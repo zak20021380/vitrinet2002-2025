@@ -159,6 +159,7 @@
 <main class="max-w-7xl mx-auto mt-32 mb-14 px-2 sm:px-4">
   <section class="glass rounded-2xl py-10 px-3 sm:px-12 shadow-lg mt-2">
     <h2 class="text-2xl sm:text-3xl font-extrabold text-gray-800 mb-8 text-center">دسته‌بندی فروشگاه‌ها</h2>
+    <p id="errorMessage" class="text-red-500 text-center mb-4 hidden"></p>
     <!-- سرچ باکس -->
     <form onsubmit="event.preventDefault(); searchCategories();"
       class="max-w-2xl mx-auto mb-10">
@@ -294,6 +295,7 @@ function renderCategories(list, shops) {
     );
     const count = shopsInCat.length;
     const sampleName = shopsInCat.length ? shopsInCat[0].storename : "";
+    const info = count ? `<span class="inline-block px-3 py-1 bg-[#e0fdfa] text-[#10b981] text-xs rounded-full font-bold shadow">${count} فروشگاه</span> <span class="text-gray-500 text-xs">مثال: ${sampleName}</span>` : `<span class="text-gray-500 text-xs">بدون فروشگاه</span>`;
 
     grid.innerHTML += `
       <div class="category-card glass group hover:shadow-xl animate-pop min-h-[190px]" data-slug="${cat.catId}">
@@ -304,8 +306,7 @@ function renderCategories(list, shops) {
         </div>
         <div class="flex flex-col gap-3">
           <div class="flex items-center justify-center gap-2 flex-wrap mb-1">
-            <span class="inline-block px-3 py-1 bg-[#e0fdfa] text-[#10b981] text-xs rounded-full font-bold shadow">${count} فروشگاه</span>
-            ${sampleName ? `<span class="text-gray-500 text-xs">نمونه: ${sampleName}</span>` : ''}
+            ${info}
           </div>
           <a href="shops-by-category.html?cat=${cat.catId}" class="btn-grad w-full rounded-lg font-bold text-xs sm:text-sm hover:scale-105 transition-all shadow flex items-center justify-center text-center">
             <span>مشاهده فروشگاه‌ها</span>
@@ -336,34 +337,23 @@ function searchCategories() {
 // اجرا: دیتابیس مغازه‌ها رو بگیر و کارت‌ها رو باهاش بساز
 async function initCategoriesPage() {
   shops = [];
+  const errorBox = document.getElementById("errorMessage");
+  errorBox.textContent = "";
+  errorBox.classList.add("hidden");
   try {
-    const res = await fetch("http://localhost:5000/api/sellers");
+    const res = await fetch("/api/shops");
     if (res.ok) {
       shops = await res.json();
     } else {
-      console.error("خطا در دریافت داده‌ها:", res.status);
+      throw new Error("bad status");
     }
-  } catch(e) {
-    console.error("ارتباط با سرور برقرار نشد:", e);
+  } catch (e) {
+    errorBox.textContent = "خطا در دریافت اطلاعات. لطفا بعدا تلاش کنید.";
+    errorBox.classList.remove("hidden");
   }
 
-  // اگر داده‌ای نبود، برای تست نمونه اضافه کن
-  if (shops.length === 0) {
-    shops = [
-      { storename: "سوپر مارکت علی", category: "خوراک" },
-      { storename: "رستوران خوب", category: "خوراک" },
-      { storename: "لباس فروشی مد", category: "پوشاک" },
-      { storename: "آرایشگاه زیبایی", category: "زیبایی" }
-    ];
-    console.log("داده‌های نمونه برای تست اضافه شد.");
-  }
 
-  activeCategories = categories.filter(cat => shops.filter(s => s.category === cat.name).length > 0);
-
-  if (activeCategories.length === 0) {
-    // اگر هیچ دسته‌ای وجود نداشت، همه رو نشان بده با count 0
-    activeCategories = categories;
-  }
+  activeCategories = categories;
 
   // مرتب‌سازی بر اساس تعداد فروشگاه‌ها (نزولی)
   activeCategories.sort((a, b) => shops.filter(s => s.category === b.name).length - shops.filter(s => s.category === a.name).length);
@@ -394,12 +384,11 @@ function injectCounts() {
       const wrapper = card.querySelector('.flex.flex-col.gap-3');
       if (wrapper) wrapper.prepend(container);
     }
-    container.innerHTML = `<span class="inline-block px-3 py-1 bg-[#e0fdfa] text-[#10b981] text-xs rounded-full font-bold shadow">${count} فروشگاه</span>` +
-      (sample ? ` <span class="text-gray-500 text-xs">نمونه: ${sample}</span>` : '');
+    container.innerHTML = count ? `<span class="inline-block px-3 py-1 bg-[#e0fdfa] text-[#10b981] text-xs rounded-full font-bold shadow">${count} فروشگاه</span> <span class="text-gray-500 text-xs">مثال: ${sample}</span>` : `<span class="text-gray-500 text-xs">بدون فروشگاه</span>`;
   });
 }
 
-initCategoriesPage();
+document.addEventListener("DOMContentLoaded", initCategoriesPage);
 </script>
 
 </body>
