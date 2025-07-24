@@ -430,10 +430,13 @@ async function loadBantaShops() {
   const slider = document.getElementById('banta-shops-section');
   slider.innerHTML = '<div style="margin:60px auto;">در حال بارگذاری...</div>';
   try {
-    const res = await fetch('/api/shops?city=بانتا&limit=4');
+    const res = await fetch('/api/shops');
     if (!res.ok) throw new Error('network');
     const data = await res.json();
-    const shops = Array.isArray(data.shops) ? data.shops : [];
+    const shopsAll = Array.isArray(data) ? data : [];
+    const shops = shopsAll
+      .filter(s => /بانتا/i.test(s.address || ''))
+      .slice(0, 4);
     slider.innerHTML = '';
     if (!shops.length) {
       slider.innerHTML = '<p class="text-gray-500 text-center py-8">هیچ مغازه‌ای برای بانتا یافت نشد.</p>';
