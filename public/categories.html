@@ -289,9 +289,12 @@ function renderCategories(list) {
   document.getElementById("noResult").classList.add("hidden");
   list.forEach(cat => {
     const count = cat.shops ? cat.shops.length : 0;
-    const sampleName = count ? (cat.shops[0].storename || cat.shops[0].shopName || '') : '';
+    const sampleShop = count ? cat.shops[0] : null;
+    const sampleLink = sampleShop
+      ? `<a href="shop.html?shopurl=${sampleShop.shopurl}" target="_blank" class="text-[#0ea5e9] hover:text-[#10b981] underline">${sampleShop.storename || sampleShop.shopName || ''}</a>`
+      : '';
     const info = count
-      ? `<span class="inline-block px-3 py-1 bg-[#e0fdfa] text-[#10b981] text-xs rounded-full font-bold shadow">${count} فروشگاه</span> <span class="text-gray-500 text-xs">مثال: ${sampleName}</span>`
+      ? `<span class="inline-block px-3 py-1 bg-[#e0fdfa] text-[#10b981] text-xs rounded-full font-bold shadow">${count} فروشگاه</span> <span class="text-gray-500 text-xs">نمونه: ${sampleLink}</span>`
       : `<span class="text-gray-500 text-xs">بدون فروشگاه</span>`;
 
     grid.innerHTML += `
@@ -305,7 +308,7 @@ function renderCategories(list) {
           <div class="flex items-center justify-center gap-2 flex-wrap mb-1">
             ${info}
           </div>
-          <a href="shops.html?category=${cat.catId}" class="btn-grad w-full rounded-lg font-bold text-xs sm:text-sm hover:scale-105 transition-all shadow flex items-center justify-center text-center">
+          <a href="shops-by-category.html?cat=${cat.catId}" class="btn-grad w-full rounded-lg font-bold text-xs sm:text-sm hover:scale-105 transition-all shadow flex items-center justify-center text-center">
             <span>مشاهده فروشگاه‌ها</span>
           </a>
         </div>
@@ -336,13 +339,16 @@ async function initCategoriesPage() {
   errorBox.textContent = "";
   errorBox.classList.add("hidden");
   try {
-    const promises = categories.map(c =>
-      fetch(`/api/shops?category=${c.catId}`)
-        .then(r => (r.ok ? r.json() : []))
-        .catch(() => [])
-    );
-    const results = await Promise.all(promises);
-    activeCategories = categories.map((c, i) => ({ ...c, shops: results[i] }));
+    const res = await fetch('/api/shops');
+    const shops = res.ok ? await res.json() : [];
+    activeCategories = categories.map(c => ({
+      ...c,
+      shops: shops.filter(s =>
+        s.category === c.catId ||
+        s.category === c.name ||
+        s.categorySlug === c.catId
+      )
+    }));
   } catch (e) {
     activeCategories = categories.map(c => ({ ...c, shops: [] }));
     errorBox.textContent = "خطا در دریافت اطلاعات. لطفا بعدا تلاش کنید.";
