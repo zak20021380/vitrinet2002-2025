@@ -58,6 +58,10 @@ exports.getPlans = async (req, res) => {
 exports.updatePlans = async (req, res) => {
   try {
     const body        = req.body || {};
+
+    // مقادیر قیمت‌ها در شیٔ جداگانه "prices" قرار دارند
+    const prices      = body.prices || {};
+
     let   sellerPhone = (body.sellerPhone || '').toString().trim() || null;  // «» → null
 
     /* اگر شماره موبایل فرستاده شد، نرمالایز کن */
@@ -77,7 +81,7 @@ exports.updatePlans = async (req, res) => {
 
     /* فقط پلن‌هایی که قیمت معتبر (عدد > 0) دارند ذخیره می‌شوند */
     for (const planDef of SUBSCRIPTION_PLANS) {
-      const price = Number(body[planDef.slug]);
+      const price = Number(prices[planDef.slug]);
       if (Number.isNaN(price) || price <= 0) continue;
 
       updates.push(
