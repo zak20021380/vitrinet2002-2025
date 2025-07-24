@@ -65,6 +65,8 @@ router.put('/admin', async (req, res) => {
   try {
     let sellerPhone = (req.body.sellerPhone || '').toString().trim() || null;
 
+    const prices = req.body.prices || {};
+
     // نرمالایز phone اگر وجود داشت
     if (sellerPhone) {
       sellerPhone = sellerPhone.replace(/\D/g, '');  // حذف غیرعددی
@@ -77,7 +79,6 @@ router.put('/admin', async (req, res) => {
     }
 
     const updates = [];
-    const prices = req.body;
 
     for (const slug of SLUGS) {
       const price = Number(prices[slug]);

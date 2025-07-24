@@ -3753,11 +3753,24 @@ async function savePlanPrices(e) {
   e.preventDefault();
 
   // آماده‌سازی payload
-  const body = {
-    '1month':  Number(planInputs['1month'].value) || null,  // خالی → null (برای skip در بک‌اند)
-    '3month':  Number(planInputs['3month'].value) || null,
-    '12month': Number(planInputs['12month'].value) || null,
+  const prices = {
+    '1month':  Number(planInputs['1month'].value),
+    '3month':  Number(planInputs['3month'].value),
+    '12month': Number(planInputs['12month'].value)
   };
+
+  const validPrices = {};
+  Object.keys(prices).forEach(k => {
+    const val = prices[k];
+    if (!Number.isNaN(val) && val > 0) validPrices[k] = val;
+  });
+
+  if (!Object.keys(validPrices).length) {
+    showPlansMsg('هیچ قیمت معتبری ارسال نشد', false);
+    return;
+  }
+
+  const body = { prices: validPrices };
 
 
   const rawPhone = document.getElementById('seller-phone-plans').value.trim();
@@ -3788,7 +3801,9 @@ async function savePlanPrices(e) {
     });
 
     const data = await res.json();
-    if (!res.ok) throw new Error(data.message || await res.text());
+    if (!res.ok || data.success === false) {
+      throw new Error(data.message || await res.text());
+    }
 
     await loadPlanPrices();
     showPlansMsg('✅ ' + (data.message || 'قیمت‌ها با موفقیت ذخیره شدند.'), true, phone);
@@ -3863,8 +3878,18 @@ async function loadAdsPrices() {
 async function saveAdsPrices(e) {
   e.preventDefault();
   // ۱) payload
-  const body = {};
-  Object.keys(adInputs).forEach(k => body[k] = Number(adInputs[k].value) || null);  // خالی → null
+  const prices = {};
+  Object.keys(adInputs).forEach(k => {
+    const val = Number(adInputs[k].value);
+    if (!Number.isNaN(val) && val > 0) prices[k] = val;
+  });
+
+  if (!Object.keys(prices).length) {
+    showAdsMsg('هیچ قیمت معتبری ارسال نشد', false);
+    return;
+  }
+
+  const body = { prices };
 
 
   const rawPhone   = document.getElementById('seller-phone-ads').value.trim();
@@ -3897,7 +3922,9 @@ async function saveAdsPrices(e) {
       body: JSON.stringify(body)
     });
     const data = await res.json();
-    if (!res.ok) throw new Error(data.message || await res.text());
+    if (!res.ok || data.success === false) {
+      throw new Error(data.message || await res.text());
+    }
 
     // بعد از ذخیره موفق، قیمت‌ها رو reload کن
     await loadAdsPrices();
