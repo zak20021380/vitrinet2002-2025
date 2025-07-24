@@ -3,6 +3,7 @@ const router = express.Router();
 const ShopAppearance = require('../models/ShopAppearance');
 const Seller = require('../models/Seller');
 const Product = require('../models/product'); // اضافه شده برای گرفتن محصولات
+const dailyVisitCtrl = require('../controllers/dailyVisitController');
 
 // گرفتن لیست همه فروشگاه‌ها (برای vitrinNet)
 // گرفتن لیست همه فروشگاه‌ها (برای vitrinNet)
@@ -68,6 +69,9 @@ const productsCount = allProducts.filter(
     res.status(500).json({ success: false, message: 'خطای سرور!' });
   }
 });
+
+// پربازدیدترین مغازه‌های شهر
+router.get('/top-visited', dailyVisitCtrl.getTopVisitedShops);
 
 
 // گرفتن اطلاعات فروشگاه با customUrl

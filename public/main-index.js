@@ -222,73 +222,16 @@ shopSlider.addEventListener('touchend', () => {
   if (Math.abs(velocity) > 2) momentumShop();
 }, {passive:true});
 
-// اسکرول نرم و Drag برای پربازدیدترین مغازه شهر
-const mostVisitedSlider = document.getElementById('most-visited-shops');
-let mvIsDown = false, mvStartX, mvScrollLeft, mvLastX, mvVelocity = 0, mvMomentumID;
-function mvMomentum() {
-  if (Math.abs(mvVelocity) > 0.4) {
-    mostVisitedSlider.scrollLeft -= mvVelocity;
-    mvVelocity *= 0.93;
-    mvMomentumID = requestAnimationFrame(mvMomentum);
-  } else {
-    cancelAnimationFrame(mvMomentumID);
-    mvVelocity = 0;
-  }
-}
-mostVisitedSlider.addEventListener('mousedown', (e) => {
-  mvIsDown = true;
-  mvStartX = e.pageX - mostVisitedSlider.offsetLeft;
-  mvLastX = e.pageX;
-  mvScrollLeft = mostVisitedSlider.scrollLeft;
-  mvVelocity = 0;
-  cancelAnimationFrame(mvMomentumID);
-});
-mostVisitedSlider.addEventListener('mousemove', (e) => {
-  if (!mvIsDown) return;
-  const x = e.pageX - mostVisitedSlider.offsetLeft;
-  mostVisitedSlider.scrollLeft = mvScrollLeft - (x - mvStartX);
-  mvVelocity = (e.pageX - mvLastX);
-  mvLastX = e.pageX;
-});
-mostVisitedSlider.addEventListener('mouseup', () => {
-  mvIsDown = false;
-  if (Math.abs(mvVelocity) > 1) mvMomentum();
-});
-mostVisitedSlider.addEventListener('mouseleave', () => {
-  mvIsDown = false;
-  if (Math.abs(mvVelocity) > 1) mvMomentum();
-});
-mostVisitedSlider.addEventListener('touchstart', (e) => {
-  mvIsDown = true;
-  mvStartX = e.touches[0].pageX - mostVisitedSlider.offsetLeft;
-  mvLastX = e.touches[0].pageX;
-  mvScrollLeft = mostVisitedSlider.scrollLeft;
-  mvVelocity = 0;
-  cancelAnimationFrame(mvMomentumID);
-}, {passive:true});
-mostVisitedSlider.addEventListener('touchmove', (e) => {
-  if (!mvIsDown) return;
-  const x = e.touches[0].pageX - mostVisitedSlider.offsetLeft;
-  mostVisitedSlider.scrollLeft = mvScrollLeft - (x - mvStartX);
-  mvVelocity = (e.touches[0].pageX - mvLastX);
-  mvLastX = e.touches[0].pageX;
-}, {passive:false});
-mostVisitedSlider.addEventListener('touchend', () => {
-  mvIsDown = false;
-  if (Math.abs(mvVelocity) > 2) mvMomentum();
-}, {passive:true});
-
 
 async function loadMostVisitedStores() {
   const container = document.getElementById('most-visited-shops');
   container.innerHTML = '<div class="w-full text-center py-8 text-gray-500">در حال بارگذاری...</div>';
   try {
-    const res = await fetch('/api/top-visited-stores?city=sanandaj&limit=8');
+    const res = await fetch('/api/shops/top-visited?city=سنندج&limit=8');
     if (!res.ok) throw new Error('network');
     let stores = await res.json();
-    stores = Array.isArray(stores) ? stores : (stores.stores || stores.data || []);
-    stores.sort((a,b) => (b.visitCount || 0) - (a.visitCount || 0));
-    stores = stores.slice(0, 8);
+    stores = Array.isArray(stores) ? stores : [];
+    stores.sort((a,b) => (b.visits || 0) - (a.visits || 0));
 
     container.innerHTML = '';
     if (!stores.length) {
@@ -298,32 +241,32 @@ async function loadMostVisitedStores() {
 
     stores.forEach((shop, i) => {
       const rank = i + 1;
+      const img = shop.image || 'assets/images/no-image.png';
+      const name = shop.name || 'بدون نام';
+      const loc = shop.address || '';
+      const category = shop.category || 'نامشخص';
+      const visits = shop.visits || 0;
+
       const badgeColor = rank === 1 ? 'bg-emerald-500'
         : rank === 2 ? 'bg-sky-500'
         : rank === 3 ? 'bg-amber-500'
         : 'bg-slate-500';
-      const img = shop.image || 'assets/images/no-image.png';
-      const name = shop.name || shop.storename || 'بدون نام';
-      const loc = shop.location || shop.address || '';
-      const category = shop.category || 'نامشخص';
-      const visits = shop.visitCount ?? 0;
 
       const card = document.createElement('a');
-      card.href = shop.shopurl || '#';
+      card.href = shop.shopurl ? `/shop/${shop.shopurl}` : '#';
       card.target = '_blank';
-      card.className = 'relative rounded-2xl shadow bg-white p-3 w-72 flex-shrink-0 transition-all duration-300 ease-in hover:scale-105 opacity-0';
+      card.className = 'relative rounded-2xl shadow-md bg-[#f9f7f4] p-3 transition-all hover:shadow-lg hover:scale-[1.01]';
       card.innerHTML = `
-        <div class="absolute top-2 left-2 text-white text-xs px-2 py-1 rounded-full ${badgeColor}">${rank}</div>
-        <img src="${img}" class="w-full h-40 object-cover rounded-xl mb-2" onerror="this.src='assets/images/no-image.png'" />
-        <h3 class="text-sm font-bold text-green-700">${name}</h3>
-        <p class="text-xs text-gray-600">${loc}</p>
-        <div class="flex justify-between items-center mt-2">
-          <span class="bg-gray-100 text-xs px-2 py-1 rounded-full">${category}</span>
+        <div class="absolute top-2 left-2 text-white text-[11px] px-2 py-1 rounded-full ${badgeColor}">رتبه ${rank}</div>
+        <img src="${img}" class="w-full h-32 object-cover rounded-xl mb-2" onerror="this.src='assets/images/no-image.png'" />
+        <h3 class="text-sm font-bold text-gray-800 truncate">${name}</h3>
+        <p class="text-xs text-gray-600 truncate">${loc}</p>
+        <div class="flex items-center justify-between mt-2">
+          <span class="bg-emerald-100 text-emerald-600 text-[11px] px-2 py-1 rounded-full">${category}</span>
           <span class="text-[10px] text-gray-400">${visits} بازدید</span>
         </div>
       `;
       container.appendChild(card);
-      requestAnimationFrame(() => card.classList.remove('opacity-0'));
     });
   } catch (err) {
     container.innerHTML = '<p class="text-red-500 text-center w-full p-7">خطا در بارگذاری فروشگاه‌ها</p>';

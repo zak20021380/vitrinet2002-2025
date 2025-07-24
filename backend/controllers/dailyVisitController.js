@@ -165,3 +165,58 @@ exports.getSellers = async (req, res) => {
     res.status(500).json({ message: 'خطا در دریافت لیست فروشندگان' });
   }
 };
+
+// -------------------------------
+// پربازدیدترین مغازه‌ها در ۳۰ روز اخیر
+// GET /api/shops/top-visited?city=سنندج&limit=8
+exports.getTopVisitedShops = async (req, res) => {
+  try {
+    const { city = '', limit = '8' } = req.query;
+    const since = new Date();
+    since.setDate(since.getDate() - 30);
+
+    const sellerFilter = city
+      ? { address: { $regex: city, $options: 'i' } }
+      : {};
+
+    const sellers = await Seller.find(sellerFilter).select(
+      '_id storename shopurl address category boardImage'
+    );
+
+    if (!sellers.length) return res.json([]);
+
+    const sellerIds = sellers.map((s) => s._id);
+
+    const stats = await DailyVisit.aggregate([
+      { $match: { seller: { $in: sellerIds }, date: { $gte: since } } },
+      { $group: { _id: '$seller', visits: { $sum: '$count' } } },
+      { $sort: { visits: -1 } },
+      { $limit: parseInt(limit, 10) || 8 }
+    ]);
+
+    const visitMap = new Map(stats.map((s) => [s._id.toString(), s.visits]));
+
+    const result = stats.map((s, idx) => {
+      const seller = sellers.find(
+        (sl) => sl._id.toString() === s._id.toString()
+      );
+      if (!seller) return null;
+      return {
+        shopId: seller._id,
+        name: seller.storename || 'بدون نام',
+        city: city || '',
+        address: seller.address || '',
+        category: seller.category || '',
+        image: seller.boardImage || '',
+        shopurl: seller.shopurl || '',
+        visits: visitMap.get(seller._id.toString()) || 0,
+        rank: idx + 1
+      };
+    }).filter(Boolean);
+
+    res.json(result);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'خطا در دریافت پربازدیدترین فروشگاه‌ها' });
+  }
+};
