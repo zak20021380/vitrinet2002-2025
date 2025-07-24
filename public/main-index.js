@@ -371,7 +371,7 @@ async function loadPopularProducts() {
 window.addEventListener('DOMContentLoaded', loadPopularProducts);
 
 // اسکرول روان و drag برای مغازه‌های بانتا
-const bantaSlider = document.getElementById('banta-shops-slider');
+const bantaSlider = document.getElementById('banta-shops-section');
 let bantaDown = false, bantaStartX, bantaScrollLeft, bantaLastX, bantaVelocity = 0, bantaMomentumID;
 function bantaMomentum() {
   if (Math.abs(bantaVelocity) > 0.4) {
@@ -427,15 +427,16 @@ bantaSlider.addEventListener('touchend', () => {
 }, {passive:true});
 
 async function loadBantaShops() {
-  const slider = document.getElementById('banta-shops-slider');
+  const slider = document.getElementById('banta-shops-section');
   slider.innerHTML = '<div style="margin:60px auto;">در حال بارگذاری...</div>';
   try {
-    const res = await fetch('http://localhost:5000/api/shops?city=بانتا&limit=4');
+    const res = await fetch('/api/shops?city=بانتا&limit=4');
     if (!res.ok) throw new Error('network');
-    const shops = await res.json();
+    const data = await res.json();
+    const shops = Array.isArray(data.shops) ? data.shops : [];
     slider.innerHTML = '';
     if (!shops.length) {
-      slider.innerHTML = '<div class="text-gray-400 text-center w-full p-7">فروشگاهی یافت نشد.</div>';
+      slider.innerHTML = '<p class="text-gray-500 text-center py-8">هیچ مغازه‌ای برای بانتا یافت نشد.</p>';
       return;
     }
     shops.forEach(shop => {
@@ -467,7 +468,7 @@ async function loadBantaShops() {
       slider.appendChild(card);
     });
   } catch (err) {
-    slider.innerHTML = '<div class="text-red-500 text-center w-full p-7">مشکل در ارتباط با سرور!</div>';
+    slider.innerHTML = '<p class="text-red-500 text-center py-8">خطا در دریافت اطلاعات. لطفا دوباره تلاش کنید.</p>';
   }
 }
 
