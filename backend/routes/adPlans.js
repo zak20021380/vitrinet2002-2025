@@ -15,9 +15,16 @@ const SLUGS = Object.keys(DEFAULT_TITLES);
  */
 router.get('/', async (req, res) => {
   try {
-    const sellerPhone = req.query.sellerPhone
+    let sellerPhone = req.query.sellerPhone
       ? String(req.query.sellerPhone).trim()
       : null;
+
+    if (sellerPhone) {
+      sellerPhone = sellerPhone.replace(/\D/g, '');
+      if (sellerPhone.length === 10 && sellerPhone.startsWith('9')) {
+        sellerPhone = '0' + sellerPhone;
+      }
+    }
 
     // ۱) بخوان global
     const globalPlans = await AdPlan.find({
