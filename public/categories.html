@@ -52,9 +52,9 @@
       flex-direction: column;
       justify-content: space-between;
       align-items: stretch;
-      height: 100%;
-      padding: 1.2rem;
-      background: #fff;
+      min-height: 200px;
+      padding: 1rem;
+      background: #fcf7f3;
       border-radius: 1.5rem;
     }
     .category-card:hover {
@@ -106,15 +106,13 @@
       .logo-vitreenet { font-size: 2.05rem; }
     }
     @media (max-width: 1024px) {
-      .category-card {padding:1rem;}
       .cat-icon {width: 50px;height: 50px;}
       .cat-icon svg {width: 28px;height: 28px;}
     }
     @media (max-width: 700px) {
-      .category-card {padding:0.75rem;}
+      .cat-icon {width: 44px;height: 44px;}
     }
     @media (max-width: 550px){
-      .category-card {padding:0.6rem;}
       .cat-icon {width: 32px;height: 32px;}
       .cat-icon svg {width: 18px;height: 18px;}
       .btn-grad {min-height:38px; font-size: 13px;}
@@ -136,16 +134,17 @@
       border-radius: 1rem 1rem 0 0;
     }
     .mobile-bottom-nav ul {
-      display: flex; justify-content: space-around; align-items: center;
+      display: grid; grid-template-columns: repeat(3,1fr); gap: .5rem; align-items: center;
     }
     .mobile-bottom-nav li { flex: 1; }
     .mobile-bottom-nav a {
       position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center;
-      font-weight: 700; font-size: 12px; color: #475569; padding: 8px 0; border-radius: 12px;
+      font-weight: 700; font-size: 12px; color: #475569; padding: 8px 0; border-radius: 12px; transition: color .2s;
     }
-    .mobile-bottom-nav i { font-size:20px; margin-bottom:2px; color:#0ea5e9; }
-    .mobile-bottom-nav a.active { color:#10b981; font-weight:900; }
-    .mobile-bottom-nav a.active i { color:#10b981; }
+    .mobile-bottom-nav a:hover { color:#0d9488; }
+    .mobile-bottom-nav i { font-size:1.25rem; margin-bottom:2px; color:inherit; }
+    .mobile-bottom-nav a.active { color:#0f766e; font-weight:900; }
+    .mobile-bottom-nav a.active i { color:#0f766e; }
     .mobile-bottom-nav a::after {
       content:''; position:absolute; inset:0; border-radius:12px; background:rgba(14,165,233,0.12); opacity:0; transition:opacity .2s;
     }
@@ -189,7 +188,7 @@
         <i class="ri-login-box-line text-lg md:hidden"></i>
         <span>ورود</span>
       </a>
-      <a href="post.html" id="registerShopBtn" class="btn-grad px-3 py-1 rounded-full font-black shadow hover:scale-105 transition-all duration-200 whitespace-nowrap text-white text-sm sm:text-base">
+      <a href="post.html" id="registerShopBtn" class="bg-cyan-600 text-white px-4 py-1.5 rounded-full text-sm font-bold shadow">
         ثبت فروشگاه
       </a>
     </nav>
@@ -216,7 +215,7 @@
         </div>
       </form>
     <!-- دسته‌بندی‌ها -->
-    <div id="categoriesGrid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-7"></div>
+    <div id="categoriesGrid" class="flex flex-col space-y-6 sm:space-y-0 sm:grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-7"></div>
     <div id="noResult" class="hidden text-center mt-12 text-lg text-gray-400 font-bold">دسته‌ای پیدا نشد!</div>
   </section>
 </main>
@@ -342,7 +341,7 @@ function renderCategories(list) {
       : `<span class="text-gray-500 text-xs">بدون فروشگاه</span>`;
 
       grid.innerHTML += `
-        <div class="category-card group bg-white rounded-2xl shadow-md border border-gray-200 w-full sm:w-[90%] mx-auto hover:shadow-lg transition-all" data-slug="${cat.catId}">
+        <div class="category-card group shadow-md border border-gray-200 w-full max-w-sm mx-auto mb-6 hover:shadow-lg transition-all" data-slug="${cat.catId}">
           <div class="flex flex-col items-center text-center mb-3">
             <div class="cat-icon bg-gradient-to-br ${cat.color} group-hover:scale-105">${getCategoryIcon(cat.name)}</div>
             <span class="text-base font-bold text-[#10b981] mb-1 mt-1">${cat.name}</span>
@@ -352,8 +351,8 @@ function renderCategories(list) {
           <div class="flex items-center justify-center gap-2 flex-wrap mb-1">
             ${info}
           </div>
-          <a href="shops-by-category.html?cat=${cat.catId}" class="btn-grad w-full rounded-lg font-bold text-sm hover:scale-[1.02] transition-all shadow flex items-center justify-center text-center">
-            <span>مشاهده فروشگاه‌ها</span>
+          <a href="shops-by-category.html?cat=${cat.catId}" class="bg-teal-600 hover:bg-teal-700 text-white px-4 py-2 rounded-xl mx-auto block text-sm font-bold transition-all duration-200 w-full max-w-[260px] shadow hover:scale-[1.02]">
+            مشاهده فروشگاه‌ها
           </a>
         </div>
       </div>
