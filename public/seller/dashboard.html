@@ -1064,6 +1064,13 @@
       </svg>
       <span>ثبت آمار بازدید</span>
     </button>
+    <!-- وضعیت عملکرد -->
+    <button class="sidebar-link" id="menu-performance" aria-label="وضعیت عملکرد">
+      <svg width="22" height="22" fill="none" viewBox="0 0 24 24">
+        <path d="M4 13h3v7H4zM10.5 9h3v11h-3zM17 5h3v15h-3z" stroke="#10b981" stroke-width="2" stroke-linecap="round"/>
+      </svg>
+      <span>📊 وضعیت عملکرد</span>
+    </button>
     <button class="sidebar-link" id="menu-add" onclick="showSection('add')" aria-label="افزودن محصول">
       <svg width="22" height="22" fill="none" viewBox="0 0 24 24">
         <circle cx="12" cy="12" r="10" stroke="#10b981" stroke-width="2"/>
@@ -1136,6 +1143,8 @@
 
   <!-- این بخش برای نمایش محتوای لودشونده است -->
   <div id="main-content"></div>
+  <!-- محتوای وضعیت عملکرد -->
+  <div id="performance-container" style="display:none;"></div>
 
 
 
@@ -1807,10 +1816,12 @@ function showSection(section) {
   if (section !== "content" && document.getElementById('main-content')) {
     document.getElementById('main-content').innerHTML = '';
   }
+  const perf = document.getElementById('performance-container');
+  if (perf) perf.style.display = 'none';
 
   const allSections = [
     "visit", "notif", "msg", "profile", "settings", "add", "upgrade",
-    "products", "content", "seo", "guide", "register-visit"
+    "products", "content", "seo", "guide", "register-visit", "performance"
   ];
   allSections.forEach(s => {
     const btn = document.getElementById('menu-' + s);
@@ -1828,6 +1839,9 @@ function showSection(section) {
   }
   if (section === 'register-visit') {
     loadDailyVisits();
+  }
+  if (section === 'performance') {
+    loadPerformanceStatus();
   }
   if (window.innerWidth <= 768) toggleSidebar();
   if (section === "products") setupProductSection();
@@ -2540,6 +2554,37 @@ async function fetchSellerMessages() {
     return [];
   }
 }
+
+// ─── بارگذاری وضعیت عملکرد ────────────────────────────────
+async function loadPerformanceStatus() {
+  const container = document.getElementById('performance-container');
+  if (!container) return;
+  container.style.display = 'block';
+  container.innerHTML = '<div class="text-gray-400 text-center py-8">در حال بارگذاری …</div>';
+  try {
+    const res = await fetch('performance-status.html');
+    if (!res.ok) throw new Error('خطا در دریافت محتوا');
+    container.innerHTML = await res.text();
+  } catch (err) {
+    console.error(err);
+    container.innerHTML = '<div class="text-red-500 text-center py-8">⚠️ بارگذاری وضعیت عملکرد شکست خورد</div>';
+  }
+}
+
+// ─── هندل کلیک روی منوی وضعیت عملکرد ───────────────────────
+(function () {
+  const btn = document.getElementById('menu-performance');
+  if (!btn || btn.dataset.listener) return;
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.sidebar-link').forEach(el => el.classList.remove('active'));
+    btn.classList.add('active');
+    document.querySelectorAll("section[id^='section-']").forEach(sec => sec.style.display = 'none');
+    document.getElementById('main-content').innerHTML = '';
+    loadPerformanceStatus();
+    if (window.innerWidth <= 768) toggleSidebar();
+  });
+  btn.dataset.listener = '1';
+})();
 
 
 
