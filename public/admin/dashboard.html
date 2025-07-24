@@ -2763,16 +2763,24 @@ document.querySelectorAll('.products-filters button').forEach(btn => {
 
 
 
-window.deleteSeller = async function(idx) {
+window.deleteSeller = async function(id) {
+  const idx = shopsList.findIndex(s =>
+    toIdString(s.sellerId) === id ||
+    toIdString(s.seller_id) === id ||
+    toIdString(s._id) === id ||
+    toIdString(s._sid) === id ||
+    toIdString(s.shopurl) === id
+  );
   const shop = shopsList[idx];
   if (!shop) return alert('فروشگاه پیدا نشد!');
   const name = shop.storename || shop.shopLogoText || 'بدون‌نام';
 
   if (!confirm(`آیا از حذف «${name}» مطمئن هستید؟`)) return;
 
-  const sid =
-        shop.sellerId || shop.seller_id || shop._id || shop._sid || null;
+  const sid = shop.sellerId || shop.seller_id || shop._id || shop._sid || null;
   if (!sid) return alert('شناسه فروشنده نامعتبر است.');
+
+  console.log('Deleting seller', sid, shop.shopurl);
 
   try {
     const res = await fetch(`${API_BASE}/sellers/${encodeURIComponent(sid)}`, {
@@ -3349,6 +3357,7 @@ function renderSellers() {
       ? `<a href="/shop.html?shopurl=${shop.shopurl}" target="_blank" style="color:#0ea5e9;text-decoration:underline">${shop.shopurl}</a>`
       : '-';
 
+    const sid = toIdString(shop.sellerId || shop.seller_id || shop._id || shop._sid || shop.shopurl);
     let tr = document.createElement('tr');
     tr.innerHTML = `
       <td class="seller-cell seller-modal-trigger" style="cursor:pointer;color:#10b981;font-weight:bold">${shop.storename || shop.shopLogoText || '-'}</td>
@@ -3358,7 +3367,7 @@ function renderSellers() {
       <td>${countProducts}</td>
       <td>${shop._visits}</td>
       <td>
-        <button class="action-btn delete" onclick="deleteSeller(${i})">
+        <button class="action-btn delete" onclick="deleteSeller('${sid}')">
           <i class="ri-delete-bin-line"></i> حذف
         </button>
       </td>
