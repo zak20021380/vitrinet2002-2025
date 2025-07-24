@@ -65,9 +65,26 @@ function toggleTabs(tab) {
 
 
 /*──────────────── ۲) گرفتن قیمت پلن‌های اشتراک ────────────────*/
+async function getSellerPhone() {
+  try {
+    const res = await fetch(`${API_BASE}/auth/me`, { credentials: 'include' });
+    if (!res.ok) return null;
+    const data = await res.json();
+    return data?.seller?.phone || null;
+  } catch (err) {
+    console.error('getSellerPhone error', err);
+    return null;
+  }
+}
+
 async function fetchPlanPrices () {
   try {
-    const res   = await fetch(`${API_BASE}/plans`);
+    const phoneRes = await getSellerPhone();
+    let url = `${API_BASE}/plans`;
+    if (phoneRes) {
+      url += `?sellerPhone=${encodeURIComponent(phoneRes)}`;
+    }
+    const res   = await fetch(url);
     const json  = await res.json();
     const plans = json.plans || {};
 
@@ -91,24 +108,25 @@ async function fetchPlanPrices () {
 /*──────────────── ۳) گرفتن قیمت تبلیغات ویژه ────────────────*/
 async function fetchAdPrices () {
   try {
-    const res = await fetch(`${API_BASE}/adPlans`);
+    const phone = await getSellerPhone();
+    let url = `${API_BASE}/adPlans`;
+    if (phone) url += `?sellerPhone=${encodeURIComponent(phone)}`;
+    const res = await fetch(url);
     if (!res.ok) throw new Error(`${res.status} ${res.statusText}`);
     const json = await res.json();
-    const plans = json.plans || [];
-
-    console.log('🟢 قیمت‌های تبلیغات از سرور:', plans);
+    const plansObj = json.adplans || {};
 
     const map = {
-      search: 'price-ad_search',
-      home: 'price-ad_home',
-      products: 'price-ad_products',
+      ad_search: 'price-ad_search',
+      ad_home: 'price-ad_home',
+      ad_products: 'price-ad_products',
     };
 
-    plans.forEach(plan => {
-      const id = map[plan.slug];
-      if (id) {
-        const el = document.getElementById(id);
-        if (el) el.textContent = toFaPrice(plan.price);
+    Object.keys(map).forEach(slug => {
+      const id = map[slug];
+      const el = document.getElementById(id);
+      if (el && plansObj[slug] != null) {
+        el.textContent = toFaPrice(plansObj[slug]);
       }
     });
 
