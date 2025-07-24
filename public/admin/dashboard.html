@@ -2543,6 +2543,17 @@ async function fetchShops() {
   const data = await res.json();
   return Array.isArray(data) ? data : (data.shops || data.data || []);
 }
+
+async function ensureShopsLoaded() {
+  if (!shopsList.length) {
+    shopsList = await fetchShops();
+  }
+}
+
+async function sellerExists(phone) {
+  await ensureShopsLoaded();
+  return shopsList.some(s => normalizePhone(s.ownerPhone || s.phone || s.shopPhone) === phone);
+}
 /* -------- fetchProducts (FIXED & ROBUST) -------- */
 async function fetchProducts () {
   try {
@@ -3756,6 +3767,11 @@ async function savePlanPrices(e) {
     return;
   }
 
+  if (phone && !(await sellerExists(phone))) {
+    showPlansMsg('فروشنده‌ای با این شماره وجود ندارد.', false);
+    return;
+  }
+
   if (phone) body.sellerPhone = phone;
 
   try {
@@ -3811,9 +3827,9 @@ if (document.getElementById('plansForm')) {
 
 
 const adInputs = {
-  search   : document.getElementById('ad_search'),
-  home     : document.getElementById('ad_home'),
-  products : document.getElementById('ad_products')
+  'ad_search'   : document.getElementById('ad_search'),
+  'ad_home'     : document.getElementById('ad_home'),
+  'ad_products' : document.getElementById('ad_products')
 };
 const adsMsg = document.getElementById('adsMsg');
 
@@ -3855,6 +3871,11 @@ async function saveAdsPrices(e) {
   let sellerPhone  = normalizePhone(rawPhone);
   if (rawPhone && !sellerPhone) {
     showAdsMsg('شماره موبایل نامعتبر است.', false);
+    return;
+  }
+
+  if (sellerPhone && !(await sellerExists(sellerPhone))) {
+    showAdsMsg('فروشنده‌ای با این شماره وجود ندارد.', false);
     return;
   }
 
