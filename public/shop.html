@@ -1,0 +1,1475 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ONYX MODERN | فروشگاه آنلاین پوشاک شیک و مدرن</title>
+  <meta name="description" content="خرید آنلاین پوشاک و اکسسوری مینیمال و مدرن با بهترین قیمت و جدیدترین ترندهای بازار">
+  <meta name="keywords" content="خرید لباس, پوشاک زنانه, پوشاک مردانه, اکسسوری, لباس ارزان, ترند, مد, فروشگاه پوشاک, فروشگاه مدرن">
+  <meta name="robots" content="index, follow">
+  <meta name="author" content="ONYX MODERN">
+  <meta property="og:title" content="ONYX MODERN | فروشگاه آنلاین پوشاک مدرن">
+  <meta property="og:description" content="فروشگاه اینترنتی پوشاک و اکسسوری مدرن با فیلتر قیمت و جدیدترین محصولات. تجربه خریدی ساده و مطمئن.">
+  <meta property="og:image" content="https://images.unsplash.com/photo-1512436991641-6745cdb1723f?auto=format&fit=crop&w=1200&q=80">
+  <meta property="og:url" content="https://onyxmodern.com">
+  <meta property="og:type" content="website">
+  <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;700;900&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+<style>
+:root {
+  --primary: #7C83FD;
+  --secondary: #FFB677;
+  --background: #F7FAFE;
+  --text: #232946;
+  --success: #52b788;
+  --danger: #ee6c4d;
+}
+body {
+  font-family: 'Vazirmatn', sans-serif;
+  background: var(--background);
+  color: var(--text);
+  min-height: 100vh;
+  margin: 0;
+  overflow-x: hidden;
+  transition: background 0.3s, color 0.3s;
+}
+
+.onyx-nav {
+  background: rgba(255,255,255,0.98);
+  box-shadow: 0 1.5px 12px #7C83FD22;
+  backdrop-filter: blur(7px);
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  padding: 1rem;
+}
+
+.logo-txt { 
+  color: var(--primary); 
+  font-weight: 900; 
+  font-size: 1.6rem; 
+  letter-spacing: -1px;
+}
+
+.hero-slider {
+  border-radius: 1rem;
+  background: #fff;
+  overflow: hidden;
+  scroll-behavior: smooth;
+  white-space: nowrap;
+  box-shadow: 0 4px 24px #7C83FD15;
+  position: relative;
+  min-height: 440px;
+  width: 100%;
+  margin: 0 auto;
+  cursor: auto;
+}
+
+/* هر اسلاید روی هم، فقط یکی فعاله */
+.slide {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  z-index: 0;
+  transition: opacity 0.8s cubic-bezier(.45,1,.45,1);
+  pointer-events: none;
+  height: 100%;
+}
+.slide.active {
+  opacity: 1;
+  z-index: 1;
+  pointer-events: auto;
+}
+.slide img { 
+  width: 100%; 
+  height: 100%; 
+  object-fit: cover;
+  image-rendering: auto;
+  filter: none;
+  border-radius: inherit;
+}
+.slide-caption {
+  position: absolute; 
+  bottom: 0; 
+  right: 0; 
+  left: 0;
+  padding: 1.1rem 1.5rem;
+  background: linear-gradient(to top, #364f6bcc 50%, transparent 100%);
+  color: #fff; 
+  text-align: right;
+  border-radius: 0 0 1rem 1rem;
+}
+.slide-title { 
+  font-size: 1.4rem; 
+  font-weight: 900; 
+  margin-bottom: .5rem;
+}
+.slide-desc { 
+  font-size: 1rem; 
+  font-weight: 500; 
+  margin-bottom: 1rem;
+}
+
+/* دکمه فلش‌های چپ و راست - کوچک و شیک */
+#prevSlide,
+#nextSlide {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background: #fff;
+  border: none;
+  outline: none;
+  box-shadow: 0 1.5px 4px #7C83FD10;
+  padding: 0.15rem 0.18rem;
+  border-radius: 50%;
+  cursor: pointer;
+  z-index: 10;
+  transition: background 0.13s, box-shadow 0.14s;
+  width: 27px;
+  height: 27px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0.86;
+}
+#prevSlide { right: 7px; left: auto; }
+#nextSlide { left: 7px; right: auto; }
+#prevSlide:hover, #nextSlide:hover {
+  background: var(--primary);
+  opacity: 1;
+  box-shadow: 0 3px 14px #7C83FD2a;
+}
+#prevSlide svg, #nextSlide svg {
+  stroke: var(--primary);
+  transition: stroke .18s;
+  width: 13px;
+  height: 13px;
+  display: block;
+}
+#prevSlide:hover svg, #nextSlide:hover svg {
+  stroke: #fff;
+}
+
+/* نقاط اسلایدر (dot) */
+#sliderDots {
+  position: absolute;
+  bottom: 15px;
+  right: 0;
+  left: 0;
+  margin: 0 auto;
+  display: flex;
+  justify-content: center;
+  gap: 7px;
+  z-index: 5;
+}
+.slider-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: #A3BFFA;
+  opacity: .4;
+  cursor: pointer;
+  transition: background .19s, opacity .19s, transform .17s;
+}
+.slider-dot.active {
+  opacity: 1;
+  background: var(--primary);
+  transform: scale(1.15);
+}
+
+/* رسپانسیو */
+@media (max-width: 1024px) {
+  .hero-slider { min-height: 320px; }
+  .slide-caption { font-size: .97rem; padding: .8rem 1.2rem; }
+  #prevSlide, #nextSlide { top: 46%; }
+}
+@media (max-width: 600px) {
+  .hero-slider { min-height: 170px; border-radius: .7rem; }
+  .slide-caption { font-size: .87rem; padding: .4rem .5rem; }
+  #prevSlide, #nextSlide { 
+    width: 19px;
+    height: 19px;
+    padding: 0;
+  }
+  #prevSlide { right: 3px; left: auto; }
+  #nextSlide { left: 3px; right: auto; }
+  #prevSlide svg, #nextSlide svg { width: 9px; height: 9px; }
+  #sliderDots { bottom: 6px; gap: 3px; }
+  .slider-dot { width: 6px; height: 6px; }
+}
+
+
+
+
+.onyx-btn {
+  background: var(--primary); 
+  color: #fff; 
+  font-weight: bold; 
+  border-radius: .5rem;
+  padding: .48rem 1.2rem; 
+  font-size: 1rem; 
+  transition: transform .18s, box-shadow .18s;
+}
+
+.onyx-btn:hover { 
+  transform: translateY(-2px) scale(1.03); 
+  box-shadow: 0 4px 18px #7C83FD36;
+}
+
+.product-card {
+  background: #fff; 
+  border-radius: .78rem;
+  box-shadow: 0 2px 14px #7C83FD17;
+  transition: transform .17s, box-shadow .17s;
+  padding: 1rem; 
+  display: flex; 
+  flex-direction: column; 
+  align-items: center; 
+  min-height: 320px;
+}
+
+.product-card:hover { 
+  transform: translateY(-5px); 
+  box-shadow: 0 10px 34px #7C83FD33;
+}
+
+.product-card img { 
+  border-radius: .5rem; 
+  width: 100%; 
+  height: 145px; 
+  object-fit: cover; 
+  margin-bottom: .7rem;
+}
+
+.product-price { 
+  font-size: 1.08rem; 
+  font-weight: bold;
+}
+
+.badge {
+  display: inline-block; 
+  padding: 2px 10px; 
+  border-radius: 12px; 
+  font-size: .83rem; 
+  font-weight: 700; 
+  margin-right: .5rem;
+  vertical-align: middle;
+}
+
+.badge-new { 
+  background: var(--success); 
+  color: #fff; 
+}
+
+.badge-sale { 
+  background: var(--danger); 
+  color: #fff; 
+}
+
+.badge-best { 
+  background: var(--secondary); 
+  color: #fff;
+}
+
+.product-grid { 
+  display: grid; 
+  grid-template-columns: repeat(1, 1fr); 
+  gap: 1.18rem;
+}
+
+@media (min-width: 540px) {
+  .hero-slider { min-height: 360px; }
+  .product-card img { height: 170px; }
+  .product-grid { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (min-width: 768px) {
+  .product-grid { grid-template-columns: repeat(3, 1fr); }
+}
+
+@media (min-width: 920px) {
+  .hero-slider { min-height: 440px; }
+  .product-grid { grid-template-columns: repeat(4, 1fr); }
+}
+
+.footer {
+  background: #E5ECFB; 
+  color: #4661B6; 
+  font-size: .99rem; 
+  padding: 2rem 0; 
+  margin-top: 4rem;
+}
+
+.footer-logo { 
+  font-weight: 900; 
+  color: var(--primary); 
+  font-size: 1.12rem;
+}
+
+.footer a { 
+  color: #4661B6; 
+  transition: color .18s;
+}
+
+.footer a:hover { 
+  color: var(--primary);
+}
+
+.slider-dot {
+  width: 10px; 
+  height: 10px; 
+  margin: 0 4px; 
+  border-radius: 50%; 
+  background: #A3BFFA; 
+  opacity: .47; 
+  cursor: pointer;
+  transition: background .19s, opacity .19s;
+}
+
+.slider-dot.active { 
+  opacity: 1; 
+  background: var(--primary);
+}
+
+.product-preview {
+  display: none; 
+  position: fixed; 
+  top: 50%; 
+  left: 50%; 
+  transform: translate(-50%, -50%);
+  background: #fff; 
+  padding: 1.5rem; 
+  border-radius: .83rem;
+  box-shadow: 0 8px 36px #7C83FD40; 
+  z-index: 999; 
+  max-width: 95%; 
+  width: 420px;
+}
+
+.product-preview.active { 
+  display: block; 
+  animation: fadeIn .33s;
+}
+
+.scroll-top-btn {
+  position: fixed; 
+  bottom: 1.2rem; 
+  left: 1.2rem; 
+  background: var(--primary); 
+  color: #fff;
+  padding: .6rem; 
+  border-radius: 50%; 
+  box-shadow: 0 2px 12px #7C83FD34;
+  transition: transform .13s;
+}
+
+.scroll-top-btn:hover { 
+  transform: scale(1.09);
+}
+
+@keyframes fadeIn { 
+  from {opacity:0; transform: translate(-50%,-62%);} 
+  to {opacity:1; transform: translate(-50%,-50%);} 
+}
+
+/* بهینه‌سازی برای موبایل */
+@media (max-width: 540px) {
+  .hero-slider {
+    min-height: 300px; /* برای موبایل کوتاه‌تر می‌کنیم */
+  }
+  .product-card { 
+    padding: .8rem; /* کاهش فضا */
+  }
+  .footer {
+    font-size: 0.85rem;
+  }
+  .product-price { 
+    font-size: 1rem; /* اندازه قیمت رو کوچک‌تر کردیم */
+  }
+}
+
+
+
+
+/* --- استایل مدرن و رسپانسیو سلکت فیلتر/مرتب‌سازی محصولات --- */
+.onyx-filter-select {
+  appearance: none;
+  -webkit-appearance: none;
+  background-position: left 0.8em center;
+  background-repeat: no-repeat;
+  background-size: 1.27em;
+  background-image: url('data:image/svg+xml;utf8,<svg fill="gray" height="18" width="18" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M7 10l5 5 5-5z"/></svg>');
+  padding-left: 2.1em !important;
+  font-family: inherit;
+  font-weight: bold;
+  box-shadow: 0 1px 6px #7C83FD11;
+  transition: border .17s, box-shadow .18s;
+}
+.onyx-filter-select:focus {
+  outline: none !important;
+  box-shadow: 0 2px 14px #7C83FD2b;
+  border-color: var(--primary);
+  background-color: #f5f8ff;
+}
+@media (max-width: 700px) {
+  .onyx-filter-select {
+    font-size: .97rem;
+    padding-left: 1.5em !important;
+    min-width: 94px;
+  }
+  #products .flex {gap: 6px !important;}
+}
+@media (max-width: 480px) {
+  .onyx-filter-select {
+    font-size: .89rem;
+    min-width: 75px;
+    padding-left: 1em !important;
+  }
+  #products .flex {gap: 4px !important;}
+}
+
+
+
+
+.onyx-title-simple {
+  font-size: 2rem;
+  font-weight: 900;
+  color: var(--text);
+  margin-bottom: .7rem;
+  letter-spacing: -.5px;
+  line-height: 1.18;
+  text-align: right;
+  padding: 0;
+  border: none;
+  border-radius: 0;
+  background: none;
+  box-shadow: none;
+  display: block;
+}
+
+@media (min-width: 640px) {
+  .onyx-title-simple { font-size: 2.3rem; }
+}
+@media (min-width: 768px) {
+  .onyx-title-simple { font-size: 2.7rem; }
+}
+@media (max-width: 500px) {
+  .onyx-title-simple { font-size: 1.13rem; }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</style>
+
+
+</head>
+<body>
+  <!-- Header -->
+<!-- فونت IranYekan از CDN (پیشنهادشده برای جذابیت لوگو) -->
+<link href="https://cdn.fontcdn.ir/Font/Persian/IranYekan/IranYekan.css" rel="stylesheet" />
+
+<!-- فونت IranYekan برای لوگوی فروشگاه -->
+<link href="https://cdn.fontcdn.ir/Font/Persian/IranYekan/IranYekan.css" rel="stylesheet" />
+
+<header class="onyx-nav sticky top-0 z-50 w-full bg-white/90 backdrop-blur-lg shadow flex items-center justify-between px-3 md:px-7 py-3 gap-x-2" role="banner">
+  <!-- لوگو فروشگاه (راست) -->
+  <div class="flex items-center gap-4 min-w-fit">
+   <span class="logo-txt text-[1.7rem] md:text-3xl font-black bg-gradient-to-r from-pink-500 via-fuchsia-700 to-blue-500 bg-clip-text text-transparent tracking-tight drop-shadow select-none"
+      style="font-family:'IranYekan','Vazirmatn',sans-serif;letter-spacing:-1.7px;line-height:1.08;">
+  نئون استایل
+</span>
+
+    <span id="shop-status" class="inline-flex items-center gap-1 text-xs md:text-sm font-bold px-2 py-1 rounded-lg shadow transition"
+      style="background: linear-gradient(90deg,#e0fbe3,#b6f5c6);color:#19954b;">
+      <span class="w-2 h-2 rounded-full bg-green-400 inline-block"></span>
+      باز است
+    </span>
+  </div>
+
+  <!-- اکشن‌ها و لوگو ویترینت -->
+  <div class="flex items-center gap-5 min-w-fit flex-shrink-0">
+    <!-- گفت‌وگو -->
+  
+    <!-- آدرس فروشگاه -->
+    <button class="flex items-center gap-1 text-emerald-600 font-bold px-3 py-1 rounded-xl hover:bg-emerald-50 transition text-sm border border-emerald-100"
+      id="addressBtn">
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a2 2 0 01-2.828 0l-4.243-4.243A8 8 0 1120 12a8.001 8.001 0 01-2.343 4.657z"/>
+        <circle cx="12" cy="12" r="3"/>
+      </svg>
+      آدرس فروشگاه
+    </button>
+    <!-- گزارش با پاپ‌آپ -->
+    <button class="flex items-center gap-1 text-orange-500 font-bold px-2 py-1 rounded-xl hover:bg-orange-50 transition text-sm border border-orange-100"
+      id="reportBtn">
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/>
+      </svg>
+      گزارش
+    </button>
+    <!-- امتیاز و بازدید -->
+    <span class="flex items-center gap-3 text-yellow-500 font-bold text-sm ml-1 cursor-pointer rating-badge"
+          id="rateShow" style="user-select:none;">
+      <span class="flex items-center gap-1">
+        <svg class="w-5 h-5 text-yellow-400" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.04 3.21a1 1 0 00.95.69h3.367c.969 0 1.371 1.24.588 1.81l-2.726 1.98a1 1 0 00-.364 1.118l1.04 3.21c.3 .921-.755 1.688-1.54 1.118l-2.726-1.98a1 1 0 00-1.175 0l-2.726 1.98c-.785.57-1.84-.197-1.54-1.118l1.04-3.21a1 1 0 00-.364-1.118L2.05 8.637c-.783-.57-.38-1.81.588-1.81h3.367a1 1 0 00.95-.69l1.04-3.21z"/></svg>
+        <span id="shop-rating">4.8</span>
+      </span>
+      <span class="border-r border-dotted border-gray-400 h-6 mx-1"></span>
+      <span class="flex items-center gap-1 text-yellow-600"><span id="shop-visits">1,234</span> بازدید</span>
+    </span>
+    <!-- لوگو ویترینت (چپ) -->
+    <a href="/" class="ml-3 flex items-center group select-none min-w-fit" title="رفتن به صفحه اصلی">
+      <span class="text-[1.7rem] md:text-3xl font-black bg-gradient-to-l from-teal-400 via-blue-400 to-indigo-400 bg-clip-text text-transparent tracking-tighter transition group-hover:scale-105"
+        style="font-family:'IranYekan','Vazirmatn',sans-serif;letter-spacing:-1.7px;line-height:1;">
+        ویترینت
+      </span>
+    </a>
+  </div>
+
+  <!-- پاپ‌آپ آدرس فروشگاه -->
+  <div id="addressModal" class="fixed inset-0 bg-black/40 z-[99] hidden items-center justify-center">
+    <div class="bg-white rounded-2xl p-6 shadow-2xl w-[90vw] max-w-sm flex flex-col gap-4 animate-fade-in-down border border-emerald-100 text-center">
+      <div class="flex items-center justify-between mb-2">
+        <span class="text-lg font-bold text-emerald-600 flex items-center gap-1">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a2 2 0 01-2.828 0l-4.243-4.243A8 8 0 1120 12a8.001 8.001 0 01-2.343 4.657z"/>
+            <circle cx="12" cy="12" r="3"/>
+          </svg>
+          آدرس فروشگاه
+        </span>
+        <button id="closeAddressModal" class="p-1 hover:bg-emerald-100 rounded transition" aria-label="بستن">
+          <svg class="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+          </svg>
+        </button>
+      </div>
+      <div class="text-gray-800 text-base font-bold mt-2">
+        تهران، بلوار کشاورز، خیابان مهرام، پلاک ۲۱، طبقه ۲  
+        <br>
+        <span class="text-emerald-700 text-sm font-semibold mt-1 flex items-center justify-center gap-1">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 5h12M9 3v2m0 14a4 4 0 100-8 4 4 0 000 8zm7-4h2a2 2 0 002-2v-2a2 2 0 00-2-2h-2a2 2 0 00-2 2v2a2 2 0 002 2z"/></svg>
+          شماره تماس: <b dir="ltr" class="font-bold mx-1">09123456789</b>
+        </span>
+      </div>
+    </div>
+  </div>
+
+  <!-- پاپ‌آپ گزارش تخلف -->
+  <div id="reportModal" class="fixed inset-0 bg-black/30 z-[99] hidden items-center justify-center">
+    <div class="bg-white rounded-2xl p-5 shadow-2xl w-[92vw] max-w-sm flex flex-col gap-3 animate-fade-in-down border border-orange-100">
+      <div class="flex items-center justify-between mb-2">
+        <span class="text-lg font-bold text-orange-500 flex items-center gap-1">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/>
+          </svg>
+          ثبت گزارش تخلف
+        </span>
+        <button id="closeReportModal" class="p-1 hover:bg-orange-100 rounded transition" aria-label="بستن">
+          <svg class="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+          </svg>
+        </button>
+      </div>
+
+
+      <!-- نوع تخلف -->
+<label for="reportType" class="text-sm font-bold text-gray-600">نوع تخلف:</label>
+<select id="reportType"
+        class="w-full border border-orange-200 rounded-xl p-2 text-sm focus:ring-2 focus:ring-orange-400 outline-none">
+  <option value="price_mismatch">عدم تطابق قیمت با مغازه</option>
+  <option value="no_response">عدم پاسخ‌گویی به مشتری</option>
+  <option value="overpricing">عدم تطابق کالا با مغازه</option>
+  <option value="other">سایر تخلفات</option>
+</select>
+
+      <textarea id="reportText" rows="4" class="w-full border border-orange-200 rounded-xl p-2 text-sm focus:ring-2 focus:ring-orange-400 outline-none" placeholder="توضیحات تخلف را بنویسید..."></textarea>
+      <button id="submitReport" class="mt-1 bg-gradient-to-r from-orange-400 to-orange-500 text-white font-bold py-2 rounded-xl hover:shadow-lg transition">ارسال گزارش</button>
+      <div id="reportMsg" class="hidden text-green-500 font-bold mt-1"></div>
+    </div>
+  </div>
+
+  <!-- پاپ‌آپ امتیازدهی -->
+  <div id="rateModal" class="fixed inset-0 bg-black/30 z-[99] hidden items-center justify-center">
+    <div class="bg-white rounded-2xl p-6 shadow-2xl w-[92vw] max-w-xs flex flex-col gap-4 animate-fade-in-down border border-yellow-100">
+      <div class="flex items-center justify-between mb-1">
+        <span class="text-lg font-bold text-yellow-500 flex items-center gap-1">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <polygon points="12 2 15 10 23 10 17 15 19 23 12 18 5 23 7 15 1 10 9 10" fill="#fbbf24"/>
+          </svg>
+          ثبت امتیاز
+        </span>
+        <button id="closeRateModal" class="p-1 hover:bg-yellow-100 rounded transition" aria-label="بستن">
+          <svg class="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+          </svg>
+        </button>
+      </div>
+      <div class="flex justify-center gap-1" id="rateStars">
+        <!-- ستاره‌ها اینجا رندر میشه -->
+      </div>
+      <button id="submitRate" class="mt-1 bg-gradient-to-r from-yellow-400 to-yellow-500 text-white font-bold py-2 rounded-xl hover:shadow-lg transition">ثبت امتیاز</button>
+      <div id="rateMsg" class="hidden text-green-500 font-bold mt-1"></div>
+    </div>
+  </div>
+
+  <style>
+    .onyx-nav {backdrop-filter: blur(16px);}
+    .onyx-nav > div, .onyx-nav > a {min-width: 0;}
+    .onyx-nav .rating-badge {gap: 1.2rem;}
+    /* ریسپانسیو قوی */
+    @media (max-width: 700px) {
+      .onyx-nav {flex-direction: column !important; align-items: stretch; gap: 0;}
+      .onyx-nav > div, .onyx-nav > a {margin-bottom: 0.5rem !important; justify-content: center;}
+      .onyx-nav > .flex {flex-wrap: wrap;}
+      .onyx-nav .ml-3 {margin-left:0!important;}
+      .onyx-nav .text-[1.7rem], .onyx-nav .text-3xl {font-size:1.18rem;}
+      .onyx-nav .rating-badge {justify-content: center; gap:0.5rem;}
+      .onyx-nav .gap-5 {gap:1.4rem!important;}
+    }
+    @media (min-width: 701px) {
+      .onyx-nav {flex-direction: row !important;}
+      .onyx-nav > div, .onyx-nav > a {margin-bottom: 0 !important;}
+      .onyx-nav .text-[1.7rem], .onyx-nav .text-3xl {font-size:1.7rem;}
+    }
+    @keyframes fade-in-down {from{opacity:0;transform:translateY(-24px);}to{opacity:1;transform:translateY(0);}
+    }
+    .animate-fade-in-down {animation:fade-in-down .32s cubic-bezier(.3,1,.51,.98)}
+    /* ستاره امتیاز */
+    .rate-star {cursor:pointer;transition:transform 0.1s;}
+    .rate-star.active {color:#fbbf24;transform:scale(1.15);}
+    .rate-star.inactive {color:#d1d5db;}
+  </style>
+
+
+
+</header>
+
+
+
+
+
+
+
+
+
+
+
+
+  <!-- Hero Slider -->
+<section class="max-w-[95%] mx-auto hero-slider mt-4 relative" aria-label="اسلایدر تبلیغاتی" id="heroSliderSection">
+  <!-- اسلایدها اینجا به صورت داینامیک اضافه می‌شوند -->
+  <div class="absolute left-4 bottom-3 z-20 flex" id="sliderDots"></div>
+  <button id="prevSlide" class="absolute right-3 top-1/2 -translate-y-1/2 bg-white hover:bg-[var(--primary)] p-2 rounded-full shadow-md" aria-label="اسلاید قبلی">
+    <svg class="w-4 h-4" fill="none" stroke="var(--text)" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+  </button>
+  <button id="nextSlide" class="absolute left-3 top-1/2 -translate-y-1/2 bg-white hover:bg-[var(--primary)] p-2 rounded-full shadow-md" aria-label="اسلاید بعدی">
+    <svg class="w-4 h-4" fill="none" stroke="var(--text)" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+  </button>
+</section>
+
+  <!-- محصولات -->
+<section id="products" class="max-w-[95%] mx-auto mt-6 px-4">
+  <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3 md:gap-5 mb-6">
+<h1 class="onyx-title-simple">منتخب این ماه</h1>
+
+
+
+    <div class="w-full md:w-auto flex flex-wrap gap-2 md:gap-4 items-center justify-start md:justify-end bg-white rounded-2xl p-2.5 sm:p-3 shadow border border-gray-100">
+      <!-- دسته‌بندی -->
+      <select id="filterCategory"
+        class="onyx-filter-select px-3 py-2 rounded-full bg-gray-50 border border-gray-200 text-sm focus:ring-2 focus:ring-[var(--primary)] focus:border-[var(--primary)] transition w-full sm:w-auto min-w-[110px] font-semibold"
+      >
+        <option value="همه">همه دسته‌ها</option>
+        <option value="زنانه">زنانه</option>
+        <option value="مردانه">مردانه</option>
+        <option value="کودک">کودک</option>
+        <option value="اکسسوری">اکسسوری</option>
+      </select>
+      <!-- مرتب‌سازی -->
+      <select id="sortProducts"
+        class="onyx-filter-select px-3 py-2 rounded-full bg-gray-50 border border-gray-200 text-sm focus:ring-2 focus:ring-[var(--primary)] focus:border-[var(--primary)] transition w-full sm:w-auto min-w-[110px] font-semibold"
+      >
+        <option value="default">مرتب‌سازی</option>
+        <option value="newest">جدیدترین</option>
+        <option value="expensive">گران‌ترین</option>
+        <option value="cheap">ارزان‌ترین</option>
+        <option value="best">پرفروش</option>
+      </select>
+    </div>
+  </div>
+  <div class="product-grid" id="productGrid"></div>
+  <div id="noProductsMsg" class="text-center text-gray-400 font-bold text-lg mt-6 hidden">محصولی پیدا نشد!</div>
+</section>
+
+
+
+  <!-- Popup Preview -->
+  <div id="productPreview" class="product-preview" aria-modal="true" role="dialog">
+    <button id="closePreview" class="absolute top-2 left-2" aria-label="بستن پیش‌نمایش">
+      <svg class="w-5 h-5" fill="none" stroke="var(--text)" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+    </button>
+    <div class="flex flex-col sm:flex-row gap-4">
+      <img id="previewImage" src="" alt="تصویر محصول" class="w-full sm:w-1/2 h-56 sm:h-64 object-cover rounded-lg"/>
+      <div class="flex flex-col justify-between">
+        <div>
+          <h3 id="previewTitle" class="text-lg font-bold mb-2"></h3>
+          <p id="previewCategory" class="text-sm text-[var(--primary)] mb-2"></p>
+          <div class="flex gap-2 mb-3">
+            <select class="p-1.5 rounded-lg border border-gray-300 text-sm" aria-label="انتخاب سایز">
+              <option>سایز</option>
+              <option>S</option>
+              <option>M</option>
+              <option>L</option>
+            </select>
+            <select class="p-1.5 rounded-lg border border-gray-300 text-sm" aria-label="انتخاب رنگ">
+              <option>رنگ</option>
+              <option>مشکی</option>
+              <option>سفید</option>
+              <option>آبی</option>
+            </select>
+          </div>
+        </div>
+        <div class="flex gap-2">
+          <button class="onyx-btn">افزودن به سبد</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- Footer -->
+<footer class="footer bg-[#F7FAFE] text-[#232946] pt-8 pb-4 mt-10 border-t border-gray-200">
+  <div class="max-w-[98%] mx-auto grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-7 px-4">
+    <!-- لوگو و معرفی ویترینت -->
+    <div>
+      <div class="font-extrabold text-[1.3rem] text-[var(--primary)] mb-3 tracking-tight select-none">ویترینت</div>
+      <p class="text-xs leading-relaxed mb-2">
+        <b>ویترینت</b> پلتفرم ساخت فروشگاه آنلاین و توسعه برند است؛ ساده، سریع و با پشتیبانی واقعی برای کسب‌وکارهای ایرانی.
+      </p>
+      <div class="mt-3 text-xs text-gray-600">
+        <span>فروشگاه جاری:</span>
+        <span class="font-extrabold text-[var(--primary)]" id="currentShopName">نئون استایل</span>
+      </div>
+    </div>
+    <!-- دسترسی سریع -->
+    <div>
+      <div class="font-bold mb-3 text-[var(--primary)]">دسترسی سریع</div>
+      <a href="#" class="block mb-2 text-xs hover:text-[var(--primary)] transition">درباره ویترینت</a>
+      <a href="#" class="block mb-2 text-xs hover:text-[var(--primary)] transition">سوالات متداول</a>
+      <a href="#" class="block mb-2 text-xs hover:text-[var(--primary)] transition">قوانین و مقررات</a>
+      <a href="#" class="block mb-2 text-xs hover:text-[var(--primary)] transition">پشتیبانی و تماس</a>
+    </div>
+    <!-- دسته‌بندی‌ها -->
+    <div>
+      <div class="font-bold mb-3 text-[var(--primary)]">دسته‌بندی‌های برتر</div>
+      <a href="#" class="block mb-2 text-xs hover:text-[var(--primary)] transition">پوشاک زنانه</a>
+      <a href="#" class="block mb-2 text-xs hover:text-[var(--primary)] transition">پوشاک مردانه</a>
+      <a href="#" class="block mb-2 text-xs hover:text-[var(--primary)] transition">کودک و نوجوان</a>
+      <a href="#" class="block mb-2 text-xs hover:text-[var(--primary)] transition">اکسسوری</a>
+    </div>
+    <!-- اکشن‌ها -->
+    <div class="flex flex-col gap-4 items-stretch">
+      <a href="https://vitrinet.shop/register"
+         class="footer-action-btn bg-gradient-to-l from-[#52b788] to-[var(--primary)] text-white font-extrabold text-sm flex items-center justify-center gap-2 py-3 px-4 rounded-xl shadow-md hover:scale-[1.04] hover:shadow-lg active:scale-[0.98] transition-all duration-200"
+         style="color:#fff !important;">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/>
+        </svg>
+        <span>ثبت <span class="hidden xs:inline">رایگان</span> فروشگاه در ویترینت</span>
+      </a>
+      <a href="https://vitrinet.shop"
+         class="footer-home-btn flex items-center justify-center gap-2 border border-[var(--primary)] text-[var(--primary)] font-bold text-sm py-3 px-4 rounded-xl bg-white hover:bg-[var(--primary)] hover:text-white hover:shadow-lg hover:scale-[1.03] active:scale-95 transition-all duration-200">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2-2m0 0l7-7 7 7m-9 2v6m4-6v6m5 2a2 2 0 01-2 2H7a2 2 0 01-2-2v-7a2 2 0 012-2h3"/>
+        </svg>
+        <span>بازگشت به صفحه اصلی ویترینت</span>
+      </a>
+    </div>
+  </div>
+  <div class="mt-7 border-t border-gray-200 pt-3 text-center text-xs text-gray-500">
+    © ۱۴۰۴ ویترینت – تمامی حقوق برای پلتفرم ویترینت محفوظ است.
+  </div>
+  <style>
+    .footer-action-btn svg, .footer-home-btn svg {
+      vertical-align: middle;
+      margin-left: .13em;
+      margin-right: .13em;
+      transition: color .18s;
+    }
+    .footer-action-btn:hover svg, .footer-home-btn:hover svg {
+      color: #fff;
+      stroke: #fff;
+    }
+    .footer-action-btn.bg-gradient-to-l,
+    .footer-action-btn.bg-gradient-to-l:visited {
+      color: #fff !important;
+      text-shadow: 0 1px 8px #52b78826;
+    }
+    /* باگ هاور دکمه بازگشت: رنگ متن */
+    .footer-home-btn:hover,
+    .footer-home-btn:focus {
+      color: #fff !important;
+      border-color: var(--primary);
+      background: linear-gradient(to left, #52b788, var(--primary));
+    }
+    .footer-home-btn {
+      background: #fff;
+      color: var(--primary);
+      transition: all .17s cubic-bezier(.4,0,.2,1);
+      border: 1.7px solid var(--primary);
+      font-weight: 700;
+    }
+    .footer-home-btn span, .footer-home-btn svg {
+      transition: color .16s;
+    }
+    .footer-home-btn:hover span,
+    .footer-home-btn:focus span {
+      color: #fff !important;
+    }
+    /* Responsive grid */
+    @media (max-width: 900px) {
+      .footer .grid {grid-template-columns:1fr 1fr;}
+    }
+    @media (max-width: 640px) {
+      .footer .grid {grid-template-columns:1fr;}
+      .footer .flex-col {gap:1.2rem;}
+    }
+    .footer .onyx-btn, .footer-action-btn, .footer-home-btn {
+      font-family: inherit;
+      box-shadow:0 1.5px 8px #7C83FD14;
+    }
+    @media (max-width: 410px) {
+      .footer-action-btn, .footer-home-btn {font-size:.92rem;}
+      .footer-action-btn span.hidden.xs\:inline {display:none;}
+    }
+    @media (max-width: 500px) {
+      .footer p {font-size: .97em;}
+      .footer .font-extrabold {font-size:1.05rem;}
+    }
+  </style>
+</footer>
+
+
+
+
+
+
+
+  <!-- Scroll to Top -->
+  <button id="scrollTopBtn" class="scroll-top-btn hidden" aria-label="بازگشت به بالا">
+    <svg class="w-4 h-4" fill="none" stroke="white" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"/></svg>
+  </button>
+<script>
+// ===== گرفتن shopurl (هم از query ?shopurl=... هم از انتهای url) =====
+function getShopSlug() {
+  const urlParams = new URLSearchParams(window.location.search);
+  if (urlParams.has('shopurl')) {
+    return urlParams.get('shopurl');
+  }
+  // shops/mobforoshi یا shop.html/mobforoshi یا حتی shop.html?shopurl=mobforoshi
+  let path = window.location.pathname.split('/').filter(Boolean);
+  let last = path[path.length - 1] || '';
+  if (last.endsWith('.html')) last = last.replace('.html', '');
+  // اگر shops یا shop.html بود و آخرش اسلاگ نبود، خالی برگردون
+  if (['shops', 'shop', 'shop.html'].includes(last)) return '';
+  return last;
+}
+
+// ← این متغیر رو در بالای اسکریپت تعریف می‌کنیم
+let currentSellerId = null;
+
+const slug = getShopSlug();
+
+// ======== لود داده و داینامیک‌سازی کل اطلاعات فروشگاه ========
+async function loadShopData() {
+  if (!slug) return;
+  try {
+    const res = await fetch(`http://localhost:5000/api/shopAppearance/url/${slug}`);
+    if (!res.ok) throw new Error('فروشگاه یافت نشد!');
+    const data = await res.json();
+
+    // ← وقتی اطلاعات فروشگاه لود شد، شناسه‌ش رو توی currentSellerId ذخیره می‌کنیم
+    currentSellerId = data.sellerId;
+
+    // لوگو و نام فروشگاه
+    document.querySelectorAll('.logo-txt').forEach(el =>
+      el.textContent = data.shopLogoText || data.shopName || 'نام فروشگاه'
+    );
+    document.getElementById('currentShopName').textContent =
+      data.shopLogoText || data.shopName || 'نام فروشگاه';
+
+    // وضعیت فروشگاه (باز/بسته)
+    document.getElementById('shop-status').innerHTML =
+      data.shopStatus === 'closed'
+        ? '<span class="w-2 h-2 rounded-full bg-red-400 inline-block"></span> بسته است'
+        : '<span class="w-2 h-2 rounded-full bg-green-400 inline-block"></span> باز است';
+
+    // آدرس و شماره تماس
+    const addressContent = document.querySelector('#addressModal .text-gray-800');
+    if (addressContent) {
+      addressContent.innerHTML = `
+        ${data.shopAddress || 'آدرس ثبت نشده'}
+        <br>
+        <span class="text-emerald-700 text-sm font-semibold mt-1 flex items-center justify-center gap-1">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path d="M3 5h12M9 3v2m0 14a4 4 0 100-8 4 4 0 000 8zm7-4h2a2 2 0 002-2v-2a2 2 0 00-2-2h-2a2 2 0 00-2 2v2a2 2 0 002 2z"/>
+          </svg>
+          شماره تماس: <b dir="ltr" class="font-bold mx-1">${data.shopPhone || '-'}</b>
+        </span>
+      `;
+    }
+
+    // امتیاز میانگین کاربران و تعداد کل امتیازها
+    const avg = typeof data.averageRating === 'number'
+      ? parseFloat(data.averageRating).toFixed(1)
+      : '0.0';
+    document.getElementById('shop-rating').textContent = avg;
+
+    const count = typeof data.ratingCount === 'number'
+      ? data.ratingCount.toLocaleString()
+      : '0';
+    document.getElementById('shop-visits').textContent = count;
+
+    // اسلایدر
+    renderHeroSlider(data.slides || []);
+
+    // داینامیک سازی متاتگ‌ها و سئو
+    setDynamicSEO(data);
+
+    // محصولات را جدا بگیر
+    loadShopProducts(slug);
+
+  } catch (e) {
+    console.error(e);
+    document.querySelectorAll('.logo-txt').forEach(el => el.textContent = 'نام فروشگاه');
+    document.getElementById('currentShopName').textContent = 'نام فروشگاه';
+    setDynamicSEO({
+      shopName: 'نام فروشگاه',
+      shopShortDesc: 'فروشگاه آنلاین',
+      shopCity: '',
+      shopTags: ''
+    });
+  }
+}
+
+
+// ======== گرفتن و رندر محصولات فروشگاه بر اساس shopurl ========
+async function loadShopProducts(shopurl) {
+  try {
+    const res = await fetch(`http://localhost:5000/api/products/shop/${shopurl}`);
+    const products = await res.json();
+    renderProducts(products);
+  } catch (err) {
+    renderProducts([]);
+  }
+}
+
+// ======== رندر محصولات فروشگاه ========
+function renderProducts(products = []) {
+  console.log("PRODUCTS:", products); // فقط برای دیباگ
+  const grid = document.getElementById('productGrid');
+  const noMsg = document.getElementById('noProductsMsg');
+  if (!products.length) {
+    if (grid) grid.innerHTML = "";
+    if (noMsg) noMsg.classList.remove("hidden");
+    return;
+  }
+  if (noMsg) noMsg.classList.add("hidden");
+  grid.innerHTML = products.map((p, i) => {
+    let badgeClass = '';
+    if (p.badgeType === "best") badgeClass = 'bg-orange-400 text-white px-3 py-1 rounded-full text-xs font-bold ml-2';
+    else if (p.badgeType === "new") badgeClass = 'bg-green-400 text-white px-3 py-1 rounded-full text-xs font-bold ml-2';
+    else if (p.badgeType === "sale") badgeClass = 'bg-pink-500 text-white px-3 py-1 rounded-full text-xs font-bold ml-2';
+
+    // ساپورت هم img و هم images
+    let imageUrl = 'images/no-image.png';
+    if (p.images && Array.isArray(p.images) && p.images.length > 0) {
+      imageUrl = p.images[p.mainImageIndex ?? 0] || p.images[0];
+    } else if (p.img) {
+      imageUrl = p.img;
+    }
+
+    return `
+      <article class="product-card flex flex-col items-center bg-white rounded-xl shadow p-4" data-cat="${p.category}" data-idx="${i}">
+        <img src="${imageUrl}" alt="${p.title}" loading="lazy" class="w-full object-cover rounded-lg mb-2" style="max-height:170px"/>
+        <h3 class="font-bold text-base mb-1 text-center" title="${p.title}">${p.title}</h3>
+        <div class="flex items-center justify-center mb-2">
+          <span class="product-price font-bold text-lg ml-2">${p.price?.toLocaleString?.() || p.priceTxt || ''} <span style="font-size:11px;color:#aaa;">تومان</span></span>
+          ${p.badge ? `<span class="${badgeClass}">${p.badge}</span>` : ''}
+        </div>
+        <div class="text-xs text-gray-500 mb-3 text-center">${p.category || ''}</div>
+        <div class="flex gap-2 w-full mt-auto">
+          <button class="onyx-btn details-btn w-full justify-center" aria-label="مشاهده ${p.title}" data-idx="${i}">
+            مشاهده محصول
+          </button>
+        </div>
+      </article>
+    `;
+  }).join('');
+  document.querySelectorAll('.details-btn').forEach((btn, idx) => {
+    btn.onclick = function () {
+  window.location.href = `product.html?id=${products[idx]._id}`;
+};
+
+  });
+}
+
+
+// ======== رندر اسلایدر داینامیک ========
+function renderHeroSlider(slidesArr = []) {
+  const heroSlider = document.getElementById('heroSliderSection');
+  if (!heroSlider) return;
+  heroSlider.querySelectorAll('.slide').forEach(el => el.remove());
+  if (!slidesArr.length) {
+    heroSlider.insertAdjacentHTML('afterbegin', `
+      <div class="slide active">
+        <img src="https://images.unsplash.com/photo-1512436991641-6745cdb1723f?auto=format&fit=crop&w=1400&q=80&format=webp" alt="اسلاید پیش‌فرض" loading="lazy"/>
+        <div class="slide-caption">
+          <h2 class="slide-title">اسلاید نمونه</h2>
+        </div>
+      </div>
+    `);
+    return;
+  }
+  slidesArr.forEach((slide, i) => {
+    heroSlider.insertAdjacentHTML('beforeend', `
+      <div class="slide${i === 0 ? ' active' : ''}">
+        <img src="${slide.img || ''}" alt="${slide.title || 'اسلاید'}" loading="lazy"/>
+        <div class="slide-caption">
+          <h2 class="slide-title">${slide.title || ''}</h2>
+          <p class="slide-desc">${slide.desc || ''}</p>
+        </div>
+      </div>
+    `);
+  });
+  let slides = Array.from(heroSlider.querySelectorAll('.slide'));
+  let current = 0;
+  const dots = document.getElementById('sliderDots');
+  if (dots) {
+    dots.innerHTML = '';
+    slides.forEach((_, idx) => {
+      const dot = document.createElement('span');
+      dot.className = `slider-dot${idx === 0 ? ' active' : ''}`;
+      dot.onclick = () => gotoSlide(idx);
+      dots.appendChild(dot);
+    });
+  }
+  function gotoSlide(idx) {
+    slides.forEach((el, j) => el.classList.toggle('active', j === idx));
+    if (dots) {
+      dots.querySelectorAll('.slider-dot').forEach((el, j) => el.classList.toggle('active', j === idx));
+    }
+    current = idx;
+  }
+  document.getElementById('prevSlide').onclick = () => gotoSlide((current - 1 + slides.length) % slides.length);
+  document.getElementById('nextSlide').onclick = () => gotoSlide((current + 1) % slides.length);
+  setInterval(() => gotoSlide((current + 1) % slides.length), 6000);
+}
+
+
+// ========== اجرا بعد از لود صفحه ==========
+document.addEventListener('DOMContentLoaded', function () {
+  loadShopData();
+  const scrollTopBtn = document.getElementById('scrollTopBtn');
+  window.onscroll = () => {
+    if (scrollTopBtn) scrollTopBtn.classList.toggle('hidden', window.scrollY < 300);
+  }
+  if (scrollTopBtn)
+    scrollTopBtn.onclick = () => window.scrollTo({ top: 0, behavior: 'smooth' });
+});
+
+
+
+
+
+// کنترل باز و بسته شدن مودال آدرس فروشگاه
+document.addEventListener('DOMContentLoaded', function () {
+  const addressBtn = document.getElementById('addressBtn');
+  const addressModal = document.getElementById('addressModal');
+  const closeAddressModal = document.getElementById('closeAddressModal');
+  
+  if (addressBtn && addressModal) {
+    addressBtn.onclick = function() {
+      addressModal.classList.remove('hidden');
+    }
+  }
+  if (closeAddressModal && addressModal) {
+    closeAddressModal.onclick = function() {
+      addressModal.classList.add('hidden');
+    }
+  }
+  if (addressModal) {
+    addressModal.addEventListener('click', function(e) {
+      if (e.target === addressModal) {
+        addressModal.classList.add('hidden');
+      }
+    });
+  }
+});
+
+
+
+
+
+
+
+
+document.addEventListener('DOMContentLoaded', () => {
+
+/* ───────────────── ثابت‌ها و ابزار‌ها ──────────────── */
+const API_BASE     = 'http://localhost:5000';     // آدرس بک‌اند
+const AUTH_CHECK   = `${API_BASE}/api/auth/getCurrentUser`;
+const REPORT_URL   = `${API_BASE}/api/reports`;
+
+/* ‌────────── المان‌های صفحه ────────── */
+/* 1) مودال آدرس */
+const addressBtn        = document.getElementById('addressBtn');
+const addressModal      = document.getElementById('addressModal');
+const closeAddressModal = document.getElementById('closeAddressModal');
+
+/* 2) گزارش تخلف */
+const $btn   = document.getElementById('reportBtn');
+const $modal = document.getElementById('reportModal');
+const $close = document.getElementById('closeReportModal');
+
+const $type  = document.getElementById('reportType');
+const $txt   = document.getElementById('reportText');
+const $send  = document.getElementById('submitReport');
+const $msg   = document.getElementById('reportMsg');
+
+/* ───────────── کمک‌خرج‌ها ───────────── */
+
+/* ───────────── کمک‌خرج‌ها ───────────── */
+const showMsg = (text = '', ok = true) => {
+  $msg.textContent = text;
+  $msg.className   = ok ? 'text-green-500 font-bold mt-1'
+                        : 'text-red-500  font-bold mt-1';
+};
+
+const isLoggedIn = async () => {
+  try {
+    const res = await fetch(AUTH_CHECK, { credentials: 'include' });
+    return res.ok;                  // کوکی معتبر → ۲۰۰
+  } catch {
+    return false;
+  }
+};
+
+
+/* ───────────── مودال آدرس ───────────── */
+addressBtn?.addEventListener('click', () => addressModal?.classList.remove('hidden'));
+closeAddressModal?.addEventListener('click', () => addressModal?.classList.add('hidden'));
+addressModal?.addEventListener('click', e => (e.target === addressModal) && addressModal.classList.add('hidden'));
+
+/* ───────────── مودال گزارش ───────────── */
+  // ───────────── گزارش تخلف ─────────────
+  const resetForm = () => {
+    showMsg('');
+    $type.value = 'price_mismatch';
+    $txt.value  = '';
+  };
+
+  const openModal  = () => { resetForm(); $modal.classList.remove('hidden'); };
+  const closeModal = () =>   $modal.classList.add('hidden');
+
+  $btn  ?.addEventListener('click', openModal);
+  $close?.addEventListener('click', closeModal);
+  $modal?.addEventListener('click', e => (e.target === $modal) && closeModal());
+
+  /* ───────────── ارسال گزارش ───────────── */
+  $send?.addEventListener('click', async () => {
+
+    const description = $txt.value.trim();
+    const type        = $type.value;
+
+    if (description.length < 5)
+      return showMsg('توضیح حداقل ۵ کاراکتر باشد.', false);
+
+    if (!(await isLoggedIn()))
+      return askForLogin({ type, description });
+
+    $send.disabled    = true;
+    $send.textContent = 'در حال ارسال…';
+
+    try {
+      const res = await fetch(REPORT_URL, {
+        method      : 'POST',
+        credentials : 'include',
+        headers     : { 'Content-Type': 'application/json' },
+        body        : JSON.stringify({ type, description, sellerId: currentSellerId, shopurl: slug })
+      });
+
+      if (res.status === 401) return askForLogin({ type, description });
+      if (res.status === 429) return showMsg('لطفاً یک دقیقه بعد دوباره تلاش کنید.', false);
+      if (!res.ok)            return showMsg('خطا! دوباره امتحان کنید.', false);
+
+      showMsg('✅ گزارش با موفقیت ثبت شد');
+      setTimeout(closeModal, 2000);
+
+    } catch (err) {
+      console.error(err);
+      showMsg('خطای شبکه؛ بعداً تلاش کنید.', false);
+    } finally {
+      $send.disabled    = false;
+      $send.textContent = 'ارسال گزارش';
+    }
+  });
+
+  /* ───── پرسش برای ورود ───── */
+  function askForLogin(draft) {
+    $send.disabled    = false;
+    $send.textContent = 'ارسال گزارش';
+
+    if (confirm('برای ارسال گزارش باید وارد شوید. مایلید به صفحهٔ ورود بروید؟')) {
+      sessionStorage.setItem('afterLoginReturn', location.href);
+      sessionStorage.setItem('reportDraft', JSON.stringify(draft));
+      location.href = '/login.html';
+    } else {
+      showMsg('ابتدا وارد حساب شوید سپس دوباره گزارش دهید.', false);
+    }
+  }
+
+  /* ───── بازیابی پیش‌نویس پس از ورود ───── */
+  (async () => {
+    const draftStr = sessionStorage.getItem('reportDraft');
+    if (!draftStr) return;
+    if (!(await isLoggedIn())) return;  // هنوز وارد نشده
+
+    const { type, description } = JSON.parse(draftStr);
+    sessionStorage.removeItem('reportDraft');
+
+    $type.value = type;
+    $txt.value  = description;
+    $modal.classList.remove('hidden');
+  })();
+
+  // ───────────── امتیازدهی ─────────────
+  const rateShow       = document.getElementById('rateShow');
+  const rateModal      = document.getElementById('rateModal');
+  const closeRateModal = document.getElementById('closeRateModal');
+  const rateStars      = document.getElementById('rateStars');
+  const submitRateBtn  = document.getElementById('submitRate');
+  const rateMsg        = document.getElementById('rateMsg');
+  let   selectedRating = 0;
+
+  function renderStars(rating = 0) {
+    rateStars.innerHTML = '';
+    for (let i = 1; i <= 5; i++) {
+      const star = document.createElement('span');
+      star.className    = `rate-star ${i <= rating ? 'active' : 'inactive'}`;
+      star.textContent  = '★';
+      star.dataset.value = i;
+      star.addEventListener('click', () => {
+        selectedRating = i;
+        renderStars(i);
+      });
+      rateStars.appendChild(star);
+    }
+  }
+
+  rateShow.addEventListener('click', async () => {
+    if (!(await isLoggedIn())) {
+      if (confirm('برای ثبت امتیاز باید وارد شوید. به صفحهٔ ورود بروید؟')) {
+        sessionStorage.setItem('afterLoginReturn', location.href);
+        location.href = '/login.html';
+      }
+      return;
+    }
+    selectedRating = 0;
+    renderStars(0);
+    rateMsg.classList.add('hidden');
+    rateModal.classList.remove('hidden');
+  });
+
+  closeRateModal.addEventListener('click', () => rateModal.classList.add('hidden'));
+  rateModal.addEventListener('click', e => {
+    if (e.target === rateModal) closeRateModal.click();
+  });
+
+  submitRateBtn.addEventListener('click', async () => {
+    if (selectedRating < 1) {
+      rateMsg.textContent = 'لطفاً یک امتیاز انتخاب کنید.';
+      rateMsg.className   = 'text-red-500 font-bold mt-1';
+      rateMsg.classList.remove('hidden');
+      return;
+    }
+    submitRateBtn.disabled = true;
+    try {
+      const res = await fetch(`${API_BASE}/api/shopAppearance/${currentSellerId}/rate`, {
+        method      : 'POST',
+        credentials : 'include',
+        headers     : { 'Content-Type': 'application/json' },
+        body        : JSON.stringify({ rating: selectedRating })
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || 'خطا در ثبت امتیاز');
+
+      document.getElementById('shop-rating').textContent = parseFloat(data.averageRating).toFixed(1);
+      rateMsg.textContent = '✅ امتیاز با موفقیت ثبت شد.';
+      rateMsg.className   = 'text-green-500 font-bold mt-1';
+      rateModal.classList.add('hidden');
+    } catch (err) {
+      rateMsg.textContent = err.message;
+      rateMsg.className   = 'text-red-500 font-bold mt-1';
+      rateMsg.classList.remove('hidden');
+    } finally {
+      submitRateBtn.disabled = false;
+    }
+  });
+
+}); // پایان DOMContentLoaded
+
+
+
+
+
+
+
+
+
+
+
+
+let allProducts = []; // همه محصولات اینجا ذخیره میشه
+
+// ===== گرفتن و رندر محصولات فروشگاه بر اساس shopurl =====
+async function loadShopProducts(shopurl) {
+  try {
+    const res = await fetch(`http://localhost:5000/api/products/shop/${shopurl}`);
+    const products = await res.json();
+    allProducts = products || [];
+    applyFiltersAndRender();
+  } catch (err) {
+    allProducts = [];
+    applyFiltersAndRender();
+  }
+}
+
+// ===== فیلتر و مرتب‌سازی =====
+function applyFiltersAndRender() {
+  let filtered = [...allProducts];
+  
+  // دسته‌بندی
+  const cat = document.getElementById('filterCategory')?.value || "همه";
+  if (cat && cat !== "همه") {
+    filtered = filtered.filter(p => (p.category && p.category.trim() === cat));
+  }
+  
+  // مرتب‌سازی
+  const sort = document.getElementById('sortProducts')?.value || "default";
+  if (sort === "newest") {
+    filtered.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+  } else if (sort === "expensive") {
+    filtered.sort((a, b) => (b.price || 0) - (a.price || 0));
+  } else if (sort === "cheap") {
+    filtered.sort((a, b) => (a.price || 0) - (b.price || 0));
+  } else if (sort === "best") {
+    // برای پرفروش اگه فیلد مثلا "sold" یا "orders" داری استفاده کن وگرنه badgeType === 'best'
+    filtered.sort((a, b) => ((b.sold || 0) - (a.sold || 0)));
+  }
+  
+  renderProducts(filtered);
+}
+
+// ===== ایوند لیسنرهای فیلتر و مرتب‌سازی =====
+document.addEventListener('DOMContentLoaded', function () {
+  const catSel = document.getElementById('filterCategory');
+  const sortSel = document.getElementById('sortProducts');
+  if (catSel) catSel.addEventListener('change', applyFiltersAndRender);
+  if (sortSel) sortSel.addEventListener('change', applyFiltersAndRender);
+});
+
+
+
+
+
+
+// ---- داینامیک کردن title و meta تگ‌های سئو ----
+
+function setDynamicSEO(shop) {
+  // title
+  document.title = `${shop.shopName || 'فروشگاه'} | ${shop.shopShortDesc || ''}`;
+
+  // description
+  let desc = document.querySelector('meta[name="description"]');
+  if (!desc) {
+    desc = document.createElement('meta');
+    desc.setAttribute('name', 'description');
+    document.head.appendChild(desc);
+  }
+  desc.setAttribute('content', shop.shopShortDesc || 'خرید آنلاین از فروشگاه');
+
+  // keywords
+  let keywords = document.querySelector('meta[name="keywords"]');
+  if (!keywords) {
+    keywords = document.createElement('meta');
+    keywords.setAttribute('name', 'keywords');
+    document.head.appendChild(keywords);
+  }
+  keywords.setAttribute('content', `${shop.shopName || ''}, ${shop.shopCity || ''}, ${shop.shopTags || ''}, فروشگاه`);
+
+  // author
+  let author = document.querySelector('meta[name="author"]');
+  if (!author) {
+    author = document.createElement('meta');
+    author.setAttribute('name', 'author');
+    document.head.appendChild(author);
+  }
+  author.setAttribute('content', shop.shopName || '');
+
+  // og:title
+  let ogTitle = document.querySelector('meta[property="og:title"]');
+  if (!ogTitle) {
+    ogTitle = document.createElement('meta');
+    ogTitle.setAttribute('property', 'og:title');
+    document.head.appendChild(ogTitle);
+  }
+  ogTitle.setAttribute('content', `${shop.shopName || ''} | ${shop.shopShortDesc || ''}`);
+
+  // og:description
+  let ogDesc = document.querySelector('meta[property="og:description"]');
+  if (!ogDesc) {
+    ogDesc = document.createElement('meta');
+    ogDesc.setAttribute('property', 'og:description');
+    document.head.appendChild(ogDesc);
+  }
+  ogDesc.setAttribute('content', shop.shopShortDesc || '');
+
+  // og:url
+  let ogUrl = document.querySelector('meta[property="og:url"]');
+  if (!ogUrl) {
+    ogUrl = document.createElement('meta');
+    ogUrl.setAttribute('property', 'og:url');
+    document.head.appendChild(ogUrl);
+  }
+  ogUrl.setAttribute('content', window.location.href);
+
+  // og:image (اگه داری)
+  if (shop.shopImage) {
+    let ogImg = document.querySelector('meta[property="og:image"]');
+    if (!ogImg) {
+      ogImg = document.createElement('meta');
+      ogImg.setAttribute('property', 'og:image');
+      document.head.appendChild(ogImg);
+    }
+    ogImg.setAttribute('content', shop.shopImage);
+  }
+}
+
+
+
+</script>
+
+
+</body>
+</html>

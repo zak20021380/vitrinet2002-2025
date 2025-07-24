@@ -1,0 +1,1046 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>سیستم نوبت‌گیری آنلاین | آرایشگاه و کارواش</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #4361ee;
+            --secondary: #3f37c9;
+            --success: #4cc9f0;
+            --light: #f8f9fa;
+            --dark: #212529;
+            --danger: #e63946;
+            --warning: #fca311;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            font-family: 'Vazir', 'Segoe UI', Tahoma, sans-serif;
+        }
+        
+        .header {
+            background: linear-gradient(to right, var(--primary), var(--secondary));
+            color: white;
+            padding: 1.5rem 0;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .header::before {
+            content: "";
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 70%);
+            transform: rotate(30deg);
+        }
+        
+        .card {
+            border-radius: 15px;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.08);
+            border: none;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            margin-bottom: 1.5rem;
+            overflow: hidden;
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15);
+        }
+        
+        .card-header {
+            background: linear-gradient(to right, var(--primary), var(--secondary));
+            color: white;
+            font-weight: bold;
+            border-radius: 15px 15px 0 0 !important;
+            padding: 1rem 1.5rem;
+        }
+        
+        .calendar-day {
+            text-align: center;
+            padding: 0.8rem 0.5rem;
+            cursor: pointer;
+            border-radius: 10px;
+            transition: all 0.2s;
+            position: relative;
+        }
+        
+        .calendar-day:hover {
+            background-color: rgba(67, 97, 238, 0.1);
+        }
+        
+        .calendar-day.selected {
+            background-color: var(--primary);
+            color: white;
+            transform: scale(1.05);
+        }
+        
+        .calendar-day.booked::after {
+            content: "";
+            position: absolute;
+            bottom: 5px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 6px;
+            height: 6px;
+            background-color: var(--danger);
+            border-radius: 50%;
+        }
+        
+        .time-slot {
+            display: inline-block;
+            width: 100%;
+            padding: 12px 15px;
+            margin: 8px 0;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 500;
+            background-color: white;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .time-slot:hover {
+            border-color: var(--primary);
+            background-color: rgba(67, 97, 238, 0.05);
+        }
+        
+        .time-slot.selected {
+            border-color: var(--primary);
+            background-color: rgba(67, 97, 238, 0.1);
+            transform: scale(1.03);
+        }
+        
+        .time-slot.booked {
+            background-color: #f8f9fa;
+            color: #adb5bd;
+            cursor: not-allowed;
+            text-decoration: line-through;
+            border-color: #e9ecef;
+        }
+        
+        .time-slot.booked::after {
+            content: "رزرو شده";
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) rotate(-15deg);
+            font-size: 14px;
+            font-weight: bold;
+            color: var(--danger);
+            opacity: 0.7;
+        }
+        
+        .service-card {
+            text-align: center;
+            padding: 1.5rem;
+            border: 2px solid transparent;
+            border-radius: 12px;
+            transition: all 0.3s;
+            height: 100%;
+            background-color: white;
+        }
+        
+        .service-card:hover {
+            border-color: var(--primary);
+            box-shadow: 0 10px 25px rgba(67, 97, 238, 0.15);
+        }
+        
+        .service-card.selected {
+            border-color: var(--primary);
+            background-color: rgba(67, 97, 238, 0.05);
+        }
+        
+        .service-icon {
+            font-size: 2.5rem;
+            color: var(--primary);
+            margin-bottom: 1rem;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(to right, var(--primary), var(--secondary));
+            border: none;
+            border-radius: 50px;
+            padding: 12px 30px;
+            font-weight: bold;
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(67, 97, 238, 0.3);
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 7px 20px rgba(67, 97, 238, 0.4);
+        }
+        
+        .btn-primary:active {
+            transform: translateY(0);
+        }
+        
+        .step-indicator {
+            display: flex;
+            justify-content: space-between;
+            margin: 2rem 0;
+            position: relative;
+        }
+        
+        .step-indicator::before {
+            content: "";
+            position: absolute;
+            top: 20px;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background-color: #e0e0e0;
+            z-index: 1;
+        }
+        
+        .step {
+            position: relative;
+            z-index: 2;
+            text-align: center;
+            width: 25%;
+        }
+        
+        .step-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: #e0e0e0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 10px;
+            color: white;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+        
+        .step.active .step-icon {
+            background: linear-gradient(to right, var(--primary), var(--secondary));
+            transform: scale(1.1);
+        }
+        
+        .step.completed .step-icon {
+            background: linear-gradient(to right, #06d6a0, #06b48a);
+        }
+        
+        .step.completed .step-icon::after {
+            content: "\f00c";
+            font-family: "Font Awesome 5 Free";
+            font-weight: 900;
+        }
+        
+        .step-text {
+            font-size: 0.9rem;
+            color: #6c757d;
+        }
+        
+        .step.active .step-text {
+            color: var(--primary);
+            font-weight: bold;
+        }
+        
+        .payment-card {
+            background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+            border-radius: 15px;
+            overflow: hidden;
+        }
+        
+        .summary-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .total {
+            font-weight: bold;
+            font-size: 1.2rem;
+            color: var(--primary);
+        }
+        
+        .confirmation-icon {
+            font-size: 5rem;
+            color: #06d6a0;
+            margin-bottom: 1.5rem;
+            animation: pulse 1.5s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+        
+        .floating-btn {
+            position: fixed;
+            bottom: 30px;
+            left: 30px;
+            z-index: 1000;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        .admin-panel {
+            background-color: white;
+            border-radius: 15px;
+            padding: 2rem;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            margin-top: 2rem;
+        }
+        
+        .reservation-item {
+            padding: 1rem;
+            border-radius: 10px;
+            margin-bottom: 1rem;
+            background-color: #f8f9fa;
+            border-left: 4px solid var(--primary);
+            transition: all 0.3s;
+        }
+        
+        .reservation-item:hover {
+            transform: translateX(5px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+        }
+        
+        .progress-bar {
+            height: 8px;
+            border-radius: 4px;
+            background-color: #e9ecef;
+            overflow: hidden;
+            margin: 1rem 0;
+        }
+        
+        .progress {
+            height: 100%;
+            background: linear-gradient(to right, var(--primary), var(--secondary));
+            border-radius: 4px;
+            transition: width 0.5s ease;
+        }
+        
+        @media (max-width: 768px) {
+            .step-text {
+                font-size: 0.75rem;
+            }
+            
+            .time-slot {
+                padding: 10px 5px;
+                margin: 5px 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- هدر سیستم -->
+    <header class="header">
+        <div class="container">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h1 class="mb-0"><i class="far fa-calendar-alt me-2"></i>سیستم نوبت‌گیری آنلاین</h1>
+                    <p class="mb-0">آرایشگاه و کارواش مدرن</p>
+                </div>
+                <div class="d-flex">
+                    <button class="btn btn-outline-light me-2">
+                        <i class="fas fa-phone-alt me-1"></i> تماس با ما
+                    </button>
+                    <button class="btn btn-light">
+                        <i class="fas fa-info-circle me-1"></i> راهنما
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="container py-5">
+        <!-- نوار مراحل -->
+        <div class="step-indicator">
+            <div class="step active" id="step1">
+                <div class="step-icon">1</div>
+                <div class="step-text">انتخاب تاریخ</div>
+            </div>
+            <div class="step" id="step2">
+                <div class="step-icon">2</div>
+                <div class="step-text">انتخاب نوبت</div>
+            </div>
+            <div class="step" id="step3">
+                <div class="step-icon">3</div>
+                <div class="step-text">اطلاعات کاربر</div>
+            </div>
+            <div class="step" id="step4">
+                <div class="step-icon">4</div>
+                <div class="step-text">پرداخت</div>
+            </div>
+        </div>
+
+        <!-- پیشرفت فرآیند -->
+        <div class="progress-bar">
+            <div class="progress" id="bookingProgress" style="width: 25%"></div>
+        </div>
+
+        <!-- مرحله 1: انتخاب تاریخ -->
+        <div class="step-content" id="step1-content">
+            <div class="card">
+                <div class="card-header">
+                    <i class="fas fa-calendar-alt me-2"></i>انتخاب تاریخ
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-8">
+                            <div class="calendar-container mb-4">
+                                <div class="d-flex justify-content-between align-items-center mb-4">
+                                    <h4 class="mb-0" id="currentMonth">تیر 1402</h4>
+                                    <div>
+                                        <button class="btn btn-sm btn-outline-primary me-2" id="prevMonth">
+                                            <i class="fas fa-chevron-right"></i>
+                                        </button>
+                                        <button class="btn btn-sm btn-outline-primary" id="nextMonth">
+                                            <i class="fas fa-chevron-left"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                                
+                                <div class="row mb-3">
+                                    <div class="col text-center text-muted">شنبه</div>
+                                    <div class="col text-center text-muted">یکشنبه</div>
+                                    <div class="col text-center text-muted">دوشنبه</div>
+                                    <div class="col text-center text-muted">سه‌شنبه</div>
+                                    <div class="col text-center text-muted">چهارشنبه</div>
+                                    <div class="col text-center text-muted">پنجشنبه</div>
+                                    <div class="col text-center text-muted">جمعه</div>
+                                </div>
+                                
+                                <div class="row" id="calendarDays">
+                                    <!-- روزهای تقویم توسط جاوااسکریپت پر می‌شود -->
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card bg-light">
+                                <div class="card-body">
+                                    <h5><i class="fas fa-info-circle text-primary me-2"></i>راهنمای نوبت‌گیری</h5>
+                                    <ul class="mt-3">
+                                        <li class="mb-2">تاریخ مورد نظر خود را از تقویم انتخاب کنید</li>
+                                        <li class="mb-2">روزهای دارای نقطه قرمز دارای نوبت رزرو شده هستند</li>
+                                        <li class="mb-2">روزهای تعطیل به رنگ خاکستری نمایش داده می‌شوند</li>
+                                        <li>پس از انتخاب تاریخ روی دکمه ادامه کلیک کنید</li>
+                                    </ul>
+                                    <div class="d-grid mt-4">
+                                        <button class="btn btn-primary" id="toStep2" disabled>
+                                            ادامه <i class="fas fa-arrow-left ms-2"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- مرحله 2: انتخاب نوبت -->
+        <div class="step-content d-none" id="step2-content">
+            <div class="card">
+                <div class="card-header">
+                    <i class="fas fa-clock me-2"></i>انتخاب نوبت
+                </div>
+                <div class="card-body">
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <h4 id="selectedDateDisplay">تاریخ: 15 تیر 1402</h4>
+                        </div>
+                        <div class="col-md-6 text-md-end">
+                            <button class="btn btn-outline-secondary" id="backToStep1">
+                                <i class="fas fa-arrow-right me-2"></i> تغییر تاریخ
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <h5 class="mb-3"><i class="fas fa-cut me-2 text-primary"></i>نوبت‌های آرایشگاه</h5>
+                    <div class="row" id="beautySalonSlots">
+                        <!-- نوبت‌های آرایشگاه توسط جاوااسکریپت پر می‌شود -->
+                    </div>
+                    
+                    <hr class="my-4">
+                    
+                    <h5 class="mb-3"><i class="fas fa-car me-2 text-primary"></i>نوبت‌های کارواش</h5>
+                    <div class="row" id="carWashSlots">
+                        <!-- نوبت‌های کارواش توسط جاوااسکریپت پر می‌شود -->
+                    </div>
+                    
+                    <div class="d-flex justify-content-between mt-4">
+                        <button class="btn btn-outline-primary" id="backToStep1-2">
+                            <i class="fas fa-arrow-right me-2"></i> مرحله قبل
+                        </button>
+                        <button class="btn btn-primary" id="toStep3" disabled>
+                            ادامه <i class="fas fa-arrow-left ms-2"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- مرحله 3: اطلاعات کاربر -->
+        <div class="step-content d-none" id="step3-content">
+            <div class="card">
+                <div class="card-header">
+                    <i class="fas fa-user me-2"></i>اطلاعات کاربر
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="fullName" class="form-label">نام کامل</label>
+                                <input type="text" class="form-control" id="fullName" placeholder="نام و نام خانوادگی">
+                            </div>
+                            <div class="mb-3">
+                                <label for="phone" class="form-label">شماره تلفن</label>
+                                <input type="tel" class="form-control" id="phone" placeholder="09XXXXXXXXX">
+                            </div>
+                            <div class="mb-3">
+                                <label for="email" class="form-label">ایمیل (اختیاری)</label>
+                                <input type="email" class="form-control" id="email" placeholder="example@domain.com">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card h-100">
+                                <div class="card-body">
+                                    <h5><i class="fas fa-info-circle text-primary me-2"></i>جزئیات رزرو</h5>
+                                    <div class="mt-3">
+                                        <p><strong>نوع خدمت:</strong> <span id="reservationService">آرایشگاه</span></p>
+                                        <p><strong>تاریخ:</strong> <span id="reservationDate">15 تیر 1402</span></p>
+                                        <p><strong>زمان:</strong> <span id="reservationTime">10:30 - 11:00</span></p>
+                                        <p><strong>هزینه:</strong> <span id="reservationPrice">75,000 تومان</span></p>
+                                    </div>
+                                    <div class="d-grid mt-4">
+                                        <button class="btn btn-outline-secondary" id="changeReservation">
+                                            <i class="fas fa-edit me-2"></i> تغییر نوبت
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="d-flex justify-content-between mt-4">
+                        <button class="btn btn-outline-primary" id="backToStep2">
+                            <i class="fas fa-arrow-right me-2"></i> مرحله قبل
+                        </button>
+                        <button class="btn btn-primary" id="toStep4">
+                            ادامه به پرداخت <i class="fas fa-arrow-left ms-2"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- مرحله 4: پرداخت -->
+        <div class="step-content d-none" id="step4-content">
+            <div class="card">
+                <div class="card-header">
+                    <i class="fas fa-credit-card me-2"></i>پرداخت
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="payment-card p-4 h-100">
+                                <h5 class="mb-4">روش پرداخت</h5>
+                                <div class="mb-3">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="radio" name="paymentMethod" id="onlinePayment" checked>
+                                        <label class="form-check-label" for="onlinePayment">
+                                            <i class="fab fa-cc-visa me-2"></i> پرداخت اینترنتی (آنلاین)
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="mb-3">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="radio" name="paymentMethod" id="walletPayment">
+                                        <label class="form-check-label" for="walletPayment">
+                                            <i class="fas fa-wallet me-2"></i> پرداخت از کیف پول
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="mb-4">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="radio" name="paymentMethod" id="inPlacePayment">
+                                        <label class="form-check-label" for="inPlacePayment">
+                                            <i class="fas fa-money-bill-wave me-2"></i> پرداخت در محل
+                                        </label>
+                                    </div>
+                                </div>
+                                
+                                <div class="d-grid">
+                                    <button class="btn btn-primary" id="payNow">
+                                        پرداخت <i class="fas fa-lock ms-2"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card h-100">
+                                <div class="card-body">
+                                    <h5 class="mb-4">خلاصه سفارش</h5>
+                                    <div class="summary-item">
+                                        <span>نوع خدمت:</span>
+                                        <span id="summaryService">آرایشگاه مردانه</span>
+                                    </div>
+                                    <div class="summary-item">
+                                        <span>تاریخ و زمان:</span>
+                                        <span id="summaryDateTime">15 تیر 1402 - 10:30 تا 11:00</span>
+                                    </div>
+                                    <div class="summary-item">
+                                        <span>هزینه خدمت:</span>
+                                        <span id="summaryPrice">75,000 تومان</span>
+                                    </div>
+                                    <div class="summary-item">
+                                        <span>مالیات:</span>
+                                        <span>9,000 تومان</span>
+                                    </div>
+                                    <div class="summary-item total">
+                                        <span>مبلغ قابل پرداخت:</span>
+                                        <span id="summaryTotal">84,000 تومان</span>
+                                    </div>
+                                    
+                                    <div class="mt-4">
+                                        <h6>مشخصات کاربر</h6>
+                                        <p class="mb-1" id="summaryFullName">محمد رضایی</p>
+                                        <p class="mb-1" id="summaryPhone">09123456789</p>
+                                        <p class="mb-0" id="summaryEmail">mohammad@example.com</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="d-flex justify-content-between mt-4">
+                        <button class="btn btn-outline-primary" id="backToStep3">
+                            <i class="fas fa-arrow-right me-2"></i> مرحله قبل
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- مرحله 5: تایید نهایی -->
+        <div class="step-content d-none" id="step5-content">
+            <div class="card">
+                <div class="card-body text-center py-5">
+                    <div class="confirmation-icon">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                    <h2 class="text-success mb-3">نوبت شما با موفقیت ثبت شد!</h2>
+                    <p class="lead mb-4">کد رهگیری: <span class="fw-bold" id="trackingCode">TRK-658932</span></p>
+                    
+                    <div class="card bg-light mb-4 mx-auto" style="max-width: 500px;">
+                        <div class="card-body text-center">
+                            <h5>جزئیات نوبت</h5>
+                            <div class="d-flex justify-content-around mt-4">
+                                <div>
+                                    <div class="text-muted">نوع خدمت</div>
+                                    <div class="fw-bold" id="finalService">آرایشگاه</div>
+                                </div>
+                                <div>
+                                    <div class="text-muted">تاریخ</div>
+                                    <div class="fw-bold" id="finalDate">15 تیر 1402</div>
+                                </div>
+                                <div>
+                                    <div class="text-muted">زمان</div>
+                                    <div class="fw-bold" id="finalTime">10:30 - 11:00</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <p class="text-muted mb-4">یک ایمیل حاوی اطلاعات نوبت به آدرس شما ارسال شد.</p>
+                    
+                    <div class="d-flex justify-content-center gap-3">
+                        <button class="btn btn-outline-primary">
+                            <i class="fas fa-print me-2"></i> چاپ نوبت
+                        </button>
+                        <button class="btn btn-primary" id="newReservation">
+                            <i class="fas fa-plus me-2"></i> رزرو جدید
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- پنل مدیریت -->
+    <button class="btn btn-primary floating-btn" id="adminToggle">
+        <i class="fas fa-cog me-2"></i> پنل مدیریت
+    </button>
+
+    <div class="admin-panel d-none" id="adminPanel">
+        <h3 class="mb-4"><i class="fas fa-tachometer-alt me-2"></i>پنل مدیریت</h3>
+        
+        <div class="row">
+            <div class="col-md-4 mb-4">
+                <div class="card bg-primary text-white">
+                    <div class="card-body">
+                        <h5 class="card-title">نوبت‌های امروز</h5>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <h2 class="mb-0">8</h2>
+                            <i class="fas fa-calendar-day fa-3x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 mb-4">
+                <div class="card bg-success text-white">
+                    <div class="card-body">
+                        <h5 class="card-title">نوبت‌های فردا</h5>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <h2 class="mb-0">12</h2>
+                            <i class="fas fa-calendar-check fa-3x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 mb-4">
+                <div class="card bg-info text-white">
+                    <div class="card-body">
+                        <h5 class="card-title">کل درآمد ماه</h5>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <h2 class="mb-0">12.5M</h2>
+                            <i class="fas fa-wallet fa-3x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <h4 class="mt-5 mb-3">آخرین نوبت‌ها</h4>
+        <div id="reservationsList">
+            <!-- لیست رزروها توسط جاوااسکریپت پر می‌شود -->
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // داده‌های نمونه
+        const sampleData = {
+            selectedDate: null,
+            selectedSlot: null,
+            serviceType: null,
+            userInfo: null,
+            paymentMethod: null,
+            reservations: [
+                { id: 1, service: 'آرایشگاه', date: '2023-07-10', time: '10:00 - 10:30', customer: 'علی محمدی', phone: '09123456789', price: 70000 },
+                { id: 2, service: 'کارواش', date: '2023-07-10', time: '11:30 - 12:00', customer: 'رضا کریمی', phone: '09129876543', price: 120000 },
+                { id: 3, service: 'آرایشگاه', date: '2023-07-11', time: '09:30 - 10:00', customer: 'سارا احمدی', phone: '09151234567', price: 90000 },
+                { id: 4, service: 'کارواش', date: '2023-07-12', time: '14:00 - 14:30', customer: 'محمد حسینی', phone: '09367894561', price: 110000 }
+            ]
+        };
+
+        // تابع ایجاد تقویم
+        function generateCalendar() {
+            const calendarDays = document.getElementById('calendarDays');
+            calendarDays.innerHTML = '';
+            
+            // تاریخ فعلی
+            const currentDate = new Date();
+            const year = currentDate.getFullYear();
+            const month = currentDate.getMonth();
+            const today = currentDate.getDate();
+            
+            // نمایش ماه فعلی
+            const months = ['فروردین', 'اردیبهشت', 'خرداد', 'تیر', 'مرداد', 'شهریور', 'مهر', 'آبان', 'آذر', 'دی', 'بهمن', 'اسفند'];
+            document.getElementById('currentMonth').textContent = `${months[month]} ${1402}`;
+            
+            // روز اول ماه
+            const firstDay = new Date(year, month, 1).getDay();
+            
+            // تعداد روزهای ماه
+            const daysInMonth = new Date(year, month + 1, 0).getDate();
+            
+            // ایجاد روزهای خالی برای شروع هفته
+            for (let i = 0; i < firstDay; i++) {
+                const emptyDay = document.createElement('div');
+                emptyDay.className = 'col calendar-day empty';
+                calendarDays.appendChild(emptyDay);
+            }
+            
+            // ایجاد روزهای ماه
+            for (let i = 1; i <= daysInMonth; i++) {
+                const day = document.createElement('div');
+                day.className = 'col calendar-day';
+                day.textContent = i;
+                day.dataset.date = `${year}-${month + 1}-${i}`;
+                
+                // تعطیلات
+                if (i === 14 || i === 15) {
+                    day.classList.add('text-muted');
+                }
+                
+                // نوبت‌های رزرو شده
+                if (i === 10 || i === 12 || i === 18 || i === 22) {
+                    day.classList.add('booked');
+                }
+                
+                // امروز
+                if (i === today) {
+                    day.classList.add('fw-bold');
+                }
+                
+                // انتخاب تاریخ
+                day.addEventListener('click', function() {
+                    document.querySelectorAll('.calendar-day').forEach(d => d.classList.remove('selected'));
+                    this.classList.add('selected');
+                    sampleData.selectedDate = this.dataset.date;
+                    document.getElementById('toStep2').disabled = false;
+                });
+                
+                calendarDays.appendChild(day);
+            }
+        }
+        
+        // تابع ایجاد نوبت‌های زمانی
+        function generateTimeSlots() {
+            const beautySalonSlots = document.getElementById('beautySalonSlots');
+            const carWashSlots = document.getElementById('carWashSlots');
+            beautySalonSlots.innerHTML = '';
+            carWashSlots.innerHTML = '';
+            
+            // نوبت‌های آرایشگاه
+            const beautyTimes = [
+                '08:00 - 08:30', '08:30 - 09:00', '09:00 - 09:30', '09:30 - 10:00', 
+                '10:00 - 10:30', '10:30 - 11:00', '11:00 - 11:30', '11:30 - 12:00',
+                '13:00 - 13:30', '13:30 - 14:00', '14:00 - 14:30', '14:30 - 15:00',
+                '15:00 - 15:30', '15:30 - 16:00', '16:00 - 16:30', '16:30 - 17:00'
+            ];
+            
+            beautyTimes.forEach(time => {
+                const slot = document.createElement('div');
+                slot.className = 'col-6 col-md-3 mb-3';
+                slot.innerHTML = `
+                    <div class="time-slot ${time === '10:00 - 10:30' || time === '14:30 - 15:00' ? 'booked' : ''}" data-service="آرایشگاه" data-time="${time}">
+                        ${time}
+                    </div>
+                `;
+                beautySalonSlots.appendChild(slot);
+            });
+            
+            // نوبت‌های کارواش
+            const carWashTimes = [
+                '08:00 - 09:00', '09:00 - 10:00', '10:00 - 11:00', '11:00 - 12:00',
+                '13:00 - 14:00', '14:00 - 15:00', '15:00 - 16:00', '16:00 - 17:00'
+            ];
+            
+            carWashTimes.forEach(time => {
+                const slot = document.createElement('div');
+                slot.className = 'col-6 col-md-3 mb-3';
+                slot.innerHTML = `
+                    <div class="time-slot ${time === '09:00 - 10:00' || time === '15:00 - 16:00' ? 'booked' : ''}" data-service="کارواش" data-time="${time}">
+                        ${time}
+                    </div>
+                `;
+                carWashSlots.appendChild(slot);
+            });
+            
+            // اضافه کردن رویداد کلیک به نوبت‌ها
+            document.querySelectorAll('.time-slot:not(.booked)').forEach(slot => {
+                slot.addEventListener('click', function() {
+                    document.querySelectorAll('.time-slot').forEach(s => s.classList.remove('selected'));
+                    this.classList.add('selected');
+                    sampleData.selectedSlot = this.dataset.time;
+                    sampleData.serviceType = this.dataset.service;
+                    document.getElementById('toStep3').disabled = false;
+                    
+                    // نمایش جزئیات در مرحله بعدی
+                    document.getElementById('reservationService').textContent = this.dataset.service;
+                    document.getElementById('reservationDate').textContent = '15 تیر 1402';
+                    document.getElementById('reservationTime').textContent = this.dataset.time;
+                    document.getElementById('reservationPrice').textContent = 
+                        this.dataset.service === 'آرایشگاه' ? '75,000 تومان' : '120,000 تومان';
+                });
+            });
+        }
+        
+        // تابع نمایش رزروها در پنل مدیریت
+        function displayReservations() {
+            const list = document.getElementById('reservationsList');
+            list.innerHTML = '';
+            
+            sampleData.reservations.forEach(res => {
+                const item = document.createElement('div');
+                item.className = 'reservation-item';
+                item.innerHTML = `
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h5>${res.service}</h5>
+                            <p class="mb-1">${res.customer} - ${res.phone}</p>
+                            <p class="mb-0">${res.date} - ${res.time}</p>
+                        </div>
+                        <div class="text-end">
+                            <span class="badge bg-primary">${res.price.toLocaleString()} تومان</span>
+                            <div class="mt-2">
+                                <button class="btn btn-sm btn-outline-danger">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                                <button class="btn btn-sm btn-outline-success ms-2">
+                                    <i class="fas fa-check"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                list.appendChild(item);
+            });
+        }
+        
+        // تابع تغییر مرحله
+        function goToStep(step) {
+            // مخفی کردن تمام مراحل
+            document.querySelectorAll('.step-content').forEach(el => {
+                el.classList.add('d-none');
+            });
+            
+            // نمایش مرحله انتخاب شده
+            document.getElementById(`step${step}-content`).classList.remove('d-none');
+            
+            // به‌روزرسانی مراحل
+            document.querySelectorAll('.step').forEach((el, index) => {
+                if (index + 1 < step) {
+                    el.classList.remove('active');
+                    el.classList.add('completed');
+                } else if (index + 1 === step) {
+                    el.classList.add('active');
+                    el.classList.remove('completed');
+                } else {
+                    el.classList.remove('active');
+                    el.classList.remove('completed');
+                }
+            });
+            
+            // به‌روزرسانی نوار پیشرفت
+            document.getElementById('bookingProgress').style.width = `${(step-1) * 25}%`;
+        }
+        
+        // رویدادهای کلیک
+        document.getElementById('toStep2').addEventListener('click', function() {
+            goToStep(2);
+            generateTimeSlots();
+            document.getElementById('selectedDateDisplay').textContent = 'تاریخ: 15 تیر 1402';
+        });
+        
+        document.getElementById('toStep3').addEventListener('click', function() {
+            goToStep(3);
+        });
+        
+        document.getElementById('toStep4').addEventListener('click', function() {
+            // ذخیره اطلاعات کاربر
+            sampleData.userInfo = {
+                fullName: document.getElementById('fullName').value,
+                phone: document.getElementById('phone').value,
+                email: document.getElementById('email').value
+            };
+            
+            // نمایش اطلاعات در خلاصه پرداخت
+            document.getElementById('summaryService').textContent = 
+                sampleData.serviceType === 'آرایشگاه' ? 'آرایشگاه مردانه' : 'کارواش کامل';
+            document.getElementById('summaryDateTime').textContent = '15 تیر 1402 - ' + sampleData.selectedSlot;
+            document.getElementById('summaryPrice').textContent = 
+                sampleData.serviceType === 'آرایشگاه' ? '75,000 تومان' : '120,000 تومان';
+            document.getElementById('summaryTotal').textContent = 
+                sampleData.serviceType === 'آرایشگاه' ? '84,000 تومان' : '129,000 تومان';
+            document.getElementById('summaryFullName').textContent = sampleData.userInfo.fullName;
+            document.getElementById('summaryPhone').textContent = sampleData.userInfo.phone;
+            document.getElementById('summaryEmail').textContent = sampleData.userInfo.email || '--';
+            
+            goToStep(4);
+        });
+        
+        document.getElementById('payNow').addEventListener('click', function() {
+            // شبیه‌سازی پرداخت
+            setTimeout(function() {
+                // نمایش اطلاعات در مرحله تایید
+                document.getElementById('finalService').textContent = sampleData.serviceType;
+                document.getElementById('finalDate').textContent = '15 تیر 1402';
+                document.getElementById('finalTime').textContent = sampleData.selectedSlot;
+                document.getElementById('trackingCode').textContent = 'TRK-' + Math.floor(100000 + Math.random() * 900000);
+                
+                // افزودن رزرو به لیست
+                const newReservation = {
+                    id: sampleData.reservations.length + 1,
+                    service: sampleData.serviceType,
+                    date: '2023-07-15',
+                    time: sampleData.selectedSlot,
+                    customer: sampleData.userInfo.fullName,
+                    phone: sampleData.userInfo.phone,
+                    price: sampleData.serviceType === 'آرایشگاه' ? 75000 : 120000
+                };
+                
+                sampleData.reservations.unshift(newReservation);
+                displayReservations();
+                
+                goToStep(5);
+            }, 1500);
+        });
+        
+        document.getElementById('backToStep1').addEventListener('click', function() {
+            goToStep(1);
+        });
+        
+        document.getElementById('backToStep1-2').addEventListener('click', function() {
+            goToStep(1);
+        });
+        
+        document.getElementById('backToStep2').addEventListener('click', function() {
+            goToStep(2);
+        });
+        
+        document.getElementById('backToStep3').addEventListener('click', function() {
+            goToStep(3);
+        });
+        
+        document.getElementById('changeReservation').addEventListener('click', function() {
+            goToStep(2);
+        });
+        
+        document.getElementById('newReservation').addEventListener('click', function() {
+            // ریست فرم
+            document.getElementById('fullName').value = '';
+            document.getElementById('phone').value = '';
+            document.getElementById('email').value = '';
+            document.querySelectorAll('.time-slot.selected').forEach(el => el.classList.remove('selected'));
+            document.querySelectorAll('.calendar-day.selected').forEach(el => el.classList.remove('selected'));
+            document.getElementById('toStep2').disabled = true;
+            document.getElementById('toStep3').disabled = true;
+            
+            goToStep(1);
+        });
+        
+        document.getElementById('adminToggle').addEventListener('click', function() {
+            document.getElementById('adminPanel').classList.toggle('d-none');
+        });
+        
+        // رویدادهای تغییر ماه
+        document.getElementById('prevMonth').addEventListener('click', function() {
+            alert('ماه قبل');
+        });
+        
+        document.getElementById('nextMonth').addEventListener('click', function() {
+            alert('ماه بعد');
+        });
+        
+        // مقداردهی اولیه
+        document.addEventListener('DOMContentLoaded', function() {
+            generateCalendar();
+            displayReservations();
+            goToStep(1);
+        });
+    </script>
+</body>
+</html>

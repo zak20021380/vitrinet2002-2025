@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <title>مدیریت ظاهر فروشگاه | داشبورد</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;700;900&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body { font-family: 'Vazirmatn', sans-serif; }
+    .dashboard-content-wrap { background: #fff; border-radius: 1.5rem; box-shadow: 0 3px 22px #7C83FD13; }
+    .onyx-btn {
+      background: #22c55e;
+      color: #fff;
+      font-weight: bold;
+      border-radius: .55rem;
+      padding: .49rem 1.22rem;
+      font-size: 1.09rem;
+      transition: transform .14s, box-shadow .14s, background .13s;
+      box-shadow: 0 2px 14px #22c55e26;
+    }
+    .onyx-btn:hover, .onyx-btn:focus {
+      background: #19954b;
+      color: #fff;
+      transform: translateY(-2px) scale(1.03);
+      box-shadow: 0 4px 18px #22c55e3a;
+    }
+    .input-group label { font-weight:700; margin-bottom:6px; display:block; color:#19954b; }
+    .input-group input, .input-group select {
+      border:1.6px solid #e2f8e5;
+      border-radius:0.53rem;
+      padding:0.62rem 1rem;
+      font-size:1rem;
+      background:#f5fdf8;
+      transition: border .16s;
+      margin-bottom:8px;
+    }
+    .input-group input:focus, .input-group select:focus {
+      border-color: #22c55e;
+      background:#eafff1;
+      outline:none;
+    }
+    .section-title {
+      font-weight: 900;
+      font-size: 1.13rem;
+      color: #19954b;
+      margin-bottom: .5rem;
+      margin-top:2.2rem;
+    }
+    .form-title {
+      font-size: 1.48rem;
+      font-weight: 900;
+      color: #19954b;
+      margin-bottom: 1.9rem;
+      text-align: center;
+      letter-spacing:-.5px;
+    }
+    /* --- استایل کارت اسلاید --- */
+    .slide-card {
+      background: linear-gradient(120deg,#e6fbf0 90%,#fff 100%);
+      border: 2px solid #a7f3d0;
+      border-radius: 1.1rem;
+      box-shadow: 0 3px 22px #22c55e11;
+      padding: 1.1rem 1rem 1rem 1rem;
+      margin-bottom: 1.1rem;
+      display: flex;
+      flex-direction: row;
+      gap: 1.6rem;
+      align-items: flex-start;
+      position: relative;
+      transition: box-shadow .15s, border-color .15s;
+    }
+    .slide-card:hover { box-shadow:0 7px 34px #22c55e22; border-color:#22c55e;}
+    .slide-img-box {
+      flex-shrink: 0;
+      width: 100px;
+      min-width: 78px;
+      max-width: 120px;
+      height: 72px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #f9fff9;
+      border-radius: .7rem;
+      border:1.5px dashed #bbf7d0;
+      position:relative;
+      overflow: hidden;
+    }
+    .slide-img-box img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      border-radius: .6rem;
+    }
+    .slide-info-flex {
+      flex:1 1 0;
+      display: flex;
+      flex-direction: column;
+      gap: .8rem;
+    }
+    .slide-input {
+      width: 100%;
+      min-width: 0;
+      border: none;
+      border-radius: .6rem;
+      background: #f0fdfa;
+      padding: .8rem 1rem;
+      font-size: 1.08rem;
+      margin-bottom: 2px;
+      font-weight: 700;
+      color: #19954b;
+      box-shadow: 0 1.5px 9px #22c55e09;
+      transition: background .17s, box-shadow .15s;
+    }
+    .slide-input:focus {
+      outline: 2px solid #22c55e;
+      background: #eafff1;
+      color:#14532d;
+    }
+    .slide-desc-input {
+      font-size: 1rem;
+      font-weight: 500;
+      background: #f3fef7;
+      margin-top: .1rem;
+      color: #19954b;
+    }
+    .slide-actions {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: .6rem;
+      margin-right: .2rem;
+    }
+    .remove-btn {
+      background: #fff0f0;
+      color: #f43f5e;
+      font-weight: bold;
+      border-radius: 100%;
+      border: none;
+      width: 36px;
+      height: 36px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 1.5px 7px #f43f5e10;
+      cursor: pointer;
+      transition: background .14s, box-shadow .15s, color .13s;
+      font-size:1.25rem;
+    }
+    .remove-btn:hover {
+      background: #ffeaea;
+      color: #b91c1c;
+      box-shadow: 0 5px 17px #f43f5e22;
+    }
+    .slide-number {
+      background:#22c55e;
+      color:#fff;
+      font-weight:900;
+      border-radius:9px;
+      padding: 2px 12px;
+      font-size:.97rem;
+      letter-spacing:.5px;
+      margin-bottom:10px;
+      box-shadow:0 2px 7px #22c55e13;
+      display:inline-block;
+    }
+    /* اسکرول افقی برای اسلایدها روی موبایل */
+    @media (max-width: 700px) {
+      #sliderList {overflow-x: auto;scroll-snap-type: x mandatory;}
+      .slide-card { min-width: 98vw; max-width: 99vw; margin-right:0.3rem; }
+      .slide-img-box { width: 72px; height: 54px;}
+    }
+    @media (max-width: 430px) {
+      .dashboard-content-wrap { padding:.4rem!important;}
+      .slide-card {padding: .7rem .2rem; gap:.7rem;}
+      .slide-input {font-size:.93rem;}
+    }
+    /* افزایش سایز فیلدهای اسلاید در دسکتاپ */
+    @media (min-width: 700px) {
+      .slide-input { font-size: 1.17rem; padding: 1rem 1.2rem;}
+      .slide-desc-input {font-size:1.05rem;}
+      .slide-img-box { width: 110px; height: 84px;}
+    }
+  </style>
+</head>
+<body class="min-h-screen bg-[#F7FAFE] flex flex-col items-center px-2 py-3">
+  <main class="dashboard-content-wrap w-full max-w-xl mx-auto p-7 sm:p-8 md:p-10">
+    <h1 class="form-title">مدیریت ظاهر فروشگاه</h1>
+    <!-- شماره تلفن اختیاری -->
+    <div class="mb-5 input-group">
+      <label for="shopPhone">شماره تماس (اختیاری)</label>
+      <input id="shopPhone" type="tel" class="w-full" placeholder="مثلاً 09123456789" inputmode="numeric" pattern="[0-9]*">
+    </div>
+    <!-- آدرس فروشگاه -->
+    <div class="mb-5 input-group">
+      <label for="shopAddress">آدرس فروشگاه</label>
+      <input id="shopAddress" type="text" class="w-full" placeholder="مثلاً تهران، خیابان مهرام، پلاک ۲۱">
+    </div>
+    <!-- لوگوی فروشگاه (متنی) -->
+    <div class="mb-5 input-group">
+      <label for="shopLogoText">لوگو (نام فروشگاه به صورت متنی)</label>
+      <input id="shopLogoText" type="text" class="w-full font-extrabold text-lg text-green-700" placeholder="مثلاً نئون استایل">
+      <div id="logoPreview" class="mt-2 min-h-[38px]"></div>
+    </div>
+    <!-- وضعیت فروشگاه -->
+    <div class="mb-7 input-group flex items-center gap-4">
+      <label for="shopStatus" class="mb-0">وضعیت فروشگاه</label>
+      <select id="shopStatus">
+        <option value="open">باز است</option>
+        <option value="closed">بسته است</option>
+      </select>
+    </div>
+    <!-- اسلایدر فروشگاه -->
+    <div>
+      <div class="section-title">اسلایدهای صفحه اصلی فروشگاه</div>
+      <div id="sliderList" class="mb-1"></div>
+      <button type="button" onclick="addSlide()" class="onyx-btn mt-2 mb-2 w-full max-w-[330px] mx-auto block">افزودن اسلاید جدید</button>
+    </div>
+    <button onclick="saveTheme()" class="onyx-btn mt-6 w-full py-3">ذخیره همه تغییرات</button>
+  </main>
+<script>
+
+</script>
+
+
+
+
+<!-- Popup: ذخیره موفق -->
+<div id="saveSuccessPopup" class="fixed inset-0 z-[999] flex items-center justify-center bg-black/20 hidden">
+  <div class="bg-white rounded-2xl shadow-2xl max-w-xs w-[88vw] flex flex-col items-center p-6 animate-fade-in-popup border border-green-100 text-center">
+    <svg class="w-12 h-12 text-green-500 mb-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+      <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" fill="#ecfdf5"></circle>
+      <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4" stroke="#22c55e" stroke-width="2"/>
+    </svg>
+    <div class="text-lg font-bold text-green-700 mb-2">تغییرات ذخیره شد!</div>
+    <div class="text-green-500 text-sm">ظاهر فروشگاه با موفقیت به‌روزرسانی شد.</div>
+  </div>
+</div>
+<style>
+@keyframes fade-in-popup { from {opacity: 0; transform: translateY(32px);} to {opacity: 1; transform: translateY(0);} }
+.animate-fade-in-popup { animation: fade-in-popup .33s cubic-bezier(.4,1,.45,.96); }
+#saveSuccessPopup .bg-white { box-shadow: 0 7px 38px #16a34a18; }
+</style>
+
+
+
+
+</body>
+</html>

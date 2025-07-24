@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <title>تابلو فروشگاه | داشبورد</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body {
+      font-family: 'Vazirmatn', sans-serif;
+      background: linear-gradient(115deg,#e0fdfa 0%,#f8fafc 65%,#d4fbe8 100%);
+      min-height: 100vh;
+    }
+    .logo-uploader.dragover {
+      border-color: #10b981 !important;
+      background: #e0fdfa !important;
+    }
+    .custom-shadow {
+      box-shadow: 0 4px 18px rgba(16,185,129,0.13), 0 2px 8px rgba(14,165,233,0.09);
+    }
+    .animate-fadeIn {
+      animation: fadeIn .3s cubic-bezier(.4,1.3,.6,1) both;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: scale(.95);}
+      to   { opacity: 1; transform: scale(1);}
+    }
+    @media (max-width:600px) {
+      .logo-uploader { padding: 20px 8px!important; }
+      #shop-logo-preview { width: 84px!important; height: 84px!important; }
+    }
+  </style>
+</head>
+<body>
+<div class="w-full max-w-lg mx-auto p-4 sm:p-8 bg-white rounded-2xl custom-shadow border border-[#10b98122] animate-fadeIn mt-6 mb-10">
+  <h2 class="text-2xl md:text-3xl font-extrabold text-[#10b981] mb-6 text-center flex items-center justify-center gap-2">
+    <svg width="26" height="26" fill="none" viewBox="0 0 24 24">
+      <path d="M19 17H5l1-8a7 7 0 1114 0l-1 8z" stroke="#10b981" stroke-width="2"/>
+      <circle cx="19" cy="7" r="2.5" fill="#0ea5e9"/>
+    </svg>
+    تابلو فروشگاه (لوگو)
+  </h2>
+  <!-- راهنمای دلیل انتخاب تابلو -->
+  <div class="bg-[#f0fdfa] text-[#10b981] border border-[#10b98133] rounded-xl text-[15px] p-3 mb-6 leading-7 flex gap-2 items-start">
+    <svg width="22" height="22" fill="none" class="mt-1"><circle cx="11" cy="11" r="10" stroke="#10b981" stroke-width="2"/><path d="M11 7v5" stroke="#0ea5e9" stroke-width="2" stroke-linecap="round"/><circle cx="11" cy="16" r="1.3" fill="#10b981"/></svg>
+    <span>
+      تابلو فروشگاه همون تصویر لوگوی کسب‌وکار شماست که در لیست فروشگاه‌ها و ابتدای صفحه فروشگاه نمایش داده می‌شه.<br>
+      داشتن تابلو حرفه‌ای باعث بیشتر دیده‌شدن، جلب اعتماد و ماندگاری برند شما در ذهن مشتری‌ها می‌شه.
+      <b class="block text-[#0ea5e9] mt-2">پیشنهاد: عکس باکیفیت، واضح و مرتبط با کسب‌وکارت انتخاب کن.</b>
+    </span>
+  </div>
+  <!-- پیش‌نمایش لوگو فعلی -->
+  <div id="logo-preview-container" class="flex flex-col items-center mb-6">
+    <img id="shop-logo-preview"
+         src=""
+         alt="تابلو فروشگاه"
+         class="w-32 h-32 rounded-xl object-cover border shadow mb-3 bg-[#f4fdf8] transition"
+         style="display:none"/>
+    <div id="no-logo-msg" class="text-gray-400 text-[15px] mb-2" style="display:none">
+      هنوز تابلویی انتخاب نکردی!
+    </div>
+  </div>
+
+  <form id="logo-upload-form" autocomplete="off">
+    <label class="block font-bold mb-2 text-[#10b981]">انتخاب یا تغییر تابلو فروشگاه</label>
+    <div id="logo-dropzone"
+         tabindex="0"
+         class="logo-uploader relative flex flex-col items-center justify-center border-2 border-dashed border-[#10b981] rounded-xl py-8 px-4 bg-white cursor-pointer transition hover:bg-[#f0fcf7] active:scale-95 w-full mb-4 select-none"
+         >
+      <svg width="40" height="40" fill="none" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke="#10b981" stroke-width="2"/><path d="M12 8v8M8 12h8" stroke="#0ea5e9" stroke-width="2" stroke-linecap="round"/></svg>
+      <span class="mt-2 text-[#10b981] font-bold text-lg">عکس جدید رو بکش یا کلیک کن</span>
+      <span class="text-gray-500 text-sm mt-1">فقط فرمت jpg یا png مجاز است</span>
+      <input type="file" accept="image/jpeg,image/png,image/jpg" id="logo-file-input" name="logo" class="absolute inset-0 opacity-0 cursor-pointer" style="z-index:2"/>
+    </div>
+    <div id="logo-file-error" class="text-red-500 text-sm mb-2 hidden"></div>
+    <button
+      type="submit"
+      class="bg-[#10b981] hover:bg-[#0ea5e9] text-white rounded-xl py-3 px-7 font-extrabold text-[18px] transition w-full mt-2 shadow-lg"
+      id="logo-save-btn"
+      disabled
+    >ثبت تابلو جدید</button>
+  </form>
+  <div id="logo-save-success" class="hidden mt-7 bg-[#e0fdfa] text-[#10b981] p-4 rounded-2xl text-center font-bold text-lg">
+    تابلو با موفقیت ثبت شد!
+  </div>
+</div>
+
+
+</body>
+</html>

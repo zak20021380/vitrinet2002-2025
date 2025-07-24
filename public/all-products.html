@@ -1,0 +1,1730 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <title>فروشگاه زکی - همه محصولات</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    :root {
+      --primary-color: #10b981;
+      --primary-light: #e0fdfa;
+      --primary-dark: #059669;
+      --text-dark: #243241;
+      --text-medium: #374151;
+      --text-light: #6b7280;
+      --background: #f2f6f5;
+      --white: #ffffff;
+      --shadow: 0 2px 16px rgba(16, 185, 129, 0.08);
+      --hover-shadow: 0 8px 36px rgba(16, 185, 129, 0.2);
+      --border-radius: 16px;
+      --transition: all 0.3s ease;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Vazirmatn', sans-serif;
+      background: var(--background);
+      margin: 0;
+      padding: 0;
+      color: var(--text-dark);
+      line-height: 1.6;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      padding-top: 76px;
+    }
+
+    /* هدر بهبود یافته */
+    .vit-header {
+      width: 100%;
+      margin: 0 auto;
+      padding: 0 22px;
+      min-height: 76px;
+      background: rgba(255,255,255,0.95);
+      border-radius: 0 0 24px 24px;
+      box-shadow: 0 3px 18px 2px rgba(14, 165, 233, 0.15), 0 1px 7px rgba(16, 185, 129, 0.11);
+      display: flex;
+      align-items: center;
+      position: fixed;
+      top: 0; 
+      left: 0; 
+      right: 0;
+      z-index: 100;
+      backdrop-filter: blur(12px) saturate(1.1);
+      border-bottom: 1px solid rgba(224, 253, 250, 0.3);
+      transition: box-shadow .22s, background .18s;
+      justify-content: space-between;
+      gap: 20px;
+    }
+    
+    .vit-header.scrolled {
+      min-height: 66px;
+      box-shadow: 0 3px 12px 1px rgba(14, 165, 233, 0.1), 0 1px 5px rgba(16, 185, 129, 0.08);
+    }
+
+    .vit-nav {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+    
+    .vit-nav a {
+      color: var(--text-medium);
+      font-weight: 700;
+      font-size: 1.08rem;
+      text-decoration: none;
+      padding: 8px 18px;
+      border-radius: 12px;
+      transition: .16s;
+      background: none;
+      letter-spacing: 0.01em;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .vit-nav a:hover, 
+    .vit-nav a.active {
+      background: var(--primary-light);
+      color: var(--primary-color);
+      box-shadow: 0 2px 9px rgba(16, 185, 129, 0.12);
+    }
+
+    .vit-logo {
+      display: flex;
+      align-items: center;
+      z-index: 2;
+      flex-shrink: 0;
+    }
+    
+    .vit-logo a {
+      display: flex;
+      align-items: center;
+      text-decoration: none;
+      height: 60px;
+      padding: 0 10px;
+      transition: transform 0.3s ease;
+    }
+    
+    .vit-logo a:hover {
+      transform: scale(1.05);
+    }
+    
+    .vit-logo-gradient {
+      font-family: 'Vazirmatn', 'Montserrat', Arial, sans-serif;
+      font-size: 1.8rem;
+      font-weight: 900;
+      letter-spacing: .01em;
+      background: linear-gradient(90deg, var(--primary-color) 20%, #0ea5e9 80%);
+      color: transparent;
+      -webkit-background-clip: text;
+      background-clip: text;
+      display: block;
+      padding: 0 5px;
+    }
+
+    .vit-actions {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+
+    .vit-btn {
+      display: inline-flex;
+      align-items: center;
+      background: linear-gradient(92deg, var(--primary-color) 0%, #0ea5e9 100%);
+      color: var(--white);
+      font-weight: 800;
+      font-size: 1.05rem;
+      padding: 10px 22px 10px 15px;
+      border-radius: 14px;
+      box-shadow: 0 2px 13px rgba(14, 165, 233, 0.15);
+      text-decoration: none;
+      border: none;
+      outline: none;
+      cursor: pointer;
+      letter-spacing: 0.02em;
+      transition: var(--transition);
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .vit-btn::after {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -60%;
+      width: 20px;
+      height: 200%;
+      background: rgba(255, 255, 255, 0.3);
+      transform: rotate(25deg);
+      transition: all 0.6s;
+    }
+    
+    .vit-btn:hover::after {
+      left: 120%;
+    }
+    
+    .vit-btn svg {
+      margin-left: 6px;
+      margin-right: -2px;
+      stroke-width: 2;
+    }
+    
+    .vit-btn:hover {
+      background: linear-gradient(92deg, #0ea5e9 0%, var(--primary-color) 100%);
+      box-shadow: 0 7px 22px rgba(16, 185, 129, 0.3);
+      transform: translateY(-2px) scale(1.03);
+    }
+    
+    .vit-login-btn {
+      color: #0ea5e9;
+      font-weight: 800;
+      font-size: 1.05rem;
+      padding: 9px 21px;
+      border-radius: 12px;
+      background: none;
+      transition: var(--transition);
+      text-decoration: none;
+      border: 1.5px solid rgba(14, 165, 233, 0.3);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .vit-login-btn:hover {
+      background: rgba(14, 165, 233, 0.1);
+      color: var(--primary-dark);
+      border-color: rgba(16, 185, 129, 0.4);
+    }
+    
+    .vit-user {
+      display: flex;
+      align-items: center;
+      padding: 8px 15px 8px 12px;
+      border-radius: 12px;
+      background: none;
+      text-decoration: none;
+      color: #0ea5e9;
+      transition: var(--transition);
+      font-weight: 800;
+    }
+    
+    .vit-user:hover {
+      background: var(--primary-light);
+      color: var(--primary-color);
+    }
+    
+    .vit-avatar {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      margin-left: 8px;
+      background: var(--white);
+      object-fit: cover;
+      border: 1.5px solid rgba(14, 165, 233, 0.2);
+    }
+    
+    .vit-username {
+      font-size: 1.05rem;
+      font-weight: 800;
+      margin-left: 2px;
+      letter-spacing: 0.01em;
+      color: var(--text-dark);
+    }
+
+    /* سرچ باکس ساده و زیبا */
+    .search-container {
+      display: flex;
+      max-width: 500px;
+      width: 100%;
+      margin: 0 auto;
+    }
+
+    .search-box {
+      width: 100%;
+      border: 2px solid #0ea5e9;
+      border-radius: 30px;
+      overflow: hidden;
+      background: white;
+      box-shadow: 0 4px 15px rgba(14, 165, 233, 0.1);
+      transition: all 0.3s ease;
+    }
+
+    .search-box:focus-within {
+      box-shadow: 0 6px 20px rgba(14, 165, 233, 0.25);
+      border-color: var(--primary-color);
+    }
+
+    .search-box input {
+      width: 100%;
+      border: 0;
+      padding: 14px 22px;
+      outline: none;
+      font-family: inherit;
+      font-size: 1rem;
+      color: var(--text-dark);
+      background: transparent;
+    }
+
+    /* فیلترهای جذاب - بهبود یافته برای دستگاه‌های کوچک */
+    .filters-section {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 15px;
+      margin: 25px 0;
+      justify-content: center;
+    }
+
+    .filter-btn {
+      padding: 10px 22px;
+      border: none;
+      background: white;
+      border-radius: 12px;
+      cursor: pointer;
+      font-family: inherit;
+      font-weight: 700;
+      transition: all 0.3s;
+      box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--text-medium);
+      position: relative;
+    }
+
+    .filter-btn:hover, .filter-btn.active {
+      background: linear-gradient(92deg, var(--primary-color) 0%, #0ea5e9 100%);
+      color: white;
+      box-shadow: 0 5px 15px rgba(16, 185, 129, 0.3);
+      transform: translateY(-2px);
+    }
+
+    .filter-btn i {
+      font-size: 1.1rem;
+    }
+
+    /* بخش محصولات */
+    .container {
+      max-width: 1280px;
+      margin: 30px auto 40px;
+      padding: 0 20px;
+      flex: 1;
+    }
+
+    .page-title {
+      font-size: 1.8rem;
+      font-weight: 800;
+      color: var(--text-dark);
+      margin-bottom: 25px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      justify-content: center;
+    }
+
+    .page-title i {
+      color: var(--primary-color);
+    }
+
+    .product-card {
+      background: var(--white);
+      border-radius: var(--border-radius);
+      box-shadow: 0 3px 20px rgba(0, 0, 0, 0.05);
+      overflow: hidden;
+      padding-bottom: 22px;
+      border: 2px solid #e5e7eb;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      transition: var(--transition);
+      position: relative;
+    }
+
+    .product-card:hover {
+      box-shadow: var(--hover-shadow);
+      border-color: rgba(16, 185, 129, 0.4);
+      transform: translateY(-5px);
+    }
+
+    .product-image-container {
+      width: 100%;
+      height: 180px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .product-image {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: var(--transition);
+    }
+
+    .product-card:hover .product-image {
+      transform: scale(1.05);
+    }
+
+    .product-details {
+      padding: 18px 15px 0;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+    }
+
+    .product-title {
+      font-size: 1.15rem;
+      font-weight: 800;
+      color: var(--text-dark);
+      margin-bottom: 8px;
+      min-height: 42px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+    }
+
+    .product-seller {
+      font-size: 1rem;
+      color: var(--text-light);
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+
+    .product-rating {
+      font-size: 1.05rem;
+      color: #fab005;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      margin-bottom: 8px;
+      justify-content: center;
+    }
+
+    .product-card .tag {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      background: linear-gradient(135deg, var(--primary-color) 0%, #0ea5e9 100%);
+      color: var(--white);
+      font-size: 0.9rem;
+      font-weight: 700;
+      border-radius: 20px;
+      padding: 5px 12px;
+      z-index: 2;
+      box-shadow: 0 2px 10px rgba(16, 185, 129, 0.2);
+      letter-spacing: 0.01em;
+      text-transform: uppercase;
+      transition: transform 0.3s ease;
+    }
+
+    .product-card:hover .tag {
+      transform: scale(1.05);
+    }
+
+    .add-to-cart-btn {
+      background: var(--primary-color);
+      color: var(--white);
+      border: none;
+      border-radius: 10px;
+      padding: 8px 16px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: var(--transition);
+      margin-top: 12px;
+      font-family: inherit;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .add-to-cart-btn:hover {
+      background: var(--primary-dark);
+      transform: translateY(-2px);
+    }
+
+    /* فوتر */
+    footer {
+      background: var(--primary-color);
+      color: var(--white);
+      padding: 45px 0 20px;
+      margin-top: auto;
+      border-radius: 40px 40px 0 0;
+      box-shadow: 0 -2px 22px rgba(16, 185, 129, 0.2);
+    }
+
+    .footer-content {
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 0 20px;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 40px;
+    }
+
+    .footer-section {
+      margin-bottom: 25px;
+    }
+
+    .footer-section h3 {
+      font-size: 1.4rem;
+      margin-bottom: 20px;
+      position: relative;
+      padding-bottom: 10px;
+    }
+
+    .footer-section h3::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 50px;
+      height: 3px;
+      background: var(--white);
+      border-radius: 2px;
+    }
+
+    .footer-links {
+      list-style: none;
+    }
+
+    .footer-links li {
+      margin-bottom: 12px;
+    }
+
+    .footer-links a {
+      color: rgba(255, 255, 255, 0.85);
+      text-decoration: none;
+      transition: var(--transition);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .footer-links a:hover {
+      color: var(--white);
+      transform: translateX(5px);
+    }
+
+    .footer-bottom {
+      text-align: center;
+      padding-top: 25px;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+      margin-top: 20px;
+      font-size: 1.05rem;
+    }
+
+    .footer-bottom a {
+      color: #fffbe8;
+      text-decoration: none;
+      transition: var(--transition);
+      margin: 0 5px;
+      font-weight: 600;
+    }
+
+    .footer-bottom a:hover {
+      color: #ffe87d;
+      text-decoration: underline;
+    }
+ 
+    /* --- فوتر ساده و جمع‌وجور --- */
+    .simple-footer{
+      background:#f8fafc;      /* خاکستری خیلی روشن */
+      color:#64748b;           /* متن خاکستری متوسط */
+      border-top:1px solid #e2e8f0;
+      padding:20px 0;
+      margin-top:auto;         /* چسباندن به انتهای صفحه */
+      font-size:.9rem;
+    }
+    .simple-footer .sf-inner{
+      max-width:1280px;
+      margin:0 auto;
+      padding:0 20px;
+      display:flex;
+      flex-wrap:wrap;
+      justify-content:space-between;
+      align-items:center;
+      gap:10px;
+    }
+    .simple-footer .sf-links a{
+      color:inherit;
+      margin:0 6px;
+      text-decoration:none;
+      transition:color .15s;
+    }
+    .simple-footer .sf-links a:hover{
+      color:#0ea5e9;           /* رنگ اصلی سایت هنگام هاور */
+    }
+
+    /* --- دکمهٔ ثبت فروشگاه در فوتر --- */
+    .sf-store-btn{
+      display:inline-flex;
+      align-items:center;
+      gap:10px; /* افزایش فاصله بین آیکون و متن */
+      background:linear-gradient(92deg,#0ea5e9 0%,var(--primary-color) 100%);
+      color:#fff;
+      font-weight:800;
+      padding:8px 22px 8px 18px;
+      border-radius:12px;
+      font-size:.9rem;
+      box-shadow:0 2px 12px rgba(14,165,233,.25);
+      text-decoration:none;
+      transition:transform .18s,box-shadow .18s;
+    }
+    .sf-store-btn:hover{
+      transform:translateY(-2px) scale(1.03);
+      box-shadow:0 5px 20px rgba(14,165,233,.35);
+    }
+    .sf-store-btn i{
+      font-size:1rem;
+    }
+
+    /* استایل فیلتر قیمت - بهبود یافته برای دستگاه‌های کوچک */
+    .price-range {
+      padding: 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .price-range input {
+      padding: 8px;
+      font-size: 1rem;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      width: 100%;
+    }
+
+    #priceFilterMenu {
+      padding: 15px;
+      min-width: 250px;
+    }
+
+    #applyPriceFilter {
+      margin-top: 10px;
+      padding: 10px 20px;
+      background: var(--primary-color);
+      color: var(--white);
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      width: 100%;
+    }
+
+    #applyPriceFilter:hover {
+      background: var(--primary-dark);
+    }
+
+    /* تغییرات برای نمایش قیمت - بهبود یافته */
+    .product-price {
+      margin: 14px 0 0 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-weight: 900;
+      font-size: 1.2rem;
+      color: #0f766e;
+      padding: 8px 18px;
+      border-radius: 12px;
+      background-color: #ecfdf5;
+      border: 2px solid #d1fae5;
+      transition: all 0.3s ease;
+    }
+    
+    .product-price:hover {
+      transform: scale(1.05);
+      background-color: #d1fae5;
+      box-shadow: 0 4px 12px rgba(5, 150, 105, 0.2);
+    }
+    
+    .shop-address {
+      font-size: 0.96rem;
+      color: #10b981;
+      font-weight: 600;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 3px;
+    }
+
+    .dropdown-menu {
+      padding: 7px 0;
+      animation: fadeIn .18s;
+    }
+    
+    @keyframes fadeIn {
+      from { opacity:0; transform:translateY(14px);}
+      to { opacity:1; transform:translateY(0);}
+    }
+    
+    .dropdown-item {
+      display: block;
+      width: 100%;
+      background: none;
+      border: none;
+      padding: 12px 25px 12px 18px;
+      text-align: right;
+      font-size: 1rem;
+      color: #374151;
+      font-family: inherit;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background .12s, color .14s;
+    }
+    
+    .dropdown-item:hover {
+      background: linear-gradient(90deg,#e0fdfa 0%,#e6f4fd 100%);
+      color: #0ea5e9;
+    }
+
+    .products-list {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr); /* چهار محصول در هر ردیف دسکتاپ */
+      gap: 28px;
+      justify-items: stretch;
+      align-items: stretch;
+    }
+    
+    /* استایل بهبود یافته برای دکمه مشاهده محصول */
+    .see-product-btn {
+      margin-top: 20px;
+      background: transparent;
+      border: 2px solid transparent;
+      border-radius: 14px;
+      padding: 10px 28px;
+      font-weight: 800;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+      background: linear-gradient(92deg, #10b981 0%, #0ea5e9 100%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      border-image: linear-gradient(92deg, #10b981 0%, #0ea5e9 100%);
+      border-image-slice: 1;
+      box-shadow: 0 2px 8px rgba(16,185,129,0.1);
+    }
+    
+    .see-product-btn::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(92deg, #10b981 0%, #0ea5e9 100%);
+      z-index: -1;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+      border-radius: 12px;
+    }
+    
+    .see-product-btn:hover {
+      color: white !important;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(16,185,129,0.3);
+    }
+    
+    .see-product-btn:hover::after {
+      opacity: 1;
+    }
+    
+    /* بخش جدید: نمایش فیلترهای فعال */
+    .active-filters {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin: 15px 0 25px;
+      padding: 0 15px;
+      justify-content: center;
+    }
+    
+    .active-filter {
+      background: #e0fdfa;
+      color: #0f766e;
+      padding: 8px 16px;
+      border-radius: 12px;
+      font-size: 0.9rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      border: 1px solid #a7f3d0;
+    }
+    
+    .active-filter .remove {
+      cursor: pointer;
+      color: #0d9488;
+      font-weight: 900;
+    }
+    
+    /* منوی فیلتر برای موبایل */
+    .mobile-filter-btn {
+      display: none;
+      background: white;
+      border: 2px solid #0ea5e9;
+      border-radius: 12px;
+      padding: 12px 20px;
+      font-weight: 700;
+      cursor: pointer;
+      box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
+      align-items: center;
+      gap: 10px;
+      color: var(--text-medium);
+    }
+    
+    .mobile-filter-btn i {
+      font-size: 1.2rem;
+    }
+    
+    .mobile-filters-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0,0,0,0.7);
+      z-index: 999;
+      display: none;
+      justify-content: flex-end;
+    }
+    
+    .mobile-filters {
+      width: 85%;
+      max-width: 320px;
+      background: white;
+      height: 100%;
+      overflow-y: auto;
+      padding: 20px;
+      transform: translateX(100%);
+      transition: transform 0.3s ease;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+    
+    .mobile-filters.active {
+      transform: translateX(0);
+    }
+    
+    .mobile-filters-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-bottom: 15px;
+      border-bottom: 1px solid #eee;
+      margin-bottom: 10px;
+    }
+    
+    .mobile-filters-header h3 {
+      font-size: 1.3rem;
+      color: var(--text-dark);
+    }
+    
+    .close-filters {
+      background: none;
+      border: none;
+      font-size: 1.5rem;
+      color: var(--text-medium);
+      cursor: pointer;
+    }
+
+    /* رسپانسیو برای دستگاه‌های مختلف */
+    @media (max-width: 1100px) {
+      .products-list {
+        grid-template-columns: repeat(3, 1fr); /* سه‌تا تو ردیف */
+      }
+      
+      .vit-header {
+        padding: 0 15px;
+      }
+      
+      .vit-logo-gradient {
+        font-size: 1.6rem;
+      }
+
+      .filters-section {
+        gap: 12px;
+      }
+
+      .filter-btn {
+        padding: 8px 18px;
+        font-size: 0.95rem;
+      }
+    }
+
+    @media (max-width: 850px) {
+      .vit-header {
+        min-height: 70px;
+      }
+      
+      .vit-logo a {
+        height: 54px;
+      }
+      
+      .vit-nav {
+        display: none;
+      }
+      
+      .vit-logo-gradient {
+        font-size: 1.5rem;
+      }
+
+      .search-container {
+        max-width: 400px;
+      }
+      
+      /* بهبود فیلترها در تبلت */
+      .filters-section {
+        justify-content: flex-start;
+        overflow-x: auto;
+        padding-bottom: 8px;
+        margin: 20px -15px;
+        scrollbar-width: thin;
+      }
+      
+      .filters-section::-webkit-scrollbar {
+        height: 6px;
+      }
+      
+      .filters-section::-webkit-scrollbar-thumb {
+        background: #c5c5c5;
+        border-radius: 10px;
+      }
+      
+      .filter-btn {
+        flex-shrink: 0;
+      }
+    }
+
+    @media (max-width: 768px) {
+      body {
+        padding-top: 70px;
+      }
+      
+      .vit-header {
+        min-height: 70px;
+        padding: 0 12px;
+        border-radius: 0 0 18px 18px;
+      }
+      
+      .vit-logo-gradient {
+        font-size: 1.4rem;
+      }
+      
+      .vit-login-btn,
+      .vit-btn {
+        font-size: 0.95rem;
+        padding: 8px 15px;
+      }
+      
+      .vit-btn {
+        padding: 8px 18px 8px 12px;
+      }
+      
+      .vit-avatar {
+        width: 32px;
+        height: 32px;
+      }
+
+      .page-title {
+        font-size: 1.6rem;
+      }
+
+      .filters-section {
+        gap: 10px;
+        margin: 20px 0;
+      }
+
+      .filter-btn {
+        padding: 8px 16px;
+        font-size: 0.9rem;
+      }
+      
+      .products-list {
+        grid-template-columns: repeat(2, 1fr); /* دوتا تو ردیف */
+      }
+      
+      /* نمایش دکمه فیلتر موبایل */
+      .mobile-filter-btn {
+        display: flex;
+        margin: 0 auto 20px;
+      }
+      
+      .filters-section.desktop {
+        display: none;
+      }
+    }
+
+    @media (max-width: 576px) {
+      body {
+        padding-top: 66px;
+      }
+      
+      .vit-header {
+        min-height: 66px;
+        padding: 0 10px;
+      }
+      
+      .vit-logo-gradient {
+        font-size: 1.3rem;
+      }
+      
+      .footer-content {
+        grid-template-columns: 1fr;
+      }
+      
+      .footer-section h3 {
+        font-size: 1.3rem;
+      }
+
+      .search-container {
+        max-width: 100%;
+        padding: 0 10px;
+      }
+
+      .search-box input {
+        padding: 12px 18px;
+      }
+
+      .filter-btn {
+        padding: 7px 14px;
+        font-size: 0.85rem;
+      }
+      
+      .products-list {
+        grid-template-columns: 1fr; /* موبایل یکی تو ردیف */
+        gap: 18px;
+      }
+      
+      /* بهبود فیلترها در موبایل */
+      .dropdown-menu {
+        width: 100%;
+        min-width: auto !important;
+      }
+      
+      .price-range input {
+        font-size: 0.9rem;
+      }
+      
+      #applyPriceFilter {
+        font-size: 0.9rem;
+        padding: 8px 18px;
+      }
+      
+      .vit-btn span {
+        display: none;
+      }
+    }
+    
+    @media (max-width: 480px) {
+      .vit-header {
+        min-height: 62px;
+      }
+      
+      .vit-logo-gradient {
+        font-size: 1.2rem;
+      }
+      
+      .vit-login-btn {
+        display: none;
+      }
+      
+      .vit-btn {
+        padding: 7px 15px;
+      }
+      
+      .vit-btn span {
+        display: none;
+      }
+      
+      .vit-btn i {
+        margin: 0;
+        font-size: 1.2rem;
+      }
+
+      .filters-section {
+        justify-content: flex-start;
+        overflow-x: auto;
+        padding-bottom: 5px;
+        margin: 15px -10px 20px;
+        padding: 0 10px 5px;
+      }
+
+      .filters-section::-webkit-scrollbar {
+        height: 5px;
+      }
+
+      .filters-section::-webkit-scrollbar-thumb {
+        background: #c5c5c5;
+        border-radius: 10px;
+      }
+
+      .filter-btn {
+        flex-shrink: 0;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- هدر بهبود یافته -->
+<header class="vit-header" id="mainHeader">
+  <div class="vit-logo">
+    <a href="#">
+      <span class="vit-logo-gradient" style="font-size:2rem;letter-spacing:.06em;">Vitreenet</span>
+    </a>
+  </div>
+
+  <div class="vit-actions">
+    <a href="#" class="vit-login-btn">
+      <i class="fas fa-sign-in-alt"></i>
+      ورود
+    </a>
+    <!-- تغییر دکمه ثبت نام به ثبت فروشگاه -->
+    <a href="#" class="vit-btn">
+      <i class="fas fa-store-alt"></i>
+      <span style="margin-right: 8px;">ثبت فروشگاه</span> <!-- افزایش فاصله در هدر -->
+    </a>
+  </div>
+</header>
+
+
+  <div class="container">
+    <div style="margin: 0 auto 28px; max-width: 500px;">
+      <div class="search-container">
+        <div class="search-box">
+          <input type="text" id="searchInput" placeholder="جستجوی محصولات...">
+        </div>
+      </div>
+    </div>
+    
+    <!-- دکمه فیلتر موبایل -->
+    <button class="mobile-filter-btn" id="mobileFilterBtn">
+      <i class="fas fa-filter"></i>
+      فیلترها
+    </button>
+    
+    <!-- نمایش فیلترهای فعال -->
+    <div class="active-filters" id="activeFilters"></div>
+    
+    <!-- فیلترهای جذاب -->
+    <div class="filters-section desktop">
+      <!-- فیلتر اصلی همه محصولات -->
+      <div class="dropdown-filter" style="position: relative; display:inline-block;">
+        <button class="filter-btn active" id="mainFilterBtn" data-filter="all">
+          <i class="fas fa-boxes"></i>
+          همه محصولات
+          <i class="fas fa-chevron-down" style="margin-right:7px;font-size:0.95em"></i>
+        </button>
+        <div class="dropdown-menu" id="filterDropdown" style="display:none; position:absolute; right:0; top:110%; z-index:9; min-width:200px; background:#fff; border-radius:16px; box-shadow:0 8px 24px rgba(16,185,129,0.14); overflow:hidden; border:1.5px solid #0ea5e95b;">
+          <button class="dropdown-item" data-filter="پوشاک">پوشاک</button>
+          <button class="dropdown-item" data-filter="خوراک">خوراک</button>
+          <button class="dropdown-item" data-filter="خدمات">خدمات</button>
+          <button class="dropdown-item" data-filter="دیجیتال">دیجیتال</button>
+          <button class="dropdown-item" data-filter="زیبایی">زیبایی</button>
+          <button class="dropdown-item" data-filter="کتاب و تحریر">کتاب و تحریر</button>
+          <button class="dropdown-item" data-filter="لوازم خانگی">لوازم خانگی</button>
+          <button class="dropdown-item" data-filter="ورزشی">ورزشی</button>
+          <button class="dropdown-item" data-filter="تالار و مجالس">تالار و مجالس</button>
+          <button class="dropdown-item" data-filter="قنادی و شیرینی">قنادی و شیرینی</button>
+          <button class="dropdown-item" data-filter="گل و گیاه">گل و گیاه</button>
+          <button class="dropdown-item" data-filter="خودرو">خودرو</button>
+        </div>
+      </div>
+
+      <!-- مراکز خرید -->
+      <div class="dropdown-filter" style="position: relative; display:inline-block;">
+        <button class="filter-btn" id="shopsBtn">
+          <i class="fas fa-store"></i>
+          مراکز خرید
+          <i class="fas fa-chevron-down" style="margin-right:7px;font-size:0.95em"></i>
+        </button>
+        <div class="dropdown-menu" id="shopsDropdown" style="display:none; position:absolute; right:0; top:110%; z-index:9; min-width:200px; background:#fff; border-radius:16px; box-shadow:0 8px 24px rgba(16,185,129,0.14); overflow:hidden; border:1.5px solid #0ea5e95b;">
+          <button class="dropdown-item shop-item" data-shop="مرکز خرید اپال">مرکز خرید اپال</button>
+          <button class="dropdown-item shop-item" data-shop="ارگ تجریش">ارگ تجریش</button>
+          <button class="dropdown-item shop-item" data-shop="پالادیوم">پالادیوم</button>
+          <button class="dropdown-item shop-item" data-shop="ایران مال">ایران مال</button>
+          <button class="dropdown-item shop-item" data-shop="کوروش">کوروش</button>
+          <button class="dropdown-item shop-item" data-shop="هایپرسان">هایپرسان</button>
+        </div>
+      </div>
+
+      <!-- مرتب‌سازی -->
+      <button class="filter-btn" id="sort-cheap">
+        <i class="fas fa-sort-amount-down-alt"></i>
+        ارزان‌ترین
+      </button>
+      <button class="filter-btn" id="sort-expensive">
+        <i class="fas fa-sort-amount-up"></i>
+        گران‌ترین
+      </button>
+
+      <!-- فیلتر قیمت -->
+      <div class="dropdown-filter" style="position: relative; display:inline-block;">
+        <button class="filter-btn" id="priceFilterBtn">
+          <i class="fas fa-dollar-sign"></i>
+          فیلتر قیمت
+          <i class="fas fa-chevron-down" style="margin-right:7px;font-size:0.95em"></i>
+        </button>
+        <div class="dropdown-menu" id="priceFilterMenu" style="display:none; position:absolute; right:0; top:110%; z-index:9; min-width:200px; background:#fff; border-radius:16px; box-shadow:0 8px 24px rgba(16,185,129,0.14); overflow:hidden; border:1.5px solid #0ea5e95b;">
+          <div class="price-range">
+            <label for="minPrice">حداقل قیمت:</label>
+            <input type="number" id="minPrice" placeholder="حداقل قیمت" min="0">
+          </div>
+          <div class="price-range">
+            <label for="maxPrice">حداکثر قیمت:</label>
+            <input type="number" id="maxPrice" placeholder="حداکثر قیمت" min="0">
+          </div>
+          <button class="filter-btn" id="applyPriceFilter">
+            اعمال فیلتر
+          </button>
+        </div>
+      </div>
+    </div>
+    
+    <div class="products-list" id="productsList">
+      <!-- محصولات اینجا رندر می‌شوند -->
+    </div>
+  </div>
+
+  <!-- منوی فیلتر موبایل -->
+  <div class="mobile-filters-overlay" id="mobileFiltersOverlay">
+    <div class="mobile-filters" id="mobileFilters">
+      <div class="mobile-filters-header">
+        <h3>فیلترها</h3>
+        <button class="close-filters" id="closeFilters">×</button>
+      </div>
+      
+      <div class="filters-section mobile">
+        <!-- فیلتر اصلی همه محصولات -->
+        <div class="dropdown-filter" style="position: relative; display:block; width:100%;">
+          <button class="filter-btn active" id="mainFilterBtnMobile" data-filter="all">
+            <i class="fas fa-boxes"></i>
+            همه محصولات
+            <i class="fas fa-chevron-down" style="margin-right:7px;font-size:0.95em"></i>
+          </button>
+          <div class="dropdown-menu" id="filterDropdownMobile" style="display:none; position:relative; right:0; top:0; z-index:9; width:100%; background:#fff; border-radius:16px; box-shadow:0 8px 24px rgba(16,185,129,0.14); overflow:hidden; border:1.5px solid #0ea5e95b; margin-top:10px;">
+            <button class="dropdown-item" data-filter="پوشاک">پوشاک</button>
+            <button class="dropdown-item" data-filter="خوراک">خوراک</button>
+            <button class="dropdown-item" data-filter="خدمات">خدمات</button>
+            <button class="dropdown-item" data-filter="دیجیتال">دیجیتال</button>
+            <button class="dropdown-item" data-filter="زیبایی">زیبایی</button>
+            <button class="dropdown-item" data-filter="کتاب و تحریر">کتاب و تحریر</button>
+            <button class="dropdown-item" data-filter="لوازم خانگی">لوازم خانگی</button>
+            <button class="dropdown-item" data-filter="ورزشی">ورزشی</button>
+            <button class="dropdown-item" data-filter="تالار و مجالس">تالار و مجالس</button>
+            <button class="dropdown-item" data-filter="قنادی و شیرینی">قنادی و شیرینی</button>
+            <button class="dropdown-item" data-filter="گل و گیاه">گل و گیاه</button>
+            <button class="dropdown-item" data-filter="خودرو">خودرو</button>
+          </div>
+        </div>
+
+        <!-- مراکز خرید -->
+        <div class="dropdown-filter" style="position: relative; display:block; width:100%;">
+          <button class="filter-btn" id="shopsBtnMobile">
+            <i class="fas fa-store"></i>
+            مراکز خرید
+            <i class="fas fa-chevron-down" style="margin-right:7px;font-size:0.95em"></i>
+          </button>
+          <div class="dropdown-menu" id="shopsDropdownMobile" style="display:none; position:relative; right:0; top:0; z-index:9; width:100%; background:#fff; border-radius:16px; box-shadow:0 8px 24px rgba(16,185,129,0.14); overflow:hidden; border:1.5px solid #0ea5e95b; margin-top:10px;">
+            <button class="dropdown-item shop-item" data-shop="مرکز خرید اپال">مرکز خرید اپال</button>
+            <button class="dropdown-item shop-item" data-shop="ارگ تجریش">ارگ تجریش</button>
+            <button class="dropdown-item shop-item" data-shop="پالادیوم">پالادیوم</button>
+            <button class="dropdown-item shop-item" data-shop="ایران مال">ایران مال</button>
+            <button class="dropdown-item shop-item" data-shop="کوروش">کوروش</button>
+            <button class="dropdown-item shop-item" data-shop="هایپرسان">هایپرسان</button>
+          </div>
+        </div>
+
+        <!-- مرتب‌سازی -->
+        <button class="filter-btn" id="sort-cheap-mobile">
+          <i class="fas fa-sort-amount-down-alt"></i>
+          ارزان‌ترین
+        </button>
+        <button class="filter-btn" id="sort-expensive-mobile">
+          <i class="fas fa-sort-amount-up"></i>
+          گران‌ترین
+        </button>
+
+        <!-- فیلتر قیمت -->
+        <div class="dropdown-filter" style="position: relative; display:block; width:100%;">
+          <button class="filter-btn" id="priceFilterBtnMobile">
+            <i class="fas fa-dollar-sign"></i>
+            فیلتر قیمت
+            <i class="fas fa-chevron-down" style="margin-right:7px;font-size:0.95em"></i>
+          </button>
+          <div class="dropdown-menu" id="priceFilterMenuMobile" style="display:none; position:relative; right:0; top:0; z-index:9; width:100%; background:#fff; border-radius:16px; box-shadow:0 8px 24px rgba(16,185,129,0.14); overflow:hidden; border:1.5px solid #0ea5e95b; margin-top:10px;">
+            <div class="price-range">
+              <label for="minPriceMobile">حداقل قیمت:</label>
+              <input type="number" id="minPriceMobile" placeholder="حداقل قیمت" min="0">
+            </div>
+            <div class="price-range">
+              <label for="maxPriceMobile">حداکثر قیمت:</label>
+              <input type="number" id="maxPriceMobile" placeholder="حداکثر قیمت" min="0">
+            </div>
+            <button class="filter-btn" id="applyPriceFilterMobile">
+              اعمال فیلتر
+            </button>
+          </div>
+        </div>
+      </div>
+      
+      <button class="vit-btn" style="margin-top: auto; width: 100%;" id="applyFiltersMobile">
+        اعمال فیلترها
+      </button>
+    </div>
+  </div>
+
+<!-- === footer (نسخهٔ ساده) === -->
+<footer class="simple-footer">
+  <div class="sf-inner">
+    <span>© 2025 فروشگاه زکی</span>
+
+    <div class="sf-links">
+      <a href="#">درباره ما</a>
+      <a href="#">سوالات متداول</a>
+      <a href="#">تماس</a>
+    </div>
+
+    <!-- دکمه‌ی ثبت فروشگاه -->
+    <a href="/seller/register" class="sf-store-btn">
+      <i class="fas fa-store-alt"></i>
+      ثبت فروشگاه
+    </a>
+  </div>
+</footer>
+
+<script>
+/* ----------------------- داده‌های پایه ----------------------- */
+let allProducts = [];
+let products    = [];
+
+const categories = [
+  "همه محصولات","پوشاک","خوراک","خدمات","دیجیتال","زیبایی",
+  "کتاب و تحریر","لوازم خانگی","ورزشی","تالار و مجالس",
+  "قنادی و شیرینی","گل و گیاه","خودرو"
+];
+const shops = [
+  "همه مراکز خرید","مرکز خرید اپال","ارگ تجریش",
+  "پالادیوم","ایران مال","کوروش","هایپرسان"
+];
+
+let currentSort        = null;          // cheap | expensive | null
+let currentShop        = "همه مراکز خرید";
+let currentCategory    = "همه محصولات";
+let currentPriceFilter = null;          // {min,max} | null
+
+/* --------------------- آماده‌سازی دراپ‌داون‌ها --------------------- */
+document.addEventListener('DOMContentLoaded',()=>{
+  // تنظیمات اولیه
+  setupEventListeners();
+  fetchProductsFromAPI();
+});
+
+function setupEventListeners() {
+  /* --- جستجو --- */
+  document.getElementById('searchInput').addEventListener('input', filterAndSortProducts);
+  
+  /* --- فیلترهای دسکتاپ --- */
+  setupDesktopFilters();
+  
+  /* --- فیلترهای موبایل --- */
+  setupMobileFilters();
+  
+  /* --- مرتب‌سازی --- */
+  setupSorting();
+  
+  /* --- فیلتر قیمت --- */
+  setupPriceFilter();
+  
+  /* --- اسکرول هدر --- */
+  window.addEventListener('scroll', () => {
+    const h = document.getElementById('mainHeader');
+    window.scrollY > 20 ? h.classList.add('scrolled') : h.classList.remove('scrolled');
+  });
+  
+  /* --- منوی فیلتر موبایل --- */
+  document.getElementById('mobileFilterBtn').addEventListener('click', () => {
+    document.getElementById('mobileFiltersOverlay').style.display = 'flex';
+    setTimeout(() => {
+      document.getElementById('mobileFilters').classList.add('active');
+    }, 10);
+  });
+  
+  document.getElementById('closeFilters').addEventListener('click', closeMobileFilters);
+  document.getElementById('applyFiltersMobile').addEventListener('click', () => {
+    filterAndSortProducts();
+    closeMobileFilters();
+  });
+}
+
+function setupDesktopFilters() {
+  const catMenu = document.getElementById('filterDropdown');
+  const shopMenu = document.getElementById('shopsDropdown');
+  
+  // فیلتر دسته‌بندی
+  document.getElementById('mainFilterBtn').addEventListener('click', e => {
+    e.stopPropagation();
+    catMenu.style.display = catMenu.style.display === 'block' ? 'none' : 'block';
+    shopMenu.style.display = 'none';
+    document.getElementById('priceFilterMenu').style.display = 'none';
+  });
+  
+  // فیلتر فروشگاه
+  document.getElementById('shopsBtn').addEventListener('click', e => {
+    e.stopPropagation();
+    shopMenu.style.display = shopMenu.style.display === 'block' ? 'none' : 'block';
+    catMenu.style.display = 'none';
+    document.getElementById('priceFilterMenu').style.display = 'none';
+  });
+  
+  // فیلتر دسته‌بندی
+  document.querySelectorAll('#filterDropdown .dropdown-item').forEach(item => {
+    item.addEventListener('click', function() {
+      currentCategory = this.dataset.filter;
+      document.getElementById('mainFilterBtn').innerHTML = 
+        `<i class="fas fa-boxes"></i>${currentCategory}<i class="fas fa-chevron-down" style="margin-right:7px;font-size:0.95em"></i>`;
+      filterAndSortProducts();
+      updateActiveFilters();
+    });
+  });
+  
+  // فیلتر فروشگاه
+  document.querySelectorAll('#shopsDropdown .dropdown-item').forEach(item => {
+    item.addEventListener('click', function() {
+      currentShop = this.dataset.shop;
+      document.getElementById('shopsBtn').innerHTML = 
+        `<i class="fas fa-store"></i>${currentShop}<i class="fas fa-chevron-down" style="margin-right:7px;font-size:0.95em"></i>`;
+      filterAndSortProducts();
+      updateActiveFilters();
+    });
+  });
+}
+
+function setupMobileFilters() {
+  const catMenuMobile = document.getElementById('filterDropdownMobile');
+  const shopMenuMobile = document.getElementById('shopsDropdownMobile');
+  const priceMenuMobile = document.getElementById('priceFilterMenuMobile');
+  
+  // فیلتر دسته‌بندی موبایل
+  document.getElementById('mainFilterBtnMobile').addEventListener('click', e => {
+    e.stopPropagation();
+    catMenuMobile.style.display = catMenuMobile.style.display === 'block' ? 'none' : 'block';
+    shopMenuMobile.style.display = 'none';
+    priceMenuMobile.style.display = 'none';
+  });
+  
+  // فیلتر فروشگاه موبایل
+  document.getElementById('shopsBtnMobile').addEventListener('click', e => {
+    e.stopPropagation();
+    shopMenuMobile.style.display = shopMenuMobile.style.display === 'block' ? 'none' : 'block';
+    catMenuMobile.style.display = 'none';
+    priceMenuMobile.style.display = 'none';
+  });
+  
+  // فیلتر قیمت موبایل
+  document.getElementById('priceFilterBtnMobile').addEventListener('click', e => {
+    e.stopPropagation();
+    priceMenuMobile.style.display = priceMenuMobile.style.display === 'block' ? 'none' : 'block';
+    catMenuMobile.style.display = 'none';
+    shopMenuMobile.style.display = 'none';
+  });
+  
+  // فیلتر دسته‌بندی موبایل
+  document.querySelectorAll('#filterDropdownMobile .dropdown-item').forEach(item => {
+    item.addEventListener('click', function() {
+      currentCategory = this.dataset.filter;
+      document.getElementById('mainFilterBtnMobile').innerHTML = 
+        `<i class="fas fa-boxes"></i>${currentCategory}<i class="fas fa-chevron-down" style="margin-right:7px;font-size:0.95em"></i>`;
+      updateActiveFilters();
+      document.getElementById('filterDropdownMobile').style.display = 'none';
+    });
+  });
+  
+  // فیلتر فروشگاه موبایل
+  document.querySelectorAll('#shopsDropdownMobile .dropdown-item').forEach(item => {
+    item.addEventListener('click', function() {
+      currentShop = this.dataset.shop;
+      document.getElementById('shopsBtnMobile').innerHTML = 
+        `<i class="fas fa-store"></i>${currentShop}<i class="fas fa-chevron-down" style="margin-right:7px;font-size:0.95em"></i>`;
+      updateActiveFilters();
+      document.getElementById('shopsDropdownMobile').style.display = 'none';
+    });
+  });
+  
+  // فیلتر قیمت موبایل
+  document.getElementById('applyPriceFilterMobile').addEventListener('click', function() {
+    const min = parseFloat(document.getElementById('minPriceMobile').value) || 0;
+    const max = parseFloat(document.getElementById('maxPriceMobile').value) || Number.MAX_SAFE_INTEGER;
+    
+    if (min > max) {
+      alert("حداقل قیمت نمی‌تواند از حداکثر بیشتر باشد!");
+      return;
+    }
+    
+    currentPriceFilter = { min, max };
+    document.getElementById('priceFilterBtnMobile').innerHTML = 
+      `<i class="fas fa-dollar-sign"></i>فیلتر قیمت (${min.toLocaleString('fa-IR')} - ${max.toLocaleString('fa-IR')})<i class="fas fa-chevron-down" style="margin-right:7px;font-size:0.95em"></i>`;
+    updateActiveFilters();
+    document.getElementById('priceFilterMenuMobile').style.display = 'none';
+  });
+}
+
+function setupSorting() {
+  // مرتب‌سازی دسکتاپ
+  document.getElementById('sort-cheap').addEventListener('click', function() {
+    currentSort = 'cheap';
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    this.classList.add('active');
+    filterAndSortProducts();
+    updateActiveFilters();
+  });
+  
+  document.getElementById('sort-expensive').addEventListener('click', function() {
+    currentSort = 'expensive';
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    this.classList.add('active');
+    filterAndSortProducts();
+    updateActiveFilters();
+  });
+  
+  // مرتب‌سازی موبایل
+  document.getElementById('sort-cheap-mobile').addEventListener('click', function() {
+    currentSort = 'cheap';
+    document.querySelectorAll('#mobileFilters .filter-btn').forEach(b => b.classList.remove('active'));
+    this.classList.add('active');
+    updateActiveFilters();
+  });
+  
+  document.getElementById('sort-expensive-mobile').addEventListener('click', function() {
+    currentSort = 'expensive';
+    document.querySelectorAll('#mobileFilters .filter-btn').forEach(b => b.classList.remove('active'));
+    this.classList.add('active');
+    updateActiveFilters();
+  });
+}
+
+function setupPriceFilter() {
+  const priceMenu = document.getElementById('priceFilterMenu');
+  
+  // فیلتر قیمت دسکتاپ
+  document.getElementById('priceFilterBtn').addEventListener('click', e => {
+    e.stopPropagation();
+    priceMenu.style.display = priceMenu.style.display === 'block' ? 'none' : 'block';
+    document.getElementById('filterDropdown').style.display = 'none';
+    document.getElementById('shopsDropdown').style.display = 'none';
+  });
+  
+  document.getElementById('applyPriceFilter').addEventListener('click', function() {
+    const min = parseFloat(document.getElementById('minPrice').value) || 0;
+    const max = parseFloat(document.getElementById('maxPrice').value) || Number.MAX_SAFE_INTEGER;
+    
+    if (min > max) {
+      alert("حداقل قیمت نمی‌تواند از حداکثر بیشتر باشد!");
+      return;
+    }
+    
+    currentPriceFilter = { min, max };
+    document.getElementById('priceFilterBtn').innerHTML = 
+      `<i class="fas fa-dollar-sign"></i>فیلتر قیمت (${min.toLocaleString('fa-IR')} - ${max.toLocaleString('fa-IR')})<i class="fas fa-chevron-down" style="margin-right:7px;font-size:0.95em"></i>`;
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById('priceFilterBtn').classList.add('active');
+    filterAndSortProducts();
+    updateActiveFilters();
+  });
+}
+
+function closeMobileFilters() {
+  document.getElementById('mobileFilters').classList.remove('active');
+  setTimeout(() => {
+    document.getElementById('mobileFiltersOverlay').style.display = 'none';
+  }, 300);
+}
+
+/* تبدیل اعداد فارسی/عربی و حذفیات جداکننده‌ها → عدد JS */
+function parsePriceInput(str){
+  if(!str) return '';
+  const en = str.replace(/[٠-٩۰-۹]/g,d => '۰۱۲۳۴۵۶۷۸۹'.indexOf(d))   // ارقام عربی/فارسی → انگلیسی
+                .replace(/[,‌\s]/g,'')                                // ویرگول و فاصله
+                .trim();
+  return en==='' ? '' : Number(en);
+}
+
+/* ---------------------- واکشی محصولات ---------------------- */
+async function fetchProductsFromAPI(){
+  try{
+    // واکشی واقعی از بک‌اند (فرض بر این است که endpoint /api/products وجود دارد و JSON برمی‌گرداند)
+    const response = await fetch('/api/products');
+    if (!response.ok) {
+      throw new Error('خطا در دریافت محصولات از سرور');
+    }
+    allProducts = await response.json();
+    
+    filterAndSortProducts();
+  }catch(err){
+    document.getElementById('productsList').innerHTML=
+      `<div style="grid-column:1/-1;text-align:center;padding:40px">
+         <i class="fas fa-bug" style="font-size:3rem;color:#e11d48"></i>
+         <h4 style="color:#e11d48">خطا در دریافت محصولات از سرور</h4>
+         <div style="color:#888">${err.message}</div>
+       </div>`;
+  }
+}
+
+/* -------------------- فیلتر و مرتب‌سازی -------------------- */
+function filterAndSortProducts(){
+  const q=document.getElementById('searchInput').value.trim().toLowerCase();
+  let list=[...allProducts];
+
+  if(currentShop!=="همه مراکز خرید")   list=list.filter(p=>p.seller.storename===currentShop); // assuming storename is the shop name
+  if(currentCategory!=="همه محصولات")  list=list.filter(p=>p.category===currentCategory);
+  if(currentPriceFilter)               list=list.filter(p=>p.price>=currentPriceFilter.min && p.price<=currentPriceFilter.max);
+  if(q)                                list=list.filter(p=>p.title?.toLowerCase().includes(q));
+
+  if(currentSort==="cheap")      list.sort((a,b)=>a.price-b.price);
+  else if(currentSort==="expensive") list.sort((a,b)=>b.price-a.price);
+
+  products=list;
+  renderProducts(list);
+  updateActiveFilters();
+}
+
+/* -------------------- رندر محصولات -------------------- */
+function renderProducts(list){
+  const wrap=document.getElementById('productsList');
+  wrap.innerHTML="";
+  if(!list.length){
+    wrap.innerHTML=
+      `<div style="grid-column:1/-1;text-align:center;padding:50px 20px">
+         <i class="fas fa-search" style="font-size:4rem;color:#e2e8f0"></i>
+         <h3 style="color:#94a3b8">محصولی یافت نشد</h3>
+       </div>`;
+    return;
+  }
+  list.forEach(p=>{
+    const img=(p.images?.length)?p.images[0]:'https://placehold.co/320x200?text=NO+IMAGE';
+    wrap.insertAdjacentHTML('beforeend',`
+      <div class="product-card">
+        <div class="product-image-container">
+          <img class="product-image" src="${img}" alt="${p.title}">
+        </div>
+        <div class="product-details">
+          <div class="product-title">${p.title}</div>
+          <div class="shop-address"><i class="fas fa-map-marker-alt" style="color:#10b981;margin-left:5px"></i>${p.seller.address || "نامشخص"}</div>
+          <div class="product-price">${formatPrice(p.price)}</div>
+          <a href="product.html?id=${p._id}" target="_blank" class="see-product-btn"><i class="fas fa-eye"></i>مشاهده محصول</a>
+        </div>
+        <span class="tag">${p.seller.category || ""}</span>
+      </div>`);
+  });
+}
+
+function formatPrice(p) {
+  return p ? p.toLocaleString('fa-IR')+" تومان" : "-";
+}
+
+/* -------------------- نمایش فیلترهای فعال -------------------- */
+function updateActiveFilters() {
+  const activeFiltersContainer = document.getElementById('activeFilters');
+  activeFiltersContainer.innerHTML = '';
+  
+  if (currentCategory !== "همه محصولات") {
+    activeFiltersContainer.innerHTML += `
+      <div class="active-filter">
+        <span>دسته: ${currentCategory}</span>
+        <span class="remove" onclick="removeFilter('category')">×</span>
+      </div>
+    `;
+  }
+  
+  if (currentShop !== "همه مراکز خرید") {
+    activeFiltersContainer.innerHTML += `
+      <div class="active-filter">
+        <span>مرکز خرید: ${currentShop}</span>
+        <span class="remove" onclick="removeFilter('shop')">×</span>
+      </div>
+    `;
+  }
+  
+  if (currentPriceFilter) {
+    activeFiltersContainer.innerHTML += `
+      <div class="active-filter">
+        <span>قیمت: ${currentPriceFilter.min.toLocaleString('fa-IR')} - ${currentPriceFilter.max.toLocaleString('fa-IR')} تومان</span>
+        <span class="remove" onclick="removeFilter('price')">×</span>
+      </div>
+    `;
+  }
+  
+  if (currentSort) {
+    const sortText = currentSort === 'cheap' ? 'ارزان‌ترین' : 'گران‌ترین';
+    activeFiltersContainer.innerHTML += `
+      <div class="active-filter">
+        <span>مرتب‌سازی: ${sortText}</span>
+        <span class="remove" onclick="removeFilter('sort')">×</span>
+      </div>
+    `;
+  }
+}
+
+function removeFilter(type) {
+  switch(type) {
+    case 'category':
+      currentCategory = "همه محصولات";
+      document.getElementById('mainFilterBtn').innerHTML = 
+        `<i class="fas fa-boxes"></i>همه محصولات<i class="fas fa-chevron-down" style="margin-right:7px;font-size:0.95em"></i>`;
+      document.getElementById('mainFilterBtnMobile').innerHTML = 
+        `<i class="fas fa-boxes"></i>همه محصولات<i class="fas fa-chevron-down" style="margin-right:7px;font-size:0.95em"></i>`;
+      break;
+    case 'shop':
+      currentShop = "همه مراکز خرید";
+      document.getElementById('shopsBtn').innerHTML = 
+        `<i class="fas fa-store"></i>مراکز خرید<i class="fas fa-chevron-down" style="margin-right:7px;font-size:0.95em"></i>`;
+      document.getElementById('shopsBtnMobile').innerHTML = 
+        `<i class="fas fa-store"></i>مراکز خرید<i class="fas fa-chevron-down" style="margin-right:7px;font-size:0.95em"></i>`;
+      break;
+    case 'price':
+      currentPriceFilter = null;
+      document.getElementById('priceFilterBtn').innerHTML = 
+        `<i class="fas fa-dollar-sign"></i>فیلتر قیمت<i class="fas fa-chevron-down" style="margin-right:7px;font-size:0.95em"></i>`;
+      document.getElementById('priceFilterBtnMobile').innerHTML = 
+        `<i class="fas fa-dollar-sign"></i>فیلتر قیمت<i class="fas fa-chevron-down" style="margin-right:7px;font-size:0.95em"></i>`;
+      document.getElementById('minPrice').value = '';
+      document.getElementById('maxPrice').value = '';
+      document.getElementById('minPriceMobile').value = '';
+      document.getElementById('maxPriceMobile').value = '';
+      break;
+    case 'sort':
+      currentSort = null;
+      document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('#mobileFilters .filter-btn').forEach(b => b.classList.remove('active'));
+      break;
+  }
+  
+  filterAndSortProducts();
+}
+
+/* --- بستن تمام منوها با کلیک بیرون --- */
+document.body.addEventListener('click',()=>{
+  ['filterDropdown','shopsDropdown','priceFilterMenu'].forEach(id=>{
+    const el=document.getElementById(id);
+    if(el) el.style.display='none';
+  });
+});
+</script>
+</body>
+</html>

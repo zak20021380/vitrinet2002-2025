@@ -1,0 +1,841 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>ویترینت | Vitreenet</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="style-index.css" />
+  <script src="main-index.js" defer></script>
+  <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;700&display=swap" rel="stylesheet"/>
+
+</head>
+<body class="text-gray-800">
+
+<!-- HEADER افقی همیشه باز -->
+<!-- اضافه کردن فونت Poppins -->
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@900&display=swap" rel="stylesheet" />
+
+
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@800&display=swap" rel="stylesheet"/>
+
+<header class="w-full bg-white/80 shadow-sm backdrop-blur-md sticky top-0 z-50">
+  <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between px-3 sm:px-6 py-3 gap-y-2">
+
+    <!-- بخش راست: لوگوی متنی انگلیسی -->
+    <div class="flex items-center gap-3 flex-shrink-0">
+      <!-- لوگوی متنی انگلیسی جمع و جور -->
+      <a href="index.html" class="logo-vitreenet">
+        Vitreenet
+      </a>
+
+      <!-- بج شهر -->
+      <div class="flex items-center gap-1 px-3 py-1 rounded-full shadow-lg ml-2"
+           style="background:linear-gradient(90deg,#10b981E6 70%,#0ea5e9E6); border: 1.5px solid #fff6; backdrop-filter: blur(5px);">
+        <svg width="18" height="18" fill="none" viewBox="0 0 22 22" class="ml-1 drop-shadow">
+          <defs>
+            <linearGradient id="city-icon" x1="0" y1="0" x2="22" y2="22" gradientUnits="userSpaceOnUse">
+              <stop stop-color="#fff" />
+              <stop offset="1" stop-color="#b2f2e9" />
+            </linearGradient>
+          </defs>
+          <path d="M11 2.5C7.13 2.5 4 5.61 4 9.45c0 3.52 4.1 7.93 6.2 10.01.46.47 1.2.47 1.66 0 2.1-2.08 6.14-6.49 6.14-10.01C18 5.61 14.87 2.5 11 2.5Zm0 10.25a2.75 2.75 0 1 1 0-5.5 2.75 2.75 0 0 1 0 5.5Z"
+            fill="url(#city-icon)"/>
+        </svg>
+        <span id="headerCity" class="font-bold text-white text-[13px] sm:text-[14px] drop-shadow-sm" style="letter-spacing:.3px;">سنندج</span>
+      </div>
+    </div>
+
+    <!-- منو -->
+    <nav class="flex items-center justify-end gap-2 sm:gap-3 flex-wrap text-sm sm:text-base w-full sm:w-auto">
+      <a href="index.html" class="text-gray-700 hover:text-[#10b981] font-bold px-2 sm:px-3 transition">خانه</a>
+      <a href="categories.html" class="text-gray-700 hover:text-[#0ea5e9] font-bold px-2 sm:px-3 transition">دسته‌بندی</a>
+      <a href="login.html" class="text-gray-700 hover:text-[#0ea5e9] font-bold px-2 sm:px-3 transition">ورود</a>
+      <a href="post.html" class="btn-grad px-4 py-2 rounded-full font-black shadow hover:scale-105 transition-all duration-200 whitespace-nowrap text-white text-sm sm:text-base">
+        ثبت فروشگاه
+      </a>
+    </nav>
+  </div>
+</header>
+
+
+
+
+
+
+
+
+<section class="flex flex-col items-center justify-center py-10 px-2">
+  <div class="relative glass w-full max-w-[98vw] sm:max-w-2xl md:max-w-3xl mx-auto px-4 sm:px-10 py-8 sm:py-12 text-center shadow-2xl animate-fadein">
+
+    <h1 class="mt-4 text-2xl sm:text-4xl md:text-5xl font-black mb-4 leading-tight bg-gradient-to-l from-[#10b981] to-[#0ea5e9] text-transparent bg-clip-text tracking-tight">
+     ویترینت، ویترین اینترنتی مغازه های شهر
+    </h1>
+    <p class="mb-8 text-base sm:text-lg md:text-xl text-gray-600 font-medium">
+      فروشگاه و مغازه‌های اطرافت رو تو ویترینت جستجو کن و راحت مقایسه کن.
+    </p>
+    
+    <!-- فرم جستجو -->
+    <form class="w-full flex flex-col sm:flex-row justify-center items-center gap-3 max-w-xl mx-auto" id="searchForm">
+      <!-- دکمه انتخاب شهر -->
+      <button type="button" id="cityBtn"
+        class="flex items-center gap-2 px-4 py-3 rounded-full border border-gray-200 bg-white/90 text-gray-700 shadow-sm hover:border-[#10b981] transition
+               w-full sm:w-auto mb-2 sm:mb-0 city-btn-responsive"
+        style="min-width:120px; font-weight:600; font-size:16px;">
+        <span id="cityName" class="truncate">سنندج</span>
+        <svg width="19" height="19" fill="none" viewBox="0 0 24 24"><path d="M7 10l5 5 5-5" stroke="#10b981" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+      <!-- جستجو مغازه یا کالا -->
+      <input type="text"
+        class="flex-1 py-3 px-5 border border-gray-200 rounded-full text-base sm:text-lg focus:outline-none shadow-sm transition text-right bg-white/80 w-full"
+        placeholder="جستجوی مغازه، محصول یا برند..." id="mainSearchInput" />
+      <!-- دکمه جستجو -->
+      <button type="submit"
+        class="btn-grad w-full sm:w-auto px-7 py-3 rounded-full text-base sm:text-lg font-extrabold shadow hover:scale-105 transition-all duration-200"
+        style="white-space: nowrap;">
+        جستجو
+      </button>
+    </form>
+
+    <!-- پاپ‌آپ تبلیغ دقیقا بعد از فرم سرچ -->
+    <div id="adPopup" class="ad-popup-custom" style="display:none;">
+      <div id="ad-banner-slot-popup"></div>
+      <button id="closeAdBtn" class="ad-close-btn">بستن</button>
+    </div>
+
+  </div>
+</section>
+
+<!-- پاپ‌آپ شهر -->
+<div id="cityModalBackdrop" class="city-modal-backdrop">
+  <div id="cityModal"
+    class="bg-gradient-to-l from-[#10b981] to-[#0ea5e9] text-white font-bold px-8 py-6 rounded-3xl shadow-2xl border-4 border-white/20
+           flex flex-col items-center gap-4 animate-fadein scale-90 transition-all duration-300"
+    style="min-width:260px; max-width:92vw; font-size:1.05rem;">
+    <div class="flex items-center gap-3">
+      <svg width="32" height="32" fill="none" viewBox="0 0 24 24">
+        <circle cx="12" cy="12" r="12" fill="#fff3" />
+        <path d="M9 12l2 2 4-4" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      <span id="cityAlertText">ویترینت فعلا فقط در سنندج فعاله!</span>
+    </div>
+    <button id="closeAlertBtn" class="mt-1 px-6 py-2 rounded-full bg-white text-[#10b981] font-extrabold text-base shadow hover:bg-gray-100 hover:text-[#0ea5e9] transition-all duration-200">
+      باشه
+    </button>
+  </div>
+</div>
+
+
+
+<section class="w-full mt-14 px-3 sm:px-10">
+  <div class="flex items-center justify-between mb-6">
+   <h3 class="text-2xl sm:text-3xl font-extrabold tracking-tight leading-relaxed">
+  <span class="bg-gradient-to-l from-[#10b981] to-[#0ea5e9] bg-clip-text text-transparent drop-shadow-md">
+    دسته‌بندی‌های محبوب
+  </span>
+</h3>
+
+    <a href="categories.html"
+       class="hidden sm:inline text-sm font-bold text-[#10b981] hover:text-[#0ea5e9] transition">
+      مشاهده همه
+    </a>
+  </div>
+
+  <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-4 sm:gap-6">
+    <!-- زیبایی -->
+    <a href="categories.html#beauty"
+       class="group bg-gradient-to-br from-[#15e6c8] to-[#0ea5e9] rounded-2xl shadow-xl hover:scale-105 hover:shadow-2xl transition-all duration-300 flex flex-col items-center justify-center py-6 px-2 sm:py-7 sm:px-2">
+      <div class="flex items-center justify-center mb-3">
+        <img src="assets/icons/beauty.svg" alt="زیبایی" class="w-11 h-11 sm:w-14 sm:h-14 drop-shadow-lg group-hover:scale-110 transition-all duration-200"/>
+      </div>
+      <span class="text-white font-extrabold text-base sm:text-lg tracking-tight drop-shadow-md group-hover:text-gray-50 transition">
+        زیبایی
+      </span>
+    </a>
+    <!-- خودرو (SVG سفید با سایه آبی) -->
+<a href="categories.html#auto"
+   class="group bg-gradient-to-br from-[#0ea5e9] to-[#10b981] rounded-2xl shadow-xl hover:scale-105 hover:shadow-2xl transition-all duration-300 flex flex-col items-center justify-center py-6 px-2 sm:py-7 sm:px-2">
+  <div class="flex items-center justify-center mb-3">
+    <!-- SVG ماشین مدرن و حرفه‌ای، فلت و واقعا آیکون ماشین -->
+<!-- خودرو (SVG حرفه‌ای و مدرن با گرادینت آبی) -->
+<svg width="56" height="56" viewBox="0 0 512 512" fill="none"
+  class="w-14 h-14 sm:w-14 sm:h-14 drop-shadow-lg group-hover:scale-110 transition-all duration-200"
+  xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="car-blue-gradient" x1="0" y1="0" x2="512" y2="512" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#21d4fd"/>
+      <stop offset="1" stop-color="#2152ff"/>
+    </linearGradient>
+  </defs>
+  <!-- بدنه ماشین -->
+  <path d="M68 444c-18 0-28-10-28-28v-70c0-16 7-28 20-39l76-69c4-3 7-8 9-14l38-97c7-18 21-28 41-28h162c20 0 34 10 41 28l38 97c2 6 5 11 9 14l76 69c13 11 20 23 20 39v70c0 18-10 28-28 28H68z" stroke="url(#car-blue-gradient)" stroke-width="20" fill="none"/>
+  <!-- شیشه جلو و سقف -->
+  <rect x="128" y="108" width="256" height="96" rx="32" stroke="url(#car-blue-gradient)" stroke-width="16" fill="none"/>
+  <!-- چراغ چپ -->
+  <path d="M76 318c0 19 18 36 42 36h48l-32-48H84c-5 0-8 2-8 6v6z" stroke="url(#car-blue-gradient)" stroke-width="14" fill="none"/>
+  <!-- چراغ راست -->
+  <path d="M436 354c24 0 42-17 42-36v-6c0-4-3-6-8-6h-50l-32 48h48z" stroke="url(#car-blue-gradient)" stroke-width="14" fill="none"/>
+  <!-- جلوپنجره -->
+  <path d="M180 338l-22-33c-2-4 1-8 5-8h186c4 0 7 4 5 8l-22 33c-2 3-5 5-8 5H188c-3 0-6-2-8-5z" stroke="url(#car-blue-gradient)" stroke-width="14" fill="none"/>
+  <!-- چرخ چپ -->
+  <rect x="76" y="384" width="56" height="44" rx="12" stroke="url(#car-blue-gradient)" stroke-width="14" fill="none"/>
+  <!-- چرخ راست -->
+  <rect x="380" y="384" width="56" height="44" rx="12" stroke="url(#car-blue-gradient)" stroke-width="14" fill="none"/>
+</svg>
+
+  </div>
+  <span class="text-white font-extrabold text-base sm:text-lg tracking-tight drop-shadow-md group-hover:text-gray-50 transition">
+    خودرو
+  </span>
+</a>
+
+
+    <!-- دیجیتال (SVG) -->
+    <a href="categories.html#digital"
+       class="group bg-gradient-to-br from-[#22d3ee] to-[#16e387] rounded-2xl shadow-xl hover:scale-105 hover:shadow-2xl transition-all duration-300 flex flex-col items-center justify-center py-6 px-2 sm:py-7 sm:px-2">
+      <div class="flex items-center justify-center mb-3">
+        <svg width="56" height="56" viewBox="0 0 64 64" fill="none"
+          class="w-14 h-14 sm:w-14 sm:h-14 drop-shadow-lg group-hover:scale-110 transition-all duration-200"
+          xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <linearGradient id="digitalGradient" x1="0" y1="0" x2="64" y2="64" gradientUnits="userSpaceOnUse">
+              <stop stop-color="#11cdf4"/>
+              <stop offset="1" stop-color="#6b21a8"/>
+            </linearGradient>
+          </defs>
+          <!-- لپ تاپ -->
+          <rect x="4" y="14" width="40" height="28" rx="4" stroke="url(#digitalGradient)" stroke-width="2.6" fill="none"/>
+          <rect x="4" y="42" width="40" height="7" rx="2.5" stroke="url(#digitalGradient)" stroke-width="2.6" fill="none"/>
+          <rect x="18" y="46" width="12" height="2.2" rx="1.1" fill="url(#digitalGradient)"/>
+          <!-- موبایل -->
+          <rect x="34" y="20" width="24" height="36" rx="4.2" stroke="url(#digitalGradient)" stroke-width="2.6" fill="none"/>
+          <circle cx="46" cy="52" r="1.6" fill="url(#digitalGradient)"/>
+          <rect x="44.6" y="23" width="4.8" height="1.2" rx="0.6" fill="url(#digitalGradient)"/>
+        </svg>
+      </div>
+      <span class="text-white font-extrabold text-base sm:text-lg tracking-tight drop-shadow-md group-hover:text-gray-50 transition">
+        دیجیتال
+      </span>
+    </a>
+    <!-- خدمات -->
+    <a href="categories.html#services"
+       class="group bg-gradient-to-br from-[#0ea5e9] to-[#0bd6b3] rounded-2xl shadow-xl hover:scale-105 hover:shadow-2xl transition-all duration-300 flex flex-col items-center justify-center py-6 px-2 sm:py-7 sm:px-2">
+      <div class="flex items-center justify-center mb-3">
+        <img src="assets/icons/service.svg" alt="خدمات" class="w-11 h-11 sm:w-14 sm:h-14 drop-shadow-lg group-hover:scale-110 transition-all duration-200"/>
+      </div>
+      <span class="text-white font-extrabold text-base sm:text-lg tracking-tight drop-shadow-md group-hover:text-gray-50 transition">
+        خدمات
+      </span>
+    </a>
+<!-- خوراک -->
+<a href="categories.html#food"
+   class="group bg-gradient-to-br from-[#11cdf4] to-[#43e97b] rounded-2xl shadow-xl hover:scale-105 hover:shadow-2xl transition-all duration-300 flex flex-col items-center justify-center py-6 px-2 sm:py-7 sm:px-2">
+  <div class="flex items-center justify-center mb-3">
+    <!-- SVG Food Icon -->
+    <svg width="56" height="56" viewBox="0 0 56 56" fill="none"
+      class="w-11 h-11 sm:w-14 sm:h-14 drop-shadow-lg group-hover:scale-110 transition-all duration-200"
+      xmlns="http://www.w3.org/2000/svg">
+      <!-- بشقاب -->
+      <circle cx="28" cy="28" r="18" stroke="#fff" stroke-width="2.5" fill="none"/>
+      <circle cx="28" cy="28" r="10" stroke="#fff" stroke-width="2.1" fill="none"/>
+      <!-- قاشق -->
+      <rect x="15.5" y="22" width="2" height="11" rx="1" fill="#fff"/>
+      <circle cx="16.5" cy="21" r="1.5" fill="#fff"/>
+      <!-- چنگال -->
+      <rect x="38.5" y="22" width="2" height="11" rx="1" fill="#fff"/>
+      <rect x="38.5" y="19.3" width="2" height="2.8" rx="1" fill="#fff"/>
+      <rect x="41" y="21" width="1.2" height="4.5" rx="0.6" fill="#fff"/>
+      <rect x="36.8" y="21" width="1.2" height="4.5" rx="0.6" fill="#fff"/>
+    </svg>
+  </div>
+  <span class="text-white font-extrabold text-base sm:text-lg tracking-tight drop-shadow-md group-hover:text-gray-50 transition">
+    خوراک
+  </span>
+</a>
+
+  <!-- پوشاک -->
+<a href="categories.html#clothing"
+   class="group bg-gradient-to-br from-[#36d1c4] to-[#49e7b7] rounded-2xl shadow-xl hover:scale-105 hover:shadow-2xl transition-all duration-300 flex flex-col items-center justify-center py-6 px-2 sm:py-7 sm:px-2">
+  <div class="flex items-center justify-center mb-3">
+    <!-- SVG پوشاک (تیشرت کامل و مدرن) -->
+    <svg width="56" height="56" viewBox="0 0 56 56" fill="none"
+      class="w-14 h-14 sm:w-14 sm:h-14 drop-shadow-lg group-hover:scale-110 transition-all duration-200"
+      xmlns="http://www.w3.org/2000/svg">
+      <g stroke="#fff" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" fill="none">
+        <!-- بدنه تیشرت -->
+        <path d="M12 14L8 10L18 4L28 13L38 4L48 10L44 14V41C44 42.1046 43.1046 43 42 43H14C12.8954 43 12 42.1046 12 41V14Z"/>
+        <!-- یقه تیشرت -->
+        <path d="M20 14C20 16 24 18 28 18C32 18 36 16 36 14"/>
+      </g>
+    </svg>
+  </div>
+  <span class="text-white font-extrabold text-base sm:text-lg tracking-tight drop-shadow-md group-hover:text-gray-50 transition">
+    پوشاک
+  </span>
+</a>
+
+
+
+  </div>
+</section>
+
+<!-- اسکرول‌بار مخفی و استایل جلوه -->
+<section class="max-w-6xl mx-auto w-full mt-8 mb-16 animate-fadein">
+  <div class="flex items-center justify-between mb-7 px-1">
+    <h3 class="text-2xl sm:text-3xl font-extrabold text-gray-800 tracking-tight leading-relaxed">
+      <span class="bg-gradient-to-l from-[#10b981] to-[#0ea5e9] bg-clip-text text-transparent drop-shadow-md">
+        فروشگاه‌های منتخب شهر
+      </span>
+    </h3>
+    <div class="flex gap-3 items-center">
+      <!-- دکمه جستجوی فروشگاه‌های شهر -->
+      <a href="city-explore.html"
+         class="ml-2 text-white btn-grad px-5 py-2 rounded-full font-bold shadow hover:scale-105 transition-all duration-200 whitespace-nowrap">
+        یه سر به کل شهر بزن!
+      </a>
+      <!-- دکمه مشاهده همه -->
+      <a href="categories.html"
+         class="text-[#10b981] hover:text-[#0ea5e9] font-bold text-sm sm:text-base bg-[#e0fdfa] px-5 py-2 rounded-full shadow transition-all duration-200 whitespace-nowrap">
+        مشاهده همه
+      </a>
+    </div>
+  </div>
+
+  <div
+    id="drag-scroll-cards"
+    class="flex overflow-x-auto gap-5 pb-2"
+    style="-webkit-overflow-scrolling:touch;width:100%;"
+  >
+
+  </div>
+</section>
+
+<!-- پربازدیدترین مغازه شهر -->
+<section class="max-w-6xl mx-auto w-full mt-8 mb-16 animate-fadein">
+  <div class="flex items-center justify-between mb-7 px-1">
+    <h3 class="text-2xl sm:text-3xl font-extrabold text-gray-800 tracking-tight leading-relaxed">
+      <span class="bg-gradient-to-l from-[#10b981] to-[#0ea5e9] bg-clip-text text-transparent drop-shadow-md">
+        پربازدیدترین مغازه های شهر
+      </span>
+    </h3>
+    <div class="flex gap-3 items-center">
+      <a href="city-explore.html"
+         class="ml-2 text-white btn-grad px-5 py-2 rounded-full font-bold shadow hover:scale-105 transition-all duration-200 whitespace-nowrap">
+        یه سر به کل شهر بزن!
+      </a>
+      <a href="categories.html"
+         class="text-[#10b981] hover:text-[#0ea5e9] font-bold text-sm sm:text-base bg-[#e0fdfa] px-5 py-2 rounded-full shadow transition-all duration-200 whitespace-nowrap">
+        مشاهده همه
+      </a>
+    </div>
+  </div>
+
+  <div
+    id="most-visited-shops"
+    class="flex overflow-x-auto gap-5 pb-2"
+    style="-webkit-overflow-scrolling:touch;width:100%;"
+  >
+    <!-- کارت 1 -->
+    <a href="#" class="group glass min-w-[265px] max-w-xs flex-shrink-0 flex flex-col items-center p-4 rounded-2xl shadow-xl border hover:scale-[1.04] hover:shadow-2xl bg-white/90 backdrop-blur-[3px] transition-all duration-200">
+      <div class="w-full h-[120px] sm:h-[160px] rounded-xl mb-5 flex items-center justify-center relative overflow-hidden" style="background:linear-gradient(100deg,#e0fdfa,#d4fbe8);">
+        <img src="https://loremflickr.com/320/240/clothing,store,front" class="object-cover w-full h-full absolute inset-0 rounded-xl" alt="مغازه 1">
+        <span class="absolute top-2 right-2 text-xs font-bold px-2 py-1 rounded-full bg-[#10b981] text-white bg-opacity-80">جدید</span>
+      </div>
+      <div class="w-full flex flex-col items-center mb-2">
+        <span class="font-extrabold text-lg sm:text-xl text-[#10b981] mb-1">مغازه پربازدید 1</span>
+      </div>
+      <div class="flex items-center justify-center gap-2 mb-1 w-full">
+        <svg width="18" height="18" fill="none" viewBox="0 0 22 22">
+          <circle cx="11" cy="11" r="10" fill="#e0f7fa"/>
+          <path d="M11 2.5C7.13 2.5 4 5.61 4 9.45c0 3.52 4.1 7.93 6.2 10.01.46.47 1.2.47 1.66 0 2.1-2.08 6.14-6.49 6.14-10.01C18 5.61 14.87 2.5 11 2.5Zm0 10.25a2.75 2.75 0 1 1 0-5.5 2.75 2.75 0 0 1 0 5.5Z" fill="#10b981"/>
+        </svg>
+        <span class="text-gray-700 text-sm sm:text-base font-bold truncate max-w-[180px]">سنندج، خیابان اصلی</span>
+      </div>
+      <div class="flex items-center justify-center gap-2 mt-2 w-full">
+        <span class="inline-block bg-[#10b981]/10 text-[#10b981] text-xs font-bold px-3 py-1 rounded-full">پوشاک</span>
+      </div>
+    </a>
+
+    <!-- کارت 2 -->
+    <a href="#" class="group glass min-w-[265px] max-w-xs flex-shrink-0 flex flex-col items-center p-4 rounded-2xl shadow-xl border hover:scale-[1.04] hover:shadow-2xl bg-white/90 backdrop-blur-[3px] transition-all duration-200">
+      <div class="w-full h-[120px] sm:h-[160px] rounded-xl mb-5 flex items-center justify-center relative overflow-hidden" style="background:linear-gradient(100deg,#e0fdfa,#d4fbe8);">
+        <img src="https://loremflickr.com/320/240/electronics,store,front" class="object-cover w-full h-full absolute inset-0 rounded-xl" alt="مغازه 2">
+        <span class="absolute top-2 right-2 text-xs font-bold px-2 py-1 rounded-full bg-[#0ea5e9] text-white bg-opacity-80">ویژه</span>
+      </div>
+      <div class="w-full flex flex-col items-center mb-2">
+        <span class="font-extrabold text-lg sm:text-xl text-[#10b981] mb-1">مغازه پربازدید 2</span>
+      </div>
+      <div class="flex items-center justify-center gap-2 mb-1 w-full">
+        <svg width="18" height="18" fill="none" viewBox="0 0 22 22">
+          <circle cx="11" cy="11" r="10" fill="#e0f7fa"/>
+          <path d="M11 2.5C7.13 2.5 4 5.61 4 9.45c0 3.52 4.1 7.93 6.2 10.01.46.47 1.2.47 1.66 0 2.1-2.08 6.14-6.49 6.14-10.01C18 5.61 14.87 2.5 11 2.5Zm0 10.25a2.75 2.75 0 1 1 0-5.5 2.75 2.75 0 0 1 0 5.5Z" fill="#10b981"/>
+        </svg>
+        <span class="text-gray-700 text-sm sm:text-base font-bold truncate max-w-[180px]">سنندج، کوچه دوم</span>
+      </div>
+      <div class="flex items-center justify-center gap-2 mt-2 w-full">
+        <span class="inline-block bg-[#0ea5e9]/10 text-[#0ea5e9] text-xs font-bold px-3 py-1 rounded-full">دیجیتال</span>
+      </div>
+    </a>
+
+    <!-- کارت 3 -->
+    <a href="#" class="group glass min-w-[265px] max-w-xs flex-shrink-0 flex flex-col items-center p-4 rounded-2xl shadow-xl border hover:scale-[1.04] hover:shadow-2xl bg-white/90 backdrop-blur-[3px] transition-all duration-200">
+      <div class="w-full h-[120px] sm:h-[160px] rounded-xl mb-5 flex items-center justify-center relative overflow-hidden" style="background:linear-gradient(100deg,#e0fdfa,#d4fbe8);">
+        <img src="https://loremflickr.com/320/240/food,shop,facade" class="object-cover w-full h-full absolute inset-0 rounded-xl" alt="مغازه 3">
+        <span class="absolute top-2 right-2 text-xs font-bold px-2 py-1 rounded-full bg-[#10b981] text-white bg-opacity-80">محبوب</span>
+      </div>
+      <div class="w-full flex flex-col items-center mb-2">
+        <span class="font-extrabold text-lg sm:text-xl text-[#10b981] mb-1">مغازه پربازدید 3</span>
+      </div>
+      <div class="flex items-center justify-center gap-2 mb-1 w-full">
+        <svg width="18" height="18" fill="none" viewBox="0 0 22 22">
+          <circle cx="11" cy="11" r="10" fill="#e0f7fa"/>
+          <path d="M11 2.5C7.13 2.5 4 5.61 4 9.45c0 3.52 4.1 7.93 6.2 10.01.46.47 1.2.47 1.66 0 2.1-2.08 6.14-6.49 6.14-10.01C18 5.61 14.87 2.5 11 2.5Zm0 10.25a2.75 2.75 0 1 1 0-5.5 2.75 2.75 0 0 1 0 5.5Z" fill="#10b981"/>
+        </svg>
+        <span class="text-gray-700 text-sm sm:text-base font-bold truncate max-w-[180px]">سنندج، میدان مرکزی</span>
+      </div>
+      <div class="flex items-center justify-center gap-2 mt-2 w-full">
+        <span class="inline-block bg-[#10b981]/10 text-[#10b981] text-xs font-bold px-3 py-1 rounded-full">خوراک</span>
+      </div>
+    </a>
+
+    <!-- کارت 4 -->
+    <a href="#" class="group glass min-w-[265px] max-w-xs flex-shrink-0 flex flex-col items-center p-4 rounded-2xl shadow-xl border hover:scale-[1.04] hover:shadow-2xl bg-white/90 backdrop-blur-[3px] transition-all duration-200">
+      <div class="w-full h-[120px] sm:h-[160px] rounded-xl mb-5 flex items-center justify-center relative overflow-hidden" style="background:linear-gradient(100deg,#e0fdfa,#d4fbe8);">
+        <img src="https://loremflickr.com/320/240/beauty,salon,front" class="object-cover w-full h-full absolute inset-0 rounded-xl" alt="مغازه 4">
+        <span class="absolute top-2 right-2 text-xs font-bold px-2 py-1 rounded-full bg-[#0ea5e9] text-white bg-opacity-80">تخفیف</span>
+      </div>
+      <div class="w-full flex flex-col items-center mb-2">
+        <span class="font-extrabold text-lg sm:text-xl text-[#10b981] mb-1">مغازه پربازدید 4</span>
+      </div>
+      <div class="flex items-center justify-center gap-2 mb-1 w-full">
+        <svg width="18" height="18" fill="none" viewBox="0 0 22 22">
+          <circle cx="11" cy="11" r="10" fill="#e0f7fa"/>
+          <path d="M11 2.5C7.13 2.5 4 5.61 4 9.45c0 3.52 4.1 7.93 6.2 10.01.46.47 1.2.47 1.66 0 2.1-2.08 6.14-6.49 6.14-10.01C18 5.61 14.87 2.5 11 2.5Zm0 10.25a2.75 2.75 0 1 1 0-5.5 2.75 2.75 0 0 1 0 5.5Z" fill="#10b981"/>
+        </svg>
+        <span class="text-gray-700 text-sm sm:text-base font-bold truncate max-w-[180px]">سنندج، خیابان فرعی</span>
+      </div>
+      <div class="flex items-center justify-center gap-2 mt-2 w-full">
+        <span class="inline-block bg-[#0ea5e9]/10 text-[#0ea5e9] text-xs font-bold px-3 py-1 rounded-full">زیبایی</span>
+      </div>
+    </a>
+  </div>
+</section>
+
+<!-- محبوب‌ترین محصولات -->
+<!-- محبوب‌ترین محصولات -->
+<section class="max-w-6xl mx-auto w-full mt-8 mb-14 animate-fadein">
+  <div class="flex items-center justify-between mb-7 px-1">
+    <h3 class="text-2xl sm:text-3xl font-extrabold text-gray-800 tracking-tight leading-relaxed">
+      <span class="bg-gradient-to-l from-[#10b981] to-[#0ea5e9] bg-clip-text text-transparent drop-shadow-md">
+        محصولات محبوب
+      </span>
+    </h3>
+    <a href="all-products.html" class="text-[#10b981] hover:text-[#0ea5e9] font-bold text-sm sm:text-base bg-[#e0fdfa] px-5 py-2 rounded-full shadow transition-all duration-200 whitespace-nowrap">
+      مشاهده همه
+    </a>
+  </div>
+
+  <div
+    id="popular-products-slider"
+    class="flex overflow-x-auto gap-5 pb-2 hide-scrollbar"
+    style="-webkit-overflow-scrolling:touch;width:100%; user-select:none; -webkit-user-select:none; -moz-user-select:none; -ms-user-select:none;"
+  >
+    <!-- اینجا محصولات از بک‌اند بارگذاری می‌شوند -->
+  </div>
+</section>
+
+
+
+<section class="max-w-6xl mx-auto w-full mt-8 mb-14 animate-fadein">
+  <div class="flex items-center justify-between mb-7 px-1">
+    <h3 class="text-2xl sm:text-3xl font-extrabold text-gray-800 tracking-tight leading-relaxed">
+      <span class="bg-gradient-to-l from-[#10b981] to-[#0ea5e9] bg-clip-text text-transparent drop-shadow-md">
+        مغازه های بانتا رو بگرد!
+      </span>
+    </h3>
+    <a href="banta-shops.html" class="text-[#10b981] hover:text-[#0ea5e9] font-bold text-sm sm:text-base bg-[#e0fdfa] px-5 py-2 rounded-full shadow transition-all duration-200 whitespace-nowrap">
+      مشاهده همه
+    </a>
+  </div>
+
+  <div
+    id="banta-shops-slider"
+    class="flex overflow-x-auto gap-5 pb-2 hide-scrollbar"
+    style="-webkit-overflow-scrolling:touch;width:100%; user-select:none; -webkit-user-select:none; -moz-user-select:none; -ms-user-select:none;"
+  >
+    <!-- کارت‌های الکی مغازه‌ها (برای شروع) -->
+    <!-- کارت 1 -->
+    <a href="#" class="group glass min-w-[265px] max-w-xs flex-shrink-0 flex flex-col items-center p-4 rounded-2xl shadow-xl border hover:scale-[1.04] hover:shadow-2xl bg-white/90 backdrop-blur-[3px] transition-all duration-200">
+      <div class="w-full h-[120px] sm:h-[160px] rounded-xl mb-5 flex items-center justify-center relative overflow-hidden" style="background:linear-gradient(100deg,#e0fdfa,#d4fbe8);">
+        <img src="https://loremflickr.com/320/240/clothing,store,front" class="object-cover w-full h-full absolute inset-0 rounded-xl" alt="مغازه 1">
+        <span class="absolute top-2 right-2 text-xs font-bold px-2 py-1 rounded-full bg-[#10b981] text-white bg-opacity-80">جدید</span>
+      </div>
+      <div class="w-full flex flex-col items-center mb-2">
+        <span class="font-extrabold text-lg sm:text-xl text-[#10b981] mb-1">مغازه بانتا 1</span>
+      </div>
+      <div class="flex items-center justify-center gap-2 mb-1 w-full">
+        <svg width="18" height="18" fill="none" viewBox="0 0 22 22">
+          <circle cx="11" cy="11" r="10" fill="#e0f7fa"/>
+          <path d="M11 2.5C7.13 2.5 4 5.61 4 9.45c0 3.52 4.1 7.93 6.2 10.01.46.47 1.2.47 1.66 0 2.1-2.08 6.14-6.49 6.14-10.01C18 5.61 14.87 2.5 11 2.5Zm0 10.25a2.75 2.75 0 1 1 0-5.5 2.75 2.75 0 0 1 0 5.5Z" fill="#10b981"/>
+        </svg>
+        <span class="text-gray-700 text-sm sm:text-base font-bold truncate max-w-[180px]">بانتا، خیابان اصلی</span>
+      </div>
+      <div class="flex items-center justify-center gap-2 mt-2 w-full">
+        <span class="inline-block bg-[#10b981]/10 text-[#10b981] text-xs font-bold px-3 py-1 rounded-full">پوشاک</span>
+      </div>
+    </a>
+
+    <!-- کارت 2 -->
+    <a href="#" class="group glass min-w-[265px] max-w-xs flex-shrink-0 flex flex-col items-center p-4 rounded-2xl shadow-xl border hover:scale-[1.04] hover:shadow-2xl bg-white/90 backdrop-blur-[3px] transition-all duration-200">
+      <div class="w-full h-[120px] sm:h-[160px] rounded-xl mb-5 flex items-center justify-center relative overflow-hidden" style="background:linear-gradient(100deg,#e0fdfa,#d4fbe8);">
+        <img src="https://loremflickr.com/320/240/electronics,store,front" class="object-cover w-full h-full absolute inset-0 rounded-xl" alt="مغازه 2">
+        <span class="absolute top-2 right-2 text-xs font-bold px-2 py-1 rounded-full bg-[#0ea5e9] text-white bg-opacity-80">ویژه</span>
+      </div>
+      <div class="w-full flex flex-col items-center mb-2">
+        <span class="font-extrabold text-lg sm:text-xl text-[#10b981] mb-1">مغازه بانتا 2</span>
+      </div>
+      <div class="flex items-center justify-center gap-2 mb-1 w-full">
+        <svg width="18" height="18" fill="none" viewBox="0 0 22 22">
+          <circle cx="11" cy="11" r="10" fill="#e0f7fa"/>
+          <path d="M11 2.5C7.13 2.5 4 5.61 4 9.45c0 3.52 4.1 7.93 6.2 10.01.46.47 1.2.47 1.66 0 2.1-2.08 6.14-6.49 6.14-10.01C18 5.61 14.87 2.5 11 2.5Zm0 10.25a2.75 2.75 0 1 1 0-5.5 2.75 2.75 0 0 1 0 5.5Z" fill="#10b981"/>
+        </svg>
+        <span class="text-gray-700 text-sm sm:text-base font-bold truncate max-w-[180px]">بانتا، کوچه دوم</span>
+      </div>
+      <div class="flex items-center justify-center gap-2 mt-2 w-full">
+        <span class="inline-block bg-[#0ea5e9]/10 text-[#0ea5e9] text-xs font-bold px-3 py-1 rounded-full">دیجیتال</span>
+      </div>
+    </a>
+
+    <!-- کارت 3 -->
+    <a href="#" class="group glass min-w-[265px] max-w-xs flex-shrink-0 flex flex-col items-center p-4 rounded-2xl shadow-xl border hover:scale-[1.04] hover:shadow-2xl bg-white/90 backdrop-blur-[3px] transition-all duration-200">
+      <div class="w-full h-[120px] sm:h-[160px] rounded-xl mb-5 flex items-center justify-center relative overflow-hidden" style="background:linear-gradient(100deg,#e0fdfa,#d4fbe8);">
+        <img src="https://loremflickr.com/320/240/food,shop,facade" class="object-cover w-full h-full absolute inset-0 rounded-xl" alt="مغازه 3">
+        <span class="absolute top-2 right-2 text-xs font-bold px-2 py-1 rounded-full bg-[#10b981] text-white bg-opacity-80">محبوب</span>
+      </div>
+      <div class="w-full flex flex-col items-center mb-2">
+        <span class="font-extrabold text-lg sm:text-xl text-[#10b981] mb-1">مغازه بانتا 3</span>
+      </div>
+      <div class="flex items-center justify-center gap-2 mb-1 w-full">
+        <svg width="18" height="18" fill="none" viewBox="0 0 22 22">
+          <circle cx="11" cy="11" r="10" fill="#e0f7fa"/>
+          <path d="M11 2.5C7.13 2.5 4 5.61 4 9.45c0 3.52 4.1 7.93 6.2 10.01.46.47 1.2.47 1.66 0 2.1-2.08 6.14-6.49 6.14-10.01C18 5.61 14.87 2.5 11 2.5Zm0 10.25a2.75 2.75 0 1 1 0-5.5 2.75 2.75 0 0 1 0 5.5Z" fill="#10b981"/>
+        </svg>
+        <span class="text-gray-700 text-sm sm:text-base font-bold truncate max-w-[180px]">بانتا، میدان مرکزی</span>
+      </div>
+      <div class="flex items-center justify-center gap-2 mt-2 w-full">
+        <span class="inline-block bg-[#10b981]/10 text-[#10b981] text-xs font-bold px-3 py-1 rounded-full">خوراک</span>
+      </div>
+    </a>
+
+    <!-- کارت 4 (الکی بیشتر اضافه کن اگر لازم بود) -->
+    <a href="#" class="group glass min-w-[265px] max-w-xs flex-shrink-0 flex flex-col items-center p-4 rounded-2xl shadow-xl border hover:scale-[1.04] hover:shadow-2xl bg-white/90 backdrop-blur-[3px] transition-all duration-200">
+      <div class="w-full h-[120px] sm:h-[160px] rounded-xl mb-5 flex items-center justify-center relative overflow-hidden" style="background:linear-gradient(100deg,#e0fdfa,#d4fbe8);">
+        <img src="https://loremflickr.com/320/240/beauty,salon,front" class="object-cover w-full h-full absolute inset-0 rounded-xl" alt="مغازه 4">
+        <span class="absolute top-2 right-2 text-xs font-bold px-2 py-1 rounded-full bg-[#0ea5e9] text-white bg-opacity-80">تخفیف</span>
+      </div>
+      <div class="w-full flex flex-col items-center mb-2">
+        <span class="font-extrabold text-lg sm:text-xl text-[#10b981] mb-1">مغازه بانتا 4</span>
+      </div>
+      <div class="flex items-center justify-center gap-2 mb-1 w-full">
+        <svg width="18" height="18" fill="none" viewBox="0 0 22 22">
+          <circle cx="11" cy="11" r="10" fill="#e0f7fa"/>
+          <path d="M11 2.5C7.13 2.5 4 5.61 4 9.45c0 3.52 4.1 7.93 6.2 10.01.46.47 1.2.47 1.66 0 2.1-2.08 6.14-6.49 6.14-10.01C18 5.61 14.87 2.5 11 2.5Zm0 10.25a2.75 2.75 0 1 1 0-5.5 2.75 2.75 0 0 1 0 5.5Z" fill="#10b981"/>
+        </svg>
+        <span class="text-gray-700 text-sm sm:text-base font-bold truncate max-w-[180px]">بانتا، خیابان فرعی</span>
+      </div>
+      <div class="flex items-center justify-center gap-2 mt-2 w-full">
+        <span class="inline-block bg-[#0ea5e9]/10 text-[#0ea5e9] text-xs font-bold px-3 py-1 rounded-full">زیبایی</span>
+      </div>
+    </a>
+  </div>
+</section>
+
+
+<section class="max-w-6xl mx-auto w-full mt-8 mb-14 animate-fadein">
+  <div class="flex items-center justify-between mb-7 px-1">
+    <h3 class="text-2xl sm:text-3xl font-extrabold text-gray-800 tracking-tight leading-relaxed">
+      <span class="bg-gradient-to-l from-[#10b981] to-[#0ea5e9] bg-clip-text text-transparent drop-shadow-md">
+        مراکز خرید شهر رو بگرد!
+      </span>
+    </h3>
+    <a href="shopping-centers.html" class="text-[#10b981] hover:text-[#0ea5e9] font-bold text-sm sm:text-base bg-[#e0fdfa] px-5 py-2 rounded-full shadow transition-all duration-200 whitespace-nowrap">
+      مشاهده همه
+    </a>
+  </div>
+
+  <div
+    id="shopping-centers-slider"
+    class="flex overflow-x-auto gap-5 pb-2 hide-scrollbar"
+    style="-webkit-overflow-scrolling:touch;width:100%; user-select:none; -webkit-user-select:none; -moz-user-select:none; -ms-user-select:none;"
+  >
+    <!-- کارت‌ها اینجا به صورت داینامیک ساخته میشن -->
+  </div>
+</section>
+
+
+<section class="max-w-6xl mx-auto w-full mt-8 mb-14 animate-fadein">
+  <div class="flex items-center justify-between mb-7 px-1">
+    <h3 class="text-2xl sm:text-3xl font-extrabold text-gray-800 tracking-tight leading-relaxed">
+      <span class="bg-gradient-to-l from-[#10b981] to-[#0ea5e9] bg-clip-text text-transparent drop-shadow-md">
+        کیف و کفش هات رو از اینجا بخر!
+      </span>
+    </h3>
+    <a href="shoes-bags.html" class="text-[#10b981] hover:text-[#0ea5e9] font-bold text-sm sm:text-base bg-[#e0fdfa] px-5 py-2 rounded-full shadow transition-all duration-200 whitespace-nowrap">
+      مشاهده همه
+    </a>
+  </div>
+
+  <div
+    id="shoes-bags-slider"
+    class="flex overflow-x-auto gap-5 pb-2 hide-scrollbar"
+    style="-webkit-overflow-scrolling:touch;width:100%; user-select:none; -webkit-user-select:none; -moz-user-select:none; -ms-user-select:none;"
+  >
+    <!-- کارت‌های الکی مغازه‌ها (برای شروع) -->
+    <!-- کارت 1 -->
+    <a href="#" class="group glass min-w-[265px] max-w-xs flex-shrink-0 flex flex-col items-center p-4 rounded-2xl shadow-xl border hover:scale-[1.04] hover:shadow-2xl bg-white/90 backdrop-blur-[3px] transition-all duration-200">
+      <div class="w-full h-[120px] sm:h-[160px] rounded-xl mb-5 flex items-center justify-center relative overflow-hidden" style="background:linear-gradient(100deg,#e0fdfa,#d4fbe8);">
+        <img src="https://loremflickr.com/320/240/shoes,store,front" class="object-cover w-full h-full absolute inset-0 rounded-xl" alt="مغازه کیف و کفش 1">
+        <span class="absolute top-2 right-2 text-xs font-bold px-2 py-1 rounded-full bg-[#10b981] text-white bg-opacity-80">جدید</span>
+      </div>
+      <div class="w-full flex flex-col items-center mb-2">
+        <span class="font-extrabold text-lg sm:text-xl text-[#10b981] mb-1">کفش‌فروشی بانتا</span>
+      </div>
+      <div class="flex items-center justify-center gap-2 mb-1 w-full">
+        <svg width="18" height="18" fill="none" viewBox="0 0 22 22">
+          <circle cx="11" cy="11" r="10" fill="#e0f7fa"/>
+          <path d="M11 2.5C7.13 2.5 4 5.61 4 9.45c0 3.52 4.1 7.93 6.2 10.01.46.47 1.2.47 1.66 0 2.1-2.08 6.14-6.49 6.14-10.01C18 5.61 14.87 2.5 11 2.5Zm0 10.25a2.75 2.75 0 1 1 0-5.5 2.75 2.75 0 0 1 0 5.5Z" fill="#10b981"/>
+        </svg>
+        <span class="text-gray-700 text-sm sm:text-base font-bold truncate max-w-[180px]">بانتا، خیابان اصلی</span>
+      </div>
+      <div class="flex items-center justify-center gap-2 mt-2 w-full">
+        <span class="inline-block bg-[#10b981]/10 text-[#10b981] text-xs font-bold px-3 py-1 rounded-full">کفش مردانه</span>
+      </div>
+    </a>
+
+    <!-- کارت 2 -->
+    <a href="#" class="group glass min-w-[265px] max-w-xs flex-shrink-0 flex flex-col items-center p-4 rounded-2xl shadow-xl border hover:scale-[1.04] hover:shadow-2xl bg-white/90 backdrop-blur-[3px] transition-all duration-200">
+      <div class="w-full h-[120px] sm:h-[160px] rounded-xl mb-5 flex items-center justify-center relative overflow-hidden" style="background:linear-gradient(100deg,#e0fdfa,#d4fbe8);">
+        <img src="https://loremflickr.com/320/240/bag,store,front" class="object-cover w-full h-full absolute inset-0 rounded-xl" alt="مغازه کیف و کفش 2">
+        <span class="absolute top-2 right-2 text-xs font-bold px-2 py-1 rounded-full bg-[#0ea5e9] text-white bg-opacity-80">ویژه</span>
+      </div>
+      <div class="w-full flex flex-col items-center mb-2">
+        <span class="font-extrabold text-lg sm:text-xl text-[#10b981] mb-1">کیف و کفش بانتا 2</span>
+      </div>
+      <div class="flex items-center justify-center gap-2 mb-1 w-full">
+        <svg width="18" height="18" fill="none" viewBox="0 0 22 22">
+          <circle cx="11" cy="11" r="10" fill="#e0f7fa"/>
+          <path d="M11 2.5C7.13 2.5 4 5.61 4 9.45c0 3.52 4.1 7.93 6.2 10.01.46.47 1.2.47 1.66 0 2.1-2.08 6.14-6.49 6.14-10.01C18 5.61 14.87 2.5 11 2.5Zm0 10.25a2.75 2.75 0 1 1 0-5.5 2.75 2.75 0 0 1 0 5.5Z" fill="#10b981"/>
+        </svg>
+        <span class="text-gray-700 text-sm sm:text-base font-bold truncate max-w-[180px]">بانتا، کوچه دوم</span>
+      </div>
+      <div class="flex items-center justify-center gap-2 mt-2 w-full">
+        <span class="inline-block bg-[#0ea5e9]/10 text-[#0ea5e9] text-xs font-bold px-3 py-1 rounded-full">کیف زنانه</span>
+      </div>
+    </a>
+
+    <!-- کارت 3 -->
+    <a href="#" class="group glass min-w-[265px] max-w-xs flex-shrink-0 flex flex-col items-center p-4 rounded-2xl shadow-xl border hover:scale-[1.04] hover:shadow-2xl bg-white/90 backdrop-blur-[3px] transition-all duration-200">
+      <div class="w-full h-[120px] sm:h-[160px] rounded-xl mb-5 flex items-center justify-center relative overflow-hidden" style="background:linear-gradient(100deg,#e0fdfa,#d4fbe8);">
+        <img src="https://loremflickr.com/320/240/shoes,bag,shop" class="object-cover w-full h-full absolute inset-0 rounded-xl" alt="مغازه کیف و کفش 3">
+        <span class="absolute top-2 right-2 text-xs font-bold px-2 py-1 rounded-full bg-[#10b981] text-white bg-opacity-80">محبوب</span>
+      </div>
+      <div class="w-full flex flex-col items-center mb-2">
+        <span class="font-extrabold text-lg sm:text-xl text-[#10b981] mb-1">فروشگاه کیف و کفش 3</span>
+      </div>
+      <div class="flex items-center justify-center gap-2 mb-1 w-full">
+        <svg width="18" height="18" fill="none" viewBox="0 0 22 22">
+          <circle cx="11" cy="11" r="10" fill="#e0f7fa"/>
+          <path d="M11 2.5C7.13 2.5 4 5.61 4 9.45c0 3.52 4.1 7.93 6.2 10.01.46.47 1.2.47 1.66 0 2.1-2.08 6.14-6.49 6.14-10.01C18 5.61 14.87 2.5 11 2.5Zm0 10.25a2.75 2.75 0 1 1 0-5.5 2.75 2.75 0 0 1 0 5.5Z" fill="#10b981"/>
+        </svg>
+        <span class="text-gray-700 text-sm sm:text-base font-bold truncate max-w-[180px]">بانتا، میدان مرکزی</span>
+      </div>
+      <div class="flex items-center justify-center gap-2 mt-2 w-full">
+        <span class="inline-block bg-[#10b981]/10 text-[#10b981] text-xs font-bold px-3 py-1 rounded-full">کفش ورزشی</span>
+      </div>
+    </a>
+
+    <!-- کارت 4 -->
+    <a href="#" class="group glass min-w-[265px] max-w-xs flex-shrink-0 flex flex-col items-center p-4 rounded-2xl shadow-xl border hover:scale-[1.04] hover:shadow-2xl bg-white/90 backdrop-blur-[3px] transition-all duration-200">
+      <div class="w-full h-[120px] sm:h-[160px] rounded-xl mb-5 flex items-center justify-center relative overflow-hidden" style="background:linear-gradient(100deg,#e0fdfa,#d4fbe8);">
+        <img src="https://loremflickr.com/320/240/bag,shoes,store" class="object-cover w-full h-full absolute inset-0 rounded-xl" alt="مغازه کیف و کفش 4">
+        <span class="absolute top-2 right-2 text-xs font-bold px-2 py-1 rounded-full bg-[#0ea5e9] text-white bg-opacity-80">تخفیف</span>
+      </div>
+      <div class="w-full flex flex-col items-center mb-2">
+        <span class="font-extrabold text-lg sm:text-xl text-[#10b981] mb-1">کیف و کفش بانتا 4</span>
+      </div>
+      <div class="flex items-center justify-center gap-2 mb-1 w-full">
+        <svg width="18" height="18" fill="none" viewBox="0 0 22 22">
+          <circle cx="11" cy="11" r="10" fill="#e0f7fa"/>
+          <path d="M11 2.5C7.13 2.5 4 5.61 4 9.45c0 3.52 4.1 7.93 6.2 10.01.46.47 1.2.47 1.66 0 2.1-2.08 6.14-6.49 6.14-10.01C18 5.61 14.87 2.5 11 2.5Zm0 10.25a2.75 2.75 0 1 1 0-5.5 2.75 2.75 0 0 1 0 5.5Z" fill="#10b981"/>
+        </svg>
+        <span class="text-gray-700 text-sm sm:text-base font-bold truncate max-w-[180px]">بانتا، خیابان فرعی</span>
+      </div>
+      <div class="flex items-center justify-center gap-2 mt-2 w-full">
+        <span class="inline-block bg-[#0ea5e9]/10 text-[#0ea5e9] text-xs font-bold px-3 py-1 rounded-full">کیف اداری</span>
+      </div>
+    </a>
+  </div>
+</section>
+
+
+<section class="max-w-3xl mx-auto w-full px-2 animate-fadein">
+  <div class="cta-blur p-7 sm:p-8 flex flex-col md:flex-row md:items-center md:justify-between gap-8 sm:gap-10 shadow-2xl rounded-[2rem] bg-white/95">
+    
+    <!-- متن و دکمه -->
+    <div class="flex-1 text-center md:text-right">
+      <h3 class="text-xl sm:text-2xl font-black text-gray-800 mb-2 leading-relaxed">
+        صاحب کسب و کار هستی؟
+      </h3>
+      <p class="text-gray-600 mb-4 sm:mb-5 text-base sm:text-lg font-medium leading-relaxed">
+        فروشگاهتو همین الان رایگان ثبت کن و آنلاین مشتری جذب کن.
+        <span class="block text-[#10b981] font-bold mt-1">ویترینت، سکوی رشد کسب‌وکار تو!</span>
+      </p>
+      <div class="flex flex-col items-center md:flex-row md:justify-start gap-3">
+        <a href="post.html" class="btn-grad text-white px-8 py-3 rounded-full font-extrabold text-base sm:text-lg shadow hover:scale-105 transition-all duration-200">
+          ثبت‌نام فروشندگان
+        </a>
+        <span class="text-xs text-gray-400 mt-2 md:mt-0 md:mr-4">کاملاً رایگان، بدون کمیسیون</span>
+      </div>
+    </div>
+    
+    <!-- آیکون فروشگاه زیبا -->
+    <div class="flex items-center justify-center">
+      <div class="w-24 h-24 sm:w-28 sm:h-28 rounded-2xl bg-gradient-to-br from-[#10b981] to-[#0ea5e9] flex items-center justify-center shadow-lg">
+        <!-- SVG آیکون فروشگاه جدید -->
+        <svg width="58" height="58" viewBox="0 0 64 64" fill="none">
+          <!-- بدنه مغازه -->
+          <rect x="8" y="22" width="48" height="36" rx="8" fill="#fff" filter="url(#shadow)"/>
+          <!-- سایبان -->
+          <rect x="6" y="14" width="52" height="10" rx="4" fill="url(#roof)"/>
+          <!-- خطوط راه‌راه سایبان -->
+          <rect x="8" y="16" width="48" height="1" fill="#fff" opacity="0.8"/>
+          <rect x="8" y="19" width="48" height="1" fill="#fff" opacity="0.8"/>
+          <rect x="8" y="22" width="48" height="1" fill="#fff" opacity="0.8"/>
+          <!-- تابلو -->
+          <rect x="12" y="8" width="40" height="8" rx="3" fill="url(#sign)"/>
+          <rect x="16" y="10" width="32" height="1" rx="0.5" fill="#fff" opacity="0.7"/>
+          <rect x="16" y="12" width="28" height="1" rx="0.5" fill="#fff" opacity="0.5"/>
+          <!-- ویترین چپ -->
+          <rect x="12" y="28" width="16" height="20" rx="3" fill="url(#glass)" opacity="0.85"/>
+          <rect x="14" y="30" width="12" height="1" rx="0.5" fill="#fff" opacity="0.4"/>
+          <rect x="14" y="33" width="12" height="1" rx="0.5" fill="#fff" opacity="0.4"/>
+          <!-- ویترین راست -->
+          <rect x="36" y="28" width="16" height="20" rx="3" fill="url(#glass)" opacity="0.85"/>
+          <rect x="38" y="30" width="12" height="1" rx="0.5" fill="#fff" opacity="0.4"/>
+          <rect x="38" y="33" width="12" height="1" rx="0.5" fill="#fff" opacity="0.4"/>
+          <!-- درب -->
+          <rect x="29" y="36" width="10" height="22" rx="3" fill="#10b981" filter="url(#door-shadow)"/>
+          <!-- دسته درب -->
+          <circle cx="34" cy="46" r="1.5" fill="#fff"/>
+          <defs>
+            <linearGradient id="roof" x1="6" y1="14" x2="58" y2="24" gradientUnits="userSpaceOnUse">
+              <stop stop-color="#0ea5e9"/>
+              <stop offset="1" stop-color="#10b981"/>
+            </linearGradient>
+            <linearGradient id="sign" x1="12" y1="8" x2="52" y2="16" gradientUnits="userSpaceOnUse">
+              <stop stop-color="#10b981"/>
+              <stop offset="1" stop-color="#0ea5e9"/>
+            </linearGradient>
+            <linearGradient id="glass" x1="12" y1="28" x2="28" y2="48" gradientUnits="userSpaceOnUse">
+              <stop stop-color="#c7f7ea" stop-opacity="0.9"/>
+              <stop offset="1" stop-color="#e0f7fa" stop-opacity="0.7"/>
+            </linearGradient>
+            <filter id="shadow" x="0" y="0" width="64" height="64" filterUnits="userSpaceOnUse">
+              <feDropShadow dx="0" dy="3" stdDeviation="4" flood-color="#10b981" flood-opacity="0.25"/>
+            </filter>
+            <filter id="door-shadow" x="25" y="32" width="18" height="30" filterUnits="userSpaceOnUse">
+              <feDropShadow dx="0" dy="1" stdDeviation="1" flood-color="#000" flood-opacity="0.2"/>
+            </filter>
+          </defs>
+        </svg>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+
+<footer class="w-full bg-gradient-to-tr from-[#f8fafc] via-[#e0fdfa] to-[#d4fbe8] border-t border-[#e0fdfa] mt-16 px-4 sm:px-10 pt-10 pb-4 rounded-t-[2.3rem] shadow-lg">
+  <div class="max-w-6xl mx-auto flex flex-col md:flex-row items-center md:items-start justify-between gap-8">
+
+    <!-- برندینگ و معرفی -->
+    <div class="flex flex-col items-center md:items-start gap-3 md:w-1/3">
+      <div class="flex items-center gap-2 mb-1">
+        <img src="assets/images/vitrinet-logo-main.png" alt="Vitrinet" class="w-12 h-12 rounded-lg shadow bg-white border object-contain" />
+        <span class="font-extrabold text-2xl text-[#10b981] tracking-tight">ویترینت</span>
+      </div>
+      <p class="text-gray-600 text-sm font-medium text-center md:text-right leading-relaxed max-w-xs">
+        ویترینت، سکوی رشد کسب‌وکار تو؛ معرفی و ثبت فروشگاه، فقط با چند کلیک.
+      </p>
+      <!-- شبکه اجتماعی -->
+      <div class="flex gap-2 mt-1">
+        <a href="#" aria-label="تلگرام" class="bg-white/80 hover:bg-[#0ea5e9]/15 shadow rounded-full p-2 transition backdrop-blur">
+          <svg width="18" height="18" fill="none" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="#0ea5e9"/><path d="M16.21 8.42l-6.18 2.61c-.42.18-.42.41-.07.52l1.59.5.61 1.96c.08.25.25.31.49.14l1.06-.8 1.48 1.09c.21.16.38.07.44-.2l1.21-5.02c.06-.25-.1-.36-.32-.28z" fill="#fff"/></svg>
+        </a>
+        <a href="#" aria-label="اینستاگرام" class="bg-white/80 hover:bg-[#10b981]/15 shadow rounded-full p-2 transition backdrop-blur">
+          <svg width="18" height="18" fill="none" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="#10b981"/><path d="M17 8a1 1 0 11-2 0 1 1 0 012 0zM12 9.5A2.5 2.5 0 119.5 12 2.5 2.5 0 0112 9.5z" fill="#fff"/><rect x="7" y="7" width="10" height="10" rx="5" stroke="#fff" stroke-width="1.3"/></svg>
+        </a>
+      </div>
+    </div>
+
+    <!-- منو -->
+    <div class="flex-1 flex flex-col md:flex-row items-center md:items-start justify-center gap-10 mt-8 md:mt-0">
+      <!-- دسترسی سریع -->
+      <div>
+        <h4 class="font-bold text-[#0ea5e9] mb-2 text-base text-center md:text-right">دسترسی سریع</h4>
+        <ul class="space-y-2 text-gray-700 text-sm font-semibold text-center md:text-right">
+          <li><a href="index.html" class="hover:text-[#10b981] transition">خانه</a></li>
+          <li><a href="categories.html" class="hover:text-[#0ea5e9] transition">دسته‌بندی‌ها</a></li>
+          <li><a href="post.html" class="hover:text-[#10b981] transition">ثبت فروشگاه</a></li>
+          <li><a href="login.html" class="hover:text-[#0ea5e9] transition">ورود فروشنده</a></li>
+        </ul>
+      </div>
+      <!-- اطلاعات و قوانین -->
+      <div>
+        <h4 class="font-bold text-[#10b981] mb-2 text-base text-center md:text-right">اطلاعات و قوانین</h4>
+        <ul class="space-y-2 text-gray-700 text-sm font-semibold text-center md:text-right">
+          <li><a href="#" class="hover:text-[#0ea5e9] transition">درباره ویترینت</a></li>
+          <li><a href="#" class="hover:text-[#0ea5e9] transition">پشتیبانی</a></li>
+          <li><a href="#" class="hover:text-[#10b981] transition">قوانین</a></li>
+          <li><a href="#" class="hover:text-[#10b981] transition">تماس با ما</a></li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- نماد اعتماد -->
+    <div class="flex flex-col items-center md:items-end gap-3 md:w-1/4 mt-8 md:mt-0">
+      <h4 class="font-bold text-[#0ea5e9] mb-2 text-base">اعتبار ویترینت</h4>
+      <div class="flex gap-3">
+        <div class="w-12 h-12 rounded-xl bg-white/70 border flex items-center justify-center shadow">
+          <svg width="26" height="26" viewBox="0 0 34 34" fill="none">
+            <circle cx="17" cy="17" r="16" stroke="#10b981" stroke-width="2"/>
+            <path d="M10 19.5L15 25L24 14" stroke="#0ea5e9" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <div class="w-12 h-12 rounded-xl bg-white/70 border flex items-center justify-center shadow">
+          <svg width="26" height="26" viewBox="0 0 34 34" fill="none">
+            <circle cx="17" cy="17" r="16" stroke="#0ea5e9" stroke-width="2"/>
+            <path d="M12 18l4 4 6-8" stroke="#10b981" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+      </div>
+      <span class="text-xs text-gray-500 font-medium text-center">نماد اعتماد و ساماندهی<br>ویترینت، قابل اطمینان</span>
+    </div>
+  </div>
+  <div class="border-t border-[#e0f7fa] mt-8 pt-3 pb-1 text-center text-xs sm:text-sm text-gray-400">
+    © 2025 <span class="font-bold text-[#10b981]">ویترینت</span> | تمام حقوق محفوظ است.
+  </div>
+</footer>
+
+
+
+
+
+
+
+
+
+
+
+</body>
+</html>

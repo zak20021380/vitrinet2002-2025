@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <title>ثبت آمار بازدید روزانه | ویترینت</title>
+
+  <!-- فونت -->
+  <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700&display=swap" rel="stylesheet">
+  <!-- Tailwind -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <style>
+    body{font-family:"Vazirmatn",sans-serif}
+
+    /* —— کارت‌های آمار —— */
+    .stat-card{
+      position:relative;display:flex;flex-direction:column;align-items:center;
+      padding:34px 20px 24px;background:#fff;border-radius:1.3rem;
+      box-shadow:0 4px 16px rgba(16,185,129,.08);transition:.2s
+    }
+    .stat-card:hover{box-shadow:0 8px 34px rgba(14,165,233,.1);transform:translateY(-2px) scale(1.018)}
+    .stat-card .icon{
+      position:absolute;top:-30px;display:flex;align-items:center;justify-content:center;
+      width:56px;height:56px;border-radius:50%;padding:12px;font-size:30px;
+      box-shadow:0 2px 8px rgba(16,185,129,.08)
+    }
+    .stat-label{margin-top:30px;font-size:13px;font-weight:700;color:#666}
+    .stat-value{direction:ltr;font-size:2rem;font-weight:700;margin-top:4px;color:#1b2e26;letter-spacing:1px}
+    .stat-growth{margin-top:6px;font-size:13px;font-weight:700;display:flex;align-items:center;gap:4px;color:#10b981}
+    .stat-growth.negative{color:#ef4444}
+
+    /* —— پنل فرم —— */
+    .panel-card{
+      background:#fff;border-radius:1.3rem;width:100%!important;
+      max-width:none!important;min-width:0!important;
+      box-shadow:0 2px 18px rgba(14,165,233,.1);
+      padding:32px 26px;transition:.2s
+    }
+    .panel-card:hover{box-shadow:0 8px 24px rgba(14,165,233,.16);transform:translateY(-3px)}
+
+    /* —— جدول —— */
+    .product-table{width:100%;background:#fff;border-radius:1.3rem;
+      box-shadow:0 8px 32px rgba(16,185,129,.1);overflow:hidden}
+    .product-table table{width:100%;border-collapse:collapse}
+    .product-table th,.product-table td{text-align:center;padding:12px;font-size:15px}
+    .product-table th{background:#d1fae5;color:#047857;font-weight:800}
+    .product-table td{color:#333;border-bottom:1px solid rgba(16,185,129,.1)}
+    .product-table tr:hover{background:#e0fdfa}
+    @media(max-width:600px){.product-table th,.product-table td{font-size:13px;padding:8px}}
+
+    /* —— FadeIn —— */
+    @keyframes fadeIn{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+    .animate-fadeIn{animation:fadeIn .45s cubic-bezier(.36,1.32,.3,1) both}
+  </style>
+</head>
+
+<body class="bg-gradient-to-br from-[#e0fdfa] to-[#d4fbe8] min-h-screen pb-6 px-4 md:px-8">
+
+  <div class="max-w-4xl mx-auto space-y-8 pt-6 md:pt-8 animate-fadeIn">
+
+    <!-- هدر -->
+    <header class="text-center">
+      <h1 class="text-3xl md:text-4xl font-extrabold text-[#10b981] mb-3">
+        ثبت آمار بازدید روزانه
+      </h1>
+      <p class="text-gray-600 text-base md:text-lg">
+        تعداد بازدیدکنندگان امروز را وارد کنید و روند ۷ روزه و ماهانه را ببینید!
+      </p>
+    </header>
+
+    <!-- کارت‌های آمار -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
+      <!-- امروز -->
+      <div class="stat-card">
+        <div class="icon bg-[#e7fae8] text-[#10b981]">
+          <svg width="24" height="24" fill="none" viewBox="0 0 24 24">
+            <circle cx="12" cy="12" r="10" stroke="#10b981" stroke-width="2"/>
+            <path d="M12 8v6" stroke="#10b981" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <div class="stat-label">بازدید امروز</div>
+        <div class="stat-value text-[#10b981]" id="todayVisits">0</div>
+      </div>
+
+      <!-- هفته -->
+      <div class="stat-card">
+        <div class="icon bg-[#ffe7d2] text-[#fb923c]">
+          <svg width="24" height="24" fill="none" viewBox="0 0 24 24">
+            <circle cx="12" cy="12" r="10" stroke="#fb923c" stroke-width="2"/>
+            <path d="M12 8v4l3 2" stroke="#fb923c" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <div class="stat-label">بازدید این هفته</div>
+        <div class="stat-value text-[#fb923c]" id="weekVisits">0</div>
+      </div>
+
+      <!-- ماه (افزوده شد) -->
+      <div class="stat-card">
+        <div class="icon bg-[#e3f4fd] text-[#0ea5e9]">
+          <svg width="24" height="24" fill="none" viewBox="0 0 24 24">
+            <circle cx="12" cy="12" r="10" stroke="#0ea5e9" stroke-width="2"/>
+            <path d="M12 6v6l4 2" stroke="#0ea5e9" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <div class="stat-label">بازدید این ماه</div>
+        <div class="stat-value text-[#0ea5e9]" id="monthVisits">0</div>
+      </div>
+
+      <!-- کل -->
+      <div class="stat-card">
+        <div class="icon bg-[#e0fdfa] text-[#10b981]">
+          <svg width="24" height="24" fill="none" viewBox="0 0 24 24">
+            <path d="M3 12l2-2 4 4 8-8 4 4" stroke="#10b981" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <div class="stat-label">کل بازدیدها</div>
+        <div class="stat-value" id="totalVisits">0</div>
+      </div>
+    </div>
+
+    <!-- فرم ثبت -->
+    <div class="panel-card">
+      <h2 class="text-xl font-bold text-[#10b981] mb-6 text-center">
+        ثبت بازدید امروز
+      </h2>
+
+      <form id="dailyVisitForm" class="space-y-6" autocomplete="off">
+        <div>
+          <label for="visitCount" class="block font-bold mb-2 text-[#10b981]">
+            تعداد بازدیدکنندگان امروز:
+          </label>
+          <input id="visitCount" type="number" min="0"
+                 class="w-full p-3 border rounded-xl focus:outline-none focus:ring-2
+                        focus:ring-[#10b981] text-lg" placeholder="مثلاً ۱۵" required>
+        </div>
+
+        <button type="submit"
+                class="w-full bg-[#10b981] hover:bg-[#0ea5e9] text-white rounded-2xl
+                       py-3 font-extrabold text-lg transition shadow-lg">
+          ثبت آمار
+        </button>
+      </form>
+
+      <div id="successMessage"
+           class="hidden mt-6 bg-[#e0fdfa] text-[#10b981] p-4 rounded-2xl
+                  text-center font-bold text-lg">
+        آمار با موفقیت ثبت شد!
+      </div>
+    </div>
+
+    <!-- جدول -->
+    <div class="product-table">
+      <h2 class="text-xl font-bold text-[#10b981] mb-4 text-center">
+        آمار بازدید هفت روز گذشته
+      </h2>
+
+      <table>
+        <thead><tr><th>تاریخ</th><th>تعداد بازدید</th></tr></thead>
+        <tbody id="visitTableBody"></tbody>
+      </table>
+    </div>
+
+    <!-- جدول ماهانه (افزوده شد) -->
+    <div class="product-table">
+      <h2 class="text-xl font-bold text-[#10b981] mb-4 text-center">
+        مجموع بازدید هر ماه
+      </h2>
+
+      <table>
+        <thead><tr><th>ماه</th><th>مجموع بازدید</th></tr></thead>
+        <tbody id="monthTotalsBody"></tbody>
+      </table>
+    </div>
+
+  </div>
+
+  <!-- اسکریپت -->
+  <script src="daily-visits.js"></script>
+</body>
+</html>

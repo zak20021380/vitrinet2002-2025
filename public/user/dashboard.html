@@ -1,0 +1,1098 @@
+  <!DOCTYPE html>
+  <html lang="fa" dir="rtl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>داشبورد کاربر | ویترینت</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;700&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@800&display=swap" rel="stylesheet"/>
+    <style>
+      body { font-family:'Vazirmatn',sans-serif; background: linear-gradient(110deg,#e0f7fa 0%,#f9fafb 100%); min-height:100vh;}
+      .glass { background:rgba(255,255,255,0.97); backdrop-filter: blur(14px); border-radius:1.6rem; box-shadow:0 7px 32px #10b9811a, 0 3px 11px #0ea5e91a;}
+      .primary-text { color: #10b981; }
+      .brand-btn {
+        background: linear-gradient(91deg,#10b981 0%,#0ea5e9 85%);
+        color: #fff !important;
+        box-shadow: 0 2px 14px #10b98125;
+        transition: all .16s;
+      }
+      .brand-btn:hover { filter:brightness(1.08);}
+      .fadein { animation:fadein .8s;}
+      @keyframes fadein { from{opacity:0; transform:translateY(32px);} to{opacity:1; transform:translateY(0);} }
+      ::placeholder {color:#a0aec0;}
+      .tab-active { color:#10b981 !important; font-weight:900; background: #e6fcf7; }
+      .scrollbar-hide::-webkit-scrollbar {display:none;}
+      .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none;}
+      .avatar-bg { background:linear-gradient(120deg,#10b981 65%,#0ea5e9 100%); }
+      .menu-btn { transition: background .16s; }
+      .menu-btn.active { background: #e6fcf7; color: #10b981; }
+      /* همبرگر */
+      .ham {
+        width: 2.3rem; height: 2.3rem; display: flex; align-items: center; justify-content: center;
+        background: #10b9811a; border-radius: 50%; border: none; cursor: pointer;
+        transition: background .2s;
+      }
+      .ham:hover { background: #0ea5e91a; }
+      @media (max-width: 1023px) {
+        .main-grid { grid-template-columns: 1fr !important; }
+        .sidebar { display: none !important; }
+      }
+      @media (min-width: 1024px) {
+        .mobile-sidebar,.sidebar-overlay { display: none !important;}
+      }
+      /* موبایل منو */
+      .sidebar-overlay {
+        position:fixed; inset:0; background:rgba(0,0,0,0.18); z-index:50; display:none;
+      }
+      .sidebar-overlay.open {display:block; animation: fadein .25s;}
+      .mobile-sidebar {
+        position:fixed; top:0; right:0; height:100vh; width:85vw; max-width:350px;
+        background:#fff; z-index:60;
+        border-radius:1.6rem 0 0 1.6rem;
+        box-shadow:-2px 0 34px #10b98123;
+        padding:2.3rem 1.5rem 2.4rem 1.5rem;
+        overflow-y:auto;
+        transform:translateX(100%);
+        transition: transform .25s cubic-bezier(.8,.2,.3,1.2);
+      }
+      .mobile-sidebar.open { transform:translateX(0);}
+    </style>
+  </head>
+  <body class="text-gray-800 overflow-x-hidden">
+
+    <!-- Header -->
+    <header class="fixed top-0 inset-x-0 z-20 glass border-b shadow flex items-center justify-between px-6 py-3">
+      <a href="index.html" class="flex items-center gap-2 select-none shrink-0">
+        <img src="assets/images/logo.svg" alt="ویترینت" class="w-9 h-9 sm:w-10 sm:h-10 hidden sm:block" onerror="this.style.display='none';this.nextElementSibling.style.display='block'"/>
+        <span class="font-extrabold text-lg md:text-2xl primary-text" style="display:none; font-family:'Poppins',sans-serif;">Vitrinet</span>
+        <span class="font-extrabold text-lg md:text-2xl primary-text sm:hidden block" style="font-family:'Vazirmatn',sans-serif;">ویترینت</span>
+      </a>
+      <nav class="flex items-center gap-4 text-base flex-shrink-0">
+    <!-- همبرگر موبایل + بَج -->
+<button id="hamBtn"
+        class="ham lg:hidden mr-1 relative"   
+        title="منو">
+  <!-- آیکون سه‌خط -->
+  <svg width="24" height="24" fill="none" viewBox="0 0 24 24">
+    <rect x="5" y="7" width="14" height="2" rx="1" fill="#10b981"/>
+    <rect x="5" y="11" width="14" height="2" rx="1" fill="#10b981"/>
+    <rect x="5" y="15" width="14" height="2" rx="1" fill="#10b981"/>
+  </svg>
+
+  <!-- 🏷️   نشان تعداد پیام‌ها (در ابتدا خالی و پنهان) -->
+  <span id="hamBadge"
+        class="absolute -top-1.5 -left-1.5     
+               bg-red-500 text-white text-[10px]
+               w-4 h-4 rounded-full font-extrabold
+               flex items-center justify-center
+               hidden">0</span>
+</button>
+
+        <a href="index.html" class="text-gray-700 hover:text-[#10b981] font-bold">خانه</a>
+        <button id="profileBtn" type="button" class="ml-2 flex items-center gap-2 px-3 py-1.5 rounded-2xl avatar-bg text-white font-bold text-base shadow-lg focus:outline-none hover:scale-105 transition-all" style="font-family:'Vazirmatn',sans-serif;">
+          <span class="w-9 h-9 flex items-center justify-center rounded-full bg-white/10 text-2xl font-extrabold">ک‌و</span>
+          <span class="hidden sm:inline-block font-bold">پروفایل من</span>
+        </button>
+      </nav>
+    </header>
+
+    <!-- سایدبار موبایل -->
+    <div id="sidebarOverlay" class="sidebar-overlay"></div>
+    <aside id="mobileSidebar" class="mobile-sidebar fadein">
+      <button id="closeSidebar" class="absolute left-3 top-3 text-gray-400 hover:text-[#10b981] rounded-full p-1 transition" title="بستن">
+        <svg width="28" height="28" fill="none" viewBox="0 0 28 28"><circle cx="14" cy="14" r="14" fill="#f3f4f6"/><path d="M10.8 17.2l6.4-6.4M17.2 17.2l-6.4-6.4" stroke="#64748b" stroke-width="1.5" stroke-linecap="round"/></svg>
+      </button>
+      <div class="w-20 h-20 rounded-full avatar-bg flex items-center justify-center text-white text-4xl font-extrabold mb-2 select-none shadow-lg mx-auto">
+        VN
+      </div>
+  <div class="text-lg font-bold primary-text mt-2 mb-0.5 text-center sidebar-user-name">کاربر ویترینت</div>
+  <div class="text-gray-400 text-sm mb-3 text-center sidebar-user-mobile" dir="ltr">0912***2345</div>
+
+      <div class="flex flex-col gap-2 w-full mt-4 text-[15px]">
+        <button class="menu-btn text-gray-700 flex items-center gap-2 px-3 py-2 rounded-xl font-bold transition tab-active" data-section="dashboard"><svg width="18" height="18" fill="none"><circle cx="9" cy="9" r="9" fill="#10b981"/><path d="M6 9l3 3 3-3" stroke="#fff" stroke-width="1.6"/></svg> داشبورد</button>
+        <button class="menu-btn text-gray-700 flex items-center gap-2 px-3 py-2 rounded-xl font-bold transition" data-section="profile"><svg width="18" height="18" fill="none"><circle cx="9" cy="9" r="9" fill="#dbeafe"/><path d="M6 7a3 3 0 0 1 6 0c0 1.656-1.343 3-3 3s-3-1.344-3-3Zm6 6H6c0-1.656 2.343-3 3-3s3 1.344 3 3Z" fill="#3b82f6"/></svg> پروفایل من</button>
+        <button class="menu-btn text-gray-700 flex items-center gap-2 px-3 py-2 rounded-xl font-bold transition" data-section="favorites"><svg width="18" height="18" fill="none"><circle cx="9" cy="9" r="9" fill="#fce7f3"/><path d="M6.5 8A2.5 2.5 0 0 1 9 5.5 2.5 2.5 0 0 1 11.5 8C11.5 9.33 9 12 9 12S6.5 9.33 6.5 8Z" fill="#ec4899"/></svg> علاقه‌مندی‌ها</button>
+
+  <!-- پیام‌ها -->
+  <button class="menu-btn text-gray-700 flex items-center gap-2 px-3 py-2 rounded-xl font-bold transition"
+          data-section="messages">
+    <svg width="18" height="18" fill="none"><circle cx="9" cy="9" r="9" fill="#fef2f2"/><path d="M6 6h6v6H6z" fill="#ef4444"/></svg>
+    پیام‌ها
+    <span id="msgBadge" class="ml-1 text-xs font-extrabold text-red-500"></span>
+  </button>
+
+        
+      </div>
+  
+    </aside>
+
+    <main class="max-w-6xl mx-auto mt-32 mb-14 px-2 sm:px-4">
+      <div class="grid main-grid grid-cols-3 gap-7">
+        <!-- سایدبار دسکتاپ -->
+        <aside class="glass sidebar flex-col items-center py-7 px-4 sm:px-8 mb-3 fadein hidden lg:flex">
+          <div class="w-20 h-20 rounded-full avatar-bg flex items-center justify-center text-white text-4xl font-extrabold mb-2 select-none shadow-lg">
+            VN
+          </div>
+        <div class="text-lg font-bold primary-text mt-2 mb-0.5 text-center sidebar-user-name">کاربر ویترینت</div>
+  <div class="text-gray-400 text-sm mb-3 text-center sidebar-user-mobile" dir="ltr">0912***2345</div>
+
+          <div class="flex flex-col gap-2 w-full mt-4 text-[15px]">
+            <button class="menu-btn text-gray-700 flex items-center gap-2 px-3 py-2 rounded-xl font-bold transition tab-active" data-section="dashboard"><svg width="18" height="18" fill="none"><circle cx="9" cy="9" r="9" fill="#10b981"/><path d="M6 9l3 3 3-3" stroke="#fff" stroke-width="1.6"/></svg> داشبورد</button>
+            <button class="menu-btn text-gray-700 flex items-center gap-2 px-3 py-2 rounded-xl font-bold transition" data-section="profile"><svg width="18" height="18" fill="none"><circle cx="9" cy="9" r="9" fill="#dbeafe"/><path d="M6 7a3 3 0 0 1 6 0c0 1.656-1.343 3-3 3s-3-1.344-3-3Zm6 6H6c0-1.656 2.343-3 3-3s3 1.344 3 3Z" fill="#3b82f6"/></svg> پروفایل من</button>
+            <button class="menu-btn text-gray-700 flex items-center gap-2 px-3 py-2 rounded-xl font-bold transition" data-section="favorites"><svg width="18" height="18" fill="none"><circle cx="9" cy="9" r="9" fill="#fce7f3"/><path d="M6.5 8A2.5 2.5 0 0 1 9 5.5 2.5 2.5 0 0 1 11.5 8C11.5 9.33 9 12 9 12S6.5 9.33 6.5 8Z" fill="#ec4899"/></svg> علاقه‌مندی‌ها</button>
+            
+  <!-- پیام‌ها -->
+  <button class="menu-btn text-gray-700 flex items-center gap-2 px-3 py-2 rounded-xl font-bold transition"
+          data-section="messages">
+    <svg width="18" height="18" fill="none"><circle cx="9" cy="9" r="9" fill="#fef2f2"/><path d="M6 6h6v6H6z" fill="#ef4444"/></svg>
+    پیام‌ها
+    <span id="msgBadge" class="ml-1 text-xs font-extrabold text-red-500"></span>
+  </button>
+
+
+
+
+          </div>
+        
+        </aside>
+        <!-- محتوای سمت چپ -->
+        <section id="mainContent" class="col-span-2 flex flex-col gap-7 fadein">
+          <!-- اینجا محتوای داینامیک لود میشه -->
+        </section>
+      </div>
+    </main>
+    <footer class="mt-14 bg-white border-t text-center text-xs sm:text-sm text-gray-400 py-5 rounded-t-3xl">
+      © 2025 <span class="text-[#10b981] font-bold">Vitrinet</span> - همه حقوق محفوظ است.
+    </footer>
+    <script>
+
+      let pollHandle = null; 
+      // داده‌ی دموی پروفایل
+  async function loadProfileSection() {
+    let html = `
+      <div class="glass px-6 py-7 fadein">
+        <div class="text-center text-gray-400 py-12">در حال دریافت اطلاعات...</div>
+      </div>`;
+    document.getElementById('mainContent').innerHTML = html;
+
+    try {
+      const res = await fetch('/api/user/profile', {
+        method: 'GET',
+        credentials: 'include',          // کوکی JWT
+        headers: { 'Content-Type': 'application/json' }
+      });
+
+      if (!res.ok) {
+        if (res.status === 401 || res.status === 403)
+          throw new Error('برای دسترسی به این بخش ابتدا وارد شوید.');
+        throw new Error('دریافت اطلاعات با خطا مواجه شد!');
+      }
+
+      const user  = await res.json();
+      const phone = user.phone || user.mobile || '';   // ✳️ فیکس: فیلد mobile هم پوشش داده شد
+      const masked =
+        phone ? phone.toString().slice(0, 4) + '***' + phone.toString().slice(-3) : '-';
+
+      html = `
+        <div class="glass px-6 py-7 fadein">
+          <div class="flex flex-col sm:flex-row items-center gap-5 sm:gap-12 mb-6">
+            <div class="w-24 h-24 rounded-full avatar-bg flex items-center justify-center text-white text-5xl font-extrabold shadow-xl">
+              VN
+            </div>
+            <div>
+              <div class="text-xl font-black primary-text mb-2">پروفایل من</div>
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-y-1 gap-x-7 text-[16px]">
+                <div class="flex items-center gap-2">
+                  <span class="text-gray-500">نام:</span>
+                  <span class="font-bold text-gray-800">${user.firstname || '-'}</span>
+                </div>
+                <div class="flex items-center gap-2">
+                  <span class="text-gray-500">نام خانوادگی:</span>
+                  <span class="font-bold text-gray-800">${user.lastname || '-'}</span>
+                </div>
+                <div class="flex items-center gap-2">
+                  <span class="text-gray-500">شهر:</span>
+                  <span class="font-bold text-gray-800">${user.city || '-'}</span>
+                </div>
+                <div class="flex items-center gap-2">
+                  <span class="text-gray-500">شماره تماس:</span>
+                  <span class="font-bold text-gray-800" dir="ltr">${masked}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>`;
+    } catch (e) {
+      html = `
+        <div class="glass px-6 py-7 fadein">
+          <div class="text-center text-red-400 py-12">
+            برای دسترسی به این بخش ابتدا
+            <a href="/login.html"
+              class="inline-block px-3 py-1.5 mx-1 rounded-xl brand-btn text-white font-bold text-base transition hover:scale-105"
+              style="text-decoration:none;">وارد شوید</a>
+            .
+          </div>
+        </div>`;
+    }
+
+    document.getElementById('mainContent').innerHTML = html;
+  }
+
+
+
+
+
+
+
+
+      // داشبورد پیش‌فرض
+  const dashboardSection = `
+  <div class="glass flex flex-col md:flex-row items-center justify-between px-5 md:px-8 py-5 md:py-7 fadein gap-3 md:gap-0">
+    <div>
+      <div class="text-xl md:text-2xl font-black primary-text mb-1">👋 خوش آمدید، کاربر عزیز!</div>
+      <div class="text-gray-500 text-sm md:text-base">امیدواریم تجربه‌ی خوبی داشته باشید.</div>
+    </div>
+  </div>
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-5 fadein">
+    <div id="favBoxClick" class="glass p-6 flex flex-col items-center text-center min-h-[135px] justify-center cursor-pointer hover:shadow-lg transition">
+      <div class="text-[#0ea5e9] font-bold text-base mb-1">علاقه‌مندی‌های ثبت‌شده</div>
+      <div class="text-4xl font-black primary-text mb-1" id="favCountDashboard">-</div>
+    <a href="#" class="text-xs font-bold text-[#0ea5e9] hover:underline menu-btn mt-2" data-section="favorites">نمایش لیست</a>
+    </div>
+    <div id="recentFavsContainerWrapper" class="flex flex-col">
+      <div id="recentFavsContainer"></div>
+    </div>
+  </div>
+  `;
+
+
+
+
+
+  async function renderRecentFavorites() {
+    const container = document.getElementById('recentFavsContainer');
+    container.innerHTML = `
+      <div class="glass px-6 py-5 fadein">
+        <div class="flex items-center justify-between mb-4">
+          <span id="recentFavsTitle" class="text-lg font-bold primary-text cursor-pointer">علاقه‌مندی‌های اخیر شما</span>
+          <a href="#" id="recentFavsShowAll" class="text-[#0ea5e9] hover:underline font-bold text-sm menu-btn">مشاهده همه</a>
+        </div>
+        <div class="flex flex-wrap gap-3 scrollbar-hide overflow-x-auto" id="recentFavsList">
+          <div class="text-gray-400 text-center w-full py-3">در حال دریافت ...</div>
+        </div>
+      </div>
+    `;
+
+    try {
+      // درخواست با کوکی و بدون هدر Authorization
+      const res = await fetch('/api/user/profile', {
+        method: 'GET',
+        credentials: 'include', // کوکی‌ها (توکن) ارسال می‌شود
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (!res.ok) throw new Error();
+
+      const user = await res.json();
+      const favs = Array.isArray(user.favorites) ? user.favorites : [];
+
+      const favsList = container.querySelector("#recentFavsList");
+      if (favs.length === 0) {
+        favsList.innerHTML = `<div class="text-gray-400 text-center w-full py-3">هنوز علاقه‌مندی ثبت نکردی!</div>`;
+      } else {
+        favsList.innerHTML = favs.slice(-3).reverse().map(p => {
+          const shop = (p.sellerId && typeof p.sellerId === 'object') ? p.sellerId : {};
+          return `
+            <div class="min-w-[170px] max-w-xs bg-[#e0fdfa] rounded-xl p-3 flex flex-col items-center text-center">
+              <img src="${(p.images && p.images[0]) ? p.images[0] : '/assets/images/noimage.png'}" class="w-20 h-20 object-cover rounded-xl mb-2 shadow" alt="${p.title || ''}"/>
+              <span class="text-[#10b981] text-base font-bold mb-1">${p.title || '-'}</span>
+              <span class="text-xs text-gray-500 mb-1">${shop.storename ? `فروشگاه ${shop.storename}` : ''}</span>
+              <span class="text-xs text-gray-600 mb-1">قیمت: ${p.price ? p.price.toLocaleString('fa-IR') + ' تومان' : '-'}</span>
+              <a href="http://localhost:5000/product.html?id=${p._id}" class="mt-2 px-4 py-1.5 rounded-lg brand-btn text-xs font-bold inline-block" target="_blank">مشاهده محصول</a>
+            </div>
+          `;
+        }).join('');
+      }
+    } catch (e) {
+      const favsList = container.querySelector("#recentFavsList");
+      favsList.innerHTML = `<div class="text-red-400 text-center w-full py-3">دریافت لیست علاقه‌مندی‌ها ناموفق بود.</div>`;
+    }
+  }
+
+
+
+
+
+
+      // هندل کردن SPA و رسپانسیو
+  function showSection(section) {
+    const mainContent = document.getElementById('mainContent');
+    // پاک کردن فعال بودن منوها
+    document.querySelectorAll('.menu-btn').forEach(btn=>btn.classList.remove('tab-active'));
+    // فعال کردن منوی فعلی
+  document.querySelectorAll(`.menu-btn[data-section="${section}"]`).forEach(btn => btn.classList.add('tab-active'));
+    // محتوا
+    if(section === 'dashboard') {
+      mainContent.innerHTML = dashboardSection;
+      renderRecentFavorites(); // اینجا رندر داینامیک رو صدا بزن
+      updateDashboardFavCount(); // اینم اضافه کن تا تعداد علاقه‌مندی درست بشه
+    }
+    else if(section === 'profile') loadProfileSection();
+    else if(section === 'favorites') loadFavoritesSection();
+    else if(section === 'messages') loadMessagesSection();
+
+    if(section === 'messages') startMsgPolling(); else stopMsgPolling();
+
+    // اسکرول به بالا
+    mainContent.scrollIntoView({behavior:'smooth',block:'start'});
+  }
+
+
+  async function updateDashboardFavCount() {
+    try {
+      // درخواست با کوکی (credentials: 'include')
+      const res = await fetch('/api/user/profile', {
+        method: 'GET',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
+      if (!res.ok) {
+        document.getElementById('favCountDashboard').textContent = '-';
+        return;
+      }
+      const user = await res.json();
+      document.getElementById('favCountDashboard').textContent =
+        Array.isArray(user.favorites) ? user.favorites.length : '0';
+    } catch (e) {
+      document.getElementById('favCountDashboard').textContent = '-';
+    }
+  }
+
+
+      // بارگذاری پیش‌فرض
+      showSection('dashboard');
+      updateSidebarUser(); 
+
+      // --------   مقداردهیِ نشان پیام‌ها در اولین بارگذاری   --------
+(async () => {
+  await fetchUserChats();  // فقط لیست چت‌ها را می‌گیرد
+  updateBadge();           // عدد را روی همبرگر و منو می‌نویسد
+})();
+
+
+      // منوهای دسکتاپ و موبایل
+
+  /* ——— هندل منوهای سایدبار (مستقیم) ——— */
+  document.querySelectorAll('.menu-btn').forEach(btn => {
+    btn.addEventListener('click', e => {
+      e.preventDefault();
+      showSection(btn.dataset.section);
+      if (window.innerWidth < 1024) closeSidebar();
+    });
+  });
+
+
+
+
+      // سوییچ کردن با دکمه پروفایل
+      document.getElementById('profileBtn').onclick=function(){
+        showSection('profile');
+        if(window.innerWidth<1024){
+          openSidebar();
+        }
+      };
+
+      // همبرگر موبایل
+      function openSidebar(){
+        document.getElementById('mobileSidebar').classList.add('open');
+        document.getElementById('sidebarOverlay').classList.add('open');
+        document.body.style.overflow='hidden';
+      }
+      function closeSidebar(){
+        document.getElementById('mobileSidebar').classList.remove('open');
+        document.getElementById('sidebarOverlay').classList.remove('open');
+        document.body.style.overflow='';
+      }
+      document.getElementById('hamBtn').onclick = openSidebar;
+      document.getElementById('closeSidebar').onclick = closeSidebar;
+      document.getElementById('sidebarOverlay').onclick = closeSidebar;
+      document.addEventListener('keydown', function(e){
+        if(e.key === "Escape"){
+          closeSidebar();
+        }
+      });
+
+
+
+
+
+  // به‌روزرسانی اطلاعات کاربر در سایدبار (موبایل + دسکتاپ)
+  async function updateSidebarUser() {
+    try {
+      const res = await fetch('/api/user/profile', {
+        method: 'GET',
+        credentials: 'include',          // ارسال توکن از طریق کوکی
+        headers: { 'Content-Type': 'application/json' }
+      });
+      if (!res.ok) throw new Error();
+
+      const user   = await res.json();
+
+      /* ↙️ آی‌دی کاربر را برای فیلتر چت‌ها نگه می‌داریم */
+      window.currentUserId = user._id;     
+
+      const first  = user.firstname || user.firstName || 'کاربر';
+      const last   = user.lastname  || user.lastName  || 'ویترینت';
+      const phone  = user.phone     || user.mobile    || '';
+      const masked = phone
+        ? phone.toString().slice(0, 4) + '***' + phone.toString().slice(-3)
+        : '---';
+
+      document.querySelectorAll('.sidebar-user-name')
+              .forEach(el => (el.textContent = `${first} ${last}`));
+
+      document.querySelectorAll('.sidebar-user-mobile')
+              .forEach(el => (el.textContent = masked));
+    } catch (_) {
+      /* اگر خطا بود، سایدبار را بدون تغییر رها کن */
+    }
+  }
+
+
+
+
+
+
+
+
+  async function loadFavoritesSection() {
+    let html = `<div class="glass px-6 py-7 fadein"><div class="text-center text-gray-400 py-12">در حال دریافت...</div></div>`;
+    document.getElementById('mainContent').innerHTML = html;
+
+    try {
+      // درخواست با کوکی (credentials: 'include')
+      const res = await fetch('/api/user/profile', {
+        method: 'GET',
+        credentials: 'include', // مهم!
+        headers: {
+          'Content-Type': 'application/json',
+          'Cache-Control': 'no-cache'
+        }
+      });
+
+      if (!res.ok) throw new Error('دریافت پروفایل کاربر ناموفق بود!');
+      const user = await res.json();
+      const favs = user.favorites;
+
+      if (!Array.isArray(favs) || favs.length === 0) {
+        html = `<div class="glass px-6 py-7 fadein text-center text-gray-400">هیچ محصولی در علاقه‌مندی‌ها نیست.</div>`;
+      } else {
+        html = `
+        <div class="glass px-6 py-7 fadein">
+          <div class="text-xl font-black primary-text mb-5">علاقه‌مندی‌های من</div>
+          <div class="flex flex-wrap gap-4">
+            ${favs.map(p => {
+              const shop = (p.sellerId && typeof p.sellerId === 'object') ? p.sellerId : {};
+              return `
+                <div class="min-w-[170px] max-w-xs bg-[#e0fdfa] rounded-xl p-3 flex flex-col items-center text-center">
+                  <img src="${(p.images && p.images[0]) ? p.images[0] : '/assets/images/noimage.png'}" class="w-24 h-24 object-cover rounded-xl mb-2 shadow" alt="${p.title || ''}"/>
+                  <span class="text-[#10b981] text-lg font-bold mb-1">${p.title || '-'}</span>
+                  <span class="text-xs text-gray-500 mb-1">${shop.storename ? `فروشگاه ${shop.storename}` : ''}</span>
+                  <span class="text-xs text-gray-600 mb-1">قیمت: ${p.price ? p.price.toLocaleString('fa-IR') + ' تومان' : '-'}</span>
+                  <a href="http://localhost:5000/product.html?id=${p._id}" class="mt-2 px-4 py-1.5 rounded-lg brand-btn text-xs font-bold inline-block" target="_blank">مشاهده محصول</a>
+                </div>
+              `;
+            }).join('')}
+          </div>
+        </div>
+        `;
+      }
+    } catch (e) {
+      html = `<div class="glass px-6 py-7 fadein text-center text-red-400">${e.message}</div>`;
+    }
+
+    document.getElementById('mainContent').innerHTML = html;
+  }
+
+
+
+
+  /* ─────────  پیام‌های کاربر  ───────── */
+  /* ───────── بخش پیام‌های حرفه‌ای کاربر ───────── */
+  const API_BASE  = '/api';           // طبق سرورت
+  let chatsList   = [];               // لیست چت‌ها
+  let currentCid  = null;             // آی‌دی چت انتخاب شده
+  let adminChatId = null;             // آی‌دی چت با مدیر (برای ارسال سریع)
+
+async function loadMessagesSection () {
+  const box = document.getElementById('mainContent');
+  box.innerHTML = `
+    <div class="glass px-4 py-7 fadein">
+      <div class="flex items-center justify-between mb-4">
+        <span class="text-xl font-black primary-text">پیام‌های من</span>
+      </div>
+      <div id="userChatsList" class="w-full min-h-[180px]"></div>
+    </div>
+  `;
+  await fetchUserChats();
+  renderMessagesList();
+  startMsgPolling();
+}
+
+  /* گرفتن لیست چت‌ها */
+  /*  دریافت لیست چت‌های *خودِ کاربر*  */
+/* گرفتن لیست چت‌ها (فقط لیست، بدون جزئیات پیام‌ها) */
+async function fetchUserChats() {
+  try {
+    const res = await fetch(`${API_BASE}/chats`, {
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' }
+    });
+    const data = await res.json();
+
+    const allChats = Array.isArray(data) ? data : (data.chats || []);
+    const uid = window.currentUserId;
+
+    chatsList = allChats.filter(c => {
+      if (!uid) return false;
+      if (c.type === 'admin' || c.type === 'user-admin') return true;
+      if (c.userId && c.userId === uid) return true;
+      if (Array.isArray(c.participants) && c.participants.some(p => {
+        return (typeof p === 'string' && p === uid) ||
+               (typeof p === 'object' && p._id === uid);
+      })) return true;
+      if (Array.isArray(c.users) && c.users.some(u => u._id === uid)) return true;
+      return false;
+    });
+
+    const adminChat = chatsList.find(c => c.type === 'admin' || c.type === 'user-admin');
+    adminChatId = adminChat ? adminChat._id : null;
+
+  } catch (e) {
+    chatsList = [];
+  }
+}
+
+
+  /* رندر لیست چت‌ها (با شخص/مدیر/فروشنده و محصول مرتبط) */
+/* رندر لیست چت‌ها (با شخص/مدیر/فروشنده و محصول مرتبط) */
+/* رندر لیست چت‌ها (با شخص/مدیر/فروشنده و محصول مرتبط) */
+/* رندر لیست چت‌ها (با شخص/مدیر/فروشنده و محصول مرتبط) */
+/* رندر لیست چت‌ها (با شخص/مدیر/فروشنده و محصول مرتبط) */
+/* رندر لیست چت‌ها (با شخص/مدیر/فروشنده و محصول مرتبط) */
+function renderMessagesList() {
+  const box = document.getElementById('userChatsList');
+  console.log("لیست چت‌ها:", chatsList);
+
+  if (!chatsList.length) {
+    box.innerHTML = `<div class="text-gray-400 text-center py-8">هیچ گفتگویی نداری! از دکمه پیام جدید به مدیر استفاده کن.</div>`;
+    return;
+  }
+
+  // شناسه کاربر فعلی
+  const myId = window.currentUserId;
+
+  box.innerHTML = chatsList.map(c => {
+    console.log('ساختار چت در لیست:', c._id, c);
+
+    let whom = 'مخاطب'; // پیش‌فرض
+    let role = '';
+    let sellerId = null;
+    let storeName = '';
+    let shopUrl = '';
+
+    if (Array.isArray(c.participants)) {
+      const participant = c.participants.find(p => p._id !== myId);
+      if (participant) {
+        role = participant.role;
+        sellerId = participant._id;
+        storeName = participant.storename || '';
+        shopUrl = participant.shopurl || '';
+        whom = role === 'seller' ? 'فروشنده' : (role === 'admin' ? 'مدیر' : (role === 'user' ? 'کاربر' : 'مخاطب'));
+      }
+    }
+
+    // fallback از type
+    if (!role && c.type) {
+      if (c.type === 'user-seller' || c.type === 'seller-admin') {
+        whom = 'فروشنده';
+        role = 'seller';
+        sellerId = c.sellerId;
+      } else if (c.type === 'user-admin') {
+        whom = 'مدیر';
+        role = 'admin';
+      }
+    }
+
+    let whomDisplay = whom;
+    if (role === 'seller' && sellerId) {
+      const linkUrl = shopUrl ? `/store/${shopUrl}` : `/store.html?id=${sellerId}`;
+      const linkText = storeName ? `فروشنده (${storeName})` : 'فروشنده';
+      whomDisplay = `<a href="${linkUrl}" class="text-[#10b981] hover:text-blue-700 hover:underline font-semibold" target="_blank">${linkText}</a>`;
+    }
+
+let prodBlock = '';
+if (c.productId && c.productId.title) {
+  const productUrl = `/product.html?id=${c.productId._id}`;
+  prodBlock = `
+    <div class="flex items-center gap-2 mt-2">
+      <!-- فقط عکس لینک‌دار -->
+      <a href="${productUrl}" target="_blank">
+        <img src="${c.productId.images?.[0] || '/assets/images/noimage.png'}" 
+             class="w-10 h-10 object-cover rounded-lg border" alt="">
+      </a>
+      <!-- اسم محصول بدون لینک -->
+      <span class="text-xs text-gray-600">${c.productId.title}</span>
+    </div>
+  `;
+}
+
+
+    const last = c.messages?.[c.messages.length - 1] || {};
+    const txt = (last.text || '-').slice(0, 45) + (last.text?.length > 45 ? '…' : '');
+    const date = last.createdAt
+      ? new Date(last.createdAt).toLocaleDateString('fa-IR', { year: '2-digit', month: '2-digit', day: '2-digit' })
+      : '—';
+    const unread = (c.messages || []).filter(m => !m.read && m.from !== 'user').length;
+
+    let avatarText = '؟';
+    if (whom && typeof whom === 'string') {
+      avatarText = whom.slice(0, 2);
+    }
+
+return `
+  <div class="flex items-start gap-3 p-3 mb-2 bg-[#f9fafb] rounded-xl shadow-sm hover:bg-[#e6fcf7] cursor-pointer transition"
+       onclick="openChat('${c._id}')">
+
+    <!-- آواتار -->
+    <div class="w-12 h-12 rounded-full bg-gradient-to-br from-[#0ea5e9] to-[#10b981]
+                flex items-center justify-center text-white font-bold text-lg shrink-0">
+      ${avatarText}
+    </div>
+
+    <!-- بدنه -->
+    <div class="flex-1 min-w-0">
+
+      <!-- ❶ هِدِر کارت: اسم + نشان unread سمت راست، دکمه حذف سمت چپ  -->
+      <div class="flex items-center justify-between flex-wrap gap-2">
+
+        <!-- گروهِ اسم و نشان -->
+        <div class="flex items-center gap-2">
+          <span class="font-bold primary-text">${whomDisplay}</span>
+          ${
+            unread
+              ? `<span class="inline-flex items-center justify-center
+                         bg-red-500 text-white rounded-full w-5 h-5 text-xs">
+                     ${unread}
+                 </span>`
+              : ""
+          }
+        </div>
+
+        <!-- دکمه حذف -->
+        <button
+          class="px-2 py-0.5 text-xs rounded-xl bg-red-50 text-red-600 border border-red-100
+                 hover:bg-red-200 hover:text-red-900 transition"
+          onclick="event.stopPropagation(); deleteChat('${c._id}')">
+          حذف
+        </button>
+      </div>
+
+      ${prodBlock}
+      <div class="text-sm text-gray-700 mt-2">${txt}</div>
+      <div class="text-xs text-gray-400 mt-1">${date}</div>
+    </div>
+  </div>
+`;
+
+  }).join('');
+}
+
+
+
+
+  /* باز کردن مودال چت */
+  /* باز کردن مودال چت (با دریافت جزئیات کامل) */
+async function openChat(cid) {
+  currentCid = cid;
+  await showChatModal();
+}
+
+  /* ارسال پیام جدید به مدیر (ایجاد چت جدید اگر قبلا نداره) */
+  async function openAdminChat() {
+    console.log("تابع openAdminChat فراخوانی شد");
+    try {
+      // بررسی اینکه آیا چت با مدیر قبلاً ایجاد شده است یا خیر
+      if (!adminChatId) {
+        // چت جدید با مدیر ایجاد می‌کنیم
+        await createAdminChat();
+        await fetchUserChats();
+renderMessagesList();
+
+      }
+
+      // نمایش مودال چت
+      showChatModal();
+    } catch (err) {
+      console.error(err);
+      alert(`ایجاد چت با مدیر ناموفق بود. دلیل خطا: ${err.message}`);
+    }
+  }
+
+
+
+
+
+  /* دریافت جزئیات کامل یک چت (شامل تمام پیام‌ها) */
+
+
+
+
+
+
+
+  /* ایجاد (یا گرفتن) چت با مدیر سایت */
+  // ایجاد چت با مدیر سایت
+async function createAdminChat() {
+  try {
+    if (!adminChatId) {
+      const res = await fetch(`${API_BASE}/chats`, {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          text: 'سلام، نیاز به پشتیبانی دارم.',
+          recipientRole: 'admin'
+        })
+      });
+
+      if (!res.ok) throw new Error('ساخت چت با مدیر ناموفق بود');
+
+      const chat = await res.json();
+      console.log('چت با مدیر ایجاد شد:', chat);
+      adminChatId = chat._id;
+      currentCid = chat._id;
+    } else {
+      console.log('چت با مدیر قبلاً ایجاد شده است.');
+    }
+  } catch (err) {
+    console.error('خطا در ایجاد چت با مدیر:', err);
+    alert('خطا در ایجاد چت با مدیر');
+  }
+}
+
+
+
+
+
+
+
+
+
+  /* ساختار مودال چت */
+/* ساختار مودال چت */
+/* ساختار مودال چت */
+/* ساختار مودال چت */
+/* ساختار مودال چت */
+/* ساختار مودال چت */
+/* ساختار مودال چت */
+/* ساختار مودال چت (async برای fetch جزئیات) */
+async function showChatModal() {
+  console.log("در حال نمایش مودال چت...");
+
+  // دریافت جزئیات کامل چت از سرور
+  const chat = await fetchChatDetails(currentCid);
+  if (!chat) {
+    alert('دریافت گفتگو ناموفق بود!');
+    return;
+  }
+
+  console.log('messages:', chat.messages); // ← این خط را اضافه کنید
+
+  // بروزرسانی لیست محلی با جزئیات جدید (اختیاری، اما مفید برای polling بعدی)
+  const idx = chatsList.findIndex(c => c._id === currentCid);
+  if (idx !== -1) chatsList[idx] = chat;
+
+  console.log('ساختار چت کامل:', chat);
+
+  // استخراج طرف مقابل از participants (populate شده)
+  let whom = 'مخاطب'; // پیش‌فرض
+  let role = '';
+  let sellerId = null;
+  let storeName = '';
+  let shopUrl = '';
+
+  if (Array.isArray(chat.participants)) {
+    const participant = chat.participants.find(p => p._id !== window.currentUserId);
+    if (participant) {
+      role = participant.role;
+      sellerId = participant._id;
+      storeName = participant.storename || '';
+      shopUrl = participant.shopurl || '';
+      whom = role === 'seller' ? 'فروشنده' : (role === 'admin' ? 'مدیر' : (role === 'user' ? 'کاربر' : 'مخاطب'));
+    }
+  }
+
+  // fallback از type اگر participant پیدا نشد
+  if (!role && chat.type) {
+    if (chat.type === 'user-seller' || chat.type === 'seller-admin') {
+      whom = 'فروشنده';
+      role = 'seller';
+      sellerId = chat.sellerId;
+    } else if (chat.type === 'user-admin') {
+      whom = 'مدیر';
+      role = 'admin';
+    }
+  }
+
+  let whomDisplay = whom;
+
+  let sellerLink = '';
+  if (role === 'seller' && sellerId) {
+    const linkUrl = shopUrl ? `/store/${shopUrl}` : `/store.html?id=${sellerId}`;
+    const linkText = storeName ? `مغازه ${storeName}` : 'مغازه فروشنده';
+    sellerLink = `<a href="${linkUrl}" target="_blank" class="text-[#0ea5e9] hover:text-blue-700 hover:underline ml-3 text-sm font-semibold">${linkText}</a>`;
+  }
+
+  let prodBlock = '';
+  if (chat.productId && chat.productId.title) {
+    const productUrl = `/product.html?id=${chat.productId._id}`;
+    prodBlock = `
+      <a href="${productUrl}" target="_blank" class="flex items-center gap-2 bg-[#e0fdfa] px-2 py-1 rounded-lg my-2 hover:bg-[#d1f8f5] transition">
+        <img src="${chat.productId.images?.[0] || '/assets/images/noimage.png'}" class="w-9 h-9 object-cover rounded-md border" alt="">
+        <span class="text-xs text-gray-700">${chat.productId.title}</span>
+      </a>
+    `;
+  }
+
+  // مودال
+  document.body.insertAdjacentHTML('beforeend', `
+    <div id="chatModal" class="fixed inset-0 z-50 flex items-center justify-center" style="backdrop-filter:blur(4px);background:#0003;animation:fadein .25s">
+      <div class="bg-white rounded-2xl w-[98vw] max-w-md max-h-[93vh] flex flex-col shadow-xl border">
+        <div class="px-4 py-3 border-b flex justify-between items-center gap-3">
+          <div>
+            <div class="flex items-center">
+              <span class="font-bold primary-text">${whomDisplay}</span>
+              ${sellerLink}
+            </div>
+            ${prodBlock}
+          </div>
+          <button onclick="closeChat()" class="text-2xl font-black text-gray-400 hover:text-red-500 rounded-full w-8 h-8 flex items-center justify-center">×</button>
+        </div>
+        <div id="chatBody" class="flex-1 overflow-y-auto p-4 space-y-4 text-[15px] scrollbar-hide bg-[#f9fafb]"></div>
+        <div class="border-t p-3 flex gap-2 bg-white">
+          <textarea id="msgBox" rows="2" class="flex-1 border rounded-xl p-2 resize-none focus:outline-none" placeholder="پیام خود را وارد کنید"></textarea>
+          <button onclick="sendMsg()" class="brand-btn px-5 py-2 rounded-xl font-bold shrink-0">ارسال</button>
+        </div>
+      </div>
+    </div>
+  `);
+  renderChat();
+  setTimeout(() => document.getElementById('msgBox').focus(), 120);
+}
+  // بستن مودال چت
+  function closeChat() {
+    document.getElementById('chatModal')?.remove();
+    currentCid = null;
+  }
+
+  /* رندر مکالمه داخل مودال */
+/* رندر مکالمه داخل مودال */
+function renderChat() {
+  const chat = chatsList.find(c => c._id === currentCid);
+  const target = document.getElementById('chatBody');
+  if (!target) return;
+
+  function getSenderRoleText(from) {
+    if (from === 'user')    return 'کاربر';
+    if (from === 'admin')   return 'مدیر';
+    if (from === 'seller')  return 'فروشنده';
+    return 'مخاطب';
+  }
+
+  target.innerHTML = (chat.messages || []).map(m => {
+    const isMe = m.from === 'user' || m.from === window.currentUserId;
+    const cls = isMe ? 'bg-[#e0fdfa] self-end' : 'bg-[#f3f4f6]';
+    const name = `<span class="text-xs font-bold text-[#10b981]">${getSenderRoleText(m.from)}</span>`;
+    return `
+      <div class="flex flex-col ${isMe ? 'items-end' : 'items-start'}">
+        <div class="${cls} rounded-xl px-3 py-2 max-w-[78%]">
+          ${name}
+          <div>${m.text || ''}</div>
+          <div class="text-xs text-gray-400 mt-1 text-left">${new Date(m.date || m.createdAt).toLocaleTimeString('fa-IR', { hour: '2-digit', minute: '2-digit' })}</div>
+        </div>
+      </div>
+    `;
+  }).join('');
+  target.scrollTop = target.scrollHeight;
+}
+
+
+
+  /* ارسال پیام */
+/**
+ * ارسال پیام از طرف کاربر
+ */
+async function sendMsg() {
+  const ta   = document.getElementById('msgBox');
+  const text = ta.value.trim();
+  if (!text) {
+    alert('لطفاً متن پیام را وارد کنید');
+    return;
+  }
+
+  // توکنِ کاربر (مشتری) را از کوکی خارج می‌کنیم
+  const token = document.cookie
+    .split('; ')
+    .find(row => row.startsWith('user_token='))
+    ?.split('=')[1];
+
+  try {
+    // به مسیر مخصوص reply کاربر بفرستیم
+    const res = await fetch(`${API_BASE}/chats/${currentCid}/user-reply`, {
+      method: 'POST',
+      credentials: 'include',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(token && { Authorization: 'Bearer ' + token })
+      },
+      body: JSON.stringify({ text })
+    });
+
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || data.message || 'خطا در ارسال پیام');
+
+    // پس از موفقیت، textarea را پاک و لیست چت را به‌روز می‌کنیم
+    ta.value = '';
+    chatsList = chatsList.map(c => c._id === currentCid ? data : c);
+    renderChat();
+    updateBadge();
+
+  } catch (err) {
+    console.error('❌ sendMsg error:', err);
+    alert('❌ خطا در ارسال پیام:\n' + err.message);
+  }
+}
+
+
+
+
+
+async function deleteChat(cid) {
+  if(!confirm('آیا از حذف این چت مطمئن هستید؟')) return;
+
+  try {
+    const res = await fetch(`${API_BASE}/chats/${cid}`, {
+      method: 'DELETE',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' }
+    });
+    const data = await res.json();
+    if(!res.ok) throw new Error(data.error || 'حذف چت ناموفق بود!');
+    // حذف چت از لیست و رفرش
+    chatsList = chatsList.filter(c => c._id !== cid);
+    renderMessagesList();
+    updateBadge();
+    closeChat();
+  } catch (err) {
+    alert('خطا در حذف چت: ' + err.message);
+  }
+}
+
+
+
+
+  /* badge پیام‌های خوانده نشده */
+function updateBadge() {
+  const total = chatsList.reduce(
+      (n, c) => n + (c.messages || []).filter(m => !m.read && m.from !== 'user').length,
+      0);
+
+  /* 🔸 نشان کنار گزینهٔ «پیام‌ها» در سایدبار (همان کد قبلی) */
+  document.getElementById('msgBadge').textContent = total > 0 ? total : '';
+
+  /* 🔸 نشان روی همبرگر – افزوده شده */
+  const hamBadge = document.getElementById('hamBadge');
+  if (hamBadge) {
+    if (total > 0) {
+      hamBadge.textContent = total;
+      hamBadge.classList.remove('hidden');   // نمایش
+    } else {
+      hamBadge.classList.add('hidden');      // پنهان‌سازی
+    }
+  }
+}
+
+
+  /* بروزرسانی خودکار لیست و چت */
+/* بروزرسانی خودکار لیست و چت */
+function startMsgPolling(){
+  if(pollHandle) clearInterval(pollHandle);
+  pollHandle = setInterval(async()=>{
+    await fetchUserChats();
+    updateBadge();
+    if(currentCid) {
+      // اگر مودال باز است، جزئیات چت را دوباره fetch و رندر کن
+      const chat = await fetchChatDetails(currentCid);
+      if (chat) {
+        const idx = chatsList.findIndex(c => c._id === currentCid);
+        if (idx !== -1) chatsList[idx] = chat;
+        renderChat();
+      }
+    } else {
+      renderMessagesList();
+    }
+  },10000);
+}
+  function stopMsgPolling(){ if(pollHandle){clearInterval(pollHandle);pollHandle=null;} }
+  /* ───────── پایان پیام‌های حرفه‌ای ───────── */
+
+
+
+
+
+
+
+
+/* دریافت جزئیات کامل یک چت (شامل تمام پیام‌ها) */
+/* دریافت جزئیات کامل یک چت (شامل تمام پیام‌ها) */
+async function fetchChatDetails(cid) {
+  const token = document.cookie.split('; ').find(row => row.startsWith('user_token='))?.split('=')[1];
+  try {
+    const res = await fetch(`${API_BASE}/chats/${cid}`, {
+      credentials: 'include',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(token && { Authorization: 'Bearer ' + token })
+      }
+    });
+    if (!res.ok) throw new Error('دریافت جزئیات چت ناموفق بود');
+    const data = await res.json();
+    return data; // شیء چت کامل با تمام messages
+  } catch (e) {
+    console.error('❌ fetchChatDetails error:', e);
+    return null;
+  }
+}
+
+
+
+
+
+
+
+
+
+  // --- داشبورد: کلیک باکس علاقه‌مندی و علاقه‌مندی‌های اخیر --- 
+
+
+
+
+    </script>
+  </body>
+  </html>

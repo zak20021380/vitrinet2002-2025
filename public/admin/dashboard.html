@@ -1,0 +1,4328 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <title>داشبورد مدیریت | ویترینت</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;700&display=swap" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+:root {
+  --primary: #10b981;
+  --secondary: #0ea5e9;
+  --warning: #eab308;
+  --bg: #f6faf9;
+  --card: #fff;
+  --text: #20262d;
+  --border: #e5e7eb;
+  --shadow: 0 6px 30px #10b98116;
+  --sidebar-width: 220px;
+  --radius: 20px;
+  --transition: .18s cubic-bezier(.45,.8,.4,1);
+}
+
+html, body {
+  font-family: 'Vazirmatn', Tahoma, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  margin: 0;
+  height: 100%;
+  scroll-behavior: smooth;
+  font-size: 16px;
+}
+
+body { 
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+.dashboard-container { 
+  display: flex; 
+  min-height: 100vh; 
+}
+
+/* Sidebar - بهبود یافته */
+.sidebar {
+  width: var(--sidebar-width);
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  box-shadow: var(--shadow);
+  display: flex; 
+  flex-direction: column;
+  min-height: 100vh; 
+  padding: 0;
+  z-index: 100; 
+  position: relative;
+  transition: transform var(--transition), width var(--transition);
+  border-left: 1px solid var(--border);
+}
+
+.sidebar-header {
+  font-weight: bold; 
+  font-size: 1.27rem;
+  color: var(--primary); 
+  padding: 1.7rem 1.3rem 0.9rem 1.3rem;
+  border-bottom: 1px solid var(--border);
+  letter-spacing: 1px;
+}
+
+.sidebar-menu { 
+  display: flex; 
+  flex-direction: column; 
+  gap: 0.3rem; 
+  padding: 1.1rem 0; 
+  flex: 1; 
+}
+
+.sidebar-menu a {
+  display: flex; 
+  align-items: center; 
+  gap: 0.7rem;
+  padding: 0.8rem 1.4rem 0.8rem 1rem;
+  text-decoration: none; 
+  color: var(--text);
+  border-radius: 0 var(--radius) var(--radius) 0;
+  font-size: 1rem; 
+  font-weight: 500; 
+  background: none;
+  cursor: pointer; 
+  transition: background var(--transition), color var(--transition);
+  border-right: 4px solid transparent; 
+  position: relative;
+}
+
+.sidebar-menu a .count {
+  background: var(--primary); 
+  color: #fff;
+  border-radius: 10px; 
+  font-size: 0.85rem; 
+  padding: 0.2rem 0.6rem;
+  margin-right: 0.5rem; 
+  font-weight: bold; 
+  min-width: 1.8rem;
+  text-align: center; 
+  display: inline-block; 
+  box-shadow: 0 2px 8px #10b98113;
+}
+
+.sidebar-menu a.active,
+.sidebar-menu a:hover {
+  background: var(--primary);
+  color: #fff;
+  border-right: 4px solid var(--secondary);
+}
+
+.sidebar-menu a.active .count,
+.sidebar-menu a:hover .count {
+  background: #fff; 
+  color: var(--primary);
+}
+
+.sidebar-menu a i { 
+  font-size: 1.25em; 
+  opacity: .8; 
+  min-width: 1.8rem;
+}
+
+.sidebar-footer {
+  font-size: 0.85rem; 
+  color: #aaa;
+  padding: 1rem 0.6rem; 
+  border-top: 1px solid var(--border);
+  text-align: center; 
+  background: inherit;
+}
+
+/* Main Content */
+.main-content {
+  flex: 1; 
+  padding: 2rem 1.9rem 1.6rem 0.8rem;
+  background: var(--bg);
+  display: flex; 
+  flex-direction: column;
+  min-height: 100vh;
+  transition: padding var(--transition);
+}
+
+.content-header {
+  font-size: 1.25rem; 
+  font-weight: bold;
+  color: var(--primary); 
+  margin-bottom: 1.2rem;
+  text-align: right; 
+  letter-spacing: .4px;
+  display: flex; 
+  align-items: center; 
+  gap: 0.8rem;
+  flex-wrap: wrap;
+}
+
+.header-count {
+  color: #888; 
+  font-size: 1em; 
+  font-weight: normal;
+  background: #eafaf4; 
+  border-radius: 8px; 
+  padding: 0.1rem 0.8rem; 
+  margin-right: 0.1rem;
+}
+
+/* Cards - بهبود یافته برای موبایل */
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 0.9rem; 
+  margin-bottom: 1.6rem;
+}
+
+.card {
+  background: var(--card);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 1.2rem;
+  min-height: 95px;
+  display: flex; 
+  align-items: center; 
+  gap: 0.8rem;
+  font-size: 1rem;
+  border: 1px solid var(--border);
+  transition: box-shadow var(--transition), border var(--transition), background var(--transition);
+  position: relative;
+  user-select: none;
+  cursor: pointer;
+}
+
+.card .icon {
+  font-size: 1.4rem;
+  color: var(--primary);
+  background: #e6fff7;
+  border-radius: 12px;
+  padding: 0.45rem; 
+  margin-left: 0.4rem;
+  box-shadow: 0 2px 6px #10b98113;
+  display: flex; 
+  align-items: center; 
+  justify-content: center;
+  min-width: 2.5rem; 
+  min-height: 2.5rem;
+  transition: background var(--transition);
+}
+
+.card .num {
+  font-size: 1.2rem; 
+  font-weight: bold; 
+  color: var(--text);
+}
+
+.card .label {
+  font-size: 0.92rem; 
+  color: #888; 
+  margin-top: 0.1rem;
+}
+
+.card:hover { 
+  background: #e6fff7; 
+  box-shadow: 0 8px 25px #10b9811a;
+}
+
+/* Dashboard charts grid */
+.dashboard-charts {
+  display: grid; 
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem; 
+  margin-bottom: 1.5rem;
+}
+
+.dashboard-charts .chart-card {
+  background: var(--card); 
+  border-radius: var(--radius); 
+  box-shadow: var(--shadow);
+  padding: 1.2rem 0.6rem 0.5rem 0.6rem; 
+  border: 1px solid var(--border);
+  min-height: 11rem; 
+  direction: ltr;
+  user-select: none; 
+  cursor: pointer;
+  transition: background .12s;
+}
+
+.dashboard-charts .chart-card:hover { 
+  background: #f6fffa; 
+  box-shadow: 0 8px 25px #10b9811a;
+}
+
+.chart-title {
+  color: var(--primary); 
+  font-size: 0.95rem; 
+  margin-bottom: 0.5rem;
+  direction: rtl; 
+  text-align: right; 
+  font-weight: bold; 
+  letter-spacing: .3px;
+  padding: 0 0.5rem;
+}
+
+/* Table - بهبود یافته */
+.table-wrap {
+  background: var(--card); 
+  border-radius: var(--radius); 
+  box-shadow: var(--shadow);
+  padding: 0.9rem 0.2rem 0.4rem 0.2rem; 
+  margin-bottom: 1.5rem; 
+  overflow-x: auto; 
+  border: 1px solid var(--border);
+}
+
+table {
+  border-collapse: collapse; 
+  width: 100%; 
+  min-width: 350px; 
+  background: inherit; 
+  color: inherit; 
+  font-size: 0.88rem; 
+  direction: rtl;
+}
+
+th, td { 
+  text-align: right; 
+  padding: 0.5rem 0.6rem; 
+  border-bottom: 1px solid #f3f4f6; 
+}
+
+th { 
+  background: #f3f4f6; 
+  font-weight: bold; 
+  color: #444; 
+  font-size: 0.92rem;
+}
+
+tr:last-child td { 
+  border-bottom: none; 
+}
+
+.action-btn {
+  border: none; 
+  outline: none; 
+  cursor: pointer; 
+  border-radius: 8px;
+  padding: 0.3rem 0.8rem; 
+  margin-left: 0.2rem; 
+  font-size: 0.92rem;
+  background: #f4f4f4; 
+  color: var(--primary);
+  transition: background .14s, color .14s;
+  min-height: 2.4rem;
+  min-width: 4rem;
+}
+
+.action-btn.edit { 
+  background: #e0f2fe; 
+  color: var(--secondary); 
+}
+
+.action-btn.delete { 
+  background: #ffe4e6; 
+  color: #ef4444; 
+}
+
+.action-btn.delete:hover { 
+  background: #ef4444; 
+  color: #fff; 
+}
+
+.action-btn.edit:hover { 
+  background: #0ea5e9; 
+  color: #fff; 
+}
+
+/* Card view for tables on mobile - بهبود یافته */
+.table-cards {
+  display: none;
+  flex-direction: column;
+  gap: 1rem;
+  margin-bottom: 1.6rem;
+}
+
+.table-card {
+  background: var(--card);
+  border-radius: var(--radius);
+  padding: 1.3rem;
+  box-shadow: var(--shadow);
+  border: 1px solid var(--border);
+}
+
+.table-card-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 0.6rem 0;
+  border-bottom: 1px solid var(--border);
+  font-size: 0.95rem;
+}
+
+.table-card-row:last-child {
+  border-bottom: none;
+}
+
+.table-card-label {
+  font-weight: bold;
+  color: #555;
+  min-width: 7rem;
+}
+
+.table-card-value {
+  text-align: left;
+  flex: 1;
+}
+
+.table-card-actions {
+  display: flex;
+  gap: 0.6rem;
+  margin-top: 1rem;
+  justify-content: flex-end;
+}
+
+/* Responsive - بهینه‌سازی موبایل */
+@media (max-width: 1050px) { 
+  .main-content { 
+    padding: 1.3rem 2vw 1.5rem 2vw; 
+  } 
+  
+  .dashboard-charts { 
+    gap: 0.7rem; 
+  } 
+}
+
+@media (max-width: 850px) {
+  .main-content { 
+    padding: 1.7rem 2vw 1.7rem 2vw; 
+  }
+  
+  .dashboard-charts { 
+    grid-template-columns: 1fr; 
+  }
+
+  .sidebar-menu a {
+    padding: 0.8rem 1.3rem;
+  }
+}
+
+@media (max-width: 700px) {
+  .sidebar { 
+    position: fixed; 
+    top: 0; 
+    right: 0;
+    height: 100%; 
+    width: 260px;
+    box-shadow: 0 0 30px rgba(0,0,0,0.15); 
+    z-index: 200; 
+    transform: translateX(100%);
+    border-left: 1px solid var(--border);
+    backdrop-filter: blur(12px);
+  }
+  
+  .sidebar.open { 
+    transform: translateX(0); 
+  }
+  
+  .main-content { 
+    padding: 1.7rem 4vw; 
+  }
+  
+  .sidebar-toggle-btn { 
+    display: flex; 
+  }
+  
+  .table-wrap { 
+    display: none; 
+  }
+  
+  .table-cards { 
+    display: flex; 
+  }
+  
+  .cards {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.8rem;
+  }
+
+  .card {
+    padding: 1.1rem;
+    min-height: 90px;
+  }
+
+  .table-card {
+    padding: 1.2rem;
+  }
+}
+
+@media (max-width: 600px) {
+  .cards {
+    grid-template-columns: 1fr;
+  }
+  
+  .action-btn {
+    width: 100%;
+    margin: 0.3rem 0;
+    padding: 0.5rem;
+  }
+  
+  .table-card-actions {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .table-card-row {
+    flex-direction: column;
+    gap: 0.3rem;
+    padding: 0.7rem 0;
+  }
+
+  .table-card-label {
+    min-width: auto;
+    font-size: 0.9rem;
+  }
+
+  .table-card-value {
+    font-size: 1rem;
+  }
+
+  .main-content {
+    padding: 1.5rem 4vw;
+  }
+}
+
+@media (max-width: 480px) {
+  html {
+    font-size: 15px;
+  }
+  
+  .main-content { 
+    padding: 1.3rem 4vw; 
+  }
+  
+  .sidebar-header { 
+    padding: 1rem 1rem 0.8rem; 
+    font-size: 1.3rem;
+  }
+  
+  .sidebar { 
+    width: 85vw; 
+  }
+
+  .sidebar-menu a {
+    padding: 0.9rem 1.4rem;
+    font-size: 1.05rem;
+  }
+
+  .card {
+    flex-direction: column;
+    text-align: center;
+    padding: 1.3rem 0.8rem;
+  }
+
+  .card .icon {
+    margin: 0 auto 0.5rem;
+  }
+
+  .content-header {
+    font-size: 1.3rem;
+  }
+}
+
+@media (max-width: 390px) { 
+  .action-btn {
+    padding: 0.6rem;
+    font-size: 0.95rem;
+  }
+
+  .sidebar {
+    width: 90vw;
+  }
+
+  .table-card {
+    padding: 1.1rem;
+  }
+}
+
+::-webkit-scrollbar { 
+  width: 8px; 
+  height: 8px;
+}
+
+::-webkit-scrollbar-thumb { 
+  background: #10b98130; 
+  border-radius: 8px; 
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #10b98160; 
+}
+
+.sidebar-toggle-btn {
+  display: none; 
+  position: fixed; 
+  top: 1.3rem; 
+  right: 1rem;
+  background: var(--primary); 
+  color: #fff; 
+  border: none;
+  border-radius: 10px; 
+  font-size: 1.4rem; 
+  width: 2.8rem; 
+  height: 2.8rem;
+  align-items: center; 
+  justify-content: center; 
+  cursor: pointer; 
+  z-index: 150;
+  transition: background var(--transition);
+  box-shadow: 0 3px 12px rgba(0,0,0,0.15);
+}
+
+.sidebar-toggle-btn:hover { 
+  background: var(--secondary); 
+  transform: scale(1.05);
+}
+
+/* Dynamic chart improvements */
+.dynamic-chart-box-pro {
+  background: linear-gradient(135deg, #eafaf4 0%, #fff 80%);
+  box-shadow: 0 8px 44px #10b98111, 0 4px 20px #0002;
+  border-radius: 1.8rem;
+  margin: 0 auto 2rem auto;
+  max-width: 950px;
+  width: 97%;
+  padding: 2rem 1.6rem 1.5rem 1.6rem;
+  position: relative;
+  z-index: 11;
+  min-height: 21rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+  animation: fadeIn .35s;
+  transition: box-shadow .16s;
+  border: 1.5px solid #10b98122;
+}
+
+.dynamic-chart-box-pro:hover {
+  box-shadow: 0 14px 60px #10b98125, 0 8px 26px #0ea5e91c;
+}
+
+.dynamic-chart-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.2rem;
+}
+
+#chartBox-title {
+  font-weight: 800;
+  color: #10b981;
+  font-size: 1.15rem;
+  letter-spacing: .15px;
+}
+
+.close-dash-chart-btn {
+  background: linear-gradient(135deg,#10b981 0%,#0ea5e9 100%);
+  color: #fff;
+  border: none;
+  font-size: 1.5rem;
+  border-radius: 15px;
+  width: 2.8rem;
+  height: 2.8rem;
+  cursor: pointer;
+  transition: background .13s, color .13s;
+  margin-right: 0.1rem;
+  margin-left: 0.3rem;
+  box-shadow: 0 2px 12px #10b98133;
+  display: flex; 
+  align-items: center; 
+  justify-content: center;
+}
+
+.close-dash-chart-btn:hover {
+  background: #eab308;
+  color: #fff;
+}
+
+.dynamic-chart-filters {
+  display: flex;
+  gap: 0.8rem;
+  justify-content: flex-end;
+  margin-bottom: 0.6rem;
+  flex-wrap: wrap;
+  user-select: none;
+}
+
+.dash-filter-btn {
+  background: #eafaf4;
+  color: #10b981;
+  font-weight: 700;
+  padding: 0.45rem 1.2rem;
+  border-radius: 12px;
+  border: none;
+  cursor: pointer;
+  font-size: 0.95rem;
+  transition: .13s;
+  margin-bottom: 0.1rem;
+  outline: none;
+  box-shadow: 0 1px 8px #10b98113;
+  letter-spacing: .15px;
+  min-height: 2.5rem;
+}
+
+.dash-filter-btn.active,
+.dash-filter-btn:hover {
+  background: linear-gradient(135deg,#10b98144 0%,#0ea5e932 100%);
+  color: #111;
+}
+
+.dynamic-chart-canvas-wrap {
+  width: 100%;
+  min-width: 0;
+  height: 18rem;
+  padding-top: 0.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+@media (max-width: 1200px) {
+  .dynamic-chart-box-pro {
+    max-width: 99vw;
+    padding: 1.5rem 2.5vw 1.2rem;
+    min-height: 17rem;
+  }
+}
+
+@media (max-width: 800px) {
+  .dynamic-chart-box-pro {
+    max-width: 99vw;
+    min-height: 15rem;
+    padding: 1.2rem 2vw;
+    border-radius: 1.3rem;
+  }
+  
+  .dynamic-chart-canvas-wrap {
+    height: 13rem;
+  }
+  
+  .close-dash-chart-btn { 
+    width:2.5rem; 
+    height:2.5rem; 
+    font-size:1.3rem;
+  }
+}
+
+@media (max-width: 500px) {
+  .dynamic-chart-box-pro {
+    padding: 1rem 3vw;
+    min-height: 13rem;
+    border-radius: 1rem;
+  }
+  
+  .dynamic-chart-top { 
+    font-size: .95em; 
+  }
+  
+  .dynamic-chart-canvas-wrap { 
+    height: 10rem; 
+  }
+  
+  .close-dash-chart-btn { 
+    width:2.2rem; 
+    height:2.2rem; 
+    font-size:1.1rem;
+  }
+  
+  .dash-filter-btn { 
+    font-size:0.9rem; 
+    padding:0.4rem 0.9rem;
+    min-height: 2.3rem;
+  }
+}
+
+/* Animation */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(1.9rem); }
+  to { opacity: 1; transform: none; }
+}
+
+/* بهبود overlay برای موبایل */
+@media (max-width: 700px) {
+  .sidebar-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0,0,0,0.4);
+    z-index: 190;
+    backdrop-filter: blur(2px);
+  }
+  
+  .sidebar.open ~ .sidebar-overlay {
+    display: block;
+  }
+}
+
+
+
+
+.seller-filter-btn {
+  background: #fff;
+  color: #10b981;
+  border: 1.3px solid #10b98142;
+  border-radius: 9px;
+  padding: 0.43rem 1.3rem;
+  font-size: 1rem;
+  cursor: pointer;
+  font-family: inherit;
+  font-weight: bold;
+  transition: all .15s;
+  box-shadow: 0 2px 8px #10b98113;
+}
+.seller-filter-btn.active,
+.seller-filter-btn:hover {
+  background: linear-gradient(135deg,#10b98122 0%,#0ea5e930 100%);
+  color: #0ea5e9;
+  border-color: #0ea5e9;
+}
+
+
+
+
+
+
+/* --- Seller Modal Popup --- */
+.seller-modal-overlay {
+  position: fixed; inset: 0; background: rgba(40,60,50,0.25); z-index: 9998;
+  display: flex; align-items: center; justify-content: center; animation: fadeIn .35s;
+}
+.seller-modal {
+  background: #fff;
+  border-radius: 1.5rem;
+  box-shadow: 0 12px 50px #10b98144;
+  min-width: 350px; max-width: 98vw; width: 420px;
+  padding: 2.3rem 1.7rem 1.1rem;
+  direction: rtl;
+  position: relative;
+  z-index: 9999;
+  animation: fadeIn .33s;
+}
+.seller-modal-close {
+  position: absolute; top: 1.2rem; left: 1.2rem;
+  background: #eafaf4;
+  border-radius: 10px;
+  border: none; color: #16a34a;
+  font-size: 1.6rem;
+  cursor: pointer; padding: 0.25rem 1rem;
+  transition: background .15s, color .15s;
+}
+.seller-modal-close:hover { background: #10b981; color: #fff; }
+.seller-modal-title { color: #10b981; font-weight: bold; font-size: 1.1rem; margin-bottom: 1.3rem;}
+.seller-modal-row { margin-bottom: .85rem; font-size: 1.01rem;}
+.seller-modal-label { color: #333; font-weight: 700; min-width: 5rem; display: inline-block;}
+.seller-modal-value { color: #0ea5e9; font-weight: 500;}
+.seller-modal-form label { font-size: 0.96rem; font-weight: 500; color: #666;}
+.seller-modal-form textarea {
+  width: 100%; min-height: 66px; border-radius: 9px;
+  border: 1.2px solid #10b98144; margin-top: 0.2rem;
+  font-family: inherit; font-size: 1.01rem; padding: 0.4rem 0.6rem; outline: none; transition: border .13s;
+}
+.seller-modal-form textarea:focus { border-color: #10b981; }
+.seller-modal-form button {
+  margin-top: 0.7rem; padding: 0.41rem 1.4rem;
+  border-radius: 9px; border: none; color: #fff;
+  background: linear-gradient(135deg,#10b981 0%,#0ea5e9 100%);
+  font-weight: bold; font-size: 1.08rem; cursor: pointer;
+  transition: background .15s;
+}
+.seller-modal-form button:active { background: #0ea5e9; }
+.seller-modal-success {
+  color: #10b981; background: #eafaf4; border-radius: 9px;
+  padding: 0.6rem 1rem; margin-top: 1rem; font-weight: 500; text-align: center;
+}
+
+
+
+
+
+
+/* === مدیریت قیمت پلن‌ها  (Plans)  ================================ */
+#plans-panel{
+  /* ستونِ وسط‌چین در کل عرضِ Main-Content */
+  display:flex;
+  flex-direction:column;
+  align-items:center;       /* محور افقی */
+  justify-content:center;   /* محور عمودی – اگر فقط بالا می‌خواهی بگذار flex-start */
+  gap:2rem;
+  min-height:calc(100vh - 120px); /* قد نسبى براى وسط شدن */
+  padding:2rem 1rem;
+}
+
+#plans-panel .content-header{
+  width:100%;
+  text-align:center;
+  font-size:2rem;
+  font-weight:900;
+  color:var(--primary);
+  letter-spacing:.5px;
+}
+
+/* ظرفی که فرم را دقیقاً وسط نگه مى‌دارد */
+.plans-center{
+  width:100%;
+  max-width:1000px;
+  display:flex;
+  justify-content:center;   /* وسط افقی */
+  align-items:center;       /* وسط عمودی */
+}
+
+/* فرم زیبا */
+#plansForm{
+  width:100%;
+  max-width:430px;
+  background:linear-gradient(135deg,#e0fdfa 0%,#f8fafc 100%);
+  border:1.6px solid #e0fdfa;
+  border-radius:28px;
+  box-shadow:0 6px 36px #10b98122;
+  padding:2.5rem 2rem 2rem;
+  display:flex;
+  flex-direction:column;
+  animation:fadeIn .4s;
+}
+
+/* لیبل + ورودی‌ها */
+#plansForm label{
+  width:100%;
+  margin-bottom:1.1rem;
+  font-size:1.05rem;
+  font-weight:700;
+  color:#0ea5e9;
+}
+#plansForm input[type="number"]{
+  width:100%;
+  margin-top:.4rem;
+  padding:.9rem 1.2rem;
+  font-size:1.15rem;
+  font-weight:700;
+  background:#f8fafc;
+  border:1.8px solid #e0fdfa;
+  border-radius:16px;
+  outline:none;
+  transition:border .15s,box-shadow .15s;
+}
+#plansForm input[type="number"]:focus{
+  border-color:#10b981;
+  box-shadow:0 4px 24px #10b98133;
+  background:#e6fff7;
+}
+
+/* دکمهٔ ذخیره */
+#plansForm button[type="submit"]{
+  align-self:center;
+  margin-top:.6rem;
+  background:linear-gradient(90deg,#10b981 0%,#0ea5e9 100%);
+  color:#fff;
+  padding:1rem 2.6rem;
+  font-size:1.15rem;
+  font-weight:900;
+  border:none;
+  border-radius:14px;
+  cursor:pointer;
+  box-shadow:0 3px 18px #10b98135;
+  transition:transform .1s,box-shadow .15s,background .15s;
+}
+#plansForm button[type="submit"]:hover{
+  background:linear-gradient(90deg,#0ea5e9 0%,#10b981 100%);
+  box-shadow:0 6px 28px #0ea5e955;
+  transform:translateY(-3px) scale(1.04);
+}
+
+/* پیام موفقیت */
+#plansMsg{
+  display:none;
+  width:100%;
+  margin-top:1.2rem;
+  padding:.9rem 1.2rem;
+  text-align:center;
+  font-weight:800;
+  font-size:1.05rem;
+  color:#10b981;
+  background:#e0fdfa;
+  border-radius:13px;
+  box-shadow:0 2px 12px #10b98112;
+}
+
+/* ریسپانسیو سریع */
+@media(max-width:600px){
+  #plansForm{
+    padding:1.6rem 1rem;
+    border-radius:20px;
+  }
+  .plans-center{
+    min-height:50vh;
+  }
+}
+
+/* --- هِدِر «مدیریت قیمت پلن‌ها» را وسط‌چین کن --- */
+#plans-panel .content-header{
+  /* استایل‌های قبلى – می‌توانى نگه دارى یا همین را کامل جایگزین کن */
+  width:100%;
+  font-size:2rem;
+  font-weight:900;
+  color:var(--primary);
+  letter-spacing:.5px;
+
+  /* مهم‌ترین خط‌ها براى وسط‌چینى */
+  display:flex;            /* هِدِر همچنان فلکس است */
+  justify-content:center;  /* محتوایش در محور افقى وسط قرار مى‌گیرد */
+  text-align:center;       /* و متن داخلش هم وسط مى‌شود */
+}
+
+
+
+
+
+
+
+/* ---- فرم‌های قیمت‌گذاری (پلن + تبلیغات) ---- */
+.priceForm{
+  width:100%;
+  max-width:430px;
+  background:linear-gradient(135deg,#e0fdfa 0%,#f8fafc 100%);
+  border:1.6px solid #e0fdfa;
+  border-radius:28px;
+  box-shadow:0 6px 36px #10b98122;
+  padding:2.5rem 2rem 2rem;
+  display:flex;
+  flex-direction:column;
+  animation:fadeIn .4s;
+}
+.priceForm label{
+  width:100%;
+  margin-bottom:1.1rem;
+  font-size:1.05rem;
+  font-weight:700;
+  color:#0ea5e9;
+}
+.priceForm input[type="number"]{
+  width:100%;
+  margin-top:.4rem;
+  padding:.9rem 1.2rem;
+  font-size:1.15rem;
+  font-weight:700;
+  background:#f8fafc;
+  border:1.8px solid #e0fdfa;
+  border-radius:16px;
+  outline:none;
+  transition:border .15s,box-shadow .15s;
+}
+.priceForm input[type="number"]:focus{
+  border-color:#10b981;
+  box-shadow:0 4px 24px #10b98133;
+  background:#e6fff7;
+}
+.priceForm button[type="submit"]{
+  align-self:center;
+  margin-top:.6rem;
+  background:linear-gradient(90deg,#10b981 0%,#0ea5e9 100%);
+  color:#fff;
+  padding:1rem 2.6rem;
+  font-size:1.15rem;
+  font-weight:900;
+  border:none;
+  border-radius:14px;
+  cursor:pointer;
+  box-shadow:0 3px 18px #10b98135;
+  transition:transform .1s,box-shadow .15s,background .15s;
+}
+.priceForm button[type="submit"]:hover{
+  background:linear-gradient(90deg,#0ea5e9 0%,#10b981 100%);
+  box-shadow:0 6px 28px #0ea5e955;
+  transform:translateY(-3px) scale(1.04);
+}
+
+/* پیام موفقیت/خطا داخل هر فرم */
+#plansMsg, #adsMsg{
+  display:none;
+  width:100%;
+  margin-top:1.2rem;
+  padding:.9rem 1.2rem;
+  text-align:center;
+  font-weight:800;
+  font-size:1.05rem;
+  color:#10b981;
+  background:#e0fdfa;
+  border-radius:13px;
+  box-shadow:0 2px 12px #10b98112;
+}
+
+
+
+
+
+
+#chatModal {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  backdrop-filter: blur(2.5px);
+  direction: rtl;
+  font-family: 'Vazirmatn', Tahoma, sans-serif;
+}
+#chatModal.show { display: block; }
+.modal-overlay {
+  position: absolute; inset: 0;
+  background: rgba(34,41,47,0.24);
+  z-index: 0;
+}
+.modal-content {
+  position: absolute;
+  top: 50%; left: 50%;
+  width: 99%; max-width: 700px; /* بزرگ‌تر شد */
+  min-width: 340px;
+  max-height: 88vh;             /* بزرگ‌تر شد */
+  min-height: 380px;
+  transform: translate(-50%, -50%);
+  background: #fff;
+  border-radius: 32px;
+  padding: 0;
+  box-shadow: 0 12px 70px #10b98130, 0 4px 28px #0ea5e920;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  z-index: 2;
+  animation: fadeIn .38s;
+}
+.modal-content h3 {
+  background: linear-gradient(90deg,#10b981 0%,#0ea5e9 100%);
+  color: #fff;
+  font-size: 1.25rem;
+  font-weight: bold;
+  padding: 1.18rem 1.3rem 1rem 1.3rem;
+  margin: 0;
+  text-align: right;
+  letter-spacing: .2px;
+  border-bottom: 2px solid #eafaf4;
+}
+.chat-messages {
+  flex: 1 1 0;
+  overflow-y: auto;
+  background: linear-gradient(135deg,#eafaf4 0%,#fff 70%);
+  padding: 1.6rem 2.1rem 0.9rem 2.1rem;
+  min-height: 200px;
+  max-height: 54vh;
+  display: flex;
+  flex-direction: column;
+  gap: 0.95rem;
+  scroll-behavior: smooth;
+  font-size: 1.05rem;
+  /* این خط باید حذف بشه 👇 */
+  /* justify-content: flex-end; */
+}
+
+
+
+
+.chat-bubble {
+  display: flex;
+  flex-direction: column;
+  max-width: 65%;
+  min-width: 70px;
+  margin: 0.5rem 0;
+  padding: 0.95rem 1.3rem 0.95rem 1.2rem;
+  background: #f5f5f5;
+  border-radius: 17px 17px 17px 8px;
+  box-shadow: 0 2px 14px #10b98113;
+  font-size: 1.09rem;
+  word-break: break-word;
+  position: relative;
+  animation: fadeIn .24s;
+  border: 1.5px solid #10b98118;
+  align-self: flex-start;  /* پیش‌فرض (پیام فروشنده/مشتری) سمت راست */
+  direction: rtl;
+  transition: box-shadow .17s;
+}
+
+/* ادمین بیاد سمت چپ، بقیه راست */
+.chat-bubble.admin {
+  align-self: flex-end !important;
+  background: linear-gradient(90deg,#e0fdfa 0%,#f8fafc 100%);
+  border-radius: 21px 11px 22px 22px;
+  border: 1.6px solid #10b98155;
+  color: #16706b;
+  margin-left: 0;
+  margin-right: auto;
+  box-shadow: 0 2px 18px #10b98111;
+  direction: rtl;
+}
+.chat-bubble.seller {
+  align-self: flex-start !important;
+  background: linear-gradient(90deg,#eafaf4 0%,#fff 80%);
+  border-radius: 19px 22px 12px 22px;
+  border: 1.5px solid #0ea5e933;
+  color: #066e41;
+  margin-right: 0;
+  margin-left: auto;
+}
+.chat-bubble.customer {
+  align-self: flex-start !important;
+  background: #fffde7;
+  border-radius: 15px 18px 13px 22px;
+  border: 1.4px solid #eab30842;
+  color: #ba7604;
+}
+
+.chat-bubble .sender {
+  font-size: 0.95em;
+  font-weight: 700;
+  margin-bottom: 0.13em;
+  color: #0ea5e9;
+  opacity: 0.86;
+  letter-spacing: .2px;
+}
+.chat-bubble.admin .sender { color: #10b981; }
+.chat-bubble.customer .sender { color: #ba7604; }
+.chat-bubble.seller .sender { color: #0ea5e9; }
+.chat-bubble .text {
+  font-size: 1.15em;
+  font-weight: 500;
+  line-height: 2.12;
+  margin-bottom: 0.15em;
+}
+.chat-bubble .time {
+  font-size: 0.87em;
+  color: #8ca0a8;
+  margin-top: 0.25em;
+  text-align: left;
+  font-weight: 400;
+}
+
+.chat-input-area {
+  border-top: 1.7px solid #eafaf4;
+  background: #f8fafc;
+  padding: 1.1rem 2rem;
+  display: flex;
+  gap: 0.75rem;
+  align-items: flex-end;
+}
+
+
+
+.chat-input-area {
+  /* اضافه کردن این خط برای اجازه‌ی چندخطی شدن دکمه‌ها */
+  flex-wrap: wrap;
+}
+
+.chat-input-area .action-btn.delete {
+  /* اگر می‌خواهید دکمه‌ی مسدودسازی دوباره قرمز شود */
+  background: #ef4444 !important;
+  color: #fff !important;
+}
+
+.chat-input-area .action-btn.delete:hover {
+  background: #dc2626 !important;
+}
+
+
+
+.chat-input-area textarea {
+  flex: 1;
+  padding: 0.73rem 1rem;
+  border-radius: 15px;
+  border: 1.7px solid #10b98122;
+  font-size: 1.14rem;
+  font-family: inherit;
+  resize: none;
+  outline: none;
+  transition: border .15s, background .13s;
+  background: #fff;
+  min-height: 58px;
+  max-height: 120px;
+  font-weight: 500;
+}
+.chat-input-area textarea:focus {
+  border-color: #0ea5e9;
+  background: #eafaf4;
+}
+.chat-input-area button {
+  padding: 0.87rem 2.1rem;
+  border-radius: 13px;
+  background: linear-gradient(90deg,#10b981 0%,#0ea5e9 100%);
+  color: #fff;
+  border: none;
+  font-weight: bold;
+  font-size: 1.17rem;
+  cursor: pointer;
+  transition: background .12s, box-shadow .14s, transform .11s;
+  box-shadow: 0 2px 12px #10b98114;
+  letter-spacing: .4px;
+}
+.chat-input-area button:hover {
+  background: linear-gradient(90deg,#0ea5e9 0%,#10b981 100%);
+  transform: scale(1.05);
+}
+.modal-close {
+  background: none;
+  color: #10b981;
+  border: none;
+  font-size: 1.18rem;
+  font-weight: bold;
+  cursor: pointer;
+  margin: 1.2rem 2.1rem 0.7rem 0;
+  align-self: flex-start;
+  transition: color .14s;
+  border-radius: 9px;
+  padding: 0.21rem 1rem;
+}
+.modal-close:hover { color: #0ea5e9; background: #eafaf4; }
+
+@media (max-width: 900px) {
+  .modal-content { max-width: 97vw; padding: 0; }
+  .chat-messages { padding: 1.25rem 0.5rem 0.6rem 0.7rem; }
+  .chat-bubble { padding: 0.72rem 0.9rem 0.75rem 0.9rem; font-size: 1em; }
+  .chat-input-area { padding: 0.9rem 0.7rem; }
+  .modal-close { margin: 0.9rem 1rem 0.5rem 0; }
+}
+@media (max-width: 540px) {
+  .modal-content { max-width: 99vw; border-radius: 12px; }
+  .chat-messages { font-size: 0.95em; }
+  .chat-input-area textarea { min-height: 38px; font-size: 0.96em; }
+}
+
+
+/* اگر درون .count متنی نباشد، کامل display:none شود */
+.sidebar-menu a .count:empty {
+  display: none;
+}
+
+
+
+/* —— کارت ارسال پیام همگانی —— */
+/* —— کارت ارسال پیام همگانی (فشرده) —— */
+.broadcast-card {
+  background: var(--card);
+  border-radius: 17px;
+  box-shadow: 0 8px 32px #10b98112, 0 1.5px 16px #0ea5e930;
+  margin: 1.3rem 0;
+  overflow: hidden;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  font-family: 'Vazirmatn', Tahoma, sans-serif;
+  font-size: 1.04rem;
+  letter-spacing: .01em;
+  transition: transform .17s, box-shadow .18s;
+  /* فشرده */
+}
+
+.broadcast-card:hover {
+  transform: translateY(-3px) scale(1.01);
+  box-shadow: 0 16px 44px #0ea5e91c, 0 4px 18px #10b9811a;
+}
+
+/* حالت جمع‌شده */
+.broadcast-card.collapsed .broadcast-body {
+  display: none;
+}
+
+/* هدر */
+.broadcast-header {
+  display: flex;
+  align-items: center;
+  gap: .7rem;
+  background: linear-gradient(90deg, var(--primary) 70%, var(--secondary) 100%);
+  color: #fff;
+  padding: .77rem 2rem .77rem 1.2rem;
+  cursor: pointer;
+  font-size: 1.08rem;
+  font-weight: 900;
+  border-bottom: 1px solid #e0fdfa;
+  letter-spacing: .02em;
+  user-select: none;
+  min-height: 56px;
+}
+.broadcast-header i {
+  font-size: 1.33em;
+  opacity: .92;
+}
+.broadcast-header h4 {
+  margin: 0;
+  font-size: 1.07em;
+  font-weight: 900;
+  letter-spacing: .02em;
+}
+.toggle-icon {
+  margin-left: auto;
+  font-size: 1.55em !important;
+  transition: transform .24s cubic-bezier(.45,.7,.3,1.2);
+}
+.broadcast-card:not(.collapsed) .toggle-icon {
+  transform: rotate(180deg);
+}
+
+/* فرم */
+.broadcast-body {
+  padding: .99rem 2.2rem .82rem 2.2rem;
+  background: #fcfcfd;
+  display: flex;
+  flex-direction: row;
+  gap: 1.5rem;
+  align-items: flex-end;
+  max-height: 230px;
+}
+.broadcast-row {
+  display: flex;
+  flex-direction: column;
+  gap: 0.38rem;
+  flex: 1;
+  min-width: 0;
+}
+.broadcast-row label {
+  font-weight: 800;
+  color: #0ea5e9;
+  font-size: .97rem;
+  margin-bottom: 0.03rem;
+}
+.broadcast-row select,
+.broadcast-row textarea {
+  width: 100%;
+  border: 1.3px solid #e0fdfa;
+  border-radius: 9px;
+  padding: .6rem .85rem;
+  font-size: .99rem;
+  font-family: inherit;
+  background: #f8fafc;
+  outline: none;
+  resize: none;
+  transition: border .13s, box-shadow .14s;
+  font-weight: 500;
+  color: #2e3743;
+  box-shadow: 0 1px 7px #10b98109;
+}
+.broadcast-row select:focus,
+.broadcast-row textarea:focus {
+  border-color: #10b981;
+  box-shadow: 0 0 0 2px #0ea5e91a;
+}
+.broadcast-row textarea {
+  min-height: 45px;
+  max-height: 100px;
+  line-height: 1.85;
+}
+
+.broadcast-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  min-width: 105px;
+  margin-right: 1rem;
+  gap: 0.55rem;
+}
+.broadcast-actions button {
+  background: linear-gradient(90deg, var(--primary) 30%, var(--secondary) 90%);
+  color: #fff;
+  border: none;
+  border-radius: 9px;
+  padding: .65rem 1.4rem;
+  font-size: 1.04rem;
+  font-weight: 900;
+  box-shadow: 0 3px 14px #10b98116;
+  transition: transform .09s, box-shadow .13s, background .11s;
+  letter-spacing: .01em;
+  cursor: pointer;
+  width: 100%;
+}
+.broadcast-actions button:hover {
+  background: linear-gradient(90deg, var(--secondary) 10%, var(--primary) 85%);
+  transform: translateY(-1px) scale(1.03);
+  box-shadow: 0 7px 22px #10b98118, 0 2px 8px #0ea5e911;
+}
+
+.broadcast-status {
+  margin-top: .12rem;
+  font-size: .97rem;
+  min-height: 1.2em;
+  text-align: right;
+  font-weight: 700;
+  letter-spacing: .01em;
+  color: #0ea5e9;
+  transition: color .16s;
+}
+
+/* ریسپانسیو: موبایل */
+@media (max-width: 900px) {
+  .broadcast-body {
+    padding: .88rem 1.1rem .7rem 1.1rem;
+    gap: 1.1rem;
+    max-height: 260px;
+  }
+}
+@media (max-width: 600px) {
+  .broadcast-card {
+    border-radius: 10px;
+    font-size: .98rem;
+    margin: 1rem 0 .8rem 0;
+  }
+  .broadcast-header {
+    padding: .66rem .85rem .66rem .7rem;
+    font-size: 1.01rem;
+    min-height: 46px;
+  }
+  .broadcast-body {
+    flex-direction: column;
+    align-items: stretch;
+    gap: .67rem;
+    max-height: none;
+    padding: .88rem .7rem .5rem .7rem;
+  }
+  .broadcast-actions {
+    margin: 0;
+    width: 100%;
+    align-items: stretch;
+  }
+  .broadcast-actions button {
+    border-radius: 8px;
+    font-size: .97rem;
+    padding: .73rem 0;
+    width: 100%;
+  }
+}
+
+@media (max-width: 370px) {
+  .broadcast-card {
+    font-size: .94rem;
+    border-radius: 8px;
+  }
+  .broadcast-header {
+    padding: .48rem .4rem;
+    font-size: .93rem;
+  }
+  .broadcast-body {
+    padding: .58rem .2rem .4rem .2rem;
+    gap: .43rem;
+  }
+  .broadcast-row label {
+    font-size: .93rem;
+  }
+}
+
+
+
+
+
+
+/* ============ Sender-Info Modal ============ */
+.sender-modal-overlay{
+  position:fixed; inset:0; background:rgba(0,0,0,.35);
+  backdrop-filter:blur(3px);
+  display:none; align-items:center; justify-content:center;
+  z-index:10000; animation:fadeIn .32s;
+}
+.sender-modal{
+  width:380px; max-width:95vw; background:#fff;
+  border-radius:24px; padding:2rem 1.6rem 1.4rem;
+  box-shadow:0 12px 40px #00000030;
+  direction:rtl; position:relative; animation:fadeIn .35s;
+}
+.sender-modal-close{
+  position:absolute; top:1rem; left:1rem;
+  background:#eafaf4; border:none; border-radius:40px;
+  color:#10b981; font-size:1.55rem; cursor:pointer;
+  width:2.6rem; height:2.6rem;
+  transition:background .15s,color .15s;
+}
+.sender-modal-close:hover{background:#10b981;color:#fff;}
+.sender-modal h4{
+  margin:0 0 1.1rem 0; font-size:1.15rem;
+  font-weight:900; color:#0ea5e9; letter-spacing:.3px;
+}
+.sender-info-row{margin:.55rem 0; font-size:1rem;}
+.sender-info-label{font-weight:700; color:#444; min-width:6rem; display:inline-block;}
+.sender-info-value{color:#10b981; font-weight:500;}
+
+
+
+
+
+
+
+.action-btn.block {
+  background: #ef4444;
+  color: #fff;
+}
+.action-btn.block:hover {
+  background: #dc2626;
+}
+
+
+
+
+
+
+
+/* --- User Modal Popup --- */
+.user-modal-overlay {
+  position: fixed; inset: 0; background: rgba(40,60,50,0.25); z-index: 9998;
+  display: flex; align-items: center; justify-content: center; animation: fadeIn .35s;
+}
+.user-modal {
+  background: #fff;
+  border-radius: 1.5rem;
+  box-shadow: 0 12px 50px #10b98144;
+  min-width: 350px; max-width: 98vw; width: 420px;
+  padding: 2.3rem 1.7rem 1.1rem;
+  direction: rtl;
+  position: relative;
+  z-index: 9999;
+  animation: fadeIn .33s;
+}
+.user-modal-close {
+  position: absolute; top: 1.2rem; left: 1.2rem;
+  background: #eafaf4;
+  border-radius: 10px;
+  border: none; color: #16a34a;
+  font-size: 1.6rem;
+  cursor: pointer; padding: 0.25rem 1rem;
+  transition: background .15s, color .15s;
+}
+.user-modal-close:hover { background: #10b981; color: #fff; }
+.user-modal-title { color: #10b981; font-weight: bold; font-size: 1.1rem; margin-bottom: 1.3rem;}
+.user-modal-row { margin-bottom: .85rem; font-size: 1.01rem;}
+.user-modal-label { color: #333; font-weight: 700; min-width: 5rem; display: inline-block;}
+.user-modal-value { color: #0ea5e9; font-weight: 500;}
+.user-modal-form label { font-size: 0.96rem; font-weight: 500; color: #666;}
+.user-modal-form textarea {
+  width: 100%; min-height: 66px; border-radius: 9px;
+  border: 1.2px solid #10b98144; margin-top: 0.2rem;
+  font-family: inherit; font-size: 1.01rem; padding: 0.4rem 0.6rem; outline: none; transition: border .13s;
+}
+.user-modal-form textarea:focus { border-color: #10b981; }
+.user-modal-form button {
+  margin-top: 0.7rem; padding: 0.41rem 1.4rem;
+  border-radius: 9px; border: none; color: #fff;
+  background: linear-gradient(135deg,#10b981 0%,#0ea5e9 100%);
+  font-weight: bold; font-size: 1.08rem; cursor: pointer;
+  transition: background .15s;
+}
+.user-modal-form button:active { background: #0ea5e9; }
+.user-modal-success {
+  color: #10b981; background: #eafaf4; border-radius: 9px;
+  padding: 0.6rem 1rem; margin-top: 1rem; font-weight: 500; text-align: center;
+}
+  </style>
+</head>
+<body>
+  <div class="dashboard-container">
+    <!-- Sidebar -->
+    <nav class="sidebar" id="sidebar">
+      <div class="sidebar-header">ویترینت</div>
+      <div class="sidebar-menu">
+        <a href="#" class="active" data-section="dashboard"><i class="ri-dashboard-line"></i> داشبورد</a>
+        <a href="#" data-section="daily-visits"><i class="ri-eye-line"></i> آمار روزانه بازدید</a>
+        <a href="#" data-section="users"><i class="ri-user-3-line"></i> کاربران <span class="count" id="count-users">0</span></a>
+        <a href="#" data-section="sellers"><i class="ri-store-2-line"></i> فروشنده‌ها <span class="count" id="count-sellers">0</span></a>
+        <a href="#" data-section="products"><i class="ri-box-3-line"></i> محصولات <span class="count" id="count-products">0</span></a>
+        <a href="#" data-section="plans"><i class="ri-money-dollar-circle-line"></i> مدیریت قیمت پلن‌ها</a>
+        <a href="#" data-section="ads"><i class="ri-megaphone-line"></i> مدیریت قیمت تبلیغات</a>
+<a href="#" data-section="messages">
+  <i class="ri-chat-1-line"></i> پیام‌ها
+  <span class="count" id="count-messages">0</span>
+</a>
+<a href="#" data-section="reports"><i class="ri-file-list-line"></i> گزارشات <span class="count" id="count-reports">0</span></a>
+
+
+      </div>
+      <div class="sidebar-footer">
+        <span>© 2025 vitrinNet Panel</span>
+      </div>
+    </nav>
+ <!-- Main Content
+–––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––– -->
+<div class="main-content">
+  <!-- دکمهٔ باز/بستن سایدبار در موبایل -->
+  <button class="sidebar-toggle-btn" id="sidebarToggle">
+    <i class="ri-menu-3-line"></i>
+  </button>
+
+  <!-- ۱) داشبورد -->
+  <div class="section-panel" id="dashboard-panel">
+    <div class="content-header">داشبورد آماری</div>
+    <div class="cards">
+      <div class="card" id="card-visits">
+        <span class="icon"><i class="ri-eye-line"></i></span>
+        <div><div class="num" id="visit-today">0</div><div class="label">بازدید امروز</div></div>
+      </div>
+      <div class="card" id="card-users">
+        <span class="icon"><i class="ri-user-add-line"></i></span>
+        <div><div class="num" id="register-user-today">0</div><div class="label">ثبت‌نام کاربران امروز</div></div>
+      </div>
+      <div class="card" id="card-sellers">
+        <span class="icon"><i class="ri-store-2-line"></i></span>
+        <div><div class="num" id="register-seller-today">0</div><div class="label">ثبت‌نام فروشنده امروز</div></div>
+      </div>
+      <div class="card" id="card-products">
+        <span class="icon"><i class="ri-box-3-line"></i></span>
+        <div><div class="num" id="products-total">0</div><div class="label">تعداد محصولات</div></div>
+      </div>
+    </div>
+    <div id="dashboard-dynamic-chart-wrap"></div>
+  </div>
+
+  <!-- پنل جدید برای آمار روزانه بازدید -->
+  <div class="section-panel" id="daily-visits-panel" style="display:none;">
+    <p style="text-align:center">در حال بارگیری...</p>
+  </div>
+
+  <!-- ۲) کاربران -->
+<!-- ۲) کاربران -->
+<div class="section-panel" id="users-panel" style="display:none;">
+  <div class="content-header">کاربران <span class="header-count" id="header-users-count"></span></div>
+  <div style="margin-bottom:1rem;display:flex;gap:0.5rem;align-items:center;">
+    <input type="text" id="userSearch" placeholder="جستجو نام، نام خانوادگی یا تلفن..." 
+           style="width:100%;max-width:400px;padding:0.7rem 1rem;border-radius:12px;border:1.5px solid #10b98144;font-size:1rem;font-family:inherit;outline:none;transition:border .15s;">
+  </div>
+  <div class="table-wrap">
+    <table id="usersTable">
+      <thead><tr><th>نام</th><th>ایمیل</th><th>عملیات</th></tr></thead>
+      <tbody></tbody>
+    </table>
+  </div>
+</div>
+
+  <!-- ۳) فروشنده‌ها -->
+  <div class="section-panel" id="sellers-panel" style="display:none;">
+    <div class="content-header">فروشنده‌ها <span class="header-count" id="header-sellers-count"></span></div>
+    <div style="margin-bottom:1rem;display:flex;gap:0.5rem;align-items:center;">
+  <input type="text" id="sellerSearch" placeholder="جستجو نام فروشگاه، فروشنده یا آدرس..." 
+         style="width:100%;max-width:400px;padding:0.7rem 1rem;border-radius:12px;border:1.5px solid #10b98144;font-size:1rem;font-family:inherit;outline:none;transition:border .15s;">
+</div>
+    <div class="sellers-filters" style="display:flex;gap:.7rem;margin-bottom:1.1rem;flex-wrap:wrap">
+      <button class="seller-filter-btn active" data-sort="newest">جدیدترین</button>
+      <button class="seller-filter-btn" data-sort="oldest">قدیمی‌ترین</button>
+      <button class="seller-filter-btn" data-sort="mostvisited">پربازدیدترین</button>
+      <button class="seller-filter-btn" data-sort="mostproducts">پرمحصول‌ترین</button>
+    </div>
+
+    <div class="table-wrap">
+      <table id="sellersTable">
+        <thead>
+          <tr>
+            <th>نام فروشگاه</th><th>نام صاحب فروشگاه</th><th>آدرس فروشگاه</th>
+            <th>لینک فروشگاه</th><th>تعداد محصولات</th><th>بازدید</th><th>عملیات</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ۴) محصولات -->
+  <div class="section-panel" id="products-panel" style="display:none;">
+    <div class="content-header">محصولات <span class="header-count" id="header-products-count"></span></div>
+
+<!-- جستجوی محصولات -->
+<div style="margin-bottom:1rem;display:flex;gap:0.5rem;align-items:center;">
+  <input type="text" id="productSearch" placeholder="جستجو نام محصول، فروشنده یا فروشگاه..." 
+         style="width:100%;max-width:400px;padding:0.7rem 1rem;border-radius:12px;border:1.5px solid #10b98144;font-size:1rem;font-family:inherit;outline:none;transition:border .15s;">
+</div>
+
+<!-- فیلتر مرتب‌سازی محصولات -->
+<div class="products-filters" style="display:flex;gap:.7rem;margin-bottom:1.1rem;flex-wrap:wrap">
+  <button class="seller-filter-btn active" data-sort="newest">جدیدترین</button>
+  <button class="seller-filter-btn" data-sort="oldest">قدیمی‌ترین</button>
+</div>
+
+    <div class="table-wrap">
+      <table id="productsTable">
+    <!-- productsTable – header AFTER the change -->
+<thead>
+  <tr>
+    <th>نام محصول</th>  <!-- ستون جدید برای نام محصول -->
+    <th>نام فروشگاه</th>
+    <th>نام صاحب فروشگاه</th>
+    <th>آدرس فروشگاه</th>
+    <th>لینک فروشگاه</th>
+    <th>عملیات</th>
+  </tr>
+</thead>
+
+        <tbody></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ۵) مدیریت قیمت پلن‌ها -->
+  <div class="section-panel" id="plans-panel" style="display:none;">
+    <div class="content-header">مدیریت قیمت پلن‌ها</div>
+    <div class="plans-center" style="flex-direction:column;gap:2.5rem;width:100%;max-width:1000px;">
+      <form id="plansForm">
+        <div>
+          <input id="seller-phone-plans" type="text" placeholder="شماره موبایل فروشنده (اختیاری برای قیمت اختصاصی)" style="width:100%;margin-bottom:1rem;padding:0.9rem 1.2rem;font-size:1.15rem;background:#f8fafc;border:1.8px solid #e0fdfa;border-radius:16px;outline:none;"/>
+        </div>
+        <div>
+          <label for="plan-1month">اشتراک ۱ ماهه</label>
+          <input id="plan-1month" type="number" />
+        </div>
+        <div>
+          <label for="plan-3month">اشتراک ۳ ماهه</label>
+          <input id="plan-3month" type="number" />
+        </div>
+        <div>
+          <label for="plan-12month">اشتراک ۱۲ ماهه</label>
+          <input id="plan-12month" type="number" />
+        </div>
+        <button type="submit">ذخیره قیمت پلن‌ها</button>
+        <div id="plansMsg" style="display:none;"></div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ۶) مدیریت قیمت تبلیغات (جداسازی‌شده) -->
+  <div class="section-panel" id="ads-panel" style="display:none;">
+    <div class="content-header">مدیریت قیمت تبلیغات</div>
+    <div class="plans-center" style="flex-direction:column;gap:2.5rem;width:100%;max-width:1000px;">
+      <form id="adsForm" class="priceForm">
+        <div>
+          <input id="seller-phone-ads" type="text" placeholder="شماره موبایل فروشنده (اختیاری برای قیمت اختصاصی)" style="width:100%;margin-bottom:1rem;padding:0.9rem 1.2rem;font-size:1.15rem;background:#f8fafc;border:1.8px solid #e0fdfa;border-radius:16px;outline:none;"/>
+        </div>
+        <div>
+          <label for="ad_search">تبلیغ جستجو</label>
+          <input id="ad_search" type="number" />
+        </div>
+        <div>
+          <label for="ad_home">تبلیغ صفحه اول</label>
+          <input id="ad_home" type="number" />
+        </div>
+        <div>
+          <label for="ad_products">تبلیغ بین محصولات</label>
+          <input id="ad_products" type="number" />
+        </div>
+        <button type="submit">ذخیره قیمت تبلیغات</button>
+        <div id="adsMsg" style="display:none;"></div>
+      </form>
+    </div>
+  </div>
+
+
+
+<!-- ۷) پیام‌ها -->
+<div class="section-panel" id="messages-panel" style="display:none;">
+  <div class="content-header">پیام‌ها <span class="header-count" id="header-messages-count"></span></div>
+
+
+<!-- فیلتر پیام‌ها -->
+<!-- فیلتر پیام‌ها -->
+<div class="messages-filters" style="display:flex;gap:0.7rem;margin-bottom:1.1rem;flex-wrap:wrap;">
+  <button class="seller-filter-btn active" data-filter="seller">پیام‌های فروشنده</button>
+  <button class="seller-filter-btn" data-filter="customer">پیام‌های مشتری</button>
+  <button class="seller-filter-btn" data-filter="newest">جدیدترین</button>
+  <button class="seller-filter-btn" data-filter="oldest">قدیمی‌ترین</button>
+  <button class="seller-filter-btn" data-filter="unanswered">پاسخ‌نداده‌ها</button>
+</div>
+
+
+
+<!-- 📢 کارت ارسال پیام همگانی -->
+<!-- 📢 کارت ارسال پیام همگانی -->
+<div class="broadcast-card collapsed" id="broadcastCard">
+  <div class="broadcast-header" id="broadcastHeader">
+    <i class="ri-mail-send-line"></i>
+    <h4>ارسال پیام همگانی</h4>
+    <i class="ri-arrow-down-s-line toggle-icon" id="broadcastToggleIcon"></i>
+  </div>
+  <div class="broadcast-body" id="broadcastBody">
+    <!-- بقیه فرم بدون تغییر -->
+    <div class="broadcast-row">
+      <label for="broadcastTarget">ارسال به:</label>
+      <select id="broadcastTarget">
+        <option value="sellers">👩‍💼 همه فروشنده‌ها</option>
+        <option value="customers">🛒 همه مشتری‌ها</option>
+      </select>
+    </div>
+    <div class="broadcast-row">
+      <label for="broadcastText">متن پیام:</label>
+      <textarea id="broadcastText" placeholder="متن پیام خود را بنویسید…"></textarea>
+    </div>
+    <div class="broadcast-actions">
+      <button onclick="sendBroadcastMessage()">ارسال پیام</button>
+    </div>
+    <p id="broadcastStatus" class="broadcast-status"></p>
+  </div>
+</div>
+
+
+
+
+  <div class="table-wrap">
+    <table id="messagesTable">
+<thead>
+  <tr>
+    <th>پیام جدید</th>
+    <th>آخرین پیام</th>
+    <th>فرستنده</th>
+    <th>تاریخ</th>
+    <th>عملیات</th>
+  </tr>
+</thead>
+
+
+
+
+      <tbody></tbody>
+    </table>
+  </div>
+</div>
+
+
+
+<!-- پنل جدید برای گزارش‌ها -->
+<div class="section-panel" id="reports-panel" style="display:none;">
+  <p style="text-align:center">در حال بارگیری...</p>
+</div>
+
+
+</div><!-- /main-content -->
+
+
+
+
+
+
+
+
+
+
+<script>
+const API_BASE = "http://localhost:5000/api";
+// اگر admin_token ست نشده، از کلید token هم استفاده کن
+
+let messagesInterval = null;
+let badgeInterval = null; // ⬅️ تایمر مجزا برای بج
+
+/**
+ * شروع polling پیام‌ها هر 5 ثانیه
+ */
+function startMessagesPolling() {
+  // اگر قبلاً یک polling فعال است، آن را متوقف کن
+  if (messagesInterval) clearInterval(messagesInterval);
+  // فوراً یک‌بار پیام‌ها را بگیر
+  fetchMessages().catch(console.error);
+  // سپس هر 5 ثانیه یک‌بار
+  messagesInterval = setInterval(() => {
+    fetchMessages().catch(console.error);
+  }, 5000);
+}
+
+/**
+ * متوقف کردن polling
+ */
+function stopMessagesPolling() {
+  if (messagesInterval) {
+    clearInterval(messagesInterval);
+    messagesInterval = null;
+  }
+}
+
+
+
+
+/* بعد از const token = … این را اضافه کن */
+function toIdString(raw) {
+  if (!raw) return '';
+  
+  if (typeof raw === 'string') return raw;
+  
+  if (typeof raw === 'object') {
+    if (raw.$oid) return String(raw.$oid);
+    if (raw._id) return String(raw._id);
+    if (raw.id) return String(raw.id);
+    
+    if (typeof raw.toString === 'function') {
+      return raw.toString();
+    }
+  }
+  
+  return String(raw);
+}
+
+
+
+
+
+
+
+// -------- داده‌های تستی آمار بازدید (فیک) --------
+let days30 = Array.from({length: 30}, (_,i) => {
+  let d = new Date();
+  d.setDate(d.getDate() - (29-i));
+  return d.toLocaleDateString('fa-IR', {month:'numeric', day:'numeric'});
+});
+let weekDays = ['شنبه', 'یکشنبه', 'دوشنبه', 'سه‌شنبه', 'چهارشنبه', 'پنجشنبه', 'جمعه'];
+let last7daysIdx = (new Date().getDay() + 6) % 7;
+let weekLabels = [];
+for (let i=6;i>=0;i--) weekLabels.push(weekDays[(last7daysIdx-i+7)%7]);
+
+let visitsPerDay = Array.from({length: 30}, (_,i)=> Math.round(60+Math.sin(i/3)*40+Math.random()*25));
+let usersPerDay = Array(30).fill(0);
+let sellersPerDay = Array(30).fill(0);
+let productsPerDay = Array(30).fill(0);
+
+let usersList = [];
+let shopsList = [];
+let productsList = [];
+let productsSortMode = 'newest';  // حالت پیش‌فرض مرتب‌سازی
+let productSearchQuery = '';      // کوئری جستجو (برای فیلتر)
+
+
+let messagesList = [];
+
+
+
+
+/* --- global name-maps ------------------------------------ */
+/* --- global name-maps -------------------------------- */
+let sellerNameById = {};   // { sellerId : "نام فروشنده / فروشگاه" }
+let userNameById   = {};   // { userId   : "نام کاربر" }
+
+/* -------------------- buildNameMaps (FIXED) -------------------- */
+/**
+ * تمام شناسه‌های ممکن فروشنده و کاربر را به «قابل‌نمایش‌ترین» نامشان نگاشت می‌کند.
+ * اولویت نام‌ها، از صریح‌ترین (همراه چت) تا محاسبه‌شده از دیتابیس است.
+ */
+function normSellerId(id) {
+  // اگر رشته خالی یا undefined بود
+  if (!id) return '';
+  // اگر همین الان هم shopurl: بود
+  if (typeof id !== 'string') id = String(id);
+  if (id.startsWith('shopurl:')) return id;
+  // اگر فقط اسلاگ هست
+  return 'shopurl:' + id;
+}
+
+function buildNameMaps() {
+  sellerNameById = {};
+
+  // فروشگاه‌ها
+  shopsList.forEach(shop => {
+    const ids = [
+      shop._id, shop._sid, shop.id,
+      shop.sellerId, shop.seller_id,
+      shop.shopurl
+    ].filter(Boolean).map(toIdString);
+
+    const label = (shop.ownerName || '').trim() ||
+      (`${shop.ownerFirstname || ''} ${shop.ownerLastname || ''}`).trim() ||
+      shop.storename || shop.storeName || shop.shopLogoText || 'فروشنده';
+
+    ids.forEach(id => { 
+      if (id) sellerNameById[normSellerId(id)] = label; 
+    });
+  });
+
+  // پیام‌ها - نام صریح فروشنده
+  messagesList.forEach(chat => {
+    const ids = [
+      chat.sellerId,
+      chat.shopurl,
+      chat.seller?._id,
+      chat.seller?.id
+    ].filter(Boolean).map(toIdString);
+
+    const label =
+      (chat.sellerName || chat.storeName ||
+        chat.seller?.storename || chat.seller?.ownerName || '').trim();
+
+    if (label)
+      ids.forEach(id => { 
+        if (id) sellerNameById[normSellerId(id)] = label; 
+      });
+  });
+
+  // Patch: shopurl → sellerId
+  messagesList.forEach(chat => {
+    const sid  = normSellerId(toIdString(chat.sellerId));
+    const surl = normSellerId(toIdString(chat.shopurl));
+    if (!sid || !surl) return;
+    // پیدا کردن فروشگاه مطابق shopurl
+    const shop = shopsList.find(s => normSellerId(toIdString(s.shopurl)) === surl);
+    if (!shop) return;
+    // برچسب فروشگاه
+    const label =
+      (shop.ownerName || '').trim() ||
+      (`${shop.ownerFirstname||''} ${shop.ownerLastname||''}`).trim() ||
+      shop.storename || shop.storeName || shop.shopLogoText || 'فروشنده';
+    // غنی‌سازی نقشه
+    sellerNameById[sid] = label;
+  });
+
+  // مشتری‌ها
+  userNameById = {};
+  usersList.forEach(u => {
+    const ids = [
+      u._id, u.id, u.userId, u.user_id, u.customerId
+    ].filter(Boolean).map(toIdString);
+
+    const label =
+      (u.fullName || u.fullname || '').trim() ||
+      (`${u.firstName || u.firstname || ''} ${u.lastName || u.lastname || ''}`).trim() ||
+      u.name || u.username || u.phone || 'مشتری';
+
+    ids.forEach(id => { 
+      if (id) userNameById[id] = label; 
+    });
+  });
+
+  // پیام‌ها - نام صریح مشتری
+  messagesList.forEach(chat => {
+    const id = toIdString(chat.customerId || chat.userId);
+    const name = (chat.customerName || chat.userName || '').trim();
+    if (id && name) userNameById[id] = name;
+  });
+}
+
+
+
+
+
+
+
+// ← همینجا، درست بعد از let messagesList = [];
+/* ------------------------------- fetchMessages (FIXED) ------------------------------ */
+async function fetchMessages() {
+  console.log('⚙️ fetchMessages called');
+
+const res = await fetch(`${API_BASE}/chats/all`, { credentials: 'include' });
+
+  const data = await res.json();
+
+  if (!res.ok) {
+    console.error('❌ خطا در واکشی پیام‌ها:', data);
+    throw new Error(data.error || 'خطا در واکشی پیام‌ها');
+  }
+
+  /* ۱) ذخیره لیست چت‌ها */
+  messagesList = Array.isArray(data) ? data : (data.chats || []);
+
+  /* ۲) نرمال‌سازی شناسه‌ها در خود چت (برای سازگاری کامل) */
+  messagesList.forEach(c => {
+    if (c.sellerId)   c.sellerId   = toIdString(c.sellerId);
+    if (!c.sellerId && c.shopurl)
+  c.sellerId = 'shopurl:' + c.shopurl;     // ← اضافه کنید
+
+    if (c.customerId) c.customerId = toIdString(c.customerId);
+  });
+
+  /* ۳) مپ نام‌ها را «بعد از» داشتن پیام‌ها بسازیم */
+  buildNameMaps();
+
+  /* ۴) آپدیت شمارنده‌ها */
+  updateSidebarCounts();
+  updateHeaderCounts();
+
+  /* ۵) اگر پنل پیام‌ها همین حالا باز است، جدول را فوراً رندر کن */
+  if (panels.messages.style.display !== 'none') {
+    renderMessages();
+  }
+}
+
+
+
+
+function getTotalUnreadMessages() {
+  let total = 0;
+  messagesList.forEach(chat => {
+    if (Array.isArray(chat.messages)) {
+      total += chat.messages.filter(
+        m => m.from === 'seller' && !m.readByAdmin
+      ).length;
+    }
+  });
+  return total;
+}
+
+
+
+
+
+
+
+
+/* ------------------ helpers/name-utils.js ------------------ */
+
+/**
+ * یک رشته را نرمالایز می‌کند (حذف فاصله‌های دوطرف و چند space پیاپی)
+ */
+function clean(str = '') {
+  return String(str).replace(/\s+/g, ' ').trim();
+}
+
+/**
+ * از یک شیء (یا حتی رشته) سعی می‌کند نام قابل‌نمایش استخراج کند.
+ * کلیدهای متداول + کلیدهای اضافی (آرگومان دوم) بررسی می‌شوند.
+ */
+function extractName(obj, extraKeys = []) {
+  if (!obj) return '';
+
+  // اگر خودِ ورودی رشته باشد
+  if (typeof obj === 'string') return clean(obj);
+
+  // کلیدهای رایج
+  const commonKeys = [
+    'fullName', 'fullname', 'name', 'username',      // عمومی
+    'storename', 'storeName',                        // فروشنده
+    'ownerName',                                     // فروشنده
+    'firstName', 'firstname', 'lastName', 'lastname' // جداگانه
+  ];
+
+  for (const k of [...commonKeys, ...extraKeys]) {
+    if (obj[k]) return clean(obj[k]);
+  }
+
+  // حالت first/last جدا
+  if (obj.firstName || obj.firstname || obj.lastName || obj.lastname) {
+    return clean(
+      `${obj.firstName || obj.firstname || ''} ${obj.lastName || obj.lastname || ''}`
+    );
+  }
+
+  return '';
+}
+
+/* --------------- core/getSenderName.js ---------------- */
+
+/**
+ * با درنظرگرفتن انواع ساختارهای ممکن پیام، نام نمایش‌داده‌شدهٔ فرستنده را برمی‌گرداند.
+ * همیشه یک مقدار «غیرفالسـی» (حداقل عنوان پیش‌فرض) برمی‌گردد.
+ */
+/* --------------- core/getSenderName.js ---------------- */
+/**
+ * براى هر پیام برچسب «فرستنده» را برمى‌گرداند.
+ * اولویت: نام صریح در خود پیام → نام صریح در شیء chat → mapها → لیست‌ها → پیش‌فرض
+/* -------------------- getSenderName (FIXED) -------------------- */
+/**
+ * نام قابل‌نمایش فرستندهٔ یک پیام را برمی‌گرداند.
+ * اولویت: ۱) نام صریح در خود پیام، ۲) نام صریح در شیء chat،
+ * ۳) مپ‌های ازپیش‌ساخته، ۴) جست‌وجو در لیست‌ها، ۵) برچسب پیش‌فرض.
+ */
+function getSenderName (chat = {}, msg = {}) {
+
+  /* ---------- 1) نام صریح داخل خود پیام ---------- */
+  const explicitMsg =
+    extractName(msg,         ['fromName', 'senderName', 'displayName']) ||
+    extractName(msg.sender || {}, ['fromName', 'senderName', 'displayName']);
+  if (explicitMsg) return explicitMsg;
+
+  /* ---------- 2) نام صریح داخل شیء Chat ---------- */
+  const explicitChat =
+    extractName(chat, ['sellerName',   'seller_name',
+                       'storeName',    'store_name',
+                       'customerName', 'customer_name',
+                       'userName',     'user_name',
+                       'username']);
+  if (explicitChat) return explicitChat;
+
+  /* ---------- 3) تشخیص «نقش» فرستنده ---------- */
+  let role = String(msg.from || chat.role || '').toLowerCase().trim();
+
+  /* اگر نقش صریح نیست، با وجود شناسه حدس بزنیم */
+  if (!role) {
+    if (msg.sellerId   || chat.sellerId   || chat.seller_id || chat.shopurl)
+      role = 'seller';
+    else if (msg.customerId || chat.customerId || chat.userId ||
+             chat.customer_id || chat.user_id)
+      role = 'customer';
+    else if (msg.fromId === 'admin' || chat.admin)
+      role = 'admin';
+  }
+
+  /* ---------- 4) فروشنده ---------- */
+  if (role === 'seller') {
+    const sid = toIdString(
+      msg.sellerId || chat.sellerId || chat.seller_id ||
+      msg.shopurl  || chat.shopurl  || ''
+    );
+
+    if (sellerNameById[sid]) return sellerNameById[sid];
+
+    /* جست‌وجو در shopsList برای اطلاعات بیشتر */
+    const shop = shopsList.find(s =>
+      s._sid === sid || toIdString(s.shopurl) === sid
+    );
+    if (shop) {
+      const name =
+        (shop.ownerName || '').trim() ||
+        (`${shop.ownerFirstname || ''} ${shop.ownerLastname || ''}`).trim() ||
+        shop.storename || shop.storeName || '';
+      if (name) return name;
+    }
+    return 'فروشنده';
+  }
+
+  /* ---------- 5) مشتری / کاربر ---------- */
+  if (role === 'customer' || role === 'user') {
+    const uid = toIdString(
+      msg.customerId   || chat.customerId   ||
+      chat.customer_id || chat.userId       ||
+      chat.user_id     || ''
+    );
+
+    if (userNameById[uid]) return userNameById[uid];
+
+    /* fallback → جست‌وجو در usersList */
+    const user = usersList.find(u =>
+      toIdString(u._id || u.id || u.userId || u.user_id) === uid
+    );
+    if (user) {
+      const name =
+        (user.fullName || user.fullname || '').trim() ||
+        (`${user.firstName || user.firstname || ''} ${user.lastName || user.lastname || ''}`).trim() ||
+        user.name || user.username || '';
+      if (name) return name;
+    }
+    return 'مشتری';
+  }
+
+  /* ---------- 6) ادمین یا فرستندهٔ ناشناس ---------- */
+  return 'ادمین';
+}
+
+
+
+
+
+
+/* ───── 2) نسخهٔ نهاییِ تابع renderMessages ───── */
+/* ───── نسخهٔ اصلاح‌شده‌ی تابع renderMessages ───── */
+function renderMessages() {
+  const tbody = document.querySelector('#messagesTable tbody');
+  tbody.innerHTML = '';
+
+  // 1. کپی لیست پیام‌ها برای فیلتر و مرتب‌سازی
+  let chats = [...messagesList];
+  
+  // 2. اعمال فیلترها
+  if (messagesFilterMode === 'seller') {
+    chats = chats.filter(chat => chat.sellerId);
+  } else if (messagesFilterMode === 'customer') {
+    chats = chats.filter(chat => !chat.sellerId);
+  } else if (messagesFilterMode === 'unanswered') {
+    chats = chats.filter(chat => {
+      const msgs = chat.messages || [];
+      return msgs.length > 0 && msgs[msgs.length - 1].from !== 'admin';
+    });
+  }
+
+  // 3. مرتب‌سازی بر اساس تاریخ
+  chats.sort((a, b) => {
+    const aLastMsg = a.messages[a.messages.length - 1];
+    const bLastMsg = b.messages[b.messages.length - 1];
+    const aTime = aLastMsg ? new Date(aLastMsg.createdAt || aLastMsg.date).getTime() : 0;
+    const bTime = bLastMsg ? new Date(bLastMsg.createdAt || bLastMsg.date).getTime() : 0;
+    
+    return messagesFilterMode === 'oldest' ? aTime - bTime : bTime - aTime;
+  });
+
+  // 4. بررسی خالی بودن لیست پس از فیلتر
+  if (chats.length === 0) {
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="5" style="text-align:center;color:#888;padding:1.5rem">
+          ${getEmptyFilterMessage()}
+        </td>
+      </tr>`;
+    return;
+  }
+
+  // 5. رندر پیام‌های فیلتر شده
+  chats.forEach(chat => {
+    const msgs = chat.messages || [];
+    const lastMsg = msgs[msgs.length - 1];
+    const senderMsg = msgs.slice().reverse().find(m => m.from !== 'admin') || lastMsg;
+
+    const senderLabel = getSenderName(chat, senderMsg);
+    const unreadCount = msgs.filter(m => m.from === 'seller' && !m.readByAdmin).length;
+
+    const fullText = lastMsg && lastMsg.text ? lastMsg.text : '-';
+    const shortText = fullText.length > 36 ? fullText.slice(0, 36) + '…' : fullText;
+
+    const raw = lastMsg && (lastMsg.createdAt || lastMsg.date);
+    const dt = raw ? new Date(raw) : null;
+    const faDate = (dt && !isNaN(dt.valueOf()))
+      ? dt.toLocaleString('fa-IR', {
+          hour12: false,
+          year: 'numeric',
+          month: '2-digit',
+          day: '2-digit',
+          hour: '2-digit',
+          minute: '2-digit'
+        })
+      : '—';
+
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td style="text-align:center;color:#10b981;font-weight:bold">
+        ${unreadCount
+          ? `<span style="background:#eafaf4;border-radius:8px;padding:2px 10px">${unreadCount}</span>`
+          : '۰'
+        }
+      </td>
+      <td>${shortText}</td>
+      <td class="msg-sender-cell"
+          style="cursor:pointer;color:#0ea5e9;font-weight:bold">
+        ${senderLabel}
+      </td>
+      <td>${faDate}</td>
+      <td>
+        <button class="action-btn delete" onclick="deleteMessage('${chat._id}')">حذف</button>
+        <button class="action-btn view" onclick="openChatModal('${chat._id}')">مشاهده</button>
+         <button class="action-btn block"  onclick="blockSender('${chat._id}')">مسدودسازی</button>
+
+      </td>`;
+    
+    tbody.appendChild(tr);
+
+    // افزودن کلیک برای نمایش اطلاعات فرستنده
+    tr.querySelector('.msg-sender-cell').addEventListener('click', () => {
+      openSenderModal(chat);
+    });
+  });
+}
+
+// تابع کمکی برای ایجاد پیام مناسب بر اساس فیلتر
+function getEmptyFilterMessage() {
+  switch(messagesFilterMode) {
+    case 'seller':
+      return 'هیچ پیامی از فروشنده‌ها وجود ندارد.';
+    case 'customer':
+      return 'هیچ پیامی از مشتری‌ها وجود ندارد.';
+    case 'unanswered':
+      return 'هیچ پیام پاسخ داده نشده‌ای وجود ندارد.';
+    case 'oldest':
+      return 'هیچ پیام قدیمی‌ای وجود ندارد.';
+    default:
+      return 'هیچ پیامی وجود ندارد.';
+  }
+}
+
+
+
+
+
+
+
+
+
+// ----------------- فیلتر پیام‌ها -----------------
+// ----------------- فیلتر پیام‌ها -----------------
+// ——— کد یکپارچهٔ فیلتر و رندر پیام‌ها ———
+let messagesFilterMode = 'seller'; // پیش‌فرض: پیام‌های فروشنده
+
+// تنظیم دکمه‌های فیلتر
+document.querySelectorAll('.messages-filters button').forEach(btn => {
+  btn.addEventListener('click', () => {
+    // حذف active از همه و اضافه کردن به کلیک‌شده
+    document.querySelectorAll('.messages-filters button')
+      .forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+
+    // تعیین حالت فیلتر
+    messagesFilterMode = btn.getAttribute('data-filter');
+    renderMessages();
+  });
+});
+
+
+// ————————————————————————————————
+
+
+
+
+
+// هندل کلیک روی فرستنده (می‌تونه باکس یا مودال باز کنه)
+function showSenderDetails(sellerId, label) {
+  if (label !== 'فروشنده') return;
+  alert(`مشخصات فروشنده (ID: ${sellerId})`);
+}
+
+
+async function deleteMessage(chatId) {
+  if (!confirm('آیا مطمئن هستید که می‌خواهید این چت را حذف کنید؟')) return;
+
+  try {
+    const res = await fetch(`${API_BASE}/chats/${chatId}`, {
+      method: 'DELETE',
+      credentials: 'include'
+    });
+
+    if (!res.ok) {
+      const data = await res.json();
+      throw new Error(data.error || 'خطا در حذف چت');
+    }
+
+    // بروزرسانی لیست
+    messagesList = messagesList.filter(c => c._id !== chatId);
+    renderMessages();
+    updateSidebarCounts();
+
+  } catch (err) {
+    alert('❌ ' + (err.message || 'خطا در حذف چت'));
+    console.error(err);
+  }
+}
+
+
+
+
+// مسدودسازی فرستنده مستقیماً از جدول
+// اصلاح تابع blockSender
+async function blockSender(sellerId) {
+  if (!confirm('آیا مطمئن هستید که می‌خواهید این فروشنده را مسدود کنید؟')) return;
+
+  try {
+    const res = await fetch(`${API_BASE}/sellers/${encodeURIComponent(sellerId)}/block`, {
+      method: 'POST',
+      credentials: 'include'
+    });
+    
+    if (!res.ok) {
+      const data = await res.json();
+      throw new Error(data.error || 'خطا در مسدودسازی');
+    }
+    
+    alert('✅ فروشنده با موفقیت مسدود شد.');
+    // به‌روزرسانی لیست
+    await fetchMessages();
+  } catch (err) {
+    console.error('❌ blockSender error:', err);
+    alert('❌ ' + err.message);
+  }
+}
+
+
+
+
+// -------- fetchers --------
+// ← این بخش را پیدا کنید (جایی که تابع fetchUsers تعریف شده است)
+// بهتره این خطاگیری رو هم به تابع اضافه کنید
+// ← این بخش را پیدا کنید (جایی که تابع fetchUsers تعریف شده است)
+// ─── اصلاح تابع fetchUsers ───
+// جایگزین کل تابع قبلی کنید
+async function fetchUsers() {
+  try {
+    const res = await fetch(`${API_BASE}/user`, {   // ← مسیر مفرد
+      credentials: 'include'
+      });
+    if (!res.ok) {
+      console.error('Error fetching users:', res.status, await res.text());
+      return [];
+    }
+    const data = await res.json();
+    console.log('fetchUsers returned:', data);      // ← برای دیباگ بنویسید ببینید زیر چه کلیدی آبجکتِ کاربرهاست
+    // اگر مستقیماً آرایه است:
+    if (Array.isArray(data)) return data;
+    // اگر زیر فیلد users یا data قرار گرفته:
+    if (Array.isArray(data.users)) return data.users;
+    if (Array.isArray(data.data))  return data.data;
+    return [];
+  } catch (err) {
+    console.error('Exception in fetchUsers:', err);
+    return [];
+  }
+}
+
+
+async function fetchShops() {
+  const res = await fetch(API_BASE + '/shops', {
+    credentials: 'include'
+  });
+  const data = await res.json();
+  return Array.isArray(data) ? data : (data.shops || data.data || []);
+}
+/* -------- fetchProducts (FIXED & ROBUST) -------- */
+async function fetchProducts () {
+  try {
+    const res = await fetch(`${API_BASE}/products`, { credentials: 'include' });
+
+    /* اگر پاسخ خطاست یک آرایهٔ خالی برگردانیم */
+    if (!res.ok) {
+      console.error('fetchProducts – HTTP‑', res.status, await res.text());
+      return [];
+    }
+
+    const data = await res.json();
+
+    /* در بسیاری از بک‑اِندها دادهٔ واقعی زیر کلیدهای متفاوت است */
+    const productsArr =
+          (Array.isArray(data)                    ? data                     :
+          Array.isArray(data.products)            ? data.products            :
+          Array.isArray(data.items)               ? data.items               :
+          Array.isArray(data.allProducts)         ? data.allProducts         :
+          Array.isArray(data.data?.products)      ? data.data.products       :
+          Array.isArray(data.data?.items)         ? data.data.items          :
+          []);
+
+    return productsArr;
+  } catch (err) {
+    console.error('fetchProducts – EXCEPTION', err);
+    return [];
+  }
+}
+
+
+// -------- نمایش کارت‌ها و جداول --------
+function updateDashboardCards() {
+  document.getElementById('visit-today').textContent = visitsPerDay[visitsPerDay.length-1];
+  document.getElementById('register-user-today').textContent = usersPerDay[usersPerDay.length-1];
+  document.getElementById('register-seller-today').textContent = shopsList.length;
+  document.getElementById('products-total').textContent = productsList.length;
+}
+function updateSidebarCounts() {
+  document.getElementById('count-users').textContent    = usersList.length;
+  document.getElementById('count-sellers').textContent  = shopsList.length;
+  document.getElementById('count-products').textContent = productsList.length;
+
+  const unread = getTotalUnreadMessages();
+  // فقط اگر عدد بزرگ‌تر از صفر باشد نمایش بده
+  document.getElementById('count-messages').textContent = unread > 0 ? unread : '';
+}
+function updateHeaderCounts() {
+  document.getElementById('header-users-count').textContent    = `(${usersList.length} کاربر)`;
+  document.getElementById('header-sellers-count').textContent  = `(${shopsList.length} فروشگاه)`;
+  document.getElementById('header-products-count').textContent = `(${productsList.length} محصول)`;
+
+  const unread = getTotalUnreadMessages();
+  // اگر صفر بود خالی بنویس
+  document.getElementById('header-messages-count').textContent =
+    unread > 0 ? `(${unread} پیام جدید)` : '';
+}
+
+
+
+
+// -------- نمایش کاربران --------
+// -------- نمایش کاربران --------
+function renderUsers(filteredUsers = usersList) {
+  const tbody = document.querySelector('#usersTable tbody');
+  tbody.innerHTML = '';
+  filteredUsers.forEach((user, i) => {
+    const fullName = `${user.firstname || user.name || ''} ${user.lastname || ''}`.trim();
+    const contact = user.email || user.phone || '';
+    let tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td class="user-cell user-modal-trigger" style="cursor:pointer;color:#10b981;font-weight:bold">${fullName}</td>
+      <td class="user-cell user-modal-trigger" style="cursor:pointer">${contact}</td>
+      <td>
+        <button class="action-btn delete" onclick="deleteUser(${i})"><i class="ri-delete-bin-line"></i> حذف</button>
+      </td>
+    `;
+    // اتصال ایندکس کاربر به هر سلول قابل کلیک
+    Array.from(tr.querySelectorAll('.user-modal-trigger')).forEach(td=>{
+      td.onclick = () => showUserModal(user);
+    });
+    tbody.appendChild(tr);
+  });
+  if (!filteredUsers.length) {
+    tbody.innerHTML = `<tr><td colspan="3" style="color:#888;text-align:center">هیچ کاربری یافت نشد.</td></tr>`;
+  }
+}
+
+// پاپ‌آپ اطلاعات کاربر
+function showUserModal(user) {
+  const overlay = document.getElementById('user-modal-overlay');
+  const uid = toIdString(user._id || user.id || '');
+  const fullName = `${user.firstname || ''} ${user.lastname || ''}`.trim() || user.name || '-';
+  const fDate = d => d ? new Date(d).toLocaleDateString('fa-IR',{year:'numeric',month:'long',day:'numeric'}) : '—';
+
+  const modalHtml = `
+    <div class="user-modal">
+      <button class="user-modal-close" onclick="closeUserModal()">×</button>
+      <div class="user-modal-title">
+        مشخصات کاربر:
+        <span style="color:#0ea5e9">${fullName}</span>
+      </div>
+      <div class="user-modal-row">
+        <span class="user-modal-label">نام:</span>
+        <span class="user-modal-value">${user.firstname || '-'}</span>
+      </div>
+      <div class="user-modal-row">
+        <span class="user-modal-label">نام خانوادگی:</span>
+        <span class="user-modal-value">${user.lastname || '-'}</span>
+      </div>
+      <div class="user-modal-row">
+        <span class="user-modal-label">ایمیل:</span>
+        <span class="user-modal-value">${user.email || '-'}</span>
+      </div>
+      <div class="user-modal-row">
+        <span class="user-modal-label">تلفن:</span>
+        <span class="user-modal-value">${user.phone || '-'}</span>
+      </div>
+      <div class="user-modal-row">
+        <span class="user-modal-label">ثبت‌نام:</span>
+        <span class="user-modal-value">${fDate(user.createdAt)}</span>
+      </div>
+      <form id="userMessageForm" class="user-modal-form" data-user-id="${uid}">
+        <label for="userMessage">ارسال پیام به این کاربر:</label>
+        <textarea id="userMessage" name="msg" placeholder="پیام خود را بنویسید…" required></textarea>
+        <button type="submit">ارسال پیام</button>
+        <div id="user-modal-success" class="user-modal-success" style="display:none"></div>
+      </form>
+    </div>`;
+
+  overlay.innerHTML = modalHtml;
+  overlay.style.display = 'flex';
+
+  document.getElementById('userMessageForm').addEventListener('submit', sendUserMessage);
+}
+
+function closeUserModal() {
+  document.getElementById('user-modal-overlay').style.display = "none";
+  document.getElementById('user-modal-overlay').innerHTML = "";
+}
+
+async function sendUserMessage(e) {
+  e.preventDefault();
+  const form = e.currentTarget;
+  const uid = form.dataset.userId;
+  const text = form.querySelector('textarea').value.trim();
+
+  if (!text) return alert('متن پیام نمی‌تواند خالی باشد.');
+  if (!uid) return alert('شناسه کاربر پیدا نشد!');
+
+  try {
+    const res = await fetch(`${API_BASE}/chats`, {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      credentials: 'include',
+      body: JSON.stringify({ text, from: 'admin', sellerId: uid })  // تغییر به sellerId برای رفع خطای backend
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'خطا در ارسال پیام');
+
+    form.querySelector('textarea').value = '';
+    const okBox = document.getElementById('user-modal-success');
+    okBox.textContent = '✅ پیام با موفقیت ارسال شد!';
+    okBox.style.display = 'block';
+    setTimeout(() => okBox.style.display = 'none', 2500);
+  } catch (err) {
+    console.error('sendUserMessage error:', err);
+    alert('❌ خطا در ارسال پیام:\n' + err.message);
+  }
+}
+// جستجو کاربران
+document.getElementById('userSearch').addEventListener('input', e => {
+  const q = e.target.value.trim().toLowerCase();
+  const filtered = usersList.filter(u => {
+    return (
+      (u.firstname || '').toLowerCase().includes(q) ||
+      (u.lastname || '').toLowerCase().includes(q) ||
+      (u.name || '').toLowerCase().includes(q) ||
+      (u.phone || '').toLowerCase().includes(q)
+    );
+  });
+  renderUsers(filtered);
+});
+
+
+// جستجو محصولات
+document.getElementById('productSearch').addEventListener('input', e => {
+  productSearchQuery = e.target.value.trim().toLowerCase();
+  renderProducts();
+});
+
+// فیلتر مرتب‌سازی محصولات
+document.querySelectorAll('.products-filters button').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.products-filters button').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    productsSortMode = btn.getAttribute('data-sort');
+    renderProducts();
+  });
+});
+
+// -------- نمایش فروشگاه‌ها --------
+
+
+
+
+
+
+
+window.deleteSeller = function(idx) {
+  if (confirm('فروشگاه حذف شود؟')) {
+    shopsList.splice(idx, 1);
+    renderSellers(); updateSidebarCounts(); updateHeaderCounts();
+  }
+};
+
+
+
+
+/* ---------- helper : پیدا کردن فروشگاه یک محصول ---------- */
+function findShopForProduct(prod) {
+  if (!prod) return null;
+
+  /* 1) بر اساس shopurl */
+  if (prod.shopurl) {
+    return shopsList.find(s => String(s.shopurl) === String(prod.shopurl));
+  }
+
+  /* 2) بر اساس شناسهٔ فروشنده */
+  const sid = toIdString(prod.sellerId || prod.seller_id);
+  if (sid) {
+    return shopsList.find(s =>
+      toIdString(s.sellerId || s.seller_id || s._sid) === sid
+    );
+  }
+  return null;
+}
+
+
+// -------- نمایش محصولات --------
+/* ---------- renderProducts (نسخهٔ جدید) ---------- */
+/* -------- renderProducts (NO product‑count column) -------- */
+// -------- نمایش محصولات --------
+function renderProducts() {
+  const tbody = document.querySelector('#productsTable tbody');
+  tbody.innerHTML = '';
+
+  // ۱) کپی لیست و اعمال فیلتر جستجو
+  let list = [...productsList];
+  if (productSearchQuery) {
+    list = list.filter(prod => {
+      let shop = prod.seller || findShopForProduct(prod);
+      return (
+        (prod.title || prod.name || '').toLowerCase().includes(productSearchQuery) ||
+        (shop?.storename || shop?.shopLogoText || '').toLowerCase().includes(productSearchQuery) ||
+        (shop?.ownerName || `${shop?.ownerFirstname || ''} ${shop?.ownerLastname || ''}`.trim().toLowerCase()).includes(productSearchQuery)
+      );
+    });
+  }
+
+  // ۲) اعمال مرتب‌سازی (فرض: فیلد createdAt در هر محصول وجود دارد)
+  list.forEach(prod => {
+    prod._createdAt = prod.createdAt ? new Date(prod.createdAt).getTime() : 0;
+  });
+  if (productsSortMode === 'newest') {
+    list.sort((a, b) => b._createdAt - a._createdAt);
+  } else if (productsSortMode === 'oldest') {
+    list.sort((a, b) => a._createdAt - b._createdAt);
+  }
+
+  // ۳) اگر لیست خالی بود
+  if (!list.length) {
+    tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;color:#888;padding:1.5rem">هیچ محصولی یافت نشد.</td></tr>`;
+    return;
+  }
+
+  // ۴) رندر لیست فیلترشده/مرتب‌شده
+  list.forEach((prod, i) => {
+    let shop = prod.seller || findShopForProduct(prod);
+    const productName = prod.title || prod.name || '-';
+    const storeName = shop ? (shop.storename || shop.shopLogoText || '-') : '-';
+    const ownerName = shop ? (shop.ownerName || `${shop.ownerFirstname || ''} ${shop.ownerLastname || ''}`.trim() || '-') : '-';
+    const storeAddr = shop ? (shop.address || shop.shopAddress || '-') : '-';
+    const shopUrl = (shop ? shop.shopurl : (prod.shopurl || prod.shopUrl || '')) || '';
+    const linkHTML = shopUrl ? `<a href="/shop.html?shopurl=${encodeURIComponent(shopUrl)}" target="_blank" style="color:#0ea5e9;text-decoration:underline">${shopUrl}</a>` : '-';
+
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td>${productName}</td>
+      <td>${storeName}</td>
+      <td>${ownerName}</td>
+      <td>${storeAddr}</td>
+      <td>${linkHTML}</td>
+      <td>
+        <button class="action-btn edit" onclick="editProduct(${i})"><i class="ri-pencil-line"></i> ویرایش</button>
+        <button class="action-btn delete" onclick="deleteProduct(${i})"><i class="ri-delete-bin-line"></i> حذف</button>
+      </td>`;
+    tbody.appendChild(tr);
+  });
+}
+
+
+
+// -------- حذف محصول --------
+window.deleteProduct = async function (idx) {
+  const prod = productsList[idx];
+  if (!prod) return alert('محصول پیدا نشد!');
+  
+  if (!confirm(`آیا مطمئن هستید که می‌خواهید محصول "${prod.title || prod.name || 'نامشخص'}" را حذف کنید؟`)) return;
+
+  try {
+    const res = await fetch(`${API_BASE}/products/${prod._id || prod.id}`, {
+      method: 'DELETE',
+      credentials: 'include'  // برای ارسال کوکی‌های احراز هویت (مثل admin_token)
+    });
+
+    if (!res.ok) {
+      const data = await res.json();
+      throw new Error(data.message || 'خطا در حذف محصول');
+    }
+
+    // حذف از لیست محلی و رندر مجدد
+    productsList.splice(idx, 1);
+    renderProducts();
+    updateSidebarCounts();
+    updateHeaderCounts();
+    alert('✅ محصول با موفقیت حذف شد.');
+
+  } catch (err) {
+    console.error('❌ deleteProduct error:', err);
+    alert('❌ ' + err.message);
+  }
+};
+
+
+
+
+window.deleteUser = async function (idx) {
+  const user = usersList[idx];
+  if (!user)        return alert('کاربر پیدا نشد!');
+  const name = `${user.firstname || ''} ${user.lastname || ''}`.trim()
+               || user.name || user.phone || 'بدون‌نام';
+
+  if (!confirm(`آیا از حذف «${name}» مطمئن هستید؟
+پس از حذف، این شماره دیگر قادر به ورود یا ثبت‌نام نخواهد بود.`)) return;
+
+  try {
+    const res  = await fetch(`${API_BASE}/user/${user._id || user.id}`, {
+      method      : 'DELETE',
+      credentials : 'include'
+    });
+    const data  = await res.json();
+    if (!res.ok) throw new Error(data.error || data.message || 'خطا در حذف کاربر');
+
+    /* پاک‌کردن از آرایهٔ محلی و رندر مجدد رابط */
+    usersList.splice(idx, 1);
+    renderUsers();
+    updateSidebarCounts();
+    updateHeaderCounts();
+
+    alert('✅ کاربر با موفقیت حذف و مسدود شد.');
+  } catch (err) {
+    console.error('deleteUser error:', err);
+    alert('❌ ' + err.message);
+  }
+};
+
+
+
+
+
+
+
+
+// -------- Nav & Responsive (FIXED) --------
+// -------- Nav & Responsive (FIXED) --------
+const sidebar       = document.getElementById('sidebar');
+const sidebarToggle = document.getElementById('sidebarToggle');
+const menuLinks     = document.querySelectorAll('.sidebar-menu a');
+
+// آبجکت پنل‌ها را قبلاً تعریف کرده‌اید:
+const panels = {
+  dashboard: document.getElementById('dashboard-panel'),
+  users:     document.getElementById('users-panel'),
+  sellers:   document.getElementById('sellers-panel'),
+  products:  document.getElementById('products-panel'),
+  plans:     document.getElementById('plans-panel'),
+  ads:       document.getElementById('ads-panel'),
+  messages:  document.getElementById('messages-panel'),
+  'daily-visits': document.getElementById('daily-visits-panel')
+};
+
+menuLinks.forEach(link => {
+  link.addEventListener('click', async e => {
+    e.preventDefault();
+
+    // 1) استایلِ active در منو
+    menuLinks.forEach(l => l.classList.remove('active'));
+    link.classList.add('active');
+
+    // 2) مخفی/نمایشِ پنل‌ها
+    Object.values(panels).forEach(p => p.style.display = 'none');
+    const section = link.dataset.section;
+    panels[section].style.display = 'block';
+
+    // 3) به‌روزرسانی شمارندهٔ هدر
+    updateHeaderCounts();
+
+    // 4) وقتی وارد بخش پیام‌ها شدیم، polling را استارت کن؛
+    //    وقتی خارج شدیم، polling را متوقف کن.
+    if (section === 'messages') {
+      startMessagesPolling();
+    } else {
+      stopMessagesPolling();
+    }
+
+    // لود محتوای AJAX برای آمار روزانه بازدید
+    if (section === 'daily-visits') {
+      loadDailyVisContent();
+    }
+
+    // 5) بستن سایدبار در موبایل
+    if (window.innerWidth < 700) sidebar.classList.remove('open');
+  });
+});
+
+// دکمهٔ برگر در موبایل
+sidebarToggle.addEventListener('click', () => sidebar.classList.toggle('open'));
+document.body.addEventListener('click', e => {
+  if (
+    window.innerWidth < 700 &&
+    sidebar.classList.contains('open') &&
+    !sidebar.contains(e.target) &&
+    e.target !== sidebarToggle
+  ) {
+    sidebar.classList.remove('open');
+  }
+});
+window.addEventListener('resize', () => {
+  if (window.innerWidth > 700) sidebar.classList.remove('open');
+});
+
+
+// -------- نمودار داینامیک داشبورد --------
+let chartObj;
+let filterBtns = [
+  {label: 'امروز', value: 'today'},
+  {label: 'دیروز', value: 'yesterday'},
+  {label: '۷ روز اخیر', value: 'week'},
+  {label: '۳۰ روز اخیر', value: 'month'},
+];
+
+function showDashboardChart(type, title) {
+  let wrap = document.getElementById('dashboard-dynamic-chart-wrap');
+  wrap.innerHTML = `
+    <div class="dynamic-chart-box-pro">
+      <div class="dynamic-chart-top">
+        <span id="chartBox-title">${title}</span>
+        <button id="close-dash-chart" class="close-dash-chart-btn">×</button>
+      </div>
+      <div class="dynamic-chart-filters">
+        ${filterBtns.map(b => `<button class="dash-filter-btn" data-v="${b.value}">${b.label}</button>`).join('')}
+      </div>
+      <div class="dynamic-chart-canvas-wrap">
+        <canvas id="chartBox-canvas"></canvas>
+      </div>
+    </div>
+  `;
+
+  document.getElementById('close-dash-chart').onclick = () => {
+    wrap.innerHTML = "";
+    if (chartObj) chartObj.destroy();
+  };
+
+  let arrs = {
+    visits: visitsPerDay,
+    users: usersPerDay,
+    sellers: Array(30).fill(shopsList.length),
+    products: productsPerDay
+  };
+  let labelsObj = {
+    week: ['شنبه','یکشنبه','دوشنبه','سه‌شنبه','چهارشنبه','پنجشنبه','جمعه'],
+    month: days30.map(str => {
+      let [m,d] = str.split('/');
+      return `${parseInt(d)}/${parseInt(m)}`;
+    })
+  };
+
+  function getData(period) {
+    let arr = arrs[type];
+    if (period === "today") return { data: [arr[arr.length - 1]], labels: ["امروز"] };
+    if (period === "yesterday") return { data: [arr[arr.length - 2]], labels: ["دیروز"] };
+    if (period === "week") {
+      return { data: arr.slice(-7), labels: labelsObj.week };
+    }
+    if (period === "month") {
+      if(window.innerWidth<700){
+        return {data: arr.slice(-10), labels: labelsObj.month.slice(-10)};
+      }
+      return {data: arr.slice(-30), labels: labelsObj.month};
+    }
+    return { data: [], labels: [] };
+  }
+
+  function getColor() {
+    if (type === "visits") return "rgba(16,185,129,1)";
+    if (type === "users") return "rgba(14,165,233,1)";
+    if (type === "sellers") return "rgba(22,163,74,1)";
+    if (type === "products") return "rgba(234,179,8,1)";
+    return "#666";
+  }
+  function getGradient(ctx) {
+    let grad = ctx.createLinearGradient(0,0,0,260);
+    grad.addColorStop(0,"rgba(14,165,233,0.25)");
+    grad.addColorStop(1,"rgba(16,185,129,0.04)");
+    return grad;
+  }
+  function getType(period) {
+    return (period === "today" || period === "yesterday") ? "bar" : "line";
+  }
+
+  wrap.querySelectorAll(".dash-filter-btn").forEach(btn => {
+    btn.onclick = () => {
+      wrap.querySelectorAll(".dash-filter-btn").forEach(b => b.classList.remove("active"));
+      btn.classList.add("active");
+      let period = btn.getAttribute("data-v");
+      let { data, labels } = getData(period);
+      if (chartObj) chartObj.destroy();
+
+      const canvas = document.getElementById('chartBox-canvas');
+      let parW = Math.max(canvas.parentElement.offsetWidth, 360);
+      canvas.width = Math.min(900, parW - 0 + 1);
+      canvas.height = window.innerWidth < 600 ? 240 : 340;
+
+      let color = getColor();
+      let typeC = getType(period);
+
+      chartObj = new Chart(canvas.getContext('2d'), {
+        type: typeC,
+        data: {
+          labels: labels,
+          datasets: [{
+            label: title,
+            data: data,
+            backgroundColor: (ctx) =>
+              typeC === "bar"
+                ? color + "B0"
+                : getGradient(ctx.chart.ctx),
+            borderColor: color,
+            borderWidth: 4,
+            fill: true,
+            tension: 0.5,
+            pointRadius: 8,
+            pointBackgroundColor: color,
+            pointBorderColor: "#fff",
+            pointHoverRadius: 12,
+            pointHoverBorderWidth: 2,
+            barPercentage: 0.45,
+            categoryPercentage: 0.7,
+            borderCapStyle: 'round'
+          }]
+        },
+        options: {
+          responsive: false,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              rtl: true,
+              padding: 15,
+              backgroundColor: "#fff",
+              borderColor: "#10b98122",
+              borderWidth: 1.2,
+              titleColor: "#16a34a",
+              bodyColor: "#0ea5e9",
+              bodyFont: { family: "Vazirmatn" },
+              titleFont: { family: "Vazirmatn", weight: "bold", size:16 },
+              displayColors: false,
+              callbacks: {
+                title: (ctx) => ctx[0].label,
+                label: (ctx) => " " + ctx.dataset.label + ": " + ctx.formattedValue
+              }
+            }
+          },
+          layout: { padding: { left: 5, right: 5, top: 0, bottom: 5 } },
+          scales: {
+            y: {
+              beginAtZero: true,
+              border: { color: "#e5e7eb" },
+              grid: { color: "#e5e7eb2b", drawTicks: false, borderDash: [3,5] },
+              ticks: { color: '#999', font: { size: 15, weight:'bold' } }
+            },
+            x: {
+              grid: { display: false },
+              ticks: { color: '#555', font: { size: 15, weight: 700 } }
+            }
+          }
+        }
+      });
+    };
+  });
+  wrap.querySelector('.dash-filter-btn[data-v="week"]').click();
+}
+
+// کلیک روی کارت‌های آمار
+document.getElementById('card-visits').onclick = ()=> showDashboardChart("visits", "آمار بازدید سایت");
+document.getElementById('card-users').onclick = ()=> showDashboardChart("users", "آمار ثبت‌نام کاربران");
+document.getElementById('card-sellers').onclick = ()=> showDashboardChart("sellers", "آمار فروشگاه‌ها");
+document.getElementById('card-products').onclick = ()=> showDashboardChart("products", "آمار محصولات جدید");
+
+// -------- لود اولیه دیتا و بروزرسانی --------
+// نسخهٔ اصلاح‌شده‌ی updateAll — فقط همین تابع را جایگزین کن
+async function updateAll() {
+  try {
+    // ۱) واکشی هم‌زمان داده‌ها
+    const [users, shops, products] = await Promise.all([
+      fetchUsers(),
+      fetchShops(),
+      fetchProducts()
+    ]);
+
+    // ۲) ست‌کردن آرایه‌های سراسری
+    usersList    = users;
+    shopsList    = shops;
+    console.group('🟢 shopsList snapshot');
+shopsList.slice(0, 10).forEach((s, i) => {
+  console.log(i,
+    'sid:',   s._sid,
+    '_id:',   toIdString(s._id),
+    'sellerId:', toIdString(s.sellerId ?? s.seller_id),
+    'shopurl:', toIdString(s.shopurl)
+  );
+});
+console.groupEnd();
+
+    productsList = products;
+
+    // ۳) تعیین شناسهٔ یکتا برای هر فروشنده
+   // ۳) تعیین شناسهٔ یکتا برای هر فروشنده (نسخه‌ی جدید)
+/* ─── STEP 1 : ساخت شناسه یکتا برای هر فروشنده ───────── */
+shopsList.forEach(s => {
+  // محاسبه‌ی شناسه یکتا
+  const uniqueId = toIdString(
+    s.sellerId   || s.seller_id ||
+    s._id        || s.id        ||
+    (s.shopurl ? 'shopurl:' + s.shopurl : '')
+  );
+  s._sid     = uniqueId;
+  s.sellerId = uniqueId;   // ← این خط را اضافه کن
+});
+
+
+/* 🆕  لاگ تحلیلی – فقط برای دیباگ. خواستی بعداً حذف کن. */
+console.table(
+  shopsList.map(({_sid, _id, sellerId, shopurl}) => ({ _sid, _id, sellerId, shopurl }))
+);
+/* ─────────────────────────────────────────────────────── */
+
+
+
+    // ۴) پس از داشتن _sidها، مپ نام‌ها را بساز
+    buildNameMaps();
+
+    // ۵) واکشی پیام‌ها (برای شمارنده و نمایش)
+    await fetchMessages();
+
+    // حتماً جدول پیام‌ها را هم رندر کن
+    renderMessages();
+
+    // ۶) به‌روزرسانی آمار روزانه (نمونه)
+    usersPerDay[usersPerDay.length - 1]       = usersList.length;
+    sellersPerDay[sellersPerDay.length - 1]   = shopsList.length;
+    productsPerDay[productsPerDay.length - 1] = productsList.length;
+
+    // ۷) رندر رابط کاربری
+    updateDashboardCards();
+    updateSidebarCounts();
+    updateHeaderCounts();
+    renderUsers();
+    renderSellers();
+    renderProducts();
+
+  } catch (err) {
+    alert('خطا در دریافت داده‌های پنل ادمین!\n' + (err.message || err));
+  }
+}
+
+
+
+/* اجرای اولیه */
+updateAll();
+
+
+let style = document.createElement('style');
+style.innerHTML = `@keyframes fadeIn{from{opacity:0;transform:translateY(30px);}to{opacity:1;transform:none;}}`;
+document.head.appendChild(style);
+
+
+
+
+
+
+
+// --- فیلتر و مرتب‌سازی فروشگاه‌ها ---
+let sellersSortMode = 'newest'; // حالت پیش‌فرض
+document.querySelectorAll('.seller-filter-btn').forEach(btn => {
+  btn.onclick = function() {
+    document.querySelectorAll('.seller-filter-btn').forEach(b=>b.classList.remove('active'));
+    this.classList.add('active');
+    sellersSortMode = this.getAttribute('data-sort');
+    renderSellers();
+  }
+});
+
+
+let sellerSearchQuery = '';  // متغیر برای ذخیره کوئری جستجو
+
+// جستجو فروشگاه‌ها
+document.getElementById('sellerSearch').addEventListener('input', e => {
+  sellerSearchQuery = e.target.value.trim().toLowerCase();
+  renderSellers();
+});
+
+function renderSellers() {
+  const tbody = document.querySelector('#sellersTable tbody');
+  tbody.innerHTML = '';
+
+  if (!shopsList.length) {
+    tbody.innerHTML = `<tr><td colspan="7" style="color:#888;text-align:center">هیچ فروشگاهی ثبت نشده است.</td></tr>`;
+    return;
+  }
+
+  // فیلتر جستجو (نام فروشگاه، نام صاحب، آدرس)
+  let sellers = shopsList.filter(shop => {
+    const storeName = (shop.storename || shop.shopLogoText || '').toLowerCase();
+    const ownerName = (shop.ownerName || `${shop.ownerFirstname || ''} ${shop.ownerLastname || ''}`.trim()).toLowerCase();
+    const storeAddr = (shop.address || shop.shopAddress || '').toLowerCase();
+    const phone = (shop.phone || shop.mobile || shop.ownerPhone || shop.ownerMobile || '').toLowerCase();
+    return (
+      storeName.includes(sellerSearchQuery) ||
+      ownerName.includes(sellerSearchQuery) ||
+      storeAddr.includes(sellerSearchQuery) ||
+      phone.includes(sellerSearchQuery)
+    );
+  });
+
+  sellers.forEach(shop => {
+    shop._productsCount = shop.productsCount ?? shop.productCount ?? 0;
+    shop._visits = shop.visits || shop.shopVisits || 0;
+    shop._createdAt = shop.createdAt ? new Date(shop.createdAt).getTime() : 0;
+    shop._subStart = shop.subscriptionStart ? new Date(shop.subscriptionStart) : null;
+    shop._subEnd = shop.subscriptionEnd ? new Date(shop.subscriptionEnd) : null;
+  });
+
+  // مرتب‌سازی
+  if (sellersSortMode === 'newest') {
+    sellers.sort((a, b) => b._createdAt - a._createdAt);
+  } else if (sellersSortMode === 'oldest') {
+    sellers.sort((a, b) => a._createdAt - b._createdAt);
+  } else if (sellersSortMode === 'mostvisited') {
+    sellers.sort((a, b) => b._visits - a._visits);
+  } else if (sellersSortMode === 'mostproducts') {
+    sellers.sort((a, b) => b._productsCount - a._productsCount);
+  }
+
+  sellers.forEach((shop, i) => {
+    let countProducts = shop._productsCount;
+    let ownerName = shop.ownerName || `${shop.ownerFirstname || ''} ${shop.ownerLastname || ''}`.trim() || "-";
+    let shopLink = shop.shopurl
+      ? `<a href="/shop.html?shopurl=${shop.shopurl}" target="_blank" style="color:#0ea5e9;text-decoration:underline">${shop.shopurl}</a>`
+      : '-';
+
+    let tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td class="seller-cell seller-modal-trigger" style="cursor:pointer;color:#10b981;font-weight:bold">${shop.storename || shop.shopLogoText || '-'}</td>
+      <td class="seller-cell seller-modal-trigger" style="cursor:pointer">${ownerName}</td>
+      <td class="seller-cell seller-modal-trigger" style="cursor:pointer">${shop.address || shop.shopAddress || '-'}</td>
+      <td>${shopLink}</td>
+      <td>${countProducts}</td>
+      <td>${shop._visits}</td>
+      <td>
+        <button class="action-btn delete" onclick="deleteSeller(${i})">
+          <i class="ri-delete-bin-line"></i> حذف
+        </button>
+      </td>
+    `;
+    // اتصال ایندکس فروشنده به هر سلول قابل کلیک
+    Array.from(tr.querySelectorAll('.seller-cell')).forEach(td=>{
+      td.onclick = () => showSellerModal(shop);
+    });
+    tbody.appendChild(tr);
+  });
+
+  if (!sellers.length) {
+    tbody.innerHTML = `<tr><td colspan="7" style="color:#888;text-align:center">هیچ فروشگاهی یافت نشد.</td></tr>`;
+  }
+}
+
+// پاپ‌آپ اطلاعات فروشنده
+// ← این تابع را جایگزین کنید
+/* ===== نسخهٔ جدید تابع showSellerModal (همراه شماره موبایل) ===== */
+/* ------------------------------------------------------------------
+/* ─────────────── showSellerModal ───────────────── */
+function showSellerModal (shop) {
+  const overlay = document.getElementById('seller-modal-overlay');
+
+  /* تبدیل تاریخ میلادی به شمسی */
+  const fDate = d =>
+    d
+      ? new Date(d).toLocaleDateString('fa-IR', {
+          year: 'numeric', month: 'long', day: 'numeric'
+        })
+      : '—';
+
+  /* شناسهٔ مطمئن فروشنده */
+  const sellerId =
+        (shop._id && shop._id.toString())              ||
+        (shop.sellerId && String(shop.sellerId))       ||
+        (shop._sid && !String(shop._sid).startsWith('shopurl:')
+          ? String(shop._sid)
+          : '')                                        ||
+        (shop.shopurl ? `shopurl:${shop.shopurl}` : '');
+
+  const storeName = shop.storename || shop.shopLogoText || '-';
+  const url       = shop.shopurl  || '';
+  const phone     =
+        shop.phone || shop.mobile ||
+        shop.ownerPhone || shop.ownerMobile || '-';
+
+  /* ---------- رندر اولیه ---------- */
+  overlay.innerHTML = `
+    <div class="seller-modal">
+      <button class="seller-modal-close" onclick="closeSellerModal()">×</button>
+
+      <div class="seller-modal-title">
+        مشخصات فروشگاه:
+        <span style="color:#0ea5e9">${storeName}</span>
+      </div>
+
+      <div class="seller-modal-row">
+        <span class="seller-modal-label">ثبت‌نام:</span>
+        <span class="seller-modal-value">${fDate(shop.createdAt)}</span>
+      </div>
+
+      <div class="seller-modal-row">
+        <span class="seller-modal-label">شماره موبایل:</span>
+        <span class="seller-modal-value">${phone}</span>
+      </div>
+
+      <div class="seller-modal-row">
+        <span class="seller-modal-label">نوع اشتراک:</span>
+        <span class="seller-modal-value">${shop.subscriptionType || '-'}</span>
+      </div>
+
+      <div class="seller-modal-row">
+        <span class="seller-modal-label">تاریخ خرید:</span>
+        <span class="seller-modal-value">${fDate(shop.subscriptionStart)}</span>
+      </div>
+
+      <div class="seller-modal-row">
+        <span class="seller-modal-label">تاریخ پایان:</span>
+        <span class="seller-modal-value">${fDate(shop.subscriptionEnd)}</span>
+      </div>
+
+      <!-- ردیف پسورد حذف شد -->
+
+      <form id="sellerMessageForm"
+            class="seller-modal-form"
+            data-seller-id="${sellerId}"
+            data-shopurl="${url}">
+        <label for="sellerMessage">ارسال پیام به این فروشنده:</label>
+        <textarea id="sellerMessage" name="msg"
+                  placeholder="پیام خود را بنویسید…" required></textarea>
+        <button type="submit">ارسال پیام</button>
+        <div id="seller-modal-success"
+             class="seller-modal-success"
+             style="display:none"></div>
+      </form>
+    </div>`;
+
+  overlay.style.display = 'flex';
+
+  /* ارسال پیام */
+  document
+    .getElementById('sellerMessageForm')
+    .addEventListener('submit', sendSellerMessage);
+
+  // تابع fetchSellerPassword دیگر نیازی نیست و حذف می‌شود
+}
+
+
+
+
+
+
+
+
+
+function closeSellerModal() {
+  document.getElementById('seller-modal-overlay').style.display = "none";
+  document.getElementById('seller-modal-overlay').innerHTML = "";
+}
+
+// ← این تابع را جایگزین کنید
+async function sendSellerMessage(e) {
+  e.preventDefault();
+  const form  = e.currentTarget;
+  let   rawId = form.dataset.sellerId;  // "shopurl:slug" یا ObjectId
+  const text  = form.querySelector('textarea').value.trim();
+
+  if (!text) {
+    return alert('متن پیام نمی‌تواند خالی باشد.');
+  }
+  if (!rawId) {
+    return alert('شناسه فروشنده پیدا نشد!');
+  }
+
+  // آماده‌سازی payload
+  const body = { text, from: 'admin' };
+  if (rawId.startsWith('shopurl:')) {
+    body.shopurl = rawId.replace(/^shopurl:/, '');
+  } else {
+    body.sellerId = rawId;
+  }
+
+  try {
+    const res = await fetch(`${API_BASE}/chats`, {
+      method: 'POST',
+      headers: {
+        'Content-Type':  'application/json'
+        // هدر Authorization لازم نیست چون با کوکی کار می‌کنی
+      },
+      credentials: 'include',
+      body: JSON.stringify(body)
+    });
+
+    const data = await res.json();
+    if (!res.ok) {
+      throw new Error(data.error || data.message || 'خطا در ارسال پیام');
+    }
+
+    // موفقیت
+    form.querySelector('textarea').value = '';
+    const okBox = document.getElementById('seller-modal-success');
+    okBox.textContent = '✅ پیام با موفقیت ارسال شد!';
+    okBox.style.display = 'block';
+    setTimeout(() => okBox.style.display = 'none', 2500);
+
+  } catch (err) {
+    console.error('sendSellerMessage error:', err, body);
+    alert('❌ خطا در ارسال پیام:\n' + err.message);
+  }
+}
+
+
+
+
+
+
+
+
+
+
+
+/**
+ * اگر chat.seller پر نشده باشد، با شناسه یا shopurl در shopsList جست‌وجو کن
+ */
+// 1) تابع کمکی برای یافتن شیء فروشنده
+/** پیدا کردن شیء فروشنده با sellerId یا shopurl */
+// تابع کمکی برای یافتن شیء فروشنده
+// پیدا کردن شیء فروشنده با sellerId یا shopurl
+// تابع اصلاح شده برای یافتن فروشگاه
+function findShopBySellerId(sellerId, shopUrl) {
+  const sid = toIdString(sellerId);
+  const url = toIdString(shopUrl);
+  
+  // جستجوی اولیه با استفاده از شناسه فروشنده
+  const bySellerId = shopsList.find(shop => {
+    const shopIds = [
+      toIdString(shop._id),
+      toIdString(shop.id),
+      toIdString(shop.sellerId),
+      toIdString(shop.seller_id),
+      shop._sid ? toIdString(shop._sid) : null
+    ].filter(Boolean);
+    
+    return shopIds.includes(sid);
+  });
+  
+  if (bySellerId) return bySellerId;
+  
+  // جستجوی ثانویه با استفاده از آدرس فروشگاه
+  const byShopUrl = shopsList.find(shop => 
+    toIdString(shop.shopurl) === url
+  );
+  
+  return byShopUrl || null;
+}
+// تابع اصلاح شده برای نمایش مدال فرستنده
+// تابع اصلاح شده برای دریافت اطلاعات فروشنده
+async function getSellerDetails(sellerId) {
+  try {
+    const res = await fetch(`${API_BASE}/sellers/${encodeURIComponent(sellerId)}`, {
+      credentials: 'include'
+    });
+    
+    if (!res.ok) {
+      throw new Error('فروشنده یافت نشد');
+    }
+    
+    return await res.json();
+  } catch (err) {
+    console.error('خطا در دریافت اطلاعات فروشنده:', err);
+    return null;
+  }
+}
+
+// تابع اصلاح شده برای نمایش مدال
+async function openSenderModal(chat) {
+  const ov = document.getElementById('sender-modal-overlay');
+  if (!ov) return;
+
+  ov.innerHTML = `
+    <div class="sender-modal">
+      <button class="sender-modal-close" onclick="closeSenderModal()">×</button>
+      <h4>دریافت اطلاعات فروشنده...</h4>
+    </div>
+  `;
+  ov.style.display = 'flex';
+
+  try {
+    // استفاده از شناسه فروشنده از چت
+    const sellerId = chat.sellerId || '';
+    
+    // دریافت اطلاعات فروشنده از بک‌اند
+    const seller = await getSellerDetails(sellerId);
+    
+    if (!seller) {
+      ov.innerHTML = `
+        <div class="sender-modal">
+          <button class="sender-modal-close" onclick="closeSenderModal()">×</button>
+          <h4>خطا در دریافت اطلاعات</h4>
+          <p>فروشنده با شناسه ${sellerId} یافت نشد</p>
+        </div>
+      `;
+      return;
+    }
+
+    // نمایش اطلاعات فروشنده
+    ov.innerHTML = `
+      <div class="sender-modal">
+        <button class="sender-modal-close" onclick="closeSenderModal()">×</button>
+        <h4>مشخصات فروشنده</h4>
+        
+        <div class="sender-info-row">
+          <span class="sender-info-label">نام فروشگاه:</span>
+          <span class="sender-info-value">${seller.storename || '-'}</span>
+        </div>
+        
+        <div class="sender-info-row">
+          <span class="sender-info-label">نام صاحب فروشگاه:</span>
+          <span class="sender-info-value">${seller.firstname || ''} ${seller.lastname || ''}</span>
+        </div>
+        
+        <div class="sender-info-row">
+          <span class="sender-info-label">آدرس فروشگاه:</span>
+          <span class="sender-info-value">${seller.address || '-'}</span>
+        </div>
+        
+        <div class="sender-info-row">
+          <span class="sender-info-label">شماره تماس:</span>
+          <span class="sender-info-value">${seller.phone || '-'}</span>
+        </div>
+        
+        <div class="sender-info-row">
+          <span class="sender-info-label">آدرس اینترنتی:</span>
+          <span class="sender-info-value">${seller.shopurl || '-'}</span>
+        </div>
+        
+        <div class="sender-info-row">
+          <span class="sender-info-label">دسته‌بندی:</span>
+          <span class="sender-info-value">${seller.category || '-'}</span>
+        </div>
+      </div>
+    `;
+  } catch (err) {
+    ov.innerHTML = `
+      <div class="sender-modal">
+        <button class="sender-modal-close" onclick="closeSenderModal()">×</button>
+        <h4>خطا در دریافت اطلاعات</h4>
+        <p>${err.message || 'خطای نامشخص'}</p>
+      </div>
+    `;
+  }
+}
+/* بستن مدال */
+function closeSenderModal() {
+  const ov = document.getElementById('sender-modal-overlay');
+  ov.style.display = 'none';
+  ov.innerHTML = '';
+}
+
+
+
+
+// تابع کمکی برای استانداردسازی ID
+
+
+
+
+// ————————————————————————————
+
+
+
+
+
+
+// ثبت پنل مدیریت پلن‌ها به panels
+// ثبت پنل مدیریت پلن‌ها به panels
+// ثبت پنل مدیریت پلن‌ها به panels
+panels['plans'] = document.getElementById('plans-panel');
+
+panels['ads'] = document.getElementById('ads-panel');
+panels['messages'] = document.getElementById('messages-panel');
+
+
+/* المان‌های ورودی */
+const planInputs = {
+  "1month":  document.getElementById('plan-1month'),
+  "3month":  document.getElementById('plan-3month'),
+  "12month": document.getElementById('plan-12month')
+};
+const plansMsg  = document.getElementById('plansMsg');
+
+
+
+
+
+// تابع debounce برای جلوگیری از درخواست‌های مکرر موقع تایپ (۵۰۰ میلی‌ثانیه)
+function debounce(fn, delay = 500) {
+  let timeout;
+  return (...args) => {
+    clearTimeout(timeout);
+    timeout = setTimeout(() => fn(...args), delay);
+  };
+}
+
+
+// تابع normalize phone (مشترک برای فرانت)
+function normalizePhone(p) {
+  if (!p) return null;
+  p = p.replace(/\D/g, '');  // حذف غیرعددی
+  if (p.length === 10 && p.startsWith('9')) p = '0' + p;
+  return (p.length === 11 && p.startsWith('09')) ? p : null;
+}
+
+
+/* ---------- 1) خواندن قیمت‌ها از سرور ---------- */
+async function loadPlanPrices() {
+  try {
+    let phone = document.getElementById('seller-phone-plans').value.trim();
+    phone = normalizePhone(phone);
+    let url = `${API_BASE}/plans`;
+    if (phone) {
+      url += `?sellerPhone=${encodeURIComponent(phone)}`;
+    }
+
+    const res = await fetch(url, { credentials: 'include' });
+    if (!res.ok) throw new Error(await res.text());
+
+    const { plans } = await res.json();  // { "1month": ..., "3month": ..., ... }
+
+    // پر کردن فیلدها
+    planInputs['1month'].value  = plans['1month']  ?? '';
+    planInputs['3month'].value  = plans['3month']  ?? '';
+    planInputs['12month'].value = plans['12month'] ?? '';
+
+    // اگر همه خالی (یعنی override نداره)، پیام بدید
+    if (phone && !Object.values(plans).some(p => p !== null)) {
+      showPlansMsg('قیمت اختصاصی برای این فروشنده تعریف نشده؛ از قیمت عمومی استفاده می‌شود.', true, phone);
+    }
+  } catch (err) {
+    console.error('خطا در دریافت قیمت پلن‌ها:', err);
+    showPlansMsg('❌ خطا در دریافت قیمت‌ها!', false);
+  }
+}
+
+/* ---------- 2) ذخیره قیمت‌ها روی سرور ---------- */
+function getCookie(name) {
+  const value = `; ${document.cookie}`;
+  const parts = value.split(`; ${name}=`);
+  if (parts.length === 2) return parts.pop().split(';').shift();
+  return '';
+}
+
+async function savePlanPrices(e) {
+  e.preventDefault();
+
+  // آماده‌سازی payload
+  const body = {
+    '1month':  Number(planInputs['1month'].value) || null,  // خالی → null (برای skip در بک‌اند)
+    '3month':  Number(planInputs['3month'].value) || null,
+    '12month': Number(planInputs['12month'].value) || null,
+  };
+  let phone = document.getElementById('seller-phone-plans').value.trim();
+  phone = normalizePhone(phone);
+  if (phone) body.sellerPhone = phone;
+
+  try {
+    const token = getCookie('admin_token') || getCookie('access_token');
+
+    const res = await fetch(`${API_BASE}/plans/admin`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(token && { 'Authorization': 'Bearer ' + token })
+      },
+      credentials: 'include',
+      body: JSON.stringify(body)
+    });
+
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.message || await res.text());
+
+    await loadPlanPrices();
+    showPlansMsg('✅ ' + (data.message || 'قیمت‌ها با موفقیت ذخیره شدند.'), true, phone);
+  } catch (err) {
+    console.error('خطا در ذخیره قیمت‌ها:', err);
+    showPlansMsg('❌ ' + err.message, false, phone);
+  }
+}
+
+
+/* ---------- 3) نمایش پیام موفقیت / خطا ---------- */
+function showPlansMsg(txt, ok, phone = '') {
+  const plansMsg = document.getElementById('plansMsg');
+  plansMsg.textContent      = txt + (phone ? ` (اختصاصی برای ${phone})` : ' (عمومی)');
+  plansMsg.style.display    = 'block';
+  plansMsg.style.background = ok ? '#e0fdfa' : '#fee2e2';
+  plansMsg.style.color      = ok ? '#10b981' : '#b91c1c';
+  setTimeout(() => plansMsg.style.display = 'none', 3000);
+}
+
+/* ---------- 4) اتصال رویدادها ---------- */
+if (document.getElementById('plansForm')) {
+  loadPlanPrices();                                   // بارگذاری اولیه
+  document.getElementById('plansForm')
+          .addEventListener('submit', savePlanPrices); // ذخیره روی بک‌اند
+  
+  // listener روی input شماره تلفن برای reload موقع تغییر
+  document.getElementById('seller-phone-plans')
+          .addEventListener('input', debounce(loadPlanPrices));
+}
+
+
+
+
+
+
+
+const adInputs = {
+  search   : document.getElementById('ad_search'),
+  home     : document.getElementById('ad_home'),
+  products : document.getElementById('ad_products')
+};
+const adsMsg = document.getElementById('adsMsg');
+
+// ---------- 2) خواندن قیمت‌ تبلیغات ----------
+async function loadAdsPrices() {
+  try {
+    let phone = document.getElementById('seller-phone-ads').value.trim();
+    phone = normalizePhone(phone);
+    let url = `${API_BASE}/adplans`;
+    if (phone) {
+      url += `?sellerPhone=${encodeURIComponent(phone)}`;
+    }
+    const res  = await fetch(url, { credentials: 'include' });
+    const json = await res.json();              // { adplans: { search:12000, … } }
+    const prices = json.adplans || {};
+    Object.keys(adInputs).forEach(k => {
+      adInputs[k].value = prices[k] ?? '';
+    });
+
+    // اگر همه خالی (یعنی override نداره)، پیام بدید
+    if (phone && !Object.values(prices).some(p => p !== null)) {
+      showAdsMsg('قیمت اختصاصی برای این فروشنده تعریف نشده؛ از قیمت عمومی استفاده می‌شود.', true, phone);
+    }
+  } catch (err) {
+    console.error('❌ خطا در دریافت قیمت تبلیغات', err);
+    showAdsMsg('خطا در دریافت قیمت تبلیغات!', false);
+  }
+}
+
+// ---------- 3) ذخیره قیمت تبلیغات ----------
+async function saveAdsPrices(e) {
+  e.preventDefault();
+  // ۱) payload
+  const body = {};
+  Object.keys(adInputs).forEach(k => body[k] = Number(adInputs[k].value) || null);  // خالی → null
+  let sellerPhone = document.getElementById('seller-phone-ads').value.trim();
+  sellerPhone = normalizePhone(sellerPhone);
+  if (sellerPhone) body.sellerPhone = sellerPhone;
+
+  // ۲) توکن
+  const token = getCookie('admin_token') || getCookie('access_token');
+
+  try {
+    // ۳) PUT
+    const res = await fetch(`${API_BASE}/adplans/admin`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type':  'application/json',
+        'Authorization': token ? 'Bearer ' + token : ''
+      },
+      credentials: 'include',
+      body: JSON.stringify(body)
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.message || await res.text());
+
+    // بعد از ذخیره موفق، قیمت‌ها رو reload کن
+    await loadAdsPrices();
+    showAdsMsg('✅ ' + (data.message || 'قیمت تبلیغات با موفقیت ذخیره شد.'), true, sellerPhone);
+  } catch (err) {
+    console.error('❌ خطا در ذخیره قیمت تبلیغات', err);
+    showAdsMsg('❌ ' + err.message, false, sellerPhone);
+  }
+}
+
+// ---------- 4) نمایش پیام ----------
+function showAdsMsg (txt, ok, phone = '') {
+  adsMsg.textContent      = txt + (phone ? ` (اختصاصی برای ${phone})` : ' (عمومی)');
+  adsMsg.style.display    = 'block';
+  adsMsg.style.background = ok ? '#e0fdfa' : '#fee2e2';
+  adsMsg.style.color      = ok ? '#10b981' : '#b91c1c';
+  setTimeout(() => adsMsg.style.display = 'none', 3000);
+}
+
+/* ---------- 5) اتصال رویدادها ---------- */
+if (document.getElementById('adsForm')) {
+  loadAdsPrices();                                   // بارگذاری اولیه
+  document.getElementById('adsForm')
+          .addEventListener('submit', saveAdsPrices);// ذخیره روی بک‌اند
+  
+  // listener روی input شماره تلفن برای reload موقع تغییر
+  document.getElementById('seller-phone-ads')
+          .addEventListener('input', debounce(loadAdsPrices));
+}
+
+
+
+
+
+
+
+// ─── بالای بخش "نمایش کارت‌ها و جداول" ───
+// ─── بالای بخش "نمایش کارت‌ها و جداول" ───
+// ─── در ابتدای <script> (جایی که پیام‌ها خالی تعریف شده‌اند) ───
+// ─── مدیریت پیام‌ها در پنل ادمین ───
+
+// ───────────────────────────────────────
+
+
+// ایجاد مدال HTML
+const modalWrapper = document.createElement('div');
+modalWrapper.id = 'chatModal';
+modalWrapper.innerHTML = `
+  <div class="modal-overlay" onclick="closeModal()"></div>
+  <div class="modal-content">
+    <h3>گفتگو</h3>
+    <div id="chatMessages" class="chat-messages"></div>
+    
+    <div class="chat-input-area">
+      <textarea id="chatReplyInput" rows="2" placeholder="پیام خود را بنویسید..."></textarea>
+      <button onclick="sendAdminMessage()">ارسال</button>
+      <!-- ↓ دکمهٔ مسدودسازی ↓ -->
+      <button class="action-btn block" onclick="blockCurrentSender()">مسدودسازی فرستنده</button>
+    </div>
+
+    <button class="modal-close" onclick="closeModal()">بستن</button>
+  </div>
+`;
+
+document.body.appendChild(modalWrapper);
+
+// متغیر کمکی
+let currentChatId = null;
+
+// باز کردن مدال
+window.openChatModal = async function (chatId) {
+  currentChatId = chatId;
+  const chat = messagesList.find(c => c._id === chatId);
+  const container = document.getElementById('chatMessages');
+  container.innerHTML = '';
+
+  // 🟢 اگر پیام فروشنده‌ای نخونده وجود داره، به سرور اطلاع بده که خوانده شدند
+  if (chat) {
+    const unreadMsgIds = (chat.messages || [])
+      .filter(m => m.from === 'seller' && !m.readByAdmin)
+      .map(m => m._id)
+      .filter(Boolean);
+
+    if (unreadMsgIds.length > 0) {
+      try {
+        await fetch(`${API_BASE}/chats/${chatId}/mark-read`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: 'Bearer ' + token
+          },
+          body: JSON.stringify({ messageIds: unreadMsgIds })
+        });
+        // توی لیست محلی هم برو پیام‌ها رو خوانده‌شده کن
+        chat.messages.forEach(m => {
+          if (unreadMsgIds.includes(m._id)) m.readByAdmin = true;
+        });
+        updateSidebarCounts(); // شمارنده پیام آپدیت شه
+        renderMessages();      // جدول پیام‌ها رفرش شه
+      } catch (e) {
+        console.warn('خطا در خواندن پیام‌ها:', e);
+      }
+    }
+  }
+
+  if (!chat || !chat.messages?.length) {
+    container.innerHTML = '<p style="text-align:center;color:#888">پیامی وجود ندارد.</p>';
+  } else {
+    chat.messages.forEach(msg => {
+     const sender = getSenderName(chat, msg);
+
+
+      const date = new Date(msg.createdAt || msg.date).toLocaleString('fa-IR', {
+        hour12: false,
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit'
+      });
+
+      const div = document.createElement('div');
+      div.className = 'chat-bubble ' + msg.from;
+      div.innerHTML = `
+        <div class="sender">${sender}</div>
+        <div class="text">${msg.text || '-'}</div>
+        <div class="time">${date}</div>`;
+      container.appendChild(div);
+    });
+  }
+
+  document.getElementById('chatModal').classList.add('show');
+  document.getElementById('chatReplyInput').focus();
+
+  setTimeout(() => {
+    const chatMessages = document.getElementById('chatMessages');
+    if (chatMessages) chatMessages.scrollTop = chatMessages.scrollHeight;
+  }, 100);
+};
+
+
+// بستن مدال
+window.closeModal = function () {
+  document.getElementById('chatModal').classList.remove('show');
+  document.getElementById('chatReplyInput').value = '';
+  currentChatId = null;
+};
+
+// ارسال پیام از طرف ادمین
+// ارسال پیام از طرف ادمین در مودال گفتگو
+// ─── در بخش <script> پنل ادمین ───
+// ارسال پیام از طرف ادمین در مودال گفتگو
+// در فایل JS فرانت-ند (مثلاً public/js/main.js یا داخل تگ <script> در HTML)
+// ارسال پیام از طرف ادمین در مودال گفتگو
+window.sendAdminMessage = async function () {
+  const text = document.getElementById('chatReplyInput').value.trim();
+  if (!text)          return alert('متن پیام را وارد کنید.');
+  if (!currentChatId) return alert('چت انتخاب نشده است.');
+
+  try {
+    const res = await fetch(`${API_BASE}/chats/${currentChatId}/admin-reply`, {
+      method: 'POST',
+      credentials: 'include', // ارسال کوکی‌های HttpOnly مثل admin_token
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ text })
+    });
+
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || data.message || 'خطا در ارسال پیام.');
+
+    // بروزرسانی رابط کاربری بعد از ارسال موفق
+    const idx = messagesList.findIndex(c => c._id === currentChatId);
+    if (idx !== -1) messagesList[idx] = data;
+
+    openChatModal(currentChatId); // مودال را رفرش کن
+    document.getElementById('chatReplyInput').value = '';
+    updateSidebarCounts();
+
+  } catch (err) {
+    console.error('❌ sendAdminMessage error:', err);
+    alert('❌ ' + err.message);
+  }
+};
+
+
+
+
+
+
+
+
+// بستن مدال با کلید ESC
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') closeModal();
+});
+
+
+
+document.addEventListener('DOMContentLoaded', () => {
+  const header = document.getElementById('broadcastHeader');
+  const card   = document.getElementById('broadcastCard');
+
+  header.addEventListener('click', () => {
+    card.classList.toggle('collapsed');
+  });
+});
+
+
+
+
+
+/**
+ * مسدودسازی فرستندهٔ آخرین پیام در چت جاری
+ */
+async function blockCurrentSender() {
+  if (!currentChatId) return alert('شناسهٔ چت پیدا نشد.');
+  if (!confirm('آیا مطمئن هستید که می‌خواهید فرستنده این گفتگو را مسدود کنید؟')) return;
+
+  try {
+    const res = await fetch(`${API_BASE}/chats/${currentChatId}/block`, {
+      method: 'POST',
+      headers: {
+        'Authorization': 'Bearer ' + token,
+        'Content-Type': 'application/json'
+      }
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'خطا در مسدودسازی');
+
+    alert('✅ فرستنده با موفقیت مسدود شد.');
+    closeModal();
+    // به‌روزرسانی لیست پیام‌ها
+    await fetchMessages();
+  } catch (err) {
+    console.error('❌ blockCurrentSender error:', err);
+    alert('❌ ' + err.message);
+  }
+}
+
+
+
+async function sendBroadcastMessage() {
+  const target = document.querySelector('#broadcastTarget').value;
+  const text   = document.querySelector('#broadcastText').value.trim();
+  const status = document.querySelector('#broadcastStatus');
+
+  if (!text) {
+    status.style.color = '#f43f5e';
+    status.textContent = 'متن پیام نمی‌تواند خالی باشد.';
+    return;
+  }
+  status.style.color = '#888';
+  status.textContent = '⏳ در حال ارسال...';
+
+  try {
+    const res = await fetch(`${API_BASE}/chats/broadcast`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      credentials: 'include',
+      body: JSON.stringify({ target, text })
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || data.message || 'خطا در ارسال پیام همگانی');
+    status.style.color = '#10b981';
+    status.textContent = `✅ پیام با موفقیت به ${data.sent || 0} نفر ارسال شد.`;
+    document.querySelector('#broadcastText').value = '';
+  } catch (err) {
+    console.error('❌ sendBroadcastMessage error:', err);
+    status.style.color = '#f43f5e';
+    status.textContent = '❌ ' + err.message;
+  }
+}
+
+
+
+
+async function fetchUnreadCountAndUpdateBadge() {
+  try {
+   const res = await fetch(`${API_BASE}/chats/all`, {
+  credentials: 'include'
+});
+    if (!res.ok) throw new Error("خطا در شمارش پیام‌ها");
+    const data = await res.json();
+    const chats = Array.isArray(data) ? data : (data.chats || []);
+    let total = 0;
+    chats.forEach(chat => {
+      if (Array.isArray(chat.messages)) {
+        total += chat.messages.filter(
+          m => m.from === 'seller' && !m.readByAdmin
+        ).length;
+      }
+    });
+    document.getElementById('count-messages').textContent = total > 0 ? total : '';
+    document.getElementById('header-messages-count').textContent = total > 0 ? `(${total} پیام جدید)` : '';
+  } catch (e) {
+    document.getElementById('count-messages').textContent = '';
+    document.getElementById('header-messages-count').textContent = '';
+  }
+}
+
+function startBadgePolling() {
+  if (badgeInterval) clearInterval(badgeInterval);
+  fetchUnreadCountAndUpdateBadge();
+  badgeInterval = setInterval(fetchUnreadCountAndUpdateBadge, 7000); // هر ۷ ثانیه یکبار
+}
+startBadgePolling();
+
+// لود محتوای آمار روزانه با AJAX
+function loadDailyVisContent() {
+  const panel = document.getElementById('daily-visits-panel');
+  panel.innerHTML = '<p style="text-align:center;color:#888">در حال بارگیری محتوا...</p>';
+
+  const xhr = new XMLHttpRequest();
+  xhr.open('GET', 'admin-dailyVis.html', true);  // اگر مسیر فایل متفاوت بود، تغییر بده (مثلاً 'admin/admin-dailyVis.html')
+
+  xhr.onreadystatechange = function() {
+    if (xhr.readyState === 4 && xhr.status === 200) {
+      // Parse محتوای HTML با DOMParser
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(xhr.responseText, 'text/html');
+
+      // اضافه کردن لینک‌ها، فونت‌ها و استایل‌ها به <head> صفحه اصلی (برای اعمال CSS و Tailwind)
+      const headElements = doc.querySelectorAll('head > *');
+      headElements.forEach(el => {
+        if (el.tagName === 'LINK' || el.tagName === 'STYLE' || el.tagName === 'SCRIPT') {
+          // چک کن اگر قبلاً وجود نداشته باشه، اضافه کن (برای جلوگیری از تکرار)
+          if (!document.querySelector(`[href="${el.href}"], [src="${el.src}"]`)) {
+            document.head.appendChild(el.cloneNode(true));
+          }
+        }
+      });
+
+      // قرار دادن محتوای <body> در پنل
+      panel.innerHTML = doc.body.innerHTML;
+
+      // اجرای اسکریپت‌های فایل (با ایجاد تگ <script> جدید برای هر کدام)
+      const scripts = doc.querySelectorAll('script');
+      scripts.forEach(oldScript => {
+        const newScript = document.createElement('script');
+        if (oldScript.src) {
+          newScript.src = oldScript.src;
+        } else {
+          newScript.textContent = oldScript.textContent;
+        }
+        // اضافه کردن به body برای اجرا
+        document.body.appendChild(newScript);
+      });
+    } else if (xhr.readyState === 4) {
+      panel.innerHTML = '<p style="text-align:center;color:#ef4444">خطا در بارگیری محتوا. مسیر فایل رو چک کن یا صفحه رو رفرش کن.</p>';
+    }
+  };
+  xhr.send();
+}
+
+// لود محتوای گزارش‌ها با AJAX
+// ─── تابع بهبودیافته برای لود محتوای گزارشات ───
+// ─── ۱) تابع بارگذاری AJAX گزارش‌ها ───
+// ─── 1) تابع AJAX برای لود گزارش‌ها ─────────────────────────
+/* ──────────────────────────────────────────────────────────────
+   گزارش‌ها (reports.html) – بارگذاری داینامیک با AJAX
+   این بلوک را در همان <script> اصلی داشبورد قرار بده و
+   نسخه‌های قدیمی loadReportsContent / loadDefaultReportsContent
+   را کاملاً حذف کن.                                          
+──────────────────────────────────────────────────────────────── */
+
+function loadReportsContent () {
+  const panel = panels['reports'];
+
+  /* 1) پیام «در حال بارگیری…» */
+  panel.innerHTML =
+    '<p style="text-align:center;color:#888">در حال بارگیری گزارش‌ها…</p>';
+
+  const xhr = new XMLHttpRequest();
+  /* فایل reports.html در همان پوشهٔ داشبورد است */
+  xhr.open('GET', 'reports.html', true);
+  xhr.timeout = 5000;                   // ۵ ثانیه مهلت
+
+  xhr.onreadystatechange = () => {
+    if (xhr.readyState !== 4) return;
+
+    if (xhr.status === 200) {
+      /* 2) Parse و تزریق محتواى فایل */
+      const doc = new DOMParser()
+        .parseFromString(xhr.responseText, 'text/html');
+
+      /* 3) افزودن CSS / لینک‌ها به <head> (اگر قبلاً نبودند) */
+      doc.head.querySelectorAll('link,style').forEach(el => {
+        if (el.tagName === 'LINK') {
+          if (!document.querySelector(`link[href="${el.href}"]`)) {
+            document.head.appendChild(el.cloneNode(true));
+          }
+        } else {
+          document.head.appendChild(el.cloneNode(true));
+        }
+      });
+
+      /* 4) قرار دادن بدنهٔ فایل در پنل «reports» */
+      panel.innerHTML = doc.body.innerHTML;
+
+      /* 5) اجرای تمام <script>‌های reports.html */
+      doc.querySelectorAll('script').forEach(old => {
+        const s = document.createElement('script');
+        if (old.src) s.src = old.src;
+        else         s.textContent = old.textContent;
+        document.body.appendChild(s);
+      });
+
+    } else {
+      loadDefaultReportsContent();   // فایل پیدا نشد یا خطای HTTP
+    }
+  };
+
+  xhr.onerror   = loadDefaultReportsContent;
+  xhr.ontimeout = loadDefaultReportsContent;
+  xhr.send();
+}
+
+/* 2) محتوای پیش‌فرض در صورت عدم دسترسی به reports.html */
+function loadDefaultReportsContent () {
+  const panel = panels['reports'];
+  panel.innerHTML = `
+    <div style="text-align:center;padding:2rem;">
+      <h2 style="color:#10b981;font-weight:900">گزارشی یافت نشد</h2>
+      <p style="color:#666">
+        نتوانستم <code>reports.html</code> را بارگیری کنم؛
+        لطفاً مسیر یا اتصال را بررسی کنید.
+      </p>
+    </div>`;
+}
+
+/* 3) اتصال تب «گزارشات» به این منطق */
+panels['reports'] = document.getElementById('reports-panel');
+
+menuLinks.forEach(link => {
+  if (link.dataset.section !== 'reports') return;
+
+  let loaded = false;        // فقط اولین بار AJAX بزن
+  link.addEventListener('click', () => {
+    if (!loaded) {
+      loadReportsContent();
+      loaded = true;
+    }
+  });
+});
+
+
+
+
+</script>
+
+<div id="seller-modal-overlay" class="seller-modal-overlay" style="display:none"></div>
+
+
+
+<div id="sender-modal-overlay" class="sender-modal-overlay"></div>
+
+<div id="user-modal-overlay" class="user-modal-overlay" style="display:none"></div>
+</body>
+</html>

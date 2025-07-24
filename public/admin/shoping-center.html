@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>مدیریت مراکز خرید</title>
+  <link href="https://fonts.googleapis.com/css2?family=Yekan:wght@400;500;700&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Yekan', sans-serif;
+      background: #f6f9fc;
+      color: #1a202c;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px;
+      line-height: 1.6;
+    }
+    .container {
+      max-width: 1200px; width: 100%; padding: 20px; margin: 20px auto;
+      background: #ffffff; border-radius: 16px;
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.05);
+    }
+    .header-title {
+      font-size: 2.2rem; color: #3182ce; font-weight: 700;
+      text-align: center; margin-bottom: 40px; position: relative;
+    }
+    .header-title::after {
+      content: ''; width: 70px; height: 4px; background: #63b3ed;
+      position: absolute; bottom: -10px; left: 50%;
+      transform: translateX(-50%); border-radius: 2px;
+    }
+    .center-form { background: #fff; border-radius: 12px; padding: 30px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+      max-width: 500px; margin: 0 auto 50px;
+      display: flex; flex-direction: column; gap: 20px;
+    }
+    .center-form input, .center-form textarea {
+      background: #f7fafc; border: 1px solid #e2e8f0;
+      border-radius: 10px; padding: 14px 18px;
+      font-size: 1.05rem; outline: none;
+      transition: border 0.3s, box-shadow 0.3s;
+    }
+    .center-form input:focus, .center-form textarea:focus {
+      border-color: #3182ce; box-shadow: 0 0 0 3px rgba(49,130,206,0.1);
+    }
+    .center-form button {
+      background: #3182ce; color: #fff; border: none; border-radius: 10px;
+      padding: 16px; font-size: 1.15rem; font-weight: 500; cursor: pointer;
+      transition: background 0.3s, transform 0.3s;
+    }
+    .center-form button:hover { background: #2b6cb0; transform: translateY(-2px); }
+    .center-list { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 30px; }
+    .shop-card {
+      background: #fff; border-radius: 12px; overflow: hidden;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+      transition: transform 0.3s, box-shadow 0.3s;
+      display: flex; flex-direction: column; position: relative;
+    }
+    .shop-card:hover { transform: translateY(-5px); box-shadow: 0 8px 24px rgba(0,0,0,0.1);}
+    .shop-card img {
+      width: 100%; height: 220px; object-fit: cover; border-bottom: 2px solid #e2e8f0;
+    }
+    .shop-title { font-size: 1.4rem; font-weight: 600; color: #1a202c;
+      margin: 20px 20px 10px; text-align: center;}
+    .shop-address {
+      font-size: 1.05rem; color: #4a5568; text-align: center; margin: 0 20px 15px;
+      display: flex; justify-content: center; align-items: center; gap: 6px;
+    }
+    .shop-address::before { content: '📍'; font-size: 1.2rem; }
+    .shop-category {
+      background: #ebf8ff; color: #3182ce; border-radius: 20px;
+      padding: 6px 18px; font-size: 0.95rem; font-weight: 500;
+      margin: 0 auto 20px; display: inline-block;
+    }
+    .shop-hours, .shop-holidays {
+      font-size: 1.05rem; color: #4a5568; text-align: center; margin: 0 20px 10px;
+      display: flex; justify-content: center; align-items: center; gap: 6px;
+    }
+    .shop-hours::before { content: '🕒'; font-size: 1.2rem; }
+    .shop-holidays::before { content: '📅'; font-size: 1.2rem; }
+    .card-btns { display: flex; gap: 15px; justify-content: center; margin-bottom: 20px; }
+    .edit-btn, .delete-btn {
+      padding: 10px 24px; border-radius: 20px; font-size: 1rem; font-weight: 500;
+      cursor: pointer; transition: background 0.3s; border: none;
+    }
+    .edit-btn { background: #48bb78; color: #fff;}
+    .edit-btn:hover { background: #38a169; }
+    .delete-btn { background: #f56565; color: #fff;}
+    .delete-btn:hover { background: #e53e3e; }
+    .empty-msg { text-align: center; font-size: 1.3rem; color: #a0aec0; margin: 100px 0;}
+    
+    /* استایل پاپ‌اپ‌های موفقیت */
+    .popup-success {
+      display:none;
+      position:fixed;
+      top:50px; left:50%; transform:translateX(-50%);
+      background:#38b2ac;
+      color:#fff;
+      padding:22px 38px;
+      border-radius:14px;
+      font-size:1.15rem;
+      font-weight:600;
+      box-shadow:0 8px 32px rgba(56,178,172,0.16);
+      z-index:9999;
+      transition: all 0.4s;
+      text-align: center;
+    }
+    
+    /* رسپانسیو مثل قبل */
+    @media (max-width: 1200px) { .container { max-width: 1000px; } }
+    @media (max-width: 992px) {
+      .container { padding: 15px; } .header-title { font-size: 2rem; }
+      .center-list { gap: 25px; } .shop-card img { height: 200px; }
+    }
+    @media (max-width: 768px) {
+      .container { padding: 10px; border-radius: 10px; }
+      .header-title { font-size: 1.8rem; margin-bottom: 30px; }
+      .center-form { max-width: 100%; padding: 25px; gap: 18px; }
+      .center-form input { padding: 12px 16px; font-size: 1rem; }
+      .center-form button { padding: 14px; font-size: 1.1rem; }
+      .center-list { grid-template-columns: 1fr; gap: 20px; }
+      .shop-card img { height: 180px; } .shop-title { font-size: 1.3rem; }
+      .shop-address { font-size: 1rem; } .card-btns { flex-direction: row; gap: 10px;}
+    }
+    @media (max-width: 480px) {
+      body { padding: 10px; }
+      .container { margin: 10px auto; padding: 10px; border-radius: 8px; }
+      .header-title { font-size: 1.6rem; }
+      .center-form { padding: 20px; gap: 15px; }
+      .center-form input { padding: 10px 14px; font-size: 0.95rem; }
+      .center-form button { padding: 12px; font-size: 1rem; }
+      .shop-card { border-radius: 10px; padding: 15px; }
+      .shop-card img { height: 160px; }
+      .shop-title { font-size: 1.2rem; }
+      .empty-msg { font-size: 1.2rem; margin: 80px 0; }
+      .card-btns { flex-direction: column; gap: 8px; }
+      .edit-btn, .delete-btn { padding: 10px; }
+      .popup-success { padding: 16px 28px; font-size: 1rem; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header-title">مدیریت مراکز خرید شهر</div>
+    <form class="center-form" id="centerForm">
+      <input type="text" id="title" placeholder="نام مرکز خرید" required>
+      <input type="text" id="location" placeholder="آدرس مرکز خرید" required>
+      <input type="text" id="tag" placeholder="تگ بالای کارت (اختیاری)">
+      <input type="number" id="order" placeholder="ترتیب (اختیاری)">
+      <textarea id="description" placeholder="توضیحات (اختیاری)" rows="2"></textarea>
+      <input type="text" id="hours" placeholder="ساعات کاری، مثلا 10:30 تا 22:00" required>
+      <input type="text" id="holidays" placeholder="روزهای تعطیل، مثلا شنبه، جمعه">
+      <input type="file" id="image" accept="image/*">
+      <input type="hidden" id="centerId">
+      <button type="submit">افزودن مرکز خرید</button>
+    </form>
+    <div class="center-list" id="centerList"></div>
+  </div>
+
+  <!-- پاپ‌اپ برای ثبت موفقیت‌آمیز -->
+  <div id="popup-add-success" class="popup-success">
+    ✔️ مرکز خرید با موفقیت ثبت شد!
+  </div>
+  
+  <!-- پاپ‌اپ برای ویرایش موفقیت‌آمیز -->
+  <div id="popup-edit-success" class="popup-success">
+    ✔️ ویرایش مرکز خرید با موفقیت انجام شد!
+  </div>
+
+  <script>
+    // --- تنظیمات API ---
+    const API_URL = '/api/shopping-centers';
+    // اگر سرورت جداست: 'https://yourdomain.com/api/shopping-centers'
+
+    // --- متغیرها ---
+    let editingId = null;
+    let editingImage = '';
+
+    // --- توکن خواستی اینجا اضافه کن
+    const FETCH_OPTIONS = {
+      // headers: { "Authorization": "Bearer ..." }
+    };
+
+    // --- لود لیست ---
+    function loadCenters() {
+      fetch(API_URL, FETCH_OPTIONS)
+        .then(res => res.json())
+        .then(centers => {
+          renderCenters(centers);
+        })
+        .catch(() => {
+          document.getElementById('centerList').innerHTML =
+            "<div class='empty-msg'>خطا در دریافت مراکز خرید!</div>";
+        });
+    }
+
+    // --- رندر لیست ---
+    function renderCenters(centers) {
+      const list = document.getElementById('centerList');
+      if (!centers.length) {
+        list.innerHTML = "<div class='empty-msg'>هیچ مرکز خریدی ثبت نشده است.</div>";
+        return;
+      }
+      list.innerHTML = '';
+      
+      centers.forEach(center => {
+        const card = document.createElement('div');
+        card.className = 'shop-card';
+        card.innerHTML = `
+          <img src="${center.image ? (center.image.startsWith('/') ? center.image : '/' + center.image) : 'https://via.placeholder.com/320x220?text=عکس+مرکز+خرید'}" alt="${center.title}">
+          <div class="shop-title">${center.title || ''}</div>
+          <div class="shop-address">${center.location || ''}</div>
+          ${center.tag ? `<span class="shop-category">${center.tag}</span>` : ""}
+          
+          <!-- نمایش ساعات کاری -->
+          <div class="shop-hours">ساعات کاری: ${center.hours || 'نامشخص'}</div>
+          
+          <!-- نمایش روزهای تعطیل -->
+          <div class="shop-holidays">روزهای تعطیل: ${center.holidays || 'هیچ'}</div>
+
+          <div class="card-btns">
+            <button class="edit-btn" onclick="editCenter('${center._id}')">ویرایش</button>
+            <button class="delete-btn" onclick="deleteCenter('${center._id}')">حذف</button>
+          </div>
+        `;
+        list.appendChild(card);
+      });
+    }
+
+    // --- افزودن/ویرایش مرکز ---
+    document.getElementById('centerForm').onsubmit = function(e) {
+      e.preventDefault();
+      const formData = new FormData();
+      formData.append('title', document.getElementById('title').value.trim());
+      formData.append('location', document.getElementById('location').value.trim());
+      formData.append('tag', document.getElementById('tag').value.trim());
+      formData.append('order', document.getElementById('order').value || 0);
+      formData.append('description', document.getElementById('description').value.trim());
+      
+      // ارسال ساعات کاری
+      formData.append('hours', document.getElementById('hours').value.trim());
+      
+      // ارسال روزهای تعطیل
+      formData.append('holidays', document.getElementById('holidays').value.trim());
+
+      const fileInput = document.getElementById('image');
+      if (fileInput.files.length > 0) {
+        formData.append('image', fileInput.files[0]);
+      } else if(editingImage) {
+        // اگر در حالت ویرایش عکس تغییر نکرده
+        formData.append('image', editingImage);
+      }
+
+      // افزودن یا ویرایش؟
+      const id = document.getElementById('centerId').value;
+      const method = id ? 'PUT' : 'POST';
+      const url = id ? `${API_URL}/${id}` : API_URL;
+
+      fetch(url, {
+        method,
+        body: formData,
+        ...FETCH_OPTIONS,
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data.error) alert(data.error);
+        
+        // نمایش پاپ‌اپ مناسب بر اساس عملیات
+        if (id) {
+          showSuccessPopup('edit');
+        } else {
+          showSuccessPopup('add');
+        }
+
+        editingId = null;
+        editingImage = '';
+        document.getElementById('centerForm').reset();
+        document.getElementById('centerForm').querySelector('button').textContent = 'افزودن مرکز خرید';
+        loadCenters();
+      })
+      .catch(() => alert('خطا در ذخیره اطلاعات!'));
+    };
+
+    // --- ویرایش مرکز ---
+    window.editCenter = function(id) {
+      fetch(`${API_URL}/${id}`, FETCH_OPTIONS)
+        .then(res => res.json())
+        .then(center => {
+          document.getElementById('title').value = center.title || '';
+          document.getElementById('location').value = center.location || '';
+          document.getElementById('tag').value = center.tag || '';
+          document.getElementById('order').value = center.order || '';
+          document.getElementById('description').value = center.description || '';
+          document.getElementById('hours').value = center.hours || '';
+          document.getElementById('holidays').value = center.holidays || '';
+          document.getElementById('centerId').value = center._id;
+          editingId = center._id;
+          editingImage = center.image || '';
+          document.getElementById('centerForm').querySelector('button').textContent = 'ذخیره ویرایش';
+          
+          // اسکرول به فرم ویرایش
+          document.getElementById('centerForm').scrollIntoView({ behavior: 'smooth' });
+        })
+        .catch(() => alert('خطا در دریافت اطلاعات مرکز!'));
+    };
+
+    // --- حذف مرکز ---
+    window.deleteCenter = function(id) {
+      if(!confirm('آیا واقعاً می‌خواهید این مرکز خرید حذف شود؟')) return;
+      fetch(`${API_URL}/${id}`, {
+        method: 'DELETE',
+        ...FETCH_OPTIONS,
+      })
+      .then(res => res.json())
+      .then(data => {
+        if(data.error) alert(data.error);
+        loadCenters();
+        document.getElementById('centerForm').reset();
+        document.getElementById('centerForm').querySelector('button').textContent = 'افزودن مرکز خرید';
+      })
+      .catch(() => alert('خطا در حذف مرکز خرید!'));
+    };
+
+    // --- لود اولیه ---
+    loadCenters();
+
+    // --- نمایش پاپ‌اپ موفقیت ---
+    function showSuccessPopup(type) {
+      const popupId = type === 'add' ? 'popup-add-success' : 'popup-edit-success';
+      const popup = document.getElementById(popupId);
+      
+      popup.style.display = 'block';
+      popup.style.opacity = 1;
+      
+      setTimeout(() => {
+        popup.style.opacity = 0;
+        setTimeout(() => {
+          popup.style.display = 'none';
+        }, 600);
+      }, 2200);
+    }
+  </script>
+</body>
+</html>

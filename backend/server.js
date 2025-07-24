@@ -1,0 +1,96 @@
+// server.js
+
+const express = require('express');
+const mongoose = require('mongoose');
+const cors = require('cors');
+const chatRoutes   = require('./routes/chatRoutes');
+const sellerRoutes = require('./routes/seller');
+const adminRoutes  = require('./routes/adminRoutes');
+const planRoutes   = require('./routes/plans');
+const adPlanRoutes = require('./routes/adPlans');
+const paymentRoutes = require('./routes/payment'); 
+require('dotenv').config();
+
+const app = express();
+const cookieParser = require('cookie-parser');
+const path = require('path');
+const dailyVisitRoutes = require('./routes/dailyVisitRoutes');
+
+// ------------------- Middlewares -------------------
+app.use(cookieParser());
+
+app.use(cors({
+  origin: [
+    'http://localhost:5500',
+    'http://127.0.0.1:5500'
+  ],
+  credentials: true,
+  methods: ['GET','POST','PUT','DELETE','OPTIONS'],
+  allowedHeaders: ['Content-Type','Authorization']
+}));
+
+app.use(express.json({ limit: '50mb' }));
+app.use(express.urlencoded({ extended: true, limit: '50mb' }));
+
+// ------------------- Static Files -------------------
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+app.use(express.static(path.join(__dirname, '../public')));
+
+// ------------------- Routes -------------------
+app.use('/api/auth', require('./routes/auth'));
+app.use('/api/user', require('./routes/user'));
+app.use('/api/products', require('./routes/products'));
+app.use('/api/seller', sellerRoutes);
+app.use('/api/sellers', require('./routes/seller'));
+app.use('/api/shopAppearance', require('./routes/shopAppearance'));
+app.use('/api/slides', require('./routes/slides'));
+app.use('/api/favorite', require('./routes/favorites'));
+app.use('/api/chats', chatRoutes);
+app.use('/api/messages', chatRoutes);
+app.use('/api/plans', planRoutes);
+app.use('/api/adPlans', adPlanRoutes);
+app.use('/api/admin', adminRoutes);
+app.use('/api/shops', require('./routes/shops'));
+app.use('/api/adOrder', require('./routes/adOrder'));
+app.use('/api/sellerPlans', require('./routes/sellerPlans'));
+app.use('/api/shopping-centers', require('./routes/shoppingCenter'));
+app.use('/api/shop-appearances', require('./routes/shopAppearance'));
+app.use('/api/payment', paymentRoutes);  // روت‌های پرداخت
+
+app.use('/api/daily-visits', dailyVisitRoutes);
+app.use('/api/reports', require('./routes/report'));
+
+// ------------------- Health Check -------------------
+app.get('/', (req, res) => {
+  res.send('Vitrinet Backend is running!');
+});
+
+// ------------------- Database & Server -------------------
+const PORT = process.env.PORT || 5000;
+const MONGO_URI = process.env.MONGO_URI;
+
+mongoose.connect(MONGO_URI)
+  .then(() => {
+    console.log('✅ MongoDB connected');
+    app.listen(PORT, () => {
+      console.log(`🚀 Server running on port ${PORT}`);
+    });
+  })
+  .catch(err => {
+    console.error('❌ MongoDB Connection Error:', err.message || err);
+    process.exit(1);
+  });
+
+// ------------------- Global Error Handler -------------------
+app.use((err, req, res, next) => {
+  if (err.message === 'Not allowed by CORS') {
+    return res.status(403).json({ message: 'دسترسی غیرمجاز (CORS)!' });
+  }
+  console.error('Server Error:', err.stack || err);
+  res.status(500).json({ message: 'خطای سرور! لطفاً بعداً تلاش کنید.' });
+});
+
+// ------------------- 404 Not Found -------------------
+app.use((req, res) => {
+  res.status(404).json({ message: 'آدرس موردنظر یافت نشد!' });
+});

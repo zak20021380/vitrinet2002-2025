@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>تماس با ما - ویترینت</title>
+  <meta name="description" content="فرم تماس مینیمال و شیک برای ارتباط با ویترینت، فروشگاه آنلاین پوشاک و اکسسوری.">
+  <meta name="keywords" content="ویترینت, تماس, فروشگاه آنلاین, پوشاک, اکسسوری, فرم تماس">
+  <meta name="robots" content="index, follow">
+  <meta property="og:title" content="تماس با ویترینت">
+  <meta property="og:description" content="فرم تماس مینیمال برای ارتباط با ویترینت، فروشگاه آنلاین پوشاک و اکسسوری.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://vitrinnet.com/contact">
+  <meta property="og:image" content="https://vitrinnet.com/assets/og-image.jpg">
+  <link rel="icon" type="image/svg+xml" href="/assets/favicon.svg">
+  <link href="https://cdn.jsdelivr.net/npm/vazirmatn@33.0.3/Vazirmatn-font-face.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/iransans-web-font@3.1.0/stylesheet.css" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #22c55e;
+      --secondary: #a855f7;
+      --text: #0a0a0a;
+      --white: #fff;
+      --bg: #f3f4f6;
+      --header-bg: rgba(10, 10, 10, 0.9);
+      --footer-bg: #0a0a0a;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Vazirmatn', sans-serif;
+      background: linear-gradient(180deg, var(--bg) 0%, #e5e7eb 100%);
+      color: var(--text);
+      line-height: 1.6;
+      direction: rtl;
+    }
+    a { text-decoration: none; color: inherit; }
+    .container { max-width: 700px; margin: 0 auto; padding: 0 1rem; }
+    /* هدر */
+    header {
+      background: var(--header-bg);
+      backdrop-filter: blur(10px);
+      padding: 0.8rem 0;
+      position: fixed;
+      top: 0;
+      width: 100%;
+      z-index: 1000;
+    }
+    .header-content {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 1rem;
+    }
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-family: 'IRANSans', sans-serif;
+      font-weight: 700;
+      font-size: 1.4rem;
+      color: var(--white);
+    }
+    .logo svg {
+      width: 28px;
+      height: 28px;
+      transition: transform 0.3s ease;
+    }
+    .logo:hover svg { animation: pulse 0.6s ease; }
+    nav ul {
+      display: flex;
+      gap: 1.5rem;
+      list-style: none;
+    }
+    nav a {
+      color: var(--white);
+      font-family: 'IRANSans', sans-serif;
+      font-weight: 500;
+      font-size: 0.95rem;
+      position: relative;
+      transition: color 0.3s ease;
+    }
+    nav a::after {
+      content: '';
+      position: absolute;
+      width: 0;
+      height: 2px;
+      bottom: -4px;
+      right: 0;
+      background: var(--primary);
+      transition: width 0.3s ease;
+    }
+    nav a:hover::after, nav a.active::after { width: 100%; }
+    nav a:hover, nav a.active { color: var(--primary); }
+    .menu-toggle {
+      display: none;
+      background: none;
+      border: none;
+      color: var(--white);
+      font-size: 1.5rem;
+      cursor: pointer;
+    }
+    /* فرم تماس */
+    main {
+      padding: 6rem 0;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      animation: fadeIn 0.8s ease-in-out;
+    }
+    .contact-form {
+      background: #fff;
+      padding: 2.5rem;
+      border-radius: 12px;
+      box-shadow: 0 8px 30px rgba(34, 197, 94, 0.15);
+      max-width: 600px;
+      width: 100%;
+      margin: 0 auto;
+    }
+    .contact-form h2 {
+      font-size: 2rem;
+      color: var(--text);
+      margin-bottom: 1.5rem;
+      font-weight: 700;
+      text-align: center;
+    }
+    .form-group {
+      margin-bottom: 1.5rem;
+      position: relative;
+    }
+    .form-group input, .form-group textarea {
+      width: 100%;
+      padding: 0.9rem;
+      border: 1px solid #d1d5db;
+      border-radius: 8px;
+      font-size: 1rem;
+      color: var(--text);
+      background: #f9fafb;
+      transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    }
+    .form-group input:focus, .form-group textarea:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 8px rgba(34, 197, 94, 0.3);
+    }
+    .form-group textarea { resize: vertical; min-height: 120px; }
+    .form-group label {
+      position: absolute;
+      top: 0.9rem;
+      right: 1rem;
+      font-size: 0.95rem;
+      color: #6b7280;
+      transition: all 0.2s ease;
+      pointer-events: none;
+    }
+    .form-group input:focus + label,
+    .form-group textarea:focus + label,
+    .form-group input:not(:placeholder-shown) + label,
+    .form-group textarea:not(:placeholder-shown) + label {
+      top: -0.7rem;
+      right: 0.8rem;
+      font-size: 0.8rem;
+      color: var(--primary);
+      background: #fff;
+      padding: 0 0.2rem;
+    }
+    .form-group .error {
+      font-size: 0.8rem;
+      color: #ef4444;
+      margin-top: 0.3rem;
+      display: none;
+    }
+    .form-group.error .error { display: block; }
+    .form-group.error input, .form-group.error textarea {
+      border-color: #ef4444;
+      box-shadow: 0 0 8px rgba(239, 68, 68, 0.2);
+    }
+    .submit-btn {
+      background: linear-gradient(90deg, var(--primary), var(--secondary));
+      color: var(--white);
+      padding: 0.9rem 2.5rem;
+      border-radius: 8px;
+      font-family: 'IRANSans', sans-serif;
+      font-weight: 500;
+      font-size: 1rem;
+      border: none;
+      cursor: pointer;
+      display: block;
+      margin: 1rem auto 0;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    .submit-btn:hover {
+      transform: scale(1.05);
+      box-shadow: 0 0 12px rgba(34, 197, 94, 0.5);
+    }
+    /* پاپ‌آپ فرم */
+    .form-popup {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(10, 10, 10, 0.8);
+      backdrop-filter: blur(8px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s ease;
+    }
+    .form-popup.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+    .form-popup-content {
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(10px);
+      padding: 2rem;
+      border-radius: 12px;
+      text-align: center;
+      box-shadow: 0 10px 40px rgba(34, 197, 94, 0.2);
+      max-width: 90%;
+      width: 360px;
+      animation: zoomIn 0.3s ease-out;
+    }
+    .form-popup-content svg {
+      margin-bottom: 1rem;
+      width: 40px;
+      height: 40px;
+    }
+    .form-popup-content h4 {
+      font-size: 1.3rem;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 0.8rem;
+    }
+    .form-popup-content p {
+      font-size: 0.9rem;
+      color: var(--text);
+      margin-bottom: 1.5rem;
+    }
+    .form-popup-close {
+      background: linear-gradient(90deg, var(--primary), var(--secondary));
+      color: var(--white);
+      padding: 0.7rem 2rem;
+      border-radius: 8px;
+      font-family: 'IRANSans', sans-serif;
+      font-weight: 500;
+      font-size: 0.95rem;
+      border: none;
+      cursor: pointer;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    .form-popup-close:hover {
+      transform: scale(1.05);
+      box-shadow: 0 0 12px rgba(34, 197, 94, 0.5);
+    }
+    /* فوتر */
+    .footer-vitrinnet {
+      background: linear-gradient(180deg, var(--footer-bg) 0%, #1e1e1e 100%);
+      padding: 1.5rem 1rem;
+      color: var(--white);
+      text-align: center;
+    }
+    .footer-logo {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      font-family: 'IRANSans', sans-serif;
+      font-weight: 700;
+      font-size: 1.2rem;
+      color: var(--white);
+      margin-bottom: 1rem;
+    }
+    .footer-logo svg {
+      width: 24px;
+      height: 24px;
+      transition: transform 0.3s ease;
+    }
+    .footer-logo:hover svg { animation: pulse 0.6s ease; }
+    .footer-socials {
+      display: flex;
+      justify-content: center;
+      gap: 0.8rem;
+      margin: 1rem 0;
+    }
+    .footer-socials a {
+      display: inline-flex;
+      padding: 0.6rem;
+      border-radius: 50%;
+      background: #1e1e1e;
+      transition: background 0.3s ease, transform 0.3s ease;
+    }
+    .footer-socials a:hover {
+      background: var(--primary);
+      transform: scale(1.1);
+    }
+    .footer-socials svg {
+      width: 20px;
+      height: 20px;
+      fill: var(--white);
+    }
+    .footer-socials a:hover svg { fill: var(--white); }
+    .footer-bottom {
+      font-size: 0.85rem;
+      color: #6b7280;
+    }
+    /* انیمیشن‌ها */
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes zoomIn {
+      from { opacity: 0; transform: scale(0.9); }
+      to { opacity: 1; transform: scale(1); }
+    }
+    @keyframes pulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.15); }
+      100% { transform: scale(1); }
+    }
+    /* رسپانسیو */
+    @media (max-width: 768px) {
+      .contact-form { padding: 2rem; }
+      nav ul { display: none; }
+      nav.active ul {
+        display: flex;
+        flex-direction: column;
+        position: absolute;
+        top: 100%;
+        right: 0;
+        background: var(--header-bg);
+        backdrop-filter: blur(10px);
+        width: 100%;
+        padding: 1rem;
+        box-shadow: 0 4px 12px rgba(34, 197, 94, 0.2);
+      }
+      .menu-toggle { display: block; }
+    }
+    @media (max-width: 480px) {
+      .container { padding: 0 0.8rem; }
+      .contact-form { padding: 1.5rem; }
+      .contact-form h2 { font-size: 1.6rem; }
+      .form-group input, .form-group textarea { padding: 0.8rem; font-size: 0.95rem; }
+      .form-group label { font-size: 0.9rem; }
+      .form-group input:focus + label,
+      .form-group textarea:focus + label,
+      .form-group input:not(:placeholder-shown) + label,
+      .form-group textarea:not(:placeholder-shown) + label {
+        top: -0.6rem;
+        font-size: 0.75rem;
+      }
+      .submit-btn { padding: 0.8rem 2rem; font-size: 0.95rem; }
+      .form-popup-content { padding: 1.5rem; width: 320px; }
+      .form-popup-content h4 { font-size: 1.2rem; }
+      .form-popup-content p { font-size: 0.85rem; }
+      .form-popup-close { padding: 0.6rem 1.8rem; font-size: 0.9rem; }
+      .footer-logo { font-size: 1.1rem; }
+      .footer-logo svg { width: 22px; height: 22px; }
+      .footer-socials a { padding: 0.5rem; }
+      .footer-socials svg { width: 18px; height: 18px; }
+    }
+    @media (min-width: 1200px) {
+      .container { max-width: 800px; }
+      .contact-form { padding: 3rem; }
+      .contact-form h2 { font-size: 2.2rem; }
+    }
+  </style>
+</head>
+<body>
+  <header role="banner">
+    <div class="header-content">
+      <a href="/" class="logo" aria-label="صفحه اصلی ویترینت">
+        <svg width="28" height="28" viewBox="0 0 64 64" fill="none">
+          <rect x="12" y="8" width="40" height="8" rx="3" fill="url(#sign)"/>
+          <rect x="10" y="20" width="44" height="36" rx="8" fill="#fff" filter="url(#shadow)"/>
+          <rect x="29" y="36" width="10" height="20" rx="3" fill="#22c55e"/>
+          <defs>
+            <linearGradient id="sign" x1="12" y1="8" x2="52" y2="16">
+              <stop stop-color="#22c55e"/>
+              <stop offset="1" stop-color="#a855f7"/>
+            </linearGradient>
+            <filter id="shadow" x="0" y="0" width="64" height="64">
+              <feDropShadow dx="0" dy="2" stdDeviation="3" flood-color="#22c55e" flood-opacity="0.2"/>
+            </filter>
+          </defs>
+        </svg>
+        ویترینت
+      </a>
+      <nav role="navigation" aria-label="منوی اصلی">
+        <button class="menu-toggle" aria-label="باز کردن منو" aria-expanded="false">☰</button>
+        <ul>
+          <li><a href="/" aria-label="صفحه اصلی">خانه</a></li>
+          <li><a href="/products" aria-label="محصولات">محصولات</a></li>
+          <li><a href="/about" aria-label="درباره ما">درباره</a></li>
+          <li><a href="/contact" class="active" aria-label="تماس با ما">تماس</a></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+  <main role="main">
+    <section class="contact-section" aria-labelledby="contact-title">
+      <div class="contact-form">
+        <h2 id="contact-title">ارتباط با ما</h2>
+        <form id="contact-form" role="form" aria-label="فرم تماس">
+          <div class="form-group">
+            <input type="text" id="name" placeholder=" " required aria-label="نام">
+            <label for="name">نام</label>
+            <span class="error">لطفاً نام خود را وارد کنید</span>
+          </div>
+          <div class="form-group">
+            <input type="email" id="email" placeholder=" " required aria-label="ایمیل">
+            <label for="email">ایمیل</label>
+            <span class="error">لطفاً ایمیل معتبر وارد کنید</span>
+          </div>
+          <div class="form-group">
+            <textarea id="message" placeholder=" " required aria-label="پیام"></textarea>
+            <label for="message">پیام</label>
+            <span class="error">لطفاً پیام خود را وارد کنید</span>
+          </div>
+          <button type="submit" class="submit-btn">ارسال پیام</button>
+        </form>
+      </div>
+    </section>
+    <div class="form-popup" role="alert" aria-live="polite">
+      <div class="form-popup-content">
+        <svg viewBox="0 0 24 24" fill="none">
+          <path d="M20 6L9 17l-5-5" stroke="#22c55e" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <h4>پیام شما ارسال شد!</h4>
+        <p>به‌زودی با شما تماس می‌گیریم</p>
+        <button class="form-popup-close" aria-label="بستن پاپ‌آپ">بستن</button>
+      </div>
+    </div>
+  </main>
+  <footer class="footer-vitrinnet" role="contentinfo">
+    <div class="footer-logo">
+      <svg width="24" height="24" viewBox="0 0 64 64" fill="none">
+        <rect x="12" y="8" width="40" height="8" rx="3" fill="url(#sign)"/>
+        <rect x="10" y="20" width="44" height="36" rx="8" fill="#fff" filter="url(#shadow)"/>
+        <rect x="29" y="36" width="10" height="20" rx="3" fill="#22c55e"/>
+        <defs>
+          <linearGradient id="sign" x1="12" y1="8" x2="52" y2="16">
+            <stop stop-color="#22c55e"/>
+            <stop offset="1" stop-color="#a855f7"/>
+          </linearGradient>
+          <filter id="shadow" x="0" y="0" width="64" height="64">
+            <feDropShadow dx="0" dy="2" stdDeviation="3" flood-color="#22c55e" flood-opacity="0.2"/>
+          </filter>
+        </defs>
+      </svg>
+      ویترینت
+    </div>
+    <nav class="footer-socials" aria-label="شبکه‌های اجتماعی">
+      <a href="https://instagram.com" aria-label="اینستاگرام ویترینت" rel="nofollow">
+        <svg viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 1.366.062 2.633.326 3.608 1.301.975.975 1.24 2.242 1.301 3.608.058 1.266.07 1.646.07 4.85s-.012 3.584-.07 4.85c-.062 1.366-.326 2.633-1.301 3.608-.975.975-2.242 1.24-3.608 1.301-1.266.058-1.646.07-4.85.07s-3.584-.012-4.85-.07c-1.366-.062-2.633-.326-3.608-1.301-.975-.975-1.24-2.242-1.301-3.608-.058-1.266-.07-1.646-.07-4.85s.012-3.584.07-4.85c.062-1.366.326-2.633 1.301-3.608.975-.975 2.242-1.24 3.608-1.301 1.266-.058 1.646-.07 4.85-.07zm0-2.163c-3.259 0-3.667.014-4.947.072-1.468.067-2.832.364-3.892 1.424-1.06 1.06-1.357 2.424-1.424 3.892-.058 1.28-.072 1.688-.072 4.947s.014 3.667.072 4.947c.067 1.468.364 2.832 1.424 3.892 1.06 1.06 2.424 1.357 3.892 1.424 1.28.058 1.688.072 4.947.072s3.667-.014 4.947-.072c1.468-.067 2.832-.364 3.892-1.424 1.06-1.06 1.357-2.424 1.424-3.892.058-1.28.072-1.688.072-4.947s-.014-3.667-.072-4.947c-.067-1.468-.364-2.832-1.424-3.892-1.06-1.06-2.424-1.357-3.892-1.424-1.28-.058-1.688-.072-4.947-.072zm0 5.838c-3.313 0-6 2.687-6 6s2.687 6 6 6 6-2.687 6-6-2.687-6-6-6zm0 10c-2.21 0-4-1.79-4-4s1.79-4 4-4 4 1.79 4 4-1.79 4-4 4zm4.7-10.3c-.775 0-1.4-.625-1.4-1.4s.625-1.4 1.4-1.4 1.4.625 1.4 1.4-.625 1.4-1.4 1.4z"/></svg>
+      </a>
+      <a href="https://twitter.com" aria-label="توییتر ویترینت" rel="nofollow">
+        <svg viewBox="0 0 24 24"><path d="M22.46 6c-.77.35-1.6.58-2.46.69a4.31 4.31 0 001.88-2.38 8.64 8.64 0 01-2.73 1.04 4.3 4.3 0 00-7.34 3.92 12.2 12.2 0 01-8.86-4.5 4.3 4.3 0 001.33 5.74 4.28 4.28 0 01-1.95-.54v.05c0 2.01 1.43 3.68 3.33 4.06a4.3 4.3 0 01-1.94.07 4.3 4.3 0 004.01 2.98 8.62 8.62 0 01-5.33 1.84c-.35 0-.69-.02-1.03-.06a12.15 12.15 0 006.59 1.93c7.91 0 12.24-6.55 12.24-12.24 0-.19 0-.37-.01-.56.84-.6 1.56-1.35 2.14-2.2z"/></svg>
+      </a>
+      <a href="https://telegram.org" aria-label="تلگرام ویترینت" rel="nofollow">
+        <svg viewBox="0 0 24 24"><path d="M11.944 0A12 12 0 000 12a12 12 0 0012 12 12 12 0 0012-12A12 12 0 0012 0h-.056zm4.772 7.597c-.527 0-.955.427-.955.955v2.864H8.239V8.552c0-.528-.428-.955-.955-.955s-.955.427-.955.955v8.591c0 .528.428.955.955.955h8.591c.528 0 .955-.427.955-.955v-8.591c0-.528-.428-.955-.955-.955zm-3.818 2.864h1.91v1.91h-1.91v-1.91zm-3.818 0h1.91v1.91h-1.91v-1.91zm7.636 3.818h-1.91v1.91h1.91v-1.91zm-3.818 0h-1.91v1.91h1.91v-1.91zm-3.818 0h-1.91v1.91h1.91v-1.91z"/></svg>
+      </a>
+    </nav>
+    <div class="footer-bottom">
+      © ۱۴۰۴ ویترینت – تمام حقوق محفوظ است.
+    </div>
+  </footer>
+  <script>
+    // منوی همبرگر
+    document.addEventListener('DOMContentLoaded', () => {
+      const menuToggle = document.querySelector('.menu-toggle');
+      const nav = document.querySelector('nav');
+      menuToggle.addEventListener('click', () => {
+        nav.classList.toggle('active');
+        const expanded = nav.classList.contains('active');
+        menuToggle.setAttribute('aria-expanded', expanded);
+        menuToggle.textContent = expanded ? '✕' : '☰';
+      });
+    });
+
+    // اعتبارسنجی فرم
+    const form = document.getElementById('contact-form');
+    const popup = document.querySelector('.form-popup');
+    const closePopupBtn = document.querySelector('.form-popup-close');
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      let isValid = true;
+      const fields = [
+        { id: 'name', validate: val => val.trim().length > 0, error: 'لطفاً نام خود را وارد کنید' },
+        { id: 'email', validate: val => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val), error: 'لطفاً ایمیل معتبر وارد کنید' },
+        { id: 'message', validate: val => val.trim().length > 0, error: 'لطفاً پیام خود را وارد کنید' }
+      ];
+      fields.forEach(field => {
+        const input = document.getElementById(field.id);
+        const group = input.parentElement;
+        if (!field.validate(input.value)) {
+          group.classList.add('error');
+          isValid = false;
+        } else {
+          group.classList.remove('error');
+        }
+      });
+      if (isValid) {
+        popup.classList.add('active');
+        form.reset();
+      }
+    });
+    closePopupBtn.addEventListener('click', () => popup.classList.remove('active'));
+    popup.addEventListener('click', (e) => {
+      if (e.target === popup) popup.classList.remove('active');
+    });
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && popup.classList.contains('active')) popup.classList.remove('active');
+    });
+  </script>
+</body>
+</html>

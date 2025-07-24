@@ -1,0 +1,912 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>داشبورد آمار درآمد</title>
+  <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/remixicon@4.3.0/fonts/remixicon.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
+  <style>
+    :root {
+      --primary: #10b981;
+      --primary-dark: #059669;
+      --primary-light: #d1fae5;
+      --secondary: #0ea5e9;
+      --secondary-dark: #0284c7;
+      --secondary-light: #e0f2fe;
+      --accent: #eab308;
+      --accent-dark: #ca8a04;
+      --accent-light: #fef9c3;
+      --success: #22c55e;
+      --info: #3b82f6;
+      --warning: #f97316;
+      --danger: #ef4444;
+      --dark: #1e293b;
+      --light: #f8fafc;
+      --bg: #f1f5f9;
+      --card-bg: #ffffff;
+      --text-dark: #0f172a;
+      --text-muted: #64748b;
+      --border: #e2e8f0;
+      --shadow: 0 4px 20px rgba(0,0,0,0.05);
+      --shadow-lg: 0 10px 25px rgba(0,0,0,0.08);
+      --gradient-bg: linear-gradient(135deg, #f0fdf4 0%, #eff6ff 100%);
+      --transition: 0.3s ease;
+      --radius: 16px;
+      --radius-sm: 12px;
+      --radius-md: 14px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Vazirmatn', sans-serif;
+      background: var(--bg);
+      color: var(--text-dark);
+      min-height: 100vh;
+      padding: 1.5rem;
+      line-height: 1.6;
+      font-size: 16px;
+      font-weight: 400;
+    }
+
+    .dashboard-container {
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+
+    .dashboard-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 2rem;
+      flex-wrap: wrap;
+      gap: 1.5rem;
+    }
+
+    .header-title {
+      font-size: 1.8rem;
+      font-weight: 800;
+      color: var(--dark);
+      position: relative;
+      padding-right: 1.2rem;
+    }
+
+    .header-title::after {
+      content: "";
+      position: absolute;
+      right: 0;
+      top: 0;
+      height: 100%;
+      width: 4px;
+      background: var(--primary);
+      border-radius: 4px;
+    }
+
+    .header-actions {
+      display: flex;
+      gap: 1rem;
+      align-items: center;
+    }
+
+    .date-display {
+      background: var(--card-bg);
+      border-radius: var(--radius-sm);
+      padding: 0.6rem 1.2rem;
+      font-weight: 500;
+      color: var(--text-muted);
+      box-shadow: var(--shadow);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .export-btn {
+      background: var(--primary);
+      color: white;
+      border: none;
+      padding: 0.6rem 1.5rem;
+      border-radius: var(--radius-sm);
+      font-weight: 600;
+      cursor: pointer;
+      transition: var(--transition);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      box-shadow: 0 4px 6px rgba(16, 185, 129, 0.2);
+    }
+
+    .export-btn:hover {
+      background: var(--primary-dark);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 10px rgba(16, 185, 129, 0.25);
+    }
+
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 1.5rem;
+      margin-bottom: 2rem;
+    }
+
+    .dashboard-card {
+      background: var(--card-bg);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 1.5rem;
+      transition: var(--transition);
+      display: flex;
+      flex-direction: column;
+    }
+
+    .dashboard-card:hover {
+      box-shadow: var(--shadow-lg);
+      transform: translateY(-5px);
+    }
+
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.5rem;
+    }
+
+    .card-title {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: var(--dark);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .card-value {
+      font-size: 1.8rem;
+      font-weight: 700;
+      margin-top: auto;
+      margin-bottom: 0.5rem;
+      color: var(--primary);
+    }
+
+    .card-subtitle {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+
+    .card-trend {
+      display: flex;
+      align-items: center;
+      gap: 0.3rem;
+      font-size: 0.85rem;
+      font-weight: 500;
+      margin-top: 0.5rem;
+    }
+
+    .trend-up {
+      color: var(--success);
+    }
+
+    .trend-down {
+      color: var(--danger);
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 1.5rem;
+      margin-bottom: 2rem;
+    }
+
+    .chart-section {
+      background: var(--card-bg);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .chart-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.5rem;
+    }
+
+    .chart-title {
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: var(--dark);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .chart-container {
+      height: 300px;
+      position: relative;
+    }
+
+    .filter-section {
+      display: flex;
+      gap: 1rem;
+      margin-bottom: 2rem;
+      flex-wrap: wrap;
+      align-items: center;
+      background: var(--card-bg);
+      padding: 1.2rem 1.5rem;
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+    }
+
+    .filter-section label {
+      font-weight: 500;
+      color: var(--text-muted);
+      font-size: 0.95rem;
+      display: flex;
+      align-items: center;
+      gap: 0.3rem;
+    }
+
+    .filter-section input[type="date"] {
+      padding: 0.7rem 1rem;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      font-size: 0.95rem;
+      background: #ffffff;
+      color: var(--text-dark);
+      cursor: pointer;
+      transition: var(--transition);
+      font-family: 'Vazirmatn', sans-serif;
+    }
+
+    .filter-section input[type="date"]:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(16,185,129,0.15);
+      outline: none;
+    }
+
+    .filter-btn {
+      background: var(--primary);
+      color: #ffffff;
+      border: none;
+      padding: 0.7rem 1.5rem;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 0.95rem;
+      transition: var(--transition);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .filter-btn:hover {
+      background: var(--primary-dark);
+      transform: translateY(-2px);
+    }
+
+    .sellers-section {
+      background: var(--card-bg);
+      border-radius: var(--radius);
+      padding: 1.5rem;
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .sellers-header {
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: var(--dark);
+      margin-bottom: 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .table-container {
+      overflow-x: auto;
+    }
+
+    .sellers-table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 800px;
+    }
+
+    .sellers-table th {
+      background: var(--light);
+      font-weight: 600;
+      color: var(--text-muted);
+      padding: 1rem;
+      text-align: right;
+      border-bottom: 2px solid var(--border);
+      font-size: 0.95rem;
+    }
+
+    .sellers-table td {
+      padding: 1rem;
+      border-bottom: 1px solid var(--border);
+      font-size: 0.95rem;
+      color: var(--text-dark);
+      font-weight: 500;
+    }
+
+    .sellers-table tr:hover {
+      background: var(--primary-light);
+    }
+
+    .sellers-table tr:nth-child(even) {
+      background: #f8fafc;
+    }
+
+    .sellers-table tr:nth-child(even):hover {
+      background: var(--primary-light);
+    }
+
+    .sellers-table .amount {
+      font-weight: 600;
+      color: var(--primary);
+    }
+
+    .sellers-table .seller-name {
+      font-weight: 600;
+      color: var(--dark);
+    }
+
+    .badge {
+      padding: 0.3rem 0.7rem;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      font-weight: 500;
+      display: inline-block;
+    }
+
+    .badge-success {
+      background: var(--primary-light);
+      color: var(--primary-dark);
+    }
+
+    .badge-warning {
+      background: var(--accent-light);
+      color: var(--accent-dark);
+    }
+
+    .badge-info {
+      background: var(--secondary-light);
+      color: var(--secondary-dark);
+    }
+
+    /* ریسپانسیو */
+    @media (max-width: 1024px) {
+      .dashboard-grid {
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      }
+      
+      .chart-container {
+        height: 280px;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .dashboard-header {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+      
+      .header-actions {
+        width: 100%;
+        justify-content: space-between;
+      }
+      
+      .filter-section {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+      
+      .filter-section > div {
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+      }
+      
+      .filter-btn {
+        width: 100%;
+        justify-content: center;
+      }
+    }
+
+    @media (max-width: 576px) {
+      body {
+        padding: 1rem;
+      }
+      
+      .dashboard-grid {
+        grid-template-columns: 1fr;
+      }
+      
+      .card-value {
+        font-size: 1.6rem;
+      }
+      
+      .chart-container {
+        height: 250px;
+      }
+      
+      .header-title {
+        font-size: 1.5rem;
+      }
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .animated {
+      animation: fadeIn 0.6s ease-out forwards;
+    }
+
+    .delay-1 { animation-delay: 0.1s; }
+    .delay-2 { animation-delay: 0.2s; }
+    .delay-3 { animation-delay: 0.3s; }
+    .delay-4 { animation-delay: 0.4s; }
+    .delay-5 { animation-delay: 0.5s; }
+  </style>
+</head>
+<body>
+  <div class="dashboard-container">
+    <div class="dashboard-header animated">
+      <div>
+        <h1 class="header-title">داشبورد آمار درآمد</h1>
+        <p class="text-muted">بررسی و تحلیل درآمدهای ماهانه</p>
+      </div>
+      <div class="header-actions">
+        <div class="date-display">
+          <i class="ri-calendar-line"></i>
+          <span id="currentDate">امروز: ۱۴۰۳/۰۴/۲۳</span>
+        </div>
+        <button class="export-btn">
+          <i class="ri-download-line"></i>
+          خروجی Excel
+        </button>
+      </div>
+    </div>
+
+    <div class="filter-section animated delay-1">
+      <div>
+        <label for="startDate"><i class="ri-calendar-line"></i> از تاریخ:</label>
+        <input type="date" id="startDate">
+      </div>
+      <div>
+        <label for="endDate"><i class="ri-calendar-line"></i> تا تاریخ:</label>
+        <input type="date" id="endDate">
+      </div>
+      <button class="filter-btn" onclick="filterIncome()">
+        <i class="ri-filter-3-line"></i> اعمال فیلتر
+      </button>
+    </div>
+
+    <div class="dashboard-grid">
+      <div class="dashboard-card animated delay-2">
+        <div class="card-header">
+          <h3 class="card-title"><i class="ri-money-dollar-circle-line"></i> درآمد کل</h3>
+          <span class="badge badge-success">+12.5%</span>
+        </div>
+        <div class="card-value" id="totalIncome">۱۲,۸۴۰,۰۰۰ تومان</div>
+        <p class="card-subtitle">درآمد کل از تمام منابع</p>
+        <div class="card-trend trend-up">
+          <i class="ri-arrow-up-line"></i>
+          <span>۱,۴۲۰,۰۰۰ تومان افزایش نسبت به ماه قبل</span>
+        </div>
+      </div>
+
+      <div class="dashboard-card animated delay-3">
+        <div class="card-header">
+          <h3 class="card-title"><i class="ri-shopping-bag-line"></i> درآمد از پلن‌ها</h3>
+          <span class="badge badge-warning">+8.3%</span>
+        </div>
+        <div class="card-value" id="plansIncome">۹,۲۶۰,۰۰۰ تومان</div>
+        <p class="card-subtitle">درآمد از فروش پلن‌های اشتراک</p>
+        <div class="card-trend trend-up">
+          <i class="ri-arrow-up-line"></i>
+          <span>۷۱۰,۰۰۰ تومان افزایش نسبت به ماه قبل</span>
+        </div>
+      </div>
+
+      <div class="dashboard-card animated delay-4">
+        <div class="card-header">
+          <h3 class="card-title"><i class="ri-megaphone-line"></i> درآمد از تبلیغات</h3>
+          <span class="badge badge-info">+18.7%</span>
+        </div>
+        <div class="card-value" id="adsIncome">۳,۵۸۰,۰۰۰ تومان</div>
+        <p class="card-subtitle">درآمد حاصل از تبلیغات</p>
+        <div class="card-trend trend-up">
+          <i class="ri-arrow-up-line"></i>
+          <span>۵۶۰,۰۰۰ تومان افزایش نسبت به ماه قبل</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="stats-grid">
+      <div class="dashboard-card animated delay-1">
+        <div class="card-header">
+          <h3 class="card-title"><i class="ri-calendar-event-line"></i> پلن ۱ ماهه</h3>
+        </div>
+        <div class="card-value" id="plans1MonthIncome">۲,۴۸۰,۰۰۰ تومان</div>
+        <p class="card-subtitle">درآمد از پلن ۱ ماهه</p>
+        <div class="card-trend trend-up">
+          <i class="ri-arrow-up-line"></i>
+          <span>۱۵.۲% افزایش نسبت به ماه قبل</span>
+        </div>
+      </div>
+
+      <div class="dashboard-card animated delay-2">
+        <div class="card-header">
+          <h3 class="card-title"><i class="ri-calendar-2-line"></i> پلن ۳ ماهه</h3>
+        </div>
+        <div class="card-value" id="plans3MonthIncome">۴,۱۵۰,۰۰۰ تومان</div>
+        <p class="card-subtitle">درآمد از پلن ۳ ماهه</p>
+        <div class="card-trend trend-up">
+          <i class="ri-arrow-up-line"></i>
+          <span>۶.۸% افزایش نسبت به ماه قبل</span>
+        </div>
+      </div>
+
+      <div class="dashboard-card animated delay-3">
+        <div class="card-header">
+          <h3 class="card-title"><i class="ri-calendar-check-line"></i> پلن ۱۲ ماهه</h3>
+        </div>
+        <div class="card-value" id="plans12MonthIncome">۲,۶۳۰,۰۰۰ تومان</div>
+        <p class="card-subtitle">درآمد از پلن ۱۲ ماهه</p>
+        <div class="card-trend trend-down">
+          <i class="ri-arrow-down-line"></i>
+          <span>۳.۲% کاهش نسبت به ماه قبل</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="chart-section animated delay-4">
+      <div class="chart-header">
+        <h3 class="chart-title"><i class="ri-line-chart-line"></i> روند درآمدی ۳۰ روز گذشته</h3>
+        <div>
+          <span class="badge badge-success">پلن‌ها</span>
+          <span class="badge badge-info">تبلیغات</span>
+        </div>
+      </div>
+      <div class="chart-container">
+        <canvas id="incomeLineChart"></canvas>
+      </div>
+    </div>
+
+    <div class="chart-section animated delay-5">
+      <div class="chart-header">
+        <h3 class="chart-title"><i class="ri-bar-chart-2-line"></i> تفکیک درآمد بر اساس منابع</h3>
+        <div>
+          <span class="badge badge-success">پلن‌ها</span>
+          <span class="badge badge-info">تبلیغات</span>
+        </div>
+      </div>
+      <div class="chart-container">
+        <canvas id="incomeBarChart"></canvas>
+      </div>
+    </div>
+
+    <div class="sellers-section animated">
+      <div class="chart-header">
+        <h3 class="sellers-header"><i class="ri-user-star-line"></i> درآمد از فروشندگان برتر</h3>
+        <div class="card-trend trend-up">
+          <i class="ri-arrow-up-line"></i>
+          <span>درآمد کل: ۸,۴۵۰,۰۰۰ تومان</span>
+        </div>
+      </div>
+      <div class="table-container">
+        <table class="sellers-table">
+          <thead>
+            <tr>
+              <th>نام فروشنده</th>
+              <th>درآمد از پلن‌ها</th>
+              <th>درآمد از تبلیغات</th>
+              <th>کل درآمد</th>
+              <th>پلن ۱ ماهه</th>
+              <th>پلن ۳ ماهه</th>
+              <th>پلن ۱۲ ماهه</th>
+            </tr>
+          </thead>
+          <tbody id="sellersIncomeTable">
+            <tr>
+              <td class="seller-name">محمد حسینی</td>
+              <td class="amount">۱,۸۴۰,۰۰۰ تومان</td>
+              <td class="amount">۶۵۰,۰۰۰ تومان</td>
+              <td class="amount">۲,۴۹۰,۰۰۰ تومان</td>
+              <td class="amount">۵۲۰,۰۰۰ تومان</td>
+              <td class="amount">۸۹۰,۰۰۰ تومان</td>
+              <td class="amount">۴۳۰,۰۰۰ تومان</td>
+            </tr>
+            <tr>
+              <td class="seller-name">فاطمه احمدی</td>
+              <td class="amount">۱,۶۲۰,۰۰۰ تومان</td>
+              <td class="amount">۵۸۰,۰۰۰ تومان</td>
+              <td class="amount">۲,۲۰۰,۰۰۰ تومان</td>
+              <td class="amount">۴۳۰,۰۰۰ تومان</td>
+              <td class="amount">۷۵۰,۰۰۰ تومان</td>
+              <td class="amount">۴۴۰,۰۰۰ تومان</td>
+            </tr>
+            <tr>
+              <td class="seller-name">علی رضایی</td>
+              <td class="amount">۱,۴۵۰,۰۰۰ تومان</td>
+              <td class="amount">۴۹۰,۰۰۰ تومان</td>
+              <td class="amount">۱,۹۴۰,۰۰۰ تومان</td>
+              <td class="amount">۳۹۰,۰۰۰ تومان</td>
+              <td class="amount">۶۸۰,۰۰۰ تومان</td>
+              <td class="amount">۳۸۰,۰۰۰ تومان</td>
+            </tr>
+            <tr>
+              <td class="seller-name">زهرا محمدی</td>
+              <td class="amount">۱,۳۱۰,۰۰۰ تومان</td>
+              <td class="amount">۴۳۰,۰۰۰ تومان</td>
+              <td class="amount">۱,۷۴۰,۰۰۰ تومان</td>
+              <td class="amount">۳۵۰,۰۰۰ تومان</td>
+              <td class="amount">۶۰۰,۰۰۰ تومان</td>
+              <td class="amount">۳۶۰,۰۰۰ تومان</td>
+            </tr>
+            <tr>
+              <td class="seller-name">امیر عباسی</td>
+              <td class="amount">۱,۰۴۰,۰۰۰ تومان</td>
+              <td class="amount">۳۸۰,۰۰۰ تومان</td>
+              <td class="amount">۱,۴۲۰,۰۰۰ تومان</td>
+              <td class="amount">۲۸۰,۰۰۰ تومان</td>
+              <td class="amount">۴۵۰,۰۰۰ تومان</td>
+              <td class="amount">۳۱۰,۰۰۰ تومان</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // تنظیم تاریخ امروز
+    const today = new Date();
+    const persianDate = today.toLocaleDateString('fa-IR');
+    document.getElementById('currentDate').textContent = `امروز: ${persianDate}`;
+    
+    // تنظیم تاریخ‌های پیش‌فرض برای فیلتر
+    const startDateInput = document.getElementById('startDate');
+    const endDateInput = document.getElementById('endDate');
+    
+    const startDate = new Date();
+    startDate.setDate(startDate.getDate() - 30);
+    
+    startDateInput.valueAsDate = startDate;
+    endDateInput.valueAsDate = today;
+    
+    // ایجاد چارت خطی
+    const lineCtx = document.getElementById('incomeLineChart').getContext('2d');
+    const incomeLineChart = new Chart(lineCtx, {
+      type: 'line',
+      data: {
+        labels: ['۱', '۵', '۱۰', '۱۵', '۲۰', '۲۵', '۳۰'],
+        datasets: [
+          {
+            label: 'درآمد از پلن‌ها',
+            data: [250000, 290000, 310000, 340000, 280000, 320000, 350000],
+            borderColor: '#10b981',
+            backgroundColor: 'rgba(16, 185, 129, 0.1)',
+            borderWidth: 3,
+            tension: 0.3,
+            fill: true,
+            pointBackgroundColor: '#ffffff',
+            pointBorderWidth: 2,
+            pointRadius: 5,
+            pointHoverRadius: 7
+          },
+          {
+            label: 'درآمد از تبلیغات',
+            data: [120000, 100000, 130000, 110000, 140000, 115000, 125000],
+            borderColor: '#0ea5e9',
+            backgroundColor: 'rgba(14, 165, 233, 0.1)',
+            borderWidth: 3,
+            tension: 0.3,
+            fill: true,
+            pointBackgroundColor: '#ffffff',
+            pointBorderWidth: 2,
+            pointRadius: 5,
+            pointHoverRadius: 7
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            display: false
+          },
+          tooltip: {
+            backgroundColor: 'rgba(255, 255, 255, 0.9)',
+            titleColor: '#1e293b',
+            bodyColor: '#1e293b',
+            borderColor: '#e2e8f0',
+            borderWidth: 1,
+            padding: 12,
+            boxPadding: 6,
+            usePointStyle: true,
+            callbacks: {
+              label: function(context) {
+                return `${context.dataset.label}: ${context.parsed.y.toLocaleString('fa-IR')} تومان`;
+              }
+            }
+          }
+        },
+        scales: {
+          x: {
+            grid: {
+              display: false
+            },
+            ticks: {
+              color: '#64748b'
+            }
+          },
+          y: {
+            beginAtZero: true,
+            grid: {
+              color: 'rgba(226, 232, 240, 0.5)'
+            },
+            ticks: {
+              color: '#64748b',
+              callback: function(value) {
+                return value.toLocaleString('fa-IR') + ' تومان';
+              }
+            }
+          }
+        },
+        interaction: {
+          intersect: false,
+          mode: 'index'
+        }
+      }
+    });
+
+    // ایجاد چارت میله‌ای
+    const barCtx = document.getElementById('incomeBarChart').getContext('2d');
+    const incomeBarChart = new Chart(barCtx, {
+      type: 'bar',
+      data: {
+        labels: ['پلن ۱ ماهه', 'پلن ۳ ماهه', 'پلن ۱۲ ماهه', 'تبلیغات', 'کل درآمد'],
+        datasets: [{
+          label: 'درآمد',
+          data: [2480000, 4150000, 2630000, 3580000, 12840000],
+          backgroundColor: [
+            'rgba(16, 185, 129, 0.7)',
+            'rgba(16, 185, 129, 0.8)',
+            'rgba(16, 185, 129, 0.9)',
+            'rgba(14, 165, 233, 0.8)',
+            'rgba(16, 185, 129, 1)'
+          ],
+          borderRadius: 8,
+          borderWidth: 0
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            display: false
+          },
+          tooltip: {
+            backgroundColor: 'rgba(255, 255, 255, 0.9)',
+            titleColor: '#1e293b',
+            bodyColor: '#1e293b',
+            borderColor: '#e2e8f0',
+            borderWidth: 1,
+            padding: 12,
+            boxPadding: 6,
+            callbacks: {
+              label: function(context) {
+                return `${context.parsed.y.toLocaleString('fa-IR')} تومان`;
+              }
+            }
+          },
+          datalabels: {
+            anchor: 'end',
+            align: 'top',
+            formatter: function(value) {
+              return (value / 1000000).toFixed(1) + 'M';
+            },
+            font: {
+              weight: 'bold',
+              size: 10
+            },
+            color: '#1e293b'
+          }
+        },
+        scales: {
+          x: {
+            grid: {
+              display: false
+            },
+            ticks: {
+              color: '#64748b'
+            }
+          },
+          y: {
+            beginAtZero: true,
+            grid: {
+              color: 'rgba(226, 232, 240, 0.5)'
+            },
+            ticks: {
+              color: '#64748b',
+              callback: function(value) {
+                return (value / 1000000).toFixed(0) + 'M';
+              }
+            }
+          }
+        }
+      },
+      plugins: [ChartDataLabels]
+    });
+
+    // تابع فیلتر کردن
+    window.filterIncome = function() {
+      const start = document.getElementById('startDate').value;
+      const end = document.getElementById('endDate').value;
+      
+      // شبیه‌سازی بارگذاری داده‌های جدید
+      document.querySelectorAll('.card-value').forEach(el => {
+        el.style.opacity = '0.5';
+        el.style.transition = 'opacity 0.3s';
+      });
+      
+      setTimeout(() => {
+        document.querySelectorAll('.card-value').forEach(el => {
+          el.style.opacity = '1';
+        });
+        
+        // نمایش پیام موفقیت
+        const toast = document.createElement('div');
+        toast.textContent = 'فیلتر با موفقیت اعمال شد!';
+        toast.style.position = 'fixed';
+        toast.style.bottom = '20px';
+        toast.style.left = '20px';
+        toast.style.backgroundColor = '#10b981';
+        toast.style.color = 'white';
+        toast.style.padding = '10px 20px';
+        toast.style.borderRadius = '8px';
+        toast.style.zIndex = '1000';
+        toast.style.boxShadow = '0 4px 12px rgba(0,0,0,0.1)';
+        toast.style.fontFamily = 'Vazirmatn, sans-serif';
+        toast.style.fontWeight = '500';
+        document.body.appendChild(toast);
+        
+        setTimeout(() => {
+          toast.style.opacity = '0';
+          toast.style.transition = 'opacity 0.5s';
+          setTimeout(() => {
+            document.body.removeChild(toast);
+          }, 500);
+        }, 3000);
+      }, 800);
+    }
+    
+    // شبیه‌سازی انیمیشن‌ها
+    document.querySelectorAll('.animated').forEach((el, index) => {
+      el.style.opacity = '0';
+    });
+    
+    setTimeout(() => {
+      document.querySelectorAll('.animated').forEach((el, index) => {
+        el.classList.add('animated');
+      });
+    }, 100);
+  </script>
+</body>
+</html>

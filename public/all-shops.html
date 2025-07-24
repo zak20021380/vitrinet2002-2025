@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <title>ویترینت | فروشگاه‌های سنندج</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;700&display=swap" rel="stylesheet"/>
+  <style>
+    body {
+      font-family: 'Vazirmatn', sans-serif;
+      background: linear-gradient(115deg, #e0fdfa 0%, #f8fafc 60%, #d4fbe8 100%);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+    .glass {
+      background: rgba(255,255,255,0.85);
+      box-shadow: 0 10px 40px #10b98121, 0 3px 12px #0ea5e91a;
+      backdrop-filter: blur(14px);
+      border-radius: 1.8rem;
+      transition: box-shadow .24s, transform .18s;
+    }
+    .glass:hover {
+      box-shadow: 0 20px 55px #10b9812d, 0 8px 24px #0ea5e93a;
+      transform: translateY(-6px) scale(1.025);
+    }
+    .btn-grad {
+      background: linear-gradient(90deg,#10b981 10%,#0ea5e9 100%);
+      color: #fff !important;
+      box-shadow: 0 2px 12px #10b98133;
+      font-weight: bold;
+      border: none;
+    }
+    .btn-grad:hover {filter: brightness(1.08);}
+    ::-webkit-scrollbar {width: 7px;}
+    ::-webkit-scrollbar-thumb {background: #c8f7e6;}
+    @media (max-width: 640px) {
+      .filters-wrap { flex-direction: column; gap: 10px;}
+      .shops-grid-custom { grid-template-columns: repeat(2,minmax(0,1fr)) !important;}
+      .user-header-wrap {gap: 8px !important;}
+      .user-name {font-size: 1rem !important;}
+      .city-badge {font-size: .95rem !important;}
+      .user-avatar {width: 38px !important; height: 38px !important;}
+    }
+  </style>
+</head>
+<body class="text-gray-800 bg-[#f8fafc]">
+
+<!-- هدر تمیز و حرفه‌ای -->
+<header class="w-full bg-white/95 shadow-sm sticky top-0 z-50">
+  <div class="max-w-7xl mx-auto flex items-center justify-between px-3 py-2 sm:py-3">
+    <!-- لوگو -->
+    <a href="index.html" class="text-2xl sm:text-3xl font-extrabold bg-gradient-to-r from-[#10b981] to-[#0ea5e9] text-transparent bg-clip-text tracking-tight whitespace-nowrap select-none">ویترینت</a>
+    <!-- اطلاعات کاربر و شهر -->
+    <div class="flex items-center user-header-wrap gap-3">
+      <img src="https://ui-avatars.com/api/?name=آرمین+احمدی&background=10b981&color=fff&rounded=true&size=64"
+        alt="آرمین احمدی" class="user-avatar w-10 h-10 sm:w-12 sm:h-12 rounded-full border-2 border-[#10b981]/25 shadow-sm bg-white flex-shrink-0" />
+      <div class="flex flex-col items-end">
+        <span class="user-name font-extrabold text-base sm:text-lg text-gray-900 leading-5">آرمین احمدی</span>
+        <span class="city-badge inline-block mt-1 px-3 py-0.5 rounded-xl bg-[#e6f8f3] text-[#10b981] font-bold text-xs sm:text-base shadow-sm whitespace-nowrap">سنندج</span>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- فیلترهای اصلی -->
+<section class="max-w-7xl mx-auto px-3 py-4">
+  <div class="flex items-center justify-between gap-3 mb-6 flex-wrap filters-wrap">
+    <div class="flex flex-wrap items-center gap-2 w-full sm:w-auto order-2 sm:order-1">
+      <!-- جستجو -->
+      <div class="relative flex items-center">
+        <input type="text" id="searchInput" placeholder="جستجو: نام، دسته، مرکز خرید..." class="border border-gray-200 rounded-full px-5 py-2.5 shadow-sm focus:ring-2 focus:ring-[#10b981] w-44 sm:w-64 text-base transition" />
+        <button id="clearSearchBtn" class="absolute left-3 text-gray-400 hover:text-[#10b981] text-lg hidden" tabindex="-1" type="button">&times;</button>
+      </div>
+      <!-- دسته‌بندی -->
+      <select id="categoryFilter" class="border border-gray-200 rounded-full px-4 py-2.5 bg-[#f7fafc] text-base focus:ring-2 focus:ring-[#10b981] transition">
+        <option value="">همه دسته‌ها</option>
+        <option>پوشاک</option>
+        <option>خوراک</option>
+        <option>کافه</option>
+        <option>لوازم خانگی</option>
+        <option>دیجیتال</option>
+        <option>خدمات</option>
+        <option>کتاب و تحریر</option>
+        <option>تالار</option>
+        <option>گل و گیاه</option>
+        <option>لوازم قنادی</option>
+        <option>لباس کودک</option>
+      </select>
+      <!-- زیر دسته دینامیک -->
+      <select id="subcategoryFilter" class="border border-gray-200 rounded-full px-4 py-2.5 bg-[#f7fafc] text-base focus:ring-2 focus:ring-[#FBBF24] transition hidden"></select>
+      <!-- مراکز خرید -->
+      <select id="centerFilter" class="border border-gray-200 rounded-full px-4 py-2.5 bg-[#f7fafc] text-base focus:ring-2 focus:ring-[#0ea5e9] transition">
+        <option value="">همه مراکز خرید</option>
+        <option>مرکز خرید اطلس</option>
+        <option>مجتمع مرکزی</option>
+        <option>پاساژ پارسیان</option>
+        <option>بازارچه استقلال</option>
+        <option>مرکز خرید نگین</option>
+        <option>مجتمع پاستور</option>
+        <option>بازار سنندج</option>
+      </select>
+      <!-- فیلتر سلکت ساده -->
+      <select id="mainFilter" class="border border-gray-200 rounded-full px-4 py-2.5 bg-[#f7fafc] text-base focus:ring-2 focus:ring-[#00B8D9] transition">
+        <option value="newest">جدیدترین</option>
+        <option value="isPopular">پربازدیدترین</option>
+        <option value="hasDiscount">% تخفیف‌دار</option>
+      </select>
+      <!-- پاک کردن فیلترها -->
+      <button id="resetFilters" class="ml-2 text-[#0ea5e9] border border-[#0ea5e9] rounded-full px-4 py-2 text-sm font-bold hover:bg-[#e0fdfa] transition">
+        پاک‌کردن فیلترها
+      </button>
+    </div>
+    <!-- دکمه ثبت فروشگاه -->
+    <a href="post.html" class="btn-grad px-7 py-3 rounded-full font-extrabold shadow hover:scale-105 transition-all duration-200 whitespace-nowrap text-white text-base order-1 sm:order-2">
+      + ثبت فروشگاه جدید
+    </a>
+  </div>
+
+  <!-- گرید کارت فروشگاه -->
+  <div id="shopsGrid" class="grid shops-grid-custom grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5"></div>
+  <div class="text-center text-gray-500 font-bold mt-10 hidden" id="noResult">فروشگاهی با این مشخصات یافت نشد.</div>
+</section>
+
+<script>
+// زیر دسته‌ها
+const subcategories = {
+  "پوشاک": ["مردانه", "زنانه", "بچه‌گانه", "ورزشی", "اکسسوری"],
+  "خوراک": ["رستوران", "فست‌فود", "سوپرمارکت", "شیرینی", "نوشیدنی"],
+  "کافه": ["کافی‌شاپ", "آیس‌کریم", "قهوه‌فروشی"],
+  "لوازم خانگی": ["برقی", "آشپزخانه", "خواب و نشیمن"],
+  "دیجیتال": ["موبایل", "لپ‌تاپ", "لوازم جانبی"],
+  "خدمات": ["آرایش", "خیاطی", "کلیدسازی"],
+  "کتاب و تحریر": ["کتاب", "دفتر", "لوازم تحریر"],
+  "تالار": ["عروسی", "مجلس", "سمینار"],
+  "گل و گیاه": ["گلدان", "دسته گل", "درختچه"],
+  "لوازم قنادی": ["شکلات", "ابزار", "مواد اولیه"],
+  "لباس کودک": ["پسرانه", "دخترانه"]
+};
+
+const demoShops = [
+  {id:1, name:"Vitrinet", category:"پوشاک", subcategory:"مردانه", address:"سنندج، مرکز خرید اطلس", center:"مرکز خرید اطلس", hasDiscount:true, isPopular:true, createdAt:1716000010, logo:"V", desc:"فروشگاه منتخب"},
+  {id:2, name:"Cafe Latte", category:"کافه", subcategory:"کافی‌شاپ", address:"سنندج، پاساژ پارسیان", center:"پاساژ پارسیان", hasDiscount:false, isPopular:true, createdAt:1715999999, logo:"C", desc:"منتخب خوراک"},
+  {id:3, name:"Arshia", category:"لباس کودک", subcategory:"پسرانه", address:"سنندج، مجتمع پاستور", center:"مجتمع پاستور", hasDiscount:false, isPopular:false, createdAt:1715999997, logo:"A", desc:"منتخب خانواده"},
+  {id:4, name:"Parnian", category:"لوازم خانگی", subcategory:"برقی", address:"سنندج، بازار سنندج", center:"بازار سنندج", hasDiscount:true, isPopular:false, createdAt:1715999996, logo:"P", desc:"منتخب خانه"},
+  {id:5, name:"Baran", category:"کتاب و تحریر", subcategory:"کتاب", address:"سنندج، مرکز خرید نگین", center:"مرکز خرید نگین", hasDiscount:true, isPopular:false, createdAt:1715999995, logo:"B", desc:"منتخب آموزش"},
+  {id:6, name:"Golzar", category:"گل و گیاه", subcategory:"گلدان", address:"سنندج، بازارچه استقلال", center:"بازارچه استقلال", hasDiscount:false, isPopular:true, createdAt:1715999994, logo:"G", desc:"منتخب طبیعت"},
+  {id:7, name:"Nooshin", category:"لوازم قنادی", subcategory:"شکلات", address:"سنندج، مجتمع مرکزی", center:"مجتمع مرکزی", hasDiscount:false, isPopular:false, createdAt:1715999993, logo:"N", desc:"منتخب خوراکی"},
+  {id:8, name:"Talar", category:"تالار", subcategory:"عروسی", address:"سنندج، مرکز خرید اطلس", center:"مرکز خرید اطلس", hasDiscount:true, isPopular:false, createdAt:1715999992, logo:"T", desc:"منتخب مجالس"}
+];
+
+let shopsRaw = demoShops.slice();
+renderShops(shopsRaw);
+
+// زیر دسته‌بندی داینامیک
+document.getElementById('categoryFilter').addEventListener('change', function() {
+  updateSubcategories();
+  filterShops();
+});
+function updateSubcategories() {
+  const cat = document.getElementById('categoryFilter').value;
+  const subcatSelect = document.getElementById('subcategoryFilter');
+  subcatSelect.innerHTML = '';
+  if (!cat || !subcategories[cat]) {
+    subcatSelect.classList.add('hidden');
+    return;
+  }
+  subcatSelect.classList.remove('hidden');
+  subcatSelect.innerHTML = `<option value="">همه زیر دسته‌ها</option>` +
+    subcategories[cat].map(sub =>
+      `<option value="${sub}">${sub}</option>`
+    ).join('');
+}
+document.getElementById('subcategoryFilter').addEventListener('change', filterShops);
+
+// فیلترها
+document.getElementById('searchInput').addEventListener('input', filterShops);
+document.getElementById('centerFilter').addEventListener('change', filterShops);
+document.getElementById('mainFilter').addEventListener('change', filterShops);
+
+document.getElementById('resetFilters').addEventListener('click', function() {
+  document.getElementById('searchInput').value = '';
+  document.getElementById('categoryFilter').selectedIndex = 0;
+  document.getElementById('centerFilter').selectedIndex = 0;
+  document.getElementById('mainFilter').selectedIndex = 0;
+  updateSubcategories();
+  document.getElementById('subcategoryFilter').selectedIndex = 0;
+  filterShops();
+});
+
+function filterShops() {
+  let q = document.getElementById('searchInput').value.trim().toLowerCase();
+  let cat = document.getElementById('categoryFilter').value;
+  let subcat = document.getElementById('subcategoryFilter').value;
+  let center = document.getElementById('centerFilter').value;
+  let mainFilter = document.getElementById('mainFilter').value;
+
+  let filtered = shopsRaw.slice();
+
+  if (q)
+    filtered = filtered.filter(shop =>
+      (shop.name && shop.name.toLowerCase().includes(q)) ||
+      (shop.category && shop.category.toLowerCase().includes(q)) ||
+      (shop.address && shop.address.toLowerCase().includes(q))
+    );
+  if (cat)
+    filtered = filtered.filter(shop => shop.category === cat);
+  if (subcat)
+    filtered = filtered.filter(shop => shop.subcategory === subcat);
+  if (center)
+    filtered = filtered.filter(shop => shop.center === center);
+
+  // سلکت فیلتر اصلی
+  if (mainFilter === 'hasDiscount')
+    filtered = filtered.filter(shop => shop.hasDiscount);
+  else if (mainFilter === 'isPopular')
+    filtered = filtered.filter(shop => shop.isPopular);
+  else if (mainFilter === 'newest')
+    filtered.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+
+  renderShops(filtered);
+}
+
+function renderShops(shops) {
+  const grid = document.getElementById('shopsGrid');
+  grid.innerHTML = '';
+  if (!shops || shops.length === 0) {
+    document.getElementById('noResult').classList.remove('hidden');
+    return;
+  }
+  document.getElementById('noResult').classList.add('hidden');
+  shops.forEach(shop => {
+    let catColor = '#10b981';
+    if (shop.category && shop.category.includes('کافه')) catColor = '#0ea5e9';
+    if (shop.category && shop.category.includes('خانگی')) catColor = '#ef4444';
+    if (shop.category && shop.category.includes('آموزش')) catColor = '#8b5cf6';
+    if (shop.category && shop.category.includes('گل')) catColor = '#10b981';
+    if (shop.category && shop.category.includes('قنادی')) catColor = '#f59e42';
+    if (shop.category && shop.category.includes('لباس کودک')) catColor = '#fbbf24';
+    if (shop.category && shop.category.includes('تحریر')) catColor = '#8b5cf6';
+    if (shop.category && shop.category.includes('تالار')) catColor = '#f43f5e';
+
+    let badge = '';
+    if (shop.hasDiscount) badge += `<span class="inline-block bg-[#00B8D9]/10 text-[#00B8D9] text-xs font-bold px-3 py-1 rounded-full">تخفیف</span>`;
+    if (shop.isPopular) badge += `<span class="inline-block bg-[#10b981]/10 text-[#10b981] text-xs font-bold px-3 py-1 rounded-full">محبوب</span>`;
+
+    grid.innerHTML += `
+      <a href="shop.html?id=${shop.id||''}" class="glass group flex flex-col items-start p-4 rounded-2xl shadow-xl border border-[#d0f3ea80] hover:scale-[1.04] hover:shadow-2xl bg-white/90 backdrop-blur-[3px] transition-all duration-200 cursor-pointer relative">
+        <div class="w-full aspect-[3/1.6] rounded-xl mb-4 bg-gradient-to-tr from-[#e0fdfa] to-[#d4fbe8] flex items-center justify-center relative overflow-hidden">
+          <span class="text-4xl font-extrabold select-none" style="color:${catColor}">${shop.logo||shop.name[0]}</span>
+        </div>
+        <div class="flex items-center gap-2 mb-2">
+          <span class="font-extrabold text-lg sm:text-xl" style="color:${catColor}">${shop.name||""}</span>
+          <span class="text-xs text-gray-400 font-medium ml-1">${shop.category||""}${shop.subcategory? ' | ' + shop.subcategory : ''}</span>
+        </div>
+        <div class="flex items-center gap-2 mb-1">
+          <svg width="16" height="16" fill="none" viewBox="0 0 22 22">
+            <circle cx="11" cy="11" r="10" fill="#e0f7fa"/>
+            <path d="M11 2.5C7.13 2.5 4 5.61 4 9.45c0 3.52 4.1 7.93 6.2 10.01.46.47 1.2.47 1.66 0 2.1-2.08 6.14-6.49 6.14-10.01C18 5.61 14.87 2.5 11 2.5Zm0 10.25a2.75 2.75 0 1 1 0-5.5 2.75 2.75 0 0 1 0 5.5Z" fill="#10b981"/>
+          </svg>
+          <span class="text-gray-700 text-xs sm:text-base font-bold">${shop.address||""}</span>
+        </div>
+        <div class="flex flex-wrap gap-2 mt-1 items-center">
+          <span class="inline-block px-3 py-1 rounded-full text-xs font-bold" style="background:${catColor}13;color:${catColor}">${shop.category||""}${shop.subcategory?' | '+shop.subcategory:''}</span>
+          ${badge}
+          <span class="text-xs text-gray-400">${shop.desc||""}</span>
+        </div>
+      </a>
+    `;
+  });
+}
+
+// دکمه پاک‌کردن سرچ
+document.getElementById('searchInput').addEventListener('input', function() {
+  document.getElementById('clearSearchBtn').style.display = this.value.length > 0 ? 'block' : 'none';
+});
+document.getElementById('clearSearchBtn').addEventListener('click', function() {
+  document.getElementById('searchInput').value = '';
+  this.style.display = 'none';
+  filterShops();
+});
+</script>
+</body>
+</html>

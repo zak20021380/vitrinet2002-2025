@@ -1,0 +1,2586 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>داشبورد فروشنده | ویترینت</title>
+  <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700&display=swap" rel="stylesheet" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+  body {
+    font-family: 'Vazirmatn', sans-serif;
+    background: linear-gradient(115deg, #e0fdfa 0%, #f8fafc 65%, #d4fbe8 100%);
+    min-height: 100vh;
+    transition: background 0.3s ease;
+    margin: 0;
+  }
+  .dark body {
+    background: linear-gradient(120deg, #212e2b 0%, #23272f 90%);
+  }
+
+  /* Sidebar Styles */
+  .sidebar {
+    background: rgba(255, 255, 255, 0.98);
+    box-shadow: 0 8px 32px rgba(16, 185, 129, 0.1);
+    border-radius: 2rem 0 2rem 2rem;
+    width: 80px;
+    position: fixed;
+    top: 2rem;
+    right: 2rem;
+    height: calc(100vh - 4rem);
+    max-height: 520px;
+    z-index: 110;
+    transition: width 0.3s ease-in-out, right 0.3s ease-in-out;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 16px 0;
+    gap: 18px;
+    overflow-y: auto;
+    overflow-x: visible;
+  }
+
+  .sidebar.expanded {
+    width: 240px;
+    align-items: flex-start;
+    padding-right: 20px;
+  }
+
+  .sidebar .sidebar-toggle {
+    cursor: pointer;
+    margin-bottom: 14px;
+    margin-right: 4px;
+    transition: transform 0.3s ease-in-out;
+  }
+
+  .sidebar.expanded .sidebar-toggle {
+    transform: rotate(180deg);
+  }
+
+  .sidebar .sidebar-avatar {
+    width: 54px;
+    height: 54px;
+    border-radius: 50%;
+    border: 3px solid transparent;
+    background: linear-gradient(45deg, #0ea5e9, #10b981) border-box;
+    margin-bottom: 8px;
+    object-fit: cover;
+    box-shadow: 0 4px 20px rgba(14, 165, 233, 0.3), 0 0 10px rgba(16, 185, 129, 0.2);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    animation: avatarLoad 0.5s ease-in-out;
+  }
+
+  .sidebar .sidebar-avatar:hover {
+    transform: scale(1.1);
+    box-shadow: 0 6px 24px rgba(14, 165, 233, 0.4), 0 0 15px rgba(16, 185, 129, 0.3);
+  }
+
+  @keyframes avatarLoad {
+    0% { transform: scale(0.8); opacity: 0; }
+    100% { transform: scale(1); opacity: 1; }
+  }
+
+  .sidebar.expanded .sidebar-avatar {
+    margin-bottom: 0;
+  }
+
+  @media (max-width: 768px) {
+    .sidebar .sidebar-avatar,
+    .sidebar.expanded .sidebar-avatar {
+      width: 40px;
+      height: 40px;
+    }
+  }
+
+  .sidebar .sidebar-user {
+    opacity: 0;
+    max-width: 0;
+    font-weight: bold;
+    margin-bottom: 7px;
+    transition: all 0.3s ease-in-out;
+    white-space: nowrap;
+    font-size: 15px;
+    color: #10b981;
+    padding-right: 2px;
+  }
+
+  .sidebar.expanded .sidebar-user {
+    opacity: 1;
+    max-width: 220px;
+    margin-bottom: 14px;
+  }
+
+  .sidebar .sidebar-link {
+    width: 48px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 1.2rem;
+    color: #10b981;
+    font-size: 24px;
+    background: #f8fafc;
+    margin-bottom: 8px;
+    position: relative;
+    transition: all 0.2s ease-in-out;
+    border: none;
+    outline: none;
+    cursor: pointer;
+  }
+
+  .sidebar.expanded .sidebar-link {
+    width: 200px;
+    justify-content: flex-start;
+    font-size: 18px;
+    gap: 12px;
+    padding-right: 14px;
+  }
+
+  .sidebar-link.active,
+  .sidebar-link:hover {
+    background: #e0fdfa;
+    color: #0ea5e9;
+    font-weight: bold;
+    box-shadow: 0 2px 8px rgba(14, 165, 233, 0.1);
+  }
+
+  .sidebar .sidebar-link span {
+    opacity: 0;
+    transition: opacity 0.2s ease-in-out;
+    margin-right: 10px;
+    font-weight: bold;
+  }
+
+  .sidebar.expanded .sidebar-link span {
+    opacity: 1;
+  }
+
+  .sidebar .noti-dot {
+    position: absolute;
+    top: 6px;
+    right: 110px;    /* ← این‌جا */
+    left: auto;    /* ← و این‌جا */
+    min-width: 18px;
+    height: 18px;
+    padding: 0 4px;
+    background: #f87171;
+    color: #fff;
+    font-size: 12px;
+    line-height: 18px;
+    text-align: center;
+    border-radius: 9px;
+    border: 1px solid #fff;
+    box-sizing: border-box;
+  }
+
+
+
+  .sidebar-hamburger {
+    display: none;
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: #fff;
+    border-radius: 50%;
+    z-index: 120;
+    border: none;
+    box-shadow: 0 2px 12px rgba(14, 165, 233, 0.15);
+    padding: 12px;
+    cursor: pointer;
+    transition: background 0.2s ease;
+  }
+
+  .sidebar-hamburger:hover {
+    background: #e0fdfa;
+  }
+
+  .sidebar-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 100;
+    transition: opacity 0.3s ease-in-out;
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .sidebar-overlay.active {
+    display: block;
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  /* Mobile Sidebar */
+  @media (max-width: 768px) {
+    .sidebar {
+      top: 0;
+      right: -100%;
+      width: 75%;
+      height: 100vh;
+      border-radius: 0;
+      padding: 20px;
+      box-shadow: 0 2px 12px rgba(0, 0, 0, 0.2);
+      transition: right 0.3s ease-in-out;
+    }
+
+    .sidebar.expanded {
+      right: 0;
+      width: 75%;
+    }
+
+    .sidebar .sidebar-toggle {
+      margin-bottom: 0;
+      margin-right: 0;
+      display: block;
+    }
+
+    .sidebar.expanded .sidebar-user {
+      font-size: 14px;
+      opacity: 1;
+      max-width: 100%;
+    }
+
+    .sidebar .sidebar-user {
+      display: block;
+      opacity: 0;
+      max-width: 0;
+    }
+
+    .sidebar-link span {
+      font-size: 15px;
+    }
+
+    .sidebar-hamburger {
+      display: block;
+      z-index: 300;
+    }
+
+    .sidebar-overlay {
+      display: block;
+    }
+  }
+
+  @media (min-width: 769px) {
+    .sidebar-hamburger {
+      display: none !important;
+    }
+    .sidebar {
+      right: 2rem !important;
+    }
+  }
+
+  /* Stat Cards, Chart, Panels */
+  .stat-card {
+    background: #fff;
+    border-radius: 1.3rem;
+    box-shadow: 0 4px 16px rgba(16, 185, 129, 0.08);
+    padding: 34px 20px 24px;
+    min-width: 120px;
+    flex: 1 1 0px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin: 0 6px;
+    position: relative;
+    transition: all 0.2s ease;
+  }
+
+  .stat-card:hover {
+    box-shadow: 0 8px 34px rgba(14, 165, 233, 0.1);
+    transform: translateY(-2px) scale(1.018);
+  }
+
+  .stat-card .icon {
+    position: absolute;
+    top: -30px;
+    background: #e0fdfa;
+    border-radius: 50%;
+    padding: 12px;
+    box-shadow: 0 2px 8px rgba(16, 185, 129, 0.08);
+    font-size: 30px;
+    color: #10b981;
+  }
+
+  .stat-card .stat-label {
+    margin-top: 30px;
+    font-size: 13px;
+    color: #666;
+    font-weight: bold;
+  }
+
+  .stat-card .stat-value {
+    font-size: 2rem;
+    font-weight: bold;
+    margin-top: 2px;
+    color: #1b2e26;
+    direction: ltr;
+    letter-spacing: 1px;
+  }
+
+  .stat-card .stat-growth {
+    font-size: 13px;
+    margin-top: 5px;
+    font-weight: bold;
+    color: #10b981;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .stat-card .stat-growth.negative {
+    color: #ef4444;
+  }
+
+  .chart-card {
+    background: #fff;
+    border-radius: 1.3rem;
+    box-shadow: 0 4px 18px rgba(16, 185, 129, 0.1);
+    padding: 24px;
+    margin-top: 35px;
+    width: 100%;
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+    transition: box-shadow 0.2s;
+  }
+
+  .chart-tabs {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 10px;
+    justify-content: center;
+  }
+
+  .chart-tab {
+    background: #f1faf7;
+    color: #10b981;
+    border-radius: 12px;
+    padding: 5px 19px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: all 0.15s;
+    border: 0;
+    outline: none;
+  }
+
+  .chart-tab.active,
+  .chart-tab:hover {
+    background: #10b981;
+    color: #fff;
+  }
+
+  .chart-info {
+    font-size: 13px;
+    color: #888;
+    text-align: center;
+    margin-bottom: 2px;
+    margin-top: 7px;
+  }
+
+  .panel-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 22px;
+    width: 100%;
+    max-width: 1050px;
+    margin: 28px auto 0 auto;
+    justify-content: center;
+  }
+
+  .panel-card {
+    flex: 1 1 220px;
+    min-width: 220px;
+    max-width: 320px;
+    background: #fff;
+    border-radius: 1.2rem;
+    box-shadow: 0 2px 18px rgba(14, 165, 233, 0.1);
+    padding: 23px 17px 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+    position: relative;
+    margin-bottom: 14px;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+
+  .panel-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 24px rgba(14, 165, 233, 0.2);
+  }
+
+  .panel-title {
+    font-weight: bold;
+    font-size: 15px;
+    color: #10b981;
+    margin-bottom: 7px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .notif-item {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    font-size: 13px;
+    margin-bottom: 4px;
+    color: #ea580c;
+  }
+
+  .msg-item {
+    font-size: 13px;
+    color: #0ea5e9;
+    background: #e0fdfa;
+    padding: 6px 12px;
+    border-radius: 8px;
+    margin-bottom: 6px;
+    white-space: pre-line;
+  }
+
+  .shopinfo-list {
+    font-size: 14px;
+    color: #333;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  .shopinfo-list li {
+    margin-bottom: 7px;
+  }
+
+  .theme-toggle {
+    position: fixed;
+    left: 18px;
+    top: 16px;
+    background: #e0fdfa;
+    border: none;
+    border-radius: 50%;
+    padding: 7px;
+    cursor: pointer;
+    box-shadow: 0 2px 7px rgba(14, 165, 233, 0.3);
+    transition: background 0.14s;
+    z-index: 150;
+  }
+
+  .theme-toggle:hover {
+    background: #0ea5e9;
+    color: #fff;
+  }
+
+  /* Dark Mode Styles */
+  .dark .stat-card,
+  .dark .chart-card,
+  .dark .panel-card {
+    background: #242a31;
+    color: #fff;
+  }
+
+  .dark .sidebar {
+    background: #202a26;
+  }
+
+  .dark .sidebar-link,
+  .dark .sidebar-link span {
+    color: #a7ffeb;
+  }
+
+  .dark .sidebar-link.active,
+  .dark .sidebar-link:hover {
+    background: rgba(22, 185, 138, 0.3);
+    color: #fff;
+  }
+
+  .dark .chart-tab {
+    background: #2a3e37;
+    color: #2be1c2;
+  }
+
+  .dark .chart-tab.active,
+  .dark .chart-tab:hover {
+    background: #10b981;
+    color: #fff;
+  }
+
+  .dark .chart-info {
+    color: #bbb;
+  }
+
+  .dark .stat-card .stat-label,
+  .dark .stat-card .stat-value,
+  .dark .panel-title {
+    color: #6ee7b7;
+  }
+
+  .dark .notif-item {
+    color: #facc15;
+  }
+
+  .dark .msg-item {
+    background: #083344;
+    color: #fff;
+  }
+
+  .dark .shopinfo-list {
+    color: #d1fae5;
+  }
+
+  /* Product Table */
+  .product-table {
+    width: 100%;
+    max-width: 600px;
+    margin: 20px auto;
+    background: #fff;
+    border-radius: 1.3rem;
+    box-shadow: 0 8px 32px rgba(16, 185, 129, 0.1);
+    overflow: hidden;
+  }
+
+  .product-table table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  .product-table th,
+  .product-table td {
+    padding: 12px;
+    text-align: center;
+    font-size: 15px;
+  }
+
+  .product-table th {
+    background: #d1fae5;
+    color: #047857;
+    font-weight: bold;
+  }
+
+  .product-table td {
+    color: #333;
+    border-bottom: 1px solid rgba(16, 185, 129, 0.1);
+  }
+
+  .product-table tr:hover {
+    background: #e0fdfa;
+  }
+
+  @media (max-width: 600px) {
+    .product-table th,
+    .product-table td {
+      font-size: 13px;
+      padding: 8px;
+    }
+  }
+
+  /* Plan Card Styles */
+  .plan-card {
+    background: #fff;
+    border-radius: 1.3rem;
+    box-shadow: 0 4px 16px rgba(16, 185, 129, 0.1);
+    padding: 24px;
+    flex: 1 1 280px;
+    max-width: 320px;
+    text-align: center;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+  }
+
+  .plan-card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 8px 24px rgba(14, 165, 233, 0.2);
+  }
+
+  .plan-card .plan-title {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: #10b981;
+    margin-bottom: 12px;
+  }
+
+  .plan-card .plan-price {
+    font-size: 2rem;
+    font-weight: bold;
+    color: #0ea5e9;
+    margin-bottom: 12px;
+  }
+
+  .plan-card .plan-features {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 20px;
+    font-size: 14px;
+    color: #333;
+  }
+
+  .plan-card .plan-features li {
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+
+  .plan-card .plan-button {
+    background: #10b981;
+    color: #fff;
+    padding: 10px 20px;
+    border-radius: 12px;
+    font-weight: bold;
+    border: none;
+    cursor: pointer;
+    transition: background 0.2s ease;
+  }
+
+  .plan-card .plan-button:hover {
+    background: #0ea5e9;
+  }
+
+  .dark .plan-card {
+    background: #242a31;
+  }
+
+  .dark .plan-card .plan-features {
+    color: #d1fae5;
+  }
+
+
+
+
+/* اصلاح کامل ریسپانسیو و نمایش صحیح دکمه‌های سایدبار */
+:root {
+  --sidebar-bg: rgba(255,255,255,0.98);
+  --shadow: 0 8px 32px rgba(16,185,129,0.10);
+  --primary: #10b981;
+}
+
+/* سایدبار پایه - فقط دسکتاپ */
+.sidebar {
+  background: var(--sidebar-bg);
+  box-shadow: var(--shadow);
+  border-radius: 2rem 0 2rem 2rem;
+  width: 80px;
+  position: fixed;
+  top: 2rem;
+  right: 2rem;
+  height: calc(100vh - 4rem);
+  z-index: 120;
+  transition: width 0.3s, transform 0.3s;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 1rem 0;
+  gap: 1rem;
+  overflow-y: auto;
+  overflow-x: hidden;
+  will-change: width, transform;
+  scrollbar-width: thin;
+  scrollbar-color: #d1fae5 #f1f1f1;
+  max-height: 90vh;
+}
+
+/* حالت باز دسکتاپ */
+.sidebar.expanded {
+  width: 240px;
+  align-items: flex-start;
+  padding-right: 1.25rem;
+  padding-left: 0.5rem;
+  max-height: 100vh;
+}
+
+/* لینک‌های سایدبار */
+.sidebar-link {
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 1.2rem;
+  color: var(--primary);
+  font-size: 21px;
+  background: #f8fafc;
+  margin-bottom: 6px;
+  transition: all 0.2s;
+  border: none;
+  outline: none;
+  cursor: pointer;
+  overflow: hidden;
+  gap: 0;
+  padding-right: 0;
+  font-weight: 500;
+}
+
+.sidebar.expanded .sidebar-link {
+  width: 185px;
+  justify-content: flex-start;
+  font-size: 16px;
+  gap: 11px;
+  padding-right: 10px;
+}
+
+.sidebar-link span {
+  opacity: 0;
+  transition: opacity 0.22s;
+  margin-right: 10px;
+  font-weight: bold;
+  white-space: nowrap;
+  font-size: 15px;
+}
+.sidebar.expanded .sidebar-link span {
+  opacity: 1;
+}
+
+/* همبرگر */
+.hamburger-menu {
+  display: none;
+  position: fixed;
+  top: 17px;
+  right: 15px;
+  width: 46px;
+  height: 46px;
+  z-index: 2000;
+  background: #fff;
+  border-radius: 50%;
+  border: none;
+  box-shadow: 0 2px 8px rgba(16,185,129,0.13);
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.2s;
+  padding: 0;
+}
+.hamburger-menu span {
+  display: block;
+  width: 26px;
+  height: 3px;
+  background: var(--primary);
+  border-radius: 2px;
+  margin: 4px 0;
+  transition: all 0.3s;
+}
+
+/* Overlay */
+.sidebar-overlay {
+  display: none;
+}
+
+/* موبایل و تبلت: سایدبار و لینک‌ها مخفی، فقط همبرگر */
+@media (max-width: 1024px) {
+  .sidebar {
+    top: 0;
+    right: 0;
+    transform: translateX(105%);
+    width: 85vw;
+    max-width: 340px;
+    height: 100vh;
+    border-radius: 0 0 0 2rem;
+    padding: 1.5rem 0 1rem 0;
+    box-shadow: 0 2px 16px rgba(0,0,0,0.12);
+    gap: 1rem;
+    transition: transform 0.3s, width 0.3s;
+    z-index: 1200;
+    visibility: hidden;
+    overflow-y: auto;
+    max-height: 100vh;
+    /* مخفی کردن تمام دکمه‌ها در حالت بسته */
+    pointer-events: none;
+    opacity: 0;
+  }
+  .sidebar.expanded {
+    transform: translateX(0);
+    width: 85vw;
+    max-width: 340px;
+    align-items: flex-start;
+    padding-right: 1rem;
+    padding-left: 1rem;
+    border-radius: 0 0 0 2rem;
+    max-height: 100vh;
+    visibility: visible;
+    pointer-events: all;
+    opacity: 1;
+  }
+  .sidebar:not(.expanded) .sidebar-link {
+    display: none !important;
+  }
+  .hamburger-menu {
+    display: flex;
+  }
+  .sidebar-overlay {
+    display: block;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.4);
+    z-index: 1199;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.22s;
+  }
+  .sidebar.expanded ~ .sidebar-overlay {
+    opacity: 1;
+    pointer-events: all;
+  }
+}
+
+/* موبایل کوچک */
+@media (max-width: 768px) {
+  .sidebar,
+  .sidebar.expanded {
+    width: 97vw !important;
+    min-width: 0 !important;
+    max-width: 100vw !important;
+    right: 0 !important;
+    border-radius: 0 0 0 1.5rem !important;
+    padding-right: 3vw !important;
+    padding-left: 1vw !important;
+    gap: 4px !important;
+  }
+}
+
+@media (max-width: 520px) {
+  .sidebar,
+  .sidebar.expanded {
+    width: 100vw !important;
+    min-width: 0 !important;
+    max-width: 100vw !important;
+    right: 0 !important;
+    padding-right: 1vw !important;
+    padding-left: 1vw !important;
+    gap: 3px !important;
+    border-radius: 0 !important;
+  }
+  .sidebar-link,
+  .sidebar.expanded .sidebar-link {
+    width: 100% !important;
+    font-size: 15px !important;
+    gap: 7px !important;
+    padding-right: 4px !important;
+  }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+@media (max-width: 1024px) {
+  /* در موبایل کمی جابجایی: */
+  .noti-dot {
+    top: 8px;
+    right: 8px;
+  }
+}
+
+
+
+  /* Fade In Animation برای مدال */
+  @keyframes fadeIn {
+    from { opacity: 0; transform: scale(.95);}
+    to   { opacity: 1; transform: scale(1);}
+  }
+  .animate-fadeIn {
+    animation: fadeIn .35s cubic-bezier(.36,1.32,.3,1) both;
+  }
+
+  /* اسکرول ملایم برای جدول موبایل */
+  #productListMobile {
+    scroll-behavior: smooth;
+  }
+
+  /* استایل جدول دسکتاپ */
+  #section-products table {
+    border-collapse: separate;
+    border-spacing: 0;
+    width: 100%;
+  }
+  #section-products th, #section-products td {
+    padding: 14px 8px;
+    text-align: center;
+    vertical-align: middle;
+  }
+  #section-products th {
+    font-weight: 800;
+    font-size: 15px;
+    background: #e0fdfa;
+    color: #10b981;
+    border-bottom: 1.5px solid #d1fae5;
+  }
+  .dark #section-products th {
+    background: #232b26;
+    color: #30e8b8;
+  }
+  #section-products td {
+    background: #fff;
+    color: #333;
+    font-size: 15px;
+  }
+  .dark #section-products td {
+    background: #23272f;
+    color: #e1fffa;
+  }
+  #section-products tr.even td {
+    background: #f9fdfa;
+  }
+  .dark #section-products tr.even td {
+    background: #242a31;
+  }
+
+  #section-products img {
+    box-shadow: 0 2px 10px rgba(16,185,129,0.10);
+  }
+
+  /* استایل کارت موبایل محصولات */
+
+
+
+
+
+
+/* اطمینان از اینکه دکمه overflow: hidden نداره */
+/* ===== قالب جدید برای Badge عددی ===== */
+.sidebar-link {
+  position: relative; /* مطمئن شو overflow:visible و position:relative باشد */
+  overflow: visible;
+}
+
+.noti-dot {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  background: #ef4444;
+  color: #fff;
+  font-size: 12px;
+  font-weight: bold;
+  line-height: 1;
+  border-radius: 10px;
+  border: 2px solid #fff;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+  z-index: 20;
+  transition: transform 0.2s ease;
+}
+
+.noti-dot.show {
+  transform: scale(1.2);
+}
+
+
+/* ==== استایل پاپ‌اپ پیام جدید ==== */
+#messagePopup {
+  position: fixed;
+  /* نمایش بالا به جای پایین */
+  top: 30px;
+  left: 50%;
+  bottom: auto; /* اطمینان از لغو bottom */
+  transform: translateX(-50%) translateY(-120%);
+  background: #10b981;
+  color: #fff;
+  padding: 20px 40px;      /* بزرگ‌تر از قبل */
+  border-radius: 14px;
+  box-shadow: 0 6px 28px rgba(0,0,0,0.20);
+  font-weight: bold;
+  font-size: 18px;         /* فونت بزرگ‌تر */
+  opacity: 0;
+  transition: transform 0.4s ease, opacity 0.4s ease;
+  z-index: 2000;
+}
+
+#messagePopup.show {
+  transform: translateX(-50%) translateY(0);
+  opacity: 1;
+}
+
+/* موبایل */
+@media (max-width: 600px) {
+  #messagePopup {
+    width: 95vw;
+    min-width: unset;
+    max-width: 97vw;
+    padding: 13px 5vw;
+    font-size: 16px;
+  }
+}
+
+
+
+@media (max-width: 1024px) {
+  /* در موبایل کمی جابجایی: */
+  .noti-dot {
+    top: 8px;
+    right: 8px;
+  }
+}
+
+
+
+</style>
+</head>
+<body>
+
+  <div id="messagePopup">پیام جدید دارید: <span id="newMsgCount">0</span> پیام</div>
+
+  <!-- Hamburger Button for Mobile -->
+  <button class="sidebar-hamburger" onclick="toggleSidebar()" aria-label="باز کردن منو" aria-expanded="false">
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+      <path d="M3 6h18M3 12h18M3 18h18" stroke="#10b981" stroke-width="2" stroke-linecap="round"/>
+    </svg>
+  </button>
+
+  <!-- Sidebar Overlay -->
+  <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+
+  <!-- Sidebar -->
+  <!-- Sidebar -->
+  <!-- Sidebar -->
+  <aside class="sidebar" id="sidebar">
+    <!-- دکمه باز/بستن سایدبار -->
+    <button class="sidebar-toggle" onclick="toggleSidebar()" title="باز/بستن منو" aria-label="باز/بستن منو" aria-expanded="false">
+      <svg width="28" height="28" viewBox="0 0 24 24">
+        <path d="M9 6l6 6-6 6" stroke="#10b981" stroke-width="2" fill="none" stroke-linecap="round"/>
+      </svg>
+    </button>
+    <!-- دکمه‌های سایدبار -->
+    <button class="sidebar-link active" id="menu-visit" onclick="showSection('visit')" aria-label="آمار بازدید">
+      <svg width="22" height="22" fill="none" viewBox="0 0 24 24">
+        <circle cx="12" cy="12" r="9" stroke="#10b981" stroke-width="2"/>
+        <path d="M9 12l2 2 4-4" stroke="#0ea5e9" stroke-width="2" stroke-linecap="round"/>
+      </svg>
+      <span>آمار بازدید</span>
+    </button>
+    <button class="sidebar-link" id="menu-register-visit" onclick="showSection('register-visit')" aria-label="ثبت آمار بازدید">
+      <svg width="22" height="22" fill="none" viewBox="0 0 24 24">
+        <rect x="3" y="4" width="18" height="18" rx="2" stroke="#10b981" stroke-width="2"/>
+        <path d="M16 2v4M8 2v4M3 10h18" stroke="#0ea5e9" stroke-width="2" stroke-linecap="round"/>
+      </svg>
+      <span>ثبت آمار بازدید</span>
+    </button>
+    <button class="sidebar-link" id="menu-add" onclick="showSection('add')" aria-label="افزودن محصول">
+      <svg width="22" height="22" fill="none" viewBox="0 0 24 24">
+        <circle cx="12" cy="12" r="10" stroke="#10b981" stroke-width="2"/>
+        <path d="M12 8v8M8 12h8" stroke="#0ea5e9" stroke-width="2" stroke-linecap="round"/>
+      </svg>
+      <span>افزودن محصول</span>
+    </button>
+    <button class="sidebar-link" id="menu-products" onclick="showSection('products')" aria-label="مدیریت محصولات">
+      <svg width="22" height="22" fill="none" viewBox="0 0 24 24">
+        <rect x="3" y="6" width="18" height="13" rx="3" stroke="#10b981" stroke-width="2"/>
+        <path d="M8 13h8" stroke="#0ea5e9" stroke-width="2" stroke-linecap="round"/>
+      </svg>
+      <span>مدیریت محصولات</span>
+    </button>
+    <button class="sidebar-link" id="menu-content" onclick="showSection('content')" aria-label="مدیریت ظاهر فروشگاه">
+      <svg width="22" height="22" fill="none" viewBox="0 0 24 24">
+        <rect x="4" y="4" width="16" height="16" rx="3" stroke="#10b981" stroke-width="2"/>
+        <path d="M8 8h8M8 12h8M8 16h8" stroke="#0ea5e9" stroke-width="2"/>
+      </svg>
+      <span>مدیریت ظاهر فروشگاه</span>
+    </button>
+
+    <button class="sidebar-link" id="btn-shop-preview" type="button" aria-label="پیشنمایش سایت">
+      <svg width="22" height="22" fill="none" viewBox="0 0 24 24">
+        <rect x="3" y="6" width="18" height="13" rx="3" stroke="#0ea5e9" stroke-width="2"/>
+        <path d="M8 9h8M8 13h5" stroke="#10b981" stroke-width="2" stroke-linecap="round"/>
+      </svg>
+      <span>پیشنمایش سایت</span>
+    </button>
+
+    <button class="sidebar-link" id="menu-notif" onclick="showSection('notif')" aria-label="تابلو فروشگاه">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+        <path d="M19 17H5l1-8a7 7 0 1114 0l-1 8z" stroke="#fb923c" stroke-width="2"/>
+        <circle cx="19" cy="7" r="2.5" fill="#f87171"/>
+      </svg>
+      <span>تابلو فروشگاه</span>
+    </button>
+
+    <!-- پیام ها - دقیقا اینجا بین notif و upgrade اضافه شد -->
+    <button class="sidebar-link relative" id="menu-msg" onclick="showSection('msg')" aria-label="پیام‌ها">
+      <svg width="22" height="22" fill="none" viewBox="0 0 24 24">
+        <rect x="3" y="5" width="18" height="14" rx="3" stroke="#0ea5e9" stroke-width="2"/>
+        <path d="M3 7l9 6 9-6" stroke="#10b981" stroke-width="2" stroke-linecap="round"/>
+      </svg>
+      <span>پیام‌ها</span>
+      <!-- Badge for unread messages -->
+      <span id="msgBadge" class="noti-dot" style="display:none; z-index: 10;"></span>
+    </button>
+
+
+    <!-- دکمه ارتقا در سایدبار (اصلاح شده) -->
+    <button class="sidebar-link" id="menu-upgrade" aria-label="ارتقا" >
+        <svg width="22" height="22" fill="none" viewBox="0 0 24 24">
+            <path d="M12 2l3.5 7 7.5 1-5.5 5.5 1.5 7.5-7-4-7 4 1.5-7.5-5.5-5.5 7.5-1L12 2z" stroke="#f59e0b" stroke-width="2"/>
+        </svg>
+        <span>ارتقا</span>
+    </button>
+
+    <button class="sidebar-link" id="menu-guide" onclick="showSection('guide')" aria-label="راهنمای استفاده">
+      <svg width="22" height="22" fill="none" viewBox="0 0 24 24">
+        <circle cx="12" cy="12" r="10" stroke="#0ea5e9" stroke-width="2"/>
+        <path d="M12 7v5" stroke="#10b981" stroke-width="2" stroke-linecap="round"/>
+        <circle cx="12" cy="16" r="1.2" fill="#10b981"/>
+      </svg>
+      <span>راهنمای استفاده</span>
+    </button>
+  </aside>
+
+
+
+  <!-- این بخش برای نمایش محتوای لودشونده است -->
+  <div id="main-content"></div>
+
+
+
+
+  <!-- Theme Toggle -->
+  <button class="theme-toggle" onclick="toggleTheme()" title="تغییر تم" aria-label="تغییر تم">
+    <svg id="theme-icon" width="19" height="19" viewBox="0 0 24 24">
+      <circle cx="12" cy="12" r="5" stroke="#10b981" stroke-width="2" fill="none"/>
+      <path d="M12 3v2m0 14v2m9-9h-2M5 12H3m15.5 6.5l-1.5-1.5M6.5 6.5l-1.5-1.5m12 0l-1.5 1.5M6.5 17.5l-1.5 1.5" stroke="#0ea5e9" stroke-width="2" stroke-linecap="round"/>
+    </svg>
+  </button>
+
+  <!-- Main Content -->
+  <div class="main-container flex flex-col items-center justify-center min-h-screen pt-6 px-4">
+    <!-- آمار بازدید -->
+    <section id="section-visit">
+<h1 class="text-2xl md:text-3xl font-extrabold text-[#10b981] text-center mb-2">
+  سلام <span id="seller-welcome" style="color:#0ea5e9;">فروشنده عزیز</span> 👋
+</h1>
+      <div class="text-gray-500 text-[15px] mb-8 text-center">آمار و وضعیت فروشگاهت رو یکجا ببین و مدیریت کن!</div>
+      <div class="w-full max-w-2xl flex flex-wrap justify-center gap-4 mb-7">
+        <div class="stat-card">
+          <div class="icon">
+            <svg width="24" height="24" fill="none" viewBox="0 0 24 24"><path d="M3 12l2-2 4 4 8-8 4 4" stroke="#10b981" stroke-width="2" stroke-linecap="round"/></svg>
+          </div>
+          <div class="stat-label">کل بازدیدها</div>
+          <div class="stat-value" id="totalViews">18,974</div>
+          <div class="stat-growth">
+            <svg width="14" height="14" viewBox="0 0 16 16"><path d="M3 9l4-4 3.5 3.5 2.5-2.5" stroke="#10b981" stroke-width="2" fill="none" stroke-linecap="round"/></svg>
+            +7.1%
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="icon" style="background:#ffe7d2;">
+            <svg width="24" height="24" fill="none" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke="#fb923c" stroke-width="2"/><path d="M12 8v4l3 2" stroke="#fb923c" stroke-width="2" stroke-linecap="round"/></svg>
+          </div>
+          <div class="stat-label">این ماه</div>
+          <div class="stat-value text-[#fb923c]" id="monthViews">983</div>
+          <div class="stat-growth">
+            <svg width="14" height="14" viewBox="0 0 16 16"><path d="M3 9l4-4 3.5 3.5 2.5-2.5" stroke="#fb923c" stroke-width="2" fill="none" stroke-linecap="round"/></svg>
+            +5.2%
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="icon" style="background:#e3f4fd;">
+            <svg width="24" height="24" fill="none" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke="#0ea5e9" stroke-width="2"/><path d="M12 6v6l4 2" stroke="#0ea5e9" stroke-width="2" stroke-linecap="round"/></svg>
+          </div>
+          <div class="stat-label">دیروز</div>
+          <div class="stat-value text-[#0ea5e9]" id="yesterdayViews">160</div>
+          <div class="stat-growth negative">
+            <svg width="14" height="14" viewBox="0 0 16 16"><path d="M13 7l-4 4-3.5-3.5-2.5 2.5" stroke="#ef4444" stroke-width="2" fill="none" stroke-linecap="round"/></svg>
+            -2.5%
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="icon" style="background:#e7fae8;">
+            <svg width="24" height="24" fill="none" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke="#10b981" stroke-width="2"/><path d="M12 8v6" stroke="#10b981" stroke-width="2" stroke-linecap="round"/></svg>
+          </div>
+          <div class="stat-label">امروز</div>
+          <div class="stat-value text-[#10b981]" id="todayViews">148</div>
+          <div class="stat-growth">
+            <svg width="14" height="14" viewBox="0 0 16 16"><path d="M3 9l4-4 3.5 3.5 2.5-2.5" stroke="#10b981" stroke-width="2" fill="none" stroke-linecap="round"/></svg>
+            +4.3%
+          </div>
+        </div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-tabs">
+          <button class="chart-tab active" id="tab-week" onclick="switchChart('week')">هفتگی</button>
+          <button class="chart-tab" id="tab-month" onclick="switchChart('month')">ماهانه</button>
+        </div>
+        <div class="text-md font-bold text-[#10b981] mb-2 text-center" id="chartTitle">نمودار بازدید هفتگی</div>
+        <canvas id="visitChart" height="150"></canvas>
+        <div class="chart-info">بروزرسانی: امروز | داده‌ها شبیه‌سازی شده‌اند</div>
+      </div>
+
+      <!-- Product Table -->
+      <div class="product-table">
+        <table>
+          <thead>
+            <tr>
+              <th>محصول</th>
+              <th>بازدید این ماه</th>
+              <th>بازدید کل</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>پسته ممتاز</td>
+              <td>۳۵۵</td>
+              <td>۷۲۰۰</td>
+            </tr>
+            <tr>
+              <td>زعفران صادراتی</td>
+              <td>۲۷۸</td>
+              <td>۶۹۵۰</td>
+            </tr>
+            <tr>
+              <td>خرمای کبکاب</td>
+              <td>۱۹۰</td>
+              <td>۴۴۰۰</td>
+            </tr>
+            <tr>
+              <td>عسل طبیعی</td>
+              <td>۱۶۰</td>
+              <td>۳۷۰۰</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <!-- پیام‌ها -->
+
+
+    <!-- پروفایل -->
+    <section id="section-profile" style="display:none">
+      <h2 class="text-2xl md:text-3xl font-extrabold text-[#10b981] text-center mb-3">پروفایل فروشنده</h2>
+      <div class="panel-card mx-auto">
+  <ul class="shopinfo-list">
+  <li>نام: <strong id="seller-profile-name">-</strong></li>
+  <li>ایمیل: <strong id="seller-profile-email">-</strong></li>
+  <li>شماره تماس: <strong id="seller-profile-phone">-</strong></li>
+</ul>
+
+      </div>
+    </section>
+
+    <!-- تنظیمات -->
+    <section id="section-settings" style="display:none">
+      <h2 class="text-2xl md:text-3xl font-extrabold text-[#fb923c] text-center mb-3">تنظیمات فروشنده</h2>
+      <div class="panel-card mx-auto">
+        <ul class="shopinfo-list">
+          <li>تغییر رمز عبور</li>
+          <li>مدیریت اعلان‌ها</li>
+          <li>حذف حساب کاربری</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- افزودن محصول -->
+<section id="section-add" style="display:none;">
+  <h2 class="text-2xl md:text-3xl font-extrabold text-[#10b981] text-center mb-3 flex items-center justify-center gap-2">
+    <svg width="28" height="28" fill="none" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke="#10b981" stroke-width="2"/><path d="M12 8v8M8 12h8" stroke="#0ea5e9" stroke-width="2" stroke-linecap="round"/></svg>
+    افزودن محصول جدید
+  </h2>
+  <div class="panel-card mx-auto w-full max-w-2xl bg-[#f9fdfb] shadow-2xl border border-[#10b98122] rounded-3xl p-6 sm:p-10 transition-all duration-300">
+    <form id="addProductForm" autocomplete="off">
+      <!-- نام محصول -->
+      <div class="mb-4">
+        <label class="block font-bold mb-1 text-[#10b981]">نام محصول <span class="text-red-500">*</span></label>
+        <input name="title" type="text" class="w-full p-3 border rounded-xl focus:outline-none focus:ring-2 focus:ring-[#10b981] text-lg" placeholder="مثلاً: کفش مردانه چرم" required>
+      </div>
+      <!-- قیمت -->
+      <div class="mb-4">
+        <label class="block font-bold mb-1 text-[#10b981]">قیمت (تومان) <span class="text-red-500">*</span></label>
+        <input name="price" type="number" min="1" class="w-full p-3 border rounded-xl focus:outline-none focus:ring-2 focus:ring-[#10b981] text-lg" placeholder="مثلاً: 570000" required>
+      </div>
+      <!-- دسته‌بندی -->
+      <div class="mb-4">
+        <label class="block font-bold mb-1 text-[#10b981]">دسته‌بندی <span class="text-red-500">*</span></label>
+        <input name="category" type="text" class="w-full p-3 border rounded-xl focus:outline-none focus:ring-2 focus:ring-[#10b981] text-lg" placeholder="مثلاً: مردانه / زنانه / بچگانه ..." required>
+      </div>
+      <!-- تگ‌ها فقط یکی قابل انتخاب -->
+      <div class="mb-4">
+        <label class="block font-bold mb-1 text-[#10b981]">برچسب محصول</label>
+        <div class="flex gap-5 flex-wrap">
+          <label class="flex items-center gap-2 text-gray-600 cursor-pointer text-base">
+            <input type="radio" name="tag" value="پرفروش" class="accent-[#10b981]" required>
+            <span>پرفروش</span>
+          </label>
+          <label class="flex items-center gap-2 text-gray-600 cursor-pointer text-base">
+            <input type="radio" name="tag" value="جدید" class="accent-[#10b981]" required>
+            <span>جدید</span>
+          </label>
+        </div>
+      </div>
+      <!-- توضیحات -->
+      <div class="mb-4">
+        <label class="block font-bold mb-1 text-[#10b981]">توضیحات <span class="text-red-500">*</span></label>
+        <textarea name="desc" class="w-full p-3 border rounded-xl focus:outline-none focus:ring-2 focus:ring-[#10b981] text-lg" rows="3" placeholder="توضیحات محصول ..." required></textarea>
+      </div>
+      <!-- آپلود عکس با دکمه سفارشی و مدرن -->
+      <div class="mb-5">
+        <label class="block font-bold mb-2 text-[#10b981]">عکس محصول <span class="text-red-500">*</span>
+          <span class="text-xs text-gray-500">(حداقل ۳ عکس)</span>
+        </label>
+        <div class="w-full">
+          <label for="productImagesInput" tabindex="0" class="flex flex-col items-center justify-center border-2 border-dashed border-[#10b981] rounded-2xl py-8 bg-white cursor-pointer transition hover:bg-[#f0fcf7] active:scale-95 w-full select-none">
+            <svg width="42" height="42" fill="none" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke="#10b981" stroke-width="2"/><path d="M12 8v8M8 12h8" stroke="#0ea5e9" stroke-width="2" stroke-linecap="round"/></svg>
+            <span class="mt-2 text-[#10b981] font-bold text-lg">انتخاب عکس</span>
+            <span class="text-gray-500 text-sm mt-1">می‌توانید چند عکس را همزمان انتخاب کنید</span>
+          </label>
+          <input name="images" id="productImagesInput" type="file" accept="image/*" multiple class="hidden" required>
+        </div>
+        <div id="imagePreview" class="flex flex-wrap gap-2 mt-3"></div>
+        <div id="imgErrorMsg" class="text-red-500 text-sm mt-2 hidden">حداقل ۳ عکس الزامی است.</div>
+      </div>
+      <button type="submit" class="bg-[#10b981] hover:bg-[#0ea5e9] text-white rounded-2xl py-3 px-7 font-extrabold text-[18px] transition w-full mt-3 shadow-lg">
+        ثبت محصول
+      </button>
+    </form>
+    <div id="addSuccess" class="hidden mt-7 bg-[#e0fdfa] text-[#10b981] p-4 rounded-2xl text-center font-bold text-lg">
+      محصول با موفقیت افزوده شد!
+    </div>
+  </div>
+</section>
+
+
+
+
+<!-- مدیریت محصولات -->
+
+<!-- مدیریت محصولات -->
+<section id="section-products" style="display:none;">
+  <h2 class="text-2xl md:text-3xl font-extrabold text-[#10b981] text-center mb-3 flex items-center justify-center gap-2">
+    <svg width="28" height="28" fill="none" viewBox="0 0 24 24">
+      <rect x="3" y="6" width="18" height="13" rx="3" stroke="#10b981" stroke-width="2"/>
+      <path d="M8 13h8" stroke="#0ea5e9" stroke-width="2" stroke-linecap="round"/>
+    </svg>
+    مدیریت محصولات فروشگاه
+  </h2>
+  <div class="panel-card mx-auto w-full max-w-2xl bg-[#f9fdfb] shadow-xl border border-[#10b98122] rounded-2xl animate-fadeIn">
+
+    <!-- جدول محصولات فقط دسکتاپ و تبلت -->
+    <div class="overflow-x-auto mt-1 hidden md:block">
+      <table class="min-w-full text-[15px] bg-white rounded-xl border border-gray-200 overflow-hidden" id="productsTable">
+        <thead class="bg-[#f1f7f5]">
+          <tr>
+            <th class="px-2 py-3 text-right font-bold min-w-[60px]">عکس</th>
+            <th class="px-2 py-3 text-right font-bold min-w-[120px]">نام محصول</th>
+            <th class="px-2 py-3 text-right font-bold min-w-[80px]">قیمت</th>
+            <th class="px-2 py-3 text-right font-bold min-w-[100px]">دسته‌بندی</th>
+            <th class="px-2 py-3 text-right font-bold min-w-[90px]">برچسب‌ها</th>
+            <th class="px-2 py-3 text-right font-bold min-w-[70px]">ویرایش</th>
+            <th class="px-2 py-3 text-right font-bold min-w-[60px]">حذف</th>
+          </tr>
+        </thead>
+        <tbody id="productsTableBody" class="divide-y divide-gray-100">
+          <!-- محصولات اینجا رندر می‌شوند -->
+        </tbody>
+      </table>
+    </div>
+
+    <!-- کارت محصولات فقط موبایل (زیر سایز md) -->
+    <div id="productsMobileList" class="md:hidden flex flex-col gap-3 mt-3">
+      <!-- کارت هر محصول اینجا با JS رندر می‌شه (مثال کارت خام در پایین) -->
+      <!-- 
+      <div class="flex items-center gap-3 bg-white rounded-xl shadow p-3 border border-gray-100">
+        <img src="آدرس_عکس" alt="" class="w-14 h-14 object-cover rounded-lg border" />
+        <div class="flex-1 flex flex-col gap-1">
+          <div class="font-bold text-[#10b981] text-[15px]">نام محصول</div>
+          <div class="text-gray-600 text-xs">دسته: <span class="font-bold">دسته‌بندی</span></div>
+          <div class="text-[#0ea5e9] text-sm font-bold">قیمت: ۲۳۰,۰۰۰</div>
+          <div class="text-xs text-gray-400 mt-1">برچسب‌ها: <span class="font-bold">پرفروش، جدید</span></div>
+        </div>
+        <div class="flex flex-col gap-2">
+          <button class="bg-[#10b981] hover:bg-[#0ea5e9] text-white rounded-lg px-2 py-1 text-xs font-bold transition" onclick="...">ویرایش</button>
+          <button class="bg-red-500 hover:bg-red-600 text-white rounded-lg px-2 py-1 text-xs font-bold transition" onclick="...">حذف</button>
+        </div>
+      </div>
+      -->
+    </div>
+
+    <!-- پیام خالی -->
+    <div id="noProductMsg" class="text-center text-gray-400 text-[16px] py-6 hidden">هیچ محصولی ثبت نشده است!</div>
+  </div>
+
+  <!-- مدال ویرایش محصول -->
+<!-- مدال ویرایش محصول - کاملاً ریسپانسیو و موبایل‌فرندلی -->
+<div id="editProductModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40" style="display:none;">
+  <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md mx-2 p-3 sm:p-5 relative animate-fadeIn"
+      style="max-height:95vh;display:flex;flex-direction:column;">
+    <!-- دکمه بستن -->
+    <button class="absolute left-3 top-3 text-gray-400 hover:text-red-500" onclick="closeEditModal()" aria-label="بستن">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+        <path d="M6 18L18 6M6 6l12 12" stroke="#ef4444" stroke-width="2" stroke-linecap="round"/>
+      </svg>
+    </button>
+    <h3 class="text-xl font-bold text-[#0ea5e9] mb-3 text-center mt-1">ویرایش محصول</h3>
+    <!-- بدنه فرم اسکرولی برای موبایل کوچک -->
+    <form id="editProductForm"
+          class="space-y-3 flex-1 overflow-y-auto px-1"
+          style="min-width:0;max-height:calc(85vh - 70px);" autocomplete="off">
+      <input type="hidden" name="productId" />
+      <div>
+        <label class="block font-bold mb-1 text-[#10b981]">نام محصول</label>
+        <input name="title" type="text"
+              class="w-full p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#10b981] text-base"
+              required>
+      </div>
+      <div>
+        <label class="block font-bold mb-1 text-[#10b981]">قیمت (تومان)</label>
+        <input name="price" type="number" min="1"
+              class="w-full p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#10b981] text-base"
+              required>
+      </div>
+      <div>
+        <label class="block font-bold mb-1 text-[#10b981]">دسته‌بندی</label>
+        <input name="category" type="text"
+              class="w-full p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#10b981] text-base"
+              required>
+      </div>
+      <div>
+        <label class="block font-bold mb-1 text-[#10b981]">برچسب محصول</label>
+        <div class="flex gap-5 flex-wrap" id="editTagRadioGroup">
+          <label class="flex items-center gap-2 text-gray-600 cursor-pointer text-base">
+            <input type="radio" name="tag" value="پرفروش" class="accent-[#10b981]">
+            <span>پرفروش</span>
+          </label>
+          <label class="flex items-center gap-2 text-gray-600 cursor-pointer text-base">
+            <input type="radio" name="tag" value="جدید" class="accent-[#10b981]">
+            <span>جدید</span>
+          </label>
+        </div>
+      </div>
+      <div>
+        <label class="block font-bold mb-1 text-[#10b981]">توضیحات</label>
+        <textarea name="desc"
+                  class="w-full p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#10b981] text-base"
+                  rows="2"></textarea>
+      </div>
+<div>
+  <label class="block font-bold mb-1 text-[#10b981]">عکس محصول</label>
+  <div id="editImagePreview" class="flex flex-wrap gap-2 mb-2"></div>
+  <input
+    name="images"
+    id="editProductImagesInput"
+    type="file"
+    accept="image/*"
+    multiple
+    class="w-full p-2 border rounded-lg bg-white text-base"
+    onchange="previewEditImages(event)"
+    style="direction: ltr"
+  >
+  <div id="editImgHelp" class="text-xs text-gray-500 mt-1">
+    می‌توانید تا <b>۳ عکس</b> داشته باشید. برای حذف هر عکس روی <b>ضربدر</b> بزنید.
+  </div>
+  <div id="editImgErrorMsg" class="text-xs text-red-500 mt-1 hidden"></div>
+</div>
+
+
+      <!-- فاصله برای موبایل که دکمه زیر فرم قرار بگیره -->
+      <div style="height:4px"></div>
+      <button type="submit"
+              class="bg-[#10b981] hover:bg-[#0ea5e9] text-white rounded-xl py-2 px-6 font-bold text-base transition w-full mt-2 shadow">
+        ثبت تغییرات
+      </button>
+    </form>
+  </div>
+</div>
+
+
+
+
+
+
+
+
+
+<script>
+
+
+
+// ۱) فانکشن برای گرفتن اطلاعات فروشنده
+// ۱) فانکشن برای گرفتن اطلاعات فروشنده‌ی جاری
+// === dashboard.html (یا هر جا که این تابع هست) ===
+// تابع دریافت تعداد پیام‌های خوانده نشده
+ // گرفتن فروشنده جاری
+async function fetchCurrentSeller() {
+  try {
+    const res = await fetch('/api/auth/getCurrentSeller', {
+      method: 'GET',
+      credentials: 'include'
+    });
+    if (!res.ok) {
+      window.location.href = 'login.html';
+      throw new Error('Not authenticated');
+    }
+    const { seller } = await res.json();
+    return seller;
+  } catch (err) {
+    console.error('Error fetching seller:', err);
+    window.location.href = 'login.html';
+    return null;
+  }
+}
+
+// ————————— تابع دریافت تعداد پیام‌های خوانده‌نشده —————————
+async function fetchUnreadCount() {
+  try {
+    if (!window.seller?.id) return 0;
+    const res = await fetch(`/api/chats?sellerId=${window.seller.id}`, {
+      credentials: 'include'
+    });
+    if (!res.ok) return 0;
+    const chats = await res.json();
+    // مجموع پیام‌های ادمین که هنوز readBySeller=false هستند
+    return chats.reduce((sum, chat) => {
+      const unread = (chat.messages||[])
+        .filter(m => m.from === 'admin' && !m.readBySeller)
+        .length;
+      return sum + unread;
+    }, 0);
+  } catch (err) {
+    console.error('Error fetching unread count:', err);
+    return 0;
+  }
+}
+
+// ————————— تابع به‌روزرسانی نمای بج —————————
+function updateBadge(count) {
+  const badge = document.getElementById('msgBadge');
+  if (!badge) return;
+  if (count > 0) {
+    badge.innerText = count > 99 ? '99+' : count;
+    badge.style.display = 'flex';
+    badge.animate([
+      { transform: 'scale(1)', opacity: 1 },
+      { transform: 'scale(1.18)', opacity: .85 },
+      { transform: 'scale(1)', opacity: 1 }
+    ], { duration: 280 });
+  } else {
+    badge.style.display = 'none';
+  }
+}
+
+// ————————— شروع پولینگ بج —————————
+function startBadgePolling() {
+  if (window.badgeInterval) clearInterval(window.badgeInterval);
+  // بار اول فوری
+  fetchUnreadCount().then(updateBadge);
+  // سپس هر ۱۵ ثانیه
+  window.badgeInterval = setInterval(() => {
+    fetchUnreadCount().then(updateBadge);
+  }, 15000);
+}
+
+// ————————— علامت‌گذاری همه پیام‌ها به‌عنوان خوانده‌شده —————————
+ // ————————— علامت‌گذاری همه‌ی پیام‌های خوانده‌نشده به‌عنوان خوانده‌شده —————————
+// جایگزین تابع قبلی markAllRead
+async function markAllRead() {
+  try {
+    if (!window.seller?.id) return;
+
+    const res = await fetch('/api/chats/markAllRead', {
+      method: 'POST',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ sellerId: window.seller.id })
+    });
+
+    if (!res.ok) {
+      const err = await res.json();
+      throw new Error(err.error || 'Failed to mark all read');
+    }
+
+    // پس از موفقیت، نشانگر (badge) صفر می‌شود
+    updateBadge(0);
+
+  } catch (err) {
+    console.error('Error marking all as read:', err);
+  }
+}
+
+
+// ————————— هندل کلیک روی منوی پیام‌ها —————————
+(function setupMessagesHandler() {
+  const btn = document.getElementById('menu-msg');
+  if (!btn || btn.dataset.listener === '1') return;
+  btn.dataset.listener = '1';
+
+  btn.addEventListener('click', async () => {
+    // هایلایت منو
+    document.querySelectorAll('.sidebar-link').forEach(el => el.classList.remove('active'));
+    btn.classList.add('active');
+
+    // بارگذاری بخش پیام‌ها (تابع شما)
+    if (typeof loadDashboardMessages === 'function') {
+      await loadDashboardMessages();
+    }
+
+    // علامت‌گذاری همه پیام‌ها خوانده شده
+    await markAllRead();
+
+    // بستن سایدبار در موبایل
+    if (window.innerWidth <= 768) {
+      toggleSidebar();
+    }
+  });
+})();
+
+
+
+function getUnreadTotal(chats){
+return chats.reduce((sum , chat)=>
+  sum + (chat.messages||[])
+          .filter(m => m.from !== 'seller' && !m.readBySeller)
+          .length
+,0);
+}
+
+// نگهداری تعداد آخرین پیام‌ها
+let lastMsgCount = 0;
+
+// فراخوانی تعداد پیام‌های خوانده‌نشده جدید (می‌توانید همان fetchUnreadCount را مجدداً استفاده کنید)
+async function fetchNewMsgCount(){
+  try{
+    if(!window.seller?.id) return 0;
+    const res = await fetch(`/api/chats?sellerId=${window.seller.id}`,
+                            { credentials:'include' });
+    if(!res.ok) return 0;
+    const chats = await res.json();
+    return getUnreadTotal(chats);    // ← همان محاسبه‌ی عمومی
+  }catch{
+    return 0;
+  }
+}
+
+// نمایش پاپ‌اپ پیام جدید
+function showMessagePopup(count) {
+  const popup = document.getElementById('messagePopup');
+  const span = document.getElementById('newMsgCount');
+  span.innerText = count > 99 ? '99+' : count;
+  popup.classList.add('show');
+  setTimeout(() => popup.classList.remove('show'), 4000);
+}
+
+// شروع پولینگ برای دریاف پیام جدید
+function startMessagePolling() {
+  // بار اول مقدار اولیه بگیریم
+  fetchNewMsgCount().then(c => lastMsgCount = c);
+  // هر ۲۰ ثانیه چک کن
+  setInterval(async () => {
+    const c = await fetchNewMsgCount();
+    if (c > lastMsgCount) {
+      showMessagePopup(c - lastMsgCount);
+    }
+    lastMsgCount = c;
+    updateBadge(c);          // هم بج را آپدیت کن
+  }, 20000);
+}
+
+
+// ————————— راه‌اندازی اولیه —————————
+document.addEventListener('DOMContentLoaded', async () => {
+  // ۱) دریافت فروشنده
+  window.seller = await fetchCurrentSeller();
+  console.log('🚀 seller object:', window.seller);
+
+  if (window.seller?.id) {
+    // ۲) شروع پولینگ‌ها
+    startBadgePolling();
+    startMessagePolling();
+
+    // ۳) نمایش نام و نام‌خانوادگی فروشنده
+    const welcomeEl = document.getElementById('seller-welcome');
+    if (welcomeEl) {
+      const first = window.seller.firstname || '';
+      const last  = window.seller.lastname  || '';
+      // اگر هر دو موجود باشد "firstname lastname"
+      const fullName = `${first}${last ? ' ' + last : ''}`;
+      welcomeEl.textContent = `${fullName} عزیز`;
+    }
+  }
+});
+// ————————— توقف پولینگ هنگام خروج —————————
+window.addEventListener('beforeunload', () => {
+  if (window.badgeInterval) {
+    clearInterval(window.badgeInterval);
+  }
+});
+
+
+
+
+// ۳) باقی کدها (مثل پیش‌نمایش، ارسال محصول جدید) بدون تغییر باقی می‌مانند
+
+
+// ۳) استفاده در دکمه‌ی پیش‌نمایش:
+document
+  .getElementById('btn-shop-preview')
+  .addEventListener('click', () => {
+    if (!window.seller?.shopurl) {
+      return alert('آدرس فروشگاه شما ثبت نشده.');
+    }
+    const url = new URL('/shop.html', window.location.origin);
+    url.searchParams.set('shopurl', window.seller.shopurl);
+    window.open(url.href, '_blank');
+  });
+
+// ۴) ارسال محصول جدید:
+document.getElementById('addProductForm').addEventListener('submit', async e => {
+  e.preventDefault();
+  if (!window.seller?.id) return alert('ابتدا وارد شوید.');
+  // ... ساخت body و fetch مشابه قبل، اما به جای localStorage، از window.seller.id استفاده کنید
+});
+
+
+
+
+
+
+
+
+
+
+function showProductSuccessPopup() {
+  console.log("✅ تابع showProductSuccessPopup صدا زده شد");
+  const popup = document.getElementById('productSuccessPopup');
+  if (!popup) return console.error("❌ popup not found");
+  popup.style.display = "flex";
+  popup.style.opacity = "1";
+  console.log("Opacity set to 1:", popup.style.opacity);
+  setTimeout(() => {
+    popup.style.opacity = "0";
+    setTimeout(() => popup.style.display = "none", 300);
+  }, 2000);
+}
+  
+
+// ----------- سایدبار و تم سایت ----------
+function toggleSidebar() {
+  const sidebar = document.getElementById('sidebar');
+  const overlay = document.getElementById('sidebarOverlay');
+  const hamburger = document.querySelector('.sidebar-hamburger');
+  const toggleBtn = document.querySelector('.sidebar-toggle');
+  const isExpanded = sidebar.classList.toggle('expanded');
+  overlay.classList.toggle('active', isExpanded);
+  hamburger.setAttribute('aria-expanded', isExpanded);
+  toggleBtn.setAttribute('aria-expanded', isExpanded);
+  if (isExpanded) toggleBtn.focus();
+  else hamburger.focus();
+}
+function toggleTheme() {
+  document.documentElement.classList.toggle('dark');
+  const icon = document.getElementById('theme-icon');
+  if (document.documentElement.classList.contains('dark')) {
+    icon.innerHTML = '<path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z" fill="#0ea5e9"/>';
+  } else {
+    icon.innerHTML = '<circle cx="12" cy="12" r="5" stroke="#10b981" stroke-width="2" fill="none"/><path d="M12 3v2m0 14v2m9-9h-2M5 12H3m15.5 6.5l-1.5-1.5M6.5 6.5l-1.5-1.5m12 0l-1.5 1.5M6.5 17.5l-1.5 1.5" stroke="#0ea5e9" stroke-width="2" stroke-linecap="round"/>';
+  }
+}
+
+// ----------- بخش سوییچ بین بخش‌ها و چارت بازدید ----------
+function showSection(section) {
+  // اگر بخش انتخابی "content" (یعنی مدیریت ظاهر فروشگاه) نیست،
+  // محتوای main-content رو پاک کن که چیزی زیر بخش جدید نمونه
+  if (section !== "content" && document.getElementById('main-content')) {
+    document.getElementById('main-content').innerHTML = '';
+  }
+
+  const allSections = [
+    "visit", "notif", "msg", "profile", "settings", "add", "upgrade",
+    "products", "content", "seo", "guide", "register-visit"
+  ];
+  allSections.forEach(s => {
+    const btn = document.getElementById('menu-' + s);
+    if (btn) btn.classList.remove('active');
+    const sec = document.getElementById('section-' + s);
+    if (sec) sec.style.display = 'none';
+  });
+  const btnActive = document.getElementById('menu-' + section);
+  if (btnActive) btnActive.classList.add('active');
+  const secActive = document.getElementById('section-' + section);
+  if (secActive) secActive.style.display = 'block';
+
+  if (section === 'visit' && document.getElementById('visitChart')) {
+    setTimeout(() => renderChart(currentChart), 80);
+  }
+  if (section === 'register-visit') {
+    loadDailyVisits();
+  }
+  if (window.innerWidth <= 768) toggleSidebar();
+  if (section === "products") setupProductSection();
+}
+
+function switchChart(type) {
+  if (currentChart === type) return;
+  currentChart = type;
+  renderChart(type);
+  document.getElementById('tab-week').classList.toggle('active', type === 'week');
+  document.getElementById('tab-month').classList.toggle('active', type === 'month');
+  document.getElementById('chartTitle').innerText = type === 'week' ? 'نمودار بازدید هفتگی' : 'نمودار بازدید ماهانه';
+}
+
+
+// ----------- چارت بازدید (نمونه) ----------
+let chartData = {
+  week: { labels: ['شنبه','یکشنبه','دوشنبه','سه‌شنبه','چهارشنبه','پنجشنبه','جمعه'], data: [112,131,123,148,156,166,140] },
+  month: { labels: ['فروردین','اردیبهشت','خرداد','تیر','مرداد','شهریور','مهر','آبان','آذر','دی','بهمن','اسفند'], data: [880,970,1050,1254,1411,1393,1522,1610,1733,1652,1567,1295] }
+};
+let currentChart = 'week', visitChart;
+function renderChart(type = 'week') {
+  const ctx = document.getElementById('visitChart').getContext('2d');
+  if (visitChart) visitChart.destroy();
+  visitChart = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: chartData[type].labels,
+      datasets: [{
+        label: 'بازدیدها', data: chartData[type].data, fill: true, tension: 0.38,
+        borderColor: '#10b981', backgroundColor: 'rgba(16,185,129,0.09)', pointBackgroundColor: '#10b981', pointRadius: 5, pointHoverRadius: 7,
+      }]
+    },
+    options: { responsive: true, plugins: { legend: { display: false } },
+      scales: {
+        y: { beginAtZero: true, grid: { color: '#e5e7eb44', borderDash: [4,4] }, ticks: { color: '#888', font: { size: 13, weight: 'bold' } } },
+        x: { grid: { display: false }, ticks: { color: '#666', font: { size: 13, weight: 'bold' } } }
+      }
+    }
+  });
+}
+
+// ----------- پاپ‌آپ موفقیت ----------
+  
+
+// ----------- آپلود و پیش‌نمایش عکس محصول (چندگانه) ----------
+window._productFiles = [];
+const imgInput = document.getElementById("productImagesInput");
+const previewBox = document.getElementById("imagePreview");
+const imgErrorMsg = document.getElementById("imgErrorMsg");
+
+imgInput.addEventListener("change", function (event) {
+  const files = Array.from(event.target.files);
+  window._productFiles = files;
+  previewBox.innerHTML = "";
+  imgErrorMsg.classList.add("hidden");
+  if (files.length === 0) return;
+  files.forEach((file, idx) => {
+    const reader = new FileReader();
+    reader.onload = e => {
+      const div = document.createElement("div");
+      div.className = "relative";
+      div.innerHTML = `
+        <img src="${e.target.result}" class="w-20 h-20 object-cover rounded-xl border shadow" alt="عکس محصول"/>
+        <button type="button" class="absolute top-1 right-1 bg-white rounded-full shadow p-1 text-gray-500 hover:bg-red-100 hover:text-red-500" title="حذف عکس" onclick="removeImage(${idx})">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M6 18L18 6M6 6l12 12" stroke="#ef4444" stroke-width="2" stroke-linecap="round"/></svg>
+        </button>
+      `;
+      previewBox.appendChild(div);
+    };
+    reader.readAsDataURL(file);
+  });
+});
+function removeImage(index) {
+  let files = Array.from(window._productFiles || []);
+  files.splice(index, 1);
+  window._productFiles = files;
+  // آپدیت ورودی فایل با DataTransfer
+  const input = document.getElementById("productImagesInput");
+  const dataTransfer = new DataTransfer();
+  files.forEach(f => dataTransfer.items.add(f));
+  input.files = dataTransfer.files;
+  // بازنمایی پیش‌نمایش
+  previewBox.innerHTML = "";
+  files.forEach((file, idx) => {
+    const reader = new FileReader();
+    reader.onload = e => {
+      const div = document.createElement("div");
+      div.className = "relative";
+      div.innerHTML = `
+        <img src="${e.target.result}" class="w-20 h-20 object-cover rounded-xl border shadow" alt="عکس محصول"/>
+        <button type="button" class="absolute top-1 right-1 bg-white rounded-full shadow p-1 text-gray-500 hover:bg-red-100 hover:text-red-500" title="حذف عکس" onclick="removeImage(${idx})">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M6 18L18 6M6 6l12 12" stroke="#ef4444" stroke-width="2" stroke-linecap="round"/></svg>
+        </button>
+      `;
+      previewBox.appendChild(div);
+    };
+    reader.readAsDataURL(file);
+  });
+  if (files.length < 3) imgErrorMsg.classList.remove("hidden");
+  else imgErrorMsg.classList.add("hidden");
+}
+
+// ----------- افزودن محصول جدید (متصل به دیتابیس) ----------
+document.getElementById("addProductForm").addEventListener("submit", async function (e) {
+  e.preventDefault();
+
+  // چک کردن seller و id از window.seller به جای localStorage
+  if (!window.seller?.id) {
+    alert("اطلاعات فروشنده ناقص است. لطفاً دوباره وارد شوید.");
+    window.location.href = "login.html";
+    return;
+  }
+
+  const form = e.target;
+  const files = Array.from(imgInput.files);
+  if (files.length < 3) {
+    imgErrorMsg.classList.remove("hidden");
+    imgErrorMsg.innerText = "حداقل ۳ عکس الزامی است.";
+    imgInput.focus();
+    return;
+  }
+
+  // خواندن همه عکس‌ها به صورت base64
+  let imagesBase64 = [];
+  for (const file of files) {
+    const base64 = await readFileAsBase64(file);
+    imagesBase64.push(base64);
+  }
+
+  // درست کردن برچسب‌ها (tags)
+  let tags = [];
+  if (form.tags) {
+    tags = form.tags.value.split(',').map(t => t.trim()).filter(Boolean);
+  } else if (form.tag) {
+    tags = [form.tag.value.trim()];
+  }
+
+  const productData = {
+    sellerId: window.seller.id,  // اینجا هم از window.seller استفاده می‌کنیم
+    title: form.title.value.trim(),
+    price: Number(form.price.value),
+    category: form.category.value.trim(),
+    tags: tags,
+    desc: form.desc.value.trim(),
+    images: imagesBase64
+  };
+
+  try {
+    const res = await fetch("/api/products", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(productData),
+      credentials: "include"  // اگر نیاز به ارسال کوکی/توکن دارید
+    });
+    const result = await res.json();
+    if (res.ok) {
+      form.reset();
+      window._productFiles = [];
+      previewBox.innerHTML = "";
+      imgErrorMsg.classList.add("hidden");
+      showProductSuccessPopup(); // پاپ‌آپ شیک و جدید نمایش داده میشه
+      if (typeof renderProducts === "function") renderProducts();
+    } else {
+      alert(result.message || "خطا در ثبت محصول!");
+    }
+  } catch (err) {
+    alert("خطا در اتصال به سرور.");
+    console.error(err);
+  }
+});
+
+
+
+
+
+function readFileAsBase64(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = e => resolve(e.target.result);
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+
+// ----------- نمایش محصولات (دریافت از سرور) ----------
+async function renderProducts() {
+  // seller رو اینجا از localStorage بخون تا همیشه مقدار درست داشته باشی
+// اگر seller در حافظه لود نشده یا id ندارد، ریدایرکت به لاگین
+if (!window.seller?.id) {
+  alert("اطلاعات فروشنده ناقص است. لطفاً دوباره وارد شوید.");
+  window.location.href = "login.html";
+  return;
+}
+
+
+  // المنت‌های جدول و کارت موبایل
+  const tbody = document.getElementById('productsTableBody');
+  const mobileList = document.getElementById('productsMobileList');
+  const noProductMsg = document.getElementById('noProductMsg');
+  if (tbody) tbody.innerHTML = "";
+  if (mobileList) mobileList.innerHTML = "";
+
+  try {
+    // دریافت محصولات فروشنده
+  const res = await fetch(`/api/products?sellerId=${window.seller.id}`, { credentials: 'include' });
+    if (!res.ok) throw new Error("مشکل در دریافت محصولات");
+    const products = await res.json();
+
+    // اگر هیچ محصولی نیست
+    if (!products.length) {
+      noProductMsg.classList.remove('hidden');
+      return;
+    }
+    noProductMsg.classList.add('hidden');
+    window._allProducts = products;
+
+    // ---- رندر جدول (دسکتاپ) ----
+    products.forEach((prod) => {
+      // تعیین عکس شاخص بر اساس mainImageIndex یا اولین عکس
+      let cover = "";
+      if (prod.images && prod.images.length) {
+        if (typeof prod.mainImageIndex === "number" && prod.images[prod.mainImageIndex]) {
+          cover = prod.images[prod.mainImageIndex];
+        } else {
+          cover = prod.images[0];
+        }
+      }
+      if (tbody) {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td><img src="${cover}" alt="" class="w-12 h-12 object-cover rounded-lg border shadow mx-auto"/></td>
+          <td>${prod.title}</td>
+          <td>${prod.price ? prod.price.toLocaleString('fa-IR') : "-"}</td>
+          <td>${prod.category || '-'}</td>
+          <td>${prod.tags && prod.tags.length ? prod.tags.join('، ') : '-'}</td>
+          <td>
+            <button class="bg-[#10b981] hover:bg-[#0ea5e9] text-white rounded-lg px-3 py-1 text-[14px] transition" onclick="showEditModal('${prod._id}')">ویرایش</button>
+          </td>
+          <td>
+            <button class="bg-red-500 hover:bg-red-600 text-white rounded-lg px-3 py-1 text-[14px] transition" onclick="deleteProduct('${prod._id}')">حذف</button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      }
+
+      // ---- رندر کارت موبایل (فقط نمایش در md و پایین‌تر) ----
+      if (mobileList) {
+        const card = document.createElement('div');
+        card.className = "flex items-center gap-3 bg-white rounded-xl shadow p-3 border border-gray-100";
+        card.innerHTML = `
+          <img src="${cover}" alt="" class="w-14 h-14 object-cover rounded-lg border" />
+          <div class="flex-1 flex flex-col gap-1">
+            <div class="font-bold text-[#10b981] text-[15px]">${prod.title}</div>
+            <div class="text-gray-600 text-xs">دسته: <span class="font-bold">${prod.category || '-'}</span></div>
+            <div class="text-[#0ea5e9] text-sm font-bold">قیمت: ${prod.price ? prod.price.toLocaleString('fa-IR') : '-'}</div>
+            <div class="text-xs text-gray-400 mt-1">برچسب‌ها: <span class="font-bold">${prod.tags && prod.tags.length ? prod.tags.join('، ') : '-'}</span></div>
+          </div>
+          <div class="flex flex-col gap-2">
+            <button class="bg-[#10b981] hover:bg-[#0ea5e9] text-white rounded-lg px-2 py-1 text-xs font-bold transition" onclick="showEditModal('${prod._id}')">ویرایش</button>
+            <button class="bg-red-500 hover:bg-red-600 text-white rounded-lg px-2 py-1 text-xs font-bold transition" onclick="deleteProduct('${prod._id}')">حذف</button>
+          </div>
+        `;
+        mobileList.appendChild(card);
+      }
+    });
+  } catch (err) {
+    if (tbody) tbody.innerHTML = `<tr><td colspan="7" class="text-center text-red-500 py-6">خطا در دریافت محصولات!</td></tr>`;
+    if (mobileList) mobileList.innerHTML = `<div class="text-center text-red-500 py-6">خطا در دریافت محصولات!</div>`;
+    noProductMsg.classList.add('hidden');
+  }
+}
+
+
+// ----------- حذف محصول (دیتابیس) ----------
+async function deleteProduct(productId) {
+  if (!confirm("آیا از حذف این محصول مطمئن هستید؟")) return;
+  try {
+    const res = await fetch(`http://localhost:5000/api/products/${productId}`, { method: "DELETE" });
+    const result = await res.json();
+    if (res.ok) {
+      renderProducts();
+    } else {
+      alert(result.message || "خطا در حذف محصول!");
+    }
+  } catch (err) {
+    alert("خطا در ارتباط با سرور!");
+  }
+}
+
+// ----------- مدال و فرم ویرایش محصول (دیتابیس) ----------
+  // ----------- مدال و فرم ویرایش محصول (دیتابیس) با مدیریت تا ۳ عکس ----------
+
+  function showEditModal(productId) {
+    const products = window._allProducts || [];
+    const prod = products.find(p => p._id === productId);
+    if (!prod) return alert("محصول پیدا نشد!");
+
+    const modal = document.getElementById("editProductModal");
+    modal.style.display = "flex";
+    const form = document.getElementById("editProductForm");
+
+    // مقداردهی input مخفی productId
+    form.productId.value = prod._id || "";
+    form.title.value = prod.title || "";
+    form.price.value = prod.price || "";
+    form.category.value = prod.category || "";
+    form.desc.value = prod.desc || "";
+
+    // مقداردهی تگ (فقط یکی)
+    const tagValue = (prod.tags && prod.tags.length) ? prod.tags[0] : "";
+    const radios = form.querySelectorAll('input[name="tag"]');
+    radios.forEach(radio => {
+      radio.checked = (radio.value === tagValue);
+    });
+
+    // مقداردهی عکس‌های قبلی
+    window._editOldImages = Array.isArray(prod.images) ? [...prod.images] : [];
+    // مقداردهی ایندکس عکس شاخص (اگر در محصول وجود داشت، مقدارش رو ست کن، وگرنه ۰)
+    window._editMainIndex =
+      typeof prod.mainImageIndex === "number" &&
+      prod.mainImageIndex < (prod.images || []).length
+        ? prod.mainImageIndex
+        : 0;
+    // عکس‌های جدیدی که موقع ویرایش اضافه می‌شوند
+    window._editNewImages = [];
+    renderEditImagePreview();
+
+    // ریست input فایل برای اضافه‌کردن عکس جدید
+    const input = document.getElementById("editProductImagesInput");
+    if (input) input.value = "";
+  }
+
+
+  // پیش‌نمایش عکس‌های ویرایش (قبلی + جدید)
+  // فرض می‌کنیم متغیر window._editMainIndex شماره عکس شاخصه (ایندکس در مجموع عکس‌های فعلی)
+  function renderEditImagePreview() {
+    const preview = document.getElementById("editImagePreview");
+    preview.innerHTML = "";
+    const images = [...window._editOldImages, ...window._editNewImages];
+    // اگه شاخص از محدوده خارج شده بود، صفر کن
+    if (typeof window._editMainIndex !== "number" || window._editMainIndex >= images.length) {
+      window._editMainIndex = 0;
+    }
+    images.forEach((img, idx) => {
+      const isMain = idx === window._editMainIndex;
+      const div = document.createElement("div");
+      div.className = "relative group inline-block m-1";
+      div.innerHTML = `
+        <img src="${img}" class="w-16 h-16 object-cover rounded-xl border shadow ring-2 ${isMain ? 'ring-[#10b981]' : 'ring-transparent'} cursor-pointer"
+          title="${isMain ? 'عکس شاخص' : 'برای انتخاب عکس شاخص کلیک کنید'}"
+          onclick="setMainImageIndex(${idx})"
+          style="transition:ring 0.15s;"
+        />
+        <button type="button" class="absolute top-1 right-1 bg-white rounded-full shadow p-1 text-gray-500 hover:bg-red-100 hover:text-red-500"
+          title="حذف عکس" onclick="removeEditImage('${idx < window._editOldImages.length ? 'old' : 'new'}', ${idx < window._editOldImages.length ? idx : idx - window._editOldImages.length})">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M6 18L18 6M6 6l12 12" stroke="#ef4444" stroke-width="2" stroke-linecap="round"/></svg>
+        </button>
+        ${isMain ? `<span class="absolute bottom-1 left-1 bg-[#10b981] text-white text-xs px-2 py-1 rounded-lg shadow">شاخص</span>` : ''}
+      `;
+      preview.appendChild(div);
+    });
+  }
+
+
+
+  // حذف عکس (قدیمی یا جدید)
+  function removeEditImage(type, idx) {
+    if (type === "old") window._editOldImages.splice(idx, 1);
+    if (type === "new") window._editNewImages.splice(idx, 1);
+    renderEditImagePreview();
+  }
+
+  // وقتی عکس جدید انتخاب شد (input فایل باید onchange="previewEditImages(event)" باشد)
+  function previewEditImages(event) {
+    const files = Array.from(event.target.files);
+    if (!files.length) return;
+    // بیشتر از ۳ تا نشه
+    let remain = 3 - (window._editOldImages.length + window._editNewImages.length);
+    if (remain <= 0) return; // ظرفیت پر
+    for (let i = 0; i < Math.min(remain, files.length); i++) {
+      const file = files[i];
+      const reader = new FileReader();
+      reader.onload = e => {
+        window._editNewImages.push(e.target.result);
+        renderEditImagePreview();
+      };
+      reader.readAsDataURL(file);
+    }
+    // ریست input برای آپلود دوباره
+    event.target.value = "";
+  }
+
+  // بستن مدال ویرایش
+  function closeEditModal() {
+    document.getElementById("editProductModal").style.display = "none";
+  }
+
+  // ارسال فرم ویرایش محصول
+  document.getElementById("editProductForm").addEventListener("submit", async function(e) {
+    e.preventDefault();
+    const productId = this.productId.value;
+
+    // مقدار برچسب (تگ) فقط از رادیو
+    let tagValue = "";
+    const tagRadio = this.querySelector('input[name="tag"]:checked');
+    if (tagRadio) tagValue = tagRadio.value.trim();
+
+    // ترکیب عکس‌های قبلی و جدید، حداکثر ۳ تا
+    const allImages = [...(window._editOldImages || []), ...(window._editNewImages || [])].slice(0, 3);
+
+    // افزودن mainImageIndex برای ذخیره عکس شاخص
+    let updatedFields = {
+      title: this.title.value.trim(),
+      price: +this.price.value,
+      category: this.category.value.trim(),
+      tags: tagValue ? [tagValue] : [],
+      desc: this.desc.value.trim(),
+      images: allImages,
+      mainImageIndex: typeof window._editMainIndex === "number" ? window._editMainIndex : 0,
+    };
+
+    try {
+      const res = await fetch(`http://localhost:5000/api/products/${productId}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(updatedFields)
+      });
+      const result = await res.json();
+      if (res.ok) {
+        closeEditModal();
+        renderProducts();
+      } else {
+        alert(result.message || "خطا در ویرایش محصول!");
+      }
+    } catch (err) {
+      alert("خطا در ارتباط با سرور!");
+    }
+  });
+
+
+
+  // ----------- هر بار وارد مدیریت محصولات شد ----------
+  function setupProductSection() {
+    renderProducts();
+  }
+
+
+
+
+
+
+
+function setMainImageIndex(idx) {
+  window._editMainIndex = idx;
+  renderEditImagePreview();
+}
+
+
+
+  // --- لود کردن محتوای dashboard-content.html و اجرای اسکریپت‌های داخل آن ---
+  // لود کردن محتوای dashboard-content.html و اجرای اسکریپت‌ها
+  async function loadDashboardContent() {
+    const mainContent = document.getElementById("main-content");
+    mainContent.innerHTML = '<div class="text-gray-400 text-center py-8">در حال بارگذاری ...</div>';
+    try {
+      const res = await fetch("dashboard-content.html");
+      if (!res.ok) throw new Error("خطا در دریافت محتوا");
+      const html = await res.text();
+
+      // 1. اسکریپت‌ها رو جدا کن
+      const tempDiv = document.createElement("div");
+      tempDiv.innerHTML = html;
+      const scripts = tempDiv.querySelectorAll("script");
+      scripts.forEach(script => script.remove());
+
+      // 2. فقط HTML بدون اسکریپت رو بریز
+      mainContent.innerHTML = tempDiv.innerHTML;
+
+      // 3. هر اسکریپت جداگانه اضافه کن (تا اجرا بشه)
+      scripts.forEach(script => {
+        const newScript = document.createElement("script");
+        if (script.src) {
+          newScript.src = script.src;
+        } else {
+          newScript.textContent = script.textContent;
+        }
+        document.body.appendChild(newScript);
+      });
+
+      // 4. در صورت وجود تابع initContentDashboard، اجراش کن
+      setTimeout(() => {
+        if (typeof initContentDashboard === "function") {
+          initContentDashboard();
+        }
+      }, 0);
+
+    } catch (err) {
+      mainContent.innerHTML = `<div class="text-red-500 text-center py-8">بارگذاری محتوا با مشکل مواجه شد!</div>`;
+    }
+  }
+
+  // رویداد کلیک منوی مدیریت ظاهر فروشگاه
+  document.getElementById("menu-content").addEventListener("click", function() {
+    loadDashboardContent();
+  });
+
+
+
+
+
+  /// --- لود کردن محتوای dashboard-logo.html و اجرای اسکریپت‌های لازم ---
+  async function loadDashboardLogo() {
+    const mainContent = document.getElementById("main-content");
+    mainContent.innerHTML = '<div class="text-gray-400 text-center py-8">در حال بارگذاری ...</div>';
+    try {
+      const res = await fetch("dashboard-logo.html");
+      if (!res.ok) throw new Error("خطا در دریافت محتوا");
+      const html = await res.text();
+
+      // فقط HTML رو بریز (اسکریپت‌ها رو جدا جدا لود می‌کنیم)
+      mainContent.innerHTML = html;
+
+      // بعدش اسکریپت مربوط به لوگو رو لود کن (اگه قبلاً لود نشده)
+      loadDashboardLogoScript(function() {
+        // بعد از لود شدن اسکریپت و تعریف شدن فانکشن، اجراش کن
+        if (typeof initLogoDashboard === "function") {
+          initLogoDashboard();
+        }
+      });
+    } catch (err) {
+      mainContent.innerHTML = `<div class="text-red-500 text-center py-8">بارگذاری محتوا با مشکل مواجه شد!</div>`;
+    }
+  }
+
+  // رویداد کلیک منوی تابلو فروشگاه
+  document.getElementById("menu-notif").addEventListener("click", function() {
+    loadDashboardLogo();
+  });
+
+  // تابع برای لود اسکریپت فقط یک بار
+  function loadDashboardLogoScript(callback) {
+    if (window._logoScriptLoaded) {
+      if (typeof callback === "function") callback();
+      return;
+    }
+    var script = document.createElement("script");
+    script.src = "dashboard-logo.js";
+    script.onload = function() {
+      window._logoScriptLoaded = true;
+      if (typeof callback === "function") callback();
+    };
+    document.body.appendChild(script);
+  }
+
+
+
+
+
+
+  // --- loader بخش ارتقا (کاملاً تضمینی برای اجرای صحیح اسکریپت) ---
+  /* -------------------------------------------------
+   ❶ لودِ صفحه و اسکریپت ارتقا
+   ------------------------------------------------- */
+  async function loadDashboardUpgrade () {
+    const main = document.getElementById('main-content');
+    main.innerHTML =
+      '<div class="text-gray-400 text-center py-8">در حال بارگذاری …</div>';
+
+    try {
+      /* 1) دریافت و تزریق HTML */
+      const res = await fetch('dashboard-upgrade.html');
+      if (!res.ok) throw new Error('خطا در دریافت محتوا');
+      main.innerHTML = await res.text();
+
+      /* 2) اگر اسکریپت قبلاً وجود دارد (ریفرشِ گرم)، حذفش کن تا کش نشود */
+      const old = document.getElementById('upgrade-js-script');
+      if (old) old.remove();
+
+      /* 3) افزودن اسکریپت و اجرای تابع init */
+      const s = document.createElement('script');
+      s.id  = 'upgrade-js-script';
+      s.src = 'dashboard-upgrade.js';
+      s.onload = () =>
+        typeof initUpgradeDashboard === 'function' && initUpgradeDashboard();
+      document.body.appendChild(s);
+    } catch (err) {
+      console.error(err);
+      main.innerHTML =
+        '<div class="text-red-500 text-center py-8">⚠️ بارگذاری بخش ارتقا شکست خورد</div>';
+    }
+  }
+
+  /* -------------------------------------------------
+   ❷ هندلِ کلیکِ منوی «ارتقا»
+   ------------------------------------------------- */
+  (function () {
+    const btn = document.getElementById('menu-upgrade');
+    if (!btn || btn.dataset.listener) return;      // دوبار ثبت نشود
+
+    btn.addEventListener('click', () => {
+      /* هایلایت منو و مخفی‌کردن سایر سکشن‌ها */
+      document.querySelectorAll('.sidebar-link').forEach(el => el.classList.remove('active'));
+      btn.classList.add('active');
+
+      document.querySelectorAll("section[id^='section-']").forEach(sec => sec.style.display = 'none');
+
+      /* لودِ محتواى ارتقا */
+      loadDashboardUpgrade();
+
+      /* بستن سایدبار در موبایل */
+      if (innerWidth <= 768) toggleSidebar();
+    });
+
+    btn.dataset.listener = '1';
+  })();
+
+
+
+
+
+
+
+async function loadDailyVisits () {
+  const main = document.getElementById('main-content');
+  main.innerHTML =
+    '<div class="text-gray-400 text-center py-8">در حال بارگذاری آمار …</div>';
+
+  try {
+    /* 1) دریافت و تزریق HTML */
+    const res = await fetch('daily-visits.html');
+    if (!res.ok) throw new Error('خطا در دریافت محتوا');
+    main.innerHTML = await res.text();
+
+    /* 2) جلوگیری از کشِ اسکریپت در رفرش گرم */
+    const old = document.getElementById('daily-visits-js');
+    if (old) old.remove();
+
+    /* 3) افزودن اسکریپت و اجرای منطق */
+    const s   = document.createElement('script');
+    s.id  = 'daily-visits-js';
+    s.src = 'daily-visits.js';
+    document.body.appendChild(s);
+  } catch (err) {
+    console.error(err);
+    main.innerHTML =
+      '<div class="text-red-500 text-center py-8">⚠️ بارگذاری آمار شکست خورد</div>';
+  }
+}
+
+
+
+
+
+// ─── تابع بارگذاری بخش پیام‌ها ─────────────────────────────────
+async function loadDashboardMessages() {
+  const main = document.getElementById('main-content');
+  main.innerHTML = '<div class="text-gray-400 text-center py-8">در حال بارگذاری پیام‌ها …</div>';
+  try {
+    // ۱) fetch HTML
+    const res = await fetch('dashboard-messages.html');
+    if (!res.ok) throw new Error('خطا در دریافت پیام‌ها');
+    main.innerHTML = await res.text();
+
+    // ۲) حذف اسکریپت قبلی (در صورت رفرش گرم)
+    const old = document.getElementById('messages-js-script');
+    if (old) old.remove();
+
+    // ۳) append اسکریپت
+    const s = document.createElement('script');
+    s.id  = 'messages-js-script';
+    s.src = 'dashboard-messages.js';
+    document.body.appendChild(s);
+
+  } catch (err) {
+    console.error(err);
+    main.innerHTML = '<div class="text-red-500 text-center py-8">⚠️ بارگذاری پیام‌ها شکست خورد</div>';
+  }
+}
+
+
+// ─── هندل کلیک روی منوی پیام‌ها ─────────────────────────────────
+(function () {
+const btn = document.getElementById('menu-msg');
+if (!btn || btn.dataset.listener) return;
+btn.addEventListener('click', () => {
+  // هایلایت منو
+  document.querySelectorAll('.sidebar-link').forEach(el => el.classList.remove('active'));
+  btn.classList.add('active');
+  // مخفی کردن سایر سکشن‌ها
+  document.querySelectorAll("section[id^='section-']").forEach(sec => sec.style.display = 'none');
+  // بارگذاری بخش پیام‌ها
+  loadDashboardMessages();
+  // علامت‌گذاری همه‌ی پیام‌های خوانده‌نشده
+updateBadge(0);
+  // بستن سایدبار در موبایل
+  if (window.innerWidth <= 768) toggleSidebar();
+});
+btn.dataset.listener = '1';
+})();
+
+// گرفتن همه پیام‌ها و ذخیره در window.chats
+async function fetchSellerMessages() {
+  if (!window.seller?.id) return [];
+  try {
+    const res = await fetch(`/api/messages?sellerId=${window.seller.id}`, { credentials: "include" });
+    if (!res.ok) return [];
+    return await res.json();
+  } catch (err) {
+    return [];
+  }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+</script>
+
+
+
+
+
+
+
+<!-- Success Popup -->
+<!-- Success Popup (اصلاح برای RTL و تداخل container) -->
+<div id="productSuccessPopup" style="display:none !important; z-index:10000 !important; position:fixed !important; top:0 !important; right:0 !important; left:0 !important; bottom:0 !important; justify-content:center !important; align-items:center !important; background:rgba(0,0,0,0.8) !important; opacity:0; transition:opacity 0.3s;">
+<div style="background:white; border-radius:16px; padding:20px; text-align:center; max-width:300px; direction:rtl;">
+  <svg width="44" height="44" viewBox="0 0 48 48" fill="none">
+    <circle cx="24" cy="24" r="22" fill="#e0fdfa" stroke="#10b981" stroke-width="2"/>
+    <path d="M16 25l6 6 10-12" stroke="#10b981" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+  </svg>
+  <div style="font-size:20px; color:#10b981;">محصول با موفقیت ثبت شد!</div>
+  <div style="color:gray;">می‌توانید محصول خود را در لیست محصولات ببینید.</div>
+</div>
+</div>
+
+ 
+
+
+
+
+<script src="dashboard-content.js"></script>
+
+
+</body>
+</html>

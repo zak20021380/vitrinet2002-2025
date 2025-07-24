@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <title>ورود ادمین | ویترینت</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;700&display=swap" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #10b981;
+      --secondary: #0ea5e9;
+      --danger: #ef4444;
+      --bg: #f6faf9;
+      --bg-dark: #171717;
+      --card: #fff;
+      --card-dark: #22272e;
+      --text: #23272f;
+      --text-dark: #f4f4f4;
+      --radius: 20px;
+      --shadow: 0 8px 36px #10b98118;
+      --transition: .15s cubic-bezier(.4,1,.6,1);
+    }
+    html, body {
+      min-height: 100vh;
+      margin: 0; padding: 0;
+      font-family: 'Vazirmatn', Tahoma, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      transition: background .15s;
+      direction: rtl;
+    }
+    body.dark {
+      background: var(--bg-dark);
+      color: var(--text-dark);
+    }
+    .centered {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(120deg, #eafaf4 0%, #d1fae5 100%);
+      transition: background .13s;
+    }
+    body.dark .centered {
+      background: linear-gradient(120deg, #23272f 0%, #0a151b 100%);
+    }
+    .login-container {
+      width: 100%;
+      max-width: 380px;
+      background: var(--card);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 38px 28px 30px 28px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0px;
+      position: relative;
+      animation: fadeIn .6s;
+      transition: background .18s, color .18s;
+    }
+    body.dark .login-container {
+      background: var(--card-dark);
+      color: var(--text-dark);
+      box-shadow: 0 8px 50px #10b98122;
+    }
+    @keyframes fadeIn { from{opacity:0;transform:translateY(40px);} to{opacity:1;transform:none;} }
+    .login-avatar {
+      width: 70px; height: 70px;
+      background: linear-gradient(135deg,#10b981 0%,#0ea5e9 100%);
+      border-radius: 50%;
+      box-shadow: 0 4px 22px #10b9811a;
+      display: flex; align-items: center; justify-content: center;
+      margin-bottom: 16px;
+      font-size: 2.3em; color: #fff;
+      animation: avatarPop .7s;
+    }
+    @keyframes avatarPop { 0%{transform:scale(.7);opacity:0;} 100%{transform:scale(1);opacity:1;} }
+    .login-title {
+      color: var(--primary);
+      font-size: 1.27rem;
+      font-weight: bold;
+      text-align: center;
+      margin-bottom: 18px;
+      letter-spacing: .1px;
+    }
+    form {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 19px;
+      margin-bottom: 0;
+    }
+    .form-group {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 7px;
+      margin-bottom: 0;
+    }
+    label {
+      font-size: 1em;
+      color: #484e54;
+      font-weight: 500;
+      margin-bottom: 1px;
+      margin-right: 2px;
+      transition: color .13s;
+    }
+    body.dark label { color: #eafaf4; }
+    .input-wrap {
+      width: 100%;
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+    .input-wrap i {
+      position: absolute;
+      right: 12px;
+      color: #10b981b0;
+      font-size: 1.22em;
+      z-index: 2;
+      pointer-events: none;
+    }
+    input {
+      width: 100%;
+      font-size: 1.09em;
+      padding: 12px 42px 12px 14px;
+      border-radius: 11px;
+      border: 1.5px solid #e5e7eb;
+      outline: none;
+      font-family: inherit;
+      background: #f7fafc;
+      color: var(--text);
+      font-weight: 500;
+      box-sizing: border-box;
+      transition: border .13s, background .13s;
+    }
+    input:focus {
+      border: 1.5px solid var(--primary);
+      background: #eafaf4;
+    }
+    body.dark input {
+      background: #262c32;
+      color: #eafaf4;
+      border-color: #444b57;
+    }
+    .login-btn {
+      width: 100%;
+      background: linear-gradient(135deg,#10b981 0%,#0ea5e9 100%);
+      color: #fff;
+      border: none;
+      border-radius: 11px;
+      font-size: 1.12em;
+      font-weight: bold;
+      padding: 13px 0;
+      margin-top: 7px;
+      cursor: pointer;
+      box-shadow: 0 1px 8px #10b98110;
+      letter-spacing: .11px;
+      transition: background .15s, box-shadow .15s;
+    }
+    .login-btn:hover {
+      background: #0ea5e9;
+      box-shadow: 0 4px 15px #0ea5e92a;
+    }
+    .error-message {
+      color: var(--danger);
+      text-align: center;
+      font-size: 1.05em;
+      margin-top: 12px;
+      min-height: 23px;
+      font-weight: 500;
+      letter-spacing: .1px;
+      height: 21px;
+    }
+    .login-footer {
+      width: 100%;
+      text-align: center;
+      font-size: .99em;
+      color: #bbb;
+      margin-top: 24px;
+      letter-spacing: .05em;
+    }
+    .theme-toggle {
+      position: absolute;
+      left: 18px; top: 19px;
+      background: #eafaf4;
+      color: #10b981;
+      border: none;
+      border-radius: 8px;
+      width: 34px; height: 34px;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer;
+      box-shadow: 0 1px 4px #10b98112;
+      font-size: 1.22em;
+      transition: background .15s, color .13s;
+      outline: none;
+    }
+    .theme-toggle:hover { background: #10b98144; }
+    body.dark .theme-toggle { background: #21272f; color: #fff; }
+    @media (max-width: 600px) {
+      .login-container { max-width: 96vw; padding: 19px 2vw 19px 2vw;}
+      .login-title { font-size: 1.05rem; }
+      .login-avatar { width: 49px; height: 49px; font-size: 1.2em; }
+      .theme-toggle { left: 9px; top: 9px; width:26px;height:26px; font-size:1em;}
+    }
+    @media (max-width: 430px) {
+      .login-container { padding: 11px 2vw 13px 2vw; border-radius: 12px;}
+      .login-footer { font-size: .89em; }
+    }
+  </style>
+</head>
+<body>
+  <div class="centered">
+    <div class="login-container">
+      <button class="theme-toggle" id="toggleTheme" title="تم شب/روز"><i class="ri-moon-clear-line"></i></button>
+      <div class="login-avatar"><i class="ri-shield-user-fill"></i></div>
+      <div class="login-title">ورود ادمین</div>
+      <form id="adminLoginForm" autocomplete="off">
+        <div class="form-group">
+          <label for="phone">شماره موبایل</label>
+          <div class="input-wrap">
+            <i class="ri-phone-line"></i>
+            <input type="tel" id="phone" name="phone" required pattern="^09\d{9}$" placeholder="مثلاً 09123456789" inputmode="numeric">
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="password">رمز عبور</label>
+          <div class="input-wrap">
+            <i class="ri-lock-password-line"></i>
+            <input type="password" id="password" name="password" required placeholder="••••••••">
+          </div>
+        </div>
+        <button class="login-btn" type="submit">ورود</button>
+        <div class="error-message" id="loginError"></div>
+      </form>
+      <div class="login-footer">© 2025 ویترینت</div>
+    </div>
+  </div>
+  <script src="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.js"></script>
+<script>
+  // تم شب/روز
+  const body = document.body;
+  const themeBtn = document.getElementById('toggleTheme');
+  let dark = localStorage.getItem('admin_theme_dark') === '1';
+  if (dark) body.classList.add('dark');
+  themeBtn.onclick = function() {
+    body.classList.toggle('dark');
+    dark = body.classList.contains('dark');
+    localStorage.setItem('admin_theme_dark', dark ? '1' : '0');
+    themeBtn.innerHTML = dark
+      ? '<i class="ri-sun-line"></i>'
+      : '<i class="ri-moon-clear-line"></i>';
+  };
+  themeBtn.innerHTML = dark
+    ? '<i class="ri-sun-line"></i>'
+    : '<i class="ri-moon-clear-line"></i>';
+
+  // فرم لاگین ادمین
+  document.getElementById('adminLoginForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    const phone = document.getElementById('phone').value.trim();
+    const password = document.getElementById('password').value;
+    const errorDiv = document.getElementById('loginError');
+    errorDiv.textContent = '';
+    try {
+      // اتصال به بک‌اند روی پورت 5000
+      const res = await fetch('http://localhost:5000/api/admin/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+        body: JSON.stringify({ phone, password })
+      });
+      const data = await res.json();
+if (res.ok) {
+        // ذخیره توکن با کلید admin_token
+        // انتقال به داشبورد ادمین
+        window.location.href = 'dashboard.html';
+      } else {
+        errorDiv.textContent = data.message || 'ورود ناموفق بود. لطفاً اطلاعات را درست وارد کنید.';
+      }
+    } catch (err) {
+      errorDiv.textContent = 'ارتباط با سرور برقرار نشد!';
+    }
+  });
+</script>
+
+</body>
+</html>

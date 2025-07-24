@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ثبت‌نام کاربر - ویترینت</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@800&display=swap" rel="stylesheet" />
+  <style>
+    body {
+      font-family: 'Vazirmatn', sans-serif;
+      background: linear-gradient(110deg, #e0f7fa 0%, #f9fafb 100%);
+      min-height: 100vh;
+    }
+    .glass {
+      background: rgba(255,255,255,0.96);
+      backdrop-filter: blur(13px);
+      box-shadow: 0 7px 32px #10b98129, 0 3px 11px #0ea5e91a;
+      border-radius: 1.7rem;
+    }
+    .brand-btn {
+      background: linear-gradient(91deg, #10b981 0%, #0ea5e9 85%);
+      color: #fff !important;
+      box-shadow: 0 2px 14px #10b98125;
+      transition: all .16s;
+    }
+    .brand-btn:hover { filter:brightness(1.08);}
+    .primary-text { color: #10b981;}
+    ::placeholder {color:#a0aec0;}
+    .hide-scrollbar::-webkit-scrollbar { display: none; }
+    .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    header { box-shadow: 0 4px 22px #14b8a631;}
+    .input-error {
+      border-color: #ef4444 !important;
+      background-color: #fef2f2 !important;
+    }
+    .err-text { color: #ef4444; font-size: 13px; margin-top: 0.3rem; font-weight: 600;}
+    #toast {
+      position: fixed;
+      top: 50%;
+      right: 50%;
+      transform: translate(50%,-50%);
+      background: linear-gradient(93deg,#10b981,#0ea5e9 92%);
+      color: #fff;
+      font-weight: bold;
+      font-size: 15px;
+      padding: 13px 32px;
+      border-radius: 18px;
+      box-shadow: 0 6px 32px #10b98137;
+      opacity: 0;
+      z-index: 9999;
+      pointer-events: none;
+      transition: all .23s cubic-bezier(.4,0,.2,1);
+      min-width: 200px;
+      text-align: center;
+      line-height: 2.1;
+    }
+    #toast.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+    @media (max-width:640px){
+      header .text-lg {font-size: 16px!important;}
+      header .md\:text-2xl {font-size:18px!important;}
+      header .gap-4 {gap:9px!important;}
+      header .px-6 {padding-left: 0.9rem!important; padding-right:0.9rem!important;}
+      header .py-3 {padding-top:0.45rem!important; padding-bottom:0.45rem!important;}
+      main {margin-top:94px!important;}
+      #toast { font-size: 13px; padding:10px 12px; min-width:120px; }
+    }
+  </style>
+</head>
+<body class="text-gray-800 overflow-x-hidden">
+
+  <!-- Toast -->
+  <div id="toast">ویترینت فعلا فقط در سنندج فعال است.</div>
+
+  <!-- Header شیشه‌ای و ریسپانسیو -->
+  <header class="fixed top-0 inset-x-0 z-20 glass border-b shadow flex items-center justify-between px-6 py-3">
+    <a href="index.html" class="flex items-center gap-2 select-none shrink-0">
+      <img src="assets/images/logo.svg" alt="ویترینت" class="w-9 h-9 sm:w-10 sm:h-10 hidden sm:block" onerror="this.style.display='none';this.nextElementSibling.style.display='block'"/>
+      <span class="font-extrabold text-lg md:text-2xl primary-text" style="display:none; font-family:'Poppins',sans-serif;">Vitrinet</span>
+      <span class="font-extrabold text-lg md:text-2xl primary-text sm:hidden block" style="font-family:'Vazirmatn',sans-serif;">ویترینت</span>
+    </a>
+    <nav class="flex items-center gap-4 text-base flex-shrink-0">
+      <a href="index.html" class="text-gray-700 hover:text-[#10b981] font-bold">خانه</a>
+      <a href="login.html" class="text-gray-700 hover:text-[#0ea5e9] font-bold">ورود</a>
+    </nav>
+  </header>
+
+  <!-- فرم ثبت‌نام کاربر -->
+  <main class="max-w-xl mx-auto mt-40 mb-10 px-2 sm:px-0">
+    <section class="glass border rounded-2xl shadow-2xl p-6 sm:p-8">
+      <h2 class="text-2xl sm:text-3xl font-black bg-gradient-to-l from-[#10b981] to-[#0ea5e9] text-transparent bg-clip-text text-center mb-8 tracking-tight">ثبت‌نام کاربر در ویترینت</h2>
+      <form id="signupForm" class="space-y-5" autocomplete="off" novalidate>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label class="block text-[15px] font-bold mb-1 text-gray-700">نام</label>
+            <input name="firstname" type="text" class="w-full border rounded-xl p-3 text-base focus:ring-2 focus:ring-[#10b981]/30 bg-white/90 shadow-sm transition" placeholder="مثلاً امیرحسین" required />
+            <div class="err-text hidden"></div>
+          </div>
+          <div>
+            <label class="block text-[15px] font-bold mb-1 text-gray-700">نام خانوادگی</label>
+            <input name="lastname" type="text" class="w-full border rounded-xl p-3 text-base focus:ring-2 focus:ring-[#10b981]/30 bg-white/90 shadow-sm transition" placeholder="مثلاً کریمی" required />
+            <div class="err-text hidden"></div>
+          </div>
+        </div>
+        <div>
+          <label class="block text-[15px] font-bold mb-1 text-gray-700">شماره موبایل</label>
+          <input name="phone" type="tel" class="w-full border rounded-xl p-3 text-base focus:ring-2 focus:ring-[#10b981]/30 bg-white/90 shadow-sm transition" placeholder="مثلاً 09121234567" inputmode="tel" autocomplete="tel" required />
+          <div class="err-text hidden"></div>
+        </div>
+        <div>
+          <label class="block text-[15px] font-bold mb-1 text-gray-700">شهر محل سکونت</label>
+          <input id="cityfield" type="text" value="سنندج" readonly tabindex="-1"
+            class="w-full border rounded-xl p-3 text-base bg-gray-50 text-gray-500 shadow-sm transition cursor-not-allowed select-none opacity-90"
+            style="pointer-events:auto;" />
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label class="block text-[15px] font-bold mb-1 text-gray-700">رمز عبور</label>
+            <input name="password" type="password" class="w-full border rounded-xl p-3 text-base focus:ring-2 focus:ring-[#0ea5e9]/30 bg-white/90 shadow-sm transition" placeholder="رمز عبور ایمن وارد کنید" autocomplete="new-password" required />
+            <div class="err-text hidden"></div>
+          </div>
+          <div>
+            <label class="block text-[15px] font-bold mb-1 text-gray-700">تکرار رمز عبور</label>
+            <input name="password2" type="password" class="w-full border rounded-xl p-3 text-base focus:ring-2 focus:ring-[#0ea5e9]/30 bg-white/90 shadow-sm transition" placeholder="تکرار رمز عبور" autocomplete="new-password" required />
+            <div class="err-text hidden"></div>
+          </div>
+        </div>
+        <div class="flex items-center gap-2 text-sm mt-1">
+          <input type="checkbox" id="terms" required class="accent-[#10b981] w-4 h-4 rounded border-gray-300" />
+          <label for="terms" class="select-none text-gray-700">
+            <span>قوانین و مقررات ویترینت را می‌پذیرم.</span>
+            <a href="terms.html" class="text-[#0ea5e9] font-extrabold hover:underline ml-1">مطالعه قوانین</a>
+          </label>
+        </div>
+        <div class="text-center mt-8">
+          <button type="submit" class="brand-btn py-3 px-8 rounded-xl font-bold text-lg shadow-md hover:scale-[1.03] transition-all duration-200">ثبت‌نام</button>
+        </div>
+      </form>
+      <div class="text-center text-sm text-gray-600 mt-8">
+        قبلاً ثبت‌نام کردی؟
+        <a href="login.html" class="text-[#0ea5e9] hover:underline font-extrabold">ورود</a>
+      </div>
+    </section>
+  </main>
+
+  <!-- فوتر شیک و جمع و جور -->
+  <footer class="mt-20 bg-white border-t text-center text-xs sm:text-sm text-gray-400 py-5 rounded-t-3xl animate-fadein" style="animation-delay:.4s;">
+    © 2025 <span class="text-[#10b981] font-bold">Vitrinet</span> - همه حقوق محفوظ است.
+  </footer>
+
+<script>
+  // toast
+  const toast = document.getElementById('toast');
+  const cityField = document.getElementById('cityfield');
+  cityField.addEventListener('click', function(e) {
+    toast.innerText = "ویترینت فعلا فقط در سنندج فعال است.";
+    toast.classList.add('active');
+    setTimeout(()=>toast.classList.remove('active'), 2000);
+  });
+
+  // فرم اعتبارسنجی ساده و فارسی
+// فرم اعتبارسنجی ساده و فارسی
+document.getElementById('signupForm').addEventListener('submit', function(e){
+  e.preventDefault();
+  let valid = true;
+  this.querySelectorAll('input').forEach(inp=>{
+    inp.classList.remove('input-error');
+    let err = inp.parentNode.querySelector('.err-text');
+    if (err) err.classList.add('hidden');
+  });
+
+  let fn = this.firstname, ln = this.lastname, phone = this.phone, pass = this.password, pass2 = this.password2;
+  if (!fn.value.trim()) {
+    setError(fn, 'لطفا نام خود را وارد کنید');
+    valid = false;
+  }
+  if (!ln.value.trim()) {
+    setError(ln, 'لطفا نام خانوادگی خود را وارد کنید');
+    valid = false;
+  }
+  if (!/^09\d{9}$/.test(phone.value)) {
+    setError(phone, 'شماره موبایل معتبر وارد کنید');
+    valid = false;
+  }
+  if (!pass.value) {
+    setError(pass, 'رمز عبور را وارد کنید');
+    valid = false;
+  } else if (pass.value.length < 8) {
+    setError(pass, 'رمز عبور باید حداقل ۸ کاراکتر باشد');
+    valid = false;
+  }
+  if (!pass2.value) {
+    setError(pass2, 'تکرار رمز عبور را وارد کنید');
+    valid = false;
+  } else if (pass.value !== pass2.value) {
+    setError(pass2, 'رمزهای عبور یکسان نیستند');
+    valid = false;
+  }
+  let terms = this.terms;
+  if (!terms.checked) {
+    alert("لطفا قوانین و مقررات را بپذیرید.");
+    valid = false;
+  }
+
+  if (valid) {
+    // ارسال اطلاعات ثبت‌نام به سرور (API جدید)
+    fetch("http://localhost:5000/api/auth/register-user", {
+      method: "POST",
+      headers: {"Content-Type": "application/json"},
+      body: JSON.stringify({
+        firstname: fn.value,
+        lastname: ln.value,
+        phone: phone.value,
+        password: pass.value
+      })
+    })
+    .then(res => res.json())
+    .then(data => {
+      if (data.success) {
+        // بعد از موفقیت ثبت‌نام، هدایت به صفحه وریفای
+        window.location.href = "verify-user.html?phone=" + encodeURIComponent(phone.value);
+      } else {
+        alert(data.message || "خطا در ثبت‌نام");
+      }
+    })
+    .catch(() => alert("ارتباط با سرور برقرار نشد!"));
+  }
+});
+
+
+function setError(input, msg) {
+  input.classList.add('input-error');
+  let err = input.parentNode.querySelector('.err-text');
+  if (err) {
+    err.innerText = msg;
+    err.classList.remove('hidden');
+  }
+}
+
+</script>
+</body>
+</html>

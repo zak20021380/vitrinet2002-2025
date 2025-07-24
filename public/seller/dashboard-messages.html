@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>پیام‌های مشتریان | ویترینت</title>
+  <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;700&display=swap" rel="stylesheet" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body {font-family:'Vazirmatn',sans-serif;}
+    .modal-bg {background:rgba(36,48,58,0.27);}
+    .msg-customer {background:#e0fdfa; color:#0284c7;}
+    .msg-seller   {background:#f1faf7; color:#334155;}
+    .msg-admin    {background:#fef3c7; color:#b45309;}
+    .chat-delete-btn {transition:background .13s;}
+    .chat-delete-btn:hover {background:#fee2e2; color:#dc2626;}
+    .modal::-webkit-scrollbar {width:6px;background:transparent;}
+    .modal::-webkit-scrollbar-thumb {background:#10b98133;border-radius:9px;}
+    .cost-box {
+      background:linear-gradient(90deg,#f0fdfa 85%,#f8fafc 100%);
+      color:#10b981;font-weight:bold;border-radius:1em;font-size:15px;
+      display:inline-block;padding:5px 18px;margin-top:2px;
+      box-shadow:0 3px 14px #10b98112;
+    }
+    /* کارت لیست چت */
+    .chat-item:hover {background:#f0fdfa;}
+    @media (max-width:700px){
+      .msg-bubble{font-size:14px;}
+    }
+    @media (max-width:450px){
+      .modal{padding:14px 6px !important;}
+    }
+  </style>
+</head>
+<body class="bg-gradient-to-tr from-[#e0fdfa] via-[#f8fafc] to-[#d4fbe8] min-h-screen pb-8">
+
+  <div class="max-w-2xl mx-auto bg-white/90 shadow-2xl rounded-3xl px-3 sm:px-7 py-7 mt-4">
+
+    <!-- هدر صفحه -->
+    <div class="flex items-center justify-between mb-7 flex-wrap gap-3">
+      <h1 class="text-2xl sm:text-3xl font-extrabold text-[#0ea5e9] flex items-center gap-2">
+        <svg width="28" height="28" fill="none" viewBox="0 0 24 24">
+          <rect x="3" y="5" width="18" height="14" rx="3" stroke="#10b981" stroke-width="2"/>
+          <path d="M3 7l9 6 9-6" stroke="#0ea5e9" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+        پیام‌های مشتریان
+      </h1>
+      <button
+        id="openContactAdmin"
+        class="flex items-center gap-2 bg-yellow-400 hover:bg-yellow-500 text-slate-800 font-bold py-2 px-5 rounded-xl text-base shadow transition-all"
+      >
+        <svg width="22" height="22" fill="none" viewBox="0 0 24 24">
+          <path d="M4 4h16v16H4z" stroke="#b45309" stroke-width="2"/>
+        </svg>
+        ارتباط با مدیر
+      </button>
+    </div>
+
+    <div class="text-gray-400 text-center text-base mb-6">
+      همه چت‌ها درباره محصولاتت همینجاست. لازم نیست همه رو جواب بدی. اگه خواستی، حذفشون کن یا تبلیغ بفرست!
+    </div>
+
+    <!-- لیست چت‌ها -->
+    <div id="chats" class="flex flex-col gap-4">
+      <!-- آیتم‌های چت به‌صورت داینامیک با JS درج می‌شوند -->
+      <!-- ساختار هر آیتم: 
+      <div class="chat-item cursor-pointer bg-white border rounded-xl p-4 flex justify-between items-center" data-chat-id="...">
+        <div class="flex items-center gap-3">
+          <img src="IMAGE" class="w-10 h-10 rounded-lg border hidden sm:block" alt="">
+          <div class="flex flex-col">
+            <span class="font-bold text-[#10b981] truncate max-w-[160px] sm:max-w-[220px]">عنوان چت یا محصول</span>
+            <span class="text-xs text-gray-400 mt-0.5 hidden sm:block">آخرین پیام خلاصه…</span>
+          </div>
+        </div>
+        <div class="flex items-center gap-2">
+          <span class="hidden text-xs text-gray-400 sm:inline" id="chat-time-...">۴ دقیقه پیش</span>
+          <span class="inline-flex items-center justify-center h-5 min-w-[20px] text-xs font-bold rounded-full bg-red-500 text-white"
+                id="badge-...">2</span>
+        </div>
+      </div>
+      -->
+    </div>
+  </div>
+
+  <!-- --- مدال نمایش کامل یک چت --- -->
+  <div id="chatModalBg" class="fixed z-40 inset-0 hidden modal-bg flex items-center justify-center">
+    <div class="modal bg-white rounded-2xl shadow-2xl p-5 sm:p-8 w-full max-w-lg max-h-[92vh] overflow-y-auto relative flex flex-col">
+      <button id="closeChatModal" class="absolute left-3 top-3 text-gray-400 hover:text-[#ef4444] text-2xl" type="button">&#10006;</button>
+
+      <!-- هدر مدال -->
+      <div id="chatModalHeader" class="flex items-center gap-3 mb-4">
+        <!-- تصویر محصول/آیکون -->
+        <img id="chatModalAvatar" src="" alt="" class="w-10 h-10 rounded-lg border hidden">
+        <div class="flex flex-col">
+          <h2 id="chatModalTitle" class="text-[#10b981] font-bold text-lg"></h2>
+          <span id="chatModalSub" class="text-xs text-gray-400"></span>
+        </div>
+      </div>
+
+      <!-- بدنه پیام‌ها -->
+      <div id="chatModalMessages" class="flex flex-col gap-3 overflow-y-auto flex-1 pr-1">
+        <!-- پیام‌ها به‌صورت داینامیک درج می‌شوند
+        <div class="msg-bubble msg-admin self-start px-4 py-2 rounded-2xl text-sm leading-relaxed">
+          <div class="font-semibold text-xs mb-1">مدیر سایت</div>
+          متن پیام
+          <div class="text-[10px] text-gray-400 mt-1 text-left">۱۴۰۲/۰۳/۱۷ - ۱۴:۰۹</div>
+        </div>
+        -->
+      </div>
+
+      <!-- فرم ارسال پاسخ -->
+      <form id="chatReplyForm" class="flex gap-2 mt-4">
+        <input id="chatReplyInput" type="text" placeholder="پاسخ…" class="flex-1 border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#0ea5e9]" required />
+        <button class="bg-[#0ea5e9] hover:bg-[#0284c7] text-white px-6 py-2 rounded-lg shadow" type="submit">ارسال</button>
+      </form>
+    </div>
+  </div>
+  <!-- --- پایان مدال چت --- -->
+
+  <!-- --- مدال ارسال تبلیغ --- -->
+  <div id="adModalBg" class="fixed z-40 inset-0 hidden modal-bg flex items-center justify-center">
+    <div class="modal bg-white rounded-2xl shadow-2xl p-5 sm:p-9 w-full max-w-lg max-h-[92vh] overflow-y-auto relative">
+      <button id="closeAdModal" class="absolute left-3 top-3 text-gray-400 hover:text-[#ef4444] text-2xl" type="button">&#10006;</button>
+      <h2 class="text-lg sm:text-xl font-bold text-[#10b981] mb-3 flex items-center gap-2">
+        <svg width="20" height="20" fill="none" viewBox="0 0 24 24"><path d="M12 4v16m8-8H4" stroke="#10b981" stroke-width="2" stroke-linecap="round"/></svg>
+        ارسال تبلیغ به مشتریان
+      </h2>
+
+      <!-- فرم ارسال تبلیغ -->
+      <form id="adForm" class="flex flex-col gap-5" autocomplete="off">
+        <!-- نوع تبلیغ -->
+        <div>
+          <label class="font-semibold text-[15px] text-gray-700 mb-1 block">نوع تبلیغ:</label>
+          <div class="flex gap-4 mt-2">
+            <label class="flex items-center gap-2">
+              <input type="radio" name="adType" value="sms" checked class="accent-[#10b981]"/>
+              <span>پیامک</span>
+            </label>
+            <label class="flex items-center gap-2">
+              <input type="radio" name="adType" value="dashboard" class="accent-[#10b981]"/>
+              <span>درون سایت (داشبورد مشتری)</span>
+            </label>
+          </div>
+        </div>
+        <!-- انتخاب محصول -->
+        <div>
+          <label class="font-semibold text-[15px] text-gray-700 mb-1 block">انتخاب محصول:</label>
+          <div class="flex flex-col gap-2 max-h-36 overflow-y-auto pr-1">
+            <label class="flex items-center gap-3 cursor-pointer hover:bg-[#f0fdfa] p-2 rounded transition">
+              <input type="radio" name="product" value="prod1" class="accent-[#10b981]" checked />
+              <img src="https://via.placeholder.com/28x28?text=کشمش" class="w-7 h-7 rounded border" alt="">
+              <span class="font-medium text-[#10b981] text-[15px]">کشمش سبز پلویی ممتاز</span>
+            </label>
+            <label class="flex items-center gap-3 cursor-pointer hover:bg-[#f0fdfa] p-2 rounded transition">
+              <input type="radio" name="product" value="prod2" class="accent-[#10b981]" />
+              <img src="https://via.placeholder.com/28x28?text=پسته" class="w-7 h-7 rounded border" alt="">
+              <span class="font-medium text-[#10b981] text-[15px]">پسته احمد آقایی درجه۱</span>
+            </label>
+          </div>
+        </div>
+        <!-- متن تبلیغ -->
+        <div>
+          <label class="font-semibold text-[15px] text-gray-700 mb-1 block">متن تبلیغ:</label>
+          <textarea name="adText" id="adText" rows="2" required maxlength="70"
+            class="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#10b981] text-base bg-white shadow-sm resize-none"
+            placeholder="متن تبلیغ را بنویسید (در پیامک، حداکثر ۷۰ کاراکتر)"></textarea>
+          <div id="charCount" class="text-xs text-gray-400 mt-1 text-left">۰/۷۰</div>
+        </div>
+        <!-- تعداد مشتریان -->
+        <div>
+          <label class="font-semibold text-[15px] text-gray-700 mb-1 block">تعداد مشتریان:</label>
+          <input type="number" name="adCount" min="1" max="10000" value="1000" class="border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#10b981] w-32 text-base shadow-sm" required />
+        </div>
+        <!-- هزینه تبلیغ -->
+        <div>
+          <label class="font-semibold text-[15px] text-gray-700 mb-1 block">هزینه کل تبلیغ:</label>
+          <span id="adCostBox" class="cost-box">۰ تومان</span>
+        </div>
+        <button
+          type="submit"
+          id="adSubmitBtn"
+          class="flex items-center justify-center gap-2 bg-[#10b981] hover:bg-[#0ea5e9] text-white font-bold py-2.5 px-6 rounded-xl text-base shadow transition-all mt-1"
+        >
+          <svg width="20" height="20" fill="none" viewBox="0 0 24 24"><path d="M12 4v16m8-8H4" stroke="#fff" stroke-width="2" stroke-linecap="round"/></svg>
+          ارسال تبلیغ
+        </button>
+      </form>
+      <div id="adSuccess" class="hidden text-green-600 font-bold text-center mt-4"></div>
+    </div>
+  </div>
+  <!-- --- پایان مدال تبلیغ --- -->
+
+  <!-- === مدال «ارتباط با مدیر» === -->
+  <div id="contactModalBg" class="fixed z-40 inset-0 hidden modal-bg flex items-center justify-center">
+    <div class="modal bg-white rounded-2xl shadow-2xl p-5 sm:p-9 w-full max-w-lg max-h-[92vh] overflow-y-auto relative">
+      <button id="closeContactModal" class="absolute left-3 top-3 text-gray-400 hover:text-[#ef4444] text-2xl" type="button">&#10006;</button>
+      <h2 class="text-lg sm:text-xl font-bold text-yellow-500 mb-3">ارتباط با مدیر</h2>
+      <form id="contactForm" class="flex flex-col gap-5">
+        <div>
+          <label class="font-semibold text-[15px] text-gray-700 mb-1 block">متن پیام:</label>
+          <textarea id="contactText" rows="4" required
+            class="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-yellow-400 text-base bg-white shadow-sm resize-none"></textarea>
+        </div>
+        <button type="submit" class="bg-yellow-400 hover:bg-yellow-500 text-slate-800 font-bold py-2 px-6 rounded-xl shadow transition-all">
+          ارسال پیام
+        </button>
+        <div id="contactSuccess" class="hidden text-green-600 font-bold text-center mt-4">✅ پیام با موفقیت ارسال شد.</div>
+      </form>
+    </div>
+  </div>
+  <!-- === پایان مدال «ارتباط با مدیر» === -->
+
+  <script src="dashboard-messages.js"></script>
+</body>
+</html>

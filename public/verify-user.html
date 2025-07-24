@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>تایید شماره موبایل - ویترینت</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;700&display=swap" rel="stylesheet" />
+  <style>
+    body { font-family: 'Vazirmatn', sans-serif; background: linear-gradient(110deg, #e0f7fa 0%, #f9fafb 100%); min-height: 100vh; }
+    .glass { background: rgba(255,255,255,0.96); backdrop-filter: blur(13px); box-shadow: 0 7px 32px #10b98129, 0 3px 11px #0ea5e91a; border-radius: 1.7rem;}
+    .brand-btn { background: linear-gradient(91deg, #10b981 0%, #0ea5e9 85%); color: #fff !important; box-shadow: 0 2px 14px #10b98125; }
+    .brand-btn:disabled { opacity: .55; cursor: not-allowed;}
+    .brand-btn:hover { filter:brightness(1.08);}
+    .input-digit { font-size: 2rem; text-align: center; width: 48px; height: 58px; border-radius: 16px; border: 1.8px solid #d1fae5; margin: 0 5px; background: #f8fafc; transition: border .18s; outline: none; font-family: inherit; color: #10b981; font-weight: bold;}
+    .input-digit:focus { border-color: #0ea5e9; background: #f0fdfa;}
+    .err-text { color: #ef4444; font-size: 14px; margin-top: .5rem; text-align: center; font-weight: 600;}
+    #timer { font-weight: bold; letter-spacing: 1px;}
+    @media (max-width:600px){ .input-digit {width: 36px; height: 45px; font-size: 1.25rem;} .glass {padding: 1.5rem !important;}}
+  </style>
+</head>
+<body class="text-gray-800 overflow-x-hidden">
+
+  <main class="flex flex-col items-center justify-center min-h-[85vh] pt-4 px-2">
+    <section class="glass w-full max-w-md px-4 sm:px-8 py-8 sm:py-10 shadow-2xl mx-auto mt-2">
+      <h2 class="text-2xl sm:text-3xl font-black bg-gradient-to-l from-[#10b981] to-[#0ea5e9] text-transparent bg-clip-text text-center mb-5 tracking-tight">
+        تایید شماره موبایل
+      </h2>
+      <div class="text-center text-base sm:text-lg text-gray-700 font-semibold mb-2">
+        کد تاییدی که به شماره شما ارسال شد را وارد کنید.
+      </div>
+      <form id="verifyForm" autocomplete="off">
+        <div class="flex justify-center gap-1 mt-5 mb-2" dir="ltr">
+          <input type="text" maxlength="1" inputmode="numeric" class="input-digit" autocomplete="one-time-code" required>
+          <input type="text" maxlength="1" inputmode="numeric" class="input-digit" autocomplete="one-time-code" required>
+          <input type="text" maxlength="1" inputmode="numeric" class="input-digit" autocomplete="one-time-code" required>
+          <input type="text" maxlength="1" inputmode="numeric" class="input-digit" autocomplete="one-time-code" required>
+          <input type="text" maxlength="1" inputmode="numeric" class="input-digit" autocomplete="one-time-code" required>
+        </div>
+        <div class="err-text hidden" id="errorText"></div>
+        <button id="verifyBtn" type="submit"
+          class="brand-btn w-full mt-6 py-3 rounded-xl font-black text-lg shadow-md transition-all duration-200 hover:scale-[1.03]"
+          disabled>
+          تایید کد
+        </button>
+      </form>
+      <div class="flex justify-center items-center gap-2 mt-6">
+        <span class="text-gray-600 text-sm">ارسال مجدد کد بعد از</span>
+        <span id="timer" class="text-[#0ea5e9]">60</span>
+        <span class="text-gray-600 text-sm">ثانیه</span>
+      </div>
+      <div class="text-center text-sm mt-3">
+        شماره اشتباه است؟
+        <a href="register.html" class="text-[#0ea5e9] hover:underline font-extrabold">تغییر شماره</a>
+      </div>
+    </section>
+    <!-- پیام موفقیت‌آمیز -->
+    <div id="successMsg"
+      class="fixed inset-0 bg-black/30 z-50 flex items-center justify-center hidden">
+      <div class="bg-white rounded-2xl px-7 py-8 shadow-2xl text-center animate-fadein w-[90vw] max-w-xs">
+        <div class="text-3xl mb-4 text-[#10b981]">✅</div>
+        <div class="text-lg font-bold text-gray-700 mb-2">کد تایید با موفقیت ثبت شد</div>
+        <div class="text-gray-500 mb-5 text-sm">خوش آمدید! به ویترینت :)</div>
+        <button id="go-dashboard-btn"
+          class="brand-btn py-2.5 px-7 rounded-lg font-bold text-base shadow hover:scale-105 transition">
+          ورود به ویترینت
+        </button>
+      </div>
+    </div>
+  </main>
+  <footer class="mt-20 bg-white border-t text-center text-xs sm:text-sm text-gray-400 py-5 rounded-t-3xl animate-fadein" style="animation-delay:.4s;">
+    © 2025 <span class="text-[#10b981] font-bold">Vitrinet</span> - همه حقوق محفوظ است.
+  </footer>
+<script>
+  // گرفتن فقط phone از query string
+  function getQueryParam(name) {
+    const url = new URL(window.location.href);
+    return url.searchParams.get(name) || "";
+  }
+  let phone = getQueryParam("phone");
+  if (!phone) {
+    window.location.href = "register.html";
+  }
+
+  // اگر پسورد تو session نبود، یک مقدار تستی ست کن (برای راحتی تست)
+  if (!sessionStorage.getItem('signup_password')) {
+    sessionStorage.setItem('signup_password', 'testpassword');
+  }
+
+  const digits = Array.from(document.querySelectorAll('.input-digit'));
+  const btn = document.getElementById('verifyBtn');
+  const form = document.getElementById('verifyForm');
+  const errorText = document.getElementById('errorText');
+  const successMsg = document.getElementById('successMsg');
+  const goDashboardBtn = document.getElementById('go-dashboard-btn');
+
+  digits.forEach((input, idx) => {
+    input.addEventListener('input', (e) => {
+      if (input.value.length > 1) input.value = input.value.slice(0,1);
+      if (input.value && idx < digits.length - 1) digits[idx+1].focus();
+      btnCheck();
+    });
+    input.addEventListener('keydown', (e) => {
+      if (e.key === "Backspace" && !input.value && idx > 0) {
+        digits[idx-1].focus();
+      }
+    });
+    input.addEventListener('paste', (e) => {
+      e.preventDefault();
+      let data = (e.clipboardData || window.clipboardData).getData('text').replace(/\D/g,'').slice(0,5);
+      data.split('').forEach((num, i) => {
+        if (digits[i]) digits[i].value = num;
+      });
+      digits[data.length-1]?.focus();
+      btnCheck();
+    });
+  });
+
+  function btnCheck() {
+    const filled = digits.every(d=>d.value && d.value.length === 1);
+    btn.disabled = !filled;
+    if (!filled) errorText.classList.add('hidden');
+  }
+
+  // ثبت و اعتبارسنجی کد فقط با مقدار 12345
+  form.addEventListener('submit', function(e) {
+    e.preventDefault();
+    const code = digits.map(d => d.value).join('');
+    if (!/^\d{5}$/.test(code)) {
+      errorText.innerText = "کد وارد شده معتبر نیست!";
+      errorText.classList.remove('hidden');
+      return;
+    }
+
+    if (code === "12345") {
+      // پسورد موقع ثبت‌نام باید تو sessionStorage باشه (حتی اگر نبود، بالا مقداردهی کردیم)
+      const password = sessionStorage.getItem('signup_password');
+      // ذخیره اطلاعات کاربر ساختگی تو localStorage
+      localStorage.setItem('token', 'fake-user-token');
+      localStorage.setItem('user', JSON.stringify({
+        phone: phone,
+        name: 'کاربر ویترینت'
+      }));
+      sessionStorage.removeItem('signup_password');
+      sessionStorage.removeItem('signup_phone');
+      successMsg.classList.remove('hidden');
+      goDashboardBtn.onclick = function() {
+        window.location.href = "user/dashboard.html";
+      };
+    } else {
+      errorText.innerText = "کد تایید اشتباه است!";
+      errorText.classList.remove('hidden');
+    }
+  });
+
+  // تایمر ارسال مجدد کد
+  let seconds = 60, timerEl = document.getElementById('timer');
+  let timer = setInterval(() => {
+    seconds--;
+    timerEl.innerText = seconds;
+    if(seconds <= 0){
+      clearInterval(timer);
+      timerEl.innerHTML = `<a href="#" onclick="resendCode(event)" class="text-[#0ea5e9] font-extrabold underline">ارسال مجدد</a>`;
+    }
+  }, 1000);
+
+  window.resendCode = function(e){
+    e.preventDefault();
+    timerEl.innerText = "60";
+    seconds = 60;
+    errorText.classList.add('hidden');
+    digits.forEach(d=>d.value="");
+    digits[0].focus();
+    btnCheck();
+    timer = setInterval(() => {
+      seconds--;
+      timerEl.innerText = seconds;
+      if(seconds <= 0){
+        clearInterval(timer);
+        timerEl.innerHTML = `<a href="#" onclick="resendCode(event)" class="text-[#0ea5e9] font-extrabold underline">ارسال مجدد</a>`;
+      }
+    }, 1000);
+    // اینجا درخواست ارسال مجدد کد رو بزن (در حالت دمو لازم نیست)
+  }
+</script>
+</body>
+</html>

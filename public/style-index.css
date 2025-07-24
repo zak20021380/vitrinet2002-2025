@@ -1,0 +1,449 @@
+body {
+      font-family: 'Vazirmatn', sans-serif;
+      background: linear-gradient(115deg, #e0fdfa 0%, #f8fafc 60%, #d4fbe8 100%);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+    .glass {
+      background: rgba(255,255,255,0.82);
+      box-shadow: 0 10px 40px #10b98124, 0 3px 12px #0ea5e91a;
+      backdrop-filter: blur(17px);
+      border-radius: 1.8rem;
+    }
+    .btn-grad {
+      background: linear-gradient(90deg,#10b981 10%,#0ea5e9 100%);
+      color: #fff !important;
+      box-shadow: 0 2px 12px #10b98133;
+    }
+    .btn-grad:hover {filter: brightness(1.08);}
+    .cat-icon {
+      background: linear-gradient(135deg, #10b981 60%, #0ea5e9 120%);
+      box-shadow: 0 4px 16px #10b98133;
+      transition: .22s cubic-bezier(.43,1.3,.7,1.3);
+    }
+    .cat-icon:hover { transform: scale(1.12) rotate(-3deg);}
+    .cta-blur {
+      background: rgba(255,255,255,0.95);
+      box-shadow: 0 4px 28px #0ea5e92a;
+      backdrop-filter: blur(20px);
+      border-radius: 1.7rem;
+    }
+    .animate-fadein {
+      animation: fadein 1.1s cubic-bezier(.48,.75,.23,1.1) both;
+    }
+    .animate-pop {
+      animation: pop 0.8s cubic-bezier(.4,2,.6,1) both;
+    }
+    @keyframes fadein {
+      0% { opacity:0; transform: translateY(40px);}
+      100% { opacity:1; transform: none;}
+    }
+    @keyframes pop {
+      0% { opacity:0; transform: scale(.7);}
+      60% { opacity:1; transform: scale(1.15);}
+      100% { opacity:1; transform: scale(1);}
+    }
+    ::-webkit-scrollbar {width: 7px;}
+    ::-webkit-scrollbar-thumb {background: #c8f7e6;}
+    @media (max-width: 540px) {
+      .menu-link { font-size: 13px; padding-left: 7px; padding-right: 7px;}
+      .btn-grad { padding-left: 16px !important; padding-right: 16px !important; font-size: 13px !important;}
+    }
+    @media (max-width: 390px) {
+      .menu-link { font-size: 12px; }
+    }
+
+      .logo-vitreenet {
+    font-family: 'Poppins', sans-serif;
+    font-weight: 900;
+    font-size: 2rem;                /* موبایل */
+    background: linear-gradient(90deg,#10b981 5%,#0ea5e9 90%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    letter-spacing: 2.4px;
+    text-shadow: 0 4px 20px #10b9812e, 0 1px 0 #fff;
+    transition: filter .17s;
+    filter: drop-shadow(0 2px 8px #0ea5e955);
+    user-select: none;
+    white-space: nowrap;
+    line-height: 1.15;
+    display: inline-block;
+  }
+  @media (min-width: 640px) {
+    .logo-vitreenet { font-size: 2.5rem; }
+  }
+  @media (min-width: 1024px) {
+    .logo-vitreenet { font-size: 2.7rem; }
+  }
+  .logo-vitreenet:hover {
+    filter: brightness(1.12) drop-shadow(0 5px 20px #10b98155);
+  }
+
+
+    .logo-vitreenet {
+    font-family: 'Poppins', sans-serif;
+    font-weight: 800;
+    font-size: 1.55rem;             /* موبایل */
+    background: linear-gradient(90deg,#11d6ad 0%, #10b981 60%, #2db4e8 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    letter-spacing: 1.7px;
+    transition: filter .16s;
+    filter: drop-shadow(0 1px 5px #10b98118);
+    white-space: nowrap;
+    display: inline-block;
+    padding-right: 3px;
+    padding-left: 3px;
+    line-height: 1.1;
+    text-shadow: none;
+  }
+  .logo-vitreenet:hover {
+    filter: brightness(1.09) drop-shadow(0 2px 14px #2db4e866);
+  }
+  @media (min-width: 640px) {
+    .logo-vitreenet { font-size: 1.9rem; }
+  }
+  @media (min-width: 1024px) {
+    .logo-vitreenet { font-size: 2.05rem; }
+  }
+
+
+
+    /* ظاهر پاپ‌آپ */
+  .city-modal-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,.27);
+    z-index: 50;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    pointer-events: none;
+    transition: all .3s;
+  }
+  .city-modal-backdrop.active {
+    opacity: 1;
+    pointer-events: all;
+  }
+
+  /* سلکت ریسپانسیو واقعی */
+  .city-btn-responsive {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    min-width: 120px;
+    max-width: 100%;
+    white-space: nowrap;
+    text-align: center;
+    transition: all .18s;
+  }
+  .city-btn-responsive svg {
+    min-width: 18px; min-height: 18px;
+  }
+  @media (max-width: 640px) {
+    .city-btn-responsive {
+      width: 100% !important;
+      min-width: 0 !important;
+      max-width: 100%;
+      font-size: 15px;
+      padding-top: 13px;
+      padding-bottom: 13px;
+      margin-bottom: 0 !important;
+      border-radius: 1.5rem;
+    }
+    .city-btn-responsive span {
+      font-size: 15px !important;
+      text-align: center;
+      flex: 1 1 0%;
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+    }
+  }
+  @media (max-width: 420px) {
+    #cityModal { padding: 22px 7px; font-size: 15px;}
+  }
+
+
+/* پاپ‌آپ تبلیغ */
+.ad-popup-custom {
+    position: static !important;
+    z-index: 110;
+    margin-top: 18px;
+    margin-right: auto;
+    margin-left: auto;
+    min-width: 260px;
+    max-width: 360px;
+    width: 90vw;
+    background: #f8fafc; /* رنگ خاص، روشن و مات */
+    border: 1.5px solid #e0f2f1;
+    border-radius: 18px;
+    box-shadow: 0 12px 44px #0ea5e93a, 0 2px 12px #10b98118;
+    padding: 0 0 18px 0;
+    animation: fadein .3s;
+    display: none;
+    transition: box-shadow .22s, border .14s;
+    box-sizing: border-box;
+    /* وسط‌چین در والد */
+}
+
+.ad-popup-custom:before {
+    content: "";
+    display: block;
+    height: 9px;
+    width: 60px;
+    margin: 0 auto 10px auto;
+    border-radius: 9px;
+    background: linear-gradient(90deg,#10b98118 0%,#0ea5e915 100%);
+}
+
+/* دکمه بستن، ساده و متفاوت */
+.ad-close-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 18px auto 0 auto;
+    padding: 11px 0;
+    width: 88%;
+    font-size: 1.02rem;
+    font-weight: 700;
+    color: #0ea5e9;
+    background: #fff;
+    border-radius: 13px;
+    border: 1.5px solid #10b98133;
+    box-shadow: 0 2px 8px #10b98119;
+    cursor: pointer;
+    letter-spacing: 0.5px;
+    font-family: 'Vazirmatn', Tahoma, sans-serif;
+    outline: none;
+    transition: 
+        background .14s,
+        color .14s,
+        border .14s,
+        box-shadow .13s;
+}
+.ad-close-btn:hover {
+    background: #e0fdfa;
+    color: #f43f5e;
+    border-color: #0ea5e9;
+    box-shadow: 0 4px 18px #0ea5e92a;
+}
+
+/* موبایل (همون قبلی بمونه) */
+@media (max-width: 540px) {
+    .ad-popup-custom {
+        min-width: 0;
+        max-width: 98vw;
+        width: 96vw;
+        border-radius: 11px;
+        padding-left: 2vw;
+        padding-right: 2vw;
+        border: none;
+        background: #fff;
+        box-shadow: 0 8px 22px #10b98128;
+    }
+    .ad-close-btn {
+        width: 86%;
+        font-size: 1.09rem;
+        padding: 12px 0;
+        margin-top: 16px;
+        background: #f3f4f6;
+        color: #f43f5e;
+        border-radius: 17px;
+        border: 1.5px solid #f43f5e33;
+        font-family: 'Vazirmatn', Tahoma, sans-serif;
+        font-weight: 700;
+        box-shadow: none;
+        letter-spacing: .6px;
+    }
+    .ad-close-btn:hover,
+    .ad-close-btn:active {
+        background: #fef2f2;
+        color: #b91c1c;
+        border-color: #f43f5e77;
+    }
+}
+
+
+
+
+
+
+/* کارت تبلیغ ویژه */
+.special-ad-card {
+  border: 2.2px dashed #10b981 !important;
+  background: linear-gradient(109deg,#f8fafc 70%,#e0fdfa 100%) !important;
+  box-shadow: 0 8px 36px #10b98124, 0 2px 14px #0ea5e91a;
+  position: relative;
+  /* فقط سایه و بک تغییر می‌کنه */
+  transition: background 0.18s, box-shadow 0.18s;
+}
+.special-ad-card:hover {
+  background: linear-gradient(109deg,#e0fdfa 70%,#c8f7e6 100%) !important;
+  box-shadow: 0 12px 40px #0ea5e930, 0 4px 14px #10b98118;
+  /* هیچ تغییری در ترنسفورم و سایز کارت موقع هاور */
+}
+
+.ad-badge-vip {
+  position: absolute;
+  top: 10px;
+  left: 11px;
+  z-index: 12;
+  padding: 3px 12px 3px 8px;
+  font-size: 0.91rem;
+  font-weight: 900;
+  color: #fff;
+  background: linear-gradient(90deg,#10b981 20%,#0ea5e9 90%);
+  border-radius: 13px 8px 13px 13px;
+  box-shadow: 0 2px 9px #10b9811d, 0 1px 6px #0ea5e912;
+  letter-spacing: 0.4px;
+  border: none;
+  text-shadow: 0 1px 6px #0ea5e933, 0 1px 0 #fff7;
+  filter: saturate(1.11) brightness(1.06);
+  transition: filter 0.16s, background 0.17s;
+  cursor: pointer;
+  user-select: none;
+  outline: none;
+  font-family: inherit;
+  line-height: 1.12;
+  backdrop-filter: blur(2px) brightness(1.03);
+  animation: adBadgePop 0.7s cubic-bezier(.6,2,.5,1) both;
+}
+@keyframes adBadgePop {
+  0%   { opacity: 0; transform: scale(.8);}
+  75%  { opacity: 1; transform: scale(1.12);}
+  100% { opacity: 1; transform: scale(1);}
+}
+.special-ad-card:hover .ad-badge-vip {
+  filter: saturate(1.13) brightness(1.1);
+  background: linear-gradient(90deg,#10b981 15%,#0ea5e9 80%);
+}
+@media (max-width: 540px) {
+  .ad-badge-vip {
+    font-size: 0.81rem;
+    padding: 2px 9px 2px 7px;
+    top: 7px;
+    left: 6px;
+    border-radius: 11px 7px 11px 12px;
+    box-shadow: 0 1.5px 7px #10b98119;
+  }
+}
+
+
+.special-ad-card .shop-card-banner {
+  border: 1.8px solid #0ea5e988;
+  background: linear-gradient(90deg,#f0fdfa 40%,#e0fdfa 100%);
+  transition: border 0.15s;
+}
+
+.special-ad-card .shop-card-banner img {
+  filter: drop-shadow(0 3px 16px #10b98138);
+}
+
+/* دسته‌بندی تبلیغ ویژه با گرادینت مدرن */
+.special-ad-card .ad-category {
+  display: inline-block;
+  background: linear-gradient(90deg,#10b981 0%, #0ea5e9 100%);
+  color: #fff;
+  font-size: 0.98rem;
+  font-weight: 800;
+  border-radius: 16px;
+  padding: 4px 16px 4px 16px;
+  letter-spacing: 0.3px;
+  box-shadow: 0 1px 8px #0ea5e922;
+  margin-top: 4px;
+  margin-bottom: 2px;
+  transition: background 0.15s;
+}
+.special-ad-card .ad-category.no-category {
+  background: linear-gradient(90deg,#cbd5e1 10%,#f43f5e 100%);
+  color: #fff !important;
+  opacity: 0.85;
+}
+
+
+.hide-scrollbar::-webkit-scrollbar { display: none; }
+.hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+.category-item .category-anim {
+  /* ویبره نرم موقع هاور */
+  will-change: transform, box-shadow;
+}
+.category-item:hover .category-anim {
+  animation: jellyPop .56s cubic-bezier(.43,2.1,.62,.97);
+}
+@keyframes jellyPop {
+  0%   { transform: scale(1);}
+  20%  { transform: scale(.95,1.07);}
+  50%  { transform: scale(1.11,.92);}
+  70%  { transform: scale(.98,1.03);}
+  100% { transform: scale(1);}
+}
+
+
+
+/* مخفی کردن اسکرول‌بار */
+#drag-scroll-cards {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+#drag-scroll-cards::-webkit-scrollbar {
+  display: none;
+}
+/* موس عادی (pointer) موقع Hover و Drag */
+#drag-scroll-cards.grabbing {
+  cursor: pointer !important;
+}
+#drag-scroll-cards {
+  cursor: pointer;
+  user-select: none;
+  scroll-behavior: auto !important;
+}
+
+
+#popular-products-slider {
+  cursor: pointer !important;
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+}
+
+/* استایل ناوبری پایین موبایل */
+nav.fixed.bottom-0 {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  height: 60px; /* ارتفاع مناسب */
+  background-color: #fff;
+  box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+}
+
+nav.fixed.bottom-0 ul {
+  list-style: none;
+  display: flex;
+  width: 100%;
+  justify-content: space-around;
+  margin: 0;
+  padding: 0;
+}
+
+nav.fixed.bottom-0 li {
+  text-align: center;
+  font-size: 12px;
+}
+
+nav.fixed.bottom-0 img {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%; /* گرد کردن آیکون‌ها مثل عکس کاربر */
+  margin-bottom: 4px;
+}
+
+nav.fixed.bottom-0 a {
+  text-decoration: none;
+  color: inherit;
+}

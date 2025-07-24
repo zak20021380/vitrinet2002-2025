@@ -1,0 +1,972 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>مراکز خرید سنندج | ویترینت</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    :root {
+      --primary: #0ea5e9;
+      --primary-dark: #0284c7;
+      --secondary: #10b981;
+      --secondary-dark: #059669;
+      --light: #f0fdfa;
+      --dark: #0f172a;
+      --gray: #64748b;
+      --light-gray: #f1f5f9;
+      --shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+      --transition: all 0.3s ease;
+    }
+    
+    body {
+      font-family: 'Vazirmatn', sans-serif;
+      background: linear-gradient(135deg, #f7fafc 60%, #e0f2fe 100%);
+      color: var(--dark);
+      min-height: 100vh;
+      direction: rtl;
+      padding-bottom: 80px;
+    }
+    
+    /* هدر ساده و مدرن با بهبود رسپانسیو */
+    .header {
+      background: #fff;
+      color: var(--dark);
+      padding: 0 5%;
+      min-height: 70px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      box-shadow: 0 2px 15px rgba(0, 0, 0, 0.1);
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      flex-wrap: wrap;
+    }
+    
+    .logo {
+      background: linear-gradient(90deg, var(--secondary), var(--primary));
+      color: white;
+      padding: 8px 20px;
+      border-radius: 12px;
+      font-weight: 700;
+      text-decoration: none;
+      transition: var(--transition);
+      font-size: 1.05rem;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      box-shadow: 0 4px 10px rgba(14, 165, 233, 0.3);
+    }
+    
+    .logo:hover {
+      background: linear-gradient(90deg, var(--secondary-dark), var(--primary-dark));
+      transform: translateY(-2px);
+      box-shadow: 0 6px 15px rgba(14, 165, 233, 0.4);
+    }
+    
+    .main-menu {
+      display: flex;
+      gap: 28px;
+    }
+    
+    .main-menu a {
+      color: var(--gray);
+      padding: 8px 20px;
+      font-weight: 500;
+      text-decoration: none;
+      transition: var(--transition);
+      font-size: 1.05rem;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .main-menu a:hover {
+      color: var(--primary);
+      transform: translateY(-2px);
+    }
+    
+    .main-menu a.active {
+      color: var(--primary-dark);
+      font-weight: 700;
+    }
+    
+    .btn-register {
+      background: linear-gradient(90deg, var(--secondary), var(--primary));
+      color: white;
+      padding: 8px 20px;
+      border-radius: 12px;
+      font-weight: 700;
+      text-decoration: none;
+      transition: var(--transition);
+      font-size: 1.05rem;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      box-shadow: 0 4px 10px rgba(14, 165, 233, 0.3);
+    }
+    
+    .btn-register:hover {
+      background: linear-gradient(90deg, var(--secondary-dark), var(--primary-dark));
+      transform: translateY(-2px);
+      box-shadow: 0 6px 15px rgba(14, 165, 233, 0.4);
+    }
+    
+    /* بخش جستجو */
+    .search-section {
+      max-width: 1200px;
+      margin: 30px auto 40px;
+      padding: 0 20px;
+    }
+    
+    .search-filter-container {
+      background: #fff;
+      border-radius: 18px;
+      box-shadow: 0 8px 30px rgba(5, 150, 105, 0.1);
+      padding: 25px;
+      position: relative;
+      z-index: 10;
+    }
+    
+    .section-title {
+      color: white;
+      font-weight: 700;
+      font-size: 1.8rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 25px;
+      background: transparent;
+      padding: 0;
+      border-radius: 0;
+      box-shadow: none;
+      transition: none;
+      background: linear-gradient(90deg, var(--secondary), var(--primary));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      text-align: center;
+    }
+    
+    .search-filter-bar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px;
+      margin-top: 15px;
+    }
+    
+    .search-box {
+      flex: 1; /* جعبه جستجو بزرگتر شده */
+      min-width: 300px;
+      display: flex;
+      align-items: center;
+      background: var(--light);
+      border-radius: 12px;
+      padding: 0 16px;
+      border: 2px solid #e0fdfa;
+      box-shadow: 0 2px 10px rgba(14, 165, 233, 0.1);
+      transition: var(--transition);
+    }
+    
+    .search-box:focus-within {
+      border-color: var(--primary);
+      box-shadow: 0 2px 15px rgba(14, 165, 233, 0.2);
+    }
+    
+    .search-box input {
+      border: none;
+      background: transparent;
+      font-family: inherit;
+      font-size: 1.1rem;
+      flex: 1;
+      outline: none;
+      padding: 14px 10px;
+      color: var(--primary-dark);
+    }
+    
+    .search-box input::placeholder {
+      color: #94a3b8;
+    }
+    
+    .search-icon {
+      font-size: 1.4rem;
+      margin-left: 10px;
+      color: var(--primary);
+    }
+    
+    /* کارت‌های مراکز خرید شیک و جذاب */
+    .main-container {
+      max-width: 1300px;
+      margin: 0 auto 40px;
+      padding: 0 20px;
+    }
+    
+    .centers-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+      gap: 30px;
+    }
+    
+    .center-card {
+      background: #fff;
+      border-radius: 20px;
+      overflow: hidden;
+      transition: var(--transition);
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      position: relative;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+      border: 1px solid #e2e8f0;
+    }
+    
+    .center-card:hover {
+      transform: translateY(-8px);
+      box-shadow: 0 12px 30px rgba(14, 165, 233, 0.2);
+    }
+    
+    .center-img-container {
+      position: relative;
+      height: 220px;
+      overflow: hidden;
+    }
+    
+    .center-img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: var(--transition);
+    }
+    
+    .center-card:hover .center-img {
+      transform: scale(1.05);
+    }
+    
+    .center-tag {
+      position: absolute;
+      top: 16px;
+      left: 16px;
+      background: linear-gradient(90deg, var(--secondary), var(--primary));
+      color: white;
+      font-size: 0.9rem;
+      font-weight: 700;
+      padding: 6px 18px;
+      border-radius: 20px;
+      box-shadow: 0 3px 10px rgba(0, 0, 0, 0.15);
+      z-index: 2;
+    }
+    
+    .center-info {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      padding: 22px;
+      text-align: center;
+    }
+    
+    .center-title {
+      font-size: 1.3rem;
+      font-weight: 800;
+      color: var(--dark);
+      margin-bottom: 8px;
+      line-height: 1.4;
+      text-align: center;
+    }
+    
+    .center-address {
+      color: var(--gray);
+      font-size: 1.02rem;
+      margin-bottom: 14px;
+      line-height: 1.6;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      text-align: center;
+    }
+    
+    .center-address i {
+      color: var(--secondary);
+      font-size: 1.1rem;
+    }
+    
+    .center-desc {
+      font-size: 1.05rem;
+      color: var(--dark);
+      line-height: 1.7;
+      margin-bottom: 18px;
+      flex: 1;
+      text-align: center;
+    }
+    
+    .center-meta {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      padding-top: 12px;
+      border-top: 1px dashed #e2e8f0;
+      color: var(--gray);
+      font-size: 0.95rem;
+    }
+    
+    .center-meta span {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+    
+    .center-actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 15px;
+    }
+    
+    .action-btn {
+      flex: 1;
+      padding: 12px;
+      text-align: center;
+      border-radius: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: var(--transition);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+    
+    .btn-primary {
+      background: linear-gradient(90deg, var(--secondary), var(--primary));
+      color: white;
+    }
+    
+    .btn-primary:hover {
+      background: linear-gradient(90deg, var(--secondary-dark), var(--primary-dark));
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(14, 165, 233, 0.3);
+    }
+    
+    /* فوتر ساده و مدرن */
+    .footer {
+      background: #0f172a;
+      color: #fff;
+      padding: 40px 5% 30px;
+      margin-top: 60px;
+      text-align: center;
+      font-size: 1.1rem;
+      font-weight: 500;
+    }
+    
+    .footer-content {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 30px;
+      text-align: right;
+    }
+    
+    .footer-column h3 {
+      font-size: 1.3rem;
+      margin-bottom: 22px;
+      position: relative;
+      padding-bottom: 12px;
+      color: #fff;
+    }
+    
+    .footer-column h3:after {
+      content: "";
+      position: absolute;
+      bottom: 0;
+      right: 0;
+      width: 50px;
+      height: 3px;
+      background: var(--primary);
+      border-radius: 2px;
+    }
+    
+    .footer-links {
+      list-style: none;
+    }
+    
+    .footer-links li {
+      margin-bottom: 14px;
+    }
+    
+    .footer-links a {
+      color: rgba(255, 255, 255, 0.85);
+      text-decoration: none;
+      transition: var(--transition);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    .footer-links a:hover {
+      color: white;
+      transform: translateX(-5px);
+    }
+    
+    .footer-links i {
+      font-size: 0.9rem;
+    }
+    
+    .social-links {
+      display: flex;
+      gap: 15px;
+      margin-top: 20px;
+    }
+    
+    .social-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 1.1rem;
+      transition: var(--transition);
+    }
+    
+    .social-icon:hover {
+      background: var(--primary);
+      transform: translateY(-3px);
+    }
+    
+    .copyright {
+      margin-top: 40px;
+      padding-top: 25px;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+      font-size: 0.95rem;
+      color: rgba(255, 255, 255, 0.8);
+      font-weight: 400;
+    }
+    
+    /* ریسپانسیو بهبود یافته برای همه دستگاه‌ها */
+    @media (max-width: 1200px) {
+      .main-container {
+        max-width: 1100px;
+      }
+      
+      .centers-list {
+        grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+        gap: 25px;
+      }
+    }
+    
+    @media (max-width: 1100px) {
+      .centers-list {
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      }
+      
+      .center-img-container {
+        height: 200px;
+      }
+    }
+    
+    @media (max-width: 900px) {
+      .header {
+        flex-direction: column;
+        gap: 15px;
+        padding: 15px 20px;
+        align-items: center;
+        justify-content: center;
+        min-height: auto;
+      }
+      
+      .logo {
+        order: 1;
+        width: auto;
+        padding: 8px 20px;
+        font-size: 1.1rem;
+      }
+      
+      .btn-register {
+        order: 2;
+        width: auto;
+        padding: 8px 20px;
+        font-size: 1.1rem;
+      }
+      
+      .main-menu {
+        order: 3;
+        width: 100%;
+        gap: 15px;
+        flex-wrap: wrap;
+        justify-content: center;
+        margin-top: 10px;
+      }
+      
+      .main-menu a {
+        flex: 0 0 auto;
+        padding: 8px 15px;
+        font-size: 1rem;
+        gap: 6px;
+      }
+      
+      .search-filter-bar {
+        flex-direction: column;
+      }
+      
+      .search-box {
+        width: 100%;
+      }
+      
+      .section-title {
+        font-size: 1.6rem;
+      }
+    }
+    
+    @media (max-width: 600px) {
+      .header {
+        position: relative;
+        padding: 10px 15px;
+      }
+      
+      .section-title {
+        font-size: 1.4rem;
+      }
+      
+      .center-img-container {
+        height: 180px;
+      }
+      
+      .center-title {
+        font-size: 1.2rem;
+      }
+      
+      .center-desc {
+        font-size: 1rem;
+      }
+      
+      .footer-content {
+        grid-template-columns: 1fr;
+        text-align: center;
+      }
+      
+      .footer-column h3:after {
+        left: 0;
+        right: 0;
+        margin: 0 auto;
+      }
+      
+      .footer-links a {
+        justify-content: center;
+      }
+      
+      .social-links {
+        justify-content: center;
+      }
+      
+      .main-menu {
+        flex-direction: row;
+        flex-wrap: wrap;
+        gap: 10px;
+        justify-content: center;
+      }
+      
+      .main-menu a {
+        padding: 8px 20px;
+        font-size: 1rem;
+      }
+      
+      .logo {
+        font-size: 1rem;
+        gap: 6px;
+        padding: 6px 15px;
+      }
+      
+      .btn-register {
+        padding: 6px 15px;
+        font-size: 1rem;
+      }
+      
+      .search-filter-container {
+        padding: 20px 15px;
+      }
+      
+      .search-box input {
+        font-size: 1rem;
+        padding: 12px 8px;
+      }
+      
+      .centers-list {
+        gap: 20px;
+      }
+      
+      .center-card {
+        max-width: 90%;
+        margin: 0 auto;
+      }
+      
+      .center-meta {
+        gap: 6px;
+        font-size: 0.9rem;
+      }
+    }
+    
+    @media (max-width: 480px) {
+      .centers-list {
+        grid-template-columns: 1fr;
+        gap: 20px;
+      }
+      
+      .center-card {
+        border-radius: 15px;
+      }
+      
+      .center-info {
+        padding: 18px;
+      }
+      
+      .center-title {
+        font-size: 1.15rem;
+      }
+      
+      .center-address {
+        font-size: 0.95rem;
+      }
+      
+      .center-desc {
+        font-size: 0.95rem;
+      }
+      
+      .center-meta {
+        font-size: 0.9rem;
+        gap: 8px;
+      }
+      
+      .center-actions {
+        flex-direction: column;
+        gap: 8px;
+      }
+      
+      .action-btn {
+        padding: 10px;
+        font-size: 0.95rem;
+      }
+      
+      .footer {
+        padding: 30px 15px 20px;
+      }
+      
+      .footer-column h3 {
+        font-size: 1.2rem;
+      }
+      
+      .footer-links a {
+        font-size: 1rem;
+      }
+      
+      .copyright {
+        font-size: 0.9rem;
+      }
+      
+      .main-menu {
+        flex-direction: column;
+        gap: 8px;
+      }
+      
+      .main-menu a {
+        padding: 6px 15px;
+        font-size: 0.95rem;
+      }
+    }
+    
+    @media (max-width: 320px) {
+      .header {
+        padding: 10px 10px;
+      }
+      
+      .logo {
+        padding: 6px 10px;
+        font-size: 0.95rem;
+      }
+      
+      .btn-register {
+        padding: 6px 10px;
+        font-size: 0.95rem;
+      }
+      
+      .main-menu a {
+        padding: 8px 15px;
+        font-size: 0.95rem;
+      }
+      
+      .section-title {
+        font-size: 1.3rem;
+      }
+      
+      .search-box {
+        padding: 0 10px;
+      }
+      
+      .search-icon {
+        font-size: 1.2rem;
+      }
+      
+      .center-img-container {
+        height: 160px;
+      }
+    }
+    
+    /* انیمیشن‌ها */
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    .fade-in {
+      animation: fadeIn 0.6s ease forwards;
+    }
+    
+    .delay-1 { animation-delay: 0.1s; }
+    .delay-2 { animation-delay: 0.2s; }
+    .delay-3 { animation-delay: 0.3s; }
+    
+    /* اسکلتون لودر */
+    .skeleton {
+      background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+      background-size: 200% 100%;
+      animation: loading 1.5s infinite;
+      border-radius: 8px;
+    }
+    
+    @keyframes loading {
+      0% { background-position: 200% 0; }
+      100% { background-position: -200% 0; }
+    }
+    
+    .skeleton-img {
+      height: 220px;
+      width: 100%;
+      margin-bottom: 15px;
+    }
+    
+    .skeleton-line {
+      height: 20px;
+      margin-bottom: 12px;
+    }
+    
+    .skeleton-line.short {
+      width: 60%;
+    }
+    
+    .skeleton-line.medium {
+      width: 80%;
+    }
+  </style>
+</head>
+<body>
+  <!-- هدر ساده و مدرن -->
+  <div class="header">
+    <div class="logo">
+      <i class="fas fa-map-marker-alt"></i> ویترینت سنندج
+    </div>
+    
+    <nav class="main-menu">
+      <a href="/"><i class="fas fa-home"></i> خانه</a>
+      <a href="shops.html"><i class="fas fa-shopping-bag"></i> فروشگاه‌ها</a>
+      <a href="about.html"><i class="fas fa-info-circle"></i> درباره ما</a>
+    </nav>
+    
+    <a href="register-shop.html" class="btn-register">
+      <i class="fas fa-plus-circle"></i> ثبت فروشگاه
+    </a>
+  </div>
+
+  <!-- بخش جستجو و فیلتر مدرن -->
+  <section class="search-section">
+    <div class="search-filter-container">
+      <h2 class="section-title">
+        مراکز خرید سنندج
+      </h2>
+      
+      <div class="search-filter-bar">
+        <div class="search-box">
+          <span class="search-icon"><i class="fas fa-search"></i></span>
+          <input id="searchInput" type="text" placeholder="جستجوی نام مرکز خرید..." autocomplete="off">
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- کارت‌های مراکز خرید شیک و جذاب -->
+  <div class="main-container">
+    <div id="all-centers-list" class="centers-list">
+      <!-- محتوای داینامیک با جاوااسکریپت پر می‌شود -->
+    </div>
+  </div>
+
+  <!-- فوتر ساده و مدرن -->
+  <footer class="footer">
+    <div class="footer-content">
+      <div class="footer-column">
+        <h3>درباره ویترینت</h3>
+        <p style="color: rgba(255,255,255,0.85); line-height: 1.8; text-align: justify;">
+          ویترینت مرجع جامع معرفی مراکز خرید و فروشگاه‌های سنندج است. ما با معرفی بهترین مراکز خرید، به شما کمک می‌کنیم تجربه خریدی لذت‌بخش در شهر زیبای سنندج داشته باشید.
+        </p>
+        <div class="social-links">
+          <a href="#" class="social-icon"><i class="fab fa-instagram"></i></a>
+          <a href="#" class="social-icon"><i class="fab fa-telegram"></i></a>
+          <a href="#" class="social-icon"><i class="fab fa-whatsapp"></i></a>
+          <a href="#" class="social-icon"><i class="fab fa-twitter"></i></a>
+        </div>
+      </div>
+      
+      <div class="footer-column">
+        <h3>لینک‌های سریع</h3>
+        <ul class="footer-links">
+          <li><a href="/"><i class="fas fa-chevron-left"></i> صفحه اصلی</a></li>
+          <li><a href="all-shopping-centers.html"><i class="fas fa-chevron-left"></i> همه مراکز خرید</a></li>
+          <li><a href="shops.html"><i class="fas fa-chevron-left"></i> فروشگاه‌های برتر</a></li>
+          <li><a href="about.html"><i class="fas fa-chevron-left"></i> درباره ما</a></li>
+          <li><a href="contact.html"><i class="fas fa-chevron-left"></i> تماس با ما</a></li>
+        </ul>
+      </div>
+      
+      <div class="footer-column">
+        <h3>تماس با ما</h3>
+        <ul class="footer-links">
+          <li><a href="#"><i class="fas fa-map-marker-alt"></i> سنندج، خیابان انقلاب</a></li>
+          <li><a href="tel:+988733456789"><i class="fas fa-phone"></i> ۰۸۷-۳۳۴۵۶۷۸۹</a></li>
+          <li><a href="mailto:info@vitrinat.com"><i class="fas fa-envelope"></i> info@vitrinat.com</a></li>
+          <li><a href="#"><i class="fas fa-clock"></i> همه روزه ۸ صبح تا ۸ شب</a></li>
+        </ul>
+      </div>
+    </div>
+    
+    <div class="copyright">
+      ویترینت سنندج © ۱۴۰۳ - تمامی حقوق محفوظ است
+    </div>
+  </footer>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // --- تنظیمات API ---
+    const API_URL = '/api/shopping-centers'; // همان API پنل مدیریت
+
+    const listDiv = document.getElementById('all-centers-list');
+    
+    // ابتدا اسکلتون لودر نمایش داده می‌شود
+    listDiv.innerHTML = '';
+    for (let i = 0; i < 6; i++) {
+      listDiv.innerHTML += `
+        <div class="center-card fade-in delay-${i % 3}">
+          <div class="skeleton skeleton-img"></div>
+          <div class="center-info">
+            <div class="skeleton skeleton-line" style="height: 28px; margin-bottom: 15px;"></div>
+            <div class="skeleton skeleton-line short" style="height: 22px; margin-bottom: 10px;"></div>
+            <div class="skeleton skeleton-line" style="height: 18px; margin-bottom: 8px;"></div>
+            <div class="skeleton skeleton-line" style="height: 18px; margin-bottom: 8px;"></div>
+            <div class="skeleton skeleton-line medium" style="height: 18px; margin-bottom: 20px;"></div>
+            <div style="display: flex; gap: 10px; margin-top: auto;">
+              <div class="skeleton" style="height: 40px; flex: 1; border-radius: 12px;"></div>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+    
+    // fetch داده‌ها از API (پس از تاخیر برای اسکلتون)
+    setTimeout(() => {
+      fetch(API_URL)
+        .then(res => res.json())
+        .then(centers => {
+          renderCenters(centers);
+        })
+        .catch(() => {
+          listDiv.innerHTML = `
+            <div style="grid-column: 1/-1; text-align: center; padding: 50px 20px;">
+              <i class="fas fa-exclamation-triangle" style="font-size: 4rem; color: #cbd5e1; margin-bottom: 20px;"></i>
+              <h3 style="color: #64748b; font-size: 1.5rem;">خطا در بارگذاری مراکز خرید!</h3>
+            </div>
+          `;
+        });
+    }, 1500);
+    
+    function renderCenters(centers) {
+      listDiv.innerHTML = '';
+      
+      if (!centers.length) {
+        listDiv.innerHTML = `
+          <div style="grid-column: 1/-1; text-align: center; padding: 50px 20px;">
+            <i class="fas fa-store-slash" style="font-size: 4rem; color: #cbd5e1; margin-bottom: 20px;"></i>
+            <h3 style="color: #64748b; font-size: 1.5rem;">مرکز خریدی یافت نشد!</h3>
+            <p style="color: #94a3b8; margin-top: 10px;">لطفاً عبارت جستجو را تغییر دهید</p>
+          </div>
+        `;
+        return;
+      }
+
+      centers.forEach((center, index) => {
+        const card = document.createElement('div');
+        card.className = `center-card fade-in delay-${index % 3}`;
+        card.innerHTML = `
+          <div class="center-img-container">
+            <img class="center-img" src="${center.image || 'https://via.placeholder.com/800x600?text=تصویر+مرکز+خرید'}" alt="${center.title}">
+            ${center.tag ? `<div class="center-tag">${center.tag}</div>` : ''}
+          </div>
+          <div class="center-info">
+            <h3 class="center-title">${center.title}</h3>
+            <div class="center-address">
+              <i class="fas fa-map-marker-alt"></i> ${center.location || 'نامشخص'}
+            </div>
+            <p class="center-desc">${center.description || ''}</p>
+            
+            <div class="center-meta">
+              <!-- تعداد مغازه‌ها را نمایش می‌دهیم -->
+              <span><i class="fas fa-store"></i> ${center.stores || 0} مغازه</span>
+              <span><i class="fas fa-clock"></i> ساعات کاری: ${center.hours || 'نامشخص'}</span>
+              <span><i class="fas fa-calendar-times"></i> روزهای تعطیل: ${center.holidays || 'هیچ'}</span>
+            </div>
+            
+            <div class="center-actions">
+              <div class="action-btn btn-primary" onclick="goToShops('${center._id}', '${center.title}')">
+                <i class="fas fa-list"></i> مشاهده فروشگاه‌ها
+              </div>
+            </div>
+          </div>
+        `;
+        listDiv.appendChild(card);
+      });
+    }
+
+    window.goToShops = function(id, title) {
+      window.location.href = `shopping-centers-shops.html?centerId=${id}&title=${encodeURIComponent(title)}`;
+    };
+
+    // جستجو فقط بر اساس نام مرکز خرید
+    document.getElementById('searchInput').addEventListener('input', function() {
+      const searchTerm = this.value.trim().toLowerCase();
+      if (searchTerm === '') {
+        fetch(API_URL)
+          .then(res => res.json())
+          .then(centers => renderCenters(centers));
+        return;
+      }
+      
+      fetch(API_URL)
+        .then(res => res.json())
+        .then(centers => {
+          const filtered = centers.filter(center => 
+            center.title.toLowerCase().includes(searchTerm)
+          );
+          renderCenters(filtered);
+        });
+    });
+  });
+</script>
+
+</body>
+</html>

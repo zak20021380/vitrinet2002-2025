@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ثبت فروشگاه - ویترینت</title>
+  <meta name="description" content="فرم ثبت فروشگاه جدید در ویترینت با انتخاب نام و آدرس اختصاصی فروشگاه. همین حالا فروشگاه آنلاین خود را راه‌اندازی کنید!" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;700&display=swap" rel="stylesheet" />
+  <style>
+    body {
+      font-family: 'Vazirmatn', sans-serif;
+      background: linear-gradient(115deg, #e0fdfa 0%, #f8fafc 60%, #d4fbe8 100%);
+      min-height: 100vh;
+    }
+    .glass {
+      background: rgba(255,255,255,0.92);
+      box-shadow: 0 10px 38px #10b98119, 0 2px 10px #0ea5e914;
+      border-radius: 1.5rem;
+      backdrop-filter: blur(10px);
+    }
+    .brand-btn {
+      background: linear-gradient(90deg, #10b981 10%, #0ea5e9 100%);
+      color: #fff !important;
+      font-weight: bold;
+      border-radius: 1rem;
+      transition: all .17s;
+      box-shadow: 0 2px 12px #10b98126;
+    }
+    .brand-btn:hover { filter: brightness(1.08);}
+    .primary-text { color: #10b981; }
+    input[type="password"]:invalid {
+      background: #fef2f2;
+      border-color: #ef4444;
+    }
+    @media (max-width: 600px) {
+      .glass {padding:1.1rem !important;}
+      .header-logo {font-size: 1.25rem !important;}
+    }
+    .fadein { animation: fadein .7s; }
+    @keyframes fadein {
+      from { opacity: 0; transform: translateY(30px);}
+      to   { opacity: 1; transform: translateY(0);}
+    }
+  </style>
+</head>
+<body class="text-gray-800">
+
+  <!-- هدر شیشه‌ای -->
+  <header class="w-full bg-white/90 shadow-sm backdrop-blur-md sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between px-3 sm:px-6 py-3 gap-y-2">
+      <div class="flex items-center gap-3 flex-shrink-0">
+        <a href="index.html" class="header-logo font-bold text-[1.55rem] sm:text-[1.9rem] md:text-[2.05rem] bg-gradient-to-l from-[#11d6ad] via-[#10b981] to-[#2db4e8] bg-clip-text text-transparent" style="letter-spacing:1.7px;">ویترینت</a>
+      </div>
+      <nav class="flex items-center justify-end gap-2 sm:gap-3 flex-wrap text-sm sm:text-base w-full sm:w-auto">
+        <a href="index.html" class="text-gray-700 hover:text-[#10b981] font-bold px-2 sm:px-3 transition">خانه</a>
+        <a href="categories.html" class="text-gray-700 hover:text-[#0ea5e9] font-bold px-2 sm:px-3 transition">دسته‌بندی</a>
+        <a href="login.html" class="text-gray-700 hover:text-[#0ea5e9] font-bold px-2 sm:px-3 transition">ورود</a>
+      </nav>
+    </div>
+  </header>
+
+  <!-- فرم ثبت فروشگاه -->
+<main class="max-w-xl mx-auto min-h-screen flex flex-col justify-center items-center px-2" style="margin-top:48px;">
+    <section class="glass border rounded-2xl shadow-2xl p-6 sm:p-10" id="register-section">
+      <h2 class="text-2xl sm:text-3xl font-extrabold primary-text mb-7 text-center">ثبت فروشگاه جدید</h2>
+<form class="space-y-5" id="signup-form" autocomplete="off" novalidate>
+
+  <!-- نام فروشنده -->
+  <div>
+    <label class="block text-sm font-bold mb-1">نام فروشنده <span class="text-red-500">*</span></label>
+    <input required type="text" name="firstname" id="firstname" class="w-full p-3 border rounded-xl focus:ring-2 focus:ring-green-200" placeholder="مثلاً علی" />
+    <div id="firstname-hint" class="text-xs mt-2 text-red-500 hidden"></div>
+  </div>
+
+  <!-- نام خانوادگی فروشنده -->
+  <div>
+    <label class="block text-sm font-bold mb-1">نام خانوادگی فروشنده <span class="text-red-500">*</span></label>
+    <input required type="text" name="lastname" id="lastname" class="w-full p-3 border rounded-xl focus:ring-2 focus:ring-green-200" placeholder="مثلاً حسینی" />
+    <div id="lastname-hint" class="text-xs mt-2 text-red-500 hidden"></div>
+  </div>
+
+  <!-- نام فروشگاه -->
+  <div>
+    <label class="block text-sm font-bold mb-1">نام فروشگاه <span class="text-red-500">*</span></label>
+    <input required type="text" name="storename" id="storename" class="w-full p-3 border rounded-xl focus:ring-2 focus:ring-green-200" placeholder="مثلاً گل‌فروش مرکزی" />
+    <div id="storename-hint" class="text-xs mt-2 text-red-500 hidden"></div>
+  </div>
+
+  <!-- نمایش و ساخت آدرس فروشگاه -->
+  <div>
+    <label class="block text-sm font-bold mb-1 flex items-center gap-1">
+      نام آدرس فروشگاه <span class="text-red-500">*</span>
+      <span class="ml-2 text-xs text-gray-500 font-normal">(فقط حروف انگلیسی کوچک و عدد، حداقل ۴ و حداکثر ۱۰ کاراکتر، بدون فاصله و کاراکتر خاص)</span>
+    </label>
+    <div class="flex items-center gap-2">
+      <span class="whitespace-nowrap text-xs sm:text-base text-gray-500">vitreenet.ir/</span>
+      <input required type="text" name="shopurl" id="shopurl"
+        pattern="^[a-z0-9]{4,10}$"
+        class="flex-1 p-3 border rounded-xl focus:ring-2 focus:ring-green-200 text-left ltr"
+        placeholder="shopgol" maxlength="10" autocomplete="off" />
+    </div>
+    <div class="mt-2">
+      <span class="text-xs bg-gray-100 rounded p-1" id="address-preview">آدرس فروشگاه شما: vitreenet.ir/shopgol</span>
+    </div>
+    <div class="text-xs text-gray-500 mt-2 bg-gray-50 rounded p-2">
+      <strong>راهنما:</strong>
+      <ul class="list-disc pr-5 mt-1">
+        <li>فقط از حروف انگلیسی کوچک و عدد استفاده کنید.</li>
+        <li>حداقل ۴ و حداکثر ۱۰ کاراکتر.</li>
+        <li>از فاصله و کاراکترهای خاص (مثل @, #, !, ؟ و ...) استفاده نکنید.</li>
+        <li>این نام بخشی از آدرس فروشگاه شما خواهد بود (<b>vitreenet.ir/</b>).</li>
+        <li>مثال: <b>shopgol</b> | <b>cakebox</b> | <b>bookcity</b></li>
+      </ul>
+      <div id="shopurl-hint" class="text-red-500 mt-2 hidden"></div>
+    </div>
+  </div>
+  <!-- پایان ساخت آدرس فروشگاه -->
+
+  <div>
+    <label class="block text-sm font-bold mb-1">شماره تماس <span class="text-red-500">*</span></label>
+    <input required type="tel" id="phone" pattern="^09\d{9}$" name="phone" class="w-full p-3 border rounded-xl focus:ring-2 focus:ring-green-200" placeholder="0912xxxxxxx" />
+    <div id="phone-hint" class="text-xs mt-2 text-red-500 hidden"></div>
+  </div>
+
+  <div>
+    <label class="block text-sm font-bold mb-1">دسته‌بندی <span class="text-red-500">*</span></label>
+    <select required name="category" id="category" class="w-full p-3 border rounded-xl focus:ring-2 focus:ring-green-200">
+      <option value="" disabled selected>انتخاب دسته</option>
+      <option>پوشاک</option>
+      <option>خوراک</option>
+      <option>خدمات</option>
+      <option>دیجیتال</option>
+      <option>زیبایی</option>
+      <option>کتاب و تحریر</option>
+      <option>لوازم خانگی</option>
+      <option>ورزشی</option>
+      <option>تالار و مجالس</option>
+      <option>قنادی و شیرینی</option>
+      <option>گل و گیاه</option>
+      <option>خودرو</option>
+    </select>
+    <div id="category-hint" class="text-xs mt-2 text-red-500 hidden"></div>
+  </div>
+
+  <div>
+    <label class="block text-sm font-bold mb-1">شهر</label>
+    <input type="text" readonly value="سنندج" class="w-full p-3 border rounded-xl bg-gray-100 text-gray-500 focus:ring-0 cursor-not-allowed" />
+  </div>
+
+  <div>
+    <label class="block text-sm font-bold mb-1">آدرس دقیق <span class="text-red-500">*</span></label>
+    <input required type="text" name="address" id="address" class="w-full p-3 border rounded-xl focus:ring-2 focus:ring-green-200" placeholder="خیابان، کوچه، پلاک..." />
+    <div id="address-hint" class="text-xs mt-2 text-red-500 hidden"></div>
+  </div>
+
+  <div>
+    <label class="block text-sm font-bold mb-1">توضیحات فروشگاه</label>
+    <textarea name="desc" class="w-full p-3 border rounded-xl resize-none focus:ring-2 focus:ring-green-200" rows="3" placeholder="توضیحی درباره نوع خدمات یا محصولات..."></textarea>
+  </div>
+
+  <div>
+    <label class="block text-sm font-bold mb-1 flex items-center gap-1">
+      رمز عبور <span class="text-red-500">*</span>
+      <span class="ml-2 text-xs text-gray-500 font-normal">(حداقل ۸ کاراکتر، شامل عدد، حرف انگلیسی و نماد)</span>
+    </label>
+    <input required type="password" id="pass1" minlength="8"
+      class="w-full p-3 border rounded-xl focus:ring-2 focus:ring-green-200" placeholder="رمز عبور قوی وارد کنید" autocomplete="new-password" />
+  </div>
+
+  <div>
+    <label class="block text-sm font-bold mb-1">تکرار رمز عبور <span class="text-red-500">*</span></label>
+    <input required type="password" id="pass2" minlength="8"
+      class="w-full p-3 border rounded-xl focus:ring-2 focus:ring-green-200" placeholder="رمز را دوباره وارد کنید" autocomplete="new-password" />
+    <div id="pass-hint" class="text-xs mt-2 text-red-500 hidden"></div>
+  </div>
+
+  <!-- قوانین سایت -->
+  <div class="flex items-center gap-2 mt-3">
+    <input required type="checkbox" id="rules" class="accent-[#10b981] w-5 h-5 rounded border-gray-400" />
+    <label for="rules" class="text-sm select-none">
+      <span>قوانین سایت را مطالعه کرده‌ام و قبول دارم.</span>
+      <a href="rules.html" target="_blank" class="text-[#0ea5e9] underline hover:text-[#10b981]">مطالعه قوانین</a>
+    </label>
+  </div>
+  <div id="rules-hint" class="text-xs mt-2 text-red-500 hidden"></div>
+
+  <button type="submit" class="w-full brand-btn text-white py-3 rounded-xl font-bold text-lg shadow-md hover:opacity-90 transition mt-2">
+    ثبت فروشگاه
+  </button>
+
+  <div id="pass-guide" class="text-xs text-gray-500 mt-1 text-center">
+    رمز باید حداقل ۸ کاراکتر و ترکیبی از اعداد، حروف انگلیسی و نمادهایی مثل ! @ # $ % ^ & * باشد.
+  </div>
+</form>
+
+    </section>
+
+    <!-- مرحله تایید کد پیامکی -->
+    <section class="glass border rounded-2xl shadow-2xl p-6 sm:p-10 fadein hidden" id="verify-section">
+      <h2 class="text-xl sm:text-2xl font-extrabold text-[#10b981] mb-4 text-center">تأیید شماره موبایل</h2>
+      <div class="text-center text-gray-600 text-sm mb-6">
+        کد ۵ رقمی ارسال شده به شماره <span id="verify-phone" class="font-bold text-gray-800"></span> را وارد کنید.
+        <div class="mt-2 text-xs text-gray-500">اگر پیامک دریافت نکردید، تا ۶۰ ثانیه صبر کنید یا شماره را بررسی نمایید.</div>
+      </div>
+      <form class="flex flex-col items-center gap-5" id="verify-form" autocomplete="off">
+        <input type="text" inputmode="numeric" pattern="^\d{5}$" maxlength="5" id="sms-code" class="w-40 text-center border rounded-xl p-3 text-lg font-bold tracking-widest focus:ring-2 focus:ring-green-200" placeholder="-----" required />
+        <div id="code-hint" class="text-xs text-red-500 hidden"></div>
+        <button type="submit" class="w-full brand-btn text-white py-3 rounded-xl font-bold text-lg shadow-md hover:opacity-90 transition">
+          تأیید کد
+        </button>
+        <button type="button" id="resend-btn" class="text-xs text-[#0ea5e9] underline hover:text-[#10b981] mt-2" disabled>ارسال مجدد کد <span id="resend-timer">(60)</span></button>
+      </form>
+    </section>
+  </main>
+
+  <!-- فوتر -->
+  <footer class="mt-20 bg-white border-t text-center text-sm text-gray-500 py-4">
+    © 2025 <span class="font-bold text-[#10b981]">ویترینت</span> | همه حقوق محفوظ است.
+  </footer>
+
+<script>
+  // نمایش لحظه‌ای آدرس فروشگاه
+  document.getElementById("shopurl").addEventListener("input", function (e) {
+    let val = this.value.trim();
+    // فقط حروف کوچک و عدد؛ بیشتر از 10 کاراکتر اجازه وارد کردن نده
+    let cleaned = val.replace(/[^a-z0-9]/g, '').slice(0, 10);
+    if (val !== cleaned) {
+      this.value = cleaned;
+    }
+    let prev = document.getElementById("address-preview");
+    if (cleaned.length > 0) {
+      prev.innerText = "آدرس فروشگاه شما: vitreenet.ir/" + cleaned;
+    } else {
+      prev.innerText = "آدرس فروشگاه شما: vitreenet.ir/shopgol";
+    }
+    document.getElementById("shopurl-hint").classList.add("hidden");
+  });
+
+  // ریست پیام خطا با تغییر هر فیلد
+  [
+    ["firstname", "firstname-hint"],
+    ["lastname", "lastname-hint"],
+    ["pass1", "pass-hint"],
+    ["pass2", "pass-hint"],
+    ["storename", "storename-hint"],
+    ["shopurl", "shopurl-hint"],
+    ["phone", "phone-hint"],
+    ["category", "category-hint"],
+    ["address", "address-hint"],
+    ["rules", "rules-hint"]
+  ].forEach(function (pair) {
+    let el = document.getElementById(pair[0]);
+    if (el) {
+      el.addEventListener("input", function () {
+        document.getElementById(pair[1]).classList.add("hidden");
+      });
+      if (["category", "rules"].includes(pair[0])) {
+        el.addEventListener("change", function () {
+          document.getElementById(pair[1]).classList.add("hidden");
+        });
+      }
+    }
+  });
+
+  // اعتبارسنجی و ارسال فرم ثبت فروشگاه
+  document.getElementById("signup-form").addEventListener("submit", function (e) {
+    e.preventDefault(); // همیشه ابتدا قرار بگیره تا فرم ارسال نشه تا بررسی کامل شه
+
+    let hasError = false;
+
+    // نام فروشنده
+    let firstname = document.getElementById("firstname").value.trim();
+    let firstnameHint = document.getElementById("firstname-hint");
+    if (!firstname) {
+      firstnameHint.innerText = "لطفاً نام فروشنده را وارد کنید.";
+      firstnameHint.classList.remove("hidden");
+      hasError = true;
+    } else {
+      firstnameHint.classList.add("hidden");
+    }
+
+    // نام خانوادگی فروشنده
+    let lastname = document.getElementById("lastname").value.trim();
+    let lastnameHint = document.getElementById("lastname-hint");
+    if (!lastname) {
+      lastnameHint.innerText = "لطفاً نام خانوادگی فروشنده را وارد کنید.";
+      lastnameHint.classList.remove("hidden");
+      hasError = true;
+    } else {
+      lastnameHint.classList.add("hidden");
+    }
+
+    // نام فروشگاه
+    let storename = document.getElementById("storename").value.trim();
+    let storenameHint = document.getElementById("storename-hint");
+    if (!storename) {
+      storenameHint.innerText = "لطفاً نام فروشگاه را وارد کنید.";
+      storenameHint.classList.remove("hidden");
+      hasError = true;
+    } else {
+      storenameHint.classList.add("hidden");
+    }
+
+    // آدرس فروشگاه
+    let shopurl = document.getElementById("shopurl").value.trim();
+    let shopurlHint = document.getElementById("shopurl-hint");
+    if (shopurl.length < 4) {
+      shopurlHint.innerText = "آدرس فروشگاه باید حداقل ۴ کاراکتر باشد.";
+      shopurlHint.classList.remove("hidden");
+      hasError = true;
+    } else if (shopurl.length > 10) {
+      shopurlHint.innerText = "آدرس فروشگاه نباید بیشتر از ۱۰ کاراکتر باشد.";
+      shopurlHint.classList.remove("hidden");
+      hasError = true;
+    } else if (!/^[a-z0-9]+$/.test(shopurl)) {
+      shopurlHint.innerText = "آدرس فقط می‌تواند شامل حروف انگلیسی کوچک و عدد باشد. از فاصله و کاراکترهای خاص مثل # یا ! استفاده نکنید.";
+      shopurlHint.classList.remove("hidden");
+      hasError = true;
+    } else {
+      shopurlHint.classList.add("hidden");
+    }
+
+    // شماره موبایل
+    let phone = document.getElementById("phone").value.trim();
+    let phoneHint = document.getElementById("phone-hint");
+    if (!/^09\d{9}$/.test(phone)) {
+      phoneHint.innerText = "شماره موبایل را به صورت صحیح و کامل وارد کنید (مثلاً 09123456789).";
+      phoneHint.classList.remove("hidden");
+      hasError = true;
+    } else {
+      phoneHint.classList.add("hidden");
+    }
+
+    // دسته‌بندی
+    let category = document.getElementById("category").value;
+    let categoryHint = document.getElementById("category-hint");
+    if (!category) {
+      categoryHint.innerText = "لطفاً دسته‌بندی فروشگاه را انتخاب کنید.";
+      categoryHint.classList.remove("hidden");
+      hasError = true;
+    } else {
+      categoryHint.classList.add("hidden");
+    }
+
+    // آدرس دقیق
+    let address = document.getElementById("address").value.trim();
+    let addressHint = document.getElementById("address-hint");
+    if (!address) {
+      addressHint.innerText = "لطفاً آدرس دقیق فروشگاه را وارد کنید.";
+      addressHint.classList.remove("hidden");
+      hasError = true;
+    } else {
+      addressHint.classList.add("hidden");
+    }
+
+    // رمز عبور
+    let pass1 = document.getElementById("pass1").value;
+    let pass2 = document.getElementById("pass2").value;
+    let passHint = document.getElementById("pass-hint");
+    if (pass1.length < 8) {
+      passHint.innerText = "رمز عبور باید حداقل ۸ کاراکتر باشد.";
+      passHint.classList.remove("hidden");
+      hasError = true;
+    } else if (!/[a-zA-Z]/.test(pass1)) {
+      passHint.innerText = "رمز عبور باید حداقل یک حرف انگلیسی داشته باشد.";
+      passHint.classList.remove("hidden");
+      hasError = true;
+    } else if (!/\d/.test(pass1)) {
+      passHint.innerText = "رمز عبور باید حداقل یک عدد داشته باشد.";
+      passHint.classList.remove("hidden");
+      hasError = true;
+    } else if (!/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(pass1)) {
+      passHint.innerText = "رمز عبور باید حداقل یک نماد مثل !@#$% داشته باشد.";
+      passHint.classList.remove("hidden");
+      hasError = true;
+    } else if (pass1 !== pass2) {
+      passHint.innerText = "رمز عبور و تکرار آن با هم یکسان نیستند.";
+      passHint.classList.remove("hidden");
+      hasError = true;
+    } else {
+      passHint.classList.add("hidden");
+    }
+
+    // قوانین سایت
+    let rules = document.getElementById("rules");
+    let rulesHint = document.getElementById("rules-hint");
+    if (!rules.checked) {
+      rulesHint.innerText = "لطفاً تیک پذیرش قوانین سایت را بزنید.";
+      rulesHint.classList.remove("hidden");
+      hasError = true;
+    } else {
+      rulesHint.classList.add("hidden");
+    }
+
+    // اگر حتی یکی از خطاها وجود داشت، اجازه ارسال فرم نده
+    if (hasError) {
+      return;
+    }
+
+    // ساخت داده‌ها برای ارسال به بک‌اند
+    const data = {
+      firstname: firstname,
+      lastname: lastname,
+      storename: storename,
+      shopurl: shopurl,
+      phone: phone,
+      category: category,
+      address: address,
+      desc: document.querySelector("textarea[name='desc']").value.trim(),
+      password: pass1,
+    };
+
+    // غیر فعال کردن دکمه ثبت تا پاسخ بیاد
+    let btn = this.querySelector("button[type='submit']");
+    btn.disabled = true;
+    btn.innerText = "در حال ارسال...";
+
+  fetch("http://localhost:5000/api/auth/register", {
+  method: "POST",
+  headers: {
+    "Content-Type": "application/json",
+  },
+  body: JSON.stringify(data),
+})
+.then(res => res.json())
+.then(result => {
+  btn.disabled = false;
+  btn.innerText = "ثبت فروشگاه";
+if (result.success) {
+  localStorage.setItem('shopurl', data.shopurl);
+sessionStorage.setItem('signup_password', data.password);
+  window.location.href = "verify.html?shopurl=" + encodeURIComponent(data.shopurl) + "&phone=" + encodeURIComponent(data.phone);
+}
+
+  else {
+    alert("خطا در ثبت‌نام: " + (result.message || "لطفاً دوباره تلاش کنید"));
+  }
+})
+.catch(err => {
+  btn.disabled = false;
+  btn.innerText = "ثبت فروشگاه";
+  console.error("Error:", err);
+  alert("مشکلی در ارتباط با سرور پیش آمد.");
+});
+
+
+  });
+
+  // مرحله تأیید شماره موبایل
+function showVerifySection(phone) {
+  // مقدار shopurl رو از localStorage بخون
+  var shopurl = localStorage.getItem('shopurl');
+  // ریدایرکت به صفحه verify.html با پارامتر
+  window.location.href = `verify.html?shopurl=${encodeURIComponent(shopurl)}&phone=${encodeURIComponent(phone)}`;
+}
+
+
+  // تایید کد پیامک
+// --- تایید کد پیامک با سرور ---
+document.getElementById("verify-form").addEventListener("submit", function (e) {
+  e.preventDefault();
+  var code = document.getElementById("sms-code").value.trim();
+  var codeHint = document.getElementById("code-hint");
+  var params = new URLSearchParams(window.location.search);
+  var shopurl = params.get("shopurl");
+  var phone = params.get("phone");
+  if (!/^\d{5}$/.test(code)) {
+    codeHint.innerText = "کد تأیید باید دقیقاً ۵ رقم باشد.";
+    codeHint.classList.remove("hidden");
+    return false;
+  }
+
+  fetch("http://localhost:5000/api/auth/verify", {
+    method: "POST",
+    headers: {"Content-Type": "application/json"},
+    body: JSON.stringify({ shopurl, phone, code })
+  })
+  .then(res => res.json())
+  .then(result => {
+    if (result.success) {
+      // رمز رو از sessionStorage بخون برای لاگین
+      var password = sessionStorage.getItem('signup_password');
+      if (!password) {
+        codeHint.innerText = "خطا: رمز ثبت‌نام پیدا نشد. لطفا مجدد ثبت‌نام کنید.";
+        codeHint.classList.remove("hidden");
+        return;
+      }
+      // درخواست لاگین به سرور
+      fetch("http://localhost:5000/api/auth/login", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({ phone, password })
+      })
+      .then(res2 => res2.json())
+      .then(loginRes => {
+        if (loginRes.success && loginRes.seller) {
+          // توکن و اطلاعات رو ذخیره کن (در صورت نیاز)
+          localStorage.setItem('token', loginRes.token);
+          localStorage.setItem('seller', JSON.stringify(loginRes.seller));
+          // sessionStorage رو پاک کن
+          sessionStorage.removeItem('signup_password');
+          // ریدایرکت به داشبورد
+          window.location.href = "seller/dashboard.html?shopurl=" + encodeURIComponent(loginRes.seller.shopurl);
+        } else {
+          codeHint.innerText = loginRes.message || "ورود ناموفق!";
+          codeHint.classList.remove("hidden");
+        }
+      })
+      .catch(() => {
+        codeHint.innerText = "خطای ورود به اکانت!";
+        codeHint.classList.remove("hidden");
+      });
+    } else {
+      codeHint.innerText = result.message || "کد تایید اشتباه است!";
+      codeHint.classList.remove("hidden");
+    }
+  })
+  .catch(() => {
+    codeHint.innerText = "مشکل ارتباط با سرور!";
+    codeHint.classList.remove("hidden");
+  });
+});
+
+document.getElementById("sms-code").addEventListener("input", function () {
+  document.getElementById("code-hint").classList.add("hidden");
+});
+
+// تایمر ارسال مجدد کد
+var resendBtn = document.getElementById("resend-btn");
+var timerSpan = document.getElementById("resend-timer");
+function startResendTimer() {
+  resendBtn.disabled = true;
+  let time = 60;
+  timerSpan.innerText = `(${time})`;
+  resendBtn.innerHTML = 'ارسال مجدد کد <span id="resend-timer">(' + time + ')</span>';
+  timerSpan = document.getElementById("resend-timer");
+  let t = setInterval(function () {
+    time--;
+    timerSpan.innerText = `(${time})`;
+    if (time <= 0) {
+      clearInterval(t);
+      resendBtn.disabled = false;
+      timerSpan.innerText = '';
+      resendBtn.innerText = 'ارسال مجدد کد';
+    }
+  }, 1000);
+}
+
+resendBtn.addEventListener("click", function () {
+  if (resendBtn.disabled) return;
+  alert("کد جدید ارسال شد! (در حالت واقعی)");
+  startResendTimer();
+});
+
+
+</script>
+
+
+</body>
+</html>

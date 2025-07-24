@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>ورود به ویترینت</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;700&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@800&display=swap" rel="stylesheet" />
+  <style>
+    body {
+      font-family: 'Vazirmatn', sans-serif;
+      background: linear-gradient(108deg, #e0fdfa 0%, #f8fafc 60%, #d4fbe8 100%);
+      min-height: 100vh;
+    }
+    .glass {
+      background: rgba(255,255,255,0.91);
+      backdrop-filter: blur(13px);
+      box-shadow: 0 8px 40px #10b98121, 0 3px 14px #0ea5e916;
+      border-radius: 1.7rem;
+    }
+    .brand-btn {
+      background: linear-gradient(93deg,#10b981 0%,#0ea5e9 90%);
+      color: #fff !important;
+      box-shadow: 0 2px 12px #10b98131;
+    }
+    .brand-btn:hover {filter: brightness(1.07);}
+    .seller-box {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      margin: 2.6rem 0 0 0;
+    }
+    @media (min-width: 480px) {
+      .seller-box {
+        flex-direction: row;
+        justify-content: flex-start;
+        gap: 1.1rem;
+      }
+    }
+    .seller-login-link {
+      background: linear-gradient(91deg,#10b981 50%,#0ea5e9 130%);
+      color: #fff !important;
+      font-weight: 900;
+      padding: .65em 1.65em;
+      border-radius: 1.1em;
+      font-size: 1.07rem;
+      transition: box-shadow 0.17s, background 0.16s, transform 0.18s;
+      box-shadow: 0 1px 7px #10b98113;
+      display: flex;
+      align-items: center;
+      gap: 0.7em;
+      text-decoration: none;
+      letter-spacing: -.01em;
+      margin-top: 0;
+      margin-bottom: 0;
+    }
+    .seller-login-link:hover {
+      background: #0ea5e9;
+      color: #fff;
+      box-shadow: 0 2px 16px #0ea5e92c;
+      transform: scale(1.06);
+      text-decoration: none;
+    }
+    .seller-icon {
+      width: 1.35em;
+      height: 1.35em;
+    }
+    /* Responsive logo */
+    .logo-vitrin {
+      font-family: 'Poppins', 'Vazirmatn', Arial, sans-serif;
+      font-size: 1.42rem;
+      font-weight: 900;
+      letter-spacing: -.01em;
+      background: linear-gradient(93deg, #10b981 30%, #0ea5e9 90%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+      text-fill-color: transparent;
+      color: transparent;
+      transition: color .18s, background .18s;
+      display: inline-block;
+      padding: .18em 0;
+    }
+    .logo-vitrin:hover {
+      filter: brightness(1.18);
+      text-decoration: underline wavy #10b98177;
+    }
+    .fadein {
+      animation: fadein 0.4s;
+    }
+    @keyframes fadein {
+      from {opacity:0; transform:translateY(16px);}
+      to {opacity:1; transform:translateY(0);}
+    }
+    @media (max-width: 640px) {
+      .glass {padding: 1.6em 0.7em 1.7em 0.7em;}
+      .seller-login-link {font-size: .97rem; padding: .45em 1.15em;}
+      .seller-icon {width: 1.1em; height: 1.1em;}
+      .logo-vitrin {font-size: 1.09rem;}
+    }
+  </style>
+</head>
+<body class="text-gray-800 overflow-x-hidden">
+
+<!-- Header فقط لوگوی متنی خوش استایل و لینک به صفحه اصلی + ثبت رایگان فروشگاه -->
+<header class="w-full bg-white/90 shadow-sm backdrop-blur-md sticky top-0 z-40">
+  <div class="max-w-6xl mx-auto flex items-center justify-between px-3 sm:px-7 py-2 sm:py-3 gap-2 relative">
+    <a href="index.html" class="logo-vitrin select-none" title="ویترینت - صفحه اصلی">ویترینت</a>
+    <a href="/post.html"
+       class="rounded-full font-extrabold bg-gradient-to-l from-[#10b981] to-[#0ea5e9] text-white shadow-md transition-all duration-150 text-[14px] sm:text-[15px] px-4 sm:px-5 py-2 sm:py-[9px] flex items-center justify-center
+              hover:scale-105 hover:from-[#0ea5e9] hover:to-[#10b981]"
+       style="letter-spacing:-.01em; text-decoration:none; min-width:120px; max-width:195px;"
+       title="ثبت رایگان فروشگاه">
+      ثبت رایگان فروشگاه
+    </a>
+  </div>
+</header>
+
+
+
+
+<main class="flex flex-col items-center justify-center min-h-[84vh] pt-10 pb-8 px-2">
+  <section class="glass w-full max-w-md px-4 sm:px-8 py-8 sm:py-10 shadow-2xl mx-auto fadein">
+
+    <h2 class="text-2xl sm:text-3xl font-black bg-gradient-to-l from-[#10b981] to-[#0ea5e9] text-transparent bg-clip-text text-center mb-6 tracking-tight">ورود به ویترینت</h2>
+
+    <form class="space-y-6 mt-3" id="loginForm" autocomplete="on" novalidate>
+      <div>
+        <label class="block text-[15px] font-bold mb-2 text-gray-700">شماره موبایل</label>
+        <input type="tel"
+               id="mobile"
+               class="w-full py-3 px-4 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#10b981]/30 bg-white/85 text-base shadow-sm transition"
+               placeholder="مثلاً 09121234567" inputmode="tel" autocomplete="tel" required />
+      </div>
+<div>
+  <label class="block text-[15px] font-bold mb-2 text-gray-700">رمز عبور</label>
+  <div class="relative w-full">
+    <input
+      type="password"
+      id="password"
+      class="w-full py-3 px-4 pr-12 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#0ea5e9]/30 bg-white/85 text-base shadow-sm transition"
+      placeholder="رمز خود را وارد کنید"
+      autocomplete="current-password"
+      required
+    />
+    <button
+      type="button"
+      id="togglePassword"
+      class="absolute top-0 bottom-0 left-3 flex items-center justify-center h-full w-9 p-0 m-0 bg-transparent border-none outline-none z-20"
+      tabindex="-1"
+      aria-label="نمایش یا مخفی کردن رمز"
+      style="line-height:0;"
+    >
+      <svg id="eyeOpen" xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-gray-400 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M15 12a3 3 0 11-6 0 3 3 0 016 0zm6 0c0 4-4.5 7-9 7s-9-3-9-7 4.5-7 9-7 9 3 9 7z"/>
+      </svg>
+      <svg id="eyeClosed" xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-gray-400 pointer-events-none hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M13.875 18.825A10.05 10.05 0 0112 19c-5 0-9-3-9-7a9.96 9.96 0 012.623-6.745M9.88 9.88a3 3 0 104.24 4.24M3 3l18 18"/>
+      </svg>
+    </button>
+  </div>
+  <div id="error-message" class="hidden mt-2 text-red-500 text-sm font-bold transition-all"></div>
+  <div id="forgot-link" class="hidden mt-2 text-sm">
+    <a href="recover.html" class="text-[#0ea5e9] font-extrabold hover:underline transition">رمز عبور را فراموش کرده‌اید؟</a>
+  </div>
+</div>
+
+
+
+
+
+
+
+      <button type="submit" class="w-full brand-btn py-3 rounded-xl font-black text-lg shadow-md transition-all duration-200 hover:scale-[1.03]">
+        ورود
+      </button>
+    </form>
+
+    <!-- باکس فروشنده ریسپانسیو عالی و تمیز -->
+<!-- باکس فروشنده فوق‌ظریف و ریسپانسیو -->
+<!-- باکس فروشنده فوق‌ظریف و ریسپانسیو بدون هیچ آیکون -->
+<div class="w-full flex flex-col items-center mt-8 mb-2">
+  <span class="text-gray-500 text-[15px] font-bold tracking-tight mb-3">فروشنده هستید؟</span>
+  <a href="/seller/login"
+     class="block w-full sm:w-[340px] rounded-[1.5em] shadow-lg transition
+     bg-gradient-to-l from-[#10b981] to-[#0ea5e9] focus:outline-none
+     hover:scale-[1.028] active:scale-100 ring-2 ring-transparent hover:ring-[#0ea5e9]/30"
+     style="text-decoration:none;"
+     title="ورود فروشندگان">
+    <span class="flex items-center justify-center w-full h-[58px] sm:h-[54px]">
+      <span class="font-extrabold text-white text-base sm:text-[1.11rem] tracking-tight w-full text-center select-none">
+        ورود به عنوان فروشنده
+      </span>
+    </span>
+  </a>
+</div>
+
+
+
+    <div class="text-sm text-center text-gray-600 mt-9">
+      حساب نداری؟
+      <a href="register.html" class="text-[#10b981] font-extrabold hover:underline transition">ثبت‌نام کن</a>
+    </div>
+  </section>
+</main>
+
+<!-- فوتر -->
+<footer class="mt-14 border-t bg-gradient-to-r from-[#e0fdfa] to-[#f8fafc] text-center text-xs sm:text-sm text-gray-400 py-6 rounded-t-3xl fadein" style="animation-delay:.4s;">
+  © 2025 <span class="text-[#10b981] font-bold">ویترینت</span> - همه حقوق محفوظ است.
+</footer>
+
+<!-- جاوااسکریپت برای نمایش پیام خطا و ریکاوری -->
+<!-- جاوااسکریپت برای نمایش پیام خطا و ریکاوری -->
+<script>
+document.getElementById('loginForm').addEventListener('submit', async function(e) {
+  e.preventDefault();
+  const phone = document.getElementById('mobile').value.trim();
+  const password = document.getElementById('password').value.trim();
+  const errorMsg = document.getElementById('error-message');
+  const forgotLink = document.getElementById('forgot-link');
+
+  try {
+    const res = await fetch('/api/auth/login-user', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      credentials: 'include',
+      body: JSON.stringify({ phone, password })
+    });
+
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.message || 'خطا در ورود!');
+
+    // --- ذخیره توکن در کوکی ---
+
+    // === ریدایرکت بعد از لاگین ===
+// === ریدایرکت بعد از لاگین ===
+const back = sessionStorage.getItem('afterLoginReturn');   // اگر از صفحه گزارش آمده‌ایم
+if (back) {
+  sessionStorage.removeItem('afterLoginReturn');
+  window.location.href = back;           // ⇠ بازگشت به همان فروشگاه
+} else {
+  // رفتار قبلی: ?redirect=... یا داشبورد کاربر
+  const urlParams  = new URLSearchParams(window.location.search);
+  const redirectUrl = urlParams.get('redirect');
+  window.location.href = redirectUrl || '/user/dashboard.html';
+}
+
+
+  } catch(err) {
+    errorMsg.innerText = err.message || 'خطا در ورود!';
+    errorMsg.classList.remove('hidden');
+    forgotLink.classList.remove('hidden');
+  }
+});
+
+
+// 👁 نمایش/مخفی‌کردن رمز عبور
+document.getElementById('togglePassword').addEventListener('click', function() {
+  const passwordInput = document.getElementById('password');
+  const eyeOpen = document.getElementById('eyeOpen');
+  const eyeClosed = document.getElementById('eyeClosed');
+
+  if (passwordInput.type === 'password') {
+    passwordInput.type = 'text';
+    eyeOpen.classList.add('hidden');
+    eyeClosed.classList.remove('hidden');
+  } else {
+    passwordInput.type = 'password';
+    eyeOpen.classList.remove('hidden');
+    eyeClosed.classList.add('hidden');
+  }
+});
+</script>
+
+
+
+
+
+
+
+
+</body>
+</html>

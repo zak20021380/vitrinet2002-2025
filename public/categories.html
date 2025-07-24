@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>دسته‌بندی فروشگاه‌ها - ویترینت</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;700&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@800&display=swap" rel="stylesheet"/>
+  <style>
+    body {
+      font-family: 'Vazirmatn', sans-serif;
+      background: linear-gradient(115deg, #e0fdfa 0%, #f8fafc 60%, #d4fbe8 100%);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+    .glass {
+      background: rgba(255,255,255,0.87);
+      box-shadow: 0 10px 40px #10b98124, 0 3px 12px #0ea5e91a;
+      backdrop-filter: blur(14px);
+      border-radius: 1.5rem;
+    }
+    .cat-icon {
+      border-radius: 1.1rem;
+      box-shadow: 0 4px 16px #10b98133;
+      width: 62px;
+      height: 62px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 18px;
+      background: linear-gradient(120deg,#e0fdfa 5%, #f3faf7 70%);
+      transition: .21s cubic-bezier(.43,1.3,.7,1.3);
+      border: 1.5px solid #e0fdfa;
+      overflow: hidden;
+    }
+    .cat-icon svg {
+      width: 38px;
+      height: 38px;
+      display: block;
+    }
+    .cat-icon:hover { 
+      box-shadow: 0 7px 30px #0ea5e933;
+      border-color: #10b981;
+      transform: scale(1.1) rotate(-2deg);
+    }
+    .category-card {
+      transition: all .18s cubic-bezier(.4,2,.6,1);
+      border: 2px solid #f1f5f9;
+      min-height: 270px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      align-items: stretch;
+      height: 100%;
+      padding: 1.7rem 1.1rem;
+      background: rgba(255,255,255,0.97);
+      border-radius: 1.5rem;
+    }
+    .category-card:hover {
+      box-shadow: 0 8px 38px #10b9811d, 0 3px 13px #0ea5e91a;
+      border-color: #10b981;
+      transform:translateY(-7px) scale(1.03);
+    }
+    .btn-grad {
+      background: linear-gradient(90deg,#10b981 10%,#0ea5e9 100%);
+      color: #fff !important;
+      box-shadow: 0 2px 12px #10b98133;
+      font-weight: bold;
+      border-radius: 1rem;
+      transition: all .17s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      min-height: 44px;
+      padding: 0.6rem 0;
+    }
+    .btn-grad span {
+      width: 100%;
+      display: block;
+      text-align: center;
+    }
+    .btn-grad:hover { filter: brightness(1.08);}
+    .logo-vitreenet {
+      font-family: 'Poppins', sans-serif;
+      font-weight: 800;
+      font-size: 1.55rem;
+      background: linear-gradient(90deg,#11d6ad 0%, #10b981 60%, #2db4e8 100%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      letter-spacing: 1.7px;
+      filter: drop-shadow(0 1px 5px #10b98118);
+      white-space: nowrap;
+      display: inline-block;
+      padding-right: 3px;
+      padding-left: 3px;
+      line-height: 1.1;
+      text-shadow: none;
+    }
+    @media (min-width: 640px) {
+      .logo-vitreenet { font-size: 1.9rem; }
+    }
+    @media (min-width: 1024px) {
+      .logo-vitreenet { font-size: 2.05rem; }
+    }
+    @media (max-width: 1024px) {
+      .category-card {padding:1.2rem 0.8rem;}
+      .cat-icon {width: 50px;height: 50px;}
+      .cat-icon svg {width: 28px;height: 28px;}
+    }
+    @media (max-width: 700px) {
+      .category-card {padding:0.8rem 0.4rem;}
+    }
+    @media (max-width: 550px){
+      .category-card {min-height: 160px;padding:0.5rem 0.15rem;}
+      .cat-icon {width: 32px;height: 32px;}
+      .cat-icon svg {width: 18px;height: 18px;}
+      .btn-grad {min-height:32px; font-size: 13px;}
+    }
+    ::-webkit-scrollbar {width: 7px;}
+    ::-webkit-scrollbar-thumb {background: #c8f7e6;}
+  </style>
+</head>
+<body class="text-gray-800">
+
+<!-- هدر سایت -->
+<header class="w-full bg-white/90 shadow-sm backdrop-blur-md sticky top-0 z-50">
+  <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between px-3 sm:px-6 py-3 gap-y-2">
+    <div class="flex items-center gap-3 flex-shrink-0">
+      <a href="index.html" class="logo-vitreenet">Vitreenet</a>
+      <div class="flex items-center gap-1 px-3 py-1 rounded-full shadow-lg ml-2"
+           style="background:linear-gradient(90deg,#10b981E6 70%,#0ea5e9E6); border: 1.5px solid #fff6; backdrop-filter: blur(5px);">
+        <svg width="18" height="18" fill="none" viewBox="0 0 22 22" class="ml-1 drop-shadow">
+          <defs>
+            <linearGradient id="city-icon" x1="0" y1="0" x2="22" y2="22" gradientUnits="userSpaceOnUse">
+              <stop stop-color="#fff" />
+              <stop offset="1" stop-color="#b2f2e9" />
+            </linearGradient>
+          </defs>
+          <path d="M11 2.5C7.13 2.5 4 5.61 4 9.45c0 3.52 4.1 7.93 6.2 10.01.46.47 1.2.47 1.66 0 2.1-2.08 6.14-6.49 6.14-10.01C18 5.61 14.87 2.5 11 2.5Zm0 10.25a2.75 2.75 0 1 1 0-5.5 2.75 2.75 0 0 1 0 5.5Z"
+            fill="url(#city-icon)"/>
+        </svg>
+        <span class="font-bold text-white text-[13px] sm:text-[14px] drop-shadow-sm" style="letter-spacing:.3px;">سنندج</span>
+      </div>
+    </div>
+    <nav class="flex items-center justify-end gap-2 sm:gap-3 flex-wrap text-sm sm:text-base w-full sm:w-auto">
+      <a href="index.html" class="text-gray-700 hover:text-[#10b981] font-bold px-2 sm:px-3 transition">خانه</a>
+      <a href="categories.html" class="text-gray-700 hover:text-[#0ea5e9] font-bold px-2 sm:px-3 transition">دسته‌بندی</a>
+      <a href="login.html" class="text-gray-700 hover:text-[#0ea5e9] font-bold px-2 sm:px-3 transition">ورود</a>
+      <a href="post.html" class="btn-grad px-4 py-2 rounded-full font-black shadow hover:scale-105 transition-all duration-200 whitespace-nowrap text-white text-sm sm:text-base">
+        ثبت فروشگاه
+      </a>
+    </nav>
+  </div>
+</header>
+
+<main class="max-w-7xl mx-auto mt-32 mb-14 px-2 sm:px-4">
+  <section class="glass rounded-2xl py-10 px-3 sm:px-12 shadow-lg mt-2">
+    <h2 class="text-2xl sm:text-3xl font-extrabold text-gray-800 mb-8 text-center">دسته‌بندی فروشگاه‌ها</h2>
+    <!-- سرچ باکس -->
+    <form onsubmit="event.preventDefault(); searchCategories();"
+      class="max-w-2xl mx-auto mb-10">
+      <div class="flex rounded-xl shadow bg-[#f3faf7] border-2 border-[#e0f7fa] overflow-hidden">
+        <input type="text" id="searchInput"
+          class="px-4 py-3 w-full text-base outline-none bg-transparent font-bold text-gray-700 placeholder:text-gray-400"
+          placeholder="جستجو در دسته‌بندی، توضیحات یا فروشگاه نمونه ..." autocomplete="off">
+        <button type="submit" class="btn-grad px-5 flex items-center justify-center text-lg font-extrabold transition-all hover:opacity-95">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <circle cx="11" cy="11" r="8" stroke="currentColor"/>
+            <path d="M21 21l-3.8-3.8" stroke-linecap="round"/>
+          </svg>
+        </button>
+      </div>
+    </form>
+    <!-- دسته‌بندی‌ها -->
+    <div id="categoriesGrid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-7"></div>
+    <div id="noResult" class="hidden text-center mt-12 text-lg text-gray-400 font-bold">دسته‌ای پیدا نشد!</div>
+  </section>
+</main>
+
+<footer class="w-full bg-gradient-to-tr from-[#f8fafc] via-[#e0fdfa] to-[#d4fbe8] border-t border-[#e0fdfa] mt-16 px-4 sm:px-10 pt-10 pb-4 rounded-t-[2.3rem] shadow-lg">
+  <div class="max-w-6xl mx-auto flex flex-col md:flex-row items-center md:items-start justify-between gap-8">
+    <div class="flex flex-col items-center md:items-start gap-3 md:w-1/3">
+      <div class="flex items-center gap-2 mb-1">
+        <img src="assets/images/vitrinet-logo-main.png" alt="Vitrinet" class="w-12 h-12 rounded-lg shadow bg-white border object-contain" />
+        <span class="font-extrabold text-2xl text-[#10b981] tracking-tight">ویترینت</span>
+      </div>
+      <p class="text-gray-600 text-sm font-medium text-center md:text-right leading-relaxed max-w-xs">
+        ویترینت، سکوی رشد کسب‌وکار تو؛ معرفی و ثبت فروشگاه، فقط با چند کلیک.
+      </p>
+      <div class="flex gap-2 mt-1">
+        <a href="#" aria-label="تلگرام" class="bg-white/80 hover:bg-[#0ea5e9]/15 shadow rounded-full p-2 transition backdrop-blur">
+          <svg width="18" height="18" fill="none" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="#0ea5e9"/><path d="M16.21 8.42l-6.18 2.61c-.42.18-.42.41-.07.52l1.59.5.61 1.96c.08.25.25.31.49.14l1.06-.8 1.48 1.09c.21.16.38.07.44-.2l1.21-5.02c.06-.25-.1-.36-.32-.28z" fill="#fff"/></svg>
+        </a>
+        <a href="#" aria-label="اینستاگرام" class="bg-white/80 hover:bg-[#10b981]/15 shadow rounded-full p-2 transition backdrop-blur">
+          <svg width="18" height="18" fill="none" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="#10b981"/><path d="M17 8a1 1 0 11-2 0 1 1 0 012 0zM12 9.5a2.5 2.5 0 1 1-5 0 2.5 2.5 0 0 1 5 0z" fill="#fff"/><rect x="7" y="7" width="10" height="10" rx="5" stroke="#fff" stroke-width="1.3"/></svg>
+        </a>
+      </div>
+    </div>
+    <div class="flex-1 flex flex-col md:flex-row items-center md:items-start justify-center gap-10 mt-8 md:mt-0">
+      <div>
+        <h4 class="font-bold text-[#0ea5e9] mb-2 text-base text-center md:text-right">دسترسی سریع</h4>
+        <ul class="space-y-2 text-gray-700 text-sm font-semibold text-center md:text-right">
+          <li><a href="index.html" class="hover:text-[#10b981] transition">خانه</a></li>
+          <li><a href="categories.html" class="hover:text-[#0ea5e9] transition">دسته‌بندی‌ها</a></li>
+          <li><a href="post.html" class="hover:text-[#10b981] transition">ثبت فروشگاه</a></li>
+          <li><a href="login.html" class="hover:text-[#0ea5e9] transition">ورود فروشنده</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4 class="font-bold text-[#10b981] mb-2 text-base text-center md:text-right">اطلاعات و قوانین</h4>
+        <ul class="space-y-2 text-gray-700 text-sm font-semibold text-center md:text-right">
+          <li><a href="#" class="hover:text-[#0ea5e9] transition">درباره ویترینت</a></li>
+          <li><a href="#" class="hover:text-[#0ea5e9] transition">پشتیبانی</a></li>
+          <li><a href="#" class="hover:text-[#10b981] transition">قوانین</a></li>
+          <li><a href="#" class="hover:text-[#10b981] transition">تماس با ما</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="flex flex-col items-center md:items-end gap-3 md:w-1/4 mt-8 md:mt-0">
+      <h4 class="font-bold text-[#0ea5e9] mb-2 text-base">اعتبار ویترینت</h4>
+      <div class="flex gap-3">
+        <div class="w-12 h-12 rounded-xl bg-white/70 border flex items-center justify-center shadow">
+          <svg width="26" height="26" viewBox="0 0 34 34" fill="none">
+            <circle cx="17" cy="17" r="16" stroke="#10b981" stroke-width="2"/>
+            <path d="M10 19.5L15 25L24 14" stroke="#0ea5e9" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <div class="w-12 h-12 rounded-xl bg-white/70 border flex items-center justify-center shadow">
+          <svg width="26" height="26" viewBox="0 0 34 34" fill="none">
+            <circle cx="17" cy="17" r="16" stroke="#0ea5e9" stroke-width="2"/>
+            <path d="M12 18l4 4 6-8" stroke="#10b981" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+      </div>
+      <span class="text-xs text-gray-500 font-medium text-center">نماد اعتماد و ساماندهی<br>ویترینت، قابل اطمینان</span>
+    </div>
+  </div>
+  <div class="border-t border-[#e0f7fa] mt-8 pt-3 pb-1 text-center text-xs sm:text-sm text-gray-400">
+    © 2025 <span class="font-bold text-[#10b981]">ویترینت</span> | تمام حقوق محفوظ است.
+  </div>
+</footer>
+
+<script>
+// لیست دسته‌بندی‌ها (کد ثابت)
+const categories = [
+  { name: "خوراک", color: "from-[#22d3ee] to-[#43e97b]", desc: "مواد غذایی، سوپرمارکت، رستوران، فست‌فود، کافه", catId: "food" },
+  { name: "پوشاک", color: "from-[#36d1c4] to-[#49e7b7]", desc: "لباس مردانه، زنانه، بچگانه، کفش و کیف", catId: "clothing" },
+  { name: "زیبایی", color: "from-[#15e6c8] to-[#0ea5e9]", desc: "آرایشی، بهداشتی، سالن زیبایی و سلامت", catId: "beauty" },
+  { name: "خدمات", color: "from-[#0ea5e9] to-[#0bd6b3]", desc: "تعمیرات، آموزشی، رفاهی، خدمات شهری", catId: "service" },
+  { name: "دیجیتال", color: "from-[#22d3ee] to-[#16e387]", desc: "موبایل، لپ‌تاپ، کالای دیجیتال، لوازم جانبی", catId: "digital" },
+  { name: "کتاب و تحریر", color: "from-[#c4b5fd] to-[#8b5cf6]", desc: "کتاب، لوازم تحریر، لوازم اداری", catId: "book" },
+  { name: "خودرو", color: "from-[#21d4fd] to-[#2152ff]", desc: "قطعات یدکی، خدمات خودرو، لوازم جانبی", catId: "auto" },
+  { name: "قنادی و شیرینی", color: "from-[#fbbf24] to-[#f59e0b]", desc: "قنادی، شیرینی فروشی، نان فانتزی", catId: "sweets" },
+  { name: "گل و گیاه", color: "from-[#bbf7d0] to-[#10b981]", desc: "گل فروشی، گیاهان آپارتمانی", catId: "flower" },
+  { name: "لوازم خانگی", color: "from-[#fee2e2] to-[#fecdd3]", desc: "لوازم منزل، برقی، آشپزخانه", catId: "home" },
+  { name: "ورزشی", color: "from-[#21d4fd] to-[#43e97b]", desc: "پوشاک ورزشی، باشگاه، لوازم ورزش", catId: "sport" },
+  { name: "تالار و مجالس", color: "from-[#fecdd3] to-[#fef9c3]", desc: "تالار پذیرایی، خدمات مجالس", catId: "talar" }
+];
+
+// SVG جایگزین موقت آیکون
+function getCategoryIcon(title) {
+  return `
+    <svg viewBox="0 0 48 48" fill="none">
+      <rect x="4" y="7" width="40" height="27" rx="7" fill="url(#g${title})"/>
+      <defs>
+        <linearGradient id="g${title}" x1="0" y1="0" x2="48" y2="44" gradientUnits="userSpaceOnUse">
+          <stop stop-color="#10b981"/>
+          <stop offset="1" stop-color="#0ea5e9"/>
+        </linearGradient>
+      </defs>
+      <rect x="13" y="17" width="22" height="6" rx="2.3" fill="#fff" opacity=".6"/>
+      <rect x="17" y="26" width="14" height="3" rx="1.2" fill="#fff" opacity=".4"/>
+    </svg>
+  `;
+}
+
+// تابع داینامیک رندر
+function renderCategories(list, shops) {
+  const grid = document.getElementById("categoriesGrid");
+  grid.innerHTML = "";
+  if (list.length === 0) {
+    document.getElementById("noResult").classList.remove("hidden");
+    return;
+  } else {
+    document.getElementById("noResult").classList.add("hidden");
+  }
+  list.forEach(cat => {
+    // تعداد مغازه‌های این دسته طبق دیتابیس
+    const shopsInCat = shops.filter(
+      s => s.category === cat.name
+    );
+    const count = shopsInCat.length;
+    const sampleNames = shopsInCat.map(s => s.storename).slice(0,2);
+
+    grid.innerHTML += `
+      <div class="category-card glass group hover:shadow-xl animate-pop min-h-[190px]">
+        <div class="flex flex-col items-center text-center mb-3">
+          <div class="cat-icon bg-gradient-to-br ${cat.color} group-hover:scale-105">${getCategoryIcon(cat.name)}</div>
+          <span class="text-lg font-extrabold text-[#10b981] mb-1 tracking-tight mt-1">${cat.name}</span>
+          <span class="text-sm text-gray-500 mb-2 block">${cat.desc}</span>
+        </div>
+        <div class="flex flex-col gap-3">
+          <div class="flex items-center justify-center gap-2 flex-wrap mb-1">
+            <span class="inline-block px-3 py-1 bg-[#e0fdfa] text-[#10b981] text-xs rounded-full font-bold shadow">${count} فروشگاه</span>
+            <span class="hidden sm:inline-block text-gray-400 text-xs">|</span>
+            <span class="hidden sm:inline-block text-gray-500 text-xs">نمونه:</span>
+            <span class="hidden sm:inline-block text-gray-500 text-xs">${sampleNames.length ? sampleNames.join("، ") : "-"}</span>
+          </div>
+          <a href="shops-by-category.html?cat=${cat.catId}" class="btn-grad w-full rounded-lg font-bold text-xs sm:text-sm hover:scale-105 transition-all shadow flex items-center justify-center text-center">
+            <span>مشاهده فروشگاه‌ها</span>
+          </a>
+        </div>
+      </div>
+    `;
+  });
+}
+
+// جستجو
+let shops = [];
+let activeCategories = [];
+
+function searchCategories() {
+  const value = document.getElementById("searchInput").value.trim();
+  let filtered = activeCategories;
+  if (value !== "") {
+    filtered = activeCategories.filter(cat =>
+      cat.name.includes(value) ||
+      cat.desc.includes(value) ||
+      shops.some(s => s.category === cat.name && s.storename.includes(value))
+    );
+  }
+  renderCategories(filtered, shops);
+}
+
+// اجرا: دیتابیس مغازه‌ها رو بگیر و کارت‌ها رو باهاش بساز
+async function initCategoriesPage() {
+  shops = [];
+  try {
+    const res = await fetch("http://localhost:5000/api/sellers");
+    if (res.ok) {
+      shops = await res.json();
+    } else {
+      console.error("خطا در دریافت داده‌ها:", res.status);
+    }
+  } catch(e) {
+    console.error("ارتباط با سرور برقرار نشد:", e);
+  }
+
+  // اگر داده‌ای نبود، برای تست نمونه اضافه کن
+  if (shops.length === 0) {
+    shops = [
+      { storename: "سوپر مارکت علی", category: "خوراک" },
+      { storename: "رستوران خوب", category: "خوراک" },
+      { storename: "لباس فروشی مد", category: "پوشاک" },
+      { storename: "آرایشگاه زیبایی", category: "زیبایی" }
+    ];
+    console.log("داده‌های نمونه برای تست اضافه شد.");
+  }
+
+  activeCategories = categories.filter(cat => shops.filter(s => s.category === cat.name).length > 0);
+
+  if (activeCategories.length === 0) {
+    // اگر هیچ دسته‌ای وجود نداشت، همه رو نشان بده با count 0
+    activeCategories = categories;
+  }
+
+  // مرتب‌سازی بر اساس تعداد فروشگاه‌ها (نزولی)
+  activeCategories.sort((a, b) => shops.filter(s => s.category === b.name).length - shops.filter(s => s.category === a.name).length);
+
+  renderCategories(activeCategories, shops);
+
+  document.getElementById("searchInput").addEventListener("keyup", function(e){
+    if(e.key === "Enter") searchCategories();
+  });
+}
+
+initCategoriesPage();
+</script>
+
+</body>
+</html>

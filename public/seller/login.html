@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>ورود فروشنده | ویترینت</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Vazirmatn', sans-serif;
+      background: linear-gradient(115deg, #e0fdfa 0%, #f8fafc 60%, #d4fbe8 100%);
+      min-height: 100vh;
+    }
+    .glass {
+      background: rgba(255,255,255,0.95);
+      box-shadow: 0 10px 38px #10b98118, 0 2px 10px #0ea5e915;
+      border-radius: 1.7rem;
+      backdrop-filter: blur(14px);
+      margin-top: 42px;
+    }
+    .brand-btn {
+      background: linear-gradient(90deg, #10b981 10%, #0ea5e9 100%);
+      color: #fff !important;
+      font-weight: bold;
+      border-radius: 1.2rem;
+      transition: all .16s;
+      box-shadow: 0 2px 12px #10b98120;
+    }
+    .brand-btn:hover { filter: brightness(1.1);}
+    .fadein { animation: fadein .65s;}
+    @keyframes fadein {
+      from { opacity: 0; transform: translateY(32px);}
+      to   { opacity: 1; transform: translateY(0);}
+    }
+    .header-logo {
+      font-weight: bold;
+      font-size: 2rem;
+      background: linear-gradient(90deg,#10b981 40%,#0ea5e9 70%);
+      background-clip: text;
+      -webkit-background-clip: text;
+      color: transparent;
+      letter-spacing:1.4px;
+      margin-bottom: 1.1rem;
+      text-align: center;
+      display: block;
+      text-decoration: none;
+    }
+    /* استایل مودال جدید */
+    .modal-bg {
+      background: rgba(22,22,22,0.20);
+      position: fixed; inset: 0;
+      display: flex; align-items: center; justify-content: center;
+      z-index: 100;
+      transition: background 0.2s;
+    }
+    .modal-content {
+      background: white;
+      border-radius: 1.5rem;
+      box-shadow: 0 18px 48px #10b9811a;
+      padding: 2.1rem 1.6rem 1.4rem 1.6rem;
+      max-width: 350px; width: 95vw;
+      text-align: center;
+      animation: fadein .36s;
+      position: relative;
+    }
+    .modal-content h3 {
+      font-size: 1.2rem;
+      color: #0ea5e9;
+      font-weight: 900;
+      margin-bottom: 8px;
+      letter-spacing: -.3px;
+    }
+    .modal-content p {
+      color: #64748b;
+      font-size: 0.98rem;
+      margin-bottom: 16px;
+    }
+    .modal-content input {
+      direction: ltr;
+      text-align: left;
+    }
+    .modal-close-x {
+      position: absolute;
+      left: 1.1rem;
+      top: 1.1rem;
+      color: #a0aec0;
+      background: none;
+      border: none;
+      font-size: 1.7rem;
+      line-height: 1;
+      cursor: pointer;
+      transition: color .14s;
+    }
+    .modal-close-x:hover { color: #0ea5e9;}
+    @media (max-width: 600px) {
+      .glass {padding: 1.1rem .6rem !important;}
+      .header-logo {font-size: 1.24rem;}
+      .modal-content {padding: 1.3rem .5rem 1rem .5rem;}
+    }
+  </style>
+</head>
+<body class="text-gray-800">
+
+  <!-- هدر شیشه‌ای -->
+  <header class="w-full bg-white/90 shadow-sm backdrop-blur-md sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between px-3 sm:px-6 py-3 gap-y-2">
+      <div class="flex items-center gap-3 flex-shrink-0">
+        <a href="index.html" class="header-logo font-bold text-[1.55rem] sm:text-[1.9rem] md:text-[2.05rem] bg-gradient-to-l from-[#11d6ad] via-[#10b981] to-[#2db4e8] bg-clip-text text-transparent" style="letter-spacing:1.7px;">ویترینت</a>
+      </div>
+      <nav class="flex items-center justify-end gap-2 sm:gap-3 flex-wrap text-sm sm:text-base w-full sm:w-auto">
+        <a href="index.html" class="text-gray-700 hover:text-[#10b981] font-bold px-2 sm:px-3 transition">خانه</a>
+        <a href="categories.html" class="text-gray-700 hover:text-[#0ea5e9] font-bold px-2 sm:px-3 transition">دسته‌بندی</a>
+        <a href="login.html" class="text-gray-700 hover:text-[#0ea5e9] font-bold px-2 sm:px-3 transition">ورود</a>
+      </nav>
+    </div>
+  </header>
+
+  <!-- فرم ورود -->
+  <main class="max-w-xl mx-auto min-h-screen flex flex-col justify-center items-center px-2" style="margin-top:36px;">
+    <section class="glass border rounded-2xl shadow-2xl p-6 sm:p-10 w-full fadein" id="login-section">
+      <a href="index.html" class="header-logo">ویترینت</a>
+      <h2 class="text-2xl sm:text-3xl font-extrabold text-[#10b981] mb-7 text-center">ورود به حساب فروشنده</h2>
+      <form id="login-form" class="space-y-6" autocomplete="on" novalidate>
+        <div>
+          <label class="block text-sm font-bold mb-1" for="phone">شماره موبایل <span class="text-red-500">*</span></label>
+          <input type="text" id="phone" maxlength="11" inputmode="numeric"
+            class="w-full p-3 border rounded-xl focus:ring-2 focus:ring-green-200 bg-gray-50 text-left ltr"
+            placeholder="09121234567" required />
+        </div>
+        <div>
+          <label class="block text-sm font-bold mb-1" for="password">رمز عبور <span class="text-red-500">*</span></label>
+          <input type="password" id="password"
+            class="w-full p-3 border rounded-xl focus:ring-2 focus:ring-green-200 bg-gray-50"
+            placeholder="رمز عبور" required autocomplete="current-password" />
+        </div>
+        <button type="submit" class="w-full brand-btn text-white py-3 rounded-xl font-bold text-lg shadow-md hover:opacity-90 transition mt-2">ورود</button>
+        <div class="flex flex-row-reverse justify-between items-center mt-2">
+          <button type="button" id="forgot-btn" class="flex items-center gap-1 text-xs text-[#0ea5e9] underline hover:text-[#10b981] font-bold transition">
+            <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 15v2m0 4a9 9 0 1 0-9-9m9 13a4 4 0 0 1-4-4h8a4 4 0 0 1-4 4z" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            فراموشی رمز عبور؟
+          </button>
+          <span class="text-xs text-gray-500">رمز را فراموش کردید؟</span>
+        </div>
+        <div id="error-message" class="text-red-500 text-center text-sm mt-1 min-h-[22px]"></div>
+      </form>
+      <div class="text-center text-sm mt-5">
+        <span>فروشنده جدید هستید؟ </span>
+        <a href="post.html" class="text-[#0ea5e9] underline hover:text-[#10b981] font-bold">ساخت حساب فروشندگی</a>
+      </div>
+    </section>
+  </main>
+
+  <!-- Modal: فراموشی رمز عبور -->
+  <div id="modal-bg" class="modal-bg hidden">
+    <div class="modal-content">
+      <button type="button" class="modal-close-x" id="modal-close" title="بستن">&times;</button>
+      <h3>بازیابی رمز عبور</h3>
+      <p>شماره موبایل خود را وارد کنید تا کد تأیید برایتان ارسال شود.</p>
+      <form id="forgot-form" class="space-y-4">
+        <input type="text" id="forgot-phone" maxlength="11" inputmode="numeric"
+          class="w-full p-3 border rounded-xl focus:ring-2 focus:ring-green-200 bg-gray-50 text-left ltr"
+          placeholder="مثلاً 09123456789" required />
+        <div id="forgot-error" class="text-red-500 text-xs min-h-[22px]"></div>
+        <button type="submit" class="brand-btn text-white py-3 px-5 rounded-xl font-bold text-base w-full">ارسال کد تأیید</button>
+        <button type="button" id="modal-cancel" class="w-full text-gray-500 mt-1 font-bold hover:text-[#0ea5e9] transition">انصراف</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- فوتر -->
+  <footer class="mt-20 bg-white border-t text-center text-sm text-gray-500 py-4">
+    © 2025 <span class="font-bold text-[#10b981]">ویترینت</span> | همه حقوق محفوظ است.
+  </footer>
+
+<script>
+  // --- المان‌های صفحه ---
+  const phoneInput  = document.getElementById('phone');
+  const form        = document.getElementById('login-form');
+  const errorBox    = document.getElementById('error-message');
+  const forgotBtn   = document.getElementById('forgot-btn');
+  const modalBg     = document.getElementById('modal-bg');
+  const modalClose  = document.getElementById('modal-close');
+  const modalCancel = document.getElementById('modal-cancel');
+  const forgotForm  = document.getElementById('forgot-form');
+  const forgotPhone = document.getElementById('forgot-phone');
+  const forgotError = document.getElementById('forgot-error');
+
+  // --- محدود کردن شماره موبایل به 11 رقم ---
+  phoneInput.addEventListener('input', () => {
+    phoneInput.value = phoneInput.value.replace(/[^0-9]/g, '').slice(0, 11);
+  });
+
+  // --- ارسال فرم لاگین ---
+  form.addEventListener('submit', async e => {
+    e.preventDefault();
+    errorBox.textContent = '';
+
+    const phone    = phoneInput.value.trim();
+    const password = document.getElementById('password').value;
+
+    if (phone.length !== 11 || !phone.startsWith('09')) {
+      errorBox.textContent = 'شماره موبایل معتبر وارد کنید.';
+      return;
+    }
+
+    try {
+      const res = await fetch('http://localhost:5000/api/auth/login', {
+        method: 'POST',
+        credentials: 'include', // ارسال/دریافت کوکی HttpOnly
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ phone, password })
+      });
+      const data = await res.json();
+
+      if (!res.ok) {
+        errorBox.textContent = data.message || 'ورود ناموفق بود.';
+      } else {
+        // موفقیت: می‌رویم به داشبورد فروشنده
+        window.location.href = 'dashboard.html';
+      }
+    } catch (err) {
+      console.error('خطا در ورود:', err);
+      errorBox.textContent = 'خطا در ارتباط با سرور.';
+    }
+  });
+
+  // --- مدال فراموشی رمز ---
+  forgotBtn.addEventListener('click', () => {
+    modalBg.classList.remove('hidden');
+    forgotPhone.value = '';
+    forgotError.textContent = '';
+    forgotPhone.focus();
+  });
+  modalClose.addEventListener('click', () => modalBg.classList.add('hidden'));
+  modalCancel.addEventListener('click', () => modalBg.classList.add('hidden'));
+  modalBg.addEventListener('click', e => {
+    if (e.target === modalBg) modalBg.classList.add('hidden');
+  });
+
+  // --- محدود کردن شماره در فراموشی رمز ---
+  forgotPhone.addEventListener('input', () => {
+    forgotPhone.value = forgotPhone.value.replace(/[^0-9]/g, '').slice(0, 11);
+    forgotError.textContent = '';
+  });
+
+  // --- ارسال فرم فراموشی رمز ---
+  forgotForm.addEventListener('submit', e => {
+    e.preventDefault();
+    const p = forgotPhone.value.trim();
+    if (p.length !== 11 || !p.startsWith('09')) {
+      forgotError.textContent = 'شماره موبایل معتبر وارد کنید.';
+      return;
+    }
+    alert('کد تأیید به شماره شما ارسال شد (شبیه‌سازی)');
+    modalBg.classList.add('hidden');
+  });
+</script>
+
+
+</body>
+</html>
