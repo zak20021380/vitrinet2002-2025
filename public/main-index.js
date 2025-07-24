@@ -873,6 +873,7 @@ document.addEventListener('DOMContentLoaded', function() {
           mobileList.appendChild(l);
         }
       });
+      highlightActive();
     } else {
       links.forEach(l => {
         if (!desktopNav.contains(l)) {
@@ -881,6 +882,18 @@ document.addEventListener('DOMContentLoaded', function() {
         }
       });
     }
+  }
+
+  function highlightActive() {
+    const current = location.pathname.split('/').pop() || 'index.html';
+    Array.from(mobileList.querySelectorAll('a')).forEach(a => {
+      const path = new URL(a.href).pathname.split('/').pop();
+      if (path === current) {
+        a.classList.add('active');
+      } else {
+        a.classList.remove('active');
+      }
+    });
   }
 
   moveLinks();
