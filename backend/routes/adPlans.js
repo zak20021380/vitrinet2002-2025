@@ -72,7 +72,7 @@ router.put('/admin', async (req, res) => {
   try {
     let sellerPhone = (req.body.sellerPhone || '').toString().trim() || null;
 
-    const prices = req.body.prices || {};
+    const prices = req.body.prices || req.body || {};
 
     // نرمالایز phone اگر وجود داشت
     if (sellerPhone) {
@@ -98,16 +98,16 @@ const match = sellerPhone
 const update = {
   $set: {
     title: DEFAULT_TITLES[slug],
-    price,
+    price
+  },
+  $setOnInsert: {
+    slug,
     sellerPhone: sellerPhone || null
   }
 };
 
 updates.push(
-  AdPlan.findOneAndUpdate(match, update, {
-    upsert: true,
-    new: true
-  })
+  AdPlan.updateOne(match, update, { upsert: true })
 );
 
     }
