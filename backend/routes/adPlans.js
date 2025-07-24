@@ -91,13 +91,25 @@ router.put('/admin', async (req, res) => {
       const price = Number(prices[slug]);
       if (isNaN(price) || price <= 0) continue;
 
-      updates.push(
-        AdPlan.findOneAndUpdate(
-          { slug, sellerPhone },
-          { $set: { title: DEFAULT_TITLES[slug], price, sellerPhone } },
-          { upsert: true, new: true }
-        )
-      );
+const match = sellerPhone
+  ? { slug, sellerPhone }
+  : { slug, sellerPhone: null };
+
+const update = {
+  $set: {
+    title: DEFAULT_TITLES[slug],
+    price,
+    sellerPhone: sellerPhone || null
+  }
+};
+
+updates.push(
+  AdPlan.findOneAndUpdate(match, update, {
+    upsert: true,
+    new: true
+  })
+);
+
     }
 
     if (!updates.length) {
