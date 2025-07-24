@@ -9,6 +9,7 @@ const JWT_SECRET = "vitrinet_secret_key";
 
 const User        = require('../models/user');          // ← مدل کاربر
 const BannedPhone = require('../models/BannedPhone');   // ← لیست سیاه شماره‌ها
+const Seller      = require('../models/Seller');        // ← مدل فروشنده
 
 /**
  * @param {'admin'|'seller'|'user'|null} requiredRole
@@ -67,6 +68,12 @@ module.exports = (requiredRole = null) => {
   if (payload.role === 'user') {
     const u = await User.findById(payload.id).select('deleted phone');
     if (!u || u.deleted || await BannedPhone.findOne({ phone: u.phone })) {
+      return res.status(403).json({ message: 'دسترسی شما مسدود شده است.' });
+    }
+  }
+  if (payload.role === 'seller') {
+    const s = await Seller.findById(payload.id).select('phone');
+    if (!s || await BannedPhone.findOne({ phone: s.phone })) {
       return res.status(403).json({ message: 'دسترسی شما مسدود شده است.' });
     }
   }

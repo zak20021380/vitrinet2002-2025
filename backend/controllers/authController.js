@@ -85,6 +85,8 @@ res.cookie('admin_token', token, {
         password,
       } = req.body;
 
+      await ensurePhoneAllowed(phone);
+
       // چک تکراری نبودن فروشنده
       const exists = await Seller.findOne({
         $or: [{ shopurl }, { phone }],
@@ -165,7 +167,7 @@ res.cookie('admin_token', token, {
 exports.login = async (req, res) => {
   try {
     const { phone, password } = req.body;
-    // … اعتبارسنجی اولیه و ensurePhoneAllowed …
+    await ensurePhoneAllowed(phone);
 
     // بارگذاری صریح password
     const seller = await Seller.findOne({ phone }).select('+password');

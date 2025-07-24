@@ -2763,10 +2763,33 @@ document.querySelectorAll('.products-filters button').forEach(btn => {
 
 
 
-window.deleteSeller = function(idx) {
-  if (confirm('فروشگاه حذف شود؟')) {
+window.deleteSeller = async function(idx) {
+  const shop = shopsList[idx];
+  if (!shop) return alert('فروشگاه پیدا نشد!');
+  const name = shop.storename || shop.shopLogoText || 'بدون‌نام';
+
+  if (!confirm(`آیا از حذف «${name}» مطمئن هستید؟`)) return;
+
+  const sid =
+        shop.sellerId || shop.seller_id || shop._id || shop._sid || null;
+  if (!sid) return alert('شناسه فروشنده نامعتبر است.');
+
+  try {
+    const res = await fetch(`${API_BASE}/sellers/${encodeURIComponent(sid)}`, {
+      method: 'DELETE',
+      credentials: 'include'
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.message || 'خطا در حذف فروشنده');
+
     shopsList.splice(idx, 1);
-    renderSellers(); updateSidebarCounts(); updateHeaderCounts();
+    renderSellers();
+    updateSidebarCounts();
+    updateHeaderCounts();
+    alert('✅ فروشنده با موفقیت حذف شد.');
+  } catch (err) {
+    console.error('deleteSeller error:', err);
+    alert('❌ ' + err.message);
   }
 };
 
