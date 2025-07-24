@@ -426,6 +426,53 @@ bantaSlider.addEventListener('touchend', () => {
   if (Math.abs(bantaVelocity) > 2) bantaMomentum();
 }, {passive:true});
 
+async function loadBantaShops() {
+  const slider = document.getElementById('banta-shops-slider');
+  slider.innerHTML = '<div style="margin:60px auto;">در حال بارگذاری...</div>';
+  try {
+    const res = await fetch('http://localhost:5000/api/shops?city=بانتا&limit=4');
+    if (!res.ok) throw new Error('network');
+    const shops = await res.json();
+    slider.innerHTML = '';
+    if (!shops.length) {
+      slider.innerHTML = '<div class="text-gray-400 text-center w-full p-7">فروشگاهی یافت نشد.</div>';
+      return;
+    }
+    shops.forEach(shop => {
+      const badge = shop.category && shop.category.trim()
+        ? `<span class="inline-block bg-[#10b981]/10 text-[#10b981] text-xs font-bold px-3 py-1 rounded-full">${shop.category}</span>`
+        : `<span class="inline-block bg-[#cbd5e1]/40 text-[#64748b] text-xs font-bold px-3 py-1 rounded-full">سایر</span>`;
+
+      const card = document.createElement('a');
+      card.href = shop.shopurl ? `shop.html?shopurl=${shop.shopurl}` : '#';
+      card.className = 'group glass min-w-[265px] max-w-xs flex-shrink-0 flex flex-col items-center p-4 rounded-2xl shadow-xl border hover:scale-[1.04] hover:shadow-2xl bg-white/90 backdrop-blur-[3px] transition-all duration-200';
+      card.innerHTML = `
+        <div class="w-full h-[120px] sm:h-[160px] rounded-xl mb-5 flex items-center justify-center relative overflow-hidden" style="background:linear-gradient(100deg,#e0fdfa,#d4fbe8);">
+          ${shop.boardImage ? `<img src="${shop.boardImage}" class="object-cover w-full h-full absolute inset-0 rounded-xl" alt="${shop.storename}">` : (shop.banner ? `<img src="${shop.banner}" class="object-cover w-full h-full absolute inset-0 rounded-xl" alt="${shop.storename}">` : `<div class="flex items-center justify-center w-full h-full absolute inset-0 rounded-xl text-gray-300 text-4xl font-black">?</div>`)}
+        </div>
+        <div class="w-full flex flex-col items-center mb-2">
+          <span class="font-extrabold text-lg sm:text-xl text-[#10b981] mb-1">${shop.storename}</span>
+        </div>
+        <div class="flex items-center justify-center gap-2 mb-1 w-full">
+          <svg width="18" height="18" fill="none" viewBox="0 0 22 22">
+            <circle cx="11" cy="11" r="10" fill="#e0f7fa"/>
+            <path d="M11 2.5C7.13 2.5 4 5.61 4 9.45c0 3.52 4.1 7.93 6.2 10.01.46.47 1.2.47 1.66 0 2.1-2.08 6.14-6.49 6.14-10.01C18 5.61 14.87 2.5 11 2.5Zm0 10.25a2.75 2.75 0 1 1 0-5.5 2.75 2.75 0 0 1 0 5.5Z" fill="#10b981"/>
+          </svg>
+          <span class="text-gray-700 text-sm sm:text-base font-bold truncate max-w-[180px]">${shop.address}</span>
+        </div>
+        <div class="flex items-center justify-center gap-2 mt-2 w-full">
+          ${badge}
+        </div>
+      `;
+      slider.appendChild(card);
+    });
+  } catch (err) {
+    slider.innerHTML = '<div class="text-red-500 text-center w-full p-7">مشکل در ارتباط با سرور!</div>';
+  }
+}
+
+window.addEventListener('DOMContentLoaded', loadBantaShops);
+
 
 // ====== آدرس API سرور (در صورت نیاز کامل کن: http://yourdomain.com/api/shopping-centers) ======
 const API_URL = '/api/shopping-centers';
