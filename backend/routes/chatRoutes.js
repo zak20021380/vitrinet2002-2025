@@ -69,7 +69,7 @@ router.post('/:id/admin-reply',
 
 /*━━━━━━━━━━ ۶) علامت خوانده شدن پیام ━━━━━━━━━━*/
 router.post('/:id/mark-read',
-  auth('seller'),
+  auth('admin'),
   chatController.markMessagesRead
 );
 

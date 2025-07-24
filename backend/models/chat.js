@@ -16,6 +16,9 @@ const messageSchema = new Schema({
   /* تاریخ و ساعت ارسال پیام */
   date: { type: Date, default: Date.now },
 
+  // وضعیت خوانده شدن کلی پیام
+  read: { type: Boolean, default: false },
+
   /* آیا ادمین این پیام را دیده است؟ */
   readByAdmin: { type: Boolean, default: false },
 
