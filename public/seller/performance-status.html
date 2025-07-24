@@ -1,77 +1,61 @@
 <style>
   .performance-wrap{direction:rtl;font-family:'Vazirmatn',sans-serif;}
-  .score-circle{position:relative;width:130px;height:130px;margin:0 auto;}
-  .score-circle svg{width:100%;height:100%;transform:rotate(-90deg);}
-  .score-circle .circle-bg{fill:none;stroke:#e5e7eb;stroke-width:3.8;}
-  .score-circle .circle{fill:none;stroke:#10b981;stroke-width:3.8;stroke-linecap:round;stroke-dasharray:85,100;}
-  .score-circle .score-text{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:1.5rem;font-weight:700;color:#10b981;direction:ltr;}
   .metric-card{background:#fff;border-radius:1rem;box-shadow:0 4px 16px rgba(16,185,129,.08);padding:20px;transition:.2s;}
   .metric-card:hover{box-shadow:0 8px 24px rgba(14,165,233,.16);transform:translateY(-2px);}
   .progress-bar{width:100%;height:8px;background:#e5e7eb;border-radius:4px;overflow:hidden;}
   .progress-bar div{height:100%;background:#10b981;border-radius:4px;}
-  .product-table{width:100%;background:#fff;border-radius:1.3rem;box-shadow:0 8px 32px rgba(16,185,129,.1);overflow:hidden;margin-top:1rem;}
-  .product-table table{width:100%;border-collapse:collapse;}
-  .product-table th,.product-table td{text-align:center;padding:12px;font-size:15px;}
-  .product-table th{background:#d1fae5;color:#047857;font-weight:800;}
-  .product-table td{color:#333;border-bottom:1px solid rgba(16,185,129,.1);}
-  .product-table tr:hover{background:#e0fdfa;}
-  @media(max-width:600px){.product-table th,.product-table td{font-size:13px;padding:8px}}
+  .badge{font-size:13px;padding:2px 8px;border-radius:9999px;font-weight:bold;}
   @keyframes fadeIn{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
   .animate-fadeIn{animation:fadeIn .45s cubic-bezier(.36,1.32,.3,1) both}
 </style>
-<div class="performance-wrap max-w-3xl mx-auto space-y-8 py-6 px-4 animate-fadeIn">
+<div class="performance-wrap max-w-3xl mx-auto py-6 px-4 space-y-6 animate-fadeIn">
   <h2 class="text-2xl md:text-3xl font-extrabold text-[#10b981] text-center">وضعیت عملکرد فروشنده</h2>
-  <section class="text-center">
-    <div class="score-circle">
-      <svg viewBox="0 0 36 36">
-        <path class="circle-bg" d="M18 2.0845a 15.9155 15.9155 0 1 1 0 31.831a 15.9155 15.9155 0 1 1 0 -31.831"/>
-        <path class="circle" d="M18 2.0845a 15.9155 15.9155 0 1 1 0 31.831a 15.9155 15.9155 0 1 1 0 -31.831"/>
-      </svg>
-      <div class="score-text">85</div>
-    </div>
-    <div class="mt-2 font-bold">امتیاز کلی</div>
-  </section>
-  <section class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+  <p class="text-center font-bold text-gray-700 mt-2">امتیاز کلی شما: ۸۲ از ۱۰۰ - عملکرد خوب</p>
+  <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 mt-6">
     <div class="metric-card">
-      <div class="flex justify-between mb-1 text-sm font-bold text-[#10b981]">
-        <span>سرعت پاسخگویی</span><span>90%</span>
+      <div class="flex justify-between items-center mb-2">
+        <span>پاسخگویی به مشتری</span>
+        <span class="badge bg-green-100 text-green-700">خوب</span>
       </div>
-      <div class="progress-bar"><div style="width:90%"></div></div>
+      <div class="progress-bar"><div style="width:92%"></div></div>
     </div>
     <div class="metric-card">
-      <div class="flex justify-between mb-1 text-sm font-bold text-[#10b981]">
-        <span>رضایت مشتری</span><span>85%</span>
+      <div class="flex justify-between items-center mb-2">
+        <span>رعایت قیمت‌گذاری</span>
+        <span class="badge bg-green-100 text-green-700">خوب</span>
+      </div>
+      <div class="progress-bar"><div style="width:88%"></div></div>
+    </div>
+    <div class="metric-card">
+      <div class="flex justify-between items-center mb-2">
+        <span>تحویل به‌موقع</span>
+        <span class="badge bg-yellow-100 text-yellow-700">متوسط</span>
+      </div>
+      <div class="progress-bar"><div style="width:75%;background:#facc15"></div></div>
+    </div>
+    <div class="metric-card">
+      <div class="flex justify-between items-center mb-2">
+        <span>کیفیت خدمات</span>
+        <span class="badge bg-green-100 text-green-700">خوب</span>
       </div>
       <div class="progress-bar"><div style="width:85%"></div></div>
     </div>
-    <div class="metric-card">
-      <div class="flex justify-between mb-1 text-sm font-bold text-[#10b981]">
-        <span>قیمت‌گذاری منصفانه</span><span>80%</span>
+    <div class="metric-card sm:col-span-2">
+      <div class="flex justify-between items-center mb-2">
+        <span>شکایات ثبت‌شده</span>
+        <span class="badge bg-red-100 text-red-700">کم</span>
       </div>
-      <div class="progress-bar"><div style="width:80%"></div></div>
+      <div class="progress-bar"><div style="width:20%;background:#ef4444"></div></div>
     </div>
-    <div class="metric-card">
-      <div class="flex justify-between mb-1 text-sm font-bold text-[#10b981]">
-        <span>زمان ارسال سفارش</span><span>70%</span>
-      </div>
-      <div class="progress-bar"><div style="width:70%"></div></div>
-    </div>
-  </section>
-  <section>
-    <div class="product-table">
-      <table>
-        <thead>
-          <tr><th>تاریخ</th><th>امتیاز</th></tr>
-        </thead>
-        <tbody>
-          <tr><td>1402/07/10</td><td>83</td></tr>
-          <tr><td>1402/06/10</td><td>80</td></tr>
-          <tr><td>1402/05/10</td><td>78</td></tr>
-        </tbody>
-      </table>
-    </div>
-  </section>
-  <section>
-    <p class="bg-[#fef3c7] text-[#b45309] p-4 rounded-xl shadow text-center font-bold">برای حفظ رتبه، کیفیت پاسخگویی را بهبود بدهید</p>
-  </section>
+  </div>
+  <div class="text-center">
+    <button id="back-performance" class="mt-6 bg-[#10b981] hover:bg-[#0ea5e9] text-white font-bold px-6 py-2 rounded-xl shadow">بازگشت</button>
+  </div>
 </div>
+<script>
+  const backBtn = document.getElementById('back-performance');
+  if(backBtn) backBtn.addEventListener('click',()=>{
+    if(typeof showSection==='function') showSection('visit');
+  });
+</script>
+
