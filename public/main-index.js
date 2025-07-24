@@ -857,3 +857,32 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   });
 });
+
+// جابجایی لینک‌های ناوبری بین هدر و فوتر موبایل
+document.addEventListener('DOMContentLoaded', function() {
+  const desktopNav = document.getElementById('desktopNav');
+  const mobileList = document.getElementById('mobileNavList');
+  const registerBtn = document.getElementById('registerShopBtn');
+  const links = Array.from(desktopNav.querySelectorAll('.main-nav-link'));
+
+  function moveLinks() {
+    if (window.innerWidth <= 768) {
+      links.forEach(l => {
+        if (!mobileList.contains(l)) {
+          l.classList.remove('hide-on-mobile');
+          mobileList.appendChild(l);
+        }
+      });
+    } else {
+      links.forEach(l => {
+        if (!desktopNav.contains(l)) {
+          l.classList.add('hide-on-mobile');
+          desktopNav.insertBefore(l, registerBtn);
+        }
+      });
+    }
+  }
+
+  moveLinks();
+  window.addEventListener('resize', moveLinks);
+});
