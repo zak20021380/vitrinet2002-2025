@@ -3747,8 +3747,15 @@ async function savePlanPrices(e) {
     '3month':  Number(planInputs['3month'].value) || null,
     '12month': Number(planInputs['12month'].value) || null,
   };
-  let phone = document.getElementById('seller-phone-plans').value.trim();
-  phone = normalizePhone(phone);
+
+
+  const rawPhone = document.getElementById('seller-phone-plans').value.trim();
+  const phone    = normalizePhone(rawPhone);
+  if (rawPhone && !phone) {
+    showPlansMsg('شماره موبایل نامعتبر است.', false);
+    return;
+  }
+
   if (phone) body.sellerPhone = phone;
 
   try {
@@ -3842,8 +3849,16 @@ async function saveAdsPrices(e) {
   // ۱) payload
   const body = {};
   Object.keys(adInputs).forEach(k => body[k] = Number(adInputs[k].value) || null);  // خالی → null
-  let sellerPhone = document.getElementById('seller-phone-ads').value.trim();
-  sellerPhone = normalizePhone(sellerPhone);
+
+
+  const rawPhone   = document.getElementById('seller-phone-ads').value.trim();
+  let sellerPhone  = normalizePhone(rawPhone);
+  if (rawPhone && !sellerPhone) {
+    showAdsMsg('شماره موبایل نامعتبر است.', false);
+    return;
+  }
+
+
   if (sellerPhone) body.sellerPhone = sellerPhone;
 
   // ۲) توکن
