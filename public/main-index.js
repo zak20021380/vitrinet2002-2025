@@ -279,6 +279,60 @@ mostVisitedSlider.addEventListener('touchend', () => {
 }, {passive:true});
 
 
+async function loadMostVisitedStores() {
+  const container = document.getElementById('most-visited-shops');
+  container.innerHTML = '<div class="w-full text-center py-8 text-gray-500">در حال بارگذاری...</div>';
+  try {
+    const res = await fetch('/api/top-visited-stores?city=sanandaj&limit=8');
+    if (!res.ok) throw new Error('network');
+    let stores = await res.json();
+    stores = Array.isArray(stores) ? stores : (stores.stores || stores.data || []);
+    stores.sort((a,b) => (b.visitCount || 0) - (a.visitCount || 0));
+    stores = stores.slice(0, 8);
+
+    container.innerHTML = '';
+    if (!stores.length) {
+      container.innerHTML = '<p class="text-gray-400 text-center w-full p-7">فروشگاهی یافت نشد.</p>';
+      return;
+    }
+
+    stores.forEach((shop, i) => {
+      const rank = i + 1;
+      const badgeColor = rank === 1 ? 'bg-emerald-500'
+        : rank === 2 ? 'bg-sky-500'
+        : rank === 3 ? 'bg-amber-500'
+        : 'bg-slate-500';
+      const img = shop.image || 'assets/images/no-image.png';
+      const name = shop.name || shop.storename || 'بدون نام';
+      const loc = shop.location || shop.address || '';
+      const category = shop.category || 'نامشخص';
+      const visits = shop.visitCount ?? 0;
+
+      const card = document.createElement('a');
+      card.href = shop.shopurl || '#';
+      card.target = '_blank';
+      card.className = 'relative rounded-2xl shadow bg-white p-3 w-72 flex-shrink-0 transition-all duration-300 ease-in hover:scale-105 opacity-0';
+      card.innerHTML = `
+        <div class="absolute top-2 left-2 text-white text-xs px-2 py-1 rounded-full ${badgeColor}">${rank}</div>
+        <img src="${img}" class="w-full h-40 object-cover rounded-xl mb-2" onerror="this.src='assets/images/no-image.png'" />
+        <h3 class="text-sm font-bold text-green-700">${name}</h3>
+        <p class="text-xs text-gray-600">${loc}</p>
+        <div class="flex justify-between items-center mt-2">
+          <span class="bg-gray-100 text-xs px-2 py-1 rounded-full">${category}</span>
+          <span class="text-[10px] text-gray-400">${visits} بازدید</span>
+        </div>
+      `;
+      container.appendChild(card);
+      requestAnimationFrame(() => card.classList.remove('opacity-0'));
+    });
+  } catch (err) {
+    container.innerHTML = '<p class="text-red-500 text-center w-full p-7">خطا در بارگذاری فروشگاه‌ها</p>';
+  }
+}
+
+window.addEventListener('DOMContentLoaded', loadMostVisitedStores);
+
+
 
 
 
