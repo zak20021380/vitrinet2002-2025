@@ -215,8 +215,15 @@ exports.login = async (req, res) => {
     });
 
   } catch (err) {
+    if (/مسدود/.test(err.message)) {
+      return res
+        .status(403)
+        .json({ success: false, message: 'شما مسدود شده‌اید و امکان ورود ندارید.' });
+    }
     console.error('❌ Error in login:', err);
-    return res.status(500).json({ success: false, message: 'خطای سرور در ورود فروشنده.' });
+    return res
+      .status(500)
+      .json({ success: false, message: 'خطای سرور در ورود فروشنده.' });
   }
 };
 
@@ -400,11 +407,15 @@ exports.loginUser = async (req, res) => {
     });
 
   } catch (err) {
+    if (/مسدود/.test(err.message)) {
+      return res
+        .status(403)
+        .json({ success: false, message: 'شما مسدود شده‌اید و امکان ورود ندارید.' });
+    }
     console.error('Error in user login:', err);
-    const code = /مسدود/.test(err.message) ? 403 : 500;
-    return res.status(code).json({
+    return res.status(500).json({
       success: false,
-      message: err.message || 'خطای سرور در ورود کاربر.'
+      message: 'خطای سرور در ورود کاربر.'
     });
   }
 };
