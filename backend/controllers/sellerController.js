@@ -1,6 +1,5 @@
 const Seller = require('../models/Seller');
 const bcrypt = require('bcryptjs');
-const mongoose = require('mongoose');
 const Product = require('../models/product');
 const ShopAppearance = require('../models/ShopAppearance');
 const SellerPlan = require('../models/sellerPlan');
@@ -43,53 +42,44 @@ exports.registerSeller = async (req, res) => {
 
 // حذف کامل فروشنده و تمام داده‌های مرتبط
 exports.deleteSeller = async (req, res) => {
-  const session = await mongoose.startSession();
-  session.startTransaction();
   try {
     const { sellerId } = req.params;
 
-    // ---------- تشخیص shopurl یا ObjectId ----------
     let seller;
     if (typeof sellerId === 'string' && sellerId.startsWith('shopurl:')) {
       const shopurl = sellerId.replace(/^shopurl:/, '');
-      seller = await Seller.findOne({ shopurl }).session(session);
+      seller = await Seller.findOne({ shopurl });
     } else {
-      seller = await Seller.findById(sellerId).session(session);
+      seller = await Seller.findById(sellerId);
     }
 
     if (!seller) {
-      await session.abortTransaction();
       return res.status(404).json({ message: 'فروشنده پیدا نشد.' });
     }
 
     const phone = seller.phone;
 
     await Promise.all([
-      Product.deleteMany({ sellerId: seller._id }).session(session),
-      ShopAppearance.deleteMany({ sellerId: seller._id }).session(session),
-      SellerPlan.deleteMany({ sellerId: seller._id }).session(session),
-      AdOrder.deleteMany({ sellerId: seller._id }).session(session),
-      Payment.deleteMany({ sellerId: seller._id }).session(session),
-      Chat.deleteMany({ sellerId: seller._id }).session(session),
-      Report.deleteMany({ sellerId: seller._id }).session(session),
+      Product.deleteMany({ sellerId: seller._id }),
+      ShopAppearance.deleteMany({ sellerId: seller._id }),
+      SellerPlan.deleteMany({ sellerId: seller._id }),
+      AdOrder.deleteMany({ sellerId: seller._id }),
+      Payment.deleteMany({ sellerId: seller._id }),
+      Chat.deleteMany({ sellerId: seller._id }),
+      Report.deleteMany({ sellerId: seller._id }),
+      Seller.deleteOne({ _id: seller._id })
     ]);
-
-    await Seller.deleteOne({ _id: seller._id }).session(session);
 
     if (phone) {
       await BannedPhone.updateOne(
         { phone },
         { $set: { phone } },
-        { upsert: true, session }
+        { upsert: true }
       );
     }
 
-    await session.commitTransaction();
-    session.endSession();
     res.json({ message: 'فروشنده با موفقیت حذف شد.' });
   } catch (err) {
-    await session.abortTransaction();
-    session.endSession();
     console.error('deleteSeller error:', err);
     res.status(500).json({ message: 'خطا در حذف فروشنده.', error: err.message });
   }
