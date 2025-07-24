@@ -293,10 +293,10 @@ function renderCategories(list, shops) {
       s => s.category === cat.name
     );
     const count = shopsInCat.length;
-    const sampleNames = shopsInCat.map(s => s.storename).slice(0,2);
+    const sampleName = shopsInCat.length ? shopsInCat[0].storename : "";
 
     grid.innerHTML += `
-      <div class="category-card glass group hover:shadow-xl animate-pop min-h-[190px]">
+      <div class="category-card glass group hover:shadow-xl animate-pop min-h-[190px]" data-slug="${cat.catId}">
         <div class="flex flex-col items-center text-center mb-3">
           <div class="cat-icon bg-gradient-to-br ${cat.color} group-hover:scale-105">${getCategoryIcon(cat.name)}</div>
           <span class="text-lg font-extrabold text-[#10b981] mb-1 tracking-tight mt-1">${cat.name}</span>
@@ -305,9 +305,7 @@ function renderCategories(list, shops) {
         <div class="flex flex-col gap-3">
           <div class="flex items-center justify-center gap-2 flex-wrap mb-1">
             <span class="inline-block px-3 py-1 bg-[#e0fdfa] text-[#10b981] text-xs rounded-full font-bold shadow">${count} فروشگاه</span>
-            <span class="hidden sm:inline-block text-gray-400 text-xs">|</span>
-            <span class="hidden sm:inline-block text-gray-500 text-xs">نمونه:</span>
-            <span class="hidden sm:inline-block text-gray-500 text-xs">${sampleNames.length ? sampleNames.join("، ") : "-"}</span>
+            ${sampleName ? `<span class="text-gray-500 text-xs">نمونه: ${sampleName}</span>` : ''}
           </div>
           <a href="shops-by-category.html?cat=${cat.catId}" class="btn-grad w-full rounded-lg font-bold text-xs sm:text-sm hover:scale-105 transition-all shadow flex items-center justify-center text-center">
             <span>مشاهده فروشگاه‌ها</span>
@@ -371,9 +369,33 @@ async function initCategoriesPage() {
   activeCategories.sort((a, b) => shops.filter(s => s.category === b.name).length - shops.filter(s => s.category === a.name).length);
 
   renderCategories(activeCategories, shops);
+  injectCounts();
 
   document.getElementById("searchInput").addEventListener("keyup", function(e){
     if(e.key === "Enter") searchCategories();
+  });
+}
+
+function injectCounts() {
+  document.querySelectorAll('.category-card[data-slug]').forEach(card => {
+    const slug = card.dataset.slug;
+    const catName = (categories.find(c => c.catId === slug) || {}).name || slug;
+    const shopsInCat = shops.filter(s => s.categorySlug === slug || s.category === catName);
+    const count = shopsInCat.length;
+    const sample = count ? (shopsInCat[0].storename || shopsInCat[0].shopName || '') : '';
+    const info = card.querySelector('.cat-info') || card.querySelector('.info');
+    let container;
+    if (info) {
+      container = info;
+      container.innerHTML = '';
+    } else {
+      container = document.createElement('div');
+      container.className = 'flex items-center justify-center gap-2 flex-wrap mb-1 cat-info';
+      const wrapper = card.querySelector('.flex.flex-col.gap-3');
+      if (wrapper) wrapper.prepend(container);
+    }
+    container.innerHTML = `<span class="inline-block px-3 py-1 bg-[#e0fdfa] text-[#10b981] text-xs rounded-full font-bold shadow">${count} فروشگاه</span>` +
+      (sample ? ` <span class="text-gray-500 text-xs">نمونه: ${sample}</span>` : '');
   });
 }
 
