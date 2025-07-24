@@ -47,7 +47,16 @@ exports.deleteSeller = async (req, res) => {
   session.startTransaction();
   try {
     const { sellerId } = req.params;
-    const seller = await Seller.findById(sellerId).session(session);
+
+    // ---------- تشخیص shopurl یا ObjectId ----------
+    let seller;
+    if (typeof sellerId === 'string' && sellerId.startsWith('shopurl:')) {
+      const shopurl = sellerId.replace(/^shopurl:/, '');
+      seller = await Seller.findOne({ shopurl }).session(session);
+    } else {
+      seller = await Seller.findById(sellerId).session(session);
+    }
+
     if (!seller) {
       await session.abortTransaction();
       return res.status(404).json({ message: 'فروشنده پیدا نشد.' });
