@@ -2551,7 +2551,7 @@ btn.dataset.listener = '1';
 async function fetchSellerMessages() {
   if (!window.seller?.id) return [];
   try {
-    const res = await fetch(`/api/messages?sellerId=${window.seller.id}`, { credentials: "include" });
+    const res = await fetch(`/api/chats?sellerId=${window.seller.id}`, { credentials: "include" });
     if (!res.ok) return [];
     return await res.json();
   } catch (err) {
