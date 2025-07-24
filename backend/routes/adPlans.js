@@ -91,10 +91,15 @@ router.put('/admin', async (req, res) => {
       const price = Number(prices[slug]);
       if (isNaN(price) || price <= 0) continue;
 
+      const query = { slug };
+      if (sellerPhone !== null && sellerPhone !== undefined) {
+        query.sellerPhone = sellerPhone;
+      }
+
       updates.push(
         AdPlan.findOneAndUpdate(
-          { slug, sellerPhone },
-          { slug, title: DEFAULT_TITLES[slug], price, sellerPhone },
+          query,
+          { $set: { title: DEFAULT_TITLES[slug], price, sellerPhone } },
           { upsert: true, new: true }
         )
       );
@@ -104,7 +109,14 @@ router.put('/admin', async (req, res) => {
       return res.status(400).json({ success: false, message: 'هیچ قیمت معتبری ارسال نشد.' });
     }
 
-    await Promise.all(updates);
+    try {
+      await Promise.all(updates);
+    } catch (err) {
+      if (err.code === 11000) {
+        return res.status(400).json({ success: false, message: 'پلن تکراری است.' });
+      }
+      throw err;
+    }
 
     return res.json({
       success: true,
