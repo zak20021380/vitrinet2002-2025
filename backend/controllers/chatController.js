@@ -206,6 +206,7 @@ exports.createChat = async (req, res) => {
         from: senderRole,
         text,
         date: new Date(),
+        read: false,
         readByAdmin: (chatType === 'user-admin' || chatType === 'seller-admin') ? false : true,
         readBySeller: senderRole === 'seller'
       });
@@ -271,6 +272,7 @@ exports.createAdminUserChat = async (req, res) => {
       from: 'user',
       text: content,
       date: new Date(),
+      read: false,
       readByAdmin: false,
       readBySeller: true
     });
@@ -450,6 +452,7 @@ exports.sendMessage = async (req, res) => {
       from: senderRole,
       text: text.trim(),
       date: new Date(),
+      read: false,
       readByAdmin,
       readBySeller
     });
@@ -556,6 +559,7 @@ exports.replyToChat = async (req, res) => {
       from: 'seller',
       text: text.trim(),
       date: new Date(),
+      read: false,
       // اگر چت با ادمین باشد (seller-admin)، admin هنوز پیام را نخوانده
       readByAdmin: chat.type === 'seller-admin' ? false : true,
       readBySeller: true
@@ -611,6 +615,7 @@ exports.adminReplyToChat = async (req, res) => {
       from: 'admin',
       text: text.trim(),
       date: new Date(),
+      read: false,
       readByAdmin: true,
       readBySeller: chat.type === 'seller-admin'
     });
@@ -714,7 +719,7 @@ exports.getAllChats = async (req, res) => {
 
         await Chat.updateOne(
           { _id: chatId },
-          { $set: { "messages.$[m].readByAdmin": true } },
+          { $set: { "messages.$[m].readByAdmin": true, "messages.$[m].read": true } },
           { arrayFilters: [{ "m._id": { $in: messageIds } }] }
         );
 
@@ -791,6 +796,7 @@ exports.broadcastMessage = async (req, res) => {
         from: 'admin',
         text,
         date: new Date(),
+        read: false,
         readByAdmin: true,
         readBySeller: target === 'sellers' ? false : false  // برای customers هم false ست کنید تا سازگار باشد
       });
@@ -888,6 +894,7 @@ exports.contactAdmin = async (req, res) => {
       from: 'seller',
       text: content,
       date: new Date(),
+      read: false,
       readByAdmin: false,
       readBySeller: true
     });
@@ -906,11 +913,13 @@ exports.contactAdmin = async (req, res) => {
     exports.getUnreadCount = async (req, res) => {
       try {
         const sellerId = req.user.id;
-        // فرض می‌کنیم مدل Chat فیلد boolean به نام "read" دارد
-        const count = await Chat.countDocuments({
-          sellerId,
-          read: false
+        const chats = await Chat.find({ sellerId });
+
+        let count = 0;
+        chats.forEach(ch => {
+          count += (ch.messages || []).filter(m => m.from === 'admin' && !m.read).length;
         });
+
         return res.json({ success: true, count });
       } catch (err) {
         console.error('Error in getUnreadCount:', err);
@@ -938,7 +947,7 @@ exports.contactAdmin = async (req, res) => {
         // برای هر چتِ این فروشنده، همهٔ پیام‌های admin را خوانده‌شده می‌کنیم
         await Chat.updateMany(
           { sellerId },
-          { $set: { 'messages.$[m].readBySeller': true } },
+          { $set: { 'messages.$[m].readBySeller': true, 'messages.$[m].read': true } },
           {
             // فقط فیلد from را چک می‌کنیم، بدون شرط روی readBySeller
             arrayFilters: [{ 'm.from': 'admin' }]
@@ -996,6 +1005,7 @@ exports.userReplyToChat = async (req, res) => {
       from: 'user',
       text: text.trim(),
       date: new Date(),
+      read: false,
       readByAdmin,
       readBySeller: false
     });

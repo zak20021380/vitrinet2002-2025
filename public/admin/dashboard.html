@@ -2138,7 +2138,7 @@ function getTotalUnreadMessages() {
   messagesList.forEach(chat => {
     if (Array.isArray(chat.messages)) {
       total += chat.messages.filter(
-        m => m.from === 'seller' && !m.readByAdmin
+        m => m.from === 'seller' && !m.read
       ).length;
     }
   });
@@ -2345,7 +2345,7 @@ function renderMessages() {
     const senderMsg = msgs.slice().reverse().find(m => m.from !== 'admin') || lastMsg;
 
     const senderLabel = getSenderName(chat, senderMsg);
-    const unreadCount = msgs.filter(m => m.from === 'seller' && !m.readByAdmin).length;
+    const unreadCount = msgs.filter(m => m.from === 'seller' && !m.read).length;
 
     const fullText = lastMsg && lastMsg.text ? lastMsg.text : '-';
     const shortText = fullText.length > 36 ? fullText.slice(0, 36) + '…' : fullText;
@@ -4004,23 +4004,26 @@ window.openChatModal = async function (chatId) {
   // 🟢 اگر پیام فروشنده‌ای نخونده وجود داره، به سرور اطلاع بده که خوانده شدند
   if (chat) {
     const unreadMsgIds = (chat.messages || [])
-      .filter(m => m.from === 'seller' && !m.readByAdmin)
+      .filter(m => m.from === 'seller' && !m.read)
       .map(m => m._id)
       .filter(Boolean);
 
     if (unreadMsgIds.length > 0) {
       try {
+        const token = getCookie('admin_token') || getCookie('access_token');
         await fetch(`${API_BASE}/chats/${chatId}/mark-read`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            Authorization: 'Bearer ' + token
+            ...(token && { Authorization: 'Bearer ' + token })
           },
+          credentials: 'include',
           body: JSON.stringify({ messageIds: unreadMsgIds })
         });
         // توی لیست محلی هم برو پیام‌ها رو خوانده‌شده کن
         chat.messages.forEach(m => {
           if (unreadMsgIds.includes(m._id)) m.readByAdmin = true;
+          if (unreadMsgIds.includes(m._id)) m.read = true;
         });
         updateSidebarCounts(); // شمارنده پیام آپدیت شه
         renderMessages();      // جدول پیام‌ها رفرش شه
@@ -4218,7 +4221,7 @@ async function fetchUnreadCountAndUpdateBadge() {
     chats.forEach(chat => {
       if (Array.isArray(chat.messages)) {
         total += chat.messages.filter(
-          m => m.from === 'seller' && !m.readByAdmin
+          m => m.from === 'seller' && !m.read
         ).length;
       }
     });
