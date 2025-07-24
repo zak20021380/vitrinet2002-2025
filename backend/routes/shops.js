@@ -8,8 +8,21 @@ const Product = require('../models/product'); // اضافه شده برای گر
 // گرفتن لیست همه فروشگاه‌ها (برای vitrinNet)
 router.get('/', async (req, res) => {
   try {
-    const shops = await ShopAppearance.find({}).populate('sellerId');
+    const { city, limit } = req.query;
+    let shops = await ShopAppearance.find({}).populate('sellerId');
     const allProducts = await Product.find({});
+
+    if (city) {
+      const regex = new RegExp(city, 'i');
+      shops = shops.filter(s =>
+        regex.test(s.shopAddress || '') ||
+        regex.test(s.sellerId?.address || '')
+      );
+    }
+    if (limit) {
+      const n = parseInt(limit, 10);
+      if (!isNaN(n)) shops = shops.slice(0, n);
+    }
 
     const shopCards = shops.map(shop => {
       const seller = shop.sellerId;
