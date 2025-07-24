@@ -2780,7 +2780,7 @@ window.deleteSeller = async function(id) {
   const sid = shop.sellerId || shop.seller_id || shop._id || shop._sid || null;
   if (!sid) return alert('شناسه فروشنده نامعتبر است.');
 
-  console.log('Deleting seller', sid, shop.shopurl);
+  console.log('Deleting seller:', sid, name);
 
   try {
     const res = await fetch(`${API_BASE}/sellers/${encodeURIComponent(sid)}`, {
@@ -3367,7 +3367,7 @@ function renderSellers() {
       <td>${countProducts}</td>
       <td>${shop._visits}</td>
       <td>
-        <button class="action-btn delete" onclick="deleteSeller('${sid}')">
+        <button class="action-btn delete">
           <i class="ri-delete-bin-line"></i> حذف
         </button>
       </td>
@@ -3376,6 +3376,10 @@ function renderSellers() {
     Array.from(tr.querySelectorAll('.seller-cell')).forEach(td=>{
       td.onclick = () => showSellerModal(shop);
     });
+    const delBtn = tr.querySelector('.action-btn.delete');
+    if (delBtn) {
+      delBtn.addEventListener('click', () => deleteSeller(sid));
+    }
     tbody.appendChild(tr);
   });
 
