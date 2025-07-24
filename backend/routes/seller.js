@@ -3,6 +3,7 @@ const router = express.Router();
 const { getCurrentSeller } = require('../controllers/authController');
 
 const { registerSeller } = require('../controllers/sellerController');
+const { deleteSeller } = require('../controllers/sellerController');
 const Seller = require('../models/Seller');
 const authMiddleware = require('../middlewares/authMiddleware');
 const mongoose = require('mongoose');   
@@ -60,6 +61,9 @@ router.get('/', authMiddleware('admin'), async (req, res) => {
 
 
 router.get('/profile', authMiddleware('seller'), getCurrentSeller);
+
+// حذف فروشنده - فقط ادمین
+router.delete('/:sellerId', authMiddleware('admin'), deleteSeller);
 
 
 
