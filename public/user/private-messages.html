@@ -16,15 +16,40 @@
     </div>
   </div>
 <script>
-const userId = localStorage.getItem('user_id');
+let userId = null;
+
+async function getUserId(){
+  if(userId) return userId;
+  try{
+    const res = await fetch('/api/user/profile', {credentials:'include'});
+    const data = await res.json();
+    if(res.ok && data._id) userId = data._id;
+  }catch(e){}
+  return userId;
+}
+
 async function fetchMsgs(){
+  if(!await getUserId()) return;
   const res = await fetch(`/api/messages/${userId}`, {credentials:'include'});
   const data = await res.json();
   const box = document.getElementById('msgs');
-  box.innerHTML = data.map(m=>`<div class="${m.senderModel==='Admin'?'text-left':'text-right'}"><div class="inline-block px-2 py-1 rounded ${m.senderModel==='Admin'?'bg-gray-200':'bg-green-100'}">${m.message}</div><div class="text-xs text-gray-400">${new Date(m.timestamp).toLocaleString('fa-IR')}</div></div>`).join('');
+  if(!Array.isArray(data) || data.length===0){
+    box.innerHTML = '<div class="text-center text-gray-400 py-10">پیامی وجود ندارد</div>';
+    return;
+  }
+  box.innerHTML = data.map(m=>{
+    const sender = m.senderModel==='Admin'?'مدیر سایت':'شما';
+    return `<div class="${m.senderModel==='Admin'?'text-left':'text-right'}">
+      <div class="inline-block px-2 py-1 rounded ${m.senderModel==='Admin'?'bg-gray-200':'bg-green-100'}">
+        <span class="text-[11px] font-bold text-gray-500 mr-1">${sender}</span>${m.message}
+      </div>
+      <div class="text-xs text-gray-400">${new Date(m.timestamp).toLocaleString('fa-IR')}</div>
+    </div>`;
+  }).join('');
   box.scrollTop = box.scrollHeight;
 }
 async function send(){
+  if(!await getUserId()) return;
   const msg = document.getElementById('msgInput').value.trim();
   if(!msg) return;
   await fetch('/api/messages/send', {method:'POST', credentials:'include', headers:{'Content-Type':'application/json'}, body:JSON.stringify({message:msg})});
