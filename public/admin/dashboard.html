@@ -2705,11 +2705,22 @@ async function sendUserMessage(e) {
   if (!uid) return alert('شناسه کاربر پیدا نشد!');
 
   try {
-    const res = await fetch(`${API_BASE}/chats`, {
+    // ابتدا اطمینان حاصل کن که چت بین ادمین و کاربر وجود دارد
+    const ensureRes = await fetch(`${API_BASE}/chats/ensure`, {
       method: 'POST',
-      headers: {'Content-Type': 'application/json'},
+      headers: { 'Content-Type': 'application/json' },
       credentials: 'include',
-      body: JSON.stringify({ text, from: 'admin', sellerId: uid })  // تغییر به sellerId برای رفع خطای backend
+      body: JSON.stringify({ recipientId: uid, recipientRole: 'user' })
+    });
+    const chat = await ensureRes.json();
+    if (!ensureRes.ok) throw new Error(chat.error || 'خطا در ایجاد گفتگو');
+
+    // سپس پیام را به عنوان ادمین در آن چت ارسال کن
+    const res = await fetch(`${API_BASE}/chats/${chat._id}/admin-reply`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify({ text })
     });
     const data = await res.json();
     if (!res.ok) throw new Error(data.error || 'خطا در ارسال پیام');

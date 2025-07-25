@@ -563,6 +563,7 @@ async function fetchUserChats() {
       if (c.type === 'admin' || c.type === 'user-admin') return true;
       if (c.userId && c.userId === uid) return true;
       if (Array.isArray(c.participants) && c.participants.some(p => {
+        if (!p) return false;
         return (typeof p === 'string' && p === uid) ||
                (typeof p === 'object' && p._id === uid);
       })) return true;
@@ -607,7 +608,7 @@ function renderMessagesList() {
     let shopUrl = '';
 
     if (Array.isArray(c.participants)) {
-      const participant = c.participants.find(p => p._id !== myId);
+      const participant = c.participants.find(p => p && p._id !== myId);
       if (participant) {
         role = participant.role;
         sellerId = participant._id;
@@ -830,7 +831,7 @@ async function showChatModal() {
   let shopUrl = '';
 
   if (Array.isArray(chat.participants)) {
-    const participant = chat.participants.find(p => p._id !== window.currentUserId);
+    const participant = chat.participants.find(p => p && p._id !== window.currentUserId);
     if (participant) {
       role = participant.role;
       sellerId = participant._id;
