@@ -35,11 +35,12 @@ async function fetchMsgs(){
   const data=await res.json();
   const box=document.getElementById('msgs');
   box.innerHTML=data.map(m=>{
-    const isAdmin = m.senderId?.role === 'admin' || m.senderModel === 'Admin';
-    const sender = isAdmin
+    const role = m.senderId?.role || (m.senderModel === 'Admin' ? 'admin' : 'user');
+    const isAdminSender = role === 'admin';
+    const sender = isAdminSender
       ? 'مدیر سایت'
       : (m.senderId?.firstname?`${m.senderId.firstname} ${m.senderId.lastname}`.trim():m.senderId?.phone||'مشتری');
-    return `<div class="${isAdmin?'text-right':'text-left'}"><div class="inline-block px-2 py-1 rounded ${isAdmin?'bg-blue-100':'bg-gray-200'}">${sender}: ${m.message}</div><div class="text-xs text-gray-400">${new Date(m.timestamp).toLocaleString('fa-IR')}</div></div>`;
+    return `<div class="${isAdminSender?'text-right':'text-left'}"><div class="inline-block px-2 py-1 rounded ${isAdminSender?'bg-blue-100':'bg-gray-200'}">${sender}: ${m.message}</div><div class="text-xs text-gray-400">${new Date(m.timestamp).toLocaleString('fa-IR')}</div></div>`;
   }).join('');
   box.scrollTop=box.scrollHeight;
 }

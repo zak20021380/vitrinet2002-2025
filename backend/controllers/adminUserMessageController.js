@@ -1,5 +1,6 @@
 const AdminUserMessage = require('../models/adminUserMessage');
 const Admin = require('../models/admin');
+const mongoose = require('mongoose');
 
 // لیست کاربران که با مدیر گفتگو داشته‌اند
 exports.listUsers = async (req, res) => {
@@ -62,14 +63,18 @@ exports.getMessages = async (req, res) => {
 
     const uid = requester.role === 'admin' ? userId : requester.id;
 
+    const adminObjId = new mongoose.Types.ObjectId(adminId);
+    const userObjId  = new mongoose.Types.ObjectId(uid);
+
     const msgs = await AdminUserMessage.find({
       $or: [
-        { senderId: uid, receiverId: adminId },
-        { senderId: adminId, receiverId: uid }
+        { senderId: userObjId, receiverId: adminObjId },
+        { senderId: adminObjId, receiverId: userObjId }
       ]
     })
       .sort({ timestamp: 1 })
       .populate('senderId', 'role firstname lastname phone name')
+      .populate('receiverId', 'role firstname lastname phone name')
       .lean();
 
     res.json(msgs);
@@ -93,21 +98,22 @@ exports.sendMessage = async (req, res) => {
     const adminDoc = await Admin.findOne();
     if (!adminDoc) return res.status(500).json({ message: 'ادمین یافت نشد' });
     const adminId = adminDoc._id.toString();
+    const adminObjId = new mongoose.Types.ObjectId(adminId);
 
     let msgData;
     if (sender.role === 'admin') {
       if (!userId) return res.status(400).json({ message: 'شناسه کاربر الزامی است' });
       msgData = {
-        senderId: sender.id,
-        receiverId: userId,
+        senderId: new mongoose.Types.ObjectId(sender.id),
+        receiverId: new mongoose.Types.ObjectId(userId),
         senderModel: 'Admin',
         receiverModel: 'User',
         message
       };
     } else if (sender.role === 'user') {
       msgData = {
-        senderId: sender.id,
-        receiverId: adminId,
+        senderId: new mongoose.Types.ObjectId(sender.id),
+        receiverId: adminObjId,
         senderModel: 'User',
         receiverModel: 'Admin',
         message
@@ -117,7 +123,8 @@ exports.sendMessage = async (req, res) => {
     }
 
     const saved = await AdminUserMessage.create(msgData);
-    res.json(saved);
+    await saved.populate('senderId', 'role firstname lastname phone name');
+    res.json(saved.toObject());
   } catch (err) {
     console.error('sendMessage error', err);
     res.status(500).json({ message: 'خطای سرور' });
