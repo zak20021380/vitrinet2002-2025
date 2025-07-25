@@ -51,8 +51,9 @@ exports.getMessages = async (req, res) => {
     const { userId } = req.params;
     const requester = req.user;
 
-    // ensure authorized
-    if (requester.role === 'user' && requester.id !== userId) {
+    // allow only admin or the owner of the messages
+    const requesterId = requester._id || requester.id;
+    if (requester.role !== 'admin' && requesterId?.toString() !== userId) {
       return res.status(403).json({ message: 'دسترسی غیرمجاز' });
     }
 
