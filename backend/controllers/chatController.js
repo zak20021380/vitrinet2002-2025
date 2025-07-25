@@ -315,7 +315,7 @@ exports.ensureChat = async (req, res) => {
     const { recipientId, recipientRole, productId = null } = req.body;
     console.log('Ensuring chat between:', { recipientId, recipientRole, productId });
 
-    const myId = req.user._id.toString();
+    const myId = req.user.id;
     const myRole = req.user.role;
     console.log('My ID:', myId, 'My Role:', myRole);
 
@@ -375,7 +375,7 @@ exports.ensureChat = async (req, res) => {
     -------------------------------------------------------------------*/
 exports.getMyChats = async (req, res) => {
   try {
-    const myId = new mongoose.Types.ObjectId(req.user._id);
+    const myId = new mongoose.Types.ObjectId(req.user.id);
 
     // کل چت‌هایی که کاربر عضوشه رو بیار و همه شرکت‌کننده‌ها رو populate کن
     const chats = await Chat.find({ participants: myId })
@@ -428,7 +428,7 @@ exports.sendMessage = async (req, res) => {
   try {
     const { id } = req.params;
     const { text } = req.body;
-    const senderId = req.user._id;
+    const senderId = new mongoose.Types.ObjectId(req.user.id);
     const senderRole = req.user.role;
 
     if (!text || !text.trim()) {
