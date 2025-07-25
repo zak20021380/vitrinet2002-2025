@@ -38,9 +38,9 @@ async function fetchMsgs(){
     return;
   }
   box.innerHTML = data.map(m=>{
-    const role = m.senderId?.role || (m.senderModel === 'Admin' ? 'admin' : 'user');
+    const role = m.senderRole || m.senderId?.role || (m.senderModel === 'Admin' ? 'admin' : 'user');
     const isMe = m.senderId?._id === userId || role === 'user';
-    let label = 'مدیر سایت';
+    let label = m.senderName || (role === 'admin' ? 'مدیر سایت' : 'کاربر');
     if (isMe) label = 'شما';
     const align  = isMe ? 'text-right' : 'text-left';
     const bubble = isMe ? 'bg-green-100' : 'bg-gray-200';

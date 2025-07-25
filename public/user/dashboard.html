@@ -910,14 +910,15 @@ function renderChat() {
 
   function getSenderRoleText(msg, isMe) {
     if (isMe) return 'شما';
-    const role = msg?.sender?.role || msg?.senderId?.role || msg?.from;
+    const role = msg.senderRole || msg?.sender?.role || msg?.senderId?.role || msg?.from;
     if (role === 'admin')  return 'مدیر سایت';
+    if (role === 'seller') return 'فروشنده';
     if (role === 'user')   return 'مشتری';
     return 'مخاطب';
   }
 
   target.innerHTML = (chat.messages || []).map(m => {
-    const isMe = m.from === 'user' || m.from === window.currentUserId;
+    const isMe = m.senderId?._id === window.currentUserId || m.senderRole === 'user' || m.from === 'user' || m.from === window.currentUserId;
     const cls = isMe ? 'bg-[#e0fdfa] self-end' : 'bg-[#f3f4f6]';
     const name = `<span class="text-xs font-bold text-[#10b981]">${getSenderRoleText(m, isMe)}</span>`;
     return `
