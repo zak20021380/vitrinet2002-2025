@@ -296,13 +296,23 @@ function renderChatModal(chat) {
 
   chatModalMsgsBox.innerHTML = '';
   chat.messages.forEach(m => {
-    const bubble       = document.createElement('div');
-    const fromSeller   = m.from === 'seller' || m.sender?.role === 'seller';
-    const fromAdmin    = m.from === 'admin'  || m.sender?.role === 'admin';
-    const clsAlign     = fromSeller ? 'self-end' : 'self-start';
-    const clsRole      = fromAdmin ? 'msg-admin' : fromSeller ? 'msg-seller' : 'msg-customer';
-    const senderName   = fromSeller ? 'شما' : fromAdmin ? 'مدیر سایت' : customerName;
-    const timeISO      = m.createdAt || m.created_at || m.date || m.updatedAt || m.timestamp;
+    const bubble = document.createElement('div');
+
+    const role = m.sender?.role || m.senderId?.role || m.from;
+    const fromSeller = role === 'seller';
+    const fromAdmin  = role === 'admin';
+
+    const clsAlign   = fromSeller ? 'self-end' : 'self-start';
+    const clsRole    = fromAdmin ? 'msg-admin' : fromSeller ? 'msg-seller' : 'msg-customer';
+    let senderName;
+    if (fromSeller)       senderName = 'شما';
+    else if (fromAdmin)   senderName = 'مدیر سایت';
+    else if (role === 'user')    senderName = 'مشتری';
+    else if (role === 'seller')  senderName = 'فروشنده';
+    else if (role === 'admin')   senderName = 'مدیر سایت';
+    else                        senderName = 'ناشناس';
+
+    const timeISO    = m.createdAt || m.created_at || m.date || m.updatedAt || m.timestamp;
 
     bubble.className = `msg-bubble ${clsRole} ${clsAlign} px-4 py-2 rounded-2xl text-sm leading-relaxed`;
     bubble.innerHTML = `
