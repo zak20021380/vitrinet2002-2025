@@ -31,8 +31,12 @@ async function getUserId(){
 async function fetchMsgs(){
   if(!await getUserId()) return;
   const res = await fetch(`/api/messages/${userId}`, {credentials:'include'});
-  const data = await res.json();
   const box = document.getElementById('msgs');
+  if(res.status===401 || res.status===403){
+    box.innerHTML = '<div class="text-center text-red-500 py-10">امکان دسترسی به این گفتگو وجود ندارد.</div>';
+    return;
+  }
+  const data = await res.json();
   if(!Array.isArray(data) || data.length===0){
     box.innerHTML = '<div class="text-center text-gray-400 py-10">پیامی وجود ندارد</div>';
     return;
@@ -57,7 +61,11 @@ async function send(){
   if(!await getUserId()) return;
   const msg = document.getElementById('msgInput').value.trim();
   if(!msg) return;
-  await fetch('/api/messages/send', {method:'POST', credentials:'include', headers:{'Content-Type':'application/json'}, body:JSON.stringify({message:msg})});
+  const res = await fetch('/api/messages/send', {method:'POST', credentials:'include', headers:{'Content-Type':'application/json'}, body:JSON.stringify({message:msg})});
+  if(res.status===401 || res.status===403){
+    alert('امکان دسترسی به این گفتگو وجود ندارد.');
+    return;
+  }
   document.getElementById('msgInput').value='';
   fetchMsgs();
 }
