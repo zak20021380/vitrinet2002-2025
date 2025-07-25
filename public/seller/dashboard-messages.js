@@ -194,8 +194,11 @@ function renderChatListItem(chat) {
     return ((u?.firstname || '') + ' ' + (u?.lastname || '')).trim() || 'ناشناس';
   })();
 
-  const isAdminChat = (chat.participants || []).some(p => p.role === 'admin');
-  const title = isAdminChat
+  const lastRole =
+    lastMsg?.sender?.role ||
+    lastMsg?.senderId?.role ||
+    lastMsg?.from;
+  const title = lastRole === 'admin'
     ? 'مدیر سایت'
     : productTitle
     ? `مشتری — ${productTitle}`
