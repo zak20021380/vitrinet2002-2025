@@ -194,7 +194,8 @@ function renderChatListItem(chat) {
     return ((u?.firstname || '') + ' ' + (u?.lastname || '')).trim() || 'ناشناس';
   })();
 
-  const title = chat.messages.some(m => m.from === 'admin')
+  const isAdminChat = (chat.participants || []).some(p => p.role === 'admin');
+  const title = isAdminChat
     ? 'مدیر سایت'
     : productTitle
     ? `مشتری — ${productTitle}`
@@ -274,7 +275,8 @@ function renderChatListItem(chat) {
  ***********************************************/
 function renderChatModal(chat) {
   const productTitle = chat.productId?.title || '';
-  chatModalTitle.textContent = chat.messages.some(m => m.from === 'admin')
+  const isAdminChat = (chat.participants || []).some(p => p.role === 'admin');
+  chatModalTitle.textContent = isAdminChat
     ? 'گفتگو با مدیر سایت'
     : productTitle
     ? productTitle
@@ -295,8 +297,8 @@ function renderChatModal(chat) {
   chatModalMsgsBox.innerHTML = '';
   chat.messages.forEach(m => {
     const bubble       = document.createElement('div');
-    const fromSeller   = m.from === 'seller';
-    const fromAdmin    = m.from === 'admin';
+    const fromSeller   = m.from === 'seller' || m.sender?.role === 'seller';
+    const fromAdmin    = m.from === 'admin'  || m.sender?.role === 'admin';
     const clsAlign     = fromSeller ? 'self-end' : 'self-start';
     const clsRole      = fromAdmin ? 'msg-admin' : fromSeller ? 'msg-seller' : 'msg-customer';
     const senderName   = fromSeller ? 'شما' : fromAdmin ? 'مدیر سایت' : customerName;
