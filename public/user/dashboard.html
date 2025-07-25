@@ -613,7 +613,7 @@ function renderMessagesList() {
         sellerId = participant._id;
         storeName = participant.storename || '';
         shopUrl = participant.shopurl || '';
-        whom = role === 'seller' ? 'فروشنده' : (role === 'admin' ? 'مدیر' : (role === 'user' ? 'کاربر' : 'مخاطب'));
+        whom = role === 'seller' ? 'فروشنده' : (role === 'admin' ? 'مدیر سایت' : (role === 'user' ? 'کاربر' : 'مخاطب'));
       }
     }
 
@@ -624,7 +624,7 @@ function renderMessagesList() {
         role = 'seller';
         sellerId = c.sellerId;
       } else if (c.type === 'user-admin') {
-        whom = 'مدیر';
+        whom = 'مدیر سایت';
         role = 'admin';
       }
     }
@@ -908,17 +908,18 @@ function renderChat() {
   const target = document.getElementById('chatBody');
   if (!target) return;
 
-  function getSenderRoleText(from) {
-    if (from === 'user')    return 'کاربر';
-    if (from === 'admin')   return 'مدیر';
-    if (from === 'seller')  return 'فروشنده';
+  function getSenderRoleText(msg) {
+    const role = msg?.sender?.role || msg?.from;
+    if (role === 'admin')   return 'مدیر سایت';
+    if (role === 'seller')  return 'فروشنده';
+    if (role === 'user')    return 'مشتری';
     return 'مخاطب';
   }
 
   target.innerHTML = (chat.messages || []).map(m => {
     const isMe = m.from === 'user' || m.from === window.currentUserId;
     const cls = isMe ? 'bg-[#e0fdfa] self-end' : 'bg-[#f3f4f6]';
-    const name = `<span class="text-xs font-bold text-[#10b981]">${getSenderRoleText(m.from)}</span>`;
+    const name = `<span class="text-xs font-bold text-[#10b981]">${getSenderRoleText(m)}</span>`;
     return `
       <div class="flex flex-col ${isMe ? 'items-end' : 'items-start'}">
         <div class="${cls} rounded-xl px-3 py-2 max-w-[78%]">
