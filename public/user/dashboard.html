@@ -527,7 +527,6 @@
   const API_BASE  = '/api';           // طبق سرورت
   let chatsList   = [];               // لیست چت‌ها
   let currentCid  = null;             // آی‌دی چت انتخاب شده
-  let adminChatId = null;             // آی‌دی چت با مدیر (برای ارسال سریع)
 
 async function loadMessagesSection () {
   const box = document.getElementById('mainContent');
@@ -535,6 +534,7 @@ async function loadMessagesSection () {
     <div class="glass px-4 py-7 fadein">
       <div class="flex items-center justify-between mb-4">
         <span class="text-xl font-black primary-text">پیام‌های من</span>
+        <button class="brand-btn text-sm px-3 py-1.5 rounded-xl" onclick="openAdminMsgModal()">چت با مدیر سایت</button>
       </div>
       <div id="userChatsList" class="w-full min-h-[180px]"></div>
     </div>
@@ -571,8 +571,6 @@ async function fetchUserChats() {
       return false;
     });
 
-    const adminChat = chatsList.find(c => c.type === 'admin' || c.type === 'user-admin');
-    adminChatId = adminChat ? adminChat._id : null;
 
   } catch (e) {
     chatsList = [];
@@ -725,25 +723,92 @@ async function openChat(cid) {
 }
 
   /* ارسال پیام جدید به مدیر (ایجاد چت جدید اگر قبلا نداره) */
-  async function openAdminChat() {
-    console.log("تابع openAdminChat فراخوانی شد");
-    try {
-      // بررسی اینکه آیا چت با مدیر قبلاً ایجاد شده است یا خیر
-      if (!adminChatId) {
-        // چت جدید با مدیر ایجاد می‌کنیم
-        await createAdminChat();
-        await fetchUserChats();
-        renderMessagesList();
-      } else {
-        // اگر قبلاً چت ساخته شده بود، شناسهٔ آن را به عنوان چت جاری تنظیم کن
-        currentCid = adminChatId;
-      }
+  // باز کردن مودال گفتگوی کاربر با مدیر (نسخه ساده)
+  async function openAdminMsgModal() {
+    const uid = window.currentUserId;
+    if (!uid) return;
+    showAdminMsgModal(uid);
+  }
 
-      // نمایش مودال چت
-      await showChatModal();
+  function closeAdminMsg() {
+    document.getElementById('adminMsgModal')?.remove();
+  }
+
+  async function showAdminMsgModal(uid) {
+    document.getElementById('adminMsgModal')?.remove();
+    document.body.insertAdjacentHTML('beforeend', `
+      <div id="adminMsgModal" class="fixed inset-0 z-50 flex items-center justify-center" style="backdrop-filter:blur(4px);background:#0003;animation:fadein .25s">
+        <div class="bg-white rounded-2xl w-[98vw] max-w-md max-h-[93vh] flex flex-col shadow-xl border">
+          <div class="px-4 py-3 border-b flex justify-between items-center">
+            <span class="font-bold primary-text">گفتگو با مدیر سایت</span>
+            <button onclick="closeAdminMsg()" class="text-2xl font-black text-gray-400 hover:text-red-500 rounded-full w-8 h-8 flex items-center justify-center">×</button>
+          </div>
+          <div id="adminMsgBody" class="flex-1 overflow-y-auto p-4 space-y-4 text-[15px] scrollbar-hide bg-[#f9fafb]"></div>
+          <div class="border-t p-3 flex gap-2 bg-white">
+            <textarea id="adminMsgInput" rows="2" class="flex-1 border rounded-xl p-2 resize-none focus:outline-none" placeholder="پیام خود را وارد کنید"></textarea>
+            <button onclick="sendAdminMsg()" class="brand-btn px-5 py-2 rounded-xl font-bold shrink-0">ارسال</button>
+          </div>
+        </div>
+      </div>
+    `);
+    renderAdminMsgs(uid);
+  }
+
+  async function renderAdminMsgs(uid) {
+    const box = document.getElementById('adminMsgBody');
+    if (!box) return;
+    box.innerHTML = '<div class="text-center text-gray-400 py-6">در حال دریافت...</div>';
+    try {
+      const res = await fetch(`/api/messages/thread/${uid}`, { credentials: 'include' });
+      if (!res.ok) {
+        if (res.status === 401 || res.status === 403) throw new Error('دسترسی غیرمجاز');
+        throw new Error('دریافت گفتگو ناموفق بود');
+      }
+      let data = await res.json();
+      if (!Array.isArray(data)) data = [];
+      data.sort((a,b)=> new Date(a.timestamp || a.createdAt) - new Date(b.timestamp || b.createdAt));
+      box.innerHTML = data.map(m => {
+        const role = m.senderRole || m.senderId?.role || (m.senderModel === 'Admin' ? 'admin' : 'user');
+        const isMe = role === 'user';
+        const label = isMe ? 'شما' : 'مدیر سایت';
+        const cls = isMe ? 'bg-[#e0fdfa] self-end' : 'bg-[#f3f4f6]';
+        const time = new Date(m.timestamp || m.createdAt).toLocaleTimeString('fa-IR', { hour: '2-digit', minute: '2-digit' });
+        const align = isMe ? 'items-end' : 'items-start';
+        const msgText = m.message || m.text || '';
+        return `
+          <div class="flex flex-col ${align}">
+            <div class="${cls} rounded-xl px-3 py-2 max-w-[78%]">
+              <span class="text-xs font-bold text-[#10b981]">${label}</span>
+              <div>${msgText}</div>
+              <div class="text-xs text-gray-400 mt-1 text-left">${time}</div>
+            </div>
+          </div>`;
+      }).join('');
+      box.scrollTop = box.scrollHeight;
     } catch (err) {
-      console.error(err);
-      alert(`ایجاد چت با مدیر ناموفق بود. دلیل خطا: ${err.message}`);
+      box.innerHTML = '<div class="text-center text-red-500 py-6">امکان دریافت گفتگو وجود ندارد.</div>';
+    }
+  }
+
+  async function sendAdminMsg() {
+    const ta = document.getElementById('adminMsgInput');
+    const text = ta.value.trim();
+    if (!text) return;
+    try {
+      const res = await fetch('/api/messages/send', {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message: text })
+      });
+      if (!res.ok) {
+        if (res.status === 401 || res.status === 403) throw new Error('دسترسی غیرمجاز');
+        throw new Error('ارسال پیام ناموفق بود');
+      }
+      ta.value = '';
+      renderAdminMsgs(window.currentUserId);
+    } catch (err) {
+      alert('خطا در ارسال پیام: ' + err.message);
     }
   }
 
@@ -754,40 +819,6 @@ async function openChat(cid) {
   /* دریافت جزئیات کامل یک چت (شامل تمام پیام‌ها) */
 
 
-
-
-
-
-
-  /* ایجاد (یا گرفتن) چت با مدیر سایت */
-  // ایجاد چت با مدیر سایت
-async function createAdminChat() {
-  try {
-    if (!adminChatId) {
-      const res = await fetch(`${API_BASE}/chats`, {
-        method: 'POST',
-        credentials: 'include',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          text: 'سلام، نیاز به پشتیبانی دارم.',
-          recipientRole: 'admin'
-        })
-      });
-
-      if (!res.ok) throw new Error('ساخت چت با مدیر ناموفق بود');
-
-      const chat = await res.json();
-      console.log('چت با مدیر ایجاد شد:', chat);
-      adminChatId = chat._id;
-      currentCid = chat._id;
-    } else {
-      console.log('چت با مدیر قبلاً ایجاد شده است.');
-    }
-  } catch (err) {
-    console.error('خطا در ایجاد چت با مدیر:', err);
-    alert('خطا در ایجاد چت با مدیر');
-  }
-}
 
 
 
