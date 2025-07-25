@@ -388,7 +388,7 @@ exports.getMyChats = async (req, res) => {
       if (Array.isArray(chat.participants)) {
         // دقیقاً کسی که من نیستم (یعنی طرف مقابلم)
         const other = chat.participants.find(p =>
-          p._id.toString() !== myId.toString()
+          p && p._id && p._id.toString() !== myId.toString()
         );
         if (other) {
           // اگه فروشنده باشه، اسم فروشگاهش رو هم بزار
@@ -509,7 +509,7 @@ exports.getChatById = async (req, res) => {
     if (req.user.role !== 'admin') {
       const userId = req.user.id;
       const isParticipant = chat.participants.some(
-        p => p._id.toString() === userId
+        p => p && p._id && p._id.toString() === userId
       );
       if (!isParticipant) {
         console.warn('🚫 Unauthorized access attempt', {
