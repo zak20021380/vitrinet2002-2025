@@ -43,9 +43,10 @@ participantsModel: [{
 }],
 
   productId:  { type: Schema.Types.ObjectId, ref: 'Product' },
-    type: {
+  type: {
     type: String,
-enum: ['product', 'user-admin', 'user-seller', 'seller-admin'],  // ← اینجا 'seller-admin' را اضافه کنید    required: true
+    enum: ['product', 'user-admin', 'user-seller', 'seller-admin', 'general'], // allow general chats
+    required: true
   },
 
 
