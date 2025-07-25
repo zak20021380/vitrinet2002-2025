@@ -4,25 +4,39 @@ const Admin = require('../models/admin');
 // لیست کاربران که با مدیر گفتگو داشته‌اند
 exports.listUsers = async (req, res) => {
   try {
-    const users = await AdminUserMessage.aggregate([
+    // کاربرانی که با ادمین مکاتبه کرده‌اند را استخراج کن
+    const result = await AdminUserMessage.aggregate([
       {
-        $group: {
-          _id: '$senderId'
-        }
-      },
-      {
-        $unionWith: {
-          coll: 'adminusermessages',
-          pipeline: [
-            { $group: { _id: '$receiverId' } }
+        $match: {
+          $or: [
+            { senderModel: 'User' },
+            { receiverModel: 'User' }
           ]
         }
       },
-      { $group: { _id: '$_id' } }
+      {
+        $project: {
+          userId: {
+            $cond: [
+              { $eq: ['$senderModel', 'User'] },
+              '$senderId',
+              '$receiverId'
+            ]
+          }
+        }
+      },
+      { $group: { _id: '$userId' } }
     ]);
-    const ids = users.map(u => u._id);
-    res.json(ids);
-  } catch(err){
+
+    const userIds = result.map(r => r._id);
+
+    const users = await require('../models/user')
+      .find({ _id: { $in: userIds } })
+      .select('firstname lastname phone')
+      .lean();
+
+    res.json(users);
+  } catch (err) {
     console.error('listUsers error', err);
     res.status(500).json({ message: 'خطای سرور' });
   }
@@ -53,7 +67,10 @@ exports.getMessages = async (req, res) => {
         { senderId: uid, receiverId: adminId },
         { senderId: adminId, receiverId: uid }
       ]
-    }).sort({ timestamp: 1 }).lean();
+    })
+      .sort({ timestamp: 1 })
+      .populate('senderId', 'firstname lastname phone name')
+      .lean();
 
     res.json(msgs);
   } catch (err) {

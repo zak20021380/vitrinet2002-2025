@@ -909,9 +909,8 @@ function renderChat() {
   if (!target) return;
 
   function getSenderRoleText(msg) {
-    const role = msg?.sender?.role || msg?.from;
+    const role = msg?.sender?.role || msg?.senderId?.role || msg?.from;
     if (role === 'admin')   return 'مدیر سایت';
-    if (role === 'seller')  return 'فروشنده';
     if (role === 'user')    return 'مشتری';
     return 'مخاطب';
   }
