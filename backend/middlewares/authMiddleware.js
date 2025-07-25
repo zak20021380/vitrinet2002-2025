@@ -79,7 +79,7 @@ module.exports = (requiredRole = null) => {
   }
 
   /* ۴) تزریق اطلاعات کاربر و ادامهٔ زنجیره */
-  req.user = { id: payload.id, role: payload.role };
+  req.user = { id: payload.id, _id: payload.id, role: payload.role };
   next();
 
 } catch (err) {

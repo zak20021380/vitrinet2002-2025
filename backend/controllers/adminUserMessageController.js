@@ -53,8 +53,12 @@ exports.getMessages = async (req, res) => {
 
     // allow only admin or the owner of the messages
     const requesterId = requester._id || requester.id;
-    if (requester.role !== 'admin' && requesterId?.toString() !== userId) {
-      return res.status(403).json({ message: 'دسترسی غیرمجاز' });
+    const authorized =
+      requester.role === 'admin' ||
+      (requester.role === 'user' && requesterId?.toString() === userId);
+
+    if (!authorized) {
+      return res.status(403).json({ error: 'دسترسی غیرمجاز' });
     }
 
     // find admin id
