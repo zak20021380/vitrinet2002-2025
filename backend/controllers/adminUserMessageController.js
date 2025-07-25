@@ -108,7 +108,11 @@ exports.sendMessage = async (req, res) => {
         receiverId: new mongoose.Types.ObjectId(userId),
         senderModel: 'Admin',
         receiverModel: 'User',
-        message
+        message,
+        senderRole: 'admin',
+        senderName: 'مدیر سایت',
+        recipientId: new mongoose.Types.ObjectId(userId),
+        type: 'private'
       };
     } else if (sender.role === 'user') {
       msgData = {
@@ -116,7 +120,11 @@ exports.sendMessage = async (req, res) => {
         receiverId: adminObjId,
         senderModel: 'User',
         receiverModel: 'Admin',
-        message
+        message,
+        senderRole: 'user',
+        senderName: `${sender.firstname || ''} ${sender.lastname || ''}`.trim() || sender.phone || 'کاربر',
+        recipientId: adminObjId,
+        type: 'private'
       };
     } else {
       return res.status(403).json({ message: 'نقش نامعتبر' });
@@ -124,7 +132,9 @@ exports.sendMessage = async (req, res) => {
 
     const saved = await AdminUserMessage.create(msgData);
     await saved.populate('senderId', 'role firstname lastname phone name');
-    res.json(saved.toObject());
+    const obj = saved.toObject();
+    if (!obj.createdAt) obj.createdAt = obj.timestamp;
+    res.json(obj);
   } catch (err) {
     console.error('sendMessage error', err);
     res.status(500).json({ message: 'خطای سرور' });

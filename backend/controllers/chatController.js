@@ -771,7 +771,7 @@ exports.broadcastMessage = async (req, res) => {
 
       // تلاش برای پیدا کردن چت موجود با فیلتر نوع و productId
       let chat = await Chat.findOne({
-        participants,
+        participants: { $all: participants, $size: 2 },
         productId: null,
         type: chatType
       });
