@@ -732,12 +732,14 @@ async function openChat(cid) {
         // چت جدید با مدیر ایجاد می‌کنیم
         await createAdminChat();
         await fetchUserChats();
-renderMessagesList();
-
+        renderMessagesList();
+      } else {
+        // اگر قبلاً چت ساخته شده بود، شناسهٔ آن را به عنوان چت جاری تنظیم کن
+        currentCid = adminChatId;
       }
 
       // نمایش مودال چت
-      showChatModal();
+      await showChatModal();
     } catch (err) {
       console.error(err);
       alert(`ایجاد چت با مدیر ناموفق بود. دلیل خطا: ${err.message}`);
