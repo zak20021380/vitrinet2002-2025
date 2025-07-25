@@ -119,6 +119,15 @@ async function fetchChats() {
     if (!res.ok) throw new Error('خطا در واکشی چت‌ها');
 
     const chats = await res.json();
+    chats.forEach(c => {
+      if (Array.isArray(c.messages)) {
+        c.messages.sort((a, b) => {
+          const ta = new Date(a.createdAt || a.date || a.timestamp).getTime();
+          const tb = new Date(b.createdAt || b.date || b.timestamp).getTime();
+          return ta - tb;
+        });
+      }
+    });
 
     // بج کلی
     if (typeof window.updateBadge === 'function') {
@@ -195,9 +204,9 @@ function renderChatListItem(chat) {
   })();
 
   const lastRole =
+    lastMsg?.from ||
     lastMsg?.sender?.role ||
-    lastMsg?.senderId?.role ||
-    lastMsg?.from;
+    lastMsg?.senderId?.role;
   const title = lastRole === 'admin'
     ? 'مدیر سایت'
     : productTitle
@@ -298,10 +307,15 @@ function renderChatModal(chat) {
   }
 
   chatModalMsgsBox.innerHTML = '';
-  chat.messages.forEach(m => {
+  const msgs = (chat.messages || []).slice().sort((a, b) => {
+    const ta = new Date(a.createdAt || a.date || a.timestamp).getTime();
+    const tb = new Date(b.createdAt || b.date || b.timestamp).getTime();
+    return ta - tb;
+  });
+  msgs.forEach(m => {
     const bubble = document.createElement('div');
 
-    const role = m.sender?.role || m.senderId?.role || m.from;
+    const role = m.from || m.sender?.role || m.senderId?.role;
     const fromSeller = role === 'seller';
     const fromAdmin  = role === 'admin';
 
