@@ -5,6 +5,7 @@ const userSchema = new mongoose.Schema({
   lastname  : { type: String, required: true },
   phone     : { type: String, required: true, unique: true },
   password  : { type: String, required: true },
+  role      : { type: String, default: 'user' },
 
   /* ─── فیلدهای جدید برای حذف نرم ─── */
   deleted   : { type: Boolean, default: false },      // نشانهٔ حذف کاربر

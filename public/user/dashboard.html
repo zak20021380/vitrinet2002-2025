@@ -908,17 +908,18 @@ function renderChat() {
   const target = document.getElementById('chatBody');
   if (!target) return;
 
-  function getSenderRoleText(msg) {
+  function getSenderRoleText(msg, isMe) {
+    if (isMe) return 'شما';
     const role = msg?.sender?.role || msg?.senderId?.role || msg?.from;
-    if (role === 'admin')   return 'مدیر سایت';
-    if (role === 'user')    return 'مشتری';
+    if (role === 'admin')  return 'مدیر سایت';
+    if (role === 'user')   return 'مشتری';
     return 'مخاطب';
   }
 
   target.innerHTML = (chat.messages || []).map(m => {
     const isMe = m.from === 'user' || m.from === window.currentUserId;
     const cls = isMe ? 'bg-[#e0fdfa] self-end' : 'bg-[#f3f4f6]';
-    const name = `<span class="text-xs font-bold text-[#10b981]">${getSenderRoleText(m)}</span>`;
+    const name = `<span class="text-xs font-bold text-[#10b981]">${getSenderRoleText(m, isMe)}</span>`;
     return `
       <div class="flex flex-col ${isMe ? 'items-end' : 'items-start'}">
         <div class="${cls} rounded-xl px-3 py-2 max-w-[78%]">

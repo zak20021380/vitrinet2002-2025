@@ -12,6 +12,11 @@ const adminSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  // added for role-based messaging labels
+  role: {
+    type: String,
+    default: 'admin'
+  },
   name: {
     type: String,
     default: 'ادمین'
