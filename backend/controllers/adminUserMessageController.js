@@ -69,7 +69,7 @@ exports.getMessages = async (req, res) => {
       ]
     })
       .sort({ timestamp: 1 })
-      .populate('senderId', 'firstname lastname phone name')
+      .populate('senderId', 'role firstname lastname phone name')
       .lean();
 
     res.json(msgs);

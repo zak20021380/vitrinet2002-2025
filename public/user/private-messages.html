@@ -38,10 +38,10 @@ async function fetchMsgs(){
     return;
   }
   box.innerHTML = data.map(m=>{
-    const role = m.senderModel === 'Admin' ? 'admin' : 'user';
-    const sender = role === 'admin' ? 'مدیر سایت' : 'شما';
-    const align  = role === 'admin' ? 'text-left' : 'text-right';
-    const bubble = role === 'admin' ? 'bg-gray-200' : 'bg-green-100';
+    const isMe = m.senderId?._id === userId || m.senderModel === 'User';
+    const sender = isMe ? 'شما' : 'مدیر سایت';
+    const align  = isMe ? 'text-right' : 'text-left';
+    const bubble = isMe ? 'bg-green-100' : 'bg-gray-200';
     return `<div class="${align}">
       <div class="inline-block px-2 py-1 rounded ${bubble}">
         <span class="text-[11px] font-bold text-gray-500 mr-1">${sender}</span>${m.message}
