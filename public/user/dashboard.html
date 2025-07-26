@@ -811,9 +811,14 @@ async function openAdminMsgModal() {
       if (!Array.isArray(data)) data = [];
       data.sort((a,b)=> new Date(a.timestamp || a.createdAt) - new Date(b.timestamp || b.createdAt));
       box.innerHTML = data.map(m => {
-        const role = m.senderRole || m.senderId?.role || (m.senderModel === 'Admin' ? 'admin' : 'user');
-        const isMe = role === 'user';
-        const label = isMe ? 'شما' : 'مدیر سایت';
+        const rawRole =
+          m.senderRole ||
+          m.senderId?.role ||
+          (typeof m.senderModel === 'string' ? m.senderModel.toLowerCase() : '') ||
+          (typeof m.from === 'string' ? m.from.toLowerCase() : '');
+        const role = (rawRole || '').toLowerCase();
+        const isMe = m.senderId?._id === window.currentUserId || role === 'user';
+        const label = isMe ? 'شما' : role === 'admin' ? 'مدیر سایت' : role === 'seller' ? 'فروشنده' : 'مشتری';
         const cls = isMe ? 'bg-[#e0fdfa] self-end' : 'bg-[#f3f4f6]';
         const time = new Date(m.timestamp || m.createdAt).toLocaleTimeString('fa-IR', { hour: '2-digit', minute: '2-digit' });
         const align = isMe ? 'items-end' : 'items-start';
@@ -1048,13 +1053,13 @@ function renderChat() {
 
   function getSenderRoleText(msg, isMe) {
     if (isMe) return 'شما';
-    const role =
+    const raw =
       msg.senderRole ||
       msg?.sender?.role ||
       msg?.senderId?.role ||
-      (msg.senderModel === 'Admin' ? 'admin' :
-       msg.senderModel === 'Seller' ? 'seller' :
-       msg.senderModel === 'User' ? 'user' : msg?.from);
+      (typeof msg.senderModel === 'string' ? msg.senderModel.toLowerCase() : '') ||
+      (typeof msg.from === 'string' ? msg.from.toLowerCase() : '');
+    const role = (raw || '').toLowerCase();
     if (role === 'admin')  return 'مدیر سایت';
     if (role === 'seller') return 'فروشنده';
     if (role === 'user')   return 'مشتری';
@@ -1062,7 +1067,13 @@ function renderChat() {
   }
 
   target.innerHTML = (chat.messages || []).map(m => {
-    const isMe = m.senderId?._id === window.currentUserId || m.senderRole === 'user' || m.from === 'user' || m.from === window.currentUserId;
+    const roleHint = (m.senderRole || m?.senderId?.role || '').toLowerCase();
+    const isMe =
+      m.senderId?._id === window.currentUserId ||
+      m.senderId === window.currentUserId ||
+      roleHint === 'user' ||
+      m.from === 'user' ||
+      m.from === window.currentUserId;
     const cls = isMe ? 'bg-[#e0fdfa] self-end' : 'bg-[#f3f4f6]';
     const name = `<span class="text-xs font-bold text-[#10b981]">${getSenderRoleText(m, isMe)}</span>`;
     return `
