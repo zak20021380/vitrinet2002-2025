@@ -253,6 +253,11 @@ exports.createChat = async (req, res) => {
       }
     }
 
+    if (!chat) {
+      console.error('Unable to create or retrieve chat with finder:', finder);
+      return res.status(500).json({ error: 'خطا در ایجاد چت.' });
+    }
+
     const text = (rawText || '').trim();
     if (text) {
       chat.messages.push({
