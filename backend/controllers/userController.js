@@ -1,6 +1,7 @@
 const User        = require('../models/user');
 const Block       = require('../models/Block');          // قبلاً خواسته شده بود
 const BannedPhone = require('../models/BannedPhone');    // لیست دائمی شماره‌های مسدود
+const Seller      = require('../models/Seller');
 
 // ────────────────────────────────────────────────────────────
 // گرفتن پروفایل کاربر همراه با علاقه‌مندی‌ها پس از احراز هویت
@@ -43,12 +44,25 @@ exports.getProfile = async (req, res) => {
 exports.blockCustomer = async (req, res) => {
   try {
     const { userId } = req.params;
+    const { reason = '' } = req.body || {};
     if (!userId) return res.status(400).json({ message: 'شناسه کاربر ارسال نشده!' });
 
-    const exists = await Block.findOne({ senderId: userId, senderType: 'customer' });
-    if (exists) return res.status(400).json({ message: 'این کاربر قبلاً مسدود شده.' });
+    const sellerId = req.user && req.user.id;
+    if (!sellerId) return res.status(401).json({ message: 'فروشنده احراز هویت نشد.' });
 
-    await Block.create({ senderId: userId, senderType: 'customer' });
+    const seller = await Seller.findById(sellerId);
+    if (!seller) return res.status(404).json({ message: 'فروشنده پیدا نشد.' });
+
+    if (seller.blockedUsers && seller.blockedUsers.some(id => id.toString() === userId)) {
+      return res.status(400).json({ message: 'این کاربر قبلاً مسدود شده.' });
+    }
+
+    seller.blockedUsers = seller.blockedUsers || [];
+    seller.blockedUsers.push(userId);
+    await seller.save();
+
+    await Block.create({ sellerId, customerId: userId, reason });
+
     res.json({ message: 'کاربر با موفقیت مسدود شد.' });
   } catch (err) {
     res.status(500).json({ message: 'خطا در مسدودسازی', error: err.message });

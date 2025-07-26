@@ -179,9 +179,12 @@ exports.createChat = async (req, res) => {
 
     // چک اعتبار فروشنده (فقط اگر recipientRole 'seller' باشد)
     if (recipientRole === 'seller') {
-      const sellerExists = await Seller.findById(sid);
+      const sellerExists = await Seller.findById(sid).select('blockedUsers');
       if (!sellerExists) {
         return res.status(404).json({ error: 'فروشنده یافت نشد.' });
+      }
+      if (senderRole === 'user' && sellerExists.blockedUsers?.some(u => u.toString() === senderId.toString())) {
+        return res.status(403).json({ error: 'شما مسدود شده‌اید' });
       }
     }
 
@@ -538,6 +541,18 @@ exports.sendMessage = async (req, res) => {
         return res
           .status(403)
           .json({ success: false, message: 'شما مسدود شده‌اید و نمی‌توانید پیامی ارسال کنید.' });
+      }
+    }
+
+    // اگر فرستنده کاربر باشد و توسط فروشنده مسدود شده باشد
+    if (senderRole === 'user') {
+      const idx = chat.participantsModel.findIndex(m => m === 'Seller');
+      if (idx !== -1) {
+        const sellerId = chat.participants[idx];
+        const sellerDoc = await Seller.findById(sellerId).select('blockedUsers');
+        if (sellerDoc && sellerDoc.blockedUsers?.some(u => u.toString() === senderId.toString())) {
+          return res.status(403).json({ error: 'شما مسدود شده‌اید' });
+        }
       }
     }
 
@@ -1228,6 +1243,16 @@ exports.userReplyToChat = async (req, res) => {
       return res
         .status(403)
         .json({ success: false, message: 'شما مسدود شده‌اید و نمی‌توانید پیامی ارسال کنید.' });
+    }
+  }
+
+  // اگر فروشنده این کاربر را مسدود کرده باشد
+  const idx = chat.participantsModel.findIndex(m => m === 'Seller');
+  if (idx !== -1) {
+    const sellerId = chat.participants[idx];
+    const sellerDoc = await Seller.findById(sellerId).select('blockedUsers');
+    if (sellerDoc && sellerDoc.blockedUsers?.some(u => u.toString() === req.user.id)) {
+      return res.status(403).json({ error: 'شما مسدود شده‌اید' });
     }
   }
 
