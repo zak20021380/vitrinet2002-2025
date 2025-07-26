@@ -91,6 +91,12 @@ router.post('/:id/block',
   chatController.blockSender
 );
 
+// مسدودسازی مستقیم کاربر یا فروشنده توسط ادمین
+router.post('/block-target',
+  auth('admin'),
+  chatController.blockTarget
+);
+
 // اجازه می‌دهیم فروشنده با مدیر چت جدیدی باز کند
 router.post(
   '/contact-admin',

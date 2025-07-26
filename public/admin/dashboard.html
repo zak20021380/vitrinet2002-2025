@@ -1559,6 +1559,13 @@ tr:last-child td {
   background: #dc2626;
 }
 
+.blocked-badge {
+  display: inline-block;
+  color: #dc2626;
+  font-weight: bold;
+  margin-right: 0.5rem;
+}
+
 
 
 
@@ -2479,23 +2486,27 @@ async function deleteMessage(chatId) {
 
 
 // مسدودسازی فرستنده مستقیماً از جدول
-// اصلاح تابع blockSender
-async function blockSender(sellerId) {
-  if (!confirm('آیا مطمئن هستید که می‌خواهید این فروشنده را مسدود کنید؟')) return;
+async function blockSender(chatId) {
+  const chat = messagesList.find(c => c._id === chatId) || {};
+  const targetRole = chat.sellerId ? 'seller' : 'user';
+  const targetId   = chat.sellerId || chat.customerId || chat.userId;
+  const label      = targetRole === 'seller' ? 'فروشنده' : 'مشتری';
+
+  if (!targetId) return alert('شناسه کاربر پیدا نشد.');
+  if (!confirm(`آیا مطمئنید که می‌خواهید این ${label} را مسدود کنید؟`)) return;
 
   try {
-    const res = await fetch(`${API_BASE}/sellers/${encodeURIComponent(sellerId)}/block`, {
+    const res = await fetch(`${API_BASE}/chats/block-target`, {
       method: 'POST',
-      credentials: 'include'
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ targetId, targetRole })
     });
-    
-    if (!res.ok) {
-      const data = await res.json();
-      throw new Error(data.error || 'خطا در مسدودسازی');
-    }
-    
-    alert('✅ فروشنده با موفقیت مسدود شد.');
-    // به‌روزرسانی لیست
+
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'خطا در مسدودسازی');
+
+    alert('✅ ' + (data.message || 'کاربر با موفقیت مسدود شد.'));
     await fetchMessages();
   } catch (err) {
     console.error('❌ blockSender error:', err);
@@ -4030,6 +4041,7 @@ modalWrapper.innerHTML = `
       <button onclick="sendAdminMessage()">ارسال</button>
       <!-- ↓ دکمهٔ مسدودسازی ↓ -->
       <button class="action-btn block" onclick="blockCurrentSender()">مسدودسازی فرستنده</button>
+      <span id="blockedBadge" class="blocked-badge" style="display:none">مسدود شده</span>
     </div>
 
     <button class="modal-close" onclick="closeModal()">بستن</button>
@@ -4047,6 +4059,8 @@ window.openChatModal = async function (chatId) {
   const chat = messagesList.find(c => c._id === chatId);
   const container = document.getElementById('chatMessages');
   container.innerHTML = '';
+  document.getElementById('chatReplyInput').disabled = false;
+  document.getElementById('blockedBadge').style.display = 'none';
 
   // 🟢 اگر پیام فروشنده یا کاربری نخونده وجود داره، به سرور اطلاع بده که خوانده شدند
   if (chat) {
@@ -4194,22 +4208,29 @@ document.addEventListener('DOMContentLoaded', () => {
  */
 async function blockCurrentSender() {
   if (!currentChatId) return alert('شناسهٔ چت پیدا نشد.');
-  if (!confirm('آیا مطمئن هستید که می‌خواهید فرستنده این گفتگو را مسدود کنید؟')) return;
+  const chat = messagesList.find(c => c._id === currentChatId) || {};
+  const targetRole = chat.sellerId ? 'seller' : 'user';
+  const targetId   = chat.sellerId || chat.customerId || chat.userId;
+  const label      = targetRole === 'seller' ? 'فروشنده' : 'مشتری';
+
+  if (!targetId) return alert('شناسه کاربر پیدا نشد.');
+  if (!confirm(`آیا مطمئنید که می‌خواهید این ${label} را مسدود کنید؟`)) return;
 
   try {
-    const res = await fetch(`${API_BASE}/chats/${currentChatId}/block`, {
+    const res = await fetch(`${API_BASE}/chats/block-target`, {
       method: 'POST',
       headers: {
-        'Authorization': 'Bearer ' + token,
         'Content-Type': 'application/json'
-      }
+      },
+      credentials: 'include',
+      body: JSON.stringify({ targetId, targetRole })
     });
     const data = await res.json();
     if (!res.ok) throw new Error(data.error || 'خطا در مسدودسازی');
 
-    alert('✅ فرستنده با موفقیت مسدود شد.');
-    closeModal();
-    // به‌روزرسانی لیست پیام‌ها
+    alert('✅ ' + (data.message || 'کاربر با موفقیت مسدود شد.'));
+    document.getElementById('chatReplyInput').disabled = true;
+    document.getElementById('blockedBadge').style.display = 'inline-block';
     await fetchMessages();
   } catch (err) {
     console.error('❌ blockCurrentSender error:', err);

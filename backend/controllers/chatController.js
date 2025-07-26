@@ -920,6 +920,36 @@ exports.blockSender = async (req, res) => {
   }
 };
 
+/**
+ * POST /api/chats/block-target
+ * مسدودسازی کاربر یا فروشنده توسط ادمین بر اساس نقش
+ * body: { targetId, targetRole }
+ */
+exports.blockTarget = async (req, res) => {
+  try {
+    const { targetId, targetRole } = req.body || {};
+
+    if (!targetId || !targetRole)
+      return res.status(400).json({ error: 'اطلاعات ناقص ارسال شده است.' });
+
+    let Model;
+    if (targetRole === 'user') Model = User;
+    else if (targetRole === 'seller') Model = Seller;
+    else return res.status(400).json({ error: 'نقش نامعتبر است.' });
+
+    const doc = await Model.findById(targetId);
+    if (!doc) return res.status(404).json({ error: 'کاربر پیدا نشد.' });
+
+    doc.blockedByAdmin = true;
+    await doc.save();
+
+    return res.json({ success: true, message: 'کاربر با موفقیت مسدود شد.' });
+  } catch (err) {
+    console.error('❌ blockTarget error:', err);
+    return res.status(500).json({ error: 'خطا در مسدودسازی' });
+  }
+};
+
 
 
     /**
