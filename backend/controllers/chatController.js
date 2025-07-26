@@ -231,27 +231,33 @@ exports.createChat = async (req, res) => {
       productId: pid || null
     };
 
-    let chat = await Chat.findOne(finder);
-    if (!chat) {
-      try {
-        chat = await Chat.create({
+    let chat;
+    let created = false;
+
+    const result = await Chat.findOneAndUpdate(
+      finder,
+      {
+        $setOnInsert: {
           participants,
           participantsModel,
           type: chatType,
           sellerId: chatType === 'user-seller' ? sid : null,
           productId: pid,
           messages: []
-        });
-        console.log('New chat created:', chat);
-      } catch (err) {
-        if (err.code === 11000) {
-          // چت همسان قبلاً ایجاد شده است، همان را برگردان
-          chat = await Chat.findOne(finder);
-        } else {
-          throw err;
         }
+      },
+      {
+        new: true,
+        upsert: true,
+        setDefaultsOnInsert: true,
+        rawResult: true
       }
-    }
+    ).catch(err => {
+      throw err;
+    });
+
+    chat = result.value;
+    created = !result.lastErrorObject.updatedExisting;
 
     if (!chat) {
       console.error('Unable to create or retrieve chat with finder:', finder);
@@ -273,7 +279,7 @@ exports.createChat = async (req, res) => {
       console.log('Chat message added:', chat);
     }
 
-    return res.status(chat.isNew ? 201 : 200).json(chat);
+    return res.status(created ? 201 : 200).json(chat);
 
   } catch (err) {
     console.error('❌ createChat error:', err);
