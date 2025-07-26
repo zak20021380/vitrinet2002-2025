@@ -424,18 +424,29 @@ exports.ensureChat = async (req, res) => {
     };
     let chat = await Chat.findOne(finder);
     if (!chat) {
-      chat = await Chat.create({
-        participants,
-        participantsModel,
-        type: chatType,
-        productId,
-        sellerId: chatType.includes('seller')
-          ? participants[sorted.findIndex(i => i.role === 'seller')] || null
-          : null,
-        messages: []
-      });
-      console.log('New chat created:', chat);
-    } else {
+      try {
+        chat = await Chat.create({
+          participants,
+          participantsModel,
+          type: chatType,
+          productId,
+          sellerId: chatType.includes('seller')
+            ? participants[sorted.findIndex(i => i.role === 'seller')] || null
+            : null,
+          messages: []
+        });
+        console.log('New chat created:', chat);
+      } catch (err) {
+        if (err.code === 11000) {
+          // در صورتی که چت همسان همزمان ایجاد شده باشد، همان را واکشی کن
+          chat = await Chat.findOne(finder);
+        } else {
+          throw err;
+        }
+      }
+    }
+
+    if (chat) {
       // در صورت ناهماهنگی اطلاعات، اصلاح کن
       let updated = false;
       if (chat.type !== chatType) { chat.type = chatType; updated = true; }
@@ -459,6 +470,9 @@ exports.ensureChat = async (req, res) => {
         await chat.save();
         console.log('Chat updated to match roles');
       }
+    } else {
+      console.error('Unable to create or retrieve chat with finder:', finder);
+      return res.status(500).json({ error: 'خطا در ایجاد چت.' });
     }
 
     return res.json(chat);
