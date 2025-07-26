@@ -528,7 +528,7 @@
   let chatsList   = [];               // لیست چت‌ها
   let currentCid  = null;             // آی‌دی چت انتخاب شده
 
-async function loadMessagesSection () {
+async function loadMessagesSection() {
   const box = document.getElementById('mainContent');
   box.innerHTML = `
     <div class="glass px-4 py-7 fadein">
@@ -539,9 +539,9 @@ async function loadMessagesSection () {
       <div id="userChatsList" class="w-full min-h-[180px]"></div>
     </div>
   `;
-  await fetchUserChats();
-  renderMessagesList();
-  startMsgPolling();
+  await fetchUserChats();  // لیست چت‌ها رو بگیر
+  renderMessagesList();    // رندر کن
+  startMsgPolling();       // polling شروع کن
 }
 
   /* گرفتن لیست چت‌ها */
@@ -724,11 +724,26 @@ async function openChat(cid) {
 
   /* ارسال پیام جدید به مدیر (ایجاد چت جدید اگر قبلا نداره) */
   // باز کردن مودال گفتگوی کاربر با مدیر (نسخه ساده)
-  async function openAdminMsgModal() {
-    const uid = window.currentUserId;
-    if (!uid) return;
-    showAdminMsgModal(uid);
+async function openAdminMsgModal() {
+  const uid = window.currentUserId;
+  if (!uid) return alert('شناسه کاربر پیدا نشد!');
+
+  // اول چت با admin رو ensure کن (اگر وجود نداشت، بساز)
+  try {
+    const res = await fetch(`${API_BASE}/chats/ensure`, {
+      method: 'POST',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ recipientRole: 'admin' })  // بدون recipientId، چون admin پیش‌فرض
+    });
+    if (!res.ok) throw new Error('دریافت/ایجاد چت با مدیر ناموفق بود');
+    const chat = await res.json();
+    currentCid = chat._id;  // chatId رو ست کن
+    showChatModal();        // مودال رو باز کن (که جزئیات رو لود می‌کنه)
+  } catch (err) {
+    alert('خطا: ' + err.message);
   }
+}
 
   function closeAdminMsg() {
     document.getElementById('adminMsgModal')?.remove();
@@ -857,16 +872,16 @@ async function showChatModal() {
     return;
   }
 
-  console.log('messages:', chat.messages); // ← این خط را اضافه کنید
+  console.log('messages:', chat.messages); // دیباگ
 
-  // بروزرسانی لیست محلی با جزئیات جدید (اختیاری، اما مفید برای polling بعدی)
+  // بروزرسانی لیست محلی
   const idx = chatsList.findIndex(c => c._id === currentCid);
   if (idx !== -1) chatsList[idx] = chat;
 
   console.log('ساختار چت کامل:', chat);
 
-  // استخراج طرف مقابل از participants (populate شده)
-  let whom = 'مخاطب'; // پیش‌فرض
+  // استخراج طرف مقابل
+  let whom = 'مخاطب';
   let role = '';
   let sellerId = null;
   let storeName = '';
@@ -879,28 +894,27 @@ async function showChatModal() {
       sellerId = participant._id;
       storeName = participant.storename || '';
       shopUrl = participant.shopurl || '';
-      whom = role === 'seller' ? 'فروشنده' : (role === 'admin' ? 'مدیر' : (role === 'user' ? 'کاربر' : 'مخاطب'));
+      whom = role === 'seller' ? 'فروشنده' : (role === 'admin' ? 'مدیر سایت' : (role === 'user' ? 'کاربر' : 'مخاطب'));
     }
   }
 
-  // fallback از type اگر participant پیدا نشد
+  // fallback از type
   if (!role && chat.type) {
     if (chat.type === 'user-seller' || chat.type === 'seller-admin') {
       whom = 'فروشنده';
       role = 'seller';
       sellerId = chat.sellerId;
     } else if (chat.type === 'user-admin') {
-      whom = 'مدیر';
+      whom = 'مدیر سایت';
       role = 'admin';
     }
   }
 
   let whomDisplay = whom;
-
   let sellerLink = '';
   if (role === 'seller' && sellerId) {
     const linkUrl = shopUrl ? `/store/${shopUrl}` : `/store.html?id=${sellerId}`;
-    const linkText = storeName ? `مغازه ${storeName}` : 'مغازه فروشنده';
+    const linkText = storeName ? `مغازه ${storeName}` : `مغازه فروشنده`;
     sellerLink = `<a href="${linkUrl}" target="_blank" class="text-[#0ea5e9] hover:text-blue-700 hover:underline ml-3 text-sm font-semibold">${linkText}</a>`;
   }
 
@@ -915,7 +929,7 @@ async function showChatModal() {
     `;
   }
 
-  // مودال
+  // مودال HTML
   document.body.insertAdjacentHTML('beforeend', `
     <div id="chatModal" class="fixed inset-0 z-50 flex items-center justify-center" style="backdrop-filter:blur(4px);background:#0003;animation:fadein .25s">
       <div class="bg-white rounded-2xl w-[98vw] max-w-md max-h-[93vh] flex flex-col shadow-xl border">
@@ -1126,7 +1140,7 @@ async function fetchChatDetails(cid) {
     });
     if (!res.ok) throw new Error('دریافت جزئیات چت ناموفق بود');
     const data = await res.json();
-    return data; // شیء چت کامل با تمام messages
+    return data;  // چت کامل با messages
   } catch (e) {
     console.error('❌ fetchChatDetails error:', e);
     return null;
