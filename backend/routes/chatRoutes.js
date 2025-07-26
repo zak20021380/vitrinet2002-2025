@@ -114,7 +114,7 @@ router.post(
 // ۱۰) تعداد پیام‌های نخوانده
 router.get(
   '/unreadCount',
-  auth('seller'),              // فقط فروشنده‌ی لاگین‌شده
+  auth(),
   chatController.getUnreadCount
 );
 

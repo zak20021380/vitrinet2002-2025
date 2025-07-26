@@ -9,6 +9,7 @@ let chatsInterval = null;           // شناسه setInterval
 let currentChatId = null;           // اگر مدال باز است، آی‌دی چت فعال
 let chatsBox      = null;           // بعداً در DOMContentLoaded مقدار می‌گیرد
 let firstLoad     = true;           // فقط بار اول لودینگ را نشان بده
+let chatsData     = [];             // ذخیره لیست چت‌ها برای محاسبه بج
 
 function startChatsPolling() {
   if (chatsInterval) clearInterval(chatsInterval);
@@ -129,9 +130,9 @@ async function fetchChats() {
       }
     });
 
-    // بج کلی
+    chatsData = chats;
     if (typeof window.updateBadge === 'function') {
-      const totalUnread = chats.reduce(
+      const totalUnread = chatsData.reduce(
         (s, c) => s + (c.messages || []).filter(m => m.from === 'admin' && !m.readBySeller).length,
         0
       );
@@ -250,11 +251,27 @@ function renderChatListItem(chat) {
   );
 
   /* باز کردن مدال گفتگو */
-  wrapper.addEventListener('click', () => {
+  wrapper.addEventListener('click', async () => {
+    try {
+      const res = await fetch(`http://localhost:5000/api/chats/${chat._id}`, { credentials: 'include' });
+      if (res.ok) {
+        const fresh = await res.json();
+        chat = fresh;
+        const idx = chatsData.findIndex(c => c._id === chat._id);
+        if (idx !== -1) chatsData[idx] = chat;
+      }
+    } catch {}
     renderChatModal(chat);
     currentChatId = chat._id;
     const badge = document.getElementById(`badge-${chat._id}`);
     if (badge) badge.classList.add('hidden');
+    if (typeof window.updateBadge === 'function') {
+      const totalUnread = chatsData.reduce(
+        (s, c) => s + (c.messages || []).filter(m => m.from === 'admin' && !m.readBySeller).length,
+        0
+      );
+      window.updateBadge(totalUnread);
+    }
   });
 
   /* حذف چت */
