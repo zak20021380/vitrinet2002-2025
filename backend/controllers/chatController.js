@@ -206,18 +206,27 @@ exports.createChat = async (req, res) => {
       }
     }
 
-      let chatType = 'user-seller'; // پیش‌فرض نوع چت
-      if (recipientRole === 'admin') {
+      let chatType;
+      if (pid) {
+        // در صورت وجود productId چت باید از نوع "product" باشد
+        chatType = 'product';
+      } else if (recipientRole === 'admin') {
         chatType = 'admin-user';
         const adminDoc = await Admin.findById(sid);
         if (!adminDoc) {
           return res.status(400).json({ error: 'گیرنده ادمین نیست.' });
         }
-    }
+      } else {
+        chatType = 'user-seller';
+      }
     console.log('Final chatType:', chatType);
     console.log('Participants model:', participantsModel);
 
-    let chat = await Chat.findOne({ participants, type: chatType, productId: pid });
+    let chat = await Chat.findOne({
+      participants: { $all: participants, $size: participants.length },
+      type: chatType,
+      productId: pid || null
+    });
     if (!chat) {
       chat = new Chat({
         participants,
@@ -389,7 +398,11 @@ exports.ensureChat = async (req, res) => {
     }
     console.log('Chat Type:', chatType);
 
-    const finder = { participants, productId, type: chatType };
+    const finder = {
+      participants: { $all: participants, $size: participants.length },
+      productId: productId || null,
+      type: chatType
+    };
     let chat = await Chat.findOne(finder);
     if (!chat) {
       chat = await Chat.create({

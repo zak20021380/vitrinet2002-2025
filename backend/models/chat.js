@@ -55,5 +55,11 @@ participantsModel: [{
   lastUpdated:{ type: Date, default: Date.now }
 });
 
+// اطمینان از یکتایی ترکیب شرکت‌کنندگان، نوع چت و محصول
+chatSchema.index(
+  { participants: 1, productId: 1, type: 1 },
+  { unique: true }
+);
+
 /* جلوگیری از OverwriteModelError هنگام هات‌ریلود */
 module.exports = mongoose.models.Chat || mongoose.model('Chat', chatSchema);
