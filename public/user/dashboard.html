@@ -560,7 +560,7 @@ async function fetchUserChats() {
 
     chatsList = allChats.filter(c => {
       if (!uid) return false;
-      if (c.type === 'admin' || c.type === 'user-admin') return true;
+      if (c.type === 'admin' || c.type === 'user-admin' || c.type === 'admin-user') return true;
       if (c.userId && c.userId === uid) return true;
       if (Array.isArray(c.participants) && c.participants.some(p => {
         if (!p) return false;
@@ -632,7 +632,7 @@ function renderMessagesList() {
         whom = 'فروشنده';
         role = 'seller';
         sellerId = c.sellerId;
-    } else if (c.type === 'user-admin' || c.type === 'admin') {
+    } else if (c.type === 'user-admin' || c.type === 'admin-user' || c.type === 'admin') {
       whom = 'مدیر سایت';
       role = 'admin';
     }
@@ -930,7 +930,7 @@ async function showChatModal() {
       whom = 'فروشنده';
       role = 'seller';
       sellerId = chat.sellerId;
-    } else if (chat.type === 'user-admin' || chat.type === 'admin') {
+    } else if (chat.type === 'user-admin' || chat.type === 'admin-user' || chat.type === 'admin') {
       whom = 'مدیر سایت';
       role = 'admin';
     }
