@@ -527,6 +527,7 @@
   const API_BASE  = '/api';           // طبق سرورت
   let chatsList   = [];               // لیست چت‌ها
   let currentCid  = null;             // آی‌دی چت انتخاب شده
+  let blockedSellers = [];            // فروشندگان مسدودشده
 
 async function loadMessagesSection() {
   const box = document.getElementById('mainContent');
@@ -539,6 +540,7 @@ async function loadMessagesSection() {
       <div id="userChatsList" class="w-full min-h-[180px]"></div>
     </div>
   `;
+  await fetchBlockedSellers(); // فروشنده‌های مسدودشده را بگیر
   await fetchUserChats();  // لیست چت‌ها رو بگیر
   renderMessagesList();    // رندر کن
   startMsgPolling();       // polling شروع کن
@@ -604,6 +606,7 @@ function renderMessagesList() {
     let sellerId = null;
     let storeName = '';
     let shopUrl = '';
+    let isBlocked = false;
 
     if (Array.isArray(c.participants)) {
       const participant = c.participants.find(p => p && p._id !== myId);
@@ -614,6 +617,10 @@ function renderMessagesList() {
         shopUrl = participant.shopurl || '';
         whom = role === 'seller' ? 'فروشنده' : (role === 'admin' ? 'مدیر سایت' : (role === 'user' ? 'کاربر' : 'مخاطب'));
       }
+    }
+
+    if (role === 'seller' && sellerId) {
+      isBlocked = blockedSellers.includes(sellerId);
     }
 
     if (!role && Array.isArray(c.participantsModel)) {
@@ -675,7 +682,7 @@ if (c.productId && c.productId.title) {
     }
 
 return `
-  <div class="flex items-start gap-3 p-3 mb-2 bg-[#f9fafb] rounded-xl shadow-sm hover:bg-[#e6fcf7] cursor-pointer transition"
+  <div class="flex items-start gap-3 p-3 mb-2 bg-[#f9fafb] rounded-xl shadow-sm hover:bg-[#e6fcf7] cursor-pointer transition ${isBlocked ? 'opacity-50' : ''}"
        onclick="openChat('${c._id}')">
 
     <!-- آواتار -->
@@ -703,13 +710,17 @@ return `
           }
         </div>
 
-        <!-- دکمه حذف -->
-        <button
-          class="px-2 py-0.5 text-xs rounded-xl bg-red-50 text-red-600 border border-red-100
-                 hover:bg-red-200 hover:text-red-900 transition"
-          onclick="event.stopPropagation(); deleteChat('${c._id}')">
-          حذف
-        </button>
+        <!-- دکمه‌ها -->
+        <div class="flex items-center gap-1">
+          <button
+            class="px-2 py-0.5 text-xs rounded-xl bg-red-50 text-red-600 border border-red-100
+                   hover:bg-red-200 hover:text-red-900 transition"
+            onclick="event.stopPropagation(); deleteChat('${c._id}')">
+            حذف
+          </button>
+          ${role === 'seller' && !isBlocked ? `<button class="px-2 py-0.5 text-xs rounded-xl bg-gray-100 text-gray-600 border border-gray-200 hover:bg-gray-200 transition" onclick="event.stopPropagation(); blockSeller('${sellerId}')">مسدودسازی فروشنده</button>` : ''}
+          ${role === 'seller' && isBlocked ? `<span class="text-xs text-red-500">مسدود شده</span>` : ''}
+        </div>
       </div>
 
       ${prodBlock}
@@ -984,6 +995,32 @@ async function showChatModal() {
   function closeChat() {
     document.getElementById('chatModal')?.remove();
     currentCid = null;
+  }
+
+  async function fetchBlockedSellers() {
+    try {
+      const res = await fetch(`${API_BASE}/blocked-sellers`, { credentials: 'include' });
+      const data = await res.json();
+      blockedSellers = Array.isArray(data) ? data : [];
+    } catch (e) {
+      blockedSellers = [];
+    }
+  }
+
+  async function blockSeller(sid) {
+    if (!confirm('آیا مطمئن هستید که می‌خواهید این فروشنده را مسدود کنید؟')) return;
+    try {
+      const res = await fetch(`${API_BASE}/blocked-sellers/${sid}`, {
+        method: 'POST',
+        credentials: 'include'
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'خطا در مسدودسازی');
+      if (!blockedSellers.includes(sid)) blockedSellers.push(sid);
+      renderMessagesList();
+    } catch (err) {
+      alert('خطا در مسدودسازی: ' + err.message);
+    }
   }
 
   /* رندر مکالمه داخل مودال */

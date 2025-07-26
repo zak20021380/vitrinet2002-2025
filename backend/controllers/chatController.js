@@ -6,9 +6,10 @@
     const Product  = require('../models/product');
     const mongoose = require('mongoose');
     const Seller   = require('../models/Seller'); 
-    const Block = require('../models/Block');
-  const User     = require('../models/user');   // ← مطمئن شوید این خط هست
-  const Admin = require('../models/admin');  // 👈 اضافه کن
+const Block = require('../models/Block');
+const User     = require('../models/user');   // ← مطمئن شوید این خط هست
+const Admin = require('../models/admin');  // 👈 اضافه کن
+const BlockedSeller = require('../models/BlockedSeller');
 
     /**
      * GET /api/chats?sellerId=...
@@ -192,6 +193,18 @@ exports.createChat = async (req, res) => {
     const participants       = temp.map(t => t.id);
     const participantsModel  = temp.map(t => getModelFromRole(t.role));
     console.log('Participants:', participants);
+
+    // اگر فرستنده فروشنده باشد و کاربر مقابل او را مسدود کرده باشد
+    if (senderRole === 'seller') {
+      const uIdx = participantsModel.findIndex(m => m === 'User');
+      if (uIdx !== -1) {
+        const userId = participants[uIdx];
+        const blocked = await BlockedSeller.findOne({ user: userId, seller: senderId });
+        if (blocked) {
+          return res.status(403).json({ error: 'شما توسط این کاربر مسدود شده‌اید' });
+        }
+      }
+    }
 
       let chatType = 'user-seller'; // پیش‌فرض نوع چت
       if (recipientRole === 'admin') {
@@ -515,6 +528,18 @@ exports.sendMessage = async (req, res) => {
       }
     }
 
+    // اگر فرستنده فروشنده باشد و کاربر او را مسدود کرده باشد، اجازه ارسال ندارد
+    if (senderRole === 'seller') {
+      const idx = chat.participantsModel.findIndex(m => m === 'User');
+      if (idx !== -1) {
+        const userId = chat.participants[idx];
+        const blocked = await BlockedSeller.findOne({ user: userId, seller: senderId });
+        if (blocked) {
+          return res.status(403).json({ error: 'شما توسط این کاربر مسدود شده‌اید' });
+        }
+      }
+    }
+
     // در صورتی که چت نوع "seller-admin" باشد، پیام را از فروشنده به ادمین ارسال کنید.
     const readByAdmin = ['seller-admin', 'user-admin', 'admin-user', 'admin'].includes(chat.type) ? false : true;
     const readBySeller = senderRole === 'seller';
@@ -621,7 +646,17 @@ exports.replyToChat = async (req, res) => {
       return res.status(403).json({ error: 'دسترسی غیرمجاز.' });
     }
 
-    // ۴. درج پیام از طرف فروشنده
+    // ۴. اگر کاربر این فروشنده را مسدود کرده باشد، اجازه ارسال ندارد
+    const uIdx = chat.participantsModel.findIndex(m => m === 'User');
+    if (uIdx !== -1) {
+      const userId = chat.participants[uIdx];
+      const blocked = await BlockedSeller.findOne({ user: userId, seller: req.user.id });
+      if (blocked) {
+        return res.status(403).json({ error: 'شما توسط این کاربر مسدود شده‌اید' });
+      }
+    }
+
+    // ۵. درج پیام از طرف فروشنده
     chat.messages.push({
       from: 'seller',
       text: text.trim(),
@@ -631,14 +666,13 @@ exports.replyToChat = async (req, res) => {
       readByAdmin: ['seller-admin', 'user-admin', 'admin-user', 'admin'].includes(chat.type) ? false : true,
       readBySeller: true
     });
-
-    // ۵. به‌روزرسانی timestamp
+    // ۶. به‌روزرسانی timestamp
     chat.lastUpdated = Date.now();
 
-    // ۶. ذخیره در دیتابیس
+    // ۷. ذخیره در دیتابیس
     await chat.save();
 
-    // ۷. برگرداندن چت کامل
+    // ۸. برگرداندن چت کامل
     return res.json(chat);
   } catch (err) {
     console.error('❌ replyToChat error:', err);
