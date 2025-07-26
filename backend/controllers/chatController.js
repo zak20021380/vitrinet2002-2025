@@ -188,13 +188,28 @@ exports.createChat = async (req, res) => {
       }
     }
 
-    const temp = [
+    const rawParticipants = [
       { id: senderId, role: senderRole },
       { id: sid,      role: recipientRole }
-    ].sort((a, b) => a.id.toString().localeCompare(b.id.toString()));
+    ];
 
-    const participants       = temp.map(t => t.id);
-    const participantsModel  = temp.map(t => getModelFromRole(t.role));
+    // اطمینان از یکتایی شناسه‌ها
+    const uniqueMap = new Map();
+    rawParticipants.forEach(p => {
+      const key = p.id.toString();
+      if (!uniqueMap.has(key)) uniqueMap.set(key, p);
+    });
+
+    if (uniqueMap.size !== 2) {
+      return res.status(400).json({ error: 'شناسه‌های شرکت‌کننده نامعتبر است.' });
+    }
+
+    const temp = Array.from(uniqueMap.values()).sort((a, b) =>
+      a.id.toString().localeCompare(b.id.toString())
+    );
+
+    const participants      = temp.map(t => t.id);
+    const participantsModel = temp.map(t => getModelFromRole(t.role));
     console.log('Participants:', participants);
 
     // اگر فرستنده فروشنده باشد و کاربر مقابل او را مسدود کرده باشد
