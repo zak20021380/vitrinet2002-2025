@@ -15,6 +15,9 @@ const userSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref : 'Product'
   }]
+  ,
+  // آیا توسط ادمین برای ارسال پیام مسدود شده است؟
+  blockedByAdmin: { type: Boolean, default: false }
 }, { timestamps: true });
 
 module.exports = mongoose.model('User', userSchema);

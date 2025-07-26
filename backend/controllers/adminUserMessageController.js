@@ -96,9 +96,18 @@ exports.getMessages = async (req, res) => {
 exports.sendMessage = async (req, res) => {
   try {
     const { message = '', userId } = req.body;
-    const sender = req.user;
+  const sender = req.user;
 
-    if (!message.trim()) return res.status(400).json({ message: 'متن پیام الزامی است' });
+  if (!message.trim()) return res.status(400).json({ message: 'متن پیام الزامی است' });
+
+  if (sender.role === 'user') {
+    const userDoc = await require('../models/user').findById(sender.id).select('blockedByAdmin');
+    if (userDoc && userDoc.blockedByAdmin) {
+      return res
+        .status(403)
+        .json({ success: false, message: 'شما مسدود شده‌اید و نمی‌توانید پیامی ارسال کنید.' });
+    }
+  }
 
     const adminDoc = await Admin.findOne();
     if (!adminDoc) return res.status(500).json({ message: 'ادمین یافت نشد' });

@@ -28,6 +28,9 @@ const sellerSchema = new mongoose.Schema({
   subscriptionEnd: { type: Date },       // تاریخ پایان اشتراک
   visits: { type: Number, default: 0 },  // تعداد بازدید فروشگاه
 
+  // آیا توسط ادمین برای ارسال پیام مسدود شده است؟
+  blockedByAdmin: { type: Boolean, default: false }
+
 }, { timestamps: true });
 
 module.exports = mongoose.model('Seller', sellerSchema);

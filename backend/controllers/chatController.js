@@ -112,6 +112,17 @@ exports.createChat = async (req, res) => {
     const senderRole = req.user.role;
     console.log('Sender ID:', senderId, 'Sender Role:', senderRole);
 
+    // جلوگیری از ارسال پیام در صورت مسدودی توسط ادمین
+    if (['user', 'seller'].includes(senderRole) && recipientRole === 'admin') {
+      const model = senderRole === 'user' ? User : Seller;
+      const doc = await model.findById(senderId).select('blockedByAdmin');
+      if (doc && doc.blockedByAdmin) {
+        return res
+          .status(403)
+          .json({ success: false, message: 'شما مسدود شده‌اید و نمی‌توانید پیامی ارسال کنید.' });
+      }
+    }
+
     let pid = null, sid = null;
 
     if (productId) {
@@ -245,6 +256,13 @@ exports.createAdminUserChat = async (req, res) => {
     if (!req.user) return res.status(401).json({ error: 'توکن نامعتبر یا منقضی است.' });
     if (req.user.role !== 'user')
       return res.status(403).json({ error: 'فقط کاربر مجاز به ارسال پیام به مدیر است.' });
+
+    const userDoc = await User.findById(req.user.id).select('blockedByAdmin');
+    if (userDoc && userDoc.blockedByAdmin) {
+      return res
+        .status(403)
+        .json({ success: false, message: 'شما مسدود شده‌اید و نمی‌توانید پیامی ارسال کنید.' });
+    }
 
     const userId = req.user.id;
     const adminDoc = await Admin.findOne().select('_id');
@@ -484,6 +502,17 @@ exports.sendMessage = async (req, res) => {
 
     if (!chat.participants.some(p => p.equals(senderId))) {
       return res.status(403).json({ error: 'دسترسی غیرمجاز به این چت.' });
+    }
+
+    // چک مسدودی در صورتی که طرف مقابل ادمین باشد
+    if (chat.participantsModel?.includes('Admin') && ['user','seller'].includes(senderRole)) {
+      const model = senderRole === 'user' ? User : Seller;
+      const doc = await model.findById(senderId).select('blockedByAdmin');
+      if (doc && doc.blockedByAdmin) {
+        return res
+          .status(403)
+          .json({ success: false, message: 'شما مسدود شده‌اید و نمی‌توانید پیامی ارسال کنید.' });
+      }
     }
 
     // در صورتی که چت نوع "seller-admin" باشد، پیام را از فروشنده به ادمین ارسال کنید.
@@ -860,37 +889,36 @@ exports.broadcastMessage = async (req, res) => {
 
 
 
-    /**
-     * POST /api/chats/:id/block
-     * مسدودسازی فرستندهٔ آخرین پیام در چت
-     */
-    exports.blockSender = async (req, res) => {
-      try {
-        const chat = await Chat.findById(req.params.id);
-        if (!chat) return res.status(404).json({ error: 'چت پیدا نشد' });
+/**
+ * POST /api/chats/:id/block
+ * مسدودسازی یا رفع مسدودی طرف گفتگو توسط ادمین
+ */
+exports.blockSender = async (req, res) => {
+  try {
+    const { unblock = false } = req.body || {};
+    const chat = await Chat.findById(req.params.id).lean();
+    if (!chat) return res.status(404).json({ error: 'چت پیدا نشد' });
 
-        // آخرین پیام غیر-admin
-        const last = [...chat.messages].reverse().find(m => m.from !== 'admin');
-        if (!last) return res.status(400).json({ error: 'فرستنده‌ای یافت نشد' });
+    // یافتن شرکت‌کننده‌ای که ادمین نیست
+    const idx = (chat.participantsModel || []).findIndex(m => m !== 'Admin');
+    if (idx === -1) return res.status(400).json({ error: 'شرکت‌کننده‌ای برای مسدودسازی یافت نشد' });
+    const participantId = chat.participants[idx];
+    const model = chat.participantsModel[idx];
 
-        // فقط مشتری‌ها (customer) مجاز به بلاک هستند
-        if (last.from !== 'customer') {
-          return res.status(400).json({ error: 'فقط مشتری‌ها قابل مسدودسازی هستند' });
-        }
+    if (model === 'User') {
+      await User.findByIdAndUpdate(participantId, { blockedByAdmin: !unblock });
+    } else if (model === 'Seller') {
+      await Seller.findByIdAndUpdate(participantId, { blockedByAdmin: !unblock });
+    } else {
+      return res.status(400).json({ error: 'امکان مسدودسازی این نقش نیست' });
+    }
 
-        // شناسه مشتری
-        const senderId = chat.customerId;
-        if (!senderId) return res.status(400).json({ error: 'شناسهٔ مشتری نامعتبر است' });
-
-        // ایجاد بلاک
-        await Block.create({ senderId, senderType: 'customer' });
-        return res.json({ success: true });
-
-      } catch (err) {
-        console.error('❌ blockSender error:', err);
-        return res.status(500).json({ error: 'خطا در مسدودسازی فرستنده' });
-      }
-    };
+    return res.json({ success: true, blocked: !unblock });
+  } catch (err) {
+    console.error('❌ blockSender error:', err);
+    return res.status(500).json({ error: 'خطا در مسدودسازی فرستنده' });
+  }
+};
 
 
 
@@ -906,10 +934,17 @@ exports.contactAdmin = async (req, res) => {
   try {
     const { text, message } = req.body;
     const content = (text || message || '').trim();
-    if (!content) 
+  if (!content)
       return res.status(400).json({ error: 'متن پیام اجباری است.' });
-    if (!req.user || req.user.role !== 'seller') 
+  if (!req.user || req.user.role !== 'seller')
       return res.status(403).json({ error: 'فقط فروشنده مجاز است.' });
+
+  const sellerDoc = await Seller.findById(req.user.id).select('blockedByAdmin');
+  if (sellerDoc && sellerDoc.blockedByAdmin) {
+    return res
+      .status(403)
+      .json({ success: false, message: 'شما مسدود شده‌اید و نمی‌توانید پیامی ارسال کنید.' });
+  }
 
     const sellerId = req.user.id;
 
@@ -1036,9 +1071,19 @@ exports.userReplyToChat = async (req, res) => {
     }
 
     // ۳. بررسی دسترسی: فقط کاربری که عضو این چت است
-    if (!chat.participants.some(p => p.toString() === req.user.id)) {
-      return res.status(403).json({ error: 'دسترسی غیرمجاز به این چت.' });
+  if (!chat.participants.some(p => p.toString() === req.user.id)) {
+    return res.status(403).json({ error: 'دسترسی غیرمجاز به این چت.' });
+  }
+
+  // اگر طرف مقابل ادمین است، بررسی مسدودی
+  if (chat.participantsModel?.includes('Admin')) {
+    const userDoc = await User.findById(req.user.id).select('blockedByAdmin');
+    if (userDoc && userDoc.blockedByAdmin) {
+      return res
+        .status(403)
+        .json({ success: false, message: 'شما مسدود شده‌اید و نمی‌توانید پیامی ارسال کنید.' });
     }
+  }
 
     // ۴. تعیین وضعیت خوانده‌شدن برای ادمین
     // اگر چت با ادمین باشد (user-admin یا seller-admin)، readByAdmin=false
