@@ -2505,6 +2505,7 @@ async function blockSender(chatId) {
   if (!confirm(`آیا مطمئن هستید که می‌خواهید این ${label} را مسدود کنید؟`)) return;
 
   try {
+    console.log('blockSender ->', { targetId, targetRole });
     const res = await fetch(`${API_BASE}/chats/block-target`, {
       method: 'POST',
       credentials: 'include',
@@ -2533,6 +2534,7 @@ async function unblockSender(chatId) {
   if (!confirm(`آیا مطمئن هستید که می‌خواهید این ${label} را آزاد کنید؟`)) return;
 
   try {
+    console.log('unblockSender ->', { targetId, targetRole });
     const res = await fetch(`${API_BASE}/chats/unblock-target`, {
       method: 'POST',
       credentials: 'include',
@@ -3018,6 +3020,7 @@ window.blockUser = async function(id, idx) {
   if (!id) return alert('شناسه معتبر یافت نشد');
   if (!confirm('آیا مطمئن هستید که می‌خواهید این مشتری را مسدود کنید؟')) return;
   try {
+    console.log('blockUser ->', { targetId: id, targetRole: 'user' });
     const res = await fetch(`${API_BASE}/chats/block-target`, {
       method: 'POST',
       credentials: 'include',
@@ -3039,6 +3042,7 @@ window.unblockUser = async function(id, idx) {
   if (!id) return alert('شناسه معتبر یافت نشد');
   if (!confirm('آیا مطمئن هستید که می‌خواهید این مشتری را آزاد کنید؟')) return;
   try {
+    console.log('unblockUser ->', { targetId: id, targetRole: 'user' });
     const res = await fetch(`${API_BASE}/chats/unblock-target`, {
       method: 'POST',
       credentials: 'include',
@@ -4310,6 +4314,7 @@ async function blockCurrentSender() {
   if (!confirm(`آیا مطمئن هستید که می‌خواهید این ${label} را مسدود کنید؟`)) return;
 
   try {
+    console.log('blockCurrentSender ->', { targetId, targetRole });
     const res = await fetch(`${API_BASE}/chats/block-target`, {
       method: 'POST',
       headers: {
@@ -4342,6 +4347,7 @@ async function unblockCurrentSender() {
   if (!confirm(`آیا مطمئن هستید که می‌خواهید این ${label} را آزاد کنید؟`)) return;
 
   try {
+    console.log('unblockCurrentSender ->', { targetId, targetRole });
     const res = await fetch(`${API_BASE}/chats/unblock-target`, {
       method: 'POST',
       headers: {
