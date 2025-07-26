@@ -247,26 +247,34 @@ exports.createChat = async (req, res) => {
     };
 
     let chat = await Chat.findOne(finder);
-    let created = false;
-
-    if (!chat) {
-      chat = new Chat({
-        participants,
-        participantsModel,
-        type: chatType,
-        sellerId: chatType === 'user-seller' ? sid : null,
-        productId: pid,
-        messages: []
-      });
-      created = true;
-    }
-
-    if (!chat) {
-      console.error('Unable to create or retrieve chat with finder:', finder);
-      return res.status(500).json({ error: 'خطا در ایجاد چت.' });
-    }
-
     const text = (rawText || '').trim();
+
+    if (chat) {
+      if (text) {
+        chat.messages.push({
+          from: senderRole,
+          text,
+          date: new Date(),
+          read: false,
+          readByAdmin: (chatType === 'user-admin' || chatType === 'admin-user' ||
+chatType === 'seller-admin' || chatType === 'admin') ? false : true,
+          readBySeller: senderRole === 'seller'
+        });
+        chat.lastUpdated = Date.now();
+        await chat.save();
+      }
+      return res.status(200).json(chat);
+    }
+
+    chat = new Chat({
+      participants,
+      participantsModel,
+      type: chatType,
+      sellerId: chatType === 'user-seller' ? sid : null,
+      productId: pid,
+      messages: []
+    });
+
     if (text) {
       chat.messages.push({
         from: senderRole,
@@ -278,13 +286,11 @@ exports.createChat = async (req, res) => {
       });
     }
 
-    if (created || text) {
-      chat.lastUpdated = Date.now();
-      await chat.save();
-      if (text) console.log('Chat message added:', chat);
-    }
+    chat.lastUpdated = Date.now();
+    await chat.save();
+    if (text) console.log('Chat message added:', chat);
 
-    return res.status(created ? 201 : 200).json(chat);
+    return res.status(201).json(chat);
 
   } catch (err) {
     console.error('❌ createChat error:', err);
