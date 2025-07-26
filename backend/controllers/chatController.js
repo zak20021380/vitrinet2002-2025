@@ -935,12 +935,15 @@ exports.blockTarget = async (req, res) => {
     if (!targetId || !targetRole)
       return res.status(400).json({ error: 'اطلاعات ناقص ارسال شده است.' });
 
-    const model   = targetRole === 'user' ? User : Seller;
-    const blocked = await model.findByIdAndUpdate(targetId, {
-      blockedByAdmin: true
-    });
-    if (!blocked)
+    console.log('🛑 blockTarget payload', { targetId, targetRole });
+
+    const model = targetRole === 'user' ? User : Seller;
+    const target = await model.findById(targetId);
+    if (!target)
       return res.status(404).json({ message: 'شناسه یافت نشد' });
+
+    target.blockedByAdmin = true;
+    await target.save();
 
     console.log(`🔒 Blocked ${targetRole}: ${targetId}`);
 
@@ -963,12 +966,15 @@ exports.unblockTarget = async (req, res) => {
     if (!targetId || !targetRole)
       return res.status(400).json({ error: 'اطلاعات ناقص ارسال شده است.' });
 
-    const model     = targetRole === 'user' ? User : Seller;
-    const unblocked = await model.findByIdAndUpdate(targetId, {
-      blockedByAdmin: false
-    });
-    if (!unblocked)
+    console.log('🟢 unblockTarget payload', { targetId, targetRole });
+
+    const model = targetRole === 'user' ? User : Seller;
+    const target = await model.findById(targetId);
+    if (!target)
       return res.status(404).json({ message: 'شناسه یافت نشد' });
+
+    target.blockedByAdmin = false;
+    await target.save();
 
     console.log(`🔓 Unblocked ${targetRole}: ${targetId}`);
 
