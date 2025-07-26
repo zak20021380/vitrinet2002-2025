@@ -882,6 +882,19 @@ async function openAdminMsgModal() {
 /* ساختار مودال چت */
 /* ساختار مودال چت */
 /* ساختار مودال چت */
+async function ensureShopUrl(sid, existing) {
+  if (existing) return existing;
+  if (!sid) return '';
+  try {
+    const res = await fetch(`${API_BASE}/shopAppearance/${sid}`);
+    if (!res.ok) return '';
+    const data = await res.json();
+    return data.customUrl || '';
+  } catch {
+    return '';
+  }
+}
+
 /* ساختار مودال چت (async برای fetch جزئیات) */
 async function showChatModal() {
   console.log("در حال نمایش مودال چت...");
@@ -950,9 +963,12 @@ async function showChatModal() {
   let whomDisplay = whom;
   let sellerLink = '';
   if (role === 'seller' && sellerId) {
-    const linkUrl = shopUrl ? `/store/${shopUrl}` : `/store.html?id=${sellerId}`;
+    shopUrl = await ensureShopUrl(sellerId, shopUrl);
+    const linkUrl = shopUrl ? `/shop/${shopUrl}` : '';
     const linkText = storeName ? `مغازه ${storeName}` : `مغازه فروشنده`;
-    sellerLink = `<a href="${linkUrl}" target="_blank" class="text-[#0ea5e9] hover:text-blue-700 hover:underline ml-3 text-sm font-semibold">${linkText}</a>`;
+    sellerLink = linkUrl
+      ? `<a href="${linkUrl}" target="_blank" class="text-[#0ea5e9] hover:text-blue-700 hover:underline ml-3 text-sm font-semibold">${linkText}</a>`
+      : '';
   }
 
   let prodBlock = '';
