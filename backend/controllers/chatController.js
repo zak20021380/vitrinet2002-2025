@@ -654,10 +654,18 @@ exports.replyToChat = async (req, res) => {
       return res.status(404).json({ error: 'چت پیدا نشد.' });
     }
 
-    // ۳. فقط فروشنده‌ی صاحب این چت می‌تواند پاسخ بدهد
-    if (!req.user || req.user.role !== 'seller' || chat.sellerId.toString() !== req.user.id) {
-      return res.status(403).json({ error: 'دسترسی غیرمجاز.' });
-    }
+  // ۳. فقط فروشنده‌ی صاحب این چت می‌تواند پاسخ بدهد
+  if (!req.user || req.user.role !== 'seller') {
+    return res.status(403).json({ error: 'دسترسی غیرمجاز.' });
+  }
+
+  if (!chat.sellerId || !chat.sellerId.toString) {
+    return res.status(400).json({ error: 'فرستنده نامعتبر است' });
+  }
+
+  if (chat.sellerId.toString() !== req.user.id) {
+    return res.status(403).json({ error: 'دسترسی غیرمجاز.' });
+  }
 
     // ۴. اگر کاربر این فروشنده را مسدود کرده باشد، اجازه ارسال ندارد
     const uIdx = chat.participantsModel.findIndex(m => m === 'User');
