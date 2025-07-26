@@ -182,13 +182,13 @@ exports.createChat = async (req, res) => {
     const participantsModel  = temp.map(t => getModelFromRole(t.role));
     console.log('Participants:', participants);
 
-    let chatType = 'user-seller'; // پیش‌فرض نوع چت
-    if (recipientRole === 'admin') {
-      chatType = 'user-admin';
-      const adminDoc = await Admin.findById(sid);
-      if (!adminDoc) {
-        return res.status(400).json({ error: 'گیرنده ادمین نیست.' });
-      }
+      let chatType = 'user-seller'; // پیش‌فرض نوع چت
+      if (recipientRole === 'admin') {
+        chatType = 'admin-user';
+        const adminDoc = await Admin.findById(sid);
+        if (!adminDoc) {
+          return res.status(400).json({ error: 'گیرنده ادمین نیست.' });
+        }
     }
     console.log('Final chatType:', chatType);
     console.log('Participants model:', participantsModel);
@@ -213,7 +213,7 @@ exports.createChat = async (req, res) => {
         text,
         date: new Date(),
         read: false,
-        readByAdmin: (chatType === 'user-admin' || chatType === 'seller-admin' || chatType === 'admin') ? false : true,
+        readByAdmin: (chatType === 'user-admin' || chatType === 'admin-user' || chatType === 'seller-admin' || chatType === 'admin') ? false : true,
         readBySeller: senderRole === 'seller'
       });
       chat.lastUpdated = Date.now();
@@ -259,7 +259,7 @@ exports.createAdminUserChat = async (req, res) => {
 
     const finder = {
       participants: { $all: participants, $size: 2 },
-      type: 'user-admin',
+      type: 'admin-user',
       productId: productId || null
     };
 
@@ -268,7 +268,7 @@ exports.createAdminUserChat = async (req, res) => {
       chat = new Chat({
         participants,
         participantsModel,
-        type: 'user-admin',
+        type: 'admin-user',
         productId: productId || null,
         messages: []
       });
@@ -352,7 +352,7 @@ exports.ensureChat = async (req, res) => {
     } else {
       const roles = new Set([myRole, recipientRole]);
       if (roles.has('user') && roles.has('seller')) chatType = 'user-seller';
-      else if (roles.has('user') && roles.has('admin')) chatType = 'user-admin';
+      else if (roles.has('user') && roles.has('admin')) chatType = 'admin-user';
       else if (roles.has('seller') && roles.has('admin')) chatType = 'seller-admin';
       else chatType = 'general'; // چت عمومی
     }
@@ -487,7 +487,7 @@ exports.sendMessage = async (req, res) => {
     }
 
     // در صورتی که چت نوع "seller-admin" باشد، پیام را از فروشنده به ادمین ارسال کنید.
-    const readByAdmin = ['seller-admin', 'user-admin', 'admin'].includes(chat.type) ? false : true;
+    const readByAdmin = ['seller-admin', 'user-admin', 'admin-user', 'admin'].includes(chat.type) ? false : true;
     const readBySeller = senderRole === 'seller';
 
     chat.messages.push({
@@ -599,7 +599,7 @@ exports.replyToChat = async (req, res) => {
       date: new Date(),
       read: false,
       // اگر چت با ادمین باشد (seller-admin)، admin هنوز پیام را نخوانده
-      readByAdmin: ['seller-admin', 'user-admin', 'admin'].includes(chat.type) ? false : true,
+      readByAdmin: ['seller-admin', 'user-admin', 'admin-user', 'admin'].includes(chat.type) ? false : true,
       readBySeller: true
     });
 
@@ -649,10 +649,10 @@ exports.adminReplyToChat = async (req, res) => {
       return res.status(403).json({ error: 'دسترسی غیرمجاز.' });
     }
 
-    if (chat.type !== 'user-admin' && chat.type !== 'seller-admin' && chat.type !== 'admin') {
+    if (!['user-admin', 'admin-user', 'seller-admin', 'admin'].includes(chat.type)) {
       const idx = chat.participants.findIndex(p => p.toString() !== adminId);
       const otherModel = chat.participantsModel?.[idx];
-      if (otherModel === 'User') chat.type = 'user-admin';
+      if (otherModel === 'User') chat.type = 'admin-user';
       else if (otherModel === 'Seller') chat.type = 'seller-admin';
     }
 
@@ -812,7 +812,7 @@ exports.broadcastMessage = async (req, res) => {
         : ['User', 'Admin'].sort();
 
       // نوع چت را بر اساس target تنظیم کنید
-      const chatType = target === 'sellers' ? 'seller-admin' : 'user-admin';
+        const chatType = target === 'sellers' ? 'seller-admin' : 'admin-user';
 
       // تلاش برای پیدا کردن چت موجود با فیلتر نوع و productId
       let chat = await Chat.findOne({
@@ -1043,7 +1043,7 @@ exports.userReplyToChat = async (req, res) => {
     // ۴. تعیین وضعیت خوانده‌شدن برای ادمین
     // اگر چت با ادمین باشد (user-admin یا seller-admin)، readByAdmin=false
     // در غیر این صورت (مثلاً user-seller)، readByAdmin=true
-    const readByAdmin = !['user-admin', 'seller-admin', 'admin'].includes(chat.type);
+      const readByAdmin = !['user-admin', 'admin-user', 'seller-admin', 'admin'].includes(chat.type);
 
     // ۵. درج پیام
     chat.messages.push({
