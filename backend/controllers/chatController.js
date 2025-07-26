@@ -83,6 +83,10 @@ function arraysEqual(a = [], b = []) {
   return a.length === b.length && a.every((x, i) => x === b[i]);
 }
 
+function sortIdArray(ids = []) {
+  return [...ids].sort((a, b) => a.toString().localeCompare(b.toString()));
+}
+
 // controllers/chatController.js
 // controllers/chatController.js
 // تابع createChat
@@ -241,7 +245,7 @@ exports.createChat = async (req, res) => {
     console.log('Participants model:', participantsModel);
 
     const finder = {
-      participants: { $all: participants, $size: participants.length },
+      participants: sortIdArray(participants),
       type: chatType,
       productId: pid || null
     };
@@ -334,7 +338,7 @@ exports.createAdminUserChat = async (req, res) => {
     );
 
     const finder = {
-      participants: { $all: participants, $size: 2 },
+      participants: sortIdArray(participants),
       type: 'admin-user',
       productId: productId || null
     };
@@ -435,7 +439,7 @@ exports.ensureChat = async (req, res) => {
     console.log('Chat Type:', chatType);
 
     const finder = {
-      participants: { $all: participants, $size: participants.length },
+      participants: sortIdArray(participants),
       productId: productId || null,
       type: chatType
     };
@@ -978,19 +982,19 @@ exports.broadcastMessage = async (req, res) => {
     let count = 0;
     for (let r of recipients) {
       // ترتیب شرکت‌کننده‌ها
-      const participants = [r._id, adminId].sort((a, b) =>
-        a.toString().localeCompare(b.toString())
+      const sortedParts = sortIdArray([r._id, adminId]);
+      const participants = sortedParts;
+      const participantsModel = participants.map(id =>
+        id.toString() === r._id.toString() ?
+          (target === 'sellers' ? 'Seller' : 'User') : 'Admin'
       );
-      const participantsModel = target === 'sellers'
-        ? ['Seller', 'Admin'].sort()
-        : ['User', 'Admin'].sort();
 
       // نوع چت را بر اساس target تنظیم کنید
         const chatType = target === 'sellers' ? 'seller-admin' : 'admin-user';
 
       // تلاش برای پیدا کردن چت موجود با فیلتر نوع و productId
       let chat = await Chat.findOne({
-        participants: { $all: participants, $size: 2 },
+        participants: sortIdArray(participants),
         productId: null,
         type: chatType
       });
@@ -1162,13 +1166,14 @@ exports.contactAdmin = async (req, res) => {
     const adminId = adminDoc._id.toString();
 
     // ———————— جستجو یا ایجاد چت seller-admin ————————
+    const sortedParts = sortIdArray([sellerId, adminId]);
     let chat = await Chat.findOne({
-      participants: { $all: [sellerId, adminId], $size: 2 },
+      participants: sortedParts,
       type: 'seller-admin'
     });
     if (!chat) {
       chat = new Chat({
-        participants: [sellerId, adminId],
+        participants: sortedParts,
         participantsModel: ['Seller', 'Admin'],
         sellerId,
         type: 'seller-admin',
