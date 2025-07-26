@@ -207,7 +207,7 @@ exports.createChat = async (req, res) => {
         text,
         date: new Date(),
         read: false,
-        readByAdmin: (chatType === 'user-admin' || chatType === 'seller-admin') ? false : true,
+        readByAdmin: (chatType === 'user-admin' || chatType === 'seller-admin' || chatType === 'admin') ? false : true,
         readBySeller: senderRole === 'seller'
       });
       chat.lastUpdated = Date.now();
@@ -445,7 +445,7 @@ exports.sendMessage = async (req, res) => {
     }
 
     // در صورتی که چت نوع "seller-admin" باشد، پیام را از فروشنده به ادمین ارسال کنید.
-    const readByAdmin = (chat.type === 'seller-admin') ? false : true; 
+    const readByAdmin = ['seller-admin', 'user-admin', 'admin'].includes(chat.type) ? false : true;
     const readBySeller = senderRole === 'seller';
 
     chat.messages.push({
@@ -561,7 +561,7 @@ exports.replyToChat = async (req, res) => {
       date: new Date(),
       read: false,
       // اگر چت با ادمین باشد (seller-admin)، admin هنوز پیام را نخوانده
-      readByAdmin: chat.type === 'seller-admin' ? false : true,
+      readByAdmin: ['seller-admin', 'user-admin', 'admin'].includes(chat.type) ? false : true,
       readBySeller: true
     });
 
@@ -607,7 +607,7 @@ exports.adminReplyToChat = async (req, res) => {
     if (!chat) return res.status(404).json({ error: 'چت پیدا نشد.' });
 
     // فقط پاسخ در چت‌های user-admin یا seller-admin
-    if (chat.type !== 'user-admin' && chat.type !== 'seller-admin') {
+    if (chat.type !== 'user-admin' && chat.type !== 'seller-admin' && chat.type !== 'admin') {
       return res.status(400).json({ error: 'این چت برای مدیر نیست.' });
     }
 
@@ -998,7 +998,7 @@ exports.userReplyToChat = async (req, res) => {
     // ۴. تعیین وضعیت خوانده‌شدن برای ادمین
     // اگر چت با ادمین باشد (user-admin یا seller-admin)، readByAdmin=false
     // در غیر این صورت (مثلاً user-seller)، readByAdmin=true
-    const readByAdmin = !['user-admin', 'seller-admin'].includes(chat.type);
+    const readByAdmin = !['user-admin', 'seller-admin', 'admin'].includes(chat.type);
 
     // ۵. درج پیام
     chat.messages.push({
