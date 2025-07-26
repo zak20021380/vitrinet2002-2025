@@ -625,6 +625,26 @@ exports.getChatById = async (req, res) => {
     await chat.populate('participants', 'firstname lastname role storename shopurl');
     await chat.populate('productId', 'title images');
 
+    // ----- mark received messages as read -----
+    const role = req.user.role;
+    const update = {};
+    const arrayFilters = [];
+    if (role === 'seller') {
+      update['messages.$[m].readBySeller'] = true;
+      update['messages.$[m].read'] = true;
+      arrayFilters.push({ 'm.from': { $ne: 'seller' }, 'm.readBySeller': false });
+    } else if (role === 'user') {
+      update['messages.$[m].read'] = true;
+      arrayFilters.push({ 'm.from': { $ne: 'user' }, 'm.read': false });
+    }
+
+    if (arrayFilters.length) {
+      await Chat.updateOne({ _id: rawId }, { $set: update }, { arrayFilters });
+      chat = await Chat.findById(rawId)
+        .populate('participants', 'firstname lastname role storename shopurl')
+        .populate('productId', 'title images');
+    }
+
     // ۵) ارسال نتیجه
     return res.json(chat);
 
@@ -1115,22 +1135,23 @@ exports.contactAdmin = async (req, res) => {
 
 
 
-    exports.getUnreadCount = async (req, res) => {
-      try {
-        const sellerId = req.user.id;
-        const chats = await Chat.find({ sellerId });
+exports.getUnreadCount = async (req, res) => {
+  try {
+    const myId = new mongoose.Types.ObjectId(req.user.id);
+    const myRole = req.user.role;
+    const chats = await Chat.find({ participants: myId });
 
-        let count = 0;
-        chats.forEach(ch => {
-          count += (ch.messages || []).filter(m => m.from === 'admin' && !m.read).length;
-        });
+    let count = 0;
+    chats.forEach(ch => {
+      count += (ch.messages || []).filter(m => m.from !== myRole && !m.read).length;
+    });
 
-        return res.json({ success: true, count });
-      } catch (err) {
-        console.error('Error in getUnreadCount:', err);
-        return res.status(500).json({ success: false, message: 'خطای سرور' });
-      }
-    };
+    return res.json({ success: true, count });
+  } catch (err) {
+    console.error('Error in getUnreadCount:', err);
+    return res.status(500).json({ success: false, message: 'خطای سرور' });
+  }
+};
 
     /**
      * POST /api/chats/markAllRead
