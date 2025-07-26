@@ -2497,11 +2497,28 @@ async function deleteMessage(chatId) {
 // مسدودسازی فرستنده مستقیماً از جدول
 async function blockSender(chatId) {
   const chat = messagesList.find(c => c._id === chatId) || {};
-  const targetRole = chat.sellerId ? 'seller' : 'user';
-  const targetId   = chat.sellerId || chat.customerId || chat.userId;
-  const label      = targetRole === 'seller' ? 'فروشنده' : 'مشتری';
+  
+  // استخراج targetId و targetRole از participants
+  let targetRole = 'user'; // پیش‌فرض مشتری
+  let targetId = null;
+  
+  if (chat.participants && chat.participants.length > 1) {
+    const nonAdmin = chat.participants.find(p => p.role !== 'admin');
+    if (nonAdmin) {
+      targetId = nonAdmin._id;
+      targetRole = nonAdmin.role === 'seller' ? 'seller' : 'user';
+    }
+  } else if (chat.sellerId) {
+    targetId = chat.sellerId;
+    targetRole = 'seller';
+  } else if (chat.customerId || chat.userId) {
+    targetId = chat.customerId || chat.userId;
+    targetRole = 'user';
+  }
 
+  const label = targetRole === 'seller' ? 'فروشنده' : 'مشتری';
   if (!targetId) return alert('شناسه کاربر پیدا نشد.');
+
   if (!confirm(`آیا مطمئن هستید که می‌خواهید این ${label} را مسدود کنید؟`)) return;
 
   try {
@@ -2526,11 +2543,28 @@ async function blockSender(chatId) {
 
 async function unblockSender(chatId) {
   const chat = messagesList.find(c => c._id === chatId) || {};
-  const targetRole = chat.sellerId ? 'seller' : 'user';
-  const targetId   = chat.sellerId || chat.customerId || chat.userId;
-  const label      = targetRole === 'seller' ? 'فروشنده' : 'مشتری';
+  
+  // استخراج targetId و targetRole از participants
+  let targetRole = 'user';
+  let targetId = null;
+  
+  if (chat.participants && chat.participants.length > 1) {
+    const nonAdmin = chat.participants.find(p => p.role !== 'admin');
+    if (nonAdmin) {
+      targetId = nonAdmin._id;
+      targetRole = nonAdmin.role === 'seller' ? 'seller' : 'user';
+    }
+  } else if (chat.sellerId) {
+    targetId = chat.sellerId;
+    targetRole = 'seller';
+  } else if (chat.customerId || chat.userId) {
+    targetId = chat.customerId || chat.userId;
+    targetRole = 'user';
+  }
 
+  const label = targetRole === 'seller' ? 'فروشنده' : 'مشتری';
   if (!targetId) return alert('شناسه کاربر پیدا نشد.');
+
   if (!confirm(`آیا مطمئن هستید که می‌خواهید این ${label} را آزاد کنید؟`)) return;
 
   try {
@@ -2552,7 +2586,6 @@ async function unblockSender(chatId) {
     alert('❌ ' + err.message);
   }
 }
-
 
 
 
