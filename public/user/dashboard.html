@@ -616,6 +616,16 @@ function renderMessagesList() {
       }
     }
 
+    if (!role && Array.isArray(c.participantsModel)) {
+      if (c.participantsModel.includes('Admin')) {
+        role = 'admin';
+        whom = 'مدیر سایت';
+      } else if (c.participantsModel.includes('Seller')) {
+        role = 'seller';
+        whom = 'فروشنده';
+      }
+    }
+
     // fallback از type
     if (!role && c.type) {
       if (c.type === 'user-seller' || c.type === 'seller-admin') {
@@ -895,6 +905,16 @@ async function showChatModal() {
       storeName = participant.storename || '';
       shopUrl = participant.shopurl || '';
       whom = role === 'seller' ? 'فروشنده' : (role === 'admin' ? 'مدیر سایت' : (role === 'user' ? 'کاربر' : 'مخاطب'));
+    }
+  }
+
+  if (!role && Array.isArray(chat.participantsModel)) {
+    if (chat.participantsModel.includes('Admin')) {
+      role = 'admin';
+      whom = 'مدیر سایت';
+    } else if (chat.participantsModel.includes('Seller')) {
+      role = 'seller';
+      whom = 'فروشنده';
     }
   }
 

@@ -78,6 +78,10 @@ function getModelFromRole(role) {
   }
 }
 
+function arraysEqual(a = [], b = []) {
+  return a.length === b.length && a.every((x, i) => x === b[i]);
+}
+
 // controllers/chatController.js
 // controllers/chatController.js
 // تابع createChat
@@ -323,11 +327,14 @@ exports.ensureChat = async (req, res) => {
       return res.status(400).json({ error: 'recipientId و recipientRole الزامی است.' });
     }
 
-    const ids = [myId, recipientId].sort();
-    const participants = ids.map(id => new mongoose.Types.ObjectId(id));
-    const participantsModel = ids.map(id =>
-      id === myId ? getModelFromRole(myRole) : getModelFromRole(recipientRole)
-    );
+    // مرتب‌سازی شناسه‌ها همراه با نقش هر کدام
+    const sorted = [
+      { id: myId, role: myRole },
+      { id: recipientId, role: recipientRole }
+    ].sort((a, b) => a.id.localeCompare(b.id));
+
+    const participants = sorted.map(i => new mongoose.Types.ObjectId(i.id));
+    const participantsModel = sorted.map(i => getModelFromRole(i.role));
     console.log('Participants:', participants);
     console.log('Participants Model:', participantsModel);
 
@@ -351,9 +358,36 @@ exports.ensureChat = async (req, res) => {
         participantsModel,
         type: chatType,
         productId,
+        sellerId: chatType.includes('seller')
+          ? participants[sorted.findIndex(i => i.role === 'seller')] || null
+          : null,
         messages: []
       });
       console.log('New chat created:', chat);
+    } else {
+      // در صورت ناهماهنگی اطلاعات، اصلاح کن
+      let updated = false;
+      if (chat.type !== chatType) { chat.type = chatType; updated = true; }
+      if (chat.productId?.toString() !== (productId ? String(productId) : null)) {
+        chat.productId = productId;
+        updated = true;
+      }
+      if (chat.participants.length !== participants.length ||
+          chat.participants.some((p, idx) => p.toString() !== participants[idx].toString())) {
+        chat.participants = participants;
+        updated = true;
+      }
+      if (!arraysEqual(chat.participantsModel, participantsModel)) {
+        chat.participantsModel = participantsModel;
+        updated = true;
+      }
+      if (updated) {
+        chat.sellerId = chatType.includes('seller')
+          ? participants[sorted.findIndex(i => i.role === 'seller')] || null
+          : null;
+        await chat.save();
+        console.log('Chat updated to match roles');
+      }
     }
 
     return res.json(chat);
@@ -606,9 +640,16 @@ exports.adminReplyToChat = async (req, res) => {
     const chat = await Chat.findById(id);
     if (!chat) return res.status(404).json({ error: 'چت پیدا نشد.' });
 
-    // فقط پاسخ در چت‌های user-admin یا seller-admin
+    const adminId = req.user.id;
+    if (!chat.participants.some(p => p.toString() === adminId)) {
+      return res.status(403).json({ error: 'دسترسی غیرمجاز.' });
+    }
+
     if (chat.type !== 'user-admin' && chat.type !== 'seller-admin' && chat.type !== 'admin') {
-      return res.status(400).json({ error: 'این چت برای مدیر نیست.' });
+      const idx = chat.participants.findIndex(p => p.toString() !== adminId);
+      const otherModel = chat.participantsModel?.[idx];
+      if (otherModel === 'User') chat.type = 'user-admin';
+      else if (otherModel === 'Seller') chat.type = 'seller-admin';
     }
 
     chat.messages.push({
