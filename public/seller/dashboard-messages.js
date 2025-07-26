@@ -203,6 +203,7 @@ function renderChatListItem(chat) {
     const u = (chat.participants || []).find(p => p.role === 'user' || p.role === 'customer');
     return ((u?.firstname || '') + ' ' + (u?.lastname || '')).trim() || 'ناشناس';
   })();
+  const customerId = (chat.participants || []).find(p => p.role === 'user' || p.role === 'customer')?._id || '';
 
   const lastRole =
     lastMsg?.from ||
@@ -242,6 +243,7 @@ function renderChatListItem(chat) {
         ${fa(unread)}
       </span>
       <button title="حذف چت" class="chat-delete-btn text-red-500 text-xs sm:text-sm" data-delete="${chat._id}">حذف</button>
+      <button title="مسدودسازی" class="chat-block-btn text-orange-500 text-xs sm:text-sm" data-block="${customerId}">مسدود</button>
     </div>
   `;
 
@@ -292,6 +294,14 @@ function renderChatListItem(chat) {
     } catch {
       alert('❌ خطا در حذف چت');
     }
+  });
+
+  /* مسدودسازی کاربر */
+  wrapper.querySelector('[data-block]').addEventListener('click', e => {
+    e.stopPropagation();
+    blockUserId = customerId;
+    blockModalBg.classList.remove('hidden');
+    document.body.style.overflow = 'hidden';
   });
 
   return wrapper;
@@ -423,6 +433,13 @@ const contactForm     = document.getElementById('contactForm');
 const textarea        = document.getElementById('contactText');
 const successBox      = document.getElementById('contactSuccess');
 
+const blockModalBg    = document.getElementById('blockModalBg');
+const closeBlockModal = document.getElementById('closeBlockModal');
+const confirmBlockBtn = document.getElementById('confirmBlockBtn');
+const cancelBlockBtn  = document.getElementById('cancelBlockBtn');
+const blockReason     = document.getElementById('blockReason');
+let blockUserId = null;
+
 openContactBtn.addEventListener('click', () => {
   contactModalBg.classList.remove('hidden');
   document.body.style.overflow = 'hidden';
@@ -465,5 +482,39 @@ contactForm.addEventListener('submit', async e => {
   } finally {
     btn.disabled = false;
     btn.innerText = 'ارسال پیام';
+  }
+});
+
+closeBlockModal.addEventListener('click', closeBlock);
+cancelBlockBtn.addEventListener('click', closeBlock);
+
+function closeBlock() {
+  blockModalBg.classList.add('hidden');
+  document.body.style.overflow = '';
+  blockReason.value = '';
+  blockUserId = null;
+}
+
+confirmBlockBtn.addEventListener('click', async () => {
+  const reason = blockReason.value.trim();
+  if (!blockUserId) return;
+  confirmBlockBtn.disabled = true;
+  try {
+    const res = await fetch(`http://localhost:5000/api/user/block/${blockUserId}`, {
+      method: 'POST',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ reason })
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.message || 'خطا در مسدودسازی');
+    }
+    closeBlock();
+    fetchChats();
+  } catch (err) {
+    alert('❌ ' + err.message);
+  } finally {
+    confirmBlockBtn.disabled = false;
   }
 });

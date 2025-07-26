@@ -29,7 +29,10 @@ const sellerSchema = new mongoose.Schema({
   visits: { type: Number, default: 0 },  // تعداد بازدید فروشگاه
 
   // آیا توسط ادمین برای ارسال پیام مسدود شده است؟
-  blockedByAdmin: { type: Boolean, default: false }
+  blockedByAdmin: { type: Boolean, default: false },
+
+  // مشتریانی که توسط این فروشنده مسدود شده‌اند
+  blockedUsers: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }]
 
 }, { timestamps: true });
 
