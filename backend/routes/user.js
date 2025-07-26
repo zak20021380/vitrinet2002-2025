@@ -93,7 +93,7 @@ router.get('/', auth('admin'), async (req, res) => {
   try {
     const users = await User.find(
       {},
-      'firstname lastname email city phone mobile createdAt'
+      'firstname lastname email city phone mobile createdAt blockedByAdmin'
     );
     res.json(users);
   } catch (err) {

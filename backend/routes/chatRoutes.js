@@ -97,6 +97,11 @@ router.post('/block-target',
   chatController.blockTarget
 );
 
+router.post('/unblock-target',
+  auth('admin'),
+  chatController.unblockTarget
+);
+
 // اجازه می‌دهیم فروشنده با مدیر چت جدیدی باز کند
 router.post(
   '/contact-admin',

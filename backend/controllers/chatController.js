@@ -747,7 +747,7 @@ exports.getAllChats = async (req, res) => {
     // واکشی فقط چت‌هایی که ادمین در آن‌ها شرکت‌کننده است
     const chats = await Chat.find({ participants: adminId })
       .sort({ lastUpdated: -1 })
-      .populate('participants', 'firstname lastname role storename shopurl username')
+      .populate('participants', 'firstname lastname role storename shopurl username blockedByAdmin')
       .populate('productId', 'title images mainImageIndex')
       .lean();
 
@@ -765,6 +765,9 @@ exports.getAllChats = async (req, res) => {
       if (chat.productId?.title) {
         chat.customTitle += ` - محصول: ${chat.productId.title}`;
       }
+
+      const idx = (chat.participants || []).findIndex(p => p.role !== 'admin');
+      chat.blockedByAdmin = idx !== -1 ? !!chat.participants[idx].blockedByAdmin : false;
     });
 
     return res.json(chats);
@@ -938,15 +941,55 @@ exports.blockTarget = async (req, res) => {
     else return res.status(400).json({ error: 'نقش نامعتبر است.' });
 
     const doc = await Model.findById(targetId);
-    if (!doc) return res.status(404).json({ error: 'کاربر پیدا نشد.' });
+    if (!doc) {
+      return res
+        .status(404)
+        .json({ success: false, message: 'شناسه معتبر یافت نشد.' });
+    }
 
     doc.blockedByAdmin = true;
     await doc.save();
+    console.log(`🔒 Blocked ${targetRole}: ${targetId} | Role: ${targetRole}`);
 
     return res.json({ success: true, message: 'کاربر با موفقیت مسدود شد.' });
   } catch (err) {
     console.error('❌ blockTarget error:', err);
     return res.status(500).json({ error: 'خطا در مسدودسازی' });
+  }
+};
+
+/**
+ * POST /api/chats/unblock-target
+ * رفع مسدودی کاربر یا فروشنده توسط ادمین بر اساس نقش
+ * body: { targetId, targetRole }
+ */
+exports.unblockTarget = async (req, res) => {
+  try {
+    const { targetId, targetRole } = req.body || {};
+
+    if (!targetId || !targetRole)
+      return res.status(400).json({ error: 'اطلاعات ناقص ارسال شده است.' });
+
+    let Model;
+    if (targetRole === 'user') Model = User;
+    else if (targetRole === 'seller') Model = Seller;
+    else return res.status(400).json({ error: 'نقش نامعتبر است.' });
+
+    const doc = await Model.findById(targetId);
+    if (!doc) {
+      return res
+        .status(404)
+        .json({ success: false, message: 'شناسه معتبر یافت نشد.' });
+    }
+
+    doc.blockedByAdmin = false;
+    await doc.save();
+    console.log(`🔓 Unblocked ${targetRole}: ${targetId} | Role: ${targetRole}`);
+
+    return res.json({ success: true, message: 'کاربر با موفقیت آزاد شد.' });
+  } catch (err) {
+    console.error('❌ unblockTarget error:', err);
+    return res.status(500).json({ error: 'خطا در رفع مسدودی' });
   }
 };
 
