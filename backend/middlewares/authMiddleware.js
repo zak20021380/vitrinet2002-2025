@@ -41,9 +41,9 @@ module.exports = (requiredRole = null) => {
         // اولویت با نقش‌های بالاتر است تا ادمین به اشتباه کاربر عادی
         // شناسایی نشود
         token =
-          req.cookies.admin_token  ||
-          req.cookies.seller_token ||
           req.cookies.user_token   ||
+          req.cookies.seller_token ||
+          req.cookies.admin_token  ||
           req.cookies.access_token ||
           null;
       }
