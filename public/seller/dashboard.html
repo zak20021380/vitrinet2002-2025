@@ -2505,29 +2505,31 @@ let messagesLoaded = false;
 async function loadDashboardMessages() {
   const main = document.getElementById('main-content');
 
-  if (messagesLoaded) {
-    if (typeof window.fetchChats === 'function') window.fetchChats();
-    return;
-  }
-
   main.innerHTML = '<div class="text-gray-400 text-center py-8">در حال بارگذاری پیام‌ها …</div>';
   try {
-    // ۱) fetch HTML
+    // ۱) دریافت HTML بخش پیام‌ها
     const res = await fetch('dashboard-messages.html');
     if (!res.ok) throw new Error('خطا در دریافت پیام‌ها');
     main.innerHTML = await res.text();
 
-    // ۲) حذف اسکریپت قبلی (در صورت رفرش گرم)
-    const old = document.getElementById('messages-js-script');
-    if (old) old.remove();
-
-    // ۳) append اسکریپت
-    const s = document.createElement('script');
-    s.id  = 'messages-js-script';
-    s.src = 'dashboard-messages.js';
-    document.body.appendChild(s);
-
-    messagesLoaded = true;
+    if (!messagesLoaded) {
+      // در اولین بار، اسکریپت را لود کن
+      const old = document.getElementById('messages-js-script');
+      if (old) old.remove();
+      const s = document.createElement('script');
+      s.id = 'messages-js-script';
+      s.src = 'dashboard-messages.js';
+      s.onload = () => {
+        typeof window.initMessaging === 'function' && window.initMessaging();
+        typeof window.fetchChats === 'function' && window.fetchChats();
+      };
+      document.body.appendChild(s);
+      messagesLoaded = true;
+    } else {
+      // اگر اسکریپت قبلاً لود شده، فقط دوباره مقداردهی کن
+      typeof window.initMessaging === 'function' && window.initMessaging();
+      typeof window.fetchChats === 'function' && window.fetchChats();
+    }
   } catch (err) {
     console.error(err);
     main.innerHTML = '<div class="text-red-500 text-center py-8">⚠️ بارگذاری پیام‌ها شکست خورد</div>';

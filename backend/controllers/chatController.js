@@ -225,21 +225,32 @@ exports.createChat = async (req, res) => {
     console.log('Final chatType:', chatType);
     console.log('Participants model:', participantsModel);
 
-    let chat = await Chat.findOne({
+    const finder = {
       participants: { $all: participants, $size: participants.length },
       type: chatType,
       productId: pid || null
-    });
+    };
+
+    let chat = await Chat.findOne(finder);
     if (!chat) {
-      chat = new Chat({
-        participants,
-        participantsModel,
-        type: chatType,
-        sellerId: (chatType === 'user-seller') ? sid : null,
-        productId: pid,
-        messages: []
-      });
-      console.log('New chat created:', chat);
+      try {
+        chat = await Chat.create({
+          participants,
+          participantsModel,
+          type: chatType,
+          sellerId: chatType === 'user-seller' ? sid : null,
+          productId: pid,
+          messages: []
+        });
+        console.log('New chat created:', chat);
+      } catch (err) {
+        if (err.code === 11000) {
+          // چت همسان قبلاً ایجاد شده است، همان را برگردان
+          chat = await Chat.findOne(finder);
+        } else {
+          throw err;
+        }
+      }
     }
 
     const text = (rawText || '').trim();
