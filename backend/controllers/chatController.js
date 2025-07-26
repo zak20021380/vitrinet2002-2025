@@ -940,15 +940,17 @@ exports.blockTarget = async (req, res) => {
     else if (targetRole === 'seller') Model = Seller;
     else return res.status(400).json({ error: 'نقش نامعتبر است.' });
 
-    const doc = await Model.findById(targetId);
+    const doc = await Model.findByIdAndUpdate(
+      targetId,
+      { blockedByAdmin: true },
+      { new: true }
+    );
     if (!doc) {
       return res
         .status(404)
         .json({ success: false, message: 'شناسه معتبر یافت نشد.' });
     }
 
-    doc.blockedByAdmin = true;
-    await doc.save();
     console.log(`🔒 Blocked ${targetRole}: ${targetId} | Role: ${targetRole}`);
 
     return res.json({ success: true, message: 'کاربر با موفقیت مسدود شد.' });
@@ -975,15 +977,17 @@ exports.unblockTarget = async (req, res) => {
     else if (targetRole === 'seller') Model = Seller;
     else return res.status(400).json({ error: 'نقش نامعتبر است.' });
 
-    const doc = await Model.findById(targetId);
+    const doc = await Model.findByIdAndUpdate(
+      targetId,
+      { blockedByAdmin: false },
+      { new: true }
+    );
     if (!doc) {
       return res
         .status(404)
         .json({ success: false, message: 'شناسه معتبر یافت نشد.' });
     }
 
-    doc.blockedByAdmin = false;
-    await doc.save();
     console.log(`🔓 Unblocked ${targetRole}: ${targetId} | Role: ${targetRole}`);
 
     return res.json({ success: true, message: 'کاربر با موفقیت آزاد شد.' });
