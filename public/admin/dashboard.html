@@ -2138,7 +2138,7 @@ function getTotalUnreadMessages() {
   messagesList.forEach(chat => {
     if (Array.isArray(chat.messages)) {
       total += chat.messages.filter(
-        m => m.from === 'seller' && !m.read
+        m => (m.from === 'seller' || m.from === 'user') && !m.read
       ).length;
     }
   });
@@ -2345,7 +2345,7 @@ function renderMessages() {
     const senderMsg = msgs.slice().reverse().find(m => m.from !== 'admin') || lastMsg;
 
     const senderLabel = getSenderName(chat, senderMsg);
-    const unreadCount = msgs.filter(m => m.from === 'seller' && !m.read).length;
+    const unreadCount = msgs.filter(m => (m.from === 'seller' || m.from === 'user') && !m.read).length;
 
     const fullText = lastMsg && lastMsg.text ? lastMsg.text : '-';
     const shortText = fullText.length > 36 ? fullText.slice(0, 36) + '…' : fullText;
@@ -4048,10 +4048,10 @@ window.openChatModal = async function (chatId) {
   const container = document.getElementById('chatMessages');
   container.innerHTML = '';
 
-  // 🟢 اگر پیام فروشنده‌ای نخونده وجود داره، به سرور اطلاع بده که خوانده شدند
+  // 🟢 اگر پیام فروشنده یا کاربری نخونده وجود داره، به سرور اطلاع بده که خوانده شدند
   if (chat) {
     const unreadMsgIds = (chat.messages || [])
-      .filter(m => m.from === 'seller' && !m.read)
+      .filter(m => (m.from === 'seller' || m.from === 'user') && !m.read)
       .map(m => m._id)
       .filter(Boolean);
 
@@ -4268,7 +4268,7 @@ async function fetchUnreadCountAndUpdateBadge() {
     chats.forEach(chat => {
       if (Array.isArray(chat.messages)) {
         total += chat.messages.filter(
-          m => m.from === 'seller' && !m.read
+          m => (m.from === 'seller' || m.from === 'user') && !m.read
         ).length;
       }
     });
