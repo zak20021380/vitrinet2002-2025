@@ -55,6 +55,20 @@ participantsModel: [{
   lastUpdated:{ type: Date, default: Date.now }
 });
 
+// اطمینان از مرتب‌سازی شرکت‌کنندگان پیش از ذخیره
+chatSchema.pre('save', function(next) {
+  if (Array.isArray(this.participants) && Array.isArray(this.participantsModel)) {
+    const zipped = this.participants.map((id, idx) => ({
+      id,
+      model: this.participantsModel[idx]
+    }));
+    zipped.sort((a, b) => a.id.toString().localeCompare(b.id.toString()));
+    this.participants = zipped.map(z => z.id);
+    this.participantsModel = zipped.map(z => z.model);
+  }
+  next();
+});
+
 // اطمینان از یکتایی ترکیب شرکت‌کنندگان، نوع چت و محصول
 chatSchema.index(
   { participants: 1, productId: 1, type: 1 },
