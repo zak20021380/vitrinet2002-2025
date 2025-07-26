@@ -882,11 +882,17 @@ async function showChatModal() {
     return;
   }
 
+  // پس از دریافت، پیام‌های طرف مقابل را خوانده‌شده علامت بزن
+  chat.messages.forEach(m => {
+    if (m.from !== 'user') m.read = true;
+  });
+
   console.log('messages:', chat.messages); // دیباگ
 
   // بروزرسانی لیست محلی
   const idx = chatsList.findIndex(c => c._id === currentCid);
   if (idx !== -1) chatsList[idx] = chat;
+  updateBadge();
 
   console.log('ساختار چت کامل:', chat);
 
