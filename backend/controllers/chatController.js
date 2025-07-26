@@ -654,16 +654,21 @@ exports.replyToChat = async (req, res) => {
       return res.status(404).json({ error: 'چت پیدا نشد.' });
     }
 
-  // ۳. فقط فروشنده‌ی صاحب این چت می‌تواند پاسخ بدهد
+  // ۳. فقط فروشنده‌ی عضو این چت می‌تواند پاسخ بدهد
   if (!req.user || req.user.role !== 'seller') {
     return res.status(403).json({ error: 'دسترسی غیرمجاز.' });
   }
 
-  if (!chat.sellerId || !chat.sellerId.toString) {
-    return res.status(400).json({ error: 'فرستنده نامعتبر است' });
+  const senderId = req.user.id;
+
+  // چک کنید که این فروشنده داخل چت شرکت‌کننده است
+  const isParticipant = chat.participants.some(p => p.toString() === senderId);
+  if (!isParticipant) {
+    return res.status(403).json({ error: 'دسترسی غیرمجاز.' });
   }
 
-  if (chat.sellerId.toString() !== req.user.id) {
+  // در صورت وجود فیلد sellerId باید با شناسهٔ فرستنده مطابقت داشته باشد
+  if (chat.sellerId && chat.sellerId.toString() !== senderId) {
     return res.status(403).json({ error: 'دسترسی غیرمجاز.' });
   }
 
