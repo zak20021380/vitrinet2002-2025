@@ -438,6 +438,7 @@ const closeBlockModal = document.getElementById('closeBlockModal');
 const confirmBlockBtn = document.getElementById('confirmBlockBtn');
 const cancelBlockBtn  = document.getElementById('cancelBlockBtn');
 const blockReason     = document.getElementById('blockReason');
+const blockSuccess    = document.getElementById('blockSuccess');
 let blockUserId = null;
 
 openContactBtn.addEventListener('click', () => {
@@ -495,6 +496,16 @@ function closeBlock() {
   blockUserId = null;
 }
 
+function showBlockSuccess() {
+  if (!blockSuccess) return;
+  blockSuccess.classList.add('show');
+  blockSuccess.style.opacity = '1';
+  setTimeout(() => {
+    blockSuccess.style.opacity = '0';
+    setTimeout(() => blockSuccess.classList.remove('show'), 300);
+  }, 3000);
+}
+
 confirmBlockBtn.addEventListener('click', async () => {
   const reason = blockReason.value.trim();
   if (!blockUserId) return;
@@ -512,6 +523,7 @@ confirmBlockBtn.addEventListener('click', async () => {
     }
     closeBlock();
     fetchChats();
+    showBlockSuccess();
   } catch (err) {
     alert('❌ ' + err.message);
   } finally {

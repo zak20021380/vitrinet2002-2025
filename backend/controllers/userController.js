@@ -2,6 +2,7 @@ const User        = require('../models/user');
 const Block       = require('../models/Block');          // قبلاً خواسته شده بود
 const BannedPhone = require('../models/BannedPhone');    // لیست دائمی شماره‌های مسدود
 const Seller      = require('../models/Seller');
+const Report      = require('../models/Report');
 
 // ────────────────────────────────────────────────────────────
 // گرفتن پروفایل کاربر همراه با علاقه‌مندی‌ها پس از احراز هویت
@@ -61,7 +62,17 @@ exports.blockCustomer = async (req, res) => {
     seller.blockedUsers.push(userId);
     await seller.save();
 
-    await Block.create({ sellerId, customerId: userId, reason });
+    const sanitized = (reason || '').replace(/<[^>]*>?/g, '');
+
+    await Block.create({ sellerId, customerId: userId, reason: sanitized });
+
+    await Report.create({
+      sellerId,
+      userId,
+      type: 'block',
+      description: sanitized,
+      ip: req.ip
+    });
 
     res.json({ message: 'کاربر با موفقیت مسدود شد.' });
   } catch (err) {

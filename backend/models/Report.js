@@ -5,6 +5,7 @@ const REPORT_TYPES = [
   'no_response',      // پاسخ‌ندادن به مشتری
   'overpricing',      // گران‌فروشی
   'other',            // سایر
+  'block'            // مسدودسازی کاربر توسط فروشنده
 ];
 
 const reportSchema = new mongoose.Schema(
