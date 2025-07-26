@@ -246,33 +246,20 @@ exports.createChat = async (req, res) => {
       productId: pid || null
     };
 
-    let chat;
+    let chat = await Chat.findOne(finder);
     let created = false;
 
-    const result = await Chat.findOneAndUpdate(
-      finder,
-      {
-        $setOnInsert: {
-          participants,
-          participantsModel,
-          type: chatType,
-          sellerId: chatType === 'user-seller' ? sid : null,
-          productId: pid,
-          messages: []
-        }
-      },
-      {
-        new: true,
-        upsert: true,
-        setDefaultsOnInsert: true,
-        rawResult: true
-      }
-    ).catch(err => {
-      throw err;
-    });
-
-    chat = result.value;
-    created = !result.lastErrorObject.updatedExisting;
+    if (!chat) {
+      chat = new Chat({
+        participants,
+        participantsModel,
+        type: chatType,
+        sellerId: chatType === 'user-seller' ? sid : null,
+        productId: pid,
+        messages: []
+      });
+      created = true;
+    }
 
     if (!chat) {
       console.error('Unable to create or retrieve chat with finder:', finder);
@@ -289,9 +276,12 @@ exports.createChat = async (req, res) => {
         readByAdmin: (chatType === 'user-admin' || chatType === 'admin-user' || chatType === 'seller-admin' || chatType === 'admin') ? false : true,
         readBySeller: senderRole === 'seller'
       });
+    }
+
+    if (created || text) {
       chat.lastUpdated = Date.now();
       await chat.save();
-      console.log('Chat message added:', chat);
+      if (text) console.log('Chat message added:', chat);
     }
 
     return res.status(created ? 201 : 200).json(chat);
