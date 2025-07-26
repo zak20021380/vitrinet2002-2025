@@ -2501,8 +2501,15 @@ async function loadDailyVisits () {
 
 
 // ─── تابع بارگذاری بخش پیام‌ها ─────────────────────────────────
+let messagesLoaded = false;
 async function loadDashboardMessages() {
   const main = document.getElementById('main-content');
+
+  if (messagesLoaded) {
+    if (typeof window.fetchChats === 'function') window.fetchChats();
+    return;
+  }
+
   main.innerHTML = '<div class="text-gray-400 text-center py-8">در حال بارگذاری پیام‌ها …</div>';
   try {
     // ۱) fetch HTML
@@ -2520,6 +2527,7 @@ async function loadDashboardMessages() {
     s.src = 'dashboard-messages.js';
     document.body.appendChild(s);
 
+    messagesLoaded = true;
   } catch (err) {
     console.error(err);
     main.innerHTML = '<div class="text-red-500 text-center py-8">⚠️ بارگذاری پیام‌ها شکست خورد</div>';
