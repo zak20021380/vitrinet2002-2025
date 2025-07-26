@@ -935,23 +935,14 @@ exports.blockTarget = async (req, res) => {
     if (!targetId || !targetRole)
       return res.status(400).json({ error: 'اطلاعات ناقص ارسال شده است.' });
 
-    let Model;
-    if (targetRole === 'user') Model = User;
-    else if (targetRole === 'seller') Model = Seller;
-    else return res.status(400).json({ error: 'نقش نامعتبر است.' });
+    const model   = targetRole === 'user' ? User : Seller;
+    const blocked = await model.findByIdAndUpdate(targetId, {
+      blockedByAdmin: true
+    });
+    if (!blocked)
+      return res.status(404).json({ message: 'شناسه یافت نشد' });
 
-    const doc = await Model.findByIdAndUpdate(
-      targetId,
-      { blockedByAdmin: true },
-      { new: true }
-    );
-    if (!doc) {
-      return res
-        .status(404)
-        .json({ success: false, message: 'شناسه معتبر یافت نشد.' });
-    }
-
-    console.log(`🔒 Blocked ${targetRole}: ${targetId} | Role: ${targetRole}`);
+    console.log(`🔒 Blocked ${targetRole}: ${targetId}`);
 
     return res.json({ success: true, message: 'کاربر با موفقیت مسدود شد.' });
   } catch (err) {
@@ -972,23 +963,14 @@ exports.unblockTarget = async (req, res) => {
     if (!targetId || !targetRole)
       return res.status(400).json({ error: 'اطلاعات ناقص ارسال شده است.' });
 
-    let Model;
-    if (targetRole === 'user') Model = User;
-    else if (targetRole === 'seller') Model = Seller;
-    else return res.status(400).json({ error: 'نقش نامعتبر است.' });
+    const model     = targetRole === 'user' ? User : Seller;
+    const unblocked = await model.findByIdAndUpdate(targetId, {
+      blockedByAdmin: false
+    });
+    if (!unblocked)
+      return res.status(404).json({ message: 'شناسه یافت نشد' });
 
-    const doc = await Model.findByIdAndUpdate(
-      targetId,
-      { blockedByAdmin: false },
-      { new: true }
-    );
-    if (!doc) {
-      return res
-        .status(404)
-        .json({ success: false, message: 'شناسه معتبر یافت نشد.' });
-    }
-
-    console.log(`🔓 Unblocked ${targetRole}: ${targetId} | Role: ${targetRole}`);
+    console.log(`🔓 Unblocked ${targetRole}: ${targetId}`);
 
     return res.json({ success: true, message: 'کاربر با موفقیت آزاد شد.' });
   } catch (err) {
