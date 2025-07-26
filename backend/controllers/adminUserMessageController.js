@@ -55,7 +55,7 @@ exports.getMessages = async (req, res) => {
     const requesterId = requester._id || requester.id;
     const authorized =
       requester.role === 'admin' ||
-      (requester.role === 'user' && requesterId?.toString() === userId);
+      (requester.role === 'user' && String(requesterId) === String(userId));
 
     if (!authorized) {
       return res.status(403).json({ error: 'دسترسی غیرمجاز' });
