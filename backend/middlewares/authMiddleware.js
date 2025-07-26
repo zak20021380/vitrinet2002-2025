@@ -37,10 +37,13 @@ module.exports = (requiredRole = null) => {
       }
       // اگر نقش مشخص نبود (requiredRole = null)، همهٔ کوکی‌های ممکن را امتحان کن
       if (!token && !requiredRole) {
+        // در حالت بدون نقش، اگر کاربر هم‌زمان چند توکن داشته باشد
+        // اولویت با نقش‌های بالاتر است تا ادمین به اشتباه کاربر عادی
+        // شناسایی نشود
         token =
-          req.cookies.user_token   ||
-          req.cookies.seller_token ||
           req.cookies.admin_token  ||
+          req.cookies.seller_token ||
+          req.cookies.user_token   ||
           req.cookies.access_token ||
           null;
       }
