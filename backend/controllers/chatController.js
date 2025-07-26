@@ -173,7 +173,13 @@ exports.createChat = async (req, res) => {
       }
     }
 
-    const participants = [senderId, sid].sort((a, b) => a.toString().localeCompare(b.toString()));
+    const temp = [
+      { id: senderId, role: senderRole },
+      { id: sid,      role: recipientRole }
+    ].sort((a, b) => a.id.toString().localeCompare(b.id.toString()));
+
+    const participants       = temp.map(t => t.id);
+    const participantsModel  = temp.map(t => getModelFromRole(t.role));
     console.log('Participants:', participants);
 
     let chatType = 'user-seller'; // پیش‌فرض نوع چت
@@ -185,10 +191,6 @@ exports.createChat = async (req, res) => {
       }
     }
     console.log('Final chatType:', chatType);
-
-    const participantsModel = participants.map(id =>
-      id.equals(senderId) ? getModelFromRole(senderRole) : (chatType === 'user-admin' ? 'Admin' : 'Seller')
-    );
     console.log('Participants model:', participantsModel);
 
     let chat = await Chat.findOne({ participants, type: chatType, productId: pid });
@@ -316,7 +318,13 @@ exports.createAdminUserChat = async (req, res) => {
 // POST /api/chats/ensure  → ایجاد یا برگرداندن چت بین دو نقش
 exports.ensureChat = async (req, res) => {
   try {
-    const { recipientId, recipientRole, productId = null } = req.body;
+    let { recipientId, recipientRole, productId = null } = req.body;
+    if (recipientRole === 'admin' && !recipientId) {
+      const adminDoc = await Admin.findOne().select('_id');
+      if (!adminDoc)
+        return res.status(500).json({ error: 'ادمین یافت نشد' });
+      recipientId = adminDoc._id.toString();
+    }
     console.log('Ensuring chat between:', { recipientId, recipientRole, productId });
 
     const myId = req.user.id;
@@ -529,11 +537,8 @@ exports.getChatById = async (req, res) => {
       return res.status(400).json({ error: 'شناسه چت نامعتبر است' });
     }
 
-    // ۲) واکشی چت با populate
-    const chat = await Chat.findById(rawId)
-      .populate('participants', 'firstname lastname role storename shopurl')
-      .populate('productId', 'title images');
-
+    // ۲) واکشی چت بدون populate برای اعتبارسنجی
+    let chat = await Chat.findById(rawId);
     if (!chat) {
       console.warn('❓ Chat not found ->', rawId);
       return res.status(404).json({ error: 'چت پیدا نشد' });
@@ -542,19 +547,18 @@ exports.getChatById = async (req, res) => {
     // ۳) اگر نقش کاربر admin نیست، باید عضو چت باشد
     if (req.user.role !== 'admin') {
       const userId = req.user.id;
-      const isParticipant = chat.participants.some(
-        p => p && p._id && p._id.toString() === userId
-      );
+      const isParticipant = chat.participants.some(p => p.toString() === userId);
       if (!isParticipant) {
-        console.warn('🚫 Unauthorized access attempt', {
-          chatId: rawId,
-          requester: userId
-        });
+        console.warn('🚫 Unauthorized access attempt', { chatId: rawId, requester: userId });
         return res.status(403).json({ error: 'دسترسی غیرمجاز' });
       }
     }
 
-    // ۴) ارسال نتیجه
+    // ۴) پرکردن جزییات
+    await chat.populate('participants', 'firstname lastname role storename shopurl');
+    await chat.populate('productId', 'title images');
+
+    // ۵) ارسال نتیجه
     return res.json(chat);
 
   } catch (err) {
