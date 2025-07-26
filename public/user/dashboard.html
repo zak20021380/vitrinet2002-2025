@@ -759,7 +759,14 @@ async function openChat(cid) {
     if (!box) return;
     box.innerHTML = '<div class="text-center text-gray-400 py-6">در حال دریافت...</div>';
     try {
-      const res = await fetch(`/api/messages/${uid}`, { credentials: 'include' });
+      const token = document.cookie.split('; ').find(r => r.startsWith('user_token='))?.split('=')[1];
+      const res = await fetch(`${API_BASE}/messages/${uid}`, {
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token && { Authorization: 'Bearer ' + token })
+        }
+      });
       if (!res.ok) {
         if (res.status === 401 || res.status === 403) throw new Error('دسترسی غیرمجاز');
         throw new Error('دریافت گفتگو ناموفق بود');
@@ -795,10 +802,14 @@ async function openChat(cid) {
     const text = ta.value.trim();
     if (!text) return;
     try {
-      const res = await fetch('/api/messages/send', {
+      const token = document.cookie.split('; ').find(r => r.startsWith('user_token='))?.split('=')[1];
+      const res = await fetch(`${API_BASE}/messages/send`, {
         method: 'POST',
         credentials: 'include',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token && { Authorization: 'Bearer ' + token })
+        },
         body: JSON.stringify({ message: text })
       });
       if (!res.ok) {
@@ -944,7 +955,13 @@ function renderChat() {
 
   function getSenderRoleText(msg, isMe) {
     if (isMe) return 'شما';
-    const role = msg.senderRole || msg?.sender?.role || msg?.senderId?.role || msg?.from;
+    const role =
+      msg.senderRole ||
+      msg?.sender?.role ||
+      msg?.senderId?.role ||
+      (msg.senderModel === 'Admin' ? 'admin' :
+       msg.senderModel === 'Seller' ? 'seller' :
+       msg.senderModel === 'User' ? 'user' : msg?.from);
     if (role === 'admin')  return 'مدیر سایت';
     if (role === 'seller') return 'فروشنده';
     if (role === 'user')   return 'مشتری';
