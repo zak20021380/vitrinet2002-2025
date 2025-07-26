@@ -44,7 +44,8 @@ router.get('/', authMiddleware('admin'), async (req, res) => {
       phone: 1,
       createdAt: 1,
       productsCount: 1,
-      visits: 1
+      visits: 1,
+      blockedByAdmin: 1
     }).lean();
 
     const sellersWithId = sellers.map(seller => ({
