@@ -759,7 +759,7 @@ async function openChat(cid) {
     if (!box) return;
     box.innerHTML = '<div class="text-center text-gray-400 py-6">در حال دریافت...</div>';
     try {
-      const res = await fetch(`/api/messages/thread/${uid}`, { credentials: 'include' });
+      const res = await fetch(`/api/messages/${uid}`, { credentials: 'include' });
       if (!res.ok) {
         if (res.status === 401 || res.status === 403) throw new Error('دسترسی غیرمجاز');
         throw new Error('دریافت گفتگو ناموفق بود');
