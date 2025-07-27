@@ -914,7 +914,7 @@ document.addEventListener('DOMContentLoaded', function() {
   const links = Array.from(desktopNav.querySelectorAll('.main-nav-link'));
 
   function moveLinks() {
-    if (window.innerWidth <= 768) {
+    if (window.innerWidth <= 767) {
       links.forEach(l => {
         if (!mobileList.contains(l)) {
           l.classList.remove('hide-on-mobile');
