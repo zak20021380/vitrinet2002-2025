@@ -146,21 +146,18 @@ exports.createChat = async (req, res) => {
       console.log('Found seller ID from product:', sid);
     }
 
-    // ------------------ افزودن این بخش (بررسی shopurl) ------------------
     if (!sellerId && shopurl) {
-      // دنبال فروشنده با این shopurl بگرد
       const sellerDoc = await Seller.findOne({ shopurl });
       if (!sellerDoc)
         return res.status(404).json({ error: 'فروشنده با این shopurl یافت نشد.' });
       sellerId = sellerDoc._id.toString();
     }
-    // ---------------------------------------------------------------------
 
     if (sellerId) {
       let bodySellerId = sellerId;
       if (Array.isArray(bodySellerId)) {
         if (bodySellerId.length === 0) return res.status(400).json({ error: 'شناسه فروشنده نامعتبر.' });
-        bodySellerId = bodySellerId[0];  // فقط اولین
+        bodySellerId = bodySellerId[0];
         console.log('Multiple seller IDs in body; selecting the first one:', bodySellerId);
       } else if (typeof bodySellerId === 'string' && bodySellerId.includes(',')) {
         bodySellerId = bodySellerId.split(',')[0].trim();
@@ -181,7 +178,6 @@ exports.createChat = async (req, res) => {
 
     if (!sid) return res.status(400).json({ error: 'شناسهٔ فروشنده الزامی است.' });
 
-    // چک اعتبار فروشنده (فقط اگر recipientRole 'seller' باشد)
     if (recipientRole === 'seller') {
       const sellerExists = await Seller.findById(sid).select('blockedUsers');
       if (!sellerExists) {
@@ -197,7 +193,6 @@ exports.createChat = async (req, res) => {
       { id: sid,      role: recipientRole }
     ];
 
-    // اطمینان از یکتایی شناسه‌ها
     const uniqueMap = new Map();
     rawParticipants.forEach(p => {
       const key = p.id.toString();
@@ -216,7 +211,6 @@ exports.createChat = async (req, res) => {
     const participantsModel = temp.map(t => getModelFromRole(t.role));
     console.log('Participants:', participants);
 
-    // اگر فرستنده فروشنده باشد و کاربر مقابل او را مسدود کرده باشد
     if (senderRole === 'seller') {
       const uIdx = participantsModel.findIndex(m => m === 'User');
       if (uIdx !== -1) {
@@ -228,19 +222,18 @@ exports.createChat = async (req, res) => {
       }
     }
 
-      let chatType;
-      if (pid) {
-        // در صورت وجود productId چت باید از نوع "product" باشد
-        chatType = 'product';
-      } else if (recipientRole === 'admin') {
-        chatType = 'admin-user';
-        const adminDoc = await Admin.findById(sid);
-        if (!adminDoc) {
-          return res.status(400).json({ error: 'گیرنده ادمین نیست.' });
-        }
-      } else {
-        chatType = 'user-seller';
+    let chatType;
+    if (pid) {
+      chatType = 'product';
+    } else if (recipientRole === 'admin') {
+      chatType = 'admin-user';
+      const adminDoc = await Admin.findById(sid);
+      if (!adminDoc) {
+        return res.status(400).json({ error: 'گیرنده ادمین نیست.' });
       }
+    } else {
+      chatType = 'user-seller';
+    }
     console.log('Final chatType:', chatType);
     console.log('Participants model:', participantsModel);
 
@@ -270,31 +263,55 @@ chatType === 'seller-admin' || chatType === 'admin') ? false : true,
       return res.status(200).json(chat);
     }
 
-    chat = new Chat({
-      participants,
-      participantsModel,
-      type: chatType,
-      sellerId: chatType === 'user-seller' ? sid : null,
-      productId: pid,
-      messages: []
-    });
-
-    if (text) {
-      chat.messages.push({
-        from: senderRole,
-        text,
-        date: new Date(),
-        read: false,
-        readByAdmin: (chatType === 'user-admin' || chatType === 'admin-user' || chatType === 'seller-admin' || chatType === 'admin') ? false : true,
-        readBySeller: senderRole === 'seller'
+    // اگر چت پیدا نشد، سعی در ایجاد آن
+    try {
+      chat = new Chat({
+        participants,
+        participantsModel,
+        type: chatType,
+        sellerId: chatType === 'user-seller' ? sid : null,
+        productId: pid,
+        messages: []
       });
+
+      if (text) {
+        chat.messages.push({
+          from: senderRole,
+          text,
+          date: new Date(),
+          read: false,
+          readByAdmin: (chatType === 'user-admin' || chatType === 'admin-user' || chatType === 'seller-admin' || chatType === 'admin') ? false : true,
+          readBySeller: senderRole === 'seller'
+        });
+      }
+
+      chat.lastUpdated = Date.now();
+      await chat.save();
+      if (text) console.log('Chat message added:', chat);
+
+      return res.status(201).json(chat);
+    } catch (err) {
+      if (err.code === 11000) {
+        // اگر ارور duplicate بود، چت موجود را واکشی کن
+        console.log('Duplicate key detected; fetching existing chat');
+        chat = await Chat.findOne(finder);
+        if (chat && text) {
+          chat.messages.push({
+            from: senderRole,
+            text,
+            date: new Date(),
+            read: false,
+            readByAdmin: (chatType === 'user-admin' || chatType === 'admin-user' ||
+chatType === 'seller-admin' || chatType === 'admin') ? false : true,
+            readBySeller: senderRole === 'seller'
+          });
+          chat.lastUpdated = Date.now();
+          await chat.save();
+        }
+        return res.status(200).json(chat || { error: 'چت یافت نشد پس از تلاش مجدد' });
+      }
+      throw err;
     }
-
-    chat.lastUpdated = Date.now();
-    await chat.save();
-    if (text) console.log('Chat message added:', chat);
-
-    return res.status(201).json(chat);
 
   } catch (err) {
     console.error('❌ createChat error:', err);
@@ -344,28 +361,59 @@ exports.createAdminUserChat = async (req, res) => {
     };
 
     let chat = await Chat.findOne(finder);
-    if (!chat) {
+    if (chat) {
+      chat.messages.push({
+        from: 'user',
+        text: content,
+        date: new Date(),
+        read: false,
+        readByAdmin: false,
+        readBySeller: true
+      });
+      chat.lastUpdated = Date.now();
+      await chat.save();
+      return res.status(200).json(chat);
+    }
+
+    // اگر پیدا نشد، سعی در ایجاد
+    try {
       chat = new Chat({
         participants,
         participantsModel,
         type: 'admin-user',
         productId: productId || null,
-        messages: []
+        messages: [{
+          from: 'user',
+          text: content,
+          date: new Date(),
+          read: false,
+          readByAdmin: false,
+          readBySeller: true
+        }]
       });
+      chat.lastUpdated = Date.now();
+      await chat.save();
+      return res.status(201).json(chat);
+    } catch (err) {
+      if (err.code === 11000) {
+        console.log('Duplicate key detected; fetching existing chat');
+        chat = await Chat.findOne(finder);
+        if (chat) {
+          chat.messages.push({
+            from: 'user',
+            text: content,
+            date: new Date(),
+            read: false,
+            readByAdmin: false,
+            readBySeller: true
+          });
+          chat.lastUpdated = Date.now();
+          await chat.save();
+        }
+        return res.status(200).json(chat || { error: 'چت یافت نشد پس از تلاش مجدد' });
+      }
+      throw err;
     }
-
-    chat.messages.push({
-      from: 'user',
-      text: content,
-      date: new Date(),
-      read: false,
-      readByAdmin: false,
-      readBySeller: true
-    });
-    chat.lastUpdated = Date.now();
-    await chat.save();
-
-    return res.status(chat.isNew ? 201 : 200).json(chat);
 
   } catch (err) {
     console.error('❌ createAdminUserChat error:', err);
@@ -415,7 +463,6 @@ exports.ensureChat = async (req, res) => {
       return res.status(400).json({ error: 'recipientId و recipientRole الزامی است.' });
     }
 
-    // مرتب‌سازی شناسه‌ها همراه با نقش هر کدام
     const sorted = [
       { id: myId, role: myRole },
       { id: recipientId, role: recipientRole }
@@ -428,13 +475,13 @@ exports.ensureChat = async (req, res) => {
 
     let chatType;
     if (productId) {
-      chatType = 'product'; // چت مرتبط با یک محصول
+      chatType = 'product';
     } else {
       const roles = new Set([myRole, recipientRole]);
       if (roles.has('user') && roles.has('seller')) chatType = 'user-seller';
       else if (roles.has('user') && roles.has('admin')) chatType = 'admin-user';
       else if (roles.has('seller') && roles.has('admin')) chatType = 'seller-admin';
-      else chatType = 'general'; // چت عمومی
+      else chatType = 'general';
     }
     console.log('Chat Type:', chatType);
 
@@ -459,7 +506,7 @@ exports.ensureChat = async (req, res) => {
         console.log('New chat created:', chat);
       } catch (err) {
         if (err.code === 11000) {
-          // در صورتی که چت همسان همزمان ایجاد شده باشد، همان را واکشی کن
+          console.log('Duplicate key detected; fetching existing chat');
           chat = await Chat.findOne(finder);
         } else {
           throw err;
@@ -468,7 +515,6 @@ exports.ensureChat = async (req, res) => {
     }
 
     if (chat) {
-      // در صورت ناهماهنگی اطلاعات، اصلاح کن
       let updated = false;
       if (chat.type !== chatType) { chat.type = chatType; updated = true; }
       if (chat.productId?.toString() !== (productId ? String(productId) : null)) {
@@ -491,19 +537,17 @@ exports.ensureChat = async (req, res) => {
         await chat.save();
         console.log('Chat updated to match roles');
       }
+      return res.json(chat);
     } else {
       console.error('Unable to create or retrieve chat with finder:', finder);
       return res.status(500).json({ error: 'خطا در ایجاد چت.' });
     }
-
-    return res.json(chat);
 
   } catch (err) {
     console.error('ensureChat ➜', err);
     return res.status(500).json({ error: 'خطا در ایجاد / دریافت چت' });
   }
 };
-
 
 
 
