@@ -922,6 +922,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
       });
       highlightActive();
+      registerBtn.classList.add('mx-auto', 'mt-2');
     } else {
       links.forEach(l => {
         if (!desktopNav.contains(l)) {
@@ -929,6 +930,7 @@ document.addEventListener('DOMContentLoaded', function() {
           desktopNav.insertBefore(l, registerBtn);
         }
       });
+      registerBtn.classList.remove('mx-auto', 'mt-2');
     }
   }
 
