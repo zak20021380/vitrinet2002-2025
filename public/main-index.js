@@ -922,7 +922,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
       });
       highlightActive();
-      registerBtn.classList.add('mx-auto', 'mt-2');
+      registerBtn.classList.remove('mx-auto', 'mt-2');
     } else {
       links.forEach(l => {
         if (!desktopNav.contains(l)) {
