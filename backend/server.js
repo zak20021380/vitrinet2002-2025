@@ -46,6 +46,7 @@ app.use('/api/sellers', require('./routes/seller'));
 app.use('/api/shopAppearance', require('./routes/shopAppearance'));
 app.use('/api/slides', require('./routes/slides'));
 app.use('/api/favorite', require('./routes/favorites'));
+app.use('/api/favorite-shops', require('./routes/favoriteShops'));
 app.use('/api/blocked-sellers', require('./routes/blockedSellers'));
 app.use('/api/chats', chatRoutes);
 app.use('/api/messages', adminUserMessageRoutes);
