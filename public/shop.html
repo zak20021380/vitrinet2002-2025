@@ -14,6 +14,7 @@
   <meta property="og:url" content="https://onyxmodern.com">
   <meta property="og:type" content="website">
   <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;700;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <script src="https://cdn.tailwindcss.com"></script>
 <style>
 :root {
@@ -511,6 +512,10 @@ body {
       </svg>
       آدرس فروشگاه
     </button>
+    <button class="flex items-center gap-1 text-pink-500 font-bold px-3 py-1 rounded-xl hover:bg-pink-50 transition text-sm border border-pink-100" id="favShopBtn">
+      <i class="fas fa-heart"></i>
+      مغازه محبوب
+    </button>
     <!-- گزارش با پاپ‌آپ -->
     <button class="flex items-center gap-1 text-orange-500 font-bold px-2 py-1 rounded-xl hover:bg-orange-50 transition text-sm border border-orange-100"
       id="reportBtn">
@@ -563,6 +568,27 @@ body {
           شماره تماس: <b dir="ltr" class="font-bold mx-1">09123456789</b>
         </span>
       </div>
+    </div>
+  </div>
+
+  <!-- پاپ‌آپ مغازه محبوب -->
+  <div id="favShopModal" class="fixed inset-0 bg-black/40 z-[99] hidden items-center justify-center">
+    <div class="bg-white rounded-2xl p-6 shadow-2xl w-[90vw] max-w-sm flex flex-col gap-4 animate-fade-in-down border border-pink-100 text-center">
+      <div class="flex items-center justify-between mb-2">
+        <span class="text-lg font-bold text-pink-500 flex items-center gap-1">
+          <i class="fas fa-heart"></i>
+          مغازه محبوب
+        </span>
+        <button id="closeFavShopModal" class="p-1 hover:bg-pink-100 rounded transition" aria-label="بستن">
+          <svg class="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+          </svg>
+        </button>
+      </div>
+      <div class="text-gray-800 text-base font-bold mt-2">
+        این مغازه توسط <span id="favShopCount">0</span> نفر پسندیده شده است
+      </div>
+      <button id="toggleFavShopBtn" class="mt-1 bg-gradient-to-r from-pink-400 to-pink-500 text-white font-bold py-2 rounded-xl hover:shadow-lg transition"></button>
     </div>
   </div>
 
@@ -1325,6 +1351,61 @@ addressModal?.addEventListener('click', e => (e.target === addressModal) && addr
     } finally {
       submitRateBtn.disabled = false;
     }
+  });
+
+  // ───────────── مغازه محبوب ─────────────
+  const favShopBtn       = document.getElementById('favShopBtn');
+  const favShopModal     = document.getElementById('favShopModal');
+  const closeFavShop     = document.getElementById('closeFavShopModal');
+  const favShopCountEl   = document.getElementById('favShopCount');
+  const toggleFavShopBtn = document.getElementById('toggleFavShopBtn');
+
+  async function refreshFavShopInfo() {
+    try {
+      const res = await fetch(`${API_BASE}/api/favorite-shops/count/${currentSellerId}`);
+      const { count = 0 } = await res.json();
+      favShopCountEl.textContent = count;
+    } catch { favShopCountEl.textContent = 0; }
+
+    let added = false;
+    try {
+      const res2 = await fetch(`${API_BASE}/api/favorite-shops`, { credentials: 'include' });
+      if (res2.ok) {
+        const shops = await res2.json();
+        added = shops.some(s => s._id === currentSellerId);
+      }
+    } catch {}
+
+    toggleFavShopBtn.dataset.added = added ? 'true' : 'false';
+    toggleFavShopBtn.textContent = added ? '✅ افزوده شده' : '➕ افزودن به مغازه‌های محبوب';
+  }
+
+  favShopBtn?.addEventListener('click', async () => {
+    if (!(await isLoggedIn())) {
+      if (confirm('برای افزودن به علاقه‌مندی‌ها باید وارد شوید. به صفحهٔ ورود بروید؟')) {
+        sessionStorage.setItem('afterLoginReturn', location.href);
+        location.href = '/login.html';
+      }
+      return;
+    }
+    await refreshFavShopInfo();
+    favShopModal.classList.remove('hidden');
+  });
+
+  closeFavShop?.addEventListener('click', () => favShopModal.classList.add('hidden'));
+  favShopModal?.addEventListener('click', e => (e.target === favShopModal) && favShopModal.classList.add('hidden'));
+
+  toggleFavShopBtn?.addEventListener('click', async () => {
+    const added = toggleFavShopBtn.dataset.added === 'true';
+    toggleFavShopBtn.disabled = true;
+    try {
+      await fetch(`${API_BASE}/api/favorite-shops/${currentSellerId}`, {
+        method: added ? 'DELETE' : 'POST',
+        credentials: 'include'
+      });
+      await refreshFavShopInfo();
+    } catch {}
+    toggleFavShopBtn.disabled = false;
   });
 
 }); // پایان DOMContentLoaded
