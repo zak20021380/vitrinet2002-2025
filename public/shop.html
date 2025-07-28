@@ -610,7 +610,7 @@ body {
         </button>
       </div>
       <div class="text-gray-800 text-base font-bold mt-3">
-        این مغازه توسط 150 مشتری دنبال می‌شود
+        این مغازه توسط <span id="favShopCount">150</span> مشتری دنبال می‌شود
       </div>
       <button id="toggleFavShopBtn" class="mt-2 favorite-btn w-full justify-center"></button>
     </div>
@@ -1405,13 +1405,6 @@ addressModal?.addEventListener('click', e => (e.target === addressModal) && addr
   }
 
   favShopBtn?.addEventListener('click', async () => {
-    if (!(await isLoggedIn())) {
-      if (confirm('برای افزودن به علاقه‌مندی‌ها باید وارد شوید. به صفحهٔ ورود بروید؟')) {
-        sessionStorage.setItem('afterLoginReturn', location.href);
-        location.href = '/login.html';
-      }
-      return;
-    }
     await refreshFavShopInfo();
     favShopModal.classList.remove('hidden');
   });
