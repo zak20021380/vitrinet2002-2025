@@ -527,39 +527,40 @@ body {
   </div>
 
   <!-- اکشن‌ها و لوگو ویترینت -->
-  <div class="onyx-actions flex items-center gap-4 sm:gap-5 min-w-fit flex-shrink-0 w-full overflow-x-auto">
+  <!-- اکشن‌ها (در دسکتاپ کنار لوگو / در موبایل پایین صفحه) -->
+  <div class="onyx-actions flex items-center gap-4 sm:gap-5 min-w-fit flex-shrink-0 w-full overflow-x-auto md:overflow-visible">
     <!-- گفت‌وگو -->
   
     <!-- آدرس فروشگاه -->
-    <button id="addressBtn" class="favorite-btn flex items-center gap-2 font-bold rounded-xl text-sm">
+    <button id="addressBtn" class="action-item flex items-center gap-2 font-bold rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[var(--primary)]" aria-label="آدرس فروشگاه">
       <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a2 2 0 01-2.828 0l-4.243-4.243A8 8 0 1120 12a8.001 8.001 0 01-2.343 4.657z"/>
         <circle cx="12" cy="12" r="3"/>
       </svg>
       آدرس فروشگاه
     </button>
-    <button id="favShopBtn" class="favorite-btn flex items-center gap-2 font-bold rounded-xl text-sm">
+    <button id="favShopBtn" class="action-item flex items-center gap-2 font-bold rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[var(--primary)]" aria-label="مشتریان">
       مشتریان
     </button>
     <!-- گزارش با پاپ‌آپ -->
-    <button id="reportBtn" class="favorite-btn flex items-center gap-2 font-bold rounded-xl text-sm">
+    <button id="reportBtn" class="action-item flex items-center gap-2 font-bold rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[var(--primary)]" aria-label="گزارش تخلف">
       <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
         <circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/>
       </svg>
       گزارش
     </button>
     <!-- امتیاز و بازدید -->
-    <span class="flex items-center gap-3 text-yellow-500 font-bold text-sm ml-1 cursor-pointer rating-badge"
-          id="rateShow" style="user-select:none;">
+    <button id="rateShow" class="action-item rating-badge flex items-center gap-3 text-yellow-500 font-bold text-sm ml-1 cursor-pointer focus:outline-none focus:ring-2 focus:ring-[var(--primary)]" style="user-select:none;" aria-label="امتیاز و بازدید">
       <span class="flex items-center gap-1">
         <svg class="w-5 h-5 text-yellow-400" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.04 3.21a1 1 0 00.95.69h3.367c.969 0 1.371 1.24.588 1.81l-2.726 1.98a1 1 0 00-.364 1.118l1.04 3.21c.3 .921-.755 1.688-1.54 1.118l-2.726-1.98a1 1 0 00-1.175 0l-2.726 1.98c-.785.57-1.84-.197-1.54-1.118l1.04-3.21a1 1 0 00-.364-1.118L2.05 8.637c-.783-.57-.38-1.81.588-1.81h3.367a1 1 0 00.95-.69l1.04-3.21z"/></svg>
         <span id="shop-rating">4.8</span>
       </span>
       <span class="border-r border-dotted border-gray-400 h-6 mx-1"></span>
       <span class="flex items-center gap-1 text-yellow-600"><span id="shop-visits">1,234</span> بازدید</span>
-    </span>
-    <!-- لوگو ویترینت (چپ) -->
-    <a href="/" class="ml-3 flex items-center group select-none min-w-fit" title="رفتن به صفحه اصلی">
+    </button>
+    <!-- لوگو ویترینت / بازگشت به خانه -->
+    <a href="/" class="action-item ml-3 group select-none min-w-fit focus:outline-none focus:ring-2 focus:ring-[var(--primary)]" title="رفتن به صفحه اصلی" aria-label="خانه">
+      <i class="fas fa-home text-lg md:hidden"></i>
       <span class="text-[1.7rem] md:text-3xl font-black bg-gradient-to-l from-teal-400 via-blue-400 to-indigo-400 bg-clip-text text-transparent tracking-tighter transition group-hover:scale-105"
         style="font-family:'IranYekan','Vazirmatn',sans-serif;letter-spacing:-1.7px;line-height:1;">
         ویترینت
@@ -679,23 +680,37 @@ body {
     .onyx-nav > div, .onyx-nav > a {min-width: 0;}
     .onyx-nav .rating-badge {gap: 1.2rem;}
     .onyx-actions {white-space: nowrap;}
+    .action-item {display:flex; align-items:center; justify-content:center; gap:.35rem; font-weight:700;}
     .no-scrollbar {scrollbar-width: none; -ms-overflow-style: none;}
     .no-scrollbar::-webkit-scrollbar {display:none;}
     /* ریسپانسیو قوی */
     @media (max-width: 700px) {
+      body {padding-bottom:60px;}
       .onyx-nav {flex-direction: column !important; align-items: center; justify-content: center; gap:.5rem; padding:.7rem .75rem;}
       .onyx-nav > div, .onyx-nav > a {margin-bottom: 0 !important; justify-content: center; width: 100%;}
       .onyx-nav .text-[1.7rem], .onyx-nav .text-3xl {font-size:1.5rem;}
-      .onyx-actions {white-space: nowrap; flex-wrap: nowrap; justify-content: flex-start; overflow-x: auto; gap:.5rem; padding-bottom:.25rem; scrollbar-width: thin;}
-      .onyx-actions::-webkit-scrollbar {height:4px;}
+      .onyx-actions {
+        position: fixed;
+        bottom: 0; left: 0; right: 0;
+        background: rgba(255,255,255,0.95);
+        backdrop-filter: blur(12px);
+        box-shadow: 0 -2px 10px rgba(0,0,0,0.08);
+        justify-content: space-around;
+        overflow: visible;
+        gap:0;
+        padding:.35rem 0;
+        z-index:50;
+      }
+      .action-item {flex-direction: column; font-size:.75rem; min-width:52px;}
       .onyx-nav .ml-3 {margin-left:0!important;}
-      .onyx-nav .rating-badge {justify-content: center; gap:.5rem;}
+      .onyx-nav .rating-badge {justify-content: center; gap:.3rem;}
     }
     @media (min-width: 701px) {
       .onyx-nav {flex-direction: row !important;}
       .onyx-nav > div, .onyx-nav > a {margin-bottom: 0 !important;}
       .onyx-nav .text-[1.7rem], .onyx-nav .text-3xl {font-size:1.7rem;}
-      .onyx-actions {overflow: visible;}
+      .onyx-actions {position: static; background: none; box-shadow:none; overflow: visible; gap:1rem; padding:0;}
+      .action-item {flex-direction: row; font-size:.875rem;}
     }
     @keyframes fade-in-down {from{opacity:0;transform:translateY(-24px);}to{opacity:1;transform:translateY(0);}
     }
