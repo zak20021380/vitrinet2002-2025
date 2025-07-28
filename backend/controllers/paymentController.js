@@ -1,6 +1,6 @@
 const Payment = require('../models/payment');
 const AdOrder = require('../models/AdOrder');
-const Plan = require('../models/Plan'); // مدل پلن اشتراک
+const Plan = require('../models/plan'); // مدل پلن اشتراک
 const Seller = require('../models/Seller');
 const axios = require('axios'); // برای ارتباط با درگاه پرداخت (مثلاً زرین‌پال)
 

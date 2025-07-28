@@ -1,123 +1,749 @@
 <!DOCTYPE html>
 <html lang="fa" dir="rtl">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>داشبورد ویترینت</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;700&display=swap" rel="stylesheet" />
-  <style>
-    body {font-family:'Vazirmatn',sans-serif; background:linear-gradient(120deg,#ecfdf5,#f0fdf4);}
-    .glass {background:rgba(255,255,255,0.9); backdrop-filter:blur(14px); box-shadow:0 8px 32px rgba(16,185,129,0.25); border-radius:1.5rem;}
-    .btn-grad {background:linear-gradient(92deg,#10b981,#0ea5e9); color:#fff; box-shadow:0 2px 10px rgba(16,185,129,0.3);}
-    .btn-grad:hover {filter:brightness(1.08);}
-    .progress-step {width:2.5rem; height:2.5rem; border-radius:9999px;}
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vitreenet - سیستم پاداش</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#6366F1',
+                        success: '#10B981',
+                        attention: '#F59E0B',
+                        darkbg: '#0f172a',
+                        darkcard: '#1e293b',
+                    },
+                    fontFamily: {
+                        sans: ['Vazirmatn', 'sans-serif'],
+                    },
+                }
+            }
+        }
+    </script>
+    <style>
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-8px); }
+            100% { transform: translateY(0px); }
+        }
+        
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
+            70% { box-shadow: 0 0 0 12px rgba(16, 185, 129, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+        }
+        
+        @keyframes glow {
+            0% { box-shadow: 0 0 5px rgba(99, 102, 241, 0.5); }
+            50% { box-shadow: 0 0 20px rgba(99, 102, 241, 0.8); }
+            100% { box-shadow: 0 0 5px rgba(99, 102, 241, 0.5); }
+        }
+        
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+            20%, 40%, 60%, 80% { transform: translateX(5px); }
+        }
+        
+        .float-animation {
+            animation: float 3s ease-in-out infinite;
+        }
+        
+        .pulse-animation {
+            animation: pulse 2s infinite;
+        }
+        
+        .glow-animation {
+            animation: glow 3s ease-in-out infinite;
+        }
+        
+        .shake-animation {
+            animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            color: #e2e8f0;
+            font-family: 'Vazirmatn', sans-serif;
+        }
+        
+        .card {
+            background: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            border: 1px solid rgba(99, 102, 241, 0.2);
+        }
+        
+        .progress-gradient {
+            background: linear-gradient(90deg, #10B981 0%, #6366F1 100%);
+        }
+        
+        .btn-primary {
+            background: linear-gradient(90deg, #6366F1 0%, #8B5CF6 100%);
+            transition: all 0.3s ease;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(99, 102, 241, 0.3);
+        }
+        
+        .btn-success {
+            background: linear-gradient(90deg, #10B981 0%, #34D399 100%);
+            transition: all 0.3s ease;
+        }
+        
+        .btn-success:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(16, 185, 129, 0.3);
+        }
+        
+        .input-field {
+            background: rgba(30, 41, 59, 0.5);
+            border: 1px solid rgba(99, 102, 241, 0.3);
+            transition: all 0.3s ease;
+        }
+        
+        .input-field:focus {
+            border-color: #6366F1;
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.3);
+        }
+        
+        .step-indicator {
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+        
+        .step-indicator.completed {
+            background: #10B981;
+        }
+        
+        .step-indicator.active {
+            background: #6366F1;
+            box-shadow: 0 0 10px rgba(99, 102, 241, 0.7);
+        }
+        
+        .step-indicator.inactive {
+            background: #475569;
+        }
+        
+        .step-label {
+            position: absolute;
+            top: 40px;
+            text-align: center;
+            font-size: 0.75rem;
+            width: 80px;
+        }
+        
+        .reward-item {
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .reward-item:hover {
+            transform: scale(1.03);
+            background: rgba(99, 102, 241, 0.1);
+        }
+        
+        .quick-link {
+            transition: all 0.3s ease;
+        }
+        
+        .quick-link:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+        }
+        
+        .screen {
+            display: none;
+        }
+        
+        .screen.active {
+            display: block;
+        }
+        
+        .code-input {
+            letter-spacing: 8px;
+            font-weight: bold;
+        }
+        
+        .amber-warning {
+            background: rgba(245, 158, 11, 0.15);
+            border: 1px solid rgba(245, 158, 11, 0.3);
+            animation: glow 3s ease-in-out infinite;
+            cursor: pointer;
+        }
+        
+        .store-card {
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .store-card:hover {
+            transform: translateY(-5px);
+        }
+    </style>
 </head>
-<body class="text-gray-700">
-  <!-- Welcome Page -->
-  <section class="min-h-screen flex flex-col items-center justify-center text-center p-6">
-    <div class="glass px-8 py-12 max-w-md mx-auto w-full">
-      <h1 class="text-3xl font-black text-emerald-600 mb-4">به ویترینت خوش اومدی</h1>
-      <p class="text-gray-600 mb-8">با خرید از مغازه‌های شهر، جایزه بگیر!</p>
-      <button class="btn-grad px-7 py-3 rounded-full font-extrabold shadow">شروع کن</button>
+<body class="min-h-screen flex items-center justify-center p-4">
+    <div class="w-full max-w-md mx-auto">
+        <!-- Seller Code Entry Screen -->
+        <div id="codeEntryScreen" class="screen active">
+            <div class="text-center mb-8">
+                <div class="float-animation inline-block">
+                    <div class="w-24 h-24 rounded-full bg-primary bg-opacity-20 flex items-center justify-center">
+                        <i class="fas fa-qrcode text-primary text-4xl"></i>
+                    </div>
+                </div>
+                <h1 class="text-2xl font-bold text-white mt-6">کد فروشنده را وارد کنید</h1>
+                <p class="text-indigo-300 mt-3">کد فروشنده را اسکن کرده یا دستی وارد نمایید</p>
+            </div>
+            
+            <div class="card p-6 mb-6 relative overflow-hidden">
+                <div class="absolute -top-20 -left-20 w-40 h-40 rounded-full bg-primary opacity-10"></div>
+                <div class="absolute -bottom-20 -right-20 w-40 h-40 rounded-full bg-success opacity-10"></div>
+                
+                <div class="relative z-10">
+                    <div class="mb-5">
+                        <label class="block text-sm font-medium text-gray-300 mb-2">کد فروشنده</label>
+                        <div class="relative">
+                            <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                                <i class="fas fa-barcode text-indigo-400 text-xl"></i>
+                            </div>
+                            <input type="text" id="sellerCode" class="input-field w-full py-3 pr-10 pl-4 rounded-lg text-white text-center code-input" placeholder="MK27X9" maxlength="6">
+                        </div>
+                        <div id="codeError" class="text-red-400 text-sm mt-2 hidden">
+                            <i class="fas fa-exclamation-circle mr-1"></i> کد فروشنده معتبر نیست
+                        </div>
+                    </div>
+                    
+                    <button id="verifyCodeBtn" class="btn-primary w-full py-3 rounded-lg font-medium text-white glow-animation">
+                        ادامه
+                    </button>
+                    
+                    <div class="mt-6 text-center">
+                        <button class="text-primary font-medium flex items-center justify-center mx-auto">
+                            <i class="fas fa-camera mr-2"></i> اسکن کد
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="text-center">
+                <p class="text-gray-400 text-sm">
+                    کد فروشنده را از فروشنده دریافت کرده و وارد نمایید
+                </p>
+            </div>
+        </div>
+        
+        <!-- Phone Input Screen -->
+        <div id="phoneScreen" class="screen">
+            <div class="flex items-center mb-8">
+                <button id="backToCode" class="text-gray-400">
+                    <i class="fas fa-arrow-right"></i>
+                </button>
+                <h1 class="text-xl font-bold text-white mx-auto">تکمیل اطلاعات</h1>
+            </div>
+            
+            <div class="card p-6 mb-6">
+                <div class="text-center mb-6">
+                    <div class="pulse-animation inline-block rounded-full p-4 mb-4">
+                        <i class="fas fa-mobile-alt text-3xl text-primary"></i>
+                    </div>
+                    <h2 class="text-lg font-bold text-white">شماره موبایل خود را وارد کنید</h2>
+                    <p class="text-indigo-300 mt-2">برای ثبت اعتبار و دریافت پاداش‌ها نیاز است</p>
+                </div>
+                
+                <div class="mb-5">
+                    <label class="block text-sm font-medium text-gray-300 mb-2">شماره موبایل</label>
+                    <div class="relative">
+                        <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                            <span class="text-gray-400">+98</span>
+                        </div>
+                        <!-- Changed: Added text-right and dir attributes for RTL phone input -->
+                        <input type="tel" id="phone" class="input-field w-full py-3 pr-16 pl-4 rounded-lg text-white text-right" placeholder="9123456789" dir="ltr">
+                    </div>
+                    <div id="phoneError" class="text-red-400 text-sm mt-2 hidden">
+                        <i class="fas fa-exclamation-circle mr-1"></i> شماره موبایل معتبر نیست
+                    </div>
+                </div>
+                
+                <button id="sendCodeBtn" class="btn-primary w-full py-3 rounded-lg font-medium text-white">
+                    ارسال کد تایید
+                </button>
+                
+                <!-- Added "Skip for now" button -->
+                <button id="skipPhoneBtn" class="mt-4 w-full py-3 rounded-lg font-medium text-white border border-gray-600 hover:border-gray-500">
+                    فعلا بگذریم
+                </button>
+            </div>
+        </div>
+        
+        <!-- Verification Screen -->
+        <div id="verificationScreen" class="screen">
+            <div class="flex items-center mb-8">
+                <button id="backToPhone" class="text-gray-400">
+                    <i class="fas fa-arrow-right"></i>
+                </button>
+                <h1 class="text-xl font-bold text-white mx-auto">تایید شماره موبایل</h1>
+            </div>
+            
+            <div class="card p-6 mb-6">
+                <div class="text-center mb-6">
+                    <div class="float-animation inline-block rounded-full p-4 mb-4 bg-success bg-opacity-20">
+                        <i class="fas fa-sms text-3xl text-success"></i>
+                    </div>
+                    <h2 class="text-lg font-bold text-white">کد تایید ارسال شد</h2>
+                    <p id="phoneMask" class="text-indigo-300 mt-2">کد ارسال شده به شماره ۰۹۱۲XXX۵۶۷۸ را وارد کنید</p>
+                </div>
+                
+                <div class="mb-6">
+                    <label class="block text-sm font-medium text-gray-300 mb-4 text-center">کد ۴ رقمی</label>
+                    <div class="flex justify-center space-x-3">
+                        <input type="text" maxlength="1" class="verification-digit input-field w-16 h-16 text-center text-2xl rounded-lg">
+                        <input type="text" maxlength="1" class="verification-digit input-field w-16 h-16 text-center text-2xl rounded-lg">
+                        <input type="text" maxlength="1" class="verification-digit input-field w-16 h-16 text-center text-2xl rounded-lg">
+                        <input type="text" maxlength="1" class="verification-digit input-field w-16 h-16 text-center text-2xl rounded-lg">
+                    </div>
+                    <div id="verifyError" class="text-red-400 text-sm mt-4 text-center hidden">
+                        <i class="fas fa-exclamation-circle mr-1"></i> کد وارد شده صحیح نیست
+                    </div>
+                </div>
+                
+                <div class="text-center text-sm text-gray-400 mt-6">
+                    <p>کد را دریافت نکرده‌اید؟ <button id="resendCode" class="text-primary font-medium">ارسال مجدد</button></p>
+                    <p class="mt-2">زمان باقی‌مانده: <span id="countdown" class="font-bold">02:00</span></p>
+                </div>
+                
+                <button id="verifyPhoneBtn" class="btn-success w-full py-3 rounded-lg font-medium text-white mt-6">
+                    تایید و ادامه
+                </button>
+            </div>
+        </div>
+        
+        <!-- Dashboard Screen -->
+        <div id="dashboardScreen" class="screen">
+            <!-- Header -->
+            <div class="flex justify-between items-center mb-6">
+                <div>
+                    <h1 class="text-xl font-bold text-white">Vitreenet</h1>
+                    <p class="text-indigo-300 text-sm">سیستم پاداش خریدهای شما</p>
+                </div>
+                <div class="flex items-center">
+                    <div class="mr-3 text-right">
+                        <p class="text-white font-medium">کاربر گرامی</p>
+                        <p class="text-xs text-success">اعتبار فعال</p>
+                    </div>
+                    <div class="relative">
+                        <div class="w-10 h-10 rounded-full bg-primary bg-opacity-20 flex items-center justify-center">
+                            <i class="fas fa-user text-primary"></i>
+                        </div>
+                        <span class="absolute bottom-0 right-0 w-3 h-3 bg-success rounded-full border-2 border-darkbg"></span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Warning Card (if phone not verified) -->
+            <div id="phoneWarning" class="amber-warning rounded-xl p-4 mb-6 flex items-start">
+                <div class="bg-amber-500 bg-opacity-20 p-2 rounded-lg mr-3">
+                    <i class="fas fa-exclamation-circle text-amber-400 text-xl"></i>
+                </div>
+                <div>
+                    <h3 class="font-bold text-amber-200">تکمیل اطلاعات ضروری</h3>
+                    <p class="text-amber-100 text-sm mt-1">برای ثبت اعتبار باید شماره‌ات رو تایید کنی!</p>
+                </div>
+            </div>
+            
+            <!-- Credit Card -->
+            <div class="card p-5 mb-6 relative overflow-hidden">
+                <div class="absolute -top-20 -left-20 w-40 h-40 rounded-full bg-primary opacity-10"></div>
+                <div class="absolute -bottom-20 -right-20 w-40 h-40 rounded-full bg-success opacity-10"></div>
+                
+                <div class="relative z-10">
+                    <div class="flex justify-between items-center mb-4">
+                        <h2 class="text-lg font-bold text-white">اعتبار فعلی شما</h2>
+                        <i class="fas fa-coins text-attention text-xl"></i>
+                    </div>
+                    
+                    <div class="pulse-animation bg-darkcard rounded-xl p-4 mb-4">
+                        <p class="text-gray-400 text-sm">موجودی قابل استفاده</p>
+                        <div class="flex items-end mt-1">
+                            <span id="currentCredit" class="text-2xl font-bold text-success">425,000</span>
+                            <span class="text-gray-400 mr-1">تومان</span>
+                        </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-2 gap-3">
+                        <div class="bg-darkcard rounded-lg p-3">
+                            <p class="text-gray-400 text-xs">تعداد خریدها</p>
+                            <p class="font-bold text-white"><i class="fas fa-shopping-bag ml-1"></i> <span id="purchaseCount">۶</span> خرید</p>
+                        </div>
+                        <div class="bg-darkcard rounded-lg p-3">
+                            <p class="text-gray-400 text-xs">تا جایزه بعدی</p>
+                            <p class="font-bold text-attention"><i class="fas fa-bullseye ml-1"></i> <span id="toNextCount">۳</span> خرید دیگر</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Progress Tracker -->
+            <div class="card p-5 mb-6">
+                <h2 class="text-lg font-bold text-white mb-4">پیشرفت شما</h2>
+                
+                <div class="mb-4">
+                    <div class="flex justify-between text-sm text-gray-400 mb-1">
+                        <span id="nextRewardLabel">پاداش بعدی: ۵۰۰,۰۰۰ تومان</span>
+                        <span id="specialRewardLabel">پاداش ویژه: ۱,۰۰۰,۰۰۰ تومان</span>
+                    </div>
+                    <div class="relative h-3 bg-gray-700 rounded-full overflow-hidden">
+                        <div id="progressBar" class="progress-gradient h-full rounded-full"></div>
+                    </div>
+                </div>
+                
+                <div class="mt-6">
+                    <div class="flex items-center mb-3">
+                        <div class="w-6 h-6 rounded-full bg-attention flex items-center justify-center mr-2">
+                            <i class="fas fa-gift text-white text-xs"></i>
+                        </div>
+                        <p id="nextMessage" class="text-attention">۳ خرید تا رسیدن به ۵۰۰,۰۰۰ تومان اعتبار</p>
+                    </div>
+                    <div class="flex items-center">
+                        <div class="w-6 h-6 rounded-full bg-primary flex items-center justify-center mr-2">
+                            <i class="fas fa-trophy text-white text-xs"></i>
+                        </div>
+                        <p id="finalMessage" class="text-primary">۷ خرید تا جایزه نهایی (۱,۰۰۰,۰۰۰ تومان)</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Store Type Selector -->
+            <div class="mb-6">
+                <h2 class="text-lg font-bold text-white mb-4">انتخاب نوع فروشگاه</h2>
+                <div class="grid grid-cols-1 gap-3">
+                    <div class="store-card premium-stores bg-primary bg-opacity-10 border border-primary rounded-xl p-4 flex items-center">
+                        <div class="w-12 h-12 rounded-full bg-primary bg-opacity-20 flex items-center justify-center mr-3">
+                            <i class="fas fa-crown text-primary text-xl"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-bold text-white">مشاهده مغازه‌های پرمیوم</h3>
+                            <p class="text-primary text-sm mt-1">فروشگاه‌های ویژه با پاداش بیشتر</p>
+                        </div>
+                        <div class="mr-auto">
+                            <i class="fas fa-arrow-left text-primary"></i>
+                        </div>
+                    </div>
+                    
+                    <div class="store-card normal-stores bg-gray-700 bg-opacity-50 rounded-xl p-4 flex items-center">
+                        <div class="w-12 h-12 rounded-full bg-gray-600 flex items-center justify-center mr-3">
+                            <i class="fas fa-store text-gray-300 text-xl"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-bold text-white">مشاهده مغازه‌های عادی</h3>
+                            <p class="text-gray-400 text-sm mt-1">تمام فروشگاه‌های موجود</p>
+                        </div>
+                        <div class="mr-auto">
+                            <i class="fas fa-arrow-left text-gray-400"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Quick Stats -->
+            <div class="grid grid-cols-3 gap-3 mb-6">
+                <div class="card p-3 text-center">
+                    <p class="text-gray-400 text-sm">امروز</p>
+                    <p class="font-bold text-white">۰ خرید</p>
+                </div>
+                <div class="card p-3 text-center">
+                    <p class="text-gray-400 text-sm">این ماه</p>
+                    <p class="font-bold text-white">۳ خرید</p>
+                </div>
+                <div class="card p-3 text-center">
+                    <p class="text-gray-400 text-sm">کل خریدها</p>
+                    <p class="font-bold text-white"><span id="totalPurchases">۶</span> خرید</p>
+                </div>
+            </div>
+        </div>
     </div>
-  </section>
 
-  <!-- Onboarding Wizard -->
-  <section class="py-12 px-4">
-    <div class="max-w-xl mx-auto">
-      <div class="flex items-center justify-center gap-2 mb-8">
-        <div class="progress-step bg-emerald-500 text-white flex items-center justify-center font-bold">1</div>
-        <div class="h-1 flex-1 bg-emerald-200"></div>
-        <div class="progress-step bg-gray-300 text-gray-500 flex items-center justify-center font-bold">2</div>
-        <div class="h-1 flex-1 bg-emerald-200"></div>
-        <div class="progress-step bg-gray-300 text-gray-500 flex items-center justify-center font-bold">3</div>
-      </div>
+    <script>
+        // Screen management
+        const screens = {
+            code: document.getElementById('codeEntryScreen'),
+            phone: document.getElementById('phoneScreen'),
+            verification: document.getElementById('verificationScreen'),
+            dashboard: document.getElementById('dashboardScreen')
+        };
+        
+        // State management
+        let appState = {
+            sellerCode: '',
+            phone: '',
+            isPhoneVerified: false,
+            credit: 0,
+            purchases: 0,
+            rewardedMilestones: []
+        };
 
-      <!-- Step 1 -->
-      <div class="glass p-6 space-y-6 mb-6">
-        <h2 class="text-xl font-extrabold text-emerald-600 mb-4">چطور کار می‌کنه؟</h2>
-        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 text-center">
-          <div class="flex flex-col items-center gap-2">
-            <div class="w-16 h-16 bg-gradient-to-br from-emerald-400 to-emerald-600 rounded-2xl"></div>
-            <span class="font-bold text-sm">خرید از مغازه‌ها</span>
-          </div>
-          <div class="flex flex-col items-center gap-2">
-            <div class="w-16 h-16 bg-gradient-to-br from-emerald-400 to-emerald-600 rounded-2xl"></div>
-            <span class="font-bold text-sm">جمع امتیاز</span>
-          </div>
-          <div class="flex flex-col items-center gap-2">
-            <div class="w-16 h-16 bg-gradient-to-br from-emerald-400 to-emerald-600 rounded-2xl"></div>
-            <span class="font-bold text-sm">دریافت جایزه</span>
-          </div>
-        </div>
-      </div>
+        const milestones = [
+            { purchases: 3, reward: 200000 },
+            { purchases: 6, reward: 225000 },
+            { purchases: 9, reward: 500000 },
+            { purchases: 13, reward: 1000000 }
+        ];
 
-      <!-- Step 2 -->
-      <div class="glass p-6 space-y-4 mb-6">
-        <h2 class="text-xl font-extrabold text-emerald-600 mb-4">انتخاب شهر</h2>
-        <select class="w-full border border-gray-200 rounded-lg p-3 text-right">
-          <option>سنندج</option>
-          <option>تهران</option>
-          <option>اصفهان</option>
-          <option>مشهد</option>
-        </select>
-      </div>
+        const validSellerCodes = ["MK27X9", "SH56BY", "ZXC123"];
 
-      <!-- Step 3 -->
-      <div class="glass p-6 space-y-6 text-center">
-        <h2 class="text-xl font-extrabold text-emerald-600 mb-4">ساخت حساب یا مهمان</h2>
-        <p class="text-gray-600">برای ذخیره امتیازاتت می‌تونی حساب بسازی یا مهمان ادامه بدی.</p>
-        <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
-          <a href="register.html" class="btn-grad px-6 py-2 rounded-full font-bold shadow">ساخت حساب</a>
-          <a href="#" class="px-6 py-2 rounded-full border border-emerald-500 text-emerald-600 font-bold">ادامه مهمان</a>
-        </div>
-      </div>
-    </div>
-  </section>
+        // Load state from localStorage
+        const storedState = localStorage.getItem('appState');
+        if (storedState) {
+            appState = JSON.parse(storedState);
+        } else {
+            // Initial state for demo
+            appState.credit = 425000;
+            appState.purchases = 6;
+            appState.rewardedMilestones = [3, 6];
+            localStorage.setItem('appState', JSON.stringify(appState));
+        }
 
-  <!-- Main Dashboard -->
-  <section class="py-12 px-4">
-    <div class="max-w-xl mx-auto space-y-6">
-      <!-- Points -->
-      <div class="glass p-6 flex flex-col items-center text-center">
-        <span class="text-gray-600">امتیاز فعلی:</span>
-        <span class="text-4xl font-black text-emerald-600 mt-2">۰</span>
-        <div class="flex justify-between w-full mt-4 text-sm font-bold text-gray-500">
-          <span>100K</span>
-          <span>300K</span>
-          <span>500K</span>
-          <span>1M تومان</span>
-        </div>
-        <div class="w-full bg-gray-200 rounded-full h-2 mt-2">
-          <div class="h-full bg-gradient-to-l from-emerald-400 to-emerald-500 rounded-full" style="width:0%"></div>
-        </div>
-      </div>
-      <!-- Premium stores -->
-      <div class="glass p-6">
-        <h3 class="font-extrabold text-emerald-600 mb-3">مغازه‌های ویژه</h3>
-        <ul class="space-y-2">
-          <li class="flex items-center justify-between">
-            <span>سوپرمارکت ممتاز</span>
-            <span class="text-xs bg-emerald-500 text-white rounded-full px-2 py-0.5">پریمیوم</span>
-          </li>
-          <li class="flex items-center justify-between">
-            <span>فروشگاه پوشاک برتر</span>
-            <span class="text-xs bg-emerald-500 text-white rounded-full px-2 py-0.5">پریمیوم</span>
-          </li>
-        </ul>
-      </div>
-      <!-- Mission card -->
-      <div class="glass p-6 text-center">
-        <h3 class="font-extrabold text-emerald-600 mb-2">ماموریت امروز</h3>
-        <p>اولین خریدتو انجام بده تا مسیر جایزه‌ات شروع شه</p>
-      </div>
-      <!-- Remaining time -->
-      <div class="glass p-6 text-center">
-        <p class="font-bold text-gray-600">۲۵ روز باقی مانده تا استفاده از امتیازها</p>
-      </div>
-    </div>
-  </section>
+        // Helper function to convert to Persian digits with commas
+        function toPersianNumber(num) {
+            const persianDigits = ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹'];
+            return num
+                .toString()
+                .replace(/\B(?=(\d{3})+(?!\d))/g, ',')
+                .replace(/\d/g, d => persianDigits[d]);
+        }
+
+        function toPersianDigits(str) {
+            const persianDigits = ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹'];
+            return str.replace(/\d/g, d => persianDigits[d]);
+        }
+
+        // Show a specific screen
+        function showScreen(screenName) {
+            Object.values(screens).forEach(screen => screen.classList.remove('active'));
+            screens[screenName].classList.add('active');
+            
+            if (screenName === 'dashboard') {
+                updatePhoneWarning();
+                updateDashboard();
+            }
+
+            if (screenName === 'verification') {
+                if (appState.phone) {
+                    const fullPhone = '0' + appState.phone;
+                    const masked = fullPhone.substring(0, 4) + 'XXX' + fullPhone.substring(7);
+                    document.getElementById('phoneMask').textContent = `کد ارسال شده به شماره ${toPersianDigits(masked)} را وارد کنید`;
+                }
+            }
+        }
+        
+        // Update phone warning visibility
+        function updatePhoneWarning() {
+            const warningElement = document.getElementById('phoneWarning');
+            if (appState.isPhoneVerified) {
+                warningElement.classList.add('hidden');
+            } else {
+                warningElement.classList.remove('hidden');
+            }
+        }
+
+        function registerPurchase() {
+            appState.purchases++;
+            milestones.forEach(m => {
+                if (appState.purchases === m.purchases && !appState.rewardedMilestones.includes(m.purchases)) {
+                    appState.credit += m.reward;
+                    appState.rewardedMilestones.push(m.purchases);
+                    alert(`تبریک! شما به پاداش ${toPersianNumber(m.reward)} تومان رسیدید!`);
+                }
+            });
+            localStorage.setItem('appState', JSON.stringify(appState));
+        }
+        
+        function updateDashboard() {
+            const upcomingMilestones = milestones.filter(m => !appState.rewardedMilestones.includes(m.purchases) && m.purchases > appState.purchases);
+            upcomingMilestones.sort((a, b) => a.purchases - b.purchases);
+            const nextMilestone = upcomingMilestones[0] || { purchases: Infinity, reward: 0 };
+            const finalMilestone = milestones[milestones.length - 1];
+
+            const nextLeft = nextMilestone.purchases !== Infinity ? nextMilestone.purchases - appState.purchases : 0;
+            const finalLeft = finalMilestone.purchases - appState.purchases;
+            const nextAmount = nextMilestone.reward;
+            const finalAmount = finalMilestone.reward;
+
+            document.getElementById('currentCredit').textContent = toPersianNumber(appState.credit);
+            document.getElementById('purchaseCount').textContent = toPersianNumber(appState.purchases);
+            document.getElementById('toNextCount').textContent = toPersianNumber(nextLeft);
+            document.getElementById('nextMessage').textContent = `${toPersianNumber(nextLeft)} خرید تا رسیدن به ${toPersianNumber(nextAmount)} تومان اعتبار`;
+            document.getElementById('finalMessage').textContent = `${toPersianNumber(finalLeft)} خرید تا جایزه نهایی (${toPersianNumber(finalAmount)} تومان)`;
+            document.getElementById('nextRewardLabel').textContent = `پاداش بعدی: ${toPersianNumber(nextAmount)} تومان`;
+            document.getElementById('specialRewardLabel').textContent = `پاداش ویژه: ${toPersianNumber(finalAmount)} تومان`;
+
+            const progress = (appState.purchases / finalMilestone.purchases) * 100;
+            document.getElementById('progressBar').style.width = `${progress}%`;
+
+            document.getElementById('totalPurchases').textContent = toPersianNumber(appState.purchases);
+        }
+        
+        // Navigation
+        document.getElementById('verifyCodeBtn').addEventListener('click', function() {
+            const sellerCode = document.getElementById('sellerCode').value;
+            const errorElement = document.getElementById('codeError');
+            
+            if (!sellerCode || !validSellerCodes.includes(sellerCode)) {
+                errorElement.classList.remove('hidden');
+                document.getElementById('sellerCode').classList.add('shake-animation');
+                setTimeout(() => {
+                    document.getElementById('sellerCode').classList.remove('shake-animation');
+                }, 500);
+            } else {
+                errorElement.classList.add('hidden');
+                appState.sellerCode = sellerCode;
+                if (appState.isPhoneVerified) {
+                    registerPurchase();
+                    showScreen('dashboard');
+                } else {
+                    showScreen('phone');
+                }
+            }
+        });
+        
+        document.getElementById('backToCode').addEventListener('click', function() {
+            showScreen('code');
+        });
+        
+        document.getElementById('backToPhone').addEventListener('click', function() {
+            showScreen('phone');
+        });
+        
+        // Phone validation
+        document.getElementById('sendCodeBtn').addEventListener('click', function() {
+            const phone = document.getElementById('phone').value;
+            const errorElement = document.getElementById('phoneError');
+            
+            if (!phone || phone.length !== 10 || !phone.startsWith('9')) {
+                errorElement.classList.remove('hidden');
+                document.getElementById('phone').classList.add('shake-animation');
+                setTimeout(() => {
+                    document.getElementById('phone').classList.remove('shake-animation');
+                }, 500);
+            } else {
+                errorElement.classList.add('hidden');
+                appState.phone = phone;
+                showScreen('verification');
+                startCountdown();
+            }
+        });
+        
+        // Skip phone verification
+        document.getElementById('skipPhoneBtn').addEventListener('click', function() {
+            appState.isPhoneVerified = false;
+            showScreen('dashboard');
+        });
+        
+        // Verification code functionality
+        const verificationDigits = document.querySelectorAll('.verification-digit');
+        verificationDigits.forEach((digit, index) => {
+            digit.addEventListener('input', function() {
+                if (this.value.length === 1 && index < verificationDigits.length - 1) {
+                    verificationDigits[index + 1].focus();
+                }
+            });
+            
+            digit.addEventListener('keydown', function(e) {
+                if (e.key === 'Backspace' && this.value.length === 0 && index > 0) {
+                    verificationDigits[index - 1].focus();
+                }
+            });
+        });
+        
+        // Countdown timer
+        function startCountdown() {
+            let timeLeft = 120;
+            const countdownElement = document.getElementById('countdown');
+            const countdownInterval = setInterval(() => {
+                const minutes = Math.floor(timeLeft / 60);
+                const seconds = timeLeft % 60;
+                countdownElement.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+                
+                if (timeLeft <= 0) {
+                    clearInterval(countdownInterval);
+                }
+                timeLeft--;
+            }, 1000);
+        }
+        
+        // Verify code
+        document.getElementById('verifyPhoneBtn').addEventListener('click', function() {
+            let code = '';
+            verificationDigits.forEach(digit => {
+                code += digit.value;
+            });
+            
+            if (code === '1234') {
+                appState.isPhoneVerified = true;
+                registerPurchase();
+                localStorage.setItem('appState', JSON.stringify(appState));
+                showScreen('dashboard');
+            } else {
+                document.getElementById('verifyError').classList.remove('hidden');
+                verificationDigits.forEach(digit => {
+                    digit.classList.add('shake-animation');
+                });
+                setTimeout(() => {
+                    verificationDigits.forEach(digit => {
+                        digit.classList.remove('shake-animation');
+                    });
+                }, 500);
+            }
+        });
+        
+        // Resend code
+        document.getElementById('resendCode').addEventListener('click', function() {
+            document.getElementById('verifyError').classList.add('hidden');
+            startCountdown();
+        });
+        
+        // Store card click handlers
+        function handleStoreClick() {
+            if (!appState.isPhoneVerified) {
+                alert("لطفاً ابتدا شماره موبایل خود را تایید کنید.");
+                return;
+            }
+            
+            // Changed: Open separate pages based on store type
+            if (this.classList.contains('premium-stores')) {
+                window.location.href = 'premium.html';
+            } else if (this.classList.contains('normal-stores')) {
+                window.location.href = 'normal.html';
+            }
+        }
+        
+        // Initialize app
+        document.addEventListener('DOMContentLoaded', function() {
+            // Add event listeners to store cards
+            document.querySelectorAll('.store-card').forEach(card => {
+                card.addEventListener('click', handleStoreClick);
+            });
+            
+            // Add click handler for phone warning card
+            document.getElementById('phoneWarning').addEventListener('click', function() {
+                showScreen('phone');
+            });
+            
+            // Update phone warning
+            updatePhoneWarning();
+        });
+    </script>
 </body>
 </html>

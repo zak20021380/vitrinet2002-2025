@@ -1,0 +1,650 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>پنل فروشندگان ویتری‌نت | Vitreenet</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/vazirmatn@4.1.2/Vazirmatn-font-face.css">
+    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.1/build/qrcode.min.js"></script>
+    <style>
+        @keyframes glow {
+            0% { box-shadow: 0 0 5px rgba(99, 102, 241, 0.5); }
+            50% { box-shadow: 0 0 20px rgba(99, 102, 241, 0.8); }
+            100% { box-shadow: 0 0 5px rgba(99, 102, 241, 0.5); }
+        }
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-8px); }
+            100% { transform: translateY(0px); }
+        }
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+        
+        body {
+            font-family: 'Vazirmatn', sans-serif;
+            background: linear-gradient(135deg, #0a0e1d 0%, #0f172a 100%);
+            color: #e2e8f0;
+            min-height: 100vh;
+        }
+        
+        .glassy-card {
+            background: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(99, 102, 241, 0.2);
+            border-radius: 16px;
+            transition: all 0.3s ease;
+        }
+        
+        .glassy-card:hover {
+            border-color: rgba(99, 102, 241, 0.5);
+            transform: translateY(-5px);
+        }
+        
+        .glowing-border {
+            animation: glow 3s infinite;
+        }
+        
+        .floating {
+            animation: float 6s ease-in-out infinite;
+        }
+        
+        .pulsing {
+            animation: pulse 2s infinite;
+        }
+        
+        .progress-bar {
+            height: 8px;
+            border-radius: 4px;
+            background: rgba(255, 255, 255, 0.1);
+            overflow: hidden;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #6366F1, #8B5CF6);
+            border-radius: 4px;
+            box-shadow: 0 0 10px rgba(99, 102, 241, 0.7);
+        }
+        
+        .badge-premium {
+            background: linear-gradient(45deg, #f59e0b, #f97316);
+            box-shadow: 0 0 15px rgba(245, 158, 11, 0.5);
+        }
+        
+        .badge-basic {
+            background: linear-gradient(45deg, #64748b, #94a3b8);
+        }
+        
+        .qr-code-container {
+            background: white;
+            border-radius: 12px;
+            padding: 12px;
+            display: inline-block;
+        }
+        
+        .customer-card {
+            transition: all 0.3s ease;
+            border: 1px solid rgba(99, 102, 241, 0.1);
+        }
+        
+        .customer-card:hover {
+            border-color: rgba(99, 102, 241, 0.4);
+            transform: scale(1.02);
+        }
+        
+        .leaderboard-rank {
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            font-weight: bold;
+        }
+        
+        .top-1 {
+            background: linear-gradient(45deg, #fcd34d, #f59e0b);
+            box-shadow: 0 0 15px rgba(252, 211, 77, 0.5);
+        }
+        
+        .top-2 {
+            background: linear-gradient(45deg, #cbd5e1, #94a3b8);
+            box-shadow: 0 0 15px rgba(203, 213, 225, 0.5);
+        }
+        
+        .top-3 {
+            background: linear-gradient(45deg, #fca5a5, #f87171);
+            box-shadow: 0 0 15px rgba(252, 165, 165, 0.5);
+        }
+        
+        .current-user {
+            background: rgba(99, 102, 241, 0.2);
+            border: 1px solid rgba(99, 102, 241, 0.5);
+        }
+    </style>
+</head>
+<body class="p-4 md:p-6">
+    <!-- Header -->
+    <header class="flex justify-between items-center mb-8">
+        <div class="flex items-center gap-3">
+            <div class="w-14 h-14 bg-indigo-500 rounded-xl flex items-center justify-center text-2xl font-bold">V</div>
+            <h1 class="text-2xl font-bold bg-gradient-to-r from-indigo-400 to-purple-500 bg-clip-text text-transparent">ویتری‌نت</h1>
+        </div>
+        <div class="flex items-center gap-4">
+            <div class="relative">
+                <div class="absolute -top-2 -left-2 w-5 h-5 rounded-full bg-rose-500 border-2 border-slate-900"></div>
+                <div class="bg-gray-800 rounded-full p-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                    </svg>
+                </div>
+            </div>
+            <button class="bg-indigo-600 hover:bg-indigo-700 text-white py-2 px-4 rounded-lg transition flex items-center gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                </svg>
+                خروج
+            </button>
+        </div>
+    </header>
+
+    <div class="max-w-6xl mx-auto">
+        <!-- Welcome Section -->
+        <div class="glassy-card glowing-border p-6 mb-8">
+            <div class="flex flex-col md:flex-row justify-between items-center gap-6">
+                <div class="flex items-center gap-4">
+                    <div class="w-20 h-20 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white text-3xl font-bold">
+                        <span>ن</span>
+                    </div>
+                    <div>
+                        <h2 class="text-2xl font-bold">سلام، نوید!</h2>
+                        <p class="text-slate-400 mt-1">فروشگاه الکترونیک نوید</p>
+                    </div>
+                </div>
+                <div class="flex items-center gap-4">
+                    <div class="badge-basic py-2 px-4 rounded-full flex items-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                        </svg>
+                        <span>حساب معمولی</span>
+                    </div>
+                    <button class="bg-gradient-to-r from-amber-500 to-orange-500 text-white py-2 px-4 rounded-lg flex items-center gap-2 hover:opacity-90 transition">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
+                        </svg>
+                        ارتقاء به پرمیوم
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Summary Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            <div class="glassy-card p-5 relative overflow-hidden">
+                <div class="absolute -top-4 -right-4 w-16 h-16 bg-indigo-500 rounded-full opacity-10"></div>
+                <div class="flex justify-between items-start">
+                    <div>
+                        <p class="text-slate-400">مشتریان معرفی شده</p>
+                        <p class="text-2xl font-bold mt-2">۴۸ نفر</p>
+                    </div>
+                    <div class="bg-indigo-500/20 p-3 rounded-lg">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                        </svg>
+                    </div>
+                </div>
+                <div class="mt-4 flex items-center gap-2 text-emerald-400">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+                    </svg>
+                    <span class="text-sm">۱۲٪ افزایش نسبت به هفته قبل</span>
+                </div>
+            </div>
+            
+            <div class="glassy-card p-5 relative overflow-hidden">
+                <div class="absolute -top-4 -right-4 w-16 h-16 bg-emerald-500 rounded-full opacity-10"></div>
+                <div class="flex justify-between items-start">
+                    <div>
+                        <p class="text-slate-400">اعتبار جایزه داده شده</p>
+                        <p class="text-2xl font-bold mt-2">۲,۵۴۰,۰۰۰ تومان</p>
+                    </div>
+                    <div class="bg-emerald-500/20 p-3 rounded-lg">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                    </div>
+                </div>
+                <div class="mt-4 flex items-center gap-2 text-emerald-400">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+                    </svg>
+                    <span class="text-sm">۸٪ افزایش نسبت به هفته قبل</span>
+                </div>
+            </div>
+            
+            <div class="glassy-card p-5 relative overflow-hidden">
+                <div class="absolute -top-4 -right-4 w-16 h-16 bg-amber-500 rounded-full opacity-10"></div>
+                <div class="flex justify-between items-start">
+                    <div>
+                        <p class="text-slate-400">خریدهای رهگیری شده</p>
+                        <p class="text-2xl font-bold mt-2">۸۷ خرید</p>
+                    </div>
+                    <div class="bg-amber-500/20 p-3 rounded-lg">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+                        </svg>
+                    </div>
+                </div>
+                <div class="mt-4 flex items-center gap-2 text-rose-400">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 17h8m0 0V9m0 8l-8-8-4 4-6-6" />
+                    </svg>
+                    <span class="text-sm">۳٪ کاهش نسبت به هفته قبل</span>
+                </div>
+            </div>
+            
+            <div class="glassy-card p-5 relative overflow-hidden">
+                <div class="absolute -top-4 -right-4 w-16 h-16 bg-rose-500 rounded-full opacity-10"></div>
+                <div class="flex justify-between items-start">
+                    <div>
+                        <p class="text-slate-400">مشتریان تایید شده</p>
+                        <p class="text-2xl font-bold mt-2">۳۶ نفر</p>
+                    </div>
+                    <div class="bg-rose-500/20 p-3 rounded-lg">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-rose-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                    </div>
+                </div>
+                <div class="mt-4 flex items-center gap-2 text-emerald-400">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+                    </svg>
+                    <span class="text-sm">۱۵٪ افزایش نسبت به هفته قبل</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+            <!-- Weekly Missions -->
+            <div class="glassy-card p-6">
+                <div class="flex justify-between items-center mb-6">
+                    <h3 class="text-xl font-bold flex items-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
+                        </svg>
+                        مأموریت‌های هفتگی
+                    </h3>
+                    <div class="text-slate-400 text-sm">۲ از ۴ تکمیل شده</div>
+                </div>
+                
+                <div class="space-y-5">
+                    <div class="p-4 rounded-xl bg-slate-800/50 border border-slate-700">
+                        <div class="flex justify-between mb-3">
+                            <div class="flex items-center gap-2">
+                                <div class="bg-emerald-500/20 p-1 rounded">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
+                                    </svg>
+                                </div>
+                                <span>۵ مشتری جدید معرفی کنید</span>
+                            </div>
+                            <div class="bg-emerald-500/10 text-emerald-400 text-xs py-1 px-2 rounded">تکمیل شد</div>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: 100%"></div>
+                        </div>
+                        <div class="mt-3 flex justify-between text-sm">
+                            <div class="text-slate-400">پاداش: ۵۰,۰۰۰ تومان</div>
+                            <div class="text-emerald-400 flex items-center gap-1">
+                                <span>دریافت جایزه</span>
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                                </svg>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="p-4 rounded-xl bg-slate-800/50 border border-slate-700">
+                        <div class="flex justify-between mb-3">
+                            <div class="flex items-center gap-2">
+                                <div class="bg-indigo-500/20 p-1 rounded">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                                    </svg>
+                                </div>
+                                <span>۳ مشتری را به نسخه پرمیوم ارتقاء دهید</span>
+                            </div>
+                            <div class="bg-amber-500/10 text-amber-400 text-xs py-1 px-2 rounded">در حال انجام</div>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: 66%"></div>
+                        </div>
+                        <div class="mt-3 flex justify-between text-sm">
+                            <div class="text-slate-400">پاداش: ۱۰۰,۰۰۰ تومان</div>
+                            <div class="text-slate-500">۱ مشتری دیگر نیاز است</div>
+                        </div>
+                    </div>
+                    
+                    <div class="p-4 rounded-xl bg-slate-800/50 border border-slate-700 opacity-70">
+                        <div class="flex justify-between mb-3">
+                            <div class="flex items-center gap-2">
+                                <div class="bg-purple-500/20 p-1 rounded">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-purple-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 14v3m4-3v3m4-3v3M3 21h18M3 10h18M3 7l9-4 9 4M4 10h16v11H4V10z" />
+                                    </svg>
+                                </div>
+                                <span>۱۵ خرید رهگیری شده داشته باشید</span>
+                            </div>
+                            <div class="bg-slate-700 text-slate-500 text-xs py-1 px-2 rounded">شروع نشده</div>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: 0%"></div>
+                        </div>
+                        <div class="mt-3 text-sm text-slate-500">پاداش: ۷۵,۰۰۰ تومان</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Share & QR Code -->
+            <div class="glassy-card p-6">
+                <h3 class="text-xl font-bold mb-6 flex items-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
+                    </svg>
+                    کد دعوت و QR
+                </h3>
+                
+                <div class="flex flex-col md:flex-row items-center gap-6">
+                    <div class="qr-code-container floating">
+                        <div id="qrcode" class="w-40 h-40"></div>
+                    </div>
+                    
+                    <div class="flex-1">
+                        <div class="mb-4">
+                            <p class="text-slate-400 mb-2">کد دعوت شما:</p>
+                            <div class="flex items-center gap-2">
+                                <div class="bg-slate-800 text-xl font-mono py-3 px-6 rounded-lg tracking-widest">VTR-N8D2</div>
+                                <button class="bg-indigo-600 hover:bg-indigo-700 p-3 rounded-lg transition">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" />
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <p class="text-slate-400 mb-4">با استفاده از این کد یا QR، مشتریان جدید را دعوت کنید تا از پاداش‌ها بهره‌مند شوید.</p>
+                        
+                        <button class="w-full bg-slate-800 hover:bg-slate-700 py-3 rounded-lg flex items-center justify-center gap-2 transition">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+                            </svg>
+                            چاپ و نمایش در فروشگاه
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Referred Customers -->
+        <div class="glassy-card p-6 mb-8">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-xl font-bold flex items-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-cyan-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                    </svg>
+                    مشتریان معرفی شده
+                </h3>
+                <button class="text-sm text-slate-400 hover:text-white flex items-center gap-1">
+                    مشاهده همه
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                    </svg>
+                </button>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div class="customer-card glassy-card p-4">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <div class="font-bold">۰۹۱۲•••۴۵۶</div>
+                            <div class="text-slate-400 text-sm mt-1">تاریخ عضویت: ۱۴۰۲/۰۵/۱۲</div>
+                        </div>
+                        <div class="bg-emerald-500/10 text-emerald-400 text-xs py-1 px-2 rounded flex items-center gap-1">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                            </svg>
+                            تایید شده
+                        </div>
+                    </div>
+                    <div class="mt-4 flex items-center justify-between">
+                        <div class="text-slate-400">تعداد خریدها:</div>
+                        <div class="font-bold">۱۲ خرید</div>
+                    </div>
+                </div>
+                
+                <div class="customer-card glassy-card p-4">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <div class="font-bold">۰۹۳۶•••۲۱۹</div>
+                            <div class="text-slate-400 text-sm mt-1">تاریخ عضویت: ۱۴۰۲/۰۵/۲۱</div>
+                        </div>
+                        <div class="bg-rose-500/10 text-rose-400 text-xs py-1 px-2 rounded flex items-center gap-1">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                            تایید نشده
+                        </div>
+                    </div>
+                    <div class="mt-4 flex items-center justify-between">
+                        <div class="text-slate-400">تعداد خریدها:</div>
+                        <div class="font-bold">۳ خرید</div>
+                    </div>
+                </div>
+                
+                <div class="customer-card glassy-card p-4">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <div class="font-bold">۰۹۰۱•••۷۸۳</div>
+                            <div class="text-slate-400 text-sm mt-1">تاریخ عضویت: ۱۴۰۲/۰۵/۲۵</div>
+                        </div>
+                        <div class="bg-emerald-500/10 text-emerald-400 text-xs py-1 px-2 rounded flex items-center gap-1">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                            </svg>
+                            تایید شده
+                        </div>
+                    </div>
+                    <div class="mt-4 flex items-center justify-between">
+                        <div class="text-slate-400">تعداد خریدها:</div>
+                        <div class="font-bold">۷ خرید</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+            <!-- Leaderboard -->
+            <div class="glassy-card p-6">
+                <div class="flex justify-between items-center mb-6">
+                    <h3 class="text-xl font-bold flex items-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 8v8m-4-5v5m-4-2v2m-2 4h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        </svg>
+                        جدول رقابت فروشندگان
+                    </h3>
+                    <div class="text-sm text-slate-400">بروزرسانی: امروز ۱۴:۳۰</div>
+                </div>
+                
+                <div class="space-y-3">
+                    <div class="current-user flex items-center justify-between p-4 rounded-xl">
+                        <div class="flex items-center gap-3">
+                            <div class="leaderboard-rank top-3">۴</div>
+                            <div class="font-bold">نوید رضایی</div>
+                        </div>
+                        <div class="flex items-center gap-4">
+                            <div>۴۸ مشتری</div>
+                            <div class="text-slate-400">فروشگاه شما</div>
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-center justify-between p-4 rounded-xl bg-slate-800/30">
+                        <div class="flex items-center gap-3">
+                            <div class="leaderboard-rank top-1">۱</div>
+                            <div class="font-bold">سارا محمدی</div>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <div>۱۲۴ مشتری</div>
+                            <div class="text-amber-400">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
+                                </svg>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-center justify-between p-4 rounded-xl bg-slate-800/30">
+                        <div class="flex items-center gap-3">
+                            <div class="leaderboard-rank top-2">۲</div>
+                            <div class="font-bold">امیرحسین نوروزی</div>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <div>۹۸ مشتری</div>
+                            <div class="text-slate-400">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 18.657A8 8 0 016.343 7.343S7 9 9 10c0-2 .5-5 2.986-7C14 5 16.09 5.777 17.656 7.343A7.975 7.975 0 0120 13a7.975 7.975 0 01-2.343 5.657z" />
+                                </svg>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-center justify-between p-4 rounded-xl bg-slate-800/30">
+                        <div class="flex items-center gap-3">
+                            <div class="leaderboard-rank">۳</div>
+                            <div class="font-bold">فاطمه زارعی</div>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <div>۷۶ مشتری</div>
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-center justify-between p-4 rounded-xl bg-slate-800/30">
+                        <div class="flex items-center gap-3">
+                            <div class="leaderboard-rank">۵</div>
+                            <div>محمد کریمی</div>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <div>۳۹ مشتری</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Store Settings -->
+            <div class="glassy-card p-6">
+                <h3 class="text-xl font-bold mb-6 flex items-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                    </svg>
+                    تنظیمات فروشگاه
+                </h3>
+                
+                <div class="space-y-4">
+                    <div class="flex items-center justify-between p-4 rounded-xl bg-slate-800/30">
+                        <div class="flex items-center gap-3">
+                            <div class="bg-indigo-500/20 p-2 rounded-lg">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                                </svg>
+                            </div>
+                            <span>ویرایش پروفایل</span>
+                        </div>
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                        </svg>
+                    </div>
+                    
+                    <div class="flex items-center justify-between p-4 rounded-xl bg-slate-800/30">
+                        <div class="flex items-center gap-3">
+                            <div class="bg-amber-500/20 p-2 rounded-lg">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
+                                </svg>
+                            </div>
+                            <span>درخواست ارتقاء به پرمیوم</span>
+                        </div>
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                        </svg>
+                    </div>
+                    
+                    <div class="flex items-center justify-between p-4 rounded-xl bg-slate-800/30">
+                        <div class="flex items-center gap-3">
+                            <div class="bg-emerald-500/20 p-2 rounded-lg">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                                </svg>
+                            </div>
+                            <span>گزارشات و آمار</span>
+                        </div>
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                        </svg>
+                    </div>
+                    
+                    <div class="flex items-center justify-between p-4 rounded-xl bg-slate-800/30">
+                        <div class="flex items-center gap-3">
+                            <div class="bg-rose-500/20 p-2 rounded-lg">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-rose-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z" />
+                                </svg>
+                            </div>
+                            <span>پشتیبانی واتساپ</span>
+                        </div>
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                        </svg>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="mt-12 text-center text-slate-500 text-sm">
+        <p>کلیه حقوق برای پلتفرم ویتری‌نت محفوظ است © ۱۴۰۲</p>
+    </footer>
+
+    <script>
+        // Generate QR code
+        document.addEventListener('DOMContentLoaded', function() {
+            const qrElement = document.getElementById('qrcode');
+            new QRCode(qrElement, {
+                text: 'https://vitreenet.com/invite/VTR-N8D2',
+                width: 160,
+                height: 160,
+                colorDark: "#000000",
+                colorLight: "#ffffff",
+                correctLevel: QRCode.CorrectLevel.H
+            });
+        });
+        
+        // Add glowing effect to cards on hover
+        const cards = document.querySelectorAll('.glassy-card');
+        cards.forEach(card => {
+            card.addEventListener('mouseenter', () => {
+                card.classList.add('glowing-border');
+            });
+            
+            card.addEventListener('mouseleave', () => {
+                card.classList.remove('glowing-border');
+            });
+        });
+    </script>
+</body>
+</html>

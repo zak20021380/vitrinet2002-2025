@@ -1,0 +1,611 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vitreenet - فروشگاه‌های پرمیوم</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#6366F1',
+                        success: '#10B981',
+                        attention: '#F59E0B',
+                        darkbg: '#0f172a',
+                        darkcard: '#1e293b',
+                    },
+                    fontFamily: {
+                        sans: ['Vazirmatn', 'sans-serif'],
+                    },
+                }
+            }
+        }
+    </script>
+    <style>
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-8px); }
+            100% { transform: translateY(0px); }
+        }
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
+            70% { box-shadow: 0 0 0 12px rgba(16, 185, 129, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+        }
+        @keyframes glow {
+            0% { box-shadow: 0 0 5px rgba(99, 102, 241, 0.5); }
+            50% { box-shadow: 0 0 20px rgba(99, 102, 241, 0.8); }
+            100% { box-shadow: 0 0 5px rgba(99, 102, 241, 0.5); }
+        }
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+            20%, 40%, 60%, 80% { transform: translateX(5px); }
+        }
+        .float-animation {
+            animation: float 3s ease-in-out infinite;
+        }
+        .pulse-animation {
+            animation: pulse 2s infinite;
+        }
+        .glow-animation {
+            animation: glow 3s ease-in-out infinite;
+        }
+        .shake-animation {
+            animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both;
+        }
+        body {
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            color: #e2e8f0;
+            font-family: 'Vazirmatn', sans-serif;
+        }
+        .card {
+            background: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            border: 1px solid rgba(99, 102, 241, 0.2);
+        }
+        .progress-gradient {
+            background: linear-gradient(90deg, #10B981 0%, #6366F1 100%);
+        }
+        .btn-primary {
+            background: linear-gradient(90deg, #6366F1 0%, #8B5CF6 100%);
+            transition: all 0.3s ease;
+        }
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(99, 102, 241, 0.3);
+        }
+        .btn-success {
+            background: linear-gradient(90deg, #10B981 0%, #34D399 100%);
+            transition: all 0.3s ease;
+        }
+        .btn-success:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(16, 185, 129, 0.3);
+        }
+        .input-field {
+            background: rgba(30, 41, 59, 0.5);
+            border: 1px solid rgba(99, 102, 241, 0.3);
+            transition: all 0.3s ease;
+        }
+        .input-field:focus {
+            border-color: #6366F1;
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.3);
+        }
+        .step-indicator {
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+        .step-indicator.completed {
+            background: #10B981;
+        }
+        .step-indicator.active {
+            background: #6366F1;
+            box-shadow: 0 0 10px rgba(99, 102, 241, 0.7);
+        }
+        .step-indicator.inactive {
+            background: #475569;
+        }
+        .step-label {
+            position: absolute;
+            top: 40px;
+            text-align: center;
+            font-size: 0.75rem;
+            width: 80px;
+        }
+        .reward-item {
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        .reward-item:hover {
+            transform: scale(1.03);
+            background: rgba(99, 102, 241, 0.1);
+        }
+        .quick-link {
+            transition: all 0.3s ease;
+        }
+        .quick-link:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+        }
+        .screen {
+            display: none;
+        }
+        .screen.active {
+            display: block;
+        }
+        .code-input {
+            letter-spacing: 8px;
+            font-weight: bold;
+        }
+        .amber-warning {
+            background: rgba(245, 158, 11, 0.15);
+            border: 1px solid rgba(245, 158, 11, 0.3);
+            animation: glow 3s ease-in-out infinite;
+            cursor: pointer;
+        }
+        .store-card {
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        .store-card:hover {
+            transform: translateY(-5px);
+        }
+        .store-listing-card {
+            background: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            border: 1px solid rgba(99, 102, 241, 0.2);
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+        }
+        .store-listing-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+        }
+        .premium-badge {
+            background: linear-gradient(90deg, #6366F1 0%, #8B5CF6 100%);
+        }
+        .normal-badge {
+            background: linear-gradient(90deg, #475569 0%, #64748b 100%);
+        }
+        /* Additional responsive styles for store cards */
+        .store-content {
+            display: flex;
+            flex-direction: row;
+            align-items: flex-start;
+            flex: 1;
+        }
+        .store-icon-container {
+            flex-shrink: 0;
+            margin-left: 1rem; /* Changed from margin-right for RTL */
+        }
+        .store-info {
+            flex: 1;
+            min-width: 0; /* Allows text truncation */
+        }
+        .store-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+        .store-title {
+            font-weight: bold;
+            color: white;
+            font-size: 1rem; /* Base size */
+            flex: 1;
+            min-width: 0; /* Allows text truncation */
+        }
+        .store-badge {
+            white-space: nowrap;
+        }
+        .store-description {
+            color: #94a3b8; /* gray-400 equivalent */
+            font-size: 0.875rem; /* text-sm */
+            margin-top: 0.5rem;
+            line-height: 1.5; /* Improved readability */
+        }
+        .store-button-container {
+            margin-top: auto;
+            padding-top: 1.25rem;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+            justify-content: flex-end;
+        }
+        /* Responsive adjustments */
+        @media (max-width: 480px) {
+            .store-content {
+                flex-direction: row;
+                align-items: flex-start;
+            }
+            .store-icon-container {
+                width: 56px; /* w-14 equivalent */
+                height: 56px; /* h-14 equivalent */
+            }
+            .store-title {
+                font-size: 0.875rem; /* Smaller title on very small screens */
+            }
+            .store-badge {
+                font-size: 0.75rem; /* text-xs equivalent */
+                padding: 0.25rem 0.5rem; /* px-2 py-1 equivalent */
+            }
+            .store-description {
+                font-size: 0.75rem; /* text-xs equivalent on small screens */
+                margin-top: 0.25rem;
+            }
+            .store-button-container {
+                padding-top: 1rem;
+                gap: 0.5rem;
+            }
+            .store-listing-card {
+                padding: 1rem; /* Reduce padding on small screens */
+            }
+            .store-button {
+                padding: 0.5rem 0.75rem !important;
+                font-size: 0.75rem !important; /* text-xs equivalent */
+            }
+        }
+
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent background */
+            backdrop-filter: blur(5px); /* Blurred background */
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            animation: fadeIn 0.3s ease-out forwards;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .modal-content {
+            background: rgba(30, 41, 59, 0.95); /* Dark card background with slight transparency */
+            backdrop-filter: blur(15px); /* Glassmorphism effect */
+            border-radius: 16px;
+            border: 1px solid rgba(99, 102, 241, 0.3); /* Matching border */
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+            width: 90%;
+            max-width: 500px;
+            padding: 2rem;
+            position: relative;
+            animation: slideIn 0.4s ease-out forwards;
+            transform: translateY(20px);
+            opacity: 0;
+        }
+
+        @keyframes slideIn {
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .close {
+            color: #cbd5e1; /* gray-300 equivalent */
+            position: absolute;
+            top: 1rem;
+            left: 1rem; /* Adjusted for RTL */
+            font-size: 1.5rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: color 0.2s ease;
+        }
+
+        .close:hover,
+        .close:focus {
+            color: #ffffff;
+        }
+
+        .modal-header {
+            margin-bottom: 1.5rem;
+            text-align: center;
+        }
+
+        .modal-title {
+            font-size: 1.25rem;
+            font-weight: bold;
+            color: #e2e8f0; /* text-gray-100 equivalent */
+        }
+
+        .modal-body {
+            text-align: center;
+            color: #cbd5e1; /* text-gray-300 equivalent */
+            font-size: 1rem;
+            line-height: 1.6;
+        }
+
+        .store-button {
+            padding: 0.625rem 1rem; /* py-2.5 px-4 */
+            border-radius: 0.5rem; /* rounded-lg */
+            font-size: 0.875rem; /* text-sm */
+            font-weight: 500; /* font-medium */
+            transition: all 0.3s ease;
+            cursor: pointer;
+            border: none;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .store-button:hover {
+            transform: translateY(-2px);
+        }
+
+        .btn-view-products {
+            background: linear-gradient(90deg, #6366F1 0%, #8B5CF6 100%);
+            box-shadow: 0 4px 6px rgba(99, 102, 241, 0.2);
+        }
+
+        .btn-view-products:hover {
+            box-shadow: 0 6px 12px rgba(99, 102, 241, 0.3);
+        }
+
+        .btn-view-address {
+            background: linear-gradient(90deg, #475569 0%, #64748b 100%);
+            box-shadow: 0 4px 6px rgba(71, 85, 105, 0.2);
+        }
+
+        .btn-view-address:hover {
+            box-shadow: 0 6px 12px rgba(71, 85, 105, 0.3);
+        }
+
+        .button-icon {
+            margin-left: 0.5rem; /* ml-2 for RTL */
+        }
+    </style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-4">
+    <div class="w-full max-w-md mx-auto">
+        <!-- Stores Listing Screen -->
+        <div id="storesScreen" class="screen active">
+            <!-- Header -->
+            <div class="flex justify-between items-center mb-8">
+                <div>
+                    <h1 class="text-xl font-bold text-white">Vitreenet</h1>
+                    <p class="text-indigo-300 text-sm mt-1">فروشگاه‌های پرمیوم</p>
+                </div>
+                <!-- Removed user section as requested -->
+            </div>
+            <!-- Back Button -->
+            <div class="mb-6">
+                <a href="index.html" class="flex items-center text-indigo-300 hover:text-indigo-200 transition-colors bg-gray-800 bg-opacity-50 rounded-full px-4 py-2.5 w-fit">
+                    <i class="fas fa-arrow-left ml-2"></i>
+                    بازگشت به داشبورد
+                </a>
+            </div>
+            <!-- Page Title -->
+            <div class="mb-7 flex items-center">
+                <div class="w-12 h-12 rounded-full bg-primary bg-opacity-20 flex items-center justify-center mr-3">
+                    <i class="fas fa-crown text-primary text-xl"></i>
+                </div>
+                <div>
+                    <h2 class="text-xl font-bold text-white">فروشگاه‌های پرمیوم</h2>
+                    <p class="text-gray-400 mt-1">فروشگاه‌های ویژه با پاداش بیشتر</p>
+                </div>
+            </div>
+            <!-- Stats Banner -->
+            <div class="card p-5 mb-6 flex justify-between items-center">
+                <div>
+                    <p class="text-gray-400 text-sm">تعداد فروشگاه‌ها</p>
+                    <p class="font-bold text-white text-xl mt-1">۱۲ فروشگاه</p>
+                </div>
+                <div class="bg-primary bg-opacity-20 p-3 rounded-lg">
+                    <i class="fas fa-crown text-primary text-xl"></i>
+                </div>
+            </div>
+            <!-- Search Box -->
+            <div class="mb-7">
+                <div class="relative">
+                    <input type="text" class="input-field w-full py-3.5 pr-12 pl-4 rounded-lg text-white text-base" placeholder="جستجوی فروشگاه...">
+                    <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                        <i class="fas fa-search text-gray-400"></i>
+                    </div>
+                </div>
+            </div>
+            <!-- Store Listing -->
+            <div class="mb-8">
+                <h3 class="text-lg font-bold text-white mb-5">لیست فروشگاه‌ها</h3>
+                <div class="grid grid-cols-1 gap-5">
+                    <!-- Store 1 -->
+                    <div class="store-listing-card p-5 border border-primary border-opacity-50">
+                        <div class="store-content">
+                            <div class="store-icon-container w-14 h-14 rounded-xl bg-gradient-to-br from-indigo-600 to-purple-700 flex items-center justify-center">
+                                <i class="fas fa-shopping-bag text-white text-xl"></i>
+                            </div>
+                            <div class="store-info">
+                                <div class="store-header">
+                                    <h4 class="store-title">بوتیک لوکس</h4>
+                                    <span class="premium-badge store-badge text-xs px-2.5 py-1.5 rounded-full text-white">۲x پاداش</span>
+                                </div>
+                                <p class="store-description">لباس و اکسسوری</p>
+                            </div>
+                        </div>
+                        <div class="store-button-container">
+                            <button class="store-button btn-view-address" data-address="تهران، خیابان ولیعصر، پلاک ۱۲۳">
+                                <i class="fas fa-map-marker-alt button-icon"></i> مشاهده آدرس
+                            </button>
+                            <a href="products.html" class="store-button btn-view-products">
+                                <i class="fas fa-box-open button-icon"></i> مشاهده محصولات
+                            </a>
+                        </div>
+                    </div>
+                    <!-- Store 2 -->
+                    <div class="store-listing-card p-5 border border-primary border-opacity-50">
+                        <div class="store-content">
+                            <div class="store-icon-container w-14 h-14 rounded-xl bg-gradient-to-br from-blue-600 to-cyan-600 flex items-center justify-center">
+                                <i class="fas fa-mobile-alt text-white text-xl"></i>
+                            </div>
+                            <div class="store-info">
+                                <div class="store-header">
+                                    <h4 class="store-title">گجت‌های پیشرفته</h4>
+                                    <span class="premium-badge store-badge text-xs px-2.5 py-1.5 rounded-full text-white">۳x پاداش</span>
+                                </div>
+                                <p class="store-description">الکترونیک و فناوری</p>
+                            </div>
+                        </div>
+                        <div class="store-button-container">
+                            <button class="store-button btn-view-address" data-address="اصفهان، میدان نقش جهان، پلاک ۴۵">
+                                <i class="fas fa-map-marker-alt button-icon"></i> مشاهده آدرس
+                            </button>
+                            <a href="products.html" class="store-button btn-view-products">
+                                <i class="fas fa-box-open button-icon"></i> مشاهده محصولات
+                            </a>
+                        </div>
+                    </div>
+                    <!-- Store 3 -->
+                    <div class="store-listing-card p-5 border border-primary border-opacity-50">
+                        <div class="store-content">
+                            <div class="store-icon-container w-14 h-14 rounded-xl bg-gradient-to-br from-purple-600 to-pink-600 flex items-center justify-center">
+                                <i class="fas fa-gem text-white text-xl"></i>
+                            </div>
+                            <div class="store-info">
+                                <div class="store-header">
+                                    <h4 class="store-title">جواهرات ویژه</h4>
+                                    <span class="premium-badge store-badge text-xs px-2.5 py-1.5 rounded-full text-white">۲x پاداش</span>
+                                </div>
+                                <p class="store-description">جواهرات و زیورآلات</p>
+                            </div>
+                        </div>
+                        <div class="store-button-container">
+                             <button class="store-button btn-view-address" data-address="شیراز، خیابان زند، پلاک ۶۷">
+                                <i class="fas fa-map-marker-alt button-icon"></i> مشاهده آدرس
+                            </button>
+                            <a href="products.html" class="store-button btn-view-products">
+                                <i class="fas fa-box-open button-icon"></i> مشاهده محصولات
+                            </a>
+                        </div>
+                    </div>
+                    <!-- Store 4 -->
+                    <div class="store-listing-card p-5 border border-primary border-opacity-50">
+                        <div class="store-content">
+                            <div class="store-icon-container w-14 h-14 rounded-xl bg-gradient-to-br from-violet-600 to-indigo-700 flex items-center justify-center">
+                                <i class="fas fa-wine-glass-alt text-white text-xl"></i>
+                            </div>
+                            <div class="store-info">
+                                <div class="store-header">
+                                    <h4 class="store-title">رستوران لوکس</h4>
+                                    <span class="premium-badge store-badge text-xs px-2.5 py-1.5 rounded-full text-white">۲.۵x پاداش</span>
+                                </div>
+                                <p class="store-description">غذا و نوشیدنی</p>
+                            </div>
+                        </div>
+                        <div class="store-button-container">
+                            <button class="store-button btn-view-address" data-address="تبریز، ساحل آذرشهر، پلاک ۸۹">
+                                <i class="fas fa-map-marker-alt button-icon"></i> مشاهده آدرس
+                            </button>
+                            <a href="products.html" class="store-button btn-view-products">
+                                <i class="fas fa-box-open button-icon"></i> مشاهده محصولات
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- Floating Action Button -->
+            <div class="fixed bottom-6 left-6 z-10">
+                <div class="bg-primary w-14 h-14 rounded-full flex items-center justify-center shadow-lg">
+                    <i class="fas fa-crown text-white text-xl"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Structure -->
+    <div id="addressModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <div class="modal-header">
+                <h2 class="modal-title">آدرس فروشگاه</h2>
+            </div>
+            <div class="modal-body" id="modalAddressContent">
+                <!-- Address will be inserted here by JavaScript -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Helper function to convert to Persian digits with commas
+        function toPersianNumber(num) {
+            const persianDigits = ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹'];
+            return num
+                .toString()
+                .replace(/\B(?=(\d{3})+(?!\d))/g, ',')
+                .replace(/\d/g, d => persianDigits[d]);
+        }
+
+        // Modal functionality
+        document.addEventListener('DOMContentLoaded', function () {
+            const modal = document.getElementById("addressModal");
+            const modalContent = document.getElementById("modalAddressContent");
+            const closeBtn = document.querySelector(".close");
+            const viewAddressButtons = document.querySelectorAll(".btn-view-address");
+
+            // Function to open modal and display address
+            function openModal(address) {
+                modalContent.textContent = address;
+                modal.style.display = "flex";
+                // Prevent background scrolling
+                document.body.style.overflow = 'hidden';
+            }
+
+            // Function to close modal
+            function closeModal() {
+                modal.style.display = "none";
+                // Re-enable background scrolling
+                document.body.style.overflow = '';
+            }
+
+            // Event listeners for "View Address" buttons
+            viewAddressButtons.forEach(button => {
+                button.addEventListener("click", function () {
+                    const address = this.getAttribute("data-address");
+                    openModal(address);
+                });
+            });
+
+            // Event listener for close button (X)
+            closeBtn.addEventListener("click", closeModal);
+
+            // Event listener for clicking outside the modal content
+            window.addEventListener("click", function (event) {
+                if (event.target === modal) {
+                    closeModal();
+                }
+            });
+
+            // Optional: Close modal with Escape key
+            document.addEventListener("keydown", function (event) {
+                if (event.key === "Escape" && modal.style.display === "flex") {
+                    closeModal();
+                }
+            });
+
+            // Any other initialization for the stores page can go here
+        });
+    </script>
+</body>
+</html>
