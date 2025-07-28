@@ -46,6 +46,7 @@
       display: block;
       text-decoration: none;
     }
+    .header-nav{transition:max-height .3s ease,padding .3s ease;}
     /* استایل مودال جدید */
     .modal-bg {
       background: rgba(22,22,22,0.20);
@@ -93,9 +94,11 @@
       transition: color .14s;
     }
     .modal-close-x:hover { color: #0ea5e9;}
-    @media (max-width: 600px) {
+    @media (max-width: 640px) {
       .glass {padding: 1.1rem .6rem !important;}
-      .header-logo {font-size: 1.24rem;}
+      .header-logo {font-size: 1.4rem;}
+      .header-nav {max-height:0; padding-top:0; padding-bottom:0; overflow:hidden;}
+      #nav-toggle:checked + .header-nav {max-height:12rem; padding-top:.5rem; padding-bottom:.5rem;}
       .modal-content {padding: 1.3rem .5rem 1rem .5rem;}
     }
   </style>
@@ -104,14 +107,16 @@
 
   <!-- هدر شیشه‌ای -->
   <header class="w-full bg-white/90 shadow-sm backdrop-blur-md sticky top-0 z-50">
-    <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between px-3 sm:px-6 py-3 gap-y-2">
-      <div class="flex items-center gap-3 flex-shrink-0">
+    <div class="max-w-7xl mx-auto px-3 sm:px-6 py-2 sm:py-3 flex flex-col sm:flex-row items-center sm:justify-between gap-y-2">
+      <div class="flex items-center justify-between w-full sm:w-auto">
         <a href="index.html" class="header-logo font-bold text-[1.55rem] sm:text-[1.9rem] md:text-[2.05rem] bg-gradient-to-l from-[#11d6ad] via-[#10b981] to-[#2db4e8] bg-clip-text text-transparent" style="letter-spacing:1.7px;">ویترینت</a>
+        <label for="nav-toggle" class="sm:hidden text-gray-700 text-2xl cursor-pointer p-2">&#9776;</label>
       </div>
-      <nav class="flex items-center justify-end gap-2 sm:gap-3 flex-wrap text-sm sm:text-base w-full sm:w-auto">
-        <a href="index.html" class="text-gray-700 hover:text-[#10b981] font-bold px-2 sm:px-3 transition">خانه</a>
-        <a href="categories.html" class="text-gray-700 hover:text-[#0ea5e9] font-bold px-2 sm:px-3 transition">دسته‌بندی</a>
-        <a href="login.html" class="text-gray-700 hover:text-[#0ea5e9] font-bold px-2 sm:px-3 transition">ورود</a>
+      <input type="checkbox" id="nav-toggle" class="hidden peer">
+      <nav class="header-nav flex flex-col sm:flex-row items-center justify-end gap-2 sm:gap-4 w-full sm:w-auto text-[0.9rem] sm:text-base">
+        <a href="index.html" class="block px-3 py-2 sm:px-3 sm:py-0 text-gray-700 hover:text-[#10b981] font-bold transition">خانه</a>
+        <a href="categories.html" class="block px-3 py-2 sm:px-3 sm:py-0 text-gray-700 hover:text-[#0ea5e9] font-bold transition">دسته‌بندی</a>
+        <a href="login.html" class="block px-3 py-2 sm:px-3 sm:py-0 text-gray-700 hover:text-[#0ea5e9] font-bold transition">ورود</a>
       </nav>
     </div>
   </header>
