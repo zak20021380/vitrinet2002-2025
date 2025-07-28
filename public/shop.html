@@ -460,16 +460,29 @@ body {
 
 /* Favorite button modern style */
 .favorite-btn {
-  background: linear-gradient(145deg, rgba(255,255,255,0.55), rgba(255,255,255,0.35));
-  backdrop-filter: blur(8px);
-  border: 1px solid #f9c2d5;
-  color: #e11d48;
-  box-shadow: 0 2px 6px #f9a8d433;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: .4rem;
+  padding: .55rem 1rem;
+  font-family: inherit;
+  font-weight: 700;
+  font-size: .875rem;
+  background: linear-gradient(135deg, rgba(82,183,136,0.7), rgba(124,131,253,0.7));
+  backdrop-filter: blur(12px);
+  border-radius: 1rem;
+  border: 1px solid rgba(255,255,255,0.5);
+  color: #fff;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.15);
   transition: transform .2s, box-shadow .2s;
 }
 .favorite-btn:hover {
-  transform: scale(1.05);
-  box-shadow: 0 4px 12px #f9a8d455;
+  transform: scale(1.06);
+  box-shadow: 0 4px 14px rgba(0,0,0,0.2);
+}
+
+@media (max-width: 480px) {
+  .favorite-btn { padding: .45rem .8rem; font-size: .8rem; }
 }
 
 
@@ -526,8 +539,8 @@ body {
       </svg>
       آدرس فروشگاه
     </button>
-    <button id="favShopBtn" class="favorite-btn flex items-center gap-1 font-bold px-3 py-1 text-sm">
-      <i class="fas fa-heart"></i>
+    <button id="favShopBtn" class="favorite-btn flex items-center gap-2 font-bold rounded-xl text-sm">
+      <i class="fas fa-star"></i>
       مغازه محبوب
     </button>
     <!-- گزارش با پاپ‌آپ -->
@@ -587,22 +600,22 @@ body {
 
   <!-- پاپ‌آپ مغازه محبوب -->
   <div id="favShopModal" class="fixed inset-0 bg-black/40 z-[99] hidden items-center justify-center">
-    <div class="bg-white rounded-2xl p-6 shadow-2xl w-[90vw] max-w-sm flex flex-col gap-4 animate-fade-in-down border border-pink-100 text-center">
-      <div class="flex items-center justify-between mb-2">
-        <span class="text-lg font-bold text-pink-500 flex items-center gap-1">
-          <i class="fas fa-heart"></i>
+    <div class="bg-white/80 backdrop-blur-lg rounded-3xl p-6 shadow-2xl w-[90vw] max-w-sm flex flex-col gap-4 animate-fade-in-down border border-gray-200 text-center">
+      <div class="flex items-center justify-between mb-1">
+        <span class="text-lg font-bold text-[var(--primary)] flex items-center gap-1">
+          <i class="fas fa-star"></i>
           مغازه محبوب
         </span>
-        <button id="closeFavShopModal" class="p-1 hover:bg-pink-100 rounded transition" aria-label="بستن">
+        <button id="closeFavShopModal" class="p-1 hover:bg-gray-100 rounded transition" aria-label="بستن">
           <svg class="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
           </svg>
         </button>
       </div>
-      <div class="text-gray-800 text-base font-bold mt-2">
+      <div class="text-gray-800 text-base font-bold mt-3">
         این مغازه توسط <span id="favShopCount">0</span> نفر پسندیده شده است
       </div>
-      <button id="toggleFavShopBtn" class="mt-1 bg-gradient-to-r from-pink-400 to-pink-500 text-white font-bold py-2 rounded-xl hover:shadow-lg transition"></button>
+      <button id="toggleFavShopBtn" class="mt-2 favorite-btn w-full justify-center"></button>
     </div>
   </div>
 
@@ -1391,7 +1404,7 @@ addressModal?.addEventListener('click', e => (e.target === addressModal) && addr
     } catch {}
 
     toggleFavShopBtn.dataset.added = added ? 'true' : 'false';
-    toggleFavShopBtn.textContent = added ? '✅ افزوده شده' : '➕ افزودن به مغازه‌های محبوب';
+    toggleFavShopBtn.textContent = added ? 'افزوده شد' : 'افزودن به محبوب‌ها';
   }
 
   favShopBtn?.addEventListener('click', async () => {
