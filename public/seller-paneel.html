@@ -216,6 +216,9 @@
                 <div>
                     <h1 class="text-lg font-bold">پنل فروشنده</h1>
                     <p class="text-sm text-gray-400">فروشگاه تکنوشاپ</p>
+                    <p class="text-sm text-gray-400 md:hidden">
+                        فروشگاه تکنوشاپ | کد: <span id="headerSellerCode" class="text-primary"></span>
+                    </p>
                 </div>
             </div>
             <div class="flex items-center space-x-2 space-x-reverse">
@@ -271,6 +274,17 @@
             </div>
             <!-- Stats Cards -->
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+                <div class="card p-5" id="seller-code-card">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <p class="text-gray-400 text-sm">کد فروشنده</p>
+                            <p id="sellerCodeValue" class="text-2xl font-bold mt-1 text-primary"></p>
+                        </div>
+                        <button id="copySellerCode" class="bg-primary/20 p-3 rounded-lg">
+                            <i data-lucide="clipboard" class="w-5 h-5 text-primary"></i>
+                        </button>
+                    </div>
+                </div>
                 <div class="card p-5">
                     <div class="flex justify-between items-start">
                         <div>
@@ -497,6 +511,13 @@
         </section>
     </main>
     <script>
+        const sellerCode = 'MK27X9';   // ← will come from backend later
+        document.getElementById('sellerCodeValue').textContent = sellerCode;
+        document.getElementById('copySellerCode').addEventListener('click', () => {
+            navigator.clipboard.writeText(sellerCode);
+            showToast('کد فروشنده کپی شد!');
+        });
+        document.getElementById('headerSellerCode').textContent = sellerCode;
         // Initialize Lucide icons
         lucide.createIcons();
         // Tab switching functionality
@@ -665,7 +686,6 @@
             }
         });
 
-        const sellerCode = 'MK27X9';
         document.querySelectorAll('.seller-code-pill').forEach(pill => {
             const copy = () => {
                 navigator.clipboard.writeText(sellerCode).then(() => {
