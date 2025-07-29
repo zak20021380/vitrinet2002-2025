@@ -1415,6 +1415,16 @@
             const storeCount = document.getElementById('storeCount');
             // Initialize variables
             let currentFilter = 'all';
+            // Check URL parameter for initial filter
+            const urlParams = new URLSearchParams(window.location.search);
+            const typeParam = urlParams.get('type');
+            if (typeParam === 'premium' || typeParam === 'regular') {
+                const filterValue = typeParam === 'premium' ? 'premium' : 'normal';
+                currentFilter = filterValue;
+                filterOptions.forEach(opt => {
+                    opt.classList.toggle('active', opt.dataset.filter === filterValue);
+                });
+            }
             const batchSize = 4;
             // Update slider position
             function updateSlider() {
