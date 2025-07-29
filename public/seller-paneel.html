@@ -228,7 +228,7 @@
         <div class="container mx-auto px-4 py-3">
             <div class="flex overflow-x-auto space-x-4 space-x-reverse pb-2">
                 <button class="tab-btn px-4 py-2 rounded-lg card tab-active" data-tab="dashboard">داشبورد</button>
-                <button class="tab-btn px-4 py-2 rounded-lg card" data-tab="redeem">ثبت خرید</button>
+                <button class="tab-btn px-4 py-2 rounded-lg card" data-tab="redeem">تأیید خرید مشتری</button>
                 <button class="tab-btn px-4 py-2 rounded-lg card" data-tab="history">تاریخچه</button>
                 <button class="tab-btn px-4 py-2 rounded-lg card" data-tab="settlement">تسویه</button>
                 <button class="tab-btn px-4 py-2 rounded-lg card" data-tab="alerts">هشدارها</button>
@@ -242,7 +242,7 @@
         <div class="hidden md:flex mb-6 overflow-x-auto pb-2">
             <div class="flex space-x-2 space-x-reverse">
                 <button class="tab-btn px-6 py-3 rounded-lg card tab-active" data-tab="dashboard">داشبورد</button>
-                <button class="tab-btn px-6 py-3 rounded-lg card" data-tab="redeem">ثبت خرید با کد اعتبار</button>
+                <button class="tab-btn px-6 py-3 rounded-lg card" data-tab="redeem">تأیید خرید مشتری</button>
                 <button class="tab-btn px-6 py-3 rounded-lg card" data-tab="history">تاریخچه فروش</button>
                 <button class="tab-btn px-6 py-3 rounded-lg card" data-tab="settlement">وضعیت تسویه</button>
                 <button class="tab-btn px-6 py-3 rounded-lg card" data-tab="alerts">هشدارها</button>
@@ -343,10 +343,10 @@
         <!-- Redeem Tab -->
         <section id="redeem" class="tab-content hidden">
             <div class="card p-6 max-w-2xl mx-auto">
-                <h2 class="text-2xl font-bold mb-6">ثبت خرید با کد اعتبار</h2>
+                <h2 class="text-2xl font-bold mb-6">تأیید خرید مشتری</h2>
                 <form id="redeem-form">
                     <div class="mb-5">
-                        <label class="block text-gray-400 mb-2">Final prize code</label>
+                        <label class="block text-gray-400 mb-2">کد تأیید مشتری</label>
                         <input type="text" id="credit-code" class="w-full bg-dark border border-gray-700 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-primary" placeholder="مثال: 123456" maxlength="6">
                     </div>
                     <div class="mb-6">
@@ -354,7 +354,7 @@
                         <input type="number" id="amount" class="w-full bg-dark border border-gray-700 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-primary" placeholder="مثال: 500000">
                     </div>
                     <button type="submit" class="w-full bg-primary hover:bg-purple-700 text-white font-bold py-3 px-4 rounded-lg transition duration-200">
-                        ثبت خرید
+                        تأیید خرید
                     </button>
                 </form>
             </div>
@@ -603,7 +603,7 @@
             // Simulate API call
             setTimeout(() => {
                 if (Math.random() > 0.2) {
-                    showToast(`${amount} تومان was deducted from your credit (code ****${code.slice(-4)}).`);
+                    showToast('تأیید خرید با موفقیت ثبت شد');
                     updateRemainingCredit(parseInt(amount, 10));
                     const date = new Date().toLocaleDateString("fa-IR");
                     addCreditRow(date, code, amount);
