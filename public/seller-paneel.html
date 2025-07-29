@@ -230,7 +230,6 @@
                 <button class="tab-btn px-4 py-2 rounded-lg card tab-active" data-tab="dashboard">داشبورد</button>
                 <button class="tab-btn px-4 py-2 rounded-lg card" data-tab="redeem">تأیید خرید مشتری</button>
                 <button class="tab-btn px-4 py-2 rounded-lg card" data-tab="history">تاریخچه</button>
-                <button class="tab-btn px-4 py-2 rounded-lg card" data-tab="settlement">کسر اعتبار</button>
                 <button class="tab-btn px-4 py-2 rounded-lg card" data-tab="alerts">هشدارها</button>
                 <button class="tab-btn px-4 py-2 rounded-lg card" data-tab="settings">تنظیمات</button>
             </div>
@@ -244,7 +243,6 @@
                 <button class="tab-btn px-6 py-3 rounded-lg card tab-active" data-tab="dashboard">داشبورد</button>
                 <button class="tab-btn px-6 py-3 rounded-lg card" data-tab="redeem">تأیید خرید مشتری</button>
                 <button class="tab-btn px-6 py-3 rounded-lg card" data-tab="history">تاریخچه فروش</button>
-                <button class="tab-btn px-6 py-3 rounded-lg card" data-tab="settlement">کسر اعتبار</button>
                 <button class="tab-btn px-6 py-3 rounded-lg card" data-tab="alerts">هشدارها</button>
                 <button class="tab-btn px-6 py-3 rounded-lg card" data-tab="settings">تنظیمات</button>
             </div>
@@ -411,39 +409,6 @@
                 </div>
             </div>
         </section>
-        <!-- Settlement Tab -->
-        <section id="settlement" class="tab-content hidden">
-            <div class="card p-6 mb-6">
-                <h2 class="text-2xl font-bold mb-6">سوابق کسر اعتبار</h2>
-                <div class="mb-6 p-5 bg-gradient-to-r from-primary/20 to-indigo-900/20 border border-primary/30 rounded-xl">
-                    <div class="flex flex-col md:flex-row md:items-center md:justify-between">
-                        <div>
-                            <p class="text-gray-300 text-sm">اعتبار باقی‌ماندهٔ فروشگاه</p>
-                            <p id="remainingCredit" class="text-3xl font-bold mt-1 text-primary">0 تومان</p>
-                        </div>
-                        <div class="mt-4 md:mt-0">
-                            <div class="bg-primary/20 p-3 rounded-lg inline-block">
-                                <i data-lucide="wallet" class="w-8 h-8 text-primary"></i>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="overflow-x-auto">
-                    <table id="deduction-table" class="w-full text-right">
-                        <thead>
-                            <tr class="border-b border-gray-700">
-                                <th class="pb-3 text-gray-400 font-normal">تاریخ</th>
-                                <th class="pb-3 text-gray-400 font-normal">کد اعتبار</th>
-                                <th class="pb-3 text-gray-400 font-normal">مبلغ کسر شده</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </section>
-
         <!-- Alerts Tab -->
         <section id="alerts" class="tab-content hidden">
             <div class="card p-6">
@@ -497,14 +462,6 @@
                     <div class="mb-5">
                         <label class="block text-gray-400 mb-2">شماره تماس</label>
                         <input type="text" value="021-12345678" class="w-full bg-dark border border-gray-700 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-primary">
-                    </div>
-                    <div class="mb-5">
-                        <label class="block text-gray-400 mb-2">شماره حساب بانکی</label>
-                        <input type="text" value="IR123456789012345678901234" class="w-full bg-dark border border-gray-700 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-primary">
-                    </div>
-                    <div class="mb-5">
-                        <label class="block text-gray-400 mb-2">نام و نام خانوادگی صاحب حساب</label>
-                        <input type="text" placeholder="مثال: علی رضایی" class="w-full bg-dark border border-gray-700 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-primary">
                     </div>
                     <div class="mb-6">
                         <label class="block text-gray-400 mb-2">سطح فروشگاه</label>
@@ -571,11 +528,15 @@
 
         function updateRemainingCredit(delta) {
             remainingCredit -= delta;
-            document.getElementById("remainingCredit").textContent = remainingCredit + " تومان";
+            const elem = document.getElementById("remainingCredit");
+            if (elem) {
+                elem.textContent = remainingCredit + " تومان";
+            }
         }
 
         function addCreditRow(date, code, amount) {
             const tbody = document.querySelector("#deduction-table tbody");
+            if (!tbody) return;
             const tr = document.createElement("tr");
             tr.className = "border-b border-gray-800 hover:bg-dark/50 transaction-enter";
             tr.innerHTML = `
