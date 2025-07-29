@@ -1286,6 +1286,28 @@
             <button id="closeCashoutModal" class="close-cashout-modal">متوجه شدم</button>
         </div>
     </div>
+    <!-- User Info Modal -->
+    <div id="userInfoModal" class="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm hidden items-center justify-center">
+        <div class="bg-darkcard rounded-xl p-6 w-11/12 max-w-sm relative">
+            <button id="closeUserInfoModal" class="absolute top-2 left-2 text-gray-400">
+                <i class="fas fa-times"></i>
+            </button>
+            <h2 class="text-center text-lg font-bold text-white mb-4">تکمیل اطلاعات</h2>
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-sm mb-1">نام و نام خانوادگی</label>
+                    <input id="fullNameInput" type="text" class="input-field w-full py-2 px-3 rounded-lg text-white" placeholder="نام کامل">
+                    <p id="fullNameError" class="text-red-400 text-xs mt-1 hidden">نام حداقل 3 حرف باشد</p>
+                </div>
+                <div>
+                    <label class="block text-sm mb-1">شماره موبایل</label>
+                    <input id="mobileInput" type="tel" dir="ltr" class="input-field w-full py-2 px-3 rounded-lg text-white text-right" placeholder="09123456789">
+                    <p id="mobileError" class="text-red-400 text-xs mt-1 hidden">شماره موبایل معتبر نیست</p>
+                </div>
+                <button id="submitUserInfoBtn" class="btn-success w-full py-2 rounded-lg text-white">ثبت اطلاعات</button>
+            </div>
+        </div>
+    </div>
     <script>
         // Screen management
         const screens = {
@@ -1322,6 +1344,7 @@
             appState.rewardedMilestones = [3, 6];
             localStorage.setItem('appState', JSON.stringify(appState));
         }
+        let userInfo = JSON.parse(localStorage.getItem('userInfo') || '{}');
         // Helper function to convert to Persian digits with commas
         function toPersianNumber(num) {
             const persianDigits = ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹'];
@@ -1473,6 +1496,24 @@
         }
         function hideCashoutModal() {
             document.getElementById('cashoutModal').classList.remove('active');
+        }
+        function showUserInfoModal() {
+            const fullNameInput = document.getElementById('fullNameInput');
+            const phoneInput = document.getElementById('mobileInput');
+            if (userInfo.fullName) fullNameInput.value = userInfo.fullName;
+            if (userInfo.phone) phoneInput.value = userInfo.phone;
+            document.getElementById('userInfoModal').classList.remove('hidden');
+        }
+        function hideUserInfoModal() {
+            document.getElementById('userInfoModal').classList.add('hidden');
+        }
+        function handleCashoutRequest() {
+            userInfo = JSON.parse(localStorage.getItem('userInfo') || '{}');
+            if (!userInfo.fullName || !userInfo.phone) {
+                showUserInfoModal();
+            } else {
+                showCashoutModal();
+            }
         }
         // Navigation
         document.getElementById('verifyCodeBtn').addEventListener('click', function() {
@@ -1632,7 +1673,33 @@
         // Celebration Popup Close Button
         document.getElementById('closeCelebration').addEventListener('click', hideCelebrationPopup);
         // Cashout Modal Event Listeners (Added)
-        document.getElementById('requestCashoutBtn').addEventListener('click', showCashoutModal);
+        document.getElementById('requestCashoutBtn').addEventListener('click', handleCashoutRequest);
+        document.getElementById('closeUserInfoModal').addEventListener('click', hideUserInfoModal);
+        document.getElementById('userInfoModal').addEventListener('click', function(e) {
+            if (e.target === this) hideUserInfoModal();
+        });
+        document.getElementById('submitUserInfoBtn').addEventListener('click', function() {
+            const fullName = document.getElementById('fullNameInput').value.trim();
+            const phoneNum = document.getElementById('mobileInput').value.trim();
+            let valid = true;
+            if (fullName.length < 3) {
+                document.getElementById('fullNameError').classList.remove('hidden');
+                valid = false;
+            } else {
+                document.getElementById('fullNameError').classList.add('hidden');
+            }
+            if (!/^09\d{9}$/.test(phoneNum)) {
+                document.getElementById('mobileError').classList.remove('hidden');
+                valid = false;
+            } else {
+                document.getElementById('mobileError').classList.add('hidden');
+            }
+            if (!valid) return;
+            userInfo = { fullName, phone: phoneNum };
+            localStorage.setItem('userInfo', JSON.stringify(userInfo));
+            hideUserInfoModal();
+            showCashoutModal();
+        });
         document.getElementById('closeCashoutModal').addEventListener('click', hideCashoutModal);
         document.getElementById('cashoutModal').addEventListener('click', function(e) {
             if (e.target === this) {
