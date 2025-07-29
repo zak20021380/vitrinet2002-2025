@@ -548,6 +548,16 @@
             background-color: var(--primary);
             color: white;
         }
+        .date-filter {
+            background-color: #334155;
+            border: none;
+            color: var(--text-primary);
+            border-radius: 0.5rem;
+            padding: 0.5rem 1rem;
+        }
+        .date-filter::-webkit-calendar-picker-indicator {
+            filter: invert(1);
+        }
         /* LTR Text */
         .ltr-text {
             direction: ltr;
@@ -685,7 +695,7 @@
             <div class="topbar">
                 <div class="search-bar">
                     <i class="fas fa-search"></i>
-                    <input type="text" placeholder="جستجو...">
+                    <input type="text" id="withdrawalSearch" placeholder="جستجو...">
                 </div>
                 <div class="user-actions">
                     <div class="notification">
@@ -1029,9 +1039,12 @@
                     
                     <!-- Filter Bar -->
                     <div class="filter-bar">
-                        <div class="filter-pill active" data-filter="all">همه</div>
-                        <div class="filter-pill" data-filter="seller">فروشگاه‌ها</div>
-                        <div class="filter-pill" data-filter="customer">مشتریان</div>
+                        <div class="filter-pill active" data-group="type" data-filter="all">همه</div>
+                        <div class="filter-pill" data-group="type" data-filter="seller">فروشگاه‌ها</div>
+                        <div class="filter-pill" data-group="type" data-filter="customer">مشتریان</div>
+                        <div class="filter-pill" data-group="status" data-status="settled">تسویه شده‌ها</div>
+                        <div class="filter-pill" data-group="status" data-status="unsettled">تسویه نشده‌ها</div>
+                        <input type="date" id="settleDateFilter" class="date-filter">
                     </div>
                     
                     <div class="table-container">
@@ -1050,7 +1063,7 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                <tr class="withdrawal-row" data-type="seller">
+                                <tr class="withdrawal-row" data-type="seller" data-status="unsettled" data-date="1403-02-10" data-name="فروشگاه نگین" data-card="1234-5678-9012-3456">
                                     <td>فروشگاه نگین</td>
                                     <td>۵,۰۰۰,۰۰۰</td>
                                     <td class="ltr-text">1234-5678-9012-3456</td>
@@ -1070,7 +1083,7 @@
                                         </div>
                                     </td>
                                 </tr>
-                                <tr class="withdrawal-row" data-type="customer">
+                                <tr class="withdrawal-row" data-type="customer" data-status="settled" data-date="1403-02-08" data-name="علی محمدی" data-card="9876-5432-1098-7654">
                                     <td>علی محمدی</td>
                                     <td>۲,۵۰۰,۰۰۰</td>
                                     <td class="ltr-text">9876-5432-1098-7654</td>
@@ -1084,7 +1097,7 @@
                                         </div>
                                     </td>
                                 </tr>
-                                <tr class="withdrawal-row" data-type="seller">
+                                <tr class="withdrawal-row" data-type="seller" data-status="unsettled" data-date="1403-02-05" data-name="فروشگاه آرمان" data-card="1111-2222-3333-4444">
                                     <td>فروشگاه آرمان</td>
                                     <td>۱,۲۰۰,۰۰۰</td>
                                     <td class="ltr-text">1111-2222-3333-4444</td>
@@ -1367,34 +1380,48 @@
             });
         });
         
-        // Filter functionality
-        document.querySelectorAll('.filter-pill').forEach(pill => {
+        // Combined Filtering and Search
+        const searchInput = document.getElementById('withdrawalSearch');
+        const dateInput = document.getElementById('settleDateFilter');
+        let currentType = 'all';
+        let currentStatus = 'all';
+
+        function applyFilters() {
+            const query = searchInput.value.trim().toLowerCase();
+            const date = dateInput.value;
+            document.querySelectorAll('#withdrawals .withdrawal-row').forEach(row => {
+                const rowType = row.dataset.type;
+                const rowStatus = row.dataset.status;
+                const rowDate = row.dataset.date;
+                const name = (row.dataset.name || '').toLowerCase();
+                const card = row.dataset.card || '';
+
+                const matchType = currentType === 'all' || rowType === currentType;
+                const matchStatus = currentStatus === 'all' || rowStatus === currentStatus;
+                const matchDate = !date || rowDate === date;
+                const matchSearch = !query || name.includes(query) || card.includes(query);
+
+                if (matchType && matchStatus && matchDate && matchSearch) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        }
+
+        document.querySelectorAll('#withdrawals .filter-pill').forEach(pill => {
             pill.addEventListener('click', function() {
-                // Remove active class from all pills
-                document.querySelectorAll('.filter-pill').forEach(p => {
-                    p.classList.remove('active');
-                });
-                // Add active class to clicked pill
+                const group = this.dataset.group;
+                document.querySelectorAll(`#withdrawals .filter-pill[data-group='${group}']`).forEach(p => p.classList.remove('active'));
                 this.classList.add('active');
-                
-                // Get filter type
-                const filterType = this.getAttribute('data-filter');
-                
-                // Filter rows
-                document.querySelectorAll('.withdrawal-row').forEach(row => {
-                    if (filterType === 'all') {
-                        row.style.display = '';
-                    } else {
-                        const rowType = row.getAttribute('data-type');
-                        if (rowType === filterType) {
-                            row.style.display = '';
-                        } else {
-                            row.style.display = 'none';
-                        }
-                    }
-                });
+                if (group === 'type') currentType = this.dataset.filter;
+                if (group === 'status') currentStatus = this.dataset.status;
+                applyFilters();
             });
         });
+
+        searchInput.addEventListener('input', applyFilters);
+        dateInput.addEventListener('change', applyFilters);
         
         // Modal Functions
         function openModal(modalId) {
