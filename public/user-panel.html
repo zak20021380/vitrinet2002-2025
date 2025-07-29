@@ -714,9 +714,9 @@
         /* START OF NEW STYLES */
         
         /* Floating Back to Main Page Button */
-        #backToDashboardBtn {
+        #backHomeBtn {
             position: fixed;
-            bottom: 24px;
+            bottom: calc(1.5rem + env(safe-area-inset-bottom));
             left: 50%;
             transform: translateX(-50%);
             z-index: 50;
@@ -732,22 +732,15 @@
             animation: float 3s ease-in-out infinite;
             display: flex;
             align-items: center;
-            opacity: 0;
-            visibility: hidden;
-            transition: opacity 0.3s ease, visibility 0.3s ease, transform 0.3s ease;
         }
         
-        #backToDashboardBtn.active {
-            opacity: 1;
-            visibility: visible;
-        }
         
-        #backToDashboardBtn:hover {
+        #backHomeBtn:hover {
             transform: translateX(-50%) translateY(-5px);
             box-shadow: 0 12px 30px rgba(99, 102, 241, 0.7);
         }
         
-        #backToDashboardBtn i {
+        #backHomeBtn i {
             margin-left: 8px;
         }
         
@@ -879,6 +872,11 @@
             box-shadow: 0 5px 15px rgba(99, 102, 241, 0.4);
         }
         
+        @media (max-width: 640px) {
+            .screen {
+                padding-bottom: 6rem;
+            }
+        }
         /* END OF NEW STYLES */
     </style>
 </head>
@@ -1179,7 +1177,7 @@
     </button>
     
     <!-- New: Floating Back to Main Page Button -->
-    <button id="backToDashboardBtn">
+    <button id="backHomeBtn">
         <i class="fas fa-home mr-2"></i>
         <span>بازگشت به صفحه اصلی</span>
     </button>
@@ -1325,21 +1323,6 @@
             Object.values(screens).forEach(screen => screen.classList.remove('active'));
             screens[screenName].classList.add('active');
 
-            // Control visibility of the floating buttons
-            const rulesBtn = document.getElementById('showRulesBtn');
-            const sellerCodeBtn = document.getElementById('sellerCodeBtn');
-            const backToDashboardBtn = document.getElementById('backToDashboardBtn');
-            
-            if (screenName === 'dashboard') {
-                sellerCodeBtn.style.display = 'flex'; // Show on dashboard
-                backToDashboardBtn.classList.remove('active');
-            } else if (screenName === 'phone') {
-                sellerCodeBtn.style.display = 'none'; // Hide on other screens
-                backToDashboardBtn.classList.add('active');
-            } else {
-                sellerCodeBtn.style.display = 'none'; // Hide on other screens
-                backToDashboardBtn.classList.remove('active');
-            }
 
             if (screenName === 'dashboard') {
                 updatePhoneWarning();
@@ -1506,12 +1489,11 @@
                 showScreen('phone');
             }
         }
-        
-        // New: Back to dashboard button click handler
-        document.getElementById('backToDashboardBtn').addEventListener('click', function() {
-            showScreen('dashboard');
+        // Back to home button
+        document.getElementById('backHomeBtn').addEventListener('click', function() {
+            window.location.href = 'index.html';
         });
-        
+
         document.getElementById('backToCode').addEventListener('click', function() {
             showScreen('code');
         });
@@ -1660,13 +1642,6 @@
             // Update phone warning
             updatePhoneWarning();
 
-            // Ensure the floating buttons are initially hidden if not on dashboard
-            const sellerCodeBtn = document.getElementById('sellerCodeBtn');
-            const backToDashboardBtn = document.getElementById('backToDashboardBtn');
-            if (!screens.dashboard.classList.contains('active')) {
-                sellerCodeBtn.style.display = 'none';
-            }
-            backToDashboardBtn.classList.remove('active');
         });
     </script>
 </body>
