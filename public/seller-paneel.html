@@ -107,15 +107,6 @@
         .modal-overlay.active .modal-content {
             transform: translateY(0);
         }
-        /* Pulse animation for settlement button */
-        @keyframes pulse {
-            0% { box-shadow: 0 0 0 0 rgba(139, 92, 246, 0.4); }
-            70% { box-shadow: 0 0 0 10px rgba(139, 92, 246, 0); }
-            100% { box-shadow: 0 0 0 0 rgba(139, 92, 246, 0); }
-        }
-        .pulse {
-            animation: pulse 2s infinite;
-        }
         /* Transaction card animation */
         .transaction-enter {
             opacity: 0;
@@ -310,6 +301,17 @@
                         </div>
                     </div>
                 </div>
+                <div class="card p-5">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <p class="text-gray-400 text-sm">Credit used this month</p>
+                            <p class="text-2xl font-bold mt-1"><span id="monthUsed">0 تومان</span></p>
+                        </div>
+                        <div class="bg-secondary/20 p-3 rounded-lg">
+                            <i data-lucide="credit-card" class="w-5 h-5 text-secondary"></i>
+                        </div>
+                    </div>
+                </div>
             </div>
             <!-- Chart and Notifications -->
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -344,7 +346,7 @@
                 <h2 class="text-2xl font-bold mb-6">ثبت خرید با کد اعتبار</h2>
                 <form id="redeem-form">
                     <div class="mb-5">
-                        <label class="block text-gray-400 mb-2">کد اعتبار مشتری</label>
+                        <label class="block text-gray-400 mb-2">Final prize code</label>
                         <input type="text" id="credit-code" class="w-full bg-dark border border-gray-700 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-primary" placeholder="مثال: 123456" maxlength="6">
                     </div>
                     <div class="mb-6">
@@ -412,14 +414,12 @@
         <!-- Settlement Tab -->
         <section id="settlement" class="tab-content hidden">
             <div class="card p-6 mb-6">
-                <h2 class="text-2xl font-bold mb-6">وضعیت تسویه حساب</h2>
-                
-                <!-- Balance Summary Card -->
+                <h2 class="text-2xl font-bold mb-6">Credit deduction history</h2>
                 <div class="mb-6 p-5 bg-gradient-to-r from-primary/20 to-indigo-900/20 border border-primary/30 rounded-xl">
                     <div class="flex flex-col md:flex-row md:items-center md:justify-between">
                         <div>
-                            <p class="text-gray-300 text-sm">مبلغ قابل تسویه</p>
-                            <p class="text-3xl font-bold mt-1 text-primary">8,450,000 <span class="text-lg">تومان</span></p>
+                            <p class="text-gray-300 text-sm">Remaining seller credit</p>
+                            <p id="remainingCredit" class="text-3xl font-bold mt-1 text-primary">0 تومان</p>
                         </div>
                         <div class="mt-4 md:mt-0">
                             <div class="bg-primary/20 p-3 rounded-lg inline-block">
@@ -428,140 +428,22 @@
                         </div>
                     </div>
                 </div>
-
-                <!-- Transactions Header -->
-                <div class="flex justify-between items-center mb-4">
-                    <h3 class="font-bold text-lg">تراکنش‌های اخیر</h3>
-                    <span class="text-sm text-gray-400">5 مورد</span>
+                <div class="overflow-x-auto">
+                    <table id="deduction-table" class="w-full text-right">
+                        <thead>
+                            <tr class="border-b border-gray-700">
+                                <th class="pb-3 text-gray-400 font-normal">تاریخ</th>
+                                <th class="pb-3 text-gray-400 font-normal">کد جایزه</th>
+                                <th class="pb-3 text-gray-400 font-normal">مبلغ کسر شده</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        </tbody>
+                    </table>
                 </div>
-
-                <!-- Transactions List -->
-                <div class="space-y-4 mb-24"> <!-- mb-24 to leave space for sticky button -->
-                    <!-- Transaction Item 1 -->
-                    <div class="transaction-enter transaction-enter-active card p-4 border border-gray-700/50 hover:border-primary/30 transition-all duration-300">
-                        <div class="flex justify-between items-start">
-                            <div>
-                                <div class="flex items-center">
-                                    <i data-lucide="calendar" class="w-4 h-4 text-gray-400 ml-2"></i>
-                                    <span class="text-sm text-gray-300">1402/08/15</span>
-                                </div>
-                                <div class="flex items-center mt-2">
-                                    <i data-lucide="user" class="w-4 h-4 text-gray-400 ml-2"></i>
-                                    <span class="font-mono">****5678</span>
-                                </div>
-                            </div>
-                            <div class="text-right">
-                                <p class="font-bold">1,250,000 تومان</p>
-                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-900/30 text-green-400 mt-1">
-                                    <i data-lucide="check-circle" class="w-3 h-3 ml-1"></i>
-                                    پرداخت شده
-                                </span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Transaction Item 2 -->
-                    <div class="transaction-enter transaction-enter-active card p-4 border border-gray-700/50 hover:border-primary/30 transition-all duration-300">
-                        <div class="flex justify-between items-start">
-                            <div>
-                                <div class="flex items-center">
-                                    <i data-lucide="calendar" class="w-4 h-4 text-gray-400 ml-2"></i>
-                                    <span class="text-sm text-gray-300">1402/08/14</span>
-                                </div>
-                                <div class="flex items-center mt-2">
-                                    <i data-lucide="user" class="w-4 h-4 text-gray-400 ml-2"></i>
-                                    <span class="font-mono">****2345</span>
-                                </div>
-                            </div>
-                            <div class="text-right">
-                                <p class="font-bold">850,000 تومان</p>
-                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-900/30 text-yellow-400 mt-1">
-                                    <i data-lucide="clock" class="w-3 h-3 ml-1"></i>
-                                    در صف پرداخت
-                                </span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Transaction Item 3 -->
-                    <div class="transaction-enter transaction-enter-active card p-4 border border-gray-700/50 hover:border-primary/30 transition-all duration-300">
-                        <div class="flex justify-between items-start">
-                            <div>
-                                <div class="flex items-center">
-                                    <i data-lucide="calendar" class="w-4 h-4 text-gray-400 ml-2"></i>
-                                    <span class="text-sm text-gray-300">1402/08/12</span>
-                                </div>
-                                <div class="flex items-center mt-2">
-                                    <i data-lucide="user" class="w-4 h-4 text-gray-400 ml-2"></i>
-                                    <span class="font-mono">****9012</span>
-                                </div>
-                            </div>
-                            <div class="text-right">
-                                <p class="font-bold">2,100,000 تومان</p>
-                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-900/30 text-yellow-400 mt-1">
-                                    <i data-lucide="clock" class="w-3 h-3 ml-1"></i>
-                                    در صف پرداخت
-                                </span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Transaction Item 4 -->
-                    <div class="transaction-enter transaction-enter-active card p-4 border border-gray-700/50 hover:border-primary/30 transition-all duration-300">
-                        <div class="flex justify-between items-start">
-                            <div>
-                                <div class="flex items-center">
-                                    <i data-lucide="calendar" class="w-4 h-4 text-gray-400 ml-2"></i>
-                                    <span class="text-sm text-gray-300">1402/08/10</span>
-                                </div>
-                                <div class="flex items-center mt-2">
-                                    <i data-lucide="user" class="w-4 h-4 text-gray-400 ml-2"></i>
-                                    <span class="font-mono">****3456</span>
-                                </div>
-                            </div>
-                            <div class="text-right">
-                                <p class="font-bold">1,500,000 تومان</p>
-                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-900/30 text-yellow-400 mt-1">
-                                    <i data-lucide="clock" class="w-3 h-3 ml-1"></i>
-                                    در صف پرداخت
-                                </span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Transaction Item 5 -->
-                    <div class="transaction-enter transaction-enter-active card p-4 border border-gray-700/50 hover:border-primary/30 transition-all duration-300">
-                        <div class="flex justify-between items-start">
-                            <div>
-                                <div class="flex items-center">
-                                    <i data-lucide="calendar" class="w-4 h-4 text-gray-400 ml-2"></i>
-                                    <span class="text-sm text-gray-300">1402/08/05</span>
-                                </div>
-                                <div class="flex items-center mt-2">
-                                    <i data-lucide="user" class="w-4 h-4 text-gray-400 ml-2"></i>
-                                    <span class="font-mono">****7890</span>
-                                </div>
-                            </div>
-                            <div class="text-right">
-                                <p class="font-bold">2,750,000 تومان</p>
-                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-900/30 text-yellow-400 mt-1">
-                                    <i data-lucide="clock" class="w-3 h-3 ml-1"></i>
-                                    در صف پرداخت
-                                </span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Sticky Settlement Button -->
-            <div class="sticky-button-container">
-                <button id="request-settlement-btn" class="w-full py-4 bg-gradient-to-r from-primary to-purple-700 hover:from-purple-700 hover:to-primary text-white font-bold rounded-xl shadow-lg transition-all duration-300 transform hover:scale-[1.02] pulse flex items-center justify-center">
-                    <i data-lucide="send" class="w-5 h-5 ml-2"></i>
-                    درخواست تسویه حساب
-                </button>
             </div>
         </section>
+
         <!-- Alerts Tab -->
         <section id="alerts" class="tab-content hidden">
             <div class="card p-6">
@@ -685,6 +567,26 @@
                 toast.remove();
             }, 3000);
         }
+        let remainingCredit = 0;
+
+        function updateRemainingCredit(delta) {
+            remainingCredit -= delta;
+            document.getElementById("remainingCredit").textContent = remainingCredit + " تومان";
+        }
+
+        function addCreditRow(date, code, amount) {
+            const tbody = document.querySelector("#deduction-table tbody");
+            const tr = document.createElement("tr");
+            tr.className = "border-b border-gray-800 hover:bg-dark/50 transaction-enter";
+            tr.innerHTML = `
+                <td class="py-4">${date}</td>
+                <td class="py-4 font-mono">****${code.slice(-4)}</td>
+                <td class="py-4">${amount} تومان</td>
+            `;
+            tbody.prepend(tr);
+            requestAnimationFrame(() => tr.classList.add("transaction-enter-active"));
+        }
+
         // Redeem form submission
         document.getElementById('redeem-form').addEventListener('submit', (e) => {
             e.preventDefault();
@@ -701,10 +603,13 @@
             // Simulate API call
             setTimeout(() => {
                 if (Math.random() > 0.2) {
-                    showToast('خرید با موفقیت ثبت شد');
-                    document.getElementById('redeem-form').reset();
+                    showToast(`${amount} تومان was deducted from your credit (code ****${code.slice(-4)}).`);
+                    updateRemainingCredit(parseInt(amount, 10));
+                    const date = new Date().toLocaleDateString("fa-IR");
+                    addCreditRow(date, code, amount);
+                    document.getElementById("redeem-form").reset();
                 } else {
-                    showToast('کد اعتبار نامعتبر است', 'error');
+                    showToast("کد اعتبار نامعتبر است", "error");
                 }
             }, 1000);
         });
@@ -783,42 +688,6 @@
             }
         });
 
-        // Settlement functionality
-        document.getElementById('request-settlement-btn').addEventListener('click', function() {
-            const btn = this;
-            const originalText = btn.innerHTML;
-            
-            // Show loading state
-            btn.innerHTML = '<i data-lucide="loader" class="w-5 h-5 ml-2 animate-spin"></i> در حال پردازش...';
-            btn.disabled = true;
-            btn.classList.remove('pulse');
-            
-            // Update icons
-            lucide.createIcons();
-            
-            // Simulate API call
-            setTimeout(() => {
-                // Reset button
-                btn.innerHTML = originalText;
-                btn.disabled = false;
-                lucide.createIcons();
-                
-                // Show success or error based on random
-                if (Math.random() > 0.3) {
-                    showToast('درخواست تسویه با موفقیت ثبت شد. مبلغ طی ۲۴ ساعت آینده به حساب شما واریز خواهد شد.', 'success');
-                    
-                    // Add visual feedback to balance card
-                    const balanceCard = document.querySelector('#settlement .bg-gradient-to-r');
-                    balanceCard.classList.add('ring-2', 'ring-green-500/50');
-                    setTimeout(() => {
-                        balanceCard.classList.remove('ring-2', 'ring-green-500/50');
-                    }, 2000);
-                } else {
-                    showToast('خطا در ثبت درخواست. لطفاً مجدداً تلاش کنید.', 'error');
-                    btn.classList.add('pulse'); // Re-add pulse on error
-                }
-            }, 2000);
-        });
-    </script>
+</script>
 </body>
 </html>
