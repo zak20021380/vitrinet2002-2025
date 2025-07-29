@@ -1067,11 +1067,20 @@
                         <h2 class="text-lg font-bold text-white">اعتبار فعلی شما</h2>
                         <i class="fas fa-coins text-attention text-xl"></i>
                     </div>
-                    <div class="pulse-animation bg-darkcard rounded-xl p-4 mb-4">
-                        <p class="text-gray-400 text-sm">موجودی قابل استفاده</p>
-                        <div class="flex items-end mt-1">
-                            <span id="currentCredit" class="text-2xl font-bold text-success">425,000</span>
-                            <span class="text-gray-400 mr-1">تومان</span>
+                    <div class="pulse-animation bg-darkcard rounded-xl p-4 mb-4 space-y-1">
+                        <div>
+                            <p class="text-gray-400 text-sm">موجودی کل</p>
+                            <div class="flex items-end mt-1">
+                                <span id="totalCredit" class="text-2xl font-bold text-success">425,000</span>
+                                <span class="text-gray-400 mr-1">تومان</span>
+                            </div>
+                        </div>
+                        <div>
+                            <p class="text-gray-400 text-sm">موجودی قابل استفاده</p>
+                            <div class="flex items-end mt-1">
+                                <span id="currentCredit" class="text-xl font-bold text-success">425,000</span>
+                                <span class="text-gray-400 mr-1">تومان</span>
+                            </div>
                         </div>
                     </div>
                     <div class="grid grid-cols-2 gap-3">
@@ -1190,7 +1199,7 @@
         </div>
     </div>
     <!-- Seller Code Button (Floating) -->
-    <button id="sellerCodeBtn" class="seller-code-btn">
+    <button id="sellerCodeBtn" class="seller-code-btn md:hidden hidden">
         <i class="fas fa-qrcode"></i>
         <span>وارد کردن کد فروشنده</span>
     </button>
@@ -1370,14 +1379,17 @@
                 sellerCodeBtn.style.display = 'flex'; // Show on dashboard
                 backToDashboardBtn.classList.remove('active');
                 backHomeBtn.style.display = 'flex'; // Always show back home button
+                toggleSellerCodeBtnVisibility();
             } else if (screenName === 'phone') {
                 sellerCodeBtn.style.display = 'none'; // Hide on other screens
                 backToDashboardBtn.classList.add('active');
                 backHomeBtn.style.display = 'flex'; // Always show back home button
+                toggleSellerCodeBtnVisibility();
             } else {
                 sellerCodeBtn.style.display = 'none'; // Hide on other screens
                 backToDashboardBtn.classList.remove('active');
                 backHomeBtn.style.display = 'flex'; // Always show back home button
+                toggleSellerCodeBtnVisibility();
             }
             if (screenName === 'dashboard') {
                 updatePhoneWarning();
@@ -1410,6 +1422,24 @@
                 warningElement.classList.remove('hidden');
             }
         }
+
+        function toggleSellerCodeBtnVisibility() {
+            const btn = document.getElementById('sellerCodeBtn');
+            if (window.innerWidth >= 768) {
+                btn.classList.add('hidden');
+                return;
+            }
+            if (btn.style.display === 'none') {
+                btn.classList.add('hidden');
+                return;
+            }
+            const atBottom = window.innerHeight + window.scrollY >= document.body.offsetHeight;
+            if (atBottom) {
+                btn.classList.remove('hidden');
+            } else {
+                btn.classList.add('hidden');
+            }
+        }
         function registerPurchase() {
             appState.purchases++;
             milestones.forEach(m => {
@@ -1440,6 +1470,7 @@
                 finalRewardBanner.classList.add('hidden');
                 document.getElementById('finalMessage').textContent = `${toPersianNumber(finalLeft)} خرید تا جایزه نهایی (${toPersianNumber(finalAmount)} تومان)`;
             }
+            document.getElementById('totalCredit').textContent = toPersianNumber(appState.credit);
             document.getElementById('currentCredit').textContent = toPersianNumber(appState.credit);
             document.getElementById('purchaseCount').textContent = toPersianNumber(appState.purchases);
             document.getElementById('toNextCount').textContent = toPersianNumber(nextLeft);
@@ -1754,6 +1785,9 @@
             document.getElementById('backHomeBtn').addEventListener('click', () => {
                 showScreen('dashboard');
             });
+            toggleSellerCodeBtnVisibility();
+            window.addEventListener('scroll', toggleSellerCodeBtnVisibility);
+            window.addEventListener('resize', toggleSellerCodeBtnVisibility);
         });
     </script>
 </body>
