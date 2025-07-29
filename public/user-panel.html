@@ -710,9 +710,7 @@
         .seller-code-btn i {
             margin-left: 8px;
         }
-        
         /* START OF NEW STYLES */
-        
         /* Floating Back to Main Page Button */
         #backToDashboardBtn {
             position: fixed;
@@ -736,21 +734,17 @@
             visibility: hidden;
             transition: opacity 0.3s ease, visibility 0.3s ease, transform 0.3s ease;
         }
-        
         #backToDashboardBtn.active {
             opacity: 1;
             visibility: visible;
         }
-        
         #backToDashboardBtn:hover {
             transform: translateX(-50%) translateY(-5px);
             box-shadow: 0 12px 30px rgba(99, 102, 241, 0.7);
         }
-        
         #backToDashboardBtn i {
             margin-left: 8px;
         }
-        
         /* Seller Code Success Popup */
         #sellerCodeSuccessPopup {
             position: fixed;
@@ -767,13 +761,11 @@
             transition: all 0.3s ease;
             pointer-events: none;
         }
-        
         #sellerCodeSuccessPopup.active {
             opacity: 1;
             visibility: visible;
             pointer-events: auto;
         }
-        
         .seller-code-overlay {
             position: absolute;
             top: 0;
@@ -783,7 +775,6 @@
             background: rgba(15, 23, 42, 0.85);
             backdrop-filter: blur(10px);
         }
-        
         .seller-code-popup-card {
             position: relative;
             z-index: 10;
@@ -803,12 +794,10 @@
             transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
             animation: gold-pulse 3s infinite;
         }
-        
         #sellerCodeSuccessPopup.active .seller-code-popup-card {
             transform: scale(1);
             opacity: 1;
         }
-        
         .seller-code-popup-icon {
             width: 100px;
             height: 100px;
@@ -822,7 +811,6 @@
             overflow: hidden;
             box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
         }
-        
         .seller-code-popup-icon::after {
             content: '';
             position: absolute;
@@ -834,7 +822,6 @@
             border-radius: 50%;
             animation: rotate 10s linear infinite;
         }
-        
         .seller-code-popup-icon i {
             font-size: 48px;
             color: #FFD700;
@@ -842,7 +829,6 @@
             z-index: 2;
             text-shadow: 0 0 15px rgba(245, 158, 11, 0.8);
         }
-        
         .seller-code-popup-title {
             font-size: 1.8rem;
             font-weight: 700;
@@ -852,14 +838,12 @@
             -webkit-text-fill-color: transparent;
             background-clip: text;
         }
-        
         .seller-code-popup-message {
             font-size: 1.1rem;
             line-height: 1.6;
             color: #e2e8f0;
             margin-bottom: 25px;
         }
-        
         .close-seller-code-popup {
             background: linear-gradient(90deg, #6366F1 0%, #8B5CF6 100%);
             color: white;
@@ -873,13 +857,45 @@
             max-width: 200px;
             margin: 0 auto;
         }
-        
         .close-seller-code-popup:hover {
             transform: translateY(-2px);
             box-shadow: 0 5px 15px rgba(99, 102, 241, 0.4);
         }
-        
         /* END OF NEW STYLES */
+        /* Floating Back Home Button */
+        #backHomeBtn {
+            position: fixed;
+            bottom: 24px;
+            left: 24px;
+            z-index: 50;
+            background: linear-gradient(90deg, #6366F1, #8B5CF6);
+            color: white;
+            border: none;
+            border-radius: 50px;
+            padding: 14px 24px;
+            font-weight: 600;
+            box-shadow: 0 8px 25px rgba(99, 102, 241, 0.5);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            animation: float 3s ease-in-out infinite;
+            display: flex;
+            align-items: center;
+            width: auto;
+            height: auto;
+        }
+        #backHomeBtn:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 30px rgba(99, 102, 241, 0.7);
+        }
+        #backHomeBtn i {
+            margin-left: 8px;
+        }
+        /* Fix for small screens to prevent overlap */
+        @media (max-width: 480px) {
+            #codeEntryScreen .text-center.mb-8 {
+                padding-top: 4rem;
+            }
+        }
     </style>
 </head>
 <body class="min-h-screen flex items-center justify-center p-4">
@@ -1177,13 +1193,16 @@
         <i class="fas fa-qrcode"></i>
         <span>وارد کردن کد فروشنده</span>
     </button>
-    
     <!-- New: Floating Back to Main Page Button -->
     <button id="backToDashboardBtn">
         <i class="fas fa-home mr-2"></i>
         <span>بازگشت به صفحه اصلی</span>
     </button>
-    
+    <!-- New: Floating Back Home Button -->
+    <button id="backHomeBtn">
+        <i class="fas fa-home mr-2"></i>
+        <span>بازگشت به صفحه اصلی</span>
+    </button>
     <!-- New: Seller Code Success Popup -->
     <div id="sellerCodeSuccessPopup">
         <div class="seller-code-overlay"></div>
@@ -1198,7 +1217,6 @@
             </button>
         </div>
     </div>
-    
     <!-- Rules Modal -->
     <div id="rulesModal">
         <div class="modal-content">
@@ -1324,23 +1342,24 @@
         function showScreen(screenName) {
             Object.values(screens).forEach(screen => screen.classList.remove('active'));
             screens[screenName].classList.add('active');
-
             // Control visibility of the floating buttons
             const rulesBtn = document.getElementById('showRulesBtn');
             const sellerCodeBtn = document.getElementById('sellerCodeBtn');
             const backToDashboardBtn = document.getElementById('backToDashboardBtn');
-            
+            const backHomeBtn = document.getElementById('backHomeBtn');
             if (screenName === 'dashboard') {
                 sellerCodeBtn.style.display = 'flex'; // Show on dashboard
                 backToDashboardBtn.classList.remove('active');
+                backHomeBtn.style.display = 'flex'; // Always show back home button
             } else if (screenName === 'phone') {
                 sellerCodeBtn.style.display = 'none'; // Hide on other screens
                 backToDashboardBtn.classList.add('active');
+                backHomeBtn.style.display = 'flex'; // Always show back home button
             } else {
                 sellerCodeBtn.style.display = 'none'; // Hide on other screens
                 backToDashboardBtn.classList.remove('active');
+                backHomeBtn.style.display = 'flex'; // Always show back home button
             }
-
             if (screenName === 'dashboard') {
                 updatePhoneWarning();
                 updateDashboard();
@@ -1472,17 +1491,14 @@
             } else {
                 errorElement.classList.add('hidden');
                 appState.sellerCode = sellerCode;
-                
                 // Show success popup instead of immediately navigating
                 const popup = document.getElementById('sellerCodeSuccessPopup');
                 popup.classList.add('active');
-                
                 // Auto close after 2.5 seconds
                 const autoCloseTimer = setTimeout(() => {
                     hideSellerCodeSuccessPopup();
                     navigateAfterSellerCodeSuccess();
                 }, 2500);
-                
                 // Manual close
                 document.getElementById('closeSellerCodePopup').addEventListener('click', function() {
                     clearTimeout(autoCloseTimer);
@@ -1491,12 +1507,10 @@
                 });
             }
         });
-        
         // New: Hide seller code success popup
         function hideSellerCodeSuccessPopup() {
             document.getElementById('sellerCodeSuccessPopup').classList.remove('active');
         }
-        
         // New: Navigate after seller code success popup is closed
         function navigateAfterSellerCodeSuccess() {
             if (appState.isPhoneVerified) {
@@ -1506,12 +1520,10 @@
                 showScreen('phone');
             }
         }
-        
         // New: Back to dashboard button click handler
         document.getElementById('backToDashboardBtn').addEventListener('click', function() {
             showScreen('dashboard');
         });
-        
         document.getElementById('backToCode').addEventListener('click', function() {
             showScreen('code');
         });
@@ -1659,14 +1671,20 @@
             });
             // Update phone warning
             updatePhoneWarning();
-
             // Ensure the floating buttons are initially hidden if not on dashboard
             const sellerCodeBtn = document.getElementById('sellerCodeBtn');
             const backToDashboardBtn = document.getElementById('backToDashboardBtn');
+            const backHomeBtn = document.getElementById('backHomeBtn');
             if (!screens.dashboard.classList.contains('active')) {
                 sellerCodeBtn.style.display = 'none';
             }
             backToDashboardBtn.classList.remove('active');
+            // Always show back home button
+            backHomeBtn.style.display = 'flex';
+            // Back Home Button Event Listener
+            document.getElementById('backHomeBtn').addEventListener('click', () => {
+                window.location.href = 'index.html';
+            });
         });
     </script>
 </body>

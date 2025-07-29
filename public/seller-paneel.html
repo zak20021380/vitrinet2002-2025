@@ -70,7 +70,7 @@
         /* Fixed chart container */
         #chart-container {
             position: relative;
-            height: 400px;
+            height: 300px; /* Reduced height for mobile */
             width: 100%;
         }
         /* Modal styles */
@@ -125,6 +125,36 @@
             padding: 20px 0 10px 0;
             margin: 0 -1.5rem; /* Compensate for padding */
             padding-inline: 1.5rem;
+        }
+        /* Mobile bottom tab bar */
+        @media (max-width: 768px) {
+            #mobile-tab-bar {
+                position: fixed;
+                bottom: 0;
+                left: 0;
+                right: 0;
+                z-index: 40;
+                display: flex;
+                background-color: #0B1120;
+                border-top: 1px solid #334155;
+                padding: 8px 0;
+            }
+            #mobile-tab-bar button {
+                flex: 1;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                padding: 8px 4px;
+                font-size: 0.75rem;
+                color: #94A3B8;
+            }
+            #mobile-tab-bar button.tab-active {
+                color: #8B5CF6;
+            }
+            #mobile-tab-bar i {
+                margin-bottom: 4px;
+            }
         }
     </style>
 </head>
@@ -208,19 +238,24 @@
     </div>
     <!-- Header -->
     <header class="bg-darker border-b border-gray-800 sticky top-0 z-40">
-        <div class="container mx-auto px-4 py-3 flex justify-between items-center">
-            <div class="flex items-center space-x-3 space-x-reverse">
-                <div class="bg-primary w-10 h-10 rounded-full flex items-center justify-center">
-                    <i data-lucide="store" class="w-5 h-5"></i>
+        <div class="container mx-auto px-4 py-3 flex flex-col items-center gap-2 md:flex-row md:justify-between">
+            <div class="flex flex-col items-center gap-2 w-full md:flex-row md:items-center md:w-auto">
+                <div class="flex items-center gap-3">
+                    <div class="bg-primary w-12 h-12 rounded-full flex items-center justify-center">
+                        <i data-lucide="store" class="w-6 h-6"></i>
+                    </div>
+                    <div class="text-center md:text-right">
+                        <h1 class="text-xl font-bold">پنل فروشنده</h1>
+                        <p class="text-base text-gray-400">فروشگاه تکنوشاپ</p>
+                    </div>
                 </div>
-                <div>
-                    <h1 class="text-lg font-bold">پنل فروشنده</h1>
-                    <p class="text-sm text-gray-400">فروشگاه تکنوشاپ</p>
+                <!-- STORE-CODE BADGE - Enhanced for mobile -->
+                <div role="status" aria-label="Store code" 
+                     class="px-5 py-2 rounded-full bg-gradient-to-r from-purple-900/50 to-indigo-900/50 border-2 border-purple-500/50 text-purple-300 text-lg font-bold tracking-wider flex items-center gap-2 shadow-lg shadow-purple-500/20">
+                    <i data-lucide="hash" class="w-5 h-5"></i>
+                    <span>کد فروشنده: <span class="select-all text-white">1234</span></span>
                 </div>
             </div>
-            <button id="menu-toggle" class="p-2 rounded-lg bg-dark">
-                <i data-lucide="menu" class="w-5 h-5"></i>
-            </button>
         </div>
     </header>
     <!-- Mobile Navigation -->
@@ -236,7 +271,7 @@
         </div>
     </nav>
     <!-- Main Content -->
-    <main class="container mx-auto px-4 py-6">
+    <main class="container mx-auto px-4 py-6 pb-24 md:pb-6">
         <!-- Desktop Navigation -->
         <div class="hidden md:flex mb-6 overflow-x-auto pb-2">
             <div class="flex space-x-2 space-x-reverse">
@@ -249,12 +284,12 @@
         </div>
         <!-- Dashboard Tab -->
         <section id="dashboard" class="tab-content">
-            <div class="mb-6">
+            <div class="mb-6 text-center md:text-right">
                 <h2 class="text-2xl font-bold mb-2">سلام، فروشگاه تکنوشاپ 👋</h2>
                 <p class="text-gray-400">به پنل فروشنده خود خوش آمدید</p>
             </div>
             <!-- Stats Cards -->
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+            <div class="grid grid-cols-1 gap-4 mb-6">
                 <div class="card p-5">
                     <div class="flex justify-between items-start">
                         <div>
@@ -312,8 +347,8 @@
                 </div>
             </div>
             <!-- Chart and Notifications -->
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                <div class="lg:col-span-2 card p-5">
+            <div class="grid grid-cols-1 gap-6">
+                <div class="card p-5">
                     <h3 class="font-bold mb-4">فعالیت اخیر</h3>
                     <div id="chart-container">
                         <canvas id="activityChart"></canvas>
@@ -340,18 +375,18 @@
         </section>
         <!-- Redeem Tab -->
         <section id="redeem" class="tab-content hidden">
-            <div class="card p-6 max-w-2xl mx-auto">
-                <h2 class="text-2xl font-bold mb-6">تأیید خرید مشتری</h2>
+            <div class="card p-6">
+                <h2 class="text-2xl font-bold mb-6 text-center md:text-right">تأیید خرید مشتری</h2>
                 <form id="redeem-form">
                     <div class="mb-5">
                         <label class="block text-gray-400 mb-2">کد تأیید مشتری</label>
-                        <input type="text" id="credit-code" class="w-full bg-dark border border-gray-700 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-primary" placeholder="مثال: 123456" maxlength="6">
+                        <input type="text" id="credit-code" class="w-full bg-dark border border-gray-700 rounded-lg px-4 py-4 md:py-3 focus:outline-none focus:ring-2 focus:ring-primary" placeholder="مثال: 123456" maxlength="6">
                     </div>
                     <div class="mb-6">
                         <label class="block text-gray-400 mb-2">مبلغ خرید (تومان)</label>
-                        <input type="number" id="amount" class="w-full bg-dark border border-gray-700 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-primary" placeholder="مثال: 500000">
+                        <input type="number" id="amount" class="w-full bg-dark border border-gray-700 rounded-lg px-4 py-4 md:py-3 focus:outline-none focus:ring-2 focus:ring-primary" placeholder="مثال: 500000">
                     </div>
-                    <button type="submit" class="w-full bg-primary hover:bg-purple-700 text-white font-bold py-3 px-4 rounded-lg transition duration-200">
+                    <button type="submit" class="w-full bg-primary hover:bg-purple-700 text-white font-bold py-4 md:py-3 px-4 rounded-lg transition duration-200">
                         تأیید خرید
                     </button>
                 </form>
@@ -360,11 +395,11 @@
         <!-- History Tab -->
         <section id="history" class="tab-content hidden">
             <div class="card p-6">
-                <div class="flex flex-col md:flex-row md:items-center md:justify-between mb-6">
-                    <h2 class="text-2xl font-bold">تاریخچه فروش با کد</h2>
-                    <div class="flex space-x-2 space-x-reverse mt-4 md:mt-0">
-                        <input type="text" placeholder="جستجو بر اساس کد" class="bg-dark border border-gray-700 rounded-lg px-4 py-2 text-sm">
-                        <button class="bg-primary hover:bg-purple-700 text-white px-4 py-2 rounded-lg text-sm">
+                <div class="flex flex-col items-center md:flex-row md:items-center md:justify-between mb-6">
+                    <h2 class="text-2xl font-bold mb-4 md:mb-0 text-center md:text-right">تاریخچه فروش با کد</h2>
+                    <div class="flex space-x-2 space-x-reverse">
+                        <input type="text" placeholder="جستجو بر اساس کد" class="bg-dark border border-gray-700 rounded-lg px-4 py-3 text-sm w-full">
+                        <button class="bg-primary hover:bg-purple-700 text-white px-4 py-3 rounded-lg text-sm">
                             <i data-lucide="download" class="w-4 h-4"></i>
                         </button>
                     </div>
@@ -412,7 +447,7 @@
         <!-- Alerts Tab -->
         <section id="alerts" class="tab-content hidden">
             <div class="card p-6">
-                <h2 class="text-2xl font-bold mb-6">هشدارها و تخلفات</h2>
+                <h2 class="text-2xl font-bold mb-6 text-center md:text-right">هشدارها و تخلفات</h2>
                 <div class="space-y-4">
                     <div class="p-4 bg-red-900/20 border border-red-900/50 rounded-lg">
                         <div class="flex justify-between">
@@ -452,16 +487,16 @@
         </section>
         <!-- Settings Tab -->
         <section id="settings" class="tab-content hidden">
-            <div class="card p-6 max-w-2xl mx-auto">
-                <h2 class="text-2xl font-bold mb-6">تنظیمات فروشگاه</h2>
+            <div class="card p-6">
+                <h2 class="text-2xl font-bold mb-6 text-center md:text-right">تنظیمات فروشگاه</h2>
                 <form id="settings-form">
                     <div class="mb-5">
                         <label class="block text-gray-400 mb-2">نام فروشگاه</label>
-                        <input type="text" value="تکنوشاپ" class="w-full bg-dark border border-gray-700 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-primary">
+                        <input type="text" value="تکنوشاپ" class="w-full bg-dark border border-gray-700 rounded-lg px-4 py-4 md:py-3 focus:outline-none focus:ring-2 focus:ring-primary">
                     </div>
                     <div class="mb-5">
                         <label class="block text-gray-400 mb-2">شماره تماس</label>
-                        <input type="text" value="021-12345678" class="w-full bg-dark border border-gray-700 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-primary">
+                        <input type="text" value="021-12345678" class="w-full bg-dark border border-gray-700 rounded-lg px-4 py-4 md:py-3 focus:outline-none focus:ring-2 focus:ring-primary">
                     </div>
                     <div class="mb-6">
                         <label class="block text-gray-400 mb-2">سطح فروشگاه</label>
@@ -470,16 +505,39 @@
                             <p class="text-sm text-gray-400 mt-1">فعال تا: 1403/02/01</p>
                         </div>
                     </div>
-                    <button type="submit" class="w-full bg-primary hover:bg-purple-700 text-white font-bold py-3 px-4 rounded-lg transition duration-200 mb-4">
+                    <button type="submit" class="w-full bg-primary hover:bg-purple-700 text-white font-bold py-4 md:py-3 px-4 rounded-lg transition duration-200 mb-4">
                         ذخیره تغییرات
                     </button>
-                    <button type="button" class="w-full bg-red-900/30 hover:bg-red-900/50 text-red-400 font-bold py-3 px-4 rounded-lg transition duration-200">
+                    <button type="button" class="w-full bg-red-900/30 hover:bg-red-900/50 text-red-400 font-bold py-4 md:py-3 px-4 rounded-lg transition duration-200">
                         خروج از حساب کاربری
                     </button>
                 </form>
             </div>
         </section>
     </main>
+    <!-- Mobile Bottom Tab Bar -->
+    <nav id="mobile-tab-bar" class="hidden md:hidden">
+        <button class="tab-btn tab-active" data-tab="dashboard">
+            <i data-lucide="home" class="w-5 h-5"></i>
+            <span>داشبورد</span>
+        </button>
+        <button class="tab-btn" data-tab="redeem">
+            <i data-lucide="credit-card" class="w-5 h-5"></i>
+            <span>تأیید خرید</span>
+        </button>
+        <button class="tab-btn" data-tab="history">
+            <i data-lucide="list" class="w-5 h-5"></i>
+            <span>تاریخچه</span>
+        </button>
+        <button class="tab-btn" data-tab="alerts">
+            <i data-lucide="bell" class="w-5 h-5"></i>
+            <span>هشدارها</span>
+        </button>
+        <button class="tab-btn" data-tab="settings">
+            <i data-lucide="settings" class="w-5 h-5"></i>
+            <span>تنظیمات</span>
+        </button>
+    </nav>
     <script>
         // Initialize Lucide icons
         lucide.createIcons();
@@ -501,11 +559,10 @@
                 button.classList.add('tab-active');
             });
         });
-        // Mobile menu toggle
-        document.getElementById('menu-toggle').addEventListener('click', () => {
-            const nav = document.getElementById('mobile-nav');
-            nav.classList.toggle('hidden');
-        });
+        // Show mobile tab bar on small screens
+        if (window.innerWidth <= 768) {
+            document.getElementById('mobile-tab-bar').classList.remove('hidden');
+        }
         // Toast notification function
         function showToast(message, type = 'success') {
             const container = document.getElementById('toast-container');
@@ -525,7 +582,6 @@
             }, 3000);
         }
         let remainingCredit = 0;
-
         function updateRemainingCredit(delta) {
             remainingCredit -= delta;
             const elem = document.getElementById("remainingCredit");
@@ -533,7 +589,6 @@
                 elem.textContent = remainingCredit + " تومان";
             }
         }
-
         function addCreditRow(date, code, amount) {
             const tbody = document.querySelector("#deduction-table tbody");
             if (!tbody) return;
@@ -547,7 +602,6 @@
             tbody.prepend(tr);
             requestAnimationFrame(() => tr.classList.add("transaction-enter-active"));
         }
-
         // Redeem form submission
         document.getElementById('redeem-form').addEventListener('submit', (e) => {
             e.preventDefault();
@@ -648,7 +702,6 @@
                 closeModalFunc();
             }
         });
-
 </script>
 </body>
 </html>
