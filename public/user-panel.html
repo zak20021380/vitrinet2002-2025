@@ -1037,7 +1037,7 @@
                 </div>
                 <div class="flex items-center">
                     <div class="mr-3 text-right">
-                        <p class="text-white font-medium">کاربر گرامی</p>
+                        <p id="userGreeting" class="text-white font-medium">کاربر گرامی</p>
                         <p class="text-xs text-success">اعتبار فعال</p>
                     </div>
                     <div class="relative">
@@ -1744,6 +1744,12 @@
             backToDashboardBtn.classList.remove('active');
             // Always show back home button
             backHomeBtn.style.display = 'flex';
+            const userObj = window.user || {};
+            const firstName = userObj.firstname || userObj.firstName;
+            const lastName = userObj.lastname || userObj.lastName;
+            if (firstName && lastName) {
+                document.getElementById('userGreeting').textContent = `${firstName} ${lastName}`;
+            }
             // Back Home Button Event Listener
             document.getElementById('backHomeBtn').addEventListener('click', () => {
                 showScreen('dashboard');
