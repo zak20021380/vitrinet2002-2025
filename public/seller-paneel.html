@@ -3,647 +3,817 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>پنل فروشندگان ویتری‌نت | Vitreenet</title>
+    <title>پنل فروشنده - Vitreenet</title>
+    <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/vazirmatn@4.1.2/Vazirmatn-font-face.css">
-    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.1/build/qrcode.min.js"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#8B5CF6',
+                        secondary: '#86EFAC',
+                        dark: '#0F172A',
+                        darker: '#0B1120',
+                        light: '#F1F5F9'
+                    }
+                }
+            }
+        }
+    </script>
     <style>
-        @keyframes glow {
-            0% { box-shadow: 0 0 5px rgba(99, 102, 241, 0.5); }
-            50% { box-shadow: 0 0 20px rgba(99, 102, 241, 0.8); }
-            100% { box-shadow: 0 0 5px rgba(99, 102, 241, 0.5); }
-        }
-        @keyframes float {
-            0% { transform: translateY(0px); }
-            50% { transform: translateY(-8px); }
-            100% { transform: translateY(0px); }
-        }
-        @keyframes pulse {
-            0% { opacity: 1; }
-            50% { opacity: 0.5; }
-            100% { opacity: 1; }
-        }
-        
         body {
             font-family: 'Vazirmatn', sans-serif;
-            background: linear-gradient(135deg, #0a0e1d 0%, #0f172a 100%);
-            color: #e2e8f0;
-            min-height: 100vh;
+            background-color: #0F172A;
+            color: #F1F5F9;
         }
-        
-        .glassy-card {
-            background: rgba(30, 41, 59, 0.7);
-            backdrop-filter: blur(12px);
-            border: 1px solid rgba(99, 102, 241, 0.2);
+        .card {
+            background: linear-gradient(145deg, #1E293B, #0F172A);
+            border: 1px solid #334155;
             border-radius: 16px;
             transition: all 0.3s ease;
         }
-        
-        .glassy-card:hover {
-            border-color: rgba(99, 102, 241, 0.5);
-            transform: translateY(-5px);
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
         }
-        
-        .glowing-border {
-            animation: glow 3s infinite;
+        .btn {
+            transition: all 0.2s ease;
         }
-        
-        .floating {
-            animation: float 6s ease-in-out infinite;
+        .btn:hover {
+            transform: translateY(-1px);
         }
-        
-        .pulsing {
-            animation: pulse 2s infinite;
+        .tab-active {
+            border-bottom: 2px solid #8B5CF6;
+            color: #8B5CF6;
         }
-        
-        .progress-bar {
-            height: 8px;
-            border-radius: 4px;
-            background: rgba(255, 255, 255, 0.1);
-            overflow: hidden;
+        .toast {
+            animation: slideIn 0.3s ease, fadeOut 0.5s ease 2.5s forwards;
         }
-        
-        .progress-fill {
-            height: 100%;
-            background: linear-gradient(90deg, #6366F1, #8B5CF6);
-            border-radius: 4px;
-            box-shadow: 0 0 10px rgba(99, 102, 241, 0.7);
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
         }
-        
-        .badge-premium {
-            background: linear-gradient(45deg, #f59e0b, #f97316);
-            box-shadow: 0 0 15px rgba(245, 158, 11, 0.5);
+        @keyframes fadeOut {
+            from { opacity: 1; }
+            to { opacity: 0; }
         }
-        
-        .badge-basic {
-            background: linear-gradient(45deg, #64748b, #94a3b8);
+        .modal {
+            animation: modalFade 0.3s ease;
         }
-        
-        .qr-code-container {
-            background: white;
-            border-radius: 12px;
-            padding: 12px;
-            display: inline-block;
+        @keyframes modalFade {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
         }
-        
-        .customer-card {
-            transition: all 0.3s ease;
-            border: 1px solid rgba(99, 102, 241, 0.1);
+        /* Fixed chart container */
+        #chart-container {
+            position: relative;
+            height: 400px;
+            width: 100%;
         }
-        
-        .customer-card:hover {
-            border-color: rgba(99, 102, 241, 0.4);
-            transform: scale(1.02);
-        }
-        
-        .leaderboard-rank {
-            width: 32px;
-            height: 32px;
+        /* Modal styles */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.7);
             display: flex;
             align-items: center;
             justify-content: center;
-            border-radius: 50%;
-            font-weight: bold;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
         }
-        
-        .top-1 {
-            background: linear-gradient(45deg, #fcd34d, #f59e0b);
-            box-shadow: 0 0 15px rgba(252, 211, 77, 0.5);
+        .modal-overlay.active {
+            opacity: 1;
+            visibility: visible;
         }
-        
-        .top-2 {
-            background: linear-gradient(45deg, #cbd5e1, #94a3b8);
-            box-shadow: 0 0 15px rgba(203, 213, 225, 0.5);
+        .modal-content {
+            background: #1E293B;
+            border: 1px solid #334155;
+            border-radius: 16px;
+            width: 90%;
+            max-width: 500px;
+            max-height: 90vh;
+            overflow-y: auto;
+            transform: translateY(20px);
+            transition: transform 0.3s ease;
         }
-        
-        .top-3 {
-            background: linear-gradient(45deg, #fca5a5, #f87171);
-            box-shadow: 0 0 15px rgba(252, 165, 165, 0.5);
+        .modal-overlay.active .modal-content {
+            transform: translateY(0);
         }
-        
-        .current-user {
-            background: rgba(99, 102, 241, 0.2);
-            border: 1px solid rgba(99, 102, 241, 0.5);
+        /* Pulse animation for settlement button */
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(139, 92, 246, 0.4); }
+            70% { box-shadow: 0 0 0 10px rgba(139, 92, 246, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(139, 92, 246, 0); }
+        }
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+        /* Transaction card animation */
+        .transaction-enter {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        .transaction-enter-active {
+            opacity: 1;
+            transform: translateY(0);
+            transition: opacity 300ms, transform 300ms;
+        }
+        /* Sticky button container */
+        .sticky-button-container {
+            position: sticky;
+            bottom: 0;
+            background: linear-gradient(to top, rgba(15, 23, 42, 0.95) 80%, transparent);
+            padding: 20px 0 10px 0;
+            margin: 0 -1.5rem; /* Compensate for padding */
+            padding-inline: 1.5rem;
         }
     </style>
 </head>
-<body class="p-4 md:p-6">
-    <!-- Header -->
-    <header class="flex justify-between items-center mb-8">
-        <div class="flex items-center gap-3">
-            <div class="w-14 h-14 bg-indigo-500 rounded-xl flex items-center justify-center text-2xl font-bold">V</div>
-            <h1 class="text-2xl font-bold bg-gradient-to-r from-indigo-400 to-purple-500 bg-clip-text text-transparent">ویتری‌نت</h1>
-        </div>
-        <div class="flex items-center gap-4">
-            <div class="relative">
-                <div class="absolute -top-2 -left-2 w-5 h-5 rounded-full bg-rose-500 border-2 border-slate-900"></div>
-                <div class="bg-gray-800 rounded-full p-2">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
-                    </svg>
-                </div>
-            </div>
-            <button class="bg-indigo-600 hover:bg-indigo-700 text-white py-2 px-4 rounded-lg transition flex items-center gap-2">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-                </svg>
-                خروج
-            </button>
-        </div>
-    </header>
-
-    <div class="max-w-6xl mx-auto">
-        <!-- Welcome Section -->
-        <div class="glassy-card glowing-border p-6 mb-8">
-            <div class="flex flex-col md:flex-row justify-between items-center gap-6">
-                <div class="flex items-center gap-4">
-                    <div class="w-20 h-20 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white text-3xl font-bold">
-                        <span>ن</span>
-                    </div>
-                    <div>
-                        <h2 class="text-2xl font-bold">سلام، نوید!</h2>
-                        <p class="text-slate-400 mt-1">فروشگاه الکترونیک نوید</p>
-                    </div>
-                </div>
-                <div class="flex items-center gap-4">
-                    <div class="badge-basic py-2 px-4 rounded-full flex items-center gap-2">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-                        </svg>
-                        <span>حساب معمولی</span>
-                    </div>
-                    <button class="bg-gradient-to-r from-amber-500 to-orange-500 text-white py-2 px-4 rounded-lg flex items-center gap-2 hover:opacity-90 transition">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
-                        </svg>
-                        ارتقاء به پرمیوم
+<body class="min-h-screen">
+    <!-- Toast Container -->
+    <div id="toast-container" class="fixed top-4 right-4 z-50 space-y-2"></div>
+    <!-- Account Status Modal -->
+    <div id="account-modal" class="modal-overlay">
+        <div class="modal-content">
+            <div class="p-6">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-2xl font-bold">وضعیت حساب</h2>
+                    <button id="close-modal" class="p-2 rounded-lg hover:bg-dark">
+                        <i data-lucide="x" class="w-5 h-5"></i>
                     </button>
                 </div>
-            </div>
-        </div>
-
-        <!-- Summary Cards -->
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-            <div class="glassy-card p-5 relative overflow-hidden">
-                <div class="absolute -top-4 -right-4 w-16 h-16 bg-indigo-500 rounded-full opacity-10"></div>
-                <div class="flex justify-between items-start">
-                    <div>
-                        <p class="text-slate-400">مشتریان معرفی شده</p>
-                        <p class="text-2xl font-bold mt-2">۴۸ نفر</p>
-                    </div>
-                    <div class="bg-indigo-500/20 p-3 rounded-lg">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
-                        </svg>
-                    </div>
-                </div>
-                <div class="mt-4 flex items-center gap-2 text-emerald-400">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
-                    </svg>
-                    <span class="text-sm">۱۲٪ افزایش نسبت به هفته قبل</span>
-                </div>
-            </div>
-            
-            <div class="glassy-card p-5 relative overflow-hidden">
-                <div class="absolute -top-4 -right-4 w-16 h-16 bg-emerald-500 rounded-full opacity-10"></div>
-                <div class="flex justify-between items-start">
-                    <div>
-                        <p class="text-slate-400">اعتبار جایزه داده شده</p>
-                        <p class="text-2xl font-bold mt-2">۲,۵۴۰,۰۰۰ تومان</p>
-                    </div>
-                    <div class="bg-emerald-500/20 p-3 rounded-lg">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
-                    </div>
-                </div>
-                <div class="mt-4 flex items-center gap-2 text-emerald-400">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
-                    </svg>
-                    <span class="text-sm">۸٪ افزایش نسبت به هفته قبل</span>
-                </div>
-            </div>
-            
-            <div class="glassy-card p-5 relative overflow-hidden">
-                <div class="absolute -top-4 -right-4 w-16 h-16 bg-amber-500 rounded-full opacity-10"></div>
-                <div class="flex justify-between items-start">
-                    <div>
-                        <p class="text-slate-400">خریدهای رهگیری شده</p>
-                        <p class="text-2xl font-bold mt-2">۸۷ خرید</p>
-                    </div>
-                    <div class="bg-amber-500/20 p-3 rounded-lg">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
-                        </svg>
-                    </div>
-                </div>
-                <div class="mt-4 flex items-center gap-2 text-rose-400">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 17h8m0 0V9m0 8l-8-8-4 4-6-6" />
-                    </svg>
-                    <span class="text-sm">۳٪ کاهش نسبت به هفته قبل</span>
-                </div>
-            </div>
-            
-            <div class="glassy-card p-5 relative overflow-hidden">
-                <div class="absolute -top-4 -right-4 w-16 h-16 bg-rose-500 rounded-full opacity-10"></div>
-                <div class="flex justify-between items-start">
-                    <div>
-                        <p class="text-slate-400">مشتریان تایید شده</p>
-                        <p class="text-2xl font-bold mt-2">۳۶ نفر</p>
-                    </div>
-                    <div class="bg-rose-500/20 p-3 rounded-lg">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-rose-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
-                    </div>
-                </div>
-                <div class="mt-4 flex items-center gap-2 text-emerald-400">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
-                    </svg>
-                    <span class="text-sm">۱۵٪ افزایش نسبت به هفته قبل</span>
-                </div>
-            </div>
-        </div>
-
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
-            <!-- Weekly Missions -->
-            <div class="glassy-card p-6">
-                <div class="flex justify-between items-center mb-6">
-                    <h3 class="text-xl font-bold flex items-center gap-2">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
-                        </svg>
-                        مأموریت‌های هفتگی
-                    </h3>
-                    <div class="text-slate-400 text-sm">۲ از ۴ تکمیل شده</div>
-                </div>
-                
-                <div class="space-y-5">
-                    <div class="p-4 rounded-xl bg-slate-800/50 border border-slate-700">
-                        <div class="flex justify-between mb-3">
-                            <div class="flex items-center gap-2">
-                                <div class="bg-emerald-500/20 p-1 rounded">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
-                                    </svg>
-                                </div>
-                                <span>۵ مشتری جدید معرفی کنید</span>
-                            </div>
-                            <div class="bg-emerald-500/10 text-emerald-400 text-xs py-1 px-2 rounded">تکمیل شد</div>
-                        </div>
-                        <div class="progress-bar">
-                            <div class="progress-fill" style="width: 100%"></div>
-                        </div>
-                        <div class="mt-3 flex justify-between text-sm">
-                            <div class="text-slate-400">پاداش: ۵۰,۰۰۰ تومان</div>
-                            <div class="text-emerald-400 flex items-center gap-1">
-                                <span>دریافت جایزه</span>
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
-                                </svg>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="p-4 rounded-xl bg-slate-800/50 border border-slate-700">
-                        <div class="flex justify-between mb-3">
-                            <div class="flex items-center gap-2">
-                                <div class="bg-indigo-500/20 p-1 rounded">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
-                                    </svg>
-                                </div>
-                                <span>۳ مشتری را به نسخه پرمیوم ارتقاء دهید</span>
-                            </div>
-                            <div class="bg-amber-500/10 text-amber-400 text-xs py-1 px-2 rounded">در حال انجام</div>
-                        </div>
-                        <div class="progress-bar">
-                            <div class="progress-fill" style="width: 66%"></div>
-                        </div>
-                        <div class="mt-3 flex justify-between text-sm">
-                            <div class="text-slate-400">پاداش: ۱۰۰,۰۰۰ تومان</div>
-                            <div class="text-slate-500">۱ مشتری دیگر نیاز است</div>
-                        </div>
-                    </div>
-                    
-                    <div class="p-4 rounded-xl bg-slate-800/50 border border-slate-700 opacity-70">
-                        <div class="flex justify-between mb-3">
-                            <div class="flex items-center gap-2">
-                                <div class="bg-purple-500/20 p-1 rounded">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-purple-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 14v3m4-3v3m4-3v3M3 21h18M3 10h18M3 7l9-4 9 4M4 10h16v11H4V10z" />
-                                    </svg>
-                                </div>
-                                <span>۱۵ خرید رهگیری شده داشته باشید</span>
-                            </div>
-                            <div class="bg-slate-700 text-slate-500 text-xs py-1 px-2 rounded">شروع نشده</div>
-                        </div>
-                        <div class="progress-bar">
-                            <div class="progress-fill" style="width: 0%"></div>
-                        </div>
-                        <div class="mt-3 text-sm text-slate-500">پاداش: ۷۵,۰۰۰ تومان</div>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Share & QR Code -->
-            <div class="glassy-card p-6">
-                <h3 class="text-xl font-bold mb-6 flex items-center gap-2">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
-                    </svg>
-                    کد دعوت و QR
-                </h3>
-                
-                <div class="flex flex-col md:flex-row items-center gap-6">
-                    <div class="qr-code-container floating">
-                        <div id="qrcode" class="w-40 h-40"></div>
-                    </div>
-                    
-                    <div class="flex-1">
-                        <div class="mb-4">
-                            <p class="text-slate-400 mb-2">کد دعوت شما:</p>
-                            <div class="flex items-center gap-2">
-                                <div class="bg-slate-800 text-xl font-mono py-3 px-6 rounded-lg tracking-widest">VTR-N8D2</div>
-                                <button class="bg-indigo-600 hover:bg-indigo-700 p-3 rounded-lg transition">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" />
-                                    </svg>
-                                </button>
-                            </div>
-                        </div>
-                        
-                        <p class="text-slate-400 mb-4">با استفاده از این کد یا QR، مشتریان جدید را دعوت کنید تا از پاداش‌ها بهره‌مند شوید.</p>
-                        
-                        <button class="w-full bg-slate-800 hover:bg-slate-700 py-3 rounded-lg flex items-center justify-center gap-2 transition">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
-                            </svg>
-                            چاپ و نمایش در فروشگاه
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
-        
-        <!-- Referred Customers -->
-        <div class="glassy-card p-6 mb-8">
-            <div class="flex justify-between items-center mb-6">
-                <h3 class="text-xl font-bold flex items-center gap-2">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-cyan-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-                    </svg>
-                    مشتریان معرفی شده
-                </h3>
-                <button class="text-sm text-slate-400 hover:text-white flex items-center gap-1">
-                    مشاهده همه
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
-                    </svg>
-                </button>
-            </div>
-            
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                <div class="customer-card glassy-card p-4">
-                    <div class="flex justify-between items-start">
+                <!-- Account Status Section -->
+                <div class="mb-6">
+                    <div class="flex items-center justify-between p-4 bg-dark rounded-lg">
                         <div>
-                            <div class="font-bold">۰۹۱۲•••۴۵۶</div>
-                            <div class="text-slate-400 text-sm mt-1">تاریخ عضویت: ۱۴۰۲/۰۵/۱۲</div>
+                            <p class="text-gray-400">سطح فروشگاه شما</p>
+                            <p class="text-xl font-bold text-yellow-400 mt-1">عادی</p>
                         </div>
-                        <div class="bg-emerald-500/10 text-emerald-400 text-xs py-1 px-2 rounded flex items-center gap-1">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-                            </svg>
-                            تایید شده
+                        <div class="bg-yellow-400/20 p-3 rounded-lg">
+                            <i data-lucide="user" class="w-6 h-6 text-yellow-400"></i>
                         </div>
                     </div>
-                    <div class="mt-4 flex items-center justify-between">
-                        <div class="text-slate-400">تعداد خریدها:</div>
-                        <div class="font-bold">۱۲ خرید</div>
-                    </div>
-                </div>
-                
-                <div class="customer-card glassy-card p-4">
-                    <div class="flex justify-between items-start">
-                        <div>
-                            <div class="font-bold">۰۹۳۶•••۲۱۹</div>
-                            <div class="text-slate-400 text-sm mt-1">تاریخ عضویت: ۱۴۰۲/۰۵/۲۱</div>
-                        </div>
-                        <div class="bg-rose-500/10 text-rose-400 text-xs py-1 px-2 rounded flex items-center gap-1">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                            </svg>
-                            تایید نشده
-                        </div>
-                    </div>
-                    <div class="mt-4 flex items-center justify-between">
-                        <div class="text-slate-400">تعداد خریدها:</div>
-                        <div class="font-bold">۳ خرید</div>
+                    <div class="mt-4 p-4 bg-dark rounded-lg">
+                        <h3 class="font-bold mb-3">مزایای حساب عادی</h3>
+                        <ul class="space-y-2 text-sm">
+                            <li class="flex items-start">
+                                <i data-lucide="check" class="w-4 h-4 text-green-500 mt-0.5 ml-2"></i>
+                                <span>ثبت فروش با کد اعتبار</span>
+                            </li>
+                            <li class="flex items-start">
+                                <i data-lucide="check" class="w-4 h-4 text-green-500 mt-0.5 ml-2"></i>
+                                <span>مشاهده تاریخچه فروش</span>
+                            </li>
+                            <li class="flex items-start">
+                                <i data-lucide="check" class="w-4 h-4 text-green-500 mt-0.5 ml-2"></i>
+                                <span>مشاهده وضعیت تسویه</span>
+                            </li>
+                        </ul>
                     </div>
                 </div>
-                
-                <div class="customer-card glassy-card p-4">
-                    <div class="flex justify-between items-start">
-                        <div>
-                            <div class="font-bold">۰۹۰۱•••۷۸۳</div>
-                            <div class="text-slate-400 text-sm mt-1">تاریخ عضویت: ۱۴۰۲/۰۵/۲۵</div>
-                        </div>
-                        <div class="bg-emerald-500/10 text-emerald-400 text-xs py-1 px-2 rounded flex items-center gap-1">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-                            </svg>
-                            تایید شده
-                        </div>
+                <!-- Upgrade Section -->
+                <div class="border-t border-gray-700 pt-6">
+                    <h3 class="text-xl font-bold mb-4">ارتقاء به حساب پرمیوم</h3>
+                    <p class="text-gray-400 mb-4">با ارتقاء به حساب پرمیوم، از مزایای ویژه‌ای برخوردار شوید:</p>
+                    <ul class="mb-4 space-y-2">
+                        <li class="flex items-start">
+                            <i data-lucide="star" class="w-4 h-4 text-secondary mt-0.5 ml-2"></i>
+                            <span>نمایش بالاتر در نتایج جستجو</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i data-lucide="star" class="w-4 h-4 text-secondary mt-0.5 ml-2"></i>
+                            <span>دسترسی به آمار پیشرفته فروش</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i data-lucide="star" class="w-4 h-4 text-secondary mt-0.5 ml-2"></i>
+                            <span>امکان ارسال پیام مستقیم به مشتریان</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i data-lucide="star" class="w-4 h-4 text-secondary mt-0.5 ml-2"></i>
+                            <span>تخفیف ویژه برای تسویه‌حساب‌های بعدی</span>
+                        </li>
+                    </ul>
+                    <div class="p-4 bg-dark rounded-lg mb-4">
+                        <p class="text-center">
+                            <span class="text-lg font-bold">هزینه اشتراک: </span>
+                            <span class="text-xl font-bold text-secondary">120,000 تومان</span>
+                            <span class="text-gray-400"> در ماه</span>
+                        </p>
                     </div>
-                    <div class="mt-4 flex items-center justify-between">
-                        <div class="text-slate-400">تعداد خریدها:</div>
-                        <div class="font-bold">۷ خرید</div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
-            <!-- Leaderboard -->
-            <div class="glassy-card p-6">
-                <div class="flex justify-between items-center mb-6">
-                    <h3 class="text-xl font-bold flex items-center gap-2">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 8v8m-4-5v5m-4-2v2m-2 4h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                        </svg>
-                        جدول رقابت فروشندگان
-                    </h3>
-                    <div class="text-sm text-slate-400">بروزرسانی: امروز ۱۴:۳۰</div>
-                </div>
-                
-                <div class="space-y-3">
-                    <div class="current-user flex items-center justify-between p-4 rounded-xl">
-                        <div class="flex items-center gap-3">
-                            <div class="leaderboard-rank top-3">۴</div>
-                            <div class="font-bold">نوید رضایی</div>
-                        </div>
-                        <div class="flex items-center gap-4">
-                            <div>۴۸ مشتری</div>
-                            <div class="text-slate-400">فروشگاه شما</div>
-                        </div>
-                    </div>
-                    
-                    <div class="flex items-center justify-between p-4 rounded-xl bg-slate-800/30">
-                        <div class="flex items-center gap-3">
-                            <div class="leaderboard-rank top-1">۱</div>
-                            <div class="font-bold">سارا محمدی</div>
-                        </div>
-                        <div class="flex items-center gap-2">
-                            <div>۱۲۴ مشتری</div>
-                            <div class="text-amber-400">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
-                                </svg>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="flex items-center justify-between p-4 rounded-xl bg-slate-800/30">
-                        <div class="flex items-center gap-3">
-                            <div class="leaderboard-rank top-2">۲</div>
-                            <div class="font-bold">امیرحسین نوروزی</div>
-                        </div>
-                        <div class="flex items-center gap-2">
-                            <div>۹۸ مشتری</div>
-                            <div class="text-slate-400">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 18.657A8 8 0 016.343 7.343S7 9 9 10c0-2 .5-5 2.986-7C14 5 16.09 5.777 17.656 7.343A7.975 7.975 0 0120 13a7.975 7.975 0 01-2.343 5.657z" />
-                                </svg>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="flex items-center justify-between p-4 rounded-xl bg-slate-800/30">
-                        <div class="flex items-center gap-3">
-                            <div class="leaderboard-rank">۳</div>
-                            <div class="font-bold">فاطمه زارعی</div>
-                        </div>
-                        <div class="flex items-center gap-2">
-                            <div>۷۶ مشتری</div>
-                        </div>
-                    </div>
-                    
-                    <div class="flex items-center justify-between p-4 rounded-xl bg-slate-800/30">
-                        <div class="flex items-center gap-3">
-                            <div class="leaderboard-rank">۵</div>
-                            <div>محمد کریمی</div>
-                        </div>
-                        <div class="flex items-center gap-2">
-                            <div>۳۹ مشتری</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Store Settings -->
-            <div class="glassy-card p-6">
-                <h3 class="text-xl font-bold mb-6 flex items-center gap-2">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                    </svg>
-                    تنظیمات فروشگاه
-                </h3>
-                
-                <div class="space-y-4">
-                    <div class="flex items-center justify-between p-4 rounded-xl bg-slate-800/30">
-                        <div class="flex items-center gap-3">
-                            <div class="bg-indigo-500/20 p-2 rounded-lg">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                                </svg>
-                            </div>
-                            <span>ویرایش پروفایل</span>
-                        </div>
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
-                        </svg>
-                    </div>
-                    
-                    <div class="flex items-center justify-between p-4 rounded-xl bg-slate-800/30">
-                        <div class="flex items-center gap-3">
-                            <div class="bg-amber-500/20 p-2 rounded-lg">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
-                                </svg>
-                            </div>
-                            <span>درخواست ارتقاء به پرمیوم</span>
-                        </div>
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
-                        </svg>
-                    </div>
-                    
-                    <div class="flex items-center justify-between p-4 rounded-xl bg-slate-800/30">
-                        <div class="flex items-center gap-3">
-                            <div class="bg-emerald-500/20 p-2 rounded-lg">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                                </svg>
-                            </div>
-                            <span>گزارشات و آمار</span>
-                        </div>
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
-                        </svg>
-                    </div>
-                    
-                    <div class="flex items-center justify-between p-4 rounded-xl bg-slate-800/30">
-                        <div class="flex items-center gap-3">
-                            <div class="bg-rose-500/20 p-2 rounded-lg">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-rose-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z" />
-                                </svg>
-                            </div>
-                            <span>پشتیبانی واتساپ</span>
-                        </div>
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
-                        </svg>
-                    </div>
+                    <a href="/pay-premium" class="block w-full bg-gradient-to-r from-purple-600 to-secondary hover:from-purple-700 hover:to-green-500 text-white font-bold py-3 px-4 rounded-lg transition duration-200 text-center">
+                        ادامه و پرداخت
+                    </a>
                 </div>
             </div>
         </div>
     </div>
+    <!-- Header -->
+    <header class="bg-darker border-b border-gray-800 sticky top-0 z-40">
+        <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+            <div class="flex items-center space-x-3 space-x-reverse">
+                <div class="bg-primary w-10 h-10 rounded-full flex items-center justify-center">
+                    <i data-lucide="store" class="w-5 h-5"></i>
+                </div>
+                <div>
+                    <h1 class="text-lg font-bold">پنل فروشنده</h1>
+                    <p class="text-sm text-gray-400">فروشگاه تکنوشاپ</p>
+                </div>
+            </div>
+            <button id="menu-toggle" class="p-2 rounded-lg bg-dark">
+                <i data-lucide="menu" class="w-5 h-5"></i>
+            </button>
+        </div>
+    </header>
+    <!-- Mobile Navigation -->
+    <nav id="mobile-nav" class="bg-darker border-b border-gray-800 hidden md:hidden">
+        <div class="container mx-auto px-4 py-3">
+            <div class="flex overflow-x-auto space-x-4 space-x-reverse pb-2">
+                <button class="tab-btn px-4 py-2 rounded-lg card tab-active" data-tab="dashboard">داشبورد</button>
+                <button class="tab-btn px-4 py-2 rounded-lg card" data-tab="redeem">ثبت خرید</button>
+                <button class="tab-btn px-4 py-2 rounded-lg card" data-tab="history">تاریخچه</button>
+                <button class="tab-btn px-4 py-2 rounded-lg card" data-tab="settlement">تسویه</button>
+                <button class="tab-btn px-4 py-2 rounded-lg card" data-tab="alerts">هشدارها</button>
+                <button class="tab-btn px-4 py-2 rounded-lg card" data-tab="settings">تنظیمات</button>
+            </div>
+        </div>
+    </nav>
+    <!-- Main Content -->
+    <main class="container mx-auto px-4 py-6">
+        <!-- Desktop Navigation -->
+        <div class="hidden md:flex mb-6 overflow-x-auto pb-2">
+            <div class="flex space-x-2 space-x-reverse">
+                <button class="tab-btn px-6 py-3 rounded-lg card tab-active" data-tab="dashboard">داشبورد</button>
+                <button class="tab-btn px-6 py-3 rounded-lg card" data-tab="redeem">ثبت خرید با کد اعتبار</button>
+                <button class="tab-btn px-6 py-3 rounded-lg card" data-tab="history">تاریخچه فروش</button>
+                <button class="tab-btn px-6 py-3 rounded-lg card" data-tab="settlement">وضعیت تسویه</button>
+                <button class="tab-btn px-6 py-3 rounded-lg card" data-tab="alerts">هشدارها</button>
+                <button class="tab-btn px-6 py-3 rounded-lg card" data-tab="settings">تنظیمات</button>
+            </div>
+        </div>
+        <!-- Dashboard Tab -->
+        <section id="dashboard" class="tab-content">
+            <div class="mb-6">
+                <h2 class="text-2xl font-bold mb-2">سلام، فروشگاه تکنوشاپ 👋</h2>
+                <p class="text-gray-400">به پنل فروشنده خود خوش آمدید</p>
+            </div>
+            <!-- Stats Cards -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+                <div class="card p-5">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <p class="text-gray-400 text-sm">مجموع فروش امروز</p>
+                            <p class="text-2xl font-bold mt-1">2,450,000 تومان</p>
+                        </div>
+                        <div class="bg-primary/20 p-3 rounded-lg">
+                            <i data-lucide="trending-up" class="w-5 h-5 text-primary"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="card p-5">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <p class="text-gray-400 text-sm">مجموع فروش این ماه</p>
+                            <p class="text-2xl font-bold mt-1">42,780,000 تومان</p>
+                        </div>
+                        <div class="bg-secondary/20 p-3 rounded-lg">
+                            <i data-lucide="calendar" class="w-5 h-5 text-secondary"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="card p-5">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <p class="text-gray-400 text-sm">مشتریان امروز</p>
+                            <p class="text-2xl font-bold mt-1">24 نفر</p>
+                        </div>
+                        <div class="bg-primary/20 p-3 rounded-lg">
+                            <i data-lucide="users" class="w-5 h-5 text-primary"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="card p-5 cursor-pointer" id="account-status-card">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <p class="text-gray-400 text-sm">سطح فروشگاه</p>
+                            <p class="text-2xl font-bold mt-1 text-yellow-400">عادی</p>
+                        </div>
+                        <div class="bg-yellow-400/20 p-3 rounded-lg">
+                            <i data-lucide="user" class="w-5 h-5 text-yellow-400"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- Chart and Notifications -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <div class="lg:col-span-2 card p-5">
+                    <h3 class="font-bold mb-4">فعالیت اخیر</h3>
+                    <div id="chart-container">
+                        <canvas id="activityChart"></canvas>
+                    </div>
+                </div>
+                <div class="card p-5">
+                    <h3 class="font-bold mb-4">اعلانات سیستم</h3>
+                    <div class="space-y-4">
+                        <div class="p-3 bg-primary/10 rounded-lg border border-primary/30">
+                            <p class="text-sm">تسویه حساب ماه قبل در صف پرداخت قرار گرفت</p>
+                            <p class="text-xs text-gray-400 mt-1">2 روز پیش</p>
+                        </div>
+                        <div class="p-3 bg-dark rounded-lg">
+                            <p class="text-sm">فروشگاه شما به سطح پرمیوم ارتقا یافت</p>
+                            <p class="text-xs text-gray-400 mt-1">5 روز پیش</p>
+                        </div>
+                        <div class="p-3 bg-dark rounded-lg">
+                            <p class="text-sm">کد تخفیف جدید برای مشتریان فعال شد</p>
+                            <p class="text-xs text-gray-400 mt-1">1 هفته پیش</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <!-- Redeem Tab -->
+        <section id="redeem" class="tab-content hidden">
+            <div class="card p-6 max-w-2xl mx-auto">
+                <h2 class="text-2xl font-bold mb-6">ثبت خرید با کد اعتبار</h2>
+                <form id="redeem-form">
+                    <div class="mb-5">
+                        <label class="block text-gray-400 mb-2">کد اعتبار مشتری</label>
+                        <input type="text" id="credit-code" class="w-full bg-dark border border-gray-700 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-primary" placeholder="مثال: 123456" maxlength="6">
+                    </div>
+                    <div class="mb-6">
+                        <label class="block text-gray-400 mb-2">مبلغ خرید (تومان)</label>
+                        <input type="number" id="amount" class="w-full bg-dark border border-gray-700 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-primary" placeholder="مثال: 500000">
+                    </div>
+                    <button type="submit" class="w-full bg-primary hover:bg-purple-700 text-white font-bold py-3 px-4 rounded-lg transition duration-200">
+                        ثبت خرید
+                    </button>
+                </form>
+            </div>
+        </section>
+        <!-- History Tab -->
+        <section id="history" class="tab-content hidden">
+            <div class="card p-6">
+                <div class="flex flex-col md:flex-row md:items-center md:justify-between mb-6">
+                    <h2 class="text-2xl font-bold">تاریخچه فروش با کد</h2>
+                    <div class="flex space-x-2 space-x-reverse mt-4 md:mt-0">
+                        <input type="text" placeholder="جستجو بر اساس کد" class="bg-dark border border-gray-700 rounded-lg px-4 py-2 text-sm">
+                        <button class="bg-primary hover:bg-purple-700 text-white px-4 py-2 rounded-lg text-sm">
+                            <i data-lucide="download" class="w-4 h-4"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-right">
+                        <thead>
+                            <tr class="border-b border-gray-700">
+                                <th class="pb-3 text-gray-400 font-normal">تاریخ</th>
+                                <th class="pb-3 text-gray-400 font-normal">کد مشتری</th>
+                                <th class="pb-3 text-gray-400 font-normal">مبلغ</th>
+                                <th class="pb-3 text-gray-400 font-normal">وضعیت</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr class="border-b border-gray-800 hover:bg-dark/50">
+                                <td class="py-4">1402/08/15</td>
+                                <td class="py-4">****5678</td>
+                                <td class="py-4">1,250,000 تومان</td>
+                                <td class="py-4"><span class="px-2 py-1 bg-green-900/30 text-green-400 rounded-full text-xs">تأیید شده</span></td>
+                            </tr>
+                            <tr class="border-b border-gray-800 hover:bg-dark/50">
+                                <td class="py-4">1402/08/14</td>
+                                <td class="py-4">****2345</td>
+                                <td class="py-4">850,000 تومان</td>
+                                <td class="py-4"><span class="px-2 py-1 bg-yellow-900/30 text-yellow-400 rounded-full text-xs">در انتظار</span></td>
+                            </tr>
+                            <tr class="border-b border-gray-800 hover:bg-dark/50">
+                                <td class="py-4">1402/08/12</td>
+                                <td class="py-4">****9012</td>
+                                <td class="py-4">2,100,000 تومان</td>
+                                <td class="py-4"><span class="px-2 py-1 bg-green-900/30 text-green-400 rounded-full text-xs">تأیید شده</span></td>
+                            </tr>
+                            <tr class="border-b border-gray-800 hover:bg-dark/50">
+                                <td class="py-4">1402/08/10</td>
+                                <td class="py-4">****3456</td>
+                                <td class="py-4">650,000 تومان</td>
+                                <td class="py-4"><span class="px-2 py-1 bg-red-900/30 text-red-400 rounded-full text-xs">رد شده</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+        <!-- Settlement Tab -->
+        <section id="settlement" class="tab-content hidden">
+            <div class="card p-6 mb-6">
+                <h2 class="text-2xl font-bold mb-6">وضعیت تسویه حساب</h2>
+                
+                <!-- Balance Summary Card -->
+                <div class="mb-6 p-5 bg-gradient-to-r from-primary/20 to-indigo-900/20 border border-primary/30 rounded-xl">
+                    <div class="flex flex-col md:flex-row md:items-center md:justify-between">
+                        <div>
+                            <p class="text-gray-300 text-sm">مبلغ قابل تسویه</p>
+                            <p class="text-3xl font-bold mt-1 text-primary">8,450,000 <span class="text-lg">تومان</span></p>
+                        </div>
+                        <div class="mt-4 md:mt-0">
+                            <div class="bg-primary/20 p-3 rounded-lg inline-block">
+                                <i data-lucide="wallet" class="w-8 h-8 text-primary"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
 
-    <!-- Footer -->
-    <footer class="mt-12 text-center text-slate-500 text-sm">
-        <p>کلیه حقوق برای پلتفرم ویتری‌نت محفوظ است © ۱۴۰۲</p>
-    </footer>
+                <!-- Transactions Header -->
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="font-bold text-lg">تراکنش‌های اخیر</h3>
+                    <span class="text-sm text-gray-400">5 مورد</span>
+                </div>
 
+                <!-- Transactions List -->
+                <div class="space-y-4 mb-24"> <!-- mb-24 to leave space for sticky button -->
+                    <!-- Transaction Item 1 -->
+                    <div class="transaction-enter transaction-enter-active card p-4 border border-gray-700/50 hover:border-primary/30 transition-all duration-300">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <div class="flex items-center">
+                                    <i data-lucide="calendar" class="w-4 h-4 text-gray-400 ml-2"></i>
+                                    <span class="text-sm text-gray-300">1402/08/15</span>
+                                </div>
+                                <div class="flex items-center mt-2">
+                                    <i data-lucide="user" class="w-4 h-4 text-gray-400 ml-2"></i>
+                                    <span class="font-mono">****5678</span>
+                                </div>
+                            </div>
+                            <div class="text-right">
+                                <p class="font-bold">1,250,000 تومان</p>
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-900/30 text-green-400 mt-1">
+                                    <i data-lucide="check-circle" class="w-3 h-3 ml-1"></i>
+                                    پرداخت شده
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Transaction Item 2 -->
+                    <div class="transaction-enter transaction-enter-active card p-4 border border-gray-700/50 hover:border-primary/30 transition-all duration-300">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <div class="flex items-center">
+                                    <i data-lucide="calendar" class="w-4 h-4 text-gray-400 ml-2"></i>
+                                    <span class="text-sm text-gray-300">1402/08/14</span>
+                                </div>
+                                <div class="flex items-center mt-2">
+                                    <i data-lucide="user" class="w-4 h-4 text-gray-400 ml-2"></i>
+                                    <span class="font-mono">****2345</span>
+                                </div>
+                            </div>
+                            <div class="text-right">
+                                <p class="font-bold">850,000 تومان</p>
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-900/30 text-yellow-400 mt-1">
+                                    <i data-lucide="clock" class="w-3 h-3 ml-1"></i>
+                                    در صف پرداخت
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Transaction Item 3 -->
+                    <div class="transaction-enter transaction-enter-active card p-4 border border-gray-700/50 hover:border-primary/30 transition-all duration-300">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <div class="flex items-center">
+                                    <i data-lucide="calendar" class="w-4 h-4 text-gray-400 ml-2"></i>
+                                    <span class="text-sm text-gray-300">1402/08/12</span>
+                                </div>
+                                <div class="flex items-center mt-2">
+                                    <i data-lucide="user" class="w-4 h-4 text-gray-400 ml-2"></i>
+                                    <span class="font-mono">****9012</span>
+                                </div>
+                            </div>
+                            <div class="text-right">
+                                <p class="font-bold">2,100,000 تومان</p>
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-900/30 text-yellow-400 mt-1">
+                                    <i data-lucide="clock" class="w-3 h-3 ml-1"></i>
+                                    در صف پرداخت
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Transaction Item 4 -->
+                    <div class="transaction-enter transaction-enter-active card p-4 border border-gray-700/50 hover:border-primary/30 transition-all duration-300">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <div class="flex items-center">
+                                    <i data-lucide="calendar" class="w-4 h-4 text-gray-400 ml-2"></i>
+                                    <span class="text-sm text-gray-300">1402/08/10</span>
+                                </div>
+                                <div class="flex items-center mt-2">
+                                    <i data-lucide="user" class="w-4 h-4 text-gray-400 ml-2"></i>
+                                    <span class="font-mono">****3456</span>
+                                </div>
+                            </div>
+                            <div class="text-right">
+                                <p class="font-bold">1,500,000 تومان</p>
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-900/30 text-yellow-400 mt-1">
+                                    <i data-lucide="clock" class="w-3 h-3 ml-1"></i>
+                                    در صف پرداخت
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Transaction Item 5 -->
+                    <div class="transaction-enter transaction-enter-active card p-4 border border-gray-700/50 hover:border-primary/30 transition-all duration-300">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <div class="flex items-center">
+                                    <i data-lucide="calendar" class="w-4 h-4 text-gray-400 ml-2"></i>
+                                    <span class="text-sm text-gray-300">1402/08/05</span>
+                                </div>
+                                <div class="flex items-center mt-2">
+                                    <i data-lucide="user" class="w-4 h-4 text-gray-400 ml-2"></i>
+                                    <span class="font-mono">****7890</span>
+                                </div>
+                            </div>
+                            <div class="text-right">
+                                <p class="font-bold">2,750,000 تومان</p>
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-900/30 text-yellow-400 mt-1">
+                                    <i data-lucide="clock" class="w-3 h-3 ml-1"></i>
+                                    در صف پرداخت
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sticky Settlement Button -->
+            <div class="sticky-button-container">
+                <button id="request-settlement-btn" class="w-full py-4 bg-gradient-to-r from-primary to-purple-700 hover:from-purple-700 hover:to-primary text-white font-bold rounded-xl shadow-lg transition-all duration-300 transform hover:scale-[1.02] pulse flex items-center justify-center">
+                    <i data-lucide="send" class="w-5 h-5 ml-2"></i>
+                    درخواست تسویه حساب
+                </button>
+            </div>
+        </section>
+        <!-- Alerts Tab -->
+        <section id="alerts" class="tab-content hidden">
+            <div class="card p-6">
+                <h2 class="text-2xl font-bold mb-6">هشدارها و تخلفات</h2>
+                <div class="space-y-4">
+                    <div class="p-4 bg-red-900/20 border border-red-900/50 rounded-lg">
+                        <div class="flex justify-between">
+                            <h3 class="font-bold">استفاده بیش از حد از کد</h3>
+                            <span class="px-2 py-1 bg-red-900/30 text-red-400 rounded-full text-xs">جدید</span>
+                        </div>
+                        <p class="text-gray-400 text-sm mt-2">مشتری با کد ****1234 بیش از حد مجاز از کد استفاده کرده است</p>
+                        <div class="flex justify-between items-center mt-3">
+                            <p class="text-xs text-gray-500">1402/08/15 - 14:30</p>
+                            <button class="text-sm text-primary">پاسخ</button>
+                        </div>
+                    </div>
+                    <div class="p-4 bg-yellow-900/20 border border-yellow-900/50 rounded-lg">
+                        <div class="flex justify-between">
+                            <h3 class="font-bold">عدم تطابق اطلاعات</h3>
+                            <span class="px-2 py-1 bg-yellow-900/30 text-yellow-400 rounded-full text-xs">جدید</span>
+                        </div>
+                        <p class="text-gray-400 text-sm mt-2">اطلاعات فروش با سیستم تطابق ندارد. لطفاً بررسی کنید</p>
+                        <div class="flex justify-between items-center mt-3">
+                            <p class="text-xs text-gray-500">1402/08/14 - 09:15</p>
+                            <button class="text-sm text-primary">پاسخ</button>
+                        </div>
+                    </div>
+                    <div class="p-4 bg-dark rounded-lg">
+                        <div class="flex justify-between">
+                            <h3 class="font-bold">بروزرسانی سیاست‌ها</h3>
+                            <span class="px-2 py-1 bg-gray-700 text-gray-400 rounded-full text-xs">خوانده شده</span>
+                        </div>
+                        <p class="text-gray-400 text-sm mt-2">سیاست‌های استفاده از کدهای اعتباری به‌روزرسانی شد</p>
+                        <div class="flex justify-between items-center mt-3">
+                            <p class="text-xs text-gray-500">1402/08/10 - 16:45</p>
+                            <button class="text-sm text-primary">مشاهده</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <!-- Settings Tab -->
+        <section id="settings" class="tab-content hidden">
+            <div class="card p-6 max-w-2xl mx-auto">
+                <h2 class="text-2xl font-bold mb-6">تنظیمات فروشگاه</h2>
+                <form id="settings-form">
+                    <div class="mb-5">
+                        <label class="block text-gray-400 mb-2">نام فروشگاه</label>
+                        <input type="text" value="تکنوشاپ" class="w-full bg-dark border border-gray-700 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-primary">
+                    </div>
+                    <div class="mb-5">
+                        <label class="block text-gray-400 mb-2">شماره تماس</label>
+                        <input type="text" value="021-12345678" class="w-full bg-dark border border-gray-700 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-primary">
+                    </div>
+                    <div class="mb-5">
+                        <label class="block text-gray-400 mb-2">شماره حساب بانکی</label>
+                        <input type="text" value="IR123456789012345678901234" class="w-full bg-dark border border-gray-700 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-primary">
+                    </div>
+                    <div class="mb-6">
+                        <label class="block text-gray-400 mb-2">سطح فروشگاه</label>
+                        <div class="p-4 bg-secondary/10 rounded-lg border border-secondary/30 cursor-pointer" id="settings-account-status">
+                            <p class="font-bold text-secondary">پرمیوم</p>
+                            <p class="text-sm text-gray-400 mt-1">فعال تا: 1403/02/01</p>
+                        </div>
+                    </div>
+                    <button type="submit" class="w-full bg-primary hover:bg-purple-700 text-white font-bold py-3 px-4 rounded-lg transition duration-200 mb-4">
+                        ذخیره تغییرات
+                    </button>
+                    <button type="button" class="w-full bg-red-900/30 hover:bg-red-900/50 text-red-400 font-bold py-3 px-4 rounded-lg transition duration-200">
+                        خروج از حساب کاربری
+                    </button>
+                </form>
+            </div>
+        </section>
+    </main>
     <script>
-        // Generate QR code
-        document.addEventListener('DOMContentLoaded', function() {
-            const qrElement = document.getElementById('qrcode');
-            new QRCode(qrElement, {
-                text: 'https://vitreenet.com/invite/VTR-N8D2',
-                width: 160,
-                height: 160,
-                colorDark: "#000000",
-                colorLight: "#ffffff",
-                correctLevel: QRCode.CorrectLevel.H
+        // Initialize Lucide icons
+        lucide.createIcons();
+        // Tab switching functionality
+        document.querySelectorAll('.tab-btn').forEach(button => {
+            button.addEventListener('click', () => {
+                // Hide all tab contents
+                document.querySelectorAll('.tab-content').forEach(content => {
+                    content.classList.add('hidden');
+                });
+                // Remove active class from all tabs
+                document.querySelectorAll('.tab-btn').forEach(btn => {
+                    btn.classList.remove('tab-active');
+                });
+                // Show selected tab content
+                const tabId = button.getAttribute('data-tab');
+                document.getElementById(tabId).classList.remove('hidden');
+                // Add active class to clicked tab
+                button.classList.add('tab-active');
             });
         });
-        
-        // Add glowing effect to cards on hover
-        const cards = document.querySelectorAll('.glassy-card');
-        cards.forEach(card => {
-            card.addEventListener('mouseenter', () => {
-                card.classList.add('glowing-border');
+        // Mobile menu toggle
+        document.getElementById('menu-toggle').addEventListener('click', () => {
+            const nav = document.getElementById('mobile-nav');
+            nav.classList.toggle('hidden');
+        });
+        // Toast notification function
+        function showToast(message, type = 'success') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = `toast px-4 py-3 rounded-lg shadow-lg flex items-center ${
+                type === 'success' ? 'bg-green-900/80' : 'bg-red-900/80'
+            }`;
+            toast.innerHTML = `
+                <i data-lucide="${type === 'success' ? 'check-circle' : 'x-circle'}" class="w-5 h-5 ml-2"></i>
+                <span>${message}</span>
+            `;
+            container.appendChild(toast);
+            lucide.createIcons();
+            // Remove toast after animation
+            setTimeout(() => {
+                toast.remove();
+            }, 3000);
+        }
+        // Redeem form submission
+        document.getElementById('redeem-form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const code = document.getElementById('credit-code').value;
+            const amount = document.getElementById('amount').value;
+            if (!code || !amount) {
+                showToast('لطفاً تمام فیلدها را پر کنید', 'error');
+                return;
+            }
+            if (code.length !== 6) {
+                showToast('کد اعتبار باید 6 رقم باشد', 'error');
+                return;
+            }
+            // Simulate API call
+            setTimeout(() => {
+                if (Math.random() > 0.2) {
+                    showToast('خرید با موفقیت ثبت شد');
+                    document.getElementById('redeem-form').reset();
+                } else {
+                    showToast('کد اعتبار نامعتبر است', 'error');
+                }
+            }, 1000);
+        });
+        // Settings form submission
+        document.getElementById('settings-form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            showToast('تغییرات با موفقیت ذخیره شد');
+        });
+        // Initialize chart
+        document.addEventListener('DOMContentLoaded', () => {
+            const ctx = document.getElementById('activityChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: ['فروردین', 'اردیبهشت', 'خرداد', 'تیر', 'مرداد', 'شهریور'],
+                    datasets: [{
+                        label: 'فروش ماهانه (تومان)',
+                        data: [32000000, 45000000, 38000000, 52000000, 48000000, 61000000],
+                        borderColor: '#8B5CF6',
+                        backgroundColor: 'rgba(139, 92, 246, 0.1)',
+                        borderWidth: 2,
+                        fill: true,
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.1)'
+                            },
+                            ticks: {
+                                color: '#94A3B8'
+                            }
+                        },
+                        x: {
+                            grid: {
+                                display: false
+                            },
+                            ticks: {
+                                color: '#94A3B8'
+                            }
+                        }
+                    }
+                }
             });
+        });
+        // Account modal functionality
+        const accountModal = document.getElementById('account-modal');
+        const closeModal = document.getElementById('close-modal');
+        const accountStatusCard = document.getElementById('account-status-card');
+        const settingsAccountStatus = document.getElementById('settings-account-status');
+        const openModal = () => {
+            accountModal.classList.add('active');
+            document.body.style.overflow = 'hidden';
+            lucide.createIcons();
+        };
+        const closeModalFunc = () => {
+            accountModal.classList.remove('active');
+            document.body.style.overflow = 'auto';
+        };
+        accountStatusCard.addEventListener('click', openModal);
+        settingsAccountStatus.addEventListener('click', openModal);
+        closeModal.addEventListener('click', closeModalFunc);
+        accountModal.addEventListener('click', (e) => {
+            if (e.target === accountModal) {
+                closeModalFunc();
+            }
+        });
+
+        // Settlement functionality
+        document.getElementById('request-settlement-btn').addEventListener('click', function() {
+            const btn = this;
+            const originalText = btn.innerHTML;
             
-            card.addEventListener('mouseleave', () => {
-                card.classList.remove('glowing-border');
-            });
+            // Show loading state
+            btn.innerHTML = '<i data-lucide="loader" class="w-5 h-5 ml-2 animate-spin"></i> در حال پردازش...';
+            btn.disabled = true;
+            btn.classList.remove('pulse');
+            
+            // Update icons
+            lucide.createIcons();
+            
+            // Simulate API call
+            setTimeout(() => {
+                // Reset button
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+                lucide.createIcons();
+                
+                // Show success or error based on random
+                if (Math.random() > 0.3) {
+                    showToast('درخواست تسویه با موفقیت ثبت شد. مبلغ طی ۲۴ ساعت آینده به حساب شما واریز خواهد شد.', 'success');
+                    
+                    // Add visual feedback to balance card
+                    const balanceCard = document.querySelector('#settlement .bg-gradient-to-r');
+                    balanceCard.classList.add('ring-2', 'ring-green-500/50');
+                    setTimeout(() => {
+                        balanceCard.classList.remove('ring-2', 'ring-green-500/50');
+                    }, 2000);
+                } else {
+                    showToast('خطا در ثبت درخواست. لطفاً مجدداً تلاش کنید.', 'error');
+                    btn.classList.add('pulse'); // Re-add pulse on error
+                }
+            }, 2000);
         });
     </script>
 </body>

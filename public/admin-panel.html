@@ -1,0 +1,1570 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>پنل مدیریت سیستم جوایز</title>
+    <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --primary: #6366F1;
+            --primary-dark: #4f46e5;
+            --dark-bg: #0f172a;
+            --card-bg: #1e293b;
+            --sidebar-bg: #1e293b;
+            --text-primary: #f1f5f9;
+            --text-secondary: #94a3b8;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --info: #3b82f6;
+        }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Vazirmatn', sans-serif;
+            background-color: var(--dark-bg);
+            color: var(--text-primary);
+            direction: rtl;
+            line-height: 1.6;
+        }
+        .container {
+            display: flex;
+            min-height: 100vh;
+        }
+        /* Sidebar Styles */
+        .sidebar {
+            width: 250px;
+            background-color: var(--sidebar-bg);
+            padding: 1.5rem 0;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+            z-index: 100;
+            position: fixed;
+            height: 100vh;
+            overflow-y: auto;
+        }
+        .sidebar-header {
+            padding: 0 1.5rem 1.5rem;
+            border-bottom: 1px solid #334155;
+            margin-bottom: 1rem;
+        }
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .logo i {
+            color: var(--primary);
+            font-size: 1.5rem;
+        }
+        .logo h1 {
+            font-size: 1.25rem;
+            font-weight: 600;
+        }
+        .nav-links {
+            list-style: none;
+            padding: 0 1rem;
+        }
+        .nav-item {
+            margin-bottom: 0.5rem;
+        }
+        .nav-link {
+            display: flex;
+            align-items: center;
+            padding: 0.75rem 1rem;
+            border-radius: 0.5rem;
+            color: var(--text-secondary);
+            text-decoration: none;
+            transition: all 0.2s;
+            font-size: 0.95rem;
+        }
+        .nav-link:hover, .nav-link.active {
+            background-color: rgba(99, 102, 241, 0.1);
+            color: var(--primary);
+        }
+        .nav-link i {
+            margin-left: 0.75rem;
+            width: 20px;
+            text-align: center;
+        }
+        /* Main Content Styles */
+        .main-content {
+            flex: 1;
+            margin-right: 250px;
+            transition: all 0.3s ease;
+        }
+        .topbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 1.5rem;
+            background-color: var(--card-bg);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            position: sticky;
+            top: 0;
+            z-index: 99;
+        }
+        .search-bar {
+            display: flex;
+            align-items: center;
+            background-color: #334155;
+            border-radius: 0.5rem;
+            padding: 0.5rem 1rem;
+            width: 300px;
+        }
+        .search-bar input {
+            background: transparent;
+            border: none;
+            color: var(--text-primary);
+            outline: none;
+            width: 100%;
+            margin-right: 0.5rem;
+        }
+        .user-actions {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        .notification {
+            position: relative;
+            cursor: pointer;
+        }
+        .notification-badge {
+            position: absolute;
+            top: -5px;
+            left: -5px;
+            background-color: var(--danger);
+            color: white;
+            border-radius: 50%;
+            width: 18px;
+            height: 18px;
+            font-size: 0.7rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .user-profile {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            cursor: pointer;
+        }
+        .user-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background-color: var(--primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+        }
+        /* Content Area */
+        .content {
+            padding: 1.5rem;
+        }
+        .page-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        .page-title i {
+            color: var(--primary);
+        }
+        /* Stats Cards */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+        .stat-card {
+            background-color: var(--card-bg);
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease;
+        }
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+        .stat-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+        .stat-card-title {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+        .stat-card-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 0.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+        }
+        .stat-card-value {
+            font-size: 1.75rem;
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+        }
+        .stat-card-change {
+            font-size: 0.85rem;
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+        .positive {
+            color: var(--success);
+        }
+        .negative {
+            color: var(--danger);
+        }
+        /* Charts and Tables */
+        .chart-container {
+            background-color: var(--card-bg);
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .chart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+        .chart-title {
+            font-size: 1.1rem;
+            font-weight: 500;
+        }
+        .chart-actions {
+            display: flex;
+            gap: 0.75rem;
+        }
+        .chart-actions button {
+            background-color: #334155;
+            border: none;
+            color: var(--text-secondary);
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .chart-actions button:hover {
+            background-color: var(--primary);
+            color: white;
+        }
+        .chart-wrapper {
+            height: 300px;
+            position: relative;
+        }
+        /* Tables */
+        .table-container {
+            background-color: var(--card-bg);
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            overflow-x: auto;
+        }
+        .table-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+        .table-title {
+            font-size: 1.1rem;
+            font-weight: 500;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        thead {
+            background-color: rgba(99, 102, 241, 0.1);
+        }
+        th {
+            padding: 1rem;
+            text-align: right;
+            font-weight: 500;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+        td {
+            padding: 1rem;
+            border-top: 1px solid #334155;
+        }
+        tr:hover {
+            background-color: rgba(51, 65, 85, 0.5);
+        }
+        .status-badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+        .status-active {
+            background-color: rgba(16, 185, 129, 0.1);
+            color: var(--success);
+        }
+        .status-pending {
+            background-color: rgba(245, 158, 11, 0.1);
+            color: var(--warning);
+        }
+        .status-inactive {
+            background-color: rgba(239, 68, 68, 0.1);
+            color: var(--danger);
+        }
+        .status-approved {
+            background-color: rgba(16, 185, 129, 0.1);
+            color: var(--success);
+        }
+        .status-rejected {
+            background-color: rgba(239, 68, 68, 0.1);
+            color: var(--danger);
+        }
+        .action-buttons {
+            display: flex;
+            gap: 0.5rem;
+        }
+        .btn {
+            padding: 0.5rem 0.75rem;
+            border-radius: 0.5rem;
+            border: none;
+            cursor: pointer;
+            font-size: 0.85rem;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .btn-primary {
+            background-color: var(--primary);
+            color: white;
+        }
+        .btn-primary:hover {
+            background-color: var(--primary-dark);
+        }
+        .btn-secondary {
+            background-color: #334155;
+            color: var(--text-primary);
+        }
+        .btn-secondary:hover {
+            background-color: #475569;
+        }
+        .btn-success {
+            background-color: var(--success);
+            color: white;
+        }
+        .btn-warning {
+            background-color: var(--warning);
+            color: white;
+        }
+        .btn-danger {
+            background-color: var(--danger);
+            color: white;
+        }
+        /* Reward Ladder */
+        .reward-ladder {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 2rem 0;
+            position: relative;
+        }
+        .ladder-step {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            z-index: 2;
+        }
+        .step-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background-color: var(--primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 0.75rem;
+            font-size: 1.5rem;
+            color: white;
+        }
+        .step-label {
+            text-align: center;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+        .ladder-connector {
+            position: absolute;
+            height: 4px;
+            background-color: var(--primary);
+            top: 30px;
+            left: 15%;
+            right: 15%;
+            z-index: 1;
+        }
+        /* Modal */
+        .modal {
+            position: fixed;
+            top: 0;
+            right: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+        .modal.active {
+            opacity: 1;
+            visibility: visible;
+        }
+        .modal-content {
+            background-color: var(--card-bg);
+            border-radius: 0.75rem;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+            transform: translateY(-20px);
+            transition: transform 0.3s ease;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        .modal.active .modal-content {
+            transform: translateY(0);
+        }
+        .modal-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid #334155;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .modal-title {
+            font-size: 1.25rem;
+            font-weight: 500;
+        }
+        .modal-close {
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+        .modal-body {
+            padding: 1.5rem;
+        }
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+        .form-control {
+            width: 100%;
+            padding: 0.75rem;
+            background-color: #334155;
+            border: 1px solid #475569;
+            border-radius: 0.5rem;
+            color: var(--text-primary);
+            font-family: 'Vazirmatn', sans-serif;
+        }
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+        .modal-footer {
+            padding: 1.5rem;
+            border-top: 1px solid #334155;
+            display: flex;
+            justify-content: flex-end;
+            gap: 1rem;
+        }
+        /* Toast Notification */
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            padding: 1rem 1.5rem;
+            border-radius: 0.5rem;
+            color: white;
+            font-weight: 500;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            z-index: 1000;
+            transform: translateX(-100%);
+            transition: transform 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        .toast.show {
+            transform: translateX(0);
+        }
+        .toast-success {
+            background-color: var(--success);
+        }
+        .toast-error {
+            background-color: var(--danger);
+        }
+        /* Filter Bar */
+        .filter-bar {
+            display: flex;
+            gap: 0.75rem;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+        }
+        .filter-pill {
+            padding: 0.5rem 1rem;
+            border-radius: 9999px;
+            background-color: #334155;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 0.9rem;
+        }
+        .filter-pill.active {
+            background-color: var(--primary);
+            color: white;
+        }
+        /* LTR Text */
+        .ltr-text {
+            direction: ltr;
+            text-align: left;
+            font-family: monospace;
+        }
+        /* Responsive Design */
+        @media (max-width: 992px) {
+            .sidebar {
+                width: 70px;
+            }
+            .sidebar .logo h1, 
+            .sidebar .nav-link span {
+                display: none;
+            }
+            .sidebar .nav-link {
+                justify-content: center;
+                padding: 1rem;
+            }
+            .sidebar .nav-link i {
+                margin: 0;
+            }
+            .main-content {
+                margin-right: 70px;
+            }
+        }
+        @media (max-width: 768px) {
+            .search-bar {
+                width: 200px;
+            }
+            .stats-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+            .chart-wrapper {
+                height: 250px;
+            }
+        }
+        @media (max-width: 576px) {
+            .sidebar {
+                width: 0;
+                padding: 0;
+            }
+            .sidebar.active {
+                width: 250px;
+                padding: 1.5rem 0;
+            }
+            .main-content {
+                margin-right: 0;
+            }
+            .topbar {
+                padding: 1rem;
+            }
+            .search-bar {
+                width: 150px;
+            }
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+            .chart-wrapper {
+                height: 200px;
+            }
+            .reward-ladder {
+                flex-direction: column;
+                gap: 2rem;
+            }
+            .ladder-connector {
+                width: 4px;
+                height: 100px;
+                top: 80px;
+                left: 50%;
+                transform: translateX(-50%);
+            }
+            .filter-bar {
+                gap: 0.5rem;
+            }
+            .filter-pill {
+                padding: 0.4rem 0.8rem;
+                font-size: 0.8rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="logo">
+                    <i class="fas fa-gift"></i>
+                    <h1>سیستم جوایز</h1>
+                </div>
+            </div>
+            <ul class="nav-links">
+                <li class="nav-item">
+                    <a href="#" class="nav-link active" data-tab="dashboard">
+                        <i class="fas fa-home"></i>
+                        <span>داشبورد</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link" data-tab="stores">
+                        <i class="fas fa-store"></i>
+                        <span>مدیریت فروشگاه‌ها</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link" data-tab="rewards">
+                        <i class="fas fa-trophy"></i>
+                        <span>تنظیمات جوایز</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link" data-tab="withdrawals">
+                        <i class="fas fa-money-bill-wave"></i>
+                        <span>درخواست‌های تسویه</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link" data-tab="users">
+                        <i class="fas fa-users"></i>
+                        <span>مدیریت کاربران</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link" data-tab="reports">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <span>گزارش‌ها</span>
+                    </a>
+                </li>
+            </ul>
+        </aside>
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Topbar -->
+            <div class="topbar">
+                <div class="search-bar">
+                    <i class="fas fa-search"></i>
+                    <input type="text" placeholder="جستجو...">
+                </div>
+                <div class="user-actions">
+                    <div class="notification">
+                        <i class="fas fa-bell"></i>
+                        <span class="notification-badge">3</span>
+                    </div>
+                    <div class="user-profile">
+                        <div class="user-avatar">م</div>
+                        <span>مدیر سیستم</span>
+                    </div>
+                </div>
+            </div>
+            <!-- Content Area -->
+            <div class="content">
+                <!-- Dashboard Tab -->
+                <div id="dashboard" class="tab-content">
+                    <h2 class="page-title">
+                        <i class="fas fa-chart-line"></i>
+                        داشبورد
+                    </h2>
+                    <!-- Stats Cards -->
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="stat-card-header">
+                                <div class="stat-card-title">فروشگاه‌ها</div>
+                                <div class="stat-card-icon" style="background-color: rgba(99, 102, 241, 0.2); color: var(--primary);">
+                                    <i class="fas fa-store"></i>
+                                </div>
+                            </div>
+                            <div class="stat-card-value">142</div>
+                            <div class="stat-card-change positive">
+                                <i class="fas fa-arrow-up"></i>
+                                <span>12% نسبت به ماه گذشته</span>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-card-header">
+                                <div class="stat-card-title">کاربران</div>
+                                <div class="stat-card-icon" style="background-color: rgba(16, 185, 129, 0.2); color: var(--success);">
+                                    <i class="fas fa-users"></i>
+                                </div>
+                            </div>
+                            <div class="stat-card-value">3,842</div>
+                            <div class="stat-card-change positive">
+                                <i class="fas fa-arrow-up"></i>
+                                <span>8% نسبت به ماه گذشته</span>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-card-header">
+                                <div class="stat-card-title">جوایز پرداخت‌شده</div>
+                                <div class="stat-card-icon" style="background-color: rgba(245, 158, 11, 0.2); color: var(--warning);">
+                                    <i class="fas fa-gift"></i>
+                                </div>
+                            </div>
+                            <div class="stat-card-value">12,480</div>
+                            <div class="stat-card-change negative">
+                                <i class="fas fa-arrow-down"></i>
+                                <span>3% نسبت به ماه گذشته</span>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-card-header">
+                                <div class="stat-card-title">تسویه‌های تأییدشده</div>
+                                <div class="stat-card-icon" style="background-color: rgba(59, 130, 246, 0.2); color: var(--info);">
+                                    <i class="fas fa-money-check"></i>
+                                </div>
+                            </div>
+                            <div class="stat-card-value">56</div>
+                            <div class="stat-card-change positive">
+                                <i class="fas fa-arrow-up"></i>
+                                <span>15% نسبت به ماه گذشته</span>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Charts -->
+                    <div class="chart-container">
+                        <div class="chart-header">
+                            <h3 class="chart-title">عملکرد ماهانه</h3>
+                            <div class="chart-actions">
+                                <button>هفتگی</button>
+                                <button class="active">ماهانه</button>
+                                <button>سالانه</button>
+                            </div>
+                        </div>
+                        <div class="chart-wrapper">
+                            <canvas id="performanceChart"></canvas>
+                        </div>
+                    </div>
+                    <!-- Recent Activity -->
+                    <div class="table-container">
+                        <div class="table-header">
+                            <h3 class="table-title">آخرین فعالیت‌ها</h3>
+                        </div>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>فعالیت</th>
+                                    <th>زمان</th>
+                                    <th>وضعیت</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>ثبت نام فروشگاه "فروشگاه آرمان"</td>
+                                    <td>۲ ساعت پیش</td>
+                                    <td><span class="status-badge status-active">تکمیل شده</span></td>
+                                </tr>
+                                <tr>
+                                    <td>دریافت جایزه توسط "علی محمدی"</td>
+                                    <td>۳ ساعت پیش</td>
+                                    <td><span class="status-badge status-active">تکمیل شده</span></td>
+                                </tr>
+                                <tr>
+                                    <td>ثبت درخواست تسویه توسط "فروشگاه نگین"</td>
+                                    <td>۵ ساعت پیش</td>
+                                    <td><span class="status-badge status-pending">در انتظار</span></td>
+                                </tr>
+                                <tr>
+                                    <td>بروزرسانی اطلاعات فروشگاه "کتاب فروشی مدرن"</td>
+                                    <td>۱۲ ساعت پیش</td>
+                                    <td><span class="status-badge status-active">تکمیل شده</span></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <!-- Stores Tab -->
+                <div id="stores" class="tab-content" style="display: none;">
+                    <h2 class="page-title">
+                        <i class="fas fa-store"></i>
+                        مدیریت فروشگاه‌ها
+                    </h2>
+                    <div class="table-container">
+                        <div class="table-header">
+                            <h3 class="table-title">لیست فروشگاه‌ها</h3>
+                            <button class="btn btn-primary">
+                                <i class="fas fa-plus"></i>
+                                افزودن فروشگاه جدید
+                            </button>
+                        </div>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>نام فروشگاه</th>
+                                    <th>تلفن</th>
+                                    <th>کد فروشنده</th>
+                                    <th>وضعیت</th>
+                                    <th>ویژه</th>
+                                    <th>اقدامات</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>فروشگاه آرمان</td>
+                                    <td>09123456789</td>
+                                    <td>
+                                        <input type="text" class="form-control" value="1234" style="width: 80px;">
+                                    </td>
+                                    <td><span class="status-badge status-active">فعال</span></td>
+                                    <td><i class="fas fa-check-circle text-green-500"></i></td>
+                                    <td>
+                                        <div class="action-buttons">
+                                            <button class="btn btn-secondary">
+                                                <i class="fas fa-edit"></i>
+                                            </button>
+                                            <button class="btn btn-danger">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>فروشگاه نگین</td>
+                                    <td>09129876543</td>
+                                    <td>
+                                        <input type="text" class="form-control" value="5678" style="width: 80px;">
+                                    </td>
+                                    <td><span class="status-badge status-pending">در انتظار</span></td>
+                                    <td><i class="fas fa-times-circle text-red-500"></i></td>
+                                    <td>
+                                        <div class="action-buttons">
+                                            <button class="btn btn-secondary">
+                                                <i class="fas fa-edit"></i>
+                                            </button>
+                                            <button class="btn btn-danger">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>کتاب فروشی مدرن</td>
+                                    <td>09131112233</td>
+                                    <td>
+                                        <input type="text" class="form-control" value="9012" style="width: 80px;">
+                                    </td>
+                                    <td><span class="status-badge status-active">فعال</span></td>
+                                    <td><i class="fas fa-check-circle text-green-500"></i></td>
+                                    <td>
+                                        <div class="action-buttons">
+                                            <button class="btn btn-secondary">
+                                                <i class="fas fa-edit"></i>
+                                            </button>
+                                            <button class="btn btn-danger">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <!-- Rewards Tab -->
+                <div id="rewards" class="tab-content" style="display: none;">
+                    <h2 class="page-title">
+                        <i class="fas fa-trophy"></i>
+                        تنظیمات جوایز
+                    </h2>
+                    <!-- Reward Configuration -->
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="form-group">
+                                <label>امتیاز هر خرید (عادی)</label>
+                                <input type="number" class="form-control" value="10">
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="form-group">
+                                <label>امتیاز هر خرید (ویژه)</label>
+                                <input type="number" class="form-control" value="20">
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="form-group">
+                                <label>حداکثر جایزه ماهانه (امتیاز)</label>
+                                <input type="number" class="form-control" value="100">
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="form-group">
+                                <label>تعداد خرید برای هر مرحله</label>
+                                <input type="number" class="form-control" value="5">
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Reward Ladder -->
+                    <div class="chart-container">
+                        <h3 class="chart-title">پلکان جوایز</h3>
+                        <div class="reward-ladder">
+                            <div class="ladder-step">
+                                <div class="step-icon">۱</div>
+                                <div class="step-label">خرید ۵ بار</div>
+                            </div>
+                            <div class="ladder-step">
+                                <div class="step-icon">۲</div>
+                                <div class="step-label">خرید ۱۰ بار</div>
+                            </div>
+                            <div class="ladder-step">
+                                <div class="step-icon">۳</div>
+                                <div class="step-label">خرید ۱۵ بار</div>
+                            </div>
+                            <div class="ladder-connector"></div>
+                        </div>
+                    </div>
+                    <!-- Reward Items -->
+                    <div class="table-container">
+                        <div class="table-header">
+                            <h3 class="table-title">جوایز موجود</h3>
+                            <button class="btn btn-primary" onclick="openModal('rewardModal')">
+                                <i class="fas fa-plus"></i>
+                                افزودن جایزه جدید
+                            </button>
+                        </div>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>عنوان جایزه</th>
+                                    <th>امتیاز مورد نیاز</th>
+                                    <th>وضعیت</th>
+                                    <th>اقدامات</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>کارت هدیه ۱۰۰ هزار تومانی</td>
+                                    <td>50</td>
+                                    <td><span class="status-badge status-active">فعال</span></td>
+                                    <td>
+                                        <div class="action-buttons">
+                                            <button class="btn btn-secondary">
+                                                <i class="fas fa-edit"></i>
+                                            </button>
+                                            <button class="btn btn-danger">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>تخفیف ۲۰ درصدی</td>
+                                    <td>30</td>
+                                    <td><span class="status-badge status-active">فعال</span></td>
+                                    <td>
+                                        <div class="action-buttons">
+                                            <button class="btn btn-secondary">
+                                                <i class="fas fa-edit"></i>
+                                            </button>
+                                            <button class="btn btn-danger">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>هدیه ویژه</td>
+                                    <td>100</td>
+                                    <td><span class="status-badge status-inactive">غیرفعال</span></td>
+                                    <td>
+                                        <div class="action-buttons">
+                                            <button class="btn btn-secondary">
+                                                <i class="fas fa-edit"></i>
+                                            </button>
+                                            <button class="btn btn-danger">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <!-- Withdrawals Tab -->
+                <div id="withdrawals" class="tab-content" style="display: none;">
+                    <h2 class="page-title">
+                        <i class="fas fa-money-bill-wave"></i>
+                        درخواست‌های تسویه
+                    </h2>
+                    
+                    <!-- Filter Bar -->
+                    <div class="filter-bar">
+                        <div class="filter-pill active" data-filter="all">همه</div>
+                        <div class="filter-pill" data-filter="seller">فروشگاه‌ها</div>
+                        <div class="filter-pill" data-filter="customer">مشتریان</div>
+                    </div>
+                    
+                    <div class="table-container">
+                        <div class="table-header">
+                            <h3 class="table-title">لیست درخواست‌ها</h3>
+                        </div>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>فروشنده</th>
+                                    <th>مبلغ (تومان)</th>
+                                    <th>شماره کارت</th>
+                                    <th>تاریخ</th>
+                                    <th>وضعیت</th>
+                                    <th>اقدامات</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr class="withdrawal-row" data-type="seller">
+                                    <td>فروشگاه نگین</td>
+                                    <td>۵,۰۰۰,۰۰۰</td>
+                                    <td class="ltr-text">1234-5678-9012-3456</td>
+                                    <td>۱۴۰۳/۰۲/۱۰</td>
+                                    <td><span class="status-badge status-pending">در انتظار</span></td>
+                                    <td>
+                                        <div class="action-buttons">
+                                            <button class="btn btn-success approve-btn" data-id="1">
+                                                <i class="fas fa-check"></i>
+                                            </button>
+                                            <button class="btn btn-danger reject-btn" data-id="1">
+                                                <i class="fas fa-times"></i>
+                                            </button>
+                                            <button class="btn btn-secondary view-details" data-id="1">
+                                                <i class="fas fa-eye"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr class="withdrawal-row" data-type="customer">
+                                    <td>علی محمدی</td>
+                                    <td>۲,۵۰۰,۰۰۰</td>
+                                    <td class="ltr-text">9876-5432-1098-7654</td>
+                                    <td>۱۴۰۳/۰۲/۰۸</td>
+                                    <td><span class="status-badge status-approved">تأیید شده</span></td>
+                                    <td>
+                                        <div class="action-buttons">
+                                            <button class="btn btn-secondary view-details" data-id="2">
+                                                <i class="fas fa-eye"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr class="withdrawal-row" data-type="seller">
+                                    <td>فروشگاه آرمان</td>
+                                    <td>۱,۲۰۰,۰۰۰</td>
+                                    <td class="ltr-text">1111-2222-3333-4444</td>
+                                    <td>۱۴۰۳/۰۲/۰۵</td>
+                                    <td><span class="status-badge status-rejected">رد شده</span></td>
+                                    <td>
+                                        <div class="action-buttons">
+                                            <button class="btn btn-secondary view-details" data-id="3">
+                                                <i class="fas fa-eye"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <!-- Users Tab -->
+                <div id="users" class="tab-content" style="display: none;">
+                    <h2 class="page-title">
+                        <i class="fas fa-users"></i>
+                        مدیریت کاربران
+                    </h2>
+                    <div class="table-container">
+                        <div class="table-header">
+                            <h3 class="table-title">لیست کاربران</h3>
+                        </div>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>نام</th>
+                                    <th>تلفن</th>
+                                    <th>تاریخ عضویت</th>
+                                    <th>وضعیت</th>
+                                    <th>اقدامات</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>علی محمدی</td>
+                                    <td>09121112233</td>
+                                    <td>۱۴۰۲/۱۰/۰۱</td>
+                                    <td><span class="status-badge status-active">فعال</span></td>
+                                    <td>
+                                        <div class="action-buttons">
+                                            <button class="btn btn-secondary">
+                                                <i class="fas fa-edit"></i>
+                                            </button>
+                                            <button class="btn btn-danger">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>زهرا رضایی</td>
+                                    <td>09124445566</td>
+                                    <td>۱۴۰۲/۱۱/۱۵</td>
+                                    <td><span class="status-badge status-inactive">غیرفعال</span></td>
+                                    <td>
+                                        <div class="action-buttons">
+                                            <button class="btn btn-secondary">
+                                                <i class="fas fa-edit"></i>
+                                            </button>
+                                            <button class="btn btn-danger">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>محمد حسینی</td>
+                                    <td>09137778899</td>
+                                    <td>۱۴۰۳/۰۱/۲۰</td>
+                                    <td><span class="status-badge status-active">فعال</span></td>
+                                    <td>
+                                        <div class="action-buttons">
+                                            <button class="btn btn-secondary">
+                                                <i class="fas fa-edit"></i>
+                                            </button>
+                                            <button class="btn btn-danger">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <!-- Reports Tab -->
+                <div id="reports" class="tab-content" style="display: none;">
+                    <h2 class="page-title">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        گزارش‌ها
+                    </h2>
+                    <div class="table-container">
+                        <div class="table-header">
+                            <h3 class="table-title">لیست گزارش‌ها</h3>
+                        </div>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>گزارش‌دهنده</th>
+                                    <th>فروشگاه مورد نظر</th>
+                                    <th>نوع گزارش</th>
+                                    <th>تاریخ</th>
+                                    <th>وضعیت</th>
+                                    <th>اقدامات</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>علی محمدی</td>
+                                    <td>فروشگاه نگین</td>
+                                    <td>عدم تحویل کالا</td>
+                                    <td>۱۴۰۳/۰۲/۱۰</td>
+                                    <td><span class="status-badge status-pending">در حال بررسی</span></td>
+                                    <td>
+                                        <div class="action-buttons">
+                                            <button class="btn btn-success">
+                                                <i class="fas fa-check"></i>
+                                            </button>
+                                            <button class="btn btn-warning">
+                                                <i class="fas fa-times"></i>
+                                            </button>
+                                            <button class="btn btn-secondary">
+                                                <i class="fas fa-eye"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>زهرا رضایی</td>
+                                    <td>فروشگاه آرمان</td>
+                                    <td>کالای نامرغوب</td>
+                                    <td>۱۴۰۳/۰۲/۰۸</td>
+                                    <td><span class="status-badge status-approved">بررسی شده</span></td>
+                                    <td>
+                                        <button class="btn btn-secondary">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>محمد حسینی</td>
+                                    <td>کتاب فروشی مدرن</td>
+                                    <td>عدم پاسخگویی</td>
+                                    <td>۱۴۰۳/۰۲/۰۵</td>
+                                    <td><span class="status-badge status-rejected">رد شده</span></td>
+                                    <td>
+                                        <button class="btn btn-secondary">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+    
+    <!-- Withdrawal Details Modal -->
+    <div id="withdrawalModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">جزئیات درخواست تسویه</h3>
+                <button class="modal-close" onclick="closeModal('withdrawalModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>نام فروشنده</label>
+                    <input type="text" class="form-control" id="sellerName" readonly>
+                </div>
+                <div class="form-group">
+                    <label>شماره کارت</label>
+                    <input type="text" class="form-control ltr-text" id="cardNumber" readonly>
+                </div>
+                <div class="form-group">
+                    <label>مبلغ (تومان)</label>
+                    <input type="text" class="form-control" id="amount" readonly>
+                </div>
+                <div class="form-group">
+                    <label>تاریخ درخواست</label>
+                    <input type="text" class="form-control" id="requestDate" readonly>
+                </div>
+                <div class="form-group">
+                    <label>وضعیت</label>
+                    <select class="form-control" id="status">
+                        <option value="pending">در انتظار</option>
+                        <option value="approved">تأیید شده</option>
+                        <option value="rejected">رد شده</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>سطح فروشگاه</label>
+                    <select class="form-control" id="accountLevel">
+                        <option value="normal">عادی</option>
+                        <option value="premium">ویژه</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>پیام به فروشنده</label>
+                    <textarea class="form-control" id="message" rows="3" placeholder="پیام خود را بنویسید..."></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeModal('withdrawalModal')">لغو</button>
+                <button class="btn btn-primary" id="saveWithdrawalBtn">
+                    <span id="saveText">ذخیره تغییرات</span>
+                    <span id="loadingSpinner" style="display: none;">
+                        <i class="fas fa-spinner fa-spin"></i> در حال پردازش...
+                    </span>
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Reward Modal -->
+    <div id="rewardModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">افزودن جایزه جدید</h3>
+                <button class="modal-close" onclick="closeModal('rewardModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>عنوان جایزه</label>
+                    <input type="text" class="form-control" placeholder="عنوان جایزه را وارد کنید">
+                </div>
+                <div class="form-group">
+                    <label>امتیاز مورد نیاز</label>
+                    <input type="number" class="form-control" placeholder="امتیاز مورد نیاز را وارد کنید">
+                </div>
+                <div class="form-group">
+                    <label>وضعیت</label>
+                    <select class="form-control">
+                        <option>فعال</option>
+                        <option>غیرفعال</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>تصویر جایزه</label>
+                    <input type="file" class="form-control">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeModal('rewardModal')">لغو</button>
+                <button class="btn btn-primary">ذخیره جایزه</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Toast Notification -->
+    <div id="toast" class="toast">
+        <i class="fas fa-check-circle"></i>
+        <span>عملیات با موفقیت انجام شد</span>
+    </div>
+    
+    <script>
+        // Tab Navigation
+        document.querySelectorAll('.nav-link').forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                // Remove active class from all links
+                document.querySelectorAll('.nav-link').forEach(l => {
+                    l.classList.remove('active');
+                });
+                // Add active class to clicked link
+                this.classList.add('active');
+                // Hide all tab contents
+                document.querySelectorAll('.tab-content').forEach(tab => {
+                    tab.style.display = 'none';
+                });
+                // Show the selected tab
+                const tabId = this.getAttribute('data-tab');
+                document.getElementById(tabId).style.display = 'block';
+            });
+        });
+        
+        // Filter functionality
+        document.querySelectorAll('.filter-pill').forEach(pill => {
+            pill.addEventListener('click', function() {
+                // Remove active class from all pills
+                document.querySelectorAll('.filter-pill').forEach(p => {
+                    p.classList.remove('active');
+                });
+                // Add active class to clicked pill
+                this.classList.add('active');
+                
+                // Get filter type
+                const filterType = this.getAttribute('data-filter');
+                
+                // Filter rows
+                document.querySelectorAll('.withdrawal-row').forEach(row => {
+                    if (filterType === 'all') {
+                        row.style.display = '';
+                    } else {
+                        const rowType = row.getAttribute('data-type');
+                        if (rowType === filterType) {
+                            row.style.display = '';
+                        } else {
+                            row.style.display = 'none';
+                        }
+                    }
+                });
+            });
+        });
+        
+        // Modal Functions
+        function openModal(modalId) {
+            document.getElementById(modalId).classList.add('active');
+        }
+        
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.remove('active');
+        }
+        
+        // Toast Notification
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('toast');
+            toast.querySelector('span').textContent = message;
+            if (type === 'success') {
+                toast.className = 'toast toast-success';
+                toast.querySelector('i').className = 'fas fa-check-circle';
+            } else {
+                toast.className = 'toast toast-error';
+                toast.querySelector('i').className = 'fas fa-exclamation-circle';
+            }
+            toast.classList.add('show');
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+        
+        // Withdrawal Actions
+        function approveWithdrawal(id) {
+            showToast('درخواست تسویه تأیید شد', 'success');
+        }
+        
+        function rejectWithdrawal(id) {
+            showToast('درخواست تسویه رد شد', 'error');
+        }
+        
+        // View Withdrawal Details
+        document.querySelectorAll('.view-details').forEach(button => {
+            button.addEventListener('click', function() {
+                const id = this.getAttribute('data-id');
+                
+                // In a real app, you would fetch data from server based on ID
+                // For demo purposes, we'll use static data
+                const withdrawalData = {
+                    1: {
+                        sellerName: "فروشگاه نگین",
+                        cardNumber: "1234-5678-9012-3456",
+                        amount: "۵,۰۰۰,۰۰۰",
+                        requestDate: "۱۴۰۳/۰۲/۱۰",
+                        status: "pending",
+                        accountLevel: "premium"
+                    },
+                    2: {
+                        sellerName: "علی محمدی",
+                        cardNumber: "9876-5432-1098-7654",
+                        amount: "۲,۵۰۰,۰۰۰",
+                        requestDate: "۱۴۰۳/۰۲/۰۸",
+                        status: "approved",
+                        accountLevel: "normal"
+                    },
+                    3: {
+                        sellerName: "فروشگاه آرمان",
+                        cardNumber: "1111-2222-3333-4444",
+                        amount: "۱,۲۰۰,۰۰۰",
+                        requestDate: "۱۴۰۳/۰۲/۰۵",
+                        status: "rejected",
+                        accountLevel: "normal"
+                    }
+                };
+                
+                const data = withdrawalData[id];
+                if (data) {
+                    document.getElementById('sellerName').value = data.sellerName;
+                    document.getElementById('cardNumber').value = data.cardNumber;
+                    document.getElementById('amount').value = data.amount;
+                    document.getElementById('requestDate').value = data.requestDate;
+                    document.getElementById('status').value = data.status;
+                    document.getElementById('accountLevel').value = data.accountLevel;
+                    
+                    openModal('withdrawalModal');
+                }
+            });
+        });
+        
+        // Save Withdrawal Changes
+        document.getElementById('saveWithdrawalBtn').addEventListener('click', function() {
+            const saveBtn = this;
+            const saveText = document.getElementById('saveText');
+            const loadingSpinner = document.getElementById('loadingSpinner');
+            
+            // Show loading state
+            saveText.style.display = 'none';
+            loadingSpinner.style.display = 'inline';
+            saveBtn.disabled = true;
+            
+            // Simulate API call
+            setTimeout(() => {
+                // Reset button
+                saveText.style.display = 'inline';
+                loadingSpinner.style.display = 'none';
+                saveBtn.disabled = false;
+                
+                // Show success message
+                showToast('تغییرات با موفقیت ذخیره شد', 'success');
+                
+                // Close modal
+                closeModal('withdrawalModal');
+            }, 1500);
+        });
+        
+        // Chart Initialization
+        document.addEventListener('DOMContentLoaded', function() {
+            const ctx = document.getElementById('performanceChart').getContext('2d');
+            const chart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: ['فروردین', 'اردیبهشت', 'خرداد', 'تیر', 'مرداد', 'شهریور'],
+                    datasets: [{
+                        label: 'تعداد خریدها',
+                        data: [120, 190, 300, 500, 230, 340],
+                        borderColor: '#6366F1',
+                        backgroundColor: 'rgba(99, 102, 241, 0.1)',
+                        borderWidth: 2,
+                        pointBackgroundColor: '#6366F1',
+                        pointRadius: 4,
+                        pointHoverRadius: 6,
+                        fill: true,
+                        tension: 0.3
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.1)'
+                            },
+                            ticks: {
+                                color: '#94a3b8'
+                            }
+                        },
+                        x: {
+                            grid: {
+                                display: false
+                            },
+                            ticks: {
+                                color: '#94a3b8'
+                            }
+                        }
+                    }
+                }
+            });
+        });
+        
+        // Close modal when clicking outside
+        window.addEventListener('click', function(event) {
+            const modals = document.querySelectorAll('.modal');
+            modals.forEach(modal => {
+                if (event.target === modal) {
+                    modal.classList.remove('active');
+                }
+            });
+        });
+    </script>
+</body>
+</html>

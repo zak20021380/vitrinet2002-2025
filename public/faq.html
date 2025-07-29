@@ -31,89 +31,112 @@
             50% { transform: translateY(-8px); }
             100% { transform: translateY(0px); }
         }
-        
         @keyframes pulse {
             0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
             70% { box-shadow: 0 0 0 12px rgba(16, 185, 129, 0); }
             100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
         }
-        
         @keyframes glow {
             0% { box-shadow: 0 0 5px rgba(99, 102, 241, 0.5); }
             50% { box-shadow: 0 0 20px rgba(99, 102, 241, 0.8); }
             100% { box-shadow: 0 0 5px rgba(99, 102, 241, 0.5); }
         }
-        
         @keyframes shake {
             0%, 100% { transform: translateX(0); }
             10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
             20%, 40%, 60%, 80% { transform: translateX(5px); }
         }
-        
+        @keyframes pulse-glow {
+            0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(99, 102, 241, 0.7); }
+            70% { transform: scale(1.05); box-shadow: 0 0 15px 8px rgba(99, 102, 241, 0.4); }
+            100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(99, 102, 241, 0); }
+        }
+        @keyframes confetti-slow {
+            0% { transform: translate3d(0, 0, 0) rotateX(0) rotateY(0); opacity: 1; }
+            100% { transform: translate3d(25px, 105vh, 0) rotateX(360deg) rotateY(180deg); opacity: 0; }
+        }
+        @keyframes confetti-medium {
+            0% { transform: translate3d(0, 0, 0) rotateX(0) rotateY(0); opacity: 1; }
+            100% { transform: translate3d(100px, 105vh, 0) rotateX(100deg) rotateY(360deg); opacity: 0; }
+        }
+        @keyframes confetti-fast {
+            0% { transform: translate3d(0, 0, 0) rotateX(0) rotateY(0); opacity: 1; }
+            100% { transform: translate3d(-50px, 105vh, 0) rotateX(10deg) rotateY(250deg); opacity: 0; }
+        }
+        @keyframes scaleIn {
+            0% { transform: scale(0.5); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        @keyframes gold-pulse {
+            0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.5); }
+            70% { transform: scale(1.05); box-shadow: 0 0 25px 15px rgba(245, 158, 11, 0.4); }
+            100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(245, 158, 11, 0); }
+        }
+        @keyframes shine {
+            0% { background-position: -100% 0; }
+            100% { background-position: 200% 0; }
+        }
+        @keyframes rotate {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
         .float-animation {
             animation: float 3s ease-in-out infinite;
         }
-        
         .pulse-animation {
             animation: pulse 2s infinite;
         }
-        
         .glow-animation {
             animation: glow 3s ease-in-out infinite;
         }
-        
         .shake-animation {
             animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both;
         }
-        
+        .pulse-glow-animation {
+            animation: pulse-glow 2s infinite;
+        }
+        .gold-pulse-animation {
+            animation: gold-pulse 2s infinite;
+        }
         body {
             background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
             color: #e2e8f0;
             font-family: 'Vazirmatn', sans-serif;
         }
-        
         .card {
             background: rgba(30, 41, 59, 0.7);
             backdrop-filter: blur(10px);
             border-radius: 16px;
             border: 1px solid rgba(99, 102, 241, 0.2);
         }
-        
         .progress-gradient {
             background: linear-gradient(90deg, #10B981 0%, #6366F1 100%);
         }
-        
         .btn-primary {
             background: linear-gradient(90deg, #6366F1 0%, #8B5CF6 100%);
             transition: all 0.3s ease;
         }
-        
         .btn-primary:hover {
             transform: translateY(-2px);
             box-shadow: 0 10px 20px rgba(99, 102, 241, 0.3);
         }
-        
         .btn-success {
             background: linear-gradient(90deg, #10B981 0%, #34D399 100%);
             transition: all 0.3s ease;
         }
-        
         .btn-success:hover {
             transform: translateY(-2px);
             box-shadow: 0 10px 20px rgba(16, 185, 129, 0.3);
         }
-        
         .input-field {
             background: rgba(30, 41, 59, 0.5);
             border: 1px solid rgba(99, 102, 241, 0.3);
             transition: all 0.3s ease;
         }
-        
         .input-field:focus {
             border-color: #6366F1;
             box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.3);
         }
-        
         .step-indicator {
             width: 35px;
             height: 35px;
@@ -123,20 +146,16 @@
             justify-content: center;
             position: relative;
         }
-        
         .step-indicator.completed {
             background: #10B981;
         }
-        
         .step-indicator.active {
             background: #6366F1;
             box-shadow: 0 0 10px rgba(99, 102, 241, 0.7);
         }
-        
         .step-indicator.inactive {
             background: #475569;
         }
-        
         .step-label {
             position: absolute;
             top: 40px;
@@ -144,54 +163,723 @@
             font-size: 0.75rem;
             width: 80px;
         }
-        
         .reward-item {
             transition: all 0.3s ease;
             cursor: pointer;
         }
-        
         .reward-item:hover {
             transform: scale(1.03);
             background: rgba(99, 102, 241, 0.1);
         }
-        
         .quick-link {
             transition: all 0.3s ease;
         }
-        
         .quick-link:hover {
             transform: translateY(-5px);
             box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
         }
-        
         .screen {
             display: none;
         }
-        
         .screen.active {
             display: block;
         }
-        
         .code-input {
             letter-spacing: 8px;
             font-weight: bold;
         }
-        
         .amber-warning {
             background: rgba(245, 158, 11, 0.15);
             border: 1px solid rgba(245, 158, 11, 0.3);
             animation: glow 3s ease-in-out infinite;
             cursor: pointer;
         }
-        
         .store-card {
             transition: all 0.3s ease;
             cursor: pointer;
         }
-        
         .store-card:hover {
             transform: translateY(-5px);
         }
+        /* Rules Modal Styles */
+        #rulesModal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(15, 23, 42, 0.95);
+            backdrop-filter: blur(10px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+        #rulesModal.active {
+            opacity: 1;
+            visibility: visible;
+        }
+        .modal-content {
+            background: rgba(30, 41, 59, 0.85);
+            backdrop-filter: blur(20px);
+            border-radius: 24px;
+            border: 1px solid rgba(99, 102, 241, 0.3);
+            width: 90%;
+            max-width: 600px;
+            max-height: 90vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        }
+        .modal-header {
+            padding: 24px;
+            border-bottom: 1px solid rgba(99, 102, 241, 0.2);
+            text-align: center;
+        }
+        .modal-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #fff;
+        }
+        .modal-body {
+            padding: 24px;
+            overflow-y: auto;
+            flex-grow: 1;
+        }
+        .rules-list {
+            list-style-type: none;
+            padding: 0;
+            margin: 0;
+        }
+        .rules-list li {
+            padding: 12px 0;
+            border-bottom: 1px solid rgba(226, 232, 240, 0.1);
+            display: flex;
+            align-items: flex-start;
+        }
+        .rules-list li:last-child {
+            border-bottom: none;
+        }
+        .rule-icon {
+            color: #6366F1;
+            font-size: 1.2rem;
+            margin-left: 12px;
+            margin-top: 4px;
+        }
+        .rule-text {
+            font-size: 1rem;
+            line-height: 1.7;
+            color: #e2e8f0;
+        }
+        .modal-footer {
+            padding: 24px;
+            text-align: center;
+            border-top: 1px solid rgba(99, 102, 241, 0.2);
+        }
+        .accept-rules-btn {
+            background: linear-gradient(90deg, #6366F1 0%, #8B5CF6 100%);
+            color: white;
+            font-weight: 600;
+            padding: 16px 32px;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 200px;
+        }
+        .accept-rules-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(99, 102, 241, 0.4);
+        }
+        .accept-rules-btn i {
+            margin-left: 8px;
+        }
+        /* Rules Button Styles (Updated) */
+        .rules-btn {
+            background: linear-gradient(90deg, #f59e0b, #f97316);
+            border-radius: 12px;
+            padding: 16px 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            margin-bottom: 24px;
+            width: 100%;
+            font-weight: bold;
+            color: white;
+            border: none;
+            box-shadow: 0 4px 15px rgba(245, 158, 11, 0.3);
+        }
+        .rules-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(245, 158, 11, 0.4);
+        }
+        .rules-btn i {
+            margin-left: 8px;
+        }
+        /* Quick Links Styles */
+        .quick-links-container {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+        .quick-link {
+            background: rgba(30, 41, 59, 0.7);
+            border: 1px solid rgba(99, 102, 241, 0.2);
+            border-radius: 16px;
+            padding: 20px 12px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        .quick-link:hover {
+            transform: translateY(-5px);
+            background: rgba(99, 102, 241, 0.1);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+        }
+        .quick-link-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 12px;
+            font-size: 1.5rem;
+        }
+        .quick-link:nth-child(1) .quick-link-icon {
+            background: rgba(99, 102, 241, 0.15);
+            color: #6366F1;
+        }
+        .quick-link:nth-child(2) .quick-link-icon {
+            background: rgba(16, 185, 129, 0.15);
+            color: #10B981;
+        }
+        .quick-link:nth-child(3) .quick-link-icon {
+            background: rgba(245, 158, 11, 0.15);
+            color: #F59E0B;
+        }
+        .quick-link-title {
+            font-weight: 600;
+            font-size: 0.9rem;
+            margin-top: 4px;
+        }
+        /* Celebration Popup Styles (Updated) */
+        #celebrationPopup {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 2000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+            pointer-events: none;
+        }
+        #celebrationPopup.active {
+            opacity: 1;
+            visibility: visible;
+            pointer-events: auto;
+        }
+        .celebration-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(15, 23, 42, 0.9);
+            backdrop-filter: blur(10px);
+        }
+        .celebration-card {
+            position: relative;
+            z-index: 10;
+            background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+            backdrop-filter: blur(20px);
+            border-radius: 24px;
+            border: 2px solid;
+            border-image: linear-gradient(45deg, #F59E0B, #FFD700, #F59E0B) 1;
+            box-shadow: 0 0 40px rgba(245, 158, 11, 0.5),
+                        0 25px 50px -12px rgba(0, 0, 0, 0.8);
+            width: 90%;
+            max-width: 550px;
+            padding: 40px 32px;
+            text-align: center;
+            transform: scale(0.5);
+            opacity: 0;
+            transition: all 0.7s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        #celebrationPopup.active .celebration-card {
+            transform: scale(1);
+            opacity: 1;
+        }
+        .celebration-icon {
+            width: 180px;
+            height: 180px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, rgba(245, 158, 11, 0.1) 0%, rgba(245, 158, 11, 0.3) 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 30px;
+            animation: gold-pulse 3s ease-in-out infinite;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5);
+        }
+        .celebration-icon::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(245, 158, 11, 0.3) 0%, transparent 70%);
+            border-radius: 50%;
+            animation: rotate 10s linear infinite;
+        }
+        .celebration-icon i {
+            font-size: 90px;
+            color: #FFD700;
+            position: relative;
+            z-index: 2;
+            text-shadow: 0 0 25px rgba(245, 158, 11, 0.9);
+        }
+        .celebration-title {
+            font-size: 42px;
+            font-weight: 900;
+            margin-bottom: 20px;
+            background: linear-gradient(45deg, #FFD700, #F59E0B, #FFD700);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: 0 0 20px rgba(245, 158, 11, 0.4);
+            letter-spacing: -1px;
+            position: relative;
+            display: inline-block;
+        }
+        .celebration-title::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 25%;
+            width: 50%;
+            height: 4px;
+            background: linear-gradient(90deg, transparent, #FFD700, #F59E0B, #FFD700, transparent);
+            border-radius: 2px;
+        }
+        .celebration-message {
+            font-size: 20px;
+            line-height: 1.6;
+            color: #e2e8f0;
+            margin-bottom: 30px;
+            background: linear-gradient(45deg, #e2e8f0, #cbd5e1);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-weight: 500;
+        }
+        .celebration-timer {
+            background: linear-gradient(90deg, rgba(30, 41, 59, 0.7), rgba(30, 41, 59, 0.9), rgba(30, 41, 59, 0.7));
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 30px;
+            border: 1px solid rgba(245, 158, 11, 0.4);
+            box-shadow: 0 0 15px rgba(245, 158, 11, 0.2);
+        }
+        .timer-text {
+            font-size: 18px;
+            color: #FFD700;
+            margin-bottom: 12px;
+            font-weight: 600;
+        }
+        .timer-progress {
+            height: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 5px;
+            overflow: hidden;
+        }
+        .timer-progress-bar {
+            height: 100%;
+            width: 100%;
+            background: linear-gradient(90deg, #F59E0B, #FFD700);
+            border-radius: 5px;
+            transition: width 0.1s linear;
+            position: relative;
+            overflow: hidden;
+        }
+        .timer-progress-bar::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+            animation: shine 1.5s infinite;
+        }
+        .confetti {
+            position: absolute;
+            width: 15px;
+            height: 15px;
+            opacity: 0.9;
+            border-radius: 2px;
+            z-index: 1;
+        }
+        .confetti:nth-child(1) {
+            background: #F59E0B;
+            animation: confetti-slow 2.5s linear 1 forwards;
+        }
+        .confetti:nth-child(2) {
+            background: #FFD700;
+            animation: confetti-medium 3s linear 1 forwards;
+        }
+        .confetti:nth-child(3) {
+            background: #10B981;
+            animation: confetti-fast 2s linear 1 forwards;
+        }
+        .confetti:nth-child(4) {
+            background: #6366F1;
+            animation: confetti-slow 2.7s linear 1 forwards;
+        }
+        .confetti:nth-child(5) {
+            background: #F59E0B;
+            animation: confetti-medium 2.8s linear 1 forwards;
+        }
+        .confetti:nth-child(6) {
+            background: #FFD700;
+            animation: confetti-fast 3.2s linear 1 forwards;
+        }
+        .confetti:nth-child(7) {
+            background: #10B981;
+            animation: confetti-slow 3.1s linear 1 forwards;
+        }
+        .confetti:nth-child(8) {
+            background: #6366F1;
+            animation: confetti-medium 2.6s linear 1 forwards;
+        }
+        .confetti:nth-child(9) {
+            background: #F59E0B;
+            animation: confetti-fast 2.9s linear 1 forwards;
+        }
+        .confetti:nth-child(10) {
+            background: #FFD700;
+            animation: confetti-slow 3.4s linear 1 forwards;
+        }
+        .confetti:nth-child(11) {
+            background: #10B981;
+            animation: confetti-medium 3.3s linear 1 forwards;
+        }
+        .confetti:nth-child(12) {
+            background: #6366F1;
+            animation: confetti-fast 3.6s linear 1 forwards;
+        }
+        /* Final Reward Banner Styles */
+        .final-reward-banner {
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.2), rgba(16, 185, 129, 0.4));
+            border: 1px solid rgba(16, 185, 129, 0.5);
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 24px;
+            text-align: center;
+            box-shadow: 0 10px 25px rgba(16, 185, 129, 0.3);
+            animation: pulse-glow 3s infinite;
+        }
+        .final-reward-banner h2 {
+            font-size: 1.25rem;
+            font-weight: bold;
+            color: #10B981;
+            margin-bottom: 16px;
+        }
+        .final-reward-banner p {
+            font-size: 1rem;
+            color: #e2e8f0;
+            margin-bottom: 16px;
+        }
+        /* Cashout Modal Styles */
+        #cashoutModal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(15, 23, 42, 0.9);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 3000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+        #cashoutModal.active {
+            opacity: 1;
+            visibility: visible;
+        }
+        .cashout-modal-content {
+            background: rgba(30, 41, 59, 0.95);
+            border-radius: 20px;
+            padding: 32px;
+            width: 90%;
+            max-width: 400px;
+            text-align: center;
+            border: 1px solid rgba(99, 102, 241, 0.3);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            transform: scale(0.9);
+            transition: transform 0.3s ease;
+        }
+        #cashoutModal.active .cashout-modal-content {
+            transform: scale(1);
+        }
+        .cashout-icon {
+            width: 80px;
+            height: 80px;
+            background: rgba(16, 185, 129, 0.2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+            font-size: 36px;
+            color: #10B981;
+        }
+        .cashout-title {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: white;
+            margin-bottom: 16px;
+        }
+        .cashout-message {
+            font-size: 1rem;
+            color: #cbd5e1;
+            line-height: 1.6;
+            margin-bottom: 24px;
+        }
+        .close-cashout-modal {
+            background: linear-gradient(90deg, #6366F1 0%, #8B5CF6 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+        }
+        .close-cashout-modal:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(99, 102, 241, 0.4);
+        }
+        /* Seller Code Button Styles (Updated) */
+        .seller-code-btn {
+            position: fixed;
+            bottom: 24px;
+            left: 24px; /* Changed to left for RTL */
+            z-index: 40;
+            background: linear-gradient(90deg, #6366F1, #8B5CF6);
+            color: white;
+            border: none;
+            border-radius: 50px;
+            padding: 14px 20px;
+            font-weight: 600;
+            box-shadow: 0 10px 25px rgba(99, 102, 241, 0.4);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            animation: float 3s ease-in-out infinite;
+            display: flex;
+            align-items: center;
+        }
+        .seller-code-btn:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(99, 102, 241, 0.6);
+        }
+        .seller-code-btn i {
+            margin-left: 8px;
+        }
+        
+        /* START OF NEW STYLES */
+        
+        /* Floating Back to Main Page Button */
+        #backToDashboardBtn {
+            position: fixed;
+            bottom: 24px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 50;
+            background: linear-gradient(90deg, #6366F1, #8B5CF6);
+            color: white;
+            border: none;
+            border-radius: 50px;
+            padding: 14px 24px;
+            font-weight: 600;
+            box-shadow: 0 8px 25px rgba(99, 102, 241, 0.5);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            animation: float 3s ease-in-out infinite;
+            display: flex;
+            align-items: center;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s ease, transform 0.3s ease;
+        }
+        
+        #backToDashboardBtn.active {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        #backToDashboardBtn:hover {
+            transform: translateX(-50%) translateY(-5px);
+            box-shadow: 0 12px 30px rgba(99, 102, 241, 0.7);
+        }
+        
+        #backToDashboardBtn i {
+            margin-left: 8px;
+        }
+        
+        /* Seller Code Success Popup */
+        #sellerCodeSuccessPopup {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 2500;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+            pointer-events: none;
+        }
+        
+        #sellerCodeSuccessPopup.active {
+            opacity: 1;
+            visibility: visible;
+            pointer-events: auto;
+        }
+        
+        .seller-code-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(15, 23, 42, 0.85);
+            backdrop-filter: blur(10px);
+        }
+        
+        .seller-code-popup-card {
+            position: relative;
+            z-index: 10;
+            background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+            backdrop-filter: blur(20px);
+            border-radius: 24px;
+            border: 2px solid;
+            border-image: linear-gradient(45deg, #F59E0B, #FFD700, #F59E0B) 1;
+            box-shadow: 0 0 30px rgba(245, 158, 11, 0.6),
+                        0 20px 40px -12px rgba(0, 0, 0, 0.8);
+            width: 90%;
+            max-width: 450px;
+            padding: 30px;
+            text-align: center;
+            transform: scale(0.9);
+            opacity: 0;
+            transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            animation: gold-pulse 3s infinite;
+        }
+        
+        #sellerCodeSuccessPopup.active .seller-code-popup-card {
+            transform: scale(1);
+            opacity: 1;
+        }
+        
+        .seller-code-popup-icon {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, rgba(245, 158, 11, 0.15) 0%, rgba(245, 158, 11, 0.3) 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 25px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
+        }
+        
+        .seller-code-popup-icon::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(245, 158, 11, 0.3) 0%, transparent 70%);
+            border-radius: 50%;
+            animation: rotate 10s linear infinite;
+        }
+        
+        .seller-code-popup-icon i {
+            font-size: 48px;
+            color: #FFD700;
+            position: relative;
+            z-index: 2;
+            text-shadow: 0 0 15px rgba(245, 158, 11, 0.8);
+        }
+        
+        .seller-code-popup-title {
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-bottom: 15px;
+            background: linear-gradient(45deg, #FFD700, #F59E0B, #FFD700);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .seller-code-popup-message {
+            font-size: 1.1rem;
+            line-height: 1.6;
+            color: #e2e8f0;
+            margin-bottom: 25px;
+        }
+        
+        .close-seller-code-popup {
+            background: linear-gradient(90deg, #6366F1 0%, #8B5CF6 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+            max-width: 200px;
+            margin: 0 auto;
+        }
+        
+        .close-seller-code-popup:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(99, 102, 241, 0.4);
+        }
+        
+        /* END OF NEW STYLES */
     </style>
 </head>
 <body class="min-h-screen flex items-center justify-center p-4">
@@ -207,11 +895,9 @@
                 <h1 class="text-2xl font-bold text-white mt-6">کد فروشنده را وارد کنید</h1>
                 <p class="text-indigo-300 mt-3">کد فروشنده را اسکن کرده یا دستی وارد نمایید</p>
             </div>
-            
             <div class="card p-6 mb-6 relative overflow-hidden">
                 <div class="absolute -top-20 -left-20 w-40 h-40 rounded-full bg-primary opacity-10"></div>
                 <div class="absolute -bottom-20 -right-20 w-40 h-40 rounded-full bg-success opacity-10"></div>
-                
                 <div class="relative z-10">
                     <div class="mb-5">
                         <label class="block text-sm font-medium text-gray-300 mb-2">کد فروشنده</label>
@@ -225,11 +911,9 @@
                             <i class="fas fa-exclamation-circle mr-1"></i> کد فروشنده معتبر نیست
                         </div>
                     </div>
-                    
                     <button id="verifyCodeBtn" class="btn-primary w-full py-3 rounded-lg font-medium text-white glow-animation">
                         ادامه
                     </button>
-                    
                     <div class="mt-6 text-center">
                         <button class="text-primary font-medium flex items-center justify-center mx-auto">
                             <i class="fas fa-camera mr-2"></i> اسکن کد
@@ -237,14 +921,12 @@
                     </div>
                 </div>
             </div>
-            
             <div class="text-center">
                 <p class="text-gray-400 text-sm">
                     کد فروشنده را از فروشنده دریافت کرده و وارد نمایید
                 </p>
             </div>
         </div>
-        
         <!-- Phone Input Screen -->
         <div id="phoneScreen" class="screen">
             <div class="flex items-center mb-8">
@@ -253,7 +935,6 @@
                 </button>
                 <h1 class="text-xl font-bold text-white mx-auto">تکمیل اطلاعات</h1>
             </div>
-            
             <div class="card p-6 mb-6">
                 <div class="text-center mb-6">
                     <div class="pulse-animation inline-block rounded-full p-4 mb-4">
@@ -262,7 +943,6 @@
                     <h2 class="text-lg font-bold text-white">شماره موبایل خود را وارد کنید</h2>
                     <p class="text-indigo-300 mt-2">برای ثبت اعتبار و دریافت پاداش‌ها نیاز است</p>
                 </div>
-                
                 <div class="mb-5">
                     <label class="block text-sm font-medium text-gray-300 mb-2">شماره موبایل</label>
                     <div class="relative">
@@ -276,18 +956,15 @@
                         <i class="fas fa-exclamation-circle mr-1"></i> شماره موبایل معتبر نیست
                     </div>
                 </div>
-                
                 <button id="sendCodeBtn" class="btn-primary w-full py-3 rounded-lg font-medium text-white">
                     ارسال کد تایید
                 </button>
-                
                 <!-- Added "Skip for now" button -->
                 <button id="skipPhoneBtn" class="mt-4 w-full py-3 rounded-lg font-medium text-white border border-gray-600 hover:border-gray-500">
                     فعلا بگذریم
                 </button>
             </div>
         </div>
-        
         <!-- Verification Screen -->
         <div id="verificationScreen" class="screen">
             <div class="flex items-center mb-8">
@@ -296,7 +973,6 @@
                 </button>
                 <h1 class="text-xl font-bold text-white mx-auto">تایید شماره موبایل</h1>
             </div>
-            
             <div class="card p-6 mb-6">
                 <div class="text-center mb-6">
                     <div class="float-animation inline-block rounded-full p-4 mb-4 bg-success bg-opacity-20">
@@ -305,7 +981,6 @@
                     <h2 class="text-lg font-bold text-white">کد تایید ارسال شد</h2>
                     <p id="phoneMask" class="text-indigo-300 mt-2">کد ارسال شده به شماره ۰۹۱۲XXX۵۶۷۸ را وارد کنید</p>
                 </div>
-                
                 <div class="mb-6">
                     <label class="block text-sm font-medium text-gray-300 mb-4 text-center">کد ۴ رقمی</label>
                     <div class="flex justify-center space-x-3">
@@ -318,20 +993,25 @@
                         <i class="fas fa-exclamation-circle mr-1"></i> کد وارد شده صحیح نیست
                     </div>
                 </div>
-                
                 <div class="text-center text-sm text-gray-400 mt-6">
                     <p>کد را دریافت نکرده‌اید؟ <button id="resendCode" class="text-primary font-medium">ارسال مجدد</button></p>
                     <p class="mt-2">زمان باقی‌مانده: <span id="countdown" class="font-bold">02:00</span></p>
                 </div>
-                
                 <button id="verifyPhoneBtn" class="btn-success w-full py-3 rounded-lg font-medium text-white mt-6">
                     تایید و ادامه
                 </button>
             </div>
         </div>
-        
         <!-- Dashboard Screen -->
         <div id="dashboardScreen" class="screen">
+            <!-- Final Reward Banner (Added) -->
+            <div id="finalRewardBanner" class="final-reward-banner hidden">
+                <h2>🎉 تبریک!</h2>
+                <p>به بالاترین سطح جایزه رسیدی و می‌تونی درخواست تسویه بدی.</p>
+                <button id="requestCashoutBtn" class="btn-success py-2 px-6 rounded-lg font-medium">
+                    درخواست تسویه جایزه
+                </button>
+            </div>
             <!-- Header -->
             <div class="flex justify-between items-center mb-6">
                 <div>
@@ -351,7 +1031,6 @@
                     </div>
                 </div>
             </div>
-            
             <!-- Warning Card (if phone not verified) -->
             <div id="phoneWarning" class="amber-warning rounded-xl p-4 mb-6 flex items-start">
                 <div class="bg-amber-500 bg-opacity-20 p-2 rounded-lg mr-3">
@@ -362,18 +1041,15 @@
                     <p class="text-amber-100 text-sm mt-1">برای ثبت اعتبار باید شماره‌ات رو تایید کنی!</p>
                 </div>
             </div>
-            
             <!-- Credit Card -->
             <div class="card p-5 mb-6 relative overflow-hidden">
                 <div class="absolute -top-20 -left-20 w-40 h-40 rounded-full bg-primary opacity-10"></div>
                 <div class="absolute -bottom-20 -right-20 w-40 h-40 rounded-full bg-success opacity-10"></div>
-                
                 <div class="relative z-10">
                     <div class="flex justify-between items-center mb-4">
                         <h2 class="text-lg font-bold text-white">اعتبار فعلی شما</h2>
                         <i class="fas fa-coins text-attention text-xl"></i>
                     </div>
-                    
                     <div class="pulse-animation bg-darkcard rounded-xl p-4 mb-4">
                         <p class="text-gray-400 text-sm">موجودی قابل استفاده</p>
                         <div class="flex items-end mt-1">
@@ -381,7 +1057,6 @@
                             <span class="text-gray-400 mr-1">تومان</span>
                         </div>
                     </div>
-                    
                     <div class="grid grid-cols-2 gap-3">
                         <div class="bg-darkcard rounded-lg p-3">
                             <p class="text-gray-400 text-xs">تعداد خریدها</p>
@@ -394,11 +1069,9 @@
                     </div>
                 </div>
             </div>
-            
             <!-- Progress Tracker -->
             <div class="card p-5 mb-6">
                 <h2 class="text-lg font-bold text-white mb-4">پیشرفت شما</h2>
-                
                 <div class="mb-4">
                     <div class="flex justify-between text-sm text-gray-400 mb-1">
                         <span id="nextRewardLabel">پاداش بعدی: ۵۰۰,۰۰۰ تومان</span>
@@ -408,7 +1081,6 @@
                         <div id="progressBar" class="progress-gradient h-full rounded-full"></div>
                     </div>
                 </div>
-                
                 <div class="mt-6">
                     <div class="flex items-center mb-3">
                         <div class="w-6 h-6 rounded-full bg-attention flex items-center justify-center mr-2">
@@ -424,7 +1096,6 @@
                     </div>
                 </div>
             </div>
-            
             <!-- Store Type Selector -->
             <div class="mb-6">
                 <h2 class="text-lg font-bold text-white mb-4">انتخاب نوع فروشگاه</h2>
@@ -441,7 +1112,6 @@
                             <i class="fas fa-arrow-left text-primary"></i>
                         </div>
                     </div>
-                    
                     <div class="store-card normal-stores bg-gray-700 bg-opacity-50 rounded-xl p-4 flex items-center">
                         <div class="w-12 h-12 rounded-full bg-gray-600 flex items-center justify-center mr-3">
                             <i class="fas fa-store text-gray-300 text-xl"></i>
@@ -456,7 +1126,6 @@
                     </div>
                 </div>
             </div>
-            
             <!-- Quick Stats -->
             <div class="grid grid-cols-3 gap-3 mb-6">
                 <div class="card p-3 text-center">
@@ -472,9 +1141,137 @@
                     <p class="font-bold text-white"><span id="totalPurchases">۶</span> خرید</p>
                 </div>
             </div>
+            <!-- Rules Button (Moved) -->
+            <button id="showRulesBtn" class="rules-btn">
+                <i class="fas fa-book-open"></i>
+                <span>مشاهده قوانین سیستم پاداش</span>
+            </button>
+            <!-- Quick Links Section -->
+            <div class="mb-6">
+                <h2 class="text-lg font-bold text-white mb-4">دسترسی سریع</h2>
+                <div class="quick-links-container">
+                    <a href="https://vitrinet.shop" target="_blank" class="quick-link">
+                        <div class="quick-link-icon">
+                            <i class="fas fa-globe"></i>
+                        </div>
+                        <div class="quick-link-title">سایت اصلی ویترینت</div>
+                    </a>
+                    <a href="https://vitrinet.shop/about" target="_blank" class="quick-link">
+                        <div class="quick-link-icon">
+                            <i class="fas fa-info-circle"></i>
+                        </div>
+                        <div class="quick-link-title">درباره ما</div>
+                    </a>
+                    <a href="https://wa.me/989123456789" target="_blank" class="quick-link">
+                        <div class="quick-link-icon">
+                            <i class="fas fa-headset"></i>
+                        </div>
+                        <div class="quick-link-title">پشتیبانی سریع</div>
+                    </a>
+                </div>
+            </div>
         </div>
     </div>
-
+    <!-- Seller Code Button (Floating) -->
+    <button id="sellerCodeBtn" class="seller-code-btn">
+        <i class="fas fa-qrcode"></i>
+        <span>وارد کردن کد فروشنده</span>
+    </button>
+    
+    <!-- New: Floating Back to Main Page Button -->
+    <button id="backToDashboardBtn">
+        <i class="fas fa-home mr-2"></i>
+        <span>بازگشت به صفحه اصلی</span>
+    </button>
+    
+    <!-- New: Seller Code Success Popup -->
+    <div id="sellerCodeSuccessPopup">
+        <div class="seller-code-overlay"></div>
+        <div class="seller-code-popup-card">
+            <div class="seller-code-popup-icon">
+                <i class="fas fa-trophy"></i>
+            </div>
+            <h2 class="seller-code-popup-title">تبریک!</h2>
+            <p class="seller-code-popup-message">کد فروشنده با موفقیت ثبت شد!</p>
+            <button id="closeSellerCodePopup" class="close-seller-code-popup">
+                متوجه شدم
+            </button>
+        </div>
+    </div>
+    
+    <!-- Rules Modal -->
+    <div id="rulesModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">قوانین استفاده از سیستم پاداش ویترینت</h2>
+            </div>
+            <div class="modal-body">
+                <ul class="rules-list">
+                    <li>
+                        <i class="fas fa-circle rule-icon"></i>
+                        <p class="rule-text">برای دریافت پاداش، خرید باید به صورت حضوری ثبت و تأیید شود.</p>
+                    </li>
+                    <li>
+                        <i class="fas fa-circle rule-icon"></i>
+                        <p class="rule-text">هر شماره موبایل فقط یک حساب کاربری می‌تواند داشته باشد.</p>
+                    </li>
+                    <li>
+                        <i class="fas fa-circle rule-icon"></i>
+                        <p class="rule-text">تخلف یا سوءاستفاده باعث قطع دسترسی به پاداش خواهد شد.</p>
+                    </li>
+                    <li>
+                        <i class="fas fa-circle rule-icon"></i>
+                        <p class="rule-text">اطلاعات حساب شما نزد ویترینت محرمانه می‌ماند.</p>
+                    </li>
+                    <li>
+                        <i class="fas fa-circle rule-icon"></i>
+                        <p class="rule-text">امکان تغییر یا توقف سیستم پاداش در هر زمان برای ویترینت محفوظ است.</p>
+                    </li>
+                    <li>
+                        <i class="fas fa-circle rule-icon"></i>
+                        <p class="rule-text">برای اطلاعات بیشتر به vitrinet.shop مراجعه کنید.</p>
+                    </li>
+                </ul>
+            </div>
+            <div class="modal-footer">
+                <button id="acceptRulesBtn" class="accept-rules-btn">
+                    <i class="fas fa-check-circle"></i>
+                    فهمیدم و قبول دارم
+                </button>
+            </div>
+        </div>
+    </div>
+    <!-- Celebration Popup -->
+    <div id="celebrationPopup">
+        <div class="celebration-overlay"></div>
+        <div class="celebration-card">
+            <div class="celebration-icon">
+                <i class="fas fa-trophy"></i>
+            </div>
+            <h1 class="celebration-title">تبریک!</h1>
+            <p class="celebration-message">شما به جایزه نهایی سیستم پاداش ویترینت رسیده‌اید</p>
+            <div class="celebration-timer">
+                <p class="timer-text">۲ روز فرصت دارید تا از جایزه خود استفاده کنید</p>
+                <div class="timer-progress">
+                    <div class="timer-progress-bar"></div>
+                </div>
+            </div>
+            <button id="closeCelebration" class="btn-primary w-full py-3 rounded-lg font-medium text-white">
+                متوجه شدم
+            </button>
+        </div>
+    </div>
+    <!-- Cashout Modal (Added) -->
+    <div id="cashoutModal">
+        <div class="cashout-modal-content">
+            <div class="cashout-icon">
+                <i class="fas fa-trophy"></i>
+            </div>
+            <h2 class="cashout-title">درخواست تسویه</h2>
+            <p class="cashout-message">درخواست تسویه شما با موفقیت ثبت شد! طی ۲۴ ساعت آینده با شما تماس می‌گیریم.</p>
+            <button id="closeCashoutModal" class="close-cashout-modal">متوجه شدم</button>
+        </div>
+    </div>
     <script>
         // Screen management
         const screens = {
@@ -483,7 +1280,6 @@
             verification: document.getElementById('verificationScreen'),
             dashboard: document.getElementById('dashboardScreen')
         };
-        
         // State management
         let appState = {
             sellerCode: '',
@@ -491,18 +1287,16 @@
             isPhoneVerified: false,
             credit: 0,
             purchases: 0,
-            rewardedMilestones: []
+            rewardedMilestones: [],
+            hasSeenFinalRewardPopup: false
         };
-
         const milestones = [
             { purchases: 3, reward: 200000 },
             { purchases: 6, reward: 225000 },
             { purchases: 9, reward: 500000 },
             { purchases: 13, reward: 1000000 }
         ];
-
         const validSellerCodes = ["MK27X9", "SH56BY", "ZXC123"];
-
         // Load state from localStorage
         const storedState = localStorage.getItem('appState');
         if (storedState) {
@@ -514,7 +1308,6 @@
             appState.rewardedMilestones = [3, 6];
             localStorage.setItem('appState', JSON.stringify(appState));
         }
-
         // Helper function to convert to Persian digits with commas
         function toPersianNumber(num) {
             const persianDigits = ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹'];
@@ -523,22 +1316,45 @@
                 .replace(/\B(?=(\d{3})+(?!\d))/g, ',')
                 .replace(/\d/g, d => persianDigits[d]);
         }
-
         function toPersianDigits(str) {
             const persianDigits = ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹'];
             return str.replace(/\d/g, d => persianDigits[d]);
         }
-
         // Show a specific screen
         function showScreen(screenName) {
             Object.values(screens).forEach(screen => screen.classList.remove('active'));
             screens[screenName].classList.add('active');
+
+            // Control visibility of the floating buttons
+            const rulesBtn = document.getElementById('showRulesBtn');
+            const sellerCodeBtn = document.getElementById('sellerCodeBtn');
+            const backToDashboardBtn = document.getElementById('backToDashboardBtn');
             
+            if (screenName === 'dashboard') {
+                sellerCodeBtn.style.display = 'flex'; // Show on dashboard
+                backToDashboardBtn.classList.remove('active');
+            } else if (screenName === 'phone') {
+                sellerCodeBtn.style.display = 'none'; // Hide on other screens
+                backToDashboardBtn.classList.add('active');
+            } else {
+                sellerCodeBtn.style.display = 'none'; // Hide on other screens
+                backToDashboardBtn.classList.remove('active');
+            }
+
             if (screenName === 'dashboard') {
                 updatePhoneWarning();
                 updateDashboard();
+                // Check if we should show the celebration popup
+                if (!appState.hasSeenFinalRewardPopup && 
+                    appState.purchases >= 13 && 
+                    appState.rewardedMilestones.includes(13)) {
+                    setTimeout(() => {
+                        showCelebrationPopup();
+                        appState.hasSeenFinalRewardPopup = true;
+                        localStorage.setItem('appState', JSON.stringify(appState));
+                    }, 1000);
+                }
             }
-
             if (screenName === 'verification') {
                 if (appState.phone) {
                     const fullPhone = '0' + appState.phone;
@@ -547,7 +1363,6 @@
                 }
             }
         }
-        
         // Update phone warning visibility
         function updatePhoneWarning() {
             const warningElement = document.getElementById('phoneWarning');
@@ -557,7 +1372,6 @@
                 warningElement.classList.remove('hidden');
             }
         }
-
         function registerPurchase() {
             appState.purchases++;
             milestones.forEach(m => {
@@ -569,37 +1383,86 @@
             });
             localStorage.setItem('appState', JSON.stringify(appState));
         }
-        
         function updateDashboard() {
             const upcomingMilestones = milestones.filter(m => !appState.rewardedMilestones.includes(m.purchases) && m.purchases > appState.purchases);
             upcomingMilestones.sort((a, b) => a.purchases - b.purchases);
             const nextMilestone = upcomingMilestones[0] || { purchases: Infinity, reward: 0 };
             const finalMilestone = milestones[milestones.length - 1];
-
             const nextLeft = nextMilestone.purchases !== Infinity ? nextMilestone.purchases - appState.purchases : 0;
             const finalLeft = finalMilestone.purchases - appState.purchases;
             const nextAmount = nextMilestone.reward;
             const finalAmount = finalMilestone.reward;
-
+            // Check if user has reached final reward
+            const hasReachedFinalReward = appState.purchases >= 13 && appState.rewardedMilestones.includes(13);
+            const finalRewardBanner = document.getElementById('finalRewardBanner');
+            if (hasReachedFinalReward) {
+                finalRewardBanner.classList.remove('hidden');
+                document.getElementById('finalMessage').textContent = "شما به نهایت جایزه رسیده‌اید!";
+            } else {
+                finalRewardBanner.classList.add('hidden');
+                document.getElementById('finalMessage').textContent = `${toPersianNumber(finalLeft)} خرید تا جایزه نهایی (${toPersianNumber(finalAmount)} تومان)`;
+            }
             document.getElementById('currentCredit').textContent = toPersianNumber(appState.credit);
             document.getElementById('purchaseCount').textContent = toPersianNumber(appState.purchases);
             document.getElementById('toNextCount').textContent = toPersianNumber(nextLeft);
             document.getElementById('nextMessage').textContent = `${toPersianNumber(nextLeft)} خرید تا رسیدن به ${toPersianNumber(nextAmount)} تومان اعتبار`;
-            document.getElementById('finalMessage').textContent = `${toPersianNumber(finalLeft)} خرید تا جایزه نهایی (${toPersianNumber(finalAmount)} تومان)`;
             document.getElementById('nextRewardLabel').textContent = `پاداش بعدی: ${toPersianNumber(nextAmount)} تومان`;
             document.getElementById('specialRewardLabel').textContent = `پاداش ویژه: ${toPersianNumber(finalAmount)} تومان`;
-
             const progress = (appState.purchases / finalMilestone.purchases) * 100;
             document.getElementById('progressBar').style.width = `${progress}%`;
-
             document.getElementById('totalPurchases').textContent = toPersianNumber(appState.purchases);
         }
-        
+        // Celebration Popup Functions
+        function showCelebrationPopup() {
+            const popup = document.getElementById('celebrationPopup');
+            popup.classList.add('active');
+            // Create confetti
+            createConfetti();
+            // Start the progress bar countdown
+            const progressBar = document.querySelector('.timer-progress-bar');
+            progressBar.style.width = '100%';
+            let timeLeft = 5;
+            const interval = setInterval(() => {
+                timeLeft--;
+                progressBar.style.width = `${(timeLeft / 5) * 100}%`;
+                if (timeLeft <= 0) {
+                    clearInterval(interval);
+                    hideCelebrationPopup();
+                }
+            }, 1000);
+        }
+        function hideCelebrationPopup() {
+            const popup = document.getElementById('celebrationPopup');
+            popup.classList.remove('active');
+        }
+        function createConfetti() {
+            const popup = document.getElementById('celebrationPopup');
+            // Remove any existing confetti
+            document.querySelectorAll('.confetti').forEach(el => el.remove());
+            // Create new confetti
+            for (let i = 0; i < 12; i++) {
+                const confetti = document.createElement('div');
+                confetti.className = 'confetti';
+                confetti.style.left = Math.random() * 100 + '%';
+                confetti.style.top = '-20px';
+                confetti.style.transform = `rotate(${Math.random() * 360}deg)`;
+                confetti.style.width = (Math.random() * 10 + 5) + 'px';
+                confetti.style.height = (Math.random() * 10 + 5) + 'px';
+                confetti.style.borderRadius = Math.random() > 0.5 ? '50%' : '2px';
+                popup.appendChild(confetti);
+            }
+        }
+        // Cashout Modal Functions (Added)
+        function showCashoutModal() {
+            document.getElementById('cashoutModal').classList.add('active');
+        }
+        function hideCashoutModal() {
+            document.getElementById('cashoutModal').classList.remove('active');
+        }
         // Navigation
         document.getElementById('verifyCodeBtn').addEventListener('click', function() {
             const sellerCode = document.getElementById('sellerCode').value;
             const errorElement = document.getElementById('codeError');
-            
             if (!sellerCode || !validSellerCodes.includes(sellerCode)) {
                 errorElement.classList.remove('hidden');
                 document.getElementById('sellerCode').classList.add('shake-animation');
@@ -609,28 +1472,56 @@
             } else {
                 errorElement.classList.add('hidden');
                 appState.sellerCode = sellerCode;
-                if (appState.isPhoneVerified) {
-                    registerPurchase();
-                    showScreen('dashboard');
-                } else {
-                    showScreen('phone');
-                }
+                
+                // Show success popup instead of immediately navigating
+                const popup = document.getElementById('sellerCodeSuccessPopup');
+                popup.classList.add('active');
+                
+                // Auto close after 2.5 seconds
+                const autoCloseTimer = setTimeout(() => {
+                    hideSellerCodeSuccessPopup();
+                    navigateAfterSellerCodeSuccess();
+                }, 2500);
+                
+                // Manual close
+                document.getElementById('closeSellerCodePopup').addEventListener('click', function() {
+                    clearTimeout(autoCloseTimer);
+                    hideSellerCodeSuccessPopup();
+                    navigateAfterSellerCodeSuccess();
+                });
             }
+        });
+        
+        // New: Hide seller code success popup
+        function hideSellerCodeSuccessPopup() {
+            document.getElementById('sellerCodeSuccessPopup').classList.remove('active');
+        }
+        
+        // New: Navigate after seller code success popup is closed
+        function navigateAfterSellerCodeSuccess() {
+            if (appState.isPhoneVerified) {
+                registerPurchase();
+                showScreen('dashboard');
+            } else {
+                showScreen('phone');
+            }
+        }
+        
+        // New: Back to dashboard button click handler
+        document.getElementById('backToDashboardBtn').addEventListener('click', function() {
+            showScreen('dashboard');
         });
         
         document.getElementById('backToCode').addEventListener('click', function() {
             showScreen('code');
         });
-        
         document.getElementById('backToPhone').addEventListener('click', function() {
             showScreen('phone');
         });
-        
         // Phone validation
         document.getElementById('sendCodeBtn').addEventListener('click', function() {
             const phone = document.getElementById('phone').value;
             const errorElement = document.getElementById('phoneError');
-            
             if (!phone || phone.length !== 10 || !phone.startsWith('9')) {
                 errorElement.classList.remove('hidden');
                 document.getElementById('phone').classList.add('shake-animation');
@@ -644,13 +1535,11 @@
                 startCountdown();
             }
         });
-        
         // Skip phone verification
         document.getElementById('skipPhoneBtn').addEventListener('click', function() {
             appState.isPhoneVerified = false;
             showScreen('dashboard');
         });
-        
         // Verification code functionality
         const verificationDigits = document.querySelectorAll('.verification-digit');
         verificationDigits.forEach((digit, index) => {
@@ -659,14 +1548,12 @@
                     verificationDigits[index + 1].focus();
                 }
             });
-            
             digit.addEventListener('keydown', function(e) {
                 if (e.key === 'Backspace' && this.value.length === 0 && index > 0) {
                     verificationDigits[index - 1].focus();
                 }
             });
         });
-        
         // Countdown timer
         function startCountdown() {
             let timeLeft = 120;
@@ -675,21 +1562,18 @@
                 const minutes = Math.floor(timeLeft / 60);
                 const seconds = timeLeft % 60;
                 countdownElement.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-                
                 if (timeLeft <= 0) {
                     clearInterval(countdownInterval);
                 }
                 timeLeft--;
             }, 1000);
         }
-        
         // Verify code
         document.getElementById('verifyPhoneBtn').addEventListener('click', function() {
             let code = '';
             verificationDigits.forEach(digit => {
                 code += digit.value;
             });
-            
             if (code === '1234') {
                 appState.isPhoneVerified = true;
                 registerPurchase();
@@ -707,20 +1591,17 @@
                 }, 500);
             }
         });
-        
         // Resend code
         document.getElementById('resendCode').addEventListener('click', function() {
             document.getElementById('verifyError').classList.add('hidden');
             startCountdown();
         });
-        
         // Store card click handlers
         function handleStoreClick() {
             if (!appState.isPhoneVerified) {
                 alert("لطفاً ابتدا شماره موبایل خود را تایید کنید.");
                 return;
             }
-            
             // Changed: Open separate pages based on store type
             if (this.classList.contains('premium-stores')) {
                 window.location.href = 'premium.html';
@@ -728,21 +1609,64 @@
                 window.location.href = 'normal.html';
             }
         }
-        
+        // Rules Modal Functions
+        function showRulesModal() {
+            document.getElementById('rulesModal').classList.add('active');
+        }
+        function hideRulesModal() {
+            document.getElementById('rulesModal').classList.remove('active');
+        }
+        // Check if rules have been accepted
+        if (!localStorage.getItem('rulesAccepted')) {
+            // Show rules modal on first visit
+            setTimeout(showRulesModal, 500);
+        }
+        // Celebration Popup Close Button
+        document.getElementById('closeCelebration').addEventListener('click', hideCelebrationPopup);
+        // Cashout Modal Event Listeners (Added)
+        document.getElementById('requestCashoutBtn').addEventListener('click', showCashoutModal);
+        document.getElementById('closeCashoutModal').addEventListener('click', hideCashoutModal);
+        document.getElementById('cashoutModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                hideCashoutModal();
+            }
+        });
+        // Seller Code Button Event Listener (Added)
+        document.getElementById('sellerCodeBtn').addEventListener('click', function() {
+            showScreen('code');
+        });
         // Initialize app
         document.addEventListener('DOMContentLoaded', function() {
             // Add event listeners to store cards
             document.querySelectorAll('.store-card').forEach(card => {
                 card.addEventListener('click', handleStoreClick);
             });
-            
             // Add click handler for phone warning card
             document.getElementById('phoneWarning').addEventListener('click', function() {
                 showScreen('phone');
             });
-            
+            // Rules Modal Events
+            document.getElementById('acceptRulesBtn').addEventListener('click', function() {
+                localStorage.setItem('rulesAccepted', 'true');
+                hideRulesModal();
+            });
+            document.getElementById('showRulesBtn').addEventListener('click', showRulesModal);
+            // Close modal when clicking outside content
+            document.getElementById('rulesModal').addEventListener('click', function(e) {
+                if (e.target === this) {
+                    hideRulesModal();
+                }
+            });
             // Update phone warning
             updatePhoneWarning();
+
+            // Ensure the floating buttons are initially hidden if not on dashboard
+            const sellerCodeBtn = document.getElementById('sellerCodeBtn');
+            const backToDashboardBtn = document.getElementById('backToDashboardBtn');
+            if (!screens.dashboard.classList.contains('active')) {
+                sellerCodeBtn.style.display = 'none';
+            }
+            backToDashboardBtn.classList.remove('active');
         });
     </script>
 </body>
