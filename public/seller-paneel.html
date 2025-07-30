@@ -246,7 +246,7 @@
                     </div>
                     <div class="text-center md:text-right">
                         <h1 class="text-xl font-bold">پنل فروشنده</h1>
-                        <p class="text-base text-gray-400">فروشگاه تکنوشاپ</p>
+                        <p id="header-store-name" class="text-base text-gray-400">فروشگاه تکنوشاپ</p>
                     </div>
                 </div>
                 <!-- STORE-CODE BADGE - Enhanced for mobile -->
@@ -285,7 +285,7 @@
         <!-- Dashboard Tab -->
         <section id="dashboard" class="tab-content">
             <div class="mb-6 text-center md:text-right">
-                <h2 class="text-2xl font-bold mb-2">سلام، فروشگاه تکنوشاپ 👋</h2>
+                <h2 id="greeting-store-name" class="text-2xl font-bold mb-2">سلام، فروشگاه تکنوشاپ 👋</h2>
                 <p class="text-gray-400">به پنل فروشنده خود خوش آمدید</p>
             </div>
             <!-- Stats Cards -->
@@ -492,11 +492,11 @@
                 <form id="settings-form">
                     <div class="mb-5">
                         <label class="block text-gray-400 mb-2">نام فروشگاه</label>
-                        <input type="text" value="تکنوشاپ" class="w-full bg-dark border border-gray-700 rounded-lg px-4 py-4 md:py-3 focus:outline-none focus:ring-2 focus:ring-primary">
+                        <input id="input-store-name" type="text" value="تکنوشاپ" class="w-full bg-dark border border-gray-700 rounded-lg px-4 py-4 md:py-3 focus:outline-none focus:ring-2 focus:ring-primary">
                     </div>
                     <div class="mb-5">
                         <label class="block text-gray-400 mb-2">شماره تماس</label>
-                        <input type="text" value="021-12345678" class="w-full bg-dark border border-gray-700 rounded-lg px-4 py-4 md:py-3 focus:outline-none focus:ring-2 focus:ring-primary">
+                        <input id="input-contact-number" type="text" value="021-12345678" class="w-full bg-dark border border-gray-700 rounded-lg px-4 py-4 md:py-3 focus:outline-none focus:ring-2 focus:ring-primary">
                     </div>
                     <div class="mb-6">
                         <label class="block text-gray-400 mb-2">سطح فروشگاه</label>
@@ -507,9 +507,6 @@
                     </div>
                     <button type="submit" class="w-full bg-primary hover:bg-purple-700 text-white font-bold py-4 md:py-3 px-4 rounded-lg transition duration-200 mb-4">
                         ذخیره تغییرات
-                    </button>
-                    <button type="button" class="w-full bg-red-900/30 hover:bg-red-900/50 text-red-400 font-bold py-4 md:py-3 px-4 rounded-lg transition duration-200">
-                        خروج از حساب کاربری
                     </button>
                 </form>
             </div>
@@ -631,6 +628,20 @@
         // Settings form submission
         document.getElementById('settings-form').addEventListener('submit', (e) => {
             e.preventDefault();
+            const nameInput = document.getElementById('input-store-name');
+            const contactInput = document.getElementById('input-contact-number');
+            const newName = nameInput.value.trim();
+            const newContact = contactInput.value.trim();
+            if (newName) {
+                const headerName = document.getElementById('header-store-name');
+                const greetingName = document.getElementById('greeting-store-name');
+                if (headerName) headerName.textContent = `فروشگاه ${newName}`;
+                if (greetingName) greetingName.textContent = `سلام، فروشگاه ${newName} 👋`;
+            }
+            // Update other contact number displays if present
+            document.querySelectorAll('[data-contact-display]').forEach(el => {
+                el.textContent = newContact;
+            });
             showToast('تغییرات با موفقیت ذخیره شد');
         });
         // Initialize chart
