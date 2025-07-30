@@ -1442,39 +1442,39 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                <tr>
+                                <tr data-id="1">
                                     <td>علی محمدی</td>
                                     <td>09123456789</td>
                                     <td>۱۴۰۲/۱۰/۱۵</td>
                                     <td><span class="status-badge status-active">فعال</span></td>
                                     <td>
                                         <div class="action-buttons">
-                                            <button class="btn btn-secondary"><i class="fas fa-edit"></i></button>
-                                            <button class="btn btn-danger"><i class="fas fa-trash"></i></button>
+                                            <button class="btn btn-secondary" onclick="event.stopPropagation()"><i class="fas fa-edit"></i></button>
+                                            <button class="btn btn-danger" onclick="event.stopPropagation()"><i class="fas fa-trash"></i></button>
                                         </div>
                                     </td>
                                 </tr>
-                                <tr>
+                                <tr data-id="2">
                                     <td>زهرا رضایی</td>
                                     <td>09124445566</td>
                                     <td>۱۴۰۲/۱۱/۱۵</td>
                                     <td><span class="status-badge status-inactive">غیرفعال</span></td>
                                     <td>
                                         <div class="action-buttons">
-                                            <button class="btn btn-secondary"><i class="fas fa-edit"></i></button>
-                                            <button class="btn btn-danger"><i class="fas fa-trash"></i></button>
+                                            <button class="btn btn-secondary" onclick="event.stopPropagation()"><i class="fas fa-edit"></i></button>
+                                            <button class="btn btn-danger" onclick="event.stopPropagation()"><i class="fas fa-trash"></i></button>
                                         </div>
                                     </td>
                                 </tr>
-                                <tr>
+                                <tr data-id="3">
                                     <td>محمد حسینی</td>
                                     <td>09137778899</td>
                                     <td>۱۴۰۳/۰۱/۲۰</td>
                                     <td><span class="status-badge status-active">فعال</span></td>
                                     <td>
                                         <div class="action-buttons">
-                                            <button class="btn btn-secondary"><i class="fas fa-edit"></i></button>
-                                            <button class="btn btn-danger"><i class="fas fa-trash"></i></button>
+                                            <button class="btn btn-secondary" onclick="event.stopPropagation()"><i class="fas fa-edit"></i></button>
+                                            <button class="btn btn-danger" onclick="event.stopPropagation()"><i class="fas fa-trash"></i></button>
                                         </div>
                                     </td>
                                 </tr>
@@ -1510,22 +1510,33 @@
                         </div>
                     </div>
                 </div>
-                    <!-- User Block Modal -->
-                    <div class="modal" id="userBlockModal">
-                        <div class="modal-content">
-                            <div class="modal-header">
-                                <h3 class="modal-title">مدیریت حساب کاربر</h3>
-                                <button class="modal-close" onclick="closeModal('userBlockModal')">&times;</button>
-                            </div>
-                            <div class="modal-body">
-                                <div class="user-info">
-                                    <p><span>نام کامل:</span> <span id="modalUserName"></span></p>
-                                    <p><span>شماره موبایل:</span> <span id="modalUserMobile"></span></p>
-                                    <p><span>وضعیت:</span> <span id="modalUserStatus"></span></p>
+                    <!-- Block Confirmation Modal -->
+                    <div class="modal" id="blockConfirmModal">
+                        <div class="modal-content bg-darkcard p-6 rounded-xl shadow-lg text-white w-full max-w-md">
+                            <div class="modal-body text-center">
+                                <p class="mb-4">آیا از مسدود کردن این کاربر مطمئن هستید؟</p>
+                                <div class="flex justify-center gap-4">
+                                    <button class="btn btn-primary" id="confirmBlockBtn">بله</button>
+                                    <button class="btn btn-secondary" onclick="closeModal('blockConfirmModal')">خیر</button>
                                 </div>
                             </div>
-                            <div class="modal-footer">
-                                <button class="btn btn-primary" id="blockUserBtn">مسدود کردن حساب</button>
+                        </div>
+                    </div>
+
+                    <!-- Customer Info Modal -->
+                    <div class="modal" id="customerInfoModal">
+                        <div class="modal-content bg-darkcard p-6 rounded-xl shadow-lg text-white w-full max-w-md">
+                            <div class="flex items-center justify-between mb-4">
+                                <h3 class="text-lg font-semibold">اطلاعات مشتری</h3>
+                                <button class="modal-close" onclick="closeModal('customerInfoModal')">&times;</button>
+                            </div>
+                            <div class="space-y-2 text-sm">
+                                <div>نام و نام خانوادگی: <span id="infoFullName" class="font-semibold"></span></div>
+                                <div>شماره موبایل: <span id="infoPhone" class="font-semibold"></span></div>
+                                <div>تاریخ ثبت‌نام: <span id="infoDate" class="font-semibold"></span></div>
+                                <div>تعداد خریدها: <span id="infoPurchases" class="font-semibold"></span></div>
+                                <div>موجودی کل: <span id="infoTotal" class="font-semibold"></span></div>
+                                <div>موجودی قابل تسویه: <span id="infoWithdraw" class="font-semibold"></span></div>
                             </div>
                         </div>
                     </div>
@@ -2790,45 +2801,58 @@
             if (addRuleBtn) addRuleBtn.addEventListener('click', addRule);
             renderRules();
 
-            // Customer Row Click - Block/Unblock Modal
-            const customerRows = document.querySelectorAll('#customers tbody tr:not(.loading-row)');
-            const blockModalName = document.getElementById('modalUserName');
-            const blockModalMobile = document.getElementById('modalUserMobile');
-            const blockModalStatus = document.getElementById('modalUserStatus');
-            const blockBtn = document.getElementById('blockUserBtn');
-            let activeRow = null;
+            // Customer Row Features
+            const customerRows = document.querySelectorAll('#customers tbody tr[data-id]');
+            const infoName = document.getElementById('infoFullName');
+            const infoPhone = document.getElementById('infoPhone');
+            const infoDate = document.getElementById('infoDate');
+            const infoPurchases = document.getElementById('infoPurchases');
+            const infoTotal = document.getElementById('infoTotal');
+            const infoWithdraw = document.getElementById('infoWithdraw');
+            const confirmBlockBtn = document.getElementById('confirmBlockBtn');
+            let selectedRow = null;
+
+            const customerInfo = {
+                1: { name: 'علی محمدی', phone: '09123456789', date: '۱۴۰۲/۱۰/۱۵', purchases: '۱۲', total: '۱۰٬۰۰۰٬۰۰۰ تومان', withdraw: '۵٬۰۰۰٬۰۰۰ تومان' },
+                2: { name: 'زهرا رضایی', phone: '09124445566', date: '۱۴۰۲/۱۱/۱۵', purchases: '۸', total: '۶٬۰۰۰٬۰۰۰ تومان', withdraw: '۳٬۵۰۰٬۰۰۰ تومان' },
+                3: { name: 'محمد حسینی', phone: '09137778899', date: '۱۴۰۳/۰۱/۲۰', purchases: '۳', total: '۲٬۰۰۰٬۰۰۰ تومان', withdraw: '۱٬۰۰۰٬۰۰۰ تومان' }
+            };
 
             customerRows.forEach(row => {
                 row.addEventListener('click', function(e) {
                     if (e.target.closest('.action-buttons')) return;
-                    activeRow = this;
-                    blockModalName.textContent = this.children[0].textContent;
-                    blockModalMobile.textContent = this.children[1].textContent;
-                    const statusSpan = this.querySelector('.status-badge');
-                    const isActive = statusSpan.classList.contains('status-active');
-                    blockModalStatus.textContent = isActive ? 'فعال' : 'غیرفعال';
-                    blockBtn.textContent = isActive ? 'مسدود کردن حساب' : 'رفع مسدودیت';
-                    openModal('userBlockModal');
+                    const id = this.getAttribute('data-id');
+                    const data = customerInfo[id];
+                    if (data) {
+                        infoName.textContent = data.name;
+                        infoPhone.textContent = data.phone;
+                        infoDate.textContent = data.date;
+                        infoPurchases.textContent = data.purchases;
+                        infoTotal.textContent = data.total;
+                        infoWithdraw.textContent = data.withdraw;
+                        openModal('customerInfoModal');
+                    }
                 });
+
+                const trash = row.querySelector('.btn-danger');
+                if (trash) {
+                    trash.addEventListener('click', function(ev) {
+                        ev.stopPropagation();
+                        selectedRow = row;
+                        openModal('blockConfirmModal');
+                    });
+                }
             });
 
-            blockBtn.addEventListener('click', function() {
-                if (!activeRow) return;
-                const statusSpan = activeRow.querySelector('.status-badge');
-                const isActive = statusSpan.classList.contains('status-active');
-                const confirmMsg = isActive ? 'آیا از مسدود کردن حساب کاربر مطمئن هستید؟' : 'آیا از رفع مسدودیت حساب کاربر مطمئن هستید؟';
-                if (!confirm(confirmMsg)) return;
-                if (isActive) {
+            if (confirmBlockBtn) {
+                confirmBlockBtn.addEventListener('click', function() {
+                    if (!selectedRow) return;
+                    const statusSpan = selectedRow.querySelector('.status-badge');
                     statusSpan.textContent = 'غیرفعال';
-                    statusSpan.classList.remove('status-active');
-                    statusSpan.classList.add('status-inactive');
-                } else {
-                    statusSpan.textContent = 'فعال';
-                    statusSpan.classList.remove('status-inactive');
-                    statusSpan.classList.add('status-active');
-                }
-                closeModal('userBlockModal');
-            });
+                    statusSpan.className = 'status-badge bg-red-700 text-red-100';
+                    closeModal('blockConfirmModal');
+                });
+            }
 
             // Seller Row Features
             const sellerDateText = document.getElementById('sellerDateText');
