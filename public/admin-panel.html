@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>پنل مدیریت سیستم جوایز</title>
+    <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -1754,10 +1755,12 @@
                         <div class="table-header">
                             <h3 class="table-title">ویرایش قوانین پنل مشتری</h3>
                         </div>
-                        <div class="form-group">
-                            <textarea id="customerRules" class="form-control" rows="5"></textarea>
-                        </div>
-                        <button class="btn btn-primary" onclick="saveCustomerRules()">ذخیره قوانین</button>
+                        <div id="rulesList" class="space-y-2 mb-4"></div>
+                        <button id="addRuleBtn" class="btn btn-secondary w-full mb-4 flex items-center justify-center gap-2">
+                            <i class="fas fa-plus"></i>
+                            افزودن قانون جدید
+                        </button>
+                        <button class="btn btn-primary w-full" onclick="saveRules()">ذخیره قوانین</button>
                     </div>
                 </div>
             </div>
@@ -2025,13 +2028,72 @@
             }, 3000);
         }
 
-        let customerRulesData = 'قوانین اولیه مشتریان را اینجا وارد کنید';
+        let customerRules = JSON.parse(localStorage.getItem('customerRules') || '["قانون نمونه"]');
 
-        function saveCustomerRules() {
-            const textarea = document.getElementById('customerRules');
-            if (textarea) {
-                customerRulesData = textarea.value;
+        function renderRules() {
+            const list = document.getElementById('rulesList');
+            if (!list) return;
+            list.innerHTML = '';
+            customerRules.forEach((rule, index) => {
+                const row = document.createElement('div');
+                row.className = 'flex items-center gap-2 rule-row';
+                row.innerHTML = `
+                    <span class="rule-display flex-1">${rule}</span>
+                    <input type="text" class="form-control rule-input flex-1 hidden" value="${rule}">
+                    <button class="edit-rule text-yellow-400 hover:text-yellow-500"><i class="fas fa-pencil-alt"></i></button>
+                    <button class="delete-rule text-red-500 hover:text-red-600"><i class="fas fa-trash-alt"></i></button>
+                `;
+                const display = row.querySelector('.rule-display');
+                const input = row.querySelector('.rule-input');
+                row.querySelector('.edit-rule').addEventListener('click', () => {
+                    display.classList.add('hidden');
+                    input.classList.remove('hidden');
+                    input.focus();
+                });
+                function finish() {
+                    const text = input.value.trim();
+                    if (!text) { showToast('متن قانون نمی‌تواند خالی باشد', 'error'); input.value = rule; return; }
+                    if (customerRules.some((r, i) => i !== index && r === text)) { showToast('قانون تکراری است', 'error'); input.value = rule; return; }
+                    customerRules[index] = text;
+                    display.textContent = text;
+                    display.classList.remove('hidden');
+                    input.classList.add('hidden');
+                }
+                input.addEventListener('blur', finish);
+                input.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); finish(); } });
+                row.querySelector('.delete-rule').addEventListener('click', () => {
+                    customerRules.splice(index, 1);
+                    renderRules();
+                });
+                list.appendChild(row);
+            });
+        }
+
+        function addRule() {
+            customerRules.push('');
+            renderRules();
+            const lastRow = document.querySelector('#rulesList .rule-row:last-child');
+            if (lastRow) {
+                lastRow.querySelector('.rule-display').classList.add('hidden');
+                const input = lastRow.querySelector('.rule-input');
+                input.classList.remove('hidden');
+                input.focus();
             }
+        }
+
+        function saveRules() {
+            const rows = document.querySelectorAll('#rulesList .rule-row');
+            const newRules = [];
+            for (const row of rows) {
+                const input = row.querySelector('.rule-input');
+                const text = input.classList.contains('hidden') ? row.querySelector('.rule-display').textContent.trim() : input.value.trim();
+                if (!text) { showToast('متن قانون نمی‌تواند خالی باشد', 'error'); return; }
+                if (newRules.includes(text)) { showToast('قوانین تکراری مجاز نیست', 'error'); return; }
+                newRules.push(text);
+            }
+            customerRules = newRules;
+            localStorage.setItem('customerRules', JSON.stringify(customerRules));
+            renderRules();
             showToast('قوانین با موفقیت ذخیره شد', 'success');
         }
         // Withdrawal Actions
@@ -2634,10 +2696,9 @@
                 settlementCountInput.addEventListener('input', renderSettlements);
                 renderSettlements();
             }
-            const rulesTextarea = document.getElementById('customerRules');
-            if (rulesTextarea) {
-                rulesTextarea.value = customerRulesData;
-            }
+            const addRuleBtn = document.getElementById('addRuleBtn');
+            if (addRuleBtn) addRuleBtn.addEventListener('click', addRule);
+            renderRules();
 
             // Customer Row Click - Block/Unblock Modal
             const customerRows = document.querySelectorAll('#customers tbody tr:not(.loading-row)');
