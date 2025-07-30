@@ -1096,7 +1096,7 @@
                         </div>
                     </div>
                     <div class="grid grid-cols-2 gap-3">
-                        <div class="bg-darkcard rounded-lg p-3">
+                        <div class="bg-darkcard rounded-lg p-3 purchase-count-box cursor-pointer">
                             <p class="text-gray-400 text-xs">تعداد خریدها</p>
                             <p class="font-bold text-white"><i class="fas fa-shopping-bag ml-1"></i> <span id="purchaseCount">۶</span> خرید</p>
                         </div>
@@ -1381,6 +1381,16 @@
                 </div>
                 <p id="profileWarning" class="text-red-500 text-sm hidden text-center"></p>
             </div>
+        </div>
+    </div>
+    <!-- Purchase History Modal -->
+    <div id="purchaseHistoryModal" class="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm hidden items-center justify-center p-4">
+        <div class="bg-darkcard rounded-xl w-full max-w-sm p-6 relative flex flex-col max-h-[80vh]">
+            <button id="closePurchaseHistoryModal" class="absolute top-2 left-2 text-gray-400">
+                <i class="fas fa-times"></i>
+            </button>
+            <h2 class="text-center text-lg font-bold text-white mb-4">تاریخچه خریدها</h2>
+            <ul id="purchaseHistoryList" class="space-y-3 overflow-y-auto pr-2 flex-1"></ul>
         </div>
     </div>
     <script>
@@ -1834,6 +1844,13 @@
             { id: 2, amount: 300000, date: '۱۴۰۲/۰۳/۲۵', status: 'در حال بررسی' },
             { id: 3, amount: 200000, date: '۱۴۰۲/۰۴/۳۰', status: 'رد شده' }
         ];
+        const samplePurchases = [
+            { store: 'فروشگاه الف', date: '۱۴۰۳/۰۴/۰۵' },
+            { store: 'فروشگاه ب', date: '۱۴۰۳/۰۴/۱۰' },
+            { store: 'فروشگاه ج', date: '۱۴۰۳/۰۴/۱۵' },
+            { store: 'فروشگاه د', date: '۱۴۰۳/۰۴/۲۰' },
+            { store: 'فروشگاه ه', date: '۱۴۰۳/۰۴/۲۵' }
+        ];
         function getStatusClass(status) {
             if (status === 'موفق') return 'text-green-500';
             if (status === 'در حال بررسی') return 'text-yellow-500';
@@ -1855,6 +1872,18 @@
                     <td class="text-right py-2 ${getStatusClass(cashout.status)}">${cashout.status}</td>
                 `;
                 tbody.insertBefore(tr, document.getElementById('loadingRow'));
+            });
+        }
+
+        function renderPurchaseHistory() {
+            const list = document.getElementById('purchaseHistoryList');
+            if (!list) return;
+            list.innerHTML = '';
+            samplePurchases.forEach(p => {
+                const li = document.createElement('li');
+                li.className = 'flex justify-between border-b border-gray-700 pb-2';
+                li.innerHTML = `<span class="text-gray-300">${p.store}</span><span class="text-gray-400 text-sm ltr-text">${p.date}</span>`;
+                list.appendChild(li);
             });
         }
         // Initialize app
@@ -1908,6 +1937,19 @@
             document.getElementById('closeProfileModal').addEventListener('click', hideProfileModal);
             document.getElementById('profileModal').addEventListener('click', function(e) {
                 if (e.target === this) hideProfileModal();
+            });
+            const purchaseBox = document.querySelector('.purchase-count-box');
+            const purchaseModal = document.getElementById('purchaseHistoryModal');
+            const closePurchaseModal = document.getElementById('closePurchaseHistoryModal');
+            if (purchaseBox) {
+                purchaseBox.addEventListener('click', () => {
+                    renderPurchaseHistory();
+                    purchaseModal.classList.remove('hidden');
+                });
+            }
+            closePurchaseModal.addEventListener('click', () => purchaseModal.classList.add('hidden'));
+            purchaseModal.addEventListener('click', e => {
+                if (e.target === purchaseModal) purchaseModal.classList.add('hidden');
             });
             toggleSellerCodeBtnVisibility();
             window.addEventListener('scroll', toggleSellerCodeBtnVisibility);
