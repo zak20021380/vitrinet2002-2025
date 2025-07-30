@@ -1271,6 +1271,14 @@
                             </select>
                         </div>
                         <div class="filter-group">
+                            <label>وضعیت تسویه:</label>
+                            <select class="filter-select" id="settlementStatusFilter">
+                                <option value="all">همه</option>
+                                <option value="settled">تسویه شده</option>
+                                <option value="unsettled">تسویه نشده</option>
+                            </select>
+                        </div>
+                        <div class="filter-group">
                             <label>تاریخ:</label>
                             <input type="date" class="date-filter" id="withdrawalDateFilter">
                         </div>
@@ -1294,17 +1302,19 @@
                                     <th>مبلغ (تومان)</th>
                                     <th>تاریخ درخواست</th>
                                     <th>وضعیت</th>
+                                    <th>وضعیت تسویه</th>
                                     <th>اقدامات</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                <tr data-id="1" data-status="pending" data-name="علی محمدی" data-card="1234-5678-9012-3456" data-date="۱۴۰۳/۰۲/۱۰">
+                                <tr data-id="1" data-status="pending" data-settlement="unsettled" data-name="علی محمدی" data-card="1234-5678-9012-3456" data-date="۱۴۰۳/۰۲/۱۰">
                                     <td>۱</td>
                                     <td>علی محمدی</td>
                                     <td class="ltr-text">1234-5678-9012-3456</td>
                                     <td>۵٬۰۰۰٬۰۰۰</td>
                                     <td>۱۴۰۳/۰۲/۱۰</td>
                                     <td><span class="status-badge status-pending">در انتظار</span></td>
+                                    <td><span class="settlement-badge bg-red-600/80 text-white text-sm rounded-full px-2 py-1">تسویه نشده</span></td>
                                     <td>
                                         <div class="action-buttons">
                                             <button class="btn btn-success" onclick="approveWithdrawal(1)">
@@ -1316,16 +1326,18 @@
                                             <button class="btn btn-secondary view-details" data-id="1">
                                                 <i class="fas fa-eye"></i>
                                             </button>
+                                            <button class="btn btn-primary settle-btn" onclick="settleWithdrawal(1)">تسویه شد ✅</button>
                                         </div>
                                     </td>
                                 </tr>
-                                <tr data-id="2" data-status="approved" data-name="زهرا رضایی" data-card="9876-5432-1098-7654" data-date="۱۴۰۳/۰۲/۰۸">
+                                <tr data-id="2" data-status="approved" data-settlement="settled" data-name="زهرا رضایی" data-card="9876-5432-1098-7654" data-date="۱۴۰۳/۰۲/۰۸">
                                     <td>۲</td>
                                     <td>زهرا رضایی</td>
                                     <td class="ltr-text">9876-5432-1098-7654</td>
                                     <td>۲٬۵۰۰٬۰۰۰</td>
                                     <td>۱۴۰۳/۰۲/۰۸</td>
                                     <td><span class="status-badge status-active">تأیید شده</span></td>
+                                    <td><span class="settlement-badge bg-green-600/80 text-white text-sm rounded-full px-2 py-1">تسویه شده</span></td>
                                     <td>
                                         <div class="action-buttons">
                                             <button class="btn btn-success" onclick="approveWithdrawal(2)">
@@ -1340,13 +1352,14 @@
                                         </div>
                                     </td>
                                 </tr>
-                                <tr data-id="3" data-status="rejected" data-name="محمد حسینی" data-card="1111-2222-3333-4444" data-date="۱۴۰۳/۰۲/۰۵">
+                                <tr data-id="3" data-status="rejected" data-settlement="unsettled" data-name="محمد حسینی" data-card="1111-2222-3333-4444" data-date="۱۴۰۳/۰۲/۰۵">
                                     <td>۳</td>
                                     <td>محمد حسینی</td>
                                     <td class="ltr-text">1111-2222-3333-4444</td>
                                     <td>۱٬۲۰۰٬۰۰۰</td>
                                     <td>۱۴۰۳/۰۲/۰۵</td>
                                     <td><span class="status-badge status-inactive">رد شده</span></td>
+                                    <td><span class="settlement-badge bg-red-600/80 text-white text-sm rounded-full px-2 py-1">تسویه نشده</span></td>
                                     <td>
                                         <div class="action-buttons">
                                             <button class="btn btn-success" onclick="approveWithdrawal(3)">
@@ -1358,12 +1371,13 @@
                                             <button class="btn btn-secondary view-details" data-id="3">
                                                 <i class="fas fa-eye"></i>
                                             </button>
+                                            <button class="btn btn-primary settle-btn" onclick="settleWithdrawal(3)">تسویه شد ✅</button>
                                         </div>
                                     </td>
                                 </tr>
                                 <!-- Loading Row -->
                                 <tr class="loading-row" id="withdrawalsLoadingRow">
-                                    <td colspan="7" class="text-center py-4">
+                                    <td colspan="8" class="text-center py-4">
                                         <div class="flex justify-center items-center">
                                             <div class="w-5 h-5 border-t-2 border-blue-500 rounded-full animate-spin ml-2"></div>
                                             <span>در حال بارگذاری...</span>
@@ -1371,7 +1385,7 @@
                                     </td>
                                 </tr>
                                 <tr id="withdrawalsEmptyRow" style="display:none;">
-                                    <td colspan="7" class="text-center py-4">درخواستی یافت نشد</td>
+                                    <td colspan="8" class="text-center py-4">درخواستی یافت نشد</td>
                                 </tr>
                             </tbody>
                         </table>
@@ -2189,6 +2203,24 @@
             showToast("درخواست تسویه رد شد", "error");
         }
 
+        function settleWithdrawal(id) {
+            const row = document.querySelector(`#withdrawals tbody tr[data-id="${id}"]`);
+            if (row) {
+                row.setAttribute('data-settlement', 'settled');
+                const badge = row.querySelector('.settlement-badge');
+                if (badge) {
+                    badge.textContent = 'تسویه شده';
+                    badge.classList.remove('bg-red-600/80');
+                    badge.classList.add('bg-green-600/80');
+                }
+                const btn = row.querySelector('.settle-btn');
+                if (btn) btn.remove();
+            }
+            filterWithdrawals();
+            fetch(`/api/payouts/${id}/settle`, { method: 'PUT' }).catch(() => {});
+            showToast('درخواست تسویه تسویه شد', 'success');
+        }
+
         // View Withdrawal Details
         document.querySelectorAll('.view-details').forEach(button => {
             button.addEventListener('click', function() {
@@ -2707,6 +2739,7 @@
 
             // Withdrawal Filters
             const statusFilter = document.getElementById('withdrawalStatusFilter');
+            const settlementFilter = document.getElementById('settlementStatusFilter');
             const dateFilter = document.getElementById('withdrawalDateFilter');
             const searchInput = document.getElementById('withdrawalSearch');
             const emptyRow = document.getElementById('withdrawalsEmptyRow');
@@ -2791,12 +2824,14 @@
 
             function filterWithdrawals() {
                 const statusVal = statusFilter.value;
+                const settlementVal = settlementFilter.value;
                 const dateVal = formatDateToPersian(dateFilter.value);
                 const searchVal = searchInput.value.trim().toLowerCase().replace(/\s+/g, '');
 
                 filteredRows = [];
                 allRows.forEach(row => {
                     const rowStatus = row.getAttribute('data-status');
+                    const rowSettlement = row.getAttribute('data-settlement');
                     const rowDate = row.getAttribute('data-date');
                     const rowName = row.getAttribute('data-name').toLowerCase().replace(/\s+/g, '');
                     const rowCard = normalizeNumber(row.getAttribute('data-card'));
@@ -2804,6 +2839,9 @@
                     let match = true;
                     if (statusVal !== 'all') {
                         match = match && rowStatus === statusVal;
+                    }
+                    if (settlementVal !== 'all') {
+                        match = match && rowSettlement === settlementVal;
                     }
                     if (dateVal) {
                         match = match && rowDate === dateVal;
@@ -2820,8 +2858,9 @@
                 updatePage();
             }
 
-            if (statusFilter && dateFilter && searchInput) {
+            if (statusFilter && dateFilter && searchInput && settlementFilter) {
                 statusFilter.addEventListener('change', filterWithdrawals);
+                settlementFilter.addEventListener('change', filterWithdrawals);
                 dateFilter.addEventListener('change', filterWithdrawals);
                 searchInput.addEventListener('input', filterWithdrawals);
                 filterWithdrawals();
