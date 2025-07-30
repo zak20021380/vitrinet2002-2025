@@ -1052,7 +1052,7 @@
                         <p id="userGreeting" class="text-white font-medium">کاربر گرامی</p>
                         <p class="text-xs text-success">اعتبار فعال</p>
                     </div>
-                    <div class="relative">
+                    <div class="relative user-profile-icon cursor-pointer">
                         <div class="w-10 h-10 rounded-full bg-primary bg-opacity-20 flex items-center justify-center">
                             <i class="fas fa-user text-primary"></i>
                         </div>
@@ -1359,6 +1359,30 @@
             </div>
         </div>
     </div>
+    <!-- Profile Modal -->
+    <div id="profileModal" class="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm hidden items-center justify-center p-4">
+        <div class="bg-darkcard rounded-xl w-full max-w-sm p-6 relative shadow-xl">
+            <button id="closeProfileModal" class="absolute top-2 left-2 text-gray-400">
+                <i class="fas fa-times"></i>
+            </button>
+            <h2 class="text-center text-lg font-bold text-white mb-4">پروفایل کاربر</h2>
+            <div class="space-y-3 text-right">
+                <div>
+                    <p class="text-gray-400 text-sm">نام و نام خانوادگی</p>
+                    <p id="profileFullName" class="text-white font-medium"></p>
+                </div>
+                <div>
+                    <p class="text-gray-400 text-sm">شماره موبایل</p>
+                    <p id="profilePhone" class="text-white font-medium ltr-text"></p>
+                </div>
+                <div>
+                    <p class="text-gray-400 text-sm">تاریخ عضویت</p>
+                    <p id="profileRegDate" class="text-white font-medium"></p>
+                </div>
+                <p id="profileWarning" class="text-red-500 text-sm hidden text-center"></p>
+            </div>
+        </div>
+    </div>
     <script>
         // Screen management
         const screens = {
@@ -1579,6 +1603,27 @@
         }
         function hideUserInfoModal() {
             document.getElementById('userInfoModal').classList.add('hidden');
+        }
+        function showProfileModal() {
+            userInfo = JSON.parse(localStorage.getItem('userInfo') || '{}');
+            if (!userInfo.registrationDate) {
+                userInfo.registrationDate = new Date().toLocaleDateString('fa-IR');
+                localStorage.setItem('userInfo', JSON.stringify(userInfo));
+            }
+            document.getElementById('profileFullName').textContent = userInfo.fullName || '-';
+            document.getElementById('profilePhone').textContent = userInfo.phone ? toPersianDigits(userInfo.phone) : '-';
+            document.getElementById('profileRegDate').textContent = userInfo.registrationDate ? toPersianDigits(userInfo.registrationDate) : '-';
+            const warning = document.getElementById('profileWarning');
+            if (!userInfo.fullName || !userInfo.phone) {
+                warning.textContent = 'لطفاً پروفایل خود را تکمیل کنید تا بتوانید از جوایز استفاده کنید.';
+                warning.classList.remove('hidden');
+            } else {
+                warning.classList.add('hidden');
+            }
+            document.getElementById('profileModal').classList.remove('hidden');
+        }
+        function hideProfileModal() {
+            document.getElementById('profileModal').classList.add('hidden');
         }
         function handleCashoutRequest() {
             userInfo = JSON.parse(localStorage.getItem('userInfo') || '{}');
@@ -1855,6 +1900,14 @@
             // Back Home Button Event Listener
             document.getElementById('backHomeBtn').addEventListener('click', () => {
                 showScreen('dashboard');
+            });
+            const profileIcon = document.querySelector('.user-profile-icon');
+            if (profileIcon) {
+                profileIcon.addEventListener('click', showProfileModal);
+            }
+            document.getElementById('closeProfileModal').addEventListener('click', hideProfileModal);
+            document.getElementById('profileModal').addEventListener('click', function(e) {
+                if (e.target === this) hideProfileModal();
             });
             toggleSellerCodeBtnVisibility();
             window.addEventListener('scroll', toggleSellerCodeBtnVisibility);
