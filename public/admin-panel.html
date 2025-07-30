@@ -1066,6 +1066,10 @@
         .milestone-setting {
             margin-bottom: 1.5rem;
         }
+
+        .bg-darkcard {
+            background-color: var(--card-bg);
+        }
     </style>
 </head>
 <body>
@@ -1625,34 +1629,63 @@
                 <div id="reports" class="tab-content">
                     <h2 class="page-title"><i class="fas fa-chart-bar"></i> گزارش‌ها</h2>
                     
-                    <!-- Export Buttons -->
-                    <div class="export-buttons">
-                        <button class="btn btn-secondary" onclick="exportData('balances', 'excel')">
-                            <i class="fas fa-file-excel"></i> خروجی موجودی مشتریان
-                        </button>
-                        <button class="btn btn-secondary" onclick="exportData('withdrawals', 'excel')">
-                            <i class="fas fa-file-excel"></i> خروجی تسویه‌ها
-                        </button>
-                        <button class="btn btn-secondary" onclick="exportData('rewards', 'excel')">
-                            <i class="fas fa-file-excel"></i> خروجی تاریخچه جوایز
-                        </button>
-                        <button class="btn btn-secondary" onclick="exportData('logs', 'csv')">
-                            <i class="fas fa-file-csv"></i> خروجی لاگ‌ها
-                        </button>
+                    <!-- Analytics Filters -->
+                    <div id="analyticsFilters" class="filter-pills mb-4">
+                        <button class="filter-pill active" data-period="daily" onclick="switchAnalyticsPeriod('daily')">روزانه</button>
+                        <button class="filter-pill" data-period="weekly" onclick="switchAnalyticsPeriod('weekly')">هفتگی</button>
+                        <button class="filter-pill" data-period="monthly" onclick="switchAnalyticsPeriod('monthly')">ماهانه</button>
                     </div>
-                    
-                    <!-- Rewards vs Purchases Chart -->
-                    <div class="chart-container">
-                        <div class="chart-header">
-                            <h3 class="chart-title">نمودار جوایز در مقابل خریدها</h3>
-                            <div class="chart-actions">
-                                <button>هفتگی</button>
-                                <button class="active">ماهانه</button>
-                                <button>سالانه</button>
+
+                    <!-- Statistics Cards -->
+                    <div id="analyticsCards" class="grid grid-cols-2 md:grid-cols-3 gap-4 mb-4">
+                        <div class="rounded-xl shadow-lg bg-darkcard text-white p-4 flex items-center gap-3">
+                            <div class="text-primary text-2xl"><i class="fas fa-wallet"></i></div>
+                            <div>
+                                <div class="text-sm text-gray-400">بودجه ماهانه</div>
+                                <div id="metricBudget" class="text-xl font-semibold">۰</div>
                             </div>
                         </div>
-                        <div class="chart-wrapper">
-                            <canvas id="rewardsVsPurchasesChart"></canvas>
+                        <div class="rounded-xl shadow-lg bg-darkcard text-white p-4 flex items-center gap-3">
+                            <div class="text-yellow-500 text-2xl"><i class="fas fa-gift"></i></div>
+                            <div>
+                                <div class="text-sm text-gray-400">جوایز پرداخت‌شده</div>
+                                <div id="metricRewards" class="text-xl font-semibold">۰</div>
+                            </div>
+                        </div>
+                        <div class="rounded-xl shadow-lg bg-darkcard text-white p-4 flex items-center gap-3">
+                            <div class="text-green-500 text-2xl"><i class="fas fa-shopping-cart"></i></div>
+                            <div>
+                                <div class="text-sm text-gray-400">تعداد خریدها</div>
+                                <div id="metricPurchases" class="text-xl font-semibold">۰</div>
+                            </div>
+                        </div>
+                        <div class="rounded-xl shadow-lg bg-darkcard text-white p-4 flex items-center gap-3">
+                            <div class="text-blue-400 text-2xl"><i class="fas fa-users"></i></div>
+                            <div>
+                                <div class="text-sm text-gray-400">تعداد فروشندگان زنجیره</div>
+                                <div id="metricSellers" class="text-xl font-semibold">۰</div>
+                            </div>
+                        </div>
+                        <div class="rounded-xl shadow-lg bg-darkcard text-white p-4 flex items-center gap-3">
+                            <div class="text-purple-400 text-2xl"><i class="fas fa-star"></i></div>
+                            <div>
+                                <div class="text-sm text-gray-400">فروشنده‌های پرمیوم</div>
+                                <div id="metricPremium" class="text-xl font-semibold">۰</div>
+                            </div>
+                        </div>
+                        <div class="rounded-xl shadow-lg bg-darkcard text-white p-4 flex items-center gap-3">
+                            <div class="text-gray-400 text-2xl"><i class="fas fa-user"></i></div>
+                            <div>
+                                <div class="text-sm text-gray-400">فروشنده‌های عادی</div>
+                                <div id="metricRegular" class="text-xl font-semibold">۰</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Comparison Chart -->
+                    <div class="bg-darkcard rounded-xl shadow-lg p-4 mb-4">
+                        <div class="h-64">
+                            <canvas id="analyticsChart"></canvas>
                         </div>
                     </div>
 
@@ -2375,84 +2408,120 @@
         // Chart Initialization
         document.addEventListener('DOMContentLoaded', function() {
             loadBudget();
-            // Rewards vs Purchases Chart
-            const ctx = document.getElementById('rewardsVsPurchasesChart');
-            if (ctx) {
-                const chart = new Chart(ctx.getContext('2d'), {
-                    type: 'line',
+
+            const analyticsData = {
+                daily: {
+                    cards: {
+                        budget: '۵٬۰۰۰٬۰۰۰ تومان',
+                        rewards: '۲۰۰٬۰۰۰ تومان',
+                        purchases: '۱۵۰',
+                        sellers: '۲۰',
+                        premium: '۵',
+                        regular: '۱۵'
+                    },
+                    chart: {
+                        labels: ['ش', 'ی', 'د', 'س', 'چ', 'پ', 'ج'],
+                        rewards: [5, 6, 4, 7, 5, 6, 5],
+                        purchases: [20, 22, 18, 24, 21, 19, 23]
+                    }
+                },
+                weekly: {
+                    cards: {
+                        budget: '۳۰٬۰۰۰٬۰۰۰ تومان',
+                        rewards: '۱٬۰۰۰٬۰۰۰ تومان',
+                        purchases: '۹۰۰',
+                        sellers: '۳۰',
+                        premium: '۱۰',
+                        regular: '۲۰'
+                    },
+                    chart: {
+                        labels: ['هفته ۱','هفته ۲','هفته ۳','هفته ۴'],
+                        rewards: [15, 18, 16, 20],
+                        purchases: [220, 230, 210, 240]
+                    }
+                },
+                monthly: {
+                    cards: {
+                        budget: '۱۲۰٬۰۰۰٬۰۰۰ تومان',
+                        rewards: '۴٬۰۰۰٬۰۰۰ تومان',
+                        purchases: '۳٬۵۰۰',
+                        sellers: '۵۰',
+                        premium: '۱۵',
+                        regular: '۳۵'
+                    },
+                    chart: {
+                        labels: ['فروردین','اردیبهشت','خرداد','تیر'],
+                        rewards: [25, 22, 30, 28],
+                        purchases: [800, 850, 900, 950]
+                    }
+                }
+            };
+
+            let analyticsChart;
+            const analyticsCanvas = document.getElementById('analyticsChart');
+            if (analyticsCanvas) {
+                analyticsChart = new Chart(analyticsCanvas.getContext('2d'), {
+                    type: 'bar',
                     data: {
-                        labels: ['فروردین', 'اردیبهشت', 'خرداد', 'تیر', 'مرداد', 'شهریور'],
-                        datasets: [{
-                            label: 'تعداد خریدها',
-                             data: [120, 190, 300, 500, 230, 340],
-                            borderColor: '#6366F1',
-                            backgroundColor: 'rgba(99, 102, 241, 0.1)',
-                            borderWidth: 2,
-                            pointBackgroundColor: '#6366F1',
-                            pointRadius: 4,
-                            pointHoverRadius: 6,
-                            fill: true,
-                            tension: 0.3,
-                            yAxisID: 'y'
-                        }, {
-                            label: 'مبلغ جوایز (هزار تومان)',
-                             data: [1200, 1900, 3000, 5000, 2300, 3400],
-                            borderColor: '#10b981',
-                            backgroundColor: 'rgba(16, 185, 129, 0.1)',
-                            borderWidth: 2,
-                            pointBackgroundColor: '#10b981',
-                            pointRadius: 4,
-                            pointHoverRadius: 6,
-                            fill: true,
-                            tension: 0.3,
-                            yAxisID: 'y1'
-                        }]
+                        labels: [],
+                        datasets: [
+                            {
+                                label: 'جوایز',
+                                backgroundColor: '#10b981',
+                                data: []
+                            },
+                            {
+                                label: 'خریدها',
+                                backgroundColor: '#3b82f6',
+                                data: []
+                            }
+                        ]
                     },
                     options: {
                         responsive: true,
                         maintainAspectRatio: false,
-                        plugins: {
-                            legend: {
-                                position: 'top',
-                            }
-                        },
+                        plugins: { legend: { position: 'top' } },
                         scales: {
-                            y: {
-                                type: 'linear',
-                                display: true,
-                                position: 'right',
-                                beginAtZero: true,
-                                grid: {
-                                    color: 'rgba(255, 255, 255, 0.1)'
-                                },
-                                ticks: {
-                                    color: '#94a3b8'
-                                }
-                            },
-                            y1: {
-                                type: 'linear',
-                                display: true,
-                                position: 'left',
-                                beginAtZero: true,
-                                grid: {
-                                    drawOnChartArea: false,
-                                },
-                                ticks: {
-                                    color: '#94a3b8'
-                                }
-                            },
                             x: {
-                                grid: {
-                                    display: false
-                                },
-                                ticks: {
-                                    color: '#94a3b8'
-                                }
+                                grid: { color: 'rgba(255,255,255,0.1)' },
+                                ticks: { color: '#94a3b8' }
+                            },
+                            y: {
+                                beginAtZero: true,
+                                grid: { color: 'rgba(255,255,255,0.1)' },
+                                ticks: { color: '#94a3b8' }
                             }
                         }
                     }
                 });
             }
+
+            function updateAnalytics(period) {
+                const data = analyticsData[period];
+                if (!data) return;
+                document.getElementById('metricBudget').textContent = data.cards.budget;
+                document.getElementById('metricRewards').textContent = data.cards.rewards;
+                document.getElementById('metricPurchases').textContent = data.cards.purchases;
+                document.getElementById('metricSellers').textContent = data.cards.sellers;
+                document.getElementById('metricPremium').textContent = data.cards.premium;
+                document.getElementById('metricRegular').textContent = data.cards.regular;
+
+                if (analyticsChart) {
+                    analyticsChart.data.labels = data.chart.labels;
+                    analyticsChart.data.datasets[0].data = data.chart.rewards;
+                    analyticsChart.data.datasets[1].data = data.chart.purchases;
+                    analyticsChart.update();
+                }
+            }
+
+            window.switchAnalyticsPeriod = function(period) {
+                document.querySelectorAll('#analyticsFilters button').forEach(btn => btn.classList.remove('active'));
+                const activeBtn = document.querySelector(`#analyticsFilters button[data-period="${period}"]`);
+                if (activeBtn) activeBtn.classList.add('active');
+                updateAnalytics(period);
+            };
+
+            switchAnalyticsPeriod('monthly');
 
             // Performance Chart (for dashboard)
             const perfCtx = document.getElementById('performanceChart');
