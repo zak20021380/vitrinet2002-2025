@@ -1749,6 +1749,16 @@
                             <button><i class="fas fa-chevron-left"></i></button>
                         </div>
                     </div>
+                    <!-- Customer Panel Rules -->
+                    <div class="table-container">
+                        <div class="table-header">
+                            <h3 class="table-title">ویرایش قوانین پنل مشتری</h3>
+                        </div>
+                        <div class="form-group">
+                            <textarea id="customerRules" class="form-control" rows="5"></textarea>
+                        </div>
+                        <button class="btn btn-primary" onclick="saveCustomerRules()">ذخیره قوانین</button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -2015,6 +2025,15 @@
             }, 3000);
         }
 
+        let customerRulesData = 'قوانین اولیه مشتریان را اینجا وارد کنید';
+
+        function saveCustomerRules() {
+            const textarea = document.getElementById('customerRules');
+            if (textarea) {
+                customerRulesData = textarea.value;
+            }
+            showToast('قوانین با موفقیت ذخیره شد', 'success');
+        }
         // Withdrawal Actions
         function approveWithdrawal(id) {
             const row = document.querySelector(`#withdrawals tbody tr[data-id="${id}"]`);
@@ -2556,6 +2575,10 @@
                 }
                 settlementCountInput.addEventListener('input', renderSettlements);
                 renderSettlements();
+            }
+            const rulesTextarea = document.getElementById('customerRules');
+            if (rulesTextarea) {
+                rulesTextarea.value = customerRulesData;
             }
 
             // Customer Row Click - Block/Unblock Modal
