@@ -893,6 +893,18 @@
                 padding-top: 4rem;
             }
         }
+
+        /* Withdrawals Section Styles */
+        .withdrawals-container {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        .loading-row {
+            display: none;
+        }
+        .loading-row.show {
+            display: table-row;
+        }
     </style>
 </head>
 <body class="min-h-screen flex items-center justify-center p-4">
@@ -1138,7 +1150,16 @@
                                 <th class="text-right pb-2">وضعیت</th>
                             </tr>
                         </thead>
-                        <tbody id="cashoutTableBody">
+                        <tbody id="cashoutTableBody" class="withdrawals-container">
+                            <!-- Withdrawal rows will be inserted here -->
+                            <tr class="loading-row" id="loadingRow">
+                                <td colspan="4" class="text-center py-4">
+                                    <div class="flex justify-center items-center">
+                                        <div class="w-5 h-5 border-t-2 border-blue-500 rounded-full animate-spin ml-2"></div>
+                                        <span>در حال بارگذاری...</span>
+                                    </div>
+                                </td>
+                            </tr>
                         </tbody>
                     </table>
                 </div>
@@ -1776,7 +1797,10 @@
         }
         function renderCashouts() {
             const tbody = document.getElementById('cashoutTableBody');
-            tbody.innerHTML = '';
+            // Clear existing rows except the loading row
+            while (tbody.firstChild && tbody.firstChild !== document.getElementById('loadingRow')) {
+                tbody.removeChild(tbody.firstChild);
+            }
             sampleCashouts.forEach(cashout => {
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
@@ -1785,7 +1809,7 @@
                     <td class="text-right py-2">${cashout.date}</td>
                     <td class="text-right py-2 ${getStatusClass(cashout.status)}">${cashout.status}</td>
                 `;
-                tbody.appendChild(tr);
+                tbody.insertBefore(tr, document.getElementById('loadingRow'));
             });
         }
         // Initialize app
@@ -1835,6 +1859,97 @@
             toggleSellerCodeBtnVisibility();
             window.addEventListener('scroll', toggleSellerCodeBtnVisibility);
             window.addEventListener('resize', toggleSellerCodeBtnVisibility);
+
+            // Lazy loading implementation for withdrawals section
+            const withdrawalsContainer = document.querySelector('.withdrawals-container');
+            const loadingRow = document.getElementById('loadingRow');
+            let page = 1;
+            let isLoading = false;
+            let hasMore = true;
+
+            // Function to simulate API call
+         /* ----------- NEW fake‑data generator for lazy loading ----------- */
+function fetchWithdrawals(page, size) {
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      // ساخت داده تصادفی بر اساس شماره صفحه
+      const startId = (page - 1) * size + 1;
+
+      const rows = Array.from({ length: size }, (_, idx) => {
+        const id = startId + idx;
+        const statuses = ['موفق', 'در حال بررسی', 'رد شده'];
+
+        return {
+          id,
+          amount: 100000 + ((id * 37) % 900000),        // مبلغ تصادفی
+          date: `۱۴۰۲/۰${(id % 9) + 1}/${(id % 28 + 1)
+            .toString()
+            .padStart(2, '0')}`,                        // تاریخ غیرتکراری
+          status: statuses[id % 3]                      // وضعیت چرخشی
+        };
+      });
+
+      resolve({
+        data: rows,
+        more: page < 20        // تا ۲۰ صفحه داده جعلی برمی‌گرداند
+      });
+    }, 500);                    // تأخیر ۵۰۰ms شبیه‌سازی شبکه
+  });
+}
+/* ---------------------------------------------------------------- */
+
+
+            // Function to load more withdrawals
+            async function loadMoreWithdrawals() {
+                if (isLoading || !hasMore) return;
+                
+                isLoading = true;
+                loadingRow.classList.add('show');
+                
+                try {
+                    const response = await fetchWithdrawals(page, 10);
+                    const newWithdrawals = response.data;
+                    hasMore = response.more;
+                    
+                    // Add new rows to the table
+                    const tbody = document.getElementById('cashoutTableBody');
+                    newWithdrawals.forEach(cashout => {
+                        const tr = document.createElement('tr');
+                        tr.innerHTML = `
+                            <td class="text-right py-2">${cashout.id}</td>
+                            <td class="text-right py-2">${toPersianNumber(cashout.amount)}</td>
+                            <td class="text-right py-2">${cashout.date}</td>
+                            <td class="text-right py-2 ${getStatusClass(cashout.status)}">${cashout.status}</td>
+                        `;
+                        tbody.insertBefore(tr, loadingRow);
+                    });
+                    
+                    page++;
+                } catch (error) {
+                    console.error('Error loading withdrawals:', error);
+                } finally {
+                    isLoading = false;
+                    loadingRow.classList.remove('show');
+                }
+            }
+
+            // Intersection Observer to detect when user scrolls to bottom
+            const observer = new IntersectionObserver((entries) => {
+                if (entries[0].isIntersecting && hasMore) {
+                    loadMoreWithdrawals();
+                }
+            }, {
+                root: withdrawalsContainer,
+                threshold: 1.0
+            });
+
+            // Observe the loading row
+            if (loadingRow) {
+                observer.observe(loadingRow);
+            }
+
+            // Initial render
+            renderCashouts();
         });
     </script>
 </body>
