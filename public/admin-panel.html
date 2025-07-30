@@ -1443,183 +1443,28 @@
                 <div id="rewards" class="tab-content">
                     <h2 class="page-title"><i class="fas fa-trophy"></i> تنظیمات جوایز</h2>
                     
-                    <!-- Milestone Setting -->
-                    <div class="table-container milestone-setting">
-                        <div class="table-header">
-                            <h3 class="table-title">تنظیم مرحله جایزه ۱٬۰۰۰٬۰۰۰ تومانی</h3>
+                    <!-- Simple Reward Settings -->
+                    <div class="table-container">
+                        <h3 class="table-title" style="margin-bottom: 1rem;">پیکربندی جوایز</h3>
+                        <div class="form-group">
+                            <label>تعداد خریدهای عادی برای سقف جایزه</label>
+                            <input type="number" class="form-control" value="15" min="1">
                         </div>
                         <div class="form-group">
-                            <label>تعداد خریدهای مورد نیاز برای دریافت جایزه ۱٬۰۰۰٬۰۰۰ تومانی</label>
-                            <input type="number" class="form-control" id="millionTomanMilestone" value="13" min="1">
+                            <label>تعداد خریدهای ویژه برای سقف جایزه</label>
+                            <input type="number" class="form-control" value="10" min="1">
                         </div>
-                    </div>
-                    
-                    <!-- Purchase Type Management -->
-                    <div class="table-container purchase-type-management">
-                        <div class="table-header">
-                            <h3 class="table-title">مدیریت انواع خرید</h3>
-                            <button class="btn btn-primary" onclick="addPurchaseType()">
-                                <i class="fas fa-plus"></i> افزودن نوع خرید
-                            </button>
+                        <div class="form-group">
+                            <label>حداکثر مبلغ جایزه (تومان)</label>
+                            <input type="number" class="form-control" value="1000000" min="0">
                         </div>
-                        <div id="purchaseTypesContainer">
-                            <div class="purchase-type-row">
-                                <input type="text" class="form-control" placeholder="نام نوع خرید" value="عادی">
-                                <button class="btn btn-danger" onclick="removePurchaseType(this)">
-                                    <i class="fas fa-trash"></i>
-                                </button>
-                            </div>
-                            <div class="purchase-type-row">
-                                <input type="text" class="form-control" placeholder="نام نوع خرید" value="ویژه">
-                                <button class="btn btn-danger" onclick="removePurchaseType(this)">
-                                    <i class="fas fa-trash"></i>
-                                </button>
-                            </div>
+                        <div class="form-group">
+                            <label>مبلغ جایزه هر خرید عادی (تومان)</label>
+                            <input type="number" class="form-control" value="0" min="0">
                         </div>
-                    </div>
-
-                    <!-- Reward Tier Builder -->
-                    <div class="table-container tier-builder">
-                        <div class="table-header">
-                            <h3 class="table-title">سازنده مراحل جایزه</h3>
-                            <button class="btn btn-primary" onclick="addTierRow()">
-                                <i class="fas fa-plus"></i> افزودن مرحله
-                            </button>
-                        </div>
-                        <div id="tierBuilderContainer">
-                            <div class="tier-row">
-                                <div class="tier-input">
-                                    <label>تعداد خریدها</label>
-                                    <input type="number" class="form-control" placeholder="تعداد خرید" value="3">
-                                </div>
-                                <div class="purchase-type-inputs">
-                                    <div class="purchase-type-input">
-                                        <label>عادی (تومان)</label>
-                                        <input type="number" class="form-control" placeholder="مبلغ جایزه" value="200000">
-                                    </div>
-                                    <div class="purchase-type-input">
-                                        <label>ویژه (تومان)</label>
-                                        <input type="number" class="form-control" placeholder="مبلغ جایزه" value="250000">
-                                    </div>
-                                </div>
-                                <div class="tier-input">
-                                    <label>قابل تسویه؟</label>
-                                    <select class="form-control">
-                                        <option>بله</option>
-                                        <option selected>خیر</option>
-                                    </select>
-                                </div>
-                                <div class="tier-actions">
-                                    <button class="btn btn-secondary"><i class="fas fa-arrow-up"></i></button>
-                                    <button class="btn btn-secondary"><i class="fas fa-arrow-down"></i></button>
-                                    <button class="btn btn-danger" onclick="removeTierRow(this)"><i class="fas fa-trash"></i></button>
-                                </div>
-                            </div>
-                            <div class="tier-row">
-                                <div class="tier-input">
-                                    <label>تعداد خریدها</label>
-                                    <input type="number" class="form-control" placeholder="تعداد خرید" value="6">
-                                </div>
-                                <div class="purchase-type-inputs">
-                                    <div class="purchase-type-input">
-                                        <label>عادی (تومان)</label>
-                                        <input type="number" class="form-control" placeholder="مبلغ جایزه" value="225000">
-                                    </div>
-                                    <div class="purchase-type-input">
-                                        <label>ویژه (تومان)</label>
-                                        <input type="number" class="form-control" placeholder="مبلغ جایزه" value="275000">
-                                    </div>
-                                </div>
-                                <div class="tier-input">
-                                    <label>قابل تسویه؟</label>
-                                    <select class="form-control">
-                                        <option>بله</option>
-                                        <option selected>خیر</option>
-                                    </select>
-                                </div>
-                                <div class="tier-actions">
-                                    <button class="btn btn-secondary"><i class="fas fa-arrow-up"></i></button>
-                                    <button class="btn btn-secondary"><i class="fas fa-arrow-down"></i></button>
-                                    <button class="btn btn-danger" onclick="removeTierRow(this)"><i class="fas fa-trash"></i></button>
-                                </div>
-                            </div>
-                            <div class="tier-row">
-                                <div class="tier-input">
-                                    <label>تعداد خریدها</label>
-                                    <input type="number" class="form-control" placeholder="تعداد خرید" value="9">
-                                </div>
-                                <div class="purchase-type-inputs">
-                                    <div class="purchase-type-input">
-                                        <label>عادی (تومان)</label>
-                                        <input type="number" class="form-control" placeholder="مبلغ جایزه" value="500000">
-                                    </div>
-                                    <div class="purchase-type-input">
-                                        <label>ویژه (تومان)</label>
-                                        <input type="number" class="form-control" placeholder="مبلغ جایزه" value="600000">
-                                    </div>
-                                </div>
-                                <div class="tier-input">
-                                    <label>قابل تسویه؟</label>
-                                    <select class="form-control">
-                                        <option selected>بله</option>
-                                        <option>خیر</option>
-                                    </select>
-                                </div>
-                                <div class="tier-actions">
-                                    <button class="btn btn-secondary"><i class="fas fa-arrow-up"></i></button>
-                                    <button class="btn btn-secondary"><i class="fas fa-arrow-down"></i></button>
-                                    <button class="btn btn-danger" onclick="removeTierRow(this)"><i class="fas fa-trash"></i></button>
-                                </div>
-                            </div>
-                            <div class="tier-row">
-                                <div class="tier-input">
-                                    <label>تعداد خریدها</label>
-                                    <input type="number" class="form-control" placeholder="تعداد خرید" value="13">
-                                </div>
-                                <div class="purchase-type-inputs">
-                                    <div class="purchase-type-input">
-                                        <label>عادی (تومان)</label>
-                                        <input type="number" class="form-control" placeholder="مبلغ جایزه" value="1000000">
-                                    </div>
-                                    <div class="purchase-type-input">
-                                        <label>ویژه (تومان)</label>
-                                        <input type="number" class="form-control" placeholder="مبلغ جایزه" value="1200000">
-                                    </div>
-                                </div>
-                                <div class="tier-input">
-                                    <label>قابل تسویه؟</label>
-                                    <select class="form-control">
-                                        <option selected>بله</option>
-                                        <option>خیر</option>
-                                    </select>
-                                </div>
-                                <div class="tier-actions">
-                                    <button class="btn btn-secondary"><i class="fas fa-arrow-up"></i></button>
-                                    <button class="btn btn-secondary"><i class="fas fa-arrow-down"></i></button>
-                                    <button class="btn btn-danger" onclick="removeTierRow(this)"><i class="fas fa-trash"></i></button>
-                                </div>
-                            </div>
-                        </div>
-                        <div style="margin-top: 1rem; text-align: left;">
-                            <button class="btn btn-primary" onclick="saveTiers()">
-                                <i class="fas fa-save"></i> ذخیره تغییرات
-                            </button>
-                        </div>
-                    </div>
-
-                    <!-- Reward Configuration -->
-                    <div class="stats-grid">
-                        <div class="stat-card">
-                            <div class="form-group">
-                                <label>امتیاز هر خرید (عادی)</label>
-                                <input type="number" class="form-control" value="10">
-                            </div>
-                        </div>
-                        <div class="stat-card">
-                            <div class="form-group">
-                                <label>امتیاز هر خرید (ویژه)</label>
-                                <input type="number" class="form-control" value="15">
-                            </div>
+                        <div class="form-group">
+                            <label>مبلغ جایزه هر خرید ویژه (تومان)</label>
+                            <input type="number" class="form-control" value="0" min="0">
                         </div>
                     </div>
 
