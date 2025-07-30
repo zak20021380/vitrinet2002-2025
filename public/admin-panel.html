@@ -1122,7 +1122,7 @@
                                     <i class="fas fa-wallet"></i>
                                 </div>
                             </div>
-                            <div class="stat-card-value">۵۰٬۰۰۰٬۰۰۰ تومان</div>
+                            <div class="stat-card-value" id="dashboardBudgetValue">۵۰٬۰۰۰٬۰۰۰ تومان</div>
                             <div class="stat-card-change positive">
                                 <i class="fas fa-arrow-up"></i>
                                 <span>۲٪ افزایش</span>
@@ -1191,7 +1191,7 @@
                         <div class="table-header">
                             <h3 class="table-title">وضعیت بودجه ماهانه</h3>
                         </div>
-                        <div class="budget-gauge">
+                        <div class="budget-gauge" id="dashboardBudgetGauge">
                             <div class="budget-container" style="width: 100%;">
                                 <div class="budget-progress warning" style="width: 84%;"></div>
                                 <div class="budget-label">۸۴٪</div>
@@ -1587,7 +1587,7 @@
                         </div>
                         <div class="setting-row">
                             <div class="setting-label">بودجه ماهانه</div>
-                            <div class="setting-value">۵۰٬۰۰۰٬۰۰۰ تومان</div>
+                            <div class="setting-value" id="financeBudgetText">۵۰٬۰۰۰٬۰۰۰ تومان</div>
                         </div>
                     </div>
                     
@@ -1599,7 +1599,7 @@
                                 <i class="fas fa-edit"></i> تنظیم بودجه
                             </button>
                         </div>
-                        <div class="budget-gauge">
+                        <div class="budget-gauge" id="financeBudgetGauge">
                             <div class="budget-container" style="width: 100%;">
                                 <div class="budget-progress warning" style="width: 84%;"></div>
                                 <div class="budget-label">۸۴٪</div>
@@ -1883,7 +1883,7 @@
                     <label>مصرف شده تا کنون (تومان)</label>
                     <input type="number" class="form-control" id="budgetUsed" value="42000000" readonly>
                 </div>
-                <div class="budget-gauge">
+                <div class="budget-gauge" id="modalBudgetGauge">
                     <div class="budget-container" style="width: 100%;">
                         <div class="budget-progress warning" style="width: 84%;"></div>
                         <div class="budget-label">۸۴٪</div>
@@ -1920,7 +1920,7 @@
                 <div id="settlementAmountsContainer"></div>
                 <div class="form-group">
                     <label>بودجه ماهانه (تومان)</label>
-                    <input type="number" class="form-control" value="50000000">
+                    <input type="number" id="financeMonthlyBudget" class="form-control" value="50000000">
                 </div>
             </div>
             <div class="modal-footer">
@@ -2171,14 +2171,71 @@
             }
         }
 
+        function formatNumber(num) {
+            return Number(num || 0).toLocaleString('fa-IR');
+        }
+
+        function updateGauge(id, used, total) {
+            const el = document.getElementById(id);
+            if (!el) return;
+            const percent = total ? Math.round((used / total) * 100) : 0;
+            const progress = el.querySelector('.budget-progress');
+            const label = el.querySelector('.budget-label');
+            const gaugeValue = el.querySelector('.gauge-value');
+            const gaugeStatus = el.querySelector('.gauge-status');
+            if (progress) progress.style.width = percent + '%';
+            if (label) label.textContent = formatNumber(percent) + '٪';
+            if (gaugeValue) gaugeValue.textContent = `${formatNumber(used)} / ${formatNumber(total)} تومان`;
+            if (gaugeStatus) gaugeStatus.textContent = `${formatNumber(percent)}٪ مصرف شده`;
+        }
+
+        function updateBudgetUI(budget) {
+            const usedInput = document.getElementById('budgetUsed');
+            const used = usedInput ? parseInt(usedInput.value) : 0;
+            const formatted = formatNumber(budget) + ' تومان';
+
+            const dashValue = document.getElementById('dashboardBudgetValue');
+            if (dashValue) dashValue.textContent = formatted;
+
+            const financeText = document.getElementById('financeBudgetText');
+            if (financeText) financeText.textContent = formatted;
+
+            updateGauge('dashboardBudgetGauge', used, budget);
+            updateGauge('financeBudgetGauge', used, budget);
+            updateGauge('modalBudgetGauge', used, budget);
+        }
+
+        function loadBudget() {
+            const defaultBudget = 50000000;
+            const stored = localStorage.getItem('monthlyBudget');
+            const budget = stored ? parseInt(stored) : defaultBudget;
+
+            const modalInput = document.getElementById('monthlyBudget');
+            if (modalInput) modalInput.value = budget;
+            const financeInput = document.getElementById('financeMonthlyBudget');
+            if (financeInput) financeInput.value = budget;
+
+            updateBudgetUI(budget);
+        }
+
         // Finance Settings
         function saveFinanceSettings() {
+            const input = document.getElementById('financeMonthlyBudget');
+            if (input) {
+                const val = parseInt(input.value || '0');
+                localStorage.setItem('monthlyBudget', val);
+                updateBudgetUI(val);
+            }
             showToast('تنظیمات مالی با موفقیت ذخیره شد', 'success');
             closeModal('financeSettingsModal');
         }
 
         // Budget Functions
         function saveBudget() {
+            const input = document.getElementById('monthlyBudget');
+            const val = parseInt(input.value || '0');
+            localStorage.setItem('monthlyBudget', val);
+            updateBudgetUI(val);
             showToast('بودجه ماهانه با موفقیت ذخیره شد', 'success');
             closeModal('budgetModal');
         }
@@ -2234,6 +2291,7 @@
 
         // Chart Initialization
         document.addEventListener('DOMContentLoaded', function() {
+            loadBudget();
             // Rewards vs Purchases Chart
             const ctx = document.getElementById('rewardsVsPurchasesChart');
             if (ctx) {
