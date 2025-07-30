@@ -1395,13 +1395,7 @@
                         </table>
                         
                         <!-- Pagination -->
-                        <div class="pagination">
-                            <button disabled><i class="fas fa-chevron-right"></i></button>
-                            <button class="active">۱</button>
-                            <button>۲</button>
-                            <button>۳</button>
-                            <button><i class="fas fa-chevron-left"></i></button>
-                        </div>
+                        <div class="pagination" id="withdrawalsPagination"></div>
                     </div>
                 </div>
 
@@ -2408,6 +2402,12 @@
             const dateFilter = document.getElementById('withdrawalDateFilter');
             const searchInput = document.getElementById('withdrawalSearch');
             const emptyRow = document.getElementById('withdrawalsEmptyRow');
+            const paginationContainer = document.getElementById('withdrawalsPagination');
+
+            const allRows = Array.from(document.querySelectorAll('#withdrawals tbody tr[data-id]'));
+            let filteredRows = allRows.slice();
+            let currentPage = 1;
+            const rowsPerPage = 5;
 
             function toPersianDigits(str) {
                 const map = ['۰','۱','۲','۳','۴','۵','۶','۷','۸','۹'];
@@ -2426,16 +2426,71 @@
                 return str.replace(/[۰-۹]/g, d => persian.indexOf(d)).replace(/[^0-9]/g, '');
             }
 
+            function renderPagination(totalPages) {
+                if (!paginationContainer) return;
+                paginationContainer.innerHTML = '';
+
+                const prevBtn = document.createElement('button');
+                prevBtn.innerHTML = '<i class="fas fa-chevron-right"></i>';
+                prevBtn.disabled = currentPage === 1;
+                prevBtn.addEventListener('click', () => {
+                    if (currentPage > 1) {
+                        currentPage--;
+                        updatePage();
+                    }
+                });
+                paginationContainer.appendChild(prevBtn);
+
+                for (let i = 1; i <= totalPages; i++) {
+                    const btn = document.createElement('button');
+                    btn.textContent = toPersianDigits(i.toString());
+                    if (i === currentPage) btn.classList.add('active');
+                    btn.addEventListener('click', () => {
+                        currentPage = i;
+                        updatePage();
+                    });
+                    paginationContainer.appendChild(btn);
+                }
+
+                const nextBtn = document.createElement('button');
+                nextBtn.innerHTML = '<i class="fas fa-chevron-left"></i>';
+                nextBtn.disabled = currentPage === totalPages || totalPages === 0;
+                nextBtn.addEventListener('click', () => {
+                    if (currentPage < totalPages) {
+                        currentPage++;
+                        updatePage();
+                    }
+                });
+                paginationContainer.appendChild(nextBtn);
+            }
+
+            function updatePage() {
+                const totalPages = Math.ceil(filteredRows.length / rowsPerPage) || 1;
+                if (currentPage > totalPages) currentPage = totalPages;
+
+                allRows.forEach(row => { row.style.display = 'none'; });
+
+                const start = (currentPage - 1) * rowsPerPage;
+                const end = start + rowsPerPage;
+                filteredRows.slice(start, end).forEach(row => { row.style.display = ''; });
+
+                if (emptyRow) {
+                    emptyRow.style.display = filteredRows.length ? 'none' : 'table-row';
+                }
+
+                renderPagination(totalPages);
+            }
+
             function filterWithdrawals() {
                 const statusVal = statusFilter.value;
                 const dateVal = formatDateToPersian(dateFilter.value);
-                const searchVal = searchInput.value.trim().toLowerCase();
+                const searchVal = searchInput.value.trim().toLowerCase().replace(/\s+/g, '');
 
-                let hasMatch = false;
-                document.querySelectorAll('#withdrawals tbody tr[data-id]').forEach(row => {
+                filteredRows = [];
+                allRows.forEach(row => {
                     const rowStatus = row.getAttribute('data-status');
                     const rowDate = row.getAttribute('data-date');
-                    const rowName = row.getAttribute('data-name').toLowerCase();
+                    const rowName = row.getAttribute('data-name').toLowerCase().replace(/\s+/g, '');
                     const rowCard = normalizeNumber(row.getAttribute('data-card'));
 
                     let match = true;
@@ -2450,13 +2505,11 @@
                         match = match && (rowName.includes(searchVal) || rowCard.includes(normSearchNum));
                     }
 
-                    row.style.display = match ? '' : 'none';
-                    if (match) hasMatch = true;
+                    if (match) filteredRows.push(row);
                 });
 
-                if (emptyRow) {
-                    emptyRow.style.display = hasMatch ? 'none' : 'table-row';
-                }
+                currentPage = 1;
+                updatePage();
             }
 
             if (statusFilter && dateFilter && searchInput) {
