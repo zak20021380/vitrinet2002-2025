@@ -1642,9 +1642,9 @@
                     
                     <!-- Analytics Filters -->
                     <div id="analyticsFilters" class="filter-pills mb-4">
-                        <button class="filter-pill active" data-period="daily" onclick="switchAnalyticsPeriod('daily')">روزانه</button>
+                        <button class="filter-pill" data-period="daily" onclick="switchAnalyticsPeriod('daily')">روزانه</button>
                         <button class="filter-pill" data-period="weekly" onclick="switchAnalyticsPeriod('weekly')">هفتگی</button>
-                        <button class="filter-pill" data-period="monthly" onclick="switchAnalyticsPeriod('monthly')">ماهانه</button>
+                        <button class="filter-pill active" data-period="monthly" onclick="switchAnalyticsPeriod('monthly')">ماهانه</button>
                     </div>
 
                     <!-- Statistics Cards -->
@@ -1690,6 +1690,13 @@
                                 <div class="text-sm text-gray-400">فروشنده‌های عادی</div>
                                 <div id="metricRegular" class="text-xl font-semibold">۰</div>
                             </div>
+                        </div>
+                    </div>
+
+                    <!-- Monthly Statistics Chart -->
+                    <div class="bg-darkcard rounded-xl shadow-lg p-4 mb-4">
+                        <div class="h-72 md:h-96">
+                            <canvas id="statsChart"></canvas>
                         </div>
                     </div>
 
@@ -2461,10 +2468,37 @@
                         regular: '۳۵'
                     },
                     chart: {
-                        labels: ['فروردین','اردیبهشت','خرداد','تیر'],
-                        rewards: [25, 22, 30, 28],
-                        purchases: [800, 850, 900, 950]
+                        labels: ['فروردین','اردیبهشت','خرداد','تیر','مرداد','شهریور'],
+                        rewards: [25, 22, 30, 28, 35, 32],
+                        purchases: [800, 850, 900, 950, 970, 980]
                     }
+                }
+            };
+
+            const statsData = {
+                daily: {
+                    labels: ['ش','ی','د','س','چ','پ','ج'],
+                    budget: [5000000,5000000,5000000,5000000,5000000,5000000,5000000],
+                    rewards: [200000,150000,180000,220000,170000,190000,210000],
+                    customers: [30,28,32,35,33,30,29],
+                    regular: [12,11,13,15,14,12,12],
+                    premium: [3,3,4,4,3,3,3]
+                },
+                weekly: {
+                    labels: ['هفته ۱','هفته ۲','هفته ۳','هفته ۴'],
+                    budget: [30000000,32000000,31000000,33000000],
+                    rewards: [1000000,1100000,1050000,1150000],
+                    customers: [150,160,155,165],
+                    regular: [60,65,62,68],
+                    premium: [10,11,10,12]
+                },
+                monthly: {
+                    labels: ['فروردین','اردیبهشت','خرداد','تیر','مرداد','شهریور'],
+                    budget: [30000000,32000000,28000000,35000000,33000000,34000000],
+                    rewards: [1000000,1200000,900000,1500000,1300000,1400000],
+                    customers: [200,210,190,220,230,240],
+                    regular: [80,85,82,88,90,92],
+                    premium: [20,22,21,23,24,25]
                 }
             };
 
@@ -2507,6 +2541,33 @@
                 });
             }
 
+            let statsChart;
+            const statsCanvas = document.getElementById('statsChart');
+            if (statsCanvas) {
+                statsChart = new Chart(statsCanvas.getContext('2d'), {
+                    type: 'bar',
+                    data: {
+                        labels: [],
+                        datasets: [
+                            { label: '🪙 بودجه', backgroundColor: '#6366F1', data: [] },
+                            { label: '🎁 جوایز پرداخت‌شده', backgroundColor: '#f59e0b', data: [] },
+                            { label: '👤 مشتریان فعال', backgroundColor: '#10b981', data: [] },
+                            { label: '🧍‍♂️ فروشندگان عادی', backgroundColor: '#6b7280', data: [] },
+                            { label: '⭐ فروشندگان پریمیوم', backgroundColor: '#a855f7', data: [] }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: { legend: { position: 'top' } },
+                        scales: {
+                            x: { grid: { color: 'rgba(255,255,255,0.1)' }, ticks: { color: '#94a3b8' } },
+                            y: { beginAtZero: true, grid: { color: 'rgba(255,255,255,0.1)' }, ticks: { color: '#94a3b8' } }
+                        }
+                    }
+                });
+            }
+
             function updateAnalytics(period) {
                 const data = analyticsData[period];
                 if (!data) return;
@@ -2522,6 +2583,17 @@
                     analyticsChart.data.datasets[0].data = data.chart.rewards;
                     analyticsChart.data.datasets[1].data = data.chart.purchases;
                     analyticsChart.update();
+                }
+
+                const stats = statsData[period];
+                if (stats && statsChart) {
+                    statsChart.data.labels = stats.labels;
+                    statsChart.data.datasets[0].data = stats.budget;
+                    statsChart.data.datasets[1].data = stats.rewards;
+                    statsChart.data.datasets[2].data = stats.customers;
+                    statsChart.data.datasets[3].data = stats.regular;
+                    statsChart.data.datasets[4].data = stats.premium;
+                    statsChart.update();
                 }
             }
 
