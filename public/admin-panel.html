@@ -2488,6 +2488,18 @@
         document.addEventListener('DOMContentLoaded', function() {
             loadBudget();
 
+            const jalaliMonths = ['فروردین','اردیبهشت','خرداد','تیر','مرداد','شهریور','مهر','آبان','آذر','دی','بهمن','اسفند'];
+
+            function expandMonthlyDataset(dataset, keys) {
+                const index = {};
+                dataset.labels.forEach((m, i) => index[m] = i);
+                const expanded = { labels: jalaliMonths };
+                keys.forEach(k => {
+                    expanded[k] = jalaliMonths.map(m => (index[m] !== undefined ? dataset[k][index[m]] : 0));
+                });
+                return expanded;
+            }
+
             const analyticsData = {
                 daily: {
                     cards: {
@@ -2565,6 +2577,9 @@
                     premium: [20,22,21,23,24,25]
                 }
             };
+
+            analyticsData.monthly.chart = expandMonthlyDataset(analyticsData.monthly.chart, ['rewards','purchases']);
+            statsData.monthly = expandMonthlyDataset(statsData.monthly, ['budget','rewards','purchases','sellers','regular','premium']);
 
             let analyticsChart;
             const analyticsCanvas = document.getElementById('analyticsChart');
