@@ -1290,7 +1290,11 @@
                         </div>
                         <div class="filter-group">
                             <label>تاریخ:</label>
-                            <input type="date" class="date-filter">
+                            <input type="date" class="date-filter" id="withdrawalDateFilter">
+                        </div>
+                        <div class="filter-group">
+                            <label>جستجو:</label>
+                            <input type="text" class="form-control" id="withdrawalSearch" placeholder="جستجو بر اساس نام یا شماره کارت">
                         </div>
                     </div>
                     
@@ -1312,7 +1316,7 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                <tr data-id="1">
+                                <tr data-id="1" data-status="pending" data-name="علی محمدی" data-card="1234-5678-9012-3456" data-date="۱۴۰۳/۰۲/۱۰">
                                     <td>۱</td>
                                     <td>علی محمدی</td>
                                     <td class="ltr-text">1234-5678-9012-3456</td>
@@ -1333,7 +1337,7 @@
                                         </div>
                                     </td>
                                 </tr>
-                                <tr data-id="2">
+                                <tr data-id="2" data-status="approved" data-name="زهرا رضایی" data-card="9876-5432-1098-7654" data-date="۱۴۰۳/۰۲/۰۸">
                                     <td>۲</td>
                                     <td>زهرا رضایی</td>
                                     <td class="ltr-text">9876-5432-1098-7654</td>
@@ -1354,7 +1358,7 @@
                                         </div>
                                     </td>
                                 </tr>
-                                <tr data-id="3">
+                                <tr data-id="3" data-status="rejected" data-name="محمد حسینی" data-card="1111-2222-3333-4444" data-date="۱۴۰۳/۰۲/۰۵">
                                     <td>۳</td>
                                     <td>محمد حسینی</td>
                                     <td class="ltr-text">1111-2222-3333-4444</td>
@@ -1383,6 +1387,9 @@
                                             <span>در حال بارگذاری...</span>
                                         </div>
                                     </td>
+                                </tr>
+                                <tr id="withdrawalsEmptyRow" style="display:none;">
+                                    <td colspan="7" class="text-center py-4">درخواستی یافت نشد</td>
                                 </tr>
                             </tbody>
                         </table>
@@ -2395,6 +2402,69 @@
                     closeModal('withdrawalModal');
                 }, 1500);
             });
+
+            // Withdrawal Filters
+            const statusFilter = document.getElementById('withdrawalStatusFilter');
+            const dateFilter = document.getElementById('withdrawalDateFilter');
+            const searchInput = document.getElementById('withdrawalSearch');
+            const emptyRow = document.getElementById('withdrawalsEmptyRow');
+
+            function toPersianDigits(str) {
+                const map = ['۰','۱','۲','۳','۴','۵','۶','۷','۸','۹'];
+                return str.replace(/\d/g, d => map[d]);
+            }
+
+            function formatDateToPersian(value) {
+                if (!value) return '';
+                const parts = value.split('-');
+                if (parts.length !== 3) return '';
+                return toPersianDigits(parts.join('/'));
+            }
+
+            function normalizeNumber(str) {
+                const persian = '۰۱۲۳۴۵۶۷۸۹';
+                return str.replace(/[۰-۹]/g, d => persian.indexOf(d)).replace(/[^0-9]/g, '');
+            }
+
+            function filterWithdrawals() {
+                const statusVal = statusFilter.value;
+                const dateVal = formatDateToPersian(dateFilter.value);
+                const searchVal = searchInput.value.trim().toLowerCase();
+
+                let hasMatch = false;
+                document.querySelectorAll('#withdrawals tbody tr[data-id]').forEach(row => {
+                    const rowStatus = row.getAttribute('data-status');
+                    const rowDate = row.getAttribute('data-date');
+                    const rowName = row.getAttribute('data-name').toLowerCase();
+                    const rowCard = normalizeNumber(row.getAttribute('data-card'));
+
+                    let match = true;
+                    if (statusVal !== 'all') {
+                        match = match && rowStatus === statusVal;
+                    }
+                    if (dateVal) {
+                        match = match && rowDate === dateVal;
+                    }
+                    if (searchVal) {
+                        const normSearchNum = normalizeNumber(searchVal);
+                        match = match && (rowName.includes(searchVal) || rowCard.includes(normSearchNum));
+                    }
+
+                    row.style.display = match ? '' : 'none';
+                    if (match) hasMatch = true;
+                });
+
+                if (emptyRow) {
+                    emptyRow.style.display = hasMatch ? 'none' : 'table-row';
+                }
+            }
+
+            if (statusFilter && dateFilter && searchInput) {
+                statusFilter.addEventListener('change', filterWithdrawals);
+                dateFilter.addEventListener('change', filterWithdrawals);
+                searchInput.addEventListener('input', filterWithdrawals);
+                filterWithdrawals();
+            }
 
             // Reward Stage Inputs
             const stageCountInput = document.getElementById('stageCountInput');
