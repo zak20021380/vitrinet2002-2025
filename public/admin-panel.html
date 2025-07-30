@@ -648,50 +648,6 @@
             }
         }
 
-        /* Reward Ladder */
-        .reward-ladder {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin: 2rem 0;
-            position: relative;
-        }
-
-        .ladder-step {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            z-index: 2;
-        }
-
-        .step-icon {
-            width: 60px;
-            height: 60px;
-            border-radius: 50%;
-            background-color: var(--primary);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-bottom: 0.75rem;
-            font-size: 1.5rem;
-            color: white;
-        }
-
-        .step-label {
-            text-align: center;
-            font-size: 0.9rem;
-            color: var(--text-secondary);
-        }
-
-        .ladder-connector {
-            position: absolute;
-            height: 4px;
-            background-color: var(--primary);
-            top: 30px;
-            left: 10%;
-            right: 10%;
-            z-index: 1;
-        }
 
         /* Pagination */
         .pagination {
@@ -1129,6 +1085,7 @@
                 <li><a href="#" class="nav-link" data-tab="withdrawals"><i class="fas fa-money-bill-transfer"></i> <span>تسویه‌ها</span></a></li>
                 <li><a href="#" class="nav-link" data-tab="rewards"><i class="fas fa-trophy"></i> <span>جوایز</span></a></li>
                 <li><a href="#" class="nav-link" data-tab="customers"><i class="fas fa-users"></i> <span>مشتریان</span></a></li>
+                  <li><a href="#" class="nav-link" data-tab="sellers"><i class="fas fa-store"></i> <span>فروشندگان</span></a></li>
                 <li><a href="#" class="nav-link" data-tab="finance"><i class="fas fa-coins"></i> <span>مالی</span></a></li>
                 <li><a href="#" class="nav-link" data-tab="reports"><i class="fas fa-chart-bar"></i> <span>گزارش‌ها</span></a></li>
                 <li><a href="#" class="nav-link" data-tab="settings"><i class="fas fa-cog"></i> <span>تنظیمات</span></a></li>
@@ -1251,31 +1208,6 @@
                         </div>
                     </div>
 
-                    <!-- Reward Ladder Preview -->
-                    <div class="table-container">
-                        <div class="table-header">
-                            <h3 class="table-title">پل جوایز</h3>
-                        </div>
-                        <div class="reward-ladder">
-                            <div class="ladder-connector"></div>
-                            <div class="ladder-step">
-                                <div class="step-icon">۳</div>
-                                <div class="step-label">۲۰۰٬۰۰۰ تومان</div>
-                            </div>
-                            <div class="ladder-step">
-                                <div class="step-icon">۶</div>
-                                <div class="step-label">۲۲۵٬۰۰۰ تومان</div>
-                            </div>
-                            <div class="ladder-step">
-                                <div class="step-icon">۹</div>
-                                <div class="step-label">۵۰۰٬۰۰۰ تومان</div>
-                            </div>
-                            <div class="ladder-step">
-                                <div class="step-icon">۱۳</div>
-                                <div class="step-label">۱٬۰۰۰٬۰۰۰ تومان</div>
-                            </div>
-                        </div>
-                    </div>
 
                     <!-- Rewards vs Purchases Chart -->
                     <div class="chart-container">
@@ -1348,9 +1280,6 @@
                     <div class="table-container">
                         <div class="table-header">
                             <h3 class="table-title">لیست درخواست‌ها</h3>
-                            <button class="btn btn-primary" onclick="openModal('withdrawalModal')">
-                                <i class="fas fa-plus"></i> درخواست جدید
-                            </button>
                         </div>
                         <table>
                             <thead>
@@ -1365,10 +1294,10 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                <tr>
+                                <tr data-id="1">
                                     <td>۱</td>
                                     <td>علی محمدی</td>
-                                    <td class="ltr-text">**** **** **** 3456</td>
+                                    <td class="ltr-text">1234-5678-9012-3456</td>
                                     <td>۵٬۰۰۰٬۰۰۰</td>
                                     <td>۱۴۰۳/۰۲/۱۰</td>
                                     <td><span class="status-badge status-pending">در انتظار</span></td>
@@ -1386,10 +1315,10 @@
                                         </div>
                                     </td>
                                 </tr>
-                                <tr>
+                                <tr data-id="2">
                                     <td>۲</td>
                                     <td>زهرا رضایی</td>
-                                    <td class="ltr-text">**** **** **** 7654</td>
+                                    <td class="ltr-text">9876-5432-1098-7654</td>
                                     <td>۲٬۵۰۰٬۰۰۰</td>
                                     <td>۱۴۰۳/۰۲/۰۸</td>
                                     <td><span class="status-badge status-active">تأیید شده</span></td>
@@ -1401,10 +1330,10 @@
                                         </div>
                                     </td>
                                 </tr>
-                                <tr>
+                                <tr data-id="3">
                                     <td>۳</td>
                                     <td>محمد حسینی</td>
-                                    <td class="ltr-text">**** **** **** 4444</td>
+                                    <td class="ltr-text">1111-2222-3333-4444</td>
                                     <td>۱٬۲۰۰٬۰۰۰</td>
                                     <td>۱۴۰۳/۰۲/۰۵</td>
                                     <td><span class="status-badge status-inactive">رد شده</span></td>
@@ -1635,6 +1564,42 @@
                             <div>قابل استفاده: <span style="color: var(--success);">۸٬۷۵۰٬۰۰۰</span></div>
                             <div>مسدود شده: <span style="color: var(--warning);">۶٬۵۰۰٬۰۰۰</span></div>
                         </div>
+                    </div>
+                </div>
+                <!-- Sellers Tab -->
+                <div id="sellers" class="tab-content">
+                    <h2 class="page-title"><i class="fas fa-store"></i> فروشندگان</h2>
+
+                    <div class="table-container">
+                        <div class="table-header">
+                            <h3 class="table-title">لیست فروشندگان</h3>
+                        </div>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>نام فروشنده</th>
+                                    <th>تعداد مشتریان معرفی‌شده</th>
+                                    <th>شناسه فروشگاه</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>فروشگاه الف</td>
+                                    <td>۱۲</td>
+                                    <td class="ltr-text">shop-001</td>
+                                </tr>
+                                <tr>
+                                    <td>فروشگاه ب</td>
+                                    <td>۸</td>
+                                    <td class="ltr-text">shop-002</td>
+                                </tr>
+                                <tr>
+                                    <td>فروشگاه ج</td>
+                                    <td>۱۵</td>
+                                    <td class="ltr-text">shop-003</td>
+                                </tr>
+                            </tbody>
+                        </table>
                     </div>
                 </div>
 
@@ -2076,11 +2041,23 @@
 
         // Withdrawal Actions
         function approveWithdrawal(id) {
-            showToast('درخواست تسویه تأیید شد', 'success');
+            const row = document.querySelector(`#withdrawals tbody tr[data-id="${id}"]`);
+            if (row) {
+                const badge = row.querySelector(".status-badge");
+                badge.textContent = "موفق";
+                badge.className = "status-badge status-approved";
+            }
+            showToast("درخواست تسویه تأیید شد", "success");
         }
 
         function rejectWithdrawal(id) {
-            showToast('درخواست تسویه رد شد', 'error');
+            const row = document.querySelector(`#withdrawals tbody tr[data-id="${id}"]`);
+            if (row) {
+                const badge = row.querySelector(".status-badge");
+                badge.textContent = "رد شده";
+                badge.className = "status-badge status-inactive";
+            }
+            showToast("درخواست تسویه رد شد", "error");
         }
 
         // View Withdrawal Details
