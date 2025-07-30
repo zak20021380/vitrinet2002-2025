@@ -1663,42 +1663,42 @@
 
                     <!-- Statistics Cards -->
                     <div id="analyticsCards" class="grid grid-cols-2 md:grid-cols-3 gap-4 mb-4">
-                        <div class="rounded-xl shadow-lg bg-darkcard text-white p-4 flex items-center gap-3">
+                        <div data-metric="budget" class="rounded-xl shadow-lg bg-darkcard text-white p-4 flex items-center gap-3 cursor-pointer transition hover:shadow-md">
                             <div class="text-primary text-2xl"><i class="fas fa-wallet"></i></div>
                             <div>
                                 <div class="text-sm text-gray-400">بودجه ماهانه</div>
                                 <div id="metricBudget" class="text-xl font-semibold">۰</div>
                             </div>
                         </div>
-                        <div class="rounded-xl shadow-lg bg-darkcard text-white p-4 flex items-center gap-3">
+                        <div data-metric="rewards" class="rounded-xl shadow-lg bg-darkcard text-white p-4 flex items-center gap-3 cursor-pointer transition hover:shadow-md">
                             <div class="text-yellow-500 text-2xl"><i class="fas fa-gift"></i></div>
                             <div>
                                 <div class="text-sm text-gray-400">جوایز پرداخت‌شده</div>
                                 <div id="metricRewards" class="text-xl font-semibold">۰</div>
                             </div>
                         </div>
-                        <div class="rounded-xl shadow-lg bg-darkcard text-white p-4 flex items-center gap-3">
+                        <div data-metric="purchases" class="rounded-xl shadow-lg bg-darkcard text-white p-4 flex items-center gap-3 cursor-pointer transition hover:shadow-md">
                             <div class="text-green-500 text-2xl"><i class="fas fa-shopping-cart"></i></div>
                             <div>
                                 <div class="text-sm text-gray-400">تعداد خریدها</div>
                                 <div id="metricPurchases" class="text-xl font-semibold">۰</div>
                             </div>
                         </div>
-                        <div class="rounded-xl shadow-lg bg-darkcard text-white p-4 flex items-center gap-3">
+                        <div data-metric="sellers" class="rounded-xl shadow-lg bg-darkcard text-white p-4 flex items-center gap-3 cursor-pointer transition hover:shadow-md">
                             <div class="text-blue-400 text-2xl"><i class="fas fa-users"></i></div>
                             <div>
                                 <div class="text-sm text-gray-400">تعداد فروشندگان زنجیره</div>
                                 <div id="metricSellers" class="text-xl font-semibold">۰</div>
                             </div>
                         </div>
-                        <div class="rounded-xl shadow-lg bg-darkcard text-white p-4 flex items-center gap-3">
+                        <div data-metric="premium" class="rounded-xl shadow-lg bg-darkcard text-white p-4 flex items-center gap-3 cursor-pointer transition hover:shadow-md">
                             <div class="text-purple-400 text-2xl"><i class="fas fa-star"></i></div>
                             <div>
                                 <div class="text-sm text-gray-400">فروشنده‌های پرمیوم</div>
                                 <div id="metricPremium" class="text-xl font-semibold">۰</div>
                             </div>
                         </div>
-                        <div class="rounded-xl shadow-lg bg-darkcard text-white p-4 flex items-center gap-3">
+                        <div data-metric="regular" class="rounded-xl shadow-lg bg-darkcard text-white p-4 flex items-center gap-3 cursor-pointer transition hover:shadow-md">
                             <div class="text-gray-400 text-2xl"><i class="fas fa-user"></i></div>
                             <div>
                                 <div class="text-sm text-gray-400">فروشنده‌های عادی</div>
@@ -2512,7 +2512,8 @@
                     labels: ['ش','ی','د','س','چ','پ','ج'],
                     budget: [5000000,5000000,5000000,5000000,5000000,5000000,5000000],
                     rewards: [200000,150000,180000,220000,170000,190000,210000],
-                    customers: [30,28,32,35,33,30,29],
+                    purchases: [20,22,18,24,21,19,23],
+                    sellers: [30,28,32,35,33,30,29],
                     regular: [12,11,13,15,14,12,12],
                     premium: [3,3,4,4,3,3,3]
                 },
@@ -2520,7 +2521,8 @@
                     labels: ['هفته ۱','هفته ۲','هفته ۳','هفته ۴'],
                     budget: [30000000,32000000,31000000,33000000],
                     rewards: [1000000,1100000,1050000,1150000],
-                    customers: [150,160,155,165],
+                    purchases: [220,230,210,240],
+                    sellers: [150,160,155,165],
                     regular: [60,65,62,68],
                     premium: [10,11,10,12]
                 },
@@ -2528,7 +2530,8 @@
                     labels: ['فروردین','اردیبهشت','خرداد','تیر','مرداد','شهریور'],
                     budget: [30000000,32000000,28000000,35000000,33000000,34000000],
                     rewards: [1000000,1200000,900000,1500000,1300000,1400000],
-                    customers: [200,210,190,220,230,240],
+                    purchases: [800,850,900,950,970,980],
+                    sellers: [200,210,190,220,230,240],
                     regular: [80,85,82,88,90,92],
                     premium: [20,22,21,23,24,25]
                 }
@@ -2581,17 +2584,21 @@
                     data: {
                         labels: [],
                         datasets: [
-                            { label: '🪙 بودجه', backgroundColor: '#6366F1', data: [] },
-                            { label: '🎁 جوایز پرداخت‌شده', backgroundColor: '#f59e0b', data: [] },
-                            { label: '👤 مشتریان فعال', backgroundColor: '#10b981', data: [] },
-                            { label: '🧍‍♂️ فروشندگان عادی', backgroundColor: '#6b7280', data: [] },
-                            { label: '⭐ فروشندگان پریمیوم', backgroundColor: '#a855f7', data: [] }
+                            { label: '', backgroundColor: '#6366F1', borderColor: '#6366F1', data: [] }
                         ]
                     },
                     options: {
                         responsive: true,
                         maintainAspectRatio: false,
-                        plugins: { legend: { position: 'top' } },
+                        plugins: {
+                            legend: { position: 'top' },
+                            tooltip: {
+                                callbacks: {
+                                    title: ctx => ctx[0].label,
+                                    label: ctx => 'مقدار: ' + ctx.parsed.y.toLocaleString('fa-IR')
+                                }
+                            }
+                        },
                         scales: {
                             x: { grid: { color: 'rgba(255,255,255,0.1)' }, ticks: { color: '#94a3b8' } },
                             y: { beginAtZero: true, grid: { color: 'rgba(255,255,255,0.1)' }, ticks: { color: '#94a3b8' } }
@@ -2599,6 +2606,52 @@
                     }
                 });
             }
+
+            const metricConfig = {
+                budget:  { label: '🪙 بودجه', color: '#6366F1' },
+                rewards: { label: '🎁 جوایز پرداخت‌شده', color: '#f59e0b' },
+                purchases: { label: '🛒 تعداد خریدها', color: '#10b981' },
+                sellers: { label: '👥 تعداد فروشندگان زنجیره', color: '#60a5fa' },
+                premium: { label: '⭐ فروشندگان پریمیوم', color: '#a855f7' },
+                regular: { label: '🧍‍♂️ فروشندگان عادی', color: '#6b7280' }
+            };
+
+            let currentPeriod = 'monthly';
+            let currentMetric = 'budget';
+
+            function renderStatsChart(metric) {
+                const stats = statsData[currentPeriod];
+                if (!stats || !metricConfig[metric]) return;
+                let dataArr = [];
+                switch(metric) {
+                    case 'budget': dataArr = stats.budget; break;
+                    case 'rewards': dataArr = stats.rewards; break;
+                    case 'purchases': dataArr = stats.purchases; break;
+                    case 'sellers': dataArr = stats.sellers; break;
+                    case 'regular': dataArr = stats.regular; break;
+                    case 'premium': dataArr = stats.premium; break;
+                }
+                statsChart.data.labels = stats.labels;
+                statsChart.data.datasets = [{
+                    label: metricConfig[metric].label,
+                    backgroundColor: metricConfig[metric].color,
+                    borderColor: metricConfig[metric].color,
+                    data: dataArr
+                }];
+                statsChart.update();
+            }
+
+            function selectStatsCard(metric) {
+                currentMetric = metric;
+                document.querySelectorAll('#analyticsCards > div').forEach(c => c.classList.remove('ring-2','ring-primary'));
+                const active = document.querySelector(`#analyticsCards div[data-metric="${metric}"]`);
+                if (active) active.classList.add('ring-2','ring-primary');
+                renderStatsChart(metric);
+            }
+
+            document.querySelectorAll('#analyticsCards > div').forEach(card => {
+                card.addEventListener('click', () => selectStatsCard(card.getAttribute('data-metric')));
+            });
 
             function updateAnalytics(period) {
                 const data = analyticsData[period];
@@ -2620,23 +2673,20 @@
                 const stats = statsData[period];
                 if (stats && statsChart) {
                     statsChart.data.labels = stats.labels;
-                    statsChart.data.datasets[0].data = stats.budget;
-                    statsChart.data.datasets[1].data = stats.rewards;
-                    statsChart.data.datasets[2].data = stats.customers;
-                    statsChart.data.datasets[3].data = stats.regular;
-                    statsChart.data.datasets[4].data = stats.premium;
-                    statsChart.update();
                 }
             }
 
             window.switchAnalyticsPeriod = function(period) {
+                currentPeriod = period;
                 document.querySelectorAll('#analyticsFilters button').forEach(btn => btn.classList.remove('active'));
                 const activeBtn = document.querySelector(`#analyticsFilters button[data-period="${period}"]`);
                 if (activeBtn) activeBtn.classList.add('active');
                 updateAnalytics(period);
+                renderStatsChart(currentMetric);
             };
 
             switchAnalyticsPeriod('monthly');
+            selectStatsCard('budget');
 
             // Performance Chart (for dashboard)
             const perfCtx = document.getElementById('performanceChart');
