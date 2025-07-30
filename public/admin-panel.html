@@ -1342,6 +1342,12 @@
                                     <td><span class="status-badge status-active">تأیید شده</span></td>
                                     <td>
                                         <div class="action-buttons">
+                                            <button class="btn btn-success" onclick="approveWithdrawal(2)">
+                                                <i class="fas fa-check"></i>
+                                            </button>
+                                            <button class="btn btn-danger" onclick="rejectWithdrawal(2)">
+                                                <i class="fas fa-times"></i>
+                                            </button>
                                             <button class="btn btn-secondary view-details" data-id="2">
                                                 <i class="fas fa-eye"></i>
                                             </button>
@@ -1357,6 +1363,12 @@
                                     <td><span class="status-badge status-inactive">رد شده</span></td>
                                     <td>
                                         <div class="action-buttons">
+                                            <button class="btn btn-success" onclick="approveWithdrawal(3)">
+                                                <i class="fas fa-check"></i>
+                                            </button>
+                                            <button class="btn btn-danger" onclick="rejectWithdrawal(3)">
+                                                <i class="fas fa-times"></i>
+                                            </button>
                                             <button class="btn btn-secondary view-details" data-id="3">
                                                 <i class="fas fa-eye"></i>
                                             </button>
@@ -1400,60 +1412,6 @@
                         <div id="rewardStagesContainer"></div>
                     </div>
 
-                    <!-- Reward Items -->
-                    <div class="table-container">
-                        <div class="table-header">
-                            <h3 class="table-title">جوایز موجود</h3>
-                            <button class="btn btn-primary" onclick="openModal('rewardModal')">
-                                <i class="fas fa-plus"></i> افزودن جایزه جدید
-                            </button>
-                        </div>
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th>عنوان جایزه</th>
-                                    <th>امتیاز مورد نیاز</th>
-                                    <th>وضعیت</th>
-                                    <th>اقدامات</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td>کارت هدیه ۱۰۰ هزار تومانی</td>
-                                    <td>۵۰</td>
-                                    <td><span class="status-badge status-active">فعال</span></td>
-                                    <td>
-                                        <div class="action-buttons">
-                                            <button class="btn btn-secondary"><i class="fas fa-edit"></i></button>
-                                            <button class="btn btn-danger"><i class="fas fa-trash"></i></button>
-                                        </div>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>تخفیف ۲۰ درصدی</td>
-                                    <td>۳۰</td>
-                                    <td><span class="status-badge status-active">فعال</span></td>
-                                    <td>
-                                        <div class="action-buttons">
-                                            <button class="btn btn-secondary"><i class="fas fa-edit"></i></button>
-                                            <button class="btn btn-danger"><i class="fas fa-trash"></i></button>
-                                        </div>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>هدیه ویژه</td>
-                                    <td>۱۰۰</td>
-                                    <td><span class="status-badge status-inactive">غیرفعال</span></td>
-                                    <td>
-                                        <div class="action-buttons">
-                                            <button class="btn btn-secondary"><i class="fas fa-edit"></i></button>
-                                            <button class="btn btn-danger"><i class="fas fa-trash"></i></button>
-                                        </div>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
                 </div>
 
                 <!-- Customers Tab -->
@@ -1582,24 +1540,24 @@
                                 <tr>
                                     <th>نام فروشنده</th>
                                     <th>تعداد مشتریان معرفی‌شده</th>
-                                    <th>شناسه فروشگاه</th>
+                                    <th>آدرس فروشگاه</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 <tr>
                                     <td>فروشگاه الف</td>
                                     <td>۱۲</td>
-                                    <td class="ltr-text">shop-001</td>
+                                    <td class="ltr-text">https://shop-a.example.com</td>
                                 </tr>
                                 <tr>
                                     <td>فروشگاه ب</td>
                                     <td>۸</td>
-                                    <td class="ltr-text">shop-002</td>
+                                    <td class="ltr-text">https://shop-b.example.com</td>
                                 </tr>
                                 <tr>
                                     <td>فروشگاه ج</td>
                                     <td>۱۵</td>
-                                    <td class="ltr-text">shop-003</td>
+                                    <td class="ltr-text">https://shop-c.example.com</td>
                                 </tr>
                             </tbody>
                         </table>
@@ -1850,6 +1808,23 @@
         </div>
     </div>
 
+    <!-- Withdrawal Details Modal -->
+    <div class="modal" id="withdrawalDetailsModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">جزئیات تسویه</h3>
+                <button class="modal-close" onclick="closeModal('withdrawalDetailsModal')">&times;</button>
+            </div>
+            <div class="modal-body" id="withdrawalDetailsBody">
+                <p><strong>نام کامل:</strong> <span id="detailName"></span></p>
+                <p><strong>شماره کارت:</strong> <span class="ltr-text" id="detailCard"></span></p>
+                <p><strong>تاریخ درخواست:</strong> <span id="detailDate"></span></p>
+                <p><strong>مبلغ:</strong> <span id="detailAmount"></span></p>
+                <p><strong>وضعیت:</strong> <span id="detailStatus"></span></p>
+            </div>
+        </div>
+    </div>
+
     <!-- Reward Modal -->
     <div class="modal" id="rewardModal">
         <div class="modal-content">
@@ -2047,7 +2022,7 @@
             const row = document.querySelector(`#withdrawals tbody tr[data-id="${id}"]`);
             if (row) {
                 const badge = row.querySelector(".status-badge");
-                badge.textContent = "موفق";
+                badge.textContent = "تایید شده";
                 badge.className = "status-badge status-approved";
             }
             showToast("درخواست تسویه تأیید شد", "success");
@@ -2067,39 +2042,40 @@
         document.querySelectorAll('.view-details').forEach(button => {
             button.addEventListener('click', function() {
                 const id = this.getAttribute('data-id');
-                // In a real app, you would fetch data from server based on ID
-                // For demo purposes, we'll use static data
                 const withdrawalData = {
                     1: {
                         sellerName: "علی محمدی",
                         cardNumber: "1234-5678-9012-3456",
                         amount: "۵,۰۰۰,۰۰۰",
                         requestDate: "۱۴۰۳/۰۲/۱۰",
-                        status: "pending",
-                        accountLevel: "premium"
+                        status: "pending"
                     },
                     2: {
                         sellerName: "زهرا رضایی",
                         cardNumber: "9876-5432-1098-7654",
                         amount: "۲,۵۰۰,۰۰۰",
                         requestDate: "۱۴۰۳/۰۲/۰۸",
-                        status: "approved",
-                        accountLevel: "normal"
+                        status: "approved"
                     },
                     3: {
                         sellerName: "محمد حسینی",
                         cardNumber: "1111-2222-3333-4444",
                         amount: "۱,۲۰۰,۰۰۰",
                         requestDate: "۱۴۰۳/۰۲/۰۵",
-                        status: "rejected",
-                        accountLevel: "normal"
+                        status: "rejected"
                     }
                 };
-                
+
                 const data = withdrawalData[id];
                 if (data) {
-                    // Here you would populate a detail modal with the data
-                    showToast(`جزئیات درخواست #${id} بارگذاری شد`, 'success');
+                    document.getElementById('detailName').textContent = data.sellerName;
+                    document.getElementById('detailCard').textContent = data.cardNumber;
+                    document.getElementById('detailDate').textContent = data.requestDate;
+                    document.getElementById('detailAmount').textContent = data.amount;
+                    const statusText = data.status === 'approved' ? 'تایید شده' :
+                        data.status === 'rejected' ? 'رد شده' : 'در انتظار';
+                    document.getElementById('detailStatus').textContent = statusText;
+                    openModal('withdrawalDetailsModal');
                 }
             });
         });
