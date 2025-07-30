@@ -917,6 +917,17 @@
             width: 150px;
             color: var(--text-secondary);
         }
+        /* User Block Modal */
+        .user-info p {
+            margin-bottom: 0.5rem;
+            display: flex;
+        }
+        .user-info p span:first-child {
+            width: 120px;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+
 
         /* Toggle Button */
         .toggle-switch {
@@ -1528,6 +1539,25 @@
                         </div>
                     </div>
                 </div>
+                    <!-- User Block Modal -->
+                    <div class="modal" id="userBlockModal">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h3 class="modal-title">مدیریت حساب کاربر</h3>
+                                <button class="modal-close" onclick="closeModal('userBlockModal')">&times;</button>
+                            </div>
+                            <div class="modal-body">
+                                <div class="user-info">
+                                    <p><span>نام کامل:</span> <span id="modalUserName"></span></p>
+                                    <p><span>شماره موبایل:</span> <span id="modalUserMobile"></span></p>
+                                    <p><span>وضعیت:</span> <span id="modalUserStatus"></span></p>
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button class="btn btn-primary" id="blockUserBtn">مسدود کردن حساب</button>
+                            </div>
+                        </div>
+                    </div>
                 <!-- Sellers Tab -->
                 <div id="sellers" class="tab-content">
                     <h2 class="page-title"><i class="fas fa-store"></i> فروشندگان</h2>
@@ -2561,6 +2591,46 @@
                 settlementCountInput.addEventListener('input', renderSettlements);
                 renderSettlements();
             }
+
+            // Customer Row Click - Block/Unblock Modal
+            const customerRows = document.querySelectorAll('#customers tbody tr:not(.loading-row)');
+            const blockModalName = document.getElementById('modalUserName');
+            const blockModalMobile = document.getElementById('modalUserMobile');
+            const blockModalStatus = document.getElementById('modalUserStatus');
+            const blockBtn = document.getElementById('blockUserBtn');
+            let activeRow = null;
+
+            customerRows.forEach(row => {
+                row.addEventListener('click', function(e) {
+                    if (e.target.closest('.action-buttons')) return;
+                    activeRow = this;
+                    blockModalName.textContent = this.children[0].textContent;
+                    blockModalMobile.textContent = this.children[1].textContent;
+                    const statusSpan = this.querySelector('.status-badge');
+                    const isActive = statusSpan.classList.contains('status-active');
+                    blockModalStatus.textContent = isActive ? 'فعال' : 'غیرفعال';
+                    blockBtn.textContent = isActive ? 'مسدود کردن حساب' : 'رفع مسدودیت';
+                    openModal('userBlockModal');
+                });
+            });
+
+            blockBtn.addEventListener('click', function() {
+                if (!activeRow) return;
+                const statusSpan = activeRow.querySelector('.status-badge');
+                const isActive = statusSpan.classList.contains('status-active');
+                const confirmMsg = isActive ? 'آیا از مسدود کردن حساب کاربر مطمئن هستید؟' : 'آیا از رفع مسدودیت حساب کاربر مطمئن هستید؟';
+                if (!confirm(confirmMsg)) return;
+                if (isActive) {
+                    statusSpan.textContent = 'غیرفعال';
+                    statusSpan.classList.remove('status-active');
+                    statusSpan.classList.add('status-inactive');
+                } else {
+                    statusSpan.textContent = 'فعال';
+                    statusSpan.classList.remove('status-inactive');
+                    statusSpan.classList.add('status-active');
+                }
+                closeModal('userBlockModal');
+            });
         });
     </script>
 </body>
