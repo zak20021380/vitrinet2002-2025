@@ -345,9 +345,16 @@
             color: var(--info);
         }
 
+        .settlement-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+
         .action-buttons {
             display: flex;
             gap: 0.5rem;
+            flex-wrap: wrap;
         }
 
         .btn {
@@ -1314,7 +1321,12 @@
                                     <td>۵٬۰۰۰٬۰۰۰</td>
                                     <td>۱۴۰۳/۰۲/۱۰</td>
                                     <td><span class="status-badge status-pending">در انتظار</span></td>
-                                    <td><span class="settlement-badge bg-red-600/80 text-white text-sm rounded-full px-2 py-1">تسویه نشده</span></td>
+                                    <td>
+                                        <button title="تغییر وضعیت تسویه" onclick="toggleSettlement(1)" class="settlement-badge group flex items-center gap-1 py-1 px-3 text-sm font-medium rounded-full bg-red-600/80 text-white ring-2 ring-red-400 transition duration-200 ease-in-out cursor-pointer focus:outline-none">
+                                            <span>تسویه نشده</span>
+                                            <i class="fas fa-pen text-xs opacity-0 group-hover:opacity-100"></i>
+                                        </button>
+                                    </td>
                                     <td>
                                         <div class="action-buttons">
                                             <button class="btn btn-success" onclick="approveWithdrawal(1)">
@@ -1326,7 +1338,6 @@
                                             <button class="btn btn-secondary view-details" data-id="1">
                                                 <i class="fas fa-eye"></i>
                                             </button>
-                                            <button class="btn btn-primary settle-btn" onclick="settleWithdrawal(1)">تسویه شد ✅</button>
                                         </div>
                                     </td>
                                 </tr>
@@ -1337,7 +1348,12 @@
                                     <td>۲٬۵۰۰٬۰۰۰</td>
                                     <td>۱۴۰۳/۰۲/۰۸</td>
                                     <td><span class="status-badge status-active">تأیید شده</span></td>
-                                    <td><span class="settlement-badge bg-green-600/80 text-white text-sm rounded-full px-2 py-1">تسویه شده</span></td>
+                                    <td>
+                                        <button title="تغییر وضعیت تسویه" onclick="toggleSettlement(2)" class="settlement-badge group flex items-center gap-1 py-1 px-3 text-sm font-medium rounded-full bg-green-600/80 text-white ring-2 ring-green-500 transition duration-200 ease-in-out cursor-pointer focus:outline-none">
+                                            <span>تسویه شده</span>
+                                            <i class="fas fa-pen text-xs opacity-0 group-hover:opacity-100"></i>
+                                        </button>
+                                    </td>
                                     <td>
                                         <div class="action-buttons">
                                             <button class="btn btn-success" onclick="approveWithdrawal(2)">
@@ -1359,7 +1375,12 @@
                                     <td>۱٬۲۰۰٬۰۰۰</td>
                                     <td>۱۴۰۳/۰۲/۰۵</td>
                                     <td><span class="status-badge status-inactive">رد شده</span></td>
-                                    <td><span class="settlement-badge bg-red-600/80 text-white text-sm rounded-full px-2 py-1">تسویه نشده</span></td>
+                                    <td>
+                                        <button title="تغییر وضعیت تسویه" onclick="toggleSettlement(3)" class="settlement-badge group flex items-center gap-1 py-1 px-3 text-sm font-medium rounded-full bg-red-600/80 text-white ring-2 ring-red-400 transition duration-200 ease-in-out cursor-pointer focus:outline-none">
+                                            <span>تسویه نشده</span>
+                                            <i class="fas fa-pen text-xs opacity-0 group-hover:opacity-100"></i>
+                                        </button>
+                                    </td>
                                     <td>
                                         <div class="action-buttons">
                                             <button class="btn btn-success" onclick="approveWithdrawal(3)">
@@ -1371,7 +1392,6 @@
                                             <button class="btn btn-secondary view-details" data-id="3">
                                                 <i class="fas fa-eye"></i>
                                             </button>
-                                            <button class="btn btn-primary settle-btn" onclick="settleWithdrawal(3)">تسویه شد ✅</button>
                                         </div>
                                     </td>
                                 </tr>
@@ -2203,22 +2223,31 @@
             showToast("درخواست تسویه رد شد", "error");
         }
 
-        function settleWithdrawal(id) {
+        function toggleSettlement(id) {
             const row = document.querySelector(`#withdrawals tbody tr[data-id="${id}"]`);
             if (row) {
-                row.setAttribute('data-settlement', 'settled');
                 const badge = row.querySelector('.settlement-badge');
-                if (badge) {
-                    badge.textContent = 'تسویه شده';
-                    badge.classList.remove('bg-red-600/80');
-                    badge.classList.add('bg-green-600/80');
+                const current = row.getAttribute('data-settlement');
+                if (current === 'settled') {
+                    row.setAttribute('data-settlement', 'unsettled');
+                    if (badge) {
+                        badge.textContent = 'تسویه نشده';
+                        badge.classList.remove('bg-green-600/80', 'ring-green-500');
+                        badge.classList.add('bg-red-600/80', 'ring-red-400');
+                    }
+                    fetch(`/api/payouts/${id}/unsettle`, { method: 'PUT' }).catch(() => {});
+                } else {
+                    row.setAttribute('data-settlement', 'settled');
+                    if (badge) {
+                        badge.textContent = 'تسویه شده';
+                        badge.classList.remove('bg-red-600/80', 'ring-red-400');
+                        badge.classList.add('bg-green-600/80', 'ring-green-500');
+                    }
+                    fetch(`/api/payouts/${id}/settle`, { method: 'PUT' }).catch(() => {});
                 }
-                const btn = row.querySelector('.settle-btn');
-                if (btn) btn.remove();
             }
             filterWithdrawals();
-            fetch(`/api/payouts/${id}/settle`, { method: 'PUT' }).catch(() => {});
-            showToast('درخواست تسویه تسویه شد', 'success');
+            showToast('وضعیت تسویه با موفقیت تغییر کرد ✅', 'success');
         }
 
         // View Withdrawal Details
