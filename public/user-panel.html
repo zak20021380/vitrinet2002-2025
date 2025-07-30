@@ -1122,6 +1122,27 @@
                     </div>
                 </div>
             </div>
+            <!-- Cash-out section -->
+            <div class="card p-5 mb-6">
+                <h2 class="text-lg font-bold text-white mb-4">تسویه‌ها</h2>
+                <button onclick="handleCashoutRequest()" class="btn-success w-full py-3 rounded-lg font-medium text-white mb-4">
+                    درخواست تسویه جدید
+                </button>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-sm text-gray-400">
+                        <thead>
+                            <tr>
+                                <th class="text-right pb-2">#</th>
+                                <th class="text-right pb-2">مقدار (تومان)</th>
+                                <th class="text-right pb-2">تاریخ درخواست</th>
+                                <th class="text-right pb-2">وضعیت</th>
+                            </tr>
+                        </thead>
+                        <tbody id="cashoutTableBody">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
             <!-- Store Type Selector -->
             <div class="mb-6">
                 <h2 class="text-lg font-bold text-white mb-4">انتخاب نوع فروشگاه</h2>
@@ -1479,6 +1500,7 @@
             const progress = (appState.purchases / finalMilestone.purchases) * 100;
             document.getElementById('progressBar').style.width = `${progress}%`;
             document.getElementById('totalPurchases').textContent = toPersianNumber(appState.purchases);
+            renderCashouts();
         }
         // Celebration Popup Functions
         function showCelebrationPopup() {
@@ -1740,6 +1762,32 @@
         document.getElementById('sellerCodeBtn').addEventListener('click', function() {
             showScreen('code');
         });
+        // Cash-out rendering
+        const sampleCashouts = [
+            { id: 1, amount: 500000, date: '۱۴۰۲/۰۲/۲۰', status: 'موفق' },
+            { id: 2, amount: 300000, date: '۱۴۰۲/۰۳/۲۵', status: 'در حال بررسی' },
+            { id: 3, amount: 200000, date: '۱۴۰۲/۰۴/۳۰', status: 'رد شده' }
+        ];
+        function getStatusClass(status) {
+            if (status === 'موفق') return 'text-green-500';
+            if (status === 'در حال بررسی') return 'text-yellow-500';
+            if (status === 'رد شده') return 'text-red-500';
+            return '';
+        }
+        function renderCashouts() {
+            const tbody = document.getElementById('cashoutTableBody');
+            tbody.innerHTML = '';
+            sampleCashouts.forEach(cashout => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td class="text-right py-2">${cashout.id}</td>
+                    <td class="text-right py-2">${toPersianNumber(cashout.amount)}</td>
+                    <td class="text-right py-2">${cashout.date}</td>
+                    <td class="text-right py-2 ${getStatusClass(cashout.status)}">${cashout.status}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
         // Initialize app
         document.addEventListener('DOMContentLoaded', function() {
             // Add event listeners to store cards
