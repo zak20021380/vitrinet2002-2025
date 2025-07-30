@@ -742,6 +742,24 @@
             min-width: 150px;
         }
 
+        /* Reward Stages */
+        .stage-row {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1rem;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .stage-row input {
+            flex: 1;
+            min-width: 120px;
+        }
+
+        .stage-number {
+            min-width: 70px;
+        }
+
         /* Fraud Flags */
         .fraud-flag {
             padding: 0.75rem;
@@ -1374,27 +1392,12 @@
                     
                     <!-- Simple Reward Settings -->
                     <div class="table-container">
-                        <h3 class="table-title" style="margin-bottom: 1rem;">پیکربندی جوایز</h3>
+                        <h3 class="table-title" style="margin-bottom: 1rem;">مراحل پاداش</h3>
                         <div class="form-group">
-                            <label>تعداد خریدهای عادی برای سقف جایزه</label>
-                            <input type="number" class="form-control" value="15" min="1">
+                            <label>تعداد مراحل خرید</label>
+                            <input type="number" id="stageCountInput" class="form-control" value="3" min="1">
                         </div>
-                        <div class="form-group">
-                            <label>تعداد خریدهای ویژه برای سقف جایزه</label>
-                            <input type="number" class="form-control" value="10" min="1">
-                        </div>
-                        <div class="form-group">
-                            <label>حداکثر مبلغ جایزه (تومان)</label>
-                            <input type="number" class="form-control" value="1000000" min="0">
-                        </div>
-                        <div class="form-group">
-                            <label>مبلغ جایزه هر خرید عادی (تومان)</label>
-                            <input type="number" class="form-control" value="0" min="0">
-                        </div>
-                        <div class="form-group">
-                            <label>مبلغ جایزه هر خرید ویژه (تومان)</label>
-                            <input type="number" class="form-control" value="0" min="0">
-                        </div>
+                        <div id="rewardStagesContainer"></div>
                     </div>
 
                     <!-- Reward Items -->
@@ -2415,6 +2418,28 @@
                     closeModal('withdrawalModal');
                 }, 1500);
             });
+
+            // Reward Stage Inputs
+            const stageCountInput = document.getElementById('stageCountInput');
+            const rewardStagesContainer = document.getElementById('rewardStagesContainer');
+            if (stageCountInput && rewardStagesContainer) {
+                function renderStages() {
+                    rewardStagesContainer.innerHTML = '';
+                    const count = parseInt(stageCountInput.value) || 0;
+                    for (let i = 1; i <= count; i++) {
+                        const row = document.createElement('div');
+                        row.className = 'stage-row';
+                        row.innerHTML = `
+                            <div class="stage-number">مرحله ${i}</div>
+                            <input type="number" class="form-control" placeholder="جایزه خرید عادی">
+                            <input type="number" class="form-control" placeholder="جایزه خرید ویژه">
+                        `;
+                        rewardStagesContainer.appendChild(row);
+                    }
+                }
+                stageCountInput.addEventListener('input', renderStages);
+                renderStages();
+            }
         });
     </script>
 </body>
