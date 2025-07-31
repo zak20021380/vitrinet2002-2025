@@ -40,7 +40,7 @@
       height: 32px;
       display: block;
     }
-    .cat-icon:hover { 
+    .cat-icon:hover, .cat-icon:active { 
       box-shadow: 0 7px 30px #0ea5e933;
       border-color: #10b981;
       transform: scale(1.1) rotate(-2deg);
@@ -53,12 +53,12 @@
       justify-content: space-between;
       align-items: center;
       text-align: center;
-      min-height: 280px;
+      min-height: 240px;
       padding: 1rem;
       background: #fcf7f3;
       border-radius: 1.5rem;
     }
-    .category-card:hover {
+    .category-card:hover, .category-card:active {
       box-shadow: 0 8px 24px #10b9811a, 0 4px 12px #0ea5e91a;
       border-color: #10b981;
       transform: translateY(-4px) scale(1.01);
@@ -118,6 +118,9 @@
       .cat-icon svg {width: 18px;height: 18px;}
       .btn-grad {min-height:38px; font-size: 13px;}
     }
+    @media (max-width: 640px) {
+      .category-card {min-height:220px;}
+    }
     /* mobile nav */
     @media (max-width: 768px) {
       .hide-on-mobile { display: none !important; }
@@ -131,6 +134,7 @@
       border-top: 1px solid #e2e8f0;
       box-shadow: 0 -2px 10px rgba(0,0,0,0.06);
       padding: 4px 0;
+      padding-bottom: calc(4px + env(safe-area-inset-bottom));
       font-family: 'Vazirmatn', sans-serif;
       border-radius: 1rem 1rem 0 0;
     }
@@ -203,6 +207,7 @@
     <!-- سرچ باکس -->
     <form onsubmit="event.preventDefault(); searchCategories();" class="w-full max-w-md mx-auto mb-10">
       <div class="flex items-center rounded-full border border-gray-200 shadow-sm bg-white/70 p-2 px-4 w-full">
+        <label for="searchInput" class="sr-only">جستجوی دسته‌ها</label>
         <input type="text" id="searchInput"
           class="flex-grow w-full bg-transparent px-2 py-1 text-sm sm:text-base outline-none font-bold text-gray-700 placeholder:text-gray-400"
           placeholder="جستجو در دسته‌بندی، توضیحات یا فروشگاه نمونه ..." autocomplete="off">
@@ -305,12 +310,12 @@ const categories = [
 ];
 
 // SVG جایگزین موقت آیکون
-function getCategoryIcon(title) {
+function getCategoryIcon(id) {
   return `
     <svg viewBox="0 0 48 48" fill="none">
-      <rect x="4" y="7" width="40" height="27" rx="7" fill="url(#g${title})"/>
+      <rect x="4" y="7" width="40" height="27" rx="7" fill="url(#g${id})"/>
       <defs>
-        <linearGradient id="g${title}" x1="0" y1="0" x2="48" y2="44" gradientUnits="userSpaceOnUse">
+        <linearGradient id="g${id}" x1="0" y1="0" x2="48" y2="44" gradientUnits="userSpaceOnUse">
           <stop stop-color="#10b981"/>
           <stop offset="1" stop-color="#0ea5e9"/>
         </linearGradient>
@@ -341,7 +346,7 @@ function renderCategories(list) {
       <div class="category-card group shadow-md border border-gray-200 w-full max-w-md mx-auto hover:shadow-lg transition-all h-full" data-slug="${cat.catId}">
         <div class="flex flex-col justify-between flex-1 items-center text-center gap-2">
           <div class="flex flex-col items-center">
-            <div class="cat-icon bg-gradient-to-br ${cat.color} mb-1 group-hover:scale-105">${getCategoryIcon(cat.name)}</div>
+            <div class="cat-icon bg-gradient-to-br ${cat.color} mb-1 group-hover:scale-105">${getCategoryIcon(cat.catId)}</div>
             <span class="font-bold text-lg mb-0">${cat.name}</span>
             <p class="text-sm text-gray-600 leading-tight text-center mt-1">${cat.desc}</p>
           </div>
@@ -416,9 +421,13 @@ document.addEventListener('DOMContentLoaded', function() {
   const mobileList = document.getElementById('mobileNavList');
   const registerBtn = document.getElementById('registerShopBtn');
   const links = Array.from(desktopNav.querySelectorAll('.main-nav-link'));
+  let isMobileView = window.innerWidth <= 768;
 
   function moveLinks() {
-    if (window.innerWidth <= 768) {
+    const nowMobile = window.innerWidth <= 768;
+    if (nowMobile === isMobileView) return;
+    isMobileView = nowMobile;
+    if (nowMobile) {
       links.forEach(l => {
         if (!mobileList.contains(l)) {
           l.classList.remove('hide-on-mobile');
