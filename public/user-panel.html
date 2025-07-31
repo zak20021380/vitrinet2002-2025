@@ -1174,9 +1174,9 @@
             </div>
 
             <!-- Step Info Modals -->
-            <div id="stepModal1" class="fixed inset-0 bg-black/70 backdrop-blur-sm hidden items-center justify-center">
-                <div class="modal-card bg-[#1e293b] rounded-xl p-4 w-11/12 max-w-xs text-center shadow-lg transform transition-all duration-300 opacity-0 scale-90 relative">
-                    <button data-close="stepModal1" class="absolute top-2 right-2 text-gray-300 text-sm">✖️</button>
+            <div id="stepModal1" class="fixed inset-0 bg-black/70 backdrop-blur-sm hidden flex items-center justify-center">
+                <div class="modal-card bg-[#1e293b] rounded-xl p-4 w-11/12 max-w-xs text-center shadow-lg transform transition-all duration-150 opacity-0 scale-90 relative">
+                    <button data-close="stepModal1" class="absolute top-2 right-2 text-gray-300 text-sm cursor-pointer">✖️</button>
                     <div class="w-12 h-12 rounded-full bg-green-600 flex items-center justify-center text-white mx-auto mb-3">
                         <i class="fa-solid fa-file-circle-plus"></i>
                     </div>
@@ -1185,9 +1185,9 @@
                     <button data-close="stepModal1" class="bg-primary text-white rounded-lg px-4 py-1 mt-2">بستن</button>
                 </div>
             </div>
-            <div id="stepModal2" class="fixed inset-0 bg-black/70 backdrop-blur-sm hidden items-center justify-center">
-                <div class="modal-card bg-[#1e293b] rounded-xl p-4 w-11/12 max-w-xs text-center shadow-lg transform transition-all duration-300 opacity-0 scale-90 relative">
-                    <button data-close="stepModal2" class="absolute top-2 right-2 text-gray-300 text-sm">✖️</button>
+            <div id="stepModal2" class="fixed inset-0 bg-black/70 backdrop-blur-sm hidden flex items-center justify-center">
+                <div class="modal-card bg-[#1e293b] rounded-xl p-4 w-11/12 max-w-xs text-center shadow-lg transform transition-all duration-150 opacity-0 scale-90 relative">
+                    <button data-close="stepModal2" class="absolute top-2 right-2 text-gray-300 text-sm cursor-pointer">✖️</button>
                     <div class="w-12 h-12 rounded-full bg-green-600 flex items-center justify-center text-white mx-auto mb-3">
                         <i class="fa-solid fa-receipt"></i>
                     </div>
@@ -1196,9 +1196,9 @@
                     <button data-close="stepModal2" class="bg-primary text-white rounded-lg px-4 py-1 mt-2">بستن</button>
                 </div>
             </div>
-            <div id="stepModal3" class="fixed inset-0 bg-black/70 backdrop-blur-sm hidden items-center justify-center">
-                <div class="modal-card bg-[#1e293b] rounded-xl p-4 w-11/12 max-w-xs text-center shadow-lg transform transition-all duration-300 opacity-0 scale-90 relative">
-                    <button data-close="stepModal3" class="absolute top-2 right-2 text-gray-300 text-sm">✖️</button>
+            <div id="stepModal3" class="fixed inset-0 bg-black/70 backdrop-blur-sm hidden flex items-center justify-center">
+                <div class="modal-card bg-[#1e293b] rounded-xl p-4 w-11/12 max-w-xs text-center shadow-lg transform transition-all duration-150 opacity-0 scale-90 relative">
+                    <button data-close="stepModal3" class="absolute top-2 right-2 text-gray-300 text-sm cursor-pointer">✖️</button>
                     <div class="w-12 h-12 rounded-full bg-yellow-500 flex items-center justify-center text-white mx-auto mb-3">
                         <i class="fa-solid fa-hand-holding-dollar"></i>
                     </div>
@@ -1207,9 +1207,9 @@
                     <button data-close="stepModal3" class="bg-primary text-white rounded-lg px-4 py-1 mt-2">بستن</button>
                 </div>
             </div>
-            <div id="stepModal4" class="fixed inset-0 bg-black/70 backdrop-blur-sm hidden items-center justify-center">
-                <div class="modal-card bg-[#1e293b] rounded-xl p-4 w-11/12 max-w-xs text-center shadow-lg transform transition-all duration-300 opacity-0 scale-90 relative">
-                    <button data-close="stepModal4" class="absolute top-2 right-2 text-gray-300 text-sm">✖️</button>
+            <div id="stepModal4" class="fixed inset-0 bg-black/70 backdrop-blur-sm hidden flex items-center justify-center">
+                <div class="modal-card bg-[#1e293b] rounded-xl p-4 w-11/12 max-w-xs text-center shadow-lg transform transition-all duration-150 opacity-0 scale-90 relative">
+                    <button data-close="stepModal4" class="absolute top-2 right-2 text-gray-300 text-sm cursor-pointer">✖️</button>
                     <div class="w-12 h-12 rounded-full bg-gray-600 flex items-center justify-center text-white mx-auto mb-3">
                         <i class="fa-solid fa-circle-check"></i>
                     </div>
@@ -1806,7 +1806,7 @@
             const card = modal.querySelector('.modal-card');
             if (card) {
                 card.classList.add('opacity-0','scale-90');
-                setTimeout(() => modal.classList.add('hidden'), 300);
+                setTimeout(() => modal.classList.add('hidden'), 150);
             } else {
                 modal.classList.add('hidden');
             }
@@ -2183,8 +2183,8 @@
             // Step modals close handlers
             for (let i = 1; i <= 4; i++) {
                 const modal = document.getElementById(`stepModal${i}`);
-                const closeBtn = modal.querySelector('[data-close]');
-                closeBtn.addEventListener('click', () => closeStepModal(i));
+                const closeBtns = modal.querySelectorAll('[data-close]');
+                closeBtns.forEach(btn => btn.addEventListener('click', () => closeStepModal(i)));
                 modal.addEventListener('click', e => {
                     if (e.target === modal) closeStepModal(i);
                 });
