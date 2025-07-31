@@ -629,60 +629,57 @@
             background: rgba(30, 41, 59, 0.8);
             border: 1px solid rgba(99, 102, 241, 0.4);
             border-radius: 16px;
-            padding: 20px;
+            padding: 16px;
             margin-bottom: 24px;
             text-align: center;
-            overflow-x: auto;
         }
         .reward-steps-container {
-            display: flex;
-            flex-direction: row-reverse;
-            align-items: stretch;
-            gap: 12px;
-            min-width: 560px;
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 8px;
+            direction: rtl;
+        }
+        @media (max-width: 640px) {
+            .reward-steps-container {
+                grid-template-columns: repeat(2, 1fr);
+            }
         }
         .reward-step {
-            background: rgba(30, 41, 59, 0.9);
+            background: rgba(30, 41, 59, 0.95);
             border: 1px solid rgba(99, 102, 241, 0.3);
-            border-radius: 12px;
+            border-radius: 0.75rem;
             padding: 12px;
-            flex: 0 0 140px;
-            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 6rem;
             transition: all 0.3s ease;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
         }
         .reward-step.active {
-            animation: glow 2s infinite;
+            background: linear-gradient(135deg, #6366F1, #0f172a);
+            border-color: #6366F1;
+            box-shadow: 0 0 15px rgba(99, 102, 241, 0.6);
         }
         .reward-step.done {
-            background: rgba(16, 185, 129, 0.15);
-            border-color: rgba(16, 185, 129, 0.4);
-        }
-        .reward-step.waiting {
-            background: rgba(245, 158, 11, 0.15);
-            border-color: rgba(245, 158, 11, 0.4);
+            opacity: 0.9;
         }
         .reward-step.locked {
-            background: rgba(239, 68, 68, 0.15);
-            border-color: rgba(239, 68, 68, 0.4);
-            opacity: 0.6;
+            opacity: 0.4;
         }
         .step-title {
             font-weight: 700;
-            font-size: 0.8rem;
+            font-size: 0.75rem;
             margin-top: 4px;
         }
         .step-state {
-            font-size: 0.75rem;
+            font-size: 0.7rem;
             margin-top: 2px;
         }
         .step-state.success { color: #10B981; }
         .step-state.error { color: #ef4444; }
         .step-state.waiting { color: #f59e0b; }
-        .connector-line {
-            flex-grow: 1;
-            border-top: 2px dashed rgba(99, 102, 241, 0.4);
-            align-self: center;
-        }
         /* Cashout Modal Styles */
         #cashoutModal {
             position: fixed;
@@ -1110,28 +1107,25 @@
             <div id="rewardStatusBar" class="reward-status-bar hidden">
                 <div class="reward-steps-container text-white text-xs md:text-sm">
                     <div id="rewardStep1" class="reward-step">
-                        <i class="fas fa-gift text-xl"></i>
-                        <div class="step-title">درخواست دریافت کد اعتباری</div>
+                        <div class="text-xl">🎯</div>
+                        <div class="step-title">رسیدن به جایزه</div>
                         <div id="status1" class="step-state"></div>
                     </div>
-                    <div class="connector-line"></div>
                     <div id="rewardStep2" class="reward-step">
-                        <i class="fas fa-receipt text-xl"></i>
+                        <div class="text-xl">📄</div>
                         <div class="step-title">دریافت کد خرید</div>
                         <div id="purchaseCodeText" class="step-state"></div>
                         <div id="status2" class="step-state"></div>
-                        <button id="requestCodeBtn" class="btn-primary mt-2 text-xs w-full hidden">دریافت کد خرید</button>
+                        <button id="requestCodeBtn" class="btn-primary mt-1 text-xs w-full hidden">دریافت کد خرید</button>
                     </div>
-                    <div class="connector-line"></div>
                     <div id="rewardStep3" class="reward-step">
-                        <i class="fas fa-hand-holding-usd text-xl"></i>
+                        <div class="text-xl">💸</div>
                         <div class="step-title">درخواست تسویه</div>
                         <div id="status3" class="step-state"></div>
-                        <button id="requestPayoutBtn" class="btn-primary mt-2 text-xs w-full hidden">درخواست تسویه</button>
+                        <button id="requestPayoutBtn" class="btn-primary mt-1 text-xs w-full hidden">درخواست تسویه</button>
                     </div>
-                    <div class="connector-line"></div>
                     <div id="rewardStep4" class="reward-step">
-                        <i class="fas fa-check-circle text-xl"></i>
+                        <div class="text-xl">✅</div>
                         <div class="step-title">تسویه موفق</div>
                         <div id="status4" class="step-state"></div>
                     </div>
@@ -1681,18 +1675,18 @@
 
             // Step 1 - always completed once reward reached
             step1.classList.add('done');
-            status1.textContent = 'انجام شد';
+            status1.textContent = '✔ انجام شد';
             status1.classList.add('success');
 
             // Default states for other steps
             step2.classList.add('locked');
-            status2.textContent = 'غیرفعال';
+            status2.textContent = '🔒';
             status2.classList.add('error');
             step3.classList.add('locked');
-            status3.textContent = 'غیرفعال';
+            status3.textContent = '🔒';
             status3.classList.add('error');
             step4.classList.add('locked');
-            status4.textContent = 'غیرفعال';
+            status4.textContent = '🔴 غیرفعال';
             status4.classList.add('error');
 
             requestCodeBtn.classList.add('hidden');
@@ -1702,13 +1696,13 @@
             if (finalRewardReached && hasBalance) {
                 if (step === 1) {
                     step2.classList.replace('locked', 'active');
-                    status2.textContent = 'در انتظار';
+                    status2.textContent = '🟡 در انتظار';
                     status2.classList.replace('error', 'waiting');
                     requestCodeBtn.disabled = false;
                     requestCodeBtn.classList.remove('hidden');
                 } else if (step >= 2) {
                     step2.classList.replace('locked', 'done');
-                    status2.textContent = 'کد ارسال شد';
+                    status2.textContent = '✔ ارسال شد';
                     status2.classList.replace('error', 'success');
                     purchaseCodeText.textContent = `کد: ${code}`;
                     if (step === 2) {
@@ -1723,14 +1717,14 @@
 
             if (step === 3) {
                 step3.classList.replace('locked', 'waiting');
-                status3.textContent = 'در انتظار تایید';
+                status3.textContent = '🟡 در انتظار';
                 status3.classList.replace('error', 'waiting');
             } else if (step === 4) {
                 step3.classList.replace('locked', 'done');
-                status3.textContent = 'ثبت شد';
+                status3.textContent = '✔ ثبت شد';
                 status3.classList.replace('error', 'success');
                 step4.classList.replace('locked', 'done');
-                status4.textContent = 'تسویه موفق';
+                status4.textContent = '🟢 پرداخت شد';
                 status4.classList.replace('error', 'success');
                 payoutInfo.textContent = `✅ تسویه انجام شد - ${info.date || ''}`;
                 payoutInfo.classList.remove('hidden');
