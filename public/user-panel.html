@@ -1124,28 +1124,31 @@
         <!-- Dashboard Screen -->
         <div id="dashboardScreen" class="screen">
             <!-- Final Reward Banner (Updated) -->
-            <div id="rewardStatusBar" class="reward-status-bar bg-[#0f172a] rounded-xl p-3 hidden">
-                <div class="reward-steps-container grid grid-cols-2 sm:grid-cols-4 gap-y-10 text-center text-white text-xs md:text-sm font-sans">
-                    <div id="rewardStep1" class="reward-step">
-                        <div class="step-indicator"><i class="fa-solid fa-bullseye"></i></div>
-                        <div class="step-title">رسیدن به جایزه</div>
+            <div id="rewardStatusBar" class="reward-status-bar bg-[#0f172a] rounded-2xl p-4 hidden text-white font-sans">
+                <div class="flex flex-col gap-8 sm:flex-row sm:items-center sm:justify-between">
+                    <div id="rewardStep1" class="reward-step flex flex-col items-center">
+                        <div class="step-indicator"><i class="fa-solid fa-file-circle-plus"></i></div>
+                        <div class="step-title">درخواست کد خرید</div>
                         <div id="status1" class="step-state"></div>
+                        <button id="requestCodeBtn" class="btn-primary mt-1 text-xs w-full hidden">درخواست کد خرید</button>
                     </div>
-                    <div id="rewardStep2" class="reward-step">
-                        <div class="step-indicator"><i class="fa-solid fa-file-lines"></i></div>
+                    <div class="hidden sm:flex flex-1 h-px bg-slate-600"></div>
+                    <div id="rewardStep2" class="reward-step flex flex-col items-center">
+                        <div class="step-indicator"><i class="fa-solid fa-receipt"></i></div>
                         <div class="step-title">دریافت کد خرید</div>
                         <div id="purchaseCodeText" class="step-state"></div>
                         <div id="status2" class="step-state"></div>
-                        <button id="requestCodeBtn" class="btn-primary mt-1 text-xs w-full hidden">دریافت کد خرید</button>
                     </div>
-                    <div id="rewardStep3" class="reward-step">
+                    <div class="hidden sm:flex flex-1 h-px bg-slate-600"></div>
+                    <div id="rewardStep3" class="reward-step flex flex-col items-center">
                         <div class="step-indicator"><i class="fa-solid fa-hand-holding-dollar"></i></div>
                         <div class="step-title">درخواست تسویه</div>
                         <div id="status3" class="step-state"></div>
                         <button id="requestPayoutBtn" class="btn-primary mt-1 text-xs w-full hidden">درخواست تسویه</button>
                     </div>
-                    <div id="rewardStep4" class="reward-step">
-                        <div class="step-indicator"><i class="fa-solid fa-check-circle"></i></div>
+                    <div class="hidden sm:flex flex-1 h-px bg-slate-600"></div>
+                    <div id="rewardStep4" class="reward-step flex flex-col items-center">
+                        <div class="step-indicator"><i class="fa-solid fa-circle-check"></i></div>
                         <div class="step-title">تسویه موفق</div>
                         <div id="status4" class="step-state"></div>
                     </div>
@@ -1690,24 +1693,8 @@
             const requestPayoutBtn = document.getElementById('requestPayoutBtn');
             const payoutInfo = document.getElementById('payoutInfo');
 
-            [step1, step2, step3, step4].forEach(el => el.className = 'reward-step');
-            [status1, status2, status3, status4].forEach(s => { s.className = 'step-state'; s.textContent = ''; });
-
-            // Step 1 - always completed once reward reached
-            step1.classList.add('done');
-            status1.textContent = '✔ انجام شد';
-            status1.classList.add('success');
-
-            // Default states for other steps
-            step2.classList.add('locked');
-            status2.textContent = '🔒 در دسترس نیست';
-            status2.classList.add('disabled');
-            step3.classList.add('locked');
-            status3.textContent = '🔒 غیرفعال';
-            status3.classList.add('disabled');
-            step4.classList.add('locked');
-            status4.textContent = '🔒 هنوز';
-            status4.classList.add('disabled');
+            [step1, step2, step3, step4].forEach(el => el.className = 'reward-step flex flex-col items-center');
+            [status1, status2, status3, status4, purchaseCodeText].forEach(s => { s.className = 'step-state'; s.textContent = ''; });
 
             requestCodeBtn.classList.add('hidden');
             requestPayoutBtn.classList.add('hidden');
@@ -1715,39 +1702,67 @@
 
             if (finalRewardReached && hasBalance) {
                 if (step === 1) {
-                    step2.classList.replace('locked', 'active');
-                    status2.textContent = '🟡 در انتظار';
-                    status2.classList.replace('disabled', 'waiting');
+                    step1.classList.add('active');
+                    status1.textContent = '🟡 در انتظار';
+                    status1.classList.add('waiting');
+
+                    step2.classList.add('locked');
+                    status2.textContent = '🔒 در انتظار درخواست';
+                    status2.classList.add('disabled');
+
+                    step3.classList.add('locked');
+                    status3.textContent = '🔒 غیرفعال';
+                    status3.classList.add('disabled');
+
+                    step4.classList.add('locked');
+                    status4.textContent = '🔒 هنوز';
+                    status4.classList.add('disabled');
+
                     requestCodeBtn.disabled = false;
                     requestCodeBtn.classList.remove('hidden');
                 } else if (step >= 2) {
-                    step2.classList.replace('locked', 'done');
-                    status2.textContent = '✔ ارسال شد';
-                    status2.classList.replace('disabled', 'success');
+                    step1.classList.add('done');
+                    status1.textContent = '✔ درخواست شد';
+                    status1.classList.add('success');
+
+                    step2.classList.add('done');
                     purchaseCodeText.textContent = `کد: ${code}`;
+                    status2.textContent = '✔ دریافت شد';
+                    status2.classList.add('success');
+
                     if (step === 2) {
-                        step3.classList.replace('locked', 'active');
+                        step3.classList.add('active');
                         requestPayoutBtn.disabled = false;
                         requestPayoutBtn.classList.remove('hidden');
                         status3.textContent = '';
-                        status3.classList.remove('disabled');
+                    } else if (step === 3) {
+                        step3.classList.add('waiting');
+                        status3.textContent = '🟡 در انتظار';
+                        status3.classList.add('waiting');
+                    } else if (step >= 4) {
+                        step3.classList.add('done');
+                        status3.textContent = '✔ ثبت شد';
+                        status3.classList.add('success');
+                        step4.classList.add('done');
+                        status4.textContent = '🟢 پرداخت شد';
+                        status4.classList.add('success');
+                        payoutInfo.textContent = `✅ تسویه انجام شد - ${info.date || ''}`;
+                        payoutInfo.classList.remove('hidden');
                     }
                 }
-            }
-
-            if (step === 3) {
-                step3.classList.replace('locked', 'waiting');
-                status3.textContent = '🟡 در انتظار';
-                status3.classList.replace('disabled', 'waiting');
-            } else if (step === 4) {
-                step3.classList.replace('locked', 'done');
-                status3.textContent = '✔ ثبت شد';
-                status3.classList.replace('disabled', 'success');
-                step4.classList.replace('locked', 'done');
-                status4.textContent = '🟢 پرداخت شد';
-                status4.classList.replace('disabled', 'success');
-                payoutInfo.textContent = `✅ تسویه انجام شد - ${info.date || ''}`;
-                payoutInfo.classList.remove('hidden');
+            } else {
+                step1.classList.add('locked');
+                status1.textContent = '🔒 در دسترس نیست';
+                status1.classList.add('disabled');
+                step2.classList.add('locked');
+                status2.textContent = '🔒 در دسترس نیست';
+                status2.classList.add('disabled');
+                step3.classList.add('locked');
+                status3.textContent = '🔒 غیرفعال';
+                status3.classList.add('disabled');
+                step4.classList.add('locked');
+                status4.textContent = '🔒 هنوز';
+                status4.classList.add('disabled');
             }
         }
         function markPayoutSuccess(card, date) {
