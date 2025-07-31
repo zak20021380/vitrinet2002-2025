@@ -1129,33 +1129,34 @@
         <div id="dashboardScreen" class="screen">
             <!-- Rewards Status Bar -->
             <div id="rewardStatusBar" class="bg-[#0f172a] rounded-xl p-3 text-white font-sans">
-                <div class="grid grid-cols-2 md:flex gap-4">
-                    <div id="rewardStep1" class="step flex flex-col items-center" data-info="جزئیات مرحله ۱">
+                <div class="flex flex-wrap justify-between gap-3 text-center">
+                    <div id="rewardStep1" class="step relative flex flex-col items-center basis-1/2 sm:basis-1/4 p-2" data-info="جزئیات مرحله ۱">
                         <span class="icon mb-1 flex items-center justify-center w-10 h-10 rounded-full">
                             <i class="fa-solid fa-file-circle-plus"></i>
                         </span>
-                        <span class="text-sm">درخواست کد خرید</span>
+                        <span class="text-xs font-semibold">درخواست کد خرید</span>
                         <span id="status1" class="text-xs mt-1"></span>
                     </div>
-                    <div id="rewardStep2" class="step flex flex-col items-center" data-info="جزئیات مرحله ۲">
+                    <div id="rewardStep2" class="step relative flex flex-col items-center basis-1/2 sm:basis-1/4 p-2" data-info="جزئیات مرحله ۲">
                         <span class="icon mb-1 flex items-center justify-center w-10 h-10 rounded-full">
                             <i class="fa-solid fa-receipt"></i>
                         </span>
-                        <span class="text-sm">دریافت کد خرید</span>
+                        <span class="text-xs font-semibold">دریافت کد خرید</span>
                         <span id="status2" class="text-xs mt-1"></span>
                     </div>
-                    <div id="rewardStep3" class="step flex flex-col items-center" data-info="جزئیات مرحله ۳">
+                    <div id="rewardStep3" class="step relative flex flex-col items-center basis-1/2 sm:basis-1/4 p-2" data-info="جزئیات مرحله ۳">
                         <span class="icon mb-1 flex items-center justify-center w-10 h-10 rounded-full">
                             <i class="fa-solid fa-hand-holding-dollar"></i>
                         </span>
-                        <span class="text-sm">درخواست تسویه</span>
+                        <span class="text-xs font-semibold">درخواست تسویه</span>
                         <span id="status3" class="text-xs mt-1"></span>
                     </div>
-                    <div id="rewardStep4" class="step flex flex-col items-center" data-info="جزئیات مرحله ۴">
+                    <div id="rewardStep4" class="step relative flex flex-col items-center basis-1/2 sm:basis-1/4 p-2" data-info="جزئیات مرحله ۴">
+                        <span class="lock-overlay hidden absolute -top-1 -right-1 text-gray-300 text-xs"><i class="fa-solid fa-lock"></i></span>
                         <span class="icon mb-1 flex items-center justify-center w-10 h-10 rounded-full">
                             <i class="fa-solid fa-circle-check"></i>
                         </span>
-                        <span class="text-sm">تسویه موفق</span>
+                        <span class="text-xs font-semibold">تسویه موفق</span>
                         <span id="status4" class="text-xs mt-1"></span>
                     </div>
                 </div>
@@ -1163,31 +1164,47 @@
 
             <!-- Step Info Modals -->
             <div id="stepModal1" class="fixed inset-0 bg-black/70 backdrop-blur-sm hidden items-center justify-center">
-                <div class="bg-darkcard rounded-xl p-6 w-11/12 max-w-sm text-center">
-                    <h3 class="font-bold mb-3">درخواست کد خرید</h3>
-                    <p class="step-modal-text mb-4"></p>
-                    <button data-close="stepModal1" class="btn-primary w-full py-2 rounded-lg text-white">بستن</button>
+                <div class="modal-card bg-[#1e293b] rounded-xl p-4 w-11/12 max-w-xs text-center shadow-lg transform transition-all duration-300 opacity-0 scale-90 relative">
+                    <button data-close="stepModal1" class="absolute top-2 left-2 text-gray-300 text-sm">✖️</button>
+                    <div class="w-12 h-12 rounded-full bg-green-600 flex items-center justify-center text-white mx-auto mb-3">
+                        <i class="fa-solid fa-file-circle-plus"></i>
+                    </div>
+                    <h3 class="font-bold mb-2">درخواست کد خرید</h3>
+                    <p class="step-modal-text text-sm mb-3"></p>
+                    <button data-close="stepModal1" class="bg-primary text-white rounded-lg px-4 py-1 mt-2">بستن</button>
                 </div>
             </div>
             <div id="stepModal2" class="fixed inset-0 bg-black/70 backdrop-blur-sm hidden items-center justify-center">
-                <div class="bg-darkcard rounded-xl p-6 w-11/12 max-w-sm text-center">
-                    <h3 class="font-bold mb-3">دریافت کد خرید</h3>
-                    <p class="step-modal-text mb-4"></p>
-                    <button data-close="stepModal2" class="btn-primary w-full py-2 rounded-lg text-white">بستن</button>
+                <div class="modal-card bg-[#1e293b] rounded-xl p-4 w-11/12 max-w-xs text-center shadow-lg transform transition-all duration-300 opacity-0 scale-90 relative">
+                    <button data-close="stepModal2" class="absolute top-2 left-2 text-gray-300 text-sm">✖️</button>
+                    <div class="w-12 h-12 rounded-full bg-green-600 flex items-center justify-center text-white mx-auto mb-3">
+                        <i class="fa-solid fa-receipt"></i>
+                    </div>
+                    <h3 class="font-bold mb-2">دریافت کد خرید</h3>
+                    <p class="step-modal-text text-sm mb-3"></p>
+                    <button data-close="stepModal2" class="bg-primary text-white rounded-lg px-4 py-1 mt-2">بستن</button>
                 </div>
             </div>
             <div id="stepModal3" class="fixed inset-0 bg-black/70 backdrop-blur-sm hidden items-center justify-center">
-                <div class="bg-darkcard rounded-xl p-6 w-11/12 max-w-sm text-center">
-                    <h3 class="font-bold mb-3">درخواست تسویه</h3>
-                    <p class="step-modal-text mb-4"></p>
-                    <button data-close="stepModal3" class="btn-primary w-full py-2 rounded-lg text-white">بستن</button>
+                <div class="modal-card bg-[#1e293b] rounded-xl p-4 w-11/12 max-w-xs text-center shadow-lg transform transition-all duration-300 opacity-0 scale-90 relative">
+                    <button data-close="stepModal3" class="absolute top-2 left-2 text-gray-300 text-sm">✖️</button>
+                    <div class="w-12 h-12 rounded-full bg-yellow-500 flex items-center justify-center text-white mx-auto mb-3">
+                        <i class="fa-solid fa-hand-holding-dollar"></i>
+                    </div>
+                    <h3 class="font-bold mb-2">درخواست تسویه</h3>
+                    <p class="step-modal-text text-sm mb-3"></p>
+                    <button data-close="stepModal3" class="bg-primary text-white rounded-lg px-4 py-1 mt-2">بستن</button>
                 </div>
             </div>
             <div id="stepModal4" class="fixed inset-0 bg-black/70 backdrop-blur-sm hidden items-center justify-center">
-                <div class="bg-darkcard rounded-xl p-6 w-11/12 max-w-sm text-center">
-                    <h3 class="font-bold mb-3">تسویه موفق</h3>
-                    <p class="step-modal-text mb-4"></p>
-                    <button data-close="stepModal4" class="btn-primary w-full py-2 rounded-lg text-white">بستن</button>
+                <div class="modal-card bg-[#1e293b] rounded-xl p-4 w-11/12 max-w-xs text-center shadow-lg transform transition-all duration-300 opacity-0 scale-90 relative">
+                    <button data-close="stepModal4" class="absolute top-2 left-2 text-gray-300 text-sm">✖️</button>
+                    <div class="w-12 h-12 rounded-full bg-gray-600 flex items-center justify-center text-white mx-auto mb-3">
+                        <i class="fa-solid fa-circle-check"></i>
+                    </div>
+                    <h3 class="font-bold mb-2">تسویه موفق</h3>
+                    <p class="step-modal-text text-sm mb-3"></p>
+                    <button data-close="stepModal4" class="bg-primary text-white rounded-lg px-4 py-1 mt-2">بستن</button>
                 </div>
             </div>
             <!-- Header -->
@@ -1710,38 +1727,45 @@
         }
         function renderRewardSteps() {
             const configs = [
-                {state: 'done', text: '✔ انجام شد', info: 'درخواست کد خرید ثبت شده است'},
-                {state: 'done', text: '✔ دریافت شد', info: 'کد خرید شما آماده است'},
-                {state: 'active', text: 'در انتظار', info: 'در انتظار تسویه'},
-                {state: 'locked', text: 'قفل', info: 'هنوز در دسترس نیست'}
+                {state: 'done', text: '✔️ انجام شد', info: 'درخواست کد خرید ثبت شده است'},
+                {state: 'done', text: '✔️ دریافت شد', info: 'کد خرید شما آماده است'},
+                {state: 'active', text: '🟡 در انتظار', info: 'در انتظار تسویه'},
+                {state: 'locked', text: '', info: 'هنوز در دسترس نیست'}
             ];
             configs.forEach((cfg, i) => {
                 const el = document.getElementById(`rewardStep${i+1}`);
                 const statusEl = document.getElementById(`status${i+1}`);
                 const icon = el.querySelector('.icon');
 
-                el.className = 'step shrink-0 min-w-[100px] flex flex-col items-center';
+                el.className = 'step relative flex flex-col items-center basis-1/2 sm:basis-1/4 p-2';
                 icon.className = 'icon mb-1 flex items-center justify-center w-10 h-10 rounded-full text-white';
                 statusEl.className = 'text-xs mt-1';
 
-                el.classList.remove('cursor-pointer','hover:ring-2','focus:ring-2','ring-green-400','ring-yellow-400','opacity-50','pointer-events-none');
-                icon.classList.remove('bg-green-600','bg-yellow-500','bg-gray-600');
+                el.classList.remove('cursor-pointer','hover:scale-105','ring-primary','opacity-50','pointer-events-none');
+                icon.classList.remove('bg-green-600','bg-yellow-500','bg-gray-600','grayscale');
                 statusEl.classList.remove('text-green-400','text-yellow-400','text-gray-400');
-
+                
                 if (cfg.state === 'done') {
                     icon.classList.add('bg-green-600');
                     statusEl.classList.add('text-green-400');
-                    el.classList.add('cursor-pointer','hover:ring-2','focus:ring-2','ring-green-400');
+                    el.classList.add('cursor-pointer','hover:scale-105','ring-primary');
+                    const lock = el.querySelector('.lock-overlay');
+                    if (lock) lock.classList.add('hidden');
                     el.onclick = () => openStepModal(i+1, cfg.info);
                 } else if (cfg.state === 'active') {
                     icon.classList.add('bg-yellow-500');
                     statusEl.classList.add('text-yellow-400');
-                    el.classList.add('cursor-pointer','hover:ring-2','focus:ring-2','ring-yellow-400');
+                    el.classList.add('cursor-pointer','hover:scale-105','ring-primary');
+                    const lock = el.querySelector('.lock-overlay');
+                    if (lock) lock.classList.add('hidden');
                     el.onclick = () => openStepModal(i+1, cfg.info);
                 } else {
                     icon.classList.add('bg-gray-600');
+                    icon.classList.add('grayscale');
                     statusEl.classList.add('text-gray-400');
                     el.classList.add('opacity-50','pointer-events-none');
+                    const lock = el.querySelector('.lock-overlay');
+                    if (lock) lock.classList.remove('hidden');
                     el.onclick = null;
                 }
                 statusEl.textContent = cfg.text;
@@ -1753,17 +1777,28 @@
             renderRewardSteps();
         }
 
-        function openStepModal(index, text) {
-            const modal = document.getElementById(`stepModal${index}`);
-            if (!modal) return;
+       function openStepModal(index, text) {
+           const modal = document.getElementById(`stepModal${index}`);
+           if (!modal) return;
             const p = modal.querySelector('.step-modal-text');
             if (p) p.textContent = text;
             modal.classList.remove('hidden');
+            const card = modal.querySelector('.modal-card');
+            if (card) {
+                setTimeout(() => card.classList.remove('opacity-0','scale-90'), 20);
+            }
         }
 
         function closeStepModal(index) {
             const modal = document.getElementById(`stepModal${index}`);
-            if (modal) modal.classList.add('hidden');
+            if (!modal) return;
+            const card = modal.querySelector('.modal-card');
+            if (card) {
+                card.classList.add('opacity-0','scale-90');
+                setTimeout(() => modal.classList.add('hidden'), 300);
+            } else {
+                modal.classList.add('hidden');
+            }
         }
         // Celebration Popup Functions
         function showCelebrationPopup() {
