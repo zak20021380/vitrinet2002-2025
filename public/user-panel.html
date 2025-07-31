@@ -1128,36 +1128,66 @@
         <!-- Dashboard Screen -->
         <div id="dashboardScreen" class="screen">
             <!-- Rewards Status Bar -->
-            <div id="rewardStatusBar" class="bg-[#0f172a] rounded-xl p-3 overflow-x-auto text-white font-sans">
-                <div class="flex flex-nowrap items-start gap-4 w-max">
-                    <div id="rewardStep1" class="step shrink-0 min-w-[100px] flex flex-col items-center" data-info="جزئیات مرحله ۱">
+            <div id="rewardStatusBar" class="bg-[#0f172a] rounded-xl p-3 text-white font-sans">
+                <div class="grid grid-cols-2 md:flex gap-4">
+                    <div id="rewardStep1" class="step flex flex-col items-center" data-info="جزئیات مرحله ۱">
                         <span class="icon mb-1 flex items-center justify-center w-10 h-10 rounded-full">
                             <i class="fa-solid fa-file-circle-plus"></i>
                         </span>
                         <span class="text-sm">درخواست کد خرید</span>
                         <span id="status1" class="text-xs mt-1"></span>
                     </div>
-                    <div id="rewardStep2" class="step shrink-0 min-w-[100px] flex flex-col items-center" data-info="جزئیات مرحله ۲">
+                    <div id="rewardStep2" class="step flex flex-col items-center" data-info="جزئیات مرحله ۲">
                         <span class="icon mb-1 flex items-center justify-center w-10 h-10 rounded-full">
                             <i class="fa-solid fa-receipt"></i>
                         </span>
                         <span class="text-sm">دریافت کد خرید</span>
                         <span id="status2" class="text-xs mt-1"></span>
                     </div>
-                    <div id="rewardStep3" class="step shrink-0 min-w-[100px] flex flex-col items-center" data-info="جزئیات مرحله ۳">
+                    <div id="rewardStep3" class="step flex flex-col items-center" data-info="جزئیات مرحله ۳">
                         <span class="icon mb-1 flex items-center justify-center w-10 h-10 rounded-full">
                             <i class="fa-solid fa-hand-holding-dollar"></i>
                         </span>
                         <span class="text-sm">درخواست تسویه</span>
                         <span id="status3" class="text-xs mt-1"></span>
                     </div>
-                    <div id="rewardStep4" class="step shrink-0 min-w-[100px] flex flex-col items-center" data-info="جزئیات مرحله ۴">
+                    <div id="rewardStep4" class="step flex flex-col items-center" data-info="جزئیات مرحله ۴">
                         <span class="icon mb-1 flex items-center justify-center w-10 h-10 rounded-full">
                             <i class="fa-solid fa-circle-check"></i>
                         </span>
                         <span class="text-sm">تسویه موفق</span>
                         <span id="status4" class="text-xs mt-1"></span>
                     </div>
+                </div>
+            </div>
+
+            <!-- Step Info Modals -->
+            <div id="stepModal1" class="fixed inset-0 bg-black/70 backdrop-blur-sm hidden items-center justify-center">
+                <div class="bg-darkcard rounded-xl p-6 w-11/12 max-w-sm text-center">
+                    <h3 class="font-bold mb-3">درخواست کد خرید</h3>
+                    <p class="step-modal-text mb-4"></p>
+                    <button data-close="stepModal1" class="btn-primary w-full py-2 rounded-lg text-white">بستن</button>
+                </div>
+            </div>
+            <div id="stepModal2" class="fixed inset-0 bg-black/70 backdrop-blur-sm hidden items-center justify-center">
+                <div class="bg-darkcard rounded-xl p-6 w-11/12 max-w-sm text-center">
+                    <h3 class="font-bold mb-3">دریافت کد خرید</h3>
+                    <p class="step-modal-text mb-4"></p>
+                    <button data-close="stepModal2" class="btn-primary w-full py-2 rounded-lg text-white">بستن</button>
+                </div>
+            </div>
+            <div id="stepModal3" class="fixed inset-0 bg-black/70 backdrop-blur-sm hidden items-center justify-center">
+                <div class="bg-darkcard rounded-xl p-6 w-11/12 max-w-sm text-center">
+                    <h3 class="font-bold mb-3">درخواست تسویه</h3>
+                    <p class="step-modal-text mb-4"></p>
+                    <button data-close="stepModal3" class="btn-primary w-full py-2 rounded-lg text-white">بستن</button>
+                </div>
+            </div>
+            <div id="stepModal4" class="fixed inset-0 bg-black/70 backdrop-blur-sm hidden items-center justify-center">
+                <div class="bg-darkcard rounded-xl p-6 w-11/12 max-w-sm text-center">
+                    <h3 class="font-bold mb-3">تسویه موفق</h3>
+                    <p class="step-modal-text mb-4"></p>
+                    <button data-close="stepModal4" class="btn-primary w-full py-2 rounded-lg text-white">بستن</button>
                 </div>
             </div>
             <!-- Header -->
@@ -1702,12 +1732,12 @@
                     icon.classList.add('bg-green-600');
                     statusEl.classList.add('text-green-400');
                     el.classList.add('cursor-pointer','hover:ring-2','focus:ring-2','ring-green-400');
-                    el.onclick = () => alert(cfg.info);
+                    el.onclick = () => openStepModal(i+1, cfg.info);
                 } else if (cfg.state === 'active') {
                     icon.classList.add('bg-yellow-500');
                     statusEl.classList.add('text-yellow-400');
                     el.classList.add('cursor-pointer','hover:ring-2','focus:ring-2','ring-yellow-400');
-                    el.onclick = () => alert(cfg.info);
+                    el.onclick = () => openStepModal(i+1, cfg.info);
                 } else {
                     icon.classList.add('bg-gray-600');
                     statusEl.classList.add('text-gray-400');
@@ -1721,6 +1751,19 @@
             localStorage.setItem('rewardStep', '4');
             localStorage.setItem('payoutInfo', JSON.stringify({card, date}));
             renderRewardSteps();
+        }
+
+        function openStepModal(index, text) {
+            const modal = document.getElementById(`stepModal${index}`);
+            if (!modal) return;
+            const p = modal.querySelector('.step-modal-text');
+            if (p) p.textContent = text;
+            modal.classList.remove('hidden');
+        }
+
+        function closeStepModal(index) {
+            const modal = document.getElementById(`stepModal${index}`);
+            if (modal) modal.classList.add('hidden');
         }
         // Celebration Popup Functions
         function showCelebrationPopup() {
@@ -2091,6 +2134,15 @@
                 document.getElementById('userGreeting').textContent = `${firstName} ${lastName}`;
             }
             renderRewardSteps();
+            // Step modals close handlers
+            for (let i = 1; i <= 4; i++) {
+                const modal = document.getElementById(`stepModal${i}`);
+                const closeBtn = modal.querySelector('[data-close]');
+                closeBtn.addEventListener('click', () => closeStepModal(i));
+                modal.addEventListener('click', e => {
+                    if (e.target === modal) closeStepModal(i);
+                });
+            }
             // Back Home Button Event Listener
             document.getElementById('backHomeBtn').addEventListener('click', () => {
                 showScreen('dashboard');
