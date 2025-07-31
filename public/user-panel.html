@@ -158,6 +158,14 @@
             background: #475569;
             opacity: 0.4;
         }
+        .step-indicator.locked {
+            background: #dc2626;
+            opacity: 0.6;
+        }
+        .step-indicator.waiting {
+            background: #f59e0b;
+            animation: pulse 2s infinite;
+        }
         .step-label {
             margin-top: 8px;
             text-align: center;
@@ -629,6 +637,9 @@
             font-size: 0.75rem;
             margin-top: 4px;
         }
+        .step-status.success { color: #10B981; }
+        .step-status.error { color: #ef4444; }
+        .step-status.waiting { color: #f59e0b; }
         /* Cashout Modal Styles */
         #cashoutModal {
             position: fixed;
@@ -1056,26 +1067,26 @@
             <div id="rewardStatusBar" class="reward-status-bar hidden">
                 <div class="reward-steps flex items-center justify-between text-white text-sm">
                     <div class="flex flex-col items-center flex-1">
-                        <div id="rewardStep1" class="step-indicator inactive" aria-label="رسیدن به جایزه">🎯</div>
+                        <div id="rewardStep1" class="step-indicator inactive" aria-label="رسیدن به جایزه" title="پس از جمع آوری امتیاز کافی">🎯</div>
                         <span id="label1" class="step-label">رسیدن به جایزه</span>
                         <span id="status1" class="step-status"></span>
                     </div>
                     <div class="connector mx-2"><div class="connector-fill"></div></div>
                     <div class="flex flex-col items-center flex-1">
-                        <div id="rewardStep2" class="step-indicator inactive" aria-label="دریافت کد خرید">🧾</div>
+                        <div id="rewardStep2" class="step-indicator inactive" aria-label="دریافت کد خرید" title="کد خرید برای درخواست تسویه">🧾</div>
                         <span id="label2" class="step-label">دریافت کد خرید</span>
                         <span id="purchaseCodeText" class="step-status"></span>
                         <span id="status2" class="step-status"></span>
                     </div>
                     <div class="connector mx-2"><div class="connector-fill"></div></div>
                     <div class="flex flex-col items-center flex-1">
-                        <div id="rewardStep3" class="step-indicator inactive" aria-label="درخواست تسویه">💸</div>
+                        <div id="rewardStep3" class="step-indicator inactive" aria-label="درخواست تسویه" title="پس از دریافت کد می‌توانید تسویه کنید">💸</div>
                         <span id="label3" class="step-label">درخواست تسویه</span>
                         <span id="status3" class="step-status"></span>
                     </div>
                     <div class="connector mx-2"><div class="connector-fill"></div></div>
                     <div class="flex flex-col items-center flex-1">
-                        <div id="rewardStep4" class="step-indicator inactive" aria-label="تسویه جایزه">✅</div>
+                        <div id="rewardStep4" class="step-indicator inactive" aria-label="تسویه جایزه" title="پرداخت نهایی">✅</div>
                         <span id="label4" class="step-label">تسویه جایزه</span>
                         <span id="status4" class="step-status"></span>
                     </div>
@@ -1608,6 +1619,9 @@
             const step = parseInt(localStorage.getItem('rewardStep') || '1');
             const info = JSON.parse(localStorage.getItem('payoutInfo') || '{}');
             const code = localStorage.getItem('purchaseCode') || '';
+            const finalRewardReached = appState.purchases >= 13 && appState.rewardedMilestones.includes(13);
+            const hasBalance = appState.credit > 0;
+
             const step1 = document.getElementById('rewardStep1');
             const step2 = document.getElementById('rewardStep2');
             const step3 = document.getElementById('rewardStep3');
@@ -1625,36 +1639,65 @@
             const requestPayoutBtn = document.getElementById('requestPayoutBtn');
             const payoutInfo = document.getElementById('payoutInfo');
 
-            [step1, step2, step3, step4].forEach(el => el.classList.remove('completed','active','inactive'));
+            [step1, step2, step3, step4].forEach(el => el.className = 'step-indicator');
+            [status1, status2, status3, status4].forEach(s => { s.className = 'step-status'; s.textContent = ''; });
             [label1, label2, label3, label4].forEach(l => l.classList.remove('active-label'));
-            step1.classList.add(step > 1 ? 'completed' : 'active');
-            step2.classList.add(step > 2 ? 'completed' : step === 2 ? 'active' : 'inactive');
-            step3.classList.add(step > 3 ? 'completed' : step === 3 ? 'active' : 'inactive');
-            step4.classList.add(step === 4 ? 'completed' : 'inactive');
 
-            if (step === 1) label1.classList.add('active-label');
-            else if (step === 2) label2.classList.add('active-label');
-            else if (step === 3) label3.classList.add('active-label');
-            else if (step === 4) label4.classList.add('active-label');
+            // Step 1 - always completed once reward reached
+            step1.classList.add('completed');
+            status1.textContent = 'انجام شد';
+            status1.classList.add('success');
 
-            status1.textContent = step > 1 ? 'انجام شد' : 'موجود';
-            status2.textContent = step > 2 ? 'کد ارسال شد' : step === 2 ? 'در انتظار' : 'غیرفعال';
-            status3.textContent = step > 3 ? 'درخواست شد' : step === 3 ? 'در انتظار' : 'غیرفعال';
-            status4.textContent = step === 4 ? 'انجام شد' : 'غیرفعال';
-
-            purchaseCodeText.textContent = code && step >= 2 ? `کد: ${code}` : '';
+            // Default states for other steps
+            step2.classList.add('locked');
+            status2.textContent = 'غیرفعال';
+            status2.classList.add('error');
+            step3.classList.add('locked');
+            status3.textContent = 'غیرفعال';
+            status3.classList.add('error');
+            step4.classList.add('locked');
+            status4.textContent = 'غیرفعال';
+            status4.classList.add('error');
 
             requestCodeBtn.classList.add('hidden');
             requestPayoutBtn.classList.add('hidden');
             payoutInfo.classList.add('hidden');
 
-            if (step === 1) {
-                requestCodeBtn.disabled = false;
-                requestCodeBtn.classList.remove('hidden');
-            } else if (step === 2) {
-                requestPayoutBtn.disabled = false;
-                requestPayoutBtn.classList.remove('hidden');
+            if (finalRewardReached && hasBalance) {
+                if (step === 1) {
+                    // ready to request code
+                    step2.classList.replace('locked', 'active');
+                    label2.classList.add('active-label');
+                    requestCodeBtn.disabled = false;
+                    requestCodeBtn.classList.remove('hidden');
+                } else if (step >= 2) {
+                    step2.classList.replace('locked', 'completed');
+                    status2.textContent = 'کد ارسال شد';
+                    status2.classList.replace('error', 'success');
+                    purchaseCodeText.textContent = `کد: ${code}`;
+                    if (step === 2) {
+                        step3.classList.replace('locked', 'active');
+                        label3.classList.add('active-label');
+                        requestPayoutBtn.disabled = false;
+                        requestPayoutBtn.classList.remove('hidden');
+                        status3.textContent = '';
+                        status3.classList.remove('error');
+                    }
+                }
+            }
+
+            if (step === 3) {
+                step3.classList.replace('locked', 'waiting');
+                status3.textContent = 'در انتظار';
+                status3.classList.replace('error', 'waiting');
+                step4.classList.replace('locked', 'locked');
             } else if (step === 4) {
+                step3.classList.replace('locked', 'completed');
+                status3.textContent = 'درخواست تسویه ثبت شد';
+                status3.classList.replace('error', 'success');
+                step4.classList.replace('locked', 'completed');
+                status4.textContent = 'پرداخت موفق';
+                status4.classList.replace('error', 'success');
                 payoutInfo.textContent = `✅ تسویه انجام شد - ${info.date || ''}`;
                 payoutInfo.classList.remove('hidden');
             }
