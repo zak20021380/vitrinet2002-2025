@@ -649,16 +649,12 @@
         }
         @media (max-width: 640px) {
             .reward-steps-container {
-                grid-template-columns: repeat(2, 1fr);
+                grid-template-columns: repeat(4, 1fr);
             }
-            .reward-steps-container::after {
-                content: '';
-                position: absolute;
-                top: calc(50% + 22px);
-                left: 0;
-                right: 0;
-                height: 2px;
-                background: #334155;
+            .step-indicator {
+                width: 32px;
+                height: 32px;
+                font-size: 0.875rem;
             }
         }
         .reward-step {
@@ -1129,29 +1125,29 @@
         <div id="dashboardScreen" class="screen">
             <!-- Rewards Status Bar -->
             <div id="rewardStatusBar" class="bg-[#0f172a] rounded-xl p-3 text-white font-sans">
-                <div class="flex flex-wrap justify-between gap-3 text-center">
-                    <div id="rewardStep1" class="step relative flex flex-col items-center basis-1/2 sm:basis-1/4 p-2" data-info="جزئیات مرحله ۱">
+                <div class="reward-steps-container gap-3 text-center">
+                    <div id="rewardStep1" class="step relative flex flex-col items-center p-2" data-info="جزئیات مرحله ۱">
                         <span class="icon mb-1 flex items-center justify-center w-10 h-10 rounded-full">
                             <i class="fa-solid fa-file-circle-plus"></i>
                         </span>
                         <span class="text-xs font-semibold">درخواست کد خرید</span>
                         <span id="status1" class="text-xs mt-1"></span>
                     </div>
-                    <div id="rewardStep2" class="step relative flex flex-col items-center basis-1/2 sm:basis-1/4 p-2" data-info="جزئیات مرحله ۲">
+                    <div id="rewardStep2" class="step relative flex flex-col items-center p-2" data-info="جزئیات مرحله ۲">
                         <span class="icon mb-1 flex items-center justify-center w-10 h-10 rounded-full">
                             <i class="fa-solid fa-receipt"></i>
                         </span>
                         <span class="text-xs font-semibold">دریافت کد خرید</span>
                         <span id="status2" class="text-xs mt-1"></span>
                     </div>
-                    <div id="rewardStep3" class="step relative flex flex-col items-center basis-1/2 sm:basis-1/4 p-2" data-info="جزئیات مرحله ۳">
+                    <div id="rewardStep3" class="step relative flex flex-col items-center p-2" data-info="جزئیات مرحله ۳">
                         <span class="icon mb-1 flex items-center justify-center w-10 h-10 rounded-full">
                             <i class="fa-solid fa-hand-holding-dollar"></i>
                         </span>
                         <span class="text-xs font-semibold">درخواست تسویه</span>
                         <span id="status3" class="text-xs mt-1"></span>
                     </div>
-                    <div id="rewardStep4" class="step relative flex flex-col items-center basis-1/2 sm:basis-1/4 p-2" data-info="جزئیات مرحله ۴">
+                    <div id="rewardStep4" class="step relative flex flex-col items-center p-2" data-info="جزئیات مرحله ۴">
                         <span class="lock-overlay hidden absolute -top-1 -right-1 text-gray-300 text-xs"><i class="fa-solid fa-lock"></i></span>
                         <span class="icon mb-1 flex items-center justify-center w-10 h-10 rounded-full">
                             <i class="fa-solid fa-circle-check"></i>
@@ -1737,7 +1733,7 @@
                 const statusEl = document.getElementById(`status${i+1}`);
                 const icon = el.querySelector('.icon');
 
-                el.className = 'step relative flex flex-col items-center basis-1/2 sm:basis-1/4 p-2';
+                el.className = 'step relative flex flex-col items-center p-2';
                 icon.className = 'icon mb-1 flex items-center justify-center w-10 h-10 rounded-full text-white';
                 statusEl.className = 'text-xs mt-1';
 
