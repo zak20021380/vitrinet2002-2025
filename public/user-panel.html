@@ -627,55 +627,74 @@
         /* Reward Status Bar Styles */
         .reward-status-bar {
             background: #0f172a;
-            border: 1px solid rgba(99, 102, 241, 0.4);
             border-radius: 16px;
             padding: 16px;
             margin-bottom: 24px;
-            text-align: center;
         }
         .reward-steps-container {
+            position: relative;
             display: grid;
             grid-template-columns: repeat(4, 1fr);
-            gap: 8px;
             direction: rtl;
+            text-align: center;
+        }
+        .reward-steps-container::before {
+            content: '';
+            position: absolute;
+            top: 22px;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: #334155;
         }
         @media (max-width: 640px) {
             .reward-steps-container {
                 grid-template-columns: repeat(2, 1fr);
             }
+            .reward-steps-container::after {
+                content: '';
+                position: absolute;
+                top: calc(50% + 22px);
+                left: 0;
+                right: 0;
+                height: 2px;
+                background: #334155;
+            }
         }
         .reward-step {
-            background: rgba(30, 41, 59, 0.95);
-            border: 1px solid rgba(99, 102, 241, 0.3);
-            border-radius: 0.75rem;
-            padding: 12px;
+            position: relative;
+            padding-bottom: 1rem;
             display: flex;
             flex-direction: column;
             align-items: center;
+            font-family: 'Vazirmatn', sans-serif;
+        }
+        .step-indicator {
+            width: 40px;
+            height: 40px;
+            border-radius: 9999px;
+            display: flex;
+            align-items: center;
             justify-content: center;
-            height: 6rem;
-            transition: all 0.3s ease;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+            font-size: 1rem;
+            background: #475569;
+            color: #fff;
+            transition: background-color 0.3s ease;
         }
-        .reward-step.active {
-            background: linear-gradient(135deg, #6366F1, #0f172a);
-            border-color: #6366F1;
-            box-shadow: 0 0 15px rgba(99, 102, 241, 0.6);
-        }
-        .reward-step.done {
-            opacity: 0.9;
-        }
-        .reward-step.locked {
-            opacity: 0.4;
-        }
+        .reward-step.done .step-indicator { background: #10B981; }
+        .reward-step.active .step-indicator { background: #f59e0b; }
+        .reward-step.waiting .step-indicator { background: #f59e0b; }
+        .reward-step.locked .step-indicator { background: #475569; }
+        .reward-step.error .step-indicator { background: #ef4444; }
         .step-title {
             font-weight: 700;
             font-size: 0.75rem;
-            margin-top: 4px;
+            margin-top: 0.5rem;
         }
         .step-state {
             font-size: 0.7rem;
-            margin-top: 2px;
+            margin-top: 0.25rem;
+            transition: color 0.3s ease;
         }
         .step-state.success { color: #10B981; }
         .step-state.error { color: #ef4444; }
@@ -1106,29 +1125,29 @@
         <div id="dashboardScreen" class="screen">
             <!-- Final Reward Banner (Updated) -->
             <div id="rewardStatusBar" class="reward-status-bar bg-[#0f172a] rounded-xl p-3 hidden">
-                <div class="reward-steps-container grid grid-cols-4 sm:grid-cols-2 gap-3 text-center text-white text-xs md:text-sm font-sans">
-                    <div id="rewardStep1" class="reward-step flex flex-col items-center">
-                        <div class="text-2xl mb-1">🎯</div>
+                <div class="reward-steps-container grid grid-cols-2 sm:grid-cols-4 gap-y-10 text-center text-white text-xs md:text-sm font-sans">
+                    <div id="rewardStep1" class="reward-step">
+                        <div class="step-indicator"><i class="fa-solid fa-bullseye"></i></div>
                         <div class="step-title">رسیدن به جایزه</div>
-                        <div id="status1" class="step-state mt-1"></div>
+                        <div id="status1" class="step-state"></div>
                     </div>
-                    <div id="rewardStep2" class="reward-step flex flex-col items-center">
-                        <div class="text-2xl mb-1">📄</div>
+                    <div id="rewardStep2" class="reward-step">
+                        <div class="step-indicator"><i class="fa-solid fa-file-lines"></i></div>
                         <div class="step-title">دریافت کد خرید</div>
-                        <div id="purchaseCodeText" class="step-state mt-1"></div>
-                        <div id="status2" class="step-state mt-1"></div>
+                        <div id="purchaseCodeText" class="step-state"></div>
+                        <div id="status2" class="step-state"></div>
                         <button id="requestCodeBtn" class="btn-primary mt-1 text-xs w-full hidden">دریافت کد خرید</button>
                     </div>
-                    <div id="rewardStep3" class="reward-step flex flex-col items-center">
-                        <div class="text-2xl mb-1">💸</div>
+                    <div id="rewardStep3" class="reward-step">
+                        <div class="step-indicator"><i class="fa-solid fa-hand-holding-dollar"></i></div>
                         <div class="step-title">درخواست تسویه</div>
-                        <div id="status3" class="step-state mt-1"></div>
+                        <div id="status3" class="step-state"></div>
                         <button id="requestPayoutBtn" class="btn-primary mt-1 text-xs w-full hidden">درخواست تسویه</button>
                     </div>
-                    <div id="rewardStep4" class="reward-step flex flex-col items-center">
-                        <div class="text-2xl mb-1">✅</div>
+                    <div id="rewardStep4" class="reward-step">
+                        <div class="step-indicator"><i class="fa-solid fa-check-circle"></i></div>
                         <div class="step-title">تسویه موفق</div>
-                        <div id="status4" class="step-state mt-1"></div>
+                        <div id="status4" class="step-state"></div>
                     </div>
                 </div>
                 <div id="payoutInfo" class="text-success text-sm mt-2 hidden"></div>
