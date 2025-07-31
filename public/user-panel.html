@@ -138,33 +138,58 @@
             box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.3);
         }
         .step-indicator {
-            width: 35px;
-            height: 35px;
-            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            border-radius: 9999px;
             display: flex;
             align-items: center;
             justify-content: center;
-            position: relative;
+            font-size: 1.25rem;
+            color: #fff;
         }
         .step-indicator.completed {
             background: #10B981;
         }
         .step-indicator.active {
             background: #6366F1;
-            box-shadow: 0 0 10px rgba(99, 102, 241, 0.7);
+            animation: pulse-glow 2s infinite;
         }
         .step-indicator.inactive {
             background: #475569;
+            opacity: 0.4;
         }
         .step-label {
-            position: absolute;
-            top: 40px;
+            margin-top: 8px;
             text-align: center;
             font-size: 0.75rem;
-            width: 80px;
         }
         .active-label {
             text-decoration: underline;
+        }
+        .connector {
+            flex: 1;
+            height: 4px;
+            background: #334155;
+            border-radius: 9999px;
+            position: relative;
+            overflow: hidden;
+        }
+        .connector-fill {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            right: 0;
+            width: 0;
+            background: #10B981;
+            border-radius: inherit;
+            transition: width 0.5s ease;
+        }
+        .step-indicator.completed + .connector .connector-fill {
+            width: 100%;
+        }
+        .step-indicator.active + .connector .connector-fill {
+            width: 50%;
+            background: #6366F1;
         }
         .reward-item {
             transition: all 0.3s ease;
@@ -1029,33 +1054,33 @@
         <div id="dashboardScreen" class="screen">
             <!-- Final Reward Banner (Updated) -->
             <div id="rewardStatusBar" class="reward-status-bar hidden">
-                <div class="flex items-center justify-between text-white text-sm mb-4">
+                <div class="reward-steps flex items-center justify-between text-white text-sm">
                     <div class="flex flex-col items-center flex-1">
-                        <div id="rewardStep1" class="step-indicator inactive">🎯</div>
+                        <div id="rewardStep1" class="step-indicator inactive" aria-label="رسیدن به جایزه">🎯</div>
                         <span id="label1" class="step-label">رسیدن به جایزه</span>
                         <span id="status1" class="step-status"></span>
                     </div>
-                    <div class="flex-1 h-0.5 bg-gray-600 mx-2"></div>
+                    <div class="connector mx-2"><div class="connector-fill"></div></div>
                     <div class="flex flex-col items-center flex-1">
-                        <div id="rewardStep2" class="step-indicator inactive">🧾</div>
+                        <div id="rewardStep2" class="step-indicator inactive" aria-label="دریافت کد خرید">🧾</div>
                         <span id="label2" class="step-label">دریافت کد خرید</span>
                         <span id="purchaseCodeText" class="step-status"></span>
                         <span id="status2" class="step-status"></span>
                     </div>
-                    <div class="flex-1 h-0.5 bg-gray-600 mx-2"></div>
+                    <div class="connector mx-2"><div class="connector-fill"></div></div>
                     <div class="flex flex-col items-center flex-1">
-                        <div id="rewardStep3" class="step-indicator inactive">💸</div>
+                        <div id="rewardStep3" class="step-indicator inactive" aria-label="درخواست تسویه">💸</div>
                         <span id="label3" class="step-label">درخواست تسویه</span>
                         <span id="status3" class="step-status"></span>
                     </div>
-                    <div class="flex-1 h-0.5 bg-gray-600 mx-2"></div>
+                    <div class="connector mx-2"><div class="connector-fill"></div></div>
                     <div class="flex flex-col items-center flex-1">
-                        <div id="rewardStep4" class="step-indicator inactive">✅</div>
+                        <div id="rewardStep4" class="step-indicator inactive" aria-label="تسویه جایزه">✅</div>
                         <span id="label4" class="step-label">تسویه جایزه</span>
                         <span id="status4" class="step-status"></span>
                     </div>
                 </div>
-                <div id="stepActions" class="text-center">
+                <div id="stepActions" class="text-center mt-4">
                     <button id="requestCodeBtn" class="btn-primary w-full py-2 rounded-lg font-medium mb-2 hidden">دریافت کد خرید</button>
                     <button id="requestPayoutBtn" class="btn-primary w-full py-2 rounded-lg font-medium hidden">درخواست تسویه</button>
                     <div id="payoutInfo" class="text-success text-sm mt-2 hidden"></div>
