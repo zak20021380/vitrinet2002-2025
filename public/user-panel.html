@@ -626,7 +626,7 @@
         }
         /* Reward Status Bar Styles */
         .reward-status-bar {
-            background: rgba(30, 41, 59, 0.8);
+            background: #0f172a;
             border: 1px solid rgba(99, 102, 241, 0.4);
             border-radius: 16px;
             padding: 16px;
@@ -680,6 +680,7 @@
         .step-state.success { color: #10B981; }
         .step-state.error { color: #ef4444; }
         .step-state.waiting { color: #f59e0b; }
+        .step-state.disabled { color: #9ca3af; }
         /* Cashout Modal Styles */
         #cashoutModal {
             position: fixed;
@@ -1104,30 +1105,30 @@
         <!-- Dashboard Screen -->
         <div id="dashboardScreen" class="screen">
             <!-- Final Reward Banner (Updated) -->
-            <div id="rewardStatusBar" class="reward-status-bar hidden">
-                <div class="reward-steps-container text-white text-xs md:text-sm">
-                    <div id="rewardStep1" class="reward-step">
-                        <div class="text-xl">🎯</div>
+            <div id="rewardStatusBar" class="reward-status-bar bg-[#0f172a] rounded-xl p-3 hidden">
+                <div class="reward-steps-container grid grid-cols-4 sm:grid-cols-2 gap-3 text-center text-white text-xs md:text-sm font-sans">
+                    <div id="rewardStep1" class="reward-step flex flex-col items-center">
+                        <div class="text-2xl mb-1">🎯</div>
                         <div class="step-title">رسیدن به جایزه</div>
-                        <div id="status1" class="step-state"></div>
+                        <div id="status1" class="step-state mt-1"></div>
                     </div>
-                    <div id="rewardStep2" class="reward-step">
-                        <div class="text-xl">📄</div>
+                    <div id="rewardStep2" class="reward-step flex flex-col items-center">
+                        <div class="text-2xl mb-1">📄</div>
                         <div class="step-title">دریافت کد خرید</div>
-                        <div id="purchaseCodeText" class="step-state"></div>
-                        <div id="status2" class="step-state"></div>
+                        <div id="purchaseCodeText" class="step-state mt-1"></div>
+                        <div id="status2" class="step-state mt-1"></div>
                         <button id="requestCodeBtn" class="btn-primary mt-1 text-xs w-full hidden">دریافت کد خرید</button>
                     </div>
-                    <div id="rewardStep3" class="reward-step">
-                        <div class="text-xl">💸</div>
+                    <div id="rewardStep3" class="reward-step flex flex-col items-center">
+                        <div class="text-2xl mb-1">💸</div>
                         <div class="step-title">درخواست تسویه</div>
-                        <div id="status3" class="step-state"></div>
+                        <div id="status3" class="step-state mt-1"></div>
                         <button id="requestPayoutBtn" class="btn-primary mt-1 text-xs w-full hidden">درخواست تسویه</button>
                     </div>
-                    <div id="rewardStep4" class="reward-step">
-                        <div class="text-xl">✅</div>
+                    <div id="rewardStep4" class="reward-step flex flex-col items-center">
+                        <div class="text-2xl mb-1">✅</div>
                         <div class="step-title">تسویه موفق</div>
-                        <div id="status4" class="step-state"></div>
+                        <div id="status4" class="step-state mt-1"></div>
                     </div>
                 </div>
                 <div id="payoutInfo" class="text-success text-sm mt-2 hidden"></div>
@@ -1680,14 +1681,14 @@
 
             // Default states for other steps
             step2.classList.add('locked');
-            status2.textContent = '🔒';
-            status2.classList.add('error');
+            status2.textContent = '🔒 در دسترس نیست';
+            status2.classList.add('disabled');
             step3.classList.add('locked');
-            status3.textContent = '🔒';
-            status3.classList.add('error');
+            status3.textContent = '🔒 غیرفعال';
+            status3.classList.add('disabled');
             step4.classList.add('locked');
-            status4.textContent = '🔴 غیرفعال';
-            status4.classList.add('error');
+            status4.textContent = '🔒 هنوز';
+            status4.classList.add('disabled');
 
             requestCodeBtn.classList.add('hidden');
             requestPayoutBtn.classList.add('hidden');
@@ -1697,20 +1698,20 @@
                 if (step === 1) {
                     step2.classList.replace('locked', 'active');
                     status2.textContent = '🟡 در انتظار';
-                    status2.classList.replace('error', 'waiting');
+                    status2.classList.replace('disabled', 'waiting');
                     requestCodeBtn.disabled = false;
                     requestCodeBtn.classList.remove('hidden');
                 } else if (step >= 2) {
                     step2.classList.replace('locked', 'done');
                     status2.textContent = '✔ ارسال شد';
-                    status2.classList.replace('error', 'success');
+                    status2.classList.replace('disabled', 'success');
                     purchaseCodeText.textContent = `کد: ${code}`;
                     if (step === 2) {
                         step3.classList.replace('locked', 'active');
                         requestPayoutBtn.disabled = false;
                         requestPayoutBtn.classList.remove('hidden');
                         status3.textContent = '';
-                        status3.classList.remove('error');
+                        status3.classList.remove('disabled');
                     }
                 }
             }
@@ -1718,14 +1719,14 @@
             if (step === 3) {
                 step3.classList.replace('locked', 'waiting');
                 status3.textContent = '🟡 در انتظار';
-                status3.classList.replace('error', 'waiting');
+                status3.classList.replace('disabled', 'waiting');
             } else if (step === 4) {
                 step3.classList.replace('locked', 'done');
                 status3.textContent = '✔ ثبت شد';
-                status3.classList.replace('error', 'success');
+                status3.classList.replace('disabled', 'success');
                 step4.classList.replace('locked', 'done');
                 status4.textContent = '🟢 پرداخت شد';
-                status4.classList.replace('error', 'success');
+                status4.classList.replace('disabled', 'success');
                 payoutInfo.textContent = `✅ تسویه انجام شد - ${info.date || ''}`;
                 payoutInfo.classList.remove('hidden');
             }
