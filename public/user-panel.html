@@ -626,10 +626,13 @@
         }
         /* Reward Status Bar Styles */
         .reward-status-bar {
-            background: #0f172a;
+            background: linear-gradient(135deg, rgba(30,41,59,0.8), rgba(15,23,42,0.8));
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255,255,255,0.05);
             border-radius: 16px;
             padding: 16px;
             margin-bottom: 24px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.4);
         }
         .reward-steps-container {
             position: relative;
@@ -686,6 +689,18 @@
         .reward-step.waiting .step-indicator { background: #f59e0b; }
         .reward-step.locked .step-indicator { background: #475569; }
         .reward-step.error .step-indicator { background: #ef4444; }
+        .lock-overlay {
+            position: absolute;
+            inset: 0;
+            background: rgba(0,0,0,0.5);
+            border-radius: 9999px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #d1d5db;
+            font-size: 0.75rem;
+            pointer-events: none;
+        }
         .step-title {
             font-weight: 700;
             font-size: 0.75rem;
@@ -1148,8 +1163,8 @@
                         <span id="status3" class="text-xs mt-1"></span>
                     </div>
                     <div id="rewardStep4" class="step relative flex flex-col items-center p-2" data-info="جزئیات مرحله ۴">
-                        <span class="lock-overlay hidden absolute -top-1 -right-1 text-gray-300 text-xs"><i class="fa-solid fa-lock"></i></span>
-                        <span class="icon mb-1 flex items-center justify-center w-10 h-10 rounded-full">
+                        <span class="icon mb-1 flex items-center justify-center w-10 h-10 rounded-full relative">
+                            <span class="lock-overlay hidden"><i class="fa-solid fa-lock"></i></span>
                             <i class="fa-solid fa-circle-check"></i>
                         </span>
                         <span class="text-xs font-semibold">تسویه موفق</span>
