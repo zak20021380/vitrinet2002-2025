@@ -163,6 +163,9 @@
             font-size: 0.75rem;
             width: 80px;
         }
+        .active-label {
+            text-decoration: underline;
+        }
         .reward-item {
             transition: all 0.3s ease;
             cursor: pointer;
@@ -588,27 +591,18 @@
             background: #6366F1;
             animation: confetti-fast 3.6s linear 1 forwards;
         }
-        /* Final Reward Banner Styles */
-        .final-reward-banner {
-            background: linear-gradient(135deg, rgba(16, 185, 129, 0.2), rgba(16, 185, 129, 0.4));
-            border: 1px solid rgba(16, 185, 129, 0.5);
+        /* Reward Status Bar Styles */
+        .reward-status-bar {
+            background: rgba(30, 41, 59, 0.8);
+            border: 1px solid rgba(99, 102, 241, 0.4);
             border-radius: 16px;
             padding: 20px;
             margin-bottom: 24px;
             text-align: center;
-            box-shadow: 0 10px 25px rgba(16, 185, 129, 0.3);
-            animation: pulse-glow 3s infinite;
         }
-        .final-reward-banner h2 {
-            font-size: 1.25rem;
-            font-weight: bold;
-            color: #10B981;
-            margin-bottom: 16px;
-        }
-        .final-reward-banner p {
-            font-size: 1rem;
-            color: #e2e8f0;
-            margin-bottom: 16px;
+        .step-status {
+            font-size: 0.75rem;
+            margin-top: 4px;
         }
         /* Cashout Modal Styles */
         #cashoutModal {
@@ -1034,32 +1028,37 @@
         <!-- Dashboard Screen -->
         <div id="dashboardScreen" class="screen">
             <!-- Final Reward Banner (Updated) -->
-            <div id="finalRewardBanner" class="final-reward-banner hidden">
-                <h2 class="mb-4">🎉 تبریک! به سطح جایزه رسیدی</h2>
-                <div class="reward-progress flex items-center justify-between mb-4 text-white text-sm">
+            <div id="rewardStatusBar" class="reward-status-bar hidden">
+                <div class="flex items-center justify-between text-white text-sm mb-4">
                     <div class="flex flex-col items-center flex-1">
-                        <div id="rewardStep1" class="step-indicator active">🎯</div>
-                        <span class="step-label">رسیدن به جایزه</span>
+                        <div id="rewardStep1" class="step-indicator inactive">🎯</div>
+                        <span id="label1" class="step-label">رسیدن به جایزه</span>
+                        <span id="status1" class="step-status"></span>
                     </div>
                     <div class="flex-1 h-0.5 bg-gray-600 mx-2"></div>
                     <div class="flex flex-col items-center flex-1">
-                        <div id="rewardStep2" class="step-indicator inactive">📤</div>
-                        <span class="step-label">درخواست تسویه</span>
+                        <div id="rewardStep2" class="step-indicator inactive">🧾</div>
+                        <span id="label2" class="step-label">دریافت کد خرید</span>
+                        <span id="purchaseCodeText" class="step-status"></span>
+                        <span id="status2" class="step-status"></span>
                     </div>
                     <div class="flex-1 h-0.5 bg-gray-600 mx-2"></div>
                     <div class="flex flex-col items-center flex-1">
                         <div id="rewardStep3" class="step-indicator inactive">💸</div>
-                        <span class="step-label">پرداخت موفق</span>
+                        <span id="label3" class="step-label">درخواست تسویه</span>
+                        <span id="status3" class="step-status"></span>
+                    </div>
+                    <div class="flex-1 h-0.5 bg-gray-600 mx-2"></div>
+                    <div class="flex flex-col items-center flex-1">
+                        <div id="rewardStep4" class="step-indicator inactive">✅</div>
+                        <span id="label4" class="step-label">تسویه جایزه</span>
+                        <span id="status4" class="step-status"></span>
                     </div>
                 </div>
-                <div id="cashoutSection" class="text-center">
-                    <button id="requestCashoutBtn" class="btn-primary w-full py-2 rounded-lg font-medium">
-                        درخواست تسویه جایزه
-                    </button>
-                </div>
-                <div id="payoutSuccess" class="text-center hidden mt-2">
-                    <span class="bg-success text-white text-sm py-1 px-3 rounded-md inline-block mb-1">✔️ تسویه با موفقیت انجام شد</span>
-                    <p class="text-gray-200 text-xs">کارت <span id="payoutCard">****1234</span> - <span id="payoutDate">۱۴۰۲/۰۵/۰۱</span></p>
+                <div id="stepActions" class="text-center">
+                    <button id="requestCodeBtn" class="btn-primary w-full py-2 rounded-lg font-medium mb-2 hidden">دریافت کد خرید</button>
+                    <button id="requestPayoutBtn" class="btn-primary w-full py-2 rounded-lg font-medium hidden">درخواست تسویه</button>
+                    <div id="payoutInfo" class="text-success text-sm mt-2 hidden"></div>
                 </div>
             </div>
             <!-- Header -->
@@ -1558,14 +1557,15 @@
             const finalAmount = finalMilestone.reward;
             // Check if user has reached final reward
             const hasReachedFinalReward = appState.purchases >= 13 && appState.rewardedMilestones.includes(13);
-            const finalRewardBanner = document.getElementById('finalRewardBanner');
+            const rewardBar = document.getElementById('rewardStatusBar');
             if (hasReachedFinalReward) {
-                finalRewardBanner.classList.remove('hidden');
-                document.getElementById('finalMessage').textContent = "شما به نهایت جایزه رسیده‌اید!";
+                rewardBar.classList.remove('hidden');
             } else {
-                finalRewardBanner.classList.add('hidden');
-                document.getElementById('finalMessage').textContent = `${toPersianNumber(finalLeft)} خرید تا جایزه نهایی (${toPersianNumber(finalAmount)} تومان)`;
+                rewardBar.classList.add('hidden');
             }
+            document.getElementById('finalMessage').textContent = hasReachedFinalReward
+                ? 'شما به نهایت جایزه رسیده‌اید!'
+                : `${toPersianNumber(finalLeft)} خرید تا جایزه نهایی (${toPersianNumber(finalAmount)} تومان)`;
             document.getElementById('totalCredit').textContent = toPersianNumber(appState.credit);
             document.getElementById('currentCredit').textContent = toPersianNumber(appState.credit);
             document.getElementById('purchaseCount').textContent = toPersianNumber(appState.purchases);
@@ -1582,27 +1582,60 @@
         function renderRewardSteps() {
             const step = parseInt(localStorage.getItem('rewardStep') || '1');
             const info = JSON.parse(localStorage.getItem('payoutInfo') || '{}');
+            const code = localStorage.getItem('purchaseCode') || '';
             const step1 = document.getElementById('rewardStep1');
             const step2 = document.getElementById('rewardStep2');
             const step3 = document.getElementById('rewardStep3');
-            [step1, step2, step3].forEach(el => el.classList.remove('completed', 'active', 'inactive'));
+            const step4 = document.getElementById('rewardStep4');
+            const status1 = document.getElementById('status1');
+            const status2 = document.getElementById('status2');
+            const status3 = document.getElementById('status3');
+            const status4 = document.getElementById('status4');
+            const label1 = document.getElementById('label1');
+            const label2 = document.getElementById('label2');
+            const label3 = document.getElementById('label3');
+            const label4 = document.getElementById('label4');
+            const purchaseCodeText = document.getElementById('purchaseCodeText');
+            const requestCodeBtn = document.getElementById('requestCodeBtn');
+            const requestPayoutBtn = document.getElementById('requestPayoutBtn');
+            const payoutInfo = document.getElementById('payoutInfo');
+
+            [step1, step2, step3, step4].forEach(el => el.classList.remove('completed','active','inactive'));
+            [label1, label2, label3, label4].forEach(l => l.classList.remove('active-label'));
             step1.classList.add(step > 1 ? 'completed' : 'active');
             step2.classList.add(step > 2 ? 'completed' : step === 2 ? 'active' : 'inactive');
-            step3.classList.add(step === 3 ? 'active' : 'inactive');
-            const cashout = document.getElementById('cashoutSection');
-            const success = document.getElementById('payoutSuccess');
-            if (step === 3) {
-                cashout.classList.add('hidden');
-                success.classList.remove('hidden');
-                if (info.card) document.getElementById('payoutCard').textContent = '****' + info.card.slice(-4);
-                if (info.date) document.getElementById('payoutDate').textContent = info.date;
-            } else {
-                cashout.classList.remove('hidden');
-                success.classList.add('hidden');
+            step3.classList.add(step > 3 ? 'completed' : step === 3 ? 'active' : 'inactive');
+            step4.classList.add(step === 4 ? 'completed' : 'inactive');
+
+            if (step === 1) label1.classList.add('active-label');
+            else if (step === 2) label2.classList.add('active-label');
+            else if (step === 3) label3.classList.add('active-label');
+            else if (step === 4) label4.classList.add('active-label');
+
+            status1.textContent = step > 1 ? 'انجام شد' : 'موجود';
+            status2.textContent = step > 2 ? 'کد ارسال شد' : step === 2 ? 'در انتظار' : 'غیرفعال';
+            status3.textContent = step > 3 ? 'درخواست شد' : step === 3 ? 'در انتظار' : 'غیرفعال';
+            status4.textContent = step === 4 ? 'انجام شد' : 'غیرفعال';
+
+            purchaseCodeText.textContent = code && step >= 2 ? `کد: ${code}` : '';
+
+            requestCodeBtn.classList.add('hidden');
+            requestPayoutBtn.classList.add('hidden');
+            payoutInfo.classList.add('hidden');
+
+            if (step === 1) {
+                requestCodeBtn.disabled = false;
+                requestCodeBtn.classList.remove('hidden');
+            } else if (step === 2) {
+                requestPayoutBtn.disabled = false;
+                requestPayoutBtn.classList.remove('hidden');
+            } else if (step === 4) {
+                payoutInfo.textContent = `✅ تسویه انجام شد - ${info.date || ''}`;
+                payoutInfo.classList.remove('hidden');
             }
         }
         function markPayoutSuccess(card, date) {
-            localStorage.setItem('rewardStep', '3');
+            localStorage.setItem('rewardStep', '4');
             localStorage.setItem('payoutInfo', JSON.stringify({card, date}));
             renderRewardSteps();
         }
@@ -1849,9 +1882,15 @@
         }
         // Celebration Popup Close Button
         document.getElementById('closeCelebration').addEventListener('click', hideCelebrationPopup);
-        // Cashout Modal Event Listeners (Added)
-        document.getElementById('requestCashoutBtn').addEventListener('click', function() {
+        // Reward flow buttons
+        document.getElementById('requestCodeBtn').addEventListener('click', function() {
+            const code = Math.random().toString(36).substring(2, 6).toUpperCase();
+            localStorage.setItem('purchaseCode', code);
             localStorage.setItem('rewardStep', '2');
+            renderRewardSteps();
+        });
+        document.getElementById('requestPayoutBtn').addEventListener('click', function() {
+            localStorage.setItem('rewardStep', '3');
             renderRewardSteps();
             handleCashoutRequest();
         });
