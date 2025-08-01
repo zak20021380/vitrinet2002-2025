@@ -1335,7 +1335,7 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                <tr data-id="1" data-status="pending" data-settlement="unsettled" data-name="علی محمدی" data-card="1234-5678-9012-3456" data-date="۱۴۰۳/۰۲/۱۰">
+                                <tr data-id="1" data-status="pending" data-settlement="unsettled" data-name="علی محمدی" data-card="1234-5678-9012-3456" data-date="۱۴۰۳/۰۲/۱۰" data-phone="09123456789" data-joined="۱۴۰۲/۱۰/۱۵">
                                     <td>۱</td>
                                     <td>علی محمدی</td>
                                     <td class="ltr-text">1234-5678-9012-3456</td>
@@ -1362,7 +1362,7 @@
                                         </div>
                                     </td>
                                 </tr>
-                                <tr data-id="2" data-status="approved" data-settlement="settled" data-name="زهرا رضایی" data-card="9876-5432-1098-7654" data-date="۱۴۰۳/۰۲/۰۸">
+                                <tr data-id="2" data-status="approved" data-settlement="settled" data-name="زهرا رضایی" data-card="9876-5432-1098-7654" data-date="۱۴۰۳/۰۲/۰۸" data-phone="09124445566" data-joined="۱۴۰۲/۱۱/۱۵">
                                     <td>۲</td>
                                     <td>زهرا رضایی</td>
                                     <td class="ltr-text">9876-5432-1098-7654</td>
@@ -1389,7 +1389,7 @@
                                         </div>
                                     </td>
                                 </tr>
-                                <tr data-id="3" data-status="rejected" data-settlement="unsettled" data-name="محمد حسینی" data-card="1111-2222-3333-4444" data-date="۱۴۰۳/۰۲/۰۵">
+                                <tr data-id="3" data-status="rejected" data-settlement="unsettled" data-name="محمد حسینی" data-card="1111-2222-3333-4444" data-date="۱۴۰۳/۰۲/۰۵" data-phone="09137778899" data-joined="۱۴۰۳/۰۱/۲۰">
                                     <td>۳</td>
                                     <td>محمد حسینی</td>
                                     <td class="ltr-text">1111-2222-3333-4444</td>
@@ -3068,6 +3068,24 @@
                         openModal('blockConfirmModal');
                     });
                 }
+            });
+
+            const withdrawalRows = document.querySelectorAll('#withdrawals tbody tr[data-id]');
+            withdrawalRows.forEach(row => {
+                row.addEventListener('click', function(e) {
+                    if (e.target.closest('.action-buttons') || e.target.closest('.settlement-badge')) return;
+                    const id = this.getAttribute('data-id');
+                    const data = customerInfo[id];
+                    if (data) {
+                        infoName.textContent = data.name;
+                        infoPhone.textContent = data.phone;
+                        infoDate.textContent = data.date;
+                        infoPurchases.textContent = data.purchases;
+                        infoTotal.textContent = data.total;
+                        infoWithdraw.textContent = data.withdraw;
+                        openModal('customerInfoModal');
+                    }
+                });
             });
 
             if (confirmBlockBtn) {
