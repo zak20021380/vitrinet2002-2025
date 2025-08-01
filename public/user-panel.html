@@ -2215,33 +2215,43 @@
                 card.addEventListener('click', handleStoreClick);
             });
             // Add click handler for phone warning card
-            document.getElementById('phoneWarning').addEventListener('click', function() {
-                showScreen('phone');
-            });
+            const phoneWarningEl = document.getElementById('phoneWarning');
+            if (phoneWarningEl) {
+                phoneWarningEl.addEventListener('click', function() {
+                    showScreen('phone');
+                });
+            }
             // Rules Modal Events
-            document.getElementById('acceptRulesBtn').addEventListener('click', function() {
-                localStorage.setItem('rulesAccepted', 'true');
-                hideRulesModal();
-            });
-            document.getElementById('showRulesBtn').addEventListener('click', showRulesModal);
-            // Close modal when clicking outside content
-            document.getElementById('rulesModal').addEventListener('click', function(e) {
-                if (e.target === this) {
+            const acceptRulesBtn = document.getElementById('acceptRulesBtn');
+            if (acceptRulesBtn) {
+                acceptRulesBtn.addEventListener('click', function() {
+                    localStorage.setItem('rulesAccepted', 'true');
                     hideRulesModal();
-                }
-            });
+                });
+            }
+            const showRulesBtn = document.getElementById('showRulesBtn');
+            if (showRulesBtn) showRulesBtn.addEventListener('click', showRulesModal);
+            // Close modal when clicking outside content
+            const rulesModal = document.getElementById('rulesModal');
+            if (rulesModal) {
+                rulesModal.addEventListener('click', function(e) {
+                    if (e.target === this) {
+                        hideRulesModal();
+                    }
+                });
+            }
             // Update phone warning
             updatePhoneWarning();
             // Ensure the floating buttons are initially hidden if not on dashboard
             const sellerCodeBtn = document.getElementById('sellerCodeBtn');
             const backToDashboardBtn = document.getElementById('backToDashboardBtn');
             const backHomeBtn = document.getElementById('backHomeBtn');
-            if (!screens.dashboard.classList.contains('active')) {
+            if (sellerCodeBtn && !screens.dashboard.classList.contains('active')) {
                 sellerCodeBtn.style.display = 'none';
             }
-            backToDashboardBtn.classList.remove('active');
+            if (backToDashboardBtn) backToDashboardBtn.classList.remove('active');
             // Always show back home button
-            backHomeBtn.style.display = 'flex';
+            if (backHomeBtn) backHomeBtn.style.display = 'flex';
             const userObj = window.user || {};
             const firstName = userObj.firstname || userObj.firstName;
             const lastName = userObj.lastname || userObj.lastName;
@@ -2263,23 +2273,29 @@
             if (profileIcon) {
                 profileIcon.addEventListener('click', showProfileModal);
             }
-            document.getElementById('closeProfileModal').addEventListener('click', hideProfileModal);
-            document.getElementById('profileModal').addEventListener('click', function(e) {
-                if (e.target === this) hideProfileModal();
-            });
+            const closeProfileModalBtn = document.getElementById('closeProfileModal');
+            if (closeProfileModalBtn) closeProfileModalBtn.addEventListener('click', hideProfileModal);
+            const profileModal = document.getElementById('profileModal');
+            if (profileModal) {
+                profileModal.addEventListener('click', function(e) {
+                    if (e.target === this) hideProfileModal();
+                });
+            }
             const purchaseBox = document.querySelector('.purchase-count-box');
             const purchaseModal = document.getElementById('purchaseHistoryModal');
             const closePurchaseModal = document.getElementById('closePurchaseHistoryModal');
-            if (purchaseBox) {
+            if (purchaseBox && purchaseModal) {
                 purchaseBox.addEventListener('click', () => {
                     renderPurchaseHistory();
                     purchaseModal.classList.remove('hidden');
                 });
             }
-            closePurchaseModal.addEventListener('click', () => purchaseModal.classList.add('hidden'));
-            purchaseModal.addEventListener('click', e => {
-                if (e.target === purchaseModal) purchaseModal.classList.add('hidden');
-            });
+            if (closePurchaseModal && purchaseModal) {
+                closePurchaseModal.addEventListener('click', () => purchaseModal.classList.add('hidden'));
+                purchaseModal.addEventListener('click', e => {
+                    if (e.target === purchaseModal) purchaseModal.classList.add('hidden');
+                });
+            }
             toggleSellerCodeBtnVisibility();
             window.addEventListener('scroll', toggleSellerCodeBtnVisibility);
             window.addEventListener('resize', toggleSellerCodeBtnVisibility);
