@@ -1623,7 +1623,7 @@
                 .replace(/\B(?=(\d{3})+(?!\d))/g, ',')
                 .replace(/\d/g, d => persianDigits[d]);
         }
-        function toPersianDigits(str) {
+function toPersianDigits(str) {
             const persianDigits = ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹'];
             return str.replace(/\d/g, d => persianDigits[d]);
         }
@@ -1744,17 +1744,24 @@
             renderCashouts();
             renderRewardSteps();
         }
-        function renderRewardSteps() {
-            const configs = [
-                {state: 'done', text: '✔️ انجام شد', info: 'درخواست کد خرید ثبت شده است'},
-                {state: 'done', text: '✔️ دریافت شد', info: 'کد خرید شما آماده است'},
-                {state: 'active', text: '🟡 در انتظار', info: 'در انتظار تسویه'},
-                {state: 'locked', text: '', info: 'هنوز در دسترس نیست'}
-            ];
-            configs.forEach((cfg, i) => {
-                const el = document.getElementById(`rewardStep${i+1}`);
-                const statusEl = document.getElementById(`status${i+1}`);
-                const icon = el.querySelector('.step-indicator');
+         function renderRewardSteps() {
+             purchaseCodeData = JSON.parse(localStorage.getItem('purchaseCodeData') || '{}');
+             const configs = [
+                 purchaseCodeData.requestedTime ?
+                     {state: 'done', text: '✔️ انجام شد', info: 'درخواست کد خرید ثبت شده است'} :
+                     {state: 'active', text: '🟡 درخواست', info: 'برای ثبت درخواست کلیک کنید'},
+                 purchaseCodeData.ready ?
+                     {state: 'done', text: '✔️ دریافت شد', info: `کد خرید شما: ${purchaseCodeData.code || ''}` } :
+                     purchaseCodeData.requestedTime ?
+                         {state: 'active', text: '🟡 در حال بررسی', info: 'پس از تایید، کد خرید در دسترس خواهد بود'} :
+                         {state: 'locked', text: '', info: 'هنوز در دسترس نیست'},
+                 {state: 'active', text: '🟡 در انتظار', info: 'در انتظار تسویه'},
+                 {state: 'locked', text: '', info: 'هنوز در دسترس نیست'}
+             ];
+             configs.forEach((cfg, i) => {
+                 const el = document.getElementById(`rewardStep${i+1}`);
+                 const statusEl = document.getElementById(`status${i+1}`);
+                 const icon = el.querySelector('.step-indicator');
 
                 el.className = 'reward-step relative flex flex-col items-center p-2';
                 icon.className = 'step-indicator mb-1 flex items-center justify-center w-10 h-10 rounded-full text-white';
@@ -1764,24 +1771,34 @@
                 icon.classList.remove('bg-green-600','bg-yellow-500','bg-gray-600','grayscale');
                 statusEl.classList.remove('text-green-400','text-yellow-400','text-gray-400');
                 
-                if (cfg.state === 'done') {
-                    icon.classList.add('bg-green-600');
-                    statusEl.classList.add('text-green-400');
-                    el.classList.add('cursor-pointer','hover:scale-105','ring-primary');
-                    const lock = el.querySelector('.lock-overlay');
-                    if (lock) lock.classList.add('hidden');
-                    el.onclick = () => openStepModal(i+1, cfg.info);
-                } else if (cfg.state === 'active') {
-                    icon.classList.add('bg-yellow-500');
-                    statusEl.classList.add('text-yellow-400');
-                    el.classList.add('cursor-pointer','hover:scale-105','ring-primary');
-                    const lock = el.querySelector('.lock-overlay');
-                    if (lock) lock.classList.add('hidden');
-                    el.onclick = () => openStepModal(i+1, cfg.info);
-                } else {
-                    icon.classList.add('bg-gray-600');
-                    icon.classList.add('grayscale');
-                    statusEl.classList.add('text-gray-400');
+                 if (cfg.state === 'done') {
+                     icon.classList.add('bg-green-600');
+                     statusEl.classList.add('text-green-400');
+                     el.classList.add('cursor-pointer','hover:scale-105','ring-primary');
+                     const lock = el.querySelector('.lock-overlay');
+                     if (lock) lock.classList.add('hidden');
+                    if (i === 0 && !purchaseCodeData.requestedTime) {
+                        el.onclick = () => { requestPurchaseCode(); openStepModal(i+1, 'درخواست شما ثبت شد. لطفاً یک دقیقه منتظر بمانید'); };
+                    } else {
+                        el.onclick = () => openStepModal(i+1, cfg.info);
+                    }
+                 } else if (cfg.state === 'active') {
+                     icon.classList.add('bg-yellow-500');
+                     statusEl.classList.add('text-yellow-400');
+                     el.classList.add('cursor-pointer','hover:scale-105','ring-primary');
+                     const lock = el.querySelector('.lock-overlay');
+                     if (lock) lock.classList.add('hidden');
+                    if (i === 0 && !purchaseCodeData.requestedTime) {
+                        el.onclick = () => { requestPurchaseCode(); openStepModal(i+1, 'درخواست شما ثبت شد. لطفاً یک دقیقه منتظر بمانید'); };
+                    } else if (i === 1 && !purchaseCodeData.ready) {
+                        el.onclick = () => openStepModal(i+1, cfg.info);
+                    } else {
+                        el.onclick = () => openStepModal(i+1, cfg.info);
+                    }
+                 } else {
+                     icon.classList.add('bg-gray-600');
+                     icon.classList.add('grayscale');
+                     statusEl.classList.add('text-gray-400');
                     el.classList.add('opacity-50','pointer-events-none');
                     const lock = el.querySelector('.lock-overlay');
                     if (lock) lock.classList.remove('hidden');
@@ -2187,6 +2204,7 @@
             if (firstName && lastName) {
                 document.getElementById('userGreeting').textContent = `${firstName} ${lastName}`;
             }
+            initPurchaseCodeProcess();
             renderRewardSteps();
             // Step modals close handlers
             for (let i = 1; i <= 4; i++) {
@@ -2262,6 +2280,45 @@ function fetchWithdrawals(page, size) {
     }, 500);                    // تأخیر ۵۰۰ms شبیه‌سازی شبکه
   });
 }
+
+        // -------- Purchase Code Process --------
+        let purchaseCodeData = JSON.parse(localStorage.getItem('purchaseCodeData') || '{}');
+
+        function generatePurchaseCode() {
+            return Math.floor(100000 + Math.random() * 900000).toString();
+        }
+
+        function startPurchaseCodeTimer() {
+            if (!purchaseCodeData.requestedTime || purchaseCodeData.ready) return;
+            const remaining = 60000 - (Date.now() - purchaseCodeData.requestedTime);
+            if (remaining <= 0) {
+                purchaseCodeData.ready = true;
+                purchaseCodeData.code = generatePurchaseCode();
+                localStorage.setItem('purchaseCodeData', JSON.stringify(purchaseCodeData));
+                renderRewardSteps();
+            } else {
+                setTimeout(() => {
+                    purchaseCodeData.ready = true;
+                    purchaseCodeData.code = generatePurchaseCode();
+                    localStorage.setItem('purchaseCodeData', JSON.stringify(purchaseCodeData));
+                    renderRewardSteps();
+                }, remaining);
+            }
+        }
+
+        function requestPurchaseCode() {
+            if (purchaseCodeData.requestedTime) return;
+            purchaseCodeData = { requestedTime: Date.now(), ready: false };
+            localStorage.setItem('purchaseCodeData', JSON.stringify(purchaseCodeData));
+            renderRewardSteps();
+            startPurchaseCodeTimer();
+        }
+
+        function initPurchaseCodeProcess() {
+            if (purchaseCodeData.requestedTime && !purchaseCodeData.ready) {
+                startPurchaseCodeTimer();
+            }
+        }
 /* ---------------------------------------------------------------- */
 
 
