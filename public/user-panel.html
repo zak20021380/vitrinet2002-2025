@@ -1151,13 +1151,6 @@
                     فعلا بگذریم
                 </button>
                 
-                <!-- Back to home button - improved positioning -->
-                <div class="mt-6 flex justify-center">
-                    <button id="backHomeBtn" type="button" onclick="goToDashboard()" class="btn-secondary">
-                        <i class="fas fa-home mr-2"></i>
-                        <span>ورود به صفحه اصلی</span>
-                    </button>
-                </div>
             </div>
         </div>
         <!-- Verification Screen -->
@@ -1236,46 +1229,46 @@
             <!-- Step Info Modals -->
             <div id="stepModal1">
                 <div class="modal-card">
-                    <button data-close="stepModal1" class="absolute top-2 right-2 text-gray-300 text-sm cursor-pointer">✖️</button>
+                    <button data-close="stepModal1" onclick="closeStepModal(1)" class="absolute top-2 right-2 text-gray-300 text-sm cursor-pointer">✖️</button>
                     <div class="w-12 h-12 rounded-full bg-green-600 flex items-center justify-center text-white mx-auto mb-3">
                         <i class="fa-solid fa-file-circle-plus"></i>
                     </div>
                     <h3 class="font-bold mb-2">درخواست کد خرید</h3>
                     <p class="step-modal-text text-sm mb-3"></p>
-                    <button data-close="stepModal1" class="bg-primary text-white rounded-lg px-4 py-1 mt-2">بستن</button>
+                    <button data-close="stepModal1" onclick="closeStepModal(1)" class="bg-primary text-white rounded-lg px-4 py-1 mt-2">بستن</button>
                 </div>
             </div>
             <div id="stepModal2">
                 <div class="modal-card">
-                    <button data-close="stepModal2" class="absolute top-2 right-2 text-gray-300 text-sm cursor-pointer">✖️</button>
+                    <button data-close="stepModal2" onclick="closeStepModal(2)" class="absolute top-2 right-2 text-gray-300 text-sm cursor-pointer">✖️</button>
                     <div class="w-12 h-12 rounded-full bg-green-600 flex items-center justify-center text-white mx-auto mb-3">
                         <i class="fa-solid fa-receipt"></i>
                     </div>
                     <h3 class="font-bold mb-2">دریافت کد خرید</h3>
                     <p class="step-modal-text text-sm mb-3"></p>
-                    <button data-close="stepModal2" class="bg-primary text-white rounded-lg px-4 py-1 mt-2">بستن</button>
+                    <button data-close="stepModal2" onclick="closeStepModal(2)" class="bg-primary text-white rounded-lg px-4 py-1 mt-2">بستن</button>
                 </div>
             </div>
             <div id="stepModal3">
                 <div class="modal-card">
-                    <button data-close="stepModal3" class="absolute top-2 right-2 text-gray-300 text-sm cursor-pointer">✖️</button>
+                    <button data-close="stepModal3" onclick="closeStepModal(3)" class="absolute top-2 right-2 text-gray-300 text-sm cursor-pointer">✖️</button>
                     <div class="w-12 h-12 rounded-full bg-yellow-500 flex items-center justify-center text-white mx-auto mb-3">
                         <i class="fa-solid fa-hand-holding-dollar"></i>
                     </div>
                     <h3 class="font-bold mb-2">درخواست تسویه</h3>
                     <p class="step-modal-text text-sm mb-3"></p>
-                    <button data-close="stepModal3" class="bg-primary text-white rounded-lg px-4 py-1 mt-2">بستن</button>
+                    <button data-close="stepModal3" onclick="closeStepModal(3)" class="bg-primary text-white rounded-lg px-4 py-1 mt-2">بستن</button>
                 </div>
             </div>
             <div id="stepModal4">
                 <div class="modal-card">
-                    <button data-close="stepModal4" class="absolute top-2 right-2 text-gray-300 text-sm cursor-pointer">✖️</button>
+                    <button data-close="stepModal4" onclick="closeStepModal(4)" class="absolute top-2 right-2 text-gray-300 text-sm cursor-pointer">✖️</button>
                     <div class="w-12 h-12 rounded-full bg-gray-600 flex items-center justify-center text-white mx-auto mb-3">
                         <i class="fa-solid fa-circle-check"></i>
                     </div>
                     <h3 class="font-bold mb-2">تسویه موفق</h3>
                     <p class="step-modal-text text-sm mb-3"></p>
-                    <button data-close="stepModal4" class="bg-primary text-white rounded-lg px-4 py-1 mt-2">بستن</button>
+                    <button data-close="stepModal4" onclick="closeStepModal(4)" class="bg-primary text-white rounded-lg px-4 py-1 mt-2">بستن</button>
                 </div>
             </div>
             <!-- Header -->
@@ -1571,13 +1564,13 @@
             </div>
             <h2 class="cashout-title">درخواست تسویه</h2>
             <p class="cashout-message">درخواست تسویه شما با موفقیت ثبت شد! طی ۲۴ ساعت آینده با شما تماس می‌گیریم.</p>
-            <button id="closeCashoutModal" class="close-cashout-modal">متوجه شدم</button>
+            <button id="closeCashoutModal" onclick="hideCashoutModal()" class="close-cashout-modal">متوجه شدم</button>
         </div>
     </div>
     <!-- User Info Modal -->
     <div id="userInfoModal" class="fixed inset-0 z-50 bg-black/70 hidden flex items-center justify-center">
         <div class="bg-darkcard rounded-xl p-6 w-11/12 max-w-sm relative">
-            <button id="closeUserInfoModal" class="absolute top-2 left-2 text-gray-400">
+            <button id="closeUserInfoModal" onclick="hideUserInfoModal()" class="absolute top-2 left-2 text-gray-400">
                 <i class="fas fa-times"></i>
             </button>
             <h2 class="text-center text-lg font-bold text-white mb-4">تکمیل اطلاعات</h2>
@@ -1599,7 +1592,7 @@
     <!-- Profile Modal -->
     <div id="profileModal" class="fixed inset-0 z-50 bg-black/70 hidden flex items-center justify-center p-4">
         <div class="bg-darkcard rounded-xl w-full max-w-sm p-6 relative shadow-xl">
-            <button id="closeProfileModal" class="absolute top-2 left-2 text-gray-400">
+            <button id="closeProfileModal" onclick="hideProfileModal()" class="absolute top-2 left-2 text-gray-400">
                 <i class="fas fa-times"></i>
             </button>
             <h2 class="text-center text-lg font-bold text-white mb-4">پروفایل کاربر</h2>
@@ -1623,7 +1616,7 @@
     <!-- Purchase History Modal -->
     <div id="purchaseHistoryModal" class="fixed inset-0 z-50 bg-black/70 hidden flex items-center justify-center p-4">
         <div class="bg-darkcard rounded-xl w-full max-w-sm p-6 relative flex flex-col max-h-[80vh]">
-            <button id="closePurchaseHistoryModal" class="absolute top-2 left-2 text-gray-400">
+            <button id="closePurchaseHistoryModal" onclick="document.getElementById('purchaseHistoryModal').classList.add('hidden')" class="absolute top-2 left-2 text-gray-400">
                 <i class="fas fa-times"></i>
             </button>
             <h2 class="text-center text-lg font-bold text-white mb-4">تاریخچه خریدها</h2>
