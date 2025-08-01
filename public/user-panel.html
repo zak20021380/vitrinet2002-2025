@@ -1087,11 +1087,8 @@
                 <div class="mb-5">
                     <label class="block text-sm font-medium text-gray-300 mb-2">شماره موبایل</label>
                     <div class="relative">
-                        <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-                            <span class="text-gray-400">+98</span>
-                        </div>
-                        <!-- Changed: Added text-right and dir attributes for RTL phone input -->
-                        <input type="tel" id="phone" class="input-field w-full py-3 pr-16 pl-4 rounded-lg text-white text-right" placeholder="9123456789" dir="ltr">
+                        <!-- Changed: Phone input now starts with 0 and is left-to-right -->
+                        <input type="tel" id="phone" class="input-field w-full py-3 pr-4 pl-4 rounded-lg text-white text-left" placeholder="09123456789" dir="ltr">
                     </div>
                     <div id="phoneError" class="text-red-400 text-sm mt-2 hidden">
                         <i class="fas fa-exclamation-circle mr-1"></i> شماره موبایل معتبر نیست
@@ -1104,6 +1101,14 @@
                 <button id="skipPhoneBtn" class="mt-4 w-full py-3 rounded-lg font-medium text-white border border-gray-600 hover:border-gray-500">
                     فعلا بگذریم
                 </button>
+                
+                <!-- Back to home button aligned to the left -->
+                <div class="mt-6 flex justify-start">
+                    <button id="backHomeBtn" type="button" onclick="goToDashboard()">
+                        <i class="fas fa-home mr-2"></i>
+                        <span>ورود به صفحه اصلی</span>
+                    </button>
+                </div>
             </div>
         </div>
         <!-- Verification Screen -->
@@ -1535,7 +1540,7 @@
                 </div>
                 <div>
                     <label class="block text-sm mb-1">شماره موبایل</label>
-                    <input id="mobileInput" type="tel" dir="ltr" class="input-field w-full py-2 px-3 rounded-lg text-white text-right" placeholder="09123456789">
+                    <input id="mobileInput" type="tel" dir="ltr" class="input-field w-full py-2 px-3 rounded-lg text-white text-left" placeholder="09123456789">
                     <p id="mobileError" class="text-red-400 text-xs mt-1 hidden">شماره موبایل معتبر نیست</p>
                 </div>
                 <button id="submitUserInfoBtn" class="btn-success w-full py-2 rounded-lg text-white">ثبت اطلاعات</button>
@@ -1975,7 +1980,8 @@
         document.getElementById('sendCodeBtn').addEventListener('click', function() {
             const phone = document.getElementById('phone').value;
             const errorElement = document.getElementById('phoneError');
-            if (!phone || phone.length !== 10 || !phone.startsWith('9')) {
+            // Updated validation to accept 11 digits starting with 0
+            if (!phone || phone.length !== 11 || !phone.startsWith('0')) {
                 errorElement.classList.remove('hidden');
                 document.getElementById('phone').classList.add('shake-animation');
                 setTimeout(() => {
@@ -2091,7 +2097,7 @@
             } else {
                 document.getElementById('fullNameError').classList.add('hidden');
             }
-            if (!/^09\d{9}$/.test(phoneNum)) {
+            if (!/^0\d{10}$/.test(phoneNum)) {
                 document.getElementById('mobileError').classList.remove('hidden');
                 valid = false;
             } else {
@@ -2161,7 +2167,7 @@
             });
         }
         // Initialize app
-        function initApp() {
+        document.addEventListener('DOMContentLoaded', function() {
             // Add event listeners to store cards
             document.querySelectorAll('.store-card').forEach(card => {
                 card.addEventListener('click', handleStoreClick);
@@ -2352,13 +2358,7 @@ function fetchWithdrawals(page, size) {
             }
             // Initial render
             renderCashouts();
-        }
-
-        if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', initApp);
-        } else {
-            initApp();
-        }
+        });
     </script>
 </body>
 </html>
