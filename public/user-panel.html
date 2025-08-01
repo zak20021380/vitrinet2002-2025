@@ -1006,7 +1006,6 @@
                 padding-top: 4rem;
             }
         }
-
         /* Withdrawals Section Styles */
         .withdrawals-container {
             max-height: 300px;
@@ -1063,10 +1062,10 @@
                 <p class="text-gray-400 text-sm">
                     کد فروشنده را از فروشنده دریافت کرده و وارد نمایید
                 </p>
-              <a href="#" id="backHomeBtn">
-  <i class="fas fa-home mr-2"></i>
-  <span>ورود به صفحه اصلی</span>
-</a>
+                <button id="backHomeBtn" type="button" onclick="goToDashboard()">
+                    <i class="fas fa-home mr-2"></i>
+                    <span>ورود به صفحه اصلی</span>
+                </button>
             </div>
         </div>
         <!-- Phone Input Screen -->
@@ -1180,7 +1179,6 @@
                     </div>
                 </div>
             </div>
-
             <!-- Step Info Modals -->
             <div id="stepModal1" class="fixed inset-0 bg-black/70 hidden flex items-center justify-center">
                 <div class="modal-card bg-[#1e293b] rounded-xl p-4 w-11/12 max-w-xs text-center shadow-lg transform transition-all duration-150 opacity-0 scale-90 relative">
@@ -1431,7 +1429,7 @@
         <span>وارد کردن کد فروشنده</span>
     </button>
     <!-- New: Floating Back to Main Page Button -->
-    <button id="backToDashboardBtn">
+    <button id="backToDashboardBtn" onclick="goToDashboard()">
         <i class="fas fa-home mr-2"></i>
         <span>ورود به صفحه اصلی</span>
     </button>
@@ -1623,7 +1621,7 @@
                 .replace(/\B(?=(\d{3})+(?!\d))/g, ',')
                 .replace(/\d/g, d => persianDigits[d]);
         }
-function toPersianDigits(str) {
+        function toPersianDigits(str) {
             const persianDigits = ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹'];
             return str.replace(/\d/g, d => persianDigits[d]);
         }
@@ -1673,6 +1671,11 @@ function toPersianDigits(str) {
                     document.getElementById('phoneMask').textContent = `کد ارسال شده به شماره ${toPersianDigits(masked)} را وارد کنید`;
                 }
             }
+        }
+        // Function to go to dashboard
+        function goToDashboard() {
+            console.log('Going to dashboard');
+            showScreen('dashboard');
         }
         // Update phone warning visibility
         function updatePhoneWarning() {
@@ -1762,11 +1765,9 @@ function toPersianDigits(str) {
                  const el = document.getElementById(`rewardStep${i+1}`);
                  const statusEl = document.getElementById(`status${i+1}`);
                  const icon = el.querySelector('.step-indicator');
-
                 el.className = 'reward-step relative flex flex-col items-center p-2';
                 icon.className = 'step-indicator mb-1 flex items-center justify-center w-10 h-10 rounded-full text-white';
                 statusEl.className = 'step-state text-xs mt-1';
-
                 el.classList.remove('cursor-pointer','hover:scale-105','ring-primary','opacity-50','pointer-events-none');
                 icon.classList.remove('bg-green-600','bg-yellow-500','bg-gray-600','grayscale');
                 statusEl.classList.remove('text-green-400','text-yellow-400','text-gray-400');
@@ -1812,7 +1813,6 @@ function toPersianDigits(str) {
             localStorage.setItem('payoutInfo', JSON.stringify({card, date}));
             renderRewardSteps();
         }
-
        function openStepModal(index, text) {
            const modal = document.getElementById(`stepModal${index}`);
            if (!modal) return;
@@ -1824,7 +1824,6 @@ function toPersianDigits(str) {
                 setTimeout(() => card.classList.remove('opacity-0','scale-90'), 20);
             }
         }
-
         function closeStepModal(index) {
             const modal = document.getElementById(`stepModal${index}`);
             if (!modal) return;
@@ -2150,7 +2149,6 @@ function toPersianDigits(str) {
                 tbody.insertBefore(tr, document.getElementById('loadingRow'));
             });
         }
-
         function renderPurchaseHistory() {
             const list = document.getElementById('purchaseHistoryList');
             if (!list) return;
@@ -2213,17 +2211,6 @@ function toPersianDigits(str) {
                     if (e.target === modal) closeStepModal(i);
                 });
             }
-            // Back Home Button Event Listener
-document.getElementById('backHomeBtn').addEventListener('click', function (e) {
-  e.preventDefault();
-  window.location.href = '/user/dashboard.html';
-});
-// Floating back button to dashboard
-document.getElementById('backToDashboardBtn').addEventListener('click', function (e) {
-  e.preventDefault();
-  window.location.href = '/user/dashboard.html';
-});
-
 
             const profileIcon = document.querySelector('.user-profile-icon');
             if (profileIcon) {
@@ -2249,14 +2236,12 @@ document.getElementById('backToDashboardBtn').addEventListener('click', function
             toggleSellerCodeBtnVisibility();
             window.addEventListener('scroll', toggleSellerCodeBtnVisibility);
             window.addEventListener('resize', toggleSellerCodeBtnVisibility);
-
             // Lazy loading implementation for withdrawals section
             const withdrawalsContainer = document.querySelector('.withdrawals-container');
             const loadingRow = document.getElementById('loadingRow');
             let page = 1;
             let isLoading = false;
             let hasMore = true;
-
             // Function to simulate API call
          /* ----------- NEW fake‑data generator for lazy loading ----------- */
 function fetchWithdrawals(page, size) {
@@ -2264,11 +2249,9 @@ function fetchWithdrawals(page, size) {
     setTimeout(() => {
       // ساخت داده تصادفی بر اساس شماره صفحه
       const startId = (page - 1) * size + 1;
-
       const rows = Array.from({ length: size }, (_, idx) => {
         const id = startId + idx;
         const statuses = ['موفق', 'در حال بررسی', 'رد شده'];
-
         return {
           id,
           amount: 100000 + ((id * 37) % 900000),        // مبلغ تصادفی
@@ -2278,7 +2261,6 @@ function fetchWithdrawals(page, size) {
           status: statuses[id % 3]                      // وضعیت چرخشی
         };
       });
-
       resolve({
         data: rows,
         more: page < 20        // تا ۲۰ صفحه داده جعلی برمی‌گرداند
@@ -2286,14 +2268,11 @@ function fetchWithdrawals(page, size) {
     }, 500);                    // تأخیر ۵۰۰ms شبیه‌سازی شبکه
   });
 }
-
         // -------- Purchase Code Process --------
         let purchaseCodeData = JSON.parse(localStorage.getItem('purchaseCodeData') || '{}');
-
         function generatePurchaseCode() {
             return Math.floor(100000 + Math.random() * 900000).toString();
         }
-
         function startPurchaseCodeTimer() {
             if (!purchaseCodeData.requestedTime || purchaseCodeData.ready) return;
             const remaining = 60000 - (Date.now() - purchaseCodeData.requestedTime);
@@ -2311,7 +2290,6 @@ function fetchWithdrawals(page, size) {
                 }, remaining);
             }
         }
-
         function requestPurchaseCode() {
             if (purchaseCodeData.requestedTime) return;
             purchaseCodeData = { requestedTime: Date.now(), ready: false };
@@ -2319,14 +2297,12 @@ function fetchWithdrawals(page, size) {
             renderRewardSteps();
             startPurchaseCodeTimer();
         }
-
         function initPurchaseCodeProcess() {
             if (purchaseCodeData.requestedTime && !purchaseCodeData.ready) {
                 startPurchaseCodeTimer();
             }
         }
 /* ---------------------------------------------------------------- */
-
 
             // Function to load more withdrawals
             async function loadMoreWithdrawals() {
@@ -2361,7 +2337,6 @@ function fetchWithdrawals(page, size) {
                     loadingRow.classList.remove('show');
                 }
             }
-
             // Intersection Observer to detect when user scrolls to bottom
             const observer = new IntersectionObserver((entries) => {
                 if (entries[0].isIntersecting && hasMore) {
@@ -2371,12 +2346,10 @@ function fetchWithdrawals(page, size) {
                 root: withdrawalsContainer,
                 threshold: 1.0
             });
-
             // Observe the loading row
             if (loadingRow) {
                 observer.observe(loadingRow);
             }
-
             // Initial render
             renderCashouts();
         });
