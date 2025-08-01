@@ -2161,7 +2161,7 @@
             });
         }
         // Initialize app
-        document.addEventListener('DOMContentLoaded', function() {
+        function initApp() {
             // Add event listeners to store cards
             document.querySelectorAll('.store-card').forEach(card => {
                 card.addEventListener('click', handleStoreClick);
@@ -2352,7 +2352,13 @@ function fetchWithdrawals(page, size) {
             }
             // Initial render
             renderCashouts();
-        });
+        }
+
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initApp);
+        } else {
+            initApp();
+        }
     </script>
 </body>
 </html>
