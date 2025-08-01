@@ -676,6 +676,7 @@
             flex-direction: column;
             align-items: center;
             font-family: 'Vazirmatn', sans-serif;
+            cursor: pointer;
         }
         .step-indicator {
             width: 40px;
@@ -1840,6 +1841,8 @@
                         el.onclick = () => { requestPurchaseCode(); openStepModal(i+1, 'درخواست شما ثبت شد. لطفاً یک دقیقه منتظر بمانید'); };
                     } else if (i === 1 && !purchaseCodeData.ready) {
                         el.onclick = () => openStepModal(i+1, cfg.info);
+                    } else if (i === 2) {
+                        el.onclick = () => { requestCashout(); openStepModal(i+1, 'درخواست تسویه شما ثبت شد. لطفاً منتظر تماس باشید.'); };
                     } else {
                         el.onclick = () => openStepModal(i+1, cfg.info);
                     }
@@ -2360,6 +2363,20 @@ function fetchWithdrawals(page, size) {
             renderRewardSteps();
             startPurchaseCodeTimer();
         }
+        
+        function requestCashout() {
+            // Update purchase code data to mark step 3 as done
+            purchaseCodeData.cashoutRequested = true;
+            purchaseCodeData.cashoutRequestedTime = Date.now();
+            localStorage.setItem('purchaseCodeData', JSON.stringify(purchaseCodeData));
+            
+            // Show success message
+            showCashoutModal();
+            
+            // Update UI
+            renderRewardSteps();
+        }
+        
         function initPurchaseCodeProcess() {
             if (purchaseCodeData.requestedTime && !purchaseCodeData.ready) {
                 startPurchaseCodeTimer();
