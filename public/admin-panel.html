@@ -1359,6 +1359,9 @@
                                             <button class="btn btn-secondary view-details" data-id="1">
                                                 <i class="fas fa-eye"></i>
                                             </button>
+                                            <button class="btn btn-danger delete-withdrawal">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
                                         </div>
                                     </td>
                                 </tr>
@@ -1386,6 +1389,9 @@
                                             <button class="btn btn-secondary view-details" data-id="2">
                                                 <i class="fas fa-eye"></i>
                                             </button>
+                                            <button class="btn btn-danger delete-withdrawal">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
                                         </div>
                                     </td>
                                 </tr>
@@ -1412,6 +1418,9 @@
                                             </button>
                                             <button class="btn btn-secondary view-details" data-id="3">
                                                 <i class="fas fa-eye"></i>
+                                            </button>
+                                            <button class="btn btn-danger delete-withdrawal">
+                                                <i class="fas fa-trash"></i>
                                             </button>
                                         </div>
                                     </td>
@@ -3114,6 +3123,21 @@
                     if (confirm('آیا از حذف این فروشنده مطمئن هستید؟')) {
                         const row = this.closest('tr');
                         if (row) row.remove();
+                    }
+                });
+            });
+
+            document.querySelectorAll('.delete-withdrawal').forEach(btn => {
+                btn.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    if (confirm('آیا از حذف این درخواست مطمئن هستید؟')) {
+                        const row = this.closest('tr');
+                        if (row) {
+                            row.remove();
+                            const idx = allRows.indexOf(row);
+                            if (idx !== -1) allRows.splice(idx, 1);
+                            filterWithdrawals();
+                        }
                     }
                 });
             });
