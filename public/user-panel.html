@@ -1067,6 +1067,95 @@
         .loading-row.show {
             display: table-row;
         }
+        /* Purchase History Modal Styles */
+        #purchaseHistoryModal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(15, 23, 42, 0.9);
+            backdrop-filter: blur(10px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 5000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+        #purchaseHistoryModal.active {
+            opacity: 1;
+            visibility: visible;
+        }
+        .purchase-history-content {
+            background: rgba(30, 41, 59, 0.95);
+            border-radius: 20px;
+            padding: 32px;
+            width: 90%;
+            max-width: 500px;
+            text-align: center;
+            border: 1px solid rgba(99, 102, 241, 0.3);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            transform: scale(0.95);
+            transition: transform 0.2s ease;
+            will-change: transform, opacity;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        #purchaseHistoryModal.active .purchase-history-content {
+            transform: scale(1);
+        }
+        .purchase-history-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .purchase-history-title {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: white;
+        }
+        .close-purchase-history {
+            background: none;
+            border: none;
+            color: #cbd5e1;
+            font-size: 1.5rem;
+            cursor: pointer;
+            transition: color 0.3s ease;
+        }
+        .close-purchase-history:hover {
+            color: white;
+        }
+        .purchase-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            text-align: right;
+        }
+        .purchase-item {
+            background: rgba(30, 41, 59, 0.7);
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.3s ease;
+        }
+        .purchase-item:hover {
+            background: rgba(99, 102, 241, 0.1);
+            transform: translateY(-2px);
+        }
+        .purchase-store {
+            font-weight: 600;
+            color: white;
+        }
+        .purchase-date {
+            color: #cbd5e1;
+            font-size: 0.9rem;
+        }
     </style>
 </head>
 <body class="min-h-screen flex items-center justify-center p-4">
@@ -1327,7 +1416,7 @@
                         </div>
                     </div>
                     <div class="grid grid-cols-2 gap-3">
-                        <div class="bg-darkcard rounded-lg p-3 purchase-count-box cursor-pointer">
+                        <div class="bg-darkcard rounded-lg p-3 purchase-count-box cursor-pointer" id="purchaseCountBox">
                             <p class="text-gray-400 text-xs">تعداد خریدها</p>
                             <p class="font-bold text-white"><i class="fas fa-shopping-bag ml-1"></i> <span id="purchaseCount">۶</span> خرید</p>
                         </div>
@@ -1615,13 +1704,15 @@
         </div>
     </div>
     <!-- Purchase History Modal -->
-    <div id="purchaseHistoryModal" class="fixed inset-0 z-50 bg-black/70 hidden flex items-center justify-center p-4">
-        <div class="bg-darkcard rounded-xl w-full max-w-sm p-6 relative flex flex-col max-h-[80vh]">
-            <button id="closePurchaseHistoryModal" onclick="document.getElementById('purchaseHistoryModal').classList.add('hidden')" class="absolute top-2 left-2 text-gray-400">
-                <i class="fas fa-times"></i>
-            </button>
-            <h2 class="text-center text-lg font-bold text-white mb-4">تاریخچه خریدها</h2>
-            <ul id="purchaseHistoryList" class="space-y-3 overflow-y-auto pr-2 flex-1"></ul>
+    <div id="purchaseHistoryModal">
+        <div class="purchase-history-content">
+            <div class="purchase-history-header">
+                <h2 class="purchase-history-title">تاریخچه خریدها</h2>
+                <button id="closePurchaseHistoryModal" class="close-purchase-history">✕</button>
+            </div>
+            <ul id="purchaseHistoryList" class="purchase-list">
+                <!-- Purchase items will be inserted here -->
+            </ul>
         </div>
     </div>
     <script>
@@ -2206,8 +2297,11 @@
             list.innerHTML = '';
             samplePurchases.forEach(p => {
                 const li = document.createElement('li');
-                li.className = 'flex justify-between border-b border-gray-700 pb-2';
-                li.innerHTML = `<span class="text-gray-300">${p.store}</span><span class="text-gray-400 text-sm ltr-text">${p.date}</span>`;
+                li.className = 'purchase-item';
+                li.innerHTML = `
+                    <span class="purchase-store">${p.store}</span>
+                    <span class="purchase-date ltr-text">${p.date}</span>
+                `;
                 list.appendChild(li);
             });
         }
@@ -2284,21 +2378,39 @@
                     if (e.target === this) hideProfileModal();
                 });
             }
-            const purchaseBox = document.querySelector('.purchase-count-box');
+            // Fix for purchase count box click handler
+            const purchaseCountBox = document.getElementById('purchaseCountBox');
+            if (purchaseCountBox) {
+                purchaseCountBox.addEventListener('click', function() {
+                    const modal = document.getElementById('purchaseHistoryModal');
+                    if (modal) {
+                        renderPurchaseHistory();
+                        modal.classList.add('active');
+                    }
+                });
+            }
+            
+            // Fix for purchase history modal close button
+            const closePurchaseModalBtn = document.getElementById('closePurchaseHistoryModal');
+            if (closePurchaseModalBtn) {
+                closePurchaseModalBtn.addEventListener('click', function() {
+                    const modal = document.getElementById('purchaseHistoryModal');
+                    if (modal) {
+                        modal.classList.remove('active');
+                    }
+                });
+            }
+            
+            // Fix for purchase history modal close on outside click
             const purchaseModal = document.getElementById('purchaseHistoryModal');
-            const closePurchaseModal = document.getElementById('closePurchaseHistoryModal');
-            if (purchaseBox && purchaseModal) {
-                purchaseBox.addEventListener('click', () => {
-                    renderPurchaseHistory();
-                    purchaseModal.classList.remove('hidden');
+            if (purchaseModal) {
+                purchaseModal.addEventListener('click', function(e) {
+                    if (e.target === purchaseModal) {
+                        purchaseModal.classList.remove('active');
+                    }
                 });
             }
-            if (closePurchaseModal && purchaseModal) {
-                closePurchaseModal.addEventListener('click', () => purchaseModal.classList.add('hidden'));
-                purchaseModal.addEventListener('click', e => {
-                    if (e.target === purchaseModal) purchaseModal.classList.add('hidden');
-                });
-            }
+            
             toggleSellerCodeBtnVisibility();
             window.addEventListener('scroll', toggleSellerCodeBtnVisibility);
             window.addEventListener('resize', toggleSellerCodeBtnVisibility);
