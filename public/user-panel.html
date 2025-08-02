@@ -1702,16 +1702,24 @@
             <button id="closeProfileModal" class="absolute top-2 left-2 text-gray-400">
                 <i class="fas fa-times"></i>
             </button>
-            <h2 class="text-center text-lg font-bold text-white mb-4">اطلاعات حساب بانکی</h2>
+            <h2 class="text-center text-lg font-bold text-white mb-4">مشخصات حساب بانکی</h2>
             <div class="space-y-4">
-                <div>
-                    <label class="block text-sm mb-1">نام صاحب حساب</label>
-                    <input id="accountNameInput" type="text" class="input-field w-full py-2 px-3 rounded-lg text-white" placeholder="نام صاحب حساب">
+                <div id="accountNameSection">
+                    <div class="flex items-center justify-between mb-1">
+                        <label class="block text-sm">نام صاحب حساب</label>
+                        <button id="editAccountNameBtn" class="text-xs text-primary hidden">ویرایش</button>
+                    </div>
+                    <p id="accountNameDisplay" class="text-gray-300"></p>
+                    <input id="accountNameInput" type="text" class="input-field w-full py-2 px-3 rounded-lg text-white hidden" placeholder="نام را وارد کنید">
                     <p id="accountNameError" class="text-red-400 text-xs mt-1 hidden">این فیلد الزامی است</p>
                 </div>
-                <div>
-                    <label class="block text-sm mb-1">شماره حساب بانکی</label>
-                    <input id="accountNumberInput" type="text" dir="ltr" class="input-field w-full py-2 px-3 rounded-lg text-white text-left" placeholder="1234567890">
+                <div id="accountNumberSection">
+                    <div class="flex items-center justify-between mb-1">
+                        <label class="block text-sm">شماره کارت بانکی</label>
+                        <button id="editAccountNumberBtn" class="text-xs text-primary hidden">ویرایش</button>
+                    </div>
+                    <p id="accountNumberDisplay" class="text-gray-300 text-left" dir="ltr"></p>
+                    <input id="accountNumberInput" type="text" dir="ltr" class="input-field w-full py-2 px-3 rounded-lg text-white text-left hidden" placeholder="لطفاً شماره کارت خود را وارد کنید">
                     <p id="accountNumberError" class="text-red-400 text-xs mt-1 hidden">این فیلد الزامی است</p>
                 </div>
                 <div class="flex space-x-2 space-x-reverse pt-2">
@@ -2127,19 +2135,51 @@
         function hideUserInfoModal() {
             document.getElementById('userInfoModal').classList.add('hidden');
         }
-        function showProfileModal() {
-            const nameEl = document.getElementById('accountNameInput');
-            const numberEl = document.getElementById('accountNumberInput');
+        function populateProfileModal() {
+            accountName = localStorage.getItem('accountName') || '';
+            accountNumber = localStorage.getItem('accountNumber') || '';
+
+            const nameDisplay = document.getElementById('accountNameDisplay');
+            const nameInput = document.getElementById('accountNameInput');
+            const nameEdit = document.getElementById('editAccountNameBtn');
             const nameError = document.getElementById('accountNameError');
+            const numberDisplay = document.getElementById('accountNumberDisplay');
+            const numberInput = document.getElementById('accountNumberInput');
+            const numberEdit = document.getElementById('editAccountNumberBtn');
             const numberError = document.getElementById('accountNumberError');
-            nameEl.value = accountName;
-            numberEl.value = accountNumber;
-            const nameValid = accountName.trim() !== '';
-            const numberValid = accountNumber.trim() !== '';
-            nameEl.classList.toggle('border-red-500', !nameValid);
-            numberEl.classList.toggle('border-red-500', !numberValid);
-            nameError.classList.toggle('hidden', nameValid);
-            numberError.classList.toggle('hidden', numberValid);
+
+            nameError.classList.add('hidden');
+            numberError.classList.add('hidden');
+            nameInput.classList.remove('border-red-500');
+            numberInput.classList.remove('border-red-500');
+
+            if (accountName) {
+                nameDisplay.textContent = `نام صاحب حساب: ${accountName}`;
+                nameDisplay.classList.remove('hidden');
+                nameEdit.classList.remove('hidden');
+                nameInput.classList.add('hidden');
+            } else {
+                nameDisplay.classList.add('hidden');
+                nameEdit.classList.add('hidden');
+                nameInput.value = '';
+                nameInput.classList.remove('hidden');
+            }
+
+            if (accountNumber) {
+                numberDisplay.textContent = `شماره کارت: ${accountNumber}`;
+                numberDisplay.classList.remove('hidden');
+                numberEdit.classList.remove('hidden');
+                numberInput.classList.add('hidden');
+            } else {
+                numberDisplay.classList.add('hidden');
+                numberEdit.classList.add('hidden');
+                numberInput.value = '';
+                numberInput.classList.remove('hidden');
+            }
+        }
+
+        function showProfileModal() {
+            populateProfileModal();
             document.getElementById('profileModal').classList.remove('hidden');
         }
         function hideProfileModal() {
@@ -2148,20 +2188,34 @@
         function saveProfileInfo() {
             const nameEl = document.getElementById('accountNameInput');
             const numberEl = document.getElementById('accountNumberInput');
-            accountName = nameEl.value.trim();
-            accountNumber = numberEl.value.trim();
-            const nameValid = accountName !== '';
-            const numberValid = accountNumber !== '';
-            document.getElementById('accountNameError').classList.toggle('hidden', nameValid);
-            document.getElementById('accountNumberError').classList.toggle('hidden', numberValid);
-            nameEl.classList.toggle('border-red-500', !nameValid);
-            numberEl.classList.toggle('border-red-500', !numberValid);
-            if (nameValid && numberValid) {
-                localStorage.setItem('accountName', accountName);
-                localStorage.setItem('accountNumber', accountNumber);
-                hideProfileModal();
-                renderRewardSteps();
+            let newName = accountName;
+            let newNumber = accountNumber;
+            let valid = true;
+
+            if (!nameEl.classList.contains('hidden')) {
+                newName = nameEl.value.trim();
+                const nameValid = newName !== '';
+                document.getElementById('accountNameError').classList.toggle('hidden', nameValid);
+                nameEl.classList.toggle('border-red-500', !nameValid);
+                if (!nameValid) valid = false;
             }
+
+            if (!numberEl.classList.contains('hidden')) {
+                newNumber = numberEl.value.trim();
+                const numberValid = newNumber !== '';
+                document.getElementById('accountNumberError').classList.toggle('hidden', numberValid);
+                numberEl.classList.toggle('border-red-500', !numberValid);
+                if (!numberValid) valid = false;
+            }
+
+            if (!valid) return;
+
+            accountName = newName;
+            accountNumber = newNumber;
+            localStorage.setItem('accountName', accountName);
+            localStorage.setItem('accountNumber', accountNumber);
+            hideProfileModal();
+            renderRewardSteps();
         }
         function handleCashoutRequest() {
             const userInfo = JSON.parse(localStorage.getItem('userInfo') || '{}');
@@ -2491,6 +2545,28 @@
             if (cancelProfileBtn) cancelProfileBtn.addEventListener('click', hideProfileModal);
             const saveProfileBtn = document.getElementById('saveProfileBtn');
             if (saveProfileBtn) saveProfileBtn.addEventListener('click', saveProfileInfo);
+            const editNameBtn = document.getElementById('editAccountNameBtn');
+            if (editNameBtn) {
+                editNameBtn.addEventListener('click', function() {
+                    document.getElementById('accountNameDisplay').classList.add('hidden');
+                    editNameBtn.classList.add('hidden');
+                    const input = document.getElementById('accountNameInput');
+                    input.classList.remove('hidden');
+                    input.value = accountName;
+                    input.focus();
+                });
+            }
+            const editNumberBtn = document.getElementById('editAccountNumberBtn');
+            if (editNumberBtn) {
+                editNumberBtn.addEventListener('click', function() {
+                    document.getElementById('accountNumberDisplay').classList.add('hidden');
+                    editNumberBtn.classList.add('hidden');
+                    const input = document.getElementById('accountNumberInput');
+                    input.classList.remove('hidden');
+                    input.value = accountNumber;
+                    input.focus();
+                });
+            }
             const profileModal = document.getElementById('profileModal');
             if (profileModal) {
                 profileModal.addEventListener('click', function(e) {
