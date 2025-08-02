@@ -26,6 +26,9 @@
         }
     </script>
     <script>
+        let fullName = localStorage.getItem("fullName") || "";
+        let familyName = localStorage.getItem("familyName") || "";
+        let phone = localStorage.getItem("phone") || "";
         let accountName = localStorage.getItem("accountName") || "";
         let accountNumber = localStorage.getItem("accountNumber") || "";
     </script>
@@ -1307,7 +1310,7 @@
                         <span class="step-indicator mb-1 flex items-center justify-center w-10 h-10 rounded-full">
                             <i class="fa-solid fa-hand-holding-dollar"></i>
                         </span>
-                        <span class="step-title text-xs font-semibold">درخواست تسویه</span>
+                        <span class="step-title text-xs font-semibold">تسویه موفق</span>
                         <span id="status3" class="step-state text-xs mt-1"></span>
                     </div>
                     <div id="settlementStep" class="reward-step relative flex flex-col items-center p-2" data-info="جزئیات مرحله ۴">
@@ -1349,7 +1352,7 @@
                     <div class="w-12 h-12 rounded-full bg-yellow-500 flex items-center justify-center text-white mx-auto mb-3">
                         <i class="fa-solid fa-hand-holding-dollar"></i>
                     </div>
-                    <h3 class="font-bold mb-2">درخواست تسویه</h3>
+                    <h3 class="font-bold mb-2">تسویه موفق</h3>
                     <p class="step-modal-text text-sm mb-3"></p>
                     <button data-close="stepModal3" onclick="closeStepModal(3)" class="bg-primary text-white rounded-lg px-4 py-1 mt-2">بستن</button>
                 </div>
@@ -1702,25 +1705,32 @@
             <button id="closeProfileModal" class="absolute top-2 left-2 text-gray-400">
                 <i class="fas fa-times"></i>
             </button>
-            <h2 class="text-center text-lg font-bold text-white mb-4">مشخصات حساب بانکی</h2>
+            <h2 class="text-center text-lg font-bold text-white mb-4">اطلاعات کاربری</h2>
             <div class="space-y-4">
-                <div id="accountNameSection">
-                    <div class="flex items-center justify-between mb-1">
-                        <label class="block text-sm">نام صاحب حساب</label>
-                        <button id="editAccountNameBtn" class="text-xs text-primary hidden">ویرایش</button>
-                    </div>
-                    <p id="accountNameDisplay" class="text-gray-300"></p>
-                    <input id="accountNameInput" type="text" class="input-field w-full py-2 px-3 rounded-lg text-white hidden" placeholder="نام را وارد کنید">
-                    <p id="accountNameError" class="text-red-400 text-xs mt-1 hidden">این فیلد الزامی است</p>
+                <div>
+                    <label class="block text-sm mb-1">نام</label>
+                    <input id="profileFirstName" type="text" class="input-field w-full py-2 px-3 rounded-lg text-white">
+                    <p id="profileFirstNameError" class="text-red-400 text-xs mt-1 hidden">لطفاً نام را وارد کنید</p>
                 </div>
-                <div id="accountNumberSection">
-                    <div class="flex items-center justify-between mb-1">
-                        <label class="block text-sm">شماره کارت بانکی</label>
-                        <button id="editAccountNumberBtn" class="text-xs text-primary hidden">ویرایش</button>
-                    </div>
-                    <p id="accountNumberDisplay" class="text-gray-300 text-left" dir="ltr"></p>
-                    <input id="accountNumberInput" type="text" dir="ltr" class="input-field w-full py-2 px-3 rounded-lg text-white text-left hidden" placeholder="لطفاً شماره کارت خود را وارد کنید">
-                    <p id="accountNumberError" class="text-red-400 text-xs mt-1 hidden">این فیلد الزامی است</p>
+                <div>
+                    <label class="block text-sm mb-1">نام خانوادگی</label>
+                    <input id="profileLastName" type="text" class="input-field w-full py-2 px-3 rounded-lg text-white">
+                    <p id="profileLastNameError" class="text-red-400 text-xs mt-1 hidden">لطفاً نام خانوادگی را وارد کنید</p>
+                </div>
+                <div>
+                    <label class="block text-sm mb-1">شماره تلفن</label>
+                    <input id="profilePhone" type="tel" dir="ltr" class="input-field w-full py-2 px-3 rounded-lg text-white text-left">
+                    <p id="profilePhoneError" class="text-red-400 text-xs mt-1 hidden">لطفاً شماره تلفن را وارد کنید</p>
+                </div>
+                <div>
+                    <label class="block text-sm mb-1">نام صاحب حساب</label>
+                    <input id="profileAccountName" type="text" class="input-field w-full py-2 px-3 rounded-lg text-white">
+                    <p id="profileAccountNameError" class="text-red-400 text-xs mt-1 hidden">لطفاً نام صاحب حساب را وارد کنید</p>
+                </div>
+                <div>
+                    <label class="block text-sm mb-1">شماره کارت بانکی</label>
+                    <input id="profileAccountNumber" type="text" dir="ltr" class="input-field w-full py-2 px-3 rounded-lg text-white text-left">
+                    <p id="profileAccountNumberError" class="text-red-400 text-xs mt-1 hidden">لطفاً شماره کارت بانکی را وارد کنید</p>
                 </div>
                 <div class="flex space-x-2 space-x-reverse pt-2">
                     <button id="saveProfileBtn" class="btn-success flex-1 py-2 rounded-lg text-white">ذخیره</button>
@@ -2136,46 +2146,27 @@
             document.getElementById('userInfoModal').classList.add('hidden');
         }
         function populateProfileModal() {
+            fullName = localStorage.getItem('fullName') || '';
+            familyName = localStorage.getItem('familyName') || '';
+            phone = localStorage.getItem('phone') || '';
             accountName = localStorage.getItem('accountName') || '';
             accountNumber = localStorage.getItem('accountNumber') || '';
 
-            const nameDisplay = document.getElementById('accountNameDisplay');
-            const nameInput = document.getElementById('accountNameInput');
-            const nameEdit = document.getElementById('editAccountNameBtn');
-            const nameError = document.getElementById('accountNameError');
-            const numberDisplay = document.getElementById('accountNumberDisplay');
-            const numberInput = document.getElementById('accountNumberInput');
-            const numberEdit = document.getElementById('editAccountNumberBtn');
-            const numberError = document.getElementById('accountNumberError');
-
-            nameError.classList.add('hidden');
-            numberError.classList.add('hidden');
-            nameInput.classList.remove('border-red-500');
-            numberInput.classList.remove('border-red-500');
-
-            if (accountName) {
-                nameDisplay.textContent = `نام صاحب حساب: ${accountName}`;
-                nameDisplay.classList.remove('hidden');
-                nameEdit.classList.remove('hidden');
-                nameInput.classList.add('hidden');
-            } else {
-                nameDisplay.classList.add('hidden');
-                nameEdit.classList.add('hidden');
-                nameInput.value = '';
-                nameInput.classList.remove('hidden');
-            }
-
-            if (accountNumber) {
-                numberDisplay.textContent = `شماره کارت: ${accountNumber}`;
-                numberDisplay.classList.remove('hidden');
-                numberEdit.classList.remove('hidden');
-                numberInput.classList.add('hidden');
-            } else {
-                numberDisplay.classList.add('hidden');
-                numberEdit.classList.add('hidden');
-                numberInput.value = '';
-                numberInput.classList.remove('hidden');
-            }
+            const fields = [
+                {val: fullName, input: 'profileFirstName', error: 'profileFirstNameError'},
+                {val: familyName, input: 'profileLastName', error: 'profileLastNameError'},
+                {val: phone, input: 'profilePhone', error: 'profilePhoneError'},
+                {val: accountName, input: 'profileAccountName', error: 'profileAccountNameError'},
+                {val: accountNumber, input: 'profileAccountNumber', error: 'profileAccountNumberError'}
+            ];
+            fields.forEach(f => {
+                const inputEl = document.getElementById(f.input);
+                const errorEl = document.getElementById(f.error);
+                inputEl.value = f.val;
+                const isValid = f.val !== '';
+                inputEl.classList.toggle('border-red-500', !isValid);
+                errorEl.classList.toggle('hidden', isValid);
+            });
         }
 
         function showProfileModal() {
@@ -2186,34 +2177,43 @@
             document.getElementById('profileModal').classList.add('hidden');
         }
         function saveProfileInfo() {
-            const nameEl = document.getElementById('accountNameInput');
-            const numberEl = document.getElementById('accountNumberInput');
-            let newName = accountName;
-            let newNumber = accountNumber;
+            const firstEl = document.getElementById('profileFirstName');
+            const lastEl = document.getElementById('profileLastName');
+            const phoneEl = document.getElementById('profilePhone');
+            const accountNameEl = document.getElementById('profileAccountName');
+            const accountNumberEl = document.getElementById('profileAccountNumber');
+
             let valid = true;
 
-            if (!nameEl.classList.contains('hidden')) {
-                newName = nameEl.value.trim();
-                const nameValid = newName !== '';
-                document.getElementById('accountNameError').classList.toggle('hidden', nameValid);
-                nameEl.classList.toggle('border-red-500', !nameValid);
-                if (!nameValid) valid = false;
+            function check(inputEl, errorId) {
+                const value = inputEl.value.trim();
+                const ok = value !== '';
+                inputEl.classList.toggle('border-red-500', !ok);
+                document.getElementById(errorId).classList.toggle('hidden', ok);
+                if (!ok) valid = false;
+                return value;
             }
 
-            if (!numberEl.classList.contains('hidden')) {
-                newNumber = numberEl.value.trim();
-                const numberValid = newNumber !== '';
-                document.getElementById('accountNumberError').classList.toggle('hidden', numberValid);
-                numberEl.classList.toggle('border-red-500', !numberValid);
-                if (!numberValid) valid = false;
-            }
+            const newFirst = check(firstEl, 'profileFirstNameError');
+            const newLast = check(lastEl, 'profileLastNameError');
+            const newPhone = check(phoneEl, 'profilePhoneError');
+            const newAccName = check(accountNameEl, 'profileAccountNameError');
+            const newAccNumber = check(accountNumberEl, 'profileAccountNumberError');
 
             if (!valid) return;
 
-            accountName = newName;
-            accountNumber = newNumber;
+            fullName = newFirst;
+            familyName = newLast;
+            phone = newPhone;
+            accountName = newAccName;
+            accountNumber = newAccNumber;
+
+            localStorage.setItem('fullName', fullName);
+            localStorage.setItem('familyName', familyName);
+            localStorage.setItem('phone', phone);
             localStorage.setItem('accountName', accountName);
             localStorage.setItem('accountNumber', accountNumber);
+
             hideProfileModal();
             renderRewardSteps();
         }
@@ -2545,28 +2545,6 @@
             if (cancelProfileBtn) cancelProfileBtn.addEventListener('click', hideProfileModal);
             const saveProfileBtn = document.getElementById('saveProfileBtn');
             if (saveProfileBtn) saveProfileBtn.addEventListener('click', saveProfileInfo);
-            const editNameBtn = document.getElementById('editAccountNameBtn');
-            if (editNameBtn) {
-                editNameBtn.addEventListener('click', function() {
-                    document.getElementById('accountNameDisplay').classList.add('hidden');
-                    editNameBtn.classList.add('hidden');
-                    const input = document.getElementById('accountNameInput');
-                    input.classList.remove('hidden');
-                    input.value = accountName;
-                    input.focus();
-                });
-            }
-            const editNumberBtn = document.getElementById('editAccountNumberBtn');
-            if (editNumberBtn) {
-                editNumberBtn.addEventListener('click', function() {
-                    document.getElementById('accountNumberDisplay').classList.add('hidden');
-                    editNumberBtn.classList.add('hidden');
-                    const input = document.getElementById('accountNumberInput');
-                    input.classList.remove('hidden');
-                    input.value = accountNumber;
-                    input.focus();
-                });
-            }
             const profileModal = document.getElementById('profileModal');
             if (profileModal) {
                 profileModal.addEventListener('click', function(e) {
