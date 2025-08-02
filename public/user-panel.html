@@ -1482,7 +1482,7 @@
         </div>
     </div>
     <!-- Seller Code Button (Floating) -->
-    <button id="sellerCodeBtn" class="fixed bottom-6 right-6 z-50 bg-primary text-white font-bold px-5 py-3 rounded-full shadow-lg flex items-center">
+    <button id="sellerCodeBtn" class="fixed bottom-4 right-4 md:right-6 z-50 bg-primary text-white px-4 py-2 rounded-full shadow-md flex items-center md:hidden hidden">
         <i class="fas fa-qrcode ml-2"></i>
         وارد کردن کد فروشنده
     </button>
@@ -1722,15 +1722,19 @@
             const rulesBtn = document.getElementById('showRulesBtn');
             const backToDashboardBtn = document.getElementById('backToDashboardBtn');
             const backHomeBtn = document.getElementById('backHomeBtn');
+            const sellerCodeBtn = document.getElementById('sellerCodeBtn');
             if (screenName === 'dashboard') {
                 backToDashboardBtn.classList.remove('active');
                 backHomeBtn.style.display = 'flex'; // Show on dashboard
+                sellerCodeBtn.classList.remove('hidden');
             } else if (screenName === 'phone') {
                 backToDashboardBtn.classList.add('active');
                 backHomeBtn.style.display = 'none'; // Hide on phone screen
+                sellerCodeBtn.classList.add('hidden');
             } else {
                 backToDashboardBtn.classList.remove('active');
                 backHomeBtn.style.display = 'flex'; // Show on other screens
+                sellerCodeBtn.classList.add('hidden');
             }
             if (screenName === 'dashboard') {
                 updatePhoneWarning();
