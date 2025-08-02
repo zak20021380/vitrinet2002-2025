@@ -26,8 +26,8 @@
         }
     </script>
     <script>
-        let accountName = "";
-        let accountNumber = "";
+        let accountName = localStorage.getItem("accountName") || "";
+        let accountNumber = localStorage.getItem("accountNumber") || "";
     </script>
     <style>
         @keyframes float {
@@ -1367,8 +1367,15 @@
             </div>
             <div id="lockReasonModal" class="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center hidden z-50">
                 <div class="bg-darkcard p-6 rounded-xl max-w-sm w-11/12 text-center" dir="rtl">
-                    <p class="mb-4 text-sm">برای ثبت درخواست تسویه، ابتدا باید نام صاحب حساب و شماره حساب بانکی خود را تکمیل کنید.</p>
-                    <button id="closeLockReason" class="btn-primary px-4 py-2 rounded">بستن</button>
+                    <p class="mb-2 text-sm">لطفاً برای فعال‌سازی درخواست تسویه، اطلاعات حساب بانکی خود را وارد کنید.</p>
+                    <ul class="text-sm text-right mb-4 list-disc list-inside">
+                        <li>نام صاحب حساب</li>
+                        <li>شماره حساب بانکی</li>
+                    </ul>
+                    <div class="flex space-x-2 space-x-reverse justify-center">
+                        <button id="openProfileFromLock" class="btn-success px-4 py-2 rounded">تکمیل پروفایل</button>
+                        <button id="closeLockReason" class="btn-primary px-4 py-2 rounded">بستن</button>
+                    </div>
                 </div>
             </div>
             <!-- Header -->
@@ -1379,7 +1386,7 @@
                 </div>
                 <div class="flex items-center">
                     <div class="mr-3 text-right">
-                        <p id="userGreeting" class="text-white font-medium">کاربر گرامی</p>
+                        <p id="userGreeting" class="text-white font-medium cursor-pointer">کاربر گرامی</p>
                         <p class="text-xs text-success">اعتبار فعال</p>
                     </div>
                     <div class="relative user-profile-icon cursor-pointer">
@@ -1691,25 +1698,26 @@
     </div>
     <!-- Profile Modal -->
     <div id="profileModal" class="fixed inset-0 z-50 bg-black/70 hidden flex items-center justify-center p-4">
-        <div class="bg-darkcard rounded-xl w-full max-w-sm p-6 relative shadow-xl">
-            <button id="closeProfileModal" onclick="hideProfileModal()" class="absolute top-2 left-2 text-gray-400">
+        <div class="bg-darkcard rounded-xl w-full max-w-sm p-6 relative shadow-xl" dir="rtl">
+            <button id="closeProfileModal" class="absolute top-2 left-2 text-gray-400">
                 <i class="fas fa-times"></i>
             </button>
-            <h2 class="text-center text-lg font-bold text-white mb-4">پروفایل کاربر</h2>
-            <div class="space-y-3 text-right">
+            <h2 class="text-center text-lg font-bold text-white mb-4">اطلاعات حساب بانکی</h2>
+            <div class="space-y-4">
                 <div>
-                    <p class="text-gray-400 text-sm">نام و نام خانوادگی</p>
-                    <p id="profileFullName" class="text-white font-medium"></p>
+                    <label class="block text-sm mb-1">نام صاحب حساب</label>
+                    <input id="accountNameInput" type="text" class="input-field w-full py-2 px-3 rounded-lg text-white" placeholder="نام صاحب حساب">
+                    <p id="accountNameError" class="text-red-400 text-xs mt-1 hidden">این فیلد الزامی است</p>
                 </div>
                 <div>
-                    <p class="text-gray-400 text-sm">شماره موبایل</p>
-                    <p id="profilePhone" class="text-white font-medium ltr-text"></p>
+                    <label class="block text-sm mb-1">شماره حساب بانکی</label>
+                    <input id="accountNumberInput" type="text" dir="ltr" class="input-field w-full py-2 px-3 rounded-lg text-white text-left" placeholder="1234567890">
+                    <p id="accountNumberError" class="text-red-400 text-xs mt-1 hidden">این فیلد الزامی است</p>
                 </div>
-                <div>
-                    <p class="text-gray-400 text-sm">تاریخ عضویت</p>
-                    <p id="profileRegDate" class="text-white font-medium"></p>
+                <div class="flex space-x-2 space-x-reverse pt-2">
+                    <button id="saveProfileBtn" class="btn-success flex-1 py-2 rounded-lg text-white">ذخیره</button>
+                    <button id="cancelProfileBtn" class="btn-secondary flex-1 py-2 rounded-lg text-white">بستن</button>
                 </div>
-                <p id="profileWarning" class="text-red-500 text-sm hidden text-center"></p>
             </div>
         </div>
     </div>
@@ -1960,16 +1968,23 @@
                     } else if (i === 1 && !purchaseCodeData.ready) {
                         el.onclick = () => openStepModal(i+1, cfg.info);
                     } else if (i === 2) {
-                        el.onclick = () => { requestCashout(); openStepModal(i+1, 'درخواست تسویه شما ثبت شد. لطفاً منتظر تماس باشید.'); };
+                        el.onclick = () => openStepModal(i+1, cfg.info);
                     } else if (i === 3) {
-                        el.onclick = () => { /* settlement request handler */ };
+                        el.onclick = () => {
+                            if (!isEligible) {
+                                document.getElementById('lockReasonModal').classList.remove('hidden');
+                            } else {
+                                requestCashout();
+                                openStepModal(i+1, 'درخواست تسویه شما ثبت شد. لطفاً منتظر تماس باشید.');
+                            }
+                        };
                     } else {
                         el.onclick = () => openStepModal(i+1, cfg.info);
                     }
-                 } else {
-                     icon.classList.add('bg-gray-600');
-                     icon.classList.add('grayscale');
-                     statusEl.classList.add('text-gray-400');
+                } else {
+                    icon.classList.add('bg-gray-600');
+                    icon.classList.add('grayscale');
+                    statusEl.classList.add('text-gray-400');
                     el.classList.add('cursor-pointer','hover:scale-105','ring-primary');
                     const lock = el.querySelector('.lock-overlay');
                     if (lock) lock.classList.remove('hidden');
@@ -2113,30 +2128,47 @@
             document.getElementById('userInfoModal').classList.add('hidden');
         }
         function showProfileModal() {
-            userInfo = JSON.parse(localStorage.getItem('userInfo') || '{}');
-            if (!userInfo.registrationDate) {
-                userInfo.registrationDate = new Date().toLocaleDateString('fa-IR');
-                localStorage.setItem('userInfo', JSON.stringify(userInfo));
-            }
-            document.getElementById('profileFullName').textContent = userInfo.fullName || '-';
-            document.getElementById('profilePhone').textContent = userInfo.phone ? toPersianDigits(userInfo.phone) : '-';
-            document.getElementById('profileRegDate').textContent = userInfo.registrationDate ? toPersianDigits(userInfo.registrationDate) : '-';
-            const warning = document.getElementById('profileWarning');
-            if (!userInfo.fullName || !userInfo.phone) {
-                warning.textContent = 'لطفاً پروفایل خود را تکمیل کنید تا بتوانید از جوایز استفاده کنید.';
-                warning.classList.remove('hidden');
-            } else {
-                warning.classList.add('hidden');
-            }
+            const nameEl = document.getElementById('accountNameInput');
+            const numberEl = document.getElementById('accountNumberInput');
+            const nameError = document.getElementById('accountNameError');
+            const numberError = document.getElementById('accountNumberError');
+            nameEl.value = accountName;
+            numberEl.value = accountNumber;
+            const nameValid = accountName.trim() !== '';
+            const numberValid = accountNumber.trim() !== '';
+            nameEl.classList.toggle('border-red-500', !nameValid);
+            numberEl.classList.toggle('border-red-500', !numberValid);
+            nameError.classList.toggle('hidden', nameValid);
+            numberError.classList.toggle('hidden', numberValid);
             document.getElementById('profileModal').classList.remove('hidden');
         }
         function hideProfileModal() {
             document.getElementById('profileModal').classList.add('hidden');
         }
+        function saveProfileInfo() {
+            const nameEl = document.getElementById('accountNameInput');
+            const numberEl = document.getElementById('accountNumberInput');
+            accountName = nameEl.value.trim();
+            accountNumber = numberEl.value.trim();
+            const nameValid = accountName !== '';
+            const numberValid = accountNumber !== '';
+            document.getElementById('accountNameError').classList.toggle('hidden', nameValid);
+            document.getElementById('accountNumberError').classList.toggle('hidden', numberValid);
+            nameEl.classList.toggle('border-red-500', !nameValid);
+            numberEl.classList.toggle('border-red-500', !numberValid);
+            if (nameValid && numberValid) {
+                localStorage.setItem('accountName', accountName);
+                localStorage.setItem('accountNumber', accountNumber);
+                hideProfileModal();
+                renderRewardSteps();
+            }
+        }
         function handleCashoutRequest() {
-            userInfo = JSON.parse(localStorage.getItem('userInfo') || '{}');
+            const userInfo = JSON.parse(localStorage.getItem('userInfo') || '{}');
             if (!userInfo.fullName || !userInfo.phone) {
                 showUserInfoModal();
+            } else if (!accountName.trim() || !accountNumber.trim()) {
+                document.getElementById('lockReasonModal').classList.remove('hidden');
             } else {
                 showCashoutModal();
             }
@@ -2449,12 +2481,27 @@
             if (profileIcon) {
                 profileIcon.addEventListener('click', showProfileModal);
             }
+            const userGreetingEl = document.getElementById('userGreeting');
+            if (userGreetingEl) {
+                userGreetingEl.addEventListener('click', showProfileModal);
+            }
             const closeProfileModalBtn = document.getElementById('closeProfileModal');
             if (closeProfileModalBtn) closeProfileModalBtn.addEventListener('click', hideProfileModal);
+            const cancelProfileBtn = document.getElementById('cancelProfileBtn');
+            if (cancelProfileBtn) cancelProfileBtn.addEventListener('click', hideProfileModal);
+            const saveProfileBtn = document.getElementById('saveProfileBtn');
+            if (saveProfileBtn) saveProfileBtn.addEventListener('click', saveProfileInfo);
             const profileModal = document.getElementById('profileModal');
             if (profileModal) {
                 profileModal.addEventListener('click', function(e) {
                     if (e.target === this) hideProfileModal();
+                });
+            }
+            const openProfileFromLock = document.getElementById('openProfileFromLock');
+            if (openProfileFromLock) {
+                openProfileFromLock.addEventListener('click', () => {
+                    document.getElementById('lockReasonModal').classList.add('hidden');
+                    showProfileModal();
                 });
             }
             // Fix for purchase count box click handler
