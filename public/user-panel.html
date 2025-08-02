@@ -1724,15 +1724,17 @@
             dashboard: document.getElementById('dashboardScreen')
         };
         // State management
-        let appState = {
-            sellerCode: '',
-            phone: '',
-            isPhoneVerified: false,
-            credit: 0,
-            purchases: 0,
-            rewardedMilestones: [],
-            hasSeenFinalRewardPopup: false
-        };
+          let appState = {
+              sellerCode: '',
+              phone: '',
+              isPhoneVerified: false,
+              credit: 0,
+              purchases: 0,
+              rewardedMilestones: [],
+              hasSeenFinalRewardPopup: false
+          };
+          // Purchase code process state
+          let purchaseCodeData = JSON.parse(localStorage.getItem('purchaseCodeData') || '{}');
         const milestones = [
             { purchases: 3, reward: 200000 },
             { purchases: 6, reward: 225000 },
@@ -1917,8 +1919,8 @@
                      el.classList.add('cursor-pointer','hover:scale-105','ring-primary');
                      const lock = el.querySelector('.lock-overlay');
                      if (lock) lock.classList.add('hidden');
-                    if (i === 0 && !purchaseCodeData.requestedTime) {
-                        el.onclick = () => { window.requestPurchaseCode(); openStepModal(i+1, 'درخواست شما ثبت شد. لطفاً یک دقیقه منتظر بمانید'); };
+                 if (i === 0 && !purchaseCodeData.requestedTime) {
+                        el.onclick = () => { requestPurchaseCode(); openStepModal(i+1, 'درخواست شما ثبت شد. لطفاً یک دقیقه منتظر بمانید'); };
                     } else {
                         el.onclick = () => openStepModal(i+1, cfg.info);
                     }
@@ -1929,11 +1931,11 @@
                      const lock = el.querySelector('.lock-overlay');
                      if (lock) lock.classList.add('hidden');
                     if (i === 0 && !purchaseCodeData.requestedTime) {
-                        el.onclick = () => { window.requestPurchaseCode(); openStepModal(i+1, 'درخواست شما ثبت شد. لطفاً یک دقیقه منتظر بمانید'); };
+                        el.onclick = () => { requestPurchaseCode(); openStepModal(i+1, 'درخواست شما ثبت شد. لطفاً یک دقیقه منتظر بمانید'); };
                     } else if (i === 1 && !purchaseCodeData.ready) {
                         el.onclick = () => openStepModal(i+1, cfg.info);
                     } else if (i === 2) {
-                        el.onclick = () => { window.requestCashout(); openStepModal(i+1, 'درخواست تسویه شما ثبت شد. لطفاً منتظر تماس باشید.'); };
+                        el.onclick = () => { requestCashout(); openStepModal(i+1, 'درخواست تسویه شما ثبت شد. لطفاً منتظر تماس باشید.'); };
                     } else {
                         el.onclick = () => openStepModal(i+1, cfg.info);
                     }
@@ -1946,10 +1948,52 @@
                     if (lock) lock.classList.remove('hidden');
                     el.onclick = () => openStepModal(i+1, 'این مرحله هنوز فعال نشده است. لطفاً مراحل قبلی را تکمیل کنید.');
                 }
-                statusEl.textContent = cfg.text;
-            });
-        }
-        function markPayoutSuccess(card, date) {
+                 statusEl.textContent = cfg.text;
+             });
+         }
+         function generatePurchaseCode() {
+             return Math.floor(100000 + Math.random() * 900000).toString();
+         }
+         function startPurchaseCodeTimer() {
+             if (!purchaseCodeData.requestedTime || purchaseCodeData.ready) return;
+             const remaining = 60000 - (Date.now() - purchaseCodeData.requestedTime);
+             if (remaining <= 0) {
+                 purchaseCodeData.ready = true;
+                 purchaseCodeData.code = generatePurchaseCode();
+                 localStorage.setItem('purchaseCodeData', JSON.stringify(purchaseCodeData));
+                 renderRewardSteps();
+             } else {
+                 setTimeout(() => {
+                     purchaseCodeData.ready = true;
+                     purchaseCodeData.code = generatePurchaseCode();
+                     localStorage.setItem('purchaseCodeData', JSON.stringify(purchaseCodeData));
+                     renderRewardSteps();
+                 }, remaining);
+             }
+         }
+         function requestPurchaseCode() {
+             if (purchaseCodeData.requestedTime) return;
+             purchaseCodeData = { requestedTime: Date.now(), ready: false };
+             localStorage.setItem('purchaseCodeData', JSON.stringify(purchaseCodeData));
+             renderRewardSteps();
+             startPurchaseCodeTimer();
+         }
+         function requestCashout() {
+             purchaseCodeData.cashoutRequested = true;
+             purchaseCodeData.cashoutRequestedTime = Date.now();
+             localStorage.setItem('purchaseCodeData', JSON.stringify(purchaseCodeData));
+             showCashoutModal();
+             renderRewardSteps();
+         }
+         function initPurchaseCodeProcess() {
+             if (purchaseCodeData.requestedTime && !purchaseCodeData.ready) {
+                 startPurchaseCodeTimer();
+             }
+         }
+         // Expose to global scope
+         window.requestPurchaseCode = requestPurchaseCode;
+         window.requestCashout = requestCashout;
+         function markPayoutSuccess(card, date) {
             localStorage.setItem('rewardStep', '4');
             localStorage.setItem('payoutInfo', JSON.stringify({card, date}));
             renderRewardSteps();
@@ -2446,56 +2490,7 @@ function fetchWithdrawals(page, size) {
     }, 500);                    // تأخیر ۵۰۰ms شبیه‌سازی شبکه
   });
 }
-        // -------- Purchase Code Process --------
-        let purchaseCodeData = JSON.parse(localStorage.getItem('purchaseCodeData') || '{}');
-        function generatePurchaseCode() {
-            return Math.floor(100000 + Math.random() * 900000).toString();
-        }
-        function startPurchaseCodeTimer() {
-            if (!purchaseCodeData.requestedTime || purchaseCodeData.ready) return;
-            const remaining = 60000 - (Date.now() - purchaseCodeData.requestedTime);
-            if (remaining <= 0) {
-                purchaseCodeData.ready = true;
-                purchaseCodeData.code = generatePurchaseCode();
-                localStorage.setItem('purchaseCodeData', JSON.stringify(purchaseCodeData));
-                renderRewardSteps();
-            } else {
-                setTimeout(() => {
-                    purchaseCodeData.ready = true;
-                    purchaseCodeData.code = generatePurchaseCode();
-                    localStorage.setItem('purchaseCodeData', JSON.stringify(purchaseCodeData));
-                    renderRewardSteps();
-                }, remaining);
-            }
-        }
-        function requestPurchaseCode() {
-            if (purchaseCodeData.requestedTime) return;
-            purchaseCodeData = { requestedTime: Date.now(), ready: false };
-            localStorage.setItem('purchaseCodeData', JSON.stringify(purchaseCodeData));
-            renderRewardSteps();
-            startPurchaseCodeTimer();
-        }
-        window.requestPurchaseCode = requestPurchaseCode;
-        
-        function requestCashout() {
-            // Update purchase code data to mark step 3 as done
-            purchaseCodeData.cashoutRequested = true;
-            purchaseCodeData.cashoutRequestedTime = Date.now();
-            localStorage.setItem('purchaseCodeData', JSON.stringify(purchaseCodeData));
-            
-            // Show success message
-            showCashoutModal();
-            
-            // Update UI
-            renderRewardSteps();
-        }
-        window.requestCashout = requestCashout;
-        function initPurchaseCodeProcess() {
-            if (purchaseCodeData.requestedTime && !purchaseCodeData.ready) {
-                startPurchaseCodeTimer();
-            }
-        }
-/* ---------------------------------------------------------------- */
+ /* ---------------------------------------------------------------- */
             // Function to load more withdrawals
             async function loadMoreWithdrawals() {
                 if (isLoading || !hasMore) return;
