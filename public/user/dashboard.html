@@ -391,12 +391,12 @@
       // منوهای دسکتاپ و موبایل
 
   /* ——— هندل منوهای سایدبار (مستقیم) ——— */
-  document.querySelectorAll('.menu-btn').forEach(btn => {
-    btn.addEventListener('click', e => {
-      e.preventDefault();
-      showSection(btn.dataset.section);
-      if (window.innerWidth < 1024) closeSidebar();
-    });
+  document.addEventListener('click', e => {
+    const btn = e.target.closest('.menu-btn');
+    if (!btn) return;
+    e.preventDefault();
+    showSection(btn.dataset.section);
+    if (window.innerWidth < 1024) closeSidebar();
   });
 
 
