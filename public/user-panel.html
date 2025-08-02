@@ -778,32 +778,6 @@
         #stepModal4.active .modal-card {
             transform: scale(1);
         }
-        /* Seller Code Button Styles (Updated) */
-        .seller-code-btn {
-            position: fixed;
-            bottom: 24px;
-            right: 24px; /* Changed to right for RTL */
-            z-index: 40;
-            background: linear-gradient(90deg, #6366F1, #8B5CF6);
-            color: white;
-            border: none;
-            border-radius: 50px;
-            padding: 14px 20px;
-            font-weight: 600;
-            box-shadow: 0 10px 25px rgba(99, 102, 241, 0.4);
-            cursor: pointer;
-            transition: all 0.3s ease;
-            animation: float 3s ease-in-out infinite;
-            display: flex;
-            align-items: center;
-        }
-        .seller-code-btn:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 15px 30px rgba(99, 102, 241, 0.6);
-        }
-        .seller-code-btn i {
-            margin-left: 8px;
-        }
         /* START OF NEW STYLES */
         /* Floating Back to Main Page Button */
         #backToDashboardBtn {
@@ -1508,9 +1482,9 @@
         </div>
     </div>
     <!-- Seller Code Button (Floating) -->
-    <button id="sellerCodeBtn" class="seller-code-btn md:hidden hidden">
-        <i class="fas fa-qrcode"></i>
-        <span>وارد کردن کد فروشنده</span>
+    <button id="sellerCodeBtn" class="fixed bottom-6 right-6 z-50 bg-primary text-white font-bold px-5 py-3 rounded-full shadow-lg flex items-center">
+        <i class="fas fa-qrcode ml-2"></i>
+        وارد کردن کد فروشنده
     </button>
     <!-- New: Floating Back to Main Page Button -->
     <button id="backToDashboardBtn" onclick="goToDashboard()">
@@ -1544,7 +1518,7 @@
     <!-- Credit Limit Popup -->
     <div id="creditLimitModal" class="fixed inset-0 bg-black/70 hidden z-50 flex items-center justify-center">
         <div class="bg-darkcard p-6 rounded-xl w-11/12 max-w-sm text-center" dir="rtl">
-            <p class="text-red-400 mb-4">شما به سقف اعتبار رسیده‌اید و دیگر نمی‌توانید کد فروشنده وارد کنید.</p>
+            <p class="text-white mb-4">شما به سقف اعتبار رسیده‌اید.<br>تا پایان ماه امکان ثبت کد جدید وجود ندارد.</p>
             <button id="closeCreditLimitModal" class="bg-primary text-white px-4 py-2 rounded-lg w-full mt-2">متوجه شدم</button>
         </div>
     </div>
@@ -1746,24 +1720,17 @@
             screens[screenName].classList.add('active');
             // Control visibility of the floating buttons
             const rulesBtn = document.getElementById('showRulesBtn');
-            const sellerCodeBtn = document.getElementById('sellerCodeBtn');
             const backToDashboardBtn = document.getElementById('backToDashboardBtn');
             const backHomeBtn = document.getElementById('backHomeBtn');
             if (screenName === 'dashboard') {
-                sellerCodeBtn.style.display = 'flex'; // Show on dashboard
                 backToDashboardBtn.classList.remove('active');
                 backHomeBtn.style.display = 'flex'; // Show on dashboard
-                toggleSellerCodeBtnVisibility();
             } else if (screenName === 'phone') {
-                sellerCodeBtn.style.display = 'none'; // Hide on other screens
                 backToDashboardBtn.classList.add('active');
                 backHomeBtn.style.display = 'none'; // Hide on phone screen
-                toggleSellerCodeBtnVisibility();
             } else {
-                sellerCodeBtn.style.display = 'none'; // Hide on other screens
                 backToDashboardBtn.classList.remove('active');
                 backHomeBtn.style.display = 'flex'; // Show on other screens
-                toggleSellerCodeBtnVisibility();
             }
             if (screenName === 'dashboard') {
                 updatePhoneWarning();
@@ -1800,28 +1767,6 @@
                 warningElement.classList.add('hidden');
             } else {
                 warningElement.classList.remove('hidden');
-            }
-        }
-        function toggleSellerCodeBtnVisibility() {
-            const btn = document.getElementById('sellerCodeBtn');
-            if (!btn) return;
-            if (appState.credit >= 1000000) {
-                btn.style.display = 'none';
-                return;
-            }
-            if (window.innerWidth >= 768) {
-                btn.classList.add('hidden');
-                return;
-            }
-            if (btn.style.display === 'none') {
-                btn.classList.add('hidden');
-                return;
-            }
-            const atBottom = window.innerHeight + window.scrollY >= document.body.offsetHeight;
-            if (atBottom) {
-                btn.classList.remove('hidden');
-            } else {
-                btn.classList.add('hidden');
             }
         }
         function registerPurchase() {
@@ -2408,11 +2353,12 @@
         });
         // Seller Code Button Event Listener (Added)
         document.getElementById('sellerCodeBtn').addEventListener('click', function() {
-            if (appState.credit >= 1000000) {
+            const userCredit = appState.credit;
+            if (userCredit >= 1000000) {
                 showCreditLimitModal();
-                return;
+            } else {
+                showScreen('code');
             }
-            showScreen('code');
         });
         // Cash-out rendering
         const sampleCashouts = [
@@ -2514,13 +2460,9 @@
             }
             // Update phone warning
             updatePhoneWarning();
-            // Ensure the floating buttons are initially hidden if not on dashboard
-            const sellerCodeBtn = document.getElementById('sellerCodeBtn');
+            // Initialize floating buttons
             const backToDashboardBtn = document.getElementById('backToDashboardBtn');
             const backHomeBtn = document.getElementById('backHomeBtn');
-            if (sellerCodeBtn && !screens.dashboard.classList.contains('active')) {
-                sellerCodeBtn.style.display = 'none';
-            }
             if (backToDashboardBtn) backToDashboardBtn.classList.remove('active');
             // Always show back home button
             if (backHomeBtn) backHomeBtn.style.display = 'flex';
@@ -2594,9 +2536,6 @@
                 });
             }
             
-            toggleSellerCodeBtnVisibility();
-            window.addEventListener('scroll', toggleSellerCodeBtnVisibility);
-            window.addEventListener('resize', toggleSellerCodeBtnVisibility);
             // Lazy loading implementation for withdrawals section
             const withdrawalsContainer = document.querySelector('.withdrawals-container');
             const loadingRow = document.getElementById('loadingRow');
