@@ -25,6 +25,9 @@
             }
         }
     </script>
+    <script>
+        let isEligible = false;
+    </script>
     <style>
         @keyframes float {
             0% { transform: translateY(0px); }
@@ -1308,10 +1311,10 @@
                     </div>
                     <div id="rewardStep4" class="reward-step relative flex flex-col items-center p-2" data-info="جزئیات مرحله ۴">
                         <span class="step-indicator mb-1 flex items-center justify-center w-10 h-10 rounded-full relative">
-                            <span class="lock-overlay hidden"><i class="fa-solid fa-lock"></i></span>
-                            <i class="fa-solid fa-circle-check"></i>
+                            <i class="eligible-icon fa-solid fa-hand-holding-dollar"></i>
+                            <i class="lock-icon fa-solid fa-lock hidden"></i>
                         </span>
-                        <span class="step-title text-xs font-semibold">تسویه موفق</span>
+                        <span class="step-title text-xs font-semibold">درخواست تسویه</span>
                         <span id="status4" class="step-state text-xs mt-1"></span>
                     </div>
                 </div>
@@ -1353,12 +1356,18 @@
             <div id="stepModal4">
                 <div class="modal-card">
                     <button data-close="stepModal4" onclick="closeStepModal(4)" class="absolute top-2 right-2 text-gray-300 text-sm cursor-pointer">✖️</button>
-                    <div class="w-12 h-12 rounded-full bg-gray-600 flex items-center justify-center text-white mx-auto mb-3">
-                        <i class="fa-solid fa-circle-check"></i>
+                    <div class="w-12 h-12 rounded-full bg-yellow-500 flex items-center justify-center text-white mx-auto mb-3">
+                        <i class="fa-solid fa-hand-holding-dollar"></i>
                     </div>
-                    <h3 class="font-bold mb-2">تسویه موفق</h3>
+                    <h3 class="font-bold mb-2">درخواست تسویه</h3>
                     <p class="step-modal-text text-sm mb-3"></p>
                     <button data-close="stepModal4" onclick="closeStepModal(4)" class="bg-primary text-white rounded-lg px-4 py-1 mt-2">بستن</button>
+                </div>
+            </div>
+            <div id="eligibilityModal" class="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center hidden z-50">
+                <div class="bg-darkcard p-6 rounded-xl max-w-sm w-11/12 text-center">
+                    <p class="mb-4 text-sm">To request settlement, you must reach 50 points or complete your banking details.</p>
+                    <button id="closeEligibility" class="btn-primary px-4 py-2 rounded">بستن</button>
                 </div>
             </div>
             <!-- Header -->
@@ -1900,25 +1909,32 @@
                          {state: 'active', text: '🟡 در حال بررسی', info: 'پس از تایید، کد خرید در دسترس خواهد بود'} :
                          {state: 'locked', text: '', info: 'هنوز در دسترس نیست'},
                  {state: 'active', text: '🟡 در انتظار', info: 'در انتظار تسویه'},
-                 {state: 'locked', text: '', info: 'هنوز در دسترس نیست'}
+                 isEligible ?
+                     {state: 'active', text: '🟡 درخواست', info: 'برای ثبت درخواست کلیک کنید'} :
+                     {state: 'locked', text: '', info: 'To request settlement, you must reach 50 points or complete your banking details.'}
              ];
              configs.forEach((cfg, i) => {
                  const el = document.getElementById(`rewardStep${i+1}`);
                  const statusEl = document.getElementById(`status${i+1}`);
                  const icon = el.querySelector('.step-indicator');
+                 const eligibleIcon = el.querySelector('.eligible-icon');
+                 const lockIcon = el.querySelector('.lock-icon');
                 el.className = 'reward-step relative flex flex-col items-center p-2';
                 icon.className = 'step-indicator mb-1 flex items-center justify-center w-10 h-10 rounded-full text-white';
                 statusEl.className = 'step-state text-xs mt-1';
                 el.classList.remove('cursor-pointer','hover:scale-105','ring-primary','opacity-50','pointer-events-none');
                 icon.classList.remove('bg-green-600','bg-yellow-500','bg-gray-600','grayscale');
                 statusEl.classList.remove('text-green-400','text-yellow-400','text-gray-400');
-                
+                if (eligibleIcon) eligibleIcon.classList.add('hidden');
+                if (lockIcon) lockIcon.classList.add('hidden');
+
                  if (cfg.state === 'done') {
                      icon.classList.add('bg-green-600');
                      statusEl.classList.add('text-green-400');
                      el.classList.add('cursor-pointer','hover:scale-105','ring-primary');
                      const lock = el.querySelector('.lock-overlay');
                      if (lock) lock.classList.add('hidden');
+                     if (eligibleIcon) eligibleIcon.classList.remove('hidden');
                  if (i === 0 && !purchaseCodeData.requestedTime) {
                         el.onclick = () => { requestPurchaseCode(); openStepModal(i+1, 'درخواست شما ثبت شد. لطفاً یک دقیقه منتظر بمانید'); };
                     } else {
@@ -1930,12 +1946,15 @@
                      el.classList.add('cursor-pointer','hover:scale-105','ring-primary');
                      const lock = el.querySelector('.lock-overlay');
                      if (lock) lock.classList.add('hidden');
+                     if (eligibleIcon) eligibleIcon.classList.remove('hidden');
                     if (i === 0 && !purchaseCodeData.requestedTime) {
                         el.onclick = () => { requestPurchaseCode(); openStepModal(i+1, 'درخواست شما ثبت شد. لطفاً یک دقیقه منتظر بمانید'); };
                     } else if (i === 1 && !purchaseCodeData.ready) {
                         el.onclick = () => openStepModal(i+1, cfg.info);
                     } else if (i === 2) {
                         el.onclick = () => { requestCashout(); openStepModal(i+1, 'درخواست تسویه شما ثبت شد. لطفاً منتظر تماس باشید.'); };
+                    } else if (i === 3) {
+                        el.onclick = () => { /* settlement request handler */ };
                     } else {
                         el.onclick = () => openStepModal(i+1, cfg.info);
                     }
@@ -1946,7 +1965,12 @@
                     el.classList.add('cursor-pointer','hover:scale-105','ring-primary');
                     const lock = el.querySelector('.lock-overlay');
                     if (lock) lock.classList.remove('hidden');
-                    el.onclick = () => openStepModal(i+1, 'این مرحله هنوز فعال نشده است. لطفاً مراحل قبلی را تکمیل کنید.');
+                    if (lockIcon) lockIcon.classList.remove('hidden');
+                    if (i === 3) {
+                        el.onclick = () => document.getElementById('eligibilityModal').classList.remove('hidden');
+                    } else {
+                        el.onclick = () => openStepModal(i+1, 'این مرحله هنوز فعال نشده است. لطفاً مراحل قبلی را تکمیل کنید.');
+                    }
                 }
                  statusEl.textContent = cfg.text;
              });
@@ -1993,6 +2017,9 @@
          // Expose to global scope
          window.requestPurchaseCode = requestPurchaseCode;
          window.requestCashout = requestCashout;
+         document.getElementById('closeEligibility').onclick = () => {
+            document.getElementById('eligibilityModal').classList.add('hidden');
+         };
          function markPayoutSuccess(card, date) {
             localStorage.setItem('rewardStep', '4');
             localStorage.setItem('payoutInfo', JSON.stringify({card, date}));
