@@ -1482,7 +1482,7 @@
         </div>
     </div>
     <!-- Seller Code Button (Floating) -->
-    <button id="sellerCodeBtn" class="fixed bottom-4 right-4 md:right-6 z-50 bg-primary text-white px-4 py-2 rounded-full shadow-md flex items-center md:hidden hidden">
+    <button id="sellerCodeBtn" class="fixed bottom-4 right-4 md:right-6 z-50 bg-primary text-white px-4 py-2 rounded-full shadow-md flex items-center md:hidden">
         <i class="fas fa-qrcode ml-2"></i>
         وارد کردن کد فروشنده
     </button>
@@ -1518,7 +1518,7 @@
     <!-- Credit Limit Popup -->
     <div id="creditLimitModal" class="fixed inset-0 bg-black/70 hidden z-50 flex items-center justify-center">
         <div class="bg-darkcard p-6 rounded-xl w-11/12 max-w-sm text-center" dir="rtl">
-            <p class="text-white mb-4">شما به سقف اعتبار رسیده‌اید.<br>تا پایان ماه امکان ثبت کد جدید وجود ندارد.</p>
+            <p class="text-white mb-4">⚠️ شما به سقف اعتبار رسیده‌اید.<br>تا پایان ماه امکان ثبت کد جدید وجود ندارد.</p>
             <button id="closeCreditLimitModal" class="bg-primary text-white px-4 py-2 rounded-lg w-full mt-2">متوجه شدم</button>
         </div>
     </div>
@@ -1722,19 +1722,15 @@
             const rulesBtn = document.getElementById('showRulesBtn');
             const backToDashboardBtn = document.getElementById('backToDashboardBtn');
             const backHomeBtn = document.getElementById('backHomeBtn');
-            const sellerCodeBtn = document.getElementById('sellerCodeBtn');
             if (screenName === 'dashboard') {
                 backToDashboardBtn.classList.remove('active');
                 backHomeBtn.style.display = 'flex'; // Show on dashboard
-                sellerCodeBtn.classList.remove('hidden');
             } else if (screenName === 'phone') {
                 backToDashboardBtn.classList.add('active');
                 backHomeBtn.style.display = 'none'; // Hide on phone screen
-                sellerCodeBtn.classList.add('hidden');
             } else {
                 backToDashboardBtn.classList.remove('active');
                 backHomeBtn.style.display = 'flex'; // Show on other screens
-                sellerCodeBtn.classList.add('hidden');
             }
             if (screenName === 'dashboard') {
                 updatePhoneWarning();
