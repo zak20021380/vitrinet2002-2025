@@ -1526,6 +1526,23 @@
             </button>
         </div>
     </div>
+    <!-- Settlement Success Popup -->
+    <div id="settlementSuccessPopup" class="fixed inset-0 bg-black/70 hidden z-50 flex items-center justify-center">
+        <div class="bg-darkcard p-6 rounded-xl w-11/12 max-w-sm text-center" dir="rtl">
+            <p class="text-white mb-4">
+                تسویه با موفقیت انجام شد!<br>
+                جایزه شما آماده است. لطفاً برای دریافت اطلاعات بیشتر، به بخش "سابقه جوایز" مراجعه کنید.
+            </p>
+            <button id="closeSettlementSuccess" class="bg-primary text-white px-4 py-2 rounded-lg w-full mt-2">باشه</button>
+        </div>
+    </div>
+    <!-- Credit Limit Popup -->
+    <div id="creditLimitModal" class="fixed inset-0 bg-black/70 hidden z-50 flex items-center justify-center">
+        <div class="bg-darkcard p-6 rounded-xl w-11/12 max-w-sm text-center" dir="rtl">
+            <p class="text-red-400 mb-4">شما به سقف اعتبار رسیده‌اید و دیگر نمی‌توانید کد فروشنده وارد کنید.</p>
+            <button id="closeCreditLimitModal" class="bg-primary text-white px-4 py-2 rounded-lg w-full mt-2">متوجه شدم</button>
+        </div>
+    </div>
     <!-- Rules Modal -->
     <div id="rulesModal">
         <div class="modal-content">
@@ -1716,6 +1733,10 @@
         }
         // Show a specific screen
         function showScreen(screenName) {
+            if (screenName === 'code' && appState.credit >= 1000000) {
+                showCreditLimitModal();
+                return;
+            }
             Object.values(screens).forEach(screen => screen.classList.remove('active'));
             screens[screenName].classList.add('active');
             // Control visibility of the floating buttons
@@ -1743,8 +1764,8 @@
                 updatePhoneWarning();
                 updateDashboard();
                 // Check if we should show the celebration popup
-                if (!appState.hasSeenFinalRewardPopup && 
-                    appState.purchases >= 13 && 
+                if (!appState.hasSeenFinalRewardPopup &&
+                    appState.purchases >= 13 &&
                     appState.rewardedMilestones.includes(13)) {
                     setTimeout(() => {
                         showCelebrationPopup();
@@ -1752,6 +1773,7 @@
                         localStorage.setItem('appState', JSON.stringify(appState));
                     }, 1000);
                 }
+                checkSettlementSuccess();
             }
             if (screenName === 'verification') {
                 if (appState.phone) {
@@ -1777,6 +1799,11 @@
         }
         function toggleSellerCodeBtnVisibility() {
             const btn = document.getElementById('sellerCodeBtn');
+            if (!btn) return;
+            if (appState.credit >= 1000000) {
+                btn.style.display = 'none';
+                return;
+            }
             if (window.innerWidth >= 768) {
                 btn.classList.add('hidden');
                 return;
@@ -2196,6 +2223,25 @@
                 showScreen('phone');
             }
         }
+        function showSettlementSuccessPopup() {
+            document.getElementById('settlementSuccessPopup').classList.remove('hidden');
+        }
+        function hideSettlementSuccessPopup() {
+            document.getElementById('settlementSuccessPopup').classList.add('hidden');
+        }
+        function checkSettlementSuccess() {
+            purchaseCodeData = JSON.parse(localStorage.getItem('purchaseCodeData') || '{}');
+            if (purchaseCodeData.cashoutDone && localStorage.getItem('settlementShown') !== 'true') {
+                showSettlementSuccessPopup();
+                localStorage.setItem('settlementShown', 'true');
+            }
+        }
+        function showCreditLimitModal() {
+            document.getElementById('creditLimitModal').classList.remove('hidden');
+        }
+        function hideCreditLimitModal() {
+            document.getElementById('creditLimitModal').classList.add('hidden');
+        }
         // New: Back to dashboard button click handler
       
         document.getElementById('backToCode').addEventListener('click', function() {
@@ -2342,6 +2388,10 @@
         });
         // Seller Code Button Event Listener (Added)
         document.getElementById('sellerCodeBtn').addEventListener('click', function() {
+            if (appState.credit >= 1000000) {
+                showCreditLimitModal();
+                return;
+            }
             showScreen('code');
         });
         // Cash-out rendering
@@ -2424,6 +2474,22 @@
                     if (e.target === this) {
                         hideRulesModal();
                     }
+                });
+            }
+            const closeSettlementSuccessBtn = document.getElementById('closeSettlementSuccess');
+            if (closeSettlementSuccessBtn) closeSettlementSuccessBtn.addEventListener('click', hideSettlementSuccessPopup);
+            const settlementSuccessModal = document.getElementById('settlementSuccessPopup');
+            if (settlementSuccessModal) {
+                settlementSuccessModal.addEventListener('click', function(e) {
+                    if (e.target === this) hideSettlementSuccessPopup();
+                });
+            }
+            const closeCreditLimitBtn = document.getElementById('closeCreditLimitModal');
+            if (closeCreditLimitBtn) closeCreditLimitBtn.addEventListener('click', hideCreditLimitModal);
+            const creditLimitModal = document.getElementById('creditLimitModal');
+            if (creditLimitModal) {
+                creditLimitModal.addEventListener('click', function(e) {
+                    if (e.target === this) hideCreditLimitModal();
                 });
             }
             // Update phone warning
@@ -2592,6 +2658,9 @@ function fetchWithdrawals(page, size) {
             }
             // Initial render
             renderCashouts();
+            if (screens.dashboard.classList.contains('active')) {
+                checkSettlementSuccess();
+            }
         })();
     </script>
 </body>
