@@ -1722,6 +1722,7 @@
             const rulesBtn = document.getElementById('showRulesBtn');
             const backToDashboardBtn = document.getElementById('backToDashboardBtn');
             const backHomeBtn = document.getElementById('backHomeBtn');
+            const sellerCodeBtn = document.getElementById('sellerCodeBtn');
             if (screenName === 'dashboard') {
                 backToDashboardBtn.classList.remove('active');
                 backHomeBtn.style.display = 'flex'; // Show on dashboard
@@ -1731,6 +1732,12 @@
             } else {
                 backToDashboardBtn.classList.remove('active');
                 backHomeBtn.style.display = 'flex'; // Show on other screens
+            }
+            // Hide seller code button on the code entry screen
+            if (screenName === 'code') {
+                sellerCodeBtn.style.display = 'none';
+            } else {
+                sellerCodeBtn.style.display = 'flex';
             }
             if (screenName === 'dashboard') {
                 updatePhoneWarning();
