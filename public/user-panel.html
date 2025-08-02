@@ -1482,7 +1482,7 @@
         </div>
     </div>
     <!-- Seller Code Button (Floating) -->
-    <button id="sellerCodeBtn" class="fixed bottom-4 right-4 md:right-6 z-50 bg-primary text-white px-4 py-2 rounded-full shadow-md flex items-center md:hidden">
+    <button id="sellerCodeBtn" class="fixed bottom-4 right-4 z-50 bg-primary text-white font-bold px-4 py-2 rounded-full shadow-lg flex items-center md:hidden">
         <i class="fas fa-qrcode ml-2"></i>
         وارد کردن کد فروشنده
     </button>
@@ -1792,12 +1792,7 @@
             const finalAmount = finalMilestone.reward;
             // Check if user has reached final reward
             const hasReachedFinalReward = appState.purchases >= 13 && appState.rewardedMilestones.includes(13);
-            const rewardBar = document.getElementById('rewardStatusBar');
-            if (hasReachedFinalReward) {
-                rewardBar.classList.remove('hidden');
-            } else {
-                rewardBar.classList.add('hidden');
-            }
+            document.getElementById('rewardStatusBar').classList.remove('hidden');
             document.getElementById('finalMessage').textContent = hasReachedFinalReward
                 ? 'شما به نهایت جایزه رسیده‌اید!'
                 : `${toPersianNumber(finalLeft)} خرید تا جایزه نهایی (${toPersianNumber(finalAmount)} تومان)`;
