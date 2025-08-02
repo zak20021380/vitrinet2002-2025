@@ -1367,6 +1367,11 @@
                             <p class="font-bold text-attention"><i class="fas fa-bullseye ml-1"></i> <span id="toNextCount">۳</span> خرید دیگر</p>
                         </div>
                     </div>
+                    <div id="nextCollectBox" class="bg-darkcard text-sm text-white p-3 rounded-xl mt-4 hidden">
+                        🎉 شما جایزه خود را دریافت کرده‌اید.
+                        <br>
+                        ⏳ می‌توانید از تاریخ <span id="nextCollectDate" class="text-success font-bold"></span> دوباره شروع به جمع‌آوری اعتبار کنید.
+                    </div>
                 </div>
             </div>
             <!-- Progress Tracker -->
@@ -1831,6 +1836,7 @@
             localStorage.setItem('appState', JSON.stringify(appState));
         }
         function updateDashboard() {
+            purchaseCodeData = JSON.parse(localStorage.getItem('purchaseCodeData') || '{}');
             const upcomingMilestones = milestones.filter(m => !appState.rewardedMilestones.includes(m.purchases) && m.purchases > appState.purchases);
             upcomingMilestones.sort((a, b) => a.purchases - b.purchases);
             const nextMilestone = upcomingMilestones[0] || { purchases: Infinity, reward: 0 };
@@ -1857,6 +1863,18 @@
             document.getElementById('nextMessage').textContent = `${toPersianNumber(nextLeft)} خرید تا رسیدن به ${toPersianNumber(nextAmount)} تومان اعتبار`;
             document.getElementById('nextRewardLabel').textContent = `پاداش بعدی: ${toPersianNumber(nextAmount)} تومان`;
             document.getElementById('specialRewardLabel').textContent = `پاداش ویژه: ${toPersianNumber(finalAmount)} تومان`;
+            const infoBox = document.getElementById('nextCollectBox');
+            const dateSpan = document.getElementById('nextCollectDate');
+            const userCredit = appState.credit;
+            const userHasReceivedCode = Boolean(purchaseCodeData.redeemDate);
+            if (userCredit >= 1000000 && userHasReceivedCode) {
+                const nextDate = new Date(purchaseCodeData.redeemDate);
+                nextDate.setDate(nextDate.getDate() + 30);
+                dateSpan.textContent = nextDate.toLocaleDateString('fa-IR');
+                infoBox.classList.remove('hidden');
+            } else {
+                infoBox.classList.add('hidden');
+            }
             const progress = (appState.purchases / finalMilestone.purchases) * 100;
             document.getElementById('progressBar').style.width = `${progress}%`;
             document.getElementById('totalPurchases').textContent = toPersianNumber(appState.purchases);
@@ -1952,16 +1970,18 @@
              if (!purchaseCodeData.requestedTime || purchaseCodeData.ready) return;
              const remaining = 60000 - (Date.now() - purchaseCodeData.requestedTime);
              if (remaining <= 0) {
-                 purchaseCodeData.ready = true;
-                 purchaseCodeData.code = generatePurchaseCode();
-                 localStorage.setItem('purchaseCodeData', JSON.stringify(purchaseCodeData));
-                 renderRewardSteps();
+                purchaseCodeData.ready = true;
+                purchaseCodeData.code = generatePurchaseCode();
+                purchaseCodeData.redeemDate = Date.now();
+                localStorage.setItem('purchaseCodeData', JSON.stringify(purchaseCodeData));
+                renderRewardSteps();
              } else {
                  setTimeout(() => {
-                     purchaseCodeData.ready = true;
-                     purchaseCodeData.code = generatePurchaseCode();
-                     localStorage.setItem('purchaseCodeData', JSON.stringify(purchaseCodeData));
-                     renderRewardSteps();
+                    purchaseCodeData.ready = true;
+                    purchaseCodeData.code = generatePurchaseCode();
+                    purchaseCodeData.redeemDate = Date.now();
+                    localStorage.setItem('purchaseCodeData', JSON.stringify(purchaseCodeData));
+                    renderRewardSteps();
                  }, remaining);
              }
          }
