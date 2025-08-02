@@ -15,6 +15,7 @@
                         primary: '#6366F1',
                         success: '#10B981',
                         attention: '#F59E0B',
+                        warning: '#F59E0B',
                         darkbg: '#0f172a',
                         darkcard: '#1e293b',
                     },
@@ -1344,7 +1345,7 @@
                     <div id="nextCollectBox" class="bg-darkcard text-sm text-white p-3 rounded-xl mt-4 hidden">
                         🎉 شما جایزه خود را دریافت کرده‌اید.
                         <br>
-                        ⏳ می‌توانید از تاریخ <span id="nextCollectDate" class="text-success font-bold"></span> دوباره شروع به جمع‌آوری اعتبار کنید.
+                        ⏳ تا تاریخ <span id="nextCollectDate" class="text-warning font-bold"></span> نمی‌توانید کد جدید وارد کنید.
                     </div>
                 </div>
             </div>
@@ -1482,9 +1483,8 @@
         </div>
     </div>
     <!-- Seller Code Button (Floating) -->
-    <button id="sellerCodeBtn" class="fixed bottom-4 right-4 z-50 bg-primary text-white font-bold px-4 py-2 rounded-full shadow-lg flex items-center">
-        <i class="fas fa-qrcode ml-2"></i>
-        وارد کردن کد فروشنده
+    <button id="sellerCodeBtn" class="fixed bottom-4 right-4 z-50 bg-primary text-white font-bold px-4 py-2 rounded-full shadow-lg md:hidden">
+      وارد کردن کد فروشنده
     </button>
     <!-- New: Floating Back to Main Page Button -->
     <button id="backToDashboardBtn" onclick="goToDashboard()">
@@ -1733,11 +1733,11 @@
                 backToDashboardBtn.classList.remove('active');
                 backHomeBtn.style.display = 'flex'; // Show on other screens
             }
-            // Hide seller code button on the code entry screen
-            if (screenName === 'code') {
-                sellerCodeBtn.style.display = 'none';
+            // Show seller code button only on the dashboard
+            if (screenName === 'dashboard') {
+                sellerCodeBtn.style.display = '';
             } else {
-                sellerCodeBtn.style.display = 'flex';
+                sellerCodeBtn.style.display = 'none';
             }
             if (screenName === 'dashboard') {
                 updatePhoneWarning();
@@ -1815,9 +1815,10 @@
             const userCredit = appState.credit;
             const userHasReceivedCode = Boolean(purchaseCodeData.redeemDate);
             if (userCredit >= 1000000 && userHasReceivedCode) {
-                const nextDate = new Date(purchaseCodeData.redeemDate);
-                nextDate.setDate(nextDate.getDate() + 30);
-                dateSpan.textContent = nextDate.toLocaleDateString('fa-IR');
+                const lastRedeemDate = new Date(purchaseCodeData.redeemDate);
+                const nextValidDate = new Date(lastRedeemDate);
+                nextValidDate.setDate(nextValidDate.getDate() + 30);
+                dateSpan.textContent = nextValidDate.toLocaleDateString('fa-IR');
                 infoBox.classList.remove('hidden');
             } else {
                 infoBox.classList.add('hidden');
