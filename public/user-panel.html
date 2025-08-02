@@ -26,7 +26,8 @@
         }
     </script>
     <script>
-        let isEligible = false;
+        let accountName = "";
+        let accountNumber = "";
     </script>
     <style>
         @keyframes float {
@@ -1309,10 +1310,10 @@
                         <span class="step-title text-xs font-semibold">درخواست تسویه</span>
                         <span id="status3" class="step-state text-xs mt-1"></span>
                     </div>
-                    <div id="rewardStep4" class="reward-step relative flex flex-col items-center p-2" data-info="جزئیات مرحله ۴">
+                    <div id="settlementStep" class="reward-step relative flex flex-col items-center p-2" data-info="جزئیات مرحله ۴">
                         <span class="step-indicator mb-1 flex items-center justify-center w-10 h-10 rounded-full relative">
-                            <i class="eligible-icon fa-solid fa-hand-holding-dollar"></i>
-                            <i class="lock-icon fa-solid fa-lock hidden"></i>
+                            <i id="settlementIcon" class="eligible-icon fa-solid fa-hand-holding-usd"></i>
+                            <i class="lock-icon fa-solid fa-lock hidden text-gray-400"></i>
                         </span>
                         <span class="step-title text-xs font-semibold">درخواست تسویه</span>
                         <span id="status4" class="step-state text-xs mt-1"></span>
@@ -1364,10 +1365,10 @@
                     <button data-close="stepModal4" onclick="closeStepModal(4)" class="bg-primary text-white rounded-lg px-4 py-1 mt-2">بستن</button>
                 </div>
             </div>
-            <div id="eligibilityModal" class="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center hidden z-50">
-                <div class="bg-darkcard p-6 rounded-xl max-w-sm w-11/12 text-center">
-                    <p class="mb-4 text-sm">To request settlement, you must reach 50 points or complete your banking details.</p>
-                    <button id="closeEligibility" class="btn-primary px-4 py-2 rounded">بستن</button>
+            <div id="lockReasonModal" class="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center hidden z-50">
+                <div class="bg-darkcard p-6 rounded-xl max-w-sm w-11/12 text-center" dir="rtl">
+                    <p class="mb-4 text-sm">برای ثبت درخواست تسویه، ابتدا باید نام صاحب حساب و شماره حساب بانکی خود را تکمیل کنید.</p>
+                    <button id="closeLockReason" class="btn-primary px-4 py-2 rounded">بستن</button>
                 </div>
             </div>
             <!-- Header -->
@@ -1899,6 +1900,7 @@
         }
          function renderRewardSteps() {
              purchaseCodeData = JSON.parse(localStorage.getItem('purchaseCodeData') || '{}');
+             const isEligible = accountName.trim() !== '' && accountNumber.trim() !== '';
              const configs = [
                  purchaseCodeData.requestedTime ?
                      {state: 'done', text: '✔️ انجام شد', info: 'درخواست کد خرید ثبت شده است'} :
@@ -1910,11 +1912,12 @@
                          {state: 'locked', text: '', info: 'هنوز در دسترس نیست'},
                  {state: 'active', text: '🟡 در انتظار', info: 'در انتظار تسویه'},
                  isEligible ?
-                     {state: 'active', text: '🟡 درخواست', info: 'برای ثبت درخواست کلیک کنید'} :
-                     {state: 'locked', text: '', info: 'To request settlement, you must reach 50 points or complete your banking details.'}
+                     {state: 'active', text: '🟢 درخواست', info: 'برای ثبت درخواست کلیک کنید'} :
+                     {state: 'locked', text: '', info: 'برای ثبت درخواست تسویه، ابتدا باید نام صاحب حساب و شماره حساب بانکی خود را تکمیل کنید.'}
              ];
+             const stepIds = ['rewardStep1','rewardStep2','rewardStep3','settlementStep'];
              configs.forEach((cfg, i) => {
-                 const el = document.getElementById(`rewardStep${i+1}`);
+                 const el = document.getElementById(stepIds[i]);
                  const statusEl = document.getElementById(`status${i+1}`);
                  const icon = el.querySelector('.step-indicator');
                  const eligibleIcon = el.querySelector('.eligible-icon');
@@ -1940,13 +1943,18 @@
                     } else {
                         el.onclick = () => openStepModal(i+1, cfg.info);
                     }
-                 } else if (cfg.state === 'active') {
-                     icon.classList.add('bg-yellow-500');
-                     statusEl.classList.add('text-yellow-400');
-                     el.classList.add('cursor-pointer','hover:scale-105','ring-primary');
-                     const lock = el.querySelector('.lock-overlay');
-                     if (lock) lock.classList.add('hidden');
-                     if (eligibleIcon) eligibleIcon.classList.remove('hidden');
+                } else if (cfg.state === 'active') {
+                    if (i === 3) {
+                        icon.classList.add('bg-green-600');
+                        statusEl.classList.add('text-green-400');
+                    } else {
+                        icon.classList.add('bg-yellow-500');
+                        statusEl.classList.add('text-yellow-400');
+                    }
+                    el.classList.add('cursor-pointer','hover:scale-105','ring-primary');
+                    const lock = el.querySelector('.lock-overlay');
+                    if (lock) lock.classList.add('hidden');
+                    if (eligibleIcon) eligibleIcon.classList.remove('hidden');
                     if (i === 0 && !purchaseCodeData.requestedTime) {
                         el.onclick = () => { requestPurchaseCode(); openStepModal(i+1, 'درخواست شما ثبت شد. لطفاً یک دقیقه منتظر بمانید'); };
                     } else if (i === 1 && !purchaseCodeData.ready) {
@@ -1967,14 +1975,14 @@
                     if (lock) lock.classList.remove('hidden');
                     if (lockIcon) lockIcon.classList.remove('hidden');
                     if (i === 3) {
-                        el.onclick = () => document.getElementById('eligibilityModal').classList.remove('hidden');
+                        el.onclick = () => document.getElementById('lockReasonModal').classList.remove('hidden');
                     } else {
                         el.onclick = () => openStepModal(i+1, 'این مرحله هنوز فعال نشده است. لطفاً مراحل قبلی را تکمیل کنید.');
                     }
                 }
-                 statusEl.textContent = cfg.text;
-             });
-         }
+                statusEl.textContent = cfg.text;
+            });
+        }
          function generatePurchaseCode() {
              return Math.floor(100000 + Math.random() * 900000).toString();
          }
@@ -2017,8 +2025,8 @@
          // Expose to global scope
          window.requestPurchaseCode = requestPurchaseCode;
          window.requestCashout = requestCashout;
-         document.getElementById('closeEligibility').onclick = () => {
-            document.getElementById('eligibilityModal').classList.add('hidden');
+         document.getElementById('closeLockReason').onclick = () => {
+            document.getElementById('lockReasonModal').classList.add('hidden');
          };
          function markPayoutSuccess(card, date) {
             localStorage.setItem('rewardStep', '4');
