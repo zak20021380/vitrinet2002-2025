@@ -1466,12 +1466,12 @@
                         </div>
                         <div class="quick-link-title">سایت اصلی ویترینت</div>
                     </a>
-                    <a href="https://vitrinet.shop/about" target="_blank" class="quick-link">
+                    <button id="aboutBtn" type="button" class="quick-link">
                         <div class="quick-link-icon">
                             <i class="fas fa-info-circle"></i>
                         </div>
                         <div class="quick-link-title">درباره ما</div>
-                    </a>
+                    </button>
                     <a href="https://wa.me/989123456789" target="_blank" class="quick-link">
                         <div class="quick-link-icon">
                             <i class="fas fa-headset"></i>
@@ -2624,6 +2624,33 @@ function fetchWithdrawals(page, size) {
                 checkSettlementSuccess();
             }
         })();
+    </script>
+    <div id="aboutModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 hidden">
+        <div id="aboutModalContent" class="relative bg-white dark:bg-darkcard rounded-2xl p-6 w-[90%] max-w-md text-center shadow-xl transform transition-all duration-300 scale-95 opacity-0">
+            <button onclick="closeAboutModal()" class="absolute top-2 right-2 text-xl">×</button>
+            <h2 class="text-xl font-bold mb-2 text-primary">دربارهٔ ویتری‌پلاس</h2>
+            <p class="text-sm leading-relaxed text-gray-700 dark:text-gray-300">
+                ویتری‌پلاس یک سیستم پاداش برای خریداران فروشگاه‌های شهری است.<br>
+                با هر خرید، امتیاز می‌گیرید و به جوایز نزدیک‌تر می‌شوید!<br>
+                این سیستم زیرمجموعه‌ای از پلتفرم اصلی ویترینت است؛ ویترینت، ویترین دیجیتال فروشگاه‌های شهر شماست.
+            </p>
+        </div>
+    </div>
+    <script>
+        function closeAboutModal() {
+            document.getElementById('aboutModal').classList.add('hidden');
+            document.body.classList.remove('overflow-hidden');
+            document.getElementById('aboutModalContent').classList.add('scale-95', 'opacity-0');
+        }
+        document.getElementById('aboutBtn')?.addEventListener('click', () => {
+            const modal = document.getElementById('aboutModal');
+            const content = document.getElementById('aboutModalContent');
+            modal.classList.remove('hidden');
+            document.body.classList.add('overflow-hidden');
+            requestAnimationFrame(() => {
+                content.classList.remove('scale-95', 'opacity-0');
+            });
+        });
     </script>
 </body>
 </html>
