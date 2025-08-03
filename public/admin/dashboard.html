@@ -1790,6 +1790,14 @@ tr:last-child td {
           <label for="plan-12month">اشتراک ۱۲ ماهه</label>
           <input id="plan-12month" type="number" />
         </div>
+        <!-- VitriPlus Price Input -->
+        <div class="mb-4">
+          <label class="block text-right text-sm text-green-900 mb-1">قیمت امکانات ویژه (ویتری‌پلاس)</label>
+          <input type="number" id="vitriPlusPrice" name="vitriPlusPrice"
+                 placeholder="مثلاً 30000"
+                 class="w-full p-2 rounded-xl bg-green-100 text-green-800 text-sm text-right outline-none focus:ring-2 focus:ring-green-500"
+                 dir="rtl">
+        </div>
         <button type="submit">ذخیره قیمت پلن‌ها</button>
         <div id="plansMsg" style="display:none;"></div>
       </form>
@@ -3861,7 +3869,8 @@ panels['messages'] = document.getElementById('messages-panel');
 const planInputs = {
   "1month":  document.getElementById('plan-1month'),
   "3month":  document.getElementById('plan-3month'),
-  "12month": document.getElementById('plan-12month')
+  "12month": document.getElementById('plan-12month'),
+  "vitriPlus": document.getElementById('vitriPlusPrice')
 };
 const plansMsg  = document.getElementById('plansMsg');
 
@@ -3907,6 +3916,7 @@ async function loadPlanPrices() {
     planInputs['1month'].value  = plans['1month']  ?? '';
     planInputs['3month'].value  = plans['3month']  ?? '';
     planInputs['12month'].value = plans['12month'] ?? '';
+    planInputs['vitriPlus'].value = plans['vitriPlus'] ?? '';
 
     // اگر همه خالی (یعنی override نداره)، پیام بدید
     if (phone && !Object.values(plans).some(p => p !== null)) {
@@ -3933,7 +3943,8 @@ async function savePlanPrices(e) {
   const prices = {
     '1month':  Number(planInputs['1month'].value),
     '3month':  Number(planInputs['3month'].value),
-    '12month': Number(planInputs['12month'].value)
+    '12month': Number(planInputs['12month'].value),
+    'vitriPlus': Number(planInputs['vitriPlus'].value)
   };
 
   const validPrices = {};
