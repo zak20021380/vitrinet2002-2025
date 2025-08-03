@@ -190,7 +190,7 @@ window.selectPlan = async function (slug) {
            || "";
 
   // استفاده از مدال موجود در صفحه
-  const modal = document.getElementById('confirmPaymentModal');
+  const modal = document.getElementById('upgradeModal');
   if (!modal) return;
   modal.querySelector('h3').textContent = title;
   modal.querySelector('ul').innerHTML = benefits.map(b => `<li>${b}</li>`).join('');
