@@ -1063,6 +1063,15 @@
             font-size: 0.9rem;
         }
     </style>
+    <style>
+      @keyframes scaleUp {
+        from { transform: scale(0.9); opacity: 0; }
+        to { transform: scale(1); opacity: 1; }
+      }
+      .animate-scaleUp {
+        animation: scaleUp 0.25s ease-out forwards;
+      }
+    </style>
 </head>
 <body class="min-h-screen flex items-center justify-center p-4">
     <div class="w-full max-w-md mx-auto">
@@ -2625,32 +2634,22 @@ function fetchWithdrawals(page, size) {
             }
         })();
     </script>
-    <div id="aboutModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 hidden">
-        <div id="aboutModalContent" class="relative bg-white dark:bg-darkcard rounded-2xl p-6 w-[90%] max-w-md text-center shadow-xl transform transition-all duration-300 scale-95 opacity-0">
-            <button onclick="closeAboutModal()" class="absolute top-2 right-2 text-xl">×</button>
-            <h2 class="text-xl font-bold mb-2 text-primary">دربارهٔ ویتری‌پلاس</h2>
-            <p class="text-sm leading-relaxed text-gray-700 dark:text-gray-300">
-                ویتری‌پلاس یک سیستم پاداش برای خریداران فروشگاه‌های شهری است.<br>
-                با هر خرید، امتیاز می‌گیرید و به جوایز نزدیک‌تر می‌شوید!<br>
-                این سیستم زیرمجموعه‌ای از پلتفرم اصلی ویترینت است؛ ویترینت، ویترین دیجیتال فروشگاه‌های شهر شماست.
-            </p>
-        </div>
+    <div id="aboutModal" class="fixed inset-0 z-50 hidden bg-black/60 backdrop-blur-sm flex items-center justify-center">
+      <div class="animate-scaleUp bg-darkcard rounded-xl shadow-2xl p-6 w-[90%] max-w-md text-center text-white relative">
+        <button onclick="document.getElementById('aboutModal').classList.add('hidden')" 
+                class="absolute top-3 left-4 text-2xl text-gray-300 hover:text-white transition duration-200">×</button>
+        <h2 class="text-2xl font-bold text-primary mb-4" style="font-family: 'Vazirmatn', sans-serif;">درباره‌ی ویتری‌پلاس</h2>
+        <p class="text-sm leading-7 text-gray-300" style="font-family: 'Vazirmatn', sans-serif;">
+          ویتری‌پلاس یک سیستم پاداش مدرن برای خریداران فروشگاه‌های شهری است.<br>
+          با هر خرید، امتیاز می‌گیرید و به جوایز ویژه نزدیک‌تر می‌شوید!<br>
+          این سیستم زیرمجموعه‌ای از پلتفرم اصلی ویترینت است؛ ویترینت، ویترین دیجیتال فروشگاه‌های شهر شماست.
+        </p>
+      </div>
     </div>
     <script>
-        function closeAboutModal() {
-            document.getElementById('aboutModal').classList.add('hidden');
-            document.body.classList.remove('overflow-hidden');
-            document.getElementById('aboutModalContent').classList.add('scale-95', 'opacity-0');
-        }
-        document.getElementById('aboutBtn')?.addEventListener('click', () => {
-            const modal = document.getElementById('aboutModal');
-            const content = document.getElementById('aboutModalContent');
-            modal.classList.remove('hidden');
-            document.body.classList.add('overflow-hidden');
-            requestAnimationFrame(() => {
-                content.classList.remove('scale-95', 'opacity-0');
-            });
-        });
+      document.getElementById('aboutBtn')?.addEventListener('click', () => {
+        document.getElementById('aboutModal').classList.remove('hidden');
+      });
     </script>
 </body>
 </html>
