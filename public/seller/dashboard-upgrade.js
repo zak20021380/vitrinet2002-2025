@@ -189,44 +189,26 @@ window.selectPlan = async function (slug) {
            || document.getElementById(`price-${slug}`)?.textContent 
            || "";
 
-  // ایجاد یا گرفتن مدال تأیید پرداخت
-  let modal = document.getElementById('confirmPaymentModal');
-  if (!modal) {
-    modal = document.createElement('div');
-    modal.id = 'confirmPaymentModal';
-    modal.innerHTML = `
-      <div class="fixed inset-0 z-50 bg-black/25 flex items-center justify-center">
-        <div class="bg-white rounded-2xl shadow-2xl max-w-xs w-full p-7 text-center relative animate-fadein">
-          <button id="closePaymentModalBtn" class="absolute left-2 top-2 text-gray-400 text-xl font-bold px-2 hover:text-red-500 transition">&#10006;</button>
-          <h3 class="font-extrabold text-lg sm:text-xl mb-3 text-[#10b981]">${title}</h3>
-          <ul class="text-gray-700 mb-3 text-sm font-medium text-right pr-3 list-disc" style="margin-right:12px">
-            ${benefits.map(b => `<li>${b}</li>`).join('')}
-          </ul>
-          <div class="mb-5 mt-3 font-bold text-base text-[#0ea5e9]">${price ? "قیمت: "+price+" تومان" : ""}</div>
-          <button id="goToPaymentBtn"
-            class="btn-grad px-7 py-3 rounded-full text-white font-black shadow hover:scale-105 transition-all duration-200 text-base mt-2 w-full">
-            ادامه و پرداخت
-          </button>
-        </div>
-      </div>
-    `;
-    document.body.appendChild(modal);
-  } else {
-    modal.querySelector('h3').textContent = title;
-    modal.querySelector('ul').innerHTML = benefits.map(b => `<li>${b}</li>`).join('');
-    modal.querySelector('div.mb-5').textContent = price ? "قیمت: "+price+" تومان" : "";
-  }
-  modal.style.display = 'block';
+  // استفاده از مدال موجود در صفحه
+  const modal = document.getElementById('confirmPaymentModal');
+  if (!modal) return;
+  modal.querySelector('h3').textContent = title;
+  modal.querySelector('ul').innerHTML = benefits.map(b => `<li>${b}</li>`).join('');
+  const priceEl = modal.querySelector('#upgrade-price');
+  if (priceEl) priceEl.textContent = price ? `${price} تومان` : '';
+  const premiumToggle = modal.querySelector('#premiumToggle');
+  if (premiumToggle) premiumToggle.checked = false;
+  modal.classList.remove('hidden');
 
   // بستن با دکمه
-  modal.querySelector('#closePaymentModalBtn').onclick = () => modal.style.display = 'none';
+  modal.querySelector('#closePaymentModalBtn').onclick = () => modal.classList.add('hidden');
 
   // بستن با کلیک بیرون
-  modal.onclick = (e) => { if (e.target === modal) modal.style.display = 'none'; };
+  modal.onclick = (e) => { if (e.target === modal) modal.classList.add('hidden'); };
 
   // رفتن به پرداخت
   modal.querySelector('#goToPaymentBtn').onclick = async function() {
-    modal.style.display = 'none';
+    modal.classList.add('hidden');
     // پیام انتظار پرداخت
     const msgBox = document.getElementById('planSuccessMsg');
     if (msgBox) {
@@ -697,5 +679,19 @@ function toJalaliDate(isoStr) {
     return isoStr.split('T')[0];
   }
 }
+
+document.addEventListener("DOMContentLoaded", () => {
+  const basePrice = 86000;
+  const premiumPrice = 30000;
+  const toggle = document.getElementById("premiumToggle");
+  const display = document.getElementById("upgrade-price");
+
+  if (toggle && display) {
+    toggle.addEventListener("change", () => {
+      const final = toggle.checked ? basePrice + premiumPrice : basePrice;
+      display.textContent = new Intl.NumberFormat("fa-IR").format(final) + ' تومان';
+    });
+  }
+});
 
 
