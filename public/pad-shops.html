@@ -1110,7 +1110,7 @@
             <div class="card p-5 mb-6 flex justify-between items-center">
                 <div>
                     <p class="text-gray-400 text-sm">تعداد فروشگاه‌ها</p>
-                    <p class="font-bold text-white text-xl mt-1" id="storeCount">۸ فروشگاه</p>
+                    <p class="font-bold text-white text-xl mt-1" id="storeCount">۰ فروشگاه</p>
                 </div>
                 <div class="bg-primary bg-opacity-20 p-3 rounded-lg">
                     <i class="fas fa-store text-primary text-xl"></i>
@@ -1374,7 +1374,7 @@
                 const img = document.createElement('img');
                 img.className = 'store-image';
                 img.loading = 'lazy';
-                img.src = (shop.image && /^https?:\/\//.test(shop.image)) ? shop.image : 'https://placehold.co/600x400?text=No+Image';
+                img.src = (shop.image && /^(https?:\/\/|\/|data:image\/)/.test(shop.image)) ? shop.image : 'https://placehold.co/600x400?text=No+Image';
                 img.alt = shop.storename || '';
                 imgContainer.appendChild(img);
 
@@ -1397,7 +1397,7 @@
                 info.appendChild(categoryEl);
                 const descEl = document.createElement('p');
                 descEl.className = 'text-sm text-gray-400 mt-1';
-                descEl.textContent = shop.description || '';
+                descEl.textContent = shop.desc || '';
                 info.appendChild(descEl);
                 storeContent.appendChild(imgContainer);
                 storeContent.appendChild(info);
