@@ -478,6 +478,14 @@ const decoded = jwt.verify(token, JWT_SECRET);
         return res.status(404).json({ success: false, message: 'فروشنده یافت نشد.' });
       }
 
+      // اگر اشتراک پریمیوم منقضی شده باشد، آن را غیرفعال کن
+      if (seller.isPremium && (!seller.premiumUntil || seller.premiumUntil < new Date())) {
+        seller.isPremium = false;
+        seller.premiumUntil = null;
+        await seller.save();
+        console.log(`⚠️ Premium expired for seller ${seller._id}`);
+      }
+
       // ۴) تبدیل به آبجکت و اضافه کردن id برای فرانت
       const sellerObj = seller.toObject();
       sellerObj.id = sellerObj._id; // این خط مهمه

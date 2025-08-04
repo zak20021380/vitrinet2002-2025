@@ -2,6 +2,8 @@ const Payment = require('../models/payment');
 const AdOrder = require('../models/AdOrder');
 const Plan = require('../models/plan'); // مدل پلن اشتراک
 const Seller = require('../models/Seller');
+const SellerPlan = require('../models/sellerPlan');
+const { calcPremiumUntil } = require('../utils/premium');
 const axios = require('axios'); // برای ارتباط با درگاه پرداخت (مثلاً زرین‌پال)
 
 // درخواست پرداخت برای هر دو نوع سفارش: تبلیغ ویژه یا اشتراک فروشگاه
@@ -40,27 +42,40 @@ exports.createPaymentRequest = async (req, res) => {
 
     // پرداخت پلن اشتراک
     if (planSlug) {
-      const plan = await Plan.findOne({ slug: planSlug });
+      // -------------- خرید پلن اشتراک (ویتری‌پلاس) --------------
+      const sellerId = req.user && req.user.id;
+      if (!sellerId) {
+        return res.status(401).json({ success: false, message: 'احراز هویت نامعتبر است.' });
+      }
+
+      if (typeof planSlug !== 'string') {
+        return res.status(400).json({ success: false, message: 'شناسه پلن نامعتبر است.' });
+      }
+
+      // فقط به شناسه پلن اعتماد کن، قیمت از دیتابیس خوانده می‌شود
+      const plan = await Plan.findOne({ slug: planSlug.trim() });
       if (!plan) {
         return res.status(404).json({ success: false, message: 'پلن اشتراک پیدا نشد.' });
       }
-      // ثبت پرداخت تستی در دیتابیس (اگه خواستی)
-      const payment = new Payment({
+
+      // ایجاد رکورد پرداخت در وضعیت «در انتظار»
+      const payment = await Payment.create({
         planSlug,
-        sellerId: req.user?.id || req.user?.sellerId,
+        sellerId,
         amount: plan.price,
-        paymentStatus: 'completed',
-        paymentMethod: 'test',
+        paymentStatus: 'pending',
+        paymentMethod: 'zarinpal',
         type: 'sub'
       });
-      await payment.save();
 
-      // می‌تونی همینجا رکورد اشتراک بسازی یا وضعیت رو تغییر بدی
+      // درگاه پرداخت واقعی را صدا بزن (در اینجا فیک)
+      // برای تست، لینک کال‌بک موفق را برمی‌گردانیم
+      const callbackUrl = `/api/payment/callback?status=success&paymentId=${payment._id}`;
 
       return res.status(200).json({
         success: true,
-        message: "پرداخت تستی با موفقیت انجام شد.",
-        fake: true
+        url: callbackUrl,
+        message: 'در حال هدایت به درگاه پرداخت...'
       });
     }
 
@@ -129,6 +144,10 @@ exports.handlePaymentCallback = async (req, res) => {
     }
 
     if (status === 'success') {
+      if (payment.paymentStatus !== 'pending') {
+        return res.status(400).json({ success: false, message: 'پرداخت قبلاً پردازش شده است.' });
+      }
+
       payment.paymentStatus = 'completed';
       payment.transactionId = transactionId;
       await payment.save();
@@ -137,11 +156,45 @@ exports.handlePaymentCallback = async (req, res) => {
         adOrder.status = 'paid';
         await adOrder.save();
       }
-      // اگر خرید اشتراک بود (planSlug) اینجا وضعیت اشتراک رو فعال کن یا رکورد بساز
+
+      // --- فعال‌سازی پریمیوم بعد از تایید پرداخت ---
+      // ⚠️ هرگز به مقدار ارسالی از سمت فرانت اعتماد نکن؛
+      // فقط پس از تایید موفق درگاه پرداخت، وضعیت پریمیوم ست می‌شود.
+      if (payment.type === 'sub' && planSlug) {
+        try {
+          const plan = await Plan.findOne({ slug: planSlug });
+          if (!plan) throw new Error('invalid plan');
+
+          const seller = await Seller.findById(payment.sellerId);
+          if (seller) {
+            const now = new Date();
+            const premiumUntil = calcPremiumUntil(plan.slug, now);
+            seller.isPremium = true;
+            seller.premiumUntil = premiumUntil;
+            await seller.save();
+
+            // ثبت لاگ تغییر وضعیت
+            console.log(`✅ Seller ${seller._id} upgraded to premium until ${premiumUntil.toISOString()}`);
+
+            // ذخیره در جدول SellerPlan برای سوابق
+            await SellerPlan.create({
+              sellerId: seller._id,
+              planSlug: plan.slug,
+              planTitle: plan.title,
+              price: plan.price,
+              startDate: now,
+              endDate: premiumUntil,
+              status: 'active'
+            });
+          }
+        } catch (err) {
+          console.error('❌ خطا در فعال‌سازی اشتراک:', err);
+        }
+      }
 
       return res.status(200).json({
         success: true,
-        message: 'پرداخت با موفقیت انجام شد.',
+        message: 'Payment completed successfully.',
         payment,
         adOrder,
       });
