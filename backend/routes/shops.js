@@ -5,65 +5,25 @@ const Seller = require('../models/Seller');
 const Product = require('../models/product'); // اضافه شده برای گرفتن محصولات
 const dailyVisitCtrl = require('../controllers/dailyVisitController');
 
-// گرفتن لیست همه فروشگاه‌ها (برای vitrinNet)
-// گرفتن لیست همه فروشگاه‌ها (برای vitrinNet)
+// دریافت لیست همه فروشگاه‌ها از مدل Seller
 router.get('/', async (req, res) => {
   try {
-    const { city, limit } = req.query;
-    let shops = await ShopAppearance.find({}).populate('sellerId');
-    const allProducts = await Product.find({});
+    const sellers = await Seller.find({},
+      'storename category shopurl address desc isPremium boardImage'
+    ).lean();
 
-    if (city) {
-      const regex = new RegExp(city, 'i');
-      shops = shops.filter(s =>
-        regex.test(s.shopAddress || '') ||
-        regex.test(s.sellerId?.address || '')
-      );
-    }
-    if (limit) {
-      const n = parseInt(limit, 10);
-      if (!isNaN(n)) shops = shops.slice(0, n);
-    }
+    const result = sellers.map(seller => ({
+      id: seller._id,
+      storename: seller.storename || '',
+      category: seller.category || '',
+      shopurl: seller.shopurl || '',
+      address: seller.address || '',
+      desc: seller.desc || '',
+      isPremium: !!seller.isPremium,
+      image: seller.boardImage || ''
+    }));
 
-    const shopCards = shops.map(shop => {
-      const seller = shop.sellerId;
-
-      let ownerFirstname = (seller && seller.firstname) ? seller.firstname : '';
-      let ownerLastname = (seller && seller.lastname) ? seller.lastname : '';
-      let ownerName = (ownerFirstname || ownerLastname) ? `${ownerFirstname} ${ownerLastname}`.trim() : 'نامشخص';
-
-      const shopurl = shop.customUrl || (seller && seller.shopurl) || '';
-      // شمارش محصولات واقعی بر اساس shopurl
-const productsCount = allProducts.filter(
-  p => String(p.sellerId) === String(seller._id)
-).length;
-
-
-      return {
-        shopurl,
-        storename: shop.shopLogoText || (seller && seller.storename) || 'بدون نام',
-        address: shop.shopAddress || (seller && seller.address) || 'نامشخص',
-        banner: (shop.slides && shop.slides.length > 0 && shop.slides[0].img) ? shop.slides[0].img : '',
-        category: shop.shopCategory || (seller && seller.category) || '',
-        rating: shop.shopRating || '',
-        visits: shop.shopVisits || 0,
-        boardImage:
-          (shop.boardImage && shop.boardImage.trim().length > 0)
-            ? shop.boardImage
-            : ((seller && seller.boardImage && seller.boardImage.trim().length > 0)
-                ? seller.boardImage
-                : ""),
-        ownerName,
-        ownerFirstname,
-        ownerLastname,
-        ownerPhone: (seller && seller.phone) || '',
-        productsCount,  // 👈 اینجا مقدار درست میاد
-        createdAt: seller?.createdAt || null
-
-      };
-    });
-
-    res.json(shopCards);
+    res.json(result);
   } catch (err) {
     console.error('خطا در دریافت لیست فروشگاه‌ها:', err);
     res.status(500).json({ success: false, message: 'خطای سرور!' });
