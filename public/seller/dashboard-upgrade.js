@@ -172,6 +172,30 @@ function toFaPrice (num) {
   return (+num || 0).toLocaleString('fa-IR');
 }
 
+function faToEn(str) {
+  return (str || '').replace(/[۰-۹]/g, d => '0123456789'.charAt('۰۱۲۳۴۵۶۷۸۹'.indexOf(d)));
+}
+
+let offerTimer;
+function startOfferCountdown(seconds = 45) {
+  const el = document.getElementById('limitedOffer');
+  if (!el) return;
+  clearInterval(offerTimer);
+  let remain = seconds;
+  const tick = () => {
+    const m = String(Math.floor(remain / 60)).padStart(2, '0');
+    const s = String(remain % 60).padStart(2, '0');
+    el.textContent = `پیشنهاد محدود - ${m}:${s}`;
+    remain--;
+    if (remain < 0) {
+      clearInterval(offerTimer);
+      el.textContent = '';
+    }
+  };
+  tick();
+  offerTimer = setInterval(tick, 1000);
+}
+
 /*──────────────── ۴) انتخاب پلن ────────────────*/
 // --- جایگزین تابع قبلی selectPlan کن ---
 // زکی – نسخه نهایی با پاپ‌آپ تأیید پرداخت پلن اشتراک و تبلیغ
@@ -212,30 +236,55 @@ window.selectPlan = async function (slug) {
   // مزایای پلن
   const title = PLAN_TITLE[slug] || slug;
   const benefits = PLAN_BENEFITS[slug] || [];
-  let price = document.querySelector(`[data-plan-price="${slug}"]`)?.textContent 
-           || document.getElementById(`price-${slug}`)?.textContent 
+  let price = document.querySelector(`[data-plan-price="${slug}"]`)?.textContent
+           || document.getElementById(`price-${slug}`)?.textContent
            || "";
 
   // استفاده از مدال موجود در صفحه
   const modal = document.getElementById('upgradeModal');
   if (!modal) return;
-  modal.querySelector('h3').textContent = title;
-  modal.querySelector('ul').innerHTML = benefits.map(b => `<li>${b}</li>`).join('');
+  modal.querySelector('#upgrade-title').textContent = title;
+  modal.querySelector('ul').innerHTML = benefits.map(b => `<li class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-emerald-400"></span>${b}</li>`).join('');
   const priceEl = modal.querySelector('#upgrade-price');
-  if (priceEl) priceEl.textContent = price ? `${price} تومان` : '';
+  const oldPriceEl = modal.querySelector('#old-price');
+  const badge = modal.querySelector('#valueBadge');
   const premiumToggle = modal.querySelector('#premiumToggle');
-  if (premiumToggle) premiumToggle.checked = false;
+
+  const priceNum = +faToEn(price).replace(/,/g, '');
+  if (priceEl) {
+    priceEl.dataset.base = priceNum;
+    priceEl.textContent = price ? `${price} تومان` : '';
+  }
+
+  // نمایش قیمت قدیم برای پلن‌های چندماهه و نشان پیشنهاد ویژه
+  if (slug === '3month' || slug === '12month') {
+    const months = slug === '3month' ? 3 : 12;
+    const oneMonthEl = document.getElementById('price-1month');
+    const oneMonthPrice = oneMonthEl ? +faToEn(oneMonthEl.textContent).replace(/,/g, '') : 0;
+    if (oneMonthPrice && oldPriceEl) {
+      const oldNum = oneMonthPrice * months;
+      oldPriceEl.textContent = toFaPrice(oldNum) + ' تومان';
+      oldPriceEl.classList.remove('hidden');
+    }
+    badge?.classList.remove('hidden');
+  } else {
+    oldPriceEl?.classList.add('hidden');
+    badge?.classList.add('hidden');
+  }
+
+  if (premiumToggle) {
+    premiumToggle.checked = false;
+    premiumToggle.dispatchEvent(new Event('change'));
+  }
   modal.classList.remove('hidden');
+  startOfferCountdown();
 
-  // بستن با دکمه
-  modal.querySelector('#closePaymentModalBtn').onclick = () => modal.classList.add('hidden');
+  const closeModal = () => { modal.classList.add('hidden'); clearInterval(offerTimer); };
+  modal.querySelector('#closePaymentModalBtn').onclick = closeModal;
+  modal.onclick = (e) => { if (e.target === modal) closeModal(); };
 
-  // بستن با کلیک بیرون
-  modal.onclick = (e) => { if (e.target === modal) modal.classList.add('hidden'); };
-
-  // رفتن به پرداخت و ارتقا
   modal.querySelector('#goToPaymentBtn').onclick = async function() {
-    modal.classList.add('hidden');
+    closeModal();
     const premium = premiumToggle && premiumToggle.checked;
     try {
       const res = await fetch(`${API_BASE}/seller/upgrade`, {
@@ -708,15 +757,15 @@ function toJalaliDate(isoStr) {
 }
 
 document.addEventListener("DOMContentLoaded", () => {
-  const basePrice = 86000;
   const premiumPrice = 30000;
   const toggle = document.getElementById("premiumToggle");
   const display = document.getElementById("upgrade-price");
 
   if (toggle && display) {
     toggle.addEventListener("change", () => {
-      const final = toggle.checked ? basePrice + premiumPrice : basePrice;
-      display.textContent = new Intl.NumberFormat("fa-IR").format(final) + ' تومان';
+      const base = parseInt(display.dataset.base || '0', 10);
+      const final = base + (toggle.checked ? premiumPrice : 0);
+      display.textContent = toFaPrice(final) + ' تومان';
     });
   }
 });
