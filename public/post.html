@@ -42,6 +42,14 @@
       from { opacity: 0; transform: translateY(30px);}
       to   { opacity: 1; transform: translateY(0);}
     }
+    #category.open {
+      position: absolute;
+      z-index: 50;
+      background: #fff;
+      width: 100%;
+      max-height: 15rem;
+      overflow-y: auto;
+    }
   </style>
 </head>
 <body class="text-gray-800">
@@ -123,9 +131,9 @@
     <div id="phone-hint" class="text-xs mt-2 text-red-500 hidden"></div>
   </div>
 
-  <div>
+  <div class="relative">
     <label class="block text-sm font-bold mb-1">دسته‌بندی <span class="text-red-500">*</span></label>
-    <select required name="category" id="category" class="w-full p-3 border rounded-xl focus:ring-2 focus:ring-green-200">
+    <select required name="category" id="category" class="w-full p-3 border rounded-xl focus:ring-2 focus:ring-green-200 bg-white">
       <option value="" disabled selected>انتخاب دسته</option>
       <option>پوشاک</option>
       <option>خوراک</option>
@@ -146,11 +154,11 @@
 
   <div id="subcategory-wrapper" class="hidden">
     <label class="block text-sm font-bold mb-1">زیر دسته <span class="text-red-500">*</span></label>
-    <select id="subcategory" class="w-full p-3 border rounded-xl focus:ring-2 focus:ring-green-200">
-      <option value="" disabled selected>انتخاب زیر دسته</option>
-      <option>لباس کودک</option>
-      <option>اسباب‌بازی</option>
-    </select>
+    <div id="subcategory-chips" class="flex flex-wrap gap-2">
+      <button type="button" data-value="لباس کودک" class="px-4 py-2 border border-gray-300 rounded-full text-sm bg-white text-gray-700 hover:bg-gray-100">لباس کودک</button>
+      <button type="button" data-value="اسباب‌بازی" class="px-4 py-2 border border-gray-300 rounded-full text-sm bg-white text-gray-700 hover:bg-gray-100">اسباب‌بازی</button>
+    </div>
+    <input type="hidden" id="subcategory" />
     <div id="subcategory-hint" class="text-xs mt-2 text-red-500 hidden"></div>
   </div>
 
@@ -258,7 +266,6 @@
     ["shopurl", "shopurl-hint"],
     ["phone", "phone-hint"],
     ["category", "category-hint"],
-    ["subcategory", "subcategory-hint"],
     ["address", "address-hint"],
     ["rules", "rules-hint"]
   ].forEach(function (pair) {
@@ -267,7 +274,7 @@
       el.addEventListener("input", function () {
         document.getElementById(pair[1]).classList.add("hidden");
       });
-      if (["category", "subcategory", "rules"].includes(pair[0])) {
+      if (["category", "rules"].includes(pair[0])) {
         el.addEventListener("change", function () {
           document.getElementById(pair[1]).classList.add("hidden");
         });
@@ -277,15 +284,42 @@
 
   const categorySelect = document.getElementById("category");
   const subcatWrapper = document.getElementById("subcategory-wrapper");
-  const subcatSelect = document.getElementById("subcategory");
+  const subcatInput = document.getElementById("subcategory");
+  const subcatChips = document.querySelectorAll('#subcategory-chips button');
+
   categorySelect.addEventListener("change", function () {
     if (this.value === "کودکان") {
       subcatWrapper.classList.remove("hidden");
     } else {
       subcatWrapper.classList.add("hidden");
-      subcatSelect.selectedIndex = 0;
+      subcatInput.value = "";
+      subcatChips.forEach(b => b.classList.remove('bg-[#10b981]','text-white','border-[#10b981]'));
       document.getElementById("subcategory-hint").classList.add("hidden");
     }
+  });
+
+  subcatChips.forEach(btn => {
+    btn.addEventListener('click', function () {
+      subcatChips.forEach(b => b.classList.remove('bg-[#10b981]','text-white','border-[#10b981]'));
+      this.classList.add('bg-[#10b981]','text-white','border-[#10b981]');
+      subcatInput.value = this.dataset.value;
+      document.getElementById("subcategory-hint").classList.add("hidden");
+    });
+  });
+
+  // force category dropdown to open downward
+  categorySelect.addEventListener('focus', function(){
+    this.size = this.options.length;
+    this.classList.add('open');
+  });
+  categorySelect.addEventListener('blur', function(){
+    this.size = 1;
+    this.classList.remove('open');
+  });
+  categorySelect.addEventListener('change', function(){
+    this.size = 1;
+    this.classList.remove('open');
+    this.blur();
   });
 
   // اعتبارسنجی و ارسال فرم ثبت فروشگاه
