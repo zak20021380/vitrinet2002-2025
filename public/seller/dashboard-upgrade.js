@@ -631,11 +631,31 @@ async function fetchMyPlans() {
     if (!plan.status) return "";
     let bg = "bg-gray-400", text = "text-white", txt = "";
     switch (plan.status) {
-      case "active":   bg = "bg-green-500"; txt = "فعال"; break;
-      case "expired":  bg = "bg-red-400"; txt = "منقضی"; break;
-      case "pending":  bg = "bg-yellow-400 text-black"; txt = "در انتظار"; break;
-      case "paid":     bg = "bg-blue-500"; txt = "پرداخت شده"; break;
-      default:         txt = plan.status;
+      case "active":
+        bg = "bg-green-500";
+        txt = "فعال";
+        break;
+      case "expired":
+        bg = "bg-red-400";
+        txt = "منقضی";
+        break;
+      case "pending":
+        bg = "bg-[#F59E0B]";
+        text = "text-white";
+        txt = "در انتظار";
+        break;
+      case "paid":
+        bg = "bg-blue-500";
+        txt = "پرداخت شده";
+        break;
+      case "review":
+      case "under_review":
+        bg = "bg-gray-200";
+        text = "text-gray-600";
+        txt = "زیر نظر";
+        break;
+      default:
+        txt = plan.status;
     }
     return `<div class="absolute left-3 top-3 text-xs ${bg} ${text} rounded-full px-3 py-0.5 shadow status-badge">${txt}</div>`;
   }
