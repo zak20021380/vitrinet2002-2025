@@ -8,6 +8,8 @@ const Payment = require('../models/payment');
 const Chat = require('../models/chat');
 const Report = require('../models/Report');
 const BannedPhone = require('../models/BannedPhone');
+const Plan = require('../models/plan');
+const { calcPremiumUntil } = require('../utils/premium');
 
 exports.registerSeller = async (req, res) => {
   try {
@@ -82,5 +84,52 @@ exports.deleteSeller = async (req, res) => {
   } catch (err) {
     console.error('deleteSeller error:', err);
     res.status(500).json({ message: 'خطا در حذف فروشنده.', error: err.message });
+  }
+};
+
+// ارتقای فروشنده به پلن انتخابی (معمولی یا پرمیوم)
+exports.upgradeSeller = async (req, res) => {
+  try {
+    const sellerId = req.user && (req.user.id || req.user._id);
+    const { planSlug, premium } = req.body || {};
+
+    if (!sellerId) {
+      return res.status(401).json({ success: false, message: 'احراز هویت نامعتبر است.' });
+    }
+
+    const seller = await Seller.findById(sellerId);
+    if (!seller) {
+      return res.status(404).json({ success: false, message: 'فروشنده پیدا نشد.' });
+    }
+
+    if (premium) {
+      const plan = await Plan.findOne({ slug: planSlug });
+      if (!plan) {
+        return res.status(404).json({ success: false, message: 'پلن موردنظر یافت نشد.' });
+      }
+      const now = new Date();
+      const premiumUntil = calcPremiumUntil(plan.slug, now);
+      seller.isPremium = true;
+      seller.premiumUntil = premiumUntil;
+      await SellerPlan.create({
+        sellerId: seller._id,
+        planSlug: plan.slug,
+        planTitle: plan.title,
+        price: plan.price,
+        startDate: now,
+        endDate: premiumUntil,
+        status: 'active'
+      });
+    } else {
+      seller.isPremium = false;
+      seller.premiumUntil = null;
+    }
+
+    await seller.save();
+
+    return res.json({ success: true, seller: { id: seller._id, isPremium: seller.isPremium, premiumUntil: seller.premiumUntil } });
+  } catch (err) {
+    console.error('upgradeSeller error:', err);
+    res.status(500).json({ success: false, message: 'خطا در ارتقا حساب.' });
   }
 };
