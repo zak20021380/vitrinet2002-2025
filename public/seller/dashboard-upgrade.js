@@ -12,6 +12,33 @@ const adPriceElems = {
   products : document.getElementById("price-ad_products"),
 };
 
+// نمایش پیغام به‌صورت توست
+function showToast(message, isError = false) {
+  let toast = document.getElementById('toast');
+  if (!toast) {
+    toast = document.createElement('div');
+    toast.id = 'toast';
+    toast.className = 'fixed top-5 left-1/2 -translate-x-1/2 bg-white font-bold shadow-lg rounded-xl px-5 py-3 z-50 hidden';
+    document.body.appendChild(toast);
+  }
+  toast.textContent = message;
+  toast.classList.remove('hidden');
+  toast.classList.toggle('text-red-600', isError);
+  toast.classList.toggle('text-green-600', !isError);
+  setTimeout(() => toast.classList.add('hidden'), 3000);
+}
+
+// به‌روزرسانی نشان پرمیوم در رابط کاربری
+function updatePremiumBadge(isPremium) {
+  const badge = document.getElementById('premiumBadge');
+  if (!badge) return;
+  if (isPremium) {
+    badge.classList.remove('hidden');
+  } else {
+    badge.classList.add('hidden');
+  }
+}
+
 
 /*──────────────── ۱) تب‌بندی و مقداردهی اولیه ────────────────*/
 function initUpgradeDashboard () {
@@ -206,34 +233,27 @@ window.selectPlan = async function (slug) {
   // بستن با کلیک بیرون
   modal.onclick = (e) => { if (e.target === modal) modal.classList.add('hidden'); };
 
-  // رفتن به پرداخت
+  // رفتن به پرداخت و ارتقا
   modal.querySelector('#goToPaymentBtn').onclick = async function() {
     modal.classList.add('hidden');
-    // پیام انتظار پرداخت
-    const msgBox = document.getElementById('planSuccessMsg');
-    if (msgBox) {
-      msgBox.innerHTML = `پلن <b>${title}</b> انتخاب شد. در حال هدایت به پرداخت…`;
-      msgBox.classList.remove('hidden');
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-      setTimeout(() => msgBox.classList.add('hidden'), 3200);
-    }
-
-    // فراخوان پرداخت سمت سرور
+    const premium = premiumToggle && premiumToggle.checked;
     try {
-      const res = await fetch(`${API_BASE}/payment/request`, {
+      const res = await fetch(`${API_BASE}/seller/upgrade`, {
         method: 'POST',
-        headers: {'Content-Type': 'application/json'},
+        headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
-        body: JSON.stringify({ planSlug: slug })
+        body: JSON.stringify({ planSlug: slug, premium })
       });
       const data = await res.json();
-      if (data && data.url) {
-        window.location.href = data.url;
+      if (res.ok && data.success) {
+        const msg = premium ? 'حساب شما با موفقیت پرمیوم شد.' : 'اشتراک شما با موفقیت فعال شد.';
+        showToast(msg);
+        updatePremiumBadge(data.seller?.isPremium);
       } else {
-        alert(data.message || "خطا در ارتباط با سرور پرداخت");
+        showToast(data.message || 'خطا در پرداخت', true);
       }
     } catch (err) {
-      alert("خطا در ارتباط با سرور پرداخت");
+      showToast('خطا در ارتباط با سرور', true);
     }
   };
 };
@@ -242,10 +262,17 @@ window.selectPlan = async function (slug) {
 
 
 /*──────────────── ۵) اجرا بعد از لود ────────────────*/
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
   if (document.getElementById('tab-sub')) {
     initUpgradeDashboard();
   }
+  try {
+    const res = await fetch(`${API_BASE}/auth/me`, { credentials: 'include' });
+    if (res.ok) {
+      const data = await res.json();
+      updatePremiumBadge(data?.seller?.isPremium);
+    }
+  } catch {}
 });
 
 
