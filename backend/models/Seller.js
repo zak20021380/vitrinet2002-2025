@@ -7,6 +7,7 @@ const sellerSchema = new mongoose.Schema({
   shopurl: { type: String, unique: true },
   phone: { type: String, unique: true },
   category: String,
+  subcategory: String,
   address: String,
   desc: String,
   password: {
