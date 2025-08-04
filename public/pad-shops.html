@@ -262,7 +262,8 @@
                 height: 56px; /* h-14 equivalent */
             }
             .store-title {
-                font-size: 0.875rem; /* Smaller title on very small screens */
+                font-size: 0.85rem; /* Smaller title on very small screens */
+                line-height: 1.3;
             }
             .store-badge {
                 font-size: 0.75rem; /* text-xs equivalent */
@@ -271,13 +272,16 @@
             .store-description {
                 font-size: 0.75rem; /* text-xs equivalent on small screens */
                 margin-top: 0.25rem;
+                line-height: 1.4;
             }
             .store-button-container {
                 padding-top: 1rem;
                 gap: 0.5rem;
             }
             .store-listing-card {
-                padding: 1rem; /* Reduce padding on small screens */
+                width: 98%;
+                padding: 0.85rem; /* Reduce padding on small screens */
+                margin: 0 auto;
             }
             .store-button {
                 padding: 0.5rem 0.75rem !important;
@@ -554,7 +558,7 @@
         @media (max-width: 480px) {
             .store-grid {
                 grid-template-columns: 1fr;
-                gap: 1rem;
+                gap: 1.5rem;
             }
         }
         /* CTA Button Styles */
@@ -853,6 +857,33 @@
         .store-listing-card.normal .btn-view-address:hover {
             background: rgba(255, 255, 255, 0.1);
         }
+
+        /* Mobile-specific tweaks for store cards */
+        @media (max-width: 480px) {
+            .store-listing-card,
+            .store-listing-card.premium,
+            .store-listing-card.normal {
+                width: 98%;
+                padding: 0.85rem;
+                margin: 0 auto;
+            }
+            .store-listing-card.premium .store-title,
+            .store-listing-card.normal .store-title {
+                font-size: 0.85rem;
+                line-height: 1.3;
+            }
+            .store-listing-card.premium .store-description,
+            .store-listing-card.normal .store-description {
+                font-size: 0.75rem;
+                line-height: 1.4;
+            }
+            .store-listing-card.premium .store-image-container,
+            .store-listing-card.normal .store-image-container,
+            .store-image-container {
+                height: 105px;
+            }
+        }
+
         /* NEW CATEGORY FILTER STYLES */
         .category-filter-container {
             background: rgba(30, 41, 59, 0.7);
