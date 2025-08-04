@@ -640,6 +640,19 @@ async function fetchMyPlans() {
     return `<div class="absolute left-3 top-3 text-xs ${bg} ${text} rounded-full px-3 py-0.5 shadow status-badge">${txt}</div>`;
   }
 
+  function subStatusBadge(plan) {
+    let status = plan.status || (plan.active ? 'active' : '');
+    if (!status) return '';
+    let color = '#3B82F6', label = 'فعال';
+    switch (status) {
+      case 'expired': color = '#EF4444'; label = 'منقضی'; break;
+      case 'pending': color = '#F59E0B'; label = 'در انتظار'; break;
+      case 'active':
+      default: color = '#3B82F6'; label = 'فعال';
+    }
+    return `<span class="my-plan-status" style="background:${color}">${label}</span>`;
+  }
+
   try {
     const res = await fetch(`${API_BASE}/sellerPlans/my`, { credentials: 'include' });
     const json = await res.json();
@@ -689,15 +702,15 @@ async function fetchMyPlans() {
     // کارت‌های پلن اشتراک
     const subCards = subPlans.length
       ? subPlans.map(plan => `
-        <div class="plan-card border border-blue-100 rounded-xl bg-white p-4 sm:p-5 shadow-sm mb-4 hover:shadow-lg transition-all relative">
-          ${plan.active ? `<div class="absolute left-3 top-3 text-xs bg-blue-500 text-white rounded-full px-3 py-0.5 shadow">فعال</div>` : ""}
-          <div class="font-bold text-blue-700 text-base mb-2">${plan.title || '-'}</div>
-          <div class="text-base text-blue-800 font-extrabold mb-2">${toFaPrice(plan.price)} <span class="text-xs font-normal">تومان</span></div>
-          <div class="flex flex-col items-center gap-1 text-gray-500 text-xs sm:text-sm mb-2">
+        <div class="my-plan-card mb-4">
+          ${subStatusBadge(plan)}
+          <div class="text-lg font-bold mb-1">${plan.title || '-'}</div>
+          <div class="text-2xl font-extrabold text-[#10B981] mb-3">${toFaPrice(plan.price)} <span class="text-sm font-normal text-gray-300">تومان</span></div>
+          <div class="flex flex-col items-end gap-1 text-gray-300 text-xs sm:text-sm">
             <div>شروع: <span dir="ltr">${toJalaliDate(plan.startDate) || '-'}</span></div>
             <div>پایان: <span dir="ltr">${toJalaliDate(plan.endDate) || '-'}</span></div>
           </div>
-          ${plan.description ? `<div class="text-xs text-gray-400 mt-1">${plan.description}</div>` : ''}
+          ${plan.description ? `<div class="text-xs text-gray-400 mt-3 text-right">${plan.description}</div>` : ''}
         </div>
       `).join('')
       : `<div class="text-xs text-gray-400 py-5 text-center">هیچ پلن اشتراکی نداری!</div>`;
