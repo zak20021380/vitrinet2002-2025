@@ -213,17 +213,17 @@ window.selectPlan = async function (slug) {
     '1month':  [
       "قرار گرفتن فروشگاه شما در نتایج جستجو", 
       "ساخت ویترین اختصاصی", 
-      "دریافت پشتیبانی سریع"
+      "<span class='text-amber-300 font-bold'>امکان فعالسازی VitriPlus</span>"
     ],
     '3month': [
       "همه امکانات پلن ۱ ماهه +", 
       "۳ ماه حضور فعال", 
-      "تخفیف ویژه نسبت به ماهانه"
+      "<span class='text-amber-300 font-bold'>تخفیف ویژه VitriPlus</span>"
     ],
     '12month': [
       "همه امکانات پلن‌های قبلی +",
       "نمایش بیشتر فروشگاه",
-      "صرفه اقتصادی عالی"
+      "<span class='text-amber-300 font-bold'>ویژگی‌های اختصاصی VitriPlus</span>"
     ],
   };
 
@@ -244,10 +244,18 @@ window.selectPlan = async function (slug) {
   const modal = document.getElementById('upgradeModal');
   if (!modal) return;
   modal.querySelector('#upgrade-title').textContent = title;
-  modal.querySelector('ul').innerHTML = benefits.map(b => `<li class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-emerald-400"></span>${b}</li>`).join('');
+  const featuresUl = modal.querySelector('#featureList');
+  if (featuresUl) {
+    featuresUl.innerHTML = benefits.map(b => `\
+      <li>\
+        <svg class="w-4 h-4 text-emerald-400" fill="none" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>\
+        <span>${b}</span>\
+      </li>`).join('');
+  }
   const priceEl = modal.querySelector('#upgrade-price');
   const oldPriceEl = modal.querySelector('#old-price');
-  const badge = modal.querySelector('#valueBadge');
+  const badge = modal.querySelector('#planBadge');
+  const saveBadge = modal.querySelector('#saveBadge');
   const premiumToggle = modal.querySelector('#premiumToggle');
 
   const priceNum = +faToEn(price).replace(/,/g, '');
@@ -256,7 +264,7 @@ window.selectPlan = async function (slug) {
     priceEl.textContent = price ? `${price} تومان` : '';
   }
 
-  // نمایش قیمت قدیم برای پلن‌های چندماهه و نشان پیشنهاد ویژه
+  // نمایش قیمت قدیم و برچسب‌ها برای پلن‌های چندماهه
   if (slug === '3month' || slug === '12month') {
     const months = slug === '3month' ? 3 : 12;
     const oneMonthEl = document.getElementById('price-1month');
@@ -265,11 +273,24 @@ window.selectPlan = async function (slug) {
       const oldNum = oneMonthPrice * months;
       oldPriceEl.textContent = toFaPrice(oldNum) + ' تومان';
       oldPriceEl.classList.remove('hidden');
+      if (saveBadge) {
+        const percent = Math.round((1 - priceNum / oldNum) * 100);
+        if (percent > 0) {
+          saveBadge.textContent = `صرفه‌جویی ${percent.toLocaleString('fa-IR')}٪`;
+          saveBadge.classList.remove('hidden');
+        } else {
+          saveBadge.classList.add('hidden');
+        }
+      }
     }
-    badge?.classList.remove('hidden');
+    if (badge) {
+      badge.textContent = slug === '3month' ? 'پرفروش‌ترین' : 'پیشنهاد طلایی';
+      badge.classList.remove('hidden');
+    }
   } else {
     oldPriceEl?.classList.add('hidden');
     badge?.classList.add('hidden');
+    saveBadge?.classList.add('hidden');
   }
 
   if (premiumToggle) {
