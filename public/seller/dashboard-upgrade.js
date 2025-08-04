@@ -298,9 +298,15 @@ window.selectPlan = async function (slug) {
     premiumToggle.dispatchEvent(new Event('change'));
   }
   modal.classList.remove('hidden');
+  modal.scrollTop = 0;
+  document.body.classList.add('overflow-hidden');
   startOfferCountdown();
 
-  const closeModal = () => { modal.classList.add('hidden'); clearInterval(offerTimer); };
+  const closeModal = () => {
+    modal.classList.add('hidden');
+    document.body.classList.remove('overflow-hidden');
+    clearInterval(offerTimer);
+  };
   modal.querySelector('#closePaymentModalBtn').onclick = closeModal;
   modal.onclick = (e) => { if (e.target === modal) closeModal(); };
 
@@ -367,6 +373,8 @@ window.openAdModal = function(adType) {
 
   // نمایش مدال
   backdrop.classList.remove('hidden');
+  backdrop.scrollTop = 0;
+  document.body.classList.add('overflow-hidden');
   setTimeout(() => { backdrop.classList.add('!opacity-100'); }, 10);
 
   // مقدار اولیه: نمایش محصولات
@@ -391,6 +399,7 @@ window.closeAdModal = function() {
     backdrop.classList.add('hidden');
     backdrop.classList.remove('!opacity-100');
   }
+  document.body.classList.remove('overflow-hidden');
 };
 
 // بستن با کلیک روی بک‌دراپ
