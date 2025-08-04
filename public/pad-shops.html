@@ -758,13 +758,26 @@
             color: #0f172a;
             font-size: 16px;
         }
-        /* NORMAL STORE CARD ADJUSTMENTS */
+        /* NORMAL STORE CARD ENHANCEMENTS */
+        .store-listing-card.normal {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(12px) saturate(180%);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 20px;
+            padding: 1.5rem;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.25);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .store-listing-card.normal:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.35);
+        }
         .store-listing-card.normal .store-header {
-            margin-bottom: 0.5rem;
+            margin-bottom: 0.75rem;
         }
         .store-listing-card.normal .store-title {
             font-weight: 700;
-            font-size: 1.125rem;
+            font-size: 1.25rem;
             color: #f0f0f0;
             margin: 0;
         }
@@ -779,10 +792,23 @@
             align-items: center;
         }
         .store-listing-card.normal .store-description {
-            color: #a0aec0;
+            color: #cbd5e1;
             font-size: 0.875rem;
             margin: 0.25rem 0 0 0;
             font-weight: 400;
+        }
+        .store-listing-card.normal .store-image-container {
+            height: 180px;
+            margin-bottom: 1.25rem;
+            border-radius: 16px;
+        }
+        @media (min-width: 768px) {
+            .store-listing-card.normal .store-image-container {
+                width: 150px;
+                height: 150px;
+                margin-right: 1.5rem;
+                margin-bottom: 0;
+            }
         }
         .store-listing-card.normal .store-button-container {
             margin-top: 1.5rem;
@@ -790,29 +816,42 @@
             border-top: 1px solid rgba(99, 102, 241, 0.2);
             display: flex;
             flex-wrap: wrap;
-            gap: 0.875rem;
+            gap: 1rem;
             justify-content: flex-end;
         }
         .store-listing-card.normal .store-button {
-            padding: 0.625rem 1.25rem;
-            border-radius: 10px;
+            padding: 0.75rem 1.25rem;
+            border-radius: 12px;
             font-size: 0.875rem;
             font-weight: 500;
             transition: all 0.2s ease;
             cursor: pointer;
             border: 1px solid rgba(99, 102, 241, 0.3);
-            color: white;
+            color: #e2e8f0;
             display: flex;
             align-items: center;
             justify-content: center;
-            background: rgba(30, 41, 59, 0.5);
+            background: rgba(255, 255, 255, 0.05);
             box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
             flex: 1;
             min-width: 120px;
         }
         .store-listing-card.normal .store-button:hover {
             transform: translateY(-2px);
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+        }
+        .store-listing-card.normal .btn-view-products {
+            background: linear-gradient(90deg, #6366F1 0%, #8B5CF6 100%);
+            color: #fff;
+        }
+        .store-listing-card.normal .btn-view-products:hover {
+            box-shadow: 0 6px 12px rgba(99, 102, 241, 0.35);
+        }
+        .store-listing-card.normal .btn-view-address {
+            background: rgba(255, 255, 255, 0.05);
+        }
+        .store-listing-card.normal .btn-view-address:hover {
+            background: rgba(255, 255, 255, 0.1);
         }
         /* NEW CATEGORY FILTER STYLES */
         .category-filter-container {
@@ -1217,6 +1256,14 @@
             let currentSearch = '';
             const batchSize = 4;
 
+            function applyProductLink(element, shopurl) {
+                const slug = shopurl || element.dataset.shopurl;
+                if (!slug) return;
+                element.href = `http://localhost:5000/shop.html?shopurl=${encodeURIComponent(slug)}`;
+            }
+
+            document.querySelectorAll('.btn-view-products').forEach(btn => applyProductLink(btn));
+
             const urlParams = new URLSearchParams(window.location.search);
             const typeParam = urlParams.get('type');
             if (typeParam === 'premium' || typeParam === 'regular') {
@@ -1428,13 +1475,9 @@
                 buttonContainer.appendChild(addressBtn);
                 const productsLink = document.createElement('a');
                 productsLink.className = 'store-button btn-view-products';
-                if (shop.shopurl && /^https?:\/\//.test(shop.shopurl)) {
-                    productsLink.href = shop.shopurl;
-                } else if (shop.id) {
-                    productsLink.href = `products.html?shop=${encodeURIComponent(shop.id)}`;
-                } else {
-                    productsLink.href = 'products.html';
-                }
+                const shopSlug = shop.shopurl || shop.id || '';
+                productsLink.dataset.shopurl = shopSlug;
+                applyProductLink(productsLink, shopSlug);
                 productsLink.innerHTML = '<i class="fas fa-box-open button-icon"></i> مشاهده محصولات';
                 buttonContainer.appendChild(productsLink);
                 card.appendChild(buttonContainer);
