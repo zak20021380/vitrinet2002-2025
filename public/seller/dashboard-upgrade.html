@@ -95,6 +95,30 @@
   opacity: 1;
 }
 
+    /* استایل مدال اشتراک */
+    #upgradeModal .modal-box {
+      background: rgba(31,41,55,0.85);
+      backdrop-filter: blur(16px);
+      border: 1px solid rgba(255,255,255,0.18);
+      border-radius: 1.25rem;
+      box-shadow: 0 0 20px rgba(16,185,129,0.55);
+      animation: modalGlow 4s ease-in-out infinite alternate;
+    }
+    @keyframes modalGlow {
+      from { box-shadow: 0 0 20px rgba(16,185,129,0.55); }
+      to { box-shadow: 0 0 25px rgba(14,165,233,0.55); }
+    }
+    #goToPaymentBtn.pay-btn {
+      animation: payPulse 2s infinite;
+    }
+    @keyframes payPulse {
+      0%,100% { transform: scale(1); }
+      50% { transform: scale(1.03); }
+    }
+    #valueBadge {
+      background: linear-gradient(90deg,#f59e0b,#f43f5e);
+    }
+
   </style>
 </head>
 <body class="min-h-screen px-2 pt-6 pb-8">
@@ -270,20 +294,25 @@
     <div id="planSuccessMsg" class="hidden text-green-600 text-center mt-7 font-bold bg-[#e0fdfa] rounded-2xl py-3 px-5 shadow-lg"></div>
   </div>
   <!-- مدال تایید خرید پلن اشتراک -->
-  <div id="upgradeModal" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm hidden flex items-center justify-center">
-    <div class="bg-white rounded-2xl shadow-2xl max-w-xs w-full p-7 text-center relative animate-fadein">
+  <div id="upgradeModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm hidden">
+    <div class="modal-box w-full max-w-xs p-7 text-center relative animate-fadein">
+      <span id="valueBadge" class="hidden absolute -top-3 -right-3 text-xs font-bold text-white px-3 py-1 rounded-full shadow-lg">پیشنهاد ویژه</span>
       <button id="closePaymentModalBtn" class="absolute left-2 top-2 text-gray-400 text-xl font-bold px-2 hover:text-red-500 transition">&#10006;</button>
-      <h3 class="font-extrabold text-lg sm:text-xl mb-3 text-[#10b981]"></h3>
-      <ul class="text-gray-700 mb-3 text-sm font-medium text-right pr-3 list-disc" style="margin-right:12px"></ul>
-      <p class="text-center text-sm text-gray-600 mt-2">
-        قیمت:
-        <span id="upgrade-price" class="text-primary font-bold">۸۶,۰۰۰ تومان</span>
-      </p>
-      <label class="flex items-center justify-center gap-2 mt-4 text-sm text-gray-500">
-        <input type="checkbox" id="premiumToggle" class="accent-primary w-4 h-4">
-        فعالسازی امکانات ویژه (ویتری‌پلاس) +۳۰,۰۰۰ تومان
+      <h3 class="flex items-center justify-center gap-2 font-extrabold text-xl mb-4 text-amber-400">
+        <svg width="24" height="24" fill="none" viewBox="0 0 24 24" class="w-6 h-6"><path d="M12 2l3 5 5 1-3.5 4 1 5-5.5-3-5.5 3 1-5L4 8l5-1 3-5z" stroke="currentColor" stroke-width="2"/></svg>
+        <span id="upgrade-title"></span>
+      </h3>
+      <ul class="text-gray-200 mb-4 text-sm font-medium text-right space-y-2"></ul>
+      <div class="mb-4">
+        <span id="old-price" class="text-gray-400 line-through text-sm mr-2 hidden"></span>
+        <span id="upgrade-price" class="text-2xl font-black text-green-400" data-base="86000">۸۶,۰۰۰ تومان</span>
+      </div>
+      <label class="flex items-center justify-center gap-2 mt-2 text-sm text-gray-300">
+        <input type="checkbox" id="premiumToggle" class="accent-emerald-500 w-4 h-4">
+        فعالسازی امکانات ویژه (ویتری‌پلاس) <span class="text-xs">+۳۰,۰۰۰ تومان</span>
       </label>
-      <button id="goToPaymentBtn" class="btn-grad px-7 py-3 rounded-full text-white font-black shadow hover:scale-105 transition-all duration-200 text-base mt-5 w-full">ادامه و پرداخت</button>
+      <button id="goToPaymentBtn" class="pay-btn btn-grad w-full mt-6 py-3 rounded-2xl text-white font-extrabold shadow-lg">ادامه و پرداخت</button>
+      <div id="limitedOffer" class="mt-2 text-xs text-pink-300 animate-pulse"></div>
     </div>
   </div>
 
