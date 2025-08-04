@@ -28,6 +28,11 @@ const sellerSchema = new mongoose.Schema({
   subscriptionEnd: { type: Date },       // تاریخ پایان اشتراک
   visits: { type: Number, default: 0 },  // تعداد بازدید فروشگاه
 
+  // --- وضعیت فروشنده پریمیوم ---
+  // ⚠️ هرگز به فرانت اجازه نده این فیلدها را تغییر دهد؛ فقط کال‌بک درگاه یا ادمین
+  isPremium: { type: Boolean, default: false },
+  premiumUntil: { type: Date, default: null },
+
   // آیا توسط ادمین برای ارسال پیام مسدود شده است؟
   blockedByAdmin: { type: Boolean, default: false },
 
