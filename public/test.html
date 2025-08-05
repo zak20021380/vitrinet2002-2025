@@ -1,0 +1,826 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>سیستم نوبت‌دهی آنلاین</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --secondary: #a78bfa;
+            --success: #10b981;
+            --bg-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --card-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+
+        body {
+            font-family: 'Vazirmatn', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            direction: rtl;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 20px 0;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            animation: slideDown 0.5s ease-out;
+        }
+
+        @keyframes slideDown {
+            from {
+                transform: translateY(-100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .logo {
+            font-size: 1.8rem;
+            font-weight: bold;
+            background: var(--bg-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 30px;
+            list-style: none;
+        }
+
+        .nav-links a {
+            color: #4b5563;
+            text-decoration: none;
+            transition: all 0.3s;
+            position: relative;
+        }
+
+        .nav-links a:hover {
+            color: var(--primary);
+        }
+
+        .nav-links a::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: var(--primary);
+            transition: width 0.3s;
+        }
+
+        .nav-links a:hover::after {
+            width: 100%;
+        }
+
+        .hero {
+            text-align: center;
+            padding: 60px 0;
+            animation: fadeIn 1s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        h1 {
+            font-size: 3rem;
+            margin-bottom: 20px;
+            background: var(--bg-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .subtitle {
+            font-size: 1.2rem;
+            color: #6b7280;
+            margin-bottom: 40px;
+        }
+
+        .booking-section {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 30px;
+            margin-top: 50px;
+        }
+
+        @media (max-width: 768px) {
+            .booking-section {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .service-selection {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: var(--card-shadow);
+            height: fit-content;
+            animation: slideInLeft 0.8s ease-out;
+        }
+
+        @keyframes slideInLeft {
+            from {
+                opacity: 0;
+                transform: translateX(50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            color: #1f2937;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .section-title::before {
+            content: '🏥';
+            font-size: 1.8rem;
+        }
+
+        .service-card {
+            padding: 15px;
+            margin-bottom: 15px;
+            border: 2px solid #e5e7eb;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .service-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 0;
+            height: 100%;
+            background: linear-gradient(90deg, rgba(99, 102, 241, 0.1), rgba(167, 139, 250, 0.1));
+            transition: width 0.3s;
+            z-index: -1;
+        }
+
+        .service-card:hover::before {
+            width: 100%;
+        }
+
+        .service-card:hover {
+            border-color: var(--primary);
+            transform: translateX(-5px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+
+        .service-card.selected {
+            border-color: var(--primary);
+            background: linear-gradient(90deg, rgba(99, 102, 241, 0.05), rgba(167, 139, 250, 0.05));
+        }
+
+        .service-name {
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 5px;
+        }
+
+        .service-desc {
+            color: #6b7280;
+            font-size: 0.9rem;
+        }
+
+        .calendar-section {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: var(--card-shadow);
+            animation: slideInRight 0.8s ease-out;
+        }
+
+        @keyframes slideInRight {
+            from {
+                opacity: 0;
+                transform: translateX(-50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .calendar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .month-year {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: #1f2937;
+        }
+
+        .calendar-nav {
+            display: flex;
+            gap: 10px;
+        }
+
+        .nav-btn {
+            width: 40px;
+            height: 40px;
+            border: none;
+            background: var(--primary);
+            color: white;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+        }
+
+        .nav-btn:hover {
+            background: var(--primary-dark);
+            transform: scale(1.1);
+        }
+
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 10px;
+            margin-bottom: 30px;
+        }
+
+        .day-label {
+            text-align: center;
+            font-weight: 600;
+            color: #6b7280;
+            padding: 10px;
+        }
+
+        .day {
+            aspect-ratio: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 2px solid #e5e7eb;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 500;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .day::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: var(--primary);
+            transform: translate(-50%, -50%);
+            transition: all 0.5s;
+            z-index: -1;
+        }
+
+        .day:hover:not(.disabled) {
+            border-color: var(--primary);
+            color: var(--primary);
+            transform: scale(1.05);
+        }
+
+        .day.selected {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        .day.selected::before {
+            width: 100%;
+            height: 100%;
+            border-radius: 12px;
+        }
+
+        .day.disabled {
+            color: #d1d5db;
+            cursor: not-allowed;
+            background: #f9fafb;
+        }
+
+        .day.today {
+            border-color: var(--secondary);
+            font-weight: bold;
+        }
+
+        .time-slots {
+            margin-top: 30px;
+        }
+
+        .time-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .time-slot {
+            padding: 12px;
+            text-align: center;
+            border: 2px solid #e5e7eb;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 500;
+        }
+
+        .time-slot:hover:not(.disabled) {
+            border-color: var(--primary);
+            background: rgba(99, 102, 241, 0.1);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        .time-slot.selected {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        .time-slot.disabled {
+            color: #d1d5db;
+            cursor: not-allowed;
+            background: #f9fafb;
+        }
+
+        .booking-form {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            margin-top: 30px;
+            box-shadow: var(--card-shadow);
+            animation: fadeInUp 0.5s ease-out;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #374151;
+        }
+
+        input, textarea {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e5e7eb;
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: all 0.3s;
+            font-family: inherit;
+        }
+
+        input:focus, textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        @media (max-width: 576px) {
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 15px;
+            background: var(--bg-gradient);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .submit-btn::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.3);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+
+        .submit-btn:hover::before {
+            width: 300%;
+            height: 300%;
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(99, 102, 241, 0.3);
+        }
+
+        .success-message {
+            display: none;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 12px;
+            text-align: center;
+            margin-top: 20px;
+            animation: bounceIn 0.6s;
+        }
+
+        @keyframes bounceIn {
+            0% {
+                transform: scale(0.3);
+                opacity: 0;
+            }
+            50% {
+                transform: scale(1.05);
+            }
+            70% {
+                transform: scale(0.95);
+            }
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        .success-message.show {
+            display: block;
+        }
+
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="header-content">
+            <div class="logo">کلینیک سلامت</div>
+            <nav>
+                <ul class="nav-links">
+                    <li><a href="#home">صفحه اصلی</a></li>
+                    <li><a href="#services">خدمات</a></li>
+                    <li><a href="#doctors">پزشکان</a></li>
+                    <li><a href="#contact">تماس با ما</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="hero">
+            <h1>رزرو نوبت آنلاین</h1>
+            <p class="subtitle">به راحتی و در کمترین زمان نوبت خود را رزرو کنید</p>
+        </div>
+
+        <div class="booking-section">
+            <div class="service-selection">
+                <h2 class="section-title">انتخاب خدمات</h2>
+                <div class="service-card" onclick="selectService(this)">
+                    <div class="service-name">معاینه عمومی</div>
+                    <div class="service-desc">ویزیت و معاینه توسط پزشک عمومی</div>
+                </div>
+                <div class="service-card" onclick="selectService(this)">
+                    <div class="service-name">دندانپزشکی</div>
+                    <div class="service-desc">خدمات دندانپزشکی و ترمیمی</div>
+                </div>
+                <div class="service-card" onclick="selectService(this)">
+                    <div class="service-name">قلب و عروق</div>
+                    <div class="service-desc">معاینه تخصصی قلب</div>
+                </div>
+                <div class="service-card" onclick="selectService(this)">
+                    <div class="service-name">چشم پزشکی</div>
+                    <div class="service-desc">معاینه و تست بینایی</div>
+                </div>
+                <div class="service-card" onclick="selectService(this)">
+                    <div class="service-name">پوست و مو</div>
+                    <div class="service-desc">درمان مشکلات پوستی</div>
+                </div>
+            </div>
+
+            <div class="calendar-section">
+                <h2 class="section-title">انتخاب تاریخ و زمان</h2>
+                <div class="calendar-header">
+                    <div class="month-year" id="currentMonth">آذر 1403</div>
+                    <div class="calendar-nav">
+                        <button class="nav-btn" onclick="previousMonth()">→</button>
+                        <button class="nav-btn" onclick="nextMonth()">←</button>
+                    </div>
+                </div>
+                
+                <div class="calendar-grid">
+                    <div class="day-label">ش</div>
+                    <div class="day-label">ی</div>
+                    <div class="day-label">د</div>
+                    <div class="day-label">س</div>
+                    <div class="day-label">چ</div>
+                    <div class="day-label">پ</div>
+                    <div class="day-label">ج</div>
+                    
+                    <div class="day disabled">29</div>
+                    <div class="day disabled">30</div>
+                    <div class="day">1</div>
+                    <div class="day">2</div>
+                    <div class="day">3</div>
+                    <div class="day">4</div>
+                    <div class="day">5</div>
+                    <div class="day">6</div>
+                    <div class="day">7</div>
+                    <div class="day">8</div>
+                    <div class="day">9</div>
+                    <div class="day today">10</div>
+                    <div class="day">11</div>
+                    <div class="day">12</div>
+                    <div class="day">13</div>
+                    <div class="day">14</div>
+                    <div class="day">15</div>
+                    <div class="day">16</div>
+                    <div class="day">17</div>
+                    <div class="day">18</div>
+                    <div class="day">19</div>
+                    <div class="day">20</div>
+                    <div class="day">21</div>
+                    <div class="day">22</div>
+                    <div class="day">23</div>
+                    <div class="day">24</div>
+                    <div class="day">25</div>
+                    <div class="day">26</div>
+                    <div class="day">27</div>
+                    <div class="day">28</div>
+                    <div class="day">29</div>
+                    <div class="day">30</div>
+                    <div class="day disabled">1</div>
+                    <div class="day disabled">2</div>
+                    <div class="day disabled">3</div>
+                </div>
+
+                <div class="time-slots">
+                    <h3 style="margin-bottom: 15px; color: #374151;">ساعت‌های موجود</h3>
+                    <div class="time-grid">
+                        <div class="time-slot" onclick="selectTime(this)">08:00</div>
+                        <div class="time-slot" onclick="selectTime(this)">08:30</div>
+                        <div class="time-slot" onclick="selectTime(this)">09:00</div>
+                        <div class="time-slot disabled">09:30</div>
+                        <div class="time-slot" onclick="selectTime(this)">10:00</div>
+                        <div class="time-slot" onclick="selectTime(this)">10:30</div>
+                        <div class="time-slot disabled">11:00</div>
+                        <div class="time-slot" onclick="selectTime(this)">11:30</div>
+                        <div class="time-slot" onclick="selectTime(this)">14:00</div>
+                        <div class="time-slot" onclick="selectTime(this)">14:30</div>
+                        <div class="time-slot" onclick="selectTime(this)">15:00</div>
+                        <div class="time-slot disabled">15:30</div>
+                        <div class="time-slot" onclick="selectTime(this)">16:00</div>
+                        <div class="time-slot" onclick="selectTime(this)">16:30</div>
+                        <div class="time-slot" onclick="selectTime(this)">17:00</div>
+                        <div class="time-slot" onclick="selectTime(this)">17:30</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="booking-form">
+            <h2 class="section-title">اطلاعات بیمار</h2>
+            <form id="bookingForm">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="firstName">نام</label>
+                        <input type="text" id="firstName" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="lastName">نام خانوادگی</label>
+                        <input type="text" id="lastName" required>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="phone">شماره تماس</label>
+                        <input type="tel" id="phone" placeholder="09123456789" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="email">ایمیل (اختیاری)</label>
+                        <input type="email" id="email">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="nationalId">کد ملی</label>
+                    <input type="text" id="nationalId" required>
+                </div>
+                <div class="form-group">
+                    <label for="notes">توضیحات (اختیاری)</label>
+                    <textarea id="notes" placeholder="در صورت نیاز، توضیحات تکمیلی را وارد کنید..."></textarea>
+                </div>
+                <button type="submit" class="submit-btn">
+                    <span id="btnText">ثبت نوبت</span>
+                    <span class="loading" style="display: none;"></span>
+                </button>
+            </form>
+            <div class="success-message" id="successMessage">
+                ✅ نوبت شما با موفقیت ثبت شد! کد پیگیری: <strong>1403-2587</strong>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // انتخاب سرویس
+        function selectService(element) {
+            document.querySelectorAll('.service-card').forEach(card => {
+                card.classList.remove('selected');
+            });
+            element.classList.add('selected');
+        }
+
+        // انتخاب روز
+        document.querySelectorAll('.day:not(.disabled)').forEach(day => {
+            day.addEventListener('click', function() {
+                document.querySelectorAll('.day').forEach(d => {
+                    d.classList.remove('selected');
+                });
+                this.classList.add('selected');
+                
+                // انیمیشن برای نمایش ساعت‌ها
+                const timeSlots = document.querySelector('.time-slots');
+                timeSlots.style.animation = 'none';
+                setTimeout(() => {
+                    timeSlots.style.animation = 'fadeInUp 0.5s ease-out';
+                }, 10);
+            });
+        });
+
+        // انتخاب زمان
+        function selectTime(element) {
+            document.querySelectorAll('.time-slot').forEach(slot => {
+                slot.classList.remove('selected');
+            });
+            element.classList.add('selected');
+        }
+
+        // ناوبری تقویم
+        const months = [
+            'فروردین', 'اردیبهشت', 'خرداد', 'تیر', 'مرداد', 'شهریور',
+            'مهر', 'آبان', 'آذر', 'دی', 'بهمن', 'اسفند'
+        ];
+        let currentMonthIndex = 8; // آذر
+
+        function updateMonth() {
+            document.getElementById('currentMonth').textContent = `${months[currentMonthIndex]} 1403`;
+        }
+
+        function previousMonth() {
+            if (currentMonthIndex > 0) {
+                currentMonthIndex--;
+                updateMonth();
+                animateCalendar();
+            }
+        }
+
+        function nextMonth() {
+            if (currentMonthIndex < 11) {
+                currentMonthIndex++;
+                updateMonth();
+                animateCalendar();
+            }
+        }
+
+        function animateCalendar() {
+            const calendar = document.querySelector('.calendar-grid');
+            calendar.style.animation = 'none';
+            setTimeout(() => {
+                calendar.style.animation = 'fadeIn 0.5s ease-out';
+            }, 10);
+        }
+
+        // ارسال فرم
+        document.getElementById('bookingForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const btnText = document.getElementById('btnText');
+            const loading = document.querySelector('.loading');
+            
+            btnText.style.display = 'none';
+            loading.style.display = 'inline-block';
+            
+            // شبیه‌سازی ارسال فرم
+            setTimeout(() => {
+                btnText.style.display = 'inline';
+                loading.style.display = 'none';
+                
+                document.getElementById('successMessage').classList.add('show');
+                
+                // پاک کردن فرم
+                this.reset();
+                
+                // اسکرول به پیام موفقیت
+                document.getElementById('successMessage').scrollIntoView({ 
+                    behavior: 'smooth', 
+                    block: 'center' 
+                });
+            }, 2000);
+        });
+
+        // انیمیشن اولیه
+        window.addEventListener('load', function() {
+            document.querySelectorAll('.service-card, .day, .time-slot').forEach((element, index) => {
+                element.style.animation = `fadeIn 0.5s ease-out ${index * 0.02}s both`;
+            });
+        });
+    </script>
+</body>
+</html>
