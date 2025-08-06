@@ -118,6 +118,9 @@
       .cat-icon svg {width: 18px;height: 18px;}
       .btn-grad {min-height:38px; font-size: 13px;}
     }
+    @media (max-width: 639px) {
+      #registerShopBtn { box-shadow: none; }
+    }
     @media (max-width: 640px) {
       .category-card {min-height:220px;}
     }
@@ -161,12 +164,12 @@
 <body class="text-gray-800 overflow-x-hidden pb-20 md:pb-0">
 
 <!-- هدر سایت -->
-<header class="w-full bg-white/90 shadow-sm backdrop-blur-md sticky top-0 z-50">
-  <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between px-4 sm:px-6 py-2 sm:py-3 gap-y-2">
+<header class="w-full bg-white/30 sm:bg-white/90 backdrop-blur-xl sm:backdrop-blur-md shadow-none sm:shadow-sm sticky top-0 z-50">
+  <div class="max-w-7xl mx-auto flex flex-nowrap sm:flex-wrap items-center justify-between px-4 sm:px-6 py-2 sm:py-3 gap-y-2">
     <div class="flex items-center gap-2 flex-shrink-0">
       <a href="index.html" class="logo-vitreenet">Vitreenet</a>
-      <div class="flex items-center gap-1 px-2 py-1 rounded-full shadow-lg ml-2"
-           style="background:linear-gradient(90deg,#10b981E6 70%,#0ea5e9E6); border: 1.5px solid #fff6; backdrop-filter: blur(5px);">
+      <div class="flex items-center gap-1 px-2 py-1 rounded-full ml-2"
+           style="background:linear-gradient(90deg,#10b981E6 70%,#0ea5e9E6); backdrop-filter: blur(5px);">
         <svg width="16" height="16" fill="none" viewBox="0 0 22 22" class="ml-1 drop-shadow">
           <defs>
             <linearGradient id="city-icon" x1="0" y1="0" x2="22" y2="22" gradientUnits="userSpaceOnUse">
@@ -180,7 +183,7 @@
         <span class="font-bold text-white text-xs sm:text-sm drop-shadow-sm" style="letter-spacing:.3px;">سنندج</span>
       </div>
     </div>
-    <nav id="desktopNav" class="flex items-center justify-end gap-2 sm:gap-3 flex-wrap text-sm sm:text-base w-full sm:w-auto">
+    <nav id="desktopNav" class="flex items-center justify-end gap-2 sm:gap-3 flex-nowrap text-sm sm:text-base w-auto">
       <a href="index.html" class="main-nav-link flex-1 md:flex-none flex flex-col items-center justify-center gap-1 text-gray-600 hover:text-teal-600 font-bold px-2 sm:px-3 transition hide-on-mobile text-[12px] md:text-base">
         <i class="ri-home-5-line text-lg md:hidden"></i>
         <span>خانه</span>
@@ -193,7 +196,7 @@
         <i class="ri-login-box-line text-lg md:hidden"></i>
         <span>ورود</span>
       </a>
-      <a href="post.html" id="registerShopBtn" class="btn-grad px-4 py-1 rounded-full font-bold text-sm shadow hover:scale-105 transition">
+      <a href="post.html" id="registerShopBtn" class="btn-grad px-3 sm:px-4 py-1 rounded-full font-bold text-sm transition sm:shadow sm:hover:scale-105">
         <span>ثبت فروشگاه</span>
       </a>
     </nav>
@@ -421,7 +424,7 @@ document.addEventListener('DOMContentLoaded', function() {
   const mobileList = document.getElementById('mobileNavList');
   const registerBtn = document.getElementById('registerShopBtn');
   const links = Array.from(desktopNav.querySelectorAll('.main-nav-link'));
-  let isMobileView = window.innerWidth <= 768;
+  let isMobileView;
 
   function moveLinks() {
     const nowMobile = window.innerWidth <= 768;
