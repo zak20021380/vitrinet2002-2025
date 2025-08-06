@@ -3,832 +3,632 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>خدمات خودرو - ویترینت</title>
+    <title>سالن زیبایی لیدی | ویترینت</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;700;900&family=Morabba:wght@300;400;500;700;900&family=IranYekan:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css" rel="stylesheet" type="text/css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        vitreenet: {
+                            50: '#f0f9ff',
+                            100: '#e0f2fe',
+                            200: '#bae6fd',
+                            300: '#7dd3fc',
+                            400: '#38bdf8',
+                            500: '#0ea5e9',
+                            600: '#0284c7',
+                            700: '#0369a1',
+                            800: '#075985',
+                            900: '#0c4a6e',
+                        },
+                        premium: {
+                            50: '#fdf2f8',
+                            100: '#fce7f3',
+                            200: '#fbcfe8',
+                            300: '#f9a8d4',
+                            400: '#f472b6',
+                            500: '#ec4899',
+                            600: '#db2777',
+                            700: '#be185d',
+                            800: '#9d174d',
+                            900: '#831843',
+                        }
+                    },
+                    fontFamily: {
+                        'sans': ['Vazirmatn', 'sans-serif'],
+                        'display': ['Vazirmatn', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
     <style>
         :root {
-            --vitreenet-primary: #6D28D9;
-            --vitreenet-secondary: #8B5CF6;
-            --vitreenet-accent: #A78BFA;
-            --vitreenet-light: #EDE9FE;
-            --vitreenet-dark: #4C1D95;
+            --glass-bg: rgba(255, 255, 255, 0.15);
+            --glass-border: rgba(255, 255, 255, 0.18);
+            --primary-gradient: linear-gradient(135deg, #0ea5e9, #0284c7);
+            --premium-gradient: linear-gradient(135deg, #ec4899, #be185d);
         }
         
         body {
-            font-family: 'Vazirmatn', sans-serif;
-            overflow-x: hidden;
+            background: radial-gradient(circle at top right, #f0f9ff, #e0f2fe, #bae6fd);
+            min-height: 100vh;
+            padding-bottom: 80px;
         }
         
-        h1, h2, h3, h4, h5, h6 {
-            font-family: 'Morabba', sans-serif;
+        .glass {
+            background: var(--glass-bg);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid var(--glass-border);
+            box-shadow: 0 8px 32px rgba(2, 132, 199, 0.1);
         }
         
-        .glassmorphism {
-            background: rgba(255, 255, 255, 0.7);
+        .card-glass {
+            background: rgba(255, 255, 255, 0.25);
             backdrop-filter: blur(10px);
             -webkit-backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.18);
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            border-radius: 18px;
+            box-shadow: 0 8px 32px rgba(2, 132, 199, 0.1);
         }
         
-        .glassmorphism-dark {
-            background: rgba(109, 40, 217, 0.15);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            border: 1px solid rgba(109, 40, 217, 0.18);
+        .primary-gradient {
+            background: var(--primary-gradient);
         }
         
-        .vitreenet-gradient {
-            background: linear-gradient(135deg, var(--vitreenet-primary), var(--vitreenet-secondary));
+        .premium-gradient {
+            background: var(--premium-gradient);
         }
         
-        .vitreenet-text-gradient {
-            background: linear-gradient(135deg, var(--vitreenet-primary), var(--vitreenet-secondary));
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
+        .status-badge {
+            position: relative;
+            padding-left: 24px;
         }
         
-        .animate-float {
-            animation: float 3s ease-in-out infinite;
+        .status-badge::before {
+            content: '';
+            position: absolute;
+            left: 8px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
         }
         
-        @keyframes float {
-            0% { transform: translateY(0px); }
-            50% { transform: translateY(-10px); }
-            100% { transform: translateY(0px); }
+        .open::before {
+            background: #10b981;
+            box-shadow: 0 0 8px #10b981;
         }
         
-        .modal-backdrop {
-            background-color: rgba(0, 0, 0, 0.5);
-            backdrop-filter: blur(5px);
-            -webkit-backdrop-filter: blur(5px);
+        .closed::before {
+            background: #ef4444;
+            box-shadow: 0 0 8px #ef4444;
+        }
+        
+        .ripple {
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .ripple::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 5px;
+            height: 5px;
+            background: rgba(255, 255, 255, 0.4);
+            opacity: 0;
+            border-radius: 100%;
+            transform: scale(1, 1) translate(-50%);
+            transform-origin: 50% 50%;
+        }
+        
+        .ripple:focus:not(:active)::after {
+            animation: ripple 0.6s ease-out;
+        }
+        
+        @keyframes ripple {
+            0% {
+                transform: scale(0, 0);
+                opacity: 0.4;
+            }
+            100% {
+                transform: scale(40, 40);
+                opacity: 0;
+            }
+        }
+        
+        .bounce {
+            animation: bounce 2s infinite;
+        }
+        
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% {transform: translateY(0);}
+            40% {transform: translateY(-10px);}
+            60% {transform: translateY(-5px);}
+        }
+        
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(14, 165, 233, 0.5); }
+            70% { box-shadow: 0 0 0 12px rgba(14, 165, 233, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(14, 165, 233, 0); }
+        }
+        
+        .modal {
+            transition: opacity 0.3s ease, transform 0.3s ease;
+            transform: translateY(20px);
+            opacity: 0;
+            pointer-events: none;
+        }
+        
+        .modal.active {
+            transform: translateY(0);
+            opacity: 1;
+            pointer-events: auto;
+        }
+        
+        .progress-bar {
+            height: 12px;
+            border-radius: 6px;
+            overflow: hidden;
         }
         
         .progress-fill {
-            background: linear-gradient(90deg, var(--vitreenet-primary), var(--vitreenet-accent));
+            height: 100%;
+            background: var(--premium-gradient);
+            border-radius: 6px;
+            transition: width 1s ease-in-out;
         }
         
-        .footer-pill {
-            border-radius: 2rem;
-            box-shadow: 0 10px 25px rgba(109, 40, 217, 0.3);
+        .tab-content {
+            display: none;
         }
         
-        .btn-vitreenet {
-            background: linear-gradient(135deg, var(--vitreenet-primary), var(--vitreenet-secondary));
-            transition: all 0.3s ease;
+        .tab-content.active {
+            display: block;
+            animation: fadeIn 0.5s ease;
         }
         
-        .btn-vitreenet:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 20px rgba(109, 40, 217, 0.3);
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
         }
         
-        .btn-vitreenet:active {
-            transform: translateY(0);
+        .service-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 25px -5px rgba(2, 132, 199, 0.2);
         }
         
-        .section-title {
-            position: relative;
-            display: inline-block;
+        .review-card:hover {
+            transform: scale(1.02);
         }
         
-        .section-title::after {
-            content: '';
-            position: absolute;
-            bottom: -5px;
-            right: 0;
-            width: 100%;
-            height: 3px;
-            background: linear-gradient(90deg, var(--vitreenet-primary), var(--vitreenet-accent));
-            border-radius: 3px;
+        .animate-logo {
+            animation: rotate 20s linear infinite;
+        }
+        
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        
+        .logo-path {
+            stroke-dasharray: 1000;
+            stroke-dashoffset: 1000;
+            animation: dash 5s linear forwards infinite;
+        }
+        
+        @keyframes dash {
+            to {
+                stroke-dashoffset: 0;
+            }
         }
     </style>
 </head>
-<body class="bg-gray-50 text-gray-800">
-    <!-- Header -->
-    <header class="glassmorphism sticky top-0 z-40 shadow-md">
-        <div class="container mx-auto px-4 py-3 flex justify-between items-center">
-            <div class="flex items-center space-x-2 space-x-reverse">
-                <!-- Vitreenet Logo SVG -->
-                <svg id="vitreenet-logo" class="w-10 h-10 animate-float" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-                    <defs>
-                        <linearGradient id="logo-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                            <stop offset="0%" style="stop-color:#6D28D9;stop-opacity:1" />
-                            <stop offset="100%" style="stop-color:#8B5CF6;stop-opacity:1" />
-                        </linearGradient>
-                    </defs>
-                    <circle cx="50" cy="50" r="45" fill="url(#logo-gradient)" />
-                    <path d="M30,50 L45,35 L55,45 L70,30 L70,70 L30,70 Z" fill="white" />
-                    <circle cx="45" cy="55" r="5" fill="#6D28D9" />
-                    <circle cx="55" cy="55" r="5" fill="#6D28D9" />
+<body class="font-sans text-vitreenet-900">
+    <!-- Sticky Glassmorphic Header -->
+    <header class="glass fixed top-0 left-0 right-0 z-50 py-3 px-4 flex items-center justify-between shadow-lg">
+        <div class="flex items-center">
+            <!-- Animated Vitreenet Logo -->
+            <div class="w-12 h-12 mr-3">
+                <svg viewBox="0 0 100 100" class="animate-logo">
+                    <circle cx="50" cy="50" r="45" fill="none" stroke="#0ea5e9" stroke-width="3" class="logo-path"/>
+                    <path d="M30,30 L70,30 L70,70 L30,70 Z" fill="none" stroke="#0ea5e9" stroke-width="3" class="logo-path"/>
+                    <circle cx="50" cy="50" r="15" fill="#0ea5e9" opacity="0.7"/>
                 </svg>
-                <span class="font-bold text-xl vitreenet-text-gradient">ویترینت</span>
             </div>
-            <nav class="hidden md:flex space-x-6 space-x-reverse">
-                <a href="#home" class="hover:text-purple-600 transition-colors">خانه</a>
-                <a href="#services" class="hover:text-purple-600 transition-colors">خدمات</a>
-                <a href="#portfolio" class="hover:text-purple-600 transition-colors">نمونه کار</a>
-                <a href="#vip" class="hover:text-purple-600 transition-colors">VIP</a>
-                <a href="#rewards" class="hover:text-purple-600 transition-colors">پاداش</a>
-                <a href="#contact" class="hover:text-purple-600 transition-colors">تماس</a>
-            </nav>
-            <button id="mobile-menu-btn" class="md:hidden text-purple-600">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
-                </svg>
+            
+            <div>
+                <h1 class="text-xl font-bold">سالن زیبایی لیدی</h1>
+                <p class="text-sm text-vitreenet-700">تخصص در آرایش صورت و مو</p>
+            </div>
+        </div>
+        
+        <div class="flex items-center">
+            <!-- Open/Closed Badge -->
+            <div class="status-badge open mr-4 px-3 py-1 rounded-full bg-green-100 text-green-800 text-sm font-medium">
+                باز است
+            </div>
+            
+            <!-- Main CTA Button -->
+            <button id="mainCta" class="ripple primary-gradient text-white px-5 py-3 rounded-full font-bold text-sm shadow-lg hover:shadow-xl transition-all bounce">
+                رزرو نوبت سریع
             </button>
+            
+            <!-- Homepage Link -->
+            <a href="#" class="ml-4 text-vitreenet-600 hover:text-vitreenet-800">
+                <i class="fas fa-home text-xl"></i>
+            </a>
         </div>
     </header>
 
-    <!-- Hero Section -->
-    <section id="home" class="pt-20 pb-16 md:pt-32 md:pb-24 relative overflow-hidden">
-        <div class="absolute top-0 left-0 w-full h-full opacity-10">
-            <div class="absolute top-10 left-10 w-64 h-64 rounded-full bg-purple-300 blur-3xl"></div>
-            <div class="absolute bottom-10 right-10 w-64 h-64 rounded-full bg-purple-400 blur-3xl"></div>
-        </div>
-        <div class="container mx-auto px-4 relative z-10">
-            <div class="text-center">
-                <h1 class="text-4xl md:text-5xl font-bold mb-4 vitreenet-text-gradient">خدمات خودرویی حرفه‌ای</h1>
-                <p class="text-lg md:text-xl mb-8 max-w-2xl mx-auto">تجربه‌ای متفاوت از شستشو و خدمات خودرو با بهترین کیفیت و نازل‌ترین قیمت</p>
-                <button class="btn-vitreenet text-white font-bold py-3 px-8 rounded-full shadow-lg">
-                    رزرو آنلاین
-                </button>
-            </div>
-        </div>
-    </section>
-
-    <!-- Services Section -->
-    <section id="services" class="py-16 bg-white">
-        <div class="container mx-auto px-4">
-            <h2 class="text-3xl font-bold mb-12 text-center section-title">خدمات ما</h2>
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                <div class="glassmorphism-dark rounded-2xl p-6 transition-transform hover:scale-105">
-                    <div class="w-16 h-16 rounded-full vitreenet-gradient flex items-center justify-center mb-4">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 21v-4m0 0V5a2 2 0 012-2h6.5l1 1H21l-3 6 3 6h-8.5l-1-1H5a2 2 0 00-2 2zm9-13.5V9" />
-                        </svg>
-                    </div>
-                    <h3 class="text-xl font-bold mb-2">شستشوی معمولی</h3>
-                    <p class="text-gray-600">شستشوی کامل خارجی خودرو با مواد درجه یک</p>
-                    <p class="text-lg font-bold mt-4 vitreenet-text-gradient">از ۵۰,۰۰۰ تومان</p>
-                </div>
-                <div class="glassmorphism-dark rounded-2xl p-6 transition-transform hover:scale-105">
-                    <div class="w-16 h-16 rounded-full vitreenet-gradient flex items-center justify-center mb-4">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-                        </svg>
-                    </div>
-                    <h3 class="text-xl font-bold mb-2">شستشوی VIP</h3>
-                    <p class="text-gray-600">شستشوی داخلی و خارجی با واکس و مواد مخصوص</p>
-                    <p class="text-lg font-bold mt-4 vitreenet-text-gradient">از ۱۵۰,۰۰۰ تومان</p>
-                </div>
-                <div class="glassmorphism-dark rounded-2xl p-6 transition-transform hover:scale-105">
-                    <div class="w-16 h-16 rounded-full vitreenet-gradient flex items-center justify-center mb-4">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
-                        </svg>
-                    </div>
-                    <h3 class="text-xl font-bold mb-2">پولیش وواکس</h3>
-                    <p class="text-gray-600">پولیش کامل بدنه و واکس برای براق‌تر شدن</p>
-                    <p class="text-lg font-bold mt-4 vitreenet-text-gradient">از ۲۰۰,۰۰۰ تومان</p>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Portfolio Section -->
-    <section id="portfolio" class="py-16 bg-gray-50">
-        <div class="container mx-auto px-4">
-            <h2 class="text-3xl font-bold mb-12 text-center section-title">نمونه کارها</h2>
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                <div class="rounded-2xl overflow-hidden shadow-lg transition-transform hover:scale-105">
-                    <img src="https://picsum.photos/seed/car1/400/300.jpg" alt="نمونه کار ۱" class="w-full h-48 object-cover">
-                    <div class="p-4 bg-white">
-                        <h3 class="font-bold text-lg mb-2">شستشوی SUV</h3>
-                        <p class="text-gray-600">شستشوی کامل یک خودروی SUV با مواد درجه یک</p>
+    <!-- Main Content -->
+    <main class="pt-24 px-4 pb-28">
+        <!-- Hero Section -->
+        <section class="mb-16">
+            <div class="card-glass p-6 rounded-2xl">
+                <div class="relative h-64 rounded-xl overflow-hidden mb-6">
+                    <div class="absolute inset-0 bg-gradient-to-r from-vitreenet-700 to-vitreenet-400 flex items-center justify-center">
+                        <h2 class="text-white text-3xl font-bold">سالن زیبایی لیدی</h2>
                     </div>
                 </div>
-                <div class="rounded-2xl overflow-hidden shadow-lg transition-transform hover:scale-105">
-                    <img src="https://picsum.photos/seed/car2/400/300.jpg" alt="نمونه کار ۲" class="w-full h-48 object-cover">
-                    <div class="p-4 bg-white">
-                        <h3 class="font-bold text-lg mb-2">واکس داخلی</h3>
-                        <p class="text-gray-600">واکس کامل داخل خودرو برای حفظ کیفیت</p>
+                
+                <div class="flex justify-between items-center mb-6">
+                    <div>
+                        <h3 class="text-xl font-bold mb-2">⭐ ۴.۹ (۱۲۴ نظر)</h3>
+                        <p class="text-vitreenet-700">تهران، پاسداران، خیابان گل نبی، پلاک ۳۴</p>
                     </div>
-                </div>
-                <div class="rounded-2xl overflow-hidden shadow-lg transition-transform hover:scale-105">
-                    <img src="https://picsum.photos/seed/car3/400/300.jpg" alt="نمونه کار ۳" class="w-full h-48 object-cover">
-                    <div class="p-4 bg-white">
-                        <h3 class="font-bold text-lg mb-2">پولیش حرفه‌ای</h3>
-                        <p class="text-gray-600">پولیش حرفه‌ای برای از بین بردن خط و خش</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- VIP Section -->
-    <section id="vip" class="py-16 bg-white">
-        <div class="container mx-auto px-4">
-            <h2 class="text-3xl font-bold mb-12 text-center section-title">کلوپ ویژه‌ی مشتریان</h2>
-            <div class="max-w-4xl mx-auto glassmorphism-dark rounded-3xl p-8">
-                <div class="flex flex-col md:flex-row items-center gap-8">
-                    <div class="md:w-1/2">
-                        <h3 class="text-2xl font-bold mb-4 vitreenet-text-gradient">عضویت در کلوپ VIP</h3>
-                        <p class="mb-6">با عضویت در کلوب ویژه‌ی مشتریان، از تخفیف‌های ویژه و خدمات اختصاصی بهره‌مند شوید.</p>
-                        <ul class="space-y-3 mb-6">
-                            <li class="flex items-center">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-purple-600 ml-2" viewBox="0 0 20 20" fill="currentColor">
-                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
-                                </svg>
-                                <span>تخفیف ۲۰٪ برای تمام خدمات</span>
-                            </li>
-                            <li class="flex items-center">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-purple-600 ml-2" viewBox="0 0 20 20" fill="currentColor">
-                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
-                                </svg>
-                                <span>خدمات سریع بدون نوبت</span>
-                            </li>
-                            <li class="flex items-center">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-purple-600 ml-2" viewBox="0 0 20 20" fill="currentColor">
-                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
-                                </svg>
-                                <span>هدیه ویژه در مناسبت‌ها</span>
-                            </li>
-                        </ul>
-                        <button class="btn-vitreenet text-white font-bold py-3 px-8 rounded-full shadow-lg">
-                            عضویت در کلوپ VIP
+                    <div class="flex">
+                        <button class="ripple glass w-12 h-12 rounded-full flex items-center justify-center mr-2">
+                            <i class="fas fa-phone text-vitreenet-600"></i>
+                        </button>
+                        <button class="ripple glass w-12 h-12 rounded-full flex items-center justify-center">
+                            <i class="fas fa-map-marker-alt text-vitreenet-600"></i>
                         </button>
                     </div>
-                    <div class="md:w-1/2 flex justify-center">
-                        <div class="relative">
-                            <div class="w-64 h-64 rounded-full vitreenet-gradient flex items-center justify-center">
-                                <span class="text-white text-4xl font-bold">VIP</span>
-                            </div>
-                            <div class="absolute -bottom-4 -left-4 w-20 h-20 rounded-full bg-yellow-400 flex items-center justify-center animate-pulse">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-white" viewBox="0 0 20 20" fill="currentColor">
-                                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                                </svg>
-                            </div>
+                </div>
+                
+                <p class="text-vitreenet-800 mb-6 leading-relaxed">
+                    سالن زیبایی لیدی با بیش از ۱۰ سال سابقه در زمینه آرایش صورت و مو، با بهره‌گیری از متخصصین مجرب و استفاده از بهترین محصولات، آماده ارائه خدمات با کیفیت به شما عزیزان می‌باشد.
+                </p>
+            </div>
+        </section>
+        
+        <!-- Services Section -->
+        <section class="mb-16">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-bold">خدمات ما</h2>
+                <button class="text-vitreenet-600 font-medium">مشاهده همه</button>
+            </div>
+            
+            <div class="grid grid-cols-2 gap-4">
+                <div class="service-card card-glass p-4 rounded-xl transition-transform">
+                    <div class="flex justify-between items-start mb-3">
+                        <h3 class="font-bold">آرایش صورت حرفه‌ای</h3>
+                        <div class="w-10 h-10 rounded-full bg-vitreenet-100 flex items-center justify-center">
+                            <i class="fas fa-palette text-vitreenet-600"></i>
                         </div>
+                    </div>
+                    <p class="text-sm text-vitreenet-700 mb-3">آرایش صورت برای مراسمات خاص</p>
+                    <div class="flex justify-between items-center">
+                        <span class="font-bold">۲۹۰,۰۰۰ تومان</span>
+                        <button class="ripple bg-vitreenet-100 text-vitreenet-700 px-3 py-1 rounded-full text-sm font-medium">
+                            رزرو
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="service-card card-glass p-4 rounded-xl transition-transform">
+                    <div class="flex justify-between items-start mb-3">
+                        <h3 class="font-bold">کاشت مژه</h3>
+                        <div class="w-10 h-10 rounded-full bg-vitreenet-100 flex items-center justify-center">
+                            <i class="fas fa-eye text-vitreenet-600"></i>
+                        </div>
+                    </div>
+                    <p class="text-sm text-vitreenet-700 mb-3">کاشت مژه به روش کلاسیک و حجمی</p>
+                    <div class="flex justify-between items-center">
+                        <span class="font-bold">۴۵۰,۰۰۰ تومان</span>
+                        <button class="ripple bg-vitreenet-100 text-vitreenet-700 px-3 py-1 rounded-full text-sm font-medium">
+                            رزرو
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="service-card card-glass p-4 rounded-xl transition-transform">
+                    <div class="flex justify-between items-start mb-3">
+                        <h3 class="font-bold">میکروبلیدینگ</h3>
+                        <div class="w-10 h-10 rounded-full bg-vitreenet-100 flex items-center justify-center">
+                            <i class="fas fa-eye-brow text-vitreenet-600"></i>
+                        </div>
+                    </div>
+                    <p class="text-sm text-vitreenet-700 mb-3">میکروبلیدینگ ابرو با کیفیت عالی</p>
+                    <div class="flex justify-between items-center">
+                        <span class="font-bold">۱,۲۰۰,۰۰۰ تومان</span>
+                        <button class="ripple bg-vitreenet-100 text-vitreenet-700 px-3 py-1 rounded-full text-sm font-medium">
+                            رزرو
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="service-card card-glass p-4 rounded-xl transition-transform">
+                    <div class="flex justify-between items-start mb-3">
+                        <h3 class="font-bold">کوتاهی مو</h3>
+                        <div class="w-10 h-10 rounded-full bg-vitreenet-100 flex items-center justify-center">
+                            <i class="fas fa-cut text-vitreenet-600"></i>
+                        </div>
+                    </div>
+                    <p class="text-sm text-vitreenet-700 mb-3">کوتاهی و استایلینگ موی سر</p>
+                    <div class="flex justify-between items-center">
+                        <span class="font-bold">۱۵۰,۰۰۰ تومان</span>
+                        <button class="ripple bg-vitreenet-100 text-vitreenet-700 px-3 py-1 rounded-full text-sm font-medium">
+                            رزرو
+                        </button>
                     </div>
                 </div>
             </div>
-        </div>
-    </section>
-
-    <!-- Rewards Section -->
-    <section id="rewards" class="py-16 bg-gray-50">
-        <div class="container mx-auto px-4">
-            <h2 class="text-3xl font-bold mb-12 text-center section-title">پاداش مشتریان</h2>
-            <div class="max-w-4xl mx-auto">
-                <div class="glassmorphism-dark rounded-3xl p-8 text-center">
-                    <h3 class="text-2xl font-bold mb-6 vitreenet-text-gradient">جمع‌آوری امتیاز و دریافت پاداش</h3>
-                    <p class="mb-8">با هر خرید امتیاز جمع کنید و از خدمات رایگان بهره‌مند شوید</p>
+        </section>
+        
+        <!-- Rewards Section -->
+        <section class="mb-16">
+            <div class="card-glass rounded-2xl overflow-hidden">
+                <div class="premium-gradient p-6 text-white">
+                    <div class="flex justify-between items-center mb-4">
+                        <h2 class="text-xl font-bold">پاداش مشتری ویژه</h2>
+                        <div class="w-12 h-12 rounded-full bg-white/20 flex items-center justify-center">
+                            <i class="fas fa-crown text-xl"></i>
+                        </div>
+                    </div>
+                    <p class="mb-4">با هر ۵ بار استفاده از خدمات ما، یک خدمات رایگان دریافت کنید</p>
                     
-                    <button id="regular-rewards-btn" class="btn-vitreenet text-white font-bold py-4 px-10 rounded-full shadow-lg text-lg mb-8">
-                        پاداش مشتریان عادی
+                    <div class="mb-4">
+                        <div class="flex justify-between text-sm mb-1">
+                            <span>پیشرفت شما</span>
+                            <span>۲ از ۵</span>
+                        </div>
+                        <div class="progress-bar bg-white/30 w-full">
+                            <div class="progress-fill w-2/5"></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="p-6">
+                    <h3 class="font-bold mb-3">پاداش مشتریان عادی</h3>
+                    <button id="rewardBtn" class="ripple w-full primary-gradient text-white py-3 rounded-full font-bold">
+                        مشاهده پاداش‌ها
                     </button>
-                    
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mt-12">
-                        <div class="bg-white rounded-2xl p-6 shadow-md">
-                            <div class="w-16 h-16 rounded-full bg-purple-100 flex items-center justify-center mx-auto mb-4">
-                                <span class="text-2xl font-bold text-purple-600">1</span>
-                            </div>
-                            <h4 class="font-bold text-lg mb-2">ثبت نام</h4>
-                            <p class="text-gray-600">در سیستم ما ثبت نام کنید</p>
-                        </div>
-                        <div class="bg-white rounded-2xl p-6 shadow-md">
-                            <div class="w-16 h-16 rounded-full bg-purple-100 flex items-center justify-center mx-auto mb-4">
-                                <span class="text-2xl font-bold text-purple-600">2</span>
-                            </div>
-                            <h4 class="font-bold text-lg mb-2">جمع‌آوری امتیاز</h4>
-                            <p class="text-gray-600">با هر خرید امتیاز بگیرید</p>
-                        </div>
-                        <div class="bg-white rounded-2xl p-6 shadow-md">
-                            <div class="w-16 h-16 rounded-full bg-purple-100 flex items-center justify-center mx-auto mb-4">
-                                <span class="text-2xl font-bold text-purple-600">3</span>
-                            </div>
-                            <h4 class="font-bold text-lg mb-2">دریافت پاداش</h4>
-                            <p class="text-gray-600">امتیازات را به پاداش تبدیل کنید</p>
-                        </div>
-                    </div>
                 </div>
             </div>
-        </div>
-    </section>
-
-    <!-- Contact Section -->
-    <section id="contact" class="py-16 bg-white">
-        <div class="container mx-auto px-4">
-            <h2 class="text-3xl font-bold mb-12 text-center section-title">تماس با ما</h2>
-            <div class="max-w-4xl mx-auto">
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                    <div class="glassmorphism-dark rounded-3xl p-8">
-                        <h3 class="text-xl font-bold mb-6 vitreenet-text-gradient">اطلاعات تماس</h3>
-                        <ul class="space-y-4">
-                            <li class="flex items-start">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-purple-600 ml-3 mt-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                                </svg>
-                                <div>
-                                    <p class="font-bold">آدرس</p>
-                                    <p>تهران، خیابان ولیعصر، کوچه ۱۲، پلاک ۳۴</p>
-                                </div>
-                            </li>
-                            <li class="flex items-start">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-purple-600 ml-3 mt-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
-                                </svg>
-                                <div>
-                                    <p class="font-bold">تلفن</p>
-                                    <p>۰۲۱-۸۸۷۷۶۶۵۵</p>
-                                </div>
-                            </li>
-                            <li class="flex items-start">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-purple-600 ml-3 mt-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                </svg>
-                                <div>
-                                    <p class="font-bold">ساعت کاری</p>
-                                    <p>شنبه تا چهارشنبه: ۸ صبح تا ۸ شب</p>
-                                    <p>پنج‌شنبه و جمعه: ۹ صبح تا ۶ عصر</p>
-                                </div>
-                            </li>
-                        </ul>
+        </section>
+        
+        <!-- Portfolio Section -->
+        <section class="mb-16">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-bold">نمونه کارها</h2>
+                <button class="text-vitreenet-600 font-medium">مشاهده همه</button>
+            </div>
+            
+            <div class="grid grid-cols-2 gap-4">
+                <div class="rounded-xl overflow-hidden aspect-square bg-gradient-to-br from-vitreenet-300 to-vitreenet-500"></div>
+                <div class="rounded-xl overflow-hidden aspect-square bg-gradient-to-br from-premium-300 to-premium-500"></div>
+                <div class="rounded-xl overflow-hidden aspect-square bg-gradient-to-br from-vitreenet-400 to-vitreenet-600"></div>
+                <div class="rounded-xl overflow-hidden aspect-square bg-gradient-to-br from-premium-400 to-premium-600"></div>
+            </div>
+        </section>
+        
+        <!-- Reviews Section -->
+        <section>
+            <h2 class="text-2xl font-bold mb-6">نظرات مشتریان</h2>
+            
+            <div class="space-y-4">
+                <div class="review-card card-glass p-4 rounded-xl transition-transform">
+                    <div class="flex items-center mb-3">
+                        <div class="w-10 h-10 rounded-full bg-vitreenet-200 flex items-center justify-center mr-3">
+                            <i class="fas fa-user text-vitreenet-700"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-bold">فاطمه محمدی</h3>
+                            <div class="flex text-amber-400">
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                            </div>
+                        </div>
                     </div>
-                    <div class="glassmorphism-dark rounded-3xl p-8">
-                        <h3 class="text-xl font-bold mb-6 vitreenet-text-gradient">ارسال پیام</h3>
-                        <form id="contact-form">
-                            <div class="mb-4">
-                                <label class="block text-gray-700 mb-2" for="name">نام و نام خانوادگی</label>
-                                <input type="text" id="name" class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-purple-500" required>
+                    <p class="text-vitreenet-700">
+                        بهترین سالن آرایشی که تا حالا رفتم. پرسنل حرفه‌ای و محیط بسیار تمیز و آروم. حتما دوباره میرم.
+                    </p>
+                </div>
+                
+                <div class="review-card card-glass p-4 rounded-xl transition-transform">
+                    <div class="flex items-center mb-3">
+                        <div class="w-10 h-10 rounded-full bg-vitreenet-200 flex items-center justify-center mr-3">
+                            <i class="fas fa-user text-vitreenet-700"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-bold">زهرا حسینی</h3>
+                            <div class="flex text-amber-400">
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star-half-alt"></i>
                             </div>
-                            <div class="mb-4">
-                                <label class="block text-gray-700 mb-2" for="phone">شماره تماس</label>
-                                <input type="tel" id="phone" class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-purple-500" required>
-                            </div>
-                            <div class="mb-4">
-                                <label class="block text-gray-700 mb-2" for="message">پیام</label>
-                                <textarea id="message" rows="4" class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-purple-500" required></textarea>
-                            </div>
-                            <button type="submit" class="btn-vitreenet text-white font-bold py-3 px-8 rounded-full shadow-lg w-full">
-                                ارسال پیام
-                            </button>
-                        </form>
+                        </div>
                     </div>
+                    <p class="text-vitreenet-700">
+                        کاشت مژه‌هام عالی شده. واقعا هنرمندانه کار کردن. قیمت‌هاش هم منصفانه‌ست.
+                    </p>
                 </div>
             </div>
-        </div>
-    </section>
+        </section>
+    </main>
 
-    <!-- Mobile Footer -->
-    <footer class="fixed bottom-0 left-0 right-0 z-50 md:hidden">
-        <div class="glassmorphism footer-pill mx-4 mb-4 p-3">
-            <div class="flex justify-around items-center">
-                <button class="footer-btn flex flex-col items-center text-purple-600" data-section="home">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
-                    </svg>
-                    <span class="text-xs mt-1">خانه</span>
-                </button>
-                <button class="footer-btn flex flex-col items-center text-gray-500" data-section="services">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                    </svg>
-                    <span class="text-xs mt-1">رزرو</span>
-                </button>
-                <button class="footer-btn flex flex-col items-center text-gray-500" data-section="vip">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
-                    </svg>
-                    <span class="text-xs mt-1">VIP</span>
-                </button>
-                <button class="footer-btn flex flex-col items-center text-gray-500" data-section="rewards">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v13m0-13V6a2 2 0 112 2h-2zm0 0V5.5A2.5 2.5 0 109.5 8H12zm-7 4h14M5 12a2 2 0 110-4h14a2 2 0 110 4M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7" />
-                    </svg>
-                    <span class="text-xs mt-1">پاداش</span>
-                </button>
-                <button class="footer-btn flex flex-col items-center text-gray-500" data-section="portfolio">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                    </svg>
-                    <span class="text-xs mt-1">نمونه‌کار</span>
-                </button>
-                <button class="footer-btn flex flex-col items-center text-gray-500" data-section="contact">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                    </svg>
-                    <span class="text-xs mt-1">تماس</span>
-                </button>
+    <!-- Sticky Mobile Footer -->
+    <footer class="glass fixed bottom-4 left-4 right-4 rounded-full py-3 px-4 z-50 shadow-xl flex justify-between items-center">
+        <button class="flex flex-col items-center text-xs">
+            <div class="w-10 h-10 rounded-full bg-vitreenet-100 flex items-center justify-center mb-1">
+                <i class="fas fa-home text-vitreenet-600"></i>
             </div>
-            <div class="flex justify-center mt-3">
-                <a href="https://vitreenet.com" target="_blank" class="flex items-center text-purple-600 text-sm">
-                    <svg id="footer-logo" class="w-5 h-5 ml-1" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-                        <defs>
-                            <linearGradient id="footer-logo-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                                <stop offset="0%" style="stop-color:#6D28D9;stop-opacity:1" />
-                                <stop offset="100%" style="stop-color:#8B5CF6;stop-opacity:1" />
-                            </linearGradient>
-                        </defs>
-                        <circle cx="50" cy="50" r="45" fill="url(#footer-logo-gradient)" />
-                        <path d="M30,50 L45,35 L55,45 L70,30 L70,70 L30,70 Z" fill="white" />
-                        <circle cx="45" cy="55" r="5" fill="#6D28D9" />
-                        <circle cx="55" cy="55" r="5" fill="#6D28D9" />
-                    </svg>
-                    <span>ویترینت</span>
-                </a>
+            <span>خانه</span>
+        </button>
+        
+        <button class="flex flex-col items-center text-xs">
+            <div class="w-10 h-10 rounded-full bg-vitreenet-100 flex items-center justify-center mb-1">
+                <i class="fas fa-crown text-vitreenet-600"></i>
             </div>
-            <div class="text-center mt-2">
-                <button id="register-shop-btn" class="text-xs text-purple-600 font-bold">ثبت مغازه در ویترینت</button>
+            <span>ویژه</span>
+        </button>
+        
+        <button class="flex flex-col items-center text-xs">
+            <div class="w-10 h-10 rounded-full bg-vitreenet-100 flex items-center justify-center mb-1">
+                <i class="fas fa-gift text-vitreenet-600"></i>
             </div>
-        </div>
+            <span>پاداش</span>
+        </button>
+        
+        <button class="flex flex-col items-center text-xs">
+            <div class="w-10 h-10 rounded-full bg-vitreenet-100 flex items-center justify-center mb-1">
+                <i class="fas fa-images text-vitreenet-600"></i>
+            </div>
+            <span>نمونه‌کار</span>
+        </button>
+        
+        <button class="flex flex-col items-center text-xs">
+            <div class="w-10 h-10 rounded-full bg-vitreenet-100 flex items-center justify-center mb-1">
+                <i class="fas fa-phone text-vitreenet-600"></i>
+            </div>
+            <span>تماس</span>
+        </button>
+        
+        <!-- Animated Logo -->
+        <button class="flex flex-col items-center text-xs">
+            <div class="w-12 h-12 rounded-full bg-vitreenet-500 flex items-center justify-center mb-1 pulse">
+                <svg viewBox="0 0 24 24" width="24" height="24" class="text-white">
+                    <circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="2"/>
+                </svg>
+            </div>
+            <span>ویترینت</span>
+        </button>
+        
+        <!-- Register Shop CTA -->
+        <button class="ripple primary-gradient text-white px-4 py-2 rounded-full text-xs font-bold">
+            ثبت مغازه
+        </button>
     </footer>
 
-    <!-- Desktop Footer -->
-    <footer class="hidden md:block bg-gray-900 text-white py-12">
-        <div class="container mx-auto px-4">
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
-                <div>
-                    <div class="flex items-center space-x-2 space-x-reverse mb-4">
-                        <svg class="w-10 h-10" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-                            <defs>
-                                <linearGradient id="desktop-logo-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                                    <stop offset="0%" style="stop-color:#6D28D9;stop-opacity:1" />
-                                    <stop offset="100%" style="stop-color:#8B5CF6;stop-opacity:1" />
-                                </linearGradient>
-                            </defs>
-                            <circle cx="50" cy="50" r="45" fill="url(#desktop-logo-gradient)" />
-                            <path d="M30,50 L45,35 L55,45 L70,30 L70,70 L30,70 Z" fill="white" />
-                            <circle cx="45" cy="55" r="5" fill="#6D28D9" />
-                            <circle cx="55" cy="55" r="5" fill="#6D28D9" />
-                        </svg>
-                        <span class="font-bold text-xl">ویترینت</span>
-                    </div>
-                    <p class="text-gray-400">پلتفرم هوشمند خدمات و کسب‌وکارها</p>
-                </div>
-                <div>
-                    <h3 class="font-bold text-lg mb-4">لینک‌های مفید</h3>
-                    <ul class="space-y-2">
-                        <li><a href="#home" class="text-gray-400 hover:text-white transition-colors">خانه</a></li>
-                        <li><a href="#services" class="text-gray-400 hover:text-white transition-colors">خدمات</a></li>
-                        <li><a href="#portfolio" class="text-gray-400 hover:text-white transition-colors">نمونه کار</a></li>
-                        <li><a href="#vip" class="text-gray-400 hover:text-white transition-colors">VIP</a></li>
-                    </ul>
-                </div>
-                <div>
-                    <h3 class="font-bold text-lg mb-4">تماس با ما</h3>
-                    <ul class="space-y-2 text-gray-400">
-                        <li>تهران، خیابان ولیعصر، کوچه ۱۲</li>
-                        <li>۰۲۱-۸۸۷۷۶۶۵۵</li>
-                        <li>info@vitreenet.com</li>
-                    </ul>
-                </div>
-                <div>
-                    <h3 class="font-bold text-lg mb-4">ثبت کسب‌وکار</h3>
-                    <p class="text-gray-400 mb-4">کسب‌وکار خود را در ویترینت ثبت کنید و به هزاران مشتری دسترسی پیدا کنید</p>
-                    <button id="desktop-register-shop-btn" class="btn-vitreenet text-white font-bold py-2 px-6 rounded-full shadow-lg w-full">
-                        ثبت مغازه در ویترینت
+    <!-- Reward Modal -->
+    <div id="rewardModal" class="modal fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/30 backdrop-blur-sm">
+        <div class="card-glass w-full max-w-md rounded-2xl overflow-hidden">
+            <div class="premium-gradient p-6 text-white">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-xl font-bold">پاداش مشتریان عادی</h2>
+                    <button id="closeModal" class="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center">
+                        <i class="fas fa-times"></i>
                     </button>
                 </div>
             </div>
-            <div class="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400">
-                <p>© ۱۴۰۲ ویترینت. تمامی حقوق محفوظ است.</p>
-            </div>
-        </div>
-    </footer>
-
-    <!-- Regular Rewards Modal -->
-    <div id="rewards-modal" class="fixed inset-0 z-50 hidden">
-        <div class="modal-backdrop absolute inset-0" onclick="closeRewardsModal()"></div>
-        <div class="flex items-center justify-center min-h-screen p-4">
-            <div class="glassmorphism rounded-3xl max-w-md w-full p-8 relative transform transition-all duration-300 scale-95 opacity-0" id="modal-content">
-                <button onclick="closeRewardsModal()" class="absolute top-4 left-4 text-gray-500 hover:text-gray-700">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+            
+            <div class="p-6 text-center">
+                <div class="flex justify-center mb-6">
+                    <svg width="100" height="100" viewBox="0 0 100 100">
+                        <circle cx="50" cy="50" r="45" fill="#f0f9ff" stroke="#e0f2fe" stroke-width="2"/>
+                        <path d="M30,40 L45,60 L70,35" fill="none" stroke="#0ea5e9" stroke-width="5" stroke-linecap="round" class="logo-path"/>
+                        <circle cx="50" cy="50" r="40" fill="none" stroke="#e0f2fe" stroke-width="2" stroke-dasharray="5,5"/>
                     </svg>
-                </button>
-                
-                <div id="rewards-content">
-                    <!-- Content will be dynamically inserted here -->
                 </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Register Shop Modal -->
-    <div id="register-modal" class="fixed inset-0 z-50 hidden">
-        <div class="modal-backdrop absolute inset-0" onclick="closeRegisterModal()"></div>
-        <div class="flex items-center justify-center min-h-screen p-4">
-            <div class="glassmorphism rounded-3xl max-w-md w-full p-8 relative transform transition-all duration-300 scale-95 opacity-0" id="register-modal-content">
-                <button onclick="closeRegisterModal()" class="absolute top-4 left-4 text-gray-500 hover:text-gray-700">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                    </svg>
+                
+                <p class="text-vitreenet-800 mb-6 leading-relaxed">
+                    این مغازه در حال حاضر پاداش یا امتیاز ویژه‌ای برای مشتریان عادی ندارد. برای دریافت پاداش‌های ویژه، لطفا به برنامه مشتریان ویژه بپیوندید.
+                </p>
+                
+                <button class="ripple premium-gradient text-white w-full py-3 rounded-full font-bold">
+                    عضویت ویژه
                 </button>
-                
-                <h3 class="text-2xl font-bold mb-6 text-center vitreenet-text-gradient">ثبت کسب‌وکار در ویترینت</h3>
-                <p class="text-center mb-6">کسب‌وکار خود را در ویترینت ثبت کنید و به هزاران مشتری دسترسی پیدا کنید</p>
-                
-                <form id="register-form">
-                    <div class="mb-4">
-                        <label class="block text-gray-700 mb-2" for="shop-name">نام کسب‌وکار</label>
-                        <input type="text" id="shop-name" class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-purple-500" required>
-                    </div>
-                    <div class="mb-4">
-                        <label class="block text-gray-700 mb-2" for="owner-name">نام صاحب کسب‌وکار</label>
-                        <input type="text" id="owner-name" class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-purple-500" required>
-                    </div>
-                    <div class="mb-4">
-                        <label class="block text-gray-700 mb-2" for="shop-phone">شماره تماس</label>
-                        <input type="tel" id="shop-phone" class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-purple-500" required>
-                    </div>
-                    <div class="mb-6">
-                        <label class="block text-gray-700 mb-2" for="shop-category">دسته‌بندی کسب‌وکار</label>
-                        <select id="shop-category" class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-purple-500" required>
-                            <option value="">انتخاب کنید</option>
-                            <option value="carwash">خدمات خودرو</option>
-                            <option value="salon">سالن زیبایی</option>
-                            <option value="restaurant">رستوران</option>
-                            <option value="shop">فروشگاه</option>
-                            <option value="other">سایر</option>
-                        </select>
-                    </div>
-                    <button type="submit" class="btn-vitreenet text-white font-bold py-3 px-8 rounded-full shadow-lg w-full">
-                        ثبت کسب‌وکار
-                    </button>
-                </form>
             </div>
-        </div>
-    </div>
-
-    <!-- Success Message -->
-    <div id="success-message" class="fixed top-20 right-4 z-50 hidden">
-        <div class="glassmorphism rounded-xl p-4 shadow-lg flex items-center">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-green-500 ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-            <span id="success-text" class="text-green-700 font-medium">عملیات با موفقیت انجام شد</span>
         </div>
     </div>
 
     <script>
-        // Check if rewards exist (for demo purposes, we'll simulate this)
-        const hasRewards = true; // Change to false to test the "no rewards" state
+        // Reward Modal
+        const rewardBtn = document.getElementById('rewardBtn');
+        const rewardModal = document.getElementById('rewardModal');
+        const closeModal = document.getElementById('closeModal');
         
-        // Regular Rewards Modal
-        document.getElementById('regular-rewards-btn').addEventListener('click', function() {
-            const modal = document.getElementById('rewards-modal');
-            const modalContent = document.getElementById('modal-content');
-            const rewardsContent = document.getElementById('rewards-content');
-            
-            // Clear previous content
-            rewardsContent.innerHTML = '';
-            
-            if (hasRewards) {
-                // Show rewards details
-                rewardsContent.innerHTML = `
-                    <h3 class="text-2xl font-bold mb-6 text-center vitreenet-text-gradient">پاداش مشتریان عادی</h3>
-                    <div class="text-center mb-6">
-                        <div class="w-20 h-20 rounded-full vitreenet-gradient flex items-center justify-center mx-auto mb-4">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v13m0-13V6a2 2 0 112 2h-2zm0 0V5.5A2.5 2.5 0 109.5 8H12zm-7 4h14M5 12a2 2 0 110-4h14a2 2 0 110 4M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7" />
-                            </svg>
-                        </div>
-                        <p class="text-lg font-bold mb-2">هر ۳ بار خرید = یک شستشوی رایگان</p>
-                        <p class="text-gray-600">با هر خرید از ما، امتیاز جمع کنید و پس از ۳ خرید، از یک شستشوی رایگان بهره‌مند شوید</p>
-                    </div>
-                    
-                    <div class="mb-6">
-                        <div class="flex justify-between mb-2">
-                            <span class="text-sm font-medium">پیشرفت شما</span>
-                            <span class="text-sm font-medium">۲/۳</span>
-                        </div>
-                        <div class="w-full bg-gray-200 rounded-full h-4">
-                            <div class="progress-fill h-4 rounded-full" style="width: 66%"></div>
-                        </div>
-                    </div>
-                    
-                    <div class="text-center">
-                        <p class="text-gray-600 mb-4">فقط یک خرید دیگر تا دریافت پاداش!</p>
-                        <button class="btn-vitreenet text-white font-bold py-3 px-8 rounded-full shadow-lg">
-                            رزرو خدمات
-                        </button>
-                    </div>
-                `;
-            } else {
-                // Show no rewards message
-                rewardsContent.innerHTML = `
-                    <div class="text-center py-8">
-                        <div class="w-24 h-24 rounded-full bg-purple-100 flex items-center justify-center mx-auto mb-6">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                            </svg>
-                        </div>
-                        <p class="text-xl font-bold mb-4">این مغازه در حال حاضر پاداش یا امتیاز ویژه‌ای برای مشتریان عادی ندارد.</p>
-                        <p class="text-gray-600 mb-6">برای اطلاع از برنامه‌های آینده، با ما در ارتباط باشید</p>
-                        <button class="btn-vitreenet text-white font-bold py-3 px-8 rounded-full shadow-lg">
-                            تماس با ما
-                        </button>
-                    </div>
-                `;
-            }
-            
-            // Show modal
-            modal.classList.remove('hidden');
-            setTimeout(() => {
-                modalContent.classList.remove('scale-95', 'opacity-0');
-                modalContent.classList.add('scale-100', 'opacity-100');
-            }, 10);
+        rewardBtn.addEventListener('click', () => {
+            rewardModal.classList.add('active');
         });
         
-        function closeRewardsModal() {
-            const modal = document.getElementById('rewards-modal');
-            const modalContent = document.getElementById('modal-content');
-            
-            modalContent.classList.remove('scale-100', 'opacity-100');
-            modalContent.classList.add('scale-95', 'opacity-0');
-            
-            setTimeout(() => {
-                modal.classList.add('hidden');
-            }, 300);
-        }
-        
-        // Register Shop Modal
-        document.getElementById('register-shop-btn').addEventListener('click', function() {
-            openRegisterModal();
+        closeModal.addEventListener('click', () => {
+            rewardModal.classList.remove('active');
         });
         
-        document.getElementById('desktop-register-shop-btn').addEventListener('click', function() {
-            openRegisterModal();
-        });
-        
-        function openRegisterModal() {
-            const modal = document.getElementById('register-modal');
-            const modalContent = document.getElementById('register-modal-content');
-            
-            // Show modal
-            modal.classList.remove('hidden');
-            setTimeout(() => {
-                modalContent.classList.remove('scale-95', 'opacity-0');
-                modalContent.classList.add('scale-100', 'opacity-100');
-            }, 10);
-        }
-        
-        function closeRegisterModal() {
-            const modal = document.getElementById('register-modal');
-            const modalContent = document.getElementById('register-modal-content');
-            
-            modalContent.classList.remove('scale-100', 'opacity-100');
-            modalContent.classList.add('scale-95', 'opacity-0');
-            
-            setTimeout(() => {
-                modal.classList.add('hidden');
-            }, 300);
-        }
-        
-        // Mobile Footer Navigation
-        document.querySelectorAll('.footer-btn').forEach(btn => {
-            btn.addEventListener('click', function() {
-                const section = this.getAttribute('data-section');
-                const targetElement = document.getElementById(section);
+        // Ripple Effect
+        document.querySelectorAll('.ripple').forEach(button => {
+            button.addEventListener('click', function(e) {
+                const circle = document.createElement('span');
+                const rect = this.getBoundingClientRect();
                 
-                // Update active state
-                document.querySelectorAll('.footer-btn').forEach(b => {
-                    b.classList.remove('text-purple-600');
-                    b.classList.add('text-gray-500');
-                });
-                this.classList.remove('text-gray-500');
-                this.classList.add('text-purple-600');
+                const diameter = Math.max(this.clientWidth, this.clientHeight);
+                const radius = diameter / 2;
                 
-                // Scroll to section
-                if (targetElement) {
-                    window.scrollTo({
-                        top: targetElement.offsetTop - 80,
-                        behavior: 'smooth'
-                    });
-                }
+                circle.style.width = circle.style.height = `${diameter}px`;
+                circle.style.left = `${e.clientX - rect.left - radius}px`;
+                circle.style.top = `${e.clientY - rect.top - radius}px`;
+                circle.classList.add('ripple-effect');
                 
-                // Special handling for rewards section
-                if (section === 'rewards') {
-                    setTimeout(() => {
-                        document.getElementById('regular-rewards-btn').scrollIntoView({ behavior: 'smooth', block: 'center' });
-                    }, 500);
-                }
+                const ripple = this.getElementsByClassName('ripple-effect')[0];
+                if (ripple) ripple.remove();
+                
+                this.appendChild(circle);
+                
+                setTimeout(() => circle.remove(), 600);
             });
         });
         
-        // Contact Form
-        document.getElementById('contact-form').addEventListener('submit', function(e) {
-            e.preventDefault();
-            
-            // Get form values
-            const name = document.getElementById('name').value;
-            const phone = document.getElementById('phone').value;
-            const message = document.getElementById('message').value;
-            
-            // Here you would normally send the data to a server
-            console.log('Contact form submitted:', { name, phone, message });
-            
-            // Show success message
-            showSuccessMessage('پیام شما با موفقیت ارسال شد');
-            
-            // Reset form
-            this.reset();
-        });
-        
-        // Register Form
-        document.getElementById('register-form').addEventListener('submit', function(e) {
-            e.preventDefault();
-            
-            // Get form values
-            const shopName = document.getElementById('shop-name').value;
-            const ownerName = document.getElementById('owner-name').value;
-            const shopPhone = document.getElementById('shop-phone').value;
-            const shopCategory = document.getElementById('shop-category').value;
-            
-            // Here you would normally send the data to a server
-            console.log('Register form submitted:', { shopName, ownerName, shopPhone, shopCategory });
-            
-            // Show success message
-            showSuccessMessage('درخواست ثبت کسب‌وکار با موفقیت ارسال شد');
-            
-            // Close modal
-            closeRegisterModal();
-            
-            // Reset form
-            this.reset();
-        });
-        
-        // Success Message
-        function showSuccessMessage(message) {
-            const successMessage = document.getElementById('success-message');
-            const successText = document.getElementById('success-text');
-            
-            successText.textContent = message;
-            successMessage.classList.remove('hidden');
-            
+        // Main CTA Animation
+        const mainCta = document.getElementById('mainCta');
+        mainCta.addEventListener('click', () => {
+            mainCta.classList.add('animate-pulse');
             setTimeout(() => {
-                successMessage.classList.add('hidden');
-            }, 3000);
-        }
-        
-        // Mobile Menu Toggle
-        document.getElementById('mobile-menu-btn').addEventListener('click', function() {
-            // Here you would normally toggle a mobile menu
-            showSuccessMessage('منوی موبایل در نسخه کامل فعال است');
+                mainCta.classList.remove('animate-pulse');
+            }, 1000);
+            
+            // Simulate navigation to booking page
+            alert('به صفحه رزرو نوبت هدایت می‌شوید...');
         });
         
-        // Smooth scrolling for navigation links
-        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-            anchor.addEventListener('click', function (e) {
-                e.preventDefault();
-                
-                const targetId = this.getAttribute('href');
-                const targetElement = document.querySelector(targetId);
-                
-                if (targetElement) {
-                    window.scrollTo({
-                        top: targetElement.offsetTop - 80,
-                        behavior: 'smooth'
-                    });
-                }
+        // Service Card Hover Effects
+        document.querySelectorAll('.service-card').forEach(card => {
+            card.addEventListener('mouseenter', () => {
+                card.classList.add('shadow-lg');
+            });
+            
+            card.addEventListener('mouseleave', () => {
+                card.classList.remove('shadow-lg');
             });
         });
         
-        // Animate elements on scroll
-        function animateOnScroll() {
-            const elements = document.querySelectorAll('.glassmorphism-dark, .glassmorphism');
-            
-            elements.forEach(element => {
-                const elementPosition = element.getBoundingClientRect().top;
-                const windowHeight = window.innerHeight;
-                
-                if (elementPosition < windowHeight - 100) {
-                    element.style.opacity = '1';
-                    element.style.transform = 'translateY(0)';
-                }
+        // Tab Switching (simulated)
+        document.querySelectorAll('footer button').forEach((button, index) => {
+            button.addEventListener('click', () => {
+                // Simulate section navigation
+                const sections = ['home', 'vip', 'rewards', 'portfolio', 'contact', 'vitreenet'];
+                const sectionId = sections[index];
+                alert(`به بخش ${sectionId} هدایت می‌شوید...`);
             });
-        }
-        
-        // Set initial state for animation
-        document.addEventListener('DOMContentLoaded', function() {
-            const elements = document.querySelectorAll('.glassmorphism-dark, .glassmorphism');
-            
-            elements.forEach(element => {
-                element.style.opacity = '0';
-                element.style.transform = 'translateY(20px)';
-                element.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
-            });
-            
-            // Trigger animation
-            setTimeout(animateOnScroll, 100);
         });
-        
-        // Listen for scroll events
-        window.addEventListener('scroll', animateOnScroll);
     </script>
 </body>
 </html>
