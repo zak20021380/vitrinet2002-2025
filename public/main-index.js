@@ -913,12 +913,26 @@ document.addEventListener('DOMContentLoaded', function() {
   const registerBtn = document.getElementById('registerShopBtn');
   const links = Array.from(desktopNav.querySelectorAll('.main-nav-link'));
 
+  function addMobileLinkInteractions(link) {
+    if (link.dataset.bound) return;
+    link.addEventListener('click', function() {
+      mobileList.querySelectorAll('a').forEach(a => a.classList.remove('active'));
+      this.classList.add('active');
+    });
+    link.addEventListener('pointerdown', function() {
+      this.classList.add('tapped');
+      setTimeout(() => this.classList.remove('tapped'), 300);
+    });
+    link.dataset.bound = 'true';
+  }
+
   function moveLinks() {
     if (window.innerWidth <= 767) {
       links.forEach(l => {
         if (!mobileList.contains(l)) {
           l.classList.remove('hide-on-mobile');
           mobileList.appendChild(l);
+          addMobileLinkInteractions(l);
         }
       });
       highlightActive();
