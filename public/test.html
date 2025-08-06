@@ -13,8 +13,10 @@
         }
         .glassmorphism {
             background: rgba(255, 255, 255, 0.7);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
         }
         .service-card {
             scroll-snap-align: start;
@@ -57,19 +59,31 @@
 </head>
 <body class="bg-gray-50 text-gray-800">
     <!-- Sticky Header -->
-    <header class="sticky top-0 z-50 glassmorphism py-3 px-4 flex justify-between items-center">
-        <button class="text-gray-700 hover:text-blue-600 transition-colors px-3 py-1 rounded-lg border border-gray-300 hover:border-blue-500">
-            مغازه‌های مشابه
-        </button>
-        <h1 class="text-xl font-bold">آرایشگاه مردانه سلطنتی</h1>
-        <div class="w-8 h-8">
-            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M12 2L2 7L12 12L22 7L12 2Z" stroke="#3B82F6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                <path d="M2 17L12 22L22 17" stroke="#3B82F6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                <path d="M2 12L12 17L22 12" stroke="#3B82F6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
+    <header id="main-header" class="sticky top-0 z-50 glassmorphism backdrop-blur-md bg-white/70 transition-colors duration-300">
+        <div class="max-w-screen-xl mx-auto flex items-center justify-between px-4 py-2">
+            <a href="#" class="flex items-center text-sm text-blue-600 border border-blue-600/30 rounded-full px-4 py-2 bg-white/0 transition-all transform hover:scale-105 hover:shadow-md">
+                <i class="fa-solid fa-store ml-1"></i>
+                مغازه‌های مشابه
+            </a>
+            <div class="flex-1 text-center">
+                <h1 class="text-lg sm:text-xl font-black">آرایشگاه مردانه سلطنتی</h1>
+                <p class="text-xs text-gray-500 mt-0.5">ویژه در تجربه و کیفیت</p>
+            </div>
+            <a href="/index.html" class="w-9 h-9 flex items-center justify-center transition-transform duration-300 hover:scale-110 hover:drop-shadow-[0_0_6px_#3B82F6]">
+                <img src="../assets/images/logo.svg" alt="Vitreenet" class="w-8 h-8" />
+            </a>
         </div>
     </header>
+    <script>
+        const header = document.getElementById('main-header');
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 10) {
+                header.classList.add('bg-white/90');
+            } else {
+                header.classList.remove('bg-white/90');
+            }
+        });
+    </script>
 
     <!-- Hero Section -->
     <section class="relative h-80 overflow-hidden">
