@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>دسته‌بندی فروشگاه‌ها - ویترینت</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="style-index.css" />
   <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;700&display=swap" rel="stylesheet"/>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@800&display=swap" rel="stylesheet"/>
   <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet" />
@@ -128,52 +129,11 @@
     @media (max-width: 768px) {
       .hide-on-mobile { display: none !important; }
     }
-    .mobile-bottom-nav {
-      position: fixed;
-      left: .75rem; right: .75rem; bottom: .75rem;
-      z-index: 40;
-      background: rgba(255,255,255,0.65);
-      backdrop-filter: blur(16px);
-      border: 1px solid rgba(255,255,255,0.3);
-      box-shadow: 0 8px 20px rgba(0,0,0,0.08);
-      padding: 8px 12px;
-      padding-bottom: calc(8px + env(safe-area-inset-bottom));
-      font-family: 'Vazirmatn', sans-serif;
-      border-radius: 1.5rem;
-    }
-    .mobile-bottom-nav ul {
-      display: grid; grid-template-columns: repeat(3,1fr); gap:.75rem; align-items:center;
-    }
-    .mobile-bottom-nav a {
-      display:flex; flex-direction:column; align-items:center; justify-content:center;
-      font-weight:800; font-size:12px; color:#64748b; padding:10px 0; border-radius:1rem; transition:all .3s; position:relative;
-    }
-    .mobile-bottom-nav a .icon-wrap {
-      width:44px; height:44px; display:flex; align-items:center; justify-content:center;
-      border-radius:1rem; margin-bottom:4px;
-      background:rgba(255,255,255,0.4); border:1px solid rgba(255,255,255,0.3);
-      box-shadow:0 1px 3px rgba(0,0,0,0.05); transition:all .3s;
-    }
-    .mobile-bottom-nav a i {
-      font-size:1.75rem; transition:inherit;
-    }
-    .mobile-bottom-nav a.active {
-      color:#0f766e;
-    }
-    .mobile-bottom-nav a.active .icon-wrap {
-      background:linear-gradient(135deg,#10b981,#0ea5e9);
-      box-shadow:0 4px 12px rgba(16,185,129,0.4);
-    }
-    .mobile-bottom-nav a.active i { color:#fff; }
-    .mobile-bottom-nav a:not(.active) .icon-wrap { opacity:.8; }
-    .mobile-bottom-nav a:active .icon-wrap { transform:scale(1.15); }
-    .mobile-bottom-nav a:active i { transform:scale(1.05); }
-    .mobile-bottom-nav a:hover .icon-wrap { transform:translateY(-2px); }
     ::-webkit-scrollbar {width: 7px;}
     ::-webkit-scrollbar-thumb {background: #c8f7e6;}
   </style>
 </head>
-<body class="text-gray-800 overflow-x-hidden pb-20 md:pb-0">
+<body class="text-gray-800 overflow-x-hidden">
 
 <!-- هدر سایت -->
 <header class="w-full bg-white/30 sm:bg-white/90 backdrop-blur-xl sm:backdrop-blur-md shadow-none sm:shadow-sm sticky top-0 z-50">
@@ -304,27 +264,39 @@
 </footer>
 
   <nav id="mobileNav" class="mobile-bottom-nav md:hidden" aria-label="ناوبری موبایل">
-    <ul class="flex justify-around items-center">
+    <ul id="mobileNavList" class="flex justify-around items-center">
       <li>
-        <a href="index.html" class="nav-link">
-          <span class="icon-wrap"><i class="ri-home-smile-2-fill"></i></span>
+        <a href="index.html" class="main-nav-link text-gray-700 hover:text-[#10b981] font-bold px-2 sm:px-3 transition">
+          <svg class="w-5 h-5 mb-1" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2h-2a2 2 0 0 1-2-2v-4H9v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
           <span>خانه</span>
         </a>
       </li>
       <li>
-        <a href="categories.html" class="nav-link">
-          <span class="icon-wrap"><i class="ri-layout-grid-fill"></i></span>
+        <a href="categories.html" class="main-nav-link text-gray-700 hover:text-[#0ea5e9] font-bold px-2 sm:px-3 transition">
+          <svg class="w-5 h-5 mb-1" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 3h7v7H3V3zm11 0h7v7h-7V3zM3 14h7v7H3v-7zm11 0h7v7h-7v-7z"/></svg>
           <span>دسته‌بندی</span>
         </a>
       </li>
       <li>
-        <a href="login.html" class="nav-link">
-          <span class="icon-wrap"><i class="ri-login-box-fill"></i></span>
+        <a href="login.html" class="main-nav-link text-gray-700 hover:text-[#0ea5e9] font-bold px-2 sm:px-3 transition">
+          <svg class="w-5 h-5 mb-1" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
           <span>ورود</span>
         </a>
       </li>
     </ul>
   </nav>
+
+  <script>
+    const current = location.pathname.split('/').pop() || 'index.html';
+    document.querySelectorAll('#mobileNav a').forEach(a => {
+      const path = a.getAttribute('href');
+      if (path === current) a.classList.add('active');
+      a.addEventListener('pointerdown', function () {
+        this.classList.add('tapped');
+        setTimeout(() => this.classList.remove('tapped'), 300);
+      });
+    });
+  </script>
 
 <script>
 // لیست دسته‌بندی‌ها (کد ثابت)
