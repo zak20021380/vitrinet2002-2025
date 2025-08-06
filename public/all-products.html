@@ -4,7 +4,10 @@
   <meta charset="UTF-8">
   <title>فروشگاه زکی - همه محصولات</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@800&display=swap" rel="stylesheet"/>
+  <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
     :root {
@@ -38,7 +41,7 @@
       min-height: 100vh;
       display: flex;
       flex-direction: column;
-      padding-top: 76px;
+      padding-top: 0;
     }
 
     /* هدر بهبود یافته */
@@ -1080,26 +1083,140 @@
       }
     }
   </style>
+  <style>
+    .btn-grad {
+      background: linear-gradient(90deg,#10b981 10%,#0ea5e9 100%);
+      color: #fff !important;
+      box-shadow: 0 2px 12px #10b98133;
+      font-weight: bold;
+      border-radius: 0.75rem;
+      transition: all .17s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      min-height: 42px;
+      padding: 0.5rem 0;
+    }
+    .btn-grad span {
+      width: 100%;
+      display: block;
+      text-align: center;
+    }
+    .btn-grad:hover { filter: brightness(1.07); }
+    .logo-vitreenet {
+      font-family: 'Poppins', sans-serif;
+      font-weight: 800;
+      font-size: 1.55rem;
+      background: linear-gradient(90deg,#11d6ad 0%, #10b981 60%, #2db4e8 100%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      letter-spacing: 1.7px;
+      filter: drop-shadow(0 1px 5px #10b98118);
+      white-space: nowrap;
+      display: inline-block;
+      padding-right: 3px;
+      padding-left: 3px;
+      line-height: 1.1;
+      text-shadow: none;
+    }
+    @media (min-width: 640px) {
+      .logo-vitreenet { font-size: 1.9rem; }
+    }
+    @media (min-width: 1024px) {
+      .logo-vitreenet { font-size: 2.05rem; }
+    }
+    @media (max-width: 768px) {
+      .hide-on-mobile { display: none !important; }
+    }
+    ::-webkit-scrollbar {width: 7px;}
+    ::-webkit-scrollbar-thumb {background: #c8f7e6;}
+    @media (max-width: 550px){
+      .btn-grad {min-height:38px; font-size:13px;}
+    }
+    @media (max-width: 640px) {
+      body { padding-bottom: 72px; }
+      footer:not(.mobile-nav) { display: none; }
+      .mobile-nav {
+        display: flex !important;
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: 72px;
+        background: rgba(255,255,255,0.96);
+        backdrop-filter: blur(12px);
+        border-top: 1px solid rgba(224,242,254,0.8);
+        border-radius: 24px 24px 0 0;
+        box-shadow: 0 -5px 25px rgba(0,0,0,0.08);
+        z-index: 100;
+        padding: 8px 0;
+      }
+      .nav-item {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        color: #94a3b8;
+        transition: all 0.2s;
+        border-radius: 12px;
+        padding: 6px 0;
+      }
+      .nav-item.active {
+        color: #10b981;
+        transform: translateY(-4px);
+      }
+      .nav-item:active { transform: scale(0.92); }
+      .nav-icon {
+        width: 24px;
+        height: 24px;
+        margin-bottom: 4px;
+      }
+      .nav-label {
+        font-size: 11px;
+        font-weight: 800;
+      }
+    }
+  </style>
 </head>
 <body>
   <!-- هدر بهبود یافته -->
-<header class="vit-header" id="mainHeader">
-  <div class="vit-logo">
-    <a href="#">
-      <span class="vit-logo-gradient" style="font-size:2rem;letter-spacing:.06em;">Vitreenet</span>
-    </a>
-  </div>
-
-  <div class="vit-actions">
-    <a href="#" class="vit-login-btn">
-      <i class="fas fa-sign-in-alt"></i>
-      ورود
-    </a>
-    <!-- تغییر دکمه ثبت نام به ثبت فروشگاه -->
-    <a href="#" class="vit-btn">
-      <i class="fas fa-store-alt"></i>
-      <span style="margin-right: 8px;">ثبت فروشگاه</span> <!-- افزایش فاصله در هدر -->
-    </a>
+<header class="w-full bg-white/30 sm:bg-white/90 backdrop-blur-xl sm:backdrop-blur-md shadow-none sm:shadow-sm sticky top-0 z-50">
+  <div class="max-w-7xl mx-auto flex flex-nowrap sm:flex-wrap items-center justify-between px-4 sm:px-6 py-2 sm:py-3 gap-y-2">
+    <div class="flex items-center gap-2 flex-shrink-0">
+      <a href="index.html" class="logo-vitreenet">Vitreenet</a>
+      <div class="flex items-center gap-1 px-2 py-1 rounded-full ml-2" style="background:linear-gradient(90deg,#10b981E6 70%,#0ea5e9E6); backdrop-filter: blur(5px);">
+        <svg width="16" height="16" fill="none" viewBox="0 0 22 22" class="ml-1 drop-shadow">
+          <defs>
+            <linearGradient id="city-icon" x1="0" y1="0" x2="22" y2="22" gradientUnits="userSpaceOnUse">
+              <stop stop-color="#fff" />
+              <stop offset="1" stop-color="#b2f2e9" />
+            </linearGradient>
+          </defs>
+          <path d="M11 2.5C7.13 2.5 4 5.61 4 9.45c0 3.52 4.1 7.93 6.2 10.01.46.47 1.2.47 1.66 0 2.1-2.08 6.14-6.49 6.14-10.01C18 5.61 14.87 2.5 11 2.5Zm0 10.25a2.75 2.75 0 1 1 0-5.5 2.75 2.75 0 0 1 0 5.5Z" fill="url(#city-icon)"/>
+        </svg>
+        <span class="font-bold text-white text-xs sm:text-sm drop-shadow-sm" style="letter-spacing:.3px;">سنندج</span>
+      </div>
+    </div>
+    <nav id="desktopNav" class="flex items-center justify-end gap-2 sm:gap-3 flex-nowrap text-sm sm:text-base w-auto">
+      <a href="index.html" class="main-nav-link flex-1 md:flex-none flex flex-col items-center justify-center gap-1 text-gray-600 hover:text-teal-600 font-bold px-2 sm:px-3 transition hide-on-mobile text-[12px] md:text-base">
+        <i class="ri-home-5-line text-lg md:hidden"></i>
+        <span>خانه</span>
+      </a>
+      <a href="categories.html" class="main-nav-link flex-1 md:flex-none flex flex-col items-center justify-center gap-1 text-gray-600 hover:text-sky-600 font-bold px-2 sm:px-3 transition hide-on-mobile text-[12px] md:text-base">
+        <i class="ri-layout-grid-line text-lg md:hidden"></i>
+        <span>دسته‌بندی</span>
+      </a>
+      <a href="login.html" class="main-nav-link flex-1 md:flex-none flex flex-col items-center justify-center gap-1 text-gray-600 hover:text-sky-600 font-bold px-2 sm:px-3 transition hide-on-mobile text-[12px] md:text-base">
+        <i class="ri-login-box-line text-lg md:hidden"></i>
+        <span>ورود</span>
+      </a>
+      <a href="post.html" id="registerShopBtn" class="btn-grad px-3 sm:px-4 py-1 rounded-full font-bold text-sm transition sm:shadow sm:hover:scale-105">
+        <span>ثبت فروشگاه</span>
+      </a>
+    </nav>
   </div>
 </header>
 
@@ -1291,23 +1408,34 @@
   </div>
 
 <!-- === footer (نسخهٔ ساده) === -->
-<footer class="simple-footer">
-  <div class="sf-inner">
-    <span>© 2025 فروشگاه زکی</span>
-
-    <div class="sf-links">
-      <a href="#">درباره ما</a>
-      <a href="#">سوالات متداول</a>
-      <a href="#">تماس</a>
-    </div>
-
-    <!-- دکمه‌ی ثبت فروشگاه -->
-    <a href="/seller/register" class="sf-store-btn">
-      <i class="fas fa-store-alt"></i>
-      ثبت فروشگاه
+  <!-- Mobile Navigation Bar -->
+  <footer class="mobile-nav hidden">
+    <a href="index.html" class="nav-item">
+      <svg class="nav-icon" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/>
+      </svg>
+      <span class="nav-label">خانه</span>
     </a>
-  </div>
-</footer>
+    <a href="categories.html" class="nav-item">
+      <svg class="nav-icon" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M4 11h5V5H4v6zm0 7h5v-6H4v6zm6 0h5v-6h-5v6zm6 0h5v-6h-5v6zm-6-7h5V5h-5v6zm6-6v6h5V5h-5z"/>
+      </svg>
+      <span class="nav-label">دسته‌بندی</span>
+    </a>
+    <a href="login.html" class="nav-item">
+      <svg class="nav-icon" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+      </svg>
+      <span class="nav-label">ورود</span>
+    </a>
+  </footer>
+
+  <script src="nav-active.js"></script>
+
+  <!-- Desktop Footer -->
+  <footer class="w-full bg-gradient-to-tr from-[#f8fafc] via-[#e0fdfa] to-[#d4fbe8] border-t mt-16 px-2 pt-6 pb-3 text-center text-[15px] text-gray-500 rounded-t-[1.7rem] shadow-lg font-bold tracking-wide">
+    © 2025 ویترینت | همه حقوق محفوظ است.
+  </footer>
 
 <script>
 /* ----------------------- داده‌های پایه ----------------------- */
