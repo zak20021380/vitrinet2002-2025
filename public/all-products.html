@@ -311,9 +311,9 @@
     }
 
     .product-card {
-      background: rgba(255,255,255,0.9);
-      border-radius: 1.5rem;
-      box-shadow: 0 10px 40px rgba(16,185,129,0.14), 0 3px 12px rgba(14,165,233,0.10);
+      background: #ffffff;
+      border-radius: 1.25rem;
+      box-shadow: 0 8px 24px rgba(16,185,129,0.12), 0 4px 12px rgba(14,165,233,0.10);
       overflow: hidden;
       padding: 16px;
       border: 1px solid #e5e7eb;
@@ -325,22 +325,27 @@
     }
 
     .product-card:hover {
-      box-shadow: 0 14px 45px rgba(16,185,129,0.25), 0 6px 20px rgba(14,165,233,0.15);
-      transform: scale(1.04);
+      box-shadow: 0 12px 32px rgba(16,185,129,0.22), 0 6px 20px rgba(14,165,233,0.18);
+      transform: translateY(-4px);
     }
 
     .product-image-container {
       width: 100%;
-      height: 160px;
-      border-radius: 1rem;
-      margin-bottom: 20px;
+      height: 200px;
+      border-radius: 1.25rem;
+      margin-bottom: 16px;
       overflow: hidden;
       position: relative;
-      background: linear-gradient(100deg,#e0fdfa,#d4fbe8);
+      background: #f1f5f9;
     }
 
     @media (max-width: 640px) {
-      .product-image-container { height: 120px; }
+      .product-card { padding: 14px; }
+      .product-image-container { height: 180px; margin-bottom: 12px; }
+      .product-title { font-size: 1rem; }
+      .shop-address { font-size: 0.85rem; margin-bottom: 6px; }
+      .product-price { font-size: 1rem; }
+      .see-product-btn { width: 100%; padding: 12px; font-size: 0.95rem; }
     }
 
     .product-image {
@@ -349,8 +354,9 @@
       object-fit: cover;
       position: absolute;
       inset: 0;
-      border-radius: 1rem;
+      border-radius: 1.25rem;
       transition: transform .3s;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.06);
     }
 
     .product-card:hover .product-image {
@@ -668,12 +674,12 @@
       color: #fff;
       border: none;
       border-radius: 1rem;
-      padding: 8px 24px;
+      padding: 10px 24px;
       font-weight: 800;
       text-decoration: none;
-      display: inline-flex;
+      display: flex;
       align-items: center;
-      gap: 6px;
+      justify-content: center;
       box-shadow: 0 2px 12px rgba(16,185,129,0.2);
       transition: transform .2s, filter .2s;
     }
@@ -1653,14 +1659,14 @@ function renderProducts(list){
     const img=(p.images?.length)?p.images[0]:'https://placehold.co/320x200?text=NO+IMAGE';
     wrap.insertAdjacentHTML('beforeend',`
       <div class="product-card">
-        <div class="product-image-container">
-          <img class="product-image" src="${img}" alt="${p.title}">
+        <div class="product-image-container rounded-xl overflow-hidden shadow-sm">
+          <img class="product-image object-cover" src="${img}" alt="${p.title}">
         </div>
         <div class="product-details">
           <div class="product-title">${p.title}</div>
           <div class="shop-address"><i class="fas fa-map-marker-alt" style="color:#10b981;margin-left:5px"></i>${p.seller.address || "نامشخص"}</div>
           <div class="product-price">${formatPrice(p.price)}</div>
-          <a href="product.html?id=${p._id}" target="_blank" class="see-product-btn"><i class="fas fa-eye"></i>مشاهده محصول</a>
+          <a href="product.html?id=${p._id}" target="_blank" class="see-product-btn">مشاهده محصول</a>
         </div>
         <span class="tag">${p.seller.category || ""}</span>
       </div>`);
