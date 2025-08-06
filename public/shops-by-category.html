@@ -95,6 +95,184 @@
       margin-left: 2px;
       color: #10b981;
     }
+
+    /* ================== MOBILE UPGRADES (max-width: 640px) ================== */
+    @media (max-width: 640px) {
+      /* General Spacing & Layout */
+      body {
+        padding-bottom: 72px; /* Space for fixed bottom nav */
+      }
+      main, header, footer, .areas-scroll {
+        padding-left: 16px !important;
+        padding-right: 16px !important;
+      }
+      main {
+        padding-top: 1.5rem;
+        padding-bottom: 1.5rem;
+      }
+
+      /* Header Upgrade - Glassmorphism */
+      header {
+        backdrop-filter: blur(10px) !important;
+        background: rgba(255,255,255,0.88) !important;
+        box-shadow: 0 2px 20px rgba(0,0,0,0.08);
+        border-bottom: 1px solid rgba(224,253,250,0.7);
+      }
+      .main-logo {
+        font-size: 1.5rem !important;
+        margin-left: 8px;
+      }
+      .header-right-items {
+        display: none !important; /* Hide desktop nav items */
+      }
+      .mobile-menu-btn {
+        display: block !important;
+        background: transparent;
+        border: none;
+        width: 40px;
+        height: 40px;
+        padding: 8px;
+        margin-left: 6px;
+      }
+      .mobile-menu-btn span {
+        display: block;
+        width: 24px;
+        height: 3px;
+        background: #10b981;
+        margin: 4px 0;
+        border-radius: 2px;
+        transition: all 0.3s;
+      }
+
+      /* Shop Card Improvements */
+      .shop-card {
+        padding: 1.2rem !important;
+        min-height: 180px !important;
+        margin-bottom: 18px;
+        border-radius: 1.5rem;
+      }
+      .shop-card-image-container {
+        height: 110px !important;
+        border-radius: 1rem !important;
+        margin-bottom: 12px;
+      }
+      .shop-tags-container {
+        margin-bottom: 10px;
+      }
+      .shop-tag {
+        font-size: 12px !important;
+        padding: 6px 10px !important;
+        border-radius: 10px !important;
+        margin-inline-end: 6px;
+        margin-bottom: 4px;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+      }
+      .shop-name {
+        font-size: 1.1rem !important;
+        margin-bottom: 6px !important;
+      }
+      .shop-address {
+        font-size: 0.85rem !important;
+        margin-bottom: 12px !important;
+      }
+      .shop-entry-btn {
+        width: 100% !important;
+        padding: 12px !important;
+        border-radius: 14px !important;
+        font-size: 1rem !important;
+        font-weight: 800 !important;
+        background: linear-gradient(90deg, #10b981, #0ea5e9) !important;
+        box-shadow: 0 4px 12px rgba(16,185,129,0.3) !important;
+        margin-top: 8px;
+        transition: all 0.2s;
+      }
+      .shop-entry-btn:active {
+        transform: scale(0.98);
+        box-shadow: 0 2px 8px rgba(16,185,129,0.4) !important;
+      }
+
+      /* Area Buttons */
+      .areas-scroll {
+        overflow-x: auto;
+        padding-bottom: 10px;
+        margin-bottom: 18px;
+        flex-wrap: nowrap !important;
+        justify-content: flex-start;
+      }
+      .area-btn {
+        padding: 10px 16px !important;
+        min-width: 100px !important;
+        height: 42px;
+        font-size: 14px !important;
+        font-weight: 800;
+        border-radius: 14px !important;
+        margin-inline-end: 10px;
+        flex-shrink: 0;
+        box-shadow: 0 3px 8px rgba(0,0,0,0.1);
+        background: linear-gradient(90deg, #e0fdfa, #d1f9f0);
+      }
+      .area-btn:active {
+        transform: scale(0.96);
+      }
+
+      /* Search Input */
+      #searchInput {
+        padding: 16px 20px !important;
+        border-radius: 50px !important;
+        font-size: 1rem !important;
+        margin-bottom: 20px !important;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        border: 1px solid #e2e8f0;
+        background: rgba(255,255,255,0.9);
+      }
+
+      /* Footer Enhancement - Fixed Bottom Nav */
+      footer:not(.mobile-nav) {
+        display: none;
+      }
+      .mobile-nav {
+        display: flex !important;
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: 72px;
+        background: rgba(255,255,255,0.96);
+        backdrop-filter: blur(12px);
+        border-top: 1px solid rgba(224,242,254,0.8);
+        border-radius: 24px 24px 0 0;
+        box-shadow: 0 -5px 25px rgba(0,0,0,0.08);
+        z-index: 100;
+        padding: 8px 0;
+      }
+      .nav-item {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        color: #94a3b8;
+        transition: all 0.2s;
+        border-radius: 12px;
+        padding: 6px 0;
+      }
+      .nav-item.active {
+        color: #10b981;
+        transform: translateY(-4px);
+      }
+      .nav-item:active {
+        transform: scale(0.92);
+      }
+      .nav-icon {
+        width: 24px;
+        height: 24px;
+        margin-bottom: 4px;
+      }
+      .nav-label {
+        font-size: 11px;
+        font-weight: 800;
+      }
+    }
   </style>
 </head>
 <body class="min-h-screen flex flex-col bg-[#f8fafc]">
@@ -125,7 +303,7 @@
         </div>
       </div>
       <!-- منو -->
-      <div class="flex items-center gap-2 sm:gap-4 ml-2">
+      <div class="flex items-center gap-2 sm:gap-4 ml-2 header-right-items">
         <a href="index.html" class="hidden sm:inline text-gray-700 hover:text-[#10b981] font-bold px-2 sm:px-3 transition">خانه</a>
         <a href="categories.html" class="hidden sm:inline text-gray-700 hover:text-[#0ea5e9] font-bold px-2 sm:px-3 transition">دسته‌بندی</a>
         <a href="login.html" class="hidden sm:inline text-gray-700 hover:text-[#0ea5e9] font-bold px-2 sm:px-3 transition">ورود</a>
@@ -146,6 +324,12 @@
           ثبت فروشگاه
         </a>
       </div>
+      <!-- Mobile Menu Button -->
+      <button class="mobile-menu-btn hidden">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
     </nav>
   </header>
 
@@ -167,6 +351,30 @@
     <div id="shopsList" class="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-5"></div>
     <div id="noResult" class="hidden text-center text-gray-400 text-lg p-12 font-bold">هیچ مغازه‌ای پیدا نشد!</div>
   </main>
+  
+  <!-- Mobile Navigation Bar -->
+  <footer class="mobile-nav hidden">
+    <a href="index.html" class="nav-item active">
+      <svg class="nav-icon" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/>
+      </svg>
+      <span class="nav-label">خانه</span>
+    </a>
+    <a href="categories.html" class="nav-item">
+      <svg class="nav-icon" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M4 11h5V5H4v6zm0 7h5v-6H4v6zm6 0h5v-6h-5v6zm6 0h5v-6h-5v6zm-6-7h5V5h-5v6zm6-6v6h5V5h-5z"/>
+      </svg>
+      <span class="nav-label">دسته‌بندی</span>
+    </a>
+    <a href="login.html" class="nav-item">
+      <svg class="nav-icon" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+      </svg>
+      <span class="nav-label">ورود</span>
+    </a>
+  </footer>
+  
+  <!-- Desktop Footer -->
   <footer class="w-full bg-gradient-to-tr from-[#f8fafc] via-[#e0fdfa] to-[#d4fbe8] border-t mt-16 px-2 pt-6 pb-3 text-center text-[15px] text-gray-500 rounded-t-[1.7rem] shadow-lg font-bold tracking-wide">
     © 2025 ویترینت | همه حقوق محفوظ است.
   </footer>
@@ -290,7 +498,7 @@
         const card = document.createElement('div');
         card.className = 'shop-card group transition-all duration-200 relative hover:-translate-y-1 hover:shadow-2xl';
         card.innerHTML = `
-          <div class="relative w-full h-36 sm:h-44 mb-4 rounded-xl overflow-hidden flex items-center justify-center
+          <div class="shop-card-image-container relative w-full h-36 sm:h-44 mb-4 rounded-xl overflow-hidden flex items-center justify-center
                       bg-gradient-to-tr from-[#e0fdfa] to-[#e0f7fa] border-2 border-[#10b98112] group-hover:border-[#10b98144] shadow">
             ${shop.boardImage
               ? `<img src="${shop.boardImage}" class="object-cover w-full h-full transition-all duration-200 group-hover:scale-105" alt="${shop.storename}" loading="lazy"/>`
@@ -298,18 +506,18 @@
             }
             <span class="absolute top-2 left-2 bg-[#10b981] text-white text-xs font-bold px-2 py-1 rounded-full shadow group-hover:bg-[#0ea5e9] transition-all duration-150">جدید</span>
           </div>
-          <div class="w-full flex items-center justify-between mb-2">
-            <span class="inline-block bg-[#0ea5e9]/10 text-[#0ea5e9] text-[12px] font-extrabold px-2 py-1 rounded-full">${areaName}</span>
-            <span class="inline-block bg-[#10b981]/10 text-[#10b981] text-[12px] font-extrabold px-2 py-1 rounded-full">${shop.category || ''}</span>
+          <div class="shop-tags-container w-full flex items-center justify-between mb-2">
+            <span class="shop-tag inline-block bg-[#0ea5e9]/10 text-[#0ea5e9] text-[12px] font-extrabold px-2 py-1 rounded-full">${areaName}</span>
+            <span class="shop-tag inline-block bg-[#10b981]/10 text-[#10b981] text-[12px] font-extrabold px-2 py-1 rounded-full">${shop.category || ''}</span>
           </div>
-          <h4 class="font-bold text-base sm:text-lg text-[#10b981] text-center mb-2 truncate w-full group-hover:text-[#0ea5e9] transition-all">${shop.storename}</h4>
-          <div class="text-[#13bfa4] font-extrabold text-sm mb-1">${shop.address || ''}</div>
+          <h4 class="shop-name font-bold text-base sm:text-lg text-[#10b981] text-center mb-2 truncate w-full group-hover:text-[#0ea5e9] transition-all">${shop.storename}</h4>
+          <div class="shop-address text-[#13bfa4] font-extrabold text-sm mb-1">${shop.address || ''}</div>
           ${shop.phone ? `<div class="text-gray-400 text-xs font-bold mt-1 flex items-center gap-1 justify-center">
             <svg class="phone-icon" fill="none" viewBox="0 0 24 24"><path d="M6.62 10.79a15.054 15.054 0 006.59 6.59l2.2-2.2a1.003 1.003 0 011.01-.24c1.12.37 2.33.57 3.58.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1C10.07 21 3 13.93 3 5c0-.55.45-1 1-1h3.01c.55 0 1 .45 1 1 0 1.25.2 2.46.57 3.59a1 1 0 01-.24 1.01l-2.2 2.19z" fill="#10b981"/></svg>
             ${shop.phone}
           </div>` : ''}
           <div class="flex-1"></div>
-          <a href="shop.html?shopurl=${shop.shopurl}" class="w-full inline-block bg-gradient-to-l from-[#10b981] to-[#0ea5e9] hover:from-[#0ea5e9] hover:to-[#10b981] rounded-full px-4 py-2 mt-3 text-white font-extrabold text-sm shadow transition-all duration-200 text-center">
+          <a href="shop.html?shopurl=${shop.shopurl}" class="shop-entry-btn w-full inline-block bg-gradient-to-l from-[#10b981] to-[#0ea5e9] hover:from-[#0ea5e9] hover:to-[#10b981] rounded-full px-4 py-2 mt-3 text-white font-extrabold text-sm shadow transition-all duration-200 text-center">
             ورود به فروشگاه
           </a>
         `;
