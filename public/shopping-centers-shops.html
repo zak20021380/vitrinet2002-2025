@@ -794,19 +794,14 @@
     const urlParams = new URLSearchParams(window.location.search);
     const centerId = urlParams.get('centerId');
     const centerTitle = urlParams.get('title') || 'مرکز خرید'; // از پارامتر URL
-    
+
     if (!centerId) {
-      alert('شناسه مرکز خرید مشخص نشده است!');
+      // در صورت نبود شناسه، کاربر به صفحه مراکز خرید هدایت می‌شود
+      window.location.href = 'all-shopping-centers.html';
       return;
     }
-    
-    if (!centerTitle) {
-      alert('عنوان مرکز خرید مشخص نشده است!');
-      return;
-    }
-    
+
     document.getElementById('center-title').textContent = `مغازه‌ها و محصولات ${decodeURIComponent(centerTitle)}`; // اصلاح typo از "مگازه" به "مغازه"
-    
     const listDiv = document.getElementById('items-list');
     const searchInput = document.getElementById('searchInput'); // اصلاح typo از "searchInput"
     const priceFilter = document.getElementById('priceFilter');
