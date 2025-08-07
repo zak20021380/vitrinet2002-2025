@@ -1,5 +1,3 @@
-
-
 <!DOCTYPE html>
 <html lang="fa" dir="rtl">
 <head>
@@ -393,7 +391,6 @@
             -webkit-box-orient: vertical;
             overflow: hidden;
         }
-
         /* mobile nav */
         @media (max-width: 768px) {
             .hide-on-mobile { display: none !important; }
@@ -443,6 +440,54 @@
                 font-size: 11px;
                 font-weight: 800;
             }
+        }
+        
+        /* VIP Payment Modal Styles */
+        #vipPaymentModal {
+            transition: all 0.3s ease;
+        }
+        #vipPaymentModal .modal-content {
+            transition: all 0.3s ease;
+            transform: scale(0.95);
+            opacity: 0;
+        }
+        #vipPaymentModal .scale-100 {
+            transform: scale(1);
+        }
+        #vipPaymentModal .opacity-100 {
+            opacity: 1;
+        }
+        #vipPaymentModal .scale-95 {
+            transform: scale(0.95);
+        }
+        #vipPaymentModal .opacity-0 {
+            opacity: 0;
+        }
+        
+        /* Toast Notification Styles */
+        .toast-notification {
+            position: fixed;
+            bottom: 100px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(16, 185, 129, 0.9);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 50px;
+            font-weight: 500;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            z-index: 1000;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            display: flex;
+            align-items: center;
+            backdrop-filter: blur(10px);
+        }
+        .toast-notification.show {
+            opacity: 1;
+        }
+        .toast-notification i {
+            margin-left: 8px;
         }
     </style>
 </head>
@@ -1324,7 +1369,7 @@
                 </div>
             </div>
             <!-- Payment Button -->
-            <button class="vip-button w-full py-5 px-6 rounded-2xl text-white font-bold text-xl flex items-center justify-center">
+            <button id="vip-payment-btn" class="vip-button w-full py-5 px-6 rounded-2xl text-white font-bold text-xl flex items-center justify-center">
                 <i class="fas fa-crown ml-3 text-2xl"></i>
                 <div class="text-center">
                     <div class="text-lg">پرداخت و عضویت</div>
@@ -1470,14 +1515,42 @@
             <span class="nav-label">حساب کاربری</span>
         </a>
     </footer>
-
     <script src="nav-active.js"></script>
-
     <!-- Desktop Footer -->
     <footer class="w-full bg-gradient-to-tr from-[#f8fafc] via-[#e0fdfa] to-[#d4fbe8] border-t mt-16 px-2 pt-6 pb-3 text-center text-[15px] text-gray-500 rounded-t-[1.7rem] shadow-lg font-bold tracking-wide">
         © 2025 ویترینت | همه حقوق محفوظ است.
     </footer>
-
+    
+    <!-- VIP Payment Modal -->
+    <div id="vipPaymentModal" class="fixed inset-0 bg-black/70 z-50 hidden flex items-center justify-center p-4">
+        <div class="modal-content bg-white rounded-2xl overflow-hidden shadow-2xl max-w-md w-full glassmorphism">
+            <div class="p-6 text-center">
+                <div class="w-16 h-16 bg-gradient-to-r from-amber-400 to-amber-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i class="fas fa-crown text-white text-2xl"></i>
+                </div>
+                <h3 class="text-2xl font-bold text-gray-800 mb-2">تایید عضویت</h3>
+                <p class="text-gray-600 mb-6">با عضویت در باشگاه مشتریان ویژه، از تخفیف‌های اختصاصی و خدمات ویژه بهره‌مند شوید.</p>
+                <p class="text-lg font-bold text-blue-600 mb-6">هزینه عضویت: ۹۹,۰۰۰ تومان در ماه</p>
+                
+                <div class="flex flex-col gap-3">
+                    <button id="continue-payment-btn" class="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-bold py-4 px-6 rounded-xl transition-all flex items-center justify-center text-lg">
+                        <i class="fas fa-credit-card ml-2"></i>
+                        ادامه و پرداخت
+                    </button>
+                    <button id="cancel-vip-btn" class="bg-gray-100 hover:bg-gray-200 text-gray-800 font-bold py-3 px-6 rounded-xl transition-all">
+                        انصراف
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Toast Notification -->
+    <div id="toastNotification" class="toast-notification">
+        <i class="fas fa-spinner fa-spin"></i>
+        درحال انتقال به درگاه پرداخت...
+    </div>
+    
     <script>
         // Modal functionality for portfolio images
         function openModal(imageSrc, title) {
@@ -1521,6 +1594,64 @@
         document.addEventListener('keydown', function(e) {
             if (e.key === 'Escape') {
                 closeModal();
+                closeVipPaymentModal();
+            }
+        });
+        
+        // VIP Payment Modal functionality
+        const vipPaymentBtn = document.getElementById('vip-payment-btn');
+        const vipPaymentModal = document.getElementById('vipPaymentModal');
+        const continuePaymentBtn = document.getElementById('continue-payment-btn');
+        const cancelVipBtn = document.getElementById('cancel-vip-btn');
+        const toastNotification = document.getElementById('toastNotification');
+        
+        // Open VIP Payment Modal
+        vipPaymentBtn.addEventListener('click', function() {
+            // Disable body scroll
+            document.body.style.overflow = 'hidden';
+            
+            // Show modal with animation
+            vipPaymentModal.classList.remove('hidden');
+            setTimeout(() => {
+                vipPaymentModal.querySelector('.modal-content').classList.add('scale-100', 'opacity-100');
+                vipPaymentModal.querySelector('.modal-content').classList.remove('scale-95', 'opacity-0');
+            }, 10);
+        });
+        
+        // Close VIP Payment Modal
+        function closeVipPaymentModal() {
+            // Hide modal with animation
+            vipPaymentModal.querySelector('.modal-content').classList.add('scale-95', 'opacity-0');
+            vipPaymentModal.querySelector('.modal-content').classList.remove('scale-100', 'opacity-100');
+            
+            setTimeout(() => {
+                vipPaymentModal.classList.add('hidden');
+                // Enable body scroll
+                document.body.style.overflow = '';
+            }, 300);
+        }
+        
+        // Cancel button
+        cancelVipBtn.addEventListener('click', closeVipPaymentModal);
+        
+        // Continue to Payment button
+        continuePaymentBtn.addEventListener('click', function() {
+            // Close modal first
+            closeVipPaymentModal();
+            
+            // Show toast notification
+            toastNotification.classList.add('show');
+            
+            // Hide toast after 3 seconds
+            setTimeout(() => {
+                toastNotification.classList.remove('show');
+            }, 3000);
+        });
+        
+        // Close modal when clicking outside
+        vipPaymentModal.addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeVipPaymentModal();
             }
         });
         
