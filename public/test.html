@@ -393,6 +393,57 @@
             -webkit-box-orient: vertical;
             overflow: hidden;
         }
+
+        /* mobile nav */
+        @media (max-width: 768px) {
+            .hide-on-mobile { display: none !important; }
+        }
+        ::-webkit-scrollbar {width: 7px;}
+        ::-webkit-scrollbar-thumb {background: #c8f7e6;}
+        @media (max-width: 640px) {
+            body { padding-bottom: 72px; }
+            footer:not(.mobile-nav) { display: none; }
+            .mobile-nav {
+                display: flex !important;
+                position: fixed;
+                bottom: 0;
+                left: 0;
+                right: 0;
+                height: 72px;
+                background: rgba(255,255,255,0.96);
+                backdrop-filter: blur(12px);
+                border-top: 1px solid rgba(224,242,254,0.8);
+                border-radius: 24px 24px 0 0;
+                box-shadow: 0 -5px 25px rgba(0,0,0,0.08);
+                z-index: 100;
+                padding: 8px 0;
+            }
+            .nav-item {
+                flex: 1;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                color: #94a3b8;
+                transition: all 0.2s;
+                border-radius: 12px;
+                padding: 6px 0;
+            }
+            .nav-item.active {
+                color: #10b981;
+                transform: translateY(-4px);
+            }
+            .nav-item:active { transform: scale(0.92); }
+            .nav-icon {
+                width: 24px;
+                height: 24px;
+                margin-bottom: 4px;
+            }
+            .nav-label {
+                font-size: 11px;
+                font-weight: 800;
+            }
+        }
     </style>
 </head>
 <body class="bg-gray-50 text-gray-800">
@@ -1398,29 +1449,35 @@
             </div>
         </div>
     </section>
-    <!-- Mobile Footer (only < 1024px) -->
-    <footer class="lg:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 py-2 px-4 z-50 shadow-lg">
-        <div class="grid grid-cols-3 gap-2">
-            <button class="flex flex-col items-center justify-center py-3 px-2 text-blue-600 rounded-xl transition-all duration-300 group relative overflow-hidden bg-blue-50">
-                <div class="relative mb-1">
-                    <i class="fas fa-home text-2xl mb-1 transition-transform duration-300 group-hover:scale-110"></i>
-                    <span class="absolute -top-1 -right-1 w-2 h-2 bg-blue-600 rounded-full animate-pulse"></span>
-                </div>
-                <span class="text-xs font-medium">خانه</span>
-                <div class="absolute bottom-0 left-0 right-0 h-0.5 bg-blue-600 rounded-t-full"></div>
-            </button>
-            <button class="flex flex-col items-center justify-center py-3 px-2 text-gray-600 hover:text-blue-600 hover:bg-blue-50 transition-all duration-300 group rounded-xl relative overflow-hidden">
-                <i class="fas fa-th-large text-2xl mb-1 transition-transform duration-300 group-hover:scale-110"></i>
-                <span class="text-xs font-medium">دسته‌بندی‌ها</span>
-                <div class="absolute bottom-0 left-0 right-0 h-0.5 bg-blue-600 rounded-t-full transform scale-x-0 transition-transform duration-300 group-hover:scale-x-100"></div>
-            </button>
-            <button class="flex flex-col items-center justify-center py-3 px-2 text-gray-600 hover:text-blue-600 hover:bg-blue-50 transition-all duration-300 group rounded-xl relative overflow-hidden">
-                <i class="fas fa-plus-circle text-2xl mb-1 transition-transform duration-300 group-hover:scale-110"></i>
-                <span class="text-xs font-medium">ثبت مغازه</span>
-                <div class="absolute bottom-0 left-0 right-0 h-0.5 bg-blue-600 rounded-t-full transform scale-x-0 transition-transform duration-300 group-hover:scale-x-100"></div>
-            </button>
-        </div>
+    <!-- Mobile Navigation Bar -->
+    <footer class="mobile-nav hidden">
+        <a href="index.html" class="nav-item">
+            <svg class="nav-icon" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/>
+            </svg>
+            <span class="nav-label">خانه</span>
+        </a>
+        <a href="categories.html" class="nav-item">
+            <svg class="nav-icon" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M4 11h5V5H4v6zm0 7h5v-6H4v6zm6 0h5v-6h-5v6zm6 0h5v-6h-5v6zm-6-7h5V5h-5v6zm6-6v6h5V5h-5z"/>
+            </svg>
+            <span class="nav-label">دسته‌بندی</span>
+        </a>
+        <a href="user-panel.html" class="nav-item">
+            <svg class="nav-icon" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+            </svg>
+            <span class="nav-label">حساب کاربری</span>
+        </a>
     </footer>
+
+    <script src="nav-active.js"></script>
+
+    <!-- Desktop Footer -->
+    <footer class="w-full bg-gradient-to-tr from-[#f8fafc] via-[#e0fdfa] to-[#d4fbe8] border-t mt-16 px-2 pt-6 pb-3 text-center text-[15px] text-gray-500 rounded-t-[1.7rem] shadow-lg font-bold tracking-wide">
+        © 2025 ویترینت | همه حقوق محفوظ است.
+    </footer>
+
     <script>
         // Modal functionality for portfolio images
         function openModal(imageSrc, title) {
