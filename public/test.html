@@ -1904,16 +1904,42 @@
                     </div>
                 </div>
             </div>
-            <div class="grid grid-cols-2 gap-3">
-                <button class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg transition-all flex items-center justify-center">
-                    <i class="fas fa-phone ml-2"></i>
-                    تماس با ما
-                </button>
-                <button class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-3 px-4 rounded-lg transition-all flex items-center justify-center">
-                    <i class="fas fa-directions ml-2"></i>
-                    مسیریابی
-                </button>
-            </div>
+ 
+
+<div class="grid grid-cols-2 gap-3">
+  <!-- صفحه اصلی ویترینت -->
+  <a href="local***index.html"
+     class="group inline-flex items-center justify-center gap-1.5 sm:gap-2 w-full
+            rounded-2xl px-3.5 py-3 sm:px-4 sm:py-3.5 min-h-[52px] sm:min-h-[56px]
+            font-extrabold text-white text-[13px] sm:text-[15px] shadow-lg
+            bg-gradient-to-tr from-blue-600 to-teal-500 ring-1 ring-white/60
+            transition-all hover:from-blue-700 hover:to-teal-600
+            hover:shadow-[0_10px_25px_rgba(16,185,129,0.25)]
+            active:scale-95 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+     aria-label="رفتن به صفحه اصلی ویترینت">
+    <i class="fas fa-house ml-1.5 sm:ml-2 text-[14px] sm:text-base opacity-95 transition-transform group-active:scale-95"></i>
+    <span class="truncate">صفحه اصلی ویترینت</span>
+  </a>
+
+  <!-- مغازه‌های مشابه -->
+  <a href="local***discover.html"
+     class="group inline-flex items-center justify-center gap-1.5 sm:gap-2 w-full
+            rounded-2xl px-3.5 py-3 sm:px-4 sm:py-3.5 min-h-[52px] sm:min-h-[56px]
+            font-extrabold text-blue-800 text-[13px] sm:text-[15px]
+            bg-gradient-to-tr from-sky-50/90 via-cyan-50/90 to-emerald-50/90
+            backdrop-blur-md border border-white/60 shadow
+            hover:from-sky-100/90 hover:via-cyan-100/90 hover:to-emerald-100/90 hover:shadow-lg
+            active:scale-95 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500
+            transition-all"
+     aria-label="مشاهده مغازه‌های مشابه">
+    <i class="fas fa-store ml-1.5 sm:ml-2 text-[14px] sm:text-base opacity-95 transition-transform group-active:scale-95"></i>
+    <span class="truncate">مغازه‌های مشابه</span>
+  </a>
+</div>
+
+
+
+
         </div>
     </section>
     <!-- Mobile Navigation Bar -->
@@ -2490,6 +2516,143 @@
 
 
 
+
+<!-- Mobile Bottom Footer / Nav (5 items, same style) -->
+<footer id="mobile-bottom-nav" class="mobile-nav lg:hidden" role="navigation" aria-label="ناوبری موبایل">
+  <!-- خانه -->
+  <button type="button" class="nav-item" data-nav="home" aria-label="خانه" aria-current="page">
+    <i class="fa-solid fa-house nav-icon"></i>
+    <span class="nav-label">خانه</span>
+  </button>
+
+  <!-- خدمات -->
+  <button type="button" class="nav-item" data-nav="services" aria-label="خدمات">
+    <i class="fa-solid fa-scissors nav-icon"></i>
+    <span class="nav-label">خدمات</span>
+  </button>
+
+  <!-- رزرو (CTA وسط، برجسته) -->
+  <button type="button" class="nav-item active -mt-6 !text-white" data-nav="booking" aria-label="رزرو" style="padding:0">
+    <span class="inline-flex items-center justify-center w-14 h-14 rounded-2xl shadow-lg ring-4 ring-white/60 bg-gradient-to-tr from-blue-600 to-teal-500">
+      <i class="fa-solid fa-calendar-check text-lg"></i>
+    </span>
+    <span class="nav-label mt-1">رزرو</span>
+  </button>
+
+  <!-- نمونه‌کار -->
+  <button type="button" class="nav-item" data-nav="portfolio" aria-label="نمونه‌کار">
+    <i class="fa-solid fa-images nav-icon"></i>
+    <span class="nav-label">نمونه‌کار</span>
+  </button>
+
+  <!-- تماس -->
+  <button type="button" class="nav-item" data-nav="contact" aria-label="اطلاعات و تماس">
+    <i class="fa-solid fa-phone nav-icon"></i>
+    <span class="nav-label">تماس</span>
+  </button>
+</footer>
+
+<script>
+(() => {
+  const nav = document.getElementById('mobile-bottom-nav');
+  if (!nav) return;
+
+  const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const items = nav.querySelectorAll('.nav-item');
+
+  const setActive = (key) => {
+    items.forEach(btn => {
+      const isActive = btn.dataset.nav === key;
+      btn.classList.toggle('active', isActive);
+      btn.setAttribute('aria-current', isActive ? 'page' : 'false');
+    });
+  };
+
+  const smoothGo = (target) => {
+    if (!target) return;
+    if (prefersReduced) target.scrollIntoView();
+    else target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  };
+
+  const byId = (id) => document.getElementById(id);
+  const bySel = (sel) => document.querySelector(sel);
+
+  const findByHeading = (keyword) => {
+    const hs = [...document.querySelectorAll('h1,h2,h3,h4')];
+    const hit = hs.find(h => (h.textContent || '').includes(keyword));
+    return hit ? (hit.closest('section') || hit) : null;
+  };
+
+  // Targets (with robust fallbacks)
+  const targets = {
+    home: () => document.documentElement,
+    services: () => byId('services') || findByHeading('خدمات'),
+    booking: () => byId('booking-wizard'),
+    portfolio: () => byId('portfolio') || bySel('.portfolio-section') || findByHeading('نمونه کار'),
+    contact: () => byId('contact') || findByHeading('اطلاعات و تماس'),
+  };
+
+  // Click handlers
+  items.forEach(btn => {
+    btn.addEventListener('click', () => {
+      const key = btn.dataset.nav;
+
+      if (key === 'home') {
+        // لینک مستقیم به صفحه اصلی ویترینت
+        window.location.href = 'local***index.html';
+        return;
+      }
+
+      if (key === 'booking') {
+        const wizard = byId('booking-wizard');
+        const heroCta = byId('hero-cta');
+        if (wizard && wizard.classList.contains('hidden')) {
+          if (heroCta) heroCta.click();
+          else wizard.classList.remove('hidden');
+        }
+        const t = targets.booking();
+        if (t) {
+          const top = t.getBoundingClientRect().top + window.scrollY - 80;
+          if (prefersReduced) window.scrollTo(0, top);
+          else window.scrollTo({ top, behavior: 'smooth' });
+          setActive('booking');
+        }
+        return;
+      }
+
+      const t = targets[key] && targets[key]();
+      if (t) smoothGo(t);
+      setActive(key);
+    });
+  });
+
+  // Scroll spy (if supported)
+  const spySections = [
+    { key: 'services', el: targets.services() },
+    { key: 'portfolio', el: targets.portfolio() },
+    { key: 'contact',  el: targets.contact() },
+  ].filter(s => s.el);
+
+  if ('IntersectionObserver' in window && spySections.length) {
+    const io = new IntersectionObserver((entries) => {
+      const vis = entries.filter(e => e.isIntersecting)
+                         .sort((a,b) => b.intersectionRatio - a.intersectionRatio)[0];
+      if (!vis) return;
+      const hit = spySections.find(s => s.el === vis.target);
+      if (hit) setActive(hit.key);
+    }, { threshold: [0.35, 0.6], rootMargin: '-20% 0px -50% 0px' });
+    spySections.forEach(s => io.observe(s.el));
+
+    // Top of page = خانه
+    window.addEventListener('scroll', () => {
+      if (window.scrollY < 80) setActive('home');
+    }, { passive: true });
+  }
+
+  // Initial state
+  setActive('home');
+})();
+</script>
 
 
 
