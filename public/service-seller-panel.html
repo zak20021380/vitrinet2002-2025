@@ -1,3 +1,5 @@
+
+
 <!DOCTYPE html>
 <html lang="fa" dir="rtl">
 <head>
@@ -66,19 +68,6 @@
             font-size: 0.65rem;
             padding: 0.15rem 0.5rem;
             border-radius: 9999px;
-        }
-        .line-clamp-2 {
-            display: -webkit-box;
-            -webkit-box-orient: vertical;
-            -webkit-line-clamp: 2;
-            overflow: hidden;
-        }
-        .scrollbar-hide {
-            scrollbar-width: none;
-            -ms-overflow-style: none;
-        }
-        .scrollbar-hide::-webkit-scrollbar {
-            display: none;
         }
         /* Header Animations */
         .logo-animation {
@@ -455,6 +444,82 @@
             }
         }
         
+        /* Enhanced Mobile Navigation */
+        @media (max-width: 640px) {
+            .mobile-nav {
+                background: linear-gradient(to top, rgba(255,255,255,0.95), rgba(240,253,250,0.85));
+                backdrop-filter: blur(16px);
+                -webkit-backdrop-filter: blur(16px);
+                border-top: 1px solid rgba(226,232,240,0.5);
+                box-shadow: 0 -4px 20px rgba(0,0,0,0.06);
+                padding-bottom: calc(8px + env(safe-area-inset-bottom));
+                position: relative;
+            }
+            .nav-item {
+                height: 56px;
+                position: relative;
+                z-index: 2;
+            }
+            .nav-item.active {
+                color: #0ea5e9;
+            }
+            .nav-item.active .nav-icon {
+                filter: drop-shadow(0 0 3px rgba(14,165,233,0.5));
+            }
+            .nav-item:active {
+                transform: scale(0.95);
+                transition: transform 100ms ease;
+            }
+            .nav-indicator {
+                position: absolute;
+                bottom: 0;
+                height: 3px;
+                background: linear-gradient(90deg, #0ea5e9, #06b6d4);
+                border-radius: 3px 3px 0 0;
+                transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+                z-index: 1;
+            }
+            .nav-item.active::before {
+                content: '';
+                position: absolute;
+                top: 0;
+                left: 50%;
+                transform: translateX(-50%);
+                width: 44px;
+                height: 44px;
+                background: rgba(14,165,233,0.15);
+                border-radius: 12px;
+                z-index: 0;
+                filter: blur(8px);
+            }
+        }
+        
+        /* Enhanced Desktop Footer */
+        @media (min-width: 641px) {
+            footer:not(.mobile-nav) {
+                background: linear-gradient(135deg, #f0fdfa, #e0f2fe, #dcfce7);
+                border-top: 1px solid rgba(226,232,240,0.5);
+                box-shadow: 0 -2px 10px rgba(0,0,0,0.03);
+                padding: 1.5rem 1rem 1rem;
+                position: relative;
+                overflow: hidden;
+            }
+            footer:not(.mobile-nav)::before {
+                content: '';
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+                height: 1px;
+                background: linear-gradient(90deg, transparent, rgba(14,165,233,0.3), transparent);
+            }
+            footer:not(.mobile-nav) > div {
+                position: relative;
+                z-index: 1;
+            }
+        }
+        <!-- footer redesign end -->
+        
         /* VIP Payment Modal Styles */
         #vipPaymentModal {
             transition: all 0.3s ease;
@@ -502,468 +567,138 @@
         .toast-notification i {
             margin-left: 8px;
         }
-
-
-
-
-
-
-
-
-
-/* --- Chips & Dialog (new) --- */
-.chip {
-  height: 36px;
-  padding: 0 12px;
-  border-radius: 9999px;
-  font-weight: 800;
-  font-size: 12px;
-  background: rgba(255,255,255,0.82);
-  color: #374151; /* gray-700 */
-  border: 1px solid rgba(255,255,255,0.6);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  box-shadow: 0 4px 14px rgba(59,130,246,0.08);
-  transition: all .2s ease;
-  display: inline-flex; align-items: center; gap: 6px;
-}
-.chip:hover { background: #fff; box-shadow: 0 8px 22px rgba(59,130,246,0.14); }
-.chip:active { transform: scale(0.98); }
-
-.chip--primary {
-  color: #fff;
-  background: linear-gradient(135deg,#3B82F6,#06B6D4);
-  border: none;
-  box-shadow: 0 6px 20px rgba(59,130,246,0.28);
-}
-.chip--primary:hover { filter: brightness(0.98); }
-
-.dialog-card-enter { transform: scale(0.96); opacity: 0; }
-.dialog-card-show  { transform: scale(1);    opacity: 1; transition: all .18s ease; }
-
-        
     </style>
 </head>
 <body class="bg-gray-50 text-gray-800">
     <!-- Sticky Header -->
-    <!-- header desktop redesign start -->
-<header id="main-header" class="sticky top-0 z-50 backdrop-blur-md bg-white/50 shadow-sm transition-all duration-300">
-  <!-- ========== Mobile Header ========== -->
-  <div id="mobile-header" class="md:hidden px-3">
-    <div id="mobile-top" class="flex items-center justify-between h-14 py-3">
-      <!-- Brand (right on RTL) -->
-      <a href="/index.html" class="text-blue-600 font-extrabold text-lg tracking-tight">
-        ویترینت
-      </a>
-
-      <!-- Title (center) -->
-      <h1
-        class="flex-1 mx-2 text-center text-[15px] font-extrabold text-gray-900 truncate"
-        title="آرایشگاه مردانه سلطنتی"
-      >
-        آرایشگاه مردانه سلطنتی
-      </h1>
-
-      <!-- Actions (left): Report + Address -->
-      <div class="flex items-center gap-2">
-        <button
-          id="mobile-report-trigger"
-          data-open="reportModal"
-          aria-label="گزارش مشکل"
-          class="h-9 px-3 rounded-full text-blue-700 bg-white/80 backdrop-blur-md border border-white/60 shadow-sm hover:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 text-xs font-bold transition-all"
-        >
-          گزارش
-        </button>
-        <button
-          id="mobile-address-chip"
-          data-open="addressModal"
-          role="button"
-          aria-label="نمایش آدرس"
-          class="h-9 px-3 rounded-full text-gray-800 bg-white/90 backdrop-blur-md border border-white/60 shadow-sm hover:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 text-xs font-bold flex items-center gap-1 transition-all"
-        >
-          <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-blue-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 1 1 18 0z"></path>
-            <circle cx="12" cy="10" r="3"></circle>
-          </svg>
-          آدرس
-        </button>
-      </div>
-    </div>
-
-    <!-- keep stub for compatibility -->
-    <div id="mobile-chips" class="hidden h-0 overflow-hidden"></div>
-  </div>
-
-  <!-- ========== Desktop Header Bar ========== -->
-  <div class="hidden md:block">
+    <header id="main-header" class="sticky top-0 z-50 backdrop-blur-md bg-white/50 shadow-sm transition-all duration-300">
     <div class="max-w-screen-xl mx-auto px-3 py-3">
-      <div class="flex items-center justify-between gap-3 flex-nowrap">
-        <!-- Brand -->
-        <div class="flex items-center gap-2 flex-shrink-0 md:w-40">
-          <a href="/index.html" class="flex items-center focus:outline-none focus:ring-2 focus:ring-blue-500 rounded-md">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="w-10 h-10 text-blue-600 md:hidden">
-              <path fill="currentColor" d="M12 2L2 7l10 5l10-5l-10-5m0 2.53L19.22 7L12 10.47L4.78 7L12 4.53M2 17v3.5a1.5 1.5 0 0 0 1.5 1.5h17a1.5 1.5 0 0 0 1.5-1.5V17l-10-5l-10 5m0 2h14v2H5v-2z"/>
-            </svg>
-            <span class="hidden md:inline-block text-xl font-extrabold tracking-wide text-blue-600 transition-transform hover:scale-105 hover:drop-shadow-[0_0_6px_rgba(37,99,235,0.6)]">ویترینت</span>
-          </a>
+        <div class="flex items-center justify-between gap-3">
+            <!-- Brand -->
+            <div class="flex items-center gap-2 flex-shrink-0 md:w-40">
+                <a href="/index.html" class="flex items-center focus:outline-none focus:ring-2 focus:ring-blue-500 rounded-md">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="w-10 h-10 text-blue-600 md:hidden">
+                        <path fill="currentColor" d="M12 2L2 7l10 5l10-5l-10-5m0 2.53L19.22 7L12 10.47L4.78 7L12 4.53M2 17v3.5a1.5 1.5 0 0 0 1.5 1.5h17a1.5 1.5 0 0 0 1.5-1.5V17l-10-5l-10 5m0 2h14v2H5v-2z"/>
+                    </svg>
+                    <span class="hidden md:inline-block text-xl font-extrabold tracking-wide text-blue-600 transition-transform hover:scale-105 hover:drop-shadow-[0_0_6px_rgba(37,99,235,0.6)]">ویترینت</span>
+                </a>
+            </div>
+            <!-- Identity Cluster -->
+            <div class="flex-1 flex flex-col items-center">
+                <h1 class="text-lg font-black text-gray-900 text-center truncate md:hidden">آرایشگاه مردانه سلطنتی</h1>
+                <span title="تعداد اعضای باشگاه مشتریان ویژه" class="mt-1 md:hidden flex items-center gap-1 bg-amber-400 text-black text-[10px] sm:text-xs font-bold px-3 py-1 rounded-full shadow-[0_0_8px_rgba(251,191,36,0.7)]">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="w-3 h-3 md:w-4 md:h-4 text-amber-700" fill="currentColor">
+                        <path d="M5 16l-1-9 5 3 3-6 3 6 5-3-1 9H5zm0 2h14v2H5v-2z"/>
+                    </svg>
+                    ۱۲۸ مشتری ویژه
+                </span>
+                <div class="hidden md:flex items-center text-sm">
+                    <h1 class="font-extrabold text-gray-900 truncate max-w-[200px]">آرایشگاه مردانه سلطنتی</h1>
+                    <span class="mx-2 text-gray-400">•</span>
+                    <span class="flex items-center gap-1 px-3 py-1 rounded-full text-amber-900 font-bold bg-gradient-to-r from-amber-300 to-amber-400 shadow">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="w-4 h-4 text-amber-700" fill="currentColor">
+                            <path d="M5 16l-1-9 5 3 3-6 3 6 5-3-1 9H5zm0 2h14v2H5v-2z"/>
+                        </svg>
+                        ۱۲۸ مشتری ویژه
+                    </span>
+                    <span class="mx-2 text-gray-400">•</span>
+                    <button id="desktop-address-chip" class="flex items-center gap-1 bg-white/70 px-3 py-1 rounded-full text-gray-700 transition hover:bg-white hover:shadow focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-blue-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                            <circle cx="12" cy="10" r="3"></circle>
+                        </svg>
+                        آدرس
+                    </button>
+                    <span class="mx-2 text-gray-400">•</span>
+                    <span class="flex items-center gap-1 bg-white/70 px-3 py-1 rounded-full text-gray-700">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-amber-500" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2L9.19 8.63L2 9.24l5.46 4.73L5.82 21z"/>
+                        </svg>
+                        <span class="font-bold">4.8</span>
+                        <span class="text-gray-500">(128)</span>
+                    </span>
+                </div>
+            </div>
+            <!-- Mobile Address & Rating -->
+            <div class="flex items-center gap-3 flex-shrink-0 text-[10px] sm:text-xs md:hidden">
+                <div class="flex items-center gap-1 text-gray-700">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-blue-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                        <circle cx="12" cy="10" r="3"></circle>
+                    </svg>
+                    <span class="truncate max-w-[80px] sm:max-w-[120px]">تهران، ولیعصر</span>
+                </div>
+                <div class="flex items-center gap-1">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-amber-500" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2L9.19 8.63L2 9.24l5.46 4.73L5.82 21z"/>
+                    </svg>
+                    <span class="font-bold">4.8</span>
+                    <span class="text-gray-500">(128)</span>
+                </div>
+            </div>
+            <div class="hidden md:block md:w-40"></div>
         </div>
-
-        <!-- Identity Cluster (md only, centered text + chips) -->
-        <div class="flex-1 flex flex-col items-center lg:hidden">
-          <h1 class="text-lg font-black text-gray-900 text-center truncate md:hidden">آرایشگاه مردانه سلطنتی</h1>
-          <span title="تعداد اعضای باشگاه مشتریان ویژه" class="mt-1 md:hidden flex items-center gap-1 bg-amber-400 text-black text-[10px] sm:text-xs font-bold px-3 py-1 rounded-full shadow-[0_0_8px_rgba(251,191,36,0.7)]">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="w-3 h-3 md:w-4 md:h-4 text-amber-700" fill="currentColor">
-              <path d="M5 16l-1-9 5 3 3-6 3 6 5-3-1 9H5zm0 2h14v2H5v-2z"/>
-            </svg>
-            ۱۲۸ مشتری ویژه
-          </span>
-          <div class="hidden md:flex lg:hidden items-center text-sm">
-            <h1 class="font-extrabold text-gray-900 truncate max-w-[200px]">آرایشگاه مردانه سلطنتی</h1>
-            <span class="mx-2 text-gray-400">•</span>
-            <span class="flex items-center gap-1 px-3 py-1 rounded-full text-amber-900 font-bold bg-gradient-to-r from-amber-300 to-amber-400 shadow">
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="w-4 h-4 text-amber-700" fill="currentColor">
-                <path d="M5 16l-1-9 5 3 3-6 3 6 5-3-1 9H5zm0 2h14v2H5v-2z"/>
-              </svg>
-              ۱۲۸ مشتری ویژه
-            </span>
-            <span class="mx-2 text-gray-400">•</span>
-            <!-- unified trigger attribute -->
-            <button
-              id="desktop-address-chip"
-              data-open="addressModal"
-              class="flex items-center gap-1 bg-white/80 backdrop-blur-md border border-white/60 px-3 py-1 rounded-full text-gray-800 transition hover:bg-white hover:shadow focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-blue-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
-                <circle cx="12" cy="10" r="3"></circle>
-              </svg>
-              آدرس
+    </div>
+    <!-- Address Modal -->
+    <div id="address-modal" class="hidden fixed inset-0 items-center justify-center z-50">
+        <div id="address-overlay" class="absolute inset-0 bg-black/40 backdrop-blur-sm"></div>
+        <div id="address-card" class="relative bg-white/70 backdrop-blur-md border border-white/40 shadow-lg rounded-2xl p-6 max-w-sm w-11/12 transform transition duration-200 scale-95 opacity-0">
+            <button id="address-close" class="absolute top-2 left-2 text-gray-600 hover:text-gray-800 text-2xl leading-none">&times;</button>
+            <h2 class="text-lg font-bold mb-4">آدرس</h2>
+            <p class="text-sm text-gray-700 mb-4">تهران، خیابان ولیعصر، کوچه فرهنگ، پلاک ۱۲</p>
+            <button id="address-copy" class="flex items-center gap-1 text-sm text-blue-600 hover:text-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-500 px-3 py-1 rounded-md">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                    <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                </svg>
+                کپی
             </button>
-            <span class="mx-2 text-gray-400">•</span>
-            <span class="flex items-center gap-1 bg-white/80 backdrop-blur-md border border-white/60 px-3 py-1 rounded-full text-gray-700">
-              <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-amber-500" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2L9.19 8.63L2 9.24l5.46 4.73L5.82 21z"/>
-              </svg>
-              <span class="font-bold">4.8</span>
-              <span class="text-gray-500">(128)</span>
-            </span>
-          </div>
         </div>
-
-        <!-- Mobile Address & Rating (xs) -->
-        <div class="flex items-center gap-3 flex-shrink-0 text-[10px] sm:text-xs md:hidden">
-          <div class="flex items-center gap-1 text-gray-700">
-            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-blue-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
-              <circle cx="12" cy="10" r="3"></circle>
-            </svg>
-            <span class="truncate max-w-[80px] sm:max-w-[120px]">تهران، ولیعصر</span>
-          </div>
-          <div class="flex items-center gap-1">
-            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-amber-500" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2L9.19 8.63L2 9.24l5.46 4.73L5.82 21z"/>
-            </svg>
-            <span class="font-bold">4.8</span>
-            <span class="text-gray-500">(128)</span>
-          </div>
-        </div>
-
-        <div class="hidden md:block lg:hidden md:w-40"></div>
-
-        <!-- Desktop Center Cluster (lg) -->
-        <div class="hidden lg:flex flex-1 items-center justify-center text-sm whitespace-nowrap">
-          <h1 class="font-extrabold text-gray-900 truncate max-w-[220px]" title="آرایشگاه مردانه سلطنتی">آرایشگاه مردانه سلطنتی</h1>
-          <span class="mx-2 text-gray-400">·</span>
-          <span class="flex items-center gap-1 px-3 py-1 rounded-full text-amber-900 font-medium bg-gradient-to-r from-amber-300 to-amber-400 shadow">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="w-4 h-4 text-amber-700" fill="currentColor">
-              <path d="M5 16l-1-9 5 3 3-6 3 6 5-3-1 9H5zm0 2h14v2H5v-2z"/>
-            </svg>
-            ۱۲۸ مشتری ویژه
-          </span>
-          <span class="mx-2 text-gray-400">·</span>
-          <button
-            id="address-trigger"
-            data-open="addressModal"
-            class="flex items-center gap-1 bg-white/80 backdrop-blur-md border border-white/60 px-3 py-1 rounded-full text-gray-800 hover:bg-white hover:shadow transition focus:outline-none focus:ring-2 focus:ring-blue-500"
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-blue-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
-              <circle cx="12" cy="10" r="3"></circle>
-            </svg>
-            آدرس
-          </button>
-          <span class="mx-2 text-gray-400">·</span>
-          <span class="flex items-center gap-1 bg-white/80 backdrop-blur-md border border-white/60 px-3 py-1 rounded-full text-gray-700">
-            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-amber-500" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2L9.19 8.63L2 9.24l5.46 4.73L5.82 21z"/>
-            </svg>
-            <span class="font-bold">4.8</span>
-            <span class="text-gray-500">(128)</span>
-          </span>
-          <span class="mx-2 text-gray-400">·</span>
-          <button
-            id="report-trigger"
-            data-open="reportModal"
-            class="flex items-center gap-1 bg-white/80 backdrop-blur-md border border-white/60 px-3 py-1 rounded-full text-blue-700 hover:bg-white hover:shadow transition focus:outline-none focus:ring-2 focus:ring-blue-500 font-bold"
-          >
-            گزارش
-          </button>
-        </div>
-
-        <div class="hidden lg:block lg:w-40"></div>
-      </div>
     </div>
-  </div>
 </header>
-
-
-
-
-<!-- Address Modal (simple & clean) -->
-<div id="addressModal" role="dialog" aria-modal="true" aria-labelledby="address-title"
-     class="hidden fixed inset-0 z-[80] items-center justify-center">
-  <!-- backdrop -->
-  <div class="absolute inset-0 bg-black/50 backdrop-blur-[2px]" data-close></div>
-
-  <!-- card -->
-  <div class="modal-card relative w-[92%] max-w-sm bg-white rounded-2xl shadow-xl p-5
-              transform transition duration-150 scale-95 opacity-0">
-    <!-- close -->
-    <button type="button" data-close
-            class="absolute top-2 left-2 text-gray-500 hover:text-gray-700 text-xl leading-none">
-      &times;
-    </button>
-
-    <!-- title -->
-    <div class="flex items-center gap-2 mb-3">
-      <span class="inline-flex w-9 h-9 items-center justify-center rounded-xl
-                   bg-gradient-to-tr from-blue-600 to-teal-500 text-white">
-        <!-- pin icon -->
-        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 1 1 18 0z"></path>
-          <circle cx="12" cy="10" r="3"></circle>
-        </svg>
-      </span>
-      <h2 id="address-title" class="text-base font-extrabold text-gray-900">آدرس</h2>
-    </div>
-
-    <!-- content -->
-    <div class="space-y-3 text-[13px] sm:text-sm leading-7 text-gray-700">
-      <div class="flex items-start gap-2">
-        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 mt-1 text-blue-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 1 1 18 0z"></path>
-          <circle cx="12" cy="10" r="3"></circle>
-        </svg>
-        <p id="full-address">تهران، خیابان ولیعصر، کوچه فرهنگ، پلاک ۱۲</p>
-      </div>
-
-      <div class="flex items-center gap-2 text-gray-600">
-        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-emerald-600" viewBox="0 0 24 24" fill="currentColor">
-          <path d="M6.62 10.79a15.053 15.053 0 006.59 6.59l2.2-2.2a1 1 0 011.01-.24c1.11.37 2.3.57 3.58.57a1 1 0 011 1V20a1 1 0 01-1 1C10.07 21 3 13.93 3 5a1 1 0 011-1h3.5a1 1 0 011 1c0 1.28.2 2.47.57 3.58a1 1 0 01-.24 1.01l-2.21 2.2z"/>
-        </svg>
-        <a href="tel:02188776655" class="font-bold tracking-wide">۰۲۱-۸۸۷۷۶۶۵۵</a>
-      </div>
-    </div>
-
-    <!-- actions -->
-    <div class="mt-5 text-left">
-      <button type="button" data-close
-              class="px-4 py-2 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-800 font-bold">
-        بستن
-      </button>
-    </div>
-  </div>
-</div>
-
-
-<div id="reportModal" role="dialog" aria-modal="true" aria-labelledby="report-title"
-     class="hidden fixed inset-0 z-[80] items-center justify-center">
-  <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" data-close></div>
-  <div class="modal-card relative bg-white/80 backdrop-blur-xl border border-white/60 rounded-2xl shadow-lg p-6 w-11/12 max-w-md transform transition duration-150 scale-95 opacity-0">
-    <h2 id="report-title" class="mb-4 text-lg font-bold bg-gradient-to-r from-blue-500/20 to-teal-400/20 p-2 rounded-xl text-center">گزارش مشکل</h2>
-    <form id="report-form" class="space-y-4">
-      <div>
-        <textarea id="report-text" maxlength="500" class="w-full min-h-[6rem] p-3 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm resize-none" placeholder="مشکل یا سوءاستفاده را توضیح دهید…"></textarea>
-        <div id="report-counter" class="text-xs text-gray-500 text-left mt-1">۰/۵۰۰</div>
-      </div>
-      <input id="report-contact" type="text" class="w-full p-3 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm" placeholder="اطلاعات تماس (اختیاری)">
-      <div class="flex justify-end gap-3">
-        <button type="button" data-close class="px-4 py-2 rounded-full bg-white/80 hover:bg-white hover:shadow transition focus:outline-none focus:ring-2 focus:ring-blue-500">انصراف</button>
-        <button type="submit" class="px-4 py-2 rounded-full bg-blue-600 text-white hover:bg-blue-700 transition focus:outline-none focus:ring-2 focus:ring-blue-500">ارسال گزارش</button>
-      </div>
-    </form>
-  </div>
-</div>
-
-<!-- Toast should be above modals -->
-<div id="headerToast" class="fixed top-4 left-1/2 -translate-x-1/2 z-[100] bg-blue-600 text-white text-sm px-4 py-2 rounded-full shadow-lg opacity-0 transition-opacity pointer-events-none"></div>
-
-
 <script>
-(() => {
-  // ====== Sticky header + toast ======
-  const header = document.getElementById('main-header');
-  const toast  = document.getElementById('headerToast');
-
-  function showToast(msg) {
-    if (!toast) return;
-    toast.textContent = msg;
-    toast.classList.remove('opacity-0');
-    toast.classList.add('opacity-100');
-    setTimeout(() => {
-      toast.classList.add('opacity-0');
-      toast.classList.remove('opacity-100');
-    }, 2500);
-  }
-
-  // Header background on scroll
-  window.addEventListener('scroll', () => {
-    if (!header) return;
-    if (window.scrollY > 10) {
-      header.classList.add('bg-white/80', 'shadow-lg');
-    } else {
-      header.classList.remove('bg-white/80', 'shadow-lg');
-    }
-  });
-
-  // Mobile top compact/expand
-  const mobileTop   = document.getElementById('mobile-top');
-  const mobileChips = document.getElementById('mobile-chips');
-  let lastY = window.scrollY;
-  window.addEventListener('scroll', () => {
-    if (!mobileTop || !mobileChips) return;
-    if (window.innerWidth > 768) return;
-    if (window.scrollY > lastY && window.scrollY > 20) {
-      mobileTop.classList.remove('py-3');
-      mobileTop.classList.add('py-2');
-      mobileChips.classList.add('hidden');
-    } else {
-      mobileTop.classList.add('py-3');
-      mobileTop.classList.remove('py-2');
-      mobileChips.classList.remove('hidden');
-    }
-    lastY = window.scrollY;
-  });
-
-  // ====== Unified modal system (for both mobile & desktop) ======
-  const modalCache = new Map();
-
-  function setupModal(modal) {
-    const card = modal.querySelector('.modal-card');
-    const closeEls = modal.querySelectorAll('[data-close]');
-    let lastFocused = null;
-    let prevOverflow = '';
-
-    const focusableSelector = 'button, [href], input, textarea, select, [tabindex]:not([tabindex="-1"])';
-
-    function open() {
-      lastFocused = document.activeElement;
-      prevOverflow = document.body.style.overflow || '';
-      document.body.style.overflow = 'hidden';
-
-      modal.classList.remove('hidden');
-      modal.classList.add('flex'); // اگه کلاس flex تو HTML نباشه، اینجا تضمین می‌کنیم
-      requestAnimationFrame(() => {
-        card.classList.remove('scale-95','opacity-0');
-        card.classList.add('scale-100','opacity-100');
-        const firstFocusable = card.querySelector(focusableSelector);
-        if (firstFocusable) firstFocusable.focus();
-      });
-
-      document.addEventListener('keydown', trap);
-    }
-
-    function close() {
-      card.classList.add('scale-95','opacity-0');
-      card.classList.remove('scale-100','opacity-100');
-
-      setTimeout(() => {
-        modal.classList.add('hidden');
-        modal.classList.remove('flex');
-        document.removeEventListener('keydown', trap);
-        document.body.style.overflow = prevOverflow;
-        if (lastFocused) lastFocused.focus();
-      }, 180);
-    }
-
-    function trap(e) {
-      if (e.key === 'Escape') return close();
-      if (e.key !== 'Tab') return;
-      const f = card.querySelectorAll(focusableSelector);
-      if (!f.length) return;
-      const first = f[0], last = f[f.length - 1];
-      if (e.shiftKey && document.activeElement === first) {
-        e.preventDefault(); last.focus();
-      } else if (!e.shiftKey && document.activeElement === last) {
-        e.preventDefault(); first.focus();
-      }
-    }
-
-    // Close via elements with data-close
-    closeEls.forEach(el => el.addEventListener('click', close));
-    // Close when clicking outside the card
-    modal.addEventListener('click', (e) => {
-      if (!card.contains(e.target)) close();
+    const header = document.getElementById('main-header');
+    window.addEventListener('scroll', () => {
+        if (window.scrollY > 10) {
+            header.classList.add('bg-white/80', 'shadow-lg');
+        } else {
+            header.classList.remove('bg-white/80', 'shadow-lg');
+        }
     });
-
-    return { open, close };
-  }
-
-  function bindTriggers() {
-    document.querySelectorAll('[data-open]').forEach(btn => {
-      const id = btn.getAttribute('data-open');
-      const modal = document.getElementById(id);
-      if (!modal) return;
-      if (!modalCache.has(id)) modalCache.set(id, setupModal(modal));
-      btn.addEventListener('click', (e) => {
-        e.preventDefault();
-        modalCache.get(id).open();
-      });
+    const mql = window.matchMedia('(min-width: 768px)');
+    function initAddressModal() {
+        const chip = header.querySelector('#desktop-address-chip');
+        const modal = header.querySelector('#address-modal');
+        if (!chip || !modal) return;
+        const overlay = header.querySelector('#address-overlay');
+        const card = header.querySelector('#address-card');
+        const closeBtn = header.querySelector('#address-close');
+        const copyBtn = header.querySelector('#address-copy');
+        const addressText = 'تهران، خیابان ولیعصر، کوچه فرهنگ، پلاک ۱۲';
+        const open = () => {
+            modal.classList.remove('hidden');
+            requestAnimationFrame(() => {
+                card.classList.remove('scale-95', 'opacity-0');
+                card.classList.add('scale-100', 'opacity-100');
+            });
+        };
+        const close = () => {
+            card.classList.add('scale-95', 'opacity-0');
+            setTimeout(() => modal.classList.add('hidden'), 200);
+        };
+        chip.addEventListener('click', open);
+        overlay.addEventListener('click', close);
+        closeBtn.addEventListener('click', close);
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') close();
+        });
+        copyBtn.addEventListener('click', () => navigator.clipboard.writeText(addressText));
+    }
+    if (mql.matches) initAddressModal();
+    mql.addEventListener('change', (e) => {
+        if (e.matches) initAddressModal();
     });
-  }
-  bindTriggers();
-
-  // ====== Address copy ======
-  const addressCopyBtn = document.getElementById('address-copy-btn');
-  const fullAddressEl  = document.getElementById('full-address');
-  if (addressCopyBtn && fullAddressEl) {
-    addressCopyBtn.addEventListener('click', () => {
-      const txt = (fullAddressEl.textContent || '').trim();
-      if (!txt) return;
-      navigator.clipboard.writeText(txt).then(() => showToast('آدرس کپی شد'));
-    });
-  }
-
-  // ====== Report form + counter ======
-  const reportModal   = document.getElementById('reportModal');
-  const reportForm    = document.getElementById('report-form');
-  const reportText    = document.getElementById('report-text');
-  const reportCounter = document.getElementById('report-counter');
-
-  if (reportText && reportCounter) {
-    const updateCounter = () => {
-      const len = reportText.value.length;
-      reportCounter.textContent = `${len.toLocaleString('fa-IR')}/۵۰۰`;
-    };
-    reportText.addEventListener('input', updateCounter);
-    updateCounter();
-  }
-
-  if (reportForm && reportModal) {
-    const inst = modalCache.get('reportModal') || setupModal(reportModal);
-    modalCache.set('reportModal', inst);
-    reportForm.addEventListener('submit', (e) => {
-      e.preventDefault();
-      inst.close();
-      showToast('گزارش شما ثبت شد');
-      reportForm.reset();
-      if (reportCounter) reportCounter.textContent = '۰/۵۰۰';
-    });
-  }
-})();
 </script>
-
-
     <!-- Hero Section -->
     <section class="relative h-80 overflow-hidden">
         <div class="absolute inset-0 bg-cover bg-center" style="background-image: url('https://picsum.photos/seed/barbershop/1200/800.jpg');">
@@ -1916,183 +1651,95 @@
             </div>
         </div>
     </section>
+    <!-- footer redesign start -->
     <!-- Mobile Navigation Bar -->
-
-<footer id="site-footer" class="w-full mt-16 hide-on-mobile" aria-labelledby="vitreenet-footer-title">
-  <h2 id="vitreenet-footer-title" class="sr-only">ویترینت — ویترین آنلاین کسب‌وکارهای محلی</h2>
-
-  <div class="bg-gradient-to-tr from-[#f8fafc] via-[#e0fdfa] to-[#d4fbe8]
-              rounded-t-[1.7rem] border-t border-white/70
-              shadow-[0_-12px_30px_rgba(0,0,0,0.06)]">
-    <div class="max-w-screen-xl mx-auto px-4 sm:px-6 py-10">
-
-      <div class="grid grid-cols-1 md:grid-cols-4 gap-10">
-        <!-- 1) اشاره خیلی مختصر به مغازه -->
-        <div>
-          <div class="flex items-center gap-2 mb-2">
-            <span class="inline-flex w-9 h-9 items-center justify-center rounded-xl
-                         bg-gradient-to-tr from-blue-600 to-teal-500 text-white">
-              <i class="fa-solid fa-store"></i>
-            </span>
-            <p class="font-extrabold text-gray-800">آرایشگاه مردانه سلطنتی</p>
-          </div>
-          <p class="text-xs text-gray-600 leading-6">
-            این صفحه بر بستر <strong class="text-gray-800">ویترینت</strong> میزبانی می‌شود.
-          </p>
-          <!-- بنا به خواست شما دکمه «رزرو سریع» حذف شد -->
-        </div>
-
-        <!-- 2) ویترینت در یک نگاه (برای کاربران) -->
-        <div>
-          <div class="flex items-center gap-2 mb-3">
-            <span class="inline-flex w-9 h-9 items-center justify-center rounded-xl
-                         bg-gradient-to-tr from-blue-600 to-teal-500 text-white">
-              <i class="fa-solid fa-compass"></i>
-            </span>
-            <p class="font-extrabold text-gray-800">ویترینت در یک نگاه</p>
-          </div>
-
-          <p class="text-sm text-gray-700 leading-7">
-            با ویترینت، ویترین آنلاینِ مغازه‌ات را بساز و مدیریت کن؛
-            رزرو نوبت، پرداخت امن، باشگاه مشتریان و گزارش‌های هوشمند — همه یک‌جا و بدون کدنویسی.
-          </p>
-
-          <div class="mt-4 space-y-2">
-            <a href="/" rel="home"
-               class="block w-full text-center px-5 py-3 rounded-xl font-extrabold text-white
-                      bg-gradient-to-tr from-blue-600 to-teal-500 hover:from-blue-700 hover:to-teal-600
-                      shadow-lg transition" aria-label="رفتن به صفحه اصلی ویترینت">
-              صفحهٔ اصلی ویترینت
-            </a>
-
-            <a href="/discover"
-               class="block w-full text-center px-5 py-3 rounded-xl font-extrabold text-blue-700
-                      bg-white/80 backdrop-blur border border-white/70 hover:bg-white hover:shadow transition"
-               aria-label="مشاهده مغازه‌های مشابه در ویترینت">
-              مغازه‌های مشابه
-            </a>
-          </div>
-        </div>
-
-        <!-- 3) مزیت‌ها (خلاصه و کاربردی) -->
-        <div>
-          <p class="font-extrabold text-gray-800 mb-3">چرا ویترینت؟</p>
-          <ul class="space-y-2 text-sm text-gray-700">
-            <li class="flex items-center gap-2"><i class="fa-solid fa-check text-emerald-600"></i> رزرو آنلاین با یادآوری خودکار</li>
-            <li class="flex items-center gap-2"><i class="fa-solid fa-check text-emerald-600"></i> پرداخت امن و فاکتور دیجیتال</li>
-            <li class="flex items-center gap-2"><i class="fa-solid fa-check text-emerald-600"></i> باشگاه مشتریان و کوپن‌های تخفیف</li>
-            <li class="flex items-center gap-2"><i class="fa-solid fa-check text-emerald-600"></i> ظاهر سبک، واکنش‌گرا و سریع</li>
-            <li class="flex items-center gap-2"><i class="fa-solid fa-check text-emerald-600"></i> داشبورد آمار و گزارش‌های کاربردی</li>
-          </ul>
-        </div>
-
-        <!-- 4) CTA برای صاحبان کسب‌وکار -->
-        <div>
-          <p class="font-extrabold text-gray-800 mb-3">برای صاحبان کسب‌وکار</p>
-          <div class="space-y-3">
-            <a href="/merchant/register"
-               class="block w-full text-center px-5 py-3 rounded-xl font-extrabold text-white
-                      bg-gradient-to-tr from-blue-600 to-teal-500 hover:from-blue-700 hover:to-teal-600
-                      shadow-lg transition" aria-label="ثبت فروشگاه در ویترینت">
-              ثبت فروشگاه در ویترینت
-            </a>
-            <a href="/merchant/login"
-               class="block w-full text-center px-5 py-3 rounded-xl font-extrabold text-blue-700
-                      bg-white/80 backdrop-blur border border-white/70 hover:bg-white hover:shadow transition"
-               aria-label="ورود فروشندگان">
-              ورود فروشندگان
-            </a>
-            <div class="text-xs text-gray-500 leading-6">
-              کمتر از ۳ دقیقه تا راه‌اندازی — بدون نیاز به برنامه‌نویسی
+    <footer class="mobile-nav hidden">
+        <div class="nav-indicator"></div>
+        <a href="index.html" class="nav-item">
+            <svg class="nav-icon" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/>
+            </svg>
+            <span class="nav-label">خانه</span>
+        </a>
+        <a href="categories.html" class="nav-item">
+            <svg class="nav-icon" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M4 11h5V5H4v6zm0 7h5v-6H4v6zm6 0h5v-6h-5v6zm6 0h5v-6h-5v6zm-6-7h5V5h-5v6zm6-6v6h5V5h-5z"/>
+            </svg>
+            <span class="nav-label">دسته‌بندی</span>
+        </a>
+        <a href="user-panel.html" class="nav-item">
+            <svg class="nav-icon" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+            </svg>
+            <span class="nav-label">حساب کاربری</span>
+        </a>
+    </footer>
+    
+    <script>
+        // Mobile nav active state handler
+        document.addEventListener('DOMContentLoaded', function() {
+            const navItems = document.querySelectorAll('.nav-item');
+            const indicator = document.querySelector('.nav-indicator');
+            const currentPage = window.location.pathname.split('/').pop() || 'index.html';
+            
+            // Set active state based on current page
+            navItems.forEach(item => {
+                const href = item.getAttribute('href');
+                if (href === currentPage) {
+                    item.classList.add('active');
+                    positionIndicator(item);
+                }
+                
+                // Add tap animation
+                item.addEventListener('click', function() {
+                    // Remove active from all items
+                    navItems.forEach(navItem => {
+                        navItem.classList.remove('active');
+                    });
+                    
+                    // Add active to clicked item
+                    this.classList.add('active');
+                    positionIndicator(this);
+                });
+            });
+            
+            // Position indicator under active item
+            function positionIndicator(activeItem) {
+                const itemRect = activeItem.getBoundingClientRect();
+                const navRect = activeItem.parentElement.getBoundingClientRect();
+                const position = itemRect.left - navRect.left + itemRect.width / 2;
+                
+                indicator.style.width = '44px';
+                indicator.style.left = `calc(${position}px - 22px)`;
+                indicator.style.opacity = '1';
+            }
+            
+            // Initial position if there's an active item
+            const activeItem = document.querySelector('.nav-item.active');
+            if (activeItem) {
+                positionIndicator(activeItem);
+            } else {
+                indicator.style.opacity = '0';
+            }
+        });
+    </script>
+    <!-- footer redesign end -->
+    
+    <!-- Desktop Footer -->
+    <footer class="w-full bg-gradient-to-tr from-[#f0fdfa] via-[#e0f2fe] to-[#dcfce7] border-t mt-16 px-2 pt-6 pb-3 text-center text-[15px] text-gray-500 rounded-t-[1.7rem] shadow-lg font-bold tracking-wide">
+        <div class="max-w-screen-xl mx-auto">
+            <!-- Optional links (commented out as requested) -->
+            <!--
+            <div class="flex justify-center space-x-6 space-x-reverse mb-4 text-sm">
+                <a href="#" class="text-gray-500 hover:text-gray-700 transition-colors">شرایط استفاده</a>
+                <a href="#" class="text-gray-500 hover:text-gray-700 transition-colors">حریم خصوصی</a>
+                <a href="#" class="text-gray-500 hover:text-gray-700 transition-colors">سوالات متداول</a>
+                <a href="#" class="text-gray-500 hover:text-gray-700 transition-colors">تماس با ما</a>
             </div>
-          </div>
+            -->
+            © 2025 ویترینت | همه حقوق محفوظ است.
         </div>
-      </div>
-
-      <!-- نوار پایینی -->
-      <div class="mt-10 pt-4 border-t border-white/70
-                  flex flex-col sm:flex-row items-center justify-between gap-3
-                  text-gray-500 text-sm">
-        <div class="flex items-center gap-2">
-          <span class="inline-flex w-6 h-6 items-center justify-center rounded-lg
-                       bg-gradient-to-tr from-blue-600 to-teal-500 text-white">
-            <i class="fa-solid fa-gem"></i>
-          </span>
-          <span>ساخته شده با <strong class="text-gray-700">ویترینت</strong> — ویترین آنلاین کسب‌وکارهای محلی</span>
-        </div>
-
-        <p>© <span id="footer-year"></span> ویترینت — همه حقوق محفوظ است.</p>
-
-        <div class="flex items-center gap-2">
-          <a href="/terms" class="hover:text-blue-700 transition">قوانین</a>
-          <span class="text-gray-300">•</span>
-          <a href="/privacy" class="hover:text-blue-700 transition">حریم خصوصی</a>
-          <span class="text-gray-300">•</span>
-          <button id="back-to-top" class="chip chip--primary" aria-label="بازگشت به بالای صفحه">بازگشت به بالا</button>
-        </div>
-      </div>
-
-    </div>
-  </div>
-</footer>
-
-
-
-
-<script>
-  (function () {
-    // سال شمسی با ارقام فارسی
-    const yearEl = document.getElementById('footer-year');
-    if (yearEl) {
-      yearEl.textContent = new Intl.DateTimeFormat('fa-IR', { year: 'numeric' }).format(new Date());
-    }
-
-    // بازگشت به بالا با اسکرول نرم (رعایت Reduce Motion)
-    const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    const up = document.getElementById('back-to-top');
-    if (up) {
-      up.addEventListener('click', () => {
-        if (prefersReduced) {
-          window.scrollTo(0, 0);
-        } else {
-          window.scrollTo({ top: 0, behavior: 'smooth' });
-        }
-      });
-    }
-
-    // اسکرول نرم برای لینک‌های داخلی داخل فوتر (#anchor)
-    document.querySelectorAll('#site-footer a[href^="#"]').forEach(a => {
-      a.addEventListener('click', (e) => {
-        const id = a.getAttribute('href');
-        const target = document.querySelector(id);
-        if (!target) return;
-        e.preventDefault();
-
-        if (prefersReduced) {
-          target.scrollIntoView();
-        } else {
-          target.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        }
-
-        // بهبود دسترس‌پذیری: فوکوس پس از اسکرول
-        target.setAttribute('tabindex', '-1');
-        target.focus({ preventScroll: true });
-      });
-    });
-  })();
-</script>
-
-
-
-
-
-
-
-
-
-
-    <script src="nav-active.js"></script>
-
+    </footer>
     
     <!-- VIP Payment Modal -->
     <div id="vipPaymentModal" class="fixed inset-0 bg-black/70 z-50 hidden flex items-center justify-center p-4">
@@ -2485,14 +2132,5 @@
             }
         });
     </script>
-
-
-
-
-
-
-
-
-
 </body>
 </html>
