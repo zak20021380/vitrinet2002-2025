@@ -67,6 +67,19 @@
             padding: 0.15rem 0.5rem;
             border-radius: 9999px;
         }
+        .line-clamp-2 {
+            display: -webkit-box;
+            -webkit-box-orient: vertical;
+            -webkit-line-clamp: 2;
+            overflow: hidden;
+        }
+        .scrollbar-hide {
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+        .scrollbar-hide::-webkit-scrollbar {
+            display: none;
+        }
         /* Header Animations */
         .logo-animation {
             transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
@@ -495,6 +508,39 @@
     <!-- Sticky Header -->
     <!-- header desktop redesign start -->
     <header id="main-header" class="sticky top-0 z-50 backdrop-blur-md bg-white/50 shadow-sm transition-all duration-300">
+    <div id="mobile-header" class="md:hidden px-3">
+        <div id="mobile-top" class="flex items-center justify-between h-14 py-3">
+            <a href="/index.html" class="text-blue-600 font-extrabold text-lg">ویترینت</a>
+            <h1 class="flex-1 mx-2 text-center text-base font-extrabold text-gray-900 line-clamp-2" title="آرایشگاه مردانه سلطنتی">آرایشگاه مردانه سلطنتی</h1>
+            <div class="flex items-center gap-1">
+                <button id="mobile-share" aria-label="اشتراک‌گذاری" class="w-11 h-11 flex items-center justify-center rounded-full text-gray-700 hover:bg-white/70 active:bg-white/90 transition">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" x2="12" y1="2" y2="15"/></svg>
+                </button>
+                <a href="tel:02112345678" aria-label="تماس" class="w-11 h-11 flex items-center justify-center rounded-full text-gray-700 hover:bg-white/70 active:bg-white/90 transition">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2A19.86 19.86 0 0 1 3.08 6.18 2 2 0 0 1 5 4h3a2 2 0 0 1 2 1.72 12.05 12.05 0 0 0 .7 2.81 2 2 0 0 1-.45 2L9.91 11a16 16 0 0 0 6.09 6.09l.47-.34a2 2 0 0 1 2-.45 12.05 12.05 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+                </a>
+                <button id="mobile-more" aria-label="بیشتر" class="w-11 h-11 flex items-center justify-center rounded-full text-gray-700 hover:bg-white/70 active:bg-white/90 transition">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/></svg>
+                </button>
+            </div>
+        </div>
+        <div id="mobile-chips" class="flex gap-2 overflow-x-auto scrollbar-hide px-1 pb-2">
+            <div class="flex items-center gap-1 h-7 px-3 bg-gradient-to-r from-amber-300 to-amber-400 text-amber-900 text-xs font-bold rounded-full flex-shrink-0">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="w-4 h-4" fill="currentColor"><path d="M5 16l-1-9 5 3 3-6 3 6 5-3-1 9H5zm0 2h14v2H5v-2z"/></svg>
+                ۱۲۸ مشتری ویژه
+            </div>
+            <button id="mobile-address-chip" role="button" aria-label="آدرس" class="flex items-center gap-1 h-7 px-3 bg-white/70 text-gray-700 text-xs rounded-full flex-shrink-0 hover:bg-white">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-blue-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
+                آدرس
+            </button>
+            <div class="flex items-center gap-1 h-7 px-3 bg-white/70 text-gray-700 text-xs rounded-full flex-shrink-0">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-amber-500" viewBox="0 0 24 24" fill="currentColor"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2L9.19 8.63L2 9.24l5.46 4.73L5.82 21z"/></svg>
+                <span class="font-bold">4.8</span>
+                <span class="text-gray-500">(128)</span>
+            </div>
+        </div>
+    </div>
+    <div class="hidden md:block">
     <div class="max-w-screen-xl mx-auto px-3 py-3">
         <div class="flex items-center justify-between gap-3 flex-nowrap">
             <!-- Brand -->
@@ -639,18 +685,179 @@
             </form>
         </div>
     </div>
+    </div>
+    <!-- Mobile Address Sheet -->
+    <div id="mobile-address-sheet" class="md:hidden fixed inset-0 z-50 hidden">
+        <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" data-close></div>
+        <div class="sheet absolute bottom-0 left-0 right-0 bg-white/80 backdrop-blur-md rounded-t-2xl p-4 shadow-lg transform translate-y-full transition">
+            <div class="mx-auto h-1 w-10 bg-gray-300 rounded-full mb-4"></div>
+            <h2 class="text-base font-bold mb-2">آدرس</h2>
+            <p class="text-sm text-gray-700 mb-4">تهران، خیابان ولیعصر، کوچه فرهنگ، پلاک ۱۲</p>
+            <img src="https://via.placeholder.com/400x160?text=Map" alt="نقشه" class="w-full h-32 rounded-lg object-cover mb-4">
+            <div class="flex justify-end gap-3">
+                <button id="mobile-address-copy" class="px-4 py-2 rounded-full bg-blue-500 text-white text-sm">کپی آدرس</button>
+                <button data-close class="px-4 py-2 rounded-full bg-white/70 text-sm">بستن</button>
+            </div>
+        </div>
+    </div>
+    <!-- Mobile More Sheet -->
+    <div id="mobile-more-sheet" class="md:hidden fixed inset-0 z-50 hidden">
+        <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" data-close></div>
+        <div class="sheet absolute bottom-0 left-0 right-0 bg-white/80 backdrop-blur-md rounded-t-2xl py-2 shadow-lg transform translate-y-full transition">
+            <button id="mobile-report-trigger" class="w-full text-right px-4 py-3 text-sm hover:bg-gray-100">گزارش مشکل</button>
+            <button id="mobile-share-trigger" class="w-full text-right px-4 py-3 text-sm hover:bg-gray-100">اشتراک‌گذاری</button>
+            <button class="w-full text-right px-4 py-3 text-sm hover:bg-gray-100">افزودن به علاقه‌مندی‌ها</button>
+        </div>
+    </div>
+    <!-- Mobile Report Sheet -->
+    <div id="mobile-report-sheet" class="md:hidden fixed inset-0 z-50 hidden">
+        <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" data-close></div>
+        <form id="mobile-report-form" class="sheet absolute bottom-0 left-0 right-0 bg-white/80 backdrop-blur-md rounded-t-2xl p-4 shadow-lg transform translate-y-full transition">
+            <div class="mx-auto h-1 w-10 bg-gray-300 rounded-full mb-4"></div>
+            <h2 class="text-base font-bold mb-2">گزارش مشکل</h2>
+            <textarea id="mobile-report-text" maxlength="500" class="w-full h-24 p-2 rounded-md border border-gray-300 text-sm resize-none mb-3" placeholder="مشکل یا سوءاستفاده را توضیح دهید…"></textarea>
+            <div class="flex justify-end gap-3">
+                <button type="button" data-close class="px-4 py-2 rounded-full bg-white/70 text-sm">انصراف</button>
+                <button type="submit" class="px-4 py-2 rounded-full bg-blue-500 text-white text-sm">ارسال</button>
+            </div>
+        </form>
+    </div>
     <!-- Toast -->
     <div id="headerToast" class="fixed top-4 left-1/2 -translate-x-1/2 bg-blue-600 text-white text-sm px-4 py-2 rounded-full shadow-lg opacity-0 transition-opacity pointer-events-none"></div>
     <!-- header desktop redesign end -->
 </header>
 <script>
     const header = document.getElementById('main-header');
+    const toast = document.getElementById('headerToast');
+
+    function showToast(msg) {
+        toast.textContent = msg;
+        toast.classList.remove('opacity-0');
+        toast.classList.add('opacity-100');
+        setTimeout(() => {
+            toast.classList.add('opacity-0');
+            toast.classList.remove('opacity-100');
+        }, 2500);
+    }
+
     window.addEventListener('scroll', () => {
         if (window.scrollY > 10) {
             header.classList.add('bg-white/80', 'shadow-lg');
         } else {
             header.classList.remove('bg-white/80', 'shadow-lg');
         }
+    });
+
+    const mobileTop = document.getElementById('mobile-top');
+    const mobileChips = document.getElementById('mobile-chips');
+    let lastY = window.scrollY;
+    window.addEventListener('scroll', () => {
+        if (window.innerWidth > 768) return;
+        if (window.scrollY > lastY && window.scrollY > 20) {
+            mobileTop.classList.remove('py-3');
+            mobileTop.classList.add('py-2');
+            mobileChips.classList.add('hidden');
+        } else {
+            mobileTop.classList.add('py-3');
+            mobileTop.classList.remove('py-2');
+            mobileChips.classList.remove('hidden');
+        }
+        lastY = window.scrollY;
+    });
+
+    function setupSheet(trigger, sheet) {
+        if (!sheet) return {};
+        const panel = sheet.querySelector('.sheet');
+        const backdrop = sheet.querySelector('[data-close]');
+        let lastFocused;
+        let startY = 0;
+        const focusableSelector = 'button, [href], input, textarea, select, [tabindex]:not([tabindex="-1"])';
+        const getFocusable = () => panel.querySelectorAll(focusableSelector);
+        const open = () => {
+            lastFocused = document.activeElement;
+            sheet.classList.remove('hidden');
+            requestAnimationFrame(() => {
+                panel.classList.remove('translate-y-full');
+                panel.classList.add('translate-y-0');
+                const f = getFocusable();
+                f.length && f[0].focus();
+            });
+            document.addEventListener('keydown', trap);
+        };
+        const close = () => {
+            panel.classList.add('translate-y-full');
+            setTimeout(() => {
+                sheet.classList.add('hidden');
+                document.removeEventListener('keydown', trap);
+                if (lastFocused) lastFocused.focus();
+            }, 200);
+        };
+        const trap = (e) => {
+            if (e.key === 'Escape') return close();
+            if (e.key === 'Tab') {
+                const f = getFocusable();
+                if (!f.length) return;
+                const first = f[0];
+                const last = f[f.length - 1];
+                if (e.shiftKey && document.activeElement === first) {
+                    e.preventDefault();
+                    last.focus();
+                } else if (!e.shiftKey && document.activeElement === last) {
+                    e.preventDefault();
+                    first.focus();
+                }
+            }
+        };
+        backdrop.addEventListener('click', close);
+        panel.addEventListener('touchstart', e => startY = e.touches[0].clientY);
+        panel.addEventListener('touchend', e => {
+            if (e.changedTouches[0].clientY - startY > 50) close();
+        });
+        if (trigger) trigger.addEventListener('click', open);
+        return { open, close };
+    }
+
+    const addressSheet = setupSheet(document.getElementById('mobile-address-chip'), document.getElementById('mobile-address-sheet'));
+    const moreSheet = setupSheet(document.getElementById('mobile-more'), document.getElementById('mobile-more-sheet'));
+    const reportSheet = setupSheet(null, document.getElementById('mobile-report-sheet'));
+    const reportTrigger = document.getElementById('mobile-report-trigger');
+    if (reportTrigger) reportTrigger.addEventListener('click', () => {
+        moreSheet.close();
+        reportSheet.open();
+    });
+
+    const shareBtn = document.getElementById('mobile-share');
+    if (shareBtn) shareBtn.addEventListener('click', () => {
+        const data = { title: document.title, url: location.href };
+        if (navigator.share) {
+            navigator.share(data).catch(() => {});
+        } else {
+            navigator.clipboard.writeText(location.href).then(() => showToast('لینک کپی شد'));
+        }
+    });
+
+    const moreShare = document.getElementById('mobile-share-trigger');
+    if (moreShare) moreShare.addEventListener('click', () => {
+        moreSheet.close();
+        if (navigator.share) {
+            navigator.share({ title: document.title, url: location.href }).catch(() => {});
+        } else {
+            navigator.clipboard.writeText(location.href).then(() => showToast('لینک کپی شد'));
+        }
+    });
+
+    const addressCopy = document.getElementById('mobile-address-copy');
+    if (addressCopy) addressCopy.addEventListener('click', () => {
+        navigator.clipboard.writeText('تهران، خیابان ولیعصر، کوچه فرهنگ، پلاک ۱۲').then(() => showToast('کپی شد'));
+        addressSheet.close();
+    });
+
+    const reportForm = document.getElementById('mobile-report-form');
+    if (reportForm) reportForm.addEventListener('submit', e => {
+        e.preventDefault();
+        reportSheet.close();
+        showToast('گزارش شما ثبت شد.');
+        reportForm.reset();
     });
 
     const mql = window.matchMedia('(min-width: 768px)');
