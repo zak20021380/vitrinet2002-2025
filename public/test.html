@@ -1596,68 +1596,1279 @@
         </div>
     </section>
     <!-- Customer Reviews -->
-    <section class="py-8 px-4">
-        <div class="flex justify-between items-center mb-4">
-            <h3 class="text-xl font-bold">نظرات کاربران</h3>
-            <a href="#" class="text-blue-600 text-sm">مشاهده همه</a>
+
+
+<!-- Loyalty Rewards Card Component -->
+
+<!-- ============ Loyalty Rewards (Vitreenet) ============ -->
+<section id="loyalty-card" class="w-full py-8 px-4 sm:px-5" dir="rtl">
+  <!-- پیکربندی -->
+  <div id="lr-data"
+       data-current="3"
+       data-target="10"
+       data-reward="یک اصلاح رایگان"
+       data-booking-url=""
+       data-login-url="/login"
+       data-rules="هر نوبت باید کامل انجام شود.
+حداکثر ۲ جایزه در ماه قابل دریافت است.
+جایزه قابل‌انتقال نیست."></div>
+
+  <div class="mx-auto relative max-w-[680px] md:max-w-[720px]">
+    <!-- پس‌زمینه گرادیان ساده -->
+    <div class="absolute inset-0 -z-10 rounded-3xl bg-gradient-to-r from-purple-500/10 via-pink-500/10 to-blue-500/10 blur-2xl"></div>
+
+    <!-- قاب با گرادیان -->
+    <div class="group relative rounded-3xl p-[2px] bg-gradient-to-r from-purple-500 via-pink-500 to-blue-500 transition-shadow duration-300 hover:shadow-xl">
+      
+      <!-- MEMBER CLUB badge -->
+      <div class="absolute -top-3 right-4 z-20 select-none">
+        <span class="inline-flex rounded-full p-[1.5px] bg-gradient-to-r from-purple-500 to-pink-500 shadow-md">
+          <span dir="ltr"
+                class="relative inline-flex items-center rounded-full
+                       px-4 py-1.5 text-[10px] sm:text-[11px]
+                       font-extrabold uppercase tracking-[0.18em]
+                       text-white bg-gradient-to-r from-purple-600 to-pink-600">
+            <span class="relative z-10">VIP MEMBER</span>
+          </span>
+        </span>
+      </div>
+
+      <!-- کارت اصلی -->
+      <div class="rounded-3xl bg-white/95 backdrop-blur-sm p-6 sm:p-7 pt-14 shadow-lg relative overflow-hidden">
+
+        <!-- عنوان و چیپ قانون -->
+        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2.5 sm:gap-3 mb-5">
+          <h2 class="text-[20px] sm:text-[22px] md:text-2xl font-black bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">باشگاه مشتریان ویژه</h2>
+          <div class="min-w-0 text-[12px] sm:text-[13px] font-semibold px-3.5 py-2 rounded-full bg-gradient-to-r from-purple-100 to-pink-100 text-purple-800 border border-purple-200 shadow-sm max-w-[78vw] sm:max-w-none truncate">
+            هر <span id="reward-target" class="font-bold">۱۰</span> نوبت، <span id="reward-text" class="font-bold">یک اصلاح رایگان</span>
+          </div>
         </div>
-        <div class="scroll-container flex overflow-x-auto pb-4 space-x-4 space-x-reverse">
-            <!-- Review Card 1 -->
-            <div class="review-card flex-shrink-0 w-72 bg-white rounded-xl shadow-md p-4">
-                <div class="flex items-center mb-3">
-                    <img src="https://picsum.photos/seed/user1/40/40.jpg" alt="User" class="w-10 h-10 rounded-full ml-3">
-                    <div>
-                        <h4 class="font-bold">علی رضایی</h4>
-                        <div class="flex items-center">
-                            <i class="fas fa-star text-yellow-400 text-xs ml-1"></i>
-                            <i class="fas fa-star text-yellow-400 text-xs ml-1"></i>
-                            <i class="fas fa-star text-yellow-400 text-xs ml-1"></i>
-                            <i class="fas fa-star text-yellow-400 text-xs ml-1"></i>
-                            <i class="fas fa-star text-yellow-400 text-xs"></i>
-                        </div>
-                    </div>
-                </div>
-                <p class="text-sm text-gray-700 mb-3">تجربه‌ای عالی از آرایشگاه مردانه سلطنتی داشتم. پرسنل بسیار حرفه‌ای و محیط تمیز و شیک بود. حتماً دوباره مراجعه خواهم کرد.</p>
-                <div class="text-xs text-gray-500">۲ روز پیش</div>
+
+        <!-- متن مرحله‌ای -->
+        <div class="text-center max-w-[48ch] mx-auto mb-4">
+          <h3 id="lr-headline" class="text-[16px] sm:text-[18px] font-extrabold text-gray-800 tracking-[0.01em]"></h3>
+          <p id="lr-sub" class="text-[12px] text-gray-600 mt-1"></p>
+        </div>
+
+        <!-- متریک‌ها -->
+        <div class="grid grid-cols-2 gap-3 sm:gap-4 mb-6">
+          <div class="relative group">
+            <div class="absolute inset-0 bg-gradient-to-br from-green-400/20 to-emerald-500/20 rounded-xl blur-sm"></div>
+            <div class="relative rounded-xl bg-white border border-green-200 px-4 py-3 text-center shadow-sm">
+              <div class="text-[10px] sm:text-[11px] text-gray-600 font-medium mb-1">انجام شده</div>
+              <div id="lr-m-current" class="text-[18px] sm:text-[20px] font-bold text-green-600">۰</div>
             </div>
-            <!-- Review Card 2 -->
-            <div class="review-card flex-shrink-0 w-72 bg-white rounded-xl shadow-md p-4">
-                <div class="flex items-center mb-3">
-                    <img src="https://picsum.photos/seed/user2/40/40.jpg" alt="User" class="w-10 h-10 rounded-full ml-3">
-                    <div>
-                        <h4 class="font-bold">محمد حسینی</h4>
-                        <div class="flex items-center">
-                            <i class="fas fa-star text-yellow-400 text-xs ml-1"></i>
-                            <i class="fas fa-star text-yellow-400 text-xs ml-1"></i>
-                            <i class="fas fa-star text-yellow-400 text-xs ml-1"></i>
-                            <i class="fas fa-star text-yellow-400 text-xs ml-1"></i>
-                            <i class="far fa-star text-yellow-400 text-xs"></i>
-                        </div>
-                    </div>
-                </div>
-                <p class="text-sm text-gray-700 mb-3">کیفیت خدمات عالی بود و قیمت‌ها هم منصفانه. فقط کمی شلوغ بود و مجبور شدم منتظر بمانم. بهتر است از قبل نوبت بگیرید.</p>
-                <div class="text-xs text-gray-500">۱ هفته پیش</div>
+          </div>
+          <div class="relative group">
+            <div class="absolute inset-0 bg-gradient-to-br from-blue-400/20 to-cyan-500/20 rounded-xl blur-sm"></div>
+            <div class="relative rounded-xl bg-white border border-blue-200 px-4 py-3 text-center shadow-sm">
+              <div class="text-[10px] sm:text-[11px] text-gray-600 font-medium mb-1">تا جایزه</div>
+              <div id="lr-m-left" class="text-[18px] sm:text-[20px] font-bold text-blue-600">۰</div>
             </div>
-            <!-- Review Card 3 -->
-            <div class="review-card flex-shrink-0 w-72 bg-white rounded-xl shadow-md p-4">
-                <div class="flex items-center mb-3">
-                    <img src="https://picsum.photos/seed/user3/40/40.jpg" alt="User" class="w-10 h-10 rounded-full ml-3">
-                    <div>
-                        <h4 class="font-bold">رضا اکبری</h4>
-                        <div class="flex items-center">
-                            <i class="fas fa-star text-yellow-400 text-xs ml-1"></i>
-                            <i class="fas fa-star text-yellow-400 text-xs ml-1"></i>
-                            <i class="fas fa-star text-yellow-400 text-xs ml-1"></i>
-                            <i class="fas fa-star text-yellow-400 text-xs ml-1"></i>
-                            <i class="fas fa-star text-yellow-400 text-xs"></i>
-                        </div>
-                    </div>
+          </div>
+        </div>
+
+        <!-- نوار پیشرفت -->
+        <div class="mb-4">
+          <div class="relative h-[12px] sm:h-[14px] rounded-full bg-gray-100 shadow-inner overflow-hidden">
+            <div class="absolute inset-0 opacity-30 bg-[repeating-linear-gradient(to_right,transparent,transparent_9.5%,rgba(0,0,0,0.1)_9.5%,rgba(0,0,0,0.1)_10.5%)]"></div>
+            <div id="lr-bar" class="relative h-full w-0 rounded-full transition-all duration-500 ease-out"
+                 style="background: linear-gradient(90deg, #8B5CF6, #EC4899, #3B82F6);">
+              <div class="absolute right-0 top-1/2 -translate-y-1/2 w-3 h-3 bg-white rounded-full shadow border-2 border-purple-500"></div>
+            </div>
+          </div>
+          <div class="mt-2 text-[12px] sm:text-sm font-medium text-gray-700 flex justify-between items-center">
+            <span id="lr-counts" class="font-bold">۰ از ۰</span>
+            <span class="text-[11px] text-gray-500">در حال پیشرفت</span>
+          </div>
+        </div>
+
+        <!-- راهنما -->
+        <p id="lr-helper" class="text-center text-[12px] sm:text-[13px] text-gray-600 mb-6 font-medium"></p>
+
+        <!-- دکمه‌ها -->
+        <div class="flex flex-col sm:flex-row justify-center gap-2.5 sm:gap-3">
+          <button id="lr-cta" class="relative group w-full sm:w-auto rounded-full px-6 py-3.5 text-[14px] font-bold
+                  text-white shadow-lg overflow-hidden transform transition-all duration-200 hover:shadow-xl active:scale-[0.98]">
+            <div class="absolute inset-0 bg-gradient-to-r from-purple-600 via-pink-600 to-blue-600"></div>
+            <span class="relative z-10 flex items-center justify-center gap-2">
+              <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd"/>
+              </svg>
+              <span id="lr-cta-label">رزرو بعدی</span>
+            </span>
+          </button>
+
+          <button id="lr-rules" class="relative group w-full sm:w-auto rounded-full px-6 py-3.5 text-[14px] font-bold
+                  bg-white text-purple-700 shadow overflow-hidden border-2 border-purple-300 hover:border-purple-400 transform transition-all duration-200 hover:shadow-md active:scale-[0.98]">
+            <div class="absolute inset-0 bg-gradient-to-r from-purple-50 to-pink-50 opacity-0 group-hover:opacity-100 transition-opacity duration-200"></div>
+            <span class="relative z-10 flex items-center justify-center gap-2">
+              <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
+              </svg>
+              قوانین
+            </span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- استیکی موبایل -->
+  <div id="lr-sticky" class="fixed inset-x-0 bottom-0 z-40 sm:hidden pointer-events-none transition-all duration-200 transform translate-y-0">
+    <div class="pointer-events-auto mx-auto max-w-2xl px-3">
+      <div class="rounded-t-2xl bg-white/95 backdrop-blur shadow-xl p-4 pb-[max(16px,env(safe-area-inset-bottom))] border-t border-x border-gray-200">
+        <div class="absolute top-2 left-1/2 -translate-x-1/2 w-10 h-1 bg-gray-300 rounded-full"></div>
+        <div class="flex items-center justify-between gap-3 mt-1">
+          <div class="min-w-0 flex-1">
+            <div id="lr-sticky-label" class="text-[11px] text-gray-500 font-medium mb-1">باشگاه ویژه</div>
+            <div class="flex items-center gap-3">
+              <div id="lr-sticky-progress" class="text-[14px] font-bold text-purple-700" aria-live="polite">۰ از ۰</div>
+              <div class="flex-1 h-2 bg-gray-100 rounded-full overflow-hidden">
+                <div id="lr-sticky-bar" class="h-full w-0 transition-all duration-500 ease-out bg-gradient-to-r from-purple-600 to-pink-600"></div>
+              </div>
+            </div>
+          </div>
+          <button id="lr-cta-mobile" class="rounded-full px-5 py-3 text-[13px] font-bold text-white shadow-lg transform transition-all duration-200 active:scale-[0.98] bg-gradient-to-r from-purple-600 to-pink-600">
+            <span class="flex items-center gap-1.5">
+              <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-8.293l-3-3a1 1 0 00-1.414 1.414L10.586 9.5H7a1 1 0 100 2h3.586l-1.293 1.293a1 1 0 101.414 1.414l3-3a1 1 0 000-1.414z" clip-rule="evenodd"/>
+              </svg>
+              <span id="lr-cta-mobile-label">رزرو</span>
+            </span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Rules Modal -->
+<div id="lrRulesModal" class="fixed inset-0 z-50 hidden" role="dialog" aria-modal="true">
+  <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" data-close></div>
+  <div class="flex min-h-full items-center justify-center p-4">
+    <div class="modal-card relative w-full max-w-md transform transition-all duration-200 scale-95 opacity-0">
+      <div class="bg-white rounded-2xl shadow-2xl p-6 border border-gray-100">
+        <div class="flex items-center justify-between mb-4">
+          <h3 class="text-xl font-bold text-gray-800">قوانین باشگاه مشتریان</h3>
+          <button class="p-2 rounded-full text-gray-500 hover:text-gray-700 hover:bg-gray-100 transition-colors duration-200" data-close aria-label="بستن">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+          </button>
+        </div>
+        <div class="bg-gray-50 rounded-xl p-4 mb-5">
+          <div id="lr-rules-content" class="text-gray-700 text-sm whitespace-pre-line leading-7 max-h-64 overflow-y-auto"></div>
+        </div>
+        <button class="w-full bg-gradient-to-r from-purple-600 to-pink-600 text-white font-bold py-3 rounded-full shadow-lg transition-all duration-200 active:scale-[0.98]" data-close>متوجه شدم</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Redeem Modal -->
+<div id="lrRedeemModal" class="fixed inset-0 z-50 hidden" role="dialog" aria-modal="true">
+  <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" data-close></div>
+  <div class="flex min-h-full items-center justify-center p-4">
+    <div class="modal-card relative w-full max-w-md transform transition-all duration-200 scale-95 opacity-0">
+      <div class="bg-white rounded-2xl shadow-2xl p-6 border border-gray-100">
+        <div class="flex items-center justify-between mb-4">
+          <h3 class="text-xl font-bold text-gray-800">دریافت جایزه</h3>
+        <button class="p-2 rounded-full text-gray-500 hover:text-gray-700 hover:bg-gray-100 transition-colors duration-200" data-close aria-label="بستن">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+          </button>
+        </div>
+
+        <div id="lr-redeem-body">
+          <div class="text-center mb-5">
+            <div class="inline-flex p-4 rounded-full bg-gradient-to-br from-purple-100 to-pink-100 mb-3">
+              <svg class="w-10 h-10 text-purple-600" fill="currentColor" viewBox="0 0 20 20">
+                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+              </svg>
+            </div>
+            <p class="text-gray-700 mb-2">به <span id="lr-reward-inline" class="font-bold text-purple-700">یک اصلاح رایگان</span> رسیدی</p>
+            <p class="text-sm text-gray-500">آماده دریافت جایزه‌ای؟</p>
+          </div>
+          
+          <div class="rounded-xl bg-gray-50 border border-gray-200 p-4 mb-5">
+            <div class="flex items-center justify-between text-sm">
+              <span class="text-gray-600">وضعیت فعلی</span>
+              <span id="lr-redeem-counts" class="font-bold text-purple-700">۰ از ۰</span>
+            </div>
+          </div>
+          
+          <div class="flex gap-3">
+            <button class="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold py-3 rounded-full transition-colors duration-200 active:scale-[0.98]" data-close>فعلاً نه</button>
+            <button id="lr-redeem-confirm" class="flex-1 bg-gradient-to-r from-green-600 to-emerald-600 text-white font-bold py-3 rounded-full shadow-lg transition-all duration-200 active:scale-[0.98]">
+              <span class="flex items-center justify-center gap-2">
+                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                </svg>
+                دریافت جایزه
+              </span>
+            </button>
+          </div>
+        </div>
+
+        <div id="lr-redeem-done" class="hidden text-center py-8">
+          <div class="inline-flex p-4 rounded-full bg-gradient-to-br from-green-100 to-emerald-100 mb-4">
+            <svg class="w-12 h-12 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/>
+            </svg>
+          </div>
+          <p class="text-xl font-bold text-green-600 mb-2">جایزه ثبت شد</p>
+          <p class="text-gray-600">در رزرو بعدی استفاده می‌شه</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+(() => {
+  'use strict';
+
+  // ------- KEYS & HELPERS -------
+  const KEY_PROGRESS = 'vitreenet_loyalty_current';   // پیشرفت فعلی تا جایزه (برای مهمان هم نگه نمی‌داریم)
+  const KEY_TOTAL    = 'vitreenet_booking_total';     // تعداد کل رزروها (تشخیص «اولین نوبت»)
+  const AUTH_LS_KEY  = 'auth_user';                   // فقط حالت تست/دِمو
+
+  const toFa = n => String(n).replace(/\d/g, d => '۰۱۲۳۴۵۶۷۸۹'[d]);
+  const reduce = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  function toast(msg) {
+    const t = document.createElement('div');
+    t.className = 'fixed top-4 left-1/2 -translate-x-1/2 z-[70] bg-gray-900 text-white text-sm px-4 py-2 rounded-full shadow-lg opacity-0 transition-opacity duration-100';
+    t.textContent = msg;
+    document.body.appendChild(t);
+    requestAnimationFrame(() => t.classList.remove('opacity-0'));
+    setTimeout(() => { t.classList.add('opacity-0'); setTimeout(() => t.remove(), 80); }, 1600);
+  }
+
+  // ------- ADAPTERS (قابل تعویض با بک‌اند) -------
+  const adapters = {
+    async getAuth() {
+      if (window.__APP_USER__ && window.__APP_USER__.id) return { loggedIn: true, user: window.__APP_USER__ };
+      try { const raw = localStorage.getItem(AUTH_LS_KEY); if (raw) return { loggedIn: true, user: JSON.parse(raw) }; } catch(e) {}
+      return { loggedIn: false, user: null };
+    },
+    async getBookingSummary(userId) {
+      if (window.__BOOKING_SUMMARY__ && typeof window.__BOOKING_SUMMARY__.total === 'number') {
+        return { total: window.__BOOKING_SUMMARY__.total };
+      }
+      const total = parseInt(localStorage.getItem(KEY_TOTAL) || '0', 10) || 0;
+      return { total };
+    }
+  };
+
+  // ------- MODAL -------
+  function openModal(root) {
+    root.classList.remove('hidden');
+    const card = root.querySelector('.modal-card');
+    requestAnimationFrame(() => { card.classList.remove('scale-95','opacity-0'); card.classList.add('scale-100','opacity-100'); });
+  }
+  function closeModal(root) {
+    const card = root.querySelector('.modal-card');
+    card.classList.add('scale-95','opacity-0'); card.classList.remove('scale-100','opacity-100');
+    setTimeout(() => root.classList.add('hidden'), reduce()?0:200);
+  }
+
+  // ------- COPY (صمیمی/متعادل) -------
+  function copyFor(progress, current, target, reward) {
+    const left = Math.max(0, target - current);
+    const isHalf = current * 2 === target;
+
+    if (current >= target) return { h:'جایزه‌ت آماده‌ست', sub:'بزن بگیریمش.', help:'با رزرو بعدی اعمال می‌شه.', cta:'دریافت جایزه' };
+    if (isHalf)           return { h:'نصف راه اومدی',  sub:'همینو ادامه بده.', help:`${toFa(left)} نوبت مونده.`, cta:'رزرو بعدی' };
+    if (progress >= 90)   return { h:'سرِ مرز جایزه',   sub:'یکی‌دو تا دیگه.',  help: left<=1 ? 'با بعدی می‌رسی.' : `${toFa(left)} نوبت مونده.`, cta:'تمامش کن' };
+    if (progress >= 60)   return { h:'روغنه',          sub:'داری می‌ری جلو.',   help:`${toFa(left)} نوبت تا جایزه.`, cta:'رزرو بعدی' };
+    if (current > 0)      return { h:'شروع خوبی داری', sub:'حواست باشه ادامه بدی.', help:`${toFa(left)} نوبت مونده.`, cta:'رزرو بعدی' };
+    return { h:'خوش اومدی به باشگاه', sub:'اولین نوبت رو ست کن.', help:`با ${toFa(target)} نوبت، ${reward}.`, cta:'رزرو اولین نوبت' };
+  }
+
+  // ------- AUTH / HISTORY -------
+  let AUTH = { loggedIn: false, user: null };
+  let HAS_BOOKED_BEFORE = false;
+
+  function chooseCtaText(current, target) {
+    if (current >= target) return 'دریافت جایزه';
+    return HAS_BOOKED_BEFORE ? 'رزرو بعدی' : 'رزرو اولین نوبت';
+  }
+
+  function applyCtaText(text) {
+    const l1 = document.getElementById('lr-cta-label');
+    if (l1) l1.textContent = text;
+    const l2 = document.getElementById('lr-cta-mobile-label');
+    if (l2) l2.textContent = (text === 'دریافت جایزه') ? 'دریافت' : (text === 'رزرو اولین نوبت' ? 'شروع' : 'رزرو');
+  }
+
+  function updateSticky(current, target) {
+    const pct = Math.min(100, Math.max(0, (current/target)*100));
+    const stickyTxt = document.getElementById('lr-sticky-progress');
+    const bar = document.getElementById('lr-sticky-bar');
+    if (stickyTxt) stickyTxt.textContent = `${toFa(current)} از ${toFa(target)}`;
+    if (bar) bar.style.width = pct + '%';
+  }
+
+  function redirectToLogin() {
+    const data = document.getElementById('lr-data');
+    const loginUrl = data.dataset.loginUrl || '/login';
+    const redirect = encodeURIComponent(window.location.href);
+    window.location.href = `${loginUrl}?redirect=${redirect}`;
+  }
+
+  function requireLogin() {
+    toast('اول یه ورود کوچیک لازم داریم؛ سریع برمی‌گردیم همین‌جا 🙂');
+    setTimeout(redirectToLogin, 900);
+  }
+
+  // ------- INIT CARD -------
+  function initCard() {
+    const data = document.getElementById('lr-data');
+    const target = parseInt(data.dataset.target || '10', 10);
+    const reward = data.dataset.reward || '';
+
+    // مقدار خام (ممکنه از سرور یا لوکال بیاد)
+    const raw = parseInt(localStorage.getItem(KEY_PROGRESS) ?? data.dataset.current ?? '0', 10) || 0;
+
+    // ✳️ منطق جدید: اگر لاگین نیست یا هرگز رزرو نکرده ⇒ صفرِ واقعی نمایش داده می‌شود
+    const current = (!AUTH.loggedIn || !HAS_BOOKED_BEFORE) ? 0 : raw;
+
+    document.getElementById('reward-target').textContent = toFa(target);
+    document.getElementById('reward-text').textContent   = reward;
+
+    const pct = Math.min(100, Math.max(0, Math.round((current/target)*100)));
+    const {h, sub, help} = copyFor(pct, current, target, reward);
+
+    document.getElementById('lr-headline').textContent = h;
+    document.getElementById('lr-sub').textContent      = sub;
+    document.getElementById('lr-helper').textContent   = help;
+
+    document.getElementById('lr-counts').textContent   = `${toFa(current)} از ${toFa(target)}`;
+    document.getElementById('lr-bar').style.width      = pct + '%';
+
+    const left = Math.max(0, target - current);
+    const mCur = document.getElementById('lr-m-current');
+    const mLeft = document.getElementById('lr-m-left');
+    if (mCur)  mCur.textContent  = toFa(current);
+    if (mLeft) mLeft.textContent = toFa(left);
+
+    const ri = document.getElementById('lr-reward-inline');
+    if (ri) ri.textContent = reward;
+    const rc = document.getElementById('lr-redeem-counts');
+    if (rc) rc.textContent = `${toFa(current)} از ${toFa(target)}`;
+
+    applyCtaText(chooseCtaText(current, target));
+    updateSticky(current, target);
+
+    // این مقدار برای هندلرها استفاده می‌شود
+    data.dataset.current = String(current);
+  }
+
+  // ------- EVENTS -------
+  function bindEvents() {
+    const data = document.getElementById('lr-data');
+
+    document.getElementById('lr-rules')?.addEventListener('click', () => {
+      document.getElementById('lr-rules-content').textContent = data.dataset.rules || '';
+      openModal(document.getElementById('lrRulesModal'));
+    });
+
+    document.querySelectorAll('#lrRulesModal [data-close], #lrRedeemModal [data-close]').forEach(b=>{
+      b.addEventListener('click', e => closeModal(e.target.closest('[role="dialog"]')));
+    });
+    ['lrRulesModal','lrRedeemModal'].forEach(id=>{
+      const m = document.getElementById(id);
+      if (m) m.addEventListener('click', e => { if (e.target.hasAttribute('data-close')) closeModal(m); });
+    });
+    document.addEventListener('keydown', e => {
+      if (e.key==='Escape') ['lrRulesModal','lrRedeemModal'].forEach(id=>{
+        const m=document.getElementById(id); if(m && !m.classList.contains('hidden')) closeModal(m);
+      });
+    });
+
+    async function goCTA() {
+      const target = parseInt(data.dataset.target  || '10', 10);
+      const current = parseInt(data.dataset.current || '0', 10);
+
+      // اگر لاگین نیست: پیام بده و هدایت کن
+      if (!AUTH.loggedIn) { requireLogin(); return; }
+
+      if (current >= target) { openModal(document.getElementById('lrRedeemModal')); return; }
+
+      // رفتن به رزرو
+      const ids = ['booking-wizard','booking','reserve','reservation'];
+      let el = null; for (const id of ids) { const t = document.getElementById(id); if (t){ el=t; break; } }
+      if (el) {
+        if (el.classList.contains('hidden')) el.classList.remove('hidden');
+        const top = el.getBoundingClientRect().top + window.scrollY - 80;
+        reduce() ? window.scrollTo(0, top) : window.scrollTo({ top, behavior: 'smooth' });
+      } else {
+        const url = data.dataset.bookingUrl;
+        if (url) window.location.href = url; else toast('بخش رزرو هنوز بالا نیومده');
+      }
+    }
+    document.getElementById('lr-cta')?.addEventListener('click', goCTA);
+    document.getElementById('lr-cta-mobile')?.addEventListener('click', goCTA);
+
+    // تأیید دریافت جایزه -> ریست پیشرفت (نیازمند ورود)
+    document.getElementById('lr-redeem-confirm')?.addEventListener('click', () => {
+      if (!AUTH.loggedIn) { requireLogin(); return; }
+      document.getElementById('lr-redeem-body').classList.add('hidden');
+      document.getElementById('lr-redeem-done').classList.remove('hidden');
+      setTimeout(() => {
+        localStorage.setItem(KEY_PROGRESS, '0');
+        data.dataset.current = '0';
+        closeModal(document.getElementById('lrRedeemModal'));
+        document.getElementById('lr-redeem-done').classList.add('hidden');
+        document.getElementById('lr-redeem-body').classList.remove('hidden');
+        toast('جایزه ثبت شد؛ مبارک‌ته!');
+        initCard();
+      }, 250);
+    });
+
+    // دکمه تایید نهایی رزرو (بیرون سکشن)
+    document.getElementById('confirm-booking')?.addEventListener('click', () => {
+      if (!AUTH.loggedIn) { requireLogin(); return; }
+
+      const cur = parseInt(localStorage.getItem(KEY_PROGRESS) ?? data.dataset.current ?? '0', 10) || 0;
+      const next = cur + 1;
+      const target = parseInt(data.dataset.target || '10', 10);
+
+      // بروزرسانی پیشرفت فعلی
+      localStorage.setItem(KEY_PROGRESS, String(next));
+
+      // ثبت تاریخچه کلی برای تشخیص «رزرو داشته/نداشته»
+      const total = parseInt(localStorage.getItem(KEY_TOTAL) || '0', 10) || 0;
+      localStorage.setItem(KEY_TOTAL, String(total + 1));
+      HAS_BOOKED_BEFORE = true;
+
+      if (next >= target) toast('تبریک! جایزه‌ت رسید'); else toast(`نوبت ${toFa(next)} ثبت شد`);
+      setTimeout(initCard, 300);
+    });
+
+    // مخفی‌کردن استیکی وقتی CTA داخل ویو
+    const stickyWrap = document.getElementById('lr-sticky');
+    const cta = document.getElementById('lr-cta');
+    if (stickyWrap && cta && 'IntersectionObserver' in window) {
+      const io = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          stickyWrap.style.transform = entry.isIntersecting ? 'translateY(100%)' : 'translateY(0)';
+        });
+      }, { threshold: 0.5 });
+      io.observe(cta);
+    }
+  }
+
+  // ------- BOOTSTRAP -------
+  async function initAuthAndHistory() {
+    AUTH = await adapters.getAuth();
+    const sum = await adapters.getBookingSummary(AUTH.user?.id);
+    HAS_BOOKED_BEFORE = (sum?.total || 0) > 0;
+
+    // بعد از تعیین وضعیت، کل UI بر اساس قوانین جدید رفرش می‌شود
+    initCard();
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => { bindEvents(); initAuthAndHistory(); });
+  } else { bindEvents(); initAuthAndHistory(); }
+})();
+</script>
+<!-- ========== /Loyalty Rewards ========== -->
+
+
+
+
+
+
+
+
+
+
+    
+   <!-- Customer Reviews Section - Complete with Review Form -->
+<section class="py-8 px-4">
+    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-6">
+        <div>
+            <h3 class="text-xl font-bold mb-1">نظرات کاربران</h3>
+            <div class="flex items-center gap-2">
+                <div class="flex items-center">
+                    <i class="fas fa-star text-yellow-400 text-sm"></i>
+                    <i class="fas fa-star text-yellow-400 text-sm"></i>
+                    <i class="fas fa-star text-yellow-400 text-sm"></i>
+                    <i class="fas fa-star text-yellow-400 text-sm"></i>
+                    <i class="fas fa-star-half-alt text-yellow-400 text-sm"></i>
                 </div>
-                <p class="text-sm text-gray-700 mb-3">بهترین آرایشگاهی که تا حالا رفتم! آقای احمدی واقعاً حرفه‌ای هستند و دقیقاً می‌دونن چه مدلی به صورتم میاد. پیشنهاد میکنم.</p>
-                <div class="text-xs text-gray-500">۲ هفته پیش</div>
+                <span class="text-sm font-bold text-gray-700">4.8</span>
+                <span class="text-sm text-gray-500">(128 نظر)</span>
             </div>
         </div>
-    </section>
+        
+        <!-- Buttons Container -->
+        <div class="flex items-center gap-2 w-full sm:w-auto">
+            <!-- Write Review Button -->
+            <button id="write-review-btn" class="flex-1 sm:flex-initial flex items-center justify-center gap-2 px-4 py-2.5 bg-gradient-to-r from-blue-600 to-teal-500 text-white rounded-full text-sm font-bold hover:shadow-lg transform hover:scale-105 transition-all">
+                <i class="fas fa-pen text-xs"></i>
+                <span>ثبت نظر</span>
+            </button>
+            
+            <!-- Show All Reviews Button -->
+            <button id="show-all-reviews" class="flex-1 sm:flex-initial flex items-center justify-center gap-2 px-4 py-2.5 bg-white border border-gray-200 rounded-full text-sm font-bold text-gray-700 hover:bg-gray-50 hover:border-gray-300 transition-all shadow-sm">
+                <span>مشاهده همه</span>
+                <i class="fas fa-arrow-left text-xs"></i>
+            </button>
+        </div>
+    </div>
+    
+    <!-- Reviews Carousel -->
+    <div class="scroll-container flex overflow-x-auto pb-4 space-x-4 space-x-reverse scrollbar-hide">
+        <!-- Review Card 1 -->
+        <div class="review-card flex-shrink-0 w-80 bg-white rounded-2xl shadow-sm hover:shadow-md transition-shadow border border-gray-100 p-5">
+            <div class="flex items-start justify-between mb-3">
+                <div>
+                    <h4 class="font-bold text-gray-900 mb-1">علی رضایی</h4>
+                    <div class="flex items-center gap-1">
+                        <i class="fas fa-star text-yellow-400 text-xs"></i>
+                        <i class="fas fa-star text-yellow-400 text-xs"></i>
+                        <i class="fas fa-star text-yellow-400 text-xs"></i>
+                        <i class="fas fa-star text-yellow-400 text-xs"></i>
+                        <i class="fas fa-star text-yellow-400 text-xs"></i>
+                    </div>
+                </div>
+                <span class="text-xs text-gray-400 bg-gray-50 px-2 py-1 rounded-full">۲ روز پیش</span>
+            </div>
+            <p class="text-sm text-gray-700 leading-6">تجربه‌ای عالی از آرایشگاه مردانه سلطنتی داشتم. پرسنل بسیار حرفه‌ای و محیط تمیز و شیک بود.</p>
+        </div>
+        
+        <!-- Review Card 2 -->
+        <div class="review-card flex-shrink-0 w-80 bg-white rounded-2xl shadow-sm hover:shadow-md transition-shadow border border-gray-100 p-5">
+            <div class="flex items-start justify-between mb-3">
+                <div>
+                    <h4 class="font-bold text-gray-900 mb-1">محمد حسینی</h4>
+                    <div class="flex items-center gap-1">
+                        <i class="fas fa-star text-yellow-400 text-xs"></i>
+                        <i class="fas fa-star text-yellow-400 text-xs"></i>
+                        <i class="fas fa-star text-yellow-400 text-xs"></i>
+                        <i class="fas fa-star text-yellow-400 text-xs"></i>
+                        <i class="far fa-star text-gray-300 text-xs"></i>
+                    </div>
+                </div>
+                <span class="text-xs text-gray-400 bg-gray-50 px-2 py-1 rounded-full">۱ هفته پیش</span>
+            </div>
+            <p class="text-sm text-gray-700 leading-6">کیفیت خدمات عالی بود و قیمت‌ها هم منصفانه. فقط کمی شلوغ بود و مجبور شدم منتظر بمانم.</p>
+        </div>
+        
+        <!-- Review Card 3 -->
+        <div class="review-card flex-shrink-0 w-80 bg-white rounded-2xl shadow-sm hover:shadow-md transition-shadow border border-gray-100 p-5">
+            <div class="flex items-start justify-between mb-3">
+                <div>
+                    <h4 class="font-bold text-gray-900 mb-1">رضا اکبری</h4>
+                    <div class="flex items-center gap-1">
+                        <i class="fas fa-star text-yellow-400 text-xs"></i>
+                        <i class="fas fa-star text-yellow-400 text-xs"></i>
+                        <i class="fas fa-star text-yellow-400 text-xs"></i>
+                        <i class="fas fa-star text-yellow-400 text-xs"></i>
+                        <i class="fas fa-star text-yellow-400 text-xs"></i>
+                    </div>
+                </div>
+                <span class="text-xs text-gray-400 bg-gray-50 px-2 py-1 rounded-full">۲ هفته پیش</span>
+            </div>
+            <p class="text-sm text-gray-700 leading-6">بهترین آرایشگاهی که تا حالا رفتم! آقای احمدی واقعاً حرفه‌ای هستند و دقیقاً می‌دونن چه مدلی به صورتم میاد.</p>
+        </div>
+    </div>
+</section>
+
+<!-- Reviews Modal -->
+<div id="reviewsModal" class="fixed inset-0 z-[60] hidden">
+    <!-- Backdrop -->
+    <div class="absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity duration-300" id="reviews-backdrop"></div>
+    
+    <!-- Modal Container -->
+    <div class="flex items-end sm:items-center justify-center min-h-full p-0 sm:p-4">
+        <div id="reviews-modal-content" class="relative bg-white w-full sm:max-w-2xl md:max-w-3xl lg:max-w-4xl 
+                                                  rounded-t-3xl sm:rounded-2xl shadow-2xl transform transition-all duration-300 
+                                                  translate-y-full sm:translate-y-0 sm:scale-95 sm:opacity-0
+                                                  max-h-[90vh] sm:max-h-[85vh] flex flex-col">
+            
+            <!-- Modal Header -->
+            <div class="sticky top-0 bg-white rounded-t-3xl sm:rounded-t-2xl border-b border-gray-100 px-6 py-5 z-10">
+                <!-- Drag Handle for Mobile -->
+                <div class="sm:hidden w-12 h-1 bg-gray-300 rounded-full mx-auto mb-4"></div>
+                
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h3 class="text-xl font-bold text-gray-900 mb-2">نظرات کاربران</h3>
+                        <div class="flex items-center gap-3">
+                            <div class="flex items-center gap-1">
+                                <i class="fas fa-star text-yellow-400"></i>
+                                <span class="font-bold text-gray-800">4.8</span>
+                            </div>
+                            <span class="text-sm text-gray-500">بر اساس 128 نظر</span>
+                            
+                            <!-- Filter Chips -->
+                            <div class="hidden sm:flex items-center gap-2 mr-4">
+                                <button class="review-filter-chip active" data-filter="all">همه</button>
+                                <button class="review-filter-chip" data-filter="5">5 ستاره</button>
+                                <button class="review-filter-chip" data-filter="4">4 ستاره</button>
+                                <button class="review-filter-chip" data-filter="3">3 ستاره</button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <button id="close-reviews-modal" class="w-10 h-10 rounded-full bg-gray-100 hover:bg-gray-200 
+                                                            flex items-center justify-center transition-colors">
+                        <i class="fas fa-times text-gray-600"></i>
+                    </button>
+                </div>
+                
+                <!-- Mobile Filter Chips -->
+                <div class="sm:hidden flex items-center gap-2 mt-3 overflow-x-auto scrollbar-hide">
+                    <button class="review-filter-chip active" data-filter="all">همه</button>
+                    <button class="review-filter-chip" data-filter="5">5 ستاره</button>
+                    <button class="review-filter-chip" data-filter="4">4 ستاره</button>
+                    <button class="review-filter-chip" data-filter="3">3 ستاره</button>
+                </div>
+            </div>
+            
+            <!-- Modal Body -->
+            <div class="flex-1 overflow-y-auto px-6 py-4">
+                <!-- Rating Summary -->
+                <div class="bg-gradient-to-br from-blue-50 to-cyan-50 rounded-2xl p-5 mb-6">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div class="text-center sm:text-right">
+                            <div class="text-4xl font-bold text-gray-900 mb-1">4.8</div>
+                            <div class="flex items-center justify-center sm:justify-start gap-1 mb-2">
+                                <i class="fas fa-star text-yellow-400"></i>
+                                <i class="fas fa-star text-yellow-400"></i>
+                                <i class="fas fa-star text-yellow-400"></i>
+                                <i class="fas fa-star text-yellow-400"></i>
+                                <i class="fas fa-star-half-alt text-yellow-400"></i>
+                            </div>
+                            <div class="text-sm text-gray-600">128 نظر ثبت شده</div>
+                        </div>
+                        
+                        <div class="space-y-2">
+                            <div class="flex items-center gap-2">
+                                <span class="text-xs text-gray-600 w-12">5 ستاره</span>
+                                <div class="flex-1 h-2 bg-gray-200 rounded-full overflow-hidden">
+                                    <div class="h-full bg-yellow-400 rounded-full" style="width: 75%"></div>
+                                </div>
+                                <span class="text-xs text-gray-600 w-8">96</span>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <span class="text-xs text-gray-600 w-12">4 ستاره</span>
+                                <div class="flex-1 h-2 bg-gray-200 rounded-full overflow-hidden">
+                                    <div class="h-full bg-yellow-400 rounded-full" style="width: 15%"></div>
+                                </div>
+                                <span class="text-xs text-gray-600 w-8">19</span>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <span class="text-xs text-gray-600 w-12">3 ستاره</span>
+                                <div class="flex-1 h-2 bg-gray-200 rounded-full overflow-hidden">
+                                    <div class="h-full bg-yellow-400 rounded-full" style="width: 7%"></div>
+                                </div>
+                                <span class="text-xs text-gray-600 w-8">9</span>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <span class="text-xs text-gray-600 w-12">2 ستاره</span>
+                                <div class="flex-1 h-2 bg-gray-200 rounded-full overflow-hidden">
+                                    <div class="h-full bg-yellow-400 rounded-full" style="width: 2%"></div>
+                                </div>
+                                <span class="text-xs text-gray-600 w-8">3</span>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <span class="text-xs text-gray-600 w-12">1 ستاره</span>
+                                <div class="flex-1 h-2 bg-gray-200 rounded-full overflow-hidden">
+                                    <div class="h-full bg-yellow-400 rounded-full" style="width: 1%"></div>
+                                </div>
+                                <span class="text-xs text-gray-600 w-8">1</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Write Review CTA in Modal -->
+                <div class="mb-6">
+                    <button id="write-review-modal-btn" class="w-full sm:w-auto px-6 py-3 bg-gradient-to-r from-blue-600 to-teal-500 text-white rounded-xl font-bold hover:shadow-lg transform hover:scale-105 transition-all">
+                        <i class="fas fa-pen ml-2"></i>
+                        نظر خود را ثبت کنید
+                    </button>
+                </div>
+                
+                <!-- Reviews List -->
+                <div class="space-y-4" id="reviews-list">
+                    <!-- Review Item 1 -->
+                    <div class="review-item bg-white border border-gray-100 rounded-2xl p-5 hover:shadow-md transition-shadow" data-rating="5">
+                        <div class="flex items-start justify-between mb-3">
+                            <div>
+                                <h4 class="font-bold text-gray-900 mb-1">علی رضایی</h4>
+                                <div class="flex items-center gap-2">
+                                    <div class="flex items-center gap-1">
+                                        <i class="fas fa-star text-yellow-400 text-xs"></i>
+                                        <i class="fas fa-star text-yellow-400 text-xs"></i>
+                                        <i class="fas fa-star text-yellow-400 text-xs"></i>
+                                        <i class="fas fa-star text-yellow-400 text-xs"></i>
+                                        <i class="fas fa-star text-yellow-400 text-xs"></i>
+                                    </div>
+                                    <span class="text-xs text-gray-400">•</span>
+                                    <span class="text-xs text-gray-500">۲ روز پیش</span>
+                                </div>
+                            </div>
+                            <span class="px-3 py-1 bg-green-50 text-green-700 text-xs font-bold rounded-full">
+                                <i class="fas fa-check-circle ml-1"></i>
+                                خرید تایید شده
+                            </span>
+                        </div>
+                        <div class="review-text-container">
+                            <p class="text-sm text-gray-700 leading-7 review-text">
+                                تجربه‌ای عالی از آرایشگاه مردانه سلطنتی داشتم. پرسنل بسیار حرفه‌ای و محیط تمیز و شیک بود. حتماً دوباره مراجعه خواهم کرد.
+                            </p>
+                        </div>
+                    </div>
+                    
+                    <!-- Review Item 2 (Long Review) -->
+                    <div class="review-item bg-white border border-gray-100 rounded-2xl p-5 hover:shadow-md transition-shadow" data-rating="4">
+                        <div class="flex items-start justify-between mb-3">
+                            <div>
+                                <h4 class="font-bold text-gray-900 mb-1">محمد حسینی</h4>
+                                <div class="flex items-center gap-2">
+                                    <div class="flex items-center gap-1">
+                                        <i class="fas fa-star text-yellow-400 text-xs"></i>
+                                        <i class="fas fa-star text-yellow-400 text-xs"></i>
+                                        <i class="fas fa-star text-yellow-400 text-xs"></i>
+                                        <i class="fas fa-star text-yellow-400 text-xs"></i>
+                                        <i class="far fa-star text-gray-300 text-xs"></i>
+                                    </div>
+                                    <span class="text-xs text-gray-400">•</span>
+                                    <span class="text-xs text-gray-500">۱ هفته پیش</span>
+                                </div>
+                            </div>
+                            <span class="px-3 py-1 bg-green-50 text-green-700 text-xs font-bold rounded-full">
+                                <i class="fas fa-check-circle ml-1"></i>
+                                خرید تایید شده
+                            </span>
+                        </div>
+                        <div class="review-text-container">
+                            <p class="text-sm text-gray-700 leading-7 review-text line-clamp-3" data-full-text="کیفیت خدمات عالی بود و قیمت‌ها هم منصفانه. فقط کمی شلوغ بود و مجبور شدم منتظر بمانم. بهتر است از قبل نوبت بگیرید. محیط آرایشگاه بسیار تمیز و مرتب بود و از لوازم با کیفیتی استفاده می‌کردند. پرسنل بسیار مودب و حرفه‌ای برخورد کردند و به خواسته‌های من توجه کاملی داشتند. در کل تجربه خوبی بود و پیشنهاد می‌کنم حتماً امتحان کنید.">
+                                کیفیت خدمات عالی بود و قیمت‌ها هم منصفانه. فقط کمی شلوغ بود و مجبور شدم منتظر بمانم. بهتر است از قبل نوبت بگیرید. محیط آرایشگاه بسیار تمیز و مرتب بود و از لوازم با کیفیتی استفاده می‌کردند...
+                            </p>
+                            <button class="text-blue-600 text-sm font-bold mt-2 hover:text-blue-700 read-more-btn">
+                                مشاهده بیشتر
+                                <i class="fas fa-chevron-down mr-1 text-xs"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- More review items... -->
+                    <div class="review-item bg-white border border-gray-100 rounded-2xl p-5 hover:shadow-md transition-shadow" data-rating="5">
+                        <div class="flex items-start justify-between mb-3">
+                            <div>
+                                <h4 class="font-bold text-gray-900 mb-1">رضا اکبری</h4>
+                                <div class="flex items-center gap-2">
+                                    <div class="flex items-center gap-1">
+                                        <i class="fas fa-star text-yellow-400 text-xs"></i>
+                                        <i class="fas fa-star text-yellow-400 text-xs"></i>
+                                        <i class="fas fa-star text-yellow-400 text-xs"></i>
+                                        <i class="fas fa-star text-yellow-400 text-xs"></i>
+                                        <i class="fas fa-star text-yellow-400 text-xs"></i>
+                                    </div>
+                                    <span class="text-xs text-gray-400">•</span>
+                                    <span class="text-xs text-gray-500">۲ هفته پیش</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="review-text-container">
+                            <p class="text-sm text-gray-700 leading-7 review-text">
+                                بهترین آرایشگاهی که تا حالا رفتم! آقای احمدی واقعاً حرفه‌ای هستند و دقیقاً می‌دونن چه مدلی به صورتم میاد. پیشنهاد میکنم.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Load More Button -->
+                <div class="text-center mt-6">
+                    <button class="px-6 py-3 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold rounded-full transition-colors">
+                        نمایش نظرات بیشتر
+                        <i class="fas fa-chevron-down mr-2"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Review Form Modal -->
+<div id="reviewFormModal" class="fixed inset-0 z-[70] hidden">
+    <div class="absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity duration-300" id="review-form-backdrop"></div>
+    
+    <div class="flex items-end sm:items-center justify-center min-h-full p-0 sm:p-4">
+        <div id="review-form-content" class="relative bg-white w-full sm:max-w-lg rounded-t-3xl sm:rounded-2xl shadow-2xl transform transition-all duration-300 translate-y-full sm:translate-y-0 sm:scale-95 sm:opacity-0 max-h-[90vh] overflow-y-auto">
+            
+            <!-- Mobile Drag Handle -->
+            <div class="sm:hidden sticky top-0 bg-white rounded-t-3xl py-3 z-10">
+                <div class="w-12 h-1 bg-gray-300 rounded-full mx-auto"></div>
+            </div>
+            
+            <div class="p-6">
+                <!-- Header -->
+                <div class="flex items-center justify-between mb-6">
+                    <h3 class="text-xl font-bold text-gray-900">ثبت نظر جدید</h3>
+                    <button id="close-review-form" class="w-10 h-10 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center transition-colors">
+                        <i class="fas fa-times text-gray-600"></i>
+                    </button>
+                </div>
+                
+                <!-- Form -->
+                <form id="review-form">
+                    <!-- Rating Stars -->
+                    <div class="mb-6">
+                        <label class="block text-sm font-bold text-gray-700 mb-3">امتیاز شما</label>
+                        <div class="flex items-center gap-3">
+                            <div class="rating-stars flex gap-2">
+                                <i class="far fa-star text-3xl text-gray-300 cursor-pointer hover:text-yellow-400 transition-colors rating-star" data-rating="1"></i>
+                                <i class="far fa-star text-3xl text-gray-300 cursor-pointer hover:text-yellow-400 transition-colors rating-star" data-rating="2"></i>
+                                <i class="far fa-star text-3xl text-gray-300 cursor-pointer hover:text-yellow-400 transition-colors rating-star" data-rating="3"></i>
+                                <i class="far fa-star text-3xl text-gray-300 cursor-pointer hover:text-yellow-400 transition-colors rating-star" data-rating="4"></i>
+                                <i class="far fa-star text-3xl text-gray-300 cursor-pointer hover:text-yellow-400 transition-colors rating-star" data-rating="5"></i>
+                            </div>
+                            <span id="rating-text" class="text-sm font-bold text-gray-600"></span>
+                        </div>
+                    </div>
+                    
+                    <!-- Name -->
+                    <div class="mb-4">
+                        <label class="block text-sm font-bold text-gray-700 mb-2" for="reviewer-name">نام شما</label>
+                        <input type="text" id="reviewer-name" class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all" placeholder="نام و نام خانوادگی" required>
+                    </div>
+                    
+                    <!-- Service Used -->
+                    <div class="mb-4">
+                        <label class="block text-sm font-bold text-gray-700 mb-2" for="service-used">خدمت دریافت شده</label>
+                        <select id="service-used" class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all">
+                            <option value="">انتخاب کنید...</option>
+                            <option>اصلاح سر و صورت</option>
+                            <option>رنگ مو</option>
+                            <option>ماساژ صورت</option>
+                            <option>شستشوی حرفه‌ای</option>
+                            <option>سایر خدمات</option>
+                        </select>
+                    </div>
+                    
+                    <!-- Review Text -->
+                    <div class="mb-6">
+                        <label class="block text-sm font-bold text-gray-700 mb-2" for="review-text">نظر شما</label>
+                        <textarea id="review-text" rows="4" class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none transition-all" placeholder="تجربه خود را با دیگران به اشتراک بگذارید..." required></textarea>
+                        <div class="flex justify-between items-center mt-1">
+                            <span class="text-xs text-gray-500">حداقل 20 کاراکتر</span>
+                            <span id="char-counter" class="text-xs text-gray-500">0/500</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Recommend Checkbox -->
+                    <div class="mb-6">
+                        <label class="flex items-start gap-3 cursor-pointer">
+                            <input type="checkbox" id="recommend-checkbox" class="w-5 h-5 text-blue-600 rounded focus:ring-2 focus:ring-blue-500 mt-0.5">
+                            <span class="text-sm text-gray-700">این آرایشگاه را به دوستانم پیشنهاد می‌کنم</span>
+                        </label>
+                    </div>
+                    
+                    <!-- Buttons -->
+                    <div class="flex gap-3">
+                        <button type="button" id="cancel-review" class="flex-1 px-4 py-3 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold rounded-xl transition-colors">
+                            انصراف
+                        </button>
+                        <button type="submit" class="flex-1 px-4 py-3 bg-gradient-to-r from-blue-600 to-teal-500 text-white font-bold rounded-xl hover:shadow-lg transform hover:scale-105 transition-all disabled:opacity-50 disabled:cursor-not-allowed" id="submit-review">
+                            ارسال نظر
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Success Toast -->
+<div id="review-toast" class="fixed top-4 left-1/2 -translate-x-1/2 z-[80] px-6 py-3 bg-green-600 text-white rounded-full shadow-lg transform -translate-y-20 transition-transform duration-300">
+    <div class="flex items-center gap-2">
+        <i class="fas fa-check-circle"></i>
+        <span>نظر شما با موفقیت ثبت شد</span>
+    </div>
+</div>
+
+<!-- Styles for Reviews -->
+<style>
+/* Review Cards */
+.review-card {
+    transition: all 0.3s ease;
+}
+
+.review-card:hover {
+    transform: translateY(-2px);
+}
+
+/* Modal Animations */
+#reviewsModal.show #reviews-backdrop,
+#reviewFormModal.show #review-form-backdrop {
+    opacity: 1;
+}
+
+#reviewsModal.show #reviews-modal-content,
+#reviewFormModal.show #review-form-content {
+    transform: translateY(0) !important;
+    opacity: 1 !important;
+}
+
+@media (min-width: 640px) {
+    #reviewsModal.show #reviews-modal-content,
+    #reviewFormModal.show #review-form-content {
+        transform: scale(1) !important;
+    }
+}
+
+/* Filter Chips */
+.review-filter-chip {
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 600;
+    background: white;
+    color: #4b5563;
+    border: 1px solid #e5e7eb;
+    transition: all 0.2s;
+    white-space: nowrap;
+}
+
+.review-filter-chip:hover {
+    background: #f9fafb;
+    border-color: #d1d5db;
+}
+
+.review-filter-chip.active {
+    background: linear-gradient(135deg, #3b82f6, #06b6d4);
+    color: white;
+    border-color: transparent;
+}
+
+/* Line Clamp for Long Reviews */
+.line-clamp-3 {
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+/* Read More Button Animation */
+.read-more-btn {
+    display: inline-flex;
+    align-items: center;
+    transition: all 0.2s;
+}
+
+.read-more-btn:hover {
+    gap: 4px;
+}
+
+.read-more-btn i {
+    transition: transform 0.2s;
+}
+
+.read-more-btn.expanded i {
+    transform: rotate(180deg);
+}
+
+/* Rating Stars Animation */
+.rating-star {
+    transition: all 0.2s;
+}
+
+.rating-star:hover {
+    transform: scale(1.1);
+}
+
+.rating-star.filled {
+    color: #facc15 !important;
+}
+
+/* Success Toast */
+#review-toast.show {
+    transform: translateX(-50%) translateY(0);
+}
+
+/* Mobile Specific Styles */
+@media (max-width: 640px) {
+    #reviews-modal-content,
+    #review-form-content {
+        min-height: 70vh;
+        border-bottom-left-radius: 0;
+        border-bottom-right-radius: 0;
+    }
+}
+
+/* Smooth Scrollbar */
+.scrollbar-hide::-webkit-scrollbar {
+    display: none;
+}
+
+.scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
+</style>
+
+<!-- JavaScript for Reviews -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Reviews Modal
+    const reviewsModal = document.getElementById('reviewsModal');
+    const reviewsModalContent = document.getElementById('reviews-modal-content');
+    const showAllBtn = document.getElementById('show-all-reviews');
+    const closeReviewsBtn = document.getElementById('close-reviews-modal');
+    const reviewsBackdrop = document.getElementById('reviews-backdrop');
+    
+    // Review Form Modal
+    const reviewFormModal = document.getElementById('reviewFormModal');
+    const reviewFormContent = document.getElementById('review-form-content');
+    const writeReviewBtn = document.getElementById('write-review-btn');
+    const writeReviewModalBtn = document.getElementById('write-review-modal-btn');
+    const closeReviewFormBtn = document.getElementById('close-review-form');
+    const reviewFormBackdrop = document.getElementById('review-form-backdrop');
+    const cancelReviewBtn = document.getElementById('cancel-review');
+    
+    // Form Elements
+    const reviewForm = document.getElementById('review-form');
+    const ratingStars = document.querySelectorAll('.rating-star');
+    const ratingText = document.getElementById('rating-text');
+    const reviewTextarea = document.getElementById('review-text');
+    const charCounter = document.getElementById('char-counter');
+    const submitBtn = document.getElementById('submit-review');
+    const toast = document.getElementById('review-toast');
+    
+    let selectedRating = 0;
+    
+    // Open Reviews Modal
+    showAllBtn.addEventListener('click', function() {
+        reviewsModal.classList.remove('hidden');
+        document.body.style.overflow = 'hidden';
+        setTimeout(() => {
+            reviewsModal.classList.add('show');
+        }, 10);
+    });
+    
+    // Open Review Form Modal
+    function openReviewForm() {
+        reviewFormModal.classList.remove('hidden');
+        document.body.style.overflow = 'hidden';
+        setTimeout(() => {
+            reviewFormModal.classList.add('show');
+        }, 10);
+    }
+    
+    writeReviewBtn.addEventListener('click', openReviewForm);
+    if (writeReviewModalBtn) {
+        writeReviewModalBtn.addEventListener('click', openReviewForm);
+    }
+    
+    // Close Modals
+    function closeReviewsModal() {
+        reviewsModal.classList.remove('show');
+        setTimeout(() => {
+            reviewsModal.classList.add('hidden');
+            document.body.style.overflow = '';
+        }, 300);
+    }
+    
+    function closeReviewFormModal() {
+        reviewFormModal.classList.remove('show');
+        setTimeout(() => {
+            reviewFormModal.classList.add('hidden');
+            document.body.style.overflow = '';
+            // Reset form
+            reviewForm.reset();
+            selectedRating = 0;
+            ratingStars.forEach(star => {
+                star.classList.remove('fas', 'filled');
+                star.classList.add('far');
+            });
+            ratingText.textContent = '';
+            charCounter.textContent = '0/500';
+        }, 300);
+    }
+    
+    closeReviewsBtn.addEventListener('click', closeReviewsModal);
+    reviewsBackdrop.addEventListener('click', closeReviewsModal);
+    
+    closeReviewFormBtn.addEventListener('click', closeReviewFormModal);
+    reviewFormBackdrop.addEventListener('click', closeReviewFormModal);
+    cancelReviewBtn.addEventListener('click', closeReviewFormModal);
+    
+    // ESC key to close
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            if (!reviewsModal.classList.contains('hidden')) {
+                closeReviewsModal();
+            }
+            if (!reviewFormModal.classList.contains('hidden')) {
+                closeReviewFormModal();
+            }
+        }
+    });
+    
+    // Mobile Swipe to Close
+    function setupSwipeToClose(modalContent, closeFunction) {
+        let startY = 0;
+        let currentY = 0;
+        let isDragging = false;
+        
+        modalContent.addEventListener('touchstart', function(e) {
+            if (window.innerWidth <= 640) {
+                startY = e.touches[0].clientY;
+                isDragging = true;
+            }
+        });
+        
+        modalContent.addEventListener('touchmove', function(e) {
+            if (!isDragging || window.innerWidth > 640) return;
+            
+            currentY = e.touches[0].clientY;
+            const translateY = Math.max(0, currentY - startY);
+            
+            if (translateY > 0) {
+                modalContent.style.transform = `translateY(${translateY}px)`;
+            }
+        });
+        
+        modalContent.addEventListener('touchend', function() {
+            if (!isDragging || window.innerWidth > 640) return;
+            
+            const translateY = currentY - startY;
+            
+            if (translateY > 100) {
+                closeFunction();
+            } else {
+                modalContent.style.transform = '';
+            }
+            
+            isDragging = false;
+        });
+    }
+    
+    setupSwipeToClose(reviewsModalContent, closeReviewsModal);
+    setupSwipeToClose(reviewFormContent, closeReviewFormModal);
+    
+    // Filter Reviews
+    const filterChips = document.querySelectorAll('.review-filter-chip');
+    const reviewItems = document.querySelectorAll('.review-item');
+    
+    filterChips.forEach(chip => {
+        chip.addEventListener('click', function() {
+            filterChips.forEach(c => c.classList.remove('active'));
+            this.classList.add('active');
+            
+            const filter = this.dataset.filter;
+            
+            reviewItems.forEach(review => {
+                if (filter === 'all') {
+                    review.style.display = '';
+                } else {
+                    const rating = review.dataset.rating;
+                    review.style.display = rating === filter ? '' : 'none';
+                }
+            });
+        });
+    });
+    
+    // Read More/Less functionality
+    document.querySelectorAll('.read-more-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const textElement = this.previousElementSibling;
+            const fullText = textElement.dataset.fullText;
+            
+            if (this.classList.contains('expanded')) {
+                textElement.classList.add('line-clamp-3');
+                textElement.textContent = fullText.substring(0, 150) + '...';
+                this.innerHTML = 'مشاهده بیشتر <i class="fas fa-chevron-down mr-1 text-xs"></i>';
+                this.classList.remove('expanded');
+            } else {
+                textElement.classList.remove('line-clamp-3');
+                textElement.textContent = fullText;
+                this.innerHTML = 'مشاهده کمتر <i class="fas fa-chevron-up mr-1 text-xs"></i>';
+                this.classList.add('expanded');
+            }
+        });
+    });
+    
+    // Rating Stars Interaction
+    const ratingMessages = ['', 'ضعیف', 'متوسط', 'خوب', 'عالی', 'فوق‌العاده'];
+    
+    ratingStars.forEach(star => {
+        star.addEventListener('click', function() {
+            selectedRating = parseInt(this.dataset.rating);
+            updateStars(selectedRating);
+            ratingText.textContent = ratingMessages[selectedRating];
+        });
+        
+        star.addEventListener('mouseenter', function() {
+            const hoverRating = parseInt(this.dataset.rating);
+            updateStars(hoverRating);
+            ratingText.textContent = ratingMessages[hoverRating];
+        });
+    });
+    
+    document.querySelector('.rating-stars').addEventListener('mouseleave', function() {
+        updateStars(selectedRating);
+        ratingText.textContent = selectedRating ? ratingMessages[selectedRating] : '';
+    });
+    
+    function updateStars(rating) {
+        ratingStars.forEach((star, index) => {
+            if (index < rating) {
+                star.classList.remove('far');
+                star.classList.add('fas', 'filled');
+            } else {
+                star.classList.remove('fas', 'filled');
+                star.classList.add('far');
+            }
+        });
+    }
+    
+    // Character Counter
+    reviewTextarea.addEventListener('input', function() {
+        const length = this.value.length;
+        charCounter.textContent = `${length}/500`;
+        
+        if (length > 500) {
+            this.value = this.value.substring(0, 500);
+            charCounter.textContent = '500/500';
+        }
+    });
+    
+    // Form Submission
+    reviewForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        // Validation
+        if (selectedRating === 0) {
+            alert('لطفاً امتیاز خود را انتخاب کنید');
+            return;
+        }
+        
+        if (reviewTextarea.value.length < 20) {
+            alert('نظر شما باید حداقل 20 کاراکتر باشد');
+            return;
+        }
+        
+        // Close form modal
+        closeReviewFormModal();
+        
+        // Show success toast
+        setTimeout(() => {
+            toast.classList.add('show');
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }, 300);
+    });
+});
+</script>
     <!-- Store Info & Contact -->
     <section class="py-8 px-4">
         <h3 class="text-xl font-bold mb-4">اطلاعات و تماس</h3>
