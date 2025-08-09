@@ -2711,6 +2711,14 @@ function showToastDark(message, {type='success', durationMs=2600} = {}) {
   }
 }
 
+
+
+
+
+
+
+
+
 </style>
 
 <!-- JavaScript for Reviews -->
@@ -3689,6 +3697,116 @@ if (rateNowChip) rateNowChip.addEventListener('click', () => writeReviewBtn.clic
   })();
 </script>
 
+
+
+
+
+
+<script>
+/* پاپ‌اپ شیشه‌ای وسط صفحه + ترجمه پیام‌ها (Drop-in Replacement) */
+(() => {
+  const translate = (txt) => {
+    if (!txt) return "";
+    if (/You can submit one review per day/i.test(txt)) {
+      return "روزانه فقط یک نظر می‌توانید ثبت کنید.";
+    }
+    return txt;
+  };
+
+  // همان امضای قبلی: showToastDark(message, {type, durationMs})
+  window.showToastDark = function (message, { type = "info", durationMs = 2600 } = {}) {
+    const palette = {
+      success: { ring: "ring-emerald-200", icon: "text-emerald-600", ico: "fas fa-check" },
+      info:    { ring: "ring-blue-200",    icon: "text-blue-600",    ico: "fas fa-info-circle" },
+      error:   { ring: "ring-rose-200",    icon: "text-rose-600",    ico: "fas fa-exclamation-circle" }
+    };
+    const p = palette[type] || palette.info;
+
+    // اگر قبلاً بازه، حذف کن
+    const existing = document.getElementById("dark-toast");
+    if (existing) existing.remove();
+
+    // لایه‌ی پس‌زمینه (برای کلیک برای بستن)
+    const overlay = document.createElement("div");
+    overlay.id = "dark-toast";
+    overlay.setAttribute("role", "dialog");
+    overlay.setAttribute("aria-modal", "true");
+    overlay.dir = "rtl";
+    overlay.className =
+      "fixed inset-0 z-[160] flex items-center justify-center p-4 " +
+      "bg-black/30 backdrop-blur-sm opacity-0 transition-opacity duration-200";
+
+    // کارت وسط صفحه
+    const card = document.createElement("div");
+    card.className =
+      `relative w-full max-w-sm sm:max-w-md rounded-2xl bg-white/95 backdrop-blur-md ` +
+      `shadow-2xl ring-1 ${p.ring} transform scale-95 opacity-0 transition-all duration-200`;
+
+    // محتوای کارت
+    const inner = document.createElement("div");
+    inner.className = "px-5 py-4 flex items-start gap-3 text-slate-900";
+
+    const icon = document.createElement("i");
+    icon.className = `${p.ico} ${p.icon} text-xl mt-0.5`;
+
+    const msg = document.createElement("div");
+    msg.className = "text-[14px] leading-7 font-bold";
+    msg.textContent = translate(message);
+
+    const closeBtn = document.createElement("button");
+    closeBtn.type = "button";
+    closeBtn.setAttribute("aria-label", "بستن");
+    closeBtn.className =
+      "absolute top-2 left-2 w-9 h-9 rounded-full text-slate-500 " +
+      "hover:text-slate-700 hover:bg-slate-100 flex items-center justify-center";
+    closeBtn.innerHTML = "&times;";
+
+    inner.append(icon, msg);
+    card.append(closeBtn, inner);
+    overlay.append(card);
+    document.body.appendChild(overlay);
+
+    // انیمیشن نمایش
+    requestAnimationFrame(() => {
+      overlay.classList.remove("opacity-0");
+      card.classList.remove("scale-95", "opacity-0");
+    });
+
+    // بستن با انیمیشن
+    const remove = () => {
+      overlay.classList.add("opacity-0");
+      card.classList.add("scale-95", "opacity-0");
+      setTimeout(() => overlay.remove(), 200);
+      document.removeEventListener("keydown", onKey);
+    };
+    const onKey = (e) => { if (e.key === "Escape") remove(); };
+
+    document.addEventListener("keydown", onKey);
+    overlay.addEventListener("click", (e) => { if (e.target === overlay) remove(); });
+    closeBtn.addEventListener("click", (e) => { e.stopPropagation(); remove(); });
+
+    // زمان‌بندی خودکار + توقف با Hover
+    let timer = setTimeout(remove, durationMs);
+    overlay.addEventListener("mouseenter", () => clearTimeout(timer));
+    overlay.addEventListener("mouseleave", () => {
+      timer = setTimeout(remove, 1200);
+    });
+  };
+
+  // فارسی‌سازی Tooltip دکمه‌ی ارسال نظر در حالت محدودیت روزانه
+  document.addEventListener("DOMContentLoaded", () => {
+    const btn = document.getElementById("submit-review");
+    if (!btn) return;
+    const apply = () => {
+      if (/You can submit one review per day/i.test(btn.title || "")) {
+        btn.title = "روزانه فقط یک نظر می‌توانید ثبت کنید.";
+      }
+    };
+    apply();
+    new MutationObserver(apply).observe(btn, { attributes: true, attributeFilter: ["title"] });
+  });
+})();
+</script>
 
 
 </body>
