@@ -837,6 +837,49 @@
                         <span class="text-sm text-gray-300 mr-1">(128)</span>
                     </div>
                 </div>
+
+<!-- VIP Customers badge (hero) -->
+<div class="mt-2 flex items-center md:justify-center">
+  <!-- گرادیان دور قاب -->
+  <span class="inline-flex rounded-full p-[1.5px]
+               bg-gradient-to-r from-amber-400/80 via-pink-500/40 to-emerald-400/80
+               shadow-[0_8px_22px_rgba(0,0,0,.12)]">
+    <!-- هسته‌ی شیشه‌ای -->
+    <span id="vip-badge" data-count="32"
+          class="relative inline-flex items-center gap-2 px-3 py-1.5 rounded-full
+                 bg-white/10 backdrop-blur-md ring-1 ring-white/25 text-white
+                 text-[11px] sm:text-xs md:text-sm font-extrabold select-none">
+      <!-- آیکن مینیمال -->
+      <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg"
+           viewBox="0 0 24 24" class="w-[14px] h-[14px] opacity-95">
+        <path fill="currentColor"
+              d="M3.6 7.8l4.2 3.2 3.5-4.7 3.6 4.7 4.2-3.2.5 8.2a2 2 0 0 1-2 2H5.1a2 2 0 0 1-2-2l.5-8.2Z"/>
+        <path fill="currentColor" d="M5 18h14v2H5z" opacity=".35"/>
+      </svg>
+
+      <span class="leading-none">مشتریان ویژه</span>
+
+      <!-- جداکننده‌ی باریک -->
+      <span aria-hidden="true" class="mx-1.5 h-3 w-px bg-white/35"></span>
+
+      <!-- تعداد (روی موبایل هم نمایش داده می‌شود) -->
+      <span id="vip-count"
+            class="leading-none inline-flex items-center px-1.5 py-0.5 rounded-md
+                   bg-white/10 ring-1 ring-white/20">
+        ۳۲ نفر
+      </span>
+
+      <!-- هایلایت لطیف روی قاب -->
+      <span class="pointer-events-none absolute inset-0 rounded-full opacity-25
+                   [background:radial-gradient(120%_120%_at_85%_0%,rgba(255,255,255,.45),transparent_60%)]"></span>
+    </span>
+  </span>
+</div>
+
+
+
+
+
                 <h2 class="text-2xl font-bold mb-1 md:text-3xl">آرایشگاه مردانه سلطنتی</h2>
                 <p class="text-sm mb-4 md:mb-6">تجربه‌ای لوکس از آرایش و اصلاح مردانه</p>
 <button id="hero-cta" class="cta-button text-white font-bold py-3 px-6 rounded-full transition-all transform md:bounce-animation md:py-3 md:px-8 md:text-lg">
@@ -2101,6 +2144,22 @@
                 </div>
                 <span class="text-sm font-bold text-gray-700">4.8</span>
                 <span class="text-sm text-gray-500">(128 نظر)</span>
+
+
+                <button id="rate-now-chip" type="button"
+  class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full
+         bg-gradient-to-r from-blue-600 to-teal-500 text-white
+         text-[11px] sm:text-xs md:text-sm font-bold shadow-sm
+         hover:shadow-md active:scale-95 focus:outline-none
+         focus-visible:ring-2 focus-visible:ring-blue-500">
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"
+       class="w-4 h-4" fill="currentColor" aria-hidden="true">
+    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+  </svg>
+  <span class="hidden xs:inline sm:inline">ثبت امتیاز</span>
+  <span class="sm:hidden"> ثبت امتیاز</span>
+</button>
+
             </div>
         </div>
         
@@ -2179,7 +2238,7 @@
 </section>
 
 <!-- Reviews Modal -->
-<div id="reviewsModal" class="fixed inset-0 z-[60] hidden">
+<div id="reviewsModal" class="fixed inset-0 z-[120] hidden">
     <!-- Backdrop -->
     <div class="absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity duration-300" id="reviews-backdrop"></div>
     
@@ -2398,7 +2457,7 @@
 </div>
 
 <!-- Review Form Modal -->
-<div id="reviewFormModal" class="fixed inset-0 z-[70] hidden">
+<div id="reviewFormModal" class="fixed inset-0 z-[120] hidden">
     <div class="absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity duration-300" id="review-form-backdrop"></div>
     
     <div class="flex items-end sm:items-center justify-center min-h-full p-0 sm:p-4">
@@ -2613,6 +2672,14 @@
     -ms-overflow-style: none;
     scrollbar-width: none;
 }
+
+
+@media (max-width: 640px){
+  #review-form-content{ 
+    padding-bottom: max(16px, env(safe-area-inset-bottom));
+  }
+}
+
 </style>
 
 <!-- JavaScript for Reviews -->
@@ -2629,6 +2696,11 @@ document.addEventListener('DOMContentLoaded', function() {
     const reviewFormModal = document.getElementById('reviewFormModal');
     const reviewFormContent = document.getElementById('review-form-content');
     const writeReviewBtn = document.getElementById('write-review-btn');
+
+    // چیپ «ثبت امتیاز» کنار 4.8
+const rateNowChip = document.getElementById('rate-now-chip');
+if (rateNowChip) rateNowChip.addEventListener('click', () => writeReviewBtn.click());
+
     const writeReviewModalBtn = document.getElementById('write-review-modal-btn');
     const closeReviewFormBtn = document.getElementById('close-review-form');
     const reviewFormBackdrop = document.getElementById('review-form-backdrop');
@@ -3550,6 +3622,17 @@ document.addEventListener('DOMContentLoaded', function() {
 })();
 </script>
 
+
+
+<script>
+  (function () {
+    var badge = document.getElementById('vip-badge');
+    var out   = document.getElementById('vip-count');
+    if (!badge || !out) return;
+    var n = Number(badge.getAttribute('data-count') || 0);
+    out.textContent = new Intl.NumberFormat('fa-IR').format(n) + ' نفر';
+  })();
+</script>
 
 
 
