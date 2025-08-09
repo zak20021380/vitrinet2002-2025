@@ -657,6 +657,53 @@
 
 
 <script>
+function showToastDark(message, {type='success', durationMs=2600} = {}) {
+  const icons = {
+    success: 'fas fa-check',
+    info: 'fas fa-info-circle',
+    error: 'fas fa-exclamation-circle'
+  };
+  const existing = document.getElementById('dark-toast');
+  if (existing) existing.remove();
+  const toast = document.createElement('div');
+  toast.id = 'dark-toast';
+  toast.setAttribute('role', 'status');
+  toast.setAttribute('aria-live', 'polite');
+  toast.setAttribute('aria-atomic', 'true');
+  toast.dir = 'ltr';
+  toast.className = 'fixed left-1/2 -translate-x-1/2 bottom-[max(16px,env(safe-area-inset-bottom))] z-[160] bg-black text-white rounded-xl px-4 py-3 shadow-lg ring-1 ring-white/20 flex items-center gap-3 opacity-0 translate-y-2 transition-all duration-200 max-w-[92vw] sm:max-w-md';
+  const icon = document.createElement('i');
+  icon.className = icons[type] || icons.info;
+  const msg = document.createElement('span');
+  msg.textContent = message;
+  msg.className = 'flex-1';
+  msg.dir = 'rtl';
+  const closeBtn = document.createElement('button');
+  closeBtn.type = 'button';
+  closeBtn.textContent = '×';
+  closeBtn.className = 'text-xl leading-none';
+  toast.append(icon, msg, closeBtn);
+  document.body.appendChild(toast);
+  requestAnimationFrame(() => {
+    toast.classList.remove('opacity-0', 'translate-y-2');
+  });
+  function removeToast() {
+    toast.classList.add('opacity-0', 'translate-y-2');
+    setTimeout(() => toast.remove(), 200);
+    document.removeEventListener('keydown', onKey);
+  }
+  function onKey(e) {
+    if (e.key === 'Escape') removeToast();
+  }
+  document.addEventListener('keydown', onKey);
+  toast.addEventListener('click', removeToast);
+  closeBtn.addEventListener('click', (e) => { e.stopPropagation(); removeToast(); });
+  setTimeout(removeToast, durationMs);
+}
+</script>
+
+
+<script>
 (() => {
   // ====== Sticky header + toast ======
   const header = document.getElementById('main-header');
@@ -787,7 +834,7 @@
     addressCopyBtn.addEventListener('click', () => {
       const txt = (fullAddressEl.textContent || '').trim();
       if (!txt) return;
-      navigator.clipboard.writeText(txt).then(() => showToast('آدرس کپی شد'));
+      navigator.clipboard.writeText(txt).then(() => showToastDark('آدرس کپی شد', {type:'success'}));
     });
   }
 
@@ -812,7 +859,7 @@
     reportForm.addEventListener('submit', (e) => {
       e.preventDefault();
       inst.close();
-      showToast('گزارش شما ثبت شد');
+      showToastDark('گزارش شما ثبت شد', {type:'success'});
       reportForm.reset();
       if (reportCounter) reportCounter.textContent = '۰/۵۰۰';
     });
@@ -1878,13 +1925,8 @@
   const toFa = n => String(n).replace(/\d/g, d => '۰۱۲۳۴۵۶۷۸۹'[d]);
   const reduce = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-  function toast(msg) {
-    const t = document.createElement('div');
-    t.className = 'fixed top-4 left-1/2 -translate-x-1/2 z-[70] bg-gray-900 text-white text-sm px-4 py-2 rounded-full shadow-lg opacity-0 transition-opacity duration-100';
-    t.textContent = msg;
-    document.body.appendChild(t);
-    requestAnimationFrame(() => t.classList.remove('opacity-0'));
-    setTimeout(() => { t.classList.add('opacity-0'); setTimeout(() => t.remove(), 80); }, 1600);
+  function toast(msg, type = 'info') {
+    showToastDark(msg, {type});
   }
 
   // ------- ADAPTERS (قابل تعویض با بک‌اند) -------
@@ -2064,7 +2106,7 @@
         closeModal(document.getElementById('lrRedeemModal'));
         document.getElementById('lr-redeem-done').classList.add('hidden');
         document.getElementById('lr-redeem-body').classList.remove('hidden');
-        toast('جایزه ثبت شد؛ مبارک‌ته!');
+        toast('جایزه ثبت شد؛ مبارک‌ته!', 'success');
         initCard();
       }, 250);
     });
@@ -2085,7 +2127,7 @@
       localStorage.setItem(KEY_TOTAL, String(total + 1));
       HAS_BOOKED_BEFORE = true;
 
-      if (next >= target) toast('تبریک! جایزه‌ت رسید'); else toast(`نوبت ${toFa(next)} ثبت شد`);
+      if (next >= target) toast('تبریک! جایزه‌ت رسید', 'success'); else toast(`نوبت ${toFa(next)} ثبت شد`, 'success');
       setTimeout(initCard, 300);
     });
 
@@ -2546,13 +2588,6 @@
     </div>
 </div>
 
-<!-- Success Toast -->
-<div id="review-toast" class="fixed top-4 left-1/2 -translate-x-1/2 z-[80] px-6 py-3 bg-green-600 text-white rounded-full shadow-lg transform -translate-y-20 transition-transform duration-300">
-    <div class="flex items-center gap-2">
-        <i class="fas fa-check-circle"></i>
-        <span>نظر شما با موفقیت ثبت شد</span>
-    </div>
-</div>
 
 <!-- Styles for Reviews -->
 <style>
@@ -2648,10 +2683,6 @@
     color: #facc15 !important;
 }
 
-/* Success Toast */
-#review-toast.show {
-    transform: translateX(-50%) translateY(0);
-}
 
 /* Mobile Specific Styles */
 @media (max-width: 640px) {
@@ -2713,7 +2744,28 @@ if (rateNowChip) rateNowChip.addEventListener('click', () => writeReviewBtn.clic
     const reviewTextarea = document.getElementById('review-text');
     const charCounter = document.getElementById('char-counter');
     const submitBtn = document.getElementById('submit-review');
-    const toast = document.getElementById('review-toast');
+    const storeId = document.body.dataset.storeId || 'default';
+    const userId = window.__APP_USER__?.id;
+    const isAdmin = window.__APP_USER__?.isAdmin || window.__APP_USER__?.role === 'admin';
+    const reviewKey = userId ? `review:last:${storeId}:${userId}` : `review:last:${storeId}`;
+    function canSubmitReview() {
+        if (isAdmin) return true;
+        const last = localStorage.getItem(reviewKey);
+        return !last || (Date.now() - parseInt(last, 10)) > 86400000;
+    }
+    function markReviewSubmitted() {
+        localStorage.setItem(reviewKey, Date.now().toString());
+    }
+    function updateSubmitState() {
+        if (canSubmitReview()) {
+            submitBtn.disabled = false;
+            submitBtn.removeAttribute('title');
+        } else {
+            submitBtn.disabled = true;
+            submitBtn.title = 'You can submit one review per day.';
+            showToastDark('You can submit one review per day.', {type: 'info'});
+        }
+    }
     
     let selectedRating = 0;
     
@@ -2733,6 +2785,7 @@ if (rateNowChip) rateNowChip.addEventListener('click', () => writeReviewBtn.clic
         setTimeout(() => {
             reviewFormModal.classList.add('show');
         }, 10);
+        updateSubmitState();
     }
     
     writeReviewBtn.addEventListener('click', openReviewForm);
@@ -2917,28 +2970,30 @@ if (rateNowChip) rateNowChip.addEventListener('click', () => writeReviewBtn.clic
     // Form Submission
     reviewForm.addEventListener('submit', function(e) {
         e.preventDefault();
-        
+
+        if (!canSubmitReview()) {
+            showToastDark('You can submit one review per day.', {type: 'info'});
+            return;
+        }
+
         // Validation
         if (selectedRating === 0) {
             alert('لطفاً امتیاز خود را انتخاب کنید');
             return;
         }
-        
+
         if (reviewTextarea.value.length < 20) {
             alert('نظر شما باید حداقل 20 کاراکتر باشد');
             return;
         }
-        
+
         // Close form modal
         closeReviewFormModal();
-        
-        // Show success toast
+
         setTimeout(() => {
-            toast.classList.add('show');
-            setTimeout(() => {
-                toast.classList.remove('show');
-            }, 3000);
+            showToastDark('نظر شما با موفقیت ثبت شد', {type: 'success'});
         }, 300);
+        markReviewSubmitted();
     });
 });
 </script>
