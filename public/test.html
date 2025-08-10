@@ -1474,209 +1474,472 @@ function showToastDark(message, {type='success', durationMs=2600} = {}) {
     </div>
     
     <!-- Booking Wizard -->
-    <section id="booking-wizard" class="hidden py-8 px-4">
-        <div class="bg-white rounded-xl shadow-md p-6">
-            <h3 class="text-xl font-bold mb-6">نوبت‌گیری</h3>
-            <div class="mb-6">
-                <div class="flex justify-between items-center mb-2">
-                    <span class="text-sm text-gray-600">مرحله <span id="current-step">۱</span> از ۴</span>
-                    <div class="flex space-x-1 space-x-reverse">
-                        <div class="w-3 h-3 rounded-full bg-blue-600"></div>
-                        <div id="step-2-indicator" class="w-3 h-3 rounded-full bg-gray-300"></div>
-                        <div id="step-3-indicator" class="w-3 h-3 rounded-full bg-gray-300"></div>
-                        <div id="step-4-indicator" class="w-3 h-3 rounded-full bg-gray-300"></div>
-                    </div>
-                </div>
-                <div class="w-full bg-gray-200 rounded-full h-2">
-                    <div id="progress-bar" class="bg-blue-600 h-2 rounded-full progress-animation" style="width: 25%"></div>
-                </div>
-            </div>
-            <!-- Step 1: Select Service -->
-            <div id="step-1" class="step">
-                <h4 class="font-bold mb-4">انتخاب خدمت</h4>
-                <div class="space-y-3">
-                    <div class="service-option border border-gray-300 rounded-lg p-3 hover:border-blue-500 cursor-pointer" data-service="اصلاح سر و صورت" data-price="150000">
-                        <div class="flex justify-between items-center">
-                            <div>
-                                <h5 class="font-bold">اصلاح سر و صورت</h5>
-                                <p class="text-sm text-gray-600">اصلاح حرفه‌ای سر و صورت</p>
-                            </div>
-                            <span class="font-bold">۱۵۰٬۰۰۰ تومان</span>
-                        </div>
-                    </div>
-                    <div class="service-option border border-gray-300 rounded-lg p-3 hover:border-blue-500 cursor-pointer" data-service="ماساژ صورت" data-price="120000">
-                        <div class="flex justify-between items-center">
-                            <div>
-                                <h5 class="font-bold">ماساژ صورت</h5>
-                                <p class="text-sm text-gray-600">ماساژ صورت با روغن‌های گیاهی</p>
-                            </div>
-                            <span class="font-bold">۱۲۰,۰۰۰ تومان</span>
-                        </div>
-                    </div>
-                    <div class="service-option border border-gray-300 rounded-lg p-3 hover:border-blue-500 cursor-pointer" data-service="رنگ مو" data-price="200000">
-                        <div class="flex justify-between items-center">
-                            <div>
-                                <h5 class="font-bold">رنگ مو</h5>
-                                <p class="text-sm text-gray-600">رنگ موی حرفه‌ای</p>
-                            </div>
-                            <span class="font-bold">۲۰۰٬۰۰۰ تومان</span>
-                        </div>
-                    </div>
-                    <div class="service-option border border-gray-300 rounded-lg p-3 hover:border-blue-500 cursor-pointer" data-service="شستشوی حرفه‌ای" data-price="80000">
-                        <div class="flex justify-between items-center">
-                            <div>
-                                <h5 class="font-bold">شستشوی حرفه‌ای</h5>
-                                <p class="text-sm text-gray-600">شستشوی حرفه‌ای مو</p>
-                            </div>
-                            <span class="font-bold">۸۰٬۰۰۰ تومان</span>
-                        </div>
-                    </div>
-                </div>
-                <button id="next-to-step-2" class="mt-6 bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-full w-full transition-all disabled:bg-gray-400" disabled>
-                    ادامه
-                </button>
-            </div>
-            <!-- Step 2: Select Date and Time -->
-            <div id="step-2" class="step hidden">
-                <h4 class="font-bold mb-4">انتخاب روز و ساعت</h4>
-                <div class="mb-6">
-                    <h5 class="font-medium mb-2">روز</h5>
-                    <div class="grid grid-cols-3 gap-2">
-                        <div class="date-option border border-gray-300 rounded-lg p-2 text-center cursor-pointer hover:border-blue-500">
-                            <div class="text-sm">شنبه</div>
-                            <div class="font-bold">۱۴ تیر</div>
-                        </div>
-                        <div class="date-option border border-gray-300 rounded-lg p-2 text-center cursor-pointer hover:border-blue-500">
-                            <div class="text-sm">یکشنبه</div>
-                            <div class="font-bold">۱۵ تیر</div>
-                        </div>
-                        <div class="date-option border border-gray-300 rounded-lg p-2 text-center cursor-pointer hover:border-blue-500">
-                            <div class="text-sm">دوشنبه</div>
-                            <div class="font-bold">۱۶ تیر</div>
-                        </div>
-                        <div class="date-option border border-gray-300 rounded-lg p-2 text-center cursor-pointer hover:border-blue-500">
-                            <div class="text-sm">سه‌شنبه</div>
-                            <div class="font-bold">۱۷ تیر</div>
-                        </div>
-                        <div class="date-option border border-gray-300 rounded-lg p-2 text-center cursor-pointer hover:border-blue-500">
-                            <div class="text-sm">چهارشنبه</div>
-                            <div class="font-bold">۱۸ تیر</div>
-                        </div>
-                        <div class="date-option border border-gray-300 rounded-lg p-2 text-center cursor-pointer hover:border-blue-500">
-                            <div class="text-sm">پنج‌شنبه</div>
-                            <div class="font-bold">۱۹ تیر</div>
-                        </div>
-                    </div>
-                </div>
-                <div class="mb-6">
-                    <h5 class="font-medium mb-2">ساعت</h5>
-                    <div class="grid grid-cols-3 gap-2">
-                        <div class="time-option border border-gray-300 rounded-lg p-2 text-center cursor-pointer hover:border-blue-500">
-                            ۱۰:۰۰
-                        </div>
-                        <div class="time-option border border-gray-300 rounded-lg p-2 text-center cursor-pointer hover:border-blue-500">
-                            ۱۱:۰۰
-                        </div>
-                        <div class="time-option border border-gray-300 rounded-lg p-2 text-center cursor-pointer hover:border-blue-500">
-                            ۱۲:۰۰
-                        </div>
-                        <div class="time-option border border-gray-300 rounded-lg p-2 text-center cursor-pointer hover:border-blue-500">
-                            ۱۴:۰۰
-                        </div>
-                        <div class="time-option border border-gray-300 rounded-lg p-2 text-center cursor-pointer hover:border-blue-500">
-                            ۱۵:۰۰
-                        </div>
-                        <div class="time-option border border-gray-300 rounded-lg p-2 text-center cursor-pointer hover:border-blue-500">
-                            ۱۶:۰۰
-                        </div>
-                        <div class="time-option border border-gray-300 rounded-lg p-2 text-center cursor-pointer hover:border-blue-500">
-                            ۱۷:۰۰
-                        </div>
-                        <div class="time-option border border-gray-300 rounded-lg p-2 text-center cursor-pointer hover:border-blue-500">
-                            ۱۸:۰۰
-                        </div>
-                        <div class="time-option border border-gray-300 rounded-lg p-2 text-center cursor-pointer hover:border-blue-500">
-                            ۱۹:۰۰
-                        </div>
-                    </div>
-                </div>
-                <div class="flex space-x-3 space-x-reverse">
-                    <button id="back-to-step-1" class="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-3 px-6 rounded-full transition-all">
-                        بازگشت
-                    </button>
-                    <button id="next-to-step-3" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-full transition-all disabled:bg-gray-400" disabled>
-                        ادامه
-                    </button>
-                </div>
-            </div>
-            <!-- Step 3: Enter Phone Number -->
-            <div id="step-3" class="step hidden">
-                <h4 class="font-bold mb-4">اطلاعات تماس</h4>
-                <div class="mb-6">
-                    <label class="block text-sm font-medium mb-2" for="phone-number">شماره موبایل</label>
-                    <div class="relative">
-                        <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-                            <span class="text-gray-500">+۹۸</span>
-                        </div>
-                        <input type="tel" id="phone-number" class="w-full border border-gray-300 rounded-lg py-3 pr-12 pl-3 text-right focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="۰۹۱۲۳۴۵۶۷۸۹" maxlength="11" pattern="0[0-9]{10}" inputmode="numeric">
-                    </div>
-                    <p id="phone-error" class="text-red-500 text-xs mt-1 hidden">شماره وارد شده معتبر نیست</p>
-                </div>
-                <div class="mb-6">
-                    <label class="block text-sm font-medium mb-2" for="customer-name">نام و نام خانوادگی</label>
-                    <input type="text" id="customer-name" class="w-full border border-gray-300 rounded-lg py-3 px-3 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="نام و نام خانوادگی">
-                </div>
-                <div class="flex space-x-3 space-x-reverse">
-                    <button id="back-to-step-2" class="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-3 px-6 rounded-full transition-all">
-                        بازگشت
-                    </button>
-                    <button id="next-to-step-4" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-full transition-all disabled:bg-gray-400" disabled>
-                        ادامه
-                    </button>
-                </div>
-            </div>
-            <!-- Step 4: Confirmation -->
-            <div id="step-4" class="step hidden">
-                <h4 class="font-bold mb-4">تایید نوبت</h4>
-                <div class="bg-gray-50 rounded-lg p-4 mb-6">
-                    <div class="grid grid-cols-2 gap-x-4 gap-y-2 text-right items-baseline">
-                        <div class="text-gray-600 py-1">خدمت:</div>
-                        <div id="confirm-service" class="font-bold text-right py-1"></div>
-                        <div class="text-gray-600 py-1">تاریخ:</div>
-                        <div id="confirm-date" class="font-bold text-right py-1"></div>
-                        <div class="text-gray-600 py-1">ساعت:</div>
-                        <div id="confirm-time" class="font-bold text-right py-1"></div>
-                        <div class="text-gray-600 py-1">نام:</div>
-                        <div id="confirm-name" class="font-bold text-right py-1"></div>
-                        <div class="text-gray-600 py-1">شماره تماس:</div>
-                        <div id="confirm-phone" class="font-bold text-right py-1"></div>
-                        <div id="confirm-price-label" class="text-gray-600 mt-4 pt-4 border-t border-gray-200 py-1">مبلغ کل:</div>
-                        <div id="confirm-price" class="font-bold text-lg text-right mt-4 pt-4 border-t border-gray-200 py-1"></div>
-                    </div>
-                </div>
-                <div class="flex space-x-3 space-x-reverse">
-                    <button id="back-to-step-3" class="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-3 px-6 rounded-full transition-all">
-                        بازگشت
-                    </button>
-                    <button id="confirm-booking" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-full transition-all disabled:bg-gray-400" disabled>
-                        تایید نهایی
-                    </button>
-                </div>
-            </div>
-            <!-- Success Message -->
-            <div id="booking-success" class="hidden text-center py-8">
-                <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <i class="fas fa-check text-green-600 text-2xl"></i>
-                </div>
-                <h4 class="text-xl font-bold mb-2">نوبت شما با موفقیت ثبت شد</h4>
-                <p class="text-gray-600 mb-6">کد پیگیری شما: <span class="font-bold">#۱۲۳۴۵</span></p>
-                <p class="text-gray-600 mb-6">جزئیات نوبت به شماره موبایل شما ارسال خواهد شد.</p>
-                <button id="close-booking" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-full transition-all">
-                    بستن
-                </button>
-            </div>
+<section id="booking-wizard" class="hidden py-8 px-4" dir="rtl">
+  <style>
+    /* هایلایت انتخاب‌ها + OTP */
+    .bw-selected{ border-color:#3b82f6 !important; background:#eff6ff; }
+    .bw-otp{ width:44px;height:54px;text-align:center;font-size:20px;border:1px solid #d1d5db;border-radius:12px;outline:0; }
+    .bw-otp:focus{ border-color:#3b82f6; box-shadow:0 0 0 3px rgba(59,130,246,.25); }
+    /* بهبود لمس روی موبایل */
+    @media (hover:none){ .bw-tap{ padding-top:.65rem; padding-bottom:.65rem; } }
+  </style>
+
+  <div class="bg-white rounded-xl shadow-md p-6">
+    <h3 class="text-xl font-bold mb-6">نوبت‌گیری</h3>
+
+    <!-- مراحل و نوار پیشرفت: 5 مرحله -->
+    <div class="mb-6">
+      <div class="flex justify-between items-center mb-2">
+        <span class="text-sm text-gray-600">مرحله <span id="current-step">۱</span> از ۵</span>
+        <div class="flex space-x-1 space-x-reverse">
+          <div class="step-dot w-3 h-3 rounded-full bg-blue-600" data-step="1"></div>
+          <div class="step-dot w-3 h-3 rounded-full bg-gray-300" data-step="2"></div>
+          <div class="step-dot w-3 h-3 rounded-full bg-gray-300" data-step="3"></div>
+          <div class="step-dot w-3 h-3 rounded-full bg-gray-300" data-step="4"></div>
+          <div class="step-dot w-3 h-3 rounded-full bg-gray-300" data-step="5"></div>
         </div>
-    </section>
+      </div>
+      <div class="w-full bg-gray-200 rounded-full h-2">
+        <div id="progress-bar" class="bg-blue-600 h-2 rounded-full" style="width:20%"></div>
+      </div>
+    </div>
+
+    <!-- Step 1: انتخاب خدمت -->
+    <div id="step-1" class="step">
+      <h4 class="font-bold mb-4">انتخاب خدمت</h4>
+      <div class="space-y-3">
+        <div class="service-option border border-gray-300 rounded-lg p-3 hover:border-blue-500 cursor-pointer bw-tap" data-service="اصلاح سر و صورت" data-price="150000">
+          <div class="flex justify-between items-center">
+            <div>
+              <h5 class="font-bold">اصلاح سر و صورت</h5>
+              <p class="text-sm text-gray-600">اصلاح حرفه‌ای سر و صورت</p>
+            </div>
+            <span class="font-bold">۱۵۰٬۰۰۰ تومان</span>
+          </div>
+        </div>
+        <div class="service-option border border-gray-300 rounded-lg p-3 hover:border-blue-500 cursor-pointer bw-tap" data-service="ماساژ صورت" data-price="120000">
+          <div class="flex justify_between items-center">
+            <div>
+              <h5 class="font-bold">ماساژ صورت</h5>
+              <p class="text-sm text-gray-600">ماساژ صورت با روغن‌های گیاهی</p>
+            </div>
+            <span class="font-bold">۱۲۰٬۰۰۰ تومان</span>
+          </div>
+        </div>
+        <div class="service-option border border-gray-300 rounded-lg p-3 hover:border-blue-500 cursor-pointer bw-tap" data-service="رنگ مو" data-price="200000">
+          <div class="flex justify-between items-center">
+            <div>
+              <h5 class="font-bold">رنگ مو</h5>
+              <p class="text-sm text-gray-600">رنگ موی حرفه‌ای</p>
+            </div>
+            <span class="font-bold">۲۰۰٬۰۰۰ تومان</span>
+          </div>
+        </div>
+        <div class="service-option border border-gray-300 rounded-lg p-3 hover:border-blue-500 cursor-pointer bw-tap" data-service="شستشوی حرفه‌ای" data-price="80000">
+          <div class="flex justify-between items-center">
+            <div>
+              <h5 class="font-bold">شستشوی حرفه‌ای</h5>
+              <p class="text-sm text-gray-600">شستشوی حرفه‌ای مو</p>
+            </div>
+            <span class="font-bold">۸۰٬۰۰۰ تومان</span>
+          </div>
+        </div>
+      </div>
+      <button id="next-to-step-2" class="mt-6 bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-full w-full transition-all disabled:bg-gray-400" disabled>
+        ادامه
+      </button>
+    </div>
+
+    <!-- Step 2: انتخاب روز و ساعت -->
+    <div id="step-2" class="step hidden">
+      <h4 class="font-bold mb-4">انتخاب روز و ساعت</h4>
+
+      <div class="mb-6">
+        <h5 class="font-medium mb-2">روز</h5>
+        <div class="grid grid-cols-3 gap-2">
+          <div class="date-option border border-gray-300 rounded-lg p-2 text-center cursor-pointer hover:border-blue-500 bw-tap">
+            <div class="text-sm">شنبه</div><div class="font-bold">۱۴ تیر</div>
+          </div>
+          <div class="date-option border border-gray-300 rounded-lg p-2 text-center cursor-pointer hover:border-blue-500 bw-tap">
+            <div class="text-sm">یکشنبه</div><div class="font-bold">۱۵ تیر</div>
+          </div>
+          <div class="date-option border border-gray-300 rounded-lg p-2 text-center cursor-pointer hover:border-blue-500 bw-tap">
+            <div class="text-sm">دوشنبه</div><div class="font-bold">۱۶ تیر</div>
+          </div>
+          <div class="date-option border border-gray-300 rounded-lg p-2 text-center cursor-pointer hover:border-blue-500 bw-tap">
+            <div class="text-sm">سه‌شنبه</div><div class="font-bold">۱۷ تیر</div>
+          </div>
+          <div class="date-option border border-gray-300 rounded-lg p-2 text-center cursor-pointer hover:border-blue-500 bw-tap">
+            <div class="text-sm">چهارشنبه</div><div class="font-bold">۱۸ تیر</div>
+          </div>
+          <div class="date-option border border-gray-300 rounded-lg p-2 text-center cursor-pointer hover:border-blue-500 bw-tap">
+            <div class="text-sm">پنج‌شنبه</div><div class="font-bold">۱۹ تیر</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="mb-6">
+        <h5 class="font-medium mb-2">ساعت</h5>
+        <div class="grid grid-cols-3 gap-2">
+          <div class="time-option border border-gray-300 rounded-lg p-2 text-center cursor-pointer hover:border-blue-500 bw-tap">۱۰:۰۰</div>
+          <div class="time-option border border-gray-300 rounded-lg p-2 text-center cursor-pointer hover:border-blue-500 bw-tap">۱۱:۰۰</div>
+          <div class="time-option border border-gray-300 rounded-lg p-2 text-center cursor-pointer hover:border-blue-500 bw-tap">۱۲:۰۰</div>
+          <div class="time-option border border-gray-300 rounded-lg p-2 text-center cursor-pointer hover:border-blue-500 bw-tap">۱۴:۰۰</div>
+          <div class="time-option border border-gray-300 rounded-lg p-2 text-center cursor-pointer hover:border-blue-500 bw-tap">۱۵:۰۰</div>
+          <div class="time-option border border-gray-300 rounded-lg p-2 text-center cursor-pointer hover:border-blue-500 bw-tap">۱۶:۰۰</div>
+          <div class="time-option border border-gray-300 rounded-lg p-2 text-center cursor-pointer hover:border-blue-500 bw-tap">۱۷:۰۰</div>
+          <div class="time-option border border-gray-300 rounded-lg p-2 text-center cursor-pointer hover:border-blue-500 bw-tap">۱۸:۰۰</div>
+          <div class="time-option border border-gray-300 rounded-lg p-2 text-center cursor-pointer hover:border-blue-500 bw-tap">۱۹:۰۰</div>
+        </div>
+      </div>
+
+      <div class="flex space-x-3 space-x-reverse">
+        <button id="back-to-step-1" class="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-3 px-6 rounded-full transition-all">بازگشت</button>
+        <button id="next-to-step-3" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-full transition-all disabled:bg-gray-400" disabled>ادامه</button>
+      </div>
+    </div>
+
+    <!-- Step 3: اطلاعات تماس -->
+    <div id="step-3" class="step hidden">
+      <h4 class="font-bold mb-4">اطلاعات تماس</h4>
+
+      <!-- موبایل: LTR، شروع از چپ با صفر، ارقام فارسی مجاز -->
+      <div class="mb-6">
+        <label class="block text-sm font-medium mb-2" for="phone-number">شماره موبایل</label>
+        <div class="relative" dir="ltr">
+          <!-- پیش‌شماره کشور در چپ -->
+          <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+            <span class="text-gray-500 text-sm select-none">+98</span>
+          </div>
+          <input
+            type="tel" id="phone-number" inputmode="numeric" autocomplete="tel"
+            class="w-full border border-gray-300 rounded-lg py-3 pl-14 pr-3 text-left focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent tracking-widest"
+            placeholder="۰۹۱۲۳۴۵۶۷۸۹" maxlength="11" pattern="^0\d{10}$">
+        </div>
+        <p class="text-xs text-gray-500 mt-1">فقط شماره ایران؛ با <span class="font-bold">۰</span> شروع شود.</p>
+        <p id="phone-error" class="text-red-500 text-xs mt-1 hidden">شماره وارد شده معتبر نیست</p>
+      </div>
+
+      <div class="mb-6">
+        <label class="block text-sm font-medium mb-2" for="customer-name">نام و نام خانوادگی</label>
+        <input type="text" id="customer-name" class="w-full border border-gray-300 rounded-lg py-3 px-3 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="نام و نام خانوادگی">
+      </div>
+
+      <div class="flex space-x-3 space-x-reverse">
+        <button id="back-to-step-2" class="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-3 px-6 rounded-full transition-all">بازگشت</button>
+        <button id="next-to-step-4" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-full transition-all disabled:bg-gray-400" disabled>ادامه</button>
+      </div>
+    </div>
+
+    <!-- Step 4: تایید شماره (OTP) -->
+    <div id="step-4" class="step hidden">
+      <h4 class="font-bold mb-3">تایید شماره موبایل</h4>
+      <p class="text-sm text-gray-600 mb-4">
+        یک کد ۶ رقمی به شماره
+        <span id="otp-phone" class="font-bold text-gray-800"></span>
+        ارسال شد.
+      </p>
+
+      <button id="edit-phone" class="mb-4 text-blue-600 font-bold text-sm hover:text-blue-700">ویرایش شماره</button>
+
+      <div class="flex items-center justify-center gap-2 mb-2" dir="ltr">
+        <input class="bw-otp" type="text" inputmode="numeric" maxlength="1">
+        <input class="bw-otp" type="text" inputmode="numeric" maxlength="1">
+        <input class="bw-otp" type="text" inputmode="numeric" maxlength="1">
+        <input class="bw-otp" type="text" inputmode="numeric" maxlength="1">
+        <input class="bw-otp" type="text" inputmode="numeric" maxlength="1">
+        <input class="bw-otp" type="text" inputmode="numeric" maxlength="1">
+      </div>
+      <p id="otp-error" class="text-xs text-red-500 text-center mb-2 hidden">کد تایید صحیح نیست</p>
+
+      <div class="flex items-center justify-between mb-6">
+        <div class="text-xs text-gray-500">ارسال مجدد در <span id="otp-timer" class="font-bold">۶۰</span> ثانیه</div>
+        <button id="resend-otp" class="text-xs font-bold text-blue-600 disabled:text-gray-400" disabled>ارسال مجدد کد</button>
+      </div>
+
+      <div class="flex space-x-3 space-x-reverse">
+        <button id="back-to-step-3-otp" class="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-3 px-6 rounded-full transition-all">بازگشت</button>
+        <button id="verify-otp" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-full transition-all disabled:bg-gray-400" disabled>تایید کد</button>
+      </div>
+    </div>
+
+    <!-- Step 5: تایید نهایی -->
+    <div id="step-5" class="step hidden">
+      <h4 class="font-bold mb-4">تایید نوبت</h4>
+      <div class="bg-gray-50 rounded-lg p-4 mb-6">
+        <div class="grid grid-cols-2 gap-x-4 gap-y-2 text-right items-baseline">
+          <div class="text-gray-600 py-1">خدمت:</div><div id="confirm-service" class="font-bold text-right py-1"></div>
+          <div class="text-gray-600 py-1">تاریخ:</div><div id="confirm-date" class="font-bold text-right py-1"></div>
+          <div class="text-gray-600 py-1">ساعت:</div><div id="confirm-time" class="font-bold text-right py-1"></div>
+          <div class="text-gray-600 py-1">نام:</div><div id="confirm-name" class="font-bold text-right py-1"></div>
+          <div class="text-gray-600 py-1">شماره تماس:</div><div id="confirm-phone" class="font-bold text-right py-1"></div>
+          <div class="text-gray-600 mt-4 pt-4 border-t border-gray-200 py-1">مبلغ کل:</div>
+          <div id="confirm-price" class="font-bold text-lg text-right mt-4 pt-4 border-t border-gray-200 py-1"></div>
+        </div>
+      </div>
+      <div class="flex space-x-3 space-x-reverse">
+        <button id="back-to-step-3" class="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-3 px-6 rounded-full transition-all">بازگشت</button>
+        <button id="confirm-booking" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-full transition-all disabled:bg-gray-400" disabled>تایید نهایی</button>
+      </div>
+    </div>
+
+    <!-- Success -->
+    <div id="booking-success" class="hidden text-center py-8">
+      <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+        <i class="fas fa-check text-green-600 text-2xl"></i>
+      </div>
+      <h4 class="text-xl font-bold mb-2">نوبت شما با موفقیت ثبت شد</h4>
+      <p class="text-gray-600 mb-6">کد پیگیری شما: <span class="font-bold">#۱۲۳۴۵</span></p>
+      <p class="text-gray-600 mb-6">جزئیات نوبت به شماره موبایل شما ارسال خواهد شد.</p>
+      <button id="close-booking" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-full transition-all">بستن</button>
+    </div>
+  </div>
+
+  <script>
+    (() => {
+      'use strict';
+
+      // ---- helpers
+      const $ = s => document.querySelector(s);
+      const $$ = s => Array.from(document.querySelectorAll(s));
+      // نگاشت کامل ارقام فارسی و عربی‌هندی به انگلیسی/برعکس
+      const toEn = s => (s||'')
+        .replace(/[۰-۹]/g, d => '0123456789'['۰۱۲۳۴۵۶۷۸۹'.indexOf(d)])
+        .replace(/[٠-٩]/g, d => '0123456789'['٠١٢٣٤٥٦٧٨٩'.indexOf(d)]);
+      const toFa = s => (s||'').replace(/\d/g, d => '۰۱۲۳۴۵۶۷۸۹'[parseInt(d,10)]);
+      const scrollInto = el => { if(!el) return; const top = el.getBoundingClientRect().top + scrollY - 80; window.scrollTo({top,behavior:'smooth'}); };
+      const genId = () => 'c_' + Math.random().toString(36).slice(2,10) + Date.now().toString(36).slice(-4);
+
+      // کد مادر برای محیط توسعه (قبول «۰۰۰۰۰۰»)
+      const MASTER_OTP = '000000';
+
+      // ---- state
+      const st = { step:1, customerId:null, service:null, price:0, date:null, time:null, name:'', phone:'', otp:'', otpTimer:0, otpInt:null, otpTo:'' };
+
+      // ---- els
+      const wizard = $('#booking-wizard');
+      const steps = {1:$('#step-1'),2:$('#step-2'),3:$('#step-3'),4:$('#step-4'),5:$('#step-5')};
+      const dots = $$('.step-dot'); const curLbl = $('#current-step'); const pbar = $('#progress-bar');
+
+      // step1
+      const svcOpts = $$('.service-option'); const next1 = $('#next-to-step-2');
+
+      // step2
+      const dateOpts = $$('.date-option'); const timeOpts = $$('.time-option');
+      const back2 = $('#back-to-step-1'); const next2 = $('#next-to-step-3');
+
+      // step3
+      const nameInp = $('#customer-name'); const phoneInp = $('#phone-number');
+      const phoneErr = $('#phone-error'); const back3 = $('#back-to-step-2'); const next3 = $('#next-to-step-4');
+
+      // step4 (otp)
+      const otpPhone = $('#otp-phone'); const otpInputs = () => $$('.bw-otp');
+      const otpErr = $('#otp-error'); const otpTimerLbl = $('#otp-timer'); const resendBtn = $('#resend-otp');
+      const editPhone = $('#edit-phone'); const back4 = $('#back-to-step-3-otp'); const verifyBtn = $('#verify-otp');
+
+      // step5
+      const back5 = $('#back-to-step-3'); const confirmBtn = $('#confirm-booking');
+      const cSvc = $('#confirm-service'), cDate = $('#confirm-date'), cTime = $('#confirm-time'), cName = $('#confirm-name'), cPhone = $('#confirm-phone'), cPrice = $('#confirm-price');
+
+      // success
+      const successBox = $('#booking-success'); const closeSuccess = $('#close-booking');
+
+      // ---- nav
+      function showStep(n){
+        st.step = n;
+        Object.values(steps).forEach(s => s.classList.add('hidden'));
+        steps[n].classList.remove('hidden');
+        curLbl.textContent = n.toString();
+        pbar.style.width = (n*20) + '%';
+        dots.forEach(d => { const k = +d.dataset.step; d.classList.toggle('bg-blue-600', k<=n); d.classList.toggle('bg-gray-300', k>n); });
+        scrollInto(wizard);
+      }
+
+      // ---- validators
+      const validPhone = raw => {
+        const v = toEn(raw).trim();
+        return /^0\d{10}$/.test(v) && v.startsWith('09');
+      };
+      function chk1(){ next1.disabled = !(st.service && st.price); }
+      function chk2(){ next2.disabled = !(st.date && st.time); }
+      function chk3(){
+        const ok = nameInp.value.trim().length >= 2 && validPhone(phoneInp.value);
+        next3.disabled = !ok;
+        phoneErr.classList.toggle('hidden', validPhone(phoneInp.value));
+      }
+      function chkOTP(){
+        const code = toEn(otpInputs().map(i=>i.value).join('')).replace(/\D/g,'');
+        verifyBtn.disabled = (code.length!==6);
+        if (!verifyBtn.disabled) otpErr.classList.add('hidden');
+      }
+
+      // ---- step1
+      svcOpts.forEach(o=>{
+        o.addEventListener('click', ()=>{
+          svcOpts.forEach(x=>x.classList.remove('bw-selected'));
+          o.classList.add('bw-selected');
+          st.service = o.dataset.service; st.price = parseInt(o.dataset.price||'0',10)||0;
+          chk1();
+        });
+      });
+      next1.addEventListener('click', ()=>showStep(2));
+
+      // ---- step2
+      function pick(list, el){ list.forEach(x=>x.classList.remove('bw-selected')); el.classList.add('bw-selected'); }
+      dateOpts.forEach(el=>el.addEventListener('click', ()=>{ pick(dateOpts, el); st.date = el.innerText.trim(); chk2(); }));
+      timeOpts.forEach(el=>el.addEventListener('click', ()=>{ pick(timeOpts, el); st.time = el.innerText.trim(); chk2(); }));
+      back2.addEventListener('click', ()=>showStep(1));
+      next2.addEventListener('click', ()=>showStep(3));
+
+      // ---- step3
+      function onStep3(){
+        st.name = nameInp.value.trim();
+        st.phone = toEn(phoneInp.value);
+        chk3();
+      }
+      nameInp.addEventListener('input', onStep3);
+      phoneInp.addEventListener('input', (e)=>{
+        // فقط رقم؛ ارقام فارسی/عربی هم مجاز
+        const clean = toEn(e.target.value).replace(/\D/g,'').slice(0,11);
+        const keep  = clean.replace(/\d/g, d => '۰۱۲۳۴۵۶۷۸۹'[+d]); // نمایش با ارقام فارسی
+        e.target.value = keep;
+        onStep3();
+      });
+      back3.addEventListener('click', ()=>showStep(2));
+      next3.addEventListener('click', ()=>{
+        if (next3.disabled) return;
+        st.phone = toEn(phoneInp.value); st.name = nameInp.value.trim();
+
+        // ارسال کد (دمو)
+        st.otp = String(Math.floor(100000 + Math.random()*900000)); // در تولید واقعی از سرور بگیر
+        st.otpTo = st.phone;
+
+        // ماسک شماره برای نمایش
+        const mask = st.phone.replace(/^(\d{4})\d+(\d{2})$/, '$1******$2');
+        otpPhone.textContent = mask;
+
+        startOtpTimer();
+        clearOtp();
+        otpErr.classList.add('hidden');
+        chkOTP();
+        showStep(4);
+      });
+
+      // ---- step4 (otp)
+      function clearOtp(){ otpInputs().forEach((i,idx)=>{ i.value=''; if(idx===0) i.focus(); }); }
+      function startOtpTimer(){
+        stopOtpTimer(); st.otpTimer = 60; resendBtn.disabled = true; updateOtpTimer();
+        st.otpInt = setInterval(()=>{ st.otpTimer--; updateOtpTimer(); if(st.otpTimer<=0){ stopOtpTimer(); resendBtn.disabled=false; } }, 1000);
+      }
+      function stopOtpTimer(){ if(st.otpInt){ clearInterval(st.otpInt); st.otpInt=null; } }
+      function updateOtpTimer(){ otpTimerLbl.textContent = st.otpTimer.toString(); }
+
+      document.addEventListener('input', (e)=>{
+        const t = e.target; if(!(t instanceof HTMLInputElement)) return;
+        if(!t.classList.contains('bw-otp')) return;
+        t.value = toEn(t.value).replace(/\D/g,'').slice(0,1);
+        const arr = otpInputs(); const idx = arr.indexOf(t);
+        if(t.value && idx < arr.length-1){ arr[idx+1].focus(); }
+        chkOTP();
+      });
+      document.addEventListener('keydown', (e)=>{
+        const t = e.target; if(!(t instanceof HTMLInputElement)) return;
+        if(!t.classList.contains('bw-otp')) return;
+        if(e.key==='Backspace' && !t.value){
+          const arr = otpInputs(); const idx = arr.indexOf(t);
+          if(idx>0) arr[idx-1].focus();
+        }
+      });
+
+      // ارسال مجدد OTP (دمو)
+      const resendOtp = ()=>{
+        st.otp = String(Math.floor(100000 + Math.random()*900000));
+        startOtpTimer();
+      };
+      resendBtn.addEventListener('click', ()=>{ if(!resendBtn.disabled) resendOtp(); });
+
+      // ذخیره مشتری با customerId ثابت
+      function persistCustomer(){
+        const existing = localStorage.getItem('customerId');
+        const cid = st.customerId || existing || genId();
+        st.customerId = cid;
+        localStorage.setItem('customerId', cid);
+        localStorage.setItem('customerName', st.name);
+        localStorage.setItem('customerPhone', st.phone);
+        // اینجا می‌تونی به سرور هم sync کنی
+        // fetch('/api/customers/upsert', {method:'POST', body:JSON.stringify({id:cid,name:st.name,phone:st.phone})})
+      }
+
+      // تایید OTP
+      verifyBtn.addEventListener('click', ()=>{
+        const code = toEn(otpInputs().map(i=>i.value.trim()).join('')).replace(/\D/g,'');
+        if (code.length !== 6) { otpErr.classList.remove('hidden'); return; }
+        if (code !== st.otp && code !== MASTER_OTP) { otpErr.classList.remove('hidden'); return; }
+        stopOtpTimer();
+        persistCustomer();
+        fillConfirm();
+        showStep(5);
+        confirmBtn.disabled = false; // فقط بعد از تایید OTP
+      });
+
+      editPhone.addEventListener('click', ()=>showStep(3));
+      back4.addEventListener('click',  ()=>showStep(3));
+
+      // ---- step5 (confirm)
+      function fillConfirm(){
+        cSvc.textContent = st.service || '';
+        cDate.textContent= st.date   || '';
+        cTime.textContent= st.time   || '';
+        cName.textContent= st.name   || '';
+        cPhone.textContent= st.phone || '';
+        cPrice.textContent= (st.price? st.price.toLocaleString('fa-IR'):'۰') + ' تومان';
+      }
+
+      back5.addEventListener('click', ()=>showStep(3));
+      confirmBtn.addEventListener('click', ()=>{
+        // ارسال نهایی رزرو به همراه customerId ثابت
+        const payload = {
+          customerId: st.customerId,
+          name: st.name,
+          phone: st.phone,
+          service: st.service,
+          date: st.date,
+          time: st.time,
+          price: st.price
+        };
+        // fetch('/api/bookings', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(payload)});
+        // دمو: فقط UI موفقیت
+        Object.values(steps).forEach(s=>s.classList.add('hidden'));
+        successBox.classList.remove('hidden');
+        // console.log('BOOKING PAYLOAD', payload);
+        scrollInto(successBox);
+      });
+      closeSuccess.addEventListener('click', ()=>{
+        successBox.classList.add('hidden');
+        showStep(1);
+      });
+
+      // ---- init: پر کردن خودکار از localStorage (بدون تغییر customerId)
+      const saved = {
+        cid: localStorage.getItem('customerId'),
+        name: localStorage.getItem('customerName'),
+        phone: localStorage.getItem('customerPhone')
+      };
+      if (saved.cid) st.customerId = saved.cid;
+      if (saved.name) nameInp.value = saved.name;
+      if (saved.phone) phoneInp.value = toFa(saved.phone);
+      // ولیدیشن اولیه
+      (function initButtons(){
+        next1.disabled = true; next2.disabled = true; next3.disabled = true; confirmBtn.disabled = true;
+      })();
+      onStep3(); // در صورت پر بودن فیلدها، دکمه ادامه فعال می‌شود
+      showStep(1);
+    })();
+  </script>
+</section>
+
+
+
     <!-- Customer Reviews -->
 
 
@@ -3290,326 +3553,248 @@ if (rateNowChip) rateNowChip.addEventListener('click', () => writeReviewBtn.clic
             }
         });
         // Booking Wizard Logic
-      document.addEventListener('DOMContentLoaded', function () {
-  // --- عناصر اصلی
-  const heroCta = document.getElementById('hero-cta');
-  const bookingWizard = document.getElementById('booking-wizard');
-
-  // دکمه‌ها/لیست‌ها
-  const serviceSelectButtons = document.querySelectorAll('.service-select');
-  const serviceOptions = document.querySelectorAll('.service-option');
-
-  const dateOptions = document.querySelectorAll('.date-option');
-  const timeOptions = document.querySelectorAll('.time-option');
-
-  const nextToStep2 = document.getElementById('next-to-step-2');
-  const nextToStep3 = document.getElementById('next-to-step-3');
-  const nextToStep4 = document.getElementById('next-to-step-4');
-
-  const backToStep1 = document.getElementById('back-to-step-1');
-  const backToStep2 = document.getElementById('back-to-step-2');
-  const backToStep3 = document.getElementById('back-to-step-3');
-
-  const phoneNumber = document.getElementById('phone-number');
-  const customerName = document.getElementById('customer-name');
-  const phoneError = document.getElementById('phone-error');
-
-  const bookingSuccess = document.getElementById('booking-success');
-  const confirmBooking = document.getElementById('confirm-booking');
-  const closeBooking = document.getElementById('close-booking');
-  if (confirmBooking) confirmBooking.disabled = true;
-
-  // وضعیت انتخاب‌ها
-  let selectedService = '';
-  let selectedPrice = '';
-  let selectedDate = '';
-  let selectedTime = '';
-
-  // کمک‌تابع‌ها
-  function openWizardAndScroll() {
-    if (!bookingWizard) return;
-    bookingWizard.classList.remove('hidden');
-    window.scrollTo({ top: bookingWizard.offsetTop - 80, behavior: 'smooth' });
-  }
-  function setProgress(step) {
-    const progress = document.getElementById('progress-bar');
-    const currentStep = document.getElementById('current-step');
-    const ind2 = document.getElementById('step-2-indicator');
-    const ind3 = document.getElementById('step-3-indicator');
-    const ind4 = document.getElementById('step-4-indicator');
-
-    if (currentStep) currentStep.textContent = toPersianDigits(String(step));
-    if (progress) {
-      const width = step === 1 ? '25%' : step === 2 ? '50%' : step === 3 ? '75%' : '100%';
-      progress.style.width = width;
-    }
-    if (ind2) { ind2.classList.toggle('bg-blue-600', step >= 2); ind2.classList.toggle('bg-gray-300', step < 2); }
-    if (ind3) { ind3.classList.toggle('bg-blue-600', step >= 3); ind3.classList.toggle('bg-gray-300', step < 3); }
-    if (ind4) { ind4.classList.toggle('bg-blue-600', step >= 4); ind4.classList.toggle('bg-gray-300', step < 4); }
-  }
-  function showStep(showId, hideIds) {
-    const showEl = document.getElementById(showId);
-    if (showEl) showEl.classList.remove('hidden');
-    hideIds.forEach(id => {
-      const el = document.getElementById(id);
-      if (el) el.classList.add('hidden');
-    });
-  }
-
-  // باز کردن ویزارد از هدر
-  if (heroCta) {
-    heroCta.addEventListener('click', openWizardAndScroll);
-  }
-
-  // انتخاب سرویس از روی کارت‌ها + باز کردن ویزارد
-  if (serviceSelectButtons.length) {
-    serviceSelectButtons.forEach(button => {
-      button.addEventListener('click', function () {
-        const service = this.getAttribute('data-service') || '';
-        const price = this.getAttribute('data-price') || '';
-        openWizardAndScroll();
-
-        // هایلایت گزینه‌ی متناظر داخل ویزارد
-        setTimeout(() => {
-          serviceOptions.forEach(option => {
-            const match = option.getAttribute('data-service') === service;
-            option.classList.toggle('border-blue-500', match);
-            option.classList.toggle('bg-blue-50', match);
-          });
-          // ست کردن وضعیت و فعال‌کردن دکمه مرحله بعد
-          selectedService = service;
-          selectedPrice = price;
-          if (nextToStep2) nextToStep2.disabled = !selectedService;
-        }, 300);
-      });
-    });
-  }
-
-  // مرحله ۱: انتخاب سرویس
-  if (serviceOptions.length) {
-    serviceOptions.forEach(option => {
-      const priceSpan = option.querySelector('span.font-bold:last-child');
-      const priceVal = parseInt(option.getAttribute('data-price') || '0', 10) || 0;
-      if (priceSpan) priceSpan.textContent = priceVal > 0 ? priceVal.toLocaleString('fa-IR') + ' تومان' : 'رایگان';
-      option.addEventListener('click', function () {
-        serviceOptions.forEach(opt => opt.classList.remove('border-blue-500', 'bg-blue-50'));
-        this.classList.add('border-blue-500', 'bg-blue-50');
-
-        selectedService = this.getAttribute('data-service') || '';
-        selectedPrice = this.getAttribute('data-price') || '';
-        if (nextToStep2) nextToStep2.disabled = !selectedService;
-      });
-    });
-  }
-  if (nextToStep2) {
-    nextToStep2.addEventListener('click', function () {
-      showStep('step-2', ['step-1', 'step-3', 'step-4']);
-      setProgress(2);
-    });
-  }
-
-  // مرحله ۲: تاریخ و ساعت
-  if (dateOptions.length) {
-    dateOptions.forEach(option => {
-      option.addEventListener('click', function () {
-        dateOptions.forEach(opt => opt.classList.remove('border-blue-500', 'bg-blue-50'));
-        this.classList.add('border-blue-500', 'bg-blue-50');
-
-        // اصلاح سلکتورها (قبلاً .div:nth-child(...) بود)
-        const day =
-          (this.querySelector('[data-day]') && this.querySelector('[data-day]').textContent.trim()) ||
-          (this.querySelector('div:nth-child(1)') && this.querySelector('div:nth-child(1)').textContent.trim()) ||
-          '';
-        const date =
-          (this.querySelector('[data-date]') && this.querySelector('[data-date]').textContent.trim()) ||
-          (this.querySelector('div:nth-child(2)') && this.querySelector('div:nth-child(2)').textContent.trim()) ||
-          '';
-
-        selectedDate = (date && day) ? (date + ' ' + day) : (this.getAttribute('data-full') || this.textContent.trim());
-
-        if (nextToStep3) nextToStep3.disabled = !(selectedDate && selectedTime);
-      });
-    });
-  }
-  if (timeOptions.length) {
-    timeOptions.forEach(option => {
-      option.addEventListener('click', function () {
-        timeOptions.forEach(opt => opt.classList.remove('border-blue-500', 'bg-blue-50'));
-        this.classList.add('border-blue-500', 'bg-blue-50');
-
-        selectedTime = this.textContent.trim();
-        if (nextToStep3) nextToStep3.disabled = !(selectedDate && selectedTime);
-      });
-    });
-  }
-
-  if (backToStep1) {
-    backToStep1.addEventListener('click', function () {
-      showStep('step-1', ['step-2', 'step-3', 'step-4']);
-      setProgress(1);
-    });
-  }
-  if (nextToStep3) {
-    nextToStep3.addEventListener('click', function () {
-      showStep('step-3', ['step-1', 'step-2', 'step-4']);
-      setProgress(3);
-    });
-  }
-
-  // مرحله ۳: اطلاعات تماس
-  function toEnglishDigits(str) {
-    const persian = '۰۱۲۳۴۵۶۷۸۹';
-    const arabic = '٠١٢٣٤٥٦٧٨٩';
-    return str.replace(/[۰-۹٠-٩]/g, d => {
-      const p = persian.indexOf(d);
-      if (p > -1) return String(p);
-      return String(arabic.indexOf(d));
-    });
-  }
-  function toPersianDigits(str) {
-    return str.replace(/\d/g, d => '۰۱۲۳۴۵۶۷۸۹'[d]);
-  }
-  function validateStep3() {
-    let raw = phoneNumber && phoneNumber.value ? phoneNumber.value : '';
-    raw = toEnglishDigits(raw).replace(/[^0-9]/g, '');
-    if (raw.length && raw[0] !== '0') raw = '0' + raw;
-    raw = raw.slice(0, 11);
-    if (phoneNumber) phoneNumber.value = toPersianDigits(raw);
-    const valid = /^0\d{10}$/.test(raw);
-    const nameOk = customerName && customerName.value.trim() !== '';
-    if (nextToStep4) nextToStep4.disabled = !(valid && nameOk);
-    if (phoneError) phoneError.classList.toggle('hidden', !(raw && !valid));
-    return raw;
-  }
-  if (phoneNumber) {
-    phoneNumber.addEventListener('input', validateStep3);
-    phoneNumber.addEventListener('keydown', e => {
-      if (e.ctrlKey || e.metaKey || ['Backspace','Delete','ArrowLeft','ArrowRight','Tab'].includes(e.key)) return;
-      const key = toEnglishDigits(e.key);
-      if (!/^[0-9]$/.test(key)) e.preventDefault();
-    });
-  }
-  if (customerName) customerName.addEventListener('input', validateStep3);
-
-  if (backToStep2) {
-    backToStep2.addEventListener('click', function () {
-      showStep('step-2', ['step-1', 'step-3', 'step-4']);
-      setProgress(2);
-    });
-  }
-
-  if (nextToStep4) {
-    nextToStep4.addEventListener('click', function () {
-      const elService = document.getElementById('confirm-service');
-      const elDate = document.getElementById('confirm-date');
-      const elTime = document.getElementById('confirm-time');
-      const elName = document.getElementById('confirm-name');
-      const elPhone = document.getElementById('confirm-phone');
-      const elPrice = document.getElementById('confirm-price');
-      const elPriceLabel = document.getElementById('confirm-price-label');
-
-      if (elService) elService.textContent = toPersianDigits(selectedService);
-      if (elDate) elDate.textContent = toPersianDigits(selectedDate);
-      if (elTime) elTime.textContent = toPersianDigits(selectedTime);
-      if (elName) elName.textContent = customerName ? customerName.value : '';
-      const rawPhone = validateStep3();
-      if (elPhone) elPhone.textContent = toPersianDigits(rawPhone);
-      const priceNum = parseInt(selectedPrice || '0', 10) || 0;
-      if (priceNum > 0) {
-        if (elPriceLabel) elPriceLabel.textContent = 'مبلغ کل:';
-        if (elPrice) elPrice.textContent = priceNum.toLocaleString('fa-IR') + ' تومان';
-      } else {
-        if (elPriceLabel) elPriceLabel.textContent = 'هزینه رزرو یا نوبت :';
-        if (elPrice) elPrice.textContent = 'رایگان';
-      }
-
-      showStep('step-4', ['step-1', 'step-2', 'step-3']);
-      setProgress(4);
-      if (confirmBooking) confirmBooking.disabled = false;
-    });
-  }
-
-  // مرحله ۴: تأیید نهایی
-  if (backToStep3) {
-    backToStep3.addEventListener('click', function () {
-      showStep('step-3', ['step-1', 'step-2', 'step-4']);
-      setProgress(3);
-      if (confirmBooking) confirmBooking.disabled = true;
-    });
-  }
-
-  if (confirmBooking) {
-    confirmBooking.addEventListener('click', function () {
-      const step4 = document.getElementById('step-4');
-      if (step4) step4.classList.add('hidden');
-      if (bookingSuccess) bookingSuccess.classList.remove('hidden');
-
-      // ذخیره ساده در localStorage
-      const bookings = JSON.parse(localStorage.getItem('vitreenet-bookings') || '[]');
-      const rawPhone = validateStep3();
-      bookings.push({
-        service: selectedService,
-        price: selectedPrice,
-        date: selectedDate,
-        time: selectedTime,
-        name: customerName ? customerName.value : '',
-        phone: rawPhone,
-        timestamp: new Date().toISOString()
-      });
-      localStorage.setItem('vitreenet-bookings', JSON.stringify(bookings));
-    });
-  }
-
-  if (closeBooking) {
-    closeBooking.addEventListener('click', function () {
-      if (bookingWizard) bookingWizard.classList.add('hidden');
-      resetBookingWizard();
-    });
-  }
-
-  function resetBookingWizard() {
-    const s1 = document.getElementById('step-1');
-    const s2 = document.getElementById('step-2');
-    const s3 = document.getElementById('step-3');
-    const s4 = document.getElementById('step-4');
-
-    if (s1) s1.classList.remove('hidden');
-    if (s2) s2.classList.add('hidden');
-    if (s3) s3.classList.add('hidden');
-    if (s4) s4.classList.add('hidden');
-    if (bookingSuccess) bookingSuccess.classList.add('hidden');
-
-    const currentStep = document.getElementById('current-step');
-    if (currentStep) currentStep.textContent = '۱';
-
-    const ind2 = document.getElementById('step-2-indicator');
-    const ind3 = document.getElementById('step-3-indicator');
-    const ind4 = document.getElementById('step-4-indicator');
-    if (ind2) { ind2.classList.remove('bg-blue-600'); ind2.classList.add('bg-gray-300'); }
-    if (ind3) { ind3.classList.remove('bg-blue-600'); ind3.classList.add('bg-gray-300'); }
-    if (ind4) { ind4.classList.remove('bg-blue-600'); ind4.classList.add('bg-gray-300'); }
-
-    const progress = document.getElementById('progress-bar');
-    if (progress) progress.style.width = '25%';
-
-    serviceOptions.forEach(opt => opt.classList.remove('border-blue-500', 'bg-blue-50'));
-    dateOptions.forEach(opt => opt.classList.remove('border-blue-500', 'bg-blue-50'));
-    timeOptions.forEach(opt => opt.classList.remove('border-blue-500', 'bg-blue-50'));
-
-    if (phoneNumber) phoneNumber.value = '';
-    if (customerName) customerName.value = '';
-
-    if (nextToStep2) nextToStep2.disabled = true;
-    if (nextToStep3) nextToStep3.disabled = true;
-    if (nextToStep4) nextToStep4.disabled = true;
-    if (confirmBooking) confirmBooking.disabled = true;
-
-    selectedService = '';
-    selectedPrice = '';
-    selectedDate = '';
-    selectedTime = '';
-  }
-});
+        document.addEventListener('DOMContentLoaded', function() {
+            // Open booking wizard
+            const heroCta = document.getElementById('hero-cta');
+            const bookingWizard = document.getElementById('booking-wizard');
+            heroCta.addEventListener('click', function() {
+                bookingWizard.classList.remove('hidden');
+                window.scrollTo({
+                    top: bookingWizard.offsetTop - 80,
+                    behavior: 'smooth'
+                });
+            });
+            // Service selection from cards
+            const serviceSelectButtons = document.querySelectorAll('.service-select');
+            serviceSelectButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    const service = this.getAttribute('data-service');
+                    const price = this.getAttribute('data-price');
+                    // Open booking wizard
+                    bookingWizard.classList.remove('hidden');
+                    window.scrollTo({
+                        top: bookingWizard.offsetTop - 80,
+                        behavior: 'smooth'
+                    });
+                    // Pre-select the service
+                    setTimeout(() => {
+                        const serviceOptions = document.querySelectorAll('.service-option');
+                        serviceOptions.forEach(option => {
+                            if (option.getAttribute('data-service') === service) {
+                                option.classList.add('border-blue-500', 'bg-blue-50');
+                                document.getElementById('next-to-step-1').disabled = false;
+                            }
+                        });
+                    }, 300);
+                });
+            });
+            // Step 1: Service Selection
+            const serviceOptions = document.querySelectorAll('.service-option');
+            const nextToStep2 = document.getElementById('next-to-step-2');
+            let selectedService = '';
+            let selectedPrice = '';
+            serviceOptions.forEach(option => {
+                option.addEventListener('click', function() {
+                    // Remove selection from other options
+                    serviceOptions.forEach(opt => {
+                        opt.classList.remove('border-blue-500', 'bg-blue-50');
+                    });
+                    // Add selection to clicked option
+                    this.classList.add('border-blue-500', 'bg-blue-50');
+                    // Store selected service
+                    selectedService = this.getAttribute('data-service');
+                    selectedPrice = this.getAttribute('data-price');
+                    // Enable next button
+                    nextToStep2.disabled = false;
+                });
+            });
+            nextToStep2.addEventListener('click', function() {
+                // Move to step 2
+                document.getElementById('step-1').classList.add('hidden');
+                document.getElementById('step-2').classList.remove('hidden');
+                document.getElementById('current-step').textContent = '2';
+                document.getElementById('step-2-indicator').classList.remove('bg-gray-300');
+                document.getElementById('step-2-indicator').classList.add('bg-blue-600');
+                document.getElementById('progress-bar').style.width = '50%';
+            });
+            // Step 2: Date and Time Selection
+            const dateOptions = document.querySelectorAll('.date-option');
+            const timeOptions = document.querySelectorAll('.time-option');
+            const nextToStep3 = document.getElementById('next-to-step-3');
+            const backToStep1 = document.getElementById('back-to-step-1');
+            let selectedDate = '';
+            let selectedTime = '';
+            dateOptions.forEach(option => {
+                option.addEventListener('click', function() {
+                    // Remove selection from other options
+                    dateOptions.forEach(opt => {
+                        opt.classList.remove('border-blue-500', 'bg-blue-50');
+                    });
+                    // Add selection to clicked option
+                    this.classList.add('border-blue-500', 'bg-blue-50');
+                    // Store selected date
+                    selectedDate = this.querySelector('.div:nth-child(2)').textContent + ' ' + 
+                                   this.querySelector('.div:nth-child(1)').textContent;
+                    // Check if both date and time are selected
+                    if (selectedTime) {
+                        nextToStep3.disabled = false;
+                    }
+                });
+            });
+            timeOptions.forEach(option => {
+                option.addEventListener('click', function() {
+                    // Remove selection from other options
+                    timeOptions.forEach(opt => {
+                        opt.classList.remove('border-blue-500', 'bg-blue-50');
+                    });
+                    // Add selection to clicked option
+                    this.classList.add('border-blue-500', 'bg-blue-50');
+                    // Store selected time
+                    selectedTime = this.textContent;
+                    // Check if both date and time are selected
+                    if (selectedDate) {
+                        nextToStep3.disabled = false;
+                    }
+                });
+            });
+            backToStep1.addEventListener('click', function() {
+                // Move back to step 1
+                document.getElementById('step-2').classList.add('hidden');
+                document.getElementById('step-1').classList.remove('hidden');
+                document.getElementById('current-step').textContent = '1';
+                document.getElementById('step-2-indicator').classList.remove('bg-blue-600');
+                document.getElementById('step-2-indicator').classList.add('bg-gray-300');
+                document.getElementById('progress-bar').style.width = '25%';
+            });
+            nextToStep3.addEventListener('click', function() {
+                // Move to step 3
+                document.getElementById('step-2').classList.add('hidden');
+                document.getElementById('step-3').classList.remove('hidden');
+                document.getElementById('current-step').textContent = '3';
+                document.getElementById('step-3-indicator').classList.remove('bg-gray-300');
+                document.getElementById('step-3-indicator').classList.add('bg-blue-600');
+                document.getElementById('progress-bar').style.width = '75%';
+            });
+            // Step 3: Contact Information
+            const phoneNumber = document.getElementById('phone-number');
+            const customerName = document.getElementById('customer-name');
+            const nextToStep4 = document.getElementById('next-to-step-4');
+            const backToStep2 = document.getElementById('back-to-step-2');
+            phoneNumber.addEventListener('input', function() {
+                validateStep3();
+            });
+            customerName.addEventListener('input', function() {
+                validateStep3();
+            });
+            function validateStep3() {
+                if (phoneNumber.value.length >= 10 && customerName.value.trim() !== '') {
+                    nextToStep4.disabled = false;
+                } else {
+                    nextToStep4.disabled = true;
+                }
+            }
+            backToStep2.addEventListener('click', function() {
+                // Move back to step 2
+                document.getElementById('step-3').classList.add('hidden');
+                document.getElementById('step-2').classList.remove('hidden');
+                document.getElementById('current-step').textContent = '2';
+                document.getElementById('step-3-indicator').classList.remove('bg-blue-600');
+                document.getElementById('step-3-indicator').classList.add('bg-gray-300');
+                document.getElementById('progress-bar').style.width = '50%';
+            });
+            nextToStep4.addEventListener('click', function() {
+                // Populate confirmation details
+                document.getElementById('confirm-service').textContent = selectedService;
+                document.getElementById('confirm-date').textContent = selectedDate;
+                document.getElementById('confirm-time').textContent = selectedTime;
+                document.getElementById('confirm-name').textContent = customerName.value;
+                document.getElementById('confirm-phone').textContent = '+۹۸' + phoneNumber.value;
+                document.getElementById('confirm-price').textContent = parseInt(selectedPrice).toLocaleString('fa-IR') + ' تومان';
+                // Move to step 4
+                document.getElementById('step-3').classList.add('hidden');
+                document.getElementById('step-4').classList.remove('hidden');
+                document.getElementById('current-step').textContent = '4';
+                document.getElementById('step-4-indicator').classList.remove('bg-gray-300');
+                document.getElementById('step-4-indicator').classList.add('bg-blue-600');
+                document.getElementById('progress-bar').style.width = '100%';
+            });
+            // Step 4: Confirmation
+            const backToStep3 = document.getElementById('back-to-step-3');
+            const confirmBooking = document.getElementById('confirm-booking');
+            const bookingSuccess = document.getElementById('booking-success');
+            const closeBooking = document.getElementById('close-booking');
+            backToStep3.addEventListener('click', function() {
+                // Move back to step 3
+                document.getElementById('step-4').classList.add('hidden');
+                document.getElementById('step-3').classList.remove('hidden');
+                document.getElementById('current-step').textContent = '3';
+                document.getElementById('step-4-indicator').classList.remove('bg-blue-600');
+                document.getElementById('step-4-indicator').classList.add('bg-gray-300');
+                document.getElementById('progress-bar').style.width = '75%';
+            });
+            confirmBooking.addEventListener('click', function() {
+                // Show success message
+                document.getElementById('step-4').classList.add('hidden');
+                bookingSuccess.classList.remove('hidden');
+                // Save to localStorage for gamification
+                let bookings = JSON.parse(localStorage.getItem('vitreenet-bookings') || '[]');
+                bookings.push({
+                    service: selectedService,
+                    price: selectedPrice,
+                    date: selectedDate,
+                    time: selectedTime,
+                    name: customerName.value,
+                    phone: phoneNumber.value,
+                    timestamp: new Date().toISOString()
+                });
+                localStorage.setItem('vitreenet-bookings', JSON.stringify(bookings));
+            });
+            closeBooking.addEventListener('click', function() {
+                // Close booking wizard
+                bookingWizard.classList.add('hidden');
+                // Reset booking wizard
+                resetBookingWizard();
+            });
+            function resetBookingWizard() {
+                // Reset all steps
+                document.getElementById('step-1').classList.remove('hidden');
+                document.getElementById('step-2').classList.add('hidden');
+                document.getElementById('step-3').classList.add('hidden');
+                document.getElementById('step-4').classList.add('hidden');
+                bookingSuccess.classList.add('hidden');
+                // Reset indicators
+                document.getElementById('current-step').textContent = '1';
+                document.getElementById('step-2-indicator').classList.remove('bg-blue-600');
+                document.getElementById('step-2-indicator').classList.add('bg-gray-300');
+                document.getElementById('step-3-indicator').classList.remove('bg-blue-600');
+                document.getElementById('step-3-indicator').classList.add('bg-gray-300');
+                document.getElementById('step-4-indicator').classList.remove('bg-blue-600');
+                document.getElementById('step-4-indicator').classList.add('bg-gray-300');
+                document.getElementById('progress-bar').style.width = '25%';
+                // Reset selections
+                serviceOptions.forEach(opt => {
+                    opt.classList.remove('border-blue-500', 'bg-blue-50');
+                });
+                dateOptions.forEach(opt => {
+                    opt.classList.remove('border-blue-500', 'bg-blue-50');
+                });
+                timeOptions.forEach(opt => {
+                    opt.classList.remove('border-blue-500', 'bg-blue-50');
+                });
+                // Reset form fields
+                phoneNumber.value = '';
+                customerName.value = '';
+                // Reset buttons
+                nextToStep2.disabled = true;
+                nextToStep3.disabled = true;
+                nextToStep4.disabled = true;
+                // Reset variables
+                selectedService = '';
+                selectedPrice = '';
+                selectedDate = '';
+                selectedTime = '';
+            }
+        });
     </script>
 
 
