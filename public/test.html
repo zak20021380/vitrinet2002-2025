@@ -3299,248 +3299,285 @@ if (rateNowChip) rateNowChip.addEventListener('click', () => writeReviewBtn.clic
             }
         });
         // Booking Wizard Logic
-        document.addEventListener('DOMContentLoaded', function() {
-            // Open booking wizard
-            const heroCta = document.getElementById('hero-cta');
-            const bookingWizard = document.getElementById('booking-wizard');
-            heroCta.addEventListener('click', function() {
-                bookingWizard.classList.remove('hidden');
-                window.scrollTo({
-                    top: bookingWizard.offsetTop - 80,
-                    behavior: 'smooth'
-                });
-            });
-            // Service selection from cards
-            const serviceSelectButtons = document.querySelectorAll('.service-select');
-            serviceSelectButtons.forEach(button => {
-                button.addEventListener('click', function() {
-                    const service = this.getAttribute('data-service');
-                    const price = this.getAttribute('data-price');
-                    // Open booking wizard
-                    bookingWizard.classList.remove('hidden');
-                    window.scrollTo({
-                        top: bookingWizard.offsetTop - 80,
-                        behavior: 'smooth'
-                    });
-                    // Pre-select the service
-                    setTimeout(() => {
-                        const serviceOptions = document.querySelectorAll('.service-option');
-                        serviceOptions.forEach(option => {
-                            if (option.getAttribute('data-service') === service) {
-                                option.classList.add('border-blue-500', 'bg-blue-50');
-                                document.getElementById('next-to-step-1').disabled = false;
-                            }
-                        });
-                    }, 300);
-                });
-            });
-            // Step 1: Service Selection
-            const serviceOptions = document.querySelectorAll('.service-option');
-            const nextToStep2 = document.getElementById('next-to-step-2');
-            let selectedService = '';
-            let selectedPrice = '';
-            serviceOptions.forEach(option => {
-                option.addEventListener('click', function() {
-                    // Remove selection from other options
-                    serviceOptions.forEach(opt => {
-                        opt.classList.remove('border-blue-500', 'bg-blue-50');
-                    });
-                    // Add selection to clicked option
-                    this.classList.add('border-blue-500', 'bg-blue-50');
-                    // Store selected service
-                    selectedService = this.getAttribute('data-service');
-                    selectedPrice = this.getAttribute('data-price');
-                    // Enable next button
-                    nextToStep2.disabled = false;
-                });
-            });
-            nextToStep2.addEventListener('click', function() {
-                // Move to step 2
-                document.getElementById('step-1').classList.add('hidden');
-                document.getElementById('step-2').classList.remove('hidden');
-                document.getElementById('current-step').textContent = '2';
-                document.getElementById('step-2-indicator').classList.remove('bg-gray-300');
-                document.getElementById('step-2-indicator').classList.add('bg-blue-600');
-                document.getElementById('progress-bar').style.width = '50%';
-            });
-            // Step 2: Date and Time Selection
-            const dateOptions = document.querySelectorAll('.date-option');
-            const timeOptions = document.querySelectorAll('.time-option');
-            const nextToStep3 = document.getElementById('next-to-step-3');
-            const backToStep1 = document.getElementById('back-to-step-1');
-            let selectedDate = '';
-            let selectedTime = '';
-            dateOptions.forEach(option => {
-                option.addEventListener('click', function() {
-                    // Remove selection from other options
-                    dateOptions.forEach(opt => {
-                        opt.classList.remove('border-blue-500', 'bg-blue-50');
-                    });
-                    // Add selection to clicked option
-                    this.classList.add('border-blue-500', 'bg-blue-50');
-                    // Store selected date
-                    selectedDate = this.querySelector('.div:nth-child(2)').textContent + ' ' + 
-                                   this.querySelector('.div:nth-child(1)').textContent;
-                    // Check if both date and time are selected
-                    if (selectedTime) {
-                        nextToStep3.disabled = false;
-                    }
-                });
-            });
-            timeOptions.forEach(option => {
-                option.addEventListener('click', function() {
-                    // Remove selection from other options
-                    timeOptions.forEach(opt => {
-                        opt.classList.remove('border-blue-500', 'bg-blue-50');
-                    });
-                    // Add selection to clicked option
-                    this.classList.add('border-blue-500', 'bg-blue-50');
-                    // Store selected time
-                    selectedTime = this.textContent;
-                    // Check if both date and time are selected
-                    if (selectedDate) {
-                        nextToStep3.disabled = false;
-                    }
-                });
-            });
-            backToStep1.addEventListener('click', function() {
-                // Move back to step 1
-                document.getElementById('step-2').classList.add('hidden');
-                document.getElementById('step-1').classList.remove('hidden');
-                document.getElementById('current-step').textContent = '1';
-                document.getElementById('step-2-indicator').classList.remove('bg-blue-600');
-                document.getElementById('step-2-indicator').classList.add('bg-gray-300');
-                document.getElementById('progress-bar').style.width = '25%';
-            });
-            nextToStep3.addEventListener('click', function() {
-                // Move to step 3
-                document.getElementById('step-2').classList.add('hidden');
-                document.getElementById('step-3').classList.remove('hidden');
-                document.getElementById('current-step').textContent = '3';
-                document.getElementById('step-3-indicator').classList.remove('bg-gray-300');
-                document.getElementById('step-3-indicator').classList.add('bg-blue-600');
-                document.getElementById('progress-bar').style.width = '75%';
-            });
-            // Step 3: Contact Information
-            const phoneNumber = document.getElementById('phone-number');
-            const customerName = document.getElementById('customer-name');
-            const nextToStep4 = document.getElementById('next-to-step-4');
-            const backToStep2 = document.getElementById('back-to-step-2');
-            phoneNumber.addEventListener('input', function() {
-                validateStep3();
-            });
-            customerName.addEventListener('input', function() {
-                validateStep3();
-            });
-            function validateStep3() {
-                if (phoneNumber.value.length >= 10 && customerName.value.trim() !== '') {
-                    nextToStep4.disabled = false;
-                } else {
-                    nextToStep4.disabled = true;
-                }
-            }
-            backToStep2.addEventListener('click', function() {
-                // Move back to step 2
-                document.getElementById('step-3').classList.add('hidden');
-                document.getElementById('step-2').classList.remove('hidden');
-                document.getElementById('current-step').textContent = '2';
-                document.getElementById('step-3-indicator').classList.remove('bg-blue-600');
-                document.getElementById('step-3-indicator').classList.add('bg-gray-300');
-                document.getElementById('progress-bar').style.width = '50%';
-            });
-            nextToStep4.addEventListener('click', function() {
-                // Populate confirmation details
-                document.getElementById('confirm-service').textContent = selectedService;
-                document.getElementById('confirm-date').textContent = selectedDate;
-                document.getElementById('confirm-time').textContent = selectedTime;
-                document.getElementById('confirm-name').textContent = customerName.value;
-                document.getElementById('confirm-phone').textContent = '+۹۸' + phoneNumber.value;
-                document.getElementById('confirm-price').textContent = parseInt(selectedPrice).toLocaleString('fa-IR') + ' تومان';
-                // Move to step 4
-                document.getElementById('step-3').classList.add('hidden');
-                document.getElementById('step-4').classList.remove('hidden');
-                document.getElementById('current-step').textContent = '4';
-                document.getElementById('step-4-indicator').classList.remove('bg-gray-300');
-                document.getElementById('step-4-indicator').classList.add('bg-blue-600');
-                document.getElementById('progress-bar').style.width = '100%';
-            });
-            // Step 4: Confirmation
-            const backToStep3 = document.getElementById('back-to-step-3');
-            const confirmBooking = document.getElementById('confirm-booking');
-            const bookingSuccess = document.getElementById('booking-success');
-            const closeBooking = document.getElementById('close-booking');
-            backToStep3.addEventListener('click', function() {
-                // Move back to step 3
-                document.getElementById('step-4').classList.add('hidden');
-                document.getElementById('step-3').classList.remove('hidden');
-                document.getElementById('current-step').textContent = '3';
-                document.getElementById('step-4-indicator').classList.remove('bg-blue-600');
-                document.getElementById('step-4-indicator').classList.add('bg-gray-300');
-                document.getElementById('progress-bar').style.width = '75%';
-            });
-            confirmBooking.addEventListener('click', function() {
-                // Show success message
-                document.getElementById('step-4').classList.add('hidden');
-                bookingSuccess.classList.remove('hidden');
-                // Save to localStorage for gamification
-                let bookings = JSON.parse(localStorage.getItem('vitreenet-bookings') || '[]');
-                bookings.push({
-                    service: selectedService,
-                    price: selectedPrice,
-                    date: selectedDate,
-                    time: selectedTime,
-                    name: customerName.value,
-                    phone: phoneNumber.value,
-                    timestamp: new Date().toISOString()
-                });
-                localStorage.setItem('vitreenet-bookings', JSON.stringify(bookings));
-            });
-            closeBooking.addEventListener('click', function() {
-                // Close booking wizard
-                bookingWizard.classList.add('hidden');
-                // Reset booking wizard
-                resetBookingWizard();
-            });
-            function resetBookingWizard() {
-                // Reset all steps
-                document.getElementById('step-1').classList.remove('hidden');
-                document.getElementById('step-2').classList.add('hidden');
-                document.getElementById('step-3').classList.add('hidden');
-                document.getElementById('step-4').classList.add('hidden');
-                bookingSuccess.classList.add('hidden');
-                // Reset indicators
-                document.getElementById('current-step').textContent = '1';
-                document.getElementById('step-2-indicator').classList.remove('bg-blue-600');
-                document.getElementById('step-2-indicator').classList.add('bg-gray-300');
-                document.getElementById('step-3-indicator').classList.remove('bg-blue-600');
-                document.getElementById('step-3-indicator').classList.add('bg-gray-300');
-                document.getElementById('step-4-indicator').classList.remove('bg-blue-600');
-                document.getElementById('step-4-indicator').classList.add('bg-gray-300');
-                document.getElementById('progress-bar').style.width = '25%';
-                // Reset selections
-                serviceOptions.forEach(opt => {
-                    opt.classList.remove('border-blue-500', 'bg-blue-50');
-                });
-                dateOptions.forEach(opt => {
-                    opt.classList.remove('border-blue-500', 'bg-blue-50');
-                });
-                timeOptions.forEach(opt => {
-                    opt.classList.remove('border-blue-500', 'bg-blue-50');
-                });
-                // Reset form fields
-                phoneNumber.value = '';
-                customerName.value = '';
-                // Reset buttons
-                nextToStep2.disabled = true;
-                nextToStep3.disabled = true;
-                nextToStep4.disabled = true;
-                // Reset variables
-                selectedService = '';
-                selectedPrice = '';
-                selectedDate = '';
-                selectedTime = '';
-            }
-        });
+      document.addEventListener('DOMContentLoaded', function () {
+  // --- عناصر اصلی
+  const heroCta = document.getElementById('hero-cta');
+  const bookingWizard = document.getElementById('booking-wizard');
+
+  // دکمه‌ها/لیست‌ها
+  const serviceSelectButtons = document.querySelectorAll('.service-select');
+  const serviceOptions = document.querySelectorAll('.service-option');
+
+  const dateOptions = document.querySelectorAll('.date-option');
+  const timeOptions = document.querySelectorAll('.time-option');
+
+  const nextToStep2 = document.getElementById('next-to-step-2');
+  const nextToStep3 = document.getElementById('next-to-step-3');
+  const nextToStep4 = document.getElementById('next-to-step-4');
+
+  const backToStep1 = document.getElementById('back-to-step-1');
+  const backToStep2 = document.getElementById('back-to-step-2');
+  const backToStep3 = document.getElementById('back-to-step-3');
+
+  const phoneNumber = document.getElementById('phone-number');
+  const customerName = document.getElementById('customer-name');
+
+  const bookingSuccess = document.getElementById('booking-success');
+  const confirmBooking = document.getElementById('confirm-booking');
+  const closeBooking = document.getElementById('close-booking');
+
+  // وضعیت انتخاب‌ها
+  let selectedService = '';
+  let selectedPrice = '';
+  let selectedDate = '';
+  let selectedTime = '';
+
+  // کمک‌تابع‌ها
+  function openWizardAndScroll() {
+    if (!bookingWizard) return;
+    bookingWizard.classList.remove('hidden');
+    window.scrollTo({ top: bookingWizard.offsetTop - 80, behavior: 'smooth' });
+  }
+  function setProgress(step) {
+    const progress = document.getElementById('progress-bar');
+    const currentStep = document.getElementById('current-step');
+    const ind2 = document.getElementById('step-2-indicator');
+    const ind3 = document.getElementById('step-3-indicator');
+    const ind4 = document.getElementById('step-4-indicator');
+
+    if (currentStep) currentStep.textContent = String(step);
+    if (progress) {
+      const width = step === 1 ? '25%' : step === 2 ? '50%' : step === 3 ? '75%' : '100%';
+      progress.style.width = width;
+    }
+    if (ind2) { ind2.classList.toggle('bg-blue-600', step >= 2); ind2.classList.toggle('bg-gray-300', step < 2); }
+    if (ind3) { ind3.classList.toggle('bg-blue-600', step >= 3); ind3.classList.toggle('bg-gray-300', step < 3); }
+    if (ind4) { ind4.classList.toggle('bg-blue-600', step >= 4); ind4.classList.toggle('bg-gray-300', step < 4); }
+  }
+  function showStep(showId, hideIds) {
+    const showEl = document.getElementById(showId);
+    if (showEl) showEl.classList.remove('hidden');
+    hideIds.forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.classList.add('hidden');
+    });
+  }
+
+  // باز کردن ویزارد از هدر
+  if (heroCta) {
+    heroCta.addEventListener('click', openWizardAndScroll);
+  }
+
+  // انتخاب سرویس از روی کارت‌ها + باز کردن ویزارد
+  if (serviceSelectButtons.length) {
+    serviceSelectButtons.forEach(button => {
+      button.addEventListener('click', function () {
+        const service = this.getAttribute('data-service') || '';
+        const price = this.getAttribute('data-price') || '';
+        openWizardAndScroll();
+
+        // هایلایت گزینه‌ی متناظر داخل ویزارد
+        setTimeout(() => {
+          serviceOptions.forEach(option => {
+            const match = option.getAttribute('data-service') === service;
+            option.classList.toggle('border-blue-500', match);
+            option.classList.toggle('bg-blue-50', match);
+          });
+          // ست کردن وضعیت و فعال‌کردن دکمه مرحله بعد
+          selectedService = service;
+          selectedPrice = price;
+          if (nextToStep2) nextToStep2.disabled = !selectedService;
+        }, 300);
+      });
+    });
+  }
+
+  // مرحله ۱: انتخاب سرویس
+  if (serviceOptions.length) {
+    serviceOptions.forEach(option => {
+      option.addEventListener('click', function () {
+        serviceOptions.forEach(opt => opt.classList.remove('border-blue-500', 'bg-blue-50'));
+        this.classList.add('border-blue-500', 'bg-blue-50');
+
+        selectedService = this.getAttribute('data-service') || '';
+        selectedPrice = this.getAttribute('data-price') || '';
+        if (nextToStep2) nextToStep2.disabled = !selectedService;
+      });
+    });
+  }
+  if (nextToStep2) {
+    nextToStep2.addEventListener('click', function () {
+      showStep('step-2', ['step-1', 'step-3', 'step-4']);
+      setProgress(2);
+    });
+  }
+
+  // مرحله ۲: تاریخ و ساعت
+  if (dateOptions.length) {
+    dateOptions.forEach(option => {
+      option.addEventListener('click', function () {
+        dateOptions.forEach(opt => opt.classList.remove('border-blue-500', 'bg-blue-50'));
+        this.classList.add('border-blue-500', 'bg-blue-50');
+
+        // اصلاح سلکتورها (قبلاً .div:nth-child(...) بود)
+        const day =
+          (this.querySelector('[data-day]') && this.querySelector('[data-day]').textContent.trim()) ||
+          (this.querySelector('div:nth-child(1)') && this.querySelector('div:nth-child(1)').textContent.trim()) ||
+          '';
+        const date =
+          (this.querySelector('[data-date]') && this.querySelector('[data-date]').textContent.trim()) ||
+          (this.querySelector('div:nth-child(2)') && this.querySelector('div:nth-child(2)').textContent.trim()) ||
+          '';
+
+        selectedDate = (date && day) ? (date + ' ' + day) : (this.getAttribute('data-full') || this.textContent.trim());
+
+        if (selectedTime && nextToStep3) nextToStep3.disabled = false;
+      });
+    });
+  }
+  if (timeOptions.length) {
+    timeOptions.forEach(option => {
+      option.addEventListener('click', function () {
+        timeOptions.forEach(opt => opt.classList.remove('border-blue-500', 'bg-blue-50'));
+        this.classList.add('border-blue-500', 'bg-blue-50');
+
+        selectedTime = this.textContent.trim();
+        if (selectedDate && nextToStep3) nextToStep3.disabled = false;
+      });
+    });
+  }
+
+  if (backToStep1) {
+    backToStep1.addEventListener('click', function () {
+      showStep('step-1', ['step-2', 'step-3', 'step-4']);
+      setProgress(1);
+    });
+  }
+  if (nextToStep3) {
+    nextToStep3.addEventListener('click', function () {
+      showStep('step-3', ['step-1', 'step-2', 'step-4']);
+      setProgress(3);
+    });
+  }
+
+  // مرحله ۳: اطلاعات تماس
+  function validateStep3() {
+    const digits = (phoneNumber && phoneNumber.value ? phoneNumber.value.replace(/\D/g, '') : '');
+    const ok = digits.length >= 10 && customerName && customerName.value.trim() !== '';
+    if (nextToStep4) nextToStep4.disabled = !ok;
+  }
+  if (phoneNumber) phoneNumber.addEventListener('input', validateStep3);
+  if (customerName) customerName.addEventListener('input', validateStep3);
+
+  if (backToStep2) {
+    backToStep2.addEventListener('click', function () {
+      showStep('step-2', ['step-1', 'step-3', 'step-4']);
+      setProgress(2);
+    });
+  }
+
+  if (nextToStep4) {
+    nextToStep4.addEventListener('click', function () {
+      const elService = document.getElementById('confirm-service');
+      const elDate = document.getElementById('confirm-date');
+      const elTime = document.getElementById('confirm-time');
+      const elName = document.getElementById('confirm-name');
+      const elPhone = document.getElementById('confirm-phone');
+      const elPrice = document.getElementById('confirm-price');
+
+      if (elService) elService.textContent = selectedService;
+      if (elDate) elDate.textContent = selectedDate;
+      if (elTime) elTime.textContent = selectedTime;
+      if (elName) elName.textContent = customerName ? customerName.value : '';
+      if (elPhone) elPhone.textContent = '+۹۸' + (phoneNumber ? phoneNumber.value : '');
+      if (elPrice) {
+        const priceNum = parseInt(selectedPrice || '0', 10) || 0;
+        elPrice.textContent = priceNum.toLocaleString('fa-IR') + ' تومان';
+      }
+
+      showStep('step-4', ['step-1', 'step-2', 'step-3']);
+      setProgress(4);
+    });
+  }
+
+  // مرحله ۴: تأیید نهایی
+  if (backToStep3) {
+    backToStep3.addEventListener('click', function () {
+      showStep('step-3', ['step-1', 'step-2', 'step-4']);
+      setProgress(3);
+    });
+  }
+
+  if (confirmBooking) {
+    confirmBooking.addEventListener('click', function () {
+      const step4 = document.getElementById('step-4');
+      if (step4) step4.classList.add('hidden');
+      if (bookingSuccess) bookingSuccess.classList.remove('hidden');
+
+      // ذخیره ساده در localStorage
+      const bookings = JSON.parse(localStorage.getItem('vitreenet-bookings') || '[]');
+      bookings.push({
+        service: selectedService,
+        price: selectedPrice,
+        date: selectedDate,
+        time: selectedTime,
+        name: customerName ? customerName.value : '',
+        phone: phoneNumber ? phoneNumber.value : '',
+        timestamp: new Date().toISOString()
+      });
+      localStorage.setItem('vitreenet-bookings', JSON.stringify(bookings));
+    });
+  }
+
+  if (closeBooking) {
+    closeBooking.addEventListener('click', function () {
+      if (bookingWizard) bookingWizard.classList.add('hidden');
+      resetBookingWizard();
+    });
+  }
+
+  function resetBookingWizard() {
+    const s1 = document.getElementById('step-1');
+    const s2 = document.getElementById('step-2');
+    const s3 = document.getElementById('step-3');
+    const s4 = document.getElementById('step-4');
+
+    if (s1) s1.classList.remove('hidden');
+    if (s2) s2.classList.add('hidden');
+    if (s3) s3.classList.add('hidden');
+    if (s4) s4.classList.add('hidden');
+    if (bookingSuccess) bookingSuccess.classList.add('hidden');
+
+    const currentStep = document.getElementById('current-step');
+    if (currentStep) currentStep.textContent = '1';
+
+    const ind2 = document.getElementById('step-2-indicator');
+    const ind3 = document.getElementById('step-3-indicator');
+    const ind4 = document.getElementById('step-4-indicator');
+    if (ind2) { ind2.classList.remove('bg-blue-600'); ind2.classList.add('bg-gray-300'); }
+    if (ind3) { ind3.classList.remove('bg-blue-600'); ind3.classList.add('bg-gray-300'); }
+    if (ind4) { ind4.classList.remove('bg-blue-600'); ind4.classList.add('bg-gray-300'); }
+
+    const progress = document.getElementById('progress-bar');
+    if (progress) progress.style.width = '25%';
+
+    serviceOptions.forEach(opt => opt.classList.remove('border-blue-500', 'bg-blue-50'));
+    dateOptions.forEach(opt => opt.classList.remove('border-blue-500', 'bg-blue-50'));
+    timeOptions.forEach(opt => opt.classList.remove('border-blue-500', 'bg-blue-50'));
+
+    if (phoneNumber) phoneNumber.value = '';
+    if (customerName) customerName.value = '';
+
+    if (nextToStep2) nextToStep2.disabled = true;
+    if (nextToStep3) nextToStep3.disabled = true;
+    if (nextToStep4) nextToStep4.disabled = true;
+
+    selectedService = '';
+    selectedPrice = '';
+    selectedDate = '';
+    selectedTime = '';
+  }
+});
     </script>
 
 
