@@ -1618,7 +1618,7 @@ function showToastDark(message, {type='success', durationMs=2600} = {}) {
                         <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
                             <span class="text-gray-500">+۹۸</span>
                         </div>
-                        <input type="tel" id="phone-number" class="w-full border border-gray-300 rounded-lg py-3 pr-12 pl-3 text-right focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="0XXXXXXXXXX" maxlength="11" pattern="0[0-9]{10}" inputmode="numeric">
+                        <input type="tel" id="phone-number" class="w-full border border-gray-300 rounded-lg py-3 pr-12 pl-3 text-right focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="۰۹۱۲۳۴۵۶۷۸۹" maxlength="11" pattern="0[0-9]{10}" inputmode="numeric">
                     </div>
                 </div>
                 <div class="mb-6">
@@ -1638,29 +1638,19 @@ function showToastDark(message, {type='success', durationMs=2600} = {}) {
             <div id="step-4" class="step hidden">
                 <h4 class="font-bold mb-4">تایید نوبت</h4>
                 <div class="bg-gray-50 rounded-lg p-4 mb-6">
-                    <div class="flex justify-between mb-2">
-                        <span class="text-gray-600">خدمت:</span>
-                        <span id="confirm-service" class="font-bold"></span>
-                    </div>
-                    <div class="flex justify-between mb-2">
-                        <span class="text-gray-600">تاریخ:</span>
-                        <span id="confirm-date" class="font-bold"></span>
-                    </div>
-                    <div class="flex justify-between mb-2">
-                        <span class="text-gray-600">ساعت:</span>
-                        <span id="confirm-time" class="font-bold"></span>
-                    </div>
-                    <div class="flex justify-between mb-2">
-                        <span class="text-gray-600">نام:</span>
-                        <span id="confirm-name" class="font-bold"></span>
-                    </div>
-                    <div class="flex justify-between mb-2">
-                        <span class="text-gray-600">شماره تماس:</span>
-                        <span id="confirm-phone" class="font-bold"></span>
-                    </div>
-                    <div class="flex justify-between mt-4 pt-4 border-t border-gray-200">
-                        <span class="text-gray-600">مبلغ کل:</span>
-                        <span id="confirm-price" class="font-bold text-lg"></span>
+                    <div class="grid grid-cols-2 gap-y-2 text-right">
+                        <div class="text-gray-600">خدمت:</div>
+                        <div id="confirm-service" class="font-bold text-right"></div>
+                        <div class="text-gray-600">تاریخ:</div>
+                        <div id="confirm-date" class="font-bold text-right"></div>
+                        <div class="text-gray-600">ساعت:</div>
+                        <div id="confirm-time" class="font-bold text-right"></div>
+                        <div class="text-gray-600">نام:</div>
+                        <div id="confirm-name" class="font-bold text-right"></div>
+                        <div class="text-gray-600">شماره تماس:</div>
+                        <div id="confirm-phone" class="font-bold text-right"></div>
+                        <div class="text-gray-600 mt-4 pt-4 border-t border-gray-200">مبلغ کل:</div>
+                        <div id="confirm-price" class="font-bold text-lg text-right mt-4 pt-4 border-t border-gray-200"></div>
                     </div>
                 </div>
                 <div class="flex space-x-3 space-x-reverse">
@@ -3431,7 +3421,7 @@ if (rateNowChip) rateNowChip.addEventListener('click', () => writeReviewBtn.clic
 
         selectedDate = (date && day) ? (date + ' ' + day) : (this.getAttribute('data-full') || this.textContent.trim());
 
-        if (selectedTime && nextToStep3) nextToStep3.disabled = false;
+        if (nextToStep3) nextToStep3.disabled = !(selectedDate && selectedTime);
       });
     });
   }
@@ -3442,7 +3432,7 @@ if (rateNowChip) rateNowChip.addEventListener('click', () => writeReviewBtn.clic
         this.classList.add('border-blue-500', 'bg-blue-50');
 
         selectedTime = this.textContent.trim();
-        if (selectedDate && nextToStep3) nextToStep3.disabled = false;
+        if (nextToStep3) nextToStep3.disabled = !(selectedDate && selectedTime);
       });
     });
   }
@@ -3461,10 +3451,22 @@ if (rateNowChip) rateNowChip.addEventListener('click', () => writeReviewBtn.clic
   }
 
   // مرحله ۳: اطلاعات تماس
+  function toEnglishDigits(str) {
+    return str.replace(/[۰-۹]/g, d => '۰۱۲۳۴۵۶۷۸۹'.indexOf(d));
+  }
+  function toPersianDigits(str) {
+    return str.replace(/\d/g, d => '۰۱۲۳۴۵۶۷۸۹'[d]);
+  }
   function validateStep3() {
-    const digits = (phoneNumber && phoneNumber.value ? phoneNumber.value.replace(/\D/g, '') : '');
-    const ok = digits.length >= 10 && customerName && customerName.value.trim() !== '';
-    if (nextToStep4) nextToStep4.disabled = !ok;
+    let raw = phoneNumber && phoneNumber.value ? phoneNumber.value : '';
+    raw = toEnglishDigits(raw).replace(/[^0-9]/g, '');
+    if (raw.length && raw[0] !== '0') raw = '0' + raw;
+    raw = raw.slice(0, 11);
+    if (phoneNumber) phoneNumber.value = toPersianDigits(raw);
+    const valid = /^0\d{10}$/.test(raw);
+    const nameOk = customerName && customerName.value.trim() !== '';
+    if (nextToStep4) nextToStep4.disabled = !(valid && nameOk);
+    return raw;
   }
   if (phoneNumber) phoneNumber.addEventListener('input', validateStep3);
   if (customerName) customerName.addEventListener('input', validateStep3);
@@ -3489,10 +3491,11 @@ if (rateNowChip) rateNowChip.addEventListener('click', () => writeReviewBtn.clic
       if (elDate) elDate.textContent = selectedDate;
       if (elTime) elTime.textContent = selectedTime;
       if (elName) elName.textContent = customerName ? customerName.value : '';
-      if (elPhone) elPhone.textContent = '+۹۸' + (phoneNumber ? phoneNumber.value : '');
+      const rawPhone = validateStep3();
+      if (elPhone) elPhone.textContent = toPersianDigits(rawPhone);
       if (elPrice) {
         const priceNum = parseInt(selectedPrice || '0', 10) || 0;
-        elPrice.textContent = priceNum.toLocaleString('fa-IR') + ' تومان';
+        elPrice.textContent = priceNum > 0 ? priceNum.toLocaleString('fa-IR') + ' تومان' : 'رایگان';
       }
 
       showStep('step-4', ['step-1', 'step-2', 'step-3']);
