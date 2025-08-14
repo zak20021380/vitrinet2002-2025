@@ -1,0 +1,4758 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes, viewport-fit=cover">
+  <meta name="color-scheme" content="dark">
+  <meta name="theme-color" content="#1c1c1e">
+  <meta name="description" content="پنل مدیریت فروشنده - مدیریت نوبت‌ها، مشتریان و کسب‌وکار شما">
+  <meta name="format-detection" content="telephone=no">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="پنل فروشنده">
+  <title>پنل فروشنده - داشبورد مدیریت</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preload" href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@200..900&display=swap" as="style">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@200..900&display=swap">
+  <link rel="manifest" href="/manifest.json">
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+ <style>
+:root {
+  --c-primary: #0a84ff;
+  --c-primary-rgb: 10, 132, 255;
+  --c-primary-hover: #3b9bff;
+  --c-primary-active: #5caeff;
+  --c-text-primary: #f2f2f7;
+  --c-text-secondary: #8e8e93;
+  --c-bg-primary: #121212;
+  --c-bg-secondary: #1c1c1e;
+  --c-bg-tertiary: #2c2c2e;
+  --c-border: #38383a;
+  --c-shadow: rgba(0, 0, 0, 0.3);
+  --c-success: #30d158;
+  --c-warning: #ffd60a;
+  --c-danger: #ff453a;
+  --c-premium: #bf5af2;
+  --c-star-filled: #ffd60a;
+  --c-star-empty: #3a3a3c;
+  --c-backdrop: rgba(0, 0, 0, 0.7);
+  --font-family-base: 'Vazirmatn', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  --font-size-base: 16px;
+  --font-size-sm: 14px;
+  --font-size-lg: 20px;
+  --line-height-base: 1.6;
+  --font-weight-normal: 400;
+  --font-weight-medium: 500;
+  --font-weight-bold: 700;
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 1rem;
+  --space-4: 1.5rem;
+  --space-5: 2rem;
+  --border-radius-sm: 0.25rem;
+  --border-radius-md: 0.5rem;
+  --border-radius-lg: 1rem;
+  --border-width: 1px;
+  --z-skip-link: 1100;
+  --z-toast: 1050;
+  --z-modal: 1030;
+  --z-drawer: 1020;
+  --z-header: 1000;
+  --z-nav: 1000;
+  --z-backdrop: 1010;
+  --transition-fast: 0.2s ease;
+  --transition-base: 0.3s ease;
+  --transition-slow: 0.5s ease;
+  --header-height: 60px;
+  --nav-height-mobile: 64px;
+  --sidebar-width-collapsed: 80px;
+  --sidebar-width-expanded: 240px;
+  --container-max-width: 1200px;
+  --content-padding: var(--space-3);
+}
+*, *::before, *::after { box-sizing: border-box; }
+html {
+  -webkit-tap-highlight-color: transparent;
+  font-size: var(--font-size-base);
+}
+body {
+  margin: 0;
+  font-family: var(--font-family-base);
+  font-weight: var(--font-weight-normal);
+  line-height: var(--line-height-base);
+  color: var(--c-text-primary);
+  background-color: var(--c-bg-secondary);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  transition: background-color var(--transition-base), color var(--transition-base);
+  overflow-x: hidden;
+}
+body.no-scroll { overflow: hidden; }
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+.app-header {
+  position: sticky;
+  top: 0;
+  z-index: var(--z-header);
+  background-color: var(--c-bg-primary);
+  border-bottom: var(--border-width) solid var(--c-border);
+  height: var(--header-height);
+  transition: background-color var(--transition-base), border-color var(--transition-base);
+}
+.header-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 100%;
+  padding: 0 var(--content-padding);
+  max-width: var(--container-max-width);
+  margin: 0 auto;
+}
+.app-main {
+  padding-top: var(--space-3);
+  padding-bottom: calc(var(--nav-height-mobile) + var(--space-4) + env(safe-area-inset-bottom));
+  min-height: calc(100vh - var(--header-height));
+}
+.app-nav {
+  position: fixed;
+  bottom: 0;
+  right: 0;
+  left: 0;
+  height: calc(var(--nav-height-mobile) + env(safe-area-inset-bottom));
+  background-color: var(--c-bg-primary);
+  border-top: var(--border-width) solid var(--c-border);
+  display: flex;
+  justify-content: space-around;
+  align-items: flex-start;
+  z-index: var(--z-nav);
+  transition: background-color var(--transition-base), border-color var(--transition-base), width var(--transition-base), transform var(--transition-base);
+  padding-bottom: env(safe-area-inset-bottom);
+}
+.app-container {
+  padding: 0 var(--content-padding);
+  max-width: var(--container-max-width);
+  margin: 0 auto;
+}
+.view-section { display: none; }
+.view-section.active { display: block; animation: fadeIn 0.5s ease; }
+.content-spacer {
+  display: none;
+  height: calc(var(--nav-height-mobile) + env(safe-area-inset-bottom));
+}
+@media (min-width: 1024px) {
+  body {
+    padding-right: var(--sidebar-width-collapsed);
+    transition: padding-right var(--transition-base);
+  }
+  body.sidebar-expanded {
+    padding-right: var(--sidebar-width-expanded);
+  }
+  .app-header {
+    width: calc(100% - var(--sidebar-width-collapsed));
+    transition: width var(--transition-base);
+  }
+  body.sidebar-expanded .app-header {
+    width: calc(100% - var(--sidebar-width-expanded));
+  }
+  .app-main { padding-bottom: var(--space-4); }
+  .app-nav {
+    flex-direction: column;
+    justify-content: flex-start;
+    left: auto;
+    right: 0;
+    top: 0;
+    height: 100vh;
+    width: var(--sidebar-width-collapsed);
+    padding: var(--space-4) 0;
+    border-top: none;
+    border-left: var(--border-width) solid var(--c-border);
+    overflow: hidden;
+  }
+  .app-nav:hover, .app-nav.is-expanded { width: var(--sidebar-width-expanded); }
+  .app-container { padding: 0 var(--space-4); }
+}
+button, .btn {
+  font-family: var(--font-family-base);
+  border: none;
+  background: none;
+  cursor: pointer;
+  padding: 0;
+  text-align: center;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  font-weight: var(--font-weight-medium);
+  border-radius: var(--border-radius-md);
+  transition: background-color var(--transition-fast), color var(--transition-fast), box-shadow var(--transition-fast), transform var(--transition-fast);
+  -webkit-tap-highlight-color: transparent;
+  min-height: 44px; /* Ensuring finger-friendly size */
+}
+button:focus-visible, .btn:focus-visible {
+  outline: 2px solid var(--c-primary);
+  outline-offset: 2px;
+}
+button:disabled, .btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+.btn-primary {
+  background-color: var(--c-primary);
+  color: var(--c-text-on-primary);
+  padding: var(--space-2) var(--space-3);
+  font-size: var(--font-size-sm);
+  border-radius: 50px; /* Pill shape */
+  box-shadow: 0 2px 8px rgba(var(--c-primary-rgb), 0.2); /* Subtle glow */
+}
+.btn-primary:hover:not(:disabled) {
+    background-color: var(--c-primary-hover);
+    box-shadow: 0 4px 12px rgba(var(--c-primary-rgb), 0.3); /* Slightly stronger on hover */
+}
+.btn-primary:active:not(:disabled) {
+    background-color: var(--c-primary-active);
+    transform: scale(0.98);
+    box-shadow: 0 1px 4px rgba(var(--c-primary-rgb), 0.2);
+}
+.btn-secondary {
+  background-color: var(--c-bg-tertiary);
+  color: var(--c-text-primary);
+  padding: var(--space-2) var(--space-3);
+  font-size: var(--font-size-sm);
+}
+.btn-secondary:hover:not(:disabled) { background-color: var(--c-border); }
+.btn-icon, .icon-btn {
+  min-width: 44px;
+  min-height: 44px;
+  padding: var(--space-2);
+  border-radius: 50%;
+  color: var(--c-text-secondary);
+  background-color: transparent;
+}
+.btn-icon:hover, .icon-btn:hover { background-color: var(--c-bg-tertiary); color: var(--c-text-primary); }
+.btn-icon-sm { min-width: 32px; min-height: 32px; padding: var(--space-1); }
+.btn-icon-text { font-size: var(--font-size-sm); padding: var(--space-2) var(--space-3); }
+.btn-text-sm { font-size: var(--font-size-sm); color: var(--c-primary); }
+.btn-text-sm:hover { text-decoration: underline; }
+.skip-link {
+  position: absolute;
+  top: -100px;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: var(--c-primary);
+  color: var(--c-text-on-primary);
+  padding: var(--space-2) var(--space-3);
+  border-radius: 0 0 var(--border-radius-md) var(--border-radius-md);
+  z-index: var(--z-skip-link);
+  transition: top 0.3s ease-in-out;
+  font-weight: var(--font-weight-bold);
+}
+.skip-link:focus { top: 0; }
+.view-title {
+  font-size: 1.75rem;
+  font-weight: var(--font-weight-bold);
+  margin: 0 0 var(--space-1);
+}
+.section-title {
+  font-size: 1.25rem;
+  font-weight: var(--font-weight-bold);
+  margin: var(--space-5) 0 var(--space-3) 0;
+}
+.view-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  margin-bottom: var(--space-4);
+}
+.badge {
+  display: inline-block;
+  padding: var(--space-1) var(--space-2);
+  font-size: 0.75rem;
+  font-weight: var(--font-weight-bold);
+  border-radius: var(--border-radius-sm);
+  color: var(--c-text-primary);
+  background-color: var(--c-bg-tertiary);
+}
+.badge-success { background-color: var(--c-success); color: var(--c-text-on-primary); }
+.badge-warning { background-color: var(--c-warning); color: var(--c-text-primary); }
+.badge-premium { background-color: var(--c-premium); color: var(--c-text-on-primary); }
+.card {
+  background-color: var(--c-bg-primary);
+  border-radius: var(--border-radius-lg);
+  border: var(--border-width) solid var(--c-border);
+  padding: var(--space-3);
+  transition: all var(--transition-base);
+}
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes slideInUp {
+  from { transform: translateY(100%); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+.brand-logo {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin: 0;
+  color: var(--c-text-primary);
+}
+.logo-icon { color: var(--c-primary); }
+.brand-text {
+  font-size: 1.2rem;
+  font-weight: var(--font-weight-bold);
+  display: none;
+}
+.user-avatar { display: flex; }
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+@media (min-width: 768px) {
+  .brand-text { display: block; }
+}
+@media (min-width: 1024px) {
+  .brand-logo { margin-inline-end: auto; }
+}
+.nav-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-1);
+  flex: 1;
+  padding: var(--space-2) 0;
+  min-height: 56px;
+  color: var(--c-text-secondary);
+  background-color: transparent;
+  border-radius: var(--border-radius-md);
+  text-decoration: none;
+  font-size: 12px;
+  font-weight: var(--font-weight-medium);
+  transition: color var(--transition-fast), background-color var(--transition-fast);
+}
+.nav-item.active { color: var(--c-primary); }
+.nav-item:hover { background-color: var(--c-bg-secondary); }
+.nav-icon {
+  width: 24px;
+  height: 24px;
+  margin-bottom: 2px;
+}
+.nav-label { display: block; }
+@media (min-width: 1024px) {
+  .app-nav { gap: var(--space-2); }
+  .nav-item {
+    flex-direction: row;
+    justify-content: flex-start;
+    flex: 0 0 auto;
+    width: 100%;
+    padding: var(--space-2) var(--space-4);
+    border-radius: 0;
+    font-size: var(--font-size-sm);
+    height: 56px;
+  }
+  .nav-item:hover, .app-nav.is-expanded .nav-item { justify-content: flex-start; }
+  .nav-icon { margin-bottom: 0; }
+  .nav-label {
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity var(--transition-base), visibility var(--transition-base);
+    white-space: nowrap;
+  }
+  .app-nav:hover .nav-label, .app-nav.is-expanded .nav-label {
+    opacity: 1;
+    visibility: visible;
+  }
+}
+.welcome-message {
+  color: var(--c-text-secondary);
+  margin: 0;
+}
+.welcome-date { display: block; margin-top: var(--space-1); }
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: var(--space-3);
+}
+.stat-card {
+  background-color: var(--c-bg-primary);
+  border-radius: var(--border-radius-lg);
+  padding: var(--space-3);
+  border: var(--border-width) solid var(--c-border);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+.stat-header { display: flex; justify-content: space-between; align-items: flex-start; }
+.stat-icon {
+  background-color: var(--c-bg-tertiary);
+  color: var(--c-text-secondary);
+  width: 40px; height: 40px;
+  border-radius: var(--border-radius-md);
+  display: flex; align-items: center; justify-content: center;
+}
+.stat-badge { font-size: 12px; font-weight: 500; padding: 4px 8px; border-radius: 20px; background-color: var(--c-bg-tertiary); }
+.stat-bookings .stat-icon { background-color: rgba(var(--c-primary-rgb), 0.1); color: var(--c-primary); }
+.stat-pending .stat-icon { background-color: rgba(255,193,7,0.2); color: #b08000; }
+.stat-customers .stat-icon { background-color: rgba(25,135,84,0.15); color: var(--c-success); }
+.stat-rating .stat-icon { background-color: rgba(111,66,193,0.15); color: var(--c-premium); }
+.stat-body { display: flex; flex-direction: column; gap: var(--space-1); }
+.stat-value { font-size: 2rem; font-weight: var(--font-weight-bold); line-height: 1.2; }
+.stat-label { color: var(--c-text-secondary); font-size: var(--font-size-sm); }
+.stat-trend { display: flex; align-items: center; gap: var(--space-1); font-size: var(--font-size-sm); font-weight: 500; }
+.trend-up { color: var(--c-success); }
+.trend-down { color: var(--c-danger); }
+.stat-action { margin-top: var(--space-2); }
+.stat-stars { color: var(--c-star-filled); letter-spacing: 2px; }
+.rank-card {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  background: linear-gradient(135deg, #2c2c2e 0%, #38383a 100%);
+  border-radius: var(--border-radius-lg);
+  padding: var(--space-4);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+  border: none;
+  position: relative;
+  overflow: hidden;
+}
+.rank-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  background: radial-gradient(circle at top right, rgba(191, 90, 242, 0.15), transparent 70%);
+  z-index: 0;
+}
+.rank-card.interactive {
+  cursor: pointer;
+  transition: transform var(--transition-base), box-shadow var(--transition-base);
+}
+.rank-card.interactive:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.5);
+}
+.rank-card.interactive:active {
+  transform: translateY(-2px);
+}
+.rank-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: relative;
+  z-index: 1;
+}
+.rank-badge {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  color: var(--c-text-secondary);
+  background-color: rgba(255, 255, 255, 0.1);
+  padding: var(--space-1) var(--space-3);
+  border-radius: 30px;
+  backdrop-filter: blur(10px);
+}
+.rank-badge svg {
+  color: var(--c-premium);
+}
+.rank-body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  position: relative;
+  z-index: 1;
+}
+.rank-position {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: var(--space-3) 0;
+}
+.rank-label {
+  font-size: var(--font-size-sm);
+  color: var(--c-text-secondary);
+  margin-bottom: var(--space-2);
+}
+.rank-value-container {
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: var(--space-2);
+}
+.rank-value {
+  font-size: 3.5rem;
+  font-weight: var(--font-weight-bold);
+  line-height: 1;
+  color: var(--c-primary);
+  text-shadow: 0 0 15px rgba(10, 132, 255, 0.5);
+}
+.rank-total {
+  color: var(--c-text-secondary);
+  font-size: 1.2rem;
+}
+.rank-metrics {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-2);
+  background-color: rgba(255, 255, 255, 0.05);
+  padding: var(--space-3);
+  border-radius: var(--border-radius-md);
+  backdrop-filter: blur(5px);
+}
+.metric-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-1);
+  font-size: var(--font-size-sm);
+  text-align: center;
+  padding: var(--space-2);
+  border-radius: var(--border-radius-md);
+  transition: background-color var(--transition-fast);
+}
+.metric-item:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+.metric-item svg {
+  color: var(--c-text-secondary);
+  margin-bottom: var(--space-1);
+}
+.metric-value {
+  font-weight: var(--font-weight-bold);
+  font-size: 1.2rem;
+  color: var(--c-text-primary);
+}
+.metric-label {
+  color: var(--c-text-secondary);
+  font-size: 0.85rem;
+}
+@media (min-width: 768px) {
+  .rank-metrics {
+    grid-template-columns: repeat(3, 1fr);
+  }
+  .rank-position {
+    flex-direction: row;
+    justify-content: space-between;
+  }
+}
+.activity-list { display: flex; flex-direction: column; gap: var(--space-3); }
+.activity-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-2);
+  border-radius: var(--border-radius-md);
+}
+.activity-item .activity-icon { color: var(--c-text-secondary); }
+.activity-item .activity-text { flex-grow: 1; font-size: var(--font-size-sm); }
+.activity-item .activity-time { font-size: 12px; color: var(--c-text-secondary); white-space: nowrap; }
+.hidden { display: none !important; }
+.filter-bar {
+  display: flex;
+  gap: var(--space-2);
+  margin-bottom: var(--space-3);
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none; 
+}
+.filter-bar::-webkit-scrollbar { display: none; }
+.filter-chips { display: flex; gap: var(--space-2); }
+.filter-chip {
+  padding: var(--space-2) var(--space-3);
+  border-radius: 30px;
+  font-size: var(--font-size-sm);
+  white-space: nowrap;
+  background-color: var(--c-bg-tertiary);
+  color: var(--c-text-primary);
+}
+.filter-chip.active {
+  background-color: var(--c-primary);
+  color: var(--c-text-on-primary);
+}
+.chip-badge {
+  background-color: rgba(0,0,0,0.1);
+  color: inherit;
+  padding: 2px 6px;
+  border-radius: 10px;
+  font-size: 11px;
+  margin-inline-start: 6px;
+}
+.filter-chip.active .chip-badge { background-color: rgba(255,255,255,0.2); }
+.bookings-list { display: flex; flex-direction: column; gap: var(--space-3); }
+.booking-card {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+.booking-card-content { flex: 1; display: flex; flex-direction: column; }
+.booking-customer { font-weight: var(--font-weight-bold); }
+.booking-service { font-size: var(--font-size-sm); color: var(--c-text-secondary); }
+.booking-time { font-weight: var(--font-weight-medium); }
+.booking-actions { display: flex; gap: var(--space-2); }
+.status-badge {
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 500;
+  text-transform: capitalize;
+}
+.status-pending { background-color: var(--c-warning); color: var(--c-text-primary); }
+.status-confirmed { background-color: var(--c-success); color: white; }
+.status-completed { background-color: var(--c-bg-tertiary); color: var(--c-text-secondary); }
+.status-cancelled { background-color: var(--c-danger); color: white; }
+.customers-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: var(--space-3);
+}
+.customer-card {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+.customer-card:hover { transform: translateY(-4px); box-shadow: 0 4px 12px var(--c-shadow); }
+.customer-avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background-color: var(--c-bg-tertiary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: var(--font-weight-bold);
+  color: var(--c-primary);
+}
+.customer-info { flex: 1; }
+.customer-name { font-weight: var(--font-weight-bold); }
+.customer-phone, .customer-last-visit { font-size: var(--font-size-sm); color: var(--c-text-secondary); }
+.reviews-container { display: flex; flex-direction: column; gap: var(--space-3); }
+.review-card { display: flex; flex-direction: column; gap: var(--space-3); }
+.review-header { display: flex; justify-content: space-between; align-items: center; }
+.review-customer { font-weight: var(--font-weight-bold); }
+.review-date { font-size: var(--font-size-sm); color: var(--c-text-secondary); }
+.review-rating { color: var(--c-star-filled); }
+.review-comment { color: var(--c-text-secondary); }
+.search-wrapper {
+  position: relative;
+  margin-bottom: var(--space-4);
+}
+.search-icon {
+  position: absolute;
+  top: 50%;
+  right: var(--space-3);
+  transform: translateY(-50%);
+  color: var(--c-text-secondary);
+  pointer-events: none;
+}
+.search-input {
+  width: 100%;
+  height: 52px;
+  padding-right: 50px;
+  padding-left: 50px;
+  border-radius: var(--border-radius-md);
+  border: var(--border-width) solid var(--c-border);
+  background-color: var(--c-bg-primary);
+  font-family: inherit;
+  font-size: 1rem;
+  color: var(--c-text-primary);
+}
+.search-input:focus {
+  border-color: var(--c-primary);
+  box-shadow: 0 0 0 3px rgba(var(--c-primary-rgb), 0.2);
+  outline: none;
+}
+.search-filter {
+  position: absolute;
+  top: 50%;
+  left: 6px;
+  transform: translateY(-50%);
+}
+.plans-wrapper { max-width: 900px; margin: 0 auto; }
+.duration-selector {
+  display: flex;
+  justify-content: center;
+  background-color: var(--c-bg-tertiary);
+  border-radius: var(--border-radius-lg);
+  padding: var(--space-1);
+  margin-bottom: var(--space-4);
+}
+.duration-option {
+  flex: 1;
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--border-radius-md);
+  font-size: var(--font-size-sm);
+  color: var(--c-text-secondary);
+  position: relative;
+}
+.duration-option.active {
+  background-color: var(--c-bg-primary);
+  color: var(--c-text-primary);
+  box-shadow: 0 2px 4px var(--c-shadow);
+}
+.duration-badge {
+  font-size: 10px;
+  background-color: var(--c-success);
+  color: white;
+  padding: 2px 6px;
+  border-radius: 10px;
+  margin-inline-start: var(--space-2);
+}
+.plans-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-4);
+}
+.plan-card {
+  border-radius: var(--border-radius-lg);
+  border: var(--border-width) solid var(--c-border);
+  background-color: var(--c-bg-primary);
+  position: relative;
+  overflow: hidden;
+}
+.plan-card.featured {
+  border-color: var(--c-primary);
+  box-shadow: 0 8px 24px rgba(var(--c-primary-rgb), 0.15);
+}
+.plan-badge {
+  position: absolute;
+  top: var(--space-3);
+  right: var(--space-3);
+  background-color: var(--c-primary);
+  color: white;
+  font-size: 12px;
+  padding: 4px 12px;
+  border-radius: 20px;
+}
+.plan-content { padding: var(--space-4); display: flex; flex-direction: column; height: 100%;}
+.plan-header { text-align: right; }
+.plan-name { font-size: var(--font-size-lg); font-weight: var(--font-weight-bold); }
+.plan-description { color: var(--c-text-secondary); margin-bottom: var(--space-4); }
+.plan-price { display: flex; align-items: baseline; gap: var(--space-2); margin-bottom: var(--space-4); }
+.price-amount { font-size: 2.5rem; font-weight: var(--font-weight-bold); }
+.price-unit { color: var(--c-text-secondary); }
+.plan-features {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 var(--space-4) 0;
+  flex-grow: 1;
+}
+.feature-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-bottom: var(--space-2);
+}
+.feature-item svg { color: var(--c-success); }
+.feature-item.disabled { color: var(--c-text-secondary); text-decoration: line-through; }
+.feature-item.disabled svg { color: var(--c-text-secondary); }
+.plan-action { width: 100%; padding: var(--space-3) 0; }
+@media (min-width: 768px) {
+  .plans-grid { grid-template-columns: repeat(3, 1fr); }
+}
+.settings-list { display: flex; flex-direction: column; }
+.settings-group { margin-bottom: var(--space-4); }
+.settings-group-title {
+  font-weight: var(--font-weight-bold);
+  margin-bottom: var(--space-3);
+  padding-bottom: var(--space-2);
+  border-bottom: 1px solid var(--c-border);
+}
+.form-group {
+  margin-bottom: var(--space-3);
+  display: flex;
+  flex-direction: column;
+}
+.form-label {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--c-text-primary);
+  margin-bottom: var(--space-2);
+}
+.form-control, .form-select {
+  width: 100%;
+  height: 48px;
+  padding: 0 var(--space-3);
+  border-radius: var(--border-radius-md);
+  border: var(--border-width) solid var(--c-border);
+  background-color: var(--c-bg-primary);
+  font-family: inherit;
+  font-size: 1rem;
+  color: var(--c-text-primary);
+}
+.form-control:focus, .form-select:focus {
+  border-color: var(--c-primary);
+  box-shadow: 0 0 0 3px rgba(var(--c-primary-rgb), 0.2);
+  outline: none;
+}
+.form-actions {
+  margin-top: var(--space-4);
+  display: flex;
+  justify-content: flex-end;
+}
+.item-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: var(--space-3);
+    margin-top: var(--space-2);
+}
+.item-card {
+    background-color: var(--c-bg-primary);
+    border: var(--border-width) solid var(--c-border);
+    border-radius: var(--border-radius-md);
+    padding: var(--space-3);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+    transition: border-color var(--transition-fast);
+}
+.item-card:hover {
+    border-color: var(--c-primary);
+}
+.item-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: var(--space-2);
+}
+.item-title {
+    font-weight: var(--font-weight-bold);
+    font-size: var(--font-size-base);
+    margin: 0;
+}
+.item-badge {
+    font-size: 0.75rem;
+    padding: 2px 8px;
+    border-radius: 20px;
+    background-color: var(--c-bg-tertiary);
+    color: var(--c-text-secondary);
+}
+.item-badge.active {
+    background-color: var(--c-success);
+    color: white;
+}
+.item-details {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+    font-size: var(--font-size-sm);
+    color: var(--c-text-secondary);
+}
+.item-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: var(--space-2);
+    margin-top: var(--space-2);
+}
+.item-image-preview {
+    width: 100%;
+    height: 150px;
+    object-fit: cover;
+    border-radius: var(--border-radius-md);
+    background-color: var(--c-bg-tertiary);
+    margin-top: var(--space-2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--c-text-secondary);
+    font-size: var(--font-size-sm);
+}
+.item-image-preview img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: var(--border-radius-md);
+}
+.modal, .drawer {
+  display: none;
+  position: fixed;
+  z-index: var(--z-modal);
+}
+.modal-backdrop, .drawer-backdrop {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background-color: var(--c-backdrop);
+  z-index: var(--z-backdrop);
+  animation: fadeIn 0.3s ease;
+}
+.modal {
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 90%;
+  max-width: 500px;
+  animation: fadeIn 0.3s ease, slideInUp 0.3s ease;
+}
+.modal-content {
+  background-color: var(--c-bg-primary);
+  border-radius: var(--border-radius-lg);
+  padding: var(--space-4);
+  box-shadow: 0 10px 30px var(--c-shadow);
+  position: relative;
+}
+.modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--space-3); }
+.modal-title { font-size: var(--font-size-lg); font-weight: var(--font-weight-bold); margin: 0; }
+.modal-close-btn { position: absolute; top: 12px; left: 12px; }
+.drawer {
+  top: 0;
+  bottom: 0;
+  right: 0;
+  width: 100%;
+  max-width: 400px;
+  background-color: var(--c-bg-primary);
+  box-shadow: -5px 0 20px var(--c-shadow);
+  transform: translateX(100%);
+  transition: transform var(--transition-base);
+}
+.drawer-content { padding: var(--space-4); }
+.drawer-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--space-3); }
+.drawer-title { font-size: var(--font-size-lg); font-weight: var(--font-weight-bold); margin: 0; }
+body.has-overlay { overflow: hidden; }
+.modal.is-open, .drawer.is-open { display: block; }
+.modal-backdrop.is-open, .drawer-backdrop.is-open { display: block; }
+.drawer.is-open { transform: translateX(0); }
+#toast-root {
+  position: fixed;
+  bottom: calc(var(--nav-height-mobile) + var(--space-3));
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: var(--z-toast);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-2);
+  pointer-events: none;
+}
+.toast {
+  background-color: var(--c-bg-tertiary);
+  color: var(--c-text-primary);
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--border-radius-md);
+  box-shadow: 0 4px 12px var(--c-shadow);
+  font-size: var(--font-size-sm);
+  pointer-events: all;
+  animation: slideInUp 0.3s ease, fadeOut 0.3s ease 2.7s;
+  opacity: 0;
+}
+.toast.success { background-color: var(--c-success); color: white; }
+.toast.error { background-color: var(--c-danger); color: white; }
+@keyframes fadeOut {
+  to { opacity: 0; transform: translateY(20px); }
+}
+@media (min-width: 1024px) {
+  #toast-root {
+    bottom: var(--space-4);
+    left: auto;
+    right: var(--space-4);
+    transform: none;
+    align-items: flex-end;
+  }
+}
+.plans-header-modern {
+  position: relative;
+  padding: 2rem 0 3rem;
+  margin-bottom: 2rem;
+  text-align: center;
+  overflow: hidden;
+}
+.plans-header-bg {
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(circle at center, rgba(var(--c-primary-rgb), 0.05) 0%, transparent 70%);
+  animation: rotate 30s linear infinite;
+}
+@keyframes rotate {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+.plans-header-content {
+  position: relative;
+  z-index: 1;
+}
+.plans-badge-top {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  background: rgba(var(--c-success-rgb, 48, 209, 88), 0.1);
+  color: var(--c-success);
+  border-radius: 50px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+}
+.plans-title-modern {
+  font-size: 2rem;
+  font-weight: 800;
+  margin: 0 0 0.5rem;
+  background: linear-gradient(135deg, var(--c-text-primary) 0%, var(--c-primary) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  line-height: 1.2;
+}
+.plans-subtitle-modern {
+  color: var(--c-text-secondary);
+  font-size: 1rem;
+  margin: 0;
+}
+.duration-control {
+  margin-bottom: 2rem;
+  padding: 0 1rem;
+}
+.duration-selector-modern {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0;
+  background: var(--c-bg-primary);
+  border-radius: 16px;
+  padding: 4px;
+  position: relative;
+  box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+.duration-tab {
+  position: relative;
+  z-index: 2;
+  padding: 1rem 0.5rem;
+  background: transparent;
+  border: none;
+  color: var(--c-text-secondary);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+  border-radius: 12px;
+}
+.duration-tab.active {
+  color: var(--c-text-primary);
+}
+.duration-number {
+  font-size: 1.5rem;
+  font-weight: 700;
+  line-height: 1;
+}
+.duration-label {
+  font-size: 0.85rem;
+  opacity: 0.8;
+}
+.duration-save {
+  position: absolute;
+  top: -8px;
+  right: 50%;
+  transform: translateX(50%);
+  background: var(--c-success);
+  color: white;
+  padding: 2px 6px;
+  border-radius: 10px;
+  font-size: 0.65rem;
+  font-weight: bold;
+  white-space: nowrap;
+}
+.duration-indicator {
+  position: absolute;
+  top: 4px;
+  left: 4px;
+  width: calc(33.333% - 2.67px);
+  height: calc(100% - 8px);
+  background: linear-gradient(135deg, var(--c-primary), var(--c-primary-hover));
+  border-radius: 12px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 4px 12px rgba(var(--c-primary-rgb), 0.3);
+}
+.plans-container-modern {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  padding: 0 1rem;
+  margin-bottom: 3rem;
+}
+.plan-modern {
+  position: relative;
+  background: var(--c-bg-primary);
+  border: 1px solid var(--c-border);
+  border-radius: 20px;
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+.plan-modern:active {
+  transform: scale(0.98);
+}
+.plan-modern.featured {
+  border: 2px solid var(--c-primary);
+  box-shadow: 0 10px 30px rgba(var(--c-primary-rgb), 0.2);
+  transform: scale(1.02);
+}
+.plan-status {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  padding: 0.25rem 0.75rem;
+  background: var(--c-bg-tertiary);
+  color: var(--c-text-secondary);
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  z-index: 2;
+}
+.plan-status.featured {
+  background: linear-gradient(135deg, var(--c-primary), var(--c-premium));
+  color: white;
+  animation: pulse 2s infinite;
+}
+.plan-featured-glow {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 100px;
+  background: linear-gradient(180deg, rgba(var(--c-primary-rgb), 0.1) 0%, transparent 100%);
+  pointer-events: none;
+}
+.plan-content-modern {
+  padding: 2rem 1.5rem;
+  position: relative;
+  z-index: 1;
+}
+.plan-icon-modern {
+  width: 56px;
+  height: 56px;
+  margin: 0 auto 1rem;
+  background: var(--c-bg-tertiary);
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--c-primary);
+}
+.plan-modern.featured .plan-icon-modern {
+  background: linear-gradient(135deg, rgba(var(--c-primary-rgb), 0.1), rgba(var(--c-premium-rgb, 191, 90, 242), 0.1));
+}
+.plan-title-card {
+  font-size: 1.5rem;
+  font-weight: 700;
+  text-align: center;
+  margin: 0 0 0.5rem;
+}
+.plan-desc {
+  text-align: center;
+  color: var(--c-text-secondary);
+  font-size: 0.9rem;
+  margin: 0 0 1.5rem;
+}
+.plan-price-modern {
+  text-align: center;
+  padding-bottom: 1.5rem;
+  margin-bottom: 1.5rem;
+  border-bottom: 1px solid var(--c-border);
+}
+.price-main {
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-bottom: 0.25rem;
+}
+.price-value {
+  font-size: 2.25rem;
+  font-weight: 800;
+  color: var(--c-text-primary);
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+}
+.plan-modern.featured .price-value {
+  background: linear-gradient(135deg, var(--c-primary), var(--c-premium));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.price-currency {
+  color: var(--c-text-secondary);
+  font-size: 1rem;
+}
+.price-period {
+  color: var(--c-text-secondary);
+  font-size: 0.85rem;
+}
+.price-savings {
+  margin-top: 0.5rem;
+  color: var(--c-success);
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+.price-savings.hidden {
+  display: none;
+}
+.plan-features-modern {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+}
+.feature-modern {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 0.95rem;
+}
+.feature-check {
+  color: var(--c-success);
+  flex-shrink: 0;
+}
+.feature-x {
+  color: var(--c-text-secondary);
+  opacity: 0.4;
+  flex-shrink: 0;
+}
+.feature-modern.disabled {
+  opacity: 0.5;
+  text-decoration: line-through;
+}
+.feature-modern.highlight {
+  color: var(--c-primary);
+  font-weight: 600;
+}
+.plan-cta-modern {
+  width: 100%;
+  padding: 1rem;
+  background: var(--c-bg-tertiary);
+  color: var(--c-text-primary);
+  border: 1px solid var(--c-border);
+  border-radius: 14px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+.plan-cta-modern:active {
+  transform: scale(0.95);
+}
+.plan-cta-modern.primary {
+  background: linear-gradient(135deg, var(--c-primary), var(--c-primary-hover));
+  color: white;
+  border: none;
+  box-shadow: 0 8px 24px rgba(var(--c-primary-rgb), 0.25);
+}
+.plan-cta-modern.primary:active {
+  box-shadow: 0 4px 12px rgba(var(--c-primary-rgb), 0.2);
+}
+.plans-bottom-section {
+  padding: 2rem 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+.guarantee-badge {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem;
+  background: var(--c-bg-primary);
+  border-radius: 14px;
+  border: 1px solid var(--c-border);
+}
+.guarantee-badge svg {
+  color: var(--c-success);
+  flex-shrink: 0;
+}
+.guarantee-badge strong {
+  display: block;
+  font-size: 0.95rem;
+  margin-bottom: 0.25rem;
+}
+.guarantee-badge span {
+  font-size: 0.85rem;
+  color: var(--c-text-secondary);
+}
+.payment-methods {
+  text-align: center;
+}
+.payment-methods > span {
+  display: block;
+  font-size: 0.85rem;
+  color: var(--c-text-secondary);
+  margin-bottom: 0.75rem;
+}
+.payment-icons {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+}
+@media (min-width: 768px) {
+  .plans-title-modern {
+    font-size: 2.5rem;
+  }
+  .plans-subtitle-modern {
+    font-size: 1.25rem;
+  }
+  .plans-container-modern {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    max-width: 1200px;
+    margin: 0 auto 3rem;
+  }
+  .plan-modern.featured {
+    transform: scale(1.05);
+  }
+  .duration-selector-modern {
+    max-width: 400px;
+    margin: 0 auto;
+  }
+  .plans-bottom-section {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+}
+@media (min-width: 1024px) {
+  .plans-container-modern {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+@media (hover: none) {
+  .plan-modern:active {
+    transform: scale(0.98);
+  }
+  .plan-modern.featured:active {
+    transform: scale(1);
+  }
+}
+#plans-view .plans-social-proof{
+  text-align:center; color:var(--c-text-secondary); margin:0 1rem 1.25rem;
+}
+#plans-view .plan-modern.selected{
+  outline:2px solid var(--c-primary);
+  box-shadow:0 10px 28px rgba(var(--c-primary-rgb),0.22);
+}
+#plans-view .checkout-bar{
+  position:fixed;
+  right:0; left:0;
+  bottom:calc(var(--nav-height-mobile) + 10px + env(safe-area-inset-bottom));
+  margin:0 auto;
+  width:min(960px, calc(100% - 24px));
+  background:var(--c-bg-primary);
+  border:1px solid var(--c-border);
+  border-radius:16px;
+  box-shadow:0 14px 40px rgba(0,0,0,0.45);
+  z-index:1200;
+  transform:translateY(16px);
+  opacity:0; pointer-events:none;
+  transition:transform .2s ease, opacity .2s ease;
+}
+@media (min-width:1024px){
+  #plans-view .checkout-bar{ bottom:16px; }
+}
+#plans-view .checkout-bar.visible{
+  transform:translateY(0); opacity:1; pointer-events:auto;
+}
+#plans-view .checkout-content{
+  display:flex; align-items:center; justify-content:space-between;
+  gap:1rem; padding:12px 14px;
+}
+#plans-view .cb-left{ display:flex; align-items:center; gap:.5rem; flex-wrap:wrap; }
+#plans-view .cb-dot{ opacity:.5 }
+#plans-view .cb-saving{ font-size:.85rem; color:var(--c-success) }
+#plans-view .cb-right{ display:flex; align-items:center; gap:.75rem }
+#plans-view .cb-total{ font-weight:800; font-size:1.05rem }
+#plans-view .checkout-subline{
+  display:grid; grid-template-columns:1fr; gap:.5rem; padding:0 14px 12px 14px;
+}
+#plans-view .cb-coupon-toggle{
+  background:none; border:none; color:var(--c-primary); font-weight:600; cursor:pointer;
+  padding:6px 0; text-align:right;
+}
+#plans-view .cb-coupon{ display:flex; gap:.5rem; }
+#plans-view .cb-coupon.open{ display:flex !important; }
+#plans-view .cb-input{
+  flex:1; height:44px; border-radius:10px; border:1px solid var(--c-border);
+  background:var(--c-bg-tertiary); color:var(--c-text-primary); padding:0 .75rem; font-family:inherit;
+}
+#plans-view .cb-trust{ color:var(--c-text-secondary); font-size:.85rem }
+#plans-view .cb-trust .muted{ opacity:.85 }
+#plans-view .sr-only{
+  position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0;
+}
+:root{
+  --hero-image: none; 
+  --footer-image: none; 
+}
+.brand-hero {
+  position: relative;
+  margin: 0 0 var(--space-3);
+  border-radius: var(--border-radius-lg);
+  overflow: hidden;
+  background-image:
+    linear-gradient(180deg, rgba(0,0,0,.15), rgba(0,0,0,.35)),
+    var(--hero-image);
+  background-size: cover;
+  background-position: center;
+  min-height: 180px; 
+  border: var(--border-width) solid var(--c-border);
+}
+.brand-hero .hero-inner{
+  position: absolute; inset: 0;
+  display: flex; align-items: flex-end; justify-content: space-between;
+  padding: var(--space-3);
+}
+.brand-hero .hero-note{
+  background: rgba(0,0,0,.35);
+  color: #fff; font-size: .85rem; padding: .35rem .6rem;
+  border-radius: 10px;
+}
+.brand-footer {
+  margin: var(--space-4) auto 0;
+  max-width: var(--container-max-width);
+  border-radius: var(--border-radius-lg);
+  overflow: hidden;
+  background-image:
+    linear-gradient(180deg, rgba(0,0,0,.10), rgba(0,0,0,.35)),
+    var(--footer-image);
+  background-size: cover;
+  background-position: center;
+  min-height: 120px;
+  border: var(--border-width) solid var(--c-border);
+}
+.image-settings-group .image-field{
+  display: grid; gap: .75rem;
+  grid-template-columns: 1fr; 
+  padding: var(--space-3);
+  border: var(--border-width) solid var(--c-border);
+  border-radius: var(--border-radius-lg);
+  background: var(--c-bg-primary);
+}
+.image-settings-group .field-title{
+  font-weight: 700; margin-bottom: .25rem;
+}
+.image-settings-group .help{
+  color: var(--c-text-secondary); font-size: .85rem;
+}
+.image-settings-group .preview{
+  width: 100%; aspect-ratio: 16 / 9; 
+  background: var(--c-bg-tertiary);
+  border-radius: var(--border-radius-md);
+  overflow: hidden; display: flex; align-items: center; justify-content: center;
+  border: 1px dashed var(--c-border);
+}
+.image-settings-group .preview img{
+  width: 100%; height: 100%; object-fit: cover; display: block;
+}
+.image-settings-group .actions{
+  display: grid; gap: .5rem; grid-template-columns: 1fr 1fr;
+}
+.image-settings-group .actions .btn-secondary,
+.image-settings-group .actions .btn-primary{ width: 100%; }
+.image-settings-group .url-row{
+  display: grid; gap: .5rem; grid-template-columns: 1fr auto;
+}
+@media (min-width: 768px){
+  .brand-hero{ min-height: 240px; }
+  .brand-footer{ min-height: 160px; }
+}
+#plans-view .checkout-bar{
+  border: 1px solid rgba(255,255,255,0.08);
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02)) 0 0 / 100% 100% no-repeat,
+    var(--c-bg-primary);
+  backdrop-filter: blur(10px);
+  border-radius: 20px;
+  box-shadow: 0 18px 60px rgba(0,0,0,.45);
+  padding-top: 6px; 
+  transform: translateY(16px);
+  transition: transform .26s ease, opacity .26s ease;
+}
+#plans-view .checkout-content{
+  padding: 14px 16px;
+}
+#plans-view .cb-left{ gap: .65rem; align-items: center; }
+#plans-view .cb-plan{ font-weight: 800; letter-spacing: .1px; }
+#plans-view .cb-duration{
+  padding: .25rem .6rem;
+  background: var(--c-bg-tertiary);
+  border: 1px solid var(--c-border);
+  border-radius: 999px;
+  font-size: .85rem;
+}
+#plans-view .cb-saving{
+  padding: .15rem .5rem;
+  background: rgba(48,209,88,.15);
+  color: var(--c-success);
+  border: 1px solid rgba(48,209,88,.35);
+  border-radius: 999px;
+  font-size: .8rem;
+}
+#plans-view .cb-total{
+  font-weight: 900;
+  font-size: 1.15rem;
+  margin-inline-start: .25rem;
+}
+#plans-view .cb-cta{
+  height: 44px;
+  padding: 0 18px;
+  border-radius: 999px;
+  background: linear-gradient(135deg, var(--c-primary), var(--c-primary-hover));
+  color: #fff;
+  border: none;
+  box-shadow: 0 8px 24px rgba(var(--c-primary-rgb), .35);
+  transition: transform .15s ease, box-shadow .2s ease, filter .2s ease;
+}
+#plans-view .cb-cta:hover{ transform: translateY(-1px); box-shadow: 0 12px 30px rgba(var(--c-primary-rgb), .45); }
+#plans-view .cb-cta:active{ transform: translateY(0); filter: saturate(1.05); }
+#plans-view .cb-cta:focus-visible{ outline: 3px solid rgba(var(--c-primary-rgb), .35); outline-offset: 2px; }
+#plans-view .checkout-subline{
+  border-top: 1px dashed rgba(255,255,255,0.08);
+  padding: 10px 16px 14px;
+  gap: .75rem;
+}
+#plans-view .cb-coupon-toggle{
+  background: none; border: none; padding: 0;
+  color: var(--c-primary); font-weight: 700;
+}
+#plans-view .cb-coupon{
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: .5rem;
+  animation: cbSlideDown .25s ease;
+}
+#plans-view .cb-input{
+  height: 44px;
+  border-radius: 12px;
+  background: var(--c-bg-secondary);
+  border: 1px solid rgba(255,255,255,0.10);
+  color: var(--c-text-primary);
+  padding: 0 .75rem;
+  font-family: inherit;
+  transition: border-color .2s ease, box-shadow .2s ease;
+}
+#plans-view .cb-input::placeholder{ color: var(--c-text-secondary); }
+#plans-view .cb-input:focus{
+  outline: none;
+  border-color: var(--c-primary);
+  box-shadow: 0 0 0 3px rgba(var(--c-primary-rgb), .20);
+}
+#plans-view .cb-apply{
+  height: 44px;
+  padding: 0 14px;
+  border-radius: 12px;
+  background: var(--c-bg-tertiary);
+  color: var(--c-text-primary);
+  border: 1px solid var(--c-border);
+  transition: background-color .2s ease, border-color .2s ease, transform .15s ease;
+}
+#plans-view .cb-apply:hover{ background: var(--c-border); border-color: var(--c-primary); }
+#plans-view .cb-apply:active{ transform: translateY(1px); }
+#plans-view .cb-apply:focus-visible{ outline: 2px solid var(--c-primary); outline-offset: 2px; }
+#plans-view .cb-trust{
+  color: var(--c-text-secondary);
+  font-size: .82rem;
+  display: flex; align-items: center; gap: .5rem; flex-wrap: wrap;
+  opacity: .9;
+}
+@keyframes cbSlideDown{
+  from{ opacity: 0; transform: translateY(-6px); }
+  to{ opacity: 1; transform: translateY(0); }
+}
+#plans-view .cb-close{
+  position:absolute; top:8px; left:8px; 
+  width:34px; height:34px;
+  display:flex; align-items:center; justify-content:center;
+  border-radius:50%;
+  background: rgba(255,255,255,.06);
+  border:1px solid rgba(255,255,255,.12);
+  color: var(--c-text-secondary);
+  backdrop-filter: blur(8px);
+  cursor:pointer;
+  transition: background .2s ease, transform .08s ease, color .2s ease;
+}
+#plans-view .cb-close:hover{ background: rgba(255,255,255,.12); color: var(--c-text-primary); }
+#plans-view .cb-close:active{ transform: scale(.96); }
+#plans-view .cb-close:focus-visible{ outline: 2px solid var(--c-primary); outline-offset: 2px; }
+.auto-accept-container {
+  background: linear-gradient(135deg, rgba(var(--c-primary-rgb), 0.05), rgba(var(--c-success-rgb, 48, 209, 88), 0.05));
+  border: 1px solid var(--c-border);
+  border-radius: var(--border-radius-lg);
+  padding: var(--space-4);
+  margin-bottom: var(--space-4);
+  position: relative;
+  overflow: hidden;
+}
+.auto-accept-container::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  right: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(circle, rgba(var(--c-primary-rgb), 0.1), transparent 70%);
+  animation: pulse-glow 4s ease-in-out infinite;
+}
+@keyframes pulse-glow {
+  0%, 100% { opacity: 0.3; transform: scale(0.8); }
+  50% { opacity: 0.6; transform: scale(1); }
+}
+.auto-accept-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: var(--space-3);
+  position: relative;
+  z-index: 1;
+}
+.auto-accept-info {
+  flex: 1;
+}
+.auto-accept-title {
+  font-size: 1.1rem;
+  font-weight: var(--font-weight-bold);
+  margin-bottom: var(--space-2);
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+.auto-accept-title svg {
+  color: var(--c-success);
+}
+.auto-accept-description {
+  color: var(--c-text-secondary);
+  font-size: var(--font-size-sm);
+  line-height: 1.6;
+}
+.toggle-switch {
+  position: relative;
+  width: 60px;
+  height: 32px;
+  background: var(--c-bg-tertiary);
+  border-radius: 100px;
+  cursor: pointer;
+  transition: background-color var(--transition-base);
+  border: 2px solid var(--c-border);
+}
+.toggle-switch.active {
+  background: linear-gradient(135deg, var(--c-success), #2ecc71);
+  border-color: var(--c-success);
+}
+.toggle-switch-input {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+.toggle-switch-slider {
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 22px;
+  height: 22px;
+  background: white;
+  border-radius: 50%;
+  transition: transform var(--transition-base);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+.toggle-switch.active .toggle-switch-slider {
+  transform: translateX(28px);
+}
+.auto-accept-status {
+  margin-top: var(--space-3);
+  padding: var(--space-2) var(--space-3);
+  background: var(--c-bg-secondary);
+  border-radius: var(--border-radius-md);
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--font-size-sm);
+  position: relative;
+  z-index: 1;
+}
+.auto-accept-status.active {
+  background: rgba(var(--c-success-rgb, 48, 209, 88), 0.1);
+  color: var(--c-success);
+}
+.status-indicator {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--c-text-secondary);
+  animation: pulse 2s infinite;
+}
+.auto-accept-status.active .status-indicator {
+  background: var(--c-success);
+}
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+.modal-close-floating {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  z-index: 10;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+.modal-close-floating:hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: scale(1.1);
+}
+.customer-modal-header {
+  background: linear-gradient(135deg, var(--c-primary), var(--c-primary-hover));
+  padding: var(--space-5) var(--space-4) var(--space-4);
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+.customer-modal-header::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.1), transparent 60%);
+  animation: rotate 20s linear infinite;
+}
+.customer-avatar-large {
+  width: 80px;
+  height: 80px;
+  margin: 0 auto var(--space-3);
+  background: rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(10px);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2rem;
+  font-weight: var(--font-weight-bold);
+  color: white;
+  border: 3px solid rgba(255, 255, 255, 0.3);
+  position: relative;
+  z-index: 1;
+}
+.customer-header-info {
+  position: relative;
+  z-index: 1;
+}
+.customer-modal-name {
+  color: white;
+  font-size: 1.5rem;
+  font-weight: var(--font-weight-bold);
+  margin: 0 0 var(--space-2);
+}
+.customer-modal-phone {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  color: rgba(255, 255, 255, 0.9);
+  font-size: var(--font-size-sm);
+  background: rgba(255, 255, 255, 0.15);
+  padding: var(--space-1) var(--space-3);
+  border-radius: 100px;
+  backdrop-filter: blur(10px);
+}
+.customer-modal-stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1px;
+  background: var(--c-border);
+  margin: -1px 0 var(--space-4);
+}
+.stat-item-modal {
+  background: var(--c-bg-primary);
+  padding: var(--space-3);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-2);
+  transition: background-color var(--transition-fast);
+}
+.stat-item-modal:hover {
+  background: var(--c-bg-secondary);
+}
+.stat-icon-modal {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+}
+.stat-icon-modal.reservations {
+  background: rgba(var(--c-primary-rgb), 0.15);
+  color: var(--c-primary);
+}
+.stat-icon-modal.completed {
+  background: rgba(var(--c-success-rgb, 48, 209, 88), 0.15);
+  color: var(--c-success);
+}
+.stat-icon-modal.rating {
+  background: rgba(255, 214, 10, 0.15);
+  color: var(--c-warning);
+}
+.stat-info-modal {
+  text-align: center;
+}
+.stat-value-modal {
+  font-size: 1.5rem;
+  font-weight: var(--font-weight-bold);
+  color: var(--c-text-primary);
+  line-height: 1;
+}
+.stat-label-modal {
+  font-size: var(--font-size-sm);
+  color: var(--c-text-secondary);
+  margin-top: var(--space-1);
+}
+.customer-modal-section {
+  padding: 0 var(--space-4) var(--space-4);
+}
+.section-title-modal {
+  font-size: 1rem;
+  font-weight: var(--font-weight-bold);
+  margin-bottom: var(--space-3);
+  color: var(--c-text-primary);
+}
+.last-reservation-card {
+  background: var(--c-bg-secondary);
+  border: 1px solid var(--c-border);
+  border-radius: var(--border-radius-lg);
+  padding: var(--space-3);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+.reservation-date {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  color: var(--c-text-secondary);
+  font-size: var(--font-size-sm);
+}
+.reservation-date svg {
+  color: var(--c-primary);
+}
+.reservation-service {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+.service-name {
+  font-weight: var(--font-weight-bold);
+  color: var(--c-text-primary);
+}
+.service-time {
+  font-size: var(--font-size-sm);
+  color: var(--c-text-secondary);
+}
+.reservation-status {
+  align-self: flex-start;
+}
+.customer-modal-actions {
+  padding: var(--space-4);
+  background: var(--c-bg-secondary);
+  border-top: 1px solid var(--c-border);
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-2);
+}
+.btn-action-modal {
+  padding: var(--space-3);
+  border-radius: var(--border-radius-lg);
+  font-weight: var(--font-weight-medium);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  transition: all var(--transition-fast);
+  border: none;
+  cursor: pointer;
+  font-size: var(--font-size-sm);
+}
+.btn-action-modal.primary {
+  background: linear-gradient(135deg, var(--c-primary), var(--c-primary-hover));
+  color: white;
+  box-shadow: 0 4px 12px rgba(var(--c-primary-rgb), 0.3);
+}
+.btn-action-modal.primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(var(--c-primary-rgb), 0.4);
+}
+.btn-action-modal.secondary {
+  background: var(--c-bg-tertiary);
+  color: var(--c-text-primary);
+  border: 1px solid var(--c-border);
+}
+.btn-action-modal.secondary:hover {
+  background: var(--c-border);
+  border-color: var(--c-primary);
+}
+.customer-card {
+  cursor: pointer;
+  transition: all var(--transition-base);
+}
+.customer-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(var(--c-primary-rgb), 0.15);
+  border-color: var(--c-primary);
+}
+.customer-card:active {
+  transform: translateY(-2px);
+}
+@media (max-width: 480px) {
+  .customer-modal .modal-content {
+    width: 100%;
+    height: 100vh;
+    max-height: 100vh;
+    border-radius: 0;
+  }
+  .customer-modal-actions {
+    grid-template-columns: 1fr;
+    position: sticky;
+    bottom: 0;
+  }
+  .btn-action-modal {
+    padding: var(--space-3) var(--space-4);
+  }
+}
+#plans-view {
+  --cb-close-size: 20px;
+  --cb-close-gap: 10px;
+  --cb-spacing: 12px;
+  --cb-radius: 8px;
+}
+#plans-view .checkout-bar {
+  position: fixed;
+  padding-top: calc(var(--cb-close-size) + var(--cb-close-gap) + 8px);
+  padding-bottom: 10px;
+  padding-inline: 12px;
+}
+#plans-view .checkout-content {
+  padding-inline-start: 0 !important;
+  padding-inline-end: 0 !important;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 10px;
+}
+#plans-view .cb-close {
+  position: absolute;
+  top: var(--cb-close-gap);
+  left: var(--cb-close-gap);
+  right: auto;
+  width: var(--cb-close-size);
+  height: var(--cb-close-size);
+  padding: 0;
+  background: transparent !important;
+  border: none !important;
+  border-radius: 0;
+  color: var(--c-text-secondary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: none;
+  transform: none;
+  z-index: 1300;
+  touch-action: manipulation;
+  cursor: pointer;
+  transition: color 0.15s ease;
+}
+#plans-view .cb-close svg {
+  width: 16px;
+  height: 16px;
+}
+#plans-view .cb-close:hover {
+  color: var(--c-text-primary);
+  background: transparent !important;
+  transform: none;
+}
+#plans-view .cb-close:focus-visible {
+  outline: 2px solid rgba(var(--c-primary-rgb), 0.3);
+  outline-offset: 1px;
+}
+#plans-view .checkout-subline {
+  display: grid;
+  gap: 8px;
+  margin-top: 4px;
+}
+#plans-view .cb-coupon {
+  display: grid !important;
+  grid-template-columns: 1fr auto;
+  gap: 6px;
+  align-items: center;
+}
+#plans-view .cb-input {
+  text-align: right;
+  min-width: 0;
+  padding: 6px 10px;
+  border-radius: 6px;
+  transition: border-color 0.15s ease;
+}
+#plans-view .cb-apply {
+  white-space: nowrap;
+  min-width: 80px;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-weight: 500;
+  transition: all 0.15s ease;
+}
+@media (max-width: 420px) {
+  #plans-view {
+    --cb-close-size: 18px;
+    --cb-close-gap: 8px;
+    --cb-spacing: 10px;
+  }
+  #plans-view .checkout-bar {
+    padding-top: calc(var(--cb-close-size) + var(--cb-close-gap) + 6px);
+    padding-bottom: 8px;
+    padding-inline: 10px;
+  }
+  #plans-view .checkout-content {
+    grid-template-columns: 1fr;
+    justify-items: stretch;
+    gap: 8px;
+    text-align: center;
+  }
+  #plans-view .cb-left {
+    justify-content: center;
+    padding: 0 4px;
+  }
+  #plans-view .cb-right {
+    grid-auto-flow: row;
+    justify-items: center;
+    gap: 8px;
+  }
+  #plans-view .cb-cta {
+    width: 100%;
+    max-width: none;
+    padding: 10px 20px;
+    border-radius: 6px;
+  }
+  #plans-view .cb-total {
+    order: -1;
+    font-weight: 600;
+    margin-bottom: 2px;
+  }
+  #plans-view .cb-dot {
+    display: none;
+  }
+  #plans-view .checkout-subline {
+    margin-top: 2px;
+  }
+}
+
+
+
+
+/* ✅ وقتی مودال/دراور باز است، بک‌دراپش را نشان بده */
+.modal.is-open .modal-backdrop,
+.drawer.is-open .drawer-backdrop {
+  display: block;
+}
+
+/* ✅ محتوای مودال اسکرول داخلی داشته باشد (بدنه لاک است) */
+.modal-content {
+  max-height: calc(100dvh - 48px);
+  overflow: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* ✅ روی موبایل، مودال مشتری فول‌اسکرینِ اسکرول‌پذیر باشد */
+@media (max-width: 480px) {
+  .customer-modal .modal-content {
+    height: 100dvh;
+    max-height: 100dvh;
+    overflow: auto;
+  }
+}
+
+
+
+/* 1) شیشه‌ای بدون تارکردن */
+.rank-badge,
+.modal-close-floating,
+.customer-avatar-large {
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
+  /* اگر هنوز هاله‌ی شیشه‌ای می‌خوای: فقط شفافیت بگذار */
+  background: rgba(255,255,255,0.12);
+}
+
+/* 2) انیمیشن را از خود .modal بردار، روی .modal-content بده */
+.modal { animation: none !important; }
+.modal-content {
+  animation: modalIn 0.25s ease;
+}
+@keyframes modalIn {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: none; }
+}
+
+/* 3) فونت‌ها را تیزتر کن (مخصوصاً کروم/اندروید) */
+body { -webkit-font-smoothing: auto; }
+
+
+
+/* --- FIX: حذف هر جور blur داخل هر مودال + سنتر بدون transform --- */
+
+/* 1) هرچی backdrop-filter داخل مودال‌هاست غیرفعال بشه */
+.modal,
+.modal * {
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
+}
+
+/* 2) خود مودال رو بدون transform وسط‌چین کن تا متن رو GPU نبره */
+.modal {
+  top: 0; right: 0; bottom: 0; left: 0;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 24px;            /* فاصله از لبه‌ها */
+  width: auto !important;   /* override عرض قبلی مودال */
+  max-width: none !important;
+  transform: none !important;
+}
+
+/* 3) اندازه رو بده به محتوا، نه خود .modal */
+.modal-content {
+  width: min(500px, 90vw);
+  max-height: calc(100dvh - 48px);
+  overflow: auto;
+  /* فقط opacity انیمیت بشه (transform نه) تا متن تیز بمونه */
+  animation: modalFade 160ms ease !important;
+}
+@keyframes modalFade { from { opacity: 0 } to { opacity: 1 } }
+
+/* 4) نسخه موبایلِ فول‌اسکرین برای مودال مشتری */
+@media (max-width: 480px) {
+  .customer-modal .modal-content {
+    width: 100vw;
+    height: 100dvh;
+    max-height: 100dvh;
+    border-radius: 0;
+  }
+}
+
+/* 5) چندتا مورد پراکنده که هنوز blur داشتن داخل مودال مشتری */
+.customer-modal .customer-modal-phone {
+  background: rgba(255,255,255,0.12) !important;
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
+}
+
+/* 6) مطمئن شو فونت‌ها “auto” باشن (نه antialiased اجباری) */
+body { -webkit-font-smoothing: auto !important; }
+
+
+
+
+
+
+</style>
+</head>
+<body class="app-body">
+  <a class="skip-link" href="#app">پرش به محتوای اصلی</a>
+  <header class="app-header" role="banner">
+    <div class="header-container">
+      <button class="header-btn icon-btn" id="user-menu-btn" aria-label="پروفایل کاربر">
+        <div class="user-avatar" aria-hidden="true">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="8" r="4"/><path d="M20 21a8 8 0 0 0-16 0"/>
+          </svg>
+        </div>
+      </button>
+      <h1 class="brand-logo" aria-label="پنل فروشنده">
+        <svg class="logo-icon" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <rect x="3" y="3" width="18" height="18" rx="3"/><path d="M9 12l2 2 4-4"/>
+        </svg>
+        <span class="brand-text">پنل فروشنده</span>
+      </h1>
+      <div class="header-actions">
+        <!-- Notification button removed -->
+        <button id="view-store-btn" class="btn-primary btn-icon-text" aria-label="مشاهده صفحه فروشگاه">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/>
+          </svg>
+          <span>مشاهده صفحه من</span>
+        </button>
+      </div>
+    </div>
+  </header>
+  <main id="app" class="app-main" role="main" tabindex="-1">
+    <div class="app-container">
+      <section id="dashboard-view" class="view-section" role="region" aria-labelledby="dashboard-title" data-page="dashboard">
+        <div class="view-container">
+          <header class="view-header dashboard-header">
+            <div class="welcome-section">
+              <h2 class="view-title" id="dashboard-title">داشبورد</h2>
+              <p class="welcome-message">
+                خوش آمدید، <strong id="seller-name">فروشنده عزیز</strong>
+                <span class="welcome-date" id="welcome-date">...</span>
+              </p>
+            </div>
+          </header>
+
+<!-- Preview: Hero (بالای داشبورد) -->
+<section class="brand-hero" id="brand-hero" aria-label="پیش‌نمایش تصویر هدر">
+  <div class="hero-inner">
+    <span class="hero-note">پیش‌نمایش هدر فروشگاه</span>
+  </div>
+</section>
+
+
+
+
+          <div class="stats-grid" role="list">
+            <article class="stat-card stat-bookings" role="listitem">
+              <div class="stat-header">
+                <div class="stat-icon" aria-hidden="true">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/>
+                  </svg>
+                </div>
+                <div class="stat-badge">امروز</div>
+              </div>
+              <div class="stat-body">
+                <div class="stat-value" data-value="12">۰</div>
+                <div class="stat-label">رزرو امروز</div>
+                <div class="stat-trend trend-up" aria-label="۲۰٪ افزایش">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/> <polyline points="17 6 23 6 23 12"/>
+                  </svg>
+                  <span>۲۰٪ افزایش</span>
+                </div>
+              </div>
+            </article>
+            <article class="stat-card stat-pending" role="listitem">
+              <div class="stat-header">
+                <div class="stat-icon" aria-hidden="true">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/>
+                  </svg>
+                </div>
+                <div class="stat-badge badge-warning">منتظر</div>
+              </div>
+              <div class="stat-body">
+                <div class="stat-value" data-value="5">۰</div>
+                <div class="stat-label">در انتظار تایید</div>
+                <div class="stat-action">
+                  <a class="btn-text-sm" href="#/bookings" aria-controls="bookings-view">مشاهده ←</a>
+                </div>
+              </div>
+            </article>
+            <article class="stat-card stat-customers" role="listitem">
+              <div class="stat-header">
+                <div class="stat-icon" aria-hidden="true">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/>
+                  </svg>
+                </div>
+                <div class="stat-badge badge-success">فعال</div>
+              </div>
+              <div class="stat-body">
+                <div class="stat-value" data-value="48">۰</div>
+                <div class="stat-label">مشتریان فعال</div>
+                <div class="stat-trend trend-up">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                     <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/> <polyline points="17 6 23 6 23 12"/>
+                  </svg>
+                  <span>۱۲ مشتری جدید</span>
+                </div>
+              </div>
+            </article>
+            <article class="stat-card stat-rating" role="listitem">
+              <div class="stat-header">
+                <div class="stat-icon" aria-hidden="true">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+                  </svg>
+                </div>
+                <div class="stat-badge badge-premium">عالی</div>
+              </div>
+              <div class="stat-body">
+                <div class="stat-value" data-value="4.8">۰.۰</div>
+                <div class="stat-label">امتیاز کلی</div>
+                <div class="stat-stars" aria-label="4.8 از 5 ستاره"><span class="stars-filled" style="--rating: 4.8;">★★★★★</span></div>
+              </div>
+            </article>
+            <article class="stat-card rank-card interactive" id="rank-card" role="button" tabindex="0" aria-haspopup="dialog" aria-controls="rank-modal" aria-label="مشاهده جزئیات رتبه شما">
+              <div class="rank-header">
+                <div class="rank-badge">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                  </svg>
+                  <span id="rank-category">آرایشگاه سنندج</span>
+                </div>
+                <button type="button" class="btn-icon-sm" aria-label="اطلاعات بیشتر">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/>
+                  </svg>
+                </button>
+              </div>
+              <div class="rank-body">
+                <div class="rank-position">
+                  <span class="rank-label">رتبه فعلی شما</span>
+                  <div class="rank-value-container">
+                    <span class="rank-value" id="current-rank" data-value="12">۰</span>
+                    <span class="rank-total">از <span id="total-sellers" data-value="45">۰</span></span>
+                  </div>
+                </div>
+                <div class="rank-metrics" role="list">
+                  <div class="metric-item" data-metric="customers" role="listitem" aria-label="۴۸ مشتری">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                      <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/>
+                    </svg>
+                    <span class="metric-value" id="ucw30">۴۸</span>
+                    <span class="metric-label">مشتری</span>
+                  </div>
+                  <div class="metric-item" data-metric="bookings" role="listitem" aria-label="۱۵۶ نوبت">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                      <rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/>
+                    </svg>
+                    <span class="metric-value" id="bookingsTotal">۱۵۶</span>
+                    <span class="metric-label">نوبت</span>
+                  </div>
+                  <div class="metric-item" data-metric="rating" role="listitem" aria-label="امتیاز ۴.۸">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                      <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+                    </svg>
+                    <span class="metric-value" id="rating30">۴.۸</span>
+                    <span class="metric-label">امتیاز</span>
+                  </div>
+                </div>
+              </div>
+            </article>
+          </div>
+          <section class="recent-activity" aria-labelledby="ra-title">
+            <h3 class="section-title" id="ra-title">فعالیت‌های اخیر</h3>
+            <div class="activity-list" role="list">
+              </div>
+          </section>
+        </div>
+      </section>
+      <section id="bookings-view" class="view-section" role="region" aria-labelledby="bookings-title" data-page="bookings">
+        <div class="view-container">
+          <header class="view-header">
+            <div class="header-content">
+              <h2 class="view-title" id="bookings-title">نوبت‌ها</h2>
+              <p class="view-subtitle">مدیریت رزروها و برنامه‌ریزی</p>
+            </div>
+          </header>
+          <div class="filter-bar">
+            <div class="filter-chips" role="tablist" aria-label="فیلتر نوبت‌ها">
+              <button type="button" class="filter-chip active" data-filter="all" role="tab" aria-selected="true">همه <span class="chip-badge"></span></button>
+              <button type="button" class="filter-chip" data-filter="pending" role="tab" aria-selected="false">در انتظار <span class="chip-badge"></span></button>
+              <button type="button" class="filter-chip" data-filter="confirmed" role="tab" aria-selected="false">تایید شده <span class="chip-badge"></span></button>
+              <button type="button" class="filter-chip" data-filter="completed" role="tab" aria-selected="false">انجام شده <span class="chip-badge"></span></button>
+            </div>
+          </div>
+          <div id="bookings-list" class="bookings-list" role="list">
+            </div>
+        </div>
+      </section>
+      <section id="customers-view" class="view-section" role="region" aria-labelledby="customers-title" data-page="customers">
+        <div class="view-container">
+          <header class="view-header">
+            <div class="header-content">
+              <h2 class="view-title" id="customers-title">مشتریان</h2>
+              <p class="view-subtitle">مدیریت اطلاعات مشتریان</p>
+            </div>
+            <div class="header-actions">
+              <button type="button" id="add-customer-btn" class="btn-primary" aria-haspopup="dialog" aria-controls="customer-drawer">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="22" y1="11" x2="16" y2="11"/><line x1="19" y1="8" x2="19" y2="14"/>
+                </svg><span>افزودن مشتری</span>
+              </button>
+            </div>
+          </header>
+          <div class="search-section">
+            <div class="search-wrapper">
+              <svg class="search-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/>
+              </svg>
+              <input type="search" id="customer-search" class="search-input" placeholder="جستجوی نام، شماره تماس..." aria-label="جستجو در مشتریان">
+            </div>
+          </div>
+          <div id="customers-list" class="customers-grid" role="list"></div>
+        </div>
+      </section>
+      <section id="reviews-view" class="view-section" role="region" aria-labelledby="reviews-title" data-page="reviews">
+        <div class="view-container">
+          <header class="view-header">
+            <div class="header-content">
+              <h2 class="view-title" id="reviews-title">نظرات و امتیازات</h2>
+            </div>
+          </header>
+          <div class="filter-bar">
+            <div class="filter-chips" role="tablist" aria-label="فیلتر امتیاز">
+              <button type="button" class="filter-chip active" data-filter="all" role="tab" aria-selected="true">همه</button>
+              <button type="button" class="filter-chip" data-filter="5" role="tab" aria-selected="false"><span>۵</span> <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 17.3L18.2 21l-1.6-7L22 9.2l-7.2-.6L12 2 9.2 8.6 2 9.2l5.5 4.7L5.8 21z"/></svg></button>
+              <button type="button" class="filter-chip" data-filter="4" role="tab" aria-selected="false"><span>۴</span> <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 17.3L18.2 21l-1.6-7L22 9.2l-7.2-.6L12 2 9.2 8.6 2 9.2l5.5 4.7L5.8 21z"/></svg></button>
+              <button type="button" class="filter-chip" data-filter="3" role="tab" aria-selected="false"><span>۳</span> <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 17.3L18.2 21l-1.6-7L22 9.2l-7.2-.6L12 2 9.2 8.6 2 9.2l5.5 4.7L5.8 21z"/></svg></button>
+              <button type="button" class="filter-chip" data-filter="1" role="tab" aria-selected="false"><span>۱-۲</span> <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 17.3L18.2 21l-1.6-7L22 9.2l-7.2-.6L12 2 9.2 8.6 2 9.2l5.5 4.7L5.8 21z"/></svg></button>
+            </div>
+          </div>
+          <div id="reviews-list" class="reviews-container" role="list"></div>
+        </div>
+      </section>
+<section id="plans-view" class="view-section" role="region" aria-labelledby="plans-title" data-page="plans">
+  <div class="view-container">
+    <header class="plans-header-modern">
+      <div class="plans-header-bg"></div>
+      <div class="plans-header-content">
+        <div class="plans-badge-top">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M9.663 17l-4.84-4.84a1.5 1.5 0 012.122-2.121l2.72 2.72 6.555-6.556a1.5 1.5 0 012.122 2.122L9.663 17z"/></svg>
+          <span>بدون هزینه پنهان</span>
+        </div>
+        <h2 class="plans-title-modern" id="plans-title">قدرت بیشتر، فروش سریع‌تر</h2>
+        <p class="plans-subtitle-modern">پلن ۳ ماهه = بیشترین رشد با کمترین هزینه</p>
+      </div>
+    </header>
+
+    <!-- انتخاب مدت — پیش‌فرض: ۳ ماهه (اثر تعهد/صرفه) -->
+    <div class="duration-control">
+      <div class="duration-selector-modern" role="tablist" aria-label="انتخاب مدت اشتراک">
+        <button type="button" class="duration-tab" role="tab" data-duration="1" aria-selected="false">
+          <span class="duration-number">۱</span><span class="duration-label">ماهه</span>
+        </button>
+        <button type="button" class="duration-tab" role="tab" data-duration="2" aria-selected="false">
+          <span class="duration-number">۲</span><span class="duration-label">ماهه</span>
+          <span class="duration-save">۱۰٪</span>
+        </button>
+        <button type="button" class="duration-tab active" role="tab" data-duration="3" aria-selected="true">
+          <span class="duration-number">۳</span><span class="duration-label">ماهه</span>
+          <span class="duration-save">۲۰٪</span>
+        </button>
+        <div class="duration-indicator"></div>
+      </div>
+    </div>
+
+    <!-- کارت‌ها — دیکوی: پایه، قهرمان: حرفه‌ای -->
+    <div class="plans-container-modern">
+      <!-- پایه (انعطاف بالا) -->
+      <article class="plan-modern" data-plan="essential">
+        <div class="plan-status">انعطاف بالا</div>
+        <div class="plan-content-modern">
+          <div class="plan-icon-modern" aria-hidden="true">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+          </div>
+          <h3 class="plan-title-card">پایه</h3>
+          <p class="plan-desc">شروع امن برای تست بازار</p>
+
+          <div class="plan-price-modern">
+            <div class="price-main">
+              <!-- data-1 = قیمت ماهانه پایه (مبنای محاسبه تخفیف‌ها) -->
+              <span class="price-value" data-1="149000">۱۴۹,۰۰۰</span>
+              <span class="price-currency">تومان</span>
+            </div>
+            <div class="price-period">برای <span class="period-value">۳ ماه</span></div>
+            <div class="price-savings hidden"><span class="savings-amount"></span></div>
+          </div>
+
+          <div class="plan-features-modern">
+            <div class="feature-modern"><svg class="feature-check" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg><span>۵۰ نوبت ماهانه</span></div>
+            <div class="feature-modern"><svg class="feature-check" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg><span>مدیریت مشتریان</span></div>
+            <div class="feature-modern"><svg class="feature-check" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg><span>پیامک یادآوری</span></div>
+            <div class="feature-modern disabled"><svg class="feature-x" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg><span>گزارشات پیشرفته</span></div>
+          </div>
+
+          <button type="button" class="plan-cta-modern" aria-label="انتخاب پلن پایه">انتخاب پلن</button>
+        </div>
+      </article>
+
+      <!-- حرفه‌ای (قهرمان/به‌صرفه‌ترین) -->
+<article class="plan-modern featured" data-plan="professional">
+        <div class="plan-status featured">به‌صرفه‌ترین</div>
+        <div class="plan-featured-glow" aria-hidden="true"></div>
+        <div class="plan-content-modern">
+          <div class="plan-icon-modern" aria-hidden="true">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+          </div>
+          <h3 class="plan-title-card">حرفه‌ای</h3>
+          <p class="plan-desc">بیشترین رشد با کمترین هزینه</p>
+
+          <div class="plan-price-modern">
+            <div class="price-main">
+              <span class="price-value" data-1="299000">۲۹۹,۰۰۰</span>
+              <span class="price-currency">تومان</span>
+            </div>
+            <div class="price-period">برای <span class="period-value">۳ ماه</span></div>
+            <div class="price-savings"><span class="savings-amount"></span></div>
+          </div>
+
+          <div class="plan-features-modern">
+            <div class="feature-modern"><svg class="feature-check" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg><span><strong>نامحدود</strong> نوبت</span></div>
+            <div class="feature-modern"><svg class="feature-check" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg><span>یادآوری هوشمند</span></div>
+            <div class="feature-modern"><svg class="feature-check" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg><span>گزارشات کامل</span></div>
+            <div class="feature-modern"><svg class="feature-check" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg><span>رزرو آنلاین</span></div>
+            <div class="feature-modern"><svg class="feature-check" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg><span>پشتیبانی VIP</span></div>
+          </div>
+
+          <button type="button" class="plan-cta-modern primary" aria-label="انتخاب پلن حرفه‌ای">
+            <span>انتخاب پلن</span>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14m-7-7l7 7-7 7"/></svg>
+          </button>
+        </div>
+      </article>
+
+      <!-- سازمانی (برای تیم‌ها) -->
+      <article class="plan-modern" data-plan="enterprise">
+        <div class="plan-status">سازمانی</div>
+        <div class="plan-content-modern">
+          <div class="plan-icon-modern" aria-hidden="true">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5m4 0v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
+          </div>
+          <h3 class="plan-title-card">سازمانی</h3>
+          <p class="plan-desc">مقیاس تیمی بدون محدودیت</p>
+
+          <div class="plan-price-modern">
+            <div class="price-main">
+              <span class="price-value" data-1="599000">۵۹۹,۰۰۰</span>
+              <span class="price-currency">تومان</span>
+            </div>
+            <div class="price-period">برای <span class="period-value">۳ ماه</span></div>
+            <div class="price-savings"><span class="savings-amount"></span></div>
+          </div>
+
+          <div class="plan-features-modern">
+            <div class="feature-modern highlight"><svg class="feature-check" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg><span><strong>همه امکانات</strong></span></div>
+            <div class="feature-modern"><svg class="feature-check" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg><span>۱۰ کاربر همزمان</span></div>
+            <div class="feature-modern"><svg class="feature-check" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg><span>مدیریت شعب</span></div>
+            <div class="feature-modern"><svg class="feature-check" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg><span>دسترسی API</span></div>
+            <div class="feature-modern"><svg class="feature-check" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg><span>پشتیبانی ۲۴/۷</span></div>
+          </div>
+
+          <button type="button" class="plan-cta-modern" aria-label="انتخاب پلن سازمانی">انتخاب پلن</button>
+        </div>
+      </article>
+    </div>
+
+    <!-- سوشال‌پروف -->
+    <p class="plans-social-proof" aria-live="polite">۳۴۰ فروشنده فعال همین گزینه را دارند</p>
+
+    <!-- نوار پرداخت چسبان (CTA واحد) -->
+    <div id="checkout-bar" class="checkout-bar" role="region" aria-label="خلاصه پرداخت" aria-hidden="true">
+
+       <button type="button" class="cb-close" aria-label="بستن خلاصه پرداخت">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+    </svg>
+  </button>
+
+
+
+
+
+      <div class="checkout-content">
+        <div class="cb-left">
+          <strong class="cb-plan">حرفه‌ای</strong>
+          <span class="cb-dot">•</span>
+          <span class="cb-duration">۳ ماهه</span>
+          <div class="cb-saving"></div>
+        </div>
+        <div class="cb-right">
+          <div class="cb-total">—</div>
+          <button type="button" class="btn-primary cb-cta" aria-label="ادامه و پرداخت">ادامه و پرداخت</button>
+        </div>
+      </div>
+      <div class="checkout-subline">
+        <button type="button" class="cb-coupon-toggle" aria-expanded="false">کد تخفیف دارید؟</button>
+        <div class="cb-coupon" hidden>
+          <label for="coupon-input" class="sr-only">کد تخفیف</label>
+          <input id="coupon-input" class="cb-input" placeholder="کد را وارد کنید" inputmode="text">
+          <button type="button" class="btn-secondary cb-apply">اعمال</button>
+        </div>
+        <div class="cb-trust">
+          ۷ روز بازگشت وجه • لغو هر زمان • پرداخت امن • <span class="muted">هزینه پیامک جداگانه محاسبه می‌شود</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+      <section id="settings-view" class="view-section" role="region" aria-labelledby="settings-title" data-page="settings">
+        <div class="view-container">
+          <header class="view-header">
+            <h2 class="view-title" id="settings-title">تنظیمات</h2>
+          </header>
+          <form id="settings-form" class="settings-list">
+            <div class="settings-group">
+                <h3 class="settings-group-title">اطلاعات کسب‌وکار</h3>
+                <div class="form-group">
+                    <label for="business-name" class="form-label">نام کسب‌وکار</label>
+                    <input type="text" id="business-name" class="form-control" value="آرایشگاه مدرن سنندج">
+                </div>
+                <div class="form-group">
+                    <label for="business-category" class="form-label">دسته بندی</label>
+                    <select id="business-category" class="form-select">
+                        <option value="barbershop" selected>آرایشگاه مردانه</option>
+                        <option value="salon">سالن زیبایی زنانه</option>
+                        <option value="clinic">کلینیک زیبایی</option>
+                    </select>
+                </div>
+            </div>
+            <!-- === NEW: خدمات من (My Services) === -->
+            <div class="settings-group">
+                <div class="view-header" style="margin-bottom: var(--space-3);">
+                    <h3 class="settings-group-title" style="margin-bottom: 0; border-bottom: none;">خدمات من</h3>
+                    <div class="header-actions">
+                        <button type="button" id="add-service-btn" class="btn-primary" aria-haspopup="dialog" aria-controls="service-drawer">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                <line x1="12" y1="5" x2="12" y2="19"></line>
+                                <line x1="5" y1="12" x2="19" y2="12"></line>
+                            </svg>
+                            <span>افزودن خدمت</span>
+                        </button>
+                    </div>
+                </div>
+                <div id="services-list" class="item-grid" role="list">
+                    <!-- Services will be rendered here by JS -->
+                </div>
+            </div>
+            <!-- === NEW: نمونه‌کارها (Portfolio) === -->
+            <div class="settings-group">
+                <div class="view-header" style="margin-bottom: var(--space-3);">
+                    <h3 class="settings-group-title" style="margin-bottom: 0; border-bottom: none;">نمونه‌کارها</h3>
+                    <div class="header-actions">
+                        <button type="button" id="add-portfolio-btn" class="btn-primary" aria-haspopup="dialog" aria-controls="portfolio-drawer">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                                <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                                <path d="M21 15l-5-5L5 21"></path>
+                            </svg>
+                            <span>افزودن نمونه‌کار</span>
+                        </button>
+                    </div>
+                </div>
+                <div id="portfolio-list" class="item-grid" role="list">
+                    <!-- Portfolio items will be rendered here by JS -->
+                </div>
+            </div>
+            <!-- === END OF NEW SECTIONS === -->
+            <div class="settings-group">
+
+<!-- === NEW: تصاویر صفحه (هیرو + فوتر) === -->
+<div class="settings-group image-settings-group">
+  <h3 class="settings-group-title">تصاویر صفحه</h3>
+
+  <!-- Hero -->
+  <div class="image-field" id="field-hero">
+    <div>
+      <div class="field-title">تصویر هدر (هیرو)</div>
+      <div class="help">پیشنهاد: نسبت 16:9 یا 3:2 — کیفیت بالا — بدون متن پررنگ روی تصویر</div>
+    </div>
+    <div class="preview"><img id="hero-preview" alt="پیش‌نمایش تصویر هدر"></div>
+    <div class="actions">
+      <button type="button" class="btn-secondary" id="hero-pick-btn">انتخاب از گالری/دوربین</button>
+      <button type="button" class="btn-secondary" id="hero-remove-btn">حذف تصویر</button>
+    </div>
+    <div class="url-row">
+      <input type="url" id="hero-url" class="form-control" placeholder="یا لینک تصویر را وارد کنید (https://)">
+      <button type="button" class="btn-primary" id="hero-url-save">ثبت لینک</button>
+    </div>
+    <input type="file" accept="image/*" capture="environment" id="hero-file" hidden>
+  </div>
+
+  <!-- Footer -->
+  <div class="image-field" id="field-footer">
+    <div>
+      <div class="field-title">تصویر فوتر (نمای دور فروشگاه)</div>
+      <div class="help">پیشنهاد: افقی و عریض؛ نمای بیرونی مغازه/تابلو (نسبت 21:9 یا 16:9)</div>
+    </div>
+    <div class="preview"><img id="footer-preview" alt="پیش‌نمایش تصویر فوتر"></div>
+    <div class="actions">
+      <button type="button" class="btn-secondary" id="footer-pick-btn">انتخاب از گالری/دوربین</button>
+      <button type="button" class="btn-secondary" id="footer-remove-btn">حذف تصویر</button>
+    </div>
+    <div class="url-row">
+      <input type="url" id="footer-url" class="form-control" placeholder="یا لینک تصویر را وارد کنید (https://)">
+      <button type="button" class="btn-primary" id="footer-url-save">ثبت لینک</button>
+    </div>
+    <input type="file" accept="image/*" capture="environment" id="footer-file" hidden>
+  </div>
+</div>
+
+
+
+                <h3 class="settings-group-title">اعلان‌ها</h3>
+                <div class="form-group">
+                    <label for="notification-email" class="form-label">ایمیل برای اعلان‌ها</label>
+                    <input type="email" id="notification-email" class="form-control" value="seller@example.com">
+                </div>
+            </div>
+            <div class="form-actions">
+                <button type="submit" class="btn-primary">ذخیره تغییرات</button>
+            </div>
+        </form>
+        </div>
+      </section>
+    </div>
+  </main>
+  <nav class="app-nav" role="navigation" aria-label="منوی اصلی">
+    <a href="#/dashboard" class="nav-item active" data-page="dashboard" aria-current="page">
+      <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      <span class="nav-label">داشبورد</span>
+    </a>
+    <a href="#/bookings" class="nav-item" data-page="bookings">
+      <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+      <span class="nav-label">نوبت‌ها</span>
+    </a>
+    <a href="#/customers" class="nav-item" data-page="customers">
+      <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+      <span class="nav-label">مشتریان</span>
+    </a>
+    <a href="#/reviews" class="nav-item" data-page="reviews">
+      <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+      <span class="nav-label">نظرات</span>
+    </a>
+    <a href="#/plans" class="nav-item" data-page="plans">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 10.5V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v12c0 1.1.9 2 2 2h12.5"/><path d="M22 17a5 5 0 1 1-10 0 5 5 0 0 1 10 0Z"/><path d="m14 17 2 2 4-4"/></svg>
+        <span class="nav-label">پلن‌ها</span>
+    </a>
+    <a href="#/settings" class="nav-item" data-page="settings">
+      <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+      <span class="nav-label">تنظیمات</span>
+    </a>
+  </nav>
+  <div id="rank-modal" class="modal" role="dialog" aria-modal="true" aria-labelledby="rank-modal-title" hidden>
+    <div class="modal-backdrop" data-dismiss="modal"></div>
+    <div class="modal-content card" role="document">
+        <div class="modal-header">
+            <h3 id="rank-modal-title" class="modal-title">جزئیات رتبه‌بندی</h3>
+            <button type="button" class="btn-icon modal-close-btn" data-dismiss="modal" aria-label="بستن">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            </button>
+        </div>
+        <div class="modal-body">
+            <p>رتبه شما بر اساس ترکیبی از تعداد مشتریان جدید، تعداد کل نوبت‌ها، و میانگین امتیازات شما در ۳۰ روز گذشته محاسبه می‌شود. فعال بودن و دریافت نظرات مثبت به بهبود رتبه شما کمک می‌کند.</p>
+            <p><strong>رتبه فعلی: ۱۲ از ۴۵</strong></p>
+        </div>
+    </div>
+  </div>
+  <div id="customer-drawer" class="drawer" role="dialog" aria-modal="true" aria-labelledby="customer-drawer-title" hidden>
+    <div class="drawer-backdrop" data-dismiss="drawer"></div>
+    <div class="drawer-content" role="document">
+        <div class="drawer-header">
+            <h3 id="customer-drawer-title" class="drawer-title">افزودن مشتری جدید</h3>
+            <button type="button" class="btn-icon drawer-close-btn" data-dismiss="drawer" aria-label="بستن">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            </button>
+        </div>
+        <form id="add-customer-form" class="drawer-body">
+            <div class="form-group">
+                <label for="customer-name" class="form-label">نام و نام خانوادگی</label>
+                <input type="text" id="customer-name" class="form-control" required>
+            </div>
+            <div class="form-group">
+                <label for="customer-phone" class="form-label">شماره تماس</label>
+                <input type="tel" id="customer-phone" class="form-control" required>
+            </div>
+            <div class="form-actions">
+                <button type="submit" class="btn-primary">افزودن</button>
+            </div>
+        </form>
+    </div>
+  </div>
+
+
+<!-- Customer Details Modal - Add this after #customer-drawer -->
+<div id="customer-details-modal" class="modal customer-modal" role="dialog" aria-modal="true" aria-labelledby="customer-modal-title" hidden>
+  <div class="modal-backdrop" data-dismiss="modal"></div>
+  <div class="modal-content customer-modal-content" role="document">
+    <button type="button" class="modal-close-floating" data-dismiss="modal" aria-label="بستن">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <line x1="18" y1="6" x2="6" y2="18"/>
+        <line x1="6" y1="6" x2="18" y2="18"/>
+      </svg>
+    </button>
+    
+    <div class="customer-modal-header">
+      <div class="customer-avatar-large">
+        <span id="customer-modal-avatar">م</span>
+      </div>
+      <div class="customer-header-info">
+        <h2 id="customer-modal-name" class="customer-modal-name">نام مشتری</h2>
+        <div class="customer-modal-phone" id="customer-modal-phone">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>
+          </svg>
+          <span>۰۹۱۲۳۴۵۶۷۸۹</span>
+        </div>
+      </div>
+    </div>
+    
+    <div class="customer-modal-stats">
+      <div class="stat-item-modal">
+        <div class="stat-icon-modal reservations">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="4" width="18" height="18" rx="2"/>
+            <path d="M16 2v4M8 2v4M3 10h18"/>
+          </svg>
+        </div>
+        <div class="stat-info-modal">
+          <div class="stat-value-modal" id="customer-total-reservations">۰</div>
+          <div class="stat-label-modal">کل رزروها</div>
+        </div>
+      </div>
+      
+      <div class="stat-item-modal">
+        <div class="stat-icon-modal completed">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M9 11l3 3L22 4"/>
+            <path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/>
+          </svg>
+        </div>
+        <div class="stat-info-modal">
+          <div class="stat-value-modal" id="customer-completed-reservations">۰</div>
+          <div class="stat-label-modal">انجام شده</div>
+        </div>
+      </div>
+      
+      <div class="stat-item-modal">
+        <div class="stat-icon-modal rating">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+          </svg>
+        </div>
+        <div class="stat-info-modal">
+          <div class="stat-value-modal" id="customer-rating">۴.۸</div>
+          <div class="stat-label-modal">امتیاز</div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="customer-modal-section">
+      <h3 class="section-title-modal">آخرین رزرو</h3>
+      <div class="last-reservation-card" id="last-reservation">
+        <div class="reservation-date">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="4" width="18" height="18" rx="2"/>
+            <path d="M16 2v4M8 2v4M3 10h18"/>
+          </svg>
+          <span id="last-reservation-date">۱۴۰۳/۰۹/۱۵</span>
+        </div>
+        <div class="reservation-service">
+          <span class="service-name" id="last-reservation-service">اصلاح سر و صورت</span>
+          <span class="service-time" id="last-reservation-time">ساعت ۱۴:۳۰</span>
+        </div>
+        <div class="reservation-status">
+          <span class="status-badge status-completed" id="last-reservation-status">انجام شده</span>
+        </div>
+      </div>
+    </div>
+
+
+
+<!-- ⬇️ Customer prefs: Auto-accept & Block (place right before .customer-modal-actions) -->
+<div class="customer-modal-section" id="customer-prefs">
+  <h3 class="section-title-modal">تنظیمات این مشتری</h3>
+
+  <div class="item-card">
+    <div class="item-card-header">
+      <h4 class="item-title">تایید خودکار نوبت‌ها</h4>
+      <label class="toggle-switch">
+        <input type="checkbox" id="toggle-auto-accept" class="toggle-switch-input"/>
+        <span class="toggle-switch-slider"></span>
+      </label>
+    </div>
+    <p class="item-details">با روشن‌کردن، همه نوبت‌های این مشتری بدون نیاز به تایید، خودکار تایید می‌شوند.</p>
+  </div>
+
+  <div class="item-card" style="border-color: var(--c-danger);">
+    <div class="item-card-header">
+      <h4 class="item-title">مسدودسازی</h4>
+      <label class="toggle-switch" style="--c-success: var(--c-danger);">
+        <input type="checkbox" id="toggle-blocked" class="toggle-switch-input"/>
+        <span class="toggle-switch-slider"></span>
+      </label>
+    </div>
+    <p class="item-details">با روشن‌کردن، این مشتری دیگر نمی‌تواند نوبت رزرو کند.</p>
+  </div>
+</div>
+
+
+
+
+    
+    <div class="customer-modal-actions">
+      <button type="button" class="btn-action-modal primary">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72"/>
+        </svg>
+        تماس با مشتری
+      </button>
+      <button type="button" class="btn-action-modal secondary">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <rect x="3" y="4" width="18" height="18" rx="2"/>
+          <path d="M16 2v4M8 2v4M3 10h18M8 14h.01M12 14h.01M16 14h.01"/>
+        </svg>
+        رزرو جدید
+      </button>
+    </div>
+  </div>
+</div>
+
+
+
+
+  <!-- === NEW: Service Management Drawer === -->
+  <div id="service-drawer" class="drawer" role="dialog" aria-modal="true" aria-labelledby="service-drawer-title" hidden>
+    <div class="drawer-backdrop" data-dismiss="drawer"></div>
+    <div class="drawer-content" role="document">
+        <div class="drawer-header">
+            <h3 id="service-drawer-title" class="drawer-title">افزودن خدمت جدید</h3>
+            <button type="button" class="btn-icon drawer-close-btn" data-dismiss="drawer" aria-label="بستن">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            </button>
+        </div>
+        <form id="service-form" class="drawer-body">
+            <input type="hidden" id="service-id">
+            <div class="form-group">
+                <label for="service-title" class="form-label">عنوان خدمت</label>
+                <input type="text" id="service-title" class="form-control" required>
+            </div>
+            <div class="form-group">
+                <label for="service-price" class="form-label">قیمت (تومان)</label>
+                <input type="number" id="service-price" class="form-control" min="0" required>
+            </div>
+            <div class="form-group">
+                <label for="service-duration" class="form-label">مدت (دقیقه)</label>
+                <input type="number" id="service-duration" class="form-control" min="1" required>
+            </div>
+            <div class="form-group">
+                <label for="service-active" class="form-label">وضعیت فعال</label>
+                <select id="service-active" class="form-select" required>
+                    <option value="true">فعال</option>
+                    <option value="false">غیرفعال</option>
+                </select>
+            </div>
+            <div class="form-actions">
+                <button type="submit" class="btn-primary">ذخیره</button>
+            </div>
+        </form>
+    </div>
+  </div>
+  <!-- === NEW: Portfolio Management Drawer === -->
+  <div id="portfolio-drawer" class="drawer" role="dialog" aria-modal="true" aria-labelledby="portfolio-drawer-title" hidden>
+    <div class="drawer-backdrop" data-dismiss="drawer"></div>
+    <div class="drawer-content" role="document">
+        <div class="drawer-header">
+            <h3 id="portfolio-drawer-title" class="drawer-title">افزودن نمونه‌کار جدید</h3>
+            <button type="button" class="btn-icon drawer-close-btn" data-dismiss="drawer" aria-label="بستن">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            </button>
+        </div>
+        <form id="portfolio-form" class="drawer-body">
+            <input type="hidden" id="portfolio-id">
+            <div class="form-group">
+                <label for="portfolio-title" class="form-label">عنوان</label>
+                <input type="text" id="portfolio-title" class="form-control" required>
+            </div>
+            <div class="form-group">
+                <label for="portfolio-image" class="form-label">آدرس تصویر (URL)</label>
+                <input type="url" id="portfolio-image" class="form-control" required>
+            </div>
+            <div class="form-group">
+                <label for="portfolio-description" class="form-label">توضیح کوتاه</label>
+                <textarea id="portfolio-description" class="form-control" rows="3"></textarea>
+            </div>
+            <div class="form-actions">
+                <button type="submit" class="btn-primary">ذخیره</button>
+            </div>
+        </form>
+    </div>
+  </div>
+  <div id="toast-root" aria-live="assertive" aria-atomic="true"></div>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  /**
+   * ==============================
+   * Mock Data
+   * ==============================
+   */
+  const MOCK_DATA = {
+    recentActivity: [
+      { type: 'review', text: 'نظر جدید از <strong>علی رضایی</strong>', time: '۲ دقیقه پیش' },
+      { type: 'booking', text: 'نوبت جدید برای <strong>سارا محمدی</strong> تایید شد.', time: '۱ ساعت پیش' },
+      { type: 'customer', text: '<strong>رضا حسینی</strong> به مشتریان شما اضافه شد.', time: '۳ ساعت پیش' },
+      { type: 'booking', text: 'نوبت <strong>مریم اکبری</strong> برای فردا لغو شد.', time: '۵ ساعت پیش' },
+    ],
+    bookings: [
+      { id: 1, customerName: 'علی رضایی', service: 'اصلاح سر', time: '۱۴:۳۰', status: 'confirmed' },
+      { id: 2, customerName: 'سارا محمدی', service: 'رنگ مو', time: '۱۶:۰۰', status: 'pending' },
+      { id: 3, customerName: 'رضا حسینی', service: 'اصلاح ریش', time: '۱۱:۰۰', status: 'pending' },
+      { id: 4, customerName: 'مریم اکبری', service: 'کوتاهی مو', time: '۱۷:۳۰', status: 'confirmed' },
+      { id: 5, customerName: 'نیما افشار', service: 'اصلاح سر', time: '۱۰:۰۰', status: 'completed' },
+      { id: 6, customerName: 'زهرا قاسمی', service: 'کراتینه', time: '۱۸:۰۰', status: 'pending' },
+    ],
+    customers: [
+      { id: 1, name: 'علی رضایی', phone: '۰۹۱۲۳۴۵۶۷۸۹', lastVisit: '۱۴۰۳/۰۵/۲۰' },
+      { id: 2, name: 'سارا محمدی', phone: '۰۹۳۵۱۲۳۴۵۶۷', lastVisit: '۱۴۰۳/۰۵/۱۸' },
+      { id: 3, name: 'رضا حسینی', phone: '۰۹۱۸۹۸۷۶۵۴۳', lastVisit: '۱۴۰۳/۰۵/۱۵' },
+      { id: 4, name: 'مریم اکبری', phone: '۰۹۱۰۱۱۰۲۲۰۳', lastVisit: '۱۴۰۳/۰۴/۳۰' },
+    ],
+    reviews: [
+      { id: 1, customerName: 'علی رضایی', rating: 5, date: '۱ روز پیش', comment: 'کارشون عالی و حرفه‌ای بود. بسیار راضی بودم.' },
+      { id: 2, customerName: 'سارا محمدی', rating: 4, date: '۳ روز پیش', comment: 'محیط تمیز و برخورد پرسنل خوب بود. فقط کمی معطل شدم.' },
+      { id: 3, customerName: 'رضا حسینی', rating: 5, date: '۱ هفته پیش', comment: 'بهترین آرایشگاهی که تا حالا رفتم.' },
+      { id: 4, customerName: 'مریم اکبری', rating: 3, date: '۲ هفته پیش', comment: 'کیفیت کار متوسط بود.' },
+    ]
+  };
+  /**
+   * ==============================
+   * Storage Manager
+   * ==============================
+   */
+  class StorageManager {
+    static get(key) {
+      try {
+        return JSON.parse(localStorage.getItem(key));
+      } catch (e) {
+        console.error("Error getting from localStorage", e);
+        return null;
+      }
+    }
+    static set(key, value) {
+      try {
+        localStorage.setItem(key, JSON.stringify(value));
+      } catch (e) {
+        console.error("Error setting to localStorage", e);
+      }
+    }
+  }
+
+
+
+// === Customer Preferences Store (keyed by normalized customer name) ===
+const normalizeKey = (s) => (s || '').toString().trim().toLowerCase();
+
+const CustomerPrefs = {
+  _KEY: 'vit_customer_prefs',
+  load() { return StorageManager.get(this._KEY) || {}; },
+  save(data) { StorageManager.set(this._KEY, data); },
+  getByName(name) {
+    const all = this.load();
+    return all[normalizeKey(name)] || { autoAccept: false, blocked: false };
+  },
+  setByName(name, patch) {
+    const k = normalizeKey(name);
+    const all = this.load();
+    all[k] = { ...(all[k] || { autoAccept: false, blocked: false }), ...patch };
+    this.save(all);
+  }
+};
+
+// (اختیاری اما مفید): استفاده در فرانت رزرو سمت کاربر
+window.VitreenetRules = {
+  isBlockedByName: (name) => !!CustomerPrefs.getByName(name).blocked,
+  shouldAutoAcceptByName: (name) => !!CustomerPrefs.getByName(name).autoAccept
+};
+
+
+  /**
+   * ==============================
+   * State Manager
+   * ==============================
+   */
+  const StateManager = {
+    currentTheme: 'dark',
+    currentRoute: '',
+    isModalOpen: false,
+    focusedElementBeforeModal: null,
+  };
+  /**
+   * ==============================
+   * UI Components & Helpers
+   * ==============================
+   */
+  class UIComponents {
+    static formatPersianNumber(num) {
+      if (typeof num !== 'number') return num;
+      return new Intl.NumberFormat('fa-IR').format(num);
+    }
+    static formatPersianDate() {
+        const options = { year: 'numeric', month: 'long', day: 'numeric', weekday: 'long' };
+        return new Intl.DateTimeFormat('fa-IR-u-nu-latn', options).format(new Date());
+    }
+    static animateCountUp(el) {
+      const target = parseInt(el.dataset.value, 10);
+      const isDecimal = el.dataset.value.includes('.');
+      const targetDecimal = isDecimal ? parseFloat(el.dataset.value) : target;
+      let frame = 0;
+      const duration = 50; // frames
+      const step = targetDecimal / duration;
+      function counter() {
+        frame++;
+        const current = step * frame;
+        if (isDecimal) {
+            el.textContent = UIComponents.formatPersianNumber(parseFloat(Math.min(current, targetDecimal).toFixed(1)));
+        } else {
+            el.textContent = UIComponents.formatPersianNumber(Math.min(Math.ceil(current), target));
+        }
+        if (frame < duration) {
+          requestAnimationFrame(counter);
+        } else {
+            el.textContent = UIComponents.formatPersianNumber(targetDecimal);
+        }
+      }
+      requestAnimationFrame(counter);
+    }
+    static showToast(message, type = 'info', duration = 3000) {
+      const toastRoot = document.getElementById('toast-root');
+      if (!toastRoot) return;
+      const toast = document.createElement('div');
+      toast.className = `toast ${type}`;
+      toast.setAttribute('role', 'status');
+      toast.textContent = message;
+      toastRoot.appendChild(toast);
+      setTimeout(() => {
+        toast.remove();
+      }, duration);
+    }
+    // Modal & Drawer Logic
+    static _handleOverlay(overlay, trigger, isOpen) {
+      const body = document.body;
+      const mainContent = document.getElementById('app');
+      if (isOpen) {
+        StateManager.isModalOpen = true;
+        StateManager.focusedElementBeforeModal = document.activeElement;
+        overlay.classList.add('is-open');
+        body.classList.add('has-overlay');
+        mainContent.setAttribute('aria-hidden', 'true');
+        const focusableElements = overlay.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
+        const firstFocusable = focusableElements[0];
+        const lastFocusable = focusableElements[focusableElements.length - 1];
+        overlay.addEventListener('keydown', (e) => this._trapFocus(e, firstFocusable, lastFocusable));
+        if(firstFocusable) firstFocusable.focus();
+      } else {
+        StateManager.isModalOpen = false;
+        overlay.classList.remove('is-open');
+        body.classList.remove('has-overlay');
+        mainContent.removeAttribute('aria-hidden');
+        if (StateManager.focusedElementBeforeModal) {
+          StateManager.focusedElementBeforeModal.focus();
+        }
+      }
+    }
+    static _trapFocus(e, firstFocusable, lastFocusable) {
+        if (e.key !== 'Tab') return;
+        if (e.shiftKey) { /* shift + tab */
+            if (document.activeElement === firstFocusable) {
+                lastFocusable.focus();
+                e.preventDefault();
+            }
+        } else { /* tab */
+            if (document.activeElement === lastFocusable) {
+                firstFocusable.focus();
+                e.preventDefault();
+            }
+        }
+    }
+    static openModal(modalId) {
+      const modal = document.getElementById(modalId);
+      if (!modal) return;
+      modal.hidden = false;
+      this._handleOverlay(modal, null, true);
+    }
+    static closeModal(modalId) {
+      const modal = document.getElementById(modalId);
+      if (!modal) return;
+      modal.hidden = true;
+      this._handleOverlay(modal, null, false);
+    }
+    static openDrawer(drawerId) {
+      const drawer = document.getElementById(drawerId);
+      if (!drawer) return;
+      drawer.hidden = false;
+      this._handleOverlay(drawer, null, true);
+    }
+    static closeDrawer(drawerId) {
+      const drawer = document.getElementById(drawerId);
+      if (!drawer) return;
+      drawer.hidden = true;
+      this._handleOverlay(drawer, null, false);
+    }
+  }
+  /**
+   * ==============================
+   * Main Application Logic
+   * ==============================
+   */
+  class SellerPanelApp {
+    constructor() {
+      this.root = document.documentElement;
+      this.body = document.body;
+      this.appNav = document.querySelector('.app-nav');
+      this.debouncedSearch = this.debounce(this.filterCustomers, 300);
+      
+      // Initialize Services and Portfolio
+      this.initServices();
+      this.initPortfolio();
+      this.initCustomerFeatures();
+    }
+    init() {
+      this.setupEventListeners();
+      this.handleRouteChange();
+      this.initSidebarObserver();
+      this.renderWelcomeDate();
+      this.applyCustomerRules();
+
+    }
+setupEventListeners() {
+  // Cache frequently used elements
+  const elements = {
+    body: this.body,
+    viewStoreBtn: document.getElementById('view-store-btn'),
+    plansView: document.getElementById('plans-view'),
+    customerSearch: document.getElementById('customer-search'),
+    bookingsFilter: document.querySelector('#bookings-view .filter-chips'),
+    reviewsFilter: document.querySelector('#reviews-view .filter-chips'),
+    settingsForm: document.getElementById('settings-form'),
+    rankCard: document.getElementById('rank-card'),
+    addCustomerBtn: document.getElementById('add-customer-btn'),
+    addServiceBtn: document.getElementById('add-service-btn'),
+    addPortfolioBtn: document.getElementById('add-portfolio-btn'),
+    serviceForm: document.getElementById('service-form'),
+    portfolioForm: document.getElementById('portfolio-form')
+  };
+
+  // Map for drawer/modal management
+  const overlays = {
+    modals: {
+      'rank': 'rank-modal'
+    },
+    drawers: {
+      'customer': 'customer-drawer',
+      'service': 'service-drawer',
+      'portfolio': 'portfolio-drawer'
+    }
+  };
+
+  // Bind class methods once
+  this.boundHandleRouteChange = this.handleRouteChange.bind(this);
+  this.boundHandlePlanDurationChange = this.handlePlanDurationChange.bind(this);
+  this.boundHandleBookingFilterChange = this.handleBookingFilterChange.bind(this);
+  this.boundHandleReviewFilterChange = this.handleReviewFilterChange.bind(this);
+  this.boundHandleServiceFormSubmit = this.handleServiceFormSubmit.bind(this);
+  this.boundHandlePortfolioFormSubmit = this.handlePortfolioFormSubmit.bind(this);
+
+  // 1. Route change listener
+  window.addEventListener('hashchange', this.boundHandleRouteChange);
+
+  // 2. Centralized body click delegation
+elements.body.addEventListener('click', (e) => {
+  const target = e.target;
+
+  // Handle route navigation
+  const routeTarget = target.closest('[data-route]');
+  if (routeTarget) {
+    const route = routeTarget.dataset.route;
+    if (route === 'ranking') {
+      UIComponents.openModal('rank-modal');
+    } else {
+      window.location.hash = `/${route}`;
+    }
+    return;
+  }
+
+  // ✅ Close the overlay you clicked inside (modal/drawer)
+  const dismissTarget = target.closest('[data-dismiss]');
+  if (dismissTarget) {
+    const container = dismissTarget.closest('.modal, .drawer');
+    if (!container) return;
+
+    if (container.classList.contains('modal')) {
+      UIComponents.closeModal(container.id);
+    } else {
+      UIComponents.closeDrawer(container.id);
+    }
+    return;
+  }
+}, { passive: true });
+
+
+  // 3. View Store button
+  if (elements.viewStoreBtn) {
+    elements.viewStoreBtn.addEventListener('click', () => {
+      window.open('/store', '_blank', 'noopener,noreferrer');
+    });
+  }
+
+  // 4. Plans view - Updated selector
+  if (elements.plansView) {
+    const billingToggle = elements.plansView.querySelector('.billing-toggle');
+    if (billingToggle) {
+      billingToggle.addEventListener('click', this.boundHandlePlanDurationChange);
+    }
+  }
+
+  // 5. Search and Filters with optimized event handling
+  if (elements.customerSearch) {
+    elements.customerSearch.addEventListener('input', 
+      (e) => this.debouncedSearch(e.target.value), 
+      { passive: true }
+    );
+  }
+
+  if (elements.bookingsFilter) {
+    elements.bookingsFilter.addEventListener('click', this.boundHandleBookingFilterChange);
+  }
+
+  if (elements.reviewsFilter) {
+    elements.reviewsFilter.addEventListener('click', this.boundHandleReviewFilterChange);
+  }
+
+  // 6. Form submissions
+  if (elements.settingsForm) {
+    elements.settingsForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      UIComponents.showToast('تنظیمات با موفقیت ذخیره شد!', 'success');
+    });
+  }
+
+  if (elements.serviceForm) {
+    elements.serviceForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      this.boundHandleServiceFormSubmit();
+    });
+  }
+
+  if (elements.portfolioForm) {
+    elements.portfolioForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      this.boundHandlePortfolioFormSubmit();
+    });
+  }
+
+  // 7. Button click handlers with null checks
+  const buttonHandlers = [
+    { 
+      element: elements.rankCard, 
+      handler: () => UIComponents.openModal('rank-modal') 
+    },
+    { 
+      element: elements.addCustomerBtn, 
+      handler: () => UIComponents.openDrawer('customer-drawer') 
+    },
+    { 
+      element: elements.addServiceBtn, 
+      handler: () => {
+        this.populateServiceForm(null);
+        UIComponents.openDrawer('service-drawer');
+      } 
+    },
+    { 
+      element: elements.addPortfolioBtn, 
+      handler: () => {
+        this.populatePortfolioForm(null);
+        UIComponents.openDrawer('portfolio-drawer');
+      } 
+    }
+  ];
+
+  buttonHandlers.forEach(({ element, handler }) => {
+    if (element) {
+      element.addEventListener('click', handler);
+    }
+  });
+
+  // 8. Optimized Escape key handler - only closes active overlay
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && StateManager.isModalOpen) {
+      // Find and close only the currently open overlay
+      const activeModal = document.querySelector('.modal.is-open');
+      const activeDrawer = document.querySelector('.drawer.is-open');
+      
+      if (activeModal) {
+        UIComponents.closeModal(activeModal.id);
+      } else if (activeDrawer) {
+        UIComponents.closeDrawer(activeDrawer.id);
+      }
+    }
+  });
+
+  // 9. Cleanup method for memory management (optional)
+  this.cleanup = () => {
+    window.removeEventListener('hashchange', this.boundHandleRouteChange);
+    // Remove other event listeners if needed when app is destroyed
+  };
+}
+
+// Optional: Add this method to properly clean up event listeners
+destroy() {
+  if (this.cleanup) {
+    this.cleanup();
+  }
+  
+  // Clear any intervals or timeouts
+  if (this.debouncedSearchTimeout) {
+    clearTimeout(this.debouncedSearchTimeout);
+  }
+}
+    // --- Routing ---
+    handleRouteChange() {
+      const hash = window.location.hash || '#/dashboard';
+      const page = hash.substring(2) || 'dashboard';
+      document.querySelectorAll('.view-section').forEach(s => s.classList.remove('active'));
+      document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+      document.querySelectorAll('.nav-item').forEach(n => n.removeAttribute('aria-current'));
+      const activeSection = document.getElementById(`${page}-view`);
+      const activeNav = document.querySelector(`.nav-item[data-page="${page}"]`);
+      if (activeSection) {
+        activeSection.classList.add('active');
+        document.title = `پنل فروشنده - ${activeNav?.textContent.trim() || 'داشبورد'}`;
+        this.renderPageContent(page);
+      } else {
+        document.getElementById('dashboard-view').classList.add('active'); // Fallback
+      }
+      if (activeNav) {
+        activeNav.classList.add('active');
+        activeNav.setAttribute('aria-current', 'page');
+      }
+    }
+    renderPageContent(page) {
+      switch(page) {
+        case 'dashboard': this.renderDashboard(); break;
+        case 'bookings': this.renderBookings(); break;
+        case 'customers': this.renderCustomers(); break;
+        case 'reviews': this.renderReviews(); break;
+        case 'plans': this.renderPlans(); break;
+        case 'settings': this.renderSettings(); break; // New call for settings
+      }
+    }
+    // --- Page Rendering ---
+    renderWelcomeDate() {
+      document.getElementById('welcome-date').textContent = UIComponents.formatPersianNumber(new Date().toLocaleDateString('fa-IR'));
+    }
+    renderDashboard() {
+        document.querySelectorAll('.stat-value').forEach(UIComponents.animateCountUp);
+        // Render Recent Activity
+        const activityList = document.querySelector('.recent-activity .activity-list');
+        const icons = {
+          review: '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>',
+          booking: '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>',
+          customer: '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>',
+        };
+        activityList.innerHTML = MOCK_DATA.recentActivity.map(item => `
+          <div class="activity-item" role="listitem">
+            <div class="activity-icon" aria-hidden="true">${icons[item.type]}</div>
+            <p class="activity-text">${item.text}</p>
+            <time class="activity-time">${item.time}</time>
+          </div>
+        `).join('');
+    }
+    renderBookings(filter = 'all') {
+        const listEl = document.getElementById('bookings-list');
+        const filteredBookings = (filter === 'all')
+            ? MOCK_DATA.bookings
+            : MOCK_DATA.bookings.filter(b => b.status === filter);
+        if(filteredBookings.length === 0) {
+            listEl.innerHTML = `<p>موردی برای نمایش یافت نشد.</p>`;
+            return;
+        }
+        listEl.innerHTML = filteredBookings.map(b => `
+            <article class="booking-card card" role="listitem">
+              <div class="booking-card-content">
+                  <strong class="booking-customer">${b.customerName}</strong>
+                  <span class="booking-service">${b.service} - ساعت ${UIComponents.formatPersianNumber(b.time)}</span>
+              </div>
+              <div class="booking-actions">
+                  <span class="status-badge status-${b.status}">${{pending: 'در انتظار', confirmed: 'تایید شده', completed: 'انجام شده'}[b.status]}</span>
+              </div>
+            </article>
+        `).join('');
+        // Update badges
+        document.querySelector('.filter-chip[data-filter="all"] .chip-badge').textContent = UIComponents.formatPersianNumber(MOCK_DATA.bookings.length);
+        ['pending', 'confirmed', 'completed'].forEach(status => {
+           const count = MOCK_DATA.bookings.filter(b => b.status === status).length;
+           document.querySelector(`.filter-chip[data-filter="${status}"] .chip-badge`).textContent = UIComponents.formatPersianNumber(count);
+        });
+    }
+    renderCustomers(query = '') {
+      const listEl = document.getElementById('customers-list');
+      const normalizedQuery = query.trim().toLowerCase();
+      const filteredCustomers = MOCK_DATA.customers.filter(c => 
+          c.name.toLowerCase().includes(normalizedQuery) ||
+          c.phone.includes(normalizedQuery)
+      );
+      if(filteredCustomers.length === 0) {
+          listEl.innerHTML = `<p>مشتری با این مشخصات یافت نشد.</p>`;
+          return;
+      }
+      listEl.innerHTML = filteredCustomers.map(c => `
+        <article class="customer-card card" role="listitem" tabindex="0">
+            <div class="customer-avatar" aria-hidden="true">${c.name.charAt(0)}</div>
+            <div class="customer-info">
+                <div class="customer-name">${c.name}</div>
+                <div class="customer-phone">${UIComponents.formatPersianNumber(c.phone)}</div>
+                <div class="customer-last-visit">آخرین بازدید: ${UIComponents.formatPersianNumber(c.lastVisit)}</div>
+            </div>
+        </article>
+      `).join('');
+    }
+ renderBookings(filter = 'all') {
+  const listEl = document.getElementById('bookings-list');
+  const prefs = CustomerPrefs.load();
+
+  // اعمال قوانین روی کپی داده‌ها برای نمایش
+  const effective = MOCK_DATA.bookings.map(b => {
+    const p = prefs[normalizeKey(b.customerName)];
+    if (p?.blocked) return { ...b, status: 'cancelled' };
+    if (p?.autoAccept && b.status === 'pending') return { ...b, status: 'confirmed' };
+    return b;
+  });
+
+  const filtered = (filter === 'all') ? effective : effective.filter(b => b.status === filter);
+
+  if (filtered.length === 0) {
+    listEl.innerHTML = `<p>موردی برای نمایش یافت نشد.</p>`;
+  } else {
+    listEl.innerHTML = filtered.map(b => `
+      <article class="booking-card card" role="listitem">
+        <div class="booking-card-content">
+          <strong class="booking-customer">${b.customerName}</strong>
+          <span class="booking-service">${b.service} - ساعت ${UIComponents.formatPersianNumber(b.time)}</span>
+        </div>
+        <div class="booking-actions">
+          <span class="status-badge status-${b.status}">
+            ${({pending: 'در انتظار', confirmed: 'تایید شده', completed: 'انجام شده', cancelled: 'لغو شده'})[b.status] || b.status}
+          </span>
+        </div>
+      </article>
+    `).join('');
+  }
+
+  // بروزرسانی شمارنده‌ها
+  document.querySelector('.filter-chip[data-filter="all"] .chip-badge').textContent =
+    UIComponents.formatPersianNumber(effective.length);
+  ['pending', 'confirmed', 'completed'].forEach(status => {
+    const count = effective.filter(b => b.status === status).length;
+    const el = document.querySelector(`.filter-chip[data-filter="${status}"] .chip-badge`);
+    if (el) el.textContent = UIComponents.formatPersianNumber(count);
+  });
+}
+
+    renderPlans() {
+      // Logic is handled by handlePlanDurationChange on load
+    }
+    // --- NEW: Settings Rendering Logic ---
+    renderSettings() {
+        // This function is now called when the settings view is active
+        // It can be used to refresh data if needed, but initial render is done by initServices/initPortfolio
+        this.renderServicesList();
+        this.renderPortfolioList();
+    }
+    // --- Event Handlers ---
+
+handlePlanDurationChange(e) {
+    const selector = document.querySelector('.duration-selector-modern');
+    if (!selector) return;
+    
+    let selectedTab;
+    if (e && e.target) {
+        selectedTab = e.target.closest('.duration-tab');
+        if (!selectedTab) return;
+    } else {
+        selectedTab = selector.querySelector('.duration-tab.active');
+    }
+    
+    // Update active states
+    selector.querySelectorAll('.duration-tab').forEach(tab => {
+        tab.classList.remove('active');
+    });
+    selectedTab.classList.add('active');
+    
+    // Move indicator
+    const tabs = Array.from(selector.querySelectorAll('.duration-tab'));
+    const index = tabs.indexOf(selectedTab);
+    const indicator = selector.querySelector('.duration-indicator');
+    if (indicator) {
+        indicator.style.left = `${4 + (index * 33.333)}%`;
+    }
+    
+    // Get duration
+    const duration = parseInt(selectedTab.dataset.duration);
+    
+    // Update all plan cards
+    document.querySelectorAll('.plan-modern').forEach(card => {
+        const priceEl = card.querySelector('.price-value');
+        const periodEl = card.querySelector('.period-value');
+        const savingsEl = card.querySelector('.price-savings');
+        const savingsAmountEl = card.querySelector('.savings-amount');
+        
+        if (!priceEl) return;
+        
+        const basePrice = parseInt(priceEl.dataset['1']);
+        let totalPrice, periodText, discount = 0;
+        
+        switch(duration) {
+            case 1:
+                totalPrice = basePrice;
+                periodText = '۱ ماه';
+                break;
+            case 2:
+                totalPrice = basePrice * 2 * 0.9; // 10% discount
+                periodText = '۲ ماه';
+                discount = 10;
+                break;
+            case 3:
+                totalPrice = basePrice * 3 * 0.8; // 20% discount
+                periodText = '۳ ماه';
+                discount = 20;
+                break;
+        }
+        
+        // Update price display with animation
+        priceEl.style.transform = 'scale(0.9)';
+        setTimeout(() => {
+            priceEl.textContent = new Intl.NumberFormat('fa-IR').format(Math.round(totalPrice));
+            priceEl.style.transform = 'scale(1)';
+        }, 150);
+        
+        if (periodEl) periodEl.textContent = periodText;
+        
+        // Show/hide savings
+        if (discount > 0 && savingsEl) {
+            savingsEl.classList.remove('hidden');
+            const saved = (basePrice * duration) - totalPrice;
+            savingsAmountEl.textContent = `${new Intl.NumberFormat('fa-IR').format(Math.round(saved))} تومان صرفه‌جویی`;
+        } else if (savingsEl) {
+            savingsEl.classList.add('hidden');
+        }
+    });
+}
+
+
+
+
+
+
+
+    
+    handleBookingFilterChange(e) {
+      const chip = e.target.closest('.filter-chip');
+      if (!chip) return;
+      document.querySelectorAll('#bookings-view .filter-chip').forEach(c => c.classList.remove('active'));
+      chip.classList.add('active');
+      this.renderBookings(chip.dataset.filter);
+    }
+    handleReviewFilterChange(e) {
+      const chip = e.target.closest('.filter-chip');
+      if (!chip) return;
+      document.querySelectorAll('#reviews-view .filter-chip').forEach(c => c.classList.remove('active'));
+      chip.classList.add('active');
+      this.renderReviews(chip.dataset.filter);
+    }
+    filterCustomers(query) {
+      this.renderCustomers(query);
+    }
+    initSidebarObserver() {
+      if(window.innerWidth < 1024) return;
+      this.appNav.addEventListener('mouseenter', () => this.body.classList.add('sidebar-expanded'));
+      this.appNav.addEventListener('mouseleave', () => this.body.classList.remove('sidebar-expanded'));
+    }
+    // --- Utilities ---
+    debounce(func, delay) {
+      let timeout;
+      return (...args) => {
+        clearTimeout(timeout);
+        timeout = setTimeout(() => func.apply(this, args), delay);
+      };
+    }
+
+    // === NEW: Service Management Methods ===
+    initServices() {
+        const services = StorageManager.get('vit_services');
+        if (!services || services.length === 0) {
+            const defaultServices = [
+                { id: 1, title: 'اصلاح سر', price: 150000, duration: 30, active: true },
+                { id: 2, title: 'رنگ مو', price: 450000, duration: 90, active: true },
+                { id: 3, title: 'اصلاح ریش', price: 80000, duration: 20, active: false }
+            ];
+            StorageManager.set('vit_services', defaultServices);
+        }
+        this.renderServicesList();
+    }
+    renderServicesList() {
+        const services = StorageManager.get('vit_services') || [];
+        const container = document.getElementById('services-list');
+        container.innerHTML = services.length === 0 ? '<p>هیچ خدمتی تعریف نشده است.</p>' : services.map(service => `
+            <div class="item-card" data-id="${service.id}">
+                <div class="item-card-header">
+                    <h4 class="item-title">${service.title}</h4>
+                    <span class="item-badge ${service.active ? 'active' : ''}">${service.active ? 'فعال' : 'غیرفعال'}</span>
+                </div>
+                <div class="item-details">
+                    <span>قیمت: ${UIComponents.formatPersianNumber(service.price)} تومان</span>
+                    <span>مدت: ${UIComponents.formatPersianNumber(service.duration)} دقیقه</span>
+                </div>
+                <div class="item-actions">
+                    <button type="button" class="btn-text-sm edit-service-btn" data-id="${service.id}" aria-label="ویرایش ${service.title}">ویرایش</button>
+                    <button type="button" class="btn-text-sm delete-service-btn" data-id="${service.id}" aria-label="حذف ${service.title}">حذف</button>
+                </div>
+            </div>
+        `).join('');
+        
+        // Add event listeners to the new buttons
+        container.querySelectorAll('.edit-service-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const id = parseInt(e.target.dataset.id);
+                const services = StorageManager.get('vit_services') || [];
+                const service = services.find(s => s.id === id);
+                if (service) {
+                    this.populateServiceForm(service);
+                    UIComponents.openDrawer('service-drawer');
+                }
+            });
+        });
+        container.querySelectorAll('.delete-service-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const id = parseInt(e.target.dataset.id);
+                this.deleteService(id);
+            });
+        });
+    }
+  populateServiceForm(service) {
+        const form = document.getElementById('service-form');
+        const titleEl = document.getElementById('service-drawer-title');
+        if (service) {
+            form.dataset.editingId = service.id;
+            document.getElementById('service-id').value = service.id;
+            document.getElementById('service-title').value = service.title;
+            document.getElementById('service-price').value = service.price;
+            document.getElementById('service-duration').value = service.duration;
+            document.getElementById('service-active').value = String(!!service.active);
+            titleEl.textContent = 'ویرایش خدمت';
+        } else {
+            delete form.dataset.editingId;
+            form.reset();
+            document.getElementById('service-id').value = '';
+            document.getElementById('service-active').value = 'true';
+            titleEl.textContent = 'افزودن خدمت جدید';
+        }
+    }
+    handleServiceFormSubmit() {
+        const form = document.getElementById('service-form');
+        const id = form.dataset.editingId ? parseInt(form.dataset.editingId, 10) : null;
+        const title = document.getElementById('service-title').value.trim();
+        const price = parseFloat(document.getElementById('service-price').value);
+        const duration = parseInt(document.getElementById('service-duration').value, 10);
+        const active = document.getElementById('service-active').value === 'true';
+
+        if (!title || isNaN(price) || isNaN(duration)) {
+            UIComponents.showToast('لطفاً تمام فیلدهای اجباری را پر کنید.', 'error');
+            return;
+        }
+
+        let services = StorageManager.get('vit_services') || [];
+        if (id) {
+            // Edit existing
+            const index = services.findIndex(s => s.id === id);
+            if (index !== -1) {
+                services[index] = { id, title, price, duration, active };
+                UIComponents.showToast('خدمت با موفقیت ویرایش شد.', 'success');
+            }
+        } else {
+            // Add new
+            const newId = services.length > 0 ? Math.max(...services.map(s => s.id)) + 1 : 1;
+            services.push({ id: newId, title, price, duration, active });
+            UIComponents.showToast('خدمت جدید اضافه شد.', 'success');
+        }
+        StorageManager.set('vit_services', services);
+        this.renderServicesList();
+        UIComponents.closeDrawer('service-drawer');
+    }
+    deleteService(id) {
+        if (!confirm('آیا از حذف این خدمت مطمئن هستید؟')) return;
+        let services = StorageManager.get('vit_services') || [];
+        services = services.filter(s => s.id !== id);
+        StorageManager.set('vit_services', services);
+        this.renderServicesList();
+        UIComponents.showToast('خدمت حذف شد.', 'success');
+    }
+    // === NEW: Portfolio Management Methods ===
+    initPortfolio() {
+        const portfolio = StorageManager.get('vit_portfolio');
+        if (!portfolio || portfolio.length === 0) {
+            const defaultPortfolio = [
+                { id: 1, title: 'موی کوتاه', image: 'https://images.unsplash.com/photo-1599566150163-29194dcaad36?w=300', description: 'اصلاح سر مدرن' },
+                { id: 2, title: 'رنگ موی طبیعی', image: 'https://images.unsplash.com/photo-1564460576323-2f03bbfbfe2d?w=300', description: 'رنگ طبیعی و درخشان' },
+                { id: 3, title: 'اصلاح ریش فانتزی', image: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=300', description: 'طراحی ریش متنوع' }
+            ];
+            StorageManager.set('vit_portfolio', defaultPortfolio);
+        }
+        this.renderPortfolioList();
+    }
+    renderPortfolioList() {
+        const portfolio = StorageManager.get('vit_portfolio') || [];
+        const container = document.getElementById('portfolio-list');
+        if (!container) return;
+        container.innerHTML = portfolio.length === 0 ? '<p>هیچ نمونه‌کاری ثبت نشده است.</p>' : portfolio.map(item => `
+            <div class="item-card" data-id="${item.id}">
+                <div class="item-card-header">
+                    <h4 class="item-title">${item.title}</h4>
+                </div>
+                <div class="item-image-preview">
+                    ${this.isValidUrl(item.image) ? `<img src="${item.image}" alt="${item.title}" onerror="this.parentElement.innerHTML='<span>تصویر نامعتبر</span>'">` : '<span>آدرس تصویر نامعتبر</span>'}
+                </div>
+                <div class="item-details">
+                    <p>${item.description || '-'}</p>
+                </div>
+                <div class="item-actions">
+                    <button type="button" class="btn-text-sm edit-portfolio-btn" data-id="${item.id}" aria-label="ویرایش ${item.title}">ویرایش</button>
+                    <button type="button" class="btn-text-sm delete-portfolio-btn" data-id="${item.id}" aria-label="حذف ${item.title}">حذف</button>
+                </div>
+            </div>
+        `).join('');
+
+        // Add event listeners to the new buttons
+        container.querySelectorAll('.edit-portfolio-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const id = parseInt(e.currentTarget.dataset.id, 10);
+                const portfolio = StorageManager.get('vit_portfolio') || [];
+                const item = portfolio.find(p => p.id === id);
+                if (item) {
+                    this.populatePortfolioForm(item);
+                    UIComponents.openDrawer('portfolio-drawer');
+                }
+            });
+        });
+        container.querySelectorAll('.delete-portfolio-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const id = parseInt(e.currentTarget.dataset.id, 10);
+                this.deletePortfolioItem(id);
+            });
+        });
+    }
+    isValidUrl(string) {
+        try {
+            new URL(string);
+            return true;
+        } catch (_) {
+            return false;
+        }
+    }
+    populatePortfolioForm(item) {
+        const form = document.getElementById('portfolio-form');
+        const titleEl = document.getElementById('portfolio-drawer-title');
+        if (item) {
+            form.dataset.editingId = item.id;
+            document.getElementById('portfolio-id').value = item.id;
+            document.getElementById('portfolio-title').value = item.title;
+            document.getElementById('portfolio-image').value = item.image;
+            document.getElementById('portfolio-description').value = item.description || '';
+            titleEl.textContent = 'ویرایش نمونه‌کار';
+        } else {
+            delete form.dataset.editingId;
+            form.reset();
+            document.getElementById('portfolio-id').value = '';
+            titleEl.textContent = 'افزودن نمونه‌کار جدید';
+        }
+    }
+    handlePortfolioFormSubmit() {
+        const form = document.getElementById('portfolio-form');
+        const id = form.dataset.editingId ? parseInt(form.dataset.editingId, 10) : null;
+        const title = document.getElementById('portfolio-title').value.trim();
+        const image = document.getElementById('portfolio-image').value.trim();
+        const description = document.getElementById('portfolio-description').value.trim();
+
+        if (!title || !image) {
+            UIComponents.showToast('لطفاً عنوان و آدرس تصویر را وارد کنید.', 'error');
+            return;
+        }
+
+        if (!this.isValidUrl(image)) {
+            UIComponents.showToast('آدرس تصویر معتبر نیست.', 'error');
+            return;
+        }
+
+        let portfolio = StorageManager.get('vit_portfolio') || [];
+        if (id) {
+            // Edit existing
+            const index = portfolio.findIndex(p => p.id === id);
+            if (index !== -1) {
+                portfolio[index] = { id, title, image, description };
+                UIComponents.showToast('نمونه‌کار با موفقیت ویرایش شد.', 'success');
+            }
+        } else {
+            // Add new
+            const newId = portfolio.length > 0 ? Math.max(...portfolio.map(p => p.id)) + 1 : 1;
+            portfolio.push({ id: newId, title, image, description });
+            UIComponents.showToast('نمونه‌کار جدید اضافه شد.', 'success');
+        }
+        StorageManager.set('vit_portfolio', portfolio);
+        this.renderPortfolioList();
+        UIComponents.closeDrawer('portfolio-drawer');
+    }
+    deletePortfolioItem(id) {
+        if (!confirm('آیا از حذف این نمونه‌کار مطمئن هستید؟')) return;
+        let portfolio = StorageManager.get('vit_portfolio') || [];
+        portfolio = portfolio.filter(p => p.id !== id);
+        StorageManager.set('vit_portfolio', portfolio);
+        this.renderPortfolioList();
+        UIComponents.showToast('نمونه‌کار حذف شد.', 'success');
+    }
+
+
+
+// === BRAND IMAGES (hero/footer) ===
+initBrandImages(){
+  // خواندن از localStorage
+  const saved = StorageManager.get('vit_brand_images') || {};
+  this.brandImages = {
+    hero: saved.hero || '',
+    footer: saved.footer || ''
+  };
+  this.applyBrandImages();
+  this.bindBrandImageEvents();
+}
+
+
+
+
+// === CUSTOMER MODAL & AUTO-ACCEPT FEATURES ===
+initCustomerFeatures() {
+  // Initialize auto-accept state
+  this.autoAcceptEnabled = StorageManager.get('vit_auto_accept') || false;
+  
+  // Add auto-accept UI to settings
+  this.addAutoAcceptToggle();
+  
+  // Make customer cards clickable
+  this.initCustomerClickHandlers();
+}
+
+// Add auto-accept toggle to settings
+addAutoAcceptToggle() {
+  const settingsForm = document.getElementById('settings-form');
+  if (!settingsForm) return;
+  
+  // Find the business settings group
+  const businessGroup = settingsForm.querySelector('.settings-group');
+  if (!businessGroup) return;
+  
+  // Create auto-accept container
+  const autoAcceptHTML = `
+    <div class="auto-accept-container">
+      <div class="auto-accept-header">
+        <div class="auto-accept-info">
+          <h4 class="auto-accept-title">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+              <polyline points="22 4 12 14.01 9 11.01"/>
+            </svg>
+            پذیرش خودکار رزروها
+          </h4>
+          <p class="auto-accept-description">
+            با فعال کردن این گزینه، تمام رزروهای جدید به صورت خودکار تأیید می‌شوند و مشتریان بلافاصله تأییدیه دریافت می‌کنند. شما همچنان می‌توانید رزروها را به صورت دستی لغو کنید.
+          </p>
+        </div>
+        <label class="toggle-switch ${this.autoAcceptEnabled ? 'active' : ''}" id="auto-accept-toggle">
+          <input type="checkbox" class="toggle-switch-input" ${this.autoAcceptEnabled ? 'checked' : ''}>
+          <span class="toggle-switch-slider"></span>
+        </label>
+      </div>
+      <div class="auto-accept-status ${this.autoAcceptEnabled ? 'active' : ''}">
+        <span class="status-indicator"></span>
+        <span class="status-text">
+          ${this.autoAcceptEnabled ? 'پذیرش خودکار فعال است' : 'پذیرش خودکار غیرفعال است'}
+        </span>
+      </div>
+    </div>
+  `;
+  
+  // Insert after business name field
+  businessGroup.insertAdjacentHTML('beforeend', autoAcceptHTML);
+  
+  // Add toggle event listener
+  const toggle = document.getElementById('auto-accept-toggle');
+  if (toggle) {
+    toggle.addEventListener('click', () => this.toggleAutoAccept());
+  }
+}
+
+// Toggle auto-accept feature
+toggleAutoAccept() {
+  this.autoAcceptEnabled = !this.autoAcceptEnabled;
+  StorageManager.set('vit_auto_accept', this.autoAcceptEnabled);
+  
+  const toggle = document.getElementById('auto-accept-toggle');
+  const status = toggle.parentElement.querySelector('.auto-accept-status');
+  const statusText = status.querySelector('.status-text');
+  
+  if (this.autoAcceptEnabled) {
+    toggle.classList.add('active');
+    status.classList.add('active');
+    statusText.textContent = 'پذیرش خودکار فعال است';
+    UIComponents.showToast('پذیرش خودکار رزروها فعال شد ✅', 'success');
+    
+    // Auto-accept pending bookings
+    this.autoAcceptPendingBookings();
+  } else {
+    toggle.classList.remove('active');
+    status.classList.remove('active');
+    statusText.textContent = 'پذیرش خودکار غیرفعال است';
+    UIComponents.showToast('پذیرش خودکار غیرفعال شد', 'info');
+  }
+}
+
+// Auto-accept all pending bookings
+autoAcceptPendingBookings() {
+  // In real app, this would update the database
+  const pendingCount = MOCK_DATA.bookings.filter(b => b.status === 'pending').length;
+  
+  if (pendingCount > 0) {
+    // Simulate accepting all pending bookings
+    MOCK_DATA.bookings.forEach(booking => {
+      if (booking.status === 'pending') {
+        booking.status = 'confirmed';
+      }
+    });
+    
+    UIComponents.showToast(`${UIComponents.formatPersianNumber(pendingCount)} رزرو به صورت خودکار تأیید شد`, 'success');
+    
+    // Refresh bookings view if active
+    if (document.getElementById('bookings-view').classList.contains('active')) {
+      this.renderBookings();
+    }
+  }
+}
+
+// Initialize customer click handlers
+initCustomerClickHandlers() {
+  // Use event delegation for customer cards
+  const customersList = document.getElementById('customers-list');
+  if (customersList) {
+    customersList.addEventListener('click', (e) => {
+      const card = e.target.closest('.customer-card');
+      if (card) {
+        this.showCustomerDetails(card);
+      }
+    });
+  }
+}
+
+// Show customer details modal
+showCustomerDetails(card) {
+  // Extract customer data from card
+  const customerName = card.querySelector('.customer-name').textContent;
+  const customerPhone = card.querySelector('.customer-phone').textContent;
+  const lastVisit = card.querySelector('.customer-last-visit').textContent;
+  
+  // Get customer ID (would come from data attribute in real app)
+  const customerId = parseInt(card.dataset.customerId || Math.floor(Math.random() * 100));
+  
+  // Generate mock data for this customer
+  const customerData = this.getCustomerData(customerId, customerName, customerPhone, lastVisit);
+  
+  // Populate modal
+  this.populateCustomerModal(customerData);
+  
+  // Show modal
+  UIComponents.openModal('customer-details-modal');
+}
+
+// Get customer data (mock)
+getCustomerData(id, name, phone, lastVisit) {
+  // In real app, this would fetch from API
+  const totalReservations = Math.floor(Math.random() * 50) + 5;
+  const completedReservations = Math.floor(totalReservations * 0.8);
+  const rating = (Math.random() * 2 + 3).toFixed(1); // 3.0 to 5.0
+  
+  // Mock last reservation
+  const services = ['اصلاح سر', 'اصلاح ریش', 'رنگ مو', 'کراتینه', 'اصلاح ابرو'];
+  const statuses = ['completed', 'confirmed', 'pending'];
+  const lastReservation = {
+    date: lastVisit.replace('آخرین بازدید: ', ''),
+    service: services[Math.floor(Math.random() * services.length)],
+    time: `${Math.floor(Math.random() * 8) + 10}:${Math.random() > 0.5 ? '00' : '30'}`,
+    status: statuses[Math.floor(Math.random() * statuses.length)]
+  };
+  
+  return {
+    id,
+    name,
+    phone,
+    totalReservations,
+    completedReservations,
+    rating,
+    lastReservation
+  };
+}
+
+// Populate customer modal with data
+populateCustomerModal(data) {
+  // Avatar
+  const avatar = document.getElementById('customer-modal-avatar');
+  avatar.textContent = data.name.charAt(0);
+  
+  // Header info
+  document.getElementById('customer-modal-name').textContent = data.name;
+  document.getElementById('customer-modal-phone').querySelector('span').textContent = data.phone;
+  
+  // Stats
+  document.getElementById('customer-total-reservations').textContent = 
+    UIComponents.formatPersianNumber(data.totalReservations);
+  document.getElementById('customer-completed-reservations').textContent = 
+    UIComponents.formatPersianNumber(data.completedReservations);
+  document.getElementById('customer-rating').textContent = 
+    UIComponents.formatPersianNumber(parseFloat(data.rating));
+  
+  // Last reservation
+  document.getElementById('last-reservation-date').textContent = data.lastReservation.date;
+  document.getElementById('last-reservation-service').textContent = data.lastReservation.service;
+  document.getElementById('last-reservation-time').textContent = 
+    `ساعت ${UIComponents.formatPersianNumber(data.lastReservation.time)}`;
+  
+  // Status badge
+  const statusBadge = document.getElementById('last-reservation-status');
+  statusBadge.className = `status-badge status-${data.lastReservation.status}`;
+  const statusTexts = {
+    'completed': 'انجام شده',
+    'confirmed': 'تأیید شده',
+    'pending': 'در انتظار'
+  };
+  statusBadge.textContent = statusTexts[data.lastReservation.status];
+  
+  // Add action button handlers
+  this.attachModalActionHandlers(data);
+}
+
+// Attach handlers to modal action buttons
+attachModalActionHandlers(customerData) {
+  const modal = document.getElementById('customer-details-modal');
+  const callBtn = modal.querySelector('.btn-action-modal.primary');
+  const bookBtn = modal.querySelector('.btn-action-modal.secondary');
+  
+  // Remove old listeners by cloning
+  const newCallBtn = callBtn.cloneNode(true);
+  const newBookBtn = bookBtn.cloneNode(true);
+  callBtn.parentNode.replaceChild(newCallBtn, callBtn);
+  bookBtn.parentNode.replaceChild(newBookBtn, bookBtn);
+  
+  // Add new listeners
+  newCallBtn.addEventListener('click', () => {
+    const phoneNumber = customerData.phone.replace(/[^\d]/g, '');
+    window.location.href = `tel:${phoneNumber}`;
+    UIComponents.showToast('در حال برقراری تماس...', 'info');
+  });
+  
+  newBookBtn.addEventListener('click', () => {
+    UIComponents.closeModal('customer-details-modal');
+    UIComponents.showToast('سیستم رزرو آنلاین به زودی راه‌اندازی می‌شود', 'info');
+  });
+}
+
+// Override renderCustomers to add customer IDs
+renderCustomers(query = '') {
+  const listEl = document.getElementById('customers-list');
+  const normalizedQuery = query.trim().toLowerCase();
+  const filteredCustomers = MOCK_DATA.customers.filter(c =>
+    c.name.toLowerCase().includes(normalizedQuery) ||
+    c.phone.includes(normalizedQuery)
+  );
+
+  if (filteredCustomers.length === 0) {
+    listEl.innerHTML = `<p>مشتری با این مشخصات یافت نشد.</p>`;
+    return;
+  }
+
+  const prefsAll = CustomerPrefs.load();
+
+  listEl.innerHTML = filteredCustomers.map(c => {
+    const pref = prefsAll[normalizeKey(c.name)] || {};
+    const tags = `
+      <div class="customer-tags" style="margin-top:6px; display:flex; gap:6px; flex-wrap:wrap;">
+        ${pref.blocked ? '<span class="badge badge-warning">مسدود</span>' : ''}
+        ${pref.autoAccept ? '<span class="badge badge-success">تایید خودکار</span>' : ''}
+      </div>
+    `;
+    return `
+      <article class="customer-card card" role="listitem" tabindex="0">
+        <div class="customer-avatar" aria-hidden="true">${c.name.charAt(0)}</div>
+        <div class="customer-info">
+          <div class="customer-name">${c.name}</div>
+          <div class="customer-phone">${UIComponents.formatPersianNumber(c.phone)}</div>
+          <div class="customer-last-visit">آخرین بازدید: ${UIComponents.formatPersianNumber(c.lastVisit)}</div>
+          ${tags}
+        </div>
+      </article>
+    `;
+  }).join('');
+}
+
+
+
+applyBrandImages(){
+  // ست کردن CSS custom properties برای استفاده در UI/صفحه عمومی
+  const root = document.documentElement;
+  root.style.setProperty('--hero-image',  this.brandImages.hero  ? `url("${this.brandImages.hero}")`   : 'none');
+  root.style.setProperty('--footer-image',this.brandImages.footer? `url("${this.brandImages.footer}")` : 'none');
+
+  // پیش‌نمایش‌ها داخل تنظیمات
+  const heroImg   = document.getElementById('hero-preview');
+  const footerImg = document.getElementById('footer-preview');
+
+  if (heroImg) {
+    if (this.brandImages.hero) heroImg.src = this.brandImages.hero;
+    else heroImg.removeAttribute('src');
+  }
+  if (footerImg) {
+    if (this.brandImages.footer) footerImg.src = this.brandImages.footer;
+    else footerImg.removeAttribute('src');
+  }
+}
+
+bindBrandImageEvents(){
+  // دکمه‌ها و ورودی‌ها
+  const heroPick   = document.getElementById('hero-pick-btn');
+  const heroFile   = document.getElementById('hero-file');
+  const heroRemove = document.getElementById('hero-remove-btn');
+  const heroUrl    = document.getElementById('hero-url');
+  const heroUrlBtn = document.getElementById('hero-url-save');
+
+  const footerPick   = document.getElementById('footer-pick-btn');
+  const footerFile   = document.getElementById('footer-file');
+  const footerRemove = document.getElementById('footer-remove-btn');
+  const footerUrl    = document.getElementById('footer-url');
+  const footerUrlBtn = document.getElementById('footer-url-save');
+
+  if (heroPick && heroFile){
+    heroPick.addEventListener('click', () => heroFile.click());
+    heroFile.addEventListener('change', (e) => this._readFileToDataURL(e, 'hero'));
+  }
+  if (footerPick && footerFile){
+    footerPick.addEventListener('click', () => footerFile.click());
+    footerFile.addEventListener('change', (e) => this._readFileToDataURL(e, 'footer'));
+  }
+
+  if (heroRemove){
+    heroRemove.addEventListener('click', () => this._removeBrandImage('hero'));
+  }
+  if (footerRemove){
+    footerRemove.addEventListener('click', () => this._removeBrandImage('footer'));
+  }
+
+  if (heroUrlBtn && heroUrl){
+    heroUrlBtn.addEventListener('click', () => this._saveUrl(heroUrl.value.trim(), 'hero'));
+  }
+  if (footerUrlBtn && footerUrl){
+    footerUrlBtn.addEventListener('click', () => this._saveUrl(footerUrl.value.trim(), 'footer'));
+  }
+}
+
+// Helpers
+_readFileToDataURL(evt, type){
+  const file = evt.target.files && evt.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = () => {
+    const dataURL = reader.result; // base64
+    this._storeBrandImage(type, dataURL);
+  };
+  reader.onerror = () => UIComponents.showToast('خطا در خواندن تصویر.', 'error');
+  reader.readAsDataURL(file);
+}
+
+_saveUrl(url, type){
+  try{
+    const u = new URL(url);
+    if(!/^https?:/i.test(u.protocol)) throw new Error();
+    this._storeBrandImage(type, u.toString());
+  }catch{
+    UIComponents.showToast('لینک تصویر معتبر نیست.', 'error');
+  }
+}
+
+_storeBrandImage(type, value){
+  if (type !== 'hero' && type !== 'footer') return;
+  this.brandImages[type] = value;
+  StorageManager.set('vit_brand_images', this.brandImages);
+  this.applyBrandImages();
+  UIComponents.showToast('تصویر با موفقیت ذخیره شد.', 'success');
+}
+
+_removeBrandImage(type){
+  if (type !== 'hero' && type !== 'footer') return;
+  this.brandImages[type] = '';
+  StorageManager.set('vit_brand_images', this.brandImages);
+  this.applyBrandImages();
+  UIComponents.showToast('تصویر حذف شد.', 'success');
+}
+
+
+
+
+
+
+
+
+    // === END OF NEW METHODS ===
+  }
+  // Run the App
+  const app = new SellerPanelApp();
+  app.init();
+  if (typeof app.initBrandImages === 'function') app.initBrandImages();
+});
+
+
+
+
+
+(() => {
+  const root = document;
+  const plansView = root.getElementById('plans-view');
+  if (!plansView) return;
+
+  const nf = (n) => new Intl.NumberFormat('fa-IR').format(Math.round(n));
+
+  // State
+  const state = {
+    duration: 3,          // پیش‌فرض: فقط مدت، نه انتخاب پلن
+    selectedPlanKey: null,
+    couponPct: 0
+  };
+
+  // Elements
+  const tabs = Array.from(plansView.querySelectorAll('.duration-tab'));
+  const indicator = plansView.querySelector('.duration-indicator');
+  const cards = Array.from(plansView.querySelectorAll('.plan-modern'));
+  const checkoutBar = plansView.querySelector('#checkout-bar');
+  if (!checkoutBar) { window.__PLANS_CHECKOUT_CONTROLLER_INITIALIZED__ = true; return; }
+  const cbPlan = checkoutBar.querySelector('.cb-plan');
+  const cbDuration = checkoutBar.querySelector('.cb-duration');
+  const cbSaving = checkoutBar.querySelector('.cb-saving');
+  const cbTotal = checkoutBar.querySelector('.cb-total');
+  const couponToggle = checkoutBar.querySelector('.cb-coupon-toggle');
+  const couponRow = checkoutBar.querySelector('.cb-coupon');
+  const couponInput = checkoutBar.querySelector('#coupon-input');
+  const couponApply = checkoutBar.querySelector('.cb-apply');
+
+  // Helpers
+  const getBasePrice = (card) => {
+    const el = card.querySelector('.price-value');
+    return el ? parseInt(el.dataset['1'], 10) : 0;
+  };
+  const getDiscountPct = (duration) => (duration === 2 ? 10 : duration === 3 ? 20 : 0);
+  const calcTotal = (base, duration) => {
+    const disc = getDiscountPct(duration);
+    const gross = base * duration * (1 - disc/100);
+    const afterCoupon = gross * (1 - state.couponPct/100);
+    return { gross, afterCoupon, disc };
+  };
+  const updateIndicator = () => {
+    if (!indicator) return;
+    const activeIndex = Math.max(0, tabs.findIndex(t => t.classList.contains('active')));
+    indicator.style.transform = `translateX(${activeIndex * 100}%)`;
+  };
+
+  const updateCard = (card) => {
+    const priceEl = card.querySelector('.price-value');
+    const periodEl = card.querySelector('.period-value');
+    const savingsWrap = card.querySelector('.price-savings');
+    const savingsAmountEl = card.querySelector('.savings-amount');
+    if (!priceEl || !periodEl) return;
+
+    const base = getBasePrice(card);
+    const { gross, disc } = calcTotal(base, state.duration);
+
+    periodEl.textContent = state.duration === 1 ? '۱ ماه' : (state.duration === 2 ? '۲ ماه' : '۳ ماه');
+
+    priceEl.style.transform = 'scale(0.92)';
+    setTimeout(() => {
+      priceEl.textContent = nf(gross);
+      priceEl.style.transform = 'scale(1)';
+    }, 130);
+
+    if (savingsWrap && savingsAmountEl) {
+      if (disc > 0) {
+        const saved = base * state.duration - gross;
+        savingsWrap.classList.remove('hidden');
+        savingsAmountEl.textContent = `${nf(saved)} تومان صرفه‌جویی`;
+      } else {
+        savingsWrap.classList.add('hidden');
+      }
+    }
+  };
+
+  const updateAllCards = () => cards.forEach(updateCard);
+
+  // فقط وقتی پلنی انتخاب شده باشه نوار رو نشون بده
+  const updateCheckout = () => {
+    const selected = plansView.querySelector('.plan-modern.selected');
+
+    if (!selected) {
+      checkoutBar.classList.remove('visible');
+      checkoutBar.setAttribute('aria-hidden', 'true');
+      cbPlan.textContent = '—';
+      cbDuration.textContent = state.duration === 1 ? '۱ ماهه' : (state.duration === 2 ? '۲ ماهه' : '۳ ماهه');
+      cbSaving.textContent = '';
+      cbSaving.style.display = 'none';
+      cbTotal.textContent = '—';
+      return;
+    }
+
+    const name = selected.querySelector('.plan-title-card')?.textContent?.trim() || '-';
+    const base = getBasePrice(selected);
+    const { afterCoupon, disc } = calcTotal(base, state.duration);
+
+    cbPlan.textContent = name;
+    cbDuration.textContent = state.duration === 1 ? '۱ ماهه' : (state.duration === 2 ? '۲ ماهه' : '۳ ماهه');
+
+    const parts = [];
+    if (disc > 0) parts.push(`${disc}%`);
+    if (state.couponPct > 0) parts.push(`+ ${state.couponPct}% کد`);
+    cbSaving.textContent = parts.length ? `تخفیف: ${parts.join(' ')}` : '';
+    cbSaving.style.display = parts.length ? 'inline-block' : 'none';
+
+    cbTotal.textContent = nf(afterCoupon) + ' تومان';
+
+    checkoutBar.classList.add('visible');
+    checkoutBar.setAttribute('aria-hidden', 'false');
+  };
+
+  const selectPlan = (card) => {
+    cards.forEach(c => c.classList.remove('selected'));
+    card.classList.add('selected');
+    state.selectedPlanKey = card.dataset.plan || null;
+    updateCheckout();
+  };
+
+  // Tabs (مدت اشتراک)
+  tabs.forEach((tab) => {
+    tab.addEventListener('click', () => {
+      tabs.forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+      state.duration = parseInt(tab.dataset.duration, 10) || 1;
+      updateIndicator();
+      updateAllCards();
+      updateCheckout(); // اگر پلنی انتخاب نشده باشه مخفی می‌مونه
+    });
+  });
+
+  // انتخاب/لغو انتخاب پلن (toggle)
+  cards.forEach(card => {
+    card.addEventListener('click', (e) => {
+      const actionable = e.target.closest('.plan-cta-modern') || e.currentTarget === card;
+      if (!actionable) return;
+
+      if (card.classList.contains('selected')) {
+        // دسیلکت → نوار بسته شود
+        card.classList.remove('selected');
+        state.selectedPlanKey = null;
+        updateCheckout();
+      } else {
+        selectPlan(card);
+      }
+    });
+  });
+
+  // Coupon
+  couponToggle.addEventListener('click', () => {
+    const open = !couponRow.hasAttribute('hidden');
+    if (open) {
+      couponRow.setAttribute('hidden', '');
+      couponToggle.setAttribute('aria-expanded', 'false');
+    } else {
+      couponRow.removeAttribute('hidden');
+      couponToggle.setAttribute('aria-expanded', 'true');
+      couponInput.focus();
+    }
+  });
+
+  couponApply.addEventListener('click', () => {
+    const code = (couponInput.value || '').trim().toUpperCase();
+    const map = { 'OFF10': 10, 'VIP15': 15 }; // دموی تست
+    state.couponPct = map[code] || 0;
+    (window.UIComponents?.showToast) && UIComponents.showToast(
+      map[code] ? 'کد تخفیف اعمال شد.' : 'کد معتبر نیست.',
+      map[code] ? 'success' : 'error'
+    );
+    updateAllCards();
+    updateCheckout();
+  });
+
+  // CTA Demo
+  checkoutBar.querySelector('.cb-cta')?.addEventListener('click', () => {
+    (window.UIComponents?.showToast) && UIComponents.showToast('درگاه پرداخت به‌زودی متصل می‌شود.', 'success');
+  });
+
+  // === Init ===
+  // فقط مدت را تنظیم کن؛ هیچ پلنی را پیش‌فرض انتخاب نکن
+  const defaultTab = tabs.find(t => t.classList.contains('active')) || tabs[2] || tabs[0];
+  defaultTab.click();           // قیمت‌ها و دوره‌ها آپدیت شود
+  updateCheckout();             // چون چیزی انتخاب نشده، نوار مخفی می‌ماند
+
+  // Flag to avoid duplicate controllers
+  window.__PLANS_CHECKOUT_CONTROLLER_INITIALIZED__ = true;
+})();
+
+
+
+
+
+
+
+/* === Plans Checkout Controller (self-contained) ==================================
+   - دکمه ضربدر: می‌بنده
+   - کلیک بیرون: می‌بنده
+   - انتخاب پلن: باز می‌کنه
+   - تغییر مدت (۱/۲/۳): قیمت و تخفیف رو آپدیت می‌کنه
+   - وقتی از پلن‌ها خارج شدی و برگشتی: اگر دستی بسته بودی، بسته می‌مونه
+   - بدون وابستگی به بقیه‌ی متدهای کلاس؛ هر جا خواستی بچسبون (داخل DOMContentLoaded)
+=============================================================================== */
+(function(){
+  if (window.__PLANS_CHECKOUT_CONTROLLER_INITIALIZED__) return;
+
+  const plansView   = document.getElementById('plans-view');
+  const checkoutBar = document.getElementById('checkout-bar');
+  if (!plansView || !checkoutBar) return;
+
+  // عناصر نوار پرداخت
+  const cbPlan        = checkoutBar.querySelector('.cb-plan');
+  const cbDuration    = checkoutBar.querySelector('.cb-duration');
+  const cbSaving      = checkoutBar.querySelector('.cb-saving');
+  const cbTotal       = checkoutBar.querySelector('.cb-total');
+  const cbClose       = checkoutBar.querySelector('.cb-close');
+  const couponToggle  = checkoutBar.querySelector('.cb-coupon-toggle');
+  const couponRow     = checkoutBar.querySelector('.cb-coupon');
+  const couponInput   = document.getElementById('coupon-input');
+  const couponApply   = checkoutBar.querySelector('.cb-apply');
+
+  // کارت‌ها و تب‌های مدت
+  const cards         = Array.from(plansView.querySelectorAll('.plan-modern'));
+  const durationRoot  = plansView.querySelector('.duration-selector-modern');
+  const durationTabs  = Array.from(plansView.querySelectorAll('.duration-tab'));
+
+  // ابزارک‌ها
+  const nf = (n) => new Intl.NumberFormat('fa-IR').format(Math.round(n));
+
+  // وضعیت داخلی صفحه پلن‌ها
+  const state = {
+    duration: parseInt(plansView.querySelector('.duration-tab.active')?.dataset.duration || '3', 10),
+    selectedPlanKey: null,   // 'professional' | 'essential' | 'enterprise' | null
+    couponPct: 0,            // درصد تخفیف کد
+    dismissed: false         // کاربر دستی بسته؟ (بله = true)
+  };
+
+  // قیمت پایه هر کارت از data-1
+  const getBasePrice = (card) => {
+    const el = card.querySelector('.price-value');
+    return parseInt(el?.dataset['1'] || '0', 10) || 0;
+  };
+
+  // محاسبه مجموع با تخفیف مدت و کوپن
+  const calcTotal = (base, months) => {
+    let gross = base * months;
+    let disc = months === 2 ? 10 : months === 3 ? 20 : 0; // 2 ماه =10% ، 3 ماه =20%
+    let afterDuration = gross * (1 - disc / 100);
+    let afterCoupon   = afterDuration * (1 - state.couponPct / 100);
+    return { gross, disc, afterDuration, afterCoupon };
+  };
+
+  // به‌روزرسانی نمایش قیمت روی خودِ کارت‌ها هم (برای وقتی مدت عوض میشه)
+  const updateCardsForDuration = (months) => {
+    plansView.querySelectorAll('.plan-modern').forEach(card => {
+      const priceEl        = card.querySelector('.price-value');
+      const periodEl       = card.querySelector('.period-value');
+      const savingsWrap    = card.querySelector('.price-savings');
+      const savingsAmount  = card.querySelector('.savings-amount');
+      if (!priceEl) return;
+
+      const base = getBasePrice(card);
+      const disc = months === 2 ? 10 : months === 3 ? 20 : 0;
+      const total = base * months * (1 - disc/100);
+      priceEl.style.transform = 'scale(0.9)';
+      setTimeout(() => {
+        priceEl.textContent = nf(total);
+        priceEl.style.transform = 'scale(1)';
+      }, 120);
+
+      if (periodEl) periodEl.textContent = (months===1?'۱ ماه': months===2?'۲ ماه':'۳ ماه');
+      if (savingsWrap) {
+        if (disc > 0) {
+          const saved = (base * months) - total;
+          savingsWrap.classList.remove('hidden');
+          if (savingsAmount) savingsAmount.textContent = `${nf(saved)} تومان صرفه‌جویی`;
+        } else {
+          savingsWrap.classList.add('hidden');
+        }
+      }
+    });
+  };
+
+  // باز/بسته کردن نوار پرداخت بر اساس state
+  const updateCheckout = () => {
+    const selected = state.selectedPlanKey
+      ? plansView.querySelector(`.plan-modern[data-plan="${state.selectedPlanKey}"]`)
+      : null;
+
+    if (state.dismissed || !selected) {
+      checkoutBar.classList.remove('visible');
+      checkoutBar.setAttribute('aria-hidden','true');
+      return;
+    }
+
+    const name = selected.querySelector('.plan-title-card')?.textContent?.trim() || '—';
+    const base = getBasePrice(selected);
+    const { afterCoupon, disc } = calcTotal(base, state.duration);
+
+    cbPlan.textContent = name;
+    cbDuration.textContent = (state.duration===1?'۱ ماهه': state.duration===2?'۲ ماهه':'۳ ماهه');
+
+    const tags = [];
+    if (disc > 0) tags.push(`${disc}%`);
+    if (state.couponPct > 0) tags.push(`+ ${state.couponPct}% کد`);
+    cbSaving.textContent = tags.length ? `تخفیف: ${tags.join(' ')}` : '';
+    cbSaving.style.display = tags.length ? 'inline-block' : 'none';
+
+    cbTotal.textContent = `${nf(afterCoupon)} تومان`;
+
+    checkoutBar.classList.add('visible');
+    checkoutBar.setAttribute('aria-hidden','false');
+  };
+
+  // انتخاب یک کارت پلن
+  const selectPlan = (card) => {
+    cards.forEach(c => c.classList.remove('selected'));
+    card.classList.add('selected');
+    state.selectedPlanKey = card.dataset.plan || null;
+    state.dismissed = false; // انتخابِ پلن = اجازه بده نوار باز شه
+    updateCheckout();
+  };
+
+  // کلیک روی کارت‌ها/CTA → انتخاب پلن
+  cards.forEach(card => {
+    card.addEventListener('click', (e) => {
+      // فقط وقتی روی خود کارت یا CTA کلیک شد
+      if (!(e.target.closest('.plan-cta-modern') || e.currentTarget === card)) return;
+      e.stopPropagation(); // نذار کلیک بیرون، همون لحظه ببندتش
+      selectPlan(card);
+    });
+  });
+
+  // تغییر مدت (۱/۲/۳)
+  if (durationRoot) {
+    durationRoot.addEventListener('click', (e) => {
+      const tab = e.target.closest('.duration-tab');
+      if (!tab) return;
+
+      // Active state تب‌ها
+      durationTabs.forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+
+      // حرکت اسلایدر مدت
+      const tabs = Array.from(durationTabs);
+      const index = tabs.indexOf(tab);
+      const indicator = durationRoot.querySelector('.duration-indicator');
+      if (indicator) indicator.style.left = `${4 + (index * 33.333)}%`;
+
+      // آپدیت وضعیت و UI
+      state.duration = parseInt(tab.dataset.duration, 10) || 3;
+      updateCardsForDuration(state.duration);
+      updateCheckout(); // اگر نوار باز است، مبلغش هم عوض شود
+    });
+  }
+
+  // باز/بستن فُرم کد تخفیف
+  couponToggle?.addEventListener('click', () => {
+    const isOpen = !couponRow?.hasAttribute('hidden');
+    if (couponRow) couponRow.toggleAttribute('hidden');
+    couponToggle.setAttribute('aria-expanded', String(!isOpen));
+  });
+
+  // اعمال کد تخفیف (دموی ساده: هر متنی = ۱۰٪)
+  couponApply?.addEventListener('click', () => {
+    const code = couponInput?.value?.trim();
+    state.couponPct = code ? 10 : 0;
+    updateCheckout();
+    if (window.UIComponents?.showToast) {
+      UIComponents.showToast(
+        state.couponPct ? 'کد تخفیف ۱۰٪ اعمال شد.' : 'کد نامعتبر بود.',
+        state.couponPct ? 'success' : 'error'
+      );
+    }
+  });
+
+  // دکمه ضربدر
+  cbClose?.addEventListener('click', (e) => {
+    e.stopPropagation();
+    state.dismissed = true;
+    updateCheckout();
+  });
+
+  // کلیک بیرون از نوار → ببند
+  document.addEventListener('click', (e) => {
+    if (!checkoutBar.classList.contains('visible')) return;
+    if (checkoutBar.contains(e.target)) return;      // کلیک داخل خود نوار
+    if (e.target.closest('.plan-modern')) return;    // کلیک روی کارت‌ها (اون‌ها خودشون مدیریت می‌کنن)
+    state.dismissed = true;
+    updateCheckout();
+  }, true); // useCapture برای جلوگیری از تداخل با bubbling
+
+  // جابه‌جایی سکشن‌ها (hashchange)
+  window.addEventListener('hashchange', () => {
+    const onPlans = location.hash === '#/plans';
+    if (!onPlans) {
+      // از صفحه پلن‌ها رفتی بیرون → بسته باشه
+      checkoutBar.classList.remove('visible');
+      checkoutBar.setAttribute('aria-hidden','true');
+    } else {
+      // برگشتی به پلن‌ها → اگر قبلاً دستی بسته بودی، بسته می‌مونه
+      updateCheckout();
+    }
+  });
+
+  // مقداردهی اولیه: کارت‌ها/قیمت‌ها برای مدت پیش‌فرض
+  updateCardsForDuration(state.duration);
+  updateCheckout(); // خودکار باز نمی‌کنیم تا کاربر انتخاب کند
+})();
+
+
+
+
+
+
+
+
+</script>
+</body>
+</html>
+

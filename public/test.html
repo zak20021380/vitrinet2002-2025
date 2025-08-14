@@ -652,6 +652,112 @@
   </div>
 </div>
 
+
+
+<!-- Pending Booking Modal -->
+<div id="pendingBookingModal" role="dialog" aria-modal="true" aria-labelledby="pb-title"
+     class="hidden fixed inset-0 z-[120] items-center justify-center">
+  <!-- backdrop -->
+  <div class="absolute inset-0 bg-black/50 backdrop-blur-[2px]" data-close></div>
+
+  <!-- card -->
+  <div class="modal-card relative w-[92%] max-w-sm bg-white rounded-2xl shadow-2xl p-6
+              transform transition duration-150 scale-95 opacity-0">
+    <!-- close -->
+    <button type="button" data-close
+            class="absolute top-2 left-2 text-gray-500 hover:text-gray-700 text-xl leading-none">
+      &times;
+    </button>
+
+    <!-- header -->
+    <div class="flex items-center gap-3 mb-4">
+      <span class="inline-flex w-10 h-10 items-center justify-center rounded-xl
+                   bg-gradient-to-tr from-blue-600 to-teal-500 text-white">
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M12 22s-9-6-9-13a9 9 0 1118 0c0 7-9 13-9 13z"></path>
+          <path d="M9 12l2 2 4-4"></path>
+        </svg>
+      </span>
+      <div>
+        <h3 id="pb-title" class="text-base font-extrabold text-gray-900">درخواست ثبت شد</h3>
+        <p class="text-xs text-gray-500">نوبت شما در انتظار تأیید فروشنده است</p>
+      </div>
+    </div>
+
+    <!-- details -->
+    <div class="rounded-xl bg-gray-50 border border-gray-200 p-4 mb-4 text-sm">
+      <div class="grid grid-cols-2 gap-y-2 gap-x-3">
+        <div class="text-gray-600">خدمت</div>   <div id="pb-service" class="font-bold text-gray-800"></div>
+        <div class="text-gray-600">تاریخ</div>   <div id="pb-date"    class="font-bold text-gray-800"></div>
+        <div class="text-gray-600">ساعت</div>    <div id="pb-time"    class="font-bold text-gray-800"></div>
+        <div class="text-gray-600">شماره شما</div><div id="pb-phone"   class="font-bold text-gray-800 ltr-num"></div>
+      </div>
+    </div>
+
+    <div class="flex items-start gap-2 text-xs text-gray-600 mb-5">
+      <i class="fas fa-sms mt-0.5"></i>
+      <span>در صورت تأیید، نتیجه از طریق پیامک اطلاع‌رسانی می‌شود.</span>
+    </div>
+
+    <!-- actions -->
+    <div class="flex justify-end">
+      <button type="button" data-close
+              class="px-4 py-2 rounded-full bg-blue-600 text-white font-bold hover:bg-blue-700">
+        متوجه شدم
+      </button>
+    </div>
+  </div>
+</div>
+
+
+
+
+<!-- Block Booking While Pending (clean popup) -->
+<div id="pendingBlockModal" role="dialog" aria-modal="true" aria-labelledby="pb-block-title"
+     class="hidden fixed inset-0 z-[130] items-center justify-center">
+  <div class="absolute inset-0 bg-black/50 backdrop-blur-[2px]" data-close></div>
+
+  <div class="modal-card relative w-[92%] max-w-sm bg-white rounded-2xl shadow-2xl p-6
+              transform transition duration-150 scale-95 opacity-0">
+    <button type="button" data-close class="absolute top-2 left-2 text-gray-500 hover:text-gray-700 text-xl leading-none">&times;</button>
+
+    <div class="flex items-center gap-3 mb-3">
+      <span class="inline-flex w-10 h-10 items-center justify-center rounded-xl bg-gradient-to-tr from-amber-500 to-red-500 text-white">
+        <i class="fas fa-hourglass-half"></i>
+      </span>
+      <div>
+        <h3 id="pb-block-title" class="text-base font-extrabold text-gray-900">لطفاً کمی صبر کنید</h3>
+        <p class="text-xs text-gray-500">نوبت قبلی شما هنوز در انتظار تأیید فروشنده است.</p>
+      </div>
+    </div>
+
+    <div class="rounded-xl bg-gray-50 border border-gray-200 p-4 mb-4 text-sm">
+      <div class="grid grid-cols-2 gap-y-2 gap-x-3">
+        <div class="text-gray-600">خدمت</div><div id="pblk-service" class="font-bold text-gray-800"></div>
+        <div class="text-gray-600">تاریخ</div><div id="pblk-date" class="font-bold text-gray-800"></div>
+        <div class="text-gray-600">ساعت</div><div id="pblk-time" class="font-bold text-gray-800"></div>
+        <div class="text-gray-600">ثبت‌شده</div><div id="pblk-created" class="font-bold text-gray-800"></div>
+      </div>
+    </div>
+
+    <div class="text-xs text-gray-600 mb-5">
+      پس از تأیید، از طریق پیامک اطلاع‌رسانی می‌شود و سپس می‌توانید نوبت جدید بگیرید.
+    </div>
+
+    <div class="flex justify-end">
+      <button type="button" data-close class="px-4 py-2 rounded-full bg-blue-600 text-white font-bold hover:bg-blue-700">
+        متوجه شدم
+      </button>
+    </div>
+  </div>
+</div>
+
+
+
+
+
+
+
 <!-- Toast should be above modals -->
 <div id="headerToast" class="fixed top-4 left-1/2 -translate-x-1/2 z-[100] bg-blue-600 text-white text-sm px-4 py-2 rounded-full shadow-lg opacity-0 transition-opacity pointer-events-none"></div>
 
@@ -827,6 +933,14 @@ function showToastDark(message, {type='success', durationMs=2600} = {}) {
   }
   bindTriggers();
 
+  window.openModalById = function(id) {
+    const modal = document.getElementById(id);
+    if (!modal) return;
+    const cached = modalCache.get(id) || setupModal(modal);
+    modalCache.set(id, cached);
+    cached.open();
+  };
+
   // ====== Address copy ======
   const addressCopyBtn = document.getElementById('address-copy-btn');
   const fullAddressEl  = document.getElementById('full-address');
@@ -864,8 +978,78 @@ function showToastDark(message, {type='success', durationMs=2600} = {}) {
       if (reportCounter) reportCounter.textContent = '۰/۵۰۰';
     });
   }
+
+  // ================== Booking Gate (prevent booking when previous is pending) ==================
+  (function(){
+    const KEY_LAST = 'vt:lastBooking';
+
+    function readLast(){
+      try { return JSON.parse(localStorage.getItem(KEY_LAST) || 'null'); } catch(e){ return null; }
+    }
+    function saveLast(obj){ localStorage.setItem(KEY_LAST, JSON.stringify(obj)); }
+    function hasPending(){
+      const b = readLast();
+      return !!(b && b.status === 'pending');
+    }
+    function fillBlockedModal(){
+      const b = readLast(); if (!b) return;
+      const $ = id => document.getElementById(id);
+      $('pblk-service') && ( $('pblk-service').textContent = b.service || '' );
+      $('pblk-date')    && ( $('pblk-date').textContent    = b.date    || '' );
+      $('pblk-time')    && ( $('pblk-time').textContent    = b.time    || '' );
+      $('pblk-created') && ( $('pblk-created').textContent = new Date(b.createdAt).toLocaleString('fa-IR') );
+    }
+
+    // بازکننده ویزارد با چک «pending»
+    function openBookingWizard(prefill){
+      if (hasPending()) {
+        fillBlockedModal();
+        if (typeof window.openModalById === 'function') window.openModalById('pendingBlockModal');
+        return false;
+      }
+      const wiz = document.getElementById('booking-wizard');
+      if (wiz && wiz.classList.contains('hidden')) wiz.classList.remove('hidden');
+
+      // پیش‌انتخاب خدمت اگر از کارت خدمات اومدیم
+      if (prefill && prefill.service) {
+        document.querySelectorAll('#step-1 .service-option').forEach(opt => {
+          const match = opt.dataset.service === prefill.service;
+          opt.classList.toggle('bw-selected', match);
+          if (match) opt.dispatchEvent(new Event('click'));
+        });
+      }
+
+      const top = wiz.getBoundingClientRect().top + window.scrollY - 80;
+      window.scrollTo({ top, behavior: 'smooth' });
+      return true;
+    }
+
+    // اکسپورت‌ها
+    window.__BOOKING_GUARD__ = { hasPending, readLast, saveLast, openBookingWizard };
+    window.hasPendingBooking = hasPending;
+    window.openBookingWizard = openBookingWizard;
+    window.clearPendingBooking = function(){ localStorage.removeItem(KEY_LAST); };
+
+    // اتصال دکمه‌های صفحه بعد از آماده‌شدن DOM
+    document.addEventListener('DOMContentLoaded', () => {
+      // CTA هیرو
+      const hero = document.getElementById('hero-cta');
+      if (hero) hero.addEventListener('click', (e) => { e.preventDefault(); openBookingWizard(); });
+
+      // دکمه‌های «رزرو» روی کارت خدمات
+      document.querySelectorAll('.service-button').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          e.preventDefault();
+          openBookingWizard({ service: btn.dataset.service, price: btn.dataset.price });
+        });
+      });
+    });
+  })();
+  // ================== /Booking Gate ==================
+
 })();
 </script>
+
 
 
     <!-- Hero Section -->
@@ -1478,8 +1662,18 @@ function showToastDark(message, {type='success', durationMs=2600} = {}) {
   <style>
     /* هایلایت انتخاب‌ها + OTP */
     .bw-selected{ border-color:#3b82f6 !important; background:#eff6ff; }
-    .bw-otp{ width:44px;height:54px;text-align:center;font-size:20px;border:1px solid #d1d5db;border-radius:12px;outline:0; }
+    .bw-otp{ width:48px;height:56px;text-align:center;font-size:20px;border:1px solid #d1d5db;border-radius:12px;outline:0; }
     .bw-otp:focus{ border-color:#3b82f6; box-shadow:0 0 0 3px rgba(59,130,246,.25); }
+    /* شماره‌ها همیشه LTR نمایش داده شوند */
+    .ltr-num{ direction:ltr; unicode-bidi:isolate; }
+    /* بهبود استایل فیلد شماره موبایل (لاتین، یکنواخت) */
+    .bw-phone{
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono","Courier New", monospace;
+      font-variant-numeric: tabular-nums;
+      letter-spacing:.04em;
+      direction:ltr;
+      unicode-bidi:isolate;
+    }
     /* بهبود لمس روی موبایل */
     @media (hover:none){ .bw-tap{ padding-top:.65rem; padding-bottom:.65rem; } }
   </style>
@@ -1518,7 +1712,7 @@ function showToastDark(message, {type='success', durationMs=2600} = {}) {
           </div>
         </div>
         <div class="service-option border border-gray-300 rounded-lg p-3 hover:border-blue-500 cursor-pointer bw-tap" data-service="ماساژ صورت" data-price="120000">
-          <div class="flex justify_between items-center">
+          <div class="flex justify-between items-center">
             <div>
               <h5 class="font-bold">ماساژ صورت</h5>
               <p class="text-sm text-gray-600">ماساژ صورت با روغن‌های گیاهی</p>
@@ -1603,18 +1797,18 @@ function showToastDark(message, {type='success', durationMs=2600} = {}) {
     <div id="step-3" class="step hidden">
       <h4 class="font-bold mb-4">اطلاعات تماس</h4>
 
-      <!-- موبایل: LTR، شروع از چپ با صفر، ارقام فارسی مجاز -->
+      <!-- موبایل: LTR، شروع از چپ با صفر، ارقام «لاتین» -->
       <div class="mb-6">
         <label class="block text-sm font-medium mb-2" for="phone-number">شماره موبایل</label>
-        <div class="relative" dir="ltr">
-          <!-- پیش‌شماره کشور در چپ -->
-          <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+        <div class="relative">
+          <!-- پیش‌شماره کشور در چپ (LTR) -->
+          <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none ltr-num">
             <span class="text-gray-500 text-sm select-none">+98</span>
           </div>
           <input
             type="tel" id="phone-number" inputmode="numeric" autocomplete="tel"
-            class="w-full border border-gray-300 rounded-lg py-3 pl-14 pr-3 text-left focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent tracking-widest"
-            placeholder="۰۹۱۲۳۴۵۶۷۸۹" maxlength="11" pattern="^0\d{10}$">
+            class="bw-phone w-full border border-gray-300 rounded-lg py-3 pl-14 pr-3 text-left focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            placeholder="09123456789" maxlength="11" pattern="^0\d{10}$">
         </div>
         <p class="text-xs text-gray-500 mt-1">فقط شماره ایران؛ با <span class="font-bold">۰</span> شروع شود.</p>
         <p id="phone-error" class="text-red-500 text-xs mt-1 hidden">شماره وارد شده معتبر نیست</p>
@@ -1635,21 +1829,19 @@ function showToastDark(message, {type='success', durationMs=2600} = {}) {
     <div id="step-4" class="step hidden">
       <h4 class="font-bold mb-3">تایید شماره موبایل</h4>
       <p class="text-sm text-gray-600 mb-4">
-        یک کد ۶ رقمی به شماره
-        <span id="otp-phone" class="font-bold text-gray-800"></span>
+        یک کد ۴ رقمی به شماره
+        <span id="otp-phone" class="font-bold text-gray-800 ltr-num"></span>
         ارسال شد.
       </p>
 
       <button id="edit-phone" class="mb-4 text-blue-600 font-bold text-sm hover:text-blue-700">ویرایش شماره</button>
 
-      <div class="flex items-center justify-center gap-2 mb-2" dir="ltr">
-        <input class="bw-otp" type="text" inputmode="numeric" maxlength="1">
-        <input class="bw-otp" type="text" inputmode="numeric" maxlength="1">
-        <input class="bw-otp" type="text" inputmode="numeric" maxlength="1">
-        <input class="bw-otp" type="text" inputmode="numeric" maxlength="1">
-        <input class="bw-otp" type="text" inputmode="numeric" maxlength="1">
-        <input class="bw-otp" type="text" inputmode="numeric" maxlength="1">
-      </div>
+ <div class="flex items-center justify-center gap-2 mb-2" dir="ltr">
+  <input class="bw-otp" type="text" inputmode="numeric" maxlength="1">
+  <input class="bw-otp" type="text" inputmode="numeric" maxlength="1">
+  <input class="bw-otp" type="text" inputmode="numeric" maxlength="1">
+  <input class="bw-otp" type="text" inputmode="numeric" maxlength="1">
+</div>
       <p id="otp-error" class="text-xs text-red-500 text-center mb-2 hidden">کد تایید صحیح نیست</p>
 
       <div class="flex items-center justify-between mb-6">
@@ -1672,7 +1864,7 @@ function showToastDark(message, {type='success', durationMs=2600} = {}) {
           <div class="text-gray-600 py-1">تاریخ:</div><div id="confirm-date" class="font-bold text-right py-1"></div>
           <div class="text-gray-600 py-1">ساعت:</div><div id="confirm-time" class="font-bold text-right py-1"></div>
           <div class="text-gray-600 py-1">نام:</div><div id="confirm-name" class="font-bold text-right py-1"></div>
-          <div class="text-gray-600 py-1">شماره تماس:</div><div id="confirm-phone" class="font-bold text-right py-1"></div>
+          <div class="text-gray-600 py-1">شماره تماس:</div><div id="confirm-phone" class="font-bold text-right py-1 ltr-num"></div>
           <div class="text-gray-600 mt-4 pt-4 border-t border-gray-200 py-1">مبلغ کل:</div>
           <div id="confirm-price" class="font-bold text-lg text-right mt-4 pt-4 border-t border-gray-200 py-1"></div>
         </div>
@@ -1710,8 +1902,8 @@ function showToastDark(message, {type='success', durationMs=2600} = {}) {
       const scrollInto = el => { if(!el) return; const top = el.getBoundingClientRect().top + scrollY - 80; window.scrollTo({top,behavior:'smooth'}); };
       const genId = () => 'c_' + Math.random().toString(36).slice(2,10) + Date.now().toString(36).slice(-4);
 
-      // کد مادر برای محیط توسعه (قبول «۰۰۰۰۰۰»)
-      const MASTER_OTP = '000000';
+      // کد مادر برای محیط توسعه (قبول «۰۰۰۰»)
+      const MASTER_OTP = '0000';
 
       // ---- state
       const st = { step:1, customerId:null, service:null, price:0, date:null, time:null, name:'', phone:'', otp:'', otpTimer:0, otpInt:null, otpTo:'' };
@@ -1769,7 +1961,7 @@ function showToastDark(message, {type='success', durationMs=2600} = {}) {
       }
       function chkOTP(){
         const code = toEn(otpInputs().map(i=>i.value).join('')).replace(/\D/g,'');
-        verifyBtn.disabled = (code.length!==6);
+        verifyBtn.disabled = (code.length!==4);
         if (!verifyBtn.disabled) otpErr.classList.add('hidden');
       }
 
@@ -1799,10 +1991,9 @@ function showToastDark(message, {type='success', durationMs=2600} = {}) {
       }
       nameInp.addEventListener('input', onStep3);
       phoneInp.addEventListener('input', (e)=>{
-        // فقط رقم؛ ارقام فارسی/عربی هم مجاز
+        // فقط رقم؛ ارقام فارسی/عربی هم مجاز، خروجی «لاتین»
         const clean = toEn(e.target.value).replace(/\D/g,'').slice(0,11);
-        const keep  = clean.replace(/\d/g, d => '۰۱۲۳۴۵۶۷۸۹'[+d]); // نمایش با ارقام فارسی
-        e.target.value = keep;
+        e.target.value = clean; // نمایش لاتین
         onStep3();
       });
       back3.addEventListener('click', ()=>showStep(2));
@@ -1810,12 +2001,16 @@ function showToastDark(message, {type='success', durationMs=2600} = {}) {
         if (next3.disabled) return;
         st.phone = toEn(phoneInp.value); st.name = nameInp.value.trim();
 
-        // ارسال کد (دمو)
-        st.otp = String(Math.floor(100000 + Math.random()*900000)); // در تولید واقعی از سرور بگیر
+        // ارسال کد (دمو) — ۴ رقمی
+        st.otp = String(Math.floor(1000 + Math.random()*9000)); // در تولید واقعی از سرور بگیر
         st.otpTo = st.phone;
 
-        // ماسک شماره برای نمایش
-        const mask = st.phone.replace(/^(\d{4})\d+(\d{2})$/, '$1******$2');
+        // ماسک شماره برای نمایش (0902*****7852)
+        const mask = (p => {
+          const v = toEn(p).replace(/\D/g,'');
+          if (v.length < 8) return v;
+          return v.slice(0,4) + '*****' + v.slice(-4);
+        })(st.phone);
         otpPhone.textContent = mask;
 
         startOtpTimer();
@@ -1853,7 +2048,7 @@ function showToastDark(message, {type='success', durationMs=2600} = {}) {
 
       // ارسال مجدد OTP (دمو)
       const resendOtp = ()=>{
-        st.otp = String(Math.floor(100000 + Math.random()*900000));
+        st.otp = String(Math.floor(1000 + Math.random()*9000));
         startOtpTimer();
       };
       resendBtn.addEventListener('click', ()=>{ if(!resendBtn.disabled) resendOtp(); });
@@ -1873,10 +2068,17 @@ function showToastDark(message, {type='success', durationMs=2600} = {}) {
       // تایید OTP
       verifyBtn.addEventListener('click', ()=>{
         const code = toEn(otpInputs().map(i=>i.value.trim()).join('')).replace(/\D/g,'');
-        if (code.length !== 6) { otpErr.classList.remove('hidden'); return; }
+        if (code.length !== 4) { otpErr.classList.remove('hidden'); return; }
         if (code !== st.otp && code !== MASTER_OTP) { otpErr.classList.remove('hidden'); return; }
         stopOtpTimer();
         persistCustomer();
+
+        const auth = { id: st.customerId, name: st.name, phone: st.phone };
+localStorage.setItem('auth_user', JSON.stringify(auth)); // Loyalty همینو می‌خونه
+window.__APP_USER__ = auth; // اگه جایی از window استفاده می‌کنی
+
+// اختیاری: به Loyalty خبر بده UI رو رفرش کنه
+document.dispatchEvent(new Event('auth:changed'));
         fillConfirm();
         showStep(5);
         confirmBtn.disabled = false; // فقط بعد از تایید OTP
@@ -1896,24 +2098,100 @@ function showToastDark(message, {type='success', durationMs=2600} = {}) {
       }
 
       back5.addEventListener('click', ()=>showStep(3));
-      confirmBtn.addEventListener('click', ()=>{
-        // ارسال نهایی رزرو به همراه customerId ثابت
-        const payload = {
-          customerId: st.customerId,
-          name: st.name,
-          phone: st.phone,
-          service: st.service,
-          date: st.date,
-          time: st.time,
-          price: st.price
-        };
-        // fetch('/api/bookings', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(payload)});
-        // دمو: فقط UI موفقیت
-        Object.values(steps).forEach(s=>s.classList.add('hidden'));
-        successBox.classList.remove('hidden');
-        // console.log('BOOKING PAYLOAD', payload);
-        scrollInto(successBox);
-      });
+confirmBtn.addEventListener('click', () => {
+  // جلوگیری از کلیک دوباره
+  if (confirmBtn.disabled) return;
+  confirmBtn.disabled = true;
+
+  // ارسال نهایی رزرو به همراه customerId ثابت (دمو/اختیاری)
+  const payload = {
+    customerId: st.customerId,
+    name:   st.name,
+    phone:  st.phone,
+    service:st.service,
+    date:   st.date,
+    time:   st.time,
+    price:  st.price
+  };
+  // اگر بک‌اند داری این رو باز کن:
+  // fetch('/api/bookings', {
+  //   method:'POST',
+  //   headers:{'Content-Type':'application/json'},
+  //   body: JSON.stringify(payload)
+  // });
+
+  // پرکردن داده‌های مودال «در انتظار تایید»
+  const maskPhone = (p => {
+    const v = (p || '').replace(/\D/g,'');
+    if (v.length < 8) return v;
+    return v.slice(0,4) + '*****' + v.slice(-4);
+  })(st.phone);
+
+  const pbService = document.getElementById('pb-service');
+  const pbDate    = document.getElementById('pb-date');
+  const pbTime    = document.getElementById('pb-time');
+  const pbPhone   = document.getElementById('pb-phone');
+
+  if (pbService) pbService.textContent = st.service || '';
+  if (pbDate)    pbDate.textContent    = st.date    || '';
+  if (pbTime)    pbTime.textContent    = st.time    || '';
+  if (pbPhone)   pbPhone.textContent   = maskPhone;
+
+  // 🔒 ذخیره رزرو «در انتظار تایید» برای گیت رزرو
+  try {
+    const pending = {
+      id:       (typeof genId === 'function' ? genId() : ('b_' + Date.now())),
+      status:   'pending',
+      service:  st.service,
+      date:     st.date,
+      time:     st.time,
+      phone:    st.phone,
+      createdAt: Date.now()
+    };
+
+    if (window.__BOOKING_GUARD__?.saveLast) {
+      window.__BOOKING_GUARD__.saveLast(pending);
+    } else {
+      // fallback
+      localStorage.setItem('vt:lastBooking', JSON.stringify(pending));
+    }
+
+    // (اختیاری) اعلام یک ایونت برای سایر بخش‌ها
+    document.dispatchEvent(new CustomEvent('booking:pending', { detail: pending }));
+  } catch (e) {
+    // نذار UI خراب شه
+    console.warn('save pending booking failed', e);
+  }
+
+  // نمایش فقط مودال «در انتظار تایید»
+  if (typeof window.openModalById === 'function') {
+    window.openModalById('pendingBookingModal');
+  } else {
+    Object.values(steps).forEach(s => s.classList.add('hidden'));
+    successBox.classList.remove('hidden');
+    scrollInto(successBox);
+  }
+
+  // ریست انتخاب‌ها برای رزرو بعدی
+  try {
+    ['service','date','time'].forEach(k => st[k] = null);
+    svcOpts.forEach(x => x.classList.remove('bw-selected'));
+    dateOpts.forEach(x => x.classList.remove('bw-selected'));
+    timeOpts.forEach(x => x.classList.remove('bw-selected'));
+
+    next1.disabled = true;
+    next2.disabled = true;
+    // دکمه تایید تا وقتی دوباره مراحل طی نشن غیرفعال می‌مونه
+    confirmBtn.disabled = true;
+
+    showStep(1);
+  } catch (e) {
+    console.warn('reset wizard failed', e);
+  }
+});
+
+
+
       closeSuccess.addEventListener('click', ()=>{
         successBox.classList.add('hidden');
         showStep(1);
@@ -1927,7 +2205,7 @@ function showToastDark(message, {type='success', durationMs=2600} = {}) {
       };
       if (saved.cid) st.customerId = saved.cid;
       if (saved.name) nameInp.value = saved.name;
-      if (saved.phone) phoneInp.value = toFa(saved.phone);
+      if (saved.phone) phoneInp.value = saved.phone; // نمایش لاتین
       // ولیدیشن اولیه
       (function initButtons(){
         next1.disabled = true; next2.disabled = true; next3.disabled = true; confirmBtn.disabled = true;
@@ -1935,8 +2213,10 @@ function showToastDark(message, {type='success', durationMs=2600} = {}) {
       onStep3(); // در صورت پر بودن فیلدها، دکمه ادامه فعال می‌شود
       showStep(1);
     })();
+
   </script>
 </section>
+
 
 
 
@@ -2212,17 +2492,54 @@ function showToastDark(message, {type='success', durationMs=2600} = {}) {
   }
 
   // ------- COPY (صمیمی/متعادل) -------
-  function copyFor(progress, current, target, reward) {
-    const left = Math.max(0, target - current);
-    const isHalf = current * 2 === target;
+// ------- COPY (صمیمی/متعادل، بدون شعار) -------
+function copyFor(progress, current, target, reward) {
+  const left = Math.max(0, target - current);
+  const pick = (arr) => arr[(current + left) % arr.length]; // چرخشی ساده
 
-    if (current >= target) return { h:'جایزه‌ت آماده‌ست', sub:'بزن بگیریمش.', help:'با رزرو بعدی اعمال می‌شه.', cta:'دریافت جایزه' };
-    if (isHalf)           return { h:'نصف راه اومدی',  sub:'همینو ادامه بده.', help:`${toFa(left)} نوبت مونده.`, cta:'رزرو بعدی' };
-    if (progress >= 90)   return { h:'سرِ مرز جایزه',   sub:'یکی‌دو تا دیگه.',  help: left<=1 ? 'با بعدی می‌رسی.' : `${toFa(left)} نوبت مونده.`, cta:'تمامش کن' };
-    if (progress >= 60)   return { h:'روغنه',          sub:'داری می‌ری جلو.',   help:`${toFa(left)} نوبت تا جایزه.`, cta:'رزرو بعدی' };
-    if (current > 0)      return { h:'شروع خوبی داری', sub:'حواست باشه ادامه بدی.', help:`${toFa(left)} نوبت مونده.`, cta:'رزرو بعدی' };
-    return { h:'خوش اومدی به باشگاه', sub:'اولین نوبت رو ست کن.', help:`با ${toFa(target)} نوبت، ${reward}.`, cta:'رزرو اولین نوبت' };
+  if (current >= target) {
+    return pick([
+      { h: 'جایزه‌ت آماده‌ست 🎁',   sub: 'بزن بگیریمش.',            help: 'روی رزرو بعدی اعمالش می‌کنیم.', cta: 'دریافت جایزه' },
+      { h: 'حله! رسیدی به جایزه',   sub: 'فقط فعالش کنیم و تمام.',  help: 'تو رزرو بعدی استفاده میشه.',    cta: 'دریافت جایزه' },
+      { h: 'به هدف خوردی ✨',       sub: 'وقتِ نقد کردنشه.',         help: 'بعدی که رزرو کنی می‌افته.',      cta: 'دریافت جایزه' },
+    ]);
   }
+
+  if (current * 2 === target) {
+    return pick([
+      { h: 'نصفش رفت ✅',           sub: 'چند تا دیگه مونده.',       help: `${left} نوبت مونده.` ,           cta: 'رزرو بعدی' },
+      { h: 'نصف راهی! 👌',          sub: 'با همین فرمون برو.',       help: `${left} نوبت مونده.`,            cta: 'رزرو بعدی' },
+    ]);
+  }
+
+  if (progress >= 90) {
+    return pick([
+      { h: 'یه قدم تا جایزه',       sub: 'همین یکی دیگه.',           help: left <= 1 ? 'با نوبت بعدی می‌رسی.' : `${left} نوبت مونده.`, cta: 'رزرو بعدی' },
+      { h: 'تقریباً رسیدی ⏳',      sub: 'کم مونده، بزن بریم.',      help: left <= 1 ? 'نوبت بعدی کافیه.'    : `${left} نوبت مونده.`, cta: 'رزرو بعدی' },
+    ]);
+  }
+
+  if (progress >= 60) {
+    return pick([
+      { h: 'خوب داری میری 🚀',       sub: 'همینو نگه دار.',           help: `${left} نوبت تا جایزه.`,         cta: 'رزرو بعدی' },
+      { h: 'مسیر رو گرفتی',         sub: 'یکی‌یکی جلو برو.',         help: `${left} نوبت تا جایزه.`,         cta: 'رزرو بعدی' },
+    ]);
+  }
+
+  if (current > 0) {
+    return pick([
+      { h: 'شروع خوبی زدی',         sub: 'نذار فاصله بیفته.',        help: `${left} نوبت مونده.`,            cta: 'رزرو بعدی' },
+      { h: 'اوله راهی ولی رو غلتکی',sub: 'قدم بعدی رو بردار.',       help: `${left} نوبت مونده.`,            cta: 'رزرو بعدی' },
+    ]);
+  }
+
+  // کاربر تازه/هیچ رزروی نداشته
+  return pick([
+    { h: 'به باشگاه خوش اومدی 👋', sub: 'اولین نوبت رو بگیر و بریم.', help: `با ${target} نوبت، ${reward}.`, cta: 'رزرو اولین نوبت' },
+    { h: 'از همین‌جا شروع کن',     sub: 'اولین رزرو = یه قدم جلو.',   help: `با ${target} نوبت، ${reward}.`, cta: 'رزرو اولین نوبت' },
+  ]);
+}
+
 
   // ------- AUTH / HISTORY -------
   let AUTH = { loggedIn: false, user: null };
@@ -2325,27 +2642,75 @@ function showToastDark(message, {type='success', durationMs=2600} = {}) {
       });
     });
 
-    async function goCTA() {
-      const target = parseInt(data.dataset.target  || '10', 10);
-      const current = parseInt(data.dataset.current || '0', 10);
+   // --- REPLACE goCTA inside bindEvents() in the Loyalty Rewards script ---
+async function goCTA() {
+  const data = document.getElementById('lr-data');
+  if (!data) return;
 
-      // اگر لاگین نیست: پیام بده و هدایت کن
-      if (!AUTH.loggedIn) { requireLogin(); return; }
+  const target  = parseInt(data.dataset.target  || '10', 10);
+  const current = parseInt(data.dataset.current || '0', 10);
 
-      if (current >= target) { openModal(document.getElementById('lrRedeemModal')); return; }
+  // اگر کاربر لاگین نیست ولی CTA «رزرو اولین نوبت» است، مستقیم برو به ویزارد
+  const ctaText    = document.getElementById('lr-cta-label')?.textContent?.trim();
+  const isFirstCTA = (ctaText === 'رزرو اولین نوبت') || (!AUTH.loggedIn && !HAS_BOOKED_BEFORE);
 
-      // رفتن به رزرو
-      const ids = ['booking-wizard','booking','reserve','reservation'];
-      let el = null; for (const id of ids) { const t = document.getElementById(id); if (t){ el=t; break; } }
-      if (el) {
-        if (el.classList.contains('hidden')) el.classList.remove('hidden');
-        const top = el.getBoundingClientRect().top + window.scrollY - 80;
-        reduce() ? window.scrollTo(0, top) : window.scrollTo({ top, behavior: 'smooth' });
-      } else {
-        const url = data.dataset.bookingUrl;
-        if (url) window.location.href = url; else toast('بخش رزرو هنوز بالا نیومده');
-      }
+  // برای CTAهای دیگر (مثل «رزرو بعدی» یا «دریافت جایزه») همچنان لاگین لازم است
+  if (!AUTH.loggedIn && !isFirstCTA) {
+    requireLogin();
+    return;
+  }
+
+  // اگر به حدّ جایزه رسیدی و لاگین هستی → مودال دریافت جایزه
+  if (current >= target && AUTH.loggedIn) {
+    openModal(document.getElementById('lrRedeemModal'));
+    return;
+  }
+
+  // ===== قفل رزرو: اگر نوبت قبلی هنوز تایید نشده، اجازه ورود به ویزارد نده
+  const lsHasPending = () => {
+    try {
+      const b = JSON.parse(localStorage.getItem('vt:lastBooking') || 'null');
+      return !!(b && b.status === 'pending');
+    } catch(e){ return false; }
+  };
+  const hasPending =
+    typeof window.hasPendingBooking === 'function'
+      ? window.hasPendingBooking()
+      : lsHasPending();
+
+  if (hasPending) {
+    // اگر مودال بلاکِ اختصاصی داری
+    if (typeof window.openModalById === 'function' && document.getElementById('pendingBlockModal')) {
+      window.openModalById('pendingBlockModal');
+    } else if (typeof window.showToastDark === 'function') {
+      showToastDark('نوبت قبلی‌ت هنوز تایید نشده. لطفاً صبر کنی تا تأیید بشه ✋', { type: 'info' });
+    } else {
+      alert('نوبت قبلی هنوز تایید نشده است.');
     }
+    return;
+  }
+  // ===== /قفل رزرو
+
+  // باز کردن و اسکرول به ویزارد رزرو
+  if (typeof window.openBookingWizard === 'function') {
+    window.openBookingWizard();
+    return;
+  }
+
+  const ids = ['booking-wizard', 'booking', 'reserve', 'reservation'];
+  let el = null;
+  for (const id of ids) { const t = document.getElementById(id); if (t) { el = t; break; } }
+  if (el) {
+    if (el.classList.contains('hidden')) el.classList.remove('hidden');
+    const top = el.getBoundingClientRect().top + window.scrollY - 80;
+    (reduce() ? window.scrollTo(0, top) : window.scrollTo({ top, behavior:'smooth' }));
+  } else {
+    const url = data.dataset.bookingUrl;
+    if (url) window.location.href = url; else toast('بخش رزرو هنوز بالا نیومده');
+  }
+}
+
+
     document.getElementById('lr-cta')?.addEventListener('click', goCTA);
     document.getElementById('lr-cta-mobile')?.addEventListener('click', goCTA);
 
@@ -2366,24 +2731,29 @@ function showToastDark(message, {type='success', durationMs=2600} = {}) {
     });
 
     // دکمه تایید نهایی رزرو (بیرون سکشن)
-    document.getElementById('confirm-booking')?.addEventListener('click', () => {
-      if (!AUTH.loggedIn) { requireLogin(); return; }
+document.getElementById('confirm-booking')?.addEventListener('click', () => {
+  if (!AUTH.loggedIn) { requireLogin(); return; }
 
-      const cur = parseInt(localStorage.getItem(KEY_PROGRESS) ?? data.dataset.current ?? '0', 10) || 0;
-      const next = cur + 1;
-      const target = parseInt(data.dataset.target || '10', 10);
+  const cur    = parseInt(localStorage.getItem(KEY_PROGRESS) ?? data.dataset.current ?? '0', 10) || 0;
+  const next   = cur + 1;
+  const target = parseInt(data.dataset.target || '10', 10);
 
-      // بروزرسانی پیشرفت فعلی
-      localStorage.setItem(KEY_PROGRESS, String(next));
+  // بروزرسانی پیشرفت فعلی
+  localStorage.setItem(KEY_PROGRESS, String(next));
 
-      // ثبت تاریخچه کلی برای تشخیص «رزرو داشته/نداشته»
-      const total = parseInt(localStorage.getItem(KEY_TOTAL) || '0', 10) || 0;
-      localStorage.setItem(KEY_TOTAL, String(total + 1));
-      HAS_BOOKED_BEFORE = true;
+  // ثبت تاریخچه کلی برای تشخیص «رزرو داشته/نداشته»
+  const total = parseInt(localStorage.getItem(KEY_TOTAL) || '0', 10) || 0;
+  localStorage.setItem(KEY_TOTAL, String(total + 1));
+  HAS_BOOKED_BEFORE = true;
 
-      if (next >= target) toast('تبریک! جایزه‌ت رسید', 'success'); else toast(`نوبت ${toFa(next)} ثبت شد`, 'success');
-      setTimeout(initCard, 300);
-    });
+  // فقط وقتی از زیرِ هدف رد می‌شیم، توست جایزه رو نشون بده
+  if (cur < target && next >= target) {
+    toast('تبریک! جایزه‌ت رسید', 'success');
+  }
+
+  setTimeout(initCard, 300);
+});
+
 
     // مخفی‌کردن استیکی وقتی CTA داخل ویو
     const stickyWrap = document.getElementById('lr-sticky');
@@ -2399,19 +2769,26 @@ function showToastDark(message, {type='success', durationMs=2600} = {}) {
   }
 
   // ------- BOOTSTRAP -------
-  async function initAuthAndHistory() {
-    AUTH = await adapters.getAuth();
-    const sum = await adapters.getBookingSummary(AUTH.user?.id);
-    HAS_BOOKED_BEFORE = (sum?.total || 0) > 0;
+async function initAuthAndHistory() {
+  AUTH = await adapters.getAuth();
+  const sum = await adapters.getBookingSummary(AUTH.user?.id);
+  HAS_BOOKED_BEFORE = (sum?.total || 0) > 0;
 
-    // بعد از تعیین وضعیت، کل UI بر اساس قوانین جدید رفرش می‌شود
-    initCard();
-  }
+  // بعد از تعیین وضعیت، کل UI بر اساس قوانین جدید رفرش می‌شود
+  initCard();
+}
 
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', () => { bindEvents(); initAuthAndHistory(); });
-  } else { bindEvents(); initAuthAndHistory(); }
+// ✅ با هر تغییر لاگین/کاربر، کارت دوباره محاسبه می‌شود
+document.addEventListener('auth:changed', initAuthAndHistory);
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', () => { bindEvents(); initAuthAndHistory(); });
+} else {
+  bindEvents(); 
+  initAuthAndHistory();
+}
 })();
+
 </script>
 <!-- ========== /Loyalty Rewards ========== -->
 
@@ -3553,248 +3930,281 @@ if (rateNowChip) rateNowChip.addEventListener('click', () => writeReviewBtn.clic
             }
         });
         // Booking Wizard Logic
-        document.addEventListener('DOMContentLoaded', function() {
-            // Open booking wizard
-            const heroCta = document.getElementById('hero-cta');
-            const bookingWizard = document.getElementById('booking-wizard');
-            heroCta.addEventListener('click', function() {
-                bookingWizard.classList.remove('hidden');
-                window.scrollTo({
-                    top: bookingWizard.offsetTop - 80,
-                    behavior: 'smooth'
-                });
-            });
-            // Service selection from cards
-            const serviceSelectButtons = document.querySelectorAll('.service-select');
-            serviceSelectButtons.forEach(button => {
-                button.addEventListener('click', function() {
-                    const service = this.getAttribute('data-service');
-                    const price = this.getAttribute('data-price');
-                    // Open booking wizard
-                    bookingWizard.classList.remove('hidden');
-                    window.scrollTo({
-                        top: bookingWizard.offsetTop - 80,
-                        behavior: 'smooth'
-                    });
-                    // Pre-select the service
-                    setTimeout(() => {
-                        const serviceOptions = document.querySelectorAll('.service-option');
-                        serviceOptions.forEach(option => {
-                            if (option.getAttribute('data-service') === service) {
-                                option.classList.add('border-blue-500', 'bg-blue-50');
-                                document.getElementById('next-to-step-1').disabled = false;
-                            }
-                        });
-                    }, 300);
-                });
-            });
-            // Step 1: Service Selection
-            const serviceOptions = document.querySelectorAll('.service-option');
-            const nextToStep2 = document.getElementById('next-to-step-2');
-            let selectedService = '';
-            let selectedPrice = '';
-            serviceOptions.forEach(option => {
-                option.addEventListener('click', function() {
-                    // Remove selection from other options
-                    serviceOptions.forEach(opt => {
-                        opt.classList.remove('border-blue-500', 'bg-blue-50');
-                    });
-                    // Add selection to clicked option
-                    this.classList.add('border-blue-500', 'bg-blue-50');
-                    // Store selected service
-                    selectedService = this.getAttribute('data-service');
-                    selectedPrice = this.getAttribute('data-price');
-                    // Enable next button
-                    nextToStep2.disabled = false;
-                });
-            });
-            nextToStep2.addEventListener('click', function() {
-                // Move to step 2
-                document.getElementById('step-1').classList.add('hidden');
-                document.getElementById('step-2').classList.remove('hidden');
-                document.getElementById('current-step').textContent = '2';
-                document.getElementById('step-2-indicator').classList.remove('bg-gray-300');
-                document.getElementById('step-2-indicator').classList.add('bg-blue-600');
-                document.getElementById('progress-bar').style.width = '50%';
-            });
-            // Step 2: Date and Time Selection
-            const dateOptions = document.querySelectorAll('.date-option');
-            const timeOptions = document.querySelectorAll('.time-option');
-            const nextToStep3 = document.getElementById('next-to-step-3');
-            const backToStep1 = document.getElementById('back-to-step-1');
-            let selectedDate = '';
-            let selectedTime = '';
-            dateOptions.forEach(option => {
-                option.addEventListener('click', function() {
-                    // Remove selection from other options
-                    dateOptions.forEach(opt => {
-                        opt.classList.remove('border-blue-500', 'bg-blue-50');
-                    });
-                    // Add selection to clicked option
-                    this.classList.add('border-blue-500', 'bg-blue-50');
-                    // Store selected date
-                    selectedDate = this.querySelector('.div:nth-child(2)').textContent + ' ' + 
-                                   this.querySelector('.div:nth-child(1)').textContent;
-                    // Check if both date and time are selected
-                    if (selectedTime) {
-                        nextToStep3.disabled = false;
-                    }
-                });
-            });
-            timeOptions.forEach(option => {
-                option.addEventListener('click', function() {
-                    // Remove selection from other options
-                    timeOptions.forEach(opt => {
-                        opt.classList.remove('border-blue-500', 'bg-blue-50');
-                    });
-                    // Add selection to clicked option
-                    this.classList.add('border-blue-500', 'bg-blue-50');
-                    // Store selected time
-                    selectedTime = this.textContent;
-                    // Check if both date and time are selected
-                    if (selectedDate) {
-                        nextToStep3.disabled = false;
-                    }
-                });
-            });
-            backToStep1.addEventListener('click', function() {
-                // Move back to step 1
-                document.getElementById('step-2').classList.add('hidden');
-                document.getElementById('step-1').classList.remove('hidden');
-                document.getElementById('current-step').textContent = '1';
-                document.getElementById('step-2-indicator').classList.remove('bg-blue-600');
-                document.getElementById('step-2-indicator').classList.add('bg-gray-300');
-                document.getElementById('progress-bar').style.width = '25%';
-            });
-            nextToStep3.addEventListener('click', function() {
-                // Move to step 3
-                document.getElementById('step-2').classList.add('hidden');
-                document.getElementById('step-3').classList.remove('hidden');
-                document.getElementById('current-step').textContent = '3';
-                document.getElementById('step-3-indicator').classList.remove('bg-gray-300');
-                document.getElementById('step-3-indicator').classList.add('bg-blue-600');
-                document.getElementById('progress-bar').style.width = '75%';
-            });
-            // Step 3: Contact Information
-            const phoneNumber = document.getElementById('phone-number');
-            const customerName = document.getElementById('customer-name');
-            const nextToStep4 = document.getElementById('next-to-step-4');
-            const backToStep2 = document.getElementById('back-to-step-2');
-            phoneNumber.addEventListener('input', function() {
-                validateStep3();
-            });
-            customerName.addEventListener('input', function() {
-                validateStep3();
-            });
-            function validateStep3() {
-                if (phoneNumber.value.length >= 10 && customerName.value.trim() !== '') {
-                    nextToStep4.disabled = false;
-                } else {
-                    nextToStep4.disabled = true;
-                }
-            }
-            backToStep2.addEventListener('click', function() {
-                // Move back to step 2
-                document.getElementById('step-3').classList.add('hidden');
-                document.getElementById('step-2').classList.remove('hidden');
-                document.getElementById('current-step').textContent = '2';
-                document.getElementById('step-3-indicator').classList.remove('bg-blue-600');
-                document.getElementById('step-3-indicator').classList.add('bg-gray-300');
-                document.getElementById('progress-bar').style.width = '50%';
-            });
-            nextToStep4.addEventListener('click', function() {
-                // Populate confirmation details
-                document.getElementById('confirm-service').textContent = selectedService;
-                document.getElementById('confirm-date').textContent = selectedDate;
-                document.getElementById('confirm-time').textContent = selectedTime;
-                document.getElementById('confirm-name').textContent = customerName.value;
-                document.getElementById('confirm-phone').textContent = '+۹۸' + phoneNumber.value;
-                document.getElementById('confirm-price').textContent = parseInt(selectedPrice).toLocaleString('fa-IR') + ' تومان';
-                // Move to step 4
-                document.getElementById('step-3').classList.add('hidden');
-                document.getElementById('step-4').classList.remove('hidden');
-                document.getElementById('current-step').textContent = '4';
-                document.getElementById('step-4-indicator').classList.remove('bg-gray-300');
-                document.getElementById('step-4-indicator').classList.add('bg-blue-600');
-                document.getElementById('progress-bar').style.width = '100%';
-            });
-            // Step 4: Confirmation
-            const backToStep3 = document.getElementById('back-to-step-3');
-            const confirmBooking = document.getElementById('confirm-booking');
-            const bookingSuccess = document.getElementById('booking-success');
-            const closeBooking = document.getElementById('close-booking');
-            backToStep3.addEventListener('click', function() {
-                // Move back to step 3
-                document.getElementById('step-4').classList.add('hidden');
-                document.getElementById('step-3').classList.remove('hidden');
-                document.getElementById('current-step').textContent = '3';
-                document.getElementById('step-4-indicator').classList.remove('bg-blue-600');
-                document.getElementById('step-4-indicator').classList.add('bg-gray-300');
-                document.getElementById('progress-bar').style.width = '75%';
-            });
-            confirmBooking.addEventListener('click', function() {
-                // Show success message
-                document.getElementById('step-4').classList.add('hidden');
-                bookingSuccess.classList.remove('hidden');
-                // Save to localStorage for gamification
-                let bookings = JSON.parse(localStorage.getItem('vitreenet-bookings') || '[]');
-                bookings.push({
-                    service: selectedService,
-                    price: selectedPrice,
-                    date: selectedDate,
-                    time: selectedTime,
-                    name: customerName.value,
-                    phone: phoneNumber.value,
-                    timestamp: new Date().toISOString()
-                });
-                localStorage.setItem('vitreenet-bookings', JSON.stringify(bookings));
-            });
-            closeBooking.addEventListener('click', function() {
-                // Close booking wizard
-                bookingWizard.classList.add('hidden');
-                // Reset booking wizard
-                resetBookingWizard();
-            });
-            function resetBookingWizard() {
-                // Reset all steps
-                document.getElementById('step-1').classList.remove('hidden');
-                document.getElementById('step-2').classList.add('hidden');
-                document.getElementById('step-3').classList.add('hidden');
-                document.getElementById('step-4').classList.add('hidden');
-                bookingSuccess.classList.add('hidden');
-                // Reset indicators
-                document.getElementById('current-step').textContent = '1';
-                document.getElementById('step-2-indicator').classList.remove('bg-blue-600');
-                document.getElementById('step-2-indicator').classList.add('bg-gray-300');
-                document.getElementById('step-3-indicator').classList.remove('bg-blue-600');
-                document.getElementById('step-3-indicator').classList.add('bg-gray-300');
-                document.getElementById('step-4-indicator').classList.remove('bg-blue-600');
-                document.getElementById('step-4-indicator').classList.add('bg-gray-300');
-                document.getElementById('progress-bar').style.width = '25%';
-                // Reset selections
-                serviceOptions.forEach(opt => {
-                    opt.classList.remove('border-blue-500', 'bg-blue-50');
-                });
-                dateOptions.forEach(opt => {
-                    opt.classList.remove('border-blue-500', 'bg-blue-50');
-                });
-                timeOptions.forEach(opt => {
-                    opt.classList.remove('border-blue-500', 'bg-blue-50');
-                });
-                // Reset form fields
-                phoneNumber.value = '';
-                customerName.value = '';
-                // Reset buttons
-                nextToStep2.disabled = true;
-                nextToStep3.disabled = true;
-                nextToStep4.disabled = true;
-                // Reset variables
-                selectedService = '';
-                selectedPrice = '';
-                selectedDate = '';
-                selectedTime = '';
-            }
-        });
+document.addEventListener('DOMContentLoaded', function () {
+  // ---- عناصر اصلی
+  const heroCta         = document.getElementById('hero-cta');
+  const bookingWizard   = document.getElementById('booking-wizard');
+  const prefersReduced  = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  // مراحل و اندیکاتورها
+  const step1 = document.getElementById('step-1');
+  const step2 = document.getElementById('step-2');
+  const step3 = document.getElementById('step-3');
+  const step4 = document.getElementById('step-4');
+
+  const currentStep     = document.getElementById('current-step');
+  const progressBar     = document.getElementById('progress-bar');
+  const step2Indicator  = document.getElementById('step-2-indicator');
+  const step3Indicator  = document.getElementById('step-3-indicator');
+  const step4Indicator  = document.getElementById('step-4-indicator');
+
+  // گزینه‌ها و دکمه‌ها
+  const serviceOptions  = document.querySelectorAll('.service-option');
+  const dateOptions     = document.querySelectorAll('.date-option');
+  const timeOptions     = document.querySelectorAll('.time-option');
+
+  const nextToStep2     = document.getElementById('next-to-step-2');
+  const nextToStep3     = document.getElementById('next-to-step-3');
+  const nextToStep4     = document.getElementById('next-to-step-4');
+
+  const backToStep1     = document.getElementById('back-to-step-1');
+  const backToStep2     = document.getElementById('back-to-step-2');
+  const backToStep3     = document.getElementById('back-to-step-3');
+
+  // فیلدها و تایید
+  const phoneNumber     = document.getElementById('phone-number');
+  const customerName    = document.getElementById('customer-name');
+
+  const confirmService  = document.getElementById('confirm-service');
+  const confirmDate     = document.getElementById('confirm-date');
+  const confirmTime     = document.getElementById('confirm-time');
+  const confirmName     = document.getElementById('confirm-name');
+  const confirmPhone    = document.getElementById('confirm-phone');
+  const confirmPrice    = document.getElementById('confirm-price');
+
+  const confirmBooking  = document.getElementById('confirm-booking');
+  const bookingSuccess  = document.getElementById('booking-success');
+  const closeBooking    = document.getElementById('close-booking');
+
+  // وضعیت انتخاب‌ها
+  let selectedService = '';
+  let selectedPrice   = '';
+  let selectedDate    = '';
+  let selectedTime    = '';
+
+  // ---- توابع کمکی
+  function scrollToWizard() {
+    if (!bookingWizard) return;
+    const top = bookingWizard.getBoundingClientRect().top + window.scrollY - 80;
+    prefersReduced ? window.scrollTo(0, top) : window.scrollTo({ top, behavior: 'smooth' });
+  }
+  function openWizard() {
+    bookingWizard?.classList.remove('hidden');
+    scrollToWizard();
+  }
+  function enable(el, on = true) {
+    if (!el) return;
+    el.disabled = !on;
+  }
+
+  // ---- باز کردن ویزارد از CTA بالا
+  heroCta?.addEventListener('click', function (e) {
+    e.preventDefault?.();
+    openWizard();
+  });
+
+  // ---- باز کردن ویزارد از کارت‌های خدمات + پر‌کردن خودکار مرحله ۱
+  // (اصلاح کلاس دکمه‌ها از .service-select به .service-button)
+  document.querySelectorAll('.service-button').forEach((button) => {
+    button.addEventListener('click', function () {
+      const svc   = this.getAttribute('data-service');
+      openWizard();
+      // انتخاب خودکار همان گزینه در مرحله ۱ با تریگر کردن کلیک خودش
+      setTimeout(() => {
+        const opt = document.querySelector(`.service-option[data-service="${svc}"]`);
+        opt?.click();
+      }, 0);
+    });
+  });
+
+  // ---- مرحله ۱: انتخاب سرویس
+  serviceOptions.forEach(option => {
+    option.addEventListener('click', function () {
+      // پاک‌کردن انتخاب قبلی
+      serviceOptions.forEach(opt => opt.classList.remove('border-blue-500', 'bg-blue-50'));
+      // انتخاب فعلی
+      this.classList.add('border-blue-500', 'bg-blue-50');
+      // ذخیره
+      selectedService = this.getAttribute('data-service') || '';
+      selectedPrice   = this.getAttribute('data-price')   || '';
+      // فعال‌سازی دکمه بعدی
+      enable(nextToStep2, true);
+    });
+  });
+
+  nextToStep2?.addEventListener('click', function () {
+    step1.classList.add('hidden');
+    step2.classList.remove('hidden');
+    currentStep.textContent = '2';
+    step2Indicator.classList.remove('bg-gray-300');
+    step2Indicator.classList.add('bg-blue-600');
+    progressBar.style.width = '50%';
+    // از اینجا به بعد هنوز چیزی انتخاب نشده، دکمه مرحله بعد غیرفعال باشد
+    enable(nextToStep3, false);
+  });
+
+  // ---- مرحله ۲: انتخاب تاریخ و ساعت
+  dateOptions.forEach(option => {
+    option.addEventListener('click', function () {
+      // پاک‌کردن انتخاب قبلی
+      dateOptions.forEach(opt => opt.classList.remove('border-blue-500', 'bg-blue-50'));
+      // انتخاب فعلی
+      this.classList.add('border-blue-500', 'bg-blue-50');
+      // استخراج متن از دو div داخلی (اصلاح selector اشتباه '.div:nth-child()')
+      const first  = this.firstElementChild?.textContent?.trim() || '';
+      const second = this.lastElementChild?.textContent?.trim()  || '';
+      // مطابق منطق قبلی: فرمت «دومی + اولی»
+      selectedDate = (second + ' ' + first).trim();
+      // فعال‌سازی دکمه بعدی اگر ساعت هم انتخاب شده
+      if (selectedTime) enable(nextToStep3, true);
+    });
+  });
+
+  timeOptions.forEach(option => {
+    option.addEventListener('click', function () {
+      // پاک‌کردن انتخاب قبلی
+      timeOptions.forEach(opt => opt.classList.remove('border-blue-500', 'bg-blue-50'));
+      // انتخاب فعلی
+      this.classList.add('border-blue-500', 'bg-blue-50');
+      // ذخیره
+      selectedTime = (this.textContent || '').trim();
+      // فعال‌سازی دکمه بعدی اگر تاریخ هم انتخاب شده
+      if (selectedDate) enable(nextToStep3, true);
+    });
+  });
+
+  backToStep1?.addEventListener('click', function () {
+    step2.classList.add('hidden');
+    step1.classList.remove('hidden');
+    currentStep.textContent = '1';
+    step2Indicator.classList.remove('bg-blue-600');
+    step2Indicator.classList.add('bg-gray-300');
+    progressBar.style.width = '25%';
+  });
+
+  nextToStep3?.addEventListener('click', function () {
+    step2.classList.add('hidden');
+    step3.classList.remove('hidden');
+    currentStep.textContent = '3';
+    step3Indicator.classList.remove('bg-gray-300');
+    step3Indicator.classList.add('bg-blue-600');
+    progressBar.style.width = '75%';
+    // اطمینان از غیرفعال بودن دکمه مرحله ۴ تا تکمیل اعتبارسنجی
+    validateStep3();
+  });
+
+  // ---- مرحله ۳: اطلاعات تماس
+  function validateStep3() {
+    const okPhone = (phoneNumber.value || '').trim().length >= 10;
+    const okName  = (customerName.value || '').trim() !== '';
+    enable(nextToStep4, okPhone && okName);
+  }
+  phoneNumber?.addEventListener('input', validateStep3);
+  customerName?.addEventListener('input', validateStep3);
+
+  backToStep2?.addEventListener('click', function () {
+    step3.classList.add('hidden');
+    step2.classList.remove('hidden');
+    currentStep.textContent = '2';
+    step3Indicator.classList.remove('bg-blue-600');
+    step3Indicator.classList.add('bg-gray-300');
+    progressBar.style.width = '50%';
+  });
+
+  nextToStep4?.addEventListener('click', function () {
+    // تکمیل جزئیات تایید
+    confirmService.textContent = selectedService;
+    confirmDate.textContent    = selectedDate;
+    confirmTime.textContent    = selectedTime;
+    confirmName.textContent    = customerName.value;
+    confirmPhone.textContent   = '＋۹۸' + phoneNumber.value; // همان فرمت قبلی با ارقام فارسی
+    confirmPrice.textContent   = (parseInt(selectedPrice, 10) || 0).toLocaleString('fa-IR') + ' تومان';
+
+    // رفتن به مرحله ۴
+    step3.classList.add('hidden');
+    step4.classList.remove('hidden');
+    currentStep.textContent = '4';
+    step4Indicator.classList.remove('bg-gray-300');
+    step4Indicator.classList.add('bg-blue-600');
+    progressBar.style.width = '100%';
+  });
+
+  // ---- مرحله ۴: تایید نهایی
+  backToStep3?.addEventListener('click', function () {
+    step4.classList.add('hidden');
+    step3.classList.remove('hidden');
+    currentStep.textContent = '3';
+    step4Indicator.classList.remove('bg-blue-600');
+    step4Indicator.classList.add('bg-gray-300');
+    progressBar.style.width = '75%';
+  });
+
+  confirmBooking?.addEventListener('click', function () {
+    // پیام موفقیت
+    step4.classList.add('hidden');
+    bookingSuccess.classList.remove('hidden');
+
+    // ذخیره برای گیمیفیکیشن
+    const bookings = JSON.parse(localStorage.getItem('vitreenet-bookings') || '[]');
+    bookings.push({
+      service: selectedService,
+      price: selectedPrice,
+      date: selectedDate,
+      time: selectedTime,
+      name: customerName.value,
+      phone: phoneNumber.value,
+      timestamp: new Date().toISOString()
+    });
+    localStorage.setItem('vitreenet-bookings', JSON.stringify(bookings));
+  });
+
+  closeBooking?.addEventListener('click', function () {
+    // بستن و ریست کامل ویزارد
+    bookingWizard.classList.add('hidden');
+    resetBookingWizard();
+  });
+
+  // ---- ریست کامل ویزارد
+  function resetBookingWizard() {
+    // مراحل
+    step1.classList.remove('hidden');
+    step2.classList.add('hidden');
+    step3.classList.add('hidden');
+    step4.classList.add('hidden');
+    bookingSuccess.classList.add('hidden');
+
+    // اندیکاتورها
+    currentStep.textContent = '1';
+    step2Indicator.classList.remove('bg-blue-600');
+    step2Indicator.classList.add('bg-gray-300');
+    step3Indicator.classList.remove('bg-blue-600');
+    step3Indicator.classList.add('bg-gray-300');
+    step4Indicator.classList.remove('bg-blue-600');
+    step4Indicator.classList.add('bg-gray-300');
+    progressBar.style.width = '25%';
+
+    // انتخاب‌ها
+    serviceOptions.forEach(opt => opt.classList.remove('border-blue-500', 'bg-blue-50'));
+    dateOptions.forEach(opt => opt.classList.remove('border-blue-500', 'bg-blue-50'));
+    timeOptions.forEach(opt => opt.classList.remove('border-blue-500', 'bg-blue-50'));
+
+    // فیلدها
+    phoneNumber.value = '';
+    customerName.value = '';
+
+    // دکمه‌ها
+    enable(nextToStep2, false);
+    enable(nextToStep3, false);
+    enable(nextToStep4, false);
+
+    // وضعیت
+    selectedService = '';
+    selectedPrice   = '';
+    selectedDate    = '';
+    selectedTime    = '';
+  }
+});
+
     </script>
 
 
@@ -4060,6 +4470,164 @@ if (rateNowChip) rateNowChip.addEventListener('click', () => writeReviewBtn.clic
     new MutationObserver(apply).observe(btn, { attributes: true, attributeFilter: ["title"] });
   });
 })();
+</script>
+
+
+
+
+
+
+<script>
+/* ===== Portfolio Likes (guest-friendly) ===== */
+(function(){
+  'use strict';
+  const REQUIRE_LOGIN_FOR_LIKE = false; // اگر خواستی لاگین را اجباری کنی، اینو true کن
+  const isLoggedIn = () => { try { return !!JSON.parse(localStorage.getItem('auth_user')||'null'); } catch(e){ return false } };
+  const keyCnt = id => `vt:pf:likes:${id}`;
+  const keyMe  = id => `vt:pf:liked:${id}`;
+
+  // تبدیل هر نوع رقم فارسی/عربی به لاتین
+  const toEnDigits = s => (s||'')
+    .replace(/[۰-۹]/g, d => '0123456789'['۰۱۲۳۴۵۶۷۸۹'.indexOf(d)])
+    .replace(/[٠-٩]/g, d => '0123456789'['٠١٢٣٤٥٦٧٨٩'.indexOf(d)]);
+  // نمایش به زبان انگلیسی/لاتین با جداکننده هزارگان
+  const fmtEn = n => Number(n).toLocaleString('en-US');
+
+  function getId(card){
+    if(card.dataset.itemId) return card.dataset.itemId;
+    const seed = card.querySelector('img[src*="/seed/"]')?.src.match(/seed\/([^/]+)/)?.[1];
+    const fallback = card.querySelector('.portfolio-name')?.textContent?.trim();
+    const id = seed || fallback || ('item-' + Math.random().toString(36).slice(2,8));
+    card.dataset.itemId = id;
+    return id;
+  }
+
+  function setA11y(el, liked){
+    el.setAttribute('role','button');
+    el.setAttribute('tabindex','0');
+    el.setAttribute('aria-pressed', liked ? 'true' : 'false');
+    el.title = liked ? 'لغو لایک' : 'پسندیدن';
+  }
+
+  function updateUIFor(id, liked, count){
+    document.querySelectorAll(`.portfolio-card[data-item-id="${id}"]`).forEach(card=>{
+      const wrap = card.querySelector('.fa-heart')?.parentElement;
+      const icon = wrap?.querySelector('.fa-heart');
+      const cnt  = wrap?.querySelector('span');
+      if(!wrap || !icon || !cnt) return;
+      icon.classList.toggle('far', !liked);
+      icon.classList.toggle('fas', liked);
+      wrap.classList.toggle('text-red-500', liked);
+      cnt.textContent = fmtEn(count);   // ← نمایش لاتین
+      setA11y(wrap, liked);
+    });
+    if(window.__PF_ACTIVE_ID===id){
+      const mLikes = document.getElementById('modalLikes');
+      if(mLikes) mLikes.textContent = fmtEn(count); // ← نمایش لاتین داخل مودال
+    }
+  }
+
+  function toggle(id){
+    if (REQUIRE_LOGIN_FOR_LIKE && !isLoggedIn()) {
+      if (typeof window.showToastDark === 'function') showToastDark('برای لایک یک ورود کوتاه لازمه 🙂', {type:'info'});
+      return;
+    }
+    const liked = localStorage.getItem(keyMe(id))==='1';
+    let count = parseInt(localStorage.getItem(keyCnt(id))||'0',10);
+    count = liked ? Math.max(0, count-1) : count+1;
+    localStorage.setItem(keyCnt(id), String(count));
+    if(liked){ localStorage.removeItem(keyMe(id)); } else { localStorage.setItem(keyMe(id),'1'); }
+    updateUIFor(id, !liked, count);
+    document.dispatchEvent(new CustomEvent('portfolio:likeChanged', { detail:{ id, liked:!liked, count } }));
+  }
+
+  function bindCard(card){
+    const id = getId(card);
+    const wrap = card.querySelector('.fa-heart')?.parentElement;
+    const icon = wrap?.querySelector('.fa-heart');
+    const cnt  = wrap?.querySelector('span');
+    if(!wrap || !icon || !cnt) return;
+
+    // bootstrap از مقدار موجود در DOM فقط بار اول
+    if(localStorage.getItem(keyCnt(id))==null){
+      const rawText = toEnDigits(cnt.textContent||'0'); // ← نرمال به لاتین
+      const raw = parseInt(rawText.replace(/[^\d]/g,''),10) || 0;
+      localStorage.setItem(keyCnt(id), String(raw));
+    }
+    const liked  = localStorage.getItem(keyMe(id))==='1';
+    const stored = parseInt(localStorage.getItem(keyCnt(id))||'0',10);
+    cnt.textContent = fmtEn(stored); // ← نمایش لاتین
+    icon.classList.toggle('far', !liked);
+    icon.classList.toggle('fas', liked);
+    wrap.classList.toggle('text-red-500', liked);
+    setA11y(wrap, liked);
+
+    // click + keyboard
+    wrap.addEventListener('click', (e)=>{ e.preventDefault(); toggle(id); });
+    wrap.addEventListener('keydown', (e)=>{ if(e.key==='Enter' || e.key===' '){ e.preventDefault(); toggle(id);} });
+
+    // double-tap روی عکس = لایک
+    const img = card.querySelector('img');
+    if(img){
+      let lastTap = 0;
+      img.addEventListener('click', ()=>{
+        const now = Date.now();
+        if(now - lastTap < 350){ if(localStorage.getItem(keyMe(id))!=='1') toggle(id); }
+        lastTap = now;
+      });
+    }
+  }
+
+  function init(){ document.querySelectorAll('.portfolio-card').forEach(bindCard); }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', init); else init();
+
+  // برای استفاده در مودال
+  window.__getPortfolioLikes = id => parseInt(localStorage.getItem(keyCnt(id))||'0',10);
+})();
+</script>
+
+<script>
+/* ===== Image viewer modal (sync with like) ===== */
+function openModal(imgUrl, title, itemId){
+  const modal = document.getElementById('imageModal');
+  const cardId = itemId || (imgUrl && (imgUrl.match(/seed\/([^/]+)/)?.[1])) || (title || '').trim();
+  window.__PF_ACTIVE_ID = cardId;
+
+  document.getElementById('modalTitle').textContent = title || '';
+  document.getElementById('modalImage').src = imgUrl || '';
+  const cur = typeof window.__getPortfolioLikes === 'function' ? window.__getPortfolioLikes(cardId) : null;
+  if(cur!=null){ document.getElementById('modalLikes').textContent = Number(cur).toLocaleString('en-US'); } // ← لاتین
+
+  // قلب داخل مودال کلیک‌پذیر
+  const likeWrap = document.querySelector('#imageModal .fa-heart')?.parentElement;
+  if(likeWrap){
+    likeWrap.style.cursor = 'pointer';
+    likeWrap.onclick = function(){
+      const card = Array.from(document.querySelectorAll('.portfolio-card'))
+        .find(c => (c.dataset.itemId===cardId) || (c.querySelector('img[src*="/seed/"]')?.src.includes(`/${cardId}/`)));
+      card?.querySelector('.fa-heart')?.parentElement?.click();
+    };
+  }
+
+  modal.classList.remove('hidden');
+  modal.classList.add('flex');
+  const card = modal.querySelector('.relative');
+  if(card){
+    card.classList.remove('scale-95','opacity-0');
+    card.classList.add('scale-100','opacity-100');
+  }
+}
+function closeModal(){
+  const modal = document.getElementById('imageModal');
+  const card = modal.querySelector('.relative');
+  if(card){
+    card.classList.add('scale-95','opacity-0');
+    card.classList.remove('scale-100','opacity-100');
+    setTimeout(()=>{ modal.classList.add('hidden'); modal.classList.remove('flex'); }, 160);
+  }else{
+    modal.classList.add('hidden'); modal.classList.remove('flex');
+  }
+}
 </script>
 
 
