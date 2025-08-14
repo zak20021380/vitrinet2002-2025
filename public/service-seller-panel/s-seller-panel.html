@@ -2178,6 +2178,24 @@ body { -webkit-font-smoothing: auto; }
 
 /* 6) مطمئن شو فونت‌ها “auto” باشن (نه antialiased اجباری) */
 body { -webkit-font-smoothing: auto !important; }
+/* === PATCH: modal/drawer visibility normalization — DO NOT TOUCH ANYTHING ELSE === */
+.modal, .drawer {
+  /* rely on [hidden] to hide; not on display:none rules elsewhere */
+  display: block;
+}
+
+.modal[hidden], .drawer[hidden] {
+  display: none !important;
+}
+
+/* backdrops are children; show them only when parent is open */
+.modal-backdrop, .drawer-backdrop {
+  display: none;
+}
+.modal.is-open .modal-backdrop,
+.drawer.is-open .drawer-backdrop {
+  display: block;
+}
 
 
 
@@ -3399,7 +3417,7 @@ elements.body.addEventListener('click', (e) => {
       // Find and close only the currently open overlay
       const activeModal = document.querySelector('.modal.is-open');
       const activeDrawer = document.querySelector('.drawer.is-open');
-      
+
       if (activeModal) {
         UIComponents.closeModal(activeModal.id);
       } else if (activeDrawer) {
@@ -3407,6 +3425,24 @@ elements.body.addEventListener('click', (e) => {
       }
     }
   });
+
+  // === PATCH: checkout bar close/open (plans) — DO NOT TOUCH ANYTHING ELSE ===
+  const checkoutBar = document.getElementById('checkout-bar');
+  if (checkoutBar) {
+    // close (X) on sticky checkout bar
+    checkoutBar.querySelector('.cb-close')?.addEventListener('click', () => {
+      checkoutBar.classList.remove('visible');
+      checkoutBar.setAttribute('aria-hidden', 'true');
+    });
+
+    // open the bar when any plan CTA is clicked
+    document.querySelectorAll('.plan-cta-modern').forEach(btn => {
+      btn.addEventListener('click', () => {
+        checkoutBar.classList.add('visible');
+        checkoutBar.setAttribute('aria-hidden', 'false');
+      });
+    });
+  }
 
   // 9. Cleanup method for memory management (optional)
   this.cleanup = () => {
