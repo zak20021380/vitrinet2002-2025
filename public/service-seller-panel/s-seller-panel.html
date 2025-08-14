@@ -2409,6 +2409,20 @@ body { -webkit-font-smoothing: auto !important; }
 /* === END AGGRESSIVE BLUR FIX === */
 
 
+/* حذف دو کارت آماری داخل مودال مشتری */
+
+
+
+
+
+
+
+
+
+/* --- exceptions for toggle inside customer modal (put at the very end) --- */
+.customer-modal .toggle-switch-slider { transform: translateX(0) !important; }
+.customer-modal .toggle-switch.active .toggle-switch-slider { transform: translateX(28px) !important; }
+
 
 </style>
 </head>
@@ -3024,32 +3038,29 @@ body { -webkit-font-smoothing: auto !important; }
   <div class="modal-content customer-modal-content" role="document">
     <button type="button" class="modal-close-floating" data-dismiss="modal" aria-label="بستن">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <line x1="18" y1="6" x2="6" y2="18"/>
-        <line x1="6" y1="6" x2="18" y2="18"/>
+        <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
       </svg>
     </button>
-    
+
     <div class="customer-modal-header">
-      <div class="customer-avatar-large">
-        <span id="customer-modal-avatar">م</span>
-      </div>
+      <div class="customer-avatar-large"><span id="customer-modal-avatar">م</span></div>
       <div class="customer-header-info">
         <h2 id="customer-modal-name" class="customer-modal-name">نام مشتری</h2>
         <div class="customer-modal-phone" id="customer-modal-phone">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>
+            <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72"/>
           </svg>
           <span>۰۹۱۲۳۴۵۶۷۸۹</span>
         </div>
       </div>
     </div>
-    
-    <div class="customer-modal-stats">
-      <div class="stat-item-modal">
-        <div class="stat-icon-modal reservations">
+
+    <!-- آمار مشتری (سه کارت داخل گرید) -->
+    <div class="customer-modal-stats" role="list">
+      <div class="stat-item-modal" role="listitem">
+        <div class="stat-icon-modal reservations" aria-hidden="true">
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <rect x="3" y="4" width="18" height="18" rx="2"/>
-            <path d="M16 2v4M8 2v4M3 10h18"/>
+            <rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/>
           </svg>
         </div>
         <div class="stat-info-modal">
@@ -3057,12 +3068,11 @@ body { -webkit-font-smoothing: auto !important; }
           <div class="stat-label-modal">کل رزروها</div>
         </div>
       </div>
-      
-      <div class="stat-item-modal">
+
+      <div class="stat-item-modal" role="listitem">
         <div class="stat-icon-modal completed">
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M9 11l3 3L22 4"/>
-            <path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/>
+            <path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/>
           </svg>
         </div>
         <div class="stat-info-modal">
@@ -3070,8 +3080,8 @@ body { -webkit-font-smoothing: auto !important; }
           <div class="stat-label-modal">انجام شده</div>
         </div>
       </div>
-      
-      <div class="stat-item-modal">
+
+      <div class="stat-item-modal" role="listitem">
         <div class="stat-icon-modal rating">
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
@@ -3083,62 +3093,55 @@ body { -webkit-font-smoothing: auto !important; }
         </div>
       </div>
     </div>
-    
+
     <div class="customer-modal-section">
       <h3 class="section-title-modal">آخرین رزرو</h3>
       <div class="last-reservation-card" id="last-reservation">
         <div class="reservation-date">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <rect x="3" y="4" width="18" height="18" rx="2"/>
-            <path d="M16 2v4M8 2v4M3 10h18"/>
+            <rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/>
           </svg>
-          <span id="last-reservation-date">۱۴۰۳/۰۹/۱۵</span>
+          <span id="last-reservation-date">—</span>
         </div>
         <div class="reservation-service">
-          <span class="service-name" id="last-reservation-service">اصلاح سر و صورت</span>
-          <span class="service-time" id="last-reservation-time">ساعت ۱۴:۳۰</span>
+          <span class="service-name" id="last-reservation-service">—</span>
+          <span class="service-time" id="last-reservation-time">—</span>
         </div>
         <div class="reservation-status">
-          <span class="status-badge status-completed" id="last-reservation-status">انجام شده</span>
+          <span class="status-badge status-completed" id="last-reservation-status">—</span>
         </div>
       </div>
     </div>
 
+    <!-- تنظیمات این مشتری (سوئیچ‌ها) -->
+    <div class="customer-modal-section" id="customer-prefs">
+      <h3 class="section-title-modal">تنظیمات این مشتری</h3>
 
+      <div class="item-card">
+        <div class="item-card-header">
+          <h4 class="item-title">تایید خودکار نوبت‌ها</h4>
+          <label class="toggle-switch">
+            <input type="checkbox" id="toggle-auto-accept" class="toggle-switch-input">
+            <span class="toggle-switch-slider"></span>
+          </label>
+        </div>
+        <p class="item-details">با روشن‌کردن، همه نوبت‌های این مشتری بدون تایید دستی، خودکار تایید می‌شوند.</p>
+      </div>
 
-<!-- ⬇️ Customer prefs: Auto-accept & Block (place right before .customer-modal-actions) -->
-<div class="customer-modal-section" id="customer-prefs">
-  <h3 class="section-title-modal">تنظیمات این مشتری</h3>
-
-  <div class="item-card">
-    <div class="item-card-header">
-      <h4 class="item-title">تایید خودکار نوبت‌ها</h4>
-      <label class="toggle-switch">
-        <input type="checkbox" id="toggle-auto-accept" class="toggle-switch-input"/>
-        <span class="toggle-switch-slider"></span>
-      </label>
+      <div class="item-card" style="border-color: var(--c-danger);">
+        <div class="item-card-header">
+          <h4 class="item-title">مسدودسازی</h4>
+          <label class="toggle-switch" style="--c-success: var(--c-danger);">
+            <input type="checkbox" id="toggle-blocked" class="toggle-switch-input">
+            <span class="toggle-switch-slider"></span>
+          </label>
+        </div>
+        <p class="item-details">با روشن‌کردن، این مشتری دیگر نمی‌تواند نوبت رزرو کند.</p>
+      </div>
     </div>
-    <p class="item-details">با روشن‌کردن، همه نوبت‌های این مشتری بدون نیاز به تایید، خودکار تایید می‌شوند.</p>
-  </div>
 
-  <div class="item-card" style="border-color: var(--c-danger);">
-    <div class="item-card-header">
-      <h4 class="item-title">مسدودسازی</h4>
-      <label class="toggle-switch" style="--c-success: var(--c-danger);">
-        <input type="checkbox" id="toggle-blocked" class="toggle-switch-input"/>
-        <span class="toggle-switch-slider"></span>
-      </label>
-    </div>
-    <p class="item-details">با روشن‌کردن، این مشتری دیگر نمی‌تواند نوبت رزرو کند.</p>
-  </div>
-</div>
-
-
-
-
-    
     <div class="customer-modal-actions">
-      <button type="button" class="btn-action-modal primary">
+      <button type="button" class="btn-action-modal primary" id="call-customer-btn">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72"/>
         </svg>
@@ -3146,8 +3149,7 @@ body { -webkit-font-smoothing: auto !important; }
       </button>
       <button type="button" class="btn-action-modal secondary">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <rect x="3" y="4" width="18" height="18" rx="2"/>
-          <path d="M16 2v4M8 2v4M3 10h18M8 14h.01M12 14h.01M16 14h.01"/>
+          <rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18M8 14h.01M12 14h.01M16 14h.01"/>
         </svg>
         رزرو جدید
       </button>
@@ -3155,8 +3157,7 @@ body { -webkit-font-smoothing: auto !important; }
   </div>
 </div>
 
-
-
+    
 
   <!-- === NEW: Service Management Drawer === -->
   <div id="service-drawer" class="drawer" role="dialog" aria-modal="true" aria-labelledby="service-drawer-title" hidden>
@@ -3441,6 +3442,25 @@ window.VitreenetRules = {
    * Main Application Logic
    * ==============================
    */
+
+// ثبت یک‌باره‌ی لیسنرِ بستن مودال مشتری
+let _closeModalBound = false;
+function bindFloatingCloseOnce() {
+  if (_closeModalBound) return;
+  _closeModalBound = true;
+
+  document.addEventListener('click', (e) => {
+    if (e.target.closest('.modal-close-floating')) {
+      e.preventDefault();
+      e.stopPropagation();
+      UIComponents.closeModal('customer-details-modal');
+    }
+  }, true);
+}
+
+
+
+
   class SellerPanelApp {
     constructor() {
       this.root = document.documentElement;
@@ -3466,6 +3486,8 @@ applyCustomerRules() {
 
     init() {
       this.setupEventListeners();
+      bindFloatingCloseOnce();
+
       this.handleRouteChange();
       this.initSidebarObserver();
       this.renderWelcomeDate();
@@ -3757,60 +3779,11 @@ destroy() {
           </div>
         `).join('');
     }
-    renderBookings(filter = 'all') {
-        const listEl = document.getElementById('bookings-list');
-        const filteredBookings = (filter === 'all')
-            ? MOCK_DATA.bookings
-            : MOCK_DATA.bookings.filter(b => b.status === filter);
-        if(filteredBookings.length === 0) {
-            listEl.innerHTML = `<p>موردی برای نمایش یافت نشد.</p>`;
-            return;
-        }
-        listEl.innerHTML = filteredBookings.map(b => `
-            <article class="booking-card card" role="listitem">
-              <div class="booking-card-content">
-                  <strong class="booking-customer">${b.customerName}</strong>
-                  <span class="booking-service">${b.service} - ساعت ${UIComponents.formatPersianNumber(b.time)}</span>
-              </div>
-              <div class="booking-actions">
-                  <span class="status-badge status-${b.status}">${{pending: 'در انتظار', confirmed: 'تایید شده', completed: 'انجام شده'}[b.status]}</span>
-              </div>
-            </article>
-        `).join('');
-        // Update badges
-        document.querySelector('.filter-chip[data-filter="all"] .chip-badge').textContent = UIComponents.formatPersianNumber(MOCK_DATA.bookings.length);
-        ['pending', 'confirmed', 'completed'].forEach(status => {
-           const count = MOCK_DATA.bookings.filter(b => b.status === status).length;
-           document.querySelector(`.filter-chip[data-filter="${status}"] .chip-badge`).textContent = UIComponents.formatPersianNumber(count);
-        });
-    }
-    renderCustomers(query = '') {
-      const listEl = document.getElementById('customers-list');
-      const normalizedQuery = query.trim().toLowerCase();
-      const filteredCustomers = MOCK_DATA.customers.filter(c => 
-          c.name.toLowerCase().includes(normalizedQuery) ||
-          c.phone.includes(normalizedQuery)
-      );
-      if(filteredCustomers.length === 0) {
-          listEl.innerHTML = `<p>مشتری با این مشخصات یافت نشد.</p>`;
-          return;
-      }
-      listEl.innerHTML = filteredCustomers.map(c => `
-        <article class="customer-card card" role="listitem" tabindex="0">
-            <div class="customer-avatar" aria-hidden="true">${c.name.charAt(0)}</div>
-            <div class="customer-info">
-                <div class="customer-name">${c.name}</div>
-                <div class="customer-phone">${UIComponents.formatPersianNumber(c.phone)}</div>
-                <div class="customer-last-visit">آخرین بازدید: ${UIComponents.formatPersianNumber(c.lastVisit)}</div>
-            </div>
-        </article>
-      `).join('');
-    }
  renderBookings(filter = 'all') {
   const listEl = document.getElementById('bookings-list');
   const prefs = CustomerPrefs.load();
 
-  // اعمال قوانین روی کپی داده‌ها برای نمایش
+  // قوانین مشتری (مسدود = لغو شده، خودکار تایید = از pending به confirmed)
   const effective = MOCK_DATA.bookings.map(b => {
     const p = prefs[normalizeKey(b.customerName)];
     if (p?.blocked) return { ...b, status: 'cancelled' };
@@ -3820,9 +3793,15 @@ destroy() {
 
   const filtered = (filter === 'all') ? effective : effective.filter(b => b.status === filter);
 
-  if (filtered.length === 0) {
+  if (!filtered.length) {
     listEl.innerHTML = `<p>موردی برای نمایش یافت نشد.</p>`;
   } else {
+    const statusLabel = {
+      pending: 'در انتظار',
+      confirmed: 'تایید شده',
+      completed: 'انجام شده',
+      cancelled: 'لغو شده'
+    };
     listEl.innerHTML = filtered.map(b => `
       <article class="booking-card card" role="listitem">
         <div class="booking-card-content">
@@ -3830,23 +3809,74 @@ destroy() {
           <span class="booking-service">${b.service} - ساعت ${UIComponents.formatPersianNumber(b.time)}</span>
         </div>
         <div class="booking-actions">
-          <span class="status-badge status-${b.status}">
-            ${({pending: 'در انتظار', confirmed: 'تایید شده', completed: 'انجام شده', cancelled: 'لغو شده'})[b.status] || b.status}
-          </span>
+          <span class="status-badge status-${b.status}">${statusLabel[b.status] || b.status}</span>
         </div>
       </article>
     `).join('');
   }
 
-  // بروزرسانی شمارنده‌ها
-  document.querySelector('.filter-chip[data-filter="all"] .chip-badge').textContent =
-    UIComponents.formatPersianNumber(effective.length);
-  ['pending', 'confirmed', 'completed'].forEach(status => {
-    const count = effective.filter(b => b.status === status).length;
-    const el = document.querySelector(`.filter-chip[data-filter="${status}"] .chip-badge`);
-    if (el) el.textContent = UIComponents.formatPersianNumber(count);
-  });
+  // آپدیت چیپ‌ها براساس وضعیت‌های effective
+  const allCount = effective.length;
+  const counts = {
+    pending:   effective.filter(b => b.status === 'pending').length,
+    confirmed: effective.filter(b => b.status === 'confirmed').length,
+    completed: effective.filter(b => b.status === 'completed').length
+  };
+  const setText = (sel, val) => {
+    const el = document.querySelector(sel);
+    if (el) el.textContent = UIComponents.formatPersianNumber(val);
+  };
+  setText('.filter-chip[data-filter="all"] .chip-badge', allCount);
+  setText('.filter-chip[data-filter="pending"] .chip-badge', counts.pending);
+  setText('.filter-chip[data-filter="confirmed"] .chip-badge', counts.confirmed);
+  setText('.filter-chip[data-filter="completed"] .chip-badge', counts.completed);
 }
+
+  
+
+
+
+
+    renderReviews(filter = 'all') {
+  const listEl = document.getElementById('reviews-list');
+  
+  let filteredReviews = MOCK_DATA.reviews;
+  
+  if (filter !== 'all') {
+    if (filter === '1') {
+      // 1-2 stars
+      filteredReviews = MOCK_DATA.reviews.filter(r => r.rating <= 2);
+    } else {
+      // Filter by exact rating
+      const rating = parseInt(filter);
+      filteredReviews = MOCK_DATA.reviews.filter(r => r.rating === rating);
+    }
+  }
+  
+  if (filteredReviews.length === 0) {
+    listEl.innerHTML = `<p>نظری با این امتیاز یافت نشد.</p>`;
+    return;
+  }
+  
+  listEl.innerHTML = filteredReviews.map(review => {
+    const stars = '★'.repeat(review.rating) + '☆'.repeat(5 - review.rating);
+    return `
+      <article class="review-card card" role="listitem">
+        <div class="review-header">
+          <div>
+            <div class="review-customer">${review.customerName}</div>
+            <time class="review-date">${review.date}</time>
+          </div>
+          <div class="review-rating" aria-label="${review.rating} از 5 ستاره">
+            ${stars}
+          </div>
+        </div>
+        ${review.comment ? `<p class="review-comment">${review.comment}</p>` : ''}
+      </article>
+    `;
+  }).join('');
+}
+
 
     renderPlans() {
       // Logic is handled by handlePlanDurationChange on load
@@ -4467,6 +4497,7 @@ attachModalActionHandlers(customerData) {
 renderCustomers(query = '') {
   const listEl = document.getElementById('customers-list');
   const normalizedQuery = query.trim().toLowerCase();
+
   const filteredCustomers = MOCK_DATA.customers.filter(c =>
     c.name.toLowerCase().includes(normalizedQuery) ||
     c.phone.includes(normalizedQuery)
@@ -4482,13 +4513,15 @@ renderCustomers(query = '') {
   listEl.innerHTML = filteredCustomers.map(c => {
     const pref = prefsAll[normalizeKey(c.name)] || {};
     const tags = `
-      <div class="customer-tags" style="margin-top:6px; display:flex; gap:6px; flex-wrap:wrap;">
+      <div class="customer-tags" style="margin-top:6px;display:flex;gap:6px;flex-wrap:wrap;">
         ${pref.blocked ? '<span class="badge badge-warning">مسدود</span>' : ''}
         ${pref.autoAccept ? '<span class="badge badge-success">تایید خودکار</span>' : ''}
       </div>
     `;
     return `
-      <article class="customer-card card" role="listitem" tabindex="0">
+      <article class="customer-card card"
+               role="listitem" tabindex="0"
+               data-name="${c.name}" data-phone="${c.phone}">
         <div class="customer-avatar" aria-hidden="true">${c.name.charAt(0)}</div>
         <div class="customer-info">
           <div class="customer-name">${c.name}</div>
@@ -4500,6 +4533,97 @@ renderCustomers(query = '') {
     `;
   }).join('');
 }
+
+
+
+
+
+
+
+
+openCustomerModal(customer) {
+  // هدر
+  document.getElementById('customer-modal-name').textContent = customer.name;
+  document.getElementById('customer-modal-avatar').textContent = customer.name?.charAt(0) || '؟';
+  const phoneWrap = document.getElementById('customer-modal-phone');
+  phoneWrap.querySelector('span').textContent = customer.phone || '-';
+
+  // رزروها و آخرین رزرو
+  const bookingsFor = (MOCK_DATA.bookings || []).filter(b => b.customerName === customer.name);
+  document.getElementById('customer-total-reservations').textContent =
+    UIComponents.formatPersianNumber(bookingsFor.length);
+
+  const last = bookingsFor[bookingsFor.length - 1];
+  if (last) {
+    // اگر تاریخ نداری، می‌تونی از last.date یا lastVisit استفاده کنی
+    document.getElementById('last-reservation-date').textContent =
+      UIComponents.formatPersianNumber(customer.lastVisit || '۱۴۰۳/۰۵/۱۵');
+    document.getElementById('last-reservation-service').textContent = last.service || '-';
+    document.getElementById('last-reservation-time').textContent =
+      `ساعت ${UIComponents.formatPersianNumber(last.time || '')}`;
+    const st = document.getElementById('last-reservation-status');
+    const faMap = { pending:'در انتظار', confirmed:'تایید شده', completed:'انجام شده', cancelled:'لغو شده' };
+    st.textContent = faMap[last.status] || last.status;
+    st.className = `status-badge status-${last.status}`;
+  }
+
+  // سوییچ‌ها ← مقداردهی از localStorage
+  const prefs = CustomerPrefs.getByName(customer.name);
+  const autoEl  = document.getElementById('toggle-auto-accept');
+  const blockEl = document.getElementById('toggle-blocked');
+
+  autoEl.checked  = !!prefs.autoAccept;
+  blockEl.checked = !!prefs.blocked;
+
+  autoEl.closest('.toggle-switch').classList.toggle('active', autoEl.checked);
+  blockEl.closest('.toggle-switch').classList.toggle('active', blockEl.checked);
+
+  // هندل تغییر
+  autoEl.onchange = () => {
+    CustomerPrefs.setByName(customer.name, { autoAccept: autoEl.checked });
+    autoEl.closest('.toggle-switch').classList.toggle('active', autoEl.checked);
+    UIComponents.showToast(autoEl.checked ? 'تایید خودکار برای این مشتری فعال شد' : 'تایید خودکار غیرفعال شد', 'success');
+    this.renderBookings(); // اثر فوری روی لیست نوبت‌ها
+  };
+
+  blockEl.onchange = () => {
+    CustomerPrefs.setByName(customer.name, { blocked: blockEl.checked });
+    blockEl.closest('.toggle-switch').classList.toggle('active', blockEl.checked);
+    UIComponents.showToast(blockEl.checked ? 'این مشتری مسدود شد' : 'مسدودسازی برداشته شد', blockEl.checked ? 'error' : 'success');
+    this.renderBookings(); // اثر فوری
+  };
+
+  UIComponents.openModal('customer-details-modal');
+}
+
+initCustomerFeatures() {
+  const container = document.getElementById('customers-list');
+  if (!container) return;
+
+  // کلیک روی کارت
+  container.addEventListener('click', (e) => {
+    const card = e.target.closest('.customer-card');
+    if (!card) return;
+    this.openCustomerModal({
+      name:  card.dataset.name,
+      phone: card.dataset.phone,
+      lastVisit: (MOCK_DATA.customers.find(c => c.name === card.dataset.name) || {}).lastVisit
+    });
+  });
+
+  // باز کردن با Enter
+  container.addEventListener('keydown', (e) => {
+    if (e.key !== 'Enter') return;
+    const card = e.target.closest('.customer-card');
+    if (!card) return;
+    this.openCustomerModal({
+      name:  card.dataset.name,
+      phone: card.dataset.phone,
+      lastVisit: (MOCK_DATA.customers.find(c => c.name === card.dataset.name) || {}).lastVisit
+    });
+  });
+}
+
 
 
 
