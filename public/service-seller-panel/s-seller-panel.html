@@ -1880,45 +1880,6 @@ body.has-overlay { overflow: hidden; }
 .reservation-status {
   align-self: flex-start;
 }
-.customer-modal-actions {
-  padding: var(--space-4);
-  background: var(--c-bg-secondary);
-  border-top: 1px solid var(--c-border);
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: var(--space-2);
-}
-.btn-action-modal {
-  padding: var(--space-3);
-  border-radius: var(--border-radius-lg);
-  font-weight: var(--font-weight-medium);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: var(--space-2);
-  transition: all var(--transition-fast);
-  border: none;
-  cursor: pointer;
-  font-size: var(--font-size-sm);
-}
-.btn-action-modal.primary {
-  background: linear-gradient(135deg, var(--c-primary), var(--c-primary-hover));
-  color: white;
-  box-shadow: 0 4px 12px rgba(var(--c-primary-rgb), 0.3);
-}
-.btn-action-modal.primary:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(var(--c-primary-rgb), 0.4);
-}
-.btn-action-modal.secondary {
-  background: var(--c-bg-tertiary);
-  color: var(--c-text-primary);
-  border: 1px solid var(--c-border);
-}
-.btn-action-modal.secondary:hover {
-  background: var(--c-border);
-  border-color: var(--c-primary);
-}
 .customer-card {
   cursor: pointer;
   transition: all var(--transition-base);
@@ -1937,14 +1898,6 @@ body.has-overlay { overflow: hidden; }
     height: 100vh;
     max-height: 100vh;
     border-radius: 0;
-  }
-  .customer-modal-actions {
-    grid-template-columns: 1fr;
-    position: sticky;
-    bottom: 0;
-  }
-  .btn-action-modal {
-    padding: var(--space-3) var(--space-4);
   }
 }
 #plans-view {
@@ -2159,8 +2112,7 @@ body { -webkit-font-smoothing: auto; }
 
 /* Ensure text is sharp */
 .customer-modal-header,
-.customer-modal-section,
-.customer-modal-actions {
+.customer-modal-section {
   -webkit-font-smoothing: antialiased !important;
   -moz-osx-font-smoothing: grayscale !important;
   text-rendering: optimizeLegibility !important;
@@ -3140,20 +3092,6 @@ body { -webkit-font-smoothing: auto !important; }
       </div>
     </div>
 
-    <div class="customer-modal-actions">
-      <button type="button" class="btn-action-modal primary" id="call-customer-btn">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72"/>
-        </svg>
-        تماس با مشتری
-      </button>
-      <button type="button" class="btn-action-modal secondary">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18M8 14h.01M12 14h.01M16 14h.01"/>
-        </svg>
-        رزرو جدید
-      </button>
-    </div>
   </div>
 </div>
 
@@ -4463,34 +4401,6 @@ populateCustomerModal(data) {
     'pending': 'در انتظار'
   };
   statusBadge.textContent = statusTexts[data.lastReservation.status];
-  
-  // Add action button handlers
-  this.attachModalActionHandlers(data);
-}
-
-// Attach handlers to modal action buttons
-attachModalActionHandlers(customerData) {
-  const modal = document.getElementById('customer-details-modal');
-  const callBtn = modal.querySelector('.btn-action-modal.primary');
-  const bookBtn = modal.querySelector('.btn-action-modal.secondary');
-  
-  // Remove old listeners by cloning
-  const newCallBtn = callBtn.cloneNode(true);
-  const newBookBtn = bookBtn.cloneNode(true);
-  callBtn.parentNode.replaceChild(newCallBtn, callBtn);
-  bookBtn.parentNode.replaceChild(newBookBtn, bookBtn);
-  
-  // Add new listeners
-  newCallBtn.addEventListener('click', () => {
-    const phoneNumber = customerData.phone.replace(/[^\d]/g, '');
-    window.location.href = `tel:${phoneNumber}`;
-    UIComponents.showToast('در حال برقراری تماس...', 'info');
-  });
-  
-  newBookBtn.addEventListener('click', () => {
-    UIComponents.closeModal('customer-details-modal');
-    UIComponents.showToast('سیستم رزرو آنلاین به زودی راه‌اندازی می‌شود', 'info');
-  });
 }
 
 // Override renderCustomers to add customer IDs
