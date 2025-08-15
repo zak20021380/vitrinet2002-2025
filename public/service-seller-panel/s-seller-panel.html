@@ -1070,6 +1070,7 @@ button:disabled, .btn:disabled {
   padding: var(--space-4);
   box-shadow: 0 10px 30px var(--c-shadow);
   position: relative;
+  z-index: var(--z-modal);
 }
 .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--space-3); }
 .modal-title { font-size: var(--font-size-lg); font-weight: var(--font-weight-bold); margin: 0; }
@@ -1085,7 +1086,7 @@ button:disabled, .btn:disabled {
   transform: translateX(100%);
   transition: transform var(--transition-base);
 }
-.drawer-content { padding: var(--space-4); }
+.drawer-content { padding: var(--space-4); position: relative; z-index: var(--z-modal); }
 .drawer-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--space-3); }
 .drawer-title { font-size: var(--font-size-lg); font-weight: var(--font-weight-bold); margin: 0; }
 body.has-overlay { overflow: hidden; }
@@ -4427,7 +4428,6 @@ handlePlanDurationChange(e) {
             <div class="item-card" data-id="${service.id}">
                 <div class="item-card-header">
                     <h4 class="item-title">${service.title}</h4>
-                    <span class="item-badge ${service.active ? 'active' : ''}">${service.active ? 'فعال' : 'غیرفعال'}</span>
                 </div>
                 <div class="item-details">
                     <span>قیمت: ${UIComponents.formatPersianNumber(service.price)} تومان</span>
