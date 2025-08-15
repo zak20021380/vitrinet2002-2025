@@ -2657,8 +2657,27 @@ body { -webkit-font-smoothing: auto !important; }
   background: rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.10);
 }
 
-.plan-hero-actions{ display:flex; align-items:center; gap:.5rem; flex-wrap:wrap; }
-.btn-block{ width:100%; }
+.plan-hero-actions{ display:flex; align-items:center; justify-content:center; gap:.5rem; flex-wrap:wrap; }
+.btn-renew{
+  background: linear-gradient(135deg, var(--c-primary), var(--c-primary-active));
+  color: var(--c-text-primary);
+  padding: var(--space-3) var(--space-4);
+  font-size: var(--font-size-sm);
+  border-radius: var(--border-radius-lg);
+  box-shadow: 0 4px 12px rgba(var(--c-primary-rgb), .4);
+  display:flex; align-items:center; justify-content:center; gap:var(--space-2);
+  width:100%;
+  transition: background var(--transition-base), transform var(--transition-fast), box-shadow var(--transition-base);
+}
+.btn-renew:hover:not(:disabled){
+  background: linear-gradient(135deg, var(--c-primary-hover), var(--c-primary));
+  box-shadow: 0 6px 16px rgba(var(--c-primary-rgb), .45);
+  transform: translateY(-2px);
+}
+.btn-renew:active:not(:disabled){
+  transform: translateY(0);
+  box-shadow: 0 2px 8px rgba(var(--c-primary-rgb), .3);
+}
 .btn-sm{ min-height:36px; padding: .25rem .6rem; font-size:.85rem; border-radius: 10px; }
 
 /* چیپ وضعیت */
@@ -2721,14 +2740,17 @@ body { -webkit-font-smoothing: auto !important; }
   <div class="plan-hero-content">
     <div class="plan-hero-top">
       <span class="plan-tier-badge" id="plan-tier">🎖 پرمیوم</span>
-      <button type="button" id="plan-manage-btn" class="btn-secondary btn-sm">مدیریت پلن</button>
     </div>
 
     <h3 class="plan-hero-title">پلن فعال شما</h3>
 
     <div class="plan-hero-meta" role="list">
       <div class="meta-item" role="listitem">
-        <span>⏳ مانده:</span><strong id="plan-days-left">۱۲ روز</strong>
+        <svg class="icon-clock" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <circle cx="12" cy="12" r="10" />
+          <path d="M12 6v6l4 2" />
+        </svg>
+        <span>مانده:</span><strong id="plan-days-left">۱۲ روز</strong>
       </div>
       <div class="meta-item" role="listitem">
         <span>انقضا:</span><strong id="plan-expiry">—</strong>
@@ -2753,10 +2775,7 @@ body { -webkit-font-smoothing: auto !important; }
     </ul>
 
     <div class="plan-hero-actions">
-      <button type="button" class="btn-primary btn-block" id="plan-renew-btn">تمدید / ارتقا</button>
-      <button type="button" class="btn-secondary btn-icon-text" id="plan-invoice-btn">
-        مشاهده فاکتور
-      </button>
+      <button type="button" class="btn-renew" id="plan-renew-btn">تمدید / ارتقا</button>
     </div>
   </div>
 </section>
@@ -5292,11 +5311,8 @@ _removeBrandImage(type){
 
     // دکمه‌ها
     const goPlans = ()=>{ window.location.hash = '/plans'; };
-    const showInvoice = ()=> UIComponents?.showToast?.('نمایش فاکتور آخر… (نمونه)', 'info');
 
-    el('plan-manage-btn')?.addEventListener('click', goPlans);
     el('plan-renew-btn')?.addEventListener('click', goPlans);
-    el('plan-invoice-btn')?.addEventListener('click', showInvoice);
   })();
 });
 
