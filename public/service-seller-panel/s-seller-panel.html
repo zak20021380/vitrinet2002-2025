@@ -3148,11 +3148,16 @@ body { -webkit-font-smoothing: auto !important; }
                 </div>
                 <div class="form-group">
                     <label for="business-category" class="form-label">دسته بندی</label>
-                    <select id="business-category" class="form-select">
+                    <select id="business-category" class="form-select" disabled>
                         <option value="barbershop" selected>آرایشگاه مردانه</option>
                         <option value="salon">سالن زیبایی زنانه</option>
                         <option value="clinic">کلینیک زیبایی</option>
                     </select>
+                    <div class="help">دسته‌بندی توسط پشتیبانی تعیین می‌شود</div>
+                </div>
+                <div class="form-group">
+                    <label for="business-phone" class="form-label">شماره تلفن</label>
+                    <input type="tel" id="business-phone" class="form-control" inputmode="tel" placeholder="مثلاً ۰۹۱۲۳۴۵۶۷۸۹">
                 </div>
             </div>
             <!-- === NEW: خدمات من (My Services) === -->
@@ -3479,8 +3484,14 @@ body { -webkit-font-smoothing: auto !important; }
                 <input type="text" id="portfolio-title" class="form-control" required>
             </div>
             <div class="form-group">
-                <label for="portfolio-image" class="form-label">آدرس تصویر (URL)</label>
-                <input type="url" id="portfolio-image" class="form-control" required>
+                <label class="form-label">تصویر نمونه‌کار</label>
+                <div class="image-field" id="portfolio-image-field">
+                    <div class="preview"><img id="portfolio-image-preview" alt="پیش‌نمایش تصویر" hidden></div>
+                    <div class="actions">
+                        <button type="button" class="btn-secondary" id="portfolio-image-btn">انتخاب از گالری/دوربین</button>
+                    </div>
+                    <input type="file" accept="image/*" id="portfolio-image" hidden>
+                </div>
             </div>
             <div class="form-group">
                 <label for="portfolio-description" class="form-label">توضیح کوتاه</label>
@@ -3754,6 +3765,7 @@ function bindFloatingCloseOnce() {
       this.appNav = document.querySelector('.app-nav');
       this.debouncedSearch = this.debounce(this.filterCustomers, 300);
       this.currentBookingFilter = 'all';
+      this.currentPortfolioImage = '';
 
       // Initialize Services and Portfolio
       this.initServices();
@@ -3798,7 +3810,10 @@ setupEventListeners() {
     addServiceBtn: document.getElementById('add-service-btn'),
     addPortfolioBtn: document.getElementById('add-portfolio-btn'),
     serviceForm: document.getElementById('service-form'),
-    portfolioForm: document.getElementById('portfolio-form')
+    portfolioForm: document.getElementById('portfolio-form'),
+    portfolioImageBtn: document.getElementById('portfolio-image-btn'),
+    portfolioImageInput: document.getElementById('portfolio-image'),
+    portfolioImagePreview: document.getElementById('portfolio-image-preview')
   };
 
   // Map for drawer/modal management
@@ -3945,6 +3960,23 @@ document.addEventListener('click', (e) => {
     elements.portfolioForm.addEventListener('submit', (e) => {
       e.preventDefault();
       this.boundHandlePortfolioFormSubmit();
+    });
+  }
+
+  if (elements.portfolioImageBtn && elements.portfolioImageInput) {
+    elements.portfolioImageBtn.addEventListener('click', () => elements.portfolioImageInput.click());
+  }
+
+  if (elements.portfolioImageInput && elements.portfolioImagePreview) {
+    elements.portfolioImageInput.addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (file) {
+        this.fileToDataURL(file).then(data => {
+          this.currentPortfolioImage = data;
+          elements.portfolioImagePreview.src = data;
+          elements.portfolioImagePreview.hidden = false;
+        }).catch(() => UIComponents.showToast('خطا در خواندن تصویر.', 'error'));
+      }
     });
   }
 
@@ -4540,7 +4572,7 @@ handlePlanDurationChange(e) {
                     <h4 class="item-title">${item.title}</h4>
                 </div>
                 <div class="item-image-preview">
-                    ${this.isValidUrl(item.image) ? `<img src="${item.image}" alt="${item.title}" onerror="this.parentElement.innerHTML='<span>تصویر نامعتبر</span>'">` : '<span>آدرس تصویر نامعتبر</span>'}
+                    ${item.image ? `<img src="${item.image}" alt="${item.title}" onerror="this.parentElement.innerHTML='<span>تصویر نامعتبر</span>'">` : '<span>تصویر ناموجود</span>'}
                 </div>
                 <div class="item-details">
                     <p>${item.description || '-'}</p>
@@ -4571,14 +4603,6 @@ handlePlanDurationChange(e) {
             });
         });
     }
-    isValidUrl(string) {
-        try {
-            new URL(string);
-            return true;
-        } catch (_) {
-            return false;
-        }
-    }
     populatePortfolioForm(item) {
         const form = document.getElementById('portfolio-form');
         const titleEl = document.getElementById('portfolio-drawer-title');
@@ -4586,30 +4610,43 @@ handlePlanDurationChange(e) {
             form.dataset.editingId = item.id;
             document.getElementById('portfolio-id').value = item.id;
             document.getElementById('portfolio-title').value = item.title;
-            document.getElementById('portfolio-image').value = item.image;
+            this.currentPortfolioImage = item.image || '';
+            const preview = document.getElementById('portfolio-image-preview');
+            if (item.image) {
+                preview.src = item.image;
+                preview.hidden = false;
+            } else {
+                preview.removeAttribute('src');
+                preview.hidden = true;
+            }
+            document.getElementById('portfolio-image').value = '';
             document.getElementById('portfolio-description').value = item.description || '';
             titleEl.textContent = 'ویرایش نمونه‌کار';
         } else {
             delete form.dataset.editingId;
             form.reset();
             document.getElementById('portfolio-id').value = '';
+            this.currentPortfolioImage = '';
+            const preview = document.getElementById('portfolio-image-preview');
+            preview.removeAttribute('src');
+            preview.hidden = true;
             titleEl.textContent = 'افزودن نمونه‌کار جدید';
         }
     }
-    handlePortfolioFormSubmit() {
+    async handlePortfolioFormSubmit() {
         const form = document.getElementById('portfolio-form');
         const id = form.dataset.editingId ? parseInt(form.dataset.editingId, 10) : null;
         const title = document.getElementById('portfolio-title').value.trim();
-        const image = document.getElementById('portfolio-image').value.trim();
         const description = document.getElementById('portfolio-description').value.trim();
-
-        if (!title || !image) {
-            UIComponents.showToast('لطفاً عنوان و آدرس تصویر را وارد کنید.', 'error');
-            return;
+        const fileInput = document.getElementById('portfolio-image');
+        let imageData = this.currentPortfolioImage;
+        const file = fileInput.files[0];
+        if (file) {
+            imageData = await this.fileToDataURL(file);
         }
 
-        if (!this.isValidUrl(image)) {
-            UIComponents.showToast('آدرس تصویر معتبر نیست.', 'error');
+        if (!title || !imageData) {
+            UIComponents.showToast('لطفاً عنوان و تصویر را وارد کنید.', 'error');
             return;
         }
 
@@ -4618,13 +4655,13 @@ handlePlanDurationChange(e) {
             // Edit existing
             const index = portfolio.findIndex(p => p.id === id);
             if (index !== -1) {
-                portfolio[index] = { id, title, image, description };
+                portfolio[index] = { id, title, image: imageData, description };
                 UIComponents.showToast('نمونه‌کار با موفقیت ویرایش شد.', 'success');
             }
         } else {
             // Add new
             const newId = portfolio.length > 0 ? Math.max(...portfolio.map(p => p.id)) + 1 : 1;
-            portfolio.push({ id: newId, title, image, description });
+            portfolio.push({ id: newId, title, image: imageData, description });
             UIComponents.showToast('نمونه‌کار جدید اضافه شد.', 'success');
         }
         StorageManager.set('vit_portfolio', portfolio);
@@ -4638,6 +4675,15 @@ handlePlanDurationChange(e) {
         StorageManager.set('vit_portfolio', portfolio);
         this.renderPortfolioList();
         UIComponents.showToast('نمونه‌کار حذف شد.', 'success');
+    }
+
+    fileToDataURL(file) {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = () => resolve(reader.result);
+            reader.onerror = () => reject();
+            reader.readAsDataURL(file);
+        });
     }
 
 
