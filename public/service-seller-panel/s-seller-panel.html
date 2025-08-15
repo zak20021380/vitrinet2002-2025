@@ -2923,7 +2923,7 @@ body { -webkit-font-smoothing: auto !important; }
             <div class="filter-chips" role="tablist" aria-label="فیلتر نوبت‌ها">
               <button type="button" class="filter-chip active" data-filter="all" role="tab" aria-selected="true">همه <span class="chip-badge"></span></button>
               <button type="button" class="filter-chip" data-filter="pending" role="tab" aria-selected="false">در انتظار <span class="chip-badge"></span></button>
-              <button type="button" class="filter-chip" data-filter="confirmed" role="tab" aria-selected="false">تایید شده <span class="chip-badge"></span></button>
+              <button type="button" class="filter-chip" data-filter="confirmed" role="tab" aria-selected="false">تایید رزرو <span class="chip-badge"></span></button>
               <button type="button" class="filter-chip" data-filter="completed" role="tab" aria-selected="false">انجام شده <span class="chip-badge"></span></button>
             </div>
           </div>
@@ -3449,17 +3449,6 @@ body { -webkit-font-smoothing: auto !important; }
             <div class="form-group">
                 <label for="service-price" class="form-label">قیمت (تومان)</label>
                 <input type="number" id="service-price" class="form-control" min="0" required>
-            </div>
-            <div class="form-group">
-                <label for="service-duration" class="form-label">مدت (دقیقه)</label>
-                <input type="number" id="service-duration" class="form-control" min="1" required>
-            </div>
-            <div class="form-group">
-                <label for="service-active" class="form-label">وضعیت فعال</label>
-                <select id="service-active" class="form-select" required>
-                    <option value="true">فعال</option>
-                    <option value="false">غیرفعال</option>
-                </select>
             </div>
             <div class="form-actions">
                 <button type="submit" class="btn-primary">ذخیره</button>
@@ -4120,9 +4109,9 @@ destroy() {
   } else {
     const statusLabel = {
       pending: 'در انتظار',
-      confirmed: 'تایید شده',
+      confirmed: 'تایید رزرو',
       completed: 'انجام شده',
-      cancelled: 'لغو شده'
+      cancelled: 'لغو رزرو'
     };
     listEl.innerHTML = filtered.map(b => `
       <article class="booking-card card" role="listitem" tabindex="0" data-status="${b.status}" data-customer-name="${b.customerName}">
@@ -4134,9 +4123,9 @@ destroy() {
           <span class="status-badge status-${b.status}">${statusLabel[b.status] || b.status}</span>
           <button type="button" class="btn-secondary btn-icon-text status-change-btn" data-id="${b.id}" aria-haspopup="true" aria-expanded="false">تغییر وضعیت</button>
           <div class="status-menu" role="menu">
-            <button type="button" class="status-option" data-status="confirmed">تایید شده</button>
+            <button type="button" class="status-option" data-status="confirmed">تایید رزرو</button>
             <button type="button" class="status-option" data-status="completed">انجام شده</button>
-            <button type="button" class="status-option" data-status="cancelled">لغو شده</button>
+            <button type="button" class="status-option" data-status="cancelled">لغو رزرو</button>
           </div>
         </div>
       </article>
@@ -4430,9 +4419,9 @@ handlePlanDurationChange(e) {
         const services = StorageManager.get('vit_services');
         if (!services || services.length === 0) {
             const defaultServices = [
-                { id: 1, title: 'اصلاح سر', price: 150000, duration: 30, active: true },
-                { id: 2, title: 'رنگ مو', price: 450000, duration: 90, active: true },
-                { id: 3, title: 'اصلاح ریش', price: 80000, duration: 20, active: false }
+                { id: 1, title: 'اصلاح سر', price: 150000 },
+                { id: 2, title: 'رنگ مو', price: 450000 },
+                { id: 3, title: 'اصلاح ریش', price: 80000 }
             ];
             StorageManager.set('vit_services', defaultServices);
         }
@@ -4448,7 +4437,6 @@ handlePlanDurationChange(e) {
                 </div>
                 <div class="item-details">
                     <span>قیمت: ${UIComponents.formatPersianNumber(service.price)} تومان</span>
-                    <span>مدت: ${UIComponents.formatPersianNumber(service.duration)} دقیقه</span>
                 </div>
                 <div class="item-actions">
                     <button type="button" class="btn-text-sm edit-service-btn" data-id="${service.id}" aria-label="ویرایش ${service.title}">ویرایش</button>
@@ -4484,14 +4472,11 @@ handlePlanDurationChange(e) {
             document.getElementById('service-id').value = service.id;
             document.getElementById('service-title').value = service.title;
             document.getElementById('service-price').value = service.price;
-            document.getElementById('service-duration').value = service.duration;
-            document.getElementById('service-active').value = String(!!service.active);
             titleEl.textContent = 'ویرایش خدمت';
         } else {
             delete form.dataset.editingId;
             form.reset();
             document.getElementById('service-id').value = '';
-            document.getElementById('service-active').value = 'true';
             titleEl.textContent = 'افزودن خدمت جدید';
         }
     }
@@ -4500,10 +4485,8 @@ handlePlanDurationChange(e) {
         const id = form.dataset.editingId ? parseInt(form.dataset.editingId, 10) : null;
         const title = document.getElementById('service-title').value.trim();
         const price = parseFloat(document.getElementById('service-price').value);
-        const duration = parseInt(document.getElementById('service-duration').value, 10);
-        const active = document.getElementById('service-active').value === 'true';
 
-        if (!title || isNaN(price) || isNaN(duration)) {
+        if (!title || isNaN(price)) {
             UIComponents.showToast('لطفاً تمام فیلدهای اجباری را پر کنید.', 'error');
             return;
         }
@@ -4513,13 +4496,13 @@ handlePlanDurationChange(e) {
             // Edit existing
             const index = services.findIndex(s => s.id === id);
             if (index !== -1) {
-                services[index] = { id, title, price, duration, active };
+                services[index] = { id, title, price };
                 UIComponents.showToast('خدمت با موفقیت ویرایش شد.', 'success');
             }
         } else {
             // Add new
             const newId = services.length > 0 ? Math.max(...services.map(s => s.id)) + 1 : 1;
-            services.push({ id: newId, title, price, duration, active });
+            services.push({ id: newId, title, price });
             UIComponents.showToast('خدمت جدید اضافه شد.', 'success');
         }
         StorageManager.set('vit_services', services);
@@ -4881,7 +4864,7 @@ populateCustomerModal(data) {
   statusBadge.className = `status-badge status-${data.lastReservation.status}`;
   const statusTexts = {
     'completed': 'انجام شده',
-    'confirmed': 'تأیید شده',
+    'confirmed': 'تایید رزرو',
     'pending': 'در انتظار'
   };
   statusBadge.textContent = statusTexts[data.lastReservation.status];
@@ -4901,7 +4884,7 @@ populateCustomerModal(data) {
     cancelBtn.onclick = () => {
       data.lastReservation.status = 'cancelled';
       statusBadge.className = 'status-badge status-cancelled';
-      statusBadge.textContent = 'لغو شده';
+      statusBadge.textContent = 'لغو رزرو';
       actions.hidden = true;
       UIComponents.showToast('رزرو لغو شد', 'error');
       this.renderBookings && this.renderBookings();
@@ -4984,11 +4967,11 @@ openCustomerModal(customer) {
     const cancelBtn = document.getElementById('cancel-reservation-btn');
     
     // Status mapping
-    const faMap = { 
-      pending: 'در انتظار', 
-      confirmed: 'تایید شده', 
-      completed: 'انجام شده', 
-      cancelled: 'لغو شده' 
+    const faMap = {
+      pending: 'در انتظار',
+      confirmed: 'تایید رزرو',
+      completed: 'انجام شده',
+      cancelled: 'لغو رزرو'
     };
     
     // Update status display
