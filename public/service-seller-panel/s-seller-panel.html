@@ -1819,9 +1819,9 @@ body.has-overlay { overflow: hidden; }
   background: rgba(var(--c-success-rgb, 48, 209, 88), 0.15);
   color: var(--c-success);
 }
-.stat-icon-modal.rating {
-  background: rgba(255, 214, 10, 0.15);
-  color: var(--c-warning);
+.stat-icon-modal.cancel {
+  background: rgba(255, 69, 58, 0.15);
+  color: var(--c-danger);
 }
 .stat-info-modal {
   text-align: center;
@@ -3038,14 +3038,15 @@ body { -webkit-font-smoothing: auto !important; }
       </div>
 
       <div class="stat-item-modal" role="listitem">
-        <div class="stat-icon-modal rating">
+        <div class="stat-icon-modal cancel">
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+            <circle cx="12" cy="12" r="10"/>
+            <path d="M15 9l-6 6M9 9l6 6"/>
           </svg>
         </div>
         <div class="stat-info-modal">
-          <div class="stat-value-modal" id="customer-rating">۴.۸</div>
-          <div class="stat-label-modal">امتیاز</div>
+          <div class="stat-value-modal" id="customer-cancel-count">۰</div>
+          <div class="stat-label-modal">دفعات لغو</div>
         </div>
       </div>
     </div>
@@ -4353,7 +4354,7 @@ getCustomerData(id, name, phone, lastVisit) {
   // In real app, this would fetch from API
   const totalReservations = Math.floor(Math.random() * 50) + 5;
   const completedReservations = Math.floor(totalReservations * 0.8);
-  const rating = (Math.random() * 2 + 3).toFixed(1); // 3.0 to 5.0
+  const cancellationCount = Math.floor(Math.random() * 5);
   
   // Mock last reservation
   const services = ['اصلاح سر', 'اصلاح ریش', 'رنگ مو', 'کراتینه', 'اصلاح ابرو'];
@@ -4371,7 +4372,7 @@ getCustomerData(id, name, phone, lastVisit) {
     phone,
     totalReservations,
     completedReservations,
-    rating,
+    cancellationCount,
     lastReservation
   };
 }
@@ -4391,8 +4392,8 @@ populateCustomerModal(data) {
     UIComponents.formatPersianNumber(data.totalReservations);
   document.getElementById('customer-completed-reservations').textContent = 
     UIComponents.formatPersianNumber(data.completedReservations);
-  document.getElementById('customer-rating').textContent = 
-    UIComponents.formatPersianNumber(parseFloat(data.rating));
+  document.getElementById('customer-cancel-count').textContent =
+    UIComponents.formatPersianNumber(data.cancellationCount);
   
   // Last reservation
   document.getElementById('last-reservation-date').textContent = data.lastReservation.date;
