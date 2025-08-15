@@ -2923,7 +2923,7 @@ body { -webkit-font-smoothing: auto !important; }
             <div class="filter-chips" role="tablist" aria-label="فیلتر نوبت‌ها">
               <button type="button" class="filter-chip active" data-filter="all" role="tab" aria-selected="true">همه <span class="chip-badge"></span></button>
               <button type="button" class="filter-chip" data-filter="pending" role="tab" aria-selected="false">در انتظار <span class="chip-badge"></span></button>
-              <button type="button" class="filter-chip" data-filter="confirmed" role="tab" aria-selected="false">تایید رزرو <span class="chip-badge"></span></button>
+              <button type="button" class="filter-chip" data-filter="confirmed" role="tab" aria-selected="false">تایید شده <span class="chip-badge"></span></button>
               <button type="button" class="filter-chip" data-filter="completed" role="tab" aria-selected="false">انجام شده <span class="chip-badge"></span></button>
             </div>
           </div>
@@ -4109,9 +4109,9 @@ destroy() {
   } else {
     const statusLabel = {
       pending: 'در انتظار',
-      confirmed: 'تایید رزرو',
+      confirmed: 'تایید شده',
       completed: 'انجام شده',
-      cancelled: 'لغو رزرو'
+      cancelled: 'لغو شده'
     };
     listEl.innerHTML = filtered.map(b => `
       <article class="booking-card card" role="listitem" tabindex="0" data-status="${b.status}" data-customer-name="${b.customerName}">
@@ -4123,9 +4123,9 @@ destroy() {
           <span class="status-badge status-${b.status}">${statusLabel[b.status] || b.status}</span>
           <button type="button" class="btn-secondary btn-icon-text status-change-btn" data-id="${b.id}" aria-haspopup="true" aria-expanded="false">تغییر وضعیت</button>
           <div class="status-menu" role="menu">
-            <button type="button" class="status-option" data-status="confirmed">تایید رزرو</button>
+            <button type="button" class="status-option" data-status="confirmed">تایید شده</button>
             <button type="button" class="status-option" data-status="completed">انجام شده</button>
-            <button type="button" class="status-option" data-status="cancelled">لغو رزرو</button>
+            <button type="button" class="status-option" data-status="cancelled">لغو شده</button>
           </div>
         </div>
       </article>
@@ -4864,8 +4864,9 @@ populateCustomerModal(data) {
   statusBadge.className = `status-badge status-${data.lastReservation.status}`;
   const statusTexts = {
     'completed': 'انجام شده',
-    'confirmed': 'تایید رزرو',
-    'pending': 'در انتظار'
+    'confirmed': 'تایید شده',
+    'pending': 'در انتظار',
+    'cancelled': 'لغو شده'
   };
   statusBadge.textContent = statusTexts[data.lastReservation.status];
   const actions = document.getElementById('last-reservation-actions');
@@ -4884,7 +4885,7 @@ populateCustomerModal(data) {
     cancelBtn.onclick = () => {
       data.lastReservation.status = 'cancelled';
       statusBadge.className = 'status-badge status-cancelled';
-      statusBadge.textContent = 'لغو رزرو';
+      statusBadge.textContent = statusTexts['cancelled'];
       actions.hidden = true;
       UIComponents.showToast('رزرو لغو شد', 'error');
       this.renderBookings && this.renderBookings();
@@ -4969,9 +4970,9 @@ openCustomerModal(customer) {
     // Status mapping
     const faMap = {
       pending: 'در انتظار',
-      confirmed: 'تایید رزرو',
+      confirmed: 'تایید شده',
       completed: 'انجام شده',
-      cancelled: 'لغو رزرو'
+      cancelled: 'لغو شده'
     };
     
     // Update status display
