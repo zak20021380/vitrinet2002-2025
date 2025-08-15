@@ -725,6 +725,11 @@ button:disabled, .btn:disabled {
 .review-actions button {
   flex: 1;
 }
+.review-status {
+  color: var(--c-success);
+  font-weight: var(--font-weight-medium);
+  margin-top: var(--space-2);
+}
 .search-wrapper {
   position: relative;
   margin-bottom: var(--space-4);
@@ -3408,10 +3413,10 @@ document.addEventListener('DOMContentLoaded', () => {
       { id: 4, name: 'مریم اکبری', phone: '۰۹۱۰۱۱۰۲۲۰۳', lastReservation: '۱۴۰۳/۰۴/۳۰' },
     ],
     reviews: [
-      { id: 1, customerName: 'علی رضایی', rating: 5, date: '۱ روز پیش', comment: 'کارشون عالی و حرفه‌ای بود. بسیار راضی بودم.' },
-      { id: 2, customerName: 'سارا محمدی', rating: 4, date: '۳ روز پیش', comment: 'محیط تمیز و برخورد پرسنل خوب بود. فقط کمی معطل شدم.' },
-      { id: 3, customerName: 'رضا حسینی', rating: 5, date: '۱ هفته پیش', comment: 'بهترین آرایشگاهی که تا حالا رفتم.' },
-      { id: 4, customerName: 'مریم اکبری', rating: 3, date: '۲ هفته پیش', comment: 'کیفیت کار متوسط بود.' },
+      { id: 1, customerName: 'علی رضایی', rating: 5, date: '۱ روز پیش', comment: 'کارشون عالی و حرفه‌ای بود. بسیار راضی بودم.', status: 'pending' },
+      { id: 2, customerName: 'سارا محمدی', rating: 4, date: '۳ روز پیش', comment: 'محیط تمیز و برخورد پرسنل خوب بود. فقط کمی معطل شدم.', status: 'pending' },
+      { id: 3, customerName: 'رضا حسینی', rating: 5, date: '۱ هفته پیش', comment: 'بهترین آرایشگاهی که تا حالا رفتم.', status: 'pending' },
+      { id: 4, customerName: 'مریم اکبری', rating: 3, date: '۲ هفته پیش', comment: 'کیفیت کار متوسط بود.', status: 'pending' },
     ]
   };
   /**
@@ -4102,16 +4107,18 @@ destroy() {
           </div>
         </div>
         ${review.comment ? `<p class="review-comment">${review.comment}</p>` : ''}
-        <div class="review-actions">
-          <button type="button" class="btn-success btn-icon-text approve-review">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
-            تایید
-          </button>
-          <button type="button" class="btn-danger btn-icon-text reject-review">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-            رد
-          </button>
-        </div>
+        ${review.status === 'approved'
+          ? `<div class="review-status">تایید شده</div>`
+          : `<div class="review-actions">
+              <button type="button" class="btn-success btn-icon-text approve-review">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+                تایید
+              </button>
+              <button type="button" class="btn-danger btn-icon-text reject-review">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                رد
+              </button>
+            </div>`}
       </article>
     `;
   }).join('');
@@ -4121,6 +4128,14 @@ destroy() {
       const approveBtn = e.target.closest('.approve-review');
       const rejectBtn = e.target.closest('.reject-review');
       if (approveBtn) {
+        const card = approveBtn.closest('.review-card');
+        const id = parseInt(card.dataset.id, 10);
+        const review = MOCK_DATA.reviews.find(r => r.id === id);
+        if (review) review.status = 'approved';
+        const actions = card.querySelector('.review-actions');
+        if (actions) {
+          actions.outerHTML = '<div class="review-status">تایید شده</div>';
+        }
         UIComponents.showToast('نظر تایید شد و در صفحه شما به نمایش در میاد', 'success');
         return;
       }
