@@ -716,6 +716,15 @@ button:disabled, .btn:disabled {
 .review-date { font-size: var(--font-size-sm); color: var(--c-text-secondary); }
 .review-rating { color: var(--c-star-filled); }
 .review-comment { color: var(--c-text-secondary); }
+.review-actions {
+  display: flex;
+  gap: var(--space-2);
+  margin-top: var(--space-2);
+  flex-wrap: wrap;
+}
+.review-actions button {
+  flex: 1;
+}
 .search-wrapper {
   position: relative;
   margin-bottom: var(--space-4);
@@ -4076,7 +4085,7 @@ destroy() {
   listEl.innerHTML = filteredReviews.map(review => {
     const stars = '★'.repeat(review.rating) + '☆'.repeat(5 - review.rating);
     return `
-      <article class="review-card card" role="listitem">
+      <article class="review-card card" role="listitem" data-id="${review.id}">
         <div class="review-header">
           <div>
             <div class="review-customer">${review.customerName}</div>
@@ -4087,9 +4096,39 @@ destroy() {
           </div>
         </div>
         ${review.comment ? `<p class="review-comment">${review.comment}</p>` : ''}
+        <div class="review-actions">
+          <button type="button" class="btn-success btn-icon-text approve-review">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+            تایید
+          </button>
+          <button type="button" class="btn-danger btn-icon-text reject-review">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            رد
+          </button>
+        </div>
       </article>
     `;
   }).join('');
+
+  if (!listEl.dataset.reviewBound) {
+    listEl.addEventListener('click', (e) => {
+      const approveBtn = e.target.closest('.approve-review');
+      const rejectBtn = e.target.closest('.reject-review');
+      if (approveBtn) {
+        UIComponents.showToast('نظر تایید شد و در صفحه شما به نمایش در میاد', 'success');
+        return;
+      }
+      if (rejectBtn) {
+        const card = rejectBtn.closest('.review-card');
+        const id = parseInt(card.dataset.id, 10);
+        card.remove();
+        MOCK_DATA.reviews = MOCK_DATA.reviews.filter(r => r.id !== id);
+        UIComponents.showToast('نظر حذف شد', 'error');
+        return;
+      }
+    });
+    listEl.dataset.reviewBound = 'true';
+  }
 }
 
 
