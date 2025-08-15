@@ -352,6 +352,113 @@ button:disabled, .btn:disabled {
   display: flex;
   align-items: center;
   gap: var(--space-1);
+  position: relative;
+}
+
+#view-store-btn {
+  background: linear-gradient(135deg, var(--c-primary), var(--c-primary-hover));
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--border-radius-md);
+  font-size: var(--font-size-sm);
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+#view-store-btn svg {
+  width: 18px;
+  height: 18px;
+}
+
+@media (min-width: 768px) {
+  #view-store-btn {
+    padding: var(--space-2) var(--space-3);
+  }
+  #view-store-btn svg {
+    width: 20px;
+    height: 20px;
+  }
+}
+
+#notification-btn {
+  position: relative;
+}
+
+#notification-btn .badge {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  min-width: 16px;
+  height: 16px;
+  padding: 0 var(--space-1);
+  background-color: var(--c-danger);
+  color: var(--c-text-primary);
+  border-radius: 10px;
+  font-size: 0.7rem;
+  line-height: 16px;
+  display: none;
+}
+
+#notification-btn.has-unread .badge {
+  display: block;
+}
+
+.notification-panel {
+  position: absolute;
+  top: calc(100% + var(--space-2));
+  right: 0;
+  width: 280px;
+  max-height: 360px;
+  overflow-y: auto;
+  background-color: var(--c-bg-primary);
+  border: var(--border-width) solid var(--c-border);
+  border-radius: var(--border-radius-lg);
+  box-shadow: 0 8px 16px var(--c-shadow);
+  padding: var(--space-2);
+  display: none;
+}
+
+.notification-panel.active {
+  display: block;
+}
+
+.notification-panel h2 {
+  font-size: var(--font-size-sm);
+  margin: 0 0 var(--space-2);
+  font-weight: var(--font-weight-bold);
+}
+
+.notification-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.notification-item {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-2);
+  padding: var(--space-2) 0;
+  border-bottom: var(--border-width) solid var(--c-border);
+}
+
+.notification-item:last-child {
+  border-bottom: none;
+}
+
+.notification-icon {
+  color: var(--c-primary);
+  flex-shrink: 0;
+}
+
+.notification-text {
+  margin: 0;
+  font-size: var(--font-size-sm);
+}
+
+.notification-item time {
+  font-size: var(--font-size-sm);
+  color: var(--c-text-secondary);
 }
 @media (min-width: 768px) {
   .brand-text { display: block; }
@@ -2508,7 +2615,16 @@ body { -webkit-font-smoothing: auto !important; }
         <span class="brand-text">پنل فروشنده</span>
       </h1>
       <div class="header-actions">
-        <!-- Notification button removed -->
+        <button id="notification-btn" class="header-btn icon-btn" aria-label="اعلان‌ها" aria-haspopup="true" aria-expanded="false">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+          </svg>
+          <span class="badge" id="notification-badge"></span>
+        </button>
+        <div id="notification-panel" class="notification-panel" role="dialog" aria-labelledby="notification-title">
+          <h2 id="notification-title">اعلان‌ها</h2>
+          <ul class="notification-list" id="notification-list"></ul>
+        </div>
         <button id="view-store-btn" class="btn-primary btn-icon-text" aria-label="مشاهده صفحه فروشگاه">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
             <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/>
@@ -3559,6 +3675,8 @@ setupEventListeners() {
   // Cache frequently used elements
   const elements = {
     body: this.body,
+    notificationBtn: document.getElementById('notification-btn'),
+    notificationPanel: document.getElementById('notification-panel'),
     viewStoreBtn: document.getElementById('view-store-btn'),
     plansView: document.getElementById('plans-view'),
     customerSearch: document.getElementById('customer-search'),
@@ -3651,15 +3769,30 @@ document.addEventListener('click', (e) => {
 
 }, { passive: true });
 
+  // 3. Notifications dropdown
+  if (elements.notificationBtn && elements.notificationPanel) {
+    elements.notificationBtn.addEventListener('click', () => {
+      elements.notificationPanel.classList.toggle('active');
+      const expanded = elements.notificationPanel.classList.contains('active');
+      elements.notificationBtn.setAttribute('aria-expanded', expanded);
+    });
 
-  // 3. View Store button
+    document.addEventListener('click', (e) => {
+      if (!elements.notificationPanel.contains(e.target) && e.target !== elements.notificationBtn) {
+        elements.notificationPanel.classList.remove('active');
+        elements.notificationBtn.setAttribute('aria-expanded', 'false');
+      }
+    });
+  }
+
+  // 4. View Store button
   if (elements.viewStoreBtn) {
     elements.viewStoreBtn.addEventListener('click', () => {
       window.open('/store', '_blank', 'noopener,noreferrer');
     });
   }
 
-  // 4. Plans view - Updated selector
+  // 5. Plans view - Updated selector
   if (elements.plansView) {
     const billingToggle = elements.plansView.querySelector('.billing-toggle');
     if (billingToggle) {
@@ -4986,20 +5119,36 @@ _removeBrandImage(type){
   this.applyBrandImages();
   UIComponents.showToast('تصویر حذف شد.', 'success');
 }
+  // === END OF NEW METHODS ===
+  }
 
-
-
-
-
-
-
-
-    // === END OF NEW METHODS ===
+  function renderNotifications() {
+    const list = document.getElementById('notification-list');
+    const badge = document.getElementById('notification-badge');
+    const btn = document.getElementById('notification-btn');
+    if (!list || !badge || !btn) return;
+    const icons = {
+      review: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>',
+      booking: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>',
+      customer: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>'
+    };
+    list.innerHTML = MOCK_DATA.recentActivity.map(item => `
+      <li class="notification-item">
+        <div class="notification-icon" aria-hidden="true">${icons[item.type]}</div>
+        <div class="notification-content">
+          <p class="notification-text">${item.text}</p>
+          <time class="notification-time">${item.time}</time>
+        </div>
+      </li>
+    `).join('');
+    badge.textContent = MOCK_DATA.recentActivity.length;
+    btn.classList.add('has-unread');
   }
   // Run the App
   const app = new SellerPanelApp();
   app.init();
   if (typeof app.initBrandImages === 'function') app.initBrandImages();
+  renderNotifications();
 });
 
 
