@@ -4508,16 +4508,7 @@ renderCustomers(query = '') {
     return;
   }
 
-  const prefsAll = CustomerPrefs.load();
-
   listEl.innerHTML = filteredCustomers.map(c => {
-    const pref = prefsAll[normalizeKey(c.name)] || {};
-    const tags = `
-      <div class="customer-tags" style="margin-top:6px;display:flex;gap:6px;flex-wrap:wrap;">
-        ${pref.blocked ? '<span class="badge badge-warning">مسدود</span>' : ''}
-        ${pref.autoAccept ? '<span class="badge badge-success">تایید خودکار</span>' : ''}
-      </div>
-    `;
     return `
       <article class="customer-card card"
                role="listitem" tabindex="0"
@@ -4527,7 +4518,6 @@ renderCustomers(query = '') {
           <div class="customer-name">${c.name}</div>
           <div class="customer-phone">${UIComponents.formatPersianNumber(c.phone)}</div>
           <div class="customer-last-visit">آخرین بازدید: ${UIComponents.formatPersianNumber(c.lastVisit)}</div>
-          ${tags}
         </div>
       </article>
     `;
