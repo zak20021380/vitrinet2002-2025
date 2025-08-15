@@ -677,7 +677,7 @@ button:disabled, .btn:disabled {
 }
 .customer-info { flex: 1; }
 .customer-name { font-weight: var(--font-weight-bold); }
-.customer-phone, .customer-last-visit { font-size: var(--font-size-sm); color: var(--c-text-secondary); }
+.customer-phone, .customer-last-reservation { font-size: var(--font-size-sm); color: var(--c-text-secondary); }
 .reviews-container { display: flex; flex-direction: column; gap: var(--space-3); }
 .review-card { display: flex; flex-direction: column; gap: var(--space-3); }
 .review-header { display: flex; justify-content: space-between; align-items: center; }
@@ -3349,10 +3349,10 @@ document.addEventListener('DOMContentLoaded', () => {
       { id: 6, customerName: 'زهرا قاسمی', service: 'کراتینه', time: '۱۸:۰۰', status: 'pending' },
     ],
     customers: [
-      { id: 1, name: 'علی رضایی', phone: '۰۹۱۲۳۴۵۶۷۸۹', lastVisit: '۱۴۰۳/۰۵/۲۰' },
-      { id: 2, name: 'سارا محمدی', phone: '۰۹۳۵۱۲۳۴۵۶۷', lastVisit: '۱۴۰۳/۰۵/۱۸' },
-      { id: 3, name: 'رضا حسینی', phone: '۰۹۱۸۹۸۷۶۵۴۳', lastVisit: '۱۴۰۳/۰۵/۱۵' },
-      { id: 4, name: 'مریم اکبری', phone: '۰۹۱۰۱۱۰۲۲۰۳', lastVisit: '۱۴۰۳/۰۴/۳۰' },
+      { id: 1, name: 'علی رضایی', phone: '۰۹۱۲۳۴۵۶۷۸۹', lastReservation: '۱۴۰۳/۰۵/۲۰' },
+      { id: 2, name: 'سارا محمدی', phone: '۰۹۳۵۱۲۳۴۵۶۷', lastReservation: '۱۴۰۳/۰۵/۱۸' },
+      { id: 3, name: 'رضا حسینی', phone: '۰۹۱۸۹۸۷۶۵۴۳', lastReservation: '۱۴۰۳/۰۵/۱۵' },
+      { id: 4, name: 'مریم اکبری', phone: '۰۹۱۰۱۱۰۲۲۰۳', lastReservation: '۱۴۰۳/۰۴/۳۰' },
     ],
     reviews: [
       { id: 1, customerName: 'علی رضایی', rating: 5, date: '۱ روز پیش', comment: 'کارشون عالی و حرفه‌ای بود. بسیار راضی بودم.' },
@@ -3436,6 +3436,23 @@ window.VitreenetRules = {
     static formatPersianDate() {
         const options = { year: 'numeric', month: 'long', day: 'numeric', weekday: 'long' };
         return new Intl.DateTimeFormat('fa-IR-u-nu-latn', options).format(new Date());
+    }
+    static formatRelativeDate(dateStr) {
+      if (!dateStr) return '';
+      const persianDigits = '۰۱۲۳۴۵۶۷۸۹';
+      const latinDigits = '0123456789';
+      const toEnglish = s => s.replace(/[۰-۹]/g, d => latinDigits[persianDigits.indexOf(d)]);
+      const toPersian = s => s.replace(/[0-9]/g, d => persianDigits[d]);
+      const target = toEnglish(dateStr.trim());
+      const fmt = d => new Intl.DateTimeFormat('fa-IR-u-nu-latn-ca-persian', { year: 'numeric', month: '2-digit', day: '2-digit' }).format(d);
+      const today = new Date();
+      const todayStr = fmt(today);
+      const yesterdayStr = fmt(new Date(today.getTime() - 86400000));
+      const tomorrowStr = fmt(new Date(today.getTime() + 86400000));
+      if (target === todayStr) return 'امروز';
+      if (target === yesterdayStr) return 'دیروز';
+      if (target === tomorrowStr) return 'فردا';
+      return toPersian(target);
     }
     static animateCountUp(el) {
       const target = parseInt(el.dataset.value, 10);
@@ -4486,13 +4503,13 @@ showCustomerDetails(card) {
   // Extract customer data from card
   const customerName = card.querySelector('.customer-name').textContent;
   const customerPhone = card.querySelector('.customer-phone').textContent;
-  const lastVisit = card.querySelector('.customer-last-visit').textContent;
+  const lastReservationText = card.querySelector('.customer-last-reservation').textContent;
   
   // Get customer ID (would come from data attribute in real app)
   const customerId = parseInt(card.dataset.customerId || Math.floor(Math.random() * 100));
   
   // Generate mock data for this customer
-  const customerData = this.getCustomerData(customerId, customerName, customerPhone, lastVisit);
+  const customerData = this.getCustomerData(customerId, customerName, customerPhone, lastReservationText);
   
   // Populate modal
   this.populateCustomerModal(customerData);
@@ -4502,22 +4519,23 @@ showCustomerDetails(card) {
 }
 
 // Get customer data (mock)
-getCustomerData(id, name, phone, lastVisit) {
+getCustomerData(id, name, phone, lastReservationText) {
   // In real app, this would fetch from API
   const totalReservations = Math.floor(Math.random() * 50) + 5;
   const completedReservations = Math.floor(totalReservations * 0.8);
   const cancellationCount = Math.floor(Math.random() * 5);
-  
+
   // Mock last reservation
   const services = ['اصلاح سر', 'اصلاح ریش', 'رنگ مو', 'کراتینه', 'اصلاح ابرو'];
   const statuses = ['completed', 'confirmed', 'pending'];
+  const rawDate = lastReservationText.replace('آخرین رزرو نوبت: ', '');
   const lastReservation = {
-    date: lastVisit.replace('آخرین بازدید: ', ''),
+    date: UIComponents.formatRelativeDate(rawDate),
     service: services[Math.floor(Math.random() * services.length)],
     time: `${Math.floor(Math.random() * 8) + 10}:${Math.random() > 0.5 ? '00' : '30'}`,
     status: statuses[Math.floor(Math.random() * statuses.length)]
   };
-  
+
   return {
     id,
     name,
@@ -4612,7 +4630,7 @@ renderCustomers(query = '') {
         <div class="customer-info">
           <div class="customer-name">${c.name}</div>
           <div class="customer-phone">${UIComponents.formatPersianNumber(c.phone)}</div>
-          <div class="customer-last-visit">آخرین بازدید: ${UIComponents.formatPersianNumber(c.lastVisit)}</div>
+          <div class="customer-last-reservation">آخرین رزرو نوبت: ${UIComponents.formatRelativeDate(c.lastReservation)}</div>
         </div>
       </article>
     `;
@@ -4650,7 +4668,7 @@ openCustomerModal(customer) {
   const last = bookingsFor[bookingsFor.length - 1];
   if (last) {
     document.getElementById('last-reservation-date').textContent =
-      UIComponents.formatPersianNumber(customer.lastVisit || '۱۴۰۳/۰۵/۱۵');
+      UIComponents.formatRelativeDate(customer.lastReservation || '۱۴۰۳/۰۵/۱۵');
     document.getElementById('last-reservation-service').textContent = last.service || '-';
     document.getElementById('last-reservation-time').textContent =
       `ساعت ${UIComponents.formatPersianNumber(last.time || '')}`;
@@ -4805,7 +4823,7 @@ initCustomerFeatures() {
     this.openCustomerModal({
       name:  card.dataset.name,
       phone: card.dataset.phone,
-      lastVisit: (MOCK_DATA.customers.find(c => c.name === card.dataset.name) || {}).lastVisit
+      lastReservation: (MOCK_DATA.customers.find(c => c.name === card.dataset.name) || {}).lastReservation
     });
   });
 
@@ -4817,7 +4835,7 @@ initCustomerFeatures() {
     this.openCustomerModal({
       name:  card.dataset.name,
       phone: card.dataset.phone,
-      lastVisit: (MOCK_DATA.customers.find(c => c.name === card.dataset.name) || {}).lastVisit
+      lastReservation: (MOCK_DATA.customers.find(c => c.name === card.dataset.name) || {}).lastReservation
     });
   });
 }
