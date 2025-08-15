@@ -229,38 +229,38 @@ button:disabled, .btn:disabled {
 }
 .btn-secondary:hover:not(:disabled) { background-color: var(--c-border); }
 .btn-success {
-  background-color: var(--c-success);
+  background: linear-gradient(135deg, #30d158, #00c853);
   color: var(--c-text-on-primary);
   padding: var(--space-2) var(--space-3);
   font-size: var(--font-size-sm);
   border-radius: 50px;
-  box-shadow: 0 2px 8px rgba(48, 209, 88, 0.2);
+  box-shadow: 0 4px 8px rgba(48, 209, 88, 0.3);
 }
 .btn-success:hover:not(:disabled) {
-  background-color: #37c76b;
-  box-shadow: 0 4px 12px rgba(48, 209, 88, 0.3);
+  background: linear-gradient(135deg, #37e06b, #00b34b);
+  box-shadow: 0 6px 12px rgba(48, 209, 88, 0.4);
 }
 .btn-success:active:not(:disabled) {
-  background-color: #42d778;
-  transform: scale(0.98);
-  box-shadow: 0 1px 4px rgba(48, 209, 88, 0.2);
+  background: linear-gradient(135deg, #42d778, #00a444);
+  transform: scale(0.97);
+  box-shadow: 0 2px 6px rgba(48, 209, 88, 0.3);
 }
 .btn-danger {
-  background-color: var(--c-danger);
+  background: linear-gradient(135deg, #ff453a, #ff2d55);
   color: var(--c-text-on-primary);
   padding: var(--space-2) var(--space-3);
   font-size: var(--font-size-sm);
   border-radius: 50px;
-  box-shadow: 0 2px 8px rgba(255, 69, 58, 0.2);
+  box-shadow: 0 4px 8px rgba(255, 69, 58, 0.3);
 }
 .btn-danger:hover:not(:disabled) {
-  background-color: #ff5a52;
-  box-shadow: 0 4px 12px rgba(255, 69, 58, 0.3);
+  background: linear-gradient(135deg, #ff5a52, #ff3b44);
+  box-shadow: 0 6px 12px rgba(255, 69, 58, 0.4);
 }
 .btn-danger:active:not(:disabled) {
-  background-color: #ff6961;
-  transform: scale(0.98);
-  box-shadow: 0 1px 4px rgba(255, 69, 58, 0.2);
+  background: linear-gradient(135deg, #ff6961, #ff3b30);
+  transform: scale(0.97);
+  box-shadow: 0 2px 6px rgba(255, 69, 58, 0.3);
 }
 .btn-icon, .icon-btn {
   min-width: 44px;
@@ -1020,15 +1020,19 @@ body.has-overlay { overflow: hidden; }
   background-color: var(--c-bg-tertiary);
   color: var(--c-text-primary);
   padding: var(--space-2) var(--space-3);
-  border-radius: var(--border-radius-md);
+  border-radius: var(--border-radius-lg);
   box-shadow: 0 4px 12px var(--c-shadow);
   font-size: var(--font-size-sm);
   pointer-events: all;
-  animation: slideInUp 0.3s ease, fadeOut 0.3s ease 2.7s;
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
   opacity: 0;
+  transform: translateY(20px);
 }
-.toast.success { background-color: var(--c-success); color: white; }
-.toast.error { background-color: var(--c-danger); color: white; }
+.toast.success { background: linear-gradient(135deg, #30d158, #00c853); color: #fff; }
+.toast.error { background: linear-gradient(135deg, #ff453a, #ff2d55); color: #fff; }
+.toast-icon { font-size: 1.2em; line-height: 0; }
 @keyframes fadeOut {
   to { opacity: 0; transform: translateY(20px); }
 }
@@ -3526,13 +3530,15 @@ window.VitreenetRules = {
       }
       requestAnimationFrame(counter);
     }
-    static showToast(message, type = 'info', duration = 3000) {
+    static showToast(message, type = 'info', duration = 4000) {
       const toastRoot = document.getElementById('toast-root');
       if (!toastRoot) return;
       const toast = document.createElement('div');
       toast.className = `toast ${type}`;
       toast.setAttribute('role', 'status');
-      toast.textContent = message;
+      const icons = { success: '✓', error: '✕', info: 'ℹ' };
+      toast.innerHTML = `<span class="toast-icon">${icons[type] || icons.info}</span><span>${message}</span>`;
+      toast.style.animation = `slideInUp 0.4s ease forwards, fadeOut 0.4s ease ${duration - 400}ms forwards`;
       toastRoot.appendChild(toast);
       setTimeout(() => {
         toast.remove();
