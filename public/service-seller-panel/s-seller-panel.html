@@ -529,6 +529,7 @@ button:disabled, .btn:disabled {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
   gap: var(--space-3);
+  margin-top: var(--space-4);
 }
 .stat-card {
   background-color: var(--c-bg-primary);
@@ -1566,9 +1567,6 @@ body.has-overlay { overflow: hidden; }
 }
 .image-settings-group .actions .btn-secondary,
 .image-settings-group .actions .btn-primary{ width: 100%; }
-.image-settings-group .url-row{
-  display: grid; gap: .5rem; grid-template-columns: 1fr auto;
-}
 @media (min-width: 768px){
   .brand-hero{ min-height: 240px; }
   .brand-footer{ min-height: 160px; }
@@ -2739,12 +2737,7 @@ body { -webkit-font-smoothing: auto !important; }
 
   <div class="plan-hero-content">
     <div class="plan-hero-top">
-      <span class="plan-tier-badge" id="plan-tier">
-        <svg class="icon-premium" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-          <path d="M12 2l3.09 6.26 6.91.99-5 4.87 1.18 6.88L12 18.27 5.82 21 7 14.14l-5-4.87 6.91-.99L12 2z" />
-        </svg>
-        پرمیوم
-      </span>
+      <span class="plan-tier-badge" id="plan-tier">پرمیوم</span>
     </div>
 
     <h3 class="plan-hero-title">پلن فعال شما</h3>
@@ -3216,10 +3209,6 @@ body { -webkit-font-smoothing: auto !important; }
       <button type="button" class="btn-secondary" id="hero-pick-btn">انتخاب از گالری/دوربین</button>
       <button type="button" class="btn-secondary" id="hero-remove-btn">حذف تصویر</button>
     </div>
-    <div class="url-row">
-      <input type="url" id="hero-url" class="form-control" placeholder="یا لینک تصویر را وارد کنید (https://)">
-      <button type="button" class="btn-primary" id="hero-url-save">ثبت لینک</button>
-    </div>
     <input type="file" accept="image/*" capture="environment" id="hero-file" hidden>
   </div>
 
@@ -3234,24 +3223,12 @@ body { -webkit-font-smoothing: auto !important; }
       <button type="button" class="btn-secondary" id="footer-pick-btn">انتخاب از گالری/دوربین</button>
       <button type="button" class="btn-secondary" id="footer-remove-btn">حذف تصویر</button>
     </div>
-    <div class="url-row">
-      <input type="url" id="footer-url" class="form-control" placeholder="یا لینک تصویر را وارد کنید (https://)">
-      <button type="button" class="btn-primary" id="footer-url-save">ثبت لینک</button>
-    </div>
     <input type="file" accept="image/*" capture="environment" id="footer-file" hidden>
   </div>
 </div>
 
 
 
-                <h3 class="settings-group-title">اعلان‌ها</h3>
-                <div class="form-group">
-                    <label for="notification-email" class="form-label">ایمیل برای اعلان‌ها</label>
-                    <input type="email" id="notification-email" class="form-control" value="seller@example.com">
-                </div>
-            </div>
-            <div class="form-actions">
-                <button type="submit" class="btn-primary">ذخیره تغییرات</button>
             </div>
         </form>
         </div>
@@ -5180,14 +5157,10 @@ bindBrandImageEvents(){
   const heroPick   = document.getElementById('hero-pick-btn');
   const heroFile   = document.getElementById('hero-file');
   const heroRemove = document.getElementById('hero-remove-btn');
-  const heroUrl    = document.getElementById('hero-url');
-  const heroUrlBtn = document.getElementById('hero-url-save');
 
   const footerPick   = document.getElementById('footer-pick-btn');
   const footerFile   = document.getElementById('footer-file');
   const footerRemove = document.getElementById('footer-remove-btn');
-  const footerUrl    = document.getElementById('footer-url');
-  const footerUrlBtn = document.getElementById('footer-url-save');
 
   if (heroPick && heroFile){
     heroPick.addEventListener('click', () => heroFile.click());
@@ -5204,13 +5177,6 @@ bindBrandImageEvents(){
   if (footerRemove){
     footerRemove.addEventListener('click', () => this._removeBrandImage('footer'));
   }
-
-  if (heroUrlBtn && heroUrl){
-    heroUrlBtn.addEventListener('click', () => this._saveUrl(heroUrl.value.trim(), 'hero'));
-  }
-  if (footerUrlBtn && footerUrl){
-    footerUrlBtn.addEventListener('click', () => this._saveUrl(footerUrl.value.trim(), 'footer'));
-  }
 }
 
 // Helpers
@@ -5224,16 +5190,6 @@ _readFileToDataURL(evt, type){
   };
   reader.onerror = () => UIComponents.showToast('خطا در خواندن تصویر.', 'error');
   reader.readAsDataURL(file);
-}
-
-_saveUrl(url, type){
-  try{
-    const u = new URL(url);
-    if(!/^https?:/i.test(u.protocol)) throw new Error();
-    this._storeBrandImage(type, u.toString());
-  }catch{
-    UIComponents.showToast('لینک تصویر معتبر نیست.', 'error');
-  }
 }
 
 _storeBrandImage(type, value){
