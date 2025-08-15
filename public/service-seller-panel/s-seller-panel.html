@@ -2428,6 +2428,106 @@ body { -webkit-font-smoothing: auto !important; }
 .customer-modal .toggle-switch.active .toggle-switch-slider { transform: translateX(28px) !important; }
 
 
+
+
+
+.pending-actions {
+  display: flex;
+  gap: var(--space-2);
+  align-items: center;
+  justify-content: flex-start;
+  margin-top: var(--space-2);
+}
+
+.pending-actions button {
+  padding: 8px 16px !important;
+  font-size: 13px !important;
+  font-weight: 600 !important;
+  border-radius: 25px !important;
+  min-height: 36px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 6px !important;
+  transition: all 0.2s ease !important;
+  border: none !important;
+  cursor: pointer !important;
+  white-space: nowrap !important;
+}
+
+/* Cancel button styling */
+#cancel-reservation-btn {
+  background: rgba(255, 69, 58, 0.15) !important;
+  color: var(--c-danger) !important;
+  border: 1.5px solid rgba(255, 69, 58, 0.3) !important;
+}
+
+#cancel-reservation-btn:hover {
+  background: var(--c-danger) !important;
+  color: white !important;
+  border-color: var(--c-danger) !important;
+  transform: translateY(-1px) !important;
+  box-shadow: 0 4px 12px rgba(255, 69, 58, 0.3) !important;
+}
+
+#cancel-reservation-btn:active {
+  transform: translateY(0) !important;
+}
+
+/* Confirm button styling */
+#confirm-reservation-btn {
+  background: rgba(48, 209, 88, 0.15) !important;
+  color: var(--c-success) !important;
+  border: 1.5px solid rgba(48, 209, 88, 0.3) !important;
+}
+
+#confirm-reservation-btn:hover {
+  background: var(--c-success) !important;
+  color: white !important;
+  border-color: var(--c-success) !important;
+  transform: translateY(-1px) !important;
+  box-shadow: 0 4px 12px rgba(48, 209, 88, 0.3) !important;
+}
+
+#confirm-reservation-btn:active {
+  transform: translateY(0) !important;
+}
+
+/* Status badge improvements */
+.reservation-status {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+}
+
+.status-badge {
+  padding: 6px 14px !important;
+  border-radius: 20px !important;
+  font-size: 13px !important;
+  font-weight: 600 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 4px !important;
+}
+
+/* Responsive improvements for mobile */
+@media (max-width: 480px) {
+  .pending-actions {
+    width: 100%;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+  
+  .pending-actions button {
+    width: 100%;
+    font-size: 12px !important;
+    padding: 10px 12px !important;
+  }
+}
+
+
 </style>
 </head>
 <body class="app-body">
@@ -4527,84 +4627,171 @@ renderCustomers(query = '') {
 
 
 openCustomerModal(customer) {
-  // هدر
+  // Header
   document.getElementById('customer-modal-name').textContent = customer.name;
   document.getElementById('customer-modal-avatar').textContent = customer.name?.charAt(0) || '؟';
   const phoneWrap = document.getElementById('customer-modal-phone');
   phoneWrap.querySelector('span').textContent = customer.phone || '-';
 
-  // رزروها و آخرین رزرو
+  // Bookings and last reservation
   const bookingsFor = (MOCK_DATA.bookings || []).filter(b => b.customerName === customer.name);
   document.getElementById('customer-total-reservations').textContent =
     UIComponents.formatPersianNumber(bookingsFor.length);
 
+  // Calculate completed and cancelled counts
+  const completedCount = bookingsFor.filter(b => b.status === 'completed').length;
+  const cancelledCount = bookingsFor.filter(b => b.status === 'cancelled').length;
+  
+  document.getElementById('customer-completed-reservations').textContent = 
+    UIComponents.formatPersianNumber(completedCount);
+  document.getElementById('customer-cancel-count').textContent = 
+    UIComponents.formatPersianNumber(cancelledCount);
+
   const last = bookingsFor[bookingsFor.length - 1];
   if (last) {
-    // اگر تاریخ نداری، می‌تونی از last.date یا lastVisit استفاده کنی
     document.getElementById('last-reservation-date').textContent =
       UIComponents.formatPersianNumber(customer.lastVisit || '۱۴۰۳/۰۵/۱۵');
     document.getElementById('last-reservation-service').textContent = last.service || '-';
     document.getElementById('last-reservation-time').textContent =
       `ساعت ${UIComponents.formatPersianNumber(last.time || '')}`;
+    
     const st = document.getElementById('last-reservation-status');
-    const faMap = { pending:'در انتظار', confirmed:'تایید شده', completed:'انجام شده', cancelled:'لغو شده' };
-    st.textContent = faMap[last.status] || last.status;
-    st.className = `status-badge status-${last.status}`;
     const actions = document.getElementById('last-reservation-actions');
     const confirmBtn = document.getElementById('confirm-reservation-btn');
     const cancelBtn = document.getElementById('cancel-reservation-btn');
-    if (last.status === 'pending') {
-      actions.hidden = false;
-      confirmBtn.onclick = () => {
-        last.status = 'confirmed';
-        st.textContent = faMap[last.status];
-        st.className = `status-badge status-${last.status}`;
+    
+    // Status mapping
+    const faMap = { 
+      pending: 'در انتظار', 
+      confirmed: 'تایید شده', 
+      completed: 'انجام شده', 
+      cancelled: 'لغو شده' 
+    };
+    
+    // Update status display
+    const updateStatusDisplay = (status) => {
+      st.textContent = faMap[status] || status;
+      st.className = `status-badge status-${status}`;
+      
+      // Show/hide action buttons based on status
+      if (status === 'pending') {
+        actions.hidden = false;
+      } else {
         actions.hidden = true;
-        UIComponents.showToast('رزرو تایید شد', 'success');
+      }
+    };
+    
+    // Initial status display
+    updateStatusDisplay(last.status);
+    
+    // Confirm button handler
+    confirmBtn.onclick = () => {
+      // Update the booking status in the data
+      last.status = 'confirmed';
+      
+      // Update UI with animation
+      st.style.transform = 'scale(0.95)';
+      setTimeout(() => {
+        updateStatusDisplay('confirmed');
+        st.style.transform = 'scale(1)';
+      }, 150);
+      
+      // Show success message
+      UIComponents.showToast('✅ رزرو با موفقیت تایید شد', 'success');
+      
+      // Update bookings list if it's visible
+      if (document.getElementById('bookings-view').classList.contains('active')) {
         this.renderBookings();
-      };
-      cancelBtn.onclick = () => {
-        last.status = 'cancelled';
-        st.textContent = faMap[last.status];
-        st.className = `status-badge status-${last.status}`;
-        actions.hidden = true;
-        UIComponents.showToast('رزرو لغو شد', 'error');
+      }
+      
+      // Update dashboard stats
+      this.updateDashboardStats();
+    };
+    
+    // Cancel button handler
+    cancelBtn.onclick = () => {
+      // Confirm cancellation
+      if (!confirm('آیا از لغو این رزرو مطمئن هستید؟')) return;
+      
+      // Update the booking status in the data
+      last.status = 'cancelled';
+      
+      // Update UI with animation
+      st.style.transform = 'scale(0.95)';
+      setTimeout(() => {
+        updateStatusDisplay('cancelled');
+        st.style.transform = 'scale(1)';
+      }, 150);
+      
+      // Show error message
+      UIComponents.showToast('❌ رزرو لغو شد', 'error');
+      
+      // Update bookings list if it's visible
+      if (document.getElementById('bookings-view').classList.contains('active')) {
         this.renderBookings();
-      };
-    } else {
-      actions.hidden = true;
-    }
+      }
+      
+      // Update dashboard stats
+      this.updateDashboardStats();
+    };
   } else {
     document.getElementById('last-reservation-actions').hidden = true;
   }
 
-  // سوییچ‌ها ← مقداردهی از localStorage
+  // Customer preferences (auto-accept and blocked switches)
   const prefs = CustomerPrefs.getByName(customer.name);
-  const autoEl  = document.getElementById('toggle-auto-accept');
+  const autoEl = document.getElementById('toggle-auto-accept');
   const blockEl = document.getElementById('toggle-blocked');
 
-  autoEl.checked  = !!prefs.autoAccept;
+  autoEl.checked = !!prefs.autoAccept;
   blockEl.checked = !!prefs.blocked;
 
   autoEl.closest('.toggle-switch').classList.toggle('active', autoEl.checked);
   blockEl.closest('.toggle-switch').classList.toggle('active', blockEl.checked);
 
-  // هندل تغییر
+  // Handle preference changes
   autoEl.onchange = () => {
     CustomerPrefs.setByName(customer.name, { autoAccept: autoEl.checked });
     autoEl.closest('.toggle-switch').classList.toggle('active', autoEl.checked);
-    UIComponents.showToast(autoEl.checked ? 'تایید خودکار برای این مشتری فعال شد' : 'تایید خودکار غیرفعال شد', 'success');
-    this.renderBookings(); // اثر فوری روی لیست نوبت‌ها
+    UIComponents.showToast(
+      autoEl.checked ? '✅ تایید خودکار برای این مشتری فعال شد' : 'تایید خودکار غیرفعال شد', 
+      'success'
+    );
+    this.renderBookings();
   };
 
   blockEl.onchange = () => {
     CustomerPrefs.setByName(customer.name, { blocked: blockEl.checked });
     blockEl.closest('.toggle-switch').classList.toggle('active', blockEl.checked);
-    UIComponents.showToast(blockEl.checked ? 'این مشتری مسدود شد' : 'مسدودسازی برداشته شد', blockEl.checked ? 'error' : 'success');
-    this.renderBookings(); // اثر فوری
+    UIComponents.showToast(
+      blockEl.checked ? '🚫 این مشتری مسدود شد' : 'مسدودسازی برداشته شد', 
+      blockEl.checked ? 'error' : 'success'
+    );
+    this.renderBookings();
   };
 
   UIComponents.openModal('customer-details-modal');
+}
+
+// ADD this new method to update dashboard stats after status changes
+updateDashboardStats() {
+  // Count pending bookings
+  const pendingCount = MOCK_DATA.bookings.filter(b => b.status === 'pending').length;
+  const todayCount = MOCK_DATA.bookings.filter(b => b.status === 'confirmed').length;
+  
+  // Update pending stat card
+  const pendingValue = document.querySelector('.stat-pending .stat-value');
+  if (pendingValue) {
+    pendingValue.dataset.value = pendingCount;
+    pendingValue.textContent = UIComponents.formatPersianNumber(pendingCount);
+  }
+  
+  // Update today's bookings stat card
+  const todayValue = document.querySelector('.stat-bookings .stat-value');
+  if (todayValue) {
+    todayValue.dataset.value = todayCount;
+    todayValue.textContent = UIComponents.formatPersianNumber(todayCount);
+  }
 }
 
 initCustomerFeatures() {
