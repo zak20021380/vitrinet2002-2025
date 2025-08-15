@@ -228,6 +228,40 @@ button:disabled, .btn:disabled {
   font-size: var(--font-size-sm);
 }
 .btn-secondary:hover:not(:disabled) { background-color: var(--c-border); }
+.btn-success {
+  background-color: var(--c-success);
+  color: var(--c-text-on-primary);
+  padding: var(--space-2) var(--space-3);
+  font-size: var(--font-size-sm);
+  border-radius: 50px;
+  box-shadow: 0 2px 8px rgba(48, 209, 88, 0.2);
+}
+.btn-success:hover:not(:disabled) {
+  background-color: #37c76b;
+  box-shadow: 0 4px 12px rgba(48, 209, 88, 0.3);
+}
+.btn-success:active:not(:disabled) {
+  background-color: #42d778;
+  transform: scale(0.98);
+  box-shadow: 0 1px 4px rgba(48, 209, 88, 0.2);
+}
+.btn-danger {
+  background-color: var(--c-danger);
+  color: var(--c-text-on-primary);
+  padding: var(--space-2) var(--space-3);
+  font-size: var(--font-size-sm);
+  border-radius: 50px;
+  box-shadow: 0 2px 8px rgba(255, 69, 58, 0.2);
+}
+.btn-danger:hover:not(:disabled) {
+  background-color: #ff5a52;
+  box-shadow: 0 4px 12px rgba(255, 69, 58, 0.3);
+}
+.btn-danger:active:not(:disabled) {
+  background-color: #ff6961;
+  transform: scale(0.98);
+  box-shadow: 0 1px 4px rgba(255, 69, 58, 0.2);
+}
 .btn-icon, .icon-btn {
   min-width: 44px;
   min-height: 44px;
@@ -1880,6 +1914,14 @@ body.has-overlay { overflow: hidden; }
 }
 .reservation-status {
   align-self: flex-start;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+}
+.pending-actions {
+  display: flex;
+  gap: var(--space-2);
 }
 .customer-card {
   cursor: pointer;
@@ -3066,6 +3108,10 @@ body { -webkit-font-smoothing: auto !important; }
         </div>
         <div class="reservation-status">
           <span class="status-badge status-completed" id="last-reservation-status">—</span>
+          <div class="pending-actions" id="last-reservation-actions" hidden>
+            <button type="button" class="btn-success btn-icon-text" id="confirm-reservation-btn">تایید رزرو</button>
+            <button type="button" class="btn-danger btn-icon-text" id="cancel-reservation-btn">لغو رزرو</button>
+          </div>
         </div>
       </div>
     </div>
@@ -4410,6 +4456,30 @@ populateCustomerModal(data) {
     'pending': 'در انتظار'
   };
   statusBadge.textContent = statusTexts[data.lastReservation.status];
+  const actions = document.getElementById('last-reservation-actions');
+  const confirmBtn = document.getElementById('confirm-reservation-btn');
+  const cancelBtn = document.getElementById('cancel-reservation-btn');
+  if (data.lastReservation.status === 'pending') {
+    actions.hidden = false;
+    confirmBtn.onclick = () => {
+      data.lastReservation.status = 'confirmed';
+      statusBadge.className = 'status-badge status-confirmed';
+      statusBadge.textContent = statusTexts['confirmed'];
+      actions.hidden = true;
+      UIComponents.showToast('رزرو تایید شد', 'success');
+      this.renderBookings && this.renderBookings();
+    };
+    cancelBtn.onclick = () => {
+      data.lastReservation.status = 'cancelled';
+      statusBadge.className = 'status-badge status-cancelled';
+      statusBadge.textContent = 'لغو شده';
+      actions.hidden = true;
+      UIComponents.showToast('رزرو لغو شد', 'error');
+      this.renderBookings && this.renderBookings();
+    };
+  } else {
+    actions.hidden = true;
+  }
 }
 
 // Override renderCustomers to add customer IDs
@@ -4474,6 +4544,32 @@ openCustomerModal(customer) {
     const faMap = { pending:'در انتظار', confirmed:'تایید شده', completed:'انجام شده', cancelled:'لغو شده' };
     st.textContent = faMap[last.status] || last.status;
     st.className = `status-badge status-${last.status}`;
+    const actions = document.getElementById('last-reservation-actions');
+    const confirmBtn = document.getElementById('confirm-reservation-btn');
+    const cancelBtn = document.getElementById('cancel-reservation-btn');
+    if (last.status === 'pending') {
+      actions.hidden = false;
+      confirmBtn.onclick = () => {
+        last.status = 'confirmed';
+        st.textContent = faMap[last.status];
+        st.className = `status-badge status-${last.status}`;
+        actions.hidden = true;
+        UIComponents.showToast('رزرو تایید شد', 'success');
+        this.renderBookings();
+      };
+      cancelBtn.onclick = () => {
+        last.status = 'cancelled';
+        st.textContent = faMap[last.status];
+        st.className = `status-badge status-${last.status}`;
+        actions.hidden = true;
+        UIComponents.showToast('رزرو لغو شد', 'error');
+        this.renderBookings();
+      };
+    } else {
+      actions.hidden = true;
+    }
+  } else {
+    document.getElementById('last-reservation-actions').hidden = true;
   }
 
   // سوییچ‌ها ← مقداردهی از localStorage
