@@ -3961,7 +3961,7 @@ destroy() {
       cancelled: 'لغو شده'
     };
     listEl.innerHTML = filtered.map(b => `
-      <article class="booking-card card" role="listitem" data-status="${b.status}">
+      <article class="booking-card card" role="listitem" tabindex="0" data-status="${b.status}" data-customer-name="${b.customerName}">
         <div class="booking-card-content">
           <strong class="booking-customer">${b.customerName}</strong>
           <span class="booking-service">${b.service} - ساعت ${UIComponents.formatPersianNumber(b.time)}</span>
@@ -4001,11 +4001,31 @@ destroy() {
         const booking = MOCK_DATA.bookings.find(b => b.id === id);
         if (booking) booking.status = newStatus;
         self.renderBookings(self.currentBookingFilter || 'all');
+        self.renderPlans && self.renderPlans();
         e.stopPropagation();
         return;
       }
+
+      const card = e.target.closest('.booking-card');
+      if (card && !e.target.closest('.booking-actions')) {
+        const name = card.dataset.customerName;
+        const customer = MOCK_DATA.customers.find(c => c.name === name);
+        if (customer) {
+          self.openCustomerModal(customer);
+        }
+      }
+
       listEl.querySelectorAll('.status-menu').forEach(m => m.classList.remove('open'));
       listEl.querySelectorAll('.status-change-btn').forEach(b => b.setAttribute('aria-expanded', 'false'));
+    });
+
+    listEl.addEventListener('keydown', function(e) {
+      if (e.key !== 'Enter') return;
+      const card = e.target.closest('.booking-card');
+      if (!card) return;
+      const name = card.dataset.customerName;
+      const customer = MOCK_DATA.customers.find(c => c.name === name);
+      if (customer) self.openCustomerModal(customer);
     });
     listEl.dataset.statusBound = 'true';
   }
@@ -4800,9 +4820,10 @@ openCustomerModal(customer) {
       if (document.getElementById('bookings-view').classList.contains('active')) {
         this.renderBookings();
       }
-      
+
       // Update dashboard stats
       this.updateDashboardStats();
+      this.renderPlans && this.renderPlans();
     };
     
     // Cancel button handler
@@ -4827,9 +4848,10 @@ openCustomerModal(customer) {
       if (document.getElementById('bookings-view').classList.contains('active')) {
         this.renderBookings();
       }
-      
+
       // Update dashboard stats
       this.updateDashboardStats();
+      this.renderPlans && this.renderPlans();
     };
   } else {
     document.getElementById('last-reservation-actions').hidden = true;
@@ -4847,25 +4869,27 @@ openCustomerModal(customer) {
   blockEl.closest('.toggle-switch').classList.toggle('active', blockEl.checked);
 
   // Handle preference changes
-  autoEl.onchange = () => {
-    CustomerPrefs.setByName(customer.name, { autoAccept: autoEl.checked });
-    autoEl.closest('.toggle-switch').classList.toggle('active', autoEl.checked);
-    UIComponents.showToast(
-      autoEl.checked ? '✅ تایید خودکار برای این مشتری فعال شد' : 'تایید خودکار غیرفعال شد', 
-      'success'
-    );
-    this.renderBookings();
-  };
+    autoEl.onchange = () => {
+      CustomerPrefs.setByName(customer.name, { autoAccept: autoEl.checked });
+      autoEl.closest('.toggle-switch').classList.toggle('active', autoEl.checked);
+      UIComponents.showToast(
+        autoEl.checked ? '✅ تایید خودکار برای این مشتری فعال شد' : 'تایید خودکار غیرفعال شد',
+        'success'
+      );
+      this.renderBookings();
+      this.renderPlans && this.renderPlans();
+    };
 
-  blockEl.onchange = () => {
-    CustomerPrefs.setByName(customer.name, { blocked: blockEl.checked });
-    blockEl.closest('.toggle-switch').classList.toggle('active', blockEl.checked);
-    UIComponents.showToast(
-      blockEl.checked ? '🚫 این مشتری مسدود شد' : 'مسدودسازی برداشته شد', 
-      blockEl.checked ? 'error' : 'success'
-    );
-    this.renderBookings();
-  };
+    blockEl.onchange = () => {
+      CustomerPrefs.setByName(customer.name, { blocked: blockEl.checked });
+      blockEl.closest('.toggle-switch').classList.toggle('active', blockEl.checked);
+      UIComponents.showToast(
+        blockEl.checked ? '🚫 این مشتری مسدود شد' : 'مسدودسازی برداشته شد',
+        blockEl.checked ? 'error' : 'success'
+      );
+      this.renderBookings();
+      this.renderPlans && this.renderPlans();
+    };
 
   UIComponents.openModal('customer-details-modal');
 }
