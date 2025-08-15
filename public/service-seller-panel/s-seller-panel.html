@@ -635,13 +635,40 @@ button:disabled, .btn:disabled {
 .booking-card {
   display: flex;
   align-items: center;
+  justify-content: space-between;
   gap: var(--space-3);
+  flex-wrap: wrap;
 }
-.booking-card-content { flex: 1; display: flex; flex-direction: column; }
+.booking-card-content { flex: 1; display: flex; flex-direction: column; gap: var(--space-1); }
 .booking-customer { font-weight: var(--font-weight-bold); }
 .booking-service { font-size: var(--font-size-sm); color: var(--c-text-secondary); }
 .booking-time { font-weight: var(--font-weight-medium); }
-.booking-actions { display: flex; gap: var(--space-2); }
+.booking-actions { display: flex; align-items: center; gap: var(--space-2); position: relative; }
+.status-change-btn { white-space: nowrap; }
+.status-menu {
+  position: absolute;
+  top: calc(100% + 4px);
+  right: 0;
+  background-color: var(--c-bg-primary);
+  border: var(--border-width) solid var(--c-border);
+  border-radius: var(--border-radius-md);
+  box-shadow: 0 4px 12px var(--c-shadow);
+  display: none;
+  flex-direction: column;
+  min-width: 120px;
+  z-index: 20;
+}
+.status-menu.open { display: flex; }
+.status-option {
+  padding: var(--space-2) var(--space-3);
+  background: none;
+  border: none;
+  color: var(--c-text-primary);
+  text-align: right;
+  font-size: var(--font-size-sm);
+  cursor: pointer;
+}
+.status-option:hover { background-color: var(--c-bg-tertiary); }
 .status-badge {
   padding: 4px 10px;
   border-radius: 20px;
@@ -653,6 +680,10 @@ button:disabled, .btn:disabled {
 .status-confirmed { background-color: var(--c-success); color: white; }
 .status-completed { background-color: var(--c-bg-tertiary); color: var(--c-text-secondary); }
 .status-cancelled { background-color: var(--c-danger); color: white; }
+.booking-card[data-status="pending"] { border-inline-start: 4px solid var(--c-warning); }
+.booking-card[data-status="confirmed"] { border-inline-start: 4px solid var(--c-success); }
+.booking-card[data-status="completed"] { border-inline-start: 4px solid var(--c-primary); }
+.booking-card[data-status="cancelled"] { border-inline-start: 4px solid var(--c-danger); }
 .customers-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
@@ -3592,7 +3623,8 @@ function bindFloatingCloseOnce() {
       this.body = document.body;
       this.appNav = document.querySelector('.app-nav');
       this.debouncedSearch = this.debounce(this.filterCustomers, 300);
-      
+      this.currentBookingFilter = 'all';
+
       // Initialize Services and Portfolio
       this.initServices();
       this.initPortfolio();
@@ -3905,6 +3937,7 @@ destroy() {
         `).join('');
     }
  renderBookings(filter = 'all') {
+  this.currentBookingFilter = filter;
   const listEl = document.getElementById('bookings-list');
   const prefs = CustomerPrefs.load();
 
@@ -3928,16 +3961,53 @@ destroy() {
       cancelled: 'لغو شده'
     };
     listEl.innerHTML = filtered.map(b => `
-      <article class="booking-card card" role="listitem">
+      <article class="booking-card card" role="listitem" data-status="${b.status}">
         <div class="booking-card-content">
           <strong class="booking-customer">${b.customerName}</strong>
           <span class="booking-service">${b.service} - ساعت ${UIComponents.formatPersianNumber(b.time)}</span>
         </div>
         <div class="booking-actions">
           <span class="status-badge status-${b.status}">${statusLabel[b.status] || b.status}</span>
+          <button type="button" class="btn-secondary btn-icon-text status-change-btn" data-id="${b.id}" aria-haspopup="true" aria-expanded="false">تغییر وضعیت</button>
+          <div class="status-menu" role="menu">
+            <button type="button" class="status-option" data-status="confirmed">تایید شده</button>
+            <button type="button" class="status-option" data-status="completed">انجام شده</button>
+            <button type="button" class="status-option" data-status="cancelled">لغو شده</button>
+          </div>
         </div>
       </article>
     `).join('');
+  }
+
+  if (!listEl.dataset.statusBound) {
+    const self = this;
+    listEl.addEventListener('click', function(e) {
+      const btn = e.target.closest('.status-change-btn');
+      const option = e.target.closest('.status-option');
+      if (btn) {
+        const expanded = btn.getAttribute('aria-expanded') === 'true';
+        listEl.querySelectorAll('.status-menu').forEach(m => m.classList.remove('open'));
+        listEl.querySelectorAll('.status-change-btn').forEach(b => b.setAttribute('aria-expanded', 'false'));
+        if (!expanded) {
+          btn.setAttribute('aria-expanded', 'true');
+          btn.nextElementSibling.classList.add('open');
+        }
+        e.stopPropagation();
+        return;
+      }
+      if (option) {
+        const id = parseInt(option.closest('.booking-actions').querySelector('.status-change-btn').dataset.id, 10);
+        const newStatus = option.dataset.status;
+        const booking = MOCK_DATA.bookings.find(b => b.id === id);
+        if (booking) booking.status = newStatus;
+        self.renderBookings(self.currentBookingFilter || 'all');
+        e.stopPropagation();
+        return;
+      }
+      listEl.querySelectorAll('.status-menu').forEach(m => m.classList.remove('open'));
+      listEl.querySelectorAll('.status-change-btn').forEach(b => b.setAttribute('aria-expanded', 'false'));
+    });
+    listEl.dataset.statusBound = 'true';
   }
 
   // آپدیت چیپ‌ها براساس وضعیت‌های effective
