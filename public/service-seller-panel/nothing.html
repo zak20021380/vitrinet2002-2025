@@ -333,7 +333,14 @@
   </header>
   <!-- Main Content -->
   <main class="main-container max-w-6xl mx-auto px-4 py-6">
-    
+    <!-- Profile completion prompt -->
+    <div id="profilePrompt" class="glass-card rounded-2xl p-4 mb-6 flex items-center justify-between hidden">
+      <span class="text-sm text-gray-700">برای استفاده بهتر، لطفاً اطلاعات پروفایل خود را تکمیل کنید.</span>
+      <button onclick="editProfile()" class="btn-gradient px-4 py-2 rounded-xl text-sm font-semibold">
+        تکمیل پروفایل
+      </button>
+    </div>
+
     <!-- User Profile Section -->
     <section class="glass-card rounded-3xl p-6 mb-6">
       <div class="flex items-center gap-5">
@@ -932,14 +939,28 @@
     function closeModal(modalId) {
       const modal = $(`#${modalId}`);
       modal.classList.add('hidden');
-      
+
       // Restore focus to the trigger element if available
       if (modal._triggerElement) {
         modal._triggerElement.focus();
         modal._triggerElement = null;
       }
     }
-    
+
+    function checkProfileCompletion() {
+      const name = localStorage.getItem(K.name);
+      const phone = localStorage.getItem(K.phone);
+      const prompt = $('#profilePrompt');
+      if (!prompt) return;
+      if (!name || !phone) {
+        prompt.classList.remove('hidden');
+        prompt.classList.add('animate-pulse');
+      } else {
+        prompt.classList.add('hidden');
+        prompt.classList.remove('animate-pulse');
+      }
+    }
+
     // Form
     $('#editForm').addEventListener('submit', (e) => {
       e.preventDefault();
@@ -965,7 +986,9 @@
       
       $('#userName').textContent = name;
       $('#userPhone').textContent = phone;
-      
+
+      checkProfileCompletion();
+
       closeModal('editModal');
       showToast('ذخیره شد', 'success');
     });
@@ -1054,7 +1077,9 @@
       if (email) {
         $('#email').value = email;
       }
-      
+
+      checkProfileCompletion();
+
       renderBookings();
       renderNotifs();
       
