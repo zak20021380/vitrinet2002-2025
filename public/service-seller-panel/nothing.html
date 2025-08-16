@@ -524,6 +524,30 @@
       </div>
     </div>
   </div>
+  <!-- OTP Modal -->
+  <div id="otpModal" class="fixed inset-0 modal-backdrop z-50 hidden">
+    <div class="flex items-end sm:items-center justify-center min-h-full p-4">
+      <div class="modal-content glass-card w-full sm:max-w-md rounded-3xl p-6">
+        <div class="flex items-center justify-between mb-6">
+          <h3 class="text-xl font-black text-gray-800">تایید شماره موبایل</h3>
+          <button onclick="closeModal('otpModal')" class="p-2 rounded-xl hover:bg-gray-100 transition-colors">
+            <i class="fas fa-times text-gray-600"></i>
+          </button>
+        </div>
+        <p id="otpMessage" class="text-sm text-gray-600 mb-4"></p>
+        <form id="otpForm" class="space-y-5">
+          <div class="flex justify-center gap-3" dir="ltr" id="otpInputs">
+            <input type="tel" maxlength="1" class="otp-input w-12 h-12 rounded-xl text-center text-lg font-bold border border-gray-300 focus:border-blue-500 focus:ring-0" inputmode="numeric">
+            <input type="tel" maxlength="1" class="otp-input w-12 h-12 rounded-xl text-center text-lg font-bold border border-gray-300 focus:border-blue-500 focus:ring-0" inputmode="numeric">
+            <input type="tel" maxlength="1" class="otp-input w-12 h-12 rounded-xl text-center text-lg font-bold border border-gray-300 focus:border-blue-500 focus:ring-0" inputmode="numeric">
+            <input type="tel" maxlength="1" class="otp-input w-12 h-12 rounded-xl text-center text-lg font-bold border border-gray-300 focus:border-blue-500 focus:ring-0" inputmode="numeric">
+          </div>
+          <button type="submit" class="btn-gradient w-full py-3 rounded-xl font-bold">تایید کد</button>
+          <button type="button" id="resendBtn" class="w-full py-2 text-sm text-gray-500 disabled:opacity-50" disabled>ارسال مجدد (60)</button>
+        </form>
+      </div>
+    </div>
+  </div>
   <!-- Confirmation Modal -->
   <div id="confirmModal" class="fixed inset-0 modal-backdrop z-50 hidden">
     <div class="flex items-end sm:items-center justify-center min-h-full p-4">
@@ -956,9 +980,38 @@
     }
 
     // Form
+    let pendingProfile = null;
+    let verificationCode = '';
+    let resendTimer;
+
+    function startVerification(phone) {
+      verificationCode = Math.floor(1000 + Math.random() * 9000).toString();
+      $('#otpMessage').textContent = `کد تایید به شماره ${phone} ارسال شد`;
+      showToast('کد تایید ارسال شد', 'info');
+      console.log('OTP:', verificationCode);
+      let sec = 60;
+      const btn = $('#resendBtn');
+      btn.disabled = true;
+      btn.textContent = `ارسال مجدد (${sec})`;
+      clearInterval(resendTimer);
+      resendTimer = setInterval(() => {
+        sec--;
+        btn.textContent = `ارسال مجدد (${sec})`;
+        if (sec <= 0) {
+          clearInterval(resendTimer);
+          btn.disabled = false;
+          btn.textContent = 'ارسال مجدد';
+        }
+      }, 1000);
+      $$('.otp-input').forEach(i => i.value = '');
+      $('#otpModal').classList.remove('hidden');
+      trapFocus('otpModal');
+      setTimeout(() => $$('.otp-input')[0].focus(), 100);
+    }
+
     $('#editForm').addEventListener('submit', (e) => {
       e.preventDefault();
-      
+
       const name = $('#fullName').value.trim();
       const phone = toEn($('#mobile').value.trim());
 
@@ -966,23 +1019,46 @@
         showToast('اطلاعات ضروری را وارد کنید', 'error');
         return;
       }
-      
-      // Basic phone validation
+
       if (!/^09\d{9}$/.test(phone)) {
         showToast('شماره موبایل معتبر نیست', 'error');
         return;
       }
-      
-      localStorage.setItem(K.name, name);
-      localStorage.setItem(K.phone, phone);
-      
-      $('#userName').textContent = name;
-      $('#userPhone').textContent = phone;
 
-      checkProfileCompletion();
+      pendingProfile = { name, phone };
+      startVerification(phone);
+    });
 
-      closeModal('editModal');
-      showToast('ذخیره شد', 'success');
+    $('#resendBtn').addEventListener('click', () => {
+      if (pendingProfile) startVerification(pendingProfile.phone);
+    });
+
+    $$('.otp-input').forEach((input, idx, arr) => {
+      input.addEventListener('input', (e) => {
+        e.target.value = toEn(e.target.value).slice(0,1);
+        if (e.target.value && idx < arr.length - 1) arr[idx + 1].focus();
+      });
+      input.addEventListener('keydown', (e) => {
+        if (e.key === 'Backspace' && !e.target.value && idx > 0) arr[idx - 1].focus();
+      });
+    });
+
+    $('#otpForm').addEventListener('submit', (e) => {
+      e.preventDefault();
+      const code = Array.from($$('.otp-input')).map(i => toEn(i.value)).join('');
+      if (code === verificationCode) {
+        const { name, phone } = pendingProfile;
+        localStorage.setItem(K.name, name);
+        localStorage.setItem(K.phone, phone);
+        $('#userName').textContent = name;
+        $('#userPhone').textContent = phone;
+        checkProfileCompletion();
+        closeModal('otpModal');
+        closeModal('editModal');
+        showToast('شماره تایید شد', 'success');
+      } else {
+        showToast('کد تایید نادرست است', 'error');
+      }
     });
     
     // Input normalization
@@ -993,6 +1069,10 @@
     // Modal backdrop
     $('#editModal').addEventListener('click', (e) => {
       if (e.target.id === 'editModal') closeModal('editModal');
+    });
+
+    $('#otpModal').addEventListener('click', (e) => {
+      if (e.target.id === 'otpModal') closeModal('otpModal');
     });
     
     $('#confirmModal').addEventListener('click', (e) => {
