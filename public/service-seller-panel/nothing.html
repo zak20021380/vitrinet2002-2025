@@ -352,22 +352,6 @@
   </style>
 </head>
 <body>
-  <!-- Header -->
-  <header class="glassmorphism sticky top-0 z-40">
-    <div class="max-w-6xl mx-auto px-4 py-4">
-      <div class="flex items-center justify-between">
-        <button onclick="history.back()" class="p-3 rounded-2xl hover:bg-white/50 transition-all" aria-label="بازگشت">
-          <i class="fas fa-arrow-right text-gray-700 text-lg"></i>
-        </button>
-        
-        <h1 class="text-2xl font-black bg-gradient-to-r from-blue-600 to-cyan-500 bg-clip-text text-transparent">
-          پروفایل
-        </h1>
-        
-        <span class="w-10"></span>
-      </div>
-    </div>
-  </header>
   <!-- Main Content -->
   <main class="main-container max-w-6xl mx-auto px-4 py-6">
     <!-- Profile completion prompt -->
@@ -474,7 +458,9 @@
     <section id="loyalty" class="mb-8">
       <h3 class="text-xl font-black text-gray-800 mb-5 flex items-center gap-3">
         <span class="w-2 h-8 bg-gradient-to-b from-amber-400 to-orange-500 rounded-full"></span>
-        باشگاه مشتریان
+        <span id="loyaltyTitle">باشگاه مشتریان</span>
+        <button id="branchBtn" class="hidden ml-2 px-3 py-1 text-xs font-semibold text-white bg-gradient-to-r from-blue-500 to-cyan-500 rounded-full hover:from-blue-600 hover:to-cyan-600 transition-colors">رفتن به صفحه</button>
+        <span id="unreadBadge" class="hidden notification-dot text-xs font-bold bg-red-500 text-white px-2 py-0.5 rounded-full">0</span>
       </h3>
       
       <!-- Store Switcher -->
@@ -930,16 +916,28 @@
     }
 
     function updateLoyaltyHeader(store){
-      const h = document.querySelector('#loyalty h3');
-      if (!h) return;
-      h.innerHTML = `
-        <i class="fas fa-bell text-amber-500"></i>
-        باشگاه مشتریان${store ? ' — ' + store.storeName : ''}
-        <span id="unreadBadge" class="hidden notification-dot text-xs font-bold bg-red-500 text-white px-2 py-0.5 rounded-full">0</span>
-      `;
+      const title = document.querySelector('#loyaltyTitle');
+      const btn = document.querySelector('#branchBtn');
+      if (title) {
+        title.textContent = `باشگاه مشتریان${store ? ' — ' + store.storeName : ''}`;
+      }
+      if (btn) {
+        if (store) {
+          btn.classList.remove('hidden');
+          btn.onclick = () => goToBranch(store);
+        } else {
+          btn.classList.add('hidden');
+          btn.onclick = null;
+        }
+      }
     }
-    
-    function claimReward() {
+
+    function goToBranch(store){
+      if(!store) return;
+      window.location.href = `/store/${store.storeId}`;
+    }
+
+function claimReward() {
       const stores = getLoyaltyStores();
       const selectedStore = stores.find(s => s.active);
       
