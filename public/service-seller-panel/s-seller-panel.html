@@ -1024,6 +1024,14 @@ button:disabled, .btn:disabled {
     gap: var(--space-2);
     margin-top: var(--space-2);
 }
+.image-field {
+    display: grid;
+    gap: var(--space-2);
+}
+.image-field .actions {
+    display: flex;
+    gap: var(--space-2);
+}
 .item-image-preview {
     width: 100%;
     height: 150px;
@@ -3186,12 +3194,26 @@ body { -webkit-font-smoothing: auto !important; }
                         </button>
                     </div>
                 </div>
-                <div id="portfolio-list" class="item-grid" role="list">
-                    <!-- Portfolio items will be rendered here by JS -->
+            <div id="portfolio-list" class="item-grid" role="list">
+                <!-- Portfolio items will be rendered here by JS -->
+            </div>
+        </div>
+        <!-- === NEW: مشتریان ویژه (VIP Customers) === -->
+        <div class="settings-group">
+            <div class="view-header" style="margin-bottom: var(--space-3);">
+                <h3 class="settings-group-title" style="margin-bottom: 0; border-bottom: none;">مشتریان ویژه</h3>
+                <div class="header-actions">
+                    <button type="button" id="vip-settings-btn" class="btn-primary" aria-haspopup="dialog" aria-controls="vip-modal">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+                        </svg>
+                        <span>تنظیمات</span>
+                    </button>
                 </div>
             </div>
-            <!-- === END OF NEW SECTIONS === -->
-            <div class="settings-group">
+        </div>
+        <!-- === END OF NEW SECTIONS === -->
+        <div class="settings-group">
 
 <!-- === NEW: تصاویر صفحه (هیرو + فوتر) === -->
 <div class="settings-group image-settings-group">
@@ -3273,6 +3295,34 @@ body { -webkit-font-smoothing: auto !important; }
             <p>رتبه شما بر اساس ترکیبی از تعداد مشتریان جدید، تعداد کل نوبت‌ها، و میانگین امتیازات شما در ۳۰ روز گذشته محاسبه می‌شود. فعال بودن و دریافت نظرات مثبت به بهبود رتبه شما کمک می‌کند.</p>
             <p><strong>رتبه فعلی: ۱۲ از ۴۵</strong></p>
         </div>
+    </div>
+  </div>
+  <div id="vip-modal" class="modal" role="dialog" aria-modal="true" aria-labelledby="vip-modal-title" hidden>
+    <div class="modal-backdrop" data-dismiss="modal"></div>
+    <div class="modal-content card" role="document">
+        <div class="modal-header">
+            <h3 id="vip-modal-title" class="modal-title">تنظیمات مشتریان ویژه</h3>
+            <button type="button" class="btn-icon modal-close-btn" data-dismiss="modal" aria-label="بستن">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            </button>
+        </div>
+        <form id="vip-form" class="modal-body">
+            <div class="form-group">
+                <label for="vip-rules" class="form-label">قوانین</label>
+                <textarea id="vip-rules" class="form-control" rows="3"></textarea>
+            </div>
+            <div class="form-group">
+                <label for="vip-required" class="form-label">تعداد رزرو لازم برای جایزه</label>
+                <input type="number" id="vip-required" class="form-control" min="1">
+            </div>
+            <div class="form-group">
+                <label for="vip-reward" class="form-label">نام جایزه</label>
+                <input type="text" id="vip-reward" class="form-control">
+            </div>
+            <div class="form-actions">
+                <button type="submit" class="btn-primary">ذخیره</button>
+            </div>
+        </form>
     </div>
   </div>
   <div id="customer-drawer" class="drawer" role="dialog" aria-modal="true" aria-labelledby="customer-drawer-title" hidden>
@@ -3442,6 +3492,15 @@ body { -webkit-font-smoothing: auto !important; }
             <div class="form-group">
                 <label for="service-price" class="form-label">قیمت (تومان)</label>
                 <input type="number" id="service-price" class="form-control" min="0" required>
+            </div>
+            <div class="form-group">
+                <label class="form-label">تصویر خدمت</label>
+                <div class="image-field" id="service-image-field">
+                    <div class="actions">
+                        <button type="button" class="btn-secondary" id="service-image-btn">انتخاب از گالری/دوربین</button>
+                    </div>
+                    <input type="file" accept="image/*" capture="environment" id="service-image" hidden>
+                </div>
             </div>
             <div class="form-actions">
                 <button type="submit" class="btn-primary">ذخیره</button>
@@ -3746,11 +3805,13 @@ function bindFloatingCloseOnce() {
       this.appNav = document.querySelector('.app-nav');
       this.debouncedSearch = this.debounce(this.filterCustomers, 300);
       this.currentBookingFilter = 'all';
+      this.currentServiceImage = '';
       this.currentPortfolioImage = '';
 
-      // Initialize Services and Portfolio
+      // Initialize Services, Portfolio and VIP settings
       this.initServices();
       this.initPortfolio();
+      this.initVipSettings();
       this.initCustomerFeatures();
     }
 
@@ -3792,14 +3853,19 @@ setupEventListeners() {
     addPortfolioBtn: document.getElementById('add-portfolio-btn'),
     serviceForm: document.getElementById('service-form'),
     portfolioForm: document.getElementById('portfolio-form'),
+    serviceImageBtn: document.getElementById('service-image-btn'),
+    serviceImageInput: document.getElementById('service-image'),
     portfolioImageBtn: document.getElementById('portfolio-image-btn'),
-    portfolioImageInput: document.getElementById('portfolio-image')
+    portfolioImageInput: document.getElementById('portfolio-image'),
+    vipSettingsBtn: document.getElementById('vip-settings-btn'),
+    vipForm: document.getElementById('vip-form')
   };
 
   // Map for drawer/modal management
   const overlays = {
     modals: {
-      'rank': 'rank-modal'
+      'rank': 'rank-modal',
+      'vip': 'vip-modal'
     },
     drawers: {
       'customer': 'customer-drawer',
@@ -3815,6 +3881,7 @@ setupEventListeners() {
   this.boundHandleReviewFilterChange = this.handleReviewFilterChange.bind(this);
   this.boundHandleServiceFormSubmit = this.handleServiceFormSubmit.bind(this);
   this.boundHandlePortfolioFormSubmit = this.handlePortfolioFormSubmit.bind(this);
+  this.boundHandleVipFormSubmit = this.handleVipFormSubmit.bind(this);
 
   // 1. Route change listener
   window.addEventListener('hashchange', this.boundHandleRouteChange);
@@ -3943,8 +4010,19 @@ document.addEventListener('click', (e) => {
     });
   }
 
+  if (elements.serviceImageBtn && elements.serviceImageInput) {
+    elements.serviceImageBtn.addEventListener('click', () => elements.serviceImageInput.click());
+  }
+
   if (elements.portfolioImageBtn && elements.portfolioImageInput) {
     elements.portfolioImageBtn.addEventListener('click', () => elements.portfolioImageInput.click());
+  }
+
+  if (elements.vipForm) {
+    elements.vipForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      this.boundHandleVipFormSubmit();
+    });
   }
 
   // 7. Button click handlers with null checks
@@ -3964,12 +4042,16 @@ document.addEventListener('click', (e) => {
         UIComponents.openDrawer('service-drawer');
       } 
     },
-    { 
-      element: elements.addPortfolioBtn, 
+    {
+      element: elements.addPortfolioBtn,
       handler: () => {
         this.populatePortfolioForm(null);
         UIComponents.openDrawer('portfolio-drawer');
-      } 
+      }
+    },
+    {
+      element: elements.vipSettingsBtn,
+      handler: () => UIComponents.openModal('vip-modal')
     }
   ];
 
@@ -4412,9 +4494,9 @@ handlePlanDurationChange(e) {
         const services = StorageManager.get('vit_services');
         if (!services || services.length === 0) {
             const defaultServices = [
-                { id: 1, title: 'اصلاح سر', price: 150000 },
-                { id: 2, title: 'رنگ مو', price: 450000 },
-                { id: 3, title: 'اصلاح ریش', price: 80000 }
+                { id: 1, title: 'اصلاح سر', price: 150000, image: 'https://images.unsplash.com/photo-1598289222863-24d9027b1c39?w=300' },
+                { id: 2, title: 'رنگ مو', price: 450000, image: 'https://images.unsplash.com/photo-1562259949-b21f254d3a0d?w=300' },
+                { id: 3, title: 'اصلاح ریش', price: 80000, image: 'https://images.unsplash.com/photo-1522337660859-02fbefca4702?w=300' }
             ];
             StorageManager.set('vit_services', defaultServices);
         }
@@ -4427,6 +4509,9 @@ handlePlanDurationChange(e) {
             <div class="item-card" data-id="${service.id}">
                 <div class="item-card-header">
                     <h4 class="item-title">${service.title}</h4>
+                </div>
+                <div class="item-image-preview">
+                    ${service.image ? `<img src="${service.image}" alt="${service.title}" onerror="this.parentElement.innerHTML='<span>تصویر نامعتبر</span>'">` : '<span>بدون تصویر</span>'}
                 </div>
                 <div class="item-details">
                     <span>قیمت: ${UIComponents.formatPersianNumber(service.price)} تومان</span>
@@ -4465,19 +4550,28 @@ handlePlanDurationChange(e) {
             document.getElementById('service-id').value = service.id;
             document.getElementById('service-title').value = service.title;
             document.getElementById('service-price').value = service.price;
+            this.currentServiceImage = service.image || '';
+            document.getElementById('service-image').value = '';
             titleEl.textContent = 'ویرایش خدمت';
         } else {
             delete form.dataset.editingId;
             form.reset();
             document.getElementById('service-id').value = '';
+            this.currentServiceImage = '';
             titleEl.textContent = 'افزودن خدمت جدید';
         }
     }
-    handleServiceFormSubmit() {
+    async handleServiceFormSubmit() {
         const form = document.getElementById('service-form');
         const id = form.dataset.editingId ? parseInt(form.dataset.editingId, 10) : null;
         const title = document.getElementById('service-title').value.trim();
         const price = parseFloat(document.getElementById('service-price').value);
+        const fileInput = document.getElementById('service-image');
+        let imageData = this.currentServiceImage;
+        const file = fileInput.files[0];
+        if (file) {
+            imageData = await this.fileToDataURL(file);
+        }
 
         if (!title || isNaN(price)) {
             UIComponents.showToast('لطفاً تمام فیلدهای اجباری را پر کنید.', 'error');
@@ -4486,16 +4580,14 @@ handlePlanDurationChange(e) {
 
         let services = StorageManager.get('vit_services') || [];
         if (id) {
-            // Edit existing
             const index = services.findIndex(s => s.id === id);
             if (index !== -1) {
-                services[index] = { id, title, price };
+                services[index] = { id, title, price, image: imageData };
                 UIComponents.showToast('خدمت با موفقیت ویرایش شد.', 'success');
             }
         } else {
-            // Add new
             const newId = services.length > 0 ? Math.max(...services.map(s => s.id)) + 1 : 1;
-            services.push({ id: newId, title, price });
+            services.push({ id: newId, title, price, image: imageData });
             UIComponents.showToast('خدمت جدید اضافه شد.', 'success');
         }
         StorageManager.set('vit_services', services);
@@ -4634,6 +4726,25 @@ handlePlanDurationChange(e) {
             reader.onerror = () => reject();
             reader.readAsDataURL(file);
         });
+    }
+
+    // === NEW: VIP Settings Methods ===
+    initVipSettings() {
+        const data = StorageManager.get('vit_vip_settings') || {};
+        const rulesEl = document.getElementById('vip-rules');
+        const requiredEl = document.getElementById('vip-required');
+        const rewardEl = document.getElementById('vip-reward');
+        if (rulesEl) rulesEl.value = data.rules || '';
+        if (requiredEl) requiredEl.value = data.required || '';
+        if (rewardEl) rewardEl.value = data.reward || '';
+    }
+    handleVipFormSubmit() {
+        const rules = document.getElementById('vip-rules').value.trim();
+        const required = parseInt(document.getElementById('vip-required').value, 10) || 0;
+        const reward = document.getElementById('vip-reward').value.trim();
+        StorageManager.set('vit_vip_settings', { rules, required, reward });
+        UIComponents.showToast('تنظیمات ذخیره شد.', 'success');
+        UIComponents.closeModal('vip-modal');
     }
 
 
