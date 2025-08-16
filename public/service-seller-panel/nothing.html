@@ -10,6 +10,8 @@
   <!-- Tailwind -->
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- Font & Icons -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
   <style>
@@ -525,7 +527,6 @@
           <h3 class="text-xl font-black text-gray-800 flex items-center gap-3">
             <i class="fas fa-bell text-amber-500"></i>
             اعلان‌ها
-            <span id="unreadBadge" class="hidden notification-dot text-xs font-bold bg-red-500 text-white px-2 py-0.5 rounded-full">0</span>
           </h3>
           <button type="button" class="text-sm text-gray-600 hover:text-gray-800 transition-colors" onclick="markAllRead()">
             خواندن همه
@@ -575,11 +576,11 @@
     </div>
   </nav>
   <!-- Edit Modal -->
-  <div id="editModal" class="fixed inset-0 modal-backdrop z-50 hidden">
+  <div id="editModal" class="fixed inset-0 modal-backdrop z-50 hidden" role="dialog" aria-modal="true" aria-labelledby="editTitle">
     <div class="flex items-end sm:items-center justify-center min-h-full p-4">
       <div class="modal-content glass-card w-full sm:max-w-md rounded-3xl p-6">
         <div class="flex items-center justify-between mb-6">
-          <h3 class="text-xl font-black text-gray-800">ویرایش پروفایل</h3>
+          <h3 id="editTitle" class="text-xl font-black text-gray-800">ویرایش پروفایل</h3>
           <button type="button" onclick="closeModal('editModal')" class="p-2 rounded-xl hover:bg-gray-100 transition-colors">
             <i class="fas fa-times text-gray-600"></i>
           </button>
@@ -587,13 +588,13 @@
         <form class="space-y-5" id="editForm">
           <div>
             <label class="block text-sm font-semibold text-gray-700 mb-2">نام کامل</label>
-            <input id="fullName" type="text" placeholder="نام و نام خانوادگی"
+            <input id="fullName" type="text" required autocomplete="name" maxlength="50" placeholder="نام و نام خانوادگی"
                    class="w-full px-4 py-3 rounded-xl">
           </div>
           
           <div>
             <label class="block text-sm font-semibold text-gray-700 mb-2">موبایل</label>
-            <input id="mobile" type="tel" placeholder="09123456789" dir="ltr" inputmode="tel"
+            <input id="mobile" type="tel" required autocomplete="tel-national" maxlength="11" placeholder="09123456789" dir="ltr" inputmode="tel"
                    pattern="09[0-9]{9}" class="w-full px-4 py-3 rounded-xl text-left ltr-num">
           </div>
           
@@ -610,11 +611,11 @@
     </div>
   </div>
   <!-- OTP Modal -->
-  <div id="otpModal" class="fixed inset-0 modal-backdrop z-50 hidden">
+  <div id="otpModal" class="fixed inset-0 modal-backdrop z-50 hidden" role="dialog" aria-modal="true" aria-labelledby="otpTitle">
     <div class="flex items-end sm:items-center justify-center min-h-full p-4">
       <div class="modal-content glass-card w-full sm:max-w-md rounded-3xl p-6">
         <div class="flex items-center justify-between mb-6">
-          <h3 class="text-xl font-black text-gray-800">تایید شماره موبایل</h3>
+          <h3 id="otpTitle" class="text-xl font-black text-gray-800">تایید شماره موبایل</h3>
           <button type="button" onclick="closeModal('otpModal')" class="p-2 rounded-xl hover:bg-gray-100 transition-colors">
             <i class="fas fa-times text-gray-600"></i>
           </button>
@@ -628,17 +629,17 @@
             <input type="tel" maxlength="1" class="otp-input w-12 h-12 rounded-xl text-center text-lg font-bold border border-gray-300 focus:border-blue-500 focus:ring-0" inputmode="numeric">
           </div>
           <button type="submit" class="btn-gradient w-full py-3 rounded-xl font-bold">تایید کد</button>
-          <button type="button" id="resendBtn" class="w-full py-2 text-sm text-gray-500 disabled:opacity-50">ارسال مجدد (60)</button>
+          <button type="button" id="resendBtn" disabled class="w-full py-2 text-sm text-gray-500 disabled:opacity-50">ارسال مجدد (60)</button>
         </form>
       </div>
     </div>
   </div>
   <!-- Confirmation Modal -->
-  <div id="confirmModal" class="fixed inset-0 modal-backdrop z-50 hidden">
+  <div id="confirmModal" class="fixed inset-0 modal-backdrop z-50 hidden" role="dialog" aria-modal="true" aria-labelledby="confirmTitle">
     <div class="flex items-end sm:items-center justify-center min-h-full p-4">
       <div class="modal-content glass-card w-full sm:max-w-md rounded-3xl p-6">
         <div class="flex items-center justify-between mb-6">
-          <h3 class="text-xl font-black text-gray-800">تایید لغو رزرو</h3>
+          <h3 id="confirmTitle" class="text-xl font-black text-gray-800">تایید لغو رزرو</h3>
           <button type="button" onclick="closeModal('confirmModal')" class="p-2 rounded-xl hover:bg-gray-100 transition-colors">
             <i class="fas fa-times text-gray-600"></i>
           </button>
@@ -659,11 +660,11 @@
     </div>
   </div>
   <!-- Reschedule Modal -->
-  <div id="rescheduleModal" class="fixed inset-0 modal-backdrop z-50 hidden">
+  <div id="rescheduleModal" class="fixed inset-0 modal-backdrop z-50 hidden" role="dialog" aria-modal="true" aria-labelledby="rescheduleTitle">
     <div class="flex items-end sm:items-center justify-center min-h-full p-4">
-      <div class="modal-content glasscard w-full sm:max-w-md rounded-3xl p-6">
+      <div class="modal-content glass-card w-full sm:max-w-md rounded-3xl p-6">
         <div class="flex items-center justify-between mb-6">
-          <h3 class="text-xl font-black text-gray-800">تغییر زمان رزرو</h3>
+          <h3 id="rescheduleTitle" class="text-xl font-black text-gray-800">تغییر زمان رزرو</h3>
           <button type="button" onclick="closeModal('rescheduleModal')" class="p-2 rounded-xl hover:bg-gray-100 transition-colors">
             <i class="fas fa-times text-gray-600"></i>
           </button>
@@ -706,6 +707,7 @@
     // Helpers
     const $ = (s, r=document) => r.querySelector(s);
     const $$ = (s, r=document) => r.querySelectorAll(s);
+    const faNum = n => Number(n||0).toLocaleString('fa-IR');
     
     // Convert Persian/Arabic digits to Latin
     function toEn(str) {
@@ -865,10 +867,23 @@
     function renderStoreSwitcher() {
       const container = $('#storeSwitcher');
       if (!container) return;
-      
+
       const stores = getLoyaltyStores();
       container.innerHTML = '';
-      
+      if (!stores.length) {
+        const placeholder = document.createElement('span');
+        placeholder.className = 'store-tab opacity-50 cursor-not-allowed';
+        placeholder.textContent = 'فروشگاهی ثبت نشده';
+        container.appendChild(placeholder);
+        const claimRewardBtn = $('#claimRewardBtn');
+        if (claimRewardBtn) {
+          claimRewardBtn.disabled = true;
+          claimRewardBtn.setAttribute('aria-label', 'فروشگاهی برای جایزه موجود نیست');
+        }
+        updateLoyaltyHeader(null);
+        return;
+      }
+
       stores.forEach(store => {
         const tab = document.createElement('button');
         tab.className = 'store-tab';
@@ -878,7 +893,7 @@
         tab.onclick = () => selectStore(store.storeId);
         container.appendChild(tab);
       });
-      
+
       // If no store selected and there are stores, select the first one
       if (stores.length > 0 && !stores.some(s => s.active)) {
         selectStore(stores[0].storeId);
@@ -895,36 +910,30 @@
       setLoyaltyStores(updatedStores);
       renderStoreSwitcher();
       
-      const selectedStore = updatedStores.find(s => s.active);
-      if (selectedStore) {
-        renderLoyalty(selectedStore);
-      }
+      const selected = getLoyaltyStores().find(s => s.active);
+      if (selected) { renderLoyalty(selected); updateLoyaltyHeader(selected); }
     }
     
     function renderLoyalty(store) {
       if (!store) return;
-      
+
       const stats = calcLoyalty(store);
       $('#loyaltyCompleted').textContent = stats.completed;
       $('#loyaltyClaimed').textContent = stats.claimed;
       $('#loyaltyUnclaimed').textContent = stats.unclaimed;
-      
+
       const progressBar = document.getElementById('loyaltyProgressBar');
       const progressText = document.getElementById('loyaltyProgressText');
       const toNextText = document.getElementById('loyaltyToNextText');
       const claimBtn = $('#claimRewardBtn');
-      
+      toNextText.textContent = stats.unclaimed > 0
+        ? (stats.unclaimed === 1 ? '۱ جایزه آماده دریافت' : faNum(stats.unclaimed) + ' جایزه آماده دریافت')
+        : 'تا جایزه بعدی ' + faNum(stats.toNext) + ' رزرو مانده';
+
       if (stats.unclaimed > 0) {
         progressBar.style.setProperty('--progress', '100%');
         progressText.textContent = `${REWARD.every}/${REWARD.every}`;
-        
-        // Show Persian text reflecting how many rewards are ready
-        if (stats.unclaimed === 1) {
-          toNextText.textContent = '۱ جایزه آماده دریافت';
-        } else {
-          toNextText.textContent = `${stats.unclaimed} جایزه آماده دریافت`;
-        }
-        
+
         // Enable claim button
         claimBtn.disabled = false;
         claimBtn.setAttribute('aria-label', `${stats.unclaimed} جایزه آماده برای دریافت`);
@@ -932,12 +941,21 @@
         const percent = Math.round((stats.progress / REWARD.every) * 100);
         progressBar.style.setProperty('--progress', percent + '%');
         progressText.textContent = `${stats.progress}/${REWARD.every}`;
-        toNextText.textContent = `تا جایزه بعدی ${stats.toNext} رزرو مانده`;
-        
+
         // Disable claim button
         claimBtn.disabled = true;
         claimBtn.setAttribute('aria-label', 'جایزه‌ای برای دریافت موجود نیست');
       }
+    }
+
+    function updateLoyaltyHeader(store){
+      const h = document.querySelector('#loyalty h3');
+      if (!h) return;
+      h.innerHTML = `
+        <i class="fas fa-bell text-amber-500"></i>
+        باشگاه مشتریان${store ? ' — ' + store.storeName : ''}
+        <span id="unreadBadge" class="hidden notification-dot text-xs font-bold bg-red-500 text-white px-2 py-0.5 rounded-full">0</span>
+      `;
     }
     
     function claimReward() {
@@ -1006,14 +1024,14 @@
                 </span>
                 <div class="flex gap-2">
                   ${isActive ? `
-                    <button type="button" onclick="confirmCancel('${b.id}')" class="px-3 py-1.5 rounded-lg text-xs font-semibold text-red-600 bg-red-50 hover:bg-red-100 transition-all">
+                    <button type="button" onclick="confirmCancel('${b.id}')" aria-label="لغو رزرو" class="px-3 py-1.5 rounded-lg text-xs font-semibold text-red-600 bg-red-50 hover:bg-red-100 transition-all">
                       لغو
                     </button>
-                    <button type="button" onclick="reschedule('${b.id}')" class="px-3 py-1.5 rounded-lg text-xs font-semibold text-blue-600 bg-blue-50 hover:bg-blue-100 transition-all">
+                    <button type="button" onclick="reschedule('${b.id}')" aria-label="تغییر زمان رزرو" class="px-3 py-1.5 rounded-lg text-xs font-semibold text-blue-600 bg-blue-50 hover:bg-blue-100 transition-all">
                       تغییر
                     </button>
                   ` : `
-                    <button type="button" onclick="rebookService('${b.service}')" class="px-3 py-1.5 rounded-lg text-xs font-semibold text-green-600 bg-green-50 hover:bg-green-100 transition-all">
+                    <button type="button" onclick="rebookService('${b.service}')" aria-label="رزرو مجدد" class="px-3 py-1.5 rounded-lg text-xs font-semibold text-green-600 bg-green-50 hover:bg-green-100 transition-all">
                       رزرو مجدد
                     </button>
                   `}
@@ -1067,7 +1085,10 @@
         items[idx].status = 'canceled';
         setBookings(items);
         renderBookings();
-        renderLoyalty();  // === LOYALTY START ===
+        const selectedStore = (typeof getLoyaltyStores === 'function')
+          ? getLoyaltyStores().find(s => s.active)
+          : null;
+        if (selectedStore) renderLoyalty(selectedStore);  // === LOYALTY START ===
         closeModal('confirmModal');
         showToast('رزرو لغو شد', 'success');
         
@@ -1112,7 +1133,10 @@
         items[idx].datetime = `${date}T${time}:00`;
         setBookings(items);
         renderBookings();
-        renderLoyalty();  // === LOYALTY START ===
+        const selectedStore = (typeof getLoyaltyStores === 'function')
+          ? getLoyaltyStores().find(s => s.active)
+          : null;
+        if (selectedStore) renderLoyalty(selectedStore);  // === LOYALTY START ===
         closeModal('rescheduleModal');
         showToast('زمان رزرو با موفقیت تغییر کرد', 'success');
         currentRescheduleId = null;
@@ -1128,12 +1152,14 @@
       const badge = $('#unreadBadge');
       const items = getNotifs().slice().sort((a, b) => new Date(b.ts) - new Date(a.ts));
       const unread = items.filter(n => !n.read).length;
-      
-      if (unread > 0) {
-        badge.textContent = unread;
-        badge.classList.remove('hidden');
-      } else {
-        badge.classList.add('hidden');
+
+      if (badge) {
+        if (unread > 0) {
+          badge.textContent = unread;
+          badge.classList.remove('hidden');
+        } else {
+          badge.classList.add('hidden');
+        }
       }
       
       if (!items.length) {
@@ -1415,8 +1441,7 @@
       
       initLoyaltyStore();  // === LOYALTY START ===
       renderBookings();
-      renderNotifs();
-      
+
       // Update stats
       const bookings = getBookings();
       const now = new Date();
@@ -1426,8 +1451,10 @@
       setStat('total', bookings.length);
       setStat('active', active);
       setStat('done', completed);
-      
+
       renderStoreSwitcher();  // === LOYALTY START ===
+      updateLoyaltyHeader(getLoyaltyStores().find(s => s.active) || null);
+      renderNotifs();
     })();
     // Page load animation
     document.addEventListener('DOMContentLoaded', () => {
