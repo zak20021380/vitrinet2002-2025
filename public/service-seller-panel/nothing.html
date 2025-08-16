@@ -806,15 +806,19 @@
     
     function renderLoyalty() {
       const stats = calcLoyalty();
-      
+
       $('#loyaltyCompleted').textContent = stats.completed;
       $('#loyaltyClaimed').textContent = stats.claimed;
       $('#loyaltyUnclaimed').textContent = stats.unclaimed;
-      
-      const progressPercentage = (stats.progress / REWARD.every) * 100;
-      $('#loyaltyProgressBar').style.setProperty('--progress', progressPercentage + '%');
-      $('#loyaltyProgressText').textContent = `${stats.progress}/${REWARD.every}`;
-      $('#loyaltyToNextText').textContent = `تا جایزه بعدی ${stats.toNext} رزرو مانده`;
+
+      const progressUnits = stats.unclaimed > 0 ? REWARD.every : stats.progress;
+      const percent = Math.round((progressUnits / REWARD.every) * 100);
+      document.getElementById('loyaltyProgressBar')
+        .style.setProperty('--progress', percent + '%');
+      document.getElementById('loyaltyProgressText').textContent =
+        `${progressUnits}/${REWARD.every}`;
+      document.getElementById('loyaltyToNextText').textContent =
+        `تا جایزه بعدی ${stats.unclaimed > 0 ? 0 : stats.toNext} رزرو مانده`;
       
       const claimBtn = $('#claimRewardBtn');
       if (stats.unclaimed > 0) {
