@@ -1,5 +1,3 @@
-
-
 <!DOCTYPE html>
 <html lang="fa" dir="rtl">
 <head>
@@ -310,6 +308,12 @@
       unicode-bidi: isolate;
       font-variant-numeric: tabular-nums;
     }
+    /* === LOYALTY START === */
+    .loyalty-progress {
+      background: linear-gradient(90deg, #3B82F6 var(--progress), #E5E7EB var(--progress));
+      transition: background 0.5s ease;
+    }
+    /* === LOYALTY END === */
   </style>
 </head>
 <body>
@@ -433,6 +437,50 @@
         <!-- History items render here -->
       </div>
     </section>
+    <!-- === LOYALTY START === -->
+    <!-- Loyalty Section -->
+    <section id="loyalty" class="mb-8">
+      <h3 class="text-xl font-black text-gray-800 mb-5 flex items-center gap-3">
+        <span class="w-2 h-8 bg-gradient-to-b from-amber-400 to-orange-500 rounded-full"></span>
+        باشگاه مشتریان
+      </h3>
+      
+      <!-- Loyalty Stats Cards -->
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+        <div class="glass-card rounded-2xl p-4 text-center">
+          <div class="text-3xl font-black text-amber-600 mb-1 ltr-num" id="loyaltyCompleted">0</div>
+          <div class="text-xs text-gray-600">رزرو تکمیل‌شده</div>
+        </div>
+        <div class="glass-card rounded-2xl p-4 text-center">
+          <div class="text-3xl font-black text-green-600 mb-1 ltr-num" id="loyaltyClaimed">0</div>
+          <div class="text-xs text-gray-600">جایزه دریافت‌شده</div>
+        </div>
+        <div class="glass-card rounded-2xl p-4 text-center">
+          <div class="text-3xl font-black bg-gradient-to-r from-amber-500 to-orange-500 bg-clip-text text-transparent mb-1 ltr-num" id="loyaltyUnclaimed">0</div>
+          <div class="text-xs text-gray-600">جایزه آماده</div>
+        </div>
+      </div>
+      
+      <!-- Progress Card -->
+      <div class="glass-card rounded-3xl p-6">
+        <div class="mb-4">
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-sm font-semibold text-gray-700">پیشرفت تا جایزه بعدی</span>
+            <span class="text-sm font-bold text-amber-600 ltr-num" id="loyaltyProgressText">0/5</span>
+          </div>
+          <div class="w-full h-3 bg-gray-200 rounded-full overflow-hidden">
+            <div id="loyaltyProgressBar" class="h-full loyalty-progress rounded-full" style="--progress: 0%"></div>
+          </div>
+          <p class="text-xs text-gray-500 mt-2" id="loyaltyToNextText">تا جایزه بعدی 5 رزرو مانده</p>
+        </div>
+        
+        <button id="claimRewardBtn" onclick="claimReward()" class="btn-gradient w-full py-3 rounded-xl font-bold disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+          <i class="fas fa-gift ml-2"></i>
+          دریافت جایزه
+        </button>
+      </div>
+    </section>
+    <!-- === LOYALTY END === -->
     <!-- Notifications -->
     <section class="glass-card rounded-3xl overflow-hidden">
       <div class="p-5 border-b border-gray-100">
@@ -709,7 +757,8 @@
       bookings:'profile.bookings',
       notifications:'profile.notifications',
       name:'profile.name',
-      phone:'profile.phone'
+      phone:'profile.phone',
+      loyalty:'profile.loyalty'  // === LOYALTY START ===
     };
     // Initialize
     (function seed() {
@@ -720,6 +769,81 @@
     function setBookings(v) { localStorage.setItem(K.bookings, JSON.stringify(v)); }
     function getNotifs() { try { return JSON.parse(localStorage.getItem(K.notifications)) || []; } catch { return []; } }
     function setNotifs(v) { localStorage.setItem(K.notifications, JSON.stringify(v)); }
+    
+    // === LOYALTY START ===
+    const REWARD = { every: 5, label: 'جایزه وفاداری' };
+    
+    function initLoyaltyStore() {
+      if (!localStorage.getItem(K.loyalty)) {
+        localStorage.setItem(K.loyalty, JSON.stringify({ claimed: 0, history: [] }));
+      }
+    }
+    
+    function getLoyalty() {
+      try {
+        return JSON.parse(localStorage.getItem(K.loyalty)) || { claimed: 0, history: [] };
+      } catch {
+        return { claimed: 0, history: [] };
+      }
+    }
+    
+    function setLoyalty(v) {
+      localStorage.setItem(K.loyalty, JSON.stringify(v));
+    }
+    
+    function calcLoyalty() {
+      const bookings = getBookings();
+      const completed = bookings.filter(b => b.status === 'done').length;
+      const earned = Math.floor(completed / REWARD.every);
+      const loyalty = getLoyalty();
+      const claimed = loyalty.claimed || 0;
+      const unclaimed = Math.max(0, earned - claimed);
+      const progress = completed % REWARD.every;
+      const toNext = REWARD.every - progress;
+      
+      return { completed, earned, claimed, unclaimed, progress, toNext };
+    }
+    
+    function renderLoyalty() {
+      const stats = calcLoyalty();
+      
+      $('#loyaltyCompleted').textContent = stats.completed;
+      $('#loyaltyClaimed').textContent = stats.claimed;
+      $('#loyaltyUnclaimed').textContent = stats.unclaimed;
+      
+      const progressPercentage = (stats.progress / REWARD.every) * 100;
+      $('#loyaltyProgressBar').style.setProperty('--progress', progressPercentage + '%');
+      $('#loyaltyProgressText').textContent = `${stats.progress}/${REWARD.every}`;
+      $('#loyaltyToNextText').textContent = `تا جایزه بعدی ${stats.toNext} رزرو مانده`;
+      
+      const claimBtn = $('#claimRewardBtn');
+      if (stats.unclaimed > 0) {
+        claimBtn.disabled = false;
+        claimBtn.setAttribute('aria-label', `${stats.unclaimed} جایزه آماده برای دریافت`);
+      } else {
+        claimBtn.disabled = true;
+        claimBtn.setAttribute('aria-label', 'جایزه‌ای برای دریافت موجود نیست');
+      }
+    }
+    
+    function claimReward() {
+      const stats = calcLoyalty();
+      if (stats.unclaimed <= 0) return;
+      
+      const loyalty = getLoyalty();
+      loyalty.claimed += 1;
+      loyalty.history.push({
+        id: 'reward-' + Date.now(),
+        ts: new Date().toISOString(),
+        note: REWARD.label
+      });
+      setLoyalty(loyalty);
+      
+      renderLoyalty();
+      showToast('جایزه با موفقیت دریافت شد! 🎉', 'success');
+    }
+    // === LOYALTY END ===
+    
     // Render bookings
     function renderBookings() {
       const list = $('#upcomingList');
@@ -818,6 +942,7 @@
         items[idx].status = 'canceled';
         setBookings(items);
         renderBookings();
+        renderLoyalty();  // === LOYALTY START ===
         closeModal('confirmModal');
         showToast('رزرو لغو شد', 'success');
         
@@ -862,6 +987,7 @@
         items[idx].datetime = `${date}T${time}:00`;
         setBookings(items);
         renderBookings();
+        renderLoyalty();  // === LOYALTY START ===
         closeModal('rescheduleModal');
         showToast('زمان رزرو با موفقیت تغییر کرد', 'success');
         currentRescheduleId = null;
@@ -1147,6 +1273,8 @@
       }
 
       checkProfileCompletion();
+      
+      initLoyaltyStore();  // === LOYALTY START ===
 
       renderBookings();
       renderNotifs();
@@ -1160,6 +1288,8 @@
       setStat('total', bookings.length);
       setStat('active', active);
       setStat('done', completed);
+      
+      renderLoyalty();  // === LOYALTY START ===
     })();
     // Page load animation
     document.addEventListener('DOMContentLoaded', () => {
