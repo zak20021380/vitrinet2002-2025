@@ -611,7 +611,7 @@
   <!-- Toast -->
   <div id="toast" class="fixed top-8 left-1/2 glassmorphism px-5 py-3 rounded-full z-50 min-w-[220px] shadow-lg" role="status" aria-live="polite">
     <div class="flex items-center gap-3">
-      <div class="w-6 h-6 rounded-full bg-gradient-to-r from-green-400 to-emerald-400 flex items-center justify-center">
+      <div id="toast-icon" class="w-6 h-6 rounded-full bg-gradient-to-r from-green-400 to-emerald-400 flex items-center justify-center">
         <i class="fas fa-check text-white text-xs"></i>
       </div>
       <span id="toast-message" class="text-sm font-semibold text-gray-800">عملیات انجام شد</span>
@@ -657,10 +657,10 @@
     function showToast(message, type = 'success') {
       const toast = $('#toast');
       const toastMessage = $('#toast-message');
-      const icon = toast.querySelector('.fa-check').parentElement;
-      
+      const icon = $('#toast-icon');
+
       toastMessage.textContent = message;
-      
+
       if (type === 'success') {
         icon.className = 'w-6 h-6 rounded-full bg-gradient-to-r from-green-400 to-emerald-400 flex items-center justify-center';
         icon.innerHTML = '<i class="fas fa-check text-white text-xs"></i>';
@@ -671,7 +671,7 @@
         icon.className = 'w-6 h-6 rounded-full bg-gradient-to-r from-blue-400 to-cyan-400 flex items-center justify-center';
         icon.innerHTML = '<i class="fas fa-info text-white text-xs"></i>';
       }
-      
+
       toast.classList.add('show');
       clearTimeout(showToast._t);
       showToast._t = setTimeout(() => toast.classList.remove('show'), 3000);
