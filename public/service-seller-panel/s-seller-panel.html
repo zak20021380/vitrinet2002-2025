@@ -419,11 +419,17 @@ button:disabled, .btn:disabled {
   border-radius: var(--border-radius-lg);
   box-shadow: 0 8px 16px var(--c-shadow);
   padding: var(--space-2);
-  display: none;
+  opacity: 0;
+  transform: translateY(-10px);
+  pointer-events: none;
+  transition: opacity var(--transition-fast), transform var(--transition-fast);
+  z-index: var(--z-modal);
 }
 
 .notification-panel.active {
-  display: block;
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
 }
 
 .notification-panel h2 {
@@ -463,6 +469,15 @@ button:disabled, .btn:disabled {
 .notification-item time {
   font-size: var(--font-size-sm);
   color: var(--c-text-secondary);
+}
+
+@media (max-width: 480px) {
+  .notification-panel {
+    right: var(--space-2);
+    left: var(--space-2);
+    width: auto;
+    max-height: 70vh;
+  }
 }
 @media (min-width: 768px) {
   .brand-text { display: block; }
@@ -932,6 +947,21 @@ button:disabled, .btn:disabled {
 }
 .settings-list { display: flex; flex-direction: column; }
 .settings-group { margin-bottom: var(--space-4); }
+.vip-settings-group {
+  background-color: var(--c-bg-tertiary);
+  border: 2px solid var(--c-primary);
+  border-radius: var(--border-radius-md);
+  padding: var(--space-4);
+}
+.vip-settings-group .settings-group-title {
+  color: var(--c-primary);
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-bottom: var(--space-2);
+  border-bottom: none;
+  padding-bottom: 0;
+}
 .settings-group-title {
   font-weight: var(--font-weight-bold);
   margin-bottom: var(--space-3);
@@ -3161,6 +3191,22 @@ body { -webkit-font-smoothing: auto !important; }
                     <input type="tel" id="business-phone" class="form-control" inputmode="tel" placeholder="مثلاً ۰۹۱۲۳۴۵۶۷۸۹">
                 </div>
             </div>
+            <!-- === NEW: مشتریان ویژه (VIP Customers) === -->
+            <div class="settings-group vip-settings-group">
+                <div class="view-header">
+                    <h3 class="settings-group-title">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+                        </svg>
+                        <span>مشتریان ویژه</span>
+                    </h3>
+                    <div class="header-actions">
+                        <button type="button" id="vip-settings-btn" class="btn-primary" aria-haspopup="dialog" aria-controls="vip-modal">
+                            <span>تنظیمات</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
             <!-- === NEW: خدمات من (My Services) === -->
             <div class="settings-group">
                 <div class="view-header" style="margin-bottom: var(--space-3);">
@@ -3177,20 +3223,6 @@ body { -webkit-font-smoothing: auto !important; }
                 </div>
                 <div id="services-list" class="item-grid" role="list">
                     <!-- Services will be rendered here by JS -->
-                </div>
-            </div>
-            <!-- === NEW: مشتریان ویژه (VIP Customers) === -->
-            <div class="settings-group">
-                <div class="view-header" style="margin-bottom: var(--space-3);">
-                    <h3 class="settings-group-title" style="margin-bottom: 0; border-bottom: none;">مشتریان ویژه</h3>
-                    <div class="header-actions">
-                        <button type="button" id="vip-settings-btn" class="btn-primary" aria-haspopup="dialog" aria-controls="vip-modal">
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
-                            </svg>
-                            <span>تنظیمات</span>
-                        </button>
-                    </div>
                 </div>
             </div>
             <!-- === NEW: نمونه‌کارها (Portfolio) === -->
@@ -3950,7 +3982,7 @@ document.addEventListener('click', (e) => {
     });
 
     document.addEventListener('click', (e) => {
-      if (!elements.notificationPanel.contains(e.target) && e.target !== elements.notificationBtn) {
+      if (!elements.notificationPanel.contains(e.target) && !elements.notificationBtn.contains(e.target)) {
         elements.notificationPanel.classList.remove('active');
         elements.notificationBtn.setAttribute('aria-expanded', 'false');
       }
