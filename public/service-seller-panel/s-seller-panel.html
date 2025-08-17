@@ -2730,6 +2730,69 @@ body { -webkit-font-smoothing: auto !important; }
 
 
 
+
+
+
+/* === VIP — Clean Card (Override) === */
+.vip-settings-group{
+  position: relative;
+  background: var(--c-bg-primary);
+  border: 1px solid var(--c-border);
+  border-radius: var(--border-radius-lg);
+  padding: var(--space-3);
+  box-shadow: 0 4px 16px rgba(0,0,0,.18);
+  transition: border-color .2s ease, box-shadow .2s ease, background-color .2s ease;
+}
+.vip-settings-group:hover{
+  border-color: rgba(var(--c-primary-rgb), .45);
+  box-shadow: 0 8px 24px rgba(0,0,0,.25);
+}
+.vip-settings-group::before{ display:none !important; } /* خاموش‌کردن هاله‌ی قدیمی */
+
+.vip-star{
+  width:26px; height:26px; border-radius:50%;
+  display:inline-grid; place-items:center;
+  background: rgba(var(--c-primary-rgb), .12);
+  color: var(--c-primary);
+  box-shadow: inset 0 0 0 1px rgba(var(--c-primary-rgb), .28);
+  font-size:.9rem; line-height:1;
+}
+
+/* اگر جایی vip-summary از نسخه قبلی مونده بود، کامل خاموشش کن */
+.vip-summary{ display:none !important; }
+
+/* === VIP Modal — کمی مینیمال‌تر، بدون اغراق === */
+.vip-modal .modal-content{
+  border: 1px solid rgba(var(--c-primary-rgb), .25);
+  background: var(--c-bg-primary);
+  box-shadow: 0 16px 36px rgba(0,0,0,.40);
+}
+.vip-modal .modal-header{
+  align-items:center;
+  padding-bottom: var(--space-2);
+  border-bottom: 1px dashed var(--c-border);
+}
+.vip-modal .modal-title{
+  display:flex; align-items:center; gap:.5rem;
+}
+.vip-modal .modal-title::before{
+  content:"★";
+  display:inline-grid; place-items:center;
+  width:22px; height:22px; border-radius:50%;
+  background: rgba(var(--c-primary-rgb), .12);
+  color: var(--c-primary);
+  box-shadow: inset 0 0 0 1px rgba(var(--c-primary-rgb), .22);
+  font-size:.85rem;
+}
+.vip-modal .modal-body{ display:grid; gap: var(--space-3); }
+@media (min-width:768px){
+  .vip-modal .modal-body{ grid-template-columns: 1fr 1fr; }
+  .vip-modal .form-actions{ grid-column: 1 / -1; justify-content:flex-end; }
+}
+.vip-modal .form-group{ margin: 0; }
+.vip-modal .form-label{ color: var(--c-text-secondary); }
+.vip-modal .form-actions .btn-primary{ min-width: 140px; }
+
 </style>
 </head>
 <body class="app-body">
@@ -3170,120 +3233,118 @@ body { -webkit-font-smoothing: auto !important; }
           <header class="view-header">
             <h2 class="view-title" id="settings-title">تنظیمات</h2>
           </header>
-          <form id="settings-form" class="settings-list">
-            <div class="settings-group">
-                <h3 class="settings-group-title">اطلاعات کسب‌وکار</h3>
-                <div class="form-group">
-                    <label for="business-name" class="form-label">نام کسب‌وکار</label>
-                    <input type="text" id="business-name" class="form-control" value="آرایشگاه مدرن سنندج">
-                </div>
-                <div class="form-group">
-                    <label for="business-category" class="form-label">دسته بندی</label>
-                    <select id="business-category" class="form-select" disabled>
-                        <option value="barbershop" selected>آرایشگاه مردانه</option>
-                        <option value="salon">سالن زیبایی زنانه</option>
-                        <option value="clinic">کلینیک زیبایی</option>
-                    </select>
-                    <div class="help">دسته‌بندی توسط پشتیبانی تعیین می‌شود</div>
-                </div>
-                <div class="form-group">
-                    <label for="business-phone" class="form-label">شماره تلفن</label>
-                    <input type="tel" id="business-phone" class="form-control" inputmode="tel" placeholder="مثلاً ۰۹۱۲۳۴۵۶۷۸۹">
-                </div>
-            </div>
-            <!-- === NEW: مشتریان ویژه (VIP Customers) === -->
-            <div class="settings-group vip-settings-group">
-                <div class="view-header">
-                    <h3 class="settings-group-title">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
-                        </svg>
-                        <span>مشتریان ویژه</span>
-                    </h3>
-                    <div class="header-actions">
-                        <button type="button" id="vip-settings-btn" class="btn-primary" aria-haspopup="dialog" aria-controls="vip-modal">
-                            <span>تنظیمات</span>
-                        </button>
-                    </div>
-                </div>
-            </div>
-            <!-- === NEW: خدمات من (My Services) === -->
-            <div class="settings-group">
-                <div class="view-header" style="margin-bottom: var(--space-3);">
-                    <h3 class="settings-group-title" style="margin-bottom: 0; border-bottom: none;">خدمات من</h3>
-                    <div class="header-actions">
-                        <button type="button" id="add-service-btn" class="btn-primary" aria-haspopup="dialog" aria-controls="service-drawer">
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                                <line x1="12" y1="5" x2="12" y2="19"></line>
-                                <line x1="5" y1="12" x2="19" y2="12"></line>
-                            </svg>
-                            <span>افزودن خدمت</span>
-                        </button>
-                    </div>
-                </div>
-                <div id="services-list" class="item-grid" role="list">
-                    <!-- Services will be rendered here by JS -->
-                </div>
-            </div>
-            <!-- === NEW: نمونه‌کارها (Portfolio) === -->
-            <div class="settings-group">
-                <div class="view-header" style="margin-bottom: var(--space-3);">
-                    <h3 class="settings-group-title" style="margin-bottom: 0; border-bottom: none;">نمونه‌کارها</h3>
-                    <div class="header-actions">
-                        <button type="button" id="add-portfolio-btn" class="btn-primary" aria-haspopup="dialog" aria-controls="portfolio-drawer">
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
-                                <circle cx="8.5" cy="8.5" r="1.5"></circle>
-                                <path d="M21 15l-5-5L5 21"></path>
-                            </svg>
-                            <span>افزودن نمونه‌کار</span>
-                        </button>
-                    </div>
-                </div>
-            <div id="portfolio-list" class="item-grid" role="list">
-                <!-- Portfolio items will be rendered here by JS -->
-            </div>
-        </div>
-        <!-- === END OF NEW SECTIONS === -->
-        <div class="settings-group">
-
-<!-- === NEW: تصاویر صفحه (هیرو + فوتر) === -->
-<div class="settings-group image-settings-group">
-  <h3 class="settings-group-title">تصاویر صفحه</h3>
-
-  <!-- Hero -->
-  <div class="image-field" id="field-hero">
-    <div>
-      <div class="field-title">تصویر هدر (هیرو)</div>
-      <div class="help">پیشنهاد: نسبت 16:9 یا 3:2 — کیفیت بالا — بدون متن پررنگ روی تصویر</div>
+<form id="settings-form" class="settings-list">
+  <div class="settings-group">
+    <h3 class="settings-group-title">اطلاعات کسب‌وکار</h3>
+    <div class="form-group">
+      <label for="business-name" class="form-label">نام کسب‌وکار</label>
+      <input type="text" id="business-name" class="form-control" value="آرایشگاه مدرن سنندج">
     </div>
-    <div class="preview"><img id="hero-preview" alt="پیش‌نمایش تصویر هدر"></div>
-    <div class="actions">
-      <button type="button" class="btn-secondary" id="hero-pick-btn">انتخاب از گالری/دوربین</button>
-      <button type="button" class="btn-secondary" id="hero-remove-btn">حذف تصویر</button>
+    <div class="form-group">
+      <label for="business-category" class="form-label">دسته بندی</label>
+      <select id="business-category" class="form-select" disabled>
+        <option value="barbershop" selected>آرایشگاه مردانه</option>
+        <option value="salon">سالن زیبایی زنانه</option>
+        <option value="clinic">کلینیک زیبایی</option>
+      </select>
+      <div class="help">دسته‌بندی توسط پشتیبانی تعیین می‌شود</div>
     </div>
-    <input type="file" accept="image/*" capture="environment" id="hero-file" hidden>
+    <div class="form-group">
+      <label for="business-phone" class="form-label">شماره تلفن</label>
+      <input type="tel" id="business-phone" class="form-control" inputmode="tel" placeholder="مثلاً ۰۹۱۲۳۴۵۶۷۸۹">
+    </div>
   </div>
 
-  <!-- Footer -->
-  <div class="image-field" id="field-footer">
-    <div>
-      <div class="field-title">تصویر فوتر (نمای دور فروشگاه)</div>
-      <div class="help">پیشنهاد: افقی و عریض؛ نمای بیرونی مغازه/تابلو (نسبت 21:9 یا 16:9)</div>
+  <!-- === NEW: مشتریان ویژه (VIP Customers) — polished === -->
+<div class="settings-group vip-settings-group">
+  <div class="view-header" style="margin-bottom: var(--space-1);">
+    <h3 class="settings-group-title" style="margin: 0; border-bottom: none; display:flex; align-items:center; gap:.5rem;">
+      <span class="vip-star" aria-hidden="true">★</span>
+      <span>مشتریان ویژه</span>
+    </h3>
+    <div class="header-actions">
+      <button type="button" id="vip-settings-btn" class="btn-primary" aria-haspopup="dialog" aria-controls="vip-modal">
+        <span>تنظیمات</span>
+      </button>
     </div>
-    <div class="preview"><img id="footer-preview" alt="پیش‌نمایش تصویر فوتر"></div>
-    <div class="actions">
-      <button type="button" class="btn-secondary" id="footer-pick-btn">انتخاب از گالری/دوربین</button>
-      <button type="button" class="btn-secondary" id="footer-remove-btn">حذف تصویر</button>
-    </div>
-    <input type="file" accept="image/*" capture="environment" id="footer-file" hidden>
   </div>
 </div>
 
+  <!-- === END VIP === -->
 
+  <!-- === NEW: خدمات من (My Services) === -->
+  <div class="settings-group">
+    <div class="view-header" style="margin-bottom: var(--space-3);">
+      <h3 class="settings-group-title" style="margin-bottom: 0; border-bottom: none;">خدمات من</h3>
+      <div class="header-actions">
+        <button type="button" id="add-service-btn" class="btn-primary" aria-haspopup="dialog" aria-controls="service-drawer">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <line x1="12" y1="5" x2="12" y2="19"></line>
+            <line x1="5" y1="12" x2="19" y2="12"></line>
+          </svg>
+          <span>افزودن خدمت</span>
+        </button>
+      </div>
+    </div>
+    <div id="services-list" class="item-grid" role="list">
+      <!-- Services will be rendered here by JS -->
+    </div>
+  </div>
 
-            </div>
-        </form>
+  <!-- === NEW: نمونه‌کارها (Portfolio) === -->
+  <div class="settings-group">
+    <div class="view-header" style="margin-bottom: var(--space-3);">
+      <h3 class="settings-group-title" style="margin-bottom: 0; border-bottom: none;">نمونه‌کارها</h3>
+      <div class="header-actions">
+        <button type="button" id="add-portfolio-btn" class="btn-primary" aria-haspopup="dialog" aria-controls="portfolio-drawer">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+            <circle cx="8.5" cy="8.5" r="1.5"></circle>
+            <path d="M21 15l-5-5L5 21"></path>
+          </svg>
+          <span>افزودن نمونه‌کار</span>
+        </button>
+      </div>
+    </div>
+    <div id="portfolio-list" class="item-grid" role="list">
+      <!-- Portfolio items will be rendered here by JS -->
+    </div>
+  </div>
+
+  <!-- === تصاویر صفحه (هیرو + فوتر) === -->
+  <div class="settings-group image-settings-group">
+    <h3 class="settings-group-title">تصاویر صفحه</h3>
+
+    <!-- Hero -->
+    <div class="image-field" id="field-hero">
+      <div>
+        <div class="field-title">تصویر هدر (هیرو)</div>
+        <div class="help">پیشنهاد: نسبت 16:9 یا 3:2 — کیفیت بالا — بدون متن پررنگ روی تصویر</div>
+      </div>
+      <div class="preview"><img id="hero-preview" alt="پیش‌نمایش تصویر هدر"></div>
+      <div class="actions">
+        <button type="button" class="btn-secondary" id="hero-pick-btn">انتخاب از گالری/دوربین</button>
+        <button type="button" class="btn-secondary" id="hero-remove-btn">حذف تصویر</button>
+      </div>
+      <input type="file" accept="image/*" capture="environment" id="hero-file" hidden>
+    </div>
+
+    <!-- Footer -->
+    <div class="image-field" id="field-footer">
+      <div>
+        <div class="field-title">تصویر فوتر (نمای دور فروشگاه)</div>
+        <div class="help">پیشنهاد: افقی و عریض؛ نمای بیرونی مغازه/تابلو (نسبت 21:9 یا 16:9)</div>
+      </div>
+      <div class="preview"><img id="footer-preview" alt="پیش‌نمایش تصویر فوتر"></div>
+      <div class="actions">
+        <button type="button" class="btn-secondary" id="footer-pick-btn">انتخاب از گالری/دوربین</button>
+        <button type="button" class="btn-secondary" id="footer-remove-btn">حذف تصویر</button>
+      </div>
+      <input type="file" accept="image/*" capture="environment" id="footer-file" hidden>
+    </div>
+  </div>
+</form>
+
         </div>
       </section>
     </div>
@@ -3329,7 +3390,7 @@ body { -webkit-font-smoothing: auto !important; }
         </div>
     </div>
   </div>
-  <div id="vip-modal" class="modal" role="dialog" aria-modal="true" aria-labelledby="vip-modal-title" hidden>
+<div id="vip-modal" class="modal vip-modal" role="dialog" aria-modal="true" aria-labelledby="vip-modal-title" hidden>
     <div class="modal-backdrop" data-dismiss="modal"></div>
     <div class="modal-content card" role="document">
         <div class="modal-header">
