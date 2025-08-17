@@ -3401,10 +3401,6 @@ body { -webkit-font-smoothing: auto !important; }
         </div>
         <form id="vip-form" class="modal-body">
             <div class="form-group">
-                <label for="vip-rules" class="form-label">قوانین</label>
-                <textarea id="vip-rules" class="form-control" rows="3"></textarea>
-            </div>
-            <div class="form-group">
                 <label for="vip-required" class="form-label">تعداد رزرو لازم برای جایزه</label>
                 <input type="number" id="vip-required" class="form-control" min="1">
             </div>
@@ -4824,18 +4820,15 @@ handlePlanDurationChange(e) {
     // === NEW: VIP Settings Methods ===
     initVipSettings() {
         const data = StorageManager.get('vit_vip_settings') || {};
-        const rulesEl = document.getElementById('vip-rules');
         const requiredEl = document.getElementById('vip-required');
         const rewardEl = document.getElementById('vip-reward');
-        if (rulesEl) rulesEl.value = data.rules || '';
         if (requiredEl) requiredEl.value = data.required || '';
         if (rewardEl) rewardEl.value = data.reward || '';
     }
     handleVipFormSubmit() {
-        const rules = document.getElementById('vip-rules').value.trim();
         const required = parseInt(document.getElementById('vip-required').value, 10) || 0;
         const reward = document.getElementById('vip-reward').value.trim();
-        StorageManager.set('vit_vip_settings', { rules, required, reward });
+        StorageManager.set('vit_vip_settings', { required, reward });
         UIComponents.showToast('تنظیمات ذخیره شد.', 'success');
         UIComponents.closeModal('vip-modal');
     }
