@@ -2793,6 +2793,111 @@ body { -webkit-font-smoothing: auto !important; }
 .vip-modal .form-label{ color: var(--c-text-secondary); }
 .vip-modal .form-actions .btn-primary{ min-width: 140px; }
 
+
+
+
+
+
+/* === VIP Stats — Customers view === */
+.vip-stats-bar{
+  position: sticky;
+  top: calc(var(--header-height) + var(--space-2));
+  z-index: 6;
+  display: flex;
+  gap: .5rem;
+  align-items: center;
+  padding: .5rem;
+  border: 1px solid var(--c-border);
+  border-radius: 14px;
+  background: var(--c-bg-primary);
+  box-shadow: 0 6px 16px rgba(0,0,0,.18);
+}
+
+.vip-chip{
+  display: inline-flex;
+  align-items: center;
+  gap: .4rem;
+  padding: .45rem .7rem;
+  border-radius: 999px;
+  border: 1px solid var(--c-border);
+  background: var(--c-bg-tertiary);
+  color: var(--c-text-primary);
+  font-size: .85rem;
+  min-height: 36px;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: transform .15s ease, box-shadow .2s ease, border-color .2s ease, background-color .2s ease;
+}
+.vip-chip .count{ font-weight: 800; font-variant-numeric: tabular-nums; }
+
+.vip-chip[data-target="eligible"]{ background: rgba(var(--c-primary-rgb), .10); border-color: rgba(var(--c-primary-rgb), .35); }
+.vip-chip[data-target="oneaway"]{ background: var(--c-bg-tertiary); }
+.vip-chip[data-target="claimed"]{ background: rgba(48,209,88,.12); border-color: rgba(48,209,88,.35); color: var(--c-success); }
+
+.vip-chip:hover{ transform: translateY(-1px); box-shadow: 0 6px 14px rgba(0,0,0,.18); }
+.vip-chip[aria-pressed="true"]{
+  box-shadow: inset 0 0 0 2px rgba(var(--c-primary-rgb), .35);
+  border-color: var(--c-primary);
+}
+
+.vip-more{
+  margin-inline-start: auto;
+  padding: .45rem .7rem;
+  border-radius: 10px;
+  border: 1px dashed var(--c-border);
+  background: var(--c-bg-secondary);
+  color: var(--c-text-secondary);
+  font-size: .8rem;
+}
+
+/* Panel (collapsible names) */
+.vip-stats-panel{
+  margin-top: .5rem;
+  border: 1px solid var(--c-border);
+  border-radius: 14px;
+  background: var(--c-bg-primary);
+  box-shadow: 0 10px 24px rgba(0,0,0,.22);
+  padding: .5rem;
+  animation: vipFade .18s ease;
+}
+@keyframes vipFade{ from{opacity:0; transform: translateY(-6px);} to{opacity:1; transform:none;} }
+
+.vip-panel-head{
+  display:flex; align-items:center; justify-content:space-between;
+  padding: .35rem .5rem .5rem;
+  border-bottom: 1px dashed var(--c-border);
+  margin-bottom: .35rem;
+}
+.vip-close{
+  padding: .35rem .6rem;
+  border-radius: 8px;
+  border: 1px solid var(--c-border);
+  background: var(--c-bg-tertiary);
+  color: var(--c-text-secondary);
+  font-size: .8rem;
+}
+
+.vip-list{
+  display:flex; flex-wrap:wrap; gap:.4rem .5rem;
+  max-height: 220px; overflow:auto; padding: .25rem;
+}
+.vip-pill{
+  padding:.35rem .6rem; border-radius:999px;
+  background: var(--c-bg-tertiary);
+  border:1px solid var(--c-border);
+  font-size:.85rem; color: var(--c-text-primary);
+}
+.vip-empty{
+  color: var(--c-text-secondary);
+  text-align:center; padding:.75rem 0; font-size:.9rem;
+}
+
+/* Narrow phones: allow horizontal scroll for chips if needed */
+@media (max-width: 380px){
+  .vip-stats-bar{ overflow-x:auto; -webkit-overflow-scrolling: touch; }
+  .vip-more{ flex: 0 0 auto; }
+}
+
 </style>
 </head>
 <body class="app-body">
@@ -3048,6 +3153,42 @@ body { -webkit-font-smoothing: auto !important; }
               <input type="search" id="customer-search" class="search-input" placeholder="جستجوی نام، شماره تماس..." aria-label="جستجو در مشتریان">
             </div>
           </div>
+
+
+
+<!-- ✅ VIP Stats Bar (زیر سرچ / بالای لیست) -->
+<section id="vip-stats" class="vip-stats-bar" role="group" aria-label="آمار مشتریان ویژه">
+  <button type="button" class="vip-chip" data-target="eligible" aria-pressed="false" title="رسیده به جایزه (قابل دریافت)">
+    <span class="label">واجد جایزه</span>
+    <span class="count" id="vip-count-eligible">۰</span>
+  </button>
+  <button type="button" class="vip-chip" data-target="oneaway" aria-pressed="false" title="یک قدم تا جایزه">
+    <span class="label">یک‌قدم تا جایزه</span>
+    <span class="count" id="vip-count-oneaway">۰</span>
+  </button>
+  <button type="button" class="vip-chip" data-target="claimed" aria-pressed="false" title="جایزه گرفته‌اند">
+    <span class="label">جایزه‌گرفته‌اند</span>
+    <span class="count" id="vip-count-claimed">۰</span>
+  </button>
+  <button type="button" class="vip-more" id="vip-toggle-panel" aria-expanded="false" aria-controls="vip-stats-panel" title="نمایش لیست اسامی">
+    جزئیات
+  </button>
+</section>
+
+<!-- ✅ پنل نام‌ها (جمع‌شونده) -->
+<div id="vip-stats-panel" class="vip-stats-panel" hidden>
+  <header class="vip-panel-head">
+    <strong id="vip-panel-title">واجد جایزه</strong>
+    <button type="button" class="vip-close" id="vip-close-panel" aria-label="بستن">بستن</button>
+  </header>
+  <div class="vip-list" id="vip-list"></div>
+  <div class="vip-empty" id="vip-empty" hidden>موردی یافت نشد.</div>
+</div>
+
+<div id="customers-list" class="customers-grid" role="list"></div>
+
+
+
           <div id="customers-list" class="customers-grid" role="list"></div>
         </div>
       </section>
@@ -5892,6 +6033,199 @@ _removeBrandImage(type){
 
 
 </script>
+
+
+<script>
+(function(){
+  const $ = s => document.querySelector(s);
+  const $$ = s => Array.from(document.querySelectorAll(s));
+
+  // 1) منبع داده‌ها
+  function getVipRequired(){
+    const fromInput = document.getElementById('vip-required');
+    const v = parseInt(fromInput?.value, 10);
+    return Number.isFinite(v) && v > 0 ? v : 5; // پیش‌فرض ۵
+  }
+
+  function normalizeCustomers(raw){
+    // خروجی استاندارد:
+    // { id, name, reservations, rewardCount, lastReservationAt, vipCurrent, vipRequired }
+    return raw.map(c => ({
+      id: c.id ?? c._id ?? c.phone ?? c.name,
+      name: c.name ?? c.fullName ?? 'بدون‌نام',
+      reservations: c.reservations ?? c.totalReservations ?? c.stats?.reservations ?? 0,
+      rewardCount: c.rewardCount ?? c.vip?.rewards ?? c.rewards ?? 0,
+      vipCurrent: c.vipCurrent ?? c.vip?.current ?? c.stats?.vipCurrent ?? c.reservations ?? 0,
+      vipRequired: c.vipRequired ?? c.vip?.required ?? c.stats?.vipRequired ?? getVipRequired(),
+      lastReservationAt: c.lastReservationAt ?? c.lastAt ?? null,
+    }));
+  }
+
+  function collectCustomers(){
+    try{
+      if (window.CUSTOMERS_STORE?.getAll){
+        return normalizeCustomers(window.CUSTOMERS_STORE.getAll());
+      }
+      if (Array.isArray(window.customersData)){
+        return normalizeCustomers(window.customersData);
+      }
+    }catch(e){}
+
+    // از DOM (اگر کارت‌ها data-* داشته باشند)
+    const cards = $$('#customers-list .customer-card');
+    if(cards.length){
+      return cards.map(el => ({
+        id: el.dataset.id || el.querySelector('.customer-phone')?.textContent?.trim() || el.querySelector('.customer-name')?.textContent?.trim(),
+        name: el.querySelector('.customer-name')?.textContent?.trim() || 'بدون‌نام',
+        reservations: parseInt(el.dataset.reservations || '0', 10),
+        rewardCount: parseInt(el.dataset.rewards || '0', 10),
+        vipCurrent: parseInt(el.dataset.vipCurrent || el.dataset.reservations || '0', 10),
+        vipRequired: parseInt(el.dataset.vipRequired || getVipRequired(), 10),
+        lastReservationAt: el.dataset.lastReservationAt || null
+      }));
+    }
+    return [];
+  }
+
+  // 2) باکت‌ها
+  function computeBuckets(list){
+    // معیارها:
+    // eligible: به حد نصاب رسیده ولی هنوز claim نشده (rewardCount == 0)
+    // oneaway: یک رزرو تا حد نصاب فاصله دارد
+    // claimed: حداقل یک بار جایزه گرفته‌اند
+    const eligible = [];
+    const oneaway = [];
+    const claimed  = [];
+    list.forEach(c => {
+      const req = c.vipRequired ?? getVipRequired();
+      const cur = c.vipCurrent ?? 0;
+      const hasClaim = (c.rewardCount ?? 0) > 0;
+
+      if (hasClaim){
+        claimed.push(c);
+      }
+      if (cur >= req && !hasClaim){
+        eligible.push(c);
+      }else if (cur === req - 1){
+        oneaway.push(c);
+      }
+    });
+    return { eligible, oneaway, claimed };
+  }
+
+  // 3) رندر شمارنده‌ها
+  function renderCounts(b){
+    $('#vip-count-eligible').textContent = b.eligible.length.toLocaleString('fa-IR');
+    $('#vip-count-oneaway').textContent  = b.oneaway.length.toLocaleString('fa-IR');
+    $('#vip-count-claimed').textContent  = b.claimed.length.toLocaleString('fa-IR');
+  }
+
+  // 4) رندر لیست نام‌ها
+  function renderNames(title, arr){
+    $('#vip-panel-title').textContent = title;
+    const list = $('#vip-list');
+    list.innerHTML = '';
+    if(!arr.length){
+      $('#vip-empty').hidden = false;
+      return;
+    }
+    $('#vip-empty').hidden = true;
+    const frag = document.createDocumentFragment();
+    arr.forEach(c => {
+      const pill = document.createElement('span');
+      pill.className = 'vip-pill';
+      pill.textContent = c.name;
+      pill.title = `${c.name} — رزروها: ${c.reservations ?? 0}`;
+      pill.dataset.id = c.id;
+      frag.appendChild(pill);
+    });
+    list.appendChild(frag);
+  }
+
+  // 5) فیلتر لیست (در صورت وجود data-id روی کارت‌ها)
+  function filterListByIds(ids){
+    const cards = $$('#customers-list .customer-card');
+    if(!cards.length) return; // رندر خارجی؛ صرفاً پنل را نشان بده
+    if(!ids || !ids.length){
+      cards.forEach(el => el.hidden = false);
+      return;
+    }
+    const set = new Set(ids);
+    cards.forEach(el => {
+      const id = el.dataset.id || el.querySelector('.customer-name')?.textContent?.trim();
+      el.hidden = !set.has(id);
+    });
+  }
+
+  // 6) راه‌اندازی
+  function initVipUI(){
+    const root = $('#vip-stats');
+    if(!root) return;
+
+    const all = collectCustomers();
+    const buckets = computeBuckets(all);
+    renderCounts(buckets);
+
+    const panel = $('#vip-stats-panel');
+    const toggleBtn = $('#vip-toggle-panel');
+    const closeBtn = $('#vip-close-panel');
+
+    function openPanel(kind){
+      const map = {
+        eligible: { title: 'واجد جایزه', arr: buckets.eligible },
+        oneaway:  { title: 'یک‌قدم تا جایزه', arr: buckets.oneaway },
+        claimed:  { title: 'جایزه‌گرفته‌اند', arr: buckets.claimed },
+      };
+      const { title, arr } = map[kind] || map.eligible;
+      renderNames(title, arr);
+      panel.hidden = false;
+      toggleBtn.setAttribute('aria-expanded', 'true');
+    }
+    function closePanel(){
+      panel.hidden = true;
+      toggleBtn.setAttribute('aria-expanded', 'false');
+    }
+
+    root.addEventListener('click', (ev)=>{
+      const chip = ev.target.closest('.vip-chip');
+      if(!chip) return;
+      const active = chip.getAttribute('aria-pressed') === 'true';
+      // reset chips
+      $$('.vip-chip').forEach(c => c.setAttribute('aria-pressed','false'));
+      if(active){
+        // خاموش کردن و لغو فیلتر
+        filterListByIds(null);
+        closePanel();
+        return;
+      }
+      chip.setAttribute('aria-pressed','true');
+      const kind = chip.dataset.target;
+      const arr  = kind === 'eligible' ? buckets.eligible : kind === 'oneaway' ? buckets.oneaway : buckets.claimed;
+
+      // بازکردن پنل اسامی
+      openPanel(kind);
+
+      // فیلتر مستقیم لیست در صورت وجود data-id
+      filterListByIds(arr.map(c => c.id));
+
+      // رویداد سفارشی برای رندرهای خارجی
+      const evt = new CustomEvent('vip:filter', { detail: { kind, ids: arr.map(c => c.id) }});
+      document.getElementById('customers-list')?.dispatchEvent(evt);
+    });
+
+    toggleBtn.addEventListener('click', ()=>{
+      const expanded = toggleBtn.getAttribute('aria-expanded') === 'true';
+      if(expanded) closePanel(); else openPanel($$('.vip-chip[aria-pressed="true"]')[0]?.dataset.target || 'eligible');
+    });
+    closeBtn.addEventListener('click', closePanel);
+
+    // اگر دیتایی نداریم، پنل را غیرفعال نکن—اما نوار را نگه دار
+  }
+
+  document.addEventListener('DOMContentLoaded', initVipUI);
+})();
+</script>
+
 </body>
 </html>
 
