@@ -3500,6 +3500,8 @@ document.addEventListener('DOMContentLoaded', function(){
   const listEl  = document.getElementById('vip-list');
   const emptyEl = document.getElementById('vip-empty');
   const chipsBar = document.getElementById('vip-stats'); // همان سه دکمه بالای صفحه مشتریان (eligible/oneaway/claimed)
+  const customerModal = document.getElementById('vip-customer-modal');
+  let currentVipKind = 'eligible';
 
   if (!panel || !titleEl || !subEl || !listEl || !emptyEl) return;
 
@@ -3561,11 +3563,13 @@ document.addEventListener('DOMContentLoaded', function(){
 
   function openPanel(kind){
     const t = PANEL_TEXT[kind] || PANEL_TEXT.eligible;
+    currentVipKind = kind;
     titleEl.textContent = t.title;
     subEl.textContent   = t.sub;
     renderList(getRows(kind));
     panel.hidden = false;
     panel.focus();
+    if (customerModal) customerModal.hidden = true;
   }
 
   // دکمه‌های سه‌گانه‌ی بالای صفحه مشتریان
@@ -3582,7 +3586,7 @@ document.addEventListener('DOMContentLoaded', function(){
 
   // باز کردن مودال با کلیک روی نام
   (function attachVipModal(){
-    const modal = document.getElementById('vip-customer-modal');
+    const modal = customerModal;
     if (!modal) return;
 
     function fill(d){
@@ -3598,6 +3602,7 @@ document.addEventListener('DOMContentLoaded', function(){
     listEl.addEventListener('click', (e)=>{
       const btn = e.target.closest('.vipc-chip');
       if (!btn) return;
+      if (currentVipKind !== 'eligible') return;
       fill({
         name: btn.dataset.name,
         phone: btn.dataset.phone,
