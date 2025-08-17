@@ -2891,12 +2891,15 @@ body { -webkit-font-smoothing: auto !important; }
 
 /* Close */
 .vipc-close{
-  width:32px;height:32px;border-radius:10px;
+  width:clamp(28px,6vw,32px);height:clamp(28px,6vw,32px);border-radius:10px;
   display:grid;place-items:center;
   background:transparent;border:1px solid rgba(255,255,255,.12);
   color:var(--c-text-secondary,#bbb);cursor:pointer;
+  transition:background .2s,color .2s;
 }
-.vipc-close:hover{background:rgba(255,255,255,.06);}
+.vipc-close:hover{background:rgba(255,255,255,.06);color:var(--c-text-primary,#fff);}
+.vipc-close:focus-visible{outline:2px solid var(--c-primary,#0a84ff);outline-offset:2px;}
+.vipc-close svg{width:18px;height:18px;}
 
 /* Body */
 /* ==== VIP panel – chips & empty state ==== */
