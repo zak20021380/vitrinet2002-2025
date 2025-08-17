@@ -330,16 +330,20 @@
       </div>
     </div>
 
-    <!-- دکمه بستن کوچک، ثابت در هدر -->
-    <button type="button" class="vipc-close" id="vip-close-panel" aria-label="بستن">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+    <!-- فقط آیکن ضربدر -->
+    <button type="button" class="vipc-close-icon" id="vip-close-panel" aria-label="بستن">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
         <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
       </svg>
     </button>
   </header>
 
   <div class="vipc-body">
-    <div id="vip-list" class="vipc-chips" role="list"><!-- پر می‌شود --></div>
+    <div class="vipc-hint" id="vipc-hint">برای دیدن جزئیات، روی نام مشتری بزنید</div>
+
+    <!-- لیست نام‌ها: هر آیتم یک دکمه با عرضِ متن -->
+    <div id="vip-list" class="vipc-chips" role="list"><!-- با JS پر می‌شود --></div>
+
     <div id="vip-empty" class="vipc-empty" hidden>فعلاً اسمی اینجا نیست.</div>
   </div>
 </section>
@@ -382,6 +386,8 @@
     </div>
   </div>
 </div>
+
+
 
 
 
@@ -3431,58 +3437,135 @@ window.customersData = window.customersData || [
 
 
 <script>
-/* ===== رفتار پنل و مودال VIP ===== */
-(() => {
-  const $ = s => document.querySelector(s);
-  const nf = n => new Intl.NumberFormat('fa-IR').format(Number(n||0));
+document.addEventListener('DOMContentLoaded', function(){
+  const panel   = document.getElementById('vip-stats-panel');
+  const titleEl = document.getElementById('vip-panel-title');
+  const subEl   = document.getElementById('vip-panel-sub');
+  const listEl  = document.getElementById('vip-list');
+  const emptyEl = document.getElementById('vip-empty');
+  const chipsBar = document.getElementById('vip-stats'); // همان سه دکمه بالای صفحه مشتریان (eligible/oneaway/claimed)
+
+  if (!panel || !titleEl || !subEl || !listEl || !emptyEl) return;
+
+  const faNum = (n) => new Intl.NumberFormat('fa-IR').format(n);
+
+  // متن هر تب
+  const PANEL_TEXT = {
+    eligible: { title:'واجد جایزه',     sub:'مشتری‌هایی که به حد نصاب رسیده‌اند' },
+    oneaway:  { title:'یک‌قدم تا جایزه', sub:'مشتری‌هایی که یک رزرو تا جایزه فاصله دارند' },
+    claimed:  { title:'جایزه‌گرفته‌اند', sub:'مشتری‌هایی که جایزه‌شان را دریافت کرده‌اند' }
+  };
+
+  // نام کامل بساز (اگر فقط اسم کوچک باشد)
+  function fullNameOf(rec){
+    const raw = (rec.name || [rec.firstName, rec.lastName].filter(Boolean).join(' ')).trim();
+    if (raw.includes(' ')) return raw;
+    const all = (window.MOCK_DATA?.customers || []);
+    const m = all.find(x => x.name.startsWith(raw + ' '));
+    return (m?.name || raw || '—').trim();
+  }
+
+  // داده‌ها را فیلتر کن
+  function getRows(kind){
+    const base = (window.customersData || []);
+    return base.filter(c=>{
+      const need = c.vipRequired ?? 0, cur=c.vipCurrent ?? 0, rew=c.rewardCount ?? 0;
+      if (kind==='eligible') return cur>=need && rew===0;
+      if (kind==='oneaway')  return need>0 && cur===need-1;
+      if (kind==='claimed')  return rew>0;
+      return false;
+    }).map(c=>{
+      const fn = fullNameOf(c);
+      const m  = (window.MOCK_DATA?.customers || []).find(x=>x.name===fn) || {};
+      return { ...c, name: fn, phone: c.phone || m.phone || '' };
+    });
+  }
+
+  function renderList(rows){
+    listEl.innerHTML = rows.map(c => {
+      const full = fullNameOf(c);
+      return `
+        <button type="button" class="vipc-chip"
+                role="button"
+                aria-label="مشاهده جزئیات ${full}"
+                title="برای مشاهده جزئیات کلیک کنید"
+                data-name="${full}"
+                data-phone="${c.phone || ''}"
+                data-reservations="${c.reservations ?? c.vipCurrent ?? 0}"
+                data-rewards="${c.rewardCount ?? 0}"
+                data-last-reservation="${c.lastReservationAt || ''}">
+          <span class="vipc-chip-text">${full}</span>
+          <svg class="vipc-chip-caret" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <polyline points="15 18 9 12 15 6"></polyline>
+          </svg>
+        </button>`;
+    }).join('');
+    emptyEl.hidden = rows.length > 0;
+  }
+
+  function openPanel(kind){
+    const t = PANEL_TEXT[kind] || PANEL_TEXT.eligible;
+    titleEl.textContent = t.title;
+    subEl.textContent   = t.sub;
+    renderList(getRows(kind));
+    panel.hidden = false;
+    panel.focus();
+  }
+
+  // دکمه‌های سه‌گانه‌ی بالای صفحه مشتریان
+  chipsBar?.addEventListener('click', (e)=>{
+    const chip = e.target.closest('.vip-chip');
+    if (!chip) return;
+    const kind = chip.dataset.target || 'eligible';
+    chipsBar.querySelectorAll('.vip-chip').forEach(b => b.classList.toggle('active', b===chip));
+    openPanel(kind);
+  });
 
   // بستن پنل
-  $('#vip-close-panel')?.addEventListener('click', () => {
-    $('#vip-stats-panel').hidden = true;
-  });
+  document.getElementById('vip-close-panel')?.addEventListener('click', ()=> panel.hidden = true);
 
-  // کلیک روی چیپ نام → باز مودال
-  $('#vip-list')?.addEventListener('click', (e) => {
-    const chip = e.target.closest('.vipc-chip, .vip-pill');
-    if (!chip) return;
+  // باز کردن مودال با کلیک روی نام
+  (function attachVipModal(){
+    const modal = document.getElementById('vip-customer-modal');
+    if (!modal) return;
 
-    const data = {
-      name: chip.dataset.name || chip.textContent.trim() || '—',
-      phone: chip.dataset.phone || '—',
-      reservations: chip.dataset.reservations || 0,
-      rewards: chip.dataset.rewards || 0,
-      last: chip.dataset.lastReservation || '—'
-    };
-
-    // پرکردن مودال
-    $('#vipc-avatar').textContent = (data.name||'—').charAt(0);
-    $('#vipc-modal-title').textContent = data.name;
-    $('#vipc-phone').textContent = data.phone;
-    $('#vipc-res-count').textContent = nf(data.reservations);
-    $('#vipc-reward-count').textContent = nf(data.rewards);
-    $('#vipc-last-date').textContent = data.last;
-
-    // نمایش مودال (سازگار با UIComponents اگر وجود دارد)
-    if (window.UIComponents?.openModal) UIComponents.openModal('vip-customer-modal');
-    else $('#vip-customer-modal').hidden = false;
-  });
-
-  // بستن مودال
-  document.getElementById('vip-customer-modal')?.addEventListener('click', (e) => {
-    if (e.target.hasAttribute('data-close') || e.target.closest('[data-close]')) {
-      if (window.UIComponents?.closeModal) UIComponents.closeModal('vip-customer-modal');
-      else e.currentTarget.hidden = true;
+    function fill(d){
+      document.getElementById('vipc-avatar').textContent = (d.name||'—').charAt(0);
+      document.getElementById('vipc-modal-title').textContent = d.name || '—';
+      document.getElementById('vipc-phone').textContent = d.phone || '—';
+      document.getElementById('vipc-res-count').textContent = faNum(d.reservations ?? 0);
+      document.getElementById('vipc-reward-count').textContent = faNum(d.rewardCount ?? 0);
+      document.getElementById('vipc-last-date').textContent = d.lastReservation || d.lastReservationAt || '—';
     }
-  });
 
-  // رفتن به صفحه «مشتریان»
-  document.getElementById('vipc-open-customer')?.addEventListener('click', () => {
-    window.location.hash = '/customers';
-    if (window.UIComponents?.closeModal) UIComponents.closeModal('vip-customer-modal');
-    else document.getElementById('vip-customer-modal').hidden = true;
-  });
-})();
+    // delegation روی خودِ لیست
+    listEl.addEventListener('click', (e)=>{
+      const btn = e.target.closest('.vipc-chip');
+      if (!btn) return;
+      fill({
+        name: btn.dataset.name,
+        phone: btn.dataset.phone,
+        reservations: +btn.dataset.reservations || 0,
+        rewardCount: +btn.dataset.rewards || 0,
+        lastReservation: btn.dataset.lastReservation
+      });
+      modal.hidden = false;
+    });
+
+    modal.addEventListener('click', (e)=>{
+      if (e.target.hasAttribute('data-close') || e.target.closest('[data-close]')) modal.hidden = true;
+    });
+
+    document.getElementById('vipc-open-customer')?.addEventListener('click', ()=>{
+      window.location.hash = '/customers';
+      modal.hidden = true;
+    });
+  })();
+});
 </script>
+
+
+
 
 
 
