@@ -2842,17 +2842,6 @@ body { -webkit-font-smoothing: auto !important; }
   border-color: var(--c-primary);
 }
 
-.vip-more{
-  margin-inline-start: auto;
-  padding: .45rem .7rem;
-  border-radius: 10px;
-  border: 1px dashed var(--c-border);
-  background: var(--c-bg-secondary);
-  color: var(--c-text-secondary);
-  font-size: .8rem;
-  flex: 0 0 auto;
-}
-
 /* Panel (collapsible names) */
 .vip-stats-panel{
   margin-top: .5rem;
@@ -3167,9 +3156,6 @@ body { -webkit-font-smoothing: auto !important; }
   <button type="button" class="vip-chip" data-target="claimed" aria-pressed="false" title="جایزه گرفته‌اند">
     <span class="label">جایزه‌گرفته‌اند</span>
     <span class="count" id="vip-count-claimed">۰</span>
-  </button>
-  <button type="button" class="vip-more" id="vip-toggle-panel" aria-expanded="false" aria-controls="vip-stats-panel" title="نمایش لیست اسامی">
-    جزئیات
   </button>
 </section>
 
@@ -6165,7 +6151,6 @@ _removeBrandImage(type){
     renderCounts(buckets);
 
     const panel = $('#vip-stats-panel');
-    const toggleBtn = $('#vip-toggle-panel');
     const closeBtn = $('#vip-close-panel');
 
     function openPanel(kind){
@@ -6177,11 +6162,9 @@ _removeBrandImage(type){
       const { title, arr } = map[kind] || map.eligible;
       renderNames(title, arr);
       panel.hidden = false;
-      toggleBtn.setAttribute('aria-expanded', 'true');
     }
     function closePanel(){
       panel.hidden = true;
-      toggleBtn.setAttribute('aria-expanded', 'false');
     }
 
     root.addEventListener('click', (ev)=>{
@@ -6211,10 +6194,6 @@ _removeBrandImage(type){
       document.getElementById('customers-list')?.dispatchEvent(evt);
     });
 
-    toggleBtn.addEventListener('click', ()=>{
-      const expanded = toggleBtn.getAttribute('aria-expanded') === 'true';
-      if(expanded) closePanel(); else openPanel($$('.vip-chip[aria-pressed="true"]')[0]?.dataset.target || 'eligible');
-    });
     closeBtn.addEventListener('click', closePanel);
 
     // اگر دیتایی نداریم، پنل را غیرفعال نکن—اما نوار را نگه دار
