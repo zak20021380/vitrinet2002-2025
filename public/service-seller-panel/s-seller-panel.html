@@ -2805,32 +2805,38 @@ body { -webkit-font-smoothing: auto !important; }
   z-index: 6;
   display: flex;
   gap: .5rem;
-  align-items: center;
+  align-items: stretch;
+  justify-content: space-between;
   padding: .5rem;
   border: 1px solid var(--c-border);
   border-radius: 14px;
   background: var(--c-bg-primary);
   box-shadow: 0 6px 16px rgba(0,0,0,.18);
-  overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
 }
 
 .vip-chip{
-  display: inline-flex;
+  display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: .4rem;
-  padding: .45rem .7rem;
-  border-radius: 999px;
+  justify-content: center;
+  gap: .2rem;
+  padding: .5rem;
+  flex: 1;
+  border-radius: var(--border-radius-lg);
   border: 1px solid var(--c-border);
   background: var(--c-bg-tertiary);
   color: var(--c-text-primary);
-  font-size: .85rem;
-  min-height: 36px;
-  white-space: nowrap;
+  font-size: .8rem;
+  min-height: 60px;
+  text-align: center;
   cursor: pointer;
   transition: transform .15s ease, box-shadow .2s ease, border-color .2s ease, background-color .2s ease;
 }
-.vip-chip .count{ font-weight: 800; font-variant-numeric: tabular-nums; }
+.vip-chip .count{
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  font-size: 1rem;
+}
 
 .vip-chip[data-target="eligible"]{ background: rgba(var(--c-primary-rgb), .10); border-color: rgba(var(--c-primary-rgb), .35); }
 .vip-chip[data-target="oneaway"]{ background: var(--c-bg-tertiary); }
@@ -6018,6 +6024,15 @@ _removeBrandImage(type){
 
 </script>
 
+
+<!-- Demo VIP data for showcasing all states -->
+<script>
+window.customersData = window.customersData || [
+  { id: 'demo-eligible', name: 'علی', reservations: 3, vipCurrent: 3, vipRequired: 3, rewardCount: 0 },
+  { id: 'demo-oneaway', name: 'مریم', reservations: 2, vipCurrent: 2, vipRequired: 3, rewardCount: 0 },
+  { id: 'demo-claimed', name: 'رضا', reservations: 4, vipCurrent: 3, vipRequired: 3, rewardCount: 1 }
+];
+</script>
 
 <script>
 (function(){
