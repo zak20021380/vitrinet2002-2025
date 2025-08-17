@@ -383,7 +383,7 @@
     </div>
 
     <div class="vipc-actions">
-      <div class="vipc-reward-actions">
+      <div class="vipc-reward-actions" id="vipc-reward-actions">
         <button type="button" class="btn-success" id="vipc-grant-reward">اعطای جایزه</button>
         <button type="button" class="btn-danger" id="vipc-reject-reward">رد جایزه</button>
       </div>
@@ -3588,6 +3588,7 @@ document.addEventListener('DOMContentLoaded', function(){
   (function attachVipModal(){
     const modal = customerModal;
     if (!modal) return;
+    const rewardActions = document.getElementById('vipc-reward-actions');
 
     function fill(d){
       document.getElementById('vipc-avatar').textContent = (d.name||'—').charAt(0);
@@ -3602,7 +3603,6 @@ document.addEventListener('DOMContentLoaded', function(){
     listEl.addEventListener('click', (e)=>{
       const btn = e.target.closest('.vipc-chip');
       if (!btn) return;
-      if (currentVipKind !== 'eligible') return;
       fill({
         name: btn.dataset.name,
         phone: btn.dataset.phone,
@@ -3610,6 +3610,7 @@ document.addEventListener('DOMContentLoaded', function(){
         rewardCount: +btn.dataset.rewards || 0,
         lastReservation: btn.dataset.lastReservation
       });
+      if (rewardActions) rewardActions.hidden = currentVipKind !== 'eligible';
       modal.hidden = false;
     });
 
