@@ -383,60 +383,7 @@
     </div>
 
     <div class="vipc-actions">
-      <div class="vipc-reward-actions" id="vipc-reward-actions">
-        <button type="button" class="btn-success" id="vipc-grant-reward">اعطای جایزه</button>
-        <button type="button" class="btn-danger" id="vipc-reject-reward">رد جایزه</button>
-      </div>
       <button type="button" class="btn-primary" id="vipc-open-customer">مشاهده در مشتریان</button>
-    </div>
-  </div>
-</div>
-
-<!-- ======== Prize Modals ======== -->
-<div id="reward-confirm-modal" class="modal" role="dialog" aria-modal="true" hidden>
-  <div class="modal-backdrop" data-dismiss="modal"></div>
-  <div class="modal-content" role="document">
-    <h3 class="modal-title">اعطای جایزه</h3>
-    <p id="reward-confirm-text"></p>
-    <div class="modal-actions">
-      <button type="button" class="btn-primary" id="reward-confirm-yes">تایید</button>
-      <button type="button" class="btn-secondary" data-dismiss="modal">انصراف</button>
-    </div>
-  </div>
-</div>
-
-<div id="reward-message-modal" class="modal" role="dialog" aria-modal="true" hidden>
-  <div class="modal-backdrop" data-dismiss="modal"></div>
-  <div class="modal-content" role="document">
-    <h3 class="modal-title">ارسال توضیحات جایزه</h3>
-    <div class="form-group">
-      <textarea id="reward-message-text" class="form-control" rows="4" placeholder="توضیحات جایزه و تاریخ دقیق"></textarea>
-    </div>
-    <div class="modal-actions">
-      <button type="button" class="btn-primary" id="reward-message-send">ارسال</button>
-      <button type="button" class="btn-secondary" data-dismiss="modal">انصراف</button>
-    </div>
-  </div>
-</div>
-
-<div id="reward-reject-modal" class="modal" role="dialog" aria-modal="true" hidden>
-  <div class="modal-backdrop" data-dismiss="modal"></div>
-  <div class="modal-content" role="document">
-    <h3 class="modal-title">رد جایزه</h3>
-    <p id="reward-reject-text"></p>
-    <div class="modal-actions">
-      <button type="button" class="btn-danger" id="reward-reject-yes">تایید</button>
-      <button type="button" class="btn-secondary" data-dismiss="modal">انصراف</button>
-    </div>
-  </div>
-</div>
-
-<div id="reward-success-modal" class="modal" role="alertdialog" aria-modal="true" hidden>
-  <div class="modal-backdrop" data-dismiss="modal"></div>
-  <div class="modal-content" role="document">
-    <p id="reward-success-text"></p>
-    <div class="modal-actions">
-      <button type="button" class="btn-primary" data-dismiss="modal">باشه</button>
     </div>
   </div>
 </div>
@@ -1263,8 +1210,6 @@ window.VitreenetRules = {
       this._handleOverlay(drawer, null, false);
     }
   }
-  // Expose UIComponents globally for use in other scripts
-  window.UIComponents = UIComponents;
   /**
    * ==============================
    * Main Application Logic
@@ -3500,8 +3445,6 @@ document.addEventListener('DOMContentLoaded', function(){
   const listEl  = document.getElementById('vip-list');
   const emptyEl = document.getElementById('vip-empty');
   const chipsBar = document.getElementById('vip-stats'); // همان سه دکمه بالای صفحه مشتریان (eligible/oneaway/claimed)
-  const customerModal = document.getElementById('vip-customer-modal');
-  let currentVipKind = 'eligible';
 
   if (!panel || !titleEl || !subEl || !listEl || !emptyEl) return;
 
@@ -3563,13 +3506,11 @@ document.addEventListener('DOMContentLoaded', function(){
 
   function openPanel(kind){
     const t = PANEL_TEXT[kind] || PANEL_TEXT.eligible;
-    currentVipKind = kind;
     titleEl.textContent = t.title;
     subEl.textContent   = t.sub;
     renderList(getRows(kind));
     panel.hidden = false;
     panel.focus();
-    if (customerModal) customerModal.hidden = true;
   }
 
   // دکمه‌های سه‌گانه‌ی بالای صفحه مشتریان
@@ -3586,9 +3527,8 @@ document.addEventListener('DOMContentLoaded', function(){
 
   // باز کردن مودال با کلیک روی نام
   (function attachVipModal(){
-    const modal = customerModal;
+    const modal = document.getElementById('vip-customer-modal');
     if (!modal) return;
-    const rewardActions = document.getElementById('vipc-reward-actions');
 
     function fill(d){
       document.getElementById('vipc-avatar').textContent = (d.name||'—').charAt(0);
@@ -3610,7 +3550,6 @@ document.addEventListener('DOMContentLoaded', function(){
         rewardCount: +btn.dataset.rewards || 0,
         lastReservation: btn.dataset.lastReservation
       });
-      if (rewardActions) rewardActions.hidden = currentVipKind !== 'eligible';
       modal.hidden = false;
     });
 
@@ -3622,43 +3561,9 @@ document.addEventListener('DOMContentLoaded', function(){
       window.location.hash = '/customers';
       modal.hidden = true;
     });
-
-    document.getElementById('vipc-grant-reward')?.addEventListener('click', () => {
-      const name = document.getElementById('vipc-modal-title').textContent;
-      const phone = document.getElementById('vipc-phone').textContent;
-      document.getElementById('reward-confirm-text').textContent = `آیا مطمئن هستید جایزه به ${name} با شماره ${phone} اهدا شود؟`;
-      UIComponents.openModal('reward-confirm-modal');
-    });
-
-    document.getElementById('vipc-reject-reward')?.addEventListener('click', () => {
-      const name = document.getElementById('vipc-modal-title').textContent;
-      document.getElementById('reward-reject-text').textContent = `آیا مطمئن هستید جایزه ${name} رد شود؟`;
-      UIComponents.openModal('reward-reject-modal');
-    });
-
-    document.getElementById('reward-confirm-yes')?.addEventListener('click', () => {
-      UIComponents.closeModal('reward-confirm-modal');
-      UIComponents.openModal('reward-message-modal');
-    });
-
-    document.getElementById('reward-message-send')?.addEventListener('click', () => {
-      UIComponents.closeModal('reward-message-modal');
-      document.getElementById('reward-success-text').textContent = 'پیامک به مشتری ارسال شد و جایزه اعطا گردید.';
-      UIComponents.openModal('reward-success-modal');
-    });
-
-    document.getElementById('reward-reject-yes')?.addEventListener('click', () => {
-      UIComponents.closeModal('reward-reject-modal');
-      document.getElementById('reward-success-text').textContent = 'جایزه برای این مشتری رد شد.';
-      UIComponents.openModal('reward-success-modal');
-    });
   })();
 });
 </script>
-
-
-
-
 
 
 </body>
