@@ -3002,3 +3002,510 @@ body { -webkit-font-smoothing: auto !important; }
 
 
 
+#reservation-btn {
+  background: linear-gradient(135deg, #30d158, #00c853);
+  min-width: auto;
+  white-space: nowrap;
+}
+
+#reservation-btn:hover {
+  background: linear-gradient(135deg, #37e06b, #00b34b);
+  transform: translateY(-1px);
+}
+
+/* Modal container */
+.reservation-modal .modal-content {
+  width: 95%;
+  max-width: 900px;
+  height: 90vh;
+  max-height: 800px;
+  padding: 0;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Modal header */
+.reservation-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--space-3) var(--space-4);
+  background: linear-gradient(135deg, var(--c-primary), var(--c-primary-hover));
+  color: white;
+  position: relative;
+  overflow: hidden;
+}
+
+.reservation-modal-header::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(circle, rgba(255,255,255,0.1), transparent 60%);
+  animation: rotate 30s linear infinite;
+}
+
+.modal-header-content {
+  position: relative;
+  z-index: 1;
+}
+
+.reservation-modal-header .modal-title {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  color: white;
+  margin: 0;
+  font-size: 1.5rem;
+}
+
+.today-date {
+  margin-top: var(--space-1);
+  font-size: var(--font-size-sm);
+  opacity: 0.9;
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+.today-date::before {
+  content: '📅';
+}
+
+.reservation-modal-header .modal-close-btn {
+  position: relative;
+  z-index: 1;
+  background: rgba(255,255,255,0.2);
+  color: white;
+}
+
+.reservation-modal-header .modal-close-btn:hover {
+  background: rgba(255,255,255,0.3);
+}
+
+/* Calendar navigation */
+.calendar-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-3) var(--space-4);
+  background: var(--c-bg-secondary);
+  border-bottom: 1px solid var(--c-border);
+}
+
+.current-month {
+  font-size: 1.1rem;
+  font-weight: var(--font-weight-bold);
+  color: var(--c-text-primary);
+}
+
+/* Day tabs */
+.day-tabs {
+  display: flex;
+  gap: var(--space-1);
+  padding: var(--space-3) var(--space-4);
+  background: var(--c-bg-primary);
+  border-bottom: 1px solid var(--c-border);
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.day-tab {
+  flex: 1;
+  min-width: 80px;
+  padding: var(--space-2) var(--space-2);
+  border-radius: var(--border-radius-md);
+  background: var(--c-bg-tertiary);
+  color: var(--c-text-primary);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  transition: all var(--transition-fast);
+  white-space: nowrap;
+}
+
+.day-tab:hover {
+  background: var(--c-bg-secondary);
+}
+
+.day-tab.active {
+  background: var(--c-primary);
+  color: white;
+}
+
+.day-tab.disabled {
+  opacity: 0.5;
+  background: var(--c-bg-secondary);
+  cursor: not-allowed;
+}
+
+/* Main content */
+.reservation-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: var(--space-3) var(--space-4);
+  background: var(--c-bg-secondary);
+}
+
+/* Quick actions */
+.quick-actions {
+  display: flex;
+  gap: var(--space-2);
+  margin-bottom: var(--space-4);
+  flex-wrap: wrap;
+}
+
+.quick-action-btn {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding: var(--space-2) var(--space-3);
+  background: var(--c-bg-primary);
+  border: 1px solid var(--c-border);
+  border-radius: var(--border-radius-md);
+  color: var(--c-text-primary);
+  font-size: var(--font-size-sm);
+  transition: all var(--transition-fast);
+}
+
+.quick-action-btn:hover {
+  background: var(--c-bg-tertiary);
+  border-color: var(--c-primary);
+}
+
+.quick-action-btn svg {
+  width: 20px;
+  height: 20px;
+  color: var(--c-primary);
+}
+
+/* Time slots */
+.time-slots-container {
+  background: var(--c-bg-primary);
+  border-radius: var(--border-radius-lg);
+  padding: var(--space-3);
+  margin-bottom: var(--space-4);
+}
+
+.time-slots-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--space-3);
+}
+
+.time-slots-header h3 {
+  margin: 0;
+  font-size: 1.1rem;
+}
+
+.slots-stats {
+  display: flex;
+  gap: var(--space-3);
+  font-size: var(--font-size-sm);
+}
+
+.stat-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+.stat-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}
+
+.stat-dot.available {
+  background: var(--c-success);
+}
+
+.stat-dot.booked {
+  background: var(--c-warning);
+}
+
+.stat-dot.blocked {
+  background: var(--c-danger);
+}
+
+/* Time slots grid */
+.time-slots-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+  gap: var(--space-2);
+}
+
+.time-slot {
+  padding: var(--space-2);
+  border-radius: var(--border-radius-md);
+  text-align: center;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  position: relative;
+  overflow: hidden;
+}
+
+.time-slot.available {
+  background: rgba(48, 209, 88, 0.1);
+  border: 1px solid rgba(48, 209, 88, 0.3);
+  color: var(--c-success);
+}
+
+.time-slot.available:hover {
+  background: rgba(48, 209, 88, 0.2);
+  transform: translateY(-2px);
+}
+
+.time-slot.booked {
+  background: rgba(255, 214, 10, 0.1);
+  border: 1px solid rgba(255, 214, 10, 0.3);
+  color: var(--c-warning);
+  cursor: default;
+}
+
+.time-slot.blocked {
+  background: rgba(255, 69, 58, 0.1);
+  border: 1px solid rgba(255, 69, 58, 0.3);
+  color: var(--c-danger);
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.time-slot-time {
+  font-weight: var(--font-weight-bold);
+  display: block;
+  margin-bottom: 4px;
+}
+
+.time-slot-status {
+  font-size: 11px;
+  opacity: 0.8;
+}
+
+/* Calendar view */
+.calendar-view {
+  background: var(--c-bg-primary);
+  border-radius: var(--border-radius-lg);
+  padding: var(--space-3);
+}
+
+.calendar-view h3 {
+  margin: 0 0 var(--space-3);
+  font-size: 1.1rem;
+}
+
+.calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: var(--space-1);
+}
+
+.calendar-day {
+  aspect-ratio: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--border-radius-md);
+  background: var(--c-bg-tertiary);
+  border: 1px solid var(--c-border);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  position: relative;
+}
+
+.calendar-day:hover {
+  background: var(--c-bg-secondary);
+  border-color: var(--c-primary);
+}
+
+.calendar-day.today {
+  background: var(--c-primary);
+  color: white;
+  border-color: var(--c-primary);
+}
+
+.calendar-day.selected {
+  border: 2px solid var(--c-primary);
+  background: rgba(10, 132, 255, 0.1);
+}
+
+.calendar-day.has-slots {
+  background: rgba(48, 209, 88, 0.05);
+}
+
+.calendar-day.fully-booked {
+  background: rgba(255, 69, 58, 0.05);
+}
+
+.calendar-day-number {
+  font-weight: var(--font-weight-bold);
+  font-size: 1rem;
+}
+
+.calendar-day-slots {
+  font-size: 10px;
+  margin-top: 2px;
+  opacity: 0.7;
+}
+
+.calendar-weekday {
+  font-size: var(--font-size-sm);
+  color: var(--c-text-secondary);
+  text-align: center;
+  padding: var(--space-1);
+  font-weight: var(--font-weight-medium);
+}
+
+/* Settings panel */
+.settings-panel {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: var(--c-bg-primary);
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  animation: slideInFromRight 0.3s ease;
+}
+
+@keyframes slideInFromRight {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+.settings-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--space-3) var(--space-4);
+  background: var(--c-bg-secondary);
+  border-bottom: 1px solid var(--c-border);
+}
+
+.settings-header h3 {
+  margin: 0;
+  font-size: 1.2rem;
+}
+
+.settings-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: var(--space-4);
+}
+
+.setting-group {
+  margin-bottom: var(--space-4);
+}
+
+.setting-label {
+  display: block;
+  margin-bottom: var(--space-2);
+  color: var(--c-text-primary);
+  font-weight: var(--font-weight-medium);
+  font-size: var(--font-size-sm);
+}
+
+.setting-input {
+  width: 100%;
+  padding: var(--space-2) var(--space-3);
+  background: var(--c-bg-tertiary);
+  border: 1px solid var(--c-border);
+  border-radius: var(--border-radius-md);
+  color: var(--c-text-primary);
+  font-size: var(--font-size-base);
+  font-family: inherit;
+}
+
+.setting-input:focus {
+  outline: none;
+  border-color: var(--c-primary);
+  box-shadow: 0 0 0 3px rgba(10, 132, 255, 0.2);
+}
+
+.setting-checkbox {
+  margin-left: var(--space-2);
+}
+
+.lunch-settings {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-top: var(--space-2);
+}
+
+.save-settings {
+  width: 100%;
+  margin-top: var(--space-4);
+  padding: var(--space-3);
+  font-size: var(--font-size-base);
+}
+
+/* Mobile responsiveness */
+@media (max-width: 768px) {
+  .reservation-modal .modal-content {
+    width: 100%;
+    height: 100vh;
+    max-height: 100vh;
+    border-radius: 0;
+  }
+  
+  .reservation-modal-header {
+    padding: var(--space-3) var(--space-3);
+  }
+  
+  .day-tabs {
+    padding: var(--space-2);
+  }
+  
+  .day-tab {
+    min-width: 60px;
+    font-size: 12px;
+    padding: var(--space-1);
+  }
+  
+  .reservation-content {
+    padding: var(--space-2);
+  }
+  
+  .time-slots-grid {
+    grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+  }
+  
+  .slots-stats {
+    flex-direction: column;
+    gap: var(--space-1);
+    font-size: 11px;
+  }
+  
+  .quick-actions {
+    flex-direction: column;
+  }
+  
+  .quick-action-btn {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+/* Dark mode optimizations */
+@media (prefers-color-scheme: dark) {
+  .time-slot.available {
+    background: rgba(48, 209, 88, 0.15);
+  }
+  
+  .calendar-day {
+    background: var(--c-bg-tertiary);
+  }
+}
