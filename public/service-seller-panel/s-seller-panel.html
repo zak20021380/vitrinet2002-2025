@@ -1104,7 +1104,7 @@
     <div class="settings-panel" id="settings-panel" hidden>
       <div class="settings-header">
         <h3>تنظیمات نوبت‌دهی</h3>
-        <button type="button" class="btn-icon-sm" id="close-settings">
+        <button type="button" class="btn-icon-sm" id="close-settings" aria-label="بستن تنظیمات">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
           </svg>
@@ -3832,8 +3832,10 @@ class ReservationSystem {
       this.showSettings();
     });
 
-    document.getElementById('close-settings')?.addEventListener('click', () => {
-      this.hideSettings();
+    document.addEventListener('click', (e) => {
+      if (e.target.closest('#close-settings')) {
+        this.hideSettings();
+      }
     });
 
     document.getElementById('save-settings')?.addEventListener('click', () => {
