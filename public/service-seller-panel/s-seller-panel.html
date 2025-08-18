@@ -51,7 +51,9 @@
           <h2 id="notification-title">اعلان‌ها</h2>
           <ul class="notification-list" id="notification-list"></ul>
         </div>
-
+<button id="open-appts" class="btn-primary btn-icon-text" type="button" aria-haspopup="dialog">
+  مدیریت نوبت‌ها
+</button>
 
         
         <button id="view-store-btn" class="btn-primary btn-icon-text" aria-label="مشاهده صفحه من">
@@ -982,6 +984,83 @@
         </form>
     </div>
   </div>
+
+<div id="appts-modal" class="modal customer-modal" hidden dir="rtl" aria-labelledby="appts-title" role="dialog" aria-modal="true">
+  <div class="modal-backdrop" data-close="appts-modal"></div>
+
+  <div class="modal-content">
+    <!-- close -->
+    <button class="modal-close-floating" type="button" id="appts-close" aria-label="بستن">
+      ✕
+    </button>
+
+    <!-- header -->
+    <header class="appts-header">
+      <h2 id="appts-title" class="modal-title">مدیریت نوبت‌دهی</h2>
+      <div class="appts-meta">
+        <div class="appts-today" id="appts-today">امروز — </div>
+        <div class="appts-editing">
+          در حال ویرایش: <strong id="appts-editing-day">شنبه</strong>
+        </div>
+      </div>
+    </header>
+
+    <!-- weekday chips -->
+    <section class="appts-week">
+      <div class="weekday-chips" id="appts-weekdays" role="tablist" aria-label="روزهای هفته"></div>
+    </section>
+
+    <!-- slots editor -->
+    <section class="appts-slots card" aria-labelledby="appts-slots-title">
+      <h3 id="appts-slots-title" class="section-title">ساعت‌های این روز</h3>
+
+      <div class="appts-add">
+        <label for="appts-time" class="form-label">ساعت جدید (HH:MM)</label>
+        <div class="appts-add-row">
+          <input id="appts-time" class="form-control" type="time" dir="ltr" inputmode="numeric" pattern="[0-9]{2}:[0-9]{2}" />
+          <button id="appts-add-btn" class="btn-primary" type="button">افزودن ساعت</button>
+        </div>
+      </div>
+
+      <ul id="appts-slots" class="slot-list" aria-live="polite" aria-relevant="additions removals"></ul>
+
+      <div class="appts-actions">
+        <button id="appts-copy-btn" class="btn-secondary" type="button">کپی زمان‌های این روز…</button>
+        <button id="appts-clear-day" class="btn-danger" type="button">حذف همه زمان‌های این روز</button>
+      </div>
+    </section>
+
+    <!-- copy panel -->
+    <section id="appts-copy-panel" class="appts-copy card" hidden aria-labelledby="appts-copy-title">
+      <h3 id="appts-copy-title" class="section-title">کپی به روزهای زیر</h3>
+
+      <div class="copy-mode">
+        <label class="form-label">نحوه کپی</label>
+        <div class="copy-mode-row">
+          <label class="copy-radio">
+            <input type="radio" name="copyMode" value="replace" checked />
+            <span>جایگزینی کامل</span>
+          </label>
+          <label class="copy-radio">
+            <input type="radio" name="copyMode" value="merge" />
+            <span>ادغام (بدون تکراری)</span>
+          </label>
+        </div>
+      </div>
+
+      <div id="appts-copy-targets" class="copy-targets" role="group" aria-label="روزهای مقصد"></div>
+
+      <div class="form-actions">
+        <button id="appts-copy-cancel" class="btn-secondary" type="button">انصراف</button>
+        <button id="appts-copy-apply" class="btn-primary" type="button">کپی</button>
+      </div>
+    </section>
+  </div>
+</div>
+
+
+
+
   <div id="toast-root" aria-live="assertive" aria-atomic="true"></div>
 <script>
 document.addEventListener('DOMContentLoaded', () => {
@@ -3566,6 +3645,355 @@ document.addEventListener('DOMContentLoaded', function(){
     });
   })();
 });
+</script>
+
+
+
+<script>
+/* ========= Jalali (Shamsi) utils — no deps ========= */
+(function(){
+  function pad2(n){ return (n < 10 ? '0' : '') + n; }
+  function toFaDigits(str){
+    return String(str).replace(/\d/g, d => '۰۱۲۳۴۵۶۷۸۹'[d]);
+  }
+  function isLeapGregorian(y){
+    return (y % 4 === 0 && y % 100 !== 0) || (y % 400 === 0);
+  }
+  function toJalali(gy, gm, gd){
+    // gm: 1..12, gd:1..31
+    var g_d_m = [0,31,59,90,120,151,181,212,243,273,304,334];
+    var gy2 = gy - 1600;
+    var gm2 = gm - 1;
+    var gd2 = gd - 1;
+
+    var g_day_no = 365*gy2 + Math.floor((gy2+3)/4) - Math.floor((gy2+99)/100) + Math.floor((gy2+399)/400);
+    g_day_no += g_d_m[gm2] + gd2;
+    if (gm2 > 1 && isLeapGregorian(gy)) g_day_no += 1;
+
+    var j_day_no = g_day_no - 79;
+    var j_np = Math.floor(j_day_no / 12053); // 33y cycles
+    j_day_no %= 12053;
+
+    var jy = 979 + 33*j_np + 4*Math.floor(j_day_no/1461);
+    j_day_no %= 1461;
+
+    if (j_day_no >= 366) {
+      jy += Math.floor((j_day_no - 1)/365);
+      j_day_no = (j_day_no - 1) % 365;
+    }
+
+    var jm, jd;
+    if (j_day_no < 186) {
+      jm = 1 + Math.floor(j_day_no/31);
+      jd = 1 + (j_day_no % 31);
+    } else {
+      j_day_no -= 186;
+      jm = 7 + Math.floor(j_day_no/30);
+      jd = 1 + (j_day_no % 30);
+    }
+    return { jy, jm, jd };
+  }
+  function formatJalaliDate(d){
+    const names = ['یکشنبه','دوشنبه','سه‌شنبه','چهارشنبه','پنجشنبه','جمعه','شنبه'];
+    const gd = d.getDate(), gm = d.getMonth()+1, gy = d.getFullYear();
+    const j = toJalali(gy, gm, gd);
+    const weekdayFa = names[d.getDay()];
+    const text = `${weekdayFa}، ${j.jy}/${pad2(j.jm)}/${pad2(j.jd)}`;
+    return toFaDigits(text);
+  }
+
+  /* ========= Appointment modal ========= */
+  const weekdays = [
+    { jsIdx: 6, label: 'شنبه'    },
+    { jsIdx: 0, label: 'یکشنبه'  },
+    { jsIdx: 1, label: 'دوشنبه'  },
+    { jsIdx: 2, label: 'سه‌شنبه' },
+    { jsIdx: 3, label: 'چهارشنبه'},
+    { jsIdx: 4, label: 'پنجشنبه' },
+    { jsIdx: 5, label: 'جمعه'    },
+  ];
+
+  const $ = sel => document.querySelector(sel);
+  const $$ = sel => Array.from(document.querySelectorAll(sel));
+
+  const els = {
+    open: $('#open-appts'),
+    modal: $('#appts-modal'),
+    backdrop: '#appts-modal .modal-backdrop',
+    close: $('#appts-close'),
+    today: $('#appts-today'),
+    editingDay: $('#appts-editing-day'),
+    chips: $('#appts-weekdays'),
+    time: $('#appts-time'),
+    add: $('#appts-add-btn'),
+    list: $('#appts-slots'),
+    copyBtn: $('#appts-copy-btn'),
+    clearDay: $('#appts-clear-day'),
+    copyPanel: $('#appts-copy-panel'),
+    copyTargets: $('#appts-copy-targets'),
+    copyCancel: $('#appts-copy-cancel'),
+    copyApply: $('#appts-copy-apply'),
+  };
+
+  const STORAGE_KEY = 'appts_slots_v1';
+  const state = {
+    selectedDayIdx: 6, // default: شنبه
+    // Map by JS weekday index (0..6 => Sunday..Saturday)
+    slots: { 0:[], 1:[], 2:[], 3:[], 4:[], 5:[], 6:[] }
+  };
+
+  function load(){
+    try{
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if(!raw) return;
+      const parsed = JSON.parse(raw);
+      if(parsed && parsed.slots){
+        Object.assign(state.slots, parsed.slots);
+      }
+      if(typeof parsed.selectedDayIdx === 'number'){
+        state.selectedDayIdx = parsed.selectedDayIdx;
+      }
+    }catch(e){}
+  }
+  function save(){
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({
+      selectedDayIdx: state.selectedDayIdx,
+      slots: state.slots
+    }));
+  }
+
+  function showToast(msg, type=''){
+    let root = document.getElementById('toast-root');
+    if(!root){ root = document.createElement('div'); root.id='toast-root'; document.body.appendChild(root); }
+    const t = document.createElement('div');
+    t.className = 'toast ' + (type || '');
+    t.role = 'status';
+    t.innerHTML = `<span class="toast-icon">⚑</span><span>${msg}</span>`;
+    root.appendChild(t);
+    requestAnimationFrame(()=>{ t.style.opacity=1; t.style.transform='translateY(0)'; });
+    setTimeout(()=>{
+      t.style.transition='opacity .2s, transform .2s';
+      t.style.opacity=0; t.style.transform='translateY(20px)';
+      setTimeout(()=> t.remove(), 250);
+    }, 2200);
+  }
+
+  function sortTimes(a,b){ return a.time.localeCompare(b.time, 'fa'); }
+
+  function renderChips(){
+    els.chips.innerHTML = '';
+    weekdays.forEach(w => {
+      const btn = document.createElement('button');
+      btn.className = 'weekday-chip' + (w.jsIdx === state.selectedDayIdx ? ' active':'');
+      btn.type = 'button';
+      btn.role = 'tab';
+      btn.setAttribute('aria-selected', w.jsIdx === state.selectedDayIdx ? 'true' : 'false');
+      btn.dataset.day = String(w.jsIdx);
+      btn.textContent = w.label;
+      els.chips.appendChild(btn);
+    });
+  }
+
+  function renderEditingDay(){
+    const w = weekdays.find(x => x.jsIdx === state.selectedDayIdx);
+    els.editingDay.textContent = w ? w.label : '';
+  }
+
+  function renderList(){
+    const items = [...(state.slots[state.selectedDayIdx] || [])].sort(sortTimes);
+    els.list.innerHTML = items.map(s => {
+      const timeFa = s.time.replace(/\d/g, d => '۰۱۲۳۴۵۶۷۸۹'[d]);
+      const badge = s.booked ? '<span class="badge status-badge status-badge-booked">رزرو شده</span>' :
+                                '<span class="badge status-badge status-badge-free">آزاد</span>';
+      return `
+        <li class="slot-item" data-time="${s.time}">
+          <span class="slot-time" dir="ltr">${timeFa}</span>
+          <span class="slot-spacer"></span>
+          ${badge}
+          <button class="icon-btn slot-toggle" type="button" aria-label="تغییر وضعیت رزرو">
+            ${s.booked ? '🔓' : '🔒'}
+          </button>
+          <button class="icon-btn slot-delete" type="button" aria-label="حذف ساعت">🗑</button>
+        </li>
+      `;
+    }).join('') || '<li class="slot-empty">هنوز ساعتی برای این روز اضافه نشده.</li>';
+  }
+
+  function setToday(){
+    els.today.textContent = 'امروز — ' + formatJalaliDate(new Date());
+  }
+
+  function selectDay(jsIdx){
+    state.selectedDayIdx = jsIdx;
+    renderChips();
+    renderEditingDay();
+    renderList();
+    save();
+  }
+
+  function validTime(v){
+    return /^([01]\d|2[0-3]):([0-5]\d)$/.test(v);
+  }
+
+  function addTime(){
+    const v = (els.time.value || '').trim();
+    if(!validTime(v)){ showToast('فرمت ساعت نامعتبر است.', 'error'); return; }
+    const arr = state.slots[state.selectedDayIdx];
+    if(arr.some(x => x.time === v)){ showToast('این ساعت تکراری است.', 'error'); return; }
+    arr.push({ time: v, booked: false });
+    els.time.value = '';
+    renderList();
+    save();
+    showToast('ساعت اضافه شد.', 'success');
+  }
+
+  function deleteTime(time){
+    const arr = state.slots[state.selectedDayIdx];
+    const idx = arr.findIndex(x => x.time === time);
+    if(idx >= 0){
+      arr.splice(idx, 1);
+      renderList();
+      save();
+      showToast('حذف شد.');
+    }
+  }
+
+  function toggleBooked(time){
+    const arr = state.slots[state.selectedDayIdx];
+    const it = arr.find(x => x.time === time);
+    if(it){
+      it.booked = !it.booked;
+      renderList();
+      save();
+      showToast(it.booked ? 'به حالت رزرو شده تغییر کرد.' : 'به حالت آزاد تغییر کرد.', 'success');
+    }
+  }
+
+  function clearDay(){
+    if(!confirm('همه زمان‌های این روز حذف شوند؟')) return;
+    state.slots[state.selectedDayIdx] = [];
+    renderList(); save(); showToast('همه زمان‌های این روز حذف شد.');
+  }
+
+  function openCopyPanel(){
+    els.copyPanel.hidden = false;
+    // targets (all except current)
+    els.copyTargets.innerHTML = weekdays
+      .filter(w => w.jsIdx !== state.selectedDayIdx)
+      .map(w => `
+        <label class="copy-target">
+          <input type="checkbox" value="${w.jsIdx}" />
+          <span>${w.label}</span>
+        </label>
+      `).join('');
+  }
+  function closeCopyPanel(){ els.copyPanel.hidden = true; }
+
+  function applyCopy(){
+    const src = [...(state.slots[state.selectedDayIdx] || [])];
+    if(src.length === 0){ showToast('چیزی برای کپی نیست.', 'error'); return; }
+    const mode = (document.querySelector('input[name="copyMode"]:checked') || {}).value || 'replace';
+    const targets = Array.from(els.copyTargets.querySelectorAll('input[type="checkbox"]:checked'))
+      .map(x => parseInt(x.value, 10));
+    if(targets.length === 0){ showToast('هیچ روزی انتخاب نشده.', 'error'); return; }
+
+    targets.forEach(t => {
+      if(mode === 'replace'){
+        state.slots[t] = JSON.parse(JSON.stringify(src));
+      }else{
+        // merge (no duplicates by time)
+        const dest = state.slots[t];
+        const times = new Set(dest.map(x => x.time));
+        src.forEach(s => { if(!times.has(s.time)) dest.push({ time:s.time, booked:s.booked }); });
+      }
+    });
+    save();
+    closeCopyPanel();
+    showToast('کپی انجام شد.', 'success');
+  }
+
+  function openModal(){
+    els.modal.removeAttribute('hidden');
+    document.body.classList.add('has-overlay');
+    // focus first interactive
+    setTimeout(()=>{ els.time?.focus(); }, 50);
+  }
+  function closeModal(){
+    els.modal.setAttribute('hidden', '');
+    document.body.classList.remove('has-overlay');
+    closeCopyPanel();
+  }
+
+  // API hook (optional): set bookings programmatically by weekday + times
+  // Appts.setBooked(6, ['09:00','10:30'], true) // شنبه
+  function setBooked(weekdayIdx, timesArr, booked){
+    const arr = state.slots[weekdayIdx] || [];
+    const map = new Set(timesArr);
+    arr.forEach(s => { if(map.has(s.time)) s.booked = !!booked; });
+    if(weekdayIdx === state.selectedDayIdx){ renderList(); }
+    save();
+  }
+
+  // events
+  document.addEventListener('click', (ev)=>{
+    const t = ev.target;
+
+    // backdrop close
+    if(t.matches('#appts-modal .modal-backdrop,[data-close="appts-modal"]')) closeModal();
+
+    // open/close
+    if(t === els.open) openModal();
+    if(t === els.close) closeModal();
+
+    // chips
+    if(t.closest('.weekday-chip')){
+      const d = parseInt(t.closest('.weekday-chip').dataset.day, 10);
+      selectDay(d);
+    }
+
+    // list actions
+    if(t.closest('.slot-delete')){
+      const li = t.closest('.slot-item');
+      deleteTime(li?.dataset.time);
+    }
+    if(t.closest('.slot-toggle')){
+      const li = t.closest('.slot-item');
+      toggleBooked(li?.dataset.time);
+    }
+
+    // copy
+    if(t === els.copyBtn) openCopyPanel();
+    if(t === els.copyCancel) closeCopyPanel();
+    if(t === els.copyApply) applyCopy();
+
+    // clear
+    if(t === els.clearDay) clearDay();
+  });
+
+  els.add.addEventListener('click', addTime);
+  els.time.addEventListener('keydown', (e)=>{ if(e.key === 'Enter') addTime(); });
+
+  // init
+  load();
+  setToday();
+  renderChips();
+  renderEditingDay();
+  renderList();
+
+  // pick default selected to "today" if empty config
+  if(!localStorage.getItem(STORAGE_KEY)){
+    // map today (0..6) -> our order (maybe 6..5)
+    selectDay(new Date().getDay());
+  }
+
+  // expose tiny API
+  window.Appts = {
+    open: openModal,
+    close: closeModal,
+    getState: () => JSON.parse(JSON.stringify(state)),
+    setBooked, // Appts.setBooked(weekdayIdx, ['09:00'], true)
+  };
+})();
 </script>
 
 
