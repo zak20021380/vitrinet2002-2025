@@ -103,11 +103,16 @@ async function fetchInitialData() {
       };
       localStorage.setItem('seller', JSON.stringify(store));
       const fullName = `${seller.firstname || ''} ${seller.lastname || ''}`.trim();
-      document.getElementById('seller-name').textContent = fullName;
-      document.getElementById('seller-shop-name').textContent = seller.storename || '';
-      document.getElementById('seller-category').textContent = seller.category || '';
-      document.getElementById('seller-phone').textContent = seller.phone || '';
-      document.getElementById('seller-address').textContent = seller.address || '';
+
+      const setText = (id, text) => {
+        const el = document.getElementById(id);
+        if (el) el.textContent = text;
+      };
+      setText('seller-name', fullName);
+      setText('seller-shop-name', seller.storename || '');
+      setText('seller-category', seller.category || '');
+      setText('seller-phone', seller.phone || '');
+      setText('seller-address', seller.address || '');
     }
 
     if (servicesRes.ok) {
