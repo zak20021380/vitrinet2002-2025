@@ -1191,15 +1191,16 @@ function showToastDark(message, {type='success', durationMs=2600} = {}) {
   </template>
 </section>
 
-<!-- Fullscreen Image Modal (re-usable, no name clash) -->
-<div id="imageModal" class="fixed inset-0 bg-black/90 z-50 hidden items-center justify-center p-4">
-  <div class="relative max-w-5xl w-full max-h-[90vh] flex flex-col">
-    <button id="imageModalClose" class="absolute -top-12 right-0 text-white text-2xl z-10 hover:text-gray-300 transition-colors" aria-label="بستن">
-      <i class="fas fa-times"></i>
-    </button>
+<!-- Fullscreen Image Modal (responsive) -->
+<div id="imageModal" class="fixed inset-0 bg-black/90 z-50 hidden p-4 overflow-y-auto flex items-center justify-center">
+  <div class="relative w-full max-w-full sm:max-w-5xl max-h-[90vh] flex flex-col transform transition-all duration-200 scale-95 opacity-0">
     <div class="bg-white rounded-2xl overflow-hidden shadow-2xl flex-grow flex flex-col">
-      <div class="p-4 border-b">
+      <div class="p-4 border-b flex items-center justify-between">
         <h3 id="modalTitle" class="text-xl font-bold text-gray-800"></h3>
+        <button id="imageModalClose" type="button" class="flex items-center gap-1 text-gray-500 hover:text-gray-700 text-sm">
+          <i class="fas fa-times"></i>
+          <span>بستن</span>
+        </button>
       </div>
       <div class="flex-grow flex items-center justify-center p-2 bg-gray-100">
         <img id="modalImage" src="" alt="" class="max-w-full max-h-[60vh] object-contain rounded-lg">
@@ -1213,39 +1214,6 @@ function showToastDark(message, {type='success', durationMs=2600} = {}) {
     </div>
   </div>
 </div>
-
-
-
-    
-    <!-- Modal for Fullscreen Image View -->
-    <div id="imageModal" class="fixed inset-0 bg-black/90 z-50 hidden flex items-center justify-center p-4">
-        <div class="relative max-w-5xl w-full max-h-[90vh] flex flex-col">
-            <button onclick="closeModal()" class="absolute -top-12 right-0 text-white text-2xl z-10 hover:text-gray-300 transition-colors">
-                <i class="fas fa-times"></i>
-            </button>
-            <div class="bg-white rounded-2xl overflow-hidden shadow-2xl flex-grow flex flex-col">
-                <div class="p-4 border-b">
-                    <h3 id="modalTitle" class="text-xl font-bold text-gray-800"></h3>
-                </div>
-                <div class="flex-grow flex items-center justify-center p-2 bg-gray-100">
-                    <img id="modalImage" src="" alt="" class="max-w-full max-h-[60vh] object-contain rounded-lg">
-                </div>
-                <div class="p-4 border-t flex justify-between items-center">
-                    <div class="flex items-center space-x-4 space-x-reverse">
-                        <div class="flex items-center text-gray-600">
-                            <i class="far fa-eye ml-1"></i>
-                            <span id="modalViews" class="text-sm">1.2k</span>
-                        </div>
-                        <div class="flex items-center text-gray-600">
-                            <i class="far fa-heart ml-1"></i>
-                            <span id="modalLikes" class="text-sm">48</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    
     <!-- Booking Wizard -->
 <section id="booking-wizard" class="hidden py-8 px-4" dir="rtl">
   <style>
