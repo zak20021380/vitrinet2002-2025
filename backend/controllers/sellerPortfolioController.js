@@ -106,3 +106,30 @@ exports.deletePortfolioItem = async (req, res) => {
     return res.status(500).json({ message: 'خطای سرور' });
   }
 };
+
+
+// Get portfolio items by shop URL (query parameter version)
+exports.getPortfolioByShopUrlQuery = async (req, res) => {
+  try {
+    const { shopurl } = req.query;
+    
+    if (!shopurl) {
+      return res.status(400).json({ message: 'پارامتر shopurl الزامی است' });
+    }
+    
+    const seller = await Seller.findOne({ shopurl }).select('_id');
+    if (!seller) {
+      return res.status(404).json({ message: 'فروشنده پیدا نشد.' });
+    }
+    
+    const items = await SellerPortfolio.find({ 
+      sellerId: seller._id, 
+      isActive: true 
+    }).sort({ order: 1, createdAt: -1 });
+    
+    return res.json({ items });
+  } catch (err) {
+    console.error('getPortfolioByShopUrlQuery error:', err);
+    return res.status(500).json({ message: 'خطای سرور' });
+  }
+};

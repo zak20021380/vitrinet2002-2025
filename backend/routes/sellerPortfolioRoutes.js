@@ -3,8 +3,12 @@ const router = express.Router();
 const auth = require('../middlewares/authMiddleware');
 const ctrl = require('../controllers/sellerPortfolioController');
 
-// Public route - get portfolio by shopurl
+// Public routes - get portfolio by shopurl (multiple endpoint patterns)
 router.get('/public/:shopurl', ctrl.getPortfolioByShopUrl);
+router.get('/seller-portfolio/public/:shopurl', ctrl.getPortfolioByShopUrl);
+router.get('/portfolios/public/:shopurl', ctrl.getPortfolioByShopUrl);
+router.get('/portfolio/public/:shopurl', ctrl.getPortfolioByShopUrl);
+router.get('/portfolio', ctrl.getPortfolioByShopUrlQuery);
 
 // Private routes (seller only)
 router.get('/me', auth('seller'), ctrl.getMyPortfolio);
