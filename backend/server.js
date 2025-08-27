@@ -53,6 +53,7 @@ app.use('/api/plans', planRoutes);
 app.use('/api/adPlans', adPlanRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/shops', require('./routes/shops'));
+app.use('/api/seller-portfolio', require('./routes/sellerPortfolioRoutes'));
 app.use('/api/adOrder', require('./routes/adOrder'));
 app.use('/api/sellerPlans', require('./routes/sellerPlans'));
 app.use('/api/shopping-centers', require('./routes/shoppingCenter'));

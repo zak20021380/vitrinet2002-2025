@@ -96,7 +96,84 @@ async createService(payload) {
     });
     if (!r.ok) throw new Error('DELETE_SERVICE_FAILED');
     return true;
-  }
+  },
+
+  // Portfolio API methods
+  async getPortfolio() {
+    const r = await fetch(bust(`${API_BASE}/api/seller-portfolio/me`), {
+      credentials: 'include',
+      ...NO_CACHE
+    });
+    if (!r.ok && r.status !== 304) throw new Error('FETCH_PORTFOLIO_FAILED');
+    const data = await this._json(r);
+    const items = data.items || data.data || data || [];
+    return Array.isArray(items) ? items : [];
+  },
+
+  async createPortfolioItem(payload) {
+    console.log('Creating portfolio item:', payload);
+    const r = await fetch(`${API_BASE}/api/seller-portfolio`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify(payload)
+    });
+    if (!r.ok) {
+      let errorMessage = 'CREATE_PORTFOLIO_FAILED';
+      try {
+        const errorData = await r.json();
+        console.error('Portfolio create error:', errorData);
+        errorMessage = errorData.message || errorData.error || errorMessage;
+      } catch (e) {
+        console.error('Failed to parse error response:', e);
+      }
+      throw new Error(errorMessage);
+    }
+    const data = await this._json(r);
+    return data.item || data;
+  },
+
+  async updatePortfolioItem(id, payload) {
+    const r = await fetch(`${API_BASE}/api/seller-portfolio/${id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify(payload)
+    });
+    if (!r.ok) throw new Error('UPDATE_PORTFOLIO_FAILED');
+    const data = await this._json(r);
+    return data.item || data;
+  },
+
+async deletePortfolioItem(id) {
+        if (!confirm('آیا از حذف این نمونه‌کار مطمئن هستید؟')) return;
+
+        const before = StorageManager.get('vit_portfolio') || [];
+        const item = before.find(p => p.id === id);
+        const dbId = item?._id || item?.id;
+        const after = before.filter(p => p.id !== id && p._id !== dbId);
+
+        // Optimistic update
+        StorageManager.set('vit_portfolio', after);
+        this.renderPortfolioList();
+
+        try {
+            if (!API || typeof API.deletePortfolioItem !== 'function') {
+                throw new Error('API adapter missing');
+            }
+            await API.deletePortfolioItem(dbId);
+            UIComponents.showToast('نمونه‌کار حذف شد.', 'success');
+        } catch (err) {
+            console.error('deletePortfolioItem failed', err);
+            // Rollback on error
+            StorageManager.set('vit_portfolio', before);
+            this.renderPortfolioList();
+            UIComponents.showToast('حذف در سرور انجام نشد؛ تغییرات برگشت داده شد.', 'error');
+        }
+    },
+
+
+
 };
 
 // === END STEP 1 ===
@@ -1497,16 +1574,37 @@ async deleteService(id) {
 }
 
     // === NEW: Portfolio Management Methods ===
-    initPortfolio() {
-        const portfolio = StorageManager.get('vit_portfolio');
-        if (!portfolio || portfolio.length === 0) {
-            const defaultPortfolio = [
-                { id: 1, title: 'موی کوتاه', image: 'https://images.unsplash.com/photo-1599566150163-29194dcaad36?w=300', description: 'اصلاح سر مدرن' },
-                { id: 2, title: 'رنگ موی طبیعی', image: 'https://images.unsplash.com/photo-1564460576323-2f03bbfbfe2d?w=300', description: 'رنگ طبیعی و درخشان' },
-                { id: 3, title: 'اصلاح ریش فانتزی', image: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=300', description: 'طراحی ریش متنوع' }
-            ];
-            StorageManager.set('vit_portfolio', defaultPortfolio);
+async initPortfolio() {
+        const container = document.getElementById('portfolio-list');
+        if (container) {
+            container.innerHTML = `
+                <div class="loading-inline" style="opacity:.8; font-size:.9rem; padding:.75rem;">
+                    در حال بارگذاری نمونه‌کارها…
+                </div>`;
         }
+
+        try {
+            // Try to fetch from server
+            const items = await API.getPortfolio();
+            StorageManager.set('vit_portfolio', items);
+        } catch (err) {
+            console.warn('getPortfolio failed; using local fallback', err);
+
+            // Fallback to local storage
+            if (!StorageManager.get('vit_portfolio')) {
+                const defaultPortfolio = [
+                    { id: 1, title: 'موی کوتاه', image: 'https://images.unsplash.com/photo-1599566150163-29194dcaad36?w=300', description: 'اصلاح سر مدرن' },
+                    { id: 2, title: 'رنگ موی طبیعی', image: 'https://images.unsplash.com/photo-1564460576323-2f03bbfbfe2d?w=300', description: 'رنگ طبیعی و درخشان' },
+                    { id: 3, title: 'اصلاح ریش فانتزی', image: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=300', description: 'طراحی ریش متنوع' }
+                ];
+                StorageManager.set('vit_portfolio', defaultPortfolio);
+            }
+
+            if (container) {
+                UIComponents.showToast('اتصال به سرور برقرار نشد؛ دادهٔ محلی نمایش داده شد.', 'error');
+            }
+        }
+
         this.renderPortfolioList();
     }
     renderPortfolioList() {
@@ -1569,7 +1667,7 @@ async deleteService(id) {
             titleEl.textContent = 'افزودن نمونه‌کار جدید';
         }
     }
-    async handlePortfolioFormSubmit() {
+async handlePortfolioFormSubmit() {
         const form = document.getElementById('portfolio-form');
         const id = form.dataset.editingId ? parseInt(form.dataset.editingId, 10) : null;
         const title = document.getElementById('portfolio-title').value.trim();
@@ -1587,22 +1685,56 @@ async deleteService(id) {
         }
 
         let portfolio = StorageManager.get('vit_portfolio') || [];
-        if (id) {
-            // Edit existing
-            const index = portfolio.findIndex(p => p.id === id);
-            if (index !== -1) {
-                portfolio[index] = { id, title, image: imageData, description };
-                UIComponents.showToast('نمونه‌کار با موفقیت ویرایش شد.', 'success');
+        UIComponents.showToast(id ? 'در حال ذخیره تغییرات…' : 'در حال افزودن نمونه‌کار…', 'info', 2500);
+
+        try {
+            if (!API || typeof API.getPortfolio !== 'function') {
+                throw new Error('API adapter missing');
             }
-        } else {
-            // Add new
-            const newId = portfolio.length > 0 ? Math.max(...portfolio.map(p => p.id)) + 1 : 1;
-            portfolio.push({ id: newId, title, image: imageData, description });
-            UIComponents.showToast('نمونه‌کار جدید اضافه شد.', 'success');
+
+            let saved;
+            const payload = { title, description, image: imageData };
+            
+            if (id) {
+                // Find if this is a real DB id or local id
+                const existing = portfolio.find(p => p.id === id);
+                const dbId = existing?._id || existing?.id;
+                
+                saved = await API.updatePortfolioItem(dbId, payload);
+                const index = portfolio.findIndex(p => p.id === id || p._id === dbId);
+                if (index !== -1) {
+                    portfolio[index] = { ...portfolio[index], ...saved };
+                }
+            } else {
+                saved = await API.createPortfolioItem(payload);
+                portfolio.push(saved);
+            }
+
+            StorageManager.set('vit_portfolio', portfolio);
+            this.renderPortfolioList();
+            UIComponents.closeDrawer('portfolio-drawer');
+            UIComponents.showToast('نمونه‌کار با موفقیت ذخیره شد.', 'success');
+
+        } catch (err) {
+            console.error('portfolio save failed', err);
+            
+            // Fallback to local storage only
+            if (id) {
+                const index = portfolio.findIndex(p => p.id === id);
+                if (index !== -1) {
+                    portfolio[index] = { id, title, image: imageData, description };
+                    UIComponents.showToast('نمونه‌کار ویرایش شد (محلی).', 'success');
+                }
+            } else {
+                const newId = portfolio.length > 0 ? Math.max(...portfolio.map(p => p.id || 0)) + 1 : 1;
+                portfolio.push({ id: newId, title, image: imageData, description });
+                UIComponents.showToast('نمونه‌کار اضافه شد (محلی).', 'success');
+            }
+            
+            StorageManager.set('vit_portfolio', portfolio);
+            this.renderPortfolioList();
+            UIComponents.closeDrawer('portfolio-drawer');
         }
-        StorageManager.set('vit_portfolio', portfolio);
-        this.renderPortfolioList();
-        UIComponents.closeDrawer('portfolio-drawer');
     }
     deletePortfolioItem(id) {
         if (!confirm('آیا از حذف این نمونه‌کار مطمئن هستید؟')) return;
