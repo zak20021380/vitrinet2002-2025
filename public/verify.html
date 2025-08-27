@@ -102,7 +102,7 @@
       </div>
       <div class="text-center text-sm mt-3">
         شماره اشتباه است؟
-        <a href="register.html" class="text-[#0ea5e9] hover:underline font-extrabold">تغییر شماره</a>
+<a href="post.html" class="text-[#0ea5e9] hover:underline font-extrabold">تغییر شماره</a>
       </div>
     </section>
     <!-- پیام موفقیت آمیز وسط صفحه -->
@@ -135,10 +135,11 @@
   let shopurl = getQueryParam("shopurl");
   let phone = getQueryParam("phone");
 
-  // اگر shopurl نبود ریدایرکت کن به ثبت‌نام
-  if (!shopurl) {
-    window.location.href = "register.html";
-  }
+
+if (!shopurl) {
+  window.location.href = "post.html";
+}
+
 
   // انتخاب همه input های کد
   const digits = Array.from(document.querySelectorAll('.input-digit'));
@@ -211,22 +212,46 @@
         })
         .then(res2 => res2.json())
         .then(loginRes => {
-          if (loginRes.success && loginRes.seller) {
-            // توکن و اطلاعات رو ذخیره کن
-            localStorage.setItem('token', loginRes.token);
-            localStorage.setItem('seller', JSON.stringify(loginRes.seller));
-            // sessionStorage رو پاک کن
-            sessionStorage.removeItem('signup_password');
-            sessionStorage.removeItem('signup_phone');
-            // پیام موفقیت نشان بده و ریدایرکت کن
-            successMsg.classList.remove('hidden');
-            goDashboardBtn.onclick = function() {
-              window.location.href = "seller/dashboard.html?shopurl=" + encodeURIComponent(loginRes.seller.shopurl);
-            };
-          } else {
-            errorText.innerText = loginRes.message || "ورود ناموفق!";
-            errorText.classList.remove('hidden');
-          }
+  if (loginRes.success && loginRes.seller) {
+  // ذخیره‌ی توکن و اطلاعات
+  localStorage.setItem('token', loginRes.token);
+  localStorage.setItem('seller', JSON.stringify(loginRes.seller));
+
+  // تمیزکاری
+  sessionStorage.removeItem('signup_password');
+  sessionStorage.removeItem('signup_phone');
+
+  // ✅ تشخیص خدماتی بودن
+  // اگر بک‌اند category را برگرداند، از آن استفاده می‌کنیم؛
+  // در غیر این صورت از نقش ذخیره‌شده هنگام ثبت‌نام استفاده می‌کنیم (اگر موجود باشد).
+  const SERVICE_CATEGORIES = ["خدمات","زیبایی","تالار و مجالس","خودرو","ورزشی"];
+  const categoryFromServer = loginRes?.seller?.category || "";
+  const roleFromSignup = sessionStorage.getItem('signup_role'); // 'service' | 'seller' (اختیاری)
+  const isServiceSeller = categoryFromServer
+    ? SERVICE_CATEGORIES.includes(categoryFromServer)
+    : (roleFromSignup === 'service');
+
+  // ✅ مسیرها
+  const SERVICE_PANEL_URL = "service-seller-panel/s-seller-panel.html";
+  const DEFAULT_SELLER_PANEL_URL = "seller/dashboard.html";
+  const targetPanel = isServiceSeller ? SERVICE_PANEL_URL : DEFAULT_SELLER_PANEL_URL;
+
+  // نمایش پیام موفقیت و تعیین مقصد دکمه
+  successMsg.classList.remove('hidden');
+  if (goDashboardBtn) {
+    goDashboardBtn.textContent = isServiceSeller ? "ورود به پنل خدمات" : "ورود به پنل فروشنده";
+    goDashboardBtn.onclick = function() {
+      window.location.href = `${targetPanel}?shopurl=${encodeURIComponent(loginRes.seller.shopurl)}`;
+    };
+  } else {
+    // اگر به هر دلیل دکمه نبود، مستقیم هدایت کن
+    window.location.href = `${targetPanel}?shopurl=${encodeURIComponent(loginRes.seller.shopurl)}`;
+  }
+} else {
+  errorText.innerText = loginRes.message || "ورود ناموفق!";
+  errorText.classList.remove('hidden');
+}
+
         }).catch(() => {
           errorText.innerText = "خطای ورود به اکانت!";
           errorText.classList.remove('hidden');

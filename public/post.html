@@ -6,6 +6,8 @@
   <title>ثبت فروشگاه - ویترینت</title>
   <meta name="description" content="فرم ثبت فروشگاه جدید در ویترینت با انتخاب نام و آدرس اختصاصی فروشگاه. همین حالا فروشگاه آنلاین خود را راه‌اندازی کنید!" />
   <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;700&display=swap" rel="stylesheet" />
   <style>
     body {
@@ -33,10 +35,54 @@
       background: #fef2f2;
       border-color: #ef4444;
     }
-    @media (max-width: 600px) {
-      .glass {padding:1.1rem !important;}
-      .header-logo {font-size: 1.25rem !important;}
+    
+    /* Enhanced mobile header styles */
+
+      .nav-links {
+        position: fixed;
+        top: 0;
+        right: -100%;
+        width: 70%;
+        max-width: 280px;
+        height: 100vh;
+        background: white;
+        box-shadow: -2px 0 10px rgba(0,0,0,0.1);
+        transition: right 0.3s ease;
+        z-index: 100;
+        padding: 1.5rem;
+        overflow-y: auto;
+      }
+      .nav-links.active {
+        right: 0;
+      }
+      .mobile-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0,0,0,0.5);
+        z-index: 99;
+        display: none;
+      }
+      .mobile-overlay.active {
+        display: block;
+      }
+      .glass {
+        padding: 1.25rem !important;
+      }
     }
+    
+    @media (max-width: 400px) {
+      .glass {
+        padding: 1rem !important;
+        border-radius: 1.25rem;
+      }
+      .header-logo {
+        font-size: 1.25rem !important;
+      }
+    }
+    
     .fadein { animation: fadein .7s; }
     @keyframes fadein {
       from { opacity: 0; transform: translateY(30px);}
@@ -50,22 +96,87 @@
       max-height: 15rem;
       overflow-y: auto;
     }
+    
+    /* Optimized hamburger menu */
+    .hamburger {
+      width: 24px;
+      height: 20px;
+      position: relative;
+      cursor: pointer;
+      display: inline-block;
+      z-index: 101;
+    }
+    .hamburger span {
+      background: #374151;
+      border-radius: 2px;
+      height: 3px;
+      width: 100%;
+      position: absolute;
+      transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+      left: 0;
+    }
+    .hamburger span:nth-child(1) { top: 0; }
+    .hamburger span:nth-child(2) { top: 8px; }
+    .hamburger span:nth-child(3) { top: 16px; }
+    .hamburger.active span:nth-child(1) {
+      transform: rotate(45deg);
+      top: 8px;
+    }
+    .hamburger.active span:nth-child(2) {
+      opacity: 0;
+    }
+    .hamburger.active span:nth-child(3) {
+      transform: rotate(-45deg);
+      top: 8px;
+    }
   </style>
 </head>
 <body class="text-gray-800">
 
-  <!-- هدر شیشه‌ای -->
-  <header class="w-full bg-white/90 shadow-sm backdrop-blur-md sticky top-0 z-50">
-    <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between px-3 sm:px-6 py-3 gap-y-2">
-      <div class="flex items-center gap-3 flex-shrink-0">
-        <a href="index.html" class="header-logo font-bold text-[1.55rem] sm:text-[1.9rem] md:text-[2.05rem] bg-gradient-to-l from-[#11d6ad] via-[#10b981] to-[#2db4e8] bg-clip-text text-transparent" style="letter-spacing:1.7px;">ویترینت</a>
+  <!-- Enhanced Mobile-First Header -->
+  <header class="w-full bg-white/95 shadow-sm backdrop-blur-md sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center justify-between h-16">
+        <!-- Logo -->
+        <div class="flex-shrink-0">
+          <a href="index.html" class="header-logo font-bold text-[1.5rem] sm:text-[1.75rem] md:text-[2rem] bg-gradient-to-l from-[#11d6ad] via-[#10b981] to-[#2db4e8] bg-clip-text text-transparent" style="letter-spacing:1.5px;">ویترینت</a>
+        </div>
+        
+        <!-- Desktop Navigation -->
+        <nav class="hidden sm:flex items-center space-x-1 sm:space-x-2 md:space-x-4 rtl:space-x-reverse">
+          <a href="index.html" class="text-gray-700 hover:text-[#10b981] font-medium px-3 py-2 text-sm md:text-base transition-colors duration-200">خانه</a>
+          <a href="categories.html" class="text-gray-700 hover:text-[#0ea5e9] font-medium px-3 py-2 text-sm md:text-base transition-colors duration-200">دسته‌بندی</a>
+          <a href="login.html" class="text-gray-700 hover:text-[#0ea5e9] font-medium px-3 py-2 text-sm md:text-base transition-colors duration-200">ورود</a>
+        </nav>
+        
+        <!-- Mobile menu button -->
+<button class="mobile-menu-btn hamburger sm:hidden" id="mobile-menu-btn" aria-label="منوی موبایل">
+          <span></span>
+          <span></span>
+          <span></span>
+        </button>
       </div>
-      <nav class="flex items-center justify-end gap-2 sm:gap-3 flex-wrap text-sm sm:text-base w-full sm:w-auto">
-        <a href="index.html" class="text-gray-700 hover:text-[#10b981] font-bold px-2 sm:px-3 transition">خانه</a>
-        <a href="categories.html" class="text-gray-700 hover:text-[#0ea5e9] font-bold px-2 sm:px-3 transition">دسته‌بندی</a>
-        <a href="login.html" class="text-gray-700 hover:text-[#0ea5e9] font-bold px-2 sm:px-3 transition">ورود</a>
-      </nav>
     </div>
+    
+    <!-- Mobile Navigation -->
+    <div class="nav-links sm:hidden" id="mobile-menu">
+      <div class="flex items-center justify-between mb-6">
+        <span class="font-bold text-lg text-gray-800">منو</span>
+        <button class="text-gray-500 hover:text-gray-700" id="close-menu">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+          </svg>
+        </button>
+      </div>
+      <div class="space-y-3">
+        <a href="index.html" class="block text-gray-700 hover:text-[#10b981] font-medium py-3 px-4 rounded-lg hover:bg-gray-50 transition-all duration-200">خانه</a>
+        <a href="categories.html" class="block text-gray-700 hover:text-[#0ea5e9] font-medium py-3 px-4 rounded-lg hover:bg-gray-50 transition-all duration-200">دسته‌بندی</a>
+        <a href="login.html" class="block text-gray-700 hover:text-[#0ea5e9] font-medium py-3 px-4 rounded-lg hover:bg-gray-50 transition-all duration-200">ورود</a>
+      </div>
+    </div>
+    
+    <!-- Mobile Overlay -->
+    <div class="mobile-overlay" id="mobile-overlay"></div>
   </header>
 
   <!-- فرم ثبت فروشگاه -->
@@ -149,6 +260,24 @@
       <option>خودرو</option>
       <option>کودکان</option>
     </select>
+
+    <!-- START: service examples (visible only for service categories) -->
+<div id="service-examples" class="hidden mt-2 rounded-xl border border-gray-200 bg-gray-50 p-2.5">
+  <div class="text-xs text-gray-600 mb-1.5">مثال‌های رایج <span class="font-bold">خدمات</span>:</div>
+  <div class="flex flex-wrap gap-2">
+    <button type="button" data-svc-example="آرایشگاه مردانه" class="px-3 py-1.5 rounded-full text-xs bg-white border border-gray-300 text-gray-700 hover:bg-gray-100 active:scale-[.98]">آرایشگاه مردانه</button>
+    <button type="button" data-svc-example="آرایشگاه زنانه" class="px-3 py-1.5 rounded-full text-xs bg-white border border-gray-300 text-gray-700 hover:bg-gray-100 active:scale-[.98]">آرایشگاه زنانه</button>
+    <button type="button" data-svc-example="کارواش" class="px-3 py-1.5 rounded-full text-xs bg-white border border-gray-300 text-gray-700 hover:bg-gray-100 active:scale-[.98]">کارواش</button>
+    <button type="button" data-svc-example="کلینیک زیبایی" class="px-3 py-1.5 rounded-full text-xs bg-white border border-gray-300 text-gray-700 hover:bg-gray-100 active:scale-[.98]">کلینیک زیبایی</button>
+    <button type="button" data-svc-example="تعمیر موبایل" class="px-3 py-1.5 rounded-full text-xs bg-white border border-gray-300 text-gray-700 hover:bg-gray-100 active:scale-[.98]">تعمیر موبایل</button>
+    <button type="button" data-svc-example="آتلیه عکاسی" class="px-3 py-1.5 rounded-full text-xs bg-white border border-gray-300 text-gray-700 hover:bg-gray-100 active:scale-[.98]">آتلیه عکاسی</button>
+    <button type="button" data-svc-example="خیاطی" class="px-3 py-1.5 rounded-full text-xs bg-white border border-gray-300 text-gray-700 hover:bg-gray-100 active:scale-[.98]">خیاطی</button>
+    <button type="button" data-svc-example="آرایش حیوانات" class="px-3 py-1.5 rounded-full text-xs bg-white border border-gray-300 text-gray-700 hover:bg-gray-100 active:scale-[.98]">آرایش حیوانات</button>
+  </div>
+  <div class="text-[11px] text-gray-500 mt-2">با لمس هر مورد، متن آن به «توضیحات فروشگاه» اضافه می‌شود.</div>
+</div>
+<!-- END: service examples -->
+
     <div id="category-hint" class="text-xs mt-2 text-red-500 hidden"></div>
   </div>
 
@@ -239,6 +368,32 @@
   </footer>
 
 <script>
+  // Mobile menu functionality
+  const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+  const mobileMenu = document.getElementById('mobile-menu');
+  const mobileOverlay = document.getElementById('mobile-overlay');
+  const closeMenuBtn = document.getElementById('close-menu');
+
+  function toggleMobileMenu() {
+    mobileMenuBtn.classList.toggle('active');
+    mobileMenu.classList.toggle('active');
+    mobileOverlay.classList.toggle('active');
+    document.body.style.overflow = mobileMenu.classList.contains('active') ? 'hidden' : '';
+  }
+
+  mobileMenuBtn.addEventListener('click', toggleMobileMenu);
+  closeMenuBtn.addEventListener('click', toggleMobileMenu);
+  mobileOverlay.addEventListener('click', toggleMobileMenu);
+
+  // Close menu when clicking on a link
+  document.querySelectorAll('.nav-links a').forEach(link => {
+    link.addEventListener('click', () => {
+      if (mobileMenu.classList.contains('active')) {
+        toggleMobileMenu();
+      }
+    });
+  });
+
   // نمایش لحظه‌ای آدرس فروشگاه
   document.getElementById("shopurl").addEventListener("input", function (e) {
     let val = this.value.trim();
@@ -287,16 +442,52 @@
   const subcatInput = document.getElementById("subcategory");
   const subcatChips = document.querySelectorAll('#subcategory-chips button');
 
-  categorySelect.addEventListener("change", function () {
-    if (this.value === "کودکان") {
-      subcatWrapper.classList.remove("hidden");
+  // === Service examples: setup ===
+const serviceExamples = document.getElementById("service-examples");
+const svcChipBtns = document.querySelectorAll('[data-svc-example]');
+const SERVICE_CATEGORIES = ["خدمات","زیبایی","تالار و مجالس","خودرو","ورزشی"];
+
+// Add example text into description on tap
+svcChipBtns.forEach(btn => {
+  btn.addEventListener('click', () => {
+    const ta = document.querySelector("textarea[name='desc']");
+    if (!ta) return;
+    const tag = btn.getAttribute('data-svc-example');
+    if (!ta.value.includes(tag)) {
+      ta.value = ta.value ? (ta.value.trim() + " | " + tag) : tag;
+      showToast("به توضیحات اضافه شد: " + tag);
     } else {
-      subcatWrapper.classList.add("hidden");
-      subcatInput.value = "";
-      subcatChips.forEach(b => b.classList.remove('bg-[#10b981]','text-white','border-[#10b981]'));
-      document.getElementById("subcategory-hint").classList.add("hidden");
+      showToast("قبلاً اضافه شده 😉");
     }
   });
+});
+
+// Initial reveal on load if a service category is preselected
+if (SERVICE_CATEGORIES.includes(categorySelect.value)) {
+  serviceExamples.classList.remove("hidden");
+}
+
+
+// دسته‌بندی: نشان دادن زیرگروه "کودکان" و مثال‌های خدمات
+categorySelect.addEventListener("change", function () {
+  // بخش کودکان (بدون تغییر منطقی قبلی)
+  if (this.value === "کودکان") {
+    subcatWrapper.classList.remove("hidden");
+  } else {
+    subcatWrapper.classList.add("hidden");
+    subcatInput.value = "";
+    subcatChips.forEach(b => b.classList.remove('bg-[#10b981]','text-white','border-[#10b981]'));
+    document.getElementById("subcategory-hint").classList.add("hidden");
+  }
+
+  // اگر دستهٔ انتخابی از نوع خدمات باشد، مثال‌ها را نشان بده
+  if (SERVICE_CATEGORIES.includes(this.value)) {
+    serviceExamples.classList.remove("hidden");
+  } else {
+    serviceExamples.classList.add("hidden");
+  }
+});
+
 
   subcatChips.forEach(btn => {
     btn.addEventListener('click', function () {
@@ -501,16 +692,24 @@
 .then(result => {
   btn.disabled = false;
   btn.innerText = "ثبت فروشگاه";
-if (result.success) {
-  localStorage.setItem('shopurl', data.shopurl);
-sessionStorage.setItem('signup_password', data.password);
-  window.location.href = "verify.html?shopurl=" + encodeURIComponent(data.shopurl) + "&phone=" + encodeURIComponent(data.phone);
-}
+  if (result.success) {
+    localStorage.setItem('shopurl', data.shopurl);
+    sessionStorage.setItem('signup_password', data.password);
+
+    // ✅ اضافه‌شدن نقش و دسته برای تعیین پنل بعد از وریفای
+    // توجه: SERVICE_CATEGORIES بالاتر در همین فایل تعریف شده.
+    sessionStorage.setItem('signup_category', data.category);
+    sessionStorage.setItem('signup_role', SERVICE_CATEGORIES.includes(data.category) ? 'service' : 'seller');
+
+    window.location.href = "verify.html?shopurl=" + encodeURIComponent(data.shopurl) + "&phone=" + encodeURIComponent(data.phone);
+  }
 
   else {
     alert("خطا در ثبت‌نام: " + (result.message || "لطفاً دوباره تلاش کنید"));
   }
 })
+
+
 .catch(err => {
   btn.disabled = false;
   btn.innerText = "ثبت فروشگاه";
@@ -626,6 +825,22 @@ resendBtn.addEventListener("click", function () {
   alert("کد جدید ارسال شد! (در حالت واقعی)");
   startResendTimer();
 });
+
+
+
+// Mini toast for quick feedback
+function showToast(msg) {
+  const el = document.createElement('div');
+  el.className = "fixed bottom-4 left-1/2 -translate-x-1/2 z-[999] px-4 py-2 rounded-xl bg-gradient-to-l from-[#11d6ad] via-[#10b981] to-[#2db4e8] text-white text-sm shadow-lg";
+  el.textContent = msg;
+  document.body.appendChild(el);
+  setTimeout(() => {
+    el.style.transition = "opacity .3s, transform .3s";
+    el.style.opacity = "0";
+    el.style.transform = "translate(-50%, 8px)";
+    setTimeout(() => el.remove(), 300);
+  }, 1400);
+}
 
 
 </script>

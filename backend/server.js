@@ -26,9 +26,10 @@ app.use(cors({
     'http://127.0.0.1:5500'
   ],
   credentials: true,
-  methods: ['GET','POST','PUT','DELETE','OPTIONS'],
+  methods: ['GET','POST','PUT','PATCH','DELETE','OPTIONS'],
   allowedHeaders: ['Content-Type','Authorization']
 }));
+
 
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ extended: true, limit: '50mb' }));
@@ -43,6 +44,7 @@ app.use('/api/user', require('./routes/user'));
 app.use('/api/products', require('./routes/products'));
 app.use('/api/seller', sellerRoutes);
 app.use('/api/sellers', require('./routes/seller'));
+app.use('/api/seller-services', require('./routes/sellerServicesRoutes'));
 app.use('/api/shopAppearance', require('./routes/shopAppearance'));
 app.use('/api/slides', require('./routes/slides'));
 app.use('/api/favorite', require('./routes/favorites'));
