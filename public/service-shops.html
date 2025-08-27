@@ -4535,15 +4535,25 @@ window.addEventListener('load', () => {
     return Array.isArray(list) ? list : null;
   }
 
+  function getLocalPortfolio() {
+    try {
+      const raw = localStorage.getItem('vit_portfolio');
+      const arr = raw ? JSON.parse(raw) : [];
+      return Array.isArray(arr) ? arr.map(normalize) : [];
+    } catch (_) {
+      return [];
+    }
+  }
+
   async function loadPortfolio() {
-    if (!SLUG) return [];
+    if (!SLUG) return getLocalPortfolio();
     for (const url of CANDIDATES) {
       try {
         const items = await tryFetch(url);
         if (items && items.length) return items.map(normalize);
       } catch (_) {}
     }
-    return [];
+    return getLocalPortfolio();
   }
 
   // ---------- Rendering ----------
