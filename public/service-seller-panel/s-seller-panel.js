@@ -38,7 +38,7 @@ const API = {
 
   // ایجاد خدمت جدید
   async createService(payload) {
-    const r = await fetch(`${API_BASE}/api/seller-services/me/services`, {
+    const r = await fetch(`${API_BASE}/api/seller-services`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       credentials: 'include',
@@ -56,7 +56,7 @@ const API = {
 
   // ویرایش خدمت
   async updateService({ id, ...payload }) {
-    const r = await fetch(`${API_BASE}/api/seller-services/me/services/${id}`, {
+    const r = await fetch(`${API_BASE}/api/seller-services/${id}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       credentials: 'include',
@@ -74,7 +74,7 @@ const API = {
 
   // حذف خدمت
   async deleteService(id) {
-    const r = await fetch(`${API_BASE}/api/seller-services/me/services/${id}`, {
+    const r = await fetch(`${API_BASE}/api/seller-services/${id}`, {
       method: 'DELETE',
       credentials: 'include'
     });
