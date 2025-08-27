@@ -10,6 +10,39 @@ const Chat = require('../models/chat');
 // ثبت‌نام فروشنده
 router.post('/register', registerSeller);
 
+// ثبت‌نام فروشنده (مسیر RESTful)
+router.post('/', registerSeller);
+
+// گرفتن اطلاعات فروشنده‌ی جاری
+router.get('/me', authMiddleware('seller'), async (req, res) => {
+  try {
+    const seller = await Seller.findById(req.user.id)
+      .select('-password -otp -otpExpire')
+      .lean();
+    if (!seller) return res.status(404).json({ message: 'فروشنده پیدا نشد!' });
+    seller.id = seller._id;
+    res.json(seller);
+  } catch (err) {
+    console.error('get /me error', err);
+    res.status(500).json({ message: 'خطای سرور.' });
+  }
+});
+
+// دریافت فروشنده بر اساس shopurl (عمومی)
+router.get('/by-shopurl/:shopurl', async (req, res) => {
+  try {
+    const seller = await Seller.findOne({ shopurl: req.params.shopurl })
+      .select('-password -otp -otpExpire')
+      .lean();
+    if (!seller) return res.status(404).json({ message: 'فروشنده پیدا نشد.' });
+    seller.id = seller._id;
+    res.json(seller);
+  } catch (err) {
+    console.error('get by-shopurl error', err);
+    res.status(500).json({ message: 'خطای سرور.' });
+  }
+});
+
 // آپلود یا تغییر لوگوی فروشگاه (تابلو)
 router.post('/:sellerId/logo', async (req, res) => {
   try {
