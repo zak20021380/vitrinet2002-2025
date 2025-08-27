@@ -1568,11 +1568,11 @@ initBrandImages(){
 initCustomerFeatures() {
   // Initialize auto-accept state
   this.autoAcceptEnabled = StorageManager.get('vit_auto_accept') || false;
-  
-  // Add auto-accept UI to settings
+
+  // Adds the toggle & UI and saves state
   this.addAutoAcceptToggle();
-  
-  // Make customer cards clickable
+
+  // Binds click/keyboard handlers for customer cards
   this.initCustomerClickHandlers();
 }
 
@@ -2009,33 +2009,6 @@ updateDashboardStats() {
   }
 }
 
-initCustomerFeatures() {
-  const container = document.getElementById('customers-list');
-  if (!container) return;
-
-  // کلیک روی کارت
-  container.addEventListener('click', (e) => {
-    const card = e.target.closest('.customer-card');
-    if (!card) return;
-    this.openCustomerModal({
-      name:  card.dataset.name,
-      phone: card.dataset.phone,
-      lastReservation: (MOCK_DATA.customers.find(c => c.name === card.dataset.name) || {}).lastReservation
-    });
-  });
-
-  // باز کردن با Enter
-  container.addEventListener('keydown', (e) => {
-    if (e.key !== 'Enter') return;
-    const card = e.target.closest('.customer-card');
-    if (!card) return;
-    this.openCustomerModal({
-      name:  card.dataset.name,
-      phone: card.dataset.phone,
-      lastReservation: (MOCK_DATA.customers.find(c => c.name === card.dataset.name) || {}).lastReservation
-    });
-  });
-}
 
 
 
