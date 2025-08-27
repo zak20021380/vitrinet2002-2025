@@ -37,22 +37,38 @@ const API = {
   },
 
   // ایجاد خدمت جدید
-  async createService(payload) {
-    const r = await fetch(`${API_BASE}/api/seller-services`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      credentials: 'include',
-      body: JSON.stringify(payload)
-    });
-    if (!r.ok) throw new Error('CREATE_SERVICE_FAILED');
-    const data = this._unwrap(await this._json(r));
-    return {
-      id:    data._id || data.id,
-      title: data.title,
-      price: data.price,
-      image: data.image || ''
-    };
-  },
+// ایجاد خدمت جدید
+async createService(payload) {
+  console.log('Sending service data to server:', payload); // Debug log
+  
+  const r = await fetch(`${API_BASE}/api/seller-services`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    credentials: 'include',
+    body: JSON.stringify(payload)
+  });
+  
+  if (!r.ok) {
+    // Get more detailed error information
+    let errorMessage = 'CREATE_SERVICE_FAILED';
+    try {
+      const errorData = await r.json();
+      console.error('Server error details:', errorData);
+      errorMessage = errorData.message || errorData.error || errorMessage;
+    } catch (e) {
+      console.error('Failed to parse error response:', e);
+    }
+    throw new Error(errorMessage);
+  }
+  
+  const data = this._unwrap(await this._json(r));
+  return {
+    id:    data._id || data.id,
+    title: data.title,
+    price: data.price,
+    image: data.image || ''
+  };
+},
 
   // ویرایش خدمت
   async updateService({ id, ...payload }) {
@@ -1381,15 +1397,15 @@ async initServices() {
 // ==== REPLACE: handleServiceFormSubmit (write-through to API) ====
 // ==== REPLACE: handleServiceFormSubmit (write-through to API) ====
 async handleServiceFormSubmit() {
-  const form  = document.getElementById('service-form');
-  const id    = form.dataset.editingId ? parseInt(form.dataset.editingId, 10) : null;
+  const form = document.getElementById('service-form');
+  const id = form.dataset.editingId ? parseInt(form.dataset.editingId, 10) : null;
 
   const title = document.getElementById('service-title').value.trim();
   const price = parseFloat(document.getElementById('service-price').value);
 
   const fileInput = document.getElementById('service-image');
-  let imageData   = this.currentServiceImage;
-  const file      = fileInput.files && fileInput.files[0];
+  let imageData = this.currentServiceImage;
+  const file = fileInput.files && fileInput.files[0];
   if (file) {
     imageData = await this.fileToDataURL(file);
   }
@@ -1399,40 +1415,56 @@ async handleServiceFormSubmit() {
     return;
   }
 
-  // کش محلی فعلی
-  let services = StorageManager.get('vit_services') || [];
+  // Get seller data for additional required fields
+  const sellerData = JSON.parse(localStorage.getItem('seller') || '{}');
+  
+  // Build payload matching backend expectations
+  const payload = {
+    title: title,
+    price: price,
+    images: imageData ? [imageData] : [], // Backend expects array
+    desc: title, // Backend expects 'desc' not 'description'
+    category: sellerData.category || 'خدمات',
+    durationMinutes: 60, // Backend expects 'durationMinutes' not 'duration'
+    isActive: true
+  };
 
-  // پیام وضعیت
+  console.log('Service payload being sent:', payload); // Debug log
+
+  let services = StorageManager.get('vit_services') || [];
   UIComponents.showToast(id ? 'در حال ذخیره تغییرات…' : 'در حال افزودن خدمت…', 'info', 2500);
 
   try {
-    // اطمینان از وجود آداپتر
     if (!API || typeof API.getServices !== 'function') {
       throw new Error('API adapter missing');
     }
 
     let saved;
     if (id) {
-      // ویرایش
-      saved = await API.updateService({ id, title, price, image: imageData || null });
+      saved = await API.updateService({ id, ...payload });
       const idx = services.findIndex(s => String(s.id) === String(id));
       if (idx !== -1) services[idx] = { ...services[idx], ...saved };
     } else {
-      // افزودن
-      saved = await API.createService({ title, price, image: imageData || null });
+      saved = await API.createService(payload);
       services.push(saved);
     }
 
-    // بروزرسانی کش و لیست
     StorageManager.set('vit_services', services);
     this.renderServicesList();
-
-    // بستن فرم
     UIComponents.closeDrawer('service-drawer');
     UIComponents.showToast('با موفقیت ذخیره شد.', 'success');
+
   } catch (err) {
     console.error('service save failed', err);
-    UIComponents.showToast('خطا در ذخیره روی سرور. دوباره تلاش کنید.', 'error');
+    
+    // More detailed error handling
+    let errorMessage = 'خطا در ذخیره روی سرور';
+    if (err.message.includes('عنوان')) {
+      errorMessage = 'عنوان خدمت الزامی است';
+    } else if (err.message.includes('قیمت')) {
+      errorMessage = 'قیمت معتبر وارد کنید';
+    }
+    UIComponents.showToast(errorMessage + '. دوباره تلاش کنید.', 'error');
   }
 }
 
