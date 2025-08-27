@@ -4641,6 +4641,7 @@ window.addEventListener('load', () => {
   const mViews     = $('#modalViews');
   const mLikes     = $('#modalLikes');
   const closeBtn   = $('#imageModalClose');
+  const modalContent = imageModal?.querySelector('.relative');
 
   function openImageModal(it) {
     if (!imageModal) return;
@@ -4649,13 +4650,16 @@ window.addEventListener('load', () => {
     imageEl.alt = it.title || '';
     mViews.textContent = toFa(it.views ?? 0);
     mLikes.textContent = toFa(it.likes ?? 0);
-
     imageModal.classList.remove('hidden');
     imageModal.classList.add('flex');
+    modalContent?.classList.remove('scale-95','opacity-0');
+    modalContent?.classList.add('scale-100','opacity-100');
     document.addEventListener('keydown', onEsc);
   }
 
   function closeImageModal() {
+    modalContent?.classList.add('scale-95','opacity-0');
+    modalContent?.classList.remove('scale-100','opacity-100');
     imageModal.classList.add('hidden');
     imageModal.classList.remove('flex');
     imageEl.src = '';
