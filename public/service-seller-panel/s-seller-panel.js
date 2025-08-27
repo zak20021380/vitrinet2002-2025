@@ -133,6 +133,32 @@ async function fetchInitialData() {
     }
   } catch (err) {
     console.error('Error loading initial data', err);
+
+    // Fallback seller info when API is unreachable
+    const defaultSeller = {
+      id: 1,
+      storename: 'فروشگاه آزمایشی',
+      shopurl: '',
+      category: 'سرویس',
+      phone: '۰۹۱۲۳۴۵۶۷۸۹',
+      address: 'آدرس نامشخص'
+    };
+    const storedSeller = JSON.parse(localStorage.getItem('seller') || 'null') || defaultSeller;
+    localStorage.setItem('seller', JSON.stringify(storedSeller));
+
+    const setText = (id, text) => {
+      const el = document.getElementById(id);
+      if (el) el.textContent = text;
+    };
+    setText('seller-name', 'فروشنده عزیز');
+    setText('seller-shop-name', storedSeller.storename || '');
+    setText('seller-category', storedSeller.category || '');
+    setText('seller-phone', storedSeller.phone || '');
+    setText('seller-address', storedSeller.address || '');
+
+    if (typeof UIComponents !== 'undefined' && UIComponents.showToast) {
+      UIComponents.showToast('اتصال به سرور برقرار نشد؛ دادهٔ محلی نمایش داده شد.', 'error');
+    }
   }
 }
 
