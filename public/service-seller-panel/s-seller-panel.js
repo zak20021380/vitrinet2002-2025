@@ -115,6 +115,8 @@ async function fetchInitialData() {
       setText('seller-category', seller.category || '');
       setText('seller-phone', seller.phone || '');
       setText('seller-address', seller.address || '');
+      // Fill settings form with fetched data
+      populateSettingsForm(store);
     }
 
     if (servicesRes.ok) {
@@ -669,6 +671,7 @@ setupEventListeners() {
   this.boundHandlePlanDurationChange = this.handlePlanDurationChange.bind(this);
   this.boundHandleBookingFilterChange = this.handleBookingFilterChange.bind(this);
   this.boundHandleReviewFilterChange = this.handleReviewFilterChange.bind(this);
+  this.boundHandleSettingsFormSubmit = this.handleSettingsFormSubmit.bind(this);
   this.boundHandleServiceFormSubmit = this.handleServiceFormSubmit.bind(this);
   this.boundHandlePortfolioFormSubmit = this.handlePortfolioFormSubmit.bind(this);
   this.boundHandleVipFormSubmit = this.handleVipFormSubmit.bind(this);
@@ -769,7 +772,7 @@ if (elements.viewStoreBtn) {
   if (elements.settingsForm) {
     elements.settingsForm.addEventListener('submit', (e) => {
       e.preventDefault();
-      UIComponents.showToast('تنظیمات با موفقیت ذخیره شد!', 'success');
+      this.boundHandleSettingsFormSubmit();
     });
   }
 
@@ -1331,6 +1334,31 @@ async initServices() {
             });
         });
     }
+
+    handleSettingsFormSubmit() {
+        const nameEl = document.getElementById('business-name');
+        const phoneEl = document.getElementById('business-phone');
+        const addressEl = document.getElementById('business-address');
+        const data = JSON.parse(localStorage.getItem('seller') || '{}');
+
+        if (nameEl) data.storename = nameEl.value.trim();
+        if (phoneEl) data.phone = phoneEl.value.trim();
+        if (addressEl) data.address = addressEl.value.trim();
+
+        localStorage.setItem('seller', JSON.stringify(data));
+
+        const setText = (id, text) => {
+            const el = document.getElementById(id);
+            if (el) el.textContent = text;
+        };
+
+        setText('seller-shop-name', data.storename || '');
+        setText('seller-phone', data.phone || '');
+        setText('seller-address', data.address || '');
+
+        UIComponents.showToast('تنظیمات با موفقیت ذخیره شد!', 'success');
+    }
+
   populateServiceForm(service) {
         const form = document.getElementById('service-form');
         const titleEl = document.getElementById('service-drawer-title');
@@ -2327,6 +2355,12 @@ function populateSettingsForm(sellerData) {
   const businessPhoneEl = document.getElementById('business-phone');
   if (businessPhoneEl && sellerData.phone) {
     businessPhoneEl.value = sellerData.phone;
+  }
+
+  // Business address
+  const businessAddressEl = document.getElementById('business-address');
+  if (businessAddressEl && sellerData.address) {
+    businessAddressEl.value = sellerData.address;
   }
 
   // Business category dropdown
