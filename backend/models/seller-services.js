@@ -18,7 +18,7 @@ const sellerServiceSchema = new mongoose.Schema({
 
   // قیمت و مدت‌زمان سرویس (برای نوبت‌دهی حرفه‌ای)
   price: { type: Number, required: true, min: 0 },
-  durationMinutes: { type: Number, required: true, min: 5, max: 600 },
+  durationMinutes: { type: Number, default: 30, min: 5, max: 600 },
 
   // تصاویر (مشابه Product)
   images: [{ type: String }],
