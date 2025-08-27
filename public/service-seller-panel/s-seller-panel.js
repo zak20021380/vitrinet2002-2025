@@ -1,4 +1,4 @@
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
 
   // === STEP 1 — API client (READ services only) ===
 // اگر آدرس سرور فرق دارد، مقدار زیر را عوض کن
@@ -82,6 +82,54 @@ const API = {
 };
 
 // === END STEP 1 ===
+
+async function fetchInitialData() {
+  try {
+    const [sellerRes, servicesRes] = await Promise.all([
+      fetch('/api/sellers/me', { credentials: 'include' }),
+      fetch('/api/seller-services/me/services', { credentials: 'include' })
+    ]);
+
+    if (sellerRes.ok) {
+      const data = await sellerRes.json();
+      const seller = data.seller || data;
+      const store = {
+        id: seller.id || seller._id,
+        storename: seller.storename,
+        shopurl: seller.shopurl,
+        category: seller.category,
+        phone: seller.phone,
+        address: seller.address
+      };
+      localStorage.setItem('seller', JSON.stringify(store));
+      const fullName = `${seller.firstname || ''} ${seller.lastname || ''}`.trim();
+      document.getElementById('seller-name').textContent = fullName;
+      document.getElementById('seller-shop-name').textContent = seller.storename || '';
+      document.getElementById('seller-category').textContent = seller.category || '';
+      document.getElementById('seller-phone').textContent = seller.phone || '';
+      document.getElementById('seller-address').textContent = seller.address || '';
+    }
+
+    if (servicesRes.ok) {
+      const svcJson = await servicesRes.json();
+      const services = svcJson.items || svcJson.services || svcJson || [];
+      StorageManager.set('vit_services', services);
+      const listEl = document.getElementById('services-list');
+      if (listEl) {
+        listEl.innerHTML = services.map(s => `
+          <div class="item-card" data-id="${s._id || s.id}">
+            <div class="item-card-header">
+              <h4 class="item-title">${s.title}</h4>
+            </div>
+            <div class="item-details"><span>قیمت: ${s.price}</span></div>
+          </div>
+        `).join('');
+      }
+    }
+  } catch (err) {
+    console.error('Error loading initial data', err);
+  }
+}
 
 
 
@@ -646,37 +694,13 @@ if (dismissTarget) {
 // 4. View Store button
 if (elements.viewStoreBtn) {
   elements.viewStoreBtn.addEventListener('click', () => {
-    // دریافت اطلاعات فروشنده از localStorage
     try {
       const sellerData = JSON.parse(localStorage.getItem('seller') || '{}');
-      const shopUrl = sellerData.shopurl;
-      
-      // Function to determine if seller is service-based
-      const isServiceSeller = (category) => {
-        const serviceCategories = [
-          'آرایشگاه مردانه', 'آرایشگاه زنانه', 'سالن زیبایی زنانه', 
-          'کلینیک زیبایی', 'زیبایی', 'خدمات', 'تالار و مجالس', 
-          'خودرو', 'ورزشی'
-        ];
-        return serviceCategories.includes(category);
-      };
-      
-      if (shopUrl) {
-        // Determine correct page based on seller type
-        const pageUrl = isServiceSeller(sellerData.category) 
-          ? '/service-shops.html' 
-          : '/shop.html';
-        
-        window.open(`${pageUrl}?shopurl=${shopUrl}`, '_blank', 'noopener,noreferrer');
-      } else {
-        console.error('shopurl not found in seller data');
-        // fallback URL for service sellers
-        window.open('/service-shops.html', '_blank', 'noopener,noreferrer');
+      if (sellerData.shopurl) {
+        window.open(`/service-shops.html?shopurl=${sellerData.shopurl}`, '_blank', 'noopener,noreferrer');
       }
-    } catch (error) {
-      console.error('Error reading seller data:', error);
-      // fallback URL for service sellers
-      window.open('/service-shops.html', '_blank', 'noopener,noreferrer');
+    } catch (err) {
+      console.error('Error reading seller data', err);
     }
   });
 }
@@ -2454,10 +2478,8 @@ function showPersonalizedWelcome(sellerData) {
   }
 }
 
-// Initialize personalization
+await fetchInitialData();
 initSellerPersonalization();
-
-
 
   // Run the App
   const app = new SellerPanelApp();

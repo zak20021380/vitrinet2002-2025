@@ -236,17 +236,8 @@ if (!shopurl) {
   const DEFAULT_SELLER_PANEL_URL = "seller/dashboard.html";
   const targetPanel = isServiceSeller ? SERVICE_PANEL_URL : DEFAULT_SELLER_PANEL_URL;
 
-  // نمایش پیام موفقیت و تعیین مقصد دکمه
-  successMsg.classList.remove('hidden');
-  if (goDashboardBtn) {
-    goDashboardBtn.textContent = isServiceSeller ? "ورود به پنل خدمات" : "ورود به پنل فروشنده";
-    goDashboardBtn.onclick = function() {
-      window.location.href = `${targetPanel}?shopurl=${encodeURIComponent(loginRes.seller.shopurl)}`;
-    };
-  } else {
-    // اگر به هر دلیل دکمه نبود، مستقیم هدایت کن
-    window.location.href = `${targetPanel}?shopurl=${encodeURIComponent(loginRes.seller.shopurl)}`;
-  }
+  // هدایت مستقیم به پنل مناسب
+  window.location.href = `${targetPanel}?shopurl=${encodeURIComponent(loginRes.seller.shopurl)}`;
 } else {
   errorText.innerText = loginRes.message || "ورود ناموفق!";
   errorText.classList.remove('hidden');

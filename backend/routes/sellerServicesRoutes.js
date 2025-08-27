@@ -8,9 +8,13 @@ const ctrl = require('../controllers/sellerServicesController'); // کنترلر
 // سرویس‌های فعال یک فروشگاه خدماتی با shopurl (برای صفحه عمومی)
 router.get('/public/:shopurl', ctrl.getActiveServicesByShopUrl);
 
+// آدرس جدید برای دریافت سرویس‌ها بر اساس shopurl
+router.get('/by-shopurl/:shopurl', ctrl.getActiveServicesByShopUrl);
+
 /** ---------- Private Seller (نیازمند role: seller) ---------- */
 // لیست سرویس‌های من (با سرچ/فیلتر/صفحه‌بندی)
 router.get('/me', auth('seller'), ctrl.getMyServices);
+router.get('/me/services', auth('seller'), ctrl.getMyServices);
 
 // ساخت سرویس جدید
 router.post('/', auth('seller'), ctrl.createService);
