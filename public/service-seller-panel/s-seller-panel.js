@@ -156,6 +156,9 @@ async function fetchInitialData() {
     setText('seller-phone', storedSeller.phone || '');
     setText('seller-address', storedSeller.address || '');
 
+    // Ensure settings form uses the same fallback data
+    populateSettingsForm(storedSeller);
+
     if (typeof UIComponents !== 'undefined' && UIComponents.showToast) {
       UIComponents.showToast('اتصال به سرور برقرار نشد؛ دادهٔ محلی نمایش داده شد.', 'error');
     }
