@@ -4556,28 +4556,24 @@ window.addEventListener('load', () => {
     return node;
   }
 
-  function render(items) {
-    // clear
-    row.innerHTML = '';
-    grid.innerHTML = '';
-
-    if (!items.length) {
-      emptyMsg.classList.remove('hidden');
-      return;
-    }
-    emptyMsg.classList.add('hidden');
-
-    // mobile row
-    items.forEach(it => row.appendChild(createCard(it)));
-    // desktop grid
-    items.forEach(it => grid.appendChild(createCard(it)));
-
-    // show grid on md+
-    grid.classList.remove('hidden');
-
-    // start lazy load
-    lazyLoadImages();
+function render(items) {
+  // clear
+  row.innerHTML = '';
+  grid.innerHTML = '';
+  if (!items.length) {
+    emptyMsg.classList.remove('hidden');
+    return;
   }
+  emptyMsg.classList.add('hidden');
+  // mobile row
+  items.forEach(it => row.appendChild(createCard(it)));
+  // desktop grid - create separate cards for desktop to avoid duplication
+  items.forEach(it => grid.appendChild(createCard(it)));
+  // DON'T show grid here - let CSS handle it
+  // grid.classList.remove('hidden'); // Remove this line
+  // start lazy load
+  lazyLoadImages();
+}
 
   // ---------- Lazy Loading ----------
   function lazyLoadImages() {
@@ -4662,6 +4658,7 @@ window.addEventListener('load', () => {
   })();
 })();
 </script>
+
 
 
 </body>
