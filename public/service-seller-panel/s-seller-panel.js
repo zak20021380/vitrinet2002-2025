@@ -1,32 +1,34 @@
 document.addEventListener('DOMContentLoaded', async () => {
 
-  // === STEP 1 — API client (READ services only) ===
+// === STEP 1 — API client (READ services only) ===
 // اگر آدرس سرور فرق دارد، مقدار زیر را عوض کن
 const API_BASE = (window.__API_BASE__ || 'http://localhost:5000');
+const NO_CACHE = { cache: 'no-store', headers: { 'Cache-Control': 'no-cache' } };
+const bust = (url) => `${url}${url.includes('?') ? '&' : '?'}__=${Date.now()}`;
 
 const API = {
   async _json(res) {
     const txt = await res.text();
-    try { return txt ? JSON.parse(txt) : {}; } catch { return {}; }
+    if (!txt) return null;
+    try { return JSON.parse(txt); } catch { return null; }
   },
 
   _unwrap(res) {
-    if (Array.isArray(res)) return res;
-    if (res?.data) return res.data;
-    if (res?.services) return res.services;
-    if (res?.service) return res.service;
-    return res || [];
+    const o = res || {};
+    if (Array.isArray(o)) return o;
+    return o.items || o.data || o.services || o.service || [];
   },
 
   // فقط دریافت خدمات فروشنده‌ی لاگین‌شده
   async getServices() {
-    const r = await fetch(`${API_BASE}/api/seller-services/me/services`, {
-      credentials: 'include' // مهم: برای ارسال کوکی/توکن
+    const r = await fetch(bust(`${API_BASE}/api/seller-services/me/services`), {
+      credentials: 'include', // مهم: برای ارسال کوکی/توکن
+      ...NO_CACHE
     });
-    if (!r.ok) throw new Error('FETCH_SERVICES_FAILED');
-    const data = this._unwrap(await this._json(r));
-    // نرمالایز ساختار برای استفاده در UI
-    return (data || []).map(s => ({
+    if (!r.ok && r.status !== 304) throw new Error('FETCH_SERVICES_FAILED');
+    const raw = this._unwrap(await this._json(r));
+    const arr = Array.isArray(raw) ? raw : [];
+    return arr.map(s => ({
       id:    s._id || s.id,
       title: s.title,
       price: s.price,
@@ -86,8 +88,8 @@ const API = {
 async function fetchInitialData() {
   try {
     const [sellerRes, servicesRes] = await Promise.all([
-      fetch(`${API_BASE}/api/sellers/me`, { credentials: 'include' }),
-      fetch(`${API_BASE}/api/seller-services/me/services`, { credentials: 'include' })
+      fetch(bust(`${API_BASE}/api/sellers/me`), { credentials: 'include', ...NO_CACHE }),
+      fetch(bust(`${API_BASE}/api/seller-services/me/services`), { credentials: 'include', ...NO_CACHE })
     ]);
 
     if (sellerRes.ok) {
@@ -117,11 +119,11 @@ async function fetchInitialData() {
 
     if (servicesRes.ok) {
       const svcJson = await servicesRes.json();
-      const services = svcJson.items || svcJson.services || svcJson || [];
-      StorageManager.set('vit_services', services);
+      const svcs = svcJson.items || svcJson.services || (Array.isArray(svcJson) ? svcJson : []);
+      StorageManager.set('vit_services', svcs);
       const listEl = document.getElementById('services-list');
       if (listEl) {
-        listEl.innerHTML = services.map(s => `
+        listEl.innerHTML = svcs.map(s => `
           <div class="item-card" data-id="${s._id || s.id}">
             <div class="item-card-header">
               <h4 class="item-title">${s.title}</h4>
