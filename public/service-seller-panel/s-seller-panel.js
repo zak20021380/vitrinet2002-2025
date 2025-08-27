@@ -86,8 +86,8 @@ const API = {
 async function fetchInitialData() {
   try {
     const [sellerRes, servicesRes] = await Promise.all([
-      fetch('/api/sellers/me', { credentials: 'include' }),
-      fetch('/api/seller-services/me/services', { credentials: 'include' })
+      fetch(`${API_BASE}/api/sellers/me`, { credentials: 'include' }),
+      fetch(`${API_BASE}/api/seller-services/me/services`, { credentials: 'include' })
     ]);
 
     if (sellerRes.ok) {
