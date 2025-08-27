@@ -72,29 +72,25 @@ async createService(payload) {
 
   // ویرایش خدمت
   async updateService({ id, ...payload }) {
-    const r = await fetch(`${API_BASE}/api/seller-services/${encodeURIComponent(id)}`, {
+    const r = await fetch(`${API_BASE}/api/seller-services/${id}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       credentials: 'include',
       body: JSON.stringify(payload)
     });
     if (!r.ok) throw new Error('UPDATE_SERVICE_FAILED');
-    const data = this._unwrap(await this._json(r)) || {};
+    const data = this._unwrap(await this._json(r));
     return {
       id:    data._id || data.id || id,
       title: data.title,
       price: data.price,
-      image: data.image
-          || (Array.isArray(data.images) ? data.images[0] : '')
-          || payload.image
-          || (Array.isArray(payload.images) ? payload.images[0] : '')
-          || ''
+      image: data.image || payload.image || ''
     };
   },
 
   // حذف خدمت
   async deleteService(id) {
-    const r = await fetch(`${API_BASE}/api/seller-services/${encodeURIComponent(id)}`, {
+    const r = await fetch(`${API_BASE}/api/seller-services/${id}`, {
       method: 'DELETE',
       credentials: 'include'
     });
@@ -110,7 +106,7 @@ async createService(payload) {
     });
     if (!r.ok && r.status !== 304) throw new Error('FETCH_PORTFOLIO_FAILED');
     const data = await this._json(r);
-    const items = data?.items || data?.data || data || [];
+    const items = data.items || data.data || data || [];
     return Array.isArray(items) ? items : [];
   },
 
@@ -138,7 +134,7 @@ async createService(payload) {
   },
 
   async updatePortfolioItem(id, payload) {
-    const r = await fetch(`${API_BASE}/api/seller-portfolio/${encodeURIComponent(id)}`, {
+    const r = await fetch(`${API_BASE}/api/seller-portfolio/${id}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       credentials: 'include',
@@ -149,17 +145,36 @@ async createService(payload) {
     return data.item || data;
   },
 
-  // فقط درخواست DELETE به سرور (بدون منطق UI/Storage در لایه API)
-  async deletePortfolioItem(id) {
-    const r = await fetch(`${API_BASE}/api/seller-portfolio/${encodeURIComponent(id)}`, {
-      method: 'DELETE',
-      credentials: 'include',
-      ...NO_CACHE
-    });
-    if (!r.ok) throw new Error('DELETE_PORTFOLIO_FAILED');
-    return true;
-  },
+async deletePortfolioItem(id) {
+        if (!confirm('آیا از حذف این نمونه‌کار مطمئن هستید؟')) return;
 
+        const before = StorageManager.get('vit_portfolio') || [];
+        const item = before.find(p => p.id === id);
+        const dbId = item?._id || item?.id;
+        const after = before.filter(p => p.id !== id && p._id !== dbId);
+
+        // Optimistic update
+        StorageManager.set('vit_portfolio', after);
+        this.renderPortfolioList();
+
+        try {
+            if (!API || typeof API.deletePortfolioItem !== 'function') {
+                throw new Error('API adapter missing');
+            }
+            await API.deletePortfolioItem(dbId);
+            UIComponents.showToast('نمونه‌کار حذف شد.', 'success');
+        } catch (err) {
+            console.error('deletePortfolioItem failed', err);
+            // Rollback on error
+            StorageManager.set('vit_portfolio', before);
+            this.renderPortfolioList();
+            UIComponents.showToast('حذف در سرور انجام نشد؛ تغییرات برگشت داده شد.', 'error');
+        }
+    },
+
+
+
+};
 
 // === END STEP 1 ===
 
