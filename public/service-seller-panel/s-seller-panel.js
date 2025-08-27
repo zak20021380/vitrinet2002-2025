@@ -1593,117 +1593,14 @@ initBrandImages(){
 
 
 
-// === CUSTOMER MODAL & AUTO-ACCEPT FEATURES ===
+// === CUSTOMER MODAL FEATURES ===
 initCustomerFeatures() {
-  // Initialize auto-accept state
-  this.autoAcceptEnabled = StorageManager.get('vit_auto_accept') || false;
-
-  // Adds the toggle & UI and saves state
-  this.addAutoAcceptToggle();
-
   // Binds click/keyboard handlers for customer cards
   this.initCustomerClickHandlers();
 }
 
 
 
-
-
-// Add auto-accept toggle to settings
-addAutoAcceptToggle() {
-  const settingsForm = document.getElementById('settings-form');
-  if (!settingsForm) return;
-  
-  // Find the business settings group
-  const businessGroup = settingsForm.querySelector('.settings-group');
-  if (!businessGroup) return;
-  
-  // Create auto-accept container
-  const autoAcceptHTML = `
-    <div class="auto-accept-container">
-      <div class="auto-accept-header">
-        <div class="auto-accept-info">
-          <h4 class="auto-accept-title">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
-              <polyline points="22 4 12 14.01 9 11.01"/>
-            </svg>
-            پذیرش خودکار رزروها
-          </h4>
-          <p class="auto-accept-description">
-            با فعال کردن این گزینه، تمام رزروهای جدید به صورت خودکار تأیید می‌شوند و مشتریان بلافاصله تأییدیه دریافت می‌کنند. شما همچنان می‌توانید رزروها را به صورت دستی لغو کنید.
-          </p>
-        </div>
-        <label class="toggle-switch ${this.autoAcceptEnabled ? 'active' : ''}" id="auto-accept-toggle">
-          <input type="checkbox" class="toggle-switch-input" ${this.autoAcceptEnabled ? 'checked' : ''}>
-          <span class="toggle-switch-slider"></span>
-        </label>
-      </div>
-      <div class="auto-accept-status ${this.autoAcceptEnabled ? 'active' : ''}">
-        <span class="status-indicator"></span>
-        <span class="status-text">
-          ${this.autoAcceptEnabled ? 'پذیرش خودکار فعال است' : 'پذیرش خودکار غیرفعال است'}
-        </span>
-      </div>
-    </div>
-  `;
-  
-  // Insert after business name field
-  businessGroup.insertAdjacentHTML('beforeend', autoAcceptHTML);
-  
-  // Add toggle event listener
-  const toggle = document.getElementById('auto-accept-toggle');
-  if (toggle) {
-    toggle.addEventListener('click', () => this.toggleAutoAccept());
-  }
-}
-
-// Toggle auto-accept feature
-toggleAutoAccept() {
-  this.autoAcceptEnabled = !this.autoAcceptEnabled;
-  StorageManager.set('vit_auto_accept', this.autoAcceptEnabled);
-  
-  const toggle = document.getElementById('auto-accept-toggle');
-  const status = toggle.parentElement.querySelector('.auto-accept-status');
-  const statusText = status.querySelector('.status-text');
-  
-  if (this.autoAcceptEnabled) {
-    toggle.classList.add('active');
-    status.classList.add('active');
-    statusText.textContent = 'پذیرش خودکار فعال است';
-    UIComponents.showToast('پذیرش خودکار رزروها فعال شد ✅', 'success');
-    
-    // Auto-accept pending bookings
-    this.autoAcceptPendingBookings();
-  } else {
-    toggle.classList.remove('active');
-    status.classList.remove('active');
-    statusText.textContent = 'پذیرش خودکار غیرفعال است';
-    UIComponents.showToast('پذیرش خودکار غیرفعال شد', 'info');
-  }
-}
-
-// Auto-accept all pending bookings
-autoAcceptPendingBookings() {
-  // In real app, this would update the database
-  const pendingCount = MOCK_DATA.bookings.filter(b => b.status === 'pending').length;
-  
-  if (pendingCount > 0) {
-    // Simulate accepting all pending bookings
-    MOCK_DATA.bookings.forEach(booking => {
-      if (booking.status === 'pending') {
-        booking.status = 'confirmed';
-      }
-    });
-    
-    UIComponents.showToast(`${UIComponents.formatPersianNumber(pendingCount)} رزرو به صورت خودکار تأیید شد`, 'success');
-    
-    // Refresh bookings view if active
-    if (document.getElementById('bookings-view').classList.contains('active')) {
-      this.renderBookings();
-    }
-  }
-}
 
 // Initialize customer click handlers
 initCustomerClickHandlers() {
