@@ -763,57 +763,6 @@
 
 
 
-<!-- [A] OWNER PANEL (Seller-only editor) -->
-<button id="owner-edit-trigger" data-open="ownerPanelModal"
-        class="fixed bottom-24 left-3 z-[150] chip chip--primary hidden">
-  <i class="fas fa-pen-to-square"></i><span>ویرایش صفحه</span>
-</button>
-
-<div id="ownerPanelModal" class="hidden fixed inset-0 z-[140] items-center justify-center" role="dialog" aria-modal="true" aria-labelledby="owner-title">
-  <div class="absolute inset-0 bg-black/50 backdrop-blur-[2px]" data-close></div>
-  <div class="modal-card relative w-[92%] max-w-lg bg-white rounded-2xl shadow-2xl p-6 transform transition duration-150 scale-95 opacity-0">
-    <button type="button" data-close class="absolute top-2 left-2 text-gray-500 hover:text-gray-700 text-xl leading-none">&times;</button>
-    <h3 id="owner-title" class="text-lg font-extrabold mb-4">مدیریت صفحه فروشنده</h3>
-
-    <div class="grid grid-cols-1 gap-3">
-      <label class="text-sm font-bold">شناسه صفحه (sellerId)
-        <input id="owner-seller-id" class="mt-1 w-full border rounded-lg p-2 text-left ltr-num bg-gray-50" readonly>
-      </label>
-      <label class="text-sm font-bold">نام کسب‌وکار
-        <input id="owner-biz-name" class="mt-1 w-full border rounded-lg p-2">
-      </label>
-      <label class="text-sm font-bold">شعار کوتاه
-        <input id="owner-tagline" class="mt-1 w-full border rounded-lg p-2">
-      </label>
-      <label class="text-sm font-bold">آدرس
-        <textarea id="owner-address" rows="2" class="mt-1 w-full border rounded-lg p-2"></textarea>
-      </label>
-      <label class="text-sm font-bold">شماره تماس (مثال 09123456789)
-        <input id="owner-phone" class="mt-1 w-full border rounded-lg p-2 text-left ltr-num" dir="ltr" inputmode="numeric" maxlength="11" placeholder="09123456789">
-      </label>
-
-      <details class="mt-2">
-        <summary class="cursor-pointer text-sm font-bold text-blue-700">ویرایش خدمات (اختیاری)</summary>
-        <p class="text-xs text-gray-500 my-2">فرمت JSON: آرایه‌ای از آبجکت‌ها با کلیدهای <code>title, desc, price, img</code>.</p>
-        <textarea id="owner-services" rows="8" class="w-full border rounded-lg p-2 ltr-num font-mono text-xs"
-placeholder='[
-  {"title":"اصلاح سر و صورت","desc":"اصلاح حرفه‌ای سر و صورت","price":150000,"img":"https://picsum.photos/seed/barber/400/300"},
-  {"title":"ماساژ صورت","desc":"ماساژ با روغن گیاهی","price":120000,"img":"https://picsum.photos/seed/facial/400/300"}
-]'></textarea>
-      </details>
-    </div>
-
-    <div class="flex justify-end gap-3 mt-5">
-      <button type="button" data-close class="px-4 py-2 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-800 font-bold">بستن</button>
-      <button id="owner-save-btn" class="px-5 py-2 rounded-full bg-emerald-600 text-white font-bold hover:bg-emerald-700">ذخیره</button>
-    </div>
-  </div>
-</div>
-
-
-
-
-
 <!-- Toast should be above modals -->
 <div id="headerToast" class="fixed top-4 left-1/2 -translate-x-1/2 z-[100] bg-blue-600 text-white text-sm px-4 py-2 rounded-full shadow-lg opacity-0 transition-opacity pointer-events-none"></div>
 
@@ -4812,70 +4761,14 @@ window.addEventListener('load', () => {
     document.getElementById('seller-address').textContent = seller.address || '';
   }
 
-  // بررسی اینکه کاربرِ فعلی مالک همین فروشگاه است یا نه
-  // با یک تلاشِ «GET /:id» (محافظت‌شده) روی یکی از سرویس‌ها تست می‌کنیم
-  async function isOwnerOfShop(sampleServiceId) {
-    if (!getToken() || !sampleServiceId) return false;
-    try {
-      const res = await fetch(`${API_BASE}/${sampleServiceId}`, {
-        headers: { 'Content-Type':'application/json', ...authHeaders() },
-        credentials: 'include'
-      });
-      return res.ok; // 200 → صاحب است؛ 403/404 → نیست
-    } catch { return false; }
-  }
-
-  async function apiToggleActive(id, next) {
-    const res = await fetch(`${API_BASE}/${id}/toggle`, {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json', ...authHeaders() },
-      body: JSON.stringify(next == null ? {} : { isActive: !!next }),
-      credentials: 'include'
-    });
-    if (!res.ok) throw new Error(`Toggle failed ${res.status}`);
-    return res.json(); // { item }
-  }
-
-  async function apiUpdatePrice(fullItem, nextPrice) {
-    // PUT نیاز به title و price دارد (طبق normalizePayload)
-    const payload = {
-      title: fullItem.title,
-      price: Number(nextPrice),
-      durationMinutes: clamp(Number(fullItem.durationMinutes||30), 5, 24*60),
-      category: fullItem.category || '',
-      subcategory: fullItem.subcategory || '',
-      tags: Array.isArray(fullItem.tags) ? fullItem.tags : [],
-      desc: fullItem.desc || '',
-      images: Array.isArray(fullItem.images) ? fullItem.images : [],
-      mainImageIndex: clamp(Number(fullItem.mainImageIndex||0), 0, (fullItem.images||[]).length-1),
-      badge: fullItem.badge || '',
-      badgeType: fullItem.badgeType || '',
-      isActive: !!fullItem.isActive
-    };
-    const res = await fetch(`${API_BASE}/${fullItem._id}`, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json', ...authHeaders() },
-      body: JSON.stringify(payload),
-      credentials: 'include'
-    });
-    if (!res.ok) throw new Error(`Update failed ${res.status}`);
-    return res.json(); // { item }
-  }
-
   /** ================== Render ================== **/
-  function cardTemplate(item, ownerMode=false) {
+  function cardTemplate(item) {
     const img = Array.isArray(item.images) && item.images.length
       ? item.images[Math.max(0, Math.min(item.mainImageIndex||0, item.images.length-1))]
       : `https://picsum.photos/seed/${encodeURIComponent(item.title)}/400/300.jpg`;
 
     return `
       <div class="service-card flex-shrink-0 w-72 bg-white rounded-xl shadow-md overflow-hidden flex flex-col relative" data-svc-id="${item._id}">
-        ${ownerMode ? `
-          <div class="absolute top-2 left-2 z-10 flex items-center gap-2">
-            <button class="owner-toggle px-2 py-1 text-[11px] font-bold rounded-full ${item.isActive?'bg-emerald-100 text-emerald-700':'bg-gray-100 text-gray-700'} border">
-              ${item.isActive ? 'فعال' : 'غیرفعال'}
-            </button>
-          </div>` : ``}
         <img src="${img}" alt="${item.title}" class="service-image">
         <div class="p-5 flex flex-col flex-grow">
           <h4 class="font-bold text-lg mb-2">${item.title}</h4>
@@ -4886,11 +4779,6 @@ window.addEventListener('load', () => {
               <div class="flex items-baseline gap-2">
                 <span class="service-price">
                   <span class="price-view">${priceFa(item.price)}</span>
-                  ${ownerMode ? `
-                    <input type="number" min="0" class="price-edit hidden w-24 border rounded-lg px-2 py-1 text-sm" value="${item.price}" />
-                    <button class="save-price hidden text-xs font-bold text-blue-600">ثبت</button>
-                    <button class="edit-price text-xs font-bold text-blue-600">ویرایش</button>
-                  ` : ``}
                 </span>
                 <span class="service-currency mr-1">تومان</span>
               </div>
@@ -4905,93 +4793,14 @@ window.addEventListener('load', () => {
     `;
   }
 
-  function bindOwnerControls(container, items) {
-    if (!container) return;
-    container.addEventListener('click', async (e) => {
-      const card = e.target.closest('.service-card');
-      if (!card) return;
-      const id = card.getAttribute('data-svc-id');
-      const item = items.find(x => x._id === id);
-      if (!item) return;
-
-      // Toggle active
-      if (e.target.closest('.owner-toggle')) {
-        const btn = e.target.closest('.owner-toggle');
-        btn.disabled = true;
-        try {
-          const next = !(item.isActive);
-          await apiToggleActive(id, next);
-          toast(next ? 'سرویس فعال شد' : 'سرویس غیرفعال شد', 'success');
-          // حذف از نمای عمومی اگر غیرفعال شد → ری‌لود لیست
-          await renderAll(); 
-        } catch (err) {
-          toast('تغییر وضعیت انجام نشد', 'error');
-          console.error(err);
-        } finally { btn.disabled = false; }
-        return;
-      }
-
-      // Edit price
-      if (e.target.classList.contains('edit-price')) {
-        const priceView = card.querySelector('.price-view');
-        const priceInp  = card.querySelector('.price-edit');
-        const saveBtn   = card.querySelector('.save-price');
-        e.target.classList.add('hidden');
-        priceView.classList.add('hidden');
-        priceInp.classList.remove('hidden');
-        saveBtn.classList.remove('hidden');
-        priceInp.focus();
-        return;
-      }
-      if (e.target.classList.contains('save-price')) {
-        const priceView = card.querySelector('.price-view');
-        const priceInp  = card.querySelector('.price-edit');
-        const saveBtn   = card.querySelector('.save-price');
-        const editBtn   = card.querySelector('.edit-price');
-        const raw = Number(priceInp.value);
-        if (!Number.isFinite(raw) || raw < 0) { toast('قیمت معتبر نیست', 'error'); return; }
-        saveBtn.disabled = true;
-        try {
-          await apiUpdatePrice(item, raw);
-          toast('قیمت ذخیره شد', 'success');
-          await renderAll();
-        } catch (err) {
-          toast('ذخیره قیمت ناموفق بود', 'error');
-          console.error(err);
-        } finally {
-          saveBtn.disabled = false;
-          // برگرداندن UI به حالت نمایش را به renderAll واگذار می‌کنیم
-        }
-      }
-    });
-  }
 
   /** ================== Bootstrap ================== **/
   const servicesContainer = findServicesContainer();
   bindReserveClicks(servicesContainer);
 
   let LAST_PUBLIC = { items: [], sellerId: null };
-  let OWNER_MODE = false;
 
-  async function detectOwnerMode() {
-    // اگر آیتم نداریم، نمی‌تونیم تست مالکیت کنیم
-    const sample = LAST_PUBLIC.items && LAST_PUBLIC.items[0] ? LAST_PUBLIC.items[0]._id : null;
-    OWNER_MODE = await isOwnerOfShop(sample);
-    // یک چیپ کوچک مدیریت بالای لیست اضافه می‌کنیم
-    const h3 = servicesContainer?.closest('section')?.querySelector('h3');
-    if (h3) {
-      const old = h3.parentElement.querySelector('.owner-chip');
-      if (old) old.remove();
-      if (OWNER_MODE) {
-        const chip = document.createElement('span');
-        chip.className = 'owner-chip ml-2 inline-flex items-center gap-2 text-[11px] font-bold px-3 py-1.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200';
-        chip.innerHTML = '<i class="fa-solid fa-user-cog"></i> حالت مدیریت';
-        h3.after(chip);
-      }
-    }
-  }
-
-  function renderList(owner) {
+  function renderList() {
     if (!servicesContainer) return;
     servicesContainer.innerHTML = '';
     if (!LAST_PUBLIC.items || LAST_PUBLIC.items.length === 0) {
@@ -5010,13 +4819,9 @@ window.addEventListener('load', () => {
     });
 
     sorted.forEach(item => {
-      // در نمای عمومی، فقط isActive=true باید دیده شود؛
-      // ولی اگر ownerMode روشن باشد، همه نشان داده شوند تا بتواند خاموش/روشن کند.
-      if (!owner && !item.isActive) return;
-      servicesContainer.insertAdjacentHTML('beforeend', cardTemplate(item, owner));
+      if (!item.isActive) return;
+      servicesContainer.insertAdjacentHTML('beforeend', cardTemplate(item));
     });
-
-    if (owner) bindOwnerControls(servicesContainer, LAST_PUBLIC.items);
   }
 
   async function renderAll() {
@@ -5028,15 +4833,14 @@ window.addEventListener('load', () => {
         apiGetPublic(shopurl),
         apiGetSeller(shopurl)
       ]);
-      LAST_PUBLIC = data; // { items, sellerId }
-      updateSellerProfile(seller);
-      await detectOwnerMode();
-      renderList(OWNER_MODE);
-    } catch (err) {
-      console.error('Load public services failed', err);
-      show404();
+        LAST_PUBLIC = data; // { items, sellerId }
+        updateSellerProfile(seller);
+        renderList();
+      } catch (err) {
+        console.error('Load public services failed', err);
+        show404();
+      }
     }
-  }
 
   document.addEventListener('DOMContentLoaded', renderAll);
 })();
