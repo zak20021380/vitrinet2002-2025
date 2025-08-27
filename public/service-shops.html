@@ -4682,6 +4682,168 @@ window.addEventListener('load', () => {
 </script>
 
 
+<script>
+(function () {
+  'use strict';
+
+  // ✅ اگر مسیر mount فرق دارد، این را مطابق سرورت عوض کن
+  const API_BASE = '/api/portfolio';
+
+  // --- helpers ---
+  const $  = (s, r = document) => r.querySelector(s);
+  const $$ = (s, r = document) => Array.from(r.querySelectorAll(s));
+
+  // shopurl را از یکی از جاها می‌گیریم: window.__SHOP_URL__ یا data-attr یا URL
+function getShopUrl() {
+  // 1) از QueryString
+  const qs = new URLSearchParams(location.search);
+  const q  = qs.get('shopurl') || qs.get('shop') || qs.get('s');
+  if (q) return String(q).trim();
+
+  // 2) از متغیر/دیتا-اَتریبیوت
+  if (window.__SHOP_URL__) return String(window.__SHOP_URL__).trim();
+  const fromData = document.body?.dataset?.shopurl || document.querySelector('#seller-profile')?.dataset?.shopurl;
+  if (fromData) return String(fromData).trim();
+
+  // 3) از مسیر (پسوند .html حذف بشه)
+  const parts = location.pathname.replace(/\/+$/,'').split('/').filter(Boolean);
+  let last = parts.pop() || '';
+  return last.replace(/\.html?$/i, '');
+}
+
+  // عناصر UI
+  const grid      = $('#portfolio-grid');
+  const row       = $('#portfolio-row');
+  const tpl       = $('#tpl-portfolio-card');
+  const loadingEl = $('#portfolio-loading');
+  const emptyEl   = $('#portfolio-empty');
+
+  // مودال (لطفاً مطمئن شو فقط یک #imageModal داری)
+  const modal       = $('#imageModal');
+  const modalTitle  = $('#modalTitle');
+  const modalImg    = $('#modalImage');
+  const modalViews  = $('#modalViews');
+  const modalLikes  = $('#modalLikes');
+  const modalClose  = $('#imageModalClose');
+
+  function openModal(item) {
+    if (!modal) return;
+    modalTitle && (modalTitle.textContent = item.title || '');
+    if (modalImg) {
+      modalImg.src = item.image;
+      modalImg.alt = item.title || '';
+    }
+    if (modalViews) modalViews.textContent = ((item.views ?? 0)).toLocaleString('fa-IR');
+    if (modalLikes) modalLikes.textContent = ((item.likes ?? 0)).toLocaleString('fa-IR');
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
+  }
+  function closeModal() {
+    if (!modal) return;
+    modal.classList.add('hidden');
+    modal.classList.remove('flex');
+  }
+  modal?.addEventListener('click', (e) => { if (e.target === modal) closeModal(); });
+  modalClose?.addEventListener('click', closeModal);
+
+  // کارت ساز
+  function buildCard(item) {
+    const node = tpl.content.firstElementChild.cloneNode(true);
+    const img  = $('.portfolio-img', node);
+    const name = $('.portfolio-name', node);
+    const desc = $('.portfolio-description', node);
+    const vEl  = $('.js-views', node);
+    const lEl  = $('.js-likes', node);
+    const btn  = $('.js-open', node);
+
+    if (img) {
+      img.src = item.image;
+      img.alt = item.title || '';
+      img.loading = 'lazy';
+      img.decoding = 'async';
+    }
+    if (name) name.textContent = item.title || '—';
+    if (desc) desc.textContent = item.description || '';
+    if (vEl)  vEl.textContent  = ((item.views ?? 0)).toLocaleString('fa-IR');
+    if (lEl)  lEl.textContent  = ((item.likes ?? 0)).toLocaleString('fa-IR');
+    if (btn)  btn.addEventListener('click', () => openModal(item));
+
+    return node;
+  }
+
+async function loadPortfolio() {
+  const API_BASE = '/api/portfolio'; // اگر API روی پورت/دامنه دیگری‌ست، این را کامل کن مثلا: 'http://localhost:3000/api/portfolio'
+  const shopurl  = getShopUrl();
+
+  const loadingEl = document.getElementById('portfolio-loading');
+  const emptyEl   = document.getElementById('portfolio-empty');
+  const grid      = document.getElementById('portfolio-grid');
+  const row       = document.getElementById('portfolio-row');
+  const tpl       = document.getElementById('tpl-portfolio-card');
+
+  if (!shopurl) {
+    loadingEl?.classList.add('hidden');
+    emptyEl?.classList.remove('hidden');
+    if (emptyEl) emptyEl.textContent = 'آدرس فروشگاه نامعتبر است.';
+    return;
+  }
+
+  const url = `${API_BASE}/public/${encodeURIComponent(shopurl)}`;
+  try {
+    const res = await fetch(url, { credentials: 'include' });
+    let payload = null;
+    try { payload = await res.json(); } catch(_) {}
+
+    if (!res.ok) {
+      const msg = (payload && payload.message) ? payload.message : `HTTP ${res.status}`;
+      throw new Error(msg);
+    }
+
+    const items = Array.isArray(payload?.items) ? payload.items : [];
+    loadingEl?.classList.add('hidden');
+
+    if (!items.length) {
+      emptyEl?.classList.remove('hidden');
+      return;
+    }
+
+    grid?.classList.remove('hidden');
+
+    const buildCard = (item) => {
+      const node = tpl.content.firstElementChild.cloneNode(true);
+      node.querySelector('.portfolio-img').src = item.image;
+      node.querySelector('.portfolio-img').alt = item.title || '';
+      node.querySelector('.portfolio-name').textContent = item.title || '—';
+      node.querySelector('.portfolio-description').textContent = item.description || '';
+      node.querySelector('.js-views').textContent = (item.views ?? 0).toLocaleString('fa-IR');
+      node.querySelector('.js-likes').textContent = (item.likes ?? 0).toLocaleString('fa-IR');
+      node.querySelector('.js-open').addEventListener('click', () => openModal(item));
+      return node;
+    };
+
+    items.forEach(it => {
+      if (row)  row.appendChild(buildCard(it).cloneNode(true));
+      if (grid) grid.appendChild(buildCard(it));
+    });
+  } catch (err) {
+    console.error('portfolio fetch failed:', err);
+    loadingEl?.classList.add('hidden');
+    emptyEl?.classList.remove('hidden');
+    if (emptyEl) emptyEl.textContent = String(err.message || 'خطا در بارگذاری نمونه‌کارها');
+  }
+}
+
+  // استارت
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', loadPortfolio);
+  } else {
+    loadPortfolio();
+  }
+})();
+</script>
+
+
+
 
 </body>
 </html>
