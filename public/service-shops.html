@@ -4447,7 +4447,7 @@ function cardTemplate(item) {
   const rating      = Number(item.ratingAvg ?? item.rating ?? 0) || null;
   const ratingCount = Number(item.reviewCount ?? item.ratingCount ?? 0) || 0;
 
-  // جلوگیری از تکرار عنوان در کپشن
+  // کپشن بدون تکرار
   const title   = (item.title || '').trim();
   const descRaw = (item.desc  || '').trim();
   const norm    = s => s.toString().trim().replace(/\s+/g, ' ').toLowerCase();
@@ -4458,53 +4458,48 @@ function cardTemplate(item) {
     class="service-card group relative flex-shrink-0 w-[90vw] xs:w-[86vw] sm:w-72 md:w-80 bg-white rounded-2xl border border-gray-200 overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 snap-start"
     data-svc-id="${item._id}"
   >
-    <!-- تصویر + اورلی‌ها -->
+    <!-- تصویر + اورلی تخفیف -->
     <div class="relative overflow-hidden">
-      <img
-        src="${img}" alt="${title}" loading="lazy" decoding="async"
-        class="w-full aspect-[4/3] object-cover transition-transform duration-500 group-hover:scale-105"
-      />
+      <img src="${img}" alt="${title}" loading="lazy" decoding="async"
+           class="w-full aspect-[4/3] object-cover transition-transform duration-500 group-hover:scale-105" />
       <div class="absolute inset-0 bg-gradient-to-t from-black/55 via-black/10 to-transparent pointer-events-none"></div>
 
-      <!-- بج‌ها -->
       <div class="absolute top-2 left-2 flex gap-2">
         ${hasOff ? `<span class="rounded-full bg-rose-600/95 text-white text-[11px] px-2 py-1">${toFa(offPct)}٪ تخفیف</span>` : ``}
         ${item.badge ? `<span class="rounded-full bg-emerald-600/95 text-white text-[11px] px-2 py-1">${item.badge}</span>` : ``}
       </div>
-
-      <!-- عنوان/امتیاز (فقط روی تصویر) -->
-      <div class="absolute bottom-2 right-2 left-2 flex items-center justify-between text-white">
-        <h4 class="font-extrabold text-[16px] sm:text-[17px] md:text-lg line-clamp-1 drop-shadow">${title || '—'}</h4>
-        <div class="flex items-center gap-1 text-[11px] opacity-90 ${rating ? '' : 'hidden'}">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" class="text-amber-400">
-            <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/>
-          </svg>
-          <span>${(rating || 0).toFixed(1).replace('.', '٫')}</span>
-          <span class="opacity-80">(${toFa(ratingCount)})</span>
-        </div>
-      </div>
+      <!-- ⛔️ عنوان روی تصویر حذف شد تا تکرار نشه -->
     </div>
 
-    <!-- بدنه کارت (بدون تکرار عنوان) -->
+    <!-- کپشن -->
     <div class="p-4 flex flex-col gap-3">
+      <!-- ردیف عنوان + امتیاز -->
+      <div class="flex items-center justify-between gap-3">
+        <h4 class="font-extrabold text-[16px] sm:text-[17px] md:text-lg text-gray-900 line-clamp-1">${title || '—'}</h4>
+        <div class="flex items-center gap-1 text-[12px] ${rating ? '' : 'hidden'}" aria-label="امتیاز ${rating || 0}">
+          <svg class="w-[14px] h-[14px] text-amber-400" viewBox="0 0 24 24" fill="currentColor"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
+          <span class="text-gray-700">${(rating || 0).toFixed(1).replace('.', '٫')}</span>
+          <span class="text-gray-500">(${toFa(ratingCount)})</span>
+        </div>
+      </div>
+
       ${showDesc ? `<p class="text-[13px] sm:text-[14px] text-gray-600 leading-6 line-clamp-2">${descRaw}</p>` : ''}
 
-      <!-- ردیف قیمت/رزرو -->
+      <!-- ردیف قیمت / رزرو -->
       <div class="mt-1 grid grid-cols-[1fr_auto] items-center gap-4">
         <div class="min-w-0">
           <div class="flex items-baseline gap-1">
-            <span class="service-price text-[19px] sm:text-xl font-extrabold tracking-tight text-gray-900">
+            <span class="service-price text-[19px] sm:text-[20px] font-extrabold tracking-tight text-gray-900">
               <span class="price-view">${priceFa(finalPrice)}</span>
             </span>
             <span class="service-currency text-[12px] sm:text-[13px] text-gray-500">تومان</span>
           </div>
           <div class="text-[11px] sm:text-[12px] text-rose-600 ${hasOff ? '' : 'hidden'}">
-            <s class="text-gray-400">${priceFa(item.price || 0)}</s>
-            <span class="ml-1">– ${toFa(offPct)}٪</span>
+            <s class="text-gray-400">${priceFa(item.price || 0)}</s><span class="ml-1">– ${toFa(offPct)}٪</span>
           </div>
         </div>
 
-        <!-- دکمه رزرو (بزرگ‌تر و لمسی‌تر، بدون آیکن) -->
+        <!-- دکمه رزرو (بدون آیکن، سایز لمسی) -->
         <button
           class="service-button cta-button inline-flex items-center justify-center text-white font-bold py-3 sm:py-3.5 px-6 sm:px-7 rounded-full text-[14px] sm:text-[15px] leading-none whitespace-nowrap transition-all ${item.isActive ? '' : 'opacity-40 pointer-events-none'}"
           data-service="${title}" data-price="${finalPrice || 0}" aria-label="رزرو ${title}"
@@ -4515,6 +4510,7 @@ function cardTemplate(item) {
     </div>
   </article>`;
 }
+
 
 
 
