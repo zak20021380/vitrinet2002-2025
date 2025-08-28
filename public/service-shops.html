@@ -630,7 +630,7 @@
         <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-emerald-600" viewBox="0 0 24 24" fill="currentColor">
           <path d="M6.62 10.79a15.053 15.053 0 006.59 6.59l2.2-2.2a1 1 0 011.01-.24c1.11.37 2.3.57 3.58.57a1 1 0 011 1V20a1 1 0 01-1 1C10.07 21 3 13.93 3 5a1 1 0 011-1h3.5a1 1 0 011 1c0 1.28.2 2.47.57 3.58a1 1 0 01-.24 1.01l-2.21 2.2z"/>
         </svg>
-        <a href="tel:" class="font-bold tracking-wide">—</a>
+        <a id="modal-phone" href="tel:" class="font-bold tracking-wide">—</a>
 
       </div>
     </div>
@@ -1104,7 +1104,7 @@ function showToastDark(message, {type='success', durationMs=2600} = {}) {
         <!-- Location chip -->
         <a id="location-link" href="#" role="button" aria-label="نمایش آدرس روی نقشه"
            class="inline-flex items-center gap-1.5 rounded-full bg-white/70 px-3 py-1.5 ring-1 ring-slate-200 shadow-sm text-slate-700 transition hover:bg-white focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-400"
-           data-modal-target="location-modal">
+           data-open="addressModal">
           <svg aria-hidden="true" class="h-4 w-4 text-sky-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 1 1 18 0z"></path>
             <circle cx="12" cy="10" r="3"></circle>
@@ -1119,7 +1119,7 @@ function showToastDark(message, {type='success', durationMs=2600} = {}) {
       <!-- CTAs -->
       <div class="px-5 sm:px-8 pb-6 sm:pb-8 mt-4 md:mt-6 flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-2.5 md:gap-3">
         <!-- Secondary CTA (Call) -->
-        <a href="tel:" aria-label="تماس تلفنی"
+        <a id="hero-call" href="tel:" aria-label="تماس تلفنی"
            class="order-2 sm:order-1 inline-flex w-full sm:w-auto items-center justify-center gap-2 rounded-xl border border-slate-300/70 bg-white/60 px-4 py-3 text-slate-800 font-bold shadow-sm transition hover:bg-white hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-400">
           <svg aria-hidden="true" class="h-5 w-5 text-slate-700" viewBox="0 0 24 24" fill="currentColor">
             <path d="M6.62 10.79a15.053 15.053 0 006.59 6.59l2.2-2.2a1 1 0 011.01-.24 11 11 0 003.58.57 1 1 0 011 1V20a1 1 0 01-1 1C10.07 21 3 13.93 3 5a1 1 0 011-1h3.5a1 1 0 011 1c0 1.28.2 2.47.57 3.58a1 1 0 01-.24 1.01l-2.21 2.2z"/>
@@ -4445,12 +4445,23 @@ window.addEventListener('load', () => {
       'store-phone':  seller.phone || '',
       'store-address': seller.address || '',
       'biz-name':     seller.storename || '',
-      'biz-tagline':  seller.desc || ''
+      'biz-tagline':  seller.desc || '',
+      'full-address': seller.address || '',
+      'modal-phone':  seller.phone || ''
     };
     for (const [id, text] of Object.entries(mapping)) {
       const el = document.getElementById(id);
-      if (el) el.textContent = text;
+      if (!el) continue;
+      if (id === 'modal-phone') {
+        el.textContent = text;
+        el.href = text ? `tel:${text}` : '#';
+      } else {
+        el.textContent = text;
+      }
     }
+
+    const heroCall = document.getElementById('hero-call');
+    if (heroCall) heroCall.href = seller.phone ? `tel:${seller.phone}` : '#';
   }
 
   /** ================== Render ================== **/
