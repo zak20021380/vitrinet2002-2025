@@ -5,47 +5,61 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>حسابداری حرفه‌ای فروشگاه</title>
     <meta name="description" content="سیستم حسابداری حرفه‌ای برای فروشگاه‌داران">
-    <meta name="theme-color" content="#4f46e5">
-    <link rel="manifest" href="manifest.json">
-    <link rel="icon" type="image/svg+xml" href="favicon.svg">
-    <link rel="apple-touch-icon" href="app-icon.png">
+    <meta name="theme-color" content="#4F46E5">
     
-    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     
     <style>
         :root {
-            --primary: #4f46e5;
-            --primary-dark: #4338ca;
-            --secondary: #64748b;
-            --success: #10b981;
-            --danger: #ef4444;
-            --warning: #f59e0b;
-            --info: #3b82f6;
-            --light: #f8fafc;
-            --dark: #0f172a;
-            --white: #ffffff;
-            --body-bg: #f1f5f9;
-            --card-bg: #ffffff;
-            --text-primary: #0f172a;
-            --text-secondary: #64748b;
-            --border-color: #e2e8f0;
-            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --primary: #4F46E5;
+            --primary-light: #818CF8;
+            --primary-dark: #4338CA;
+            --secondary: #6B7280;
+            --success: #10B981;
+            --danger: #EF4444;
+            --warning: #F59E0B;
+            --info: #3B82F6;
+            --light: #F9FAFB;
+            --dark: #111827;
+            --white: #FFFFFF;
+            --body-bg: #F3F4F6;
+            --card-bg: #FFFFFF;
+            --text-primary: #1F2937;
+            --text-secondary: #6B7280;
+            --border-color: #E5E7EB;
+            --shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
             --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
             --radius: 12px;
             --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            --fab-size: 64px;
+            --fab-size: 56px;
             --bottom-nav-height: 70px;
         }
-
+        
+        /* Reduced motion for accessibility */
+        @media (prefers-reduced-motion: reduce) {
+            :root {
+                --transition: none;
+            }
+        }
+        
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
-
+        
         body {
-            font-family: 'IRANSans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            font-family: 'Vazirmatn', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
             background-color: var(--body-bg);
             color: var(--text-primary);
             line-height: 1.6;
@@ -56,14 +70,7 @@
             padding-bottom: var(--bottom-nav-height);
             overflow-x: hidden;
         }
-
-        @font-face {
-            font-family: 'IRANSans';
-            src: url('https://cdn.jsdelivr.net/gh/rastikerdar/vazir-font@v30.1.0/dist/Vazir-Regular.woff2') format('woff2');
-            font-weight: normal;
-            font-style: normal;
-        }
-
+        
         .app-container {
             flex: 1;
             display: flex;
@@ -73,67 +80,72 @@
             width: 100%;
             padding: 0 16px;
         }
-
-        header {
-            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
-            padding: 20px 16px;
-            margin-bottom: 24px;
+        
+        /* Header */
+        .app-header {
+            background: var(--white);
+            padding: 16px;
+            margin-bottom: 16px;
             border-radius: var(--radius);
-            box-shadow: var(--shadow-lg);
+            box-shadow: var(--shadow);
             display: flex;
             justify-content: space-between;
             align-items: center;
-            position: relative;
-            overflow: hidden;
+            position: sticky;
+            top: 0;
+            z-index: 50;
+            transition: var(--transition);
         }
-
-        header::before {
-            content: '';
-            position: absolute;
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
-            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 70%);
-            animation: pulse 4s infinite ease-in-out;
-        }
-
-        @keyframes pulse {
-            0%, 100% { transform: scale(1); opacity: 0.5; }
-            50% { transform: scale(1.1); opacity: 0.3; }
-        }
-
+        
         .shop-name {
             font-size: 1.5rem;
             font-weight: 700;
-            color: white;
-            position: relative;
-            z-index: 1;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
-
+        
+        .shop-name i {
+            color: var(--primary-light);
+        }
+        
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
         .date-display {
             font-size: 0.875rem;
-            color: rgba(255, 255, 255, 0.9);
-            position: relative;
-            z-index: 1;
+            color: var(--text-secondary);
+            background: var(--light);
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 6px;
         }
-
+        
+        /* Views */
         .view-container {
             flex: 1;
             display: none;
             flex-direction: column;
             animation: fadeIn 0.4s cubic-bezier(0.4, 0, 0.2, 1);
         }
-
+        
         .view-container.active {
             display: flex;
         }
-
+        
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(20px); }
             to { opacity: 1; transform: translateY(0); }
         }
-
+        
+        /* Cards */
         .card {
             background-color: var(--card-bg);
             border-radius: var(--radius);
@@ -142,42 +154,52 @@
             margin-bottom: 20px;
             transition: var(--transition);
             border: 1px solid var(--border-color);
+            overflow: hidden;
         }
-
+        
         .card:hover {
-            box-shadow: var(--shadow-lg);
-            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
         }
-
+        
         .card-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
             margin-bottom: 16px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid var(--border-color);
         }
-
+        
         .card-title {
-            font-size: 1.25rem;
-            font-weight: 700;
+            font-size: 1.125rem;
+            font-weight: 600;
             color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
-
+        
+        .card-title i {
+            color: var(--primary);
+        }
+        
+        /* Buttons */
         .btn {
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            padding: 12px 20px;
+            padding: 10px 16px;
             border: none;
             border-radius: var(--radius);
-            font-size: 1rem;
-            font-weight: 600;
+            font-size: 0.875rem;
+            font-weight: 500;
             cursor: pointer;
             transition: var(--transition);
-            min-height: 48px;
+            gap: 8px;
             position: relative;
             overflow: hidden;
         }
-
+        
         .btn::before {
             content: '';
             position: absolute;
@@ -185,53 +207,207 @@
             left: 50%;
             width: 0;
             height: 0;
-            border-radius: 50%;
             background: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
             transform: translate(-50%, -50%);
             transition: width 0.6s, height 0.6s;
         }
-
+        
         .btn:active::before {
             width: 300px;
             height: 300px;
         }
-
-        .btn-primary {
-            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
-            color: var(--white);
-        }
-
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 15px -3px rgba(79, 70, 229, 0.3);
-        }
-
-        .btn-secondary {
-            background-color: var(--secondary);
-            color: var(--white);
-        }
-
-        .btn-success {
-            background-color: var(--success);
-            color: var(--white);
-        }
-
-        .btn-danger {
-            background-color: var(--danger);
-            color: var(--white);
-        }
-
+        
         .btn-sm {
-            padding: 8px 16px;
-            font-size: 0.875rem;
-            min-height: 40px;
+            padding: 8px 12px;
+            font-size: 0.75rem;
         }
-
+        
+        .btn-primary {
+            background: var(--primary);
+            color: var(--white);
+        }
+        
+        .btn-primary:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px -1px rgba(79, 70, 229, 0.3);
+        }
+        
+        .btn-outline {
+            background: transparent;
+            border: 1px solid var(--border-color);
+            color: var(--text-secondary);
+        }
+        
+        .btn-outline:hover {
+            background: var(--light);
+            color: var(--text-primary);
+            border-color: var(--primary);
+        }
+        
+        .btn-success {
+            background: var(--success);
+            color: var(--white);
+        }
+        
+        .btn-success:hover {
+            background: #059669;
+        }
+        
+        .btn-danger {
+            background: var(--danger);
+            color: var(--white);
+        }
+        
+        .btn-danger:hover {
+            background: #DC2626;
+        }
+        
         .btn-block {
             display: flex;
             width: 100%;
         }
-
+        
+        /* Stats */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+        
+        .stat-card {
+            background: var(--white);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            padding: 20px;
+            text-align: center;
+            border: 1px solid var(--border-color);
+            transition: var(--transition);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 6px;
+            height: 100%;
+            background: var(--primary);
+            border-radius: var(--radius) 0 0 var(--radius);
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-md);
+        }
+        
+        .stat-value {
+            font-size: 1.75rem;
+            font-weight: 700;
+            margin-bottom: 4px;
+            color: var(--primary);
+        }
+        
+        .stat-label {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+        
+        /* Lists */
+        .list-group {
+            list-style: none;
+        }
+        
+        .list-item {
+            padding: 16px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: var(--transition);
+            cursor: pointer;
+        }
+        
+        .list-item:last-child {
+            border-bottom: none;
+        }
+        
+        .list-item:hover {
+            background-color: rgba(79, 70, 229, 0.05);
+        }
+        
+        .list-item-title {
+            font-weight: 500;
+            color: var(--text-primary);
+            margin-bottom: 4px;
+        }
+        
+        .list-item-subtitle {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+        }
+        
+        /* Badges */
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 4px 8px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+        
+        .badge-success {
+            background-color: rgba(16, 185, 129, 0.1);
+            color: var(--success);
+        }
+        
+        .badge-danger {
+            background-color: rgba(239, 68, 68, 0.1);
+            color: var(--danger);
+        }
+        
+        .badge-warning {
+            background-color: rgba(245, 158, 11, 0.1);
+            color: var(--warning);
+        }
+        
+        /* Search */
+        .search-box {
+            position: relative;
+            margin-bottom: 16px;
+        }
+        
+        .search-icon {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-secondary);
+        }
+        
+        .search-input {
+            width: 100%;
+            padding: 12px 40px 12px 12px;
+            background-color: var(--white);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius);
+            font-size: 0.875rem;
+            transition: var(--transition);
+        }
+        
+        .search-input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+        }
+        
+        /* FAB */
         .fab {
             position: fixed;
             bottom: calc(var(--bottom-nav-height) + 20px);
@@ -239,43 +415,38 @@
             width: var(--fab-size);
             height: var(--fab-size);
             border-radius: 50%;
-            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            background: var(--primary);
             color: var(--white);
             border: none;
             box-shadow: 0 10px 25px -5px rgba(79, 70, 229, 0.5);
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 28px;
+            font-size: 20px;
             cursor: pointer;
             z-index: 100;
             transition: var(--transition);
         }
-
+        
         .fab:hover {
-            transform: scale(1.1);
-            box-shadow: 0 20px 30px -10px rgba(79, 70, 229, 0.6);
+            transform: scale(1.05) rotate(90deg);
+            box-shadow: 0 15px 30px -5px rgba(79, 70, 229, 0.6);
         }
-
-        .fab:active {
-            transform: scale(0.95);
-        }
-
+        
+        /* Bottom Navigation */
         .bottom-nav {
             position: fixed;
             bottom: 0;
             left: 0;
             right: 0;
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            box-shadow: 0 -4px 20px -5px rgba(0, 0, 0, 0.1);
+            background: var(--white);
+            box-shadow: 0 -4px 6px -1px rgba(0, 0, 0, 0.1);
             display: flex;
             justify-content: space-around;
             height: var(--bottom-nav-height);
             z-index: 100;
-            border-top: 1px solid var(--border-color);
         }
-
+        
         .nav-item {
             flex: 1;
             display: flex;
@@ -288,205 +459,38 @@
             color: var(--text-secondary);
             position: relative;
         }
-
+        
         .nav-item.active {
             color: var(--primary);
         }
-
+        
         .nav-item.active::before {
             content: '';
             position: absolute;
             top: 0;
-            left: 25%;
-            width: 50%;
+            left: 0;
+            right: 0;
             height: 3px;
             background: var(--primary);
             border-radius: 0 0 3px 3px;
         }
-
+        
         .nav-icon {
-            font-size: 22px;
+            font-size: 20px;
             margin-bottom: 4px;
             transition: var(--transition);
         }
-
+        
         .nav-item.active .nav-icon {
-            transform: scale(1.2);
+            transform: scale(1.1);
         }
-
+        
         .nav-label {
             font-size: 0.75rem;
             font-weight: 500;
         }
-
-        .form-group {
-            margin-bottom: 20px;
-        }
-
-        .form-label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: 600;
-            font-size: 0.875rem;
-            color: var(--text-primary);
-        }
-
-        .form-control {
-            display: block;
-            width: 100%;
-            padding: 14px 16px;
-            font-size: 1rem;
-            line-height: 1.5;
-            color: var(--text-primary);
-            background-color: var(--white);
-            border: 2px solid var(--border-color);
-            border-radius: var(--radius);
-            transition: var(--transition);
-            min-height: 48px;
-        }
-
-        .form-control:focus {
-            outline: none;
-            border-color: var(--primary);
-            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
-        }
-
-        .form-control.ltr {
-            direction: ltr;
-            text-align: right;
-        }
-
-        .list-group {
-            list-style: none;
-        }
-
-        .list-item {
-            padding: 16px;
-            border-bottom: 1px solid var(--border-color);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            transition: var(--transition);
-            position: relative;
-        }
-
-        .list-item:last-child {
-            border-bottom: none;
-        }
-
-        .list-item:hover {
-            background-color: rgba(79, 70, 229, 0.05);
-        }
-
-        .list-item-title {
-            font-weight: 600;
-            color: var(--text-primary);
-        }
-
-        .list-item-subtitle {
-            font-size: 0.875rem;
-            color: var(--text-secondary);
-        }
-
-        .badge {
-            display: inline-flex;
-            align-items: center;
-            padding: 6px 12px;
-            border-radius: 20px;
-            font-size: 0.75rem;
-            font-weight: 600;
-        }
-
-        .badge-success {
-            background-color: rgba(16, 185, 129, 0.1);
-            color: var(--success);
-        }
-
-        .badge-danger {
-            background-color: rgba(239, 68, 68, 0.1);
-            color: var(--danger);
-        }
-
-        .badge-warning {
-            background-color: rgba(245, 158, 11, 0.1);
-            color: var(--warning);
-        }
-
-        .empty-state {
-            text-align: center;
-            padding: 60px 20px;
-            color: var(--text-secondary);
-        }
-
-        .empty-state-icon {
-            font-size: 64px;
-            margin-bottom: 20px;
-            opacity: 0.4;
-            color: var(--primary);
-        }
-
-        .empty-state-title {
-            font-size: 1.25rem;
-            margin-bottom: 10px;
-            font-weight: 600;
-        }
-
-        .empty-state-text {
-            margin-bottom: 24px;
-            max-width: 300px;
-            margin-left: auto;
-            margin-right: auto;
-        }
-
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 16px;
-            margin-bottom: 24px;
-        }
-
-        .stat-card {
-            background: linear-gradient(135deg, var(--card-bg) 0%, #f8fafc 100%);
-            border-radius: var(--radius);
-            box-shadow: var(--shadow);
-            padding: 20px;
-            text-align: center;
-            border: 1px solid var(--border-color);
-            transition: var(--transition);
-            position: relative;
-            overflow: hidden;
-        }
-
-        .stat-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            right: 0;
-            width: 80px;
-            height: 80px;
-            background: radial-gradient(circle, rgba(79, 70, 229, 0.05) 0%, rgba(79, 70, 229, 0) 70%);
-            border-radius: 50%;
-            transform: translate(20px, -20px);
-        }
-
-        .stat-card:hover {
-            transform: translateY(-4px);
-            box-shadow: var(--shadow-lg);
-        }
-
-        .stat-value {
-            font-size: 1.75rem;
-            font-weight: 700;
-            margin-bottom: 6px;
-            color: var(--primary);
-        }
-
-        .stat-label {
-            font-size: 0.875rem;
-            color: var(--text-secondary);
-            font-weight: 500;
-        }
-
+        
+        /* Modal */
         .modal {
             display: none;
             position: fixed;
@@ -502,11 +506,11 @@
             padding: 16px;
             animation: fadeIn 0.3s ease;
         }
-
+        
         .modal.active {
             display: flex;
         }
-
+        
         .modal-content {
             background-color: var(--card-bg);
             border-radius: var(--radius);
@@ -517,12 +521,12 @@
             animation: slideUp 0.4s cubic-bezier(0.4, 0, 0.2, 1);
             box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
         }
-
+        
         @keyframes slideUp {
             from { transform: translateY(50px); opacity: 0; }
             to { transform: translateY(0); opacity: 1; }
         }
-
+        
         .modal-header {
             padding: 20px;
             border-bottom: 1px solid var(--border-color);
@@ -530,37 +534,37 @@
             justify-content: space-between;
             align-items: center;
         }
-
+        
         .modal-title {
             font-size: 1.25rem;
-            font-weight: 700;
+            font-weight: 600;
             color: var(--text-primary);
         }
-
+        
         .modal-close {
             background: none;
             border: none;
-            font-size: 1.5rem;
+            font-size: 1.25rem;
             cursor: pointer;
             color: var(--text-secondary);
-            width: 36px;
-            height: 36px;
+            width: 32px;
+            height: 32px;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
             transition: var(--transition);
         }
-
+        
         .modal-close:hover {
             background-color: var(--light);
             color: var(--text-primary);
         }
-
+        
         .modal-body {
             padding: 20px;
         }
-
+        
         .modal-footer {
             padding: 20px;
             border-top: 1px solid var(--border-color);
@@ -568,15 +572,62 @@
             justify-content: flex-end;
             gap: 12px;
         }
-
+        
+        /* Form Elements */
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            font-size: 0.875rem;
+            color: var(--text-primary);
+        }
+        
+        .form-control {
+            display: block;
+            width: 100%;
+            padding: 12px 16px;
+            font-size: 0.875rem;
+            color: var(--text-primary);
+            background-color: var(--white);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius);
+            transition: var(--transition);
+        }
+        
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+        }
+        
+        .form-control.error {
+            border-color: var(--danger);
+        }
+        
+        .error-message {
+            color: var(--danger);
+            font-size: 0.75rem;
+            margin-top: 4px;
+            display: none;
+        }
+        
+        .error-message.show {
+            display: block;
+        }
+        
+        /* Toast */
         .toast {
             position: fixed;
-            bottom: calc(var(--bottom-nav-height) + 80px);
+            bottom: calc(var(--bottom-nav-height) + 20px);
             left: 20px;
             right: 20px;
-            background: linear-gradient(135deg, var(--dark) 0%, #1e293b 100%);
+            background: var(--dark);
             color: var(--white);
-            padding: 16px 20px;
+            padding: 16px;
             border-radius: var(--radius);
             box-shadow: var(--shadow-lg);
             display: flex;
@@ -587,422 +638,388 @@
             transition: var(--transition);
             z-index: 1000;
         }
-
+        
         .toast.show {
             transform: translateY(0);
             opacity: 1;
         }
-
+        
         .toast-message {
             flex: 1;
             font-weight: 500;
-        }
-
-        .toast-action {
-            background: none;
-            border: none;
-            color: var(--white);
-            cursor: pointer;
-            font-weight: 600;
-            margin-right: 16px;
-            padding: 6px 12px;
-            border-radius: 6px;
-            transition: var(--transition);
-        }
-
-        .toast-action:hover {
-            background-color: rgba(255, 255, 255, 0.1);
-        }
-
-        .search-box {
-            position: relative;
-            margin-bottom: 20px;
-        }
-
-        .search-icon {
-            position: absolute;
-            right: 16px;
-            top: 50%;
-            transform: translateY(-50%);
-            color: var(--text-secondary);
-        }
-
-        .search-input {
-            padding-right: 48px;
-            background-color: var(--light);
-            border: 2px solid transparent;
-        }
-
-        .search-input:focus {
-            background-color: var(--white);
-            border-color: var(--primary);
-        }
-
-        .skeleton {
-            background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
-            background-size: 200% 100%;
-            animation: loading 1.5s infinite;
-            border-radius: var(--radius);
-            height: 20px;
-            margin-bottom: 12px;
-        }
-
-        @keyframes loading {
-            0% { background-position: 200% 0; }
-            100% { background-position: -200% 0; }
-        }
-
-        .skeleton-text {
-            height: 16px;
-            width: 80%;
-            margin-bottom: 8px;
-        }
-
-        .skeleton-title {
-            height: 24px;
-            width: 60%;
-            margin-bottom: 16px;
-        }
-
-        .swipeable {
-            position: relative;
-            overflow: hidden;
-        }
-
-        .swipeable-content {
-            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
-        .swipeable-actions {
-            position: absolute;
-            top: 0;
-            left: 0;
-            bottom: 0;
-            display: flex;
-        }
-
-        .swipeable-action {
+            font-size: 0.875rem;
             display: flex;
             align-items: center;
-            justify-content: center;
-            padding: 0 20px;
-            color: white;
-            font-weight: 600;
-            font-size: 0.875rem;
+            gap: 8px;
         }
-
-        .swipeable-action.delete {
-            background-color: var(--danger);
+        
+        .toast-icon {
+            font-size: 1.25rem;
         }
-
-        .swipeable-action.edit {
-            background-color: var(--primary);
-        }
-
-        .payment-methods {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 12px;
-        }
-
-        .payment-method {
-            background-color: var(--light);
-            border: 2px solid var(--border-color);
-            border-radius: var(--radius);
-            padding: 16px;
-            text-align: center;
-            cursor: pointer;
-            transition: var(--transition);
-        }
-
-        .payment-method:hover {
-            border-color: var(--primary);
-            background-color: rgba(79, 70, 229, 0.05);
-        }
-
-        .payment-method.active {
-            border-color: var(--primary);
-            background-color: rgba(79, 70, 229, 0.1);
-            color: var(--primary);
-        }
-
-        .payment-icon {
-            font-size: 24px;
-            margin-bottom: 8px;
-        }
-
+        
+        /* Chart Container */
         .chart-container {
+            position: relative;
             height: 250px;
             margin-bottom: 20px;
-            position: relative;
-            background-color: var(--light);
-            border-radius: var(--radius);
-            padding: 16px;
         }
-
-        .chart-placeholder {
+        
+        /* Table */
+        .data-table {
             width: 100%;
-            height: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+        
+        .data-table th,
+        .data-table td {
+            padding: 12px;
+            text-align: right;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .data-table th {
+            font-weight: 600;
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+        }
+        
+        .data-table tr:hover {
+            background-color: rgba(79, 70, 229, 0.05);
+        }
+        
+        /* Product Card */
+        .product-card {
+            display: flex;
+            align-items: center;
+            padding: 12px;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius);
+            margin-bottom: 12px;
+            transition: var(--transition);
+        }
+        
+        .product-card:hover {
+            border-color: var(--primary);
+            box-shadow: var(--shadow-md);
+        }
+        
+        .product-image {
+            width: 60px;
+            height: 60px;
+            border-radius: var(--radius);
+            background-color: var(--light);
             display: flex;
             align-items: center;
             justify-content: center;
+            margin-left: 16px;
+        }
+        
+        .product-image i {
+            font-size: 24px;
+            color: var(--primary);
+        }
+        
+        .product-info {
+            flex: 1;
+        }
+        
+        .product-name {
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+        
+        .product-code {
+            font-size: 0.75rem;
             color: var(--text-secondary);
+        }
+        
+        .product-price {
+            font-weight: 700;
+            color: var(--primary);
+        }
+        
+        .product-stock {
+            font-size: 0.75rem;
+            margin-top: 4px;
+        }
+        
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--text-secondary);
+        }
+        
+        .empty-state-icon {
+            font-size: 3rem;
+            margin-bottom: 16px;
+            color: var(--border-color);
+        }
+        
+        .empty-state-title {
             font-size: 1.125rem;
-            font-weight: 500;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: var(--text-primary);
         }
-
-        .toggle-switch {
+        
+        .empty-state-description {
+            margin-bottom: 20px;
+        }
+        
+        /* Steps for multi-step forms */
+        .steps {
+            display: flex;
+            margin-bottom: 24px;
             position: relative;
-            display: inline-block;
-            width: 50px;
-            height: 26px;
         }
-
-        .toggle-switch input {
-            opacity: 0;
-            width: 0;
-            height: 0;
+        
+        .step {
+            flex: 1;
+            text-align: center;
+            position: relative;
+            z-index: 1;
         }
-
-        .slider {
-            position: absolute;
-            cursor: pointer;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background-color: #ccc;
-            transition: .4s;
-            border-radius: 34px;
-        }
-
-        .slider:before {
-            position: absolute;
-            content: "";
-            height: 18px;
-            width: 18px;
-            left: 4px;
-            bottom: 4px;
-            background-color: white;
-            transition: .4s;
+        
+        .step-number {
+            width: 32px;
+            height: 32px;
             border-radius: 50%;
+            background: var(--border-color);
+            color: var(--white);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 8px;
+            font-weight: 600;
+            transition: var(--transition);
         }
-
-        input:checked + .slider {
-            background-color: var(--primary);
+        
+        .step.active .step-number {
+            background: var(--primary);
         }
-
-        input:checked + .slider:before {
-            transform: translateX(24px);
+        
+        .step.completed .step-number {
+            background: var(--success);
         }
-
-        .dark-mode {
-            background-color: #0f172a;
-            color: #e2e8f0;
+        
+        .step-title {
+            font-size: 0.75rem;
+            font-weight: 500;
+            color: var(--text-secondary);
         }
-
-        .dark-mode .card {
-            background-color: #1e293b;
-            border-color: #334155;
+        
+        .step.active .step-title {
+            color: var(--primary);
         }
-
-        .dark-mode .stat-card {
-            background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
-            border-color: #334155;
+        
+        .step::before {
+            content: '';
+            position: absolute;
+            top: 16px;
+            right: 50%;
+            width: 100%;
+            height: 2px;
+            background: var(--border-color);
+            z-index: -1;
         }
-
-        .dark-mode .form-control {
-            background-color: #334155;
-            border-color: #475569;
-            color: #e2e8f0;
+        
+        .step:last-child::before {
+            display: none;
         }
-
-        .dark-mode .search-input {
-            background-color: #334155;
+        
+        .step.completed::before {
+            background: var(--success);
         }
-
-        .dark-mode .bottom-nav {
-            background: rgba(30, 41, 59, 0.95);
-            border-color: #334155;
-        }
-
-        .dark-mode .modal-content {
-            background-color: #1e293b;
-        }
-
-        .dark-mode .payment-method {
-            background-color: #334155;
-            border-color: #475569;
-        }
-
-        .dark-mode .chart-container {
-            background-color: #334155;
-        }
-
+        
+        /* Responsive */
         @media (min-width: 768px) {
             .app-container {
                 padding: 0 24px;
             }
-
+            
             .stats-grid {
                 grid-template-columns: repeat(4, 1fr);
             }
-
-            .modal-content {
-                max-width: 600px;
-            }
         }
-
+        
         @media (min-width: 1024px) {
             .app-container {
                 padding: 0 32px;
             }
         }
-
-        /* Language toggle */
-        .lang-toggle {
-            display: flex;
-            background-color: var(--light);
-            border-radius: 24px;
-            padding: 4px;
-            border: 1px solid var(--border-color);
+        
+        /* Dark Mode */
+        .dark-mode {
+            --body-bg: #111827;
+            --card-bg: #1F2937;
+            --text-primary: #F9FAFB;
+            --text-secondary: #9CA3AF;
+            --border-color: #374151;
+            --light: #1F2937;
+            --white: #1F2937;
         }
-
-        .lang-option {
-            padding: 6px 16px;
-            border-radius: 20px;
-            font-size: 0.875rem;
-            cursor: pointer;
-            transition: var(--transition);
-            font-weight: 500;
-        }
-
-        .lang-option.active {
-            background-color: var(--primary);
-            color: var(--white);
-        }
-
-        /* Loading animation */
-        .loader {
-            border: 3px solid var(--border-color);
-            border-radius: 50%;
-            border-top: 3px solid var(--primary);
-            width: 30px;
-            height: 30px;
-            animation: spin 1s linear infinite;
-            margin: 0 auto;
-        }
-
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
-        /* Floating label */
-        .form-floating {
-            position: relative;
-        }
-
-        .form-floating label {
-            position: absolute;
-            top: 14px;
-            right: 16px;
-            font-size: 1rem;
-            color: var(--text-secondary);
-            transition: var(--transition);
-            pointer-events: none;
-        }
-
-        .form-floating input:focus ~ label,
-        .form-floating input:not(:placeholder-shown) ~ label {
-            top: -10px;
-            right: 12px;
-            font-size: 0.75rem;
-            color: var(--primary);
-            background-color: var(--white);
-            padding: 0 4px;
-        }
-
-        /* Progress bar */
-        .progress {
-            height: 8px;
-            background-color: var(--light);
-            border-radius: 4px;
-            overflow: hidden;
-            margin-bottom: 16px;
-        }
-
-        .progress-bar {
-            height: 100%;
-            background: linear-gradient(90deg, var(--primary) 0%, var(--primary-dark) 100%);
-            border-radius: 4px;
-            transition: width 0.6s ease;
-        }
-
-        /* Tooltip */
-        .tooltip {
-            position: relative;
-            display: inline-block;
-        }
-
-        .tooltip .tooltiptext {
-            visibility: hidden;
-            width: 120px;
-            background-color: var(--dark);
-            color: var(--white);
-            text-align: center;
-            border-radius: 6px;
-            padding: 5px;
-            position: absolute;
-            z-index: 1;
-            bottom: 125%;
-            left: 50%;
-            margin-left: -60px;
-            opacity: 0;
-            transition: opacity 0.3s;
-            font-size: 0.75rem;
-        }
-
-        .tooltip:hover .tooltiptext {
-            visibility: visible;
-            opacity: 1;
-        }
-
-        /* Dark mode toggle */
+        
         .dark-mode-toggle {
-            position: fixed;
-            top: 20px;
-            left: 20px;
-            z-index: 200;
-            background-color: var(--card-bg);
+            background: var(--light);
+            border: none;
+            width: 40px;
+            height: 40px;
             border-radius: 50%;
-            width: 48px;
-            height: 48px;
             display: flex;
             align-items: center;
             justify-content: center;
-            box-shadow: var(--shadow);
+            cursor: pointer;
+            color: var(--text-primary);
+            transition: var(--transition);
+        }
+        
+        .dark-mode-toggle:hover {
+            background: var(--border-color);
+        }
+        
+        /* Animations */
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(79, 70, 229, 0.4); }
+            70% { box-shadow: 0 0 0 10px rgba(79, 70, 229, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(79, 70, 229, 0); }
+        }
+        
+        /* Speed Dial */
+        .speed-dial {
+            position: fixed;
+            bottom: calc(var(--bottom-nav-height) + 90px);
+            left: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            align-items: flex-end;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: var(--transition);
+            z-index: 90;
+        }
+        
+        .speed-dial.active {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+        .speed-dial-btn {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: var(--white);
+            color: var(--text-primary);
+            border: none;
+            box-shadow: var(--shadow-md);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
             cursor: pointer;
             transition: var(--transition);
         }
-
-        .dark-mode-toggle:hover {
+        
+        .speed-dial-btn:hover {
+            background: var(--primary);
+            color: var(--white);
             transform: scale(1.1);
+        }
+        
+        .speed-dial-label {
+            background: var(--dark);
+            color: var(--white);
+            padding: 6px 12px;
+            border-radius: var(--radius);
+            font-size: 0.75rem;
+            font-weight: 500;
+            margin-left: 12px;
+            opacity: 0;
+            transform: translateX(10px);
+            transition: var(--transition);
+        }
+        
+        .speed-dial-item {
+            display: flex;
+            align-items: center;
+            opacity: 0;
+            transform: translateY(10px);
+            transition: var(--transition);
+        }
+        
+        .speed-dial.active .speed-dial-item {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+        .speed-dial.active .speed-dial-item:nth-child(1) {
+            transition-delay: 0.1s;
+        }
+        
+        .speed-dial.active .speed-dial-item:nth-child(2) {
+            transition-delay: 0.2s;
+        }
+        
+        .speed-dial.active .speed-dial-item:nth-child(3) {
+            transition-delay: 0.3s;
+        }
+        
+        .speed-dial.active .speed-dial-item:nth-child(4) {
+            transition-delay: 0.4s;
+        }
+        
+        .speed-dial.active .speed-dial-label {
+            opacity: 1;
+            transform: translateX(0);
+        }
+        
+        /* Loading State */
+        .loading {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 40px;
+        }
+        
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid var(--border-color);
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
         }
     </style>
 </head>
 <body>
-    <!-- Dark Mode Toggle -->
-    <div class="dark-mode-toggle" id="darkModeToggle">
-        <i class="fas fa-moon"></i>
-    </div>
-
     <div class="app-container">
-        <header>
-            <div class="shop-name">فروشگاه من</div>
-            <div class="date-display" id="currentDate">۱۴۰۲/۰۵/۱۵</div>
+        <!-- Header -->
+        <header class="app-header">
+            <div class="shop-name">
+                <i class="fas fa-store"></i>
+                فروشگاه من
+            </div>
+            <div class="header-actions">
+                <div class="date-display" id="currentDate">
+                    <i class="far fa-calendar-alt"></i>
+                    ۱۴۰۲/۰۵/۱۵
+                </div>
+                <button class="dark-mode-toggle" id="darkModeToggle">
+                    <i class="fas fa-moon"></i>
+                </button>
+            </div>
         </header>
-
+        
         <!-- Sales View -->
         <div class="view-container active" id="salesView">
             <div class="stats-grid">
@@ -1023,130 +1040,167 @@
                     <div class="stat-label">اعتباری</div>
                 </div>
             </div>
-
+            
             <div class="card">
                 <div class="card-header">
-                    <h2 class="card-title">آخرین فروش‌ها</h2>
-                    <button class="btn btn-sm btn-primary">مشاهده همه</button>
+                    <h2 class="card-title">
+                        <i class="fas fa-chart-bar"></i>
+                        نمودار فروش هفتگی
+                    </h2>
                 </div>
-                <ul class="list-group" id="recentSales">
-                    <li class="list-item swipeable">
-                        <div class="swipeable-content">
-                            <div>
-                                <div class="list-item-title">فاکتور #۱۲۳۴</div>
-                                <div class="list-item-subtitle">۱۴:۳۰ - ۳ کالا</div>
-                            </div>
-                            <div>
-                                <div class="list-item-title">۱۲۵,۰۰۰ تومان</div>
-                                <div class="list-item-subtitle">نقدی</div>
-                            </div>
+                <div class="chart-container">
+                    <canvas id="salesChart"></canvas>
+                </div>
+            </div>
+            
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">
+                        <i class="fas fa-receipt"></i>
+                        آخرین فروش‌ها
+                    </h2>
+                    <button class="btn btn-outline btn-sm" id="viewAllSalesBtn">مشاهده همه</button>
+                </div>
+                <ul class="list-group">
+                    <li class="list-item">
+                        <div>
+                            <div class="list-item-title">فاکتور #۱۲۳۴</div>
+                            <div class="list-item-subtitle">۱۴:۳۰ - ۳ کالا</div>
                         </div>
-                        <div class="swipeable-actions">
-                            <div class="swipeable-action edit">ویرایش</div>
-                            <div class="swipeable-action delete">حذف</div>
-                        </div>
-                    </li>
-                    <li class="list-item swipeable">
-                        <div class="swipeable-content">
-                            <div>
-                                <div class="list-item-title">فاکتور #۱۲۳۳</div>
-                                <div class="list-item-subtitle">۱۲:۱۵ - ۵ کالا</div>
-                            </div>
-                            <div>
-                                <div class="list-item-title">۲۸۰,۰۰۰ تومان</div>
-                                <div class="list-item-subtitle">اعتباری</div>
-                            </div>
-                        </div>
-                        <div class="swipeable-actions">
-                            <div class="swipeable-action edit">ویرایش</div>
-                            <div class="swipeable-action delete">حذف</div>
+                        <div>
+                            <div class="list-item-title">۱۲۵,۰۰۰ تومان</div>
+                            <div class="list-item-subtitle">نقدی</div>
                         </div>
                     </li>
-                    <li class="list-item swipeable">
-                        <div class="swipeable-content">
-                            <div>
-                                <div class="list-item-title">فاکتور #۱۲۳۲</div>
-                                <div class="list-item-subtitle">۱۰:۴۵ - ۲ کالا</div>
-                            </div>
-                            <div>
-                                <div class="list-item-title">۷۵,۰۰۰ تومان</div>
-                                <div class="list-item-subtitle">کارت</div>
-                            </div>
+                    <li class="list-item">
+                        <div>
+                            <div class="list-item-title">فاکتور #۱۲۳۳</div>
+                            <div class="list-item-subtitle">۱۲:۱۵ - ۵ کالا</div>
                         </div>
-                        <div class="swipeable-actions">
-                            <div class="swipeable-action edit">ویرایش</div>
-                            <div class="swipeable-action delete">حذف</div>
+                        <div>
+                            <div class="list-item-title">۲۸۰,۰۰۰ تومان</div>
+                            <div class="list-item-subtitle">اعتباری</div>
+                        </div>
+                    </li>
+                    <li class="list-item">
+                        <div>
+                            <div class="list-item-title">فاکتور #۱۲۳۲</div>
+                            <div class="list-item-subtitle">۱۰:۴۵ - ۲ کالا</div>
+                        </div>
+                        <div>
+                            <div class="list-item-title">۷۵,۰۰۰ تومان</div>
+                            <div class="list-item-subtitle">کارت</div>
                         </div>
                     </li>
                 </ul>
             </div>
         </div>
-
+        
         <!-- Inventory View -->
         <div class="view-container" id="inventoryView">
             <div class="search-box">
                 <span class="search-icon"><i class="fas fa-search"></i></span>
-                <input type="text" class="form-control search-input" placeholder="جستجوی کالا...">
+                <input type="text" class="search-input" placeholder="جستجوی کالا..." id="inventorySearch">
             </div>
-
+            
             <div class="card">
                 <div class="card-header">
-                    <h2 class="card-title">کالاهای موجود</h2>
-                    <button class="btn btn-sm btn-primary">افزودن کالا</button>
+                    <h2 class="card-title">
+                        <i class="fas fa-box"></i>
+                        کالاهای موجود
+                    </h2>
+                    <button class="btn btn-primary btn-sm" id="addProductBtn">افزودن کالا</button>
                 </div>
-                <ul class="list-group" id="inventoryList">
-                    <li class="list-item swipeable">
-                        <div class="swipeable-content">
-                            <div>
-                                <div class="list-item-title">شیر پاستوریزه</div>
-                                <div class="list-item-subtitle">کد: ۱۲۳۴۵۶۷۸۹</div>
-                            </div>
-                            <div>
-                                <div class="list-item-title">۲۵,۰۰۰ تومان</div>
-                                <div class="list-item-subtitle">موجودی: ۲۴ عدد</div>
-                            </div>
+                
+                <div id="productList">
+                    <div class="product-card">
+                        <div class="product-image">
+                            <i class="fas fa-wine-bottle"></i>
                         </div>
-                        <div class="swipeable-actions">
-                            <div class="swipeable-action edit">ویرایش</div>
-                            <div class="swipeable-action delete">حذف</div>
+                        <div class="product-info">
+                            <div class="product-name">شیر پاستوریزه</div>
+                            <div class="product-code">کد: ۱۲۳۴۵۶۷۸۹</div>
+                            <div class="product-price">۲۵,۰۰۰ تومان</div>
+                            <div class="product-stock">موجودی: ۲۴ عدد</div>
                         </div>
-                    </li>
-                    <li class="list-item swipeable">
-                        <div class="swipeable-content">
-                            <div>
-                                <div class="list-item-title">نان سنگک</div>
-                                <div class="list-item-subtitle">کد: ۹۸۷۶۵۴۳۲۱</div>
-                            </div>
-                            <div>
-                                <div class="list-item-title">۵,۰۰۰ تومان</div>
-                                <div class="list-item-subtitle">موجودی: ۱۲ عدد</div>
-                            </div>
+                        <div class="product-actions">
+                            <button class="btn btn-outline btn-sm"><i class="fas fa-edit"></i></button>
+                            <button class="btn btn-outline btn-sm"><i class="fas fa-trash"></i></button>
                         </div>
-                        <div class="swipeable-actions">
-                            <div class="swipeable-action edit">ویرایش</div>
-                            <div class="swipeable-action delete">حذف</div>
+                    </div>
+                    
+                    <div class="product-card">
+                        <div class="product-image">
+                            <i class="fas fa-bread-slice"></i>
                         </div>
-                    </li>
-                    <li class="list-item swipeable">
-                        <div class="swipeable-content">
-                            <div>
-                                <div class="list-item-title">روغن مایع</div>
-                                <div class="list-item-subtitle">کد: ۵۶۷۸۹۱۲۳۴</div>
-                            </div>
-                            <div>
-                                <div class="list-item-title">۸۵,۰۰۰ تومان</div>
-                                <div class="list-item-subtitle badge badge-warning">موجودی: ۳ عدد</div>
-                            </div>
+                        <div class="product-info">
+                            <div class="product-name">نان سنگک</div>
+                            <div class="product-code">کد: ۹۸۷۶۵۴۳۲۱</div>
+                            <div class="product-price">۵,۰۰۰ تومان</div>
+                            <div class="product-stock">موجودی: ۱۲ عدد</div>
                         </div>
-                        <div class="swipeable-actions">
-                            <div class="swipeable-action edit">ویرایش</div>
-                            <div class="swipeable-action delete">حذف</div>
+                        <div class="product-actions">
+                            <button class="btn btn-outline btn-sm"><i class="fas fa-edit"></i></button>
+                            <button class="btn btn-outline btn-sm"><i class="fas fa-trash"></i></button>
                         </div>
-                    </li>
-                </ul>
+                    </div>
+                    
+                    <div class="product-card">
+                        <div class="product-image">
+                            <i class="fas fa-oil-can"></i>
+                        </div>
+                        <div class="product-info">
+                            <div class="product-name">روغن مایع</div>
+                            <div class="product-code">کد: ۵۶۷۸۹۱۲۳۴</div>
+                            <div class="product-price">۸۵,۰۰۰ تومان</div>
+                            <div class="product-stock badge badge-warning">موجودی: ۳ عدد</div>
+                        </div>
+                        <div class="product-actions">
+                            <button class="btn btn-outline btn-sm"><i class="fas fa-edit"></i></button>
+                            <button class="btn btn-outline btn-sm"><i class="fas fa-trash"></i></button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        کالاهای کم‌موجود
+                    </h2>
+                </div>
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>نام کالا</th>
+                            <th>موجودی</th>
+                            <th>حداقل موجودی</th>
+                            <th>عملیات</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>روغن مایع</td>
+                            <td>۳ عدد</td>
+                            <td>۵ عدد</td>
+                            <td>
+                                <button class="btn btn-primary btn-sm">سفارش</button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>ماست</td>
+                            <td>۷ عدد</td>
+                            <td>۱۰ عدد</td>
+                            <td>
+                                <button class="btn btn-primary btn-sm">سفارش</button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
             </div>
         </div>
-
+        
         <!-- Credit View -->
         <div class="view-container" id="creditView">
             <div class="stats-grid">
@@ -1167,74 +1221,99 @@
                     <div class="stat-label">دریافت امروز</div>
                 </div>
             </div>
-
+            
             <div class="card">
                 <div class="card-header">
-                    <h2 class="card-title">حساب‌های اعتباری</h2>
-                    <button class="btn btn-sm btn-primary">افزودن مشتری</button>
+                    <h2 class="card-title">
+                        <i class="fas fa-users"></i>
+                        حساب‌های اعتباری
+                    </h2>
+                    <button class="btn btn-primary btn-sm" id="addCustomerBtn">افزودن مشتری</button>
                 </div>
-                <ul class="list-group" id="creditList">
-                    <li class="list-item swipeable">
-                        <div class="swipeable-content">
-                            <div>
-                                <div class="list-item-title">احمد محمدی</div>
-                                <div class="list-item-subtitle">سررسید: ۱۴۰۲/۰۵/۲۰</div>
-                            </div>
-                            <div>
-                                <div class="list-item-title">۲,۵۰۰,۰۰۰ تومان</div>
-                                <div class="list-item-subtitle badge badge-danger">سررسید گذشته</div>
-                            </div>
+                <ul class="list-group">
+                    <li class="list-item">
+                        <div>
+                            <div class="list-item-title">احمد محمدی</div>
+                            <div class="list-item-subtitle">سررسید: ۱۴۰۲/۰۵/۲۰</div>
                         </div>
-                        <div class="swipeable-actions">
-                            <div class="swipeable-action edit">دریافت</div>
-                            <div class="swipeable-action delete">پیام</div>
+                        <div>
+                            <div class="list-item-title">۲,۵۰۰,۰۰۰ تومان</div>
+                            <div class="badge badge-danger">سررسید گذشته</div>
                         </div>
                     </li>
-                    <li class="list-item swipeable">
-                        <div class="swipeable-content">
-                            <div>
-                                <div class="list-item-title">رضا رضایی</div>
-                                <div class="list-item-subtitle">سررسید: ۱۴۰۲/۰۵/۲۵</div>
-                            </div>
-                            <div>
-                                <div class="list-item-title">۵,۰۰۰,۰۰۰ تومان</div>
-                                <div class="list-item-subtitle badge badge-warning">۵ روز مانده</div>
-                            </div>
+                    <li class="list-item">
+                        <div>
+                            <div class="list-item-title">رضا رضایی</div>
+                            <div class="list-item-subtitle">سررسید: ۱۴۰۲/۰۵/۲۵</div>
                         </div>
-                        <div class="swipeable-actions">
-                            <div class="swipeable-action edit">دریافت</div>
-                            <div class="swipeable-action delete">پیام</div>
+                        <div>
+                            <div class="list-item-title">۵,۰۰۰,۰۰۰ تومان</div>
+                            <div class="badge badge-warning">۵ روز مانده</div>
                         </div>
                     </li>
-                    <li class="list-item swipeable">
-                        <div class="swipeable-content">
-                            <div>
-                                <div class="list-item-title">مریم احمدی</div>
-                                <div class="list-item-subtitle">سررسید: ۱۴۰۲/۰۶/۱۰</div>
-                            </div>
-                            <div>
-                                <div class="list-item-title">۱,۲۰۰,۰۰۰ تومان</div>
-                                <div class="list-item-subtitle badge badge-success">منظم</div>
-                            </div>
+                    <li class="list-item">
+                        <div>
+                            <div class="list-item-title">مریم احمدی</div>
+                            <div class="list-item-subtitle">سررسید: ۱۴۰۲/۰۶/۱۰</div>
                         </div>
-                        <div class="swipeable-actions">
-                            <div class="swipeable-action edit">دریافت</div>
-                            <div class="swipeable-action delete">پیام</div>
+                        <div>
+                            <div class="list-item-title">۱,۲۰۰,۰۰۰ تومان</div>
+                            <div class="badge badge-success">منظم</div>
                         </div>
                     </li>
                 </ul>
             </div>
+            
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">
+                        <i class="fas fa-money-bill-wave"></i>
+                        پرداخت‌های امروز
+                    </h2>
+                </div>
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>مشتری</th>
+                            <th>مبلغ</th>
+                            <th>زمان</th>
+                            <th>عملیات</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>علی رضایی</td>
+                            <td>۱,۲۰۰,۰۰۰ تومان</td>
+                            <td>۱۰:۳۰</td>
+                            <td>
+                                <button class="btn btn-outline btn-sm">مشاهده</button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>سارا محمدی</td>
+                            <td>۸۵۰,۰۰۰ تومان</td>
+                            <td>۰۹:۱۵</td>
+                            <td>
+                                <button class="btn btn-outline btn-sm">مشاهده</button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
         </div>
-
+        
         <!-- Reports View -->
         <div class="view-container" id="reportsView">
             <div class="card">
                 <div class="card-header">
-                    <h2 class="card-title">گزارش‌ها</h2>
-                    <div class="lang-toggle">
-                        <div class="lang-option active">روز</div>
-                        <div class="lang-option">هفته</div>
-                        <div class="lang-option">ماه</div>
+                    <h2 class="card-title">
+                        <i class="fas fa-chart-line"></i>
+                        گزارش فروش
+                    </h2>
+                    <div style="display: flex; gap: 8px;">
+                        <button class="btn btn-outline btn-sm active" data-period="day">روز</button>
+                        <button class="btn btn-outline btn-sm" data-period="week">هفته</button>
+                        <button class="btn btn-outline btn-sm" data-period="month">ماه</button>
                     </div>
                 </div>
                 
@@ -1256,14 +1335,17 @@
                         <div class="stat-label">فاکتورها</div>
                     </div>
                 </div>
-
+                
                 <div class="chart-container">
-                    <div class="chart-placeholder">نمودار فروش</div>
+                    <canvas id="salesReportChart"></canvas>
                 </div>
-
-                <div class="card">
+                
+                <div class="card" style="background: var(--light);">
                     <div class="card-header">
-                        <h2 class="card-title">پرفروش‌ترین کالاها</h2>
+                        <h2 class="card-title">
+                            <i class="fas fa-star"></i>
+                            پرفروش‌ترین کالاها
+                        </h2>
                     </div>
                     <ul class="list-group">
                         <li class="list-item">
@@ -1295,19 +1377,50 @@
                         </li>
                     </ul>
                 </div>
-
+                
                 <div class="form-group">
-                    <button class="btn btn-primary btn-block">خروجی اکسل</button>
+                    <button class="btn btn-primary btn-block" id="exportBtn">
+                        <i class="fas fa-file-excel"></i>
+                        خروجی اکسل
+                    </button>
                 </div>
             </div>
         </div>
     </div>
-
+    
     <!-- FAB -->
-    <button class="fab" id="fabBtn">
+    <button class="fab pulse" id="fabBtn">
         <i class="fas fa-plus"></i>
     </button>
-
+    
+    <!-- Speed Dial -->
+    <div class="speed-dial" id="speedDial">
+        <div class="speed-dial-item">
+            <span class="speed-dial-label">فروش جدید</span>
+            <button class="speed-dial-btn" id="newSaleBtn">
+                <i class="fas fa-shopping-cart"></i>
+            </button>
+        </div>
+        <div class="speed-dial-item">
+            <span class="speed-dial-label">افزودن کالا</span>
+            <button class="speed-dial-btn" id="newProductBtn">
+                <i class="fas fa-box"></i>
+            </button>
+        </div>
+        <div class="speed-dial-item">
+            <span class="speed-dial-label">ثبت هزینه</span>
+            <button class="speed-dial-btn" id="newExpenseBtn">
+                <i class="fas fa-receipt"></i>
+            </button>
+        </div>
+        <div class="speed-dial-item">
+            <span class="speed-dial-label">مشتری جدید</span>
+            <button class="speed-dial-btn" id="newCustomerBtn">
+                <i class="fas fa-user-plus"></i>
+            </button>
+        </div>
+    </div>
+    
     <!-- Bottom Navigation -->
     <nav class="bottom-nav">
         <div class="nav-item active" data-view="salesView">
@@ -1327,7 +1440,7 @@
             <span class="nav-label">گزارش‌ها</span>
         </div>
     </nav>
-
+    
     <!-- New Sale Modal -->
     <div class="modal" id="newSaleModal">
         <div class="modal-content">
@@ -1340,7 +1453,7 @@
                     <label class="form-label">جستجوی کالا یا اسکن بارکد</label>
                     <div class="search-box">
                         <span class="search-icon"><i class="fas fa-search"></i></span>
-                        <input type="text" class="form-control search-input" placeholder="نام کالا یا بارکد">
+                        <input type="text" class="search-input" placeholder="نام کالا یا بارکد" id="productSearchInput">
                     </div>
                 </div>
                 
@@ -1348,7 +1461,7 @@
                     <div class="card-header">
                         <h3 class="card-title">کالاهای انتخاب شده</h3>
                     </div>
-                    <ul class="list-group" id="saleItemsList">
+                    <ul class="list-group" id="selectedProducts">
                         <li class="list-item">
                             <div>
                                 <div class="list-item-title">شیر پاستوریزه</div>
@@ -1369,169 +1482,580 @@
                 
                 <div class="form-group">
                     <label class="form-label">نوع پرداخت</label>
-                    <div class="payment-methods">
-                        <div class="payment-method active">
-                            <div class="payment-icon"><i class="fas fa-money-bill-wave"></i></div>
-                            <div>نقدی</div>
+                    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px;">
+                        <button class="btn btn-outline payment-method" data-method="cash">
+                            <i class="fas fa-money-bill-wave"></i>
+                            نقدی
+                        </button>
+                        <button class="btn btn-outline payment-method" data-method="card">
+                            <i class="fas fa-credit-card"></i>
+                            کارت
+                        </button>
+                        <button class="btn btn-outline payment-method" data-method="credit">
+                            <i class="fas fa-user-clock"></i>
+                            اعتباری
+                        </button>
+                        <button class="btn btn-outline payment-method" data-method="qr">
+                            <i class="fas fa-qrcode"></i>
+                            QR
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="form-group" id="customerSelect" style="display: none;">
+                    <label class="form-label">انتخاب مشتری</label>
+                    <select class="form-control">
+                        <option>احمد محمدی</option>
+                        <option>رضا رضایی</option>
+                        <option>مریم احمدی</option>
+                    </select>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" id="cancelSaleBtn">انصراف</button>
+                <button class="btn btn-primary" id="confirmSaleBtn">ثبت فروش</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Add Product Modal - Multi-step Form -->
+    <div class="modal" id="addProductModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">افزودن کالای جدید</h3>
+                <button class="modal-close"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="modal-body">
+                <!-- Steps Indicator -->
+                <div class="steps">
+                    <div class="step active" id="step1">
+                        <div class="step-number">1</div>
+                        <div class="step-title">اطلاعات پایه</div>
+                    </div>
+                    <div class="step" id="step2">
+                        <div class="step-number">2</div>
+                        <div class="step-title">موجودی و قیمت</div>
+                    </div>
+                    <div class="step" id="step3">
+                        <div class="step-number">3</div>
+                        <div class="step-title">تایید نهایی</div>
+                    </div>
+                </div>
+                
+                <!-- Step 1: Basic Information -->
+                <div id="formStep1" class="form-step">
+                    <div class="form-group">
+                        <label class="form-label">نام کالا *</label>
+                        <input type="text" class="form-control" id="productName" placeholder="نام کالا را وارد کنید">
+                        <div class="error-message" id="productNameError">نام کالا را وارد کنید</div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">کد کالا *</label>
+                        <input type="text" class="form-control" id="productCode" placeholder="کد کالا را وارد کنید">
+                        <div class="error-message" id="productCodeError">کد کالا را وارد کنید</div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">دسته‌بندی *</label>
+                        <select class="form-control" id="productCategory">
+                            <option value="">انتخاب کنید</option>
+                            <option>لبنیات</option>
+                            <option>نانوایی</option>
+                            <option>خشکبار</option>
+                            <option>نوشیدنی</option>
+                            <option>کنسرو</option>
+                            <option>سایر</option>
+                        </select>
+                        <div class="error-message" id="productCategoryError">دسته‌بندی را انتخاب کنید</div>
+                    </div>
+                </div>
+                
+                <!-- Step 2: Inventory and Price -->
+                <div id="formStep2" class="form-step" style="display: none;">
+                    <div class="form-group">
+                        <label class="form-label">قیمت فروش (تومان) *</label>
+                        <input type="number" class="form-control" id="productPrice" placeholder="قیمت فروش را وارد کنید">
+                        <div class="error-message" id="productPriceError">قیمت فروش را وارد کنید</div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">قیمت خرید (تومان) *</label>
+                        <input type="number" class="form-control" id="productCost" placeholder="قیمت خرید را وارد کنید">
+                        <div class="error-message" id="productCostError">قیمت خرید را وارد کنید</div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">موجودی اولیه *</label>
+                        <input type="number" class="form-control" id="productStock" placeholder="موجودی اولیه را وارد کنید">
+                        <div class="error-message" id="productStockError">موجودی اولیه را وارد کنید</div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">حداقل موجودی *</label>
+                        <input type="number" class="form-control" id="productMinStock" placeholder="حداقل موجودی را وارد کنید">
+                        <div class="error-message" id="productMinStockError">حداقل موجودی را وارد کنید</div>
+                    </div>
+                </div>
+                
+                <!-- Step 3: Confirmation -->
+                <div id="formStep3" class="form-step" style="display: none;">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">اطلاعات کالا</h3>
                         </div>
-                        <div class="payment-method">
-                            <div class="payment-icon"><i class="fas fa-credit-card"></i></div>
-                            <div>کارت</div>
-                        </div>
-                        <div class="payment-method">
-                            <div class="payment-icon"><i class="fas fa-user-clock"></i></div>
-                            <div>اعتباری</div>
-                        </div>
-                        <div class="payment-method">
-                            <div class="payment-icon"><i class="fas fa-qrcode"></i></div>
-                            <div>QR</div>
-                        </div>
+                        <ul class="list-group">
+                            <li class="list-item">
+                                <div class="list-item-title">نام کالا</div>
+                                <div id="confirmName">-</div>
+                            </li>
+                            <li class="list-item">
+                                <div class="list-item-title">کد کالا</div>
+                                <div id="confirmCode">-</div>
+                            </li>
+                            <li class="list-item">
+                                <div class="list-item-title">دسته‌بندی</div>
+                                <div id="confirmCategory">-</div>
+                            </li>
+                            <li class="list-item">
+                                <div class="list-item-title">قیمت فروش</div>
+                                <div id="confirmPrice">-</div>
+                            </li>
+                            <li class="list-item">
+                                <div class="list-item-title">قیمت خرید</div>
+                                <div id="confirmCost">-</div>
+                            </li>
+                            <li class="list-item">
+                                <div class="list-item-title">موجودی اولیه</div>
+                                <div id="confirmStock">-</div>
+                            </li>
+                            <li class="list-item">
+                                <div class="list-item-title">حداقل موجودی</div>
+                                <div id="confirmMinStock">-</div>
+                            </li>
+                        </ul>
                     </div>
                 </div>
             </div>
             <div class="modal-footer">
-                <button class="btn btn-secondary">انصراف</button>
-                <button class="btn btn-primary">ثبت فروش</button>
+                <button class="btn btn-outline" id="prevStepBtn" style="display: none;">قبلی</button>
+                <button class="btn btn-primary" id="nextStepBtn">بعدی</button>
+                <button class="btn btn-success" id="saveProductBtn" style="display: none;">ذخیره کالا</button>
+                <button class="btn btn-outline" id="cancelProductBtn">انصراف</button>
             </div>
         </div>
     </div>
-
+    
+    <!-- Add Customer Modal - Multi-step Form -->
+    <div class="modal" id="addCustomerModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">افزودن مشتری جدید</h3>
+                <button class="modal-close"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="modal-body">
+                <!-- Steps Indicator -->
+                <div class="steps">
+                    <div class="step active" id="customerStep1">
+                        <div class="step-number">1</div>
+                        <div class="step-title">اطلاعات شخصی</div>
+                    </div>
+                    <div class="step" id="customerStep2">
+                        <div class="step-number">2</div>
+                        <div class="step-title">اطلاعات مالی</div>
+                    </div>
+                    <div class="step" id="customerStep3">
+                        <div class="step-number">3</div>
+                        <div class="step-title">تایید نهایی</div>
+                    </div>
+                </div>
+                
+                <!-- Step 1: Personal Information -->
+                <div id="customerFormStep1" class="form-step">
+                    <div class="form-group">
+                        <label class="form-label">نام و نام خانوادگی *</label>
+                        <input type="text" class="form-control" id="customerName" placeholder="نام و نام خانوادگی را وارد کنید">
+                        <div class="error-message" id="customerNameError">نام و نام خانوادگی را وارد کنید</div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">شماره تماس *</label>
+                        <input type="tel" class="form-control" id="customerPhone" placeholder="شماره تماس را وارد کنید">
+                        <div class="error-message" id="customerPhoneError">شماره تماس را وارد کنید</div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">آدرس</label>
+                        <textarea class="form-control" rows="3" id="customerAddress" placeholder="آدرس را وارد کنید"></textarea>
+                    </div>
+                </div>
+                
+                <!-- Step 2: Financial Information -->
+                <div id="customerFormStep2" class="form-step" style="display: none;">
+                    <div class="form-group">
+                        <label class="form-label">حد اعتباری (تومان) *</label>
+                        <input type="number" class="form-control" id="customerCredit" placeholder="حد اعتباری را وارد کنید">
+                        <div class="error-message" id="customerCreditError">حد اعتباری را وارد کنید</div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">توضیحات</label>
+                        <textarea class="form-control" rows="2" id="customerNotes" placeholder="توضیحات اختیاری"></textarea>
+                    </div>
+                </div>
+                
+                <!-- Step 3: Confirmation -->
+                <div id="customerFormStep3" class="form-step" style="display: none;">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">اطلاعات مشتری</h3>
+                        </div>
+                        <ul class="list-group">
+                            <li class="list-item">
+                                <div class="list-item-title">نام و نام خانوادگی</div>
+                                <div id="confirmCustomerName">-</div>
+                            </li>
+                            <li class="list-item">
+                                <div class="list-item-title">شماره تماس</div>
+                                <div id="confirmCustomerPhone">-</div>
+                            </li>
+                            <li class="list-item">
+                                <div class="list-item-title">آدرس</div>
+                                <div id="confirmCustomerAddress">-</div>
+                            </li>
+                            <li class="list-item">
+                                <div class="list-item-title">حد اعتباری</div>
+                                <div id="confirmCustomerCredit">-</div>
+                            </li>
+                            <li class="list-item">
+                                <div class="list-item-title">توضیحات</div>
+                                <div id="confirmCustomerNotes">-</div>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" id="customerPrevStepBtn" style="display: none;">قبلی</button>
+                <button class="btn btn-primary" id="customerNextStepBtn">بعدی</button>
+                <button class="btn btn-success" id="saveCustomerBtn" style="display: none;">ذخیره مشتری</button>
+                <button class="btn btn-outline" id="cancelCustomerBtn">انصراف</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Empty State for Sales -->
+    <div class="empty-state" id="salesEmptyState" style="display: none;">
+        <div class="empty-state-icon">
+            <i class="fas fa-shopping-cart"></i>
+        </div>
+        <h3 class="empty-state-title">هنوز فروشی ثبت نشده</h3>
+        <p class="empty-state-description">
+            برای شروع، روی دکمه + کلیک کرده و فروش جدیدی ثبت کنید
+        </p>
+        <button class="btn btn-primary" id="emptyStateNewSaleBtn">
+            <i class="fas fa-plus"></i>
+            فروش جدید
+        </button>
+    </div>
+    
+    <!-- Empty State for Inventory -->
+    <div class="empty-state" id="inventoryEmptyState" style="display: none;">
+        <div class="empty-state-icon">
+            <i class="fas fa-boxes"></i>
+        </div>
+        <h3 class="empty-state-title">هیچ کالایی ثبت نشده</h3>
+        <p class="empty-state-description">
+            برای شروع، کالاهای خود را به سیستم اضافه کنید
+        </p>
+        <button class="btn btn-primary" id="emptyStateAddProductBtn">
+            <i class="fas fa-plus"></i>
+            افزودن کالا
+        </button>
+    </div>
+    
+    <!-- Empty State for Credit -->
+    <div class="empty-state" id="creditEmptyState" style="display: none;">
+        <div class="empty-state-icon">
+            <i class="fas fa-users"></i>
+        </div>
+        <h3 class="empty-state-title">هیچ مشتری اعتباری ثبت نشده</h3>
+        <p class="empty-state-description">
+            برای شروع، مشتریان اعتباری خود را به سیستم اضافه کنید
+        </p>
+        <button class="btn btn-primary" id="emptyStateAddCustomerBtn">
+            <i class="fas fa-plus"></i>
+            افزودن مشتری
+        </button>
+    </div>
+    
+    <!-- Empty State for Reports -->
+    <div class="empty-state" id="reportsEmptyState" style="display: none;">
+        <div class="empty-state-icon">
+            <i class="fas fa-chart-line"></i>
+        </div>
+        <h3 class="empty-state-title">هیچ داده‌ای برای گزارش وجود ندارد</h3>
+        <p class="empty-state-description">
+            برای مشاهده گزارش‌ها، ابتدا فروش‌ها و کالاهای خود را ثبت کنید
+        </p>
+    </div>
+    
     <!-- Toast Notification -->
     <div class="toast" id="toast">
-        <div class="toast-message" id="toastMessage">عملیات با موفقیت انجام شد</div>
+        <div class="toast-message" id="toastMessage">
+            <i class="fas fa-check-circle toast-icon"></i>
+            عملیات با موفقیت انجام شد
+        </div>
         <button class="toast-action" id="toastAction">بازگشت</button>
     </div>
-
+    
     <script>
-        // Service Worker Registration
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('/sw.js')
-                    .then(registration => {
-                        console.log('ServiceWorker registration successful with scope: ', registration.scope);
-                    })
-                    .catch(error => {
-                        console.log('ServiceWorker registration failed: ', error);
-                    });
-            });
-        }
-
         // DOM Elements
         const navItems = document.querySelectorAll('.nav-item');
         const views = document.querySelectorAll('.view-container');
         const fabBtn = document.getElementById('fabBtn');
+        const speedDial = document.getElementById('speedDial');
         const newSaleModal = document.getElementById('newSaleModal');
-        const modalClose = document.querySelector('.modal-close');
+        const addProductModal = document.getElementById('addProductModal');
+        const addCustomerModal = document.getElementById('addCustomerModal');
+        const modalCloses = document.querySelectorAll('.modal-close');
         const toast = document.getElementById('toast');
-        const toastMessage = document.getElementById('toastMessage');
-        const toastAction = document.getElementById('toastAction');
-        const currentDate = document.getElementById('currentDate');
         const darkModeToggle = document.getElementById('darkModeToggle');
-
-        // Dark Mode Toggle
-        darkModeToggle.addEventListener('click', () => {
-            document.body.classList.toggle('dark-mode');
-            const isDarkMode = document.body.classList.contains('dark-mode');
-            localStorage.setItem('darkMode', isDarkMode);
-            
-            // Update icon
-            const icon = darkModeToggle.querySelector('i');
-            if (isDarkMode) {
-                icon.classList.remove('fa-moon');
-                icon.classList.add('fa-sun');
-            } else {
-                icon.classList.remove('fa-sun');
-                icon.classList.add('fa-moon');
-            }
-        });
-
-        // Check for saved dark mode preference
-        if (localStorage.getItem('darkMode') === 'true') {
-            document.body.classList.add('dark-mode');
-            const icon = darkModeToggle.querySelector('i');
-            icon.classList.remove('fa-moon');
-            icon.classList.add('fa-sun');
-        }
-
+        const currentDate = document.getElementById('currentDate');
+        const paymentMethods = document.querySelectorAll('.payment-method');
+        const customerSelect = document.getElementById('customerSelect');
+        const reportPeriodTabs = document.querySelectorAll('[data-period]');
+        
+        // Product form elements
+        const productSteps = {
+            step1: document.getElementById('step1'),
+            step2: document.getElementById('step2'),
+            step3: document.getElementById('step3')
+        };
+        
+        const productFormSteps = {
+            step1: document.getElementById('formStep1'),
+            step2: document.getElementById('formStep2'),
+            step3: document.getElementById('formStep3')
+        };
+        
+        const productFormFields = {
+            name: document.getElementById('productName'),
+            code: document.getElementById('productCode'),
+            category: document.getElementById('productCategory'),
+            price: document.getElementById('productPrice'),
+            cost: document.getElementById('productCost'),
+            stock: document.getElementById('productStock'),
+            minStock: document.getElementById('productMinStock')
+        };
+        
+        const productFormErrors = {
+            name: document.getElementById('productNameError'),
+            code: document.getElementById('productCodeError'),
+            category: document.getElementById('productCategoryError'),
+            price: document.getElementById('productPriceError'),
+            cost: document.getElementById('productCostError'),
+            stock: document.getElementById('productStockError'),
+            minStock: document.getElementById('productMinStockError')
+        };
+        
+        const productFormButtons = {
+            prev: document.getElementById('prevStepBtn'),
+            next: document.getElementById('nextStepBtn'),
+            save: document.getElementById('saveProductBtn'),
+            cancel: document.getElementById('cancelProductBtn')
+        };
+        
+        // Customer form elements
+        const customerSteps = {
+            step1: document.getElementById('customerStep1'),
+            step2: document.getElementById('customerStep2'),
+            step3: document.getElementById('customerStep3')
+        };
+        
+        const customerFormSteps = {
+            step1: document.getElementById('customerFormStep1'),
+            step2: document.getElementById('customerFormStep2'),
+            step3: document.getElementById('customerFormStep3')
+        };
+        
+        const customerFormFields = {
+            name: document.getElementById('customerName'),
+            phone: document.getElementById('customerPhone'),
+            address: document.getElementById('customerAddress'),
+            credit: document.getElementById('customerCredit'),
+            notes: document.getElementById('customerNotes')
+        };
+        
+        const customerFormErrors = {
+            name: document.getElementById('customerNameError'),
+            phone: document.getElementById('customerPhoneError'),
+            credit: document.getElementById('customerCreditError')
+        };
+        
+        const customerFormButtons = {
+            prev: document.getElementById('customerPrevStepBtn'),
+            next: document.getElementById('customerNextStepBtn'),
+            save: document.getElementById('saveCustomerBtn'),
+            cancel: document.getElementById('cancelCustomerBtn')
+        };
+        
+        // Empty state elements
+        const emptyStates = {
+            sales: document.getElementById('salesEmptyState'),
+            inventory: document.getElementById('inventoryEmptyState'),
+            credit: document.getElementById('creditEmptyState'),
+            reports: document.getElementById('reportsEmptyState')
+        };
+        
         // Set current date (Shamsi)
         function setCurrentDate() {
-            // This is a placeholder - in a real app, you'd use a proper Shamsi calendar library
             const date = new Date();
             const shamsiDate = '۱۴۰۲/۰۵/۱۵'; // Placeholder
             currentDate.textContent = shamsiDate;
         }
         setCurrentDate();
-
+        
         // Navigation
+        function setActiveView(viewId) {
+            // Update active nav item
+            navItems.forEach(nav => nav.classList.remove('active'));
+            document.querySelector(`.nav-item[data-view="${viewId}"]`).classList.add('active');
+            
+            // Update active view
+            views.forEach(view => view.classList.remove('active'));
+            document.getElementById(viewId).classList.add('active');
+            
+            // Initialize charts if reports view
+            if (viewId === 'reportsView') {
+                initSalesReportChart();
+            }
+            
+            // Check for empty states
+            checkEmptyStates(viewId);
+        }
+        
+        // Check for empty states
+        function checkEmptyStates(viewId) {
+            // Hide all empty states first
+            Object.values(emptyStates).forEach(state => state.style.display = 'none');
+            
+            // Show appropriate empty state if needed
+            // In a real app, this would check actual data
+            // For demo purposes, we'll simulate empty states
+            if (viewId === 'salesView' && document.querySelectorAll('#salesView .list-item').length === 0) {
+                emptyStates.sales.style.display = 'block';
+            } else if (viewId === 'inventoryView' && document.querySelectorAll('#productList .product-card').length === 0) {
+                emptyStates.inventory.style.display = 'block';
+            } else if (viewId === 'creditView' && document.querySelectorAll('#creditView .list-item').length === 0) {
+                emptyStates.credit.style.display = 'block';
+            } else if (viewId === 'reportsView' && document.querySelectorAll('#reportsView .list-item').length === 0) {
+                emptyStates.reports.style.display = 'block';
+            }
+        }
+        
+        // Nav item click event
         navItems.forEach(item => {
             item.addEventListener('click', () => {
                 const targetView = item.getAttribute('data-view');
-                
-                // Update active nav item
-                navItems.forEach(nav => nav.classList.remove('active'));
-                item.classList.add('active');
-                
-                // Update active view
-                views.forEach(view => view.classList.remove('active'));
-                document.getElementById(targetView).classList.add('active');
-                
-                // Update FAB action based on active view
-                updateFabAction(targetView);
+                setActiveView(targetView);
             });
         });
-
-        // FAB Action
-        function updateFabAction(view) {
-            switch(view) {
-                case 'salesView':
-                    fabBtn.setAttribute('title', 'فروش جدید');
-                    break;
-                case 'inventoryView':
-                    fabBtn.setAttribute('title', 'افزودن کالا');
-                    break;
-                case 'creditView':
-                    fabBtn.setAttribute('title', 'افزودن مشتری');
-                    break;
-                case 'reportsView':
-                    fabBtn.setAttribute('title', 'گزارش جدید');
-                    break;
-            }
-        }
-
+        
+        // FAB click event
         fabBtn.addEventListener('click', () => {
-            const activeView = document.querySelector('.view-container.active').id;
-            
-            switch(activeView) {
-                case 'salesView':
-                    newSaleModal.classList.add('active');
-                    break;
-                case 'inventoryView':
-                    showToast('صفحه افزودن کالا');
-                    break;
-                case 'creditView':
-                    showToast('صفحه افزودن مشتری');
-                    break;
-                case 'reportsView':
-                    showToast('ایجاد گزارش جدید');
-                    break;
-            }
+            speedDial.classList.toggle('active');
+            fabBtn.classList.toggle('active');
         });
-
-        // Modal Close
-        modalClose.addEventListener('click', () => {
-            newSaleModal.classList.remove('active');
+        
+        // Speed dial buttons
+        document.getElementById('newSaleBtn').addEventListener('click', () => {
+            newSaleModal.classList.add('active');
+            speedDial.classList.remove('active');
+            fabBtn.classList.remove('active');
         });
-
+        
+        document.getElementById('newProductBtn').addEventListener('click', () => {
+            addProductModal.classList.add('active');
+            resetProductForm();
+            speedDial.classList.remove('active');
+            fabBtn.classList.remove('active');
+        });
+        
+        document.getElementById('newCustomerBtn').addEventListener('click', () => {
+            addCustomerModal.classList.add('active');
+            resetCustomerForm();
+            speedDial.classList.remove('active');
+            fabBtn.classList.remove('active');
+        });
+        
+        document.getElementById('newExpenseBtn').addEventListener('click', () => {
+            showToast('ثبت هزینه به زودی اضافه می‌شود');
+            speedDial.classList.remove('active');
+            fabBtn.classList.remove('active');
+        });
+        
+        // Modal close
+        modalCloses.forEach(closeBtn => {
+            closeBtn.addEventListener('click', () => {
+                closeBtn.closest('.modal').classList.remove('active');
+            });
+        });
+        
         // Close modal when clicking outside
-        newSaleModal.addEventListener('click', (e) => {
-            if (e.target === newSaleModal) {
-                newSaleModal.classList.remove('active');
+        document.querySelectorAll('.modal').forEach(modal => {
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) {
+                    modal.classList.remove('active');
+                }
+            });
+        });
+        
+        // Dark mode toggle
+        darkModeToggle.addEventListener('click', () => {
+            document.body.classList.toggle('dark-mode');
+            const icon = darkModeToggle.querySelector('i');
+            
+            if (document.body.classList.contains('dark-mode')) {
+                icon.classList.remove('fa-moon');
+                icon.classList.add('fa-sun');
+                localStorage.setItem('darkMode', 'enabled');
+            } else {
+                icon.classList.remove('fa-sun');
+                icon.classList.add('fa-moon');
+                localStorage.setItem('darkMode', 'disabled');
             }
         });
-
-        // Toast Notification
+        
+        // Check for saved dark mode preference
+        if (localStorage.getItem('darkMode') === 'enabled') {
+            document.body.classList.add('dark-mode');
+            const icon = darkModeToggle.querySelector('i');
+            icon.classList.remove('fa-moon');
+            icon.classList.add('fa-sun');
+        }
+        
+        // Payment method selection
+        paymentMethods.forEach(method => {
+            method.addEventListener('click', () => {
+                paymentMethods.forEach(m => m.classList.remove('btn-primary'));
+                method.classList.add('btn-primary');
+                
+                // Show customer select for credit payments
+                if (method.getAttribute('data-method') === 'credit') {
+                    customerSelect.style.display = 'block';
+                } else {
+                    customerSelect.style.display = 'none';
+                }
+            });
+        });
+        
+        // Show toast notification
         function showToast(message, actionText = null, actionCallback = null) {
-            toastMessage.textContent = message;
+            const toastMessage = document.getElementById('toastMessage');
+            const toastAction = document.getElementById('toastAction');
+            
+            toastMessage.innerHTML = `<i class="fas fa-check-circle toast-icon"></i> ${message}`;
             
             if (actionText) {
                 toastAction.textContent = actionText;
@@ -1551,141 +2075,487 @@
                 toast.classList.remove('show');
             }, 3000);
         }
-
-        // Swipe functionality for list items
-        document.querySelectorAll('.swipeable').forEach(item => {
-            let startX = 0;
-            let currentX = 0;
-            let isDragging = false;
+        
+        // Initialize Sales Chart
+        function initSalesChart() {
+            const ctx = document.getElementById('salesChart');
+            if (!ctx) return;
             
-            const content = item.querySelector('.swipeable-content');
-            const actions = item.querySelector('.swipeable-actions');
-            
-            item.addEventListener('touchstart', (e) => {
-                startX = e.touches[0].clientX;
-                isDragging = true;
-            });
-            
-            item.addEventListener('touchmove', (e) => {
-                if (!isDragging) return;
-                
-                currentX = e.touches[0].clientX;
-                const diffX = startX - currentX;
-                
-                // Only allow swiping to the left (in RTL layout)
-                if (diffX > 0 && diffX < 150) {
-                    content.style.transform = `translateX(-${diffX}px)`;
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: ['شنبه', 'یکشنبه', 'دوشنبه', 'سه‌شنبه', 'چهارشنبه', 'پنج‌شنبه', 'جمعه'],
+                    datasets: [{
+                        label: 'فروش (تومان)',
+                        data: [8500000, 9200000, 7800000, 12345000, 10500000, 11200000, 9500000],
+                        backgroundColor: 'rgba(79, 70, 229, 0.1)',
+                        borderColor: 'rgba(79, 70, 229, 1)',
+                        borderWidth: 3,
+                        pointBackgroundColor: 'rgba(79, 70, 229, 1)',
+                        pointBorderColor: '#fff',
+                        pointRadius: 5,
+                        pointHoverRadius: 7,
+                        tension: 0.3
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: function(value) {
+                                    return value.toLocaleString('fa-IR');
+                                }
+                            }
+                        }
+                    }
                 }
             });
-            
-            item.addEventListener('touchend', () => {
-                if (!isDragging) return;
-                isDragging = false;
-                
-                const diffX = startX - currentX;
-                
-                if (diffX > 75) {
-                    // Show actions
-                    content.style.transform = 'translateX(-150px)';
-                } else {
-                    // Reset position
-                    content.style.transform = 'translateX(0)';
-                }
-            });
-            
-            // Reset position when clicking outside
-            document.addEventListener('click', (e) => {
-                if (!item.contains(e.target)) {
-                    content.style.transform = 'translateX(0)';
-                }
-            });
-            
-            // Handle action clicks
-            actions.addEventListener('click', (e) => {
-                const action = e.target;
-                
-                if (action.classList.contains('delete')) {
-                    showToast('آیا از حذف اطمینان دارید؟', 'بله', () => {
-                        item.remove();
-                        showToast('با موفقیت حذف شد');
-                    });
-                } else if (action.classList.contains('edit')) {
-                    showToast('ویرایش آیتم');
-                }
-                
-                // Reset position
-                content.style.transform = 'translateX(0)';
-            });
-        });
-
-        // Language toggle
-        document.querySelectorAll('.lang-option').forEach(option => {
-            option.addEventListener('click', () => {
-                document.querySelectorAll('.lang-option').forEach(opt => opt.classList.remove('active'));
-                option.classList.add('active');
-                
-                // In a real app, this would update the content language
-                showToast(`تغییر به گزارش ${option.textContent}`);
-            });
-        });
-
-        // Payment method selection
-        document.querySelectorAll('.payment-method').forEach(method => {
-            method.addEventListener('click', () => {
-                document.querySelectorAll('.payment-method').forEach(m => m.classList.remove('active'));
-                method.classList.add('active');
-            });
-        });
-
-        // Simulate loading data
-        function simulateLoading() {
-            // This would be replaced with actual data loading from IndexedDB
-            console.log('Loading data from IndexedDB...');
         }
-
+        
+        // Initialize Sales Report Chart
+        function initSalesReportChart() {
+            const ctx = document.getElementById('salesReportChart');
+            if (!ctx) return;
+            
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['فروردین', 'اردیبهشت', 'خرداد', 'تیر', 'مرداد', 'شهریور'],
+                    datasets: [{
+                        label: 'فروش (تومان)',
+                        data: [185000000, 192000000, 178000000, 223450000, 205000000, 212000000],
+                        backgroundColor: 'rgba(79, 70, 229, 0.7)',
+                        borderColor: 'rgba(79, 70, 229, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: function(value) {
+                                    return value.toLocaleString('fa-IR');
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        
+        // Report period tabs
+        reportPeriodTabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                reportPeriodTabs.forEach(t => t.classList.remove('active'));
+                tab.classList.add('active');
+                
+                // Update chart based on selected period
+                const period = tab.getAttribute('data-period');
+                showToast(`نمایش گزارش ${period === 'day' ? 'روزانه' : period === 'week' ? 'هفتگی' : 'ماهانه'}`);
+            });
+        });
+        
+        // Button event listeners
+        document.getElementById('viewAllSalesBtn').addEventListener('click', () => {
+            showToast('نمایش تمام فروش‌ها');
+        });
+        
+        document.getElementById('addProductBtn').addEventListener('click', () => {
+            addProductModal.classList.add('active');
+            resetProductForm();
+        });
+        
+        document.getElementById('addCustomerBtn').addEventListener('click', () => {
+            addCustomerModal.classList.add('active');
+            resetCustomerForm();
+        });
+        
+        document.getElementById('exportBtn').addEventListener('click', () => {
+            showToast('در حال آماده‌سازی فایل اکسل...');
+            setTimeout(() => {
+                showToast('فایل اکسل با موفقیت دانلود شد');
+            }, 2000);
+        });
+        
+        document.getElementById('cancelSaleBtn').addEventListener('click', () => {
+            newSaleModal.classList.remove('active');
+        });
+        
+        document.getElementById('confirmSaleBtn').addEventListener('click', () => {
+            newSaleModal.classList.remove('active');
+            showToast('فاکتور فروش با موفقیت ثبت شد');
+        });
+        
+        // Product form functions
+        function resetProductForm() {
+            // Reset form fields
+            Object.values(productFormFields).forEach(field => field.value = '');
+            
+            // Reset errors
+            Object.values(productFormErrors).forEach(error => error.classList.remove('show'));
+            Object.values(productFormFields).forEach(field => field.classList.remove('error'));
+            
+            // Reset steps
+            Object.values(productFormSteps).forEach(step => step.style.display = 'none');
+            productFormSteps.step1.style.display = 'block';
+            
+            // Reset step indicators
+            Object.values(productSteps).forEach(step => {
+                step.classList.remove('active', 'completed');
+            });
+            productSteps.step1.classList.add('active');
+            
+            // Reset buttons
+            productFormButtons.prev.style.display = 'none';
+            productFormButtons.next.style.display = 'inline-flex';
+            productFormButtons.save.style.display = 'none';
+        }
+        
+        function validateProductStep(step) {
+            let isValid = true;
+            
+            if (step === 1) {
+                // Validate step 1 fields
+                if (!productFormFields.name.value.trim()) {
+                    productFormFields.name.classList.add('error');
+                    productFormErrors.name.classList.add('show');
+                    isValid = false;
+                } else {
+                    productFormFields.name.classList.remove('error');
+                    productFormErrors.name.classList.remove('show');
+                }
+                
+                if (!productFormFields.code.value.trim()) {
+                    productFormFields.code.classList.add('error');
+                    productFormErrors.code.classList.add('show');
+                    isValid = false;
+                } else {
+                    productFormFields.code.classList.remove('error');
+                    productFormErrors.code.classList.remove('show');
+                }
+                
+                if (!productFormFields.category.value) {
+                    productFormFields.category.classList.add('error');
+                    productFormErrors.category.classList.add('show');
+                    isValid = false;
+                } else {
+                    productFormFields.category.classList.remove('error');
+                    productFormErrors.category.classList.remove('show');
+                }
+            } else if (step === 2) {
+                // Validate step 2 fields
+                if (!productFormFields.price.value || productFormFields.price.value <= 0) {
+                    productFormFields.price.classList.add('error');
+                    productFormErrors.price.classList.add('show');
+                    isValid = false;
+                } else {
+                    productFormFields.price.classList.remove('error');
+                    productFormErrors.price.classList.remove('show');
+                }
+                
+                if (!productFormFields.cost.value || productFormFields.cost.value <= 0) {
+                    productFormFields.cost.classList.add('error');
+                    productFormErrors.cost.classList.add('show');
+                    isValid = false;
+                } else {
+                    productFormFields.cost.classList.remove('error');
+                    productFormErrors.cost.classList.remove('show');
+                }
+                
+                if (!productFormFields.stock.value || productFormFields.stock.value < 0) {
+                    productFormFields.stock.classList.add('error');
+                    productFormErrors.stock.classList.add('show');
+                    isValid = false;
+                } else {
+                    productFormFields.stock.classList.remove('error');
+                    productFormErrors.stock.classList.remove('show');
+                }
+                
+                if (!productFormFields.minStock.value || productFormFields.minStock.value < 0) {
+                    productFormFields.minStock.classList.add('error');
+                    productFormErrors.minStock.classList.add('show');
+                    isValid = false;
+                } else {
+                    productFormFields.minStock.classList.remove('error');
+                    productFormErrors.minStock.classList.remove('show');
+                }
+            }
+            
+            return isValid;
+        }
+        
+        function showProductStep(step) {
+            // Hide all steps
+            Object.values(productFormSteps).forEach(s => s.style.display = 'none');
+            
+            // Show current step
+            productFormSteps[`step${step}`].style.display = 'block';
+            
+            // Update step indicators
+            Object.values(productSteps).forEach(s => {
+                s.classList.remove('active');
+            });
+            productSteps[`step${step}`].classList.add('active');
+            
+            // Update buttons
+            if (step === 1) {
+                productFormButtons.prev.style.display = 'none';
+                productFormButtons.next.style.display = 'inline-flex';
+                productFormButtons.save.style.display = 'none';
+            } else if (step === 2) {
+                productFormButtons.prev.style.display = 'inline-flex';
+                productFormButtons.next.style.display = 'inline-flex';
+                productFormButtons.save.style.display = 'none';
+            } else if (step === 3) {
+                productFormButtons.prev.style.display = 'inline-flex';
+                productFormButtons.next.style.display = 'none';
+                productFormButtons.save.style.display = 'inline-flex';
+                
+                // Populate confirmation data
+                document.getElementById('confirmName').textContent = productFormFields.name.value;
+                document.getElementById('confirmCode').textContent = productFormFields.code.value;
+                document.getElementById('confirmCategory').textContent = productFormFields.category.value;
+                document.getElementById('confirmPrice').textContent = parseInt(productFormFields.price.value).toLocaleString('fa-IR') + ' تومان';
+                document.getElementById('confirmCost').textContent = parseInt(productFormFields.cost.value).toLocaleString('fa-IR') + ' تومان';
+                document.getElementById('confirmStock').textContent = productFormFields.stock.value + ' عدد';
+                document.getElementById('confirmMinStock').textContent = productFormFields.minStock.value + ' عدد';
+            }
+            
+            // Mark previous steps as completed
+            for (let i = 1; i < step; i++) {
+                productSteps[`step${i}`].classList.add('completed');
+            }
+        }
+        
+        // Product form navigation
+        productFormButtons.next.addEventListener('click', () => {
+            const currentStep = Object.values(productFormSteps).findIndex(step => step.style.display !== 'none') + 1;
+            
+            if (validateProductStep(currentStep)) {
+                showProductStep(currentStep + 1);
+            }
+        });
+        
+        productFormButtons.prev.addEventListener('click', () => {
+            const currentStep = Object.values(productFormSteps).findIndex(step => step.style.display !== 'none') + 1;
+            showProductStep(currentStep - 1);
+        });
+        
+        productFormButtons.save.addEventListener('click', () => {
+            // In a real app, this would save the product to the database
+            addProductModal.classList.remove('active');
+            showToast('کالای جدید با موفقیت اضافه شد');
+        });
+        
+        productFormButtons.cancel.addEventListener('click', () => {
+            addProductModal.classList.remove('active');
+        });
+        
+        // Customer form functions
+        function resetCustomerForm() {
+            // Reset form fields
+            Object.values(customerFormFields).forEach(field => field.value = '');
+            
+            // Reset errors
+            Object.values(customerFormErrors).forEach(error => error.classList.remove('show'));
+            Object.values(customerFormFields).forEach(field => field.classList.remove('error'));
+            
+            // Reset steps
+            Object.values(customerFormSteps).forEach(step => step.style.display = 'none');
+            customerFormSteps.step1.style.display = 'block';
+            
+            // Reset step indicators
+            Object.values(customerSteps).forEach(step => {
+                step.classList.remove('active', 'completed');
+            });
+            customerSteps.step1.classList.add('active');
+            
+            // Reset buttons
+            customerFormButtons.prev.style.display = 'none';
+            customerFormButtons.next.style.display = 'inline-flex';
+            customerFormButtons.save.style.display = 'none';
+        }
+        
+        function validateCustomerStep(step) {
+            let isValid = true;
+            
+            if (step === 1) {
+                // Validate step 1 fields
+                if (!customerFormFields.name.value.trim()) {
+                    customerFormFields.name.classList.add('error');
+                    customerFormErrors.name.classList.add('show');
+                    isValid = false;
+                } else {
+                    customerFormFields.name.classList.remove('error');
+                    customerFormErrors.name.classList.remove('show');
+                }
+                
+                if (!customerFormFields.phone.value.trim()) {
+                    customerFormFields.phone.classList.add('error');
+                    customerFormErrors.phone.classList.add('show');
+                    isValid = false;
+                } else {
+                    customerFormFields.phone.classList.remove('error');
+                    customerFormErrors.phone.classList.remove('show');
+                }
+            } else if (step === 2) {
+                // Validate step 2 fields
+                if (!customerFormFields.credit.value || customerFormFields.credit.value <= 0) {
+                    customerFormFields.credit.classList.add('error');
+                    customerFormErrors.credit.classList.add('show');
+                    isValid = false;
+                } else {
+                    customerFormFields.credit.classList.remove('error');
+                    customerFormErrors.credit.classList.remove('show');
+                }
+            }
+            
+            return isValid;
+        }
+        
+        function showCustomerStep(step) {
+            // Hide all steps
+            Object.values(customerFormSteps).forEach(s => s.style.display = 'none');
+            
+            // Show current step
+            customerFormSteps[`step${step}`].style.display = 'block';
+            
+            // Update step indicators
+            Object.values(customerSteps).forEach(s => {
+                s.classList.remove('active');
+            });
+            customerSteps[`step${step}`].classList.add('active');
+            
+            // Update buttons
+            if (step === 1) {
+                customerFormButtons.prev.style.display = 'none';
+                customerFormButtons.next.style.display = 'inline-flex';
+                customerFormButtons.save.style.display = 'none';
+            } else if (step === 2) {
+                customerFormButtons.prev.style.display = 'inline-flex';
+                customerFormButtons.next.style.display = 'inline-flex';
+                customerFormButtons.save.style.display = 'none';
+            } else if (step === 3) {
+                customerFormButtons.prev.style.display = 'inline-flex';
+                customerFormButtons.next.style.display = 'none';
+                customerFormButtons.save.style.display = 'inline-flex';
+                
+                // Populate confirmation data
+                document.getElementById('confirmCustomerName').textContent = customerFormFields.name.value;
+                document.getElementById('confirmCustomerPhone').textContent = customerFormFields.phone.value;
+                document.getElementById('confirmCustomerAddress').textContent = customerFormFields.address.value || '-';
+                document.getElementById('confirmCustomerCredit').textContent = parseInt(customerFormFields.credit.value).toLocaleString('fa-IR') + ' تومان';
+                document.getElementById('confirmCustomerNotes').textContent = customerFormFields.notes.value || '-';
+            }
+            
+            // Mark previous steps as completed
+            for (let i = 1; i < step; i++) {
+                customerSteps[`step${i}`].classList.add('completed');
+            }
+        }
+        
+        // Customer form navigation
+        customerFormButtons.next.addEventListener('click', () => {
+            const currentStep = Object.values(customerFormSteps).findIndex(step => step.style.display !== 'none') + 1;
+            
+            if (validateCustomerStep(currentStep)) {
+                showCustomerStep(currentStep + 1);
+            }
+        });
+        
+        customerFormButtons.prev.addEventListener('click', () => {
+            const currentStep = Object.values(customerFormSteps).findIndex(step => step.style.display !== 'none') + 1;
+            showCustomerStep(currentStep - 1);
+        });
+        
+        customerFormButtons.save.addEventListener('click', () => {
+            // In a real app, this would save the customer to the database
+            addCustomerModal.classList.remove('active');
+            showToast('مشتری جدید با موفقیت اضافه شد');
+        });
+        
+        customerFormButtons.cancel.addEventListener('click', () => {
+            addCustomerModal.classList.remove('active');
+        });
+        
+        // Product search
+        document.getElementById('inventorySearch').addEventListener('input', (e) => {
+            const searchTerm = e.target.value.toLowerCase();
+            const productCards = document.querySelectorAll('.product-card');
+            
+            productCards.forEach(card => {
+                const productName = card.querySelector('.product-name').textContent.toLowerCase();
+                const productCode = card.querySelector('.product-code').textContent.toLowerCase();
+                
+                if (productName.includes(searchTerm) || productCode.includes(searchTerm)) {
+                    card.style.display = 'flex';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        });
+        
+        // Product search in sale modal
+        document.getElementById('productSearchInput').addEventListener('input', (e) => {
+            const searchTerm = e.target.value;
+            if (searchTerm.length > 2) {
+                // Simulate product search
+                showToast(`جستجو برای: ${searchTerm}`);
+            }
+        });
+        
+        // Empty state buttons
+        document.getElementById('emptyStateNewSaleBtn').addEventListener('click', () => {
+            newSaleModal.classList.add('active');
+        });
+        
+        document.getElementById('emptyStateAddProductBtn').addEventListener('click', () => {
+            addProductModal.classList.add('active');
+            resetProductForm();
+        });
+        
+        document.getElementById('emptyStateAddCustomerBtn').addEventListener('click', () => {
+            addCustomerModal.classList.add('active');
+            resetCustomerForm();
+        });
+        
         // Initialize app
         document.addEventListener('DOMContentLoaded', () => {
-            simulateLoading();
-            updateFabAction('salesView');
+            // Initialize sales chart
+            setTimeout(() => {
+                initSalesChart();
+            }, 300);
             
             // Check if app is installed
             if (window.matchMedia('(display-mode: standalone)').matches) {
                 console.log('App is running in standalone mode');
             }
         });
-
+        
         // Handle online/offline status
         window.addEventListener('online', () => {
             showToast('اتصال به اینترنت برقرار شد');
-            // Sync data with server
         });
-
+        
         window.addEventListener('offline', () => {
             showToast('بدون اتصال به اینترنت. داده‌ها به صورت آفلاین ذخیره می‌شوند.');
         });
-
-        // Format numbers with Persian numerals and thousand separators
-        function formatPersianNumber(num) {
-            // Convert to string
-            const numStr = String(num);
-            
-            // Add thousand separators
-            let formatted = '';
-            for (let i = 0; i < numStr.length; i++) {
-                const pos = numStr.length - i;
-                if (i > 0 && pos % 3 === 0) {
-                    formatted += ',';
-                }
-                formatted += numStr[i];
-            }
-            
-            // Convert to Persian numerals
-            const persianDigits = ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹'];
-            return formatted.replace(/[0-9]/g, d => persianDigits[+d]);
-        }
-
-        // Example of using the format function
-        console.log(formatPersianNumber(1234500)); // "۱,۲۳۴,۵۰۰"
     </script>
 </body>
 </html>
