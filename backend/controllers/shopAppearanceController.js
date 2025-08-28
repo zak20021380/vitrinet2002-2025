@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 const ShopAppearance = require('../models/ShopAppearance');
+const Review = require('../models/Review');
 
 // تابع کمکی برای تبدیل URL نسبی به مطلق
 function makeFullUrl(req, path) {
@@ -189,8 +190,7 @@ exports.getShopsByCenterTitle = async (req, res) => {
 
 
 // ================== ثبت امتیاز فروشگاه ==================
-// ================== ثبت امتیاز فروشگاه ==================
-exports.rateShop = async (req, res) => {
+exports.addReview = async (req, res) => {
   try {
     const { sellerId } = req.params;
     const userId = req.user.id;           // از authMiddleware گرفته می‌شود
@@ -202,25 +202,68 @@ exports.rateShop = async (req, res) => {
       return res.status(400).json({ message: 'امتیاز باید عددی بین ۱ تا ۵ باشد.' });
     }
 
-    // ۲) پیدا کردن سند ShopAppearance
+    // ۲) بررسی وجود فروشگاه
     const shop = await ShopAppearance.findOne({ sellerId });
     if (!shop) {
       return res.status(404).json({ message: 'فروشگاه یافت نشد.' });
     }
 
-    // ۳) استفاده از متد مدل برای افزودن امتیاز و جلوگیری از تکرار
-    await shop.addRating(userId, score, comment);
-
-    // ۴) پاسخ با داده‌های به‌روز
-    res.json({
-      averageRating: shop.averageRating,
-      ratingCount:  shop.ratingCount
-    });
-  } catch (err) {
-    console.error('❌ rateShop error:', err.message);
-    if (err.message.includes('قبلاً امتیاز داده')) {
-      return res.status(400).json({ message: err.message });
+    // ۳) جلوگیری از ثبت امتیاز تکراری توسط همان کاربر
+    const existing = await Review.findOne({ sellerId, userId });
+    if (existing) {
+      return res.status(400).json({ message: 'کاربر قبلاً امتیاز داده است.' });
     }
+
+    // ۴) ثبت نظر جدید
+    await Review.create({ sellerId, userId, score, comment });
+
+    // ۵) محاسبه مجدد میانگین و تعداد از روی مجموعه Review
+    const agg = await Review.aggregate([
+      { $match: { sellerId: new mongoose.Types.ObjectId(sellerId) } },
+      {
+        $group: {
+          _id: null,
+          averageRating: { $avg: '$score' },
+          ratingCount: { $sum: 1 }
+        }
+      }
+    ]);
+
+    const averageRating = agg[0]?.averageRating || 0;
+    const ratingCount = agg[0]?.ratingCount || 0;
+
+    shop.averageRating = averageRating;
+    shop.ratingCount = ratingCount;
+    await shop.save();
+
+    res.json({ averageRating, ratingCount });
+  } catch (err) {
+    console.error('❌ addReview error:', err.message);
     res.status(500).json({ message: 'خطای سرور در ثبت امتیاز.' });
+  }
+};
+
+// ================== دریافت نظرات ==================
+exports.getReviews = async (req, res) => {
+  try {
+    const { sellerId } = req.params;
+    const reviews = await Review.find({ sellerId })
+      .sort({ createdAt: -1 })
+      .populate('userId', 'firstname lastname')
+      .lean();
+
+    const formatted = reviews.map(r => ({
+      _id: r._id,
+      userId: r.userId?._id,
+      userName: r.userId ? `${r.userId.firstname} ${r.userId.lastname}`.trim() : undefined,
+      score: r.score,
+      comment: r.comment,
+      createdAt: r.createdAt
+    }));
+
+    res.json(formatted);
+  } catch (err) {
+    console.error('❌ getReviews error:', err.message);
+    res.status(500).json({ message: 'خطای سرور در دریافت نظرات.' });
   }
 };

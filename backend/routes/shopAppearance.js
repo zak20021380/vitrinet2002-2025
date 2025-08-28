@@ -30,11 +30,17 @@ router.post(
   shopAppearanceController.saveShopAppearance
 );
 
+// دریافت نظرات فروشگاه
+router.get(
+  '/:sellerId/reviews',
+  shopAppearanceController.getReviews
+);
+
 // POST ثبت امتیاز فروشگاه – فقط کاربران لاگین‌شده
 router.post(
   '/:sellerId/rate',
   auth(),           // تضمین می‌کند که کاربر لاگین باشد
-  shopAppearanceController.rateShop
+  shopAppearanceController.addReview
 );
 
 module.exports = router;

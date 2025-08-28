@@ -2979,16 +2979,16 @@ document.addEventListener('DOMContentLoaded', function() {
         return;
       }
 
-      const ratings = Array.isArray(data?.ratings) ? data.ratings : [];
+      const reviews = await fetchByUrl(`/api/shopAppearance/${encodeURIComponent(sellerId)}/reviews`);
       const avg = typeof data?.averageRating === 'number'
                     ? data.averageRating
-                    : (ratings.length ? (ratings.reduce((s,r)=>s+(+r.score||0),0) / ratings.length) : 0);
+                    : (reviews.length ? (reviews.reduce((s,r)=>s+(+r.score||0),0) / reviews.length) : 0);
       const cnt = typeof data?.ratingCount === 'number'
                     ? data.ratingCount
-                    : ratings.length;
+                    : reviews.length;
 
-      updateSummary(avg, cnt, ratings);
-      renderReviews(ratings);
+      updateSummary(avg, cnt, reviews);
+      renderReviews(reviews);
     } catch (err) {
       console.error('load reviews failed', err);
       showToast('لود نظرات ناموفق بود.', 'error');

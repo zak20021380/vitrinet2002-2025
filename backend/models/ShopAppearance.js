@@ -7,14 +7,6 @@ const slideSchema = new mongoose.Schema({
   img:   String, // می‌تونه base64 یا URL باشه
 });
 
-// زیر‌اسکیما برای هر امتیاز ثبت‌شده
-const ratingSchema = new mongoose.Schema({
-  userId:    { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
-  score:     { type: Number, min: 1, max: 5, required: true },
-  comment:   { type: String, default: '' },
-  createdAt: { type: Date, default: Date.now }
-});
-
 // ظاهر و تنظیمات فروشگاه
 const shopAppearanceSchema = new mongoose.Schema({
   sellerId:     { type: mongoose.Schema.Types.ObjectId, required: true, ref: 'Seller' },
@@ -29,8 +21,7 @@ const shopAppearanceSchema = new mongoose.Schema({
 
   slides:       [slideSchema],  // لیست اسلایدها
 
-  // بخش امتیاز‌دهی
-  ratings:       [ratingSchema],          // امتیازهای ثبت‌شده
+  // خلاصه امتیاز‌دهی
   averageRating: { type: Number, default: 0 }, // میانگین امتیازها
   ratingCount:   { type: Number, default: 0 }, // تعداد کل امتیازها
 
@@ -39,22 +30,6 @@ const shopAppearanceSchema = new mongoose.Schema({
 
 }, { timestamps: true });
 
-// متد برای افزودن امتیاز جدید و به‌روزرسانی میانگین و تعداد
-shopAppearanceSchema.methods.addRating = async function(userId, score, comment = '') {
-  // بررسی اینکه کاربر قبلاً امتیاز نداده باشد
-  const existing = this.ratings.find(r => r.userId.toString() === userId.toString());
-  if (existing) {
-    throw new Error('کاربر قبلاً امتیاز داده است.');
-  }
-  // افزودن امتیاز جدید
-  this.ratings.push({ userId, score, comment });
-  this.ratingCount = this.ratings.length;
-  // محاسبه مجدد میانگین
-  const sum = this.ratings.reduce((acc, r) => acc + r.score, 0);
-  this.averageRating = sum / this.ratingCount;
-  await this.save();
-  return this;
-};
 
 // توابع کمکی و هوک‌ها
 function escapeRegex(string) {
@@ -77,6 +52,5 @@ shopAppearanceSchema.post('save', async function(doc) {
 // ایندکس‌ها برای بهبود عملکرد
 shopAppearanceSchema.index({ shopAddress: 1 });
 shopAppearanceSchema.index({ sellerId: 1 });
-shopAppearanceSchema.index({ 'ratings.userId': 1 });
 
 module.exports = mongoose.model('ShopAppearance', shopAppearanceSchema);
