@@ -1094,8 +1094,8 @@ function showToastDark(message, {type='success', durationMs=2600} = {}) {
           <svg aria-hidden="true" class="h-4 w-4 text-amber-500" viewBox="0 0 24 24" fill="currentColor">
             <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.62L12 2 9.19 8.62 2 9.24l5.46 4.73L5.82 21z"/>
           </svg>
-          <span id="avg-rating" class="font-bold">۴٫۸</span>
-          <span class="text-xs text-slate-600">( <span id="review-count">۱۲۸</span> نظر )</span>
+          <span id="avg-rating" class="font-bold">0.0</span>
+          <span class="text-xs text-slate-600">( <span id="review-count">0</span> نظر )</span>
         </div>
 
         <!-- Dot -->
@@ -2462,7 +2462,7 @@ if (document.readyState === 'loading') {
             <div class="flex items-center gap-2">
                 <div id="review-stars" class="flex items-center"></div>
                 <span id="review-average" class="text-sm font-bold text-gray-700">۰</span>
-                <span id="review-count" class="text-sm text-gray-500">(۰ نظر)</span>
+                <span id="review-count-text" class="text-sm text-gray-500">(۰ نظر)</span>
 
 
                 <button id="rate-now-chip" type="button"
@@ -3059,6 +3059,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // میانگین
     const avgStr = toFa((Number(avg)||0).toFixed(1).replace('.', '٫'));
     setTextAllById('review-average', avgStr);
+    setTextAllById('avg-rating', avgStr);
     const modalAvg = document.getElementById('modal-average');
     if (modalAvg) modalAvg.textContent = avgStr;
     const bigAvg = document.getElementById('summary-average');
@@ -3066,7 +3067,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // تعداد
     const cntStr = toFaNum(count || 0);
-    setTextAllById('review-count', `(${cntStr} نظر)`);
+    setTextAllById('review-count', cntStr);
+    setTextAllById('review-count-text', `(${cntStr} نظر)`);
     const modalCount = document.getElementById('modal-count');
     if (modalCount) modalCount.textContent = `بر اساس ${cntStr} نظر`;
     const bigCount = document.getElementById('summary-count');
@@ -4434,7 +4436,9 @@ window.addEventListener('load', () => {
       'seller-phone': seller.phone || '',
       'seller-address': seller.address || '',
       'store-phone':  seller.phone || '',
-      'store-address': seller.address || ''
+      'store-address': seller.address || '',
+      'biz-name':     seller.storename || '',
+      'biz-tagline':  seller.desc || ''
     };
     for (const [id, text] of Object.entries(mapping)) {
       const el = document.getElementById(id);
