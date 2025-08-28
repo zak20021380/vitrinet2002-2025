@@ -2847,405 +2847,427 @@ if (document.readyState === 'loading') {
 
 </style>
 
-<!-- JavaScript for Reviews -->
+<!-- JavaScript for Reviews (fixed) -->
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // Reviews Modal
-    const reviewsModal = document.getElementById('reviewsModal');
-    const reviewsModalContent = document.getElementById('reviews-modal-content');
-    const showAllBtn = document.getElementById('show-all-reviews');
-    const closeReviewsBtn = document.getElementById('close-reviews-modal');
-    const reviewsBackdrop = document.getElementById('reviews-backdrop');
-    
-    // Review Form Modal
-    const reviewFormModal = document.getElementById('reviewFormModal');
-    const reviewFormContent = document.getElementById('review-form-content');
-    const writeReviewBtn = document.getElementById('write-review-btn');
+  // ====== Elements ======
+  const reviewsModal = document.getElementById('reviewsModal');
+  const reviewsModalContent = document.getElementById('reviews-modal-content');
+  const showAllBtn = document.getElementById('show-all-reviews');
+  const closeReviewsBtn = document.getElementById('close-reviews-modal');
+  const reviewsBackdrop = document.getElementById('reviews-backdrop');
 
-    // چیپ «ثبت امتیاز» کنار 4.8
-const rateNowChip = document.getElementById('rate-now-chip');
-if (rateNowChip) rateNowChip.addEventListener('click', () => writeReviewBtn.click());
+  const reviewFormModal = document.getElementById('reviewFormModal');
+  const reviewFormContent = document.getElementById('review-form-content');
+  const writeReviewBtn = document.getElementById('write-review-btn');
+  const writeReviewModalBtn = document.getElementById('write-review-modal-btn');
+  const closeReviewFormBtn = document.getElementById('close-review-form');
+  const reviewFormBackdrop = document.getElementById('review-form-backdrop');
+  const cancelReviewBtn = document.getElementById('cancel-review');
 
-    const writeReviewModalBtn = document.getElementById('write-review-modal-btn');
-    const closeReviewFormBtn = document.getElementById('close-review-form');
-    const reviewFormBackdrop = document.getElementById('review-form-backdrop');
-    const cancelReviewBtn = document.getElementById('cancel-review');
-    
-    // Form Elements
-    const reviewForm = document.getElementById('review-form');
-    const ratingStars = document.querySelectorAll('.rating-star');
-    const ratingText = document.getElementById('rating-text');
-    const reviewTextarea = document.getElementById('review-text');
-    const charCounter = document.getElementById('char-counter');
-    const submitBtn = document.getElementById('submit-review');
-    const storeId = document.body.dataset.storeId || 'default';
-    const shopurl = new URL(location.href).searchParams.get('shopurl') || '';
-    let sellerId = null;
-    const toFa = s => String(s).replace(/\d/g, d => '۰۱۲۳۴۵۶۷۸۹'[d]);
-    function getToken() { return localStorage.getItem('access_token') || localStorage.getItem('token') || localStorage.getItem('jwt') || null; }
-    const authHeaders = () => { const t = getToken(); return t ? { 'Authorization': 'Bearer ' + t } : {}; };
-    const userId = window.__APP_USER__?.id;
-    const isAdmin = window.__APP_USER__?.isAdmin || window.__APP_USER__?.role === 'admin';
-    const reviewKey = userId ? `review:last:${storeId}:${userId}` : `review:last:${storeId}`;
-    function canSubmitReview() {
-        if (isAdmin) return true;
-        const last = localStorage.getItem(reviewKey);
-        return !last || (Date.now() - parseInt(last, 10)) > 86400000;
-    }
-    function markReviewSubmitted() {
-        localStorage.setItem(reviewKey, Date.now().toString());
-    }
-    function updateSubmitState() {
-        if (canSubmitReview()) {
-            submitBtn.disabled = false;
-            submitBtn.removeAttribute('title');
-        } else {
-            submitBtn.disabled = true;
-            submitBtn.title = 'You can submit one review per day.';
-            showToastDark('You can submit one review per day.', {type: 'info'});
-        }
-    }
+  const rateNowChip = document.getElementById('rate-now-chip');
+  if (rateNowChip) rateNowChip.addEventListener('click', () => writeReviewBtn?.click());
 
-    async function loadReviews() {
-        if (!shopurl) return;
+  // ====== Form refs ======
+  const reviewForm = document.getElementById('review-form');
+  const ratingStars = document.querySelectorAll('.rating-star');
+  const ratingText = document.getElementById('rating-text');
+  const reviewTextarea = document.getElementById('review-text');
+  const charCounter = document.getElementById('char-counter');
+  const submitBtn = document.getElementById('submit-review');
+
+  // ====== Helpers ======
+  const toFa = s => String(s).replace(/\d/g, d => '۰۱۲۳۴۵۶۷۸۹'[d]);
+  const toFaNum = n => toFa(String(n));
+  const escapeHTML = (str='') => str
+      .replace(/&/g,'&amp;').replace(/</g,'&lt;')
+      .replace(/>/g,'&gt;').replace(/"/g,'&quot;')
+      .replace(/'/g,'&#039;');
+  // آپدیت همه المان‌هایی که id تکراری دارند
+  const qAllId = (id) => Array.from(document.querySelectorAll(`[id="${id}"]`));
+  const setTextAllById = (id, text) => qAllId(id).forEach(el => el && (el.textContent = text));
+  const setHTMLAllById = (id, html) => qAllId(id).forEach(el => el && (el.innerHTML = html));
+
+  function showToast(msg, type='info'){ try { showToastDark(msg, {type}); } catch(_) { console.log(type.toUpperCase()+':', msg); } }
+
+  function getToken() {
+    return localStorage.getItem('access_token')
+        || localStorage.getItem('token')
+        || localStorage.getItem('jwt')
+        || null;
+  }
+  const authHeaders = () => {
+    const t = getToken();
+    return t ? { 'Authorization': 'Bearer ' + t } : {};
+  };
+
+  // ====== Identity / Scope ======
+  const body = document.body;
+  const storeId = body?.dataset?.storeId || 'default';
+  // اجازه بده از data-attr هم sellerId و shopurl رو بگیریم
+  const shopurl = new URL(location.href).searchParams.get('shopurl')
+                || body?.dataset?.shopurl || '';
+  let sellerId = body?.dataset?.sellerId || null;
+
+  const userId = window.__APP_USER__?.id;
+  const isAdmin = window.__APP_USER__?.isAdmin || window.__APP_USER__?.role === 'admin';
+
+  const reviewKey = userId ? `review:last:${storeId}:${userId}` : `review:last:${storeId}`;
+  function canSubmitReview() {
+    if (isAdmin) return true;
+    const last = localStorage.getItem(reviewKey);
+    return !last || (Date.now() - parseInt(last || '0', 10)) > 86400000; // 24h
+  }
+  function markReviewSubmitted() {
+    localStorage.setItem(reviewKey, Date.now().toString());
+  }
+  function updateSubmitState() {
+    if (!submitBtn) return;
+    if (canSubmitReview()) {
+      submitBtn.disabled = false;
+      submitBtn.removeAttribute('title');
+    } else {
+      submitBtn.disabled = true;
+      submitBtn.title = 'روزانه یک نظر می‌تونی ثبت کنی.';
+      showToast('روزانه یک نظر می‌تونی ثبت کنی.', 'info');
+    }
+  }
+
+  // ====== Stars ======
+  function starHtml(score, size='text-xs') {
+    let html = '';
+    for (let i=1;i<=5;i++){
+      if (score >= i) html += `<i class="fas fa-star text-yellow-400 ${size}"></i>`;
+      else if (score >= i-0.5) html += `<i class="fas fa-star-half-alt text-yellow-400 ${size}"></i>`;
+      else html += `<i class="far fa-star text-gray-300 ${size}"></i>`;
+    }
+    return html;
+  }
+  function setStars(el, score, size='text-sm'){ if(el) el.innerHTML = starHtml(score, size); }
+  function setStarsAllById(id, score, size='text-sm'){ qAllId(id).forEach(el => setStars(el, score, size)); }
+
+  // ====== Data I/O ======
+  async function fetchByUrl(url) {
+    const res = await fetch(url, { credentials: 'include' });
+    if (!res.ok) throw new Error('HTTP '+res.status);
+    return res.json();
+  }
+
+  async function loadReviews() {
+    try {
+      let data = null;
+
+      if (shopurl) {
+        // حالت معمول: از URL شاپ می‌گیریم
+        data = await fetchByUrl(`/api/shopAppearance/url/${encodeURIComponent(shopurl)}`);
+        sellerId = data.sellerId || sellerId;
+      } else if (sellerId) {
+        // fallback اگر shopurl نبود ولی sellerId داریم
         try {
-            const res = await fetch(`/api/shopAppearance/url/${encodeURIComponent(shopurl)}`);
-            if (!res.ok) throw new Error('load failed');
-            const data = await res.json();
-            sellerId = data.sellerId;
-            const ratings = data.ratings || [];
-            updateSummary(data.averageRating || 0, data.ratingCount || ratings.length, ratings);
-            renderReviews(ratings);
-        } catch (err) {
-            console.error('load reviews failed', err);
+          data = await fetchByUrl(`/api/shopAppearance/${encodeURIComponent(sellerId)}`);
+        } catch {
+          // اگر این اندپوینت پشتیبانی نشد، فقط ادامه می‌دیم تا POST کار کنه
+          data = { sellerId };
         }
+      } else {
+        showToast('sellerId یا shopurl مشخص نیست؛ ثبت نظر غیرممکنه.', 'error');
+        renderReviews([]); // خالی
+        updateSummary(0, 0, []);
+        return;
+      }
+
+      const ratings = Array.isArray(data?.ratings) ? data.ratings : [];
+      const avg = typeof data?.averageRating === 'number'
+                    ? data.averageRating
+                    : (ratings.length ? (ratings.reduce((s,r)=>s+(+r.score||0),0) / ratings.length) : 0);
+      const cnt = typeof data?.ratingCount === 'number'
+                    ? data.ratingCount
+                    : ratings.length;
+
+      updateSummary(avg, cnt, ratings);
+      renderReviews(ratings);
+    } catch (err) {
+      console.error('load reviews failed', err);
+      showToast('لود نظرات ناموفق بود.', 'error');
+      renderReviews([]);
+      updateSummary(0, 0, []);
+    }
+  }
+
+  // ====== Render ======
+  function renderReviews(list) {
+    const container = document.getElementById('reviews-container');
+    const modalList = document.getElementById('reviews-list');
+    if (container) container.innerHTML = '';
+    if (modalList) modalList.innerHTML = '';
+
+    if (!list?.length) {
+      container && (container.innerHTML = '<div class="w-full text-center text-gray-500 py-8">هنوز نظری ثبت نشده است.</div>');
+      modalList && (modalList.innerHTML = '<div class="w-full text-center text-gray-500 py-4">هنوز نظری ثبت نشده است.</div>');
+      return;
     }
 
-    function starHtml(score, size = 'text-xs') {
-        let html = '';
-        for (let i = 1; i <= 5; i++) {
-            if (score >= i) html += `<i class="fas fa-star text-yellow-400 ${size}"></i>`;
-            else if (score >= i - 0.5) html += `<i class="fas fa-star-half-alt text-yellow-400 ${size}"></i>`;
-            else html += `<i class="far fa-star text-gray-300 ${size}"></i>`;
-        }
-        return html;
-    }
+    list.forEach(r => {
+      const name = escapeHTML(r.userName || 'کاربر');
+      const date = r.createdAt ? new Date(r.createdAt).toLocaleDateString('fa-IR') : '';
+      const comment = escapeHTML(r.comment || '');
+      const score = Math.max(1, Math.min(5, Number(r.score) || 0));
+      const stars = starHtml(score);
 
-    function setStars(el, score, size = 'text-sm') {
-        if (!el) return;
-        el.innerHTML = starHtml(score, size);
-    }
+      container && container.insertAdjacentHTML('beforeend', `
+        <div class="review-card flex-shrink-0 w-80 bg-white rounded-2xl shadow-sm hover:shadow-md transition-shadow border border-gray-100 p-5">
+          <div class="flex items-start justify-between mb-3">
+            <div>
+              <h4 class="font-bold text-gray-900 mb-1">${name}</h4>
+              <div class="flex items-center gap-1">${stars}</div>
+            </div>
+            <span class="text-xs text-gray-400 bg-gray-50 px-2 py-1 rounded-full">${escapeHTML(date)}</span>
+          </div>
+          <p class="text-sm text-gray-700 leading-6">${comment}</p>
+        </div>
+      `);
 
-    function renderReviews(list) {
-        const container = document.getElementById('reviews-container');
-        const modalList = document.getElementById('reviews-list');
-        container.innerHTML = '';
-        modalList.innerHTML = '';
-        if (!list.length) {
-            container.innerHTML = '<div class="w-full text-center text-gray-500 py-8">هنوز نظری ثبت نشده است.</div>';
-            modalList.innerHTML = '<div class="w-full text-center text-gray-500 py-4">هنوز نظری ثبت نشده است.</div>';
-            return;
-        }
-        list.forEach(r => {
-            const name = r.userName || 'کاربر';
-            const date = new Date(r.createdAt).toLocaleDateString('fa-IR');
-            const stars = starHtml(r.score);
-            container.insertAdjacentHTML('beforeend',
-                `<div class="review-card flex-shrink-0 w-80 bg-white rounded-2xl shadow-sm hover:shadow-md transition-shadow border border-gray-100 p-5">
-                    <div class="flex items-start justify-between mb-3">
-                        <div>
-                            <h4 class="font-bold text-gray-900 mb-1">${name}</h4>
-                            <div class="flex items-center gap-1">${stars}</div>
-                        </div>
-                        <span class="text-xs text-gray-400 bg-gray-50 px-2 py-1 rounded-full">${date}</span>
-                    </div>
-                    <p class="text-sm text-gray-700 leading-6">${r.comment || ''}</p>
-                </div>`
-            );
-            modalList.insertAdjacentHTML('beforeend',
-                `<div class="review-item bg-white border border-gray-100 rounded-2xl p-5 hover:shadow-md transition-shadow" data-rating="${r.score}">
-                    <div class="flex items-start justify-between mb-3">
-                        <div>
-                            <h4 class="font-bold text-gray-900 mb-1">${name}</h4>
-                            <div class="flex items-center gap-2">
-                                <div class="flex items-center gap-1">${stars}</div>
-                                <span class="text-xs text-gray-400">•</span>
-                                <span class="text-xs text-gray-500">${date}</span>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="review-text-container">
-                        <p class="text-sm text-gray-700 leading-7 review-text">${r.comment || ''}</p>
-                    </div>
-                </div>`
-            );
-        });
-    }
-
-    function updateSummary(avg, count, ratings) {
-        const summaryStars = document.getElementById('review-stars');
-        const summaryAvg = document.getElementById('review-average');
-        const summaryCount = document.getElementById('review-count');
-        setStars(summaryStars, avg);
-        if (summaryAvg) summaryAvg.textContent = toFa(avg.toFixed(1).replace('.', '٫'));
-        if (summaryCount) summaryCount.textContent = `(${toFa(count)} نظر)`;
-
-        const modalStars = document.getElementById('modal-stars');
-        const modalAvg = document.getElementById('modal-average');
-        const modalCount = document.getElementById('modal-count');
-        setStars(modalStars, avg);
-        if (modalAvg) modalAvg.textContent = toFa(avg.toFixed(1).replace('.', '٫'));
-        if (modalCount) modalCount.textContent = `بر اساس ${toFa(count)} نظر`;
-
-        const bigAvg = document.getElementById('summary-average');
-        const bigStars = document.getElementById('summary-stars');
-        const bigCount = document.getElementById('summary-count');
-        setStars(bigStars, avg);
-        if (bigAvg) bigAvg.textContent = toFa(avg.toFixed(1).replace('.', '٫'));
-        if (bigCount) bigCount.textContent = `${toFa(count)} نظر ثبت شده`;
-
-        const totals = [0,0,0,0,0];
-        ratings.forEach(r => { totals[r.score - 1]++; });
-        for (let s = 1; s <= 5; s++) {
-            const bar = document.getElementById(`bar-${s}`);
-            const span = document.getElementById(`count-${s}`);
-            const c = totals[s-1];
-            const pct = count ? (c / count) * 100 : 0;
-            if (bar) bar.style.width = `${pct}%`;
-            if (span) span.textContent = toFa(c);
-        }
-    }
-
-    let selectedRating = 0;
-
-    loadReviews();
-    
-    // Open Reviews Modal
-    showAllBtn.addEventListener('click', function() {
-        reviewsModal.classList.remove('hidden');
-        document.body.style.overflow = 'hidden';
-        setTimeout(() => {
-            reviewsModal.classList.add('show');
-        }, 10);
+      modalList && modalList.insertAdjacentHTML('beforeend', `
+        <div class="review-item bg-white border border-gray-100 rounded-2xl p-5 hover:shadow-md transition-shadow" data-rating="${score}">
+          <div class="flex items-start justify-between mb-3">
+            <div>
+              <h4 class="font-bold text-gray-900 mb-1">${name}</h4>
+              <div class="flex items-center gap-2">
+                <div class="flex items-center gap-1">${stars}</div>
+                <span class="text-xs text-gray-400">•</span>
+                <span class="text-xs text-gray-500">${escapeHTML(date)}</span>
+              </div>
+            </div>
+          </div>
+          <div class="review-text-container">
+            <p class="text-sm text-gray-700 leading-7 review-text">${comment}</p>
+          </div>
+        </div>
+      `);
     });
-    
-    // Open Review Form Modal
-    function openReviewForm() {
-        reviewFormModal.classList.remove('hidden');
-        document.body.style.overflow = 'hidden';
-        setTimeout(() => {
-            reviewFormModal.classList.add('show');
-        }, 10);
-        updateSubmitState();
-    }
-    
-    writeReviewBtn.addEventListener('click', openReviewForm);
-    if (writeReviewModalBtn) {
-        writeReviewModalBtn.addEventListener('click', openReviewForm);
-    }
-    
-    // Close Modals
-    function closeReviewsModal() {
-        reviewsModal.classList.remove('show');
-        setTimeout(() => {
-            reviewsModal.classList.add('hidden');
-            document.body.style.overflow = '';
-        }, 300);
-    }
-    
-    function closeReviewFormModal() {
-        reviewFormModal.classList.remove('show');
-        setTimeout(() => {
-            reviewFormModal.classList.add('hidden');
-            document.body.style.overflow = '';
-            // Reset form
-            reviewForm.reset();
-            selectedRating = 0;
-            ratingStars.forEach(star => {
-                star.classList.remove('fas', 'filled');
-                star.classList.add('far');
-            });
-            ratingText.textContent = '';
-            charCounter.textContent = '0/500';
-        }, 300);
-    }
-    
-    closeReviewsBtn.addEventListener('click', closeReviewsModal);
-    reviewsBackdrop.addEventListener('click', closeReviewsModal);
-    
-    closeReviewFormBtn.addEventListener('click', closeReviewFormModal);
-    reviewFormBackdrop.addEventListener('click', closeReviewFormModal);
-    cancelReviewBtn.addEventListener('click', closeReviewFormModal);
-    
-    // ESC key to close
-    document.addEventListener('keydown', function(e) {
-        if (e.key === 'Escape') {
-            if (!reviewsModal.classList.contains('hidden')) {
-                closeReviewsModal();
-            }
-            if (!reviewFormModal.classList.contains('hidden')) {
-                closeReviewFormModal();
-            }
-        }
-    });
-    
-    // Mobile Swipe to Close
-    function setupSwipeToClose(modalContent, closeFunction) {
-        let startY = 0;
-        let currentY = 0;
-        let isDragging = false;
-        
-        modalContent.addEventListener('touchstart', function(e) {
-            if (window.innerWidth <= 640) {
-                startY = e.touches[0].clientY;
-                isDragging = true;
-            }
-        });
-        
-        modalContent.addEventListener('touchmove', function(e) {
-            if (!isDragging || window.innerWidth > 640) return;
-            
-            currentY = e.touches[0].clientY;
-            const translateY = Math.max(0, currentY - startY);
-            
-            if (translateY > 0) {
-                modalContent.style.transform = `translateY(${translateY}px)`;
-            }
-        });
-        
-        modalContent.addEventListener('touchend', function() {
-            if (!isDragging || window.innerWidth > 640) return;
-            
-            const translateY = currentY - startY;
-            
-            if (translateY > 100) {
-                closeFunction();
-            } else {
-                modalContent.style.transform = '';
-            }
-            
-            isDragging = false;
-        });
-    }
-    
-    setupSwipeToClose(reviewsModalContent, closeReviewsModal);
-    setupSwipeToClose(reviewFormContent, closeReviewFormModal);
-    
-    // Filter Reviews
-    const filterChips = document.querySelectorAll('.review-filter-chip');
-    filterChips.forEach(chip => {
-        chip.addEventListener('click', function() {
-            filterChips.forEach(c => c.classList.remove('active'));
-            this.classList.add('active');
-            const filter = this.dataset.filter;
-            document.querySelectorAll('.review-item').forEach(review => {
-                review.style.display = (filter === 'all' || review.dataset.rating === filter) ? '' : 'none';
-            });
-        });
-    });
-    
-    // Read More/Less functionality
-    document.querySelectorAll('.read-more-btn').forEach(btn => {
-        btn.addEventListener('click', function() {
-            const textElement = this.previousElementSibling;
-            const fullText = textElement.dataset.fullText;
-            
-            if (this.classList.contains('expanded')) {
-                textElement.classList.add('line-clamp-3');
-                textElement.textContent = fullText.substring(0, 150) + '...';
-                this.innerHTML = 'مشاهده بیشتر <i class="fas fa-chevron-down mr-1 text-xs"></i>';
-                this.classList.remove('expanded');
-            } else {
-                textElement.classList.remove('line-clamp-3');
-                textElement.textContent = fullText;
-                this.innerHTML = 'مشاهده کمتر <i class="fas fa-chevron-up mr-1 text-xs"></i>';
-                this.classList.add('expanded');
-            }
-        });
-    });
-    
-    // Rating Stars Interaction
-    const ratingMessages = ['', 'ضعیف', 'متوسط', 'خوب', 'عالی', 'فوق‌العاده'];
-    
-    ratingStars.forEach(star => {
-        star.addEventListener('click', function() {
-            selectedRating = parseInt(this.dataset.rating);
-            updateStars(selectedRating);
-            ratingText.textContent = ratingMessages[selectedRating];
-        });
-        
-        star.addEventListener('mouseenter', function() {
-            const hoverRating = parseInt(this.dataset.rating);
-            updateStars(hoverRating);
-            ratingText.textContent = ratingMessages[hoverRating];
-        });
-    });
-    
-    document.querySelector('.rating-stars').addEventListener('mouseleave', function() {
-        updateStars(selectedRating);
-        ratingText.textContent = selectedRating ? ratingMessages[selectedRating] : '';
-    });
-    
-    function updateStars(rating) {
-        ratingStars.forEach((star, index) => {
-            if (index < rating) {
-                star.classList.remove('far');
-                star.classList.add('fas', 'filled');
-            } else {
-                star.classList.remove('fas', 'filled');
-                star.classList.add('far');
-            }
-        });
-    }
-    
-    // Character Counter
-    reviewTextarea.addEventListener('input', function() {
-        const length = this.value.length;
-        charCounter.textContent = `${length}/500`;
-        
-        if (length > 500) {
-            this.value = this.value.substring(0, 500);
-            charCounter.textContent = '500/500';
-        }
-    });
-    
-    // Form Submission
-    reviewForm.addEventListener('submit', async function(e) {
-        e.preventDefault();
+  }
 
-        if (!canSubmitReview()) {
-            showToastDark('You can submit one review per day.', {type: 'info'});
-            return;
-        }
+  function updateSummary(avg, count, ratings) {
+    // ستاره‌ها
+    setStarsAllById('review-stars', avg, 'text-xs');
+    setStars(document.getElementById('modal-stars'), avg, 'text-xs');
+    setStars(document.getElementById('summary-stars'), avg, 'text-sm');
 
-        if (selectedRating === 0) {
-            alert('لطفاً امتیاز خود را انتخاب کنید');
-            return;
-        }
+    // میانگین
+    const avgStr = toFa((Number(avg)||0).toFixed(1).replace('.', '٫'));
+    setTextAllById('review-average', avgStr);
+    const modalAvg = document.getElementById('modal-average');
+    if (modalAvg) modalAvg.textContent = avgStr;
+    const bigAvg = document.getElementById('summary-average');
+    if (bigAvg) bigAvg.textContent = avgStr;
 
-        if (reviewTextarea.value.length < 20) {
-            alert('نظر شما باید حداقل 20 کاراکتر باشد');
-            return;
-        }
+    // تعداد
+    const cntStr = toFaNum(count || 0);
+    setTextAllById('review-count', `(${cntStr} نظر)`);
+    const modalCount = document.getElementById('modal-count');
+    if (modalCount) modalCount.textContent = `بر اساس ${cntStr} نظر`;
+    const bigCount = document.getElementById('summary-count');
+    if (bigCount) bigCount.textContent = `${cntStr} نظر ثبت شده`;
 
-        closeReviewFormModal();
-        try {
-            const res = await fetch(`/api/shopAppearance/${sellerId}/rate`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json', ...authHeaders() },
-                body: JSON.stringify({ rating: selectedRating, comment: reviewTextarea.value })
-            });
-            if (!res.ok) throw new Error('failed');
-            showToastDark('نظر شما با موفقیت ثبت شد', {type: 'success'});
-            markReviewSubmitted();
-            loadReviews();
-        } catch (err) {
-            console.error('submit review failed', err);
-            showToastDark('خطا در ثبت نظر', {type: 'error'});
-        }
+    // توزیع 1..5
+    const totals = [0,0,0,0,0];
+    (ratings||[]).forEach(r => {
+      const s = Math.max(1, Math.min(5, Number(r.score)||0));
+      totals[s-1] += 1;
     });
+    for (let s=1; s<=5; s++){
+      const bar = document.getElementById(`bar-${s}`);
+      const span = document.getElementById(`count-${s}`);
+      const c = totals[s-1];
+      const pct = count ? (c / count) * 100 : 0;
+      if (bar) bar.style.width = `${pct}%`;
+      if (span) span.textContent = toFaNum(c);
+    }
+  }
+
+  // ====== Modals ======
+  function openReviewsModal(){
+    if (!reviewsModal) return;
+    reviewsModal.classList.remove('hidden');
+    document.body.style.overflow = 'hidden';
+    setTimeout(() => reviewsModal.classList.add('show'), 10);
+  }
+  function closeReviewsModal() {
+    if (!reviewsModal) return;
+    reviewsModal.classList.remove('show');
+    setTimeout(() => {
+      reviewsModal.classList.add('hidden');
+      document.body.style.overflow = '';
+    }, 300);
+  }
+  function openReviewForm() {
+    if (!reviewFormModal) return;
+    reviewFormModal.classList.remove('hidden');
+    document.body.style.overflow = 'hidden';
+    setTimeout(() => reviewFormModal.classList.add('show'), 10);
+    updateSubmitState();
+  }
+  function closeReviewFormModal() {
+    if (!reviewFormModal) return;
+    reviewFormModal.classList.remove('show');
+    setTimeout(() => {
+      reviewFormModal.classList.add('hidden');
+      document.body.style.overflow = '';
+      // reset
+      reviewForm?.reset();
+      selectedRating = 0;
+      ratingStars.forEach(star => {
+        star.classList.remove('fas','filled');
+        star.classList.add('far');
+      });
+      if (ratingText) ratingText.textContent = '';
+      if (charCounter) charCounter.textContent = toFaNum('0/500');
+    }, 300);
+  }
+
+  showAllBtn?.addEventListener('click', openReviewsModal);
+  closeReviewsBtn?.addEventListener('click', closeReviewsModal);
+  reviewsBackdrop?.addEventListener('click', closeReviewsModal);
+
+  writeReviewBtn?.addEventListener('click', openReviewForm);
+  writeReviewModalBtn?.addEventListener('click', openReviewForm);
+  closeReviewFormBtn?.addEventListener('click', closeReviewFormModal);
+  reviewFormBackdrop?.addEventListener('click', closeReviewFormModal);
+  cancelReviewBtn?.addEventListener('click', closeReviewFormModal);
+
+  // ESC
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      if (reviewsModal && !reviewsModal.classList.contains('hidden')) closeReviewsModal();
+      if (reviewFormModal && !reviewFormModal.classList.contains('hidden')) closeReviewFormModal();
+    }
+  });
+
+  // Swipe close (mobile)
+  function setupSwipeToClose(modalContent, closeFn){
+    if (!modalContent) return;
+    let startY=0, currentY=0, dragging=false;
+    modalContent.addEventListener('touchstart', (e)=>{ if (innerWidth<=640){ startY=e.touches[0].clientY; dragging=true; }});
+    modalContent.addEventListener('touchmove', (e)=>{ if(!dragging||innerWidth>640)return; currentY=e.touches[0].clientY; const dy=Math.max(0,currentY-startY); if(dy>0) modalContent.style.transform=`translateY(${dy}px)`; });
+    modalContent.addEventListener('touchend', ()=>{ if(!dragging||innerWidth>640)return; const dy=currentY-startY; if(dy>100) closeFn(); else modalContent.style.transform=''; dragging=false; });
+  }
+  setupSwipeToClose(reviewsModalContent, closeReviewsModal);
+  setupSwipeToClose(reviewFormContent, closeReviewFormModal);
+
+  // ====== Filters ======
+  const filterChips = document.querySelectorAll('.review-filter-chip');
+  filterChips.forEach(chip=>{
+    chip.addEventListener('click', function(){
+      filterChips.forEach(c=>c.classList.remove('active'));
+      this.classList.add('active');
+      const filter = this.dataset.filter;
+      document.querySelectorAll('.review-item').forEach(review=>{
+        review.style.display = (filter==='all' || String(review.dataset.rating)===String(filter)) ? '' : 'none';
+      });
+    });
+  });
+
+  // ====== Rating UI ======
+  const ratingMessages = ['', 'ضعیف', 'متوسط', 'خوب', 'عالی', 'فوق‌العاده'];
+  let selectedRating = 0;
+
+  function updateStars(rating){
+    ratingStars.forEach((star, idx) => {
+      if (idx < rating) {
+        star.classList.remove('far');
+        star.classList.add('fas','filled');
+      } else {
+        star.classList.remove('fas','filled');
+        star.classList.add('far');
+      }
+    });
+  }
+
+  ratingStars.forEach(star=>{
+    star.addEventListener('click', function(){
+      selectedRating = parseInt(this.dataset.rating, 10) || 0;
+      updateStars(selectedRating);
+      if (ratingText) ratingText.textContent = ratingMessages[selectedRating] || '';
+    });
+    star.addEventListener('mouseenter', function(){
+      const hover = parseInt(this.dataset.rating, 10) || 0;
+      updateStars(hover);
+      if (ratingText) ratingText.textContent = ratingMessages[hover] || '';
+    });
+  });
+  document.querySelector('.rating-stars')?.addEventListener('mouseleave', function(){
+    updateStars(selectedRating);
+    if (ratingText) ratingText.textContent = selectedRating ? (ratingMessages[selectedRating]||'') : '';
+  });
+
+  // ====== Char counter ======
+  reviewTextarea?.addEventListener('input', function(){
+    let val = this.value;
+    if (val.length > 500) { val = val.slice(0,500); this.value = val; }
+    if (charCounter) charCounter.textContent = toFa(`${val.length}/500`);
+  });
+  if (charCounter) charCounter.textContent = toFa('0/500');
+
+  // ====== Submit ======
+  const POST_ENDPOINT = (sid) => `/api/shopAppearance/${encodeURIComponent(sid)}/rate`;
+
+  reviewForm?.addEventListener('submit', async function(e){
+    e.preventDefault();
+
+    if (!canSubmitReview()) { showToast('روزانه یک نظر می‌تونی ثبت کنی.', 'info'); return; }
+    if (!selectedRating) { showToast('لطفاً امتیاز بده 🙂', 'info'); return; }
+    if (!reviewTextarea || reviewTextarea.value.trim().length < 20) { showToast('متن نظر حداقل ۲۰ کاراکتر باشه.', 'error'); return; }
+
+    // مطمئن شو sellerId داریم
+    if (!sellerId) {
+      // تلاش آخر: دوباره از سرور بگیر
+      try { await loadReviews(); } catch {}
+    }
+    if (!sellerId) { showToast('sellerId نامشخصه؛ ثبت نظر ممکن نیست.', 'error'); return; }
+
+    const payload = {
+      rating: selectedRating,
+      comment: reviewTextarea.value.trim()
+    };
+
+    // Loading state
+    const old = submitBtn?.innerHTML;
+    if (submitBtn){
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin ml-2"></i>در حال ارسال...';
+    }
+
+    // می‌بندیم که UX روون بشه، ولی اگر خطا بود توست می‌دیم
+    closeReviewFormModal();
+
+    try {
+      const res = await fetch(POST_ENDPOINT(sellerId), {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', ...authHeaders() },
+        credentials: 'include',
+        body: JSON.stringify(payload)
+      });
+      if (!res.ok) throw new Error('HTTP '+res.status);
+
+      markReviewSubmitted();
+      showToast('نظر ثبت شد 🙌', 'success');
+      await loadReviews();
+    } catch (err) {
+      console.error('submit review failed', err);
+      showToast('خطا در ثبت نظر', 'error');
+    } finally {
+      if (submitBtn){
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = old || 'ارسال نظر';
+      }
+    }
+  });
+
+  // ====== Boot ======
+  loadReviews();
 });
 </script>
+
     <!-- Store Info & Contact -->
     <section class="py-8 px-4">
         <h3 class="text-xl font-bold mb-4">اطلاعات و تماس</h3>
