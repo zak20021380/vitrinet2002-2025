@@ -1411,9 +1411,9 @@ async initServices() {
         // Add event listeners to the new buttons
         container.querySelectorAll('.edit-service-btn').forEach(btn => {
             btn.addEventListener('click', (e) => {
-                const id = parseInt(e.target.dataset.id);
+                const id = e.target.dataset.id;
                 const services = StorageManager.get('vit_services') || [];
-                const service = services.find(s => s.id === id);
+                const service = services.find(s => String(s.id) === String(id));
                 if (service) {
                     this.populateServiceForm(service);
                     UIComponents.openDrawer('service-drawer');
@@ -1422,7 +1422,7 @@ async initServices() {
         });
         container.querySelectorAll('.delete-service-btn').forEach(btn => {
             btn.addEventListener('click', (e) => {
-                const id = parseInt(e.target.dataset.id);
+                const id = e.target.dataset.id;
                 this.deleteService(id);
             });
         });
@@ -1475,7 +1475,7 @@ async initServices() {
 // ==== REPLACE: handleServiceFormSubmit (write-through to API) ====
 async handleServiceFormSubmit() {
   const form = document.getElementById('service-form');
-  const id = form.dataset.editingId ? parseInt(form.dataset.editingId, 10) : null;
+  const id = form.dataset.editingId ? form.dataset.editingId : null;
 
   const title = document.getElementById('service-title').value.trim();
   const price = parseFloat(document.getElementById('service-price').value);
@@ -1669,7 +1669,7 @@ async initPortfolio() {
     }
 async handlePortfolioFormSubmit() {
         const form = document.getElementById('portfolio-form');
-        const id = form.dataset.editingId ? parseInt(form.dataset.editingId, 10) : null;
+        const id = form.dataset.editingId ? form.dataset.editingId : null;
         const title = document.getElementById('portfolio-title').value.trim();
         const description = document.getElementById('portfolio-description').value.trim();
         const fileInput = document.getElementById('portfolio-image');
