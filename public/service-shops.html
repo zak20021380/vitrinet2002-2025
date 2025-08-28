@@ -4348,7 +4348,7 @@ window.addEventListener('load', () => {
   'use strict';
 
   /** ================== Config & Helpers ================== **/
-  const API_BASE = '/api/seller-services';
+  const API_ROOT = window.__API_BASE__ || '';
 
   // اگر توکن رو جای دیگه می‌ذاری، این تابع رو تغییر بده
   function getToken() {
@@ -4413,7 +4413,7 @@ window.addEventListener('load', () => {
 
   /** ================== API calls ================== **/
   async function apiGetPublic(shopurl) {
-    const res = await fetch(`${API_BASE}/by-shopurl/${encodeURIComponent(shopurl)}`, {
+    const res = await fetch(`${API_ROOT}/api/seller-services/by-shopurl/${encodeURIComponent(shopurl)}`, {
       credentials: 'include'
     });
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
@@ -4421,18 +4421,25 @@ window.addEventListener('load', () => {
   }
 
   async function apiGetSeller(shopurl) {
-    const res = await fetch(`/api/sellers/by-shopurl/${encodeURIComponent(shopurl)}`, { credentials: 'include' });
+    const res = await fetch(`${API_ROOT}/api/sellers/by-shopurl/${encodeURIComponent(shopurl)}`, { credentials: 'include' });
     if (!res.ok) throw new Error('seller not found');
     return res.json();
   }
 
   function updateSellerProfile(seller) {
-    const titleEl = document.getElementById('page-title');
-    if (titleEl) titleEl.textContent = `${seller.storename || ''} | Vitreenet`;
-    document.getElementById('seller-name').textContent = seller.storename || '';
-    document.getElementById('seller-category').textContent = seller.category || '';
-    document.getElementById('seller-phone').textContent = seller.phone || '';
-    document.getElementById('seller-address').textContent = seller.address || '';
+    const mapping = {
+      'page-title':   `${seller.storename || ''} | Vitreenet`,
+      'seller-name':  seller.storename || '',
+      'seller-category': seller.category || '',
+      'seller-phone': seller.phone || '',
+      'seller-address': seller.address || '',
+      'store-phone':  seller.phone || '',
+      'store-address': seller.address || ''
+    };
+    for (const [id, text] of Object.entries(mapping)) {
+      const el = document.getElementById(id);
+      if (el) el.textContent = text;
+    }
   }
 
   /** ================== Render ================== **/
