@@ -425,7 +425,7 @@
         
     </style>
 </head>
-<body class="bg-gray-50 text-gray-800">
+<body class="bg-gray-50 text-gray-800" data-seller-id="123" data-shopurl="demo-shop">
     <!-- Sticky Header -->
     <!-- header desktop redesign start -->
 <header id="main-header" class="sticky top-0 z-[90] isolate bg-white md:bg-white/50 md:backdrop-blur-md shadow-sm transition-all duration-300">
@@ -1841,33 +1841,35 @@ confirmBtn.addEventListener('click', () => {
   </script>
 </section>
 
-<script>
-// Add loading state to all submit buttons
-document.addEventListener('DOMContentLoaded', function() {
-  const submitButtons = document.querySelectorAll('button[type="submit"], #confirm-booking, .service-button');
-  
-  submitButtons.forEach(btn => {
-    btn.addEventListener('click', function() {
-      if (this.disabled || this.classList.contains('loading')) return;
-      
-      // Store original content
-      const originalContent = this.innerHTML;
-      
-      // Add loading state
-      this.classList.add('loading');
-      this.disabled = true;
-      this.innerHTML = '<i class="fas fa-spinner fa-spin ml-2"></i>در حال پردازش...';
-      
-      // Remove loading state after operation (adjust timing based on your needs)
-      setTimeout(() => {
-        this.classList.remove('loading');
-        this.disabled = false;
-        this.innerHTML = originalContent;
-      }, 2000);
+  <script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const btns = document.querySelectorAll(
+      'button[type="submit"]:not([data-no-loader]), #confirm-booking, .service-button'
+    );
+
+    btns.forEach(btn => {
+      btn.addEventListener('click', function () {
+        if (this.disabled || this.classList.contains('loading')) return;
+
+        const original = this.innerHTML;
+
+        // Allow the submit event to fire first
+        setTimeout(() => {
+          this.classList.add('loading');
+          this.disabled = true;
+          this.innerHTML = '<i class="fas fa-spinner fa-spin ml-2"></i>در حال پردازش...';
+        }, 0);
+
+        // Safety revert after 2s (UI-only fallback)
+        setTimeout(() => {
+          this.classList.remove('loading');
+          this.disabled = false;
+          this.innerHTML = original;
+        }, 2000);
+      });
     });
   });
-});
-</script>
+  </script>
 
 
 
@@ -2704,7 +2706,8 @@ if (document.readyState === 'loading') {
                         <button type="button" id="cancel-review" class="flex-1 px-4 py-3 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold rounded-xl transition-colors">
                             انصراف
                         </button>
-                        <button type="submit" class="flex-1 px-4 py-3 bg-gradient-to-r from-blue-600 to-teal-500 text-white font-bold rounded-xl hover:shadow-lg transform hover:scale-105 transition-all disabled:opacity-50 disabled:cursor-not-allowed" id="submit-review">
+                        <button type="submit" id="submit-review" data-no-loader
+                            class="flex-1 px-4 py-3 bg-gradient-to-r from-blue-600 to-teal-500 text-white font-bold rounded-xl hover:shadow-lg transform hover:scale-105 transition-all disabled:opacity-50 disabled:cursor-not-allowed">
                             ارسال نظر
                         </button>
                     </div>
