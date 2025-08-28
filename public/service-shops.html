@@ -1329,34 +1329,7 @@ function showToastDark(message, {type='success', durationMs=2600} = {}) {
     <div id="step-1" class="step">
       <h4 class="font-bold mb-4">انتخاب خدمت</h4>
       <div class="space-y-3">
-   <div id="booking-services" class="space-y-3"></div>
-        <div class="service-option border border-gray-300 rounded-lg p-3 hover:border-blue-500 cursor-pointer bw-tap" data-service="ماساژ صورت" data-price="120000">
-          <div class="flex justify-between items-center">
-            <div>
-              <h5 class="font-bold">ماساژ صورت</h5>
-              <p class="text-sm text-gray-600">ماساژ صورت با روغن‌های گیاهی</p>
-            </div>
-            <span class="font-bold">۱۲۰٬۰۰۰ تومان</span>
-          </div>
-        </div>
-        <div class="service-option border border-gray-300 rounded-lg p-3 hover:border-blue-500 cursor-pointer bw-tap" data-service="رنگ مو" data-price="200000">
-          <div class="flex justify-between items-center">
-            <div>
-              <h5 class="font-bold">رنگ مو</h5>
-              <p class="text-sm text-gray-600">رنگ موی حرفه‌ای</p>
-            </div>
-            <span class="font-bold">۲۰۰٬۰۰۰ تومان</span>
-          </div>
-        </div>
-        <div class="service-option border border-gray-300 rounded-lg p-3 hover:border-blue-500 cursor-pointer bw-tap" data-service="شستشوی حرفه‌ای" data-price="80000">
-          <div class="flex justify-between items-center">
-            <div>
-              <h5 class="font-bold">شستشوی حرفه‌ای</h5>
-              <p class="text-sm text-gray-600">شستشوی حرفه‌ای مو</p>
-            </div>
-            <span class="font-bold">۸۰٬۰۰۰ تومان</span>
-          </div>
-        </div>
+        <div id="booking-services" class="space-y-3"></div>
       </div>
       <button id="next-to-step-2" class="mt-6 bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-full w-full transition-all disabled:bg-gray-400" disabled>
         ادامه
@@ -3585,9 +3558,9 @@ document.addEventListener('DOMContentLoaded', function () {
   const step4Indicator  = document.getElementById('step-4-indicator');
 
   // گزینه‌ها و دکمه‌ها
-  const serviceOptions  = document.querySelectorAll('.service-option');
-  const dateOptions     = document.querySelectorAll('.date-option');
-  const timeOptions     = document.querySelectorAll('.time-option');
+  let serviceOptions  = [];
+  const dateOptions   = document.querySelectorAll('.date-option');
+  const timeOptions   = document.querySelectorAll('.time-option');
 
   const nextToStep2     = document.getElementById('next-to-step-2');
   const nextToStep3     = document.getElementById('next-to-step-3');
@@ -3617,6 +3590,52 @@ document.addEventListener('DOMContentLoaded', function () {
   let selectedPrice   = '';
   let selectedDate    = '';
   let selectedTime    = '';
+
+  const priceFa = n => (Number(n)||0).toLocaleString('fa-IR');
+
+  function bindServiceOptions() {
+    serviceOptions = Array.from(document.querySelectorAll('#step-1 .service-option'));
+    serviceOptions.forEach(option => {
+      option.addEventListener('click', function () {
+        serviceOptions.forEach(opt => opt.classList.remove('border-blue-500', 'bg-blue-50'));
+        this.classList.add('border-blue-500', 'bg-blue-50');
+        selectedService = this.getAttribute('data-service') || '';
+        selectedPrice   = this.getAttribute('data-price')   || '';
+        enable(nextToStep2, true);
+      });
+    });
+  }
+
+  function renderBookingServices(items) {
+    const container = document.getElementById('booking-services');
+    if (!container) return;
+    container.innerHTML = '';
+    const active = Array.isArray(items) ? items.filter(it => it.isActive) : [];
+    if (!active.length) {
+      container.innerHTML = '<div class="text-center text-gray-500">فعلاً سرویسی ثبت نشده است.</div>';
+      return;
+    }
+    active.forEach(it => {
+      const off  = Number(it.discountPercent ?? it.offPercent ?? it.discount ?? 0) || 0;
+      const base = Number(it.finalPrice ?? it.price ?? 0);
+      const finalPrice = off ? Math.max(0, Math.round((it.price || 0) * (100 - off) / 100)) : base;
+      container.insertAdjacentHTML('beforeend',
+        `<div class="service-option border border-gray-300 rounded-lg p-3 hover:border-blue-500 cursor-pointer bw-tap" data-service="${it.title || ''}" data-price="${finalPrice}">
+          <div class="flex justify-between items-center">
+            <div>
+              <h5 class="font-bold">${it.title || ''}</h5>
+              <p class="text-sm text-gray-600">${it.desc || ''}</p>
+            </div>
+            <span class="font-bold">${priceFa(finalPrice)} تومان</span>
+          </div>
+        </div>`);
+    });
+    bindServiceOptions();
+  }
+
+  document.addEventListener('services:loaded', e => {
+    renderBookingServices(e.detail || []);
+  });
 
   // ---- توابع کمکی
   function scrollToWizard() {
@@ -3654,19 +3673,7 @@ document.addEventListener('DOMContentLoaded', function () {
   });
 
   // ---- مرحله ۱: انتخاب سرویس
-  serviceOptions.forEach(option => {
-    option.addEventListener('click', function () {
-      // پاک‌کردن انتخاب قبلی
-      serviceOptions.forEach(opt => opt.classList.remove('border-blue-500', 'bg-blue-50'));
-      // انتخاب فعلی
-      this.classList.add('border-blue-500', 'bg-blue-50');
-      // ذخیره
-      selectedService = this.getAttribute('data-service') || '';
-      selectedPrice   = this.getAttribute('data-price')   || '';
-      // فعال‌سازی دکمه بعدی
-      enable(nextToStep2, true);
-    });
-  });
+  // رویداد کلیک پس از بارگذاری خدمات توسط bindServiceOptions متصل می‌شود
 
   nextToStep2?.addEventListener('click', function () {
     step1.classList.add('hidden');
@@ -4573,6 +4580,7 @@ function cardTemplate(item) {
         LAST_PUBLIC = data; // { items, sellerId }
         updateSellerProfile(seller);
         renderList();
+        document.dispatchEvent(new CustomEvent('services:loaded', { detail: data.items || [] }));
       } catch (err) {
         console.error('Load public services failed', err);
         show404();
