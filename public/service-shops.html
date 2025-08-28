@@ -2458,15 +2458,9 @@ if (document.readyState === 'loading') {
         <div>
             <h3 class="text-xl font-bold mb-1">نظرات کاربران</h3>
             <div class="flex items-center gap-2">
-                <div class="flex items-center">
-                    <i class="fas fa-star text-yellow-400 text-sm"></i>
-                    <i class="fas fa-star text-yellow-400 text-sm"></i>
-                    <i class="fas fa-star text-yellow-400 text-sm"></i>
-                    <i class="fas fa-star text-yellow-400 text-sm"></i>
-                    <i class="fas fa-star-half-alt text-yellow-400 text-sm"></i>
-                </div>
-                <span class="text-sm font-bold text-gray-700">4.8</span>
-                <span class="text-sm text-gray-500">(128 نظر)</span>
+                <div id="review-stars" class="flex items-center"></div>
+                <span id="review-average" class="text-sm font-bold text-gray-700">۰</span>
+                <span id="review-count" class="text-sm text-gray-500">(۰ نظر)</span>
 
 
                 <button id="rate-now-chip" type="button"
@@ -2503,46 +2497,7 @@ if (document.readyState === 'loading') {
     </div>
     
     <!-- Reviews Carousel -->
-    <div class="scroll-container flex overflow-x-auto pb-4 space-x-4 space-x-reverse scrollbar-hide">
-        <!-- Review Card 1 -->
     <div id="reviews-container" class="scroll-container flex overflow-x-auto pb-4 space-x-4 space-x-reverse scrollbar-hide"></div>
-        
-        <!-- Review Card 2 -->
-        <div class="review-card flex-shrink-0 w-80 bg-white rounded-2xl shadow-sm hover:shadow-md transition-shadow border border-gray-100 p-5">
-            <div class="flex items-start justify-between mb-3">
-                <div>
-                    <h4 class="font-bold text-gray-900 mb-1">محمد حسینی</h4>
-                    <div class="flex items-center gap-1">
-                        <i class="fas fa-star text-yellow-400 text-xs"></i>
-                        <i class="fas fa-star text-yellow-400 text-xs"></i>
-                        <i class="fas fa-star text-yellow-400 text-xs"></i>
-                        <i class="fas fa-star text-yellow-400 text-xs"></i>
-                        <i class="far fa-star text-gray-300 text-xs"></i>
-                    </div>
-                </div>
-                <span class="text-xs text-gray-400 bg-gray-50 px-2 py-1 rounded-full">۱ هفته پیش</span>
-            </div>
-            <p class="text-sm text-gray-700 leading-6">کیفیت خدمات عالی بود و قیمت‌ها هم منصفانه. فقط کمی شلوغ بود و مجبور شدم منتظر بمانم.</p>
-        </div>
-        
-        <!-- Review Card 3 -->
-        <div class="review-card flex-shrink-0 w-80 bg-white rounded-2xl shadow-sm hover:shadow-md transition-shadow border border-gray-100 p-5">
-            <div class="flex items-start justify-between mb-3">
-                <div>
-                    <h4 class="font-bold text-gray-900 mb-1">رضا اکبری</h4>
-                    <div class="flex items-center gap-1">
-                        <i class="fas fa-star text-yellow-400 text-xs"></i>
-                        <i class="fas fa-star text-yellow-400 text-xs"></i>
-                        <i class="fas fa-star text-yellow-400 text-xs"></i>
-                        <i class="fas fa-star text-yellow-400 text-xs"></i>
-                        <i class="fas fa-star text-yellow-400 text-xs"></i>
-                    </div>
-                </div>
-                <span class="text-xs text-gray-400 bg-gray-50 px-2 py-1 rounded-full">۲ هفته پیش</span>
-            </div>
-            <p class="text-sm text-gray-700 leading-6">بهترین آرایشگاهی که تا حالا رفتم! آقای احمدی واقعاً حرفه‌ای هستند و دقیقاً می‌دونن چه مدلی به صورتم میاد.</p>
-        </div>
-    </div>
 </section>
 
 <!-- Reviews Modal -->
@@ -2566,12 +2521,10 @@ if (document.readyState === 'loading') {
                     <div>
                         <h3 class="text-xl font-bold text-gray-900 mb-2">نظرات کاربران</h3>
                         <div class="flex items-center gap-3">
-                            <div class="flex items-center gap-1">
-                                <i class="fas fa-star text-yellow-400"></i>
-                                <span class="font-bold text-gray-800">4.8</span>
-                            </div>
-                            <span class="text-sm text-gray-500">بر اساس 128 نظر</span>
-                            
+                            <div id="modal-stars" class="flex items-center gap-1"></div>
+                            <span id="modal-average" class="font-bold text-gray-800">۰</span>
+                            <span id="modal-count" class="text-sm text-gray-500">بر اساس ۰ نظر</span>
+
                             <!-- Filter Chips -->
                             <div class="hidden sm:flex items-center gap-2 mr-4">
                                 <button class="review-filter-chip active" data-filter="all">همه</button>
@@ -2603,54 +2556,48 @@ if (document.readyState === 'loading') {
                 <div class="bg-gradient-to-br from-blue-50 to-cyan-50 rounded-2xl p-5 mb-6">
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div class="text-center sm:text-right">
-                            <div class="text-4xl font-bold text-gray-900 mb-1">4.8</div>
-                            <div class="flex items-center justify-center sm:justify-start gap-1 mb-2">
-                                <i class="fas fa-star text-yellow-400"></i>
-                                <i class="fas fa-star text-yellow-400"></i>
-                                <i class="fas fa-star text-yellow-400"></i>
-                                <i class="fas fa-star text-yellow-400"></i>
-                                <i class="fas fa-star-half-alt text-yellow-400"></i>
-                            </div>
-                            <div class="text-sm text-gray-600">128 نظر ثبت شده</div>
+                            <div id="summary-average" class="text-4xl font-bold text-gray-900 mb-1">۰</div>
+                            <div id="summary-stars" class="flex items-center justify-center sm:justify-start gap-1 mb-2"></div>
+                            <div id="summary-count" class="text-sm text-gray-600">۰ نظر ثبت شده</div>
                         </div>
-                        
-                        <div class="space-y-2">
-                            <div class="flex items-center gap-2">
-                                <span class="text-xs text-gray-600 w-12">5 ستاره</span>
-                                <div class="flex-1 h-2 bg-gray-200 rounded-full overflow-hidden">
-                                    <div class="h-full bg-yellow-400 rounded-full" style="width: 75%"></div>
-                                </div>
-                                <span class="text-xs text-gray-600 w-8">96</span>
-                            </div>
-                            <div class="flex items-center gap-2">
-                                <span class="text-xs text-gray-600 w-12">4 ستاره</span>
-                                <div class="flex-1 h-2 bg-gray-200 rounded-full overflow-hidden">
-                                    <div class="h-full bg-yellow-400 rounded-full" style="width: 15%"></div>
-                                </div>
-                                <span class="text-xs text-gray-600 w-8">19</span>
-                            </div>
-                            <div class="flex items-center gap-2">
-                                <span class="text-xs text-gray-600 w-12">3 ستاره</span>
-                                <div class="flex-1 h-2 bg-gray-200 rounded-full overflow-hidden">
-                                    <div class="h-full bg-yellow-400 rounded-full" style="width: 7%"></div>
-                                </div>
-                                <span class="text-xs text-gray-600 w-8">9</span>
-                            </div>
-                            <div class="flex items-center gap-2">
-                                <span class="text-xs text-gray-600 w-12">2 ستاره</span>
-                                <div class="flex-1 h-2 bg-gray-200 rounded-full overflow-hidden">
-                                    <div class="h-full bg-yellow-400 rounded-full" style="width: 2%"></div>
-                                </div>
-                                <span class="text-xs text-gray-600 w-8">3</span>
-                            </div>
-                            <div class="flex items-center gap-2">
-                                <span class="text-xs text-gray-600 w-12">1 ستاره</span>
-                                <div class="flex-1 h-2 bg-gray-200 rounded-full overflow-hidden">
-                                    <div class="h-full bg-yellow-400 rounded-full" style="width: 1%"></div>
-                                </div>
-                                <span class="text-xs text-gray-600 w-8">1</span>
-                            </div>
-                        </div>
+
+        <div class="space-y-2">
+          <div class="flex items-center gap-2">
+            <span class="text-xs text-gray-600 w-12">5 ستاره</span>
+            <div class="flex-1 h-2 bg-gray-200 rounded-full overflow-hidden">
+              <div id="bar-5" class="h-full bg-yellow-400 rounded-full" style="width: 0%"></div>
+            </div>
+            <span id="count-5" class="text-xs text-gray-600 w-8">0</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="text-xs text-gray-600 w-12">4 ستاره</span>
+            <div class="flex-1 h-2 bg-gray-200 rounded-full overflow-hidden">
+              <div id="bar-4" class="h-full bg-yellow-400 rounded-full" style="width: 0%"></div>
+            </div>
+            <span id="count-4" class="text-xs text-gray-600 w-8">0</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="text-xs text-gray-600 w-12">3 ستاره</span>
+            <div class="flex-1 h-2 bg-gray-200 rounded-full overflow-hidden">
+              <div id="bar-3" class="h-full bg-yellow-400 rounded-full" style="width: 0%"></div>
+            </div>
+            <span id="count-3" class="text-xs text-gray-600 w-8">0</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="text-xs text-gray-600 w-12">2 ستاره</span>
+            <div class="flex-1 h-2 bg-gray-200 rounded-full overflow-hidden">
+              <div id="bar-2" class="h-full bg-yellow-400 rounded-full" style="width: 0%"></div>
+            </div>
+            <span id="count-2" class="text-xs text-gray-600 w-8">0</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="text-xs text-gray-600 w-12">1 ستاره</span>
+            <div class="flex-1 h-2 bg-gray-200 rounded-full overflow-hidden">
+              <div id="bar-1" class="h-full bg-yellow-400 rounded-full" style="width: 0%"></div>
+            </div>
+            <span id="count-1" class="text-xs text-gray-600 w-8">0</span>
+          </div>
+        </div>
                     </div>
                 </div>
 
@@ -2663,95 +2610,8 @@ if (document.readyState === 'loading') {
                 </div>
                 
                 <!-- Reviews List -->
-                <div class="space-y-4" id="reviews-list">
-                    <!-- Review Item 1 -->
-                    <div class="review-item bg-white border border-gray-100 rounded-2xl p-5 hover:shadow-md transition-shadow" data-rating="5">
-                        <div class="flex items-start justify-between mb-3">
-                            <div>
-                                <h4 class="font-bold text-gray-900 mb-1">علی رضایی</h4>
-                                <div class="flex items-center gap-2">
-                                    <div class="flex items-center gap-1">
-                                        <i class="fas fa-star text-yellow-400 text-xs"></i>
-                                        <i class="fas fa-star text-yellow-400 text-xs"></i>
-                                        <i class="fas fa-star text-yellow-400 text-xs"></i>
-                                        <i class="fas fa-star text-yellow-400 text-xs"></i>
-                                        <i class="fas fa-star text-yellow-400 text-xs"></i>
-                                    </div>
-                                    <span class="text-xs text-gray-400">•</span>
-                                    <span class="text-xs text-gray-500">۲ روز پیش</span>
-                                </div>
-                            </div>
-                            <span class="px-3 py-1 bg-green-50 text-green-700 text-xs font-bold rounded-full">
-                                <i class="fas fa-check-circle ml-1"></i>
-                                خرید تایید شده
-                            </span>
-                        </div>
-                        <div class="review-text-container">
-                            <p class="text-sm text-gray-700 leading-7 review-text">
-                                تجربه‌ای عالی از آرایشگاه مردانه سلطنتی داشتم. پرسنل بسیار حرفه‌ای و محیط تمیز و شیک بود. حتماً دوباره مراجعه خواهم کرد.
-                            </p>
-                        </div>
-                    </div>
-                    
-                    <!-- Review Item 2 (Long Review) -->
-                    <div class="review-item bg-white border border-gray-100 rounded-2xl p-5 hover:shadow-md transition-shadow" data-rating="4">
-                        <div class="flex items-start justify-between mb-3">
-                            <div>
-                                <h4 class="font-bold text-gray-900 mb-1">محمد حسینی</h4>
-                                <div class="flex items-center gap-2">
-                                    <div class="flex items-center gap-1">
-                                        <i class="fas fa-star text-yellow-400 text-xs"></i>
-                                        <i class="fas fa-star text-yellow-400 text-xs"></i>
-                                        <i class="fas fa-star text-yellow-400 text-xs"></i>
-                                        <i class="fas fa-star text-yellow-400 text-xs"></i>
-                                        <i class="far fa-star text-gray-300 text-xs"></i>
-                                    </div>
-                                    <span class="text-xs text-gray-400">•</span>
-                                    <span class="text-xs text-gray-500">۱ هفته پیش</span>
-                                </div>
-                            </div>
-                            <span class="px-3 py-1 bg-green-50 text-green-700 text-xs font-bold rounded-full">
-                                <i class="fas fa-check-circle ml-1"></i>
-                                خرید تایید شده
-                            </span>
-                        </div>
-                        <div class="review-text-container">
-                            <p class="text-sm text-gray-700 leading-7 review-text line-clamp-3" data-full-text="کیفیت خدمات عالی بود و قیمت‌ها هم منصفانه. فقط کمی شلوغ بود و مجبور شدم منتظر بمانم. بهتر است از قبل نوبت بگیرید. محیط آرایشگاه بسیار تمیز و مرتب بود و از لوازم با کیفیتی استفاده می‌کردند. پرسنل بسیار مودب و حرفه‌ای برخورد کردند و به خواسته‌های من توجه کاملی داشتند. در کل تجربه خوبی بود و پیشنهاد می‌کنم حتماً امتحان کنید.">
-                                کیفیت خدمات عالی بود و قیمت‌ها هم منصفانه. فقط کمی شلوغ بود و مجبور شدم منتظر بمانم. بهتر است از قبل نوبت بگیرید. محیط آرایشگاه بسیار تمیز و مرتب بود و از لوازم با کیفیتی استفاده می‌کردند...
-                            </p>
-                            <button class="text-blue-600 text-sm font-bold mt-2 hover:text-blue-700 read-more-btn">
-                                مشاهده بیشتر
-                                <i class="fas fa-chevron-down mr-1 text-xs"></i>
-                            </button>
-                        </div>
-                    </div>
-                    
-                    <!-- More review items... -->
-                    <div class="review-item bg-white border border-gray-100 rounded-2xl p-5 hover:shadow-md transition-shadow" data-rating="5">
-                        <div class="flex items-start justify-between mb-3">
-                            <div>
-                                <h4 class="font-bold text-gray-900 mb-1">رضا اکبری</h4>
-                                <div class="flex items-center gap-2">
-                                    <div class="flex items-center gap-1">
-                                        <i class="fas fa-star text-yellow-400 text-xs"></i>
-                                        <i class="fas fa-star text-yellow-400 text-xs"></i>
-                                        <i class="fas fa-star text-yellow-400 text-xs"></i>
-                                        <i class="fas fa-star text-yellow-400 text-xs"></i>
-                                        <i class="fas fa-star text-yellow-400 text-xs"></i>
-                                    </div>
-                                    <span class="text-xs text-gray-400">•</span>
-                                    <span class="text-xs text-gray-500">۲ هفته پیش</span>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="review-text-container">
-                            <p class="text-sm text-gray-700 leading-7 review-text">
-                                بهترین آرایشگاهی که تا حالا رفتم! آقای احمدی واقعاً حرفه‌ای هستند و دقیقاً می‌دونن چه مدلی به صورتم میاد. پیشنهاد میکنم.
-                            </p>
-                        </div>
-                    </div>
-                </div>
-                
+                <div class="space-y-4" id="reviews-list"></div>
+
                 <!-- Load More Button -->
                 <div class="text-center mt-6">
                     <button class="px-6 py-3 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold rounded-full transition-colors">
@@ -3019,6 +2879,11 @@ if (rateNowChip) rateNowChip.addEventListener('click', () => writeReviewBtn.clic
     const charCounter = document.getElementById('char-counter');
     const submitBtn = document.getElementById('submit-review');
     const storeId = document.body.dataset.storeId || 'default';
+    const shopurl = new URL(location.href).searchParams.get('shopurl') || '';
+    let sellerId = null;
+    const toFa = s => String(s).replace(/\d/g, d => '۰۱۲۳۴۵۶۷۸۹'[d]);
+    function getToken() { return localStorage.getItem('access_token') || localStorage.getItem('token') || localStorage.getItem('jwt') || null; }
+    const authHeaders = () => { const t = getToken(); return t ? { 'Authorization': 'Bearer ' + t } : {}; };
     const userId = window.__APP_USER__?.id;
     const isAdmin = window.__APP_USER__?.isAdmin || window.__APP_USER__?.role === 'admin';
     const reviewKey = userId ? `review:last:${storeId}:${userId}` : `review:last:${storeId}`;
@@ -3040,8 +2905,120 @@ if (rateNowChip) rateNowChip.addEventListener('click', () => writeReviewBtn.clic
             showToastDark('You can submit one review per day.', {type: 'info'});
         }
     }
-    
+
+    async function loadReviews() {
+        if (!shopurl) return;
+        try {
+            const res = await fetch(`/api/shopAppearance/url/${encodeURIComponent(shopurl)}`);
+            if (!res.ok) throw new Error('load failed');
+            const data = await res.json();
+            sellerId = data.sellerId;
+            const ratings = data.ratings || [];
+            updateSummary(data.averageRating || 0, data.ratingCount || ratings.length, ratings);
+            renderReviews(ratings);
+        } catch (err) {
+            console.error('load reviews failed', err);
+        }
+    }
+
+    function starHtml(score, size = 'text-xs') {
+        let html = '';
+        for (let i = 1; i <= 5; i++) {
+            if (score >= i) html += `<i class="fas fa-star text-yellow-400 ${size}"></i>`;
+            else if (score >= i - 0.5) html += `<i class="fas fa-star-half-alt text-yellow-400 ${size}"></i>`;
+            else html += `<i class="far fa-star text-gray-300 ${size}"></i>`;
+        }
+        return html;
+    }
+
+    function setStars(el, score, size = 'text-sm') {
+        if (!el) return;
+        el.innerHTML = starHtml(score, size);
+    }
+
+    function renderReviews(list) {
+        const container = document.getElementById('reviews-container');
+        const modalList = document.getElementById('reviews-list');
+        container.innerHTML = '';
+        modalList.innerHTML = '';
+        if (!list.length) {
+            container.innerHTML = '<div class="w-full text-center text-gray-500 py-8">هنوز نظری ثبت نشده است.</div>';
+            modalList.innerHTML = '<div class="w-full text-center text-gray-500 py-4">هنوز نظری ثبت نشده است.</div>';
+            return;
+        }
+        list.forEach(r => {
+            const name = r.userName || 'کاربر';
+            const date = new Date(r.createdAt).toLocaleDateString('fa-IR');
+            const stars = starHtml(r.score);
+            container.insertAdjacentHTML('beforeend',
+                `<div class="review-card flex-shrink-0 w-80 bg-white rounded-2xl shadow-sm hover:shadow-md transition-shadow border border-gray-100 p-5">
+                    <div class="flex items-start justify-between mb-3">
+                        <div>
+                            <h4 class="font-bold text-gray-900 mb-1">${name}</h4>
+                            <div class="flex items-center gap-1">${stars}</div>
+                        </div>
+                        <span class="text-xs text-gray-400 bg-gray-50 px-2 py-1 rounded-full">${date}</span>
+                    </div>
+                    <p class="text-sm text-gray-700 leading-6">${r.comment || ''}</p>
+                </div>`
+            );
+            modalList.insertAdjacentHTML('beforeend',
+                `<div class="review-item bg-white border border-gray-100 rounded-2xl p-5 hover:shadow-md transition-shadow" data-rating="${r.score}">
+                    <div class="flex items-start justify-between mb-3">
+                        <div>
+                            <h4 class="font-bold text-gray-900 mb-1">${name}</h4>
+                            <div class="flex items-center gap-2">
+                                <div class="flex items-center gap-1">${stars}</div>
+                                <span class="text-xs text-gray-400">•</span>
+                                <span class="text-xs text-gray-500">${date}</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="review-text-container">
+                        <p class="text-sm text-gray-700 leading-7 review-text">${r.comment || ''}</p>
+                    </div>
+                </div>`
+            );
+        });
+    }
+
+    function updateSummary(avg, count, ratings) {
+        const summaryStars = document.getElementById('review-stars');
+        const summaryAvg = document.getElementById('review-average');
+        const summaryCount = document.getElementById('review-count');
+        setStars(summaryStars, avg);
+        if (summaryAvg) summaryAvg.textContent = toFa(avg.toFixed(1).replace('.', '٫'));
+        if (summaryCount) summaryCount.textContent = `(${toFa(count)} نظر)`;
+
+        const modalStars = document.getElementById('modal-stars');
+        const modalAvg = document.getElementById('modal-average');
+        const modalCount = document.getElementById('modal-count');
+        setStars(modalStars, avg);
+        if (modalAvg) modalAvg.textContent = toFa(avg.toFixed(1).replace('.', '٫'));
+        if (modalCount) modalCount.textContent = `بر اساس ${toFa(count)} نظر`;
+
+        const bigAvg = document.getElementById('summary-average');
+        const bigStars = document.getElementById('summary-stars');
+        const bigCount = document.getElementById('summary-count');
+        setStars(bigStars, avg);
+        if (bigAvg) bigAvg.textContent = toFa(avg.toFixed(1).replace('.', '٫'));
+        if (bigCount) bigCount.textContent = `${toFa(count)} نظر ثبت شده`;
+
+        const totals = [0,0,0,0,0];
+        ratings.forEach(r => { totals[r.score - 1]++; });
+        for (let s = 1; s <= 5; s++) {
+            const bar = document.getElementById(`bar-${s}`);
+            const span = document.getElementById(`count-${s}`);
+            const c = totals[s-1];
+            const pct = count ? (c / count) * 100 : 0;
+            if (bar) bar.style.width = `${pct}%`;
+            if (span) span.textContent = toFa(c);
+        }
+    }
+
     let selectedRating = 0;
+
+    loadReviews();
     
     // Open Reviews Modal
     showAllBtn.addEventListener('click', function() {
@@ -3156,22 +3133,13 @@ if (rateNowChip) rateNowChip.addEventListener('click', () => writeReviewBtn.clic
     
     // Filter Reviews
     const filterChips = document.querySelectorAll('.review-filter-chip');
-    const reviewItems = document.querySelectorAll('.review-item');
-    
     filterChips.forEach(chip => {
         chip.addEventListener('click', function() {
             filterChips.forEach(c => c.classList.remove('active'));
             this.classList.add('active');
-            
             const filter = this.dataset.filter;
-            
-            reviewItems.forEach(review => {
-                if (filter === 'all') {
-                    review.style.display = '';
-                } else {
-                    const rating = review.dataset.rating;
-                    review.style.display = rating === filter ? '' : 'none';
-                }
+            document.querySelectorAll('.review-item').forEach(review => {
+                review.style.display = (filter === 'all' || review.dataset.rating === filter) ? '' : 'none';
             });
         });
     });
@@ -3242,7 +3210,7 @@ if (rateNowChip) rateNowChip.addEventListener('click', () => writeReviewBtn.clic
     });
     
     // Form Submission
-    reviewForm.addEventListener('submit', function(e) {
+    reviewForm.addEventListener('submit', async function(e) {
         e.preventDefault();
 
         if (!canSubmitReview()) {
@@ -3250,7 +3218,6 @@ if (rateNowChip) rateNowChip.addEventListener('click', () => writeReviewBtn.clic
             return;
         }
 
-        // Validation
         if (selectedRating === 0) {
             alert('لطفاً امتیاز خود را انتخاب کنید');
             return;
@@ -3261,13 +3228,21 @@ if (rateNowChip) rateNowChip.addEventListener('click', () => writeReviewBtn.clic
             return;
         }
 
-        // Close form modal
         closeReviewFormModal();
-
-        setTimeout(() => {
+        try {
+            const res = await fetch(`/api/shopAppearance/${sellerId}/rate`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', ...authHeaders() },
+                body: JSON.stringify({ rating: selectedRating, comment: reviewTextarea.value })
+            });
+            if (!res.ok) throw new Error('failed');
             showToastDark('نظر شما با موفقیت ثبت شد', {type: 'success'});
-        }, 300);
-        markReviewSubmitted();
+            markReviewSubmitted();
+            loadReviews();
+        } catch (err) {
+            console.error('submit review failed', err);
+            showToastDark('خطا در ثبت نظر', {type: 'error'});
+        }
     });
 });
 </script>
