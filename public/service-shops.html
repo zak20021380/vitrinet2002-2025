@@ -4204,17 +4204,23 @@ document.addEventListener('DOMContentLoaded', function () {
       if(typeof window.showToastDark === 'function') showToastDark('برای لایک ابتدا وارد شوید', {type:'info'});
       return;
     }
+    const prev = likeCache.get(id) || { liked:false, count:0 };
+    const optimistic = { liked: !prev.liked, count: prev.count + (prev.liked ? -1 : 1) };
+    likeCache.set(id, optimistic);
+    updateUI(id);
     try{
-      const res = await fetch(`${API_BASE}/api/seller-portfolio/${id}/like`, {
+      const res = await fetch(`${API_BASE}/api/portfolio/${id}/like`, {
         method:'POST',
         credentials:'include'
       });
       const data = await res.json();
       if(res.ok){
-        likeCache.set(id, { liked: data.liked, count: data.likes });
-        updateUI(id);
+        likeCache.set(id, { liked: data.liked, count: data.likeCount });
+      } else {
+        likeCache.set(id, prev);
       }
-    }catch(_){ }
+    }catch(_){ likeCache.set(id, prev); }
+    updateUI(id);
   }
 
   function bind(card){
@@ -4625,11 +4631,11 @@ function cardTemplate(item) {
   // Candidate endpoints to be compatible with new backend & s-seller-panel.js
   // The first "ok & non-empty" wins. You can prune once your final route is fixed.
   const CANDIDATES = [
+    `${API_BASE}/api/portfolio/public/${encodeURIComponent(SLUG)}`,
+    `${API_BASE}/api/portfolio?shopurl=${encodeURIComponent(SLUG)}`,
     `${API_BASE}/api/service-portfolio/public/${encodeURIComponent(SLUG)}`,
     `${API_BASE}/api/seller-portfolio/public/${encodeURIComponent(SLUG)}`,
     `${API_BASE}/api/portfolios/public/${encodeURIComponent(SLUG)}`,
-    `${API_BASE}/api/portfolio/public/${encodeURIComponent(SLUG)}`,
-    `${API_BASE}/api/portfolio?shopurl=${encodeURIComponent(SLUG)}`,
   ];
 
   // Normalize backend item to UI model
@@ -4641,8 +4647,8 @@ function cardTemplate(item) {
       desc:    item.description || item.desc || '',
       image:   img,
       views:   item.views ?? item.viewCount ?? 0,
-      likes:   item.likes ?? item.likeCount ?? 0,
-      liked:   item.liked ?? false,
+      likes:   item.likeCount ?? item.likes ?? 0,
+      liked:   !!item.liked,
       created: item.createdAt || item.updatedAt || null
     };
   }
