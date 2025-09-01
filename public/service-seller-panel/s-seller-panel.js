@@ -743,7 +743,10 @@ setupEventListeners() {
     portfolioImageBtn: document.getElementById('portfolio-image-btn'),
     portfolioImageInput: document.getElementById('portfolio-image'),
     vipSettingsBtn: document.getElementById('vip-settings-btn'),
-    vipForm: document.getElementById('vip-form')
+    vipForm: document.getElementById('vip-form'),
+    vipToggleBtn: document.getElementById('vip-toggle-btn'),
+    vipToggleConfirm: document.getElementById('vip-toggle-confirm'),
+    vipToggleMessage: document.getElementById('vip-toggle-message')
   };
 
   // Map for drawer/modal management
@@ -925,6 +928,19 @@ if (elements.viewStoreBtn) {
     {
       element: elements.vipSettingsBtn,
       handler: () => UIComponents.openModal('vip-modal')
+    },
+    {
+      element: elements.vipToggleBtn,
+      handler: () => {
+        const disabled = localStorage.getItem('vit_vip_rewards_disabled') === '1';
+        if (elements.vipToggleMessage && elements.vipToggleConfirm) {
+          elements.vipToggleMessage.textContent = disabled ? 'آیا می‌خواهید بخش جایزه دادن را فعال کنید؟' : 'آیا از غیر فعال کردن بخش جایزه دادن مطمئن هستید؟';
+          elements.vipToggleConfirm.textContent = disabled ? 'فعال کردن' : 'غیرفعال کردن';
+          elements.vipToggleConfirm.classList.toggle('btn-danger', !disabled);
+          elements.vipToggleConfirm.classList.toggle('btn-success', disabled);
+        }
+        UIComponents.openModal('vip-toggle-modal');
+      }
     }
   ];
 
@@ -933,6 +949,31 @@ if (elements.viewStoreBtn) {
       element.addEventListener('click', handler);
     }
   });
+
+  function updateVipToggleBtn() {
+    if (!elements.vipToggleBtn) return;
+    const disabled = localStorage.getItem('vit_vip_rewards_disabled') === '1';
+    elements.vipToggleBtn.textContent = disabled ? 'فعال‌سازی جایزه' : 'غیرفعال کردن جایزه';
+    elements.vipToggleBtn.classList.toggle('btn-danger', !disabled);
+    elements.vipToggleBtn.classList.toggle('btn-success', disabled);
+  }
+
+  updateVipToggleBtn();
+
+  if (elements.vipToggleConfirm) {
+    elements.vipToggleConfirm.addEventListener('click', () => {
+      const disabled = localStorage.getItem('vit_vip_rewards_disabled') === '1';
+      if (disabled) {
+        localStorage.removeItem('vit_vip_rewards_disabled');
+        UIComponents.showToast('باشگاه مشتریان ویژه فعال شد.', 'success');
+      } else {
+        localStorage.setItem('vit_vip_rewards_disabled', '1');
+        UIComponents.showToast('باشگاه مشتریان ویژه غیرفعال شد.', 'info');
+      }
+      updateVipToggleBtn();
+      UIComponents.closeModal('vip-toggle-modal');
+    });
+  }
 
   // 8. Optimized Escape key handler - only closes active overlay
   document.addEventListener('keydown', (e) => {
