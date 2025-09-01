@@ -4158,159 +4158,101 @@ document.addEventListener('DOMContentLoaded', function () {
 
 
 <script>
-/* ===== Portfolio Likes (guest-friendly) ===== */
+/* ===== Portfolio Likes (server-based) ===== */
 (function(){
   'use strict';
-  const REQUIRE_LOGIN_FOR_LIKE = false; // اگر خواستی لاگین را اجباری کنی، اینو true کن
-  const isLoggedIn = () => { try { return !!JSON.parse(localStorage.getItem('auth_user')||'null'); } catch(e){ return false } };
-  const keyCnt = id => `vt:pf:likes:${id}`;
-  const keyMe  = id => `vt:pf:liked:${id}`;
+  const API_BASE = (window.API_BASE || '').replace(/\/+$/, '');
+  const isLoggedIn = () => { try { return !!JSON.parse(localStorage.getItem('auth_user')||'null'); } catch(_) { return false; } };
+  const toFa = n => String(n ?? 0).replace(/\d/g, d => '۰۱۲۳۴۵۶۷۸۹'[d]);
 
-  // تبدیل هر نوع رقم فارسی/عربی به لاتین
-  const toEnDigits = s => (s||'')
-    .replace(/[۰-۹]/g, d => '0123456789'['۰۱۲۳۴۵۶۷۸۹'.indexOf(d)])
-    .replace(/[٠-٩]/g, d => '0123456789'['٠١٢٣٤٥٦٧٨٩'.indexOf(d)]);
-  // نمایش به زبان انگلیسی/لاتین با جداکننده هزارگان
-  const fmtEn = n => Number(n).toLocaleString('en-US');
+  const likeCache = new Map(); // id -> {liked, count}
 
-  function getId(card){
-    if(card.dataset.itemId) return card.dataset.itemId;
-    const seed = card.querySelector('img[src*="/seed/"]')?.src.match(/seed\/([^/]+)/)?.[1];
-    const fallback = card.querySelector('.portfolio-name')?.textContent?.trim();
-    const id = seed || fallback || ('item-' + Math.random().toString(36).slice(2,8));
-    card.dataset.itemId = id;
-    return id;
-  }
-
-  function setA11y(el, liked){
-    el.setAttribute('role','button');
-    el.setAttribute('tabindex','0');
-    el.setAttribute('aria-pressed', liked ? 'true' : 'false');
-    el.title = liked ? 'لغو لایک' : 'پسندیدن';
-  }
-
-  function updateUIFor(id, liked, count){
+  function updateUI(id){
+    const state = likeCache.get(id) || { liked:false, count:0 };
     document.querySelectorAll(`.portfolio-card[data-item-id="${id}"]`).forEach(card=>{
       const wrap = card.querySelector('.fa-heart')?.parentElement;
       const icon = wrap?.querySelector('.fa-heart');
       const cnt  = wrap?.querySelector('span');
-      if(!wrap || !icon || !cnt) return;
-      icon.classList.toggle('far', !liked);
-      icon.classList.toggle('fas', liked);
-      wrap.classList.toggle('text-red-500', liked);
-      cnt.textContent = fmtEn(count);   // ← نمایش لاتین
-      setA11y(wrap, liked);
+      if(!wrap||!icon||!cnt) return;
+      icon.classList.toggle('far', !state.liked);
+      icon.classList.toggle('fas', state.liked);
+      wrap.classList.toggle('text-red-500', state.liked);
+      cnt.textContent = toFa(state.count);
+      wrap.setAttribute('role','button');
+      wrap.setAttribute('tabindex','0');
+      wrap.setAttribute('aria-pressed', state.liked ? 'true' : 'false');
+      wrap.title = state.liked ? 'لغو لایک' : 'پسندیدن';
     });
+
     if(window.__PF_ACTIVE_ID===id){
+      const mWrap  = document.querySelector('#imageModal .fa-heart')?.parentElement;
+      const mIcon  = mWrap?.querySelector('.fa-heart');
       const mLikes = document.getElementById('modalLikes');
-      if(mLikes) mLikes.textContent = fmtEn(count); // ← نمایش لاتین داخل مودال
+      if(mWrap && mIcon && mLikes){
+        mIcon.classList.toggle('far', !state.liked);
+        mIcon.classList.toggle('fas', state.liked);
+        mWrap.classList.toggle('text-red-500', state.liked);
+        mLikes.textContent = toFa(state.count);
+        mWrap.setAttribute('aria-pressed', state.liked ? 'true' : 'false');
+        mWrap.title = state.liked ? 'لغو لایک' : 'پسندیدن';
+      }
     }
   }
 
-  function toggle(id){
-    if (REQUIRE_LOGIN_FOR_LIKE && !isLoggedIn()) {
-      if (typeof window.showToastDark === 'function') showToastDark('برای لایک یک ورود کوتاه لازمه 🙂', {type:'info'});
+  async function toggle(id){
+    if(!isLoggedIn()){
+      if(typeof window.showToastDark === 'function') showToastDark('برای لایک ابتدا وارد شوید', {type:'info'});
       return;
     }
-    const liked = localStorage.getItem(keyMe(id))==='1';
-    let count = parseInt(localStorage.getItem(keyCnt(id))||'0',10);
-    count = liked ? Math.max(0, count-1) : count+1;
-    localStorage.setItem(keyCnt(id), String(count));
-    if(liked){ localStorage.removeItem(keyMe(id)); } else { localStorage.setItem(keyMe(id),'1'); }
-    updateUIFor(id, !liked, count);
-    document.dispatchEvent(new CustomEvent('portfolio:likeChanged', { detail:{ id, liked:!liked, count } }));
-  }
-
-  function bindCard(card){
-    if(card.dataset.likeBound) return;
-    card.dataset.likeBound = '1';
-    const id = getId(card);
-    const wrap = card.querySelector('.fa-heart')?.parentElement;
-    const icon = wrap?.querySelector('.fa-heart');
-    const cnt  = wrap?.querySelector('span');
-    if(!wrap || !icon || !cnt) return;
-
-    // bootstrap از مقدار موجود در DOM فقط بار اول
-    if(localStorage.getItem(keyCnt(id))==null){
-      const rawText = toEnDigits(cnt.textContent||'0'); // ← نرمال به لاتین
-      const raw = parseInt(rawText.replace(/[^\d]/g,''),10) || 0;
-      localStorage.setItem(keyCnt(id), String(raw));
-    }
-    const liked  = localStorage.getItem(keyMe(id))==='1';
-    const stored = parseInt(localStorage.getItem(keyCnt(id))||'0',10);
-    cnt.textContent = fmtEn(stored); // ← نمایش لاتین
-    icon.classList.toggle('far', !liked);
-    icon.classList.toggle('fas', liked);
-    wrap.classList.toggle('text-red-500', liked);
-    setA11y(wrap, liked);
-
-    // click + keyboard
-    wrap.addEventListener('click', (e)=>{ e.preventDefault(); toggle(id); });
-    wrap.addEventListener('keydown', (e)=>{ if(e.key==='Enter' || e.key===' '){ e.preventDefault(); toggle(id);} });
-
-    // double-tap روی عکس = لایک
-    const img = card.querySelector('img');
-    if(img){
-      let lastTap = 0;
-      img.addEventListener('click', ()=>{
-        const now = Date.now();
-        if(now - lastTap < 350){ if(localStorage.getItem(keyMe(id))!=='1') toggle(id); }
-        lastTap = now;
+    try{
+      const res = await fetch(`${API_BASE}/api/seller-portfolio/${id}/like`, {
+        method:'POST',
+        credentials:'include'
       });
+      const data = await res.json();
+      if(res.ok){
+        likeCache.set(id, { liked: data.liked, count: data.likes });
+        updateUI(id);
+      }
+    }catch(_){ }
+  }
+
+  function bind(card){
+    const id = card.dataset.itemId;
+    if(!id || card.dataset.likeBound) return;
+    card.dataset.likeBound = '1';
+    const wrap = card.querySelector('.fa-heart')?.parentElement;
+    if(!wrap) return;
+    wrap.addEventListener('click', e=>{ e.preventDefault(); toggle(id); });
+    wrap.addEventListener('keydown', e=>{ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); toggle(id); }});
+  }
+
+  function init(ev){
+    const items = ev?.detail?.items || [];
+    items.forEach(it => likeCache.set(it.id, { liked: !!it.liked, count: it.likes }));
+    document.querySelectorAll('.portfolio-card').forEach(card=>{
+      bind(card);
+      const id = card.dataset.itemId;
+      if(id && likeCache.has(id)) updateUI(id);
+    });
+    const mWrap = document.querySelector('#imageModal .fa-heart')?.parentElement;
+    if(mWrap && !mWrap.dataset.likeBound){
+      mWrap.dataset.likeBound = '1';
+      mWrap.style.cursor = 'pointer';
+      mWrap.addEventListener('click', e=>{ e.preventDefault(); if(window.__PF_ACTIVE_ID) toggle(window.__PF_ACTIVE_ID); });
+      mWrap.addEventListener('keydown', e=>{ if((e.key==='Enter'||e.key===' ') && window.__PF_ACTIVE_ID){ e.preventDefault(); toggle(window.__PF_ACTIVE_ID); }});
     }
   }
 
-  function init(){ document.querySelectorAll('.portfolio-card').forEach(bindCard); }
+  window.__PF_SET_ACTIVE_ID = function(id){
+    window.__PF_ACTIVE_ID = id;
+    if(id) updateUI(id);
+  };
+  window.__getPortfolioLikes = id => (likeCache.get(id)?.count ?? 0);
+
   if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', init); else init();
   document.addEventListener('portfolio:rendered', init);
-
-  // برای استفاده در مودال
-  window.__getPortfolioLikes = id => parseInt(localStorage.getItem(keyCnt(id))||'0',10);
 })();
-</script>
-
-<script>
-/* ===== Image viewer modal (sync with like) ===== */
-function openModal(imgUrl, title, itemId){
-  const modal = document.getElementById('imageModal');
-  const cardId = itemId || (imgUrl && (imgUrl.match(/seed\/([^/]+)/)?.[1])) || (title || '').trim();
-  window.__PF_ACTIVE_ID = cardId;
-
-  document.getElementById('modalTitle').textContent = title || '';
-  document.getElementById('modalImage').src = imgUrl || '';
-  const cur = typeof window.__getPortfolioLikes === 'function' ? window.__getPortfolioLikes(cardId) : null;
-  if(cur!=null){ document.getElementById('modalLikes').textContent = Number(cur).toLocaleString('en-US'); } // ← لاتین
-
-  // قلب داخل مودال کلیک‌پذیر
-  const likeWrap = document.querySelector('#imageModal .fa-heart')?.parentElement;
-  if(likeWrap){
-    likeWrap.style.cursor = 'pointer';
-    likeWrap.onclick = function(){
-      const card = Array.from(document.querySelectorAll('.portfolio-card'))
-        .find(c => (c.dataset.itemId===cardId) || (c.querySelector('img[src*="/seed/"]')?.src.includes(`/${cardId}/`)));
-      card?.querySelector('.fa-heart')?.parentElement?.click();
-    };
-  }
-
-  modal.classList.remove('hidden');
-  modal.classList.add('flex');
-  const card = modal.querySelector('.relative');
-  if(card){
-    card.classList.remove('scale-95','opacity-0');
-    card.classList.add('scale-100','opacity-100');
-  }
-}
-function closeModal(){
-  const modal = document.getElementById('imageModal');
-  const card = modal.querySelector('.relative');
-  if(card){
-    card.classList.add('scale-95','opacity-0');
-    card.classList.remove('scale-100','opacity-100');
-    setTimeout(()=>{ modal.classList.add('hidden'); modal.classList.remove('flex'); }, 160);
-  }else{
-    modal.classList.add('hidden'); modal.classList.remove('flex');
-  }
-}
 </script>
 
 
@@ -4700,6 +4642,7 @@ function cardTemplate(item) {
       image:   img,
       views:   item.views ?? item.viewCount ?? 0,
       likes:   item.likes ?? item.likeCount ?? 0,
+      liked:   item.liked ?? false,
       created: item.createdAt || item.updatedAt || null
     };
   }
@@ -4759,6 +4702,14 @@ function cardTemplate(item) {
     imgEl.alt = it.title || '';
     imgEl.dataset.src = it.image || '';
     imgEl.src = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw=='; // 1x1
+    node.dataset.itemId = it.id;
+    const hWrap = node.querySelector('.fa-heart')?.parentElement;
+    const hIcon = hWrap?.querySelector('.fa-heart');
+    if(hWrap && hIcon && it.liked){
+      hIcon.classList.remove('far');
+      hIcon.classList.add('fas');
+      hWrap.classList.add('text-red-500');
+    }
 
     btn.addEventListener('click', () => openImageModal(it));
 
@@ -4822,7 +4773,9 @@ function render(items) {
     imageEl.src = it.image || '';
     imageEl.alt = it.title || '';
     mViews.textContent = toFa(it.views ?? 0);
-    mLikes.textContent = toFa(it.likes ?? 0);
+    const curLikes = typeof window.__getPortfolioLikes === 'function' ? window.__getPortfolioLikes(it.id) : (it.likes ?? 0);
+    mLikes.textContent = toFa(curLikes);
+    window.__PF_SET_ACTIVE_ID?.(it.id);
     imageModal.classList.remove('hidden');
     imageModal.classList.add('flex');
     modalContent?.classList.remove('scale-95','opacity-0');
