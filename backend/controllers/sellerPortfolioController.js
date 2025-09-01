@@ -1,5 +1,7 @@
+const mongoose = require('mongoose');
 const Seller = require('../models/Seller');
 const SellerPortfolio = require('../models/seller-portfolio');
+const PortfolioLike = require('../models/portfolio-like');
 const jwt = require('jsonwebtoken');
 
 const JWT_SECRET = 'vitrinet_secret_key';
@@ -36,10 +38,18 @@ exports.getPortfolioByShopUrl = async (req, res) => {
       isActive: true
     }).sort({ order: 1, createdAt: -1 }).lean();
 
+    let likedSet = new Set();
+    if (userId && itemsRaw.length) {
+      const ids = itemsRaw.map(it => it._id);
+      const likes = await PortfolioLike.find({ portfolioId: { $in: ids }, userId })
+        .select('portfolioId').lean();
+      likedSet = new Set(likes.map(l => l.portfolioId.toString()));
+    }
+
     const items = itemsRaw.map(it => ({
       ...it,
-      likes: it.likes ? it.likes.length : 0,
-      liked: userId ? it.likes.some(u => u.toString() === String(userId)) : false
+      likeCount: it.likeCount || 0,
+      liked: likedSet.has(it._id.toString())
     }));
 
     return res.json({ items });
@@ -52,14 +62,9 @@ exports.getPortfolioByShopUrl = async (req, res) => {
 // Get my portfolio items
 exports.getMyPortfolio = async (req, res) => {
   try {
-    const itemsRaw = await SellerPortfolio.find({
+    const items = await SellerPortfolio.find({
       sellerId: req.user.id
     }).sort({ order: 1, createdAt: -1 }).lean();
-
-    const items = itemsRaw.map(it => ({
-      ...it,
-      likes: it.likes ? it.likes.length : 0
-    }));
 
     return res.json({ items });
   } catch (err) {
@@ -159,10 +164,18 @@ exports.getPortfolioByShopUrlQuery = async (req, res) => {
       isActive: true
     }).sort({ order: 1, createdAt: -1 }).lean();
 
+    let likedSet = new Set();
+    if (userId && itemsRaw.length) {
+      const ids = itemsRaw.map(it => it._id);
+      const likes = await PortfolioLike.find({ portfolioId: { $in: ids }, userId })
+        .select('portfolioId').lean();
+      likedSet = new Set(likes.map(l => l.portfolioId.toString()));
+    }
+
     const items = itemsRaw.map(it => ({
       ...it,
-      likes: it.likes ? it.likes.length : 0,
-      liked: userId ? it.likes.some(u => u.toString() === String(userId)) : false
+      likeCount: it.likeCount || 0,
+      liked: likedSet.has(it._id.toString())
     }));
 
     return res.json({ items });
@@ -176,23 +189,50 @@ exports.getPortfolioByShopUrlQuery = async (req, res) => {
 exports.toggleLike = async (req, res) => {
   try {
     const { id } = req.params;
-    const userId = req.user.id;
-    const item = await SellerPortfolio.findById(id);
-    if (!item || !item.isActive) {
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ message: 'شناسه نامعتبر است' });
+    }
+
+    const portfolio = await SellerPortfolio.findById(id).select('isActive');
+    if (!portfolio || !portfolio.isActive) {
       return res.status(404).json({ message: 'آیتم پیدا نشد' });
     }
 
-    const idx = item.likes.findIndex(u => u.toString() === String(userId));
-    let liked;
-    if (idx >= 0) {
-      item.likes.splice(idx, 1);
-      liked = false;
-    } else {
-      item.likes.push(userId);
-      liked = true;
+    const userId = req.user.id;
+    const session = await mongoose.startSession();
+    session.startTransaction();
+    try {
+      await PortfolioLike.create([{ portfolioId: id, userId }], { session });
+      const updated = await SellerPortfolio.findByIdAndUpdate(
+        id,
+        { $inc: { likeCount: 1 } },
+        { new: true, session, projection: { likeCount: 1 } }
+      );
+      await session.commitTransaction();
+      return res.json({ liked: true, likeCount: updated.likeCount });
+    } catch (err) {
+      if (err.code === 11000) {
+        try {
+          await PortfolioLike.deleteOne({ portfolioId: id, userId }, { session });
+          const updated = await SellerPortfolio.findByIdAndUpdate(
+            id,
+            { $inc: { likeCount: -1 } },
+            { new: true, session, projection: { likeCount: 1 } }
+          );
+          await session.commitTransaction();
+          return res.json({ liked: false, likeCount: updated.likeCount });
+        } catch (inner) {
+          await session.abortTransaction();
+          console.error('toggleLike error:', inner);
+          return res.status(500).json({ message: 'خطای سرور' });
+        }
+      }
+      await session.abortTransaction();
+      console.error('toggleLike error:', err);
+      return res.status(500).json({ message: 'خطای سرور' });
+    } finally {
+      session.endSession();
     }
-    await item.save();
-    return res.json({ liked, likes: item.likes.length });
   } catch (err) {
     console.error('toggleLike error:', err);
     return res.status(500).json({ message: 'خطای سرور' });
