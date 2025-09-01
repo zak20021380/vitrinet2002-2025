@@ -4222,6 +4222,8 @@ document.addEventListener('DOMContentLoaded', function () {
   }
 
   function bindCard(card){
+    if(card.dataset.likeBound) return;
+    card.dataset.likeBound = '1';
     const id = getId(card);
     const wrap = card.querySelector('.fa-heart')?.parentElement;
     const icon = wrap?.querySelector('.fa-heart');
@@ -4260,6 +4262,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
   function init(){ document.querySelectorAll('.portfolio-card').forEach(bindCard); }
   if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', init); else init();
+  document.addEventListener('portfolio:rendered', init);
 
   // برای استفاده در مودال
   window.__getPortfolioLikes = id => parseInt(localStorage.getItem(keyCnt(id))||'0',10);
@@ -4850,6 +4853,7 @@ function render(items) {
     loading?.classList.remove('hidden');
     const items = await loadPortfolio();
     render(items);
+    document.dispatchEvent(new CustomEvent('portfolio:rendered', { detail: { items } }));
     loading?.classList.add('hidden');
   });
 
@@ -4858,6 +4862,7 @@ function render(items) {
     try {
       const items = await loadPortfolio();
       render(items);
+      document.dispatchEvent(new CustomEvent('portfolio:rendered', { detail: { items } }));
     } finally {
       loading?.classList.add('hidden');
     }
