@@ -1,5 +1,24 @@
 const Seller = require('../models/Seller');
 const SellerPortfolio = require('../models/seller-portfolio');
+const jwt = require('jsonwebtoken');
+
+const JWT_SECRET = 'vitrinet_secret_key';
+
+function getUserId(req) {
+  try {
+    let token = null;
+    if (req.headers.authorization?.startsWith('Bearer ')) {
+      token = req.headers.authorization.split(' ')[1];
+    } else if (req.cookies) {
+      token = req.cookies.user_token || req.cookies.seller_token || req.cookies.admin_token || req.cookies.access_token;
+    }
+    if (!token) return null;
+    const payload = jwt.verify(token, JWT_SECRET);
+    return payload.id;
+  } catch (_) {
+    return null;
+  }
+}
 
 // Get portfolio items by shop URL (public)
 exports.getPortfolioByShopUrl = async (req, res) => {
@@ -11,10 +30,17 @@ exports.getPortfolioByShopUrl = async (req, res) => {
       return res.status(404).json({ message: 'فروشنده پیدا نشد.' });
     }
 
-    const items = await SellerPortfolio.find({ 
-      sellerId: seller._id, 
-      isActive: true 
-    }).sort({ order: 1, createdAt: -1 });
+    const userId = getUserId(req);
+    const itemsRaw = await SellerPortfolio.find({
+      sellerId: seller._id,
+      isActive: true
+    }).sort({ order: 1, createdAt: -1 }).lean();
+
+    const items = itemsRaw.map(it => ({
+      ...it,
+      likes: it.likes ? it.likes.length : 0,
+      liked: userId ? it.likes.some(u => u.toString() === String(userId)) : false
+    }));
 
     return res.json({ items });
   } catch (err) {
@@ -26,9 +52,14 @@ exports.getPortfolioByShopUrl = async (req, res) => {
 // Get my portfolio items
 exports.getMyPortfolio = async (req, res) => {
   try {
-    const items = await SellerPortfolio.find({ 
-      sellerId: req.user.id 
-    }).sort({ order: 1, createdAt: -1 });
+    const itemsRaw = await SellerPortfolio.find({
+      sellerId: req.user.id
+    }).sort({ order: 1, createdAt: -1 }).lean();
+
+    const items = itemsRaw.map(it => ({
+      ...it,
+      likes: it.likes ? it.likes.length : 0
+    }));
 
     return res.json({ items });
   } catch (err) {
@@ -121,15 +152,49 @@ exports.getPortfolioByShopUrlQuery = async (req, res) => {
     if (!seller) {
       return res.status(404).json({ message: 'فروشنده پیدا نشد.' });
     }
-    
-    const items = await SellerPortfolio.find({ 
-      sellerId: seller._id, 
-      isActive: true 
-    }).sort({ order: 1, createdAt: -1 });
-    
+
+    const userId = getUserId(req);
+    const itemsRaw = await SellerPortfolio.find({
+      sellerId: seller._id,
+      isActive: true
+    }).sort({ order: 1, createdAt: -1 }).lean();
+
+    const items = itemsRaw.map(it => ({
+      ...it,
+      likes: it.likes ? it.likes.length : 0,
+      liked: userId ? it.likes.some(u => u.toString() === String(userId)) : false
+    }));
+
     return res.json({ items });
   } catch (err) {
     console.error('getPortfolioByShopUrlQuery error:', err);
+    return res.status(500).json({ message: 'خطای سرور' });
+  }
+};
+
+// Toggle like/unlike portfolio item
+exports.toggleLike = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const userId = req.user.id;
+    const item = await SellerPortfolio.findById(id);
+    if (!item || !item.isActive) {
+      return res.status(404).json({ message: 'آیتم پیدا نشد' });
+    }
+
+    const idx = item.likes.findIndex(u => u.toString() === String(userId));
+    let liked;
+    if (idx >= 0) {
+      item.likes.splice(idx, 1);
+      liked = false;
+    } else {
+      item.likes.push(userId);
+      liked = true;
+    }
+    await item.save();
+    return res.json({ liked, likes: item.likes.length });
+  } catch (err) {
+    console.error('toggleLike error:', err);
     return res.status(500).json({ message: 'خطای سرور' });
   }
 };

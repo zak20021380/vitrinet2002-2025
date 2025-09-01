@@ -10,6 +10,9 @@ router.get('/portfolios/public/:shopurl', ctrl.getPortfolioByShopUrl);
 router.get('/portfolio/public/:shopurl', ctrl.getPortfolioByShopUrl);
 router.get('/portfolio', ctrl.getPortfolioByShopUrlQuery);
 
+// Like/unlike portfolio item
+router.post('/:id/like', auth(), ctrl.toggleLike);
+
 // Private routes (seller only)
 router.get('/me', auth('seller'), ctrl.getMyPortfolio);
 router.post('/', auth('seller'), ctrl.createPortfolioItem);
