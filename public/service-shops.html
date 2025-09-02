@@ -2845,7 +2845,28 @@ if (document.readyState === 'loading') {
 
 
 
+/* Map container with footer image */
+.footer-image-map {
+  position: relative;
+  min-height: 200px;
+}
 
+.footer-image-map::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to bottom, transparent, rgba(0,0,0,0.4));
+  pointer-events: none;
+}
+
+/* Fallback text styling when no image */
+#map-container:not(.footer-image-map) {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #6b7280;
+  font-size: 14px;
+}
 
 
 </style>
@@ -4484,8 +4505,22 @@ function updateSellerProfile(seller) {
     }
   }
 
-  if (seller.footerImage) {
-    document.documentElement.style.setProperty('--footer-image', `url("${seller.footerImage}")`);
+  // Handle footer image from seller data
+  if (seller.footerImage || seller.brandingImage || seller.coverImage) {
+    const imageUrl = seller.footerImage || seller.brandingImage || seller.coverImage;
+    document.documentElement.style.setProperty('--footer-image', `url("${imageUrl}")`);
+    
+    // Apply to map container immediately if available
+    const mapContainer = document.getElementById('map-container');
+    if (mapContainer && imageUrl) {
+      mapContainer.innerHTML = '';
+      mapContainer.style.backgroundImage = `linear-gradient(rgba(0,0,0,0.1), rgba(0,0,0,0.3)), url("${imageUrl}")`;
+      mapContainer.style.backgroundSize = 'cover';
+      mapContainer.style.backgroundPosition = 'center';
+      mapContainer.style.backgroundRepeat = 'no-repeat';
+      mapContainer.classList.add('footer-image-map');
+    }
+    
     const footerEl = document.getElementById('shop-footer-image');
     if (footerEl) footerEl.hidden = false;
   }
@@ -4493,6 +4528,110 @@ function updateSellerProfile(seller) {
   const heroCall = document.getElementById('hero-call');
   if (heroCall) heroCall.href = seller.phone ? `tel:${seller.phone}` : '#';
 }
+
+
+
+// Fetch footer image from branding API
+// Fetch footer image from branding API with better error handling
+async function loadFooterImage(sellerId) {
+  if (!sellerId) {
+    console.log('No sellerId provided for footer image');
+    return;
+  }
+  
+  const mapContainer = document.getElementById('map-container');
+  if (!mapContainer) {
+    console.log('Map container not found');
+    return;
+  }
+  
+  try {
+    console.log('Fetching footer image for seller:', sellerId);
+    
+    // Try the branding endpoint first
+    const res = await fetch(`${API_ROOT}/api/branding/footer/${encodeURIComponent(sellerId)}`, {
+      credentials: 'include'
+    });
+    
+    let imageUrl = null;
+    
+    if (res.ok) {
+      const data = await res.json();
+      imageUrl = data.url || data.imageUrl || data.image;
+      console.log('Footer image from branding API:', imageUrl);
+    }
+    
+    // If no image from branding API, try to get it from seller data
+    if (!imageUrl) {
+      console.log('No image from branding API, trying seller data...');
+      // Check if we already have footerImage from seller data
+      const footerImageVar = getComputedStyle(document.documentElement).getPropertyValue('--footer-image');
+      if (footerImageVar && footerImageVar !== 'none') {
+        // Extract URL from CSS variable
+        const match = footerImageVar.match(/url\(["']?(.+?)["']?\)/);
+        if (match && match[1]) {
+          imageUrl = match[1];
+          console.log('Using footer image from seller data:', imageUrl);
+        }
+      }
+    }
+    
+    // Apply the image if we have one
+    if (imageUrl) {
+      // Update CSS variable
+      document.documentElement.style.setProperty('--footer-image', `url("${imageUrl}")`);
+      
+      // Update map container with the footer image
+      mapContainer.innerHTML = '';
+      mapContainer.style.backgroundImage = `linear-gradient(rgba(0,0,0,0.1), rgba(0,0,0,0.3)), url("${imageUrl}")`;
+      mapContainer.style.backgroundSize = 'cover';
+      mapContainer.style.backgroundPosition = 'center';
+      mapContainer.style.backgroundRepeat = 'no-repeat';
+      mapContainer.classList.add('footer-image-map');
+      
+      // Show footer image element if exists
+      const footerEl = document.getElementById('shop-footer-image');
+      if (footerEl) footerEl.hidden = false;
+      
+      console.log('Footer image applied successfully');
+    } else {
+      console.log('No footer image available');
+      // Show a nice placeholder
+      mapContainer.innerHTML = `
+        <div class="text-center">
+          <i class="fas fa-store text-4xl text-gray-400 mb-2"></i>
+          <p class="text-sm text-gray-500">تصویر برند فروشگاه</p>
+        </div>
+      `;
+    }
+  } catch (err) {
+    console.error('Failed to load footer image:', err);
+    // Show error state
+    mapContainer.innerHTML = `
+      <div class="text-center">
+        <i class="fas fa-image text-3xl text-gray-400 mb-2"></i>
+        <p class="text-sm text-gray-500">در حال بارگذاری تصویر...</p>
+      </div>
+    `;
+  }
+}
+
+
+// Debug function to check what's happening
+window.debugFooterImage = function() {
+  const mapContainer = document.getElementById('map-container');
+  const footerImageVar = getComputedStyle(document.documentElement).getPropertyValue('--footer-image');
+  const sellerId = document.body.dataset.sellerId;
+  
+  console.log('Debug Info:');
+  console.log('- Map container exists:', !!mapContainer);
+  console.log('- Map container classes:', mapContainer?.className);
+  console.log('- Map container style:', mapContainer?.style.backgroundImage);
+  console.log('- CSS variable --footer-image:', footerImageVar);
+  console.log('- Seller ID:', sellerId);
+  console.log('- API_ROOT:', window.__API_BASE__ || '');
+}
+
 
   /** ================== Render ================== **/
 function cardTemplate(item) {
@@ -4609,24 +4748,31 @@ function cardTemplate(item) {
     });
   }
 
-  async function renderAll() {
-    const shopurl = getShopUrlFromLocation();
-    if (!shopurl) { show404(); return; }
+async function renderAll() {
+  const shopurl = getShopUrlFromLocation();
+  if (!shopurl) { show404(); return; }
 
-    try {
-      const [data, seller] = await Promise.all([
-        apiGetPublic(shopurl),
-        apiGetSeller(shopurl)
-      ]);
-        LAST_PUBLIC = data; // { items, sellerId }
-        updateSellerProfile(seller);
-        renderList();
-        document.dispatchEvent(new CustomEvent('services:loaded', { detail: data.items || [] }));
-      } catch (err) {
-        console.error('Load public services failed', err);
-        show404();
-      }
+  try {
+    const [data, seller] = await Promise.all([
+      apiGetPublic(shopurl),
+      apiGetSeller(shopurl)
+    ]);
+    
+    LAST_PUBLIC = data; // { items, sellerId }
+    updateSellerProfile(seller);
+    
+    // Load footer image using sellerId
+    if (data.sellerId || seller._id || seller.id) {
+      await loadFooterImage(data.sellerId || seller._id || seller.id);
     }
+    
+    renderList();
+    document.dispatchEvent(new CustomEvent('services:loaded', { detail: data.items || [] }));
+  } catch (err) {
+    console.error('Load public services failed', err);
+    show404();
+  }
+}
 
   document.addEventListener('DOMContentLoaded', renderAll);
 })();
