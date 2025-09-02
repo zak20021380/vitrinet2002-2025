@@ -26,7 +26,10 @@ const shopAppearanceSchema = new mongoose.Schema({
   ratingCount:   { type: Number, default: 0 }, // تعداد کل امتیازها
 
   // لوگوی فروشگاه (URL یا مسیر نسبی)
-  shopLogo:      { type: String, default: '' }
+  shopLogo:      { type: String, default: '' },
+
+  // تصویر فوتر فروشگاه (URL یا مسیر نسبی)
+  footerImage:   { type: String, default: '' }
 
 }, { timestamps: true });
 
