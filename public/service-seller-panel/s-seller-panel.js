@@ -209,20 +209,25 @@ async function fetchInitialData() {
       bookingsPromise
     ]);
 
+    const localBookings = JSON.parse(localStorage.getItem('vitreenet-bookings') || '[]');
+
     if (Array.isArray(bookings) && bookings.length) {
-      MOCK_DATA.bookings = bookings;
-    } else {
-      const local = JSON.parse(localStorage.getItem('vitreenet-bookings') || '[]');
-      if (local.length) {
-        MOCK_DATA.bookings = local.map(b => ({
-          id: b.id || Date.now() + Math.random(),
-          customerName: b.name || b.customerName || '',
-          service: b.service || '',
-          time: b.time || '',
-          status: 'pending'
-        }));
-      }
+      const statusMap = new Map(localBookings.map(b => [(b._id || b.id), b.status]));
+      MOCK_DATA.bookings = bookings.map(b => ({
+        ...b,
+        status: statusMap.get(b._id || b.id) || b.status || 'pending'
+      }));
+    } else if (localBookings.length) {
+      MOCK_DATA.bookings = localBookings.map(b => ({
+        id: b.id || Date.now() + Math.random(),
+        customerName: b.name || b.customerName || '',
+        service: b.service || '',
+        time: b.time || '',
+        status: b.status || 'pending'
+      }));
     }
+
+    persistBookings();
 
     if (sellerRes.ok) {
       const data = await sellerRes.json();
