@@ -46,3 +46,32 @@ exports.getSellerBookings = async (req, res) => {
     return res.status(500).json({ message: 'خطای داخلی سرور.' });
   }
 };
+
+// به‌روزرسانی وضعیت نوبت برای فروشنده لاگین شده
+exports.updateBookingStatus = async (req, res) => {
+  try {
+    const sellerId = req.user.id;
+    const { id } = req.params;
+    const { status } = req.body || {};
+
+    const allowed = ['pending', 'confirmed', 'completed', 'cancelled'];
+    if (!allowed.includes(status)) {
+      return res.status(400).json({ message: 'وضعیت نامعتبر است.' });
+    }
+
+    const booking = await Booking.findOneAndUpdate(
+      { _id: id, sellerId },
+      { status },
+      { new: true }
+    );
+
+    if (!booking) {
+      return res.status(404).json({ message: 'نوبت یافت نشد.' });
+    }
+
+    return res.json({ booking });
+  } catch (err) {
+    console.error('updateBookingStatus error:', err);
+    return res.status(500).json({ message: 'خطای داخلی سرور.' });
+  }
+};

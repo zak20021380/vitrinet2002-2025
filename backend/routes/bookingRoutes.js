@@ -9,4 +9,7 @@ router.post('/bookings', ctrl.createBooking);
 // دریافت نوبت‌های فروشنده لاگین شده
 router.get('/seller-bookings/me', auth('seller'), ctrl.getSellerBookings);
 
+// تغییر وضعیت نوبت
+router.patch('/seller-bookings/:id/status', auth('seller'), ctrl.updateBookingStatus);
+
 module.exports = router;
