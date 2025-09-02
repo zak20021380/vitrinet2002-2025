@@ -14,7 +14,7 @@ const bookingSchema = new mongoose.Schema({
   },
   service: { type: String, required: true },
   customerName: { type: String, required: true },
-  customerPhone: { type: String, required: true },
+  customerPhone: { type: String, required: true, index: true },
   date: { type: String, required: true },
   time: { type: String, required: true },
   status: {
