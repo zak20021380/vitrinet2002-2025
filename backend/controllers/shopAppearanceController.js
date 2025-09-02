@@ -208,14 +208,19 @@ exports.addReview = async (req, res) => {
       return res.status(404).json({ message: 'فروشگاه یافت نشد.' });
     }
 
-    // ۳) جلوگیری از ثبت امتیاز تکراری توسط همان کاربر
+    // ۳) اگر کاربر قبلاً نظری داده باشد، همان را به‌روزرسانی کن
+    //     به جای برگرداندن خطای ۴۰۰ که باعث اختلال در تجربهٔ کاربری می‌شد
     const existing = await Review.findOne({ sellerId, userId });
     if (existing) {
-      return res.status(400).json({ message: 'کاربر قبلاً امتیاز داده است.' });
+      existing.score = score;
+      existing.comment = comment;
+      // در صورت ویرایش مجدد نظر، دوباره نیاز به تایید دارد
+      existing.approved = false;
+      await existing.save();
+    } else {
+      // ۴) ثبت نظر جدید
+      await Review.create({ sellerId, userId, score, comment });
     }
-
-    // ۴) ثبت نظر جدید
-    await Review.create({ sellerId, userId, score, comment });
 
     // ۵) محاسبه مجدد میانگین و تعداد از روی مجموعه Review
     const agg = await Review.aggregate([
