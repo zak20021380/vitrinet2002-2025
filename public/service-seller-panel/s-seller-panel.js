@@ -1484,17 +1484,21 @@ async initServices() {
         const start = normalizeTime(startEl?.value);
         const end = normalizeTime(endEl?.value);
 
-        if (startEl && startEl.value && !start) {
+        if (!start) {
             UIComponents.showToast('فرمت ساعت شروع نادرست است', 'error');
             return;
         }
-        if (endEl && endEl.value && !end) {
+        if (!end) {
             UIComponents.showToast('فرمت ساعت پایان نادرست است', 'error');
             return;
         }
+        if (start >= end) {
+            UIComponents.showToast('ساعت پایان باید بعد از شروع باشد', 'error');
+            return;
+        }
 
-        if (startEl) data.startTime = start || '';
-        if (endEl) data.endTime = end || '';
+        data.startTime = start;
+        data.endTime = end;
 
         localStorage.setItem('seller', JSON.stringify(data));
 
