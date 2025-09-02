@@ -1481,11 +1481,26 @@ async initServices() {
         if (phoneEl) data.phone = phoneEl.value.trim();
         if (addressEl) data.address = addressEl.value.trim();
 
+        const start = normalizeTime(startEl?.value);
+        const end = normalizeTime(endEl?.value);
+
+        if (startEl && startEl.value && !start) {
+            UIComponents.showToast('فرمت ساعت شروع نادرست است', 'error');
+            return;
+        }
+        if (endEl && endEl.value && !end) {
+            UIComponents.showToast('فرمت ساعت پایان نادرست است', 'error');
+            return;
+        }
+
+        if (startEl) data.startTime = start || '';
+        if (endEl) data.endTime = end || '';
+
         localStorage.setItem('seller', JSON.stringify(data));
 
         const payload = {
-            startTime: startEl?.value || '',
-            endTime: endEl?.value || ''
+            startTime: start || '',
+            endTime: end || ''
         };
 
         try {
@@ -3000,9 +3015,9 @@ function cleanScheduleData() {
 setTimeout(() => cleanScheduleData(), 100);
 
 
-  // --- Force 24h input if environment is 12h (AM/PM)
-  function enforce24hTimeInput() {
-    const input = el('resv-time-input');
+// --- Force 24h input if environment is 12h (AM/PM)
+  function enforce24hTimeInput(id) {
+    const input = document.getElementById(id);
     if (!input) return;
 
     const sample = new Date().toLocaleTimeString(undefined, { hour: 'numeric' });
@@ -3029,6 +3044,9 @@ setTimeout(() => cleanScheduleData(), 100);
           input.value = toFa(ok);
         }
       });
+
+      const initVal = normalizeTime(input.value);
+      if (initVal) input.value = toFa(initVal);
     }
   }
 
@@ -3055,7 +3073,9 @@ setTimeout(() => cleanScheduleData(), 100);
     el('resv-save')?.addEventListener('click', () => { save(); UIComponents.showToast('ذخیره شد.', 'success'); });
 
     // ورودی ۲۴ساعته
-    enforce24hTimeInput();
+    enforce24hTimeInput('resv-time-input');
+    enforce24hTimeInput('work-start');
+    enforce24hTimeInput('work-end');
   })();
 })();
 
