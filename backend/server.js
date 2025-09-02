@@ -64,6 +64,9 @@ app.use('/api/shop-appearances', require('./routes/shopAppearance'));
 app.use('/api/payment', paymentRoutes);  // روت‌های پرداخت
 app.use('/api/branding', require('./routes/branding'));
 
+// Booking routes
+app.use('/api', require('./routes/bookingRoutes'));
+
 app.use('/api/daily-visits', dailyVisitRoutes);
 app.use('/api/reports', require('./routes/report'));
 

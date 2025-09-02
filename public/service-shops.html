@@ -3664,6 +3664,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
   // وضعیت انتخاب‌ها
   let selectedService = '';
+  let selectedServiceId = '';
   let selectedPrice   = '';
   let selectedDate    = '';
   let selectedTime    = '';
@@ -3676,8 +3677,9 @@ document.addEventListener('DOMContentLoaded', function () {
       option.addEventListener('click', function () {
         serviceOptions.forEach(opt => opt.classList.remove('border-blue-500', 'bg-blue-50'));
         this.classList.add('border-blue-500', 'bg-blue-50');
-        selectedService = this.getAttribute('data-service') || '';
-        selectedPrice   = this.getAttribute('data-price')   || '';
+        selectedService   = this.getAttribute('data-service')     || '';
+        selectedServiceId = this.getAttribute('data-service-id') || '';
+        selectedPrice     = this.getAttribute('data-price')       || '';
         enable(nextToStep2, true);
       });
     });
@@ -3697,7 +3699,7 @@ document.addEventListener('DOMContentLoaded', function () {
       const base = Number(it.finalPrice ?? it.price ?? 0);
       const finalPrice = off ? Math.max(0, Math.round((it.price || 0) * (100 - off) / 100)) : base;
       container.insertAdjacentHTML('beforeend',
-        `<div class="service-option border border-gray-300 rounded-lg p-3 hover:border-blue-500 cursor-pointer bw-tap" data-service="${it.title || ''}" data-price="${finalPrice}">
+        `<div class="service-option border border-gray-300 rounded-lg p-3 hover:border-blue-500 cursor-pointer bw-tap" data-service-id="${it._id}" data-service="${it.title || ''}" data-price="${finalPrice}">
           <div class="flex justify-between items-center">
             <div>
               <h5 class="font-bold">${it.title || ''}</h5>
@@ -3859,10 +3861,28 @@ document.addEventListener('DOMContentLoaded', function () {
     progressBar.style.width = '75%';
   });
 
-  confirmBooking?.addEventListener('click', function () {
+  confirmBooking?.addEventListener('click', async function () {
     // پیام موفقیت
     step4.classList.add('hidden');
     bookingSuccess.classList.remove('hidden');
+
+    try {
+      await fetch(`${API_ROOT}/api/bookings`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          serviceId: selectedServiceId,
+          service: selectedService,
+          sellerId: LAST_PUBLIC?.sellerId,
+          customerName: customerName.value,
+          customerPhone: phoneNumber.value,
+          date: selectedDate,
+          time: selectedTime
+        })
+      });
+    } catch (err) {
+      console.error('submit booking failed', err);
+    }
 
     // ذخیره برای گیمیفیکیشن
     const bookings = JSON.parse(localStorage.getItem('vitreenet-bookings') || '[]');
@@ -3918,10 +3938,11 @@ document.addEventListener('DOMContentLoaded', function () {
     enable(nextToStep4, false);
 
     // وضعیت
-    selectedService = '';
-    selectedPrice   = '';
-    selectedDate    = '';
-    selectedTime    = '';
+    selectedService   = '';
+    selectedServiceId = '';
+    selectedPrice     = '';
+    selectedDate      = '';
+    selectedTime      = '';
   }
 });
 
