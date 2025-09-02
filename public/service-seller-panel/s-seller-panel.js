@@ -98,6 +98,24 @@ async createService(payload) {
     return true;
   },
 
+  // Bookings API methods
+  async getBookings() {
+    const r = await fetch(bust(`${API_BASE}/api/seller-bookings/me`), {
+      credentials: 'include',
+      ...NO_CACHE
+    });
+    if (!r.ok && r.status !== 304) throw new Error('FETCH_BOOKINGS_FAILED');
+    const raw = this._unwrap(await this._json(r));
+    const arr = Array.isArray(raw) ? raw : [];
+    return arr.map(b => ({
+      id: b._id || b.id,
+      customerName: b.customerName || '',
+      service: b.service || '',
+      time: b.time || '',
+      status: b.status || 'pending'
+    }));
+  },
+
   // Portfolio API methods
   async getPortfolio() {
     const r = await fetch(bust(`${API_BASE}/api/seller-portfolio/me`), {
@@ -180,10 +198,19 @@ async deletePortfolioItem(id) {
 
 async function fetchInitialData() {
   try {
-    const [sellerRes, servicesRes] = await Promise.all([
+    const bookingsPromise = API.getBookings().catch(err => {
+      console.error('FETCH_BOOKINGS_FAILED', err);
+      return [];
+    });
+    const [sellerRes, servicesRes, bookings] = await Promise.all([
       fetch(bust(`${API_BASE}/api/sellers/me`), { credentials: 'include', ...NO_CACHE }),
-      fetch(bust(`${API_BASE}/api/seller-services/me/services`), { credentials: 'include', ...NO_CACHE })
+      fetch(bust(`${API_BASE}/api/seller-services/me/services`), { credentials: 'include', ...NO_CACHE }),
+      bookingsPromise
     ]);
+
+    if (Array.isArray(bookings)) {
+      MOCK_DATA.bookings = bookings;
+    }
 
     if (sellerRes.ok) {
       const data = await sellerRes.json();
@@ -278,33 +305,7 @@ async function fetchInitialData() {
       { type: 'customer', text: '<strong>رضا حسینی</strong> به مشتریان شما اضافه شد.', time: '۳ ساعت پیش' },
       { type: 'booking', text: 'نوبت <strong>مریم اکبری</strong> برای فردا لغو شد.', time: '۵ ساعت پیش' },
     ],
-   bookings: [
-  // ===== CONFIRMED BOOKINGS (green booked status) =====
-  { id: 1, customerName: 'علی رضایی', service: 'اصلاح سر', time: '۱۴:۳۰', status: 'confirmed' },
-  { id: 4, customerName: 'مریم اکبری', service: 'کوتاهی مو', time: '۱۷:۳۰', status: 'confirmed' },
-  { id: 8, customerName: 'محمد کریمی', service: 'اصلاح ریش', time: '۰۹:۰۰', status: 'confirmed' },
-  { id: 12, customerName: 'فاطمه احمدی', service: 'رنگ مو', time: '۱۵:۰۰', status: 'confirmed' },
-
-  // ===== PENDING BOOKINGS (blue pending status) =====
-  { id: 2, customerName: 'سارا محمدی', service: 'رنگ مو', time: '۱۶:۰۰', status: 'pending' },
-  { id: 3, customerName: 'رضا حسینی', service: 'اصلاح ریش', time: '۱۱:۰۰', status: 'pending' },
-  { id: 6, customerName: 'زهرا قاسمی', service: 'کراتینه', time: '۱۸:۰۰', status: 'pending' },
-  { id: 9, customerName: 'حسن مولایی', service: 'اصلاح سر', time: '۱۰:۳۰', status: 'pending' },
-
-  // ===== COMPLETED BOOKINGS (gray completed status) =====
-  { id: 5, customerName: 'نیما افشار', service: 'اصلاح سر', time: '۱۰:۰۰', status: 'completed' },
-  { id: 10, customerName: 'لیلا رضایی', service: 'کوتاهی مو', time: '۰۸:۳۰', status: 'completed' },
-  { id: 13, customerName: 'احمد صادقی', service: 'اصلاح ریش', time: '۱۳:۰۰', status: 'completed' },
-
-  // ===== CANCELLED BOOKINGS (dashed green - available again) =====
-  { id: 7, customerName: 'مینا جعفری', service: 'رنگ مو', time: '۱۲:۰۰', status: 'cancelled' },
-  { id: 11, customerName: 'پیمان نوری', service: 'اصلاح سر', time: '۱۶:۳۰', status: 'cancelled' },
-  { id: 14, customerName: 'شیدا کاظمی', service: 'کراتینه', time: '۱۹:۰۰', status: 'cancelled' },
-
-  // ===== BLOCKED CUSTOMER CANCELLATIONS (red blocked status) =====
-  { id: 15, customerName: 'مهدی بلوکی', service: 'اصلاح سر', time: '۱۴:۰۰', status: 'cancelled' },
-  { id: 16, customerName: 'نرگس مسدودی', service: 'رنگ مو', time: '۱۷:۰۰', status: 'cancelled' },
-],
+   bookings: [],
     customers: [
       { id: 1, name: 'علی رضایی', phone: '۰۹۱۲۳۴۵۶۷۸۹', lastReservation: '۱۴۰۳/۰۵/۲۰' },
       { id: 2, name: 'سارا محمدی', phone: '۰۹۳۵۱۲۳۴۵۶۷', lastReservation: '۱۴۰۳/۰۵/۱۸' },
@@ -1180,6 +1181,7 @@ destroy() {
   setText('.filter-chip[data-filter="pending"] .chip-badge', counts.pending);
   setText('.filter-chip[data-filter="confirmed"] .chip-badge', counts.confirmed);
   setText('.filter-chip[data-filter="completed"] .chip-badge', counts.completed);
+  this.updateDashboardStats();
 }
 
   
