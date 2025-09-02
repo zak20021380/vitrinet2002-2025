@@ -655,6 +655,18 @@ const Notifications = {
 // اجرا
 Notifications.init();
 
+  // Utility: normalize a time string to HH:MM (24h) or return null
+  const normalizeTime = (t) => {
+    const faDigits = '۰۱۲۳۴۵۶۷۸۹', enDigits = '0123456789';
+    const toEn = (s) => (s + '').replace(/[۰-۹]/g, d => enDigits[faDigits.indexOf(d)]);
+  const pad2 = (n) => String(n).padStart(2, '0');
+    const m = /^(\d{1,2}):(\d{2})$/.exec(toEn((t || '').trim()));
+    if (!m) return null;
+    const h = +m[1], mi = +m[2];
+    if (h < 0 || h > 23 || mi < 0 || mi > 59) return null;
+    return `${pad2(h)}:${pad2(mi)}`;
+  };
+
   /**
    * ==============================
    * Main Application Logic
@@ -2704,14 +2716,7 @@ initSellerPersonalization();
   const faDigits = '۰۱۲۳۴۵۶۷۸۹', enDigits = '0123456789';
   const toFa = (s) => (s + '').replace(/[0-9]/g, (d) => faDigits[d]);
   const toEn = (s) => (s + '').replace(/[۰-۹]/g, (d) => enDigits[faDigits.indexOf(d)]);
-  const pad2 = (n) => String(n).padStart(2, '0');
-  const normalizeTime = (t) => {
-    const m = /^(\d{1,2}):(\d{2})$/.exec(toEn((t || '').trim()));
-    if (!m) return null;
-    const h = +m[1], mi = +m[2];
-    if (h < 0 || h > 23 || mi < 0 || mi > 59) return null;
-    return `${pad2(h)}:${pad2(mi)}`;
-  };
+    const pad2 = (n) => String(n).padStart(2, '0');
   const faDateShort = (d) =>
     new Intl.DateTimeFormat('fa-IR-u-ca-persian', { year: 'numeric', month: '2-digit', day: '2-digit' }).format(d);
 
