@@ -3031,7 +3031,12 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     list.forEach(r => {
-      const name = escapeHTML(r.userName || 'کاربر');
+      const rawName =
+        r.userName ||
+        (r.userId && typeof r.userId === 'object'
+          ? [r.userId.firstname, r.userId.lastname].filter(Boolean).join(' ')
+          : '');
+      const name = escapeHTML(rawName || 'کاربر');
       const date = r.createdAt ? new Date(r.createdAt).toLocaleDateString('fa-IR') : '';
       const comment = escapeHTML(r.comment || '');
       const score = Math.max(1, Math.min(5, Number(r.score) || 0));
