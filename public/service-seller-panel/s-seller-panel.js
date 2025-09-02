@@ -353,6 +353,15 @@ window.MOCK_DATA = MOCK_DATA;
     }
   }
 
+  // Persist current booking list to localStorage
+  function persistBookings() {
+    try {
+      StorageManager.set('vitreenet-bookings', MOCK_DATA.bookings);
+    } catch (e) {
+      console.error('Error persisting bookings', e);
+    }
+  }
+
 
 
 // === Customer Preferences Store (keyed by normalized customer name) ===
@@ -617,6 +626,19 @@ const Notifications = {
 
   markRead(id) {
     const items = this.load().map(n => n.id === id ? ({ ...n, read: true }) : n);
+    this.save(items);
+    this.render();
+  },
+
+  add(text, type = 'info') {
+    const items = this.load();
+    items.push({
+      id: 'n' + Date.now(),
+      type,
+      text,
+      time: new Date().toLocaleTimeString('fa-IR'),
+      read: false
+    });
     this.save(items);
     this.render();
   },
@@ -1150,15 +1172,25 @@ destroy() {
         if (booking) {
           const prev = booking.status;
           booking.status = newStatus;
+          persistBookings();
           fetch(`${API_BASE}/api/seller-bookings/${id}/status`, {
             method: 'PATCH',
             headers: { 'Content-Type': 'application/json' },
             credentials: 'include',
             body: JSON.stringify({ status: newStatus })
-          }).catch(err => {
-            console.error('UPDATE_BOOKING_STATUS_FAILED', err);
-            booking.status = prev;
-          });
+          })
+            .then(r => {
+              if (!r.ok) throw new Error('STATUS_UPDATE_FAILED');
+              const faStatus = { confirmed: 'تایید شد', completed: 'انجام شد', cancelled: 'لغو شد' };
+              UIComponents?.showToast?.(`وضعیت نوبت ${faStatus[newStatus] || newStatus}`, 'success');
+              Notifications?.add(`نوبت ${booking.customerName} ${faStatus[newStatus] || newStatus}`, 'booking');
+            })
+            .catch(err => {
+              console.error('UPDATE_BOOKING_STATUS_FAILED', err);
+              booking.status = prev;
+              persistBookings();
+              UIComponents?.showToast?.('خطا در به‌روزرسانی وضعیت نوبت', 'error');
+            });
         }
         self.renderBookings(self.currentBookingFilter || 'all');
         self.renderPlans && self.renderPlans();
@@ -2172,7 +2204,9 @@ openCustomerModal(customer) {
     confirmBtn.onclick = () => {
       // Update the booking status in the data
       last.status = 'confirmed';
-      
+      persistBookings();
+      Notifications?.add(`نوبت ${customer.name} تایید شد`, 'booking');
+
       // Update UI with animation
       st.style.transform = 'scale(0.95)';
       setTimeout(() => {
@@ -2197,10 +2231,12 @@ openCustomerModal(customer) {
     cancelBtn.onclick = () => {
       // Confirm cancellation
       if (!confirm('آیا از لغو این رزرو مطمئن هستید؟')) return;
-      
+
       // Update the booking status in the data
       last.status = 'cancelled';
-      
+      persistBookings();
+      Notifications?.add(`نوبت ${customer.name} لغو شد`, 'booking');
+
       // Update UI with animation
       st.style.transform = 'scale(0.95)';
       setTimeout(() => {
