@@ -247,7 +247,7 @@ exports.addReview = async (req, res) => {
 exports.getReviews = async (req, res) => {
   try {
     const { sellerId } = req.params;
-    const reviews = await Review.find({ sellerId })
+    const reviews = await Review.find({ sellerId, approved: true })
       .sort({ createdAt: -1 })
       .populate('userId', 'firstname lastname')
       .lean();
@@ -265,5 +265,67 @@ exports.getReviews = async (req, res) => {
   } catch (err) {
     console.error('❌ getReviews error:', err.message);
     res.status(500).json({ message: 'خطای سرور در دریافت نظرات.' });
+  }
+};
+
+// ================== دریافت نظرات تایید نشده ==================
+exports.getPendingReviews = async (req, res) => {
+  try {
+    const sellerId = req.user.id;
+    const reviews = await Review.find({ sellerId, approved: false })
+      .sort({ createdAt: -1 })
+      .populate('userId', 'firstname lastname')
+      .lean();
+
+    const formatted = reviews.map(r => ({
+      _id: r._id,
+      userId: r.userId?._id,
+      userName: r.userId ? `${r.userId.firstname} ${r.userId.lastname}`.trim() : undefined,
+      score: r.score,
+      comment: r.comment,
+      createdAt: r.createdAt,
+      approved: r.approved
+    }));
+
+    res.json(formatted);
+  } catch (err) {
+    console.error('❌ getPendingReviews error:', err.message);
+    res.status(500).json({ message: 'خطای سرور در دریافت نظرات تایید نشده.' });
+  }
+};
+
+// ================== تایید نظر ==================
+exports.approveReview = async (req, res) => {
+  try {
+    const sellerId = req.user.id;
+    const { reviewId } = req.params;
+    const review = await Review.findOneAndUpdate(
+      { _id: reviewId, sellerId },
+      { approved: true },
+      { new: true }
+    );
+    if (!review) {
+      return res.status(404).json({ message: 'نظر یافت نشد.' });
+    }
+    res.json({ message: 'نظر تایید شد.' });
+  } catch (err) {
+    console.error('❌ approveReview error:', err.message);
+    res.status(500).json({ message: 'خطای سرور در تایید نظر.' });
+  }
+};
+
+// ================== حذف/رد نظر ==================
+exports.rejectReview = async (req, res) => {
+  try {
+    const sellerId = req.user.id;
+    const { reviewId } = req.params;
+    const review = await Review.findOneAndDelete({ _id: reviewId, sellerId });
+    if (!review) {
+      return res.status(404).json({ message: 'نظر یافت نشد.' });
+    }
+    res.json({ message: 'نظر حذف شد.' });
+  } catch (err) {
+    console.error('❌ rejectReview error:', err.message);
+    res.status(500).json({ message: 'خطای سرور در حذف نظر.' });
   }
 };

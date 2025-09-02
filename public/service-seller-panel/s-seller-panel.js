@@ -311,12 +311,7 @@ async function fetchInitialData() {
       { id: 3, name: 'رضا حسینی', phone: '۰۹۱۸۹۸۷۶۵۴۳', lastReservation: '۱۴۰۳/۰۵/۱۵' },
       { id: 4, name: 'مریم اکبری', phone: '۰۹۱۰۱۱۰۲۲۰۳', lastReservation: '۱۴۰۳/۰۴/۳۰' },
     ],
-    reviews: [
-      { id: 1, customerName: 'علی رضایی', rating: 5, date: '۱ روز پیش', comment: 'کارشون عالی و حرفه‌ای بود. بسیار راضی بودم.', status: 'pending' },
-      { id: 2, customerName: 'سارا محمدی', rating: 4, date: '۳ روز پیش', comment: 'محیط تمیز و برخورد پرسنل خوب بود. فقط کمی معطل شدم.', status: 'pending' },
-      { id: 3, customerName: 'رضا حسینی', rating: 5, date: '۱ هفته پیش', comment: 'بهترین آرایشگاهی که تا حالا رفتم.', status: 'pending' },
-      { id: 4, customerName: 'مریم اکبری', rating: 3, date: '۲ هفته پیش', comment: 'کیفیت کار متوسط بود.', status: 'pending' },
-    ]
+    reviews: []
   };
 
 window.MOCK_DATA = MOCK_DATA;
@@ -1192,27 +1187,48 @@ destroy() {
 
 
 
-    renderReviews(filter = 'all') {
+    async renderReviews(filter = 'all') {
   const listEl = document.getElementById('reviews-list');
-  
+
+  if (!this._reviewsLoaded) {
+    try {
+      const r = await fetch(bust(`${API_BASE}/api/shopAppearance/reviews/pending`), { credentials: 'include', ...NO_CACHE });
+      if (r.ok) {
+        const data = await r.json();
+        MOCK_DATA.reviews = data.map(rv => ({
+          id: rv._id,
+          customerName: rv.userName || 'کاربر',
+          rating: rv.score,
+          date: new Date(rv.createdAt).toLocaleDateString('fa-IR'),
+          comment: rv.comment,
+          status: rv.approved ? 'approved' : 'pending'
+        }));
+      } else {
+        MOCK_DATA.reviews = [];
+      }
+    } catch (err) {
+      console.error('load pending reviews failed', err);
+      MOCK_DATA.reviews = [];
+    }
+    this._reviewsLoaded = true;
+  }
+
   let filteredReviews = MOCK_DATA.reviews;
-  
+
   if (filter !== 'all') {
     if (filter === '1') {
-      // 1-2 stars
       filteredReviews = MOCK_DATA.reviews.filter(r => r.rating <= 2);
     } else {
-      // Filter by exact rating
       const rating = parseInt(filter);
       filteredReviews = MOCK_DATA.reviews.filter(r => r.rating === rating);
     }
   }
-  
+
   if (filteredReviews.length === 0) {
     listEl.innerHTML = `<p>نظری با این امتیاز یافت نشد.</p>`;
     return;
   }
-  
+
   listEl.innerHTML = filteredReviews.map(review => {
     const stars = '★'.repeat(review.rating) + '☆'.repeat(5 - review.rating);
     return `
@@ -1244,27 +1260,37 @@ destroy() {
   }).join('');
 
   if (!listEl.dataset.reviewBound) {
-    listEl.addEventListener('click', (e) => {
+    listEl.addEventListener('click', async (e) => {
       const approveBtn = e.target.closest('.approve-review');
       const rejectBtn = e.target.closest('.reject-review');
       if (approveBtn) {
         const card = approveBtn.closest('.review-card');
-        const id = parseInt(card.dataset.id, 10);
-        const review = MOCK_DATA.reviews.find(r => r.id === id);
-        if (review) review.status = 'approved';
-        const actions = card.querySelector('.review-actions');
-        if (actions) {
-          actions.outerHTML = '<div class="review-status">تایید شده</div>';
+        const id = card.dataset.id;
+        try {
+          const res = await fetch(`${API_BASE}/api/shopAppearance/reviews/${id}/approve`, { method: 'PATCH', credentials: 'include' });
+          if (!res.ok) throw new Error();
+          const review = MOCK_DATA.reviews.find(r => r.id === id);
+          if (review) review.status = 'approved';
+          const actions = card.querySelector('.review-actions');
+          if (actions) { actions.outerHTML = '<div class="review-status">تایید شده</div>'; }
+          UIComponents.showToast('نظر تایید شد و در صفحه شما به نمایش در میاد', 'success');
+        } catch (err) {
+          UIComponents.showToast('تایید نظر ناموفق بود', 'error');
         }
-        UIComponents.showToast('نظر تایید شد و در صفحه شما به نمایش در میاد', 'success');
         return;
       }
       if (rejectBtn) {
         const card = rejectBtn.closest('.review-card');
-        const id = parseInt(card.dataset.id, 10);
-        card.remove();
-        MOCK_DATA.reviews = MOCK_DATA.reviews.filter(r => r.id !== id);
-        UIComponents.showToast('نظر حذف شد', 'error');
+        const id = card.dataset.id;
+        try {
+          const res = await fetch(`${API_BASE}/api/shopAppearance/reviews/${id}`, { method: 'DELETE', credentials: 'include' });
+          if (!res.ok) throw new Error();
+          card.remove();
+          MOCK_DATA.reviews = MOCK_DATA.reviews.filter(r => r.id !== id);
+          UIComponents.showToast('نظر حذف شد', 'error');
+        } catch (err) {
+          UIComponents.showToast('حذف نظر ناموفق بود', 'error');
+        }
         return;
       }
     });

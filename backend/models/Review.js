@@ -4,7 +4,8 @@ const reviewSchema = new mongoose.Schema({
   sellerId: { type: mongoose.Schema.Types.ObjectId, ref: 'Seller', required: true },
   userId:   { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
   score:    { type: Number, min: 1, max: 5, required: true },
-  comment:  { type: String, default: '' }
+  comment:  { type: String, default: '' },
+  approved: { type: Boolean, default: false }
 }, { timestamps: true });
 
 reviewSchema.index({ sellerId: 1 });
