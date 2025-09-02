@@ -2,7 +2,8 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 // === STEP 1 — API client (READ services only) ===
 // اگر آدرس سرور فرق دارد، مقدار زیر را عوض کن
-const API_BASE = (window.__API_BASE__ || 'http://localhost:5000');
+// Use same-origin API by default; fall back to provided base
+const API_BASE = window.__API_BASE__ || '';
 const NO_CACHE = { cache: 'no-store', headers: { 'Cache-Control': 'no-cache' } };
 const bust = (url) => `${url}${url.includes('?') ? '&' : '?'}__=${Date.now()}`;
 
