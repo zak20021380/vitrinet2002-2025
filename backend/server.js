@@ -62,6 +62,7 @@ app.use('/api/sellerPlans', require('./routes/sellerPlans'));
 app.use('/api/shopping-centers', require('./routes/shoppingCenter'));
 app.use('/api/shop-appearances', require('./routes/shopAppearance'));
 app.use('/api/payment', paymentRoutes);  // روت‌های پرداخت
+app.use('/api/branding', require('./routes/branding'));
 
 app.use('/api/daily-visits', dailyVisitRoutes);
 app.use('/api/reports', require('./routes/report'));
