@@ -11,6 +11,9 @@
         * {
             font-family: 'Vazirmatn', sans-serif;
         }
+        :root {
+            --footer-image: none;
+        }
         .glassmorphism {
             background: rgba(255, 255, 255, 0.7);
             backdrop-filter: blur(20px);
@@ -419,8 +422,21 @@
 }
 .chip--primary:hover { filter: brightness(0.98); }
 
+
 .dialog-card-enter { transform: scale(0.96); opacity: 0; }
 .dialog-card-show  { transform: scale(1);    opacity: 1; transition: all .18s ease; }
+
+        /* Footer brand image */
+        #shop-footer-image{
+            margin-top:2rem;
+            border-radius:1.5rem;
+            overflow:hidden;
+            background-image:linear-gradient(180deg,rgba(0,0,0,.10),rgba(0,0,0,.35)),var(--footer-image);
+            background-size:cover;
+            background-position:center;
+            min-height:160px;
+            border:1px solid rgba(0,0,0,0.1);
+        }
 
         
     </style>
@@ -3351,6 +3367,7 @@ function updateSummary(avg, count, ratings) {
     </section>
     <!-- Mobile Navigation Bar -->
 
+<div id="shop-footer-image" hidden></div>
 <footer id="site-footer" class="w-full mt-16 hide-on-mobile" aria-labelledby="vitreenet-footer-title">
   <h2 id="vitreenet-footer-title" class="sr-only">ویترینت — ویترین آنلاین کسب‌وکارهای محلی</h2>
 
@@ -4465,6 +4482,12 @@ function updateSellerProfile(seller) {
     } else {
       el.textContent = text;
     }
+  }
+
+  if (seller.footerImage) {
+    document.documentElement.style.setProperty('--footer-image', `url("${seller.footerImage}")`);
+    const footerEl = document.getElementById('shop-footer-image');
+    if (footerEl) footerEl.hidden = false;
   }
 
   const heroCall = document.getElementById('hero-call');

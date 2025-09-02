@@ -701,12 +701,11 @@ function bindFloatingCloseOnce() {
       this.currentServiceImage = '';
       this.currentPortfolioImage = '';
 
-      // Initialize Services, Portfolio, VIP & Brand images
+      // Initialize Services, Portfolio, VIP & customer features
       this.initServices();
       this.initPortfolio();
       this.initVipSettings();
       this.initCustomerFeatures();
-      this.initBrandImages();
 
     }
 
@@ -1864,16 +1863,23 @@ async handlePortfolioFormSubmit() {
 
 
 
-// === BRAND IMAGES (hero/footer) ===
+// === BRAND IMAGE (footer only) ===
 initBrandImages(){
-  // خواندن از localStorage
-  const saved = StorageManager.get('vit_brand_images') || {};
-  this.brandImages = {
-    hero: saved.hero || '',
-    footer: saved.footer || ''
-  };
-  this.applyBrandImages();
-  this.bindBrandImageEvents();
+  this.brandImages = { footer: '' };
+  this.loadFooterImage();
+  this.bindFooterImageEvents();
+}
+
+async loadFooterImage(){
+  try {
+    const res = await fetch('/api/branding/footer', { credentials: 'include' });
+    if (!res.ok) return;
+    const data = await res.json();
+    this.brandImages.footer = data.url || '';
+    this.applyBrandImages();
+  } catch (err) {
+    console.error('load footer image failed', err);
+  }
 }
 
 
@@ -2226,104 +2232,57 @@ updateDashboardStats() {
 
 
 applyBrandImages(){
-  // ست کردن CSS custom properties برای استفاده در UI/صفحه عمومی
   const root = document.documentElement;
-  root.style.setProperty('--hero-image',  this.brandImages.hero  ? `url("${this.brandImages.hero}")`   : 'none');
-  root.style.setProperty('--footer-image',this.brandImages.footer? `url("${this.brandImages.footer}")` : 'none');
+  root.style.setProperty('--footer-image', this.brandImages.footer ? `url("${this.brandImages.footer}")` : 'none');
 
-  // پیش‌نمایش‌ها داخل تنظیمات
-  const heroImg   = document.getElementById('hero-preview');
   const footerImg = document.getElementById('footer-preview');
-
-  if (heroImg) {
-    if (this.brandImages.hero) heroImg.src = this.brandImages.hero;
-    else heroImg.removeAttribute('src');
-  }
   if (footerImg) {
     if (this.brandImages.footer) footerImg.src = this.brandImages.footer;
     else footerImg.removeAttribute('src');
   }
 }
 
-bindBrandImageEvents(){
-  // دکمه‌ها و ورودی‌ها
-  const heroPick   = document.getElementById('hero-pick-btn');
-  const heroFile   = document.getElementById('hero-file');
-  const heroRemove = document.getElementById('hero-remove-btn');
-
+bindFooterImageEvents(){
   const footerPick   = document.getElementById('footer-pick-btn');
   const footerFile   = document.getElementById('footer-file');
   const footerRemove = document.getElementById('footer-remove-btn');
 
-  if (heroPick && heroFile){
-    heroPick.addEventListener('click', () => heroFile.click());
-    heroFile.addEventListener('change', (e) => this._readFileToDataURL(e, 'hero'));
-  }
   if (footerPick && footerFile){
     footerPick.addEventListener('click', () => footerFile.click());
-    footerFile.addEventListener('change', (e) => this._readFileToDataURL(e, 'footer'));
-  }
-
-  if (heroRemove){
-    heroRemove.addEventListener('click', () => this._removeBrandImage('hero'));
+    footerFile.addEventListener('change', (e) => this._handleFooterUpload(e));
   }
   if (footerRemove){
-    footerRemove.addEventListener('click', () => this._removeBrandImage('footer'));
+    footerRemove.addEventListener('click', () => this._removeFooterImage());
   }
 }
 
-// Helpers
-// Helpers (Brand Images)
-_readFileToDataURL(evt, type) {
+_handleFooterUpload(evt){
   const file = evt.target.files && evt.target.files[0];
   if (!file) return;
 
   const reader = new FileReader();
   reader.onload = () => {
-    const dataURL = reader.result; // base64
-    this._storeBrandImage(type, dataURL);
-    // اجازه انتخاب دوباره همان فایل
-    try { evt.target.value = ''; } catch (_) {}
-  };
-  reader.onerror = () => {
-    UIComponents.showToast('خطا در خواندن فایل تصویر.', 'error');
+    this.brandImages.footer = reader.result;
+    this.applyBrandImages();
   };
   reader.readAsDataURL(file);
+
+  const formData = new FormData();
+  formData.append('image', file);
+
+  fetch('/api/branding/footer', { method:'POST', body: formData, credentials:'include' })
+    .then(res => {
+      if(!res.ok) throw new Error();
+      UIComponents.showToast('تصویر فوتر ذخیره شد.', 'success');
+    })
+    .catch(() => UIComponents.showToast('خطا در آپلود تصویر.', 'error'));
 }
 
-_storeBrandImage(type, dataURL) {
-  if (!['hero', 'footer'].includes(type)) return;
-
-  // به‌روزرسانی حالت داخلی
-  this.brandImages = {
-    ...(this.brandImages || {}),
-    [type]: dataURL || ''
-  };
-
-  // ذخیره در localStorage
-  StorageManager.set('vit_brand_images', { ...this.brandImages });
-
-  // اعمال در UI + پیش‌نمایش
+_removeFooterImage(){
+  fetch('/api/branding/footer', { method:'DELETE', credentials:'include' }).catch(()=>{});
+  this.brandImages.footer = '';
   this.applyBrandImages();
-
-  // پیام موفقیت
-  const label = type === 'hero' ? 'هدر' : 'فوتر';
-  UIComponents.showToast(`تصویر ${label} ذخیره شد.`, 'success');
-}
-
-_removeBrandImage(type) {
-  if (!['hero', 'footer'].includes(type)) return;
-
-  this.brandImages = {
-    ...(this.brandImages || {}),
-    [type]: ''
-  };
-
-  StorageManager.set('vit_brand_images', { ...this.brandImages });
-  this.applyBrandImages();
-
-  const label = type === 'hero' ? 'هدر' : 'فوتر';
-  UIComponents.showToast(`تصویر ${label} حذف شد.`, 'info');
+  UIComponents.showToast('تصویر فوتر حذف شد.', 'info');
 }
 
   // === END OF NEW METHODS ===
