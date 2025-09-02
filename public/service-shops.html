@@ -2848,6 +2848,12 @@ if (document.readyState === 'loading') {
   pointer-events: none;
 }
 
+.footer-image-map img {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
 /* Fallback text styling when no image */
 #map-container:not(.footer-image-map) {
   display: flex;
@@ -3313,7 +3319,7 @@ function updateSummary(avg, count, ratings) {
                     </div>
                 </div>
                 <div class="mb-4">
-                    <div id="map-container" class="w-full min-h-[200px] rounded-lg overflow-hidden bg-gray-200 flex items-center justify-center">نقشه در حال بارگذاری...</div>
+                    <div id="map-container" class="w-full min-h-[200px] rounded-lg overflow-hidden bg-gray-200">نقشه در حال بارگذاری...</div>
                 </div>
             </div>
             <div class="mb-6">
@@ -4498,16 +4504,12 @@ function updateSellerProfile(seller) {
   if (seller.footerImage || seller.brandingImage || seller.coverImage) {
     const imageUrl = seller.footerImage || seller.brandingImage || seller.coverImage;
     document.documentElement.style.setProperty('--footer-image', `url("${imageUrl}")`);
-    
+
     // Apply to map container immediately if available
     const mapContainer = document.getElementById('map-container');
     if (mapContainer && imageUrl) {
-      mapContainer.innerHTML = '';
-      mapContainer.style.backgroundImage = `linear-gradient(rgba(0,0,0,0.1), rgba(0,0,0,0.3)), url("${imageUrl}")`;
-      mapContainer.style.backgroundSize = 'cover';
-      mapContainer.style.backgroundPosition = 'center';
-      mapContainer.style.backgroundRepeat = 'no-repeat';
       mapContainer.classList.add('footer-image-map');
+      mapContainer.innerHTML = `<img src="${imageUrl}" alt="تصویر برند فروشگاه">`;
     }
     
     const footerEl = document.getElementById('shop-footer-image');
@@ -4569,15 +4571,11 @@ async function loadFooterImage(sellerId) {
     if (imageUrl) {
       // Update CSS variable
       document.documentElement.style.setProperty('--footer-image', `url("${imageUrl}")`);
-      
+
       // Update map container with the footer image
-      mapContainer.innerHTML = '';
-      mapContainer.style.backgroundImage = `linear-gradient(rgba(0,0,0,0.1), rgba(0,0,0,0.3)), url("${imageUrl}")`;
-      mapContainer.style.backgroundSize = 'cover';
-      mapContainer.style.backgroundPosition = 'center';
-      mapContainer.style.backgroundRepeat = 'no-repeat';
       mapContainer.classList.add('footer-image-map');
-      
+      mapContainer.innerHTML = `<img src="${imageUrl}" alt="تصویر برند فروشگاه">`;
+
       // Show footer image element if exists
       const footerEl = document.getElementById('shop-footer-image');
       if (footerEl) footerEl.hidden = false;
