@@ -20,6 +20,11 @@ router.get('/', (req, res) => {
 // گرفتن ظاهر فروشگاه بر اساس customUrl (shopurl) [این روت مهمه!]
 router.get('/url/:shopurl', shopAppearanceController.getAppearanceByUrl);
 
+// مدیریت نظرات توسط فروشنده
+router.get('/reviews/pending', auth('seller'), shopAppearanceController.getPendingReviews);
+router.patch('/reviews/:reviewId/approve', auth('seller'), shopAppearanceController.approveReview);
+router.delete('/reviews/:reviewId', auth('seller'), shopAppearanceController.rejectReview);
+
 // GET ظاهر فروشگاه برای یک فروشنده (بر اساس sellerId)
 router.get('/:sellerId', shopAppearanceController.getShopAppearance);
 
