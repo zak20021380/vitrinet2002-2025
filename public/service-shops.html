@@ -1309,15 +1309,16 @@ function showToastDark(message, {type='success', durationMs=2600} = {}) {
     .bw-otp:focus{ border-color:#3b82f6; box-shadow:0 0 0 3px rgba(59,130,246,.25); }
     /* شماره‌ها همیشه LTR نمایش داده شوند */
     .ltr-num{ direction:ltr; unicode-bidi:isolate; }
-    /* بهبود استایل فیلد شماره موبایل (لاتین، یکنواخت) */
-.bw-phone{
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono","Courier New", monospace;
-  font-variant-numeric: tabular-nums;
-  letter-spacing:.04em;
-  direction:ltr;
-  text-align:left;
-  unicode-bidi: embed;
-}
+    /* نمایش اعداد با فونت فارسی */
+    .fa-num{
+      font-family: 'Vazirmatn', sans-serif;
+      font-feature-settings: 'ss02', 'tnum';
+    }
+    .bw-phone{
+      direction:ltr;
+      text-align:left;
+      unicode-bidi: embed;
+    }
     /* بهبود لمس روی موبایل */
     @media (hover:none){ .bw-tap{ padding-top:.65rem; padding-bottom:.65rem; } }
   </style>
@@ -1415,14 +1416,14 @@ function showToastDark(message, {type='success', durationMs=2600} = {}) {
               id="phone-number"
               inputmode="numeric"
               autocomplete="tel"
-              class="bw-phone flex-1 py-3 px-3 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              placeholder="09123456789"
+              class="bw-phone fa-num flex-1 py-3 px-3 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              placeholder="۰۹۱۲۳۴۵۶۷۸۹"
               maxlength="11"
-              pattern="^0[0-9]{10}$"
-              dir="ltr">
-            <span class="px-3 text-gray-500 text-sm ltr-num select-none bg-gray-50 border-r border-gray-300">+98</span>
+              pattern="^۰[۰-۹]{10}$"
+              dir="ltr"
+              lang="fa">
+            <span class="px-3 text-gray-500 text-sm fa-num ltr-num select-none bg-gray-50 border-r border-gray-300">+۹۸</span>
           </div>
-        <p class="text-xs text-gray-500 mt-1">فقط شماره ایران؛ با <span class="font-bold">۰</span> شروع شود.</p>
         <p id="phone-error" class="text-red-500 text-xs mt-1 hidden">شماره وارد شده معتبر نیست</p>
       </div>
 
