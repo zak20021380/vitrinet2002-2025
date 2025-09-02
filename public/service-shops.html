@@ -1314,6 +1314,11 @@ function showToastDark(message, {type='success', durationMs=2600} = {}) {
       font-family: 'Vazirmatn', sans-serif;
       font-feature-settings: 'ss02', 'tnum';
     }
+    /* نمایش اعداد با فونت لاتین */
+    .en-num{
+      font-family: 'Vazirmatn', sans-serif;
+      font-feature-settings: 'tnum';
+    }
     .bw-phone{
       direction:ltr;
       text-align:left;
@@ -1422,7 +1427,7 @@ function showToastDark(message, {type='success', durationMs=2600} = {}) {
               pattern="^۰[۰-۹]{10}$"
               dir="ltr"
               lang="fa">
-            <span class="px-3 text-gray-500 text-sm fa-num ltr-num select-none bg-gray-50 border-r border-gray-300">+۹۸</span>
+            <span class="px-3 text-gray-500 text-sm en-num ltr-num select-none bg-gray-50 border-r border-gray-300">+98</span>
           </div>
         <p id="phone-error" class="text-red-500 text-xs mt-1 hidden">شماره وارد شده معتبر نیست</p>
       </div>
@@ -3860,7 +3865,7 @@ document.addEventListener('DOMContentLoaded', function () {
     confirmDate.textContent    = selectedDate;
     confirmTime.textContent    = selectedTime;
     confirmName.textContent    = customerName.value;
-    confirmPhone.textContent   = '＋۹۸' + phoneNumber.value; // همان فرمت قبلی با ارقام فارسی
+    confirmPhone.textContent   = '+98' + phoneNumber.value; // پیش‌شماره لاتین مشابه شماره موبایل
     confirmPrice.textContent   = (parseInt(selectedPrice, 10) || 0).toLocaleString('fa-IR') + ' تومان';
 
     // رفتن به مرحله ۴
