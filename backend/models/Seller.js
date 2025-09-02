@@ -10,6 +10,8 @@ const sellerSchema = new mongoose.Schema({
   subcategory: String,
   address: String,
   desc: String,
+  startTime: { type: String, default: '' },
+  endTime: { type: String, default: '' },
   password: {
   type: String,
   required: true,

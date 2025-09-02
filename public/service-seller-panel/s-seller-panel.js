@@ -209,7 +209,7 @@ async function fetchInitialData() {
       setText('seller-phone', seller.phone || '');
       setText('seller-address', seller.address || '');
       // Fill settings form with fetched data
-      populateSettingsForm(store);
+      populateSettingsForm({ ...store, startTime: seller.startTime, endTime: seller.endTime });
     }
 
     if (servicesRes.ok) {
@@ -1469,10 +1469,12 @@ async initServices() {
         });
     }
 
-    handleSettingsFormSubmit() {
+    async handleSettingsFormSubmit() {
         const nameEl = document.getElementById('business-name');
         const phoneEl = document.getElementById('business-phone');
         const addressEl = document.getElementById('business-address');
+        const startEl = document.getElementById('work-start');
+        const endEl = document.getElementById('work-end');
         const data = JSON.parse(localStorage.getItem('seller') || '{}');
 
         if (nameEl) data.storename = nameEl.value.trim();
@@ -1480,6 +1482,24 @@ async initServices() {
         if (addressEl) data.address = addressEl.value.trim();
 
         localStorage.setItem('seller', JSON.stringify(data));
+
+        const payload = {
+            startTime: startEl?.value || '',
+            endTime: endEl?.value || ''
+        };
+
+        try {
+            const res = await fetch(`${API_BASE}/api/sellers/working-hours`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'include',
+                body: JSON.stringify(payload)
+            });
+            if (!res.ok) throw new Error('FAILED');
+        } catch (err) {
+            UIComponents.showToast('خطا در ذخیره تنظیمات', 'error');
+            return;
+        }
 
         const setText = (id, text) => {
             const el = document.getElementById(id);
@@ -1490,7 +1510,7 @@ async initServices() {
         setText('seller-phone', data.phone || '');
         setText('seller-address', data.address || '');
 
-        UIComponents.showToast('تنظیمات با موفقیت ذخیره شد!', 'success');
+        UIComponents.showToast('تنظیمات ذخیره شد.', 'success');
     }
 
   populateServiceForm(service) {
@@ -2566,6 +2586,16 @@ function populateSettingsForm(sellerData) {
   const businessAddressEl = document.getElementById('business-address');
   if (businessAddressEl && sellerData.address) {
     businessAddressEl.value = sellerData.address;
+  }
+
+  // Working hours
+  const startEl = document.getElementById('work-start');
+  if (startEl && sellerData.startTime) {
+    startEl.value = sellerData.startTime;
+  }
+  const endEl = document.getElementById('work-end');
+  if (endEl && sellerData.endTime) {
+    endEl.value = sellerData.endTime;
   }
 
   // Business category dropdown

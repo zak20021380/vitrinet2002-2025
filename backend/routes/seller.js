@@ -92,6 +92,23 @@ router.get('/', authMiddleware('admin'), async (req, res) => {
   }
 });
 
+// بروزرسانی ساعت کاری فروشنده
+router.put('/working-hours', authMiddleware('seller'), async (req, res) => {
+  try {
+    const { startTime, endTime } = req.body || {};
+    const sellerId = req.user && (req.user.id || req.user._id);
+    const seller = await Seller.findByIdAndUpdate(
+      sellerId,
+      { startTime, endTime },
+      { new: true }
+    );
+    if (!seller) return res.status(404).json({ message: 'فروشنده پیدا نشد!' });
+    res.json({ startTime: seller.startTime, endTime: seller.endTime });
+  } catch (err) {
+    console.error('update working hours error', err);
+    res.status(500).json({ message: 'خطای سرور.' });
+  }
+});
 
 router.get('/profile', authMiddleware('seller'), getCurrentSeller);
 
