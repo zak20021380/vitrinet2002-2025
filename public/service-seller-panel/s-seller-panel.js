@@ -1116,7 +1116,7 @@ destroy() {
         </div>
         <div class="booking-actions">
           <span class="status-badge status-${b.status}">${statusLabel[b.status] || b.status}</span>
-          <button type="button" class="btn-secondary btn-icon-text status-change-btn" data-id="${b.id}" aria-haspopup="true" aria-expanded="false">تغییر وضعیت</button>
+          <button type="button" class="btn-secondary btn-icon-text status-change-btn" data-id="${b._id || b.id}" aria-haspopup="true" aria-expanded="false">تغییر وضعیت</button>
           <div class="status-menu" role="menu">
             <button type="button" class="status-option" data-status="confirmed">تایید نوبت</button>
             <button type="button" class="status-option" data-status="completed">انجام شده</button>
@@ -1144,10 +1144,22 @@ destroy() {
         return;
       }
       if (option) {
-        const id = parseInt(option.closest('.booking-actions').querySelector('.status-change-btn').dataset.id, 10);
+        const id = option.closest('.booking-actions').querySelector('.status-change-btn').dataset.id;
         const newStatus = option.dataset.status;
-        const booking = MOCK_DATA.bookings.find(b => b.id === id);
-        if (booking) booking.status = newStatus;
+        const booking = MOCK_DATA.bookings.find(b => (b._id || b.id) == id);
+        if (booking) {
+          const prev = booking.status;
+          booking.status = newStatus;
+          fetch(`${API_BASE}/api/seller-bookings/${id}/status`, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
+            body: JSON.stringify({ status: newStatus })
+          }).catch(err => {
+            console.error('UPDATE_BOOKING_STATUS_FAILED', err);
+            booking.status = prev;
+          });
+        }
         self.renderBookings(self.currentBookingFilter || 'all');
         self.renderPlans && self.renderPlans();
         e.stopPropagation();
