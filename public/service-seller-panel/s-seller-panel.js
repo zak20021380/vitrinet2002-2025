@@ -3019,39 +3019,33 @@ function cleanScheduleData() {
 setTimeout(() => cleanScheduleData(), 100);
 
 
-// --- Force 24h input if environment is 12h (AM/PM)
+// --- Force 24h input and allow flexible hour format
   function enforce24hTimeInput(id) {
     const input = document.getElementById(id);
     if (!input) return;
 
-    const sample = new Date().toLocaleTimeString(undefined, { hour: 'numeric' });
-    const is12h = /AM|PM|am|pm|قبل|بعد|ظهر|عصر/.test(sample);
+    input.type = 'text';
+    input.setAttribute('inputmode', 'numeric');
+    input.placeholder = 'HH:MM';
 
-    if (is12h) {
-      input.type = 'text';
-      input.setAttribute('inputmode', 'numeric');
-      input.setAttribute('pattern', '^([01]\\d|2[0-3]):([0-5]\\d)$');
-      input.placeholder = 'HH:MM';
+    input.addEventListener('input', (e) => {
+      let v = toEn(e.target.value).replace(/[^\d]/g, '').slice(0, 4);
+      if (v.length >= 3) v = v.slice(0, 2) + ':' + v.slice(2);
+      e.target.value = toFa(v);
+    });
 
-      input.addEventListener('input', (e) => {
-        let v = toEn(e.target.value).replace(/[^\d]/g, '').slice(0, 4);
-        if (v.length >= 3) v = v.slice(0, 2) + ':' + v.slice(2);
-        e.target.value = toFa(v);
-      });
+    input.addEventListener('blur', () => {
+      const ok = normalizeTime(input.value);
+      if (!ok) {
+        input.value = '';
+        UIComponents.showToast('فرمت ساعت باید HH:MM باشد.', 'info');
+      } else {
+        input.value = toFa(ok);
+      }
+    });
 
-      input.addEventListener('blur', () => {
-        const ok = normalizeTime(input.value);
-        if (!ok) {
-          input.value = '';
-          UIComponents.showToast('فرمت ساعت باید HH:MM باشد.', 'info');
-        } else {
-          input.value = toFa(ok);
-        }
-      });
-
-      const initVal = normalizeTime(input.value);
-      if (initVal) input.value = toFa(initVal);
-    }
+    const initVal = normalizeTime(input.value);
+    if (initVal) input.value = toFa(initVal);
   }
 
   // wire up
