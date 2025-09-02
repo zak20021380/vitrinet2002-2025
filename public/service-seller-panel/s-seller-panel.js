@@ -1173,24 +1173,28 @@ destroy() {
           const prev = booking.status;
           booking.status = newStatus;
           persistBookings();
-          fetch(`${API_BASE}/api/seller-bookings/${id}/status`, {
-            method: 'PATCH',
-            headers: { 'Content-Type': 'application/json' },
-            credentials: 'include',
-            body: JSON.stringify({ status: newStatus })
-          })
-            .then(r => {
-              if (!r.ok) throw new Error('STATUS_UPDATE_FAILED');
-              const faStatus = { confirmed: 'تایید شد', completed: 'انجام شد', cancelled: 'لغو شد' };
-              UIComponents?.showToast?.(`وضعیت نوبت ${faStatus[newStatus] || newStatus}`, 'success');
-              Notifications?.add(`نوبت ${booking.customerName} ${faStatus[newStatus] || newStatus}`, 'booking');
+
+          const validId = /^[0-9a-fA-F]{24}$/.test(id);
+          if (validId) {
+            fetch(`${API_BASE}/api/seller-bookings/${id}/status`, {
+              method: 'PATCH',
+              headers: { 'Content-Type': 'application/json' },
+              credentials: 'include',
+              body: JSON.stringify({ status: newStatus })
             })
-            .catch(err => {
-              console.error('UPDATE_BOOKING_STATUS_FAILED', err);
-              booking.status = prev;
-              persistBookings();
-              UIComponents?.showToast?.('خطا در به‌روزرسانی وضعیت نوبت', 'error');
-            });
+              .then(r => {
+                if (!r.ok) throw new Error('STATUS_UPDATE_FAILED');
+                const faStatus = { confirmed: 'تایید شد', completed: 'انجام شد', cancelled: 'لغو شد' };
+                UIComponents?.showToast?.(`وضعیت نوبت ${faStatus[newStatus] || newStatus}`, 'success');
+                Notifications?.add(`نوبت ${booking.customerName} ${faStatus[newStatus] || newStatus}`, 'booking');
+              })
+              .catch(err => {
+                console.error('UPDATE_BOOKING_STATUS_FAILED', err);
+                booking.status = prev;
+                persistBookings();
+                UIComponents?.showToast?.('خطا در به‌روزرسانی وضعیت نوبت', 'error');
+              });
+          }
         }
         self.renderBookings(self.currentBookingFilter || 'all');
         self.renderPlans && self.renderPlans();
