@@ -39,6 +39,20 @@ router.get('/footer', auth('seller'), async (req, res) => {
   }
 });
 
+// Public endpoint to get a seller's footer image by ID
+router.get('/footer/:sellerId', async (req, res) => {
+  try {
+    const appearance = await ShopAppearance.findOne({ sellerId: req.params.sellerId });
+    const url = makeFullUrl(req, appearance?.footerImage || '');
+    if (!url) {
+      return res.status(404).json({ message: 'تصویر فوتر موجود نیست.' });
+    }
+    res.json({ url });
+  } catch (err) {
+    res.status(500).json({ message: 'خطا در دریافت تصویر فوتر.' });
+  }
+});
+
 // POST upload new footer image
 router.post('/footer', auth('seller'), upload.single('image'), async (req, res) => {
   try {
