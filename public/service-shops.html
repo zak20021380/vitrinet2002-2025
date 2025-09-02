@@ -2837,7 +2837,8 @@ if (document.readyState === 'loading') {
 /* Map container with footer image */
 .footer-image-map {
   position: relative;
-  min-height: 200px;
+  max-width: 500px;
+  margin: 0 auto;
 }
 
 .footer-image-map::before {
@@ -2852,6 +2853,8 @@ if (document.readyState === 'loading') {
   width: 100%;
   height: auto;
   display: block;
+  max-height: 400px;
+  object-fit: cover;
 }
 
 /* Fallback text styling when no image */
@@ -3319,7 +3322,7 @@ function updateSummary(avg, count, ratings) {
                     </div>
                 </div>
                 <div class="mb-4">
-                    <div id="map-container" class="w-full min-h-[200px] rounded-lg overflow-hidden bg-gray-200">نقشه در حال بارگذاری...</div>
+                    <div id="map-container" class="w-full max-w-md mx-auto min-h-[200px] rounded-lg overflow-hidden bg-gray-200">نقشه در حال بارگذاری...</div>
                 </div>
             </div>
             <div class="mb-6">
@@ -4509,6 +4512,7 @@ function updateSellerProfile(seller) {
     const mapContainer = document.getElementById('map-container');
     if (mapContainer && imageUrl) {
       mapContainer.classList.add('footer-image-map');
+      mapContainer.classList.remove('min-h-[200px]', 'bg-gray-200');
       mapContainer.innerHTML = `<img src="${imageUrl}" alt="تصویر برند فروشگاه">`;
     }
     
@@ -4574,6 +4578,7 @@ async function loadFooterImage(sellerId) {
 
       // Update map container with the footer image
       mapContainer.classList.add('footer-image-map');
+      mapContainer.classList.remove('min-h-[200px]', 'bg-gray-200');
       mapContainer.innerHTML = `<img src="${imageUrl}" alt="تصویر برند فروشگاه">`;
 
       // Show footer image element if exists
