@@ -1872,7 +1872,10 @@ initBrandImages(){
 
 async loadFooterImage(){
   try {
-    const res = await fetch('/api/branding/footer', { credentials: 'include' });
+    const res = await fetch(bust(`${API_BASE}/api/branding/footer`), {
+      credentials: 'include',
+      ...NO_CACHE
+    });
     if (!res.ok) return;
     const data = await res.json();
     this.brandImages.footer = data.url || '';
@@ -2270,7 +2273,11 @@ _handleFooterUpload(evt){
   const formData = new FormData();
   formData.append('image', file);
 
-  fetch('/api/branding/footer', { method:'POST', body: formData, credentials:'include' })
+  fetch(`${API_BASE}/api/branding/footer`, {
+    method:'POST',
+    body: formData,
+    credentials:'include'
+  })
     .then(res => {
       if(!res.ok) throw new Error();
       UIComponents.showToast('تصویر فوتر ذخیره شد.', 'success');
@@ -2279,7 +2286,10 @@ _handleFooterUpload(evt){
 }
 
 _removeFooterImage(){
-  fetch('/api/branding/footer', { method:'DELETE', credentials:'include' }).catch(()=>{});
+  fetch(`${API_BASE}/api/branding/footer`, {
+    method:'DELETE',
+    credentials:'include'
+  }).catch(()=>{});
   this.brandImages.footer = '';
   this.applyBrandImages();
   UIComponents.showToast('تصویر فوتر حذف شد.', 'info');
