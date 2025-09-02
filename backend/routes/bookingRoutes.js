@@ -12,4 +12,7 @@ router.get('/seller-bookings/me', auth('seller'), ctrl.getSellerBookings);
 // تغییر وضعیت نوبت
 router.patch('/seller-bookings/:id/status', auth('seller'), ctrl.updateBookingStatus);
 
+// بررسی وضعیت نوبت بر اساس شماره تلفن مشتری
+router.get('/bookings/status', ctrl.checkBookingStatus);
+
 module.exports = router;

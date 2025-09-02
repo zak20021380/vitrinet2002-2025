@@ -935,9 +935,25 @@ function showToastDark(message, {type='success', durationMs=2600} = {}) {
       try { return JSON.parse(localStorage.getItem(KEY_LAST) || 'null'); } catch(e){ return null; }
     }
     function saveLast(obj){ localStorage.setItem(KEY_LAST, JSON.stringify(obj)); }
-    function hasPending(){
+    async function hasPending(){
       const b = readLast();
-      return !!(b && b.status === 'pending');
+      if (!b || b.status !== 'pending') return false;
+
+      const base = window.__API_BASE__ || '';
+      try {
+        const res = await fetch(`${base}/api/bookings/status?phone=${encodeURIComponent(b.phone || '')}`);
+        if (res.ok) {
+          const data = await res.json();
+          if (data.status && data.status !== 'pending') {
+            saveLast({ ...b, status: data.status });
+            return false;
+          }
+          return data.status === 'pending';
+        }
+      } catch (err) {
+        console.warn('hasPending check failed', err);
+      }
+      return true;
     }
     function fillBlockedModal(){
       const b = readLast(); if (!b) return;
@@ -949,8 +965,8 @@ function showToastDark(message, {type='success', durationMs=2600} = {}) {
     }
 
     // بازکننده ویزارد با چک «pending»
-    function openBookingWizard(prefill){
-      if (hasPending()) {
+    async function openBookingWizard(prefill){
+      if (await hasPending()) {
         fillBlockedModal();
         if (typeof window.openModalById === 'function') window.openModalById('pendingBlockModal');
         return false;
@@ -2316,7 +2332,7 @@ async function goCTA() {
   };
   const hasPending =
     typeof window.hasPendingBooking === 'function'
-      ? window.hasPendingBooking()
+      ? await window.hasPendingBooking()
       : lsHasPending();
 
   if (hasPending) {
