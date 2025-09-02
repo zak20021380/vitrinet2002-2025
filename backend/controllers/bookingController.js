@@ -10,6 +10,15 @@ exports.createBooking = async (req, res) => {
       return res.status(400).json({ message: 'اطلاعات نوبت ناقص است.' });
     }
 
+    // جلوگیری از ثبت نوبت جدید در صورت وجود نوبت در انتظار تایید
+    const pendingExists = await Booking.exists({
+      customerPhone,
+      status: 'pending'
+    });
+    if (pendingExists) {
+      return res.status(409).json({ message: 'نوبت قبلی شما هنوز توسط فروشنده تایید یا رد نشده است.' });
+    }
+
     let sid = sellerId;
     let serviceTitle = service;
     if (serviceId) {
@@ -89,15 +98,23 @@ exports.checkBookingStatus = async (req, res) => {
       return res.status(400).json({ message: 'شماره تلفن الزامی است.' });
     }
 
-    const booking = await Booking.findOne({ customerPhone: phone })
+    // اگر نوبت معلقی وجود داشته باشد، همان را برگردانیم
+    const pending = await Booking.findOne({ customerPhone: phone, status: 'pending' })
+      .sort({ createdAt: -1 })
+      .select('status');
+    if (pending) {
+      return res.json({ status: 'pending' });
+    }
+
+    const last = await Booking.findOne({ customerPhone: phone })
       .sort({ createdAt: -1 })
       .select('status');
 
-    if (!booking) {
+    if (!last) {
       return res.json({ status: 'none' });
     }
 
-    return res.json({ status: booking.status });
+    return res.json({ status: last.status });
   } catch (err) {
     console.error('checkBookingStatus error:', err);
     return res.status(500).json({ message: 'خطای داخلی سرور.' });

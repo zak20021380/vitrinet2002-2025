@@ -3909,13 +3909,13 @@ document.addEventListener('DOMContentLoaded', function () {
           time: selectedTime
         })
       });
-
       if (!res.ok) {
-        throw new Error(`HTTP ${res.status}`);
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.message || `HTTP ${res.status}`);
       }
     } catch (err) {
       console.error('submit booking failed', err);
-      alert('خطا در ثبت نوبت. لطفاً دوباره تلاش کنید.');
+      alert(err.message || 'خطا در ثبت نوبت. لطفاً دوباره تلاش کنید.');
       bookingSuccess.classList.add('hidden');
       step4.classList.remove('hidden');
       return;
