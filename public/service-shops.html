@@ -3867,9 +3867,10 @@ document.addEventListener('DOMContentLoaded', function () {
     bookingSuccess.classList.remove('hidden');
 
     try {
-      await fetch(`${API_ROOT}/api/bookings`, {
+      const res = await fetch(`${API_ROOT}/api/bookings`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
         body: JSON.stringify({
           serviceId: selectedServiceId,
           service: selectedService,
@@ -3880,8 +3881,16 @@ document.addEventListener('DOMContentLoaded', function () {
           time: selectedTime
         })
       });
+
+      if (!res.ok) {
+        throw new Error(`HTTP ${res.status}`);
+      }
     } catch (err) {
       console.error('submit booking failed', err);
+      alert('خطا در ثبت نوبت. لطفاً دوباره تلاش کنید.');
+      bookingSuccess.classList.add('hidden');
+      step4.classList.remove('hidden');
+      return;
     }
 
     // ذخیره برای گیمیفیکیشن

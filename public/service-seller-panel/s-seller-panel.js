@@ -209,8 +209,19 @@ async function fetchInitialData() {
       bookingsPromise
     ]);
 
-    if (Array.isArray(bookings)) {
+    if (Array.isArray(bookings) && bookings.length) {
       MOCK_DATA.bookings = bookings;
+    } else {
+      const local = JSON.parse(localStorage.getItem('vitreenet-bookings') || '[]');
+      if (local.length) {
+        MOCK_DATA.bookings = local.map(b => ({
+          id: b.id || Date.now() + Math.random(),
+          customerName: b.name || b.customerName || '',
+          service: b.service || '',
+          time: b.time || '',
+          status: 'pending'
+        }));
+      }
     }
 
     if (sellerRes.ok) {
