@@ -1,3 +1,4 @@
+const mongoose = require('mongoose');
 const Booking = require('../models/booking');
 const SellerService = require('../models/seller-services');
 
@@ -57,6 +58,10 @@ exports.updateBookingStatus = async (req, res) => {
     const allowed = ['pending', 'confirmed', 'completed', 'cancelled'];
     if (!allowed.includes(status)) {
       return res.status(400).json({ message: 'وضعیت نامعتبر است.' });
+    }
+
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ message: 'شناسه نوبت نامعتبر است.' });
     }
 
     const booking = await Booking.findOneAndUpdate(
