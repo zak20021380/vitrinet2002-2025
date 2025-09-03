@@ -1143,12 +1143,20 @@ destroy() {
         </div>
         <div class="booking-actions">
           <span class="status-badge status-${b.status}">${statusLabel[b.status] || b.status}</span>
-          <button type="button" class="btn-secondary btn-icon-text status-change-btn" data-id="${b._id || b.id}" aria-haspopup="true" aria-expanded="false">تغییر وضعیت</button>
-          <div class="status-menu" role="menu">
-            <button type="button" class="status-option" data-status="confirmed">تایید نوبت</button>
-            <button type="button" class="status-option" data-status="completed">انجام شده</button>
-            <button type="button" class="status-option" data-status="cancelled">لغو نوبت</button>
+          <div class="status-wrapper">
+            <button type="button" class="btn-secondary btn-icon-text status-change-btn" data-id="${b._id || b.id}" aria-haspopup="true" aria-expanded="false">تغییر وضعیت</button>
+            <div class="status-menu" role="menu">
+              <button type="button" class="status-option" data-status="confirmed">تایید نوبت</button>
+              <button type="button" class="status-option" data-status="completed">انجام شده</button>
+              <button type="button" class="status-option" data-status="cancelled">لغو نوبت</button>
+            </div>
           </div>
+          <button type="button" class="btn-icon btn-danger delete-booking-btn" data-id="${b._id || b.id}" aria-label="حذف نوبت">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <polyline points="3 6 5 6 21 6"/>
+              <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6m5 0V4a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v2"/>
+            </svg>
+          </button>
         </div>
       </article>
     `).join('');
@@ -1157,21 +1165,41 @@ destroy() {
   if (!listEl.dataset.statusBound) {
     const self = this;
     listEl.addEventListener('click', function(e) {
+      const delBtn = e.target.closest('.delete-booking-btn');
       const btn = e.target.closest('.status-change-btn');
       const option = e.target.closest('.status-option');
+      if (delBtn) {
+        const id = delBtn.dataset.id;
+        if (!confirm('آیا از حذف این نوبت مطمئن هستید؟')) return;
+        const idx = MOCK_DATA.bookings.findIndex(b => (b._id || b.id) == id);
+        if (idx > -1) {
+          MOCK_DATA.bookings.splice(idx, 1);
+          persistBookings();
+          const validId = /^[0-9a-fA-F]{24}$/.test(id);
+          if (validId) {
+            fetch(`${API_BASE}/api/seller-bookings/${id}`, { method: 'DELETE', credentials: 'include' })
+              .catch(err => console.error('DELETE_BOOKING_FAILED', err));
+          }
+          self.renderBookings(self.currentBookingFilter || 'all');
+          self.renderPlans && self.renderPlans();
+          UIComponents?.showToast?.('نوبت حذف شد', 'success');
+        }
+        e.stopPropagation();
+        return;
+      }
       if (btn) {
         const expanded = btn.getAttribute('aria-expanded') === 'true';
         listEl.querySelectorAll('.status-menu').forEach(m => m.classList.remove('open'));
         listEl.querySelectorAll('.status-change-btn').forEach(b => b.setAttribute('aria-expanded', 'false'));
         if (!expanded) {
           btn.setAttribute('aria-expanded', 'true');
-          btn.nextElementSibling.classList.add('open');
+          btn.parentElement.querySelector('.status-menu').classList.add('open');
         }
         e.stopPropagation();
         return;
       }
       if (option) {
-        const id = option.closest('.booking-actions').querySelector('.status-change-btn').dataset.id;
+        const id = option.closest('.status-wrapper').querySelector('.status-change-btn').dataset.id;
         const newStatus = option.dataset.status;
         const booking = MOCK_DATA.bookings.find(b => (b._id || b.id) == id);
         if (booking) {
