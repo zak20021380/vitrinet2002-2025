@@ -905,81 +905,93 @@
       canceled:  {text:'لغو شده',  cls:'cancel', icon:'fa-ban'},
       done:      {text:'انجام شده', cls:'done', icon:'fa-check-double'}
     }[s] || {text:s, cls:'wait', icon:'fa-clock'});
-    // Demo data with store information
-    const demoBookings = [
-      {id:'b1', service:'اصلاح مو و صورت', datetime:'2025-09-06T15:30:00', status:'confirmed', price:280000, barber:'استاد رضایی', storeId:'s1', storeName:'شعبه مرکزی', storeLocation:'میدان ولیعصر'},
-      {id:'b2', service:'اصلاح ریش', datetime:'2025-09-10T18:00:00', status:'pending', price:150000, barber:'استاد کریمی', storeId:'s2', storeName:'شعبه غرب', storeLocation:'سعادت آباد'},
-      {id:'b3', service:'کوتاهی مو', datetime:'2025-08-02T14:00:00', status:'done', price:180000, barber:'استاد احمدی', storeId:'s1', storeName:'شعبه مرکزی', storeLocation:'میدان ولیعصر'},
-      {id:'b4', service:'رنگ مو', datetime:'2025-07-15T11:00:00', status:'done', price:350000, barber:'استاد رضایی', storeId:'s3', storeName:'شعبه شرق', storeLocation:'تهرانپارس'}
-    ];
-    
-    const demoNotifs = [
-      {id:'n1', title:'رزرو تایید شد ✓', body:'نوبت جمعه ۱۵:۳۰ تایید شد', ts:'2025-08-16T10:00:00', read:false, type:'success'},
-      {id:'n2', title:'یادآوری نوبت', body:'فردا ساعت ۱۸:۰۰ نوبت دارید', ts:'2025-08-15T20:00:00', read:true, type:'reminder'},
-      {id:'n3', title:'امتیاز ویژه', body:'شما به باشگاه مشتریان ویژه اضافه شدید', ts:'2025-08-14T12:00:00', read:false, type:'special'}
-    ];
-    // Storage
-    const K = {
-      bookings:'profile.bookings',
-      notifications:'profile.notifications',
-      name:'profile.name',
-      phone:'profile.phone',
-      loyalty:'profile.loyalty',
-      loyaltyStores:'profile.loyaltyStores'  // === LOYALTY START ===
-    };
-    // Initialize
-    (function seed() {
-      if (!localStorage.getItem(K.bookings)) localStorage.setItem(K.bookings, JSON.stringify(demoBookings));
-      if (!localStorage.getItem(K.notifications)) localStorage.setItem(K.notifications, JSON.stringify(demoNotifs));
-    })();
-    function getBookings() { try { return JSON.parse(localStorage.getItem(K.bookings)) || []; } catch { return []; } }
-    function setBookings(v) { localStorage.setItem(K.bookings, JSON.stringify(v)); }
-    function getNotifs() { try { return JSON.parse(localStorage.getItem(K.notifications)) || []; } catch { return []; } }
-    function setNotifs(v) { localStorage.setItem(K.notifications, JSON.stringify(v)); }
-    
+    // Data containers fetched from backend
+    let bookings = [];
+    let notifs = [];
+    let loyaltyInfo = { claimed: 0, history: [] };
+    let loyaltyStores = [];
+    let profileName = '';
+    let profilePhone = '';
+
+    const mapStatus = (s) => ({ pending:'pending', confirmed:'confirmed', cancelled:'canceled', completed:'done' }[s] || s);
+
+    async function loadBookings() {
+      try {
+        const res = await fetch('/api/seller-bookings/me', { credentials: 'include' });
+        const data = await res.json();
+        bookings = (data.items || []).map(b => ({
+          id: b._id,
+          service: b.service,
+          datetime: `${b.date}T${b.time}`,
+          status: mapStatus(b.status),
+          price: b.price || 0,
+          barber: b.barber || '',
+          storeId: b.storeId,
+          storeName: b.storeName || '',
+          storeLocation: b.storeLocation || ''
+        }));
+      } catch (err) {
+        console.error('loadBookings failed', err);
+        bookings = [];
+      }
+    }
+
+    async function loadNotifs() {
+      try {
+        const res = await fetch('/api/notifications', { credentials: 'include' });
+        const data = await res.json();
+        notifs = (data || []).map(n => ({
+          id: n._id,
+          title: n.title || 'اعلان',
+          body: n.message,
+          ts: n.createdAt,
+          read: n.read,
+          type: 'info'
+        }));
+      } catch (err) {
+        console.error('loadNotifs failed', err);
+        notifs = [];
+      }
+    }
+
+    async function initLoyaltyStore() {
+      try {
+        const res = await fetch('/api/loyalty', { credentials: 'include' });
+        loyaltyStores = await res.json() || [];
+      } catch (err) {
+        console.error('load loyalty failed', err);
+        loyaltyStores = [];
+      }
+    }
+
+    async function loadProfile() {
+      try {
+        const res = await fetch('/api/user/profile', { credentials: 'include' });
+        if (res.ok) {
+          const data = await res.json();
+          profileName = [data.firstname, data.lastname].filter(Boolean).join(' ');
+          profilePhone = data.phone || '';
+          $('#userName').textContent = profileName || '';
+          $('#userPhone').textContent = profilePhone || '';
+          $('#fullName').value = profileName;
+          $('#mobile').value = profilePhone;
+        }
+      } catch (err) {
+        console.error('load profile failed', err);
+      }
+    }
+
+    function getBookings() { return bookings; }
+    function setBookings(v) { bookings = v; }
+    function getNotifs() { return notifs; }
+    function setNotifs(v) { notifs = v; }
+    function getLoyaltyStores() { return loyaltyStores; }
+    function setLoyaltyStores(stores) { loyaltyStores = stores; }
+    function getLoyalty() { return loyaltyInfo; }
+    function setLoyalty(v) { loyaltyInfo = v; }
+
     // === LOYALTY START ===
     const REWARD = { every: 5, label: 'جایزه وفاداری' };
-    
-    function initLoyaltyStore() {
-      if (!localStorage.getItem(K.loyalty)) {
-        localStorage.setItem(K.loyalty, JSON.stringify({ claimed: 0, history: [] }));
-      }
-      
-      // Initialize store loyalty data
-      if (!localStorage.getItem(K.loyaltyStores)) {
-        // Demo stores data - in a real app this would come from server
-        const stores = [
-          { storeId: 's1', storeName: 'شعبه مرکزی', completed: 8, claimed: 1 },
-          { storeId: 's2', storeName: 'شعبه غرب', completed: 5, claimed: 0 },
-          { storeId: 's3', storeName: 'شعبه شرق', completed: 12, claimed: 2 }
-        ];
-        localStorage.setItem(K.loyaltyStores, JSON.stringify(stores));
-      }
-    }
-    
-    function getLoyaltyStores() {
-      try {
-        return JSON.parse(localStorage.getItem(K.loyaltyStores)) || [];
-      } catch {
-        return [];
-      }
-    }
-    
-    function setLoyaltyStores(stores) {
-      localStorage.setItem(K.loyaltyStores, JSON.stringify(stores));
-    }
-    
-    function getLoyalty() {
-      try {
-        return JSON.parse(localStorage.getItem(K.loyalty)) || { claimed: 0, history: [] };
-      } catch {
-        return { claimed: 0, history: [] };
-      }
-    }
-    
-    function setLoyalty(v) {
-      localStorage.setItem(K.loyalty, JSON.stringify(v));
-    }
     
     function calcLoyalty(store) {
       if (!store) return { completed: 0, claimed: 0, unclaimed: 0, progress: 0, toNext: 0 };
@@ -1355,20 +1367,32 @@ function claimReward() {
         </button>
       `).join('');
     }
-    function toggleRead(id) {
+    async function toggleRead(id) {
       const items = getNotifs();
       const i = items.findIndex(n => n.id === id);
-      if (i > -1) {
-        items[i].read = !items[i].read;
-        setNotifs(items);
-        renderNotifs();
+      if (i > -1 && !items[i].read) {
+        try {
+          await fetch(`/api/notifications/${id}/read`, { method: 'PUT', credentials: 'include' });
+          items[i].read = true;
+          setNotifs(items);
+          renderNotifs();
+        } catch (err) {
+          console.error('mark read failed', err);
+        }
       }
     }
-    function markAllRead() {
-      const items = getNotifs().map(n => ({ ...n, read: true }));
-      setNotifs(items);
-      renderNotifs();
-      showToast('همه خوانده شد', 'success');
+    async function markAllRead() {
+      const items = getNotifs();
+      const unread = items.filter(n => !n.read);
+      try {
+        await Promise.all(unread.map(n => fetch(`/api/notifications/${n.id}/read`, { method: 'PUT', credentials: 'include' })));
+        unread.forEach(n => n.read = true);
+        setNotifs(items);
+        renderNotifs();
+        showToast('همه خوانده شد', 'success');
+      } catch (err) {
+        console.error('mark all read failed', err);
+      }
     }
     // Navigation
     function openBooking() {
@@ -1405,8 +1429,8 @@ function claimReward() {
       }
     }
     function checkProfileCompletion() {
-      const name = localStorage.getItem(K.name);
-      const phone = localStorage.getItem(K.phone);
+      const name = profileName;
+      const phone = profilePhone;
       const prompt = $('#profilePrompt');
       if (!prompt) return;
       if (!name || !phone) {
@@ -1483,13 +1507,23 @@ function claimReward() {
         if (e.key === 'Backspace' && !e.target.value && idx > 0) arr[idx - 1].focus();
       });
     });
-    $('#otpForm').addEventListener('submit', (e) => {
+    $('#otpForm').addEventListener('submit', async (e) => {
       e.preventDefault();
       const code = Array.from($$('.otp-input')).map(i => toEn(i.value)).join('');
       if (code === verificationCode) {
         const { name, phone } = pendingProfile;
-        localStorage.setItem(K.name, name);
-        localStorage.setItem(K.phone, phone);
+        try {
+          await fetch('/api/user/profile', {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
+            body: JSON.stringify({ name, phone })
+          });
+        } catch (err) {
+          console.error('profile update failed', err);
+        }
+        profileName = name;
+        profilePhone = phone;
         $('#userName').textContent = name;
         $('#userPhone').textContent = phone;
         checkProfileCompletion();
@@ -1583,20 +1617,10 @@ function claimReward() {
     }
     
     // Initialize
-    (function init() {
-      const name = localStorage.getItem(K.name);
-      const phone = localStorage.getItem(K.phone);
-      if (name) {
-        $('#userName').textContent = name;
-        $('#fullName').value = name;
-      }
-      if (phone) {
-        $('#userPhone').textContent = phone;
-        $('#mobile').value = phone;
-      }
+    (async function init() {
+      await Promise.all([loadProfile(), loadBookings(), loadNotifs(), initLoyaltyStore()]);
       checkProfileCompletion();
-      
-      initLoyaltyStore();  // === LOYALTY START ===
+
       renderBookings();
 
       // Update stats
@@ -1604,7 +1628,7 @@ function claimReward() {
       const now = new Date();
       const active = bookings.filter(b => new Date(b.datetime) >= now && b.status !== 'canceled').length;
       const completed = bookings.filter(b => b.status === 'done').length;
-      
+
       setStat('total', bookings.length);
       setStat('active', active);
       setStat('done', completed);
