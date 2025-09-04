@@ -2876,7 +2876,7 @@ if (document.readyState === 'loading') {
 
 <!-- JavaScript for Reviews (fixed) -->
 <script>
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', async function() {
   // ====== Elements ======
   const reviewsModal = document.getElementById('reviewsModal');
   const reviewsModalContent = document.getElementById('reviews-modal-content');
@@ -2954,10 +2954,9 @@ document.addEventListener('DOMContentLoaded', function() {
   // ====== Identity / Scope ======
   const body = document.body;
   const storeId = body?.dataset?.storeId || 'default';
-  // اجازه بده از data-attr هم sellerId و shopurl رو بگیریم
-  const shopurl = new URL(location.href).searchParams.get('shopurl')
-                || body?.dataset?.shopurl || '';
-  let sellerId = body?.dataset?.sellerId || null;
+  // مقادیر shopurl و sellerId بعداً تعیین می‌شن
+  let shopurl = '';
+  let sellerId = null;
 
   const userId = window.__APP_USER__?.id;
   const isAdmin = window.__APP_USER__?.isAdmin || window.__APP_USER__?.role === 'admin';
@@ -3348,7 +3347,19 @@ function updateSummary(avg, count, ratings) {
   });
 
   // ====== Boot ======
-  loadReviews();
+  const loc = await getShopUrlFromLocation();
+  if (typeof loc === 'object') {
+    shopurl = loc.shopurl || '';
+    if (loc.sellerId) sellerId = loc.sellerId;
+  } else {
+    shopurl = loc || '';
+  }
+  if (!shopurl && !sellerId) {
+    shopurl = body?.dataset?.shopurl || '';
+    sellerId = body?.dataset?.sellerId || null;
+  }
+
+  await loadReviews();
 });
 </script>
 
