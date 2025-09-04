@@ -3008,6 +3008,7 @@ document.addEventListener('DOMContentLoaded', function() {
   // ====== Data I/O ======
   async function fetchByUrl(url) {
     const res = await fetch(url, { credentials: 'include' });
+    if (res.status === 404) return null;
     if (!res.ok) throw new Error('HTTP '+res.status);
     return res.json();
   }
@@ -3019,23 +3020,20 @@ document.addEventListener('DOMContentLoaded', function() {
       if (shopurl) {
         // حالت معمول: از URL شاپ می‌گیریم
         data = await fetchByUrl(`/api/shopAppearance/url/${encodeURIComponent(shopurl)}`);
-        sellerId = data.sellerId || sellerId;
+        sellerId = data?.sellerId || sellerId;
       } else if (sellerId) {
         // fallback اگر shopurl نبود ولی sellerId داریم
-        try {
-          data = await fetchByUrl(`/api/shopAppearance/${encodeURIComponent(sellerId)}`);
-        } catch {
-          // اگر این اندپوینت پشتیبانی نشد، فقط ادامه می‌دیم تا POST کار کنه
-          data = { sellerId };
-        }
-      } else {
+        data = await fetchByUrl(`/api/shopAppearance/${encodeURIComponent(sellerId)}`);
+      }
+
+      if (!sellerId) {
         showToast('sellerId یا shopurl مشخص نیست؛ ثبت نظر غیرممکنه.', 'error');
         renderReviews([]); // خالی
         updateSummary(0, 0, []);
         return;
       }
 
-      const reviews = await fetchByUrl(`/api/shopAppearance/${encodeURIComponent(sellerId)}/reviews`);
+      const reviews = await fetchByUrl(`/api/shopAppearance/${encodeURIComponent(sellerId)}/reviews`) || [];
       const avg = typeof data?.averageRating === 'number'
                     ? data.averageRating
                     : (reviews.length ? (reviews.reduce((s,r)=>s+(+r.score||0),0) / reviews.length) : 0);
