@@ -4938,6 +4938,8 @@ function cardTemplate(item) {
   bindReserveClicks(servicesContainer);
 
   let LAST_PUBLIC = { items: [], sellerId: null };
+  // expose to global scope for booking scripts
+  window.LAST_PUBLIC = LAST_PUBLIC;
 
   function renderList() {
     if (!servicesContainer) return;
@@ -4972,9 +4974,13 @@ async function renderAll() {
       apiGetPublic(shopurl),
       apiGetSeller(shopurl)
     ]);
-    
+
 LAST_PUBLIC = data; // { items, sellerId }
+window.LAST_PUBLIC = LAST_PUBLIC; // keep global in sync
 updateSellerProfile(seller);
+
+// ensure sellerId is available for later requests
+document.body.dataset.sellerId = data.sellerId || seller._id || seller.id;
 
 // Store seller data for s-profile.html navigation
 localStorage.setItem('seller', JSON.stringify({
