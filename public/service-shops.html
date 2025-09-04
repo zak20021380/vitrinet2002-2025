@@ -1519,6 +1519,8 @@ function showToastDark(message, {type='success', durationMs=2600} = {}) {
       const toFa = s => (s||'').replace(/\d/g, d => '۰۱۲۳۴۵۶۷۸۹'[parseInt(d,10)]);
       const scrollInto = el => { if(!el) return; const top = el.getBoundingClientRect().top + scrollY - 80; window.scrollTo({top,behavior:'smooth'}); };
       const genId = () => 'c_' + Math.random().toString(36).slice(2,10) + Date.now().toString(36).slice(-4);
+      const getCookie = name => document.cookie.split('; ').find(r => r.startsWith(name + '='))?.split('=')[1] || '';
+      const setCookie = (name, value) => { document.cookie = name + '=' + encodeURIComponent(value) + ';path=/'; };
 
       // کد مادر برای محیط توسعه (قبول «۰۰۰۰»)
       const MASTER_OTP = '0000';
@@ -1678,15 +1680,15 @@ function showToastDark(message, {type='success', durationMs=2600} = {}) {
 
       // ذخیره مشتری با customerId ثابت
       function persistCustomer(){
-        const existing = localStorage.getItem('customerId');
+        const existing = getCookie('customerId');
         const cid = st.customerId || existing || genId();
         st.customerId = cid;
-        localStorage.setItem('customerId', cid);
-        localStorage.setItem('customerName', st.name);
-        localStorage.setItem('customerPhone', st.phone);
+        setCookie('customerId', cid);
+        setCookie('customerName', st.name);
+        setCookie('customerPhone', st.phone);
         // اینجا می‌تونی به سرور هم sync کنی
         // fetch('/api/customers/upsert', {method:'POST', body:JSON.stringify({id:cid,name:st.name,phone:st.phone})})
-      }
+        }
 
       // تایید OTP
       verifyBtn.addEventListener('click', ()=>{
@@ -1697,11 +1699,11 @@ function showToastDark(message, {type='success', durationMs=2600} = {}) {
         persistCustomer();
 
         const auth = { id: st.customerId, name: st.name, phone: st.phone };
-localStorage.setItem('auth_user', JSON.stringify(auth)); // Loyalty همینو می‌خونه
-window.__APP_USER__ = auth; // اگه جایی از window استفاده می‌کنی
+        setCookie('auth_user', JSON.stringify(auth)); // ذخیره به صورت کوکی
+        window.__APP_USER__ = auth; // اگه جایی از window استفاده می‌کنی
 
-// اختیاری: به Loyalty خبر بده UI رو رفرش کنه
-document.dispatchEvent(new Event('auth:changed'));
+        // اختیاری: به Loyalty خبر بده UI رو رفرش کنه
+        document.dispatchEvent(new Event('auth:changed'));
         fillConfirm();
         showStep(5);
         confirmBtn.disabled = false; // فقط بعد از تایید OTP
@@ -1726,24 +1728,23 @@ confirmBtn.addEventListener('click', () => {
   if (confirmBtn.disabled) return;
   confirmBtn.disabled = true;
 
-  // ارسال نهایی رزرو به همراه customerId ثابت (دمو/اختیاری)
-  const payload = {
-    customerId: st.customerId,
-    name:   st.name,
-    phone:  st.phone,
-    service:st.service,
-    date:   st.date,
-    time:   st.time,
-    price:  st.price
-  };
-  // اگر بک‌اند داری این رو باز کن:
-  // fetch('/api/bookings', {
-  //   method:'POST',
-  //   headers:{'Content-Type':'application/json'},
-  //   body: JSON.stringify(payload)
-  // });
+    // ارسال نهایی رزرو به سرور
+    const payload = {
+      sellerId,
+      service: st.service,
+      customerName: st.name,
+      customerPhone: st.phone,
+      date: st.date,
+      time: st.time
+    };
+    fetch('/api/bookings', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify(payload)
+    }).catch(err => console.error('booking failed', err));
 
-  // پرکردن داده‌های مودال «در انتظار تایید»
+    // پرکردن داده‌های مودال «در انتظار تایید»
   const maskPhone = (p => {
     const v = (p || '').replace(/\D/g,'');
     if (v.length < 8) return v;
@@ -1760,31 +1761,13 @@ confirmBtn.addEventListener('click', () => {
   if (pbTime)    pbTime.textContent    = st.time    || '';
   if (pbPhone)   pbPhone.textContent   = maskPhone;
 
-  // 🔒 ذخیره رزرو «در انتظار تایید» برای گیت رزرو
-  try {
-    const pending = {
-      id:       (typeof genId === 'function' ? genId() : ('b_' + Date.now())),
-      status:   'pending',
-      service:  st.service,
-      date:     st.date,
-      time:     st.time,
-      phone:    st.phone,
-      createdAt: Date.now()
-    };
-
-    if (window.__BOOKING_GUARD__?.saveLast) {
-      window.__BOOKING_GUARD__.saveLast(pending);
-    } else {
-      // fallback
-      localStorage.setItem('vt:lastBooking', JSON.stringify(pending));
-    }
-
     // (اختیاری) اعلام یک ایونت برای سایر بخش‌ها
-    document.dispatchEvent(new CustomEvent('booking:pending', { detail: pending }));
-  } catch (e) {
-    // نذار UI خراب شه
-    console.warn('save pending booking failed', e);
-  }
+    try {
+      const pending = { service: st.service, date: st.date, time: st.time, phone: st.phone };
+      document.dispatchEvent(new CustomEvent('booking:pending', { detail: pending }));
+    } catch (e) {
+      console.warn('notify pending booking failed', e);
+    }
 
   // نمایش فقط مودال «در انتظار تایید»
   if (typeof window.openModalById === 'function') {
@@ -1821,14 +1804,14 @@ confirmBtn.addEventListener('click', () => {
       });
 
       // ---- init: پر کردن خودکار از localStorage (بدون تغییر customerId)
-      const saved = {
-        cid: localStorage.getItem('customerId'),
-        name: localStorage.getItem('customerName'),
-        phone: localStorage.getItem('customerPhone')
-      };
-      if (saved.cid) st.customerId = saved.cid;
-      if (saved.name) nameInp.value = saved.name;
-      if (saved.phone) phoneInp.value = saved.phone; // نمایش لاتین
+        const saved = {
+          cid: getCookie('customerId'),
+          name: decodeURIComponent(getCookie('customerName') || ''),
+          phone: getCookie('customerPhone')
+        };
+        if (saved.cid) st.customerId = saved.cid;
+        if (saved.name) nameInp.value = saved.name;
+        if (saved.phone) phoneInp.value = saved.phone; // نمایش لاتین
       // ولیدیشن اولیه
       (function initButtons(){
         next1.disabled = true; next2.disabled = true; next3.disabled = true; confirmBtn.disabled = true;

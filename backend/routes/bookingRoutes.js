@@ -6,6 +6,9 @@ const ctrl = require('../controllers/bookingController');
 // ایجاد نوبت جدید (عمومی)
 router.post('/bookings', ctrl.createBooking);
 
+// دریافت نوبت‌های کاربر بر اساس شماره تلفن
+router.get('/bookings', ctrl.getCustomerBookings);
+
 // دریافت نوبت‌های فروشنده لاگین شده
 router.get('/seller-bookings/me', auth('seller'), ctrl.getSellerBookings);
 
