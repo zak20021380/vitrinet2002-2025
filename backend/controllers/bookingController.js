@@ -90,6 +90,25 @@ exports.updateBookingStatus = async (req, res) => {
   }
 };
 
+// دریافت نوبت‌ها بر اساس شماره تلفن مشتری
+exports.getCustomerBookings = async (req, res) => {
+  try {
+    const { phone } = req.query || {};
+    if (!phone) {
+      return res.status(400).json({ message: 'شماره تلفن الزامی است.' });
+    }
+
+    const items = await Booking.find({ customerPhone: phone })
+      .sort({ createdAt: -1 })
+      .lean();
+
+    return res.json({ items });
+  } catch (err) {
+    console.error('getCustomerBookings error:', err);
+    return res.status(500).json({ message: 'خطای داخلی سرور.' });
+  }
+};
+
 // بررسی آخرین وضعیت نوبت بر اساس شماره تلفن مشتری
 exports.checkBookingStatus = async (req, res) => {
   try {

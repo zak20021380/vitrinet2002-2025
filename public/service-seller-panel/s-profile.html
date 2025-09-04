@@ -905,6 +905,7 @@
       canceled:  {text:'لغو شده',  cls:'cancel', icon:'fa-ban'},
       done:      {text:'انجام شده', cls:'done', icon:'fa-check-double'}
     }[s] || {text:s, cls:'wait', icon:'fa-clock'});
+    const getCookie = name => document.cookie.split('; ').find(r => r.startsWith(name + '='))?.split('=')[1] || '';
     // Data containers fetched from backend
     let bookings = [];
     let notifs = [];
@@ -914,43 +915,41 @@
     let profilePhone = '';
 
     // Update bottom navigation links to point to the seller's public shop page
-    (function updateNavLinks() {
-      try {
-        const data = JSON.parse(localStorage.getItem('seller') || '{}');
-        if (data.shopurl) {
-          const base = `../service-shops.html?shopurl=${encodeURIComponent(data.shopurl)}`;
-          const homeLink = document.getElementById('homeLink');
-          const bookingLink = document.getElementById('bookingLink');
-          if (homeLink) homeLink.href = base;
-          if (bookingLink) bookingLink.href = `${base}#booking-wizard`;
+      (function updateNavLinks() {
+        try {
+          const data = JSON.parse(getCookie('seller') || '{}');
+          if (data.shopurl) {
+            const base = `../service-shops.html?shopurl=${encodeURIComponent(data.shopurl)}`;
+            const homeLink = document.getElementById('homeLink');
+            const bookingLink = document.getElementById('bookingLink');
+            if (homeLink) homeLink.href = base;
+            if (bookingLink) bookingLink.href = `${base}#booking-wizard`;
+          }
+        } catch (err) {
+          console.error('update nav links failed', err);
         }
-      } catch (err) {
-        console.error('update nav links failed', err);
-      }
-    })();
+      })();
 
     const mapStatus = (s) => ({ pending:'pending', confirmed:'confirmed', cancelled:'canceled', completed:'done' }[s] || s);
 
-    async function loadBookings() {
-      try {
-        const res = await fetch('/api/seller-bookings/me', { credentials: 'include' });
-        const data = await res.json();
-        bookings = (data.items || []).map(b => ({
-          id: b._id,
-          service: b.service,
-          datetime: `${b.date}T${b.time}`,
-          status: mapStatus(b.status),
-          price: b.price || 0,
-          barber: b.barber || '',
-          storeId: b.storeId,
-          storeName: b.storeName || '',
-          storeLocation: b.storeLocation || ''
-        }));
-      } catch (err) {
-        console.error('loadBookings failed', err);
-        bookings = [];
+      async function loadBookings() {
+        try {
+          const phone = getCookie('customerPhone');
+          if (!phone) { bookings = []; return; }
+          const res = await fetch(`/api/bookings?phone=${encodeURIComponent(phone)}`);
+          const data = await res.json();
+          bookings = (data.items || []).map(b => ({
+            id: b._id,
+            service: b.service,
+            datetime: `${b.date}T${b.time}`,
+            status: mapStatus(b.status),
+            price: b.price || 0
+          }));
+        } catch (err) {
+          console.error('loadBookings failed', err);
+          bookings = [];
+        }
       }
-    }
 
     async function loadNotifs() {
       try {
@@ -980,22 +979,18 @@
       }
     }
 
-    async function loadProfile() {
-      try {
-        const res = await fetch('/api/user/profile', { credentials: 'include' });
-        if (res.ok) {
-          const data = await res.json();
-          profileName = [data.firstname, data.lastname].filter(Boolean).join(' ');
-          profilePhone = data.phone || '';
+      async function loadProfile() {
+        try {
+          profileName = decodeURIComponent(getCookie('customerName') || '');
+          profilePhone = getCookie('customerPhone') || '';
           $('#userName').textContent = profileName || '';
           $('#userPhone').textContent = profilePhone || '';
           $('#fullName').value = profileName;
           $('#mobile').value = profilePhone;
+        } catch (err) {
+          console.error('load profile failed', err);
         }
-      } catch (err) {
-        console.error('load profile failed', err);
       }
-    }
 
     function getBookings() { return bookings; }
     function setBookings(v) { bookings = v; }
