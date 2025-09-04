@@ -688,12 +688,12 @@
   <!-- Bottom Navigation -->
   <nav class="bottom-nav fixed bottom-0 left-0 right-0 px-2 py-2 md:hidden z-40 rounded-t-3xl">
     <div class="grid grid-cols-3 gap-1">
-      <a href="../service-shops.html" class="nav-item flex flex-col items-center py-3 rounded-xl">
+      <a id="homeLink" href="../service-shops.html" class="nav-item flex flex-col items-center py-3 rounded-xl">
         <i class="fas fa-home text-xl mb-1"></i>
         <span class="text-xs font-semibold">خانه</span>
       </a>
 
-      <a href="../service-shops.html#booking-wizard" class="nav-item flex flex-col items-center py-3 rounded-xl">
+      <a id="bookingLink" href="../service-shops.html#booking-wizard" class="nav-item flex flex-col items-center py-3 rounded-xl">
         <i class="fas fa-calendar-plus text-xl mb-1"></i>
         <span class="text-xs font-semibold">رزرو</span>
       </a>
@@ -912,6 +912,22 @@
     let loyaltyStores = [];
     let profileName = '';
     let profilePhone = '';
+
+    // Update bottom navigation links to point to the seller's public shop page
+    (function updateNavLinks() {
+      try {
+        const data = JSON.parse(localStorage.getItem('seller') || '{}');
+        if (data.shopurl) {
+          const base = `../service-shops.html?shopurl=${encodeURIComponent(data.shopurl)}`;
+          const homeLink = document.getElementById('homeLink');
+          const bookingLink = document.getElementById('bookingLink');
+          if (homeLink) homeLink.href = base;
+          if (bookingLink) bookingLink.href = `${base}#booking-wizard`;
+        }
+      } catch (err) {
+        console.error('update nav links failed', err);
+      }
+    })();
 
     const mapStatus = (s) => ({ pending:'pending', confirmed:'confirmed', cancelled:'canceled', completed:'done' }[s] || s);
 
