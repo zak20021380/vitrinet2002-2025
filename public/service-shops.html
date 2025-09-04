@@ -2895,6 +2895,14 @@ document.addEventListener('DOMContentLoaded', function() {
   const rateNowChip = document.getElementById('rate-now-chip');
   if (rateNowChip) rateNowChip.addEventListener('click', () => writeReviewBtn?.click());
 
+  function setReviewActions(enabled) {
+    [showAllBtn, writeReviewBtn, writeReviewModalBtn, rateNowChip].forEach(btn => {
+      if (!btn) return;
+      btn.disabled = !enabled;
+      btn.classList.toggle('hidden', !enabled);
+    });
+  }
+
   // ====== Form refs ======
   const reviewForm = document.getElementById('review-form');
   const ratingStars = document.querySelectorAll('.rating-star');
@@ -3013,6 +3021,15 @@ document.addEventListener('DOMContentLoaded', function() {
         showToast('sellerId یا shopurl مشخص نیست؛ ثبت نظر غیرممکنه.', 'error');
         renderReviews([]); // خالی
         updateSummary(0, 0, []);
+        setReviewActions(false);
+        return;
+      }
+
+      if (!/^[0-9a-fA-F]{24}$/.test(sellerId)) {
+        showToast('شناسه فروشنده نامعتبر است', 'error');
+        renderReviews([]);
+        updateSummary(0, 0, []);
+        setReviewActions(false);
         return;
       }
 
@@ -3026,11 +3043,13 @@ document.addEventListener('DOMContentLoaded', function() {
 
       updateSummary(avg, cnt, reviews);
       renderReviews(reviews);
+      setReviewActions(true);
     } catch (err) {
       console.error('load reviews failed', err);
       showToast('لود نظرات ناموفق بود.', 'error');
       renderReviews([]);
       updateSummary(0, 0, []);
+      setReviewActions(false);
     }
   }
 
@@ -3280,12 +3299,15 @@ function updateSummary(avg, count, ratings) {
     if (!selectedRating) { showToast('لطفاً امتیاز بده 🙂', 'info'); return; }
     if (!reviewTextarea || reviewTextarea.value.trim().length < 20) { showToast('متن نظر حداقل ۲۰ کاراکتر باشه.', 'error'); return; }
 
-    // مطمئن شو sellerId داریم
+    // مطمئن شو sellerId داریم و معتبره
     if (!sellerId) {
       // تلاش آخر: دوباره از سرور بگیر
       try { await loadReviews(); } catch {}
     }
-    if (!sellerId) { showToast('sellerId نامشخصه؛ ثبت نظر ممکن نیست.', 'error'); return; }
+    if (!sellerId || !/^[0-9a-fA-F]{24}$/.test(sellerId)) {
+      showToast(sellerId ? 'شناسه فروشنده نامعتبر است' : 'sellerId نامشخصه؛ ثبت نظر ممکن نیست.', 'error');
+      return;
+    }
 
     const payload = {
       rating: selectedRating,
