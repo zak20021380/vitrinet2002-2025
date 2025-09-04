@@ -10,6 +10,14 @@ exports.createBooking = async (req, res) => {
       return res.status(400).json({ message: 'اطلاعات نوبت ناقص است.' });
     }
 
+    // validate object ids to avoid CastErrors
+    if (serviceId && !mongoose.Types.ObjectId.isValid(serviceId)) {
+      return res.status(400).json({ message: 'شناسه سرویس نامعتبر است.' });
+    }
+    if (sellerId && !mongoose.Types.ObjectId.isValid(sellerId)) {
+      return res.status(400).json({ message: 'شناسه فروشنده نامعتبر است.' });
+    }
+
     // جلوگیری از ثبت نوبت جدید در صورت وجود نوبت در انتظار تایید
     const pendingExists = await Booking.exists({
       customerPhone,
@@ -26,6 +34,10 @@ exports.createBooking = async (req, res) => {
       if (!svc) return res.status(404).json({ message: 'سرویس یافت نشد.' });
       sid = svc.sellerId;
       serviceTitle = svc.title;
+    }
+
+    if (!mongoose.Types.ObjectId.isValid(sid)) {
+      return res.status(400).json({ message: 'شناسه فروشنده نامعتبر است.' });
     }
 
     const booking = await Booking.create({
