@@ -105,7 +105,10 @@ async createService(payload) {
       credentials: 'include',
       ...NO_CACHE
     });
-    if (!r.ok && r.status !== 304) throw new Error('FETCH_BOOKINGS_FAILED');
+    if (r.status === 401) {
+      throw { status: 401, message: 'UNAUTHORIZED' };
+    }
+    if (!r.ok && r.status !== 304) throw { status: r.status, message: 'FETCH_BOOKINGS_FAILED' };
     const raw = this._unwrap(await this._json(r));
     const arr = Array.isArray(raw) ? raw : [];
     return arr.map(b => ({
@@ -200,14 +203,21 @@ async deletePortfolioItem(id) {
 async function fetchInitialData() {
   try {
     const bookingsPromise = API.getBookings().catch(err => {
+      if (err && err.status === 401) throw err;
       console.error('FETCH_BOOKINGS_FAILED', err);
       return [];
     });
+
     const [sellerRes, servicesRes, bookings] = await Promise.all([
       fetch(bust(`${API_BASE}/api/sellers/me`), { credentials: 'include', ...NO_CACHE }),
       fetch(bust(`${API_BASE}/api/seller-services/me/services`), { credentials: 'include', ...NO_CACHE }),
       bookingsPromise
     ]);
+
+    if (sellerRes.status === 401 || servicesRes.status === 401) {
+      window.location.href = 'login.html';
+      return;
+    }
 
     const localBookings = JSON.parse(localStorage.getItem('vitreenet-bookings') || '[]');
 
@@ -273,6 +283,10 @@ async function fetchInitialData() {
       }
     }
   } catch (err) {
+    if (err && err.status === 401) {
+      window.location.href = 'login.html';
+      return;
+    }
     console.error('Error loading initial data', err);
 
     // Fallback seller info when API is unreachable
