@@ -924,6 +924,11 @@
             const base = `../service-shops.html?shopurl=${encodeURIComponent(data.shopurl)}`;
             if (homeLink) homeLink.href = base;
             if (bookingLink) bookingLink.href = `${base}#booking-wizard`;
+          } else if (data._id || data.id) {
+            const sid = data._id || data.id;
+            const base = `../service-shops.html?sellerId=${encodeURIComponent(sid)}`;
+            if (homeLink) homeLink.href = base;
+            if (bookingLink) bookingLink.href = `${base}#booking-wizard`;
           } else {
             if (homeLink) homeLink.href = '../service-shops.html';
             if (bookingLink) bookingLink.href = '../index.html#booking-wizard';
