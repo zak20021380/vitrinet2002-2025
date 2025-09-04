@@ -1800,7 +1800,7 @@ async initPortfolio() {
             const items = await API.getPortfolio();
             StorageManager.set('vit_portfolio', items);
         } catch (err) {
-            console.warn('getPortfolio failed; using local fallback', err);
+            console.warn('getPortfolio failed; using local fallback:', err?.message);
 
             // Fallback to local storage
             if (!StorageManager.get('vit_portfolio')) {
