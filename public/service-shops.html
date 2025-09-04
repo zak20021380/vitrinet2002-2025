@@ -4476,11 +4476,24 @@ window.addEventListener('load', () => {
     else alert(msg);
   }
 
-  // shopurl را فقط از پارامتر کوئری می‌خواند
-  function getShopUrlFromLocation() {
+  // دریافت shopurl از پارامترها؛ در صورت نبودن، تلاش برای تبدیل sellerId به shopurl
+  async function getShopUrlFromLocation() {
     const u = new URL(location.href);
     const q = u.searchParams.get('shopurl');
-    return q ? q.trim() : '';
+    if (q) return q.trim();
+
+    const sid = u.searchParams.get('sellerId');
+    if (!sid) return '';
+
+    try {
+      const res = await fetch(`${API_ROOT}/api/shopAppearance/${encodeURIComponent(sid)}`);
+      if (!res.ok) throw new Error('appearance not found');
+      const data = await res.json();
+      return data.customUrl ? data.customUrl.trim() : '';
+    } catch (err) {
+      console.error('get shopurl by sellerId failed', err);
+      return '';
+    }
   }
 
   function show404() {
@@ -4824,7 +4837,7 @@ function cardTemplate(item) {
   }
 
 async function renderAll() {
-  const shopurl = getShopUrlFromLocation();
+  const shopurl = await getShopUrlFromLocation();
   if (!shopurl) { show404(); return; }
 
   try {
