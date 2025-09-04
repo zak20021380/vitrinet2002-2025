@@ -43,6 +43,30 @@ router.get('/profile', auth('user'), async (req, res) => {
 });
 
 // ───────────────────────────────
+// POST/PUT /api/user/profile
+// ذخیره یا به‌روزرسانی اطلاعات پروفایل کاربر
+// ───────────────────────────────
+async function saveProfile(req, res) {
+  try {
+    const { name, phone, customerId } = req.body || {};
+
+    if (!name || !phone) {
+      return res.status(400).json({ message: 'نام و شماره تماس الزامی است' });
+    }
+
+    // در این نسخهٔ ساده فقط موفقیت را برمی‌گردانیم
+    // می‌توان در آینده ذخیره‌سازی در پایگاه‌داده را نیز افزود
+    res.json({ message: 'پروفایل با موفقیت ذخیره شد', name, phone, customerId });
+  } catch (err) {
+    console.error('profile save error:', err);
+    res.status(500).json({ message: 'خطا در ذخیره پروفایل کاربر' });
+  }
+}
+
+router.post('/profile', saveProfile);
+router.put('/profile', saveProfile);
+
+// ───────────────────────────────
 // POST /api/user/favorites
 // ───────────────────────────────
 router.post('/favorites', auth(), async (req, res) => {
