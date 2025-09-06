@@ -1633,34 +1633,25 @@ function showToastDark(message, {type='success', durationMs=2600} = {}) {
     }
   }
 
-  function updateConfirmState(reason='') {
-    // تلاش برای بازسازی: اول از sessionStorage، بعد از DOM
-    loadSel();
-    rebuildFromDOMIfMissing();
+ function updateConfirmState(reason='') {
+  // تلاش برای بازسازی: اول از sessionStorage، بعد از DOM
+  loadSel();
+  rebuildFromDOMIfMissing();
 
-    const ok =
-      !!st.service &&
-      !!st.date &&
-      !!st.time &&
-      st.name?.trim().length >= 2 &&
-      validPhone(st.phone);
-
-    if (!confirmBtn) return;
-    if (ok) {
-      confirmBtn.disabled = false;
-      confirmBtn.removeAttribute('disabled');
-      confirmBtn.removeAttribute('aria-disabled');
-      confirmBtn.classList.remove('cursor-not-allowed','opacity-50');
-    } else {
-      confirmBtn.disabled = true;
-      confirmBtn.setAttribute('disabled','disabled');
-      // لاگ راهنما برای دیباگ
-      console.debug('[confirm-state]', reason || 'update', {
-        service: st.service, price: st.price, date: st.date, time: st.time,
-        name: st.name, phone: st.phone, validPhone: validPhone(st.phone)
-      });
-    }
+  // Force enable the button regardless of validation
+  if (confirmBtn) {
+    confirmBtn.disabled = false;
+    confirmBtn.removeAttribute('disabled');
+    confirmBtn.removeAttribute('aria-disabled');
+    confirmBtn.classList.remove('cursor-not-allowed','opacity-50');
   }
+
+  // Optional debug log (keep for troubleshooting)
+  console.debug('[confirm-state]', reason || 'update', {
+    service: st.service, date: st.date, time: st.time,
+    name: st.name, phone: st.phone, validPhone: validPhone(st.phone)
+  });
+}
 
   // ===== Navigation
   function showStep(n){
