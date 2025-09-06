@@ -2030,6 +2030,30 @@ function showToastDark(message, {type='success', durationMs=2600} = {}) {
       } else {
         alert(error?.message || 'رزرو ناموفق');
       }
+      // ذخیرهٔ رزرو با وضعیت «در انتظار» در صورت شکست سرور
+      const localId = Date.now().toString(36);
+      localStorage.setItem('vt:lastBooking', JSON.stringify({
+        id: localId,
+        service: st.service,
+        date: st.date,
+        time: st.time,
+        phone: st.phone,
+        createdAt: new Date().toISOString(),
+        status: 'pending'
+      }));
+      const failBookings = JSON.parse(localStorage.getItem('vitreenet-bookings') || '[]');
+      failBookings.push({
+        id: localId,
+        service: st.service,
+        price: st.price,
+        date: st.date,
+        time: st.time,
+        name: st.name,
+        phone: st.phone,
+        timestamp: new Date().toISOString(),
+        status: 'pending'
+      });
+      localStorage.setItem('vitreenet-bookings', JSON.stringify(failBookings));
       confirmBtn.disabled = false;
       confirmBtn.removeAttribute('disabled');
       confirmBtn.innerHTML = originalText;
