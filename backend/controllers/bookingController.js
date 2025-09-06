@@ -95,6 +95,12 @@ exports.createBooking = async (req, res) => {
       if (err.name === 'ValidationError') {
         return res.status(400).json({ message: 'اطلاعات نوبت نامعتبر است.' });
       }
+      // handle duplicate bookings gracefully
+      if (err.code === 11000) {
+        return res
+          .status(409)
+          .json({ message: 'این بازه زمانی قبلاً رزرو شده است.' });
+      }
       return res.status(500).json({ message: 'خطا در ایجاد نوبت.' });
     }
 
