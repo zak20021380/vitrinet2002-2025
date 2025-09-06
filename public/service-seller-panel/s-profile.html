@@ -943,19 +943,36 @@
       async function loadBookings() {
         try {
           const phone = getCookie('customerPhone');
-          if (!phone) { bookings = []; return; }
-          const res = await fetch(`/api/bookings?phone=${encodeURIComponent(phone)}`);
-          const data = await res.json();
-          bookings = (data.items || []).map(b => ({
-            id: b._id,
-            service: b.service,
-            datetime: `${b.date}T${b.time}`,
-            status: mapStatus(b.status),
-            price: b.price || 0
-          }));
+          if (phone) {
+            const res = await fetch(`/api/bookings?phone=${encodeURIComponent(phone)}`);
+            if (res.ok) {
+              const data = await res.json();
+              setBookings((data.items || []).map(b => ({
+                id: b._id,
+                service: b.service,
+                datetime: `${b.date}T${b.time}`,
+                status: mapStatus(b.status),
+                price: b.price || 0
+              })));
+              return;
+            }
+          }
+          throw new Error('no server data');
         } catch (err) {
           console.error('loadBookings failed', err);
-          bookings = [];
+          try {
+            const local = JSON.parse(localStorage.getItem('vitreenet-bookings') || '[]');
+            setBookings(local.map(b => ({
+              id: b.id,
+              service: b.service,
+              datetime: `${b.date}T${b.time}`,
+              status: mapStatus(b.status),
+              price: b.price || 0
+            })));
+          } catch (e) {
+            console.error('load local bookings failed', e);
+            setBookings([]);
+          }
         }
       }
 
@@ -1001,7 +1018,22 @@
       }
 
     function getBookings() { return bookings; }
-    function setBookings(v) { bookings = v; }
+    function setBookings(v) {
+      bookings = v;
+      try {
+        const raw = v.map(b => ({
+          id: b.id,
+          service: b.service,
+          date: b.datetime ? b.datetime.split('T')[0] : '',
+          time: b.datetime ? b.datetime.split('T')[1]?.slice(0,5) : '',
+          status: b.status || 'pending',
+          price: b.price || 0
+        }));
+        localStorage.setItem('vitreenet-bookings', JSON.stringify(raw));
+      } catch (err) {
+        console.error('save bookings failed', err);
+      }
+    }
     function getNotifs() { return notifs; }
     function setNotifs(v) { notifs = v; }
     function getLoyaltyStores() { return loyaltyStores; }
