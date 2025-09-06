@@ -15,13 +15,17 @@ const bookingSchema = new mongoose.Schema({
   service: { type: String, required: true },
   customerName: { type: String, required: true },
   customerPhone: { type: String, required: true, index: true },
-  date: { type: String, required: true },
-  time: { type: String, required: true },
+  // Align stored field names with existing MongoDB indexes
+  bookingDate: { type: String, required: true, alias: 'date' },
+  startTime: { type: String, required: true, alias: 'time' },
   status: {
     type: String,
     enum: ['pending', 'confirmed', 'completed', 'cancelled'],
     default: 'pending'
   }
 }, { timestamps: true });
+
+// Ensure same unique compound index as database (prevents overlapping bookings)
+bookingSchema.index({ bookingDate: 1, startTime: 1, sellerId: 1 }, { unique: true });
 
 module.exports = mongoose.models.Booking || mongoose.model('Booking', bookingSchema);
