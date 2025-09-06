@@ -1,0 +1,891 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>مشکلات خودرو - انجمن فارسی</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #1a73e8;
+            --primary-dark: #0d47a1;
+            --secondary: #4caf50;
+            --danger: #f44336;
+            --warning: #ff9800;
+            --light: #f5f5f5;
+            --dark: #212121;
+            --gray: #757575;
+            --border: #e0e0e0;
+            --card-shadow: 0 2px 10px rgba(0,0,0,0.08);
+            --transition: all 0.3s ease;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Vazir', Tahoma, sans-serif;
+        }
+
+        body {
+            background-color: #f8f9fa;
+            color: var(--dark);
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 15px;
+        }
+
+        /* Header Styles */
+        header {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white;
+            padding: 15px 0;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .logo i {
+            font-size: 28px;
+        }
+
+        .logo h1 {
+            font-size: 22px;
+            font-weight: 700;
+        }
+
+        .search-bar {
+            flex: 1;
+            max-width: 500px;
+            margin: 0 20px;
+            position: relative;
+        }
+
+        .search-bar input {
+            width: 100%;
+            padding: 12px 20px 12px 50px;
+            border-radius: 30px;
+            border: none;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            font-size: 16px;
+            transition: var(--transition);
+        }
+
+        .search-bar input:focus {
+            outline: none;
+            background: rgba(255, 255, 255, 0.3);
+            box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.5);
+        }
+
+        .search-bar i {
+            position: absolute;
+            left: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: white;
+        }
+
+        .user-actions {
+            display: flex;
+            gap: 15px;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border-radius: 30px;
+            border: none;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background-color: white;
+            color: var(--primary);
+        }
+
+        .btn-primary:hover {
+            background-color: #f0f0f0;
+            transform: translateY(-2px);
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 2px solid white;
+            color: white;
+        }
+
+        .btn-outline:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+            transform: translateY(-2px);
+        }
+
+        /* Main Content */
+        .main-content {
+            display: flex;
+            gap: 20px;
+            margin: 20px 0;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            flex: 0 0 280px;
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: var(--card-shadow);
+            height: fit-content;
+        }
+
+        .sidebar-section {
+            margin-bottom: 25px;
+        }
+
+        .sidebar-section h3 {
+            font-size: 18px;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid var(--border);
+            color: var(--primary-dark);
+        }
+
+        .categories-list {
+            list-style: none;
+        }
+
+        .categories-list li {
+            padding: 10px 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .categories-list li:last-child {
+            border-bottom: none;
+        }
+
+        .categories-list a {
+            text-decoration: none;
+            color: var(--dark);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: var(--transition);
+        }
+
+        .categories-list a:hover {
+            color: var(--primary);
+            transform: translateX(-5px);
+        }
+
+        .categories-list i {
+            width: 24px;
+            text-align: center;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+        }
+
+        .stat-card {
+            background: var(--light);
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .stat-card .number {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .stat-card .label {
+            font-size: 14px;
+            color: var(--gray);
+        }
+
+        /* Forum Content */
+        .forum-content {
+            flex: 1;
+        }
+
+        .forum-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .forum-header h2 {
+            font-size: 24px;
+            color: var(--dark);
+        }
+
+        .sort-options {
+            display: flex;
+            gap: 10px;
+        }
+
+        .sort-btn {
+            padding: 8px 15px;
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: 30px;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .sort-btn.active, .sort-btn:hover {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        /* Post Card */
+        .post-card {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: var(--card-shadow);
+            transition: var(--transition);
+            border-right: 4px solid var(--primary);
+        }
+
+        .post-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .post-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .user-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: var(--primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 20px;
+            margin-left: 15px;
+        }
+
+        .user-info {
+            flex: 1;
+        }
+
+        .user-info h4 {
+            font-size: 16px;
+            margin-bottom: 5px;
+        }
+
+        .user-info .meta {
+            font-size: 14px;
+            color: var(--gray);
+        }
+
+        .post-category {
+            background: var(--light);
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 14px;
+            color: var(--primary);
+        }
+
+        .post-title {
+            font-size: 20px;
+            margin-bottom: 10px;
+            color: var(--dark);
+        }
+
+        .post-content {
+            margin-bottom: 20px;
+            color: #444;
+            line-height: 1.7;
+        }
+
+        .post-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-top: 1px solid var(--border);
+            padding-top: 15px;
+        }
+
+        .post-actions {
+            display: flex;
+            gap: 15px;
+        }
+
+        .action-btn {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            background: none;
+            border: none;
+            color: var(--gray);
+            cursor: pointer;
+            transition: var(--transition);
+            padding: 5px 10px;
+            border-radius: 5px;
+        }
+
+        .action-btn:hover {
+            background: var(--light);
+            color: var(--primary);
+        }
+
+        .action-btn.liked {
+            color: var(--danger);
+        }
+
+        .action-btn.reported {
+            color: var(--warning);
+        }
+
+        .post-stats {
+            display: flex;
+            gap: 20px;
+        }
+
+        .stat {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            color: var(--gray);
+        }
+
+        /* Pagination */
+        .pagination {
+            display: flex;
+            justify-content: center;
+            margin: 30px 0;
+            gap: 10px;
+        }
+
+        .page-btn {
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            background: white;
+            border: 1px solid var(--border);
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .page-btn.active, .page-btn:hover {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        /* Footer */
+        footer {
+            background: var(--dark);
+            color: white;
+            padding: 30px 0;
+            margin-top: 40px;
+        }
+
+        .footer-content {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 30px;
+        }
+
+        .footer-section h3 {
+            font-size: 20px;
+            margin-bottom: 20px;
+            position: relative;
+            padding-bottom: 10px;
+        }
+
+        .footer-section h3::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            right: 0;
+            width: 50px;
+            height: 2px;
+            background: var(--primary);
+        }
+
+        .footer-links {
+            list-style: none;
+        }
+
+        .footer-links li {
+            margin-bottom: 10px;
+        }
+
+        .footer-links a {
+            color: #ccc;
+            text-decoration: none;
+            transition: var(--transition);
+        }
+
+        .footer-links a:hover {
+            color: white;
+            padding-right: 5px;
+        }
+
+        .copyright {
+            text-align: center;
+            padding-top: 20px;
+            margin-top: 20px;
+            border-top: 1px solid rgba(255,255,255,0.1);
+            color: #aaa;
+            font-size: 14px;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 992px) {
+            .main-content {
+                flex-direction: column;
+            }
+            
+            .sidebar {
+                width: 100%;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .header-content {
+                flex-direction: column;
+                gap: 15px;
+            }
+            
+            .search-bar {
+                order: 3;
+                margin: 10px 0 0;
+                max-width: 100%;
+            }
+            
+            .user-actions {
+                width: 100%;
+                justify-content: center;
+            }
+            
+            .forum-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 15px;
+            }
+            
+            .sort-options {
+                align-self: stretch;
+                justify-content: space-between;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .post-footer {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 15px;
+            }
+            
+            .post-actions, .post-stats {
+                width: 100%;
+                justify-content: space-between;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <div class="container">
+            <div class="header-content">
+                <div class="logo">
+                    <i class="fas fa-car"></i>
+                    <h1>مشکلات خودرو</h1>
+                </div>
+                
+                <div class="search-bar">
+                    <input type="text" placeholder="جستجو در انجمن...">
+                    <i class="fas fa-search"></i>
+                </div>
+                
+                <div class="user-actions">
+                    <button class="btn btn-outline">
+                        <i class="fas fa-user-plus"></i>
+                        ثبت نام
+                    </button>
+                    <button class="btn btn-primary">
+                        <i class="fas fa-sign-in-alt"></i>
+                        ورود
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <div class="container">
+        <div class="main-content">
+            <!-- Sidebar -->
+            <aside class="sidebar">
+                <div class="sidebar-section">
+                    <h3>دسته‌بندی‌ها</h3>
+                    <ul class="categories-list">
+                        <li><a href="#"><i class="fas fa-engine"></i> موتور و سیستم انتقال قدرت</a></li>
+                        <li><a href="#"><i class="fas fa-tire"></i> تعلیق و ترمز</a></li>
+                        <li><a href="#"><i class="fas fa-bolt"></i> سیستم الکتریکی</a></li>
+                        <li><a href="#"><i class="fas fa-oil-can"></i> روغن و سیالات</a></li>
+                        <li><a href="#"><i class="fas fa-wrench"></i> تعمیرات عمومی</a></li>
+                        <li><a href="#"><i class="fas fa-car-crash"></i> مشکلات ایمنی</a></li>
+                        <li><a href="#"><i class="fas fa-thermometer-half"></i> سیستم خنک کننده</a></li>
+                        <li><a href="#"><i class="fas fa-wind"></i> سیستم تهویه</a></li>
+                    </ul>
+                </div>
+                
+                <div class="sidebar-section">
+                    <h3>آمار انجمن</h3>
+                    <div class="stats">
+                        <div class="stat-card">
+                            <div class="number">12,458</div>
+                            <div class="label">پست</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="number">3,241</div>
+                            <div class="label">کاربر</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="number">892</div>
+                            <div class="label">پاسخ</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="number">47</div>
+                            <div class="label">دسته‌بندی</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="sidebar-section">
+                    <h3>کاربران برتر</h3>
+                    <ul class="categories-list">
+                        <li><a href="#"><i class="fas fa-medal"></i> محمد رضایی</a></li>
+                        <li><a href="#"><i class="fas fa-medal"></i> علی محمدی</a></li>
+                        <li><a href="#"><i class="fas fa-medal"></i> حسین کریمی</a></li>
+                        <li><a href="#"><i class="fas fa-medal"></i> مریم احمدی</a></li>
+                        <li><a href="#"><i class="fas fa-medal"></i> سارا حسینی</a></li>
+                    </ul>
+                </div>
+            </aside>
+            
+            <!-- Forum Content -->
+            <main class="forum-content">
+                <div class="forum-header">
+                    <h2>آخرین مشکلات خودرو</h2>
+                    <div class="sort-options">
+                        <button class="sort-btn active">جدیدترین</button>
+                        <button class="sort-btn">محبوب‌ترین</button>
+                        <button class="sort-btn">حل نشده</button>
+                    </div>
+                </div>
+                
+                <!-- Post Cards -->
+                <div class="post-card">
+                    <div class="post-header">
+                        <div class="user-avatar">م ر</div>
+                        <div class="user-info">
+                            <h4>محمد رضایی</h4>
+                            <div class="meta">2 ساعت پیش • پراید 1399</div>
+                        </div>
+                        <div class="post-category">موتور و سیستم انتقال قدرت</div>
+                    </div>
+                    <h3 class="post-title">موتور پرایدم وقتی گرم می‌شه خاموش میشه!</h3>
+                    <p class="post-content">
+                        سلام دوستان. پرایدم وقتی چند دقیقه رانندگی می‌کنم و موتور گرم میشه، ناگهان خاموش میشه. 
+                        این مشکل چند هفسته‌ست که شروع شده. تا حالا کسی با این مشکل مواجه بوده؟
+                    </p>
+                    <div class="post-footer">
+                        <div class="post-actions">
+                            <button class="action-btn liked">
+                                <i class="fas fa-heart"></i>
+                                <span>24</span>
+                            </button>
+                            <button class="action-btn">
+                                <i class="fas fa-comment"></i>
+                                <span>8</span>
+                            </button>
+                            <button class="action-btn reported">
+                                <i class="fas fa-flag"></i>
+                                گزارش
+                            </button>
+                        </div>
+                        <div class="post-stats">
+                            <div class="stat">
+                                <i class="fas fa-eye"></i>
+                                <span>142</span>
+                            </div>
+                            <div class="stat">
+                                <i class="fas fa-clock"></i>
+                                <span>2 ساعت پیش</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="post-card">
+                    <div class="post-header">
+                        <div class="user-avatar">س ح</div>
+                        <div class="user-info">
+                            <h4>سارا حسینی</h4>
+                            <div class="meta">5 ساعت پیش • دنا 1400</div>
+                        </div>
+                        <div class="post-category">سیستم الکتریکی</div>
+                    </div>
+                    <h3 class="post-title">چراغ‌های دنا دارن به صورت ناگهانی خاموش میشن</h3>
+                    <p class="post-content">
+                        سلام. دنای من چراغ‌های جلو و عقبش به صورت ناگهانی خاموش میشن. 
+                        خودرو دارای گارانتی نیست و تعمیرش هم هزینه‌بره. 
+                        اگه کسی راه حلی ساده‌تر داره ممنون میشم راهنمایی کنه.
+                    </p>
+                    <div class="post-footer">
+                        <div class="post-actions">
+                            <button class="action-btn">
+                                <i class="fas fa-heart"></i>
+                                <span>12</span>
+                            </button>
+                            <button class="action-btn">
+                                <i class="fas fa-comment"></i>
+                                <span>5</span>
+                            </button>
+                            <button class="action-btn">
+                                <i class="fas fa-flag"></i>
+                                گزارش
+                            </button>
+                        </div>
+                        <div class="post-stats">
+                            <div class="stat">
+                                <i class="fas fa-eye"></i>
+                                <span>87</span>
+                            </div>
+                            <div class="stat">
+                                <i class="fas fa-clock"></i>
+                                <span>5 ساعت پیش</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="post-card">
+                    <div class="post-header">
+                        <div class="user-avatar">ع م</div>
+                        <div class="user-info">
+                            <h4>علی محمدی</h4>
+                            <div class="meta">1 روز پیش • سمند 1395</div>
+                        </div>
+                        <div class="post-category">تعلیق و ترمز</div>
+                    </div>
+                    <h3 class="post-title">صدا و لرزش عجیب در تعلیق سمند</h3>
+                    <p class="post-content">
+                        وقتی روی دست انداز می‌رم صدای ضربه‌ای زیادی از جلوی خودرو میاد. 
+                        همچنین وقتی ترمز می‌گیرم خودرو کمی به راست می‌کشه. 
+                        آیا ممکنه قطعات تعلیق مشکل داشته باشن؟
+                    </p>
+                    <div class="post-footer">
+                        <div class="post-actions">
+                            <button class="action-btn">
+                                <i class="fas fa-heart"></i>
+                                <span>18</span>
+                            </button>
+                            <button class="action-btn">
+                                <i class="fas fa-comment"></i>
+                                <span>12</span>
+                            </button>
+                            <button class="action-btn">
+                                <i class="fas fa-flag"></i>
+                                گزارش
+                            </button>
+                        </div>
+                        <div class="post-stats">
+                            <div class="stat">
+                                <i class="fas fa-eye"></i>
+                                <span>203</span>
+                            </div>
+                            <div class="stat">
+                                <i class="fas fa-clock"></i>
+                                <span>1 روز پیش</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="post-card">
+                    <div class="post-header">
+                        <div class="user-avatar">م ا</div>
+                        <div class="user-info">
+                            <h4>مریم احمدی</h4>
+                            <div class="meta">2 روز پیش • پژو 206 1390</div>
+                        </div>
+                        <div class="post-category">روغن و سیالات</div>
+                    </div>
+                    <h3 class="post-title">روغن موتور پژو 206 داره سریع تموم میشه</h3>
+                    <p class="post-content">
+                        روزنه کیلومتر ۱۲۰۰۰۰ رو زدم. اخیراً متوجه شدم که روزنه روغن موتور خیلی زود تموم میشه. 
+                        هر ۱۰۰۰ کیلومتر باید یک لیتر اضافه کنم. 
+                        دلیلش چی می‌تونه باشه؟
+                    </p>
+                    <div class="post-footer">
+                        <div class="post-actions">
+                            <button class="action-btn">
+                                <i class="fas fa-heart"></i>
+                                <span>9</span>
+                            </button>
+                            <button class="action-btn">
+                                <i class="fas fa-comment"></i>
+                                <span>7</span>
+                            </button>
+                            <button class="action-btn">
+                                <i class="fas fa-flag"></i>
+                                گزارش
+                            </button>
+                        </div>
+                        <div class="post-stats">
+                            <div class="stat">
+                                <i class="fas fa-eye"></i>
+                                <span>156</span>
+                            </div>
+                            <div class="stat">
+                                <i class="fas fa-clock"></i>
+                                <span>2 روز پیش</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Pagination -->
+                <div class="pagination">
+                    <button class="page-btn"><i class="fas fa-chevron-right"></i></button>
+                    <button class="page-btn active">1</button>
+                    <button class="page-btn">2</button>
+                    <button class="page-btn">3</button>
+                    <button class="page-btn">4</button>
+                    <button class="page-btn">5</button>
+                    <button class="page-btn"><i class="fas fa-chevron-left"></i></button>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>درباره انجمن</h3>
+                    <p>
+                        انجمن مشکلات خودروی فارسی‌زبانان محیطی برای تبادل تجربه و رفع مشکلات خودرویی است. 
+                        در این انجمن می‌توانید سوالات خود را مطرح کرده و از تجربیات سایر کاربران بهره‌مند شوید.
+                    </p>
+                </div>
+                
+                <div class="footer-section">
+                    <h3>دسته‌بندی‌های اصلی</h3>
+                    <ul class="footer-links">
+                        <li><a href="#">موتور و سیستم انتقال قدرت</a></li>
+                        <li><a href="#">سیستم الکتریکی</a></li>
+                        <li><a href="#">تعلیق و ترمز</a></li>
+                        <li><a href="#">روغن و سیالات</a></li>
+                        <li><a href="#">تعمیرات عمومی</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-section">
+                    <h3>لینک‌های مفید</h3>
+                    <ul class="footer-links">
+                        <li><a href="#">قوانین انجمن</a></li>
+                        <li><a href="#">راهنمای عضویت</a></li>
+                        <li><a href="#">سوالات متداول</a></li>
+                        <li><a href="#">تماس با ما</a></li>
+                        <li><a href="#">درباره ما</a></li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="copyright">
+                &copy; 2023 انجمن مشکلات خودرو. تمامی حقوق محفوظ است.
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Simple interactions for demonstration
+        document.addEventListener('DOMContentLoaded', function() {
+            // Like button functionality
+            const likeButtons = document.querySelectorAll('.action-btn');
+            likeButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    if (this.classList.contains('liked')) {
+                        this.classList.remove('liked');
+                        const count = this.querySelector('span');
+                        count.textContent = parseInt(count.textContent) - 1;
+                    } else {
+                        this.classList.add('liked');
+                        const count = this.querySelector('span');
+                        count.textContent = parseInt(count.textContent) + 1;
+                    }
+                });
+            });
+            
+            // Report button functionality
+            const reportButtons = document.querySelectorAll('.action-btn .fa-flag').closest('.action-btn');
+            reportButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    if (this.classList.contains('reported')) {
+                        this.classList.remove('reported');
+                        this.innerHTML = '<i class="fas fa-flag"></i> گزارش';
+                    } else {
+                        this.classList.add('reported');
+                        this.innerHTML = '<i class="fas fa-flag"></i> گزارش شد';
+                    }
+                });
+            });
+            
+            // Sort buttons
+            const sortButtons = document.querySelectorAll('.sort-btn');
+            sortButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    sortButtons.forEach(btn => btn.classList.remove('active'));
+                    this.classList.add('active');
+                });
+            });
+        });
+    </script>
+</body>
+</html>
