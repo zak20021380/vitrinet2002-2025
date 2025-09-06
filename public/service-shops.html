@@ -1898,7 +1898,8 @@ function showToastDark(message, {type='success', durationMs=2600} = {}) {
     cPrice.textContent = (st.price? st.price.toLocaleString('fa-IR'):'۰') + ' تومان';
 
     saveSel();
-    setTimeout(() => updateConfirmState('fillConfirm'), 50);
+    // به جای تأخیر، فوراً وضعیت دکمه تأیید را به‌روزرسانی کن تا در صورت کامل بودن اطلاعات فعال شود
+    updateConfirmState('fillConfirm');
   }
 
   back5.addEventListener('click', ()=>showStep(3));
