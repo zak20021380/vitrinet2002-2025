@@ -963,10 +963,10 @@
           try {
             const local = JSON.parse(localStorage.getItem('vitreenet-bookings') || '[]');
             setBookings(local.map(b => ({
-              id: b.id,
+              id: b.id || b.timestamp || Date.now().toString(36),
               service: b.service,
               datetime: `${b.date}T${b.time}`,
-              status: mapStatus(b.status),
+              status: mapStatus(b.status) || 'pending',
               price: b.price || 0
             })));
           } catch (e) {
