@@ -1945,29 +1945,29 @@ function showToastDark(message, {type='success', durationMs=2600} = {}) {
     const originalText = confirmBtn.innerHTML;
     confirmBtn.innerHTML = '<i class="fas fa-spinner fa-spin ml-2"></i>در حال ثبت رزرو...';
 
-    try {
-      if (!st.service) throw new Error('لطفاً یک خدمت انتخاب کنید.');
-      if (!st.date || !st.time) throw new Error('تاریخ و ساعت را انتخاب کنید.');
-      if (!st.name || !validPhone(st.phone)) throw new Error('نام و شماره موبایل معتبر لازم است.');
+      try {
+        if (!st.service && !st.serviceId) throw new Error('لطفاً یک خدمت انتخاب کنید.');
+        if (!st.date || !st.time) throw new Error('تاریخ و ساعت را انتخاب کنید.');
+        if (!st.name || !validPhone(st.phone)) throw new Error('نام و شماره موبایل معتبر لازم است.');
 
-      const { startISO, endISO } = composeSlotISO(st.date, st.time, st.duration || 60);
-      const sellerId = window.LAST_PUBLIC?.sellerId || document.body.dataset.sellerId || '';
-      if (!sellerId) throw new Error('sellerId خالی است.');
+        const { startISO, endISO } = composeSlotISO(st.date, st.time, st.duration || 60);
+        const sellerId = window.LAST_PUBLIC?.sellerId || document.body.dataset.sellerId || '';
+        if (!sellerId) throw new Error('sellerId خالی است.');
 
-      const payload = {
-        sellerId,
-        service: st.service || '',
-        serviceId: st.serviceId || undefined,
-        customerName: st.name || '',
-        customerPhone: st.phone || '',
-        price: Number(st.price) || 0,
-        date: st.date || '',
-        time: st.time || '',
-        slot: { start: startISO, end: endISO },
-        source: 'service-shops'
-      };
+        const payload = {
+          sellerId,
+          service: st.service || '',
+          serviceId: st.serviceId || undefined,
+          customerName: st.name || '',
+          customerPhone: st.phone || '',
+          price: Number(st.price) || 0,
+          date: st.date || '',
+          time: st.time || '',
+          slot: { start: startISO, end: endISO },
+          source: 'service-shops'
+        };
 
-      const res = await fetch(`${API_ROOT}/api/bookings`, {
+        const res = await fetch(`${API_ROOT}/api/bookings`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
