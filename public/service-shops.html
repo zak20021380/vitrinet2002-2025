@@ -3286,6 +3286,14 @@ document.addEventListener('DOMContentLoaded', async function() {
 
   async function loadReviews() {
     try {
+      // Ensure we have the latest identifiers in case other scripts set them later
+      if (!shopurl) {
+        shopurl = document.body?.dataset?.shopurl || '';
+      }
+      if (!sellerId) {
+        sellerId = document.body?.dataset?.sellerId || window.LAST_PUBLIC?.sellerId || null;
+      }
+
       let data = null;
 
       if (shopurl) {
