@@ -4235,13 +4235,15 @@ document.addEventListener('DOMContentLoaded', function () {
     // ذخیره برای گیمیفیکیشن
     const bookings = JSON.parse(localStorage.getItem('vitreenet-bookings') || '[]');
     bookings.push({
+      id: Date.now().toString(36),
       service: selectedService,
       price: selectedPrice,
       date: selectedDate,
       time: selectedTime,
       name: customerName.value,
       phone: phoneNumber.value,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
+      status: 'pending'
     });
     localStorage.setItem('vitreenet-bookings', JSON.stringify(bookings));
   });
