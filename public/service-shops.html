@@ -1851,8 +1851,8 @@ function updateConfirmState(reason='') {
     stopOtpTimer();
 
     verifyBtn.disabled = true;
-    const originalText = verifyBtn.textContent;
-    verifyBtn.textContent = 'در حال تایید...';
+    const originalHTML = verifyBtn.innerHTML;
+    verifyBtn.innerHTML = '<i class="fas fa-spinner fa-spin ml-2"></i>در حال تایید...';
 
     try {
       const profilePayload = { name: st.name, phone: st.phone, customerId: st.customerId };
@@ -1878,7 +1878,7 @@ function updateConfirmState(reason='') {
       showStep(5);
       requestAnimationFrame(() => updateConfirmState('after-otp'));
       verifyBtn.disabled = false;
-      verifyBtn.textContent = originalText;
+      verifyBtn.innerHTML = originalHTML;
     }
   });
 
