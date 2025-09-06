@@ -1489,8 +1489,7 @@ function showToastDark(message, {type='success', durationMs=2600} = {}) {
       </div>
       <div class="flex space-x-3 space-x-reverse">
         <button id="back-to-step-3" class="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-3 px-6 rounded-full transition-all">بازگشت</button>
-        <button id="confirm-booking" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-full transition-all disabled:bg-gray-400" disabled>تایید نهایی</button>
-      </div>
+<button id="confirm-booking" data-no-loader class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-full transition-all disabled:bg-gray-400" disabled>تایید نهایی</button>      </div>
     </div>
 
     <!-- Success -->
@@ -1633,23 +1632,34 @@ function showToastDark(message, {type='success', durationMs=2600} = {}) {
     }
   }
 
- function updateConfirmState(reason='') {
+function updateConfirmState(reason='') {
   // تلاش برای بازسازی: اول از sessionStorage، بعد از DOM
   loadSel();
   rebuildFromDOMIfMissing();
 
-  // Force enable the button regardless of validation
+  // Check if we have all required data
+  const hasAllData = !!(st.service && st.date && st.time && st.name && validPhone(st.phone));
+
+  // Update button state
   if (confirmBtn) {
-    confirmBtn.disabled = false;
-    confirmBtn.removeAttribute('disabled');
-    confirmBtn.removeAttribute('aria-disabled');
-    confirmBtn.classList.remove('cursor-not-allowed','opacity-50');
+    confirmBtn.disabled = !hasAllData;
+    if (hasAllData) {
+      confirmBtn.removeAttribute('disabled');
+      confirmBtn.removeAttribute('aria-disabled');
+      confirmBtn.classList.remove('cursor-not-allowed','opacity-50','disabled:bg-gray-400');
+      confirmBtn.classList.add('bg-blue-600','hover:bg-blue-700');
+    } else {
+      confirmBtn.setAttribute('disabled', 'disabled');
+      confirmBtn.setAttribute('aria-disabled', 'true');
+      confirmBtn.classList.add('cursor-not-allowed','opacity-50');
+    }
   }
 
-  // Optional debug log (keep for troubleshooting)
+  // Optional debug log
   console.debug('[confirm-state]', reason || 'update', {
     service: st.service, date: st.date, time: st.time,
-    name: st.name, phone: st.phone, validPhone: validPhone(st.phone)
+    name: st.name, phone: st.phone, validPhone: validPhone(st.phone),
+    hasAllData: hasAllData
   });
 }
 
@@ -4096,38 +4106,42 @@ document.addEventListener('DOMContentLoaded', function () {
     progressBar.style.width = '75%';
   });
 
-  confirmBooking?.addEventListener('click', async function () {
-    // پیام موفقیت
+confirmBooking?.addEventListener('click', async function () {
+  // Store original button state
+  const originalText = this.textContent;
+  const wasDisabled = this.disabled;
+  
+  // Set loading state
+  this.disabled = true;
+  this.innerHTML = '<i class="fas fa-spinner fa-spin ml-2"></i>در حال تایید...';
+  
+  try {
+    // Submit the booking
+    const res = await fetch(`${API_ROOT}/api/bookings`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify({
+        serviceId: selectedServiceId,
+        service: selectedService,
+        sellerId: window.LAST_PUBLIC?.sellerId,
+        customerName: customerName.value,
+        customerPhone: phoneNumber.value,
+        date: selectedDate,
+        time: selectedTime
+      })
+    });
+    
+    if (!res.ok) {
+      const data = await res.json().catch(() => ({}));
+      throw new Error(data.message || `HTTP ${res.status}`);
+    }
+    
+    // Success - show success screen
     step4.classList.add('hidden');
     bookingSuccess.classList.remove('hidden');
-
-    try {
-      const res = await fetch(`${API_ROOT}/api/bookings`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify({
-          serviceId: selectedServiceId,
-          service: selectedService,
-          sellerId: window.LAST_PUBLIC?.sellerId,
-          customerName: customerName.value,
-          customerPhone: phoneNumber.value,
-          date: selectedDate,
-          time: selectedTime
-        })
-      });
-      if (!res.ok) {
-        const data = await res.json().catch(() => ({}));
-        throw new Error(data.message || `HTTP ${res.status}`);
-      }
-    } catch (err) {
-      console.error('submit booking failed', err);
-      alert(err.message || 'خطا در ثبت نوبت. لطفاً دوباره تلاش کنید.');
-      bookingSuccess.classList.add('hidden');
-      step4.classList.remove('hidden');
-      return;
-    }
-
+    
+    // Save booking data
     window.__BOOKING_GUARD__?.saveLast({
       phone: phoneNumber.value,
       service: selectedService,
@@ -4137,7 +4151,7 @@ document.addEventListener('DOMContentLoaded', function () {
       createdAt: new Date().toISOString()
     });
 
-    // ذخیره برای گیمیفیکیشن
+    // Save for gamification
     const bookings = JSON.parse(localStorage.getItem('vitreenet-bookings') || '[]');
     bookings.push({
       id: Date.now().toString(36),
@@ -4151,7 +4165,26 @@ document.addEventListener('DOMContentLoaded', function () {
       status: 'pending'
     });
     localStorage.setItem('vitreenet-bookings', JSON.stringify(bookings));
-  });
+    
+  } catch (err) {
+    console.error('submit booking failed', err);
+    
+    // Restore button on error
+    this.disabled = wasDisabled;
+    this.innerHTML = originalText;
+    
+    // Show error to user
+    if (typeof showToastDark === 'function') {
+      showToastDark(err.message || 'خطا در ثبت نوبت. لطفاً دوباره تلاش کنید.', {type: 'error'});
+    } else {
+      alert(err.message || 'خطا در ثبت نوبت. لطفاً دوباره تلاش کنید.');
+    }
+    
+    return; // Don't hide the form on error
+  }
+  
+  // Note: Don't restore button on success as we're moving to success screen
+});
 
   closeBooking?.addEventListener('click', function () {
     // بستن و ریست کامل ویزارد
