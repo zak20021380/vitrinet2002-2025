@@ -1505,438 +1505,513 @@ function showToastDark(message, {type='success', durationMs=2600} = {}) {
     </div>
   </div>
 
-  <script>
-    (() => {
-      'use strict';
+<script>
+  (() => {
+    'use strict';
 
-      // ---- helpers
-      const API_ROOT = window.__API_BASE__ || '';
-      const $ = s => document.querySelector(s);
-      const $$ = s => Array.from(document.querySelectorAll(s));
-      // نگاشت کامل ارقام فارسی و عربی‌هندی به انگلیسی/برعکس
-      const toEn = s => (s||'')
-        .replace(/[۰-۹]/g, d => '0123456789'['۰۱۲۳۴۵۶۷۸۹'.indexOf(d)])
-        .replace(/[٠-٩]/g, d => '0123456789'['٠١٢٣٤٥٦٧٨٩'.indexOf(d)]);
-      const toFa = s => (s||'').replace(/\d/g, d => '۰۱۲۳۴۵۶۷۸۹'[parseInt(d,10)]);
-      const scrollInto = el => { if(!el) return; const top = el.getBoundingClientRect().top + scrollY - 80; window.scrollTo({top,behavior:'smooth'}); };
-      const genId = () => 'c_' + Math.random().toString(36).slice(2,10) + Date.now().toString(36).slice(-4);
-      const getCookie = name => document.cookie.split('; ').find(r => r.startsWith(name + '='))?.split('=')[1] || '';
-      const setCookie = (name, value) => { document.cookie = name + '=' + encodeURIComponent(value) + ';path=/'; };
+    // ---- helpers
+    const API_ROOT = window.__API_BASE__ || '';
+    const $  = s => document.querySelector(s);
+    const $$ = s => Array.from(document.querySelectorAll(s));
+    const toEn = s => (s||'')
+      .replace(/[۰-۹]/g, d => '0123456789'['۰۱۲۳۴۵۶۷۸۹'.indexOf(d)])
+      .replace(/[٠-٩]/g, d => '0123456789'['٠١٢٣٤٥٦٧٨٩'.indexOf(d)]);
+    const toFa = s => (s||'').replace(/\d/g, d => '۰۱۲۳۴۵۶۷۸۹'[parseInt(d,10)]);
+    const scrollInto = el => { if(!el) return; const top = el.getBoundingClientRect().top + scrollY - 80; window.scrollTo({top,behavior:'smooth'}); };
+    const genId = () => 'c_' + Math.random().toString(36).slice(2,10) + Date.now().toString(36).slice(-4);
+    const getCookie = name => document.cookie.split('; ').find(r => r.startsWith(name + '='))?.split('=')[1] || '';
+    const setCookie = (name, value) => { document.cookie = name + '=' + encodeURIComponent(value) + ';path=/'; };
+    const getToken = () =>
+      localStorage.getItem('access_token') ||
+      localStorage.getItem('auth_token')   ||
+      localStorage.getItem('jwt_token')    ||
+      getCookie('auth_token')              ||
+      null;
 
-      // کد مادر برای محیط توسعه (قبول «۰۰۰۰»)
-      const MASTER_OTP = '0000';
+    // کد مادر برای محیط توسعه (قبول «۰۰۰۰»)
+    const MASTER_OTP = '0000';
 
-      // ---- state
-      const st = { step:1, customerId:null, service:null, price:0, date:null, time:null, name:'', phone:'', otp:'', otpTimer:0, otpInt:null, otpTo:'' };
+    // ---- state
+    const st = {
+      step:1, customerId:null,
+      service:null, serviceId:null, price:0, duration:60,
+      date:null, time:null,
+      name:'', phone:'', otp:'', otpTimer:0, otpInt:null, otpTo:''
+    };
 
-      // ---- els
-      const wizard = $('#booking-wizard');
-      const steps = {1:$('#step-1'),2:$('#step-2'),3:$('#step-3'),4:$('#step-4'),5:$('#step-5')};
-      const dots = $$('.step-dot'); const curLbl = $('#current-step'); const pbar = $('#progress-bar');
+    // ---- els
+    const wizard = $('#booking-wizard');
+    const steps = {1:$('#step-1'),2:$('#step-2'),3:$('#step-3'),4:$('#step-4'),5:$('#step-5')};
+    const dots = $$('.step-dot'); const curLbl = $('#current-step'); const pbar = $('#progress-bar');
 
-      // step1
-      const svcOpts = $$('.service-option'); const next1 = $('#next-to-step-2');
+    // step1
+    const servicesWrap = $('#booking-services'); 
+    let   svcOpts = $$('.service-option'); // اگر از قبل وجود دارند
+    const next1 = $('#next-to-step-2');
 
-      // step2
-      const dateOpts = $$('.date-option'); const timeOpts = $$('.time-option');
-      const back2 = $('#back-to-step-1'); const next2 = $('#next-to-step-3');
+    // step2
+    const dateOpts = $$('.date-option'); const timeOpts = $$('.time-option');
+    const back2 = $('#back-to-step-1'); const next2 = $('#next-to-step-3');
 
-      // step3
-      const nameInp = $('#customer-name'); const phoneInp = $('#phone-number');
-      const phoneErr = $('#phone-error'); const back3 = $('#back-to-step-2'); const next3 = $('#next-to-step-4');
+    // step3
+    const nameInp = $('#customer-name'); const phoneInp = $('#phone-number');
+    const phoneErr = $('#phone-error'); const back3 = $('#back-to-step-2'); const next3 = $('#next-to-step-4');
 
-      // step4 (otp)
-      const otpPhone = $('#otp-phone'); const otpInputs = () => $$('.bw-otp');
-      const otpErr = $('#otp-error'); const otpTimerLbl = $('#otp-timer'); const resendBtn = $('#resend-otp');
-      const editPhone = $('#edit-phone'); const back4 = $('#back-to-step-3-otp'); const verifyBtn = $('#verify-otp');
+    // step4 (otp)
+    const otpPhone = $('#otp-phone'); const otpInputs = () => $$('.bw-otp');
+    const otpErr = $('#otp-error'); const otpTimerLbl = $('#otp-timer'); const resendBtn = $('#resend-otp');
+    const editPhone = $('#edit-phone'); const back4 = $('#back-to-step-3-otp'); const verifyBtn = $('#verify-otp');
 
-      // step5
-      const back5 = $('#back-to-step-3'); const confirmBtn = $('#confirm-booking');
-      const cSvc = $('#confirm-service'), cDate = $('#confirm-date'), cTime = $('#confirm-time'), cName = $('#confirm-name'), cPhone = $('#confirm-phone'), cPrice = $('#confirm-price');
+    // step5
+    const back5 = $('#back-to-step-3'); const confirmBtn = $('#confirm-booking');
+    const cSvc = $('#confirm-service'), cDate = $('#confirm-date'), cTime = $('#confirm-time'), cName = $('#confirm-name'), cPhone = $('#confirm-phone'), cPrice = $('#confirm-price');
 
-      // success
-      const successBox = $('#booking-success'); const closeSuccess = $('#close-booking');
+    // success
+    const successBox = $('#booking-success'); const closeSuccess = $('#close-booking');
 
-      // ---- nav
-      function showStep(n){
-        st.step = n;
-        Object.values(steps).forEach(s => s.classList.add('hidden'));
-        steps[n].classList.remove('hidden');
-        curLbl.textContent = n.toString();
-        pbar.style.width = (n*20) + '%';
-        dots.forEach(d => { const k = +d.dataset.step; d.classList.toggle('bg-blue-600', k<=n); d.classList.toggle('bg-gray-300', k>n); });
-        scrollInto(wizard);
+    // ===== وضعیت دکمه تایید نهایی (کلیدی!)
+    const validPhone = raw => {
+      const v = toEn(raw).trim();
+      return /^0\d{10}$/.test(v) && v.startsWith('09');
+    };
+    function updateConfirmState(){
+      const ok =
+        !!st.service &&
+        !!st.date &&
+        !!st.time &&
+        st.name?.trim().length >= 2 &&
+        validPhone(st.phone);
+      if (!confirmBtn) return;
+      if (ok) {
+        confirmBtn.disabled = false;
+        confirmBtn.removeAttribute('disabled'); // بعضی تم‌ها نیاز به حذف صریح دارند
+      } else {
+        confirmBtn.disabled = true;
+        confirmBtn.setAttribute('disabled','disabled');
       }
+    }
 
-      // ---- validators
-      const validPhone = raw => {
-        const v = toEn(raw).trim();
-        return /^0\d{10}$/.test(v) && v.startsWith('09');
-      };
-      function chk1(){ next1.disabled = !(st.service && st.price); }
-      function chk2(){ next2.disabled = !(st.date && st.time); }
-      function chk3(){
-        const ok = nameInp.value.trim().length >= 2 && validPhone(phoneInp.value);
-        next3.disabled = !ok;
-        phoneErr.classList.toggle('hidden', validPhone(phoneInp.value));
-      }
-      function chkOTP(){
-        const code = toEn(otpInputs().map(i=>i.value).join('')).replace(/\D/g,'');
-        verifyBtn.disabled = (code.length!==4);
-        if (!verifyBtn.disabled) otpErr.classList.add('hidden');
-      }
+    // ---- nav
+    function showStep(n){
+      st.step = n;
+      Object.values(steps).forEach(s => s.classList.add('hidden'));
+      steps[n].classList.remove('hidden');
+      curLbl.textContent = n.toString();
+      pbar.style.width = (n*20) + '%';
+      dots.forEach(d => { const k = +d.dataset.step; d.classList.toggle('bg-blue-600', k<=n); d.classList.toggle('bg-gray-300', k>n); });
+      scrollInto(wizard);
+      if (n === 5) updateConfirmState(); // هر بار ورود به مرحله ۵، وضعیت دکمه را بسنج
+    }
 
-      // ---- step1
+    // ---- validators
+    function chk1(){ next1.disabled = !(st.service && st.price); updateConfirmState(); }
+    function chk2(){ next2.disabled = !(st.date && st.time); updateConfirmState(); }
+    function chk3(){
+      const ok = nameInp.value.trim().length >= 2 && validPhone(phoneInp.value);
+      next3.disabled = !ok;
+      phoneErr.classList.toggle('hidden', validPhone(phoneInp.value));
+      updateConfirmState();
+    }
+    function chkOTP(){
+      const code = toEn(otpInputs().map(i=>i.value).join('')).replace(/\D/g,'');
+      verifyBtn.disabled = (code.length!==4);
+      if (!verifyBtn.disabled) otpErr.classList.add('hidden');
+    }
+
+    // ---- step1: اگر لازم باشد، گزینه‌ها را بساز
+    function buildServiceOptionsFromCards(){
+      if (!servicesWrap) return; // اگر container نداریم، از همان .service-optionهای موجود استفاده می‌کنیم
+      const sourceButtons = $$('.service-button');
+      if (!sourceButtons.length) return;
+
+      servicesWrap.innerHTML = '';
+      sourceButtons.forEach((btn, idx) => {
+        const title = btn.dataset.service || btn.closest('.service-card')?.querySelector('h4')?.textContent?.trim() || `خدمت ${idx+1}`;
+        const price = parseInt(btn.dataset.price || '0', 10) || 0;
+        const serviceId = btn.dataset.serviceId || btn.dataset.id || '';
+
+        const opt = document.createElement('div');
+        opt.className = 'service-option border border-gray-300 rounded-lg p-3 cursor-pointer hover:border-blue-500 flex items-center justify-between';
+        opt.dataset.service = title;
+        opt.dataset.price = String(price);
+        if (serviceId) opt.dataset.serviceId = serviceId;
+
+        opt.innerHTML = `
+          <div class="font-bold text-gray-800">${title}</div>
+          <div class="text-sm text-gray-600">${price ? toFa(price.toLocaleString()) + ' تومان' : '—'}</div>
+        `;
+
+        opt.addEventListener('click', () => {
+          svcOpts.forEach(x => x.classList.remove('bw-selected'));
+          opt.classList.add('bw-selected');
+          st.service   = title;
+          st.price     = price;
+          st.serviceId = serviceId || null;
+          chk1();
+        });
+
+        servicesWrap.appendChild(opt);
+      });
+
+      svcOpts = $$('#booking-services .service-option');
+    }
+
+    // اگر از قبل گزینه‌ها موجودند، روی همان‌ها listener بگذاریم
+    function wireExistingServiceOptions(){
+      if (!svcOpts.length) return;
       svcOpts.forEach(o=>{
         o.addEventListener('click', ()=>{
           svcOpts.forEach(x=>x.classList.remove('bw-selected'));
           o.classList.add('bw-selected');
-          st.service = o.dataset.service; st.price = parseInt(o.dataset.price||'0',10)||0;
+          st.service   = o.dataset.service || o.textContent.trim();
+          st.price     = parseInt(o.dataset.price||'0',10)||0;
+          st.serviceId = o.dataset.serviceId || null;
           chk1();
         });
       });
-      next1.addEventListener('click', ()=>showStep(2));
+    }
 
-      // ---- step2
-      function pick(list, el){ list.forEach(x=>x.classList.remove('bw-selected')); el.classList.add('bw-selected'); }
-      dateOpts.forEach(el=>el.addEventListener('click', ()=>{ pick(dateOpts, el); st.date = el.innerText.trim(); chk2(); }));
-      timeOpts.forEach(el=>el.addEventListener('click', ()=>{ pick(timeOpts, el); st.time = el.innerText.trim(); chk2(); }));
-      back2.addEventListener('click', ()=>showStep(1));
-      next2.addEventListener('click', ()=>showStep(3));
+    // step1 next
+    next1?.addEventListener('click', ()=>showStep(2));
 
-      // ---- step3
-      function onStep3(){
-        st.name = nameInp.value.trim();
-        st.phone = toEn(phoneInp.value);
-        chk3();
-      }
-      nameInp.addEventListener('input', onStep3);
- phoneInp.addEventListener('input', (e)=>{
-  let value = e.target.value;
-  // Keep Persian numbers for display
-  value = value.replace(/[^\u06F0-\u06F9\u0660-\u06690-9]/g, '');
-  value = value.slice(0, 11);
-  e.target.value = value;
-  
-  // Store English version internally
-  st.phone = toEn(value);
-  onStep3();
-});
-      back3.addEventListener('click', ()=>showStep(2));
-      next3.addEventListener('click', ()=>{
-        if (next3.disabled) return;
-        st.phone = toEn(phoneInp.value); st.name = nameInp.value.trim();
+    // ---- step2
+    function pick(list, el){ list.forEach(x=>x.classList.remove('bw-selected')); el.classList.add('bw-selected'); }
+    dateOpts.forEach(el=>el.addEventListener('click', ()=>{ pick(dateOpts, el); st.date = el.innerText.trim(); chk2(); }));
+    timeOpts.forEach(el=>el.addEventListener('click', ()=>{ pick(timeOpts, el); st.time = el.innerText.trim(); chk2(); }));
+    back2.addEventListener('click', ()=>showStep(1));
+    next2.addEventListener('click', ()=>showStep(3));
 
-        // ارسال کد (دمو) — ۴ رقمی
-        st.otp = String(Math.floor(1000 + Math.random()*9000)); // در تولید واقعی از سرور بگیر
-        st.otpTo = st.phone;
+    // ---- step3
+    function onStep3(){
+      st.name  = nameInp.value.trim();
+      st.phone = toEn(phoneInp.value);
+      chk3();
+    }
+    nameInp.addEventListener('input', onStep3);
+    phoneInp.addEventListener('input', (e)=>{
+      let value = e.target.value;
+      value = value.replace(/[^\u06F0-\u06F9\u0660-\u06690-9]/g, '');
+      value = value.slice(0, 11);
+      e.target.value = value;
+      st.phone = toEn(value);
+      onStep3();
+    });
+    back3.addEventListener('click', ()=>showStep(2));
+    next3.addEventListener('click', ()=>{
+      if (next3.disabled) return;
+      st.phone = toEn(phoneInp.value); st.name = nameInp.value.trim();
 
-        // ماسک شماره برای نمایش (0902*****7852)
-        const mask = (p => {
-          const v = toEn(p).replace(/\D/g,'');
-          if (v.length < 8) return v;
-          return v.slice(0,4) + '*****' + v.slice(-4);
-        })(st.phone);
-        otpPhone.textContent = mask;
+      // ارسال کد (دمو) — ۴ رقمی
+      st.otp   = String(Math.floor(1000 + Math.random()*9000));
+      st.otpTo = st.phone;
 
-        startOtpTimer();
-        clearOtp();
-        otpErr.classList.add('hidden');
-        chkOTP();
-        showStep(4);
-      });
+      // ماسک شماره
+      const v = toEn(st.phone).replace(/\D/g,'');
+      otpPhone.textContent = (v.length<8) ? v : (v.slice(0,4)+'*****'+v.slice(-4));
 
-      // ---- step4 (otp)
-      function clearOtp(){ otpInputs().forEach((i,idx)=>{ i.value=''; if(idx===0) i.focus(); }); }
-      function startOtpTimer(){
-        stopOtpTimer(); st.otpTimer = 60; resendBtn.disabled = true; updateOtpTimer();
-        st.otpInt = setInterval(()=>{ st.otpTimer--; updateOtpTimer(); if(st.otpTimer<=0){ stopOtpTimer(); resendBtn.disabled=false; } }, 1000);
-      }
-      function stopOtpTimer(){ if(st.otpInt){ clearInterval(st.otpInt); st.otpInt=null; } }
-      function updateOtpTimer(){ otpTimerLbl.textContent = st.otpTimer.toString(); }
+      startOtpTimer();
+      clearOtp();
+      otpErr.classList.add('hidden');
+      chkOTP();
+      showStep(4);
+    });
 
-      document.addEventListener('input', (e)=>{
-        const t = e.target; if(!(t instanceof HTMLInputElement)) return;
-        if(!t.classList.contains('bw-otp')) return;
-        t.value = toEn(t.value).replace(/\D/g,'').slice(0,1);
+    // ---- step4 (otp)
+    function clearOtp(){ otpInputs().forEach((i,idx)=>{ i.value=''; if(idx===0) i.focus(); }); }
+    function startOtpTimer(){
+      stopOtpTimer(); st.otpTimer = 60; resendBtn.disabled = true; updateOtpTimer();
+      st.otpInt = setInterval(()=>{ st.otpTimer--; updateOtpTimer(); if(st.otpTimer<=0){ stopOtpTimer(); resendBtn.disabled=false; } }, 1000);
+    }
+    function stopOtpTimer(){ if(st.otpInt){ clearInterval(st.otpInt); st.otpInt=null; } }
+    function updateOtpTimer(){ otpTimerLbl.textContent = st.otpTimer.toString(); }
+
+    document.addEventListener('input', (e)=>{
+      const t = e.target; if(!(t instanceof HTMLInputElement)) return;
+      if(!t.classList.contains('bw-otp')) return;
+      t.value = toEn(t.value).replace(/\D/g,'').slice(0,1);
+      const arr = otpInputs(); const idx = arr.indexOf(t);
+      if(t.value && idx < arr.length-1){ arr[idx+1].focus(); }
+      chkOTP();
+    });
+    document.addEventListener('keydown', (e)=>{
+      const t = e.target; if(!(t instanceof HTMLInputElement)) return;
+      if(!t.classList.contains('bw-otp')) return;
+      if(e.key==='Backspace' && !t.value){
         const arr = otpInputs(); const idx = arr.indexOf(t);
-        if(t.value && idx < arr.length-1){ arr[idx+1].focus(); }
-        chkOTP();
-      });
-      document.addEventListener('keydown', (e)=>{
-        const t = e.target; if(!(t instanceof HTMLInputElement)) return;
-        if(!t.classList.contains('bw-otp')) return;
-        if(e.key==='Backspace' && !t.value){
-          const arr = otpInputs(); const idx = arr.indexOf(t);
-          if(idx>0) arr[idx-1].focus();
-        }
-      });
+        if(idx>0) arr[idx-1].focus();
+      }
+    });
 
-      // ارسال مجدد OTP (دمو)
-      const resendOtp = ()=>{
-        st.otp = String(Math.floor(1000 + Math.random()*9000));
-        startOtpTimer();
-      };
-      resendBtn.addEventListener('click', ()=>{ if(!resendBtn.disabled) resendOtp(); });
+    const resendOtp = ()=>{ st.otp = String(Math.floor(1000 + Math.random()*9000)); startOtpTimer(); };
+    resendBtn.addEventListener('click', ()=>{ if(!resendBtn.disabled) resendOtp(); });
 
-      // ذخیره مشتری با customerId ثابت
-      function persistCustomer(){
-        const existing = getCookie('customerId');
-        const cid = st.customerId || existing || genId();
-        st.customerId = cid;
-        setCookie('customerId', cid);
-        setCookie('customerName', st.name);
-        setCookie('customerPhone', st.phone);
-        // اینجا می‌تونی به سرور هم sync کنی
-        // fetch('/api/customers/upsert', {method:'POST', body:JSON.stringify({id:cid,name:st.name,phone:st.phone})})
-        }
+    // ذخیره مشتری
+    function persistCustomer(){
+      const existing = getCookie('customerId');
+      const cid = st.customerId || existing || genId();
+      st.customerId = cid;
+      setCookie('customerId', cid);
+      setCookie('customerName', st.name);
+      setCookie('customerPhone', st.phone);
+    }
 
-      // تایید OTP
- // تایید OTP
+    // تایید OTP
+// تایید OTP
 verifyBtn.addEventListener('click', async ()=>{
   const code = toEn(otpInputs().map(i=>i.value.trim()).join('')).replace(/\D/g,'');
   if (code.length !== 4) { otpErr.classList.remove('hidden'); return; }
   if (code !== st.otp && code !== MASTER_OTP) { otpErr.classList.remove('hidden'); return; }
   stopOtpTimer();
-  
-  // Show loading
+
+  // loading
   verifyBtn.disabled = true;
   const originalText = verifyBtn.textContent;
   verifyBtn.textContent = 'در حال تایید...';
 
   try {
-    // Send user profile to backend
-    const profilePayload = {
-      name: st.name,
-      phone: st.phone,
-      customerId: st.customerId
-    };
-
-      const response = await fetch(`${API_ROOT}/api/user/profile`, {
+    const profilePayload = { name: st.name, phone: st.phone, customerId: st.customerId };
+    const response = await fetch(`${API_ROOT}/api/user/profile`, {
       method: 'POST',
-      headers: { 
+      headers: {
         'Content-Type': 'application/json',
         ...(getToken() ? {'Authorization': 'Bearer ' + getToken()} : {})
       },
       credentials: 'include',
       body: JSON.stringify(profilePayload)
     });
+    if (!response.ok) throw new Error('Profile save failed');
 
-    if (!response.ok) {
-      throw new Error('Profile save failed');
-    }
-
-    // Backend succeeded, proceed with local storage
     persistCustomer();
-
-    const auth = { id: st.customerId, name: st.name, phone: st.phone };
-    setCookie('auth_user', JSON.stringify(auth));
-    localStorage.setItem('auth_user', JSON.stringify(auth));
-    window.__APP_USER__ = auth;
-
-    document.dispatchEvent(new Event('auth:changed'));
-    fillConfirm();
-    showStep(5);
-    confirmBtn.disabled = false;
-
   } catch (error) {
     console.error('Profile save failed:', error);
-    // Show error but allow local flow to continue for UX
-    if (typeof showToastDark === 'function') {
-      showToastDark('خطا در ثبت اطلاعات کاربری', {type: 'error'});
-    }
-    
-    // Still proceed locally for better UX
-    persistCustomer();
-    const auth = { id: st.customerId, name: st.name, phone: st.phone };
-    setCookie('auth_user', JSON.stringify(auth));
-    localStorage.setItem('auth_user', JSON.stringify(auth));
-    window.__APP_USER__ = auth;
-    
+    if (typeof showToastDark === 'function') showToastDark('خطا در ثبت اطلاعات کاربری', {type: 'error'});
+    persistCustomer(); // ادامه محلی
+  } finally {
+    // رفتن به مرحله تایید
     fillConfirm();
     showStep(5);
-    confirmBtn.disabled = false;
-  } finally {
+    updateConfirmState(); // <<— کلیدی
+    
+    // حل مشکل دکمه تایید نهایی
+    setTimeout(() => {
+        const confirmBtn = document.getElementById('confirm-booking');
+        if (confirmBtn && st.service && st.date && st.time && st.name && validPhone(st.phone)) {
+            confirmBtn.disabled = false;
+            confirmBtn.removeAttribute('disabled');
+            confirmBtn.classList.remove('disabled:bg-gray-400');
+            console.log('دکمه تایید نهایی فعال شد');
+        }
+    }, 100);
+    
     verifyBtn.disabled = false;
     verifyBtn.textContent = originalText;
   }
 });
 
-      editPhone.addEventListener('click', ()=>showStep(3));
-      back4.addEventListener('click',  ()=>showStep(3));
+    editPhone.addEventListener('click', ()=>showStep(3));
+    back4.addEventListener('click',  ()=>showStep(3));
 
-      // ---- step5 (confirm)
-      function fillConfirm(){
-        cSvc.textContent = st.service || '';
-        cDate.textContent= st.date   || '';
-        cTime.textContent= st.time   || '';
-        cName.textContent= st.name   || '';
-        cPhone.textContent= st.phone || '';
-        cPrice.textContent= (st.price? st.price.toLocaleString('fa-IR'):'۰') + ' تومان';
+    // ---- step5 (confirm)
+    function fillConfirm(){
+      cSvc.textContent = st.service || '';
+      cDate.textContent= st.date   || '';
+      cTime.textContent= st.time   || '';
+      cName.textContent= st.name   || '';
+      cPhone.textContent= st.phone || '';
+      cPrice.textContent= (st.price? st.price.toLocaleString('fa-IR'):'۰') + ' تومان';
+      updateConfirmState(); // هر بار پر کردن، دوباره بسنج
+    }
+
+    back5.addEventListener('click', ()=>showStep(3));
+
+    // Helper: ریست وضعیت
+    function resetWizardState() {
+      ['service','date','time'].forEach(k => st[k] = null);
+      svcOpts.forEach(x => x.classList.remove('bw-selected'));
+      dateOpts.forEach(x => x.classList.remove('bw-selected'));
+      timeOpts.forEach(x => x.classList.remove('bw-selected'));
+      if (next1) next1.disabled = true;
+      if (next2) next2.disabled = true;
+      confirmBtn.disabled = true;
+      confirmBtn.setAttribute('disabled','disabled');
+      showStep(1);
+    }
+
+    // ====== زمان‌بندی اسلات از UI ======
+    const WEEKDAY_MAP = {
+      'یکشنبه':0,'دوشنبه':1,'سه‌شنبه':2,'سه شنبه':2,'چهارشنبه':3,'پنج‌شنبه':4,'پنجشنبه':4,'جمعه':5,'شنبه':6
+    };
+    function nextDateFor(dayName, hhmm){
+      const targetDow = WEEKDAY_MAP[(dayName||'').trim()];
+      const now = new Date(); let d = new Date(); let add = 0;
+      if (typeof targetDow === 'number'){
+        const diff = (targetDow - now.getDay() + 7) % 7;
+        add = diff;
+      }
+      d.setDate(now.getDate() + add);
+      const parts = toEn(hhmm||'12:00').split(':');
+      const h = parseInt(parts[0]||'12',10), m = parseInt(parts[1]||'0',10);
+      d.setHours(h||0, m||0, 0, 0);
+      if (add===0 && d.getTime() <= now.getTime()) d.setDate(d.getDate()+7);
+      return d;
+    }
+    function composeSlotISO(dateText, timeText, durationMin=60){
+      const dayName = (dateText||'').trim().split(/\s+/)[0];
+      let start = nextDateFor(dayName, timeText||'12:00');
+      if (!(start instanceof Date) || isNaN(+start)) start = new Date(Date.now() + 60*60*1000);
+      const end = new Date(start.getTime() + durationMin*60*1000);
+      return { startISO: start.toISOString(), endISO: end.toISOString() };
+    }
+
+    // ====== ارسال نهایی رزرو ======
+    confirmBtn.addEventListener('click', async () => {
+      if (confirmBtn.disabled) return;
+      updateConfirmState();
+      if (confirmBtn.disabled) return; // اگر هنوز ناقص است
+
+      confirmBtn.disabled = true;
+      const originalText = confirmBtn.innerHTML;
+      confirmBtn.innerHTML = '<i class="fas fa-spinner fa-spin ml-2"></i>در حال ثبت رزرو...';
+
+      try {
+        if (!st.service) throw new Error('لطفاً یک خدمت انتخاب کنید.');
+        if (!st.date || !st.time) throw new Error('تاریخ و ساعت را انتخاب کنید.');
+        if (!st.name || !validPhone(st.phone)) throw new Error('نام و شماره موبایل معتبر لازم است.');
+
+        const { startISO, endISO } = composeSlotISO(st.date, st.time, st.duration || 60);
+        const sellerId = window.LAST_PUBLIC?.sellerId || document.body.dataset.sellerId || '';
+        if (!sellerId) throw new Error('sellerId خالی است.');
+
+        const payload = {
+          sellerId,
+          service: st.service || '',
+          serviceId: st.serviceId || undefined,
+          customerName: st.name || '',
+          customerPhone: st.phone || '',
+          price: Number(st.price) || 0,
+          date: st.date || '',
+          time: st.time || '',
+          slot: { start: startISO, end: endISO },
+          source: 'service-shops'
+        };
+
+        const res = await fetch(`${API_ROOT}/api/bookings`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            ...(getToken() ? {'Authorization': 'Bearer ' + getToken()} : {})
+          },
+          credentials: 'include',
+          body: JSON.stringify(payload)
+        });
+
+        const raw = await res.text();
+        if (!res.ok) {
+          let msg = `HTTP ${res.status}`;
+          try { const j = JSON.parse(raw); msg = j.message || j.error || msg; } catch {}
+          throw new Error(msg);
+        }
+        const result = raw ? JSON.parse(raw) : {};
+
+        // پرکردن مودال «در انتظار تایید»
+        const v = (st.phone || '').replace(/\D/g,'');
+        const maskPhone = (v.length<8) ? v : (v.slice(0,4)+'*****'+v.slice(-4));
+        const pbService = document.getElementById('pb-service');
+        const pbDate    = document.getElementById('pb-date');
+        const pbTime    = document.getElementById('pb-time');
+        const pbPhone   = document.getElementById('pb-phone');
+
+        if (pbService) pbService.textContent = st.service || '';
+        if (pbDate)    pbDate.textContent    = st.date || new Date(startISO).toLocaleDateString('fa-IR');
+        if (pbTime)    pbTime.textContent    = st.time || new Date(startISO).toLocaleTimeString('fa-IR',{hour:'2-digit',minute:'2-digit'});
+        if (pbPhone)   pbPhone.textContent   = maskPhone;
+
+        // ذخیره بعد از موفقیت سرور
+        localStorage.setItem('vt:lastBooking', JSON.stringify({
+          id: result._id || result.id || Date.now().toString(36),
+          service: st.service, date: st.date, time: st.time,
+          phone: st.phone, createdAt: new Date().toISOString(),
+          status: 'pending'
+        }));
+        const bookings = JSON.parse(localStorage.getItem('vitreenet-bookings') || '[]');
+        bookings.push({
+          id: result._id || result.id || Date.now().toString(36),
+          service: st.service,
+          price: st.price,
+          date: st.date,
+          time: st.time,
+          name: st.name,
+          phone: st.phone,
+          timestamp: new Date().toISOString(),
+          status: 'pending'
+        });
+        localStorage.setItem('vitreenet-bookings', JSON.stringify(bookings));
+
+        if (typeof window.openModalById === 'function') window.openModalById('pendingBookingModal');
+
+        resetWizardState();
+
+      } catch (error) {
+        console.error('submit booking failed', error);
+        if (typeof showToastDark === 'function') {
+          showToastDark(error?.message ? `رزرو ناموفق: ${error.message}` : 'رزرو ناموفق', {type:'error'});
+        } else {
+          alert(error?.message || 'رزرو ناموفق');
+        }
+        confirmBtn.disabled = false;
+        confirmBtn.removeAttribute('disabled');
+        confirmBtn.innerHTML = originalText;
+        return;
       }
 
-      back5.addEventListener('click', ()=>showStep(3));
-
-
-
-// Helper function to get auth token
-function getToken() {
-  return localStorage.getItem('access_token') || 
-         localStorage.getItem('auth_token') || 
-         localStorage.getItem('jwt_token') || 
-         getCookie('auth_token') || 
-         null;
-}
-
-// Helper function to reset wizard state
-function resetWizardState() {
-  // Reset selections
-  ['service','date','time'].forEach(k => st[k] = null);
-  serviceOptions.forEach(x => x.classList.remove('bw-selected'));
-  dateOptions.forEach(x => x.classList.remove('bw-selected'));
-  timeOptions.forEach(x => x.classList.remove('bw-selected'));
-
-  // Reset buttons
-  if (next1) next1.disabled = true;
-  if (next2) next2.disabled = true;
-  confirmBtn.disabled = true;
-
-  // Go back to step 1
-  showStep(1);
-}
-
-
-
-
-
-
-confirmBtn.addEventListener('click', async () => {
-  // جلوگیری از کلیک دوباره
-  if (confirmBtn.disabled) return;
-  confirmBtn.disabled = true;
-  
-  // Show loading state
-  const originalText = confirmBtn.innerHTML;
-  confirmBtn.innerHTML = '<i class="fas fa-spinner fa-spin ml-2"></i>در حال ثبت رزرو...';
-
-  try {
-    // ارسال نهایی رزرو به سرور
-    const payload = {
-      sellerId: window.LAST_PUBLIC?.sellerId || document.body.dataset.sellerId,
-      service: st.service,
-      serviceId: st.serviceId,
-      customerName: st.name,
-      customerPhone: st.phone,
-      date: st.date,
-      time: st.time,
-      price: st.price || 0
-    };
-
-      const response = await fetch(`${API_ROOT}/api/bookings`, {
-      method: 'POST',
-      headers: { 
-        'Content-Type': 'application/json',
-        ...(getToken() ? {'Authorization': 'Bearer ' + getToken()} : {})
-      },
-      credentials: 'include',
-      body: JSON.stringify(payload)
+      confirmBtn.disabled = false;
+      confirmBtn.removeAttribute('disabled');
+      confirmBtn.innerHTML = originalText;
     });
 
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
-      throw new Error(errorData.message || 'خطا در ثبت رزرو');
-    }
-
-    const result = await response.json();
-    console.log('Booking saved successfully:', result);
-
-    // Only proceed to success if backend succeeded
-    // پرکردن داده‌های مودال «در انتظار تایید»
-    const maskPhone = (p => {
-      const v = (p || '').replace(/\D/g,'');
-      if (v.length < 8) return v;
-      return v.slice(0,4) + '*****' + v.slice(-4);
-    })(st.phone);
-
-    const pbService = document.getElementById('pb-service');
-    const pbDate    = document.getElementById('pb-date');
-    const pbTime    = document.getElementById('pb-time');
-    const pbPhone   = document.getElementById('pb-phone');
-
-    if (pbService) pbService.textContent = st.service || '';
-    if (pbDate)    pbDate.textContent    = st.date    || '';
-    if (pbTime)    pbTime.textContent    = st.time    || '';
-    if (pbPhone)   pbPhone.textContent   = maskPhone;
-
-    // Save to localStorage only after backend success
-    const bookings = JSON.parse(localStorage.getItem('vitreenet-bookings') || '[]');
-    bookings.push({
-      id: result._id || result.id || Date.now().toString(),
-      service: st.service,
-      price: st.price,
-      date: st.date,
-      time: st.time,
-      name: st.name,
-      phone: st.phone,
-      timestamp: new Date().toISOString(),
-      status: 'pending'
-    });
-    localStorage.setItem('vitreenet-bookings', JSON.stringify(bookings));
-
-    // Show success modal
-    if (typeof window.openModalById === 'function') {
-      window.openModalById('pendingBookingModal');
-    }
-
-    // Reset form
-    resetWizardState();
-
-  } catch (error) {
-    console.error('Booking failed:', error);
-    
-    // Show error to user
-    if (typeof showToastDark === 'function') {
-      showToastDark('خطا در ثبت رزرو. لطفا مجددا تلاش کنید.', {type: 'error'});
-    } else {
-      alert('خطا در ثبت رزرو. لطفا مجددا تلاش کنید.');
-    }
-    
-    // Reset button state
-    confirmBtn.disabled = false;
-    confirmBtn.innerHTML = originalText;
-    return; // Don't proceed to success state
-  }
-
-  // Reset button (only reached on success)
-  confirmBtn.disabled = false;
-  confirmBtn.innerHTML = originalText;
-});
-
-
-
-      closeSuccess.addEventListener('click', ()=>{
-        successBox.classList.add('hidden');
-        showStep(1);
-      });
-
-      // ---- init: پر کردن خودکار از localStorage (بدون تغییر customerId)
-        const saved = {
-          cid: getCookie('customerId'),
-          name: decodeURIComponent(getCookie('customerName') || ''),
-          phone: getCookie('customerPhone')
-        };
-        if (saved.cid) st.customerId = saved.cid;
-        if (saved.name) nameInp.value = saved.name;
-        if (saved.phone) phoneInp.value = saved.phone; // نمایش لاتین
-      // ولیدیشن اولیه
-      (function initButtons(){
-        next1.disabled = true; next2.disabled = true; next3.disabled = true; confirmBtn.disabled = true;
-      })();
-      onStep3(); // در صورت پر بودن فیلدها، دکمه ادامه فعال می‌شود
+    closeSuccess.addEventListener('click', ()=>{
+      successBox.classList.add('hidden');
       showStep(1);
-    })();
+    });
 
-  </script>
+    // ---- init از کوکی‌ها
+    const saved = {
+      cid: getCookie('customerId'),
+      name: decodeURIComponent(getCookie('customerName') || ''),
+      phone: getCookie('customerPhone')
+    };
+    if (saved.cid) st.customerId = saved.cid;
+    if (saved.name) nameInp.value = saved.name;
+    if (saved.phone) phoneInp.value = saved.phone;
+
+    // ساخت گزینه‌های خدمت (اگر container دارید) و ویر کردن موجودها
+    buildServiceOptionsFromCards();
+    wireExistingServiceOptions();
+
+    // ولیدیشن اولیه
+    (function initButtons(){
+      next1.disabled = true; next2.disabled = true; next3.disabled = true; confirmBtn.disabled = true;
+      confirmBtn.setAttribute('disabled','disabled');
+    })();
+    onStep3();
+    updateConfirmState(); // در شروع هم بررسی شود
+    showStep(1);
+
+
+    // کد موقت برای تست - می‌توانید بعداً حذف کنید
+window.forceEnableConfirm = function() {
+    const btn = document.getElementById('confirm-booking');
+    if (btn) {
+        btn.disabled = false;
+        btn.removeAttribute('disabled');
+        console.log('دکمه تایید نهایی به صورت دستی فعال شد');
+    }
+};
+  })();
+</script>
+
+
+
 </section>
 
   <script>
