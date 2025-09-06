@@ -4128,6 +4128,15 @@ document.addEventListener('DOMContentLoaded', function () {
       return;
     }
 
+    window.__BOOKING_GUARD__?.saveLast({
+      phone: phoneNumber.value,
+      service: selectedService,
+      date: selectedDate,
+      time: selectedTime,
+      status: 'pending',
+      createdAt: new Date().toISOString()
+    });
+
     // ذخیره برای گیمیفیکیشن
     const bookings = JSON.parse(localStorage.getItem('vitreenet-bookings') || '[]');
     bookings.push({
