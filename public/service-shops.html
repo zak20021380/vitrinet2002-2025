@@ -3647,8 +3647,16 @@ function updateSummary(avg, count, ratings) {
     shopurl = body?.dataset?.shopurl || '';
     sellerId = body?.dataset?.sellerId || null;
   }
+  async function handleServicesLoaded() {
+    sellerId = document.body?.dataset?.sellerId || null;
+    await loadReviews();
+  }
 
-  await loadReviews();
+  document.addEventListener('services:loaded', handleServicesLoaded);
+
+  if (document.body?.dataset?.sellerId) {
+    await handleServicesLoaded();
+  }
 });
 </script>
 
