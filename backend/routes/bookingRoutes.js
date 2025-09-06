@@ -15,6 +15,9 @@ router.get('/seller-bookings/me', auth('seller'), ctrl.getSellerBookings);
 // تغییر وضعیت نوبت
 router.patch('/seller-bookings/:id/status', auth('seller'), ctrl.updateBookingStatus);
 
+// حذف نوبت فروشنده
+router.delete('/seller-bookings/:id', auth('seller'), ctrl.deleteBooking);
+
 // بررسی وضعیت نوبت بر اساس شماره تلفن مشتری
 router.get('/bookings/status', ctrl.checkBookingStatus);
 

@@ -102,6 +102,28 @@ exports.updateBookingStatus = async (req, res) => {
   }
 };
 
+// حذف نوبت برای فروشنده لاگین شده
+exports.deleteBooking = async (req, res) => {
+  try {
+    const sellerId = req.user.id;
+    const { id } = req.params;
+
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ message: 'شناسه نوبت نامعتبر است.' });
+    }
+
+    const booking = await Booking.findOneAndDelete({ _id: id, sellerId });
+    if (!booking) {
+      return res.status(404).json({ message: 'نوبت یافت نشد.' });
+    }
+
+    return res.json({ message: 'نوبت حذف شد.' });
+  } catch (err) {
+    console.error('deleteBooking error:', err);
+    return res.status(500).json({ message: 'خطای داخلی سرور.' });
+  }
+};
+
 // دریافت نوبت‌ها بر اساس شماره تلفن مشتری
 exports.getCustomerBookings = async (req, res) => {
   try {
