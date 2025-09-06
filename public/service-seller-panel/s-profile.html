@@ -951,7 +951,7 @@
               serverBookings = (data.items || []).map(b => ({
                 id: b._id,
                 service: b.service,
-                datetime: `${b.date}T${b.time}`,
+                datetime: `${b.bookingDate || b.date}T${b.startTime || b.time}`,
                 status: mapStatus(b.status),
                 price: b.price || 0
               }));
@@ -967,7 +967,7 @@
           localBookings = raw.map(b => ({
             id: b.id || b.timestamp || Date.now().toString(36),
             service: b.service,
-            datetime: `${b.date}T${b.time}`,
+            datetime: `${b.bookingDate || b.date}T${b.startTime || b.time}`,
             status: mapStatus(b.status) || 'pending',
             price: b.price || 0
           }));
