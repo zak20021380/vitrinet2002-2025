@@ -941,39 +941,46 @@
     const mapStatus = (s) => ({ pending:'pending', confirmed:'confirmed', cancelled:'canceled', completed:'done' }[s] || s);
 
       async function loadBookings() {
+        let serverBookings = [];
         try {
           const phone = getCookie('customerPhone');
           if (phone) {
             const res = await fetch(`/api/bookings?phone=${encodeURIComponent(phone)}`);
             if (res.ok) {
               const data = await res.json();
-              setBookings((data.items || []).map(b => ({
+              serverBookings = (data.items || []).map(b => ({
                 id: b._id,
                 service: b.service,
                 datetime: `${b.date}T${b.time}`,
                 status: mapStatus(b.status),
                 price: b.price || 0
-              })));
-              return;
+              }));
             }
           }
-          throw new Error('no server data');
         } catch (err) {
-          console.error('loadBookings failed', err);
-          try {
-            const local = JSON.parse(localStorage.getItem('vitreenet-bookings') || '[]');
-            setBookings(local.map(b => ({
-              id: b.id || b.timestamp || Date.now().toString(36),
-              service: b.service,
-              datetime: `${b.date}T${b.time}`,
-              status: mapStatus(b.status) || 'pending',
-              price: b.price || 0
-            })));
-          } catch (e) {
-            console.error('load local bookings failed', e);
-            setBookings([]);
-          }
+          console.error('load server bookings failed', err);
         }
+
+        let localBookings = [];
+        try {
+          const raw = JSON.parse(localStorage.getItem('vitreenet-bookings') || '[]');
+          localBookings = raw.map(b => ({
+            id: b.id || b.timestamp || Date.now().toString(36),
+            service: b.service,
+            datetime: `${b.date}T${b.time}`,
+            status: mapStatus(b.status) || 'pending',
+            price: b.price || 0
+          }));
+        } catch (e) {
+          console.error('load local bookings failed', e);
+        }
+
+        const merged = [...serverBookings];
+        localBookings.forEach(b => {
+          if (!merged.some(sb => sb.id === b.id)) merged.push(b);
+        });
+
+        setBookings(merged);
       }
 
     async function loadNotifs() {
