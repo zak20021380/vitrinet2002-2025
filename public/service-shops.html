@@ -1549,15 +1549,18 @@ function showToastDark(message, {type='success', durationMs=2600} = {}) {
   // کد مادر برای محیط توسعه
   const MASTER_OTP = '0000';
 
-  // ===== Persistent selection (برای جلوگیری از گم‌شدن state)
+  // ===== Persistent selection (FIX: name & phone هم ذخیره شوند)
   const SS_KEY = 'vt:booking.sel';
   function saveSel() {
     const payload = {
       service:   st.service || null,
       serviceId: st.serviceId || null,
-      price:     typeof st.price === 'number' ? st.price : (parseInt(st.price||'0',10)||0),
+      price:     Number.isFinite(st.price) ? st.price : (parseInt(st.price||'0',10)||0),
       date:      st.date || null,
-      time:      st.time || null
+      time:      st.time || null,
+      // NEW
+      name:  (st.name || nameInp?.value || '').trim(),
+      phone: toEn(st.phone || phoneInp?.value || '')
     };
     try { sessionStorage.setItem(SS_KEY, JSON.stringify(payload)); } catch(e){}
   }
@@ -1571,6 +1574,9 @@ function showToastDark(message, {type='success', durationMs=2600} = {}) {
       if (obj.price != null) st.price = parseInt(obj.price,10) || 0;
       if (obj.date)      st.date = obj.date;
       if (obj.time)      st.time = obj.time;
+      // NEW: rehydrate name/phone و داخل input هم بریز
+      if (obj.name)  { st.name = obj.name;   if (nameInp)  nameInp.value  = obj.name; }
+      if (obj.phone) { st.phone = toEn(obj.phone); if (phoneInp) phoneInp.value = obj.phone; }
     } catch(e){}
   }
 
@@ -1651,36 +1657,31 @@ function showToastDark(message, {type='success', durationMs=2600} = {}) {
     }
   }
 
-function updateConfirmState(reason='') {
-  // تلاش برای بازسازی: اول از sessionStorage، بعد از DOM
-  loadSel();
-  rebuildFromDOMIfMissing();
+  // FIX: از ورودی‌ها هم هر بار سینک کن
+  function updateConfirmState(reason='') {
+    loadSel();
+    rebuildFromDOMIfMissing();
+    if (nameInp)  st.name  = nameInp.value.trim() || st.name || '';
+    if (phoneInp) st.phone = toEn(phoneInp.value || st.phone || '');
+    const hasAllData = !!(st.service && st.date && st.time && st.name && validPhone(st.phone));
 
-  // Check if we have all required data
-  const hasAllData = !!(st.service && st.date && st.time && st.name && validPhone(st.phone));
-
-  // Update button state
-  if (confirmBtn) {
-    confirmBtn.disabled = !hasAllData;
-    if (hasAllData) {
-      confirmBtn.removeAttribute('disabled');
-      confirmBtn.removeAttribute('aria-disabled');
-      confirmBtn.classList.remove('cursor-not-allowed','opacity-50','disabled:bg-gray-400');
-      confirmBtn.classList.add('bg-blue-600','hover:bg-blue-700');
-    } else {
-      confirmBtn.setAttribute('disabled', 'disabled');
-      confirmBtn.setAttribute('aria-disabled', 'true');
-      confirmBtn.classList.add('cursor-not-allowed','opacity-50');
+    if (confirmBtn) {
+      confirmBtn.disabled = !hasAllData;
+      confirmBtn.toggleAttribute('aria-disabled', !hasAllData);
+      confirmBtn.classList.toggle('cursor-not-allowed', !hasAllData);
+      confirmBtn.classList.toggle('opacity-50', !hasAllData);
+      if (hasAllData) {
+        confirmBtn.classList.add('bg-blue-600','hover:bg-blue-700');
+        confirmBtn.classList.remove('disabled:bg-gray-400');
+      }
     }
-  }
 
-  // Optional debug log
-  console.debug('[confirm-state]', reason || 'update', {
-    service: st.service, date: st.date, time: st.time,
-    name: st.name, phone: st.phone, validPhone: validPhone(st.phone),
-    hasAllData: hasAllData
-  });
-}
+    console.debug('[confirm-state]', reason || 'update', {
+      service: st.service, date: st.date, time: st.time,
+      name: st.name, phone: st.phone, validPhone: validPhone(st.phone),
+      hasAllData
+    });
+  }
 
   // ===== Navigation
   function showStep(n){
@@ -1696,7 +1697,7 @@ function updateConfirmState(reason='') {
 
   // ===== Validators
   function chk1(){ next1.disabled = !(st.service && st.price); saveSel(); updateConfirmState('chk1'); }
-  function chk2(){ next2.disabled = !(st.date && st.time); saveSel(); updateConfirmState('chk2'); }
+  function chk2(){ next2.disabled = !(st.date && st.time);   saveSel(); updateConfirmState('chk2'); }
   function chk3(){
     const ok = nameInp.value.trim().length >= 2 && validPhone(phoneInp.value);
     next3.disabled = !ok;
@@ -1894,6 +1895,7 @@ function updateConfirmState(reason='') {
     } finally {
       // رفتن به مرحله تایید
       fillConfirm();
+      saveSel(); // FIX: اطمینان از ذخیره name/phone قبل از Step 5
       showStep(5);
       requestAnimationFrame(() => updateConfirmState('after-otp'));
       verifyBtn.disabled = false;
@@ -1906,13 +1908,9 @@ function updateConfirmState(reason='') {
 
   // ===== Step 5 (Confirm)
   function fillConfirm(){
-    // بازسازی از session/DOM برای اطمینان
     loadSel();
     rebuildFromDOMIfMissing();
-    // اطمینان از نگهداری نام و شماره تلفن وارد شده در مرحله‌های قبل
-    // در بعضی موارد مقادیر ذخیره‌شده در state از بین می‌رفت و دکمه تأیید
-    // به دلیل نبود اطلاعات کامل غیرفعال می‌ماند. برای جلوگیری از این موضوع،
-    // دوباره مقدار فیلد‌های ورودی را در state قرار می‌دهیم.
+    // تضمین اینکه name/phone گم نشه
     st.name  = st.name  || nameInp?.value.trim() || '';
     st.phone = st.phone || toEn(phoneInp?.value || '') || '';
 
@@ -1924,11 +1922,61 @@ function updateConfirmState(reason='') {
     cPrice.textContent = (st.price? st.price.toLocaleString('fa-IR'):'۰') + ' تومان';
 
     saveSel();
-    // به جای تأخیر، فوراً وضعیت دکمه تأیید را به‌روزرسانی کن تا در صورت کامل بودن اطلاعات فعال شود
     updateConfirmState('fillConfirm');
   }
 
   back5.addEventListener('click', ()=>showStep(3));
+
+  // --- Built-in success popup on final confirm (inserted here) ---
+  (function hookConfirmToPendingModal(){
+    const btn = document.getElementById('confirm-booking');
+    if (!btn) return;
+
+    btn.addEventListener('click', async () => {
+      // اگر دکمه به خاطر نبود اطلاعات فعال نیست، خروج
+      if (btn.disabled) return;
+
+      // سینک نهایی داده‌ها
+      st.name  = (document.getElementById('customer-name')?.value || st.name || '').trim();
+      st.phone = toEn(document.getElementById('phone-number')?.value || st.phone || '');
+
+      if (!st.service || !st.date || !st.time || !st.name || !/^0\d{10}$/.test(st.phone)) return;
+
+      // 1) ذخیرهٔ وضعیت «pending» برای Gate
+      const last = {
+        id: genId(),
+        service: st.service,
+        date:    st.date,
+        time:    st.time,
+        phone:   st.phone,
+        status:  'pending',
+        createdAt: Date.now(),
+        sellerId: document.body?.dataset?.sellerId || null,
+        shopUrl:  document.body?.dataset?.shopurl  || null
+      };
+      try { localStorage.setItem('vt:lastBooking', JSON.stringify(last)); } catch(_) {}
+
+      // 2) پر کردن محتوای پاپ‌آپ داخلی
+      const setText = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val || '—'; };
+      setText('pb-service', st.service);
+      setText('pb-date',    st.date);
+      setText('pb-time',    st.time);
+      setText('pb-phone',   st.phone);
+
+      // 3) نمایش پاپ‌آپ خودِ سیستم
+      if (typeof window.openModalById === 'function') {
+        window.openModalById('pendingBookingModal');
+      } else if (typeof window.showToastDark === 'function') {
+        showToastDark('درخواست ثبت شد و در انتظار تأیید فروشنده است.', { type: 'success' });
+      } else {
+        alert('درخواست ثبت شد و در انتظار تأیید فروشنده است.');
+      }
+
+      // 4) ریست ویزارد
+      resetWizardState();
+    });
+  })();
+  // --- /built-in success popup ---
 
   // Helper: reset
   function resetWizardState() {
@@ -1970,7 +2018,7 @@ function updateConfirmState(reason='') {
     return { startISO: start.toISOString(), endISO: end.toISOString() };
   }
 
-    // ===== Submit booking (legacy handler removed; handled by modern wizard)
+  // ===== Submit booking (legacy handler removed; handled by modern wizard)
 
   closeSuccess.addEventListener('click', ()=>{
     successBox.classList.add('hidden');
@@ -1983,7 +2031,7 @@ function updateConfirmState(reason='') {
     name: decodeURIComponent(getCookie('customerName') || ''),
     phone: getCookie('customerPhone')
   };
-  if (saved.cid) st.customerId = saved.cid;
+  if (saved.cid)  st.customerId = saved.cid;
   if (saved.name) nameInp.value = saved.name;
   if (saved.phone) phoneInp.value = saved.phone;
 
@@ -2012,7 +2060,7 @@ function updateConfirmState(reason='') {
     if (tMatch) tMatch.classList.add('bw-selected');
   }
 
-  // نام/شماره از کوکی‌ها
+  // نام/شماره از کوکی‌ها یا session
   st.name  = (nameInp.value||'').trim();
   st.phone = toEn(phoneInp.value||'');
   updateConfirmState('init');
@@ -2028,18 +2076,17 @@ function updateConfirmState(reason='') {
     }
   };
 
-  // Update date options to future dates
+  // Update date options to future dates (دمویی)
   const dateOptions = $$('.date-option');
   const persianDates = ['22 شهریور', '23 شهریور', '24 شهریور', '25 شهریور', '26 شهریور', '27 شهریور'];
-
   dateOptions.forEach((opt, i) => {
     const boldDiv = opt.querySelector('.font-bold');
-    if (boldDiv) {
-      boldDiv.textContent = persianDates[i];
-    }
+    if (boldDiv) { boldDiv.textContent = persianDates[i]; }
   });
 })();
 </script>
+
+
 
 
 
