@@ -18,8 +18,10 @@
     };
 
     if(b.status && b.status !== 'pending'){
-      show(b.status);
-      localStorage.removeItem('vt:lastBooking');
+      if(!b.seen){
+        show(b.status);
+        localStorage.setItem('vt:lastBooking', JSON.stringify({...b, seen:true}));
+      }
       return true;
     }
 
@@ -30,7 +32,7 @@
         const data = await res.json();
         if(data.status && data.status !== 'pending'){
           show(data.status);
-          localStorage.setItem('vt:lastBooking', JSON.stringify({...b, status:data.status}));
+          localStorage.setItem('vt:lastBooking', JSON.stringify({...b, status:data.status, seen:true}));
           return true;
         }
       }
