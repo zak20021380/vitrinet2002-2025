@@ -3519,11 +3519,12 @@ function updateSummary(avg, count, ratings) {
       return;
     }
 
-    const token = getToken();
-    if (!token) {
-      showToast('برای ثبت نظر باید وارد شوید.', 'error');
-      return;
-    }
+      const bookings = JSON.parse(localStorage.getItem('vitreenet-bookings') || '[]');
+      if (!bookings.length) {
+        showToast('برای ثبت نظر باید حداقل یک نوبت ثبت کرده باشید.', 'error');
+        return;
+      }
+      const token = getToken();
 
     const payload = {
       rating: selectedRating,
@@ -3541,12 +3542,14 @@ function updateSummary(avg, count, ratings) {
     closeReviewFormModal();
 
     try {
-      const res = await fetch(POST_ENDPOINT(sellerId), {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + token },
-        credentials: 'include',
-        body: JSON.stringify(payload)
-      });
+        const headers = { 'Content-Type': 'application/json' };
+        if (token) headers.Authorization = 'Bearer ' + token;
+        const res = await fetch(POST_ENDPOINT(sellerId), {
+          method: 'POST',
+          headers,
+          credentials: 'include',
+          body: JSON.stringify(payload)
+        });
       if (res.status === 401) {
         clearToken();
         showToast('نشست شما منقضی شده؛ لطفاً دوباره وارد شوید.', 'error');
