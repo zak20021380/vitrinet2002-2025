@@ -1909,6 +1909,12 @@ function updateConfirmState(reason='') {
     // بازسازی از session/DOM برای اطمینان
     loadSel();
     rebuildFromDOMIfMissing();
+    // اطمینان از نگهداری نام و شماره تلفن وارد شده در مرحله‌های قبل
+    // در بعضی موارد مقادیر ذخیره‌شده در state از بین می‌رفت و دکمه تأیید
+    // به دلیل نبود اطلاعات کامل غیرفعال می‌ماند. برای جلوگیری از این موضوع،
+    // دوباره مقدار فیلد‌های ورودی را در state قرار می‌دهیم.
+    st.name  = st.name  || nameInp?.value.trim() || '';
+    st.phone = st.phone || toEn(phoneInp?.value || '') || '';
 
     cSvc.textContent   = st.service || '';
     cDate.textContent  = st.date   || '';
