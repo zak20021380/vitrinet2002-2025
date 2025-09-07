@@ -1520,12 +1520,31 @@ function showToastDark(message, {type='success', durationMs=2600} = {}) {
   const genId = () => 'c_' + Math.random().toString(36).slice(2,10) + Date.now().toString(36).slice(-4);
   const getCookie = name => document.cookie.split('; ').find(r => r.startsWith(name + '='))?.split('=')[1] || '';
   const setCookie = (name, value) => { document.cookie = name + '=' + encodeURIComponent(value) + ';path=/'; };
-  const getToken = () =>
-    localStorage.getItem('access_token') ||
-    localStorage.getItem('auth_token')   ||
-    localStorage.getItem('jwt_token')    ||
-    getCookie('auth_token')              ||
-    null;
+  const TOKEN_KEYS = ['access_token', 'auth_token', 'jwt_token'];
+  const clearToken = () => {
+    TOKEN_KEYS.forEach(k => localStorage.removeItem(k));
+    document.cookie = 'auth_token=;path=/;expires=Thu, 01 Jan 1970 00:00:00 GMT';
+  };
+  function getToken() {
+    let t = null;
+    for (const k of TOKEN_KEYS) {
+      const val = localStorage.getItem(k);
+      if (val) { t = val; break; }
+    }
+    if (!t) t = getCookie('auth_token');
+    if (!t) return null;
+    try {
+      const payload = JSON.parse(atob(t.split('.')[1] || ''));
+      if (payload.exp * 1000 < Date.now()) {
+        clearToken();
+        return null;
+      }
+    } catch (_) {
+      clearToken();
+      return null;
+    }
+    return t;
+  }
 
   // کد مادر برای محیط توسعه
   const MASTER_OTP = '0000';
@@ -4733,15 +4752,27 @@ window.addEventListener('load', () => {
 
   /** ================== Config & Helpers ================== **/
   const API_ROOT = window.__API_BASE__ || '';
-
+  const TOKEN_KEYS = ['access_token', 'token', 'jwt'];
+  const clearToken = () => TOKEN_KEYS.forEach(k => localStorage.removeItem(k));
   // اگر توکن رو جای دیگه می‌ذاری، این تابع رو تغییر بده
   function getToken() {
-    return (
-      localStorage.getItem('access_token') ||
-      localStorage.getItem('token') ||
-      localStorage.getItem('jwt') ||
-      null
-    );
+    let t = null;
+    for (const k of TOKEN_KEYS) {
+      const val = localStorage.getItem(k);
+      if (val) { t = val; break; }
+    }
+    if (!t) return null;
+    try {
+      const payload = JSON.parse(atob(t.split('.')[1] || ''));
+      if (payload.exp * 1000 < Date.now()) {
+        clearToken();
+        return null;
+      }
+    } catch (_) {
+      clearToken();
+      return null;
+    }
+    return t;
   }
   const authHeaders = () => {
     const t = getToken();
