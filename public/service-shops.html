@@ -3127,11 +3127,27 @@ document.addEventListener('DOMContentLoaded', async function() {
 
   function showToast(msg, type='info'){ try { showToastDark(msg, {type}); } catch(_) { console.log(type.toUpperCase()+':', msg); } }
 
+  const TOKEN_KEYS = ['access_token', 'token', 'jwt'];
   function getToken() {
-    return localStorage.getItem('access_token')
-        || localStorage.getItem('token')
-        || localStorage.getItem('jwt')
-        || null;
+    let t = null;
+    for (const k of TOKEN_KEYS) {
+      const val = localStorage.getItem(k);
+      if (val) { t = val; break; }
+    }
+    if (!t) return null;
+    try {
+      const payload = JSON.parse(atob(t.split('.')[1] || ''));
+      if (payload.exp * 1000 < Date.now()) {
+        TOKEN_KEYS.forEach(k => localStorage.removeItem(k));
+        return null;
+      }
+    } catch (_) {
+      return null;
+    }
+    return t;
+  }
+  function clearToken() {
+    TOKEN_KEYS.forEach(k => localStorage.removeItem(k));
   }
   const authHeaders = () => {
     const t = getToken();
@@ -3503,6 +3519,12 @@ function updateSummary(avg, count, ratings) {
       return;
     }
 
+    const token = getToken();
+    if (!token) {
+      showToast('برای ثبت نظر باید وارد شوید.', 'error');
+      return;
+    }
+
     const payload = {
       rating: selectedRating,
       comment: reviewTextarea.value.trim()
@@ -3521,10 +3543,15 @@ function updateSummary(avg, count, ratings) {
     try {
       const res = await fetch(POST_ENDPOINT(sellerId), {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', ...authHeaders() },
+        headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + token },
         credentials: 'include',
         body: JSON.stringify(payload)
       });
+      if (res.status === 401) {
+        clearToken();
+        showToast('نشست شما منقضی شده؛ لطفاً دوباره وارد شوید.', 'error');
+        return;
+      }
       if (!res.ok) throw new Error('HTTP '+res.status);
 
       markReviewSubmitted();
