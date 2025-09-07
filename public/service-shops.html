@@ -935,26 +935,72 @@ function showToastDark(message, {type='success', durationMs=2600} = {}) {
       try { return JSON.parse(localStorage.getItem(KEY_LAST) || 'null'); } catch(e){ return null; }
     }
     function saveLast(obj){ localStorage.setItem(KEY_LAST, JSON.stringify(obj)); }
-    async function hasPending(){
-      const b = readLast();
-      if (!b || b.status !== 'pending') return false;
+// نسخهٔ اصلاح‌شدهٔ hasPending با نرمال‌سازی وضعیت‌ها و پارامترهای بیشتر کوئری
+async function hasPending(){
+  const b = readLast();
+  // اگر رزرو در انتظار نداریم، خروج
+  if (!b || b.status !== 'pending') return false;
 
-      const base = window.__API_BASE__ || '';
-      try {
-        const res = await fetch(`${base}/api/bookings/status?phone=${encodeURIComponent(b.phone || '')}`);
-        if (res.ok) {
-          const data = await res.json();
-          if (data.status && data.status !== 'pending') {
-            saveLast({ ...b, status: data.status });
-            return false;
+  const base = window.__API_BASE__ || '';
+
+  // نرمال‌سازی وضعیت‌های رایج بک‌اند به سه حالت: pending / confirmed / rejected
+  const normalize = (s) => {
+    s = String(s || '').toLowerCase().trim();
+    if (['confirmed','approve','approved','accept','accepted','done','completed','success','ok'].includes(s)) return 'confirmed';
+    if (['rejected','declined','canceled','cancelled','failed','no-show','noshow'].includes(s)) return 'rejected';
+    if (['pending','waiting','awaiting','in-review'].includes(s)) return 'pending';
+    return s || 'pending';
+  };
+
+  try {
+    // هر چه اطلاعات داریم به سرور بدهیم تا شناسایی رکورد دقیق‌تر شود
+    const params = new URLSearchParams({
+      phone: b.phone || ''
+    });
+    if (b.id)       params.set('id', b.id);
+    if (b.sellerId) params.set('sellerId', b.sellerId);
+
+    const res = await fetch(`${base}/api/bookings/status?${params.toString()}`, { credentials: 'include' });
+
+    if (res.ok) {
+      const data = await res.json();
+      const raw  = data.status ?? data.state ?? data.bookingStatus;
+      const norm = normalize(raw);
+
+      // اگر از pending خارج شد، ذخیرهٔ محلی + ارسال رویداد برای سنکرون UI/باشگاه
+      if (norm !== 'pending') {
+        const next = {
+          ...b,
+          status: norm,                         // ✅ وضعیت نرمال‌شده ذخیره می‌شود
+          resolvedAt: Date.now(),
+          bookingId: data.id || data._id || b.bookingId
+        };
+        saveLast(next);
+
+        // 🔔 باشگاه مشتریان به این رویداد گوش می‌دهد
+        window.dispatchEvent(new CustomEvent('booking:status', {
+          detail: {
+            id: next.id,
+            status: norm,                       // ✅ «confirmed» حتی اگر سرور گفته باشد approved
+            phone: next.phone,
+            sellerId: next.sellerId,
+            shopUrl: next.shopUrl
           }
-          return data.status === 'pending';
-        }
-      } catch (err) {
-        console.warn('hasPending check failed', err);
+        }));
+        return false; // دیگر pending نیست
       }
+
+      // هنوز pending است
       return true;
     }
+  } catch (err) {
+    console.warn('hasPending check failed', err);
+  }
+
+  // روی خطای شبکه محافظه‌کار: pending فرض می‌کنیم تا از رزروِ تکراری جلوگیری شود
+  return true;
+}
+
     function fillBlockedModal(){
       const b = readLast(); if (!b) return;
       const $ = id => document.getElementById(id);
@@ -1658,30 +1704,40 @@ function showToastDark(message, {type='success', durationMs=2600} = {}) {
   }
 
   // FIX: از ورودی‌ها هم هر بار سینک کن
-  function updateConfirmState(reason='') {
-    loadSel();
-    rebuildFromDOMIfMissing();
-    if (nameInp)  st.name  = nameInp.value.trim() || st.name || '';
-    if (phoneInp) st.phone = toEn(phoneInp.value || st.phone || '');
-    const hasAllData = !!(st.service && st.date && st.time && st.name && validPhone(st.phone));
+function updateConfirmState(reason = '') {
+  loadSel();
+  rebuildFromDOMIfMissing();
 
-    if (confirmBtn) {
-      confirmBtn.disabled = !hasAllData;
-      confirmBtn.toggleAttribute('aria-disabled', !hasAllData);
-      confirmBtn.classList.toggle('cursor-not-allowed', !hasAllData);
-      confirmBtn.classList.toggle('opacity-50', !hasAllData);
-      if (hasAllData) {
-        confirmBtn.classList.add('bg-blue-600','hover:bg-blue-700');
-        confirmBtn.classList.remove('disabled:bg-gray-400');
-      }
-    }
+  if (nameInp)  st.name  = (nameInp.value || st.name || '').trim();
+  if (phoneInp) st.phone = toEn(phoneInp.value || st.phone || '');
 
-    console.debug('[confirm-state]', reason || 'update', {
-      service: st.service, date: st.date, time: st.time,
-      name: st.name, phone: st.phone, validPhone: validPhone(st.phone),
-      hasAllData
-    });
+  const hasAllData = !!(st.service && st.date && st.time && st.name && validPhone(st.phone));
+  if (!confirmBtn) return;
+
+  if (hasAllData) {
+    // فعال‌سازی کامل
+    confirmBtn.disabled = false;
+    confirmBtn.removeAttribute('disabled');          // اگر جایی attribute مانده باشد، پاک شود
+    confirmBtn.setAttribute('aria-disabled', 'false');
+    confirmBtn.classList.remove('cursor-not-allowed', 'opacity-50');
+    confirmBtn.classList.add('bg-blue-600', 'hover:bg-blue-700');
+  } else {
+    // غیرفعال
+    confirmBtn.disabled = true;
+    confirmBtn.setAttribute('disabled', 'disabled'); // attribute هم ست شود تا CSS همگام بماند
+    confirmBtn.setAttribute('aria-disabled', 'true');
+    confirmBtn.classList.add('cursor-not-allowed', 'opacity-50');
+    confirmBtn.classList.remove('bg-blue-600', 'hover:bg-blue-700');
   }
+
+  // برای دیباگ
+  console.debug('[confirm-state]', reason || 'update', {
+    service: st.service, date: st.date, time: st.time,
+    name: st.name, phone: st.phone, validPhone: validPhone(st.phone),
+    hasAllData
+  });
+}
+
 
   // ===== Navigation
   function showStep(n){
@@ -2095,9 +2151,10 @@ function showToastDark(message, {type='success', durationMs=2600} = {}) {
 
   <script>
   document.addEventListener('DOMContentLoaded', function () {
-    const btns = document.querySelectorAll(
-      'button[type="submit"]:not([data-no-loader]), #confirm-booking, .service-button'
-    );
+const btns = document.querySelectorAll(
+  'button[type="submit"]:not([data-no-loader]), .service-button'
+);
+
 
     btns.forEach(btn => {
       btn.addEventListener('click', function () {
@@ -2651,28 +2708,71 @@ async function goCTA() {
     });
 
     // دکمه تایید نهایی رزرو (بیرون سکشن)
-document.getElementById('confirm-booking')?.addEventListener('click', () => {
-  if (!AUTH.loggedIn) { requireLogin(); return; }
+function syncFromConfirmedBooking(source = 'event') {
+  const data = document.getElementById('lr-data');
+  if (!data) return;
 
-  const cur    = parseInt(localStorage.getItem(KEY_PROGRESS) ?? data.dataset.current ?? '0', 10) || 0;
-  const next   = cur + 1;
-  const target = parseInt(data.dataset.target || '10', 10);
+  try {
+    const raw = localStorage.getItem('vt:lastBooking');
+    if (!raw) return;
+    const b = JSON.parse(raw);
+    // قبلاً شمرده نشده باشد تا تکراری نشود
+    if (b && b.status === 'confirmed' && !b._countedForLoyalty) {
+      const target = parseInt(data.dataset.target || '10', 10);
+      const cur    = parseInt(localStorage.getItem('vitreenet_loyalty_current') ?? data.dataset.current ?? '0', 10) || 0;
+      const next   = cur + 1;
 
-  // بروزرسانی پیشرفت فعلی
-  localStorage.setItem(KEY_PROGRESS, String(next));
+      // به‌روزرسانی امتیاز و تعداد کل «صرفاً پس از تایید»
+      localStorage.setItem('vitreenet_loyalty_current', String(next));
+      const total = parseInt(localStorage.getItem('vitreenet_booking_total') || '0', 10) || 0;
+      localStorage.setItem('vitreenet_booking_total', String(total + 1));
+      // از این به بعد دوباره حساب نشود
+      b._countedForLoyalty = true;
+      localStorage.setItem('vt:lastBooking', JSON.stringify(b));
 
-  // ثبت تاریخچه کلی برای تشخیص «رزرو داشته/نداشته»
-  const total = parseInt(localStorage.getItem(KEY_TOTAL) || '0', 10) || 0;
-  localStorage.setItem(KEY_TOTAL, String(total + 1));
-  HAS_BOOKED_BEFORE = true;
+      HAS_BOOKED_BEFORE = true;
+      if (cur < target && next >= target) toast('تبریک! جایزه‌ت رسید', 'success');
 
-  // فقط وقتی از زیرِ هدف رد می‌شیم، توست جایزه رو نشون بده
-  if (cur < target && next >= target) {
-    toast('تبریک! جایزه‌ت رسید', 'success');
+      // UI را تازه کن
+      initCard();
+    }
+  } catch (e) { /* no-op */ }
+}
+
+// ۱) وقتی رویداد وضعیت از بخش «Booking Gate» می‌رسد
+window.addEventListener('booking:status', (e) => {
+  if (e?.detail?.status === 'confirmed') {
+    syncFromConfirmedBooking('event');
   }
-
-  setTimeout(initCard, 300);
 });
+
+// ۲) هم‌گام‌سازی میان تب‌ها/پنجره‌ها
+window.addEventListener('storage', (e) => {
+  if (e.key === 'vt:lastBooking') {
+    try {
+      const v = JSON.parse(e.newValue || 'null');
+      if (v?.status === 'confirmed') syncFromConfirmedBooking('storage');
+    } catch(_) {}
+  }
+});
+
+// ۳) چک دوره‌ای سبک (اختیاری، برای زمانی که کاربر روی صفحه منتظر می‌ماند)
+// اگر رزرو pending باشد، هر 30 ثانیه وضعیت را از سرور می‌پرسیم تا به‌محض تایید، سنکرون شویم
+setInterval(async () => {
+  try {
+    const b = JSON.parse(localStorage.getItem('vt:lastBooking') || 'null');
+    if (b && b.status === 'pending' && typeof window.hasPendingBooking === 'function') {
+      const stillPending = await window.hasPendingBooking();
+      if (!stillPending) {
+        // hasPendingBooking خودش vt:lastBooking را به وضعیت جدید به‌روزرسانی می‌کند
+        syncFromConfirmedBooking('poll');
+      }
+    }
+  } catch { /* noop */ }
+}, 30000);
+
+// ۴) یک بار هم روی لود صفحه چک کن (اگر قبلش تایید شده باشد)
+document.addEventListener('DOMContentLoaded', () => syncFromConfirmedBooking('boot'));
 
 
     // مخفی‌کردن استیکی وقتی CTA داخل ویو
