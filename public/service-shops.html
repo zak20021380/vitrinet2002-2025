@@ -3243,7 +3243,8 @@ document.addEventListener('DOMContentLoaded', async function() {
         return;
       }
 
-      const reviews = await fetchByUrl(`/api/shopAppearance/${encodeURIComponent(sellerId)}/reviews`) || [];
+      const reviewsRes = await fetchByUrl(`/api/shopAppearance/${encodeURIComponent(sellerId)}/reviews`);
+      const reviews = Array.isArray(reviewsRes) ? reviewsRes : (reviewsRes?.reviews || []);
       const avg = typeof data?.averageRating === 'number'
                     ? data.averageRating
                     : (reviews.length ? (reviews.reduce((s,r)=>s+(+r.score||0),0) / reviews.length) : 0);
@@ -3265,18 +3266,19 @@ document.addEventListener('DOMContentLoaded', async function() {
 
   // ====== Render ======
   function renderReviews(list) {
+    const reviews = Array.isArray(list) ? list : (list?.reviews || []);
     const container = document.getElementById('reviews-container');
     const modalList = document.getElementById('reviews-list');
     if (container) container.innerHTML = '';
     if (modalList) modalList.innerHTML = '';
 
-    if (!list?.length) {
+    if (!reviews.length) {
       container && (container.innerHTML = '<div class="w-full text-center text-gray-500 py-8">هنوز نظری ثبت نشده است.</div>');
       modalList && (modalList.innerHTML = '<div class="w-full text-center text-gray-500 py-4">هنوز نظری ثبت نشده است.</div>');
       return;
     }
 
-    list.forEach(r => {
+    reviews.forEach(r => {
       const rawName =
         r.userName ||
         (r.userId && typeof r.userId === 'object'
