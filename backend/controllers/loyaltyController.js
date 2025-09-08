@@ -96,3 +96,25 @@ exports.resolveReward = async (req, res) => {
     res.status(500).json({ message: 'Server error' });
   }
 };
+
+// فروشنده: دریافت همه مشتریان با وضعیت وفاداری
+exports.getStoreCustomers = async (req, res) => {
+  try {
+    const storeId = req.user.id;
+    const loyalties = await Loyalty.find({ storeId }).populate('userId', 'name phone');
+
+    const mapped = loyalties.map(l => ({
+      id: l.userId._id,
+      name: l.userId.name,
+      phone: l.userId.phone,
+      completed: l.completed || 0,
+      claimed: l.claimed || 0,
+      pending: l.pending || 0,
+      lastReservation: l.updatedAt
+    }));
+
+    res.json(mapped);
+  } catch (err) {
+    res.status(500).json({ message: 'Server error' });
+  }
+};

@@ -8,5 +8,6 @@ router.put('/', auth('user'), loyaltyController.updateLoyalty);
 router.post('/request', auth('user'), loyaltyController.requestReward);
 router.get('/requests', auth('seller'), loyaltyController.getRewardRequests);
 router.post('/requests/resolve', auth('seller'), loyaltyController.resolveReward);
+router.get('/customers', auth('seller'), loyaltyController.getStoreCustomers);
 
 module.exports = router;

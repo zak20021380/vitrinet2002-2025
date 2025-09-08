@@ -286,7 +286,6 @@ async function fetchInitialData() {
       }
     }
 
-    await loadRewardRequests();
   } catch (err) {
     if (err && err.status === 401) {
       window.location.href = 'login.html';
@@ -341,51 +340,44 @@ async function fetchInitialData() {
       { type: 'customer', text: '<strong>رضا حسینی</strong> به مشتریان شما اضافه شد.', time: '۳ ساعت پیش' },
       { type: 'booking', text: 'نوبت <strong>مریم اکبری</strong> برای فردا لغو شد.', time: '۵ ساعت پیش' },
     ],
-   bookings: [],
-    customers: [
-      { id: 1, name: 'علی رضایی', phone: '۰۹۱۲۳۴۵۶۷۸۹', lastReservation: '۱۴۰۳/۰۵/۲۰' },
-      { id: 2, name: 'سارا محمدی', phone: '۰۹۳۵۱۲۳۴۵۶۷', lastReservation: '۱۴۰۳/۰۵/۱۸' },
-      { id: 3, name: 'رضا حسینی', phone: '۰۹۱۸۹۸۷۶۵۴۳', lastReservation: '۱۴۰۳/۰۵/۱۵' },
-      { id: 4, name: 'مریم اکبری', phone: '۰۹۱۰۱۱۰۲۲۰۳', lastReservation: '۱۴۰۳/۰۴/۳۰' },
-    ],
+    bookings: [],
+    customers: [],
     reviews: []
   };
 
 window.MOCK_DATA = MOCK_DATA;
 
-// Load pending reward requests for this seller
-async function loadRewardRequests() {
+// دریافت مشتریان واقعی فروشنده
+async function loadCustomers() {
   try {
-    const res = await fetch(`${API_BASE}/api/loyalty/requests`, { credentials: 'include' });
+    const res = await fetch(`${API_BASE}/api/loyalty/customers`, { credentials: 'include' });
     if (!res.ok) return;
     const data = await res.json();
 
-    // reset current pending markers
-    if (Array.isArray(MOCK_DATA.customers)) {
-      MOCK_DATA.customers.forEach(c => delete c.pendingRewards);
-    }
+    const mapped = data.map(c => ({
+      id: String(c.id || c.userId || c._id),
+      name: c.name || '-',
+      phone: c.phone || '-',
+      lastReservation: c.lastReservation || '',
+      pendingRewards: c.pending || 0,
+      vipCurrent: c.completed || 0,
+      rewardCount: c.claimed || 0
+    }));
 
-    data.forEach(r => {
-      const id = String(r.userId);
-      let c = MOCK_DATA.customers.find(x => String(x.id) === id);
-      if (c) {
-        c.pendingRewards = r.pending;
-      } else {
-        MOCK_DATA.customers.push({
-          id,
-          name: r.name || '-',
-          phone: r.phone || '-',
-          lastReservation: r.lastReservation || '',
-          pendingRewards: r.pending
-        });
-      }
-    });
+    MOCK_DATA.customers = mapped;
+    window.customersData = mapped.map(c => ({
+      id: c.id,
+      name: c.name,
+      vipCurrent: c.vipCurrent,
+      rewardCount: c.rewardCount,
+      lastReservationAt: c.lastReservation
+    }));
 
     if (typeof app !== 'undefined' && app.renderCustomers) {
       app.renderCustomers();
     }
   } catch (err) {
-    console.error('loadRewardRequests', err);
+    console.error('loadCustomers', err);
   }
 }
 
@@ -401,7 +393,7 @@ async function handleRewardAction(userId, action) {
     if (typeof UIComponents !== 'undefined' && UIComponents.showToast) {
       UIComponents.showToast(action === 'approve' ? 'جایزه تایید شد' : 'درخواست رد شد', action === 'approve' ? 'success' : 'error');
     }
-    await loadRewardRequests();
+    await loadCustomers();
   } catch (err) {
     console.error('handleRewardAction', err);
   }
@@ -2957,7 +2949,9 @@ const app = new SellerPanelApp();
 app.init();
 if (typeof app.initBrandImages === 'function') app.initBrandImages();
 renderNotifications();
-loadRewardRequests();
+
+loadCustomers();
+
 
 
 // === Reservations (Jalali, 24h, RTL, mobile-first) ===
@@ -3819,11 +3813,7 @@ defaultTab?.click();
 })();
 
 
-window.customersData = window.customersData || [
-  { id: 'demo-eligible', name: 'علی', reservations: 3, vipCurrent: 3, vipRequired: 3, rewardCount: 0 },
-  { id: 'demo-oneaway', name: 'مریم', reservations: 2, vipCurrent: 2, vipRequired: 3, rewardCount: 0 },
-  { id: 'demo-claimed', name: 'رضا', reservations: 4, vipCurrent: 3, vipRequired: 3, rewardCount: 1 }
-];
+window.customersData = window.customersData || [];
 
 (function(){
   const $ = s => document.querySelector(s);
