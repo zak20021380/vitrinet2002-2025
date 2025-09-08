@@ -2787,13 +2787,27 @@ const btns = document.querySelectorAll(
       );
     };
 
+    // وضعیت‌های مختلف برگشتی را به شکل یکسان نرمال می‌کند
+    const normalizeStatus = (s = '') => {
+      s = String(s).toLowerCase().trim();
+      if ([
+        'confirmed','approve','approved','accept','accepted','done',
+        'completed','success','ok','تایید','تایید شده','موفق'
+      ].includes(s)) return 'confirmed';
+      if ([
+        'rejected','declined','canceled','cancelled','failed',
+        'no-show','noshow','رد','لغو','لغو شده'
+      ].includes(s)) return 'rejected';
+      return 'pending';
+    };
+
     function syncFromConfirmedBooking(source = 'event') {
       const data = document.getElementById('lr-data');
       if (!data) return;
 
       let b = null;
       try { b = JSON.parse(localStorage.getItem('vt:lastBooking') || 'null'); } catch {}
-      if (!b || String(b.status).toLowerCase().trim() !== 'confirmed') return;
+      if (!b || normalizeStatus(b.status) !== 'confirmed') return;
 
       const bookingId = _extractBookingId(b);
       const counted = _getCounted();
@@ -2833,7 +2847,7 @@ function setupEnhancedStatusCheck() {
   // Check on page load
   setTimeout(async () => {
     const b = JSON.parse(localStorage.getItem('vt:lastBooking') || 'null');
-    if (b && b.status === 'pending') {
+    if (b && normalizeStatus(b.status) === 'pending') {
       console.log('[Loyalty] Checking pending booking on load:', b);
       
       // Retry logic for better reliability
@@ -2854,7 +2868,7 @@ function setupEnhancedStatusCheck() {
   document.addEventListener('visibilitychange', async () => {
     if (!document.hidden) {
       const b = JSON.parse(localStorage.getItem('vt:lastBooking') || 'null');
-      if (b && b.status === 'pending') {
+      if (b && normalizeStatus(b.status) === 'pending') {
         console.log('[Loyalty] Checking booking on visibility change');
         const stillPending = await window.hasPendingBooking();
         if (!stillPending) {
@@ -2870,7 +2884,9 @@ setupEnhancedStatusCheck();
 
     // وقتی وضعیت از بخش Booking Gate می‌آید
     window.addEventListener('booking:status', (e) => {
-      if (e?.detail?.status === 'confirmed') syncFromConfirmedBooking('booking:status');
+      if (normalizeStatus(e?.detail?.status) === 'confirmed') {
+        syncFromConfirmedBooking('booking:status');
+      }
     });
 
     // همگام‌سازی بین تب‌ها
@@ -2878,7 +2894,9 @@ setupEnhancedStatusCheck();
       if (e.key === 'vt:lastBooking') {
         try {
           const v = JSON.parse(e.newValue || 'null');
-          if (v?.status === 'confirmed') syncFromConfirmedBooking('storage');
+          if (normalizeStatus(v?.status) === 'confirmed') {
+            syncFromConfirmedBooking('storage');
+          }
         } catch {}
       }
     });
@@ -2888,7 +2906,7 @@ setupEnhancedStatusCheck();
 setInterval(async () => {
   try {
     const b = JSON.parse(localStorage.getItem('vt:lastBooking') || 'null');
-    if (b && b.status === 'pending' && typeof window.hasPendingBooking === 'function') {
+    if (b && normalizeStatus(b.status) === 'pending' && typeof window.hasPendingBooking === 'function') {
       console.log('[Loyalty] Periodic check for pending booking');
       const stillPending = await window.hasPendingBooking();
       if (!stillPending) {
