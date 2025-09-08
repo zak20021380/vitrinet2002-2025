@@ -66,6 +66,7 @@ app.use('/api/branding', require('./routes/branding'));
 
 // Booking routes
 app.use('/api', require('./routes/bookingRoutes'));
+app.use('/api', require('./routes/bookingAvailabilityRoutes'));
 
 app.use('/api/daily-visits', dailyVisitRoutes);
 app.use('/api/reports', require('./routes/report'));

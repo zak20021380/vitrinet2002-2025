@@ -1439,41 +1439,12 @@ async function hasPending(){
 
       <div class="mb-6">
         <h5 class="font-medium mb-2">روز</h5>
-        <div class="grid grid-cols-3 gap-2">
-          <div class="date-option border border-gray-300 rounded-lg p-2 text-center cursor-pointer hover:border-blue-500 bw-tap">
-            <div class="text-sm">شنبه</div><div class="font-bold">۱۴ تیر</div>
-          </div>
-          <div class="date-option border border-gray-300 rounded-lg p-2 text-center cursor-pointer hover:border-blue-500 bw-tap">
-            <div class="text-sm">یکشنبه</div><div class="font-bold">۱۵ تیر</div>
-          </div>
-          <div class="date-option border border-gray-300 rounded-lg p-2 text-center cursor-pointer hover:border-blue-500 bw-tap">
-            <div class="text-sm">دوشنبه</div><div class="font-bold">۱۶ تیر</div>
-          </div>
-          <div class="date-option border border-gray-300 rounded-lg p-2 text-center cursor-pointer hover:border-blue-500 bw-tap">
-            <div class="text-sm">سه‌شنبه</div><div class="font-bold">۱۷ تیر</div>
-          </div>
-          <div class="date-option border border-gray-300 rounded-lg p-2 text-center cursor-pointer hover:border-blue-500 bw-tap">
-            <div class="text-sm">چهارشنبه</div><div class="font-bold">۱۸ تیر</div>
-          </div>
-          <div class="date-option border border-gray-300 rounded-lg p-2 text-center cursor-pointer hover:border-blue-500 bw-tap">
-            <div class="text-sm">پنج‌شنبه</div><div class="font-bold">۱۹ تیر</div>
-          </div>
-        </div>
+        <div id="booking-days" class="grid grid-cols-3 gap-2"></div>
       </div>
 
       <div class="mb-6">
         <h5 class="font-medium mb-2">ساعت</h5>
-        <div class="grid grid-cols-3 gap-2">
-          <div class="time-option border border-gray-300 rounded-lg p-2 text-center cursor-pointer hover:border-blue-500 bw-tap">۱۰:۰۰</div>
-          <div class="time-option border border-gray-300 rounded-lg p-2 text-center cursor-pointer hover:border-blue-500 bw-tap">۱۱:۰۰</div>
-          <div class="time-option border border-gray-300 rounded-lg p-2 text-center cursor-pointer hover:border-blue-500 bw-tap">۱۲:۰۰</div>
-          <div class="time-option border border-gray-300 rounded-lg p-2 text-center cursor-pointer hover:border-blue-500 bw-tap">۱۴:۰۰</div>
-          <div class="time-option border border-gray-300 rounded-lg p-2 text-center cursor-pointer hover:border-blue-500 bw-tap">۱۵:۰۰</div>
-          <div class="time-option border border-gray-300 rounded-lg p-2 text-center cursor-pointer hover:border-blue-500 bw-tap">۱۶:۰۰</div>
-          <div class="time-option border border-gray-300 rounded-lg p-2 text-center cursor-pointer hover:border-blue-500 bw-tap">۱۷:۰۰</div>
-          <div class="time-option border border-gray-300 rounded-lg p-2 text-center cursor-pointer hover:border-blue-500 bw-tap">۱۸:۰۰</div>
-          <div class="time-option border border-gray-300 rounded-lg p-2 text-center cursor-pointer hover:border-blue-500 bw-tap">۱۹:۰۰</div>
-        </div>
+        <div id="booking-times" class="grid grid-cols-3 gap-2"></div>
       </div>
 
       <div class="flex space-x-3 space-x-reverse">
@@ -1687,7 +1658,52 @@ async function hasPending(){
   const next1 = $('#next-to-step-2');
 
   // step2
-  const dateOpts = $$('.date-option'); const timeOpts = $$('.time-option');
+  let dateOpts = []; let timeOpts = [];
+  let sellerSchedule = {};
+  const WEEKDAY_NAMES = { '6':'شنبه','0':'یکشنبه','1':'دوشنبه','2':'سه‌شنبه','3':'چهارشنبه','4':'پنج‌شنبه','5':'جمعه' };
+
+  async function loadSellerSchedule(){
+    const sid = document.body?.dataset?.sellerId;
+    if(!sid) return;
+    try{
+      const res = await fetch(`${API_ROOT}/api/booking-slots/${encodeURIComponent(sid)}`);
+      if(!res.ok) throw new Error('fail');
+      sellerSchedule = await res.json() || {};
+      renderSchedule();
+    }catch(err){ console.error('load seller schedule failed', err); }
+  }
+
+  function renderSchedule(){
+    const daysWrap = document.getElementById('booking-days');
+    const timesWrap = document.getElementById('booking-times');
+    if(!daysWrap || !timesWrap) return;
+    daysWrap.innerHTML='';
+    timesWrap.innerHTML='';
+    const order=['6','0','1','2','3','4','5'];
+    order.forEach(k=>{
+      const times=sellerSchedule[k];
+      if(!Array.isArray(times) || !times.length) return;
+      const d=document.createElement('div');
+      d.className='date-option border border-gray-300 rounded-lg p-2 text-center cursor-pointer hover:border-blue-500 bw-tap';
+      d.textContent=WEEKDAY_NAMES[k];
+      d.dataset.day=k;
+      daysWrap.appendChild(d);
+    });
+    dateOpts=$$('.date-option');
+    dateOpts.forEach(el=>el.addEventListener('click', ()=>{ pick(dateOpts, el); st.date=el.innerText.trim(); renderTimes(el.dataset.day); saveSel(); chk2(); }));
+    if(dateOpts[0]) dateOpts[0].click();
+  }
+
+  function renderTimes(dayIdx){
+    const timesWrap=document.getElementById('booking-times');
+    timesWrap.innerHTML='';
+    const times=sellerSchedule[String(dayIdx)]||[];
+    times.forEach(t=>{ const div=document.createElement('div'); div.className='time-option border border-gray-300 rounded-lg p-2 text-center cursor-pointer hover:border-blue-500 bw-tap'; div.textContent=toFa(t); timesWrap.appendChild(div); });
+    timeOpts=$$('.time-option');
+    timeOpts.forEach(el=>el.addEventListener('click', ()=>{ pick(timeOpts, el); st.time=el.innerText.trim(); saveSel(); chk2(); }));
+  }
+
+  loadSellerSchedule();
   const back2 = $('#back-to-step-1'); const next2 = $('#next-to-step-3');
 
   // step3
@@ -1895,8 +1911,6 @@ async function hasPending(){
 
   // ===== Step 2
   function pick(list, el){ list.forEach(x=>x.classList.remove('bw-selected')); el.classList.add('bw-selected'); }
-  dateOpts.forEach(el=>el.addEventListener('click', ()=>{ pick(dateOpts, el); st.date = el.innerText.trim(); saveSel(); chk2(); }));
-  timeOpts.forEach(el=>el.addEventListener('click', ()=>{ pick(timeOpts, el); st.time = el.innerText.trim(); saveSel(); chk2(); }));
   back2.addEventListener('click', ()=>showStep(1));
   next2.addEventListener('click', ()=>showStep(3));
 
