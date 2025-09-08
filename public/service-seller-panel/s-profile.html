@@ -1526,7 +1526,7 @@ function claimReward() {
       trapFocus('otpModal');
       setTimeout(() => $$('.otp-input')[0].focus(), 100);
     }
-    $('#editForm').addEventListener('submit', (e) => {
+    $('#editForm').addEventListener('submit', async (e) => {
       e.preventDefault();
       
       // Check native validity first
@@ -1550,8 +1550,28 @@ function claimReward() {
         showToast('شماره موبایل معتبر نیست', 'error');
         return;
       }
-      pendingProfile = { name, phone };
-      startVerification(phone);
+      if (phone !== profilePhone) {
+        pendingProfile = { name, phone };
+        startVerification(phone);
+      } else {
+        try {
+          await fetch('/api/user/profile', {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
+            body: JSON.stringify({ name, phone })
+          });
+        } catch (err) {
+          console.error('profile update failed', err);
+        }
+        profileName = name;
+        profilePhone = phone;
+        $('#userName').textContent = name;
+        $('#userPhone').textContent = phone;
+        checkProfileCompletion();
+        closeModal('editModal');
+        showToast('پروفایل بروزرسانی شد', 'success');
+      }
     });
     $('#resendBtn').addEventListener('click', () => {
       if (pendingProfile) startVerification(pendingProfile.phone);
