@@ -430,7 +430,7 @@
         
     </style>
 </head>
-<body class="bg-gray-50 text-gray-800" data-seller-id="123" data-shopurl="demo-shop">
+<body class="bg-gray-50 text-gray-800" data-seller-id="123" data-store-id="123" data-shopurl="demo-shop">
     <!-- Sticky Header -->
     <!-- header desktop redesign start -->
 <!-- header desktop redesign start -->
@@ -2837,7 +2837,7 @@ const btns = document.querySelectorAll(
     // تأیید دریافت جایزه -> ارسال درخواست به فروشنده و ریست پیشرفت
     document.getElementById('lr-redeem-confirm')?.addEventListener('click', async () => {
       if (!AUTH.loggedIn) { requireLogin(); return; }
-      const storeId = document.body?.dataset?.storeId;
+      const storeId = document.body?.dataset?.storeId || document.body?.dataset?.sellerId;
       document.getElementById('lr-redeem-body').classList.add('hidden');
       document.getElementById('lr-redeem-done').classList.remove('hidden');
       try {
@@ -5826,7 +5826,10 @@ function render(items) {
   const sellerId = params.get('sellerId');
 
   if (shopurl)  document.body.dataset.shopurl  = shopurl;
-  if (sellerId) document.body.dataset.sellerId = sellerId;
+  if (sellerId) {
+    document.body.dataset.sellerId = sellerId;
+    document.body.dataset.storeId  = sellerId;
+  }
 
   // 2) پری‌فیل سرویس برای ویزارد (اختیاری: اگر در URL بود)
   //     این کلید همونه که خود ویزارد داخلش انتخاب‌ها رو نگه می‌داره
