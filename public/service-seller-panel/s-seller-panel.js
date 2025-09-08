@@ -687,6 +687,7 @@ static closeDrawer(drawerId) {
   drawer.hidden = true;
   this._handleOverlay(drawer, null, false);
 }
+}
 
 
 
