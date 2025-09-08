@@ -2752,18 +2752,27 @@ const btns = document.querySelectorAll(
     document.getElementById('lr-cta')?.addEventListener('click', goCTA);
     document.getElementById('lr-cta-mobile')?.addEventListener('click', goCTA);
 
-    // تأیید دریافت جایزه -> ریست پیشرفت (نیازمند ورود)
-    document.getElementById('lr-redeem-confirm')?.addEventListener('click', () => {
+    // تأیید دریافت جایزه -> ارسال درخواست به فروشنده و ریست پیشرفت
+    document.getElementById('lr-redeem-confirm')?.addEventListener('click', async () => {
       if (!AUTH.loggedIn) { requireLogin(); return; }
+      const storeId = document.body?.dataset?.storeId;
       document.getElementById('lr-redeem-body').classList.add('hidden');
       document.getElementById('lr-redeem-done').classList.remove('hidden');
+      try {
+        await fetch('/api/loyalty/request', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+          body: JSON.stringify({ storeId })
+        });
+      } catch (_) {}
       setTimeout(() => {
         localStorage.setItem(KEY_PROGRESS, '0');
         data.dataset.current = '0';
         closeModal(document.getElementById('lrRedeemModal'));
         document.getElementById('lr-redeem-done').classList.add('hidden');
         document.getElementById('lr-redeem-body').classList.remove('hidden');
-        toast('جایزه ثبت شد؛ مبارک‌ته!', 'success');
+        toast('درخواست جایزه ثبت شد', 'success');
         initCard();
       }, 250);
     });
