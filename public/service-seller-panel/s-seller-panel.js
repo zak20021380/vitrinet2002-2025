@@ -115,7 +115,10 @@ async createService(payload) {
       id: b._id || b.id,
       customerName: b.customerName || '',
       service: b.service || '',
-      time: b.time || '',
+      // backend may return `bookingDate`/`startTime` instead of `date`/`time`
+      date: b.bookingDate || b.date || '',
+      time: b.startTime || b.time || '',
+      customerPhone: b.customerPhone || '',
       status: b.status || 'pending'
     }));
   },
