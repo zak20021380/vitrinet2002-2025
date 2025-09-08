@@ -2816,7 +2816,12 @@ const btns = document.querySelectorAll(
 
       let b = null;
       try { b = JSON.parse(localStorage.getItem('vt:lastBooking') || 'null'); } catch {}
+
+      // Only proceed if seller has approved the booking
       if (!b || normalizeStatus(b.status) !== 'confirmed') return;
+
+      // Prevent counting the same booking multiple times (e.g. when no id is provided)
+      if (b._countedForLoyalty) return;
 
       const bookingId = _extractBookingId(b);
       const counted = _getCounted();
