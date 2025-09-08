@@ -2815,11 +2815,7 @@ initSellerPersonalization();
   ];
   const el = (id) => document.getElementById(id);
   const $$ = (sel) => Array.from(document.querySelectorAll(sel));
-  const KEY = 'vit_resv_schedule';
-
-
-
-  
+  const KEY = 'vit_resv_schedule'; // legacy key, no localStorage usage
 
   const faDigits = '۰۱۲۳۴۵۶۷۸۹', enDigits = '0123456789';
   const toFa = (s) => (s + '').replace(/[0-9]/g, (d) => faDigits[d]);
@@ -2862,17 +2858,41 @@ initSellerPersonalization();
   })();
 
 
-  // state + storage
- const state = { selectedIdx: 0, schedule: load() };
-// Clean any old data format on load
-  function load() {
-    const def = { '6': [], '0': [], '1': [], '2': [], '3': [], '4': [], '5': [] };
-    try { return Object.assign(def, StorageManager.get(KEY) || {}); } catch { return def; }
+  // state + storage from server
+  const state = {
+    selectedIdx: 0,
+    schedule: { '6': [], '0': [], '1': [], '2': [], '3': [], '4': [], '5': [] }
+  };
+
+  async function load() {
+    try {
+      const res = await fetch(`${API_BASE}/api/booking-slots/me`, { credentials: 'include' });
+      if (res.ok) {
+        const data = await res.json();
+        state.schedule = Object.assign(state.schedule, data || {});
+        cleanScheduleData();
+      }
+    } catch (e) {
+      console.error('load schedule failed', e);
+    }
   }
-  function save() { StorageManager.set(KEY, state.schedule); }
+
+  async function save() {
+    try {
+      await fetch(`${API_BASE}/api/booking-slots/me`, {
+        method: 'PUT',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(state.schedule)
+      });
+    } catch (e) {
+      console.error('save schedule failed', e);
+    }
+  }
 
   // open modal
-  function openModal() {
+  async function openModal() {
+    await load();
     UIComponents.openModal('resv-modal');
     updateTodayBanner();
     scheduleMidnightTick();
@@ -3128,8 +3148,7 @@ function cleanScheduleData() {
   save();
 }
 
-// Call the cleaning function once after state is loaded (add this line after state = { ... })
-setTimeout(() => cleanScheduleData(), 100);
+// cleaning is triggered after schedule load
 
 
 // --- Force 24h input and allow flexible hour format
