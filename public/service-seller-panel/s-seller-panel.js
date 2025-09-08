@@ -282,6 +282,8 @@ async function fetchInitialData() {
         `).join('');
       }
     }
+
+    await loadRewardRequests();
   } catch (err) {
     if (err && err.status === 401) {
       window.location.href = 'login.html';
@@ -348,7 +350,61 @@ async function fetchInitialData() {
 
 window.MOCK_DATA = MOCK_DATA;
 
-  
+// Load pending reward requests for this seller
+async function loadRewardRequests() {
+  try {
+    const res = await fetch(`${API_BASE}/api/loyalty/requests`, { credentials: 'include' });
+    if (!res.ok) return;
+    const data = await res.json();
+
+    // reset current pending markers
+    if (Array.isArray(MOCK_DATA.customers)) {
+      MOCK_DATA.customers.forEach(c => delete c.pendingRewards);
+    }
+
+    data.forEach(r => {
+      const id = String(r.userId);
+      let c = MOCK_DATA.customers.find(x => String(x.id) === id);
+      if (c) {
+        c.pendingRewards = r.pending;
+      } else {
+        MOCK_DATA.customers.push({
+          id,
+          name: r.name || '-',
+          phone: r.phone || '-',
+          lastReservation: r.lastReservation || '',
+          pendingRewards: r.pending
+        });
+      }
+    });
+
+    if (typeof app !== 'undefined' && app.renderCustomers) {
+      app.renderCustomers();
+    }
+  } catch (err) {
+    console.error('loadRewardRequests', err);
+  }
+}
+
+// Handle approve/reject reward actions
+async function handleRewardAction(userId, action) {
+  try {
+    await fetch(`${API_BASE}/api/loyalty/requests/resolve`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify({ userId, action })
+    });
+    if (typeof UIComponents !== 'undefined' && UIComponents.showToast) {
+      UIComponents.showToast(action === 'approve' ? 'جایزه تایید شد' : 'درخواست رد شد', action === 'approve' ? 'success' : 'error');
+    }
+    await loadRewardRequests();
+  } catch (err) {
+    console.error('handleRewardAction', err);
+  }
+}
+
+
   /**
    * ==============================
    * Storage Manager
@@ -2038,6 +2094,18 @@ initCustomerClickHandlers() {
   const customersList = document.getElementById('customers-list');
   if (customersList) {
     customersList.addEventListener('click', (e) => {
+      const approveBtn = e.target.closest('.reward-approve');
+      const rejectBtn  = e.target.closest('.reward-reject');
+      if (approveBtn) {
+        handleRewardAction(approveBtn.dataset.userId, 'approve');
+        e.stopPropagation();
+        return;
+      }
+      if (rejectBtn) {
+        handleRewardAction(rejectBtn.dataset.userId, 'reject');
+        e.stopPropagation();
+        return;
+      }
       const card = e.target.closest('.customer-card');
       if (card) {
         this.showCustomerDetails(card);
@@ -2174,13 +2242,19 @@ renderCustomers(query = '') {
     return `
       <article class="customer-card card"
                role="listitem" tabindex="0"
-               data-name="${c.name}" data-phone="${c.phone}">
+               data-name="${c.name}" data-phone="${c.phone}" data-user-id="${c.id}">
         <div class="customer-avatar" aria-hidden="true">${c.name.charAt(0)}</div>
         <div class="customer-info">
           <div class="customer-name">${c.name}</div>
           <div class="customer-phone">${UIComponents.formatPersianNumber(c.phone)}</div>
           <div class="customer-last-reservation">آخرین رزرو نوبت: ${UIComponents.formatRelativeDate(c.lastReservation)}</div>
         </div>
+        ${c.pendingRewards ? `
+        <div class="customer-reward" style="margin-top:8px;">
+          <span class="status-badge status-pending" style="margin-left:8px;">درخواست جایزه (${c.pendingRewards})</span>
+          <button type="button" class="btn-success reward-approve" data-user-id="${c.id}">تایید</button>
+          <button type="button" class="btn-danger reward-reject" data-user-id="${c.id}">رد</button>
+        </div>` : ''}
       </article>
     `;
   }).join('');
@@ -2796,10 +2870,11 @@ await fetchInitialData();
 initSellerPersonalization();
 
   // Run the App
-  const app = new SellerPanelApp();
-  app.init();
-  if (typeof app.initBrandImages === 'function') app.initBrandImages();
-  renderNotifications();
+const app = new SellerPanelApp();
+app.init();
+if (typeof app.initBrandImages === 'function') app.initBrandImages();
+renderNotifications();
+loadRewardRequests();
 
 
 // === Reservations (Jalali, 24h, RTL, mobile-first) ===
