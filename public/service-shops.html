@@ -1703,41 +1703,64 @@ async function hasPending(){
     }
   }
 
-  // FIX: از ورودی‌ها هم هر بار سینک کن
-function updateConfirmState(reason = '') {
-  loadSel();
-  rebuildFromDOMIfMissing();
+  // ===== PATCH: نسخهٔ پایدار فعال/غیرفعال‌سازی دکمه
+  function updateConfirmState(reason = '') {
+    // از DOM بازسازی انتخاب‌ها
+    const svcSel  = document.querySelector('#booking-services .service-option.bw-selected');
+    const dateSel = document.querySelector('.date-option.bw-selected');
+    const timeSel = document.querySelector('.time-option.bw-selected');
 
-  if (nameInp)  st.name  = (nameInp.value || st.name || '').trim();
-  if (phoneInp) st.phone = toEn(phoneInp.value || st.phone || '');
+    if (svcSel) {
+      st.service   = svcSel.dataset.service || svcSel.textContent.trim();
+      st.price     = parseInt(svcSel.dataset.price || '0', 10) || 0;
+      st.serviceId = svcSel.dataset.serviceId || null;
+    }
+    if (dateSel) st.date = dateSel.innerText.trim();
+    if (timeSel) st.time = timeSel.innerText.trim();
 
-  const hasAllData = !!(st.service && st.date && st.time && st.name && validPhone(st.phone));
-  if (!confirmBtn) return;
+    // از ورودی‌ها
+    if (nameInp)  st.name  = (nameInp.value || '').trim();
+    if (phoneInp) st.phone = toEn(phoneInp.value || '');
 
-  if (hasAllData) {
-    // فعال‌سازی کامل
-    confirmBtn.disabled = false;
-    confirmBtn.removeAttribute('disabled');          // اگر جایی attribute مانده باشد، پاک شود
-    confirmBtn.setAttribute('aria-disabled', 'false');
-    confirmBtn.classList.remove('cursor-not-allowed', 'opacity-50');
-    confirmBtn.classList.add('bg-blue-600', 'hover:bg-blue-700');
-  } else {
-    // غیرفعال
-    confirmBtn.disabled = true;
-    confirmBtn.setAttribute('disabled', 'disabled'); // attribute هم ست شود تا CSS همگام بماند
-    confirmBtn.setAttribute('aria-disabled', 'true');
-    confirmBtn.classList.add('cursor-not-allowed', 'opacity-50');
-    confirmBtn.classList.remove('bg-blue-600', 'hover:bg-blue-700');
+    const hasAllData = !!(st.service && st.date && st.time && st.name && /^0\d{10}$/.test(st.phone));
+    if (!confirmBtn) return;
+
+    if (hasAllData) {
+      confirmBtn.disabled = false;
+      confirmBtn.removeAttribute('disabled');
+      confirmBtn.setAttribute('aria-disabled', 'false');
+      confirmBtn.classList.remove('cursor-not-allowed', 'opacity-50');
+      confirmBtn.classList.add('bg-blue-600', 'hover:bg-blue-700');
+    } else {
+      confirmBtn.disabled = true;
+      confirmBtn.setAttribute('disabled', 'disabled');
+      confirmBtn.setAttribute('aria-disabled', 'true');
+      confirmBtn.classList.add('cursor-not-allowed', 'opacity-50');
+      confirmBtn.classList.remove('bg-blue-600', 'hover:bg-blue-700');
+    }
+
+    console.debug('[confirm-state]', reason, {
+      service: st.service, date: st.date, time: st.time,
+      name: st.name, phone: st.phone, ok: hasAllData
+    });
   }
 
-  // برای دیباگ
-  console.debug('[confirm-state]', reason || 'update', {
-    service: st.service, date: st.date, time: st.time,
-    name: st.name, phone: st.phone, validPhone: validPhone(st.phone),
-    hasAllData
-  });
-}
-
+  // ===== PATCH: نوع دکمه و نگهبان ضد-disabled
+  if (confirmBtn) {
+    confirmBtn.type = 'button'; // از هر submit-handler عمومی در امان
+    const confirmGuard = new MutationObserver(() => {
+      const ready = !!(st.service && st.date && st.time && (nameInp?.value||'').trim() && /^0\d{10}$/.test(toEn(phoneInp?.value||'')));
+      if (ready && confirmBtn.hasAttribute('disabled')) {
+        confirmBtn.disabled = false;
+        confirmBtn.removeAttribute('disabled');
+        confirmBtn.setAttribute('aria-disabled', 'false');
+        confirmBtn.classList.remove('cursor-not-allowed', 'opacity-50');
+        confirmBtn.classList.add('bg-blue-600', 'hover:bg-blue-700');
+      }
+    });
+    confirmGuard.observe(confirmBtn, { attributes: true, attributeFilter: ['disabled'] });
+    // اختیاری: روی unload قطعش نکنیم هم مشکلی نیست
+  }
 
   // ===== Navigation
   function showStep(n){
@@ -1748,7 +1771,12 @@ function updateConfirmState(reason = '') {
     pbar.style.width = (n*20) + '%';
     dots.forEach(d => { const k = +d.dataset.step; d.classList.toggle('bg-blue-600', k<=n); d.classList.toggle('bg-gray-300', k>n); });
     scrollInto(wizard);
-    if (n === 5) updateConfirmState('enter-step5');
+    if (n === 5) {
+      updateConfirmState('enter-step5');
+      // PATCH: دوبار فراخوانی برای حذف race با رندر/transition
+      requestAnimationFrame(() => updateConfirmState('enter-step5:raf'));
+      setTimeout(() => updateConfirmState('enter-step5:timeout'), 0);
+    }
   }
 
   // ===== Validators
@@ -1951,7 +1979,7 @@ function updateConfirmState(reason = '') {
     } finally {
       // رفتن به مرحله تایید
       fillConfirm();
-      saveSel(); // FIX: اطمینان از ذخیره name/phone قبل از Step 5
+      saveSel(); // اطمینان از ذخیره name/phone قبل از Step 5
       showStep(5);
       requestAnimationFrame(() => updateConfirmState('after-otp'));
       verifyBtn.disabled = false;
@@ -1983,13 +2011,12 @@ function updateConfirmState(reason = '') {
 
   back5.addEventListener('click', ()=>showStep(3));
 
-  // --- Built-in success popup on final confirm (inserted here) ---
+  // --- Built-in success popup on final confirm ---
   (function hookConfirmToPendingModal(){
     const btn = document.getElementById('confirm-booking');
     if (!btn) return;
 
     btn.addEventListener('click', async () => {
-      // اگر دکمه به خاطر نبود اطلاعات فعال نیست، خروج
       if (btn.disabled) return;
 
       // سینک نهایی داده‌ها
@@ -1998,7 +2025,7 @@ function updateConfirmState(reason = '') {
 
       if (!st.service || !st.date || !st.time || !st.name || !/^0\d{10}$/.test(st.phone)) return;
 
-      // 1) ذخیرهٔ وضعیت «pending» برای Gate
+      // 1) ذخیرهٔ وضعیت «pending»
       const last = {
         id: genId(),
         service: st.service,
@@ -2019,7 +2046,7 @@ function updateConfirmState(reason = '') {
       setText('pb-time',    st.time);
       setText('pb-phone',   st.phone);
 
-      // 3) نمایش پاپ‌آپ خودِ سیستم
+      // 3) نمایش پاپ‌آپ
       if (typeof window.openModalById === 'function') {
         window.openModalById('pendingBookingModal');
       } else if (typeof window.showToastDark === 'function') {
@@ -2099,6 +2126,7 @@ function updateConfirmState(reason = '') {
   (function initButtons(){
     next1.disabled = true; next2.disabled = true; next3.disabled = true; confirmBtn.disabled = true;
     confirmBtn.setAttribute('disabled','disabled');
+    if (confirmBtn) confirmBtn.type = 'button';
   })();
 
   // اگر prefill در session هست، از همون شروع کن
@@ -2141,6 +2169,7 @@ function updateConfirmState(reason = '') {
   });
 })();
 </script>
+
 
 
 
@@ -2429,22 +2458,25 @@ const btns = document.querySelectorAll(
   }
 
   // ------- KEYS & HELPERS -------
-  const KEY_PROGRESS = 'vitreenet_loyalty_current';   // پیشرفت فعلی تا جایزه (برای مهمان هم نگه نمی‌داریم)
-  const KEY_TOTAL    = 'vitreenet_booking_total';     // تعداد کل رزروها (تشخیص «اولین نوبت»)
+  const KEY_PROGRESS = 'vitreenet_loyalty_current';   // پیشرفت فعلی تا جایزه
+  const KEY_TOTAL    = 'vitreenet_booking_total';     // تعداد کل رزروها (برای تشخیص «اولین نوبت»)
   const AUTH_LS_KEY  = 'auth_user';                   // فقط حالت تست/دِمو
 
   const toFa = n => String(n).replace(/\d/g, d => '۰۱۲۳۴۵۶۷۸۹'[d]);
   const reduce = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   function toast(msg, type = 'info') {
-    showToastDark(msg, {type});
+    if (typeof showToastDark === 'function') showToastDark(msg, { type });
   }
 
   // ------- ADAPTERS (قابل تعویض با بک‌اند) -------
   const adapters = {
     async getAuth() {
       if (window.__APP_USER__ && window.__APP_USER__.id) return { loggedIn: true, user: window.__APP_USER__ };
-      try { const raw = localStorage.getItem(AUTH_LS_KEY); if (raw) return { loggedIn: true, user: JSON.parse(raw) }; } catch(e) {}
+      try {
+        const raw = localStorage.getItem(AUTH_LS_KEY);
+        if (raw) return { loggedIn: true, user: JSON.parse(raw) };
+      } catch (e) {}
       return { loggedIn: false, user: null };
     },
     async getBookingSummary(userId) {
@@ -2469,54 +2501,46 @@ const btns = document.querySelectorAll(
   }
 
   // ------- COPY (صمیمی/متعادل) -------
-// ------- COPY (صمیمی/متعادل، بدون شعار) -------
-function copyFor(progress, current, target, reward) {
-  const left = Math.max(0, target - current);
-  const pick = (arr) => arr[(current + left) % arr.length]; // چرخشی ساده
+  function copyFor(progress, current, target, reward) {
+    const left = Math.max(0, target - current);
+    const pick = (arr) => arr[(current + left) % arr.length];
 
-  if (current >= target) {
+    if (current >= target) {
+      return pick([
+        { h: 'جایزه‌ت آماده‌ست 🎁', sub: 'بزن بگیریمش.',            help: 'روی رزرو بعدی اعمالش می‌کنیم.', cta: 'دریافت جایزه' },
+        { h: 'حله! رسیدی به جایزه', sub: 'فقط فعالش کنیم و تمام.',  help: 'تو رزرو بعدی استفاده میشه.',    cta: 'دریافت جایزه' },
+        { h: 'به هدف خوردی ✨',     sub: 'وقتِ نقد کردنشه.',         help: 'بعدی که رزرو کنی می‌افته.',      cta: 'دریافت جایزه' },
+      ]);
+    }
+    if (current * 2 === target) {
+      return pick([
+        { h: 'نصفش رفت ✅',      sub: 'چند تا دیگه مونده.',  help: `${left} نوبت مونده.`, cta: 'رزرو بعدی' },
+        { h: 'نصف راهی! 👌',     sub: 'با همین فرمون برو.',  help: `${left} نوبت مونده.`, cta: 'رزرو بعدی' },
+      ]);
+    }
+    if (progress >= 90) {
+      return pick([
+        { h: 'یه قدم تا جایزه',  sub: 'همین یکی دیگه.',      help: left <= 1 ? 'با نوبت بعدی می‌رسی.' : `${left} نوبت مونده.`, cta: 'رزرو بعدی' },
+        { h: 'تقریباً رسیدی ⏳', sub: 'کم مونده، بزن بریم.', help: left <= 1 ? 'نوبت بعدی کافیه.'    : `${left} نوبت مونده.`, cta: 'رزرو بعدی' },
+      ]);
+    }
+    if (progress >= 60) {
+      return pick([
+        { h: 'خوب داری میری 🚀', sub: 'همینو نگه دار.',      help: `${left} نوبت تا جایزه.`, cta: 'رزرو بعدی' },
+        { h: 'مسیر رو گرفتی',   sub: 'یکی‌یکی جلو برو.',    help: `${left} نوبت تا جایزه.`, cta: 'رزرو بعدی' },
+      ]);
+    }
+    if (current > 0) {
+      return pick([
+        { h: 'شروع خوبی زدی',   sub: 'نذار فاصله بیفته.',   help: `${left} نوبت مونده.`,    cta: 'رزرو بعدی' },
+        { h: 'اوله راهی ولی رو غلتکی', sub: 'قدم بعدی رو بردار.', help: `${left} نوبت مونده.`, cta: 'رزرو بعدی' },
+      ]);
+    }
     return pick([
-      { h: 'جایزه‌ت آماده‌ست 🎁',   sub: 'بزن بگیریمش.',            help: 'روی رزرو بعدی اعمالش می‌کنیم.', cta: 'دریافت جایزه' },
-      { h: 'حله! رسیدی به جایزه',   sub: 'فقط فعالش کنیم و تمام.',  help: 'تو رزرو بعدی استفاده میشه.',    cta: 'دریافت جایزه' },
-      { h: 'به هدف خوردی ✨',       sub: 'وقتِ نقد کردنشه.',         help: 'بعدی که رزرو کنی می‌افته.',      cta: 'دریافت جایزه' },
+      { h: 'به باشگاه خوش اومدی 👋', sub: 'اولین نوبت رو بگیر و بریم.', help: `با ${target} نوبت، ${reward}.`, cta: 'رزرو اولین نوبت' },
+      { h: 'از همین‌جا شروع کن',     sub: 'اولین رزرو = یه قدم جلو.',   help: `با ${target} نوبت، ${reward}.`, cta: 'رزرو اولین نوبت' },
     ]);
   }
-
-  if (current * 2 === target) {
-    return pick([
-      { h: 'نصفش رفت ✅',           sub: 'چند تا دیگه مونده.',       help: `${left} نوبت مونده.` ,           cta: 'رزرو بعدی' },
-      { h: 'نصف راهی! 👌',          sub: 'با همین فرمون برو.',       help: `${left} نوبت مونده.`,            cta: 'رزرو بعدی' },
-    ]);
-  }
-
-  if (progress >= 90) {
-    return pick([
-      { h: 'یه قدم تا جایزه',       sub: 'همین یکی دیگه.',           help: left <= 1 ? 'با نوبت بعدی می‌رسی.' : `${left} نوبت مونده.`, cta: 'رزرو بعدی' },
-      { h: 'تقریباً رسیدی ⏳',      sub: 'کم مونده، بزن بریم.',      help: left <= 1 ? 'نوبت بعدی کافیه.'    : `${left} نوبت مونده.`, cta: 'رزرو بعدی' },
-    ]);
-  }
-
-  if (progress >= 60) {
-    return pick([
-      { h: 'خوب داری میری 🚀',       sub: 'همینو نگه دار.',           help: `${left} نوبت تا جایزه.`,         cta: 'رزرو بعدی' },
-      { h: 'مسیر رو گرفتی',         sub: 'یکی‌یکی جلو برو.',         help: `${left} نوبت تا جایزه.`,         cta: 'رزرو بعدی' },
-    ]);
-  }
-
-  if (current > 0) {
-    return pick([
-      { h: 'شروع خوبی زدی',         sub: 'نذار فاصله بیفته.',        help: `${left} نوبت مونده.`,            cta: 'رزرو بعدی' },
-      { h: 'اوله راهی ولی رو غلتکی',sub: 'قدم بعدی رو بردار.',       help: `${left} نوبت مونده.`,            cta: 'رزرو بعدی' },
-    ]);
-  }
-
-  // کاربر تازه/هیچ رزروی نداشته
-  return pick([
-    { h: 'به باشگاه خوش اومدی 👋', sub: 'اولین نوبت رو بگیر و بریم.', help: `با ${target} نوبت، ${reward}.`, cta: 'رزرو اولین نوبت' },
-    { h: 'از همین‌جا شروع کن',     sub: 'اولین رزرو = یه قدم جلو.',   help: `با ${target} نوبت، ${reward}.`, cta: 'رزرو اولین نوبت' },
-  ]);
-}
-
 
   // ------- AUTH / HISTORY -------
   let AUTH = { loggedIn: false, user: null };
@@ -2563,7 +2587,7 @@ function copyFor(progress, current, target, reward) {
     // مقدار خام (ممکنه از سرور یا لوکال بیاد)
     const raw = parseInt(localStorage.getItem(KEY_PROGRESS) ?? data.dataset.current ?? '0', 10) || 0;
 
-    // ✳️ منطق جدید: اگر لاگین نیست یا هرگز رزرو نکرده ⇒ صفرِ واقعی نمایش داده می‌شود
+    // اگر لاگین نیست یا هرگز رزرو نکرده ⇒ صفر نمایش داده می‌شود
     const current = (!AUTH.loggedIn || !HAS_BOOKED_BEFORE) ? 0 : raw;
 
     document.getElementById('reward-target').textContent = toFa(target);
@@ -2593,7 +2617,7 @@ function copyFor(progress, current, target, reward) {
     applyCtaText(chooseCtaText(current, target));
     updateSticky(current, target);
 
-    // این مقدار برای هندلرها استفاده می‌شود
+    // برای هندلرها
     data.dataset.current = String(current);
   }
 
@@ -2619,74 +2643,69 @@ function copyFor(progress, current, target, reward) {
       });
     });
 
-   // --- REPLACE goCTA inside bindEvents() in the Loyalty Rewards script ---
-async function goCTA() {
-  const data = document.getElementById('lr-data');
-  if (!data) return;
+    // --- CTA ---
+    async function goCTA() {
+      const data = document.getElementById('lr-data');
+      if (!data) return;
 
-  const target  = parseInt(data.dataset.target  || '10', 10);
-  const current = parseInt(data.dataset.current || '0', 10);
+      const target  = parseInt(data.dataset.target  || '10', 10);
+      const current = parseInt(data.dataset.current || '0', 10);
 
-  // اگر کاربر لاگین نیست ولی CTA «رزرو اولین نوبت» است، مستقیم برو به ویزارد
-  const ctaText    = document.getElementById('lr-cta-label')?.textContent?.trim();
-  const isFirstCTA = (ctaText === 'رزرو اولین نوبت') || (!AUTH.loggedIn && !HAS_BOOKED_BEFORE);
+      // اگر کاربر لاگین نیست ولی CTA «رزرو اولین نوبت» است، مستقیم وارد ویزارد شو
+      const ctaText    = document.getElementById('lr-cta-label')?.textContent?.trim();
+      const isFirstCTA = (ctaText === 'رزرو اولین نوبت') || (!AUTH.loggedIn && !HAS_BOOKED_BEFORE);
 
-  // برای CTAهای دیگر (مثل «رزرو بعدی» یا «دریافت جایزه») همچنان لاگین لازم است
-  if (!AUTH.loggedIn && !isFirstCTA) {
-    requireLogin();
-    return;
-  }
+      if (!AUTH.loggedIn && !isFirstCTA) {
+        requireLogin();
+        return;
+      }
 
-  // اگر به حدّ جایزه رسیدی و لاگین هستی → مودال دریافت جایزه
-  if (current >= target && AUTH.loggedIn) {
-    openModal(document.getElementById('lrRedeemModal'));
-    return;
-  }
+      if (current >= target && AUTH.loggedIn) {
+        openModal(document.getElementById('lrRedeemModal'));
+        return;
+      }
 
-  // ===== قفل رزرو: اگر نوبت قبلی هنوز تایید نشده، اجازه ورود به ویزارد نده
-  const lsHasPending = () => {
-    try {
-      const b = JSON.parse(localStorage.getItem('vt:lastBooking') || 'null');
-      return !!(b && b.status === 'pending');
-    } catch(e){ return false; }
-  };
-  const hasPending =
-    typeof window.hasPendingBooking === 'function'
-      ? await window.hasPendingBooking()
-      : lsHasPending();
+      // قفل رزرو تا تایید قبلی
+      const lsHasPending = () => {
+        try {
+          const b = JSON.parse(localStorage.getItem('vt:lastBooking') || 'null');
+          return !!(b && b.status === 'pending');
+        } catch(e){ return false; }
+      };
+      const hasPending =
+        typeof window.hasPendingBooking === 'function'
+          ? await window.hasPendingBooking()
+          : lsHasPending();
 
-  if (hasPending) {
-    // اگر مودال بلاکِ اختصاصی داری
-    if (typeof window.openModalById === 'function' && document.getElementById('pendingBlockModal')) {
-      window.openModalById('pendingBlockModal');
-    } else if (typeof window.showToastDark === 'function') {
-      showToastDark('نوبت قبلی‌ت هنوز تایید نشده. لطفاً صبر کنی تا تأیید بشه ✋', { type: 'info' });
-    } else {
-      alert('نوبت قبلی هنوز تایید نشده است.');
+      if (hasPending) {
+        if (typeof window.openModalById === 'function' && document.getElementById('pendingBlockModal')) {
+          window.openModalById('pendingBlockModal');
+        } else if (typeof showToastDark === 'function') {
+          showToastDark('نوبت قبلی‌ت هنوز تایید نشده. لطفاً صبر کنی تا تأیید بشه ✋', { type: 'info' });
+        } else {
+          alert('نوبت قبلی هنوز تایید نشده است.');
+        }
+        return;
+      }
+
+      // باز کردن ویزارد رزرو
+      if (typeof window.openBookingWizard === 'function') {
+        window.openBookingWizard();
+        return;
+      }
+
+      const ids = ['booking-wizard', 'booking', 'reserve', 'reservation'];
+      let el = null;
+      for (const id of ids) { const t = document.getElementById(id); if (t) { el = t; break; } }
+      if (el) {
+        if (el.classList.contains('hidden')) el.classList.remove('hidden');
+        const top = el.getBoundingClientRect().top + window.scrollY - 80;
+        (reduce() ? window.scrollTo(0, top) : window.scrollTo({ top, behavior:'smooth' }));
+      } else {
+        const url = data.dataset.bookingUrl;
+        if (url) window.location.href = url; else toast('بخش رزرو هنوز بالا نیومده');
+      }
     }
-    return;
-  }
-  // ===== /قفل رزرو
-
-  // باز کردن و اسکرول به ویزارد رزرو
-  if (typeof window.openBookingWizard === 'function') {
-    window.openBookingWizard();
-    return;
-  }
-
-  const ids = ['booking-wizard', 'booking', 'reserve', 'reservation'];
-  let el = null;
-  for (const id of ids) { const t = document.getElementById(id); if (t) { el = t; break; } }
-  if (el) {
-    if (el.classList.contains('hidden')) el.classList.remove('hidden');
-    const top = el.getBoundingClientRect().top + window.scrollY - 80;
-    (reduce() ? window.scrollTo(0, top) : window.scrollTo({ top, behavior:'smooth' }));
-  } else {
-    const url = data.dataset.bookingUrl;
-    if (url) window.location.href = url; else toast('بخش رزرو هنوز بالا نیومده');
-  }
-}
-
 
     document.getElementById('lr-cta')?.addEventListener('click', goCTA);
     document.getElementById('lr-cta-mobile')?.addEventListener('click', goCTA);
@@ -2707,73 +2726,93 @@ async function goCTA() {
       }, 250);
     });
 
-    // دکمه تایید نهایی رزرو (بیرون سکشن)
-function syncFromConfirmedBooking(source = 'event') {
-  const data = document.getElementById('lr-data');
-  if (!data) return;
+    // ====== شمارشِ امن رزروهای تایید شده (Patch) ======
+    const KEY_COUNTED = 'vit_loyalty_counted_ids'; // لیست رزروهایی که شمرده‌ایم
 
-  try {
-    const raw = localStorage.getItem('vt:lastBooking');
-    if (!raw) return;
-    const b = JSON.parse(raw);
-    // قبلاً شمرده نشده باشد تا تکراری نشود
-    if (b && b.status === 'confirmed' && !b._countedForLoyalty) {
-      const target = parseInt(data.dataset.target || '10', 10);
-      const cur    = parseInt(localStorage.getItem('vitreenet_loyalty_current') ?? data.dataset.current ?? '0', 10) || 0;
-      const next   = cur + 1;
+    const _getCounted = () => {
+      try { return new Set(JSON.parse(localStorage.getItem(KEY_COUNTED) || '[]')); }
+      catch { return new Set(); }
+    };
+    const _setCounted = (set) => {
+      try { localStorage.setItem(KEY_COUNTED, JSON.stringify([...set])); } catch {}
+    };
+    const _extractBookingId = (b) => {
+      if (!b) return null;
+      return (
+        b.bookingId || b.id || b._id ||
+        // fallback اگر بک‌اند id نده
+        [b.sellerId||'', b.phone||'', b.date||'', b.time||''].join('|')
+      );
+    };
 
-      // به‌روزرسانی امتیاز و تعداد کل «صرفاً پس از تایید»
-      localStorage.setItem('vitreenet_loyalty_current', String(next));
-      const total = parseInt(localStorage.getItem('vitreenet_booking_total') || '0', 10) || 0;
-      localStorage.setItem('vitreenet_booking_total', String(total + 1));
-      // از این به بعد دوباره حساب نشود
+    function syncFromConfirmedBooking(source = 'event') {
+      const data = document.getElementById('lr-data');
+      if (!data) return;
+
+      let b = null;
+      try { b = JSON.parse(localStorage.getItem('vt:lastBooking') || 'null'); } catch {}
+      if (!b || String(b.status).toLowerCase().trim() !== 'confirmed') return;
+
+      const bookingId = _extractBookingId(b);
+      const counted = _getCounted();
+
+      // اگر قبلاً این رزرو شمرده شده، خروج
+      if (bookingId && counted.has(bookingId)) return;
+
+      // افزایش‌ها
+      const cur   = parseInt(localStorage.getItem(KEY_PROGRESS) ?? data.dataset.current ?? '0', 10) || 0;
+      const next  = cur + 1;
+      localStorage.setItem(KEY_PROGRESS, String(next));
+
+      const total = parseInt(localStorage.getItem(KEY_TOTAL) || '0', 10) || 0;
+      localStorage.setItem(KEY_TOTAL, String(total + 1));
+
+      // علامت‌گذاری این رزرو
+      if (bookingId) { counted.add(bookingId); _setCounted(counted); }
       b._countedForLoyalty = true;
-      localStorage.setItem('vt:lastBooking', JSON.stringify(b));
+      try { localStorage.setItem('vt:lastBooking', JSON.stringify(b)); } catch {}
 
       HAS_BOOKED_BEFORE = true;
-      if (cur < target && next >= target) toast('تبریک! جایزه‌ت رسید', 'success');
 
-      // UI را تازه کن
+      // نوتیف/رفرش UI
+      const target = parseInt(data.dataset.target || '10', 10);
+      if (cur < target && next >= target) toast('تبریک! به جایزه رسیدی 🎉', 'success');
+
+      data.dataset.current = String(next);
       initCard();
     }
-  } catch (e) { /* no-op */ }
-}
 
-// ۱) وقتی رویداد وضعیت از بخش «Booking Gate» می‌رسد
-window.addEventListener('booking:status', (e) => {
-  if (e?.detail?.status === 'confirmed') {
-    syncFromConfirmedBooking('event');
-  }
-});
+    // وقتی وضعیت از بخش Booking Gate می‌آید
+    window.addEventListener('booking:status', (e) => {
+      if (e?.detail?.status === 'confirmed') syncFromConfirmedBooking('booking:status');
+    });
 
-// ۲) هم‌گام‌سازی میان تب‌ها/پنجره‌ها
-window.addEventListener('storage', (e) => {
-  if (e.key === 'vt:lastBooking') {
-    try {
-      const v = JSON.parse(e.newValue || 'null');
-      if (v?.status === 'confirmed') syncFromConfirmedBooking('storage');
-    } catch(_) {}
-  }
-});
-
-// ۳) چک دوره‌ای سبک (اختیاری، برای زمانی که کاربر روی صفحه منتظر می‌ماند)
-// اگر رزرو pending باشد، هر 30 ثانیه وضعیت را از سرور می‌پرسیم تا به‌محض تایید، سنکرون شویم
-setInterval(async () => {
-  try {
-    const b = JSON.parse(localStorage.getItem('vt:lastBooking') || 'null');
-    if (b && b.status === 'pending' && typeof window.hasPendingBooking === 'function') {
-      const stillPending = await window.hasPendingBooking();
-      if (!stillPending) {
-        // hasPendingBooking خودش vt:lastBooking را به وضعیت جدید به‌روزرسانی می‌کند
-        syncFromConfirmedBooking('poll');
+    // همگام‌سازی بین تب‌ها
+    window.addEventListener('storage', (e) => {
+      if (e.key === 'vt:lastBooking') {
+        try {
+          const v = JSON.parse(e.newValue || 'null');
+          if (v?.status === 'confirmed') syncFromConfirmedBooking('storage');
+        } catch {}
       }
-    }
-  } catch { /* noop */ }
-}, 30000);
+    });
 
-// ۴) یک بار هم روی لود صفحه چک کن (اگر قبلش تایید شده باشد)
-document.addEventListener('DOMContentLoaded', () => syncFromConfirmedBooking('boot'));
+    // چک دوره‌ای سبک (وقتی pending است)
+    setInterval(async () => {
+      try {
+        const b = JSON.parse(localStorage.getItem('vt:lastBooking') || 'null');
+        if (b && b.status === 'pending' && typeof window.hasPendingBooking === 'function') {
+          const stillPending = await window.hasPendingBooking();
+          if (!stillPending) {
+            // hasPendingBooking خودش vt:lastBooking را آپدیت می‌کند
+            syncFromConfirmedBooking('poll');
+          }
+        }
+      } catch {}
+    }, 30000);
 
+    // یک‌بار روی لود صفحه
+    document.addEventListener('DOMContentLoaded', () => syncFromConfirmedBooking('boot'));
 
     // مخفی‌کردن استیکی وقتی CTA داخل ویو
     const stickyWrap = document.getElementById('lr-sticky');
@@ -2789,27 +2828,25 @@ document.addEventListener('DOMContentLoaded', () => syncFromConfirmedBooking('bo
   }
 
   // ------- BOOTSTRAP -------
-async function initAuthAndHistory() {
-  AUTH = await adapters.getAuth();
-  const sum = await adapters.getBookingSummary(AUTH.user?.id);
-  HAS_BOOKED_BEFORE = (sum?.total || 0) > 0;
+  async function initAuthAndHistory() {
+    AUTH = await adapters.getAuth();
+    const sum = await adapters.getBookingSummary(AUTH.user?.id);
+    HAS_BOOKED_BEFORE = (sum?.total || 0) > 0;
+    initCard();
+  }
 
-  // بعد از تعیین وضعیت، کل UI بر اساس قوانین جدید رفرش می‌شود
-  initCard();
-}
+  // با هر تغییر لاگین/کاربر، کارت دوباره محاسبه می‌شود
+  document.addEventListener('auth:changed', initAuthAndHistory);
 
-// ✅ با هر تغییر لاگین/کاربر، کارت دوباره محاسبه می‌شود
-document.addEventListener('auth:changed', initAuthAndHistory);
-
-if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', () => { bindEvents(); initAuthAndHistory(); });
-} else {
-  bindEvents(); 
-  initAuthAndHistory();
-}
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => { bindEvents(); initAuthAndHistory(); });
+  } else {
+    bindEvents();
+    initAuthAndHistory();
+  }
 })();
-
 </script>
+
 <!-- ========== /Loyalty Rewards ========== -->
 
 
