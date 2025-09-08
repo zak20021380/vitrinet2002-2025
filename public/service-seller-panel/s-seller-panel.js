@@ -2879,14 +2879,24 @@ initSellerPersonalization();
 
   async function save() {
     try {
-      await fetch(`${API_BASE}/api/booking-slots/me`, {
+      const res = await fetch(`${API_BASE}/api/booking-slots/me`, {
         method: 'PUT',
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(state.schedule)
       });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        const msg = data.message || 'خطا در ذخیره برنامه نوبت‌دهی';
+        UIComponents?.showToast?.(msg, 'error');
+        return false;
+      }
+      UIComponents?.showToast?.('نوبت‌ها با موفقیت ذخیره شد.', 'success');
+      return true;
     } catch (e) {
       console.error('save schedule failed', e);
+      UIComponents?.showToast?.('خطا در ذخیره برنامه نوبت‌دهی', 'error');
+      return false;
     }
   }
 
@@ -3200,7 +3210,7 @@ function cleanScheduleData() {
     el('resv-copy-apply')?.addEventListener('click', applyCopy);
 
     // ذخیره
-    el('resv-save')?.addEventListener('click', () => { save(); UIComponents.showToast('ذخیره شد.', 'success'); });
+    el('resv-save')?.addEventListener('click', () => { save(); });
 
     // ورودی ۲۴ساعته
     enforce24hTimeInput('resv-time-input');
