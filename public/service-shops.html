@@ -2053,54 +2053,136 @@ async function hasPending(){
 
   back5.addEventListener('click', ()=>showStep(3));
 
-  // --- Built-in success popup on final confirm ---
-  (function hookConfirmToPendingModal(){
-    const btn = document.getElementById('confirm-booking');
-    if (!btn) return;
+// --- Final submit: send booking to backend & then show pending modal ---
+(function hookConfirmToServerBooking(){
+  const btn = document.getElementById('confirm-booking');
+  if (!btn) return;
 
-    btn.addEventListener('click', async () => {
-      if (btn.disabled) return;
+  // در صورت نیاز، مسیر API خودت رو اینجا تنظیم کن
+  const BOOKING_ENDPOINT = (window.__API_BASE__ || '') + '/api/bookings';
 
-      // سینک نهایی داده‌ها
-      st.name  = (document.getElementById('customer-name')?.value || st.name || '').trim();
-      st.phone = toEn(document.getElementById('phone-number')?.value || st.phone || '');
+  btn.type = 'button'; // جلوگیری از submit فرم‌های عمومی
 
-      if (!st.service || !st.date || !st.time || !st.name || !/^0\d{10}$/.test(st.phone)) return;
+  btn.addEventListener('click', async (e) => {
+    // جلوِ هر لیسنر قدیمی را بگیر
+    e.preventDefault();
+    e.stopPropagation();
+    e.stopImmediatePropagation();
 
-      // 1) ذخیرهٔ وضعیت «pending»
+    if (btn.disabled) return;
+
+    // بازسازی/برداشت مقادیر نهایی از DOM
+    const name  = (document.getElementById('customer-name')?.value || (st.name||'')).trim();
+    const phone = toEn(document.getElementById('phone-number')?.value || (st.phone||''));
+
+    // خدمت/روز/ساعت از DOM اگر توی st نباشه
+    const svcSel  = document.querySelector('#booking-services .service-option.bw-selected');
+    if (svcSel) {
+      st.service   = svcSel.dataset.service || svcSel.textContent.trim();
+      st.price     = parseInt(svcSel.dataset.price || '0', 10) || 0;
+      st.serviceId = svcSel.dataset.serviceId || null;
+    }
+    const dateSel = document.querySelector('.date-option.bw-selected');
+    if (dateSel) st.date = dateSel.innerText.trim();
+    const timeSel = document.querySelector('.time-option.bw-selected');
+    if (timeSel) st.time = timeSel.innerText.trim();
+
+    // اعتبارسنجی اولیه (همون‌هایی که بک‌اند می‌خواد)
+    if (!st.service || !st.date || !st.time || !name || !/^0\d{10}$/.test(phone)) {
+      const msg = 'اطلاعات نوبت ناقص است.';
+      (typeof showToastDark==='function') ? showToastDark(msg, {type:'error'}) : alert(msg);
+      console.error('submit booking failed', new Error(msg), {st, name, phone});
+      return;
+    }
+
+    // نرمال‌سازی تاریخ/ساعت به فرمت مورد انتظار بک‌اند
+    const { startISO } = composeSlotISO(st.date, st.time, st.duration || 60);
+    const date = startISO.slice(0,10);   // YYYY-MM-DD
+    const time = startISO.slice(11,16);  // HH:mm
+
+    const sellerId = document.body?.dataset?.sellerId || null;
+
+    // ساخت payload طبق قرارداد بک‌اند: یا serviceId یا (sellerId + service)
+    const payload = {
+      customerName:  name,
+      customerPhone: phone,
+      date,
+      time,
+      ...(st.serviceId ? { serviceId: st.serviceId } : { sellerId, service: st.service })
+    };
+
+    // دکمه در حال پردازش
+    const originalHTML = btn.innerHTML;
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin ml-2"></i>در حال ثبت...';
+
+    try {
+      const res = await fetch(BOOKING_ENDPOINT, {
+        method: 'POST',
+        headers: {
+          'Content-Type':'application/json',
+          ...(getToken() ? {'Authorization':'Bearer ' + getToken()} : {})
+        },
+        credentials: 'include',
+        body: JSON.stringify(payload)
+      });
+
+      if (!res.ok) {
+        let serverMsg = 'خطا در ثبت نوبت';
+        try {
+          const data = await res.json();
+          serverMsg = data?.message || data?.error || serverMsg;
+        } catch(_) {}
+        throw new Error(serverMsg);
+      }
+
+      const data = await res.json(); // انتظار: id/bookingId/status ...
+
+      // ذخیره «pending» محلی (برای بلاک رزرو بعدی و همگام‌سازی)
       const last = {
-        id: genId(),
-        service: st.service,
-        date:    st.date,
-        time:    st.time,
-        phone:   st.phone,
-        status:  'pending',
+        id:        genId(),
+        bookingId: data.id || data._id || data.bookingId || null,
+        service:   st.service,
+        date:      st.date,  // برای نمایش
+        time:      st.time,  // برای نمایش
+        phone,
+        status:    data.status || 'pending',
         createdAt: Date.now(),
-        sellerId: document.body?.dataset?.sellerId || null,
-        shopUrl:  document.body?.dataset?.shopurl  || null
+        sellerId,
+        shopUrl:   document.body?.dataset?.shopurl || null
       };
-      try { localStorage.setItem('vt:lastBooking', JSON.stringify(last)); } catch(_) {}
+      try { localStorage.setItem('vt:lastBooking', JSON.stringify(last)); } catch(_){}
 
-      // 2) پر کردن محتوای پاپ‌آپ داخلی
+      // پر کردن و نمایش مودال «ثبت شد / در انتظار تأیید»
       const setText = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val || '—'; };
       setText('pb-service', st.service);
       setText('pb-date',    st.date);
       setText('pb-time',    st.time);
-      setText('pb-phone',   st.phone);
+      setText('pb-phone',   phone);
 
-      // 3) نمایش پاپ‌آپ
       if (typeof window.openModalById === 'function') {
         window.openModalById('pendingBookingModal');
-      } else if (typeof window.showToastDark === 'function') {
+      } else if (typeof showToastDark === 'function') {
         showToastDark('درخواست ثبت شد و در انتظار تأیید فروشنده است.', { type: 'success' });
       } else {
         alert('درخواست ثبت شد و در انتظار تأیید فروشنده است.');
       }
 
-      // 4) ریست ویزارد
+      // ریست ویزارد
       resetWizardState();
-    });
-  })();
+
+    } catch (err) {
+      const msg = err?.message || 'ثبت نوبت ناموفق بود';
+      (typeof showToastDark==='function') ? showToastDark(msg, {type:'error'}) : alert(msg);
+      console.error('submit booking failed', err, {payload});
+    } finally {
+      btn.innerHTML = originalHTML;
+      btn.disabled = false;
+    }
+  }, true); // capture=true تا هر لیسنر قدیمی قبلش خنثی بشه
+})();
+// --- /Final submit ---
+
   // --- /built-in success popup ---
 
   // Helper: reset
