@@ -4495,11 +4495,11 @@ confirmBooking?.addEventListener('click', async function () {
       headers: { 'Content-Type': 'application/json' },
       credentials: 'include',
       body: JSON.stringify({
-        serviceId: selectedServiceId,
+        serviceId: selectedServiceId || undefined,
         service: selectedService,
-        sellerId: window.LAST_PUBLIC?.sellerId,
-        customerName: customerName.value,
-        customerPhone: phoneNumber.value,
+        sellerId: document.body?.dataset?.sellerId || window.LAST_PUBLIC?.sellerId,
+        customerName: customerName.value.trim(),
+        customerPhone: phoneNumber.value.trim(),
         date: selectedDate,
         time: selectedTime
       })
