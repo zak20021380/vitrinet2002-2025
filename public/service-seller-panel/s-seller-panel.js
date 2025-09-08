@@ -1270,10 +1270,10 @@ destroy() {
     listEl.innerHTML = `<p>موردی برای نمایش یافت نشد.</p>`;
   } else {
     const statusLabel = {
-      pending: 'در انتظار',
-      confirmed: 'تایید نوبت',
+      pending: 'در انتظار تایید',
+      confirmed: 'تایید شده',
       completed: 'انجام شده',
-      cancelled: 'لغو نوبت'
+      cancelled: 'لغو شده'
     };
     listEl.innerHTML = filtered.map(b => `
       <article class="booking-card card" role="listitem" tabindex="0" data-status="${b.status}" data-customer-name="${b.customerName}">
@@ -1420,6 +1420,7 @@ destroy() {
   setText('.filter-chip[data-filter="confirmed"] .chip-badge', counts.confirmed);
   setText('.filter-chip[data-filter="completed"] .chip-badge', counts.completed);
   this.updateDashboardStats();
+  window.updateResvDayIndicators && window.updateResvDayIndicators();
 }
 
   
@@ -3052,6 +3053,25 @@ loadCustomers();
     }
   }
 
+  function updateDayIndicators() {
+    const bookings = window.MOCK_DATA?.bookings || [];
+    const chips = document.querySelectorAll('#resv-week .resv-day-chip');
+    chips.forEach(chip => {
+      const day = parseInt(chip.dataset.day, 10);
+      chip.classList.remove('has-pending', 'has-cancelled');
+      const dayBookings = bookings.filter(b => {
+        const d = new Date(toEn(b.date));
+        return !isNaN(d) && d.getDay() === day;
+      });
+      if (dayBookings.some(b => b.status === 'pending')) {
+        chip.classList.add('has-pending');
+      } else if (dayBookings.some(b => b.status === 'cancelled')) {
+        chip.classList.add('has-cancelled');
+      }
+    });
+  }
+  window.updateResvDayIndicators = updateDayIndicators;
+
   // open modal
   async function openModal() {
     await load();
@@ -3062,6 +3082,7 @@ loadCustomers();
     const todayJS = new Date().getDay();
     const idx = PERSIAN_WEEKDAYS.findIndex((w) => w.js === todayJS);
     selectDay(Math.max(0, idx));
+    updateDayIndicators();
   }
 
   // tabs (weekdays)
