@@ -832,898 +832,739 @@
       <span id="toast-message" class="text-sm font-semibold text-gray-800">عملیات انجام شد</span>
     </div>
   </div>
-  <script>
-    // Helpers
-    const $ = (s, r=document) => r.querySelector(s);
-    const $$ = (s, r=document) => r.querySelectorAll(s);
-    const faNum = n => Number(n||0).toLocaleString('fa-IR');
-    
-    // Convert Persian/Arabic digits to Latin
-    function toEn(str) {
-      if (!str) return '';
-      return str.toString().replace(/[٠-٩۰-۹]/g, d => d.charCodeAt(0) - (d.charCodeAt(0) >= 1632 ? 1632 : 1776));
-    }
-    
-    // Format relative time
-    function relativeTime(ts) {
-      const now = new Date();
-      const date = new Date(ts);
-      const diffMs = now - date;
-      const diffMins = Math.floor(diffMs / 60000);
-      const diffHours = Math.floor(diffMs / 3600000);
-      const diffDays = Math.floor(diffMs / 86400000);
-      
-      if (diffMins < 1) return 'اکنون';
-      if (diffMins < 60) return `${diffMins} دقیقه پیش`;
-      if (diffHours < 24) return `${diffHours} ساعت پیش`;
-      if (diffDays < 7) return `${diffDays} روز پیش`;
-      
-      return date.toLocaleDateString('fa-IR-u-ca-persian');
-    }
-    
-    // Set stat value
-    function setStat(key, value) {
-      const statEl = $(`[data-stat="${key}"] .text-3xl`);
-      if (statEl) {
-        statEl.textContent = value;
-      }
-    }
-    
-    // Toast System
-    function showToast(message, type = 'success') {
-      const toast = $('#toast');
-      const toastMessage = $('#toast-message');
-      const icon = $('#toast-icon');
-      toastMessage.textContent = message;
-      if (type === 'success') {
-        icon.className = 'w-6 h-6 rounded-full bg-gradient-to-r from-green-400 to-emerald-400 flex items-center justify-center';
-        icon.innerHTML = '<i class="fas fa-check text-white text-xs"></i>';
-      } else if (type === 'error') {
-        icon.className = 'w-6 h-6 rounded-full bg-gradient-to-r from-red-400 to-pink-400 flex items-center justify-center';
-        icon.innerHTML = '<i class="fas fa-times text-white text-xs"></i>';
-      } else if (type === 'info') {
-        icon.className = 'w-6 h-6 rounded-full bg-gradient-to-r from-blue-400 to-cyan-400 flex items-center justify-center';
-        icon.innerHTML = '<i class="fas fa-info text-white text-xs"></i>';
-      }
-      toast.classList.add('show');
-      clearTimeout(showToast._t);
-      showToast._t = setTimeout(() => toast.classList.remove('show'), 3000);
-    }
-    // Date/Time formatters
-    const fmtDate = (iso) => {
-      const d = new Date(iso);
-      return d.toLocaleDateString('fa-IR-u-ca-persian', {weekday:'long', day:'numeric', month:'long'});
-    };
-    
-    const fmtTime = (iso) => {
-      const d = new Date(iso);
-      return d.toLocaleTimeString('fa-IR', {hour:'2-digit', minute:'2-digit'});
-    };
-    const statusMeta = (s) => ({
-      confirmed: {text:'تایید شده', cls:'ok', icon:'fa-circle-check'},
-      pending:   {text:'در انتظار', cls:'wait', icon:'fa-hourglass-half'},
-      canceled:  {text:'لغو شده',  cls:'cancel', icon:'fa-ban'},
-      done:      {text:'انجام شده', cls:'done', icon:'fa-check-double'}
-    }[s] || {text:s, cls:'wait', icon:'fa-clock'});
-    const getCookie = name => document.cookie.split('; ').find(r => r.startsWith(name + '='))?.split('=')[1] || '';
-    // Data containers fetched from backend
-    let bookings = [];
-    let notifs = [];
-    let loyaltyInfo = { claimed: 0, history: [] };
-    let loyaltyStores = [];
-    let profileName = '';
-    let profilePhone = '';
+<script>
+  /***** =======================
+   *  Vitrin(ish) Profile Page
+   *  Pro-grade cache + sync
+   *  ======================= ***/
 
-    // Update bottom navigation links to point to the seller's public shop page
-      (function updateNavLinks() {
-        try {
-          const data = JSON.parse(localStorage.getItem('seller') || '{}');
-          const homeLink = document.getElementById('homeLink');
-          const bookingLink = document.getElementById('bookingLink');
-          if (data.shopurl) {
-            const base = `../service-shops.html?shopurl=${encodeURIComponent(data.shopurl)}`;
-            if (homeLink) homeLink.href = base;
-            if (bookingLink) bookingLink.href = `${base}#booking-wizard`;
-          } else if (data._id || data.id) {
-            const sid = data._id || data.id;
-            const base = `../service-shops.html?sellerId=${encodeURIComponent(sid)}`;
-            if (homeLink) homeLink.href = base;
-            if (bookingLink) bookingLink.href = `${base}#booking-wizard`;
-          } else {
-            if (homeLink) homeLink.href = '../service-shops.html';
-            if (bookingLink) bookingLink.href = '../index.html#booking-wizard';
-          }
-        } catch (err) {
-          console.error('update nav links failed', err);
-        }
-      })();
+  /* ---------- Utilities ---------- */
+  const $  = (s, r=document) => r.querySelector(s);
+  const $$ = (s, r=document) => r.querySelectorAll(s);
+  const faNum = n => Number(n||0).toLocaleString('fa-IR');
+  const toEn = (str) => !str ? '' : str.toString().replace(/[٠-٩۰-۹]/g, d => d.charCodeAt(0) - (d.charCodeAt(0) >= 1632 ? 1632 : 1776));
+  const getCookie = name => document.cookie.split('; ').find(r => r.startsWith(name + '='))?.split('=')[1] || '';
+  const isOnline = () => navigator.onLine;
 
-    const mapStatus = (s) => ({ pending:'pending', confirmed:'confirmed', cancelled:'canceled', completed:'done' }[s] || s);
+  // safer fetch with timeout
+  async function safeFetch(url, opts={}, timeout=10000) {
+    const ctrl = new AbortController();
+    const t = setTimeout(() => ctrl.abort(), timeout);
+    try { return await fetch(url, {...opts, signal: ctrl.signal}); }
+    finally { clearTimeout(t); }
+  }
 
-      async function loadBookings() {
-        let serverBookings = [];
-        try {
-          const phone = getCookie('customerPhone');
-          if (phone) {
-            const res = await fetch(`/api/bookings?phone=${encodeURIComponent(phone)}`);
-            if (res.ok) {
-              const data = await res.json();
-              serverBookings = (data.items || []).map(b => ({
-                id: b._id,
-                service: b.service,
-                datetime: `${b.bookingDate || b.date}T${b.startTime || b.time}`,
-                status: mapStatus(b.status),
-                price: b.price || 0
-              }));
-            }
-          }
-        } catch (err) {
-          console.error('load server bookings failed', err);
-        }
+  // relative time
+  function relativeTime(ts) {
+    const now = new Date(), date = new Date(ts);
+    const diff = now - date;
+    const m = Math.floor(diff/60000), h = Math.floor(diff/3600000), d = Math.floor(diff/86400000);
+    if (m < 1)  return 'اکنون';
+    if (m < 60) return `${m} دقیقه پیش`;
+    if (h < 24) return `${h} ساعت پیش`;
+    if (d < 7)  return `${d} روز پیش`;
+    return date.toLocaleDateString('fa-IR-u-ca-persian');
+  }
 
-        let localBookings = [];
-        try {
-          const raw = JSON.parse(localStorage.getItem('vitreenet-bookings') || '[]');
-          localBookings = raw.map(b => ({
-            id: b.id || b.timestamp || Date.now().toString(36),
-            service: b.service,
-            datetime: `${b.bookingDate || b.date}T${b.startTime || b.time}`,
-            status: mapStatus(b.status) || 'pending',
-            price: b.price || 0
-          }));
-        } catch (e) {
-          console.error('load local bookings failed', e);
-        }
+  const fmtDate = iso => new Date(iso).toLocaleDateString('fa-IR-u-ca-persian', {weekday:'long', day:'numeric', month:'long'});
+  const fmtTime = iso => new Date(iso).toLocaleTimeString('fa-IR', {hour:'2-digit', minute:'2-digit'});
 
-        const merged = [...serverBookings];
-        localBookings.forEach(b => {
-          if (!merged.some(sb => sb.id === b.id)) merged.push(b);
-        });
+  const statusMeta = (s) => ({
+    confirmed: {text:'تایید شده', cls:'ok', icon:'fa-circle-check'},
+    pending:   {text:'در انتظار', cls:'wait', icon:'fa-hourglass-half'},
+    canceled:  {text:'لغو شده',  cls:'cancel', icon:'fa-ban'},
+    done:      {text:'انجام شده', cls:'done', icon:'fa-check-double'}
+  }[s] || {text:s, cls:'wait', icon:'fa-clock'});
 
-        setBookings(merged);
-      }
+  const mapStatus = (s) => ({ pending:'pending', confirmed:'confirmed', cancelled:'canceled', completed:'done' }[s] || s);
 
-    async function loadNotifs() {
+  // Toast
+  function showToast(message, type='success') {
+    const toast = $('#toast'), msg = $('#toast-message'), icon = $('#toast-icon');
+    msg.textContent = message;
+    if (type==='success') { icon.className='w-6 h-6 rounded-full bg-gradient-to-r from-green-400 to-emerald-400 flex items-center justify-center'; icon.innerHTML='<i class="fas fa-check text-white text-xs"></i>'; }
+    else if (type==='error') { icon.className='w-6 h-6 rounded-full bg-gradient-to-r from-red-400 to-pink-400 flex items-center justify-center'; icon.innerHTML='<i class="fas fa-times text-white text-xs"></i>'; }
+    else { icon.className='w-6 h-6 rounded-full bg-gradient-to-r from-blue-400 to-cyan-400 flex items-center justify-center'; icon.innerHTML='<i class="fas fa-info text-white text-xs"></i>'; }
+    toast.classList.add('show'); clearTimeout(showToast._t);
+    showToast._t = setTimeout(()=>toast.classList.remove('show'), 3000);
+  }
+
+  function setStat(key, value) {
+    const el = $(`[data-stat="${key}"] .text-3xl`);
+    if (el) el.textContent = value;
+  }
+
+  /* ---------- Namespaced Cache ---------- */
+  const APP_NS = 'vtrn';
+  const STORAGE_VERSION = 1;
+
+  // derive user key (phone preferred). keep short, avoid PII exposure in key by masking
+  const phoneCookie = getCookie('customerPhone') || '';
+  const userKeyRaw  = phoneCookie || getCookie('customerId') || 'guest';
+  const userKeyMask = userKeyRaw ? (userKeyRaw.slice(0,3) + '…' + userKeyRaw.slice(-2)) : 'guest';
+
+  // seller context (for deep-links)
+  const seller = (() => { try { return JSON.parse(localStorage.getItem('seller')||'{}'); } catch { return {}; } })();
+  const shopId = seller._id || seller.id || seller.shopurl || 'global';
+
+  const KEYS = {
+    profile:   `${APP_NS}:v${STORAGE_VERSION}:u:${userKeyMask}:profile`,
+    bookings:  `${APP_NS}:v${STORAGE_VERSION}:u:${userKeyMask}:bookings`,
+    notifs:    `${APP_NS}:v${STORAGE_VERSION}:u:${userKeyMask}:notifs`,
+    loyalty:   `${APP_NS}:v${STORAGE_VERSION}:u:${userKeyMask}:loyalty`,
+    outbox:    `${APP_NS}:v${STORAGE_VERSION}:u:${userKeyMask}:outbox`,
+  };
+
+  const cache = {
+    get(key, maxAgeMs=null) {
       try {
-        const res = await fetch('/api/notifications', { credentials: 'include' });
+        const raw = localStorage.getItem(key);
+        if (!raw) return null;
+        const obj = JSON.parse(raw);
+        if (maxAgeMs && Date.now() - (obj._ts||0) > maxAgeMs) return null;
+        return obj.data;
+      } catch { return null; }
+    },
+    set(key, data) {
+      try { localStorage.setItem(key, JSON.stringify({ _ts: Date.now(), data })); } catch {}
+    },
+    update(key, fn) {
+      const curr = this.get(key) || null;
+      this.set(key, fn(curr));
+    }
+  };
+
+  // migrate older storage (vitreenet-bookings -> namespaced)
+  (function migrateOld() {
+    try {
+      const old = localStorage.getItem('vitreenet-bookings');
+      if (old && !localStorage.getItem(KEYS.bookings)) {
+        const arr = JSON.parse(old);
+        cache.set(KEYS.bookings, arr);
+      }
+    } catch {}
+  })();
+
+  /* ---------- Data state ---------- */
+  let bookings = [];         // unified list
+  let notifs = [];
+  let loyaltyStores = [];
+  let profileName = '';
+  let profilePhone = '';
+
+  /* ---------- Smart Links to shop ---------- */
+  (function updateNavLinks() {
+    try {
+      const homeLink = $('#homeLink'), bookingLink = $('#bookingLink');
+      if (seller.shopurl) {
+        const base = `../service-shops.html?shopurl=${encodeURIComponent(seller.shopurl)}`;
+        if (homeLink) homeLink.href = base;
+        if (bookingLink) bookingLink.href = `${base}#booking-wizard`;
+      } else if (seller._id || seller.id) {
+        const sid = seller._id || seller.id;
+        const base = `../service-shops.html?sellerId=${encodeURIComponent(sid)}`;
+        if (homeLink) homeLink.href = base;
+        if (bookingLink) bookingLink.href = `${base}#booking-wizard`;
+      } else {
+        if (homeLink) homeLink.href = '../service-shops.html';
+        if (bookingLink) bookingLink.href = '../index.html#booking-wizard';
+      }
+    } catch (e) { console.error('update nav links failed', e); }
+  })();
+
+  /* ---------- Profile ---------- */
+  async function loadProfile() {
+    // 1) from cache
+    const cached = cache.get(KEYS.profile, 24*3600*1000); // 24h
+    if (cached) applyProfile(cached);
+
+    // 2) from cookies (fallback)
+    if (!cached) {
+      profileName  = decodeURIComponent(getCookie('customerName') || '') || '';
+      profilePhone = getCookie('customerPhone') || '';
+      $('#userName').textContent = profileName || 'مهمان گرامی';
+      $('#userPhone').textContent = profilePhone || 'اطلاعات تماس';
+      $('#fullName').value = profileName || '';
+      $('#mobile').value   = profilePhone || '';
+    }
+
+    // 3) refresh from server (if online)
+    try {
+      if (!isOnline()) return;
+      const res = await safeFetch('/api/user/profile', { credentials:'include' });
+      if (res.ok) {
         const data = await res.json();
-        notifs = (data || []).map(n => ({
+        const prof = {
+          name: data.name || profileName || '',
+          phone: data.phone || profilePhone || '',
+        };
+        cache.set(KEYS.profile, prof);
+        applyProfile(prof);
+      }
+    } catch (e) {
+      // ignore; offline or endpoint missing
+    }
+  }
+
+  function applyProfile(p) {
+    profileName = p?.name || '';
+    profilePhone = p?.phone || '';
+    $('#userName').textContent = profileName || 'مهمان گرامی';
+    $('#userPhone').textContent = profilePhone || 'اطلاعات تماس';
+    $('#fullName').value = profileName || '';
+    $('#mobile').value   = profilePhone || '';
+  }
+
+  /* ---------- Bookings (cache-first, then server) ---------- */
+  function getBookings() { return bookings; }
+  function setBookings(list) {
+    bookings = Array.isArray(list) ? list : [];
+    // persist compact
+    const raw = bookings.map(b => ({
+      id: b.id,
+      service: b.service,
+      date: b.datetime ? b.datetime.split('T')[0] : '',
+      time: b.datetime ? b.datetime.split('T')[1]?.slice(0,5) : '',
+      status: b.status || 'pending',
+      price: b.price || 0,
+      storeName: b.storeName || '',
+      storeLocation: b.storeLocation || '',
+      barber: b.barber || ''
+    }));
+    cache.set(KEYS.bookings, raw);
+    // stats
+    const now = new Date();
+    setStat('total', bookings.length);
+    setStat('active', bookings.filter(b => new Date(b.datetime) >= now && b.status !== 'canceled').length);
+    setStat('done',   bookings.filter(b => b.status === 'done').length);
+  }
+
+  async function loadBookings() {
+    // 1) from cache
+    const cached = cache.get(KEYS.bookings, 12*3600*1000) || [];
+    const fromCache = cached.map(b => ({
+      id: b.id || b.timestamp || Date.now().toString(36),
+      service: b.service,
+      datetime: `${b.date || ''}T${(b.time||'').slice(0,5)}`,
+      status: mapStatus(b.status || 'pending'),
+      price: b.price || 0,
+      storeName: b.storeName || '',
+      storeLocation: b.storeLocation || '',
+      barber: b.barber || ''
+    }));
+    setBookings(fromCache);
+
+    // 2) refresh from server (if we can identify the user)
+    try {
+      if (!isOnline()) return;
+      const phone = profilePhone || getCookie('customerPhone') || '';
+      if (!phone) return;
+
+      const res = await safeFetch(`/api/bookings?phone=${encodeURIComponent(phone)}`, { credentials:'include', headers:{'Accept':'application/json'} });
+      if (res.ok) {
+        const data = await res.json();
+        const server = (data.items || []).map(b => ({
+          id: b._id,
+          service: b.service,
+          datetime: `${b.bookingDate || b.date}T${b.startTime || b.time}`,
+          status: mapStatus(b.status),
+          price: b.price || 0,
+          storeName: b.storeName || b.store?.name || '',
+          storeLocation: b.storeLocation || b.store?.city || '',
+          barber: b.barber || ''
+        }));
+
+        // merge (prefer server by id)
+        const byId = new Map(server.map(b => [b.id, b]));
+        for (const c of fromCache) if (!byId.has(c.id)) byId.set(c.id, c);
+        setBookings(Array.from(byId.values()).sort((a,b)=>new Date(a.datetime)-new Date(b.datetime)));
+      }
+    } catch (e) {
+      // ignore; offline or endpoint missing
+    }
+  }
+
+  /* ---------- Notifications ---------- */
+  function getNotifs() { return notifs; }
+  function setNotifs(v) { notifs = Array.isArray(v) ? v : []; cache.set(KEYS.notifs, notifs); }
+
+  async function loadNotifs() {
+    // cache first
+    const cached = cache.get(KEYS.notifs, 6*3600*1000);
+    if (cached) setNotifs(cached);
+
+    // refresh server
+    try {
+      if (!isOnline()) return;
+      const res = await safeFetch('/api/notifications', { credentials:'include' });
+      if (res.ok) {
+        const data = await res.json();
+        const items = (data || []).map(n => ({
           id: n._id,
           title: n.title || 'اعلان',
           body: n.message,
           ts: n.createdAt,
-          read: n.read,
+          read: !!n.read,
           type: 'info'
         }));
-      } catch (err) {
-        console.error('loadNotifs failed', err);
-        notifs = [];
-      }
-    }
-
-    async function initLoyaltyStore() {
-      try {
-        const res = await fetch('/api/loyalty', { credentials: 'include' });
-        loyaltyStores = await res.json() || [];
-      } catch (err) {
-        console.error('load loyalty failed', err);
-        loyaltyStores = [];
-      }
-    }
-
-      async function loadProfile() {
-        try {
-          profileName = decodeURIComponent(getCookie('customerName') || '');
-          profilePhone = getCookie('customerPhone') || '';
-          $('#userName').textContent = profileName || '';
-          $('#userPhone').textContent = profilePhone || '';
-          $('#fullName').value = profileName;
-          $('#mobile').value = profilePhone;
-        } catch (err) {
-          console.error('load profile failed', err);
-        }
-      }
-
-    function getBookings() { return bookings; }
-    function setBookings(v) {
-      bookings = v;
-      try {
-        const raw = v.map(b => ({
-          id: b.id,
-          service: b.service,
-          date: b.datetime ? b.datetime.split('T')[0] : '',
-          time: b.datetime ? b.datetime.split('T')[1]?.slice(0,5) : '',
-          status: b.status || 'pending',
-          price: b.price || 0
-        }));
-        localStorage.setItem('vitreenet-bookings', JSON.stringify(raw));
-      } catch (err) {
-        console.error('save bookings failed', err);
-      }
-    }
-    function getNotifs() { return notifs; }
-    function setNotifs(v) { notifs = v; }
-    function getLoyaltyStores() { return loyaltyStores; }
-    function setLoyaltyStores(stores) { loyaltyStores = stores; }
-    function getLoyalty() { return loyaltyInfo; }
-    function setLoyalty(v) { loyaltyInfo = v; }
-
-    // === LOYALTY START ===
-    const REWARD = { every: 5, label: 'جایزه وفاداری' };
-    
-    function calcLoyalty(store) {
-      if (!store) return { completed: 0, claimed: 0, unclaimed: 0, progress: 0, toNext: 0 };
-      
-      const completed = store.completed || 0;
-      const claimed = store.claimed || 0;
-      const earned = Math.floor(completed / REWARD.every);
-      const unclaimed = Math.max(0, earned - claimed);
-      const progress = completed % REWARD.every;
-      const toNext = REWARD.every - progress;
-      
-      return { completed, claimed, unclaimed, progress, toNext };
-    }
-    
-    function renderStoreSwitcher() {
-      const container = $('#storeSwitcher');
-      if (!container) return;
-
-      const stores = getLoyaltyStores();
-      container.innerHTML = '';
-      if (!stores.length) {
-        const placeholder = document.createElement('span');
-        placeholder.className = 'store-tab opacity-50 cursor-not-allowed';
-        placeholder.textContent = 'فروشگاهی ثبت نشده';
-        container.appendChild(placeholder);
-        const claimRewardBtn = $('#claimRewardBtn');
-        if (claimRewardBtn) {
-          claimRewardBtn.disabled = true;
-          claimRewardBtn.setAttribute('aria-label', 'فروشگاهی برای جایزه موجود نیست');
-        }
-        updateLoyaltyHeader(null);
-        return;
-      }
-
-      stores.forEach(store => {
-        const tab = document.createElement('button');
-        tab.className = 'store-tab';
-        if (store.active) tab.classList.add('active');
-        tab.textContent = store.storeName;
-        tab.dataset.storeId = store.storeId;
-        tab.onclick = () => selectStore(store.storeId);
-        container.appendChild(tab);
-      });
-
-      // If no store selected and there are stores, select the first one
-      if (stores.length > 0 && !stores.some(s => s.active)) {
-        selectStore(stores[0].storeId);
-      }
-    }
-    
-    function selectStore(storeId) {
-      const stores = getLoyaltyStores();
-      const updatedStores = stores.map(store => ({
-        ...store,
-        active: store.storeId === storeId
-      }));
-      
-      setLoyaltyStores(updatedStores);
-      renderStoreSwitcher();
-      
-      const selected = getLoyaltyStores().find(s => s.active);
-      if (selected) { renderLoyalty(selected); updateLoyaltyHeader(selected); }
-    }
-    
-    function renderLoyalty(store) {
-      if (!store) return;
-
-      const stats = calcLoyalty(store);
-      $('#loyaltyCompleted').textContent = stats.completed;
-      $('#loyaltyClaimed').textContent = stats.claimed;
-      $('#loyaltyUnclaimed').textContent = stats.unclaimed;
-
-      const progressBar = document.getElementById('loyaltyProgressBar');
-      const progressText = document.getElementById('loyaltyProgressText');
-      const toNextText = document.getElementById('loyaltyToNextText');
-      const claimBtn = $('#claimRewardBtn');
-      toNextText.textContent = stats.unclaimed > 0
-        ? (stats.unclaimed === 1 ? '۱ جایزه آماده دریافت' : faNum(stats.unclaimed) + ' جایزه آماده دریافت')
-        : 'تا جایزه بعدی ' + faNum(stats.toNext) + ' رزرو مانده';
-
-      if (stats.unclaimed > 0) {
-        progressBar.style.setProperty('--progress', '100%');
-        progressText.textContent = `${REWARD.every}/${REWARD.every}`;
-
-        // Enable claim button
-        claimBtn.disabled = false;
-        claimBtn.setAttribute('aria-label', `${stats.unclaimed} جایزه آماده برای دریافت`);
-      } else {
-        const percent = Math.round((stats.progress / REWARD.every) * 100);
-        progressBar.style.setProperty('--progress', percent + '%');
-        progressText.textContent = `${stats.progress}/${REWARD.every}`;
-
-        // Disable claim button
-        claimBtn.disabled = true;
-        claimBtn.setAttribute('aria-label', 'جایزه‌ای برای دریافت موجود نیست');
-      }
-    }
-
-    function updateLoyaltyHeader(store){
-      const title = document.querySelector('#loyaltyTitle');
-      const btn = document.querySelector('#branchBtn');
-      if (title) {
-        title.textContent = `باشگاه مشتریان${store ? ' — ' + store.storeName : ''}`;
-      }
-      if (btn) {
-        if (store) {
-          btn.classList.remove('hidden');
-          btn.onclick = () => goToBranch(store);
-        } else {
-          btn.classList.add('hidden');
-          btn.onclick = null;
-        }
-      }
-    }
-
-    function goToBranch(store){
-      if(!store) return;
-      window.location.href = `/store/${store.storeId}`;
-    }
-
-function claimReward() {
-      const stores = getLoyaltyStores();
-      const selectedStore = stores.find(s => s.active);
-      
-      if (!selectedStore) return;
-      
-      const stats = calcLoyalty(selectedStore);
-      if (stats.unclaimed <= 0) return;
-      
-      // Update claimed count for this store
-      const updatedStores = stores.map(store => {
-        if (store.storeId === selectedStore.storeId) {
-          return {
-            ...store,
-            claimed: (store.claimed || 0) + 1
-          };
-        }
-        return store;
-      });
-      
-      setLoyaltyStores(updatedStores);
-      renderStoreSwitcher();
-      renderLoyalty(updatedStores.find(s => s.active));
-      
-      // Show success message
-      showToast(`جایزه برای ${selectedStore.storeName} دریافت شد! 🎉`, 'success');
-    }
-    // === LOYALTY END ===
-    
-    // Render bookings with store badges
-    function renderBookings() {
-      const list = $('#upcomingList');
-      const hist = $('#historyList');
-      list.innerHTML = '';
-      hist.innerHTML = '';
-      const now = new Date();
-      const all = getBookings().slice().sort((a, b) => new Date(a.datetime) - new Date(b.datetime));
-      const upcoming = all.filter(b => new Date(b.datetime) >= now);
-      const history = all.filter(b => new Date(b.datetime) < now).reverse();
-      
-      const makeCard = (b) => {
-        const m = statusMeta(b.status);
-        const isActive = b.status !== 'canceled' && b.status !== 'done';
-        
-        return `
-          <article class="glass-card booking-card rounded-2xl overflow-hidden fade-in">
-            <div class="booking-card-content">
-              <div class="flex items-start justify-between gap-3 mb-3">
-                <div class="flex-1">
-                  <div class="flex items-start gap-3 mb-2">
-                    <h4 class="font-bold text-lg text-gray-900 flex-1">${b.service}</h4>
-                    <span class="chip ${m.cls}">
-                      <i class="fa-solid ${m.icon} text-xs"></i> ${m.text}
-                    </span>
-                  </div>
-                  ${b.storeName ? `
-                    <div class="mb-3">
-                      <span class="store-badge">
-                        <i class="fas fa-map-marker-alt"></i>
-                        <span>${b.storeName}${b.storeLocation ? ' — ' + b.storeLocation : ''}</span>
-                      </span>
-                    </div>
-                  ` : ''}
-                  <div class="booking-info-grid">
-                    <span class="booking-info-item">
-                      <i class="far fa-calendar-alt text-blue-500"></i> ${fmtDate(b.datetime)}
-                    </span>
-                    <span class="booking-info-item">
-                      <i class="far fa-clock text-green-500"></i> ${fmtTime(b.datetime)}
-                    </span>
-                    ${b.barber ? `
-                      <span class="booking-info-item">
-                        <i class="fas fa-user text-purple-500"></i> ${b.barber}
-                      </span>
-                    ` : ''}
-                  </div>
-                </div>
-              </div>
-              
-              <div class="flex items-center justify-between pt-3 border-t border-gray-100">
-                <span class="font-bold text-gray-700 ltr-num">
-                  ${b.price.toLocaleString('fa-IR')} تومان
-                </span>
-                <div class="booking-actions">
-                  ${isActive ? `
-                    <button type="button" onclick="confirmCancel('${b.id}')" aria-label="لغو رزرو" class="px-3 py-2 rounded-lg text-xs font-semibold text-red-600 bg-red-50 hover:bg-red-100 transition-all">
-                      <i class="fas fa-times ml-1"></i> لغو
-                    </button>
-                    <button type="button" onclick="reschedule('${b.id}')" aria-label="تغییر زمان رزرو" class="px-3 py-2 rounded-lg text-xs font-semibold text-blue-600 bg-blue-50 hover:bg-blue-100 transition-all">
-                      <i class="fas fa-edit ml-1"></i> تغییر
-                    </button>
-                  ` : `
-                    <button type="button" onclick="rebookService('${b.service}')" aria-label="رزرو مجدد" class="px-4 py-2 rounded-lg text-xs font-semibold text-green-600 bg-green-50 hover:bg-green-100 transition-all">
-                      <i class="fas fa-redo ml-1"></i> رزرو مجدد
-                    </button>
-                  `}
-                </div>
-              </div>
-            </div>
-          </article>
-        `;
-      };
-      
-      if (upcoming.length) {
-        list.innerHTML = upcoming.map(makeCard).join('');
-      } else {
-        list.innerHTML = `
-          <div class="glass-card rounded-3xl p-8 text-center fade-in">
-            <div class="w-20 h-20 mx-auto mb-4 rounded-full bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center">
-              <i class="fa-regular fa-calendar-xmark text-3xl text-gray-400"></i>
-            </div>
-            <h4 class="font-bold text-lg text-gray-700 mb-2">رزروی فعال ندارید</h4>
-            <p class="text-gray-500 mb-5 text-sm">همین الان رزرو کنید</p>
-            <button class="btn-gradient px-6 py-2.5 rounded-xl text-sm font-bold" onclick="openBooking()">
-              رزرو جدید
-            </button>
-          </div>
-        `;
-      }
-      
-      if (history.length) {
-        hist.innerHTML = history.map(makeCard).join('');
-      } else {
-        hist.innerHTML = `
-          <div class="glass-card rounded-3xl p-8 text-center fade-in">
-            <p class="text-gray-600">تاریخچه‌ای وجود ندارد</p>
-          </div>
-        `;
-      }
-    }
-    // Booking actions
-    function confirmCancel(id) {
-      const booking = getBookings().find(b => b.id === id);
-      if (!booking) return;
-      
-      $('#confirmBookingInfo').textContent = `${booking.service} - ${fmtDate(booking.datetime)} ${fmtTime(booking.datetime)}`;
-      $('#confirmCancelBtn').onclick = () => cancelBooking(id);
-      $('#confirmModal').classList.remove('hidden');
-      trapFocus('confirmModal');
-    }
-    
-    function cancelBooking(id) {
-      const items = getBookings();
-      const idx = items.findIndex(x => x.id === id);
-      if (idx > -1) {
-        items[idx].status = 'canceled';
-        setBookings(items);
-        renderBookings();
-        const selectedStore = (typeof getLoyaltyStores === 'function')
-          ? getLoyaltyStores().find(s => s.active)
-          : null;
-        if (selectedStore) renderLoyalty(selectedStore);  // === LOYALTY START ===
-        closeModal('confirmModal');
-        showToast('رزرو لغو شد', 'success');
-        
-        // Optional: 5s Undo toast
-        setTimeout(() => {
-          showToast('برای بازگردانی رزرو، اینجا کلیک کنید', 'info');
-          // In a real implementation, we would add an undo function here
-        }, 100);
-      }
-    }
-    
-    let currentRescheduleId = null;
-    function reschedule(id) {
-      const booking = getBookings().find(b => b.id === id);
-      if (!booking) return;
-      
-      currentRescheduleId = id;
-      const date = new Date(booking.datetime);
-      $('#rescheduleDate').value = date.toISOString().split('T')[0];
-      $('#rescheduleTime').value = date.toTimeString().slice(0, 5);
-      $('#rescheduleModal').classList.remove('hidden');
-      trapFocus('rescheduleModal');
-    }
-    
-    $('#rescheduleForm').addEventListener('submit', (e) => {
-      e.preventDefault();
-      
-      if (!currentRescheduleId) return;
-      
-      const date = $('#rescheduleDate').value;
-      const time = $('#rescheduleTime').value;
-      
-      if (!date || !time) {
-        showToast('لطفا تاریخ و زمان را وارد کنید', 'error');
-        return;
-      }
-      
-      const items = getBookings();
-      const idx = items.findIndex(x => x.id === currentRescheduleId);
-      
-      if (idx > -1) {
-        items[idx].datetime = `${date}T${time}:00`;
-        setBookings(items);
-        renderBookings();
-        const selectedStore = (typeof getLoyaltyStores === 'function')
-          ? getLoyaltyStores().find(s => s.active)
-          : null;
-        if (selectedStore) renderLoyalty(selectedStore);  // === LOYALTY START ===
-        closeModal('rescheduleModal');
-        showToast('زمان رزرو با موفقیت تغییر کرد', 'success');
-        currentRescheduleId = null;
-      }
-    });
-    
-    function rebookService(service) {
-      showToast(`رزرو ${service}`, 'info');
-    }
-    // Render notifications with enhanced mobile layout
-    function renderNotifs() {
-      const list = $('#notifyList');
-      const badge = $('#unreadBadge');
-      const items = getNotifs().slice().sort((a, b) => new Date(b.ts) - new Date(a.ts));
-      const unread = items.filter(n => !n.read).length;
-
-      if (badge) {
-        if (unread > 0) {
-          badge.textContent = unread;
-          badge.classList.remove('hidden');
-        } else {
-          badge.classList.add('hidden');
-        }
-      }
-      
-      if (!items.length) {
-        list.innerHTML = `
-          <div class="py-8 text-center">
-            <p class="text-gray-500">اعلانی ندارید</p>
-          </div>
-        `;
-        return;
-      }
-      
-      const getIcon = (type) => ({
-        success: 'fa-circle-check text-green-500',
-        reminder: 'fa-bell text-blue-500',
-        special: 'fa-star text-yellow-500',
-        info: 'fa-info-circle text-gray-500'
-      }[type] || 'fa-info-circle text-gray-500');
-      
-      list.innerHTML = items.map(n => `
-        <button class="notification-item w-full text-right p-4 flex items-start gap-3 hover:bg-gray-50 transition-colors ${n.read ? 'opacity-60' : ''}" onclick="toggleRead('${n.id}')">
-          <i class="fas ${getIcon(n.type)} mt-1 flex-shrink-0"></i>
-          <div class="flex-1 min-w-0">
-            <div class="flex items-start justify-between gap-2 mb-1">
-              <strong class="text-sm text-gray-800 block">${n.title}</strong>
-              <span class="text-xs text-gray-400 flex-shrink-0">${relativeTime(n.ts)}</span>
-            </div>
-            <p class="text-xs text-gray-600 break-words">${n.body}</p>
-          </div>
-          ${!n.read ? '<span class="w-2 h-2 bg-red-500 rounded-full mt-2 animate-pulse flex-shrink-0"></span>' : ''}
-        </button>
-      `).join('');
-    }
-    async function toggleRead(id) {
-      const items = getNotifs();
-      const i = items.findIndex(n => n.id === id);
-      if (i > -1 && !items[i].read) {
-        try {
-          await fetch(`/api/notifications/${id}/read`, { method: 'PUT', credentials: 'include' });
-          items[i].read = true;
-          setNotifs(items);
-          renderNotifs();
-        } catch (err) {
-          console.error('mark read failed', err);
-        }
-      }
-    }
-    async function markAllRead() {
-      const items = getNotifs();
-      const unread = items.filter(n => !n.read);
-      try {
-        await Promise.all(unread.map(n => fetch(`/api/notifications/${n.id}/read`, { method: 'PUT', credentials: 'include' })));
-        unread.forEach(n => n.read = true);
         setNotifs(items);
-        renderNotifs();
-        showToast('همه خوانده شد', 'success');
-      } catch (err) {
-        console.error('mark all read failed', err);
       }
+    } catch (e) {}
+  }
+
+  /* ---------- Loyalty (per-store list already in backend) ---------- */
+  function getLoyaltyStores() { return loyaltyStores; }
+  function setLoyaltyStores(stores) { loyaltyStores = Array.isArray(stores) ? stores : []; cache.set(KEYS.loyalty, loyaltyStores); }
+
+  const REWARD = { every: 5, label: 'جایزه وفاداری' };
+
+  function calcLoyalty(store) {
+    if (!store) return { completed: 0, claimed: 0, unclaimed: 0, progress: 0, toNext: 0 };
+    const completed = store.completed || 0;
+    const claimed   = store.claimed || 0;
+    const earned    = Math.floor(completed / REWARD.every);
+    const unclaimed = Math.max(0, earned - claimed);
+    const progress  = completed % REWARD.every;
+    const toNext    = REWARD.every - progress;
+    return { completed, claimed, unclaimed, progress, toNext };
+  }
+
+  async function initLoyaltyStore() {
+    const cached = cache.get(KEYS.loyalty, 24*3600*1000);
+    if (cached) setLoyaltyStores(cached);
+    try {
+      if (!isOnline()) return;
+      const res = await safeFetch('/api/loyalty', { credentials:'include' });
+      if (res.ok) setLoyaltyStores(await res.json() || []);
+    } catch (e) {}
+  }
+
+  function renderStoreSwitcher() {
+    const container = $('#storeSwitcher'); if (!container) return;
+    const stores = getLoyaltyStores(); container.innerHTML = '';
+
+    if (!stores.length) {
+      const placeholder = document.createElement('span');
+      placeholder.className = 'store-tab opacity-50 cursor-not-allowed';
+      placeholder.textContent = 'فروشگاهی ثبت نشده';
+      container.appendChild(placeholder);
+      const claimBtn = $('#claimRewardBtn'); if (claimBtn) { claimBtn.disabled = true; claimBtn.setAttribute('aria-label','فروشگاهی برای جایزه موجود نیست'); }
+      updateLoyaltyHeader(null); return;
     }
-    // Navigation
-    function openBooking() {
-      showToast('در حال انتقال...', 'info');
-      setTimeout(() => location.href = 'index.html#booking', 800);
+
+    stores.forEach(store => {
+      const tab = document.createElement('button');
+      tab.className = 'store-tab'; if (store.active) tab.classList.add('active');
+      tab.textContent = store.storeName; tab.dataset.storeId = store.storeId;
+      tab.onclick = () => selectStore(store.storeId);
+      container.appendChild(tab);
+    });
+
+    if (!stores.some(s=>s.active)) selectStore(stores[0].storeId);
+  }
+
+  function selectStore(storeId) {
+    const updated = getLoyaltyStores().map(s => ({...s, active: s.storeId===storeId}));
+    setLoyaltyStores(updated);
+    renderStoreSwitcher();
+    const selected = getLoyaltyStores().find(s => s.active);
+    if (selected) { renderLoyalty(selected); updateLoyaltyHeader(selected); }
+  }
+
+  function renderLoyalty(store) {
+    if (!store) return;
+    const stats = calcLoyalty(store);
+    $('#loyaltyCompleted').textContent = stats.completed;
+    $('#loyaltyClaimed').textContent   = stats.claimed;
+    $('#loyaltyUnclaimed').textContent = stats.unclaimed;
+
+    const bar = $('#loyaltyProgressBar'), pText = $('#loyaltyProgressText'), nextText = $('#loyaltyToNextText'), btn = $('#claimRewardBtn');
+    nextText.textContent = stats.unclaimed>0 ? (stats.unclaimed===1 ? '۱ جایزه آماده دریافت' : faNum(stats.unclaimed)+' جایزه آماده دریافت') : 'تا جایزه بعدی ' + faNum(stats.toNext) + ' رزرو مانده';
+
+    if (stats.unclaimed>0) {
+      bar.style.setProperty('--progress','100%'); pText.textContent = `${REWARD.every}/${REWARD.every}`;
+      btn.disabled = false; btn.setAttribute('aria-label', `${stats.unclaimed} جایزه آماده برای دریافت`);
+    } else {
+      const percent = Math.round((stats.progress/REWARD.every)*100);
+      bar.style.setProperty('--progress', percent+'%'); pText.textContent = `${stats.progress}/${REWARD.every}`;
+      btn.disabled = true; btn.setAttribute('aria-label','جایزه‌ای برای دریافت موجود نیست');
     }
-    function scrollToBookings() {
-      document.getElementById('bookings').scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }
-    function scrollToHistory() {
-      document.getElementById('history').scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }
-    // Modal
-    function editProfile() {
-      $('#editModal').classList.remove('hidden');
-      setTimeout(() => $('#fullName').focus(), 100);
-      trapFocus('editModal');
-    }
-    
-    function closeModal(modalId) {
-      const modal = $(`#${modalId}`);
-      modal.classList.add('hidden');
-      
-      // Remove the stored focus trap handler if it exists
-      if (modal._trapHandler) {
-        modal.removeEventListener('keydown', modal._trapHandler);
-        delete modal._trapHandler;
-      }
-      
-      // Restore focus to the trigger element if available
-      if (modal._triggerElement) {
-        modal._triggerElement.focus();
-        modal._triggerElement = null;
-      }
-    }
-    function checkProfileCompletion() {
-      const name = profileName;
-      const phone = profilePhone;
-      const prompt = $('#profilePrompt');
-      if (!prompt) return;
-      if (!name || !phone) {
-        prompt.classList.remove('hidden');
-        prompt.classList.add('animate-pulse');
-      } else {
-        prompt.classList.add('hidden');
-        prompt.classList.remove('animate-pulse');
-      }
-    }
-    // Form
-    let pendingProfile = null;
-    let verificationCode = '';
-    let resendTimer;
-    function startVerification(phone) {
-      verificationCode = Math.floor(1000 + Math.random() * 9000).toString();
-      $('#otpMessage').textContent = `کد تایید به شماره ${phone} ارسال شد`;
-      showToast('کد تایید ارسال شد', 'info');
-      let sec = 60;
-      const btn = $('#resendBtn');
-      btn.disabled = true;
-      btn.textContent = `ارسال مجدد (${sec})`;
-      clearInterval(resendTimer);
-      resendTimer = setInterval(() => {
-        sec--;
-        btn.textContent = `ارسال مجدد (${sec})`;
-        if (sec <= 0) {
-          clearInterval(resendTimer);
-          btn.disabled = false;
-          btn.textContent = 'ارسال مجدد';
-        }
-      }, 1000);
-      $$('.otp-input').forEach(i => i.value = '');
-      $('#otpModal').classList.remove('hidden');
-      trapFocus('otpModal');
-      setTimeout(() => $$('.otp-input')[0].focus(), 100);
-    }
-    $('#editForm').addEventListener('submit', async (e) => {
-      e.preventDefault();
-      
-      // Check native validity first
-      if (!e.target.checkValidity()) {
-        showToast('اطلاعات ضروری را وارد کنید', 'error');
-        return;
-      }
-      
-      const name = $('#fullName').value.trim();
-      const phone = toEn($('#mobile').value.trim());
-      if (!name || !phone) {
-        showToast('اطلاعات ضروری را وارد کنید', 'error');
-        return;
-      }
-      const nameRe = /^[اآء-ی‌\s]{2,}$/u;
-      if (!nameRe.test(name)) {
-        showToast('نام و نام خانوادگی باید فقط شامل حروف فارسی باشد', 'error');
-        return;
-      }
-      if (!/^09\d{9}$/.test(phone)) {
-        showToast('شماره موبایل معتبر نیست', 'error');
-        return;
-      }
-      if (phone !== profilePhone) {
-        pendingProfile = { name, phone };
-        startVerification(phone);
-      } else {
-        try {
-          await fetch('/api/user/profile', {
-            method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
-            credentials: 'include',
-            body: JSON.stringify({ name, phone })
+  }
+
+  function updateLoyaltyHeader(store){
+    const title = $('#loyaltyTitle'), btn = $('#branchBtn');
+    if (title) title.textContent = `باشگاه مشتریان${store ? ' — ' + store.storeName : ''}`;
+    if (!btn) return;
+    if (store) { btn.classList.remove('hidden'); btn.onclick = ()=> window.location.href = `/store/${store.storeId}`; }
+    else { btn.classList.add('hidden'); btn.onclick = null; }
+  }
+
+  function claimReward() {
+    const stores = getLoyaltyStores(); const selected = stores.find(s=>s.active); if (!selected) return;
+    const stats = calcLoyalty(selected); if (stats.unclaimed<=0) return;
+    const updated = stores.map(s => s.storeId===selected.storeId ? {...s, claimed:(s.claimed||0)+1} : s);
+    setLoyaltyStores(updated); renderStoreSwitcher(); renderLoyalty(updated.find(s=>s.active));
+    showToast(`جایزه برای ${selected.storeName} دریافت شد! 🎉`, 'success');
+  }
+
+  /* ---------- Render Bookings ---------- */
+  function renderBookings() {
+    const list = $('#upcomingList'), hist = $('#historyList');
+    list.innerHTML = ''; hist.innerHTML = '';
+    const now = new Date();
+    const all = getBookings().slice().sort((a,b)=> new Date(a.datetime) - new Date(b.datetime));
+    const upcoming = all.filter(b=> new Date(b.datetime) >= now);
+    const history  = all.filter(b=> new Date(b.datetime) <  now).reverse();
+
+    const makeCard = (b) => {
+      const m = statusMeta(b.status);
+      const isActive = b.status!=='canceled' && b.status!=='done';
+      return `
+        <article class="glass-card booking-card rounded-2xl overflow-hidden fade-in">
+          <div class="booking-card-content">
+            <div class="flex items-start justify-between gap-3 mb-3">
+              <div class="flex-1">
+                <div class="flex items-start gap-3 mb-2">
+                  <h4 class="font-bold text-lg text-gray-900 flex-1">${b.service}</h4>
+                  <span class="chip ${m.cls}"><i class="fa-solid ${m.icon} text-xs"></i> ${m.text}</span>
+                </div>
+                ${b.storeName ? `
+                  <div class="mb-3">
+                    <span class="store-badge"><i class="fas fa-map-marker-alt"></i><span>${b.storeName}${b.storeLocation ? ' — ' + b.storeLocation : ''}</span></span>
+                  </div>` : ''}
+                <div class="booking-info-grid">
+                  <span class="booking-info-item"><i class="far fa-calendar-alt text-blue-500"></i> ${fmtDate(b.datetime)}</span>
+                  <span class="booking-info-item"><i class="far fa-clock text-green-500"></i> ${fmtTime(b.datetime)}</span>
+                  ${b.barber ? `<span class="booking-info-item"><i class="fas fa-user text-purple-500"></i> ${b.barber}</span>` : ''}
+                </div>
+              </div>
+            </div>
+            <div class="flex items-center justify-between pt-3 border-t border-gray-100">
+              <span class="font-bold text-gray-700 ltr-num">${(b.price||0).toLocaleString('fa-IR')} تومان</span>
+              <div class="booking-actions">
+                ${isActive ? `
+                  <button type="button" onclick="confirmCancel('${b.id}')" class="px-3 py-2 rounded-lg text-xs font-semibold text-red-600 bg-red-50 hover:bg-red-100 transition-all"><i class="fas fa-times ml-1"></i> لغو</button>
+                  <button type="button" onclick="reschedule('${b.id}')" class="px-3 py-2 rounded-lg text-xs font-semibold text-blue-600 bg-blue-50 hover:bg-blue-100 transition-all"><i class="fas fa-edit ml-1"></i> تغییر</button>
+                ` : `
+                  <button type="button" onclick="rebookService('${b.service}')" class="px-4 py-2 rounded-lg text-xs font-semibold text-green-600 bg-green-50 hover:bg-green-100 transition-all"><i class="fas fa-redo ml-1"></i> رزرو مجدد</button>
+                `}
+              </div>
+            </div>
+          </div>
+        </article>`;
+    };
+
+    list.innerHTML = upcoming.length ? upcoming.map(makeCard).join('') : `
+      <div class="glass-card rounded-3xl p-8 text-center fade-in">
+        <div class="w-20 h-20 mx-auto mb-4 rounded-full bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center">
+          <i class="fa-regular fa-calendar-xmark text-3xl text-gray-400"></i>
+        </div>
+        <h4 class="font-bold text-lg text-gray-700 mb-2">رزروی فعال ندارید</h4>
+        <p class="text-gray-500 mb-5 text-sm">همین الان رزرو کنید</p>
+        <button class="btn-gradient px-6 py-2.5 rounded-xl text-sm font-bold" onclick="openBooking()">رزرو جدید</button>
+      </div>`;
+
+    hist.innerHTML = history.length ? history.map(makeCard).join('') : `
+      <div class="glass-card rounded-3xl p-8 text-center fade-in">
+        <p class="text-gray-600">تاریخچه‌ای وجود ندارد</p>
+      </div>`;
+  }
+
+  /* ---------- Mutations + Outbox (offline-first) ---------- */
+  const uuid = () => (crypto?.randomUUID?.() || ('id-' + Math.random().toString(36).slice(2) + Date.now().toString(36)));
+
+  function enqueueMutation(type, payload) {
+    const job = { id: uuid(), type, payload, ts: Date.now() };
+    cache.update(KEYS.outbox, (curr)=> (Array.isArray(curr)? [...curr, job] : [job]));
+  }
+
+  async function processOutbox() {
+    const queue = cache.get(KEYS.outbox) || [];
+    if (!queue.length) return;
+    const remain = [];
+    for (const job of queue) {
+      try {
+        if (job.type === 'cancel') {
+          // try best-guess endpoint; fallback to keep in queue
+          const res = await safeFetch(`/api/bookings/${encodeURIComponent(job.payload.id)}/cancel`, { method:'PUT', credentials:'include' });
+          if (!res.ok) throw new Error('cancel failed');
+        } else if (job.type === 'reschedule') {
+          const {id, date, time} = job.payload;
+          const res = await safeFetch(`/api/bookings/${encodeURIComponent(id)}/reschedule`, {
+            method:'PUT',
+            headers:{'Content-Type':'application/json'},
+            credentials:'include',
+            body: JSON.stringify({ date, time })
           });
-        } catch (err) {
-          console.error('profile update failed', err);
+          if (!res.ok) throw new Error('reschedule failed');
         }
-        profileName = name;
-        profilePhone = phone;
-        $('#userName').textContent = name;
-        $('#userPhone').textContent = phone;
-        checkProfileCompletion();
-        closeModal('editModal');
-        showToast('پروفایل بروزرسانی شد', 'success');
+      } catch {
+        remain.push(job); // keep for later
       }
-    });
-    $('#resendBtn').addEventListener('click', () => {
-      if (pendingProfile) startVerification(pendingProfile.phone);
-    });
-    $$('.otp-input').forEach((input, idx, arr) => {
-      input.addEventListener('input', (e) => {
-        e.target.value = toEn(e.target.value).slice(0,1);
-        if (e.target.value && idx < arr.length - 1) arr[idx + 1].focus();
-      });
-      input.addEventListener('keydown', (e) => {
-        if (e.key === 'Backspace' && !e.target.value && idx > 0) arr[idx - 1].focus();
-      });
-    });
-    $('#otpForm').addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const code = Array.from($$('.otp-input')).map(i => toEn(i.value)).join('');
-      if (code === verificationCode) {
-        const { name, phone } = pendingProfile;
-        try {
-          await fetch('/api/user/profile', {
-            method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
-            credentials: 'include',
-            body: JSON.stringify({ name, phone })
-          });
-        } catch (err) {
-          console.error('profile update failed', err);
-        }
-        profileName = name;
-        profilePhone = phone;
-        $('#userName').textContent = name;
-        $('#userPhone').textContent = phone;
-        checkProfileCompletion();
-        closeModal('otpModal');
-        closeModal('editModal');
-        showToast('شماره تایید شد', 'success');
-      } else {
-        showToast('کد تایید نادرست است', 'error');
-      }
-    });
-    
-    // Input normalization
-    $('#mobile').addEventListener('input', (e) => {
-      e.target.value = toEn(e.target.value).replace(/\D/g, '');
-    });
-    $('#fullName').addEventListener('input', (e) => {
-      e.target.value = e.target.value.replace(/[^اآء-ی‌\s]/gu, '');
-    });
-    
-    // Modal backdrop
-    $('#editModal').addEventListener('click', (e) => {
-      if (e.target.id === 'editModal') closeModal('editModal');
-    });
-    $('#otpModal').addEventListener('click', (e) => {
-      if (e.target.id === 'otpModal') closeModal('otpModal');
-    });
-    
-    $('#confirmModal').addEventListener('click', (e) => {
-      if (e.target.id === 'confirmModal') closeModal('confirmModal');
-    });
-    
-    $('#rescheduleModal').addEventListener('click', (e) => {
-      if (e.target.id === 'rescheduleModal') closeModal('rescheduleModal');
-    });
-    
-    // Escape key handling
-    document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape') {
-        const openModal = $('.modal-backdrop:not(.hidden)');
-        if (openModal) {
-          closeModal(openModal.id);
-        }
-      }
-    });
-    
-    // Focus trap for modals
-    function trapFocus(modalId) {
-      const modal = $(`#${modalId}`);
-      if (!modal) return;
-      
-      // Remove any existing handler to prevent memory leaks
-      if (modal._trapHandler) {
-        modal.removeEventListener('keydown', modal._trapHandler);
-      }
-      
-      // Store the element that opened the modal
-      modal._triggerElement = document.activeElement;
-      
-      // Get all focusable elements
-      const focusableElements = modal.querySelectorAll(
-        'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
-      );
-      
-      if (focusableElements.length === 0) return;
-      
-      const firstElement = focusableElements[0];
-      const lastElement = focusableElements[focusableElements.length - 1];
-      
-      // Focus the first element
-      setTimeout(() => firstElement.focus(), 100);
-      
-      // Create the handler function and store it on the modal
-      modal._trapHandler = function handleTab(e) {
-        if (e.key !== 'Tab') return;
-        
-        if (e.shiftKey) {
-          if (document.activeElement === firstElement) {
-            e.preventDefault();
-            lastElement.focus();
-          }
-        } else {
-          if (document.activeElement === lastElement) {
-            e.preventDefault();
-            firstElement.focus();
-          }
-        }
-      };
-      
-      // Add the event listener
-      modal.addEventListener('keydown', modal._trapHandler);
     }
-    
-    // Initialize
-    (async function init() {
-      await Promise.all([loadProfile(), loadBookings(), loadNotifs(), initLoyaltyStore()]);
-      checkProfileCompletion();
+    cache.set(KEYS.outbox, remain);
+    if (remain.length===0) showToast('تغییرات آفلاین با سرور همگام شد', 'success');
+  }
 
-      renderBookings();
+  window.addEventListener('online', processOutbox);
 
-      // Update stats
-      const bookings = getBookings();
-      const now = new Date();
-      const active = bookings.filter(b => new Date(b.datetime) >= now && b.status !== 'canceled').length;
-      const completed = bookings.filter(b => b.status === 'done').length;
+  // booking actions
+  function confirmCancel(id) {
+    const b = getBookings().find(x=>x.id===id); if (!b) return;
+    $('#confirmBookingInfo').textContent = `${b.service} - ${fmtDate(b.datetime)} ${fmtTime(b.datetime)}`;
+    $('#confirmCancelBtn').onclick = () => cancelBooking(id);
+    $('#confirmModal').classList.remove('hidden'); trapFocus('confirmModal');
+  }
 
-      setStat('total', bookings.length);
-      setStat('active', active);
-      setStat('done', completed);
+  async function cancelBooking(id) {
+    const items = getBookings(); const idx = items.findIndex(x=>x.id===id);
+    if (idx === -1) return;
+    items[idx].status = 'canceled'; setBookings(items); renderBookings();
+    const selectedStore = getLoyaltyStores().find(s=>s.active); if (selectedStore) renderLoyalty(selectedStore);
+    closeModal('confirmModal'); showToast('رزرو لغو شد', 'success');
 
-      renderStoreSwitcher();  // === LOYALTY START ===
-      updateLoyaltyHeader(getLoyaltyStores().find(s => s.active) || null);
-      renderNotifs();
-    })();
-    // Page load animation
-    document.addEventListener('DOMContentLoaded', () => {
-      document.body.style.opacity = '0';
-      setTimeout(() => {
-        document.body.style.transition = 'opacity 0.5s ease-out';
-        document.body.style.opacity = '1';
-      }, 100);
-    });
-  </script>
+    // try server; if offline or failed -> outbox
+    try {
+      if (!isOnline()) throw new Error('offline');
+      const res = await safeFetch(`/api/bookings/${encodeURIComponent(id)}/cancel`, { method:'PUT', credentials:'include' });
+      if (!res.ok) throw new Error('server rejected');
+    } catch {
+      enqueueMutation('cancel', { id });
+    }
+  }
+
+  let currentRescheduleId = null;
+  function reschedule(id) {
+    const b = getBookings().find(x=>x.id===id); if (!b) return;
+    currentRescheduleId = id;
+    const d = new Date(b.datetime);
+    $('#rescheduleDate').value = d.toISOString().split('T')[0];
+    $('#rescheduleTime').value = d.toTimeString().slice(0,5);
+    $('#rescheduleModal').classList.remove('hidden'); trapFocus('rescheduleModal');
+  }
+
+  $('#rescheduleForm').addEventListener('submit', async (e)=>{
+    e.preventDefault();
+    if (!currentRescheduleId) return;
+    const date = $('#rescheduleDate').value, time = $('#rescheduleTime').value;
+    if (!date || !time) return showToast('لطفا تاریخ و زمان را وارد کنید', 'error');
+
+    const items = getBookings(); const idx = items.findIndex(x=>x.id===currentRescheduleId);
+    if (idx > -1) {
+      items[idx].datetime = `${date}T${time}:00`; setBookings(items); renderBookings();
+      const selectedStore = getLoyaltyStores().find(s=>s.active); if (selectedStore) renderLoyalty(selectedStore);
+      closeModal('rescheduleModal'); showToast('زمان رزرو با موفقیت تغییر کرد', 'success');
+    }
+
+    // try server; fallback to outbox
+    try {
+      if (!isOnline()) throw new Error('offline');
+      const res = await safeFetch(`/api/bookings/${encodeURIComponent(currentRescheduleId)}/reschedule`, {
+        method:'PUT', headers:{'Content-Type':'application/json'}, credentials:'include',
+        body: JSON.stringify({ date, time })
+      });
+      if (!res.ok) throw new Error('server rejected');
+    } catch {
+      enqueueMutation('reschedule', { id: currentRescheduleId, date, time });
+    }
+
+    currentRescheduleId = null;
+  });
+
+  function rebookService(service) { showToast(`رزرو ${service}`, 'info'); }
+
+  /* ---------- Notifications render & actions ---------- */
+  function renderNotifs() {
+    const list = $('#notifyList'), badge = $('#unreadBadge');
+    const items = getNotifs().slice().sort((a,b)=> new Date(b.ts) - new Date(a.ts));
+    const unread = items.filter(n=>!n.read).length;
+    if (badge) { if (unread>0) { badge.textContent=unread; badge.classList.remove('hidden'); } else badge.classList.add('hidden'); }
+    if (!items.length) { list.innerHTML = `<div class="py-8 text-center"><p class="text-gray-500">اعلانی ندارید</p></div>`; return; }
+
+    const icon = (t)=>({success:'fa-circle-check text-green-500', reminder:'fa-bell text-blue-500', special:'fa-star text-yellow-500', info:'fa-info-circle text-gray-500'}[t] || 'fa-info-circle text-gray-500');
+
+    list.innerHTML = items.map(n => `
+      <button class="notification-item w-full text-right p-4 flex items-start gap-3 hover:bg-gray-50 transition-colors ${n.read?'opacity-60':''}"
+              onclick="toggleRead('${n.id}')">
+        <i class="fas ${icon(n.type)} mt-1 flex-shrink-0"></i>
+        <div class="flex-1 min-w-0">
+          <div class="flex items-start justify-between gap-2 mb-1">
+            <strong class="text-sm text-gray-800 block">${n.title}</strong>
+            <span class="text-xs text-gray-400 flex-shrink-0">${relativeTime(n.ts)}</span>
+          </div>
+          <p class="text-xs text-gray-600 break-words">${n.body}</p>
+        </div>
+        ${!n.read ? '<span class="w-2 h-2 bg-red-500 rounded-full mt-2 animate-pulse flex-shrink-0"></span>' : ''}
+      </button>`).join('');
+  }
+
+  async function toggleRead(id) {
+    const items = getNotifs(); const i = items.findIndex(n=>n.id===id);
+    if (i>-1 && !items[i].read) {
+      items[i].read = true; setNotifs(items); renderNotifs();
+      try {
+        if (!isOnline()) return;
+        await safeFetch(`/api/notifications/${id}/read`, { method:'PUT', credentials:'include' });
+      } catch {}
+    }
+  }
+
+  async function markAllRead() {
+    const items = getNotifs(); const unread = items.filter(n=>!n.read);
+    unread.forEach(n=> n.read = true); setNotifs(items); renderNotifs(); showToast('همه خوانده شد', 'success');
+    try {
+      if (!isOnline()) return;
+      await Promise.all(unread.map(n => safeFetch(`/api/notifications/${n.id}/read`, { method:'PUT', credentials:'include' })));
+    } catch {}
+  }
+
+  /* ---------- Navigation ---------- */
+  function openBooking() { showToast('در حال انتقال...', 'info'); setTimeout(()=> location.href='index.html#booking', 800); }
+  function scrollToBookings() { $('#bookings').scrollIntoView({ behavior:'smooth', block:'start' }); }
+  function scrollToHistory()  { $('#history').scrollIntoView({ behavior:'smooth', block:'start' }); }
+
+  /* ---------- Modals / Forms ---------- */
+  function editProfile() { $('#editModal').classList.remove('hidden'); setTimeout(()=>$('#fullName').focus(), 100); trapFocus('editModal'); }
+
+  function closeModal(id) {
+    const m = $(`#${id}`); m.classList.add('hidden');
+    if (m._trapHandler) { m.removeEventListener('keydown', m._trapHandler); delete m._trapHandler; }
+    if (m._triggerElement) { m._triggerElement.focus(); m._triggerElement = null; }
+  }
+
+  function checkProfileCompletion() {
+    const prompt = $('#profilePrompt');
+    if (!prompt) return;
+    if (!profileName || !profilePhone) { prompt.classList.remove('hidden'); prompt.classList.add('animate-pulse'); }
+    else { prompt.classList.add('hidden'); prompt.classList.remove('animate-pulse'); }
+  }
+
+  // OTP simulation for phone change (same UX as قبل)
+  let pendingProfile = null, verificationCode = '', resendTimer;
+  function startVerification(phone) {
+    verificationCode = Math.floor(1000 + Math.random()*9000).toString();
+    $('#otpMessage').textContent = `کد تایید به شماره ${phone} ارسال شد`;
+    showToast('کد تایید ارسال شد', 'info');
+    let sec = 60; const btn = $('#resendBtn'); btn.disabled=true; btn.textContent=`ارسال مجدد (${sec})`;
+    clearInterval(resendTimer);
+    resendTimer = setInterval(()=>{ sec--; btn.textContent=`ارسال مجدد (${sec})`; if (sec<=0){ clearInterval(resendTimer); btn.disabled=false; btn.textContent='ارسال مجدد'; } },1000);
+    $$('.otp-input').forEach(i=> i.value=''); $('#otpModal').classList.remove('hidden'); trapFocus('otpModal'); setTimeout(()=> $$('.otp-input')[0].focus(), 100);
+  }
+
+  $('#editForm').addEventListener('submit', async (e)=>{
+    e.preventDefault();
+    if (!e.target.checkValidity()) return showToast('اطلاعات ضروری را وارد کنید', 'error');
+
+    const name = $('#fullName').value.trim();
+    const phone = toEn($('#mobile').value.trim());
+    if (!name || !phone) return showToast('اطلاعات ضروری را وارد کنید', 'error');
+
+    const nameRe = /^[اآء-ی‌\s]{2,}$/u;
+    if (!nameRe.test(name)) return showToast('نام و نام خانوادگی باید فقط شامل حروف فارسی باشد', 'error');
+    if (!/^09\d{9}$/.test(phone)) return showToast('شماره موبایل معتبر نیست', 'error');
+
+    if (phone !== profilePhone) { pendingProfile = { name, phone }; startVerification(phone); }
+    else {
+      try {
+        if (isOnline()) {
+          await safeFetch('/api/user/profile', { method:'PUT', headers:{'Content-Type':'application/json'}, credentials:'include', body: JSON.stringify({ name, phone }) });
+        }
+      } catch {}
+      applyProfile({ name, phone }); cache.set(KEYS.profile, { name, phone });
+      checkProfileCompletion(); closeModal('editModal'); showToast('پروفایل بروزرسانی شد', 'success');
+    }
+  });
+
+  $('#resendBtn').addEventListener('click', ()=> { if (pendingProfile) startVerification(pendingProfile.phone); });
+
+  $$('.otp-input').forEach((input, idx, arr)=>{
+    input.addEventListener('input', (e)=>{ e.target.value = toEn(e.target.value).slice(0,1); if (e.target.value && idx < arr.length-1) arr[idx+1].focus(); });
+    input.addEventListener('keydown', (e)=>{ if (e.key==='Backspace' && !e.target.value && idx>0) arr[idx-1].focus(); });
+  });
+
+  $('#otpForm').addEventListener('submit', async (e)=>{
+    e.preventDefault();
+    const code = Array.from($$('.otp-input')).map(i=> toEn(i.value)).join('');
+    if (code === verificationCode) {
+      const {name, phone} = pendingProfile;
+      try {
+        if (isOnline()) {
+          await safeFetch('/api/user/profile', { method:'PUT', headers:{'Content-Type':'application/json'}, credentials:'include', body: JSON.stringify({ name, phone }) });
+        }
+      } catch {}
+      applyProfile({ name, phone }); cache.set(KEYS.profile, { name, phone });
+      checkProfileCompletion(); closeModal('otpModal'); closeModal('editModal'); showToast('شماره تایید شد', 'success');
+    } else showToast('کد تایید نادرست است', 'error');
+  });
+
+  // input normalization
+  $('#mobile').addEventListener('input', (e)=> e.target.value = toEn(e.target.value).replace(/\D/g,''));
+  $('#fullName').addEventListener('input', (e)=> e.target.value = e.target.value.replace(/[^اآء-ی‌\s]/gu,''));
+
+  // backdrop click
+  $('#editModal').addEventListener('click', (e)=> { if (e.target.id==='editModal') closeModal('editModal'); });
+  $('#otpModal').addEventListener('click', (e)=> { if (e.target.id==='otpModal') closeModal('otpModal'); });
+  $('#confirmModal').addEventListener('click', (e)=> { if (e.target.id==='confirmModal') closeModal('confirmModal'); });
+  $('#rescheduleModal').addEventListener('click', (e)=> { if (e.target.id==='rescheduleModal') closeModal('rescheduleModal'); });
+
+  // ESC to close modal
+  document.addEventListener('keydown', (e)=> {
+    if (e.key === 'Escape') {
+      const open = $('.modal-backdrop:not(.hidden)'); if (open) closeModal(open.id);
+    }
+  });
+
+  // focus trap
+  function trapFocus(modalId) {
+    const modal = $(`#${modalId}`); if (!modal) return;
+    if (modal._trapHandler) modal.removeEventListener('keydown', modal._trapHandler);
+    modal._triggerElement = document.activeElement;
+
+    const focusables = modal.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
+    if (!focusables.length) return;
+    const first = focusables[0], last = focusables[focusables.length-1];
+
+    setTimeout(()=> first.focus(), 100);
+    modal._trapHandler = function(e){
+      if (e.key !== 'Tab') return;
+      if (e.shiftKey) { if (document.activeElement === first) { e.preventDefault(); last.focus(); } }
+      else { if (document.activeElement === last) { e.preventDefault(); first.focus(); } }
+    };
+    modal.addEventListener('keydown', modal._trapHandler);
+  }
+
+  /* ---------- Init ---------- */
+  (async function init(){
+    await loadProfile();
+    await Promise.all([loadBookings(), loadNotifs(), initLoyaltyStore()]);
+    checkProfileCompletion();
+    renderBookings();
+    renderStoreSwitcher();
+    updateLoyaltyHeader(getLoyaltyStores().find(s=>s.active) || null);
+    renderNotifs();
+    processOutbox(); // try to flush queued ops
+  })();
+
+  // entry animation
+  document.addEventListener('DOMContentLoaded', ()=>{
+    document.body.style.opacity='0';
+    setTimeout(()=>{ document.body.style.transition='opacity 0.5s ease-out'; document.body.style.opacity='1'; }, 100);
+  });
+
+  /* ---------- Expose globals used by HTML ---------- */
+  window.openBooking = openBooking;
+  window.scrollToBookings = scrollToBookings;
+  window.scrollToHistory  = scrollToHistory;
+  window.editProfile = editProfile;
+  window.closeModal = closeModal;
+  window.confirmCancel = confirmCancel;
+  window.reschedule = reschedule;
+  window.rebookService = rebookService;
+  window.markAllRead = markAllRead;
+  window.toggleRead = toggleRead;
+  window.claimReward = claimReward;
+</script>
+
 <script src="../booking-status-popup.js"></script>
 </body>
 </html>

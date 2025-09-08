@@ -5578,5 +5578,58 @@ function render(items) {
 
 <script src="booking-status-popup.js"></script>
 
+<script>
+(function () {
+  // 1) تزریق shopurl / sellerId از URL به دیتاستِ بدنه
+  const params   = new URLSearchParams(location.search);
+  const shopurl  = params.get('shopurl');
+  const sellerId = params.get('sellerId');
+
+  if (shopurl)  document.body.dataset.shopurl  = shopurl;
+  if (sellerId) document.body.dataset.sellerId = sellerId;
+
+  // 2) پری‌فیل سرویس برای ویزارد (اختیاری: اگر در URL بود)
+  //     این کلید همونه که خود ویزارد داخلش انتخاب‌ها رو نگه می‌داره
+  const SS_KEY    = 'vt:booking.sel';
+  const service   = params.get('service');     // مثلا "اصلاح سر و صورت"
+  const price     = params.get('price');       // مثلا 150000
+  const serviceId = params.get('serviceId');   // اگر داری
+
+  if (service || price || serviceId) {
+    let cur = {};
+    try { cur = JSON.parse(sessionStorage.getItem(SS_KEY) || '{}'); } catch(_) {}
+    if (service)   cur.service   = decodeURIComponent(service);
+    if (price)     cur.price     = parseInt(price, 10) || 0;
+    if (serviceId) cur.serviceId = serviceId;
+    try { sessionStorage.setItem(SS_KEY, JSON.stringify(cur)); } catch(_) {}
+  }
+
+  // 3) اگر با #booking-wizard اومدیم، به‌صورت ایمن ویزارد رو باز کن
+  function bootWizardFromHash() {
+    if (location.hash !== '#booking-wizard') return;
+
+    // اولویت: از گارد داخلی استفاده کن (جلوگیری از رزرو در حالت pending)
+    if (typeof window.openBookingWizard === 'function') {
+      window.openBookingWizard(
+        service ? { service: decodeURIComponent(service), price: parseInt(price || '0', 10) || undefined } : undefined
+      );
+      return;
+    }
+
+    // فالبک ساده: باز کردن سکشن و اسکرول
+    const el = document.getElementById('booking-wizard');
+    if (el) {
+      el.classList.remove('hidden');
+      const top = el.getBoundingClientRect().top + window.scrollY - 80;
+      window.scrollTo({ top, behavior: 'smooth' });
+    }
+  }
+
+  document.addEventListener('DOMContentLoaded', bootWizardFromHash);
+  window.addEventListener('hashchange', bootWizardFromHash);
+})();
+</script>
+
+
 </body>
 </html>
