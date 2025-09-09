@@ -1652,6 +1652,10 @@ async function hasPending(){
     .replace(/[۰-۹]/g, d => '0123456789'['۰۱۲۳۴۵۶۷۸۹'.indexOf(d)])
     .replace(/[٠-٩]/g, d => '0123456789'['٠١٢٣٤٥٦٧٨٩'.indexOf(d)]);
   const toFa = s => (s||'').replace(/\d/g, d => '۰۱۲۳۴۵۶۷۸۹'[parseInt(d,10)]);
+  const normalizeTime = t => {
+    const [h='00', m='00'] = String(t||'').split(':');
+    return `${h.padStart(2,'0')}:${m.padStart(2,'0')}`;
+  };
   const scrollInto = el => { if(!el) return; const top = el.getBoundingClientRect().top + scrollY - 80; window.scrollTo({top,behavior:'smooth'}); };
   const genId = () => 'c_' + Math.random().toString(36).slice(2,10) + Date.now().toString(36).slice(-4);
   const getCookie = name => document.cookie.split('; ').find(r => r.startsWith(name + '='))?.split('=')[1] || '';
@@ -1690,7 +1694,8 @@ async function hasPending(){
       const res = await fetch(`${API_ROOT}/api/booked-slots/${encodeURIComponent(sid)}?date=${encodeURIComponent(dateISO)}`);
       if(!res.ok) throw new Error('fail');
       const data = await res.json();
-      return new Set(data.times || []);
+      const times = (data.times || []).map(normalizeTime);
+      return new Set(times);
     }catch(err){
       console.error('fetch booked slots failed', err);
       return new Set();
@@ -1805,7 +1810,7 @@ async function renderTimes(dayIdx){
   if (!timesWrap) return;
   
   timesWrap.innerHTML = '';
-  const times = sellerSchedule[String(dayIdx)] || [];
+  const times = (sellerSchedule[String(dayIdx)] || []).map(normalizeTime);
   const dayName = WEEKDAY_NAMES[String(dayIdx)];
   const { startISO } = composeSlotISO(dayName, '00:00');
   
@@ -1834,9 +1839,10 @@ async function renderTimes(dayIdx){
   }
   
   times.forEach(time => {
+    const norm = normalizeTime(time);
     const button = document.createElement('button');
-    const isBooked = bookedTimes.has(time);
-    const timeDisplay = toFa(time);
+    const isBooked = bookedTimes.has(norm);
+    const timeDisplay = toFa(norm);
     
     button.type = 'button';
     button.className = 'time-slot';
