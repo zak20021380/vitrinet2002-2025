@@ -251,13 +251,13 @@ exports.getBookedSlots = async (req, res) => {
 
     const items = await Booking.find({
       sellerId,
-      date,
+      bookingDate: date,
       status: { $in: ['pending', 'confirmed'] }
     })
-      .select('time')
+      .select('startTime')
       .lean();
 
-    const times = items.map(b => b.time);
+    const times = items.map(b => b.startTime);
     return res.json({ times });
   } catch (err) {
     console.error('getBookedSlots error:', err);
