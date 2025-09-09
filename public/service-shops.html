@@ -4798,6 +4798,30 @@ confirmBooking?.addEventListener('click', async function () {
   this.innerHTML = '<i class="fas fa-spinner fa-spin ml-2"></i>در حال تایید...';
   
   try {
+    // Determine sellerId from available sources
+    let sellerId =
+      document.body?.dataset?.sellerId ||
+      window.LAST_PUBLIC?.sellerId ||
+      (window.LAST_PUBLIC?.items?.find(it => it._id === selectedServiceId)?.sellerId);
+
+    // Validate required data before submitting
+    if (!selectedService || !sellerId) {
+      // Restore button state on validation failure
+      this.disabled = wasDisabled;
+      this.innerHTML = originalText;
+
+      const msg = !selectedService
+        ? 'لطفاً یک سرویس را انتخاب کنید.'
+        : 'اطلاعات فروشنده یافت نشد. لطفاً صفحه را دوباره بارگذاری کنید.';
+
+      if (typeof showToastDark === 'function') {
+        showToastDark(msg, { type: 'error' });
+      } else {
+        alert(msg);
+      }
+      return;
+    }
+
     // Submit the booking
     const res = await fetch(`${API_ROOT}/api/bookings`, {
       method: 'POST',
@@ -4806,7 +4830,7 @@ confirmBooking?.addEventListener('click', async function () {
       body: JSON.stringify({
         serviceId: selectedServiceId || undefined,
         service: selectedService,
-        sellerId: document.body?.dataset?.sellerId || window.LAST_PUBLIC?.sellerId,
+        sellerId,
         customerName: customerName.value.trim(),
         customerPhone: phoneNumber.value.trim(),
         date: selectedDate,
