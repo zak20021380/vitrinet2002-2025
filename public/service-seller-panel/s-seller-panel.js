@@ -228,6 +228,8 @@ async function fetchInitialData() {
       const statusMap = new Map(localBookings.map(b => [(b._id || b.id), b.status]));
       MOCK_DATA.bookings = bookings.map(b => ({
         ...b,
+        date: b.bookingDate || b.date || '',
+        dateISO: b.dateISO || b.bookingDate || b.date || '',
         status: statusMap.get(b._id || b.id) || b.status || 'pending'
       }));
     } else if (localBookings.length) {
@@ -235,6 +237,8 @@ async function fetchInitialData() {
         id: b.id || Date.now() + Math.random(),
         customerName: b.name || b.customerName || '',
         service: b.service || '',
+        date: b.date || '',
+        dateISO: b.dateISO || '',
         time: b.time || '',
         status: b.status || 'pending'
       }));
@@ -3060,7 +3064,8 @@ loadCustomers();
       const day = parseInt(chip.dataset.day, 10);
       chip.classList.remove('has-pending', 'has-cancelled');
       const dayBookings = bookings.filter(b => {
-        const d = new Date(toEn(b.date));
+        const raw = b.dateISO || toEn((b.date || '').split(' ')[0]).replace(/\//g, '-');
+        const d = new Date(raw);
         return !isNaN(d) && d.getDay() === day;
       });
       if (dayBookings.some(b => b.status === 'pending')) {
@@ -3117,14 +3122,25 @@ function updateDateHint() {
     `${PERSIAN_WEEKDAYS[state.selectedIdx].label} (${faDateShort(target)})`;
 }
 
+function currentDayISO() {
+  const weekStart = getWeekStartSaturday(new Date());
+  const d = new Date(weekStart);
+  d.setDate(weekStart.getDate() + state.selectedIdx);
+  return d.toISOString().slice(0, 10);
+}
+
 
   // compute slot status from MOCK_DATA + CustomerPrefs (فقط برای نمایش؛ در ذخیره‌سازی وضعیت نداریم)
-  function getTimeSlotStatus(time) {
+  function getTimeSlotStatus(time, dateISO) {
     const bookings = (window.MOCK_DATA?.bookings || []);
     const prefs = window.CustomerPrefs ? CustomerPrefs.load() : {};
     const keyFor = (name) => (window.normalizeKey ? normalizeKey(name) : (name||'').toLowerCase());
 
-    const sameTime = bookings.filter(b => normalizeTime(toEn(b.time)) === normalizeTime(time));
+    const sameTime = bookings.filter(b => {
+      const tMatch = normalizeTime(toEn(b.time)) === normalizeTime(time);
+      const bDate = (b.dateISO || toEn((b.date || '').split(' ')[0]).replace(/\//g, '-'));
+      return tMatch && (!dateISO || bDate === dateISO);
+    });
     if (!sameTime.length) return 'available';
 
     const has = (st) => sameTime.some(b => b.status === st);
@@ -3142,6 +3158,7 @@ function updateDateHint() {
     const wrap = el('resv-times');
     const dayKey = String(PERSIAN_WEEKDAYS[state.selectedIdx].js);
     const times = [...(state.schedule[dayKey] || [])].sort();
+    const dateISO = currentDayISO();
 
     if (!times.length) {
       wrap.innerHTML = `<div class="resv-empty">ساعتی ثبت نشده.</div>`;
@@ -3156,7 +3173,7 @@ function updateDateHint() {
     };
 
     wrap.innerHTML = times.map((t) => {
-      const st = getTimeSlotStatus(t);
+      const st = getTimeSlotStatus(t, dateISO);
       const deletable = (st === 'available' || st === 'cancelled-available');
       return `
         <button type="button"
@@ -3245,7 +3262,8 @@ function updateDateHint() {
     const t = chip?.dataset.time;
     if (!t) return;
 
-    const st = getTimeSlotStatus(t);
+    const dateISO = currentDayISO();
+    const st = getTimeSlotStatus(t, dateISO);
     if (st === 'booked')  return UIComponents.showToast('این ساعت رزرو شده است.', 'info');
     if (st === 'pending') return UIComponents.showToast('این ساعت در انتظار تایید است.', 'info');
 

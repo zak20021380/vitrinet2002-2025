@@ -4893,12 +4893,21 @@ confirmBooking?.addEventListener('click', async function () {
     // Success - show success screen
     step4.classList.add('hidden');
     bookingSuccess.classList.remove('hidden');
-    
+
+    // extract ISO date (yyyy-mm-dd) for seller panel
+    const dateISO = (() => {
+      const fa = '۰۱۲۳۴۵۶۷۸۹', en = '0123456789';
+      const toEn = s => (s + '').replace(/[۰-۹]/g, d => en[fa.indexOf(d)]);
+      const m = toEn(selectedDate).match(/(\d{4})[\/\-](\d{1,2})[\/\-](\d{1,2})/);
+      return m ? `${m[1]}-${m[2].padStart(2,'0')}-${m[3].padStart(2,'0')}` : '';
+    })();
+
     // Save booking data
     window.__BOOKING_GUARD__?.saveLast({
       phone: phoneNumber.value,
       service: selectedService,
       date: selectedDate,
+      dateISO,
       time: selectedTime,
       status: 'pending',
       createdAt: new Date().toISOString()
@@ -4911,6 +4920,7 @@ confirmBooking?.addEventListener('click', async function () {
       service: selectedService,
       price: selectedPrice,
       date: selectedDate,
+      dateISO,
       time: selectedTime,
       name: customerName.value,
       phone: phoneNumber.value,
