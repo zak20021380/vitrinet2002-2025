@@ -111,16 +111,22 @@ async createService(payload) {
     if (!r.ok && r.status !== 304) throw { status: r.status, message: 'FETCH_BOOKINGS_FAILED' };
     const raw = this._unwrap(await this._json(r));
     const arr = Array.isArray(raw) ? raw : [];
-    return arr.map(b => ({
-      id: b._id || b.id,
-      customerName: b.customerName || '',
-      service: b.service || '',
-      // backend may return `bookingDate`/`startTime` instead of `date`/`time`
-      date: b.bookingDate || b.date || '',
-      time: b.startTime || b.time || '',
-      customerPhone: b.customerPhone || '',
-      status: b.status || 'pending'
-    }));
+    return arr.map(b => {
+      const rawDate = b.dateISO || b.bookingDate || b.date || '';
+      const dateStr = toEn((rawDate || '').split(' ')[0]).replace(/\//g, '-');
+      const dateISO = dateStr.split('T')[0];
+      const time = normalizeTime(toEn(b.startTime || b.time || '')) || '';
+      return {
+        id: b._id || b.id,
+        customerName: b.customerName || '',
+        service: b.service || '',
+        date: dateISO,
+        dateISO,
+        time,
+        customerPhone: b.customerPhone || '',
+        status: b.status || 'pending'
+      };
+    });
   },
 
   // Portfolio API methods
@@ -3190,8 +3196,10 @@ function currentDayISO() {
     const keyFor = (name) => (window.normalizeKey ? normalizeKey(name) : (name||'').toLowerCase());
 
     const sameTime = bookings.filter(b => {
-      const tMatch = normalizeTime(toEn(b.time)) === normalizeTime(time);
-      const bDate = (b.dateISO || toEn((b.date || '').split(' ')[0]).replace(/\//g, '-'));
+      const bTime = normalizeTime(toEn(b.time));
+      const tMatch = bTime === normalizeTime(time);
+      const rawDate = b.dateISO || toEn((b.date || '').split(' ')[0]).replace(/\//g, '-');
+      const bDate = rawDate.split('T')[0];
       return tMatch && (!dateISO || bDate === dateISO);
     });
     if (!sameTime.length) return 'available';
