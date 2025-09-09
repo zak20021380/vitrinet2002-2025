@@ -2337,6 +2337,23 @@ function persistCustomer(){
 
     const sellerId = document.body?.dataset?.sellerId || null;
 
+    // re-check availability just before submit to avoid stale selections
+    try {
+      const latest = await fetchBookedSlots(date);
+      if (latest.has(normalizeTime(time))) {
+        const warn = 'این بازه زمانی قبلاً رزرو شده است. لطفاً زمان دیگری را انتخاب کنید.';
+        (typeof showToastDark==='function') ? showToastDark(warn, {type:'error'}) : alert(warn);
+        st.time = '';
+        const dayIdx = WEEKDAY_MAP[st.date.split(/\s+/)[0]];
+        if (typeof dayIdx === 'number') await renderTimes(dayIdx);
+        showStep(2);
+        chk2();
+        return;
+      }
+    } catch (err) {
+      console.error('revalidate slot failed', err);
+    }
+
     // ساخت payload طبق قرارداد بک‌اند: یا serviceId یا (sellerId + service)
     const payload = {
       customerName:  name,
