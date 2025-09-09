@@ -1594,6 +1594,21 @@ async function hasPending(){
     return t;
   }
 
+  let bookedTimes = new Set();
+  async function fetchBookedSlots(dateISO){
+    const sid = document.body?.dataset?.sellerId;
+    if (!sid || !dateISO) return new Set();
+    try {
+      const res = await fetch(`${API_ROOT}/api/booked-slots/${encodeURIComponent(sid)}?date=${encodeURIComponent(dateISO)}`);
+      if(!res.ok) throw new Error('fail');
+      const data = await res.json();
+      return new Set(data.times || []);
+    }catch(err){
+      console.error('fetch booked slots failed', err);
+      return new Set();
+    }
+  }
+
   // کد مادر برای محیط توسعه
   const MASTER_OTP = '0000';
 
@@ -1693,17 +1708,32 @@ async function hasPending(){
       daysWrap.appendChild(d);
     });
     dateOpts=$$('.date-option');
-    dateOpts.forEach(el=>el.addEventListener('click', ()=>{ pick(dateOpts, el); st.date=el.innerText.trim(); renderTimes(el.dataset.day); saveSel(); chk2(); }));
+    dateOpts.forEach(el=>el.addEventListener('click', ()=>{ pick(dateOpts, el); st.date=el.innerText.trim(); st.time=''; renderTimes(el.dataset.day); saveSel(); chk2(); }));
     if(dateOpts[0]) dateOpts[0].click();
   }
 
-  function renderTimes(dayIdx){
+  async function renderTimes(dayIdx){
     const timesWrap=document.getElementById('booking-times');
     timesWrap.innerHTML='';
     const times=sellerSchedule[String(dayIdx)]||[];
-    times.forEach(t=>{ const div=document.createElement('div'); div.className='time-option border border-gray-300 rounded-lg p-2 text-center cursor-pointer hover:border-blue-500 bw-tap'; div.textContent=toFa(t); timesWrap.appendChild(div); });
-    timeOpts=$$('.time-option');
-    timeOpts.forEach(el=>el.addEventListener('click', ()=>{ pick(timeOpts, el); st.time=el.innerText.trim(); saveSel(); chk2(); }));
+    const dayName=WEEKDAY_NAMES[String(dayIdx)];
+    const { startISO } = composeSlotISO(dayName, '00:00');
+    bookedTimes = await fetchBookedSlots(startISO.slice(0,10));
+    times.forEach(t=>{
+      const div=document.createElement('div');
+      const isBooked = bookedTimes.has(t);
+      if(isBooked){
+        div.className='time-option relative border border-gray-300 rounded-lg p-2 text-center bg-gray-100 text-gray-400 cursor-not-allowed';
+        div.innerHTML=`<span class="line-through">${toFa(t)}</span><span class="absolute inset-0 flex items-center justify-center text-[10px] text-red-500">رزرو شد</span>`;
+        div.addEventListener('click',()=>{ (typeof showToastDark==='function') ? showToastDark('این ساعت قبلاً رزرو شده است',{type:'info'}) : alert('این ساعت قبلاً رزرو شده است'); });
+      }else{
+        div.className='time-option border border-gray-300 rounded-lg p-2 text-center cursor-pointer hover:border-blue-500 bw-tap';
+        div.textContent=toFa(t);
+        div.addEventListener('click', ()=>{ pick(timeOpts, div); st.time=div.innerText.trim(); saveSel(); chk2(); });
+      }
+      timesWrap.appendChild(div);
+    });
+    timeOpts=$$('.time-option:not(.cursor-not-allowed)');
   }
 
   document.addEventListener('services:loaded', loadSellerSchedule);
@@ -2223,6 +2253,13 @@ function persistCustomer(){
       const msg = err?.message || 'ثبت نوبت ناموفق بود';
       (typeof showToastDark==='function') ? showToastDark(msg, {type:'error'}) : alert(msg);
       console.error('submit booking failed', err, {payload});
+      if (msg.includes('بازه زمانی قبلاً رزرو شده') && st.date) {
+        st.time = '';
+        const dayIdx = WEEKDAY_MAP[st.date.split(/\s+/)[0]];
+        if (typeof dayIdx === 'number') await renderTimes(dayIdx);
+        showStep(2);
+        chk2();
+      }
     } finally {
       btn.innerHTML = originalHTML;
       btn.disabled = false;

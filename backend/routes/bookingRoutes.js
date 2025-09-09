@@ -21,4 +21,7 @@ router.delete('/seller-bookings/:id', auth('seller'), ctrl.deleteBooking);
 // بررسی وضعیت نوبت بر اساس شماره تلفن مشتری
 router.get('/bookings/status', ctrl.checkBookingStatus);
 
+// دریافت زمان‌های رزرو شده برای نمایش به کاربر
+router.get('/booked-slots/:sellerId', ctrl.getBookedSlots);
+
 module.exports = router;

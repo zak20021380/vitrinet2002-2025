@@ -227,3 +227,31 @@ exports.checkBookingStatus = async (req, res) => {
     return res.status(500).json({ message: 'خطای داخلی سرور.' });
   }
 };
+
+// دریافت زمان‌های رزرو شده برای یک فروشنده در تاریخ مشخص
+exports.getBookedSlots = async (req, res) => {
+  try {
+    const { sellerId } = req.params;
+    const { date } = req.query || {};
+    if (!sellerId || !mongoose.Types.ObjectId.isValid(sellerId)) {
+      return res.status(400).json({ message: 'شناسه فروشنده نامعتبر است.' });
+    }
+    if (!date) {
+      return res.status(400).json({ message: 'تاریخ الزامی است.' });
+    }
+
+    const items = await Booking.find({
+      sellerId,
+      date,
+      status: { $in: ['pending', 'confirmed'] }
+    })
+      .select('time')
+      .lean();
+
+    const times = items.map(b => b.time);
+    return res.json({ times });
+  } catch (err) {
+    console.error('getBookedSlots error:', err);
+    return res.status(500).json({ message: 'خطا در دریافت نوبت‌های رزرو شده' });
+  }
+};
