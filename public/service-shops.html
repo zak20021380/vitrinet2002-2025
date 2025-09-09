@@ -1653,7 +1653,7 @@ async function hasPending(){
     .replace(/[٠-٩]/g, d => '0123456789'['٠١٢٣٤٥٦٧٨٩'.indexOf(d)]);
   const toFa = s => (s||'').replace(/\d/g, d => '۰۱۲۳۴۵۶۷۸۹'[parseInt(d,10)]);
   const normalizeTime = t => {
-    const [h='00', m='00'] = String(t||'').split(':');
+    const [h='00', m='00'] = toEn(String(t||'')).split(':');
     return `${h.padStart(2,'0')}:${m.padStart(2,'0')}`;
   };
   const scrollInto = el => { if(!el) return; const top = el.getBoundingClientRect().top + scrollY - 80; window.scrollTo({top,behavior:'smooth'}); };
@@ -2050,7 +2050,13 @@ function updateConfirmState(reason = '') {
 
   // ===== Validators
   function chk1(){ next1.disabled = !(st.service && st.price); saveSel(); updateConfirmState('chk1'); }
-  function chk2(){ next2.disabled = !(st.date && st.time);   saveSel(); updateConfirmState('chk2'); }
+  function chk2(){
+    const booked = st.time && bookedTimes.has(normalizeTime(st.time));
+    if (booked) st.time = '';
+    next2.disabled = !(st.date && st.time);
+    saveSel();
+    updateConfirmState('chk2');
+  }
   function chk3(){
     const ok = nameInp.value.trim().length >= 2 && validPhone(phoneInp.value);
     next3.disabled = !ok;
