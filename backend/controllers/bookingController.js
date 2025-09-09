@@ -73,6 +73,15 @@ exports.createBooking = async (req, res) => {
     if (!mongoose.Types.ObjectId.isValid(sid)) {
       return res.status(400).json({ message: 'شناسه فروشنده نامعتبر است.' });
     }
+    // Prevent booking creation if slot already taken
+    const slotTaken = await Booking.exists({
+      bookingDate: date,
+      startTime: time,
+      sellerId: sid
+    });
+    if (slotTaken) {
+      return res.status(409).json({ message: 'این بازه زمانی قبلاً رزرو شده است.' });
+    }
 
     let booking;
     try {
@@ -82,8 +91,8 @@ exports.createBooking = async (req, res) => {
         service: serviceTitle,
         customerName,
         customerPhone,
-        date,
-        time
+        bookingDate: date,
+        startTime: time
       });
     } catch (err) {
       console.error('Booking.create error:', {
