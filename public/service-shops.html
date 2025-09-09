@@ -1750,47 +1750,88 @@ async function hasPending(){
     }
   }
 
-  // ===== PATCH: نسخهٔ پایدار فعال/غیرفعال‌سازی دکمه
-  function updateConfirmState(reason = '') {
-    // از DOM بازسازی انتخاب‌ها
-    const svcSel  = document.querySelector('#booking-services .service-option.bw-selected');
-    const dateSel = document.querySelector('.date-option.bw-selected');
-    const timeSel = document.querySelector('.time-option.bw-selected');
 
-    if (svcSel) {
-      st.service   = svcSel.dataset.service || svcSel.textContent.trim();
-      st.price     = parseInt(svcSel.dataset.price || '0', 10) || 0;
-      st.serviceId = svcSel.dataset.serviceId || null;
-    }
-    if (dateSel) st.date = dateSel.innerText.trim();
-    if (timeSel) st.time = timeSel.innerText.trim();
+// چک‌لیست خطاها برای مرحله ۵
+function getStep5Errors() {
+  const errs = [];
+  const svcSel  = document.querySelector('#booking-services .service-option.bw-selected');
+  const dateSel = document.querySelector('.date-option.bw-selected');
+  const timeSel = document.querySelector('.time-option.bw-selected');
+  const nm = (nameInp?.value || '').trim();
+  const ph = toEn(phoneInp?.value || '');
 
-    // از ورودی‌ها
-    if (nameInp)  st.name  = (nameInp.value || '').trim();
-    if (phoneInp) st.phone = toEn(phoneInp.value || '');
+  if (!svcSel)  errs.push('خدمت را انتخاب کنید.');
+  if (!dateSel) errs.push('روز را انتخاب کنید.');
+  if (!timeSel) errs.push('ساعت را انتخاب کنید.');
+  if (nm.length < 2) errs.push('نام را کامل بنویسید.');
+  if (!/^0\d{10}$/.test(ph)) errs.push('شماره موبایل نامعتبر است (مثال: 09123456789).');
 
-    const hasAllData = !!(st.service && st.date && st.time && st.name && /^0\d{10}$/.test(st.phone));
-    if (!confirmBtn) return;
+  return errs;
+}
 
-    if (hasAllData) {
-      confirmBtn.disabled = false;
-      confirmBtn.removeAttribute('disabled');
-      confirmBtn.setAttribute('aria-disabled', 'false');
-      confirmBtn.classList.remove('cursor-not-allowed', 'opacity-50');
-      confirmBtn.classList.add('bg-blue-600', 'hover:bg-blue-700');
-    } else {
-      confirmBtn.disabled = true;
-      confirmBtn.setAttribute('disabled', 'disabled');
-      confirmBtn.setAttribute('aria-disabled', 'true');
-      confirmBtn.classList.add('cursor-not-allowed', 'opacity-50');
-      confirmBtn.classList.remove('bg-blue-600', 'hover:bg-blue-700');
-    }
 
-    console.debug('[confirm-state]', reason, {
-      service: st.service, date: st.date, time: st.time,
-      name: st.name, phone: st.phone, ok: hasAllData
-    });
+
+
+
+
+// نسخه تقویت‌شده: فعال/غیرفعال + نمایش دلیل
+function updateConfirmState(reason = '') {
+  // از DOM بخوانیم تا چیزی از state جا نماند
+  const svcSel  = document.querySelector('#booking-services .service-option.bw-selected');
+  const dateSel = document.querySelector('.date-option.bw-selected');
+  const timeSel = document.querySelector('.time-option.bw-selected');
+
+  if (svcSel) {
+    st.service   = svcSel.dataset.service || svcSel.textContent.trim();
+    st.price     = parseInt(svcSel.dataset.price || '0', 10) || 0;
+    st.serviceId = svcSel.dataset.serviceId || null;
   }
+  if (dateSel) st.date = dateSel.innerText.trim();
+  if (timeSel) st.time = timeSel.innerText.trim();
+  if (nameInp)  st.name  = (nameInp.value || '').trim();
+  if (phoneInp) st.phone = toEn(phoneInp.value || '');
+
+  const errs = getStep5Errors();
+  const box  = document.getElementById('confirm-errors');
+
+  if (!confirmBtn) return;
+
+  if (errs.length) {
+    // غیرفعال + نشان‌دادن دلیل‌ها
+    confirmBtn.disabled = true;
+    confirmBtn.setAttribute('disabled', 'disabled');
+    confirmBtn.setAttribute('aria-disabled', 'true');
+    confirmBtn.classList.add('cursor-not-allowed', 'opacity-50');
+    confirmBtn.classList.remove('bg-blue-600','hover:bg-blue-700');
+
+    if (box) {
+      box.innerHTML = 'نمی‌تونم تایید کنم چون:' +
+        '<ul class="list-disc pr-5 mt-2">' +
+        errs.map(e => `<li>${e}</li>`).join('') +
+        '</ul>';
+      box.classList.remove('hidden');
+    }
+  } else {
+    // فعال
+    confirmBtn.disabled = false;
+    confirmBtn.removeAttribute('disabled');
+    confirmBtn.setAttribute('aria-disabled', 'false');
+    confirmBtn.classList.remove('cursor-not-allowed', 'opacity-50');
+    confirmBtn.classList.add('bg-blue-600', 'hover:bg-blue-700');
+
+    if (box) {
+      box.classList.add('hidden');
+      box.textContent = '';
+    }
+  }
+
+  // لاگ برای دیباگ سریع
+  console.debug('[confirm-state]', reason, {
+    service: st.service, date: st.date, time: st.time,
+    name: st.name, phone: st.phone, ok: errs.length === 0
+  });
+}
+
 
   // ===== PATCH: نوع دکمه و نگهبان ضد-disabled
   if (confirmBtn) {
