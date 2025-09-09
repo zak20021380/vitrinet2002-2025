@@ -3080,6 +3080,35 @@ loadCustomers();
   // open modal
   async function openModal() {
     await load();
+    try {
+      const bookings = await API.getBookings();
+      const localBookings = JSON.parse(localStorage.getItem('vitreenet-bookings') || '[]');
+      if (Array.isArray(bookings) && bookings.length) {
+        const statusMap = new Map(localBookings.map(b => [(b._id || b.id), b.status]));
+        MOCK_DATA.bookings = bookings.map(b => ({
+          ...b,
+          date: b.bookingDate || b.date || '',
+          dateISO: b.dateISO || b.bookingDate || b.date || '',
+          status: statusMap.get(b._id || b.id) || b.status || 'pending'
+        }));
+      } else if (localBookings.length) {
+        MOCK_DATA.bookings = localBookings.map(b => ({
+          id: b.id || Date.now() + Math.random(),
+          customerName: b.name || b.customerName || '',
+          service: b.service || '',
+          date: b.date || '',
+          dateISO: b.dateISO || '',
+          time: b.time || '',
+          status: b.status || 'pending'
+        }));
+      }
+      persistBookings();
+    } catch (err) {
+      console.error('FETCH_BOOKINGS_FAILED', err);
+    }
+
+    Object.keys(bookedCache).forEach(k => delete bookedCache[k]);
+
     UIComponents.openModal('resv-modal');
     updateTodayBanner();
     scheduleMidnightTick();
