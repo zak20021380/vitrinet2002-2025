@@ -1006,14 +1006,26 @@
     }
   }
 
-  function applyProfile(p) {
-    profileName = p?.name || '';
-    profilePhone = p?.phone || '';
-    $('#userName').textContent = profileName || 'مهمان گرامی';
-    $('#userPhone').textContent = profilePhone || 'اطلاعات تماس';
-    $('#fullName').value = profileName || '';
-    $('#mobile').value   = profilePhone || '';
+function applyProfile(p) {
+  profileName = p?.name || '';
+  profilePhone = p?.phone || '';
+  $('#userName').textContent = profileName || 'مهمان گرامی';
+  $('#userPhone').textContent = profilePhone || 'اطلاعات تماس';
+  $('#fullName').value = profileName || '';
+  $('#mobile').value   = profilePhone || '';
+  
+  // Save to localStorage for service-shops.html to use
+  if (profileName) localStorage.setItem('vt_user_name', profileName);
+  if (profilePhone) localStorage.setItem('vt_user_phone', profilePhone);
+  
+  // Also set cookies with proper expiration
+  if (profileName) {
+    document.cookie = `customerName=${encodeURIComponent(profileName)};path=/;max-age=31536000`;
   }
+  if (profilePhone) {
+    document.cookie = `customerPhone=${profilePhone};path=/;max-age=31536000`;
+  }
+}
 
   /* ---------- Bookings (cache-first, then server) ---------- */
   function getBookings() { return bookings; }

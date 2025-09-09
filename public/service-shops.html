@@ -1534,7 +1534,10 @@ async function hasPending(){
       </div>
       <div class="flex space-x-3 space-x-reverse">
         <button id="back-to-step-3" class="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-3 px-6 rounded-full transition-all">بازگشت</button>
-<button id="confirm-booking" data-no-loader class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-full transition-all disabled:bg-gray-400" disabled>تایید نهایی</button>      </div>
+<button id="confirm-booking" data-no-loader class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-full transition-all disabled:bg-gray-400" disabled>تایید نهایی</button>   
+
+
+</div>
     </div>
 
     <!-- Success -->
@@ -1980,13 +1983,17 @@ async function hasPending(){
   resendBtn.addEventListener('click', ()=>{ if(!resendBtn.disabled) resendOtp(); });
 
   // ذخیره مشتری
-  function persistCustomer(){
+function persistCustomer(){
     const existing = getCookie('customerId');
     const cid = st.customerId || existing || genId();
     st.customerId = cid;
     setCookie('customerId', cid);
     setCookie('customerName', st.name);
     setCookie('customerPhone', st.phone);
+    
+    // Also save to localStorage for better persistence
+    if (st.name) localStorage.setItem('vt_user_name', st.name);
+    if (st.phone) localStorage.setItem('vt_user_phone', st.phone);
   }
 
   // تایید OTP
@@ -2233,15 +2240,21 @@ async function hasPending(){
   });
 
   // ===== Init from cookies
+// ===== Init from localStorage first, then cookies as fallback
   const saved = {
     cid: getCookie('customerId'),
-    name: decodeURIComponent(getCookie('customerName') || ''),
-    phone: getCookie('customerPhone')
+    name: localStorage.getItem('vt_user_name') || decodeURIComponent(getCookie('customerName') || ''),
+    phone: localStorage.getItem('vt_user_phone') || getCookie('customerPhone')
   };
-  if (saved.cid)  st.customerId = saved.cid;
-  if (saved.name) nameInp.value = saved.name;
-  if (saved.phone) phoneInp.value = saved.phone;
-
+if (saved.cid)  st.customerId = saved.cid;
+  if (saved.name) {
+    nameInp.value = saved.name;
+    st.name = saved.name;
+  }
+  if (saved.phone) {
+    phoneInp.value = saved.phone;
+    st.phone = saved.phone;
+  }
   // Build & wire
   buildServiceOptionsFromCards();
   wireExistingServiceOptions();
