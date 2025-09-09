@@ -427,6 +427,61 @@
 .dialog-card-show  { transform: scale(1);    opacity: 1; transition: all .18s ease; }
 
 
+
+
+
+/* Professional booking status styles */
+/* Simple time slot styles */
+.time-slot {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 44px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 14px;
+  background: white;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.time-slot:hover {
+  border-color: #3b82f6;
+}
+
+.time-slot.selected {
+  border-color: #3b82f6;
+  background: #eff6ff;
+  color: #1d4ed8;
+}
+
+.time-slot:disabled {
+  background: #f9fafb;
+  color: #9ca3af;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.time-slot:disabled:hover {
+  border-color: #d1d5db;
+}
+
+@media (max-width: 640px) {
+  .time-slot {
+    height: 45px;
+    font-size: 13px;
+  }
+  
+  .booking-legend {
+    gap: 12px;
+    padding: 12px;
+  }
+  
+  .legend-item {
+    font-size: 12px;
+  }
+}
         
     </style>
 </head>
@@ -1476,6 +1531,7 @@ async function hasPending(){
 
       <div class="mb-6">
         <h5 class="font-medium mb-2">ساعت</h5>
+
         <div id="booking-times" class="grid grid-cols-3 gap-2"></div>
       </div>
 
@@ -1744,29 +1800,76 @@ async function hasPending(){
     if(dateOpts[0]) dateOpts[0].click();
   }
 
-  async function renderTimes(dayIdx){
-    const timesWrap=document.getElementById('booking-times');
-    timesWrap.innerHTML='';
-    const times=sellerSchedule[String(dayIdx)]||[];
-    const dayName=WEEKDAY_NAMES[String(dayIdx)];
-    const { startISO } = composeSlotISO(dayName, '00:00');
+async function renderTimes(dayIdx){
+  const timesWrap = document.getElementById('booking-times');
+  if (!timesWrap) return;
+  
+  timesWrap.innerHTML = '';
+  const times = sellerSchedule[String(dayIdx)] || [];
+  const dayName = WEEKDAY_NAMES[String(dayIdx)];
+  const { startISO } = composeSlotISO(dayName, '00:00');
+  
+  // Show loading state
+  timesWrap.innerHTML = '<div class="col-span-3 text-center py-4 text-gray-500">در حال بررسی ساعات موجود...</div>';
+  
+  try {
     bookedTimes = await fetchBookedSlots(startISO.slice(0,10));
-    times.forEach(t=>{
-      const div=document.createElement('div');
-      const isBooked = bookedTimes.has(t);
-      if(isBooked){
-        div.className='time-option relative border border-gray-300 rounded-lg p-2 text-center bg-gray-100 text-gray-400 cursor-not-allowed';
-        div.innerHTML=`<span class="line-through">${toFa(t)}</span><span class="absolute inset-0 flex items-center justify-center text-[10px] text-red-500">رزرو شد</span>`;
-        div.addEventListener('click',()=>{ (typeof showToastDark==='function') ? showToastDark('این ساعت قبلاً رزرو شده است',{type:'info'}) : alert('این ساعت قبلاً رزرو شده است'); });
-      }else{
-        div.className='time-option border border-gray-300 rounded-lg p-2 text-center cursor-pointer hover:border-blue-500 bw-tap';
-        div.textContent=toFa(t);
-        div.addEventListener('click', ()=>{ pick(timeOpts, div); st.time=div.innerText.trim(); saveSel(); chk2(); });
-      }
-      timesWrap.appendChild(div);
-    });
-    timeOpts=$$('.time-option:not(.cursor-not-allowed)');
+  } catch (error) {
+    console.error('Error fetching booked slots:', error);
+    bookedTimes = new Set();
   }
+  
+  // Clear loading
+  timesWrap.innerHTML = '';
+  
+  if (times.length === 0) {
+    const noTimesDiv = document.createElement('div');
+    noTimesDiv.className = 'col-span-3 text-center py-8 text-gray-500';
+    noTimesDiv.innerHTML = `
+      <i class="fas fa-calendar-times text-3xl mb-2 text-gray-400"></i>
+      <p>برای این روز ساعت کاری تعریف نشده است</p>
+    `;
+    timesWrap.appendChild(noTimesDiv);
+    return;
+  }
+  
+  times.forEach(time => {
+    const button = document.createElement('button');
+    const isBooked = bookedTimes.has(time);
+    const timeDisplay = toFa(time);
+    
+    button.type = 'button';
+    button.className = 'time-slot';
+    button.textContent = timeDisplay;
+    button.disabled = isBooked;
+    
+    if (isBooked) {
+      button.setAttribute('title', 'این ساعت رزرو شده است');
+    } else {
+      button.setAttribute('title', 'کلیک کنید تا این ساعت را انتخاب کنید');
+      button.addEventListener('click', () => {
+        // Remove previous selections
+        timeOpts.forEach(opt => opt.classList.remove('selected'));
+        
+        // Select current time
+        button.classList.add('selected');
+        
+        st.time = timeDisplay;
+        saveSel();
+        chk2();
+      });
+    }
+    
+    timesWrap.appendChild(button);
+  });
+  
+  // Update timeOpts array for other functions
+  timeOpts = Array.from(timesWrap.querySelectorAll('.time-slot:not(:disabled)'));
+}
+
+
+
+
 
   document.addEventListener('services:loaded', loadSellerSchedule);
   const back2 = $('#back-to-step-1'); const next2 = $('#next-to-step-3');
