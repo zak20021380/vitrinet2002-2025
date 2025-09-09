@@ -3129,6 +3129,30 @@ function currentDayISO() {
   return d.toISOString().slice(0, 10);
 }
 
+  // Cache booked slots per date to avoid duplicate requests
+  const bookedCache = {};
+
+  async function fetchBookedTimes(dateISO) {
+    if (bookedCache[dateISO]) return bookedCache[dateISO];
+
+    const seller = JSON.parse(localStorage.getItem('seller') || '{}');
+    const sid = seller.id || seller._id;
+    if (!sid) {
+      bookedCache[dateISO] = new Set();
+      return bookedCache[dateISO];
+    }
+
+    try {
+      const res = await fetch(`${API_BASE}/api/booked-slots/${encodeURIComponent(sid)}?date=${encodeURIComponent(dateISO)}`, { credentials: 'include' });
+      if (!res.ok) throw new Error('fail');
+      const data = await res.json();
+      bookedCache[dateISO] = new Set((data.times || []).map(normalizeTime));
+    } catch (e) {
+      console.error('fetch booked times failed', e);
+      bookedCache[dateISO] = new Set();
+    }
+    return bookedCache[dateISO];
+  }
 
   // compute slot status from MOCK_DATA + CustomerPrefs (فقط برای نمایش؛ در ذخیره‌سازی وضعیت نداریم)
   function getTimeSlotStatus(time, dateISO) {
@@ -3154,11 +3178,12 @@ function currentDayISO() {
   }
 
   // render time chips for selected day
-  function renderTimes() {
+  async function renderTimes() {
     const wrap = el('resv-times');
     const dayKey = String(PERSIAN_WEEKDAYS[state.selectedIdx].js);
     const times = [...(state.schedule[dayKey] || [])].sort();
     const dateISO = currentDayISO();
+    const booked = await fetchBookedTimes(dateISO);
 
     if (!times.length) {
       wrap.innerHTML = `<div class="resv-empty">ساعتی ثبت نشده.</div>`;
@@ -3173,7 +3198,8 @@ function currentDayISO() {
     };
 
     wrap.innerHTML = times.map((t) => {
-      const st = getTimeSlotStatus(t, dateISO);
+      let st = getTimeSlotStatus(t, dateISO);
+      if (booked.has(normalizeTime(t))) st = 'booked';
       const deletable = (st === 'available' || st === 'cancelled-available');
       return `
         <button type="button"
