@@ -1687,20 +1687,23 @@ async function hasPending(){
   }
 
   let bookedTimes = new Set();
-  async function fetchBookedSlots(dateISO){
-    const sid = document.body?.dataset?.sellerId;
-    if (!sid || !dateISO) return new Set();
-    try {
-      const res = await fetch(`${API_ROOT}/api/booked-slots/${encodeURIComponent(sid)}?date=${encodeURIComponent(dateISO)}`);
-      if(!res.ok) throw new Error('fail');
-      const data = await res.json();
-      const times = (data.times || []).map(normalizeTime);
-      return new Set(times);
-    }catch(err){
-      console.error('fetch booked slots failed', err);
-      return new Set();
-    }
+async function fetchBookedSlots(dateISO){
+  const sid = document.body?.dataset?.sellerId;
+  if (!sid || !dateISO) return new Set();
+  try {
+    const res = await fetch(`${API_ROOT}/api/booked-slots/${encodeURIComponent(sid)}?date=${encodeURIComponent(dateISO)}`);
+    if(!res.ok) throw new Error('fail');
+    const data = await res.json();
+    const times = (data.times || []).map(normalizeTime);
+    console.log('Fetched booked times:', times);  
+    // Remove this test line once it's working:
+    // times.push('15:00', '16:00');
+    return new Set(times);
+  }catch(err){
+    console.error('fetch booked slots failed', err);
+    return new Set();
   }
+}
 
   // کد مادر برای محیط توسعه
   const MASTER_OTP = '0000';
