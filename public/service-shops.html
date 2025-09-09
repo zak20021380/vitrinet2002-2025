@@ -1847,30 +1847,34 @@ async function renderTimes(dayIdx){
     const button = document.createElement('button');
     const isBooked = bookedTimes.has(norm);
     const timeDisplay = toFa(norm);
-    
+
     button.type = 'button';
     button.className = 'time-slot';
     button.textContent = timeDisplay;
-    button.disabled = isBooked;
+    button.dataset.time = norm;
 
     if (isBooked) {
       button.classList.add('slot--booked');
       button.setAttribute('title', 'این ساعت رزرو شده است');
+      button.setAttribute('disabled', '');
+      button.setAttribute('aria-disabled', 'true');
+      button.dataset.status = 'booked';
     } else {
       button.setAttribute('title', 'کلیک کنید تا این ساعت را انتخاب کنید');
+      button.setAttribute('aria-disabled', 'false');
       button.addEventListener('click', () => {
         // Remove previous selections
         timeOpts.forEach(opt => opt.classList.remove('selected'));
-        
+
         // Select current time
         button.classList.add('selected');
-        
+
         st.time = timeDisplay;
         saveSel();
         chk2();
       });
     }
-    
+
     timesWrap.appendChild(button);
   });
   
