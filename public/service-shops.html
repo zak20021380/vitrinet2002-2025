@@ -1866,6 +1866,14 @@ async function renderTimes(dayIdx){
   
   // Update timeOpts array for other functions
   timeOpts = Array.from(timesWrap.querySelectorAll('.time-slot:not(:disabled)'));
+
+  // Reset previously selected time if it is no longer available
+  if (!timeOpts.some(opt => opt.textContent.trim() === st.time)) {
+    st.time = '';
+  }
+
+  // Ensure next button is disabled until a valid time is chosen
+  chk2();
 }
 
 
