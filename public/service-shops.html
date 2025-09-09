@@ -1807,13 +1807,14 @@ async function renderTimes(dayIdx){
   timesWrap.innerHTML = '';
   const times = sellerSchedule[String(dayIdx)] || [];
   const dayName = WEEKDAY_NAMES[String(dayIdx)];
-  const { startISO } = composeSlotISO(dayName, '00:00');
+  const start = nextDateFor(dayName, '00:00');
+  const dateStr = formatLocalDate(start);
   
   // Show loading state
   timesWrap.innerHTML = '<div class="col-span-3 text-center py-4 text-gray-500">در حال بررسی ساعات موجود...</div>';
   
   try {
-    bookedTimes = await fetchBookedSlots(startISO.slice(0,10));
+    bookedTimes = await fetchBookedSlots(dateStr);
   } catch (error) {
     console.error('Error fetching booked slots:', error);
     bookedTimes = new Set();
@@ -2445,6 +2446,12 @@ function persistCustomer(){
     d.setHours(h||0, m||0, 0, 0);
     if (add===0 && d.getTime() <= now.getTime()) d.setDate(d.getDate()+7);
     return d;
+  }
+  function formatLocalDate(d){
+    const y = d.getFullYear();
+    const m = String(d.getMonth()+1).padStart(2,'0');
+    const day = String(d.getDate()).padStart(2,'0');
+    return `${y}-${m}-${day}`;
   }
   function composeSlotISO(dateText, timeText, durationMin=60){
     const dayName = (dateText||'').trim().split(/\s+/)[0];
