@@ -774,14 +774,14 @@
           </button>
         </div>
         <div class="mb-6">
-          <p class="text-gray-700 mb-4">آیا مطمئن هستید که می‌خواهید این رزرو را لغو کنید؟</p>
+          <p id="confirmMessage" class="text-gray-700 mb-4">آیا مطمئن هستید که می‌خواهید این رزرو را لغو کنید؟</p>
           <p class="text-sm text-gray-500" id="confirmBookingInfo"></p>
         </div>
         <div class="grid grid-cols-2 gap-3">
           <button type="button" class="py-3 rounded-xl font-bold bg-gray-100 hover:bg-gray-200 text-gray-700 transition-colors" onclick="closeModal('confirmModal')">
             برگشت
           </button>
-          <button type="button" class="py-3 rounded-xl font-bold bg-red-600 hover:bg-red-700 text-white transition-colors" id="confirmCancelBtn">
+            <button type="button" class="py-3 rounded-xl font-bold bg-red-600 hover:bg-red-700 text-white transition-colors" id="confirmActionBtn">
             لغو کن
           </button>
         </div>
@@ -1257,6 +1257,7 @@ function applyProfile(p) {
                 ${isActive ? `
                   <button type="button" onclick="confirmCancel('${b.id}')" class="px-3 py-2 rounded-lg text-xs font-semibold text-red-600 bg-red-50 hover:bg-red-100 transition-all"><i class="fas fa-times ml-1"></i> لغو</button>
                   <button type="button" onclick="reschedule('${b.id}')" class="px-3 py-2 rounded-lg text-xs font-semibold text-blue-600 bg-blue-50 hover:bg-blue-100 transition-all"><i class="fas fa-edit ml-1"></i> تغییر</button>
+                  <button type="button" onclick="confirmDelete('${b.id}')" class="px-3 py-2 rounded-lg text-xs font-semibold text-gray-600 bg-gray-50 hover:bg-gray-100 transition-all"><i class="fas fa-trash ml-1"></i> حذف</button>
                 ` : `
                   <button type="button" onclick="rebookService('${b.service}')" class="px-4 py-2 rounded-lg text-xs font-semibold text-green-600 bg-green-50 hover:bg-green-100 transition-all"><i class="fas fa-redo ml-1"></i> رزرو مجدد</button>
                 `}
@@ -1309,6 +1310,9 @@ function applyProfile(p) {
             body: JSON.stringify({ date, time })
           });
           if (!res.ok) throw new Error('reschedule failed');
+        } else if (job.type === 'delete') {
+          const res = await safeFetch(`/api/bookings/${encodeURIComponent(job.payload.id)}`, { method:'DELETE', credentials:'include' });
+          if (!res.ok) throw new Error('delete failed');
         } else if (job.type === 'profile') {
           const {name, phone} = job.payload;
           const res = await safeFetch('/api/user/profile', {
@@ -1332,8 +1336,21 @@ function applyProfile(p) {
   // booking actions
   function confirmCancel(id) {
     const b = getBookings().find(x=>x.id===id); if (!b) return;
+    $('#confirmTitle').textContent = 'تایید لغو رزرو';
+    $('#confirmMessage').textContent = 'آیا مطمئن هستید که می‌خواهید این رزرو را لغو کنید؟';
+    $('#confirmActionBtn').textContent = 'لغو کن';
     $('#confirmBookingInfo').textContent = `${b.service} - ${fmtDate(b.datetime)} ${fmtTime(b.datetime)}`;
-    $('#confirmCancelBtn').onclick = () => cancelBooking(id);
+    $('#confirmActionBtn').onclick = () => cancelBooking(id);
+    $('#confirmModal').classList.remove('hidden'); trapFocus('confirmModal');
+  }
+
+  function confirmDelete(id) {
+    const b = getBookings().find(x=>x.id===id); if (!b) return;
+    $('#confirmTitle').textContent = 'حذف رزرو';
+    $('#confirmMessage').textContent = 'آیا مطمئن هستید که می‌خواهید این رزرو را برای همیشه حذف کنید؟';
+    $('#confirmActionBtn').textContent = 'حذف';
+    $('#confirmBookingInfo').textContent = `${b.service} - ${fmtDate(b.datetime)} ${fmtTime(b.datetime)}`;
+    $('#confirmActionBtn').onclick = () => deleteBooking(id);
     $('#confirmModal').classList.remove('hidden'); trapFocus('confirmModal');
   }
 
@@ -1351,6 +1368,21 @@ function applyProfile(p) {
       if (!res.ok) throw new Error('server rejected');
     } catch {
       enqueueMutation('cancel', { id });
+    }
+  }
+
+  async function deleteBooking(id) {
+    const items = getBookings().filter(x=>x.id!==id);
+    setBookings(items); renderBookings();
+    const selectedStore = getLoyaltyStores().find(s=>s.active); if (selectedStore) renderLoyalty(selectedStore);
+    closeModal('confirmModal'); showToast('رزرو حذف شد', 'success');
+
+    try {
+      if (!isOnline()) throw new Error('offline');
+      const res = await safeFetch(`/api/bookings/${encodeURIComponent(id)}`, { method:'DELETE', credentials:'include' });
+      if (!res.ok) throw new Error('server rejected');
+    } catch {
+      enqueueMutation('delete', { id });
     }
   }
 
@@ -1581,6 +1613,7 @@ function applyProfile(p) {
   window.editProfile = editProfile;
   window.closeModal = closeModal;
   window.confirmCancel = confirmCancel;
+  window.confirmDelete = confirmDelete;
   window.reschedule = reschedule;
   window.rebookService = rebookService;
   window.markAllRead = markAllRead;
