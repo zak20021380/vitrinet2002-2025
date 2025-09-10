@@ -1942,15 +1942,12 @@ async function renderTimes(dayIdx){
 // چک‌لیست خطاها برای مرحله ۵
 function getStep5Errors() {
   const errs = [];
-  const svcSel  = document.querySelector('#booking-services .service-option.bw-selected');
-  const dateSel = document.querySelector('.date-option.bw-selected');
-  const timeSel = document.querySelector('.time-option.bw-selected');
-  const nm = (nameInp?.value || '').trim();
-  const ph = toEn(phoneInp?.value || '');
+  const nm = (st.name || nameInp?.value || '').trim();
+  const ph = toEn(st.phone || phoneInp?.value || '');
 
-  if (!svcSel)  errs.push('خدمت را انتخاب کنید.');
-  if (!dateSel) errs.push('روز را انتخاب کنید.');
-  if (!timeSel) errs.push('ساعت را انتخاب کنید.');
+  if (!st.service) errs.push('خدمت را انتخاب کنید.');
+  if (!st.date)   errs.push('روز را انتخاب کنید.');
+  if (!st.time)   errs.push('ساعت را انتخاب کنید.');
   if (nm.length < 2) errs.push('نام را کامل بنویسید.');
   if (!/^0\d{10}$/.test(ph)) errs.push('شماره موبایل نامعتبر است (مثال: 09123456789).');
 
@@ -1965,9 +1962,9 @@ function getStep5Errors() {
 // نسخه تقویت‌شده: فعال/غیرفعال + نمایش دلیل
 function updateConfirmState(reason = '') {
   // از DOM بخوانیم تا چیزی از state جا نماند
-  const svcSel  = document.querySelector('#booking-services .service-option.bw-selected');
-  const dateSel = document.querySelector('.date-option.bw-selected');
-  const timeSel = document.querySelector('.time-option.bw-selected');
+  const svcSel  = document.querySelector('#booking-services .service-option.bw-selected, #step-1 .service-option.border-blue-500');
+  const dateSel = document.querySelector('.date-option.bw-selected, .date-option.border-blue-500');
+  const timeSel = document.querySelector('.time-option.bw-selected, .time-option.border-blue-500');
 
   if (svcSel) {
     st.service   = svcSel.dataset.service || svcSel.textContent.trim();
