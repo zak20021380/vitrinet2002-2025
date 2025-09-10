@@ -7,6 +7,9 @@ const API_BASE = window.__API_BASE__ || '';
 const NO_CACHE = { cache: 'no-store', headers: { 'Cache-Control': 'no-cache' } };
 const bust = (url) => `${url}${url.includes('?') ? '&' : '?'}__=${Date.now()}`;
 
+// Cache of booked time slots keyed by ISO date
+const bookedCache = {};
+
 const API = {
   async _json(res) {
     const txt = await res.text();
@@ -3181,9 +3184,6 @@ function currentDayISO() {
   const pad2 = n => String(n).padStart(2, '0');
   return `${d.getFullYear()}-${pad2(d.getMonth()+1)}-${pad2(d.getDate())}`;
 }
-
-  // Cache booked slots per date to avoid duplicate requests
-  const bookedCache = {};
 
   async function fetchBookedTimes(dateISO) {
     if (bookedCache[dateISO]) return bookedCache[dateISO];
