@@ -507,6 +507,27 @@
     </style>
 </head>
 <body class="bg-gray-50 text-gray-800" data-seller-id="123" data-store-id="123" data-shopurl="demo-shop">
+<script>
+async function getShopUrlFromLocation() {
+  const API_ROOT = window.__API_BASE__ || '';
+  const u = new URL(location.href);
+  const q = u.searchParams.get('shopurl');
+  if (q) return q.trim();
+
+  const sid = u.searchParams.get('sellerId');
+  if (!sid) return '';
+
+  try {
+    const res = await fetch(`${API_ROOT}/api/shopAppearance/${encodeURIComponent(sid)}`);
+    if (!res.ok) throw new Error('appearance not found');
+    const data = await res.json();
+    return data.customUrl ? data.customUrl.trim() : '';
+  } catch (err) {
+    console.error('get shopurl by sellerId failed', err);
+    return '';
+  }
+}
+</script>
     <!-- Sticky Header -->
     <!-- header desktop redesign start -->
 <!-- header desktop redesign start -->
@@ -5582,25 +5603,7 @@ window.addEventListener('load', () => {
     else alert(msg);
   }
 
-  // دریافت shopurl از پارامترها؛ در صورت نبودن، تلاش برای تبدیل sellerId به shopurl
-  async function getShopUrlFromLocation() {
-    const u = new URL(location.href);
-    const q = u.searchParams.get('shopurl');
-    if (q) return q.trim();
-
-    const sid = u.searchParams.get('sellerId');
-    if (!sid) return '';
-
-    try {
-      const res = await fetch(`${API_ROOT}/api/shopAppearance/${encodeURIComponent(sid)}`);
-      if (!res.ok) throw new Error('appearance not found');
-      const data = await res.json();
-      return data.customUrl ? data.customUrl.trim() : '';
-    } catch (err) {
-      console.error('get shopurl by sellerId failed', err);
-      return '';
-    }
-  }
+  // دریافت shopurl از پارامترها؛ تابع به‌صورت سراسری تعریف شده است
 
   function show404() {
     document.body.innerHTML = '<h1 class="text-center mt-10 text-2xl">404 - فروشگاه یافت نشد</h1>';
