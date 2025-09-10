@@ -438,6 +438,9 @@ async function loadCustomers() {
     if (typeof app !== 'undefined' && app.renderCustomers) {
       app.renderCustomers();
     }
+
+    // اطلاع‌رسانی به رابط VIP برای بروزرسانی آمار پس از بارگذاری مشتریان
+    document.dispatchEvent(new Event('vip:refresh'));
   } catch (err) {
     console.error('loadCustomers', err);
   }
@@ -4038,6 +4041,8 @@ window.customersData = window.customersData || [];
   }
 
   // 2) باکت‌ها
+  let buckets = { eligible: [], oneaway: [], claimed: [] };
+
   function computeBuckets(list){
     // معیارها:
     // eligible: به حد نصاب رسیده ولی هنوز claim نشده (rewardCount == 0)
@@ -4068,6 +4073,12 @@ window.customersData = window.customersData || [];
     $('#vip-count-eligible').textContent = b.eligible.length.toLocaleString('fa-IR');
     $('#vip-count-oneaway').textContent  = b.oneaway.length.toLocaleString('fa-IR');
     $('#vip-count-claimed').textContent  = b.claimed.length.toLocaleString('fa-IR');
+  }
+
+  // بروزرسانی باکت‌ها و شمارنده‌ها از داده‌های فعلی
+  function updateBuckets(){
+    buckets = computeBuckets(collectCustomers());
+    renderCounts(buckets);
   }
 
   // 4) رندر لیست نام‌ها
@@ -4111,10 +4122,6 @@ window.customersData = window.customersData || [];
   function initVipUI(){
     const root = $('#vip-stats');
     if(!root) return;
-
-    const all = collectCustomers();
-    const buckets = computeBuckets(all);
-    renderCounts(buckets);
 
     const panel = $('#vip-stats-panel');
     const closeBtn = $('#vip-close-panel');
@@ -4162,10 +4169,14 @@ window.customersData = window.customersData || [];
 
     closeBtn.addEventListener('click', closePanel);
 
+    // ابتدا باکت‌ها را بر اساس داده‌های فعلی محاسبه کن
+    updateBuckets();
+
     // اگر دیتایی نداریم، پنل را غیرفعال نکن—اما نوار را نگه دار
   }
 
   document.addEventListener('DOMContentLoaded', initVipUI);
+  document.addEventListener('vip:refresh', updateBuckets);
 })();
 
 
