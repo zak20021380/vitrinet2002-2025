@@ -4873,20 +4873,20 @@ confirmBooking?.addEventListener('click', async function () {
     }
 
     // Submit the booking
-    const res = await fetch(`${API_ROOT}/api/bookings`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      credentials: 'include',
-      body: JSON.stringify({
-        serviceId: selectedServiceId || undefined,
-        service: selectedService,
-        sellerId,
-        customerName: customerName.value.trim(),
-        customerPhone: phoneNumber.value.trim(),
-        date: selectedDate,
-        time: selectedTime
-      })
-    });
+const res = await fetch(`${API_ROOT}/api/seller-bookings`, {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  credentials: 'include',
+  body: JSON.stringify({
+    serviceId: selectedServiceId || undefined,
+    service: selectedService,
+    sellerId,
+    customerName: customerName.value.trim(),
+    customerPhone: phoneNumber.value.trim(),
+    date: selectedDate,
+    time: selectedTime
+  })
+});
     
     if (!res.ok) {
       const data = await res.json().catch(() => ({}));
