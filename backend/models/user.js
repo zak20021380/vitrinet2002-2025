@@ -16,6 +16,14 @@ const userSchema = new mongoose.Schema({
     ref : 'Product'
   }]
   ,
+  lastVisit : { type: Date },
+
+  activityLog: [{
+    action: { type: String, required: true },
+    timestamp: { type: Date, default: Date.now },
+    meta: { type: mongoose.Schema.Types.Mixed }
+  }],
+
   // آیا توسط ادمین برای ارسال پیام مسدود شده است؟
   blockedByAdmin: { type: Boolean, default: false }
 }, { timestamps: true });

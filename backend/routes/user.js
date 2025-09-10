@@ -35,7 +35,8 @@ router.get('/profile', auth('user'), async (req, res) => {
       phone:          user.phone || user.mobile || '',
       favorites:      user.favorites,
       favoritesCount: user.favorites ? user.favorites.length : 0,
-      lastVisit:      user.lastVisit || ''
+      lastVisit:      user.lastVisit || '',
+      name:           `${user.firstname || ''} ${user.lastname || ''}`.trim()
     });
   } catch (err) {
     res.status(500).json({ message: 'خطا در دریافت پروفایل کاربر' });
@@ -48,23 +49,58 @@ router.get('/profile', auth('user'), async (req, res) => {
 // ───────────────────────────────
 async function saveProfile(req, res) {
   try {
-    const { name, phone, customerId } = req.body || {};
+    const { name, phone } = req.body || {};
 
     if (!name || !phone) {
       return res.status(400).json({ message: 'نام و شماره تماس الزامی است' });
     }
 
-    // در این نسخهٔ ساده فقط موفقیت را برمی‌گردانیم
-    // می‌توان در آینده ذخیره‌سازی در پایگاه‌داده را نیز افزود
-    res.json({ message: 'پروفایل با موفقیت ذخیره شد', name, phone, customerId });
+    const userId = req.user && req.user.id;
+    if (!userId) {
+      return res.status(401).json({ message: 'احراز هویت انجام نشده' });
+    }
+
+    // بررسی عدم تکراری بودن شماره
+    const exists = await User.findOne({ phone, _id: { $ne: userId } });
+    if (exists) {
+      return res.status(409).json({ message: 'این شماره قبلاً استفاده شده است' });
+    }
+
+    const parts = name.trim().split(/\s+/);
+    const firstname = parts.shift();
+    const lastname = parts.length ? parts.join(' ') : firstname;
+
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ message: 'کاربر پیدا نشد' });
+    }
+
+    user.firstname = firstname;
+    user.lastname  = lastname;
+    user.phone     = phone;
+    user.lastVisit = new Date();
+
+    user.activityLog = user.activityLog || [];
+    user.activityLog.push({ action: 'PROFILE_UPDATE', meta: { name, phone } });
+    if (user.activityLog.length > 20) {
+      user.activityLog = user.activityLog.slice(-20);
+    }
+
+    await user.save();
+
+    res.json({
+      message: 'پروفایل با موفقیت ذخیره شد',
+      name: `${user.firstname} ${user.lastname}`.trim(),
+      phone: user.phone
+    });
   } catch (err) {
     console.error('profile save error:', err);
     res.status(500).json({ message: 'خطا در ذخیره پروفایل کاربر' });
   }
 }
 
-router.post('/profile', saveProfile);
-router.put('/profile', saveProfile);
+router.post('/profile', auth('user'), saveProfile);
+router.put('/profile', auth('user'), saveProfile);
 
 // ───────────────────────────────
 // POST /api/user/favorites
