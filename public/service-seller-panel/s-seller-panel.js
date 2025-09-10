@@ -1304,6 +1304,7 @@ destroy() {
         </div>
         <div class="booking-actions">
           <span class="status-badge status-${b.status}">${statusLabel[b.status] || b.status}</span>
+          ${b.status !== 'completed' ? `
           <div class="status-wrapper">
             <button type="button" class="btn-secondary btn-icon-text status-change-btn" data-id="${b._id || b.id}" aria-haspopup="true" aria-expanded="false">تغییر وضعیت</button>
             <div class="status-menu" role="menu">
@@ -1312,6 +1313,7 @@ destroy() {
               <button type="button" class="status-option" data-status="cancelled">لغو نوبت</button>
             </div>
           </div>
+          ` : ''}
           <button type="button" class="btn-icon btn-danger delete-booking-btn" data-id="${b._id || b.id}" aria-label="حذف نوبت">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
               <polyline points="3 6 5 6 21 6"/>
@@ -1368,35 +1370,38 @@ destroy() {
         const id = option.closest('.status-wrapper').querySelector('.status-change-btn').dataset.id;
         const newStatus = option.dataset.status;
         const booking = MOCK_DATA.bookings.find(b => (b._id || b.id) == id);
-        if (booking) {
-          const prev = booking.status;
-          booking.status = newStatus;
-          persistBookings();
-          delete bookedCache[booking.dateISO];
-          const modal = document.getElementById('resv-modal');
-          if (modal && !modal.hidden) renderTimes();
+        if (!booking || booking.status === 'completed') {
+          UIComponents?.showToast?.('نوبت انجام‌شده قابل تغییر نیست', 'warning');
+          e.stopPropagation();
+          return;
+        }
+        const prev = booking.status;
+        booking.status = newStatus;
+        persistBookings();
+        delete bookedCache[booking.dateISO];
+        const modal = document.getElementById('resv-modal');
+        if (modal && !modal.hidden) renderTimes();
 
-          const validId = /^[0-9a-fA-F]{24}$/.test(id);
-          if (validId) {
-            fetch(`${API_BASE}/api/seller-bookings/${id}/status`, {
-              method: 'PATCH',
-              headers: { 'Content-Type': 'application/json' },
-              credentials: 'include',
-              body: JSON.stringify({ status: newStatus })
+        const validId = /^[0-9a-fA-F]{24}$/.test(id);
+        if (validId) {
+          fetch(`${API_BASE}/api/seller-bookings/${id}/status`, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
+            body: JSON.stringify({ status: newStatus })
+          })
+            .then(r => {
+              if (!r.ok) throw new Error('STATUS_UPDATE_FAILED');
+              const faStatus = { confirmed: 'تایید شد', completed: 'انجام شد', cancelled: 'لغو شد' };
+              UIComponents?.showToast?.(`وضعیت نوبت ${faStatus[newStatus] || newStatus}`, 'success');
+              Notifications?.add(`نوبت ${booking.customerName} ${faStatus[newStatus] || newStatus}`, 'booking');
             })
-              .then(r => {
-                if (!r.ok) throw new Error('STATUS_UPDATE_FAILED');
-                const faStatus = { confirmed: 'تایید شد', completed: 'انجام شد', cancelled: 'لغو شد' };
-                UIComponents?.showToast?.(`وضعیت نوبت ${faStatus[newStatus] || newStatus}`, 'success');
-                Notifications?.add(`نوبت ${booking.customerName} ${faStatus[newStatus] || newStatus}`, 'booking');
-              })
-              .catch(err => {
-                console.error('UPDATE_BOOKING_STATUS_FAILED', err);
-                booking.status = prev;
-                persistBookings();
-                UIComponents?.showToast?.('خطا در به‌روزرسانی وضعیت نوبت', 'error');
-              });
-          }
+            .catch(err => {
+              console.error('UPDATE_BOOKING_STATUS_FAILED', err);
+              booking.status = prev;
+              persistBookings();
+              UIComponents?.showToast?.('خطا در به‌روزرسانی وضعیت نوبت', 'error');
+            });
         }
         self.renderBookings(self.currentBookingFilter || 'all');
         self.renderPlans && self.renderPlans();
