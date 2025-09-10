@@ -1309,6 +1309,15 @@ function applyProfile(p) {
             body: JSON.stringify({ date, time })
           });
           if (!res.ok) throw new Error('reschedule failed');
+        } else if (job.type === 'profile') {
+          const {name, phone} = job.payload;
+          const res = await safeFetch('/api/user/profile', {
+            method:'PUT',
+            headers:{'Content-Type':'application/json'},
+            credentials:'include',
+            body: JSON.stringify({ name, phone })
+          });
+          if (!res.ok) throw new Error('profile failed');
         }
       } catch {
         remain.push(job); // keep for later
@@ -1478,10 +1487,11 @@ function applyProfile(p) {
     if (phone !== profilePhone) { pendingProfile = { name, phone }; startVerification(phone); }
     else {
       try {
-        if (isOnline()) {
-          await safeFetch('/api/user/profile', { method:'PUT', headers:{'Content-Type':'application/json'}, credentials:'include', body: JSON.stringify({ name, phone }) });
-        }
-      } catch {}
+        if (!isOnline()) throw new Error('offline');
+        await safeFetch('/api/user/profile', { method:'PUT', headers:{'Content-Type':'application/json'}, credentials:'include', body: JSON.stringify({ name, phone }) });
+      } catch {
+        enqueueMutation('profile', { name, phone });
+      }
       applyProfile({ name, phone }); cache.set(KEYS.profile, { name, phone });
       checkProfileCompletion(); closeModal('editModal'); showToast('پروفایل بروزرسانی شد', 'success');
     }
@@ -1500,10 +1510,11 @@ function applyProfile(p) {
     if (code === verificationCode) {
       const {name, phone} = pendingProfile;
       try {
-        if (isOnline()) {
-          await safeFetch('/api/user/profile', { method:'PUT', headers:{'Content-Type':'application/json'}, credentials:'include', body: JSON.stringify({ name, phone }) });
-        }
-      } catch {}
+        if (!isOnline()) throw new Error('offline');
+        await safeFetch('/api/user/profile', { method:'PUT', headers:{'Content-Type':'application/json'}, credentials:'include', body: JSON.stringify({ name, phone }) });
+      } catch {
+        enqueueMutation('profile', { name, phone });
+      }
       applyProfile({ name, phone }); cache.set(KEYS.profile, { name, phone });
       checkProfileCompletion(); closeModal('otpModal'); closeModal('editModal'); showToast('شماره تایید شد', 'success');
     } else showToast('کد تایید نادرست است', 'error');
