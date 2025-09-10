@@ -107,15 +107,32 @@ async createService(payload) {
 
   // Bookings API methods
   async getBookings() {
-    const r = await fetch(bust(`${API_BASE}/api/seller-bookings/me`), {
+    console.log('Fetching bookings from:', `${API_BASE}/api/seller-bookings/me`);
+    
+    const url = bust(`${API_BASE}/api/seller-bookings/me`);
+    console.log('Full URL with cache busting:', url);
+    
+    const r = await fetch(url, {
       credentials: 'include',
       ...NO_CACHE
     });
+    
+    console.log('Bookings API response status:', r.status);
+    console.log('Bookings API response headers:', [...r.headers.entries()]);
+    
     if (r.status === 401) {
+      console.error('Unauthorized access to bookings API');
       throw { status: 401, message: 'UNAUTHORIZED' };
     }
-    if (!r.ok && r.status !== 304) throw { status: r.status, message: 'FETCH_BOOKINGS_FAILED' };
+    
+    if (!r.ok && r.status !== 304) {
+      console.error('Failed to fetch bookings, status:', r.status);
+      throw { status: r.status, message: 'FETCH_BOOKINGS_FAILED' };
+    }
+    
     const raw = this._unwrap(await this._json(r));
+    console.log('Raw bookings response:', raw);
+    
     const arr = Array.isArray(raw) ? raw : [];
     return arr.map(b => {
       const rawDate = b.dateISO || b.bookingDate || b.date || '';
@@ -217,26 +234,44 @@ async deletePortfolioItem(id) {
 
 async function fetchInitialData() {
   try {
+    console.log('Starting fetchInitialData...');
+    
     const bookingsPromise = API.getBookings().catch(err => {
-      if (err && err.status === 401) throw err;
+      console.error('Bookings promise rejected:', err);
+      if (err && err.status === 401) {
+        console.error('Unauthorized - redirecting to login');
+        throw err;
+      }
       console.error('FETCH_BOOKINGS_FAILED', err);
       return [];
     });
 
+    console.log('Making parallel API requests...');
+    
     const [sellerRes, servicesRes, bookings] = await Promise.all([
       fetch(bust(`${API_BASE}/api/sellers/me`), { credentials: 'include', ...NO_CACHE }),
       fetch(bust(`${API_BASE}/api/seller-services/me/services`), { credentials: 'include', ...NO_CACHE }),
       bookingsPromise
     ]);
 
+    console.log('API responses received:', {
+      sellerResStatus: sellerRes.status,
+      servicesResStatus: servicesRes.status,
+      bookingsLength: Array.isArray(bookings) ? bookings.length : 'not array'
+    });
+
     if (sellerRes.status === 401 || servicesRes.status === 401) {
+      console.log('Authentication failed - redirecting to login');
       window.location.href = 'login.html';
       return;
     }
 
     const localBookings = JSON.parse(localStorage.getItem('vitreenet-bookings') || '[]');
+    console.log('Local bookings count:', localBookings.length);
 
+    // Enhanced booking data handling with better error logging
     if (Array.isArray(bookings) && bookings.length) {
+      console.log('Successfully fetched bookings from server:', bookings);
       const statusMap = new Map(localBookings.map(b => [(b._id || b.id), b.status]));
       MOCK_DATA.bookings = bookings.map(b => ({
         ...b,
@@ -244,7 +279,9 @@ async function fetchInitialData() {
         dateISO: b.dateISO || b.bookingDate || b.date || '',
         status: statusMap.get(b._id || b.id) || b.status || 'pending'
       }));
+      console.log('MOCK_DATA.bookings after server data:', MOCK_DATA.bookings);
     } else if (localBookings.length) {
+      console.log('Using local bookings as fallback:', localBookings);
       MOCK_DATA.bookings = localBookings.map(b => ({
         id: b.id || Date.now() + Math.random(),
         customerName: b.name || b.customerName || '',
@@ -254,6 +291,10 @@ async function fetchInitialData() {
         time: b.time || '',
         status: b.status || 'pending'
       }));
+      console.log('MOCK_DATA.bookings after local data:', MOCK_DATA.bookings);
+    } else {
+      console.log('No bookings found from server or local storage');
+      MOCK_DATA.bookings = [];
     }
 
     persistBookings();
