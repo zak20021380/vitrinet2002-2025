@@ -17,7 +17,10 @@ const API = {
   _unwrap(res) {
     const o = res || {};
     if (Array.isArray(o)) return o;
-    return o.items || o.data || o.services || o.service || [];
+    // Allow different backend response shapes (items, data, bookings, etc.)
+    // so that newer booking endpoints returning `{ bookings: [...] }`
+    // are parsed correctly.
+    return o.items || o.data || o.services || o.service || o.bookings || [];
   },
 
   // فقط دریافت خدمات فروشنده‌ی لاگین‌شده
