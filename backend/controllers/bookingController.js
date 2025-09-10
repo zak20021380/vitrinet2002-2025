@@ -148,15 +148,18 @@ exports.updateBookingStatus = async (req, res) => {
       return res.status(400).json({ message: 'شناسه نوبت نامعتبر است.' });
     }
 
-    const booking = await Booking.findOneAndUpdate(
-      { _id: id, sellerId },
-      { status },
-      { new: true }
-    );
+    const booking = await Booking.findOne({ _id: id, sellerId });
 
     if (!booking) {
       return res.status(404).json({ message: 'نوبت یافت نشد.' });
     }
+
+    if (booking.status === 'completed') {
+      return res.status(400).json({ message: 'نوبت انجام شده قابل تغییر نیست.' });
+    }
+
+    booking.status = status;
+    await booking.save();
 
     return res.json({ booking });
   } catch (err) {
