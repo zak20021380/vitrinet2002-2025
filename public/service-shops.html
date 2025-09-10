@@ -446,8 +446,9 @@
   transition: all 0.2s ease;
 }
 
-.time-slot:hover {
+.time-slot:hover:not(:disabled):not([disabled]) {
   border-color: #3b82f6;
+  transform: translateY(-1px);
 }
 
 .time-slot.selected {
@@ -456,15 +457,25 @@
   color: #1d4ed8;
 }
 
-.time-slot:disabled {
-  background: #f9fafb;
-  color: #9ca3af;
-  cursor: not-allowed;
-  opacity: 0.6;
+/* Disabled state for all disabled buttons */
+.time-slot:disabled,
+.time-slot[disabled],
+.time-slot.slot--booked {
+  background-color: #fee2e2 !important;
+  color: #991b1b !important;
+  cursor: not-allowed !important;
+  opacity: 0.6 !important;
+  border-color: #fecaca !important;
+  pointer-events: none !important;
+  user-select: none !important;
 }
 
-.time-slot:disabled:hover {
-  border-color: #d1d5db;
+.time-slot:disabled:hover,
+.time-slot[disabled]:hover,
+.time-slot.slot--booked:hover {
+  border-color: #fecaca !important;
+  transform: none !important;
+  background-color: #fee2e2 !important;
 }
 
 @media (max-width: 640px) {
@@ -482,7 +493,17 @@
     font-size: 12px;
   }
 }
-        
+
+/* Extra protection for disabled state on mobile */
+@media (hover: none) and (pointer: coarse) {
+  .time-slot:disabled,
+  .time-slot[disabled],
+  .time-slot.slot--booked {
+    -webkit-touch-callout: none !important;
+    -webkit-user-select: none !important;
+    touch-action: none !important;
+  }
+}     
     </style>
 </head>
 <body class="bg-gray-50 text-gray-800" data-seller-id="123" data-store-id="123" data-shopurl="demo-shop">
@@ -1689,21 +1710,37 @@ async function hasPending(){
   let bookedTimes = new Set();
 async function fetchBookedSlots(dateISO){
   const sid = document.body?.dataset?.sellerId;
-  if (!sid || !dateISO) return new Set();
+  console.log('fetchBookedSlots called with:', { sellerId: sid, date: dateISO });
+  
+  if (!sid || !dateISO) {
+    console.warn('Missing sellerId or date for fetchBookedSlots');
+    return new Set();
+  }
+  
   try {
-    const res = await fetch(`${API_ROOT}/api/booked-slots/${encodeURIComponent(sid)}?date=${encodeURIComponent(dateISO)}`);
-    if(!res.ok) throw new Error('fail');
+    const url = `${API_ROOT}/api/booked-slots/${encodeURIComponent(sid)}?date=${encodeURIComponent(dateISO)}`;
+    console.log('Fetching from:', url);
+    
+    const res = await fetch(url);
+    if(!res.ok) {
+      console.error('API returned error:', res.status, res.statusText);
+      throw new Error(`HTTP ${res.status}`);
+    }
+    
     const data = await res.json();
-    const times = (data.times || []).map(normalizeTime);
-    console.log('Fetched booked times:', times);  
-    // Remove this test line once it's working:
-    // times.push('15:00', '16:00');
+    console.log('Raw API response:', data);
+    
+    const times = (data.times || data.bookedSlots || data.slots || []).map(normalizeTime);
+    console.log('Normalized booked times:', times);
+    
     return new Set(times);
-  }catch(err){
-    console.error('fetch booked slots failed', err);
+  } catch(err) {
+    console.error('fetch booked slots failed:', err);
     return new Set();
   }
 }
+
+
 
   // کد مادر برای محیط توسعه
   const MASTER_OTP = '0000';
@@ -1815,14 +1852,39 @@ async function renderTimes(dayIdx){
   timesWrap.innerHTML = '';
   const times = (sellerSchedule[String(dayIdx)] || []).map(normalizeTime);
   const dayName = WEEKDAY_NAMES[String(dayIdx)];
-  const start = nextDateFor(dayName, '00:00');
-  const dateStr = formatLocalDate(start);
+  
+  // Fix: Get the actual selected date from the date option that was clicked
+  const selectedDateElement = document.querySelector('.date-option.bw-selected');
+  let dateStr = '';
+  
+  if (selectedDateElement) {
+    // Extract the Persian date and convert it to ISO format
+    const dateText = selectedDateElement.innerText.trim();
+    // For now, use today's date + day offset as a simple solution
+    const today = new Date();
+    const currentDayIdx = today.getDay();
+    const targetDayIdx = parseInt(dayIdx);
+    let daysToAdd = targetDayIdx - currentDayIdx;
+    if (daysToAdd < 0) daysToAdd += 7;
+    if (daysToAdd === 0 && today.getHours() >= 18) daysToAdd = 7; // If today but late, go to next week
+    
+    const targetDate = new Date(today);
+    targetDate.setDate(today.getDate() + daysToAdd);
+    dateStr = formatLocalDate(targetDate);
+  } else {
+    // Fallback to the original logic
+    const start = nextDateFor(dayName, '00:00');
+    dateStr = formatLocalDate(start);
+  }
+  
+  console.log('Fetching booked slots for date:', dateStr, 'dayIdx:', dayIdx, 'dayName:', dayName);
   
   // Show loading state
   timesWrap.innerHTML = '<div class="col-span-3 text-center py-4 text-gray-500">در حال بررسی ساعات موجود...</div>';
   
   try {
     bookedTimes = await fetchBookedSlots(dateStr);
+    console.log('Booked times received:', Array.from(bookedTimes));
   } catch (error) {
     console.error('Error fetching booked slots:', error);
     bookedTimes = new Set();
@@ -1854,21 +1916,33 @@ async function renderTimes(dayIdx){
     button.dataset.time = norm;
 
     if (isBooked) {
+      // CRITICAL FIX: Set both the property AND the attribute
+      button.disabled = true;  // This is the key fix!
       button.classList.add('slot--booked');
       button.setAttribute('title', 'این ساعت رزرو شده است');
-      button.setAttribute('disabled', '');
+      button.setAttribute('disabled', 'disabled');
       button.setAttribute('aria-disabled', 'true');
       button.dataset.status = 'booked';
+      
+      // Apply inline styles to ensure visibility
+      button.style.opacity = '0.5';
+      button.style.cursor = 'not-allowed';
+      button.style.backgroundColor = '#fee2e2';
+      button.style.color = '#991b1b';
+      button.style.borderColor = '#fecaca';
+      button.style.pointerEvents = 'none'; // Extra protection
     } else {
+      // Make sure it's enabled
+      button.disabled = false;
       button.setAttribute('title', 'کلیک کنید تا این ساعت را انتخاب کنید');
       button.setAttribute('aria-disabled', 'false');
+      
+      // Only add click handler to enabled buttons
       button.addEventListener('click', () => {
         // Remove previous selections
         timeOpts.forEach(opt => opt.classList.remove('selected'));
-
         // Select current time
         button.classList.add('selected');
-
         st.time = timeDisplay;
         saveSel();
         chk2();
@@ -1878,8 +1952,8 @@ async function renderTimes(dayIdx){
     timesWrap.appendChild(button);
   });
   
-  // Update timeOpts array for other functions
-  timeOpts = Array.from(timesWrap.querySelectorAll('.time-slot:not(:disabled)'));
+  // Update timeOpts array for other functions - only get enabled buttons
+  timeOpts = Array.from(timesWrap.querySelectorAll('.time-slot:not([disabled])'));
 
   // Reset previously selected time if it is no longer available
   if (!timeOpts.some(opt => opt.textContent.trim() === st.time)) {
