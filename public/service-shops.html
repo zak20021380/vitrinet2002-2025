@@ -2338,8 +2338,8 @@ function persistCustomer(){
     }
 
     // نرمال‌سازی تاریخ/ساعت به فرمت مورد انتظار بک‌اند
-    const { startISO } = composeSlotISO(st.date, st.time, st.duration || 60);
-    const date = startISO.slice(0,10);   // YYYY-MM-DD
+    const { startISO, dateLocal } = composeSlotISO(st.date, st.time, st.duration || 60);
+    const date = dateLocal;              // YYYY-MM-DD in local time
     const time = startISO.slice(11,16);  // HH:mm
 
     const sellerId = document.body?.dataset?.sellerId || null;
@@ -2494,7 +2494,9 @@ function persistCustomer(){
     let start = nextDateFor(dayName, timeText||'12:00');
     if (!(start instanceof Date) || isNaN(+start)) start = new Date(Date.now() + 60*60*1000);
     const end = new Date(start.getTime() + durationMin*60*1000);
-    return { startISO: start.toISOString(), endISO: end.toISOString() };
+    const pad2 = n => String(n).padStart(2,'0');
+    const dateLocal = `${start.getFullYear()}-${pad2(start.getMonth()+1)}-${pad2(start.getDate())}`;
+    return { startISO: start.toISOString(), endISO: end.toISOString(), dateLocal };
   }
 
   // ===== Submit booking (legacy handler removed; handled by modern wizard)
