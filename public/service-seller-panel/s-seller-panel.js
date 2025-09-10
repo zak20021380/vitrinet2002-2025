@@ -1328,6 +1328,8 @@ destroy() {
         if (!confirm('آیا از حذف این نوبت مطمئن هستید؟')) return;
         const idx = MOCK_DATA.bookings.findIndex(b => (b._id || b.id) == id);
         if (idx > -1) {
+          const booking = MOCK_DATA.bookings[idx];
+          const dateISO = booking?.dateISO;
           MOCK_DATA.bookings.splice(idx, 1);
           persistBookings();
           const validId = /^[0-9a-fA-F]{24}$/.test(id);
@@ -1337,6 +1339,9 @@ destroy() {
           }
           self.renderBookings(self.currentBookingFilter || 'all');
           self.renderPlans && self.renderPlans();
+          delete bookedCache[dateISO];
+          const modal = document.getElementById('resv-modal');
+          if (modal && !modal.hidden) renderTimes();
           UIComponents?.showToast?.('نوبت حذف شد', 'success');
         }
         e.stopPropagation();
@@ -1361,6 +1366,9 @@ destroy() {
           const prev = booking.status;
           booking.status = newStatus;
           persistBookings();
+          delete bookedCache[booking.dateISO];
+          const modal = document.getElementById('resv-modal');
+          if (modal && !modal.hidden) renderTimes();
 
           const validId = /^[0-9a-fA-F]{24}$/.test(id);
           if (validId) {
@@ -2416,6 +2424,9 @@ openCustomerModal(customer) {
       // Update the booking status in the data
       last.status = 'confirmed';
       persistBookings();
+      delete bookedCache[last.dateISO];
+      const modal = document.getElementById('resv-modal');
+      if (modal && !modal.hidden) renderTimes();
       Notifications?.add(`نوبت ${customer.name} تایید شد`, 'booking');
 
       // Update UI with animation
@@ -2446,6 +2457,9 @@ openCustomerModal(customer) {
       // Update the booking status in the data
       last.status = 'cancelled';
       persistBookings();
+      delete bookedCache[last.dateISO];
+      const modal = document.getElementById('resv-modal');
+      if (modal && !modal.hidden) renderTimes();
       Notifications?.add(`نوبت ${customer.name} لغو شد`, 'booking');
 
       // Update UI with animation
