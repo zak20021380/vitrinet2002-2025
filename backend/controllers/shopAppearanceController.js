@@ -254,13 +254,15 @@ exports.getReviews = async (req, res) => {
     const { sellerId } = req.params;
     const reviews = await Review.find({ sellerId, approved: true })
       .sort({ createdAt: -1 })
-      .populate('userId', 'firstname lastname')
+      .populate('userId', 'firstname lastname username')
       .lean();
 
     const formatted = reviews.map(r => ({
       _id: r._id,
       userId: r.userId?._id,
-      userName: r.userId ? `${r.userId.firstname} ${r.userId.lastname}`.trim() : undefined,
+      userName: r.userId
+        ? ([r.userId.firstname, r.userId.lastname].filter(Boolean).join(' ').trim() || r.userId.username)
+        : undefined,
       score: r.score,
       comment: r.comment,
       createdAt: r.createdAt
@@ -279,13 +281,15 @@ exports.getPendingReviews = async (req, res) => {
     const sellerId = req.user.id;
     const reviews = await Review.find({ sellerId, approved: false })
       .sort({ createdAt: -1 })
-      .populate('userId', 'firstname lastname')
+      .populate('userId', 'firstname lastname username')
       .lean();
 
     const formatted = reviews.map(r => ({
       _id: r._id,
       userId: r.userId?._id,
-      userName: r.userId ? `${r.userId.firstname} ${r.userId.lastname}`.trim() : undefined,
+      userName: r.userId
+        ? ([r.userId.firstname, r.userId.lastname].filter(Boolean).join(' ').trim() || r.userId.username)
+        : undefined,
       score: r.score,
       comment: r.comment,
       createdAt: r.createdAt,
