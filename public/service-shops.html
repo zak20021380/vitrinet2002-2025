@@ -2335,11 +2335,15 @@ function persistCustomer(){
     }
 
     // نرمال‌سازی تاریخ/ساعت به فرمت مورد انتظار بک‌اند
-    const { startISO, dateLocal } = composeSlotISO(st.date, st.time, st.duration || 60);
+    const { dateLocal } = composeSlotISO(st.date, st.time, st.duration || 60);
     const date = dateLocal;              // YYYY-MM-DD in local time
-    const time = startISO.slice(11,16);  // HH:mm
+    const time = normalizeTime(st.time); // HH:mm بدون تغییر منطقه زمانی
 
-    const sellerId = document.body?.dataset?.sellerId || null;
+    const sellerId =
+      document.body?.dataset?.sellerId ||
+      window.LAST_PUBLIC?.sellerId ||
+      (window.LAST_PUBLIC?.items?.find(it => it._id === st.serviceId)?.sellerId) ||
+      null;
 
     // re-check availability just before submit to avoid stale selections
     try {
@@ -2358,13 +2362,15 @@ function persistCustomer(){
       console.error('revalidate slot failed', err);
     }
 
-    // ساخت payload طبق قرارداد بک‌اند: یا serviceId یا (sellerId + service)
+    // ساخت payload با ارسال صریح شناسه فروشنده و سرویس
     const payload = {
       customerName:  name,
       customerPhone: phone,
       date,
       time,
-      ...(st.serviceId ? { serviceId: st.serviceId } : { sellerId, service: st.service })
+      serviceId: st.serviceId || undefined,
+      sellerId,
+      service: st.service
     };
 
     // دکمه در حال پردازش
