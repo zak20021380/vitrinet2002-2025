@@ -3161,7 +3161,8 @@ function currentDayISO() {
   const weekStart = getWeekStartSaturday(new Date());
   const d = new Date(weekStart);
   d.setDate(weekStart.getDate() + state.selectedIdx);
-  return d.toISOString().slice(0, 10);
+  const pad2 = n => String(n).padStart(2, '0');
+  return `${d.getFullYear()}-${pad2(d.getMonth()+1)}-${pad2(d.getDate())}`;
 }
 
   // Cache booked slots per date to avoid duplicate requests
