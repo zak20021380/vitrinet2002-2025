@@ -2733,7 +2733,7 @@ const btns = document.querySelectorAll(
   <!-- پیکربندی -->
 <div id="lr-data"
      data-current="0"
-     data-target="10"
+     data-goal="10"
      data-reward=""
      data-booking-url=""
      data-login-url="/login"
@@ -3083,7 +3083,7 @@ const btns = document.querySelectorAll(
   // ------- INIT CARD -------
   function initCard() {
     const data = document.getElementById('lr-data');
-    const target = parseInt(data.dataset.target || '10', 10);
+    const target = parseInt(data.dataset.goal || '10', 10);
     const reward = data.dataset.reward || '';
 
     // مقدار خام (ممکنه از سرور یا لوکال بیاد)
@@ -3150,7 +3150,7 @@ const btns = document.querySelectorAll(
       const data = document.getElementById('lr-data');
       if (!data) return;
 
-      const target  = parseInt(data.dataset.target  || '10', 10);
+      const target  = parseInt(data.dataset.goal  || '10', 10);
       const current = parseInt(data.dataset.current || '0', 10);
 
       // اگر کاربر لاگین نیست ولی CTA «رزرو اولین نوبت» است، مستقیم وارد ویزارد شو
@@ -3305,7 +3305,7 @@ const btns = document.querySelectorAll(
       HAS_BOOKED_BEFORE = true;
 
       // نوتیف/رفرش UI
-      const target = parseInt(data.dataset.target || '10', 10);
+      const target = parseInt(data.dataset.goal || '10', 10);
       if (cur < target && next >= target) toast('تبریک! به جایزه رسیدی 🎉', 'success');
 
       data.dataset.current = String(next);
