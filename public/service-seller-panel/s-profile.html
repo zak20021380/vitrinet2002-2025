@@ -1074,9 +1074,8 @@ function applyProfile(p) {
     }));
     cache.set(KEYS.bookings, raw);
     // stats
-    const now = new Date();
     setStat('total', bookings.length);
-    setStat('active', bookings.filter(b => new Date(b.datetime) >= now && b.status !== 'canceled').length);
+    setStat('active', bookings.filter(b => b.status !== 'done').length);
     setStat('done',   bookings.filter(b => b.status === 'done').length);
   }
 
@@ -1252,10 +1251,9 @@ function applyProfile(p) {
   function renderBookings() {
     const list = $('#upcomingList'), hist = $('#historyList');
     list.innerHTML = ''; hist.innerHTML = '';
-    const now = new Date();
     const all = getBookings().slice().sort((a,b)=> new Date(a.datetime) - new Date(b.datetime));
-    const upcoming = all.filter(b=> new Date(b.datetime) >= now);
-    const history  = all.filter(b=> new Date(b.datetime) <  now).reverse();
+    const upcoming = all.filter(b => b.status !== 'done');
+    const history  = all.filter(b => b.status === 'done').reverse();
 
     const makeCard = (b) => {
       const m = statusMeta(b.status);
