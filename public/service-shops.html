@@ -1538,7 +1538,7 @@ async function hasPending(){
     <!-- مراحل و نوار پیشرفت: 5 مرحله -->
     <div class="mb-6">
       <div class="flex justify-between items-center mb-2">
-        <span class="text-sm text-gray-600">مرحله <span id="current-step">۱</span> از ۵</span>
+        <span class="text-sm text-gray-600">مرحله <span id="current-step">۱</span> از <span id="total-steps">۵</span></span>
         <div class="flex space-x-1 space-x-reverse">
           <div class="step-dot w-3 h-3 rounded-full bg-blue-600" data-step="1"></div>
           <div class="step-dot w-3 h-3 rounded-full bg-gray-300" data-step="2"></div>
@@ -1824,6 +1824,13 @@ async function fetchBookedSlots(dateISO){
   const wizard = $('#booking-wizard');
   const steps = {1:$('#step-1'),2:$('#step-2'),3:$('#step-3'),4:$('#step-4'),5:$('#step-5')};
   const dots = $$('.step-dot'); const curLbl = $('#current-step'); const pbar = $('#progress-bar');
+  const totalLbl = $('#total-steps');
+  const TOTAL_STEPS = HAS_BOOKED_BEFORE ? 3 : 5;
+  const STEP_PERCENT = 100 / TOTAL_STEPS;
+  if (totalLbl) totalLbl.textContent = TOTAL_STEPS.toString();
+  if (HAS_BOOKED_BEFORE) {
+    dots.forEach(d => { const k = +d.dataset.step; if (k===3 || k===4) d.style.display = 'none'; });
+  }
 
   // step1
   const servicesWrap = $('#booking-services'); 
@@ -2138,9 +2145,15 @@ function updateConfirmState(reason = '') {
     Object.values(steps).forEach(s => s && s.classList.add('hidden'));
     const cur = steps[n];
     if (cur) cur.classList.remove('hidden');
-    curLbl.textContent = n.toString();
-    pbar.style.width = (n*20) + '%';
-    dots.forEach(d => { const k = +d.dataset.step; d.classList.toggle('bg-blue-600', k<=n); d.classList.toggle('bg-gray-300', k>n); });
+    const dispStep = HAS_BOOKED_BEFORE ? (n >= 5 ? 3 : n) : n;
+    curLbl.textContent = dispStep.toString();
+    pbar.style.width = (dispStep * STEP_PERCENT) + '%';
+    dots.forEach(d => {
+      const k = +d.dataset.step;
+      const dk = HAS_BOOKED_BEFORE ? (k === 5 ? 3 : k) : k;
+      d.classList.toggle('bg-blue-600', dk <= dispStep);
+      d.classList.toggle('bg-gray-300', dk > dispStep);
+    });
     scrollInto(wizard);
     if (n === 3) {
       // Ensure contact info validations run when entering step 3
@@ -2254,7 +2267,15 @@ function updateConfirmState(reason = '') {
   // ===== Step 2
   function pick(list, el){ list.forEach(x=>x.classList.remove('bw-selected')); el.classList.add('bw-selected'); }
   back2.addEventListener('click', ()=>showStep(1));
-  next2.addEventListener('click', ()=>showStep(3));
+  next2.addEventListener('click', ()=>{
+    if (HAS_BOOKED_BEFORE) {
+      saveSel();
+      fillConfirm();
+      showStep(5);
+    } else {
+      showStep(3);
+    }
+  });
 
   // ===== Step 3
   function onStep3(){
