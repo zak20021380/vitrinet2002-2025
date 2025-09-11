@@ -693,7 +693,7 @@
         <span class="text-xs font-semibold">خانه</span>
       </a>
 
-      <a id="bookingLink" href="../service-shops.html#booking-wizard" class="nav-item flex flex-col items-center py-3 rounded-xl">
+      <a id="bookingLink" href="../service-shops.html#services" class="nav-item flex flex-col items-center py-3 rounded-xl">
         <i class="fas fa-calendar-plus text-xl mb-1"></i>
         <span class="text-xs font-semibold">رزرو</span>
       </a>
@@ -960,15 +960,15 @@
       if (seller.shopurl) {
         const base = `../service-shops.html?shopurl=${encodeURIComponent(seller.shopurl)}`;
         if (homeLink) homeLink.href = base;
-        if (bookingLink) bookingLink.href = `${base}#booking-wizard`;
+        if (bookingLink) bookingLink.href = `${base}#services`;
       } else if (seller._id || seller.id) {
         const sid = seller._id || seller.id;
         const base = `../service-shops.html?sellerId=${encodeURIComponent(sid)}`;
         if (homeLink) homeLink.href = base;
-        if (bookingLink) bookingLink.href = `${base}#booking-wizard`;
+        if (bookingLink) bookingLink.href = `${base}#services`;
       } else {
         if (homeLink) homeLink.href = '../service-shops.html';
-        if (bookingLink) bookingLink.href = '../service-shops.html#booking-wizard';
+        if (bookingLink) bookingLink.href = '../service-shops.html#services';
       }
     } catch (e) { console.error('update nav links failed', e); }
   })();
@@ -1482,7 +1482,7 @@ function applyProfile(p) {
   function openBooking() {
     showToast('در حال انتقال...', 'info');
     const link = document.getElementById('bookingLink');
-    const url = link?.getAttribute('href') || '../service-shops.html#booking-wizard';
+    const url = link?.getAttribute('href') || '../service-shops.html#services';
     setTimeout(() => (location.href = url), 800);
   }
   function scrollToBookings() { $('#bookings').scrollIntoView({ behavior:'smooth', block:'start' }); }
