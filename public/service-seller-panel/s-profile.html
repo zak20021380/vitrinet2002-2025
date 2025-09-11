@@ -897,23 +897,25 @@
   /* ---------- Namespaced Cache ---------- */
   const APP_NS = 'vtrn';
   const STORAGE_VERSION = 1;
-
-  // derive user key (phone preferred). keep short, avoid PII exposure in key by masking
-  const phoneCookie = getCookie('customerPhone') || localStorage.getItem('vt_user_phone') || '';
-  const idCookie   = getCookie('customerId') || localStorage.getItem('vt_user_id') || '';
-  const userKeyRaw  = phoneCookie || idCookie || 'guest';
-  const userKeyMask = userKeyRaw ? (userKeyRaw.slice(0,3) + '…' + userKeyRaw.slice(-2)) : 'guest';
+  const vtUserKey = (() => {
+    let key = localStorage.getItem('vt_user_key');
+    if (!key) {
+      key = uuid();
+      try { localStorage.setItem('vt_user_key', key); } catch {}
+    }
+    return key;
+  })();
 
   // seller context (for deep-links)
   const seller = (() => { try { return JSON.parse(localStorage.getItem('seller')||'{}'); } catch { return {}; } })();
   const shopId = seller._id || seller.id || seller.shopurl || 'global';
 
   const KEYS = {
-    profile:   `${APP_NS}:v${STORAGE_VERSION}:u:${userKeyMask}:profile`,
-    bookings:  `${APP_NS}:v${STORAGE_VERSION}:u:${userKeyMask}:bookings`,
-    notifs:    `${APP_NS}:v${STORAGE_VERSION}:u:${userKeyMask}:notifs`,
-    loyalty:   `${APP_NS}:v${STORAGE_VERSION}:u:${userKeyMask}:loyalty`,
-    outbox:    `${APP_NS}:v${STORAGE_VERSION}:u:${userKeyMask}:outbox`,
+    profile:   `${APP_NS}:v${STORAGE_VERSION}:u:${vtUserKey}:profile`,
+    bookings:  `${APP_NS}:v${STORAGE_VERSION}:u:${vtUserKey}:bookings`,
+    notifs:    `${APP_NS}:v${STORAGE_VERSION}:u:${vtUserKey}:notifs`,
+    loyalty:   `${APP_NS}:v${STORAGE_VERSION}:u:${vtUserKey}:loyalty`,
+    outbox:    `${APP_NS}:v${STORAGE_VERSION}:u:${vtUserKey}:outbox`,
   };
 
   const cache = {
@@ -942,6 +944,25 @@
       if (old && !localStorage.getItem(KEYS.bookings)) {
         const arr = JSON.parse(old);
         cache.set(KEYS.bookings, arr);
+      }
+    } catch {}
+    try {
+      const phoneCookie = getCookie('customerPhone') || localStorage.getItem('vt_user_phone') || '';
+      const idCookie   = getCookie('customerId') || localStorage.getItem('vt_user_id') || '';
+      const oldRaw  = phoneCookie || idCookie || 'guest';
+      const oldMask = oldRaw ? (oldRaw.slice(0,3) + '…' + oldRaw.slice(-2)) : 'guest';
+      const oldKeys = {
+        profile:   `${APP_NS}:v${STORAGE_VERSION}:u:${oldMask}:profile`,
+        bookings:  `${APP_NS}:v${STORAGE_VERSION}:u:${oldMask}:bookings`,
+        notifs:    `${APP_NS}:v${STORAGE_VERSION}:u:${oldMask}:notifs`,
+        loyalty:   `${APP_NS}:v${STORAGE_VERSION}:u:${oldMask}:loyalty`,
+        outbox:    `${APP_NS}:v${STORAGE_VERSION}:u:${oldMask}:outbox`,
+      };
+      for (const k in oldKeys) {
+        const oldVal = localStorage.getItem(oldKeys[k]);
+        if (oldVal && !localStorage.getItem(KEYS[k])) {
+          localStorage.setItem(KEYS[k], oldVal);
+        }
       }
     } catch {}
   })();
@@ -983,8 +1004,9 @@
     if (!cached) {
       const fallback = {
         name: decodeURIComponent(getCookie('customerName') || localStorage.getItem('vt_user_name') || '') || '',
-        phone: getCookie('customerPhone') || localStorage.getItem('vt_user_phone') || ''
+        phone: toEn(getCookie('customerPhone') || localStorage.getItem('vt_user_phone') || '')
       };
+      cache.set(KEYS.profile, fallback);
       applyProfile(fallback);
     }
 
