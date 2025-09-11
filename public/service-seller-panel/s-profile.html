@@ -1360,12 +1360,12 @@ function applyProfile(p) {
     $('#confirmModal').classList.remove('hidden'); trapFocus('confirmModal');
   }
 
-  async function cancelBooking(id) {
+  async function cancelBooking(id, silent=false) {
     const items = getBookings(); const idx = items.findIndex(x=>x.id===id);
     if (idx === -1) return;
     items[idx].status = 'canceled'; setBookings(items); renderBookings();
     const selectedStore = getLoyaltyStores().find(s=>s.active); if (selectedStore) renderLoyalty(selectedStore);
-    closeModal('confirmModal'); showToast('رزرو لغو شد', 'success');
+    if (!silent) { closeModal('confirmModal'); showToast('رزرو لغو شد', 'success'); }
 
     // try server; if offline or failed -> outbox
     try {
@@ -1378,6 +1378,7 @@ function applyProfile(p) {
   }
 
   async function deleteBooking(id) {
+    await cancelBooking(id, true);
     const items = getBookings().filter(x=>x.id!==id);
     setBookings(items); renderBookings();
     const selectedStore = getLoyaltyStores().find(s=>s.active); if (selectedStore) renderLoyalty(selectedStore);
