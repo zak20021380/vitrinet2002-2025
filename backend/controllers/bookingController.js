@@ -190,6 +190,51 @@ exports.deleteBooking = async (req, res) => {
   }
 };
 
+// حذف نوبت توسط کاربر (بدون نیاز به لاگین فروشنده)
+exports.deleteBookingById = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ message: 'شناسه نوبت نامعتبر است.' });
+    }
+
+    const booking = await Booking.findByIdAndDelete(id);
+    if (!booking) {
+      return res.status(404).json({ message: 'نوبت یافت نشد.' });
+    }
+
+    return res.json({ message: 'نوبت حذف شد.' });
+  } catch (err) {
+    console.error('deleteBookingById error:', err);
+    return res.status(500).json({ message: 'خطای داخلی سرور.' });
+  }
+};
+
+// لغو نوبت توسط کاربر
+exports.cancelBookingById = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ message: 'شناسه نوبت نامعتبر است.' });
+    }
+
+    const booking = await Booking.findById(id);
+    if (!booking) {
+      return res.status(404).json({ message: 'نوبت یافت نشد.' });
+    }
+
+    booking.status = 'cancelled';
+    await booking.save();
+
+    return res.json({ booking });
+  } catch (err) {
+    console.error('cancelBookingById error:', err);
+    return res.status(500).json({ message: 'خطای داخلی سرور.' });
+  }
+};
+
 // دریافت نوبت‌ها بر اساس شماره تلفن مشتری
 exports.getCustomerBookings = async (req, res) => {
   try {
