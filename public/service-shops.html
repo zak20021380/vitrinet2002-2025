@@ -2219,9 +2219,14 @@ function updateConfirmState(reason = '') {
       if (match) {
         match.classList.add('bw-selected');
         st.price = parseInt(match.dataset.price||'0',10)||st.price||0;
-        chk1();
+        st.serviceId = match.dataset.serviceId || st.serviceId || null;
+      } else {
+        st.service = '';
+        st.price = 0;
+        st.serviceId = null;
       }
     }
+    chk1();
   }
 
   function wireExistingServiceOptions(){
@@ -2638,6 +2643,7 @@ if (saved.cid)  st.customerId = saved.cid;
   }
   // Build & wire
   buildServiceOptionsFromCards();
+  document.addEventListener('services:loaded', buildServiceOptionsFromCards);
   wireExistingServiceOptions();
 
   // Initial validation
