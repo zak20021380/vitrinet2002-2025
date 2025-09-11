@@ -899,8 +899,9 @@
   const STORAGE_VERSION = 1;
 
   // derive user key (phone preferred). keep short, avoid PII exposure in key by masking
-  const phoneCookie = getCookie('customerPhone') || '';
-  const userKeyRaw  = phoneCookie || getCookie('customerId') || 'guest';
+  const phoneCookie = getCookie('customerPhone') || localStorage.getItem('vt_user_phone') || '';
+  const idCookie   = getCookie('customerId') || localStorage.getItem('vt_user_id') || '';
+  const userKeyRaw  = phoneCookie || idCookie || 'guest';
   const userKeyMask = userKeyRaw ? (userKeyRaw.slice(0,3) + '…' + userKeyRaw.slice(-2)) : 'guest';
 
   // seller context (for deep-links)
@@ -978,10 +979,10 @@
     const cached = cache.get(KEYS.profile, 24*3600*1000); // 24h
     if (cached) applyProfile(cached);
 
-    // 2) from cookies (fallback)
+    // 2) from localStorage/cookies (fallback)
     if (!cached) {
-      profileName  = decodeURIComponent(getCookie('customerName') || '') || '';
-      profilePhone = getCookie('customerPhone') || '';
+      profileName  = decodeURIComponent(getCookie('customerName') || localStorage.getItem('vt_user_name') || '') || '';
+      profilePhone = getCookie('customerPhone') || localStorage.getItem('vt_user_phone') || '';
       $('#userName').textContent = profileName || 'مهمان گرامی';
       $('#userPhone').textContent = profilePhone || 'اطلاعات تماس';
       $('#fullName').value = profileName || '';
@@ -1017,6 +1018,8 @@ function applyProfile(p) {
   // Save to localStorage for service-shops.html to use
   if (profileName) localStorage.setItem('vt_user_name', profileName);
   if (profilePhone) localStorage.setItem('vt_user_phone', profilePhone);
+  const customerId = getCookie('customerId') || localStorage.getItem('vt_user_id') || '';
+  if (customerId) localStorage.setItem('vt_user_id', customerId);
   
   // Also set cookies with proper expiration
   if (profileName) {
@@ -1024,6 +1027,9 @@ function applyProfile(p) {
   }
   if (profilePhone) {
     document.cookie = `customerPhone=${profilePhone};path=/;max-age=31536000`;
+  }
+  if (customerId) {
+    document.cookie = `customerId=${customerId};path=/;max-age=31536000`;
   }
 }
 
@@ -1069,7 +1075,7 @@ function applyProfile(p) {
     // 2) refresh from server (if we can identify the user)
     try {
       if (!isOnline()) return;
-      const phone = profilePhone || getCookie('customerPhone') || '';
+      const phone = profilePhone || getCookie('customerPhone') || localStorage.getItem('vt_user_phone') || '';
       if (!phone) return;
 
       const res = await safeFetch(`/api/bookings?phone=${encodeURIComponent(phone)}`, { credentials:'include', headers:{'Accept':'application/json'} });
