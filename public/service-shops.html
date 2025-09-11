@@ -2268,6 +2268,12 @@ function updateConfirmState(reason = '') {
     if (next3.disabled) return;
     st.phone = toEn(phoneInp.value); st.name = nameInp.value.trim();
 
+    if (HAS_BOOKED_BEFORE) {
+      fillConfirm();
+      showStep(5);
+      return;
+    }
+
     // ارسال کد (دمو) — ۴ رقمی
     st.otp   = String(Math.floor(1000 + Math.random()*9000));
     st.otpTo = st.phone;
@@ -2395,7 +2401,7 @@ function persistCustomer(){
     updateConfirmState('fillConfirm');
   }
 
-  back5.addEventListener('click', ()=>showStep(3));
+  back5.addEventListener('click', ()=>showStep(HAS_BOOKED_BEFORE ? 2 : 3));
 
 // --- Final submit: send booking to backend & then show pending modal ---
 (function hookConfirmToServerBooking(){
