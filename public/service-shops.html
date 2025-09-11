@@ -2317,8 +2317,9 @@ function persistCustomer(){
     setCookie('customerId', cid);
     setCookie('customerName', st.name);
     setCookie('customerPhone', st.phone);
-    
+
     // Also save to localStorage for better persistence
+    localStorage.setItem('vt_user_id', cid);
     if (st.name) localStorage.setItem('vt_user_name', st.name);
     if (st.phone) localStorage.setItem('vt_user_phone', st.phone);
   }
@@ -2613,7 +2614,7 @@ function persistCustomer(){
   // ===== Init from cookies
 // ===== Init from localStorage first, then cookies as fallback
   const saved = {
-    cid: getCookie('customerId'),
+    cid: localStorage.getItem('vt_user_id') || getCookie('customerId'),
     name: localStorage.getItem('vt_user_name') || decodeURIComponent(getCookie('customerName') || ''),
     phone: localStorage.getItem('vt_user_phone') || getCookie('customerPhone')
   };
