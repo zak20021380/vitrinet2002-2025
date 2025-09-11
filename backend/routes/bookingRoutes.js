@@ -9,6 +9,12 @@ router.post('/bookings', ctrl.createBooking);
 // دریافت نوبت‌های کاربر بر اساس شماره تلفن
 router.get('/bookings', ctrl.getCustomerBookings);
 
+// حذف نوبت توسط کاربر
+router.delete('/bookings/:id', ctrl.deleteBookingById);
+
+// لغو نوبت توسط کاربر
+router.put('/bookings/:id/cancel', ctrl.cancelBookingById);
+
 // دریافت نوبت‌های فروشنده لاگین شده
 router.get('/seller-bookings/me', auth('seller'), ctrl.getSellerBookings);
 
