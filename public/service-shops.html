@@ -2142,6 +2142,10 @@ function updateConfirmState(reason = '') {
     pbar.style.width = (n*20) + '%';
     dots.forEach(d => { const k = +d.dataset.step; d.classList.toggle('bg-blue-600', k<=n); d.classList.toggle('bg-gray-300', k>n); });
     scrollInto(wizard);
+    if (n === 3) {
+      // Ensure contact info validations run when entering step 3
+      chk3();
+    }
     if (n === 5) {
       updateConfirmState('enter-step5');
       // PATCH: دوبار فراخوانی برای حذف race با رندر/transition
@@ -2260,6 +2264,7 @@ function updateConfirmState(reason = '') {
     chk3();
   }
   nameInp.addEventListener('input', onStep3);
+  nameInp.addEventListener('change', onStep3);
   phoneInp.addEventListener('input', (e)=>{
     let value = e.target.value;
     value = value.replace(/[^\u06F0-\u06F9\u0660-\u06690-9]/g, '');
@@ -2268,6 +2273,7 @@ function updateConfirmState(reason = '') {
     st.phone = toEn(value);
     onStep3();
   });
+  phoneInp.addEventListener('change', onStep3);
   back3.addEventListener('click', ()=>showStep(2));
   next3.addEventListener('click', ()=>{
     if (next3.disabled) return;
