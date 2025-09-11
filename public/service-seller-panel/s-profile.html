@@ -842,7 +842,7 @@
   const $  = (s, r=document) => r.querySelector(s);
   const $$ = (s, r=document) => r.querySelectorAll(s);
   const faNum = n => Number(n||0).toLocaleString('fa-IR');
-  const toEn = (str) => !str ? '' : str.toString().replace(/[٠-٩۰-۹]/g, d => d.charCodeAt(0) - (d.charCodeAt(0) >= 1632 ? 1632 : 1776));
+  const toEn = (str) => !str ? '' : str.toString().replace(/[٠-٩۰-۹]/g, d => d.charCodeAt(0) - (d.charCodeAt(0) <= 1641 ? 1632 : 1776));
   const getCookie = name => document.cookie.split('; ').find(r => r.startsWith(name + '='))?.split('=')[1] || '';
   const isOnline = () => navigator.onLine;
 
@@ -868,6 +868,8 @@
 
   const fmtDate = iso => new Date(iso).toLocaleDateString('fa-IR-u-ca-persian', {weekday:'long', day:'numeric', month:'long'});
   const fmtTime = iso => new Date(iso).toLocaleTimeString('fa-IR', {hour:'2-digit', minute:'2-digit'});
+
+  const uuid = () => (crypto?.randomUUID?.() || ('id-' + Math.random().toString(36).slice(2) + Date.now().toString(36)));
 
   const statusMeta = (s) => ({
     confirmed: {text:'تایید شده', cls:'ok', icon:'fa-circle-check'},
@@ -1006,7 +1008,7 @@
         name: decodeURIComponent(getCookie('customerName') || localStorage.getItem('vt_user_name') || '') || '',
         phone: toEn(getCookie('customerPhone') || localStorage.getItem('vt_user_phone') || '')
       };
-      cache.set(KEYS.profile, fallback);
+      if (fallback.name || fallback.phone) cache.set(KEYS.profile, fallback);
       applyProfile(fallback);
     }
 
@@ -1311,8 +1313,6 @@ function applyProfile(p) {
   }
 
   /* ---------- Mutations + Outbox (offline-first) ---------- */
-  const uuid = () => (crypto?.randomUUID?.() || ('id-' + Math.random().toString(36).slice(2) + Date.now().toString(36)));
-
   function enqueueMutation(type, payload) {
     const job = { id: uuid(), type, payload, ts: Date.now() };
     cache.update(KEYS.outbox, (curr)=> (Array.isArray(curr)? [...curr, job] : [job]));
