@@ -2335,17 +2335,23 @@ function persistCustomer(){
     verifyBtn.innerHTML = '<i class="fas fa-spinner fa-spin ml-2"></i>در حال تایید...';
 
     try {
-      const profilePayload = { name: st.name, phone: st.phone, customerId: st.customerId };
-      const response = await fetch(`${API_ROOT}/api/user/profile`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          ...(getToken() ? {'Authorization': 'Bearer ' + getToken()} : {})
-        },
-        credentials: 'include',
-        body: JSON.stringify(profilePayload)
-      });
-      if (!response.ok) throw new Error('Profile save failed');
+      // Only attempt to save profile on the server if a user token exists.
+      // The service flow works for anonymous customers as well, so skip the
+      // request entirely when the user is not authenticated to avoid noisy
+      // console errors ("Profile save failed").
+      if (getToken()) {
+        const profilePayload = { name: st.name, phone: st.phone, customerId: st.customerId };
+        const response = await fetch(`${API_ROOT}/api/user/profile`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + getToken()
+          },
+          credentials: 'include',
+          body: JSON.stringify(profilePayload)
+        });
+        if (!response.ok) throw new Error('Profile save failed');
+      }
 
       persistCustomer();
     } catch (error) {
