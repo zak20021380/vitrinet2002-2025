@@ -1479,7 +1479,12 @@ function applyProfile(p) {
   }
 
   /* ---------- Navigation ---------- */
-  function openBooking() { showToast('در حال انتقال...', 'info'); setTimeout(()=> location.href='../service-shops.html#booking-wizard', 800); }
+  function openBooking() {
+    showToast('در حال انتقال...', 'info');
+    const link = document.getElementById('bookingLink');
+    const url = link?.getAttribute('href') || '../service-shops.html#booking-wizard';
+    setTimeout(() => (location.href = url), 800);
+  }
   function scrollToBookings() { $('#bookings').scrollIntoView({ behavior:'smooth', block:'start' }); }
   function scrollToHistory()  { $('#history').scrollIntoView({ behavior:'smooth', block:'start' }); }
 
