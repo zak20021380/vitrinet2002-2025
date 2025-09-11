@@ -1143,7 +1143,8 @@ async function hasPending(){
         return false;
       }
       const wiz = document.getElementById('booking-wizard');
-      if (wiz && wiz.classList.contains('hidden')) wiz.classList.remove('hidden');
+      if (!wiz) return false;
+      if (wiz.classList.contains('hidden')) wiz.classList.remove('hidden');
 
       // پیش‌انتخاب خدمت اگر از کارت خدمات اومدیم
       if (prefill && prefill.service) {
@@ -6252,21 +6253,29 @@ function render(items) {
   function bootWizardFromHash() {
     if (location.hash !== '#booking-wizard') return;
 
+    const fallback = () => {
+      const el = document.getElementById('booking-wizard');
+      if (el) {
+        el.classList.remove('hidden');
+        const top = el.getBoundingClientRect().top + window.scrollY - 80;
+        window.scrollTo({ top, behavior: 'smooth' });
+      }
+    };
+
     // اولویت: از گارد داخلی استفاده کن (جلوگیری از رزرو در حالت pending)
     if (typeof window.openBookingWizard === 'function') {
-      window.openBookingWizard(
+      const result = window.openBookingWizard(
         service ? { service: decodeURIComponent(service), price: parseInt(price || '0', 10) || undefined } : undefined
       );
+      if (result && typeof result.then === 'function') {
+        result.then(opened => { if (!opened) fallback(); });
+      } else if (!result) {
+        fallback();
+      }
       return;
     }
 
-    // فالبک ساده: باز کردن سکشن و اسکرول
-    const el = document.getElementById('booking-wizard');
-    if (el) {
-      el.classList.remove('hidden');
-      const top = el.getBoundingClientRect().top + window.scrollY - 80;
-      window.scrollTo({ top, behavior: 'smooth' });
-    }
+    fallback();
   }
 
   document.addEventListener('DOMContentLoaded', bootWizardFromHash);
