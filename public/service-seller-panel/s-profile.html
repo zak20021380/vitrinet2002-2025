@@ -981,12 +981,11 @@
 
     // 2) from localStorage/cookies (fallback)
     if (!cached) {
-      profileName  = decodeURIComponent(getCookie('customerName') || localStorage.getItem('vt_user_name') || '') || '';
-      profilePhone = getCookie('customerPhone') || localStorage.getItem('vt_user_phone') || '';
-      $('#userName').textContent = profileName || 'مهمان گرامی';
-      $('#userPhone').textContent = profilePhone || 'اطلاعات تماس';
-      $('#fullName').value = profileName || '';
-      $('#mobile').value   = profilePhone || '';
+      const fallback = {
+        name: decodeURIComponent(getCookie('customerName') || localStorage.getItem('vt_user_name') || '') || '',
+        phone: getCookie('customerPhone') || localStorage.getItem('vt_user_phone') || ''
+      };
+      applyProfile(fallback);
     }
 
     // 3) refresh from server (if online)
