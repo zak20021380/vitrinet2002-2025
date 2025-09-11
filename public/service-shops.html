@@ -2134,8 +2134,10 @@ function updateConfirmState(reason = '') {
   // ===== Navigation
   function showStep(n){
     st.step = n;
-    Object.values(steps).forEach(s => s.classList.add('hidden'));
-    steps[n].classList.remove('hidden');
+    // Safely hide all steps in case some aren't present in the DOM
+    Object.values(steps).forEach(s => s && s.classList.add('hidden'));
+    const cur = steps[n];
+    if (cur) cur.classList.remove('hidden');
     curLbl.textContent = n.toString();
     pbar.style.width = (n*20) + '%';
     dots.forEach(d => { const k = +d.dataset.step; d.classList.toggle('bg-blue-600', k<=n); d.classList.toggle('bg-gray-300', k>n); });
