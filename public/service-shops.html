@@ -4892,13 +4892,37 @@ document.addEventListener('DOMContentLoaded', function () {
 
   nextToStep3?.addEventListener('click', function () {
     step2.classList.add('hidden');
-    step3.classList.remove('hidden');
-    currentStep.textContent = '3';
+
+    if (HAS_BOOKED_BEFORE) {
+      try {
+        const bookings = JSON.parse(localStorage.getItem('vitreenet-bookings') || '[]');
+        const last = bookings[bookings.length - 1] || {};
+        if (last.phone) phoneNumber.value = last.phone;
+        if (last.name)  customerName.value = last.name;
+      } catch {}
+
+      confirmService.textContent = selectedService;
+      confirmDate.textContent    = selectedDate;
+      confirmTime.textContent    = selectedTime;
+      confirmName.textContent    = customerName.value;
+      confirmPhone.textContent   = '+98' + phoneNumber.value;
+      confirmPrice.textContent   = (parseInt(selectedPrice, 10) || 0).toLocaleString('fa-IR') + ' تومان';
+
       step3Indicator?.classList.remove('bg-gray-300');
       step3Indicator?.classList.add('bg-blue-600');
-    progressBar.style.width = '75%';
-    // اطمینان از غیرفعال بودن دکمه مرحله ۴ تا تکمیل اعتبارسنجی
-    validateStep3();
+      step4.classList.remove('hidden');
+      currentStep.textContent = '4';
+      step4Indicator?.classList.remove('bg-gray-300');
+      step4Indicator?.classList.add('bg-blue-600');
+      progressBar.style.width = '100%';
+    } else {
+      step3.classList.remove('hidden');
+      currentStep.textContent = '3';
+      step3Indicator?.classList.remove('bg-gray-300');
+      step3Indicator?.classList.add('bg-blue-600');
+      progressBar.style.width = '75%';
+      validateStep3();
+    }
   });
 
   // ---- مرحله ۳: اطلاعات تماس
@@ -4940,11 +4964,22 @@ document.addEventListener('DOMContentLoaded', function () {
   // ---- مرحله ۴: تایید نهایی
   backToStep3?.addEventListener('click', function () {
     step4.classList.add('hidden');
-    step3.classList.remove('hidden');
-    currentStep.textContent = '3';
+
+    if (HAS_BOOKED_BEFORE) {
+      step2.classList.remove('hidden');
+      currentStep.textContent = '2';
+      step3Indicator?.classList.remove('bg-blue-600');
+      step3Indicator?.classList.add('bg-gray-300');
       step4Indicator?.classList.remove('bg-blue-600');
       step4Indicator?.classList.add('bg-gray-300');
-    progressBar.style.width = '75%';
+      progressBar.style.width = '50%';
+    } else {
+      step3.classList.remove('hidden');
+      currentStep.textContent = '3';
+      step4Indicator?.classList.remove('bg-blue-600');
+      step4Indicator?.classList.add('bg-gray-300');
+      progressBar.style.width = '75%';
+    }
   });
 
 confirmBooking?.addEventListener('click', async function () {
