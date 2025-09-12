@@ -549,20 +549,29 @@
       </div>
     </section>
     <!-- Stats Cards -->
-    <section class="grid grid-cols-3 gap-4 section-spacing">
-      <div class="glass-card stats-card rounded-2xl p-4 text-center fade-in" data-stat="total">
-        <div class="text-3xl font-black bg-gradient-to-r from-blue-600 to-cyan-500 bg-clip-text text-transparent mb-1">12</div>
-        <div class="text-xs text-gray-600">رزرو کل</div>
-      </div>
-      <div class="glass-card stats-card rounded-2xl p-4 text-center fade-in" data-stat="active">
-        <div class="text-3xl font-black bg-gradient-to-r from-green-600 to-emerald-500 bg-clip-text text-transparent mb-1">2</div>
-        <div class="text-xs text-gray-600">فعال</div>
-      </div>
-      <div class="glass-card stats-card rounded-2xl p-4 text-center fade-in" data-stat="done">
-        <div class="text-3xl font-black text-green-600 mb-1">10</div>
-        <div class="text-xs text-gray-600">تکمیل شده</div>
-      </div>
-    </section>
+<!-- Stats Cards -->
+<section class="grid grid-cols-2 md:grid-cols-4 gap-4 section-spacing">
+  <div class="glass-card stats-card rounded-2xl p-4 text-center fade-in" data-stat="total">
+    <div class="text-3xl font-black bg-gradient-to-r from-blue-600 to-cyan-500 bg-clip-text text-transparent mb-1">0</div>
+    <div class="text-xs text-gray-600">رزرو کل</div>
+  </div>
+
+  <div class="glass-card stats-card rounded-2xl p-4 text-center fade-in" data-stat="confirmed">
+    <div class="text-3xl font-black bg-gradient-to-r from-green-600 to-emerald-500 bg-clip-text text-transparent mb-1">0</div>
+    <div class="text-xs text-gray-600">تایید شده</div>
+  </div>
+
+  <div class="glass-card stats-card rounded-2xl p-4 text-center fade-in" data-stat="pending">
+    <div class="text-3xl font-black bg-gradient-to-r from-amber-500 to-yellow-500 bg-clip-text text-transparent mb-1">0</div>
+    <div class="text-xs text-gray-600">در انتظار تأیید</div>
+  </div>
+
+  <div class="glass-card stats-card rounded-2xl p-4 text-center fade-in" data-stat="canceled">
+    <div class="text-3xl font-black text-red-600 mb-1">0</div>
+    <div class="text-xs text-gray-600">لغو شده</div>
+  </div>
+</section>
+
     <!-- Quick Actions -->
     <section class="grid grid-cols-2 gap-4 section-spacing">
       <button onclick="openBooking()" class="glass-card rounded-2xl p-5 group hover:scale-[1.02] transition-all fade-in">
@@ -823,6 +832,46 @@
       </div>
     </div>
   </div>
+
+
+<!-- Recent Stores (Bottom Sheet / Modal) -->
+<div id="recentStoresModal" class="fixed inset-0 modal-backdrop z-50 hidden" role="dialog" aria-modal="true" aria-labelledby="recentStoresTitle">
+  <div class="flex items-end sm:items-center justify-center min-h-full p-4">
+    <!-- on mobile: bottom sheet | on desktop: centered card -->
+    <div class="modal-content glass-card w-full sm:max-w-lg rounded-t-3xl sm:rounded-3xl p-4 sm:p-6">
+      <div class="flex items-center justify-between mb-4 sm:mb-6">
+        <h3 id="recentStoresTitle" class="text-lg sm:text-xl font-black text-gray-800">فروشگاه‌های اخیر من</h3>
+        <button type="button" onclick="closeModal('recentStoresModal')" class="p-2 rounded-xl hover:bg-gray-100 transition-colors" aria-label="بستن">
+          <i class="fas fa-times text-gray-600"></i>
+        </button>
+      </div>
+
+      <!-- search -->
+      <div class="mb-3">
+        <label for="recentStoreSearch" class="sr-only">جستجو</label>
+        <div class="relative">
+          <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
+          <input id="recentStoreSearch" type="text" placeholder="جستجو در نام یا شهر…" class="w-full pl-10 pr-4 py-2.5 rounded-xl border border-gray-200 focus:border-blue-500 focus:ring-0 text-sm">
+        </div>
+      </div>
+
+      <!-- list -->
+      <div id="recentStoresList" class="space-y-3 overflow-y-auto max-h-[60vh] pr-1">
+        <!-- items render here -->
+      </div>
+
+      <!-- footer -->
+      <div class="pt-4 mt-3 border-t border-gray-100">
+        <button id="allShopsBtn" onclick="goToAllShops()" class="btn-gradient w-full py-3 rounded-xl font-bold">
+          <i class="fas fa-compass ml-2"></i>
+          مشاهده همه فروشگاه‌ها
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
   <!-- Toast -->
   <div id="toast" class="fixed top-8 left-1/2 glassmorphism px-5 py-3 rounded-full z-50 min-w-[220px] shadow-lg" role="status" aria-live="polite">
     <div class="flex items-center gap-3">
@@ -969,6 +1018,16 @@
     } catch {}
   })();
 
+
+  (function purgeBadBookingsCache(){
+  try {
+    const cached = JSON.parse(localStorage.getItem(KEYS.bookings) || 'null');
+    if (!cached || !Array.isArray(cached.data)) return;
+    const needsFix = cached.data.some(x => !x.storeName || x.storeName === 'فروشگاه');
+    if (needsFix) localStorage.removeItem(KEYS.bookings);
+  } catch {}
+})();
+
   /* ---------- Data state ---------- */
   let bookings = [];         // unified list
   let notifs = [];
@@ -977,24 +1036,66 @@
   let profilePhone = '';
 
   /* ---------- Smart Links to shop ---------- */
-  (function updateNavLinks() {
+(function updateNavLinks(){
+  const homeLink = document.getElementById('homeLink');
+  const bookingLink = document.getElementById('bookingLink');
+  if (!homeLink || !bookingLink) return;
+
+  const sameOrigin = (u)=>{ try { return new URL(u, location.href).origin === location.origin; } catch { return false; } };
+
+  // Fallback: لینک فروشگاه (بر اساس seller) یا لیست عمومی
+  let fallbackBase = '../service-shops.html';
+  if (seller && seller.shopurl) {
+    fallbackBase = `../service-shops.html?shopurl=${encodeURIComponent(seller.shopurl)}`;
+  } else if (seller && (seller._id || seller.id)) {
+    const sid = seller._id || seller.id;
+    fallbackBase = `../service-shops.html?sellerId=${encodeURIComponent(sid)}`;
+  }
+
+  // تعیین آدرس ورود سشن با اولویت: ?from=  >  referrer  >  مقدار قبلی
+  const params = new URLSearchParams(location.search);
+  const prev = sessionStorage.getItem('vt_entry_home') || '';
+  let entry = prev;
+
+  // 1) اگر پارامتر from موجود و هم‌دامنه است، همان را مبنا قرار بده
+  let candidate = '';
+  if (params.has('from')) {
     try {
-      const homeLink = $('#homeLink'), bookingLink = $('#bookingLink');
-      if (seller.shopurl) {
-        const base = `../service-shops.html?shopurl=${encodeURIComponent(seller.shopurl)}`;
-        if (homeLink) homeLink.href = base;
-        if (bookingLink) bookingLink.href = `${base}#services`;
-      } else if (seller._id || seller.id) {
-        const sid = seller._id || seller.id;
-        const base = `../service-shops.html?sellerId=${encodeURIComponent(sid)}`;
-        if (homeLink) homeLink.href = base;
-        if (bookingLink) bookingLink.href = `${base}#services`;
-      } else {
-        if (homeLink) homeLink.href = '../service-shops.html';
-        if (bookingLink) bookingLink.href = '../service-shops.html#services';
-      }
-    } catch (e) { console.error('update nav links failed', e); }
-  })();
+      const u = new URL(params.get('from'), location.href);
+      if (sameOrigin(u.href)) candidate = u.href;
+    } catch {}
+  }
+
+  // 2) در غیر این صورت اگر referrer معتبر و هم‌دامنه است
+  if (!candidate && document.referrer && sameOrigin(document.referrer)) {
+    candidate = new URL(document.referrer, location.href).href;
+  }
+
+  // 3) اگر کاندید معتبر داشتیم، روی سشن بنویس
+  if (candidate) {
+    entry = candidate;
+    sessionStorage.setItem('vt_entry_home', entry);
+  }
+
+  // ست‌کردن لینک‌ها
+  const base = entry || fallbackBase;
+  homeLink.href = base;
+
+  if (base.includes('service-shops.html')) {
+    const u = new URL(base, location.href);
+    u.hash = 'services';
+    bookingLink.href = u.href;
+  } else {
+    bookingLink.href = `${fallbackBase}#services`;
+  }
+
+  // تلاش برای history.back جهت حفظ وضعیت/اسکرول همان صفحه
+  homeLink.addEventListener('click', (e)=>{
+    const canGoBack = history.length > 1 && sameOrigin(document.referrer);
+    if (canGoBack) { e.preventDefault(); history.back(); }
+  }, { once:true });
+})();
+
 
   /* ---------- Profile ---------- */
   async function loadProfile() {
@@ -1056,73 +1157,150 @@ function applyProfile(p) {
   }
 }
 
+
+
+function resolveStoreMeta(b) {
+  const s = b?.store || {};
+  const storeName =
+    b.storeName ||
+    s.title ||                // ← خیلی وقت‌ها این فیلد است
+    s.displayName ||          // ← یا این
+    s.branchName ||           // ← یا این
+    s.name ||                 // ← قدیمی
+    b.branchName ||           // ← بعضی APIها
+    b.sellerName ||           // ← fallback
+    '';
+
+  const storeLocation =
+    b.storeLocation ||
+    s.city ||
+    (s.location && s.location.city) ||
+    (s.address && s.address.city) ||
+    b.city ||
+    b.branchCity ||
+    '';
+
+  const storeId  = b.storeId || s._id || s.id || '';
+  const shopurl  = b.shopurl || s.shopurl || s.slug || s.url || '';
+
+  return { storeName, storeLocation, storeId, shopurl };
+}
+
   /* ---------- Bookings (cache-first, then server) ---------- */
   function getBookings() { return bookings; }
-  function setBookings(list) {
-    bookings = Array.isArray(list) ? list : [];
-    // persist compact
-    const raw = bookings.map(b => ({
-      id: b.id,
-      service: b.service,
-      date: b.datetime ? b.datetime.split('T')[0] : '',
-      time: b.datetime ? b.datetime.split('T')[1]?.slice(0,5) : '',
-      status: b.status || 'pending',
-      price: b.price || 0,
-      storeName: b.storeName || '',
-      storeLocation: b.storeLocation || '',
-      barber: b.barber || ''
-    }));
-    cache.set(KEYS.bookings, raw);
-    // stats
-    setStat('total', bookings.length);
-    setStat('active', bookings.filter(b => b.status !== 'done').length);
-    setStat('done',   bookings.filter(b => b.status === 'done').length);
-  }
+function setBookings(list) {
+  bookings = Array.isArray(list) ? list : [];
 
-  async function loadBookings() {
-    // 1) from cache
-    const cached = cache.get(KEYS.bookings, 12*3600*1000) || [];
-    const fromCache = cached.map(b => ({
+  // ذخیره فشرده در کش
+  const raw = bookings.map(b => ({
+    id: b.id,
+    service: b.service,
+    date: b.datetime ? b.datetime.split('T')[0] : '',
+    time: b.datetime ? b.datetime.split('T')[1]?.slice(0,5) : '',
+    status: b.status || 'pending',
+    price: b.price || 0,
+    storeName: b.storeName || '',
+    storeLocation: b.storeLocation || '',
+    barber: b.barber || '',
+    storeId: b.storeId || '',       // ← جدید
+    shopurl: b.shopurl || ''        // ← جدید
+  }));
+  cache.set(KEYS.bookings, raw);
+
+  // کارت‌های آمار
+  setStat('total', bookings.length);
+  setStat('confirmed', bookings.filter(b => b.status === 'confirmed').length);
+  setStat('pending',  bookings.filter(b => b.status === 'pending').length);
+  setStat('canceled', bookings.filter(b => b.status === 'canceled').length);
+}
+
+
+
+async function loadBookings() {
+  // Helper برای درآوردن نام/لوکیشن فروشگاه از انواع فیلدهای ممکن
+  const resolveStoreMeta = (b) => {
+    const s = b?.store || {};
+    const storeName =
+      b.storeName ||
+      s.title ||
+      s.displayName ||
+      s.branchName ||
+      s.name ||
+      b.branchName ||
+      b.sellerName ||
+      '';
+    const storeLocation =
+      b.storeLocation ||
+      s.city ||
+      (s.location && s.location.city) ||
+      (s.address && s.address.city) ||
+      b.city ||
+      b.branchCity ||
+      '';
+    const storeId = b.storeId || s._id || s.id || '';
+    const shopurl = b.shopurl || s.shopurl || s.slug || s.url || '';
+    return { storeName, storeLocation, storeId, shopurl };
+  };
+
+  // 1) from cache
+  const cached = cache.get(KEYS.bookings, 12*3600*1000) || [];
+  const fromCache = cached.map(b => {
+    const meta = resolveStoreMeta(b);
+    return {
       id: b.id || b.timestamp || Date.now().toString(36),
       service: b.service,
-      datetime: `${b.date || ''}T${(b.time||'').slice(0,5)}`,
+      datetime: `${b.date || ''}T${(b.time || '').slice(0,5)}`,
       status: mapStatus(b.status || 'pending'),
       price: b.price || 0,
-      storeName: b.storeName || '',
-      storeLocation: b.storeLocation || '',
-      barber: b.barber || ''
-    }));
-    setBookings(fromCache);
+      storeName: b.storeName || meta.storeName || '',
+      storeLocation: b.storeLocation || meta.storeLocation || '',
+      barber: b.barber || '',
+      storeId: b.storeId || meta.storeId || '',
+      shopurl: b.shopurl || meta.shopurl || ''
+    };
+  });
+  setBookings(fromCache);
 
-    // 2) refresh from server (if we can identify the user)
-    try {
-      if (!isOnline()) return;
-      const phone = profilePhone || getCookie('customerPhone') || localStorage.getItem('vt_user_phone') || '';
-      if (!phone) return;
+  // 2) refresh from server (if we can identify the user)
+  try {
+    if (!isOnline()) return;
+    const phone = profilePhone || getCookie('customerPhone') || localStorage.getItem('vt_user_phone') || '';
+    if (!phone) return;
 
-      const res = await safeFetch(`/api/bookings?phone=${encodeURIComponent(phone)}`, { credentials:'include', headers:{'Accept':'application/json'} });
-      if (res.ok) {
-        const data = await res.json();
-        const server = (data.items || []).map(b => ({
-          id: b._id,
-          service: b.service,
-          datetime: `${b.bookingDate || b.date}T${b.startTime || b.time}`,
+    const res = await safeFetch(`/api/bookings?phone=${encodeURIComponent(phone)}`, {
+      credentials: 'include',
+      headers: { 'Accept': 'application/json' }
+    });
+
+    if (res.ok) {
+      const data = await res.json();
+      const server = (data.items || []).map(b => {
+        const meta = resolveStoreMeta(b);
+        return {
+          id: b._id || b.id,
+          service: b.service || b.serviceName || '',
+          datetime: `${b.bookingDate || b.date || ''}T${(b.startTime || b.time || '').slice(0,5)}`,
           status: mapStatus(b.status),
           price: b.price || 0,
-          storeName: b.storeName || b.store?.name || '',
-          storeLocation: b.storeLocation || b.store?.city || '',
-          barber: b.barber || ''
-        }));
+          storeName: meta.storeName,
+          storeLocation: meta.storeLocation,
+          barber: b.barber || '',
+          storeId: meta.storeId,
+          shopurl: meta.shopurl
+        };
+      });
 
-        // merge (prefer server by id)
-        const byId = new Map(server.map(b => [b.id, b]));
-        for (const c of fromCache) if (!byId.has(c.id)) byId.set(c.id, c);
-        setBookings(Array.from(byId.values()).sort((a,b)=>new Date(a.datetime)-new Date(b.datetime)));
-      }
-    } catch (e) {
-      // ignore; offline or endpoint missing
+      // merge (prefer server by id)
+      const byId = new Map(server.map(b => [b.id, b]));
+      for (const c of fromCache) if (!byId.has(c.id)) byId.set(c.id, c);
+      setBookings(Array.from(byId.values()).sort((a, b) => new Date(a.datetime) - new Date(b.datetime)));
     }
+  } catch (e) {
+    // ignore; offline or endpoint missing
   }
+}
+
+
 
   /* ---------- Notifications ---------- */
   function getNotifs() { return notifs; }
@@ -1498,12 +1676,179 @@ function applyProfile(p) {
   }
 
   /* ---------- Navigation ---------- */
-  function openBooking() {
-    showToast('در حال انتقال...', 'info');
+/* ---------- Navigation (enhanced) ---------- */
+let _recentStoresCache = [];
+
+// بازکردن شیت فروشگاه‌های اخیر؛ اگر خالی بود مسیر قبلی را می‌رود
+// ALWAYS open the modal; no auto-redirect here
+function openBooking() {
+  _recentStoresCache = buildRecentStores();
+  renderRecentStores(_recentStoresCache);
+  const m = $('#recentStoresModal');
+  if (m) {
+    m.classList.remove('hidden');
+    trapFocus('recentStoresModal');
+    setTimeout(() => $('#recentStoreSearch').focus(), 120);
+  } else {
+    // فقط اگر مودال در DOM نبود، ریدایرکت کن
     const link = document.getElementById('bookingLink');
     const url = link?.getAttribute('href') || '../service-shops.html#services';
-    setTimeout(() => (location.href = url), 800);
+    location.href = url;
   }
+}
+
+
+// استخراج فروشگاه‌های اخیر از رزروها (دِداپلیکیت + مرتب‌سازی بر اساس آخرین رزرو)
+function buildRecentStores() {
+  const map = new Map();
+  for (const b of getBookings()) {
+    if (!b.storeName && !b.storeId && !b.shopurl) continue;
+    const key = b.storeId || b.shopurl || `${b.storeName}|${b.storeLocation||''}`;
+    const prev = map.get(key) || {
+      key,
+      storeId: b.storeId || '',
+      shopurl: b.shopurl || '',
+      storeName: b.storeName || 'فروشگاه',
+      storeLocation: b.storeLocation || '',
+      count: 0,
+      lastAt: 0
+    };
+    prev.count += 1;
+    const ts = b.datetime ? new Date(b.datetime).getTime() : 0;
+    prev.lastAt = Math.max(prev.lastAt, ts);
+    map.set(key, prev);
+  }
+
+  let list = Array.from(map.values())
+    .sort((a,b)=> b.lastAt - a.lastAt)
+    .slice(0, 8);
+
+  // Fallback 1: از باشگاه مشتریان
+  if (!list.length) {
+    const loy = (getLoyaltyStores()||[]).slice(0,8).map(s=>({
+      key: s.storeId || s.shopurl || s.storeName,
+      storeId: s.storeId || '',
+      shopurl: s.shopurl || '',
+      storeName: s.storeName || 'فروشگاه',
+      storeLocation: s.city || s.storeLocation || '',
+      count: 0,
+      lastAt: 0
+    }));
+    list = loy;
+  }
+
+  // Fallback 2: از seller ذخیره‌شده در localStorage
+  if (!list.length && (seller?.shopurl || seller?._id || seller?.id || seller?.name)) {
+    list = [{
+      key: seller._id || seller.id || seller.shopurl || seller.name,
+      storeId: seller._id || seller.id || '',
+      shopurl: seller.shopurl || '',
+      storeName: seller.name || 'فروشگاه',
+      storeLocation: seller.city || '',
+      count: 0,
+      lastAt: 0
+    }];
+  }
+
+  return list;
+}
+
+
+// رندر آیتم‌ها داخل شیت
+function renderRecentStores(items, query='') {
+  const list = $('#recentStoresList');
+  if (!list) return;
+
+  const q = (query||'').trim();
+  const filtered = q
+    ? items.filter(x =>
+        (x.storeName && x.storeName.includes(q)) ||
+        (x.storeLocation && x.storeLocation.includes(q)))
+    : items;
+
+  if (!filtered.length) {
+    list.innerHTML = `
+      <div class="glass-card rounded-2xl p-6 text-center">
+        <p class="text-sm text-gray-600">موردی مطابق جستجو پیدا نشد</p>
+      </div>`;
+    return;
+  }
+
+  const loy = getLoyaltyStores();
+  const hasReward = (it)=>{
+    const st = loy.find(s =>
+      (it.storeId && s.storeId===it.storeId) ||
+      (it.shopurl && s.shopurl===it.shopurl) ||
+      s.storeName===it.storeName
+    );
+    return st ? (calcLoyalty(st).unclaimed > 0) : false;
+  };
+
+  list.innerHTML = filtered.map((s, idx) => {
+    const initial = (s.storeName||'?').trim().charAt(0);
+    const lastText = s.lastAt ? `آخرین‌بار: ${relativeTime(s.lastAt)}` : '';
+    const rewardBadge = hasReward(s)
+      ? `<span class="chip done !px-2 !py-0.5 text-[10px]"><i class="fa-solid fa-gift text-[10px]"></i> آماده</span>`
+      : '';
+
+    return `
+    <button type="button"
+      onclick="selectRecentStore(${_recentStoresCache.indexOf(s)})"
+      class="w-full text-right p-3 sm:p-4 rounded-2xl border border-gray-100 hover:bg-gray-50 transition-colors flex items-center gap-3">
+      <div class="w-11 h-11 rounded-xl bg-gradient-to-br from-blue-500 to-cyan-500 text-white flex items-center justify-center font-extrabold text-base flex-shrink-0">
+        ${initial}
+      </div>
+      <div class="flex-1 min-w-0">
+        <div class="flex items-center justify-between gap-2">
+          <span class="font-bold text-gray-800 truncate">${s.storeName}</span>
+          ${rewardBadge}
+        </div>
+        <div class="flex items-center gap-2 text-xs text-gray-500 mt-0.5">
+          ${s.storeLocation ? `<span class="truncate"><i class="fas fa-map-marker-alt ml-1"></i>${s.storeLocation}</span>` : ''}
+          ${lastText ? `<span class="truncate">• ${lastText}</span>` : ''}
+          ${s.count ? `<span class="truncate">• ${faNum(s.count)} رزرو</span>` : ''}
+        </div>
+      </div>
+      <i class="fas fa-chevron-left text-gray-300"></i>
+    </button>`;
+  }).join('');
+}
+
+// انتخاب فروشگاه و رفتن به صفحه‌ی سرویس‌های همان فروشگاه
+function selectRecentStore(index) {
+  const item = _recentStoresCache[index];
+  if (!item) return;
+  const url = shopDeepLink(item);
+  showToast('در حال انتقال…', 'info');
+  setTimeout(()=> location.href = url, 300);
+}
+
+// دیپ‌لینک صفحه‌ی فروشگاه
+function shopDeepLink(item) {
+  const base = '../service-shops.html';
+  const u = new URL(base, location.href);
+  if (item.shopurl)      u.searchParams.set('shopurl', item.shopurl);
+  else if (item.storeId) u.searchParams.set('sellerId', item.storeId);
+  u.hash = 'services';
+  return u.href;
+}
+
+// دکمه‌ی «مشاهده همه فروشگاه‌ها»
+function goToAllShops() {
+  const link = document.getElementById('bookingLink');
+  const url = link?.getAttribute('href') || '../service-shops.html#services';
+  closeModal('recentStoresModal');
+  showToast('در حال انتقال…', 'info');
+  setTimeout(() => (location.href = url), 300);
+}
+
+// فیلتر جستجو
+document.addEventListener('input', (e)=>{
+  if (e.target && e.target.id === 'recentStoreSearch') {
+    renderRecentStores(_recentStoresCache, e.target.value);
+  }
+});
+
   function scrollToBookings() { $('#bookings').scrollIntoView({ behavior:'smooth', block:'start' }); }
   function scrollToHistory()  { $('#history').scrollIntoView({ behavior:'smooth', block:'start' }); }
 
