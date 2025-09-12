@@ -1319,9 +1319,10 @@ function applyProfile(p) {
 
 
 function resolveStoreMeta(b) {
-  const s = b?.store || {};
+  const s = b?.store || b?.seller || {};
   const storeName =
     b.storeName ||
+    s.storeName || s.storename ||
     s.title ||                // ← خیلی وقت‌ها این فیلد است
     s.displayName ||          // ← یا این
     s.branchName ||           // ← یا این
@@ -1339,8 +1340,8 @@ function resolveStoreMeta(b) {
     b.branchCity ||
     '';
 
-  const storeId  = b.storeId || s._id || s.id || '';
-  const shopurl  = b.shopurl || s.shopurl || s.slug || s.url || '';
+  const storeId  = b.storeId || s._id || s.id || s.storeId || '';
+  const shopurl  = b.shopurl || s.shopurl || s.slug || s.url || s.shopUrl || '';
 
   return { storeName, storeLocation, storeId, shopurl };
 }
@@ -1378,9 +1379,10 @@ function setBookings(list) {
 async function loadBookings() {
   // Helper برای درآوردن نام/لوکیشن فروشگاه از انواع فیلدهای ممکن
   const resolveStoreMeta = (b) => {
-    const s = b?.store || {};
+    const s = b?.store || b?.seller || {};
     const storeName =
       b.storeName ||
+      s.storeName || s.storename ||
       s.title ||
       s.displayName ||
       s.branchName ||
@@ -1396,8 +1398,8 @@ async function loadBookings() {
       b.city ||
       b.branchCity ||
       '';
-    const storeId = b.storeId || s._id || s.id || '';
-    const shopurl = b.shopurl || s.shopurl || s.slug || s.url || '';
+    const storeId = b.storeId || s._id || s.id || s.storeId || '';
+    const shopurl = b.shopurl || s.shopurl || s.slug || s.url || s.shopUrl || '';
     return { storeName, storeLocation, storeId, shopurl };
   };
 
