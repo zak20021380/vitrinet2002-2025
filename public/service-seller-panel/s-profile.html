@@ -1738,13 +1738,13 @@ function buildRecentStores() {
   }
 
   // Fallback 2: از seller ذخیره‌شده در localStorage
-  if (!list.length && (seller?.shopurl || seller?._id || seller?.id || seller?.name)) {
+  if (!list.length && (seller?.shopurl || seller?._id || seller?.id || seller?.name || seller?.storename)) {
     list = [{
-      key: seller._id || seller.id || seller.shopurl || seller.name,
+      key: seller._id || seller.id || seller.shopurl || seller.storename || seller.name,
       storeId: seller._id || seller.id || '',
       shopurl: seller.shopurl || '',
-      storeName: seller.name || 'فروشگاه',
-      storeLocation: seller.city || '',
+      storeName: seller.storename || seller.displayName || seller.branchName || seller.title || seller.name || 'فروشگاه',
+      storeLocation: seller.city || seller.storeLocation || seller.address || '',
       count: 0,
       lastAt: 0
     }];
