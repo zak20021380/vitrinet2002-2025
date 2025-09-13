@@ -1595,15 +1595,21 @@ destroy() {
         </div>
         ${review.comment ? `<p class="review-comment">${review.comment}</p>` : ''}
         ${review.status === 'approved'
-          ? `<div class="review-status">تایید شده</div>`
+          ? `<div class="review-actions">
+              <div class="review-status">تایید شده</div>
+              <button type="button" class="btn-danger btn-icon-text delete-review">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6m3-3h8a1 1 0 011 1v2H8V4a1 1 0 011-1z"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
+                حذف
+              </button>
+            </div>`
           : `<div class="review-actions">
               <button type="button" class="btn-success btn-icon-text approve-review">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
                 تایید
               </button>
-              <button type="button" class="btn-danger btn-icon-text reject-review">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-                رد
+              <button type="button" class="btn-danger btn-icon-text delete-review">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6m3-3h8a1 1 0 011 1v2H8V4a1 1 0 011-1z"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
+                حذف
               </button>
             </div>`}
       </article>
@@ -1613,7 +1619,7 @@ destroy() {
   if (!listEl.dataset.reviewBound) {
     listEl.addEventListener('click', async (e) => {
       const approveBtn = e.target.closest('.approve-review');
-      const rejectBtn = e.target.closest('.reject-review');
+      const deleteBtn = e.target.closest('.delete-review');
       if (approveBtn) {
         const card = approveBtn.closest('.review-card');
         const id = card.dataset.id;
@@ -1630,15 +1636,15 @@ destroy() {
         }
         return;
       }
-      if (rejectBtn) {
-        const card = rejectBtn.closest('.review-card');
+      if (deleteBtn) {
+        const card = deleteBtn.closest('.review-card');
         const id = card.dataset.id;
         try {
           const res = await fetch(`${API_BASE}/api/shopAppearance/reviews/${id}`, { method: 'DELETE', credentials: 'include' });
           if (!res.ok) throw new Error();
           card.remove();
           MOCK_DATA.reviews = MOCK_DATA.reviews.filter(r => r.id !== id);
-          UIComponents.showToast('نظر حذف شد', 'error');
+          UIComponents.showToast('نظر حذف شد', 'success');
         } catch (err) {
           UIComponents.showToast('حذف نظر ناموفق بود', 'error');
         }
