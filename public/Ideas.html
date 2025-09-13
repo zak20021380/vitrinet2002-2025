@@ -1,891 +1,664 @@
 <!DOCTYPE html>
 <html lang="fa" dir="rtl">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>مشکلات خودرو - انجمن فارسی</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style>
-        :root {
-            --primary: #1a73e8;
-            --primary-dark: #0d47a1;
-            --secondary: #4caf50;
-            --danger: #f44336;
-            --warning: #ff9800;
-            --light: #f5f5f5;
-            --dark: #212121;
-            --gray: #757575;
-            --border: #e0e0e0;
-            --card-shadow: 0 2px 10px rgba(0,0,0,0.08);
-            --transition: all 0.3s ease;
-        }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Vazir', Tahoma, sans-serif;
-        }
-
-        body {
-            background-color: #f8f9fa;
-            color: var(--dark);
-            line-height: 1.6;
-        }
-
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 0 15px;
-        }
-
-        /* Header Styles */
-        header {
-            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
-            color: white;
-            padding: 15px 0;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-            position: sticky;
-            top: 0;
-            z-index: 100;
-        }
-
-        .header-content {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .logo {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .logo i {
-            font-size: 28px;
-        }
-
-        .logo h1 {
-            font-size: 22px;
-            font-weight: 700;
-        }
-
-        .search-bar {
-            flex: 1;
-            max-width: 500px;
-            margin: 0 20px;
-            position: relative;
-        }
-
-        .search-bar input {
-            width: 100%;
-            padding: 12px 20px 12px 50px;
-            border-radius: 30px;
-            border: none;
-            background: rgba(255, 255, 255, 0.2);
-            color: white;
-            font-size: 16px;
-            transition: var(--transition);
-        }
-
-        .search-bar input:focus {
-            outline: none;
-            background: rgba(255, 255, 255, 0.3);
-            box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.5);
-        }
-
-        .search-bar i {
-            position: absolute;
-            left: 20px;
-            top: 50%;
-            transform: translateY(-50%);
-            color: white;
-        }
-
-        .user-actions {
-            display: flex;
-            gap: 15px;
-        }
-
-        .btn {
-            padding: 10px 20px;
-            border-radius: 30px;
-            border: none;
-            font-weight: 600;
-            cursor: pointer;
-            transition: var(--transition);
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .btn-primary {
-            background-color: white;
-            color: var(--primary);
-        }
-
-        .btn-primary:hover {
-            background-color: #f0f0f0;
-            transform: translateY(-2px);
-        }
-
-        .btn-outline {
-            background: transparent;
-            border: 2px solid white;
-            color: white;
-        }
-
-        .btn-outline:hover {
-            background-color: rgba(255, 255, 255, 0.1);
-            transform: translateY(-2px);
-        }
-
-        /* Main Content */
-        .main-content {
-            display: flex;
-            gap: 20px;
-            margin: 20px 0;
-        }
-
-        /* Sidebar */
-        .sidebar {
-            flex: 0 0 280px;
-            background: white;
-            border-radius: 10px;
-            padding: 20px;
-            box-shadow: var(--card-shadow);
-            height: fit-content;
-        }
-
-        .sidebar-section {
-            margin-bottom: 25px;
-        }
-
-        .sidebar-section h3 {
-            font-size: 18px;
-            margin-bottom: 15px;
-            padding-bottom: 10px;
-            border-bottom: 1px solid var(--border);
-            color: var(--primary-dark);
-        }
-
-        .categories-list {
-            list-style: none;
-        }
-
-        .categories-list li {
-            padding: 10px 0;
-            border-bottom: 1px solid var(--border);
-        }
-
-        .categories-list li:last-child {
-            border-bottom: none;
-        }
-
-        .categories-list a {
-            text-decoration: none;
-            color: var(--dark);
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            transition: var(--transition);
-        }
-
-        .categories-list a:hover {
-            color: var(--primary);
-            transform: translateX(-5px);
-        }
-
-        .categories-list i {
-            width: 24px;
-            text-align: center;
-        }
-
-        .stats {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 15px;
-        }
-
-        .stat-card {
-            background: var(--light);
-            padding: 15px;
-            border-radius: 8px;
-            text-align: center;
-        }
-
-        .stat-card .number {
-            font-size: 24px;
-            font-weight: 700;
-            color: var(--primary);
-        }
-
-        .stat-card .label {
-            font-size: 14px;
-            color: var(--gray);
-        }
-
-        /* Forum Content */
-        .forum-content {
-            flex: 1;
-        }
-
-        .forum-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-        }
-
-        .forum-header h2 {
-            font-size: 24px;
-            color: var(--dark);
-        }
-
-        .sort-options {
-            display: flex;
-            gap: 10px;
-        }
-
-        .sort-btn {
-            padding: 8px 15px;
-            background: white;
-            border: 1px solid var(--border);
-            border-radius: 30px;
-            cursor: pointer;
-            transition: var(--transition);
-        }
-
-        .sort-btn.active, .sort-btn:hover {
-            background: var(--primary);
-            color: white;
-            border-color: var(--primary);
-        }
-
-        /* Post Card */
-        .post-card {
-            background: white;
-            border-radius: 10px;
-            padding: 20px;
-            margin-bottom: 20px;
-            box-shadow: var(--card-shadow);
-            transition: var(--transition);
-            border-right: 4px solid var(--primary);
-        }
-
-        .post-card:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-        }
-
-        .post-header {
-            display: flex;
-            align-items: center;
-            margin-bottom: 15px;
-        }
-
-        .user-avatar {
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            background: var(--primary);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-weight: bold;
-            font-size: 20px;
-            margin-left: 15px;
-        }
-
-        .user-info {
-            flex: 1;
-        }
-
-        .user-info h4 {
-            font-size: 16px;
-            margin-bottom: 5px;
-        }
-
-        .user-info .meta {
-            font-size: 14px;
-            color: var(--gray);
-        }
-
-        .post-category {
-            background: var(--light);
-            padding: 5px 15px;
-            border-radius: 20px;
-            font-size: 14px;
-            color: var(--primary);
-        }
-
-        .post-title {
-            font-size: 20px;
-            margin-bottom: 10px;
-            color: var(--dark);
-        }
-
-        .post-content {
-            margin-bottom: 20px;
-            color: #444;
-            line-height: 1.7;
-        }
-
-        .post-footer {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-top: 1px solid var(--border);
-            padding-top: 15px;
-        }
-
-        .post-actions {
-            display: flex;
-            gap: 15px;
-        }
-
-        .action-btn {
-            display: flex;
-            align-items: center;
-            gap: 5px;
-            background: none;
-            border: none;
-            color: var(--gray);
-            cursor: pointer;
-            transition: var(--transition);
-            padding: 5px 10px;
-            border-radius: 5px;
-        }
-
-        .action-btn:hover {
-            background: var(--light);
-            color: var(--primary);
-        }
-
-        .action-btn.liked {
-            color: var(--danger);
-        }
-
-        .action-btn.reported {
-            color: var(--warning);
-        }
-
-        .post-stats {
-            display: flex;
-            gap: 20px;
-        }
-
-        .stat {
-            display: flex;
-            align-items: center;
-            gap: 5px;
-            color: var(--gray);
-        }
-
-        /* Pagination */
-        .pagination {
-            display: flex;
-            justify-content: center;
-            margin: 30px 0;
-            gap: 10px;
-        }
-
-        .page-btn {
-            width: 40px;
-            height: 40px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 50%;
-            background: white;
-            border: 1px solid var(--border);
-            cursor: pointer;
-            transition: var(--transition);
-        }
-
-        .page-btn.active, .page-btn:hover {
-            background: var(--primary);
-            color: white;
-            border-color: var(--primary);
-        }
-
-        /* Footer */
-        footer {
-            background: var(--dark);
-            color: white;
-            padding: 30px 0;
-            margin-top: 40px;
-        }
-
-        .footer-content {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 30px;
-        }
-
-        .footer-section h3 {
-            font-size: 20px;
-            margin-bottom: 20px;
-            position: relative;
-            padding-bottom: 10px;
-        }
-
-        .footer-section h3::after {
-            content: '';
-            position: absolute;
-            bottom: 0;
-            right: 0;
-            width: 50px;
-            height: 2px;
-            background: var(--primary);
-        }
-
-        .footer-links {
-            list-style: none;
-        }
-
-        .footer-links li {
-            margin-bottom: 10px;
-        }
-
-        .footer-links a {
-            color: #ccc;
-            text-decoration: none;
-            transition: var(--transition);
-        }
-
-        .footer-links a:hover {
-            color: white;
-            padding-right: 5px;
-        }
-
-        .copyright {
-            text-align: center;
-            padding-top: 20px;
-            margin-top: 20px;
-            border-top: 1px solid rgba(255,255,255,0.1);
-            color: #aaa;
-            font-size: 14px;
-        }
-
-        /* Responsive Design */
-        @media (max-width: 992px) {
-            .main-content {
-                flex-direction: column;
-            }
-            
-            .sidebar {
-                width: 100%;
-            }
-        }
-
-        @media (max-width: 768px) {
-            .header-content {
-                flex-direction: column;
-                gap: 15px;
-            }
-            
-            .search-bar {
-                order: 3;
-                margin: 10px 0 0;
-                max-width: 100%;
-            }
-            
-            .user-actions {
-                width: 100%;
-                justify-content: center;
-            }
-            
-            .forum-header {
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 15px;
-            }
-            
-            .sort-options {
-                align-self: stretch;
-                justify-content: space-between;
-            }
-        }
-
-        @media (max-width: 576px) {
-            .post-footer {
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 15px;
-            }
-            
-            .post-actions, .post-stats {
-                width: 100%;
-                justify-content: space-between;
-            }
-        }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>Quiz WebApp Pro</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    :root{ 
+      --brand1:#3b82f6; 
+      --brand2:#06b6d4; 
+      --brand3:#10b981;
+      --accent1:#fde047;
+      --accent2:#fb923c;
+      --accent3:#a78bfa;
+      --accent4:#ec4899;
+    }
+    *{ font-family: 'Vazirmatn', system-ui, -apple-system, Segoe UI, Roboto, sans-serif; }
+    body{ 
+      background: radial-gradient(1200px 800px at 80% -10%, rgba(255,255,255,0.25), transparent 50%),
+                   radial-gradient(1000px 700px at 0% 100%, rgba(255,255,255,0.15), transparent 50%),
+                   linear-gradient(135deg, var(--brand1), var(--brand2), var(--brand3));
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+    .glass{ 
+      background: rgba(255,255,255,0.15); 
+      backdrop-filter: blur(20px); 
+      -webkit-backdrop-filter: blur(20px); 
+      border: 1px solid rgba(255,255,255,0.3);
+      box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.2);
+    }
+    .glass-dark{ 
+      background: rgba(0,0,0,0.2); 
+      backdrop-filter: blur(20px); 
+      -webkit-backdrop-filter: blur(20px); 
+      border: 1px solid rgba(255,255,255,0.15);
+    }
+    .btn{ 
+      @apply w-full py-4 rounded-2xl font-bold shadow-lg active:scale-[0.98] transition-all duration-300 transform hover:scale-[1.02];
+    }
+    .btn-primary{ 
+      background: linear-gradient(135deg, var(--accent1), var(--accent2)); 
+      color:#111827;
+      box-shadow: 0 4px 15px rgba(251, 146, 60, 0.4);
+    }
+    .btn-secondary{ 
+      background: linear-gradient(135deg, var(--accent3), var(--accent4)); 
+      color:#fff;
+      box-shadow: 0 4px 15px rgba(236, 72, 153, 0.4);
+    }
+    .btn-tertiary{ 
+      background: linear-gradient(135deg, #60a5fa, #6366f1); 
+      color:#fff;
+      box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4);
+    }
+    .safe{ padding-bottom: env(safe-area-inset-bottom); }
+    .ring-anim{ transition: stroke-dashoffset .2s linear; }
+    /* Choice states */
+    .choice{ 
+      @apply w-full text-right px-5 py-4 rounded-2xl border border-white/20 bg-white/10 hover:bg-white/20 transition-all duration-300 flex items-center gap-3 transform hover:scale-[1.02];
+    }
+    .choice.correct{ 
+      @apply bg-green-500/20 border-green-400/60;
+      box-shadow: 0 0 20px rgba(16, 185, 129, 0.3);
+    }
+    .choice.wrong{ 
+      @apply bg-rose-500/20 border-rose-400/60;
+      box-shadow: 0 0 20px rgba(244, 63, 94, 0.3);
+    }
+    .chip{ 
+      @apply inline-flex items-center gap-1 px-3 py-1 rounded-full text-sm font-medium bg-white/10 border border-white/20;
+    }
+    .divider{ 
+      @apply h-px w-full bg-white/20 my-3;
+    }
+    .card-hover {
+      transition: all 0.3s ease;
+    }
+    .card-hover:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 12px 40px 0 rgba(31, 38, 135, 0.3);
+    }
+    .gradient-text {
+      background: linear-gradient(90deg, var(--accent1), var(--accent2));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .nav-item {
+      position: relative;
+      transition: all 0.3s ease;
+    }
+    .nav-item.active::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      right: 0;
+      left: 0;
+      height: 3px;
+      background: linear-gradient(90deg, var(--accent1), var(--accent2));
+      border-radius: 3px 3px 0 0;
+    }
+    @keyframes pulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+      100% { transform: scale(1); }
+    }
+    .pulse {
+      animation: pulse 2s infinite;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .fade-in {
+      animation: fadeIn 0.5s ease forwards;
+    }
+  </style>
 </head>
-<body>
-    <!-- Header -->
-    <header>
-        <div class="container">
-            <div class="header-content">
-                <div class="logo">
-                    <i class="fas fa-car"></i>
-                    <h1>مشکلات خودرو</h1>
-                </div>
-                
-                <div class="search-bar">
-                    <input type="text" placeholder="جستجو در انجمن...">
-                    <i class="fas fa-search"></i>
-                </div>
-                
-                <div class="user-actions">
-                    <button class="btn btn-outline">
-                        <i class="fas fa-user-plus"></i>
-                        ثبت نام
-                    </button>
-                    <button class="btn btn-primary">
-                        <i class="fas fa-sign-in-alt"></i>
-                        ورود
-                    </button>
-                </div>
-            </div>
+<body class="min-h-screen text-white flex flex-col">
+  <!-- Header -->
+  <header class="glass sticky top-0 z-30 w-full px-4 py-3 flex items-center justify-between shadow-lg">
+    <div class="flex items-center gap-3">
+      <div class="relative">
+        <img id="hdr-avatar" src="https://i.pravatar.cc/80?img=12" class="w-12 h-12 rounded-full border-2 border-white/30 shadow-md" alt="avatar" />
+        <div class="absolute -bottom-1 -right-1 w-4 h-4 bg-green-500 rounded-full border-2 border-white"></div>
+      </div>
+      <div>
+        <div id="hdr-name" class="font-bold text-lg">کاربر مهمان</div>
+        <div class="text-xs text-white/80 flex items-center gap-1">
+          <i class="fas fa-star text-yellow-300"></i>
+          <span>امتیاز: <span id="hdr-score" class="font-bold">0</span></span>
         </div>
-    </header>
-
-    <!-- Main Content -->
-    <div class="container">
-        <div class="main-content">
-            <!-- Sidebar -->
-            <aside class="sidebar">
-                <div class="sidebar-section">
-                    <h3>دسته‌بندی‌ها</h3>
-                    <ul class="categories-list">
-                        <li><a href="#"><i class="fas fa-engine"></i> موتور و سیستم انتقال قدرت</a></li>
-                        <li><a href="#"><i class="fas fa-tire"></i> تعلیق و ترمز</a></li>
-                        <li><a href="#"><i class="fas fa-bolt"></i> سیستم الکتریکی</a></li>
-                        <li><a href="#"><i class="fas fa-oil-can"></i> روغن و سیالات</a></li>
-                        <li><a href="#"><i class="fas fa-wrench"></i> تعمیرات عمومی</a></li>
-                        <li><a href="#"><i class="fas fa-car-crash"></i> مشکلات ایمنی</a></li>
-                        <li><a href="#"><i class="fas fa-thermometer-half"></i> سیستم خنک کننده</a></li>
-                        <li><a href="#"><i class="fas fa-wind"></i> سیستم تهویه</a></li>
-                    </ul>
-                </div>
-                
-                <div class="sidebar-section">
-                    <h3>آمار انجمن</h3>
-                    <div class="stats">
-                        <div class="stat-card">
-                            <div class="number">12,458</div>
-                            <div class="label">پست</div>
-                        </div>
-                        <div class="stat-card">
-                            <div class="number">3,241</div>
-                            <div class="label">کاربر</div>
-                        </div>
-                        <div class="stat-card">
-                            <div class="number">892</div>
-                            <div class="label">پاسخ</div>
-                        </div>
-                        <div class="stat-card">
-                            <div class="number">47</div>
-                            <div class="label">دسته‌بندی</div>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="sidebar-section">
-                    <h3>کاربران برتر</h3>
-                    <ul class="categories-list">
-                        <li><a href="#"><i class="fas fa-medal"></i> محمد رضایی</a></li>
-                        <li><a href="#"><i class="fas fa-medal"></i> علی محمدی</a></li>
-                        <li><a href="#"><i class="fas fa-medal"></i> حسین کریمی</a></li>
-                        <li><a href="#"><i class="fas fa-medal"></i> مریم احمدی</a></li>
-                        <li><a href="#"><i class="fas fa-medal"></i> سارا حسینی</a></li>
-                    </ul>
-                </div>
-            </aside>
-            
-            <!-- Forum Content -->
-            <main class="forum-content">
-                <div class="forum-header">
-                    <h2>آخرین مشکلات خودرو</h2>
-                    <div class="sort-options">
-                        <button class="sort-btn active">جدیدترین</button>
-                        <button class="sort-btn">محبوب‌ترین</button>
-                        <button class="sort-btn">حل نشده</button>
-                    </div>
-                </div>
-                
-                <!-- Post Cards -->
-                <div class="post-card">
-                    <div class="post-header">
-                        <div class="user-avatar">م ر</div>
-                        <div class="user-info">
-                            <h4>محمد رضایی</h4>
-                            <div class="meta">2 ساعت پیش • پراید 1399</div>
-                        </div>
-                        <div class="post-category">موتور و سیستم انتقال قدرت</div>
-                    </div>
-                    <h3 class="post-title">موتور پرایدم وقتی گرم می‌شه خاموش میشه!</h3>
-                    <p class="post-content">
-                        سلام دوستان. پرایدم وقتی چند دقیقه رانندگی می‌کنم و موتور گرم میشه، ناگهان خاموش میشه. 
-                        این مشکل چند هفسته‌ست که شروع شده. تا حالا کسی با این مشکل مواجه بوده؟
-                    </p>
-                    <div class="post-footer">
-                        <div class="post-actions">
-                            <button class="action-btn liked">
-                                <i class="fas fa-heart"></i>
-                                <span>24</span>
-                            </button>
-                            <button class="action-btn">
-                                <i class="fas fa-comment"></i>
-                                <span>8</span>
-                            </button>
-                            <button class="action-btn reported">
-                                <i class="fas fa-flag"></i>
-                                گزارش
-                            </button>
-                        </div>
-                        <div class="post-stats">
-                            <div class="stat">
-                                <i class="fas fa-eye"></i>
-                                <span>142</span>
-                            </div>
-                            <div class="stat">
-                                <i class="fas fa-clock"></i>
-                                <span>2 ساعت پیش</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="post-card">
-                    <div class="post-header">
-                        <div class="user-avatar">س ح</div>
-                        <div class="user-info">
-                            <h4>سارا حسینی</h4>
-                            <div class="meta">5 ساعت پیش • دنا 1400</div>
-                        </div>
-                        <div class="post-category">سیستم الکتریکی</div>
-                    </div>
-                    <h3 class="post-title">چراغ‌های دنا دارن به صورت ناگهانی خاموش میشن</h3>
-                    <p class="post-content">
-                        سلام. دنای من چراغ‌های جلو و عقبش به صورت ناگهانی خاموش میشن. 
-                        خودرو دارای گارانتی نیست و تعمیرش هم هزینه‌بره. 
-                        اگه کسی راه حلی ساده‌تر داره ممنون میشم راهنمایی کنه.
-                    </p>
-                    <div class="post-footer">
-                        <div class="post-actions">
-                            <button class="action-btn">
-                                <i class="fas fa-heart"></i>
-                                <span>12</span>
-                            </button>
-                            <button class="action-btn">
-                                <i class="fas fa-comment"></i>
-                                <span>5</span>
-                            </button>
-                            <button class="action-btn">
-                                <i class="fas fa-flag"></i>
-                                گزارش
-                            </button>
-                        </div>
-                        <div class="post-stats">
-                            <div class="stat">
-                                <i class="fas fa-eye"></i>
-                                <span>87</span>
-                            </div>
-                            <div class="stat">
-                                <i class="fas fa-clock"></i>
-                                <span>5 ساعت پیش</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="post-card">
-                    <div class="post-header">
-                        <div class="user-avatar">ع م</div>
-                        <div class="user-info">
-                            <h4>علی محمدی</h4>
-                            <div class="meta">1 روز پیش • سمند 1395</div>
-                        </div>
-                        <div class="post-category">تعلیق و ترمز</div>
-                    </div>
-                    <h3 class="post-title">صدا و لرزش عجیب در تعلیق سمند</h3>
-                    <p class="post-content">
-                        وقتی روی دست انداز می‌رم صدای ضربه‌ای زیادی از جلوی خودرو میاد. 
-                        همچنین وقتی ترمز می‌گیرم خودرو کمی به راست می‌کشه. 
-                        آیا ممکنه قطعات تعلیق مشکل داشته باشن؟
-                    </p>
-                    <div class="post-footer">
-                        <div class="post-actions">
-                            <button class="action-btn">
-                                <i class="fas fa-heart"></i>
-                                <span>18</span>
-                            </button>
-                            <button class="action-btn">
-                                <i class="fas fa-comment"></i>
-                                <span>12</span>
-                            </button>
-                            <button class="action-btn">
-                                <i class="fas fa-flag"></i>
-                                گزارش
-                            </button>
-                        </div>
-                        <div class="post-stats">
-                            <div class="stat">
-                                <i class="fas fa-eye"></i>
-                                <span>203</span>
-                            </div>
-                            <div class="stat">
-                                <i class="fas fa-clock"></i>
-                                <span>1 روز پیش</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="post-card">
-                    <div class="post-header">
-                        <div class="user-avatar">م ا</div>
-                        <div class="user-info">
-                            <h4>مریم احمدی</h4>
-                            <div class="meta">2 روز پیش • پژو 206 1390</div>
-                        </div>
-                        <div class="post-category">روغن و سیالات</div>
-                    </div>
-                    <h3 class="post-title">روغن موتور پژو 206 داره سریع تموم میشه</h3>
-                    <p class="post-content">
-                        روزنه کیلومتر ۱۲۰۰۰۰ رو زدم. اخیراً متوجه شدم که روزنه روغن موتور خیلی زود تموم میشه. 
-                        هر ۱۰۰۰ کیلومتر باید یک لیتر اضافه کنم. 
-                        دلیلش چی می‌تونه باشه؟
-                    </p>
-                    <div class="post-footer">
-                        <div class="post-actions">
-                            <button class="action-btn">
-                                <i class="fas fa-heart"></i>
-                                <span>9</span>
-                            </button>
-                            <button class="action-btn">
-                                <i class="fas fa-comment"></i>
-                                <span>7</span>
-                            </button>
-                            <button class="action-btn">
-                                <i class="fas fa-flag"></i>
-                                گزارش
-                            </button>
-                        </div>
-                        <div class="post-stats">
-                            <div class="stat">
-                                <i class="fas fa-eye"></i>
-                                <span>156</span>
-                            </div>
-                            <div class="stat">
-                                <i class="fas fa-clock"></i>
-                                <span>2 روز پیش</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Pagination -->
-                <div class="pagination">
-                    <button class="page-btn"><i class="fas fa-chevron-right"></i></button>
-                    <button class="page-btn active">1</button>
-                    <button class="page-btn">2</button>
-                    <button class="page-btn">3</button>
-                    <button class="page-btn">4</button>
-                    <button class="page-btn">5</button>
-                    <button class="page-btn"><i class="fas fa-chevron-left"></i></button>
-                </div>
-            </main>
-        </div>
+      </div>
     </div>
-
-    <!-- Footer -->
-    <footer>
-        <div class="container">
-            <div class="footer-content">
-                <div class="footer-section">
-                    <h3>درباره انجمن</h3>
-                    <p>
-                        انجمن مشکلات خودروی فارسی‌زبانان محیطی برای تبادل تجربه و رفع مشکلات خودرویی است. 
-                        در این انجمن می‌توانید سوالات خود را مطرح کرده و از تجربیات سایر کاربران بهره‌مند شوید.
-                    </p>
-                </div>
-                
-                <div class="footer-section">
-                    <h3>دسته‌بندی‌های اصلی</h3>
-                    <ul class="footer-links">
-                        <li><a href="#">موتور و سیستم انتقال قدرت</a></li>
-                        <li><a href="#">سیستم الکتریکی</a></li>
-                        <li><a href="#">تعلیق و ترمز</a></li>
-                        <li><a href="#">روغن و سیالات</a></li>
-                        <li><a href="#">تعمیرات عمومی</a></li>
-                    </ul>
-                </div>
-                
-                <div class="footer-section">
-                    <h3>لینک‌های مفید</h3>
-                    <ul class="footer-links">
-                        <li><a href="#">قوانین انجمن</a></li>
-                        <li><a href="#">راهنمای عضویت</a></li>
-                        <li><a href="#">سوالات متداول</a></li>
-                        <li><a href="#">تماس با ما</a></li>
-                        <li><a href="#">درباره ما</a></li>
-                    </ul>
-                </div>
+    <button id="btn-notify" class="relative px-4 py-2 rounded-xl bg-white/10 border border-white/20 text-sm hover:bg-white/20 transition-all duration-300">
+      <i class="fas fa-bell"></i>
+      <span class="absolute -top-1 -right-1 w-5 h-5 bg-red-500 rounded-full flex items-center justify-center text-xs">3</span>
+    </button>
+  </header>
+  <!-- Pages container -->
+  <main id="pages" class="flex-1 w-full max-w-md mx-auto p-4 space-y-5">
+    <!-- DASHBOARD -->
+    <section id="page-dashboard" class="space-y-5">
+      <!-- Profile Card -->
+      <div class="glass rounded-3xl p-6 shadow-xl card-hover">
+        <div class="flex items-center gap-4 mb-4">
+          <div class="relative">
+            <img id="profile-avatar" src="https://i.pravatar.cc/120?img=12" class="w-20 h-20 rounded-full border-4 border-white/30 shadow-lg" alt="avatar" />
+            <div class="absolute bottom-0 right-0 w-8 h-8 rounded-full bg-gradient-to-r from-yellow-400 to-orange-500 flex items-center justify-center border-2 border-white">
+              <i class="fas fa-crown text-white text-sm"></i>
             </div>
-            
-            <div class="copyright">
-                &copy; 2023 انجمن مشکلات خودرو. تمامی حقوق محفوظ است.
+          </div>
+          <div class="flex-1">
+            <div class="flex items-center gap-2">
+              <h2 id="profile-name" class="text-2xl font-extrabold">زکی</h2>
+              <span id="vip-badge" class="chip bg-gradient-to-r from-yellow-400 to-orange-500 text-black font-bold hidden">VIP</span>
             </div>
+            <div class="text-sm text-white/80 flex items-center gap-1 mt-1">
+              <i class="fas fa-trophy text-yellow-300"></i>
+              <span>رتبه شما: <span id="rank" class="font-bold">—</span></span>
+            </div>
+          </div>
         </div>
-    </footer>
-
-    <script>
-        // Simple interactions for demonstration
-        document.addEventListener('DOMContentLoaded', function() {
-            // Like button functionality
-            const likeButtons = document.querySelectorAll('.action-btn');
-            likeButtons.forEach(button => {
-                button.addEventListener('click', function() {
-                    if (this.classList.contains('liked')) {
-                        this.classList.remove('liked');
-                        const count = this.querySelector('span');
-                        count.textContent = parseInt(count.textContent) - 1;
-                    } else {
-                        this.classList.add('liked');
-                        const count = this.querySelector('span');
-                        count.textContent = parseInt(count.textContent) + 1;
-                    }
-                });
-            });
-            
-            // Report button functionality
-            const reportButtons = document.querySelectorAll('.action-btn .fa-flag').closest('.action-btn');
-            reportButtons.forEach(button => {
-                button.addEventListener('click', function() {
-                    if (this.classList.contains('reported')) {
-                        this.classList.remove('reported');
-                        this.innerHTML = '<i class="fas fa-flag"></i> گزارش';
-                    } else {
-                        this.classList.add('reported');
-                        this.innerHTML = '<i class="fas fa-flag"></i> گزارش شد';
-                    }
-                });
-            });
-            
-            // Sort buttons
-            const sortButtons = document.querySelectorAll('.sort-btn');
-            sortButtons.forEach(button => {
-                button.addEventListener('click', function() {
-                    sortButtons.forEach(btn => btn.classList.remove('active'));
-                    this.classList.add('active');
-                });
-            });
-        });
-    </script>
+        <div class="divider"></div>
+        <div class="grid grid-cols-3 gap-3 text-center">
+          <div class="glass rounded-2xl p-4 card-hover">
+            <div class="text-2xl font-extrabold text-yellow-300" id="stat-score">0</div>
+            <div class="text-xs opacity-80 mt-1">امتیاز</div>
+          </div>
+          <div class="glass rounded-2xl p-4 card-hover">
+            <div class="text-2xl font-extrabold text-emerald-300" id="stat-coins">0</div>
+            <div class="text-xs opacity-80 mt-1">سکه</div>
+          </div>
+          <div class="glass rounded-2xl p-4 card-hover">
+            <div class="text-2xl font-extrabold text-rose-300" id="stat-lives">3</div>
+            <div class="text-xs opacity-80 mt-1">جان</div>
+          </div>
+        </div>
+      </div>
+      <!-- Streak & Sponsor -->
+      <div class="glass rounded-3xl p-5 card-hover">
+        <div class="flex items-center justify-between mb-3">
+          <div>
+            <div class="text-sm opacity-90 flex items-center gap-1">
+              <i class="fas fa-fire text-orange-400"></i>
+              <span>استریک روزانه</span>
+            </div>
+            <div class="text-2xl font-extrabold"><span id="streak">0</span> روز</div>
+          </div>
+          <button id="btn-claim-streak" class="btn btn-primary w-auto px-5 py-2 text-sm pulse">
+            <i class="fas fa-gift ml-1"></i> دریافت پاداش
+          </button>
+        </div>
+        <div class="w-full h-3 bg-white/15 rounded-full mt-3 overflow-hidden">
+          <div id="streak-bar" class="h-3 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-full transition-all duration-500" style="width:0%"></div>
+        </div>
+        <div class="text-xs mt-3 opacity-80 flex items-start gap-1">
+          <i class="fas fa-info-circle mt-0.5"></i>
+          <span>هر روز لاگین کنی پاداش بیشتر میشه. اگه جا بمونی صفر میشه 😬</span>
+        </div>
+      </div>
+      <!-- Actions -->
+      <div class="space-y-4">
+        <button class="btn btn-primary text-lg" id="btn-play">
+          <i class="fas fa-gamepad ml-2"></i> شروع مسابقه
+        </button>
+        <div class="grid grid-cols-2 gap-4">
+          <button class="btn btn-secondary" id="btn-shop">
+            <i class="fas fa-shopping-cart ml-2"></i> فروشگاه
+          </button>
+          <button class="btn btn-tertiary" id="btn-leaderboard">
+            <i class="fas fa-chart-line ml-2"></i> لیدربورد
+          </button>
+        </div>
+        <button class="w-full py-4 rounded-2xl bg-white/10 border border-white/20 hover:bg-white/20 transition-all duration-300 flex items-center justify-center gap-2" id="btn-invite">
+          <i class="fas fa-user-plus"></i>
+          <span>دعوت دوستان (+سکه)</span>
+        </button>
+      </div>
+      <div class="glass rounded-3xl p-4 text-center text-sm">
+        <div class="flex items-center justify-center gap-2">
+          <i class="fas fa-bolt text-yellow-300"></i>
+          <span>اسپانسر امروز: <span class="font-bold">کافه XYZ</span></span>
+        </div>
+        <div class="mt-2">
+          کد تخفیف: <span class="font-mono bg-white/20 px-2 py-1 rounded">SANANDAJ10</span>
+        </div>
+      </div>
+    </section>
+    <!-- QUIZ PAGE -->
+    <section id="page-quiz" class="hidden space-y-5">
+      <div class="glass rounded-3xl p-6 shadow-xl">
+        <div class="flex items-center justify-between mb-4">
+          <div class="flex items-center gap-2 text-sm">
+            <span id="quiz-cat" class="chip">
+              <i class="fas fa-folder ml-1"></i> عمومی
+            </span>
+            <span id="quiz-diff" class="chip">
+              <i class="fas fa-signal ml-1"></i> آسون
+            </span>
+          </div>
+          <div class="flex items-center gap-2 text-sm">
+            <span class="chip">
+              <i class="fas fa-heart text-red-400 ml-1"></i> <span id="lives">3</span>
+            </span>
+            <span class="chip">
+              <i class="fas fa-coins text-yellow-300 ml-1"></i> <span id="coins">0</span>
+            </span>
+          </div>
+        </div>
+        <div class="mt-4 flex items-center justify-center">
+          <div class="relative">
+            <svg width="140" height="140" viewBox="0 0 140 140" class="-rotate-90">
+              <circle cx="70" cy="70" r="64" stroke="rgba(255,255,255,.2)" stroke-width="12" fill="none"/>
+              <circle id="timer-ring" cx="70" cy="70" r="64" stroke="url(#gradient)" stroke-width="12" fill="none" stroke-linecap="round" stroke-dasharray="402.124" stroke-dashoffset="0" class="ring-anim"/>
+              <defs>
+                <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                  <stop offset="0%" stop-color="#fde047" />
+                  <stop offset="100%" stop-color="#fb923c" />
+                </linearGradient>
+              </defs>
+            </svg>
+            <div class="absolute inset-0 flex items-center justify-center">
+              <div class="text-3xl font-extrabold" id="timer-text">30</div>
+            </div>
+          </div>
+        </div>
+        <h3 id="question" class="text-xl font-bold mt-4 leading-8 text-center"></h3>
+      </div>
+      <div id="choices" class="space-y-4"></div>
+      <div class="flex items-center gap-4">
+        <button id="btn-quit" class="flex-1 py-4 rounded-2xl bg-white/10 border border-white/20 hover:bg-white/20 transition-all duration-300 flex items-center justify-center gap-2">
+          <i class="fas fa-times"></i>
+          <span>خروج</span>
+        </button>
+        <button id="btn-continue" class="hidden flex-1 py-4 rounded-2xl bg-gradient-to-r from-yellow-400 to-orange-500 text-black font-bold flex items-center justify-center gap-2">
+          <i class="fas fa-coins"></i>
+          <span>ادامه با 10 سکه</span>
+        </button>
+      </div>
+    </section>
+    <!-- LEADERBOARD -->
+    <section id="page-leaderboard" class="hidden space-y-5">
+      <div class="glass rounded-3xl p-6">
+        <h3 class="text-2xl font-extrabold mb-5 flex items-center gap-2">
+          <i class="fas fa-trophy text-yellow-300"></i>
+          <span>لیدربورد هفتگی</span>
+        </h3>
+        <div id="lb-list" class="space-y-3"></div>
+      </div>
+      <button class="w-full py-4 rounded-2xl bg-white/10 border border-white/20 hover:bg-white/20 transition-all duration-300 flex items-center justify-center gap-2" id="btn-back-lb">
+        <i class="fas fa-arrow-right"></i>
+        <span>بازگشت</span>
+      </button>
+    </section>
+    <!-- SHOP / VIP -->
+    <section id="page-shop" class="hidden space-y-5">
+      <div class="glass rounded-3xl p-6 space-y-4">
+        <h3 class="text-2xl font-extrabold flex items-center gap-2">
+          <i class="fas fa-shopping-bag text-purple-300"></i>
+          <span>فروشگاه</span>
+        </h3>
+        <div class="grid grid-cols-2 gap-4">
+          <div class="glass-dark rounded-2xl p-5 card-hover">
+            <div class="text-center mb-3">
+              <div class="w-12 h-12 mx-auto rounded-full bg-red-500/20 flex items-center justify-center mb-2">
+                <i class="fas fa-heart text-red-400 text-xl"></i>
+              </div>
+              <div class="font-bold text-lg">جان +1</div>
+              <div class="text-sm opacity-80 mt-1">برگشت به بازی</div>
+            </div>
+            <button class="btn btn-primary text-sm" data-buy="life">
+              <i class="fas fa-coins ml-1"></i> خرید 30💰
+            </button>
+          </div>
+          <div class="glass-dark rounded-2xl p-5 card-hover">
+            <div class="text-center mb-3">
+              <div class="w-12 h-12 mx-auto rounded-full bg-blue-500/20 flex items-center justify-center mb-2">
+                <i class="fas fa-bolt text-blue-400 text-xl"></i>
+              </div>
+              <div class="font-bold text-lg">بوست امتیاز x2</div>
+              <div class="text-sm opacity-80 mt-1">تا 10 دقیقه</div>
+            </div>
+            <button class="btn btn-secondary text-sm" data-buy="boost">
+              <i class="fas fa-coins ml-1"></i> خرید 50💰
+            </button>
+          </div>
+          <div class="glass-dark rounded-2xl p-5 col-span-2 card-hover">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-4">
+                <div class="w-16 h-16 rounded-full bg-gradient-to-r from-yellow-400 to-orange-500 flex items-center justify-center">
+                  <i class="fas fa-crown text-white text-2xl"></i>
+                </div>
+                <div>
+                  <div class="font-bold text-lg">اشتراک VIP (ماهانه)</div>
+                  <div class="text-sm opacity-80 mt-1">+جان روزانه، +استریک، +جام‌های ویژه</div>
+                </div>
+              </div>
+              <button class="btn btn-tertiary w-auto px-4" data-buy="vip">
+                <i class="fas fa-coins ml-1"></i> خرید 200💰
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <button class="w-full py-4 rounded-2xl bg-white/10 border border-white/20 hover:bg-white/20 transition-all duration-300 flex items-center justify-center gap-2" id="btn-back-shop">
+        <i class="fas fa-arrow-right"></i>
+        <span>بازگشت</span>
+      </button>
+    </section>
+  </main>
+  <!-- Bottom Nav -->
+  <nav class="glass safe sticky bottom-0 z-30 w-full shadow-lg">
+    <div class="max-w-md mx-auto grid grid-cols-3">
+      <button class="py-4 text-center hover:bg-white/10 transition-all duration-300 nav-item" data-tab="dashboard">
+        <i class="fas fa-home text-xl mb-1"></i>
+        <div class="text-xs">خانه</div>
+      </button>
+      <button class="py-4 text-center hover:bg-white/10 transition-all duration-300 nav-item" data-tab="quiz">
+        <i class="fas fa-gamepad text-xl mb-1"></i>
+        <div class="text-xs">مسابقه</div>
+      </button>
+      <button class="py-4 text-center hover:bg-white/10 transition-all duration-300 nav-item" data-tab="leaderboard">
+        <i class="fas fa-chart-line text-xl mb-1"></i>
+        <div class="text-xs">لیدربورد</div>
+      </button>
+    </div>
+  </nav>
+  <script>
+  // === Minimal state/store ===
+  const $ = s => document.querySelector(s);
+  const $$ = s => Array.from(document.querySelectorAll(s));
+  const clamp = (n, a, b) => Math.max(a, Math.min(b, n));
+  const State = {
+    user: { id: 'guest', name: 'کاربر مهمان', avatar: 'https://i.pravatar.cc/120?img=12' },
+    score: 0,
+    coins: 100,
+    lives: 3,
+    vip: false,
+    streak: 0,
+    lastClaim: 0,
+    boostUntil: 0,
+    leaderboard: [
+      { id: 'u1', name: 'آرتین', score: 18200 },
+      { id: 'u2', name: 'سمانه', score: 16500 },
+      { id: 'u3', name: 'مانی', score: 14950 },
+      { id: 'u4', name: 'نیکا', score: 13200 },
+    ],
+    quiz: { duration:30, remain:30, timer:null, inProgress:false, correctIndex:-1, answered:false }
+  };
+  const STORAGE_KEY = 'quiz_webapp_pro_state_v1';
+  function loadState(){
+    try{
+      const s = JSON.parse(localStorage.getItem(STORAGE_KEY)||'null');
+      if(s){ Object.assign(State, s); }
+    }catch{}
+  }
+  function saveState(){ localStorage.setItem(STORAGE_KEY, JSON.stringify(State)); }
+  // Try Telegram WebApp user
+  try{
+    if(window.Telegram && Telegram.WebApp){
+      Telegram.WebApp.ready();
+      const u = Telegram.WebApp.initDataUnsafe?.user;
+      if(u){
+        State.user.id = String(u.id);
+        State.user.name = [u.first_name, u.last_name].filter(Boolean).join(' ');
+        if(u.username) State.user.name += ` (@${u.username})`;
+        $('#profile-name').textContent = State.user.name;
+      }
+    }
+  }catch{}
+  loadState();
+  // === UI bindings ===
+  function fmt(n){ return new Intl.NumberFormat('fa-IR').format(n); }
+  function renderHeader(){
+    $('#hdr-name').textContent = State.user.name;
+    $('#hdr-score').textContent = fmt(State.score);
+    $('#hdr-avatar').src = State.user.avatar;
+  }
+  function renderDashboard(){
+    $('#profile-name').textContent = State.user.name;
+    $('#profile-avatar').src = State.user.avatar;
+    $('#stat-score').textContent = fmt(State.score);
+    $('#stat-coins').textContent = fmt(State.coins);
+    $('#stat-lives').textContent = State.lives;
+    $('#vip-badge').classList.toggle('hidden', !State.vip);
+    $('#streak').textContent = State.streak;
+    const pct = clamp((State.streak%7)/7*100,0,100);
+    $('#streak-bar').style.width = pct + '%';
+  }
+  function renderTopBars(){
+    $('#lives').textContent = State.lives;
+    $('#coins').textContent = fmt(State.coins);
+  }
+  function navTo(page){
+    ['dashboard','quiz','leaderboard','shop'].forEach(p=>{
+      $('#page-'+p)?.classList.add('hidden');
+    });
+    $('#page-'+page)?.classList.remove('hidden');
+    $('#page-'+page)?.classList.add('fade-in');
+    // highlight tab
+    $$('nav [data-tab]').forEach(b=>{
+      b.classList.toggle('bg-white/10', b.dataset.tab===page);
+      b.classList.toggle('active', b.dataset.tab===page);
+    });
+    if(page==='dashboard') renderDashboard();
+    if(page==='leaderboard') renderLeaderboard();
+  }
+  // === Quiz Logic ===
+  const localQuestions = [
+    { q:'پایتخت استرالیا کدام است؟', c:['ملبورن','سیدنی','پرت','کانبرا'], a:3, cat:'جغرافیا', diff:'آسون' },
+    { q:'قهرمان جام جهانی فوتبال ۱۹۹۸؟', c:['آلمان','برزیل','فرانسه','ایتالیا'], a:2, cat:'ورزش', diff:'متوسط' },
+    { q:'در دنیای «هری پاتر» نگهبان آزکابان چیست؟', c:['دیوانه‌ساز','غول','اژدها','کوتولهٔ خانگی'], a:0, cat:'سرگرمی', diff:'آسون' },
+    { q:'عدد π تقریباً برابر با؟', c:['۲٫۷','۳٫۱۴','۳٫۴۱','۲٫۱۴'], a:1, cat:'علم', diff:'آسون' },
+    { q:'کدام هنرمند نقاشی «شب پرستاره» را کشیده؟', c:['پیکاسو','ون‌گوگ','مونک','داوینچی'], a:1, cat:'هنر', diff:'متوسط' },
+  ];
+  async function fetchQuestion(){
+    // Try OpenTDB; fallback to local
+    try{
+      const url = 'https://opentdb.com/api.php?amount=1&type=multiple&encode=url3986';
+      const r = await fetch(url, { cache:'no-store' });
+      const j = await r.json();
+      if(j?.results?.length){
+        const it = j.results[0];
+        const decode = s => decodeURIComponent(s||'').replace(/&(#\d+|[a-z]+);/gi, m=>{ const t=document.createElement('textarea'); t.innerHTML=m; return t.value; });
+        const q = decode(it.question);
+        const correct = decode(it.correct_answer);
+        const choices = [...it.incorrect_answers.map(decode), correct].sort(()=>Math.random()-0.5);
+        return { q, c:choices, a: choices.indexOf(correct), cat: it.category||'عمومی', diff: it.difficulty||'—' };
+      }
+    }catch(e){ /* offline or blocked */ }
+    // fallback
+    return localQuestions[Math.floor(Math.random()*localQuestions.length)];
+  }
+  function resetTimer(seconds){
+    const circ = 2*Math.PI*64; // 402.124
+    const ring = $('#timer-ring');
+    ring.setAttribute('stroke-dasharray', circ);
+    ring.style.strokeDashoffset = '0';
+    $('#timer-text').textContent = seconds;
+    State.quiz.duration = seconds;
+    State.quiz.remain = seconds;
+    if(State.quiz.timer) clearInterval(State.quiz.timer);
+    State.quiz.timer = setInterval(()=>{
+      State.quiz.remain -= 1;
+      const r = clamp(State.quiz.remain,0,seconds);
+      $('#timer-text').textContent = r;
+      const off = circ * (1 - r/seconds);
+      ring.style.strokeDashoffset = String(off);
+      if(r<=0){ clearInterval(State.quiz.timer); lockChoices(); showContinue(); }
+    }, 1000);
+  }
+  function lockChoices(){
+    $$('#choices .choice').forEach(el=> el.classList.add('pointer-events-none','opacity-70'));
+  }
+  function showContinue(){
+    if(State.lives<=0){ $('#btn-continue').classList.remove('hidden'); }
+  }
+  async function startQuiz(){
+    State.quiz.inProgress = true; State.quiz.answered = false; $('#btn-continue').classList.add('hidden');
+    renderTopBars();
+    const q = await fetchQuestion();
+    State.quiz.correctIndex = q.a;
+    $('#quiz-cat').innerHTML = `<i class="fas fa-folder ml-1"></i> ${q.cat}`;
+    $('#quiz-diff').innerHTML = `<i class="fas fa-signal ml-1"></i> ${typeof q.diff==='string' ? q.diff : '—'}`;
+    $('#question').textContent = q.q;
+    const box = $('#choices'); box.innerHTML='';
+    q.c.forEach((txt,idx)=>{
+      const btn = document.createElement('button');
+      btn.className='choice';
+      btn.innerHTML = `<span class="chip">${String.fromCharCode(65+idx)}</span><span>${txt}</span>`;
+      btn.addEventListener('click', ()=> selectAnswer(idx));
+      box.appendChild(btn);
+    });
+    resetTimer(30);
+  }
+  function selectAnswer(idx){
+    if(State.quiz.answered) return;
+    State.quiz.answered = true;
+    clearInterval(State.quiz.timer);
+    const correct = State.quiz.correctIndex;
+    const list = $$('#choices .choice');
+    list.forEach((el,i)=>{
+      el.classList.add(i===correct? 'correct':'wrong');
+    });
+    lockChoices();
+    // scoring with time bonus & VIP/boost
+    const base = idx===correct ? 100 : 0;
+    const timeBonus = idx===correct ? Math.floor( (State.quiz.remain/State.quiz.duration) * 50 ) : 0;
+    const boostActive = Date.now() < State.boostUntil;
+    const vipBonus = State.vip ? 20 : 0;
+    const total = Math.floor((base + timeBonus + vipBonus) * (boostActive?2:1));
+    if(base>0){
+      State.score += total;
+      State.coins += 5; // small coin for correct
+    } else {
+      State.lives -= 1;
+      if(State.lives<=0) showContinue();
+    }
+    saveState(); renderHeader(); renderTopBars();
+  }
+  // === Leaderboard ===
+  function renderLeaderboard(){
+    const me = { id: State.user.id, name: State.user.name, score: State.score };
+    const arr = [...State.leaderboard.filter(x=>x.id!==me.id), me].sort((a,b)=>b.score-a.score).slice(0,20);
+    const wrap = $('#lb-list'); wrap.innerHTML='';
+    arr.forEach((u,i)=>{
+      const row = document.createElement('div');
+      row.className = 'flex items-center justify-between bg-white/10 border border-white/20 rounded-xl px-4 py-3 card-hover';
+      
+      let rankIcon = '';
+      if(i === 0) rankIcon = '<i class="fas fa-trophy text-yellow-300"></i>';
+      else if(i === 1) rankIcon = '<i class="fas fa-medal text-gray-300"></i>';
+      else if(i === 2) rankIcon = '<i class="fas fa-award text-amber-700"></i>';
+      else rankIcon = `<span class="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center">${i+1}</span>`;
+      
+      row.innerHTML = `<div class="flex items-center gap-3">
+        ${rankIcon}
+        <div>
+          <div class="font-bold">${u.name}</div>
+          <div class="text-xs opacity-80 flex items-center gap-1">
+            <i class="fas fa-star text-yellow-300"></i>
+            <span>${fmt(u.score)}</span>
+          </div>
+        </div>
+      </div>`;
+      wrap.appendChild(row);
+    });
+  }
+  // === Shop ===
+  function buy(item){
+    const price = { life:30, boost:50, vip:200 }[item];
+    if(State.coins < price){ 
+      // Create a modern toast notification instead of alert
+      const toast = document.createElement('div');
+      toast.className = 'fixed top-20 left-1/2 transform -translate-x-1/2 glass px-6 py-3 rounded-2xl text-white font-bold z-50 fade-in';
+      toast.innerHTML = '<i class="fas fa-exclamation-circle ml-2"></i>سکه کافی نیست';
+      document.body.appendChild(toast);
+      setTimeout(() => toast.remove(), 3000);
+      return; 
+    }
+    State.coins -= price;
+    if(item==='life') State.lives += 1;
+    if(item==='boost') State.boostUntil = Date.now() + 10*60*1000; // 10 min
+    if(item==='vip') State.vip = true;
+    saveState(); renderDashboard(); renderTopBars(); $('#vip-badge').classList.toggle('hidden', !State.vip);
+    
+    // Success toast
+    const toast = document.createElement('div');
+    toast.className = 'fixed top-20 left-1/2 transform -translate-x-1/2 glass px-6 py-3 rounded-2xl text-white font-bold z-50 fade-in';
+    toast.innerHTML = '<i class="fas fa-check-circle ml-2"></i>خرید با موفقیت انجام شد';
+    document.body.appendChild(toast);
+    setTimeout(() => toast.remove(), 3000);
+  }
+  // === Streak ===
+  function claimStreak(){
+    const nowDay = Math.floor(Date.now()/86400000);
+    if(State.lastClaim === nowDay){ 
+      const toast = document.createElement('div');
+      toast.className = 'fixed top-20 left-1/2 transform -translate-x-1/2 glass px-6 py-3 rounded-2xl text-white font-bold z-50 fade-in';
+      toast.innerHTML = '<i class="fas fa-info-circle ml-2"></i>امروز قبلاً دریافت کردی';
+      document.body.appendChild(toast);
+      setTimeout(() => toast.remove(), 3000);
+      return; 
+    }
+    const yesterday = nowDay - 1;
+    if(State.lastClaim === yesterday) State.streak += 1; else State.streak = 1;
+    State.lastClaim = nowDay;
+    const reward = 5 * State.streak; // grows with streak
+    State.coins += reward; State.score += reward*10;
+    saveState(); renderDashboard(); renderHeader();
+    
+    const toast = document.createElement('div');
+    toast.className = 'fixed top-20 left-1/2 transform -translate-x-1/2 glass px-6 py-3 rounded-2xl text-white font-bold z-50 fade-in';
+    toast.innerHTML = `<i class="fas fa-gift ml-2"></i>پاداش امروز: ${reward} سکه 🎉`;
+    document.body.appendChild(toast);
+    setTimeout(() => toast.remove(), 3000);
+  }
+  // === Invite ===
+  function doInvite(){
+    const link = `https://t.me/share/url?url=${encodeURIComponent('https://t.me/your_bot?start=ref_'+State.user.id)}&text=${encodeURIComponent('بیا تو مسابقه!')}`;
+    try{ window.open(link, '_blank'); }catch{ navigator.clipboard.writeText(link); 
+      const toast = document.createElement('div');
+      toast.className = 'fixed top-20 left-1/2 transform -translate-x-1/2 glass px-6 py-3 rounded-2xl text-white font-bold z-50 fade-in';
+      toast.innerHTML = '<i class="fas fa-check-circle ml-2"></i>لینک کپی شد';
+      document.body.appendChild(toast);
+      setTimeout(() => toast.remove(), 3000);
+    }
+  }
+  // === Events ===
+  $('#btn-play').addEventListener('click', ()=>{ navTo('quiz'); startQuiz(); });
+  $('#btn-leaderboard').addEventListener('click', ()=>{ navTo('leaderboard'); });
+  $('#btn-shop').addEventListener('click', ()=>{ navTo('shop'); });
+  $('#btn-back-lb').addEventListener('click', ()=> navTo('dashboard'));
+  $('#btn-back-shop').addEventListener('click', ()=> navTo('dashboard'));
+  $('#btn-quit').addEventListener('click', ()=>{ navTo('dashboard'); });
+  $('#btn-continue').addEventListener('click', ()=>{
+    if(State.coins>=10){ State.coins-=10; State.lives=1; saveState(); $('#btn-continue').classList.add('hidden'); renderTopBars(); resetTimer(15); $$('#choices .choice').forEach(el=>{ el.classList.remove('wrong','correct','pointer-events-none','opacity-70'); }); State.quiz.answered=false; }
+    else {
+      const toast = document.createElement('div');
+      toast.className = 'fixed top-20 left-1/2 transform -translate-x-1/2 glass px-6 py-3 rounded-2xl text-white font-bold z-50 fade-in';
+      toast.innerHTML = '<i class="fas fa-exclamation-circle ml-2"></i>سکه کافی نیست';
+      document.body.appendChild(toast);
+      setTimeout(() => toast.remove(), 3000);
+    }
+  });
+  $('#btn-claim-streak').addEventListener('click', claimStreak);
+  $('#btn-invite').addEventListener('click', doInvite);
+  $$('[data-buy]').forEach(b=> b.addEventListener('click', e=> buy(e.currentTarget.dataset.buy)));
+  $$('nav [data-tab]').forEach(b=> b.addEventListener('click', e=>{
+    const tab = e.currentTarget.dataset.tab;
+    if(tab==='quiz'){ navTo('quiz'); startQuiz(); } else navTo(tab);
+  }));
+  // Init
+  renderHeader(); renderDashboard(); navTo('dashboard');
+  </script>
 </body>
 </html>

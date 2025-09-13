@@ -686,37 +686,236 @@ button:disabled, .btn:disabled {
 .activity-item .activity-text { flex-grow: 1; font-size: var(--font-size-sm); }
 .activity-item .activity-time { font-size: 12px; color: var(--c-text-secondary); white-space: nowrap; }
 .hidden { display: none !important; }
+/* === RESPONSIVE FILTER BAR === */
 .filter-bar {
+  position: relative;
   display: flex;
   gap: var(--space-2);
   margin-bottom: var(--space-3);
+  overflow: hidden; /* Changed from auto to hidden */
+}
+
+/* Scrollable container */
+.filter-chips {
+  display: flex;
+  gap: var(--space-2);
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
-  scrollbar-width: none; 
+  scrollbar-width: none;
+  scroll-behavior: smooth;
+  padding: 4px 0; /* Space for focus outlines */
+  /* Add padding for fade effect */
+  padding-inline: 4px;
 }
-.filter-bar::-webkit-scrollbar { display: none; }
-.filter-chips { display: flex; gap: var(--space-2); }
+
+.filter-chips::-webkit-scrollbar { 
+  display: none; 
+}
+
+/* Individual filter chips */
 .filter-chip {
+  flex: 0 0 auto; /* Prevent shrinking */
   padding: var(--space-2) var(--space-3);
   border-radius: 30px;
   font-size: var(--font-size-sm);
   white-space: nowrap;
   background-color: var(--c-bg-tertiary);
   color: var(--c-text-primary);
+  border: 2px solid transparent;
+  transition: all var(--transition-fast);
+  cursor: pointer;
+  position: relative;
+  min-height: 44px; /* Touch-friendly size */
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
 }
+
+.filter-chip:hover {
+  background-color: var(--c-border);
+  transform: translateY(-1px);
+}
+
+.filter-chip:focus-visible {
+  outline: none;
+  border-color: var(--c-primary);
+  box-shadow: 0 0 0 3px rgba(var(--c-primary-rgb), 0.2);
+}
+
 .filter-chip.active {
   background-color: var(--c-primary);
   color: var(--c-text-on-primary);
+  font-weight: 600;
+  box-shadow: 0 2px 8px rgba(var(--c-primary-rgb), 0.3);
 }
+
 .chip-badge {
-  background-color: rgba(0,0,0,0.1);
+  background-color: rgba(0,0,0,0.15);
   color: inherit;
-  padding: 2px 6px;
-  border-radius: 10px;
+  padding: 2px 8px;
+  border-radius: 12px;
   font-size: 11px;
-  margin-inline-start: 6px;
+  font-weight: 700;
+  margin-inline-start: 4px;
+  min-width: 20px;
+  text-align: center;
 }
-.filter-chip.active .chip-badge { background-color: rgba(255,255,255,0.2); }
+
+.filter-chip.active .chip-badge { 
+  background-color: rgba(255,255,255,0.2); 
+}
+
+/* === SCROLL INDICATORS (Fade Effect) === */
+.filter-bar::before,
+.filter-bar::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 40px;
+  pointer-events: none;
+  z-index: 1;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.filter-bar::before {
+  left: 0;
+  background: linear-gradient(to right, var(--c-bg-primary) 0%, transparent 100%);
+}
+
+.filter-bar::after {
+  right: 0;
+  background: linear-gradient(to left, var(--c-bg-primary) 0%, transparent 100%);
+}
+
+/* Show indicators when scrollable */
+.filter-bar.has-scroll-start::before,
+.filter-bar.has-scroll-end::after {
+  opacity: 1;
+}
+
+/* === MOBILE DROPDOWN APPROACH (Optional - for very small screens) === */
+@media (max-width: 380px) {
+  .filter-bar {
+    flex-direction: column;
+    gap: 0;
+    margin-bottom: var(--space-3);
+    overflow: visible;
+  }
+
+  .filter-chips {
+    position: relative;
+    display: flex;
+    flex-wrap: wrap;
+    overflow: visible;
+    padding: 0;
+    gap: 8px;
+  }
+
+  /* Show only active filter + one more on mobile */
+  .filter-chip {
+    min-height: 40px;
+    padding: 8px 16px;
+    font-size: 13px;
+  }
+
+  /* Stack filters in 2x2 grid on very small screens */
+  .filter-chips {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+  }
+
+  .filter-chip {
+    width: 100%;
+    justify-content: center;
+    text-align: center;
+  }
+
+  .chip-badge {
+    font-size: 10px;
+    padding: 1px 6px;
+    margin-inline-start: 3px;
+  }
+}
+
+/* === TABLET OPTIMIZATION === */
+@media (min-width: 768px) {
+  .filter-bar {
+    justify-content: center;
+  }
+
+  .filter-chips {
+    justify-content: center;
+    padding-inline: 0;
+  }
+
+  /* No scroll indicators needed on larger screens */
+  .filter-bar::before,
+  .filter-bar::after {
+    display: none;
+  }
+}
+
+/* === IMPROVED ACCESSIBILITY === */
+@media (prefers-reduced-motion: reduce) {
+  .filter-chips {
+    scroll-behavior: auto;
+  }
+  
+  .filter-chip {
+    transition: none;
+  }
+}
+
+/* === HIGH CONTRAST MODE === */
+@media (prefers-contrast: high) {
+  .filter-chip {
+    border-width: 2px;
+    border-color: var(--c-border);
+  }
+
+  .filter-chip.active {
+    border-color: var(--c-primary);
+  }
+}
+
+/* === TOUCH GESTURE HINT === */
+@media (max-width: 768px) and (hover: none) {
+  .filter-chips {
+    position: relative;
+  }
+
+  /* Initial hint animation */
+  .filter-chips::after {
+    content: '';
+    position: absolute;
+    right: 20px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 30px;
+    height: 30px;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='30' height='30' viewBox='0 0 24 24' fill='none' stroke='%238e8e93' stroke-width='2'%3E%3Cpath d='M9 18l6-6-6-6'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: center;
+    opacity: 0;
+    animation: swipeHint 3s ease-in-out 0.5s;
+    pointer-events: none;
+  }
+
+  @keyframes swipeHint {
+    0%, 100% { opacity: 0; transform: translateY(-50%) translateX(0); }
+    20%, 80% { opacity: 0.7; }
+    50% { transform: translateY(-50%) translateX(-10px); }
+  }
+
+  /* Hide hint after first interaction */
+  .filter-chips:active::after,
+  .filter-chips.scrolled::after {
+    display: none;
+  }
+}
 .bookings-list { display: flex; flex-direction: column; gap: var(--space-3); }
 .booking-card {
   display: flex;
