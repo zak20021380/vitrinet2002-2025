@@ -1352,7 +1352,7 @@ destroy() {
     };
     listEl.innerHTML = filtered.map(b => {
       const statusText = b.status === 'cancelled'
-        ? (b.cancelledBy === 'customer' ? 'لغو توسط مشتری' : 'لغو شده')
+        ? (b.cancelledBy === 'customer' ? 'لغو شده توسط مشتری' : 'لغو شده')
         : (baseStatusLabel[b.status] || b.status);
       return `
       <article class="booking-card card" role="listitem" tabindex="0" data-status="${b.status}" ${b.cancelledBy ? `data-cancelled-by="${b.cancelledBy}"` : ''} data-customer-name="${b.customerName}">
@@ -2364,7 +2364,7 @@ populateCustomerModal(data) {
     'completed': 'انجام شده',
     'confirmed': 'تایید شده',
     'pending': 'در انتظار',
-    'cancelled': 'لغو شده'
+    'cancelled': data.lastReservation.cancelledBy === 'customer' ? 'لغو شده توسط مشتری' : 'لغو شده'
   };
   statusBadge.textContent = statusTexts[data.lastReservation.status];
   const actions = document.getElementById('last-reservation-actions');
@@ -2476,7 +2476,7 @@ openCustomerModal(customer) {
       pending: 'در انتظار',
       confirmed: 'تایید شده',
       completed: 'انجام شده',
-      cancelled: 'لغو شده'
+      cancelled: last && last.cancelledBy === 'customer' ? 'لغو شده توسط مشتری' : 'لغو شده'
     };
     
     // Update status display
