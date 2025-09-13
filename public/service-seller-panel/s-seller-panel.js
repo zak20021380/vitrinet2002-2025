@@ -1929,7 +1929,7 @@ async initServices() {
   populateServiceForm(service) {
         const form = document.getElementById('service-form');
         const titleEl = document.getElementById('service-drawer-title');
-        if (service) {
+        if (service && service.id != null) {
             form.dataset.editingId = service.id;
             document.getElementById('service-id').value = service.id;
             document.getElementById('service-title').value = service.title;
@@ -1949,7 +1949,8 @@ async initServices() {
 // ==== REPLACE: handleServiceFormSubmit (write-through to API) ====
 async handleServiceFormSubmit() {
   const form = document.getElementById('service-form');
-  const id = form.dataset.editingId ? form.dataset.editingId : null;
+  const rawId = form.dataset.editingId;
+  const id = rawId && rawId !== 'undefined' && rawId !== 'null' && rawId !== '' ? rawId : null;
 
   const title = document.getElementById('service-title').value.trim();
   const price = parseFloat(document.getElementById('service-price').value);
