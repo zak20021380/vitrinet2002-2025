@@ -4011,6 +4011,7 @@ document.addEventListener('DOMContentLoaded', async function() {
   // مقادیر shopurl و sellerId بعداً تعیین می‌شن
   let shopurl = '';
   let sellerId = null;
+  let reviewsData = [];
 
   const userId = window.__APP_USER__?.id;
   const isAdmin = window.__APP_USER__?.isAdmin || window.__APP_USER__?.role === 'admin';
@@ -4106,16 +4107,16 @@ document.addEventListener('DOMContentLoaded', async function() {
       }
 
       const reviewsRes = await fetchByUrl(`/api/shopAppearance/${encodeURIComponent(sellerId)}/reviews`);
-      const reviews = Array.isArray(reviewsRes) ? reviewsRes : (reviewsRes?.reviews || []);
+      reviewsData = Array.isArray(reviewsRes) ? reviewsRes : (reviewsRes?.reviews || []);
       const avg = typeof data?.averageRating === 'number'
                     ? data.averageRating
-                    : (reviews.length ? (reviews.reduce((s,r)=>s+(+r.score||0),0) / reviews.length) : 0);
+                    : (reviewsData.length ? (reviewsData.reduce((s,r)=>s+(+r.score||0),0) / reviewsData.length) : 0);
       const cnt = typeof data?.ratingCount === 'number'
                     ? data.ratingCount
-                    : reviews.length;
+                    : reviewsData.length;
 
-      updateSummary(avg, cnt, reviews);
-      renderReviews(reviews);
+      updateSummary(avg, cnt, reviewsData);
+      renderReviews(reviewsData);
       setReviewActions(true);
     } catch (err) {
       console.error('load reviews failed', err);
@@ -4133,6 +4134,11 @@ document.addEventListener('DOMContentLoaded', async function() {
     const modalList = document.getElementById('reviews-list');
     if (container) container.innerHTML = '';
     if (modalList) modalList.innerHTML = '';
+    const sellerLocal = (() => {
+      try { return JSON.parse(localStorage.getItem('seller') || 'null'); }
+      catch (_) { return null; }
+    })();
+    const isOwner = sellerLocal && (sellerLocal._id === document.body.dataset.sellerId || sellerLocal.id === document.body.dataset.sellerId);
 
     if (!reviews.length) {
       container && (container.innerHTML = '<div class="w-full text-center text-gray-500 py-8">هنوز نظری ثبت نشده است.</div>');
@@ -4141,6 +4147,7 @@ document.addEventListener('DOMContentLoaded', async function() {
     }
 
     reviews.forEach(r => {
+      const id = r._id || r.id;
       const rawName =
         r.userName ||
         (r.userId && typeof r.userId === 'object'
@@ -4156,20 +4163,23 @@ document.addEventListener('DOMContentLoaded', async function() {
       const stars = starHtml(score);
 
       container && container.insertAdjacentHTML('beforeend', `
-        <div class="review-card flex-shrink-0 w-80 bg-white rounded-2xl shadow-sm hover:shadow-md transition-shadow border border-gray-100 p-5">
+        <div class="review-card flex-shrink-0 w-80 bg-white rounded-2xl shadow-sm hover:shadow-md transition-shadow border border-gray-100 p-5" data-id="${id}">
           <div class="flex items-start justify-between mb-3">
             <div>
               <h4 class="font-bold text-gray-900 mb-1">${name}</h4>
               <div class="flex items-center gap-1">${stars}</div>
             </div>
-            <span class="text-xs text-gray-400 bg-gray-50 px-2 py-1 rounded-full">${escapeHTML(date)}</span>
+            <div class="flex items-center gap-2">
+              <span class="text-xs text-gray-400 bg-gray-50 px-2 py-1 rounded-full">${escapeHTML(date)}</span>
+              ${isOwner ? `<button class="delete-review text-gray-400 hover:text-red-500 transition-colors" title="حذف نظر"><i class="fa-solid fa-trash"></i></button>` : ''}
+            </div>
           </div>
           <p class="text-sm text-gray-700 leading-6">${comment}</p>
         </div>
       `);
 
       modalList && modalList.insertAdjacentHTML('beforeend', `
-        <div class="review-item bg-white border border-gray-100 rounded-2xl p-5 hover:shadow-md transition-shadow" data-rating="${score}">
+        <div class="review-item bg-white border border-gray-100 rounded-2xl p-5 hover:shadow-md transition-shadow" data-rating="${score}" data-id="${id}">
           <div class="flex items-start justify-between mb-3">
             <div>
               <h4 class="font-bold text-gray-900 mb-1">${name}</h4>
@@ -4179,6 +4189,7 @@ document.addEventListener('DOMContentLoaded', async function() {
                 <span class="text-xs text-gray-500">${escapeHTML(date)}</span>
               </div>
             </div>
+            ${isOwner ? `<button class="delete-review text-gray-400 hover:text-red-500 transition-colors" title="حذف نظر"><i class="fa-solid fa-trash"></i></button>` : ''}
           </div>
           <div class="review-text-container">
             <p class="text-sm text-gray-700 leading-7 review-text">${comment}</p>
@@ -4187,6 +4198,31 @@ document.addEventListener('DOMContentLoaded', async function() {
       `);
     });
   }
+
+  const reviewEls = [document.getElementById('reviews-container'), document.getElementById('reviews-list')];
+  reviewEls.forEach(el => {
+    el?.addEventListener('click', async e => {
+      const btn = e.target.closest('.delete-review');
+      if (!btn) return;
+      const card = btn.closest('[data-id]');
+      const id = card?.dataset?.id;
+      if (!id) return;
+      try {
+        const res = await fetch(`${API_ROOT}/api/shopAppearance/reviews/${encodeURIComponent(id)}`, {
+          method: 'DELETE',
+          credentials: 'include'
+        });
+        if (!res.ok) throw new Error();
+        reviewsData = reviewsData.filter(r => String(r._id || r.id) !== String(id));
+        card.remove();
+        const avg = reviewsData.length ? (reviewsData.reduce((s,r)=>s+(+r.score||0),0) / reviewsData.length) : 0;
+        updateSummary(avg, reviewsData.length, reviewsData);
+        showToast('نظر حذف شد', 'success');
+      } catch(err) {
+        showToast('حذف نظر ناموفق بود', 'error');
+      }
+    });
+  });
 
 function updateSummary(avg, count, ratings) {
   // ستاره‌ها
