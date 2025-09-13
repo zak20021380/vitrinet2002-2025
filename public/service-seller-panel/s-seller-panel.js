@@ -146,6 +146,7 @@ async createService(payload) {
       const time = normalizeTime(toEn(b.startTime || b.time || '')) || '';
       return {
         id: b._id || b.id,
+        customerId: b.customerId || b.userId || '',
         customerName: b.customerName || '',
         service: b.service || '',
         date: dateISO,
@@ -1379,7 +1380,7 @@ destroy() {
             </div>
           </div>
           ` : ''}
-          <button type="button" class="btn-icon-text ${b.blocked ? 'btn-secondary' : 'btn-danger'} block-customer-btn" data-name="${b.customerName}" data-blocked="${b.blocked}" aria-label="${b.blocked ? 'آزادسازی مشتری' : 'مسدودسازی مشتری'}">${b.blocked ? 'آزادسازی' : 'مسدود'}</button>
+          <button type="button" class="btn-icon-text ${b.blocked ? 'btn-secondary' : 'btn-danger'} block-customer-btn" data-name="${b.customerName}" data-user-id="${b.customerId || ''}" data-blocked="${b.blocked}" aria-label="${b.blocked ? 'آزادسازی مشتری' : 'مسدودسازی مشتری'}">${b.blocked ? 'آزادسازی' : 'مسدود'}</button>
           <button type="button" class="btn-icon btn-danger delete-booking-btn" data-id="${b._id || b.id}" aria-label="حذف نوبت">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
               <polyline points="3 6 5 6 21 6"/>
@@ -1394,21 +1395,34 @@ destroy() {
 
   if (!listEl.dataset.statusBound) {
     const self = this;
-    listEl.addEventListener('click', function(e) {
+    listEl.addEventListener('click', async function(e) {
       const delBtn = e.target.closest('.delete-booking-btn');
       const btn = e.target.closest('.status-change-btn');
       const option = e.target.closest('.status-option');
       const blockBtn = e.target.closest('.block-customer-btn');
       if (blockBtn) {
         const name = blockBtn.dataset.name;
+        const userId = blockBtn.dataset.userId;
         const currentlyBlocked = blockBtn.dataset.blocked === 'true';
-        CustomerPrefs.setByName(name, { blocked: !currentlyBlocked });
-        UIComponents.showToast(
-          currentlyBlocked ? 'مسدودسازی برداشته شد' : '🚫 این مشتری مسدود شد',
-          currentlyBlocked ? 'success' : 'error'
-        );
-        self.renderBookings(self.currentBookingFilter || 'all');
-        self.renderPlans && self.renderPlans();
+        try {
+          const res = await fetch(`${API_BASE}/api/user/block/${userId}`, {
+            method: currentlyBlocked ? 'DELETE' : 'POST',
+            credentials: 'include',
+            headers: currentlyBlocked ? undefined : { 'Content-Type': 'application/json' },
+            body: currentlyBlocked ? undefined : JSON.stringify({})
+          });
+          if (!res.ok) throw new Error('BLOCK_FAILED');
+          CustomerPrefs.setByName(name, { blocked: !currentlyBlocked });
+          blockBtn.dataset.blocked = (!currentlyBlocked).toString();
+          UIComponents.showToast(
+            currentlyBlocked ? 'مسدودسازی برداشته شد' : '🚫 این مشتری مسدود شد',
+            currentlyBlocked ? 'success' : 'error'
+          );
+          self.renderBookings(self.currentBookingFilter || 'all');
+          self.renderPlans && self.renderPlans();
+        } catch (_) {
+          UIComponents.showToast('خطا در ارتباط با سرور', 'error');
+        }
         e.stopPropagation();
         return;
       } else if (delBtn) {
