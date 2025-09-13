@@ -81,6 +81,37 @@ exports.blockCustomer = async (req, res) => {
 };
 
 // ────────────────────────────────────────────────────────────
+// آزادسازی مشتری مسدود شده توسط فروشنده
+// ────────────────────────────────────────────────────────────
+exports.unblockCustomer = async (req, res) => {
+  try {
+    const { userId } = req.params;
+    if (!userId) return res.status(400).json({ message: 'شناسه کاربر ارسال نشده!' });
+
+    const sellerId = req.user && req.user.id;
+    if (!sellerId) return res.status(401).json({ message: 'فروشنده احراز هویت نشد.' });
+
+    const seller = await Seller.findById(sellerId);
+    if (!seller) return res.status(404).json({ message: 'فروشنده پیدا نشد.' });
+
+    seller.blockedUsers = seller.blockedUsers || [];
+    const idx = seller.blockedUsers.findIndex(id => id.toString() === userId);
+    if (idx === -1) {
+      return res.status(404).json({ message: 'این کاربر در لیست مسدود نیست.' });
+    }
+
+    seller.blockedUsers.splice(idx, 1);
+    await seller.save();
+
+    await Block.deleteOne({ sellerId, customerId: userId });
+
+    res.json({ message: 'کاربر با موفقیت آزاد شد.' });
+  } catch (err) {
+    res.status(500).json({ message: 'خطا در آزادسازی', error: err.message });
+  }
+};
+
+// ────────────────────────────────────────────────────────────
 // حذف نرمِ کاربر توسط ادمین  ➜  /user/:id   [DELETE]
 // ────────────────────────────────────────────────────────────
 exports.softDelete = async (req, res) => {

@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 const Booking = require('../models/booking');
 const SellerService = require('../models/seller-services');
+const Seller = require('../models/Seller');
 
 // ایجاد نوبت جدید توسط کاربر
 exports.createBooking = async (req, res) => {
@@ -73,6 +74,25 @@ exports.createBooking = async (req, res) => {
     if (!mongoose.Types.ObjectId.isValid(sid)) {
       return res.status(400).json({ message: 'شناسه فروشنده نامعتبر است.' });
     }
+
+    // Blocked user check
+    try {
+      const sellerDoc = await Seller.findById(sid).select('blockedUsers');
+      if (sellerDoc) {
+        const blocked = (sellerDoc.blockedUsers || []).map(u => u.toString());
+        const uid = req.user && req.user.id;
+        if (uid && blocked.includes(uid.toString())) {
+          return res.status(403).json({ message: 'شما توسط این فروشنده مسدود شده‌اید.' });
+        }
+        if (customerPhone && blocked.includes(customerPhone)) {
+          return res.status(403).json({ message: 'شما توسط این فروشنده مسدود شده‌اید.' });
+        }
+      }
+    } catch (err) {
+      console.error('blocked user check error:', err);
+      return res.status(500).json({ message: 'خطا در بررسی وضعیت مسدودیت.' });
+    }
+
     // Prevent booking creation if slot already taken
     const slotTaken = await Booking.exists({
       bookingDate: date,
@@ -298,6 +318,15 @@ exports.getBookedSlots = async (req, res) => {
     }
     if (!date) {
       return res.status(400).json({ message: 'تاریخ الزامی است.' });
+    }
+
+    const sellerDoc = await Seller.findById(sellerId).select('blockedUsers');
+    if (sellerDoc) {
+      const blocked = (sellerDoc.blockedUsers || []).map(u => u.toString());
+      const uid = req.user && req.user.id;
+      if (uid && blocked.includes(uid.toString())) {
+        return res.status(403).json({ message: 'شما توسط این فروشنده مسدود شده‌اید.' });
+      }
     }
 
     const items = await Booking.find({

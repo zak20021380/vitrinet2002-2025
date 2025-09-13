@@ -164,12 +164,11 @@ router.get('/', auth('admin'), async (req, res) => {
 
 
 router.delete('/:id', isAdmin, userCtrl.softDelete);   // ← اضافه شود
-module.exports = router;
 
 // ───────────────────────────────
-// POST /api/user/block/:userId    (فروشنده باید لاگین باشد)
+// مدیریت مسدودسازی مشتری توسط فروشنده
 // ───────────────────────────────
-router.post('/block/:userId', auth('seller'), userController.blockCustomer);
-
+router.post('/block/:userId',  auth('seller'), userController.blockCustomer);
+router.delete('/block/:userId', auth('seller'), userController.unblockCustomer);
 
 module.exports = router;
