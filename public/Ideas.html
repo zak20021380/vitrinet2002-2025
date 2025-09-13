@@ -120,9 +120,112 @@
     .fade-in {
       animation: fadeIn 0.5s ease forwards;
     }
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .slide-up {
+      animation: slideUp 0.4s ease forwards;
+    }
+    @keyframes bounce {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-10px); }
+    }
+    .bounce {
+      animation: bounce 1s ease infinite;
+    }
+    .achievement-unlock {
+      animation: achievementPulse 0.6s ease;
+    }
+    @keyframes achievementPulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.2); }
+      100% { transform: scale(1); }
+    }
+    .tab-active {
+      background: rgba(255,255,255,0.2);
+      border-bottom: 3px solid var(--accent1);
+    }
+    .category-card {
+      transition: all 0.3s ease;
+    }
+    .category-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+    }
+    .confetti {
+      position: fixed;
+      width: 10px;
+      height: 10px;
+      background-color: var(--accent1);
+      position: absolute;
+      animation: confetti-fall 3s linear forwards;
+    }
+    @keyframes confetti-fall {
+      to {
+        transform: translateY(100vh) rotate(360deg);
+        opacity: 0;
+      }
+    }
+    .progress-ring {
+      transform: rotate(-90deg);
+    }
+    .toast {
+      position: fixed;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 1000;
+      min-width: 300px;
+      text-align: center;
+    }
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.7);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+    }
+    .modal.active {
+      display: flex;
+    }
+    .achievement-badge {
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      margin: 0 auto;
+    }
+    .locked {
+      filter: grayscale(100%);
+      opacity: 0.5;
+    }
+    .sparkle {
+      position: absolute;
+      width: 8px;
+      height: 8px;
+      background: white;
+      border-radius: 50%;
+      animation: sparkle 1.5s linear infinite;
+    }
+    @keyframes sparkle {
+      0% { transform: scale(0) rotate(0deg); opacity: 1; }
+      100% { transform: scale(1.5) rotate(180deg); opacity: 0; }
+    }
   </style>
 </head>
 <body class="min-h-screen text-white flex flex-col">
+  <!-- Toast Container -->
+  <div id="toast-container" class="fixed top-4 left-1/2 transform -translate-x-1/2 z-50"></div>
+
   <!-- Header -->
   <header class="glass sticky top-0 z-30 w-full px-4 py-3 flex items-center justify-between shadow-lg">
     <div class="flex items-center gap-3">
@@ -138,11 +241,17 @@
         </div>
       </div>
     </div>
-    <button id="btn-notify" class="relative px-4 py-2 rounded-xl bg-white/10 border border-white/20 text-sm hover:bg-white/20 transition-all duration-300">
-      <i class="fas fa-bell"></i>
-      <span class="absolute -top-1 -right-1 w-5 h-5 bg-red-500 rounded-full flex items-center justify-center text-xs">3</span>
-    </button>
+    <div class="flex items-center gap-2">
+      <button id="btn-settings" class="relative px-3 py-2 rounded-xl bg-white/10 border border-white/20 text-sm hover:bg-white/20 transition-all duration-300">
+        <i class="fas fa-cog"></i>
+      </button>
+      <button id="btn-notify" class="relative px-3 py-2 rounded-xl bg-white/10 border border-white/20 text-sm hover:bg-white/20 transition-all duration-300">
+        <i class="fas fa-bell"></i>
+        <span class="absolute -top-1 -right-1 w-5 h-5 bg-red-500 rounded-full flex items-center justify-center text-xs">3</span>
+      </button>
+    </div>
   </header>
+
   <!-- Pages container -->
   <main id="pages" class="flex-1 w-full max-w-md mx-auto p-4 space-y-5">
     <!-- DASHBOARD -->
@@ -166,6 +275,9 @@
               <span>رتبه شما: <span id="rank" class="font-bold">—</span></span>
             </div>
           </div>
+          <button id="btn-profile" class="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center hover:bg-white/20 transition-all">
+            <i class="fas fa-user"></i>
+          </button>
         </div>
         <div class="divider"></div>
         <div class="grid grid-cols-3 gap-3 text-center">
@@ -183,6 +295,37 @@
           </div>
         </div>
       </div>
+
+      <!-- Daily Challenge -->
+      <div class="glass rounded-3xl p-5 card-hover">
+        <div class="flex items-center justify-between mb-3">
+          <div>
+            <div class="text-sm opacity-90 flex items-center gap-1">
+              <i class="fas fa-calendar-day text-purple-400"></i>
+              <span>چالش روزانه</span>
+            </div>
+            <div class="text-xl font-extrabold mt-1">مسابقه علمی</div>
+          </div>
+          <div class="text-center">
+            <div class="text-xs opacity-80">زمان باقی مانده</div>
+            <div id="daily-timer" class="font-mono font-bold">12:45:30</div>
+          </div>
+        </div>
+        <div class="flex items-center justify-between mt-4">
+          <div class="flex items-center gap-2">
+            <div class="chip">
+              <i class="fas fa-trophy text-yellow-300 ml-1"></i> 100 امتیاز
+            </div>
+            <div class="chip">
+              <i class="fas fa-coins text-yellow-300 ml-1"></i> 50 سکه
+            </div>
+          </div>
+          <button id="btn-daily" class="btn btn-primary w-auto px-5 py-2 text-sm">
+            <i class="fas fa-play ml-1"></i> شروع
+          </button>
+        </div>
+      </div>
+
       <!-- Streak & Sponsor -->
       <div class="glass rounded-3xl p-5 card-hover">
         <div class="flex items-center justify-between mb-3">
@@ -205,6 +348,23 @@
           <span>هر روز لاگین کنی پاداش بیشتر میشه. اگه جا بمونی صفر میشه 😬</span>
         </div>
       </div>
+
+      <!-- Achievements Preview -->
+      <div class="glass rounded-3xl p-5">
+        <div class="flex items-center justify-between mb-4">
+          <h3 class="text-lg font-bold flex items-center gap-2">
+            <i class="fas fa-medal text-yellow-300"></i>
+            <span>دستاوردها</span>
+          </h3>
+          <button id="btn-all-achievements" class="text-sm text-white/80 hover:text-white">
+            مشاهده همه <i class="fas fa-chevron-left text-xs mr-1"></i>
+          </button>
+        </div>
+        <div id="achievements-preview" class="grid grid-cols-4 gap-3">
+          <!-- Achievements will be loaded here -->
+        </div>
+      </div>
+
       <!-- Actions -->
       <div class="space-y-4">
         <button class="btn btn-primary text-lg" id="btn-play">
@@ -233,6 +393,21 @@
         </div>
       </div>
     </section>
+
+    <!-- CATEGORIES PAGE -->
+    <section id="page-categories" class="hidden space-y-5">
+      <div class="glass rounded-3xl p-6">
+        <h2 class="text-2xl font-extrabold mb-4 text-center">انتخاب دسته</h2>
+        <div class="grid grid-cols-2 gap-4" id="categories-grid">
+          <!-- Categories will be loaded here -->
+        </div>
+      </div>
+      <button class="w-full py-4 rounded-2xl bg-white/10 border border-white/20 hover:bg-white/20 transition-all duration-300 flex items-center justify-center gap-2" id="btn-back-categories">
+        <i class="fas fa-arrow-right"></i>
+        <span>بازگشت</span>
+      </button>
+    </section>
+
     <!-- QUIZ PAGE -->
     <section id="page-quiz" class="hidden space-y-5">
       <div class="glass rounded-3xl p-6 shadow-xl">
@@ -256,7 +431,7 @@
         </div>
         <div class="mt-4 flex items-center justify-center">
           <div class="relative">
-            <svg width="140" height="140" viewBox="0 0 140 140" class="-rotate-90">
+            <svg width="140" height="140" viewBox="0 0 140 140" class="progress-ring">
               <circle cx="70" cy="70" r="64" stroke="rgba(255,255,255,.2)" stroke-width="12" fill="none"/>
               <circle id="timer-ring" cx="70" cy="70" r="64" stroke="url(#gradient)" stroke-width="12" fill="none" stroke-linecap="round" stroke-dasharray="402.124" stroke-dashoffset="0" class="ring-anim"/>
               <defs>
@@ -285,13 +460,21 @@
         </button>
       </div>
     </section>
+
     <!-- LEADERBOARD -->
     <section id="page-leaderboard" class="hidden space-y-5">
       <div class="glass rounded-3xl p-6">
-        <h3 class="text-2xl font-extrabold mb-5 flex items-center gap-2">
-          <i class="fas fa-trophy text-yellow-300"></i>
-          <span>لیدربورد هفتگی</span>
-        </h3>
+        <div class="flex items-center justify-between mb-4">
+          <h3 class="text-2xl font-extrabold flex items-center gap-2">
+            <i class="fas fa-trophy text-yellow-300"></i>
+            <span>لیدربورد</span>
+          </h3>
+          <div class="flex items-center gap-2 text-sm">
+            <button class="chip tab-active" data-period="weekly">هفتگی</button>
+            <button class="chip" data-period="monthly">ماهانه</button>
+            <button class="chip" data-period="all">همه زمان</button>
+          </div>
+        </div>
         <div id="lb-list" class="space-y-3"></div>
       </div>
       <button class="w-full py-4 rounded-2xl bg-white/10 border border-white/20 hover:bg-white/20 transition-all duration-300 flex items-center justify-center gap-2" id="btn-back-lb">
@@ -299,6 +482,7 @@
         <span>بازگشت</span>
       </button>
     </section>
+
     <!-- SHOP / VIP -->
     <section id="page-shop" class="hidden space-y-5">
       <div class="glass rounded-3xl p-6 space-y-4">
@@ -306,6 +490,31 @@
           <i class="fas fa-shopping-bag text-purple-300"></i>
           <span>فروشگاه</span>
         </h3>
+        
+        <!-- Special Offers -->
+        <div class="glass-dark rounded-2xl p-4">
+          <div class="flex items-center justify-between mb-2">
+            <h4 class="font-bold flex items-center gap-2">
+              <i class="fas fa-fire text-orange-400"></i>
+              <span>پیشنهاد ویژه</span>
+            </h4>
+            <div class="text-xs bg-red-500 px-2 py-1 rounded-full">محدود</div>
+          </div>
+          <div class="flex items-center gap-3">
+            <div class="w-16 h-16 rounded-xl bg-gradient-to-r from-purple-500 to-pink-500 flex items-center justify-center">
+              <i class="fas fa-gem text-white text-2xl"></i>
+            </div>
+            <div class="flex-1">
+              <div class="font-bold">بسته الماسی</div>
+              <div class="text-sm opacity-80">500 سکه + 10 جان + VIP هفتگی</div>
+            </div>
+            <div class="text-center">
+              <div class="text-xs line-through opacity-60">300💰</div>
+              <div class="font-bold">199💰</div>
+            </div>
+          </div>
+        </div>
+        
         <div class="grid grid-cols-2 gap-4">
           <div class="glass-dark rounded-2xl p-5 card-hover">
             <div class="text-center mb-3">
@@ -331,21 +540,46 @@
               <i class="fas fa-coins ml-1"></i> خرید 50💰
             </button>
           </div>
-          <div class="glass-dark rounded-2xl p-5 col-span-2 card-hover">
-            <div class="flex items-center justify-between">
-              <div class="flex items-center gap-4">
-                <div class="w-16 h-16 rounded-full bg-gradient-to-r from-yellow-400 to-orange-500 flex items-center justify-center">
-                  <i class="fas fa-crown text-white text-2xl"></i>
-                </div>
-                <div>
-                  <div class="font-bold text-lg">اشتراک VIP (ماهانه)</div>
-                  <div class="text-sm opacity-80 mt-1">+جان روزانه، +استریک، +جام‌های ویژه</div>
-                </div>
+          <div class="glass-dark rounded-2xl p-5 card-hover">
+            <div class="text-center mb-3">
+              <div class="w-12 h-12 mx-auto rounded-full bg-yellow-500/20 flex items-center justify-center mb-2">
+                <i class="fas fa-coins text-yellow-400 text-xl"></i>
               </div>
-              <button class="btn btn-tertiary w-auto px-4" data-buy="vip">
-                <i class="fas fa-coins ml-1"></i> خرید 200💰
-              </button>
+              <div class="font-bold text-lg">سکه +100</div>
+              <div class="text-sm opacity-80 mt-1">برای خرید آیتم‌ها</div>
             </div>
+            <button class="btn btn-tertiary text-sm" data-buy="coins">
+              <i class="fas fa-coins ml-1"></i> خرید 20💰
+            </button>
+          </div>
+          <div class="glass-dark rounded-2xl p-5 card-hover">
+            <div class="text-center mb-3">
+              <div class="w-12 h-12 mx-auto rounded-full bg-green-500/20 flex items-center justify-center mb-2">
+                <i class="fas fa-infinity text-green-400 text-xl"></i>
+              </div>
+              <div class="font-bold text-lg">حذف تبلیغات</div>
+              <div class="text-sm opacity-80 mt-1">همیشگی</div>
+            </div>
+            <button class="btn btn-primary text-sm" data-buy="noads">
+              <i class="fas fa-coins ml-1"></i> خرید 100💰
+            </button>
+          </div>
+        </div>
+        
+        <div class="glass-dark rounded-2xl p-5 card-hover">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-4">
+              <div class="w-16 h-16 rounded-full bg-gradient-to-r from-yellow-400 to-orange-500 flex items-center justify-center">
+                <i class="fas fa-crown text-white text-2xl"></i>
+              </div>
+              <div>
+                <div class="font-bold text-lg">اشتراک VIP (ماهانه)</div>
+                <div class="text-sm opacity-80 mt-1">+جان روزانه، +استریک، +جام‌های ویژه</div>
+              </div>
+            </div>
+            <button class="btn btn-tertiary w-auto px-4" data-buy="vip">
+              <i class="fas fa-coins ml-1"></i> خرید 200💰
+            </button>
           </div>
         </div>
       </div>
@@ -354,13 +588,235 @@
         <span>بازگشت</span>
       </button>
     </section>
+
+    <!-- PROFILE PAGE -->
+    <section id="page-profile" class="hidden space-y-5">
+      <div class="glass rounded-3xl p-6">
+        <div class="flex flex-col items-center mb-6">
+          <div class="relative mb-4">
+            <img id="profile-page-avatar" src="https://i.pravatar.cc/150?img=12" class="w-24 h-24 rounded-full border-4 border-white/30 shadow-lg" alt="avatar" />
+            <div class="absolute bottom-0 right-0 w-10 h-10 rounded-full bg-gradient-to-r from-yellow-400 to-orange-500 flex items-center justify-center border-2 border-white">
+              <i class="fas fa-crown text-white"></i>
+            </div>
+          </div>
+          <h2 id="profile-page-name" class="text-2xl font-extrabold">زکی</h2>
+          <div class="text-sm text-white/80 mt-1">@zaki_user</div>
+          <div class="flex items-center gap-2 mt-2">
+            <span id="profile-vip-badge" class="chip bg-gradient-to-r from-yellow-400 to-orange-500 text-black font-bold hidden">VIP</span>
+            <span class="chip">
+              <i class="fas fa-calendar-alt ml-1"></i> عضو از فروردین ۱۴۰۲
+            </span>
+          </div>
+        </div>
+        
+        <div class="divider"></div>
+        
+        <div class="grid grid-cols-3 gap-4 text-center mb-6">
+          <div>
+            <div class="text-2xl font-extrabold text-yellow-300" id="profile-score">0</div>
+            <div class="text-xs opacity-80 mt-1">امتیاز کل</div>
+          </div>
+          <div>
+            <div class="text-2xl font-extrabold text-emerald-300" id="profile-coins">0</div>
+            <div class="text-xs opacity-80 mt-1">سکه</div>
+          </div>
+          <div>
+            <div class="text-2xl font-extrabold text-rose-300" id="profile-level">1</div>
+            <div class="text-xs opacity-80 mt-1">سطح</div>
+          </div>
+        </div>
+        
+        <div class="mb-6">
+          <div class="flex items-center justify-between mb-2">
+            <div class="text-sm font-bold">پیشرفت سطح</div>
+            <div class="text-xs opacity-80"><span id="profile-exp">0</span> / <span id="profile-exp-needed">100</span> XP</div>
+          </div>
+          <div class="w-full h-3 bg-white/15 rounded-full overflow-hidden">
+            <div id="profile-exp-bar" class="h-3 bg-gradient-to-r from-blue-400 to-purple-500 rounded-full transition-all duration-500" style="width:0%"></div>
+          </div>
+        </div>
+        
+        <div class="space-y-4">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <i class="fas fa-gamepad text-blue-400"></i>
+              <span>مسابقات انجام شده</span>
+            </div>
+            <div class="font-bold" id="profile-games">0</div>
+          </div>
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <i class="fas fa-percentage text-green-400"></i>
+              <span>دقت پاسخ‌ها</span>
+            </div>
+            <div class="font-bold" id="profile-accuracy">0%</div>
+          </div>
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <i class="fas fa-fire text-orange-400"></i>
+              <span>بیشترین استریک</span>
+            </div>
+            <div class="font-bold" id="profile-best-streak">0</div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="glass rounded-3xl p-6">
+        <h3 class="text-xl font-extrabold mb-4 flex items-center gap-2">
+          <i class="fas fa-chart-pie text-purple-300"></i>
+          <span>آمار دسته‌بندی‌ها</span>
+        </h3>
+        <div id="category-stats" class="space-y-3">
+          <!-- Category stats will be loaded here -->
+        </div>
+      </div>
+      
+      <button class="w-full py-4 rounded-2xl bg-white/10 border border-white/20 hover:bg-white/20 transition-all duration-300 flex items-center justify-center gap-2" id="btn-back-profile">
+        <i class="fas fa-arrow-right"></i>
+        <span>بازگشت</span>
+      </button>
+    </section>
+
+    <!-- ACHIEVEMENTS PAGE -->
+    <section id="page-achievements" class="hidden space-y-5">
+      <div class="glass rounded-3xl p-6">
+        <h3 class="text-2xl font-extrabold mb-4 flex items-center gap-2">
+          <i class="fas fa-medal text-yellow-300"></i>
+          <span>دستاوردها</span>
+        </h3>
+        <div class="flex items-center justify-between mb-4">
+          <div class="text-sm">
+            <span class="font-bold" id="achievements-unlocked">0</span> از <span id="achievements-total">0</span> دستاوردها
+          </div>
+          <div class="text-xs opacity-80">
+            <i class="fas fa-filter ml-1"></i>
+            <span>فیلتر:</span>
+            <select id="achievement-filter" class="bg-transparent border-b border-white/30">
+              <option value="all">همه</option>
+              <option value="unlocked">باز شده</option>
+              <option value="locked">قفل شده</option>
+            </select>
+          </div>
+        </div>
+        <div id="achievements-list" class="space-y-4">
+          <!-- Achievements will be loaded here -->
+        </div>
+      </div>
+      <button class="w-full py-4 rounded-2xl bg-white/10 border border-white/20 hover:bg-white/20 transition-all duration-300 flex items-center justify-center gap-2" id="btn-back-achievements">
+        <i class="fas fa-arrow-right"></i>
+        <span>بازگشت</span>
+      </button>
+    </section>
+
+    <!-- SETTINGS PAGE -->
+    <section id="page-settings" class="hidden space-y-5">
+      <div class="glass rounded-3xl p-6">
+        <h3 class="text-2xl font-extrabold mb-4 flex items-center gap-2">
+          <i class="fas fa-cog text-blue-300"></i>
+          <span>تنظیمات</span>
+        </h3>
+        
+        <div class="space-y-4">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 rounded-full bg-blue-500/20 flex items-center justify-center">
+                <i class="fas fa-volume-up text-blue-400"></i>
+              </div>
+              <div>
+                <div class="font-bold">افکت‌های صوتی</div>
+                <div class="text-xs opacity-80">پخش صدا در بازی</div>
+              </div>
+            </div>
+            <label class="relative inline-flex items-center cursor-pointer">
+              <input type="checkbox" id="sound-toggle" class="sr-only peer" checked>
+              <div class="w-11 h-6 bg-gray-600 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:right-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-500"></div>
+            </label>
+          </div>
+          
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 rounded-full bg-purple-500/20 flex items-center justify-center">
+                <i class="fas fa-language text-purple-400"></i>
+              </div>
+              <div>
+                <div class="font-bold">زبان</div>
+                <div class="text-xs opacity-80">انتخاب زبان برنامه</div>
+              </div>
+            </div>
+            <select id="language-select" class="bg-white/10 border border-white/20 rounded-xl px-3 py-2 text-sm">
+              <option value="fa">فارسی</option>
+              <option value="en">English</option>
+            </select>
+          </div>
+          
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 rounded-full bg-yellow-500/20 flex items-center justify-center">
+                <i class="fas fa-bell text-yellow-400"></i>
+              </div>
+              <div>
+                <div class="font-bold">اعلان‌ها</div>
+                <div class="text-xs opacity-80">دریافت نوتیفیکیشن</div>
+              </div>
+            </div>
+            <label class="relative inline-flex items-center cursor-pointer">
+              <input type="checkbox" id="notification-toggle" class="sr-only peer" checked>
+              <div class="w-11 h-6 bg-gray-600 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:right-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-500"></div>
+            </label>
+          </div>
+          
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 rounded-full bg-green-500/20 flex items-center justify-center">
+                <i class="fas fa-moon text-green-400"></i>
+              </div>
+              <div>
+                <div class="font-bold">حالت شب</div>
+                <div class="text-xs opacity-80">رنگ‌های تیره‌تر</div>
+              </div>
+            </div>
+            <label class="relative inline-flex items-center cursor-pointer">
+              <input type="checkbox" id="darkmode-toggle" class="sr-only peer">
+              <div class="w-11 h-6 bg-gray-600 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:right-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-500"></div>
+            </label>
+          </div>
+        </div>
+        
+        <div class="divider my-4"></div>
+        
+        <div class="space-y-3">
+          <button class="w-full py-3 rounded-xl bg-white/10 border border-white/20 hover:bg-white/20 transition-all duration-300 flex items-center justify-center gap-2">
+            <i class="fas fa-question-circle"></i>
+            <span>راهنما و پشتیبانی</span>
+          </button>
+          <button class="w-full py-3 rounded-xl bg-white/10 border border-white/20 hover:bg-white/20 transition-all duration-300 flex items-center justify-center gap-2">
+            <i class="fas fa-shield-alt"></i>
+            <span>سیاست حفظ حریم خصوصی</span>
+          </button>
+          <button class="w-full py-3 rounded-xl bg-rose-500/20 border border-rose-500/30 hover:bg-rose-500/30 transition-all duration-300 flex items-center justify-center gap-2">
+            <i class="fas fa-sign-out-alt"></i>
+            <span>خروج از حساب کاربری</span>
+          </button>
+        </div>
+      </div>
+      
+      <button class="w-full py-4 rounded-2xl bg-white/10 border border-white/20 hover:bg-white/20 transition-all duration-300 flex items-center justify-center gap-2" id="btn-back-settings">
+        <i class="fas fa-arrow-right"></i>
+        <span>بازگشت</span>
+      </button>
+    </section>
   </main>
+
   <!-- Bottom Nav -->
   <nav class="glass safe sticky bottom-0 z-30 w-full shadow-lg">
-    <div class="max-w-md mx-auto grid grid-cols-3">
+    <div class="max-w-md mx-auto grid grid-cols-4">
       <button class="py-4 text-center hover:bg-white/10 transition-all duration-300 nav-item" data-tab="dashboard">
         <i class="fas fa-home text-xl mb-1"></i>
         <div class="text-xs">خانه</div>
+      </button>
+      <button class="py-4 text-center hover:bg-white/10 transition-all duration-300 nav-item" data-tab="categories">
+        <i class="fas fa-th-large text-xl mb-1"></i>
+        <div class="text-xs">دسته‌ها</div>
       </button>
       <button class="py-4 text-center hover:bg-white/10 transition-all duration-300 nav-item" data-tab="quiz">
         <i class="fas fa-gamepad text-xl mb-1"></i>
@@ -372,13 +828,58 @@
       </button>
     </div>
   </nav>
+
+  <!-- Tutorial Modal -->
+  <div id="tutorial-modal" class="modal">
+    <div class="glass rounded-3xl p-6 max-w-md mx-4 slide-up">
+      <div class="flex items-center justify-between mb-4">
+        <h3 class="text-xl font-extrabold">خوش آمدید!</h3>
+        <button id="close-tutorial" class="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center hover:bg-white/20">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      <div class="space-y-4 mb-6">
+        <div class="flex items-start gap-3">
+          <div class="w-8 h-8 rounded-full bg-blue-500/20 flex items-center justify-center flex-shrink-0 mt-1">
+            <span class="font-bold">1</span>
+          </div>
+          <div>
+            <div class="font-bold">مسابقه دادن</div>
+            <div class="text-sm opacity-80">روی دکمه "شروع مسابقه" کلیک کنید و به سوالات پاسخ دهید.</div>
+          </div>
+        </div>
+        <div class="flex items-start gap-3">
+          <div class="w-8 h-8 rounded-full bg-green-500/20 flex items-center justify-center flex-shrink-0 mt-1">
+            <span class="font-bold">2</span>
+          </div>
+          <div>
+            <div class="font-bold">جمع آوری سکه</div>
+            <div class="text-sm opacity-80">با پاسخ صحیح به سوالات، سکه دریافت کنید و در فروشگاه آیتم بخرید.</div>
+          </div>
+        </div>
+        <div class="flex items-start gap-3">
+          <div class="w-8 h-8 rounded-full bg-purple-500/20 flex items-center justify-center flex-shrink-0 mt-1">
+            <span class="font-bold">3</span>
+          </div>
+          <div>
+            <div class="font-bold">دستاوردها</div>
+            <div class="text-sm opacity-80">با انجام فعالیت‌های مختلف، دستاوردهای ویژه را باز کنید.</div>
+          </div>
+        </div>
+      </div>
+      <button id="start-tutorial" class="btn btn-primary">
+        <i class="fas fa-play ml-2"></i> شروع بازی
+      </button>
+    </div>
+  </div>
+
   <script>
   // === Minimal state/store ===
   const $ = s => document.querySelector(s);
   const $$ = s => Array.from(document.querySelectorAll(s));
   const clamp = (n, a, b) => Math.max(a, Math.min(b, n));
   const State = {
-    user: { id: 'guest', name: 'کاربر مهمان', avatar: 'https://i.pravatar.cc/120?img=12' },
+    user: { id: 'guest', name: 'کاربر مهمان', avatar: 'https://i.pravatar.cc/120?img=12', username: 'zaki_user' },
     score: 0,
     coins: 100,
     lives: 3,
@@ -386,13 +887,43 @@
     streak: 0,
     lastClaim: 0,
     boostUntil: 0,
+    level: 1,
+    exp: 0,
+    gamesPlayed: 0,
+    correctAnswers: 0,
+    bestStreak: 0,
+    soundEnabled: true,
+    notificationsEnabled: true,
+    darkMode: false,
+    language: 'fa',
     leaderboard: [
       { id: 'u1', name: 'آرتین', score: 18200 },
       { id: 'u2', name: 'سمانه', score: 16500 },
       { id: 'u3', name: 'مانی', score: 14950 },
       { id: 'u4', name: 'نیکا', score: 13200 },
     ],
-    quiz: { duration:30, remain:30, timer:null, inProgress:false, correctIndex:-1, answered:false }
+    achievements: [
+      { id: 'first_win', name: 'اولین پیروزی', desc: 'برنده اولین مسابقه خود شو', icon: 'fa-trophy', unlocked: false },
+      { id: 'streak_3', name: 'آتشین', desc: 'به استریک ۳ روزه برس', icon: 'fa-fire', unlocked: false },
+      { id: 'streak_7', name: 'هفته طلایی', desc: 'به استریک ۷ روزه برس', icon: 'fa-fire', unlocked: false },
+      { id: 'score_1000', name: 'مبتدی', desc: 'به ۱۰۰۰ امتیاز برس', icon: 'fa-star', unlocked: false },
+      { id: 'score_5000', name: 'حرفه‌ای', desc: 'به ۵۰۰۰ امتیاز برس', icon: 'fa-star', unlocked: false },
+      { id: 'perfect_10', name: 'کامل', desc: '۱۰ سوال متوالی درست پاسخ بده', icon: 'fa-check-circle', unlocked: false },
+      { id: 'category_master', name: 'استاد دسته‌ها', desc: 'در تمام دسته‌ها بازی کن', icon: 'fa-th-large', unlocked: false },
+      { id: 'vip', name: 'VIP', desc: 'اشتراک VIP تهیه کن', icon: 'fa-crown', unlocked: false },
+    ],
+    categoryStats: {
+      'عمومی': { played: 0, correct: 0 },
+      'جغرافیا': { played: 0, correct: 0 },
+      'ورزش': { played: 0, correct: 0 },
+      'علم': { played: 0, correct: 0 },
+      'تاریخ': { played: 0, correct: 0 },
+      'هنر': { played: 0, correct: 0 },
+      'سرگرمی': { played: 0, correct: 0 },
+    },
+    selectedCategory: null,
+    quiz: { duration:30, remain:30, timer:null, inProgress:false, correctIndex:-1, answered:false, consecutiveCorrect:0 },
+    showTutorial: true
   };
   const STORAGE_KEY = 'quiz_webapp_pro_state_v1';
   function loadState(){
@@ -410,7 +941,7 @@
       if(u){
         State.user.id = String(u.id);
         State.user.name = [u.first_name, u.last_name].filter(Boolean).join(' ');
-        if(u.username) State.user.name += ` (@${u.username})`;
+        if(u.username) State.user.username = u.username;
         $('#profile-name').textContent = State.user.name;
       }
     }
@@ -433,13 +964,19 @@
     $('#streak').textContent = State.streak;
     const pct = clamp((State.streak%7)/7*100,0,100);
     $('#streak-bar').style.width = pct + '%';
+    
+    // Update achievements preview
+    renderAchievementsPreview();
+    
+    // Update daily challenge timer
+    updateDailyChallengeTimer();
   }
   function renderTopBars(){
     $('#lives').textContent = State.lives;
     $('#coins').textContent = fmt(State.coins);
   }
   function navTo(page){
-    ['dashboard','quiz','leaderboard','shop'].forEach(p=>{
+    ['dashboard','categories','quiz','leaderboard','shop','profile','achievements','settings'].forEach(p=>{
       $('#page-'+p)?.classList.add('hidden');
     });
     $('#page-'+page)?.classList.remove('hidden');
@@ -451,16 +988,389 @@
     });
     if(page==='dashboard') renderDashboard();
     if(page==='leaderboard') renderLeaderboard();
+    if(page==='shop') renderShop();
+    if(page==='profile') renderProfile();
+    if(page==='achievements') renderAchievements();
+    if(page==='settings') renderSettings();
+    if(page==='categories') renderCategories();
+  }
+  function showToast(message, type = 'info', duration = 3000) {
+    const toastContainer = $('#toast-container');
+    const toast = document.createElement('div');
+    
+    // Set icon based on type
+    let icon = 'fa-info-circle';
+    let bgColor = 'bg-blue-500/80';
+    
+    if (type === 'success') {
+      icon = 'fa-check-circle';
+      bgColor = 'bg-green-500/80';
+    } else if (type === 'error') {
+      icon = 'fa-exclamation-circle';
+      bgColor = 'bg-red-500/80';
+    } else if (type === 'warning') {
+      icon = 'fa-exclamation-triangle';
+      bgColor = 'bg-yellow-500/80';
+    }
+    
+    toast.className = `glass ${bgColor} px-6 py-4 rounded-2xl text-white font-bold z-50 flex items-center gap-3 mb-3 fade-in`;
+    toast.innerHTML = `<i class="fas ${icon} text-xl"></i><span>${message}</span>`;
+    
+    toastContainer.appendChild(toast);
+    
+    // Remove toast after duration
+    setTimeout(() => {
+      toast.style.opacity = '0';
+      toast.style.transform = 'translateY(-20px)';
+      toast.style.transition = 'all 0.3s ease';
+      setTimeout(() => toast.remove(), 300);
+    }, duration);
+  }
+  function createConfetti() {
+    const colors = ['#fde047', '#fb923c', '#a78bfa', '#ec4899', '#60a5fa', '#34d399'];
+    const confettiCount = 50;
+    
+    for (let i = 0; i < confettiCount; i++) {
+      const confetti = document.createElement('div');
+      confetti.className = 'confetti';
+      confetti.style.left = `${Math.random() * 100}%`;
+      confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+      confetti.style.width = `${Math.random() * 10 + 5}px`;
+      confetti.style.height = confetti.style.width;
+      confetti.style.opacity = Math.random() * 0.8 + 0.2;
+      confetti.style.animationDuration = `${Math.random() * 3 + 2}s`;
+      confetti.style.animationDelay = `${Math.random() * 0.5}s`;
+      document.body.appendChild(confetti);
+      
+      // Remove confetti after animation
+      setTimeout(() => confetti.remove(), 5000);
+    }
+  }
+  function checkAchievements() {
+    let newAchievement = false;
+    
+    // First win
+    if (State.gamesPlayed > 0 && !State.achievements.find(a => a.id === 'first_win').unlocked) {
+      State.achievements.find(a => a.id === 'first_win').unlocked = true;
+      unlockAchievement('first_win');
+      newAchievement = true;
+    }
+    
+    // Streak achievements
+    if (State.streak >= 3 && !State.achievements.find(a => a.id === 'streak_3').unlocked) {
+      State.achievements.find(a => a.id === 'streak_3').unlocked = true;
+      unlockAchievement('streak_3');
+      newAchievement = true;
+    }
+    
+    if (State.streak >= 7 && !State.achievements.find(a => a.id === 'streak_7').unlocked) {
+      State.achievements.find(a => a.id === 'streak_7').unlocked = true;
+      unlockAchievement('streak_7');
+      newAchievement = true;
+    }
+    
+    // Score achievements
+    if (State.score >= 1000 && !State.achievements.find(a => a.id === 'score_1000').unlocked) {
+      State.achievements.find(a => a.id === 'score_1000').unlocked = true;
+      unlockAchievement('score_1000');
+      newAchievement = true;
+    }
+    
+    if (State.score >= 5000 && !State.achievements.find(a => a.id === 'score_5000').unlocked) {
+      State.achievements.find(a => a.id === 'score_5000').unlocked = true;
+      unlockAchievement('score_5000');
+      newAchievement = true;
+    }
+    
+    // Perfect streak
+    if (State.quiz.consecutiveCorrect >= 10 && !State.achievements.find(a => a.id === 'perfect_10').unlocked) {
+      State.achievements.find(a => a.id === 'perfect_10').unlocked = true;
+      unlockAchievement('perfect_10');
+      newAchievement = true;
+    }
+    
+    // Category master
+    const allCategoriesPlayed = Object.values(State.categoryStats).every(stat => stat.played > 0);
+    if (allCategoriesPlayed && !State.achievements.find(a => a.id === 'category_master').unlocked) {
+      State.achievements.find(a => a.id === 'category_master').unlocked = true;
+      unlockAchievement('category_master');
+      newAchievement = true;
+    }
+    
+    // VIP achievement
+    if (State.vip && !State.achievements.find(a => a.id === 'vip').unlocked) {
+      State.achievements.find(a => a.id === 'vip').unlocked = true;
+      unlockAchievement('vip');
+      newAchievement = true;
+    }
+    
+    if (newAchievement) {
+      saveState();
+    }
+  }
+  function unlockAchievement(id) {
+    const achievement = State.achievements.find(a => a.id === id);
+    if (!achievement) return;
+    
+    // Show achievement unlocked notification
+    const toast = document.createElement('div');
+    toast.className = 'fixed top-20 left-1/2 transform -translate-x-1/2 glass px-6 py-4 rounded-2xl text-white font-bold z-50 flex items-center gap-3 achievement-unlock';
+    toast.innerHTML = `
+      <div class="w-12 h-12 rounded-full bg-gradient-to-r from-yellow-400 to-orange-500 flex items-center justify-center">
+        <i class="fas ${achievement.icon} text-white text-xl"></i>
+      </div>
+      <div>
+        <div class="font-bold">دستاورد جدید!</div>
+        <div class="text-sm">${achievement.name}</div>
+      </div>
+    `;
+    document.body.appendChild(toast);
+    
+    // Create confetti
+    createConfetti();
+    
+    // Play sound if enabled
+    if (State.soundEnabled) {
+      // In a real app, you would play an achievement sound here
+      console.log('Playing achievement sound');
+    }
+    
+    // Remove toast after delay
+    setTimeout(() => {
+      toast.style.opacity = '0';
+      toast.style.transform = 'translateY(-20px) translateX(-50%)';
+      toast.style.transition = 'all 0.5s ease';
+      setTimeout(() => toast.remove(), 500);
+    }, 3000);
+  }
+  function renderAchievementsPreview() {
+    const container = $('#achievements-preview');
+    container.innerHTML = '';
+    
+    // Show first 4 unlocked achievements, or first 4 if none unlocked
+    const unlocked = State.achievements.filter(a => a.unlocked).slice(0, 4);
+    const toShow = unlocked.length > 0 ? unlocked : State.achievements.slice(0, 4);
+    
+    toShow.forEach(achievement => {
+      const div = document.createElement('div');
+      div.className = 'flex flex-col items-center';
+      
+      const badge = document.createElement('div');
+      badge.className = `achievement-badge ${achievement.unlocked ? 'bg-gradient-to-r from-yellow-400 to-orange-500' : 'bg-gray-500/20 locked'}`;
+      badge.innerHTML = `<i class="fas ${achievement.icon} ${achievement.unlocked ? 'text-white' : 'text-gray-400'}"></i>`;
+      
+      const name = document.createElement('div');
+      name.className = 'text-xs mt-1 text-center';
+      name.textContent = achievement.name;
+      
+      div.appendChild(badge);
+      div.appendChild(name);
+      container.appendChild(div);
+    });
+  }
+  function renderAchievements() {
+    const container = $('#achievements-list');
+    container.innerHTML = '';
+    
+    const filter = $('#achievement-filter').value;
+    let achievements = State.achievements;
+    
+    if (filter === 'unlocked') {
+      achievements = achievements.filter(a => a.unlocked);
+    } else if (filter === 'locked') {
+      achievements = achievements.filter(a => !a.unlocked);
+    }
+    
+    $('#achievements-unlocked').textContent = State.achievements.filter(a => a.unlocked).length;
+    $('#achievements-total').textContent = State.achievements.length;
+    
+    achievements.forEach(achievement => {
+      const div = document.createElement('div');
+      div.className = `glass rounded-2xl p-4 flex items-center gap-4 ${achievement.unlocked ? '' : 'opacity-60'}`;
+      
+      const badge = document.createElement('div');
+      badge.className = `achievement-badge ${achievement.unlocked ? 'bg-gradient-to-r from-yellow-400 to-orange-500' : 'bg-gray-500/20'}`;
+      badge.innerHTML = `<i class="fas ${achievement.icon} ${achievement.unlocked ? 'text-white' : 'text-gray-400'}"></i>`;
+      
+      const info = document.createElement('div');
+      info.className = 'flex-1';
+      info.innerHTML = `
+        <div class="font-bold">${achievement.name}</div>
+        <div class="text-sm opacity-80">${achievement.desc}</div>
+      `;
+      
+      const status = document.createElement('div');
+      status.className = 'text-sm';
+      status.innerHTML = achievement.unlocked ? 
+        '<span class="text-green-400"><i class="fas fa-check-circle ml-1"></i>باز شده</span>' : 
+        '<span class="text-gray-400"><i class="fas fa-lock ml-1"></i>قفل شده</span>';
+      
+      div.appendChild(badge);
+      div.appendChild(info);
+      div.appendChild(status);
+      container.appendChild(div);
+    });
+  }
+  function renderProfile() {
+    $('#profile-page-name').textContent = State.user.name;
+    $('#profile-page-avatar').src = State.user.avatar;
+    $('#profile-vip-badge').classList.toggle('hidden', !State.vip);
+    $('#profile-score').textContent = fmt(State.score);
+    $('#profile-coins').textContent = fmt(State.coins);
+    $('#profile-level').textContent = State.level;
+    $('#profile-exp').textContent = State.exp;
+    
+    // Calculate exp needed for next level
+    const expNeeded = State.level * 100;
+    $('#profile-exp-needed').textContent = expNeeded;
+    $('#profile-exp-bar').style.width = `${(State.exp / expNeeded) * 100}%`;
+    
+    $('#profile-games').textContent = State.gamesPlayed;
+    $('#profile-best-streak').textContent = State.bestStreak;
+    
+    // Calculate accuracy
+    const accuracy = State.gamesPlayed > 0 ? Math.round((State.correctAnswers / State.gamesPlayed) * 100) : 0;
+    $('#profile-accuracy').textContent = `${accuracy}%`;
+    
+    // Render category stats
+    const categoryStatsContainer = $('#category-stats');
+    categoryStatsContainer.innerHTML = '';
+    
+    Object.entries(State.categoryStats).forEach(([category, stats]) => {
+      if (stats.played === 0) return;
+      
+      const div = document.createElement('div');
+      div.className = 'flex items-center justify-between';
+      
+      const catName = document.createElement('div');
+      catName.className = 'text-sm';
+      catName.textContent = category;
+      
+      const catStats = document.createElement('div');
+      catStats.className = 'text-xs opacity-80';
+      const accuracy = stats.played > 0 ? Math.round((stats.correct / stats.played) * 100) : 0;
+      catStats.textContent = `${stats.correct}/${stats.played} (${accuracy}%)`;
+      
+      div.appendChild(catName);
+      div.appendChild(catStats);
+      categoryStatsContainer.appendChild(div);
+    });
+  }
+  function renderSettings() {
+    $('#sound-toggle').checked = State.soundEnabled;
+    $('#notification-toggle').checked = State.notificationsEnabled;
+    $('#darkmode-toggle').checked = State.darkMode;
+    $('#language-select').value = State.language;
+  }
+  function renderCategories() {
+    const container = $('#categories-grid');
+    container.innerHTML = '';
+    
+    const categories = [
+      { id: 'general', name: 'عمومی', icon: 'fa-globe', color: 'blue' },
+      { id: 'geography', name: 'جغرافیا', icon: 'fa-map-marked-alt', color: 'green' },
+      { id: 'sports', name: 'ورزش', icon: 'fa-football-ball', color: 'orange' },
+      { id: 'science', name: 'علم', icon: 'fa-flask', color: 'purple' },
+      { id: 'history', name: 'تاریخ', icon: 'fa-landmark', color: 'yellow' },
+      { id: 'art', name: 'هنر', icon: 'fa-palette', color: 'pink' },
+      { id: 'entertainment', name: 'سرگرمی', icon: 'fa-film', color: 'red' },
+    ];
+    
+    categories.forEach(category => {
+      const div = document.createElement('div');
+      div.className = `category-card glass rounded-2xl p-5 flex flex-col items-center justify-center cursor-pointer`;
+      
+      const icon = document.createElement('div');
+      icon.className = `w-16 h-16 rounded-full bg-${category.color}-500/20 flex items-center justify-center mb-3`;
+      icon.innerHTML = `<i class="fas ${category.icon} text-${category.color}-400 text-2xl"></i>`;
+      
+      const name = document.createElement('div');
+      name.className = 'font-bold text-lg';
+      name.textContent = category.name;
+      
+      div.appendChild(icon);
+      div.appendChild(name);
+      
+      div.addEventListener('click', () => {
+        State.selectedCategory = category;
+        navTo('quiz');
+        startQuiz();
+      });
+      
+      container.appendChild(div);
+    });
+  }
+  function renderShop() {
+    // Shop items are already in HTML, just update button states based on coins
+    $$('[data-buy]').forEach(btn => {
+      const item = btn.dataset.buy;
+      const price = { life:30, boost:50, coins:20, noads:100, vip:200 }[item];
+      
+      if (State.coins < price) {
+        btn.disabled = true;
+        btn.classList.add('opacity-50', 'cursor-not-allowed');
+      } else {
+        btn.disabled = false;
+        btn.classList.remove('opacity-50', 'cursor-not-allowed');
+      }
+    });
+  }
+  function updateDailyChallengeTimer() {
+    // Calculate time until next day
+    const now = new Date();
+    const tomorrow = new Date(now);
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    tomorrow.setHours(0, 0, 0, 0);
+    
+    const diff = tomorrow - now;
+    const hours = Math.floor(diff / (1000 * 60 * 60));
+    const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+    const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+    
+    $('#daily-timer').textContent = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+    
+    // Update every second
+    setTimeout(updateDailyChallengeTimer, 1000);
   }
   // === Quiz Logic ===
-  const localQuestions = [
-    { q:'پایتخت استرالیا کدام است؟', c:['ملبورن','سیدنی','پرت','کانبرا'], a:3, cat:'جغرافیا', diff:'آسون' },
-    { q:'قهرمان جام جهانی فوتبال ۱۹۹۸؟', c:['آلمان','برزیل','فرانسه','ایتالیا'], a:2, cat:'ورزش', diff:'متوسط' },
-    { q:'در دنیای «هری پاتر» نگهبان آزکابان چیست؟', c:['دیوانه‌ساز','غول','اژدها','کوتولهٔ خانگی'], a:0, cat:'سرگرمی', diff:'آسون' },
-    { q:'عدد π تقریباً برابر با؟', c:['۲٫۷','۳٫۱۴','۳٫۴۱','۲٫۱۴'], a:1, cat:'علم', diff:'آسون' },
-    { q:'کدام هنرمند نقاشی «شب پرستاره» را کشیده؟', c:['پیکاسو','ون‌گوگ','مونک','داوینچی'], a:1, cat:'هنر', diff:'متوسط' },
-  ];
-  async function fetchQuestion(){
+  const localQuestions = {
+    'general': [
+      { q:'پایتخت استرالیا کدام است؟', c:['ملبورن','سیدنی','پرت','کانبرا'], a:3, cat:'عمومی', diff:'آسون' },
+      { q:'کدام سیاره در منظومه شمسی بزرگترین است؟', c:['زمین','مشتری','زحل','اورانوس'], a:1, cat:'عمومی', diff:'آسون' },
+    ],
+    'geography': [
+      { q:'طولانی‌ترین رود جهان کدام است؟', c:['آمازون','نیل','یانگ‌تسه','میسیسیپی'], a:1, cat:'جغرافیا', diff:'متوسط' },
+      { q:'کشوری با بیشترین جمعیت جهان؟', c:['هند','چین','آمریکا','اندونزی'], a:1, cat:'جغرافیا', diff:'آسون' },
+    ],
+    'sports': [
+      { q:'قهرمان جام جهانی فوتبال ۱۹۹۸؟', c:['آلمان','برزیل','فرانسه','ایتالیا'], a:2, cat:'ورزش', diff:'متوسط' },
+      { q:'در کدام ورزش از اصطلاح "اسلم دانک" استفاده می‌شود؟', c:['تنیس','بسکتبال','فوتبال','والیبال'], a:1, cat:'ورزش', diff:'آسون' },
+    ],
+    'science': [
+      { q:'عدد π تقریباً برابر با؟', c:['۲٫۷','۳٫۱۴','۳٫۴۱','۲٫۱۴'], a:1, cat:'علم', diff:'آسون' },
+      { q:'سرعت نور در خلاء چقدر است؟', c:['۲۹۹٬۷۹۲ کیلومتر بر ثانیه','۲۹۹٬۷۹۲ متر بر ثانیه','۲۹۹٬۷۹۲ مایل بر ثانیه','۲۹۹٬۷۹۲ کیلومتر بر ساعت'], a:0, cat:'علم', diff:'سخت' },
+    ],
+    'history': [
+      { q:'جنگ جهانی دوم در چه سالی پایان یافت؟', c:['۱۹۴۳','۱۹۴۴','۱۹۴۵','۱۹۴۶'], a:2, cat:'تاریخ', diff:'آسون' },
+      { q:'اولین رئیس جمهور آمریکا چه کسی بود؟', c:['توماس جفرسون','جورج واشنگتن','آبراهام لینکلن','بنجامین فرانکلین'], a:1, cat:'تاریخ', diff:'آسون' },
+    ],
+    'art': [
+      { q:'کدام هنرمند نقاشی «شب پرستاره» را کشیده؟', c:['پیکاسو','ون‌گوگ','مونک','داوینچی'], a:1, cat:'هنر', diff:'متوسط' },
+      { q:'مونا لیزا اثر کدام هنرمند است؟', c:['میکلآنژ','رافائل','لئوناردو داوینچی','دوناتلو'], a:2, cat:'هنر', diff:'آسون' },
+    ],
+    'entertainment': [
+      { q:'در دنیای «هری پاتر» نگهبان آزکابان چیست؟', c:['دیوانه‌ساز','غول','اژدها','کوتولهٔ خانگی'], a:0, cat:'سرگرمی', diff:'آسون' },
+      { q:'کدام فیلم برنده اسکار بهترین فیلم در سال ۲۰۲۰ شد؟', c:['پاراسایت','۱۹۱۷','جوکر','رویای سبز'], a:0, cat:'سرگرمی', diff:'متوسط' },
+    ]
+  };
+  
+  async function fetchQuestion() {
+    // If a category is selected, use local questions for that category
+    if (State.selectedCategory) {
+      const catQuestions = localQuestions[State.selectedCategory.id] || localQuestions['general'];
+      return catQuestions[Math.floor(Math.random() * catQuestions.length)];
+    }
+    
     // Try OpenTDB; fallback to local
     try{
       const url = 'https://opentdb.com/api.php?amount=1&type=multiple&encode=url3986';
@@ -476,7 +1386,7 @@
       }
     }catch(e){ /* offline or blocked */ }
     // fallback
-    return localQuestions[Math.floor(Math.random()*localQuestions.length)];
+    return localQuestions['general'][Math.floor(Math.random()*localQuestions['general'].length)];
   }
   function resetTimer(seconds){
     const circ = 2*Math.PI*64; // 402.124
@@ -503,7 +1413,9 @@
     if(State.lives<=0){ $('#btn-continue').classList.remove('hidden'); }
   }
   async function startQuiz(){
-    State.quiz.inProgress = true; State.quiz.answered = false; $('#btn-continue').classList.add('hidden');
+    State.quiz.inProgress = true; 
+    State.quiz.answered = false; 
+    $('#btn-continue').classList.add('hidden');
     renderTopBars();
     const q = await fetchQuestion();
     State.quiz.correctIndex = q.a;
@@ -530,26 +1442,101 @@
       el.classList.add(i===correct? 'correct':'wrong');
     });
     lockChoices();
+    
+    // Update category stats
+    if (State.selectedCategory) {
+      const catName = State.selectedCategory.name;
+      if (State.categoryStats[catName]) {
+        State.categoryStats[catName].played += 1;
+        if (idx === correct) {
+          State.categoryStats[catName].correct += 1;
+        }
+      }
+    }
+    
     // scoring with time bonus & VIP/boost
     const base = idx===correct ? 100 : 0;
     const timeBonus = idx===correct ? Math.floor( (State.quiz.remain/State.quiz.duration) * 50 ) : 0;
     const boostActive = Date.now() < State.boostUntil;
     const vipBonus = State.vip ? 20 : 0;
     const total = Math.floor((base + timeBonus + vipBonus) * (boostActive?2:1));
+    
     if(base>0){
       State.score += total;
       State.coins += 5; // small coin for correct
+      State.correctAnswers += 1;
+      State.quiz.consecutiveCorrect += 1;
+      
+      // Add experience
+      State.exp += 10;
+      checkLevelUp();
+      
+      // Play success sound if enabled
+      if (State.soundEnabled) {
+        // In a real app, you would play a success sound here
+        console.log('Playing success sound');
+      }
     } else {
       State.lives -= 1;
+      State.quiz.consecutiveCorrect = 0;
+      
+      // Play failure sound if enabled
+      if (State.soundEnabled) {
+        // In a real app, you would play a failure sound here
+        console.log('Playing failure sound');
+      }
+      
       if(State.lives<=0) showContinue();
     }
-    saveState(); renderHeader(); renderTopBars();
+    
+    State.gamesPlayed += 1;
+    saveState(); 
+    renderHeader(); 
+    renderTopBars();
+    
+    // Check for achievements
+    checkAchievements();
+    
+    // Update best streak
+    if (State.streak > State.bestStreak) {
+      State.bestStreak = State.streak;
+    }
+  }
+  function checkLevelUp() {
+    const expNeeded = State.level * 100;
+    if (State.exp >= expNeeded) {
+      State.level += 1;
+      State.exp = State.exp - expNeeded;
+      
+      // Show level up notification
+      showToast(`سطح ${State.level} رسیدی!`, 'success');
+      
+      // Reward coins for leveling up
+      const coinsReward = State.level * 10;
+      State.coins += coinsReward;
+      showToast(`${coinsReward} سکه جایزه گرفتی!`, 'success');
+      
+      // Create confetti
+      createConfetti();
+      
+      // Play level up sound if enabled
+      if (State.soundEnabled) {
+        // In a real app, you would play a level up sound here
+        console.log('Playing level up sound');
+      }
+    }
   }
   // === Leaderboard ===
-  function renderLeaderboard(){
+  function renderLeaderboard(period = 'weekly') {
     const me = { id: State.user.id, name: State.user.name, score: State.score };
     const arr = [...State.leaderboard.filter(x=>x.id!==me.id), me].sort((a,b)=>b.score-a.score).slice(0,20);
     const wrap = $('#lb-list'); wrap.innerHTML='';
+    
+    // Update tab buttons
+    $$('[data-period]').forEach(btn => {
+      btn.classList.toggle('tab-active', btn.dataset.period === period);
+    });
+    
     arr.forEach((u,i)=>{
       const row = document.createElement('div');
       row.className = 'flex items-center justify-between bg-white/10 border border-white/20 rounded-xl px-4 py-3 card-hover';
@@ -575,79 +1562,96 @@
   }
   // === Shop ===
   function buy(item){
-    const price = { life:30, boost:50, vip:200 }[item];
+    const price = { life:30, boost:50, coins:20, noads:100, vip:200 }[item];
     if(State.coins < price){ 
-      // Create a modern toast notification instead of alert
-      const toast = document.createElement('div');
-      toast.className = 'fixed top-20 left-1/2 transform -translate-x-1/2 glass px-6 py-3 rounded-2xl text-white font-bold z-50 fade-in';
-      toast.innerHTML = '<i class="fas fa-exclamation-circle ml-2"></i>سکه کافی نیست';
-      document.body.appendChild(toast);
-      setTimeout(() => toast.remove(), 3000);
+      showToast('سکه کافی نیست', 'error');
       return; 
     }
     State.coins -= price;
     if(item==='life') State.lives += 1;
     if(item==='boost') State.boostUntil = Date.now() + 10*60*1000; // 10 min
     if(item==='vip') State.vip = true;
-    saveState(); renderDashboard(); renderTopBars(); $('#vip-badge').classList.toggle('hidden', !State.vip);
+    if(item==='coins') State.coins += 100; // Add 100 coins
+    if(item==='noads') {
+      // In a real app, you would implement ad removal here
+      showToast('تبلیغات حذف شد!', 'success');
+    }
     
-    // Success toast
-    const toast = document.createElement('div');
-    toast.className = 'fixed top-20 left-1/2 transform -translate-x-1/2 glass px-6 py-3 rounded-2xl text-white font-bold z-50 fade-in';
-    toast.innerHTML = '<i class="fas fa-check-circle ml-2"></i>خرید با موفقیت انجام شد';
-    document.body.appendChild(toast);
-    setTimeout(() => toast.remove(), 3000);
+    saveState(); 
+    renderDashboard(); 
+    renderTopBars(); 
+    $('#vip-badge').classList.toggle('hidden', !State.vip);
+    
+    showToast('خرید با موفقیت انجام شد', 'success');
+    
+    // Check for VIP achievement
+    if (item === 'vip') {
+      checkAchievements();
+    }
   }
   // === Streak ===
   function claimStreak(){
     const nowDay = Math.floor(Date.now()/86400000);
     if(State.lastClaim === nowDay){ 
-      const toast = document.createElement('div');
-      toast.className = 'fixed top-20 left-1/2 transform -translate-x-1/2 glass px-6 py-3 rounded-2xl text-white font-bold z-50 fade-in';
-      toast.innerHTML = '<i class="fas fa-info-circle ml-2"></i>امروز قبلاً دریافت کردی';
-      document.body.appendChild(toast);
-      setTimeout(() => toast.remove(), 3000);
+      showToast('امروز قبلاً دریافت کردی', 'warning');
       return; 
     }
     const yesterday = nowDay - 1;
     if(State.lastClaim === yesterday) State.streak += 1; else State.streak = 1;
     State.lastClaim = nowDay;
     const reward = 5 * State.streak; // grows with streak
-    State.coins += reward; State.score += reward*10;
-    saveState(); renderDashboard(); renderHeader();
+    State.coins += reward; 
+    State.score += reward*10;
+    saveState(); 
+    renderDashboard(); 
+    renderHeader();
     
-    const toast = document.createElement('div');
-    toast.className = 'fixed top-20 left-1/2 transform -translate-x-1/2 glass px-6 py-3 rounded-2xl text-white font-bold z-50 fade-in';
-    toast.innerHTML = `<i class="fas fa-gift ml-2"></i>پاداش امروز: ${reward} سکه 🎉`;
-    document.body.appendChild(toast);
-    setTimeout(() => toast.remove(), 3000);
+    showToast(`پاداش امروز: ${reward} سکه 🎉`, 'success');
+    
+    // Check for streak achievements
+    checkAchievements();
   }
   // === Invite ===
   function doInvite(){
     const link = `https://t.me/share/url?url=${encodeURIComponent('https://t.me/your_bot?start=ref_'+State.user.id)}&text=${encodeURIComponent('بیا تو مسابقه!')}`;
     try{ window.open(link, '_blank'); }catch{ navigator.clipboard.writeText(link); 
-      const toast = document.createElement('div');
-      toast.className = 'fixed top-20 left-1/2 transform -translate-x-1/2 glass px-6 py-3 rounded-2xl text-white font-bold z-50 fade-in';
-      toast.innerHTML = '<i class="fas fa-check-circle ml-2"></i>لینک کپی شد';
-      document.body.appendChild(toast);
-      setTimeout(() => toast.remove(), 3000);
+      showToast('لینک کپی شد', 'success');
     }
   }
+  // === Daily Challenge ===
+  function startDailyChallenge() {
+    // In a real app, this would start a special daily challenge
+    showToast('چالش روزانه به زودی فعال می‌شود', 'info');
+  }
   // === Events ===
-  $('#btn-play').addEventListener('click', ()=>{ navTo('quiz'); startQuiz(); });
+  $('#btn-play').addEventListener('click', ()=>{ navTo('categories'); });
+  $('#btn-daily').addEventListener('click', startDailyChallenge);
   $('#btn-leaderboard').addEventListener('click', ()=>{ navTo('leaderboard'); });
   $('#btn-shop').addEventListener('click', ()=>{ navTo('shop'); });
+  $('#btn-profile').addEventListener('click', ()=>{ navTo('profile'); });
+  $('#btn-all-achievements').addEventListener('click', ()=>{ navTo('achievements'); });
+  $('#btn-settings').addEventListener('click', ()=>{ navTo('settings'); });
+  $('#btn-back-categories').addEventListener('click', ()=> navTo('dashboard'));
   $('#btn-back-lb').addEventListener('click', ()=> navTo('dashboard'));
   $('#btn-back-shop').addEventListener('click', ()=> navTo('dashboard'));
+  $('#btn-back-profile').addEventListener('click', ()=> navTo('dashboard'));
+  $('#btn-back-achievements').addEventListener('click', ()=> navTo('dashboard'));
+  $('#btn-back-settings').addEventListener('click', ()=> navTo('dashboard'));
   $('#btn-quit').addEventListener('click', ()=>{ navTo('dashboard'); });
   $('#btn-continue').addEventListener('click', ()=>{
-    if(State.coins>=10){ State.coins-=10; State.lives=1; saveState(); $('#btn-continue').classList.add('hidden'); renderTopBars(); resetTimer(15); $$('#choices .choice').forEach(el=>{ el.classList.remove('wrong','correct','pointer-events-none','opacity-70'); }); State.quiz.answered=false; }
-    else {
-      const toast = document.createElement('div');
-      toast.className = 'fixed top-20 left-1/2 transform -translate-x-1/2 glass px-6 py-3 rounded-2xl text-white font-bold z-50 fade-in';
-      toast.innerHTML = '<i class="fas fa-exclamation-circle ml-2"></i>سکه کافی نیست';
-      document.body.appendChild(toast);
-      setTimeout(() => toast.remove(), 3000);
+    if(State.coins>=10){ 
+      State.coins-=10; 
+      State.lives=1; 
+      saveState(); 
+      $('#btn-continue').classList.add('hidden'); 
+      renderTopBars(); 
+      resetTimer(15); 
+      $$('#choices .choice').forEach(el=>{ 
+        el.classList.remove('wrong','correct','pointer-events-none','opacity-70'); 
+      }); 
+      State.quiz.answered=false; 
+    } else {
+      showToast('سکه کافی نیست', 'error');
     }
   });
   $('#btn-claim-streak').addEventListener('click', claimStreak);
@@ -655,10 +1659,63 @@
   $$('[data-buy]').forEach(b=> b.addEventListener('click', e=> buy(e.currentTarget.dataset.buy)));
   $$('nav [data-tab]').forEach(b=> b.addEventListener('click', e=>{
     const tab = e.currentTarget.dataset.tab;
-    if(tab==='quiz'){ navTo('quiz'); startQuiz(); } else navTo(tab);
+    if(tab==='quiz'){ navTo('categories'); } else navTo(tab);
   }));
+  $$('[data-period]').forEach(b=> b.addEventListener('click', e=> renderLeaderboard(e.currentTarget.dataset.period)));
+  
+  // Settings event listeners
+  $('#sound-toggle').addEventListener('change', e => {
+    State.soundEnabled = e.target.checked;
+    saveState();
+  });
+  
+  $('#notification-toggle').addEventListener('change', e => {
+    State.notificationsEnabled = e.target.checked;
+    saveState();
+  });
+  
+  $('#darkmode-toggle').addEventListener('change', e => {
+    State.darkMode = e.target.checked;
+    saveState();
+    // In a real app, you would apply dark mode styles here
+    showToast('حالت شب ' + (State.darkMode ? 'فعال' : 'غیرفعال') + ' شد', 'info');
+  });
+  
+  $('#language-select').addEventListener('change', e => {
+    State.language = e.target.value;
+    saveState();
+    // In a real app, you would change the language here
+    showToast('زبان به ' + (State.language === 'fa' ? 'فارسی' : 'English') + ' تغییر کرد', 'info');
+  });
+  
+  $('#achievement-filter').addEventListener('change', renderAchievements);
+  
+  // Tutorial modal events
+  $('#close-tutorial').addEventListener('click', () => {
+    $('#tutorial-modal').classList.remove('active');
+    State.showTutorial = false;
+    saveState();
+  });
+  
+  $('#start-tutorial').addEventListener('click', () => {
+    $('#tutorial-modal').classList.remove('active');
+    State.showTutorial = false;
+    saveState();
+    navTo('categories');
+  });
+  
   // Init
-  renderHeader(); renderDashboard(); navTo('dashboard');
+  renderHeader(); 
+  renderDashboard(); 
+  navTo('dashboard');
+  
+  // Show tutorial if it's the first time
+  if (State.showTutorial) {
+    $('#tutorial-modal').classList.add('active');
+  }
+  
+  // Check for achievements on load
+  checkAchievements();
   </script>
 </body>
 </html>
