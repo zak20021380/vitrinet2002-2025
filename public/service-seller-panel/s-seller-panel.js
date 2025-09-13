@@ -1336,9 +1336,10 @@ destroy() {
   // قوانین مشتری (مسدود = لغو شده، خودکار تایید = از pending به confirmed)
   const effective = MOCK_DATA.bookings.map(b => {
     const p = prefs[normalizeKey(b.customerName)];
-    if (p?.blocked) return { ...b, status: 'cancelled' };
-    if (p?.autoAccept && b.status === 'pending') return { ...b, status: 'confirmed' };
-    return b;
+    const blocked = !!p?.blocked;
+    if (blocked) return { ...b, status: 'cancelled', blocked };
+    if (p?.autoAccept && b.status === 'pending') return { ...b, status: 'confirmed', blocked };
+    return { ...b, blocked };
   });
 
   const filtered = (filter === 'all') ? effective : effective.filter(b => b.status === filter);
@@ -1378,6 +1379,7 @@ destroy() {
             </div>
           </div>
           ` : ''}
+          <button type="button" class="btn-icon-text ${b.blocked ? 'btn-secondary' : 'btn-danger'} block-customer-btn" data-name="${b.customerName}" data-blocked="${b.blocked}" aria-label="${b.blocked ? 'آزادسازی مشتری' : 'مسدودسازی مشتری'}">${b.blocked ? 'آزادسازی' : 'مسدود'}</button>
           <button type="button" class="btn-icon btn-danger delete-booking-btn" data-id="${b._id || b.id}" aria-label="حذف نوبت">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
               <polyline points="3 6 5 6 21 6"/>
@@ -1396,7 +1398,20 @@ destroy() {
       const delBtn = e.target.closest('.delete-booking-btn');
       const btn = e.target.closest('.status-change-btn');
       const option = e.target.closest('.status-option');
-      if (delBtn) {
+      const blockBtn = e.target.closest('.block-customer-btn');
+      if (blockBtn) {
+        const name = blockBtn.dataset.name;
+        const currentlyBlocked = blockBtn.dataset.blocked === 'true';
+        CustomerPrefs.setByName(name, { blocked: !currentlyBlocked });
+        UIComponents.showToast(
+          currentlyBlocked ? 'مسدودسازی برداشته شد' : '🚫 این مشتری مسدود شد',
+          currentlyBlocked ? 'success' : 'error'
+        );
+        self.renderBookings(self.currentBookingFilter || 'all');
+        self.renderPlans && self.renderPlans();
+        e.stopPropagation();
+        return;
+      } else if (delBtn) {
         const id = delBtn.dataset.id;
         if (!confirm('آیا از حذف این نوبت مطمئن هستید؟')) return;
         const idx = MOCK_DATA.bookings.findIndex(b => (b._id || b.id) == id);
