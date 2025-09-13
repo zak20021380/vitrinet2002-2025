@@ -1711,8 +1711,13 @@ function renderBookings() {
                   <i class="fas fa-trash ml-1" aria-hidden="true"></i> حذف
                 </button>
               ` : `
-                <button type="button" 
-                        onclick="rebookService('${b.service}')" 
+                <button type="button"
+                        onclick="rebookService(this)"
+                        data-service="${b.service}"
+                        data-service-id="${b.serviceId || ''}"
+                        data-price="${b.price || 0}"
+                        data-store-id="${meta.storeId || ''}"
+                        data-shopurl="${meta.shopurl || ''}"
                         class="px-4 py-2 rounded-lg text-xs font-semibold text-green-600 bg-green-50 hover:bg-green-100 transition-all"
                         aria-label="رزرو مجدد ${b.service}">
                   <i class="fas fa-redo ml-1" aria-hidden="true"></i> رزرو مجدد
@@ -1883,7 +1888,32 @@ function renderBookings() {
     currentRescheduleId = null;
   });
 
-  function rebookService(service) { showToast(`رزرو ${service}`, 'info'); }
+  function rebookService(btn) {
+    if (!btn) return;
+    const service   = btn.dataset.service || '';
+    const price     = btn.dataset.price || '';
+    const serviceId = btn.dataset.serviceId || '';
+    const storeId   = btn.dataset.storeId || '';
+    const shopurl   = btn.dataset.shopurl || '';
+
+    try {
+      const payload = { service };
+      if (price) payload.price = parseInt(price, 10) || 0;
+      if (serviceId) payload.serviceId = serviceId;
+      sessionStorage.setItem('vt:booking.sel', JSON.stringify(payload));
+    } catch (e) {}
+
+    const url = new URL('../service-shops.html', location.href);
+    if (shopurl)      url.searchParams.set('shopurl', shopurl);
+    else if (storeId) url.searchParams.set('sellerId', storeId);
+    if (service)   url.searchParams.set('service', service);
+    if (price)     url.searchParams.set('price', price);
+    if (serviceId) url.searchParams.set('serviceId', serviceId);
+    url.hash = 'booking-wizard';
+
+    showToast('در حال انتقال…', 'info');
+    setTimeout(() => { location.href = url.href; }, 300);
+  }
 
   /* ---------- Notifications render & actions ---------- */
   function renderNotifs() {
