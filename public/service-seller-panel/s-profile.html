@@ -1896,6 +1896,13 @@ function renderBookings() {
     const storeId   = btn.dataset.storeId || '';
     const shopurl   = btn.dataset.shopurl || '';
 
+    const key = `vt:rebooked:${serviceId || service}:${storeId}`;
+    if (localStorage.getItem(key)) {
+      showToast('رزرو مجدد تنها یکبار امکان‌پذیر است', 'error');
+      return;
+    }
+    localStorage.setItem(key, '1');
+
     try {
       const payload = { service };
       if (price) payload.price = parseInt(price, 10) || 0;
