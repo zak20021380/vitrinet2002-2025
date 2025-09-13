@@ -486,17 +486,30 @@ async function handleRewardAction(userId, action) {
   class StorageManager {
     static get(key) {
       try {
-        return JSON.parse(localStorage.getItem(key));
+        const lsItem = localStorage.getItem(key);
+        if (lsItem !== null) return JSON.parse(lsItem);
+        const ssItem = sessionStorage.getItem(key);
+        return ssItem ? JSON.parse(ssItem) : null;
       } catch (e) {
-        console.error("Error getting from localStorage", e);
+        console.error("Error getting from storage", e);
         return null;
       }
     }
     static set(key, value) {
+      const data = JSON.stringify(value);
       try {
-        localStorage.setItem(key, JSON.stringify(value));
+        localStorage.setItem(key, data);
       } catch (e) {
-        console.error("Error setting to localStorage", e);
+        if (e && (e.name === 'QuotaExceededError' || e.code === 22)) {
+          console.warn('localStorage quota exceeded, using sessionStorage instead');
+          try {
+            sessionStorage.setItem(key, data);
+          } catch (e2) {
+            console.error('Error setting to sessionStorage', e2);
+          }
+        } else {
+          console.error("Error setting to localStorage", e);
+        }
       }
     }
   }
