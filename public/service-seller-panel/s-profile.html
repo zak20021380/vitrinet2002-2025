@@ -1079,12 +1079,21 @@
 
   const uuid = () => (crypto?.randomUUID?.() || ('id-' + Math.random().toString(36).slice(2) + Date.now().toString(36)));
 
-  const statusMeta = (s) => ({
-    confirmed: {text:'تایید شده', cls:'ok', icon:'fa-circle-check'},
-    pending:   {text:'در انتظار', cls:'wait', icon:'fa-hourglass-half'},
-    canceled:  {text:'لغو شده',  cls:'cancel', icon:'fa-ban'},
-    done:      {text:'انجام شده', cls:'done', icon:'fa-check-double'}
-  }[s] || {text:s, cls:'wait', icon:'fa-clock'});
+  const statusMeta = (s, cancelledBy) => {
+    const meta = ({
+      confirmed: {text:'تایید شده', cls:'ok', icon:'fa-circle-check'},
+      pending:   {text:'در انتظار', cls:'wait', icon:'fa-hourglass-half'},
+      canceled:  {text:'لغو شده',  cls:'cancel', icon:'fa-ban'},
+      done:      {text:'انجام شده', cls:'done', icon:'fa-check-double'}
+    }[s] || {text:s, cls:'wait', icon:'fa-clock'});
+
+    if (s === 'canceled') {
+      if (cancelledBy === 'seller') meta.text = 'لغو شده توسط فروشنده';
+      else if (cancelledBy === 'customer') meta.text = 'لغو شده توسط مشتری';
+    }
+
+    return meta;
+  };
 
   const mapStatus = (s) => ({ pending:'pending', confirmed:'confirmed', cancelled:'canceled', completed:'done' }[s] || s);
 
@@ -1361,6 +1370,7 @@ function setBookings(list) {
     date: b.datetime ? b.datetime.split('T')[0] : '',
     time: b.datetime ? b.datetime.split('T')[1]?.slice(0,5) : '',
     status: b.status || 'pending',
+    cancelledBy: b.cancelledBy || '',
     price: b.price || 0,
     storeName: b.storeName || '',
     storeLocation: b.storeLocation || '',
@@ -1418,6 +1428,7 @@ async function loadBookings() {
       service: b.service,
       datetime: `${b.date || ''}T${(b.time || '').slice(0,5)}`,
       status: mapStatus(b.status || 'pending'),
+      cancelledBy: b.cancelledBy || '',
       price: b.price || 0,
       storeName: b.storeName || meta.storeName || '',
       storeLocation: b.storeLocation || meta.storeLocation || '',
@@ -1448,6 +1459,7 @@ async function loadBookings() {
           service: b.service || b.serviceName || '',
           datetime: `${b.bookingDate || b.date || ''}T${(b.startTime || b.time || '').slice(0,5)}`,
           status: mapStatus(b.status),
+          cancelledBy: b.cancelledBy || b.canceledBy || '',
           price: b.price || 0,
           storeName: meta.storeName,
           storeLocation: meta.storeLocation,
@@ -1601,7 +1613,7 @@ function renderBookings() {
   const history  = all.filter(b => b.status === 'done').reverse();
 
   const makeCard = (b) => {
-    const m = statusMeta(b.status);
+    const m = statusMeta(b.status, b.cancelledBy);
     const isActive = b.status!=='canceled' && b.status!=='done';
 
     // Enhanced store display logic
@@ -1801,7 +1813,9 @@ function renderBookings() {
   async function cancelBooking(id, silent=false) {
     const items = getBookings(); const idx = items.findIndex(x=>x.id===id);
     if (idx === -1) return;
-    items[idx].status = 'canceled'; setBookings(items); renderBookings();
+    items[idx].status = 'canceled';
+    items[idx].cancelledBy = 'customer';
+    setBookings(items); renderBookings();
     const selectedStore = getLoyaltyStores().find(s=>s.active); if (selectedStore) renderLoyalty(selectedStore);
     if (!silent) { closeModal('confirmModal'); showToast('رزرو لغو شد', 'success'); }
 
