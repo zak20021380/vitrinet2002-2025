@@ -1403,6 +1403,11 @@ destroy() {
       if (blockBtn) {
         const name = blockBtn.dataset.name;
         const userId = blockBtn.dataset.userId;
+        if (!userId) {
+          UIComponents.showToast('شناسه مشتری یافت نشد', 'error');
+          e.stopPropagation();
+          return;
+        }
         const currentlyBlocked = blockBtn.dataset.blocked === 'true';
         try {
           const res = await fetch(`${API_BASE}/api/user/block/${userId}`, {
