@@ -1367,7 +1367,7 @@ destroy() {
         </div>
         <div class="booking-actions">
           <span class="status-badge status-${b.status}">${statusText}</span>
-          ${b.status !== 'completed' ? `
+          ${!['completed','cancelled'].includes(b.status) ? `
           <div class="status-wrapper">
             <button type="button" class="btn-secondary btn-icon-text status-change-btn" data-id="${b._id || b.id}" aria-haspopup="true" aria-expanded="false">تغییر وضعیت</button>
             <div class="status-menu" role="menu">
@@ -1434,8 +1434,8 @@ destroy() {
         const id = option.closest('.status-wrapper').querySelector('.status-change-btn').dataset.id;
         const newStatus = option.dataset.status;
         const booking = MOCK_DATA.bookings.find(b => (b._id || b.id) == id);
-        if (!booking || booking.status === 'completed') {
-          UIComponents?.showToast?.('نوبت انجام‌شده قابل تغییر نیست', 'warning');
+        if (!booking || ['completed','cancelled'].includes(booking.status)) {
+          UIComponents?.showToast?.('نوبت انجام‌شده یا لغو شده قابل تغییر نیست', 'warning');
           e.stopPropagation();
           return;
         }
