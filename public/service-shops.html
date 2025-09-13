@@ -4016,6 +4016,7 @@ document.addEventListener('DOMContentLoaded', async function() {
   const isAdmin = window.__APP_USER__?.isAdmin || window.__APP_USER__?.role === 'admin';
 
   const reviewKey = userId ? `review:last:${storeId}:${userId}` : `review:last:${storeId}`;
+  const ratingKey = userId ? `review:rated:${storeId}:${userId}` : `review:rated:${storeId}`;
   function canSubmitReview() {
     if (isAdmin) return true;
     const last = localStorage.getItem(reviewKey);
@@ -4023,6 +4024,16 @@ document.addEventListener('DOMContentLoaded', async function() {
   }
   function markReviewSubmitted() {
     localStorage.setItem(reviewKey, Date.now().toString());
+  }
+  function getStoredRating() {
+    const r = parseInt(localStorage.getItem(ratingKey) || '0', 10);
+    return isNaN(r) ? 0 : r;
+  }
+  function hasRated() {
+    return getStoredRating() > 0;
+  }
+  function markRated(rating) {
+    localStorage.setItem(ratingKey, String(rating || 1));
   }
   function updateSubmitState() {
     if (!submitBtn) return;
@@ -4250,6 +4261,7 @@ function updateSummary(avg, count, ratings) {
     document.body.style.overflow = 'hidden';
     setTimeout(() => reviewFormModal.classList.add('show'), 10);
     updateSubmitState();
+    updateRatingState();
   }
   function closeReviewFormModal() {
     if (!reviewFormModal) return;
@@ -4344,6 +4356,18 @@ function updateSummary(avg, count, ratings) {
     if (ratingText) ratingText.textContent = selectedRating ? (ratingMessages[selectedRating]||'') : '';
   });
 
+  function updateRatingState(){
+    const stored = getStoredRating();
+    if (stored > 0) {
+      selectedRating = stored;
+      updateStars(selectedRating);
+      if (ratingText) ratingText.textContent = ratingMessages[selectedRating] || '';
+      ratingStars.forEach(star => star.style.pointerEvents = 'none');
+    } else {
+      ratingStars.forEach(star => star.style.pointerEvents = '');
+    }
+  }
+
   // ====== Char counter ======
   reviewTextarea?.addEventListener('input', function(){
     let val = this.value;
@@ -4358,7 +4382,16 @@ function updateSummary(avg, count, ratings) {
   reviewForm?.addEventListener('submit', async function(e){
     e.preventDefault();
 
+    const storedRating = getStoredRating();
+    const alreadyRated = storedRating > 0;
+    if (alreadyRated && selectedRating !== storedRating) {
+      showToast('امکان تغییر امتیاز وجود ندارد.', 'info');
+      return;
+    }
     if (!canSubmitReview()) { showToast('روزانه یک نظر می‌تونی ثبت کنی.', 'info'); return; }
+    if (alreadyRated) {
+      selectedRating = storedRating;
+    }
     if (!selectedRating) { showToast('لطفاً امتیاز بده 🙂', 'info'); return; }
     if (!reviewTextarea || reviewTextarea.value.trim().length < 5) { showToast('متن نظر حداقل ۵ کاراکتر باشه.', 'error'); return; }
 
@@ -4372,10 +4405,14 @@ function updateSummary(avg, count, ratings) {
       return;
     }
 
-      const bookings = JSON.parse(localStorage.getItem('vitreenet-bookings') || '[]');
-      if (!bookings.length) {
-        showToast('برای ثبت نظر باید حداقل یک نوبت ثبت کرده باشید.', 'error');
-        return;
+      const firstReview = !localStorage.getItem(reviewKey);
+      if (firstReview) {
+        const bookings = JSON.parse(localStorage.getItem('vitreenet-bookings') || '[]');
+        const hasApproved = bookings.some(b => ['confirmed','completed'].includes(b.status));
+        if (!hasApproved) {
+          showToast('برای ثبت نظر باید حداقل یک نوبت تایید شده داشته باشید.', 'error');
+          return;
+        }
       }
       const token = getToken();
 
@@ -4411,6 +4448,7 @@ function updateSummary(avg, count, ratings) {
       if (!res.ok) throw new Error('HTTP '+res.status);
 
       markReviewSubmitted();
+      if (!alreadyRated) markRated(selectedRating);
       showToast('نظر ثبت شد و پس از تایید نمایش داده می‌شود 🙌', 'success');
       await loadReviews();
     } catch (err) {
