@@ -157,6 +157,9 @@ exports.updateBookingStatus = async (req, res) => {
     if (booking.status === 'completed') {
       return res.status(400).json({ message: 'نوبت انجام شده قابل تغییر نیست.' });
     }
+    if (booking.status === 'cancelled') {
+      return res.status(400).json({ message: 'نوبت لغو شده قابل تغییر نیست.' });
+    }
 
     booking.status = status;
     await booking.save();
