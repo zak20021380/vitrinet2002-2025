@@ -152,7 +152,8 @@ async createService(payload) {
         dateISO,
         time,
         customerPhone: b.customerPhone || '',
-        status: b.status || 'pending'
+        status: b.status || 'pending',
+        cancelledBy: b.cancelledBy || b.canceledBy
       };
     });
   },
@@ -283,7 +284,7 @@ async function fetchInitialData() {
         const serverStatus = b.status || 'pending';
         const localStatus = statusMap.get(id);
         const status = serverStatus === 'cancelled' ? 'cancelled' : (localStatus || serverStatus);
-        const cancelledBy = serverStatus === 'cancelled' && localStatus !== 'cancelled' ? 'customer' : undefined;
+        const cancelledBy = b.cancelledBy || (serverStatus === 'cancelled' && localStatus !== 'cancelled' ? 'customer' : undefined);
         if (cancelledBy === 'customer') {
           UIComponents?.showToast?.(`رزرو ${b.customerName || ''} توسط مشتری لغو شد`, 'error');
         }
