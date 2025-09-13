@@ -278,12 +278,23 @@ async function fetchInitialData() {
     if (Array.isArray(bookings) && bookings.length) {
       console.log('Successfully fetched bookings from server:', bookings);
       const statusMap = new Map(localBookings.map(b => [(b._id || b.id), b.status]));
-      MOCK_DATA.bookings = bookings.map(b => ({
-        ...b,
-        date: b.bookingDate || b.date || '',
-        dateISO: b.dateISO || b.bookingDate || b.date || '',
-        status: statusMap.get(b._id || b.id) || b.status || 'pending'
-      }));
+      MOCK_DATA.bookings = bookings.map(b => {
+        const id = b._id || b.id;
+        const serverStatus = b.status || 'pending';
+        const localStatus = statusMap.get(id);
+        const status = serverStatus === 'cancelled' ? 'cancelled' : (localStatus || serverStatus);
+        const cancelledBy = serverStatus === 'cancelled' && localStatus !== 'cancelled' ? 'customer' : undefined;
+        if (cancelledBy === 'customer') {
+          UIComponents?.showToast?.(`رزرو ${b.customerName || ''} توسط مشتری لغو شد`, 'error');
+        }
+        return {
+          ...b,
+          date: b.bookingDate || b.date || '',
+          dateISO: b.dateISO || b.bookingDate || b.date || '',
+          status,
+          cancelledBy
+        };
+      });
       console.log('MOCK_DATA.bookings after server data:', MOCK_DATA.bookings);
     } else if (localBookings.length) {
       console.log('Using local bookings as fallback:', localBookings);
@@ -1334,14 +1345,17 @@ destroy() {
   if (!filtered.length) {
     listEl.innerHTML = `<p>موردی برای نمایش یافت نشد.</p>`;
   } else {
-    const statusLabel = {
+    const baseStatusLabel = {
       pending: 'در انتظار تایید',
       confirmed: 'تایید شده',
-      completed: 'انجام شده',
-      cancelled: 'لغو شده'
+      completed: 'انجام شده'
     };
-    listEl.innerHTML = filtered.map(b => `
-      <article class="booking-card card" role="listitem" tabindex="0" data-status="${b.status}" data-customer-name="${b.customerName}">
+    listEl.innerHTML = filtered.map(b => {
+      const statusText = b.status === 'cancelled'
+        ? (b.cancelledBy === 'customer' ? 'لغو توسط مشتری' : 'لغو شده')
+        : (baseStatusLabel[b.status] || b.status);
+      return `
+      <article class="booking-card card" role="listitem" tabindex="0" data-status="${b.status}" ${b.cancelledBy ? `data-cancelled-by="${b.cancelledBy}"` : ''} data-customer-name="${b.customerName}">
         <div class="booking-card-content">
           <strong class="booking-customer">${b.customerName}</strong>
           <span class="booking-service">
@@ -1349,10 +1363,10 @@ destroy() {
   ${UIComponents.formatPersianDayMonth(b.date) ? ' - ' + UIComponents.formatPersianDayMonth(b.date) : ''}
   - ساعت ${UIComponents.formatPersianNumber(b.time)}
 </span>
-
+          ${b.cancelledBy === 'customer' ? '<span class="cancel-note">این نوبت توسط مشتری لغو شده است</span>' : ''}
         </div>
         <div class="booking-actions">
-          <span class="status-badge status-${b.status}">${statusLabel[b.status] || b.status}</span>
+          <span class="status-badge status-${b.status}">${statusText}</span>
           ${b.status !== 'completed' ? `
           <div class="status-wrapper">
             <button type="button" class="btn-secondary btn-icon-text status-change-btn" data-id="${b._id || b.id}" aria-haspopup="true" aria-expanded="false">تغییر وضعیت</button>
@@ -1371,7 +1385,8 @@ destroy() {
           </button>
         </div>
       </article>
-    `).join('');
+      `;
+    }).join('');
   }
 
   if (!listEl.dataset.statusBound) {
@@ -1426,6 +1441,7 @@ destroy() {
         }
         const prev = booking.status;
         booking.status = newStatus;
+        booking.cancelledBy = (newStatus === 'cancelled') ? 'seller' : undefined;
         persistBookings();
         delete bookedCache[booking.dateISO];
         const modal = document.getElementById('resv-modal');
