@@ -1320,6 +1320,7 @@ function applyProfile(p) {
 
 function resolveStoreMeta(b) {
   const s = b?.store || b?.seller || {};
+  const g = seller || {};
   const storeName =
     b.storeName ||
     s.storeName || s.storename ||
@@ -1329,6 +1330,7 @@ function resolveStoreMeta(b) {
     s.name ||                 // ← قدیمی
     b.branchName ||           // ← بعضی APIها
     b.sellerName ||           // ← fallback
+    g.storeName || g.storename || g.title || g.displayName || g.branchName || g.name ||
     '';
 
   const storeLocation =
@@ -1338,10 +1340,11 @@ function resolveStoreMeta(b) {
     (s.address && s.address.city) ||
     b.city ||
     b.branchCity ||
+    g.city || (g.location && g.location.city) || (g.address && g.address.city) ||
     '';
 
-  const storeId  = b.storeId || s._id || s.id || s.storeId || '';
-  const shopurl  = b.shopurl || s.shopurl || s.slug || s.url || s.shopUrl || '';
+  const storeId  = b.storeId || s._id || s.id || s.storeId || g._id || g.id || '';
+  const shopurl  = b.shopurl || s.shopurl || s.slug || s.url || s.shopUrl || g.shopurl || g.slug || g.url || g.shopUrl || '';
 
   return { storeName, storeLocation, storeId, shopurl };
 }
@@ -1380,6 +1383,7 @@ async function loadBookings() {
   // Helper برای درآوردن نام/لوکیشن فروشگاه از انواع فیلدهای ممکن
   const resolveStoreMeta = (b) => {
     const s = b?.store || b?.seller || {};
+    const g = seller || {};
     const storeName =
       b.storeName ||
       s.storeName || s.storename ||
@@ -1389,6 +1393,7 @@ async function loadBookings() {
       s.name ||
       b.branchName ||
       b.sellerName ||
+      g.storeName || g.storename || g.title || g.displayName || g.branchName || g.name ||
       '';
     const storeLocation =
       b.storeLocation ||
@@ -1397,9 +1402,10 @@ async function loadBookings() {
       (s.address && s.address.city) ||
       b.city ||
       b.branchCity ||
+      g.city || (g.location && g.location.city) || (g.address && g.address.city) ||
       '';
-    const storeId = b.storeId || s._id || s.id || s.storeId || '';
-    const shopurl = b.shopurl || s.shopurl || s.slug || s.url || s.shopUrl || '';
+    const storeId = b.storeId || s._id || s.id || s.storeId || g._id || g.id || '';
+    const shopurl = b.shopurl || s.shopurl || s.slug || s.url || s.shopUrl || g.shopurl || g.slug || g.url || g.shopUrl || '';
     return { storeName, storeLocation, storeId, shopurl };
   };
 
@@ -1597,34 +1603,35 @@ function renderBookings() {
   const makeCard = (b) => {
     const m = statusMeta(b.status);
     const isActive = b.status!=='canceled' && b.status!=='done';
-    
+
     // Enhanced store display logic
-    const hasStore = b.storeName || b.storeId || b.shopurl;
+    const meta = resolveStoreMeta(b);
+    const hasStore = meta.storeName || meta.storeId || meta.shopurl;
     const storeDisplay = hasStore ? `
       <div class="store-info-container">
-        ${b.shopurl || b.storeId ? `
+        ${meta.shopurl || meta.storeId ? `
           <a href="${shopDeepLink({
-            storeId: b.storeId,
-            shopurl: b.shopurl,
-            storeName: b.storeName
-          })}" class="store-link-wrapper" aria-label="مشاهده فروشگاه ${b.storeName || ''}">
+            storeId: meta.storeId,
+            shopurl: meta.shopurl,
+            storeName: meta.storeName
+          })}" class="store-link-wrapper" aria-label="مشاهده فروشگاه ${meta.storeName || ''}">
         ` : ''}
           <div class="store-badge ${b.premium ? 'premium' : ''}">
             <i class="fas fa-store store-badge-icon" aria-hidden="true"></i>
             <div class="store-badge-text">
-              <span class="store-badge-name">${b.storeName || 'فروشگاه'}</span>
-              ${b.storeLocation ? `
+              <span class="store-badge-name">${meta.storeName || 'فروشگاه'}</span>
+              ${meta.storeLocation ? `
                 <span class="store-badge-location">
                   <i class="fas fa-map-marker-alt" style="font-size: 0.55rem;"></i>
-                  ${b.storeLocation}
+                  ${meta.storeLocation}
                 </span>
               ` : ''}
             </div>
-            ${b.shopurl || b.storeId ? `
+            ${meta.shopurl || meta.storeId ? `
               <i class="fas fa-external-link-alt" style="font-size: 0.6rem; margin-right: auto; opacity: 0.6;"></i>
             ` : ''}
           </div>
-        ${b.shopurl || b.storeId ? '</a>' : ''}
+        ${meta.shopurl || meta.storeId ? '</a>' : ''}
       </div>
     ` : '';
     
