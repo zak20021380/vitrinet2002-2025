@@ -1529,22 +1529,36 @@ destroy() {
 
   if (!this._reviewsLoaded) {
     try {
-      const r = await fetch(bust(`${API_BASE}/api/shopAppearance/reviews/pending`), { credentials: 'include', ...NO_CACHE });
-      if (r.ok) {
-        const data = await r.json();
-        MOCK_DATA.reviews = data.map(rv => ({
-          id: rv._id,
-          customerName: rv.userName || 'کاربر',
-          rating: rv.score,
-          date: new Date(rv.createdAt).toLocaleDateString('fa-IR'),
-          comment: rv.comment,
-          status: rv.approved ? 'approved' : 'pending'
-        }));
-      } else {
-        MOCK_DATA.reviews = [];
-      }
+      const seller = JSON.parse(localStorage.getItem('seller') || '{}');
+      const sellerId = seller.id || seller._id;
+
+      const pendingReq = fetch(bust(`${API_BASE}/api/shopAppearance/reviews/pending`), { credentials: 'include', ...NO_CACHE });
+      const approvedReq = sellerId
+        ? fetch(bust(`${API_BASE}/api/shopAppearance/${sellerId}/reviews`), { credentials: 'include', ...NO_CACHE })
+        : null;
+
+      const [pendingRes, approvedRes] = await Promise.all([pendingReq, approvedReq]);
+
+      const pending = pendingRes?.ok ? await pendingRes.json() : [];
+      const approved = approvedRes?.ok ? await approvedRes.json() : [];
+
+      const mapReview = rv => ({
+        id: rv._id,
+        customerName: rv.userName || 'کاربر',
+        rating: rv.score,
+        date: new Date(rv.createdAt).toLocaleDateString('fa-IR'),
+        comment: rv.comment,
+        status: rv.approved ? 'approved' : 'pending'
+      });
+
+      const mappedPending = Array.isArray(pending) ? pending.map(mapReview) : [];
+      const mappedApproved = Array.isArray(approved)
+        ? approved.map(rv => ({ ...mapReview(rv), status: 'approved' }))
+        : [];
+
+      MOCK_DATA.reviews = [...mappedPending, ...mappedApproved];
     } catch (err) {
-      console.error('load pending reviews failed', err);
+      console.error('load reviews failed', err);
       MOCK_DATA.reviews = [];
     }
     this._reviewsLoaded = true;
