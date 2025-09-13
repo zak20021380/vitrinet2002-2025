@@ -1503,7 +1503,8 @@ destroy() {
   const counts = {
     pending:   effective.filter(b => b.status === 'pending').length,
     confirmed: effective.filter(b => b.status === 'confirmed').length,
-    completed: effective.filter(b => b.status === 'completed').length
+    completed: effective.filter(b => b.status === 'completed').length,
+    cancelled: effective.filter(b => b.status === 'cancelled').length
   };
   const setText = (sel, val) => {
     const el = document.querySelector(sel);
@@ -1513,6 +1514,7 @@ destroy() {
   setText('.filter-chip[data-filter="pending"] .chip-badge', counts.pending);
   setText('.filter-chip[data-filter="confirmed"] .chip-badge', counts.confirmed);
   setText('.filter-chip[data-filter="completed"] .chip-badge', counts.completed);
+  setText('.filter-chip[data-filter="cancelled"] .chip-badge', counts.cancelled);
   this.updateDashboardStats();
   window.updateResvDayIndicators && window.updateResvDayIndicators();
 }
