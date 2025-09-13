@@ -4147,7 +4147,10 @@ document.addEventListener('DOMContentLoaded', async function() {
           ? [r.userId.firstname, r.userId.lastname].filter(Boolean).join(' ')
           : '');
       const name = escapeHTML(rawName || 'کاربر');
-      const date = r.createdAt ? new Date(r.createdAt).toLocaleDateString('fa-IR') : '';
+      // Ensure the review date is displayed correctly in Tehran timezone
+      const date = r.createdAt
+        ? new Date(r.createdAt).toLocaleDateString('fa-IR', { timeZone: 'Asia/Tehran' })
+        : '';
       const comment = escapeHTML(r.comment || '');
       const score = Math.max(1, Math.min(5, Number(r.score) || 0));
       const stars = starHtml(score);
