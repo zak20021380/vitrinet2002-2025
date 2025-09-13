@@ -1608,9 +1608,9 @@ async function loadBookings() {
 function renderBookings() {
   const list = $('#upcomingList'), hist = $('#historyList');
   list.innerHTML = ''; hist.innerHTML = '';
-  const all = getBookings().slice().sort((a,b)=> new Date(a.datetime) - new Date(b.datetime));
-  const upcoming = all.filter(b => b.status !== 'done');
-  const history  = all.filter(b => b.status === 'done').reverse();
+  const all = getBookings().slice().sort((a,b)=> new Date(b.datetime) - new Date(a.datetime));
+  const upcoming = all.filter(b => b.status !== 'done' && b.status !== 'canceled');
+  const history  = all.filter(b => b.status === 'done' || b.status === 'canceled');
 
   const makeCard = (b) => {
     const m = statusMeta(b.status, b.cancelledBy);
