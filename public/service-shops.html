@@ -3268,9 +3268,9 @@ const btns = document.querySelectorAll(
       const ctaText    = document.getElementById('lr-cta-label')?.textContent?.trim();
       const isFirstCTA = (ctaText === 'رزرو اولین نوبت') || (!AUTH.loggedIn && !HAS_BOOKED_BEFORE);
 
+      // در حالت میهمان، مستقیماً ویزارد رزرو باز شود و دیگر کاربر مجبور به ورود نباشد
       if (!AUTH.loggedIn && !isFirstCTA) {
-        requireLogin();
-        return;
+        toast('برای ذخیره امتیازات، ورود پیشنهاد می‌شود');
       }
 
       if (current >= target && AUTH.loggedIn) {
