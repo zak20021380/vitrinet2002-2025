@@ -278,6 +278,47 @@ async deletePortfolioItem(id) {
     },
 
 
+  // Notifications API methods
+  async getNotifications() {
+    const r = await fetch(bust(`${API_BASE}/api/notifications`), {
+      credentials: 'include',
+      ...NO_CACHE
+    });
+    if (!r.ok && r.status !== 304) throw new Error('FETCH_NOTIFICATIONS_FAILED');
+    const raw = this._unwrap(await this._json(r));
+    const arr = Array.isArray(raw) ? raw : [];
+    const fmt = (d) => {
+      const diff = (Date.now() - new Date(d).getTime()) / 1000;
+      if (diff < 3600) return `${Math.floor(diff/60)} دقیقه پیش`;
+      if (diff < 86400) return `${Math.floor(diff/3600)} ساعت پیش`;
+      return `${Math.floor(diff/86400)} روز پیش`;
+    };
+    return arr.map(n => ({
+      id: n._id || n.id,
+      text: n.message || '',
+      time: n.createdAt ? fmt(n.createdAt) : '',
+      read: !!n.read
+    }));
+  },
+
+  async markNotificationRead(id) {
+    const r = await fetch(`${API_BASE}/api/notifications/${id}/read`, {
+      method: 'PUT',
+      credentials: 'include'
+    });
+    if (!r.ok) throw new Error('MARK_NOTIFICATION_READ_FAILED');
+    return true;
+  },
+
+  async deleteNotification(id) {
+    const r = await fetch(`${API_BASE}/api/notifications/${id}`, {
+      method: 'DELETE',
+      credentials: 'include'
+    });
+    if (!r.ok) throw new Error('DELETE_NOTIFICATION_FAILED');
+    return true;
+  }
+
 
 };
 
@@ -451,14 +492,9 @@ async function fetchInitialData() {
    * ==============================
    * Mock Data
    * ==============================
-   */
+  */
   const MOCK_DATA = {
-    recentActivity: [
-      { type: 'review', text: 'نظر جدید از <strong>علی رضایی</strong>', time: '۲ دقیقه پیش' },
-      { type: 'booking', text: 'نوبت جدید برای <strong>سارا محمدی</strong> تایید شد.', time: '۱ ساعت پیش' },
-      { type: 'customer', text: '<strong>رضا حسینی</strong> به مشتریان شما اضافه شد.', time: '۳ ساعت پیش' },
-      { type: 'booking', text: 'نوبت <strong>مریم اکبری</strong> برای فردا لغو شد.', time: '۵ ساعت پیش' },
-    ],
+    recentActivity: [],
     bookings: [],
     customers: [],
     reviews: []
@@ -818,27 +854,21 @@ static closeDrawer(drawerId) {
   /* === STEP — Notifications (پنل اعلان‌ها) === */
 const Notifications = {
   _KEY: 'vit_notifications',
-  _SEEDED_KEY: 'vit_notifications_seeded_v1',
   _els: {},
 
   load() { return StorageManager.get(this._KEY) || []; },
   save(list) { StorageManager.set(this._KEY, list); },
 
-  seedFromMock() {
-    if (StorageManager.get(this._SEEDED_KEY)) return;
-    const now = Date.now();
-    const items = (window.MOCK_DATA?.recentActivity || []).map((a, i) => ({
-      id: 'n' + (now + i),
-      type: a.type || 'info',
-      text: a.text || '',
-      time: a.time || '',
-      read: false
-    }));
-    this.save(items);
-    StorageManager.set(this._SEEDED_KEY, true);
+  async fetchFromServer() {
+    try {
+      const items = await API.getNotifications();
+      this.save(items);
+    } catch (err) {
+      console.error('Failed to load notifications', err);
+    }
   },
 
-  init() {
+  async init() {
     this._els = {
       btn: document.getElementById('notification-btn'),
       panel: document.getElementById('notification-panel'),
@@ -851,7 +881,7 @@ const Notifications = {
     if (!this._els.btn || !this._els.panel) return;
 
     // آماده‌سازی اولیه
-    this.seedFromMock();
+    await this.fetchFromServer();
     this.render();
 
     // باز/بستن پنل
@@ -864,15 +894,19 @@ const Notifications = {
     document.addEventListener('keydown', (e) => { if (e.key === 'Escape') this.close(); });
 
     // اکشن‌ها
-    this._els.clearAll?.addEventListener('click', () => {
+    this._els.clearAll?.addEventListener('click', async () => {
+      const items = this.load();
+      await Promise.all(items.map(n => API.deleteNotification(n.id).catch(() => {})));
       this.save([]);
       this.render();
       UIComponents.showToast('همه اعلان‌ها حذف شد.', 'info');
     });
 
-    this._els.markRead?.addEventListener('click', () => {
-      const items = this.load().map(n => ({ ...n, read: true }));
-      this.save(items);
+    this._els.markRead?.addEventListener('click', async () => {
+      const items = this.load();
+      await Promise.all(items.filter(n => !n.read).map(n => API.markNotificationRead(n.id).catch(() => {})));
+      const all = items.map(n => ({ ...n, read: true }));
+      this.save(all);
       this.render();
       UIComponents.showToast('همه اعلان‌ها خوانده شد.', 'success');
     });
@@ -893,13 +927,15 @@ const Notifications = {
   close() { this._els.panel.hidden = true;  this._els.btn.setAttribute('aria-expanded', 'false'); },
   toggle(){ this._els.panel.hidden ? this.open() : this.close(); },
 
-  remove(id) {
+  async remove(id) {
+    try { await API.deleteNotification(id); } catch (e) {}
     const items = this.load().filter(n => n.id !== id);
     this.save(items);
     this.render();
   },
 
-  markRead(id) {
+  async markRead(id) {
+    try { await API.markNotificationRead(id); } catch (e) {}
     const items = this.load().map(n => n.id === id ? ({ ...n, read: true }) : n);
     this.save(items);
     this.render();
@@ -2810,197 +2846,6 @@ _removeFooterImage(){
   // === END OF NEW METHODS ===
   }
 
-function renderNotifications() {
-  const list = document.getElementById('notification-list');
-  const badge = document.getElementById('notification-badge');
-  const btn = document.getElementById('notification-btn');
-  const panel = document.getElementById('notification-panel');
-  
-  if (!list || !badge || !btn || !panel) return;
-  
-  const notifications = MOCK_DATA.recentActivity || [];
-  
-  const icons = {
-    review: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>',
-    booking: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>',
-    customer: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>'
-  };
-  
-  // Render notifications
-  if (notifications.length === 0) {
-    list.innerHTML = `
-      <div class="notification-empty">
-        <svg class="notification-empty-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-          <path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/>
-          <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
-        </svg>
-        <div>هیچ اعلان جدیدی ندارید</div>
-      </div>
-    `;
-  } else {
-    list.innerHTML = notifications.map((item, index) => `
-      <li class="notification-item" role="button" tabindex="0" data-index="${index}">
-        <div class="notification-icon" aria-hidden="true">${icons[item.type] || icons.booking}</div>
-        <div class="notification-content">
-          <p class="notification-text">${item.text}</p>
-          <time class="notification-time">${item.time}</time>
-        </div>
-        <button class="notification-delete-btn" aria-label="حذف اعلان" data-index="${index}">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <line x1="18" y1="6" x2="6" y2="18"></line>
-            <line x1="6" y1="6" x2="18" y2="18"></line>
-          </svg>
-        </button>
-      </li>
-    `).join('');
-  }
-  
-  // Update badge with animation
-  updateNotificationBadge(notifications.length);
-  
-  // Enhanced click handler with badge reset
-  btn.addEventListener('click', function(e) {
-    e.stopPropagation();
-    const isOpen = panel.classList.contains('active');
-    
-    if (isOpen) {
-      closeNotificationPanel();
-    } else {
-      openNotificationPanel();
-    }
-  });
-  
-  // Close panel when clicking outside
-  document.addEventListener('click', function(e) {
-    if (!panel.contains(e.target) && !btn.contains(e.target)) {
-      closeNotificationPanel();
-    }
-  });
-  
-  // Close panel on escape key
-  document.addEventListener('keydown', function(e) {
-    if (e.key === 'Escape' && panel.classList.contains('active')) {
-      closeNotificationPanel();
-      btn.focus();
-    }
-  });
-  
-  // Make notification items clickable and handle delete button
-  list.addEventListener('click', function(e) {
-    const deleteBtn = e.target.closest('.notification-delete-btn');
-    const item = e.target.closest('.notification-item');
-    
-    if (deleteBtn) {
-      // Handle delete button click
-      e.stopPropagation();
-      const index = parseInt(deleteBtn.dataset.index, 10);
-      
-      // Remove notification from data
-      if (index >= 0 && index < MOCK_DATA.recentActivity.length) {
-        MOCK_DATA.recentActivity.splice(index, 1);
-        
-        // Re-render notifications
-        renderNotifications();
-        
-        // Show success message
-        if (typeof UIComponents !== 'undefined' && UIComponents.showToast) {
-          UIComponents.showToast('اعلان حذف شد', 'success');
-        }
-      }
-    } else if (item) {
-      // Handle notification item click
-      // Add a subtle click animation
-      item.style.transform = 'scale(0.98)';
-      setTimeout(() => {
-        item.style.transform = '';
-      }, 150);
-      
-      // Here you can add navigation logic based on notification type
-      console.log('Notification clicked:', item);
-    }
-  });
-}
-
-function updateNotificationBadge(count) {
-  const badge = document.getElementById('notification-badge');
-  const btn = document.getElementById('notification-btn');
-  
-  if (!badge || !btn) return;
-  
-  if (count > 0) {
-    let displayCount;
-    let countType = 'normal';
-    
-    // Smart count display
-    if (count > 99) {
-      displayCount = '۹۹+';
-      countType = 'max';
-    } else if (count > 9) {
-      displayCount = new Intl.NumberFormat('fa-IR').format(count);
-      countType = 'high';
-    } else {
-      displayCount = new Intl.NumberFormat('fa-IR').format(count);
-      countType = 'normal';
-    }
-    
-    // Update badge content and styling
-    if (badge.textContent !== displayCount) {
-      badge.classList.remove('animate-in');
-      badge.textContent = displayCount;
-      badge.setAttribute('data-count', countType);
-      
-      // Trigger entrance animation
-      setTimeout(() => {
-        badge.classList.add('animate-in');
-      }, 10);
-    }
-    
-    btn.classList.add('has-unread');
-  } else {
-    // Animate badge disappearance
-    badge.classList.add('animate-out');
-    setTimeout(() => {
-      badge.textContent = '';
-      badge.removeAttribute('data-count');
-      badge.classList.remove('animate-out', 'animate-in');
-    }, 400);
-    
-    btn.classList.remove('has-unread');
-  }
-}
-
-function openNotificationPanel() {
-  const panel = document.getElementById('notification-panel');
-  const btn = document.getElementById('notification-btn');
-  
-  if (!panel || !btn) return;
-  
-  panel.classList.add('active');
-  btn.setAttribute('aria-expanded', 'true');
-  
-  // Reset badge count when panel opens
-  setTimeout(() => {
-    updateNotificationBadge(0);
-    // Mark notifications as read in your data store here
-    // MOCK_DATA.recentActivity = [];
-  }, 500);
-  
-  // Focus management for accessibility
-  const firstFocusable = panel.querySelector('.notification-item');
-  if (firstFocusable) {
-    firstFocusable.focus();
-  }
-}
-
-function closeNotificationPanel() {
-  const panel = document.getElementById('notification-panel');
-  const btn = document.getElementById('notification-btn');
-  
-  if (!panel || !btn) return;
-  
-  panel.classList.remove('active');
-  btn.setAttribute('aria-expanded', 'false');
-}
 
 
 
@@ -3171,10 +3016,9 @@ initSellerPersonalization();
   // Run the App
 const app = new SellerPanelApp();
 app.init();
-if (typeof app.initBrandImages === 'function') app.initBrandImages();
-renderNotifications();
+  if (typeof app.initBrandImages === 'function') app.initBrandImages();
 
-loadCustomers();
+  loadCustomers();
 
 
 
@@ -4449,57 +4293,3 @@ document.addEventListener('DOMContentLoaded', function(){
 
 
 
-document.addEventListener('DOMContentLoaded', function() {
-  const clearAllBtn = document.getElementById('notif-clear-all');
-  const notificationList = document.getElementById('notification-list');
-  const notificationBadge = document.getElementById('notification-badge');
-  
-  if (clearAllBtn) {
-    clearAllBtn.addEventListener('click', function() {
-      // Clear all notifications from the UI
-      if (notificationList) {
-        // Check if there are notifications to clear
-        const hasNotifications = notificationList.children.length > 0 && 
-                               !notificationList.querySelector('.notification-empty');
-        
-        if (hasNotifications) {
-          // Create empty state
-          notificationList.innerHTML = `
-            <div class="notification-empty">
-              <svg class="notification-empty-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                <path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/>
-                <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
-              </svg>
-              <div>هیچ اعلان جدیدی ندارید</div>
-            </div>
-          `;
-          
-          // Update notification badge
-          if (notificationBadge) {
-            notificationBadge.textContent = '';
-            notificationBadge.classList.remove('animate-in');
-            notificationBadge.setAttribute('data-count', '0');
-            
-            // Add animation effect
-            setTimeout(() => {
-              notificationBadge.classList.add('animate-out');
-              setTimeout(() => {
-                notificationBadge.classList.remove('animate-out');
-              }, 400);
-            }, 10);
-          }
-          
-          // Show success message
-          if (typeof UIComponents !== 'undefined' && UIComponents.showToast) {
-            UIComponents.showToast('تمام اعلان‌ها حذف شدند', 'success');
-          }
-        } else {
-          // Show message that there are no notifications to clear
-          if (typeof UIComponents !== 'undefined' && UIComponents.showToast) {
-            UIComponents.showToast('هیچ اعلانی برای حذف وجود ندارد', 'info');
-          }
-        }
-      }
-    });
-  }
-});
