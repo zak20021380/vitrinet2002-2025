@@ -553,36 +553,10 @@
           </div>
           <div class="text-xs opacity-80">فصل ۱ • هفته ۱</div>
         </div>
-        
-        <div class="grid grid-cols-2 gap-3 mb-4">
-          <div class="pass-card pass-free">
-            <div class="font-bold mb-2">رایگان</div>
-            <div class="text-xs opacity-80 mb-2">مأموریت‌های روزانه و هفتگی</div>
-            <div class="text-xs flex items-center gap-1">
-              <i class="fas fa-star text-yellow-300"></i>
-              <span><span id="pass-free-xp">0</span>/<span id="pass-free-max">100</span> XP</span>
-            </div>
-            <div class="limit-bar mt-1">
-              <div id="pass-free-progress" class="limit-progress" style="width:0%"></div>
-            </div>
-          </div>
-          
-          <div class="pass-card pass-premium">
-            <div class="font-bold mb-2 flex items-center gap-1">
-              <i class="fas fa-crown text-yellow-300"></i>
-              <span>پریمیوم</span>
-            </div>
-            <div class="text-xs opacity-80 mb-2">جایزه‌های ویژه و قاب استان</div>
-            <div class="text-xs flex items-center gap-1">
-              <i class="fas fa-star text-yellow-300"></i>
-              <span><span id="pass-premium-xp">0</span>/<span id="pass-premium-max">200</span> XP</span>
-            </div>
-            <div class="limit-bar mt-1">
-              <div id="pass-premium-progress" class="limit-progress" style="width:0%"></div>
-            </div>
-          </div>
-        </div>
-        
+
+        <div id="province-top" class="grid grid-cols-2 gap-3 mb-4"></div>
+        <div id="my-province-rank" class="flex justify-center mb-4"></div>
+
         <button id="btn-view-missions" class="btn btn-province w-full">
           <i class="fas fa-tasks ml-2"></i> مشاهده مأموریت‌ها
         </button>
@@ -2286,14 +2260,33 @@ patchPricingKeys(RemoteConfig);
     const pct = clamp((State.streak%7)/7*100,0,100);
     $('#streak-bar').style.width = pct + '%';
     
-    // Update Province Pass UI
-    $('#pass-free-xp').textContent = faNum(Server.pass.freeXp);
-    $('#pass-premium-xp').textContent = faNum(Server.pass.premiumXp);
-    $('#pass-free-max').textContent = faNum(100);
-    $('#pass-premium-max').textContent = faNum(200);
-    $('#pass-free-progress').style.width = `${Math.min(100, (Server.pass.freeXp / 100) * 100)}%`;
-    $('#pass-premium-progress').style.width = `${Math.min(100, (Server.pass.premiumXp / 200) * 100)}%`;
-    
+    // Top provinces and rank
+    const provincesSorted = [...State.provinces].sort((a,b)=>b.score-a.score);
+    const topWrap = $('#province-top');
+    if(topWrap){
+      topWrap.innerHTML = provincesSorted.slice(0,2).map((p,i)=>{
+        let badgeClass = 'bg-white/20';
+        if(i===0) badgeClass = 'bg-gradient-to-br from-yellow-200 to-yellow-400 text-gray-900';
+        else if(i===1) badgeClass = 'bg-gradient-to-br from-gray-300 to-gray-400 text-gray-900';
+        return `
+        <div class="glass rounded-xl p-3 flex flex-col items-center text-center card-hover">
+          <span class="rank-badge ${badgeClass} mb-2">${faNum(i+1)}</span>
+          <div class="font-bold">${p.name}</div>
+          <div class="text-xs opacity-80 mt-1">${faNum(p.score)} امتیاز</div>
+        </div>`;}).join('');
+    }
+
+    const myProvRankEl = $('#my-province-rank');
+    const userProvince = State.user.province;
+    const myProvIdx = provincesSorted.findIndex(p=>p.name===userProvince);
+    if(myProvRankEl){
+      if(userProvince){
+        myProvRankEl.innerHTML = `<span class="chip"><i class="fas fa-flag text-green-300 ml-1"></i> رتبه استان شما: ${faNum(myProvIdx+1)}</span>`;
+      }else{
+        myProvRankEl.innerHTML = '<span class="chip">استان شما تعیین نشده</span>';
+      }
+    }
+
     // rank
     const me = { id: State.user.id, score: State.score, province: State.user.province };
     const arr = [...State.leaderboard.filter(x=>x.id!==me.id), {id:me.id,name:State.user.name,score:me.score,province:me.province}].sort((a,b)=>b.score-a.score);
