@@ -2192,17 +2192,35 @@ function updateConfirmState(reason = '') {
     if (!verifyBtn.disabled) otpErr.classList.add('hidden');
   }
 
-  // ===== Step 1: build service options from service cards
-  function buildServiceOptionsFromCards(){
+  // ===== Step 1: build service options from real services
+  async function buildServiceOptionsFromCards(){
     if (!servicesWrap) return;
-    const sourceButtons = $$('.service-button');
-    if (!sourceButtons.length) return;
-
     servicesWrap.innerHTML = '';
-    sourceButtons.forEach((btn, idx) => {
-      const title = btn.dataset.service || btn.closest('.service-card')?.querySelector('h4')?.textContent?.trim() || `خدمت ${idx+1}`;
-      const price = parseInt(btn.dataset.price || '0', 10) || 0;
-      const serviceId = btn.dataset.serviceId || btn.dataset.id || '';
+
+    let items = [];
+    if (window.LAST_PUBLIC && Array.isArray(window.LAST_PUBLIC.items) && window.LAST_PUBLIC.items.length) {
+      items = window.LAST_PUBLIC.items;
+    } else {
+      try {
+        const shopurl = document.body?.dataset?.shopurl || (typeof getShopUrlFromLocation === 'function' ? await getShopUrlFromLocation() : '');
+        if (shopurl) {
+          const res = await fetch(`${API_ROOT}/api/seller-services/by-shopurl/${encodeURIComponent(shopurl)}` , { credentials: 'include' });
+          if (res.ok) {
+            const data = await res.json();
+            items = Array.isArray(data.items) ? data.items : [];
+          }
+        }
+      } catch(err){
+        console.error('load services failed', err);
+      }
+    }
+
+    if (!items.length) return;
+
+    items.forEach((svc, idx) => {
+      const title = svc.title || `خدمت ${idx+1}`;
+      const price = parseInt(svc.price || '0', 10) || 0;
+      const serviceId = svc._id || svc.id || '';
 
       const opt = document.createElement('div');
       opt.className = 'service-option border border-gray-300 rounded-lg p-3 cursor-pointer hover:border-blue-500 flex items-center justify-between';
