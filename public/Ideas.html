@@ -65,7 +65,7 @@
     .sheet.show{ transform:translateY(0) }
     .confetti{ position:fixed; inset:0; pointer-events:none; z-index:80 }
     .selected-setup-item { background: linear-gradient(135deg, var(--accent1), var(--accent2)) !important; color: #111827 !important; border-color: transparent !important; font-weight: 700; box-shadow: 0 0 15px rgba(251, 146, 60, 0.4) !important; }
-    .leaderboard-tab { transition: all 0.3s ease; position: relative; }
+    .leaderboard-tab { transition: all 0.3s ease; position: relative; cursor:pointer; }
     .leaderboard-tab.active { background: rgba(255, 255, 255, 0.2); border-radius: 0.75rem; }
     .leaderboard-tab.active::after { content: ''; position: absolute; bottom: -0.5rem; right: 50%; transform: translateX(50%); width: 50%; height: 3px; background: linear-gradient(90deg, var(--accent1), var(--accent2)); border-radius: 3px 3px 0 0; }
     .detail-popup { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0.9); background: var(--card); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border: 1px solid var(--cardBorder); border-radius: 1.5rem; box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3); z-index: 100; max-width: 90%; width: 400px; max-height: 90vh; overflow-y: auto; opacity: 0; transition: all 0.3s ease; padding: 1.5rem; }
@@ -773,13 +773,13 @@
         </h3>
         <!-- تب‌های لیدربورد -->
         <div class="flex justify-between mb-6 bg-white/10 rounded-xl p-1">
-          <button class="leaderboard-tab flex-1 py-2 px-3 rounded-lg text-center font-medium active" data-tab="individual">
+          <button type="button" class="leaderboard-tab flex-1 py-2 px-3 rounded-lg text-center font-medium active" data-tab="individual">
             افراد
           </button>
-          <button class="leaderboard-tab flex-1 py-2 px-3 rounded-lg text-center font-medium" data-tab="province">
+          <button type="button" class="leaderboard-tab flex-1 py-2 px-3 rounded-lg text-center font-medium" data-tab="province">
             استان‌ها
           </button>
-          <button class="leaderboard-tab flex-1 py-2 px-3 rounded-lg text-center font-medium" data-tab="group">
+          <button type="button" class="leaderboard-tab flex-1 py-2 px-3 rounded-lg text-center font-medium" data-tab="group">
             گروه‌ها
           </button>
         </div>
@@ -3355,11 +3355,12 @@ async function startPurchaseCoins(pkgId){
   
   // Leaderboard Tabs
   $$('.leaderboard-tab').forEach(tab => {
-    tab.addEventListener('click', () => {
+    tab.addEventListener('click', (e) => {
+      e.preventDefault();
       $$('.leaderboard-tab').forEach(t => t.classList.remove('active'));
       tab.classList.add('active');
       $$('.lb-content').forEach(content => content.classList.add('hidden'));
-      $(`#lb-${tab.dataset.tab}`).classList.remove('hidden');
+      $(`#lb-${tab.dataset.tab}`)?.classList.remove('hidden');
     });
   });
   
