@@ -1531,11 +1531,7 @@ async function loadBookings() {
   async function initLoyaltyStore() {
     const cached = cache.get(KEYS.loyalty, 24*3600*1000);
     if (cached) setLoyaltyStores(cached);
-    try {
-      if (!isOnline()) return;
-      const res = await safeFetch('/api/loyalty', { credentials:'include' });
-      if (res.ok) setLoyaltyStores(await res.json() || []);
-    } catch (e) {}
+    else setLoyaltyStores([]);
   }
 
   function renderStoreSwitcher() {
@@ -1596,6 +1592,28 @@ async function loadBookings() {
     if (!btn) return;
     if (store) { btn.classList.remove('hidden'); btn.onclick = ()=> window.location.href = `/store/${store.storeId}`; }
     else { btn.classList.add('hidden'); btn.onclick = null; }
+  }
+
+  // بروزرسانی پیشرفت باشگاه از آخرین رزرو تایید شده بدون نیاز به ورود
+  function updateLoyaltyFromLastBooking() {
+    try {
+      const raw = localStorage.getItem('vt:lastBooking');
+      if (!raw) return;
+      const b = JSON.parse(raw);
+      if (b.status !== 'confirmed' || b.loyaltyAdded) return;
+
+      const storeId = b.sellerId || b.shopUrl || 'unknown';
+      const storeName = b.storeName || (seller?.storeName || seller?.displayName || seller?.title || seller?.name) || 'فروشگاه';
+
+      const stores = getLoyaltyStores();
+      const existing = stores.find(s => s.storeId === storeId);
+      if (existing) existing.completed = (existing.completed || 0) + 1;
+      else stores.push({ storeId, storeName, completed: 1, claimed: 0, active: true });
+      setLoyaltyStores(stores);
+
+      // جلوگیری از ثبت دوباره
+      try { localStorage.setItem('vt:lastBooking', JSON.stringify({...b, loyaltyAdded: true})); } catch {}
+    } catch (e) {}
   }
 
   function claimReward() {
@@ -2262,6 +2280,7 @@ document.addEventListener('input', (e)=>{
   (async function init(){
     await loadProfile();
     await Promise.all([loadBookings(), loadNotifs(), initLoyaltyStore()]);
+    updateLoyaltyFromLastBooking();
     checkProfileCompletion();
     renderBookings();
     renderStoreSwitcher();
@@ -2271,9 +2290,9 @@ document.addEventListener('input', (e)=>{
   })();
 
   // بروزرسانی خودکار باشگاه مشتریان پس از تایید رزرو
-  window.addEventListener('booking:status', async (e) => {
+  window.addEventListener('booking:status', (e) => {
     if (e.detail?.status === 'confirmed') {
-      await initLoyaltyStore();
+      updateLoyaltyFromLastBooking();
       renderStoreSwitcher();
       const active = getLoyaltyStores().find(s => s.active) || null;
       if (active) renderLoyalty(active);
