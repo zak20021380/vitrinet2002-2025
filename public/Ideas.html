@@ -486,37 +486,16 @@
               </div>
               <span class="text-sm"><span id="lives-used">0</span>/<span id="lives-limit">3</span></span>
             </div>
-            <div class="limit-bar">
-              <div id="lives-progress" class="limit-progress" style="width:0%"></div>
-            </div>
-            <div class="text-xs opacity-70 mt-1" id="lives-recovery-timer">بازیابی بعدی: --:--</div>
+          <div class="limit-bar">
+            <div id="lives-progress" class="limit-progress" style="width:0%"></div>
           </div>
-          
-          <!-- Energy Limit -->
-          <div class="limit-card">
-            <div class="flex justify-between items-center">
-              <div class="flex items-center gap-2">
-                <i class="fas fa-bolt text-yellow-300"></i>
-                <span>انرژی</span>
-              </div>
-              <span class="text-sm"><span id="energy-used">0</span>/<span id="energy-limit">10</span></span>
-            </div>
-            <div class="limit-bar">
-              <div id="energy-progress" class="limit-progress" style="width:0%"></div>
-            </div>
-            <div class="text-xs opacity-70 mt-1" id="energy-recovery-timer">بازیابی بعدی: --:--</div>
-          </div>
+          <div class="text-xs opacity-70 mt-1" id="lives-recovery-timer">بازیابی بعدی: --:--</div>
+        </div>
         </div>
         
         <!-- Limit Reached CTAs (hidden by default) -->
         <div id="limit-reached-ctas" class="hidden mt-4 space-y-2">
           <div class="text-center text-sm opacity-90 mb-2">به محدودیت روزانه رسیدی!</div>
-          <button id="btn-buy-energy" class="btn btn-primary text-sm w-full px-4 py-3">
-            <i class="fas fa-coins ml-2"></i> خرید انرژی با ۵۰ سکه
-          </button>
-          <button id="btn-watch-energy" class="btn btn-secondary text-sm w-full px-4 py-3">
-            <i class="fas fa-play ml-2"></i> تماشای ویدیو و دریافت انرژی
-          </button>
           <button id="btn-buy-vip-limit" class="btn btn-tertiary text-sm w-full px-4 py-3">
             <i class="fas fa-crown ml-2"></i> خرید VIP و افزایش محدودیت‌ها
           </button>
@@ -985,7 +964,7 @@
             </div>
             <ul class="text-sm opacity-90 space-y-1 list-disc pr-5 mb-3">
               <li>حذف تبلیغات بنری</li>
-              <li>دو برابر محدودیت روزانه مسابقه/کلید/انرژی</li>
+              <li>دو برابر محدودیت روزانه مسابقه/کلید</li>
             </ul>
             <button id="buy-vip-lite" class="btn btn-secondary w-full" aria-label="خرید اشتراک VIP لایت">خرید اشتراک</button>
           </div>
@@ -1001,10 +980,10 @@
             </div>
             <ul class="text-sm opacity-90 space-y-1 list-disc pr-5 mb-3">
               <li>حذف تمام تبلیغات (بنری، همسان، میانی، ویدیویی)</li>
-              <li>دو برابر محدودیت روزانه مسابقه/کلید/انرژی</li>
+              <li>دو برابر محدودیت روزانه مسابقه/کلید</li>
               <li>دو برابر امتیاز در رویدادها</li>
               <li>قاب آواتار ویژه استان</li>
-              <li>محدودیت بسیار بالا برای مسابقه/کلید/انرژی</li>
+              <li>محدودیت بسیار بالا برای مسابقه/کلید</li>
             </ul>
             <button id="buy-vip-pro" class="btn btn-primary w-full" aria-label="خرید اشتراک VIP پرو">خرید اشتراک</button>
           </div>
@@ -1283,7 +1262,7 @@
             <div class="referral-tier">
               <div>
                 <div class="font-medium">دعوت مستقیم (سطح ۱)</div>
-                <div class="text-xs opacity-70">هر دوست: ۵۰ سکه + ۱ انرژی</div>
+                <div class="text-xs opacity-70">هر دوست: ۵۰ سکه</div>
               </div>
               <div class="text-sm font-bold text-yellow-300">۷ روز اول</div>
             </div>
@@ -2085,14 +2064,19 @@ patchPricingKeys(RemoteConfig);
     $('#lives-used').textContent = faNum(livesUsed);
     $('#lives-limit').textContent = faNum(livesLimit);
     $('#lives-progress').style.width = `${livesPct}%`;
-    
-    // Energy
-    const energyLimit = RemoteConfig.gameLimits.energy.daily * vipMultiplier;
-    const energyUsed = Server.limits.energy.used;
-    const energyPct = Math.min(100, (energyUsed / energyLimit) * 100);
-    $('#energy-used').textContent = faNum(energyUsed);
-    $('#energy-limit').textContent = faNum(energyLimit);
-    $('#energy-progress').style.width = `${energyPct}%`;
+
+    // Energy (UI elements may be absent)
+    const energyUsedEl = $('#energy-used');
+    const energyLimitEl = $('#energy-limit');
+    const energyProgEl = $('#energy-progress');
+    if (energyUsedEl && energyLimitEl && energyProgEl) {
+      const energyLimit = RemoteConfig.gameLimits.energy.daily * vipMultiplier;
+      const energyUsed = Server.limits.energy.used;
+      const energyPct = Math.min(100, (energyUsed / energyLimit) * 100);
+      energyUsedEl.textContent = faNum(energyUsed);
+      energyLimitEl.textContent = faNum(energyLimit);
+      energyProgEl.style.width = `${energyPct}%`;
+    }
   }
   
   function updateDailyResetTimer(msUntilReset) {
@@ -2123,19 +2107,22 @@ patchPricingKeys(RemoteConfig);
     }
     
     // Energy recovery
-    if (Server.limits.energy.used > 0) {
-      const energyRecoveryTime = RemoteConfig.gameLimits.energy.recoveryTime;
-      const timeUntilEnergyRecovery = energyRecoveryTime - (now - Server.limits.energy.lastRecovery);
-      
-      if (timeUntilEnergyRecovery > 0) {
-        const minutes = Math.floor(timeUntilEnergyRecovery / (1000 * 60));
-        const seconds = Math.floor((timeUntilEnergyRecovery % (1000 * 60)) / 1000);
-        $('#energy-recovery-timer').textContent = `بازیابی بعدی: ${faNum(minutes)}:${faNum(seconds).padStart(2, '0')}`;
+    const energyTimer = $('#energy-recovery-timer');
+    if (energyTimer) {
+      if (Server.limits.energy.used > 0) {
+        const energyRecoveryTime = RemoteConfig.gameLimits.energy.recoveryTime;
+        const timeUntilEnergyRecovery = energyRecoveryTime - (now - Server.limits.energy.lastRecovery);
+
+        if (timeUntilEnergyRecovery > 0) {
+          const minutes = Math.floor(timeUntilEnergyRecovery / (1000 * 60));
+          const seconds = Math.floor((timeUntilEnergyRecovery % (1000 * 60)) / 1000);
+          energyTimer.textContent = `بازیابی بعدی: ${faNum(minutes)}:${faNum(seconds).padStart(2, '0')}`;
+        } else {
+          energyTimer.textContent = 'بازیابی بعدی: اکنون';
+        }
       } else {
-        $('#energy-recovery-timer').textContent = 'بازیابی بعدی: اکنون';
+        energyTimer.textContent = 'بازیابی بعدی: --:--';
       }
-    } else {
-      $('#energy-recovery-timer').textContent = 'بازیابی بعدی: --:--';
     }
   }
   
@@ -2145,17 +2132,15 @@ patchPricingKeys(RemoteConfig);
     
     const matchesLimit = RemoteConfig.gameLimits.matches.daily * vipMultiplier;
     const livesLimit = RemoteConfig.gameLimits.lives.daily * vipMultiplier;
-    const energyLimit = RemoteConfig.gameLimits.energy.daily * vipMultiplier;
-    
+
     const matchesReached = Server.limits.matches.used >= matchesLimit;
     const livesReached = Server.limits.lives.used >= livesLimit;
-    const energyReached = Server.limits.energy.used >= energyLimit;
-    
+    const energyLimit = RemoteConfig.gameLimits.energy.daily * vipMultiplier;
+    const energyReached = $('#energy-used') ? Server.limits.energy.used >= energyLimit : false;
+
     // Show/hide limit reached CTAs
     $('#limit-reached-ctas').classList.toggle('hidden', !(matchesReached || livesReached || energyReached));
-    
-    // Update buy energy button state
-    $('#btn-buy-energy').disabled = State.coins < 50;
+
     
     // Log analytics if limit reached
     if (matchesReached && !State.limitsLogged?.matches) {
@@ -2176,61 +2161,63 @@ patchPricingKeys(RemoteConfig);
       State.limitsLogged.energy = true;
     }
   }
-  
+
   function useGameResource(type) {
+    if (type === 'energy') return true;
     const now = Date.now();
-    
+
     // Check if we can use the resource
-    const vipMultiplier = Server.subscription.active ? 
+    const vipMultiplier = Server.subscription.active ?
       (Server.subscription.tier === 'pro' ? 3 : 2) : 1;
-    
+
     const limit = RemoteConfig.gameLimits[type].daily * vipMultiplier;
-    
+
     if (Server.limits[type].used >= limit) {
       return false;
     }
-    
+
     // Use the resource
     Server.limits[type].used++;
     Server.limits[type].lastRecovery = now;
-    
+
     // Update UI
     updateLimitsUI();
     checkLimitsReached();
-    
+
     // Save state
     saveState();
-    
+
     return true;
   }
-  
+
   function recoverGameResource(type) {
+    if (type === 'energy') return false;
     const now = Date.now();
-    
+
     // Check if we can recover
     if (Server.limits[type].used <= 0) {
       return false;
     }
-    
+
     // Check recovery time
     const recoveryTime = RemoteConfig.gameLimits[type].recoveryTime;
     const timeSinceLastRecovery = now - Server.limits[type].lastRecovery;
-    
+
     if (timeSinceLastRecovery < recoveryTime) {
       return false;
     }
-    
+
     // Recover the resource
     Server.limits[type].used--;
     Server.limits[type].lastRecovery = now;
-    
+
     // Update UI
     updateLimitsUI();
     checkLimitsReached();
-    
+
     // Save state
     saveState();
-    
+
     return true;
   }
   
@@ -2491,13 +2478,6 @@ patchPricingKeys(RemoteConfig);
   }
   
   function startQuiz({cat, diff, count}){
-    // Check energy limit
-    if (!useGameResource('energy')) {
-      toast('<i class="fas fa-bolt ml-2"></i>انرژی کافی نداری!');
-      $('#limit-reached-ctas').classList.remove('hidden');
-      return;
-    }
-    
     State.quiz.cat=cat; State.quiz.diff=diff;
     State.quiz.list = buildSet(cat, diff, count).map(q=>({ ...q }));
     State.quiz.idx = 0; State.quiz.sessionEarned = 0; State.quiz.results=[];
@@ -2650,13 +2630,6 @@ patchPricingKeys(RemoteConfig);
   }
   
   function startDaily(){
-    // Check energy limit
-    if (!useGameResource('energy')) {
-      toast('<i class="fas fa-bolt ml-2"></i>انرژی کافی نداری!');
-      $('#limit-reached-ctas').classList.remove('hidden');
-      return;
-    }
-    
     const seed = Math.floor(Date.now()/86400000);
     const pool = qBank.slice().map((q,i)=>({q, k: Math.sin((i+1)*seed)*10000})).sort((a,b)=>a.k-b.k).map(o=>o.q);
     State.lives = Math.max(State.lives, 1);
@@ -3236,10 +3209,10 @@ async function startPurchaseCoins(pkgId){
           cleanup(true);
           if(reward==='coins'){ State.coins += amount; renderTopBars(); saveState(); }
           if(reward==='life'){ State.lives += 1; renderTopBars(); saveState(); }
-          if(reward==='energy') { recoverGameResource('energy'); updateLimitsUI(); }
           await logEvent('ad_completed',{placement:'rewarded', reward, amount});
           await logEvent('reward_granted',{reward, amount});
-          toast(`<i class="fas fa-check ml-1"></i> پاداش دریافت شد: ${faNum(amount)} ${reward==='coins'?'سکه':reward==='life'?'کلید':'انرژی'}`);
+          const rewardName = reward==='coins'?'سکه':'کلید';
+          toast(`<i class="fas fa-check ml-1"></i> پاداش دریافت شد: ${faNum(amount)} ${rewardName}`);
           SFX.coin();
         };
       });
@@ -3659,26 +3632,6 @@ async function startPurchaseCoins(pkgId){
   $$('[data-close="#modal-pay-confirm"]').forEach(b=> b.addEventListener('click', ()=>closeModal('#modal-pay-confirm')));
 
   // Game Limits CTAs
-  $('#btn-buy-energy')?.addEventListener('click', () => {
-    if (State.coins >= 50) {
-      State.coins -= 50;
-      recoverGameResource('energy');
-      renderTopBars();
-      renderDashboard();
-      toast('<i class="fas fa-check-circle ml-2"></i>انرژی با موفقیت خریداری شد!');
-      SFX.coin();
-    } else {
-      toast('<i class="fas fa-exclamation-circle ml-2"></i>سکه کافی نیست');
-    }
-  });
-  
-  $('#btn-watch-energy')?.addEventListener('click', async () => {
-    const ok = await AdManager.showRewarded({reward:'energy', amount:1});
-    if (ok) {
-      renderDashboard();
-    }
-  });
-  
   $('#btn-buy-vip-limit')?.addEventListener('click', () => {
     navTo('vip');
   });
