@@ -702,9 +702,15 @@
             </span>
           </div>
         </div>
-        <button onclick="editProfile()" class="action-btn p-3 rounded-xl">
-          <i class="fas fa-pen text-gray-600"></i>
-        </button>
+        <div class="flex gap-2 flex-shrink-0">
+          <button onclick="openNotifs()" class="action-btn p-3 rounded-xl relative" aria-label="اعلان‌ها">
+            <i class="fas fa-bell text-gray-600"></i>
+            <span id="notifBtnBadge" class="hidden notification-dot absolute -top-1 -right-1 w-4 h-4 bg-red-500 text-white text-[0.6rem] rounded-full flex items-center justify-center font-bold"></span>
+          </button>
+          <button onclick="editProfile()" class="action-btn p-3 rounded-xl" aria-label="ویرایش پروفایل">
+            <i class="fas fa-pen text-gray-600"></i>
+          </button>
+        </div>
       </div>
     </section>
     <!-- Stats Cards -->
@@ -1950,10 +1956,19 @@ function renderBookings() {
 
   /* ---------- Notifications render & actions ---------- */
   function renderNotifs() {
-    const list = $('#notifyList'), badge = $('#unreadBadge');
+    const list = $('#notifyList'), badge = $('#unreadBadge'), btnBadge = $('#notifBtnBadge');
     const items = getNotifs().slice().sort((a,b)=> new Date(b.ts) - new Date(a.ts));
     const unread = items.filter(n=>!n.read).length;
-    if (badge) { if (unread>0) { badge.textContent=unread; badge.classList.remove('hidden'); } else badge.classList.add('hidden'); }
+    [badge, btnBadge].forEach(el => {
+      if (el) {
+        if (unread > 0) {
+          el.textContent = unread;
+          el.classList.remove('hidden');
+        } else {
+          el.classList.add('hidden');
+        }
+      }
+    });
     if (!items.length) { list.innerHTML = `<div class="py-8 text-center"><p class="text-gray-500">اعلانی ندارید</p></div>`; return; }
 
     const icon = (t)=>({success:'fa-circle-check text-green-500', reminder:'fa-bell text-blue-500', special:'fa-star text-yellow-500', info:'fa-info-circle text-gray-500', danger:'fa-circle-xmark text-red-500'}[t] || 'fa-info-circle text-gray-500');
@@ -2004,6 +2019,15 @@ function renderBookings() {
       if (!isOnline()) return;
       await safeFetch(`/api/notifications/${id}`, { method:'DELETE', credentials:'include' });
     } catch {}
+  }
+
+  function openNotifs() {
+    const section = document.querySelector('.notification-section');
+    if (section) {
+      section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      section.classList.add('ring-2', 'ring-blue-400', 'ring-offset-2');
+      setTimeout(() => section.classList.remove('ring-2', 'ring-blue-400', 'ring-offset-2'), 2000);
+    }
   }
 
   /* ---------- Navigation ---------- */
@@ -2350,6 +2374,7 @@ document.addEventListener('input', (e)=>{
     window.toggleRead = toggleRead;
     window.removeNotif = removeNotif;
     window.claimReward = claimReward;
+    window.openNotifs = openNotifs;
 </script>
 
 <script src="../booking-status-popup.js"></script>
