@@ -2270,6 +2270,17 @@ document.addEventListener('input', (e)=>{
     processOutbox(); // try to flush queued ops
   })();
 
+  // بروزرسانی خودکار باشگاه مشتریان پس از تایید رزرو
+  window.addEventListener('booking:status', async (e) => {
+    if (e.detail?.status === 'confirmed') {
+      await initLoyaltyStore();
+      renderStoreSwitcher();
+      const active = getLoyaltyStores().find(s => s.active) || null;
+      if (active) renderLoyalty(active);
+      updateLoyaltyHeader(active);
+    }
+  });
+
   // entry animation
   document.addEventListener('DOMContentLoaded', ()=>{
     document.body.style.opacity='0';
