@@ -613,7 +613,7 @@
             <div class="match-type-icon text-red-400">
               <i class="fas fa-hand-fist"></i>
             </div>
-            <div class="font-bold">نبرد تن به تن</div>
+            <div class="font-bold">نبرد با دوستان</div>
           </div>
           <div class="match-type-card" data-match="province">
             <div class="match-type-icon text-green-400">
@@ -996,11 +996,11 @@
       <div class="glass rounded-3xl p-6">
         <h3 class="text-2xl font-extrabold mb-5 flex items-center gap-2">
           <i class="fas fa-hand-fist text-red-400"></i>
-          <span>نبرد تن به تن</span>
+          <span>نبرد با دوستان</span>
         </h3>
         <div class="space-y-4">
           <div class="text-center">
-            <p class="mb-4">حریف خود را برای نبرد انتخاب کنید</p>
+            <p class="mb-4">دوست خود را برای نبرد انتخاب کنید</p>
             <div class="flex flex-wrap justify-center gap-3 mb-4">
               <button id="btn-duel-random" class="btn btn-duel w-auto px-5 py-2 flex items-center gap-2">
                 <i class="fas fa-shuffle"></i><span>حریف تصادفی</span>
@@ -1009,48 +1009,7 @@
                 <i class="fas fa-link"></i><span>لینک دعوت</span>
               </button>
             </div>
-            <div class="space-y-3 max-h-80 overflow-y-auto pr-2">
-              <div class="duel-opponent glass rounded-2xl p-4 flex items-center justify-between">
-                <div class="flex items-center gap-3">
-                  <img src="https://i.pravatar.cc/60?img=3" class="w-12 h-12 rounded-full border-2 border-white/30" alt="opponent">
-                  <div>
-                    <div class="font-bold">علی رضایی</div>
-                    <div class="text-sm opacity-80 flex items-center gap-1"><i class="fas fa-star text-yellow-300"></i><span>امتیاز: ۱۲,۴۵۰</span></div>
-                  </div>
-                </div>
-                <button class="btn btn-duel text-sm w-auto px-4">چالش</button>
-              </div>
-              <div class="duel-opponent glass rounded-2xl p-4 flex items-center justify-between">
-                <div class="flex items-center gap-3">
-                  <img src="https://i.pravatar.cc/60?img=5" class="w-12 h-12 rounded-full border-2 border-white/30" alt="opponent">
-                  <div>
-                    <div class="font-bold">سارا محمدی</div>
-                    <div class="text-sm opacity-80 flex items-center gap-1"><i class="fas fa-star text-yellow-300"></i><span>امتیاز: ۹,۸۰۰</span></div>
-                  </div>
-                </div>
-                <button class="btn btn-duel text-sm w-auto px-4">چالش</button>
-              </div>
-              <div class="duel-opponent glass rounded-2xl p-4 flex items-center justify-between">
-                <div class="flex items-center gap-3">
-                  <img src="https://i.pravatar.cc/60?img=8" class="w-12 h-12 rounded-full border-2 border-white/30" alt="opponent">
-                  <div>
-                    <div class="font-bold">رضا قاسمی</div>
-                    <div class="text-sm opacity-80 flex items-center gap-1"><i class="fas fa-star text-yellow-300"></i><span>امتیاز: ۱۵,۲۰۰</span></div>
-                  </div>
-                </div>
-                <button class="btn btn-duel text-sm w-auto px-4">چالش</button>
-              </div>
-              <div class="duel-opponent glass rounded-2xl p-4 flex items-center justify-between">
-                <div class="flex items-center gap-3">
-                  <img src="https://i.pravatar.cc/60?img=11" class="w-12 h-12 rounded-full border-2 border-white/30" alt="opponent">
-                  <div>
-                    <div class="font-bold">مریم احمدی</div>
-                    <div class="text-sm opacity-80 flex items-center gap-1"><i class="fas fa-star text-yellow-300"></i><span>امتیاز: ۷,۶۵۰</span></div>
-                  </div>
-                </div>
-                <button class="btn btn-duel text-sm w-auto px-4">چالش</button>
-              </div>
-            </div>
+            <div id="duel-friends-list" class="space-y-3 max-h-80 overflow-y-auto pr-2"></div>
           </div>
         </div>
       </div>
@@ -3467,29 +3426,66 @@ async function startPurchaseCoins(pkgId){
     });
   });
   
-  // Duel Opponents
-  $$('.duel-opponent button').forEach(btn => {
-    btn.addEventListener('click', (e) => {
-      const opponentName = e.currentTarget.closest('.duel-opponent').querySelector('.font-bold').textContent;
-      toast(`چالش به ${opponentName} ارسال شد!`);
+  // Duel Friends list
+  const duelFriends = [
+    { id: 1, name: 'علی رضایی', score: 12450, avatar: 'https://i.pravatar.cc/60?img=3' },
+    { id: 2, name: 'سارا محمدی', score: 9800, avatar: 'https://i.pravatar.cc/60?img=5' },
+    { id: 3, name: 'رضا قاسمی', score: 15200, avatar: 'https://i.pravatar.cc/60?img=8' },
+    { id: 4, name: 'مریم احمدی', score: 7650, avatar: 'https://i.pravatar.cc/60?img=11' }
+  ];
 
-      // Log analytics
-      logEvent('duel_start', { opponent: opponentName });
+  const randomPool = [
+    { id: 5, name: 'حسین کریمی', score: 13200, avatar: 'https://i.pravatar.cc/60?img=12' },
+    { id: 6, name: 'نگار موسوی', score: 9100, avatar: 'https://i.pravatar.cc/60?img=13' },
+    { id: 7, name: 'کامران علیپور', score: 10100, avatar: 'https://i.pravatar.cc/60?img=14' }
+  ];
+
+  function renderDuelFriends(){
+    const list = $('#duel-friends-list');
+    if(!list) return;
+    list.innerHTML = '';
+    duelFriends.forEach(friend => {
+      const card = document.createElement('div');
+      card.className = 'duel-opponent glass rounded-2xl p-4 flex items-center justify-between';
+      card.innerHTML = `
+        <div class="flex items-center gap-3">
+          <img src="${friend.avatar}" class="w-12 h-12 rounded-full border-2 border-white/30" alt="opponent">
+          <div>
+            <div class="font-bold">${friend.name}</div>
+            <div class="text-sm opacity-80 flex items-center gap-1"><i class="fas fa-star text-yellow-300"></i><span>امتیاز: ${friend.score.toLocaleString('fa-IR')}</span></div>
+          </div>
+        </div>
+        <button class="btn btn-duel text-sm w-auto px-4" data-id="${friend.id}">چالش</button>`;
+      list.appendChild(card);
     });
-  });
+    list.querySelectorAll('button[data-id]').forEach(btn => {
+      btn.addEventListener('click', () => challengeFriend(parseInt(btn.dataset.id)));
+    });
+  }
 
-  // Random Opponent
-  $('#btn-duel-random')?.addEventListener('click', () => {
-    const cards = $$('.duel-opponent');
-    if (!cards.length) return;
-    const card = cards[Math.floor(Math.random() * cards.length)];
-    // Highlight selected opponent for a moment
-    card.classList.add('ring-4', 'ring-offset-2', 'ring-yellow-300');
+  function challengeFriend(id){
+    const friend = duelFriends.find(f => f.id === id);
+    if(!friend) return;
+    toast(`دعوت نبرد برای ${friend.name} ارسال شد!`);
+    logEvent('duel_challenge', { opponent: friend.name });
+  }
+
+  renderDuelFriends();
+
+  // Random Opponent Matching
+  $('#btn-duel-random')?.addEventListener('click', async () => {
+    const btn = $('#btn-duel-random');
+    if(!btn) return;
+    btn.disabled = true;
     vibrate(30);
-    setTimeout(() => {
-      card.classList.remove('ring-4', 'ring-offset-2', 'ring-yellow-300');
-      card.querySelector('button')?.click();
-    }, 500);
+    toast('در حال جستجوی حریف تصادفی...');
+    await new Promise(res => setTimeout(res, 1500));
+    const opponent = randomPool[Math.floor(Math.random()*randomPool.length)];
+    toast(`حریف ${opponent.name} پیدا شد!`);
+    logEvent('duel_random_found', { opponent: opponent.name });
+    duelFriends.unshift(opponent);
+    renderDuelFriends();
+    btn.disabled = false;
   });
 
   // Invite Link Copy
