@@ -703,6 +703,9 @@
             <span class="chip"><i class="fas fa-coins text-yellow-300 ml-1"></i> <span id="coins">۰</span></span>
           </div>
         </div>
+        <div id="duel-banner" class="hidden mb-2 flex items-center justify-center">
+          <span class="chip"><i class="fas fa-hand-fist text-red-400 ml-1"></i><span id="duel-opponent-name"></span></span>
+        </div>
         <div class="mt-2 flex items-center justify-center">
           <div class="relative w-[140px] h-[140px]">
             <svg width="140" height="140" viewBox="0 0 140 140" class="-rotate-90 block">
@@ -1881,6 +1884,7 @@ patchPricingKeys(RemoteConfig);
     score:0, coins:120, lives:3, vip:false, // vip will be overridden by server
     streak:0, lastClaim:0, boostUntil:0,
     theme:'ocean',
+    duelOpponent:null,
     achievements:{ firstWin:false, tenCorrect:false, streak3:false, vipBought:false },
     settings:{ sound:true, haptics:true },
     leaderboard:[
@@ -1936,7 +1940,8 @@ patchPricingKeys(RemoteConfig);
       const serverState = JSON.parse(localStorage.getItem('server_state') || '{}');
       if (serverState.limits) Object.assign(Server.limits, serverState.limits);
       if (serverState.pass) Object.assign(Server.pass, serverState.pass);
-    }catch{} 
+    }catch{}
+    State.duelOpponent = null;
   }
   
   function saveState(){ 
@@ -2474,7 +2479,14 @@ patchPricingKeys(RemoteConfig);
     const q = State.quiz.list[0];
     renderQuestionUI(q);
     resetTimer(diff==='سخت'?20:diff==='متوسط'?25:30);
-    
+
+    if(State.duelOpponent){
+      $('#duel-opponent-name').textContent = State.duelOpponent.name;
+      $('#duel-banner').classList.remove('hidden');
+    } else {
+      $('#duel-banner').classList.add('hidden');
+    }
+
     // Log analytics
     logEvent('quiz_start', { category: cat, difficulty: diff, questionCount: count });
   }
@@ -3319,7 +3331,11 @@ async function startPurchaseCoins(pkgId){
   $('#btn-daily')?.addEventListener('click', startDaily);
   $('#btn-back-lb')?.addEventListener('click', ()=> navTo('dashboard'));
   $('#btn-back-shop')?.addEventListener('click', ()=> navTo('dashboard'));
-  $('#btn-quit')?.addEventListener('click', ()=>{ navTo('dashboard'); });
+  $('#btn-quit')?.addEventListener('click', ()=>{
+    State.duelOpponent = null;
+    $('#duel-banner').classList.add('hidden');
+    navTo('dashboard');
+  });
   $('#btn-continue')?.addEventListener('click', ()=>{
     if(State.coins>=10){ State.coins-=10; State.lives=1; saveState(); $('#btn-continue').classList.add('hidden'); renderTopBars();
       resetTimer(15); $$('#choices .choice').forEach(el=>{ el.classList.remove('wrong','correct','pointer-events-none','opacity-70'); el.style.opacity=''; el.style.pointerEvents=''; }); State.quiz.answered=false;
@@ -3470,6 +3486,14 @@ async function startPurchaseCoins(pkgId){
     logEvent('duel_challenge', { opponent: friend.name });
   }
 
+  function startDuelMatch(opponent){
+    State.duelOpponent = opponent;
+    used5050=false; usedSkip=false; paused=false;
+    startQuiz({cat:'عمومی', diff:'متوسط', count:5});
+    logEvent('duel_start', { opponent: opponent.name });
+    navTo('quiz');
+  }
+
   renderDuelFriends();
 
   // Random Opponent Matching
@@ -3486,6 +3510,7 @@ async function startPurchaseCoins(pkgId){
     duelFriends.unshift(opponent);
     renderDuelFriends();
     btn.disabled = false;
+    startDuelMatch(opponent);
   });
 
   // Invite Link Copy
@@ -3758,7 +3783,11 @@ async function startPurchaseCoins(pkgId){
   // Share Result
   $('#btn-share')?.addEventListener('click', shareResult);
   $('#btn-again')?.addEventListener('click', openSetupSheet);
-  $('#btn-back-results')?.addEventListener('click', ()=> navTo('dashboard'));
+  $('#btn-back-results')?.addEventListener('click', ()=>{
+    State.duelOpponent = null;
+    $('#duel-banner').classList.add('hidden');
+    navTo('dashboard');
+  });
   
   // Lifeline buttons
   $('#life-5050')?.addEventListener('click', life5050);
