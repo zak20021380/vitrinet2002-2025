@@ -923,9 +923,19 @@ const Notifications = {
     });
   },
 
-  open()  { this._els.panel.hidden = false; this._els.btn.setAttribute('aria-expanded', 'true'); },
-  close() { this._els.panel.hidden = true;  this._els.btn.setAttribute('aria-expanded', 'false'); },
-  toggle(){ this._els.panel.hidden ? this.open() : this.close(); },
+  open() {
+    this._els.panel.hidden = false;
+    this._els.panel.classList.add('active');
+    this._els.btn.setAttribute('aria-expanded', 'true');
+  },
+  close() {
+    this._els.panel.classList.remove('active');
+    this._els.panel.hidden = true;
+    this._els.btn.setAttribute('aria-expanded', 'false');
+  },
+  toggle(){
+    this._els.panel.classList.contains('active') ? this.close() : this.open();
+  },
 
   async remove(id) {
     try { await API.deleteNotification(id); } catch (e) {}
