@@ -2515,6 +2515,10 @@ populateCustomerModal(data) {
 // Override renderCustomers to add customer IDs
 renderCustomers(query = '') {
   const listEl = document.getElementById('customers-list');
+  if (!listEl) {
+    console.warn('renderCustomers: element with id "customers-list" not found');
+    return;
+  }
   const normalizedQuery = query.trim().toLowerCase();
 
   const filteredCustomers = MOCK_DATA.customers.filter(c =>
