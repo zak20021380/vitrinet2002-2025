@@ -3282,6 +3282,13 @@ const btns = document.querySelectorAll(
       const data = document.getElementById('lr-data');
       if (!data) return;
 
+      // اطمینان از وضعیت به‌روز احراز هویت قبل از ادامه
+      if (AUTH.user === null) {
+        try {
+          AUTH = await adapters.getAuth();
+        } catch (_) {}
+      }
+
       const target  = parseInt(data.dataset.goal  || '10', 10);
       const current = parseInt(data.dataset.current || '0', 10);
 
