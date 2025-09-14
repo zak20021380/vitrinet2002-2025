@@ -1378,7 +1378,8 @@ function setBookings(list) {
     storeLocation: b.storeLocation || '',
     barber: b.barber || '',
     storeId: b.storeId || '',       // ← جدید
-    shopurl: b.shopurl || ''        // ← جدید
+    shopurl: b.shopurl || '',       // ← جدید
+    updatedAt: b.updatedAt || b.datetime || ''
   }));
   cache.set(KEYS.bookings, raw);
 
@@ -1436,7 +1437,8 @@ async function loadBookings() {
       storeLocation: b.storeLocation || meta.storeLocation || '',
       barber: b.barber || '',
       storeId: b.storeId || meta.storeId || '',
-      shopurl: b.shopurl || meta.shopurl || ''
+      shopurl: b.shopurl || meta.shopurl || '',
+      updatedAt: b.updatedAt || `${b.date || ''}T${(b.time || '').slice(0,5)}`
     };
   });
   setBookings(fromCache);
@@ -1467,14 +1469,15 @@ async function loadBookings() {
           storeLocation: meta.storeLocation,
           barber: b.barber || '',
           storeId: meta.storeId,
-          shopurl: meta.shopurl
+          shopurl: meta.shopurl,
+          updatedAt: b.updatedAt || b.createdAt || `${b.bookingDate || b.date || ''}T${(b.startTime || b.time || '').slice(0,5)}`
         };
       });
 
       // merge (prefer server by id)
       const byId = new Map(server.map(b => [b.id, b]));
       for (const c of fromCache) if (!byId.has(c.id)) byId.set(c.id, c);
-      setBookings(Array.from(byId.values()).sort((a, b) => new Date(a.datetime) - new Date(b.datetime)));
+      setBookings(Array.from(byId.values()).sort((a, b) => new Date(a.updatedAt || a.datetime) - new Date(b.updatedAt || b.datetime)));
     }
   } catch (e) {
     // ignore; offline or endpoint missing
@@ -1628,7 +1631,7 @@ async function loadBookings() {
 function renderBookings() {
   const list = $('#upcomingList'), hist = $('#historyList');
   list.innerHTML = ''; hist.innerHTML = '';
-  const all = getBookings().slice().sort((a,b)=> new Date(b.datetime) - new Date(a.datetime));
+  const all = getBookings().slice().sort((a,b)=> new Date(b.updatedAt || b.datetime) - new Date(a.updatedAt || a.datetime));
   const upcoming = all.filter(b => b.status !== 'done' && b.status !== 'canceled');
   const history  = all.filter(b => b.status === 'done' || b.status === 'canceled');
 
@@ -1840,6 +1843,7 @@ function renderBookings() {
     if (idx === -1) return;
     items[idx].status = 'canceled';
     items[idx].cancelledBy = 'customer';
+    items[idx].updatedAt = new Date().toISOString();
     setBookings(items); renderBookings();
     const selectedStore = getLoyaltyStores().find(s=>s.active); if (selectedStore) renderLoyalty(selectedStore);
     if (!silent) { closeModal('confirmModal'); showToast('رزرو لغو شد', 'success'); }
@@ -1888,7 +1892,9 @@ function renderBookings() {
 
     const items = getBookings(); const idx = items.findIndex(x=>x.id===currentRescheduleId);
     if (idx > -1) {
-      items[idx].datetime = `${date}T${time}:00`; setBookings(items); renderBookings();
+      items[idx].datetime = `${date}T${time}:00`;
+      items[idx].updatedAt = new Date().toISOString();
+      setBookings(items); renderBookings();
       const selectedStore = getLoyaltyStores().find(s=>s.active); if (selectedStore) renderLoyalty(selectedStore);
       closeModal('rescheduleModal'); showToast('زمان رزرو با موفقیت تغییر کرد', 'success');
     }
