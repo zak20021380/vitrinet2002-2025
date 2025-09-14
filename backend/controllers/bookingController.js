@@ -2,6 +2,8 @@ const mongoose = require('mongoose');
 const Booking = require('../models/booking');
 const SellerService = require('../models/seller-services');
 const Seller = require('../models/Seller');
+const User = require('../models/user');
+const { createNotification } = require('./notificationController');
 
 // Convert Persian/Arabic digits in a string to English digits
 function normalizeDigits(str = '') {
@@ -200,6 +202,17 @@ exports.updateBookingStatus = async (req, res) => {
 
     booking.status = status;
     await booking.save();
+
+    if (status === 'confirmed') {
+      try {
+        const user = await User.findOne({ phone: { $regex: digitInsensitiveRegex(booking.customerPhone) } }).select('_id');
+        if (user) {
+          await createNotification(user._id, `نوبت شما برای ${booking.service} در تاریخ ${booking.bookingDate} ساعت ${booking.startTime} تایید شد.`);
+        }
+      } catch (err) {
+        console.error('notify user confirmation error:', err);
+      }
+    }
 
     return res.json({ booking });
   } catch (err) {
