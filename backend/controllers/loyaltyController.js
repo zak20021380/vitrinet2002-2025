@@ -4,7 +4,14 @@ const Loyalty = require('../models/loyalty');
 exports.getLoyaltyStores = async (req, res) => {
   try {
     const userId = req.user.id;
-    const stores = await Loyalty.find({ userId });
+    const loyalties = await Loyalty.find({ userId }).populate('storeId', 'storename shopurl');
+    const stores = loyalties.map(l => ({
+      storeId: l.storeId?._id || l.storeId,
+      storeName: l.storeId?.storename || '',
+      shopUrl: l.storeId?.shopurl || '',
+      completed: l.completed || 0,
+      claimed: l.claimed || 0,
+    }));
     res.json(stores);
   } catch (err) {
     res.status(500).json({ message: 'Server error' });
