@@ -21,6 +21,8 @@
       if(!b.seen){
         show(b.status);
         localStorage.setItem('vt:lastBooking', JSON.stringify({...b, seen:true}));
+        // اطلاع‌رسانی به سایر بخش‌ها برای به‌روزرسانی پیشرفت باشگاه
+        window.dispatchEvent(new CustomEvent('booking:status', {detail:{status:b.status}}));
       }
       return true;
     }
@@ -33,6 +35,8 @@
         if(data.status && data.status !== 'pending'){
           show(data.status);
           localStorage.setItem('vt:lastBooking', JSON.stringify({...b, status:data.status, seen:true}));
+          // اعلان برای همگام‌سازی بخش وفاداری
+          window.dispatchEvent(new CustomEvent('booking:status', {detail:{status:data.status}}));
           return true;
         }
       }

@@ -3504,7 +3504,11 @@ setInterval(async () => {
 }, 10000); // Changed from 30000 to 10000
 
     // یک‌بار روی لود صفحه
-    document.addEventListener('DOMContentLoaded', () => syncFromConfirmedBooking('boot'));
+    // چون این تابع پس از DOMContentLoaded فراخوانی می‌شود،
+    // اضافه کردن لیسنر به این رویداد مؤثر نبود و شمارش اولیه انجام نمی‌شد.
+    // بنابراین مستقیماً آن را اجرا می‌کنیم تا در صورت وجود رزرو تایید شده
+    // پیشرفت باشگاه به‌روزرسانی شود.
+    syncFromConfirmedBooking('boot');
 
     // مخفی‌کردن استیکی وقتی CTA داخل ویو
     const stickyWrap = document.getElementById('lr-sticky');
