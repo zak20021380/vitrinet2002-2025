@@ -2756,9 +2756,6 @@ function buildPackages(){
     grid.appendChild(card);
   });
 
-  // اتصال هندلر خرید
-// Update payment button handlers for the beautiful modal
-updatePaymentButtonHandlers();
   // وضعیت کیف پول و آفلاین
   $('#wallet-balance').textContent = (Server.wallet.coins == null ? '—' : faNum(Server.wallet.coins));
   $('#wallet-offline').classList.toggle('hidden', online());
@@ -2846,17 +2843,6 @@ async function handlePaymentConfirm(packageId, priceToman, needsPayment) {
     closePaymentModal();
     startPurchaseCoins(packageId);
   }
-}
-
-// Update click handler binding
-function updatePaymentButtonHandlers() {
-  $$('.buy-pkg').forEach(btn => {
-    btn.onclick = (e) => {
-      e.preventDefault();
-      const packageId = btn.dataset.id;
-      showPaymentModal(packageId);
-    };
-  });
 }
 
   function showPayConfirm(btn){
@@ -3248,26 +3234,30 @@ async function startPurchaseCoins(pkgId){
     cWrap.innerHTML=''; dWrap.innerHTML='';
     let selCat='همه', selDiff='آسان';
     ['همه',...cats].forEach(c=>{
-      const b=document.createElement('button'); 
+      const b=document.createElement('button');
       b.className='w-full py-2 rounded-xl bg-white/10 border border-white/20 hover:bg-white/20';
       if (c === selCat) b.classList.add('selected-setup-item');
       b.textContent=c; b.dataset.val=c; cWrap.appendChild(b);
     });
     ['همه',...diffs].forEach(d=>{
-      const b=document.createElement('button'); 
+      const b=document.createElement('button');
       b.className='w-full py-2 rounded-xl bg-white/10 border border-white/20 hover:bg-white/20';
       if (d === selDiff) b.classList.add('selected-setup-item');
       b.textContent=d; b.dataset.val=d; dWrap.appendChild(b);
     });
-    cWrap.querySelectorAll('button').forEach(btn=> btn.addEventListener('click', e=>{
+    cWrap.onclick = (e)=>{
+      const btn = e.target.closest('button');
+      if(!btn) return;
       cWrap.querySelectorAll('button').forEach(x=>x.classList.remove('selected-setup-item'));
-      e.currentTarget.classList.add('selected-setup-item'); selCat=e.currentTarget.dataset.val;
-    }));
-    dWrap.querySelectorAll('button').forEach(btn=> btn.addEventListener('click', e=>{
+      btn.classList.add('selected-setup-item'); selCat=btn.dataset.val;
+    };
+    dWrap.onclick = (e)=>{
+      const btn = e.target.closest('button');
+      if(!btn) return;
       dWrap.querySelectorAll('button').forEach(x=>x.classList.remove('selected-setup-item'));
-      e.currentTarget.classList.add('selected-setup-item'); selDiff=e.currentTarget.dataset.val;
-    }));
-    $('#range-count').addEventListener('input', e=> $('#setup-count').textContent=faNum(e.target.value));
+      btn.classList.add('selected-setup-item'); selDiff=btn.dataset.val;
+    };
+    $('#range-count').oninput = e=> $('#setup-count').textContent=faNum(e.target.value);
     $('#setup-start').onclick=()=>{ closeSheet(); used5050=false; usedSkip=false; paused=false; startQuiz({cat:selCat,diff:selDiff,count:+$('#range-count').value}); navTo('quiz'); };
     openSheet();
   }
@@ -3332,6 +3322,13 @@ async function startPurchaseCoins(pkgId){
   }
   
   // ===== Events =====
+  // Delegate wallet package purchase buttons to handle re-renders
+  $('#pkg-grid')?.addEventListener('click', (e) => {
+    const btn = e.target.closest('.buy-pkg');
+    if (!btn) return;
+    e.preventDefault();
+    showPaymentModal(btn.dataset.id);
+  });
   $('#btn-play').addEventListener('click', openSetupSheet);
   $('#setup-close').addEventListener('click', closeSheet);
   $('#btn-daily').addEventListener('click', startDaily);
