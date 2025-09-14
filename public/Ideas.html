@@ -1403,7 +1403,19 @@
       <button class="btn btn-primary" data-close="#modal-receipt">باشه</button>
     </div>
   </div>
-  
+
+  <!-- Payment Confirm Modal -->
+  <div id="modal-pay-confirm" class="modal" aria-modal="true" role="dialog" aria-label="تایید پرداخت">
+    <div class="glass rounded-3xl p-5 w-full max-w-xs text-center space-y-4">
+      <div id="pay-popup-message" class="text-lg font-extrabold"></div>
+      <div id="pay-popup-wallet" class="text-sm opacity-80"></div>
+      <div class="flex gap-3 pt-2">
+        <button class="btn btn-secondary" data-close="#modal-pay-confirm">انصراف</button>
+        <button id="pay-popup-confirm" class="btn btn-primary flex-1">ادامه</button>
+      </div>
+    </div>
+  </div>
+
   <!-- Interstitial Ad -->
   <div id="modal-interstitial" class="interstitial" aria-modal="true" role="dialog" aria-label="تبلیغ میانی">
     <div class="interstitial-card glass w-full h-full max-w-md max-h-[80vh]">
@@ -2430,75 +2442,42 @@ document.addEventListener('click', (e) => {
   }
   
   // ===== Wallet (server) =====
-function buildPackages(){
-  const grid = $('#pkg-grid');
-  grid.innerHTML = '';
-
-  // نرخ تبدیل پشتیبان برای وقتی priceToman نباشه
-  const usdToToman = RemoteConfig?.pricing?.usdToToman || 70_000;
-
-  // آماده‌سازی پکیج‌ها با محاسبه‌ی قیمت تومانی و ارزش هر پکیج
-  const packs = (RemoteConfig?.pricing?.coins || []).map(p => {
-    const bonus = Number(p.bonus || 0);
-    const priceToman = (typeof p.priceToman === 'number' && p.priceToman > 0)
-      ? p.priceToman
-      : Math.round(((p.priceCents || 0) / 100) * usdToToman);
-
-    const received = p.amount + Math.floor(p.amount * bonus / 100); // مقدار دریافتی
-    const valueScore = priceToman > 0 ? (received / priceToman) : 0; // سکه به ازای هر تومان
-
-    return { ...p, bonus, priceToman, received, valueScore };
-  });
-
-  if (!packs.length){
-    grid.innerHTML = `<div class="glass-dark rounded-2xl p-4 text-center opacity-80">
-      در حال حاضر بسته‌ای موجود نیست
-    </div>`;
-    return;
+  function buildPackages(){
+    const grid = $('#pkg-grid'); grid.innerHTML='';
+    RemoteConfig.pricing.coins.forEach(pkg=>{
+      const bonus = pkg.bonus ? `<span class="chip bg-white/20"><i class="fas fa-gift ml-1"></i> ${faNum(pkg.bonus)}%</span>` : '';
+      const card = document.createElement('div');
+      card.className='glass-dark rounded-2xl p-4 card-hover flex flex-col';
+      card.innerHTML = `
+        <div class="flex items-center justify-between">
+          <div class="text-lg font-bold">${faNum(pkg.amount)} سکه</div>
+          ${bonus}
+        </div>
+        <div class="text-sm opacity-80 mt-1">${faNum(pkg.amount + Math.floor(pkg.amount*pkg.bonus/100))} دریافتی</div>
+        <button class="btn btn-primary mt-3 buy-pkg" data-id="${pkg.id}" data-price="${(pkg.priceCents/100).toFixed(2)}" aria-label="خرید بسته ${faNum(pkg.amount)} سکه">پرداخت ${faNum((pkg.priceCents/100).toFixed(2))} $</button>`;
+      grid.appendChild(card);
+    });
+    $$('.buy-pkg').forEach(b=> b.addEventListener('click', ()=> showPayConfirm(b)));
+    $('#wallet-balance').textContent = (Server.wallet.coins==null?'—':faNum(Server.wallet.coins));
+    $('#wallet-offline').classList.toggle('hidden', online());
   }
 
-  // پیدا کردن به‌صرفه‌ترین بسته
-  const best = packs.reduce((a,b) => (a.valueScore >= b.valueScore ? a : b), packs[0]);
-
-  // رندر کارت‌ها
-  packs.forEach(pkg => {
-    const card = document.createElement('div');
-    card.className = 'glass-dark rounded-2xl p-4 card-hover flex flex-col relative';
-
-    const bonusBadge = pkg.bonus
-      ? `<span class="chip bg-white/20"><i class="fas fa-gift ml-1"></i> ${faNum(pkg.bonus)}%</span>`
-      : '';
-
-    const bestRibbon = (pkg.id === best.id)
-      ? `<div class="ribbon">به‌صرفه‌ترین</div>`
-      : '';
-
-    card.innerHTML = `
-      ${bestRibbon}
-      <div class="flex items-center justify-between">
-        <div class="text-lg font-bold">${faNum(pkg.amount)} سکه</div>
-        ${bonusBadge}
-      </div>
-      <div class="text-sm opacity-80 mt-1">${faNum(pkg.received)} دریافتی</div>
-
-      <button class="btn btn-primary mt-3 buy-pkg"
-              data-id="${pkg.id}"
-              aria-label="خرید بسته ${faNum(pkg.amount)} سکه">
-        پرداخت ${faNum(pkg.priceToman)} <span class="text-xs">تومان</span>
-      </button>
-    `;
-
-    grid.appendChild(card);
-  });
-
-  // اتصال هندلر خرید
-  $$('.buy-pkg').forEach(b => b.addEventListener('click', () => startPurchaseCoins(b.dataset.id)));
-
-  // وضعیت کیف پول و آفلاین
-  $('#wallet-balance').textContent = (Server.wallet.coins == null ? '—' : faNum(Server.wallet.coins));
-  $('#wallet-offline').classList.toggle('hidden', online());
-}
-
+  function showPayConfirm(btn){
+    const pkgId = btn.dataset.id;
+    const price = parseFloat(btn.dataset.price||'0');
+    const wallet = Server.wallet.coins||0;
+    $('#pay-popup-message').innerHTML = `قیمت بسته: ${faNum(price)} تومان`;
+    $('#pay-popup-wallet').innerHTML = `موجودی کیف پول: ${faNum(wallet)} تومان`;
+    $('#pay-popup-confirm').onclick = ()=>{
+      closeModal('#modal-pay-confirm');
+      if(wallet >= price){
+        startPurchaseCoins(pkgId);
+      }else{
+        window.location.href = '/payment';
+      }
+    };
+    openModal('#modal-pay-confirm');
+  }
   
   function renderVipStatusPill(){
     const s = Server.subscription;
@@ -3043,10 +3022,11 @@ async function startPurchaseCoins(pkgId){
   // Detail Popup Events
   $('#detail-close').addEventListener('click', closeDetailPopup);
   $('#detail-overlay').addEventListener('click', closeDetailPopup);
-  
+
   // Close modals (receipt)
   $$('[data-close="#modal-receipt"]').forEach(b=> b.addEventListener('click', ()=>closeModal('#modal-receipt')));
-  
+  $$('[data-close="#modal-pay-confirm"]').forEach(b=> b.addEventListener('click', ()=>closeModal('#modal-pay-confirm')));
+
   // Game Limits CTAs
   $('#btn-buy-energy').addEventListener('click', () => {
     if (State.coins >= 50) {
