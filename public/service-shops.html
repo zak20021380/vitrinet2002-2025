@@ -3221,8 +3221,8 @@ const btns = document.querySelectorAll(
     // مقدار خام (ممکنه از سرور یا لوکال بیاد)
     const raw = parseInt(localStorage.getItem(KEY_PROGRESS) ?? data.dataset.current ?? '0', 10) || 0;
 
-    // اگر لاگین نیست یا هرگز رزرو نکرده ⇒ صفر نمایش داده می‌شود
-    const current = (!AUTH.loggedIn || !HAS_BOOKED_BEFORE) ? 0 : raw;
+    // اگر هرگز رزرو نکرده ⇒ صفر نمایش داده می‌شود
+    const current = (!HAS_BOOKED_BEFORE) ? 0 : raw;
 
     document.getElementById('reward-target').textContent = toFa(target);
     document.getElementById('reward-text').textContent   = reward;
