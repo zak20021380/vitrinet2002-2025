@@ -1378,7 +1378,10 @@ destroy() {
     }
     // --- Page Rendering ---
     renderWelcomeDate() {
-      document.getElementById('welcome-date').textContent = UIComponents.formatPersianNumber(new Date().toLocaleDateString('fa-IR'));
+      const el = document.getElementById('welcome-date');
+      if (el) {
+        el.textContent = UIComponents.formatPersianNumber(new Date().toLocaleDateString('fa-IR'));
+      }
     }
     renderDashboard() {
         document.querySelectorAll('.stat-value').forEach(UIComponents.animateCountUp);
