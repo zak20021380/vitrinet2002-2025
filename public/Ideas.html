@@ -387,9 +387,19 @@
               <h2 id="profile-name" class="text-2xl font-extrabold">زکی</h2>
               <span id="vip-chip" class="chip bg-gradient-to-r from-yellow-400 to-orange-500 text-black font-bold hidden">وی‌آی‌پی</span>
             </div>
-            <div class="text-sm text-white/80 flex items-center gap-1 mt-1">
-              <i class="fas fa-trophy text-yellow-300"></i>
-              <span>رتبه شما: <span id="rank" class="font-bold">—</span></span>
+            <div class="text-sm text-white/80 flex flex-col gap-1 mt-1">
+              <div class="flex items-center gap-1">
+                <i class="fas fa-flag text-yellow-300"></i>
+                <span>رتبه کشوری: <span id="rank-country" class="font-bold">—</span></span>
+              </div>
+              <div class="flex items-center gap-1">
+                <i class="fas fa-map-marker-alt text-emerald-300"></i>
+                <span>رتبه استان: <span id="rank-province" class="font-bold">—</span></span>
+              </div>
+              <div class="flex items-center gap-1">
+                <i class="fas fa-location-dot text-sky-300"></i>
+                <span>استان شما: <span id="user-province">—</span></span>
+              </div>
             </div>
           </div>
           <button id="btn-edit-profile" class="px-3 py-2 rounded-xl bg-white/10 border border-white/20 hover:bg-white/20 transition">ویرایش</button>
@@ -2272,10 +2282,15 @@ patchPricingKeys(RemoteConfig);
     $('#pass-premium-progress').style.width = `${Math.min(100, (Server.pass.premiumXp / 200) * 100)}%`;
     
     // rank
-    const me = { id: State.user.id, score: State.score };
-    const arr = [...State.leaderboard.filter(x=>x.id!==me.id), {id:me.id,name:State.user.name,score:me.score}].sort((a,b)=>b.score-a.score);
-    const idx = arr.findIndex(x=>x.id===me.id);
-    $('#rank').textContent = idx>=0 ? faNum(idx+1) : '—';
+    const me = { id: State.user.id, score: State.score, province: State.user.province };
+    const arr = [...State.leaderboard.filter(x=>x.id!==me.id), {id:me.id,name:State.user.name,score:me.score,province:me.province}].sort((a,b)=>b.score-a.score);
+    const countryIdx = arr.findIndex(x=>x.id===me.id);
+    $('#rank-country').textContent = countryIdx>=0 ? faNum(countryIdx+1) : '—';
+
+    const provArr = arr.filter(x=>x.province===me.province);
+    const provIdx = provArr.findIndex(x=>x.id===me.id);
+    $('#rank-province').textContent = provIdx>=0 ? faNum(provIdx+1) : '—';
+    $('#user-province').textContent = me.province || '—';
     
     // Update limits UI
     updateLimitsUI();
