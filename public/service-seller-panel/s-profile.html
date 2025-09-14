@@ -1557,7 +1557,7 @@ async function loadBookings() {
         const data = await res.json();
         const stores = Array.isArray(data) ? data.map(s => ({
           storeId: s.storeId,
-          storeName: s.storeName || 'فروشگاه',
+          storeName: s.storeName || seller?.storeName || seller?.displayName || seller?.title || seller?.name || 'فروشگاه',
           completed: s.completed || 0,
           claimed: s.claimed || 0,
           active: false
@@ -1625,9 +1625,11 @@ async function loadBookings() {
 
   function updateLoyaltyHeader(store){
     const title = $('#loyaltyTitle'), btn = $('#branchBtn');
-    if (title) title.textContent = `باشگاه مشتریان${store ? ' — ' + store.storeName : ''}`;
+    const storeName = store?.storeName || seller?.storeName || seller?.displayName || seller?.title || seller?.name || '';
+    if (title) title.textContent = `باشگاه مشتریان${storeName ? ' — ' + storeName : ''}`;
     if (!btn) return;
-    if (store) { btn.classList.remove('hidden'); btn.onclick = ()=> window.location.href = `/store/${store.storeId}`; }
+    const storeId = store?.storeId || seller?.sellerId || seller?._id || seller?.id;
+    if (storeId) { btn.classList.remove('hidden'); btn.onclick = ()=> window.location.href = `/store/${storeId}`; }
     else { btn.classList.add('hidden'); btn.onclick = null; }
   }
 
