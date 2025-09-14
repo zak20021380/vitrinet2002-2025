@@ -407,6 +407,10 @@
                 <i class="fas fa-location-dot text-sky-300"></i>
                 <span>استان شما: <span id="user-province">—</span></span>
               </div>
+              <div class="flex items-center gap-1">
+                <i class="fas fa-users text-blue-300"></i>
+                <span>گروه شما: <span id="user-group">—</span></span>
+              </div>
             </div>
           </div>
           <button id="btn-edit-profile" class="px-3 py-2 rounded-xl bg-white/10 border border-white/20 hover:bg-white/20 transition">ویرایش</button>
@@ -1569,8 +1573,12 @@
       <div class="space-y-3">
         <label class="block text-sm opacity-90">نام</label>
         <input id="inp-name" class="w-full p-3 rounded-xl bg-white/10 border border-white/20" placeholder="نام شما">
-        <label class="block text-sm opacity-90">آواتار (لینک)</label>
-        <input id="inp-avatar" class="w-full p-3 rounded-xl bg-white/10 border border-white/20" placeholder="https://...">
+        <label class="block text-sm opacity-90">استان</label>
+        <select id="sel-province" class="w-full p-3 rounded-xl bg-white/10 border border-white/20"></select>
+        <label class="block text-sm opacity-90">گروه شما</label>
+        <div id="lbl-group" class="w-full p-3 rounded-xl bg-white/10 border border-white/20"></div>
+        <label class="block text-sm opacity-90">عکس پروفایل</label>
+        <input id="inp-avatar" type="file" accept="image/*" class="w-full p-3 rounded-xl bg-white/10 border border-white/20">
       </div>
       <div class="divider"></div>
       <button id="btn-save-profile" class="btn btn-primary">ذخیره</button>
@@ -1900,7 +1908,7 @@ patchPricingKeys(RemoteConfig);
   // ===== App State (legacy gameplay remains local) =====
   const STORAGE_KEY='quiz_webapp_pro_state_v2_fa';
   const State = {
-    user:{ id:'guest', name:'کاربر مهمان', avatar:'https://i.pravatar.cc/120?img=12', province:'تهران', group:'قهرمانان دانش' },
+    user:{ id:'guest', name:'کاربر مهمان', avatar:'https://i.pravatar.cc/120?img=12', province:'', group:'قهرمانان دانش' },
     score:0, coins:120, lives:3, vip:false, // vip will be overridden by server
     streak:0, lastClaim:0, boostUntil:0,
     theme:'ocean',
@@ -2298,7 +2306,8 @@ patchPricingKeys(RemoteConfig);
     const provIdx = provArr.findIndex(x=>x.id===me.id);
     $('#rank-province').textContent = provIdx>=0 ? faNum(provIdx+1) : '—';
     $('#user-province').textContent = me.province || '—';
-    
+    $('#user-group').textContent = State.user.group || '—';
+
     // Update limits UI
     updateLimitsUI();
   }
@@ -3383,9 +3392,48 @@ async function startPurchaseCoins(pkgId){
   $('#btn-notify')?.addEventListener('click', ()=>{ renderNotifications(); openModal('#modal-notify'); });
   $('[data-close="#modal-settings"]')?.addEventListener('click', ()=>closeModal('#modal-settings'));
   $('[data-close="#modal-notify"]')?.addEventListener('click', ()=>closeModal('#modal-notify'));
-  $('#btn-edit-profile')?.addEventListener('click', ()=>{ $('#inp-name').value = State.user.name; $('#inp-avatar').value = State.user.avatar; openModal('#modal-profile'); });
+  $('#btn-edit-profile')?.addEventListener('click', ()=>{
+    $('#inp-name').value = State.user.name;
+    const sel = $('#sel-province');
+    sel.innerHTML = State.provinces.map(p=>`<option value="${p.name}">${p.name}</option>`).join('');
+    if(State.user.province){
+      sel.value = State.user.province;
+      sel.disabled = true;
+    } else {
+      sel.disabled = false;
+      sel.insertAdjacentHTML('afterbegin','<option value="" disabled selected>انتخاب استان</option>');
+    }
+    $('#lbl-group').textContent = State.user.group || '—';
+    $('#inp-avatar').value = '';
+    openModal('#modal-profile');
+  });
   $('[data-close="#modal-profile"]')?.addEventListener('click', ()=>closeModal('#modal-profile'));
-  $('#btn-save-profile')?.addEventListener('click', ()=>{ const n=$('#inp-name').value.trim(); const a=$('#inp-avatar').value.trim(); if(n) State.user.name=n; if(a) State.user.avatar=a; saveState(); renderHeader(); renderDashboard(); closeModal('#modal-profile'); toast('ذخیره شد ✅'); });
+  $('#btn-save-profile')?.addEventListener('click', ()=>{
+    const n = $('#inp-name').value.trim();
+    if(n) State.user.name = n;
+
+    if(!State.user.province){
+      const p = $('#sel-province').value;
+      if(p) State.user.province = p;
+    }
+
+    const file = $('#inp-avatar').files[0];
+    if(file){
+      const reader = new FileReader();
+      reader.onload = () => { State.user.avatar = reader.result; finish(); };
+      reader.readAsDataURL(file);
+    } else {
+      finish();
+    }
+
+    function finish(){
+      saveState();
+      renderHeader();
+      renderDashboard();
+      closeModal('#modal-profile');
+      toast('ذخیره شد ✅');
+    }
+  });
   $('#btn-clear')?.addEventListener('click', ()=>{ if(confirm('همهٔ داده‌ها حذف شود؟')){ localStorage.removeItem(STORAGE_KEY); location.reload(); } });
   
   // Leaderboard Tabs
