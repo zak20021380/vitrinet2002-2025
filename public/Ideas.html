@@ -1501,7 +1501,9 @@
 // === RemoteConfig (اصلاح‌شده) ===
 const RemoteConfig = {
   ab: (Math.random() < 0.5) ? 'A' : 'B',
+
   provinceTargeting: { enabled: true, allow: ['تهران','کردستان','آذربایجان غربی','اصفهان'] },
+
   ads: {
     enabled: true,
     placements: { banner:true, native:true, interstitial:true, rewarded:true },
@@ -1510,34 +1512,44 @@ const RemoteConfig = {
     rewardedMinWatchMs: 7_000,
     session: { interstitialShown: 0, rewardedShown: 0, lastInterstitialAt: 0 }
   },
+
   pricing: {
+    // نرخ تبدیل دلاری برای مواقعی که priceToman نداشتیم (اختیاری)
+    usdToToman: 70_000,
+
+    // ← این بخش به تومان به‌روزرسانی شد
     coins: [
-      { id:'c100',  amount:100,  bonus:0,   priceCents:199 },
-      { id:'c500',  amount:500,  bonus:5,   priceCents:799 },
-      { id:'c1200', amount:1200, bonus:12,  priceCents:1499 },
-      { id:'c3000', amount:3000, bonus:25,  priceCents:2999 }
+      { id:'c100',  amount:100,  bonus:0,  priceToman: 59_000,   priceCents:199  },
+      { id:'c500',  amount:500,  bonus:5,  priceToman: 239_000,  priceCents:799  },
+      { id:'c1200', amount:1200, bonus:12, priceToman: 459_000,  priceCents:1499 },
+      { id:'c3000', amount:3000, bonus:25, priceToman: 899_000,  priceCents:2999 }
     ],
+
     vip: {
       lite: { id:'vip_lite', priceCents:299 },
       pro:  { id:'vip_pro',  priceCents:599 }
     },
-    // ✅ اضافه شد: بسته‌های «کلید» (پرداخت با سکهٔ بازی)
+
+    // بسته‌های «کلید» (پرداخت با سکهٔ بازی)
     keys: [
       { id:'k1',  amount:1,  priceGame:30  }, // بسته کوچک
       { id:'k3',  amount:3,  priceGame:80  }, // بسته اقتصادی
       { id:'k10', amount:10, priceGame:250 }  // بسته بزرگ
     ]
   },
+
   abOverrides: {
     A: { ads:{ freqCaps:{ interstitialPerSession:2 } } },
     B: { ads:{ freqCaps:{ interstitialPerSession:1 } } }
   },
+
   gameLimits: {
     matches: { daily: 5, vipMultiplier: 2, recoveryTime: 2 * 60 * 60 * 1000 }, // 2 hours
     lives:   { daily: 3, vipMultiplier: 2, recoveryTime: 30 * 60 * 1000 },     // 30 minutes
     energy:  { daily: 10, vipMultiplier: 2, recoveryTime: 15 * 60 * 1000 }     // 15 minutes
   }
 };
+
 
 
 // === Patch ایمن برای RemoteConfig.pricing.keys ===
@@ -2418,25 +2430,75 @@ document.addEventListener('click', (e) => {
   }
   
   // ===== Wallet (server) =====
-  function buildPackages(){
-    const grid = $('#pkg-grid'); grid.innerHTML='';
-    RemoteConfig.pricing.coins.forEach(pkg=>{
-      const bonus = pkg.bonus ? `<span class="chip bg-white/20"><i class="fas fa-gift ml-1"></i> ${faNum(pkg.bonus)}%</span>` : '';
-      const card = document.createElement('div');
-      card.className='glass-dark rounded-2xl p-4 card-hover flex flex-col';
-      card.innerHTML = `
-        <div class="flex items-center justify-between">
-          <div class="text-lg font-bold">${faNum(pkg.amount)} سکه</div>
-          ${bonus}
-        </div>
-        <div class="text-sm opacity-80 mt-1">${faNum(pkg.amount + Math.floor(pkg.amount*pkg.bonus/100))} دریافتی</div>
-        <button class="btn btn-primary mt-3 buy-pkg" data-id="${pkg.id}" aria-label="خرید بسته ${faNum(pkg.amount)} سکه">پرداخت ${faNum((pkg.priceCents/100).toFixed(2))} $</button>`;
-      grid.appendChild(card);
-    });
-    $$('.buy-pkg').forEach(b=> b.addEventListener('click', ()=> startPurchaseCoins(b.dataset.id)));
-    $('#wallet-balance').textContent = (Server.wallet.coins==null?'—':faNum(Server.wallet.coins));
-    $('#wallet-offline').classList.toggle('hidden', online());
+function buildPackages(){
+  const grid = $('#pkg-grid');
+  grid.innerHTML = '';
+
+  // نرخ تبدیل پشتیبان برای وقتی priceToman نباشه
+  const usdToToman = RemoteConfig?.pricing?.usdToToman || 70_000;
+
+  // آماده‌سازی پکیج‌ها با محاسبه‌ی قیمت تومانی و ارزش هر پکیج
+  const packs = (RemoteConfig?.pricing?.coins || []).map(p => {
+    const bonus = Number(p.bonus || 0);
+    const priceToman = (typeof p.priceToman === 'number' && p.priceToman > 0)
+      ? p.priceToman
+      : Math.round(((p.priceCents || 0) / 100) * usdToToman);
+
+    const received = p.amount + Math.floor(p.amount * bonus / 100); // مقدار دریافتی
+    const valueScore = priceToman > 0 ? (received / priceToman) : 0; // سکه به ازای هر تومان
+
+    return { ...p, bonus, priceToman, received, valueScore };
+  });
+
+  if (!packs.length){
+    grid.innerHTML = `<div class="glass-dark rounded-2xl p-4 text-center opacity-80">
+      در حال حاضر بسته‌ای موجود نیست
+    </div>`;
+    return;
   }
+
+  // پیدا کردن به‌صرفه‌ترین بسته
+  const best = packs.reduce((a,b) => (a.valueScore >= b.valueScore ? a : b), packs[0]);
+
+  // رندر کارت‌ها
+  packs.forEach(pkg => {
+    const card = document.createElement('div');
+    card.className = 'glass-dark rounded-2xl p-4 card-hover flex flex-col relative';
+
+    const bonusBadge = pkg.bonus
+      ? `<span class="chip bg-white/20"><i class="fas fa-gift ml-1"></i> ${faNum(pkg.bonus)}%</span>`
+      : '';
+
+    const bestRibbon = (pkg.id === best.id)
+      ? `<div class="ribbon">به‌صرفه‌ترین</div>`
+      : '';
+
+    card.innerHTML = `
+      ${bestRibbon}
+      <div class="flex items-center justify-between">
+        <div class="text-lg font-bold">${faNum(pkg.amount)} سکه</div>
+        ${bonusBadge}
+      </div>
+      <div class="text-sm opacity-80 mt-1">${faNum(pkg.received)} دریافتی</div>
+
+      <button class="btn btn-primary mt-3 buy-pkg"
+              data-id="${pkg.id}"
+              aria-label="خرید بسته ${faNum(pkg.amount)} سکه">
+        پرداخت ${faNum(pkg.priceToman)} <span class="text-xs">تومان</span>
+      </button>
+    `;
+
+    grid.appendChild(card);
+  });
+
+  // اتصال هندلر خرید
+  $$('.buy-pkg').forEach(b => b.addEventListener('click', () => startPurchaseCoins(b.dataset.id)));
+
+  // وضعیت کیف پول و آفلاین
+  $('#wallet-balance').textContent = (Server.wallet.coins == null ? '—' : faNum(Server.wallet.coins));
+  $('#wallet-offline').classList.toggle('hidden', online());
+}
+
   
   function renderVipStatusPill(){
     const s = Server.subscription;
@@ -2492,51 +2554,73 @@ document.addEventListener('click', (e) => {
   
   function genIdemKey(){ return 'idem_'+Math.random().toString(36).slice(2)+Date.now().toString(36); }
   
-  async function startPurchaseCoins(pkgId){
-    if(!online()){ toast('<i class="fas fa-wifi-slash ml-2"></i> آفلاین هستی'); return; }
-    const pkg = RemoteConfig.pricing.coins.find(p=>p.id===pkgId);
-    if(!pkg){ toast('بسته یافت نشد'); return; }
-    const idem = genIdemKey();
-    const btn = document.querySelector(`.buy-pkg[data-id="${pkgId}"]`);
-    btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin ml-2"></i> در حال ایجاد تراکنش...';
-    await logEvent('purchase_initiated', { kind:'coins', pkgId, priceCents:pkg.priceCents, idem });
-    const res = await Net.jpost('/api/payments/create', { idempotencyKey: idem, type:'coins', packageId: pkgId });
-    if(!res || !res.txnId){
-      btn.disabled=false; btn.innerHTML = `پرداخت ${faNum((pkg.priceCents/100).toFixed(2))} $`;
-      toast('<i class="fas fa-triangle-exclamation ml-2"></i> ایجاد تراکنش ناموفق'); 
-      await logEvent('purchase_failed', { kind:'coins', pkgId, reason:'create_failed' }); 
-      return;
-    }
-    const txnId = res.txnId;
-    // Poll wallet until updated or timeout
-    const before = Server.wallet.coins;
-    let ok=false;
-    for(let i=0;i<20;i++){ await wait(1000); await refreshWallet(); if(Server.wallet.coins!=null && (before==null || Server.wallet.coins>before)){ ok=true; break; } }
-    btn.disabled=false; btn.innerHTML = `پرداخت ${faNum((pkg.priceCents/100).toFixed(2))} $`;
-    if(ok){
-      Server.wallet.lastTxnId = txnId;
-      openReceipt({
-        title:'خرید سکه موفق بود',
-        rows:[
-          ['کد تراکنش', txnId],
-          ['بسته', `${faNum(pkg.amount)} (+${pkg.bonus}%)`],
-          ['مبلغ', `${enNum((pkg.priceCents/100).toFixed(2))} $`],
-          ['موجودی جدید', faNum(Server.wallet.coins)]
-        ]
-      });
-      await logEvent('purchase_succeeded', { kind:'coins', pkgId, txnId });
-      SFX.coin();
-    } else {
-      openReceipt({
-        title:'در انتظار تایید',
-        rows:[
-          ['کد تراکنش', txnId],
-          ['وضعیت', 'هنوز تایید نشده؛ چند لحظه بعد دوباره بررسی می‌شود.']
-        ]
-      });
-      await logEvent('purchase_failed', { kind:'coins', pkgId, txnId, reason:'confirm_timeout' });
-    }
+async function startPurchaseCoins(pkgId){
+  if(!online()){ toast('<i class="fas fa-wifi-slash ml-2"></i> آفلاین هستی'); return; }
+  const pkg = (RemoteConfig.pricing.coins || []).find(p=>p.id===pkgId);
+  if(!pkg){ toast('بسته یافت نشد'); return; }
+
+  const priceTmn = coinPriceToman(pkg);             // تومان برای نمایش و رسید
+  const idem = genIdemKey();
+  const btn = document.querySelector(`.buy-pkg[data-id="${pkgId}"]`);
+  const normalLabel = `<i class="fas fa-credit-card ml-1"></i> پرداخت ${formatToman(priceTmn)}`;
+
+  btn.disabled = true;
+  btn.innerHTML = '<i class="fas fa-spinner fa-spin ml-2"></i> در حال ایجاد تراکنش...';
+
+  await logEvent('purchase_initiated', { kind:'coins', pkgId, priceCents:pkg.priceCents, priceToman:priceTmn, idem });
+
+  const res = await Net.jpost('/api/payments/create', {
+    idempotencyKey: idem,
+    type:'coins',
+    packageId: pkgId
+  });
+
+  if(!res || !res.txnId){
+    btn.disabled = false;
+    btn.innerHTML = normalLabel;
+    toast('<i class="fas fa-triangle-exclamation ml-2"></i> ایجاد تراکنش ناموفق');
+    await logEvent('purchase_failed', { kind:'coins', pkgId, reason:'create_failed' });
+    return;
   }
+
+  const txnId = res.txnId;
+  // Poll wallet until updated or timeout
+  const before = Server.wallet.coins;
+  let ok=false;
+  for(let i=0;i<20;i++){
+    await wait(1000);
+    await refreshWallet();
+    if(Server.wallet.coins!=null && (before==null || Server.wallet.coins>before)){ ok=true; break; }
+  }
+
+  btn.disabled = false;
+  btn.innerHTML = normalLabel;
+
+  if(ok){
+    Server.wallet.lastTxnId = txnId;
+    openReceipt({
+      title:'خرید سکه موفق بود',
+      rows:[
+        ['کد تراکنش', txnId],
+        ['بسته', `${faNum(pkg.amount)} (+${pkg.bonus||0}%)`],
+        ['مبلغ', formatToman(priceTmn)],
+        ['موجودی جدید', faNum(Server.wallet.coins)]
+      ]
+    });
+    await logEvent('purchase_succeeded', { kind:'coins', pkgId, txnId, priceToman:priceTmn });
+    SFX.coin();
+  } else {
+    openReceipt({
+      title:'در انتظار تایید',
+      rows:[
+        ['کد تراکنش', txnId],
+        ['وضعیت', 'هنوز تایید نشده؛ چند لحظه بعد دوباره بررسی می‌شود.']
+      ]
+    });
+    await logEvent('purchase_failed', { kind:'coins', pkgId, txnId, reason:'confirm_timeout' });
+  }
+}
+
   
   function openReceipt({title, rows}){
     $('#receipt-body').innerHTML = `<div class="font-bold mb-2">${title}</div>` + rows.map(r=>`<div class="flex items-center justify-between"><span class="opacity-80">${r[0]}</span><span class="font-bold">${r[1]}</span></div>`).join('');
