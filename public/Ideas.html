@@ -3433,7 +3433,12 @@ async function startPurchaseCoins(pkgId){
     navTo('support');
     document.querySelector('.support-tab[data-tab="advertiser"]')?.click();
   });
-  $$('[data-buy]').forEach(b=> b.addEventListener('click', e=> buy(e.currentTarget.dataset.buy)));
+  // Delegate shop item purchases to handle dynamic re-renders
+  document.addEventListener('click', (e) => {
+    const btn = e.target.closest('[data-buy]');
+    if (!btn) return;
+    buy(btn.dataset.buy);
+  });
   $$('nav [data-tab]').forEach(b=> b.addEventListener('click', e=>{
     const tab=e.currentTarget.dataset.tab; if(tab==='quiz'){ openSetupSheet(); } else navTo(tab);
   }));
