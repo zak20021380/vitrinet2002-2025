@@ -3,6 +3,21 @@ const Booking = require('../models/booking');
 const SellerService = require('../models/seller-services');
 const Seller = require('../models/Seller');
 
+// Convert Persian/Arabic digits in a string to English digits
+function normalizeDigits(str = '') {
+  return str
+    .toString()
+    .replace(/[\u06F0-\u06F9]/g, d => String.fromCharCode(d.charCodeAt(0) - 1728))
+    .replace(/[\u0660-\u0669]/g, d => String.fromCharCode(d.charCodeAt(0) - 1632));
+}
+
+// Build a regex matching digits in any of the three numeral sets
+function digitInsensitiveRegex(phone = '') {
+  const en = normalizeDigits(phone);
+  const pattern = en.replace(/\d/g, d => `[${d}${String.fromCharCode(0x06F0 + +d)}${String.fromCharCode(0x0660 + +d)}]`);
+  return new RegExp(`^${pattern}$`);
+}
+
 // ایجاد نوبت جدید توسط کاربر
 exports.createBooking = async (req, res) => {
   try {
@@ -11,10 +26,11 @@ exports.createBooking = async (req, res) => {
       sellerId,
       service,
       customerName,
-      customerPhone,
+      customerPhone: rawPhone,
       date,
       time
     } = req.body || {};
+    const customerPhone = normalizeDigits(rawPhone || '');
 
     // log incoming payload for debugging
     console.log('createBooking payload:', {
@@ -48,7 +64,7 @@ exports.createBooking = async (req, res) => {
 
     // جلوگیری از ثبت نوبت جدید در صورت وجود نوبت در انتظار تایید
     const pendingExists = await Booking.exists({
-      customerPhone,
+      customerPhone: { $regex: digitInsensitiveRegex(customerPhone) },
       status: 'pending'
     });
     if (pendingExists) {
@@ -79,7 +95,8 @@ exports.createBooking = async (req, res) => {
     try {
       const sellerDoc = await Seller.findById(sid).select('blockedUsers');
       if (sellerDoc) {
-        const blocked = (sellerDoc.blockedUsers || []).map(u => u.toString());
+        const blocked = (sellerDoc.blockedUsers || [])
+          .map(u => normalizeDigits(u.toString()));
         const uid = req.user && req.user.id;
         if (uid && blocked.includes(uid.toString())) {
           return res.status(403).json({ message: 'شما توسط این فروشنده مسدود شده‌اید.' });
@@ -261,12 +278,15 @@ exports.cancelBookingById = async (req, res) => {
 // دریافت نوبت‌ها بر اساس شماره تلفن مشتری
 exports.getCustomerBookings = async (req, res) => {
   try {
-    const { phone } = req.query || {};
-    if (!phone) {
+    const { phone: rawPhone } = req.query || {};
+    if (!rawPhone) {
       return res.status(400).json({ message: 'شماره تلفن الزامی است.' });
     }
 
-    const items = await Booking.find({ customerPhone: phone })
+    const phone = normalizeDigits(rawPhone);
+    const regex = digitInsensitiveRegex(phone);
+
+    const items = await Booking.find({ customerPhone: { $regex: regex } })
       .sort({ createdAt: -1 })
       .lean();
 
@@ -280,20 +300,23 @@ exports.getCustomerBookings = async (req, res) => {
 // بررسی آخرین وضعیت نوبت بر اساس شماره تلفن مشتری
 exports.checkBookingStatus = async (req, res) => {
   try {
-    const { phone } = req.query || {};
-    if (!phone) {
+    const { phone: rawPhone } = req.query || {};
+    if (!rawPhone) {
       return res.status(400).json({ message: 'شماره تلفن الزامی است.' });
     }
 
+    const phone = normalizeDigits(rawPhone);
+    const regex = digitInsensitiveRegex(phone);
+
     // اگر نوبت معلقی وجود داشته باشد، همان را برگردانیم
-    const pending = await Booking.findOne({ customerPhone: phone, status: 'pending' })
+    const pending = await Booking.findOne({ customerPhone: { $regex: regex }, status: 'pending' })
       .sort({ createdAt: -1 })
       .select('status');
     if (pending) {
       return res.json({ status: 'pending' });
     }
 
-    const last = await Booking.findOne({ customerPhone: phone })
+    const last = await Booking.findOne({ customerPhone: { $regex: regex } })
       .sort({ createdAt: -1 })
       .select('status');
 
