@@ -3678,44 +3678,48 @@ async function startPurchaseCoins(pkgId){
   
   // ===== Init =====
 async function init(){
-    renderHeader(); renderDashboard(); navTo('dashboard');
-    
-    // Start daily reset timer
-    checkDailyReset();
-    setInterval(checkDailyReset, 1000);
-    
-    // Server bootstrap: wallet + subscription then ads
-    await Promise.all([refreshWallet(), refreshSubscription()]);
-    renderHeader(); renderDashboard();
-    AdManager.refreshAll();
-    
-    // Set up ESC key to close payment modal
-    document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape' && $('#modal-payment').classList.contains('show')) {
-        closePaymentModal();
-      }
-    });
-    
-    // Log session start
-    logEvent('session_start', {
-      screen_width: window.screen.width,
-      screen_height: window.screen.height,
-      user_agent: navigator.userAgent
-    });
-    
-    // Banner should be present from first print
-    if(!localStorage.getItem(STORAGE_KEY)){ setTimeout(()=>toast('برای شروع روی «شروع مسابقه» بزن ✨'), 800); }
-    
-    // Re-render wallet display if user changes connectivity
-    window.addEventListener('online', ()=>{ $('#wallet-offline')?.classList.add('hidden'); AdManager.refreshAll(); });
-    window.addEventListener('offline', ()=>{ $('#wallet-offline')?.classList.remove('hidden'); });
-    
-    // Hide loading screen
     const loading = $('#loading');
-    loading.classList.add('hidden');
-    
-    // Show popup ad on open
-    AdManager.maybeShowInterstitial('app_open');
+    try{
+      renderHeader(); renderDashboard(); navTo('dashboard');
+
+      // Start daily reset timer
+      checkDailyReset();
+      setInterval(checkDailyReset, 1000);
+
+      // Server bootstrap: wallet + subscription then ads
+      await Promise.all([refreshWallet(), refreshSubscription()]);
+      renderHeader(); renderDashboard();
+      AdManager.refreshAll();
+
+      // Set up ESC key to close payment modal
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && $('#modal-payment').classList.contains('show')) {
+          closePaymentModal();
+        }
+      });
+
+      // Log session start
+      logEvent('session_start', {
+        screen_width: window.screen.width,
+        screen_height: window.screen.height,
+        user_agent: navigator.userAgent
+      });
+
+      // Banner should be present from first print
+      if(!localStorage.getItem(STORAGE_KEY)){ setTimeout(()=>toast('برای شروع روی «شروع مسابقه» بزن ✨'), 800); }
+
+      // Re-render wallet display if user changes connectivity
+      window.addEventListener('online', ()=>{ $('#wallet-offline')?.classList.add('hidden'); AdManager.refreshAll(); });
+      window.addEventListener('offline', ()=>{ $('#wallet-offline')?.classList.remove('hidden'); });
+
+      // Show popup ad on open
+      AdManager.maybeShowInterstitial('app_open');
+    }catch(err){
+      console.error('Initialization failed', err);
+      toast('خطا در راه‌اندازی برنامه');
+    }finally{
+      loading.classList.add('hidden');
+    }
   }
   
   init();
