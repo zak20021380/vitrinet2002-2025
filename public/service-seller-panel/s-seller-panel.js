@@ -1861,7 +1861,7 @@ handlePlanDurationChange(e) {
       this.renderCustomers(query);
     }
     initSidebarObserver() {
-      if(window.innerWidth < 1024) return;
+      if (window.innerWidth < 1024 || !this.appNav) return;
       this.appNav.addEventListener('mouseenter', () => this.body.classList.add('sidebar-expanded'));
       this.appNav.addEventListener('mouseleave', () => this.body.classList.remove('sidebar-expanded'));
     }
