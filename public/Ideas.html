@@ -624,10 +624,10 @@
           <i class="fas fa-gamepad ml-2"></i> شروع مسابقه
         </button>
         <div class="grid grid-cols-2 gap-4">
-          <button class="btn btn-secondary" id="btn-shop">
+          <button type="button" class="btn btn-secondary" id="btn-shop" data-tab="shop">
             <i class="fas fa-shopping-cart ml-2"></i> فروشگاه
           </button>
-          <button class="btn btn-tertiary" id="btn-leaderboard">
+          <button type="button" class="btn btn-tertiary" id="btn-leaderboard" data-tab="leaderboard">
             <i class="fas fa-chart-line ml-2"></i> لیدربورد
           </button>
         </div>
@@ -3229,8 +3229,6 @@ async function startPurchaseCoins(pkgId){
   $('#btn-play').addEventListener('click', openSetupSheet);
   $('#setup-close').addEventListener('click', closeSheet);
   $('#btn-daily').addEventListener('click', startDaily);
-  $('#btn-leaderboard').addEventListener('click', ()=> navTo('leaderboard'));
-  $('#btn-shop').addEventListener('click', ()=> navTo('shop'));
   $('#btn-back-lb').addEventListener('click', ()=> navTo('dashboard'));
   $('#btn-back-shop').addEventListener('click', ()=> navTo('dashboard'));
   $('#btn-quit').addEventListener('click', ()=>{ navTo('dashboard'); });
@@ -3255,7 +3253,7 @@ async function startPurchaseCoins(pkgId){
     }catch{ navigator.clipboard.writeText(link); toast('<i class="fas fa-check-circle ml-2"></i>لینک کپی شد'); }
   });
   $$('[data-buy]').forEach(b=> b.addEventListener('click', e=> buy(e.currentTarget.dataset.buy)));
-  $$('nav [data-tab]').forEach(b=> b.addEventListener('click', e=>{
+  $$('[data-tab]').forEach(b=> b.addEventListener('click', e=>{
     const tab=e.currentTarget.dataset.tab; if(tab==='quiz'){ openSetupSheet(); } else navTo(tab);
   }));
   $('#btn-settings').addEventListener('click', ()=>{
