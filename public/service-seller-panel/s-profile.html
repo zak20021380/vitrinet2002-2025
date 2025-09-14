@@ -1950,11 +1950,11 @@ function renderBookings() {
     if (badge) { if (unread>0) { badge.textContent=unread; badge.classList.remove('hidden'); } else badge.classList.add('hidden'); }
     if (!items.length) { list.innerHTML = `<div class="py-8 text-center"><p class="text-gray-500">اعلانی ندارید</p></div>`; return; }
 
-    const icon = (t)=>({success:'fa-circle-check text-green-500', reminder:'fa-bell text-blue-500', special:'fa-star text-yellow-500', info:'fa-info-circle text-gray-500'}[t] || 'fa-info-circle text-gray-500');
+    const icon = (t)=>({success:'fa-circle-check text-green-500', reminder:'fa-bell text-blue-500', special:'fa-star text-yellow-500', info:'fa-info-circle text-gray-500', danger:'fa-circle-xmark text-red-500'}[t] || 'fa-info-circle text-gray-500');
 
     list.innerHTML = items.map(n => `
-      <button class="notification-item w-full text-right p-4 flex items-start gap-3 hover:bg-gray-50 transition-colors ${n.read?'opacity-60':''}"
-              onclick="toggleRead('${n.id}')">
+      <div class="notification-item w-full text-right p-4 flex items-start gap-3 hover:bg-gray-50 transition-colors ${n.read?'opacity-60':''}"
+           onclick="toggleRead('${n.id}')">
         <i class="fas ${icon(n.type)} mt-1 flex-shrink-0"></i>
         <div class="flex-1 min-w-0">
           <div class="flex items-start justify-between gap-2 mb-1">
@@ -1963,8 +1963,11 @@ function renderBookings() {
           </div>
           <p class="text-xs text-gray-600 break-words">${n.body}</p>
         </div>
-        ${!n.read ? '<span class="w-2 h-2 bg-red-500 rounded-full mt-2 animate-pulse flex-shrink-0"></span>' : ''}
-      </button>`).join('');
+        <div class="flex flex-col items-center gap-2 ml-2">
+          ${!n.read ? '<span class="w-2 h-2 bg-red-500 rounded-full animate-pulse"></span>' : ''}
+          <button class="text-gray-400 hover:text-red-500 transition-colors" aria-label="حذف اعلان" onclick="removeNotif('${n.id}', event)"><i class="fas fa-times"></i></button>
+        </div>
+      </div>`).join('');
   }
 
   async function toggleRead(id) {
@@ -1984,6 +1987,16 @@ function renderBookings() {
     try {
       if (!isOnline()) return;
       await Promise.all(unread.map(n => safeFetch(`/api/notifications/${n.id}/read`, { method:'PUT', credentials:'include' })));
+    } catch {}
+  }
+
+  async function removeNotif(id, ev) {
+    if (ev) ev.stopPropagation();
+    setNotifs(getNotifs().filter(n => n.id !== id));
+    renderNotifs();
+    try {
+      if (!isOnline()) return;
+      await safeFetch(`/api/notifications/${id}`, { method:'DELETE', credentials:'include' });
     } catch {}
   }
 
@@ -2289,14 +2302,25 @@ document.addEventListener('input', (e)=>{
     processOutbox(); // try to flush queued ops
   })();
 
-  // بروزرسانی خودکار باشگاه مشتریان پس از تایید رزرو
+  // بروزرسانی خودکار باشگاه مشتریان و ایجاد اعلان برای وضعیت رزرو
   window.addEventListener('booking:status', (e) => {
-    if (e.detail?.status === 'confirmed') {
+    const st = e.detail?.status;
+    if (st === 'confirmed') {
       updateLoyaltyFromLastBooking();
       renderStoreSwitcher();
       const active = getLoyaltyStores().find(s => s.active) || null;
       if (active) renderLoyalty(active);
       updateLoyaltyHeader(active);
+    }
+
+    if (st === 'confirmed' || st === 'cancelled' || st === 'canceled' || st === 'rejected') {
+      let info = null;
+      try { info = JSON.parse(localStorage.getItem('vt:lastBooking') || 'null'); } catch {}
+      const svc = info?.service ? ` برای ${info.service}` : '';
+      const title = st === 'confirmed' ? 'تایید رزرو' : 'لغو رزرو';
+      const body  = st === 'confirmed' ? `رزرو${svc} شما تایید شد` : `رزرو${svc} شما لغو شد`;
+      const n = { id:`local-${Date.now()}`, title, body, ts:new Date().toISOString(), read:false, type: st === 'confirmed' ? 'success' : 'danger' };
+      const items = getNotifs(); items.push(n); setNotifs(items); renderNotifs();
     }
   });
 
@@ -2313,12 +2337,13 @@ document.addEventListener('input', (e)=>{
   window.editProfile = editProfile;
   window.closeModal = closeModal;
   window.confirmCancel = confirmCancel;
-  window.confirmDelete = confirmDelete;
-  window.reschedule = reschedule;
-  window.rebookService = rebookService;
-  window.markAllRead = markAllRead;
-  window.toggleRead = toggleRead;
-  window.claimReward = claimReward;
+    window.confirmDelete = confirmDelete;
+    window.reschedule = reschedule;
+    window.rebookService = rebookService;
+    window.markAllRead = markAllRead;
+    window.toggleRead = toggleRead;
+    window.removeNotif = removeNotif;
+    window.claimReward = claimReward;
 </script>
 
 <script src="../booking-status-popup.js"></script>
