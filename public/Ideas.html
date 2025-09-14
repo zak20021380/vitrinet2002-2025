@@ -3480,21 +3480,43 @@ async function startPurchaseCoins(pkgId){
 
   // Random Opponent
   $('#btn-duel-random')?.addEventListener('click', () => {
-    const buttons = $$('.duel-opponent button');
-    if (!buttons.length) return;
-    const randomBtn = buttons[Math.floor(Math.random() * buttons.length)];
-    randomBtn.click();
+    const cards = $$('.duel-opponent');
+    if (!cards.length) return;
+    const card = cards[Math.floor(Math.random() * cards.length)];
+    // Highlight selected opponent for a moment
+    card.classList.add('ring-4', 'ring-offset-2', 'ring-yellow-300');
+    vibrate(30);
+    setTimeout(() => {
+      card.classList.remove('ring-4', 'ring-offset-2', 'ring-yellow-300');
+      card.querySelector('button')?.click();
+    }, 500);
   });
 
   // Invite Link Copy
   $('#btn-duel-link')?.addEventListener('click', async () => {
-    const inviter = (State && State.user && State.user.name) ? State.user.name : 'guest';
+    const inviter = State?.user?.name || 'guest';
     const link = `${location.origin}${location.pathname}?duel_invite=${encodeURIComponent(inviter)}`;
     try {
-      await navigator.clipboard.writeText(link);
-      toast('لینک دعوت کپی شد ✅');
+      if (navigator.share) {
+        await navigator.share({
+          title: 'دعوت به نبرد',
+          text: `${inviter} شما را به نبرد دعوت کرده است!`,
+          url: link
+        });
+        toast('دعوت ارسال شد ✅');
+      } else if (navigator.clipboard) {
+        await navigator.clipboard.writeText(link);
+        toast('لینک دعوت کپی شد ✅');
+      } else {
+        prompt('این لینک را کپی کنید:', link);
+      }
     } catch {
-      prompt('این لینک را کپی کنید:', link);
+      try {
+        await navigator.clipboard.writeText(link);
+        toast('لینک دعوت کپی شد ✅');
+      } catch {
+        prompt('این لینک را کپی کنید:', link);
+      }
     }
     logEvent('duel_invite_link');
   });
