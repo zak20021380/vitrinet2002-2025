@@ -1511,14 +1511,21 @@ async function loadBookings() {
       const res = await safeFetch('/api/notifications', { credentials:'include' });
       if (res.ok) {
         const data = await res.json();
-        const items = (data || []).map(n => ({
-          id: n._id,
-          title: n.title || 'اعلان',
-          body: n.message,
-          ts: n.createdAt,
-          read: !!n.read,
-          type: 'info'
-        }));
+        const typeByMsg = (msg = '') =>
+          msg.includes('تایید') ? 'success' : msg.includes('لغو') ? 'danger' : 'info';
+        const titleByMsg = (msg = '') =>
+          msg.includes('تایید') ? 'رزرو تایید شد' : msg.includes('لغو') ? 'رزرو لغو شد' : 'اعلان';
+        const items = (data || []).map(n => {
+          const msg = n.message || '';
+          return {
+            id: n._id,
+            title: n.title || titleByMsg(msg),
+            body: msg,
+            ts: n.createdAt,
+            read: !!n.read,
+            type: n.type || typeByMsg(msg)
+          };
+        });
         setNotifs(items);
         // re-render after fetching fresh notifications
         renderNotifs();

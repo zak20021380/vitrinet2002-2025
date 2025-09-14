@@ -203,14 +203,18 @@ exports.updateBookingStatus = async (req, res) => {
     booking.status = status;
     await booking.save();
 
-    if (status === 'confirmed') {
+    if (status === 'confirmed' || status === 'cancelled') {
       try {
         const user = await User.findOne({ phone: { $regex: digitInsensitiveRegex(booking.customerPhone) } }).select('_id');
         if (user) {
-          await createNotification(user._id, `نوبت شما برای ${booking.service} در تاریخ ${booking.bookingDate} ساعت ${booking.startTime} تایید شد.`);
+          const msg =
+            status === 'confirmed'
+              ? `نوبت شما برای ${booking.service} در تاریخ ${booking.bookingDate} ساعت ${booking.startTime} تایید شد.`
+              : `نوبت شما برای ${booking.service} در تاریخ ${booking.bookingDate} ساعت ${booking.startTime} لغو شد.`;
+          await createNotification(user._id, msg);
         }
       } catch (err) {
-        console.error('notify user confirmation error:', err);
+        console.error('notify user status change error:', err);
       }
     }
 
