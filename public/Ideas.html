@@ -1717,6 +1717,8 @@
   // ===== Helpers =====
   const $ = s => document.querySelector(s);
   const $$ = s => Array.from(document.querySelectorAll(s));
+  // Ensure all buttons default to type="button" to avoid unintended form submits
+  $$('button:not([type])').forEach(btn => btn.type = 'button');
   const clamp = (n,a,b)=>Math.max(a,Math.min(b,n));
   const faNum = n => (n===null||n===undefined||Number.isNaN(Number(n))) ? '—' : Number(n).toLocaleString('fa-IR');
   const enNum = n => Number(n).toLocaleString('en-US');
