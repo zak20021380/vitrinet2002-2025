@@ -1,0 +1,2074 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>Quiz WebApp Pro - پنل مدیریت</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    :root{ 
+      --brand1:#3b82f6; 
+      --brand2:#06b6d4; 
+      --brand3:#10b981;
+      --accent1:#fde047;
+      --accent2:#fb923c;
+      --accent3:#a78bfa;
+      --accent4:#ec4899;
+      --dark-bg: #0f172a;
+      --card-bg: rgba(30, 41, 59, 0.8);
+    }
+    *{ 
+      font-family: 'Vazirmatn', system-ui, -apple-system, Segoe UI, Roboto, sans-serif; 
+      box-sizing: border-box;
+    }
+    body{ 
+      background: radial-gradient(1200px 800px at 80% -10%, rgba(59, 130, 246, 0.15), transparent 50%),
+                   radial-gradient(1000px 700px at 0% 100%, rgba(6, 182, 212, 0.1), transparent 50%),
+                   linear-gradient(135deg, var(--dark-bg), #1e293b);
+      min-height: 100vh;
+      overflow-x: hidden;
+      color: #f8fafc;
+    }
+    .glass{ 
+      background: rgba(30, 41, 59, 0.7); 
+      backdrop-filter: blur(20px); 
+      -webkit-backdrop-filter: blur(20px); 
+      border: 1px solid rgba(255,255,255,0.1);
+      box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.36);
+    }
+    .glass-dark{ 
+      background: rgba(15, 23, 42, 0.8); 
+      backdrop-filter: blur(20px); 
+      -webkit-backdrop-filter: blur(20px); 
+      border: 1px solid rgba(255,255,255,0.1);
+    }
+    .btn{ 
+      @apply w-full py-3 rounded-xl font-bold shadow-lg active:scale-[0.98] transition-all duration-300 transform hover:scale-[1.02] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-slate-900;
+    }
+    .btn-primary{ 
+      background: linear-gradient(135deg, var(--accent1), var(--accent2)); 
+      color:#111827;
+      box-shadow: 0 4px 15px rgba(251, 146, 60, 0.4);
+    }
+    .btn-secondary{ 
+      background: linear-gradient(135deg, var(--accent3), var(--accent4)); 
+      color:#fff;
+      box-shadow: 0 4px 15px rgba(236, 72, 153, 0.4);
+    }
+    .btn-tertiary{ 
+      background: linear-gradient(135deg, #60a5fa, #6366f1); 
+      color:#fff;
+      box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4);
+    }
+    .safe { padding-bottom: env(safe-area-inset-bottom); }
+    .divider{ 
+      @apply h-px w-full bg-white/10 my-3;
+    }
+    .card-hover {
+      transition: all 0.3s ease;
+      cursor: pointer;
+    }
+    .card-hover:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 12px 40px 0 rgba(0, 0, 0, 0.3);
+    }
+    .gradient-text {
+      background: linear-gradient(90deg, var(--accent1), var(--accent2));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .nav-item {
+      position: relative;
+      transition: all 0.3s ease;
+    }
+    .nav-item.active::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      right: 0;
+      left: 0;
+      height: 3px;
+      background: linear-gradient(90deg, var(--accent1), var(--accent2));
+      border-radius: 3px 3px 0 0;
+    }
+    .sidebar-item {
+      transition: all 0.3s ease;
+      border-radius: 12px;
+    }
+    .sidebar-item:hover {
+      background: rgba(255,255,255,0.08);
+      border-right: 3px solid var(--accent1);
+    }
+    .sidebar-item.active {
+      background: rgba(255,255,255,0.12);
+      border-right: 3px solid var(--accent1);
+    }
+    .table-container {
+      overflow-x: auto;
+      border-radius: 12px;
+    }
+    .table {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0;
+    }
+    .table th, .table td {
+      padding: 12px 15px;
+      text-align: right;
+      white-space: nowrap;
+    }
+    .table th {
+      background: rgba(30, 41, 59, 0.7);
+      font-weight: 600;
+      position: sticky;
+      top: 0;
+    }
+    .table tr:nth-child(even) {
+      background: rgba(255,255,255,0.03);
+    }
+    .table tr:hover {
+      background: rgba(255,255,255,0.05);
+    }
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.7);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+      padding: 1rem;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+    .modal.active {
+      display: flex;
+      opacity: 1;
+    }
+    .modal-content {
+      transform: translateY(20px);
+      transition: transform 0.3s ease;
+    }
+    .modal.active .modal-content {
+      transform: translateY(0);
+    }
+    .toast {
+      position: fixed;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 1000;
+      min-width: 300px;
+      text-align: center;
+    }
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0.35rem 0.65rem;
+      border-radius: 6px;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+    .badge-success {
+      background-color: rgba(16, 185, 129, 0.2);
+      color: #10b981;
+      border: 1px solid rgba(16, 185, 129, 0.3);
+    }
+    .badge-warning {
+      background-color: rgba(251, 146, 60, 0.2);
+      color: #fb923c;
+      border: 1px solid rgba(251, 146, 60, 0.3);
+    }
+    .badge-danger {
+      background-color: rgba(244, 63, 94, 0.2);
+      color: #f43f5e;
+      border: 1px solid rgba(244, 63, 94, 0.3);
+    }
+    .badge-info {
+      background-color: rgba(59, 130, 246, 0.2);
+      color: #3b82f6;
+      border: 1px solid rgba(59, 130, 246, 0.3);
+    }
+    .form-input {
+      width: 100%;
+      padding: 0.75rem 1rem;
+      border-radius: 0.5rem;
+      background: rgba(30, 41, 59, 0.7);
+      border: 1px solid rgba(255,255,255,0.1);
+      color: white;
+      transition: all 0.3s ease;
+    }
+    .form-input:focus {
+      outline: none;
+      border-color: var(--accent1);
+      background: rgba(30, 41, 59, 0.9);
+      box-shadow: 0 0 0 3px rgba(251, 191, 36, 0.2);
+    }
+    .form-select {
+      width: 100%;
+      padding: 0.75rem 1rem;
+      border-radius: 0.5rem;
+      background: rgba(30, 41, 59, 0.7);
+      border: 1px solid rgba(255,255,255,0.1);
+      color: white;
+      transition: all 0.3s ease;
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%23fff'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: left 0.75rem center;
+      background-size: 1rem;
+    }
+    .form-select:focus {
+      outline: none;
+      border-color: var(--accent1);
+      background-color: rgba(30, 41, 59, 0.9);
+      box-shadow: 0 0 0 3px rgba(251, 191, 36, 0.2);
+    }
+    .form-select option {
+      background: #1e293b;
+    }
+    .stat-card {
+      transition: all 0.3s ease;
+      border-radius: 16px;
+      overflow: hidden;
+    }
+    .stat-card:hover {
+      transform: translateY(-5px);
+    }
+    .pagination {
+      display: flex;
+      justify-content: center;
+      gap: 0.5rem;
+      margin-top: 1.5rem;
+    }
+    .pagination button {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: rgba(30, 41, 59, 0.7);
+      border: 1px solid rgba(255,255,255,0.1);
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.3s ease;
+    }
+    .pagination button:hover {
+      background: rgba(255,255,255,0.1);
+    }
+    .pagination button.active {
+      background: linear-gradient(135deg, var(--accent1), var(--accent2));
+      color: #111827;
+    }
+    .fade-in {
+      animation: fadeIn 0.5s ease-in-out;
+    }
+    .slide-up {
+      animation: slideUp 0.3s ease-out;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    @keyframes slideUp {
+      from { 
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to { 
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+      body {
+        font-size: 14px;
+      }
+      .glass {
+        border-radius: 12px;
+      }
+      .table th, .table td {
+        padding: 8px 10px;
+        font-size: 0.85rem;
+      }
+      .btn {
+        padding: 0.75rem;
+        font-size: 0.9rem;
+      }
+      .stat-card {
+        padding: 1rem;
+      }
+      .modal-content {
+        width: 95%;
+        margin: 0 auto;
+      }
+    }
+    @media (max-width: 640px) {
+      .grid-cols-1 {
+        grid-template-columns: 1fr;
+      }
+      .grid-cols-2 {
+        grid-template-columns: 1fr;
+      }
+      .grid-cols-3 {
+        grid-template-columns: 1fr;
+      }
+      .grid-cols-4 {
+        grid-template-columns: 1fr;
+      }
+    }
+    /* Custom scrollbar */
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+    ::-webkit-scrollbar-track {
+      background: rgba(15, 23, 42, 0.5);
+      border-radius: 10px;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 10px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: rgba(255, 255, 255, 0.3);
+    }
+  </style>
+</head>
+<body class="min-h-screen text-white flex flex-col safe">
+  <!-- Toast Container -->
+  <div id="toast-container" class="fixed top-4 left-1/2 transform -translate-x-1/2 z-50 flex flex-col items-center"></div>
+  
+  <!-- Header -->
+  <header class="glass sticky top-0 z-30 w-full px-4 py-3 flex items-center justify-between shadow-lg">
+    <div class="flex items-center gap-3">
+      <div class="w-10 h-10 rounded-full bg-gradient-to-r from-yellow-400 to-orange-500 flex items-center justify-center shadow-md">
+        <i class="fas fa-crown text-white"></i>
+      </div>
+      <div>
+        <div class="font-bold text-lg">پنل مدیریت</div>
+        <div class="text-xs text-white/80">Quiz WebApp Pro</div>
+      </div>
+    </div>
+    <div class="flex items-center gap-2">
+      <button id="btn-notify" class="relative px-3 py-2 rounded-xl bg-white/10 border border-white/10 text-sm hover:bg-white/20 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-yellow-400/50">
+        <i class="fas fa-bell"></i>
+        <span class="absolute -top-1 -right-1 w-5 h-5 bg-red-500 rounded-full flex items-center justify-center text-xs shadow-md">3</span>
+      </button>
+      <div class="flex items-center gap-2">
+        <img src="https://i.pravatar.cc/80?img=12" class="w-10 h-10 rounded-full border-2 border-white/20 shadow-md" alt="admin" />
+        <div class="hidden md:block">
+          <div class="font-bold">مدیر سیستم</div>
+          <div class="text-xs text-white/80">admin@example.com</div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <div class="flex flex-1 overflow-hidden">
+    <!-- Sidebar -->
+    <aside class="w-64 glass p-4 hidden md:block flex-shrink-0 overflow-y-auto">
+      <div class="mb-8">
+        <h2 class="text-xl font-bold mb-4 px-2">منو</h2>
+        <ul class="space-y-2">
+          <li>
+            <a href="#" class="sidebar-item active flex items-center gap-3 p-3 rounded-xl" data-page="dashboard">
+              <i class="fas fa-tachometer-alt"></i>
+              <span>داشبورد</span>
+            </a>
+          </li>
+          <li>
+            <a href="#" class="sidebar-item flex items-center gap-3 p-3 rounded-xl" data-page="questions">
+              <i class="fas fa-question-circle"></i>
+              <span>مدیریت سوالات</span>
+            </a>
+          </li>
+          <li>
+            <a href="#" class="sidebar-item flex items-center gap-3 p-3 rounded-xl" data-page="categories">
+              <i class="fas fa-th-large"></i>
+              <span>مدیریت دسته‌بندی‌ها</span>
+            </a>
+          </li>
+          <li>
+            <a href="#" class="sidebar-item flex items-center gap-3 p-3 rounded-xl" data-page="users">
+              <i class="fas fa-users"></i>
+              <span>مدیریت کاربران</span>
+            </a>
+          </li>
+          <li>
+            <a href="#" class="sidebar-item flex items-center gap-3 p-3 rounded-xl" data-page="analytics">
+              <i class="fas fa-chart-bar"></i>
+              <span>تحلیل داده‌ها</span>
+            </a>
+          </li>
+          <li>
+            <a href="#" class="sidebar-item flex items-center gap-3 p-3 rounded-xl" data-page="achievements">
+              <i class="fas fa-medal"></i>
+              <span>مدیریت دستاوردها</span>
+            </a>
+          </li>
+          <li>
+            <a href="#" class="sidebar-item flex items-center gap-3 p-3 rounded-xl" data-page="settings">
+              <i class="fas fa-cog"></i>
+              <span>تنظیمات</span>
+            </a>
+          </li>
+        </ul>
+      </div>
+      
+      <div class="mt-auto">
+        <button class="w-full py-3 rounded-xl bg-white/10 border border-white/10 hover:bg-white/20 transition-all duration-300 flex items-center justify-center gap-2 focus:outline-none focus:ring-2 focus:ring-yellow-400/50">
+          <i class="fas fa-sign-out-alt"></i>
+          <span>خروج</span>
+        </button>
+      </div>
+    </aside>
+
+    <!-- Mobile Menu Toggle -->
+    <button id="mobile-menu-toggle" class="md:hidden fixed bottom-4 right-4 z-40 w-14 h-14 rounded-full bg-gradient-to-r from-yellow-400 to-orange-500 flex items-center justify-center shadow-lg focus:outline-none focus:ring-2 focus:ring-yellow-400/50">
+      <i class="fas fa-bars text-white text-xl"></i>
+    </button>
+
+    <!-- Mobile Menu -->
+    <div id="mobile-menu" class="fixed inset-0 glass z-40 pt-20 px-4 transform translate-x-full transition-transform duration-300 md:hidden overflow-y-auto">
+      <div class="flex justify-end mb-6">
+        <button id="close-mobile-menu" class="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-yellow-400/50">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      
+      <ul class="space-y-4">
+        <li>
+          <a href="#" class="sidebar-item active flex items-center gap-3 p-3 rounded-xl" data-page="dashboard">
+            <i class="fas fa-tachometer-alt"></i>
+            <span>داشبورد</span>
+          </a>
+        </li>
+        <li>
+          <a href="#" class="sidebar-item flex items-center gap-3 p-3 rounded-xl" data-page="questions">
+            <i class="fas fa-question-circle"></i>
+            <span>مدیریت سوالات</span>
+          </a>
+        </li>
+        <li>
+          <a href="#" class="sidebar-item flex items-center gap-3 p-3 rounded-xl" data-page="categories">
+            <i class="fas fa-th-large"></i>
+            <span>مدیریت دسته‌بندی‌ها</span>
+          </a>
+        </li>
+        <li>
+          <a href="#" class="sidebar-item flex items-center gap-3 p-3 rounded-xl" data-page="users">
+            <i class="fas fa-users"></i>
+            <span>مدیریت کاربران</span>
+          </a>
+        </li>
+        <li>
+          <a href="#" class="sidebar-item flex items-center gap-3 p-3 rounded-xl" data-page="analytics">
+            <i class="fas fa-chart-bar"></i>
+            <span>تحلیل داده‌ها</span>
+          </a>
+        </li>
+        <li>
+          <a href="#" class="sidebar-item flex items-center gap-3 p-3 rounded-xl" data-page="achievements">
+            <i class="fas fa-medal"></i>
+            <span>مدیریت دستاوردها</span>
+          </a>
+        </li>
+        <li>
+          <a href="#" class="sidebar-item flex items-center gap-3 p-3 rounded-xl" data-page="settings">
+            <i class="fas fa-cog"></i>
+            <span>تنظیمات</span>
+          </a>
+        </li>
+      </ul>
+      
+      <div class="mt-8 mb-6">
+        <button class="w-full py-3 rounded-xl bg-white/10 border border-white/10 hover:bg-white/20 transition-all duration-300 flex items-center justify-center gap-2 focus:outline-none focus:ring-2 focus:ring-yellow-400/50">
+          <i class="fas fa-sign-out-alt"></i>
+          <span>خروج</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Main Content -->
+    <main id="main-content" class="flex-1 p-4 md:p-6 overflow-y-auto">
+      <!-- DASHBOARD -->
+      <section id="page-dashboard" class="space-y-6 fade-in">
+        <div class="flex items-center justify-between mb-6">
+          <h1 class="text-2xl font-bold">داشبورد</h1>
+          <div class="text-sm text-white/80">
+            <i class="fas fa-calendar-alt ml-1"></i>
+            <span id="current-date">۱۴۰۲/۰۳/۱۵</span>
+          </div>
+        </div>
+
+        <!-- Stats Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div class="glass rounded-2xl p-5 stat-card">
+            <div class="flex items-center justify-between mb-3">
+              <div class="w-12 h-12 rounded-full bg-blue-500/20 flex items-center justify-center">
+                <i class="fas fa-users text-blue-400 text-xl"></i>
+              </div>
+              <span class="text-xs text-green-400 font-bold">+۱۲٪</span>
+            </div>
+            <div class="text-2xl font-bold mb-1">۲,۴۵۶</div>
+            <div class="text-sm opacity-80">کاربران فعال</div>
+          </div>
+          
+          <div class="glass rounded-2xl p-5 stat-card">
+            <div class="flex items-center justify-between mb-3">
+              <div class="w-12 h-12 rounded-full bg-green-500/20 flex items-center justify-center">
+                <i class="fas fa-question-circle text-green-400 text-xl"></i>
+              </div>
+              <span class="text-xs text-green-400 font-bold">+۸٪</span>
+            </div>
+            <div class="text-2xl font-bold mb-1">۱,۲۳۴</div>
+            <div class="text-sm opacity-80">سوالات</div>
+          </div>
+          
+          <div class="glass rounded-2xl p-5 stat-card">
+            <div class="flex items-center justify-between mb-3">
+              <div class="w-12 h-12 rounded-full bg-purple-500/20 flex items-center justify-center">
+                <i class="fas fa-gamepad text-purple-400 text-xl"></i>
+              </div>
+              <span class="text-xs text-green-400 font-bold">+۲۴٪</span>
+            </div>
+            <div class="text-2xl font-bold mb-1">۵,۶۷۸</div>
+            <div class="text-sm opacity-80">بازی‌های امروز</div>
+          </div>
+          
+          <div class="glass rounded-2xl p-5 stat-card">
+            <div class="flex items-center justify-between mb-3">
+              <div class="w-12 h-12 rounded-full bg-yellow-500/20 flex items-center justify-center">
+                <i class="fas fa-coins text-yellow-400 text-xl"></i>
+              </div>
+              <span class="text-xs text-red-400 font-bold">-۳٪</span>
+            </div>
+            <div class="text-2xl font-bold mb-1">۱۲,۳۴۵</div>
+            <div class="text-sm opacity-80">سکه‌های کسب شده</div>
+          </div>
+        </div>
+
+        <!-- Charts -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div class="glass rounded-2xl p-6">
+            <h2 class="text-lg font-bold mb-4">کاربران فعال در ۷ روز گذشته</h2>
+            <div class="h-64 flex items-end justify-between gap-2">
+              <div class="flex flex-col items-center flex-1">
+                <div class="w-full bg-gradient-to-t from-blue-500 to-blue-400 rounded-t-lg" style="height: 70%"></div>
+                <div class="text-xs mt-2">شنبه</div>
+              </div>
+              <div class="flex flex-col items-center flex-1">
+                <div class="w-full bg-gradient-to-t from-blue-500 to-blue-400 rounded-t-lg" style="height: 85%"></div>
+                <div class="text-xs mt-2">یکشنبه</div>
+              </div>
+              <div class="flex flex-col items-center flex-1">
+                <div class="w-full bg-gradient-to-t from-blue-500 to-blue-400 rounded-t-lg" style="height: 60%"></div>
+                <div class="text-xs mt-2">دوشنبه</div>
+              </div>
+              <div class="flex flex-col items-center flex-1">
+                <div class="w-full bg-gradient-to-t from-blue-500 to-blue-400 rounded-t-lg" style="height: 90%"></div>
+                <div class="text-xs mt-2">سه‌شنبه</div>
+              </div>
+              <div class="flex flex-col items-center flex-1">
+                <div class="w-full bg-gradient-to-t from-blue-500 to-blue-400 rounded-t-lg" style="height: 75%"></div>
+                <div class="text-xs mt-2">چهارشنبه</div>
+              </div>
+              <div class="flex flex-col items-center flex-1">
+                <div class="w-full bg-gradient-to-t from-blue-500 to-blue-400 rounded-t-lg" style="height: 95%"></div>
+                <div class="text-xs mt-2">پنجشنبه</div>
+              </div>
+              <div class="flex flex-col items-center flex-1">
+                <div class="w-full bg-gradient-to-t from-yellow-500 to-yellow-400 rounded-t-lg" style="height: 100%"></div>
+                <div class="text-xs mt-2">جمعه</div>
+              </div>
+            </div>
+          </div>
+          
+          <div class="glass rounded-2xl p-6">
+            <h2 class="text-lg font-bold mb-4">محبوب‌ترین دسته‌بندی‌ها</h2>
+            <div class="space-y-4">
+              <div>
+                <div class="flex justify-between mb-1">
+                  <span>علم</span>
+                  <span>۳۵٪</span>
+                </div>
+                <div class="w-full h-3 bg-white/10 rounded-full overflow-hidden">
+                  <div class="h-3 bg-gradient-to-r from-blue-500 to-blue-400 rounded-full" style="width: 35%"></div>
+                </div>
+              </div>
+              <div>
+                <div class="flex justify-between mb-1">
+                  <span>تاریخ</span>
+                  <span>۲۵٪</span>
+                </div>
+                <div class="w-full h-3 bg-white/10 rounded-full overflow-hidden">
+                  <div class="h-3 bg-gradient-to-r from-green-500 to-green-400 rounded-full" style="width: 25%"></div>
+                </div>
+              </div>
+              <div>
+                <div class="flex justify-between mb-1">
+                  <span>ورزش</span>
+                  <span>۲۰٪</span>
+                </div>
+                <div class="w-full h-3 bg-white/10 rounded-full overflow-hidden">
+                  <div class="h-3 bg-gradient-to-r from-purple-500 to-purple-400 rounded-full" style="width: 20%"></div>
+                </div>
+              </div>
+              <div>
+                <div class="flex justify-between mb-1">
+                  <span>جغرافیا</span>
+                  <span>۱۵٪</span>
+                </div>
+                <div class="w-full h-3 bg-white/10 rounded-full overflow-hidden">
+                  <div class="h-3 bg-gradient-to-r from-yellow-500 to-yellow-400 rounded-full" style="width: 15%"></div>
+                </div>
+              </div>
+              <div>
+                <div class="flex justify-between mb-1">
+                  <span>سرگرمی</span>
+                  <span>۵٪</span>
+                </div>
+                <div class="w-full h-3 bg-white/10 rounded-full overflow-hidden">
+                  <div class="h-3 bg-gradient-to-r from-pink-500 to-pink-400 rounded-full" style="width: 5%"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Recent Activity -->
+        <div class="glass rounded-2xl p-6">
+          <div class="flex items-center justify-between mb-4">
+            <h2 class="text-lg font-bold">فعالیت‌های اخیر</h2>
+            <button class="text-sm text-white/80 hover:text-white transition-colors">مشاهده همه</button>
+          </div>
+          <div class="space-y-4">
+            <div class="flex items-center gap-3 p-3 rounded-xl bg-white/5">
+              <div class="w-10 h-10 rounded-full bg-green-500/20 flex items-center justify-center flex-shrink-0">
+                <i class="fas fa-user-plus text-green-400"></i>
+              </div>
+              <div class="flex-1">
+                <div class="font-bold">کاربر جدید ثبت‌نام کرد</div>
+                <div class="text-sm opacity-80">کاربر "زکی" به سیستم اضافه شد</div>
+              </div>
+              <div class="text-xs opacity-60">۱۰ دقیقه پیش</div>
+            </div>
+            <div class="flex items-center gap-3 p-3 rounded-xl bg-white/5">
+              <div class="w-10 h-10 rounded-full bg-blue-500/20 flex items-center justify-center flex-shrink-0">
+                <i class="fas fa-question-circle text-blue-400"></i>
+              </div>
+              <div class="flex-1">
+                <div class="font-bold">سوال جدید اضافه شد</div>
+                <div class="text-sm opacity-80">سوال جدید در دسته‌بندی "علم" اضافه شد</div>
+              </div>
+              <div class="text-xs opacity-60">۲ ساعت پیش</div>
+            </div>
+            <div class="flex items-center gap-3 p-3 rounded-xl bg-white/5">
+              <div class="w-10 h-10 rounded-full bg-purple-500/20 flex items-center justify-center flex-shrink-0">
+                <i class="fas fa-trophy text-purple-400"></i>
+              </div>
+              <div class="flex-1">
+                <div class="font-bold">مسابقه جدید ایجاد شد</div>
+                <div class="text-sm opacity-80">مسابقه هفتگی جدید برای کاربران VIP ایجاد شد</div>
+              </div>
+              <div class="text-xs opacity-60">۵ ساعت پیش</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- QUESTIONS MANAGEMENT -->
+      <section id="page-questions" class="hidden space-y-6">
+        <div class="flex items-center justify-between mb-6">
+          <h1 class="text-2xl font-bold">مدیریت سوالات</h1>
+          <button id="btn-add-question" class="btn btn-primary w-auto px-5">
+            <i class="fas fa-plus ml-2"></i> افزودن سوال
+          </button>
+        </div>
+
+        <!-- Filters -->
+        <div class="glass rounded-2xl p-4">
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+              <label class="block text-sm mb-1">دسته‌بندی</label>
+              <select class="form-select">
+                <option>همه دسته‌بندی‌ها</option>
+                <option>عمومی</option>
+                <option>جغرافیا</option>
+                <option>ورزش</option>
+                <option>علم</option>
+                <option>تاریخ</option>
+                <option>هنر</option>
+                <option>سرگرمی</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-sm mb-1">سطح دشواری</label>
+              <select class="form-select">
+                <option>همه سطوح</option>
+                <option>آسون</option>
+                <option>متوسط</option>
+                <option>سخت</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-sm mb-1">جستجو</label>
+              <input type="text" placeholder="جستجوی سوال..." class="form-input">
+            </div>
+          </div>
+        </div>
+
+        <!-- Questions Table -->
+        <div class="glass rounded-2xl overflow-hidden">
+          <div class="table-container">
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>شناسه</th>
+                  <th>سوال</th>
+                  <th>دسته‌بندی</th>
+                  <th>سطح دشواری</th>
+                  <th>وضعیت</th>
+                  <th>عملیات</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>#۱۰۲۴</td>
+                  <td>پایتخت استرالیا کدام است؟</td>
+                  <td>جغرافیا</td>
+                  <td>آسون</td>
+                  <td><span class="badge badge-success">فعال</span></td>
+                  <td>
+                    <div class="flex gap-2">
+                      <button class="w-8 h-8 rounded-full bg-blue-500/20 flex items-center justify-center hover:bg-blue-500/30 transition-colors">
+                        <i class="fas fa-edit text-blue-400"></i>
+                      </button>
+                      <button class="w-8 h-8 rounded-full bg-red-500/20 flex items-center justify-center hover:bg-red-500/30 transition-colors">
+                        <i class="fas fa-trash text-red-400"></i>
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+                <tr>
+                  <td>#۱۰۲۳</td>
+                  <td>کدام سیاره در منظومه شمسی بزرگترین است؟</td>
+                  <td>علم</td>
+                  <td>آسون</td>
+                  <td><span class="badge badge-success">فعال</span></td>
+                  <td>
+                    <div class="flex gap-2">
+                      <button class="w-8 h-8 rounded-full bg-blue-500/20 flex items-center justify-center hover:bg-blue-500/30 transition-colors">
+                        <i class="fas fa-edit text-blue-400"></i>
+                      </button>
+                      <button class="w-8 h-8 rounded-full bg-red-500/20 flex items-center justify-center hover:bg-red-500/30 transition-colors">
+                        <i class="fas fa-trash text-red-400"></i>
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+                <tr>
+                  <td>#۱۰۲۲</td>
+                  <td>طولانی‌ترین رود جهان کدام است؟</td>
+                  <td>جغرافیا</td>
+                  <td>متوسط</td>
+                  <td><span class="badge badge-warning">در حال بررسی</span></td>
+                  <td>
+                    <div class="flex gap-2">
+                      <button class="w-8 h-8 rounded-full bg-blue-500/20 flex items-center justify-center hover:bg-blue-500/30 transition-colors">
+                        <i class="fas fa-edit text-blue-400"></i>
+                      </button>
+                      <button class="w-8 h-8 rounded-full bg-red-500/20 flex items-center justify-center hover:bg-red-500/30 transition-colors">
+                        <i class="fas fa-trash text-red-400"></i>
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+                <tr>
+                  <td>#۱۰۲۱</td>
+                  <td>قهرمان جام جهانی فوتبال ۱۹۹۸؟</td>
+                  <td>ورزش</td>
+                  <td>متوسط</td>
+                  <td><span class="badge badge-success">فعال</span></td>
+                  <td>
+                    <div class="flex gap-2">
+                      <button class="w-8 h-8 rounded-full bg-blue-500/20 flex items-center justify-center hover:bg-blue-500/30 transition-colors">
+                        <i class="fas fa-edit text-blue-400"></i>
+                      </button>
+                      <button class="w-8 h-8 rounded-full bg-red-500/20 flex items-center justify-center hover:bg-red-500/30 transition-colors">
+                        <i class="fas fa-trash text-red-400"></i>
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+                <tr>
+                  <td>#۱۰۲۰</td>
+                  <td>عدد π تقریباً برابر با؟</td>
+                  <td>علم</td>
+                  <td>آسون</td>
+                  <td><span class="badge badge-danger">غیرفعال</span></td>
+                  <td>
+                    <div class="flex gap-2">
+                      <button class="w-8 h-8 rounded-full bg-blue-500/20 flex items-center justify-center hover:bg-blue-500/30 transition-colors">
+                        <i class="fas fa-edit text-blue-400"></i>
+                      </button>
+                      <button class="w-8 h-8 rounded-full bg-red-500/20 flex items-center justify-center hover:bg-red-500/30 transition-colors">
+                        <i class="fas fa-trash text-red-400"></i>
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          
+          <!-- Pagination -->
+          <div class="p-4">
+            <div class="pagination">
+              <button><i class="fas fa-chevron-right"></i></button>
+              <button class="active">۱</button>
+              <button>۲</button>
+              <button>۳</button>
+              <button>۴</button>
+              <button>۵</button>
+              <button><i class="fas fa-chevron-left"></i></button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- CATEGORIES MANAGEMENT -->
+      <section id="page-categories" class="hidden space-y-6">
+        <div class="flex items-center justify-between mb-6">
+          <h1 class="text-2xl font-bold">مدیریت دسته‌بندی‌ها</h1>
+          <button id="btn-add-category" class="btn btn-primary w-auto px-5">
+            <i class="fas fa-plus ml-2"></i> افزودن دسته‌بندی
+          </button>
+        </div>
+
+        <!-- Categories Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div class="glass rounded-2xl p-6 card-hover">
+            <div class="flex items-center justify-between mb-4">
+              <div class="w-16 h-16 rounded-full bg-blue-500/20 flex items-center justify-center">
+                <i class="fas fa-globe text-blue-400 text-2xl"></i>
+              </div>
+              <div class="badge badge-success">فعال</div>
+            </div>
+            <h3 class="text-xl font-bold mb-2">عمومی</h3>
+            <p class="text-sm opacity-80 mb-4">سوالات عمومی و متنوع</p>
+            <div class="flex justify-between text-sm">
+              <div><i class="fas fa-question-circle ml-1"></i> ۱۲۴ سوال</div>
+              <div><i class="fas fa-gamepad ml-1"></i> ۲,۳۴۵ بازی</div>
+            </div>
+            <div class="flex gap-2 mt-4">
+              <button class="flex-1 py-2 rounded-xl bg-white/10 border border-white/10 hover:bg-white/20 transition-all duration-300">
+                <i class="fas fa-edit"></i>
+              </button>
+              <button class="flex-1 py-2 rounded-xl bg-white/10 border border-white/10 hover:bg-white/20 transition-all duration-300">
+                <i class="fas fa-trash"></i>
+              </button>
+            </div>
+          </div>
+          
+          <div class="glass rounded-2xl p-6 card-hover">
+            <div class="flex items-center justify-between mb-4">
+              <div class="w-16 h-16 rounded-full bg-green-500/20 flex items-center justify-center">
+                <i class="fas fa-map-marked-alt text-green-400 text-2xl"></i>
+              </div>
+              <div class="badge badge-success">فعال</div>
+            </div>
+            <h3 class="text-xl font-bold mb-2">جغرافیا</h3>
+            <p class="text-sm opacity-80 mb-4">سوالات مربوط به جغرافیا و کشورها</p>
+            <div class="flex justify-between text-sm">
+              <div><i class="fas fa-question-circle ml-1"></i> ۸۹ سوال</div>
+              <div><i class="fas fa-gamepad ml-1"></i> ۱,۸۹۰ بازی</div>
+            </div>
+            <div class="flex gap-2 mt-4">
+              <button class="flex-1 py-2 rounded-xl bg-white/10 border border-white/10 hover:bg-white/20 transition-all duration-300">
+                <i class="fas fa-edit"></i>
+              </button>
+              <button class="flex-1 py-2 rounded-xl bg-white/10 border border-white/10 hover:bg-white/20 transition-all duration-300">
+                <i class="fas fa-trash"></i>
+              </button>
+            </div>
+          </div>
+          
+          <div class="glass rounded-2xl p-6 card-hover">
+            <div class="flex items-center justify-between mb-4">
+              <div class="w-16 h-16 rounded-full bg-orange-500/20 flex items-center justify-center">
+                <i class="fas fa-football-ball text-orange-400 text-2xl"></i>
+              </div>
+              <div class="badge badge-success">فعال</div>
+            </div>
+            <h3 class="text-xl font-bold mb-2">ورزش</h3>
+            <p class="text-sm opacity-80 mb-4">سوالات مربوط به ورزش و ورزشکاران</p>
+            <div class="flex justify-between text-sm">
+              <div><i class="fas fa-question-circle ml-1"></i> ۶۷ سوال</div>
+              <div><i class="fas fa-gamepad ml-1"></i> ۱,۲۳۴ بازی</div>
+            </div>
+            <div class="flex gap-2 mt-4">
+              <button class="flex-1 py-2 rounded-xl bg-white/10 border border-white/10 hover:bg-white/20 transition-all duration-300">
+                <i class="fas fa-edit"></i>
+              </button>
+              <button class="flex-1 py-2 rounded-xl bg-white/10 border border-white/10 hover:bg-white/20 transition-all duration-300">
+                <i class="fas fa-trash"></i>
+              </button>
+            </div>
+          </div>
+          
+          <div class="glass rounded-2xl p-6 card-hover">
+            <div class="flex items-center justify-between mb-4">
+              <div class="w-16 h-16 rounded-full bg-purple-500/20 flex items-center justify-center">
+                <i class="fas fa-flask text-purple-400 text-2xl"></i>
+              </div>
+              <div class="badge badge-success">فعال</div>
+            </div>
+            <h3 class="text-xl font-bold mb-2">علم</h3>
+            <p class="text-sm opacity-80 mb-4">سوالات مربوط به علم و دانش</p>
+            <div class="flex justify-between text-sm">
+              <div><i class="fas fa-question-circle ml-1"></i> ۱۵۶ سوال</div>
+              <div><i class="fas fa-gamepad ml-1"></i> ۳,۴۵۶ بازی</div>
+            </div>
+            <div class="flex gap-2 mt-4">
+              <button class="flex-1 py-2 rounded-xl bg-white/10 border border-white/10 hover:bg-white/20 transition-all duration-300">
+                <i class="fas fa-edit"></i>
+              </button>
+              <button class="flex-1 py-2 rounded-xl bg-white/10 border border-white/10 hover:bg-white/20 transition-all duration-300">
+                <i class="fas fa-trash"></i>
+              </button>
+            </div>
+          </div>
+          
+          <div class="glass rounded-2xl p-6 card-hover">
+            <div class="flex items-center justify-between mb-4">
+              <div class="w-16 h-16 rounded-full bg-yellow-500/20 flex items-center justify-center">
+                <i class="fas fa-landmark text-yellow-400 text-2xl"></i>
+              </div>
+              <div class="badge badge-success">فعال</div>
+            </div>
+            <h3 class="text-xl font-bold mb-2">تاریخ</h3>
+            <p class="text-sm opacity-80 mb-4">سوالات مربوط به تاریخ و تمدن‌ها</p>
+            <div class="flex justify-between text-sm">
+              <div><i class="fas fa-question-circle ml-1"></i> ۹۸ سوال</div>
+              <div><i class="fas fa-gamepad ml-1"></i> ۲,۱۰۹ بازی</div>
+            </div>
+            <div class="flex gap-2 mt-4">
+              <button class="flex-1 py-2 rounded-xl bg-white/10 border border-white/10 hover:bg-white/20 transition-all duration-300">
+                <i class="fas fa-edit"></i>
+              </button>
+              <button class="flex-1 py-2 rounded-xl bg-white/10 border border-white/10 hover:bg-white/20 transition-all duration-300">
+                <i class="fas fa-trash"></i>
+              </button>
+            </div>
+          </div>
+          
+          <div class="glass rounded-2xl p-6 card-hover">
+            <div class="flex items-center justify-between mb-4">
+              <div class="w-16 h-16 rounded-full bg-pink-500/20 flex items-center justify-center">
+                <i class="fas fa-palette text-pink-400 text-2xl"></i>
+              </div>
+              <div class="badge badge-warning">در حال بررسی</div>
+            </div>
+            <h3 class="text-xl font-bold mb-2">هنر</h3>
+            <p class="text-sm opacity-80 mb-4">سوالات مربوط به هنر و هنرمندان</p>
+            <div class="flex justify-between text-sm">
+              <div><i class="fas fa-question-circle ml-1"></i> ۴۵ سوال</div>
+              <div><i class="fas fa-gamepad ml-1"></i> ۸۷۶ بازی</div>
+            </div>
+            <div class="flex gap-2 mt-4">
+              <button class="flex-1 py-2 rounded-xl bg-white/10 border border-white/10 hover:bg-white/20 transition-all duration-300">
+                <i class="fas fa-edit"></i>
+              </button>
+              <button class="flex-1 py-2 rounded-xl bg-white/10 border border-white/10 hover:bg-white/20 transition-all duration-300">
+                <i class="fas fa-trash"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- USERS MANAGEMENT -->
+      <section id="page-users" class="hidden space-y-6">
+        <div class="flex items-center justify-between mb-6">
+          <h1 class="text-2xl font-bold">مدیریت کاربران</h1>
+          <button id="btn-add-user" class="btn btn-primary w-auto px-5">
+            <i class="fas fa-user-plus ml-2"></i> افزودن کاربر
+          </button>
+        </div>
+
+        <!-- Filters -->
+        <div class="glass rounded-2xl p-4">
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+              <label class="block text-sm mb-1">نوع کاربر</label>
+              <select class="form-select">
+                <option>همه کاربران</option>
+                <option>کاربران عادی</option>
+                <option>کاربران VIP</option>
+                <option>مدیران</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-sm mb-1">وضعیت</label>
+              <select class="form-select">
+                <option>همه وضعیت‌ها</option>
+                <option>فعال</option>
+                <option>مسدود شده</option>
+                <option>در حال بررسی</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-sm mb-1">جستجو</label>
+              <input type="text" placeholder="جستجوی کاربر..." class="form-input">
+            </div>
+          </div>
+        </div>
+
+        <!-- Users Table -->
+        <div class="glass rounded-2xl overflow-hidden">
+          <div class="table-container">
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>نام کاربری</th>
+                  <th>ایمیل</th>
+                  <th>امتیاز</th>
+                  <th>سکه</th>
+                  <th>نوع کاربر</th>
+                  <th>وضعیت</th>
+                  <th>عملیات</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>
+                    <div class="flex items-center gap-2">
+                      <img src="https://i.pravatar.cc/40?img=1" class="w-8 h-8 rounded-full" alt="user">
+                      <span>زکی</span>
+                    </div>
+                  </td>
+                  <td>zaki@example.com</td>
+                  <td>۲,۴۵۰</td>
+                  <td>۱۲۰</td>
+                  <td><span class="badge badge-warning">VIP</span></td>
+                  <td><span class="badge badge-success">فعال</span></td>
+                  <td>
+                    <div class="flex gap-2">
+                      <button class="w-8 h-8 rounded-full bg-blue-500/20 flex items-center justify-center hover:bg-blue-500/30 transition-colors">
+                        <i class="fas fa-edit text-blue-400"></i>
+                      </button>
+                      <button class="w-8 h-8 rounded-full bg-red-500/20 flex items-center justify-center hover:bg-red-500/30 transition-colors">
+                        <i class="fas fa-ban text-red-400"></i>
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <div class="flex items-center gap-2">
+                      <img src="https://i.pravatar.cc/40?img=2" class="w-8 h-8 rounded-full" alt="user">
+                      <span>سارا</span>
+                    </div>
+                  </td>
+                  <td>sara@example.com</td>
+                  <td>۱,۸۹۰</td>
+                  <td>۸۵</td>
+                  <td><span class="badge badge-info">عادی</span></td>
+                  <td><span class="badge badge-success">فعال</span></td>
+                  <td>
+                    <div class="flex gap-2">
+                      <button class="w-8 h-8 rounded-full bg-blue-500/20 flex items-center justify-center hover:bg-blue-500/30 transition-colors">
+                        <i class="fas fa-edit text-blue-400"></i>
+                      </button>
+                      <button class="w-8 h-8 rounded-full bg-red-500/20 flex items-center justify-center hover:bg-red-500/30 transition-colors">
+                        <i class="fas fa-ban text-red-400"></i>
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <div class="flex items-center gap-2">
+                      <img src="https://i.pravatar.cc/40?img=3" class="w-8 h-8 rounded-full" alt="user">
+                      <span>رضا</span>
+                    </div>
+                  </td>
+                  <td>reza@example.com</td>
+                  <td>۳,۲۱۰</td>
+                  <td>۲۰۰</td>
+                  <td><span class="badge badge-warning">VIP</span></td>
+                  <td><span class="badge badge-success">فعال</span></td>
+                  <td>
+                    <div class="flex gap-2">
+                      <button class="w-8 h-8 rounded-full bg-blue-500/20 flex items-center justify-center hover:bg-blue-500/30 transition-colors">
+                        <i class="fas fa-edit text-blue-400"></i>
+                      </button>
+                      <button class="w-8 h-8 rounded-full bg-red-500/20 flex items-center justify-center hover:bg-red-500/30 transition-colors">
+                        <i class="fas fa-ban text-red-400"></i>
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <div class="flex items-center gap-2">
+                      <img src="https://i.pravatar.cc/40?img=4" class="w-8 h-8 rounded-full" alt="user">
+                      <span>مریم</span>
+                    </div>
+                  </td>
+                  <td>maryam@example.com</td>
+                  <td>۹۸۰</td>
+                  <td>۴۵</td>
+                  <td><span class="badge badge-info">عادی</span></td>
+                  <td><span class="badge badge-danger">مسدود شده</span></td>
+                  <td>
+                    <div class="flex gap-2">
+                      <button class="w-8 h-8 rounded-full bg-blue-500/20 flex items-center justify-center hover:bg-blue-500/30 transition-colors">
+                        <i class="fas fa-edit text-blue-400"></i>
+                      </button>
+                      <button class="w-8 h-8 rounded-full bg-green-500/20 flex items-center justify-center hover:bg-green-500/30 transition-colors">
+                        <i class="fas fa-check text-green-400"></i>
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <div class="flex items-center gap-2">
+                      <img src="https://i.pravatar.cc/40?img=5" class="w-8 h-8 rounded-full" alt="user">
+                      <span>امیر</span>
+                    </div>
+                  </td>
+                  <td>amir@example.com</td>
+                  <td>۱,۵۶۰</td>
+                  <td>۷۰</td>
+                  <td><span class="badge badge-info">عادی</span></td>
+                  <td><span class="badge badge-warning">در حال بررسی</span></td>
+                  <td>
+                    <div class="flex gap-2">
+                      <button class="w-8 h-8 rounded-full bg-blue-500/20 flex items-center justify-center hover:bg-blue-500/30 transition-colors">
+                        <i class="fas fa-edit text-blue-400"></i>
+                      </button>
+                      <button class="w-8 h-8 rounded-full bg-red-500/20 flex items-center justify-center hover:bg-red-500/30 transition-colors">
+                        <i class="fas fa-ban text-red-400"></i>
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          
+          <!-- Pagination -->
+          <div class="p-4">
+            <div class="pagination">
+              <button><i class="fas fa-chevron-right"></i></button>
+              <button class="active">۱</button>
+              <button>۲</button>
+              <button>۳</button>
+              <button>۴</button>
+              <button>۵</button>
+              <button><i class="fas fa-chevron-left"></i></button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ANALYTICS -->
+      <section id="page-analytics" class="hidden space-y-6">
+        <div class="flex items-center justify-between mb-6">
+          <h1 class="text-2xl font-bold">تحلیل داده‌ها</h1>
+          <div class="flex gap-2">
+            <button class="px-4 py-2 rounded-xl bg-white/10 border border-white/10 hover:bg-white/20 transition-all duration-300">
+              <i class="fas fa-download ml-2"></i> خروجی
+            </button>
+            <button class="px-4 py-2 rounded-xl bg-white/10 border border-white/10 hover:bg-white/20 transition-all duration-300">
+              <i class="fas fa-filter ml-2"></i> فیلتر
+            </button>
+          </div>
+        </div>
+
+        <!-- Date Range Selector -->
+        <div class="glass rounded-2xl p-4">
+          <div class="flex flex-wrap items-center gap-4">
+            <div>
+              <label class="block text-sm mb-1">از تاریخ</label>
+              <input type="date" class="form-input w-auto">
+            </div>
+            <div>
+              <label class="block text-sm mb-1">تا تاریخ</label>
+              <input type="date" class="form-input w-auto">
+            </div>
+            <div class="flex-1"></div>
+            <button class="px-4 py-2 rounded-xl bg-gradient-to-r from-yellow-400 to-orange-500 text-black font-bold">
+              اعمال فیلتر
+            </button>
+          </div>
+        </div>
+
+        <!-- Charts -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div class="glass rounded-2xl p-6">
+            <h2 class="text-lg font-bold mb-4">نرخ بازگشت کاربران</h2>
+            <div class="h-64 flex items-end justify-between gap-2">
+              <div class="flex flex-col items-center flex-1">
+                <div class="w-full bg-gradient-to-t from-blue-500 to-blue-400 rounded-t-lg" style="height: 40%"></div>
+                <div class="text-xs mt-2">فروردین</div>
+              </div>
+              <div class="flex flex-col items-center flex-1">
+                <div class="w-full bg-gradient-to-t from-blue-500 to-blue-400 rounded-t-lg" style="height: 60%"></div>
+                <div class="text-xs mt-2">اردیبهشت</div>
+              </div>
+              <div class="flex flex-col items-center flex-1">
+                <div class="w-full bg-gradient-to-t from-blue-500 to-blue-400 rounded-t-lg" style="height: 55%"></div>
+                <div class="text-xs mt-2">خرداد</div>
+              </div>
+              <div class="flex flex-col items-center flex-1">
+                <div class="w-full bg-gradient-to-t from-blue-500 to-blue-400 rounded-t-lg" style="height: 70%"></div>
+                <div class="text-xs mt-2">تیر</div>
+              </div>
+              <div class="flex flex-col items-center flex-1">
+                <div class="w-full bg-gradient-to-t from-blue-500 to-blue-400 rounded-t-lg" style="height: 65%"></div>
+                <div class="text-xs mt-2">مرداد</div>
+              </div>
+              <div class="flex flex-col items-center flex-1">
+                <div class="w-full bg-gradient-to-t from-blue-500 to-blue-400 rounded-t-lg" style="height: 80%"></div>
+                <div class="text-xs mt-2">شهریور</div>
+              </div>
+              <div class="flex flex-col items-center flex-1">
+                <div class="w-full bg-gradient-to-t from-yellow-500 to-yellow-400 rounded-t-lg" style="height: 85%"></div>
+                <div class="text-xs mt-2">مهر</div>
+              </div>
+            </div>
+          </div>
+          
+          <div class="glass rounded-2xl p-6">
+            <h2 class="text-lg font-bold mb-4">درآمد ماهانه</h2>
+            <div class="h-64 flex items-end justify-between gap-2">
+              <div class="flex flex-col items-center flex-1">
+                <div class="w-full bg-gradient-to-t from-green-500 to-green-400 rounded-t-lg" style="height: 50%"></div>
+                <div class="text-xs mt-2">فروردین</div>
+              </div>
+              <div class="flex flex-col items-center flex-1">
+                <div class="w-full bg-gradient-to-t from-green-500 to-green-400 rounded-t-lg" style="height: 65%"></div>
+                <div class="text-xs mt-2">اردیبهشت</div>
+              </div>
+              <div class="flex flex-col items-center flex-1">
+                <div class="w-full bg-gradient-to-t from-green-500 to-green-400 rounded-t-lg" style="height: 45%"></div>
+                <div class="text-xs mt-2">خرداد</div>
+              </div>
+              <div class="flex flex-col items-center flex-1">
+                <div class="w-full bg-gradient-to-t from-green-500 to-green-400 rounded-t-lg" style="height: 70%"></div>
+                <div class="text-xs mt-2">تیر</div>
+              </div>
+              <div class="flex flex-col items-center flex-1">
+                <div class="w-full bg-gradient-to-t from-green-500 to-green-400 rounded-t-lg" style="height: 60%"></div>
+                <div class="text-xs mt-2">مرداد</div>
+              </div>
+              <div class="flex flex-col items-center flex-1">
+                <div class="w-full bg-gradient-to-t from-green-500 to-green-400 rounded-t-lg" style="height: 75%"></div>
+                <div class="text-xs mt-2">شهریور</div>
+              </div>
+              <div class="flex flex-col items-center flex-1">
+                <div class="w-full bg-gradient-to-t from-yellow-500 to-yellow-400 rounded-t-lg" style="height: 90%"></div>
+                <div class="text-xs mt-2">مهر</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- User Activity Heatmap -->
+        <div class="glass rounded-2xl p-6">
+          <h2 class="text-lg font-bold mb-4">نقشه فعالیت کاربران</h2>
+          <div class="overflow-x-auto">
+            <table class="w-full">
+              <thead>
+                <tr>
+                  <th></th>
+                  <th class="text-xs">شنبه</th>
+                  <th class="text-xs">یکشنبه</th>
+                  <th class="text-xs">دوشنبه</th>
+                  <th class="text-xs">سه‌شنبه</th>
+                  <th class="text-xs">چهارشنبه</th>
+                  <th class="text-xs">پنجشنبه</th>
+                  <th class="text-xs">جمعه</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td class="text-xs">صبح</td>
+                  <td class="p-1"><div class="w-6 h-6 rounded bg-green-500/40"></div></td>
+                  <td class="p-1"><div class="w-6 h-6 rounded bg-green-500/60"></div></td>
+                  <td class="p-1"><div class="w-6 h-6 rounded bg-green-500/40"></div></td>
+                  <td class="p-1"><div class="w-6 h-6 rounded bg-green-500/80"></div></td>
+                  <td class="p-1"><div class="w-6 h-6 rounded bg-green-500/60"></div></td>
+                  <td class="p-1"><div class="w-6 h-6 rounded bg-green-500/20"></div></td>
+                  <td class="p-1"><div class="w-6 h-6 rounded bg-green-500/20"></div></td>
+                </tr>
+                <tr>
+                  <td class="text-xs">ظهر</td>
+                  <td class="p-1"><div class="w-6 h-6 rounded bg-green-500/60"></div></td>
+                  <td class="p-1"><div class="w-6 h-6 rounded bg-green-500/80"></div></td>
+                  <td class="p-1"><div class="w-6 h-6 rounded bg-green-500/60"></div></td>
+                  <td class="p-1"><div class="w-6 h-6 rounded bg-green-500/100"></div></td>
+                  <td class="p-1"><div class="w-6 h-6 rounded bg-green-500/80"></div></td>
+                  <td class="p-1"><div class="w-6 h-6 rounded bg-green-500/40"></div></td>
+                  <td class="p-1"><div class="w-6 h-6 rounded bg-green-500/40"></div></td>
+                </tr>
+                <tr>
+                  <td class="text-xs">بعدازظهر</td>
+                  <td class="p-1"><div class="w-6 h-6 rounded bg-green-500/80"></div></td>
+                  <td class="p-1"><div class="w-6 h-6 rounded bg-green-500/100"></div></td>
+                  <td class="p-1"><div class="w-6 h-6 rounded bg-green-500/80"></div></td>
+                  <td class="p-1"><div class="w-6 h-6 rounded bg-green-500/100"></div></td>
+                  <td class="p-1"><div class="w-6 h-6 rounded bg-green-500/100"></div></td>
+                  <td class="p-1"><div class="w-6 h-6 rounded bg-green-500/60"></div></td>
+                  <td class="p-1"><div class="w-6 h-6 rounded bg-green-500/60"></div></td>
+                </tr>
+                <tr>
+                  <td class="text-xs">شب</td>
+                  <td class="p-1"><div class="w-6 h-6 rounded bg-green-500/100"></div></td>
+                  <td class="p-1"><div class="w-6 h-6 rounded bg-green-500/100"></div></td>
+                  <td class="p-1"><div class="w-6 h-6 rounded bg-green-500/100"></div></td>
+                  <td class="p-1"><div class="w-6 h-6 rounded bg-green-500/100"></div></td>
+                  <td class="p-1"><div class="w-6 h-6 rounded bg-green-500/100"></div></td>
+                  <td class="p-1"><div class="w-6 h-6 rounded bg-green-500/100"></div></td>
+                  <td class="p-1"><div class="w-6 h-6 rounded bg-green-500/80"></div></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="flex items-center justify-center mt-4 gap-2 text-xs">
+            <div class="flex items-center gap-1">
+              <div class="w-4 h-4 rounded bg-green-500/20"></div>
+              <span>کم</span>
+            </div>
+            <div class="flex items-center gap-1">
+              <div class="w-4 h-4 rounded bg-green-500/40"></div>
+              <span>متوسط</span>
+            </div>
+            <div class="flex items-center gap-1">
+              <div class="w-4 h-4 rounded bg-green-500/60"></div>
+              <span>زیاد</span>
+            </div>
+            <div class="flex items-center gap-1">
+              <div class="w-4 h-4 rounded bg-green-500/80"></div>
+              <span>بسیار زیاد</span>
+            </div>
+            <div class="flex items-center gap-1">
+              <div class="w-4 h-4 rounded bg-green-500/100"></div>
+              <span>حداکثر</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Top Users -->
+        <div class="glass rounded-2xl p-6">
+            <h2 class="text-lg font-bold mb-4">برترین کاربران ماه</h2>
+            <div class="space-y-4">
+              <div class="flex items-center gap-4 p-3 rounded-xl bg-white/5">
+                <div class="w-10 h-10 rounded-full bg-yellow-500/20 flex items-center justify-center">
+                  <span class="font-bold">۱</span>
+                </div>
+                <div class="flex-1">
+                  <div class="font-bold">زکی</div>
+                  <div class="text-sm opacity-80">۳,۲۱۰ امتیاز</div>
+                </div>
+                <div class="text-sm opacity-80">۱۲۴ بازی</div>
+              </div>
+              <div class="flex items-center gap-4 p-3 rounded-xl bg-white/5">
+                <div class="w-10 h-10 rounded-full bg-gray-400/20 flex items-center justify-center">
+                  <span class="font-bold">۲</span>
+                </div>
+                <div class="flex-1">
+                  <div class="font-bold">سارا</div>
+                  <div class="text-sm opacity-80">۲,۸۹۰ امتیاز</div>
+                </div>
+                <div class="text-sm opacity-80">۹۸ بازی</div>
+              </div>
+              <div class="flex items-center gap-4 p-3 rounded-xl bg-white/5">
+                <div class="w-10 h-10 rounded-full bg-amber-700/20 flex items-center justify-center">
+                  <span class="font-bold">۳</span>
+                </div>
+                <div class="flex-1">
+                  <div class="font-bold">رضا</div>
+                  <div class="text-sm opacity-80">۲,۵۶۰ امتیاز</div>
+                </div>
+                <div class="text-sm opacity-80">۸۷ بازی</div>
+              </div>
+              <div class="flex items-center gap-4 p-3 rounded-xl bg-white/5">
+                <div class="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center">
+                  <span class="font-bold">۴</span>
+                </div>
+                <div class="flex-1">
+                  <div class="font-bold">مریم</div>
+                  <div class="text-sm opacity-80">۲,۳۴۰ امتیاز</div>
+                </div>
+                <div class="text-sm opacity-80">۷۶ بازی</div>
+              </div>
+              <div class="flex items-center gap-4 p-3 rounded-xl bg-white/5">
+                <div class="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center">
+                  <span class="font-bold">۵</span>
+                </div>
+                <div class="flex-1">
+                  <div class="font-bold">امیر</div>
+                  <div class="text-sm opacity-80">۲,۱۰۰ امتیاز</div>
+                </div>
+                <div class="text-sm opacity-80">۶۵ بازی</div>
+              </div>
+            </div>
+          </div>
+      </section>
+
+      <!-- ACHIEVEMENTS MANAGEMENT -->
+      <section id="page-achievements" class="hidden space-y-6">
+        <div class="flex items-center justify-between mb-6">
+          <h1 class="text-2xl font-bold">مدیریت دستاوردها</h1>
+          <button id="btn-add-achievement" class="btn btn-primary w-auto px-5">
+            <i class="fas fa-plus ml-2"></i> افزودن دستاورد
+          </button>
+        </div>
+
+        <!-- Achievements Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div class="glass rounded-2xl p-6 card-hover">
+            <div class="flex items-center justify-between mb-4">
+              <div class="w-16 h-16 rounded-full bg-gradient-to-r from-yellow-400 to-orange-500 flex items-center justify-center">
+                <i class="fas fa-trophy text-white text-2xl"></i>
+              </div>
+              <div class="badge badge-success">فعال</div>
+            </div>
+            <h3 class="text-xl font-bold mb-2">اولین پیروزی</h3>
+            <p class="text-sm opacity-80 mb-4">برنده اولین مسابقه خود شو</p>
+            <div class="flex justify-between text-sm mb-4">
+              <div><i class="fas fa-users ml-1"></i> ۱,۲۳۴ کسب کرده</div>
+              <div><i class="fas fa-percentage ml-1"></i> ۵۰٪ کاربران</div>
+            </div>
+            <div class="flex gap-2">
+              <button class="flex-1 py-2 rounded-xl bg-white/10 border border-white/10 hover:bg-white/20 transition-all duration-300">
+                <i class="fas fa-edit"></i>
+              </button>
+              <button class="flex-1 py-2 rounded-xl bg-white/10 border border-white/10 hover:bg-white/20 transition-all duration-300">
+                <i class="fas fa-trash"></i>
+              </button>
+            </div>
+          </div>
+          
+          <div class="glass rounded-2xl p-6 card-hover">
+            <div class="flex items-center justify-between mb-4">
+              <div class="w-16 h-16 rounded-full bg-gradient-to-r from-orange-400 to-red-500 flex items-center justify-center">
+                <i class="fas fa-fire text-white text-2xl"></i>
+              </div>
+              <div class="badge badge-success">فعال</div>
+            </div>
+            <h3 class="text-xl font-bold mb-2">آتشین</h3>
+            <p class="text-sm opacity-80 mb-4">به استریک ۳ روزه برس</p>
+            <div class="flex justify-between text-sm mb-4">
+              <div><i class="fas fa-users ml-1"></i> ۸۹۰ کسب کرده</div>
+              <div><i class="fas fa-percentage ml-1"></i> ۳۶٪ کاربران</div>
+            </div>
+            <div class="flex gap-2">
+              <button class="flex-1 py-2 rounded-xl bg-white/10 border border-white/10 hover:bg-white/20 transition-all duration-300">
+                <i class="fas fa-edit"></i>
+              </button>
+              <button class="flex-1 py-2 rounded-xl bg-white/10 border border-white/10 hover:bg-white/20 transition-all duration-300">
+                <i class="fas fa-trash"></i>
+              </button>
+            </div>
+          </div>
+          
+          <div class="glass rounded-2xl p-6 card-hover">
+            <div class="flex items-center justify-between mb-4">
+              <div class="w-16 h-16 rounded-full bg-gradient-to-r from-yellow-400 to-amber-500 flex items-center justify-center">
+                <i class="fas fa-fire text-white text-2xl"></i>
+              </div>
+              <div class="badge badge-success">فعال</div>
+            </div>
+            <h3 class="text-xl font-bold mb-2">هفته طلایی</h3>
+            <p class="text-sm opacity-80 mb-4">به استریک ۷ روزه برس</p>
+            <div class="flex justify-between text-sm mb-4">
+              <div><i class="fas fa-users ml-1"></i> ۴۵۶ کسب کرده</div>
+              <div><i class="fas fa-percentage ml-1"></i> ۱۸٪ کاربران</div>
+            </div>
+            <div class="flex gap-2">
+              <button class="flex-1 py-2 rounded-xl bg-white/10 border border-white/10 hover:bg-white/20 transition-all duration-300">
+                <i class="fas fa-edit"></i>
+              </button>
+              <button class="flex-1 py-2 rounded-xl bg-white/10 border border-white/10 hover:bg-white/20 transition-all duration-300">
+                <i class="fas fa-trash"></i>
+              </button>
+            </div>
+          </div>
+          
+          <div class="glass rounded-2xl p-6 card-hover">
+            <div class="flex items-center justify-between mb-4">
+              <div class="w-16 h-16 rounded-full bg-gradient-to-r from-blue-400 to-indigo-500 flex items-center justify-center">
+                <i class="fas fa-star text-white text-2xl"></i>
+              </div>
+              <div class="badge badge-success">فعال</div>
+            </div>
+            <h3 class="text-xl font-bold mb-2">مبتدی</h3>
+            <p class="text-sm opacity-80 mb-4">به ۱۰۰۰ امتیاز برس</p>
+            <div class="flex justify-between text-sm mb-4">
+              <div><i class="fas fa-users ml-1"></i> ۱,۸۹۰ کسب کرده</div>
+              <div><i class="fas fa-percentage ml-1"></i> ۷۶٪ کاربران</div>
+            </div>
+            <div class="flex gap-2">
+              <button class="flex-1 py-2 rounded-xl bg-white/10 border border-white/10 hover:bg-white/20 transition-all duration-300">
+                <i class="fas fa-edit"></i>
+              </button>
+              <button class="flex-1 py-2 rounded-xl bg-white/10 border border-white/10 hover:bg-white/20 transition-all duration-300">
+                <i class="fas fa-trash"></i>
+              </button>
+            </div>
+          </div>
+          
+          <div class="glass rounded-2xl p-6 card-hover">
+            <div class="flex items-center justify-between mb-4">
+              <div class="w-16 h-16 rounded-full bg-gradient-to-r from-purple-400 to-pink-500 flex items-center justify-center">
+                <i class="fas fa-star text-white text-2xl"></i>
+              </div>
+              <div class="badge badge-success">فعال</div>
+            </div>
+            <h3 class="text-xl font-bold mb-2">حرفه‌ای</h3>
+            <p class="text-sm opacity-80 mb-4">به ۵۰۰۰ امتیاز برس</p>
+            <div class="flex justify-between text-sm mb-4">
+              <div><i class="fas fa-users ml-1"></i> ۶۷۸ کسب کرده</div>
+              <div><i class="fas fa-percentage ml-1"></i> ۲۷٪ کاربران</div>
+            </div>
+            <div class="flex gap-2">
+              <button class="flex-1 py-2 rounded-xl bg-white/10 border border-white/10 hover:bg-white/20 transition-all duration-300">
+                <i class="fas fa-edit"></i>
+              </button>
+              <button class="flex-1 py-2 rounded-xl bg-white/10 border border-white/10 hover:bg-white/20 transition-all duration-300">
+                <i class="fas fa-trash"></i>
+              </button>
+            </div>
+          </div>
+          
+          <div class="glass rounded-2xl p-6 card-hover">
+            <div class="flex items-center justify-between mb-4">
+              <div class="w-16 h-16 rounded-full bg-gradient-to-r from-green-400 to-emerald-500 flex items-center justify-center">
+                <i class="fas fa-check-circle text-white text-2xl"></i>
+              </div>
+              <div class="badge badge-warning">در حال بررسی</div>
+            </div>
+            <h3 class="text-xl font-bold mb-2">کامل</h3>
+            <p class="text-sm opacity-80 mb-4">۱۰ سوال متوالی درست پاسخ بده</p>
+            <div class="flex justify-between text-sm mb-4">
+              <div><i class="fas fa-users ml-1"></i> ۲۳۴ کسب کرده</div>
+              <div><i class="fas fa-percentage ml-1"></i> ۹٪ کاربران</div>
+            </div>
+            <div class="flex gap-2">
+              <button class="flex-1 py-2 rounded-xl bg-white/10 border border-white/10 hover:bg-white/20 transition-all duration-300">
+                <i class="fas fa-edit"></i>
+              </button>
+              <button class="flex-1 py-2 rounded-xl bg-white/10 border border-white/10 hover:bg-white/20 transition-all duration-300">
+                <i class="fas fa-trash"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- SETTINGS -->
+      <section id="page-settings" class="hidden space-y-6">
+        <div class="flex items-center justify-between mb-6">
+          <h1 class="text-2xl font-bold">تنظیمات</h1>
+          <button class="btn btn-primary w-auto px-5">
+            <i class="fas fa-save ml-2"></i> ذخیره تغییرات
+          </button>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <!-- General Settings -->
+          <div class="glass rounded-2xl p-6">
+            <h2 class="text-xl font-bold mb-4">تنظیمات عمومی</h2>
+            <div class="space-y-4">
+              <div>
+                <label class="block text-sm mb-1">نام برنامه</label>
+                <input type="text" value="Quiz WebApp Pro" class="form-input">
+              </div>
+              <div>
+                <label class="block text-sm mb-1">زبان پیش‌فرض</label>
+                <select class="form-select">
+                  <option value="fa" selected>فارسی</option>
+                  <option value="en">English</option>
+                </select>
+              </div>
+              <div>
+                <label class="block text-sm mb-1">زمان پیش‌فرض برای سوالات (ثانیه)</label>
+                <input type="number" value="30" class="form-input">
+              </div>
+              <div>
+                <label class="block text-sm mb-1">حداکثر سوالات в هر مسابقه</label>
+                <input type="number" value="10" class="form-input">
+              </div>
+            </div>
+          </div>
+
+          <!-- Reward Settings -->
+          <div class="glass rounded-2xl p-6">
+            <h2 class="text-xl font-bold mb-4">تنظیمات پاداش‌ها</h2>
+            <div class="space-y-4">
+              <div>
+                <label class="block text-sm mb-1">امتیاز برای پاسخ صحیح</label>
+                <input type="number" value="100" class="form-input">
+              </div>
+              <div>
+                <label class="block text-sm mb-1">سکه برای پاسخ صحیح</label>
+                <input type="number" value="5" class="form-input">
+              </div>
+              <div>
+                <label class="block text-sm mb-1">امتیاز پاداش استریک روزانه</label>
+                <input type="number" value="50" class="form-input">
+              </div>
+              <div>
+                <label class="block text-sm mb-1">سکه پاداش استریک روزانه</label>
+                <input type="number" value="10" class="form-input">
+              </div>
+            </div>
+          </div>
+
+          <!-- Shop Settings -->
+          <div class="glass rounded-2xl p-6">
+            <h2 class="text-xl font-bold mb-4">تنظیمات فروشگاه</h2>
+            <div class="space-y-4">
+              <div>
+                <label class="block text-sm mb-1">قیمت جان اضافی (سکه)</label>
+                <input type="number" value="30" class="form-input">
+              </div>
+              <div>
+                <label class="block text-sm mb-1">قیمت بوست امتیاز (سکه)</label>
+                <input type="number" value="50" class="form-input">
+              </div>
+              <div>
+                <label class="block text-sm mb-1">قیمت بسته سکه (سکه)</label>
+                <input type="number" value="20" class="form-input">
+              </div>
+              <div>
+                <label class="block text-sm mb-1">قیمت حذف تبلیغات (سکه)</label>
+                <input type="number" value="100" class="form-input">
+              </div>
+              <div>
+                <label class="block text-sm mb-1">قیمت اشتراک VIP ماهانه (سکه)</label>
+                <input type="number" value="200" class="form-input">
+              </div>
+            </div>
+          </div>
+
+          <!-- Notification Settings -->
+          <div class="glass rounded-2xl p-6">
+            <h2 class="text-xl font-bold mb-4">تنظیمات اعلان‌ها</h2>
+            <div class="space-y-4">
+              <div class="flex items-center justify-between">
+                <div>
+                  <div class="font-bold">اعلان‌های روزانه</div>
+                  <div class="text-sm opacity-80">ارسال یادآوری روزانه به کاربران</div>
+                </div>
+                <label class="relative inline-flex items-center cursor-pointer">
+                  <input type="checkbox" class="sr-only peer" checked>
+                  <div class="w-11 h-6 bg-gray-600 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:right-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-500"></div>
+                </label>
+              </div>
+              <div class="flex items-center justify-between">
+                <div>
+                  <div class="font-bold">اعلان‌های ویژه</div>
+                  <div class="text-sm opacity-80">ارسال اعلان برای رویدادهای ویژه</div>
+                </div>
+                <label class="relative inline-flex items-center cursor-pointer">
+                  <input type="checkbox" class="sr-only peer" checked>
+                  <div class="w-11 h-6 bg-gray-600 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:right-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-500"></div>
+                </label>
+              </div>
+              <div>
+                <label class="block text-sm mb-1">زمان ارسال اعلان روزانه</label>
+                <input type="time" value="20:00" class="form-input">
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- Modals -->
+  <!-- Add Question Modal -->
+  <div id="add-question-modal" class="modal">
+    <div class="glass rounded-3xl p-6 max-w-2xl w-full mx-4 modal-content">
+      <div class="flex items-center justify-between mb-4">
+        <h3 class="text-xl font-extrabold">افزودن سوال جدید</h3>
+        <button class="close-modal w-8 h-8 rounded-full bg-white/10 flex items-center justify-center hover:bg-white/20 transition-colors">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      <div class="space-y-4">
+        <div>
+          <label class="block text-sm mb-1">متن سوال</label>
+          <textarea class="form-input" rows="3" placeholder="متن سوال را وارد کنید..."></textarea>
+        </div>
+        <div>
+          <label class="block text-sm mb-1">دسته‌بندی</label>
+          <select class="form-select">
+            <option>عمومی</option>
+            <option>جغرافیا</option>
+            <option>ورزش</option>
+            <option>علم</option>
+            <option>تاریخ</option>
+            <option>هنر</option>
+            <option>سرگرمی</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-sm mb-1">سطح دشواری</label>
+          <select class="form-select">
+            <option>آسون</option>
+            <option>متوسط</option>
+            <option>سخت</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-sm mb-1">گزینه‌ها</label>
+          <div class="space-y-2">
+            <div class="flex items-center gap-2">
+              <input type="radio" name="correct-answer" class="w-5 h-5">
+              <input type="text" class="form-input flex-1" placeholder="گزینه ۱">
+            </div>
+            <div class="flex items-center gap-2">
+              <input type="radio" name="correct-answer" class="w-5 h-5">
+              <input type="text" class="form-input flex-1" placeholder="گزینه ۲">
+            </div>
+            <div class="flex items-center gap-2">
+              <input type="radio" name="correct-answer" class="w-5 h-5">
+              <input type="text" class="form-input flex-1" placeholder="گزینه ۳">
+            </div>
+            <div class="flex items-center gap-2">
+              <input type="radio" name="correct-answer" class="w-5 h-5">
+              <input type="text" class="form-input flex-1" placeholder="گزینه ۴">
+            </div>
+          </div>
+        </div>
+        <div class="flex gap-3">
+          <button class="btn btn-secondary">انصراف</button>
+          <button class="btn btn-primary">ذخیره سوال</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add Category Modal -->
+  <div id="add-category-modal" class="modal">
+    <div class="glass rounded-3xl p-6 max-w-md w-full mx-4 modal-content">
+      <div class="flex items-center justify-between mb-4">
+        <h3 class="text-xl font-extrabold">افزودن دسته‌بندی جدید</h3>
+        <button class="close-modal w-8 h-8 rounded-full bg-white/10 flex items-center justify-center hover:bg-white/20 transition-colors">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      <div class="space-y-4">
+        <div>
+          <label class="block text-sm mb-1">نام دسته‌بندی</label>
+          <input type="text" class="form-input" placeholder="نام دسته‌بندی را وارد کنید...">
+        </div>
+        <div>
+          <label class="block text-sm mb-1">توضیحات</label>
+          <textarea class="form-input" rows="2" placeholder="توضیحات مختصر درباره دسته‌بندی..."></textarea>
+        </div>
+        <div>
+          <label class="block text-sm mb-1">آیکون</label>
+          <select class="form-select">
+            <option value="fa-globe">گلوب</option>
+            <option value="fa-map-marked-alt">نقشه</option>
+            <option value="fa-football-ball">توپ فوتبال</option>
+            <option value="fa-flask">فلاسک</option>
+            <option value="fa-landmark">بنای تاریخی</option>
+            <option value="fa-palette">پالت</option>
+            <option value="fa-film">فیلم</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-sm mb-1">رنگ</label>
+          <select class="form-select">
+            <option value="blue">آبی</option>
+            <option value="green">سبز</option>
+            <option value="orange">نارنجی</option>
+            <option value="purple">بنفش</option>
+            <option value="yellow">زرد</option>
+            <option value="pink">صورتی</option>
+            <option value="red">قرمز</option>
+          </select>
+        </div>
+        <div class="flex gap-3">
+          <button class="btn btn-secondary">انصراف</button>
+          <button class="btn btn-primary">ذخیره دسته‌بندی</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add User Modal -->
+  <div id="add-user-modal" class="modal">
+    <div class="glass rounded-3xl p-6 max-w-md w-full mx-4 modal-content">
+      <div class="flex items-center justify-between mb-4">
+        <h3 class="text-xl font-extrabold">افزودن کاربر جدید</h3>
+        <button class="close-modal w-8 h-8 rounded-full bg-white/10 flex items-center justify-center hover:bg-white/20 transition-colors">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      <div class="space-y-4">
+        <div>
+          <label class="block text-sm mb-1">نام کاربری</label>
+          <input type="text" class="form-input" placeholder="نام کاربری را وارد کنید...">
+        </div>
+        <div>
+          <label class="block text-sm mb-1">ایمیل</label>
+          <input type="email" class="form-input" placeholder="ایمیل را وارد کنید...">
+        </div>
+        <div>
+          <label class="block text-sm mb-1">رمز عبور</label>
+          <input type="password" class="form-input" placeholder="رمز عبور را وارد کنید...">
+        </div>
+        <div>
+          <label class="block text-sm mb-1">نوع کاربر</label>
+          <select class="form-select">
+            <option>عادی</option>
+            <option>VIP</option>
+            <option>مدیر</option>
+          </select>
+        </div>
+        <div class="flex gap-3">
+          <button class="btn btn-secondary">انصراف</button>
+          <button class="btn btn-primary">ذخیره کاربر</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add Achievement Modal -->
+  <div id="add-achievement-modal" class="modal">
+    <div class="glass rounded-3xl p-6 max-w-md w-full mx-4 modal-content">
+      <div class="flex items-center justify-between mb-4">
+        <h3 class="text-xl font-extrabold">افزودن دستاورد جدید</h3>
+        <button class="close-modal w-8 h-8 rounded-full bg-white/10 flex items-center justify-center hover:bg-white/20 transition-colors">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      <div class="space-y-4">
+        <div>
+          <label class="block text-sm mb-1">نام دستاورد</label>
+          <input type="text" class="form-input" placeholder="نام دستاورد را وارد کنید...">
+        </div>
+        <div>
+          <label class="block text-sm mb-1">توضیحات</label>
+          <textarea class="form-input" rows="2" placeholder="توضیحات مختصر درباره دستاورد..."></textarea>
+        </div>
+        <div>
+          <label class="block text-sm mb-1">آیکون</label>
+          <select class="form-select">
+            <option value="fa-trophy">جام</option>
+            <option value="fa-fire">آتش</option>
+            <option value="fa-star">ستاره</option>
+            <option value="fa-check-circle">چک مارک</option>
+            <option value="fa-crown">تاج</option>
+            <option value="fa-medal">مدال</option>
+            <option value="fa-gem">جواهر</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-sm mb-1">رنگ</label>
+          <select class="form-select">
+            <option value="yellow">زرد</option>
+            <option value="blue">آبی</option>
+            <option value="green">سبز</option>
+            <option value="purple">بنفش</option>
+            <option value="pink">صورتی</option>
+            <option value="red">قرمز</option>
+            <option value="orange">نارنجی</option>
+          </select>
+        </div>
+        <div class="flex gap-3">
+          <button class="btn btn-secondary">انصراف</button>
+          <button class="btn btn-primary">ذخیره دستاورد</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // State management
+    const $ = s => document.querySelector(s);
+    const $$ = s => Array.from(document.querySelectorAll(s));
+    
+    // Navigation
+    function navigateTo(page) {
+      // Hide all pages
+      $$('main > section').forEach(section => {
+        section.classList.add('hidden');
+      });
+      
+      // Show selected page
+      $(`#page-${page}`).classList.remove('hidden');
+      $(`#page-${page}`).classList.add('fade-in');
+      
+      // Update active sidebar item
+      $$('.sidebar-item').forEach(item => {
+        item.classList.remove('active');
+        if (item.dataset.page === page) {
+          item.classList.add('active');
+        }
+      });
+      
+      // Close mobile menu if open
+      $('#mobile-menu').classList.add('translate-x-full');
+      
+      // Scroll to top
+      window.scrollTo(0, 0);
+    }
+    
+    // Event listeners for navigation
+    $$('.sidebar-item').forEach(item => {
+      item.addEventListener('click', (e) => {
+        e.preventDefault();
+        navigateTo(item.dataset.page);
+      });
+    });
+    
+    // Mobile menu toggle
+    $('#mobile-menu-toggle').addEventListener('click', () => {
+      $('#mobile-menu').classList.toggle('translate-x-full');
+    });
+    
+    $('#close-mobile-menu').addEventListener('click', () => {
+      $('#mobile-menu').classList.add('translate-x-full');
+    });
+    
+    // Modal handling
+    function openModal(modalId) {
+      $(modalId).classList.add('active');
+      document.body.style.overflow = 'hidden';
+    }
+    
+    function closeModal(modalId) {
+      $(modalId).classList.remove('active');
+      document.body.style.overflow = 'auto';
+    }
+    
+    // Close modal when clicking outside
+    $$('.modal').forEach(modal => {
+      modal.addEventListener('click', (e) => {
+        if (e.target === modal) {
+          closeModal(`#${modal.id}`);
+        }
+      });
+    });
+    
+    // Close modal with close button
+    $$('.close-modal').forEach(button => {
+      button.addEventListener('click', () => {
+        const modal = button.closest('.modal');
+        closeModal(`#${modal.id}`);
+      });
+    });
+    
+    // Button event listeners
+    $('#btn-add-question').addEventListener('click', () => openModal('#add-question-modal'));
+    $('#btn-add-category').addEventListener('click', () => openModal('#add-category-modal'));
+    $('#btn-add-user').addEventListener('click', () => openModal('#add-user-modal'));
+    $('#btn-add-achievement').addEventListener('click', () => openModal('#add-achievement-modal'));
+    
+    // Toast notification
+    function showToast(message, type = 'info', duration = 3000) {
+      const toastContainer = $('#toast-container');
+      const toast = document.createElement('div');
+      
+      // Set icon based on type
+      let icon = 'fa-info-circle';
+      let bgColor = 'bg-blue-500/80';
+      
+      if (type === 'success') {
+        icon = 'fa-check-circle';
+        bgColor = 'bg-green-500/80';
+      } else if (type === 'error') {
+        icon = 'fa-exclamation-circle';
+        bgColor = 'bg-red-500/80';
+      } else if (type === 'warning') {
+        icon = 'fa-exclamation-triangle';
+        bgColor = 'bg-yellow-500/80';
+      }
+      
+      toast.className = `glass ${bgColor} px-6 py-4 rounded-2xl text-white font-bold z-50 flex items-center gap-3 mb-3 fade-in shadow-lg`;
+      toast.innerHTML = `<i class="fas ${icon} text-xl"></i><span>${message}</span>`;
+      
+      toastContainer.appendChild(toast);
+      
+      // Remove toast after duration
+      setTimeout(() => {
+        toast.style.opacity = '0';
+        toast.style.transform = 'translateY(-20px)';
+        toast.style.transition = 'all 0.3s ease';
+        setTimeout(() => toast.remove(), 300);
+      }, duration);
+    }
+    
+    // Set current date
+    const date = new Date();
+    const persianDate = new Intl.DateTimeFormat('fa-IR', { 
+      year: 'numeric', 
+      month: '2-digit', 
+      day: '2-digit' 
+    }).format(date);
+    $('#current-date').textContent = persianDate;
+    
+    // Initialize with dashboard
+    navigateTo('dashboard');
+    
+    // Simulate real-time data updates
+    setInterval(() => {
+      // Update random stats
+      const activeUsers = Math.floor(Math.random() * 100) + 2400;
+      const gamesToday = Math.floor(Math.random() * 500) + 5200;
+      
+      // Update DOM elements if they exist
+      const activeUsersEl = document.querySelector('#page-dashboard .stat-card:nth-child(1) .text-2xl');
+      const gamesTodayEl = document.querySelector('#page-dashboard .stat-card:nth-child(3) .text-2xl');
+      
+      if (activeUsersEl) activeUsersEl.textContent = activeUsers.toLocaleString('fa-IR');
+      if (gamesTodayEl) gamesTodayEl.textContent = gamesToday.toLocaleString('fa-IR');
+    }, 5000);
+    
+    // Responsive adjustments
+    function handleResize() {
+      if (window.innerWidth >= 768) {
+        $('#mobile-menu').classList.add('translate-x-full');
+      }
+    }
+    
+    window.addEventListener('resize', handleResize);
+    
+    // Keyboard shortcuts
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        $$('.modal').forEach(modal => {
+          if (modal.classList.contains('active')) {
+            closeModal(`#${modal.id}`);
+          }
+        });
+        
+        $('#mobile-menu').classList.add('translate-x-full');
+      }
+    });
+  </script>
+</body>
+</html>
