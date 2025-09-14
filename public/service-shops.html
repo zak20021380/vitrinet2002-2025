@@ -2505,6 +2505,12 @@ function persistCustomer(){
   // در صورت نیاز، مسیر API خودت رو اینجا تنظیم کن
   const BOOKING_ENDPOINT = (window.__API_BASE__ || '') + '/api/bookings';
 
+  // اطلاعات فروشنده برای استفاده در ذخیره محلی نوبت
+  const seller = (() => {
+    try { return JSON.parse(localStorage.getItem('seller') || 'null'); }
+    catch (_) { return null; }
+  })();
+
   btn.type = 'button'; // جلوگیری از submit فرم‌های عمومی
 
   btn.addEventListener('click', async (e) => {
