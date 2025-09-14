@@ -1534,7 +1534,19 @@
       <div id="notif-list" class="space-y-3 text-sm"></div>
     </div>
   </div>
-  
+
+  <!-- Province Coming Soon Modal -->
+  <div id="modal-province-soon" class="modal">
+    <div class="glass rounded-3xl p-5 w-full max-w-md text-center">
+      <div class="flex items-center justify-between mb-4">
+        <div class="text-xl font-extrabold">مسابقه استانی</div>
+        <button class="px-3 py-2 rounded-xl bg-white/10 border border-white/20 hover:bg-white/20" data-close="#modal-province-soon"><i class="fas fa-times"></i></button>
+      </div>
+      <div class="mb-4">این بخش به زودی فعال می‌شود.</div>
+      <button class="btn btn-primary" data-close="#modal-province-soon">باشه</button>
+    </div>
+  </div>
+
   <!-- Edit Profile Modal -->
   <div id="modal-profile" class="modal">
     <div class="glass rounded-3xl p-5 w-full max-w-md">
@@ -3467,7 +3479,7 @@ async function startPurchaseCoins(pkgId){
     card.addEventListener('click', () => {
       const matchType = card.dataset.match;
       if (matchType === 'duel') navTo('duel');
-      else if (matchType === 'province') navTo('province');
+      else if (matchType === 'province') openModal('#modal-province-soon');
       else if (matchType === 'group') navTo('group');
     });
   });
@@ -3630,6 +3642,7 @@ async function startPurchaseCoins(pkgId){
   // Close modals (receipt)
   $$('[data-close="#modal-receipt"]').forEach(b=> b.addEventListener('click', ()=>closeModal('#modal-receipt')));
   $$('[data-close="#modal-pay-confirm"]').forEach(b=> b.addEventListener('click', ()=>closeModal('#modal-pay-confirm')));
+  $$('[data-close="#modal-province-soon"]').forEach(b=> b.addEventListener('click', ()=>closeModal('#modal-province-soon')));
 
   // Game Limits CTAs
   $('#btn-buy-vip-limit')?.addEventListener('click', () => {
