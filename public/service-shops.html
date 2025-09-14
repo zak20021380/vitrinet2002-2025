@@ -3105,6 +3105,15 @@ const btns = document.querySelectorAll(
       }
       const total = parseInt(localStorage.getItem(KEY_TOTAL) || '0', 10) || 0;
       return { total };
+    },
+    async getLoyaltyProgress(storeId) {
+      try {
+        const res = await fetch(`/api/loyalty/progress/${storeId}`, { credentials: 'include' });
+        if (!res.ok) throw new Error('fail');
+        return await res.json();
+      } catch (_) {
+        return { completed: 0 };
+      }
     }
   };
 
@@ -3343,6 +3352,12 @@ const btns = document.querySelectorAll(
           credentials: 'include',
           body: JSON.stringify({ storeId })
         });
+        await fetch('/api/loyalty', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+          body: JSON.stringify({ storeId, completed: 0 })
+        });
       } catch (_) {}
       setTimeout(() => {
         localStorage.setItem(KEY_PROGRESS, '0');
@@ -3421,6 +3436,16 @@ const btns = document.querySelectorAll(
       try { localStorage.setItem('vt:lastBooking', JSON.stringify(b)); } catch {}
 
       HAS_BOOKED_BEFORE = true;
+
+      if (AUTH.loggedIn) {
+        const storeId = document.body?.dataset?.storeId || document.body?.dataset?.sellerId;
+        fetch('/api/loyalty', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+          body: JSON.stringify({ storeId, completed: next })
+        }).catch(() => {});
+      }
 
       // نوتیف/رفرش UI
       const target = parseInt(data.dataset.goal || '10', 10);
@@ -3535,6 +3560,18 @@ setInterval(async () => {
     AUTH = await adapters.getAuth();
     const sum = await adapters.getBookingSummary(AUTH.user?.id);
     HAS_BOOKED_BEFORE = (sum?.total || 0) > 0;
+    if (AUTH.loggedIn) {
+      const storeId = document.body?.dataset?.storeId || document.body?.dataset?.sellerId;
+      if (storeId) {
+        const prog = await adapters.getLoyaltyProgress(storeId);
+        const val = parseInt(prog?.completed, 10) || 0;
+        const data = document.getElementById('lr-data');
+        if (data) {
+          data.dataset.current = String(val);
+          try { localStorage.setItem(KEY_PROGRESS, String(val)); } catch {}
+        }
+      }
+    }
     initCard();
   }
 

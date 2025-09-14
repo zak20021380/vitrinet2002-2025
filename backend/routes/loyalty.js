@@ -5,6 +5,7 @@ const auth = require('../middlewares/authMiddleware');
 
 router.get('/', auth('user'), loyaltyController.getLoyaltyStores);
 router.put('/', auth('user'), loyaltyController.updateLoyalty);
+router.get('/progress/:storeId', auth('user'), loyaltyController.getProgress);
 router.post('/request', auth('user'), loyaltyController.requestReward);
 router.get('/requests', auth('seller'), loyaltyController.getRewardRequests);
 router.post('/requests/resolve', auth('seller'), loyaltyController.resolveReward);
