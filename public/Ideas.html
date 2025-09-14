@@ -2451,31 +2451,44 @@ patchPricingKeys(RemoteConfig);
     const content = `
       <div class="space-y-4">
         <input id="new-group-name" class="form-input" placeholder="نام گروه">
-        <textarea id="new-group-members" class="form-textarea" placeholder="نام اعضا را با ویرگول جدا کنید"></textarea>
+        <div id="invite-container" class="hidden space-y-2">
+          <label class="block text-sm opacity-90">لینک دعوت</label>
+          <div class="flex">
+            <input id="new-group-link" class="form-input flex-1" readonly>
+            <button id="btn-copy-link" class="btn btn-secondary ml-2"><i class="fas fa-copy"></i></button>
+          </div>
+          <div class="text-xs opacity-80">این لینک را برای دعوت دوستان خود به اشتراک بگذارید</div>
+        </div>
         <button id="btn-save-group" class="btn btn-group w-full"><i class="fas fa-check ml-2"></i> ایجاد گروه</button>
       </div>`;
     showDetailPopup('ایجاد گروه جدید', content);
     $('#btn-save-group').addEventListener('click', () => {
       const name = $('#new-group-name').value.trim();
-      const membersInput = $('#new-group-members').value.trim();
       if(!name){ toast('نام گروه را وارد کنید'); return; }
-      const members = membersInput ? membersInput.split(/\s*,\s*/).filter(Boolean) : [];
       const newGroup = {
         id: 'g'+(State.groups.length+1),
         name,
         score: 0,
-        members: members.length + 1,
+        members: 1,
         admin: State.user.name,
         created: new Date().toLocaleDateString('fa-IR'),
-        memberList: [State.user.name, ...members],
+        memberList: [State.user.name],
         requests: []
       };
       State.groups.push(newGroup);
       State.user.group = name;
-      logEvent('group_created', { group: name });
-      toast('گروه با موفقیت ایجاد شد');
-      closeDetailPopup();
+      saveState();
       renderGroupSelect();
+      logEvent('group_created', { group: name });
+      const link = location.origin + '/?join=' + newGroup.id;
+      $('#new-group-link').value = link;
+      $('#invite-container').classList.remove('hidden');
+      $('#btn-copy-link').addEventListener('click', () => {
+        navigator.clipboard.writeText(link);
+        toast('لینک کپی شد');
+      });
+      $('#btn-save-group').disabled = true;
+      toast('گروه با موفقیت ایجاد شد');
     });
   }
   
