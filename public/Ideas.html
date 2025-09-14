@@ -3480,16 +3480,15 @@ async function startPurchaseCoins(pkgId){
 
   // Random Opponent
   $('#btn-duel-random')?.addEventListener('click', () => {
-    const names = $$('.duel-opponent .font-bold').map(el => el.textContent.trim());
-    if (!names.length) return;
-    const opponentName = names[Math.floor(Math.random() * names.length)];
-    toast(`چالش رندوم به ${opponentName} ارسال شد!`);
-    logEvent('duel_random', { opponent: opponentName });
+    const buttons = $$('.duel-opponent button');
+    if (!buttons.length) return;
+    const randomBtn = buttons[Math.floor(Math.random() * buttons.length)];
+    randomBtn.click();
   });
 
   // Invite Link Copy
   $('#btn-duel-link')?.addEventListener('click', async () => {
-    const inviter = (State && State.profile && State.profile.name) ? State.profile.name : 'guest';
+    const inviter = (State && State.user && State.user.name) ? State.user.name : 'guest';
     const link = `${location.origin}${location.pathname}?duel_invite=${encodeURIComponent(inviter)}`;
     try {
       await navigator.clipboard.writeText(link);
