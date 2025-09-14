@@ -756,6 +756,22 @@
       <div class="glass rounded-3xl p-6 text-center">
         <div class="text-2xl font-extrabold mb-2">نتیجهٔ مسابقه</div>
         <div class="text-sm opacity-80 mb-4">خلاصهٔ عملکردت 👇</div>
+        <!-- Duel result (shown only when playing a duel) -->
+        <div id="duel-result" class="hidden mb-4">
+          <div class="duel-avatars">
+            <div class="duel-avatar">
+              <img id="duel-avatar-you" class="w-16 h-16 rounded-full border-2 border-white/30" alt="you">
+              <div id="duel-name-you" class="text-sm"></div>
+            </div>
+            <div class="duel-vs">VS</div>
+            <div class="duel-avatar">
+              <img id="duel-avatar-opponent" class="w-16 h-16 rounded-full border-2 border-white/30" alt="opponent">
+              <div id="duel-name-opponent" class="text-sm"></div>
+            </div>
+          </div>
+          <div id="duel-winner" class="font-bold mt-2"></div>
+          <div id="duel-stats" class="text-sm opacity-90 mt-1 leading-6"></div>
+        </div>
         <div class="grid grid-cols-3 gap-3">
           <div class="glass rounded-2xl p-4">
             <div class="text-xl font-extrabold text-emerald-300" id="res-correct">۰</div>
@@ -2573,6 +2589,29 @@ patchPricingKeys(RemoteConfig);
         <div class="text-xs opacity-70">پاسخ شما: ${r.you}</div>`;
       wrap.appendChild(row);
     });
+    if(State.duelOpponent){
+      const total = State.quiz.list.length;
+      const opponentCorrect = Math.floor(Math.random()*(total+1));
+      const opponentWrong = total - opponentCorrect;
+      const opponentEarned = opponentCorrect * 120;
+      const yourCorrect = correctCount;
+      const yourWrong = total - correctCount;
+      const yourEarned = State.quiz.sessionEarned;
+      const youName = State.user?.name || 'شما';
+      const oppName = State.duelOpponent.name;
+      $('#duel-avatar-you').src = State.user?.avatar || 'https://i.pravatar.cc/60?img=1';
+      $('#duel-name-you').textContent = youName;
+      $('#duel-avatar-opponent').src = State.duelOpponent.avatar || '';
+      $('#duel-name-opponent').textContent = oppName;
+      let winnerText = 'مسابقه مساوی شد!';
+      if (yourEarned > opponentEarned) winnerText = `${youName} برنده شد!`;
+      else if (yourEarned < opponentEarned) winnerText = `${oppName} برنده شد!`;
+      $('#duel-winner').textContent = winnerText;
+      $('#duel-stats').innerHTML = `${youName}: ${faNum(yourCorrect)} درست، ${faNum(yourWrong)} نادرست، ${faNum(yourEarned)} امتیاز<br>${oppName}: ${faNum(opponentCorrect)} درست، ${faNum(opponentWrong)} نادرست، ${faNum(opponentEarned)} امتیاز`;
+      $('#duel-result').classList.remove('hidden');
+    } else {
+      $('#duel-result').classList.add('hidden');
+    }
     saveState();
     navTo('results');
     AdManager.maybeShowInterstitial('post_quiz');
