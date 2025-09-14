@@ -2616,7 +2616,8 @@ function persistCustomer(){
         status:    data.status || 'pending',
         createdAt: Date.now(),
         sellerId,
-        shopUrl:   document.body?.dataset?.shopurl || null
+        shopUrl:   document.body?.dataset?.shopurl || null,
+        storeName: seller?.storeName || seller?.displayName || seller?.title || seller?.name || 'فروشگاه'
       };
       try { localStorage.setItem('vt:lastBooking', JSON.stringify(last)); } catch(_){}
 
