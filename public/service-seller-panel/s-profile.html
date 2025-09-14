@@ -1499,7 +1499,11 @@ async function loadBookings() {
   async function loadNotifs() {
     // cache first
     const cached = cache.get(KEYS.notifs, 6*3600*1000);
-    if (cached) setNotifs(cached);
+    if (cached) {
+      setNotifs(cached);
+      // render immediately so cached notifications are visible
+      renderNotifs();
+    }
 
     // refresh server
     try {
@@ -1516,6 +1520,8 @@ async function loadBookings() {
           type: 'info'
         }));
         setNotifs(items);
+        // re-render after fetching fresh notifications
+        renderNotifs();
       }
     } catch (e) {}
   }
