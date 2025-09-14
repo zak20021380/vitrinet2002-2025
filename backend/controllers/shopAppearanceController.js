@@ -16,6 +16,31 @@ function escapeRegex(string) {
   return string.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
 }
 
+// بازمحاسبهٔ امتیاز فروشگاه فقط بر اساس نظرات تایید شده
+async function recalcShopRating(sellerId) {
+  const agg = await Review.aggregate([
+    { $match: { sellerId: new mongoose.Types.ObjectId(sellerId), approved: true } },
+    {
+      $group: {
+        _id: null,
+        averageRating: { $avg: '$score' },
+        ratingCount: { $sum: 1 }
+      }
+    }
+  ]);
+
+  const averageRating = agg[0]?.averageRating || 0;
+  const ratingCount = agg[0]?.ratingCount || 0;
+
+  await ShopAppearance.findOneAndUpdate(
+    { sellerId },
+    { averageRating, ratingCount },
+    { new: true }
+  );
+
+  return { averageRating, ratingCount };
+}
+
 // ================== دریافت ظاهر فروشگاه بر اساس sellerId ==================
 exports.getShopAppearance = async (req, res) => {
   try {
@@ -222,24 +247,8 @@ exports.addReview = async (req, res) => {
       await Review.create({ sellerId, userId, score, comment });
     }
 
-    // ۵) محاسبه مجدد میانگین و تعداد از روی مجموعه Review
-    const agg = await Review.aggregate([
-      { $match: { sellerId: new mongoose.Types.ObjectId(sellerId) } },
-      {
-        $group: {
-          _id: null,
-          averageRating: { $avg: '$score' },
-          ratingCount: { $sum: 1 }
-        }
-      }
-    ]);
-
-    const averageRating = agg[0]?.averageRating || 0;
-    const ratingCount = agg[0]?.ratingCount || 0;
-
-    shop.averageRating = averageRating;
-    shop.ratingCount = ratingCount;
-    await shop.save();
+    // ۵) محاسبهٔ مجدد امتیازها فقط بر اساس نظرات تایید شده
+    const { averageRating, ratingCount } = await recalcShopRating(sellerId);
 
     res.json({ averageRating, ratingCount });
   } catch (err) {
@@ -316,7 +325,8 @@ exports.approveReview = async (req, res) => {
     if (!review) {
       return res.status(404).json({ message: 'نظر یافت نشد.' });
     }
-    res.json({ message: 'نظر تایید شد.' });
+    const { averageRating, ratingCount } = await recalcShopRating(sellerId);
+    res.json({ message: 'نظر تایید شد.', averageRating, ratingCount });
   } catch (err) {
     console.error('❌ approveReview error:', err.message);
     res.status(500).json({ message: 'خطای سرور در تایید نظر.' });
@@ -332,7 +342,8 @@ exports.rejectReview = async (req, res) => {
     if (!review) {
       return res.status(404).json({ message: 'نظر یافت نشد.' });
     }
-    res.json({ message: 'نظر حذف شد.' });
+    const { averageRating, ratingCount } = await recalcShopRating(sellerId);
+    res.json({ message: 'نظر حذف شد.', averageRating, ratingCount });
   } catch (err) {
     console.error('❌ rejectReview error:', err.message);
     res.status(500).json({ message: 'خطای سرور در حذف نظر.' });
