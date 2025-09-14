@@ -1688,6 +1688,49 @@ async function hasPending(){
 (() => {
   'use strict';
 
+  const SafeSS = {
+    setJSON(key, value, opts = {}) {
+      const str = JSON.stringify(value);
+      if (str.length > 500 * 1024) return false;
+      try { sessionStorage.setItem(key, str); return true; }
+      catch (e) {
+        if (e && (e.name === 'QuotaExceededError' || e.code === 22)) {
+          const prefix = /^vt:(?:cache|logs|tmp):/;
+          const items = [];
+          for (let i = 0; i < sessionStorage.length; i++) {
+            const k = sessionStorage.key(i);
+            if (prefix.test(k)) {
+              const v = sessionStorage.getItem(k) || '';
+              items.push({ key: k, size: v.length });
+            }
+          }
+          items.sort((a, b) => b.size - a.size);
+          for (const it of items) sessionStorage.removeItem(it.key);
+          try { sessionStorage.setItem(key, str); return true; }
+          catch (e2) { console.warn('SafeSS quota exceeded', e2); return false; }
+        }
+        console.warn('SafeSS setJSON failed', e);
+        return false;
+      }
+    },
+    getJSON(key, fallback = null) {
+      try { const raw = sessionStorage.getItem(key); return raw ? JSON.parse(raw) : fallback; }
+      catch { return fallback; }
+    }
+  };
+  function auditSessionStorage() {
+    const rows = [];
+    for (let i = 0; i < sessionStorage.length; i++) {
+      const k = sessionStorage.key(i);
+      const v = sessionStorage.getItem(k) || '';
+      rows.push({ key: k, bytes: v.length });
+    }
+    rows.sort((a, b) => b.bytes - a.bytes);
+    console.table(rows);
+  }
+  window.SafeSS = SafeSS;
+  window.auditSessionStorage = auditSessionStorage;
+
   // ===== Helpers
   const API_ROOT = window.__API_BASE__ || '';
   const $  = s => document.querySelector(s);
