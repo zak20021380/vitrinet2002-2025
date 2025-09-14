@@ -1551,6 +1551,21 @@ async function loadBookings() {
   }
 
   async function initLoyaltyStore() {
+    try {
+      const res = await fetch('/api/loyalty', { credentials: 'include' });
+      if (res.ok) {
+        const data = await res.json();
+        const stores = Array.isArray(data) ? data.map(s => ({
+          storeId: s.storeId,
+          storeName: s.storeName || 'فروشگاه',
+          completed: s.completed || 0,
+          claimed: s.claimed || 0,
+          active: false
+        })) : [];
+        setLoyaltyStores(stores);
+        return;
+      }
+    } catch (e) {}
     const cached = cache.get(KEYS.loyalty, 24*3600*1000);
     if (cached) setLoyaltyStores(cached);
     else setLoyaltyStores([]);
