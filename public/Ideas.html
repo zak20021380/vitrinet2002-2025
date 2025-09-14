@@ -433,11 +433,11 @@
             </div>
           </div>
           
-          <!-- Lives Limit -->
+          <!-- Keys Limit -->
           <div class="limit-card">
             <div class="flex justify-between items-center">
               <div class="flex items-center gap-2">
-                <i class="fas fa-heart text-red-400"></i>
+                <i class="fas fa-key text-yellow-400"></i>
                 <span>کلید</span>
               </div>
               <span class="text-sm"><span id="lives-used">0</span>/<span id="lives-limit">3</span></span>
@@ -659,7 +659,7 @@
             <span class="chip"><i class="fas fa-hashtag ml-1"></i> <span id="qnum">۱</span>/<span id="qtotal">۵</span></span>
           </div>
           <div class="flex items-center gap-2">
-            <span class="chip"><i class="fas fa-heart text-red-400 ml-1"></i> <span id="lives">۳</span></span>
+            <span class="chip"><i class="fas fa-key text-yellow-400 ml-1"></i> <span id="lives">۳</span></span>
             <span class="chip"><i class="fas fa-coins text-yellow-300 ml-1"></i> <span id="coins">۰</span></span>
           </div>
         </div>
@@ -919,7 +919,7 @@
             </div>
             <ul class="text-sm opacity-90 space-y-1 list-disc pr-5 mb-3">
               <li>حذف تبلیغات بنری</li>
-              <li>دو برابر محدودیت روزانه مسابقه/جان/انرژی</li>
+              <li>دو برابر محدودیت روزانه مسابقه/کلید/انرژی</li>
             </ul>
             <button id="buy-vip-lite" class="btn btn-secondary w-full" aria-label="خرید اشتراک VIP لایت">خرید اشتراک</button>
           </div>
@@ -935,10 +935,10 @@
             </div>
             <ul class="text-sm opacity-90 space-y-1 list-disc pr-5 mb-3">
               <li>حذف تمام تبلیغات (بنری، همسان، میانی، ویدیویی)</li>
-              <li>دو برابر محدودیت روزانه مسابقه/جان/انرژی</li>
+              <li>دو برابر محدودیت روزانه مسابقه/کلید/انرژی</li>
               <li>دو برابر امتیاز در رویدادها</li>
               <li>قاب آواتار ویژه استان</li>
-              <li>محدودیت بسیار بالا برای مسابقه/جان/انرژی</li>
+              <li>محدودیت بسیار بالا برای مسابقه/کلید/انرژی</li>
             </ul>
             <button id="buy-vip-pro" class="btn btn-primary w-full" aria-label="خرید اشتراک VIP پرو">خرید اشتراک</button>
           </div>
@@ -3093,7 +3093,7 @@ async function startPurchaseCoins(pkgId){
           if(reward==='energy') { recoverGameResource('energy'); updateLimitsUI(); }
           await logEvent('ad_completed',{placement:'rewarded', reward, amount});
           await logEvent('reward_granted',{reward, amount});
-          toast(`<i class="fas fa-check ml-1"></i> پاداش دریافت شد: ${faNum(amount)} ${reward==='coins'?'سکه':reward==='life'?'جان':'انرژی'}`);
+          toast(`<i class="fas fa-check ml-1"></i> پاداش دریافت شد: ${faNum(amount)} ${reward==='coins'?'سکه':reward==='life'?'کلید':'انرژی'}`);
           SFX.coin();
         };
       });
