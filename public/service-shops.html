@@ -1781,13 +1781,12 @@ async function fetchBookedSlots(dateISO){
       name:  (st.name || nameInp?.value || '').trim(),
       phone: toEn(st.phone || phoneInp?.value || '')
     };
-    try { sessionStorage.setItem(SS_KEY, JSON.stringify(payload)); } catch(e){}
+    SafeSS.setJSON(SS_KEY, payload); // SafeSS
   }
   function loadSel() {
     try {
-      const raw = sessionStorage.getItem(SS_KEY);
-      if (!raw) return;
-      const obj = JSON.parse(raw);
+      const obj = SafeSS.getJSON(SS_KEY, null); // SafeSS
+      if (!obj) return; // SafeSS
       if (obj.service)   st.service = obj.service;
       if (obj.serviceId) st.serviceId = obj.serviceId;
       if (obj.price != null) st.price = parseInt(obj.price,10) || 0;
@@ -1809,7 +1808,8 @@ async function fetchBookedSlots(dateISO){
         price:     parseInt(btn.dataset.price||'0',10)||0,
         serviceId: btn.dataset.serviceId || btn.dataset.id || null
       };
-      sessionStorage.setItem(SS_KEY, JSON.stringify({ ...JSON.parse(sessionStorage.getItem(SS_KEY)||'{}'), ...pre }));
+      const existing = SafeSS.getJSON(SS_KEY, {}); // SafeSS
+      SafeSS.setJSON(SS_KEY, { ...existing, ...pre }); // SafeSS
     } catch(_) {}
   });
 
@@ -5922,12 +5922,11 @@ function render(items) {
   const serviceId = params.get('serviceId');   // اگر داری
 
   if (service || price || serviceId) {
-    let cur = {};
-    try { cur = JSON.parse(sessionStorage.getItem(SS_KEY) || '{}'); } catch(_) {}
+    let cur = SafeSS.getJSON(SS_KEY, {}); // SafeSS
     if (service)   cur.service   = decodeURIComponent(service);
     if (price)     cur.price     = parseInt(price, 10) || 0;
     if (serviceId) cur.serviceId = serviceId;
-    try { sessionStorage.setItem(SS_KEY, JSON.stringify(cur)); } catch(_) {}
+    SafeSS.setJSON(SS_KEY, cur); // SafeSS
   }
 
   // 3) اگر با #booking-wizard اومدیم، به‌صورت ایمن ویزارد رو باز کن

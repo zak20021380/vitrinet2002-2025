@@ -694,12 +694,12 @@ categorySelect.addEventListener("change", function () {
   btn.innerText = "ثبت فروشگاه";
   if (result.success) {
     localStorage.setItem('shopurl', data.shopurl);
-    sessionStorage.setItem('signup_password', data.password);
+    SafeSS.setJSON('signup_password', data.password); // SafeSS
 
     // ✅ اضافه‌شدن نقش و دسته برای تعیین پنل بعد از وریفای
     // توجه: SERVICE_CATEGORIES بالاتر در همین فایل تعریف شده.
-    sessionStorage.setItem('signup_category', data.category);
-    sessionStorage.setItem('signup_role', SERVICE_CATEGORIES.includes(data.category) ? 'service' : 'seller');
+    SafeSS.setJSON('signup_category', data.category); // SafeSS
+    SafeSS.setJSON('signup_role', SERVICE_CATEGORIES.includes(data.category) ? 'service' : 'seller'); // SafeSS
 
     window.location.href = "verify.html?shopurl=" + encodeURIComponent(data.shopurl) + "&phone=" + encodeURIComponent(data.phone);
   }
@@ -753,7 +753,7 @@ document.getElementById("verify-form").addEventListener("submit", function (e) {
   .then(result => {
     if (result.success) {
       // رمز رو از sessionStorage بخون برای لاگین
-      var password = sessionStorage.getItem('signup_password');
+      var password = SafeSS.getJSON('signup_password'); // SafeSS
       if (!password) {
         codeHint.innerText = "خطا: رمز ثبت‌نام پیدا نشد. لطفا مجدد ثبت‌نام کنید.";
         codeHint.classList.remove("hidden");

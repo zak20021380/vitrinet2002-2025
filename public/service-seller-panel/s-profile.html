@@ -1222,7 +1222,7 @@
 
   // تعیین آدرس ورود سشن با اولویت: ?from=  >  referrer  >  مقدار قبلی
   const params = new URLSearchParams(location.search);
-  const prev = sessionStorage.getItem('vt_entry_home') || '';
+  const prev = SafeSS.getJSON('vt_entry_home', ''); // SafeSS
   let entry = prev;
 
   // 1) اگر پارامتر from موجود و هم‌دامنه است، همان را مبنا قرار بده
@@ -1242,7 +1242,7 @@
   // 3) اگر کاندید معتبر داشتیم، روی سشن بنویس
   if (candidate) {
     entry = candidate;
-    sessionStorage.setItem('vt_entry_home', entry);
+    SafeSS.setJSON('vt_entry_home', entry); // SafeSS
   }
 
   // ست‌کردن لینک‌ها
@@ -1907,7 +1907,7 @@ function renderBookings() {
       const payload = { service };
       if (price) payload.price = parseInt(price, 10) || 0;
       if (serviceId) payload.serviceId = serviceId;
-      sessionStorage.setItem('vt:booking.sel', JSON.stringify(payload));
+      SafeSS.setJSON('vt:booking.sel', payload); // SafeSS
     } catch (e) {}
 
     const url = new URL('../service-shops.html', location.href);
