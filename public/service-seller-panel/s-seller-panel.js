@@ -1,3 +1,47 @@
+// SafeSS
+const SafeSS = { // SafeSS
+  setJSON(key, value, opts = {}) { // SafeSS
+    const str = JSON.stringify(value); // SafeSS
+    if (str.length > 500 * 1024) return false; // SafeSS
+    try { sessionStorage.setItem(key, str); return true; } // SafeSS
+    catch (e) { // SafeSS
+      if (e && (e.name === 'QuotaExceededError' || e.code === 22)) { // SafeSS
+        const prefix = /^vt:(?:cache|logs|tmp):/; // SafeSS
+        const items = []; // SafeSS
+        for (let i = 0; i < sessionStorage.length; i++) { // SafeSS
+          const k = sessionStorage.key(i); // SafeSS
+          if (prefix.test(k)) { // SafeSS
+            const v = sessionStorage.getItem(k) || ''; // SafeSS
+            items.push({ key: k, size: v.length }); // SafeSS
+          } // SafeSS
+        } // SafeSS
+        items.sort((a, b) => b.size - a.size); // SafeSS
+        for (const it of items) sessionStorage.removeItem(it.key); // SafeSS
+        try { sessionStorage.setItem(key, str); return true; } // SafeSS
+        catch (e2) { console.warn('SafeSS quota exceeded', e2); return false; } // SafeSS
+      } // SafeSS
+      console.warn('SafeSS setJSON failed', e); // SafeSS
+      return false; // SafeSS
+    } // SafeSS
+  }, // SafeSS
+  getJSON(key, fallback = null) { // SafeSS
+    try { const raw = sessionStorage.getItem(key); return raw ? JSON.parse(raw) : fallback; } // SafeSS
+    catch { return fallback; } // SafeSS
+  } // SafeSS
+}; // SafeSS
+function auditSessionStorage() { // SafeSS
+  const rows = []; // SafeSS
+  for (let i = 0; i < sessionStorage.length; i++) { // SafeSS
+    const k = sessionStorage.key(i); // SafeSS
+    const v = sessionStorage.getItem(k) || ''; // SafeSS
+    rows.push({ key: k, bytes: v.length }); // SafeSS
+  } // SafeSS
+  rows.sort((a, b) => b.bytes - a.bytes); // SafeSS
+  console.table(rows); // SafeSS
+} // SafeSS
+window.SafeSS = SafeSS; // SafeSS
+window.auditSessionStorage = auditSessionStorage; // SafeSS
+// SafeSS end
 document.addEventListener('DOMContentLoaded', async () => {
 
 // === STEP 1 — API client (READ services only) ===
@@ -488,8 +532,7 @@ async function handleRewardAction(userId, action) {
       try {
         const lsItem = localStorage.getItem(key);
         if (lsItem !== null) return JSON.parse(lsItem);
-        const ssItem = sessionStorage.getItem(key);
-        return ssItem ? JSON.parse(ssItem) : null;
+        return SafeSS.getJSON(key, null); // SafeSS
       } catch (e) {
         console.error("Error getting from storage", e);
         return null;
@@ -502,11 +545,7 @@ async function handleRewardAction(userId, action) {
       } catch (e) {
         if (e && (e.name === 'QuotaExceededError' || e.code === 22)) {
           console.warn('localStorage quota exceeded, using sessionStorage instead');
-          try {
-            sessionStorage.setItem(key, data);
-          } catch (e2) {
-            console.error('Error setting to sessionStorage', e2);
-          }
+          SafeSS.setJSON(key, value); // SafeSS
         } else {
           console.error("Error setting to localStorage", e);
         }

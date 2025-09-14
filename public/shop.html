@@ -1386,8 +1386,8 @@ addressModal?.addEventListener('click', e => (e.target === addressModal) && addr
     $send.textContent = 'ارسال گزارش';
 
     if (confirm('برای ارسال گزارش باید وارد شوید. مایلید به صفحهٔ ورود بروید؟')) {
-      sessionStorage.setItem('afterLoginReturn', location.href);
-      sessionStorage.setItem('reportDraft', JSON.stringify(draft));
+      SafeSS.setJSON('afterLoginReturn', location.href); // SafeSS
+      SafeSS.setJSON('reportDraft', draft); // SafeSS
       location.href = '/login.html';
     } else {
       showMsg('ابتدا وارد حساب شوید سپس دوباره گزارش دهید.', false);
@@ -1396,11 +1396,11 @@ addressModal?.addEventListener('click', e => (e.target === addressModal) && addr
 
   /* ───── بازیابی پیش‌نویس پس از ورود ───── */
   (async () => {
-    const draftStr = sessionStorage.getItem('reportDraft');
-    if (!draftStr) return;
+    const draft = SafeSS.getJSON('reportDraft'); // SafeSS
+    if (!draft) return; // SafeSS
     if (!(await isLoggedIn())) return;  // هنوز وارد نشده
 
-    const { type, description } = JSON.parse(draftStr);
+    const { type, description } = draft; // SafeSS
     sessionStorage.removeItem('reportDraft');
 
     $type.value = type;
@@ -1435,7 +1435,7 @@ addressModal?.addEventListener('click', e => (e.target === addressModal) && addr
   rateShow.addEventListener('click', async () => {
     if (!(await isLoggedIn())) {
       if (confirm('برای ثبت امتیاز باید وارد شوید. به صفحهٔ ورود بروید؟')) {
-        sessionStorage.setItem('afterLoginReturn', location.href);
+        SafeSS.setJSON('afterLoginReturn', location.href); // SafeSS
         location.href = '/login.html';
       }
       return;

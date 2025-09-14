@@ -83,8 +83,8 @@
   }
 
   // اگر پسورد تو session نبود، یک مقدار تستی ست کن (برای راحتی تست)
-  if (!sessionStorage.getItem('signup_password')) {
-    sessionStorage.setItem('signup_password', 'testpassword');
+  if (!SafeSS.getJSON('signup_password')) { // SafeSS
+    SafeSS.setJSON('signup_password', 'testpassword'); // SafeSS
   }
 
   const digits = Array.from(document.querySelectorAll('.input-digit'));
@@ -134,7 +134,7 @@
 
     if (code === "12345") {
       // پسورد موقع ثبت‌نام باید تو sessionStorage باشه (حتی اگر نبود، بالا مقداردهی کردیم)
-      const password = sessionStorage.getItem('signup_password');
+      const password = SafeSS.getJSON('signup_password'); // SafeSS
       // ذخیره اطلاعات کاربر ساختگی تو localStorage
       localStorage.setItem('token', 'fake-user-token');
       localStorage.setItem('user', JSON.stringify({

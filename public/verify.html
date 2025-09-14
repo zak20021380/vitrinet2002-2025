@@ -199,7 +199,7 @@ if (!shopurl) {
       if (result.success) {
         // بعد از موفقیت، تلاش برای لاگین با شماره و رمز ثبت‌نامی ذخیره‌شده
         // رمز رو موقع ثبت‌نام تو sessionStorage گذاشتی
-        const password = sessionStorage.getItem('signup_password');
+        const password = SafeSS.getJSON('signup_password'); // SafeSS
         if (!password) {
           errorText.innerText = "خطای ورود: رمز ثبت‌نام پیدا نشد. لطفا مجدد وارد شوید.";
           errorText.classList.remove('hidden');
@@ -226,7 +226,7 @@ if (!shopurl) {
   // در غیر این صورت از نقش ذخیره‌شده هنگام ثبت‌نام استفاده می‌کنیم (اگر موجود باشد).
   const SERVICE_CATEGORIES = ["خدمات","زیبایی","تالار و مجالس","خودرو","ورزشی"];
   const categoryFromServer = loginRes?.seller?.category || "";
-  const roleFromSignup = sessionStorage.getItem('signup_role'); // 'service' | 'seller' (اختیاری)
+  const roleFromSignup = SafeSS.getJSON('signup_role'); // SafeSS 'service' | 'seller' (اختیاری)
   const isServiceSeller = categoryFromServer
     ? SERVICE_CATEGORIES.includes(categoryFromServer)
     : (roleFromSignup === 'service');
