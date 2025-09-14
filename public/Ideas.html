@@ -1890,6 +1890,7 @@ patchPricingKeys(RemoteConfig);
       { id: 'g4', name: 'دانش‌آموزان نخبه', score: 18700, members: 15, admin: 'مریم احمدی', created: '۱۴۰۲/۰۴/۰۵' },
       { id: 'g5', name: 'پیشروان علم', score: 21300, members: 27, admin: 'امیر حسینی', created: '۱۴۰۲/۰۲/۲۸' },
     ],
+    ads: { banner: [], native: [], interstitial: [], rewarded: [] },
     quiz:{
       inProgress:false, answered:false, correctIndex:-1,
       duration:30, remain:30, timer:null,
@@ -2983,10 +2984,35 @@ async function startPurchaseCoins(pkgId){
   // ===== Ads Manager =====
   const AdManager = {
     enabled(){ return RemoteConfig.ads.enabled && !Server.subscription.active; },
+    getLocalAd(placement){
+      const ads = State.ads?.[placement] || [];
+      const now = Date.now();
+      const province = Server.user.province || State.user.province;
+      return ads.find(a => {
+        const start = new Date(a.startDate).getTime();
+        const end = new Date(a.endDate).getTime();
+        const targets = a.provinces || [];
+        return now >= start && now <= end && (targets.length === 0 || targets.includes(province));
+      }) || null;
+    },
     // Banner
     async renderBanner(){
       const slot = $('#ad-banner .ad-banner-inner'); if(!slot) return;
       slot.innerHTML = ''; // reserved height stays via parent
+      const local = this.getLocalAd('banner');
+      if(local){
+        const w=document.createElement('a');
+        w.href=local.landing; w.target='_blank';
+        w.className='w-full h-full block relative';
+        w.innerHTML=`<img src="${local.creative}" alt="banner ad" class="w-full h-full object-cover">`;
+        const close=document.createElement('button'); close.className='ad-close'; close.innerHTML='<i class="fas fa-times"></i>';
+        close.setAttribute('aria-label','بستن بنر');
+        close.onclick=()=>{ slot.innerHTML='<div class="ad-skeleton">بنر بسته شد</div>'; logEvent('ad_close',{placement:'banner', local:true}); };
+        w.appendChild(close); slot.appendChild(w);
+        logEvent('ad_impression',{placement:'banner', local:true});
+        w.addEventListener('click',()=>logEvent('ad_click',{placement:'banner', local:true}),{once:true});
+        return;
+      }
       if(!this.enabled() || !RemoteConfig.ads.placements.banner){
         slot.innerHTML = `<div class="ad-skeleton">${Server.subscription.active ? 'وی‌آی‌پی: بدون تبلیغ' : 'تبلیغ غیرفعال'}</div>`;
         return;
@@ -3020,6 +3046,20 @@ async function startPurchaseCoins(pkgId){
     async renderNative(selector){
       const slot = document.querySelector(selector); if(!slot) return;
       slot.innerHTML = '<div class="ad-skeleton">تبلیغ همسان</div>';
+      const local=this.getLocalAd('native');
+      if(local){
+        slot.innerHTML=`<div class="w-full flex items-center gap-3 p-3 relative">
+            <img src="${local.creative}" class="w-16 h-16 rounded-2xl object-cover" alt="ad">
+            <div class="flex-1">
+              <div class="font-bold">تبلیغ اسپانسری</div>
+              <div class="text-xs opacity-80">${new URL(local.landing).hostname}</div>
+            </div>
+            <a role="button" href="${local.landing}" class="btn btn-primary w-auto px-4 py-2 text-sm" aria-label="مشاهده">مشاهده</a>
+          </div>`;
+        logEvent('ad_impression',{placement:'native', local:true});
+        slot.querySelector('a')?.addEventListener('click',()=>logEvent('ad_click',{placement:'native', local:true}),{once:true});
+        return;
+      }
       if(!this.enabled() || !RemoteConfig.ads.placements.native){ slot.innerHTML = '<div class="ad-skeleton">—</div>'; return; }
       try{
         const res = await Net.jget('/api/ads?placement=native&province='+encodeURIComponent(Server.user.province||State.user.province));
@@ -3050,11 +3090,15 @@ async function startPurchaseCoins(pkgId){
       if(now - sess.lastInterstitialAt < RemoteConfig.ads.interstitialCooldownMs) return;
       sess.interstitialShown++; sess.lastInterstitialAt=now;
       const modal = $('#modal-interstitial'); const frame = $('#interstitial-frame');
-      logEvent('ad_impression',{placement:'interstitial', trigger});
-      // Try remote
-      let url = null; try{ const res = await Net.jget('/api/ads?placement=interstitial&province='+encodeURIComponent(Server.user.province||State.user.province)); url = res?.url||null; }catch{}
-      frame.src = url || 'about:blank';
-      if(!url){ frame.srcdoc = `<style>body{margin:0;display:flex;align-items:center;justify-content:center;background:#111;color:#fff;font-family:sans-serif}</style><div>تبلیغ محلی</div>`; }
+      const local = this.getLocalAd('interstitial');
+      logEvent('ad_impression',{placement:'interstitial', trigger, local:!!local});
+      if(local){
+        frame.src = local.creative;
+      } else {
+        let url = null; try{ const res = await Net.jget('/api/ads?placement=interstitial&province='+encodeURIComponent(Server.user.province||State.user.province)); url = res?.url||null; }catch{}
+        frame.src = url || 'about:blank';
+        if(!url){ frame.srcdoc = `<style>body{margin:0;display:flex;align-items:center;justify-content:center;background:#111;color:#fff;font-family:sans-serif}</style><div>تبلیغ محلی</div>`; }
+      }
       modal.classList.add('show');
       let closed=false;
       function close(){ if(closed) return; closed=true; modal.classList.remove('show'); frame.src='about:blank'; logEvent('ad_close',{placement:'interstitial'}); }
@@ -3068,9 +3112,14 @@ async function startPurchaseCoins(pkgId){
       if(Server.subscription.active){ toast('در VIP تبلیغات نمایش داده نمی‌شود'); return false; }
       sess.rewardedShown++;
       const modal = $('#modal-rewarded'); const vid = $('#rewarded-video'); const claim = $('#rewarded-claim'); const cd = $('#rewarded-countdown');
-      // Load remote url
-      let src = null; try{ const res = await Net.jget('/api/ads?placement=rewarded&province='+encodeURIComponent(Server.user.province||State.user.province)); src = res?.video||null; }catch{}
-      if(!src){ // tiny placeholder
+      const local = this.getLocalAd('rewarded');
+      let src = null;
+      if(local){
+        src = local.creative;
+      } else {
+        try{ const res = await Net.jget('/api/ads?placement=rewarded&province='+encodeURIComponent(Server.user.province||State.user.province)); src = res?.video||null; }catch{}
+      }
+      if(!src){
         vid.removeAttribute('src'); vid.querySelector('source').src=''; vid.load();
         cd.textContent = 'اسپانسر محلی — پخش نمادین';
       } else {
@@ -3517,18 +3566,22 @@ async function startPurchaseCoins(pkgId){
     try {
       // Simulate API call
       await wait(1500);
-      
-      // In a real app, this would be:
-      // const result = await Net.jpost('/api/ads/apply', { 
-      //   placement, budget, provinces, startDate, endDate, creative, landing 
-      // });
-      
+
+      // In a real app, this would be an API call
+      const ad = { placement, budget: Number(budget), provinces, startDate, endDate, creative, landing };
+      if(!State.ads[placement]) State.ads[placement] = [];
+      State.ads[placement].push(ad);
+      saveState();
+
       // Show success message
-      toast('<i class="fas fa-check-circle ml-2"></i>درخواست تبلیغ شما با موفقیت ارسال شد');
-      
+      toast('<i class="fas fa-check-circle ml-2"></i>درخواست تبلیغ شما با موفقیت ذخیره شد');
+
       // Reset form
       e.target.reset();
-      
+
+      // Refresh ads
+      AdManager.refreshAll();
+
       // Log analytics
       logEvent('ad_request_submitted', { category: 'advertiser', placement, budget });
     } catch (error) {
