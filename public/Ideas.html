@@ -1883,17 +1883,17 @@ patchPricingKeys(RemoteConfig);
   // ===== App State (legacy gameplay remains local) =====
   const STORAGE_KEY='quiz_webapp_pro_state_v2_fa';
   const State = {
-    user:{ id:'guest', name:'کاربر مهمان', avatar:'https://i.pravatar.cc/120?img=12', province:'تهران' },
+    user:{ id:'guest', name:'کاربر مهمان', avatar:'https://i.pravatar.cc/120?img=12', province:'تهران', group:'قهرمانان دانش' },
     score:0, coins:120, lives:3, vip:false, // vip will be overridden by server
     streak:0, lastClaim:0, boostUntil:0,
     theme:'ocean',
     achievements:{ firstWin:false, tenCorrect:false, streak3:false, vipBought:false },
     settings:{ sound:true, haptics:true },
     leaderboard:[
-      { id:'u1', name:'آرتین', score:18200 },
-      { id:'u2', name:'سمانه', score:16500 },
-      { id:'u3', name:'مانی', score:14950 },
-      { id:'u4', name:'نیکا', score:13200 },
+      { id:'u1', name:'آرتین', score:18200, province:'تهران', group:'قهرمانان دانش' },
+      { id:'u2', name:'سمانه', score:16500, province:'اصفهان', group:'متفکران جوان' },
+      { id:'u3', name:'مانی', score:14950, province:'خراسان رضوی', group:'چالش‌برانگیزان' },
+      { id:'u4', name:'نیکا', score:13200, province:'فارس', group:'دانش‌آموزان نخبه' },
     ],
     provinces: [
       { id: 'p1', name: 'تهران', score: 18500, members: 124, manager: 'علی رضایی', region: 'مرکز' },
@@ -2311,7 +2311,7 @@ patchPricingKeys(RemoteConfig);
       row.innerHTML=`<div class="flex items-center gap-3">${rankIcon}
         <div><div class="font-bold">${u.name}</div>
         <div class="text-xs opacity-80 flex items-center gap-1"><i class="fas fa-star text-yellow-300"></i><span>${faNum(u.score)}</span></div></div></div>`;
-      row.addEventListener('click', () => showUserDetail(u));
+      row.addEventListener('click', () => showUserDetail({...u, nationalRank:i+1}));
       wrap.appendChild(row);
     });
     
@@ -2353,6 +2353,9 @@ patchPricingKeys(RemoteConfig);
   }
   
   function showUserDetail(user) {
+    const all = [...State.leaderboard, { id: State.user.id, name: State.user.name, score: State.score, province: State.user.province, group: State.user.group }].sort((a,b)=>b.score-a.score);
+    const nationalRank = user.nationalRank || (all.findIndex(x => x.id === user.id) + 1);
+    const provinceRank = all.filter(x => x.province === user.province).sort((a,b)=>b.score-a.score).findIndex(x => x.id === user.id) + 1;
     const content = `
       <div class="flex flex-col items-center mb-4">
         <img src="${user.avatar || `https://i.pravatar.cc/120?u=${encodeURIComponent(user.name)}`}" class="w-20 h-20 rounded-full border-4 border-white/30 shadow-lg mb-3" alt="avatar">
@@ -2360,8 +2363,12 @@ patchPricingKeys(RemoteConfig);
         <div class="text-sm opacity-80 mt-1">کاربر فعال</div>
       </div>
       <div class="space-y-3">
-        <div class="flex justify-between items-center glass rounded-xl p-3"><span class="opacity-80">امتیاز کل</span><span class="font-bold text-yellow-300">${faNum(user.score)}</span></div>
-        <div class="flex justify-between items-center glass rounded-xl p-3"><span class="opacity-80">تاریخ عضویت</span><span class="font-bold">۱۴۰۲/۰۱/۱۵</span></div>
+        <div class="flex justify-between items-center glass rounded-xl p-3"><span class="opacity-80 flex items-center gap-2"><i class="fas fa-star text-yellow-300"></i>امتیاز کل</span><span class="font-bold text-yellow-300">${faNum(user.score)}</span></div>
+        <div class="flex justify-between items-center glass rounded-xl p-3"><span class="opacity-80 flex items-center gap-2"><i class="fas fa-map-marker-alt text-pink-400"></i>استان</span><span class="font-bold">${user.province || '—'}</span></div>
+        <div class="flex justify-between items-center glass rounded-xl p-3"><span class="opacity-80 flex items-center gap-2"><i class="fas fa-users text-blue-300"></i>گروه</span><span class="font-bold">${user.group || '—'}</span></div>
+        <div class="flex justify-between items-center glass rounded-xl p-3"><span class="opacity-80 flex items-center gap-2"><i class="fas fa-globe text-yellow-300"></i>رتبه کشوری</span><span class="font-bold text-yellow-300">${faNum(nationalRank)}</span></div>
+        <div class="flex justify-between items-center glass rounded-xl p-3"><span class="opacity-80 flex items-center gap-2"><i class="fas fa-flag text-green-300"></i>رتبه استانی</span><span class="font-bold text-green-300">${faNum(provinceRank)}</span></div>
+        <div class="flex justify-between items-center glass rounded-xl p-3"><span class="opacity-80 flex items-center gap-2"><i class="fas fa-calendar-alt"></i>تاریخ عضویت</span><span class="font-bold">${user.joined || '۱۴۰۲/۰۱/۱۵'}</span></div>
       </div>`;
     showDetailPopup('جزئیات کاربر', content);
   }
