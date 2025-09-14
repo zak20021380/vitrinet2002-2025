@@ -11,6 +11,20 @@ exports.getLoyaltyStores = async (req, res) => {
   }
 };
 
+// دریافت پیشرفت فعلی وفاداری برای یک فروشگاه
+exports.getProgress = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const { storeId } = req.params;
+    if (!storeId) return res.status(400).json({ message: 'storeId is required' });
+
+    const loyalty = await Loyalty.findOne({ userId, storeId });
+    res.json({ completed: loyalty?.completed || 0 });
+  } catch (err) {
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
 // بروزرسانی یا ایجاد رکورد وفاداری برای کاربر
 exports.updateLoyalty = async (req, res) => {
   try {
