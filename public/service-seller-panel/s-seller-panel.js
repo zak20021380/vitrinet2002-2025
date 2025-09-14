@@ -1356,7 +1356,10 @@ destroy() {
         document.title = `پنل فروشنده - ${activeNav?.textContent.trim() || 'داشبورد'}`;
         this.renderPageContent(page);
       } else {
-        document.getElementById('dashboard-view').classList.add('active'); // Fallback
+        const dashboardView = document.getElementById('dashboard-view');
+        if (dashboardView) {
+          dashboardView.classList.add('active');
+        }
       }
       if (activeNav) {
         activeNav.classList.add('active');
@@ -1912,6 +1915,9 @@ async initServices() {
     renderServicesList() {
         const services = StorageManager.get('vit_services') || [];
         const container = document.getElementById('services-list');
+        if (!container) {
+            return;
+        }
         container.innerHTML = services.length === 0 ? '<p>هیچ خدمتی تعریف نشده است.</p>' : services.map(service => `
             <div class="item-card" data-id="${service.id}">
                 <div class="item-card-header">
