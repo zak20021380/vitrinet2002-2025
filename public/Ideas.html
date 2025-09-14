@@ -1067,48 +1067,8 @@
         <div class="space-y-4">
           <div class="text-center">
             <p class="mb-4">گروه خود را برای مسابقه انتخاب کنید</p>
-            <div class="space-y-3 max-h-80 overflow-y-auto pr-2">
-              <div class="location-card" data-group="1">
-                <div class="location-icon group-icon"><i class="fas fa-users"></i></div>
-                <div class="flex-1">
-                  <div class="font-bold">قهرمانان دانش</div>
-                  <div class="text-sm opacity-80 flex items-center gap-1"><i class="fas fa-user"></i><span>مدیر: علی رضایی</span></div>
-                </div>
-                <div class="text-sm font-bold text-purple-300"><i class="fas fa-trophy"></i> ۲۲,۱۰۰</div>
-              </div>
-              <div class="location-card" data-group="2">
-                <div class="location-icon group-icon"><i class="fas fa-users"></i></div>
-                <div class="flex-1">
-                  <div class="font-bold">متفکران جوان</div>
-                  <div class="text-sm opacity-80 flex items-center gap-1"><i class="fas fa-user"></i><span>مدیر: سارا محمدی</span></div>
-                </div>
-                <div class="text-sm font-bold text-purple-300"><i class="fas fa-trophy"></i> ۱۹,۸۰۰</div>
-              </div>
-              <div class="location-card" data-group="3">
-                <div class="location-icon group-icon"><i class="fas fa-users"></i></div>
-                <div class="flex-1">
-                  <div class="font-bold">چالش‌برانگیزان</div>
-                  <div class="text-sm opacity-80 flex items-center gap-1"><i class="fas fa-user"></i><span>مدیر: رضا قاسمی</span></div>
-                </div>
-                <div class="text-sm font-bold text-purple-300"><i class="fas fa-trophy"></i> ۲۰,۵۰۰</div>
-              </div>
-              <div class="location-card" data-group="4">
-                <div class="location-icon group-icon"><i class="fas fa-users"></i></div>
-                <div class="flex-1">
-                  <div class="font-bold">دانش‌آموزان نخبه</div>
-                  <div class="text-sm opacity-80 flex items-center gap-1"><i class="fas fa-user"></i><span>مدیر: مریم احمدی</span></div>
-                </div>
-                <div class="text-sm font-bold text-purple-300"><i class="fas fa-trophy"></i> ۱۸,۷۰۰</div>
-              </div>
-              <div class="location-card" data-group="5">
-                <div class="location-icon group-icon"><i class="fas fa-users"></i></div>
-                <div class="flex-1">
-                  <div class="font-bold">پیشروان علم</div>
-                  <div class="text-sm opacity-80 flex items-center gap-1"><i class="fas fa-user"></i><span>مدیر: امیر حسینی</span></div>
-                </div>
-                <div class="text-sm font-bold text-purple-300"><i class="fas fa-trophy"></i> ۲۱,۳۰۰</div>
-              </div>
-            </div>
+            <button id="btn-create-group" class="btn btn-group w-full mb-4"><i class="fas fa-plus ml-2"></i> ایجاد گروه جدید</button>
+            <div id="group-select-list" class="space-y-3 max-h-80 overflow-y-auto pr-2"></div>
           </div>
         </div>
       </div>
@@ -1891,11 +1851,11 @@ patchPricingKeys(RemoteConfig);
       { id: 'p5', name: 'کردستان', score: 15900, members: 105, manager: 'امیر حسینی', region: 'غرب' },
     ],
     groups: [
-      { id: 'g1', name: 'قهرمانان دانش', score: 22100, members: 24, admin: 'علی رضایی', created: '۱۴۰۲/۰۲/۱۵' },
-      { id: 'g2', name: 'متفکران جوان', score: 19800, members: 18, admin: 'سارا محمدی', created: '۱۴۰۲/۰۳/۲۰' },
-      { id: 'g3', name: 'چالش‌برانگیزان', score: 20500, members: 21, admin: 'رضا قاسمی', created: '۱۴۰۲/۰۱/۱۰' },
-      { id: 'g4', name: 'دانش‌آموزان نخبه', score: 18700, members: 15, admin: 'مریم احمدی', created: '۱۴۰۲/۰۴/۰۵' },
-      { id: 'g5', name: 'پیشروان علم', score: 21300, members: 27, admin: 'امیر حسینی', created: '۱۴۰۲/۰۲/۲۸' },
+      { id: 'g1', name: 'قهرمانان دانش', score: 22100, members: 24, admin: 'علی رضایی', created: '۱۴۰۲/۰۲/۱۵', memberList: [], requests: [] },
+      { id: 'g2', name: 'متفکران جوان', score: 19800, members: 18, admin: 'سارا محمدی', created: '۱۴۰۲/۰۳/۲۰', memberList: [], requests: [] },
+      { id: 'g3', name: 'چالش‌برانگیزان', score: 20500, members: 21, admin: 'رضا قاسمی', created: '۱۴۰۲/۰۱/۱۰', memberList: [], requests: [] },
+      { id: 'g4', name: 'دانش‌آموزان نخبه', score: 18700, members: 15, admin: 'مریم احمدی', created: '۱۴۰۲/۰۴/۰۵', memberList: [], requests: [] },
+      { id: 'g5', name: 'پیشروان علم', score: 21300, members: 27, admin: 'امیر حسینی', created: '۱۴۰۲/۰۲/۲۸', memberList: [], requests: [] },
     ],
     ads: { banner: [], native: [], interstitial: [], rewarded: [] },
     quiz:{
@@ -2428,7 +2388,10 @@ patchPricingKeys(RemoteConfig);
   }
   
   function showGroupDetail(group) {
-    const content = `
+    const isAdmin = group.admin === State.user.name;
+    const isMember = State.user.group === group.name;
+    const requested = group.requests?.includes(State.user.id);
+    let content = `
       <div class="flex flex-col items-center mb-4">
         <div class="w-20 h-20 rounded-full bg-gradient-to-r from-purple-400 to-indigo-500 flex items-center justify-center mb-3"><i class="fas fa-users text-white text-2xl"></i></div>
         <h4 class="text-xl font-bold">${group.name}</h4>
@@ -2438,7 +2401,82 @@ patchPricingKeys(RemoteConfig);
         <div class="flex justify-between items-center glass rounded-xl p-3"><span class="opacity-80">امتیاز کل</span><span class="font-bold text-purple-300">${faNum(group.score)}</span></div>
         <div class="flex justify-between items-center glass rounded-xl p-3"><span class="opacity-80">تعداد اعضا</span><span class="font-bold">${faNum(group.members)}</span></div>
       </div>`;
+
+    if (isAdmin) {
+      const membersHtml = (group.memberList || []).map(m=>`<div class="glass rounded-xl p-2 text-sm">${m}</div>`).join('');
+      content += `
+        <div class="mt-4">
+          <input id="new-member-name" class="form-input mb-2" placeholder="نام عضو جدید">
+          <button id="btn-add-member" class="btn btn-group w-full"><i class="fas fa-user-plus ml-2"></i> افزودن عضو</button>
+          <div id="member-list" class="space-y-2 mt-4">${membersHtml}</div>
+        </div>`;
+    } else if (!isMember) {
+      content += `
+        <button id="btn-join-group" class="btn btn-group w-full mt-4" ${requested ? 'disabled' : ''}>
+          <i class="fas fa-user-plus ml-2"></i> ${requested ? 'در انتظار تایید' : 'درخواست عضویت'}
+        </button>`;
+    }
+
     showDetailPopup('جزئیات گروه', content);
+
+    $('#btn-join-group')?.addEventListener('click', () => requestJoinGroup(group.id));
+    $('#btn-add-member')?.addEventListener('click', () => {
+      const name = $('#new-member-name').value.trim();
+      if(!name){ toast('نام عضو جدید را وارد کنید'); return; }
+      group.memberList = group.memberList || [];
+      group.memberList.push(name);
+      group.members += 1;
+      $('#member-list').innerHTML += `<div class="glass rounded-xl p-2 text-sm">${name}</div>`;
+      $('#new-member-name').value='';
+      toast(`عضو ${name} اضافه شد`);
+      renderGroupSelect();
+    });
+  }
+
+  function requestJoinGroup(groupId){
+    const group = State.groups.find(g=>g.id===groupId);
+    if(!group) return;
+    group.requests = group.requests || [];
+    if(group.requests.includes(State.user.id)){
+      toast('درخواست شما قبلا ثبت شده است');
+      return;
+    }
+    group.requests.push(State.user.id);
+    toast(`درخواست عضویت به ${group.name} ارسال شد`);
+    logEvent('group_join_request', { group: group.name });
+    closeDetailPopup();
+  }
+
+  function openCreateGroup(){
+    const content = `
+      <div class="space-y-4">
+        <input id="new-group-name" class="form-input" placeholder="نام گروه">
+        <textarea id="new-group-members" class="form-textarea" placeholder="نام اعضا را با ویرگول جدا کنید"></textarea>
+        <button id="btn-save-group" class="btn btn-group w-full"><i class="fas fa-check ml-2"></i> ایجاد گروه</button>
+      </div>`;
+    showDetailPopup('ایجاد گروه جدید', content);
+    $('#btn-save-group').addEventListener('click', () => {
+      const name = $('#new-group-name').value.trim();
+      const membersInput = $('#new-group-members').value.trim();
+      if(!name){ toast('نام گروه را وارد کنید'); return; }
+      const members = membersInput ? membersInput.split(/\s*,\s*/).filter(Boolean) : [];
+      const newGroup = {
+        id: 'g'+(State.groups.length+1),
+        name,
+        score: 0,
+        members: members.length + 1,
+        admin: State.user.name,
+        created: new Date().toLocaleDateString('fa-IR'),
+        memberList: [State.user.name, ...members],
+        requests: []
+      };
+      State.groups.push(newGroup);
+      State.user.group = name;
+      logEvent('group_created', { group: name });
+      toast('گروه با موفقیت ایجاد شد');
+      closeDetailPopup();
+      renderGroupSelect();
+    });
   }
   
   // ===== Quiz Flow (legacy) =====
@@ -3590,16 +3628,25 @@ async function startPurchaseCoins(pkgId){
   });
   
   // Group Selection
-  $$('[data-group]').forEach(card => {
-    card.addEventListener('click', () => {
-      const groupId = card.dataset.group;
-      const group = State.groups.find(g => g.id === groupId);
-      toast(`ثبت‌نام در مسابقه ${group.name} با موفقیت انجام شد!`);
-      
-      // Log analytics
-      logEvent('group_match_join', { group: group.name });
+  function renderGroupSelect() {
+    const list = $('#group-select-list');
+    if (!list) return;
+    list.innerHTML = '';
+    State.groups.forEach(g => {
+      const card = document.createElement('div');
+      card.className = 'location-card';
+      card.innerHTML = `
+        <div class="location-icon group-icon"><i class="fas fa-users"></i></div>
+        <div class="flex-1"><div class="font-bold">${g.name}</div>
+          <div class="text-sm opacity-80 flex items-center gap-1"><i class="fas fa-user"></i><span>مدیر: ${g.admin}</span></div>
+        </div>
+        <div class="text-sm font-bold text-purple-300"><i class="fas fa-trophy"></i> ${faNum(g.score)}</div>`;
+      card.addEventListener('click', () => showGroupDetail(g));
+      list.appendChild(card);
     });
-  });
+  }
+  renderGroupSelect();
+  $('#btn-create-group')?.addEventListener('click', openCreateGroup);
   
   // Back Buttons for New Pages
   $('#btn-back-duel')?.addEventListener('click', () => navTo('dashboard'));
