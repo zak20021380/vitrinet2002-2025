@@ -3336,19 +3336,19 @@ async function startPurchaseCoins(pkgId){
     e.preventDefault();
     showPaymentModal(btn.dataset.id);
   });
-  $('#btn-play').addEventListener('click', openSetupSheet);
-  $('#setup-close').addEventListener('click', closeSheet);
-  $('#btn-daily').addEventListener('click', startDaily);
-  $('#btn-back-lb').addEventListener('click', ()=> navTo('dashboard'));
-  $('#btn-back-shop').addEventListener('click', ()=> navTo('dashboard'));
-  $('#btn-quit').addEventListener('click', ()=>{ navTo('dashboard'); });
-  $('#btn-continue').addEventListener('click', ()=>{
+  $('#btn-play')?.addEventListener('click', openSetupSheet);
+  $('#setup-close')?.addEventListener('click', closeSheet);
+  $('#btn-daily')?.addEventListener('click', startDaily);
+  $('#btn-back-lb')?.addEventListener('click', ()=> navTo('dashboard'));
+  $('#btn-back-shop')?.addEventListener('click', ()=> navTo('dashboard'));
+  $('#btn-quit')?.addEventListener('click', ()=>{ navTo('dashboard'); });
+  $('#btn-continue')?.addEventListener('click', ()=>{
     if(State.coins>=10){ State.coins-=10; State.lives=1; saveState(); $('#btn-continue').classList.add('hidden'); renderTopBars();
       resetTimer(15); $$('#choices .choice').forEach(el=>{ el.classList.remove('wrong','correct','pointer-events-none','opacity-70'); el.style.opacity=''; el.style.pointerEvents=''; }); State.quiz.answered=false;
     } else { toast('<i class="fas fa-exclamation-circle ml-2"></i>سکه کافی نیست'); }
   });
-  $('#btn-claim-streak').addEventListener('click', claimStreak);
-  $('#btn-invite').addEventListener('click', ()=>{
+  $('#btn-claim-streak')?.addEventListener('click', claimStreak);
+  $('#btn-invite')?.addEventListener('click', ()=>{
     const link=`https://t.me/share/url?url=${encodeURIComponent('https://t.me/your_bot?start=ref_'+State.user.id)}&text=${encodeURIComponent('بیا تو مسابقه!')}`;
     try{
       if (navigator.share) {
@@ -3370,23 +3370,23 @@ async function startPurchaseCoins(pkgId){
   $$('nav [data-tab]').forEach(b=> b.addEventListener('click', e=>{
     const tab=e.currentTarget.dataset.tab; if(tab==='quiz'){ openSetupSheet(); } else navTo(tab);
   }));
-  $('#btn-settings').addEventListener('click', ()=>{
+  $('#btn-settings')?.addEventListener('click', ()=>{
     $('#set-sound').checked = !!State.settings.sound;
     $('#set-haptics').checked = !!State.settings.haptics;
     $('#set-theme').checked = (State.theme==='night');
     openModal('#modal-settings');
   });
-  $('#btn-theme').addEventListener('click', ()=>{
+  $('#btn-theme')?.addEventListener('click', ()=>{
     const next = (State.theme==='ocean')?'night':'ocean';
     State.theme=next; document.documentElement.setAttribute('data-theme', next); saveState();
   });
-  $('#btn-notify').addEventListener('click', ()=>{ renderNotifications(); openModal('#modal-notify'); });
-  $('[data-close="#modal-settings"]').addEventListener('click', ()=>closeModal('#modal-settings'));
-  $('[data-close="#modal-notify"]').addEventListener('click', ()=>closeModal('#modal-notify'));
-  $('#btn-edit-profile').addEventListener('click', ()=>{ $('#inp-name').value = State.user.name; $('#inp-avatar').value = State.user.avatar; openModal('#modal-profile'); });
-  $('[data-close="#modal-profile"]').addEventListener('click', ()=>closeModal('#modal-profile'));
-  $('#btn-save-profile').addEventListener('click', ()=>{ const n=$('#inp-name').value.trim(); const a=$('#inp-avatar').value.trim(); if(n) State.user.name=n; if(a) State.user.avatar=a; saveState(); renderHeader(); renderDashboard(); closeModal('#modal-profile'); toast('ذخیره شد ✅'); });
-  $('#btn-clear').addEventListener('click', ()=>{ if(confirm('همهٔ داده‌ها حذف شود؟')){ localStorage.removeItem(STORAGE_KEY); location.reload(); } });
+  $('#btn-notify')?.addEventListener('click', ()=>{ renderNotifications(); openModal('#modal-notify'); });
+  $('[data-close="#modal-settings"]')?.addEventListener('click', ()=>closeModal('#modal-settings'));
+  $('[data-close="#modal-notify"]')?.addEventListener('click', ()=>closeModal('#modal-notify'));
+  $('#btn-edit-profile')?.addEventListener('click', ()=>{ $('#inp-name').value = State.user.name; $('#inp-avatar').value = State.user.avatar; openModal('#modal-profile'); });
+  $('[data-close="#modal-profile"]')?.addEventListener('click', ()=>closeModal('#modal-profile'));
+  $('#btn-save-profile')?.addEventListener('click', ()=>{ const n=$('#inp-name').value.trim(); const a=$('#inp-avatar').value.trim(); if(n) State.user.name=n; if(a) State.user.avatar=a; saveState(); renderHeader(); renderDashboard(); closeModal('#modal-profile'); toast('ذخیره شد ✅'); });
+  $('#btn-clear')?.addEventListener('click', ()=>{ if(confirm('همهٔ داده‌ها حذف شود؟')){ localStorage.removeItem(STORAGE_KEY); location.reload(); } });
   
   // Leaderboard Tabs
   $$('.leaderboard-tab').forEach(tab => {
@@ -3445,42 +3445,42 @@ async function startPurchaseCoins(pkgId){
   });
   
   // Back Buttons for New Pages
-  $('#btn-back-duel').addEventListener('click', () => navTo('dashboard'));
-  $('#btn-back-province').addEventListener('click', () => navTo('dashboard'));
-  $('#btn-back-group').addEventListener('click', () => navTo('dashboard'));
-  $('#btn-back-pass-missions').addEventListener('click', () => navTo('dashboard'));
-  $('#btn-back-referral').addEventListener('click', () => navTo('dashboard'));
-  $('#btn-back-support').addEventListener('click', () => navTo('dashboard'));
+  $('#btn-back-duel')?.addEventListener('click', () => navTo('dashboard'));
+  $('#btn-back-province')?.addEventListener('click', () => navTo('dashboard'));
+  $('#btn-back-group')?.addEventListener('click', () => navTo('dashboard'));
+  $('#btn-back-pass-missions')?.addEventListener('click', () => navTo('dashboard'));
+  $('#btn-back-referral')?.addEventListener('click', () => navTo('dashboard'));
+  $('#btn-back-support')?.addEventListener('click', () => navTo('dashboard'));
   
   // Wallet/VIP navigation
-  $('#btn-open-wallet').addEventListener('click', ()=>navTo('wallet'));
-  $('#btn-open-wallet-2').addEventListener('click', ()=>navTo('wallet'));
-  $('#btn-open-vip').addEventListener('click', ()=>navTo('vip'));
-  $('#go-wallet').addEventListener('click', ()=>navTo('wallet'));
-  $('#go-vip').addEventListener('click', ()=>navTo('vip'));
-  $('#btn-back-wallet').addEventListener('click', ()=>navTo('shop'));
-  $('#btn-back-vip').addEventListener('click', ()=>navTo('shop'));
+  $('#btn-open-wallet')?.addEventListener('click', ()=>navTo('wallet'));
+  $('#btn-open-wallet-2')?.addEventListener('click', ()=>navTo('wallet'));
+  $('#btn-open-vip')?.addEventListener('click', ()=>navTo('vip'));
+  $('#go-wallet')?.addEventListener('click', ()=>navTo('wallet'));
+  $('#go-vip')?.addEventListener('click', ()=>navTo('vip'));
+  $('#btn-back-wallet')?.addEventListener('click', ()=>navTo('shop'));
+  $('#btn-back-vip')?.addEventListener('click', ()=>navTo('shop'));
   
   // Rewarded CTA
-  $('#btn-rewarded-coins').addEventListener('click', async ()=>{
+  $('#btn-rewarded-coins')?.addEventListener('click', async ()=>{
     const ok = await AdManager.showRewarded({reward:'coins', amount:20});
     if(ok) renderTopBars();
   });
   
   // VIP purchase buttons
-  $('#buy-vip-lite').addEventListener('click', ()=> startPurchaseVip('lite'));
-  $('#buy-vip-pro').addEventListener('click', ()=> startPurchaseVip('pro'));
+  $('#buy-vip-lite')?.addEventListener('click', ()=> startPurchaseVip('lite'));
+  $('#buy-vip-pro')?.addEventListener('click', ()=> startPurchaseVip('pro'));
   
   // Detail Popup Events
-  $('#detail-close').addEventListener('click', closeDetailPopup);
-  $('#detail-overlay').addEventListener('click', closeDetailPopup);
+  $('#detail-close')?.addEventListener('click', closeDetailPopup);
+  $('#detail-overlay')?.addEventListener('click', closeDetailPopup);
 
   // Close modals (receipt)
   $$('[data-close="#modal-receipt"]').forEach(b=> b.addEventListener('click', ()=>closeModal('#modal-receipt')));
   $$('[data-close="#modal-pay-confirm"]').forEach(b=> b.addEventListener('click', ()=>closeModal('#modal-pay-confirm')));
 
   // Game Limits CTAs
-  $('#btn-buy-energy').addEventListener('click', () => {
+  $('#btn-buy-energy')?.addEventListener('click', () => {
     if (State.coins >= 50) {
       State.coins -= 50;
       recoverGameResource('energy');
@@ -3493,29 +3493,29 @@ async function startPurchaseCoins(pkgId){
     }
   });
   
-  $('#btn-watch-energy').addEventListener('click', async () => {
+  $('#btn-watch-energy')?.addEventListener('click', async () => {
     const ok = await AdManager.showRewarded({reward:'energy', amount:1});
     if (ok) {
       renderDashboard();
     }
   });
   
-  $('#btn-buy-vip-limit').addEventListener('click', () => {
+  $('#btn-buy-vip-limit')?.addEventListener('click', () => {
     navTo('vip');
   });
   
   // Province Pass
-  $('#btn-view-missions').addEventListener('click', () => {
+  $('#btn-view-missions')?.addEventListener('click', () => {
     navTo('pass-missions');
   });
   
   // Referral
-  $('#btn-copy-referral').addEventListener('click', () => {
+  $('#btn-copy-referral')?.addEventListener('click', () => {
     navigator.clipboard.writeText(State.referral.code);
     toast('<i class="fas fa-check-circle ml-2"></i>کد دعوت کپی شد!');
   });
   
-  $('#btn-share-referral').addEventListener('click', () => {
+  $('#btn-share-referral')?.addEventListener('click', () => {
     const link = `https://t.me/your_bot?start=ref_${State.user.id}`;
     const text = `با کد دعوت من در Quiz WebApp Pro ثبت‌نام کن و جایزه بگیر! کد: ${State.referral.code}`;
     
@@ -3550,7 +3550,7 @@ async function startPurchaseCoins(pkgId){
   });
   
   // Support Form
-  $('#support-form').addEventListener('submit', async (e) => {
+  $('#support-form')?.addEventListener('submit', async (e) => {
     e.preventDefault();
     
     const name = $('#support-name').value.trim();
@@ -3601,7 +3601,7 @@ async function startPurchaseCoins(pkgId){
   });
   
   // Advertiser Form
-  $('#advertiser-form').addEventListener('submit', async (e) => {
+  $('#advertiser-form')?.addEventListener('submit', async (e) => {
     e.preventDefault();
     
     const placement = $('#ad-placement').value;
@@ -3659,14 +3659,14 @@ async function startPurchaseCoins(pkgId){
   });
   
   // Share Result
-  $('#btn-share').addEventListener('click', shareResult);
-  $('#btn-again').addEventListener('click', openSetupSheet);
-  $('#btn-back-results').addEventListener('click', ()=> navTo('dashboard'));
+  $('#btn-share')?.addEventListener('click', shareResult);
+  $('#btn-again')?.addEventListener('click', openSetupSheet);
+  $('#btn-back-results')?.addEventListener('click', ()=> navTo('dashboard'));
   
   // Lifeline buttons
-  $('#life-5050').addEventListener('click', life5050);
-  $('#life-skip').addEventListener('click', lifeSkip);
-  $('#life-pause').addEventListener('click', lifePause);
+  $('#life-5050')?.addEventListener('click', life5050);
+  $('#life-skip')?.addEventListener('click', lifeSkip);
+  $('#life-pause')?.addEventListener('click', lifePause);
   
   // Active Match Actions
   $$('.match-action').forEach(btn => {
