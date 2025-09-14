@@ -1001,6 +1001,14 @@
         <div class="space-y-4">
           <div class="text-center">
             <p class="mb-4">حریف خود را برای نبرد انتخاب کنید</p>
+            <div class="flex flex-wrap justify-center gap-3 mb-4">
+              <button id="btn-duel-random" class="btn btn-duel w-auto px-5 py-2 flex items-center gap-2">
+                <i class="fas fa-shuffle"></i><span>حریف تصادفی</span>
+              </button>
+              <button id="btn-duel-link" class="btn btn-tertiary w-auto px-5 py-2 flex items-center gap-2">
+                <i class="fas fa-link"></i><span>لینک دعوت</span>
+              </button>
+            </div>
             <div class="space-y-3 max-h-80 overflow-y-auto pr-2">
               <div class="duel-opponent glass rounded-2xl p-4 flex items-center justify-between">
                 <div class="flex items-center gap-3">
@@ -3462,12 +3470,34 @@ async function startPurchaseCoins(pkgId){
     btn.addEventListener('click', (e) => {
       const opponentName = e.currentTarget.closest('.duel-opponent').querySelector('.font-bold').textContent;
       toast(`چالش به ${opponentName} ارسال شد!`);
-      
+
       // Log analytics
       logEvent('duel_start', { opponent: opponentName });
     });
   });
-  
+
+  // Random Opponent
+  $('#btn-duel-random')?.addEventListener('click', () => {
+    const names = $$('.duel-opponent .font-bold').map(el => el.textContent.trim());
+    if (!names.length) return;
+    const opponentName = names[Math.floor(Math.random() * names.length)];
+    toast(`چالش رندوم به ${opponentName} ارسال شد!`);
+    logEvent('duel_random', { opponent: opponentName });
+  });
+
+  // Invite Link Copy
+  $('#btn-duel-link')?.addEventListener('click', async () => {
+    const inviter = (State && State.profile && State.profile.name) ? State.profile.name : 'guest';
+    const link = `${location.origin}${location.pathname}?duel_invite=${encodeURIComponent(inviter)}`;
+    try {
+      await navigator.clipboard.writeText(link);
+      toast('لینک دعوت کپی شد ✅');
+    } catch {
+      prompt('این لینک را کپی کنید:', link);
+    }
+    logEvent('duel_invite_link');
+  });
+
   // Province Selection
   $$('[data-province]').forEach(card => {
     card.addEventListener('click', () => {
