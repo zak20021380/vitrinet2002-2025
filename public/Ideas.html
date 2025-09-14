@@ -411,6 +411,13 @@
                 <i class="fas fa-users text-blue-300"></i>
                 <span>گروه شما: <span id="user-group">—</span></span>
               </div>
+              <div class="flex items-center gap-1">
+                <i class="fas fa-swords text-rose-300"></i>
+                <div class="flex flex-wrap items-center gap-2">
+                  <span class="chip text-green-300 bg-green-500/20 border-green-500/30"><i class="fas fa-trophy"></i><span id="duel-wins">۰</span> برد</span>
+                  <span class="chip text-rose-300 bg-rose-500/20 border-rose-500/30"><i class="fas fa-skull"></i><span id="duel-losses">۰</span> باخت</span>
+                </div>
+              </div>
             </div>
           </div>
           <button id="btn-edit-profile" class="px-3 py-2 rounded-xl bg-white/10 border border-white/20 hover:bg-white/20 transition">ویرایش</button>
@@ -1901,6 +1908,8 @@ patchPricingKeys(RemoteConfig);
     streak:0, lastClaim:0, boostUntil:0,
     theme:'ocean',
     duelOpponent:null,
+    duelWins:0,
+    duelLosses:0,
     achievements:{ firstWin:false, tenCorrect:false, streak3:false, vipBought:false },
     settings:{ sound:true, haptics:true },
     leaderboard:[
@@ -2297,6 +2306,8 @@ patchPricingKeys(RemoteConfig);
     $('#rank-province').textContent = provIdx>=0 ? faNum(provIdx+1) : '—';
     $('#user-province').textContent = me.province || '—';
     $('#user-group').textContent = State.user.group || '—';
+    $('#duel-wins').textContent = faNum(State.duelWins);
+    $('#duel-losses').textContent = faNum(State.duelLosses);
 
     // Update limits UI
     updateLimitsUI();
@@ -2604,11 +2615,18 @@ patchPricingKeys(RemoteConfig);
       $('#duel-avatar-opponent').src = State.duelOpponent.avatar || '';
       $('#duel-name-opponent').textContent = oppName;
       let winnerText = 'مسابقه مساوی شد!';
-      if (yourEarned > opponentEarned) winnerText = `${youName} برنده شد!`;
-      else if (yourEarned < opponentEarned) winnerText = `${oppName} برنده شد!`;
+      if (yourEarned > opponentEarned) {
+        winnerText = `${youName} برنده شد!`;
+        State.duelWins++;
+      }
+      else if (yourEarned < opponentEarned) {
+        winnerText = `${oppName} برنده شد!`;
+        State.duelLosses++;
+      }
       $('#duel-winner').textContent = winnerText;
       $('#duel-stats').innerHTML = `${youName}: ${faNum(yourCorrect)} درست، ${faNum(yourWrong)} نادرست، ${faNum(yourEarned)} امتیاز<br>${oppName}: ${faNum(opponentCorrect)} درست، ${faNum(opponentWrong)} نادرست، ${faNum(opponentEarned)} امتیاز`;
       $('#duel-result').classList.remove('hidden');
+      renderDashboard();
     } else {
       $('#duel-result').classList.add('hidden');
     }
