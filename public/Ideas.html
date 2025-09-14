@@ -136,6 +136,22 @@
     .status-open{ background:rgba(251,191,36,0.2); color:var(--accent1) }
     .status-closed{ background:rgba(16,185,129,0.2); color:#10b981 }
     .status-pending{ background:rgba(167,139,250,0.2); color:#a78bfa }
+    .advertiser-form{ background:rgba(255,255,255,0.05); padding:1.5rem; border-radius:1.5rem; border:1px solid rgba(255,255,255,0.2); }
+    .advertiser-form .form-input,
+    .advertiser-form .form-textarea,
+    .advertiser-form select{
+      background:rgba(255,255,255,0.15);
+      border:1px solid rgba(255,255,255,0.3);
+      transition:all .3s ease;
+    }
+    .advertiser-form .form-input:focus,
+    .advertiser-form .form-textarea:focus,
+    .advertiser-form select:focus{
+      background:rgba(255,255,255,0.25);
+      border-color:var(--accent1);
+      box-shadow:0 0 0 3px rgba(251,146,60,0.4);
+      outline:none;
+    }
     /* Loading skeleton */
     .skeleton{ background:linear-gradient(90deg, rgba(255,255,255,0.05) 25%, rgba(255,255,255,0.1) 50%, rgba(255,255,255,0.05) 75%); background-size:200% 100%; animation:skeleton-loading 1.5s infinite }
     @keyframes skeleton-loading{ 0%{ background-position:200% 0 } 100%{ background-position:-200% 0 } }
@@ -647,6 +663,9 @@
           کد تخفیف: <span class="font-mono bg-white/20 px-2 py-1 rounded">SANANDAJ10</span>
         </div>
       </div>
+      <button id="btn-advertisers" class="btn btn-tertiary w-full">
+        تبلیغ‌دهندگان
+      </button>
     </section>
     
     <!-- QUIZ -->
@@ -1376,12 +1395,12 @@
         
         <!-- Advertiser Content -->
         <div id="advertiser-content" class="tab-content hidden">
-          <div class="mb-6">
-            <h4 class="font-bold mb-3 flex items-center gap-2">
+          <div class="mb-6 glass rounded-2xl p-6">
+            <h4 class="font-bold mb-4 flex items-center gap-2">
               <i class="fas fa-bullhorn text-green-300"></i>
               <span>درخواست تبلیغ</span>
             </h4>
-            <form id="advertiser-form" class="space-y-4">
+            <form id="advertiser-form" class="space-y-4 advertiser-form">
               <div class="form-group">
                 <label class="form-label" for="ad-placement">نوع تبلیغ</label>
                 <select id="ad-placement" class="form-input" required>
@@ -3289,7 +3308,7 @@ async function startPurchaseCoins(pkgId){
   $('#btn-claim-streak').addEventListener('click', claimStreak);
   $('#btn-invite').addEventListener('click', ()=>{
     const link=`https://t.me/share/url?url=${encodeURIComponent('https://t.me/your_bot?start=ref_'+State.user.id)}&text=${encodeURIComponent('بیا تو مسابقه!')}`;
-    try{ 
+    try{
       if (navigator.share) {
         navigator.share({
           title: 'دعوت به مسابقه',
@@ -3297,9 +3316,13 @@ async function startPurchaseCoins(pkgId){
           url: `https://t.me/your_bot?start=ref_${State.user.id}`
         });
       } else {
-        window.open(link,'_blank'); 
+        window.open(link,'_blank');
       }
     }catch{ navigator.clipboard.writeText(link); toast('<i class="fas fa-check-circle ml-2"></i>لینک کپی شد'); }
+  });
+  $('#btn-advertisers')?.addEventListener('click', ()=>{
+    navTo('support');
+    document.querySelector('.support-tab[data-tab="advertiser"]')?.click();
   });
   $$('[data-buy]').forEach(b=> b.addEventListener('click', e=> buy(e.currentTarget.dataset.buy)));
   $$('[data-tab]').forEach(b=> b.addEventListener('click', e=>{
