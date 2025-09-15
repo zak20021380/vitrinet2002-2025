@@ -496,11 +496,15 @@
               </div>
               <span class="text-sm"><span id="lives-used">0</span>/<span id="lives-limit">3</span></span>
             </div>
-          <div class="limit-bar">
-            <div id="lives-progress" class="limit-progress" style="width:0%"></div>
+            <div class="limit-bar">
+              <div id="lives-progress" class="limit-progress" style="width:0%"></div>
+            </div>
+            <div class="mt-1">
+              <button id="btn-duel-limit" class="btn btn-duel text-xs w-full py-2">
+                <i class="fas fa-hand-fist ml-1"></i> نبرد تن به تن
+              </button>
+            </div>
           </div>
-          <div class="text-xs opacity-70 mt-1" id="lives-recovery-timer">بازیابی بعدی: --:--</div>
-        </div>
         </div>
         
         <!-- Limit Reached CTAs (hidden by default) -->
@@ -509,6 +513,10 @@
           <button id="btn-buy-vip-limit" class="btn btn-tertiary text-sm w-full px-4 py-3">
             <i class="fas fa-crown ml-2"></i> خرید VIP و افزایش محدودیت‌ها
           </button>
+          <div class="flex items-center gap-2">
+            <input id="reset-limit-key" type="text" placeholder="کلید ریست" class="flex-1 bg-white/10 border border-white/20 rounded-xl px-3 py-2 text-xs" />
+            <button id="btn-reset-limits" class="btn btn-secondary text-xs px-4 py-2">ریست</button>
+          </div>
         </div>
       </div>
       
@@ -2163,23 +2171,7 @@ patchPricingKeys(RemoteConfig);
   
   function updateRecoveryTimers() {
     const now = Date.now();
-    
-    // Lives recovery
-    if (Server.limits.lives.used > 0) {
-      const livesRecoveryTime = RemoteConfig.gameLimits.lives.recoveryTime;
-      const timeUntilLivesRecovery = livesRecoveryTime - (now - Server.limits.lives.lastRecovery);
-      
-      if (timeUntilLivesRecovery > 0) {
-        const minutes = Math.floor(timeUntilLivesRecovery / (1000 * 60));
-        const seconds = Math.floor((timeUntilLivesRecovery % (1000 * 60)) / 1000);
-        $('#lives-recovery-timer').textContent = `بازیابی بعدی: ${faNum(minutes)}:${faNum(seconds).padStart(2, '0')}`;
-      } else {
-        $('#lives-recovery-timer').textContent = 'بازیابی بعدی: اکنون';
-      }
-    } else {
-      $('#lives-recovery-timer').textContent = 'بازیابی بعدی: --:--';
-    }
-    
+
     // Energy recovery
     const energyTimer = $('#energy-recovery-timer');
     if (energyTimer) {
@@ -3851,6 +3843,48 @@ async function startPurchaseCoins(pkgId){
   // Game Limits CTAs
   $('#btn-buy-vip-limit')?.addEventListener('click', () => {
     navTo('vip');
+  });
+
+  $('#btn-duel-limit')?.addEventListener('click', () => {
+    navTo('duel');
+  });
+
+  $('#btn-reset-limits')?.addEventListener('click', async () => {
+    const keyInput = $('#reset-limit-key');
+    const key = keyInput?.value.trim();
+    if (!key) return;
+    const btn = $('#btn-reset-limits');
+    btn.disabled = true;
+    try {
+      const res = await fetch('/api/limits/reset', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ key })
+      });
+      const data = await res.json();
+      if (res.ok && data?.success) {
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        const t = today.getTime();
+        Server.limits.matches.used = 0;
+        Server.limits.lives.used = 0;
+        Server.limits.energy.used = 0;
+        Server.limits.matches.lastReset = t;
+        Server.limits.lives.lastReset = t;
+        Server.limits.energy.lastReset = t;
+        updateLimitsUI();
+        checkLimitsReached();
+        saveState();
+        keyInput.value = '';
+        toast('<i class="fas fa-check-circle ml-2"></i>محدودیت‌ها ریست شد');
+      } else {
+        toast(data?.message || 'کلید نامعتبر است');
+      }
+    } catch {
+      toast('خطا در ارتباط با سرور');
+    } finally {
+      btn.disabled = false;
+    }
   });
   
   // Province Ranking
