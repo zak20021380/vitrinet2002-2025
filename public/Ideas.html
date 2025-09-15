@@ -1500,6 +1500,13 @@
           <span>تم شب (Night)</span>
           <input type="checkbox" id="set-theme" class="w-5 h-5 accent-emerald-400">
         </label>
+        <div>
+          <label class="flex items-center justify-between">
+            <span>غیرفعال کردن درخواست نبرد</span>
+            <input type="checkbox" id="set-block-duels" class="w-5 h-5 accent-emerald-400">
+          </label>
+          <p class="text-xs opacity-70 mt-1 pr-1">با فعال کردن این گزینه، هیچ درخواست نبرد تن‌به‌تن دریافت نخواهید کرد.</p>
+        </div>
       </div>
       <div class="divider"></div>
       <button id="btn-clear" class="w-full py-3 rounded-xl bg-white/10 border border-white/20">پاک‌سازی داده‌ها (ریست)</button>
@@ -1952,7 +1959,7 @@ patchPricingKeys(RemoteConfig);
     duelWins:0,
     duelLosses:0,
     achievements:{ firstWin:false, tenCorrect:false, streak3:false, vipBought:false },
-    settings:{ sound:true, haptics:true },
+    settings:{ sound:true, haptics:true, blockDuels:false },
     leaderboard:[
       { id:'u1', name:'آرتین', score:18200, province:'تهران', group:'قهرمانان دانش' },
       { id:'u2', name:'سمانه', score:16500, province:'اصفهان', group:'متفکران جوان' },
@@ -2014,7 +2021,13 @@ patchPricingKeys(RemoteConfig);
   
   loadState();
   document.documentElement.setAttribute('data-theme', State.theme || 'ocean');
-  
+
+  const qs = new URLSearchParams(location.search);
+  const duelInviter = qs.get('duel_invite');
+  if(duelInviter && !State.settings.blockDuels){
+    toast(`${duelInviter} شما را به نبرد دعوت کرده است!`);
+  }
+
   // Telegram WebApp (optional)
   try{
     if(window.Telegram && Telegram.WebApp){
@@ -3510,6 +3523,7 @@ async function startPurchaseCoins(pkgId){
   function closeModal(sel){ const m=$(sel); m.classList.remove('show'); }
   $('#set-sound')?.addEventListener('change', e=>{ State.settings.sound = e.target.checked; saveState(); });
   $('#set-haptics')?.addEventListener('change', e=>{ State.settings.haptics = e.target.checked; saveState(); });
+  $('#set-block-duels')?.addEventListener('change', e=>{ State.settings.blockDuels = e.target.checked; saveState(); });
   $('#set-theme')?.addEventListener('change', e=>{
     const night = e.target.checked; State.theme = night ? 'night' : 'ocean';
     document.documentElement.setAttribute('data-theme', State.theme); saveState();
@@ -3683,6 +3697,7 @@ async function startPurchaseCoins(pkgId){
   $('#btn-settings')?.addEventListener('click', ()=>{
     $('#set-sound').checked = !!State.settings.sound;
     $('#set-haptics').checked = !!State.settings.haptics;
+    $('#set-block-duels').checked = !!State.settings.blockDuels;
     $('#set-theme').checked = (State.theme==='night');
     openModal('#modal-settings');
   });
