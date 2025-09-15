@@ -500,8 +500,8 @@
               <div id="duels-progress" class="limit-progress" style="width:0%"></div>
             </div>
             <div class="mt-1">
-              <button id="btn-duel-limit" class="btn btn-duel text-xs w-full py-2">
-                <i class="fas fa-hand-fist ml-1"></i> نبرد تن به تن
+              <button id="btn-reset-duel-limit" class="btn btn-secondary text-xs w-full py-2">
+                <i class="fas fa-key ml-1"></i> ریست با کلید
               </button>
             </div>
           </div>
@@ -3844,8 +3844,26 @@ async function startPurchaseCoins(pkgId){
     navTo('vip');
   });
 
-  $('#btn-duel-limit')?.addEventListener('click', () => {
-    navTo('duel');
+  $('#btn-reset-duel-limit')?.addEventListener('click', () => {
+    if (State.lives <= 0) {
+      toast('کلید کافی نیست');
+      return;
+    }
+    if (Server.limits.lives.used === 0) {
+      toast('نیازی به ریست نیست');
+      return;
+    }
+    State.lives -= 1;
+    renderTopBars();
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const t = today.getTime();
+    Server.limits.lives.used = 0;
+    Server.limits.lives.lastReset = t;
+    updateLimitsUI();
+    checkLimitsReached();
+    saveState();
+    toast('<i class="fas fa-check-circle ml-2"></i>محدودیت نبرد ریست شد');
   });
 
   $('#btn-reset-limits')?.addEventListener('click', async () => {
