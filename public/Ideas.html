@@ -768,10 +768,10 @@
         </div>
         <div class="divider"></div>
         <div id="res-list" class="text-right space-y-2 max-h-64 overflow-auto pr-2"></div>
-        <!-- Rewarded CTA -->
+        <!-- Leaderboard CTA -->
         <div class="mt-4 grid grid-cols-1 gap-3">
-          <button id="btn-rewarded-coins" class="btn btn-secondary w-full px-4 py-3" aria-label="تماشای ویدیو و دریافت سکه">
-            <i class="fas fa-play ml-2"></i> تماشای ویدیو و دریافت ۲۰💰
+          <button id="btn-view-leaderboard" class="btn btn-secondary w-full px-4 py-3" aria-label="مشاهده رتبه‌بندی">
+            <i class="fas fa-trophy ml-2"></i> مشاهده رتبه‌بندی
           </button>
         </div>
       </div>
@@ -3820,10 +3820,9 @@ async function startPurchaseCoins(pkgId){
   $('#btn-back-wallet')?.addEventListener('click', ()=>navTo('shop'));
   $('#btn-back-vip')?.addEventListener('click', ()=>navTo('shop'));
   
-  // Rewarded CTA
-  $('#btn-rewarded-coins')?.addEventListener('click', async ()=>{
-    const ok = await AdManager.showRewarded({reward:'coins', amount:20});
-    if(ok) renderTopBars();
+  // Leaderboard CTA
+  $('#btn-view-leaderboard')?.addEventListener('click', ()=>{
+    navTo('leaderboard');
   });
   
   // VIP purchase buttons
