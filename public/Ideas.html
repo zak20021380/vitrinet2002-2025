@@ -1671,12 +1671,15 @@
       selectEl.appendChild(opt);
     }
 
-    State.provinces.forEach(p => {
-      const option = document.createElement('option');
-      option.value = p.name;
-      option.textContent = p.name;
-      selectEl.appendChild(option);
-    });
+    State.provinces
+      .slice()
+      .sort((a,b)=>a.name.localeCompare(b.name, 'fa'))
+      .forEach(p => {
+        const option = document.createElement('option');
+        option.value = p.name;
+        option.textContent = p.name;
+        selectEl.appendChild(option);
+      });
 
     // بازگردانی انتخاب قبلی در صورت نیاز
     if(prevValue){
@@ -1894,39 +1897,7 @@ patchPricingKeys(RemoteConfig);
       { id:'u3', name:'مانی', score:14950, province:'خراسان رضوی', group:'چالش‌برانگیزان' },
       { id:'u4', name:'نیکا', score:13200, province:'فارس', group:'دانش‌آموزان نخبه' },
     ],
-    provinces: [
-      { id: 'p1', name: 'تهران', score: 18500, members: 124, manager: 'علی رضایی', region: 'مرکز' },
-      { id: 'p2', name: 'اصفهان', score: 15200, members: 98, manager: 'سارا محمدی', region: 'مرکز' },
-      { id: 'p3', name: 'خراسان رضوی', score: 16800, members: 112, manager: 'رضا قاسمی', region: 'شمال شرق' },
-      { id: 'p4', name: 'فارس', score: 14300, members: 87, manager: 'مریم احمدی', region: 'جنوب' },
-      { id: 'p5', name: 'کردستان', score: 15900, members: 105, manager: 'امیر حسینی', region: 'غرب' },
-      { id: 'p6', name: 'آذربایجان شرقی', score: 0, members: 0, manager: '', region: 'شمال غرب' },
-      { id: 'p7', name: 'آذربایجان غربی', score: 0, members: 0, manager: '', region: 'شمال غرب' },
-      { id: 'p8', name: 'اردبیل', score: 0, members: 0, manager: '', region: 'شمال غرب' },
-      { id: 'p9', name: 'البرز', score: 0, members: 0, manager: '', region: 'مرکز' },
-      { id: 'p10', name: 'ایلام', score: 0, members: 0, manager: '', region: 'غرب' },
-      { id: 'p11', name: 'بوشهر', score: 0, members: 0, manager: '', region: 'جنوب' },
-      { id: 'p12', name: 'چهارمحال و بختیاری', score: 0, members: 0, manager: '', region: 'مرکز' },
-      { id: 'p13', name: 'خراسان جنوبی', score: 0, members: 0, manager: '', region: 'شرق' },
-      { id: 'p14', name: 'خراسان شمالی', score: 0, members: 0, manager: '', region: 'شمال شرق' },
-      { id: 'p15', name: 'خوزستان', score: 0, members: 0, manager: '', region: 'جنوب غرب' },
-      { id: 'p16', name: 'زنجان', score: 0, members: 0, manager: '', region: 'شمال غرب' },
-      { id: 'p17', name: 'سمنان', score: 0, members: 0, manager: '', region: 'مرکز' },
-      { id: 'p18', name: 'سیستان و بلوچستان', score: 0, members: 0, manager: '', region: 'جنوب شرق' },
-      { id: 'p19', name: 'قزوین', score: 0, members: 0, manager: '', region: 'شمال' },
-      { id: 'p20', name: 'قم', score: 0, members: 0, manager: '', region: 'مرکز' },
-      { id: 'p21', name: 'کرمان', score: 0, members: 0, manager: '', region: 'جنوب شرق' },
-      { id: 'p22', name: 'کرمانشاه', score: 0, members: 0, manager: '', region: 'غرب' },
-      { id: 'p23', name: 'کهگیلویه و بویراحمد', score: 0, members: 0, manager: '', region: 'جنوب' },
-      { id: 'p24', name: 'گلستان', score: 0, members: 0, manager: '', region: 'شمال شرق' },
-      { id: 'p25', name: 'گیلان', score: 0, members: 0, manager: '', region: 'شمال' },
-      { id: 'p26', name: 'لرستان', score: 0, members: 0, manager: '', region: 'غرب' },
-      { id: 'p27', name: 'مازندران', score: 0, members: 0, manager: '', region: 'شمال' },
-      { id: 'p28', name: 'مرکزی', score: 0, members: 0, manager: '', region: 'مرکز' },
-      { id: 'p29', name: 'هرمزگان', score: 0, members: 0, manager: '', region: 'جنوب' },
-      { id: 'p30', name: 'همدان', score: 0, members: 0, manager: '', region: 'غرب' },
-      { id: 'p31', name: 'یزد', score: 0, members: 0, manager: '', region: 'مرکز' },
-    ],
+    provinces: [], // populated from data/provinces.json
     groups: [
       { id: 'g1', name: 'قهرمانان دانش', score: 22100, members: 24, admin: 'علی رضایی', created: '۱۴۰۲/۰۲/۱۵', memberList: [], requests: [] },
       { id: 'g2', name: 'متفکران جوان', score: 19800, members: 18, admin: 'سارا محمدی', created: '۱۴۰۲/۰۳/۲۰', memberList: [], requests: [] },
@@ -3972,6 +3943,16 @@ async function startPurchaseCoins(pkgId){
 async function init(){
     const loading = $('#loading');
     try{
+      try{
+        const resp = await fetch('../data/provinces.json');
+        if(resp.ok){
+          State.provinces = await resp.json();
+        }
+      }catch(err){
+        console.error('Failed to load provinces', err);
+        State.provinces = [];
+      }
+
       renderHeader(); renderDashboard(); navTo('dashboard');
 
       if(!State.user.province){
