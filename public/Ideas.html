@@ -1639,7 +1639,19 @@
   const $ = s => document.querySelector(s);
   const $$ = s => Array.from(document.querySelectorAll(s));
   // Ensure all buttons default to type="button" to avoid unintended form submits
-  $$('button:not([type])').forEach(btn => btn.type = 'button');
+  function ensureButtonType(root=document){
+    root.querySelectorAll('button:not([type])').forEach(btn=>btn.type='button');
+  }
+  ensureButtonType();
+  new MutationObserver(m=>{
+    m.forEach(mu=>{
+      mu.addedNodes.forEach(node=>{
+        if(node.nodeType!==Node.ELEMENT_NODE) return;
+        if(node.matches && node.matches('button:not([type])')) node.type='button';
+        if(node.querySelectorAll) ensureButtonType(node);
+      });
+    });
+  }).observe(document.body,{childList:true,subtree:true});
   const clamp = (n,a,b)=>Math.max(a,Math.min(b,n));
   const faNum = n => (n===null||n===undefined||Number.isNaN(Number(n))) ? '—' : Number(n).toLocaleString('fa-IR');
   const enNum = n => Number(n).toLocaleString('en-US');
