@@ -178,6 +178,7 @@
   color:#111827; font-weight:800; font-size:.75rem; padding:.25rem .6rem;
   border-radius:999px; box-shadow:0 8px 24px rgba(251,146,60,.35)
 }
+#pkg-grid{ grid-auto-rows:1fr; }
 .product-card { position:relative; }
 .product-card:disabled { opacity:.55; cursor:not-allowed; }
 
@@ -921,7 +922,7 @@
         <div id="wallet-offline" class="hidden bg-rose-500/20 border border-rose-400/40 text-rose-50 text-sm rounded-xl p-3 mb-3">
           <i class="fas fa-wifi-slash ml-1"></i> آفلاین هستی؛ خرید غیرفعال است.
         </div>
-        <div id="pkg-grid" class="grid grid-cols-2 gap-3"></div>
+        <div id="pkg-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4"></div>
         <div class="text-xs opacity-80 mt-3">پس از ایجاد تراکنش، نتیجه از سرور تأیید شده و رسید نمایش داده می‌شود. لطفاً چند ثانیه صبر کن.</div>
       </div>
       <button class="w-full py-4 rounded-2xl bg-white/10 border border-white/20 hover:bg-white/20 transition flex items-center justify-center gap-2" id="btn-back-wallet">
@@ -2953,7 +2954,7 @@ function buildPackages(){
   // رندر کارت‌ها
   packs.forEach(pkg => {
     const card = document.createElement('div');
-    card.className = 'glass-dark rounded-2xl p-4 card-hover flex flex-col relative';
+    card.className = 'glass-dark rounded-2xl p-4 card-hover flex flex-col justify-between relative h-full';
 
     const bonusBadge = pkg.bonus
       ? `<span class="chip bg-white/20"><i class="fas fa-gift ml-1"></i> ${faNum(pkg.bonus)}%</span>`
