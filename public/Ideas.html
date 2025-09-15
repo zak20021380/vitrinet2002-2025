@@ -2553,8 +2553,14 @@ patchPricingKeys(RemoteConfig);
         <div class="flex justify-between items-center glass rounded-xl p-3"><span class="opacity-80 flex items-center gap-2"><i class="fas fa-globe text-yellow-300"></i>رتبه کشوری</span><span class="font-bold text-yellow-300">${faNum(nationalRank)}</span></div>
         <div class="flex justify-between items-center glass rounded-xl p-3"><span class="opacity-80 flex items-center gap-2"><i class="fas fa-flag text-green-300"></i>رتبه استانی</span><span class="font-bold text-green-300">${faNum(provinceRank)}</span></div>
         <div class="flex justify-between items-center glass rounded-xl p-3"><span class="opacity-80 flex items-center gap-2"><i class="fas fa-calendar-alt"></i>تاریخ عضویت</span><span class="font-bold">${user.joined || '۱۴۰۲/۰۱/۱۵'}</span></div>
-      </div>`;
+      </div>
+      <button id="btn-user-duel" class="btn btn-duel w-full mt-4" aria-label="درخواست نبرد تن به تن"><i class="fas fa-swords ml-2"></i> درخواست نبرد</button>`;
     showDetailPopup('جزئیات کاربر', content);
+    $('#btn-user-duel')?.addEventListener('click', () => {
+      toast(`درخواست نبرد برای ${user.name} ارسال شد`);
+      logEvent('duel_request', { from: State.user.name, to: user.name });
+      closeDetailPopup();
+    });
   }
   
   function showProvinceDetail(province) {
