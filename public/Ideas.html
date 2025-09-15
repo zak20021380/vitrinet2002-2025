@@ -1932,11 +1932,11 @@ patchPricingKeys(RemoteConfig);
     ],
     provinces: [], // populated from data/provinces.json
     groups: [
-      { id: 'g1', name: 'قهرمانان دانش', score: 22100, members: 24, admin: 'علی رضایی', created: '۱۴۰۲/۰۲/۱۵', memberList: [], requests: [] },
-      { id: 'g2', name: 'متفکران جوان', score: 19800, members: 18, admin: 'سارا محمدی', created: '۱۴۰۲/۰۳/۲۰', memberList: [], requests: [] },
-      { id: 'g3', name: 'چالش‌برانگیزان', score: 20500, members: 21, admin: 'رضا قاسمی', created: '۱۴۰۲/۰۱/۱۰', memberList: [], requests: [] },
-      { id: 'g4', name: 'دانش‌آموزان نخبه', score: 18700, members: 15, admin: 'مریم احمدی', created: '۱۴۰۲/۰۴/۰۵', memberList: [], requests: [] },
-      { id: 'g5', name: 'پیشروان علم', score: 21300, members: 27, admin: 'امیر حسینی', created: '۱۴۰۲/۰۲/۲۸', memberList: [], requests: [] },
+      { id: 'g1', name: 'قهرمانان دانش', score: 22100, members: 24, admin: 'علی رضایی', created: '۱۴۰۲/۰۲/۱۵', memberList: ['کاربر مهمان','علی رضایی','سارا اکبری','رضا کریمی'], matches:[{opponent:'متفکران جوان', time:'۱۴۰۳/۰۵/۲۵ ۱۸:۰۰'}], requests: [] },
+      { id: 'g2', name: 'متفکران جوان', score: 19800, members: 18, admin: 'سارا محمدی', created: '۱۴۰۲/۰۳/۲۰', memberList: ['سارا محمدی','مهدی احمدی'], matches:[{opponent:'پیشروان علم', time:'۱۴۰۳/۰۵/۳۰ ۱۹:۰۰'}], requests: [] },
+      { id: 'g3', name: 'چالش‌برانگیزان', score: 20500, members: 21, admin: 'رضا قاسمی', created: '۱۴۰۲/۰۱/۱۰', memberList: ['رضا قاسمی'], matches:[], requests: [] },
+      { id: 'g4', name: 'دانش‌آموزان نخبه', score: 18700, members: 15, admin: 'مریم احمدی', created: '۱۴۰۲/۰۴/۰۵', memberList: ['مریم احمدی'], matches:[], requests: [] },
+      { id: 'g5', name: 'پیشروان علم', score: 21300, members: 27, admin: 'امیر حسینی', created: '۱۴۰۲/۰۲/۲۸', memberList: ['امیر حسینی'], matches:[{opponent:'قهرمانان دانش', time:'۱۴۰۳/۰۶/۰۲ ۲۰:۰۰'}], requests: [] },
     ],
     ads: { banner: [], native: [], interstitial: [], rewarded: [] },
     quiz:{
@@ -2536,16 +2536,24 @@ patchPricingKeys(RemoteConfig);
         <div class="flex justify-between items-center glass rounded-xl p-3"><span class="opacity-80">تعداد اعضا</span><span class="font-bold">${faNum(group.members)}</span></div>
       </div>`;
 
+    const membersHtml = (group.memberList || []).map(m=>`<div class="glass rounded-xl p-2 text-sm flex items-center gap-2"><i class="fas fa-user text-blue-200"></i>${m}</div>`).join('');
+    content += `
+      <div class="mt-4">
+        ${isAdmin ? `<input id="new-member-name" class="form-input mb-2" placeholder="نام عضو جدید">
+        <button id="btn-add-member" class="btn btn-group w-full"><i class="fas fa-user-plus ml-2"></i> افزودن عضو</button>` : ''}
+        <h5 class="font-bold mb-2${isAdmin ? ' mt-4' : ''}">اعضای گروه</h5>
+        <div id="member-list" class="space-y-2">${membersHtml || '<div class="text-sm opacity-80">عضوی ثبت نشده است</div>'}</div>
+      </div>`;
+
+    const matchesHtml = (group.matches || []).map(m=>`<div class="glass rounded-xl p-2 text-sm flex justify-between"><span>${m.opponent}</span><span>${m.time}</span></div>`).join('');
+    content += `
+      <div class="mt-4">
+        <h5 class="font-bold mb-2">نبردهای پیش‌رو</h5>
+        <div class="space-y-2">${matchesHtml || '<div class="text-sm opacity-80">نبردی برنامه‌ریزی نشده است</div>'}</div>
+      </div>`;
+
     if (isAdmin) {
-      const membersHtml = (group.memberList || []).map(m=>`<div class="glass rounded-xl p-2 text-sm">${m}</div>`).join('');
-      content += `
-        <div class="mt-4">
-          <input id="new-member-name" class="form-input mb-2" placeholder="نام عضو جدید">
-          <button id="btn-add-member" class="btn btn-group w-full"><i class="fas fa-user-plus ml-2"></i> افزودن عضو</button>
-          <div id="member-list" class="space-y-2 mt-4">${membersHtml}</div>
-        </div>`;
-      content += `
-        <button id="btn-request-duel" class="btn btn-duel w-full mt-4"><i class="fas fa-swords ml-2"></i> درخواست نبرد</button>`;
+      content += `<button id="btn-request-duel" class="btn btn-duel w-full mt-4"><i class="fas fa-swords ml-2"></i> درخواست نبرد</button>`;
     } else if (!isMember) {
       content += `
         <button id="btn-join-group" class="btn btn-group w-full mt-4" ${requested ? 'disabled' : ''}>
@@ -2562,7 +2570,7 @@ patchPricingKeys(RemoteConfig);
       group.memberList = group.memberList || [];
       group.memberList.push(name);
       group.members += 1;
-      $('#member-list').innerHTML += `<div class="glass rounded-xl p-2 text-sm">${name}</div>`;
+      $('#member-list').innerHTML += `<div class="glass rounded-xl p-2 text-sm flex items-center gap-2"><i class="fas fa-user text-blue-200"></i>${name}</div>`;
       $('#new-member-name').value='';
       toast(`عضو ${name} اضافه شد`);
       renderGroupSelect();
@@ -2638,7 +2646,8 @@ patchPricingKeys(RemoteConfig);
         admin: State.user.name,
         created: new Date().toLocaleDateString('fa-IR'),
         memberList: [State.user.name],
-        requests: []
+        requests: [],
+        matches: []
       };
       State.groups.push(newGroup);
       State.user.group = name;
