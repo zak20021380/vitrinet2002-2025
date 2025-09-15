@@ -3529,10 +3529,8 @@ async function startPurchaseCoins(pkgId){
     populateProvinceOptions(sel, 'انتخاب استان');
     if(State.user.province){
       sel.value = State.user.province;
-      sel.disabled = true;
-    } else {
-      sel.disabled = false;
     }
+    sel.disabled = false;
     $('#lbl-group').textContent = State.user.group || '—';
     $('#inp-avatar').value = '';
     openModal('#modal-profile');
@@ -3542,10 +3540,8 @@ async function startPurchaseCoins(pkgId){
     const n = $('#inp-name').value.trim();
     if(n) State.user.name = n;
 
-    if(!State.user.province){
-      const p = $('#sel-province').value;
-      if(p) State.user.province = p;
-    }
+    const p = $('#sel-province').value;
+    if(p) State.user.province = p;
 
     const file = $('#inp-avatar').files[0];
     if(file){
