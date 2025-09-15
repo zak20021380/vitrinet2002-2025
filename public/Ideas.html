@@ -1643,6 +1643,19 @@
   const clamp = (n,a,b)=>Math.max(a,Math.min(b,n));
   const faNum = n => (n===null||n===undefined||Number.isNaN(Number(n))) ? '—' : Number(n).toLocaleString('fa-IR');
   const enNum = n => Number(n).toLocaleString('en-US');
+  function populateProvinceOptions(selectEl, placeholder){
+    if(!selectEl) return;
+    selectEl.innerHTML = '';
+    if(placeholder){
+      const opt = new Option(placeholder, '', true, true);
+      opt.disabled = true;
+      selectEl.add(opt);
+    }
+    State.provinces.forEach(p=>{
+      const option = new Option(p.name, p.name);
+      selectEl.add(option);
+    });
+  }
   const vibrate = ms => { try{ if(State.settings.haptics && navigator.vibrate) navigator.vibrate(ms) }catch{} };
   const toast = (html, ms=2200) => {
     const t=document.createElement('div');
@@ -3508,13 +3521,12 @@ async function startPurchaseCoins(pkgId){
   $('#btn-edit-profile')?.addEventListener('click', ()=>{
     $('#inp-name').value = State.user.name;
     const sel = $('#sel-province');
-    sel.innerHTML = State.provinces.map(p=>`<option value="${p.name}">${p.name}</option>`).join('');
+    populateProvinceOptions(sel, 'انتخاب استان');
     if(State.user.province){
       sel.value = State.user.province;
       sel.disabled = true;
     } else {
       sel.disabled = false;
-      sel.insertAdjacentHTML('afterbegin','<option value="" disabled selected>انتخاب استان</option>');
     }
     $('#lbl-group').textContent = State.user.group || '—';
     $('#inp-avatar').value = '';
@@ -3937,7 +3949,7 @@ async function init(){
 
       if(!State.user.province){
         const sel = $('#first-province');
-        sel.innerHTML += State.provinces.map(p=>`<option value="${p.name}">${p.name}</option>`).join('');
+        populateProvinceOptions(sel, 'استان خود را انتخاب کنید');
         openModal('#modal-province-select');
       }
 
