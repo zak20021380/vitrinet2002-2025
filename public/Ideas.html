@@ -504,6 +504,25 @@
             </div>
             <div class="mt-3">
               <button id="btn-reset-duel-limit" class="btn btn-secondary text-sm w-full py-2">
+              <i class="fas fa-key ml-1"></i> حذف محدودیت با 10 کلید
+              </button>
+            </div>
+          </div>
+
+          <!-- Group Battle Limit -->
+          <div class="limit-card">
+            <div class="flex justify-between items-center">
+              <div class="flex items-center gap-2">
+                <i class="fas fa-users text-indigo-300"></i>
+                <span>نبرد گروهی</span>
+              </div>
+              <span class="text-sm"><span id="group-battles-used">0</span>/<span id="group-battles-limit">2</span></span>
+            </div>
+            <div class="limit-bar">
+              <div id="group-battles-progress" class="limit-progress" style="width:0%"></div>
+            </div>
+            <div class="mt-3">
+              <button id="btn-reset-group-limit" class="btn btn-secondary text-sm w-full py-2">
                 <i class="fas fa-key ml-1"></i> حذف محدودیت با 10 کلید
               </button>
             </div>
@@ -1807,6 +1826,7 @@ const RemoteConfig = {
   gameLimits: {
     matches: { daily: 5, vipMultiplier: 2, recoveryTime: 2 * 60 * 60 * 1000 }, // 2 hours
     lives:   { daily: 3, vipMultiplier: 2, recoveryTime: 30 * 60 * 1000 },     // 30 minutes
+    groupBattles: { daily: 2, vipMultiplier: 2, recoveryTime: 60 * 60 * 1000 }, // 1 hour
     energy:  { daily: 10, vipMultiplier: 2, recoveryTime: 15 * 60 * 1000 }     // 15 minutes
   }
 };
@@ -1881,6 +1901,7 @@ patchPricingKeys(RemoteConfig);
     limits: {
       matches: { used: 0, lastReset: 0, lastRecovery: 0 },
       lives: { used: 0, lastReset: 0, lastRecovery: 0 },
+      groupBattles: { used: 0, lastReset: 0, lastRecovery: 0 },
       energy: { used: 0, lastReset: 0, lastRecovery: 0 }
     },
     pass: {
@@ -2110,7 +2131,12 @@ patchPricingKeys(RemoteConfig);
       Server.limits.lives.used = 0;
       Server.limits.lives.lastReset = today.getTime();
     }
-    
+
+    if (Server.limits.groupBattles.lastReset < today.getTime()) {
+      Server.limits.groupBattles.used = 0;
+      Server.limits.groupBattles.lastReset = today.getTime();
+    }
+
     if (Server.limits.energy.lastReset < today.getTime()) {
       Server.limits.energy.used = 0;
       Server.limits.energy.lastReset = today.getTime();
@@ -2148,6 +2174,14 @@ patchPricingKeys(RemoteConfig);
     $('#duels-used').textContent = faNum(duelsUsed);
     $('#duels-limit').textContent = faNum(duelsLimit);
     $('#duels-progress').style.width = `${duelsPct}%`;
+
+    // Group Battles
+    const groupLimit = RemoteConfig.gameLimits.groupBattles.daily * vipMultiplier;
+    const groupUsed = Server.limits.groupBattles.used;
+    const groupPct = Math.min(100, (groupUsed / groupLimit) * 100);
+    $('#group-battles-used').textContent = faNum(groupUsed);
+    $('#group-battles-limit').textContent = faNum(groupLimit);
+    $('#group-battles-progress').style.width = `${groupPct}%`;
 
     // Energy (UI elements may be absent)
     const energyUsedEl = $('#energy-used');
@@ -2200,14 +2234,16 @@ patchPricingKeys(RemoteConfig);
     
     const matchesLimit = RemoteConfig.gameLimits.matches.daily * vipMultiplier;
     const duelsLimit = RemoteConfig.gameLimits.lives.daily * vipMultiplier;
+    const groupLimit = RemoteConfig.gameLimits.groupBattles.daily * vipMultiplier;
 
     const matchesReached = Server.limits.matches.used >= matchesLimit;
     const duelsReached = Server.limits.lives.used >= duelsLimit;
+    const groupReached = Server.limits.groupBattles.used >= groupLimit;
     const energyLimit = RemoteConfig.gameLimits.energy.daily * vipMultiplier;
     const energyReached = $('#energy-used') ? Server.limits.energy.used >= energyLimit : false;
 
     // Show/hide limit reached CTAs
-    $('#limit-reached-ctas').classList.toggle('hidden', !(matchesReached || duelsReached || energyReached));
+    $('#limit-reached-ctas').classList.toggle('hidden', !(matchesReached || duelsReached || groupReached || energyReached));
 
     
     // Log analytics if limit reached
@@ -2221,6 +2257,12 @@ patchPricingKeys(RemoteConfig);
       logEvent('limit_reached', { type: 'duels', limit: duelsLimit });
       State.limitsLogged = State.limitsLogged || {};
       State.limitsLogged.duels = true;
+    }
+
+    if (groupReached && !State.limitsLogged?.groupBattles) {
+      logEvent('limit_reached', { type: 'groupBattles', limit: groupLimit });
+      State.limitsLogged = State.limitsLogged || {};
+      State.limitsLogged.groupBattles = true;
     }
     
     if (energyReached && !State.limitsLogged?.energy) {
@@ -3914,6 +3956,28 @@ async function startPurchaseCoins(pkgId){
     toast('<i class="fas fa-check-circle ml-2"></i>محدودیت نبرد ریست شد');
   });
 
+  $('#btn-reset-group-limit')?.addEventListener('click', () => {
+    if (State.lives <= 0) {
+      toast('کلید کافی نیست');
+      return;
+    }
+    if (Server.limits.groupBattles.used === 0) {
+      toast('نیازی به ریست نیست');
+      return;
+    }
+    State.lives -= 1;
+    renderTopBars();
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const t = today.getTime();
+    Server.limits.groupBattles.used = 0;
+    Server.limits.groupBattles.lastReset = t;
+    updateLimitsUI();
+    checkLimitsReached();
+    saveState();
+    toast('<i class="fas fa-check-circle ml-2"></i>محدودیت نبرد گروهی ریست شد');
+  });
+
   $('#btn-reset-limits')?.addEventListener('click', async () => {
     if (State.lives <= 0) {
       toast('کلید کافی نیست');
@@ -3936,9 +4000,11 @@ async function startPurchaseCoins(pkgId){
         const t = today.getTime();
         Server.limits.matches.used = 0;
         Server.limits.lives.used = 0;
+        Server.limits.groupBattles.used = 0;
         Server.limits.energy.used = 0;
         Server.limits.matches.lastReset = t;
         Server.limits.lives.lastReset = t;
+        Server.limits.groupBattles.lastReset = t;
         Server.limits.energy.lastReset = t;
         updateLimitsUI();
         checkLimitsReached();
