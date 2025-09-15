@@ -1990,14 +1990,15 @@ patchPricingKeys(RemoteConfig);
     (function setupProvinceSelect(){
     // 1) اگر خالی بود، استان‌ها را مقداردهی کن
     function bootstrapProvinces(){
-      if (Array.isArray(State.provinces) && State.provinces.length) return;
       const NAMES = [
         "آذربایجان شرقی","آذربایجان غربی","اردبیل","اصفهان","البرز","ایلام","بوشهر","تهران",
         "چهارمحال و بختیاری","خراسان جنوبی","خراسان رضوی","خراسان شمالی","خوزستان","زنجان","سمنان",
         "سیستان و بلوچستان","فارس","قزوین","قم","کردستان","کرمان","کرمانشاه","کهگیلویه و بویراحمد",
         "گلستان","گیلان","لرستان","مازندران","مرکزی","هرمزگان","همدان","یزد"
       ];
-      State.provinces = NAMES.map(n => ({ name:n, score:0, members:0, region:'' }));
+      if (!Array.isArray(State.provinces) || State.provinces.length !== NAMES.length) {
+        State.provinces = NAMES.map(n => ({ name:n, score:0, members:0, region:'' }));
+      }
     }
 
     function openModal(sel){ document.querySelector(sel).classList.add('show'); }
