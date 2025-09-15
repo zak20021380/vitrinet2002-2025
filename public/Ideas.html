@@ -1645,16 +1645,31 @@
   const enNum = n => Number(n).toLocaleString('en-US');
   function populateProvinceOptions(selectEl, placeholder){
     if(!selectEl) return;
+
+    // حفظ مقدار انتخاب‌شده در صورت وجود
+    const prevValue = selectEl.value;
     selectEl.innerHTML = '';
+
     if(placeholder){
-      const opt = new Option(placeholder, '', true, true);
+      const opt = document.createElement('option');
+      opt.value = '';
+      opt.textContent = placeholder;
       opt.disabled = true;
-      selectEl.add(opt);
+      opt.selected = true;
+      selectEl.appendChild(opt);
     }
-    State.provinces.forEach(p=>{
-      const option = new Option(p.name, p.name);
-      selectEl.add(option);
+
+    State.provinces.forEach(p => {
+      const option = document.createElement('option');
+      option.value = p.name;
+      option.textContent = p.name;
+      selectEl.appendChild(option);
     });
+
+    // بازگردانی انتخاب قبلی در صورت نیاز
+    if(prevValue){
+      selectEl.value = prevValue;
+    }
   }
   const vibrate = ms => { try{ if(State.settings.haptics && navigator.vibrate) navigator.vibrate(ms) }catch{} };
   const toast = (html, ms=2200) => {
