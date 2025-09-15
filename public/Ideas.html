@@ -4013,79 +4013,7 @@ async function init(){
 
 
 
-function openModal(sel){ const m=document.querySelector(sel); if(m) m.classList.add('show'); }
-function closeModal(sel){ const m=document.querySelector(sel); if(m) m.classList.remove('show'); }
 
-// بستن با data-close (برای همه‌ی مودال‌ها)
-document.addEventListener('click', (e)=>{
-  const btn = e.target.closest('[data-close]');
-  if(!btn) return;
-  const target = btn.getAttribute('data-close');
-  if(target) closeModal(target);
-});
-
-// لود استان‌ها (با fallback اگه فایل نبود)
-async function loadProvinces(){
-  const fallback = ['تهران','اصفهان','خراسان رضوی','فارس','کردستان','آذربایجان شرقی','آذربایجان غربی','گیلان','مازندران','خوزستان'];
-  try{
-    const res = await fetch('/data/provinces.json',{cache:'no-store'});
-    if(res.ok){
-      const data = await res.json();
-      if(Array.isArray(data) && data.length){
-        State.provinces = data.map(p => typeof p==='string' ? {name:p, score:0, members:0} : p);
-        return;
-      }
-    }
-  }catch(_){}
-  State.provinces = fallback.map(name => ({name, score:0, members:0}));
-}
-
-// راه‌انداز انتخاب استان
-async function initProvinceSelection(){
-  await loadProvinces();
-
-  // پر کردن سلکت‌ها
-  populateProvinceOptions(document.querySelector('#first-province'), 'استان خود را انتخاب کنید');
-  populateProvinceOptions(document.querySelector('#sel-province'));
-
-  // اگر هنوز استان ثبت نشده، مودال رو باز کن
-  if(!State.user.province){
-    openModal('#modal-province-select');
-  }
-
-  // دکمه‌ی تایید در مودال انتخاب استان
-  document.querySelector('#btn-confirm-province')?.addEventListener('click', ()=>{
-    const v = document.querySelector('#first-province')?.value;
-    if(!v){
-      vibrate(80);
-      toast('اول یک استان انتخاب کن 🙂');
-      return;
-    }
-    State.user.province = v;
-    saveState();
-    renderHeader();
-    renderDashboard();
-    closeModal('#modal-province-select');
-    toast('استان ذخیره شد ✅');
-  });
-
-  // انتخاب سریع از کارت‌های صفحه‌ی مسابقهٔ استانی
-  document.querySelectorAll('#page-province .location-card').forEach(card=>{
-    card.addEventListener('click', ()=>{
-      const name = card.querySelector('.font-bold')?.textContent?.trim();
-      if(!name) return;
-      State.user.province = name;
-      saveState();
-      renderHeader();
-      renderDashboard();
-      toast(`ثبت شد: ${name} ✅`);
-      navTo('dashboard');
-    });
-  });
-}
-
-// اجرا
-initProvinceSelection();
   
   </script>
 </body>
