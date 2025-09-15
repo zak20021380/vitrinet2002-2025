@@ -566,8 +566,8 @@
         <div id="province-top" class="grid grid-cols-2 gap-3 mb-4"></div>
         <div id="my-province-rank" class="flex justify-center mb-4"></div>
 
-        <button id="btn-view-missions" class="btn btn-province w-full">
-          <i class="fas fa-tasks ml-2"></i> مشاهده مأموریت‌ها
+        <button id="btn-view-ranking" class="btn btn-province w-full">
+          <i class="fas fa-ranking-star ml-2"></i> مشاهده رتبه‌بندی
         </button>
       </div>
       
@@ -801,6 +801,7 @@
           </div>
         </div>
         <div id="lb-province" class="lb-content hidden">
+          <div id="my-province-rank-lb" class="flex justify-center mb-4"></div>
           <div id="province-list" class="space-y-3"></div>
         </div>
         <div id="lb-group" class="lb-content hidden">
@@ -2426,22 +2427,37 @@ patchPricingKeys(RemoteConfig);
     
     // provinces
     const provinceList = $('#province-list'); provinceList.innerHTML='';
-    State.provinces.sort((a,b)=>b.score-a.score).forEach((p,i)=>{
+    const provincesSorted = [...State.provinces].sort((a,b)=>b.score-a.score);
+    provincesSorted.forEach((p,i)=>{
       const row=document.createElement('div');
       row.className='location-card';
       const rank=i+1;
-        let badgeClass='bg-white/20';
-        if(rank===1) badgeClass='bg-gradient-to-br from-yellow-200 to-yellow-400 text-gray-900';
-        else if(rank===2) badgeClass='bg-gradient-to-br from-gray-300 to-gray-400 text-gray-900';
-        else if(rank===3) badgeClass='bg-gradient-to-br from-amber-600 to-amber-700 text-gray-900';
-        row.innerHTML=`<span class="rank-badge ${badgeClass}">${faNum(rank)}</span>
+      let badgeClass='bg-white/20';
+      if(rank===1) badgeClass='bg-gradient-to-br from-yellow-200 to-yellow-400 text-gray-900';
+      else if(rank===2) badgeClass='bg-gradient-to-br from-gray-300 to-gray-400 text-gray-900';
+      else if(rank===3) badgeClass='bg-gradient-to-br from-amber-600 to-amber-700 text-gray-900';
+      row.innerHTML=`<span class="rank-badge ${badgeClass}">${faNum(rank)}</span>
         <div class="location-icon province-icon"><i class="fas fa-map-marked-alt"></i></div>
         <div class="flex-1"><div class="font-bold">${p.name}</div>
         <div class="text-sm opacity-80 flex items-center gap-1"><i class="fas fa-users"></i><span>${faNum(p.members)} شرکت‌کننده</span></div></div>
         <div class="text-sm font-bold text-green-300"><i class="fas fa-trophy"></i> ${faNum(p.score)}</div>`;
+      if(p.name===State.user.province){
+        row.classList.add('ring-2','ring-green-300');
+        setTimeout(()=>row.scrollIntoView({behavior:'smooth',block:'center'}),0);
+      }
       row.addEventListener('click', () => showProvinceDetail({...p, rank}));
       provinceList.appendChild(row);
     });
+
+    const myProvRankElLb = $('#my-province-rank-lb');
+    if(myProvRankElLb){
+      const myProvIdx = provincesSorted.findIndex(p=>p.name===State.user.province);
+      if(State.user.province && myProvIdx !== -1){
+        myProvRankElLb.innerHTML = `<span class="chip"><i class="fas fa-flag text-green-300 ml-1"></i> رتبه استان شما: ${faNum(myProvIdx+1)}</span>`;
+      }else{
+        myProvRankElLb.innerHTML = '<span class="chip">استان شما تعیین نشده</span>';
+      }
+    }
     
     // groups
     const groupList = $('#group-list'); groupList.innerHTML='';
@@ -3833,9 +3849,10 @@ async function startPurchaseCoins(pkgId){
     navTo('vip');
   });
   
-  // Province Pass
-  $('#btn-view-missions')?.addEventListener('click', () => {
-    navTo('pass-missions');
+  // Province Ranking
+  $('#btn-view-ranking')?.addEventListener('click', () => {
+    navTo('leaderboard');
+    document.querySelector('.leaderboard-tab[data-tab="province"]')?.click();
   });
   
   // Referral
