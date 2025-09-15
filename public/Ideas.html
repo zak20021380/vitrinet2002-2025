@@ -486,18 +486,18 @@
               <div id="matches-progress" class="limit-progress" style="width:0%"></div>
             </div>
           </div>
-          
-          <!-- Keys Limit -->
+
+          <!-- Duel Limit -->
           <div class="limit-card">
             <div class="flex justify-between items-center">
               <div class="flex items-center gap-2">
-                <i class="fas fa-key text-yellow-400"></i>
-                <span>کلید</span>
+                <i class="fas fa-hand-fist text-rose-400"></i>
+                <span>نبرد تن به تن</span>
               </div>
-              <span class="text-sm"><span id="lives-used">0</span>/<span id="lives-limit">3</span></span>
+              <span class="text-sm"><span id="duels-used">0</span>/<span id="duels-limit">3</span></span>
             </div>
             <div class="limit-bar">
-              <div id="lives-progress" class="limit-progress" style="width:0%"></div>
+              <div id="duels-progress" class="limit-progress" style="width:0%"></div>
             </div>
             <div class="mt-1">
               <button id="btn-duel-limit" class="btn btn-duel text-xs w-full py-2">
@@ -513,10 +513,9 @@
           <button id="btn-buy-vip-limit" class="btn btn-tertiary text-sm w-full px-4 py-3">
             <i class="fas fa-crown ml-2"></i> خرید VIP و افزایش محدودیت‌ها
           </button>
-          <div class="flex items-center gap-2">
-            <input id="reset-limit-key" type="text" placeholder="کلید ریست" class="flex-1 bg-white/10 border border-white/20 rounded-xl px-3 py-2 text-xs" />
-            <button id="btn-reset-limits" class="btn btn-secondary text-xs px-4 py-2">ریست</button>
-          </div>
+          <button id="btn-reset-limits" class="btn btn-secondary text-sm w-full px-4 py-3">
+            <i class="fas fa-key ml-2"></i> ریست با کلید
+          </button>
         </div>
       </div>
       
@@ -2139,13 +2138,13 @@ patchPricingKeys(RemoteConfig);
     $('#matches-limit').textContent = faNum(matchesLimit);
     $('#matches-progress').style.width = `${matchesPct}%`;
     
-    // Lives
-    const livesLimit = RemoteConfig.gameLimits.lives.daily * vipMultiplier;
-    const livesUsed = Server.limits.lives.used;
-    const livesPct = Math.min(100, (livesUsed / livesLimit) * 100);
-    $('#lives-used').textContent = faNum(livesUsed);
-    $('#lives-limit').textContent = faNum(livesLimit);
-    $('#lives-progress').style.width = `${livesPct}%`;
+    // Duels
+    const duelsLimit = RemoteConfig.gameLimits.lives.daily * vipMultiplier;
+    const duelsUsed = Server.limits.lives.used;
+    const duelsPct = Math.min(100, (duelsUsed / duelsLimit) * 100);
+    $('#duels-used').textContent = faNum(duelsUsed);
+    $('#duels-limit').textContent = faNum(duelsLimit);
+    $('#duels-progress').style.width = `${duelsPct}%`;
 
     // Energy (UI elements may be absent)
     const energyUsedEl = $('#energy-used');
@@ -2197,15 +2196,15 @@ patchPricingKeys(RemoteConfig);
       (Server.subscription.tier === 'pro' ? 3 : 2) : 1;
     
     const matchesLimit = RemoteConfig.gameLimits.matches.daily * vipMultiplier;
-    const livesLimit = RemoteConfig.gameLimits.lives.daily * vipMultiplier;
+    const duelsLimit = RemoteConfig.gameLimits.lives.daily * vipMultiplier;
 
     const matchesReached = Server.limits.matches.used >= matchesLimit;
-    const livesReached = Server.limits.lives.used >= livesLimit;
+    const duelsReached = Server.limits.lives.used >= duelsLimit;
     const energyLimit = RemoteConfig.gameLimits.energy.daily * vipMultiplier;
     const energyReached = $('#energy-used') ? Server.limits.energy.used >= energyLimit : false;
 
     // Show/hide limit reached CTAs
-    $('#limit-reached-ctas').classList.toggle('hidden', !(matchesReached || livesReached || energyReached));
+    $('#limit-reached-ctas').classList.toggle('hidden', !(matchesReached || duelsReached || energyReached));
 
     
     // Log analytics if limit reached
@@ -2215,10 +2214,10 @@ patchPricingKeys(RemoteConfig);
       State.limitsLogged.matches = true;
     }
     
-    if (livesReached && !State.limitsLogged?.lives) {
-      logEvent('limit_reached', { type: 'lives', limit: livesLimit });
+    if (duelsReached && !State.limitsLogged?.duels) {
+      logEvent('limit_reached', { type: 'duels', limit: duelsLimit });
       State.limitsLogged = State.limitsLogged || {};
-      State.limitsLogged.lives = true;
+      State.limitsLogged.duels = true;
     }
     
     if (energyReached && !State.limitsLogged?.energy) {
@@ -3850,19 +3849,22 @@ async function startPurchaseCoins(pkgId){
   });
 
   $('#btn-reset-limits')?.addEventListener('click', async () => {
-    const keyInput = $('#reset-limit-key');
-    const key = keyInput?.value.trim();
-    if (!key) return;
+    if (State.lives <= 0) {
+      toast('کلید کافی نیست');
+      return;
+    }
     const btn = $('#btn-reset-limits');
     btn.disabled = true;
     try {
       const res = await fetch('/api/limits/reset', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ key })
+        body: JSON.stringify({})
       });
       const data = await res.json();
       if (res.ok && data?.success) {
+        State.lives -= 1;
+        renderTopBars();
         const today = new Date();
         today.setHours(0, 0, 0, 0);
         const t = today.getTime();
@@ -3875,10 +3877,9 @@ async function startPurchaseCoins(pkgId){
         updateLimitsUI();
         checkLimitsReached();
         saveState();
-        keyInput.value = '';
         toast('<i class="fas fa-check-circle ml-2"></i>محدودیت‌ها ریست شد');
       } else {
-        toast(data?.message || 'کلید نامعتبر است');
+        toast(data?.message || 'خطا در ریست محدودیت');
       }
     } catch {
       toast('خطا در ارتباط با سرور');
