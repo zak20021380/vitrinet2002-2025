@@ -1703,60 +1703,6 @@ function populateProvinceOptions(selectEl, placeholder){
   }
 
 
-  (function setupProvinceSelect(){
-  // 1) اگر خالی بود، استان‌ها را مقداردهی کن
-  function bootstrapProvinces(){
-    if (Array.isArray(State.provinces) && State.provinces.length) return;
-    const NAMES = [
-      "آذربایجان شرقی","آذربایجان غربی","اردبیل","اصفهان","البرز","ایلام","بوشهر","تهران",
-      "چهارمحال و بختیاری","خراسان جنوبی","خراسان رضوی","خراسان شمالی","خوزستان","زنجان","سمنان",
-      "سیستان و بلوچستان","فارس","قزوین","قم","کردستان","کرمان","کرمانشاه","کهگیلویه و بویراحمد",
-      "گلستان","گیلان","لرستان","مازندران","مرکزی","هرمزگان","همدان","یزد"
-    ];
-    State.provinces = NAMES.map(n => ({ name:n, score:0, members:0, region:'' }));
-  }
-
-  function openModal(sel){ document.querySelector(sel).classList.add('show'); }
-  function closeModal(sel){ document.querySelector(sel).classList.remove('show'); }
-
-  function fillAllProvinceSelects(){
-    bootstrapProvinces();
-    populateProvinceOptions(document.getElementById('first-province'), 'استان خود را انتخاب کنید');
-    const editSel = document.getElementById('sel-province');
-    populateProvinceOptions(editSel);
-    if (editSel) editSel.value = State.user.province || '';
-  }
-
-  // 2) پر کردن سلکت‌ها در شروع
-  fillAllProvinceSelects();
-
-  // 3) اگر کاربر هنوز استان ندارد، مودال را باز کن
-  if (!State.user.province) {
-    openModal('#modal-province-select');
-    setTimeout(()=>document.getElementById('first-province')?.focus(), 50);
-  }
-
-  // 4) دکمهٔ تایید استان
-  document.getElementById('btn-confirm-province')?.addEventListener('click', () => {
-    const sel = document.getElementById('first-province');
-    const val = sel?.value || '';
-    if (!val) { toast('لطفاً یک استان انتخاب کن'); return; }
-    State.user.province = val;
-    saveState();
-    renderHeader();
-    renderDashboard();
-    closeModal('#modal-province-select');
-    toast('استان شما ذخیره شد');
-  });
-
-  // 5) هنگام باز کردن «ویرایش پروفایل» مطمئن شو لیست به‌روز است
-  document.getElementById('btn-edit-profile')?.addEventListener('click', () => {
-    fillAllProvinceSelects();
-    openModal('#modal-profile');
-  });
-})();
-
-
 
 
 
@@ -2039,11 +1985,64 @@ patchPricingKeys(RemoteConfig);
         if(u.username) State.user.name += ` (@${u.username})`;
       }
     }
-  }catch{}
-  
-  // ===== Question Bank (تماماً فارسی) =====
-  const qBank = [
-    { q:'پایتخت ایران چیست؟', c:['تهران','اصفهان','شیراز','تبریز'], a:0, cat:'جغرافیای ایران', diff:'آسان' },
+    }catch{}
+
+    (function setupProvinceSelect(){
+    // 1) اگر خالی بود، استان‌ها را مقداردهی کن
+    function bootstrapProvinces(){
+      if (Array.isArray(State.provinces) && State.provinces.length) return;
+      const NAMES = [
+        "آذربایجان شرقی","آذربایجان غربی","اردبیل","اصفهان","البرز","ایلام","بوشهر","تهران",
+        "چهارمحال و بختیاری","خراسان جنوبی","خراسان رضوی","خراسان شمالی","خوزستان","زنجان","سمنان",
+        "سیستان و بلوچستان","فارس","قزوین","قم","کردستان","کرمان","کرمانشاه","کهگیلویه و بویراحمد",
+        "گلستان","گیلان","لرستان","مازندران","مرکزی","هرمزگان","همدان","یزد"
+      ];
+      State.provinces = NAMES.map(n => ({ name:n, score:0, members:0, region:'' }));
+    }
+
+    function openModal(sel){ document.querySelector(sel).classList.add('show'); }
+    function closeModal(sel){ document.querySelector(sel).classList.remove('show'); }
+
+    function fillAllProvinceSelects(){
+      bootstrapProvinces();
+      populateProvinceOptions(document.getElementById('first-province'), 'استان خود را انتخاب کنید');
+      const editSel = document.getElementById('sel-province');
+      populateProvinceOptions(editSel);
+      if (editSel) editSel.value = State.user.province || '';
+    }
+
+    // 2) پر کردن سلکت‌ها در شروع
+    fillAllProvinceSelects();
+
+    // 3) اگر کاربر هنوز استان ندارد، مودال را باز کن
+    if (!State.user.province) {
+      openModal('#modal-province-select');
+      setTimeout(()=>document.getElementById('first-province')?.focus(), 50);
+    }
+
+    // 4) دکمهٔ تایید استان
+    document.getElementById('btn-confirm-province')?.addEventListener('click', () => {
+      const sel = document.getElementById('first-province');
+      const val = sel?.value || '';
+      if (!val) { toast('لطفاً یک استان انتخاب کن'); return; }
+      State.user.province = val;
+      saveState();
+      renderHeader();
+      renderDashboard();
+      closeModal('#modal-province-select');
+      toast('استان شما ذخیره شد');
+    });
+
+    // 5) هنگام باز کردن «ویرایش پروفایل» مطمئن شو لیست به‌روز است
+    document.getElementById('btn-edit-profile')?.addEventListener('click', () => {
+      fillAllProvinceSelects();
+      openModal('#modal-profile');
+    });
+  })();
+
+    // ===== Question Bank (تماماً فارسی) =====
+    const qBank = [
+      { q:'پایتخت ایران چیست؟', c:['تهران','اصفهان','شیراز','تبریز'], a:0, cat:'جغرافیای ایران', diff:'آسان' },
     { q:'مرتفع‌ترین کوه ایران کدام است؟', c:['سبلان','زاگرس','دماوند','تفتان'], a:2, cat:'جغرافیای ایران', diff:'آسان' },
     { q:'دریاچهٔ ارومیه در کدام استان‌ها قرار دارد؟', c:['آذربایجان شرقی و غربی','کردستان و همدان','خراسان رضوی و شمالی','فارس و بوشهر'], a:0, cat:'جغرافیای ایران', diff:'متوسط' },
     { q:'رود کارون عمدتاً در کدام استان جریان دارد؟', c:['خوزستان','هرمزگان','سیستان و بلوچستان','گیلان'], a:0, cat:'جغرافیای ایران', diff:'آسان' },
