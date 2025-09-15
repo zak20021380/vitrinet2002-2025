@@ -119,6 +119,22 @@
     .vip-frame{ box-shadow:0 0 0 3px rgba(251,191,36,.9), 0 0 20px rgba(251,191,36,.35) inset; border-radius:999px }
     .province-frame{ box-shadow:0 0 0 3px rgba(16,185,129,.9), 0 0 20px rgba(16,185,129,.35) inset; border-radius:999px }
     @media(min-width:640px){ .ad-banner-slot{ bottom:64px } }
+
+    .duel-opponent{ gap:1rem; }
+    .duel-opponent-action{ display:flex; align-items:center; }
+    .duel-opponent-action .btn{ min-width:140px; }
+    #duel-friends-list{ max-height:min(20rem,60vh); }
+
+    @media(max-width:640px){
+      .match-types{ grid-template-columns:1fr; }
+      .duel-opponent{ flex-direction:column; align-items:stretch; text-align:right; }
+      .duel-opponent-action{ width:100%; }
+      .duel-opponent-action .btn{ width:100%; min-width:0; }
+    }
+
+    @media(min-width:641px) and (max-width:1024px){
+      .match-types{ grid-template-columns:repeat(2,1fr); }
+    }
     /* Game Limits UI */
     .limit-card{ background: linear-gradient(135deg, rgba(255,255,255,0.15), rgba(255,255,255,0.05)); border-radius: 1rem; padding: 1rem; margin-bottom: 1rem; border: 1px solid rgba(255,255,255,0.15); }
     .limit-bar{ height:8px; width:100%; background:rgba(255,255,255,0.2); border-radius:4px; overflow:hidden; margin-top:0.5rem }
@@ -1027,6 +1043,10 @@
         </h3>
         <div class="space-y-4">
           <div class="text-center">
+            <div class="inline-flex items-center gap-2 px-3 py-2 mb-4 rounded-2xl bg-white/10 border border-white/20 text-sm" aria-live="polite">
+              <i class="fas fa-hourglass-half text-amber-300"></i>
+              <span>نبرد باقی‌مانده امروز: <span id="duel-limit-remaining">۳</span> / <span id="duel-limit-total">۳</span></span>
+            </div>
             <p class="mb-4">دوست خود را برای نبرد انتخاب کنید</p>
             <div class="flex flex-wrap justify-center gap-3 mb-4">
               <button id="btn-duel-random" class="btn btn-duel w-auto px-5 py-2 flex items-center gap-2">
@@ -1837,6 +1857,7 @@ const RemoteConfig = {
 
   gameLimits: {
     matches: { daily: 5, vipMultiplier: 2, recoveryTime: 2 * 60 * 60 * 1000 }, // 2 hours
+    duels:   { daily: 3, vipMultiplier: 2, recoveryTime: 30 * 60 * 1000 },     // 30 minutes
     lives:   { daily: 3, vipMultiplier: 2, recoveryTime: 30 * 60 * 1000 },     // 30 minutes
     groupBattles: { daily: 2, vipMultiplier: 2, recoveryTime: 60 * 60 * 1000 }, // 1 hour
     energy:  { daily: 10, vipMultiplier: 2, recoveryTime: 15 * 60 * 1000 }     // 15 minutes
@@ -1912,6 +1933,7 @@ patchPricingKeys(RemoteConfig);
     user: { province:'تهران' }, // can be set by your auth bootstrap
     limits: {
       matches: { used: 0, lastReset: 0, lastRecovery: 0 },
+      duels: { used: 0, lastReset: 0, lastRecovery: 0 },
       lives: { used: 0, lastReset: 0, lastRecovery: 0 },
       groupBattles: { used: 0, lastReset: 0, lastRecovery: 0 },
       energy: { used: 0, lastReset: 0, lastRecovery: 0 }
@@ -2006,6 +2028,9 @@ patchPricingKeys(RemoteConfig);
       // Load server state if available
       const serverState = JSON.parse(localStorage.getItem('server_state') || '{}');
       if (serverState.limits) Object.assign(Server.limits, serverState.limits);
+      if (!Server.limits.duels) {
+        Server.limits.duels = { used: 0, lastReset: 0, lastRecovery: 0 };
+      }
       if (serverState.pass) Object.assign(Server.pass, serverState.pass);
     }catch{}
     State.duelOpponent = null;
@@ -2144,7 +2169,12 @@ patchPricingKeys(RemoteConfig);
       Server.limits.matches.used = 0;
       Server.limits.matches.lastReset = today.getTime();
     }
-    
+
+    if (Server.limits.duels.lastReset < today.getTime()) {
+      Server.limits.duels.used = 0;
+      Server.limits.duels.lastReset = today.getTime();
+    }
+
     if (Server.limits.lives.lastReset < today.getTime()) {
       Server.limits.lives.used = 0;
       Server.limits.lives.lastReset = today.getTime();
@@ -2186,12 +2216,18 @@ patchPricingKeys(RemoteConfig);
     $('#matches-progress').style.width = `${matchesPct}%`;
     
     // Duels
-    const duelsLimit = RemoteConfig.gameLimits.lives.daily * vipMultiplier;
-    const duelsUsed = Server.limits.lives.used;
+    const duelsLimit = RemoteConfig.gameLimits.duels.daily * vipMultiplier;
+    const duelsUsed = Server.limits.duels.used;
     const duelsPct = Math.min(100, (duelsUsed / duelsLimit) * 100);
     $('#duels-used').textContent = faNum(duelsUsed);
     $('#duels-limit').textContent = faNum(duelsLimit);
     $('#duels-progress').style.width = `${duelsPct}%`;
+    const duelRemainingEl = $('#duel-limit-remaining');
+    const duelTotalEl = $('#duel-limit-total');
+    if (duelRemainingEl && duelTotalEl) {
+      duelRemainingEl.textContent = faNum(Math.max(duelsLimit - duelsUsed, 0));
+      duelTotalEl.textContent = faNum(duelsLimit);
+    }
 
     // Group Battles
     const groupLimit = RemoteConfig.gameLimits.groupBattles.daily * vipMultiplier;
@@ -2251,11 +2287,11 @@ patchPricingKeys(RemoteConfig);
       (Server.subscription.tier === 'pro' ? 3 : 2) : 1;
     
     const matchesLimit = RemoteConfig.gameLimits.matches.daily * vipMultiplier;
-    const duelsLimit = RemoteConfig.gameLimits.lives.daily * vipMultiplier;
+    const duelsLimit = RemoteConfig.gameLimits.duels.daily * vipMultiplier;
     const groupLimit = RemoteConfig.gameLimits.groupBattles.daily * vipMultiplier;
 
     const matchesReached = Server.limits.matches.used >= matchesLimit;
-    const duelsReached = Server.limits.lives.used >= duelsLimit;
+    const duelsReached = Server.limits.duels.used >= duelsLimit;
     const groupReached = Server.limits.groupBattles.used >= groupLimit;
     const energyLimit = RemoteConfig.gameLimits.energy.daily * vipMultiplier;
     const energyReached = $('#energy-used') ? Server.limits.energy.used >= energyLimit : false;
@@ -3800,18 +3836,24 @@ async function startPurchaseCoins(pkgId){
     const list = $('#duel-friends-list');
     if(!list) return;
     list.innerHTML = '';
+    if(duelFriends.length === 0){
+      list.innerHTML = '<div class="glass rounded-2xl p-4 text-sm opacity-80 text-center">فعلاً دوستی برای نبرد در دسترس نیست.</div>';
+      return;
+    }
     duelFriends.forEach(friend => {
       const card = document.createElement('div');
       card.className = 'duel-opponent glass rounded-2xl p-4 flex items-center justify-between';
       card.innerHTML = `
-        <div class="flex items-center gap-3">
+        <div class="duel-opponent-info flex items-center gap-3 flex-1">
           <img src="${friend.avatar}" class="w-12 h-12 rounded-full border-2 border-white/30" alt="opponent">
           <div>
             <div class="font-bold">${friend.name}</div>
-            <div class="text-sm opacity-80 flex items-center gap-1"><i class="fas fa-star text-yellow-300"></i><span>امتیاز: ${friend.score.toLocaleString('fa-IR')}</span></div>
+            <div class="text-sm opacity-80 flex items-center gap-1"><i class="fas fa-star text-yellow-300"></i><span>امتیاز: ${faNum(friend.score)}</span></div>
           </div>
         </div>
-        <button class="btn btn-duel text-sm w-auto px-4" data-id="${friend.id}">چالش</button>`;
+        <div class="duel-opponent-action">
+          <button class="btn btn-duel text-sm w-auto px-4" data-id="${friend.id}" aria-label="شروع نبرد با ${friend.name}">چالش</button>
+        </div>`;
       list.appendChild(card);
     });
     list.querySelectorAll('button[data-id]').forEach(btn => {
@@ -3822,16 +3864,31 @@ async function startPurchaseCoins(pkgId){
   function challengeFriend(id){
     const friend = duelFriends.find(f => f.id === id);
     if(!friend) return;
-    toast(`دعوت نبرد برای ${friend.name} ارسال شد!`);
     logEvent('duel_challenge', { opponent: friend.name });
+    const started = startDuelMatch(friend);
+    if(started){
+      const idx = duelFriends.findIndex(f => f.id === friend.id);
+      if(idx > 0){
+        const [item] = duelFriends.splice(idx,1);
+        duelFriends.unshift(item);
+        renderDuelFriends();
+      }
+      toast(`نبرد با ${friend.name} شروع شد!`);
+    }
   }
 
   function startDuelMatch(opponent){
+    if(!useGameResource('duels')){
+      toast('به محدودیت نبرد تن‌به‌تن امروز رسیدی');
+      logEvent('duel_limit_reached', { opponent: opponent?.name });
+      return false;
+    }
     State.duelOpponent = opponent;
     used5050=false; usedSkip=false; paused=false;
     startQuiz({cat:'عمومی', diff:'متوسط', count:5});
     logEvent('duel_start', { opponent: opponent.name });
     navTo('quiz');
+    return true;
   }
 
   renderDuelFriends();
@@ -3847,10 +3904,14 @@ async function startPurchaseCoins(pkgId){
     const opponent = randomPool[Math.floor(Math.random()*randomPool.length)];
     toast(`حریف ${opponent.name} پیدا شد!`);
     logEvent('duel_random_found', { opponent: opponent.name });
-    duelFriends.unshift(opponent);
-    renderDuelFriends();
+    const started = startDuelMatch(opponent);
+    if(started){
+      const existingIdx = duelFriends.findIndex(f => f.id === opponent.id);
+      if(existingIdx >= 0){ duelFriends.splice(existingIdx,1); }
+      duelFriends.unshift(opponent);
+      renderDuelFriends();
+    }
     btn.disabled = false;
-    startDuelMatch(opponent);
   });
 
   // Invite Link Copy
@@ -3987,7 +4048,7 @@ async function startPurchaseCoins(pkgId){
       toast('کلید کافی نیست');
       return;
     }
-    if (Server.limits.lives.used === 0) {
+    if (Server.limits.duels.used === 0) {
       toast('نیازی به ریست نیست');
       return;
     }
@@ -3996,8 +4057,8 @@ async function startPurchaseCoins(pkgId){
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     const t = today.getTime();
-    Server.limits.lives.used = 0;
-    Server.limits.lives.lastReset = t;
+    Server.limits.duels.used = 0;
+    Server.limits.duels.lastReset = t;
     updateLimitsUI();
     checkLimitsReached();
     saveState();
@@ -4047,10 +4108,12 @@ async function startPurchaseCoins(pkgId){
         today.setHours(0, 0, 0, 0);
         const t = today.getTime();
         Server.limits.matches.used = 0;
+        Server.limits.duels.used = 0;
         Server.limits.lives.used = 0;
         Server.limits.groupBattles.used = 0;
         Server.limits.energy.used = 0;
         Server.limits.matches.lastReset = t;
+        Server.limits.duels.lastReset = t;
         Server.limits.lives.lastReset = t;
         Server.limits.groupBattles.lastReset = t;
         Server.limits.energy.lastReset = t;
