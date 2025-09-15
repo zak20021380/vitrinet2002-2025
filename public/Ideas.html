@@ -1512,7 +1512,7 @@
         <label class="block text-sm opacity-90">نام</label>
         <input id="inp-name" class="w-full p-3 rounded-xl bg-white/10 border border-white/20" placeholder="نام شما">
         <label class="block text-sm opacity-90">استان</label>
-        <select id="sel-province" class="w-full p-3 rounded-xl bg-white/10 border border-white/20"></select>
+        <select id="sel-province" class="w-full p-3 rounded-xl bg-white/10 border border-white/20" disabled></select>
         <label class="block text-sm opacity-90">گروه شما</label>
         <div id="lbl-group" class="w-full p-3 rounded-xl bg-white/10 border border-white/20"></div>
         <label class="block text-sm opacity-90">عکس پروفایل</label>
@@ -3598,7 +3598,7 @@ async function startPurchaseCoins(pkgId){
     if(State.user.province){
       sel.value = State.user.province;
     }
-    sel.disabled = false;
+    sel.disabled = true;
     $('#lbl-group').textContent = State.user.group || '—';
     $('#inp-avatar').value = '';
     openModal('#modal-profile');
@@ -3608,8 +3608,7 @@ async function startPurchaseCoins(pkgId){
     const n = $('#inp-name').value.trim();
     if(n) State.user.name = n;
 
-    const p = $('#sel-province').value;
-    if(p) State.user.province = p;
+    // استان قابل تغییر نیست، بنابراین مقدار آن ذخیره نمی‌شود
 
     const file = $('#inp-avatar').files[0];
     if(file){
