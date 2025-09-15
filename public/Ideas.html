@@ -331,6 +331,14 @@
   display: grid;
 }
 
+
+
+/* --- Province select fixes --- */
+#modal-province-select { z-index: 120 !important; }        /* بالاتر از بقیه مودال‌ها */
+#modal-province-select .glass { overflow: visible !important; }
+#first-province { pointer-events: auto; }                  /* اگر لایه‌ای روی select بود */
+
+
   </style>
 </head>
 <body class="min-h-screen text-white flex flex-col">
@@ -1656,10 +1664,10 @@
   const clamp = (n,a,b)=>Math.max(a,Math.min(b,n));
   const faNum = n => (n===null||n===undefined||Number.isNaN(Number(n))) ? '—' : Number(n).toLocaleString('fa-IR');
   const enNum = n => Number(n).toLocaleString('en-US');
-  function populateProvinceOptions(selectEl, placeholder){
+function populateProvinceOptions(selectEl, placeholder){
     if(!selectEl) return;
 
-    // حفظ مقدار انتخاب‌شده در صورت وجود
+    // Save the currently selected value if any
     const prevValue = selectEl.value;
     selectEl.innerHTML = '';
 
@@ -1672,6 +1680,12 @@
       selectEl.appendChild(opt);
     }
 
+    // Check if provinces exist
+    if(!State.provinces || State.provinces.length === 0){
+      console.warn('No provinces available to populate');
+      return;
+    }
+
     State.provinces
       .slice()
       .sort((a,b)=>a.name.localeCompare(b.name, 'fa'))
@@ -1682,11 +1696,65 @@
         selectEl.appendChild(option);
       });
 
-    // بازگردانی انتخاب قبلی در صورت نیاز
-    if(prevValue){
+    // Restore previous selection if it exists
+    if(prevValue && Array.from(selectEl.options).some(opt => opt.value === prevValue)){
       selectEl.value = prevValue;
     }
   }
+
+
+  (function setupProvinceSelect(){
+  // 1) اگر خالی بود، استان‌ها را مقداردهی کن
+  function bootstrapProvinces(){
+    if (Array.isArray(State.provinces) && State.provinces.length) return;
+    const NAMES = [
+      "آذربایجان شرقی","آذربایجان غربی","اردبیل","اصفهان","البرز","ایلام","بوشهر","تهران",
+      "چهارمحال و بختیاری","خراسان جنوبی","خراسان رضوی","خراسان شمالی","خوزستان","زنجان","سمنان",
+      "سیستان و بلوچستان","فارس","قزوین","قم","کردستان","کرمان","کرمانشاه","کهگیلویه و بویراحمد",
+      "گلستان","گیلان","لرستان","مازندران","مرکزی","هرمزگان","همدان","یزد"
+    ];
+    State.provinces = NAMES.map(n => ({ name:n, score:0, members:0, region:'' }));
+  }
+
+  function openModal(sel){ document.querySelector(sel).classList.add('show'); }
+  function closeModal(sel){ document.querySelector(sel).classList.remove('show'); }
+
+  function fillAllProvinceSelects(){
+    bootstrapProvinces();
+    populateProvinceOptions(document.getElementById('first-province'), 'استان خود را انتخاب کنید');
+    const editSel = document.getElementById('sel-province');
+    populateProvinceOptions(editSel);
+    if (editSel) editSel.value = State.user.province || '';
+  }
+
+  // 2) پر کردن سلکت‌ها در شروع
+  fillAllProvinceSelects();
+
+  // 3) اگر کاربر هنوز استان ندارد، مودال را باز کن
+  if (!State.user.province) {
+    openModal('#modal-province-select');
+    setTimeout(()=>document.getElementById('first-province')?.focus(), 50);
+  }
+
+  // 4) دکمهٔ تایید استان
+  document.getElementById('btn-confirm-province')?.addEventListener('click', () => {
+    const sel = document.getElementById('first-province');
+    const val = sel?.value || '';
+    if (!val) { toast('لطفاً یک استان انتخاب کن'); return; }
+    State.user.province = val;
+    saveState();
+    renderHeader();
+    renderDashboard();
+    closeModal('#modal-province-select');
+    toast('استان شما ذخیره شد');
+  });
+
+  // 5) هنگام باز کردن «ویرایش پروفایل» مطمئن شو لیست به‌روز است
+  document.getElementById('btn-edit-profile')?.addEventListener('click', () => {
+    fillAllProvinceSelects();
+    openModal('#modal-profile');
+  });
+})();
 
 
 
@@ -3946,23 +4014,85 @@ async function startPurchaseCoins(pkgId){
 async function init(){
     const loading = $('#loading');
     try{
+      // Fallback provinces in case JSON fails to load
+      const fallbackProvinces = [
+        { id: '1', name: 'آذربایجان شرقی', score: 15000, members: 120, region: 'شمال غربی' },
+        { id: '2', name: 'آذربایجان غربی', score: 14500, members: 110, region: 'شمال غربی' },
+        { id: '3', name: 'اردبیل', score: 12000, members: 85, region: 'شمال غربی' },
+        { id: '4', name: 'اصفهان', score: 18000, members: 180, region: 'مرکزی' },
+        { id: '5', name: 'البرز', score: 16000, members: 140, region: 'مرکزی' },
+        { id: '6', name: 'ایلام', score: 11000, members: 70, region: 'غربی' },
+        { id: '7', name: 'بوشهر', score: 12500, members: 90, region: 'جنوبی' },
+        { id: '8', name: 'تهران', score: 22000, members: 250, region: 'مرکزی' },
+        { id: '9', name: 'چهارمحال و بختیاری', score: 11500, members: 75, region: 'مرکزی' },
+        { id: '10', name: 'خراسان جنوبی', score: 10500, members: 65, region: 'شرقی' },
+        { id: '11', name: 'خراسان رضوی', score: 17000, members: 160, region: 'شرقی' },
+        { id: '12', name: 'خراسان شمالی', score: 10000, members: 60, region: 'شرقی' },
+        { id: '13', name: 'خوزستان', score: 16500, members: 150, region: 'جنوب غربی' },
+        { id: '14', name: 'زنجان', score: 12000, members: 80, region: 'شمال غربی' },
+        { id: '15', name: 'سمنان', score: 11000, members: 70, region: 'مرکزی' },
+        { id: '16', name: 'سیستان و بلوچستان', score: 13000, members: 95, region: 'جنوب شرقی' },
+        { id: '17', name: 'فارس', score: 17500, members: 165, region: 'جنوبی' },
+        { id: '18', name: 'قزوین', score: 12500, members: 85, region: 'مرکزی' },
+        { id: '19', name: 'قم', score: 13500, members: 100, region: 'مرکزی' },
+        { id: '20', name: 'کردستان', score: 14000, members: 105, region: 'غربی' },
+        { id: '21', name: 'کرمان', score: 15000, members: 120, region: 'جنوب شرقی' },
+        { id: '22', name: 'کرمانشاه', score: 13500, members: 100, region: 'غربی' },
+        { id: '23', name: 'کهگیلویه و بویراحمد', score: 10500, members: 65, region: 'جنوب غربی' },
+        { id: '24', name: 'گلستان', score: 12000, members: 80, region: 'شمالی' },
+        { id: '25', name: 'گیلان', score: 15500, members: 125, region: 'شمالی' },
+        { id: '26', name: 'لرستان', score: 12500, members: 85, region: 'غربی' },
+        { id: '27', name: 'مازندران', score: 16000, members: 135, region: 'شمالی' },
+        { id: '28', name: 'مرکزی', score: 13000, members: 95, region: 'مرکزی' },
+        { id: '29', name: 'هرمزگان', score: 14000, members: 105, region: 'جنوبی' },
+        { id: '30', name: 'همدان', score: 13000, members: 90, region: 'غربی' },
+        { id: '31', name: 'یزد', score: 14500, members: 110, region: 'مرکزی' }
+      ];
+
       try{
-        // استان‌ها را از مسیر قابل دسترس در پوشه public بارگذاری می‌کنیم
+        // Try to load provinces from JSON file
         const resp = await fetch('./data/provinces.json');
         if(resp.ok){
-          State.provinces = await resp.json();
+          const loadedProvinces = await resp.json();
+          if(loadedProvinces && loadedProvinces.length > 0){
+            State.provinces = loadedProvinces;
+          } else {
+            State.provinces = fallbackProvinces;
+          }
+        } else {
+          State.provinces = fallbackProvinces;
         }
       }catch(err){
-        console.error('Failed to load provinces', err);
-        State.provinces = [];
+        console.warn('Failed to load provinces from JSON, using fallback', err);
+        State.provinces = fallbackProvinces;
+      }
+
+      // Ensure provinces are populated
+      if(!State.provinces || State.provinces.length === 0){
+        State.provinces = fallbackProvinces;
       }
 
       renderHeader(); renderDashboard(); navTo('dashboard');
 
+      // Check if user needs to select province
       if(!State.user.province){
         const sel = $('#first-province');
-        populateProvinceOptions(sel, 'استان خود را انتخاب کنید');
-        openModal('#modal-province-select');
+        if(sel){
+          populateProvinceOptions(sel, 'استان خود را انتخاب کنید');
+          
+          // Double-check that options were added
+          if(sel.options.length <= 1){ // Only placeholder
+            // Manually add provinces if populateProvinceOptions failed
+            State.provinces.forEach(p => {
+              const option = document.createElement('option');
+              option.value = p.name;
+              option.textContent = p.name;
+              sel.appendChild(option);
+            });
+          }
+          
+          openModal('#modal-province-select');
+        }
       }
 
       // Start daily reset timer
@@ -4004,9 +4134,10 @@ async function init(){
       loading.classList.add('hidden');
     }
   }
-  
   init();
 
+
+  
 
 
 
