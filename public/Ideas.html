@@ -417,7 +417,7 @@
                 <i class="fas fa-location-dot text-sky-300"></i>
                 <span>استان شما: <span id="user-province">—</span></span>
               </div>
-              <div class="flex items-center gap-1">
+              <div id="btn-view-group" class="flex items-center gap-1 cursor-pointer hover:underline">
                 <i class="fas fa-users text-blue-300"></i>
                 <span>گروه شما: <span id="user-group">—</span></span>
               </div>
@@ -2544,6 +2544,8 @@ patchPricingKeys(RemoteConfig);
           <button id="btn-add-member" class="btn btn-group w-full"><i class="fas fa-user-plus ml-2"></i> افزودن عضو</button>
           <div id="member-list" class="space-y-2 mt-4">${membersHtml}</div>
         </div>`;
+      content += `
+        <button id="btn-request-duel" class="btn btn-duel w-full mt-4"><i class="fas fa-swords ml-2"></i> درخواست نبرد</button>`;
     } else if (!isMember) {
       content += `
         <button id="btn-join-group" class="btn btn-group w-full mt-4" ${requested ? 'disabled' : ''}>
@@ -2565,6 +2567,7 @@ patchPricingKeys(RemoteConfig);
       toast(`عضو ${name} اضافه شد`);
       renderGroupSelect();
     });
+    $('#btn-request-duel')?.addEventListener('click', () => openDuelRequest(group));
   }
 
   function requestJoinGroup(groupId){
@@ -2579,6 +2582,34 @@ patchPricingKeys(RemoteConfig);
     toast(`درخواست عضویت به ${group.name} ارسال شد`);
     logEvent('group_join_request', { group: group.name });
     closeDetailPopup();
+  }
+
+  function openDuelRequest(group){
+    const opponents = State.groups.filter(g=>g.id!==group.id);
+    if(opponents.length===0){
+      toast('گروه دیگری برای نبرد موجود نیست');
+      return;
+    }
+    const cards = opponents.map(g=>`
+      <div class="location-card" data-opp="${g.id}">
+        <div class="location-icon group-icon"><i class="fas fa-users"></i></div>
+        <div class="flex-1"><div class="font-bold">${g.name}</div>
+          <div class="text-sm opacity-80 flex items-center gap-1"><i class="fas fa-user"></i><span>مدیر: ${g.admin}</span></div>
+        </div>
+      </div>`).join('');
+    const content = `
+      <div class="space-y-3">${cards}</div>
+      <button id="btn-back-duel-select" class="btn btn-secondary w-full mt-4"><i class="fas fa-arrow-right ml-2"></i> بازگشت</button>`;
+    showDetailPopup('انتخاب گروه رقیب', content);
+    $$('[data-opp]').forEach(el=>{
+      el.addEventListener('click',()=>{
+        const target = State.groups.find(g=>g.id===el.dataset.opp);
+        toast(`درخواست نبرد به ${target.name} ارسال شد`);
+        logEvent('group_duel_request', {from: group.name, to: target.name});
+        closeDetailPopup();
+      });
+    });
+    $('#btn-back-duel-select')?.addEventListener('click',()=>showGroupDetail(group));
   }
 
   function openCreateGroup(){
@@ -2613,6 +2644,7 @@ patchPricingKeys(RemoteConfig);
       State.user.group = name;
       saveState();
       renderGroupSelect();
+      $('#user-group').textContent = State.user.group;
       logEvent('group_created', { group: name });
       const link = location.origin + '/?join=' + newGroup.id;
       $('#new-group-link').value = link;
@@ -3802,6 +3834,11 @@ async function startPurchaseCoins(pkgId){
   }
   renderGroupSelect();
   $('#btn-create-group')?.addEventListener('click', openCreateGroup);
+  $('#btn-view-group')?.addEventListener('click', () => {
+    const myGroup = State.groups.find(g => g.name === State.user.group);
+    if (myGroup) showGroupDetail(myGroup);
+    else navTo('group');
+  });
   
   // Back Buttons for New Pages
   $('#btn-back-duel')?.addEventListener('click', () => navTo('dashboard'));
