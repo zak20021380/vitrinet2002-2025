@@ -54,11 +54,35 @@
     .btn-group{ background:linear-gradient(135deg,#c084fc,#a78bfa); color:#fff; box-shadow:0 8px 24px rgba(167,139,250,.35) }
     .btn-duel{ background:linear-gradient(135deg,#f87171,#ef4444); color:#fff; box-shadow:0 8px 24px rgba(239,68,68,.35) }
     .chip{ display:inline-flex; align-items:center; gap:.4rem; padding:.25rem .6rem; border-radius:999px; font-size:.85rem; font-weight:700; background:rgba(255,255,255,.10); border:1px solid rgba(255,255,255,.2); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:10rem }
+    @keyframes chipAttention{ 0%,100%{transform:translateY(0); box-shadow:0 0 0 0 rgba(250,204,21,0)} 50%{transform:translateY(-3px); box-shadow:0 12px 30px rgba(250,204,21,0.35)} }
+    .chip.attention{ animation:chipAttention .6s ease; box-shadow:0 0 0 2px rgba(250,204,21,0.35); }
     .divider{ height:1px; width:100%; background:rgba(255,255,255,.20); margin:.75rem 0 }
     .choice{ width:100%; text-align:right; padding:1rem 1.1rem; border-radius:1rem; border:1px solid rgba(255,255,255,.20); background:rgba(255,255,255,.10); transition:all .2s ease; display:flex; align-items:center; gap:.75rem; min-height:44px }
     .choice:hover{ background:rgba(255,255,255,.20); transform:translateY(-1px) }
     .choice.correct{ background:rgba(16,185,129,.25); border-color:rgba(16,185,129,.7); box-shadow:0 0 18px rgba(16,185,129,.35) }
     .choice.wrong{ background:rgba(244,63,94,.25); border-color:rgba(244,63,94,.7); box-shadow:0 0 18px rgba(244,63,94,.35) }
+    .lifeline-btn{ position:relative; display:flex; flex-direction:column; align-items:center; justify-content:flex-start; gap:.85rem; padding:1.2rem 1rem; border-radius:1.75rem; background:linear-gradient(145deg, rgba(255,255,255,0.22), rgba(255,255,255,0.05)); border:1px solid rgba(255,255,255,0.35); box-shadow:0 18px 45px rgba(15,23,42,0.2); transition:transform .25s ease, box-shadow .25s ease, border-color .25s ease; min-height:170px; text-align:center; }
+    .lifeline-btn:hover{ transform:translateY(-6px); box-shadow:0 26px 60px rgba(15,23,42,0.24); border-color:rgba(255,255,255,0.45); }
+    .lifeline-btn:active{ transform:translateY(-2px); }
+    .lifeline-btn:disabled{ opacity:.6; cursor:not-allowed; box-shadow:none; transform:none; border-color:rgba(255,255,255,0.18); }
+    .lifeline-icon{ width:3.4rem; height:3.4rem; border-radius:1.2rem; display:flex; align-items:center; justify-content:center; font-size:1.35rem; color:#0f172a; background:linear-gradient(135deg,var(--accent1),var(--accent2)); box-shadow:0 14px 34px rgba(14,116,144,0.35); }
+    .lifeline-btn:disabled .lifeline-icon{ background:linear-gradient(135deg, rgba(34,197,94,0.28), rgba(16,185,129,0.24)); color:#d1fae5; box-shadow:none; }
+    .lifeline-details{ display:flex; flex-direction:column; gap:.3rem; }
+    .lifeline-title{ font-weight:800; font-size:1.05rem; letter-spacing:-0.01em; }
+    .lifeline-sub{ font-size:.82rem; opacity:.85; line-height:1.5; }
+    .lifeline-footer{ display:flex; flex-direction:column; align-items:center; gap:.45rem; }
+    .lifeline-cost{ display:inline-flex; align-items:center; gap:.35rem; padding:.4rem .95rem; border-radius:999px; font-weight:800; font-size:.9rem; background:rgba(17,24,39,0.22); border:1px solid rgba(255,255,255,0.25); color:#facc15; box-shadow:0 12px 26px rgba(15,23,42,0.25); }
+    .lifeline-cost i{ color:#facc15; }
+    .lifeline-cost.not-enough{ background:rgba(127,29,29,0.38); color:#fecaca; border-color:rgba(248,113,113,0.4); box-shadow:0 0 0 1px rgba(248,113,113,0.35); }
+    .lifeline-status{ font-size:.8rem; font-weight:700; display:flex; align-items:center; gap:.4rem; color:#bbf7d0; background:rgba(34,197,94,0.28); border:1px solid rgba(34,197,94,0.42); border-radius:999px; padding:.35rem .95rem; }
+    .lifeline-btn[data-insufficient="true"]{ border-color:rgba(248,113,113,0.38); box-shadow:0 0 0 1px rgba(248,113,113,0.25) inset; }
+    .lifeline-btn[data-insufficient="true"] .lifeline-icon{ background:linear-gradient(135deg, rgba(248,113,113,0.35), rgba(239,68,68,0.32)); color:#fff; box-shadow:none; }
+    .lifeline-btn[data-insufficient="true"] .lifeline-title{ color:#fee2e2; }
+    .lifeline-btn[data-insufficient="true"] .lifeline-sub{ color:rgba(255,255,255,0.78); }
+    @keyframes timerGlow{ 0%,100%{filter:drop-shadow(0 0 0 rgba(250,204,21,0));} 50%{filter:drop-shadow(0 0 14px rgba(250,204,21,0.75));} }
+    @keyframes timerTextGlow{ 0%,100%{color:#fff; text-shadow:none;} 50%{color:#fde047; text-shadow:0 0 12px rgba(250,204,21,0.85);} }
+    #timer-ring.timer-boost{ animation:timerGlow .85s ease; }
+    #timer-text.timer-boost{ animation:timerTextGlow .85s ease; }
     .modal{ position:fixed; inset:0; display:none; place-items:center; background:rgba(0,0,0,.45); z-index:70; padding:1rem }
     .modal.show{ display:grid }
     .sheet{ position:fixed; inset-inline:0; bottom:0; transform:translateY(100%); transition:transform .35s ease; z-index:60 }
@@ -750,15 +774,39 @@
       </div>
       
       <!-- Lifelines -->
-      <div class="grid grid-cols-3 gap-2 sm:gap-3">
-        <button id="life-5050" class="w-full py-3 rounded-2xl bg-white/10 border border-white/20 hover:bg-white/20 transition text-[0.65rem] sm:text-sm flex items-center justify-center gap-2">
-          <i class="fas fa-percent"></i> ۵۰–۵۰
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+        <button id="life-5050" class="lifeline-btn" type="button" aria-label="کمک ۵۰–۵۰">
+          <div class="lifeline-icon"><i class="fas fa-percent"></i></div>
+          <div class="lifeline-details">
+            <div class="lifeline-title">۵۰–۵۰</div>
+            <div class="lifeline-sub">حذف دو گزینهٔ نادرست</div>
+          </div>
+          <div class="lifeline-footer">
+            <div class="lifeline-cost"><i class="fas fa-key"></i><span>۳ کلید</span></div>
+            <div class="lifeline-status hidden"><i class="fas fa-check ml-1"></i> ۵۰–۵۰ فعال شد</div>
+          </div>
         </button>
-        <button id="life-skip" class="w-full py-3 rounded-2xl bg-white/10 border border-white/20 hover:bg-white/20 transition text-[0.65rem] sm:text-sm flex items-center justify-center gap-2">
-          <i class="fas fa-forward"></i> پرش رو به سوال بعدی
+        <button id="life-skip" class="lifeline-btn" type="button" aria-label="پرش به سؤال بعدی">
+          <div class="lifeline-icon"><i class="fas fa-forward"></i></div>
+          <div class="lifeline-details">
+            <div class="lifeline-title">پرش به سؤال بعدی</div>
+            <div class="lifeline-sub">یک‌بار می‌توانی سؤال را رد کنی</div>
+          </div>
+          <div class="lifeline-footer">
+            <div class="lifeline-cost"><i class="fas fa-key"></i><span>۳ کلید</span></div>
+            <div class="lifeline-status hidden"><i class="fas fa-check ml-1"></i> سؤال بعدی فعال شد</div>
+          </div>
         </button>
-        <button id="life-pause" class="w-full py-3 rounded-2xl bg-white/10 border border-white/20 hover:bg-white/20 transition text-[0.65rem] sm:text-sm flex items-center justify-center gap-2">
-          <i class="fas fa-pause"></i> مکث
+        <button id="life-pause" class="lifeline-btn" type="button" aria-label="افزودن زمان">
+          <div class="lifeline-icon"><i class="fas fa-stopwatch"></i></div>
+          <div class="lifeline-details">
+            <div class="lifeline-title">افزودن ۱۰ ثانیه</div>
+            <div class="lifeline-sub">۱۰ ثانیه زمان بیشتر برای این سؤال</div>
+          </div>
+          <div class="lifeline-footer">
+            <div class="lifeline-cost"><i class="fas fa-key"></i><span>۳ کلید</span></div>
+            <div class="lifeline-status hidden"><i class="fas fa-bolt ml-1"></i> ۱۰ ثانیه اضافه شد</div>
+          </div>
         </button>
       </div>
       
@@ -2019,6 +2067,8 @@ patchPricingKeys(RemoteConfig);
   
   const cats = ['عمومی','علم','جغرافیای ایران','ادبیات فارسی','تاریخ ایران','سینما و موسیقی ایران','ورزش ایران','تکنولوژی'];
   const diffs = ['آسان','متوسط','سخت'];
+  const LIFELINE_COST = 3;
+  const TIMER_CIRC = 2 * Math.PI * 64;
   
   function loadState(){ 
     try{ 
@@ -2486,7 +2536,84 @@ patchPricingKeys(RemoteConfig);
   function renderTopBars(){
     $('#lives').textContent = faNum(State.lives);
     $('#coins').textContent = faNum(State.coins);
+    updateLifelineStates();
   }
+
+  function animateKeyChip(){
+    const chip = $('#lives')?.closest('.chip');
+    if(!chip) return;
+    chip.classList.remove('attention');
+    void chip.offsetWidth;
+    chip.classList.add('attention');
+    setTimeout(()=>chip.classList.remove('attention'), 650);
+  }
+
+  function updateLifelineStates(){
+    const hasKeys = State.lives >= LIFELINE_COST;
+    ['life-5050','life-skip','life-pause'].forEach(id=>{
+      const btn = $('#'+id);
+      if(!btn) return;
+      if(btn.disabled){
+        btn.dataset.insufficient = 'false';
+        const costEl = btn.querySelector('.lifeline-cost');
+        if(costEl) costEl.classList.remove('not-enough');
+        return;
+      }
+      btn.dataset.insufficient = hasKeys ? 'false' : 'true';
+      const costEl = btn.querySelector('.lifeline-cost');
+      if(costEl) costEl.classList.toggle('not-enough', !hasKeys);
+    });
+  }
+
+  function spendLifelineCost(){
+    if(State.lives < LIFELINE_COST){
+      toast(`برای استفاده از این قابلیت به ${faNum(LIFELINE_COST)} کلید نیاز داری`);
+      animateKeyChip();
+      return false;
+    }
+    State.lives -= LIFELINE_COST;
+    renderTopBars();
+    saveState();
+    animateKeyChip();
+    return true;
+  }
+
+  function markLifelineUsed(id){
+    const btn = typeof id === 'string' ? $('#'+id) : id;
+    if(!btn) return;
+    btn.disabled = true;
+    btn.dataset.used = 'true';
+    btn.dataset.insufficient = 'false';
+    const costEl = btn.querySelector('.lifeline-cost');
+    if(costEl){
+      costEl.classList.remove('not-enough');
+      costEl.classList.add('hidden');
+    }
+    const statusEl = btn.querySelector('.lifeline-status');
+    if(statusEl) statusEl.classList.remove('hidden');
+    updateLifelineStates();
+  }
+
+  function resetLifelinesUI(){
+    ['life-5050','life-skip','life-pause'].forEach(id=>{
+      const btn = $('#'+id);
+      if(!btn) return;
+      btn.disabled = false;
+      btn.dataset.used = 'false';
+      btn.dataset.insufficient = 'false';
+      const costEl = btn.querySelector('.lifeline-cost');
+      if(costEl){
+        costEl.classList.remove('hidden','not-enough');
+      }
+      const statusEl = btn.querySelector('.lifeline-status');
+      if(statusEl){
+        statusEl.classList.add('hidden');
+      }
+    });
+    updateLifelineStates();
+  }
+
+  updateLifelineStates();
   
   function navTo(page){
     ['dashboard','quiz','leaderboard','shop','wallet','vip','results','duel','province','group','pass-missions','referral','support'].forEach(p=>$('#page-'+p)?.classList.add('hidden'));
@@ -2779,22 +2906,60 @@ patchPricingKeys(RemoteConfig);
     return pool.sort(()=>Math.random()-0.5).slice(0, count);
   }
   
-  function resetTimer(seconds){
-    const circ = 2*Math.PI*64;
+  function updateTimerVisual(){
     const ring = $('#timer-ring');
-    ring.setAttribute('stroke-dasharray', String(circ));
-    ring.style.strokeDashoffset='0';
-    $('#timer-text').textContent = faNum(seconds);
-    State.quiz.duration = seconds; State.quiz.remain = seconds;
+    const text = $('#timer-text');
+    if(!ring || !text) return;
+    const total = Math.max(1, State.quiz.duration);
+    const remain = clamp(State.quiz.remain, 0, total);
+    text.textContent = faNum(remain);
+    ring.style.strokeDashoffset = String(TIMER_CIRC * (1 - (remain / total)));
+  }
+
+  function resetTimer(seconds){
+    const ring = $('#timer-ring');
+    if(ring) ring.setAttribute('stroke-dasharray', String(TIMER_CIRC));
+    State.quiz.duration = seconds;
+    State.quiz.remain = seconds;
+    updateTimerVisual();
     if(State.quiz.timer) clearInterval(State.quiz.timer);
     State.quiz.timer = setInterval(()=>{
       State.quiz.remain -= 1;
-      const r = clamp(State.quiz.remain,0,seconds);
-      $('#timer-text').textContent = faNum(r);
-      const off = circ*(1 - r/seconds); ring.style.strokeDashoffset = String(off);
-      if(r<=5 && r>0) SFX.tick();
-      if(r<=0){ clearInterval(State.quiz.timer); lockChoices(); showContinue(); registerAnswer(-1); }
+      if(State.quiz.remain <= 5 && State.quiz.remain > 0) SFX.tick();
+      if(State.quiz.remain <= 0){
+        State.quiz.remain = 0;
+        updateTimerVisual();
+        clearInterval(State.quiz.timer);
+        lockChoices();
+        showContinue();
+        registerAnswer(-1);
+        return;
+      }
+      updateTimerVisual();
     },1000);
+  }
+
+  function addExtraTime(extra){
+    if(!Number.isFinite(extra) || extra <= 0) return;
+    State.quiz.remain += extra;
+    State.quiz.duration += extra;
+    updateTimerVisual();
+    const ring = $('#timer-ring');
+    if(ring){
+      ring.classList.remove('timer-boost');
+      if(ring.getBBox) ring.getBBox();
+      requestAnimationFrame(()=>{
+        ring.classList.add('timer-boost');
+        setTimeout(()=>ring.classList.remove('timer-boost'), 900);
+      });
+    }
+    const text = $('#timer-text');
+    if(text){
+      text.classList.remove('timer-boost');
+      void text.offsetWidth;
+      text.classList.add('timer-boost');
+      setTimeout(()=>text.classList.remove('timer-boost'), 900);
+    }
   }
   
   function renderQuestionUI(q){
@@ -2814,6 +2979,8 @@ patchPricingKeys(RemoteConfig);
   }
   
   function startQuiz({cat, diff, count}){
+    used5050=false; usedSkip=false; usedTimeBoost=false;
+    resetLifelinesUI();
     State.quiz.cat=cat; State.quiz.diff=diff;
     State.quiz.list = buildSet(cat, diff, count).map(q=>({ ...q }));
     State.quiz.idx = 0; State.quiz.sessionEarned = 0; State.quiz.results=[];
@@ -2969,6 +3136,8 @@ patchPricingKeys(RemoteConfig);
     const seed = Math.floor(Date.now()/86400000);
     const pool = qBank.slice().map((q,i)=>({q, k: Math.sin((i+1)*seed)*10000})).sort((a,b)=>a.k-b.k).map(o=>o.q);
     State.lives = Math.max(State.lives, 1);
+    used5050=false; usedSkip=false; usedTimeBoost=false;
+    resetLifelinesUI();
     State.quiz.cat='عمومی'; State.quiz.diff='متوسط'; State.quiz.list=pool.slice(0,5);
     State.quiz.idx=0; State.quiz.sessionEarned=0; State.quiz.results=[]; State.quiz.inProgress=true; State.quiz.answered=false;
     navTo('quiz'); renderTopBars(); renderQuestionUI(State.quiz.list[0]); resetTimer(25);
@@ -3572,24 +3741,39 @@ async function startPurchaseCoins(pkgId){
   });
   
   // Lifelines
-  let used5050=false, usedSkip=false, paused=false;
+  let used5050=false, usedSkip=false, usedTimeBoost=false;
   function life5050(){
     if(used5050) return toast('۵۰–۵۰ را قبلاً استفاده کردی 😅');
+    if(!spendLifelineCost()) return;
     used5050=true;
+    markLifelineUsed('life-5050');
     const correct = State.quiz.list[State.quiz.idx].a;
     const idxs = [0,1,2,3].filter(i=>i!==correct).sort(()=>Math.random()-0.5).slice(0,2);
     idxs.forEach(i=>{ const el=$$('#choices .choice')[i]; if(el){ el.style.opacity=.35; el.style.pointerEvents='none'; } });
+    toast('<i class="fas fa-percent ml-1"></i> دو گزینه حذف شد');
+    SFX.coin();
   }
   function lifeSkip(){
     if(usedSkip) return toast('پرش فقط یک‌بار مجازه');
-    usedSkip=true; clearInterval(State.quiz.timer);
+    if(!spendLifelineCost()) return;
+    usedSkip=true;
+    markLifelineUsed('life-skip');
+    clearInterval(State.quiz.timer);
     const cur = State.quiz.list[State.quiz.idx];
     State.quiz.results.push({ q: cur.q, ok:false, correct: cur.c[cur.a], you:'— (پرش)' });
+    saveState();
+    toast('<i class="fas fa-forward ml-1"></i> به سؤال بعدی رفتی');
     nextQuestion();
   }
   function lifePause(){
-    if(paused){ paused=false; resetTimer(State.quiz.remain); $('#life-pause').innerHTML='<i class="fas fa-pause"></i> مکث'; return; }
-    paused=true; clearInterval(State.quiz.timer); $('#life-pause').innerHTML='<i class="fas fa-play"></i> ادامه';
+    if(usedTimeBoost) return toast('فقط یک‌بار می‌توانی زمان اضافه کنی');
+    if(!spendLifelineCost()) return;
+    usedTimeBoost=true;
+    markLifelineUsed('life-pause');
+    addExtraTime(10);
+    saveState();
+    toast(`<i class="fas fa-stopwatch ml-1"></i> ${faNum(10)} ثانیه به زمانت اضافه شد`);
+    SFX.coin();
   }
   
   // ===== Setup Sheet =====
@@ -3622,7 +3806,7 @@ async function startPurchaseCoins(pkgId){
       btn.classList.add('selected-setup-item'); selDiff=btn.dataset.val;
     };
     $('#range-count').oninput = e=> $('#setup-count').textContent=faNum(e.target.value);
-    $('#setup-start').onclick=()=>{ closeSheet(); used5050=false; usedSkip=false; paused=false; startQuiz({cat:selCat,diff:selDiff,count:+$('#range-count').value}); navTo('quiz'); };
+    $('#setup-start').onclick=()=>{ closeSheet(); used5050=false; usedSkip=false; usedTimeBoost=false; startQuiz({cat:selCat,diff:selDiff,count:+$('#range-count').value}); navTo('quiz'); };
     openSheet();
   }
   function openSheet(){ $('#sheet-setup').classList.add('show'); }
@@ -3884,7 +4068,7 @@ async function startPurchaseCoins(pkgId){
       return false;
     }
     State.duelOpponent = opponent;
-    used5050=false; usedSkip=false; paused=false;
+    used5050=false; usedSkip=false; usedTimeBoost=false;
     startQuiz({cat:'عمومی', diff:'متوسط', count:5});
     logEvent('duel_start', { opponent: opponent.name });
     navTo('quiz');
