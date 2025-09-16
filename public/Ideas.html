@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="fa" dir="rtl" data-theme="ocean">
 <head>
   <meta charset="UTF-8" />
@@ -2126,6 +2126,20 @@ patchPricingKeys(RemoteConfig);
       ]
     }
   };
+
+
+  // Helper functions for group management
+function isUserGroupAdmin() {
+  return State.groups.some(g => g.admin === State.user.name);
+}
+
+function getUserGroup() {
+  return State.groups.find(g => g.memberList?.includes(State.user.name));
+}
+
+function isUserInGroup() {
+  return !!State.user.group || !!getUserGroup();
+}
   
   const cats = ['عمومی','علم','جغرافیای ایران','ادبیات فارسی','تاریخ ایران','سینما و موسیقی ایران','ورزش ایران','تکنولوژی'];
   const diffs = ['آسان','متوسط','سخت'];
@@ -2848,12 +2862,17 @@ patchPricingKeys(RemoteConfig);
 
     if (isAdmin) {
       content += `<button id="btn-request-duel" class="btn btn-duel w-full mt-4"><i class="fas fa-swords ml-2"></i> درخواست نبرد</button>`;
-    } else if (!isMember) {
-      content += `
-        <button id="btn-join-group" class="btn btn-group w-full mt-4" ${requested ? 'disabled' : ''}>
-          <i class="fas fa-user-plus ml-2"></i> ${requested ? 'در انتظار تایید' : 'درخواست عضویت'}
-        </button>`;
-    }
+} else if (!isMember && !isUserInGroup()) {
+  content += `
+    <button id="btn-join-group" class="btn btn-group w-full mt-4" ${requested ? 'disabled' : ''}>
+      <i class="fas fa-user-plus ml-2"></i> ${requested ? 'در انتظار تایید' : 'درخواست عضویت'}
+    </button>`;
+} else if (!isMember && isUserInGroup()) {
+  content += `
+    <div class="glass rounded-2xl p-3 mt-4 text-center text-sm opacity-80">
+      <i class="fas fa-info-circle ml-1"></i> شما در حال حاضر عضو گروه "${State.user.group}" هستید
+    </div>`;
+}
 
     showDetailPopup('جزئیات گروه', content);
 
@@ -2872,19 +2891,25 @@ patchPricingKeys(RemoteConfig);
     $('#btn-request-duel')?.addEventListener('click', () => openDuelRequest(group));
   }
 
-  function requestJoinGroup(groupId){
-    const group = State.groups.find(g=>g.id===groupId);
-    if(!group) return;
-    group.requests = group.requests || [];
-    if(group.requests.includes(State.user.id)){
-      toast('درخواست شما قبلا ثبت شده است');
-      return;
-    }
-    group.requests.push(State.user.id);
-    toast(`درخواست عضویت به ${group.name} ارسال شد`);
-    logEvent('group_join_request', { group: group.name });
-    closeDetailPopup();
+function requestJoinGroup(groupId){
+  // Check if user is already in a group
+  if (isUserInGroup()) {
+    toast('شما در حال حاضر عضو یک گروه هستید. ابتدا باید از گروه فعلی خارج شوید.');
+    return;
   }
+  
+  const group = State.groups.find(g=>g.id===groupId);
+  if(!group) return;
+  group.requests = group.requests || [];
+  if(group.requests.includes(State.user.id)){
+    toast('درخواست شما قبلا ثبت شده است');
+    return;
+  }
+  group.requests.push(State.user.id);
+  toast(`درخواست عضویت به ${group.name} ارسال شد`);
+  logEvent('group_join_request', { group: group.name });
+  closeDetailPopup();
+}
 
   function openDuelRequest(group){
     const opponents = State.groups.filter(g=>g.id!==group.id);
@@ -2914,52 +2939,58 @@ patchPricingKeys(RemoteConfig);
     $('#btn-back-duel-select')?.addEventListener('click',()=>showGroupDetail(group));
   }
 
-  function openCreateGroup(){
-    const content = `
-      <div class="space-y-4">
-        <input id="new-group-name" class="form-input" placeholder="نام گروه">
-        <div id="invite-container" class="hidden space-y-2">
-          <label class="block text-sm opacity-90">لینک دعوت</label>
-          <div class="flex">
-            <input id="new-group-link" class="form-input flex-1" readonly>
-            <button id="btn-copy-link" class="btn btn-secondary ml-2"><i class="fas fa-copy"></i></button>
-          </div>
-          <div class="text-xs opacity-80">این لینک را برای دعوت دوستان خود به اشتراک بگذارید</div>
-        </div>
-        <button id="btn-save-group" class="btn btn-group w-full"><i class="fas fa-check ml-2"></i> ایجاد گروه</button>
-      </div>`;
-    showDetailPopup('ایجاد گروه جدید', content);
-    $('#btn-save-group').addEventListener('click', () => {
-      const name = $('#new-group-name').value.trim();
-      if(!name){ toast('نام گروه را وارد کنید'); return; }
-      const newGroup = {
-        id: 'g'+(State.groups.length+1),
-        name,
-        score: 0,
-        members: 1,
-        admin: State.user.name,
-        created: new Date().toLocaleDateString('fa-IR'),
-        memberList: [State.user.name],
-        requests: [],
-        matches: []
-      };
-      State.groups.push(newGroup);
-      State.user.group = name;
-      saveState();
-      renderGroupSelect();
-      $('#user-group').textContent = State.user.group;
-      logEvent('group_created', { group: name });
-      const link = location.origin + '/?join=' + newGroup.id;
-      $('#new-group-link').value = link;
-      $('#invite-container').classList.remove('hidden');
-      $('#btn-copy-link').addEventListener('click', () => {
-        navigator.clipboard.writeText(link);
-        toast('لینک کپی شد');
-      });
-      $('#btn-save-group').disabled = true;
-      toast('گروه با موفقیت ایجاد شد');
-    });
+function openCreateGroup(){
+  // Check if user is already in a group
+  if (isUserInGroup()) {
+    toast('شما در حال حاضر عضو یک گروه هستید. ابتدا باید از گروه فعلی خارج شوید.');
+    return;
   }
+  
+  const content = `
+    <div class="space-y-4">
+      <input id="new-group-name" class="form-input" placeholder="نام گروه">
+      <div id="invite-container" class="hidden space-y-2">
+        <label class="block text-sm opacity-90">لینک دعوت</label>
+        <div class="flex">
+          <input id="new-group-link" class="form-input flex-1" readonly>
+          <button id="btn-copy-link" class="btn btn-secondary ml-2"><i class="fas fa-copy"></i></button>
+        </div>
+        <div class="text-xs opacity-80">این لینک را برای دعوت دوستان خود به اشتراک بگذارید</div>
+      </div>
+      <button id="btn-save-group" class="btn btn-group w-full"><i class="fas fa-check ml-2"></i> ایجاد گروه</button>
+    </div>`;
+  showDetailPopup('ایجاد گروه جدید', content);
+  $('#btn-save-group').addEventListener('click', () => {
+    const name = $('#new-group-name').value.trim();
+    if(!name){ toast('نام گروه را وارد کنید'); return; }
+    const newGroup = {
+      id: 'g'+(State.groups.length+1),
+      name,
+      score: 0,
+      members: 1,
+      admin: State.user.name,
+      created: new Date().toLocaleDateString('fa-IR'),
+      memberList: [State.user.name],
+      requests: [],
+      matches: []
+    };
+    State.groups.push(newGroup);
+    State.user.group = name;
+    saveState();
+    renderGroupSelect();
+    $('#user-group').textContent = State.user.group;
+    logEvent('group_created', { group: name });
+    const link = location.origin + '/?join=' + newGroup.id;
+    $('#new-group-link').value = link;
+    $('#invite-container').classList.remove('hidden');
+    $('#btn-copy-link').addEventListener('click', () => {
+      navigator.clipboard.writeText(link);
+      toast('لینک کپی شد');
+    });
+    $('#btn-save-group').disabled = true;
+    toast('گروه با موفقیت ایجاد شد');
+  });
+}
   
   // ===== Quiz Flow (legacy) =====
   function buildSet(cat, diff, count){
@@ -4213,23 +4244,111 @@ async function startPurchaseCoins(pkgId){
   });
   
   // Group Selection
-  function renderGroupSelect() {
-    const list = $('#group-select-list');
-    if (!list) return;
-    list.innerHTML = '';
-    State.groups.forEach(g => {
-      const card = document.createElement('div');
-      card.className = 'location-card';
-      card.innerHTML = `
-        <div class="location-icon group-icon"><i class="fas fa-users"></i></div>
-        <div class="flex-1"><div class="font-bold">${g.name}</div>
-          <div class="text-sm opacity-80 flex items-center gap-1"><i class="fas fa-user"></i><span>مدیر: ${g.admin}</span></div>
-        </div>
-        <div class="text-sm font-bold text-purple-300"><i class="fas fa-trophy"></i> ${faNum(g.score)}</div>`;
-      card.addEventListener('click', () => showGroupDetail(g));
-      list.appendChild(card);
-    });
+function renderGroupSelect() {
+  const list = $('#group-select-list');
+  if (!list) return;
+  list.innerHTML = '';
+  
+  // Hide create button if user already has a group
+  const createBtn = $('#btn-create-group');
+  if (createBtn) {
+    createBtn.style.display = isUserInGroup() ? 'none' : 'block';
   }
+  
+  // Add user's current group info if they have one
+  if (isUserInGroup()) {
+    const userGroup = getUserGroup() || State.groups.find(g => g.name === State.user.group);
+    if (userGroup) {
+      const isAdmin = userGroup.admin === State.user.name;
+      const infoCard = document.createElement('div');
+      infoCard.className = 'glass rounded-2xl p-4 mb-4 text-center';
+      infoCard.innerHTML = `
+        <div class="text-lg font-bold mb-2">گروه فعلی شما</div>
+        <div class="text-xl font-bold text-purple-300 mb-2">${userGroup.name}</div>
+        <div class="text-sm opacity-80 mb-3">شما ${isAdmin ? 'مدیر' : 'عضو'} این گروه هستید</div>
+        <button id="btn-leave-delete-group" class="btn ${isAdmin ? 'btn-duel' : 'btn-secondary'} w-full">
+          <i class="fas fa-${isAdmin ? 'trash' : 'sign-out-alt'} ml-2"></i>
+          ${isAdmin ? 'حذف گروه' : 'خروج از گروه'}
+        </button>
+      `;
+      list.appendChild(infoCard);
+      
+      // Add event listener for leave/delete button
+      $('#btn-leave-delete-group')?.addEventListener('click', () => {
+        const confirmMsg = isAdmin 
+          ? 'آیا از حذف گروه اطمینان دارید؟ این عمل غیرقابل بازگشت است.'
+          : 'آیا از خروج از گروه اطمینان دارید؟';
+        
+        if (confirm(confirmMsg)) {
+          if (isAdmin) {
+            deleteGroup(userGroup.id);
+          } else {
+            leaveGroup(userGroup.id);
+          }
+        }
+      });
+      
+      return; // Don't show other groups if user is already in one
+    }
+  }
+  
+  // Show available groups only if user is not in any group
+  State.groups.forEach(g => {
+    const card = document.createElement('div');
+    card.className = 'location-card';
+    card.innerHTML = `
+      <div class="location-icon group-icon"><i class="fas fa-users"></i></div>
+      <div class="flex-1"><div class="font-bold">${g.name}</div>
+        <div class="text-sm opacity-80 flex items-center gap-1"><i class="fas fa-user"></i><span>مدیر: ${g.admin}</span></div>
+      </div>
+      <div class="text-sm font-bold text-purple-300"><i class="fas fa-trophy"></i> ${faNum(g.score)}</div>`;
+    card.addEventListener('click', () => showGroupDetail(g));
+    list.appendChild(card);
+  });
+}
+
+
+
+
+function deleteGroup(groupId) {
+  const groupIndex = State.groups.findIndex(g => g.id === groupId);
+  if (groupIndex === -1) return;
+  
+  const group = State.groups[groupIndex];
+  
+  // Remove group from state
+  State.groups.splice(groupIndex, 1);
+  
+  // Clear user's group assignment
+  State.user.group = '';
+  
+  saveState();
+  renderGroupSelect();
+  renderDashboard();
+  
+  toast('<i class="fas fa-check-circle ml-2"></i> گروه با موفقیت حذف شد');
+  logEvent('group_deleted', { group: group.name });
+}
+
+function leaveGroup(groupId) {
+  const group = State.groups.find(g => g.id === groupId);
+  if (!group) return;
+  
+  // Remove user from member list
+  group.memberList = group.memberList?.filter(m => m !== State.user.name) || [];
+  group.members = Math.max(0, group.members - 1);
+  
+  // Clear user's group assignment
+  State.user.group = '';
+  
+  saveState();
+  renderGroupSelect();
+  renderDashboard();
+  
+  toast('<i class="fas fa-check-circle ml-2"></i> از گروه خارج شدید');
+  logEvent('group_left', { group: group.name });
+}
+
   renderGroupSelect();
   $('#btn-create-group')?.addEventListener('click', openCreateGroup);
   $('#btn-view-group')?.addEventListener('click', () => {
