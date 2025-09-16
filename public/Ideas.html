@@ -79,6 +79,23 @@
     .lifeline-btn[data-insufficient="true"] .lifeline-icon{ background:linear-gradient(135deg, rgba(248,113,113,0.35), rgba(239,68,68,0.32)); color:#fff; box-shadow:none; }
     .lifeline-btn[data-insufficient="true"] .lifeline-title{ color:#fee2e2; }
     .lifeline-btn[data-insufficient="true"] .lifeline-sub{ color:rgba(255,255,255,0.78); }
+    .lifelines-grid{ display:flex; gap:.75rem; overflow-x:auto; padding-bottom:.75rem; scroll-snap-type:x mandatory; -webkit-overflow-scrolling:touch; -ms-overflow-style:none; scrollbar-width:none; }
+    .lifelines-grid::-webkit-scrollbar{ display:none; }
+    .lifeline-btn{ width:100%; scroll-snap-align:center; }
+    @media(max-width:639px){
+      .lifelines-grid{ gap:.6rem; padding-inline:.35rem; }
+      .lifeline-btn{ flex:0 0 70%; min-width:190px; padding:1rem .85rem; min-height:150px; border-radius:1.5rem; box-shadow:0 12px 30px rgba(15,23,42,0.18); }
+      .lifeline-icon{ width:2.8rem; height:2.8rem; border-radius:1rem; font-size:1.1rem; }
+      .lifeline-title{ font-size:.95rem; }
+      .lifeline-sub{ font-size:.75rem; line-height:1.4; }
+      .lifeline-footer{ gap:.35rem; }
+      .lifeline-cost{ padding:.3rem .8rem; font-size:.8rem; }
+      .lifeline-status{ font-size:.72rem; padding:.3rem .8rem; }
+    }
+    @media(min-width:640px){
+      .lifelines-grid{ display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:.75rem; overflow:visible; padding-bottom:0; scroll-snap-type:none; }
+      .lifeline-btn{ scroll-snap-align:unset; }
+    }
     @keyframes timerGlow{ 0%,100%{filter:drop-shadow(0 0 0 rgba(250,204,21,0));} 50%{filter:drop-shadow(0 0 14px rgba(250,204,21,0.75));} }
     @keyframes timerTextGlow{ 0%,100%{color:#fff; text-shadow:none;} 50%{color:#fde047; text-shadow:0 0 12px rgba(250,204,21,0.85);} }
     #timer-ring.timer-boost{ animation:timerGlow .85s ease; }
@@ -774,7 +791,7 @@
       </div>
       
       <!-- Lifelines -->
-      <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+      <div class="lifelines-grid">
         <button id="life-5050" class="lifeline-btn" type="button" aria-label="کمک ۵۰–۵۰">
           <div class="lifeline-icon"><i class="fas fa-percent"></i></div>
           <div class="lifeline-details">
