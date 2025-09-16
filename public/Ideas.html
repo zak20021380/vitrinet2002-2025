@@ -832,9 +832,6 @@
         <button id="btn-quit" class="w-full sm:flex-1 py-4 rounded-2xl bg-white/10 border border-white/20 hover:bg-white/20 transition flex items-center justify-center gap-2">
           <i class="fas fa-arrow-right"></i> خروج
         </button>
-        <button id="btn-continue" class="hidden w-full sm:flex-1 py-4 rounded-2xl bg-gradient-to-r from-yellow-400 to-orange-500 text-black font-bold flex items-center justify-center gap-2">
-          <i class="fas fa-coins"></i> ادامه با ۱۰💰
-        </button>
       </div>
     </section>
     
@@ -2947,8 +2944,10 @@ patchPricingKeys(RemoteConfig);
         updateTimerVisual();
         clearInterval(State.quiz.timer);
         lockChoices();
-        showContinue();
-        registerAnswer(-1);
+        const ended = registerAnswer(-1);
+        if(!ended){
+          setTimeout(nextQuestion, 900);
+        }
         return;
       }
       updateTimerVisual();
@@ -3000,7 +2999,7 @@ patchPricingKeys(RemoteConfig);
     State.quiz.cat=cat; State.quiz.diff=diff;
     State.quiz.list = buildSet(cat, diff, count).map(q=>({ ...q }));
     State.quiz.idx = 0; State.quiz.sessionEarned = 0; State.quiz.results=[];
-    State.quiz.inProgress = true; State.quiz.answered=false; $('#btn-continue').classList.add('hidden');
+    State.quiz.inProgress = true; State.quiz.answered=false;
     renderTopBars();
     const q = State.quiz.list[0];
     renderQuestionUI(q);
@@ -3018,7 +3017,6 @@ patchPricingKeys(RemoteConfig);
   }
   
   function lockChoices(){ $$('#choices .choice').forEach(el=> el.classList.add('pointer-events-none','opacity-70')); }
-  function showContinue(){ if(State.lives<=0){ $('#btn-continue').classList.remove('hidden'); } }
   
   function registerAnswer(idx){
     const q = State.quiz.list[State.quiz.idx] || {};
@@ -3029,27 +3027,35 @@ patchPricingKeys(RemoteConfig);
     const boostActive = Date.now() < State.boostUntil;
     const vipBonus = Server.subscription.active ? 20 : 0; // VIP from server
     const earned = Math.floor((base + timeBonus + vipBonus) * (boostActive?2:1));
-    
+    let shouldEnd = false;
+
     if(ok){
       State.score += earned; State.coins += 5; State.quiz.sessionEarned += earned; SFX.correct(); vibrate(30);
     } else {
-      State.lives -= 1; 
+      State.lives -= 1;
       // Use a life from the limit
       useGameResource('lives');
       SFX.wrong(); vibrate([10,30,10]);
-      if(State.lives<=0) showContinue();
+      if(State.lives<=0) shouldEnd = true;
     }
-    
+
     State.quiz.results.push({ q:q.q, ok, correct: q.c[correct], you: idx>=0 ? q.c[idx] : '—' });
     saveState(); renderHeader(); renderTopBars();
-    
+
     // Log analytics
-    logEvent('question_answered', { 
-      correct: ok, 
+    logEvent('question_answered', {
+      correct: ok,
       timeSpent: State.quiz.duration - State.quiz.remain,
       category: q.cat,
       difficulty: q.diff
     });
+
+    if(shouldEnd){
+      endQuiz();
+      return true;
+    }
+
+    return false;
   }
   
   function selectAnswer(idx){
@@ -3059,8 +3065,10 @@ patchPricingKeys(RemoteConfig);
     const list = $$('#choices .choice');
     list.forEach((el,i)=> el.classList.add(i===correct? 'correct':'wrong'));
     lockChoices();
-    registerAnswer(idx);
-    setTimeout(nextQuestion, 900);
+    const ended = registerAnswer(idx);
+    if(!ended){
+      setTimeout(nextQuestion, 900);
+    }
   }
   
   function nextQuestion(){
@@ -3902,11 +3910,6 @@ async function startPurchaseCoins(pkgId){
     State.duelOpponent = null;
     $('#duel-banner').classList.add('hidden');
     navTo('dashboard');
-  });
-  $('#btn-continue')?.addEventListener('click', ()=>{
-    if(State.coins>=10){ State.coins-=10; State.lives=1; saveState(); $('#btn-continue').classList.add('hidden'); renderTopBars();
-      resetTimer(15); $$('#choices .choice').forEach(el=>{ el.classList.remove('wrong','correct','pointer-events-none','opacity-70'); el.style.opacity=''; el.style.pointerEvents=''; }); State.quiz.answered=false;
-    } else { toast('<i class="fas fa-exclamation-circle ml-2"></i>سکه کافی نیست'); }
   });
   $('#btn-claim-streak')?.addEventListener('click', claimStreak);
   $('#btn-invite')?.addEventListener('click', ()=>{
