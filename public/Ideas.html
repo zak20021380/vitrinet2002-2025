@@ -2861,18 +2861,30 @@ function isUserInGroup() {
       </div>`;
 
     if (isAdmin) {
-      content += `<button id="btn-request-duel" class="btn btn-duel w-full mt-4"><i class="fas fa-swords ml-2"></i> درخواست نبرد</button>`;
-} else if (!isMember && !isUserInGroup()) {
-  content += `
-    <button id="btn-join-group" class="btn btn-group w-full mt-4" ${requested ? 'disabled' : ''}>
-      <i class="fas fa-user-plus ml-2"></i> ${requested ? 'در انتظار تایید' : 'درخواست عضویت'}
-    </button>`;
-} else if (!isMember && isUserInGroup()) {
-  content += `
-    <div class="glass rounded-2xl p-3 mt-4 text-center text-sm opacity-80">
-      <i class="fas fa-info-circle ml-1"></i> شما در حال حاضر عضو گروه "${State.user.group}" هستید
-    </div>`;
-}
+      content += `
+        <div class="grid sm:grid-cols-2 gap-3 mt-4">
+          <button id="btn-request-duel" class="btn btn-duel w-full"><i class="fas fa-swords ml-2"></i> درخواست نبرد</button>
+          <button id="btn-delete-group-detail" class="btn btn-secondary w-full"><i class="fas fa-trash ml-2"></i> حذف گروه</button>
+        </div>`;
+    } else if (isMember) {
+      content += `
+        <div class="glass rounded-2xl p-3 mt-4 text-center text-sm opacity-80">
+          <i class="fas fa-info-circle ml-1"></i> شما عضو گروه «${group.name}» هستید. در صورت خروج برای بازگشت نیاز به تایید مدیر خواهید داشت.
+        </div>
+        <button id="btn-leave-group-detail" class="btn btn-secondary w-full mt-3">
+          <i class="fas fa-sign-out-alt ml-2"></i> خروج از گروه
+        </button>`;
+    } else if (!isMember && !isUserInGroup()) {
+      content += `
+        <button id="btn-join-group" class="btn btn-group w-full mt-4" ${requested ? 'disabled' : ''}>
+          <i class="fas fa-user-plus ml-2"></i> ${requested ? 'در انتظار تایید' : 'درخواست عضویت'}
+        </button>`;
+    } else if (!isMember && isUserInGroup()) {
+      content += `
+        <div class="glass rounded-2xl p-3 mt-4 text-center text-sm opacity-80">
+          <i class="fas fa-info-circle ml-1"></i> شما در حال حاضر عضو گروه "${State.user.group}" هستید
+        </div>`;
+    }
 
     showDetailPopup('جزئیات گروه', content);
 
@@ -2889,6 +2901,18 @@ function isUserInGroup() {
       renderGroupSelect();
     });
     $('#btn-request-duel')?.addEventListener('click', () => openDuelRequest(group));
+    $('#btn-delete-group-detail')?.addEventListener('click', () => {
+      if (confirm('آیا از حذف گروه اطمینان دارید؟ این عمل غیرقابل بازگشت است.')) {
+        deleteGroup(group.id);
+        closeDetailPopup();
+      }
+    });
+    $('#btn-leave-group-detail')?.addEventListener('click', () => {
+      if (confirm('آیا از خروج از این گروه اطمینان دارید؟')) {
+        leaveGroup(group.id);
+        closeDetailPopup();
+      }
+    });
   }
 
 function requestJoinGroup(groupId){
