@@ -144,6 +144,27 @@
     .match-status { font-size: 0.75rem; opacity: 0.8; }
     .match-action { padding: 0.5rem 1rem; border-radius: 0.5rem; font-size: 0.875rem; font-weight: 700; background: linear-gradient(135deg, var(--accent1), var(--accent2)); color: #111827; cursor: pointer; transition: all 0.2s ease; min-height:44px }
     .match-action:hover { transform: scale(1.05); }
+    .duel-entry-card{ position:relative; overflow:hidden; width:100%; border-radius:1.5rem; padding:1.25rem 1.5rem; border:1px solid rgba(255,255,255,0.2); background:linear-gradient(145deg, rgba(248,113,113,0.92), rgba(244,63,94,0.94), rgba(236,72,153,0.85)); box-shadow:0 20px 55px rgba(244,63,94,0.32); display:flex; align-items:center; justify-content:space-between; gap:1.25rem; cursor:pointer; transition:transform .3s ease, box-shadow .3s ease, border-color .3s ease; text-align:right; color:#fff; }
+    .duel-entry-card::before{ content:''; position:absolute; inset:-40% 40% auto auto; width:220px; height:220px; background:radial-gradient(circle at center, rgba(255,255,255,0.65), rgba(255,255,255,0)); opacity:.7; transform:rotate(25deg); pointer-events:none; transition:opacity .3s ease, transform .3s ease; }
+    .duel-entry-card:hover{ transform:translateY(-4px) scale(1.01); box-shadow:0 25px 65px rgba(244,63,94,0.4); border-color:rgba(255,255,255,0.4); }
+    .duel-entry-card:hover::before{ opacity:1; transform:rotate(15deg) translate(-10px,-10px); }
+    .duel-entry-icon{ flex-shrink:0; width:64px; height:64px; border-radius:22px; display:flex; align-items:center; justify-content:center; background:rgba(255,255,255,0.18); box-shadow:0 12px 26px rgba(0,0,0,0.22); font-size:1.75rem; position:relative; z-index:1; }
+    .duel-entry-content{ flex:1; display:flex; flex-direction:column; gap:.45rem; position:relative; z-index:1; }
+    .duel-entry-heading{ display:flex; align-items:center; justify-content:space-between; gap:.75rem; flex-wrap:wrap; }
+    .duel-entry-title{ font-size:1.2rem; font-weight:800; letter-spacing:-0.01em; }
+    .duel-entry-badge{ display:inline-flex; align-items:center; gap:.4rem; padding:.3rem .65rem; border-radius:999px; font-size:.75rem; font-weight:700; background:rgba(255,255,255,0.22); box-shadow:0 10px 24px rgba(15,23,42,0.16); }
+    .duel-entry-badge i{ font-size:.85rem; }
+    .duel-entry-sub{ font-size:.85rem; line-height:1.6; opacity:.9; }
+    .duel-entry-cta{ display:flex; align-items:center; gap:.45rem; font-weight:800; background:rgba(255,255,255,0.18); padding:.55rem .9rem; border-radius:999px; box-shadow:0 10px 24px rgba(15,23,42,0.18); position:relative; z-index:1; transition:background .3s ease, transform .3s ease; }
+    .duel-entry-card:hover .duel-entry-cta{ background:#fff; color:#111827; transform:translateX(-4px); }
+    @media(max-width:639px){
+      .duel-entry-card{ flex-direction:column; align-items:flex-start; text-align:right; padding:1.1rem 1.2rem; gap:1rem; }
+      .duel-entry-icon{ width:56px; height:56px; font-size:1.4rem; border-radius:18px; }
+      .duel-entry-heading{ width:100%; }
+      .duel-entry-title{ font-size:1.1rem; }
+      .duel-entry-sub{ font-size:.8rem; }
+      .duel-entry-cta{ align-self:flex-end; }
+    }
     /* Ads: fixed placeholders to keep CLS at 0 */
     .ad-banner-slot{ position:sticky; bottom:56px; /* leave room for bottom nav */ height:var(--adBannerH); z-index:40; }
     .ad-banner-inner{ height:100%; max-width:420px; margin:0 auto; display:flex; align-items:center; justify-content:center; border-radius:14px; border:1px dashed rgba(255,255,255,.25); background:rgba(0,0,0,.15) }
@@ -1557,6 +1578,22 @@
         <div>تعداد سؤال: <span id="setup-count">۵</span></div>
         <input id="range-count" type="range" min="3" max="12" value="5" class="w-48" aria-label="تعداد سوال">
       </div>
+      <button type="button" id="setup-duel" class="duel-entry-card mt-4" aria-label="ورود سریع به نبرد تن‌به‌تن">
+        <div class="duel-entry-icon">
+          <i class="fas fa-swords"></i>
+        </div>
+        <div class="duel-entry-content">
+          <div class="duel-entry-heading">
+            <span class="duel-entry-title">نبرد تن‌به‌تن</span>
+            <span class="duel-entry-badge"><i class="fas fa-bolt"></i> رقابت لحظه‌ای</span>
+          </div>
+          <p class="duel-entry-sub">آماده یک چالش مستقیم هستی؟ بلافاصله وارد اتاق نبرد شو و دوستت را به مبارزه دعوت کن.</p>
+        </div>
+        <div class="duel-entry-cta">
+          <span>ورود</span>
+          <i class="fas fa-arrow-left"></i>
+        </div>
+      </button>
       <button id="setup-start" class="btn btn-primary"><i class="fas fa-play ml-2"></i> شروع</button>
     </div>
   </div>
@@ -3830,7 +3867,12 @@ async function startPurchaseCoins(pkgId){
       btn.classList.add('selected-setup-item'); selDiff=btn.dataset.val;
     };
     $('#range-count').oninput = e=> $('#setup-count').textContent=faNum(e.target.value);
-    $('#setup-start').onclick=()=>{ closeSheet(); used5050=false; usedSkip=false; usedTimeBoost=false; startQuiz({cat:selCat,diff:selDiff,count:+$('#range-count').value}); navTo('quiz'); };
+  $('#setup-start').onclick=()=>{ closeSheet(); used5050=false; usedSkip=false; usedTimeBoost=false; startQuiz({cat:selCat,diff:selDiff,count:+$('#range-count').value}); navTo('quiz'); };
+  $('#setup-duel')?.addEventListener('click', ()=>{
+    logEvent('open_duel_from_setup');
+    closeSheet();
+    navTo('duel');
+  });
     openSheet();
   }
   function openSheet(){ $('#sheet-setup').classList.add('show'); }
