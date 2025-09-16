@@ -53,6 +53,10 @@
     .btn-province{ background:linear-gradient(135deg,#34d399,#10b981); color:#fff; box-shadow:0 8px 24px rgba(16,185,129,.35) }
     .btn-group{ background:linear-gradient(135deg,#c084fc,#a78bfa); color:#fff; box-shadow:0 8px 24px rgba(167,139,250,.35) }
     .btn-duel{ background:linear-gradient(135deg,#f87171,#ef4444); color:#fff; box-shadow:0 8px 24px rgba(239,68,68,.35) }
+    .btn-inline{ width:auto; min-width:160px; }
+    @media(max-width:639px){
+      .btn-inline{ width:100%; }
+    }
     .chip{ display:inline-flex; align-items:center; gap:.4rem; padding:.25rem .6rem; border-radius:999px; font-size:.85rem; font-weight:700; background:rgba(255,255,255,.10); border:1px solid rgba(255,255,255,.2); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:10rem }
     @keyframes chipAttention{ 0%,100%{transform:translateY(0); box-shadow:0 0 0 0 rgba(250,204,21,0)} 50%{transform:translateY(-3px); box-shadow:0 12px 30px rgba(250,204,21,0.35)} }
     .chip.attention{ animation:chipAttention .6s ease; box-shadow:0 0 0 2px rgba(250,204,21,0.35); }
@@ -119,9 +123,22 @@
     .duel-vs { font-size: 1.5rem; font-weight: 800; color: var(--accent2); }
     .location-card { display: flex; align-items: center; gap: 1rem; padding: 1rem; border-radius: 1rem; background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.15); transition: all 0.3s ease; cursor: pointer; min-height:44px }
     .location-card:hover { background: rgba(255, 255, 255, 0.2); transform: translateY(-3px); }
+    #btn-view-group[data-empty="true"]{ border-style:dashed; border-color:rgba(255,255,255,0.35); background:linear-gradient(135deg, rgba(236,72,153,0.18), rgba(59,130,246,0.18)); box-shadow:0 18px 35px rgba(14,116,144,0.25); }
+    #btn-view-group[data-empty="true"] .location-icon{ background:linear-gradient(135deg, rgba(236,72,153,0.4), rgba(59,130,246,0.4)); color:#fff; }
+    #btn-view-group[data-empty="true"] .group-card-title{ color:#fff; }
+    #btn-view-group[data-empty="true"] .group-card-value{ color:#f8fafc; opacity:0.95; }
+    #btn-view-group[data-empty="true"] .group-card-empty{ opacity:0.95; }
+    .group-card-empty{ transition:opacity .3s ease; }
     .location-icon { width: 3rem; height: 3rem; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.25rem; }
     .province-icon { background: linear-gradient(135deg, #34d399, #10b981); }
     .group-icon { background: linear-gradient(135deg, #c084fc, #a78bfa); }
+    .no-group-card{ background:linear-gradient(135deg, rgba(59,130,246,0.22), rgba(167,139,250,0.2)); border:1px dashed rgba(255,255,255,0.35); backdrop-filter:blur(24px); -webkit-backdrop-filter:blur(24px); border-radius:1.5rem; box-shadow:0 22px 45px rgba(15,23,42,0.28); }
+    .no-group-card .cta-icon{ width:3rem; height:3rem; border-radius:1rem; background:rgba(255,255,255,0.18); display:flex; align-items:center; justify-content:center; font-size:1.35rem; color:#fff; box-shadow:0 12px 28px rgba(30,64,175,0.25); }
+    .no-group-card p{ line-height:1.8; }
+    @media(max-width:639px){
+      .no-group-card{ text-align:center; }
+      .no-group-card .cta-icon{ margin:0 auto; }
+    }
     .rank-badge{
       width:2.5rem; height:2.5rem; border-radius:0.75rem;
       display:flex; align-items:center; justify-content:center;
@@ -506,11 +523,18 @@
                 <i class="fas fa-location-dot text-sky-300"></i>
                 <span>استان شما: <span id="user-province">—</span></span>
               </div>
-              <div id="btn-view-group" class="location-card col-span-1 sm:col-span-2 mt-1 sm:mt-0">
+              <div id="btn-view-group" class="location-card col-span-1 sm:col-span-2 mt-1 sm:mt-0" data-empty="true">
                 <div class="location-icon group-icon">
-                  <i class="fas fa-users"></i>
+                  <i class="fas fa-user-plus"></i>
                 </div>
-                <span class="flex-1 text-right">گروه شما: <span id="user-group">—</span></span>
+                <div class="flex-1 text-right">
+                  <div class="group-card-title font-bold">گروه شما</div>
+                  <div class="group-card-value text-sm opacity-90" id="user-group">—</div>
+                  <div id="user-group-empty-hint" class="group-card-empty text-xs opacity-80 hidden mt-1 flex items-center gap-1 justify-end sm:justify-start sm:flex-row-reverse">
+                    <i class="fas fa-circle-info"></i>
+                    <span>هنوز عضو هیچ گروهی نشده‌ای</span>
+                  </div>
+                </div>
                 <i class="fas fa-chevron-left opacity-70"></i>
               </div>
               <div class="flex items-center justify-center sm:justify-start gap-1 col-span-1 sm:col-span-2">
@@ -549,6 +573,23 @@
             <div class="mt-3 grid grid-cols-2 gap-2">
               <button id="go-wallet" class="btn btn-primary text-sm w-full px-4 py-3" aria-label="رفتن به خرید سکه"><i class="fas fa-coins ml-2"></i> خرید سکه</button>
               <button id="go-vip" class="btn btn-tertiary text-sm w-full px-4 py-3" aria-label="رفتن به اشتراک VIP"><i class="fas fa-crown ml-2"></i> اشتراک VIP</button>
+            </div>
+          </div>
+        </div>
+        <div id="no-group-hint" class="hidden mt-5">
+          <div class="no-group-card flex flex-col sm:flex-row sm:items-center gap-5 p-5">
+            <div class="flex flex-col sm:flex-row sm:items-start items-center gap-3 sm:flex-1 text-center sm:text-right">
+              <div class="cta-icon">
+                <i class="fas fa-user-group"></i>
+              </div>
+              <div class="space-y-2">
+                <div class="text-lg font-extrabold">عضویت در گروهی ندارید</div>
+                <p class="text-sm opacity-90">برای شرکت در نبردهای تیمی و دریافت امتیازهای ویژه، یکی از گروه‌های فعال را انتخاب کنید یا گروه تازه‌ای بسازید.</p>
+              </div>
+            </div>
+            <div class="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
+              <button id="btn-go-groups" class="btn btn-tertiary btn-inline text-sm"><i class="fas fa-users ml-2"></i> مشاهده گروه‌ها</button>
+              <button id="btn-create-group-cta" class="btn btn-group btn-inline text-sm"><i class="fas fa-plus ml-2"></i> ایجاد گروه جدید</button>
             </div>
           </div>
         </div>
@@ -2083,7 +2124,7 @@ patchPricingKeys(RemoteConfig);
   // ===== App State (legacy gameplay remains local) =====
   const STORAGE_KEY='quiz_webapp_pro_state_v2_fa';
   const State = {
-    user:{ id:'guest', name:'کاربر مهمان', avatar:'https://i.pravatar.cc/120?img=12', province:'', group:'قهرمانان دانش' },
+    user:{ id:'guest', name:'کاربر مهمان', avatar:'https://i.pravatar.cc/120?img=12', province:'', group:'' },
     score:0, coins:120, lives:3, vip:false, // vip will be overridden by server
     streak:0, lastClaim:0, boostUntil:0,
     theme:'ocean',
@@ -2100,7 +2141,7 @@ patchPricingKeys(RemoteConfig);
     ],
     provinces: [], // populated from data/provinces.json
     groups: [
-      { id: 'g1', name: 'قهرمانان دانش', score: 22100, members: 24, admin: 'علی رضایی', created: '۱۴۰۲/۰۲/۱۵', memberList: ['کاربر مهمان','علی رضایی','سارا اکبری','رضا کریمی'], matches:[{opponent:'متفکران جوان', time:'۱۴۰۳/۰۵/۲۵ ۱۸:۰۰'}], requests: [] },
+      { id: 'g1', name: 'قهرمانان دانش', score: 22100, members: 23, admin: 'علی رضایی', created: '۱۴۰۲/۰۲/۱۵', memberList: ['علی رضایی','سارا اکبری','رضا کریمی'], matches:[{opponent:'متفکران جوان', time:'۱۴۰۳/۰۵/۲۵ ۱۸:۰۰'}], requests: [] },
       { id: 'g2', name: 'متفکران جوان', score: 19800, members: 18, admin: 'سارا محمدی', created: '۱۴۰۲/۰۳/۲۰', memberList: ['سارا محمدی','مهدی احمدی'], matches:[{opponent:'پیشروان علم', time:'۱۴۰۳/۰۵/۳۰ ۱۹:۰۰'}], requests: [] },
       { id: 'g3', name: 'چالش‌برانگیزان', score: 20500, members: 21, admin: 'رضا قاسمی', created: '۱۴۰۲/۰۱/۱۰', memberList: ['رضا قاسمی'], matches:[], requests: [] },
       { id: 'g4', name: 'دانش‌آموزان نخبه', score: 18700, members: 15, admin: 'مریم احمدی', created: '۱۴۰۲/۰۴/۰۵', memberList: ['مریم احمدی'], matches:[], requests: [] },
@@ -2601,7 +2642,21 @@ function isUserInGroup() {
     const provIdx = provArr.findIndex(x=>x.id===me.id);
     $('#rank-province').textContent = provIdx>=0 ? faNum(provIdx+1) : '—';
     $('#user-province').textContent = me.province || '—';
-    $('#user-group').textContent = State.user.group || '—';
+    const userGroupObj = getUserGroup();
+    const groupName = userGroupObj?.name || State.user.group || '';
+    const hasGroup = !!groupName;
+    $('#user-group').textContent = hasGroup ? groupName : 'بدون گروه';
+    $('#user-group-empty-hint')?.classList.toggle('hidden', hasGroup);
+    const groupCard = $('#btn-view-group');
+    if(groupCard){
+      groupCard.dataset.empty = hasGroup ? 'false' : 'true';
+      const groupIcon = groupCard.querySelector('.location-icon i');
+      if(groupIcon){
+        groupIcon.classList.toggle('fa-users', hasGroup);
+        groupIcon.classList.toggle('fa-user-plus', !hasGroup);
+      }
+    }
+    $('#no-group-hint')?.classList.toggle('hidden', hasGroup);
     $('#duel-wins').textContent = faNum(State.duelWins);
     $('#duel-losses').textContent = faNum(State.duelLosses);
 
@@ -2789,7 +2844,8 @@ function isUserInGroup() {
   }
   
   function showUserDetail(user) {
-    const all = [...State.leaderboard, { id: State.user.id, name: State.user.name, score: State.score, province: State.user.province, group: State.user.group }].sort((a,b)=>b.score-a.score);
+    const currentGroupName = getUserGroup()?.name || State.user.group || '';
+    const all = [...State.leaderboard, { id: State.user.id, name: State.user.name, score: State.score, province: State.user.province, group: currentGroupName }].sort((a,b)=>b.score-a.score);
     const nationalRank = user.nationalRank || (all.findIndex(x => x.id === user.id) + 1);
     const provinceRank = all.filter(x => x.province === user.province).sort((a,b)=>b.score-a.score).findIndex(x => x.id === user.id) + 1;
     const content = `
@@ -2830,8 +2886,10 @@ function isUserInGroup() {
   }
   
   function showGroupDetail(group) {
+    const userGroup = getUserGroup();
+    const currentGroupName = userGroup?.name || State.user.group || '';
     const isAdmin = group.admin === State.user.name;
-    const isMember = State.user.group === group.name;
+    const isMember = (userGroup?.id === group.id) || State.user.group === group.name;
     const requested = group.requests?.includes(State.user.id);
     let content = `
       <div class="flex flex-col items-center mb-4">
@@ -2880,9 +2938,10 @@ function isUserInGroup() {
           <i class="fas fa-user-plus ml-2"></i> ${requested ? 'در انتظار تایید' : 'درخواست عضویت'}
         </button>`;
     } else if (!isMember && isUserInGroup()) {
+      const joinedGroupLabel = currentGroupName ? `«${currentGroupName}»` : 'گروه فعلی خود';
       content += `
         <div class="glass rounded-2xl p-3 mt-4 text-center text-sm opacity-80">
-          <i class="fas fa-info-circle ml-1"></i> شما در حال حاضر عضو گروه "${State.user.group}" هستید
+          <i class="fas fa-info-circle ml-1"></i> شما در حال حاضر عضو ${joinedGroupLabel} هستید
         </div>`;
     }
 
@@ -3002,7 +3061,7 @@ function openCreateGroup(){
     State.user.group = name;
     saveState();
     renderGroupSelect();
-    $('#user-group').textContent = State.user.group;
+    renderDashboard();
     logEvent('group_created', { group: name });
     const link = location.origin + '/?join=' + newGroup.id;
     $('#new-group-link').value = link;
@@ -4070,7 +4129,8 @@ async function startPurchaseCoins(pkgId){
       sel.value = State.user.province;
     }
     sel.disabled = true;
-    $('#lbl-group').textContent = State.user.group || '—';
+    const currentGroupName = getUserGroup()?.name || State.user.group || '—';
+    $('#lbl-group').textContent = currentGroupName || '—';
     $('#inp-avatar').value = '';
     openModal('#modal-profile');
   });
@@ -4376,9 +4436,24 @@ function leaveGroup(groupId) {
   renderGroupSelect();
   $('#btn-create-group')?.addEventListener('click', openCreateGroup);
   $('#btn-view-group')?.addEventListener('click', () => {
-    const myGroup = State.groups.find(g => g.name === State.user.group);
-    if (myGroup) showGroupDetail(myGroup);
-    else navTo('group');
+    const myGroup = getUserGroup() || State.groups.find(g => g.name === State.user.group);
+    if (myGroup) {
+      showGroupDetail(myGroup);
+    } else {
+      renderGroupSelect();
+      navTo('group');
+    }
+  });
+  $('#btn-go-groups')?.addEventListener('click', () => {
+    renderGroupSelect();
+    navTo('group');
+    logEvent('cta_group_browse');
+  });
+  $('#btn-create-group-cta')?.addEventListener('click', () => {
+    renderGroupSelect();
+    navTo('group');
+    openCreateGroup();
+    logEvent('cta_group_create');
   });
   
   // Back Buttons for New Pages
