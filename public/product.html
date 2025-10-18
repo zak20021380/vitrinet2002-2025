@@ -78,6 +78,7 @@
       align-items: center;
       gap: 1.25rem;
       padding: 1rem 0;
+      grid-template-areas: 'brand nav support';
     }
 
     .brand {
@@ -93,6 +94,7 @@
       font-size: 1.24rem;
       letter-spacing: -0.02em;
       color: var(--primary);
+      grid-area: brand;
     }
 
     .brand:hover {
@@ -123,6 +125,7 @@
       color: var(--text-muted);
       font-weight: 600;
       transition: color 0.2s ease;
+      grid-area: nav;
     }
 
     nav a {
@@ -178,6 +181,7 @@
       cursor: pointer;
       transition: color 0.2s ease, border-color 0.2s ease, background 0.2s ease;
       order: 3;
+      grid-area: toggle;
     }
 
     .nav-toggle:hover,
@@ -211,6 +215,7 @@
       box-shadow: 0 16px 32px rgba(14, 165, 233, 0.22);
       transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
       order: 2;
+      grid-area: support;
     }
 
     .support-link:hover,
@@ -324,11 +329,15 @@
       border-radius: calc(var(--radius-lg) - 12px);
       background: linear-gradient(135deg, rgba(148, 163, 184, 0.12), rgba(226, 232, 240, 0.18));
       box-shadow: inset 0 0 0 1px rgba(15, 23, 42, 0.06);
-      height: clamp(280px, 46vw, 520px);
       touch-action: pan-y;
       user-select: none;
       -webkit-user-select: none;
       isolation: isolate;
+      aspect-ratio: var(--slider-aspect, 1 / 1);
+    }
+
+    .slider-viewport:not(.has-aspect) {
+      min-height: clamp(280px, 46vw, 520px);
     }
 
     .slider-viewport:focus-visible {
@@ -367,7 +376,7 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      padding: clamp(0.75rem, 2vw, 2rem);
+      padding: clamp(0.6rem, 2vw, 1.6rem);
       background: linear-gradient(145deg, rgba(255, 255, 255, 0.7), rgba(226, 232, 240, 0.5));
       opacity: 0.95;
       transition: opacity 0.3s ease;
@@ -378,10 +387,8 @@
     }
 
     .slide img {
-      width: auto;
-      height: auto;
-      max-width: 100%;
-      max-height: 100%;
+      width: 100%;
+      height: 100%;
       object-fit: contain;
       border-radius: calc(var(--radius-lg) - 18px);
       box-shadow: 0 18px 32px rgba(15, 23, 42, 0.12);
@@ -1209,9 +1216,18 @@
       }
 
       .header-inner {
-        grid-template-columns: 1fr;
+        grid-template-columns: auto auto;
+        grid-template-areas:
+          'brand toggle'
+          'support support'
+          'nav nav';
+        align-items: center;
         justify-items: stretch;
-        gap: 0.85rem;
+        gap: 0.75rem;
+      }
+
+      .brand {
+        justify-self: start;
       }
 
       .nav-toggle {
@@ -1220,6 +1236,7 @@
       }
 
       nav {
+        justify-self: stretch;
         width: 100%;
         background: rgba(255, 255, 255, 0.95);
         border: 1px solid rgba(148, 163, 184, 0.25);
@@ -1283,8 +1300,8 @@
         grid-template-columns: 1fr;
       }
 
-      .slider-viewport {
-        height: clamp(240px, 62vw, 440px);
+      .slider-viewport:not(.has-aspect) {
+        min-height: clamp(240px, 62vw, 440px);
       }
     }
 
@@ -1292,6 +1309,7 @@
       .header-inner {
         grid-template-columns: auto 1fr auto;
         align-items: center;
+        grid-template-areas: 'brand nav support';
       }
 
       nav {
@@ -1371,8 +1389,8 @@
         padding: 0.75rem;
       }
 
-      .slider-viewport {
-        height: clamp(220px, 70vw, 380px);
+      .slider-viewport:not(.has-aspect) {
+        min-height: clamp(220px, 70vw, 380px);
       }
 
       .slider-zoom {
@@ -1455,8 +1473,8 @@
     }
 
     @media (max-width: 480px) {
-      .slider-viewport {
-        height: clamp(200px, 88vw, 340px);
+      .slider-viewport:not(.has-aspect) {
+        min-height: clamp(200px, 88vw, 340px);
       }
 
       .slider-control {
@@ -1596,7 +1614,7 @@
                 <path d="M12 3.5c-3.5 0-6.5 2.7-6.5 6.4 0 4.1 4.9 9.61 6.16 11.01.19.21.49.21.68 0C13.6 19.51 18.5 14 18.5 9.9c0-3.7-3-6.4-6.5-6.4Z" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" />
                 <circle cx="12" cy="10" r="2.6" stroke="currentColor" stroke-width="1.6" />
               </svg>
-              <span>نمایش آدرس مغازه</span>
+              <span>مشاهده آدرس مغازه</span>
             </button>
             <a class="product-action product-action--primary" id="sellerLink" target="_blank" rel="noopener" hidden>
               <svg viewBox="0 0 24 24" fill="none" aria-hidden="true" focusable="false">
@@ -1838,7 +1856,8 @@
         title: '',
         sellerName: '',
         addressInfo: null,
-        copyTimeout: null
+        copyTimeout: null,
+        sliderAspect: ''
       };
 
       const persianNumberFormatter = new Intl.NumberFormat('fa-IR');
@@ -1859,6 +1878,34 @@
         active: null,
         lastFocus: null
       };
+
+      function clearSliderAspectRatio() {
+        if (!dom.sliderViewport) {
+          return;
+        }
+        dom.sliderViewport.style.removeProperty('--slider-aspect');
+        delete dom.sliderViewport.dataset.aspectSource;
+        dom.sliderViewport.classList.remove('has-aspect');
+        state.sliderAspect = '';
+      }
+
+      function updateSliderAspectRatioFromImage(image) {
+        if (!dom.sliderViewport || !image) {
+          return;
+        }
+        const { naturalWidth, naturalHeight } = image;
+        if (!naturalWidth || !naturalHeight) {
+          return;
+        }
+        const ratio = `${naturalWidth} / ${naturalHeight}`;
+        if (ratio === state.sliderAspect) {
+          return;
+        }
+        dom.sliderViewport.style.setProperty('--slider-aspect', ratio);
+        dom.sliderViewport.dataset.aspectSource = ratio;
+        dom.sliderViewport.classList.add('has-aspect');
+        state.sliderAspect = ratio;
+      }
 
       if (dom.sliderPrev) {
         dom.sliderPrev.addEventListener('click', () => showPreviousImage());
@@ -2205,6 +2252,7 @@
         state.images = resolved;
         state.activeIndex = Number.isInteger(product.mainImageIndex) ? product.mainImageIndex : 0;
         dom.thumbnails.innerHTML = '';
+        clearSliderAspectRatio();
 
         if (!state.images.length) {
           dom.heroWrapper.hidden = true;
@@ -2221,6 +2269,7 @@
             dom.sliderCounter.hidden = true;
             dom.sliderCounter.textContent = '';
           }
+          clearSliderAspectRatio();
           syncLightbox();
           updateLightboxControls();
           return;
@@ -2268,6 +2317,14 @@
             const img = document.createElement('img');
             img.src = src;
             img.alt = `${state.title || 'تصویر محصول'} - تصویر ${imageNumber}`;
+            img.addEventListener('load', () => {
+              if (index === state.activeIndex) {
+                updateSliderAspectRatioFromImage(img);
+              }
+            }, { once: true });
+            if (img.complete && img.naturalWidth && img.naturalHeight && index === state.activeIndex) {
+              updateSliderAspectRatioFromImage(img);
+            }
 
             slide.appendChild(img);
             dom.sliderTrack.appendChild(slide);
@@ -2321,6 +2378,16 @@
             slide.classList.toggle('is-active', idx === index);
             slide.setAttribute('aria-hidden', idx === index ? 'false' : 'true');
           });
+        }
+
+        const activeSlide = dom.sliderTrack ? dom.sliderTrack.children[index] : null;
+        const activeImage = activeSlide ? activeSlide.querySelector('img') : null;
+        if (activeImage) {
+          if (activeImage.complete && activeImage.naturalWidth && activeImage.naturalHeight) {
+            updateSliderAspectRatioFromImage(activeImage);
+          } else {
+            activeImage.addEventListener('load', () => updateSliderAspectRatioFromImage(activeImage), { once: true });
+          }
         }
 
         if (dom.sliderIndicators) {
@@ -2716,7 +2783,7 @@
               sellerName
             };
             dom.sellerAddressButton.hidden = false;
-            dom.sellerAddressButton.setAttribute('aria-label', `نمایش آدرس ${sellerName} در پنجره مجزا`);
+            dom.sellerAddressButton.setAttribute('aria-label', `مشاهده آدرس ${sellerName} در پنجره مجزا`);
             dom.sellerAddressButton.disabled = false;
             hasAddressAction = true;
           }
