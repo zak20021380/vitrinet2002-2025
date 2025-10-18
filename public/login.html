@@ -217,6 +217,33 @@
 <!-- جاوااسکریپت برای نمایش پیام خطا و ریکاوری -->
 <!-- جاوااسکریپت برای نمایش پیام خطا و ریکاوری -->
 <script>
+// --- Safe sessionStorage helper (SafeSS) ---
+// Ensures SafeSS is available even if shared utilities are not loaded
+const SafeSS = window.SafeSS || {
+  setJSON(key, value) {
+    try {
+      const str = JSON.stringify(value);
+      sessionStorage.setItem(key, str);
+      return true;
+    } catch (err) {
+      console.warn('SafeSS setJSON failed', err);
+      return false;
+    }
+  },
+  getJSON(key, fallback = null) {
+    try {
+      const raw = sessionStorage.getItem(key);
+      return raw ? JSON.parse(raw) : fallback;
+    } catch (err) {
+      console.warn('SafeSS getJSON failed', err);
+      return fallback;
+    }
+  }
+};
+if (!window.SafeSS) {
+  window.SafeSS = SafeSS;
+}
+
 document.getElementById('loginForm').addEventListener('submit', async function(e) {
   e.preventDefault();
   const phone = document.getElementById('mobile').value.trim();
