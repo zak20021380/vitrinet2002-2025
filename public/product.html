@@ -616,6 +616,13 @@
       box-shadow: none;
     }
 
+    .product-action.is-disabled {
+      pointer-events: none;
+      cursor: not-allowed;
+      opacity: 0.65;
+      box-shadow: none;
+    }
+
     .product-action:not(:disabled):hover,
     .product-action:not(:disabled):focus-visible {
       transform: translateY(-2px);
@@ -1608,15 +1615,15 @@
             </div>
           </div>
 
-          <div class="product-actions" id="sellerActions" hidden>
-            <button class="product-action product-action--secondary" type="button" id="sellerAddressButton" hidden disabled>
+          <div class="product-actions" id="sellerActions">
+            <button class="product-action product-action--secondary" type="button" id="sellerAddressButton" disabled>
               <svg viewBox="0 0 24 24" fill="none" aria-hidden="true" focusable="false">
                 <path d="M12 3.5c-3.5 0-6.5 2.7-6.5 6.4 0 4.1 4.9 9.61 6.16 11.01.19.21.49.21.68 0C13.6 19.51 18.5 14 18.5 9.9c0-3.7-3-6.4-6.5-6.4Z" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" />
                 <circle cx="12" cy="10" r="2.6" stroke="currentColor" stroke-width="1.6" />
               </svg>
               <span>مشاهده آدرس مغازه</span>
             </button>
-            <a class="product-action product-action--primary" id="sellerLink" target="_blank" rel="noopener" hidden>
+            <a class="product-action product-action--primary is-disabled" id="sellerLink" target="_blank" rel="noopener" aria-disabled="true" tabindex="-1">
               <svg viewBox="0 0 24 24" fill="none" aria-hidden="true" focusable="false">
                 <path d="M4.5 9.25h15l-.84 9.05a2 2 0 0 1-1.99 1.7H7.33a2 2 0 0 1-1.99-1.7L4.5 9.25Zm2.25-4.5h10.5L18 9.25H6l.75-4.5Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" />
                 <path d="M9.5 12.5v4.5m5-4.5v4.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" />
@@ -2725,6 +2732,21 @@
         const hasSeller = seller && (seller.storename || seller.ownerName || seller.ownerFirstname || seller.ownerLastname || seller.phone || seller.address || seller.category || seller.boardImage || seller.desc);
         if (!hasSeller) {
           dom.sellerCard.hidden = true;
+          if (dom.sellerActions) {
+            dom.sellerActions.hidden = true;
+          }
+          if (dom.sellerAddressButton) {
+            dom.sellerAddressButton.disabled = true;
+            dom.sellerAddressButton.classList.add('is-disabled');
+            dom.sellerAddressButton.removeAttribute('aria-label');
+          }
+          if (dom.sellerLink) {
+            dom.sellerLink.classList.add('is-disabled');
+            dom.sellerLink.setAttribute('aria-disabled', 'true');
+            dom.sellerLink.setAttribute('tabindex', '-1');
+            dom.sellerLink.removeAttribute('href');
+            dom.sellerLink.removeAttribute('aria-label');
+          }
           state.addressInfo = null;
           return;
         }
@@ -2768,7 +2790,10 @@
           dom.sellerPhone.removeAttribute('href');
         }
 
-        let hasAddressAction = false;
+        if (dom.sellerActions) {
+          dom.sellerActions.hidden = false;
+        }
+
         if (addressText) {
           dom.sellerAddressRow.hidden = false;
           dom.sellerAddress.textContent = addressText;
@@ -2785,33 +2810,33 @@
             dom.sellerAddressButton.hidden = false;
             dom.sellerAddressButton.setAttribute('aria-label', `مشاهده آدرس ${sellerName} در پنجره مجزا`);
             dom.sellerAddressButton.disabled = false;
-            hasAddressAction = true;
+            dom.sellerAddressButton.classList.remove('is-disabled');
           }
         } else {
           dom.sellerAddressRow.hidden = true;
           dom.sellerAddress.textContent = '';
           if (dom.sellerAddressButton) {
-            dom.sellerAddressButton.hidden = true;
             dom.sellerAddressButton.removeAttribute('aria-label');
             dom.sellerAddressButton.disabled = true;
+            dom.sellerAddressButton.classList.add('is-disabled');
           }
           state.addressInfo = null;
         }
 
-        let hasShopLink = false;
-        if (seller.shopurl) {
-          dom.sellerLink.hidden = false;
-          dom.sellerLink.href = `/shop.html?shopurl=${encodeURIComponent(seller.shopurl)}`;
-          dom.sellerLink.setAttribute('aria-label', `مشاهده صفحه مغازه ${sellerName} در ویترینت`);
-          hasShopLink = true;
-        } else {
-          dom.sellerLink.hidden = true;
-          dom.sellerLink.removeAttribute('href');
-          dom.sellerLink.removeAttribute('aria-label');
-        }
-
-        if (dom.sellerActions) {
-          dom.sellerActions.hidden = !(hasAddressAction || hasShopLink);
+        if (dom.sellerLink) {
+          if (seller.shopurl) {
+            dom.sellerLink.href = `/shop.html?shopurl=${encodeURIComponent(seller.shopurl)}`;
+            dom.sellerLink.setAttribute('aria-label', `مشاهده صفحه مغازه ${sellerName} در ویترینت`);
+            dom.sellerLink.classList.remove('is-disabled');
+            dom.sellerLink.removeAttribute('aria-disabled');
+            dom.sellerLink.removeAttribute('tabindex');
+          } else {
+            dom.sellerLink.removeAttribute('href');
+            dom.sellerLink.removeAttribute('aria-label');
+            dom.sellerLink.classList.add('is-disabled');
+            dom.sellerLink.setAttribute('aria-disabled', 'true');
+            dom.sellerLink.setAttribute('tabindex', '-1');
+          }
         }
       }
 
