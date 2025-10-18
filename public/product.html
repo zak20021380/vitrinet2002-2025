@@ -42,6 +42,9 @@
       background: var(--bg);
       color: var(--text-main);
       -webkit-font-smoothing: antialiased;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
     }
 
     a {
@@ -112,12 +115,58 @@
       flex-wrap: wrap;
       justify-content: center;
       flex: 1 1 100%;
-      order: 3;
+      order: 4;
+      transition: max-height 0.25s ease;
     }
 
     nav a:hover,
     nav a:focus {
       color: var(--primary);
+    }
+
+    nav a {
+      padding: 0.25rem 0.75rem;
+      border-radius: var(--radius-sm);
+      transition: background 0.2s ease, color 0.2s ease;
+    }
+
+    nav a:focus-visible {
+      outline: 2px solid var(--primary);
+      outline-offset: 2px;
+    }
+
+    .nav-toggle {
+      display: none;
+      align-items: center;
+      gap: 0.45rem;
+      padding: 0.55rem 1rem;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border);
+      background: rgba(255, 255, 255, 0.85);
+      color: var(--text-main);
+      font-family: inherit;
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: color 0.2s ease, border-color 0.2s ease, background 0.2s ease;
+      order: 3;
+    }
+
+    .nav-toggle:hover,
+    .nav-toggle:focus-visible {
+      color: var(--primary);
+      border-color: rgba(29, 78, 216, 0.5);
+      background: rgba(29, 78, 216, 0.08);
+    }
+
+    .nav-toggle:focus-visible {
+      outline: none;
+      box-shadow: 0 0 0 3px rgba(29, 78, 216, 0.2);
+    }
+
+    .nav-toggle-icon {
+      width: 20px;
+      height: 20px;
     }
 
     .support-link {
@@ -138,6 +187,7 @@
 
     main {
       padding: 2.2rem 0 3rem;
+      flex: 1 0 auto;
     }
 
     .product-hero {
@@ -488,6 +538,7 @@
       color: #e2e8f0;
       padding: 2.6rem 0 2.1rem;
       margin-top: 3.2rem;
+      flex-shrink: 0;
     }
 
     .footer-inner {
@@ -539,6 +590,90 @@
       color: rgba(226, 232, 240, 0.7);
     }
 
+    @media (max-width: 900px) {
+      .header-inner {
+        align-items: flex-start;
+        gap: 0.85rem;
+      }
+
+      nav {
+        justify-content: flex-start;
+        gap: 0.75rem;
+      }
+
+      nav a {
+        padding: 0.35rem 0.6rem;
+      }
+
+      .info-panels {
+        gap: 1rem;
+      }
+    }
+
+    @media (max-width: 768px) {
+      header {
+        position: static;
+      }
+
+      .header-inner {
+        flex-wrap: wrap;
+      }
+
+      .nav-toggle {
+        display: inline-flex;
+      }
+
+      nav {
+        width: 100%;
+        display: none;
+        background: rgba(255, 255, 255, 0.95);
+        border: 1px solid rgba(148, 163, 184, 0.25);
+        border-radius: var(--radius-md);
+        padding: 0.85rem;
+        box-shadow: 0 16px 40px rgba(15, 23, 42, 0.08);
+      }
+
+      nav[data-expanded="true"] {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+        gap: 0.75rem;
+      }
+
+      nav a {
+        justify-self: stretch;
+        text-align: center;
+        padding: 0.65rem 0.75rem;
+        background: rgba(148, 163, 184, 0.12);
+      }
+
+      nav a:hover,
+      nav a:focus {
+        background: rgba(29, 78, 216, 0.16);
+        color: var(--primary);
+      }
+
+      .support-link {
+        width: 100%;
+        text-align: center;
+      }
+
+      .product-hero {
+        gap: 1.45rem;
+      }
+
+      .meta-grid {
+        grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      }
+
+      .tag-list {
+        justify-content: center;
+      }
+
+      .info-panels {
+        grid-template-columns: 1fr;
+      }
+    }
+
     @media (min-width: 768px) {
       .header-inner {
         flex-wrap: nowrap;
@@ -547,10 +682,23 @@
       nav {
         flex: unset;
         order: unset;
+        background: transparent;
+        border: none;
+        padding: 0;
+        box-shadow: none;
+      }
+
+      nav a {
+        background: transparent;
       }
 
       .support-link {
         order: unset;
+        width: auto;
+      }
+
+      .nav-toggle {
+        display: none !important;
       }
 
       .product-hero {
@@ -561,6 +709,12 @@
       .gallery {
         position: sticky;
         top: 104px;
+      }
+    }
+
+    @media (min-width: 1024px) {
+      .product-hero {
+        grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
       }
     }
 
@@ -587,6 +741,28 @@
       }
     }
 
+    @media (max-width: 540px) {
+      .meta-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .seller-header {
+        gap: 0.75rem;
+      }
+
+      .seller-card {
+        padding: 1rem;
+      }
+
+      .panel {
+        padding: 1.25rem;
+      }
+
+      h1 {
+        font-size: clamp(1.35rem, 7vw, 1.8rem);
+      }
+    }
+
     @media (prefers-reduced-motion: reduce) {
       *, *::before, *::after {
         animation-duration: 0.01ms !important;
@@ -605,7 +781,13 @@
         <span>ویترینت</span>
       </a>
       <a class="support-link" href="tel:02191090810" aria-label="تماس با پشتیبانی ویترینت">پشتیبانی ۰۲۱۹۱۰۹۰۸۱۰</a>
-      <nav aria-label="ناوبری اصلی">
+      <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="primaryNav">
+        <span class="nav-toggle-label">منو</span>
+        <svg class="nav-toggle-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+          <path d="M4 7h16M4 12h16M4 17h16" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+        </svg>
+      </button>
+      <nav id="primaryNav" aria-label="ناوبری اصلی" data-expanded="true">
         <a href="/index.html">خانه</a>
         <a href="/all-products.html">محصولات</a>
         <a href="/shops-by-category.html">دسته‌بندی‌ها</a>
@@ -724,6 +906,56 @@
   </footer>
 
   <script>
+    (function handleNavigation() {
+      const toggle = document.querySelector('.nav-toggle');
+      const nav = document.getElementById('primaryNav');
+      if (!toggle || !nav) return;
+
+      const mobileQuery = window.matchMedia('(max-width: 768px)');
+
+      function setExpanded(expanded) {
+        nav.dataset.expanded = expanded ? 'true' : 'false';
+        toggle.setAttribute('aria-expanded', expanded ? 'true' : 'false');
+      }
+
+      function syncState() {
+        if (mobileQuery.matches) {
+          toggle.hidden = false;
+          if (!toggle.hasAttribute('data-mobile-initialised')) {
+            setExpanded(false);
+            toggle.setAttribute('data-mobile-initialised', 'true');
+          } else {
+            toggle.setAttribute('aria-expanded', nav.dataset.expanded === 'true' ? 'true' : 'false');
+          }
+        } else {
+          toggle.hidden = true;
+          toggle.removeAttribute('data-mobile-initialised');
+          setExpanded(true);
+        }
+      }
+
+      toggle.addEventListener('click', () => {
+        const expanded = nav.dataset.expanded === 'true';
+        setExpanded(!expanded);
+      });
+
+      nav.addEventListener('click', (event) => {
+        if (!mobileQuery.matches) return;
+        const target = event.target;
+        if (target instanceof HTMLElement && target.tagName === 'A') {
+          setExpanded(false);
+        }
+      });
+
+      if (typeof mobileQuery.addEventListener === 'function') {
+        mobileQuery.addEventListener('change', syncState);
+      } else if (typeof mobileQuery.addListener === 'function') {
+        mobileQuery.addListener(syncState);
+      }
+
+      syncState();
+    })();
+
     (function () {
       'use strict';
 
