@@ -806,22 +806,25 @@ tr:last-child td {
   justify-content: center;
   animation: fadeIn .35s;
   padding: 1.5rem;
+  overflow-y: auto;
 }
 .seller-modal {
   background: #fff;
   border-radius: 1.5rem;
   box-shadow: 0 12px 50px #10b98144;
-  width: min(440px, 100%);
-  max-width: 540px;
+  width: min(520px, 100%);
+  max-width: 100%;
   min-width: 0;
   padding: 2.2rem 1.7rem 1.2rem;
   direction: rtl;
   position: relative;
   z-index: 9999;
   animation: fadeIn .33s;
+  max-height: min(90vh, 720px);
+  overflow-y: auto;
 }
 .seller-modal-close {
-  position: absolute; top: 1.2rem; left: 1.2rem;
+  position: absolute; top: 1.2rem; right: 1.2rem;
   background: #eafaf4;
   border-radius: 10px;
   border: none; color: #16a34a;
@@ -1122,13 +1125,14 @@ tr:last-child td {
 @media (max-width: 640px) {
   .seller-modal-overlay {
     padding: 1rem;
-    align-items: flex-end;
+    align-items: flex-start;
   }
   .seller-modal {
     width: 100%;
     max-width: 100%;
     border-radius: 1.25rem 1.25rem 0 0;
     padding: 1.6rem 1.2rem 1rem;
+    max-height: none;
   }
   .seller-modal-row {
     display: flex;
@@ -1156,6 +1160,9 @@ tr:last-child td {
   .seller-score-actions button {
     flex: 1 1 auto;
     width: 100%;
+  }
+  .seller-modal {
+    padding: 1.4rem 1rem 0.9rem;
   }
 }
 
@@ -4087,6 +4094,8 @@ function renderSellers() {
 /* ===== نسخهٔ جدید تابع showSellerModal (همراه شماره موبایل) ===== */
 /* ------------------------------------------------------------------
 /* ─────────────── showSellerModal ───────────────── */
+let sellerModalOverlayClickHandler = null;
+let sellerModalKeydownHandler = null;
 async function showSellerModal (shop) {
   const overlay = document.getElementById('seller-modal-overlay');
 
@@ -4150,8 +4159,8 @@ async function showSellerModal (shop) {
 
   /* ---------- رندر اولیه ---------- */
   overlay.innerHTML = `
-    <div class="seller-modal">
-      <button class="seller-modal-close" onclick="closeSellerModal()">×</button>
+    <div class="seller-modal" role="dialog" aria-modal="true">
+      <button type="button" class="seller-modal-close" onclick="closeSellerModal()" aria-label="بستن پنجره">×</button>
 
       <div class="seller-modal-title">
         مشخصات فروشگاه:
@@ -4231,6 +4240,26 @@ async function showSellerModal (shop) {
     </div>`;
 
   overlay.style.display = 'flex';
+
+  if (sellerModalOverlayClickHandler) {
+    overlay.removeEventListener('click', sellerModalOverlayClickHandler);
+  }
+  sellerModalOverlayClickHandler = (event) => {
+    if (event.target === overlay) {
+      closeSellerModal();
+    }
+  };
+  overlay.addEventListener('click', sellerModalOverlayClickHandler);
+
+  if (sellerModalKeydownHandler) {
+    document.removeEventListener('keydown', sellerModalKeydownHandler);
+  }
+  sellerModalKeydownHandler = (event) => {
+    if (event.key === 'Escape') {
+      closeSellerModal();
+    }
+  };
+  document.addEventListener('keydown', sellerModalKeydownHandler);
 
   const scoreInputEl = document.getElementById('sellerScoreInput');
   const scoreValueEl = document.getElementById('sellerScoreValue');
@@ -4405,8 +4434,18 @@ async function showSellerModal (shop) {
 
 
 function closeSellerModal() {
-  document.getElementById('seller-modal-overlay').style.display = "none";
-  document.getElementById('seller-modal-overlay').innerHTML = "";
+  const overlay = document.getElementById('seller-modal-overlay');
+  if (!overlay) return;
+  overlay.style.display = "none";
+  overlay.innerHTML = "";
+  if (sellerModalOverlayClickHandler) {
+    overlay.removeEventListener('click', sellerModalOverlayClickHandler);
+    sellerModalOverlayClickHandler = null;
+  }
+  if (sellerModalKeydownHandler) {
+    document.removeEventListener('keydown', sellerModalKeydownHandler);
+    sellerModalKeydownHandler = null;
+  }
 }
 
 // ← این تابع را جایگزین کنید
