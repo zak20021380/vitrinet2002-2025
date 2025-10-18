@@ -333,7 +333,11 @@
       user-select: none;
       -webkit-user-select: none;
       isolation: isolate;
-      height: clamp(280px, 46vw, 520px);
+      aspect-ratio: var(--slider-aspect, 1 / 1);
+    }
+
+    .slider-viewport:not(.has-aspect) {
+      min-height: clamp(280px, 46vw, 520px);
     }
 
     .slider-viewport:focus-visible {
@@ -1303,8 +1307,8 @@
         grid-template-columns: 1fr;
       }
 
-      .slider-viewport {
-        height: clamp(240px, 62vw, 440px);
+      .slider-viewport:not(.has-aspect) {
+        min-height: clamp(240px, 62vw, 440px);
       }
     }
 
@@ -1392,8 +1396,8 @@
         padding: 0.75rem;
       }
 
-      .slider-viewport {
-        height: clamp(220px, 70vw, 380px);
+      .slider-viewport:not(.has-aspect) {
+        min-height: clamp(220px, 70vw, 380px);
       }
 
       .slider-zoom {
@@ -1476,8 +1480,8 @@
     }
 
     @media (max-width: 480px) {
-      .slider-viewport {
-        height: clamp(200px, 88vw, 340px);
+      .slider-viewport:not(.has-aspect) {
+        min-height: clamp(200px, 88vw, 340px);
       }
 
       .slider-control {
@@ -1859,7 +1863,8 @@
         title: '',
         sellerName: '',
         addressInfo: null,
-        copyTimeout: null
+        copyTimeout: null,
+        sliderAspect: ''
       };
 
       const persianNumberFormatter = new Intl.NumberFormat('fa-IR');
@@ -1880,6 +1885,34 @@
         active: null,
         lastFocus: null
       };
+
+      function clearSliderAspectRatio() {
+        if (!dom.sliderViewport) {
+          return;
+        }
+        dom.sliderViewport.style.removeProperty('--slider-aspect');
+        delete dom.sliderViewport.dataset.aspectSource;
+        dom.sliderViewport.classList.remove('has-aspect');
+        state.sliderAspect = '';
+      }
+
+      function updateSliderAspectRatioFromImage(image) {
+        if (!dom.sliderViewport || !image) {
+          return;
+        }
+        const { naturalWidth, naturalHeight } = image;
+        if (!naturalWidth || !naturalHeight) {
+          return;
+        }
+        const ratio = `${naturalWidth} / ${naturalHeight}`;
+        if (ratio === state.sliderAspect) {
+          return;
+        }
+        dom.sliderViewport.style.setProperty('--slider-aspect', ratio);
+        dom.sliderViewport.dataset.aspectSource = ratio;
+        dom.sliderViewport.classList.add('has-aspect');
+        state.sliderAspect = ratio;
+      }
 
       if (dom.sliderPrev) {
         dom.sliderPrev.addEventListener('click', () => showPreviousImage());
@@ -2226,6 +2259,7 @@
         state.images = resolved;
         state.activeIndex = Number.isInteger(product.mainImageIndex) ? product.mainImageIndex : 0;
         dom.thumbnails.innerHTML = '';
+        clearSliderAspectRatio();
 
         if (!state.images.length) {
           dom.heroWrapper.hidden = true;
@@ -2242,6 +2276,7 @@
             dom.sliderCounter.hidden = true;
             dom.sliderCounter.textContent = '';
           }
+          clearSliderAspectRatio();
           syncLightbox();
           updateLightboxControls();
           return;
@@ -2289,6 +2324,14 @@
             const img = document.createElement('img');
             img.src = src;
             img.alt = `${state.title || 'تصویر محصول'} - تصویر ${imageNumber}`;
+            img.addEventListener('load', () => {
+              if (index === state.activeIndex) {
+                updateSliderAspectRatioFromImage(img);
+              }
+            }, { once: true });
+            if (img.complete && img.naturalWidth && img.naturalHeight && index === state.activeIndex) {
+              updateSliderAspectRatioFromImage(img);
+            }
 
             slide.appendChild(img);
             dom.sliderTrack.appendChild(slide);
@@ -2342,6 +2385,16 @@
             slide.classList.toggle('is-active', idx === index);
             slide.setAttribute('aria-hidden', idx === index ? 'false' : 'true');
           });
+        }
+
+        const activeSlide = dom.sliderTrack ? dom.sliderTrack.children[index] : null;
+        const activeImage = activeSlide ? activeSlide.querySelector('img') : null;
+        if (activeImage) {
+          if (activeImage.complete && activeImage.naturalWidth && activeImage.naturalHeight) {
+            updateSliderAspectRatioFromImage(activeImage);
+          } else {
+            activeImage.addEventListener('load', () => updateSliderAspectRatioFromImage(activeImage), { once: true });
+          }
         }
 
         if (dom.sliderIndicators) {
@@ -2754,6 +2807,7 @@
               mapUrl,
               sellerName
             };
+            dom.sellerAddressButton.hidden = false;
             dom.sellerAddressButton.setAttribute('aria-label', `مشاهده آدرس ${sellerName} در پنجره مجزا`);
             dom.sellerAddressButton.disabled = false;
             dom.sellerAddressButton.classList.remove('is-disabled');
