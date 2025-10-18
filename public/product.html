@@ -83,27 +83,34 @@
     .brand {
       display: inline-flex;
       align-items: center;
-      gap: 0.6rem;
-      padding: 0.55rem 0.85rem;
+      justify-content: center;
+      padding: 0.6rem 1.1rem;
       border-radius: var(--radius-sm);
-      background: rgba(29, 78, 216, 0.08);
-      transition: transform 0.2s ease;
+      background: linear-gradient(135deg, rgba(29, 78, 216, 0.16), rgba(14, 165, 233, 0.12));
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+      font-weight: 800;
+      font-size: 1.22rem;
+      letter-spacing: -0.02em;
+      color: var(--primary);
     }
 
     .brand:hover {
       transform: translateY(-1px);
+      box-shadow: 0 12px 24px rgba(29, 78, 216, 0.18);
     }
 
-    .brand img {
-      width: 40px;
-      height: 40px;
+    .brand:focus-visible {
+      outline: none;
+      box-shadow: 0 0 0 3px rgba(29, 78, 216, 0.28);
     }
 
-    .brand span {
+    .brand-text {
+      background: linear-gradient(120deg, #1d4ed8, #0ea5e9);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
       font-weight: 900;
-      font-size: 1.15rem;
-      color: var(--primary);
-      letter-spacing: -0.01em;
+      white-space: nowrap;
     }
 
     nav {
@@ -442,21 +449,51 @@
       word-break: break-word;
     }
 
-    .seller-link {
-      align-self: flex-start;
-      padding: 0.7rem 1.4rem;
-      border-radius: var(--radius-sm);
-      background: #fff;
-      color: var(--primary);
-      font-weight: 700;
-      transition: background 0.2s ease, transform 0.2s ease;
-      box-shadow: 0 12px 24px rgba(29, 78, 216, 0.18);
+    .seller-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      margin-top: 0.5rem;
     }
 
-    .seller-link:hover,
-    .seller-link:focus {
+    .seller-action {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0.65rem 1.3rem;
+      border-radius: var(--radius-sm);
+      border: none;
+      background: rgba(29, 78, 216, 0.12);
+      color: var(--primary);
+      font-weight: 700;
+      font-family: inherit;
+      cursor: pointer;
+      transition: transform 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
+      text-decoration: none;
+      min-width: 0;
+    }
+
+    .seller-action:hover,
+    .seller-action:focus-visible {
       transform: translateY(-2px);
-      background: rgba(255, 255, 255, 0.9);
+      background: rgba(29, 78, 216, 0.18);
+      box-shadow: 0 12px 22px rgba(29, 78, 216, 0.16);
+    }
+
+    .seller-action:focus-visible {
+      outline: none;
+      box-shadow: 0 0 0 3px rgba(29, 78, 216, 0.25);
+    }
+
+    .seller-action--primary {
+      background: var(--primary);
+      color: #fff;
+      box-shadow: 0 14px 26px rgba(29, 78, 216, 0.28);
+    }
+
+    .seller-action--primary:hover,
+    .seller-action--primary:focus-visible {
+      background: #153aa8;
     }
 
     .info-panels {
@@ -728,16 +765,46 @@
       }
 
       .gallery {
-        padding: 1rem;
-        min-height: 260px;
+        padding: 0.85rem;
+        min-height: 220px;
       }
 
       .hero-image {
         padding: 0.75rem;
       }
 
+      .hero-image img {
+        aspect-ratio: 4 / 3;
+        max-height: 260px;
+        margin-inline: auto;
+      }
+
+      .product-hero {
+        gap: 1.4rem;
+      }
+
+      .product-summary {
+        gap: 1rem;
+      }
+
+      .thumbnails {
+        gap: 0.6rem;
+      }
+
+      .thumb {
+        min-width: 64px;
+      }
+
       .seller-card {
         padding: 1.2rem;
+      }
+
+      .seller-actions {
+        width: 100%;
+      }
+
+      .seller-action {
+        flex: 1 1 100%;
       }
     }
 
@@ -776,9 +843,8 @@
 <body>
   <header>
     <div class="layout-width header-inner">
-      <a class="brand" href="https://www.vitrinnet.com" target="_blank" rel="noopener">
-        <img src="/assets/images/logo.svg" alt="لوگوی ویترینت">
-        <span>ویترینت</span>
+      <a class="brand" href="/index.html">
+        <span class="brand-text">ویترینت</span>
       </a>
       <a class="support-link" href="tel:02191090810" aria-label="تماس با پشتیبانی ویترینت">پشتیبانی ۰۲۱۹۱۰۹۰۸۱۰</a>
       <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="primaryNav">
@@ -865,7 +931,10 @@
                 <dd id="sellerAddress"></dd>
               </div>
             </dl>
-            <a class="seller-link" id="sellerLink" target="_blank" rel="noopener" hidden>مشاهده پروفایل فروشگاه</a>
+            <div class="seller-actions" id="sellerActions" hidden>
+              <button class="seller-action" type="button" id="sellerAddressButton" hidden>مشاهده آدرس فروشگاه</button>
+              <a class="seller-action seller-action--primary" id="sellerLink" target="_blank" rel="noopener" hidden>ورود به صفحه فروشگاه</a>
+            </div>
           </div>
         </div>
       </section>
@@ -989,6 +1058,8 @@
         sellerPhone: document.getElementById('sellerPhone'),
         sellerAddressRow: document.getElementById('sellerAddressRow'),
         sellerAddress: document.getElementById('sellerAddress'),
+        sellerActions: document.getElementById('sellerActions'),
+        sellerAddressButton: document.getElementById('sellerAddressButton'),
         sellerLink: document.getElementById('sellerLink'),
         descriptionLong: document.getElementById('productDescriptionLong'),
         featuresPanel: document.getElementById('featuresPanel'),
@@ -1264,20 +1335,43 @@
           dom.sellerPhone.removeAttribute('href');
         }
 
+        let hasAddressAction = false;
         if (seller.address) {
           dom.sellerAddressRow.hidden = false;
           dom.sellerAddress.textContent = seller.address;
+
+          if (dom.sellerAddressButton) {
+            const mapQuery = [seller.address, seller.city].filter(Boolean).join('، ');
+            const mapUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(mapQuery || seller.address)}`;
+            dom.sellerAddressButton.hidden = false;
+            dom.sellerAddressButton.setAttribute('aria-label', `مشاهده آدرس ${sellerName} روی نقشه`);
+            dom.sellerAddressButton.onclick = () => {
+              window.open(mapUrl, '_blank', 'noopener');
+            };
+            hasAddressAction = true;
+          }
         } else {
           dom.sellerAddressRow.hidden = true;
           dom.sellerAddress.textContent = '';
+          if (dom.sellerAddressButton) {
+            dom.sellerAddressButton.hidden = true;
+            dom.sellerAddressButton.removeAttribute('aria-label');
+            dom.sellerAddressButton.onclick = null;
+          }
         }
 
+        let hasShopLink = false;
         if (seller.shopurl) {
           dom.sellerLink.hidden = false;
           dom.sellerLink.href = `/shop.html?shopurl=${encodeURIComponent(seller.shopurl)}`;
+          hasShopLink = true;
         } else {
           dom.sellerLink.hidden = true;
           dom.sellerLink.removeAttribute('href');
+        }
+
+        if (dom.sellerActions) {
+          dom.sellerActions.hidden = !(hasAddressAction || hasShopLink);
         }
       }
 
