@@ -15,6 +15,543 @@
 
 
 
+
+
+// -----------------------------
+// جستجوی پیشرفته صفحه اصلی
+// -----------------------------
+const SEARCH_API_BASE = 'http://localhost:5000/api';
+const searchElements = {
+  form: document.getElementById('searchForm'),
+  input: document.getElementById('mainSearchInput'),
+  panel: document.getElementById('searchResultsPanel'),
+  container: document.getElementById('searchResultsContainer'),
+  status: document.getElementById('searchStatusText'),
+  queryLabel: document.getElementById('searchQueryLabel'),
+  closeBtn: document.getElementById('closeSearchPanel'),
+  refreshBtn: document.getElementById('refreshSearchBtn')
+};
+
+const searchState = {
+  loading: false,
+  loaderPromise: null,
+  loaded: false,
+  items: [],
+  summary: { shops: 0, products: 0, centers: 0, categories: 0 },
+  trending: { shops: [], products: [], centers: [], categories: [] },
+  lastUpdated: null
+};
+
+const typeOrder = { shop: 0, product: 1, center: 2, category: 3 };
+
+const typeMeta = {
+  shop: {
+    label: 'مغازه‌ها',
+    accent: 'from-[#10b981] to-[#0ea5e9]',
+    icon: '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l1.5-4.5A2 2 0 0 1 6.4 3h11.2a2 2 0 0 1 1.9 1.3L21 9"/><path d="M20 9v8a2 2 0 0 1-2 2h-1.5a2 2 0 0 1-2-2v-3a2 2 0 0 0-2-2h0a2 2 0 0 0-2 2v3a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V9"/><path d="M4 9h16"/></svg>'
+  },
+  product: {
+    label: 'محصولات',
+    accent: 'from-[#0ea5e9] to-[#6366f1]',
+    icon: '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="14" rx="2"/><path d="M8 4v14"/><path d="M16 4v14"/><path d="M3 10h18"/></svg>'
+  },
+  center: {
+    label: 'مراکز خرید',
+    accent: 'from-[#6366f1] to-[#f97316]',
+    icon: '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-6 9 6"/><path d="M4 10v10h16V10"/><path d="M9 21V12h6v9"/></svg>'
+  },
+  category: {
+    label: 'دسته‌بندی‌ها',
+    accent: 'from-[#f59e0b] to-[#10b981]',
+    icon: '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/></svg>'
+  }
+};
+
+function normalizeText(str) {
+  return (str || '')
+    .toString()
+    .trim()
+    .replace(/[‌]/g, '')
+    .replace(/[آإأ]/g, 'ا')
+    .replace(/[ي]/g, 'ی')
+    .replace(/[ك]/g, 'ک')
+    .replace(/[ۀة]/g, 'ه')
+    .replace(/[ًٌٍَُِّْ]/g, '')
+    .toLowerCase();
+}
+
+function tokenize(value) {
+  return normalizeText(value)
+    .split(/\s+/)
+    .map(token => token.trim())
+    .filter(Boolean);
+}
+
+function escapeHTML(str) {
+  return (str || '').replace(/[&<>"']/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch]));
+}
+
+function highlightText(text, rawTokens) {
+  if (!text) return '';
+  const safe = escapeHTML(text);
+  if (!rawTokens || !rawTokens.length) return safe;
+  let highlighted = safe;
+  rawTokens.forEach(token => {
+    if (!token) return;
+    const escaped = token.replace(/[-/\^$*+?.()|[\]{}]/g, '\$&');
+    highlighted = highlighted.replace(new RegExp(escaped, 'gi'), match => `<span class="bg-emerald-100 text-emerald-700 font-bold px-1 rounded-md">${match}</span>`);
+  });
+  return highlighted;
+}
+
+function formatPrice(value) {
+  if (value === null || value === undefined || value === '') return '';
+  const number = Number(value);
+  if (Number.isNaN(number)) return '';
+  return number.toLocaleString('fa-IR') + ' تومان';
+}
+
+function buildSearchItem(type, data) {
+  const base = {
+    type,
+    title: data.title || '',
+    subtitle: data.subtitle || '',
+    location: data.location || '',
+    description: data.description || '',
+    url: data.url || '#',
+    badge: data.badge || '',
+    extras: data.extras || {},
+    rawCount: data.rawCount || 0
+  };
+  const titleNorm = normalizeText(base.title);
+  const subtitleNorm = normalizeText(base.subtitle);
+  const locationNorm = normalizeText(base.location);
+  const descriptionNorm = normalizeText(base.description);
+  return {
+    ...base,
+    typeWeight: typeOrder[type] ?? 99,
+    keywords: [titleNorm, subtitleNorm, locationNorm, descriptionNorm, normalizeText(data.extraKeywords || '')].join(' ').trim(),
+    norm: {
+      title: titleNorm,
+      subtitle: subtitleNorm,
+      location: locationNorm,
+      description: descriptionNorm
+    }
+  };
+}
+
+function buildSearchIndex(dataset) {
+  const shops = Array.isArray(dataset.shops) ? dataset.shops : [];
+  const products = Array.isArray(dataset.products) ? dataset.products : [];
+  const centers = Array.isArray(dataset.centers) ? dataset.centers : [];
+  const items = [];
+  const categoryMap = new Map();
+
+  shops.forEach(shop => {
+    const item = buildSearchItem('shop', {
+      title: shop.storename || 'نام فروشگاه نامشخص',
+      subtitle: shop.category || 'دسته‌بندی نامشخص',
+      location: shop.address || '',
+      description: shop.desc || '',
+      url: shop.shopurl ? `shop.html?shopurl=${encodeURIComponent(shop.shopurl)}` : '#',
+      badge: 'مغازه',
+      extraKeywords: shop.shopurl || ''
+    });
+    items.push(item);
+    const categoryName = (shop.category || '').trim();
+    if (categoryName) {
+      const normalizedName = categoryName;
+      const entry = categoryMap.get(normalizedName) || { name: categoryName, count: 0 };
+      entry.count += 1;
+      categoryMap.set(normalizedName, entry);
+    }
+  });
+
+  products.forEach(product => {
+    const priceText = formatPrice(product.price);
+    const item = buildSearchItem('product', {
+      title: product.title || 'نام محصول نامشخص',
+      subtitle: product.sellerCategory || product.category || '',
+      location: product.seller?.address || product.seller?.city || '',
+      description: product.desc || '',
+      url: product._id ? `product.html?id=${product._id}` : '#',
+      badge: 'محصول',
+      extras: {
+        shopName: product.shopName || product.seller?.storename || '',
+        priceText
+      },
+      extraKeywords: [product.shopName, product.seller?.storename, Array.isArray(product.tags) ? product.tags.join(' ') : product.tags || '', priceText].join(' ')
+    });
+    items.push(item);
+  });
+
+  centers.forEach(center => {
+    const title = center.title || 'مرکز خرید';
+    const url = center._id
+      ? `shopping-centers-shops.html?centerId=${center._id}&title=${encodeURIComponent(center.title || '')}`
+      : '#';
+    const item = buildSearchItem('center', {
+      title,
+      subtitle: center.tag || '',
+      location: center.location || '',
+      description: center.description || '',
+      url,
+      badge: 'مرکز خرید',
+      extras: { stores: center.stores }
+    });
+    items.push(item);
+  });
+
+  const categories = Array.from(categoryMap.values())
+    .map(cat => buildSearchItem('category', {
+      title: cat.name,
+      subtitle: `${cat.count} فروشگاه`,
+      description: 'مشاهده مغازه‌های این دسته',
+      url: `shops-by-category.html?cat=${encodeURIComponent(cat.name.trim().replace(/\s+/g, '-'))}`,
+      badge: 'دسته‌بندی',
+      rawCount: cat.count
+    }))
+    .sort((a, b) => (b.rawCount || 0) - (a.rawCount || 0));
+
+  items.push(...categories);
+
+  const trending = {
+    shops: items.filter(item => item.type === 'shop').slice(0, 4),
+    products: items.filter(item => item.type === 'product').slice(0, 3),
+    centers: items.filter(item => item.type === 'center').slice(0, 3),
+    categories: categories.slice(0, 6)
+  };
+
+  return {
+    items,
+    summary: {
+      shops: shops.length,
+      products: products.length,
+      centers: centers.length,
+      categories: categories.length
+    },
+    trending
+  };
+}
+
+async function fetchJSON(url) {
+  const res = await fetch(url);
+  if (!res.ok) throw new Error(`Failed to fetch ${url}: ${res.status}`);
+  return res.json();
+}
+
+async function ensureSearchData(force = false) {
+  if (!searchElements.input) return [];
+  if (searchState.loading && searchState.loaderPromise) {
+    return searchState.loaderPromise;
+  }
+  if (searchState.loaded && !force) {
+    return searchState.items;
+  }
+
+  searchState.loading = true;
+  if (searchElements.status) {
+    searchElements.status.textContent = 'در حال آماده‌سازی داده‌های جستجو...';
+  }
+  if (searchElements.panel) {
+    searchElements.panel.classList.remove('hidden');
+  }
+
+  const loader = (async () => {
+    try {
+      const [shopsRes, productsRes, centersRes] = await Promise.allSettled([
+        fetchJSON(`${SEARCH_API_BASE}/shops`),
+        fetchJSON(`${SEARCH_API_BASE}/products`),
+        fetchJSON(`${SEARCH_API_BASE}/shopping-centers`)
+      ]);
+
+      const shops = shopsRes.status === 'fulfilled' ? shopsRes.value : [];
+      const products = productsRes.status === 'fulfilled' ? productsRes.value : [];
+      const centers = centersRes.status === 'fulfilled' ? centersRes.value : [];
+
+      const { items, summary, trending } = buildSearchIndex({ shops, products, centers });
+      searchState.items = items;
+      searchState.summary = summary;
+      searchState.trending = trending;
+      searchState.loaded = true;
+      searchState.lastUpdated = new Date();
+
+      if (searchElements.status) {
+        const { shops: sCount, products: pCount, centers: cCount } = summary;
+        searchElements.status.textContent = `بیش از ${sCount} مغازه، ${pCount} محصول و ${cCount} مرکز خرید برای جستجو آماده است.`;
+      }
+      if (searchElements.refreshBtn) {
+        searchElements.refreshBtn.classList.remove('hidden');
+      }
+
+      return items;
+    } catch (error) {
+      console.error('search preload error', error);
+      if (searchElements.status) {
+        searchElements.status.textContent = 'خطا در آماده‌سازی داده‌های جستجو. لطفاً دوباره تلاش کنید.';
+      }
+      if (searchElements.container) {
+        searchElements.container.innerHTML = '<div class="rounded-2xl border border-dashed border-rose-200 bg-white/80 p-6 text-center text-sm font-bold text-rose-500">در بارگذاری داده‌های جستجو خطایی رخ داد. لطفاً بعداً دوباره تلاش کنید.</div>';
+      }
+      throw error;
+    } finally {
+      searchState.loading = false;
+      searchState.loaderPromise = null;
+    }
+  })();
+
+  searchState.loaderPromise = loader;
+  return loader;
+}
+
+function renderGroup(type, items, rawTokens) {
+  if (!items || !items.length) return '';
+  const meta = typeMeta[type] || { label: type, accent: 'from-[#94a3b8] to-[#cbd5f5]', icon: '' };
+  const groupCards = items.map(item => renderResultCard(item, rawTokens)).join('');
+  return `
+    <section class="space-y-4">
+      <div class="flex items-center justify-between gap-3">
+        <div class="flex items-center gap-2 text-sm sm:text-base font-extrabold text-slate-600">
+          <span class="flex h-9 w-9 items-center justify-center rounded-2xl bg-gradient-to-br ${meta.accent} text-white shadow-md">
+            ${meta.icon}
+          </span>
+          <span class="text-slate-700">${meta.label}</span>
+        </div>
+      </div>
+      <div class="grid gap-3 sm:gap-4 ${type === 'category' ? 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3' : 'grid-cols-1 sm:grid-cols-2'}">
+        ${groupCards}
+      </div>
+    </section>
+  `;
+}
+
+function renderResultCard(item, rawTokens) {
+  const titleHTML = highlightText(item.title, rawTokens);
+  const subtitleHTML = item.subtitle ? highlightText(item.subtitle, rawTokens) : '';
+  const locationHTML = item.location ? highlightText(item.location, rawTokens) : '';
+  const descriptionHTML = item.description ? highlightText(item.description, rawTokens) : '';
+  const badge = item.badge
+    ? `<span class="inline-flex items-center justify-center rounded-full bg-emerald-100 px-3 py-1 text-[11px] font-extrabold text-emerald-600">${escapeHTML(item.badge)}</span>`
+    : '';
+
+  let footerHTML = '';
+  if (item.type === 'product') {
+    const price = item.extras?.priceText;
+    const shopName = item.extras?.shopName ? escapeHTML(item.extras.shopName) : '';
+    footerHTML = `
+      <div class="mt-3 flex flex-wrap items-center justify-between gap-2 text-xs sm:text-sm">
+        ${shopName ? `<span class="inline-flex items-center gap-1 rounded-full bg-sky-50 px-3 py-1 font-bold text-sky-600"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 01-2.83 2.83l-.06-.06A1.65 1.65 0 0015 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 008.6 15a1.65 1.65 0 00-1.82-.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 005 8.6a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 008.6 5a1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0015 8.6a1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 15z"></path></svg>${shopName}</span>` : ''}
+        ${price ? `<span class="inline-flex items-center rounded-full bg-emerald-500/10 px-3 py-1 text-[11px] font-extrabold text-emerald-600">${escapeHTML(price)}</span>` : ''}
+      </div>
+    `;
+  } else if (item.type === 'center') {
+    const stores = item.extras?.stores;
+    footerHTML = stores !== undefined
+      ? `<div class="mt-3 inline-flex items-center gap-1 rounded-full bg-indigo-50 px-3 py-1 text-xs font-bold text-indigo-600"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-6 9 6"/><path d="M4 10v10h16V10"/><path d="M9 21V12h6v9"/></svg>${stores || 0} مغازه</div>`
+      : '';
+  } else if (item.type === 'category') {
+    footerHTML = `<div class="mt-3 inline-flex items-center gap-1 rounded-full bg-amber-50 px-3 py-1 text-xs font-bold text-amber-600"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/></svg>${escapeHTML(item.subtitle)}</div>`;
+  }
+
+  const body = `
+    <div class="flex flex-col gap-2 text-right">
+      <div class="flex flex-wrap items-center justify-between gap-2">
+        <h4 class="text-base sm:text-lg font-black text-slate-700 leading-7">${titleHTML}</h4>
+        ${badge}
+      </div>
+      ${subtitleHTML ? `<p class="text-xs sm:text-sm font-bold text-slate-500">${subtitleHTML}</p>` : ''}
+      ${locationHTML ? `<p class="flex items-center justify-end gap-1 text-xs text-slate-400"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 5.25-9 13-9 13s-9-7.75-9-13a9 9 0 1 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>${locationHTML}</p>` : ''}
+      ${descriptionHTML ? `<p class="text-[11px] sm:text-xs leading-6 text-slate-400">${descriptionHTML}</p>` : ''}
+      ${footerHTML}
+    </div>
+  `;
+
+  return `
+    <a href="${item.url}" class="group block rounded-2xl border border-slate-100 bg-white/90 p-4 shadow-lg transition-all duration-200 hover:-translate-y-1 hover:border-emerald-200 hover:shadow-2xl focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400">
+      ${body}
+    </a>
+  `;
+}
+
+function renderDefaultResults() {
+  if (!searchElements.panel) return;
+  const { trending, summary } = searchState;
+  const groups = [];
+  if (trending.shops.length) groups.push(renderGroup('shop', trending.shops, []));
+  if (trending.products.length) groups.push(renderGroup('product', trending.products, []));
+  if (trending.centers.length) groups.push(renderGroup('center', trending.centers, []));
+  if (trending.categories.length) groups.push(renderGroup('category', trending.categories, []));
+
+  if (searchElements.queryLabel) {
+    searchElements.queryLabel.textContent = '';
+  }
+  if (searchElements.status) {
+    if (searchState.loaded) {
+      searchElements.status.textContent = `برای شروع، محبوب‌ترین گزینه‌ها از بین ${summary.shops} مغازه و ${summary.centers} مرکز خرید را ببینید.`;
+    } else {
+      searchElements.status.textContent = 'برای مشاهده نتایج جستجو، عبارت موردنظر خود را تایپ کنید.';
+    }
+  }
+  if (searchElements.container) {
+    searchElements.container.innerHTML = groups.length
+      ? groups.join('')
+      : '<div class="rounded-2xl border border-dashed border-slate-200 bg-white/70 p-8 text-center text-sm font-bold text-slate-400">هنوز داده‌ای برای نمایش وجود ندارد.</div>';
+  }
+  searchElements.panel.classList.remove('hidden');
+}
+
+function renderSearchResults(query, matches, rawTokens) {
+  if (!searchElements.panel) return;
+  const grouped = matches.reduce((acc, item) => {
+    (acc[item.type] = acc[item.type] || []).push(item);
+    return acc;
+  }, {});
+
+  const sections = [
+    renderGroup('shop', grouped.shop || [], rawTokens),
+    renderGroup('product', grouped.product || [], rawTokens),
+    renderGroup('center', grouped.center || [], rawTokens),
+    renderGroup('category', grouped.category || [], rawTokens)
+  ].filter(Boolean);
+
+  if (searchElements.container) {
+    if (sections.length) {
+      searchElements.container.innerHTML = sections.join('');
+    } else {
+      searchElements.container.innerHTML = '<div class="rounded-2xl border border-dashed border-slate-200 bg-white/70 p-8 text-center text-sm font-bold text-slate-400">هیچ نتیجه‌ای با این جستجو پیدا نشد. عبارات مشابه یا کوتاه‌تر را امتحان کنید.</div>';
+    }
+  }
+
+  if (searchElements.queryLabel) {
+    searchElements.queryLabel.textContent = `«${query}»`;
+  }
+  if (searchElements.status) {
+    const total = matches.length;
+    searchElements.status.textContent = total
+      ? `${total} نتیجه مرتبط با «${query}» پیدا شد.`
+      : `نتیجه‌ای برای «${query}» پیدا نشد.`;
+  }
+  searchElements.panel.classList.remove('hidden');
+}
+
+function performSearch(tokens) {
+  if (!tokens.length) return [];
+  const matches = [];
+  searchState.items.forEach(item => {
+    let score = 0;
+    tokens.forEach(token => {
+      if (!token) return;
+      if (item.norm.title.includes(token)) score += 6;
+      else if (item.norm.subtitle.includes(token)) score += 4;
+      else if (item.norm.location.includes(token)) score += 3;
+      else if (item.keywords.includes(token)) score += 1;
+    });
+    if (score > 0) {
+      matches.push({ ...item, score });
+    }
+  });
+
+  return matches.sort((a, b) => {
+    if (b.score !== a.score) return b.score - a.score;
+    if (a.typeWeight !== b.typeWeight) return a.typeWeight - b.typeWeight;
+    if ((b.rawCount || 0) !== (a.rawCount || 0)) return (b.rawCount || 0) - (a.rawCount || 0);
+    return 0;
+  });
+}
+
+async function handleSearch(query, { immediate = false } = {}) {
+  if (!searchElements.input) return;
+  const trimmed = (query || '').trim();
+  try {
+    await ensureSearchData();
+  } catch {
+    return;
+  }
+
+  if (!trimmed) {
+    renderDefaultResults();
+    return;
+  }
+
+  const normalizedTokens = tokenize(trimmed);
+  const rawTokens = trimmed.split(/\s+/).filter(Boolean);
+  if (!normalizedTokens.length) {
+    renderDefaultResults();
+    return;
+  }
+
+  const matches = performSearch(normalizedTokens);
+  renderSearchResults(trimmed, matches, rawTokens);
+
+  if (immediate && matches.length) {
+    setTimeout(() => {
+      const firstLink = searchElements.container?.querySelector('a');
+      firstLink?.focus();
+    }, 10);
+  }
+}
+
+let searchDebounce;
+function scheduleSearch(query) {
+  clearTimeout(searchDebounce);
+  searchDebounce = setTimeout(() => handleSearch(query), 280);
+}
+
+function attachSearchEvents() {
+  if (!searchElements.input || !searchElements.form) return;
+
+  searchElements.input.addEventListener('focus', () => {
+    ensureSearchData().then(() => renderDefaultResults()).catch(() => renderDefaultResults());
+    if (searchElements.panel) {
+      searchElements.panel.classList.remove('hidden');
+    }
+  });
+
+  searchElements.input.addEventListener('input', (event) => {
+    const value = event.target.value;
+    scheduleSearch(value);
+  });
+
+  searchElements.form.addEventListener('submit', (event) => {
+    event.preventDefault();
+    const query = searchElements.input.value;
+    handleSearch(query, { immediate: true });
+  });
+
+  document.addEventListener('click', (event) => {
+    if (!searchElements.panel || searchElements.panel.classList.contains('hidden')) return;
+    const isInside = searchElements.panel.contains(event.target) || searchElements.form.contains(event.target);
+    if (!isInside) {
+      searchElements.panel.classList.add('hidden');
+    }
+  });
+
+  document.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape' && searchElements.panel && !searchElements.panel.classList.contains('hidden')) {
+      searchElements.panel.classList.add('hidden');
+    }
+  });
+
+  if (searchElements.closeBtn) {
+    searchElements.closeBtn.addEventListener('click', () => {
+      if (searchElements.panel) searchElements.panel.classList.add('hidden');
+    });
+  }
+
+  if (searchElements.refreshBtn) {
+    searchElements.refreshBtn.addEventListener('click', async () => {
+      try {
+        await ensureSearchData(true);
+        handleSearch(searchElements.input.value);
+      } catch {
+        // خطا از قبل مدیریت شده است
+      }
+    });
+  }
+}
+
+attachSearchEvents();
+
 // واکشی و رندر تبلیغ فروشگاه ویژه قبل از کارت فروشگاه‌ها
 // متغیر تبلیغ ویژه (در صورت وجود)
 let adHomeData = null;
