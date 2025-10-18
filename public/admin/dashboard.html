@@ -2458,10 +2458,36 @@ function parsePerformancePayload(payload) {
     publicMessage
   };
 
+  const aliasKeys = [];
+  const addAlias = (value) => {
+    const normalised = normaliseScoreKey(value);
+    if (normalised && !aliasKeys.includes(normalised)) {
+      aliasKeys.push(normalised);
+    }
+  };
+
+  addAlias(payload.sellerKey);
+  addAlias(sellerId);
+  addAlias(payload._id);
+  if (payload.seller && typeof payload.seller === 'object') {
+    addAlias(payload.seller._id || payload.seller.id);
+  }
+  if (shopurl) addAlias(`shopurl:${shopurl}`);
+  if (Array.isArray(payload.aliases)) {
+    payload.aliases.forEach(addAlias);
+  }
+
   const keyCandidate = payload.sellerKey || sellerId || (shopurl ? `shopurl:${shopurl}` : '');
-  const normalised = normaliseScoreKey(keyCandidate);
-  if (normalised) {
-    meta.sellerKey = normalised;
+  addAlias(keyCandidate);
+
+  meta.sellerKey = aliasKeys.length ? aliasKeys[0] : '';
+  meta.aliasKeys = aliasKeys;
+
+  if (meta.sellerKey && !meta.aliasKeys.includes(meta.sellerKey)) {
+    meta.aliasKeys.unshift(meta.sellerKey);
+  }
+  if (!meta.aliasKeys.length && meta.sellerKey) {
+    meta.aliasKeys = [meta.sellerKey];
   }
 
   return meta;
@@ -2510,9 +2536,16 @@ async function refreshSellerPerformanceMap() {
     const nextMap = {};
     records.forEach(item => {
       const meta = parsePerformancePayload(item);
-      if (meta && meta.sellerKey) {
-        nextMap[meta.sellerKey] = meta;
-      }
+      if (!meta) return;
+      const keys = Array.isArray(meta.aliasKeys) && meta.aliasKeys.length
+        ? meta.aliasKeys
+        : (meta.sellerKey ? [meta.sellerKey] : []);
+      keys.forEach(alias => {
+        const normalised = normaliseScoreKey(alias);
+        if (normalised) {
+          nextMap[normalised] = meta;
+        }
+      });
     });
 
     sellerPerformanceMap = nextMap;
@@ -2557,8 +2590,18 @@ async function setSellerScoreByKey(key, value, note, message) {
   }
 
   const meta = parsePerformancePayload(payload);
-  if (meta && meta.sellerKey) {
-    sellerPerformanceMap[meta.sellerKey] = meta;
+  if (meta) {
+    const keys = new Set([
+      normalised,
+      ...(Array.isArray(meta.aliasKeys) ? meta.aliasKeys : []),
+      meta.sellerKey
+    ]);
+    keys.forEach(alias => {
+      const keyAlias = normaliseScoreKey(alias);
+      if (keyAlias) {
+        sellerPerformanceMap[keyAlias] = meta;
+      }
+    });
   }
   sellerPerformanceLoaded = true;
   return meta;
@@ -2591,8 +2634,18 @@ async function clearSellerScoreByKey(key) {
   }
 
   const meta = parsePerformancePayload(payload);
-  if (meta && meta.sellerKey) {
-    sellerPerformanceMap[meta.sellerKey] = meta;
+  if (meta) {
+    const keys = new Set([
+      normalised,
+      ...(Array.isArray(meta.aliasKeys) ? meta.aliasKeys : []),
+      meta.sellerKey
+    ]);
+    keys.forEach(alias => {
+      const keyAlias = normaliseScoreKey(alias);
+      if (keyAlias) {
+        sellerPerformanceMap[keyAlias] = meta;
+      }
+    });
   } else {
     delete sellerPerformanceMap[normalised];
   }
