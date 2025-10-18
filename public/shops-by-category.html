@@ -60,15 +60,46 @@
       border: 1.2px solid #e0fdfa;
       min-height: 320px;
       font-family: 'Vazirmatn', 'Montserrat', sans-serif;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
       padding: 1.3rem 1.1rem 1.2rem 1.1rem;
     }
-    .shop-card:hover { 
+    .shop-card-content {
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      gap: 1.1rem;
+    }
+    .shop-card-body {
+      display: flex;
+      flex-direction: column;
+      gap: 0.65rem;
+      height: 100%;
+      align-items: stretch;
+    }
+    .shop-card-spacer {
+      flex: 1 1 auto;
+    }
+    .shop-card:hover {
       transform: scale(1.034);
       box-shadow: 0 14px 40px #0ea5e925;
       border-color: #10b98150;
+    }
+    .shop-card-image-container {
+      position: relative;
+      width: 100%;
+      border-radius: 1.1rem;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .shop-tags-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.4rem;
+      align-items: center;
+    }
+    .shop-tag {
+      margin-inline-end: 0;
     }
     @media (max-width: 640px) {
       .shop-card { padding: 0.8rem !important; min-height: 110px;}
@@ -94,6 +125,9 @@
       height: 17px;
       margin-left: 2px;
       color: #10b981;
+    }
+    .shop-phone {
+      justify-content: center;
     }
 
     .btn-grad {
@@ -142,25 +176,47 @@
 
       /* Shop Card Improvements */
       .shop-card {
-        padding: 1.2rem !important;
-        min-height: 180px !important;
+        padding: 1.05rem 1.05rem 1.15rem !important;
+        min-height: 175px !important;
         margin-bottom: 18px;
         border-radius: 1.5rem;
       }
+      .shop-card-content {
+        flex-direction: row;
+        align-items: stretch;
+        gap: 0.85rem;
+      }
       .shop-card-image-container {
-        height: 110px !important;
+        width: 40%;
+        min-width: 128px;
+        max-width: 160px;
+        aspect-ratio: 4 / 3;
+        height: auto !important;
         border-radius: 1rem !important;
-        margin-bottom: 12px;
+        margin-bottom: 0;
+      }
+      .shop-card-image-container img {
+        height: 100%;
+        width: 100%;
+        object-fit: cover;
+      }
+      .shop-card-body {
+        gap: 0.55rem;
+        align-items: flex-start;
       }
       .shop-tags-container {
-        margin-bottom: 10px;
+        gap: 0.35rem 0.5rem;
+        margin-bottom: 4px;
+      }
+      .shop-tag {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
       }
       .shop-tag {
         font-size: 12px !important;
-        padding: 6px 10px !important;
+        padding: 5.5px 10px !important;
         border-radius: 10px !important;
-        margin-inline-end: 6px;
-        margin-bottom: 4px;
         box-shadow: 0 2px 6px rgba(0,0,0,0.08);
       }
       .shop-name {
@@ -168,8 +224,13 @@
         margin-bottom: 6px !important;
       }
       .shop-address {
-        font-size: 0.85rem !important;
-        margin-bottom: 12px !important;
+        font-size: 0.82rem !important;
+        line-height: 1.6;
+        margin-bottom: 4px !important;
+      }
+      .shop-phone {
+        justify-content: flex-start;
+        font-size: 0.78rem;
       }
       .shop-entry-btn {
         width: 100% !important;
@@ -179,12 +240,15 @@
         font-weight: 800 !important;
         background: linear-gradient(90deg, #10b981, #0ea5e9) !important;
         box-shadow: 0 4px 12px rgba(16,185,129,0.3) !important;
-        margin-top: 8px;
+        margin-top: 10px;
         transition: all 0.2s;
       }
       .shop-entry-btn:active {
         transform: scale(0.98);
         box-shadow: 0 2px 8px rgba(16,185,129,0.4) !important;
+      }
+      .shop-card-spacer {
+        display: none;
       }
 
       /* Area Buttons */
@@ -506,28 +570,31 @@
         const card = document.createElement('div');
         card.className = 'shop-card group transition-all duration-200 relative hover:-translate-y-1 hover:shadow-2xl';
         card.innerHTML = `
-          <div class="shop-card-image-container relative w-full h-36 sm:h-44 mb-4 rounded-xl overflow-hidden flex items-center justify-center
-                      bg-gradient-to-tr from-[#e0fdfa] to-[#e0f7fa] border-2 border-[#10b98112] group-hover:border-[#10b98144] shadow">
-            ${shop.boardImage
-              ? `<img src="${shop.boardImage}" class="object-cover w-full h-full transition-all duration-200 group-hover:scale-105" alt="${shop.storename}" loading="lazy"/>`
-              : `<img src="${shop.banner || 'assets/images/shop-default.png'}" class="object-cover w-full h-full opacity-90 transition-all duration-200 group-hover:scale-105" alt="${shop.storename}" loading="lazy"/>`
-            }
-            <span class="absolute top-2 left-2 bg-[#10b981] text-white text-xs font-bold px-2 py-1 rounded-full shadow group-hover:bg-[#0ea5e9] transition-all duration-150">جدید</span>
+          <div class="shop-card-content">
+            <div class="shop-card-image-container relative h-36 sm:h-44 bg-gradient-to-tr from-[#e0fdfa] to-[#e0f7fa] border-2 border-[#10b98112] group-hover:border-[#10b98144] shadow">
+              ${shop.boardImage
+                ? `<img src="${shop.boardImage}" class="object-cover w-full h-full transition-all duration-200 group-hover:scale-105" alt="${shop.storename}" loading="lazy"/>`
+                : `<img src="${shop.banner || 'assets/images/shop-default.png'}" class="object-cover w-full h-full opacity-90 transition-all duration-200 group-hover:scale-105" alt="${shop.storename}" loading="lazy"/>`
+              }
+              <span class="absolute top-2 left-2 bg-[#10b981] text-white text-xs font-bold px-2 py-1 rounded-full shadow group-hover:bg-[#0ea5e9] transition-all duration-150">جدید</span>
+            </div>
+            <div class="shop-card-body">
+              <div class="shop-tags-container w-full">
+                <span class="shop-tag inline-block bg-[#0ea5e9]/10 text-[#0ea5e9] text-[12px] font-extrabold px-2 py-1 rounded-full">${areaName}</span>
+                <span class="shop-tag inline-block bg-[#10b981]/10 text-[#10b981] text-[12px] font-extrabold px-2 py-1 rounded-full">${shop.category || ''}</span>
+              </div>
+              <h4 class="shop-name font-bold text-base sm:text-lg text-[#10b981] text-right sm:text-center lg:text-right mb-1 sm:mb-2 truncate w-full group-hover:text-[#0ea5e9] transition-all">${shop.storename}</h4>
+              <div class="shop-address text-[#13bfa4] font-extrabold text-sm text-right sm:text-center lg:text-right">${shop.address || ''}</div>
+              ${shop.phone ? `<div class="shop-phone text-gray-400 text-xs font-bold flex items-center gap-1">
+                <svg class="phone-icon" fill="none" viewBox="0 0 24 24"><path d="M6.62 10.79a15.054 15.054 0 006.59 6.59l2.2-2.2a1.003 1.003 0 011.01-.24c1.12.37 2.33.57 3.58.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1C10.07 21 3 13.93 3 5c0-.55.45-1 1-1h3.01c.55 0 1 .45 1 1 0 1.25.2 2.46.57 3.59a1 1 0 01-.24 1.01l-2.2 2.19z" fill="#10b981"/></svg>
+                ${shop.phone}
+              </div>` : ''}
+              <div class="shop-card-spacer"></div>
+              <a href="shop.html?shopurl=${shop.shopurl}" class="shop-entry-btn w-full inline-block bg-gradient-to-l from-[#10b981] to-[#0ea5e9] hover:from-[#0ea5e9] hover:to-[#10b981] rounded-full px-4 py-2 mt-3 text-white font-extrabold text-sm shadow transition-all duration-200 text-center">
+                ورود به فروشگاه
+              </a>
+            </div>
           </div>
-          <div class="shop-tags-container w-full flex items-center justify-between mb-2">
-            <span class="shop-tag inline-block bg-[#0ea5e9]/10 text-[#0ea5e9] text-[12px] font-extrabold px-2 py-1 rounded-full">${areaName}</span>
-            <span class="shop-tag inline-block bg-[#10b981]/10 text-[#10b981] text-[12px] font-extrabold px-2 py-1 rounded-full">${shop.category || ''}</span>
-          </div>
-          <h4 class="shop-name font-bold text-base sm:text-lg text-[#10b981] text-center mb-2 truncate w-full group-hover:text-[#0ea5e9] transition-all">${shop.storename}</h4>
-          <div class="shop-address text-[#13bfa4] font-extrabold text-sm mb-1">${shop.address || ''}</div>
-          ${shop.phone ? `<div class="text-gray-400 text-xs font-bold mt-1 flex items-center gap-1 justify-center">
-            <svg class="phone-icon" fill="none" viewBox="0 0 24 24"><path d="M6.62 10.79a15.054 15.054 0 006.59 6.59l2.2-2.2a1.003 1.003 0 011.01-.24c1.12.37 2.33.57 3.58.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1C10.07 21 3 13.93 3 5c0-.55.45-1 1-1h3.01c.55 0 1 .45 1 1 0 1.25.2 2.46.57 3.59a1 1 0 01-.24 1.01l-2.2 2.19z" fill="#10b981"/></svg>
-            ${shop.phone}
-          </div>` : ''}
-          <div class="flex-1"></div>
-          <a href="shop.html?shopurl=${shop.shopurl}" class="shop-entry-btn w-full inline-block bg-gradient-to-l from-[#10b981] to-[#0ea5e9] hover:from-[#0ea5e9] hover:to-[#10b981] rounded-full px-4 py-2 mt-3 text-white font-extrabold text-sm shadow transition-all duration-200 text-center">
-            ورود به فروشگاه
-          </a>
         `;
         list.appendChild(card);
       });
