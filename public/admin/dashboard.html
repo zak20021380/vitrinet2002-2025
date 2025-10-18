@@ -921,10 +921,72 @@ tr:last-child td {
   color: #64748b;
   line-height: 1.6;
 }
+.seller-score-message {
+  margin-top: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+.seller-score-message label {
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: #0f172a;
+}
+.seller-score-message textarea {
+  width: 100%;
+  min-height: 88px;
+  border-radius: 0.9rem;
+  border: 1px solid #bae6fd;
+  background: #fff;
+  font-family: inherit;
+  font-size: 0.95rem;
+  padding: 0.6rem 0.8rem;
+  transition: border-color .15s ease, box-shadow .15s ease;
+  resize: vertical;
+}
+.seller-score-message textarea:focus {
+  border-color: #0ea5e9;
+  box-shadow: 0 0 0 3px rgba(14,165,233,.1);
+  outline: none;
+}
+.seller-score-message-hint {
+  font-size: 0.75rem;
+  color: #475569;
+  line-height: 1.7;
+}
 .seller-score-note-display {
   display: flex;
   flex-direction: column;
   gap: 0.35rem;
+}
+.seller-score-message-display {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  margin-top: 0.9rem;
+  padding: 0.85rem 1rem;
+  border-radius: 0.9rem;
+  background: #ecfeff;
+  border: 1px solid #bae6fd;
+}
+.seller-score-message-display.is-empty {
+  background: #f8fafc;
+  border-style: dashed;
+  color: #64748b;
+}
+.seller-score-message-display.is-empty .seller-score-message-title,
+.seller-score-message-display.is-empty .seller-message-text {
+  color: #64748b;
+}
+.seller-score-message-title {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #0f172a;
+}
+.seller-message-text {
+  font-size: 0.9rem;
+  color: #0f172a;
+  line-height: 1.7;
 }
 .seller-score-note-title {
   font-size: 0.78rem;
@@ -2375,6 +2437,9 @@ function parsePerformancePayload(payload) {
   const note = typeof payload.adminScoreNote === 'string'
     ? payload.adminScoreNote
     : (typeof payload.note === 'string' ? payload.note : '');
+  const publicMessage = typeof payload.adminScoreMessage === 'string'
+    ? payload.adminScoreMessage
+    : (typeof payload.publicMessage === 'string' ? payload.publicMessage : '');
   const meta = {
     sellerId,
     shopurl,
@@ -2388,7 +2453,9 @@ function parsePerformancePayload(payload) {
     canStay: payload.canStay !== false,
     message: payload.message || '',
     adminScoreNote: note,
-    note
+    note,
+    adminScoreMessage: publicMessage,
+    publicMessage
   };
 
   const keyCandidate = payload.sellerKey || sellerId || (shopurl ? `shopurl:${shopurl}` : '');
@@ -2458,13 +2525,16 @@ async function refreshSellerPerformanceMap() {
   }
 }
 
-async function setSellerScoreByKey(key, value, note) {
+async function setSellerScoreByKey(key, value, note, message) {
   const normalised = normaliseScoreKey(key);
   if (!normalised) throw new Error('شناسه فروشنده برای ثبت نمره معتبر نیست.');
 
   const body = { score: value };
   if (typeof note === 'string') {
     body.note = note;
+  }
+  if (typeof message === 'string') {
+    body.message = message;
   }
 
   const res = await fetch(`${API_BASE}/sellers/performance/${encodeURIComponent(normalised)}`, {
@@ -2494,9 +2564,9 @@ async function setSellerScoreByKey(key, value, note) {
   return meta;
 }
 
-async function setSellerScoreForShop(shop, value, note) {
+async function setSellerScoreForShop(shop, value, note, message) {
   const key = resolveSellerKeyFromShop(shop);
-  return key ? setSellerScoreByKey(key, value, note) : null;
+  return key ? setSellerScoreByKey(key, value, note, message) : null;
 }
 
 async function clearSellerScoreByKey(key) {
@@ -4151,11 +4221,21 @@ async function showSellerModal (shop) {
     : (performanceMeta && typeof performanceMeta.adminScoreNote === 'string'
       ? performanceMeta.adminScoreNote
       : '');
+  const existingAdminMessage = performanceMeta && typeof performanceMeta.adminScoreMessage === 'string'
+    ? performanceMeta.adminScoreMessage
+    : (performanceMeta && typeof performanceMeta.publicMessage === 'string'
+      ? performanceMeta.publicMessage
+      : '');
   const defaultNoteMessage = 'یادداشتی ثبت نشده است.';
+  const defaultMessageText = 'پیامی برای فروشنده ثبت نشده است.';
   const noteDisplayHtml = existingAdminNote
     ? formatNoteForDisplay(existingAdminNote)
     : escapeHtml(defaultNoteMessage);
   const noteValueForInput = escapeHtml(existingAdminNote);
+  const messageDisplayHtml = existingAdminMessage
+    ? formatNoteForDisplay(existingAdminMessage)
+    : escapeHtml(defaultMessageText);
+  const messageValueForInput = escapeHtml(existingAdminMessage);
 
   /* ---------- رندر اولیه ---------- */
   overlay.innerHTML = `
@@ -4210,6 +4290,11 @@ async function showSellerModal (shop) {
           <textarea id="sellerScoreNote" placeholder="نکات ارزیابی را وارد کنید…">${noteValueForInput}</textarea>
           <p class="seller-score-note-hint">این یادداشت فقط برای تیم ادمین نمایش داده می‌شود و به فروشنده ارسال نخواهد شد.</p>
         </div>
+        <div class="seller-score-message">
+          <label for="sellerScoreMessage">پیام قابل نمایش برای فروشنده</label>
+          <textarea id="sellerScoreMessage" placeholder="این پیام همراه با نمره برای فروشنده ارسال می‌شود…">${messageValueForInput}</textarea>
+          <p class="seller-score-message-hint">فروشنده متن این پیام را در بخش وضعیت عملکرد پنل خود مشاهده می‌کند.</p>
+        </div>
         <div class="seller-score-alert" id="sellerScoreAlert" style="display:none;"></div>
         <div class="seller-score-status" id="sellerScoreStatus">
           <div class="seller-score-status-header">
@@ -4218,6 +4303,10 @@ async function showSellerModal (shop) {
           </div>
           <p class="seller-status-text" id="sellerStatusText">${statusMessage}</p>
           <p class="seller-status-note ${performanceMeta ? (performanceMeta.canStay ? 'status-eligible' : 'status-ineligible') : 'status-neutral'}" id="sellerStatusNote">${eligibilityNote}</p>
+          <div class="seller-score-message-display" id="sellerMessageDisplay">
+            <span class="seller-score-message-title">آخرین پیام برای فروشنده</span>
+            <p class="seller-message-text" id="sellerMessageText">${messageDisplayHtml}</p>
+          </div>
           <div class="seller-score-note-display" id="sellerNoteDisplay">
             <span class="seller-score-note-title">آخرین یادداشت ثبت‌شده</span>
             <p class="seller-note-text" id="sellerNoteText">${noteDisplayHtml}</p>
@@ -4267,13 +4356,16 @@ async function showSellerModal (shop) {
   const scoreClearBtn = document.getElementById('clearSellerScoreBtn');
   const scoreAlertEl = document.getElementById('sellerScoreAlert');
   const sellerScoreNoteEl = document.getElementById('sellerScoreNote');
+  const sellerScoreMessageEl = document.getElementById('sellerScoreMessage');
   const statusElements = {
     badge: document.getElementById('sellerStatusBadge'),
     text: document.getElementById('sellerStatusText'),
     note: document.getElementById('sellerStatusNote'),
     updated: document.getElementById('sellerStatusUpdated'),
     noteText: document.getElementById('sellerNoteText'),
-    noteContainer: document.getElementById('sellerNoteDisplay')
+    noteContainer: document.getElementById('sellerNoteDisplay'),
+    messageText: document.getElementById('sellerMessageText'),
+    messageContainer: document.getElementById('sellerMessageDisplay')
   };
 
   if (scoreInputEl && scoreValueEl) {
@@ -4285,6 +4377,13 @@ async function showSellerModal (shop) {
     if (!info) return '';
     if (typeof info.note === 'string') return info.note;
     if (typeof info.adminScoreNote === 'string') return info.adminScoreNote;
+    return '';
+  };
+
+  const resolveMessageValue = (info) => {
+    if (!info) return '';
+    if (typeof info.adminScoreMessage === 'string') return info.adminScoreMessage;
+    if (typeof info.publicMessage === 'string') return info.publicMessage;
     return '';
   };
 
@@ -4301,7 +4400,26 @@ async function showSellerModal (shop) {
     }
   };
 
+  const updateMessageUI = (value) => {
+    const messageValue = typeof value === 'string' ? value : '';
+    if (sellerScoreMessageEl) sellerScoreMessageEl.value = messageValue;
+    if (statusElements.messageText) {
+      statusElements.messageText.innerHTML = messageValue
+        ? formatNoteForDisplay(messageValue)
+        : escapeHtml(defaultMessageText);
+    }
+    if (statusElements.messageContainer) {
+      statusElements.messageContainer.style.display = 'flex';
+      if (messageValue) {
+        statusElements.messageContainer.classList.remove('is-empty');
+      } else {
+        statusElements.messageContainer.classList.add('is-empty');
+      }
+    }
+  };
+
   updateNoteUI(existingAdminNote);
+  updateMessageUI(existingAdminMessage);
 
   const applyStatusMeta = (meta) => {
     const info = meta || null;
@@ -4328,6 +4446,7 @@ async function showSellerModal (shop) {
         : 'هنوز نمره‌ای ثبت نشده است.';
     }
     updateNoteUI(resolveNoteValue(info));
+    updateMessageUI(resolveMessageValue(info));
   };
 
   applyStatusMeta(performanceMeta);
@@ -4357,10 +4476,15 @@ async function showSellerModal (shop) {
       }
       const sourceValue = scoreInputEl ? scoreInputEl.value : initialAdminScore;
       const noteValue = sellerScoreNoteEl ? sellerScoreNoteEl.value : '';
+      const messageValue = sellerScoreMessageEl ? sellerScoreMessageEl.value : '';
+      if (!messageValue.trim()) {
+        showScoreAlert('لطفاً دلیل نمره را برای فروشنده بنویسید.', 'error');
+        return;
+      }
       scoreSaveBtn.disabled = true;
       scoreSaveBtn.classList.add('is-loading');
       try {
-        const meta = await setSellerScoreByKey(sellerScoreKey, sourceValue, noteValue);
+        const meta = await setSellerScoreByKey(sellerScoreKey, sourceValue, noteValue, messageValue);
         performanceMeta = meta || performanceMeta;
         const finalScore = meta && meta.adminScore != null
           ? meta.adminScore
@@ -4373,6 +4497,7 @@ async function showSellerModal (shop) {
           applyStatusMeta(meta);
         } else {
           updateNoteUI(noteValue);
+          updateMessageUI(messageValue);
         }
         renderSellers();
         showScoreAlert((meta && meta.message) || 'نمره ثبت شد.');
@@ -4404,6 +4529,7 @@ async function showSellerModal (shop) {
           applyStatusMeta(meta);
         } else {
           updateNoteUI('');
+          updateMessageUI('');
         }
         renderSellers();
         showScoreAlert((meta && meta.message) || 'نمره حذف شد.');

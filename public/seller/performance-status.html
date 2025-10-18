@@ -24,6 +24,8 @@
   .score-card.status-neutral { background: #f8fafc; border-color: #e2e8f0; }
   .score-card.status-neutral .label { color: #0f172a; }
   .score-card.status-neutral .status { color: #0ea5e9; }
+  .greeting-line { font-size: 1rem; font-weight: 800; color: #0f172a; margin: 0; }
+  .greeting-line span { color: #0ea5e9; }
   .summary-card {
     background: #fff;
     border-radius: 1rem;
@@ -34,6 +36,33 @@
   }
   .summary-card h3 { font-weight: 800; color: #0ea5e9; font-size: 1.1rem; margin-bottom: .6rem; }
   .summary-card p { color: #475569; margin: 0; }
+  .message-card {
+    background: #fff;
+    border-radius: 1rem;
+    box-shadow: 0 8px 28px rgba(14,165,233,.12);
+    padding: 22px 24px;
+    border: 1px solid #bae6fd;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+  .message-card[hidden] { display: none; }
+  .message-card-header { display: flex; align-items: flex-start; gap: 1rem; }
+  .message-card-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 14px;
+    background: #e0f2fe;
+    color: #0284c7;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    box-shadow: inset 0 0 0 1px rgba(2,132,199,.1);
+  }
+  .message-card-title { margin: 0; font-weight: 800; color: #0284c7; font-size: 1.05rem; }
+  .message-card-meta { margin: 0.25rem 0 0; font-size: .85rem; color: #64748b; }
+  .message-card-text { margin: 0; font-size: .95rem; line-height: 1.9; color: #0f172a; }
   .error-box {
     background: #fee2e2;
     border: 1px solid #fecaca;
@@ -46,12 +75,16 @@
   @media (max-width: 640px) {
     .performance-wrap { padding: 1rem 0.75rem; }
     .score-card { padding: 20px; }
+    .message-card { padding: 18px; gap: 0.85rem; }
+    .message-card-icon { width: 40px; height: 40px; font-size: 1.3rem; }
+    .greeting-line { font-size: .95rem; }
   }
 </style>
 <div class="performance-wrap max-w-3xl mx-auto py-6 space-y-6" id="performance-root">
   <header class="text-center space-y-2">
     <h2 class="text-2xl md:text-3xl font-extrabold text-[#10b981]">وضعیت عملکرد فروشگاه</h2>
-    <p class="text-gray-600 text-sm">در این بخش می‌تونی نتیجه ارزیابی تیم ادمین را ببینی و از وضعیت ادامه همکاری مطلع بشی.</p>
+    <p class="greeting-line" id="performance-greeting">سلام <span id="performance-greeting-name">فروشنده</span> عزیز!</p>
+    <p class="text-gray-600 text-sm">در این بخش می‌تونی نتیجه ارزیابی تیم ادمین را ببینی، پیام اختصاصی آن‌ها را بخوانی و از وضعیت ادامه همکاری مطلع بشی.</p>
   </header>
   <div class="score-card status-neutral" id="performance-card">
     <div class="score" id="performance-score">--<span class="score-suffix">/100</span></div>
@@ -59,6 +92,16 @@
     <div class="status" id="performance-status">به محض ثبت نمره توسط تیم ادمین، وضعیت عملکردت نمایش داده می‌شود.</div>
     <div class="updated" id="performance-updated">آخرین بروزرسانی: —</div>
   </div>
+  <section class="message-card" id="performance-message-card" hidden>
+    <div class="message-card-header">
+      <div class="message-card-icon" aria-hidden="true">💬</div>
+      <div>
+        <h3 class="message-card-title">پیام تیم ادمین برای <span id="performance-message-name">شما</span></h3>
+        <p class="message-card-meta" id="performance-message-updated"></p>
+      </div>
+    </div>
+    <p class="message-card-text" id="performance-message-text"></p>
+  </section>
   <div class="summary-card" id="performance-summary">
     <h3>جمع‌بندی وضعیت</h3>
     <p id="performance-summary-text">پس از ثبت نمره، توصیه‌های لازم برای حفظ یا بهبود حضور در ویترینت اینجا نمایش داده می‌شود.</p>

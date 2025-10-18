@@ -13,10 +13,34 @@
     }
   }
 
+  function escapeHtml(value) {
+    if (value === null || value === undefined) return '';
+    return String(value)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#039;');
+  }
+
+  function formatMultiline(value) {
+    if (!value) return '';
+    return escapeHtml(value).replace(/\n/g, '<br>');
+  }
+
   function applyState(refs, state) {
     const severity = state && state.severity ? state.severity : 'neutral';
+    const displayName = state && state.displayName ? state.displayName : '';
+    const addressedName = displayName || 'فروشنده';
     if (refs.card) {
       refs.card.className = `score-card status-${severity}`;
+    }
+
+    if (refs.greetingName) {
+      refs.greetingName.textContent = addressedName;
+    }
+    if (refs.messageName) {
+      refs.messageName.textContent = addressedName;
     }
 
     if (refs.scoreEl) {
@@ -31,9 +55,10 @@
       refs.labelEl.textContent = state && state.statusLabel ? state.statusLabel : 'در انتظار ارزیابی';
     }
     if (refs.statusEl) {
+      const greetingPrefix = displayName ? `${displayName} عزیز، ` : '';
       refs.statusEl.textContent = state && state.statusMessage
-        ? state.statusMessage
-        : 'به محض ثبت نمره توسط تیم ادمین، وضعیت عملکردت نمایش داده می‌شود.';
+        ? `${greetingPrefix}${state.statusMessage}`
+        : `${greetingPrefix}به محض ثبت نمره توسط تیم ادمین، وضعیت عملکردت نمایش داده می‌شود.`;
     }
     if (refs.updatedEl) {
       refs.updatedEl.textContent = state && state.updatedAt
@@ -43,18 +68,38 @@
 
     if (refs.summaryEl) {
       let summaryMessage = 'پس از ثبت نمره، توصیه‌های لازم برای حفظ یا بهبود حضور در ویترینت نمایش داده می‌شود.';
+      const summaryPrefix = displayName ? `${displayName} عزیز، ` : '';
       if (!state || state.adminScore == null) {
-        summaryMessage = 'هنوز امتیازی برای شما ثبت نشده است. پس از ارزیابی تیم ادمین، نتیجه و راهنمایی‌های لازم اینجا قرار می‌گیرد.';
+        summaryMessage = `${summaryPrefix}هنوز امتیازی برای شما ثبت نشده است. پس از ارزیابی تیم ادمین، نتیجه و راهنمایی‌های لازم اینجا قرار می‌گیرد.`;
       } else if (state.canStay === false) {
-        summaryMessage = '⛔ با نمره فعلی امکان ادامه فعالیت در ویترینت وجود ندارد. لطفاً برای بررسی مجدد با پشتیبانی تماس بگیر یا اقدامات اصلاحی پیشنهاد شده را انجام بده.';
+        summaryMessage = `${summaryPrefix}⛔ با نمره فعلی امکان ادامه فعالیت در ویترینت وجود ندارد. لطفاً برای بررسی مجدد با پشتیبانی تماس بگیر یا اقدامات اصلاحی پیشنهاد شده را انجام بده.`;
       } else if (severity === 'warning') {
-        summaryMessage = '⚠️ شما واجد شرایط ادامه همکاری هستید، اما لازم است در ارائه خدمات و رضایت مشتریان بهبود ایجاد کنید تا ریسک خروج از ویترینت کاهش یابد.';
+        summaryMessage = `${summaryPrefix}⚠️ شما واجد شرایط ادامه همکاری هستید، اما لازم است در ارائه خدمات و رضایت مشتریان بهبود ایجاد کنید تا ریسک خروج از ویترینت کاهش یابد.`;
       } else if (severity === 'danger') {
-        summaryMessage = '⛔ امتیاز شما کمتر از حد قابل قبول است و باید فوراً مشکلات را برطرف کنید. برای دریافت راهنمایی بیشتر با تیم پشتیبانی هماهنگ شوید.';
+        summaryMessage = `${summaryPrefix}⛔ امتیاز شما کمتر از حد قابل قبول است و باید فوراً مشکلات را برطرف کنید. برای دریافت راهنمایی بیشتر با تیم پشتیبانی هماهنگ شوید.`;
       } else {
-        summaryMessage = '✅ عملکرد شما مورد تأیید است. برای حفظ این وضعیت، روند فعلی را ادامه بده و همواره بازخورد مشتریان را بررسی کن.';
+        summaryMessage = `${summaryPrefix}✅ عملکرد شما مورد تأیید است. برای حفظ این وضعیت، روند فعلی را ادامه بده و همواره بازخورد مشتریان را بررسی کن.`;
       }
       refs.summaryEl.textContent = summaryMessage;
+    }
+
+    if (refs.messageCard) {
+      const message = state && typeof state.adminScoreMessage === 'string'
+        ? state.adminScoreMessage.trim()
+        : '';
+      if (message) {
+        if (refs.messageText) {
+          refs.messageText.innerHTML = formatMultiline(message);
+        }
+        if (refs.messageUpdated) {
+          refs.messageUpdated.textContent = state && state.updatedAt
+            ? `ارسال شده در ${formatDateTime(state.updatedAt)}`
+            : '';
+        }
+        refs.messageCard.hidden = false;
+      } else {
+        refs.messageCard.hidden = true;
+      }
     }
   }
 
@@ -95,7 +140,12 @@
       labelEl: root.querySelector('#performance-label'),
       statusEl: root.querySelector('#performance-status'),
       updatedEl: root.querySelector('#performance-updated'),
-      summaryEl: root.querySelector('#performance-summary-text')
+      summaryEl: root.querySelector('#performance-summary-text'),
+      greetingName: root.querySelector('#performance-greeting-name'),
+      messageCard: root.querySelector('#performance-message-card'),
+      messageText: root.querySelector('#performance-message-text'),
+      messageUpdated: root.querySelector('#performance-message-updated'),
+      messageName: root.querySelector('#performance-message-name')
     };
 
     try {
