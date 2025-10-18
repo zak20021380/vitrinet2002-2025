@@ -845,6 +845,138 @@ tr:last-child td {
   padding: 0.6rem 1rem; margin-top: 1rem; font-weight: 500; text-align: center;
 }
 
+.seller-score-block {
+  margin-top: 1.5rem;
+  padding: 1.2rem 1.4rem 1.35rem;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 1.1rem;
+}
+.seller-score-block .seller-modal-label {
+  display: block;
+  margin-bottom: 0.85rem;
+  color: #0f172a;
+}
+.seller-score-range {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+.seller-score-range input[type=range] {
+  flex: 1 1 auto;
+  accent-color: #10b981;
+}
+.seller-score-value {
+  min-width: 4.5rem;
+  text-align: center;
+  font-weight: 800;
+  font-size: 1.25rem;
+  color: #0ea5e9;
+  background: #ecfdf5;
+  border-radius: 0.9rem;
+  padding: 0.4rem 0.7rem;
+}
+.seller-score-actions {
+  display: flex;
+  gap: 0.75rem;
+  margin-top: 1rem;
+  flex-wrap: wrap;
+}
+.seller-score-actions button {
+  flex: 1 1 140px;
+  padding: 0.6rem 1rem;
+  border-radius: 0.9rem;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  transition: background .18s ease, color .18s ease, transform .18s ease;
+}
+.seller-score-actions .score-save-btn {
+  background: linear-gradient(135deg,#10b981 0%,#0ea5e9 100%);
+  color: #fff;
+}
+.seller-score-actions .score-save-btn:hover {
+  transform: translateY(-1px);
+  background: linear-gradient(135deg,#059669 0%,#0284c7 100%);
+}
+.seller-score-actions .score-clear-btn {
+  background: #f1f5f9;
+  color: #475569;
+}
+.seller-score-actions .score-clear-btn:hover {
+  background: #e2e8f0;
+}
+.seller-score-actions .score-clear-btn:disabled {
+  opacity: .55;
+  cursor: not-allowed;
+  transform: none;
+}
+.seller-score-hint {
+  font-size: 0.82rem;
+  color: #64748b;
+  margin-top: 0.85rem;
+  line-height: 1.7;
+}
+.seller-score-alert {
+  margin-top: 0.9rem;
+  border-radius: 0.95rem;
+  padding: 0.65rem 0.95rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  display: none;
+}
+.seller-score-alert.is-success {
+  background: #ecfdf5;
+  color: #047857;
+  border: 1px solid #bbf7d0;
+}
+.seller-score-alert.is-error {
+  background: #fee2e2;
+  color: #b91c1c;
+  border: 1px solid #fecaca;
+}
+
+.seller-score-cell {
+  text-align: center;
+}
+.seller-score-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  min-width: 102px;
+  padding: 0.38rem 0.85rem;
+  border-radius: 9999px;
+  font-size: 0.86rem;
+  font-weight: 600;
+  background: #f8fafc;
+  color: #475569;
+  border: 1px solid #e2e8f0;
+  transition: transform .18s ease, box-shadow .18s ease;
+}
+.seller-score-badge.has-score {
+  background: #ecfdf5;
+  border-color: #bbf7d0;
+  color: #047857;
+}
+.seller-score-badge.has-score strong {
+  font-weight: 800;
+  font-size: 1.02rem;
+}
+.seller-score-badge span.score-suffix {
+  font-size: 0.75rem;
+  opacity: .75;
+}
+.seller-score-badge.no-score {
+  background: #f1f5f9;
+  border-color: #e2e8f0;
+  color: #64748b;
+}
+.seller-score-badge:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 10px 26px rgba(15,118,110,.18);
+}
+
 
 
 
@@ -1727,7 +1859,7 @@ tr:last-child td {
         <thead>
           <tr>
             <th>نام فروشگاه</th><th>نام صاحب فروشگاه</th><th>آدرس فروشگاه</th>
-            <th>لینک فروشگاه</th><th>تعداد محصولات</th><th>بازدید</th><th>عملیات</th>
+            <th>لینک فروشگاه</th><th>تعداد محصولات</th><th>بازدید</th><th>نمره ادمین</th><th>عملیات</th>
           </tr>
         </thead>
         <tbody></tbody>
@@ -2000,6 +2132,89 @@ let productsList = [];
 let productsSortMode = 'newest';  // حالت پیش‌فرض مرتب‌سازی
 let productSearchQuery = '';      // کوئری جستجو (برای فیلتر)
 
+const SELLER_SCORE_STORAGE_KEY = 'adminSellerScores';
+let sellerScores = loadSellerScores();
+
+function loadSellerScores() {
+  if (typeof window === 'undefined' || !window.localStorage) return {};
+  try {
+    const raw = window.localStorage.getItem(SELLER_SCORE_STORAGE_KEY);
+    if (!raw) return {};
+    const parsed = JSON.parse(raw);
+    return parsed && typeof parsed === 'object' ? parsed : {};
+  } catch (err) {
+    console.warn('⚠️ خطا در خواندن نمره فروشنده‌ها:', err);
+    return {};
+  }
+}
+
+function persistSellerScores() {
+  if (typeof window === 'undefined' || !window.localStorage) return;
+  try {
+    window.localStorage.setItem(SELLER_SCORE_STORAGE_KEY, JSON.stringify(sellerScores));
+  } catch (err) {
+    console.warn('⚠️ خطا در ذخیره نمره فروشنده‌ها:', err);
+  }
+}
+
+function normaliseScoreKey(id) {
+  if (!id) return '';
+  return toIdString(id);
+}
+
+function resolveSellerKeyFromShop(shop) {
+  if (!shop) return '';
+  const candidate =
+    shop._sid ||
+    shop.sellerId ||
+    shop.seller_id ||
+    (shop.shopurl ? `shopurl:${shop.shopurl}` : '') ||
+    shop._id;
+  return normaliseScoreKey(candidate);
+}
+
+function getSellerScoreByKey(key) {
+  const normalised = normaliseScoreKey(key);
+  if (!normalised) return null;
+  return Object.prototype.hasOwnProperty.call(sellerScores, normalised)
+    ? sellerScores[normalised]
+    : null;
+}
+
+function getSellerScoreForShop(shop) {
+  const key = resolveSellerKeyFromShop(shop);
+  return key ? getSellerScoreByKey(key) : null;
+}
+
+function setSellerScoreByKey(key, value) {
+  const normalised = normaliseScoreKey(key);
+  if (!normalised) return null;
+  const numeric = Math.round(Number(value));
+  if (Number.isNaN(numeric)) return null;
+  const clamped = Math.max(0, Math.min(100, numeric));
+  sellerScores[normalised] = clamped;
+  persistSellerScores();
+  return clamped;
+}
+
+function setSellerScoreForShop(shop, value) {
+  const key = resolveSellerKeyFromShop(shop);
+  return key ? setSellerScoreByKey(key, value) : null;
+}
+
+function clearSellerScoreByKey(key) {
+  const normalised = normaliseScoreKey(key);
+  if (!normalised) return;
+  if (Object.prototype.hasOwnProperty.call(sellerScores, normalised)) {
+    delete sellerScores[normalised];
+    persistSellerScores();
+  }
+}
+
+function clearSellerScoreForShop(shop) {
+  const key = resolveSellerKeyFromShop(shop);
+  if (key) clearSellerScoreByKey(key);
+}
 
 let messagesList = [];
 
@@ -3462,7 +3677,7 @@ function renderSellers() {
   tbody.innerHTML = '';
 
   if (!shopsList.length) {
-    tbody.innerHTML = `<tr><td colspan="7" style="color:#888;text-align:center">هیچ فروشگاهی ثبت نشده است.</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="8" style="color:#888;text-align:center">هیچ فروشگاهی ثبت نشده است.</td></tr>`;
     return;
   }
 
@@ -3506,6 +3721,11 @@ function renderSellers() {
       ? `<a href="/shop.html?shopurl=${shop.shopurl}" target="_blank" style="color:#0ea5e9;text-decoration:underline">${shop.shopurl}</a>`
       : '-';
 
+    const sellerKey = resolveSellerKeyFromShop(shop);
+    const adminScore = sellerKey ? getSellerScoreByKey(sellerKey) : null;
+    const scoreBadge = adminScore != null
+      ? `<span class="seller-score-badge has-score"><strong>${adminScore}</strong><span class="score-suffix">/100</span></span>`
+      : '<span class="seller-score-badge no-score">ثبت نشده</span>';
     const sid = toIdString(shop.sellerId || shop.seller_id || shop._id || shop._sid || shop.shopurl);
     let tr = document.createElement('tr');
     tr.innerHTML = `
@@ -3515,6 +3735,7 @@ function renderSellers() {
       <td>${shopLink}</td>
       <td>${countProducts}</td>
       <td>${shop._visits}</td>
+      <td class="seller-cell seller-modal-trigger seller-score-cell" data-score-key="${sellerKey || ''}">${scoreBadge}</td>
       <td>
         <button class="action-btn delete">
           <i class="ri-delete-bin-line"></i> حذف
@@ -3533,7 +3754,7 @@ function renderSellers() {
   });
 
   if (!sellers.length) {
-    tbody.innerHTML = `<tr><td colspan="7" style="color:#888;text-align:center">هیچ فروشگاهی یافت نشد.</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="8" style="color:#888;text-align:center">هیچ فروشگاهی یافت نشد.</td></tr>`;
   }
 }
 
@@ -3567,6 +3788,10 @@ function showSellerModal (shop) {
   const phone     =
         shop.phone || shop.mobile ||
         shop.ownerPhone || shop.ownerMobile || '-';
+  const sellerScoreKey = resolveSellerKeyFromShop(shop);
+  const existingAdminScore = sellerScoreKey ? getSellerScoreByKey(sellerScoreKey) : null;
+  let hasExistingScore = existingAdminScore != null;
+  const initialAdminScore = hasExistingScore ? existingAdminScore : 75;
 
   /* ---------- رندر اولیه ---------- */
   overlay.innerHTML = `
@@ -3605,6 +3830,20 @@ function showSellerModal (shop) {
 
       <!-- ردیف پسورد حذف شد -->
 
+      <div class="seller-score-block" data-score-key="${sellerScoreKey || ''}">
+        <span class="seller-modal-label">نمره ارزیابی ادمین</span>
+        <div class="seller-score-range">
+          <input type="range" id="sellerScoreInput" min="0" max="100" step="1" value="${initialAdminScore}" aria-label="امتیاز عملکرد فروشنده">
+          <div class="seller-score-value" id="sellerScoreValue">${initialAdminScore}</div>
+        </div>
+        <div class="seller-score-actions">
+          <button type="button" class="score-save-btn" id="saveSellerScoreBtn">ثبت نمره</button>
+          <button type="button" class="score-clear-btn" id="clearSellerScoreBtn" ${hasExistingScore ? '' : 'disabled'}>حذف نمره</button>
+        </div>
+        <p class="seller-score-hint">نمره ۰ تا ۱۰۰ کیفیت همکاری فروشنده را از نگاه تیم ادمین نشان می‌دهد. پس از انتخاب مقدار، دکمه «ثبت نمره» را بزن.</p>
+        <div class="seller-score-alert" id="sellerScoreAlert" style="display:none;"></div>
+      </div>
+
       <form id="sellerMessageForm"
             class="seller-modal-form"
             data-seller-id="${sellerId}"
@@ -3620,6 +3859,67 @@ function showSellerModal (shop) {
     </div>`;
 
   overlay.style.display = 'flex';
+
+  const scoreInputEl = document.getElementById('sellerScoreInput');
+  const scoreValueEl = document.getElementById('sellerScoreValue');
+  const scoreSaveBtn = document.getElementById('saveSellerScoreBtn');
+  const scoreClearBtn = document.getElementById('clearSellerScoreBtn');
+  const scoreAlertEl = document.getElementById('sellerScoreAlert');
+
+  if (scoreInputEl && scoreValueEl) {
+    scoreInputEl.value = String(initialAdminScore);
+    scoreValueEl.textContent = String(initialAdminScore);
+  }
+
+  const showScoreAlert = (message, type = 'success') => {
+    if (!scoreAlertEl) return;
+    scoreAlertEl.textContent = message;
+    scoreAlertEl.classList.remove('is-success', 'is-error');
+    scoreAlertEl.classList.add(type === 'error' ? 'is-error' : 'is-success');
+    scoreAlertEl.style.display = 'block';
+    setTimeout(() => {
+      if (scoreAlertEl) scoreAlertEl.style.display = 'none';
+    }, 2800);
+  };
+
+  if (scoreInputEl) {
+    scoreInputEl.addEventListener('input', () => {
+      if (scoreValueEl) scoreValueEl.textContent = scoreInputEl.value;
+    });
+  }
+
+  if (scoreSaveBtn) {
+    scoreSaveBtn.addEventListener('click', () => {
+      if (!sellerScoreKey) {
+        showScoreAlert('شناسه فروشنده برای ثبت نمره یافت نشد.', 'error');
+        return;
+      }
+      const sourceValue = scoreInputEl ? scoreInputEl.value : initialAdminScore;
+      const savedScore = setSellerScoreByKey(sellerScoreKey, sourceValue);
+      if (savedScore == null) {
+        showScoreAlert('مقدار نمره معتبر نیست.', 'error');
+        return;
+      }
+      if (scoreValueEl) scoreValueEl.textContent = String(savedScore);
+      hasExistingScore = true;
+      if (scoreClearBtn) scoreClearBtn.disabled = false;
+      showScoreAlert('نمره با موفقیت ثبت شد.');
+      renderSellers();
+    });
+  }
+
+  if (scoreClearBtn) {
+    scoreClearBtn.addEventListener('click', () => {
+      if (!sellerScoreKey) return;
+      clearSellerScoreByKey(sellerScoreKey);
+      hasExistingScore = false;
+      if (scoreClearBtn) scoreClearBtn.disabled = true;
+      if (scoreInputEl) scoreInputEl.value = '50';
+      if (scoreValueEl) scoreValueEl.textContent = '50';
+      showScoreAlert('نمره ادمین حذف شد.');
+      renderSellers();
+    });
+  }
 
   /* ارسال پیام */
   document
