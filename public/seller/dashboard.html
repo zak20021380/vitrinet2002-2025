@@ -2595,7 +2595,14 @@ async function loadPerformanceStatus() {
   try {
     const res = await fetch('performance-status.html');
     if (!res.ok) throw new Error('خطا در دریافت محتوا');
-    container.innerHTML = await res.text();
+    const html = await res.text();
+    container.innerHTML = html;
+
+    const initPerformance = window.initSellerPerformanceStatus;
+    if (typeof initPerformance === 'function') {
+      const rootEl = container.querySelector('#performance-root');
+      initPerformance(rootEl || undefined);
+    }
   } catch (err) {
     console.error(err);
     container.innerHTML = '<div class="text-red-500 text-center py-8">مشکلی در بارگذاری وضعیت عملکرد پیش آمده.</div>';
@@ -2655,6 +2662,7 @@ async function loadPerformanceStatus() {
 
 
 
+<script src="performance-status.js"></script>
 <script src="dashboard-content.js"></script>
 
 
