@@ -379,12 +379,19 @@ function renderDefaultResults() {
   if (!searchElements.panel) return;
   const { trending, summary } = searchState;
   const typeSequence = ['shop', 'product', 'center', 'category'];
+  const trendingKeyMap = {
+    shop: 'shops',
+    product: 'products',
+    center: 'centers',
+    category: 'categories'
+  };
   let remainingSlots = MAX_VISIBLE_SEARCH_RESULTS;
   const groups = [];
 
   typeSequence.forEach(type => {
     if (remainingSlots <= 0) return;
-    const source = trending[type] || [];
+    const sourceKey = trendingKeyMap[type] || type;
+    const source = trending[sourceKey] || [];
     if (!source.length) return;
     const limitedItems = source.slice(0, remainingSlots);
     groups.push(renderGroup(type, limitedItems, []));
