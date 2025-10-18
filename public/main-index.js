@@ -32,6 +32,8 @@ const searchElements = {
   refreshBtn: document.getElementById('refreshSearchBtn')
 };
 
+const MAX_VISIBLE_SEARCH_RESULTS = 5;
+
 const searchState = {
   loading: false,
   loaderPromise: null,
@@ -376,11 +378,18 @@ function renderResultCard(item, rawTokens) {
 function renderDefaultResults() {
   if (!searchElements.panel) return;
   const { trending, summary } = searchState;
+  const typeSequence = ['shop', 'product', 'center', 'category'];
+  let remainingSlots = MAX_VISIBLE_SEARCH_RESULTS;
   const groups = [];
-  if (trending.shops.length) groups.push(renderGroup('shop', trending.shops, []));
-  if (trending.products.length) groups.push(renderGroup('product', trending.products, []));
-  if (trending.centers.length) groups.push(renderGroup('center', trending.centers, []));
-  if (trending.categories.length) groups.push(renderGroup('category', trending.categories, []));
+
+  typeSequence.forEach(type => {
+    if (remainingSlots <= 0) return;
+    const source = trending[type] || [];
+    if (!source.length) return;
+    const limitedItems = source.slice(0, remainingSlots);
+    groups.push(renderGroup(type, limitedItems, []));
+    remainingSlots -= limitedItems.length;
+  });
 
   if (searchElements.queryLabel) {
     searchElements.queryLabel.textContent = '';
@@ -400,7 +409,7 @@ function renderDefaultResults() {
   searchElements.panel.classList.remove('hidden');
 }
 
-function renderSearchResults(query, matches, rawTokens) {
+function renderSearchResults(query, matches, rawTokens, totalMatches = matches.length) {
   if (!searchElements.panel) return;
   const grouped = matches.reduce((acc, item) => {
     (acc[item.type] = acc[item.type] || []).push(item);
@@ -426,10 +435,14 @@ function renderSearchResults(query, matches, rawTokens) {
     searchElements.queryLabel.textContent = `«${query}»`;
   }
   if (searchElements.status) {
-    const total = matches.length;
-    searchElements.status.textContent = total
-      ? `${total} نتیجه مرتبط با «${query}» پیدا شد.`
-      : `نتیجه‌ای برای «${query}» پیدا نشد.`;
+    const displayed = matches.length;
+    if (totalMatches && totalMatches > displayed) {
+      searchElements.status.textContent = `${displayed} نتیجه از ${totalMatches} نتیجه مرتبط با «${query}» نمایش داده شد.`;
+    } else {
+      searchElements.status.textContent = displayed
+        ? `${displayed} نتیجه مرتبط با «${query}» پیدا شد.`
+        : `نتیجه‌ای برای «${query}» پیدا نشد.`;
+    }
   }
   searchElements.panel.classList.remove('hidden');
 }
@@ -481,7 +494,8 @@ async function handleSearch(query, { immediate = false } = {}) {
   }
 
   const matches = performSearch(normalizedTokens);
-  renderSearchResults(trimmed, matches, rawTokens);
+  const limitedMatches = matches.slice(0, MAX_VISIBLE_SEARCH_RESULTS);
+  renderSearchResults(trimmed, limitedMatches, rawTokens, matches.length);
 
   if (immediate && matches.length) {
     setTimeout(() => {
