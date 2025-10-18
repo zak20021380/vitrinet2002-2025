@@ -58,13 +58,56 @@
     }
 
     header {
-      background: rgba(255, 255, 255, 0.92);
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.95) 0%, rgba(241, 245, 249, 0.95) 100%);
       backdrop-filter: blur(22px);
-      border-bottom: 1px solid rgba(148, 163, 184, 0.12);
-      box-shadow: 0 18px 34px rgba(15, 23, 42, 0.08);
+      border-bottom: 1px solid rgba(148, 163, 184, 0.14);
+      box-shadow: 0 22px 44px rgba(15, 23, 42, 0.08);
       position: sticky;
       top: 0;
       z-index: 40;
+    }
+
+    .header-accent {
+      background: linear-gradient(90deg, rgba(14, 165, 233, 0.12), rgba(59, 130, 246, 0.12));
+      border-bottom: 1px solid rgba(148, 163, 184, 0.18);
+    }
+
+    .header-accent-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      padding: 0.45rem 0;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--primary);
+      flex-wrap: wrap;
+    }
+
+    .header-accent-links {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .header-accent-link {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.3rem;
+      padding: 0.35rem 0.85rem;
+      border-radius: 999px;
+      border: 1px solid rgba(29, 78, 216, 0.18);
+      background: rgba(255, 255, 255, 0.9);
+      color: var(--primary);
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .header-accent-link:hover,
+    .header-accent-link:focus-visible {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 24px rgba(29, 78, 216, 0.18);
+      outline: none;
     }
 
     .layout-width {
@@ -74,11 +117,18 @@
 
     .header-inner {
       display: grid;
-      grid-template-columns: auto 1fr auto;
+      grid-template-columns: minmax(0, auto) 1fr minmax(0, auto);
       align-items: center;
-      gap: 1.25rem;
-      padding: 1rem 0;
-      grid-template-areas: 'brand nav support';
+      gap: 1.5rem;
+      padding: 1.2rem 0;
+      grid-template-areas: 'brand nav actions';
+    }
+
+    .header-brand {
+      grid-area: brand;
+      display: flex;
+      flex-direction: column;
+      gap: 0.35rem;
     }
 
     .brand {
@@ -94,7 +144,13 @@
       font-size: 1.24rem;
       letter-spacing: -0.02em;
       color: var(--primary);
-      grid-area: brand;
+    }
+
+    .brand-tagline {
+      margin: 0;
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      font-weight: 600;
     }
 
     .brand:hover {
@@ -118,7 +174,7 @@
     }
 
     nav {
-      display: flex;
+      display: inline-flex;
       align-items: center;
       justify-content: center;
       gap: 0.75rem;
@@ -126,6 +182,53 @@
       font-weight: 600;
       transition: color 0.2s ease;
       grid-area: nav;
+      background: rgba(15, 23, 42, 0.04);
+      padding: 0.4rem 0.6rem;
+      border-radius: 999px;
+      box-shadow: inset 0 0 0 1px rgba(148, 163, 184, 0.18);
+    }
+
+    .header-actions {
+      grid-area: actions;
+      display: inline-flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 0.75rem;
+    }
+
+    .header-action {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.45rem;
+      padding: 0.55rem 1.2rem;
+      border-radius: 999px;
+      border: 1px solid rgba(29, 78, 216, 0.22);
+      background: rgba(255, 255, 255, 0.9);
+      color: var(--primary);
+      font-weight: 700;
+      font-size: 0.92rem;
+      transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+    }
+
+    .header-action:hover,
+    .header-action:focus-visible {
+      transform: translateY(-2px);
+      box-shadow: 0 18px 32px rgba(29, 78, 216, 0.18);
+      background: rgba(241, 245, 249, 0.95);
+      outline: none;
+    }
+
+    .header-action--ghost {
+      background: rgba(14, 165, 233, 0.1);
+      border-color: transparent;
+      color: var(--accent);
+    }
+
+    .header-action--ghost:hover,
+    .header-action--ghost:focus-visible {
+      background: rgba(14, 165, 233, 0.2);
+      box-shadow: 0 16px 28px rgba(14, 165, 233, 0.2);
     }
 
     nav a {
@@ -180,8 +283,6 @@
       font-weight: 600;
       cursor: pointer;
       transition: color 0.2s ease, border-color 0.2s ease, background 0.2s ease;
-      order: 3;
-      grid-area: toggle;
     }
 
     .nav-toggle:hover,
@@ -214,8 +315,7 @@
       font-weight: 700;
       box-shadow: 0 16px 32px rgba(14, 165, 233, 0.22);
       transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
-      order: 2;
-      grid-area: support;
+      white-space: nowrap;
     }
 
     .support-link:hover,
@@ -261,9 +361,8 @@
 
     .hero-image {
       position: relative;
-      padding: 1rem;
+      padding: 0;
       border-radius: calc(var(--radius-lg) - 6px);
-      background: linear-gradient(145deg, rgba(29, 78, 216, 0.08), rgba(14, 165, 233, 0.08));
     }
 
     .slider {
@@ -333,11 +432,8 @@
       user-select: none;
       -webkit-user-select: none;
       isolation: isolate;
-      aspect-ratio: var(--slider-aspect, 1 / 1);
-    }
-
-    .slider-viewport:not(.has-aspect) {
-      min-height: clamp(280px, 46vw, 520px);
+      aspect-ratio: var(--slider-aspect, 4 / 3);
+      min-height: clamp(320px, 46vw, 520px);
     }
 
     .slider-viewport:focus-visible {
@@ -373,11 +469,7 @@
     .slide {
       position: relative;
       height: 100%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: clamp(0.6rem, 2vw, 1.6rem);
-      background: linear-gradient(145deg, rgba(255, 255, 255, 0.7), rgba(226, 232, 240, 0.5));
+      display: block;
       opacity: 0.95;
       transition: opacity 0.3s ease;
     }
@@ -387,12 +479,10 @@
     }
 
     .slide img {
+      display: block;
       width: 100%;
       height: 100%;
-      object-fit: contain;
-      border-radius: calc(var(--radius-lg) - 18px);
-      box-shadow: 0 18px 32px rgba(15, 23, 42, 0.12);
-      background: #fff;
+      object-fit: cover;
     }
 
     .slider-control {
@@ -1223,23 +1313,24 @@
       }
 
       .header-inner {
-        grid-template-columns: auto auto;
+        grid-template-columns: 1fr auto;
         grid-template-areas:
           'brand toggle'
-          'support support'
-          'nav nav';
+          'nav nav'
+          'actions actions';
         align-items: center;
         justify-items: stretch;
         gap: 0.75rem;
       }
 
-      .brand {
+      .header-brand {
         justify-self: start;
       }
 
       .nav-toggle {
         display: inline-flex;
         justify-self: end;
+        grid-area: toggle;
       }
 
       nav {
@@ -1285,10 +1376,17 @@
         background: rgba(29, 78, 216, 0.16);
       }
 
+      .header-actions {
+        width: 100%;
+        justify-content: stretch;
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .header-action,
       .support-link {
         width: 100%;
-        justify-self: stretch;
-        text-align: center;
+        justify-content: center;
       }
 
       .product-hero {
@@ -1307,26 +1405,26 @@
         grid-template-columns: 1fr;
       }
 
-      .slider-viewport:not(.has-aspect) {
-        min-height: clamp(240px, 62vw, 440px);
+      .slider-viewport {
+        min-height: clamp(260px, 62vw, 440px);
       }
     }
 
     @media (min-width: 768px) {
       .header-inner {
-        grid-template-columns: auto 1fr auto;
+        grid-template-columns: minmax(0, auto) 1fr minmax(0, auto);
         align-items: center;
-        grid-template-areas: 'brand nav support';
+        grid-template-areas: 'brand nav actions';
       }
 
       nav {
-        display: flex;
+        display: inline-flex;
         flex: unset;
         order: unset;
-        background: transparent;
+        background: rgba(15, 23, 42, 0.04);
         border: none;
-        padding: 0;
-        box-shadow: none;
+        padding: 0.4rem 0.6rem;
+        box-shadow: inset 0 0 0 1px rgba(148, 163, 184, 0.18);
         max-height: none;
         opacity: 1;
         pointer-events: auto;
@@ -1337,10 +1435,8 @@
         background: transparent;
       }
 
-      .support-link {
-        order: unset;
-        width: auto;
-        justify-self: end;
+      .header-actions {
+        justify-content: flex-end;
       }
 
       .nav-toggle {
@@ -1377,6 +1473,16 @@
         padding-top: 1.8rem;
       }
 
+      .header-accent-inner {
+        justify-content: center;
+        text-align: center;
+      }
+
+      .header-accent-links {
+        justify-content: center;
+        width: 100%;
+      }
+
       .gallery {
         padding: 0.85rem;
         min-height: 220px;
@@ -1393,11 +1499,11 @@
       }
 
       .hero-image {
-        padding: 0.75rem;
+        padding: 0;
       }
 
-      .slider-viewport:not(.has-aspect) {
-        min-height: clamp(220px, 70vw, 380px);
+      .slider-viewport {
+        min-height: clamp(230px, 70vw, 380px);
       }
 
       .slider-zoom {
@@ -1480,8 +1586,8 @@
     }
 
     @media (max-width: 480px) {
-      .slider-viewport:not(.has-aspect) {
-        min-height: clamp(200px, 88vw, 340px);
+      .slider-viewport {
+        min-height: clamp(210px, 88vw, 340px);
       }
 
       .slider-control {
@@ -1535,11 +1641,22 @@
 </head>
 <body>
   <header>
+    <div class="header-accent">
+      <div class="layout-width header-accent-inner">
+        <span>بازار آنلاین تجهیزات، ماشین‌آلات و خدمات صنعتی</span>
+        <div class="header-accent-links">
+          <a class="header-accent-link" href="/Ideas.html">مجله ایده‌ها</a>
+          <a class="header-accent-link" href="/all-shops.html">فروشگاه‌ها</a>
+        </div>
+      </div>
+    </div>
     <div class="layout-width header-inner">
-      <a class="brand" href="/index.html">
-        <span class="brand-text">ویترینت</span>
-      </a>
-      <a class="support-link" href="tel:02191090810" aria-label="تماس با پشتیبانی ویترینت">پشتیبانی ۰۲۱۹۱۰۹۰۸۱۰</a>
+      <div class="header-brand">
+        <a class="brand" href="/index.html">
+          <span class="brand-text">ویترینت</span>
+        </a>
+        <p class="brand-tagline">مقایسه، انتخاب و ارتباط مستقیم با فروشنده</p>
+      </div>
       <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="primaryNav">
         <span class="nav-toggle-label">منو</span>
         <svg class="nav-toggle-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
@@ -1552,6 +1669,10 @@
         <a href="/shops-by-category.html">دسته‌بندی‌ها</a>
         <a href="/contact.html">ارتباط با ما</a>
       </nav>
+      <div class="header-actions">
+        <a class="header-action header-action--ghost" href="/login.html">ورود فروشندگان</a>
+        <a class="support-link" href="tel:02191090810" aria-label="تماس با پشتیبانی ویترینت">پشتیبانی ۰۲۱۹۱۰۹۰۸۱۰</a>
+      </div>
     </div>
   </header>
 
@@ -1621,14 +1742,14 @@
                 <path d="M12 3.5c-3.5 0-6.5 2.7-6.5 6.4 0 4.1 4.9 9.61 6.16 11.01.19.21.49.21.68 0C13.6 19.51 18.5 14 18.5 9.9c0-3.7-3-6.4-6.5-6.4Z" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" />
                 <circle cx="12" cy="10" r="2.6" stroke="currentColor" stroke-width="1.6" />
               </svg>
-              <span>مشاهده آدرس مغازه</span>
+              <span>مشاهده آدرس</span>
             </button>
             <a class="product-action product-action--primary is-disabled" id="sellerLink" target="_blank" rel="noopener" aria-disabled="true" tabindex="-1">
               <svg viewBox="0 0 24 24" fill="none" aria-hidden="true" focusable="false">
                 <path d="M4.5 9.25h15l-.84 9.05a2 2 0 0 1-1.99 1.7H7.33a2 2 0 0 1-1.99-1.7L4.5 9.25Zm2.25-4.5h10.5L18 9.25H6l.75-4.5Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" />
                 <path d="M9.5 12.5v4.5m5-4.5v4.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" />
               </svg>
-              <span>مشاهده صفحه مغازه</span>
+              <span>مشاهده صفحه فروشگاه</span>
             </a>
           </div>
 
@@ -1690,7 +1811,7 @@
           <path d="m7 7 10 10m0-10-10 10" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
         </svg>
       </button>
-      <h2 class="overlay-title" id="addressModalTitle">آدرس مغازه</h2>
+      <h2 class="overlay-title" id="addressModalTitle">آدرس فروشگاه</h2>
       <div class="overlay-body">
         <p>آدرس دقیق فروشنده برای مراجعه حضوری:</p>
         <p class="overlay-highlight" id="addressModalAddress">-</p>
@@ -1857,6 +1978,8 @@
         jsonLd: document.getElementById('productJsonLd')
       };
 
+      const FIXED_SLIDER_ASPECT = '4 / 3';
+
       const state = {
         images: [],
         activeIndex: 0,
@@ -1864,7 +1987,7 @@
         sellerName: '',
         addressInfo: null,
         copyTimeout: null,
-        sliderAspect: ''
+        sliderAspect: FIXED_SLIDER_ASPECT
       };
 
       const persianNumberFormatter = new Intl.NumberFormat('fa-IR');
@@ -1890,28 +2013,18 @@
         if (!dom.sliderViewport) {
           return;
         }
-        dom.sliderViewport.style.removeProperty('--slider-aspect');
-        delete dom.sliderViewport.dataset.aspectSource;
-        dom.sliderViewport.classList.remove('has-aspect');
-        state.sliderAspect = '';
+        dom.sliderViewport.style.setProperty('--slider-aspect', FIXED_SLIDER_ASPECT);
+        state.sliderAspect = FIXED_SLIDER_ASPECT;
       }
 
-      function updateSliderAspectRatioFromImage(image) {
-        if (!dom.sliderViewport || !image) {
+      function updateSliderAspectRatioFromImage() {
+        if (!dom.sliderViewport) {
           return;
         }
-        const { naturalWidth, naturalHeight } = image;
-        if (!naturalWidth || !naturalHeight) {
-          return;
+        if (state.sliderAspect !== FIXED_SLIDER_ASPECT) {
+          dom.sliderViewport.style.setProperty('--slider-aspect', FIXED_SLIDER_ASPECT);
+          state.sliderAspect = FIXED_SLIDER_ASPECT;
         }
-        const ratio = `${naturalWidth} / ${naturalHeight}`;
-        if (ratio === state.sliderAspect) {
-          return;
-        }
-        dom.sliderViewport.style.setProperty('--slider-aspect', ratio);
-        dom.sliderViewport.dataset.aspectSource = ratio;
-        dom.sliderViewport.classList.add('has-aspect');
-        state.sliderAspect = ratio;
       }
 
       if (dom.sliderPrev) {
@@ -2155,8 +2268,8 @@
 
         if (dom.addressModalTitle) {
           dom.addressModalTitle.textContent = state.addressInfo.sellerName
-            ? `آدرس مغازه ${state.addressInfo.sellerName}`
-            : 'آدرس مغازه';
+            ? `آدرس فروشگاه ${state.addressInfo.sellerName}`
+            : 'آدرس فروشگاه';
         }
 
         openOverlay(dom.addressModal, dom.addressModalClose || dom.addressModalCopy || dom.addressModalMap);
@@ -2826,7 +2939,7 @@
         if (dom.sellerLink) {
           if (seller.shopurl) {
             dom.sellerLink.href = `/shop.html?shopurl=${encodeURIComponent(seller.shopurl)}`;
-            dom.sellerLink.setAttribute('aria-label', `مشاهده صفحه مغازه ${sellerName} در ویترینت`);
+            dom.sellerLink.setAttribute('aria-label', `مشاهده صفحه فروشگاه ${sellerName} در ویترینت`);
             dom.sellerLink.classList.remove('is-disabled');
             dom.sellerLink.removeAttribute('aria-disabled');
             dom.sellerLink.removeAttribute('tabindex');
