@@ -46,6 +46,7 @@ const sellerSchema = new mongoose.Schema({
   adminScore: { type: Number, min: 0, max: 100, default: null },
   adminScoreUpdatedAt: { type: Date, default: null },
   adminScoreNote: { type: String, default: '' },
+  adminScoreMessage: { type: String, default: '' },
   performanceStatus: {
     type: String,
     enum: ['unset', 'warning', 'good', 'excellent', 'critical'],

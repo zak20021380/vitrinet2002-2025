@@ -16,18 +16,26 @@ const { clampAdminScore, evaluatePerformance } = require('../utils/performanceSt
 function buildPerformancePayload(seller, options = {}) {
   const { includeNote = false } = options;
   const performance = evaluatePerformance(seller?.adminScore ?? null);
+  const displayName = (
+    seller?.storename ||
+    [seller?.firstname, seller?.lastname].filter(Boolean).join(' ').trim() ||
+    seller?.shopurl ||
+    ''
+  );
 
   const payload = {
     sellerId: seller?._id ? seller._id.toString() : null,
     shopurl: seller?.shopurl || null,
     storename: seller?.storename || null,
+    displayName,
     adminScore: seller?.adminScore ?? null,
     updatedAt: seller?.adminScoreUpdatedAt || null,
     status: performance.status,
     statusLabel: performance.label,
     statusMessage: performance.message,
     severity: performance.severity,
-    canStay: performance.canStay
+    canStay: performance.canStay,
+    adminScoreMessage: seller?.adminScoreMessage || ''
   };
 
   if (includeNote) {
@@ -181,6 +189,7 @@ exports.updateAdminScore = async (req, res) => {
     const { sellerId } = req.params;
     const score = clampAdminScore(req.body?.score);
     const note = typeof req.body?.note === 'string' ? req.body.note.trim() : '';
+    const message = typeof req.body?.message === 'string' ? req.body.message.trim() : '';
 
     if (score === null) {
       return res.status(400).json({ message: 'نمره معتبر نیست. مقدار باید بین ۰ تا ۱۰۰ باشد.' });
@@ -194,6 +203,7 @@ exports.updateAdminScore = async (req, res) => {
     seller.adminScore = score;
     seller.adminScoreUpdatedAt = new Date();
     seller.adminScoreNote = note;
+    seller.adminScoreMessage = message;
     const performance = evaluatePerformance(score);
     seller.performanceStatus = performance.status;
 
@@ -223,6 +233,7 @@ exports.clearAdminScore = async (req, res) => {
     seller.adminScore = null;
     seller.adminScoreUpdatedAt = null;
     seller.adminScoreNote = '';
+    seller.adminScoreMessage = '';
     seller.performanceStatus = 'unset';
 
     await seller.save();
@@ -241,7 +252,7 @@ exports.clearAdminScore = async (req, res) => {
 
 exports.listSellerPerformance = async (req, res) => {
   try {
-    const sellers = await Seller.find({}, 'storename shopurl adminScore adminScoreUpdatedAt performanceStatus adminScoreNote');
+    const sellers = await Seller.find({}, 'storename shopurl adminScore adminScoreUpdatedAt performanceStatus adminScoreNote adminScoreMessage');
 
     const payload = sellers.map(seller => {
       const data = buildPerformancePayload(seller, { includeNote: true });
@@ -266,7 +277,7 @@ exports.getCurrentSellerPerformanceStatus = async (req, res) => {
     }
 
     const seller = await Seller.findById(sellerId)
-      .select('storename shopurl adminScore adminScoreUpdatedAt performanceStatus');
+      .select('storename firstname lastname shopurl adminScore adminScoreUpdatedAt performanceStatus adminScoreMessage');
 
     if (!seller) {
       return res.status(404).json({ message: 'فروشنده پیدا نشد.' });
