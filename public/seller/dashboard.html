@@ -353,6 +353,156 @@
     transition: box-shadow 0.2s;
   }
 
+  .seller-quick-actions {
+    width: 100%;
+    max-width: 720px;
+    margin: 0 auto 2.5rem;
+    padding: 1.25rem clamp(1rem, 3vw, 1.75rem);
+    background: linear-gradient(135deg, rgba(14, 165, 233, 0.08), rgba(16, 185, 129, 0.08));
+    border-radius: 28px;
+    border: 1px solid rgba(14, 165, 233, 0.12);
+    box-shadow: 0 24px 48px rgba(15, 118, 110, 0.08);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    justify-content: center;
+    align-items: stretch;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .seller-quick-actions::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(120deg, rgba(14, 165, 233, 0.18), rgba(16, 185, 129, 0.12));
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    pointer-events: none;
+  }
+
+  .seller-quick-actions:focus-within::before,
+  .seller-quick-actions:hover::before {
+    opacity: 0.45;
+  }
+
+  .seller-action-btn {
+    flex: 1 1 280px;
+    min-height: 104px;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem 1.1rem;
+    border-radius: 20px;
+    border: none;
+    position: relative;
+    background: #fff;
+    box-shadow: 0 18px 34px rgba(15, 118, 110, 0.08);
+    color: #0f172a;
+    text-align: right;
+    cursor: pointer;
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+  }
+
+  .seller-action-btn:focus-visible {
+    outline: 3px solid rgba(14, 165, 233, 0.4);
+    outline-offset: 3px;
+  }
+
+  .seller-action-btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 28px 50px rgba(14, 165, 233, 0.18);
+  }
+
+  .seller-action-btn.is-disabled,
+  .seller-action-btn:disabled {
+    cursor: not-allowed;
+    opacity: 0.6;
+    box-shadow: none;
+    transform: none;
+  }
+
+  .seller-action-btn.is-disabled:hover {
+    transform: none;
+  }
+
+  .seller-action-icon {
+    flex-shrink: 0;
+    width: 54px;
+    height: 54px;
+    border-radius: 18px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, rgba(14, 165, 233, 0.16), rgba(16, 185, 129, 0.16));
+    color: #0ea5e9;
+  }
+
+  .seller-action-icon svg {
+    width: 26px;
+    height: 26px;
+  }
+
+  .seller-action-content {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    align-items: flex-start;
+  }
+
+  .seller-action-title {
+    font-weight: 800;
+    font-size: 1.05rem;
+    color: #0f172a;
+  }
+
+  .seller-action-subtitle {
+    font-size: 0.9rem;
+    color: #475569;
+  }
+
+  .seller-action-btn--store .seller-action-icon {
+    background: linear-gradient(135deg, rgba(14, 165, 233, 0.22), rgba(59, 130, 246, 0.18));
+    color: #2563eb;
+  }
+
+  .seller-action-btn--address .seller-action-icon {
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.22), rgba(45, 212, 191, 0.18));
+    color: #0d9488;
+  }
+
+  .seller-action-feedback {
+    width: 100%;
+    margin: 0;
+    margin-top: 0.5rem;
+    padding: 0.8rem 1rem;
+    border-radius: 16px;
+    font-size: 0.92rem;
+    font-weight: 600;
+    background: rgba(14, 165, 233, 0.12);
+    color: #0c4a6e;
+    display: none;
+  }
+
+  .seller-action-feedback.is-visible {
+    display: block;
+  }
+
+  .seller-action-feedback.is-success {
+    background: rgba(34, 197, 94, 0.16);
+    color: #065f46;
+  }
+
+  .seller-action-feedback.is-warning {
+    background: rgba(251, 191, 36, 0.18);
+    color: #92400e;
+  }
+
+  .seller-action-feedback.is-error {
+    background: rgba(248, 113, 113, 0.22);
+    color: #991b1b;
+  }
+
   .chart-tabs {
     display: flex;
     gap: 12px;
@@ -376,6 +526,202 @@
   .chart-tab:hover {
     background: #10b981;
     color: #fff;
+  }
+
+  .seller-modal-backdrop {
+    position: fixed;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1.5rem;
+    background: rgba(15, 23, 42, 0.35);
+    backdrop-filter: blur(6px);
+    z-index: 400;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.25s ease, visibility 0.25s ease;
+  }
+
+  .seller-modal-backdrop.is-visible {
+    opacity: 1;
+    visibility: visible;
+  }
+
+  .seller-modal-dialog {
+    width: min(100%, 420px);
+    background: #ffffff;
+    border-radius: 24px;
+    padding: clamp(1.4rem, 4vw, 2rem);
+    box-shadow: 0 32px 64px rgba(15, 23, 42, 0.22);
+    position: relative;
+    transform: translateY(16px);
+    transition: transform 0.25s ease;
+  }
+
+  .seller-modal-backdrop.is-visible .seller-modal-dialog {
+    transform: translateY(0);
+  }
+
+  .seller-modal-close {
+    position: absolute;
+    top: 16px;
+    inset-inline-start: 16px;
+    background: rgba(226, 232, 240, 0.7);
+    border: none;
+    border-radius: 12px;
+    width: 40px;
+    height: 40px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: #1f2937;
+    cursor: pointer;
+    transition: background 0.2s ease;
+  }
+
+  .seller-modal-close:hover,
+  .seller-modal-close:focus-visible {
+    background: rgba(226, 232, 240, 0.95);
+  }
+
+  .seller-modal-title {
+    margin: 0 0 1rem;
+    font-size: 1.3rem;
+    font-weight: 800;
+    color: #0f172a;
+  }
+
+  .seller-modal-address {
+    margin: 0;
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: #0f172a;
+    line-height: 1.8;
+  }
+
+  .seller-modal-city {
+    margin: 0.65rem 0 0;
+    color: #475569;
+    font-size: 0.95rem;
+  }
+
+  .seller-modal-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-top: 1.5rem;
+  }
+
+  .seller-modal-button {
+    flex: 1 1 140px;
+    border-radius: 14px;
+    padding: 0.75rem 1.1rem;
+    font-size: 0.95rem;
+    font-weight: 700;
+    border: 1px solid rgba(148, 163, 184, 0.35);
+    background: #fff;
+    color: #0f172a;
+    cursor: pointer;
+    text-align: center;
+    transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+    text-decoration: none;
+  }
+
+  .seller-modal-button:hover,
+  .seller-modal-button:focus-visible {
+    transform: translateY(-2px);
+    box-shadow: 0 18px 32px rgba(14, 165, 233, 0.18);
+    outline: none;
+  }
+
+  .seller-modal-button--primary {
+    background: linear-gradient(135deg, rgba(14, 165, 233, 0.92), rgba(6, 182, 212, 0.92));
+    border-color: transparent;
+    color: #fff;
+  }
+
+  .seller-modal-feedback {
+    margin: 1rem 0 0;
+    font-size: 0.9rem;
+    font-weight: 600;
+    padding: 0.75rem 1rem;
+    border-radius: 12px;
+    background: rgba(14, 165, 233, 0.1);
+    color: #0c4a6e;
+    display: none;
+  }
+
+  .seller-modal-feedback.is-visible {
+    display: block;
+  }
+
+  .seller-modal-feedback.is-success {
+    background: rgba(34, 197, 94, 0.18);
+    color: #047857;
+  }
+
+  .seller-modal-feedback.is-error {
+    background: rgba(248, 113, 113, 0.22);
+    color: #b91c1c;
+  }
+
+  @media (max-width: 1024px) {
+    .seller-quick-actions {
+      border-radius: 24px;
+      padding: 1.1rem 1.2rem;
+      gap: 0.85rem;
+    }
+
+    .seller-action-btn {
+      flex: 1 1 240px;
+      min-height: 96px;
+    }
+
+    .seller-modal-dialog {
+      padding: 1.5rem;
+    }
+  }
+
+  @media (max-width: 768px) {
+    .seller-quick-actions {
+      flex-direction: column;
+      align-items: stretch;
+      padding: 1.05rem;
+    }
+
+    .seller-action-btn {
+      flex: 1 1 auto;
+      width: 100%;
+    }
+
+    .seller-action-icon {
+      width: 48px;
+      height: 48px;
+    }
+
+    .seller-action-title {
+      font-size: 1rem;
+    }
+
+    .seller-modal-dialog {
+      width: 100%;
+    }
+  }
+
+  @media (max-width: 640px) {
+    .seller-quick-actions {
+      margin-bottom: 2rem;
+    }
+
+    .seller-modal-actions {
+      flex-direction: column;
+      align-items: stretch;
+    }
+
+    .seller-modal-button {
+      width: 100%;
+    }
   }
 
   .chart-info {
@@ -1195,6 +1541,34 @@
   سلام <span id="seller-welcome" style="color:#0ea5e9;">فروشنده عزیز</span> 👋
 </h1>
       <div class="text-gray-500 text-[15px] mb-8 text-center">آمار و وضعیت فروشگاهت رو یکجا ببین و مدیریت کن!</div>
+      <div class="seller-quick-actions" id="sellerQuickActions">
+        <button type="button" class="seller-action-btn seller-action-btn--store is-disabled" id="sellerStoreButton" disabled aria-label="برای مشاهده فروشگاه ابتدا آدرس اختصاصی را ثبت کنید.">
+          <span class="seller-action-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none">
+              <path d="M4 9.5 5.4 5.8c.28-.74 1-.3 1.73-.3h9.74c.73 0 1.45-.45 1.73.3L20 9.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M4 9.5h16v8.2c0 1.65-.67 2.3-2.33 2.3H6.33C4.67 20 4 19.35 4 17.7V9.5Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/>
+              <path d="M9.5 14.5h5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+            </svg>
+          </span>
+          <span class="seller-action-content">
+            <span class="seller-action-title">مشاهده صفحه فروشگاه</span>
+            <span class="seller-action-subtitle">پیش‌نمایش آنچه مشتریان می‌بینند</span>
+          </span>
+        </button>
+        <button type="button" class="seller-action-btn seller-action-btn--address is-disabled" id="sellerAddressAction" disabled aria-label="برای نمایش آدرس ابتدا آدرس فروشگاه را تکمیل کنید.">
+          <span class="seller-action-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none">
+              <path d="M12 3.5c-3.5 0-6.5 2.7-6.5 6.4 0 4.1 4.9 9.61 6.16 11.01.19.21.49.21.68 0C13.6 19.51 18.5 14 18.5 9.9c0-3.7-3-6.4-6.5-6.4Z" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+              <circle cx="12" cy="10" r="2.6" stroke="currentColor" stroke-width="1.6"/>
+            </svg>
+          </span>
+          <span class="seller-action-content">
+            <span class="seller-action-title">مشاهده آدرس فروشگاه</span>
+            <span class="seller-action-subtitle">جزییات کامل برای مراجعه حضوری</span>
+          </span>
+        </button>
+        <p class="seller-action-feedback" id="sellerActionFeedback" role="status" aria-live="polite"></p>
+      </div>
       <div class="w-full max-w-2xl flex flex-wrap justify-center gap-4 mb-7">
         <div class="stat-card w-full sm:w-auto">
           <div class="icon">
@@ -1556,8 +1930,317 @@
 
 
 <script>
+const quickActionsDom = {
+  container: document.getElementById('sellerQuickActions'),
+  storeButton: document.getElementById('sellerStoreButton'),
+  addressButton: document.getElementById('sellerAddressAction'),
+  feedback: document.getElementById('sellerActionFeedback'),
+  modal: document.getElementById('sellerAddressModal'),
+  modalClose: document.getElementById('sellerAddressModalClose'),
+  modalTitle: document.getElementById('sellerAddressTitle'),
+  modalAddress: document.getElementById('sellerAddressText'),
+  modalCity: document.getElementById('sellerAddressCity'),
+  modalMap: document.getElementById('sellerAddressMap'),
+  modalCopy: document.getElementById('sellerAddressCopy'),
+  modalFeedback: document.getElementById('sellerAddressFeedback')
+};
 
+const quickActionsState = {
+  addressInfo: null,
+  feedbackTimeout: null,
+  modalFeedbackTimeout: null,
+  lastFocus: null
+};
 
+function setupSellerQuickActions() {
+  if (quickActionsDom.storeButton) {
+    quickActionsDom.storeButton.addEventListener('click', handleSellerStoreClick);
+  }
+
+  if (quickActionsDom.addressButton) {
+    quickActionsDom.addressButton.addEventListener('click', handleSellerAddressClick);
+  }
+
+  if (quickActionsDom.modalClose) {
+    quickActionsDom.modalClose.addEventListener('click', closeSellerAddressModal);
+  }
+
+  if (quickActionsDom.modal) {
+    quickActionsDom.modal.addEventListener('click', (event) => {
+      if (event.target === quickActionsDom.modal) {
+        closeSellerAddressModal();
+      }
+    });
+  }
+
+  if (quickActionsDom.modalCopy) {
+    quickActionsDom.modalCopy.addEventListener('click', copySellerAddress);
+  }
+
+  document.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape' && isSellerAddressModalOpen()) {
+      event.preventDefault();
+      closeSellerAddressModal();
+    }
+  });
+
+  updateSellerQuickActions();
+}
+
+function updateSellerQuickActions() {
+  if (!quickActionsDom.container) {
+    return;
+  }
+
+  const seller = window.seller || {};
+  const hasStoreUrl = typeof seller.shopurl === 'string' && seller.shopurl.trim() !== '';
+  const addressText = typeof seller.address === 'string' ? seller.address.trim() : '';
+  const cityText = typeof seller.city === 'string' ? seller.city.trim() : '';
+  const sellerName = seller.storename || [seller.firstname, seller.lastname].filter(Boolean).join(' ').trim();
+
+  if (quickActionsDom.storeButton) {
+    if (hasStoreUrl) {
+      const storeUrl = new URL('/shop.html', window.location.origin);
+      storeUrl.searchParams.set('shopurl', seller.shopurl.trim());
+      quickActionsDom.storeButton.dataset.storeUrl = storeUrl.toString();
+      quickActionsDom.storeButton.disabled = false;
+      quickActionsDom.storeButton.classList.remove('is-disabled');
+      quickActionsDom.storeButton.removeAttribute('aria-label');
+      quickActionsDom.storeButton.setAttribute('title', 'باز کردن صفحه فروشگاه در تب جدید');
+    } else {
+      quickActionsDom.storeButton.dataset.storeUrl = '';
+      quickActionsDom.storeButton.disabled = true;
+      quickActionsDom.storeButton.classList.add('is-disabled');
+      quickActionsDom.storeButton.removeAttribute('title');
+      quickActionsDom.storeButton.setAttribute('aria-label', 'برای مشاهده فروشگاه ابتدا آدرس اختصاصی را ثبت کنید.');
+    }
+  }
+
+  if (addressText) {
+    const mapQuery = [addressText, cityText].filter(Boolean).join('، ');
+    quickActionsState.addressInfo = {
+      address: addressText,
+      city: cityText,
+      mapUrl: mapQuery ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(mapQuery)}` : '',
+      sellerName
+    };
+  } else {
+    quickActionsState.addressInfo = null;
+  }
+
+  if (quickActionsDom.addressButton) {
+    if (quickActionsState.addressInfo) {
+      quickActionsDom.addressButton.disabled = false;
+      quickActionsDom.addressButton.classList.remove('is-disabled');
+      quickActionsDom.addressButton.removeAttribute('aria-label');
+      quickActionsDom.addressButton.setAttribute('title', 'نمایش آدرس فروشگاه در پنجره مجزا');
+    } else {
+      quickActionsDom.addressButton.disabled = true;
+      quickActionsDom.addressButton.classList.add('is-disabled');
+      quickActionsDom.addressButton.removeAttribute('title');
+      quickActionsDom.addressButton.setAttribute('aria-label', 'برای نمایش آدرس ابتدا آدرس فروشگاه را تکمیل کنید.');
+    }
+  }
+
+  if (quickActionsDom.modalMap) {
+    if (quickActionsState.addressInfo?.mapUrl) {
+      quickActionsDom.modalMap.href = quickActionsState.addressInfo.mapUrl;
+      quickActionsDom.modalMap.hidden = false;
+    } else {
+      quickActionsDom.modalMap.hidden = true;
+      quickActionsDom.modalMap.removeAttribute('href');
+    }
+  }
+}
+
+function handleSellerStoreClick() {
+  if (!quickActionsDom.storeButton || quickActionsDom.storeButton.disabled) {
+    showSellerActionFeedback('warning', 'آدرس اختصاصی فروشگاه هنوز ثبت نشده است.');
+    return;
+  }
+
+  const storeUrl = quickActionsDom.storeButton.dataset.storeUrl;
+  if (!storeUrl) {
+    showSellerActionFeedback('warning', 'آدرس اختصاصی فروشگاه هنوز ثبت نشده است.');
+    return;
+  }
+
+  window.open(storeUrl, '_blank', 'noopener');
+  showSellerActionFeedback('success', 'صفحه فروشگاه در یک تب جدید باز شد.');
+}
+
+function handleSellerAddressClick() {
+  if (!quickActionsState.addressInfo) {
+    showSellerActionFeedback('warning', 'آدرس فروشگاه هنوز ثبت نشده است.');
+    return;
+  }
+
+  openSellerAddressModal();
+}
+
+function openSellerAddressModal() {
+  if (!quickActionsDom.modal || !quickActionsState.addressInfo) {
+    return;
+  }
+
+  const info = quickActionsState.addressInfo;
+
+  if (quickActionsDom.modalAddress) {
+    quickActionsDom.modalAddress.textContent = info.address;
+  }
+
+  if (quickActionsDom.modalCity) {
+    if (info.city) {
+      quickActionsDom.modalCity.textContent = `شهر: ${info.city}`;
+      quickActionsDom.modalCity.hidden = false;
+    } else {
+      quickActionsDom.modalCity.hidden = true;
+      quickActionsDom.modalCity.textContent = '';
+    }
+  }
+
+  if (quickActionsDom.modalTitle) {
+    quickActionsDom.modalTitle.textContent = info.sellerName
+      ? `آدرس فروشگاه ${info.sellerName}`
+      : 'آدرس فروشگاه';
+  }
+
+  if (quickActionsDom.modalFeedback) {
+    quickActionsDom.modalFeedback.classList.remove('is-visible', 'is-success', 'is-error');
+    quickActionsDom.modalFeedback.textContent = '';
+  }
+
+  if (quickActionsState.modalFeedbackTimeout) {
+    clearTimeout(quickActionsState.modalFeedbackTimeout);
+    quickActionsState.modalFeedbackTimeout = null;
+  }
+
+  quickActionsState.lastFocus = document.activeElement instanceof HTMLElement
+    ? document.activeElement
+    : null;
+
+  quickActionsDom.modal.classList.add('is-visible');
+  quickActionsDom.modal.setAttribute('aria-hidden', 'false');
+
+  requestAnimationFrame(() => {
+    (quickActionsDom.modalClose || quickActionsDom.modalCopy || quickActionsDom.modal)?.focus({ preventScroll: true });
+  });
+}
+
+function closeSellerAddressModal() {
+  if (!quickActionsDom.modal) {
+    return;
+  }
+
+  quickActionsDom.modal.classList.remove('is-visible');
+  quickActionsDom.modal.setAttribute('aria-hidden', 'true');
+
+  if (quickActionsState.lastFocus && typeof quickActionsState.lastFocus.focus === 'function') {
+    quickActionsState.lastFocus.focus({ preventScroll: true });
+  }
+
+  quickActionsState.lastFocus = null;
+}
+
+function isSellerAddressModalOpen() {
+  return Boolean(quickActionsDom.modal && quickActionsDom.modal.classList.contains('is-visible'));
+}
+
+async function copySellerAddress() {
+  if (!quickActionsState.addressInfo) {
+    showSellerModalFeedback('error', 'آدرسی برای کپی موجود نیست.');
+    return;
+  }
+
+  const textToCopy = [quickActionsState.addressInfo.city, quickActionsState.addressInfo.address]
+    .filter(Boolean)
+    .join('، ');
+
+  try {
+    if (navigator.clipboard && typeof navigator.clipboard.writeText === 'function') {
+      await navigator.clipboard.writeText(textToCopy);
+    } else {
+      fallbackCopyText(textToCopy);
+    }
+    showSellerModalFeedback('success', 'آدرس با موفقیت کپی شد.');
+  } catch (error) {
+    console.error('copy address failed', error);
+    showSellerModalFeedback('error', 'امکان کپی آدرس وجود ندارد.');
+  }
+}
+
+function fallbackCopyText(value) {
+  const textarea = document.createElement('textarea');
+  textarea.value = value;
+  textarea.setAttribute('readonly', '');
+  textarea.style.position = 'fixed';
+  textarea.style.insetInlineStart = '-9999px';
+  document.body.appendChild(textarea);
+  textarea.select();
+  const succeeded = typeof document.execCommand === 'function' && document.execCommand('copy');
+  document.body.removeChild(textarea);
+  if (!succeeded) {
+    throw new Error('execCommand copy failed');
+  }
+}
+
+function showSellerActionFeedback(type, message) {
+  if (!quickActionsDom.feedback) {
+    return;
+  }
+
+  if (quickActionsState.feedbackTimeout) {
+    clearTimeout(quickActionsState.feedbackTimeout);
+  }
+
+  quickActionsDom.feedback.textContent = message;
+  quickActionsDom.feedback.classList.remove('is-visible', 'is-success', 'is-error', 'is-warning');
+
+  if (type === 'success') {
+    quickActionsDom.feedback.classList.add('is-success');
+  } else if (type === 'error') {
+    quickActionsDom.feedback.classList.add('is-error');
+  } else {
+    quickActionsDom.feedback.classList.add('is-warning');
+  }
+
+  quickActionsDom.feedback.classList.add('is-visible');
+
+  quickActionsState.feedbackTimeout = window.setTimeout(() => {
+    quickActionsDom.feedback.classList.remove('is-visible', 'is-success', 'is-error', 'is-warning');
+    quickActionsDom.feedback.textContent = '';
+    quickActionsState.feedbackTimeout = null;
+  }, 3600);
+}
+
+function showSellerModalFeedback(type, message) {
+  if (!quickActionsDom.modalFeedback) {
+    return;
+  }
+
+  if (quickActionsState.modalFeedbackTimeout) {
+    clearTimeout(quickActionsState.modalFeedbackTimeout);
+  }
+
+  quickActionsDom.modalFeedback.textContent = message;
+  quickActionsDom.modalFeedback.classList.remove('is-visible', 'is-success', 'is-error');
+
+  if (type === 'success') {
+    quickActionsDom.modalFeedback.classList.add('is-success');
+  } else if (type === 'error') {
+    quickActionsDom.modalFeedback.classList.add('is-error');
+  }
+
+  quickActionsDom.modalFeedback.classList.add('is-visible');
+
+  quickActionsState.modalFeedbackTimeout = window.setTimeout(() => {
+    quickActionsDom.modalFeedback.classList.remove('is-visible', 'is-success', 'is-error');
+    quickActionsDom.modalFeedback.textContent = '';
+    quickActionsState.modalFeedbackTimeout = null;
+  }, 3200);
+}
+
+setupSellerQuickActions();
 
 // ۱) فانکشن برای گرفتن اطلاعات فروشنده
 // ۱) فانکشن برای گرفتن اطلاعات فروشنده‌ی جاری
@@ -1744,6 +2427,8 @@ document.addEventListener('DOMContentLoaded', async () => {
   // ۱) دریافت فروشنده
   window.seller = await fetchCurrentSeller();
   console.log('🚀 seller object:', window.seller);
+
+  updateSellerQuickActions();
 
   if (window.seller?.id) {
     // ۲) شروع پولینگ‌ها
@@ -2643,6 +3328,24 @@ async function loadPerformanceStatus() {
 
 
 
+
+<div class="seller-modal-backdrop" id="sellerAddressModal" aria-hidden="true">
+  <div class="seller-modal-dialog" role="dialog" aria-modal="true" aria-labelledby="sellerAddressTitle">
+    <button type="button" class="seller-modal-close" id="sellerAddressModalClose" aria-label="بستن پنجره">
+      <svg viewBox="0 0 24 24" fill="none" width="22" height="22" aria-hidden="true">
+        <path d="m7 7 10 10m0-10-10 10" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </button>
+    <h2 class="seller-modal-title" id="sellerAddressTitle">آدرس فروشگاه</h2>
+    <p class="seller-modal-address" id="sellerAddressText">-</p>
+    <p class="seller-modal-city" id="sellerAddressCity" hidden></p>
+    <div class="seller-modal-actions">
+      <button type="button" class="seller-modal-button seller-modal-button--primary" id="sellerAddressCopy">کپی آدرس</button>
+      <a class="seller-modal-button" id="sellerAddressMap" href="#" target="_blank" rel="noopener" hidden>مشاهده روی نقشه</a>
+    </div>
+    <p class="seller-modal-feedback" id="sellerAddressFeedback" role="status" aria-live="polite"></p>
+  </div>
+</div>
 
 <!-- Success Popup -->
 <!-- Success Popup (اصلاح برای RTL و تداخل container) -->
