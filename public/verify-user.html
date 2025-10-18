@@ -83,6 +83,30 @@
   }
 
   // اگر پسورد تو session نبود، یک مقدار تستی ست کن (برای راحتی تست)
+  const SafeSS = window.SafeSS || {
+    setJSON(key, value) {
+      try {
+        sessionStorage.setItem(key, JSON.stringify(value));
+        return true;
+      } catch (e) {
+        console.warn('SafeSS setJSON failed', e);
+        return false;
+      }
+    },
+    getJSON(key, fallback = null) {
+      try {
+        const raw = sessionStorage.getItem(key);
+        return raw ? JSON.parse(raw) : fallback;
+      } catch (e) {
+        console.warn('SafeSS getJSON failed', e);
+        return fallback;
+      }
+    }
+  };
+  if (!window.SafeSS) {
+    window.SafeSS = SafeSS;
+  }
+
   if (!SafeSS.getJSON('signup_password')) { // SafeSS
     SafeSS.setJSON('signup_password', 'testpassword'); // SafeSS
   }
@@ -93,6 +117,8 @@
   const errorText = document.getElementById('errorText');
   const successMsg = document.getElementById('successMsg');
   const goDashboardBtn = document.getElementById('go-dashboard-btn');
+
+  digits[0]?.focus();
 
   digits.forEach((input, idx) => {
     input.addEventListener('input', (e) => {
