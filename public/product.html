@@ -1674,11 +1674,6 @@
           <h2 id="featuresHeading">ویژگی‌ها و کاربردها</h2>
           <ul class="feature-list" id="featureList"></ul>
         </article>
-        <article class="panel" aria-labelledby="contactHeading">
-          <h2 id="contactHeading">راه‌های ارتباطی</h2>
-          <p class="panel-body">برای ثبت سفارش، لطفاً مستقیماً با فروشنده یا پشتیبانی ویترینت تماس بگیرید.</p>
-          <ul class="specs" id="contactList"></ul>
-        </article>
       </section>
     </div>
   </main>
@@ -2841,7 +2836,12 @@
       }
 
       function renderContactPanel(seller) {
-        dom.contactList.innerHTML = '';
+        const contactList = dom.contactList;
+        if (!contactList) {
+          return;
+        }
+
+        contactList.innerHTML = '';
         const items = [];
         const addressText = seller && seller.address ? String(seller.address).trim() : '';
 
@@ -2927,7 +2927,7 @@
 
           li.appendChild(labelSpan);
           li.appendChild(valueSpan);
-          dom.contactList.appendChild(li);
+          contactList.appendChild(li);
         });
       }
 
