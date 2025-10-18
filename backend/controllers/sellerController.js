@@ -1,3 +1,4 @@
+const mongoose = require('mongoose');
 const Seller = require('../models/Seller');
 const bcrypt = require('bcryptjs');
 const Product = require('../models/product');
@@ -10,6 +11,47 @@ const Report = require('../models/Report');
 const BannedPhone = require('../models/BannedPhone');
 const Plan = require('../models/plan');
 const { calcPremiumUntil } = require('../utils/premium');
+const { clampAdminScore, evaluatePerformance } = require('../utils/performanceStatus');
+
+function buildPerformancePayload(seller, options = {}) {
+  const { includeNote = false } = options;
+  const performance = evaluatePerformance(seller?.adminScore ?? null);
+
+  const payload = {
+    sellerId: seller?._id ? seller._id.toString() : null,
+    shopurl: seller?.shopurl || null,
+    storename: seller?.storename || null,
+    adminScore: seller?.adminScore ?? null,
+    updatedAt: seller?.adminScoreUpdatedAt || null,
+    status: performance.status,
+    statusLabel: performance.label,
+    statusMessage: performance.message,
+    severity: performance.severity,
+    canStay: performance.canStay
+  };
+
+  if (includeNote) {
+    payload.adminScoreNote = seller?.adminScoreNote || '';
+  }
+
+  return payload;
+}
+
+async function findSellerByFlexibleId(identifier) {
+  if (!identifier) return null;
+
+  if (typeof identifier === 'string' && identifier.startsWith('shopurl:')) {
+    const shopurl = identifier.replace(/^shopurl:/, '');
+    return Seller.findOne({ shopurl });
+  }
+
+  if (mongoose.Types.ObjectId.isValid(identifier)) {
+    const byId = await Seller.findById(identifier);
+    if (byId) return byId;
+  }
+
+  return Seller.findOne({ shopurl: identifier });
+}
 
 exports.registerSeller = async (req, res) => {
   try {
@@ -131,5 +173,115 @@ exports.upgradeSeller = async (req, res) => {
   } catch (err) {
     console.error('upgradeSeller error:', err);
     res.status(500).json({ success: false, message: 'خطا در ارتقا حساب.' });
+  }
+};
+
+exports.updateAdminScore = async (req, res) => {
+  try {
+    const { sellerId } = req.params;
+    const score = clampAdminScore(req.body?.score);
+    const note = typeof req.body?.note === 'string' ? req.body.note.trim() : '';
+
+    if (score === null) {
+      return res.status(400).json({ message: 'نمره معتبر نیست. مقدار باید بین ۰ تا ۱۰۰ باشد.' });
+    }
+
+    const seller = await findSellerByFlexibleId(sellerId);
+    if (!seller) {
+      return res.status(404).json({ message: 'فروشنده پیدا نشد.' });
+    }
+
+    seller.adminScore = score;
+    seller.adminScoreUpdatedAt = new Date();
+    seller.adminScoreNote = note;
+    const performance = evaluatePerformance(score);
+    seller.performanceStatus = performance.status;
+
+    await seller.save();
+
+    const payload = buildPerformancePayload(seller, { includeNote: true });
+    return res.json({
+      message: 'نمره فروشنده با موفقیت ذخیره شد.',
+      ...payload,
+      sellerKey: payload.sellerId || (payload.shopurl ? `shopurl:${payload.shopurl}` : null)
+    });
+  } catch (err) {
+    console.error('updateAdminScore error:', err);
+    return res.status(500).json({ message: 'خطا در ثبت نمره فروشنده.' });
+  }
+};
+
+exports.clearAdminScore = async (req, res) => {
+  try {
+    const { sellerId } = req.params;
+    const seller = await findSellerByFlexibleId(sellerId);
+
+    if (!seller) {
+      return res.status(404).json({ message: 'فروشنده پیدا نشد.' });
+    }
+
+    seller.adminScore = null;
+    seller.adminScoreUpdatedAt = null;
+    seller.adminScoreNote = '';
+    seller.performanceStatus = 'unset';
+
+    await seller.save();
+
+    const payload = buildPerformancePayload(seller, { includeNote: true });
+    return res.json({
+      message: 'نمره فروشنده حذف شد.',
+      ...payload,
+      sellerKey: payload.sellerId || (payload.shopurl ? `shopurl:${payload.shopurl}` : null)
+    });
+  } catch (err) {
+    console.error('clearAdminScore error:', err);
+    return res.status(500).json({ message: 'خطا در حذف نمره فروشنده.' });
+  }
+};
+
+exports.listSellerPerformance = async (req, res) => {
+  try {
+    const sellers = await Seller.find({}, 'storename shopurl adminScore adminScoreUpdatedAt performanceStatus adminScoreNote');
+
+    const payload = sellers.map(seller => {
+      const data = buildPerformancePayload(seller, { includeNote: true });
+      return {
+        ...data,
+        sellerKey: data.sellerId || (data.shopurl ? `shopurl:${data.shopurl}` : null)
+      };
+    });
+
+    return res.json(payload);
+  } catch (err) {
+    console.error('listSellerPerformance error:', err);
+    return res.status(500).json({ message: 'خطا در دریافت وضعیت عملکرد فروشنده‌ها.' });
+  }
+};
+
+exports.getCurrentSellerPerformanceStatus = async (req, res) => {
+  try {
+    const sellerId = req.user && (req.user.id || req.user._id);
+    if (!sellerId) {
+      return res.status(401).json({ message: 'برای مشاهده وضعیت عملکرد ابتدا وارد شوید.' });
+    }
+
+    const seller = await Seller.findById(sellerId)
+      .select('storename shopurl adminScore adminScoreUpdatedAt performanceStatus');
+
+    if (!seller) {
+      return res.status(404).json({ message: 'فروشنده پیدا نشد.' });
+    }
+
+    const payload = buildPerformancePayload(seller);
+    return res.json({
+      ...payload,
+      message: payload.adminScore == null
+        ? 'هنوز نمره‌ای برای شما ثبت نشده است.'
+        : 'آخرین وضعیت عملکرد شما با موفقیت بارگذاری شد.',
+      sellerKey: payload.sellerId || (payload.shopurl ? `shopurl:${payload.shopurl}` : null)
+    });
+  } catch (err) {
+    console.error('getCurrentSellerPerformanceStatus error:', err);
+    return res.status(500).json({ message: 'خطا در دریافت وضعیت عملکرد.' });
   }
 };

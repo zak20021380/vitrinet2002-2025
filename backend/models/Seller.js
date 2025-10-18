@@ -13,10 +13,10 @@ const sellerSchema = new mongoose.Schema({
   startTime: { type: String, default: '' },
   endTime: { type: String, default: '' },
   password: {
-  type: String,
-  required: true,
-  select: false  // یعنی رمز رو پیش‌فرض نفرست
-},
+    type: String,
+    required: true,
+    select: false  // یعنی رمز رو پیش‌فرض نفرست
+  },
 
 
   // --- برای OTP ---
@@ -40,7 +40,17 @@ const sellerSchema = new mongoose.Schema({
   blockedByAdmin: { type: Boolean, default: false },
 
   // مشتریانی که توسط این فروشنده مسدود شده‌اند
-  blockedUsers: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }]
+  blockedUsers: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
+
+  // --- ارزیابی عملکرد توسط تیم ادمین ---
+  adminScore: { type: Number, min: 0, max: 100, default: null },
+  adminScoreUpdatedAt: { type: Date, default: null },
+  adminScoreNote: { type: String, default: '' },
+  performanceStatus: {
+    type: String,
+    enum: ['unset', 'warning', 'good', 'excellent', 'critical'],
+    default: 'unset'
+  }
 
 }, { timestamps: true });
 
