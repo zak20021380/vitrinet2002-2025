@@ -1,68 +1,146 @@
 <style>
-  .performance-wrap{direction:rtl;font-family:'Vazirmatn',sans-serif;}
-  .score-card{background:#ecfdf5;border-radius:1rem;box-shadow:0 4px 16px rgba(16,185,129,.15);padding:24px;margin-bottom:1.5rem;text-align:center;}
-  .score-card .score{font-size:2.5rem;font-weight:900;color:#0ea5e9;}
-  .score-card .label{font-weight:bold;margin-top:.25rem;color:#16a34a;}
-  .score-card .status{margin-top:.5rem;font-size:15px;font-weight:bold;color:#16a34a;}
-  .metric-card{background:#fff;border-radius:1rem;box-shadow:0 4px 16px rgba(16,185,129,.08);padding:20px;transition:.3s;}
-  .metric-card:hover{box-shadow:0 6px 20px rgba(14,165,233,.16);transform:translateY(-2px);}
-  .progress-bar{width:100%;height:8px;background:#e5e7eb;border-radius:4px;overflow:hidden;}
-  .progress-inner{height:100%;background:#10b981;border-radius:4px;transition:width .4s ease;}
-  .badge{font-size:13px;padding:2px 8px;border-radius:9999px;font-weight:bold;}
+  .performance-wrap { direction: rtl; font-family: 'Vazirmatn', sans-serif; }
+  .score-card {
+    border-radius: 1rem;
+    padding: 24px;
+    text-align: center;
+    border: 1px solid transparent;
+    box-shadow: 0 8px 24px rgba(15, 118, 110, 0.08);
+    transition: box-shadow .25s ease, transform .25s ease;
+    background: #f8fafc;
+  }
+  .score-card:hover { box-shadow: 0 12px 32px rgba(14,165,233,.15); transform: translateY(-4px); }
+  .score-card .score { font-size: 2.7rem; font-weight: 900; color: #0ea5e9; }
+  .score-card .score-suffix { font-size: 1rem; color: #475569; margin-right: .35rem; }
+  .score-card .label { font-weight: 800; margin-top: .6rem; font-size: 1.1rem; }
+  .score-card .status { margin-top: .75rem; font-weight: 600; font-size: .95rem; }
+  .score-card .updated { margin-top: .6rem; font-size: .8rem; color: #64748b; }
+  .score-card.status-success { background: #ecfdf5; border-color: #bbf7d0; }
+  .score-card.status-success .label, .score-card.status-success .status { color: #047857; }
+  .score-card.status-warning { background: #fef3c7; border-color: #fde68a; }
+  .score-card.status-warning .label, .score-card.status-warning .status { color: #b45309; }
+  .score-card.status-danger { background: #fee2e2; border-color: #fecaca; }
+  .score-card.status-danger .label, .score-card.status-danger .status { color: #b91c1c; }
+  .score-card.status-neutral { background: #f8fafc; border-color: #e2e8f0; }
+  .score-card.status-neutral .label { color: #0f172a; }
+  .score-card.status-neutral .status { color: #0ea5e9; }
+  .summary-card {
+    background: #fff;
+    border-radius: 1rem;
+    box-shadow: 0 6px 20px rgba(15,118,110,.08);
+    padding: 20px 22px;
+    line-height: 1.8;
+    font-size: .92rem;
+  }
+  .summary-card h3 { font-weight: 800; color: #0ea5e9; font-size: 1.1rem; margin-bottom: .6rem; }
+  .summary-card p { color: #475569; margin: 0; }
+  .error-box {
+    background: #fee2e2;
+    border: 1px solid #fecaca;
+    color: #b91c1c;
+    text-align: center;
+    border-radius: 1rem;
+    padding: 22px;
+    font-weight: 600;
+  }
+  @media (max-width: 640px) {
+    .performance-wrap { padding: 1rem 0.75rem; }
+    .score-card { padding: 20px; }
+  }
 </style>
-<div class="performance-wrap max-w-3xl mx-auto py-6 px-4 space-y-6">
+<div class="performance-wrap max-w-3xl mx-auto py-6 space-y-6" id="performance-root">
   <header class="text-center space-y-2">
     <h2 class="text-2xl md:text-3xl font-extrabold text-[#10b981]">وضعیت عملکرد فروشگاه</h2>
-    <p class="text-gray-600 text-sm">در این بخش می‌تونی عملکردت رو در زمینه‌های مختلف بررسی کنی و ببینی واجد شرایط تمدید هستی یا نه.</p>
+    <p class="text-gray-600 text-sm">در این بخش می‌تونی نتیجه ارزیابی تیم ادمین را ببینی و از وضعیت ادامه همکاری مطلع بشی.</p>
   </header>
-  <div class="score-card">
-    <div class="score">82<span class="text-xl">/100</span></div>
-    <div class="label">عملکرد خوب</div>
-    <div class="status">✅ واجد شرایط تمدید هستی</div>
-    <div class="text-gray-500 text-xs mt-2">آخرین بروزرسانی: ۲۴ تیر ۱۴۰۳</div>
+  <div class="score-card status-neutral" id="performance-card">
+    <div class="score" id="performance-score">--<span class="score-suffix">/100</span></div>
+    <div class="label" id="performance-label">در انتظار ارزیابی</div>
+    <div class="status" id="performance-status">به محض ثبت نمره توسط تیم ادمین، وضعیت عملکردت نمایش داده می‌شود.</div>
+    <div class="updated" id="performance-updated">آخرین بروزرسانی: —</div>
   </div>
-  <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
-    <div class="metric-card">
-      <div class="flex justify-between items-center mb-2">
-        <span class="flex items-center gap-1 font-bold"><i class="ri-customer-service-2-fill text-lg text-[#10b981]"></i> پاسخگویی به مشتریان</span>
-        <span class="badge bg-green-100 text-green-700">عالی</span>
-      </div>
-      <div class="progress-bar"><div class="progress-inner" data-progress="92%" style="width:92%"></div></div>
-    </div>
-    <div class="metric-card">
-      <div class="flex justify-between items-center mb-2">
-        <span class="flex items-center gap-1 font-bold"><i class="ri-add-circle-fill text-lg text-[#10b981]"></i> ثبت منظم محصولات جدید</span>
-        <span class="badge bg-blue-100 text-blue-700">روبه‌بهبود</span>
-      </div>
-      <div class="progress-bar"><div class="progress-inner bg-sky-400" data-progress="78%" style="width:78%"></div></div>
-    </div>
-    <div class="metric-card">
-      <div class="flex justify-between items-center mb-2">
-        <span class="flex items-center gap-1 font-bold"><i class="ri-price-tag-3-fill text-lg text-[#10b981]"></i> ثبت قیمت‌های واقعی</span>
-        <span class="badge bg-green-100 text-green-700">خوب</span>
-      </div>
-      <div class="progress-bar"><div class="progress-inner" data-progress="88%" style="width:88%"></div></div>
-    </div>
-    <div class="metric-card">
-      <div class="flex justify-between items-center mb-2">
-        <span class="flex items-center gap-1 font-bold"><i class="ri-emotion-unhappy-fill text-lg text-[#10b981]"></i> شکایات کاربران</span>
-        <span class="badge bg-red-100 text-red-700">20% حل نشده</span>
-      </div>
-      <div class="progress-bar"><div class="progress-inner bg-red-500" data-progress="20%" style="width:20%"></div></div>
-    </div>
-  </div>
-  <div class="metric-card space-y-3">
-    <h3 class="font-bold text-[#0ea5e9]">پیشنهادهای بهبود</h3>
-    <ul class="text-sm text-gray-700 space-y-2">
-      <li class="flex items-start gap-2"><span class="text-xl">💡</span> تقویم هفتگی برای اضافه‌کردن محصولات تازه تنظیم کن</li>
-      <li class="flex items-start gap-2"><span class="text-xl">💡</span> پس از ثبت محصول، توضیحات و تصاویر را سریع‌تر به‌روزرسانی کن</li>
-    </ul>
+  <div class="summary-card" id="performance-summary">
+    <h3>جمع‌بندی وضعیت</h3>
+    <p id="performance-summary-text">پس از ثبت نمره، توصیه‌های لازم برای حفظ یا بهبود حضور در ویترینت اینجا نمایش داده می‌شود.</p>
   </div>
 </div>
 <script>
-  document.querySelectorAll('.progress-inner').forEach(el=>{
-    const w = el.getAttribute('data-progress');
-    el.style.width = '0';
-    setTimeout(()=>{el.style.width = w;},50);
-  });
+(function () {
+  const root = document.getElementById('performance-root');
+  const card = document.getElementById('performance-card');
+  const scoreEl = document.getElementById('performance-score');
+  const labelEl = document.getElementById('performance-label');
+  const statusEl = document.getElementById('performance-status');
+  const updatedEl = document.getElementById('performance-updated');
+  const summaryEl = document.getElementById('performance-summary-text');
+
+  const applyState = (state) => {
+    const severity = state && state.severity ? state.severity : 'neutral';
+    card.className = `score-card status-${severity}`;
+
+    if (state && state.adminScore != null) {
+      scoreEl.innerHTML = `${state.adminScore}<span class="score-suffix">/100</span>`;
+    } else {
+      scoreEl.innerHTML = `--<span class="score-suffix">/100</span>`;
+    }
+
+    labelEl.textContent = state && state.statusLabel ? state.statusLabel : 'در انتظار ارزیابی';
+    statusEl.textContent = state && state.statusMessage
+      ? state.statusMessage
+      : 'به محض ثبت نمره توسط تیم ادمین، وضعیت عملکردت نمایش داده می‌شود.';
+    updatedEl.textContent = state && state.updatedAt
+      ? `آخرین بروزرسانی: ${formatDateTime(state.updatedAt)}`
+      : 'آخرین بروزرسانی: —';
+
+    let summaryMessage = 'پس از ثبت نمره، توصیه‌های لازم برای حفظ یا بهبود حضور در ویترینت نمایش داده می‌شود.';
+    if (!state || state.adminScore == null) {
+      summaryMessage = 'هنوز امتیازی برای شما ثبت نشده است. پس از ارزیابی تیم ادمین، نتیجه و راهنمایی‌های لازم اینجا قرار می‌گیرد.';
+    } else if (state.canStay === false) {
+      summaryMessage = '⛔ با نمره فعلی امکان ادامه فعالیت در ویترینت وجود ندارد. لطفاً برای بررسی مجدد با پشتیبانی تماس بگیر یا اقدامات اصلاحی پیشنهاد شده را انجام بده.';
+    } else if (severity === 'warning') {
+      summaryMessage = '⚠️ شما واجد شرایط ادامه همکاری هستید، اما لازم است در ارائه خدمات و رضایت مشتریان بهبود ایجاد کنید تا ریسک خروج از ویترینت کاهش یابد.';
+    } else if (severity === 'danger') {
+      summaryMessage = '⛔ امتیاز شما کمتر از حد قابل قبول است و باید فوراً مشکلات را برطرف کنید. برای دریافت راهنمایی بیشتر با تیم پشتیبانی هماهنگ شوید.';
+    } else {
+      summaryMessage = '✅ عملکرد شما مورد تأیید است. برای حفظ این وضعیت، روند فعلی را ادامه بده و همواره بازخورد مشتریان را بررسی کن.';
+    }
+    summaryEl.textContent = summaryMessage;
+  };
+
+  const showError = (message) => {
+    root.innerHTML = `<div class="error-box">${message}</div>`;
+  };
+
+  const formatDateTime = (value) => {
+    if (!value) return '';
+    try {
+      return new Date(value).toLocaleString('fa-IR', {
+        dateStyle: 'medium',
+        timeStyle: 'short'
+      });
+    } catch (err) {
+      return '';
+    }
+  };
+
+  (async () => {
+    try {
+      const res = await fetch('/api/seller/performance/status', { credentials: 'include' });
+      let payload = null;
+      try {
+        payload = await res.json();
+      } catch (err) {
+        payload = null;
+      }
+      if (!res.ok) {
+        const message = payload && payload.message ? payload.message : 'خطا در دریافت وضعیت عملکرد. لطفاً دوباره تلاش کن.';
+        throw new Error(message);
+      }
+      applyState(payload || {});
+    } catch (err) {
+      console.error('loadPerformanceStatus error:', err);
+      showError(err.message || 'خطا در دریافت وضعیت عملکرد.');
+    }
+  })();
+})();
 </script>

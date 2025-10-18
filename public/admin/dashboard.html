@@ -797,15 +797,24 @@ tr:last-child td {
 
 /* --- Seller Modal Popup --- */
 .seller-modal-overlay {
-  position: fixed; inset: 0; background: rgba(40,60,50,0.25); z-index: 9998;
-  display: flex; align-items: center; justify-content: center; animation: fadeIn .35s;
+  position: fixed;
+  inset: 0;
+  background: rgba(40,60,50,0.25);
+  z-index: 9998;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: fadeIn .35s;
+  padding: 1.5rem;
 }
 .seller-modal {
   background: #fff;
   border-radius: 1.5rem;
   box-shadow: 0 12px 50px #10b98144;
-  min-width: 350px; max-width: 98vw; width: 420px;
-  padding: 2.3rem 1.7rem 1.1rem;
+  width: min(440px, 100%);
+  max-width: 540px;
+  min-width: 0;
+  padding: 2.2rem 1.7rem 1.2rem;
   direction: rtl;
   position: relative;
   z-index: 9999;
@@ -876,6 +885,49 @@ tr:last-child td {
   border-radius: 0.9rem;
   padding: 0.4rem 0.7rem;
 }
+.seller-score-note {
+  margin-top: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+.seller-score-note label {
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: #0f172a;
+}
+.seller-score-note textarea {
+  width: 100%;
+  min-height: 72px;
+  border-radius: 0.9rem;
+  border: 1px solid #cbd5f5;
+  background: #fff;
+  font-family: inherit;
+  font-size: 0.92rem;
+  padding: 0.55rem 0.75rem;
+  transition: border-color .15s ease, box-shadow .15s ease;
+  resize: vertical;
+}
+.seller-score-note textarea:focus {
+  border-color: #0ea5e9;
+  box-shadow: 0 0 0 3px rgba(14,165,233,.1);
+  outline: none;
+}
+.seller-score-note-hint {
+  font-size: 0.75rem;
+  color: #64748b;
+  line-height: 1.6;
+}
+.seller-score-note-display {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+.seller-score-note-title {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #0f172a;
+}
 .seller-score-actions {
   display: flex;
   gap: 0.75rem;
@@ -936,6 +988,96 @@ tr:last-child td {
   border: 1px solid #fecaca;
 }
 
+.seller-score-cell-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.35rem;
+}
+
+.seller-status-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.28rem 0.75rem;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  background: #e2e8f0;
+  color: #475569;
+  transition: background .18s ease, color .18s ease;
+}
+.seller-status-pill.status-success {
+  background: #dcfce7;
+  color: #047857;
+}
+.seller-status-pill.status-warning {
+  background: #fef3c7;
+  color: #b45309;
+}
+.seller-status-pill.status-danger {
+  background: #fee2e2;
+  color: #b91c1c;
+}
+.seller-status-pill.status-neutral {
+  background: #e2e8f0;
+  color: #475569;
+}
+
+.seller-status-note {
+  font-size: 0.78rem;
+  font-weight: 600;
+}
+.seller-status-note.status-eligible {
+  color: #047857;
+}
+.seller-status-note.status-ineligible {
+  color: #b91c1c;
+}
+.seller-status-note.status-neutral {
+  color: #475569;
+}
+.seller-note-text {
+  font-size: 0.8rem;
+  color: #334155;
+  line-height: 1.7;
+  background: #f1f5f9;
+  border-radius: 0.75rem;
+  padding: 0.65rem 0.75rem;
+  border: 1px dashed #cbd5f5;
+  word-break: break-word;
+}
+
+.seller-score-status {
+  margin-top: 1.1rem;
+  padding-top: 0.9rem;
+  border-top: 1px dashed #cbd5f5;
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+}
+.seller-score-status-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+.seller-status-text {
+  font-size: 0.85rem;
+  color: #475569;
+  line-height: 1.7;
+}
+.seller-status-updated {
+  font-size: 0.76rem;
+  color: #64748b;
+}
+
+.seller-score-actions button.is-loading {
+  opacity: .65;
+  cursor: wait;
+}
+
 .seller-score-cell {
   text-align: center;
 }
@@ -975,6 +1117,46 @@ tr:last-child td {
 .seller-score-badge:hover {
   transform: translateY(-1px);
   box-shadow: 0 10px 26px rgba(15,118,110,.18);
+}
+
+@media (max-width: 640px) {
+  .seller-modal-overlay {
+    padding: 1rem;
+    align-items: flex-end;
+  }
+  .seller-modal {
+    width: 100%;
+    max-width: 100%;
+    border-radius: 1.25rem 1.25rem 0 0;
+    padding: 1.6rem 1.2rem 1rem;
+  }
+  .seller-modal-row {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.35rem;
+  }
+  .seller-modal-label {
+    min-width: 0;
+  }
+  .seller-score-range {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.65rem;
+  }
+  .seller-score-value {
+    align-self: flex-start;
+  }
+}
+
+@media (max-width: 400px) {
+  .seller-score-actions {
+    flex-direction: column;
+  }
+  .seller-score-actions button {
+    flex: 1 1 auto;
+    width: 100%;
+  }
 }
 
 
@@ -2088,20 +2270,47 @@ function stopMessagesPolling() {
 /* بعد از const token = … این را اضافه کن */
 function toIdString(raw) {
   if (!raw) return '';
-  
+
   if (typeof raw === 'string') return raw;
-  
+
   if (typeof raw === 'object') {
     if (raw.$oid) return String(raw.$oid);
     if (raw._id) return String(raw._id);
     if (raw.id) return String(raw.id);
-    
+
     if (typeof raw.toString === 'function') {
       return raw.toString();
     }
   }
-  
+
   return String(raw);
+}
+
+function escapeHtml(value) {
+  if (value === null || value === undefined) return '';
+  return String(value)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
+
+function formatNoteForDisplay(note) {
+  if (!note) return '';
+  return escapeHtml(note).replace(/\n/g, '<br>');
+}
+
+function formatDateTime(value) {
+  if (!value) return '';
+  try {
+    return new Date(value).toLocaleString('fa-IR', {
+      dateStyle: 'medium',
+      timeStyle: 'short'
+    });
+  } catch (err) {
+    return '';
+  }
 }
 
 
@@ -2132,30 +2341,8 @@ let productsList = [];
 let productsSortMode = 'newest';  // حالت پیش‌فرض مرتب‌سازی
 let productSearchQuery = '';      // کوئری جستجو (برای فیلتر)
 
-const SELLER_SCORE_STORAGE_KEY = 'adminSellerScores';
-let sellerScores = loadSellerScores();
-
-function loadSellerScores() {
-  if (typeof window === 'undefined' || !window.localStorage) return {};
-  try {
-    const raw = window.localStorage.getItem(SELLER_SCORE_STORAGE_KEY);
-    if (!raw) return {};
-    const parsed = JSON.parse(raw);
-    return parsed && typeof parsed === 'object' ? parsed : {};
-  } catch (err) {
-    console.warn('⚠️ خطا در خواندن نمره فروشنده‌ها:', err);
-    return {};
-  }
-}
-
-function persistSellerScores() {
-  if (typeof window === 'undefined' || !window.localStorage) return;
-  try {
-    window.localStorage.setItem(SELLER_SCORE_STORAGE_KEY, JSON.stringify(sellerScores));
-  } catch (err) {
-    console.warn('⚠️ خطا در ذخیره نمره فروشنده‌ها:', err);
-  }
-}
+let sellerPerformanceMap = {};
+let sellerPerformanceLoaded = false;
 
 function normaliseScoreKey(id) {
   if (!id) return '';
@@ -2173,12 +2360,50 @@ function resolveSellerKeyFromShop(shop) {
   return normaliseScoreKey(candidate);
 }
 
-function getSellerScoreByKey(key) {
+function parsePerformancePayload(payload) {
+  if (!payload || typeof payload !== 'object') return null;
+
+  const sellerId = payload.sellerId ? toIdString(payload.sellerId) : '';
+  const shopurl = payload.shopurl || '';
+  const note = typeof payload.adminScoreNote === 'string'
+    ? payload.adminScoreNote
+    : (typeof payload.note === 'string' ? payload.note : '');
+  const meta = {
+    sellerId,
+    shopurl,
+    storename: payload.storename || '',
+    adminScore: payload.adminScore != null ? Number(payload.adminScore) : null,
+    updatedAt: payload.updatedAt || null,
+    status: payload.status || 'unset',
+    statusLabel: payload.statusLabel || 'منتظر ارزیابی',
+    statusMessage: payload.statusMessage || '',
+    severity: payload.severity || 'neutral',
+    canStay: payload.canStay !== false,
+    message: payload.message || '',
+    adminScoreNote: note,
+    note
+  };
+
+  const keyCandidate = payload.sellerKey || sellerId || (shopurl ? `shopurl:${shopurl}` : '');
+  const normalised = normaliseScoreKey(keyCandidate);
+  if (normalised) {
+    meta.sellerKey = normalised;
+  }
+
+  return meta;
+}
+
+function getSellerPerformanceByKey(key) {
   const normalised = normaliseScoreKey(key);
   if (!normalised) return null;
-  return Object.prototype.hasOwnProperty.call(sellerScores, normalised)
-    ? sellerScores[normalised]
+  return Object.prototype.hasOwnProperty.call(sellerPerformanceMap, normalised)
+    ? sellerPerformanceMap[normalised]
     : null;
+}
+
+function getSellerScoreByKey(key) {
+  const meta = getSellerPerformanceByKey(key);
+  return meta && meta.adminScore != null ? meta.adminScore : null;
 }
 
 function getSellerScoreForShop(shop) {
@@ -2186,34 +2411,121 @@ function getSellerScoreForShop(shop) {
   return key ? getSellerScoreByKey(key) : null;
 }
 
-function setSellerScoreByKey(key, value) {
-  const normalised = normaliseScoreKey(key);
-  if (!normalised) return null;
-  const numeric = Math.round(Number(value));
-  if (Number.isNaN(numeric)) return null;
-  const clamped = Math.max(0, Math.min(100, numeric));
-  sellerScores[normalised] = clamped;
-  persistSellerScores();
-  return clamped;
-}
+async function refreshSellerPerformanceMap() {
+  try {
+    const res = await fetch(`${API_BASE}/sellers/performance`, {
+      credentials: 'include'
+    });
 
-function setSellerScoreForShop(shop, value) {
-  const key = resolveSellerKeyFromShop(shop);
-  return key ? setSellerScoreByKey(key, value) : null;
-}
+    let payload = null;
+    try {
+      payload = await res.json();
+    } catch (err) {
+      payload = null;
+    }
 
-function clearSellerScoreByKey(key) {
-  const normalised = normaliseScoreKey(key);
-  if (!normalised) return;
-  if (Object.prototype.hasOwnProperty.call(sellerScores, normalised)) {
-    delete sellerScores[normalised];
-    persistSellerScores();
+    if (!res.ok) {
+      const message = payload && payload.message ? payload.message : 'خطا در دریافت وضعیت عملکرد فروشنده‌ها.';
+      throw new Error(message);
+    }
+
+    const records = Array.isArray(payload)
+      ? payload
+      : (Array.isArray(payload?.data) ? payload.data : []);
+
+    const nextMap = {};
+    records.forEach(item => {
+      const meta = parsePerformancePayload(item);
+      if (meta && meta.sellerKey) {
+        nextMap[meta.sellerKey] = meta;
+      }
+    });
+
+    sellerPerformanceMap = nextMap;
+    sellerPerformanceLoaded = true;
+    return true;
+  } catch (err) {
+    console.error('⚠️ خطا در دریافت وضعیت عملکرد فروشنده‌ها:', err);
+    sellerPerformanceLoaded = false;
+    return false;
   }
 }
 
-function clearSellerScoreForShop(shop) {
+async function setSellerScoreByKey(key, value, note) {
+  const normalised = normaliseScoreKey(key);
+  if (!normalised) throw new Error('شناسه فروشنده برای ثبت نمره معتبر نیست.');
+
+  const body = { score: value };
+  if (typeof note === 'string') {
+    body.note = note;
+  }
+
+  const res = await fetch(`${API_BASE}/sellers/performance/${encodeURIComponent(normalised)}`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    credentials: 'include',
+    body: JSON.stringify(body)
+  });
+
+  let payload = null;
+  try {
+    payload = await res.json();
+  } catch (err) {
+    payload = null;
+  }
+
+  if (!res.ok) {
+    const message = payload && payload.message ? payload.message : 'خطا در ثبت نمره فروشنده.';
+    throw new Error(message);
+  }
+
+  const meta = parsePerformancePayload(payload);
+  if (meta && meta.sellerKey) {
+    sellerPerformanceMap[meta.sellerKey] = meta;
+  }
+  sellerPerformanceLoaded = true;
+  return meta;
+}
+
+async function setSellerScoreForShop(shop, value, note) {
   const key = resolveSellerKeyFromShop(shop);
-  if (key) clearSellerScoreByKey(key);
+  return key ? setSellerScoreByKey(key, value, note) : null;
+}
+
+async function clearSellerScoreByKey(key) {
+  const normalised = normaliseScoreKey(key);
+  if (!normalised) throw new Error('شناسه فروشنده معتبر نیست.');
+
+  const res = await fetch(`${API_BASE}/sellers/performance/${encodeURIComponent(normalised)}`, {
+    method: 'DELETE',
+    credentials: 'include'
+  });
+
+  let payload = null;
+  try {
+    payload = await res.json();
+  } catch (err) {
+    payload = null;
+  }
+
+  if (!res.ok) {
+    const message = payload && payload.message ? payload.message : 'خطا در حذف نمره فروشنده.';
+    throw new Error(message);
+  }
+
+  const meta = parsePerformancePayload(payload);
+  if (meta && meta.sellerKey) {
+    sellerPerformanceMap[meta.sellerKey] = meta;
+  } else {
+    delete sellerPerformanceMap[normalised];
+  }
+  sellerPerformanceLoaded = true;
+  return meta;
+}
+
+async function clearSellerScoreForShop(shop) {
+  const key = resolveSellerKeyFromShop(shop);
+  return key ? clearSellerScoreByKey(key) : null;
 }
 
 let messagesList = [];
@@ -3573,6 +3885,7 @@ async function updateAll() {
     // ۲) ست‌کردن آرایه‌های سراسری
     usersList    = users;
     shopsList    = shops;
+    await refreshSellerPerformanceMap();
     console.group('🟢 shopsList snapshot');
 shopsList.slice(0, 10).forEach((s, i) => {
   console.log(i,
@@ -3722,10 +4035,21 @@ function renderSellers() {
       : '-';
 
     const sellerKey = resolveSellerKeyFromShop(shop);
-    const adminScore = sellerKey ? getSellerScoreByKey(sellerKey) : null;
+    const performance = sellerKey ? getSellerPerformanceByKey(sellerKey) : null;
+    const adminScore = performance && performance.adminScore != null ? performance.adminScore : null;
     const scoreBadge = adminScore != null
       ? `<span class="seller-score-badge has-score"><strong>${adminScore}</strong><span class="score-suffix">/100</span></span>`
       : '<span class="seller-score-badge no-score">ثبت نشده</span>';
+    const statusSeverity = performance ? performance.severity || 'neutral' : 'neutral';
+    const statusLabel = performance ? performance.statusLabel : 'در انتظار ارزیابی';
+    const statusBadge = `<span class="seller-status-pill status-${statusSeverity}">${statusLabel}</span>`;
+    const eligibilityClass = performance
+      ? (performance.canStay ? 'status-eligible' : 'status-ineligible')
+      : 'status-neutral';
+    const eligibilityText = performance
+      ? (performance.canStay ? '✅ مجاز به ادامه فعالیت' : '⛔ امکان ادامه فعالیت در ویترینت وجود ندارد')
+      : 'در انتظار ارزیابی ادمین';
+    const combinedStatus = `<div class="seller-score-cell-wrap">${scoreBadge}${statusBadge}<span class="seller-status-note ${eligibilityClass}">${eligibilityText}</span></div>`;
     const sid = toIdString(shop.sellerId || shop.seller_id || shop._id || shop._sid || shop.shopurl);
     let tr = document.createElement('tr');
     tr.innerHTML = `
@@ -3735,7 +4059,7 @@ function renderSellers() {
       <td>${shopLink}</td>
       <td>${countProducts}</td>
       <td>${shop._visits}</td>
-      <td class="seller-cell seller-modal-trigger seller-score-cell" data-score-key="${sellerKey || ''}">${scoreBadge}</td>
+      <td class="seller-cell seller-modal-trigger seller-score-cell" data-score-key="${sellerKey || ''}">${combinedStatus}</td>
       <td>
         <button class="action-btn delete">
           <i class="ri-delete-bin-line"></i> حذف
@@ -3763,7 +4087,7 @@ function renderSellers() {
 /* ===== نسخهٔ جدید تابع showSellerModal (همراه شماره موبایل) ===== */
 /* ------------------------------------------------------------------
 /* ─────────────── showSellerModal ───────────────── */
-function showSellerModal (shop) {
+async function showSellerModal (shop) {
   const overlay = document.getElementById('seller-modal-overlay');
 
   /* تبدیل تاریخ میلادی به شمسی */
@@ -3789,9 +4113,40 @@ function showSellerModal (shop) {
         shop.phone || shop.mobile ||
         shop.ownerPhone || shop.ownerMobile || '-';
   const sellerScoreKey = resolveSellerKeyFromShop(shop);
-  const existingAdminScore = sellerScoreKey ? getSellerScoreByKey(sellerScoreKey) : null;
+
+  if (sellerScoreKey && !sellerPerformanceLoaded) {
+    await refreshSellerPerformanceMap();
+  }
+
+  let performanceMeta = sellerScoreKey ? getSellerPerformanceByKey(sellerScoreKey) : null;
+
+  const existingAdminScore = performanceMeta && performanceMeta.adminScore != null
+    ? performanceMeta.adminScore
+    : null;
+  const defaultAdminScore = 75;
   let hasExistingScore = existingAdminScore != null;
-  const initialAdminScore = hasExistingScore ? existingAdminScore : 75;
+  const initialAdminScore = hasExistingScore ? existingAdminScore : defaultAdminScore;
+  const statusSeverity = performanceMeta ? performanceMeta.severity || 'neutral' : 'neutral';
+  const statusLabel = performanceMeta ? performanceMeta.statusLabel : 'در انتظار ارزیابی';
+  const statusMessage = performanceMeta && performanceMeta.statusMessage
+    ? performanceMeta.statusMessage
+    : 'پس از ثبت نمره، وضعیت عملکرد نمایش داده می‌شود.';
+  const eligibilityNote = performanceMeta
+    ? (performanceMeta.canStay ? '✅ این فروشنده مجاز به ادامه همکاری است.' : '⛔ با این نمره فروشنده قادر به ماندن در ویترینت نیست.')
+    : 'برای تعیین وضعیت همکاری، ابتدا نمره را ثبت کنید.';
+  const statusUpdatedText = performanceMeta && performanceMeta.updatedAt
+    ? `آخرین بروزرسانی: ${formatDateTime(performanceMeta.updatedAt)}`
+    : 'هنوز نمره‌ای ثبت نشده است.';
+  const existingAdminNote = performanceMeta && typeof performanceMeta.note === 'string'
+    ? performanceMeta.note
+    : (performanceMeta && typeof performanceMeta.adminScoreNote === 'string'
+      ? performanceMeta.adminScoreNote
+      : '');
+  const defaultNoteMessage = 'یادداشتی ثبت نشده است.';
+  const noteDisplayHtml = existingAdminNote
+    ? formatNoteForDisplay(existingAdminNote)
+    : escapeHtml(defaultNoteMessage);
+  const noteValueForInput = escapeHtml(existingAdminNote);
 
   /* ---------- رندر اولیه ---------- */
   overlay.innerHTML = `
@@ -3841,7 +4196,24 @@ function showSellerModal (shop) {
           <button type="button" class="score-clear-btn" id="clearSellerScoreBtn" ${hasExistingScore ? '' : 'disabled'}>حذف نمره</button>
         </div>
         <p class="seller-score-hint">نمره ۰ تا ۱۰۰ کیفیت همکاری فروشنده را از نگاه تیم ادمین نشان می‌دهد. پس از انتخاب مقدار، دکمه «ثبت نمره» را بزن.</p>
+        <div class="seller-score-note">
+          <label for="sellerScoreNote">یادداشت داخلی ادمین</label>
+          <textarea id="sellerScoreNote" placeholder="نکات ارزیابی را وارد کنید…">${noteValueForInput}</textarea>
+          <p class="seller-score-note-hint">این یادداشت فقط برای تیم ادمین نمایش داده می‌شود و به فروشنده ارسال نخواهد شد.</p>
+        </div>
         <div class="seller-score-alert" id="sellerScoreAlert" style="display:none;"></div>
+        <div class="seller-score-status" id="sellerScoreStatus">
+          <div class="seller-score-status-header">
+            <span class="seller-status-pill status-${statusSeverity}" id="sellerStatusBadge">${statusLabel}</span>
+            <span class="seller-status-updated" id="sellerStatusUpdated">${statusUpdatedText}</span>
+          </div>
+          <p class="seller-status-text" id="sellerStatusText">${statusMessage}</p>
+          <p class="seller-status-note ${performanceMeta ? (performanceMeta.canStay ? 'status-eligible' : 'status-ineligible') : 'status-neutral'}" id="sellerStatusNote">${eligibilityNote}</p>
+          <div class="seller-score-note-display" id="sellerNoteDisplay">
+            <span class="seller-score-note-title">آخرین یادداشت ثبت‌شده</span>
+            <p class="seller-note-text" id="sellerNoteText">${noteDisplayHtml}</p>
+          </div>
+        </div>
       </div>
 
       <form id="sellerMessageForm"
@@ -3865,11 +4237,71 @@ function showSellerModal (shop) {
   const scoreSaveBtn = document.getElementById('saveSellerScoreBtn');
   const scoreClearBtn = document.getElementById('clearSellerScoreBtn');
   const scoreAlertEl = document.getElementById('sellerScoreAlert');
+  const sellerScoreNoteEl = document.getElementById('sellerScoreNote');
+  const statusElements = {
+    badge: document.getElementById('sellerStatusBadge'),
+    text: document.getElementById('sellerStatusText'),
+    note: document.getElementById('sellerStatusNote'),
+    updated: document.getElementById('sellerStatusUpdated'),
+    noteText: document.getElementById('sellerNoteText'),
+    noteContainer: document.getElementById('sellerNoteDisplay')
+  };
 
   if (scoreInputEl && scoreValueEl) {
     scoreInputEl.value = String(initialAdminScore);
     scoreValueEl.textContent = String(initialAdminScore);
   }
+
+  const resolveNoteValue = (info) => {
+    if (!info) return '';
+    if (typeof info.note === 'string') return info.note;
+    if (typeof info.adminScoreNote === 'string') return info.adminScoreNote;
+    return '';
+  };
+
+  const updateNoteUI = (value) => {
+    const noteValue = typeof value === 'string' ? value : '';
+    if (sellerScoreNoteEl) sellerScoreNoteEl.value = noteValue;
+    if (statusElements.noteText) {
+      statusElements.noteText.innerHTML = noteValue
+        ? formatNoteForDisplay(noteValue)
+        : escapeHtml(defaultNoteMessage);
+    }
+    if (statusElements.noteContainer) {
+      statusElements.noteContainer.style.display = 'flex';
+    }
+  };
+
+  updateNoteUI(existingAdminNote);
+
+  const applyStatusMeta = (meta) => {
+    const info = meta || null;
+    const severity = info ? info.severity || 'neutral' : 'neutral';
+    if (statusElements.badge) {
+      statusElements.badge.textContent = info ? info.statusLabel : 'در انتظار ارزیابی';
+      statusElements.badge.className = `seller-status-pill status-${severity}`;
+    }
+    if (statusElements.text) {
+      statusElements.text.textContent = info && info.statusMessage
+        ? info.statusMessage
+        : 'پس از ثبت نمره، وضعیت عملکرد نمایش داده می‌شود.';
+    }
+    if (statusElements.note) {
+      const canStay = info ? !!info.canStay : null;
+      statusElements.note.textContent = info
+        ? (canStay ? '✅ این فروشنده مجاز به ادامه همکاری است.' : '⛔ با این نمره فروشنده قادر به ماندن در ویترینت نیست.')
+        : 'برای تعیین وضعیت همکاری، ابتدا نمره را ثبت کنید.';
+      statusElements.note.className = `seller-status-note ${info ? (canStay ? 'status-eligible' : 'status-ineligible') : 'status-neutral'}`;
+    }
+    if (statusElements.updated) {
+      statusElements.updated.textContent = info && info.updatedAt
+        ? `آخرین بروزرسانی: ${formatDateTime(info.updatedAt)}`
+        : 'هنوز نمره‌ای ثبت نشده است.';
+    }
+    updateNoteUI(resolveNoteValue(info));
+  };
+
+  applyStatusMeta(performanceMeta);
 
   const showScoreAlert = (message, type = 'success') => {
     if (!scoreAlertEl) return;
@@ -3889,35 +4321,70 @@ function showSellerModal (shop) {
   }
 
   if (scoreSaveBtn) {
-    scoreSaveBtn.addEventListener('click', () => {
+    scoreSaveBtn.addEventListener('click', async () => {
       if (!sellerScoreKey) {
         showScoreAlert('شناسه فروشنده برای ثبت نمره یافت نشد.', 'error');
         return;
       }
       const sourceValue = scoreInputEl ? scoreInputEl.value : initialAdminScore;
-      const savedScore = setSellerScoreByKey(sellerScoreKey, sourceValue);
-      if (savedScore == null) {
-        showScoreAlert('مقدار نمره معتبر نیست.', 'error');
-        return;
+      const noteValue = sellerScoreNoteEl ? sellerScoreNoteEl.value : '';
+      scoreSaveBtn.disabled = true;
+      scoreSaveBtn.classList.add('is-loading');
+      try {
+        const meta = await setSellerScoreByKey(sellerScoreKey, sourceValue, noteValue);
+        performanceMeta = meta || performanceMeta;
+        const finalScore = meta && meta.adminScore != null
+          ? meta.adminScore
+          : Math.max(0, Math.min(100, Math.round(Number(sourceValue) || 0)));
+        if (scoreValueEl) scoreValueEl.textContent = String(finalScore);
+        if (scoreInputEl) scoreInputEl.value = String(finalScore);
+        hasExistingScore = finalScore != null;
+        if (scoreClearBtn) scoreClearBtn.disabled = !hasExistingScore;
+        if (meta) {
+          applyStatusMeta(meta);
+        } else {
+          updateNoteUI(noteValue);
+        }
+        renderSellers();
+        showScoreAlert((meta && meta.message) || 'نمره ثبت شد.');
+      } catch (err) {
+        console.error('saveSellerScore error:', err);
+        showScoreAlert(err.message || 'خطا در ثبت نمره.', 'error');
+      } finally {
+        scoreSaveBtn.disabled = false;
+        scoreSaveBtn.classList.remove('is-loading');
       }
-      if (scoreValueEl) scoreValueEl.textContent = String(savedScore);
-      hasExistingScore = true;
-      if (scoreClearBtn) scoreClearBtn.disabled = false;
-      showScoreAlert('نمره با موفقیت ثبت شد.');
-      renderSellers();
     });
   }
 
   if (scoreClearBtn) {
-    scoreClearBtn.addEventListener('click', () => {
-      if (!sellerScoreKey) return;
-      clearSellerScoreByKey(sellerScoreKey);
-      hasExistingScore = false;
-      if (scoreClearBtn) scoreClearBtn.disabled = true;
-      if (scoreInputEl) scoreInputEl.value = '50';
-      if (scoreValueEl) scoreValueEl.textContent = '50';
-      showScoreAlert('نمره ادمین حذف شد.');
-      renderSellers();
+    scoreClearBtn.addEventListener('click', async () => {
+      if (!sellerScoreKey) {
+        showScoreAlert('شناسه فروشنده یافت نشد.', 'error');
+        return;
+      }
+      scoreClearBtn.disabled = true;
+      scoreClearBtn.classList.add('is-loading');
+      try {
+        const meta = await clearSellerScoreByKey(sellerScoreKey);
+        performanceMeta = meta || null;
+        if (scoreInputEl) scoreInputEl.value = String(defaultAdminScore);
+        if (scoreValueEl) scoreValueEl.textContent = String(defaultAdminScore);
+        hasExistingScore = false;
+        if (meta) {
+          applyStatusMeta(meta);
+        } else {
+          updateNoteUI('');
+        }
+        renderSellers();
+        showScoreAlert((meta && meta.message) || 'نمره حذف شد.');
+      } catch (err) {
+        console.error('clearSellerScore error:', err);
+        showScoreAlert(err.message || 'خطا در حذف نمره.', 'error');
+        scoreClearBtn.disabled = false;
+      } finally {
+        scoreClearBtn.classList.remove('is-loading');
+      }
     });
   }
 

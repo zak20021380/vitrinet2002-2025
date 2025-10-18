@@ -2,7 +2,15 @@ const express = require('express');
 const router = express.Router();
 const { getCurrentSeller } = require('../controllers/authController');
 
-const { registerSeller, deleteSeller, upgradeSeller } = require('../controllers/sellerController');
+const {
+  registerSeller,
+  deleteSeller,
+  upgradeSeller,
+  updateAdminScore,
+  clearAdminScore,
+  listSellerPerformance,
+  getCurrentSellerPerformanceStatus
+} = require('../controllers/sellerController');
 const Seller = require('../models/Seller');
 const authMiddleware = require('../middlewares/authMiddleware');
 const mongoose = require('mongoose');   
@@ -114,6 +122,15 @@ router.get('/profile', authMiddleware('seller'), getCurrentSeller);
 
 // ارتقا حساب فروشنده (خرید اشتراک/پرمیوم)
 router.post('/upgrade', authMiddleware('seller'), upgradeSeller);
+
+
+// وضعیت عملکرد فروشنده (ادمین)
+router.get('/performance', authMiddleware('admin'), listSellerPerformance);
+router.put('/performance/:sellerId', authMiddleware('admin'), updateAdminScore);
+router.delete('/performance/:sellerId', authMiddleware('admin'), clearAdminScore);
+
+// وضعیت عملکرد برای خود فروشنده
+router.get('/performance/status', authMiddleware('seller'), getCurrentSellerPerformanceStatus);
 
 // حذف فروشنده - فقط ادمین
 router.delete('/:sellerId', authMiddleware('admin'), deleteSeller);
