@@ -12,6 +12,9 @@ router.post('/login', adminController.login);
 // پروفایل ادمین (فقط با نقش ادمین و توکن معتبر)
 router.get('/profile', authMiddleware('admin'), adminController.profile);
 
+// آمار داشبورد ادمین
+router.get('/dashboard/stats', authMiddleware('admin'), adminController.getDashboardStats);
+
 // اگر بخوای روت‌های بیشتر مخصوص ادمین اضافه کنی (مثال)
 // router.get('/dashboard', authMiddleware('admin'), adminController.dashboard);
 

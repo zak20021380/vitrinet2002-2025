@@ -1,8 +1,12 @@
 // controllers/adminController.js
 
-const Admin    = require('../models/admin');
-const bcrypt   = require('bcryptjs');
-const jwt      = require('jsonwebtoken');
+const Admin      = require('../models/admin');
+const bcrypt     = require('bcryptjs');
+const jwt        = require('jsonwebtoken');
+const User       = require('../models/user');
+const Seller     = require('../models/Seller');
+const Product    = require('../models/product');
+const DailyVisit = require('../models/DailyVisit');
 
 // کلید سری JWT از .env خوانده می‌شود وگرنه مقدار پیش‌فرض
 const JWT_SECRET = "vitrinet_secret_key";
@@ -108,5 +112,187 @@ exports.profile = async (req, res) => {
   } catch (err) {
     console.error('❌ get admin profile error:', err);
     res.status(500).json({ message: 'خطا در دریافت پروفایل.', error: err.message });
+  }
+};
+
+/**
+ * آمار تجمیعی داشبورد ادمین
+ * GET /api/admin/dashboard/stats
+ */
+exports.getDashboardStats = async (req, res) => {
+  try {
+    const daysParam = parseInt(req.query.days, 10);
+    const rangeDays = Number.isFinite(daysParam) ? daysParam : 30;
+    const days = Math.min(Math.max(rangeDays, 7), 180);
+
+    let timeZone = req.query.tz || 'Asia/Tehran';
+
+    const now = new Date();
+    let tzFormatter;
+    try {
+      tzFormatter = new Intl.DateTimeFormat('en-CA', {
+        timeZone,
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit'
+      });
+    } catch (err) {
+      timeZone = 'UTC';
+      tzFormatter = new Intl.DateTimeFormat('en-CA', {
+        timeZone,
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit'
+      });
+    }
+
+    const tzNow = new Date(now.toLocaleString('en-US', { timeZone }));
+    const offsetMs = tzNow.getTime() - now.getTime();
+
+    const startOfTodayLocal = new Date(now.getTime() + offsetMs);
+    startOfTodayLocal.setHours(0, 0, 0, 0);
+    const startOfToday = new Date(startOfTodayLocal.getTime() - offsetMs);
+
+    const startOfTomorrow = new Date(startOfToday);
+    startOfTomorrow.setUTCDate(startOfTomorrow.getUTCDate() + 1);
+
+    const rangeStart = new Date(startOfToday);
+    rangeStart.setUTCDate(rangeStart.getUTCDate() - (days - 1));
+
+    const formatDateKey = (date) => tzFormatter.format(date);
+
+    const todayKey = formatDateKey(startOfToday);
+    const rangeStartKey = formatDateKey(rangeStart);
+
+    const dailyVisitRangeStart = new Date(`${rangeStartKey}T00:00:00.000Z`);
+    const dailyVisitRangeEnd = new Date(`${todayKey}T23:59:59.999Z`);
+
+    const baseUserFilter = { $or: [{ deleted: { $exists: false } }, { deleted: false }] };
+
+    const [
+      totalUsers,
+      totalSellers,
+      totalProducts,
+      visitsAggregation,
+      usersAggregation,
+      sellersAggregation,
+      productsAggregation,
+      newUsersToday,
+      newSellersToday,
+      newProductsToday
+    ] = await Promise.all([
+      User.countDocuments(baseUserFilter),
+      Seller.countDocuments(),
+      Product.countDocuments(),
+      DailyVisit.aggregate([
+        { $match: { date: { $gte: dailyVisitRangeStart, $lte: dailyVisitRangeEnd } } },
+        {
+          $group: {
+            _id: {
+              $dateToString: { format: '%Y-%m-%d', date: '$date', timezone: 'UTC' }
+            },
+            count: { $sum: '$count' }
+          }
+        },
+        { $sort: { _id: 1 } }
+      ]),
+      User.aggregate([
+        {
+          $match: {
+            ...baseUserFilter,
+            createdAt: { $gte: rangeStart, $lt: startOfTomorrow }
+          }
+        },
+        {
+          $group: {
+            _id: {
+              $dateToString: { format: '%Y-%m-%d', date: '$createdAt', timezone: timeZone }
+            },
+            count: { $sum: 1 }
+          }
+        },
+        { $sort: { _id: 1 } }
+      ]),
+      Seller.aggregate([
+        {
+          $match: {
+            createdAt: { $gte: rangeStart, $lt: startOfTomorrow }
+          }
+        },
+        {
+          $group: {
+            _id: {
+              $dateToString: { format: '%Y-%m-%d', date: '$createdAt', timezone: timeZone }
+            },
+            count: { $sum: 1 }
+          }
+        },
+        { $sort: { _id: 1 } }
+      ]),
+      Product.aggregate([
+        {
+          $match: {
+            createdAt: { $gte: rangeStart, $lt: startOfTomorrow }
+          }
+        },
+        {
+          $group: {
+            _id: {
+              $dateToString: { format: '%Y-%m-%d', date: '$createdAt', timezone: timeZone }
+            },
+            count: { $sum: 1 }
+          }
+        },
+        { $sort: { _id: 1 } }
+      ]),
+      User.countDocuments({ ...baseUserFilter, createdAt: { $gte: startOfToday, $lt: startOfTomorrow } }),
+      Seller.countDocuments({ createdAt: { $gte: startOfToday, $lt: startOfTomorrow } }),
+      Product.countDocuments({ createdAt: { $gte: startOfToday, $lt: startOfTomorrow } })
+    ]);
+
+    const visitsMap = new Map(visitsAggregation.map((item) => [item._id, item.count]));
+    const usersMap = new Map(usersAggregation.map((item) => [item._id, item.count]));
+    const sellersMap = new Map(sellersAggregation.map((item) => [item._id, item.count]));
+    const productsMap = new Map(productsAggregation.map((item) => [item._id, item.count]));
+
+    const trends = [];
+    const cursor = new Date(rangeStart);
+
+    while (cursor < startOfTomorrow) {
+      const key = formatDateKey(cursor);
+      trends.push({
+        date: key,
+        visits: visitsMap.get(key) || 0,
+        newUsers: usersMap.get(key) || 0,
+        newSellers: sellersMap.get(key) || 0,
+        newProducts: productsMap.get(key) || 0
+      });
+      cursor.setUTCDate(cursor.getUTCDate() + 1);
+    }
+
+    const visitsToday = visitsMap.get(todayKey) || 0;
+
+    res.json({
+      summary: {
+        visitsToday,
+        newUsersToday,
+        newSellersToday,
+        newProductsToday,
+        totalUsers,
+        totalSellers,
+        totalProducts
+      },
+      trends,
+      range: {
+        start: trends[0]?.date || rangeStartKey,
+        end: trends[trends.length - 1]?.date || todayKey,
+        days: trends.length,
+        timeZone
+      },
+      generatedAt: now.toISOString()
+    });
+  } catch (err) {
+    console.error('❌ dashboard stats error:', err);
+    res.status(500).json({ message: 'خطا در دریافت آمار داشبورد.', error: err.message });
   }
 };

@@ -685,6 +685,25 @@ tr:last-child td {
   display: flex;
   align-items: center;
   justify-content: center;
+  flex-direction: column;
+  gap: 0.75rem;
+  position: relative;
+}
+
+.dynamic-chart-empty {
+  display: none;
+  width: 100%;
+  height: 100%;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  color: #6b7280;
+  font-weight: 600;
+  background: #f8fafc;
+  border-radius: 1.2rem;
+  border: 1.5px dashed #0ea5e942;
+  padding: 1.2rem;
+  line-height: 1.9;
 }
 
 @media (max-width: 1200px) {
@@ -2355,6 +2374,12 @@ function toIdString(raw) {
   return String(raw);
 }
 
+function formatNumber(value) {
+  const num = Number(value);
+  if (!Number.isFinite(num)) return numberFormatter.format(0);
+  return numberFormatter.format(num);
+}
+
 function escapeHtml(value) {
   if (value === null || value === undefined) return '';
   return String(value)
@@ -2388,21 +2413,27 @@ function formatDateTime(value) {
 
 
 
-// -------- داده‌های تستی آمار بازدید (فیک) --------
-let days30 = Array.from({length: 30}, (_,i) => {
-  let d = new Date();
-  d.setDate(d.getDate() - (29-i));
-  return d.toLocaleDateString('fa-IR', {month:'numeric', day:'numeric'});
-});
-let weekDays = ['شنبه', 'یکشنبه', 'دوشنبه', 'سه‌شنبه', 'چهارشنبه', 'پنجشنبه', 'جمعه'];
-let last7daysIdx = (new Date().getDay() + 6) % 7;
-let weekLabels = [];
-for (let i=6;i>=0;i--) weekLabels.push(weekDays[(last7daysIdx-i+7)%7]);
+const numberFormatter = new Intl.NumberFormat('fa-IR');
+const persianDateFormatter = new Intl.DateTimeFormat('fa-IR', { month: 'numeric', day: 'numeric' });
 
-let visitsPerDay = Array.from({length: 30}, (_,i)=> Math.round(60+Math.sin(i/3)*40+Math.random()*25));
-let usersPerDay = Array(30).fill(0);
-let sellersPerDay = Array(30).fill(0);
-let productsPerDay = Array(30).fill(0);
+let dashboardSummary = {
+  visitsToday: 0,
+  newUsersToday: 0,
+  newSellersToday: 0,
+  newProductsToday: 0,
+  totalUsers: 0,
+  totalSellers: 0,
+  totalProducts: 0,
+  generatedAt: null,
+  range: null
+};
+
+let dashboardTrend = [];
+let trendLabels = [];
+let visitsPerDay = [];
+let usersPerDay = [];
+let sellersPerDay = [];
+let productsPerDay = [];
 
 let usersList = [];
 let shopsList = [];
@@ -3260,6 +3291,80 @@ async function unblockSender(chatId) {
 // ← این بخش را پیدا کنید (جایی که تابع fetchUsers تعریف شده است)
 // ─── اصلاح تابع fetchUsers ───
 // جایگزین کل تابع قبلی کنید
+const DASHBOARD_TREND_DAYS = 90;
+
+async function fetchDashboardStats(days = DASHBOARD_TREND_DAYS) {
+  try {
+    const res = await fetch(`${API_BASE}/admin/dashboard/stats?days=${encodeURIComponent(days)}`, {
+      credentials: 'include'
+    });
+
+    if (!res.ok) {
+      console.error('fetchDashboardStats – HTTP‑', res.status, await res.text());
+      return null;
+    }
+
+    const data = await res.json();
+    return data;
+  } catch (err) {
+    console.error('fetchDashboardStats – EXCEPTION', err);
+    return null;
+  }
+}
+
+function applyDashboardStats(stats, { usersFallback = 0, sellersFallback = 0, productsFallback = 0 } = {}) {
+  const safeNumber = (value, fallback = 0) => {
+    const num = Number(value);
+    return Number.isFinite(num) ? num : fallback;
+  };
+
+  dashboardSummary = {
+    visitsToday: safeNumber(stats?.summary?.visitsToday),
+    newUsersToday: safeNumber(stats?.summary?.newUsersToday),
+    newSellersToday: safeNumber(stats?.summary?.newSellersToday),
+    newProductsToday: safeNumber(stats?.summary?.newProductsToday),
+    totalUsers: safeNumber(stats?.summary?.totalUsers, safeNumber(usersFallback)),
+    totalSellers: safeNumber(stats?.summary?.totalSellers, safeNumber(sellersFallback)),
+    totalProducts: safeNumber(stats?.summary?.totalProducts, safeNumber(productsFallback)),
+    generatedAt: stats?.generatedAt || null,
+    range: stats?.range || null
+  };
+
+  const trendsPayload = Array.isArray(stats?.trends) ? stats.trends : [];
+
+  const normalisedTrend = trendsPayload
+    .map((item) => {
+      const iso = typeof item.date === 'string'
+        ? item.date.slice(0, 10)
+        : (item.date ? new Date(item.date).toISOString().slice(0, 10) : null);
+
+      if (!iso) return null;
+
+      const dateObj = new Date(iso);
+      const label = Number.isNaN(dateObj.getTime())
+        ? iso
+        : persianDateFormatter.format(dateObj);
+
+      return {
+        date: iso,
+        label,
+        visits: safeNumber(item.visits),
+        users: safeNumber(item.newUsers),
+        sellers: safeNumber(item.newSellers),
+        products: safeNumber(item.newProducts)
+      };
+    })
+    .filter(Boolean)
+    .sort((a, b) => a.date.localeCompare(b.date));
+
+  dashboardTrend = normalisedTrend;
+  trendLabels = dashboardTrend.map((item) => item.label);
+  visitsPerDay = dashboardTrend.map((item) => item.visits);
+  usersPerDay = dashboardTrend.map((item) => item.users);
+  sellersPerDay = dashboardTrend.map((item) => item.sellers);
+  productsPerDay = dashboardTrend.map((item) => item.products);
+}
+
 async function fetchUsers() {
   try {
     const res = await fetch(`${API_BASE}/user`, {   // ← مسیر مفرد
@@ -3335,29 +3440,29 @@ async function fetchProducts () {
 
 // -------- نمایش کارت‌ها و جداول --------
 function updateDashboardCards() {
-  document.getElementById('visit-today').textContent = visitsPerDay[visitsPerDay.length-1];
-  document.getElementById('register-user-today').textContent = usersPerDay[usersPerDay.length-1];
-  document.getElementById('register-seller-today').textContent = shopsList.length;
-  document.getElementById('products-total').textContent = productsList.length;
+  document.getElementById('visit-today').textContent = formatNumber(dashboardSummary.visitsToday);
+  document.getElementById('register-user-today').textContent = formatNumber(dashboardSummary.newUsersToday);
+  document.getElementById('register-seller-today').textContent = formatNumber(dashboardSummary.newSellersToday);
+  document.getElementById('products-total').textContent = formatNumber(dashboardSummary.totalProducts);
 }
 function updateSidebarCounts() {
-  document.getElementById('count-users').textContent    = usersList.length;
-  document.getElementById('count-sellers').textContent  = shopsList.length;
-  document.getElementById('count-products').textContent = productsList.length;
+  document.getElementById('count-users').textContent    = formatNumber(usersList.length);
+  document.getElementById('count-sellers').textContent  = formatNumber(shopsList.length);
+  document.getElementById('count-products').textContent = formatNumber(productsList.length);
 
   const unread = getTotalUnreadMessages();
   // فقط اگر عدد بزرگ‌تر از صفر باشد نمایش بده
-  document.getElementById('count-messages').textContent = unread > 0 ? unread : '';
+  document.getElementById('count-messages').textContent = unread > 0 ? formatNumber(unread) : '';
 }
 function updateHeaderCounts() {
-  document.getElementById('header-users-count').textContent    = `(${usersList.length} کاربر)`;
-  document.getElementById('header-sellers-count').textContent  = `(${shopsList.length} فروشگاه)`;
-  document.getElementById('header-products-count').textContent = `(${productsList.length} محصول)`;
+  document.getElementById('header-users-count').textContent    = `(${formatNumber(usersList.length)} کاربر)`;
+  document.getElementById('header-sellers-count').textContent  = `(${formatNumber(shopsList.length)} فروشگاه)`;
+  document.getElementById('header-products-count').textContent = `(${formatNumber(productsList.length)} محصول)`;
 
   const unread = getTotalUnreadMessages();
   // اگر صفر بود خالی بنویس
   document.getElementById('header-messages-count').textContent =
-    unread > 0 ? `(${unread} پیام جدید)` : '';
+    unread > 0 ? `(${formatNumber(unread)} پیام جدید)` : '';
 }
 
 
@@ -3856,6 +3961,9 @@ function showDashboardChart(type, title) {
       </div>
       <div class="dynamic-chart-canvas-wrap">
         <canvas id="chartBox-canvas"></canvas>
+        <div id="chartBox-empty" class="dynamic-chart-empty">
+          داده‌ای برای این بازه زمانی ثبت نشده است.
+        </div>
       </div>
     </div>
   `;
@@ -3865,34 +3973,55 @@ function showDashboardChart(type, title) {
     if (chartObj) chartObj.destroy();
   };
 
-  let arrs = {
+  const arrs = {
     visits: visitsPerDay,
     users: usersPerDay,
-    sellers: Array(30).fill(shopsList.length),
+    sellers: sellersPerDay,
     products: productsPerDay
-  };
-  let labelsObj = {
-    week: ['شنبه','یکشنبه','دوشنبه','سه‌شنبه','چهارشنبه','پنجشنبه','جمعه'],
-    month: days30.map(str => {
-      let [m,d] = str.split('/');
-      return `${parseInt(d)}/${parseInt(m)}`;
-    })
   };
 
   function getData(period) {
-    let arr = arrs[type];
-    if (period === "today") return { data: [arr[arr.length - 1]], labels: ["امروز"] };
-    if (period === "yesterday") return { data: [arr[arr.length - 2]], labels: ["دیروز"] };
-    if (period === "week") {
-      return { data: arr.slice(-7), labels: labelsObj.week };
+    const arr = arrs[type] || [];
+    const labels = trendLabels;
+    const count = arr.length;
+
+    if (!count) {
+      return { data: [], labels: [] };
     }
-    if (period === "month") {
-      if(window.innerWidth<700){
-        return {data: arr.slice(-10), labels: labelsObj.month.slice(-10)};
-      }
-      return {data: arr.slice(-30), labels: labelsObj.month};
+
+    if (period === 'today') {
+      const idx = count - 1;
+      return {
+        data: [arr[idx]],
+        labels: [labels[idx] || 'امروز']
+      };
     }
-    return { data: [], labels: [] };
+
+    if (period === 'yesterday') {
+      const idx = count - 2;
+      if (idx < 0) return { data: [], labels: [] };
+      return {
+        data: [arr[idx]],
+        labels: [labels[idx] || 'دیروز']
+      };
+    }
+
+    if (period === 'week') {
+      const sliceStart = Math.max(count - 7, 0);
+      const dataSlice = arr.slice(sliceStart);
+      const labelSlice = labels.slice(sliceStart, sliceStart + dataSlice.length);
+      return { data: dataSlice, labels: labelSlice };
+    }
+
+    if (period === 'month') {
+      const limit = window.innerWidth < 700 ? 10 : 30;
+      const sliceStart = Math.max(count - limit, 0);
+      const dataSlice = arr.slice(sliceStart);
+      const labelSlice = labels.slice(sliceStart, sliceStart + dataSlice.length);
+      return { data: dataSlice, labels: labelSlice };
+    }
+
+    return { data: arr, labels };
   }
 
   function getColor() {
@@ -3911,6 +4040,8 @@ function showDashboardChart(type, title) {
   function getType(period) {
     return (period === "today" || period === "yesterday") ? "bar" : "line";
   }
+  const canvas = document.getElementById('chartBox-canvas');
+  const emptyBox = document.getElementById('chartBox-empty');
 
   wrap.querySelectorAll(".dash-filter-btn").forEach(btn => {
     btn.onclick = () => {
@@ -3918,9 +4049,20 @@ function showDashboardChart(type, title) {
       btn.classList.add("active");
       let period = btn.getAttribute("data-v");
       let { data, labels } = getData(period);
-      if (chartObj) chartObj.destroy();
+      if (chartObj) {
+        chartObj.destroy();
+        chartObj = null;
+      }
 
-      const canvas = document.getElementById('chartBox-canvas');
+      if (!data.length) {
+        canvas.style.display = 'none';
+        emptyBox.style.display = 'flex';
+        return;
+      }
+
+      emptyBox.style.display = 'none';
+      canvas.style.display = 'block';
+
       let parW = Math.max(canvas.parentElement.offsetWidth, 360);
       canvas.width = Math.min(900, parW - 0 + 1);
       canvas.height = window.innerWidth < 600 ? 240 : 340;
@@ -4005,11 +4147,12 @@ document.getElementById('card-products').onclick = ()=> showDashboardChart("prod
 // نسخهٔ اصلاح‌شده‌ی updateAll — فقط همین تابع را جایگزین کن
 async function updateAll() {
   try {
-    // ۱) واکشی هم‌زمان داده‌ها
-    const [users, shops, products] = await Promise.all([
+    // ۱) واکشی هم‌زمان داده‌ها و آمار داشبورد
+    const [users, shops, products, stats] = await Promise.all([
       fetchUsers(),
       fetchShops(),
-      fetchProducts()
+      fetchProducts(),
+      fetchDashboardStats()
     ]);
 
     // ۲) ست‌کردن آرایه‌های سراسری
@@ -4029,7 +4172,14 @@ console.groupEnd();
 
     productsList = products;
 
-    // ۳) تعیین شناسهٔ یکتا برای هر فروشنده
+    // ۳) به‌روزرسانی آمار داشبورد
+    applyDashboardStats(stats, {
+      usersFallback: usersList.length,
+      sellersFallback: shopsList.length,
+      productsFallback: productsList.length
+    });
+
+    // ۴) تعیین شناسهٔ یکتا برای هر فروشنده
    // ۳) تعیین شناسهٔ یکتا برای هر فروشنده (نسخه‌ی جدید)
 /* ─── STEP 1 : ساخت شناسه یکتا برای هر فروشنده ───────── */
 shopsList.forEach(s => {
@@ -4052,19 +4202,14 @@ console.table(
 
 
 
-    // ۴) پس از داشتن _sidها، مپ نام‌ها را بساز
+    // ۵) پس از داشتن _sidها، مپ نام‌ها را بساز
     buildNameMaps();
 
-    // ۵) واکشی پیام‌ها (برای شمارنده و نمایش)
+    // ۶) واکشی پیام‌ها (برای شمارنده و نمایش)
     await fetchMessages();
 
     // حتماً جدول پیام‌ها را هم رندر کن
     renderMessages();
-
-    // ۶) به‌روزرسانی آمار روزانه (نمونه)
-    usersPerDay[usersPerDay.length - 1]       = usersList.length;
-    sellersPerDay[sellersPerDay.length - 1]   = shopsList.length;
-    productsPerDay[productsPerDay.length - 1] = productsList.length;
 
     // ۷) رندر رابط کاربری
     updateDashboardCards();
