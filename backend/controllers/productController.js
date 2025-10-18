@@ -126,24 +126,41 @@ exports.deleteProduct = async (req, res) => {
 
 // گرفتن محصول تکی با آیدی
 // گرفتن محصول تکی با آیدی و دادن مشخصات فروشنده
-// گرفتن محصول تکی با آیدی و دادن مشخصات فروشنده
+// گرفتن محصول تکی با آیدی و دادن مشخصات فروشنده + ساخت URL کامل تصاویر
 exports.getProductById = async (req, res) => {
   try {
     const id = req.params.id;
-    // پیدا کردن محصول و گرفتن اطلاعات seller (گسترش‌یافته)
+
     const product = await Product.findById(id)
       .populate({
         path: 'sellerId',
-        select: 'storename ownerName address shopurl ownerFirstname ownerLastname phone logo category city'
+        select: 'storename ownerName address shopurl ownerFirstname ownerLastname phone boardImage category city desc'
       })
       .lean();
 
-    if (!product) return res.status(404).json({ message: 'محصول پیدا نشد!' });
+    if (!product) {
+      return res.status(404).json({ message: 'محصول پیدا نشد!' });
+    }
 
-    // اضافه کردن اطلاعات seller به خروجی
-    product.seller = product.sellerId || {};
+    const seller = product.sellerId || {};
+    const images = Array.isArray(product.images)
+      ? product.images.map((img) => makeFullUrl(req, img)).filter(Boolean)
+      : [];
+    const mainIndex = Number.isInteger(product.mainImageIndex) ? product.mainImageIndex : 0;
+    const safeIndex = Math.min(Math.max(mainIndex, 0), Math.max(images.length - 1, 0));
+    const response = {
+      ...product,
+      images,
+      mainImageIndex: safeIndex,
+      mainImage: images[safeIndex] || '',
+      seller: {
+        ...seller,
+        boardImage: makeFullUrl(req, seller.boardImage)
+      },
+      sellerId: seller?._id?.toString() || product.sellerId
+    };
 
-    res.json(product);
+    return res.json(response);
   } catch (err) {
     res.status(500).json({ message: 'خطا در دریافت محصول', error: err.message });
   }

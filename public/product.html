@@ -213,6 +213,35 @@
       min-height: 320px;
     }
 
+    .gallery-loading {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 0.75rem;
+      padding: 1.5rem 1rem;
+      color: var(--text-muted);
+      background: var(--surface-soft);
+      border-radius: calc(var(--radius-lg) - 8px);
+      text-align: center;
+      min-height: 160px;
+    }
+
+    .gallery-loading__spinner {
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      border: 3px solid rgba(29, 78, 216, 0.18);
+      border-top-color: var(--primary);
+      animation: gallery-spin 1s linear infinite;
+    }
+
+    @keyframes gallery-spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
     .gallery-placeholder {
       flex: 1;
       display: flex;
@@ -1320,6 +1349,33 @@
       }
     }
 
+    @media (max-width: 480px) {
+      .product-summary {
+        align-items: stretch;
+      }
+
+      .product-summary h1 {
+        font-size: 1.55rem;
+      }
+
+      .status-message {
+        font-size: 0.9rem;
+        text-align: justify;
+      }
+
+      .meta-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .tag-list {
+        justify-content: flex-start;
+      }
+
+      .gallery-loading {
+        min-height: 130px;
+      }
+    }
+
     @media (max-width: 540px) {
       .meta-grid {
         grid-template-columns: 1fr;
@@ -1421,7 +1477,11 @@
   <main>
     <div class="layout-width">
       <section class="product-hero" aria-labelledby="productTitle">
-        <div class="gallery" aria-live="polite">
+        <div class="gallery" id="productGallery" aria-live="polite" aria-busy="false">
+          <div class="gallery-loading" id="galleryLoading" hidden>
+            <span class="gallery-loading__spinner" aria-hidden="true"></span>
+            <p>در حال دریافت تصاویر واقعی از سرور...</p>
+          </div>
           <div class="gallery-placeholder" id="galleryPlaceholder">
             <p>در حال بارگذاری تصاویر محصول...</p>
           </div>
@@ -1666,7 +1726,9 @@
         badge: document.getElementById('productBadge'),
         title: document.getElementById('productTitle'),
         subtitle: document.getElementById('productSubtitle'),
+        gallery: document.getElementById('productGallery'),
         galleryPlaceholder: document.getElementById('galleryPlaceholder'),
+        galleryLoading: document.getElementById('galleryLoading'),
         heroWrapper: document.getElementById('heroImageWrapper'),
         sliderTrack: document.getElementById('sliderTrack'),
         sliderViewport: document.getElementById('sliderViewport'),
@@ -1798,6 +1860,7 @@
       fetchProduct(productId);
 
       async function fetchProduct(id) {
+        setLoading(true);
         try {
           const response = await fetch(`/api/products/${encodeURIComponent(id)}`);
           if (!response.ok) {
@@ -1809,6 +1872,8 @@
         } catch (error) {
           console.error('load product failed', error);
           showError('امکان دریافت اطلاعات محصول وجود ندارد. لطفاً بعداً تلاش کنید.');
+        } finally {
+          setLoading(false);
         }
       }
 
@@ -1979,6 +2044,20 @@
         openOverlay(dom.addressModal, dom.addressModalClose || dom.addressModalCopy || dom.addressModalMap);
       }
 
+      function setLoading(isLoading) {
+        if (dom.gallery) {
+          dom.gallery.setAttribute('aria-busy', isLoading ? 'true' : 'false');
+        }
+
+        if (dom.galleryLoading) {
+          dom.galleryLoading.hidden = !isLoading;
+        }
+
+        if (isLoading && dom.galleryPlaceholder) {
+          dom.galleryPlaceholder.hidden = true;
+        }
+      }
+
       function setStatus(message) {
         if (!dom.status) return;
         dom.status.textContent = message;
@@ -2068,13 +2147,26 @@
       }
 
       function renderGallery(product, seller) {
-        const resolved = Array.isArray(product.images) ? product.images.map(resolveMediaPath).filter(Boolean) : [];
+        const resolved = Array.isArray(product.images)
+          ? product.images.map(resolveMediaPath).filter(Boolean)
+          : [];
+
+        const mainImageResolved = resolveMediaPath(product.mainImage);
+        if (mainImageResolved && !resolved.includes(mainImageResolved)) {
+          resolved.unshift(mainImageResolved);
+        }
+
         if ((!resolved || !resolved.length) && seller && seller.boardImage) {
           resolved.push(resolveMediaPath(seller.boardImage));
         }
 
         state.images = resolved;
-        state.activeIndex = Number.isInteger(product.mainImageIndex) ? product.mainImageIndex : 0;
+
+        const requestedIndex = Number.isInteger(product.mainImageIndex) ? product.mainImageIndex : -1;
+        const validRequestedIndex = requestedIndex >= 0 && requestedIndex < resolved.length ? requestedIndex : -1;
+        const mainIndex = mainImageResolved ? resolved.indexOf(mainImageResolved) : -1;
+        const preferredIndex = validRequestedIndex > -1 ? validRequestedIndex : mainIndex > -1 ? mainIndex : 0;
+        state.activeIndex = preferredIndex;
         dom.thumbnails.innerHTML = '';
 
         if (!state.images.length) {
@@ -2129,6 +2221,8 @@
             const img = document.createElement('img');
             img.src = src;
             img.alt = `${state.title || 'تصویر محصول'} - تصویر ${index + 1}`;
+            img.loading = index === initialIndex ? 'eager' : 'lazy';
+            img.decoding = 'async';
 
             slide.appendChild(img);
             dom.sliderTrack.appendChild(slide);
@@ -2152,6 +2246,8 @@
           const thumbImage = document.createElement('img');
           thumbImage.src = src;
           thumbImage.alt = `${state.title || 'تصویر محصول'} - تصویر ${index + 1}`;
+          thumbImage.loading = 'lazy';
+          thumbImage.decoding = 'async';
 
           button.appendChild(thumbImage);
           button.addEventListener('click', () => setActiveImage(index));
@@ -2273,6 +2369,8 @@
           const img = document.createElement('img');
           img.src = src;
           img.alt = `${state.title || 'تصویر محصول'} - تصویر ${index + 1}`;
+          img.loading = 'lazy';
+          img.decoding = 'async';
 
           button.appendChild(img);
           button.addEventListener('click', () => setActiveImage(index));
@@ -2295,6 +2393,8 @@
         const currentSrc = state.images[state.activeIndex];
         dom.lightboxImage.src = currentSrc;
         dom.lightboxImage.alt = `${state.title || 'تصویر محصول'} - نمای بزرگ تصویر ${state.activeIndex + 1}`;
+        dom.lightboxImage.loading = 'eager';
+        dom.lightboxImage.decoding = 'async';
 
         if (dom.lightboxCaption) {
           dom.lightboxCaption.textContent = `تصویر ${state.activeIndex + 1} از ${state.images.length}`;
@@ -2411,6 +2511,8 @@
           dom.sellerAvatar.hidden = false;
           dom.sellerImage.src = resolveMediaPath(seller.boardImage);
           dom.sellerImage.alt = `${sellerName} - تصویر فروشنده`;
+          dom.sellerImage.loading = 'lazy';
+          dom.sellerImage.decoding = 'async';
         } else {
           dom.sellerAvatar.hidden = true;
           dom.sellerImage.removeAttribute('src');
