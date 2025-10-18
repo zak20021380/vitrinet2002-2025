@@ -240,6 +240,21 @@
       gap: 0.75rem;
     }
 
+    .slider-counter {
+      position: absolute;
+      inset-inline-end: 1.1rem;
+      top: 1.1rem;
+      padding: 0.35rem 0.75rem;
+      border-radius: 999px;
+      background: rgba(15, 23, 42, 0.55);
+      color: #fff;
+      font-size: 0.85rem;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      box-shadow: 0 12px 24px rgba(15, 23, 42, 0.18);
+      backdrop-filter: blur(6px);
+    }
+
     .slider-zoom {
       position: absolute;
       inset-inline-start: 1rem;
@@ -516,6 +531,71 @@
       grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
     }
 
+    .product-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      margin-top: 0.5rem;
+    }
+
+    .product-action {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      padding: 0.75rem 1.45rem;
+      border-radius: var(--radius-sm);
+      border: 1px solid rgba(29, 78, 216, 0.15);
+      background: rgba(255, 255, 255, 0.9);
+      color: var(--primary);
+      font-weight: 700;
+      font-size: 0.95rem;
+      cursor: pointer;
+      transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+      box-shadow: 0 14px 24px rgba(15, 23, 42, 0.08);
+    }
+
+    .product-action svg {
+      width: 18px;
+      height: 18px;
+      color: currentColor;
+    }
+
+    .product-action:disabled {
+      cursor: not-allowed;
+      opacity: 0.65;
+      box-shadow: none;
+    }
+
+    .product-action:not(:disabled):hover,
+    .product-action:not(:disabled):focus-visible {
+      transform: translateY(-2px);
+      box-shadow: 0 18px 32px rgba(29, 78, 216, 0.25);
+      outline: none;
+    }
+
+    .product-action:not(:disabled):focus-visible {
+      box-shadow: 0 0 0 4px rgba(29, 78, 216, 0.22);
+    }
+
+    .product-action--secondary {
+      color: var(--text-main);
+      border-color: rgba(148, 163, 184, 0.35);
+      background: var(--surface);
+    }
+
+    .product-action--primary {
+      background: linear-gradient(135deg, rgba(29, 78, 216, 0.9), rgba(14, 165, 233, 0.9));
+      color: #fff;
+      border-color: transparent;
+    }
+
+    .product-action--primary:not(:disabled):hover,
+    .product-action--primary:not(:disabled):focus-visible {
+      background: linear-gradient(135deg, #153aa8, #0b8ed1);
+    }
+
     .meta-card {
       background: var(--surface);
       border-radius: var(--radius-md);
@@ -630,70 +710,6 @@
       font-size: 1rem;
       color: var(--text-main);
       word-break: break-word;
-    }
-
-    .seller-actions {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 0.75rem;
-      margin-top: 0.5rem;
-    }
-
-    .seller-action {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      padding: 0.65rem 1.3rem;
-      border-radius: var(--radius-sm);
-      border: none;
-      background: rgba(29, 78, 216, 0.12);
-      color: var(--primary);
-      font-weight: 700;
-      font-family: inherit;
-      cursor: pointer;
-      transition: transform 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
-      text-decoration: none;
-      min-width: 0;
-      gap: 0.55rem;
-    }
-
-    .seller-action:hover,
-    .seller-action:focus-visible {
-      transform: translateY(-2px);
-      background: rgba(29, 78, 216, 0.18);
-      box-shadow: 0 12px 22px rgba(29, 78, 216, 0.16);
-    }
-
-    .seller-action:focus-visible {
-      outline: none;
-      box-shadow: 0 0 0 3px rgba(29, 78, 216, 0.25);
-    }
-
-    .seller-action--primary {
-      background: var(--primary);
-      color: #fff;
-      box-shadow: 0 14px 26px rgba(29, 78, 216, 0.28);
-    }
-
-    .seller-action__icon {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .seller-action__icon svg {
-      width: 18px;
-      height: 18px;
-      color: currentColor;
-    }
-
-    .seller-action__icon svg path {
-      stroke: currentColor;
-    }
-
-    .seller-action--primary:hover,
-    .seller-action--primary:focus-visible {
-      background: #153aa8;
     }
 
     .info-panels {
@@ -1132,6 +1148,15 @@
         padding: 0.35rem 0.6rem;
       }
 
+      .product-actions {
+        justify-content: center;
+      }
+
+      .product-action {
+        flex: 1 1 calc(50% - 0.75rem);
+        min-width: 180px;
+      }
+
       .info-panels {
         gap: 1rem;
       }
@@ -1259,6 +1284,16 @@
         min-height: 220px;
       }
 
+      .product-actions {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .product-action {
+        flex: 1 1 auto;
+        width: 100%;
+      }
+
       .hero-image {
         padding: 0.75rem;
       }
@@ -1305,18 +1340,6 @@
 
       .thumb {
         min-width: 64px;
-      }
-
-      .seller-card {
-        padding: 1.2rem;
-      }
-
-      .seller-actions {
-        width: 100%;
-      }
-
-      .seller-action {
-        flex: 1 1 100%;
       }
 
       .overlay-dialog {
@@ -1443,6 +1466,7 @@
           </div>
           <figure class="hero-image" id="heroImageWrapper" hidden>
             <div class="slider" id="gallerySlider">
+              <div class="slider-counter" id="sliderCounter" hidden></div>
               <button class="slider-control slider-control--prev" type="button" id="sliderPrev" aria-label="نمایش تصویر قبلی">
                 <span aria-hidden="true">&#x2039;</span>
               </button>
@@ -1493,6 +1517,23 @@
             </div>
           </div>
 
+          <div class="product-actions" id="sellerActions" hidden>
+            <button class="product-action product-action--secondary" type="button" id="sellerAddressButton" hidden disabled>
+              <svg viewBox="0 0 24 24" fill="none" aria-hidden="true" focusable="false">
+                <path d="M12 3.5c-3.5 0-6.5 2.7-6.5 6.4 0 4.1 4.9 9.61 6.16 11.01.19.21.49.21.68 0C13.6 19.51 18.5 14 18.5 9.9c0-3.7-3-6.4-6.5-6.4Z" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" />
+                <circle cx="12" cy="10" r="2.6" stroke="currentColor" stroke-width="1.6" />
+              </svg>
+              <span>نمایش آدرس مغازه</span>
+            </button>
+            <a class="product-action product-action--primary" id="sellerLink" target="_blank" rel="noopener" hidden>
+              <svg viewBox="0 0 24 24" fill="none" aria-hidden="true" focusable="false">
+                <path d="M4.5 9.25h15l-.84 9.05a2 2 0 0 1-1.99 1.7H7.33a2 2 0 0 1-1.99-1.7L4.5 9.25Zm2.25-4.5h10.5L18 9.25H6l.75-4.5Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" />
+                <path d="M9.5 12.5v4.5m5-4.5v4.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" />
+              </svg>
+              <span>مشاهده صفحه مغازه</span>
+            </a>
+          </div>
+
           <ul class="tag-list" id="tagList" hidden></ul>
 
           <div class="seller-card" id="sellerCard" hidden>
@@ -1520,26 +1561,6 @@
                 <dd id="sellerAddress"></dd>
               </div>
             </dl>
-            <div class="seller-actions" id="sellerActions" hidden>
-              <button class="seller-action" type="button" id="sellerAddressButton" hidden>
-                <span class="seller-action__icon" aria-hidden="true">
-                  <svg viewBox="0 0 24 24" fill="none" focusable="false">
-                    <path d="M12 3.5c-3.5 0-6.5 2.7-6.5 6.4 0 4.1 4.9 9.61 6.16 11.01.19.21.49.21.68 0C13.6 19.51 18.5 14 18.5 9.9c0-3.7-3-6.4-6.5-6.4Z" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" />
-                    <circle cx="12" cy="10" r="2.6" stroke="currentColor" stroke-width="1.6" />
-                  </svg>
-                </span>
-                <span>مشاهده آدرس مغازه</span>
-              </button>
-              <a class="seller-action seller-action--primary" id="sellerLink" target="_blank" rel="noopener" hidden>
-                <span class="seller-action__icon" aria-hidden="true">
-                  <svg viewBox="0 0 24 24" fill="none" focusable="false">
-                    <path d="M4.5 9.25h15l-.84 9.05a2 2 0 0 1-1.99 1.7H7.33a2 2 0 0 1-1.99-1.7L4.5 9.25Zm2.25-4.5h10.5L18 9.25H6l.75-4.5Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" />
-                    <path d="M9.5 12.5v4.5m5-4.5v4.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" />
-                  </svg>
-                </span>
-                <span>مشاهده صفحه مغازه</span>
-              </a>
-            </div>
           </div>
         </div>
       </section>
@@ -1690,6 +1711,7 @@
         sliderNext: document.getElementById('sliderNext'),
         sliderIndicators: document.getElementById('sliderIndicators'),
         sliderZoom: document.getElementById('sliderZoom'),
+        sliderCounter: document.getElementById('sliderCounter'),
         thumbnails: document.getElementById('thumbnails'),
         lightbox: document.getElementById('galleryLightbox'),
         lightboxImage: document.getElementById('lightboxImage'),
@@ -1745,6 +1767,8 @@
         addressInfo: null,
         copyTimeout: null
       };
+
+      const persianNumberFormatter = new Intl.NumberFormat('fa-IR');
 
       const sliderTransition = 'transform 0.45s cubic-bezier(0.22, 0.61, 0.36, 1)';
 
@@ -2120,6 +2144,10 @@
             dom.lightboxThumbnails.innerHTML = '';
             dom.lightboxThumbnails.hidden = true;
           }
+          if (dom.sliderCounter) {
+            dom.sliderCounter.hidden = true;
+            dom.sliderCounter.textContent = '';
+          }
           syncLightbox();
           updateLightboxControls();
           return;
@@ -2146,10 +2174,16 @@
 
         dom.thumbnails.innerHTML = '';
 
+        if (dom.sliderCounter) {
+          dom.sliderCounter.hidden = true;
+          dom.sliderCounter.textContent = '';
+        }
+
         const initialIndex = Math.min(Math.max(state.activeIndex, 0), state.images.length - 1);
         state.activeIndex = initialIndex;
 
         state.images.forEach((src, index) => {
+          const imageNumber = persianNumberFormatter.format(index + 1);
           if (dom.sliderTrack) {
             const slide = document.createElement('li');
             slide.className = 'slide';
@@ -2160,7 +2194,7 @@
 
             const img = document.createElement('img');
             img.src = src;
-            img.alt = `${state.title || 'تصویر محصول'} - تصویر ${index + 1}`;
+            img.alt = `${state.title || 'تصویر محصول'} - تصویر ${imageNumber}`;
 
             slide.appendChild(img);
             dom.sliderTrack.appendChild(slide);
@@ -2170,7 +2204,7 @@
             const indicator = document.createElement('button');
             indicator.type = 'button';
             indicator.className = 'slider-indicator';
-            indicator.setAttribute('aria-label', `نمایش تصویر ${index + 1}`);
+            indicator.setAttribute('aria-label', `نمایش تصویر ${imageNumber}`);
             indicator.setAttribute('aria-pressed', index === initialIndex ? 'true' : 'false');
             indicator.addEventListener('click', () => setActiveImage(index));
             dom.sliderIndicators.appendChild(indicator);
@@ -2183,7 +2217,7 @@
 
           const thumbImage = document.createElement('img');
           thumbImage.src = src;
-          thumbImage.alt = `${state.title || 'تصویر محصول'} - تصویر ${index + 1}`;
+          thumbImage.alt = `${state.title || 'تصویر محصول'} - تصویر ${imageNumber}`;
 
           button.appendChild(thumbImage);
           button.addEventListener('click', () => setActiveImage(index));
@@ -2191,7 +2225,9 @@
         });
 
         if (dom.sliderViewport) {
-          dom.sliderViewport.setAttribute('aria-label', `گالری تصاویر محصول - تصویر ${initialIndex + 1} از ${state.images.length}`);
+          const activeText = persianNumberFormatter.format(initialIndex + 1);
+          const totalText = persianNumberFormatter.format(state.images.length);
+          dom.sliderViewport.setAttribute('aria-label', `گالری تصاویر محصول - تصویر ${activeText} از ${totalText}`);
         }
 
         dom.thumbnails.hidden = state.images.length < 2;
@@ -2226,13 +2262,16 @@
         }
 
         if (dom.sliderViewport) {
-          dom.sliderViewport.setAttribute('aria-label', `گالری تصاویر محصول - تصویر ${index + 1} از ${state.images.length}`);
+          const activeText = persianNumberFormatter.format(index + 1);
+          const totalText = persianNumberFormatter.format(state.images.length);
+          dom.sliderViewport.setAttribute('aria-label', `گالری تصاویر محصول - تصویر ${activeText} از ${totalText}`);
         }
 
         [...dom.thumbnails.children].forEach((btn, idx) => {
           btn.setAttribute('aria-pressed', idx === index ? 'true' : 'false');
         });
 
+        updateSliderCounter();
         updateSliderControls();
         syncLightbox();
       }
@@ -2253,6 +2292,20 @@
         if (dom.sliderIndicators) {
           dom.sliderIndicators.hidden = !hasMultiple;
         }
+      }
+
+      function updateSliderCounter() {
+        if (!dom.sliderCounter) return;
+        if (!state.images.length) {
+          dom.sliderCounter.hidden = true;
+          dom.sliderCounter.textContent = '';
+          return;
+        }
+
+        const current = persianNumberFormatter.format(state.activeIndex + 1);
+        const total = persianNumberFormatter.format(state.images.length);
+        dom.sliderCounter.hidden = false;
+        dom.sliderCounter.textContent = state.images.length > 1 ? `${current} / ${total}` : total;
       }
 
       function showNextImage() {
@@ -2418,7 +2471,8 @@
 
           const img = document.createElement('img');
           img.src = src;
-          img.alt = `${state.title || 'تصویر محصول'} - تصویر ${index + 1}`;
+          const imageNumber = persianNumberFormatter.format(index + 1);
+          img.alt = `${state.title || 'تصویر محصول'} - تصویر ${imageNumber}`;
 
           button.appendChild(img);
           button.addEventListener('click', () => setActiveImage(index));
@@ -2440,10 +2494,12 @@
 
         const currentSrc = state.images[state.activeIndex];
         dom.lightboxImage.src = currentSrc;
-        dom.lightboxImage.alt = `${state.title || 'تصویر محصول'} - نمای بزرگ تصویر ${state.activeIndex + 1}`;
+        const imageNumber = persianNumberFormatter.format(state.activeIndex + 1);
+        const totalNumber = persianNumberFormatter.format(state.images.length);
+        dom.lightboxImage.alt = `${state.title || 'تصویر محصول'} - نمای بزرگ تصویر ${imageNumber}`;
 
         if (dom.lightboxCaption) {
-          dom.lightboxCaption.textContent = `تصویر ${state.activeIndex + 1} از ${state.images.length}`;
+          dom.lightboxCaption.textContent = `تصویر ${imageNumber} از ${totalNumber}`;
         }
 
         if (dom.lightboxThumbnails) {
