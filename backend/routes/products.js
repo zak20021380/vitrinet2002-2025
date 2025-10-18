@@ -50,18 +50,10 @@ router.get('/shop/:shopurl', async (req, res) => {
 });
 
 // -----------------------------
-// دریافت محصول تکی با آیدی
+// دریافت محصول تکی با آیدی (به همراه اطلاعات فروشنده)
 // GET /api/products/:id
 // -----------------------------
-router.get('/:id', async (req, res) => {
-  try {
-    const product = await Product.findById(req.params.id);
-    if (!product) return res.status(404).json({ message: 'محصول پیدا نشد!' });
-    res.json(product);
-  } catch (err) {
-    res.status(500).json({ message: 'خطای سرور در دریافت محصول.' });
-  }
-});
+router.get('/:id', productController.getProductById);
 
 // -----------------------------
 // ویرایش محصول

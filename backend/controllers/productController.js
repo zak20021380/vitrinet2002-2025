@@ -130,20 +130,56 @@ exports.deleteProduct = async (req, res) => {
 exports.getProductById = async (req, res) => {
   try {
     const id = req.params.id;
-    // پیدا کردن محصول و گرفتن اطلاعات seller (گسترش‌یافته)
     const product = await Product.findById(id)
       .populate({
         path: 'sellerId',
-        select: 'storename ownerName address shopurl ownerFirstname ownerLastname phone logo category city'
+        select: 'storename ownerName address shopurl ownerFirstname ownerLastname phone logo boardImage category city'
       })
       .lean();
 
-    if (!product) return res.status(404).json({ message: 'محصول پیدا نشد!' });
+    if (!product) {
+      return res.status(404).json({ message: 'محصول پیدا نشد!' });
+    }
 
-    // اضافه کردن اطلاعات seller به خروجی
-    product.seller = product.sellerId || {};
+    const rawImages = Array.isArray(product.images) ? product.images : [];
+    const resolvedImages = rawImages
+      .map((img) => makeFullUrl(req, img))
+      .filter(Boolean);
 
-    res.json(product);
+    const sellerDoc = product.sellerId && typeof product.sellerId === 'object' ? product.sellerId : {};
+    const seller = sellerDoc && Object.keys(sellerDoc).length
+      ? {
+          ...sellerDoc,
+          _id: sellerDoc._id ? sellerDoc._id.toString() : sellerDoc._id,
+          logo: sellerDoc.logo ? makeFullUrl(req, sellerDoc.logo) : sellerDoc.logo,
+          boardImage: sellerDoc.boardImage ? makeFullUrl(req, sellerDoc.boardImage) : sellerDoc.boardImage,
+        }
+      : {};
+
+    const imagesWithFallback = resolvedImages.length
+      ? resolvedImages
+      : seller.boardImage
+        ? [seller.boardImage]
+        : [];
+
+    const mainIndex = Number.isInteger(product.mainImageIndex) ? product.mainImageIndex : 0;
+    const mainImage = imagesWithFallback.length ? (imagesWithFallback[mainIndex] || imagesWithFallback[0]) : '';
+
+    const sellerIdValue = sellerDoc && sellerDoc._id
+      ? sellerDoc._id.toString()
+      : product.sellerId && typeof product.sellerId === 'object' && typeof product.sellerId.toString === 'function'
+        ? product.sellerId.toString()
+        : product.sellerId;
+
+    const response = {
+      ...product,
+      images: imagesWithFallback,
+      image: mainImage,
+      seller,
+      sellerId: sellerIdValue,
+    };
+
+    res.json(response);
   } catch (err) {
     res.status(500).json({ message: 'خطا در دریافت محصول', error: err.message });
   }

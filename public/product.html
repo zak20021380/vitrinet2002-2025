@@ -1621,14 +1621,14 @@
                 <path d="M12 3.5c-3.5 0-6.5 2.7-6.5 6.4 0 4.1 4.9 9.61 6.16 11.01.19.21.49.21.68 0C13.6 19.51 18.5 14 18.5 9.9c0-3.7-3-6.4-6.5-6.4Z" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" />
                 <circle cx="12" cy="10" r="2.6" stroke="currentColor" stroke-width="1.6" />
               </svg>
-              <span>مشاهده آدرس مغازه</span>
+              <span>مشاهده آدرس</span>
             </button>
             <a class="product-action product-action--primary is-disabled" id="sellerLink" target="_blank" rel="noopener" aria-disabled="true" tabindex="-1">
               <svg viewBox="0 0 24 24" fill="none" aria-hidden="true" focusable="false">
                 <path d="M4.5 9.25h15l-.84 9.05a2 2 0 0 1-1.99 1.7H7.33a2 2 0 0 1-1.99-1.7L4.5 9.25Zm2.25-4.5h10.5L18 9.25H6l.75-4.5Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" />
                 <path d="M9.5 12.5v4.5m5-4.5v4.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" />
               </svg>
-              <span>مشاهده صفحه مغازه</span>
+              <span>مشاهده صفحه فروشگاه</span>
             </a>
           </div>
 
@@ -1685,7 +1685,7 @@
           <path d="m7 7 10 10m0-10-10 10" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
         </svg>
       </button>
-      <h2 class="overlay-title" id="addressModalTitle">آدرس مغازه</h2>
+      <h2 class="overlay-title" id="addressModalTitle">آدرس فروشگاه</h2>
       <div class="overlay-body">
         <p>آدرس دقیق فروشنده برای مراجعه حضوری:</p>
         <p class="overlay-highlight" id="addressModalAddress">-</p>
@@ -2150,8 +2150,8 @@
 
         if (dom.addressModalTitle) {
           dom.addressModalTitle.textContent = state.addressInfo.sellerName
-            ? `آدرس مغازه ${state.addressInfo.sellerName}`
-            : 'آدرس مغازه';
+            ? `آدرس فروشگاه ${state.addressInfo.sellerName}`
+            : 'آدرس فروشگاه';
         }
 
         openOverlay(dom.addressModal, dom.addressModalClose || dom.addressModalCopy || dom.addressModalMap);
@@ -2803,7 +2803,7 @@
               sellerName
             };
             dom.sellerAddressButton.hidden = false;
-            dom.sellerAddressButton.setAttribute('aria-label', `مشاهده آدرس ${sellerName} در پنجره مجزا`);
+            dom.sellerAddressButton.setAttribute('aria-label', `مشاهده آدرس فروشگاه ${sellerName} در پنجره مجزا`);
             dom.sellerAddressButton.disabled = false;
             dom.sellerAddressButton.classList.remove('is-disabled');
           }
@@ -2821,7 +2821,7 @@
         if (dom.sellerLink) {
           if (seller.shopurl) {
             dom.sellerLink.href = `/shop.html?shopurl=${encodeURIComponent(seller.shopurl)}`;
-            dom.sellerLink.setAttribute('aria-label', `مشاهده صفحه مغازه ${sellerName} در ویترینت`);
+            dom.sellerLink.setAttribute('aria-label', `مشاهده صفحه فروشگاه ${sellerName} در ویترینت`);
             dom.sellerLink.classList.remove('is-disabled');
             dom.sellerLink.removeAttribute('aria-disabled');
             dom.sellerLink.removeAttribute('tabindex');
