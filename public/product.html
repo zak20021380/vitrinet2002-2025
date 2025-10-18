@@ -78,6 +78,7 @@
       align-items: center;
       gap: 1.25rem;
       padding: 1rem 0;
+      grid-template-areas: 'brand nav support';
     }
 
     .brand {
@@ -93,6 +94,7 @@
       font-size: 1.24rem;
       letter-spacing: -0.02em;
       color: var(--primary);
+      grid-area: brand;
     }
 
     .brand:hover {
@@ -123,6 +125,7 @@
       color: var(--text-muted);
       font-weight: 600;
       transition: color 0.2s ease;
+      grid-area: nav;
     }
 
     nav a {
@@ -178,6 +181,7 @@
       cursor: pointer;
       transition: color 0.2s ease, border-color 0.2s ease, background 0.2s ease;
       order: 3;
+      grid-area: toggle;
     }
 
     .nav-toggle:hover,
@@ -211,6 +215,7 @@
       box-shadow: 0 16px 32px rgba(14, 165, 233, 0.22);
       transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
       order: 2;
+      grid-area: support;
     }
 
     .support-link:hover,
@@ -324,11 +329,11 @@
       border-radius: calc(var(--radius-lg) - 12px);
       background: linear-gradient(135deg, rgba(148, 163, 184, 0.12), rgba(226, 232, 240, 0.18));
       box-shadow: inset 0 0 0 1px rgba(15, 23, 42, 0.06);
-      height: clamp(280px, 46vw, 520px);
       touch-action: pan-y;
       user-select: none;
       -webkit-user-select: none;
       isolation: isolate;
+      height: clamp(280px, 46vw, 520px);
     }
 
     .slider-viewport:focus-visible {
@@ -367,7 +372,7 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      padding: clamp(0.75rem, 2vw, 2rem);
+      padding: clamp(0.6rem, 2vw, 1.6rem);
       background: linear-gradient(145deg, rgba(255, 255, 255, 0.7), rgba(226, 232, 240, 0.5));
       opacity: 0.95;
       transition: opacity 0.3s ease;
@@ -378,10 +383,8 @@
     }
 
     .slide img {
-      width: auto;
-      height: auto;
-      max-width: 100%;
-      max-height: 100%;
+      width: 100%;
+      height: 100%;
       object-fit: contain;
       border-radius: calc(var(--radius-lg) - 18px);
       box-shadow: 0 18px 32px rgba(15, 23, 42, 0.12);
@@ -604,6 +607,13 @@
     }
 
     .product-action:disabled {
+      cursor: not-allowed;
+      opacity: 0.65;
+      box-shadow: none;
+    }
+
+    .product-action.is-disabled {
+      pointer-events: none;
       cursor: not-allowed;
       opacity: 0.65;
       box-shadow: none;
@@ -1209,9 +1219,18 @@
       }
 
       .header-inner {
-        grid-template-columns: 1fr;
+        grid-template-columns: auto auto;
+        grid-template-areas:
+          'brand toggle'
+          'support support'
+          'nav nav';
+        align-items: center;
         justify-items: stretch;
-        gap: 0.85rem;
+        gap: 0.75rem;
+      }
+
+      .brand {
+        justify-self: start;
       }
 
       .nav-toggle {
@@ -1220,6 +1239,7 @@
       }
 
       nav {
+        justify-self: stretch;
         width: 100%;
         background: rgba(255, 255, 255, 0.95);
         border: 1px solid rgba(148, 163, 184, 0.25);
@@ -1292,6 +1312,7 @@
       .header-inner {
         grid-template-columns: auto 1fr auto;
         align-items: center;
+        grid-template-areas: 'brand nav support';
       }
 
       nav {
@@ -1590,15 +1611,15 @@
             </div>
           </div>
 
-          <div class="product-actions" id="sellerActions" hidden>
-            <button class="product-action product-action--secondary" type="button" id="sellerAddressButton" hidden disabled>
+          <div class="product-actions" id="sellerActions">
+            <button class="product-action product-action--secondary" type="button" id="sellerAddressButton" disabled>
               <svg viewBox="0 0 24 24" fill="none" aria-hidden="true" focusable="false">
                 <path d="M12 3.5c-3.5 0-6.5 2.7-6.5 6.4 0 4.1 4.9 9.61 6.16 11.01.19.21.49.21.68 0C13.6 19.51 18.5 14 18.5 9.9c0-3.7-3-6.4-6.5-6.4Z" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" />
                 <circle cx="12" cy="10" r="2.6" stroke="currentColor" stroke-width="1.6" />
               </svg>
-              <span>نمایش آدرس مغازه</span>
+              <span>مشاهده آدرس مغازه</span>
             </button>
-            <a class="product-action product-action--primary" id="sellerLink" target="_blank" rel="noopener" hidden>
+            <a class="product-action product-action--primary is-disabled" id="sellerLink" target="_blank" rel="noopener" aria-disabled="true" tabindex="-1">
               <svg viewBox="0 0 24 24" fill="none" aria-hidden="true" focusable="false">
                 <path d="M4.5 9.25h15l-.84 9.05a2 2 0 0 1-1.99 1.7H7.33a2 2 0 0 1-1.99-1.7L4.5 9.25Zm2.25-4.5h10.5L18 9.25H6l.75-4.5Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" />
                 <path d="M9.5 12.5v4.5m5-4.5v4.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" />
@@ -2658,6 +2679,21 @@
         const hasSeller = seller && (seller.storename || seller.ownerName || seller.ownerFirstname || seller.ownerLastname || seller.phone || seller.address || seller.category || seller.boardImage || seller.desc);
         if (!hasSeller) {
           dom.sellerCard.hidden = true;
+          if (dom.sellerActions) {
+            dom.sellerActions.hidden = true;
+          }
+          if (dom.sellerAddressButton) {
+            dom.sellerAddressButton.disabled = true;
+            dom.sellerAddressButton.classList.add('is-disabled');
+            dom.sellerAddressButton.removeAttribute('aria-label');
+          }
+          if (dom.sellerLink) {
+            dom.sellerLink.classList.add('is-disabled');
+            dom.sellerLink.setAttribute('aria-disabled', 'true');
+            dom.sellerLink.setAttribute('tabindex', '-1');
+            dom.sellerLink.removeAttribute('href');
+            dom.sellerLink.removeAttribute('aria-label');
+          }
           state.addressInfo = null;
           return;
         }
@@ -2701,7 +2737,10 @@
           dom.sellerPhone.removeAttribute('href');
         }
 
-        let hasAddressAction = false;
+        if (dom.sellerActions) {
+          dom.sellerActions.hidden = false;
+        }
+
         if (addressText) {
           dom.sellerAddressRow.hidden = false;
           dom.sellerAddress.textContent = addressText;
@@ -2715,36 +2754,35 @@
               mapUrl,
               sellerName
             };
-            dom.sellerAddressButton.hidden = false;
-            dom.sellerAddressButton.setAttribute('aria-label', `نمایش آدرس ${sellerName} در پنجره مجزا`);
+            dom.sellerAddressButton.setAttribute('aria-label', `مشاهده آدرس ${sellerName} در پنجره مجزا`);
             dom.sellerAddressButton.disabled = false;
-            hasAddressAction = true;
+            dom.sellerAddressButton.classList.remove('is-disabled');
           }
         } else {
           dom.sellerAddressRow.hidden = true;
           dom.sellerAddress.textContent = '';
           if (dom.sellerAddressButton) {
-            dom.sellerAddressButton.hidden = true;
             dom.sellerAddressButton.removeAttribute('aria-label');
             dom.sellerAddressButton.disabled = true;
+            dom.sellerAddressButton.classList.add('is-disabled');
           }
           state.addressInfo = null;
         }
 
-        let hasShopLink = false;
-        if (seller.shopurl) {
-          dom.sellerLink.hidden = false;
-          dom.sellerLink.href = `/shop.html?shopurl=${encodeURIComponent(seller.shopurl)}`;
-          dom.sellerLink.setAttribute('aria-label', `مشاهده صفحه مغازه ${sellerName} در ویترینت`);
-          hasShopLink = true;
-        } else {
-          dom.sellerLink.hidden = true;
-          dom.sellerLink.removeAttribute('href');
-          dom.sellerLink.removeAttribute('aria-label');
-        }
-
-        if (dom.sellerActions) {
-          dom.sellerActions.hidden = !(hasAddressAction || hasShopLink);
+        if (dom.sellerLink) {
+          if (seller.shopurl) {
+            dom.sellerLink.href = `/shop.html?shopurl=${encodeURIComponent(seller.shopurl)}`;
+            dom.sellerLink.setAttribute('aria-label', `مشاهده صفحه مغازه ${sellerName} در ویترینت`);
+            dom.sellerLink.classList.remove('is-disabled');
+            dom.sellerLink.removeAttribute('aria-disabled');
+            dom.sellerLink.removeAttribute('tabindex');
+          } else {
+            dom.sellerLink.removeAttribute('href');
+            dom.sellerLink.removeAttribute('aria-label');
+            dom.sellerLink.classList.add('is-disabled');
+            dom.sellerLink.setAttribute('aria-disabled', 'true');
+            dom.sellerLink.setAttribute('tabindex', '-1');
+          }
         }
       }
 
