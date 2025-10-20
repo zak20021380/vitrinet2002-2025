@@ -69,7 +69,7 @@
     }
 
     .layout-width {
-      width: min(1080px, 92vw);
+      width: min(1100px, 94vw);
       margin: 0 auto;
     }
 
@@ -79,14 +79,14 @@
       align-items: center;
       gap: 1.25rem;
       padding: 0.75rem 0;
-      grid-template-areas: 'brand nav support';
+      grid-template-areas: 'brand nav cta';
     }
 
     .brand {
       display: inline-flex;
       align-items: center;
       gap: 0.85rem;
-      padding: 0.6rem 1rem;
+      padding: 0.65rem 1.1rem;
       border-radius: 999px;
       background: linear-gradient(135deg, rgba(255, 255, 255, 0.92), rgba(248, 250, 252, 0.9));
       border: 1px solid rgba(59, 130, 246, 0.16);
@@ -110,20 +110,35 @@
       border-color: rgba(37, 99, 235, 0.32);
     }
 
-    .brand-icon {
-      width: 44px;
-      height: 44px;
+    .brand-emblem {
+      position: relative;
+      width: 46px;
+      height: 46px;
       border-radius: 16px;
-      background: linear-gradient(135deg, rgba(29, 78, 216, 0.2), rgba(14, 165, 233, 0.28));
+      background: linear-gradient(140deg, #1d4ed8, #0ea5e9);
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.6);
+      box-shadow: 0 18px 30px rgba(29, 78, 216, 0.28);
+      overflow: hidden;
+      isolation: isolate;
     }
 
-    .brand-icon img {
-      width: 26px;
-      height: 26px;
+    .brand-emblem::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle at 22% 18%, rgba(255, 255, 255, 0.55), transparent 55%);
+      opacity: 0.9;
+      mix-blend-mode: screen;
+    }
+
+    .brand-initial {
+      position: relative;
+      font-size: 1.3rem;
+      font-weight: 900;
+      letter-spacing: -0.04em;
+      color: #fff;
     }
 
     .brand-text {
@@ -243,7 +258,7 @@
       height: 20px;
     }
 
-    .support-link {
+    .cta-link {
       display: inline-flex;
       align-items: center;
       justify-content: center;
@@ -257,50 +272,52 @@
       box-shadow: 0 18px 36px rgba(37, 99, 235, 0.25);
       transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
       order: 2;
-      grid-area: support;
+      grid-area: cta;
       text-align: right;
     }
 
-    .support-link:hover,
-    .support-link:focus {
+    .cta-link:hover,
+    .cta-link:focus {
       transform: translateY(-2px);
       box-shadow: 0 24px 40px rgba(37, 99, 235, 0.32);
       background: linear-gradient(135deg, #1d4ed8, #0284c7);
     }
 
-    .support-icon {
-      width: 34px;
-      height: 34px;
+    .cta-icon {
+      width: 36px;
+      height: 36px;
       border-radius: 12px;
       background: rgba(255, 255, 255, 0.18);
       display: inline-flex;
       align-items: center;
       justify-content: center;
       box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.35);
+      color: #fff;
     }
 
-    .support-icon svg {
+    .cta-icon svg {
       width: 18px;
       height: 18px;
     }
 
-    .support-text {
+    .cta-text {
       display: flex;
       flex-direction: column;
-      line-height: 1.1;
+      line-height: 1.15;
       align-items: flex-end;
       text-align: right;
     }
 
-    .support-title {
-      font-size: 0.78rem;
-      opacity: 0.9;
+    .cta-title {
+      font-size: 0.88rem;
+      font-weight: 800;
+      letter-spacing: -0.01em;
     }
 
-    .support-number {
-      font-size: 0.98rem;
-      font-weight: 800;
-      letter-spacing: 0.02em;
+    .cta-caption {
+      font-size: 0.74rem;
+      font-weight: 600;
+      opacity: 0.88;
     }
 
     main {
@@ -678,8 +695,9 @@
       cursor: pointer;
       transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
       box-shadow: 0 14px 24px rgba(15, 23, 42, 0.08);
-      min-width: 220px;
-      flex: 1 1 240px;
+      min-width: clamp(200px, 48vw, 320px);
+      flex: 1 1 clamp(220px, 48vw, 320px);
+      text-align: center;
     }
 
     .product-action svg {
@@ -690,15 +708,19 @@
 
     .product-action:disabled {
       cursor: not-allowed;
-      opacity: 0.65;
+      opacity: 0.75;
       box-shadow: none;
+      background: rgba(148, 163, 184, 0.15);
+      color: rgba(15, 23, 42, 0.6);
     }
 
     .product-action.is-disabled {
       pointer-events: none;
       cursor: not-allowed;
-      opacity: 0.65;
+      opacity: 0.75;
       box-shadow: none;
+      background: rgba(148, 163, 184, 0.15);
+      color: rgba(15, 23, 42, 0.6);
     }
 
     .product-action:not(:disabled):hover,
@@ -1286,8 +1308,8 @@
       }
 
       .product-action {
-        flex: 1 1 calc(50% - 0.75rem);
-        min-width: 200px;
+        flex: 1 1 min(320px, 100%);
+        min-width: min(240px, 100%);
       }
 
       .info-panels {
@@ -1306,7 +1328,7 @@
         grid-template-columns: auto auto;
         grid-template-areas:
           'brand toggle'
-          'support support'
+          'cta cta'
           'nav nav';
         align-items: center;
         justify-items: stretch;
@@ -1324,10 +1346,14 @@
         gap: 0.9rem;
       }
 
-      .brand-icon {
-        width: 48px;
-        height: 48px;
+      .brand-emblem {
+        width: 50px;
+        height: 50px;
         border-radius: 18px;
+      }
+
+      .brand-initial {
+        font-size: 1.45rem;
       }
 
       .brand-name {
@@ -1386,23 +1412,23 @@
         background: rgba(29, 78, 216, 0.16);
       }
 
-      .support-link {
+      .cta-link {
         width: 100%;
         justify-self: stretch;
         justify-content: space-between;
         padding: 0.75rem 1.1rem;
       }
 
-      .support-text {
+      .cta-text {
         align-items: flex-end;
       }
 
-      .support-title {
-        font-size: 0.82rem;
+      .cta-title {
+        font-size: 0.9rem;
       }
 
-      .support-number {
-        font-size: 1.05rem;
+      .cta-caption {
+        font-size: 0.8rem;
       }
 
       .product-hero {
@@ -1430,7 +1456,7 @@
       .header-inner {
         grid-template-columns: auto 1fr auto;
         align-items: center;
-        grid-template-areas: 'brand nav support';
+        grid-template-areas: 'brand nav cta';
       }
 
       nav {
@@ -1451,7 +1477,7 @@
         background: transparent;
       }
 
-      .support-link {
+      .cta-link {
         order: unset;
         width: auto;
         justify-self: end;
@@ -1496,9 +1522,13 @@
         padding: 0.65rem 0.9rem;
       }
 
-      .brand-icon {
+      .brand-emblem {
         width: 44px;
         height: 44px;
+      }
+
+      .brand-initial {
+        font-size: 1.32rem;
       }
 
       .brand-name {
@@ -1509,12 +1539,12 @@
         font-size: 0.76rem;
       }
 
-      .support-link {
+      .cta-link {
         padding: 0.7rem 1rem;
       }
 
-      .support-title {
-        font-size: 0.78rem;
+      .cta-title {
+        font-size: 0.82rem;
       }
 
       .gallery {
@@ -1530,6 +1560,7 @@
       .product-action {
         flex: 1 1 auto;
         width: 100%;
+        min-width: 100%;
       }
 
       .hero-image {
@@ -1630,10 +1661,14 @@
         gap: 0.75rem;
       }
 
-      .brand-icon {
+      .brand-emblem {
         width: 40px;
         height: 40px;
         border-radius: 16px;
+      }
+
+      .brand-initial {
+        font-size: 1.22rem;
       }
 
       .brand-name {
@@ -1644,13 +1679,13 @@
         font-size: 0.72rem;
       }
 
-      .support-link {
+      .cta-link {
         padding: 0.65rem 0.9rem;
         gap: 0.6rem;
       }
 
-      .support-title {
-        font-size: 0.76rem;
+      .cta-title {
+        font-size: 0.78rem;
       }
 
       .slider-viewport:not(.has-aspect) {
@@ -1692,6 +1727,53 @@
       }
     }
 
+    @media (max-width: 360px) {
+      .header-inner {
+        padding: 0.8rem;
+      }
+
+      .brand {
+        flex-direction: column;
+        align-items: flex-end;
+        gap: 0.6rem;
+      }
+
+      .brand-emblem {
+        width: 36px;
+        height: 36px;
+      }
+
+      .brand-initial {
+        font-size: 1.1rem;
+      }
+
+      .cta-link {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 0.55rem;
+      }
+
+      .cta-text {
+        align-items: flex-end;
+      }
+
+      .cta-icon {
+        align-self: flex-end;
+      }
+
+      .cta-title {
+        font-size: 0.82rem;
+      }
+
+      .cta-caption {
+        font-size: 0.72rem;
+      }
+
+      .product-actions {
+        gap: 0.6rem;
+      }
+    }
+
     @media (prefers-reduced-motion: reduce) {
       *, *::before, *::after {
         animation-duration: 0.01ms !important;
@@ -1710,23 +1792,23 @@
   <header>
     <div class="layout-width header-inner">
       <a class="brand" href="/index.html" aria-label="صفحه اصلی ویترینت">
-        <span class="brand-icon" aria-hidden="true">
-          <img src="/assets/images/logo.svg" alt="">
+        <span class="brand-emblem" aria-hidden="true">
+          <span class="brand-initial">VN</span>
         </span>
         <span class="brand-text">
           <span class="brand-name">ویترینت</span>
           <span class="brand-tagline">بازار آنلاین تجهیزات صنعتی</span>
         </span>
       </a>
-      <a class="support-link" href="tel:02191090810" aria-label="تماس با پشتیبانی ویترینت">
-        <span class="support-icon" aria-hidden="true">
-          <svg viewBox="0 0 24 24" fill="none">
-            <path d="M6.5 3.5A2.5 2.5 0 0 1 9 6v2.1a1.9 1.9 0 0 1-.54 1.33l-1.04 1.05a 0.9 0.9 0 0 0-.2 1 8.73 8.73 0 0 0 3.7 3.7 0.9 0.9 0 0 0 1-.2l1.05-1.04A1.9 1.9 0 0 1 13.9 13H16a2.5 2.5 0 0 1 2.5 2.5v1.8c0 1.08-.74 2.02-1.79 2.32a5.8 5.8 0 0 1-1.54.2c-7.18 0-13-5.82-13-13 0-.53 0-1.06.2-1.54A2.5 2.5 0 0 1 6.5 3.5Z" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"></path>
-          </svg>
+      <a class="cta-link" href="/post.html" aria-label="ثبت فروشگاه در ویترینت">
+        <span class="cta-text">
+          <span class="cta-title">ثبت فروشگاه</span>
+          <span class="cta-caption">شروع فروش در ویترینت</span>
         </span>
-        <span class="support-text">
-          <span class="support-title">پشتیبانی اختصاصی</span>
-          <span class="support-number">۰۲۱۹۱۰۹۰۸۱۰</span>
+        <span class="cta-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none">
+            <path d="M12 5v14m7-7H5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
         </span>
       </a>
       <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="primaryNav">
