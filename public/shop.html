@@ -35,21 +35,384 @@ body {
   transition: background 0.3s, color 0.3s;
 }
 
-.onyx-nav {
-  background: rgba(255,255,255,0.98);
-  box-shadow: 0 1.5px 12px #7C83FD22;
-  backdrop-filter: blur(7px);
+.shop-header {
   position: sticky;
   top: 0;
-  z-index: 50;
-  padding: 1rem;
+  z-index: 60;
+  padding: clamp(0.65rem, 1.8vw, 1.1rem) clamp(0.9rem, 4vw, 2.4rem);
+  background: linear-gradient(120deg, rgba(124,131,253,0.18), rgba(56,189,248,0.14), rgba(255,255,255,0.94));
+  backdrop-filter: blur(18px);
+  border-bottom: 1px solid rgba(124,131,253,0.08);
+  box-shadow: 0 18px 40px rgba(17, 24, 39, 0.08);
 }
 
-.logo-txt { 
-  color: var(--primary); 
-  font-weight: 900; 
-  font-size: 1.6rem; 
-  letter-spacing: -1px;
+.shop-header__container {
+  width: min(1120px, 100%);
+  margin: 0 auto;
+  background: rgba(255,255,255,0.95);
+  border-radius: 1.75rem;
+  border: 1px solid rgba(124,131,253,0.12);
+  padding: clamp(1rem, 2vw, 1.7rem) clamp(1.1rem, 2.3vw, 2rem);
+  display: flex;
+  flex-direction: column;
+  gap: 1.1rem;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 22px 55px rgba(15, 23, 42, 0.12);
+}
+
+.shop-header__container::before {
+  content: "";
+  position: absolute;
+  inset: -90% 35% 55% -25%;
+  background: radial-gradient(circle at top, rgba(124,131,253,0.16), transparent 65%);
+  pointer-events: none;
+}
+
+.shop-header__container > * {
+  position: relative;
+  z-index: 1;
+}
+
+.shop-header__brand {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.shop-brand-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.shop-logo {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: clamp(2rem, 5vw, 2.8rem);
+  font-weight: 900;
+  background: linear-gradient(135deg, #ec4899, #8b5cf6, #3b82f6);
+  -webkit-background-clip: text;
+  color: transparent;
+  letter-spacing: -1.6px;
+  text-shadow: 0 12px 32px rgba(124,131,253,0.18);
+}
+
+.shop-tagline {
+  margin: 0;
+  font-weight: 600;
+  font-size: clamp(0.9rem, 2vw, 1.05rem);
+  color: #4c577a;
+}
+
+.shop-badges {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  flex-wrap: wrap;
+}
+
+.shop-status {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  padding: 0.5rem 1.2rem 0.5rem 0.9rem;
+  border-radius: 999px;
+  font-weight: 800;
+  font-size: 0.88rem;
+  background: linear-gradient(135deg, rgba(134,239,172,0.24), rgba(16,185,129,0.2));
+  color: #047857;
+  border: 1px solid rgba(16,185,129,0.28);
+  box-shadow: 0 16px 30px rgba(16,185,129,0.18);
+  padding-right: 1.6rem;
+}
+
+.shop-status::before {
+  content: "";
+  position: absolute;
+  right: 0.75rem;
+  width: 0.55rem;
+  height: 0.55rem;
+  border-radius: 50%;
+  background: #34d399;
+  box-shadow: 0 0 0 6px rgba(74,222,128,0.2);
+}
+
+.shop-status.is-closed {
+  background: linear-gradient(135deg, rgba(248,113,113,0.24), rgba(239,68,68,0.24));
+  color: #b91c1c;
+  border-color: rgba(239,68,68,0.32);
+  box-shadow: 0 16px 30px rgba(248,113,113,0.2);
+}
+
+.shop-status.is-closed::before {
+  background: #f87171;
+  box-shadow: 0 0 0 6px rgba(248,113,113,0.24);
+}
+
+.shop-rating {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.85rem;
+  padding: 0.55rem 1.2rem;
+  border-radius: 999px;
+  border: 1px dashed rgba(250,204,21,0.55);
+  background: linear-gradient(135deg, #fff7e5, #fff1c1);
+  color: #a16207;
+  font-weight: 800;
+  font-size: 0.9rem;
+  box-shadow: 0 18px 32px rgba(250,204,21,0.2);
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+}
+
+.shop-rating:hover {
+  transform: translateY(-2px);
+  background: linear-gradient(135deg, #fff4d0, #ffe7a6);
+  box-shadow: 0 20px 36px rgba(245,158,11,0.28);
+}
+
+.shop-rating:focus-visible {
+  outline: 3px solid rgba(124,131,253,0.35);
+  outline-offset: 3px;
+}
+
+.shop-rating svg {
+  width: 20px;
+  height: 20px;
+  fill: #facc15;
+}
+
+.shop-rating__score {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.shop-rating__score strong {
+  font-size: 1.2rem;
+}
+
+.shop-rating__divider {
+  width: 1px;
+  height: 24px;
+  background: linear-gradient(to bottom, transparent, rgba(250,204,21,0.6), transparent);
+}
+
+.shop-rating__visits {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  color: #b45309;
+}
+
+.shop-rating__visits i {
+  color: #d97706;
+}
+
+.shop-header__info {
+  display: flex;
+  align-items: center;
+  gap: 1.2rem;
+  flex-wrap: wrap;
+  padding: 0.75rem 1rem;
+  border-radius: 1.3rem;
+  background: linear-gradient(120deg, rgba(124,131,253,0.12), rgba(45,212,191,0.12));
+  border: 1px solid rgba(124,131,253,0.12);
+}
+
+.shop-info-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 600;
+  font-size: 0.92rem;
+  color: #384161;
+  white-space: normal;
+}
+
+.shop-info-item i {
+  color: var(--primary);
+  font-size: 1rem;
+}
+
+.shop-header__actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.shop-header__pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.65rem 1.25rem;
+  border-radius: 999px;
+  border: 1px solid rgba(124,131,253,0.15);
+  background: #f5f6ff;
+  color: #1f2a60;
+  font-weight: 800;
+  font-size: 0.92rem;
+  text-decoration: none;
+  box-shadow: 0 16px 32px rgba(124,131,253,0.18);
+  transition: transform 0.22s ease, box-shadow 0.22s ease, background 0.22s ease, color 0.22s ease;
+  cursor: pointer;
+}
+
+.shop-header__pill i {
+  font-size: 1rem;
+}
+
+.shop-header__pill:hover,
+.shop-header__pill:focus-visible {
+  transform: translateY(-3px);
+  background: #eef2ff;
+  color: #1e3a8a;
+  box-shadow: 0 22px 42px rgba(59,130,246,0.18);
+}
+
+.shop-header__pill--primary {
+  background: linear-gradient(135deg, #22d3ee, #3b82f6);
+  color: #fff;
+  border-color: transparent;
+  box-shadow: 0 20px 40px rgba(56,189,248,0.4);
+}
+
+.shop-header__pill--primary:hover,
+.shop-header__pill--primary:focus-visible {
+  background: linear-gradient(135deg, #0ea5e9, #2563eb);
+  box-shadow: 0 24px 48px rgba(37,99,235,0.45);
+}
+
+.shop-header__pill--alert {
+  background: #fff5f2;
+  color: #b91c1c;
+  border-color: rgba(248,113,113,0.45);
+  box-shadow: 0 18px 34px rgba(248,113,113,0.22);
+}
+
+.shop-header__pill--alert:hover,
+.shop-header__pill--alert:focus-visible {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.shop-header__pill--home {
+  background: #eef2ff;
+  color: #1d4ed8;
+  border-color: rgba(59,130,246,0.35);
+}
+
+.shop-header__pill--home:hover,
+.shop-header__pill--home:focus-visible {
+  background: #e0e7ff;
+  color: #1e3a8a;
+}
+
+@media (max-width: 992px) {
+  .shop-header__container {
+    border-radius: 1.6rem;
+    padding: 1rem 1.4rem;
+  }
+  .shop-header__actions {
+    justify-content: flex-start;
+  }
+}
+
+@media (max-width: 768px) {
+  .shop-header {
+    padding: 0.6rem clamp(0.7rem, 6vw, 1.3rem);
+  }
+  .shop-header__brand {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+  .shop-badges {
+    width: 100%;
+    justify-content: flex-start;
+  }
+  .shop-header__info {
+    border-radius: 1.1rem;
+  }
+}
+
+@media (max-width: 640px) {
+  .shop-header__container {
+    border-radius: 1.4rem;
+    padding: 1rem;
+    gap: 1.2rem;
+  }
+  .shop-header__info {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.7rem;
+    padding: 0.85rem 1rem;
+  }
+  .shop-info-item {
+    font-size: 0.86rem;
+  }
+  .shop-header__actions {
+    width: 100%;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.75rem;
+  }
+  .shop-header__pill {
+    width: 100%;
+    padding: 0.7rem 1rem;
+    font-size: 0.84rem;
+  }
+  .shop-header__pill--home {
+    grid-column: span 2;
+  }
+  .shop-rating {
+    width: 100%;
+    justify-content: space-between;
+  }
+}
+
+@media (max-width: 460px) {
+  .shop-logo {
+    font-size: clamp(1.9rem, 8vw, 2.3rem);
+  }
+  .shop-tagline {
+    font-size: 0.88rem;
+  }
+  .shop-rating {
+    font-size: 0.82rem;
+    padding: 0.55rem 1rem;
+  }
+}
+
+@keyframes fade-in-down {
+  from { opacity: 0; transform: translateY(-24px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fade-in-down {
+  animation: fade-in-down 0.32s cubic-bezier(.3, 1, .51, .98);
+}
+
+.rate-star {
+  cursor: pointer;
+  transition: transform 0.1s ease, color 0.1s ease;
+}
+
+.rate-star.active {
+  color: #fbbf24;
+  transform: scale(1.15);
+}
+
+.rate-star.inactive {
+  color: #d1d5db;
 }
 
 .hero-slider {
@@ -511,319 +874,62 @@ body {
 <!-- فونت IranYekan برای لوگوی فروشگاه -->
 <link href="https://cdn.fontcdn.ir/Font/Persian/IranYekan/IranYekan.css" rel="stylesheet" />
 
-<header class="onyx-nav sticky top-0 z-50 w-full bg-white/90 backdrop-blur-lg shadow flex items-center justify-between px-3 md:px-7 py-3 gap-x-2" role="banner">
-  <!-- لوگو فروشگاه (راست) -->
-  <div class="shop-identity flex items-center gap-4 min-w-fit w-full">
-   <span class="logo-txt text-[1.7rem] md:text-3xl font-black bg-gradient-to-r from-pink-500 via-fuchsia-700 to-blue-500 bg-clip-text text-transparent tracking-tight drop-shadow select-none"
-      style="font-family:'IranYekan','Vazirmatn',sans-serif;letter-spacing:-1.7px;line-height:1.08;">
-  نئون استایل
-</span>
-
-    <span id="shop-status" class="inline-flex items-center gap-1 text-xs md:text-sm font-bold px-2 py-1 rounded-lg shadow transition"
-      style="background: linear-gradient(90deg,#e0fbe3,#b6f5c6);color:#19954b;">
-      <span class="w-2 h-2 rounded-full bg-green-400 inline-block"></span>
-      باز است
-    </span>
-  </div>
-
-  <!-- اکشن‌ها و لوگو ویترینت -->
-  <!-- اکشن‌ها (در دسکتاپ کنار لوگو / در موبایل پایین صفحه) -->
-  <div class="onyx-actions flex items-center gap-4 sm:gap-5 min-w-fit flex-shrink-0 w-full overflow-x-auto md:overflow-visible">
-    <!-- گفت‌وگو -->
-  
-    <!-- آدرس فروشگاه -->
-    <button
-      id="addressBtn"
-      class="action-item cursor-pointer flex items-center gap-1 px-2.5 py-1 rounded-lg text-blue-700 bg-blue-50 hover:bg-blue-100 hover:shadow-sm active:bg-blue-200 transition focus:outline-none focus:ring-2 focus:ring-blue-300"
-      aria-label="آدرس فروشگاه"
-      style="font-family:'Vazirmatn',sans-serif;font-weight:600;">
-      <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a2 2 0 01-2.828 0l-4.243-4.243A8 8 0 1 1 20 12a8.001 8.001 0 01-2.343 4.657z"/>
-        <circle cx="12" cy="12" r="3"/>
-      </svg>
-      <span>آدرس فروشگاه</span>
-    </button>
-    <button
-      id="favShopBtn"
-      class="action-item cursor-pointer px-2.5 py-1 rounded-lg text-blue-700 bg-blue-50 hover:bg-blue-100 hover:shadow-sm active:bg-blue-200 transition focus:outline-none focus:ring-2 focus:ring-blue-300"
-      aria-label="مشتریان"
-      style="font-family:'Vazirmatn',sans-serif;font-weight:600;">
-      <span>مشتریان</span>
-    </button>
-    <!-- گزارش با پاپ‌آپ -->
-    <button
-      id="reportBtn"
-      class="action-item cursor-pointer flex items-center gap-1 px-2.5 py-1 rounded-lg text-blue-700 bg-blue-50 hover:bg-blue-100 hover:shadow-sm active:bg-blue-200 transition focus:outline-none focus:ring-2 focus:ring-blue-300"
-      aria-label="گزارش تخلف"
-      style="font-family:'Vazirmatn',sans-serif;font-weight:600;">
-      <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-        <circle cx="12" cy="12" r="10"/>
-        <path d="M12 8v4M12 16h.01"/>
-      </svg>
-      <span>گزارش</span>
-    </button>
-    <!-- امتیاز و بازدید -->
-    <button id="rateShow" class="action-item rating-badge flex items-center gap-3 text-yellow-500 font-bold text-sm ml-1 cursor-pointer focus:outline-none focus:ring-2 focus:ring-[var(--primary)]" style="user-select:none;" aria-label="امتیاز و بازدید">
-      <span class="flex items-center gap-1">
-        <svg class="w-5 h-5 text-yellow-400" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.04 3.21a1 1 0 00.95.69h3.367c.969 0 1.371 1.24.588 1.81l-2.726 1.98a1 1 0 00-.364 1.118l1.04 3.21c.3 .921-.755 1.688-1.54 1.118l-2.726-1.98a1 1 0 00-1.175 0l-2.726 1.98c-.785.57-1.84-.197-1.54-1.118l1.04-3.21a1 1 0 00-.364-1.118L2.05 8.637c-.783-.57-.38-1.81.588-1.81h3.367a1 1 0 00.95-.69l1.04-3.21z"/></svg>
-        <span id="shop-rating">4.8</span>
-      </span>
-      <span class="border-r border-dotted border-gray-400 h-6 mx-1"></span>
-      <span class="flex items-center gap-1 text-yellow-600"><span id="shop-visits">1,234</span> بازدید</span>
-    </button>
-    <!-- لوگو ویترینت / بازگشت به خانه -->
-    <a href="/" class="vitrinet-link action-item ml-3 group select-none min-w-fit focus:outline-none focus:ring-2 focus:ring-[var(--primary)]" title="رفتن به صفحه اصلی" aria-label="خانه">
-      <i class="fas fa-home text-lg md:hidden"></i>
-      <span class="text-[1.7rem] md:text-3xl font-black bg-gradient-to-l from-teal-400 via-blue-400 to-indigo-400 bg-clip-text text-transparent tracking-tighter transition group-hover:scale-105"
-        style="font-family:'IranYekan','Vazirmatn',sans-serif;letter-spacing:-1.7px;line-height:1;">
-        ویترینت
-      </span>
-    </a>
-  </div>
-
-  <!-- پاپ‌آپ آدرس فروشگاه -->
-  <div id="addressModal" class="fixed inset-0 bg-black/40 z-[99] hidden items-center justify-center">
-    <div class="bg-white rounded-2xl p-6 shadow-2xl w-[90vw] max-w-sm flex flex-col gap-4 animate-fade-in-down border border-emerald-100 text-center">
-      <div class="flex items-center justify-between mb-2">
-        <span class="text-lg font-bold text-emerald-600 flex items-center gap-1">
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a2 2 0 01-2.828 0l-4.243-4.243A8 8 0 1120 12a8.001 8.001 0 01-2.343 4.657z"/>
-            <circle cx="12" cy="12" r="3"/>
-          </svg>
-          آدرس فروشگاه
+<header class="shop-header" role="banner">
+  <div class="shop-header__container">
+    <div class="shop-header__brand">
+      <div class="shop-brand-card">
+        <span class="shop-logo" style="font-family:'IranYekan','Vazirmatn',sans-serif;">
+          نئون استایل
         </span>
-        <button id="closeAddressModal" class="p-1 hover:bg-emerald-100 rounded transition" aria-label="بستن">
-          <svg class="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-          </svg>
+        <p class="shop-tagline">لباس‌های مدرن، جسورانه و مناسب هر موقعیت</p>
+      </div>
+      <div class="shop-badges">
+        <span id="shop-status" class="shop-status" aria-live="polite">
+          باز است
+        </span>
+        <button id="rateShow" class="shop-rating" type="button" aria-label="مشاهده امتیاز و تعداد بازدید">
+          <span class="shop-rating__score">
+            <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.04 3.21a1 1 0 00.95.69h3.367c.969 0 1.371 1.24.588 1.81l-2.726 1.98a1 1 0 00-.364 1.118l1.04 3.21c.3.921-.755 1.688-1.54 1.118l-2.726-1.98a1 1 0 00-1.175 0l-2.726 1.98c-.785.57-1.84-.197-1.54-1.118l1.04-3.21a1 1 0 00-.364-1.118L2.05 8.637c-.783-.57-.38-1.81.588-1.81h3.367a1 1 0 00.95-.69l1.04-3.21z"/></svg>
+            <strong id="shop-rating">4.8</strong>
+          </span>
+          <span class="shop-rating__divider" aria-hidden="true"></span>
+          <span class="shop-rating__visits"><i class="fas fa-eye" aria-hidden="true"></i><span id="shop-visits">1,234</span> بازدید</span>
         </button>
       </div>
-      <div class="text-gray-800 text-base font-bold mt-2">
-        تهران، بلوار کشاورز، خیابان مهرام، پلاک ۲۱، طبقه ۲  
-        <br>
-        <span class="text-emerald-700 text-sm font-semibold mt-1 flex items-center justify-center gap-1">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 5h12M9 3v2m0 14a4 4 0 100-8 4 4 0 000 8zm7-4h2a2 2 0 002-2v-2a2 2 0 00-2-2h-2a2 2 0 00-2 2v2a2 2 0 002 2z"/></svg>
-          شماره تماس: <b dir="ltr" class="font-bold mx-1">09123456789</b>
-        </span>
+    </div>
+    <div class="shop-header__info" aria-label="اطلاعات سریع فروشگاه">
+      <div class="shop-info-item">
+        <i class="fas fa-location-dot" aria-hidden="true"></i>
+        <span id="shop-header-address">تهران، بلوار کشاورز، خیابان مهرام، پلاک ۲۱</span>
+      </div>
+      <div class="shop-info-item">
+        <i class="fas fa-clock" aria-hidden="true"></i>
+        <span id="shop-header-hours">ساعت کاری: ۱۰ تا ۲۲ (هر روز)</span>
+      </div>
+      <div class="shop-info-item" dir="ltr">
+        <i class="fas fa-phone" aria-hidden="true"></i>
+        <span id="shop-header-phone">0912 345 6789</span>
       </div>
     </div>
-  </div>
-
-  <!-- پاپ‌آپ مغازه محبوب -->
-  <div id="favShopModal" class="fixed inset-0 bg-black/40 z-[99] hidden items-center justify-center">
-    <div class="bg-white/80 backdrop-blur-lg rounded-3xl p-6 shadow-2xl w-[90vw] max-w-sm flex flex-col gap-4 animate-fade-in-down border border-gray-200 text-center">
-      <div class="flex items-center justify-between mb-1">
-        <span class="text-lg font-bold text-[var(--primary)] flex items-center gap-1">
-          <i class="fas fa-star"></i>
-          مشتریان
-        </span>
-        <button id="closeFavShopModal" class="p-1 hover:bg-gray-100 rounded transition" aria-label="بستن">
-          <svg class="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-          </svg>
-        </button>
-      </div>
-      <div class="text-gray-800 text-base font-bold mt-3">
-        این مغازه توسط <span id="favShopCount">150</span> مشتری دنبال می‌شود
-      </div>
-      <button id="toggleFavShopBtn" class="mt-2 favorite-btn w-full justify-center"></button>
+    <div class="shop-header__actions">
+      <button id="addressBtn" class="shop-header__pill shop-header__pill--primary" type="button" aria-label="نمایش آدرس فروشگاه">
+        <i class="fas fa-map-marker-alt" aria-hidden="true"></i>
+        <span>آدرس فروشگاه</span>
+      </button>
+      <button id="favShopBtn" class="shop-header__pill" type="button" aria-label="مشاهده مشتریان وفادار">
+        <i class="fas fa-heart" aria-hidden="true"></i>
+        <span>مشتریان</span>
+      </button>
+      <button id="reportBtn" class="shop-header__pill shop-header__pill--alert" type="button" aria-label="گزارش تخلف">
+        <i class="fas fa-exclamation-circle" aria-hidden="true"></i>
+        <span>گزارش تخلف</span>
+      </button>
+      <a href="/" class="shop-header__pill shop-header__pill--home" title="بازگشت به ویترینت" aria-label="بازگشت به خانه">
+        <i class="fas fa-home" aria-hidden="true"></i>
+        <span>صفحه اصلی ویترینت</span>
+      </a>
     </div>
   </div>
-
-  <!-- پاپ‌آپ گزارش تخلف -->
-  <div id="reportModal" class="fixed inset-0 bg-black/30 z-[99] hidden items-center justify-center">
-    <div class="bg-white rounded-2xl p-5 shadow-2xl w-[92vw] max-w-sm flex flex-col gap-3 animate-fade-in-down border border-orange-100">
-      <div class="flex items-center justify-between mb-2">
-        <span class="text-lg font-bold text-orange-500 flex items-center gap-1">
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-            <circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/>
-          </svg>
-          ثبت گزارش تخلف
-        </span>
-        <button id="closeReportModal" class="p-1 hover:bg-orange-100 rounded transition" aria-label="بستن">
-          <svg class="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-          </svg>
-        </button>
-      </div>
-
-
-      <!-- نوع تخلف -->
-<label for="reportType" class="text-sm font-bold text-gray-600">نوع تخلف:</label>
-<select id="reportType"
-        class="w-full border border-orange-200 rounded-xl p-2 text-sm focus:ring-2 focus:ring-orange-400 outline-none">
-  <option value="price_mismatch">عدم تطابق قیمت با مغازه</option>
-  <option value="no_response">عدم پاسخ‌گویی به مشتری</option>
-  <option value="overpricing">عدم تطابق کالا با مغازه</option>
-  <option value="other">سایر تخلفات</option>
-</select>
-
-      <textarea id="reportText" rows="4" class="w-full border border-orange-200 rounded-xl p-2 text-sm focus:ring-2 focus:ring-orange-400 outline-none" placeholder="توضیحات تخلف را بنویسید..."></textarea>
-      <button id="submitReport" class="mt-1 bg-gradient-to-r from-orange-400 to-orange-500 text-white font-bold py-2 rounded-xl hover:shadow-lg transition">ارسال گزارش</button>
-      <div id="reportMsg" class="hidden text-green-500 font-bold mt-1"></div>
-    </div>
-  </div>
-
-  <!-- پاپ‌آپ امتیازدهی -->
-  <div id="rateModal" class="fixed inset-0 bg-black/30 z-[99] hidden items-center justify-center">
-    <div class="bg-white rounded-2xl p-6 shadow-2xl w-[92vw] max-w-xs flex flex-col gap-4 animate-fade-in-down border border-yellow-100">
-      <div class="flex items-center justify-between mb-1">
-        <span class="text-lg font-bold text-yellow-500 flex items-center gap-1">
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-            <polygon points="12 2 15 10 23 10 17 15 19 23 12 18 5 23 7 15 1 10 9 10" fill="#fbbf24"/>
-          </svg>
-          ثبت امتیاز
-        </span>
-        <button id="closeRateModal" class="p-1 hover:bg-yellow-100 rounded transition" aria-label="بستن">
-          <svg class="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-          </svg>
-        </button>
-      </div>
-      <div class="flex justify-center gap-1" id="rateStars">
-        <!-- ستاره‌ها اینجا رندر میشه -->
-      </div>
-      <button id="submitRate" class="mt-1 bg-gradient-to-r from-yellow-400 to-yellow-500 text-white font-bold py-2 rounded-xl hover:shadow-lg transition">ثبت امتیاز</button>
-      <div id="rateMsg" class="hidden text-green-500 font-bold mt-1"></div>
-    </div>
-  </div>
-
-  <style>
-    .onyx-nav {backdrop-filter: blur(16px);}
-    .onyx-nav > div {min-width: 0;}
-    .onyx-nav .rating-badge {gap: 1.2rem;}
-    .onyx-actions {white-space: nowrap;}
-    .action-item {display:flex; align-items:center; justify-content:center; gap:.35rem; font-weight:700;}
-    .vitrinet-link {display:flex; align-items:center; gap:.4rem;}
-    .shop-identity {flex:1 1 auto;}
-    .no-scrollbar {scrollbar-width: none; -ms-overflow-style: none;}
-    .no-scrollbar::-webkit-scrollbar {display:none;}
-    @media (max-width: 700px) {
-      body {padding-bottom:0;}
-      .onyx-nav {
-        flex-direction: column !important;
-        align-items: stretch !important;
-        justify-content: center !important;
-        gap: .9rem;
-        padding: .85rem .85rem !important;
-        box-shadow: 0 1.5px 12px #7C83FD22;
-      }
-      .shop-identity {
-        width: 100%;
-        justify-content: space-between;
-        align-items: flex-start;
-        gap: .75rem;
-      }
-      .shop-identity .logo-txt {
-        font-size: 1.55rem !important;
-      }
-      #shop-status {
-        font-size: .78rem;
-        padding: .35rem .6rem;
-      }
-      .onyx-actions {
-        display: grid !important;
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-        gap: .55rem;
-        width: 100%;
-        background: rgba(255,255,255,0.96);
-        border-radius: 1.1rem;
-        padding: .65rem .75rem;
-        box-shadow: 0 12px 32px rgba(124,131,253,0.16);
-        white-space: normal;
-      }
-      .onyx-actions .action-item {
-        flex-direction: row !important;
-        font-size: .82rem !important;
-        min-width: 0 !important;
-        padding: .5rem .6rem !important;
-        border-radius: .9rem !important;
-        gap: .4rem !important;
-      }
-      .onyx-actions .action-item svg {
-        width: 16px;
-        height: 16px;
-      }
-      .onyx-actions .rating-badge {
-        grid-column: span 2;
-        justify-content: space-between;
-        align-items: center;
-        gap: .6rem;
-        padding: .55rem .7rem;
-        background: #fff;
-        border-radius: .95rem;
-        border: 1px dashed rgba(251, 191, 36, 0.45);
-        color: #ca8a04;
-      }
-      .onyx-actions .rating-badge .border-r {
-        display: none;
-      }
-      .onyx-actions .rating-badge span:first-child {
-        gap: .35rem;
-      }
-      .onyx-actions .rating-badge span:last-child {
-        color: #d97706;
-      }
-      .onyx-actions .vitrinet-link {
-        order: -1;
-        grid-column: span 2;
-        justify-content: space-between;
-        margin: 0;
-        padding: .6rem .85rem;
-        border-radius: 1rem;
-        background: linear-gradient(135deg, rgba(124,131,253,0.12), rgba(56,189,248,0.12));
-        box-shadow: 0 8px 24px rgba(124,131,253,0.15);
-      }
-      .onyx-actions .vitrinet-link span {
-        font-size: 1.5rem;
-      }
-      .onyx-actions .vitrinet-link .fa-home {
-        display: block;
-      }
-      .onyx-nav .ml-3 {
-        margin-left: 0 !important;
-      }
-    }
-    @media (min-width: 701px) {
-      .onyx-nav {
-        flex-direction: row !important;
-        align-items: center !important;
-        justify-content: space-between !important;
-        gap: 1.5rem;
-      }
-      .onyx-nav > div:first-child {
-        width: auto;
-        flex: 1 1 auto;
-      }
-      .onyx-actions {
-        position: static;
-        background: none;
-        box-shadow: none;
-        overflow: visible;
-        gap: 1.2rem;
-        padding: 0;
-        width: auto;
-        flex: 1 1 auto;
-        justify-content: flex-end;
-        flex-wrap: nowrap;
-      }
-      .vitrinet-link {
-        margin-right: .75rem;
-      }
-      .action-item {
-        flex-direction: row;
-        font-size: .875rem;
-      }
-    }
-    @keyframes fade-in-down {from{opacity:0;transform:translateY(-24px);}to{opacity:1;transform:translateY(0);}}
-    .animate-fade-in-down {animation:fade-in-down .32s cubic-bezier(.3,1,.51,.98)}
-    .rate-star {cursor:pointer;transition:transform 0.1s;}
-    .rate-star.active {color:#fbbf24;transform:scale(1.15);}
-    .rate-star.inactive {color:#d1d5db;}
-  </style>
-
-
-
 </header>
 
 
@@ -1072,17 +1178,19 @@ async function loadShopData() {
     currentSellerId = data.sellerId;
 
     // لوگو و نام فروشگاه
-    document.querySelectorAll('.logo-txt').forEach(el =>
+    document.querySelectorAll('.shop-logo').forEach(el =>
       el.textContent = data.shopLogoText || data.shopName || 'نام فروشگاه'
     );
     document.getElementById('currentShopName').textContent =
       data.shopLogoText || data.shopName || 'نام فروشگاه';
 
     // وضعیت فروشگاه (باز/بسته)
-    document.getElementById('shop-status').innerHTML =
-      data.shopStatus === 'closed'
-        ? '<span class="w-2 h-2 rounded-full bg-red-400 inline-block"></span> بسته است'
-        : '<span class="w-2 h-2 rounded-full bg-green-400 inline-block"></span> باز است';
+    const statusEl = document.getElementById('shop-status');
+    if (statusEl) {
+      const isClosed = data.shopStatus === 'closed';
+      statusEl.textContent = isClosed ? 'بسته است' : 'باز است';
+      statusEl.classList.toggle('is-closed', isClosed);
+    }
 
     // آدرس و شماره تماس
     const addressContent = document.querySelector('#addressModal .text-gray-800');
@@ -1097,6 +1205,16 @@ async function loadShopData() {
           شماره تماس: <b dir="ltr" class="font-bold mx-1">${data.shopPhone || '-'}</b>
         </span>
       `;
+    }
+
+    const headerAddress = document.getElementById('shop-header-address');
+    if (headerAddress) headerAddress.textContent = data.shopAddress || 'آدرس ثبت نشده';
+    const headerPhone = document.getElementById('shop-header-phone');
+    if (headerPhone) headerPhone.textContent = data.shopPhone || data.phoneNumber || '-';
+    const headerHours = document.getElementById('shop-header-hours');
+    if (headerHours) {
+      const hours = data.shopWorkingHours || data.workingHours || data.shopWorkTime || data.shopWorkHours || data.workHours;
+      headerHours.textContent = hours ? `ساعت کاری: ${hours}` : 'ساعت کاری: —';
     }
 
     // امتیاز میانگین کاربران و تعداد کل امتیازها
@@ -1121,8 +1239,19 @@ async function loadShopData() {
 
   } catch (e) {
     console.error(e);
-    document.querySelectorAll('.logo-txt').forEach(el => el.textContent = 'نام فروشگاه');
+    document.querySelectorAll('.shop-logo').forEach(el => el.textContent = 'نام فروشگاه');
     document.getElementById('currentShopName').textContent = 'نام فروشگاه';
+    const statusEl = document.getElementById('shop-status');
+    if (statusEl) {
+      statusEl.textContent = 'وضعیت نامشخص';
+      statusEl.classList.remove('is-closed');
+    }
+    const headerAddress = document.getElementById('shop-header-address');
+    if (headerAddress) headerAddress.textContent = 'آدرس ثبت نشده';
+    const headerPhone = document.getElementById('shop-header-phone');
+    if (headerPhone) headerPhone.textContent = '-';
+    const headerHours = document.getElementById('shop-header-hours');
+    if (headerHours) headerHours.textContent = 'ساعت کاری: —';
     setDynamicSEO({
       shopName: 'نام فروشگاه',
       shopShortDesc: 'فروشگاه آنلاین',
