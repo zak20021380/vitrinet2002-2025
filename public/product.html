@@ -1692,7 +1692,6 @@
         <p id="addressModalCity" hidden></p>
       </div>
       <div class="overlay-actions">
-        <a class="overlay-button overlay-button--primary" id="addressModalMap" target="_blank" rel="noopener">نمایش روی نقشه</a>
         <button class="overlay-button" type="button" id="addressModalCopy">کپی آدرس</button>
       </div>
     </div>
@@ -1842,7 +1841,6 @@
         addressModalTitle: document.getElementById('addressModalTitle'),
         addressModalAddress: document.getElementById('addressModalAddress'),
         addressModalCity: document.getElementById('addressModalCity'),
-        addressModalMap: document.getElementById('addressModalMap'),
         addressModalCopy: document.getElementById('addressModalCopy'),
         addressModalClose: document.getElementById('addressModalClose'),
         descriptionLong: document.getElementById('productDescriptionLong'),
@@ -2128,16 +2126,6 @@
           }
         }
 
-        if (dom.addressModalMap) {
-          if (state.addressInfo.mapUrl) {
-            dom.addressModalMap.href = state.addressInfo.mapUrl;
-            dom.addressModalMap.hidden = false;
-          } else {
-            dom.addressModalMap.hidden = true;
-            dom.addressModalMap.removeAttribute('href');
-          }
-        }
-
         if (dom.addressModalCopy) {
           if (state.copyTimeout) {
             clearTimeout(state.copyTimeout);
@@ -2154,7 +2142,7 @@
             : 'آدرس مغازه';
         }
 
-        openOverlay(dom.addressModal, dom.addressModalClose || dom.addressModalCopy || dom.addressModalMap);
+        openOverlay(dom.addressModal, dom.addressModalClose || dom.addressModalCopy);
       }
 
       function setStatus(message) {
@@ -2864,15 +2852,6 @@
           items.push({
             label: 'شهر',
             value: seller.city
-          });
-        }
-
-        if (state.addressInfo && state.addressInfo.mapUrl) {
-          items.push({
-            label: 'نمایش روی نقشه',
-            value: state.addressInfo.mapUrl,
-            type: 'external-link',
-            text: 'باز کردن در نقشه گوگل'
           });
         }
 
