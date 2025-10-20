@@ -846,7 +846,6 @@ body {
       </a>
     </div>
     <div class="badge-cluster">
-      <span id="shop-status" class="status-badge" role="status" aria-live="polite">باز است</span>
       <button id="rateShow" class="rating-badge" type="button" aria-label="نمایش امتیاز و بازدید">
         <span class="rating-score">
           <svg viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.04 3.21a1 1 0 0 0 .95.69h3.367c.969 0 1.371 1.24.588 1.81l-2.726 1.98a1 1 0 0 0-.364 1.118l1.04 3.21c.3.921-.755 1.688-1.54 1.118l-2.726-1.98a1 1 0 0 0-1.175 0l-2.726 1.98c-.785.57-1.84-.197-1.54-1.118l1.04-3.21a1 1 0 0 0-.364-1.118L2.05 8.637c-.783-.57-.38-1.81.588-1.81h3.367a1 1 0 0 0 .95-.69l1.04-3.21Z"/></svg>
@@ -1234,10 +1233,13 @@ async function loadShopData() {
       data.shopLogoText || data.shopName || 'نام فروشگاه';
 
     // وضعیت فروشگاه (باز/بسته)
-    document.getElementById('shop-status').innerHTML =
-      data.shopStatus === 'closed'
-        ? '<span class="w-2 h-2 rounded-full bg-red-400 inline-block"></span> بسته است'
-        : '<span class="w-2 h-2 rounded-full bg-green-400 inline-block"></span> باز است';
+    const shopStatusEl = document.getElementById('shop-status');
+    if (shopStatusEl) {
+      shopStatusEl.innerHTML =
+        data.shopStatus === 'closed'
+          ? '<span class="w-2 h-2 rounded-full bg-red-400 inline-block"></span> بسته است'
+          : '<span class="w-2 h-2 rounded-full bg-green-400 inline-block"></span> باز است';
+    }
 
     // آدرس و شماره تماس
     const addressContent = document.querySelector('#addressModal .text-gray-800');
