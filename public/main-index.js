@@ -1327,6 +1327,42 @@ slider.addEventListener('touchend', () => {
 }, {passive:true});
 
 
+const sliderNavIds = [
+  'drag-scroll-cards',
+  'popular-products-slider',
+  'banta-shops-section',
+  'shopping-centers-slider',
+  'shoes-bags-slider'
+];
+
+function getSliderScrollAmount(sliderEl) {
+  const firstChild = sliderEl.querySelector(':scope > *');
+  if (!firstChild) {
+    return sliderEl.clientWidth || 320;
+  }
+  const styles = window.getComputedStyle(sliderEl);
+  const gapValue = parseFloat(styles.columnGap || styles.gap || '0') || 0;
+  return firstChild.getBoundingClientRect().width + gapValue;
+}
+
+function setupSliderNavigation(sliderId) {
+  const sliderEl = document.getElementById(sliderId);
+  if (!sliderEl) return;
+  const buttons = document.querySelectorAll(`[data-scroll-target="${sliderId}"]`);
+  if (!buttons.length) return;
+
+  buttons.forEach(button => {
+    button.addEventListener('click', () => {
+      const direction = button.dataset.direction === 'next' ? 1 : -1;
+      const amount = getSliderScrollAmount(sliderEl);
+      sliderEl.scrollBy({ left: direction * amount, behavior: 'smooth' });
+    });
+  });
+}
+
+sliderNavIds.forEach(setupSliderNavigation);
+
+
 window.showAdBannerPopup = async function() {
   console.log("⏺️ شروع showAdBannerPopup");
   const adSlot = document.getElementById('ad-banner-slot-popup');
