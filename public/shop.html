@@ -1166,94 +1166,176 @@ function getShopSlug() {
 let currentSellerId = null;
 
 const slug = getShopSlug();
+const CACHE_TTL = 5 * 60 * 1000; // ۵ دقیقه
+const SHOP_CACHE_KEY = slug ? `vt:shop:${slug}` : '';
+const PRODUCT_CACHE_KEY = slug ? `vt:shop:products:${slug}` : '';
+let allProducts = [];
+const memoryCache = new Map();
+
+function writeCacheRaw(key, rawValue) {
+  if (!key) return;
+  try {
+    sessionStorage.setItem(key, rawValue);
+    memoryCache.delete(key);
+  } catch (err) {
+    memoryCache.set(key, rawValue);
+  }
+}
+
+function readCacheRaw(key) {
+  if (!key) return null;
+  try {
+    const value = sessionStorage.getItem(key);
+    if (value) return value;
+  } catch (err) {
+    // اگر دسترسی به sessionStorage ممکن نبود، حافظهٔ موقتی را چک می‌کنیم
+  }
+  return memoryCache.get(key) || null;
+}
+
+function removeCache(key) {
+  if (!key) return;
+  try { sessionStorage.removeItem(key); } catch (err) {}
+  memoryCache.delete(key);
+}
+
+function writeCache(key, value) {
+  writeCacheRaw(key, JSON.stringify({ t: Date.now(), v: value }));
+}
+
+function readCache(key) {
+  const raw = readCacheRaw(key);
+  if (!raw) return null;
+  try {
+    const parsed = JSON.parse(raw);
+    if (!parsed || typeof parsed !== 'object') return null;
+    if (Date.now() - (parsed.t || 0) > CACHE_TTL) {
+      removeCache(key);
+      return null;
+    }
+    return parsed.v;
+  } catch (err) {
+    removeCache(key);
+    return null;
+  }
+}
+
+function hydrateShop(data = {}) {
+  if (data && Object.prototype.hasOwnProperty.call(data, 'sellerId')) {
+    currentSellerId = data.sellerId;
+  }
+
+  const displayName = data.shopLogoText || data.shopName || 'نام فروشگاه';
+  document.querySelectorAll('.logo-txt').forEach(el => el.textContent = displayName);
+
+  const titleEl = document.getElementById('currentShopName');
+  if (titleEl) titleEl.textContent = displayName;
+
+  const statusEl = document.getElementById('shop-status');
+  if (statusEl) {
+    const isClosed = data.shopStatus === 'closed';
+    statusEl.innerHTML = isClosed
+      ? '<span class="w-2 h-2 rounded-full bg-red-400 inline-block"></span> بسته است'
+      : '<span class="w-2 h-2 rounded-full bg-green-400 inline-block"></span> باز است';
+  }
+
+  const addressContent = document.querySelector('#addressModal .text-gray-800');
+  if (addressContent) {
+    addressContent.innerHTML = `
+      ${data.shopAddress || 'آدرس ثبت نشده'}
+      <br>
+      <span class="text-emerald-700 text-sm font-semibold mt-1 flex items-center justify-center gap-1">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path d="M3 5h12M9 3v2m0 14a4 4 0 100-8 4 4 0 000 8zm7-4h2a2 2 0 002-2v-2a2 2 0 00-2-2h-2a2 2 0 00-2 2v2a2 2 0 002 2z"/>
+        </svg>
+        شماره تماس: <b dir="ltr" class="font-bold mx-1">${data.shopPhone || '-'}</b>
+      </span>
+    `;
+  }
+
+  const avg = typeof data.averageRating === 'number'
+    ? parseFloat(data.averageRating).toFixed(1)
+    : '0.0';
+  const ratingEl = document.getElementById('shop-rating');
+  if (ratingEl) ratingEl.textContent = avg;
+
+  const count = typeof data.ratingCount === 'number'
+    ? data.ratingCount.toLocaleString()
+    : '0';
+  const visitsEl = document.getElementById('shop-visits');
+  if (visitsEl) visitsEl.textContent = count;
+
+  renderHeroSlider(data.slides || []);
+
+  const seoName = data.shopName || displayName;
+  const seoPayload = {
+    shopName: seoName,
+    shopShortDesc: data.shopShortDesc || data.shopDescription || 'فروشگاه آنلاین',
+    shopCity: data.shopCity || '',
+    shopTags: data.shopTags || '',
+    shopImage: data.shopImage || data.shopCover || data.shopHero,
+  };
+  setDynamicSEO({ ...data, ...seoPayload });
+}
 
 // ======== لود داده و داینامیک‌سازی کل اطلاعات فروشگاه ========
 async function loadShopData() {
   if (!slug) return;
+
+  const cached = readCache(SHOP_CACHE_KEY);
+  if (cached) {
+    hydrateShop(cached);
+  }
+
   try {
-    const res = await fetch(`http://localhost:5000/api/shopAppearance/url/${slug}`);
+    const res = await fetch(`http://localhost:5000/api/shopAppearance/url/${slug}`, { cache: 'no-store' });
     if (!res.ok) throw new Error('فروشگاه یافت نشد!');
     const data = await res.json();
-
-    // ← وقتی اطلاعات فروشگاه لود شد، شناسه‌ش رو توی currentSellerId ذخیره می‌کنیم
-    currentSellerId = data.sellerId;
-
-    // لوگو و نام فروشگاه
-    document.querySelectorAll('.logo-txt').forEach(el =>
-      el.textContent = data.shopLogoText || data.shopName || 'نام فروشگاه'
-    );
-    document.getElementById('currentShopName').textContent =
-      data.shopLogoText || data.shopName || 'نام فروشگاه';
-
-    // وضعیت فروشگاه (باز/بسته)
-    document.getElementById('shop-status').innerHTML =
-      data.shopStatus === 'closed'
-        ? '<span class="w-2 h-2 rounded-full bg-red-400 inline-block"></span> بسته است'
-        : '<span class="w-2 h-2 rounded-full bg-green-400 inline-block"></span> باز است';
-
-    // آدرس و شماره تماس
-    const addressContent = document.querySelector('#addressModal .text-gray-800');
-    if (addressContent) {
-      addressContent.innerHTML = `
-        ${data.shopAddress || 'آدرس ثبت نشده'}
-        <br>
-        <span class="text-emerald-700 text-sm font-semibold mt-1 flex items-center justify-center gap-1">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-            <path d="M3 5h12M9 3v2m0 14a4 4 0 100-8 4 4 0 000 8zm7-4h2a2 2 0 002-2v-2a2 2 0 00-2-2h-2a2 2 0 00-2 2v2a2 2 0 002 2z"/>
-          </svg>
-          شماره تماس: <b dir="ltr" class="font-bold mx-1">${data.shopPhone || '-'}</b>
-        </span>
-      `;
-    }
-
-    // امتیاز میانگین کاربران و تعداد کل امتیازها
-    const avg = typeof data.averageRating === 'number'
-      ? parseFloat(data.averageRating).toFixed(1)
-      : '0.0';
-    document.getElementById('shop-rating').textContent = avg;
-
-    const count = typeof data.ratingCount === 'number'
-      ? data.ratingCount.toLocaleString()
-      : '0';
-    document.getElementById('shop-visits').textContent = count;
-
-    // اسلایدر
-    renderHeroSlider(data.slides || []);
-
-    // داینامیک سازی متاتگ‌ها و سئو
-    setDynamicSEO(data);
-
-    // محصولات را جدا بگیر
-    loadShopProducts(slug);
-
+    hydrateShop(data);
+    writeCache(SHOP_CACHE_KEY, data);
   } catch (e) {
     console.error(e);
-    document.querySelectorAll('.logo-txt').forEach(el => el.textContent = 'نام فروشگاه');
-    document.getElementById('currentShopName').textContent = 'نام فروشگاه';
-    setDynamicSEO({
-      shopName: 'نام فروشگاه',
-      shopShortDesc: 'فروشگاه آنلاین',
-      shopCity: '',
-      shopTags: ''
-    });
+    if (!cached) {
+      hydrateShop({
+        sellerId: null,
+        shopName: 'نام فروشگاه',
+        shopShortDesc: 'فروشگاه آنلاین',
+        shopCity: '',
+        shopTags: '',
+        slides: []
+      });
+    }
   }
 }
 
 
 // ======== گرفتن و رندر محصولات فروشگاه بر اساس shopurl ========
 async function loadShopProducts(shopurl) {
+  if (!shopurl) return;
+
+  const cached = readCache(PRODUCT_CACHE_KEY);
+  if (Array.isArray(cached)) {
+    allProducts = cached;
+    applyFiltersAndRender();
+  }
+
   try {
-    const res = await fetch(`http://localhost:5000/api/products/shop/${shopurl}`);
+    const res = await fetch(`http://localhost:5000/api/products/shop/${shopurl}`, { cache: 'no-store' });
     const products = await res.json();
-    renderProducts(products);
+    allProducts = Array.isArray(products) ? products : [];
+    writeCache(PRODUCT_CACHE_KEY, allProducts);
+    applyFiltersAndRender();
   } catch (err) {
-    renderProducts([]);
+    console.error(err);
+    if (!Array.isArray(cached)) {
+      allProducts = [];
+      applyFiltersAndRender();
+    }
   }
 }
 
 // ======== رندر محصولات فروشگاه ========
 function renderProducts(products = []) {
-  console.log("PRODUCTS:", products); // فقط برای دیباگ
   const grid = document.getElementById('productGrid');
   const noMsg = document.getElementById('noProductsMsg');
   if (!products.length) {
@@ -1357,6 +1439,7 @@ function renderHeroSlider(slidesArr = []) {
 // ========== اجرا بعد از لود صفحه ==========
 document.addEventListener('DOMContentLoaded', function () {
   loadShopData();
+  loadShopProducts(slug);
   const shopHeader = document.getElementById('shopHeader');
   const headerMenuToggle = document.getElementById('headerMenuToggle');
 
@@ -1394,7 +1477,7 @@ document.addEventListener('DOMContentLoaded', function () {
   const scrollTopBtn = document.getElementById('scrollTopBtn');
   window.onscroll = () => {
     if (scrollTopBtn) scrollTopBtn.classList.toggle('hidden', window.scrollY < 300);
-  }
+  };
   if (scrollTopBtn)
     scrollTopBtn.onclick = () => window.scrollTo({ top: 0, behavior: 'smooth' });
 });
@@ -1689,30 +1772,6 @@ addressModal?.addEventListener('click', e => (e.target === addressModal) && addr
 }); // پایان DOMContentLoaded
 
 
-
-
-
-
-
-
-
-
-
-
-let allProducts = []; // همه محصولات اینجا ذخیره میشه
-
-// ===== گرفتن و رندر محصولات فروشگاه بر اساس shopurl =====
-async function loadShopProducts(shopurl) {
-  try {
-    const res = await fetch(`http://localhost:5000/api/products/shop/${shopurl}`);
-    const products = await res.json();
-    allProducts = products || [];
-    applyFiltersAndRender();
-  } catch (err) {
-    allProducts = [];
-    applyFiltersAndRender();
-  }
-}
 
 // ===== فیلتر و مرتب‌سازی =====
 function applyFiltersAndRender() {
