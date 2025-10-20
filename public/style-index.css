@@ -77,63 +77,121 @@ body {
       .menu-link { font-size: 12px; }
     }
 
-      .logo-vitreenet {
-    font-family: 'Poppins', sans-serif;
-    font-weight: 900;
-    font-size: 2rem;                /* موبایل */
-    background: linear-gradient(90deg,#10b981 5%,#0ea5e9 90%);
-    -webkit-background-clip: text;
-    background-clip: text;
-    color: transparent;
-    letter-spacing: 2.4px;
-    text-shadow: 0 4px 20px #10b9812e, 0 1px 0 #fff;
-    transition: filter .17s;
-    filter: drop-shadow(0 2px 8px #0ea5e955);
-    user-select: none;
-    white-space: nowrap;
-    line-height: 1.15;
-    display: inline-block;
-  }
-  @media (min-width: 640px) {
-    .logo-vitreenet { font-size: 2.5rem; }
-  }
-  @media (min-width: 1024px) {
-    .logo-vitreenet { font-size: 2.7rem; }
-  }
-  .logo-vitreenet:hover {
-    filter: brightness(1.12) drop-shadow(0 5px 20px #10b98155);
-  }
+    .vitreenet-brand {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.75rem;
+      text-decoration: none;
+      padding: 0.2rem 0.35rem;
+      border-radius: 999px;
+      transition: transform 0.25s ease, box-shadow 0.25s ease;
+    }
+    .vitreenet-brand:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 8px 24px rgba(14, 165, 233, 0.12);
+    }
+    .vitreenet-brand__mark {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 999px;
+      background: radial-gradient(circle at 30% 20%, rgba(255,255,255,0.55), rgba(255,255,255,0));
+      padding: 2px;
+    }
+    .vitreenet-brand__mark svg {
+      width: 46px;
+      height: 46px;
+      display: block;
+      transition: transform 0.35s cubic-bezier(.43,1.4,.58,1);
+    }
+    .vitreenet-brand:hover .vitreenet-brand__mark svg {
+      transform: rotate(-7deg) scale(1.04);
+    }
+    .vitreenet-brand__text {
+      display: flex;
+      flex-direction: column;
+      gap: 0.1rem;
+      line-height: 1.05;
+      min-width: 0;
+    }
+    .vitreenet-brand__title {
+      font-family: 'Poppins', sans-serif;
+      font-weight: 700;
+      font-size: 1.45rem;
+      letter-spacing: 0.12em;
+      color: #0f172a;
+      text-transform: uppercase;
+    }
+    .vitreenet-brand__subtitle {
+      font-family: 'Vazirmatn', sans-serif;
+      font-weight: 700;
+      font-size: 0.9rem;
+      color: #0f766e;
+    }
+    @media (max-width: 640px) {
+      .vitreenet-brand {
+        gap: 0.55rem;
+        padding: 0.1rem 0.2rem;
+      }
+      .vitreenet-brand__mark svg {
+        width: 36px;
+        height: 36px;
+      }
+      .vitreenet-brand__title {
+        font-size: 1.1rem;
+        letter-spacing: 0.08em;
+      }
+      .vitreenet-brand__subtitle {
+        font-size: 0.72rem;
+      }
+    }
+    @media (max-width: 400px) {
+      .vitreenet-brand {
+        gap: 0.4rem;
+      }
+      .vitreenet-brand__subtitle {
+        display: none;
+      }
+      .vitreenet-brand__title {
+        font-size: 1.05rem;
+      }
+    }
 
-
-    .logo-vitreenet {
-    font-family: 'Poppins', sans-serif;
-    font-weight: 800;
-    font-size: 1.55rem;             /* موبایل */
-    background: linear-gradient(90deg,#11d6ad 0%, #10b981 60%, #2db4e8 100%);
-    -webkit-background-clip: text;
-    background-clip: text;
-    color: transparent;
-    letter-spacing: 1.7px;
-    transition: filter .16s;
-    filter: drop-shadow(0 1px 5px #10b98118);
-    white-space: nowrap;
-    display: inline-block;
-    padding-right: 3px;
-    padding-left: 3px;
-    line-height: 1.1;
-    text-shadow: none;
-  }
-  .logo-vitreenet:hover {
-    filter: brightness(1.09) drop-shadow(0 2px 14px #2db4e866);
-  }
-  @media (min-width: 640px) {
-    .logo-vitreenet { font-size: 1.9rem; }
-  }
-  @media (min-width: 1024px) {
-    .logo-vitreenet { font-size: 2.05rem; }
-  }
-
-
+    #loginNavLink.logged-in {
+      background: linear-gradient(115deg, #10b981 0%, #0ea5e9 100%);
+      color: #fff !important;
+      padding: 0.45rem 1.1rem;
+      border-radius: 999px;
+      box-shadow: 0 8px 22px rgba(14, 165, 233, 0.2);
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+    #loginNavLink.logged-in .login-link-label {
+      color: inherit;
+    }
+    #loginNavLink.logged-in svg {
+      display: none;
+    }
+    .login-link-label {
+      transition: color 0.2s ease;
+    }
+    #loginMobileLink.logged-in {
+      background: linear-gradient(115deg, #10b981 0%, #0ea5e9 100%);
+      color: #fff;
+      border-radius: 18px;
+      box-shadow: 0 6px 18px rgba(16, 185, 129, 0.25);
+    }
+    .nav-item-account {
+      transition: background 0.25s ease, box-shadow 0.25s ease, color 0.2s ease;
+    }
+    #loginMobileLink.logged-in .nav-icon {
+      color: #fff;
+      fill: currentColor;
+    }
+    #loginMobileLink.logged-in .nav-label {
+      color: #fff;
+    }
 
     /* ظاهر پاپ‌آپ */
   .city-modal-backdrop {
