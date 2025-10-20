@@ -3542,43 +3542,6 @@ function cleanScheduleData() {
 
 
 
-  // === Plan Hero: data + wiring ===
-  (function(){
-    // نمونه داده — هر وقت لازم شد از سرور پرش کن
-    const plan = {
-      tier: 'پرمیوم',          // پایه / حرفه‌ای / پرمیوم
-      start: '2025-08-01',     // ISO
-      end:   '2025-09-12',     // ISO
-      perks: ['نمایش ویژه','ابزارهای حرفه‌ای','پشتیبانی سریع']
-    };
-
-    const el = (id)=>document.getElementById(id);
-    const days = (a,b)=> Math.round((b-a)/86400000);
-    const now   = new Date();
-    const start = new Date(plan.start);
-    const end   = new Date(plan.end);
-
-    const totalDays = Math.max(days(start, end), 0);
-    const usedDays  = Math.min(Math.max(days(start, now), 0), totalDays);
-    const leftDays  = Math.max(totalDays - usedDays, 0);
-    const progress  = totalDays ? Math.round((usedDays/totalDays)*100) : 0;
-
-    const faNum = (n)=> new Intl.NumberFormat('fa-IR').format(n);
-    const faDate= (d)=> new Intl.DateTimeFormat('fa-IR-u-nu-latn-ca-persian',{year:'numeric',month:'2-digit',day:'2-digit'}).format(d);
-
-    // پر کردن UI
-    if (el('plan-tier')) el('plan-tier').textContent = `🎖 ${plan.tier}`;
-    if (el('plan-days-left')) el('plan-days-left').textContent = `${faNum(leftDays)} روز`;
-    if (el('plan-expiry')) el('plan-expiry').textContent = faDate(end);
-    if (el('plan-progress-bar')) el('plan-progress-bar').style.width = progress + '%';
-    if (el('plan-used')) el('plan-used').textContent = progress + '%';
-    if (el('plan-left')) el('plan-left').textContent = (100 - progress) + '%';
-
-    // دکمه‌ها
-    const goPlans = ()=>{ window.location.hash = '/plans'; };
-
-    el('plan-renew-btn')?.addEventListener('click', goPlans);
-  })();
 });
 
 
