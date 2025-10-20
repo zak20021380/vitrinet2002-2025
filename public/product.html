@@ -474,30 +474,31 @@
       pointer-events: none;
     }
 
-    .slide {
-      position: relative;
-      height: 100%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: clamp(0.6rem, 2vw, 1.6rem);
-      background: linear-gradient(145deg, rgba(255, 255, 255, 0.7), rgba(226, 232, 240, 0.5));
-      opacity: 0.95;
-      transition: opacity 0.3s ease;
-    }
+ .slide {
+  position: relative;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.7), rgba(226, 232, 240, 0.5));
+  opacity: 0.95;
+  transition: opacity 0.3s ease;
+  overflow: hidden;
+}
 
-    .slide.is-active {
-      opacity: 1;
-    }
+.slide.is-active {
+  opacity: 1;
+}
 
-    .slide img {
-      width: 100%;
-      height: 100%;
-      object-fit: contain;
-      border-radius: calc(var(--radius-lg) - 18px);
-      box-shadow: 0 18px 32px rgba(15, 23, 42, 0.12);
-      background: #fff;
-    }
+.slide img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 0;
+  box-shadow: none;
+  background: #fff;
+}
 
     .slider-control {
       position: absolute;
@@ -1144,23 +1145,26 @@
       align-items: center;
     }
 
-    .lightbox-figure {
-      margin: 0;
-      position: relative;
-      background: rgba(15, 23, 42, 0.55);
-      border-radius: calc(var(--radius-lg) - 4px);
-      overflow: hidden;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      min-height: clamp(280px, 60vh, 520px);
-    }
+.lightbox-figure {
+  margin: 0;
+  position: relative;
+  background: rgba(15, 23, 42, 0.55);
+  border-radius: calc(var(--radius-lg) - 4px);
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: clamp(280px, 60vh, 520px);
+  max-height: clamp(400px, 70vh, 600px);
+}
 
-    .lightbox-figure img {
-      width: 100%;
-      height: 100%;
-      object-fit: contain;
-    }
+.lightbox-figure img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  max-width: 100%;
+  max-height: 100%;
+}
 
     .lightbox-figure figcaption {
       position: absolute;
@@ -1206,47 +1210,70 @@
       transform: translateY(-50%) scale(1.05);
     }
 
-    .lightbox-thumbnails {
-      display: flex;
-      gap: 0.6rem;
-      overflow-x: auto;
-      padding-bottom: 0.4rem;
-      scrollbar-width: thin;
-    }
+.lightbox-thumbnails {
+  display: flex;
+  gap: 0.8rem;
+  overflow-x: auto;
+  padding: 0.6rem 0.2rem;
+  scrollbar-width: thin;
+  justify-content: center;
+  flex-wrap: wrap;
+}
 
-    .lightbox-thumbnails::-webkit-scrollbar {
-      height: 6px;
-    }
+.lightbox-thumbnails::-webkit-scrollbar {
+  height: 8px;
+}
 
-    .lightbox-thumbnails::-webkit-scrollbar-thumb {
-      background: rgba(148, 163, 184, 0.4);
-      border-radius: 999px;
-    }
+.lightbox-thumbnails::-webkit-scrollbar-thumb {
+  background: rgba(148, 163, 184, 0.6);
+  border-radius: 999px;
+}
 
-    .lightbox-thumb {
-      border: 2px solid transparent;
-      border-radius: var(--radius-sm);
-      overflow: hidden;
-      padding: 0.2rem;
-      background: rgba(15, 23, 42, 0.35);
-      cursor: pointer;
-      transition: transform 0.2s ease, border-color 0.2s ease;
-    }
+.lightbox-thumb {
+  border: 3px solid transparent;
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  padding: 0.3rem;
+  background: rgba(15, 23, 42, 0.45);
+  cursor: pointer;
+  transition: transform 0.2s ease, border-color 0.2s ease, background 0.2s ease;
+  flex-shrink: 0;
+}
 
-    .lightbox-thumb[aria-pressed="true"],
-    .lightbox-thumb:hover,
-    .lightbox-thumb:focus-visible {
-      border-color: rgba(14, 165, 233, 0.75);
-      transform: translateY(-2px);
-      outline: none;
-    }
+.lightbox-thumb[aria-pressed="true"],
+.lightbox-thumb:hover,
+.lightbox-thumb:focus-visible {
+  border-color: rgba(14, 165, 233, 0.95);
+  background: rgba(14, 165, 233, 0.25);
+  transform: translateY(-2px) scale(1.05);
+  outline: none;
+}
 
-    .lightbox-thumb img {
-      width: 72px;
-      height: 72px;
-      object-fit: cover;
-      border-radius: calc(var(--radius-sm) - 4px);
-    }
+.lightbox-thumb img {
+  width: 90px;
+  height: 90px;
+  object-fit: cover;
+  border-radius: calc(var(--radius-sm) - 4px);
+  display: block;
+}
+
+@media (max-width: 640px) {
+  .lightbox-thumb img {
+    width: 70px;
+    height: 70px;
+  }
+}
+
+@media (max-width: 480px) {
+  .lightbox-thumb img {
+    width: 60px;
+    height: 60px;
+  }
+  
+  .lightbox-thumbnails {
+    gap: 0.6rem;
+  }
+}
 
     .footer-inner {
       display: flex;
