@@ -1345,6 +1345,11 @@ function getSliderScrollAmount(sliderEl) {
   return firstChild.getBoundingClientRect().width + gapValue;
 }
 
+function getDocumentDirectionMultiplier(sliderEl) {
+  const dir = window.getComputedStyle(sliderEl).direction;
+  return dir === 'rtl' ? -1 : 1;
+}
+
 function setupSliderNavigation(sliderId) {
   const sliderEl = document.getElementById(sliderId);
   if (!sliderEl) return;
@@ -1353,9 +1358,12 @@ function setupSliderNavigation(sliderId) {
 
   buttons.forEach(button => {
     button.addEventListener('click', () => {
-      const direction = button.dataset.direction === 'next' ? 1 : -1;
+      const dirAttr = button.dataset.direction;
+      if (!dirAttr) return;
+      const direction = dirAttr === 'next' ? 1 : -1;
       const amount = getSliderScrollAmount(sliderEl);
-      sliderEl.scrollBy({ left: direction * amount, behavior: 'smooth' });
+      const directionMultiplier = getDocumentDirectionMultiplier(sliderEl);
+      sliderEl.scrollBy({ left: direction * directionMultiplier * amount, behavior: 'smooth' });
     });
   });
 }
