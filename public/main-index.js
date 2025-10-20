@@ -1498,6 +1498,12 @@ document.addEventListener('DOMContentLoaded', function() {
   const desktopNav = document.getElementById('desktopNav');
   const mobileList = document.getElementById('mobileNavList');
   const registerBtn = document.getElementById('registerShopBtn');
+
+  if (!desktopNav || !mobileList || !registerBtn) {
+    console.warn('Navigation elements missing – skipping responsive nav setup.');
+    return;
+  }
+
   const links = Array.from(desktopNav.querySelectorAll('.main-nav-link'));
 
   function addMobileLinkInteractions(link) {
