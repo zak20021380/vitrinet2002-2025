@@ -1346,8 +1346,10 @@ function getSliderScrollAmount(sliderEl) {
 }
 
 function getDocumentDirectionMultiplier(sliderEl) {
-  const dir = window.getComputedStyle(sliderEl).direction;
-  return dir === 'rtl' ? -1 : 1;
+  // در مرورگرهای مدرن، اسکرول افقی در حالت RTL همانند LTR کار می‌کند و
+  // اعمال ضریب منفی باعث برعکس شدن جهت دکمه‌ها می‌شد. بنابراین همواره ۱
+  // برمی‌گردانیم تا اسکرول مطابق انتظار کاربر انجام شود.
+  return 1;
 }
 
 function setupSliderNavigation(sliderId) {
