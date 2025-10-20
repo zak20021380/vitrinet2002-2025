@@ -513,7 +513,7 @@ body {
 
 <header class="onyx-nav sticky top-0 z-50 w-full bg-white/90 backdrop-blur-lg shadow flex items-center justify-between px-3 md:px-7 py-3 gap-x-2" role="banner">
   <!-- لوگو فروشگاه (راست) -->
-  <div class="flex items-center gap-4 min-w-fit w-full">
+  <div class="shop-identity flex items-center gap-4 min-w-fit w-full">
    <span class="logo-txt text-[1.7rem] md:text-3xl font-black bg-gradient-to-r from-pink-500 via-fuchsia-700 to-blue-500 bg-clip-text text-transparent tracking-tight drop-shadow select-none"
       style="font-family:'IranYekan','Vazirmatn',sans-serif;letter-spacing:-1.7px;line-height:1.08;">
   نئون استایل
@@ -572,7 +572,7 @@ body {
       <span class="flex items-center gap-1 text-yellow-600"><span id="shop-visits">1,234</span> بازدید</span>
     </button>
     <!-- لوگو ویترینت / بازگشت به خانه -->
-    <a href="/" class="action-item ml-3 group select-none min-w-fit focus:outline-none focus:ring-2 focus:ring-[var(--primary)]" title="رفتن به صفحه اصلی" aria-label="خانه">
+    <a href="/" class="vitrinet-link action-item ml-3 group select-none min-w-fit focus:outline-none focus:ring-2 focus:ring-[var(--primary)]" title="رفتن به صفحه اصلی" aria-label="خانه">
       <i class="fas fa-home text-lg md:hidden"></i>
       <span class="text-[1.7rem] md:text-3xl font-black bg-gradient-to-l from-teal-400 via-blue-400 to-indigo-400 bg-clip-text text-transparent tracking-tighter transition group-hover:scale-105"
         style="font-family:'IranYekan','Vazirmatn',sans-serif;letter-spacing:-1.7px;line-height:1;">
@@ -690,33 +690,99 @@ body {
 
   <style>
     .onyx-nav {backdrop-filter: blur(16px);}
-    .onyx-nav > div, .onyx-nav > a {min-width: 0;}
+    .onyx-nav > div {min-width: 0;}
     .onyx-nav .rating-badge {gap: 1.2rem;}
     .onyx-actions {white-space: nowrap;}
     .action-item {display:flex; align-items:center; justify-content:center; gap:.35rem; font-weight:700;}
+    .vitrinet-link {display:flex; align-items:center; gap:.4rem;}
+    .shop-identity {flex:1 1 auto;}
     .no-scrollbar {scrollbar-width: none; -ms-overflow-style: none;}
     .no-scrollbar::-webkit-scrollbar {display:none;}
-    /* ریسپانسیو قوی */
     @media (max-width: 700px) {
-      body {padding-bottom:60px;}
-      .onyx-nav {flex-direction: column !important; align-items: center; justify-content: center; gap:.5rem; padding:.7rem .75rem;}
-      .onyx-nav > div, .onyx-nav > a {margin-bottom: 0 !important; justify-content: center; width: 100%;}
-      .onyx-nav .text-[1.7rem], .onyx-nav .text-3xl {font-size:1.5rem;}
-      .onyx-actions {
-        position: fixed;
-        bottom: 0; left: 0; right: 0;
-        background: rgba(255,255,255,0.95);
-        backdrop-filter: blur(12px);
-        box-shadow: 0 -2px 10px rgba(0,0,0,0.08);
-        justify-content: space-around;
-        overflow: visible;
-        gap:0;
-        padding:.35rem 0;
-        z-index:50;
+      body {padding-bottom:0;}
+      .onyx-nav {
+        flex-direction: column !important;
+        align-items: stretch !important;
+        justify-content: center !important;
+        gap: .9rem;
+        padding: .85rem .85rem !important;
+        box-shadow: 0 1.5px 12px #7C83FD22;
       }
-      .action-item {flex-direction: column; font-size:.75rem; min-width:52px;}
-      .onyx-nav .ml-3 {margin-left:0!important;}
-      .onyx-nav .rating-badge {justify-content: center; gap:.3rem;}
+      .shop-identity {
+        width: 100%;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: .75rem;
+      }
+      .shop-identity .logo-txt {
+        font-size: 1.55rem !important;
+      }
+      #shop-status {
+        font-size: .78rem;
+        padding: .35rem .6rem;
+      }
+      .onyx-actions {
+        display: grid !important;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: .55rem;
+        width: 100%;
+        background: rgba(255,255,255,0.96);
+        border-radius: 1.1rem;
+        padding: .65rem .75rem;
+        box-shadow: 0 12px 32px rgba(124,131,253,0.16);
+        white-space: normal;
+      }
+      .onyx-actions .action-item {
+        flex-direction: row !important;
+        font-size: .82rem !important;
+        min-width: 0 !important;
+        padding: .5rem .6rem !important;
+        border-radius: .9rem !important;
+        gap: .4rem !important;
+      }
+      .onyx-actions .action-item svg {
+        width: 16px;
+        height: 16px;
+      }
+      .onyx-actions .rating-badge {
+        grid-column: span 2;
+        justify-content: space-between;
+        align-items: center;
+        gap: .6rem;
+        padding: .55rem .7rem;
+        background: #fff;
+        border-radius: .95rem;
+        border: 1px dashed rgba(251, 191, 36, 0.45);
+        color: #ca8a04;
+      }
+      .onyx-actions .rating-badge .border-r {
+        display: none;
+      }
+      .onyx-actions .rating-badge span:first-child {
+        gap: .35rem;
+      }
+      .onyx-actions .rating-badge span:last-child {
+        color: #d97706;
+      }
+      .onyx-actions .vitrinet-link {
+        order: -1;
+        grid-column: span 2;
+        justify-content: space-between;
+        margin: 0;
+        padding: .6rem .85rem;
+        border-radius: 1rem;
+        background: linear-gradient(135deg, rgba(124,131,253,0.12), rgba(56,189,248,0.12));
+        box-shadow: 0 8px 24px rgba(124,131,253,0.15);
+      }
+      .onyx-actions .vitrinet-link span {
+        font-size: 1.5rem;
+      }
+      .onyx-actions .vitrinet-link .fa-home {
+        display: block;
+      }
+      .onyx-nav .ml-3 {
+        margin-left: 0 !important;
+      }
     }
     @media (min-width: 701px) {
       .onyx-nav {
@@ -741,70 +807,19 @@ body {
         justify-content: flex-end;
         flex-wrap: nowrap;
       }
-      .action-item {flex-direction: row; font-size: .875rem;}
+      .vitrinet-link {
+        margin-right: .75rem;
+      }
+      .action-item {
+        flex-direction: row;
+        font-size: .875rem;
+      }
     }
-    @keyframes fade-in-down {from{opacity:0;transform:translateY(-24px);}to{opacity:1;transform:translateY(0);}
-    }
+    @keyframes fade-in-down {from{opacity:0;transform:translateY(-24px);}to{opacity:1;transform:translateY(0);}}
     .animate-fade-in-down {animation:fade-in-down .32s cubic-bezier(.3,1,.51,.98)}
-    /* ستاره امتیاز */
     .rate-star {cursor:pointer;transition:transform 0.1s;}
     .rate-star.active {color:#fbbf24;transform:scale(1.15);}
     .rate-star.inactive {color:#d1d5db;}
-
-    @media (max-width: 700px) {
-      .onyx-nav {
-        flex-direction: column !important;
-        align-items: stretch !important;
-        justify-content: flex-start !important;
-        gap: 0.5rem;
-        padding: .7rem .65rem !important;
-        box-shadow: 0 1.5px 12px #7C83FD22;
-      }
-      .onyx-nav > div:first-child {
-        width: 100%;
-        justify-content: center;
-        align-items: center;
-        margin-bottom: 0.4rem;
-        gap: .7rem;
-      }
-      .onyx-actions {
-        position: fixed;
-        bottom: 0; left: 0; right: 0;
-        width: 100vw;
-        background: rgba(255,255,255,0.98);
-        backdrop-filter: blur(14px);
-        box-shadow: 0 -2px 10px #7C83FD22;
-        z-index: 99;
-        padding: .32rem 0 .42rem 0;
-        display: flex !important;
-        flex-direction: row !important;
-        align-items: center !important;
-        justify-content: space-around !important;
-        gap: 0 !important;
-        min-width: 0 !important;
-        overflow-x: auto;
-        border-radius: 0;
-        white-space: nowrap;
-        scrollbar-width: none;
-        -ms-overflow-style: none;
-      }
-      .onyx-actions::-webkit-scrollbar {display:none;}
-      .action-item {
-        flex-direction: column !important;
-        align-items: center !important;
-        font-size: .81rem !important;
-        min-width: 52px !important;
-        padding: 0 !important;
-        margin: 0 !important;
-      }
-      .onyx-nav .ml-3 {margin-left: 0 !important;}
-      .onyx-nav .text-[1.7rem], .onyx-nav .text-3xl {font-size: 1.35rem;}
-      .onyx-nav > div:first-child .logo-txt {
-        font-size: 1.5rem !important;
-        margin-bottom: 0;
-        padding: 0 .6rem;
-      }
-    }
   </style>
 
 
