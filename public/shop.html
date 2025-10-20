@@ -1016,10 +1016,6 @@ body {
         class="onyx-filter-select px-3 py-2 rounded-full bg-gray-50 border border-gray-200 text-sm focus:ring-2 focus:ring-[var(--primary)] focus:border-[var(--primary)] transition w-full sm:w-auto min-w-[110px] font-semibold"
       >
         <option value="همه">همه دسته‌ها</option>
-        <option value="زنانه">زنانه</option>
-        <option value="مردانه">مردانه</option>
-        <option value="کودک">کودک</option>
-        <option value="اکسسوری">اکسسوری</option>
       </select>
       <!-- مرتب‌سازی -->
       <select id="sortProducts"
@@ -1751,15 +1747,48 @@ addressModal?.addEventListener('click', e => (e.target === addressModal) && addr
 
 let allProducts = []; // همه محصولات اینجا ذخیره میشه
 
+function populateCategoryOptions(products = []) {
+  const catSel = document.getElementById('filterCategory');
+  if (!catSel) return;
+
+  const previousValue = catSel.value || 'همه';
+  const categories = [];
+
+  products.forEach(item => {
+    const category = (item && typeof item.category === 'string') ? item.category.trim() : '';
+    if (category && !categories.includes(category)) {
+      categories.push(category);
+    }
+  });
+
+  catSel.innerHTML = '';
+
+  const defaultOption = document.createElement('option');
+  defaultOption.value = 'همه';
+  defaultOption.textContent = 'همه دسته‌ها';
+  catSel.appendChild(defaultOption);
+
+  categories.forEach(category => {
+    const option = document.createElement('option');
+    option.value = category;
+    option.textContent = category;
+    catSel.appendChild(option);
+  });
+
+  catSel.value = categories.includes(previousValue) ? previousValue : 'همه';
+}
+
 // ===== گرفتن و رندر محصولات فروشگاه بر اساس shopurl =====
 async function loadShopProducts(shopurl) {
   try {
     const res = await fetch(`http://localhost:5000/api/products/shop/${shopurl}`);
     const products = await res.json();
-    allProducts = products || [];
+    allProducts = Array.isArray(products) ? products : [];
+    populateCategoryOptions(allProducts);
     applyFiltersAndRender();
   } catch (err) {
     allProducts = [];
+    populateCategoryOptions(allProducts);
     applyFiltersAndRender();
   }
 }
