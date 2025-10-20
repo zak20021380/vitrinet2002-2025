@@ -1,4 +1,99 @@
-  // نشون دادن پاپ‌آپ
+const SERVICE_PANEL_KEYWORDS = ['خدمات', 'زیبایی', 'تالار', 'مجالس', 'خودرو', 'ورزشی', 'پزشکی', 'سلامت', 'آرایش'];
+
+function safeParseLocalStorage(key) {
+  try {
+    const raw = localStorage.getItem(key);
+    return raw ? JSON.parse(raw) : null;
+  } catch (err) {
+    console.warn('خطا در خواندن localStorage برای', key, err);
+    return null;
+  }
+}
+
+function isServiceSellerAccount(seller) {
+  if (!seller || typeof seller !== 'object') return false;
+  if (seller.isService || seller.panelType === 'service') return true;
+  const role = (seller.role || seller.type || '').toString().toLowerCase();
+  if (role.includes('service')) return true;
+  const category = (seller.category || seller.sellerCategory || '').toString();
+  const tags = Array.isArray(seller.tags) ? seller.tags.join(' ') : '';
+  const haystack = `${category} ${tags}`;
+  return SERVICE_PANEL_KEYWORDS.some(keyword => haystack.includes(keyword));
+}
+
+function buildSellerPanelLink(seller) {
+  const baseUrl = isServiceSellerAccount(seller)
+    ? 'service-seller-panel/s-seller-panel.html'
+    : 'seller/dashboard.html';
+  const shopurl = seller?.shopurl || seller?.shopUrl || seller?.slug || '';
+  const query = shopurl ? `?shopurl=${encodeURIComponent(shopurl)}` : '';
+  return `${baseUrl}${query}`;
+}
+
+function updateAuthNavigationState() {
+  const loginLink = document.getElementById('loginNavLink');
+  const loginMobile = document.getElementById('loginMobileLink');
+  const desktopLabel = loginLink?.querySelector('.login-link-label');
+  const mobileLabel = loginMobile?.querySelector('.login-mobile-label');
+
+  if (!loginLink && !loginMobile) return;
+
+  const token = localStorage.getItem('token');
+  const seller = safeParseLocalStorage('seller');
+  const user = safeParseLocalStorage('user');
+
+  let targetUrl = 'login.html';
+  let labelText = 'ورود';
+  let accountType = '';
+
+  if (token && seller && typeof seller === 'object') {
+    targetUrl = buildSellerPanelLink(seller);
+    labelText = 'پنل فروشنده';
+    accountType = 'seller';
+  } else if (token && user && typeof user === 'object') {
+    targetUrl = 'user/dashboard.html';
+    labelText = 'پنل مشتری';
+    accountType = 'customer';
+  }
+
+  if (loginLink) {
+    loginLink.href = targetUrl;
+    if (accountType) {
+      loginLink.classList.add('logged-in');
+      loginLink.setAttribute('data-account-type', accountType);
+    } else {
+      loginLink.classList.remove('logged-in');
+      loginLink.removeAttribute('data-account-type');
+    }
+    if (desktopLabel) desktopLabel.textContent = labelText;
+  }
+
+  if (loginMobile) {
+    loginMobile.href = targetUrl;
+    if (accountType) {
+      loginMobile.classList.add('logged-in');
+      loginMobile.setAttribute('data-account-type', accountType);
+    } else {
+      loginMobile.classList.remove('logged-in');
+      loginMobile.removeAttribute('data-account-type');
+    }
+    if (mobileLabel) mobileLabel.textContent = labelText;
+  }
+}
+
+updateAuthNavigationState();
+window.addEventListener('storage', (event) => {
+  if (!event.key || ['token', 'seller', 'user'].includes(event.key)) {
+    updateAuthNavigationState();
+  }
+});
+document.addEventListener('visibilitychange', () => {
+  if (!document.hidden) {
+    updateAuthNavigationState();
+  }
+});
+
+// نشون دادن پاپ‌آپ
   document.getElementById('cityBtn').onclick = function(e) {
     document.getElementById('cityModalBackdrop').classList.add('active');
   };
