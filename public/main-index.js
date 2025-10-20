@@ -588,6 +588,7 @@ async function fetchAdHome() {
 async function loadShops() {
   const cardsWrap = document.getElementById('drag-scroll-cards');
   cardsWrap.innerHTML = '<div style="margin: 60px auto;">در حال بارگذاری...</div>';
+  updateSliderNavVisibility('drag-scroll-cards');
 
   // اول تبلیغ ویژه رو بگیر
   await fetchAdHome();
@@ -596,6 +597,7 @@ async function loadShops() {
     const res = await fetch('http://localhost:5000/api/shops');
     const shops = await res.json();
     cardsWrap.innerHTML = '';
+    updateSliderNavVisibility('drag-scroll-cards');
 
     // اگر تبلیغ ویژه داریم، اول کارت تبلیغ رو اضافه کن
     if (adHomeData) {
@@ -659,6 +661,7 @@ async function loadShops() {
     // کارت‌های فروشگاه‌ها رو اضافه کن
     if (!shops.length) {
       cardsWrap.innerHTML += '<div class="text-gray-400 text-center w-full p-7">فعلا فروشگاهی ثبت نشده.</div>';
+      updateSliderNavVisibility('drag-scroll-cards');
       return;
     }
 
@@ -706,8 +709,11 @@ async function loadShops() {
       cardsWrap.appendChild(card);
     });
 
+    updateSliderNavVisibility('drag-scroll-cards');
+
   } catch (e) {
     cardsWrap.innerHTML = '<div class="text-red-500 text-center و-full p-8">مشکل در ارتباط با سرور!</div>';
+    updateSliderNavVisibility('drag-scroll-cards');
   }
 }
 
@@ -841,6 +847,7 @@ window.addEventListener('DOMContentLoaded', loadMostVisitedStores);
 async function loadPopularProducts() {
   const slider = document.getElementById('popular-products-slider');
   slider.innerHTML = '<div style="margin: 60px auto;">در حال بارگذاری...</div>';
+  updateSliderNavVisibility('popular-products-slider');
 
   try {
     const res = await fetch('http://localhost:5000/api/products/latest-products');
@@ -852,10 +859,12 @@ async function loadPopularProducts() {
     if (!products?.length) {
       slider.innerHTML =
         '<div class="text-gray-400 text-center w-full p-7">محصولی یافت نشد.</div>';
+      updateSliderNavVisibility('popular-products-slider');
       return;
     }
 
     slider.innerHTML = ''; // پاک کردن لودر
+    updateSliderNavVisibility('popular-products-slider');
 
     products.forEach(p => {
       const cat  = p.sellerCategory || p.category || 'نامشخص';
@@ -908,9 +917,12 @@ async function loadPopularProducts() {
       `;
       slider.appendChild(card);
     });
+
+    updateSliderNavVisibility('popular-products-slider');
   } catch (err) {
     slider.innerHTML =
       '<div class="text-red-500 text-center w-full p-7">مشکلی در بارگذاری محصولات پیش آمد.</div>';
+    updateSliderNavVisibility('popular-products-slider');
     console.error(err);
   }
 }
@@ -977,6 +989,7 @@ bantaSlider.addEventListener('touchend', () => {
 async function loadBantaShops() {
   const slider = document.getElementById('banta-shops-section');
   slider.innerHTML = '<div style="margin:60px auto;">در حال بارگذاری...</div>';
+  updateSliderNavVisibility('banta-shops-section');
   try {
     const res = await fetch('/api/shops');
     if (!res.ok) throw new Error('network');
@@ -986,8 +999,10 @@ async function loadBantaShops() {
       .filter(s => /بانتا/i.test(s.address || ''))
       .slice(0, 4);
     slider.innerHTML = '';
+    updateSliderNavVisibility('banta-shops-section');
     if (!shops.length) {
       slider.innerHTML = '<p class="text-gray-500 text-center py-8">هیچ مغازه‌ای برای بانتا یافت نشد.</p>';
+      updateSliderNavVisibility('banta-shops-section');
       return;
     }
     shops.forEach(shop => {
@@ -1018,8 +1033,11 @@ async function loadBantaShops() {
       `;
       slider.appendChild(card);
     });
+
+    updateSliderNavVisibility('banta-shops-section');
   } catch (err) {
     slider.innerHTML = '<p class="text-red-500 text-center py-8">خطا در دریافت اطلاعات. لطفا دوباره تلاش کنید.</p>';
+    updateSliderNavVisibility('banta-shops-section');
   }
 }
 
@@ -1046,8 +1064,10 @@ const FETCH_OPTIONS = {
 function renderSliderCenters(centers) {
   const slider = document.getElementById('shopping-centers-slider');
   slider.innerHTML = '';
+  updateSliderNavVisibility('shopping-centers-slider');
   if (!centers.length) {
     slider.innerHTML = "<div style='color:#bbb; margin:70px auto; font-size:1.2rem;'>هنوز مرکز خریدی ثبت نشده!</div>";
+    updateSliderNavVisibility('shopping-centers-slider');
     return;
   }
   centers.forEach((center, i) => {
@@ -1079,6 +1099,8 @@ card.target = '_blank';  // اصلاح: باز شدن در تب جدید
     `;
     slider.appendChild(card);
   });
+
+  updateSliderNavVisibility('shopping-centers-slider');
 }
 
 // گرفتن دیتا از سرور و نمایش
@@ -1089,6 +1111,7 @@ fetch(API_URL, FETCH_OPTIONS)
   })
   .catch(err => {
     document.getElementById('shopping-centers-slider').innerHTML = "<div style='color:#ff0000;'>خطا در دریافت مراکز خرید!</div>";
+    updateSliderNavVisibility('shopping-centers-slider');
   });
 
 // --- اسکرول drag/momentum ---
@@ -1335,6 +1358,30 @@ const sliderNavIds = [
   'shoes-bags-slider'
 ];
 
+function updateSliderNavVisibility(sliderId) {
+  const sliderEl = document.getElementById(sliderId);
+  const buttons = document.querySelectorAll(`[data-scroll-target="${sliderId}"]`);
+  if (!sliderEl || !buttons.length) {
+    return;
+  }
+
+  const hasInteractiveCards = Boolean(sliderEl.querySelector(':scope > a'));
+
+  buttons.forEach(button => {
+    if (hasInteractiveCards) {
+      button.style.display = '';
+      button.setAttribute('aria-hidden', 'false');
+      button.removeAttribute('aria-disabled');
+      button.tabIndex = 0;
+    } else {
+      button.style.display = 'none';
+      button.setAttribute('aria-hidden', 'true');
+      button.setAttribute('aria-disabled', 'true');
+      button.tabIndex = -1;
+    }
+  });
+}
+
 function getSliderScrollAmount(sliderEl) {
   const firstChild = sliderEl.querySelector(':scope > *');
   if (!firstChild) {
@@ -1357,6 +1404,8 @@ function setupSliderNavigation(sliderId) {
   if (!sliderEl) return;
   const buttons = document.querySelectorAll(`[data-scroll-target="${sliderId}"]`);
   if (!buttons.length) return;
+
+  updateSliderNavVisibility(sliderId);
 
   buttons.forEach(button => {
     button.addEventListener('click', () => {
