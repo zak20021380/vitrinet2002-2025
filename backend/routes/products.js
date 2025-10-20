@@ -55,10 +55,26 @@ router.get('/shop/:shopurl', async (req, res) => {
 // -----------------------------
 router.get('/:id', async (req, res) => {
   try {
-    const product = await Product.findById(req.params.id);
-    if (!product) return res.status(404).json({ message: 'محصول پیدا نشد!' });
-    res.json(product);
+    const product = await Product.findById(req.params.id)
+      .populate({
+        path: 'sellerId',
+        select: 'storename firstname lastname ownerName ownerFirstname ownerLastname shopurl phone category subcategory address city desc boardImage'
+      })
+      .lean();
+
+    if (!product) {
+      return res.status(404).json({ message: 'محصول پیدا نشد!' });
+    }
+
+    // برای سازگاری با فرانت قدیمی، نسخه‌ی ترکیبی seller را نیز برمی‌گردانیم
+    const responsePayload = {
+      ...product,
+      seller: product.sellerId
+    };
+
+    res.json(responsePayload);
   } catch (err) {
+    console.error('خطا در دریافت محصول:', err);
     res.status(500).json({ message: 'خطای سرور در دریافت محصول.' });
   }
 });
