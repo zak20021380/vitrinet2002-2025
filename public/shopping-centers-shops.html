@@ -788,12 +788,13 @@
 <script>
   document.addEventListener('DOMContentLoaded', function() {
     // تنظیمات API
-    const SHOPS_API = '/api/shop-appearances?centerTitle='; // برگشت به centerTitle برای تطبیق با بک‌اند
-    const PRODUCTS_API = '/api/products?centerTitle='; // فرضاً برای محصولات هم centerTitle (اگر API محصولات مشابه باشه، چک کنید)
-    
+    const SHOPS_API = '/api/shop-appearances';
+    const PRODUCTS_API = '/api/products';
+
     const urlParams = new URLSearchParams(window.location.search);
     const centerId = urlParams.get('centerId');
-    const centerTitle = urlParams.get('title') || 'مرکز خرید'; // از پارامتر URL
+    let centerTitle = urlParams.get('title');
+    const fallbackTitle = centerTitle || 'مرکز خرید';
 
     if (!centerId) {
       // در صورت نبود شناسه، کاربر به صفحه مراکز خرید هدایت می‌شود
@@ -801,7 +802,7 @@
       return;
     }
 
-    document.getElementById('center-title').textContent = `مغازه‌ها و محصولات ${decodeURIComponent(centerTitle)}`; // اصلاح typo از "مگازه" به "مغازه"
+    const centerTitleElement = document.getElementById('center-title');
     const listDiv = document.getElementById('items-list');
     const searchInput = document.getElementById('searchInput'); // اصلاح typo از "searchInput"
     const priceFilter = document.getElementById('priceFilter');
@@ -929,10 +930,17 @@
     async function loadData(type) {
       showSkeleton();
       currentType = type;
-      const encodedTitle = encodeURIComponent(centerTitle);
-// انکود title برای API
-      const api = type === 'shops' ? `${SHOPS_API}${encodedTitle}` : `${PRODUCTS_API}${encodedTitle}`;
-      
+      const params = new URLSearchParams();
+      if (centerTitle) {
+        params.set('centerTitle', centerTitle);
+      }
+      if (centerId) {
+        params.set('centerId', centerId);
+      }
+      const queryString = params.toString();
+      const baseUrl = type === 'shops' ? SHOPS_API : PRODUCTS_API;
+      const api = queryString ? `${baseUrl}?${queryString}` : baseUrl;
+
       try {
         const res = await fetch(api);
         if (!res.ok) throw new Error('API error');
@@ -958,8 +966,31 @@
     priceFilter.addEventListener('change', () => renderItems(allItems));
     categoryFilter.addEventListener('change', () => renderItems(allItems));
     
+    async function loadCenterInfo() {
+      try {
+        const response = await fetch(`/api/shopping-centers/${centerId}`);
+        if (response.ok) {
+          const centerData = await response.json();
+          if (centerData?.title) {
+            centerTitle = centerData.title;
+          }
+        }
+      } catch (error) {
+        console.error('خطا در دریافت اطلاعات مرکز خرید:', error);
+      }
+
+      if (!centerTitle) {
+        centerTitle = fallbackTitle;
+      }
+
+      centerTitleElement.textContent = `مغازه‌ها و محصولات ${centerTitle}`;
+    }
+
     // لود اولیه
-    loadData('shops');
+    (async () => {
+      await loadCenterInfo();
+      loadData('shops');
+    })();
   });
 </script>
 </body>
