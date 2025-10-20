@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 const ShopAppearance = require('../models/ShopAppearance');
+const ShoppingCenter = require('../models/ShoppingCenter');
 const Review = require('../models/Review');
 
 // تابع کمکی برای تبدیل URL نسبی به مطلق
@@ -169,16 +170,40 @@ exports.getAppearanceByUrl = async (req, res) => {
 // ================== دریافت مغازه‌ها بر اساس عنوان مرکز خرید ==================
 exports.getShopsByCenterTitle = async (req, res) => {
   try {
-    const { centerTitle } = req.query;
-    if (!centerTitle) {
+    const { centerTitle: queryCenterTitle, centerId } = req.query;
+    let resolvedCenterTitle = queryCenterTitle;
+    let centerDocument = null;
+
+    if (centerId) {
+      if (mongoose.Types.ObjectId.isValid(centerId)) {
+        centerDocument = await ShoppingCenter.findById(centerId).lean();
+        if (centerDocument?.title) {
+          resolvedCenterTitle = centerDocument.title;
+        }
+      } else {
+        console.warn('Invalid centerId received for shop lookup:', centerId);
+      }
+    }
+
+    if (!resolvedCenterTitle) {
       return res.status(400).json({ message: "عنوان مرکز خرید ارسال نشده!" });
     }
 
-    const words = centerTitle.trim().split(/\s+/).filter(word => word.length > 0);
+    const lookupSources = [resolvedCenterTitle, centerDocument?.location].filter(Boolean);
+    const words = lookupSources
+      .join(' ')
+      .trim()
+      .split(/\s+/)
+      .filter(word => word.length > 0);
+
+    if (!words.length) {
+      return res.json([]);
+    }
+
     const escapedWords = words.map(word => escapeRegex(word));
     const regexPattern = escapedWords.join('|');
 
-    console.log('Received centerTitle:', centerTitle);
+    console.log('Received centerTitle:', resolvedCenterTitle);
     console.log('Regex pattern:', regexPattern);
 
     const shops = await ShopAppearance.find({
@@ -193,7 +218,7 @@ exports.getShopsByCenterTitle = async (req, res) => {
     console.log('Shops found:', shops);
 
     if (!shops.length) {
-      console.warn('No shops found for centerTitle:', centerTitle);
+      console.warn('No shops found for centerTitle:', resolvedCenterTitle);
       return res.json([]);
     }
 
