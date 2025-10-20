@@ -49,27 +49,25 @@
       transform: scale(1.055);
     }
     /* دکمه مراکز خرید */
-.center-btn {
-  background: #fff;
-  border: 2px solid #10b98133;
-  color: #13bfa4;
-  font-weight: 900;
-  border-radius: 1.3rem;
-  font-size: 1.08rem;
-  width: 350px;         /* این خط باعث میشه عرض دقیق بشه */
-  max-width: 95vw;      /* تا تو موبایل نزنه بیرون */
-  padding: 13px 0;      /* راست و چپ دیگه مهم نیست */
-  margin-bottom: 3px;
-  box-shadow: 0 2px 16px #6ee7b78c;
-  transition: all 0.18s;
-  text-align: center;
-  letter-spacing: -.5px;
-  display: block;
-  margin-left: auto;
-  margin-right: auto;
-}
-
-
+    .center-btn {
+      background: #fff;
+      border: 2px solid #10b98133;
+      color: #13bfa4;
+      font-weight: 900;
+      border-radius: 1.3rem;
+      font-size: 1.08rem;
+      width: 350px;
+      max-width: 95vw;
+      padding: 13px 0;
+      margin-bottom: 3px;
+      box-shadow: 0 2px 16px #6ee7b78c;
+      transition: all 0.18s;
+      text-align: center;
+      letter-spacing: -.5px;
+      display: block;
+      margin-left: auto;
+      margin-right: auto;
+    }
 
     .center-btn:hover {
       background: linear-gradient(90deg,#0ea5e9,#10b981);
@@ -77,6 +75,65 @@
       border-color: #0ea5e9;
       box-shadow: 0 7px 26px #10b98136;
       transform: scale(1.045);
+    }
+
+    .more-centers-btn {
+      background: linear-gradient(90deg,#10b981,#0ea5e9);
+      color: #fff;
+      font-weight: 800;
+      border-radius: 9999px;
+      font-size: 0.98rem;
+      padding: 10px 22px;
+      box-shadow: 0 5px 20px #0ea5e926;
+      transition: transform 0.18s ease, box-shadow 0.18s ease, filter 0.18s ease;
+      border: none;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .more-centers-btn:hover {
+      transform: translateY(-2px) scale(1.03);
+      box-shadow: 0 12px 30px #0ea5e933;
+      filter: brightness(1.05);
+    }
+
+    .more-centers-btn svg {
+      width: 18px;
+      height: 18px;
+    }
+
+    .centers-modal {
+      display: none;
+    }
+
+    .centers-modal.active {
+      display: flex;
+    }
+
+    .modal-area-btn {
+      background: #f0fffa;
+      border: 1.5px solid #bbf7d0;
+      color: #0f9a8b;
+      font-weight: 800;
+      border-radius: 9999px;
+      padding: 10px 18px;
+      font-size: 0.92rem;
+      transition: all 0.18s ease;
+      display: inline-flex;
+      justify-content: center;
+      align-items: center;
+      box-shadow: 0 3px 12px #0ea5e911;
+      white-space: nowrap;
+    }
+
+    .modal-area-btn:hover {
+      background: linear-gradient(90deg,#10b981,#0ea5e9);
+      color: #fff;
+      border-color: transparent;
+      box-shadow: 0 10px 26px #0ea5e92b;
+      transform: translateY(-1px);
     }
     /* سلکت‌باکس ریسپانسیو */
     .category-select {
@@ -261,6 +318,12 @@
         <button id="all-centers-btn" class="center-btn" type="button">
           همه مراکز خرید
         </button>
+        <button id="more-centers-btn" class="more-centers-btn" type="button">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 5v14M5 12h14" />
+          </svg>
+          بیشتر
+        </button>
       </div>
     </div>
     <!-- مناطق معروف -->
@@ -293,6 +356,22 @@
     <div id="shopsList" class="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-5"></div>
     <div id="noResult" class="hidden text-center text-gray-400 text-lg p-12 font-bold">هیچ مغازه‌ای پیدا نشد!</div>
   </main>
+  <div id="centersModal" class="centers-modal fixed inset-0 z-[999] items-center justify-center px-4">
+    <div id="centersModalOverlay" class="absolute inset-0 bg-[#0f172a]/40 backdrop-blur-sm transition-opacity"></div>
+    <div class="relative z-10 bg-white rounded-3xl shadow-2xl border border-[#e0fdfa] w-full max-w-3xl mx-auto p-6 sm:p-8 overflow-hidden">
+      <button id="closeCentersModal" class="absolute top-4 left-4 text-[#0f9a8b] hover:text-[#0ea5e9] transition-colors text-2xl font-bold" aria-label="بستن">
+        &times;
+      </button>
+      <div class="flex flex-col gap-3 text-center">
+        <h2 class="text-2xl sm:text-3xl font-extrabold text-[#0ea5e9]">مراکز خرید سنندج</h2>
+        <p class="text-sm sm:text-base text-[#0f9a8b] font-semibold">
+          برای مشاهده فروشگاه‌های هر مرکز خرید روی نام آن کلیک کن.
+        </p>
+      </div>
+      <div id="centersList" class="mt-6 grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4 text-sm"></div>
+    </div>
+  </div>
+
   <footer class="w-full bg-gradient-to-tr from-[#f8fafc] via-[#e0fdfa] to-[#d4fbe8] border-t mt-16 px-2 pt-6 pb-3 text-center text-[15px] text-gray-500 rounded-t-[1.7rem] shadow-lg font-bold tracking-wide">
     © 2025 ویترینت | همه حقوق محفوظ است.
   </footer>
@@ -352,6 +431,60 @@
     loadAllShops();
     window.scrollTo({ top: document.getElementById('areasShort').offsetTop - 60, behavior: 'smooth' });
   };
+
+  const centersModal = document.getElementById('centersModal');
+  const centersList = document.getElementById('centersList');
+  const centersModalOverlay = document.getElementById('centersModalOverlay');
+  const openCentersBtn = document.getElementById('more-centers-btn');
+  const closeCentersBtn = document.getElementById('closeCentersModal');
+
+  function openCentersModal() {
+    centersModal.classList.add('active');
+    document.body.classList.add('overflow-hidden');
+  }
+
+  function closeCentersModal() {
+    centersModal.classList.remove('active');
+    document.body.classList.remove('overflow-hidden');
+  }
+
+  function renderCentersModal() {
+    if (!centersList) return;
+    centersList.innerHTML = '';
+    AREAS.forEach(area => {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'modal-area-btn';
+      btn.innerText = area.name;
+      btn.onclick = () => {
+        current.area = area.id;
+        renderAreasShort(area.id);
+        loadAllShops();
+        closeCentersModal();
+        window.scrollTo({ top: document.getElementById('areasShort').offsetTop - 40, behavior: 'smooth' });
+      };
+      centersList.appendChild(btn);
+    });
+  }
+
+  if (openCentersBtn) {
+    openCentersBtn.addEventListener('click', () => {
+      renderCentersModal();
+      openCentersModal();
+    });
+  }
+
+  [centersModalOverlay, closeCentersBtn].forEach(el => {
+    if (el) {
+      el.addEventListener('click', closeCentersModal);
+    }
+  });
+
+  document.addEventListener('keydown', event => {
+    if (event.key === 'Escape' && centersModal.classList.contains('active')) {
+      closeCentersModal();
+    }
+  });
 
   // دریافت و نمایش مغازه‌های واقعی از بک‌اند + فیلتر سمت کلاینت
   async function loadAllShops() {
