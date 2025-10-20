@@ -94,6 +94,36 @@
       transition: color .14s;
     }
     .modal-close-x:hover { color: #0ea5e9;}
+    .info-box {
+      background: #ecfeff;
+      color: #0369a1;
+      font-size: 0.88rem;
+      border-radius: 1rem;
+      padding: 0.75rem 1rem;
+      line-height: 1.9;
+    }
+    .success-box {
+      background: #ecfdf5;
+      color: #0f766e;
+      font-size: 0.88rem;
+      border-radius: 1rem;
+      padding: 0.75rem 1rem;
+      line-height: 1.9;
+    }
+    .otp-input {
+      letter-spacing: 0.45rem;
+      text-align: center;
+      font-size: 1.4rem;
+      font-weight: 800;
+      direction: ltr;
+    }
+    .otp-helper button {
+      color: #0ea5e9;
+      font-weight: 700;
+    }
+    .otp-helper button:hover {
+      color: #10b981;
+    }
     @media (max-width: 640px) {
       .glass {padding: 1.1rem .6rem !important;}
       .header-logo {font-size: 1.4rem;}
@@ -175,13 +205,41 @@
     <div class="modal-content">
       <button type="button" class="modal-close-x" id="modal-close" title="بستن">&times;</button>
       <h3>بازیابی رمز عبور</h3>
-      <p>شماره موبایل خود را وارد کنید تا کد تأیید برایتان ارسال شود.</p>
+      <p id="forgot-description" class="leading-relaxed text-sm sm:text-base">شماره موبایل خود را وارد کنید تا کد تأیید برایتان ارسال شود.</p>
       <form id="forgot-form" class="space-y-4">
-        <input type="text" id="forgot-phone" maxlength="11" inputmode="numeric"
-          class="w-full p-3 border rounded-xl focus:ring-2 focus:ring-green-200 bg-gray-50 text-left ltr"
-          placeholder="مثلاً 09123456789" required />
+        <div id="forgot-step-phone" class="space-y-3">
+          <input type="text" id="forgot-phone" maxlength="11" inputmode="numeric"
+            class="w-full p-3 border rounded-xl focus:ring-2 focus:ring-green-200 bg-gray-50 text-left ltr"
+            placeholder="مثلاً 09123456789" required />
+        </div>
+        <div id="forgot-step-otp" class="space-y-3 hidden">
+          <div class="text-sm text-gray-600 leading-relaxed">
+            کد ۴ رقمی ارسال‌شده به شمارهٔ <span id="otp-phone" class="font-semibold text-gray-900"></span> را وارد کنید.
+          </div>
+          <input type="text" id="forgot-otp" maxlength="4" inputmode="numeric"
+            class="w-full p-3 border rounded-xl focus:ring-2 focus:ring-green-200 bg-gray-50 otp-input"
+            placeholder="----" required />
+          <div class="flex items-center justify-between text-[0.7rem] sm:text-xs text-gray-500 otp-helper">
+            <button type="button" id="otp-edit" class="transition">ویرایش شماره</button>
+            <button type="button" id="otp-resend" class="transition">ارسال مجدد کد</button>
+          </div>
+        </div>
+        <div id="forgot-step-reset" class="space-y-3 hidden">
+          <div>
+            <input type="password" id="new-password"
+              class="w-full p-3 border rounded-xl focus:ring-2 focus:ring-green-200 bg-gray-50"
+              placeholder="رمز عبور جدید" required />
+          </div>
+          <div>
+            <input type="password" id="confirm-password"
+              class="w-full p-3 border rounded-xl focus:ring-2 focus:ring-green-200 bg-gray-50"
+              placeholder="تکرار رمز عبور" required />
+          </div>
+        </div>
+        <div id="forgot-info" class="info-box text-xs sm:text-sm hidden"></div>
+        <div id="forgot-success" class="success-box text-xs sm:text-sm hidden"></div>
         <div id="forgot-error" class="text-red-500 text-xs min-h-[22px]"></div>
-        <button type="submit" class="brand-btn text-white py-3 px-5 rounded-xl font-bold text-base w-full">ارسال کد تأیید</button>
+        <button type="submit" id="forgot-submit" class="brand-btn text-white py-3 px-5 rounded-xl font-bold text-base w-full">ارسال کد تأیید</button>
         <button type="button" id="modal-cancel" class="w-full text-gray-500 mt-1 font-bold hover:text-[#0ea5e9] transition">انصراف</button>
       </form>
     </div>
@@ -204,6 +262,19 @@
   const forgotForm  = document.getElementById('forgot-form');
   const forgotPhone = document.getElementById('forgot-phone');
   const forgotError = document.getElementById('forgot-error');
+  const forgotDescription = document.getElementById('forgot-description');
+  const forgotSubmit = document.getElementById('forgot-submit');
+  const forgotInfo = document.getElementById('forgot-info');
+  const forgotSuccess = document.getElementById('forgot-success');
+  const stepPhone = document.getElementById('forgot-step-phone');
+  const stepOtp = document.getElementById('forgot-step-otp');
+  const stepReset = document.getElementById('forgot-step-reset');
+  const otpPhone = document.getElementById('otp-phone');
+  const otpInput = document.getElementById('forgot-otp');
+  const otpEdit = document.getElementById('otp-edit');
+  const otpResend = document.getElementById('otp-resend');
+  const newPasswordInput = document.getElementById('new-password');
+  const confirmPasswordInput = document.getElementById('confirm-password');
   const passwordInput = document.getElementById('password');
   const togglePassword = document.getElementById('toggle-password');
   const eyeOpen = document.getElementById('eye-open');
@@ -275,16 +346,91 @@
   });
 
   // --- مدال فراموشی رمز ---
+  const OTP_CODE = '1234';
+  let forgotStep = 1;
+  let storedPhone = '';
+
+  const setInfoMessage = msg => {
+    if (msg) {
+      forgotInfo.textContent = msg;
+      forgotInfo.classList.remove('hidden');
+    } else {
+      forgotInfo.textContent = '';
+      forgotInfo.classList.add('hidden');
+    }
+  };
+
+  const setSuccessMessage = msg => {
+    if (msg) {
+      forgotSuccess.textContent = msg;
+      forgotSuccess.classList.remove('hidden');
+    } else {
+      forgotSuccess.textContent = '';
+      forgotSuccess.classList.add('hidden');
+    }
+  };
+
+  const maskPhone = phone => phone.replace(/(\d{4})(\d{3})(\d{4})/, '$1-$2-$3');
+
+  const setForgotStep = step => {
+    forgotStep = step;
+    stepPhone.classList.toggle('hidden', step !== 1);
+    stepOtp.classList.toggle('hidden', step !== 2);
+    stepReset.classList.toggle('hidden', step !== 3);
+    const isDone = step === 4;
+    forgotError.textContent = '';
+    if (!isDone) setSuccessMessage('');
+
+    if (step === 1) {
+      forgotDescription.textContent = 'شماره موبایل ثبت‌شده در ویترینت را وارد کنید تا کد تأیید برای شما پیامک شود.';
+      forgotSubmit.textContent = 'ارسال کد تأیید';
+      setInfoMessage('برای نسخهٔ نمایشی، کد تأیید «1234» است.');
+      setTimeout(() => forgotPhone.focus(), 0);
+    } else if (step === 2) {
+      forgotDescription.textContent = 'کد ۴ رقمی ارسال‌شده به شمارهٔ زیر را وارد کنید.';
+      forgotSubmit.textContent = 'تأیید کد';
+      otpPhone.textContent = storedPhone ? maskPhone(storedPhone) : '';
+      otpInput.value = '';
+      setInfoMessage(`کد نمایشی: ${OTP_CODE}`);
+      setTimeout(() => otpInput.focus(), 0);
+    } else if (step === 3) {
+      forgotDescription.textContent = 'رمز عبور جدیدی تعیین کنید.';
+      forgotSubmit.textContent = 'ثبت رمز جدید';
+      newPasswordInput.value = '';
+      confirmPasswordInput.value = '';
+      setInfoMessage('رمز عبور باید حداقل ۶ کاراکتر باشد.');
+      setTimeout(() => newPasswordInput.focus(), 0);
+    } else if (step === 4) {
+      forgotDescription.textContent = 'رمز عبور جدید با موفقیت ثبت شد.';
+      forgotSubmit.textContent = 'بازگشت به ورود';
+      setInfoMessage('');
+      setSuccessMessage('اکنون می‌توانید با رمز جدید وارد شوید.');
+    }
+  };
+
+  const resetForgotFlow = () => {
+    storedPhone = '';
+    forgotForm.reset();
+    setForgotStep(1);
+  };
+
   forgotBtn.addEventListener('click', () => {
     modalBg.classList.remove('hidden');
-    forgotPhone.value = '';
-    forgotError.textContent = '';
-    forgotPhone.focus();
+    resetForgotFlow();
   });
-  modalClose.addEventListener('click', () => modalBg.classList.add('hidden'));
-  modalCancel.addEventListener('click', () => modalBg.classList.add('hidden'));
+  modalClose.addEventListener('click', () => {
+    modalBg.classList.add('hidden');
+    resetForgotFlow();
+  });
+  modalCancel.addEventListener('click', () => {
+    modalBg.classList.add('hidden');
+    resetForgotFlow();
+  });
   modalBg.addEventListener('click', e => {
-    if (e.target === modalBg) modalBg.classList.add('hidden');
+    if (e.target === modalBg) {
+      modalBg.classList.add('hidden');
+      resetForgotFlow();
+    }
   });
 
   // --- محدود کردن شماره در فراموشی رمز ---
@@ -293,16 +439,75 @@
     forgotError.textContent = '';
   });
 
+  otpInput?.addEventListener('input', () => {
+    otpInput.value = otpInput.value.replace(/[^0-9]/g, '').slice(0, 4);
+  });
+
+  otpEdit?.addEventListener('click', () => {
+    setForgotStep(1);
+    if (storedPhone) {
+      forgotPhone.value = storedPhone;
+      setTimeout(() => forgotPhone.setSelectionRange(0, forgotPhone.value.length), 0);
+    }
+  });
+
+  otpResend?.addEventListener('click', () => {
+    setSuccessMessage(`کد جدید ارسال شد (کد نمایشی: ${OTP_CODE}).`);
+  });
+
   // --- ارسال فرم فراموشی رمز ---
   forgotForm.addEventListener('submit', e => {
     e.preventDefault();
-    const p = forgotPhone.value.trim();
-    if (p.length !== 11 || !p.startsWith('09')) {
-      forgotError.textContent = 'شماره موبایل معتبر وارد کنید.';
+
+    if (forgotStep === 1) {
+      const p = forgotPhone.value.trim();
+      if (p.length !== 11 || !p.startsWith('09')) {
+        forgotError.textContent = 'شماره موبایل معتبر وارد کنید.';
+        return;
+      }
+      storedPhone = p;
+      setForgotStep(2);
+      setSuccessMessage(`کد تأیید برای شمارهٔ شما ارسال شد (کد نمایشی: ${OTP_CODE}).`);
       return;
     }
-    alert('کد تأیید به شماره شما ارسال شد (شبیه‌سازی)');
-    modalBg.classList.add('hidden');
+
+    if (forgotStep === 2) {
+      const code = otpInput.value.trim();
+      if (code.length !== 4) {
+        forgotError.textContent = 'کد تأیید ۴ رقمی را کامل وارد کنید.';
+        return;
+      }
+      if (code !== OTP_CODE) {
+        forgotError.textContent = 'کد واردشده صحیح نیست.';
+        return;
+      }
+      setForgotStep(3);
+      return;
+    }
+
+    if (forgotStep === 3) {
+      const newPass = newPasswordInput.value.trim();
+      const confirmPass = confirmPasswordInput.value.trim();
+
+      if (newPass.length < 6) {
+        forgotError.textContent = 'رمز عبور باید حداقل ۶ کاراکتر باشد.';
+        return;
+      }
+      if (newPass !== confirmPass) {
+        forgotError.textContent = 'رمز و تکرار آن یکسان نیست.';
+        return;
+      }
+
+      phoneInput.value = storedPhone;
+      passwordInput.value = newPass;
+      setForgotStep(4);
+      return;
+    }
+
+    if (forgotStep === 4) {
+      modalBg.classList.add('hidden');
+      resetForgotFlow();
+    }
   });
 </script>
 
