@@ -1044,6 +1044,120 @@ async function loadBantaShops() {
 window.addEventListener('DOMContentLoaded', loadBantaShops);
 
 
+function shopMatchesShoesBags(shop) {
+  if (!shop) return false;
+  const keywordSource = [
+    shop.category,
+    Array.isArray(shop.categories) ? shop.categories.join(' ') : '',
+    Array.isArray(shop.tags) ? shop.tags.join(' ') : shop.tags,
+    shop.storename,
+    shop.name,
+    shop.desc,
+  ]
+    .filter(Boolean)
+    .join(' ');
+
+  if (!keywordSource) return false;
+
+  const haystack = normalizeText(keywordSource);
+  const keywords = ['کیف', 'کفش', 'bag', 'shoe', 'boots', 'boot', 'صندل'];
+  return keywords.some(keyword => haystack.includes(normalizeText(keyword)));
+}
+
+function resolveShopImage(shop) {
+  const candidate = shop?.boardImage || shop?.banner || (Array.isArray(shop?.images) ? shop.images[0] : shop?.image);
+  let src = candidate || 'assets/images/no-image.png';
+  if (/^https?:/i.test(src) || src.startsWith('data:') || src.startsWith('//')) {
+    return src;
+  }
+  if (src.startsWith('/')) {
+    return src;
+  }
+  return `/${src.replace(/^\/+/, '')}`;
+}
+
+async function loadShoesAndBagsShops() {
+  const slider = document.getElementById('shoes-bags-slider');
+  if (!slider) return;
+
+  slider.innerHTML = '<div style="margin:60px auto;">در حال بارگذاری...</div>';
+  updateSliderNavVisibility('shoes-bags-slider');
+
+  try {
+    const res = await fetch('/api/shops');
+    if (!res.ok) throw new Error('network');
+
+    const raw = await res.json();
+    const shops = Array.isArray(raw)
+      ? raw
+      : Array.isArray(raw?.shops)
+        ? raw.shops
+        : [];
+
+    const filtered = shops.filter(shopMatchesShoesBags).slice(0, 8);
+
+    slider.innerHTML = '';
+
+    if (!filtered.length) {
+      slider.innerHTML = '<p class="text-gray-500 text-center py-8">هیچ فروشگاه کیف و کفشی پیدا نشد.</p>';
+      updateSliderNavVisibility('shoes-bags-slider');
+      return;
+    }
+
+    filtered.forEach(shop => {
+      const card = document.createElement('a');
+      const href = shop?.shopurl ? `shop.html?shopurl=${encodeURIComponent(shop.shopurl)}` : '#';
+      card.href = href;
+      card.className = 'group glass min-w-[265px] max-w-xs flex-shrink-0 flex flex-col items-center p-4 rounded-2xl shadow-xl border hover:scale-[1.04] hover:shadow-2xl bg-white/90 backdrop-blur-[3px] transition-all duration-200';
+
+      const badgeText = (Array.isArray(shop?.badges) ? shop.badges[0] : shop?.badge) || '';
+      const categoryText = shop?.category || (Array.isArray(shop?.categories) ? shop.categories[0] : 'کیف و کفش');
+      const tagText = Array.isArray(shop?.tags) ? shop.tags[0] : (shop?.specialty || '');
+      const locationText = shop?.address || shop?.location || '';
+      const name = shop?.storename || shop?.name || 'فروشگاه بدون نام';
+
+      const badgeTemplate = badgeText
+        ? `<span class="absolute top-2 right-2 text-xs font-bold px-2 py-1 rounded-full bg-[#10b981] text-white bg-opacity-80">${escapeHTML(badgeText)}</span>`
+        : '';
+
+      const tagTemplate = tagText
+        ? `<span class="inline-block bg-[#10b981]/10 text-[#10b981] text-xs font-bold px-3 py-1 rounded-full">${escapeHTML(tagText)}</span>`
+        : '';
+
+      card.innerHTML = `
+        <div class="w-full h-[120px] sm:h-[160px] rounded-xl mb-5 flex items-center justify-center relative overflow-hidden" style="background:linear-gradient(100deg,#e0fdfa,#d4fbe8);">
+          <img src="${resolveShopImage(shop)}" class="object-cover w-full h-full absolute inset-0 rounded-xl" alt="${escapeHTML(name)}" onerror="this.src='assets/images/no-image.png'">
+          ${badgeTemplate}
+        </div>
+        <div class="w-full flex flex-col items-center mb-2">
+          <span class="font-extrabold text-lg sm:text-xl text-[#10b981] mb-1">${escapeHTML(name)}</span>
+        </div>
+        <div class="flex items-center justify-center gap-2 mb-1 w-full">
+          <svg width="18" height="18" fill="none" viewBox="0 0 22 22">
+            <circle cx="11" cy="11" r="10" fill="#e0f7fa"/>
+            <path d="M11 2.5C7.13 2.5 4 5.61 4 9.45c0 3.52 4.1 7.93 6.2 10.01.46.47 1.2.47 1.66 0 2.1-2.08 6.14-6.49 6.14-10.01C18 5.61 14.87 2.5 11 2.5Zm0 10.25a2.75 2.75 0 1 1 0-5.5 2.75 2.75 0 0 1 0 5.5Z" fill="#10b981"/>
+          </svg>
+          <span class="text-gray-700 text-sm sm:text-base font-bold truncate max-w-[180px]">${escapeHTML(locationText || '—')}</span>
+        </div>
+        <div class="flex items-center justify-center gap-2 mt-2 w-full">
+          ${tagTemplate || `<span class="inline-block bg-[#10b981]/10 text-[#10b981] text-xs font-bold px-3 py-1 rounded-full">${escapeHTML(categoryText)}</span>`}
+        </div>
+      `;
+
+      slider.appendChild(card);
+    });
+
+    updateSliderNavVisibility('shoes-bags-slider');
+  } catch (err) {
+    slider.innerHTML = '<p class="text-red-500 text-center py-8">خطا در دریافت فروشگاه‌های کیف و کفش. لطفا دوباره تلاش کنید.</p>';
+    updateSliderNavVisibility('shoes-bags-slider');
+    console.error(err);
+  }
+}
+
+window.addEventListener('DOMContentLoaded', loadShoesAndBagsShops);
+
+
 // ====== آدرس API سرور (در صورت نیاز کامل کن: http://yourdomain.com/api/shopping-centers) ======
 const API_URL = '/api/shopping-centers';
 
