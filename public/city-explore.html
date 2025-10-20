@@ -106,10 +106,31 @@
 
     .centers-modal {
       display: none;
+      padding: 1.5rem;
+      align-items: center;
+      justify-content: center;
     }
 
     .centers-modal.active {
       display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .centers-modal-content {
+      max-height: 85vh;
+      overflow-y: auto;
+      width: min(100%, 680px);
+    }
+
+    .centers-modal-list {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    @media (min-width: 768px) {
+      .centers-modal-list {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+      }
     }
 
     .modal-area-btn {
@@ -134,6 +155,23 @@
       border-color: transparent;
       box-shadow: 0 10px 26px #0ea5e92b;
       transform: translateY(-1px);
+    }
+    .selected-center-indicator {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.6rem;
+      background: rgba(255,255,255,0.9);
+      border: 1.5px solid #10b98133;
+      border-radius: 9999px;
+      padding: 0.55rem 1.3rem;
+      color: #0ea5e9;
+      box-shadow: 0 4px 14px #0ea5e91a;
+      font-weight: 800;
+    }
+
+    .selected-center-indicator .selected-center-name {
+      color: #0f9a8b;
+      font-size: 0.95rem;
     }
     /* سلکت‌باکس ریسپانسیو */
     .category-select {
@@ -210,6 +248,44 @@
       .center-btn { font-size: 13px; padding: 9px 0; min-width: 70vw;}
       .shop-card { border-radius: .6rem; min-height: 80px; }
       .category-select { min-width: 86px !important; font-size: .97rem;}
+      .centers-modal { padding: 0.75rem; align-items: flex-end; }
+      .centers-modal-content {
+        max-height: 78vh;
+        border-radius: 1.75rem;
+        padding: 1.75rem 1.4rem 1.5rem 1.4rem !important;
+      }
+      .centers-modal-list {
+        grid-template-columns: repeat(1, minmax(0, 1fr));
+      }
+      .modal-area-btn {
+        width: 100%;
+        font-size: 1rem;
+        padding: 12px 18px;
+      }
+      .selected-center-indicator {
+        font-size: 0.9rem;
+        padding-inline: 1rem;
+        gap: 0.5rem;
+      }
+      .selected-center-indicator .selected-center-name {
+        font-size: 0.95rem;
+      }
+    }
+    @media (max-width: 480px) {
+      .centers-modal-content {
+        border-radius: 1.5rem;
+        padding: 1.6rem 1.2rem 1.4rem 1.2rem !important;
+      }
+      .modal-area-btn {
+        font-size: 0.92rem;
+        padding: 11px 16px;
+      }
+      .selected-center-indicator {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.35rem;
+        text-align: right;
+      }
     }
     /* هدر شیشه‌ای */
     .glass-bg {
@@ -325,6 +401,16 @@
           بیشتر
         </button>
       </div>
+      <div id="selectedCenterIndicator" class="hidden selected-center-indicator mt-2">
+        <span class="flex items-center gap-1 text-xs sm:text-sm text-[#0ea5e9]">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" class="text-[#10b981]">
+            <circle cx="12" cy="12" r="9"></circle>
+            <path d="m9.5 12.5 1.9 1.9 3.1-3.8"></path>
+          </svg>
+          مرکز خرید انتخاب شده:
+        </span>
+        <span id="selectedCenterName" class="selected-center-name text-sm sm:text-base"></span>
+      </div>
     </div>
     <!-- مناطق معروف -->
     <div class="areas-scroll flex gap-2 mb-6 pb-1 justify-center" id="areasShort"></div>
@@ -358,7 +444,7 @@
   </main>
   <div id="centersModal" class="centers-modal fixed inset-0 z-[999] items-center justify-center px-4">
     <div id="centersModalOverlay" class="absolute inset-0 bg-[#0f172a]/40 backdrop-blur-sm transition-opacity"></div>
-    <div class="relative z-10 bg-white rounded-3xl shadow-2xl border border-[#e0fdfa] w-full max-w-3xl mx-auto p-6 sm:p-8 overflow-hidden">
+    <div class="relative z-10 bg-white rounded-3xl shadow-2xl border border-[#e0fdfa] w-full max-w-3xl mx-auto p-6 sm:p-8 overflow-hidden centers-modal-content">
       <button id="closeCentersModal" class="absolute top-4 left-4 text-[#0f9a8b] hover:text-[#0ea5e9] transition-colors text-2xl font-bold" aria-label="بستن">
         &times;
       </button>
@@ -368,7 +454,7 @@
           برای مشاهده فروشگاه‌های هر مرکز خرید روی نام آن کلیک کن.
         </p>
       </div>
-      <div id="centersList" class="mt-6 grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4 text-sm"></div>
+      <div id="centersList" class="centers-modal-list mt-6 grid gap-3 sm:gap-4 text-sm"></div>
     </div>
   </div>
 
@@ -397,13 +483,36 @@
     {id:'shohada', name:'بلوار شهدا'},
   ];
 
+  let current = { area: null, category: "", search: "" };
+
+  const selectedCenterIndicator = document.getElementById('selectedCenterIndicator');
+  const selectedCenterName = document.getElementById('selectedCenterName');
+
+  function getAreaNameById(id) {
+    if (!id) return '';
+    const found = AREAS.find(area => area.id === id);
+    return found ? found.name : id;
+  }
+
+  function updateSelectedCenterIndicator() {
+    if (!selectedCenterIndicator || !selectedCenterName) return;
+    if (current.area) {
+      selectedCenterName.textContent = getAreaNameById(current.area);
+      selectedCenterIndicator.classList.remove('hidden');
+    } else {
+      selectedCenterIndicator.classList.add('hidden');
+      selectedCenterName.textContent = '';
+    }
+  }
+
   // ساخت دکمه مناطق معروف (بالا)
   function renderAreasShort(selected = null) {
     const container = document.getElementById('areasShort');
     container.innerHTML = '';
+    const activeArea = selected ?? current.area;
     AREAS.slice(0, 6).forEach(area => {
       const btn = document.createElement('button');
-      btn.className = 'area-btn' + (selected === area.id ? ' active' : '');
+      btn.className = 'area-btn' + (activeArea === area.id ? ' active' : '');
       btn.innerText = area.name;
       btn.onclick = () => {
         current.area = (current.area === area.id) ? null : area.id;
@@ -412,10 +521,8 @@
       }
       container.appendChild(btn);
     });
+    updateSelectedCenterIndicator();
   }
-
-  // مقدار جستجو و دسته‌بندی و منطقه
-  let current = { area: null, category: "", search: "" };
 
   document.getElementById('categorySelect').onchange = function () {
     current.category = this.value;
