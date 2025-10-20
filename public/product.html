@@ -682,11 +682,13 @@
     }
 
     .product-actions {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 0.75rem;
-      margin-top: 0.5rem;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 0.85rem;
+      margin-top: 0.75rem;
+      align-items: stretch;
       justify-content: center;
+      justify-items: stretch;
     }
 
     .product-action {
@@ -694,20 +696,33 @@
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      gap: 0.6rem;
-      padding: 0.85rem 1.6rem;
-      border-radius: var(--radius-sm);
-      border: 1px solid rgba(29, 78, 216, 0.15);
-      background: rgba(255, 255, 255, 0.9);
+      gap: 0.65rem;
+      padding: clamp(0.75rem, 1.5vw + 0.55rem, 1.05rem) clamp(1.2rem, 2vw + 0.6rem, 1.8rem);
+      border-radius: calc(var(--radius-sm) + 2px);
+      border: 1px solid rgba(29, 78, 216, 0.18);
+      background: linear-gradient(145deg, rgba(255, 255, 255, 0.95), rgba(226, 232, 240, 0.7));
       color: var(--primary);
       font-weight: 700;
-      font-size: 0.95rem;
+      font-size: clamp(0.9rem, 0.4vw + 0.85rem, 1rem);
+      line-height: 1.4;
       cursor: pointer;
-      transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
-      box-shadow: 0 14px 24px rgba(15, 23, 42, 0.08);
-      min-width: clamp(200px, 48vw, 320px);
-      flex: 1 1 clamp(220px, 48vw, 320px);
+      transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease, border-color 0.2s ease;
+      box-shadow: 0 14px 28px rgba(15, 23, 42, 0.08);
+      min-width: 0;
+      width: 100%;
       text-align: center;
+      text-decoration: none;
+    }
+
+    .product-action::after {
+      content: '';
+      position: absolute;
+      inset: 2px;
+      border-radius: inherit;
+      background: rgba(255, 255, 255, 0.45);
+      opacity: 0;
+      transition: opacity 0.2s ease;
+      pointer-events: none;
     }
 
     .product-action svg {
@@ -722,7 +737,7 @@
       box-shadow: none;
       background: rgba(148, 163, 184, 0.15);
       color: rgba(15, 23, 42, 0.6);
-    }
+      }
 
     .product-action.is-disabled {
       pointer-events: none;
@@ -735,23 +750,28 @@
 
     .product-action:not(:disabled):hover,
     .product-action:not(:disabled):focus-visible {
-      transform: translateY(-2px);
-      box-shadow: 0 18px 32px rgba(29, 78, 216, 0.25);
+      transform: translateY(-3px);
+      box-shadow: 0 20px 36px rgba(29, 78, 216, 0.22);
       outline: none;
     }
 
+    .product-action:not(:disabled):hover::after,
+    .product-action:not(:disabled):focus-visible::after {
+      opacity: 1;
+    }
+
     .product-action:not(:disabled):focus-visible {
-      box-shadow: 0 0 0 4px rgba(29, 78, 216, 0.22);
+      box-shadow: 0 0 0 4px rgba(29, 78, 216, 0.2);
     }
 
     .product-action--secondary {
       color: var(--text-main);
-      border-color: rgba(148, 163, 184, 0.35);
-      background: var(--surface);
+      border-color: rgba(148, 163, 184, 0.38);
+      background: linear-gradient(145deg, rgba(248, 250, 252, 0.95), rgba(226, 232, 240, 0.75));
     }
 
     .product-action--primary {
-      background: linear-gradient(135deg, rgba(29, 78, 216, 0.9), rgba(14, 165, 233, 0.9));
+      background: linear-gradient(135deg, rgba(29, 78, 216, 0.95), rgba(14, 165, 233, 0.92));
       color: #fff;
       border-color: transparent;
     }
@@ -1340,12 +1360,7 @@
       }
 
       .product-actions {
-        justify-content: center;
-      }
-
-      .product-action {
-        flex: 1 1 min(320px, 100%);
-        min-width: min(240px, 100%);
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
       }
 
       .info-panels {
@@ -1560,7 +1575,7 @@
       }
 
       .product-actions {
-        justify-content: flex-start;
+        justify-content: start;
       }
     }
 
@@ -1613,14 +1628,11 @@
       }
 
       .product-actions {
-        flex-direction: column;
-        align-items: stretch;
+        grid-template-columns: 1fr;
       }
 
       .product-action {
-        flex: 1 1 auto;
         width: 100%;
-        min-width: 100%;
       }
 
       .hero-image {
@@ -1785,6 +1797,21 @@
       .lightbox-thumb img {
         width: 60px;
         height: 60px;
+      }
+
+      .product-actions {
+        gap: 0.6rem;
+      }
+
+      .product-action {
+        padding: 0.8rem 1rem;
+        font-size: 0.9rem;
+        border-radius: var(--radius-sm);
+      }
+
+      .product-action svg {
+        width: 16px;
+        height: 16px;
       }
     }
 
@@ -2995,18 +3022,47 @@
       }
 
       function renderSellerCard(seller, productDesc) {
-        const hasSeller = seller && (seller.storename || seller.ownerName || seller.ownerFirstname || seller.ownerLastname || seller.phone || seller.address || seller.category || seller.boardImage || seller.desc);
-        if (!hasSeller) {
+        const sellerInfo = seller && typeof seller === 'object' ? seller : {};
+        const sellerFields = [
+          'storename',
+          'ownerName',
+          'ownerFirstname',
+          'ownerLastname',
+          'phone',
+          'address',
+          'category',
+          'subcategory',
+          'boardImage',
+          'desc',
+          'shopurl',
+          'city'
+        ];
+        const hasProfileInfo = sellerFields.some((key) => {
+          const value = sellerInfo[key];
+          if (typeof value === 'string') {
+            return value.trim().length > 0;
+          }
+          return Boolean(value);
+        });
+
+        const addressText = sellerInfo.address ? String(sellerInfo.address).trim() : '';
+        const hasAddress = addressText.length > 0;
+        const hasShopPage = Boolean(sellerInfo.shopurl);
+        const hasAnyAction = hasAddress || hasShopPage;
+
+        if (!hasProfileInfo && !hasAnyAction) {
           dom.sellerCard.hidden = true;
           if (dom.sellerActions) {
             dom.sellerActions.hidden = true;
           }
           if (dom.sellerAddressButton) {
+            dom.sellerAddressButton.hidden = true;
             dom.sellerAddressButton.disabled = true;
             dom.sellerAddressButton.classList.add('is-disabled');
             dom.sellerAddressButton.removeAttribute('aria-label');
           }
           if (dom.sellerLink) {
+            dom.sellerLink.hidden = true;
             dom.sellerLink.classList.add('is-disabled');
             dom.sellerLink.setAttribute('aria-disabled', 'true');
             dom.sellerLink.setAttribute('tabindex', '-1');
@@ -3017,15 +3073,14 @@
           return;
         }
 
-        dom.sellerCard.hidden = false;
-        const sellerName = seller.storename || seller.ownerName || [seller.ownerFirstname, seller.ownerLastname].filter(Boolean).join(' ') || 'فروشنده نامشخص';
+        dom.sellerCard.hidden = !hasProfileInfo;
+        const sellerName = sellerInfo.storename || sellerInfo.ownerName || [sellerInfo.ownerFirstname, sellerInfo.ownerLastname].filter(Boolean).join(' ') || 'فروشنده نامشخص';
         dom.sellerName.textContent = sellerName;
         state.sellerName = sellerName;
         state.addressInfo = null;
-        const addressText = seller && seller.address ? String(seller.address).trim() : '';
 
         const descriptionParts = [];
-        const sellerBio = typeof seller.desc === 'string' ? seller.desc.trim() : '';
+        const sellerBio = typeof sellerInfo.desc === 'string' ? sellerInfo.desc.trim() : '';
         if (sellerBio) {
           descriptionParts.push(sellerBio);
         } else if (productDesc) {
@@ -3034,21 +3089,21 @@
         descriptionParts.push('برای هماهنگی خرید، مستقیماً با فروشنده در ارتباط باشید.');
         dom.sellerDescription.textContent = descriptionParts.join(' ').trim();
 
-        const categoryText = [seller.category, seller.subcategory].filter(Boolean).join(' - ');
+        const categoryText = [sellerInfo.category, sellerInfo.subcategory].filter(Boolean).join(' - ');
         dom.sellerCategory.textContent = categoryText || 'اطلاعاتی ثبت نشده است.';
 
-        if (seller.boardImage) {
+        if (sellerInfo.boardImage) {
           dom.sellerAvatar.hidden = false;
-          dom.sellerImage.src = resolveMediaPath(seller.boardImage);
+          dom.sellerImage.src = resolveMediaPath(sellerInfo.boardImage);
           dom.sellerImage.alt = `${sellerName} - تصویر فروشنده`;
         } else {
           dom.sellerAvatar.hidden = true;
           dom.sellerImage.removeAttribute('src');
         }
 
-        if (seller.phone) {
+        if (sellerInfo.phone) {
           dom.sellerPhoneRow.hidden = false;
-          const phoneText = String(seller.phone);
+          const phoneText = String(sellerInfo.phone);
           dom.sellerPhone.textContent = phoneText;
           dom.sellerPhone.href = `tel:${toEnglishDigits(phoneText)}`;
         } else {
@@ -3057,19 +3112,19 @@
         }
 
         if (dom.sellerActions) {
-          dom.sellerActions.hidden = false;
+          dom.sellerActions.hidden = !hasAnyAction;
         }
 
-        if (addressText) {
+        if (hasAddress) {
           dom.sellerAddressRow.hidden = false;
           dom.sellerAddress.textContent = addressText;
 
           if (dom.sellerAddressButton) {
-            const mapQuery = [addressText, seller.city].filter(Boolean).join('، ');
+            const mapQuery = [addressText, sellerInfo.city].filter(Boolean).join('، ');
             const mapUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(mapQuery || addressText)}`;
             state.addressInfo = {
               address: addressText,
-              city: seller.city || '',
+              city: sellerInfo.city || '',
               mapUrl,
               sellerName
             };
@@ -3082,6 +3137,7 @@
           dom.sellerAddressRow.hidden = true;
           dom.sellerAddress.textContent = '';
           if (dom.sellerAddressButton) {
+            dom.sellerAddressButton.hidden = true;
             dom.sellerAddressButton.removeAttribute('aria-label');
             dom.sellerAddressButton.disabled = true;
             dom.sellerAddressButton.classList.add('is-disabled');
@@ -3090,13 +3146,15 @@
         }
 
         if (dom.sellerLink) {
-          if (seller.shopurl) {
-            dom.sellerLink.href = `/shop.html?shopurl=${encodeURIComponent(seller.shopurl)}`;
+          if (hasShopPage) {
+            dom.sellerLink.hidden = false;
+            dom.sellerLink.href = `/shop.html?shopurl=${encodeURIComponent(sellerInfo.shopurl)}`;
             dom.sellerLink.setAttribute('aria-label', `مشاهده صفحه مغازه ${sellerName} در ویترینت`);
             dom.sellerLink.classList.remove('is-disabled');
             dom.sellerLink.removeAttribute('aria-disabled');
             dom.sellerLink.removeAttribute('tabindex');
           } else {
+            dom.sellerLink.hidden = true;
             dom.sellerLink.removeAttribute('href');
             dom.sellerLink.removeAttribute('aria-label');
             dom.sellerLink.classList.add('is-disabled');
