@@ -18,6 +18,94 @@
 
 
 // -----------------------------
+// به‌روزرسانی دکمه ورود پس از احراز هویت
+// -----------------------------
+(function initAccountButtons() {
+  const desktopLink = document.getElementById('loginNavLink');
+  const mobileLink  = document.getElementById('loginNavLinkMobile');
+  if (!desktopLink && !mobileLink) return;
+
+  const SERVICE_CATEGORIES = [
+    'خدمات',
+    'زیبایی',
+    'تالار و مجالس',
+    'خودرو',
+    'ورزشی'
+  ];
+
+  const shorten = value => {
+    const text = (value || '').toString().trim();
+    if (!text) return '';
+    return text.length > 18 ? `${text.slice(0, 18)}…` : text;
+  };
+
+  const firstLetter = (text, fallback) => {
+    const trimmed = (text || '').trim();
+    return trimmed ? trimmed[0] : fallback;
+  };
+
+  const render = (label, name, href, fallbackInitial) => {
+    const originalName = (name || '').toString().trim();
+    const safeName = shorten(originalName);
+    const initial = firstLetter(originalName, fallbackInitial);
+    const content = `<span class="account-avatar">${initial}</span><span class="account-text"><span class="label">${label}</span>${safeName ? `<span class="name">${safeName}</span>` : ''}</span>`;
+
+    if (desktopLink) {
+      desktopLink.href = href;
+      desktopLink.className = 'account-link hide-on-mobile';
+      desktopLink.innerHTML = content;
+    }
+    if (mobileLink) {
+      mobileLink.href = href;
+      mobileLink.className = 'nav-item account-link';
+      mobileLink.innerHTML = content;
+    }
+  };
+
+  const fetchAuth = async url => {
+    try {
+      const res = await fetch(url, { credentials: 'include' });
+      if (!res.ok) return null;
+      return await res.json().catch(() => null);
+    } catch (err) {
+      console.warn('Auth check failed', err);
+      return null;
+    }
+  };
+
+  (async () => {
+    const userData = await fetchAuth('/api/auth/getCurrentUser');
+    if (userData && userData.user) {
+      const user = userData.user;
+      const name = user.fullName || user.name || user.firstName || '';
+      render('داشبورد من', name, '/user/dashboard.html', 'م');
+      return;
+    }
+
+    const sellerData = await fetchAuth('/api/auth/getCurrentSeller');
+    if (sellerData && sellerData.seller) {
+      const seller = sellerData.seller;
+      const rawCategory = (seller.category || '').trim();
+      const normalizedCategory = typeof rawCategory.normalize === 'function'
+        ? rawCategory.normalize('NFC')
+        : rawCategory;
+      const isServiceByCat = SERVICE_CATEGORIES.includes(normalizedCategory);
+      const sellerType = (seller.type || '').toString().toLowerCase();
+      const isServiceByType = sellerType === 'service';
+      const isServiceSeller = isServiceByType || isServiceByCat;
+      const basePanel = isServiceSeller
+        ? '/service-seller-panel/s-seller-panel.html'
+        : '/seller/dashboard.html';
+      const target = seller.shopurl
+        ? `${basePanel}?shopurl=${encodeURIComponent(seller.shopurl)}`
+        : basePanel;
+      const name = seller.storename || seller.ownerName || seller.name || '';
+      render('پنل فروشنده', name, target, 'ف');
+    }
+  })();
+})();
+
+// -----------------------------
 // جستجوی پیشرفته صفحه اصلی
 // -----------------------------
 const SEARCH_API_BASE = 'http://localhost:5000/api';
