@@ -59,6 +59,42 @@ const toEn = (s) => (s || '')
 // Cache of booked time slots keyed by ISO date
 const bookedCache = {};
 
+const toFaDigits = (value) => {
+  if (value == null) return '';
+  return String(value).replace(/[0-9]/g, (d) => '۰۱۲۳۴۵۶۷۸۹'[d]);
+};
+
+const normalizeKeyPart = (value) => toEn(String(value || '').trim().toLowerCase());
+
+const createBookingKey = (booking) => {
+  if (!booking) return '';
+  const id = booking._id || booking.id;
+  if (id) return `id:${id}`;
+  const name = normalizeKeyPart(booking.customerName || booking.name || '');
+  const date = normalizeKeyPart(booking.dateISO || booking.date || '');
+  const time = normalizeKeyPart(booking.time || booking.startTime || '');
+  if (!name && !date && !time) return '';
+  return `fallback:${name}|${date}|${time}`;
+};
+
+const collectBookingKeys = (list) => {
+  const set = new Set();
+  if (!list) return set;
+  const source = Array.isArray(list)
+    ? list
+    : (list instanceof Set ? Array.from(list) : []);
+  source.forEach((item) => {
+    if (!item) return;
+    if (typeof item === 'string') {
+      set.add(item);
+      return;
+    }
+    const key = createBookingKey(item);
+    if (key) set.add(key);
+  });
+  return set;
+};
+
 const API = {
   async _json(res) {
     const txt = await res.text();
@@ -359,6 +395,7 @@ async function fetchInitialData() {
     }
 
     const localBookings = JSON.parse(localStorage.getItem('vitreenet-bookings') || '[]');
+    const previousBookingKeys = collectBookingKeys(localBookings);
     console.log('Local bookings count:', localBookings.length);
 
     // Enhanced booking data handling with better error logging
@@ -400,7 +437,20 @@ async function fetchInitialData() {
       MOCK_DATA.bookings = [];
     }
 
+    const currentBookings = Array.isArray(MOCK_DATA.bookings) ? MOCK_DATA.bookings : [];
+    const candidateNewBookings = (Array.isArray(bookings) && bookings.length)
+      ? currentBookings.filter((b) => {
+          const key = createBookingKey(b);
+          return key && !previousBookingKeys.has(key);
+        })
+      : [];
+
     persistBookings();
+
+    BookingPopup.ensureBaseline(previousBookingKeys);
+    BookingPopup.notifyNew(candidateNewBookings);
+    BookingPopup.markKnown(currentBookings);
+    BookingPopup.hasBaseline = true;
 
     if (sellerRes.ok) {
       const data = await sellerRes.json();
@@ -1003,8 +1053,159 @@ const Notifications = {
   }
 };
 
+const BookingPopup = {
+  STORAGE_KEY: 'vit_seen_bookings',
+  modal: null,
+  elements: {},
+  hasBaseline: false,
+
+  init() {
+    this.modal = document.getElementById('new-booking-modal');
+    if (!this.modal) return;
+
+    this.elements = {
+      customer: this.modal.querySelector('[data-customer-name]'),
+      service: this.modal.querySelector('[data-service-name]'),
+      date: this.modal.querySelector('[data-booking-date]'),
+      time: this.modal.querySelector('[data-booking-time]'),
+      extra: this.modal.querySelector('[data-extra-count]'),
+      viewBtn: this.modal.querySelector('[data-view-bookings]')
+    };
+
+    this.elements.viewBtn?.addEventListener('click', () => {
+      UIComponents.closeModal('new-booking-modal');
+      if (window.location.hash !== '#/bookings') {
+        window.location.hash = '/bookings';
+      } else {
+        document.getElementById('bookings-view')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    });
+
+    if (this.getSeenKeys().size) {
+      this.hasBaseline = true;
+    }
+  },
+
+  getSeenKeys() {
+    const stored = StorageManager.get(this.STORAGE_KEY);
+    if (Array.isArray(stored)) {
+      return new Set(stored);
+    }
+    return new Set();
+  },
+
+  setSeenKeys(keys) {
+    if (!(keys instanceof Set)) return;
+    StorageManager.set(this.STORAGE_KEY, Array.from(keys));
+  },
+
+  ensureBaseline(previousKeys) {
+    const seen = this.getSeenKeys();
+    const prev = previousKeys instanceof Set
+      ? previousKeys
+      : collectBookingKeys(previousKeys);
+
+    if (prev.size) {
+      const combined = new Set([...seen, ...prev]);
+      this.setSeenKeys(combined);
+      this.hasBaseline = true;
+    } else if (seen.size) {
+      this.hasBaseline = true;
+    }
+  },
+
+  markKnown(bookingsOrKeys) {
+    const keys = bookingsOrKeys instanceof Set
+      ? bookingsOrKeys
+      : collectBookingKeys(bookingsOrKeys);
+    if (keys.size) {
+      const seen = this.getSeenKeys();
+      const combined = new Set([...seen, ...keys]);
+      this.setSeenKeys(combined);
+      if (combined.size) {
+        this.hasBaseline = true;
+      }
+    }
+    if (!this.hasBaseline) {
+      this.hasBaseline = true;
+    }
+  },
+
+  notifyNew(bookings) {
+    if (!Array.isArray(bookings) || !bookings.length) return;
+    const seen = this.getSeenKeys();
+    if (!this.hasBaseline && !seen.size) return;
+
+    const fresh = bookings.filter((booking) => {
+      const key = createBookingKey(booking);
+      return key && !seen.has(key);
+    });
+
+    if (!fresh.length) return;
+
+    this.show(fresh[0], fresh.length - 1);
+    const updated = new Set([...seen, ...fresh.map(createBookingKey).filter(Boolean)]);
+    this.setSeenKeys(updated);
+    this.hasBaseline = true;
+  },
+
+  show(booking, extraCount = 0) {
+    if (!this.modal) return;
+
+    const customerName = booking.customerName || booking.name || 'مشتری جدید';
+    const serviceRaw = booking.service;
+    const serviceName = typeof serviceRaw === 'string'
+      ? serviceRaw
+      : (serviceRaw?.title || serviceRaw?.name || '—');
+    const rawDate = booking.date || booking.dateISO || '';
+    let dateLabel = UIComponents?.formatPersianDayMonth?.(rawDate);
+    if (!dateLabel && rawDate) {
+      dateLabel = toFaDigits(rawDate.replace(/-/g, '/'));
+    }
+    const timeLabel = booking.time ? toFaDigits(booking.time) : '—';
+
+    if (this.elements.customer) this.elements.customer.textContent = customerName;
+    if (this.elements.service) this.elements.service.textContent = serviceName || '—';
+    if (this.elements.date) this.elements.date.textContent = dateLabel || '—';
+    if (this.elements.time) this.elements.time.textContent = timeLabel || '—';
+
+    if (this.elements.extra) {
+      if (extraCount > 0) {
+        const formatted = (typeof UIComponents?.formatPersianNumber === 'function')
+          ? UIComponents.formatPersianNumber(extraCount)
+          : toFaDigits(extraCount);
+        this.elements.extra.textContent = `+ ${formatted} نوبت جدید دیگر`;
+        this.elements.extra.hidden = false;
+      } else {
+        this.elements.extra.hidden = true;
+      }
+    }
+
+    UIComponents.openModal('new-booking-modal');
+  },
+
+  handleExternalUpdate(bookings) {
+    if (!Array.isArray(bookings)) return;
+    this.ensureBaseline();
+    this.notifyNew(bookings);
+    this.markKnown(bookings);
+  }
+};
+
 // اجرا
 Notifications.init();
+BookingPopup.init();
+
+  window.addEventListener('storage', (event) => {
+    if (event.key === 'vitreenet-bookings' && event.newValue) {
+      try {
+        const parsed = JSON.parse(event.newValue);
+        BookingPopup.handleExternalUpdate(Array.isArray(parsed) ? parsed : []);
+      } catch (err) {
+        console.warn('Failed to process booking storage event', err);
+      }
+    }
+  });
 
   // Utility: normalize a time string to HH:MM (24h) or return null
   const normalizeTime = (t) => {
