@@ -9,19 +9,82 @@ const dailyVisitCtrl = require('../controllers/dailyVisitController');
 router.get('/', async (req, res) => {
   try {
     const sellers = await Seller.find({},
-      'storename category shopurl address desc isPremium boardImage'
+      'storename category shopurl address desc isPremium boardImage firstname lastname phone createdAt subscriptionStart subscriptionEnd subscriptionType visits adminScore adminScoreUpdatedAt adminScoreNote adminScoreMessage performanceStatus blockedByAdmin'
     ).lean();
 
-    const result = sellers.map(seller => ({
-      id: seller._id,
-      storename: seller.storename || '',
-      category: seller.category || '',
-      shopurl: seller.shopurl || '',
-      address: seller.address || '',
-      desc: seller.desc || '',
-      isPremium: !!seller.isPremium,
-      image: seller.boardImage || ''
-    }));
+    if (!sellers.length) {
+      return res.json([]);
+    }
+
+    const sellerIds = sellers.map(s => s._id);
+
+    const [appearances, productsBySeller] = await Promise.all([
+      ShopAppearance.find({ sellerId: { $in: sellerIds } },
+        'sellerId customUrl shopPhone shopAddress shopLogoText shopStatus slides averageRating ratingCount shopLogo footerImage updatedAt'
+      ).lean(),
+      Product.aggregate([
+        { $match: { sellerId: { $in: sellerIds } } },
+        { $group: { _id: '$sellerId', count: { $sum: 1 } } }
+      ])
+    ]);
+
+    const appearanceMap = new Map();
+    appearances.forEach(app => {
+      appearanceMap.set(String(app.sellerId), app);
+    });
+
+    const productCountMap = new Map();
+    productsBySeller.forEach(entry => {
+      productCountMap.set(String(entry._id), entry.count);
+    });
+
+    const result = sellers.map(seller => {
+      const appearance = appearanceMap.get(String(seller._id)) || {};
+      const ownerFirstname = seller.firstname || '';
+      const ownerLastname = seller.lastname || '';
+      const ownerName = `${ownerFirstname} ${ownerLastname}`.trim();
+      const productCount = productCountMap.get(String(seller._id)) || 0;
+
+      return {
+        id: seller._id,
+        _id: seller._id,
+        sellerId: seller._id,
+        storename: appearance.shopLogoText || seller.storename || '',
+        shopLogoText: appearance.shopLogoText || seller.storename || '',
+        category: seller.category || '',
+        shopurl: appearance.customUrl || seller.shopurl || '',
+        address: appearance.shopAddress || seller.address || '',
+        shopAddress: appearance.shopAddress || seller.address || '',
+        shopPhone: appearance.shopPhone || '',
+        phone: seller.phone || '',
+        ownerPhone: seller.phone || '',
+        ownerFirstname,
+        ownerLastname,
+        ownerName,
+        desc: seller.desc || '',
+        isPremium: !!seller.isPremium,
+        boardImage: seller.boardImage || '',
+        shopLogo: appearance.shopLogo || '',
+        footerImage: appearance.footerImage || '',
+        shopStatus: appearance.shopStatus || '',
+        slides: appearance.slides || [],
+        averageRating: appearance.averageRating || 0,
+        ratingCount: appearance.ratingCount || 0,
+        visits: seller.visits || 0,
+        productsCount: productCount,
+        createdAt: seller.createdAt || null,
+        subscriptionStart: seller.subscriptionStart || null,
+        subscriptionEnd: seller.subscriptionEnd || null,
+        subscriptionType: seller.subscriptionType || '',
+        adminScore: seller.adminScore ?? null,
+        adminScoreUpdatedAt: seller.adminScoreUpdatedAt || null,
+        adminScoreNote: seller.adminScoreNote || '',
+        adminScoreMessage: seller.adminScoreMessage || '',
+        performanceStatus: seller.performanceStatus || 'unset',
+        blockedByAdmin: !!seller.blockedByAdmin,
+        lastAppearanceUpdate: appearance.updatedAt || null
+      };
+    });
 
     res.json(result);
   } catch (err) {
