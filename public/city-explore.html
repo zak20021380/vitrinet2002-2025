@@ -104,23 +104,92 @@
       height: 18px;
     }
 
-    .centers-modal {
-      display: none;
-      padding: 1.5rem;
-      align-items: center;
-      justify-content: center;
+    .centers-modal { 
+      display: none; 
+      padding: 1.5rem; 
+      align-items: center; 
+      justify-content: center; 
     }
 
-    .centers-modal.active {
+    .centers-modal.active { 
+      display: flex; 
+      align-items: center; 
+      justify-content: center; 
+    }
+
+    .center-info-modal {
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 1.25rem;
+    }
+
+    .center-info-modal.active {
+      display: flex;
+    }
+
+    .center-info-card {
+      width: min(100%, 420px);
+      border-radius: 1.8rem;
+      background: linear-gradient(145deg, rgba(255, 255, 255, 0.98), rgba(224, 253, 250, 0.95));
+      box-shadow: 0 28px 55px -30px rgba(14, 165, 233, 0.55), 0 18px 40px -35px rgba(16, 185, 129, 0.55);
+      border: 1.4px solid rgba(13, 148, 136, 0.18);
+      overflow: hidden;
+    }
+
+    .center-info-header {
       display: flex;
       align-items: center;
-      justify-content: center;
+      gap: 0.85rem;
+      margin-bottom: 1.1rem;
     }
 
-    .centers-modal-content {
-      max-height: 85vh;
-      overflow-y: auto;
-      width: min(100%, 680px);
+    .center-info-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 16px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(135deg, rgba(16, 185, 129, 0.85), rgba(14, 165, 233, 0.85));
+      color: #fff;
+      box-shadow: 0 12px 28px -16px rgba(14, 165, 233, 0.6);
+    }
+
+    .center-info-title {
+      font-size: 1.35rem;
+      font-weight: 900;
+      color: #0f9a8b;
+    }
+
+    .center-info-address {
+      font-size: 1.05rem;
+      font-weight: 700;
+      line-height: 1.9rem;
+      color: #0ea5e9;
+      background: rgba(255, 255, 255, 0.75);
+      border-radius: 1.2rem;
+      padding: 1rem 1.2rem;
+      border: 1.2px dashed rgba(14, 165, 233, 0.35);
+    }
+
+    .center-info-close {
+      position: absolute;
+      top: 18px;
+      left: 18px;
+      font-size: 1.7rem;
+      color: #0f9a8b;
+      transition: color 0.2s ease;
+    }
+
+    .center-info-close:hover {
+      color: #0ea5e9;
+    }
+
+    .centers-modal-content { 
+      max-height: 85vh; 
+      overflow-y: auto; 
+      width: min(100%, 680px); 
     }
 
     .centers-modal-list {
@@ -160,6 +229,25 @@
     .modal-area-btn span {
       font-weight: 900;
       font-size: 0.95rem;
+    }
+
+    .modal-center-name {
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      color: #0f9a8b;
+    }
+
+    .modal-center-name::after {
+      content: 'ℹ️';
+      font-size: 0.85rem;
+      opacity: 0.6;
+      transition: opacity 0.2s ease;
+    }
+
+    .modal-center-name:hover::after {
+      opacity: 1;
     }
 
     .modal-area-btn small {
@@ -288,6 +376,17 @@
         font-size: 1rem;
         padding: 12px 18px;
       }
+      .center-info-card {
+        border-radius: 1.55rem;
+        padding: 1.6rem 1.35rem !important;
+      }
+      .center-info-title {
+        font-size: 1.15rem;
+      }
+      .center-info-address {
+        font-size: 0.95rem;
+        line-height: 1.7rem;
+      }
       .selected-center-indicator {
         font-size: 0.9rem;
         padding-inline: 1rem;
@@ -305,6 +404,17 @@
       .modal-area-btn {
         font-size: 0.92rem;
         padding: 11px 16px;
+      }
+      .center-info-card {
+        border-radius: 1.45rem;
+        padding: 1.4rem 1.15rem !important;
+      }
+      .center-info-title {
+        font-size: 1.05rem;
+      }
+      .center-info-address {
+        font-size: 0.9rem;
+        line-height: 1.6rem;
       }
       .selected-center-indicator {
         flex-direction: column;
@@ -595,6 +705,29 @@
     </div>
   </div>
 
+  <div id="centerInfoModal" class="center-info-modal fixed inset-0 z-[1000] justify-center items-center">
+    <div id="centerInfoOverlay" class="absolute inset-0 bg-[#0f172a]/45 backdrop-blur-sm"></div>
+    <div class="relative z-10 center-info-card p-6 sm:p-8">
+      <button id="closeCenterInfo" class="center-info-close" aria-label="بستن پاپ‌آپ">&times;</button>
+      <div class="center-info-header">
+        <div class="center-info-icon">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+            <path d="M9 22V12h6v10" />
+          </svg>
+        </div>
+        <div>
+          <h3 id="centerInfoTitle" class="center-info-title"></h3>
+          <p class="text-sm font-semibold text-[#0ea5e9] opacity-80 mt-1">آدرس ثبت‌شده برای این مرکز خرید</p>
+        </div>
+      </div>
+      <div class="center-info-address" id="centerInfoAddress"></div>
+      <div id="centerInfoEmpty" class="hidden text-sm font-semibold text-[#64748b] bg-white/70 border border-[#e2e8f0] rounded-xl px-4 py-3 mt-4">
+        آدرسی برای این مرکز خرید ثبت نشده است.
+      </div>
+    </div>
+  </div>
+
   <footer class="w-full bg-gradient-to-tr from-[#f8fafc] via-[#e0fdfa] to-[#d4fbe8] border-t mt-16 px-2 pt-6 pb-3 text-center text-[15px] text-gray-500 rounded-t-[1.7rem] shadow-lg font-bold tracking-wide">
     © 2025 ویترینت | همه حقوق محفوظ است.
   </footer>
@@ -806,9 +939,6 @@
       const btn = document.createElement('button');
       btn.className = 'area-btn' + (activeArea === area.id ? ' active' : '');
       btn.textContent = area.name;
-      if (area.location) {
-        btn.title = area.location;
-      }
       btn.onclick = () => {
         current.area = (current.area === area.id) ? null : area.id;
         renderAreasShort(current.area);
@@ -839,6 +969,12 @@
   const centersModalOverlay = document.getElementById('centersModalOverlay');
   const openCentersBtn = document.getElementById('more-centers-btn');
   const closeCentersBtn = document.getElementById('closeCentersModal');
+  const centerInfoModal = document.getElementById('centerInfoModal');
+  const centerInfoOverlay = document.getElementById('centerInfoOverlay');
+  const closeCenterInfoBtn = document.getElementById('closeCenterInfo');
+  const centerInfoTitle = document.getElementById('centerInfoTitle');
+  const centerInfoAddress = document.getElementById('centerInfoAddress');
+  const centerInfoEmpty = document.getElementById('centerInfoEmpty');
 
   function openCentersModal() {
     centersModal.classList.add('active');
@@ -847,7 +983,39 @@
 
   function closeCentersModal() {
     centersModal.classList.remove('active');
+    if (centerInfoModal?.classList.contains('active')) {
+      centerInfoModal.classList.remove('active');
+    }
     document.body.classList.remove('overflow-hidden');
+  }
+
+  function openCenterInfoModal(area) {
+    if (!centerInfoModal || !area) return;
+    const location = (area.location || '').trim();
+    if (centerInfoTitle) {
+      centerInfoTitle.textContent = area.name || 'مرکز خرید';
+    }
+    if (centerInfoAddress && centerInfoEmpty) {
+      if (location) {
+        centerInfoAddress.textContent = location;
+        centerInfoAddress.classList.remove('hidden');
+        centerInfoEmpty.classList.add('hidden');
+      } else {
+        centerInfoAddress.textContent = '';
+        centerInfoAddress.classList.add('hidden');
+        centerInfoEmpty.classList.remove('hidden');
+      }
+    }
+    centerInfoModal.classList.add('active');
+    document.body.classList.add('overflow-hidden');
+  }
+
+  function closeCenterInfoModal() {
+    if (!centerInfoModal) return;
+    centerInfoModal.classList.remove('active');
+    if (!centersModal?.classList.contains('active')) {
+      document.body.classList.remove('overflow-hidden');
+    }
   }
 
   function renderCentersModal() {
@@ -864,10 +1032,12 @@
       const btn = document.createElement('button');
       btn.type = 'button';
       btn.className = 'modal-area-btn';
+      const nameHtml = escapeHtml(area.name);
+      const tagHtml = area.tag ? `<small>${escapeHtml(area.tag)}</small>` : '';
       btn.innerHTML = `
-        <span>${area.name}</span>
+        <span class="modal-center-name" data-center-id="${escapeHtml(area.id)}">${nameHtml}</span>
         ${area.stores ? `<small>${formatNumber(area.stores)} فروشگاه</small>` : ''}
-        ${area.location ? `<small>${area.location}</small>` : ''}
+        ${tagHtml}
       `;
       btn.onclick = () => {
         current.area = area.id;
@@ -876,6 +1046,13 @@
         closeCentersModal();
         window.scrollTo({ top: document.getElementById('areasShort').offsetTop - 40, behavior: 'smooth' });
       };
+      const nameEl = btn.querySelector('.modal-center-name');
+      if (nameEl) {
+        nameEl.addEventListener('click', event => {
+          event.stopPropagation();
+          openCenterInfoModal(area);
+        });
+      }
       centersList.appendChild(btn);
     });
   }
@@ -894,9 +1071,20 @@
     }
   });
 
+  [centerInfoOverlay, closeCenterInfoBtn].forEach(el => {
+    if (el) {
+      el.addEventListener('click', closeCenterInfoModal);
+    }
+  });
+
   document.addEventListener('keydown', event => {
-    if (event.key === 'Escape' && centersModal.classList.contains('active')) {
-      closeCentersModal();
+    if (event.key === 'Escape') {
+      if (centersModal.classList.contains('active')) {
+        closeCentersModal();
+      }
+      if (centerInfoModal?.classList.contains('active')) {
+        closeCenterInfoModal();
+      }
     }
   });
 
