@@ -3125,6 +3125,7 @@ tr:last-child td {
         <a href="#" data-section="daily-visits"><i class="ri-eye-line"></i> آمار روزانه بازدید</a>
         <a href="#" data-section="users"><i class="ri-user-3-line"></i> کاربران <span class="count" id="count-users">0</span></a>
         <a href="#" data-section="sellers"><i class="ri-store-2-line"></i> فروشنده‌ها <span class="count" id="count-sellers">0</span></a>
+        <a href="service-shops.html" id="service-shops-link"><i class="ri-scissors-2-line"></i> مغازه‌های خدماتی <span class="count" id="count-service-shops"></span></a>
         <a href="#" data-section="products"><i class="ri-box-3-line"></i> محصولات <span class="count" id="count-products">0</span></a>
         <a href="#" data-section="shopping-centers"><i class="ri-building-2-line"></i> مراکز خرید <span class="count" id="count-shopping-centers">0</span></a>
         <a href="#" data-section="plans"><i class="ri-money-dollar-circle-line"></i> مدیریت قیمت پلن‌ها</a>
@@ -3166,6 +3167,10 @@ tr:last-child td {
       <div class="card" id="card-sellers">
         <span class="icon"><i class="ri-store-2-line"></i></span>
         <div><div class="num" id="register-seller-today">0</div><div class="label">ثبت‌نام فروشنده امروز</div></div>
+      </div>
+      <div class="card" id="card-service-shops">
+        <span class="icon"><i class="ri-scissors-2-line"></i></span>
+        <div><div class="num" id="service-shops-total">0</div><div class="label">مغازه‌های خدماتی فعال</div></div>
       </div>
       <div class="card" id="card-products">
         <span class="icon"><i class="ri-box-3-line"></i></span>
@@ -3965,9 +3970,14 @@ let dashboardSummary = {
   newUsersToday: 0,
   newSellersToday: 0,
   newProductsToday: 0,
+  newServiceShopsToday: 0,
   totalUsers: 0,
   totalSellers: 0,
   totalProducts: 0,
+  totalServiceShops: 0,
+  activeServiceShops: 0,
+  pendingServiceShops: 0,
+  premiumServiceShops: 0,
   generatedAt: null,
   range: null
 };
@@ -3978,6 +3988,7 @@ let visitsPerDay = [];
 let usersPerDay = [];
 let sellersPerDay = [];
 let productsPerDay = [];
+let serviceShopsPerDay = [];
 
 let usersList = [];
 let shopsList = [];
@@ -5815,9 +5826,14 @@ function applyDashboardStats(stats, { usersFallback = 0, sellersFallback = 0, pr
     newUsersToday: safeNumber(stats?.summary?.newUsersToday),
     newSellersToday: safeNumber(stats?.summary?.newSellersToday),
     newProductsToday: safeNumber(stats?.summary?.newProductsToday),
+    newServiceShopsToday: safeNumber(stats?.summary?.newServiceShopsToday),
     totalUsers: safeNumber(stats?.summary?.totalUsers, safeNumber(usersFallback)),
     totalSellers: safeNumber(stats?.summary?.totalSellers, safeNumber(sellersFallback)),
     totalProducts: safeNumber(stats?.summary?.totalProducts, safeNumber(productsFallback)),
+    totalServiceShops: safeNumber(stats?.summary?.totalServiceShops),
+    activeServiceShops: safeNumber(stats?.summary?.activeServiceShops),
+    pendingServiceShops: safeNumber(stats?.summary?.pendingServiceShops),
+    premiumServiceShops: safeNumber(stats?.summary?.premiumServiceShops),
     generatedAt: stats?.generatedAt || null,
     range: stats?.range || null
   };
@@ -5843,7 +5859,8 @@ function applyDashboardStats(stats, { usersFallback = 0, sellersFallback = 0, pr
         visits: safeNumber(item.visits),
         users: safeNumber(item.newUsers),
         sellers: safeNumber(item.newSellers),
-        products: safeNumber(item.newProducts)
+        products: safeNumber(item.newProducts),
+        serviceShops: safeNumber(item.newServiceShops)
       };
     })
     .filter(Boolean)
@@ -5855,6 +5872,7 @@ function applyDashboardStats(stats, { usersFallback = 0, sellersFallback = 0, pr
   usersPerDay = dashboardTrend.map((item) => item.users);
   sellersPerDay = dashboardTrend.map((item) => item.sellers);
   productsPerDay = dashboardTrend.map((item) => item.products);
+  serviceShopsPerDay = dashboardTrend.map((item) => item.serviceShops);
 }
 
 async function fetchUsers() {
@@ -5936,11 +5954,19 @@ function updateDashboardCards() {
   document.getElementById('register-user-today').textContent = formatNumber(dashboardSummary.newUsersToday);
   document.getElementById('register-seller-today').textContent = formatNumber(dashboardSummary.newSellersToday);
   document.getElementById('products-total').textContent = formatNumber(dashboardSummary.totalProducts);
+  const serviceCardValue = document.getElementById('service-shops-total');
+  if (serviceCardValue) {
+    serviceCardValue.textContent = formatNumber(dashboardSummary.activeServiceShops);
+  }
 }
 function updateSidebarCounts() {
   document.getElementById('count-users').textContent    = formatNumber(usersList.length);
   document.getElementById('count-sellers').textContent  = formatNumber(shopsList.length);
   document.getElementById('count-products').textContent = formatNumber(productsList.length);
+  const serviceCountEl = document.getElementById('count-service-shops');
+  if (serviceCountEl) {
+    serviceCountEl.textContent = formatNumber(dashboardSummary.totalServiceShops || 0);
+  }
   const centersCountEl = document.getElementById('count-shopping-centers');
   if (centersCountEl) centersCountEl.textContent = formatNumber(shoppingCentersList.length);
 
@@ -6496,7 +6522,8 @@ function showDashboardChart(type, title) {
     visits: visitsPerDay,
     users: usersPerDay,
     sellers: sellersPerDay,
-    products: productsPerDay
+    products: productsPerDay,
+    serviceShops: serviceShopsPerDay
   };
 
   function getData(period) {
@@ -6661,6 +6688,10 @@ document.getElementById('card-visits').onclick = ()=> showDashboardChart("visits
 document.getElementById('card-users').onclick = ()=> showDashboardChart("users", "آمار ثبت‌نام کاربران");
 document.getElementById('card-sellers').onclick = ()=> showDashboardChart("sellers", "آمار فروشگاه‌ها");
 document.getElementById('card-products').onclick = ()=> showDashboardChart("products", "آمار محصولات جدید");
+const cardServiceShops = document.getElementById('card-service-shops');
+if (cardServiceShops) {
+  cardServiceShops.onclick = ()=> showDashboardChart("serviceShops", "آمار مغازه‌های خدماتی جدید");
+}
 
 const shoppingCenterFormEl = document.getElementById('shoppingCenterForm');
 if (shoppingCenterFormEl) {
