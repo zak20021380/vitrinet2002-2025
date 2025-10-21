@@ -4497,6 +4497,12 @@ const panels = {
 
 menuLinks.forEach(link => {
   link.addEventListener('click', async e => {
+    const section = link.dataset.section;
+
+    if (!section) {
+      return;
+    }
+
     e.preventDefault();
 
     // 1) استایلِ active در منو
@@ -4505,7 +4511,6 @@ menuLinks.forEach(link => {
 
     // 2) مخفی/نمایشِ پنل‌ها
     Object.values(panels).forEach(p => p.style.display = 'none');
-    const section = link.dataset.section;
     if (!panels[section]) return;
     panels[section].style.display = 'block';
 
