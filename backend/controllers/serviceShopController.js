@@ -420,7 +420,7 @@ async function buildOverview() {
     ServiceShop.find({})
       .sort({ updatedAt: -1 })
       .limit(6)
-      .select('name status city ownerName ownerPhone isPremium bookingSettings enabled bookingSettings.enabled updatedAt createdAt shopUrl')
+      .select('name status city ownerName ownerPhone isPremium bookingSettings updatedAt createdAt shopUrl')
       .lean()
   ]);
 
