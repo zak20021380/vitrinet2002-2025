@@ -600,6 +600,23 @@ tr:last-child td {
   border: 1px solid rgba(16, 185, 129, 0.25);
 }
 
+.ad-orders-table .ad-plan-location {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.82rem;
+  color: #0284c7;
+  background: rgba(14, 165, 233, 0.08);
+  padding: 0.25rem 0.6rem;
+  border-radius: 999px;
+  border: 1px solid rgba(14, 165, 233, 0.18);
+  margin-bottom: 0.35rem;
+}
+
+.ad-orders-table .ad-plan-location i {
+  font-size: 1rem;
+}
+
 .ad-orders-table .ad-title {
   font-weight: 700;
   color: #0f172a;
@@ -724,6 +741,7 @@ tr:last-child td {
   align-items: center;
   gap: 0.35rem;
   transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+  text-decoration: none;
 }
 
 .ad-action-btn i {
@@ -757,6 +775,29 @@ tr:last-child td {
 
 .ad-action-btn.reject:hover {
   background: #fecaca;
+}
+
+.ad-action-btn.link {
+  background: #e0f2fe;
+  color: #0369a1;
+  border: 1px solid rgba(14, 165, 233, 0.2);
+}
+
+.ad-action-btn.link:hover {
+  background: #bae6fd;
+}
+
+.ad-orders-table table tbody tr.ad-order-row {
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.ad-orders-table table tbody tr.ad-order-row:hover {
+  background: #f8fafc;
+}
+
+.ad-orders-table table tbody tr.ad-order-row:hover .ad-title {
+  color: #0ea5e9;
 }
 
 .ad-action-btn.is-loading {
@@ -829,6 +870,10 @@ tr:last-child td {
   .ad-action-btn {
     justify-content: center;
   }
+
+  .ad-modal-visit {
+    justify-content: center;
+  }
 }
 
 .ad-modal-overlay {
@@ -897,6 +942,34 @@ tr:last-child td {
   font-weight: 700;
 }
 
+.ad-modal-visit {
+  margin: -0.4rem 0 1.2rem;
+  display: flex;
+  justify-content: flex-start;
+}
+
+.ad-modal-visit a {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  background: #e0f2fe;
+  color: #0369a1;
+  padding: 0.4rem 0.95rem;
+  border-radius: 999px;
+  font-weight: 700;
+  text-decoration: none;
+  border: 1px solid rgba(14, 165, 233, 0.2);
+  transition: background 0.2s ease;
+}
+
+.ad-modal-visit a:hover {
+  background: #bae6fd;
+}
+
+.ad-modal-visit i {
+  font-size: 1.1rem;
+}
+
 .ad-modal-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
@@ -934,6 +1007,16 @@ tr:last-child td {
 .ad-modal-meta .label {
   font-weight: 700;
   color: #0f172a;
+}
+
+.ad-modal-meta span a {
+  color: #0ea5e9;
+  text-decoration: none;
+  font-weight: 700;
+}
+
+.ad-modal-meta span a:hover {
+  text-decoration: underline;
 }
 
 .ad-modal-preview {
@@ -3918,10 +4001,25 @@ let adModalOverlayHandler = null;
 let sellerPerformanceMap = {};
 let sellerPerformanceLoaded = false;
 
-const AD_PLAN_LABELS = {
-  ad_home: 'تبلیغ صفحه اصلی',
-  ad_search: 'تبلیغ جستجو',
-  ad_products: 'تبلیغ بین محصولات'
+const AD_PLAN_META = {
+  ad_home: {
+    label: 'تبلیغ صفحه اصلی',
+    location: 'بخش ویژه صفحه اصلی ویترینت',
+    icon: 'ri-home-smile-line',
+    url: '/index.html#drag-scroll-cards'
+  },
+  ad_search: {
+    label: 'تبلیغ جستجو',
+    location: 'پاپ‌آپ جستجوی سریع صفحه اصلی',
+    icon: 'ri-search-2-line',
+    url: '/index.html#searchForm'
+  },
+  ad_products: {
+    label: 'تبلیغ بین محصولات',
+    location: 'صفحه لیست محصولات و نتایج جستجو',
+    icon: 'ri-store-3-line',
+    url: '/all-products.html'
+  }
 };
 
 const AD_STATUS_META = {
@@ -3940,15 +4038,26 @@ function normaliseSlug(value) {
     .replace(/-+/g, '_');
 }
 
-function getAdPlanLabel(slug, fallback = 'تبلیغ ویژه') {
+const AD_PLAN_LABELS = Object.keys(AD_PLAN_META).reduce((acc, key) => {
+  acc[key] = AD_PLAN_META[key].label;
+  return acc;
+}, {});
+
+function getAdPlanMeta(slug, fallback = 'تبلیغ ویژه') {
   const normalisedSlug = normaliseSlug(slug);
-  if (normalisedSlug && AD_PLAN_LABELS[normalisedSlug]) {
-    return AD_PLAN_LABELS[normalisedSlug];
+  if (normalisedSlug && AD_PLAN_META[normalisedSlug]) {
+    return AD_PLAN_META[normalisedSlug];
   }
-  if (fallback) {
-    return String(fallback);
-  }
-  return 'تبلیغ';
+  return {
+    label: fallback || 'تبلیغ ویژه',
+    location: 'محل نمایش نامشخص',
+    icon: 'ri-information-line',
+    url: null
+  };
+}
+
+function getAdPlanLabel(slug, fallback = 'تبلیغ ویژه') {
+  return getAdPlanMeta(slug, fallback).label;
 }
 
 function getAdStatusMeta(status) {
@@ -4086,7 +4195,12 @@ function renderAdOrders() {
     const sellerName = seller.storename || order.shopTitle || 'بدون نام';
     const sellerPhone = seller.phone || order.sellerPhone || '';
     const sellerAddress = seller.address || seller.city || '';
-    const planLabel = getAdPlanLabel(order.planSlug || '', order.planTitle || 'تبلیغ ویژه');
+    const planMeta = getAdPlanMeta(order.planSlug || '', order.planTitle || 'تبلیغ ویژه');
+    const planLabel = planMeta.label;
+    const planIcon = planMeta.icon || 'ri-compass-3-line';
+    const planLocationBadge = planMeta.location
+      ? `<span class="ad-plan-location"><i class="${planIcon}"></i>${escapeHtml(planMeta.location)}</span>`
+      : '';
     const statusMeta = getAdStatusMeta(order.status);
     const createdAt = formatDateTime(order.createdAt);
     const reviewedAt = order.reviewedAt ? formatDateTime(order.reviewedAt) : '';
@@ -4137,14 +4251,19 @@ function renderAdOrders() {
       ? `<span class="ad-date-live"><i class="ri-calendar-check-line"></i> نمایش: ${displayedAt}</span>`
       : `<span class="ad-date-pending"><i class="ri-time-line"></i> در انتظار نمایش</span>`;
 
+    const viewLocationButton = planMeta.url
+      ? `<a class="ad-action-btn link" href="${escapeHtml(planMeta.url)}" target="_blank" rel="noopener"><i class="ri-external-link-line"></i> مشاهده صفحه</a>`
+      : '';
+
     return `
-      <tr>
+      <tr class="ad-order-row" data-order-id="${orderId}">
         <td>
           <div class="ad-cell-primary">${escapeHtml(sellerName)}</div>
           ${sellerMetaParts.length ? `<div class="ad-cell-secondary">${sellerMetaParts.join('')}</div>` : ''}
         </td>
         <td>
           <span class="ad-plan-pill"><i class="ri-megaphone-line"></i>${escapeHtml(planLabel)}</span>
+          ${planLocationBadge}
           ${productBadge}
           <div class="ad-title">${escapeHtml(order.adTitle || order.planTitle || 'بدون عنوان')}</div>
           ${adText}
@@ -4164,6 +4283,7 @@ function renderAdOrders() {
         </td>
         <td>
           <div class="ad-actions">
+            ${viewLocationButton}
             <button class="ad-action-btn ghost" data-action="view" data-id="${orderId}"><i class="ri-eye-line"></i> جزئیات</button>
             ${quickActions}
           </div>
@@ -4178,6 +4298,19 @@ function renderAdOrders() {
 
 function attachAdOrdersRowActions() {
   if (!adOrdersTableBody) return;
+
+  adOrdersTableBody.querySelectorAll('tr.ad-order-row').forEach(row => {
+    row.addEventListener('click', event => {
+      const interactive = event.target.closest('button, a, .ad-actions, [data-action]');
+      if (interactive) {
+        return;
+      }
+      const id = row.dataset.orderId;
+      if (id) {
+        openAdOrderModal(id);
+      }
+    });
+  });
 
   adOrdersTableBody.querySelectorAll('button[data-action="view"]').forEach(btn => {
     btn.addEventListener('click', () => openAdOrderModal(btn.dataset.id));
@@ -4459,7 +4592,15 @@ function renderAdOrderModal(order) {
 
   const seller = typeof order.sellerId === 'object' && order.sellerId !== null ? order.sellerId : {};
   const product = typeof order.productId === 'object' && order.productId !== null ? order.productId : null;
-  const planLabel = getAdPlanLabel(order.planSlug || '', order.planTitle || 'تبلیغ ویژه');
+  const planMeta = getAdPlanMeta(order.planSlug || '', order.planTitle || 'تبلیغ ویژه');
+  const planLabel = planMeta.label;
+  const planIcon = planMeta.icon || 'ri-compass-3-line';
+  const planLocationRow = planMeta.location
+    ? `<span><span class="label">محل نمایش:</span> <i class="${planIcon}"></i> ${escapeHtml(planMeta.location)}${planMeta.url ? ` <a href="${escapeHtml(planMeta.url)}" target="_blank" rel="noopener">(مشاهده)</a>` : ''}</span>`
+    : '';
+  const planVisitLink = planMeta.url
+    ? `<div class="ad-modal-visit"><a href="${escapeHtml(planMeta.url)}" target="_blank" rel="noopener"><i class="ri-external-link-line"></i> مشاهده محل نمایش در سایت</a></div>`
+    : '';
   const statusMeta = getAdStatusMeta(order.status);
   const sellerName = seller.storename || order.shopTitle || 'بدون نام';
   const sellerPhone = seller.phone || order.sellerPhone || '';
@@ -4490,6 +4631,7 @@ function renderAdOrderModal(order) {
         بررسی تبلیغ ویژه
         <span class="badge">${escapeHtml(planLabel)}</span>
       </div>
+      ${planVisitLink}
 
       <div class="ad-modal-grid">
         <div class="ad-modal-section">
@@ -4510,6 +4652,7 @@ function renderAdOrderModal(order) {
             <span><span class="label">آخرین بررسی:</span> ${reviewedAt ? `${reviewedAt}${reviewedBy ? ` توسط ${escapeHtml(reviewedBy)}` : ''}` : 'در انتظار بررسی'}</span>
             ${approvedAt ? `<span><span class="label">تاریخ تایید:</span> ${approvedAt}</span>` : ''}
             ${displayedAt ? `<span><span class="label">تاریخ نمایش:</span> ${displayedAt}</span>` : '<span><span class="label">تاریخ نمایش:</span> در انتظار تعیین</span>'}
+            ${planLocationRow}
           </div>
         </div>
       </div>
