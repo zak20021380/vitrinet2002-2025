@@ -3610,6 +3610,18 @@ function getSenderName (chat = {}, msg = {}) {
 
 /* ───── 2) نسخهٔ نهاییِ تابع renderMessages ───── */
 /* ───── نسخهٔ اصلاح‌شده‌ی تابع renderMessages ───── */
+function showMessagesError(message = 'خطا در دریافت پیام‌ها. لطفاً دوباره تلاش کنید.') {
+  const tbody = document.querySelector('#messagesTable tbody');
+  if (!tbody) return;
+
+  const safe = escapeHtml(message);
+  tbody.innerHTML = `
+    <tr>
+      <td colspan="5" style="text-align:center;color:#ef4444;padding:1.5rem">${safe}</td>
+    </tr>
+  `;
+}
+
 function renderMessages() {
   const tbody = document.querySelector('#messagesTable tbody');
   tbody.innerHTML = '';
@@ -4847,11 +4859,15 @@ console.table(
     // ۵) پس از داشتن _sidها، مپ نام‌ها را بساز
     buildNameMaps();
 
-    // ۶) واکشی پیام‌ها (برای شمارنده و نمایش)
-    await fetchMessages();
-
-    // حتماً جدول پیام‌ها را هم رندر کن
-    renderMessages();
+    // ۶) واکشی پیام‌ها (برای شمارنده و نمایش) — خطا نباید بقیهٔ داشبورد را متوقف کند
+    try {
+      await fetchMessages();
+      renderMessages();
+    } catch (messagesErr) {
+      console.error('❌ fetchMessages failed inside updateAll:', messagesErr);
+      messagesList = [];
+      showMessagesError(messagesErr?.message || 'خطا در دریافت پیام‌ها.');
+    }
 
     // ۷) رندر رابط کاربری
     updateDashboardCards();
@@ -4860,7 +4876,6 @@ console.table(
     renderUsers();
     renderSellers();
     renderProducts();
-
   } catch (err) {
     alert('خطا در دریافت داده‌های پنل ادمین!\n' + (err.message || err));
   }
