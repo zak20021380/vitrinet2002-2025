@@ -2264,7 +2264,7 @@ tr:last-child td {
         <a href="#" data-section="shopping-centers"><i class="ri-building-2-line"></i> مراکز خرید <span class="count" id="count-shopping-centers">0</span></a>
         <a href="#" data-section="plans"><i class="ri-money-dollar-circle-line"></i> مدیریت قیمت پلن‌ها</a>
         <a href="#" data-section="ads"><i class="ri-megaphone-line"></i> مدیریت قیمت تبلیغات</a>
-        <a href="home-section.html"><i class="ri-layout-grid-line"></i> کارت‌های صفحه اصلی</a>
+        <a href="#" data-section="home-section"><i class="ri-layout-grid-line"></i> کارت‌های صفحه اصلی</a>
         <a href="#" data-section="messages">
           <i class="ri-chat-1-line"></i> پیام‌ها
           <span class="count" id="count-messages">0</span>
@@ -2516,7 +2516,14 @@ tr:last-child td {
 
 
 
-<!-- ۸) پیام‌ها -->
+  <!-- ۸) کارت‌های صفحه اصلی -->
+  <div class="section-panel" id="home-section-panel" style="display:none;">
+    <p style="text-align:center;color:#888">در حال بارگیری...</p>
+  </div>
+
+
+
+<!-- ۹) پیام‌ها -->
 <div class="section-panel" id="messages-panel" style="display:none;">
   <div class="content-header">پیام‌ها <span class="header-count" id="header-messages-count"></span></div>
 
@@ -4491,6 +4498,7 @@ const panels = {
   'shopping-centers': document.getElementById('shopping-centers-panel'),
   plans:     document.getElementById('plans-panel'),
   ads:       document.getElementById('ads-panel'),
+  'home-section': document.getElementById('home-section-panel'),
   messages:  document.getElementById('messages-panel'),
   'daily-visits': document.getElementById('daily-visits-panel')
 };
@@ -4532,6 +4540,11 @@ menuLinks.forEach(link => {
     // لود محتوای AJAX برای آمار روزانه بازدید
     if (section === 'daily-visits') {
       loadDailyVisContent();
+    }
+
+    // لود محتوای کارت‌های صفحه اصلی
+    if (section === 'home-section') {
+      loadHomeSectionContent();
     }
 
     // 5) بستن سایدبار در موبایل
@@ -5640,6 +5653,7 @@ panels['plans'] = document.getElementById('plans-panel');
 
 panels['ads'] = document.getElementById('ads-panel');
 panels['messages'] = document.getElementById('messages-panel');
+panels['home-section'] = document.getElementById('home-section-panel');
 
 
 /* المان‌های ورودی */
@@ -6259,35 +6273,49 @@ function startBadgePolling() {
 }
 startBadgePolling();
 
-// لود محتوای آمار روزانه با AJAX
-function loadDailyVisContent() {
-  const panel = document.getElementById('daily-visits-panel');
-  panel.innerHTML = '<p style="text-align:center;color:#888">در حال بارگیری محتوا...</p>';
+function loadExternalPanel(panelId, url, {
+  loadingMessage = 'در حال بارگیری محتوا...',
+  errorMessage = 'خطا در بارگیری محتوا.',
+  scriptKey
+} = {}) {
+  const panel = document.getElementById(panelId);
+  if (!panel) return;
+
+  panel.innerHTML = `<p style="text-align:center;color:#888">${loadingMessage}</p>`;
 
   const xhr = new XMLHttpRequest();
-  xhr.open('GET', 'admin-dailyVis.html', true);  // اگر مسیر فایل متفاوت بود، تغییر بده (مثلاً 'admin/admin-dailyVis.html')
+  xhr.open('GET', url, true);
 
   xhr.onreadystatechange = function() {
-    if (xhr.readyState === 4 && xhr.status === 200) {
-      // Parse محتوای HTML با DOMParser
+    if (xhr.readyState !== 4) return;
+
+    if (xhr.status === 200) {
       const parser = new DOMParser();
       const doc = parser.parseFromString(xhr.responseText, 'text/html');
 
-      // اضافه کردن لینک‌ها، فونت‌ها و استایل‌ها به <head> صفحه اصلی (برای اعمال CSS و Tailwind)
       const headElements = doc.querySelectorAll('head > *');
       headElements.forEach(el => {
         if (el.tagName === 'LINK' || el.tagName === 'STYLE' || el.tagName === 'SCRIPT') {
-          // چک کن اگر قبلاً وجود نداشته باشه، اضافه کن (برای جلوگیری از تکرار)
-          if (!document.querySelector(`[href="${el.href}"], [src="${el.src}"]`)) {
+          const href = el.getAttribute('href');
+          const src = el.getAttribute('src');
+          const selectors = [];
+          if (href) selectors.push(`[href="${href}"]`);
+          if (src) selectors.push(`[src="${src}"]`);
+
+          if (!selectors.length) {
+            document.head.appendChild(el.cloneNode(true));
+          } else if (!document.querySelector(selectors.join(', '))) {
             document.head.appendChild(el.cloneNode(true));
           }
         }
       });
 
-      // قرار دادن محتوای <body> در پنل
       panel.innerHTML = doc.body.innerHTML;
 
-      // اجرای اسکریپت‌های فایل (با ایجاد تگ <script> جدید برای هر کدام)
+      if (scriptKey) {
+        document.querySelectorAll(`script[data-external-section="${scriptKey}"]`).forEach(s => s.remove());
+      }
+
       const scripts = doc.querySelectorAll('script');
       scripts.forEach(oldScript => {
         const newScript = document.createElement('script');
@@ -6296,14 +6324,35 @@ function loadDailyVisContent() {
         } else {
           newScript.textContent = oldScript.textContent;
         }
-        // اضافه کردن به body برای اجرا
+        if (scriptKey) {
+          newScript.dataset.externalSection = scriptKey;
+        }
         document.body.appendChild(newScript);
       });
-    } else if (xhr.readyState === 4) {
-      panel.innerHTML = '<p style="text-align:center;color:#ef4444">خطا در بارگیری محتوا. مسیر فایل رو چک کن یا صفحه رو رفرش کن.</p>';
+    } else {
+      panel.innerHTML = `<p style="text-align:center;color:#ef4444">${errorMessage}</p>`;
     }
   };
+
   xhr.send();
+}
+
+// لود محتوای آمار روزانه با AJAX
+function loadDailyVisContent() {
+  loadExternalPanel('daily-visits-panel', 'admin-dailyVis.html', {
+    loadingMessage: 'در حال بارگیری محتوا...',
+    errorMessage: 'خطا در بارگیری محتوا. مسیر فایل رو چک کن یا صفحه رو رفرش کن.',
+    scriptKey: 'daily-visits'
+  });
+}
+
+// لود محتوای کارت‌های صفحه اصلی با AJAX
+function loadHomeSectionContent() {
+  loadExternalPanel('home-section-panel', 'home-section.html', {
+    loadingMessage: 'در حال بارگیری محتوا...',
+    errorMessage: 'خطا در بارگیری محتوای کارت‌های صفحه اصلی.',
+    scriptKey: 'home-section'
+  });
 }
 
 // لود محتوای گزارش‌ها با AJAX
