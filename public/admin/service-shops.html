@@ -1014,7 +1014,20 @@
   <div id="toast-container" aria-live="polite" aria-atomic="true"></div>
 
   <script>
-    const API_BASE = '/api/service-shops';
+    const ADMIN_API_BASE = (() => {
+      const configured = window.ADMIN_API_BASE && String(window.ADMIN_API_BASE).trim();
+      if (configured) return configured;
+      const hasLocationOrigin = typeof location !== 'undefined'
+        && location
+        && typeof location.origin === 'string'
+        && location.origin !== 'null';
+      if (hasLocationOrigin) {
+        return `${location.origin.replace(/\/$/, '')}/api`;
+      }
+      return 'http://localhost:5000/api';
+    })();
+    window.ADMIN_API_BASE = ADMIN_API_BASE;
+    const API_BASE = `${ADMIN_API_BASE.replace(/\/$/, '')}/service-shops`;
     const numberFormatter = new Intl.NumberFormat('fa-IR');
     const dateFormatter = new Intl.DateTimeFormat('fa-IR', { dateStyle: 'medium', timeStyle: 'short' });
     const STATUS_LABELS = {
