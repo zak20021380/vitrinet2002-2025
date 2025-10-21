@@ -1815,15 +1815,22 @@ const res = await fetch('http://localhost:5000/api/adOrder/active?planSlug=ad_se
     const ad = searchAds[0];
     console.log("🎯 تبلیغ انتخاب شده:", ad);
 
-    const productId = typeof ad.productId === 'object' && ad.productId !== null
-      ? ad.productId._id || ad.productId.id
-      : ad.productId;
-    const sellerId = typeof ad.sellerId === 'object' && ad.sellerId !== null
-      ? ad.sellerId._id || ad.sellerId.id
-      : ad.sellerId;
+    const productInfo = typeof ad.productId === 'object' && ad.productId !== null
+      ? ad.productId
+      : null;
+    const sellerInfo = typeof ad.sellerId === 'object' && ad.sellerId !== null
+      ? ad.sellerId
+      : null;
+
+    const productId = productInfo ? productInfo._id || productInfo.id : ad.productId;
+    const sellerId = sellerInfo ? sellerInfo._id || sellerInfo.id : ad.sellerId;
+    const sellerShopurl = sellerInfo && typeof sellerInfo.shopurl === 'string'
+      ? sellerInfo.shopurl
+      : undefined;
 
     let targetUrl = '#';
     if (productId) targetUrl = `product.html?id=${productId}`;
+    else if (sellerShopurl) targetUrl = `shop.html?shopurl=${encodeURIComponent(sellerShopurl)}`;
     else if (sellerId) targetUrl = `shop.html?id=${sellerId}`;
 
     const safeAdTitle = escapeHTML(ad.adTitle || 'تبلیغ ویژه فروشگاه');

@@ -12,6 +12,11 @@ const POPULATE_SPEC = [
   { path: 'reviewedBy', select: 'name phone' }
 ];
 
+const PUBLIC_POPULATE_SPEC = [
+  { path: 'sellerId', select: 'storename shopurl boardImage' },
+  { path: 'productId', select: 'title price slug' }
+];
+
 function normaliseNote(note) {
   if (note === undefined) return undefined;
   if (note === null) return undefined;
@@ -359,7 +364,8 @@ exports.getActiveAds = async (req, res) => {
     // فقط جدیدترین تبلیغ رو بفرست (می‌تونی چندتا هم بدی، ولی معمولاً یکی کافیه)
     const ads = await AdOrder.find(query)
       .sort({ approvedAt: -1, createdAt: -1 })
-      .limit(1);
+      .limit(1)
+      .populate(PUBLIC_POPULATE_SPEC);
 
     res.json({ success: true, ads });
   } catch (err) {
