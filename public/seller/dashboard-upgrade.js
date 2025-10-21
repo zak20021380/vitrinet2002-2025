@@ -678,6 +678,37 @@ async function fetchMyPlans() {
     return `<span class="my-plan-status" style="background:${color}">${label}</span>`;
   }
 
+  function getAdLocationHint(plan) {
+    const slug = plan.slug || plan.planSlug || '';
+    const map = {
+      ad_home: 'محل نمایش: صفحه اصلی ویترینت',
+      ad_search: 'محل نمایش: پنجره جستجوی سریع',
+      ad_products: 'محل نمایش: صفحه لیست محصولات'
+    };
+    if (map[slug]) return map[slug];
+    if (plan.productId) return 'محل نمایش: صفحه محصول تبلیغ‌شده';
+    if (plan.sellerId) return 'محل نمایش: صفحه فروشگاه شما';
+    return '';
+  }
+
+  function resolveAdViewLink(plan) {
+    const slug = plan.slug || plan.planSlug || '';
+    const directRoutes = {
+      ad_home: '/index.html?highlightAd=ad_home#drag-scroll-cards',
+      ad_search: '/index.html?highlightAd=ad_search#adPopup',
+      ad_products: '/all-products.html?highlightAd=ad_products#productsList'
+    };
+    if (directRoutes[slug]) return directRoutes[slug];
+
+    const productId = plan.productId ? String(plan.productId).trim() : '';
+    if (productId) return `/product.html?id=${encodeURIComponent(productId)}`;
+
+    const sellerId = plan.sellerId ? String(plan.sellerId).trim() : '';
+    if (sellerId) return `/shop.html?id=${encodeURIComponent(sellerId)}`;
+
+    return '';
+  }
+
   try {
     const res = await fetch(`${API_BASE}/sellerPlans/my`, { credentials: 'include' });
     const json = await res.json();
@@ -752,35 +783,65 @@ async function fetchMyPlans() {
           }
           const status = statusBadge(plan);
           const adType = getAdTypeLabel(plan);
+          const locationHint = getAdLocationHint(plan);
+          const viewLink = plan.status === 'approved' ? resolveAdViewLink(plan) : '';
+          const productLink = plan.productId
+            ? `/product.html?id=${encodeURIComponent(String(plan.productId))}`
+            : '';
+          const shopLink = !productLink && plan.sellerId
+            ? `/shop.html?id=${encodeURIComponent(String(plan.sellerId))}`
+            : '';
 
-          const cardContent = `
-            ${status}
-            <div class="flex items-center gap-2 mb-2">
-              <span class="inline-block px-2 py-0.5 rounded bg-orange-100 text-orange-600 text-xs font-bold">${adType}</span>
-            </div>
-            ${img}
-            <div class="font-bold text-orange-700 text-base mb-1">${plan.title || '-'}</div>
-            <div class="text-base text-orange-800 font-extrabold mb-2">${toFaPrice(plan.price)} <span class="text-xs font-normal">تومان</span></div>
-            <div class="flex flex-col items-center gap-1 text-gray-500 text-xs sm:text-sm mb-2">
-              <div>شروع: <span dir="ltr">${toJalaliDate(plan.startDate) || '-'}</span></div>
-              <div>پایان: <span dir="ltr">${getAdEndDate(plan)}</span></div>
-            </div>
-            ${plan.description ? `<div class="text-xs text-gray-400 mt-1">${plan.description}</div>` : ''}
-          `;
-          if (plan.productId) {
-            return `
-              <a href="/product/${plan.productId}" target="_blank" class="block plan-card border border-orange-200 rounded-xl bg-white p-4 sm:p-5 shadow-sm mb-4 hover:shadow-lg hover:border-orange-400 transition-all relative" title="مشاهده محصول">
-                ${cardContent}
-                <span class="absolute left-3 bottom-3 text-xs text-orange-500 underline">رفتن به محصول</span>
-              </a>
-            `;
-          } else {
-            return `
-              <div class="plan-card border border-orange-200 rounded-xl bg-white p-4 sm:p-5 shadow-sm mb-4 hover:shadow-lg hover:border-orange-400 transition-all relative">
-                ${cardContent}
+          const actions = [
+            viewLink
+              ? `<a href="${viewLink}" target="_blank" rel="noopener" class="inline-flex items-center justify-center gap-1 px-3 py-2 rounded-lg text-xs sm:text-sm font-bold text-white bg-orange-500 hover:bg-orange-600 shadow-sm transition">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 5h11m0 0v11m0-11L5 21" />
+                  </svg>
+                  مشاهده تبلیغ
+                </a>`
+              : '',
+            productLink
+              ? `<a href="${productLink}" target="_blank" rel="noopener" class="inline-flex items-center justify-center gap-1 px-3 py-2 rounded-lg text-xs sm:text-sm font-bold text-orange-600 bg-orange-50 hover:bg-orange-100 border border-orange-200 transition">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 5l7 7-7 7M5 12h14" />
+                  </svg>
+                  صفحه محصول
+                </a>`
+              : '',
+            shopLink
+              ? `<a href="${shopLink}" target="_blank" rel="noopener" class="inline-flex items-center justify-center gap-1 px-3 py-2 rounded-lg text-xs sm:text-sm font-bold text-emerald-600 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 transition">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M3 7l9-4 9 4-9 4-9-4zm0 6l9 4 9-4" />
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M3 13l9 4 9-4" />
+                  </svg>
+                  صفحه فروشگاه
+                </a>`
+              : ''
+          ].filter(Boolean);
+
+          const actionsMarkup = actions.length
+            ? `<div class="flex flex-col sm:flex-row sm:flex-wrap gap-2 mt-3">${actions.join('')}</div>`
+            : '';
+
+          return `
+            <div class="plan-card border border-orange-200 rounded-xl bg-white p-4 sm:p-5 shadow-sm mb-4 hover:shadow-lg hover:border-orange-400 transition-all relative">
+              ${status}
+              <div class="flex items-center gap-2 mb-2">
+                <span class="inline-block px-2 py-0.5 rounded bg-orange-100 text-orange-600 text-xs font-bold">${adType}</span>
               </div>
-            `;
-          }
+              ${img}
+              <div class="font-bold text-orange-700 text-base mb-1">${plan.title || '-'}</div>
+              <div class="text-base text-orange-800 font-extrabold mb-2">${toFaPrice(plan.price)} <span class="text-xs font-normal">تومان</span></div>
+              <div class="flex flex-col items-center gap-1 text-gray-500 text-xs sm:text-sm mb-2">
+                <div>شروع: <span dir="ltr">${toJalaliDate(plan.startDate) || '-'}</span></div>
+                <div>پایان: <span dir="ltr">${getAdEndDate(plan)}</span></div>
+              </div>
+              ${plan.description ? `<div class="text-xs text-gray-400 mt-1 text-center">${plan.description}</div>` : ''}
+              ${locationHint ? `<div class="text-[11px] text-gray-400 mt-2 text-center">${locationHint}</div>` : ''}
+              ${actionsMarkup}
+            </div>
+          `;
         }).join('')
       : `<div class="text-xs text-gray-400 py-5 text-center">هنوز پلن تبلیغی نخریدی!</div>`;
 

@@ -39,7 +39,8 @@ router.get('/my', auth('seller'), async (req, res) => {
       type: 'ad',
       slug: ad.planSlug || ad.slug || '',     // *** این خط اضافه شد ***
       bannerImage: ad.bannerImage || ad.image || '', // اگه داری برای عکس
-      productId: ad.productId || '',          // اگر تبلیغ محصوله
+      productId: ad.productId ? String(ad.productId) : '',          // اگر تبلیغ محصوله
+      sellerId: ad.sellerId ? String(ad.sellerId) : '',             // برای لینک به فروشگاه
       status: ad.status || ''                 // وضعیت تبلیغ
     }));
 
