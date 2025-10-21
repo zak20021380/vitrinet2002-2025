@@ -60,6 +60,7 @@ app.use('/api/service-portfolio', require('./routes/sellerPortfolioRoutes'));
 app.use('/api/portfolios', require('./routes/sellerPortfolioRoutes'));
 app.use('/api/portfolio', require('./routes/sellerPortfolioRoutes'));
 app.use('/api/seller-portfolio', require('./routes/sellerPortfolioRoutes'));
+app.use('/api/service-shops', require('./routes/serviceShops'));
 app.use('/api/adOrder', require('./routes/adOrder'));
 app.use('/api/sellerPlans', require('./routes/sellerPlans'));
 app.use('/api/shopping-centers', require('./routes/shoppingCenter'));

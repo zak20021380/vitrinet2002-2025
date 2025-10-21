@@ -7,6 +7,7 @@ const User       = require('../models/user');
 const Seller     = require('../models/Seller');
 const Product    = require('../models/product');
 const DailyVisit = require('../models/DailyVisit');
+const ServiceShop = require('../models/serviceShop');
 
 // کلید سری JWT از .env خوانده می‌شود وگرنه مقدار پیش‌فرض
 const JWT_SECRET = "vitrinet_secret_key";
@@ -173,17 +174,27 @@ exports.getDashboardStats = async (req, res) => {
       totalUsers,
       totalSellers,
       totalProducts,
+      totalServiceShops,
+      activeServiceShops,
+      pendingServiceShops,
+      premiumServiceShops,
       visitsAggregation,
       usersAggregation,
       sellersAggregation,
       productsAggregation,
+      serviceShopsAggregation,
       newUsersToday,
       newSellersToday,
-      newProductsToday
+      newProductsToday,
+      newServiceShopsToday
     ] = await Promise.all([
       User.countDocuments(baseUserFilter),
       Seller.countDocuments(),
       Product.countDocuments(),
+      ServiceShop.countDocuments(),
+      ServiceShop.countDocuments({ status: 'approved', isVisible: true }),
+      ServiceShop.countDocuments({ status: 'pending' }),
+      ServiceShop.countDocuments({ isPremium: true, premiumUntil: { $gt: now } }),
       DailyVisit.aggregate([
         { $match: { date: { $gte: dailyVisitRangeStart, $lte: dailyVisitRangeEnd } } },
         {
@@ -245,15 +256,33 @@ exports.getDashboardStats = async (req, res) => {
         },
         { $sort: { _id: 1 } }
       ]),
+      ServiceShop.aggregate([
+        {
+          $match: {
+            createdAt: { $gte: rangeStart, $lt: startOfTomorrow }
+          }
+        },
+        {
+          $group: {
+            _id: {
+              $dateToString: { format: '%Y-%m-%d', date: '$createdAt', timezone: timeZone }
+            },
+            count: { $sum: 1 }
+          }
+        },
+        { $sort: { _id: 1 } }
+      ]),
       User.countDocuments({ ...baseUserFilter, createdAt: { $gte: startOfToday, $lt: startOfTomorrow } }),
       Seller.countDocuments({ createdAt: { $gte: startOfToday, $lt: startOfTomorrow } }),
-      Product.countDocuments({ createdAt: { $gte: startOfToday, $lt: startOfTomorrow } })
+      Product.countDocuments({ createdAt: { $gte: startOfToday, $lt: startOfTomorrow } }),
+      ServiceShop.countDocuments({ createdAt: { $gte: startOfToday, $lt: startOfTomorrow } })
     ]);
 
     const visitsMap = new Map(visitsAggregation.map((item) => [item._id, item.count]));
     const usersMap = new Map(usersAggregation.map((item) => [item._id, item.count]));
     const sellersMap = new Map(sellersAggregation.map((item) => [item._id, item.count]));
     const productsMap = new Map(productsAggregation.map((item) => [item._id, item.count]));
+    const serviceShopsMap = new Map(serviceShopsAggregation.map((item) => [item._id, item.count]));
 
     const trends = [];
     const cursor = new Date(rangeStart);
@@ -265,7 +294,8 @@ exports.getDashboardStats = async (req, res) => {
         visits: visitsMap.get(key) || 0,
         newUsers: usersMap.get(key) || 0,
         newSellers: sellersMap.get(key) || 0,
-        newProducts: productsMap.get(key) || 0
+        newProducts: productsMap.get(key) || 0,
+        newServiceShops: serviceShopsMap.get(key) || 0
       });
       cursor.setUTCDate(cursor.getUTCDate() + 1);
     }
@@ -278,9 +308,14 @@ exports.getDashboardStats = async (req, res) => {
         newUsersToday,
         newSellersToday,
         newProductsToday,
+        newServiceShopsToday,
         totalUsers,
         totalSellers,
-        totalProducts
+        totalProducts,
+        totalServiceShops,
+        activeServiceShops,
+        pendingServiceShops,
+        premiumServiceShops
       },
       trends,
       range: {
