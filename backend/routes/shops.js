@@ -12,16 +12,28 @@ router.get('/', async (req, res) => {
       'storename category shopurl address desc isPremium boardImage'
     ).lean();
 
-    const result = sellers.map(seller => ({
-      id: seller._id,
-      storename: seller.storename || '',
-      category: seller.category || '',
-      shopurl: seller.shopurl || '',
-      address: seller.address || '',
-      desc: seller.desc || '',
-      isPremium: !!seller.isPremium,
-      image: seller.boardImage || ''
-    }));
+    const result = sellers.map(seller => {
+      const ownerFirstname = seller.firstname || '';
+      const ownerLastname  = seller.lastname  || '';
+      const ownerName = (ownerFirstname || ownerLastname)
+        ? `${ownerFirstname} ${ownerLastname}`.trim()
+        : '';
+
+      return {
+        id: seller._id,
+        storename: seller.storename || '',
+        category: seller.category || '',
+        shopurl: seller.shopurl || '',
+        address: seller.address || '',
+        desc: seller.desc || '',
+        isPremium: !!seller.isPremium,
+        image: seller.boardImage || '',
+        ownerName,
+        ownerFirstname,
+        ownerLastname,
+        ownerPhone: seller.phone || ''
+      };
+    });
 
     res.json(result);
   } catch (err) {

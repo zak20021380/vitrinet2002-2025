@@ -4281,16 +4281,24 @@ function findShopForProduct(prod) {
   if (!prod) return null;
 
   /* 1) بر اساس shopurl */
-  if (prod.shopurl) {
-    return shopsList.find(s => String(s.shopurl) === String(prod.shopurl));
+  const prodShopUrl = prod.shopurl || prod.shopUrl || (prod.seller && prod.seller.shopurl) || (prod.seller && prod.seller.customUrl);
+  if (prodShopUrl) {
+    return shopsList.find(s => String(s.shopurl || s.customUrl) === String(prodShopUrl));
   }
 
   /* 2) بر اساس شناسهٔ فروشنده */
   const sid = toIdString(prod.sellerId || prod.seller_id);
   if (sid) {
-    return shopsList.find(s =>
-      toIdString(s.sellerId || s.seller_id || s._sid) === sid
-    );
+    return shopsList.find(s => {
+      const shopSid = toIdString(
+        s.sellerId ||
+        s.seller_id ||
+        s._sid ||
+        s.id ||
+        s._id
+      );
+      return shopSid && shopSid === sid;
+    });
   }
   return null;
 }
@@ -4335,13 +4343,47 @@ function renderProducts() {
 
   // ۴) رندر لیست فیلترشده/مرتب‌شده
   list.forEach((prod, i) => {
-    let shop = prod.seller || findShopForProduct(prod);
+    const seller = (prod.seller && typeof prod.seller === 'object') ? prod.seller : null;
+    const shopFromList = findShopForProduct(prod);
+
     const productName = prod.title || prod.name || '-';
-    const storeName = shop ? (shop.storename || shop.shopLogoText || '-') : '-';
-    const ownerName = shop ? (shop.ownerName || `${shop.ownerFirstname || ''} ${shop.ownerLastname || ''}`.trim() || '-') : '-';
-    const storeAddr = shop ? (shop.address || shop.shopAddress || '-') : '-';
-    const shopUrl = (shop ? shop.shopurl : (prod.shopurl || prod.shopUrl || '')) || '';
-    const linkHTML = shopUrl ? `<a href="/shop.html?shopurl=${encodeURIComponent(shopUrl)}" target="_blank" style="color:#0ea5e9;text-decoration:underline">${shopUrl}</a>` : '-';
+
+    const ownerFromShop = shopFromList
+      ? (shopFromList.ownerName || `${shopFromList.ownerFirstname || shopFromList.firstname || ''} ${shopFromList.ownerLastname || shopFromList.lastname || ''}`.trim())
+      : '';
+    const ownerFromSeller = seller
+      ? (seller.ownerName || `${seller.ownerFirstname || seller.firstname || ''} ${seller.ownerLastname || seller.lastname || ''}`.trim())
+      : '';
+
+    const storeName =
+      (prod.shopName && prod.shopName.trim()) ||
+      (shopFromList && (shopFromList.storename || shopFromList.shopLogoText || shopFromList.shopName)) ||
+      (seller && (seller.storename || seller.shopLogoText || seller.shopName)) ||
+      '-';
+
+    const ownerName =
+      (prod.ownerName && prod.ownerName.trim()) ||
+      ownerFromShop ||
+      ownerFromSeller ||
+      '-';
+
+    const storeAddr =
+      (prod.shopAddress && prod.shopAddress.trim()) ||
+      (prod.address && prod.address.trim()) ||
+      (shopFromList && (shopFromList.address || shopFromList.shopAddress)) ||
+      (seller && (seller.address || seller.shopAddress)) ||
+      '-';
+
+    const rawShopUrl =
+      (prod.shopurl && prod.shopurl.trim()) ||
+      (prod.shopUrl && prod.shopUrl.trim()) ||
+      (shopFromList && (shopFromList.shopurl || shopFromList.customUrl)) ||
+      (seller && (seller.shopurl || seller.customUrl)) ||
+      '';
+
+    const linkHTML = rawShopUrl
+      ? `<a href="/shop.html?shopurl=${encodeURIComponent(rawShopUrl)}" target="_blank" style="color:#0ea5e9;text-decoration:underline">${rawShopUrl}</a>`
+      : '-';
 
     const tr = document.createElement('tr');
     tr.innerHTML = `
