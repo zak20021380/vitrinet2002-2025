@@ -3814,6 +3814,33 @@ const AD_STATUS_META = {
   expired:  { label: 'منقضی شده',       icon: 'ri-time-line', className: 'expired' }
 };
 
+function normaliseSlug(value) {
+  return String(value || '')
+    .trim()
+    .toLowerCase()
+    .replace(/\s+/g, '_')
+    .replace(/-+/g, '_');
+}
+
+function getAdPlanLabel(slug, fallback = 'تبلیغ ویژه') {
+  const normalisedSlug = normaliseSlug(slug);
+  if (normalisedSlug && AD_PLAN_LABELS[normalisedSlug]) {
+    return AD_PLAN_LABELS[normalisedSlug];
+  }
+  if (fallback) {
+    return String(fallback);
+  }
+  return 'تبلیغ';
+}
+
+function getAdStatusMeta(status) {
+  const key = normaliseSlug(status);
+  if (key && AD_STATUS_META[key]) {
+    return AD_STATUS_META[key];
+  }
+  return { label: 'نامشخص', icon: 'ri-question-line', className: 'unknown' };
+}
+
 const adOrdersTableBody = document.querySelector('#adOrdersTable tbody');
 const adOrdersStatusEl = document.getElementById('adOrdersStatus');
 const adOrdersPlanFilterEl = document.getElementById('adOrdersPlanFilter');
