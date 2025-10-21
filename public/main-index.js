@@ -1970,3 +1970,18 @@ document.addEventListener('DOMContentLoaded', function() {
   moveLinks();
   window.addEventListener('resize', moveLinks);
 });
+
+document.addEventListener('DOMContentLoaded', () => {
+  try {
+    const params = new URLSearchParams(window.location.search);
+    const hash = window.location.hash ? window.location.hash.replace('#', '') : '';
+    const highlight = params.get('highlightAd') || (hash && hash.startsWith('ad_') ? hash : '');
+    if (highlight === 'ad_search' && typeof window.showAdBannerPopup === 'function') {
+      setTimeout(() => {
+        window.showAdBannerPopup();
+      }, 600);
+    }
+  } catch (err) {
+    console.warn('highlightAd parse error', err);
+  }
+});
