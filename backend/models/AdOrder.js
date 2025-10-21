@@ -12,9 +12,13 @@ const adOrderSchema = new mongoose.Schema({
   adText: { type: String },                             // متن تبلیغ (از فرم)
   status: {
     type: String,
-    enum: ['pending', 'paid', 'rejected', 'expired'],
+    enum: ['pending', 'approved', 'paid', 'rejected', 'expired'],
     default: 'pending'
   },                                                    // وضعیت سفارش تبلیغ
+  adminNote: { type: String, trim: true },              // یادداشت داخلی ادمین
+  reviewedAt: { type: Date },                           // تاریخ آخرین بررسی ادمین
+  reviewedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'Admin' }, // شناسه ادمین بررسی کننده
+  approvedAt: { type: Date },                           // تاریخ تایید نهایی
   createdAt: { type: Date, default: Date.now }
 });
 

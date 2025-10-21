@@ -635,6 +635,10 @@ async function fetchMyPlans() {
         bg = "bg-green-500";
         txt = "فعال";
         break;
+      case "approved":
+        bg = "bg-emerald-500";
+        txt = "تایید شده";
+        break;
       case "expired":
         bg = "bg-red-400";
         txt = "منقضی";
@@ -666,6 +670,7 @@ async function fetchMyPlans() {
     let color = '#3B82F6', label = 'فعال';
     switch (status) {
       case 'expired': color = '#EF4444'; label = 'منقضی'; break;
+      case 'approved': color = '#10B981'; label = 'تایید شده'; break;
       case 'pending': color = '#F59E0B'; label = 'در انتظار'; break;
       case 'active':
       default: color = '#3B82F6'; label = 'فعال';

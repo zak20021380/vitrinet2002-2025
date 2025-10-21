@@ -670,8 +670,9 @@ async function fetchAdHome() {
   try {
     const res = await fetch('http://localhost:5000/api/adOrder/active?planSlug=ad_home');
     const data = await res.json();
-    if (data.success && data.ads && data.ads.length > 0) {
-      adHomeData = data.ads[0];
+    if (data.success && Array.isArray(data.ads)) {
+      const approved = data.ads.filter(ad => ad && ad.status === 'approved');
+      adHomeData = approved.length ? approved[0] : null;
     } else {
       adHomeData = null;
     }
@@ -695,10 +696,25 @@ async function loadShops() {
     updateSliderNavVisibility('drag-scroll-cards');
 
     // اگر تبلیغ ویژه داریم، اول کارت تبلیغ رو اضافه کن
-    if (adHomeData) {
+    if (adHomeData && adHomeData.status === 'approved') {
       const ad = adHomeData;
       const card = document.createElement('a');
-      card.href = ad.sellerId ? `shop.html?id=${ad.sellerId}` : '#';
+
+      const productId = typeof ad.productId === 'object' && ad.productId !== null
+        ? ad.productId._id || ad.productId.id
+        : ad.productId;
+      const sellerId = typeof ad.sellerId === 'object' && ad.sellerId !== null
+        ? ad.sellerId._id || ad.sellerId.id
+        : ad.sellerId;
+
+      let targetUrl = '#';
+      if (productId) {
+        targetUrl = `product.html?id=${productId}`;
+      } else if (sellerId) {
+        targetUrl = `shop.html?id=${sellerId}`;
+      }
+
+      card.href = targetUrl;
       card.className = `
         group glass min-w-[265px] max-w-xs flex-shrink-0 flex flex-col items-center
         p-4 rounded-2xl shadow-xl border bg-white/90 backdrop-blur-[3px] transition-all duration-200 special-ad-card
@@ -1784,9 +1800,9 @@ const res = await fetch('http://localhost:5000/api/adOrder/active?planSlug=ad_se
     const data = await res.json();
     console.log("📦 داده دریافتی از API:", data);
 
-    // فقط تبلیغات مربوط به سرچ باکس
+    // فقط تبلیغات مربوط به سرچ باکس و تایید شده
     const searchAds = data.ads && Array.isArray(data.ads)
-      ? data.ads.filter(ad => ad.planSlug === 'ad_search')
+      ? data.ads.filter(ad => ad.planSlug === 'ad_search' && ad.status === 'approved')
       : [];
 
     if (!data.success || !searchAds.length) {
@@ -1799,9 +1815,16 @@ const res = await fetch('http://localhost:5000/api/adOrder/active?planSlug=ad_se
     const ad = searchAds[0];
     console.log("🎯 تبلیغ انتخاب شده:", ad);
 
+    const productId = typeof ad.productId === 'object' && ad.productId !== null
+      ? ad.productId._id || ad.productId.id
+      : ad.productId;
+    const sellerId = typeof ad.sellerId === 'object' && ad.sellerId !== null
+      ? ad.sellerId._id || ad.sellerId.id
+      : ad.sellerId;
+
     let targetUrl = '#';
-    if (ad.productId) targetUrl = `product.html?id=${ad.productId}`;
-    else if (ad.sellerId) targetUrl = `shop.html?id=${ad.sellerId}`;
+    if (productId) targetUrl = `product.html?id=${productId}`;
+    else if (sellerId) targetUrl = `shop.html?id=${sellerId}`;
 
     adSlot.innerHTML = `
       <a href="${targetUrl}" style="display:block;padding:18px;text-align:right;text-decoration:none;">

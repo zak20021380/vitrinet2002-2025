@@ -4,6 +4,26 @@ const Seller = require('../models/Seller');
 const AdPlan = require('../models/adPlan');
 const fs = require('fs');
 const path = require('path');
+
+const ALLOWED_STATUSES = ['pending', 'approved', 'paid', 'rejected', 'expired'];
+const POPULATE_SPEC = [
+  { path: 'sellerId', select: 'storename shopurl phone city address ownerName ownerLastname' },
+  { path: 'productId', select: 'title price slug' },
+  { path: 'reviewedBy', select: 'name phone' }
+];
+
+function normaliseNote(note) {
+  if (note === undefined) return undefined;
+  if (note === null) return undefined;
+  const trimmed = String(note).trim();
+  return trimmed.length ? trimmed : undefined;
+}
+
+async function populateAdOrder(doc) {
+  if (!doc) return doc;
+  await doc.populate(POPULATE_SPEC);
+  return doc;
+}
 // ثبت سفارش تبلیغ ویژه
 exports.createAdOrder = async (req, res) => {
   try {
@@ -99,15 +119,46 @@ exports.getSellerAdOrders = async (req, res) => {
   }
 };
 
+// دریافت همه سفارش‌های تبلیغ برای مدیریت ادمین
+exports.getAllAdOrders = async (req, res) => {
+  try {
+    const { status, planSlug, sellerId } = req.query;
+
+    const filter = {};
+    if (status && ALLOWED_STATUSES.includes(status)) {
+      filter.status = status;
+    }
+    if (planSlug) {
+      filter.planSlug = planSlug;
+    }
+    if (sellerId) {
+      filter.sellerId = sellerId;
+    }
+
+    const adOrders = await AdOrder.find(filter)
+      .sort({ createdAt: -1 })
+      .populate(POPULATE_SPEC);
+
+    res.json({ success: true, adOrders });
+  } catch (err) {
+    console.error('❌ خطا در دریافت سفارش‌های تبلیغ برای ادمین:', err);
+    res.status(500).json({
+      success: false,
+      message: 'خطا در دریافت سفارش‌های تبلیغ.',
+      error: err.message
+    });
+  }
+};
+
 // گرفتن سفارش تبلیغ با آیدی (برای ادمین یا مشاهده جزئیات)
 exports.getAdOrderById = async (req, res) => {
   try {
     const { id } = req.params;
-    const adOrder = await AdOrder.findById(id)
-      .populate('sellerId', 'storename shopurl phone')    // فقط اطلاعات مهم فروشنده
-      .populate('productId', 'title price');              // فقط اطلاعات مهم محصول
+    const adOrder = await AdOrder.findById(id);
 
     if (!adOrder) return res.status(404).json({ success: false, message: 'سفارش تبلیغ پیدا نشد.' });
+
+    await populateAdOrder(adOrder);
     res.json({ success: true, adOrder });
   } catch (err) {
     res.status(500).json({ success: false, message: 'خطا در دریافت سفارش تبلیغ', error: err.message });
@@ -116,23 +167,72 @@ exports.getAdOrderById = async (req, res) => {
 
 // (در صورت نیاز: ویرایش یا حذف سفارش تبلیغ...)
 
+// بروزرسانی وضعیت سفارش تبلیغ توسط ادمین
+exports.updateAdOrderStatus = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { status, adminNote } = req.body || {};
+
+    if (!status || !ALLOWED_STATUSES.includes(status)) {
+      return res.status(400).json({
+        success: false,
+        message: 'وضعیت ارسالی معتبر نیست.'
+      });
+    }
+
+    const adOrder = await AdOrder.findById(id);
+    if (!adOrder) {
+      return res.status(404).json({ success: false, message: 'سفارش تبلیغ پیدا نشد.' });
+    }
+
+    adOrder.status = status;
+
+    if (Object.prototype.hasOwnProperty.call(req.body || {}, 'adminNote')) {
+      adOrder.adminNote = normaliseNote(adminNote);
+    }
+
+    adOrder.reviewedAt = new Date();
+    if (req.user?.id || req.user?._id) {
+      adOrder.reviewedBy = req.user.id || req.user._id;
+    }
+
+    if (status === 'approved') {
+      adOrder.approvedAt = new Date();
+    } else if (status !== 'approved') {
+      adOrder.approvedAt = undefined;
+    }
+
+    await adOrder.save();
+    await populateAdOrder(adOrder);
+
+    res.json({
+      success: true,
+      message: 'وضعیت تبلیغ بروزرسانی شد.',
+      adOrder
+    });
+  } catch (err) {
+    console.error('❌ خطا در بروزرسانی وضعیت تبلیغ:', err);
+    res.status(500).json({
+      success: false,
+      message: 'خطا در بروزرسانی وضعیت تبلیغ.',
+      error: err.message
+    });
+  }
+};
+
 // گرفتن تبلیغ‌های فعال (مثلاً برای صفحه اصلی یا جستجو)
 exports.getActiveAds = async (req, res) => {
   try {
     // planSlug رو از query بگیر (مثلاً ad_home یا ad_search)
     const { planSlug } = req.query;
 
-    // وضعیت تبلیغ رو هم می‌تونی فیلتر کنی (مثلاً فقط تایید شده/فعال)
-    // فرض می‌کنیم status باید 'pending' باشه یا اگه ادمین داری 'accepted'
-    const status = 'pending'; // یا accepted اگه مرحله تایید ادمین داری
-
     // فیلتر داینامیک: اگر planSlug نبود همه تبلیغ‌های فعال رو بده
-    const query = { status };
+    const query = { status: 'approved' };
     if (planSlug) query.planSlug = planSlug;
 
     // فقط جدیدترین تبلیغ رو بفرست (می‌تونی چندتا هم بدی، ولی معمولاً یکی کافیه)
     const ads = await AdOrder.find(query)
-      .sort({ createdAt: -1 })
+      .sort({ approvedAt: -1, createdAt: -1 })
       .limit(1);
 
     res.json({ success: true, ads });
