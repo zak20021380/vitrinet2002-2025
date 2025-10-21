@@ -19,6 +19,7 @@ const adOrderSchema = new mongoose.Schema({
   reviewedAt: { type: Date },                           // تاریخ آخرین بررسی ادمین
   reviewedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'Admin' }, // شناسه ادمین بررسی کننده
   approvedAt: { type: Date },                           // تاریخ تایید نهایی
+  displayedAt: { type: Date },                          // تاریخ نمایش در سایت
   createdAt: { type: Date, default: Date.now }
 });
 

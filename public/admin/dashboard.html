@@ -625,6 +625,28 @@ tr:last-child td {
   gap: 0.2rem;
 }
 
+.ad-orders-table .ad-date span {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.ad-orders-table .ad-date span i {
+  color: #0ea5e9;
+}
+
+.ad-orders-table .ad-date .ad-date-live i {
+  color: #10b981;
+}
+
+.ad-orders-table .ad-date .ad-date-pending {
+  color: #94a3b8;
+}
+
+.ad-orders-table .ad-date .ad-date-pending i {
+  color: #f59e0b;
+}
+
 .ad-orders-table .ad-status-cell {
   display: flex;
   flex-direction: column;
@@ -947,6 +969,87 @@ tr:last-child td {
   font-size: 0.95rem;
   color: #475569;
   line-height: 1.9;
+}
+
+.ad-modal-edit {
+  margin-top: 1.2rem;
+  background: #f8fafc;
+  border: 1px solid rgba(14, 165, 233, 0.18);
+  border-radius: 16px;
+  padding: 1rem 1.2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+}
+
+.ad-modal-edit h4 {
+  margin: 0;
+  font-size: 0.95rem;
+  color: #0369a1;
+  font-weight: 800;
+}
+
+.ad-edit-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 0.8rem 1rem;
+  align-items: flex-start;
+}
+
+.ad-edit-grid label {
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.ad-edit-grid input,
+.ad-edit-grid textarea {
+  width: 100%;
+  border: 1.5px solid rgba(14, 165, 233, 0.25);
+  border-radius: 12px;
+  padding: 0.55rem 0.75rem;
+  font-family: inherit;
+  font-size: 0.95rem;
+  transition: border 0.2s ease, box-shadow 0.2s ease;
+}
+
+.ad-edit-grid textarea {
+  min-height: 90px;
+  resize: vertical;
+}
+
+.ad-edit-grid input:focus,
+.ad-edit-grid textarea:focus {
+  outline: none;
+  border-color: #10b981;
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.15);
+}
+
+.ad-edit-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+}
+
+.ad-edit-actions .ad-action-btn {
+  flex: 0 1 auto;
+}
+
+.ad-modal-edit-status {
+  margin: 0;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.ad-modal-edit-status.info {
+  color: #0284c7;
+}
+
+.ad-modal-edit-status.success {
+  color: #047857;
+}
+
+.ad-modal-edit-status.error {
+  color: #dc2626;
 }
 
 .ad-modal-note {
@@ -3216,10 +3319,10 @@ tr:last-child td {
 
     <div class="ad-orders-toolbar">
       <div class="filters">
-        <button class="ad-filter-btn active" data-filter="pending"><i class="ri-timer-line"></i> در انتظار</button>
+        <button class="ad-filter-btn active" data-filter="all"><i class="ri-list-unordered"></i> همه</button>
+        <button class="ad-filter-btn" data-filter="pending"><i class="ri-timer-line"></i> در انتظار</button>
         <button class="ad-filter-btn" data-filter="approved"><i class="ri-checkbox-circle-line"></i> تایید شده</button>
         <button class="ad-filter-btn" data-filter="rejected"><i class="ri-close-circle-line"></i> رد شده</button>
-        <button class="ad-filter-btn" data-filter="all"><i class="ri-list-unordered"></i> همه</button>
       </div>
       <div class="ad-orders-controls">
         <select id="adOrdersPlanFilter">
@@ -3750,6 +3853,21 @@ function formatDateTime(value) {
   }
 }
 
+function toDatetimeLocalValue(value) {
+  if (!value) return '';
+  try {
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) {
+      return '';
+    }
+    const offset = date.getTimezoneOffset();
+    const local = new Date(date.getTime() - offset * 60000);
+    return local.toISOString().slice(0, 16);
+  } catch (err) {
+    return '';
+  }
+}
+
 
 
 
@@ -3791,7 +3909,7 @@ let productSearchQuery = '';      // کوئری جستجو (برای فیلتر)
 let adOrdersList = [];
 let adOrdersLoaded = false;
 let adOrdersLoadingPromise = null;
-let adOrdersFilter = 'pending';
+let adOrdersFilter = 'all';
 let adOrdersSearchTerm = '';
 let adOrdersPlanFilter = 'all';
 let currentAdOrderId = null;
@@ -3913,7 +4031,7 @@ function updateAdOrdersSummary() {
 
   if (adOrdersHeaderCountEl) {
     adOrdersHeaderCountEl.textContent = total
-      ? `(${formatNumber(total)} تبلیغ | ${formatNumber(pending)} در انتظار)`
+      ? `(${formatNumber(total)} تبلیغ | ${formatNumber(pending)} در انتظار | ${formatNumber(approved)} تایید شده)`
       : '(هیچ تبلیغی ثبت نشده)';
   }
 }
@@ -3973,6 +4091,9 @@ function renderAdOrders() {
     const createdAt = formatDateTime(order.createdAt);
     const reviewedAt = order.reviewedAt ? formatDateTime(order.reviewedAt) : '';
     const reviewedBy = order.reviewedBy && order.reviewedBy.name ? order.reviewedBy.name : '';
+    const displayedAt = order.displayedAt
+      ? formatDateTime(order.displayedAt)
+      : (order.approvedAt ? formatDateTime(order.approvedAt) : '');
     const orderId = escapeHtml(getOrderId(order));
 
     const product = order && typeof order.productId === 'object' && order.productId !== null ? order.productId : null;
@@ -3991,16 +4112,30 @@ function renderAdOrders() {
 
     const adText = order.adText ? `<div class="ad-text">${escapeHtml(order.adText)}</div>` : '';
 
-    const quickActions = order.status === 'pending'
-      ? `
+    let quickActions = '';
+    if (order.status === 'pending') {
+      quickActions = `
         <button class="ad-action-btn approve" data-action="quick-approve" data-id="${orderId}">
           <i class="ri-checkbox-circle-line"></i> تایید سریع
         </button>
         <button class="ad-action-btn reject" data-action="quick-reject" data-id="${orderId}">
           <i class="ri-close-circle-line"></i> رد
         </button>
-      `
-      : '';
+      `;
+    } else if (order.status === 'approved') {
+      quickActions = `
+        <button class="ad-action-btn ghost" data-action="quick-edit" data-id="${orderId}">
+          <i class="ri-edit-line"></i> ویرایش
+        </button>
+        <button class="ad-action-btn reject" data-action="quick-delete" data-id="${orderId}">
+          <i class="ri-delete-bin-line"></i> حذف
+        </button>
+      `;
+    }
+
+    const displayDateHtml = displayedAt
+      ? `<span class="ad-date-live"><i class="ri-calendar-check-line"></i> نمایش: ${displayedAt}</span>`
+      : `<span class="ad-date-pending"><i class="ri-time-line"></i> در انتظار نمایش</span>`;
 
     return `
       <tr>
@@ -4017,7 +4152,8 @@ function renderAdOrders() {
         <td><div class="ad-price">${formatCurrency(order.price)}</div></td>
         <td>
           <div class="ad-date">
-            <span><i class="ri-calendar-line"></i> ${createdAt}</span>
+            <span><i class="ri-calendar-line"></i> ثبت: ${createdAt}</span>
+            ${displayDateHtml}
           </div>
         </td>
         <td>
@@ -4047,12 +4183,20 @@ function attachAdOrdersRowActions() {
     btn.addEventListener('click', () => openAdOrderModal(btn.dataset.id));
   });
 
+  adOrdersTableBody.querySelectorAll('button[data-action="quick-edit"]').forEach(btn => {
+    btn.addEventListener('click', () => openAdOrderModal(btn.dataset.id));
+  });
+
   adOrdersTableBody.querySelectorAll('button[data-action="quick-approve"]').forEach(btn => {
     btn.addEventListener('click', () => handleQuickAdAction(btn, 'approved'));
   });
 
   adOrdersTableBody.querySelectorAll('button[data-action="quick-reject"]').forEach(btn => {
     btn.addEventListener('click', () => handleQuickAdAction(btn, 'rejected'));
+  });
+
+  adOrdersTableBody.querySelectorAll('button[data-action="quick-delete"]').forEach(btn => {
+    btn.addEventListener('click', () => handleQuickDelete(btn));
   });
 }
 
@@ -4083,6 +4227,18 @@ function handleQuickAdAction(button, status) {
   }
   setButtonLoading(button, true);
   updateAdOrderStatus(orderId, status, undefined, { silent: false })
+    .catch(() => {})
+    .finally(() => setButtonLoading(button, false));
+}
+
+function handleQuickDelete(button) {
+  const orderId = button?.dataset?.id;
+  if (!orderId) return;
+  if (!confirm('آیا از حذف این تبلیغ مطمئن هستید؟')) {
+    return;
+  }
+  setButtonLoading(button, true);
+  removeAdOrder(orderId, { silent: false })
     .catch(() => {})
     .finally(() => setButtonLoading(button, false));
 }
@@ -4125,6 +4281,96 @@ async function updateAdOrderStatus(orderId, status, note, { silent = false } = {
     return updated;
   } catch (err) {
     console.error('updateAdOrderStatus error:', err);
+    if (!silent) {
+      setAdOrdersStatus(err.message || 'خطا در بروزرسانی تبلیغ.', 'error');
+    }
+    throw err;
+  }
+}
+
+async function removeAdOrder(orderId, { silent = false } = {}) {
+  if (!orderId) return false;
+
+  try {
+    const res = await fetch(`${ADMIN_API_BASE}/adOrder/${encodeURIComponent(orderId)}`, {
+      method: 'DELETE',
+      credentials: 'include'
+    });
+
+    let data = {};
+    try {
+      data = await res.json();
+    } catch (err) {
+      data = {};
+    }
+
+    if (!res.ok) {
+      throw new Error(data.error || data.message || 'خطا در حذف تبلیغ.');
+    }
+
+    const idx = adOrdersList.findIndex(order => getOrderId(order) === orderId);
+    if (idx !== -1) {
+      adOrdersList.splice(idx, 1);
+    }
+    updateAdOrdersSummary();
+    renderAdOrders();
+
+    if (!silent) {
+      setAdOrdersStatus(data.message || 'تبلیغ حذف شد.', 'success');
+    }
+
+    return true;
+  } catch (err) {
+    console.error('removeAdOrder error:', err);
+    if (!silent) {
+      setAdOrdersStatus(err.message || 'خطا در حذف تبلیغ.', 'error');
+    }
+    throw err;
+  }
+}
+
+async function updateAdOrderDetails(orderId, updates, { silent = false } = {}) {
+  if (!orderId || !updates || typeof updates !== 'object') return null;
+
+  try {
+    const res = await fetch(`${ADMIN_API_BASE}/adOrder/${encodeURIComponent(orderId)}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify(updates)
+    });
+
+    let data = {};
+    try {
+      data = await res.json();
+    } catch (err) {
+      data = {};
+    }
+
+    if (!res.ok) {
+      throw new Error(data.error || data.message || 'خطا در بروزرسانی تبلیغ.');
+    }
+
+    const updated = data.adOrder || data.order || null;
+    if (updated) {
+      const updatedId = getOrderId(updated);
+      const idx = adOrdersList.findIndex(item => getOrderId(item) === updatedId);
+      if (idx !== -1) {
+        adOrdersList[idx] = updated;
+      } else {
+        adOrdersList.push(updated);
+      }
+      updateAdOrdersSummary();
+      renderAdOrders();
+    }
+
+    if (!silent) {
+      setAdOrdersStatus(data.message || 'تبلیغ بروزرسانی شد.', 'success');
+    }
+
+    return updated;
+  } catch (err) {
+    console.error('updateAdOrderDetails error:', err);
     if (!silent) {
       setAdOrdersStatus(err.message || 'خطا در بروزرسانی تبلیغ.', 'error');
     }
@@ -4226,6 +4472,15 @@ function renderAdOrderModal(order) {
   const bannerUrl = order.bannerImage ? buildUploadsUrl(order.bannerImage) : '';
   const adminNoteValue = order.adminNote || '';
   const orderId = getOrderId(order);
+  currentAdOrderId = orderId || currentAdOrderId;
+
+  const displayDateValue = order.displayedAt || order.approvedAt || null;
+  const displayedAt = displayDateValue ? formatDateTime(displayDateValue) : '';
+  const displayedAtInputValue = toDatetimeLocalValue(displayDateValue);
+  const titleValue = order.adTitle || '';
+  const previewTitle = order.adTitle || order.planTitle || planLabel;
+  const textValue = order.adText || '';
+  const priceInputValue = order.price !== undefined && order.price !== null ? String(order.price) : '';
 
   overlay.innerHTML = `
     <div class="ad-modal" role="dialog" aria-modal="true">
@@ -4254,6 +4509,7 @@ function renderAdOrderModal(order) {
             <span><span class="label">وضعیت فعلی:</span> ${statusMeta.label}</span>
             <span><span class="label">آخرین بررسی:</span> ${reviewedAt ? `${reviewedAt}${reviewedBy ? ` توسط ${escapeHtml(reviewedBy)}` : ''}` : 'در انتظار بررسی'}</span>
             ${approvedAt ? `<span><span class="label">تاریخ تایید:</span> ${approvedAt}</span>` : ''}
+            ${displayedAt ? `<span><span class="label">تاریخ نمایش:</span> ${displayedAt}</span>` : '<span><span class="label">تاریخ نمایش:</span> در انتظار تعیین</span>'}
           </div>
         </div>
       </div>
@@ -4262,9 +4518,28 @@ function renderAdOrderModal(order) {
         <div class="banner">
           ${bannerUrl ? `<img src="${bannerUrl}" alt="بنر تبلیغ">` : '<span class="ad-status-note">بنری بارگذاری نشده است.</span>'}
         </div>
-        <div class="ad-title">${escapeHtml(order.adTitle || order.planTitle || planLabel)}</div>
-        ${order.adText ? `<div class="ad-text">${escapeHtml(order.adText)}</div>` : ''}
+        <div class="ad-title">${escapeHtml(previewTitle)}</div>
+        ${textValue ? `<div class="ad-text">${escapeHtml(textValue)}</div>` : ''}
         ${product ? `<div class="ad-modal-meta"><span><span class="label">محصول هدف:</span> ${escapeHtml(product.title || '')}</span>${product.price != null ? `<span><span class="label">قیمت محصول:</span> ${formatCurrency(product.price)}</span>` : ''}</div>` : ''}
+      </div>
+
+      <div class="ad-modal-edit">
+        <h4>ویرایش تبلیغ</h4>
+        <div class="ad-edit-grid">
+          <label for="adModalTitle">عنوان نمایشی</label>
+          <input type="text" id="adModalTitle" value="${escapeHtml(titleValue)}" placeholder="عنوان نمایش تبلیغ" />
+          <label for="adModalText">متن تبلیغ</label>
+          <textarea id="adModalText" placeholder="متن تبلیغ">${escapeHtml(textValue)}</textarea>
+          <label for="adModalPrice">مبلغ (ریال)</label>
+          <input type="number" id="adModalPrice" min="0" step="1000" value="${escapeHtml(priceInputValue)}" />
+          <label for="adModalDisplayedAt">تاریخ نمایش در سایت</label>
+          <input type="datetime-local" id="adModalDisplayedAt" value="${escapeHtml(displayedAtInputValue)}" />
+        </div>
+        <div class="ad-edit-actions">
+          <button type="button" id="adModalSave" class="ad-action-btn ghost"><i class="ri-save-3-line"></i> ذخیره تغییرات</button>
+          <button type="button" id="adModalDelete" class="ad-action-btn reject"><i class="ri-delete-bin-line"></i> حذف تبلیغ</button>
+        </div>
+        <p id="adModalEditStatus" class="ad-modal-edit-status" style="display:none;"></p>
       </div>
 
       <div class="ad-modal-note">
@@ -4282,6 +4557,7 @@ function renderAdOrderModal(order) {
         <span>ثبت درخواست: ${createdAt}</span>
         ${reviewedAt ? `<span>آخرین بررسی: ${reviewedAt}${reviewedBy ? ` توسط ${escapeHtml(reviewedBy)}` : ''}</span>` : ''}
         ${approvedAt ? `<span>تایید نهایی: ${approvedAt}</span>` : ''}
+        ${displayedAt ? `<span>نمایش در سایت: ${displayedAt}</span>` : '<span>نمایش در سایت: در انتظار نمایش</span>'}
       </div>
 
       <div class="ad-modal-status">
@@ -4292,6 +4568,13 @@ function renderAdOrderModal(order) {
   `;
 
   const noteInput = overlay.querySelector('#adModalNote');
+  const titleInput = overlay.querySelector('#adModalTitle');
+  const textInput = overlay.querySelector('#adModalText');
+  const priceInput = overlay.querySelector('#adModalPrice');
+  const displayedAtInput = overlay.querySelector('#adModalDisplayedAt');
+  const saveButton = overlay.querySelector('#adModalSave');
+  const deleteButton = overlay.querySelector('#adModalDelete');
+
   overlay.querySelectorAll('.ad-modal-actions button').forEach(button => {
     button.addEventListener('click', () => {
       const action = button.dataset.action;
@@ -4304,6 +4587,122 @@ function renderAdOrderModal(order) {
       handleAdModalAction(getOrderId(order), action === 'pending' ? 'pending' : action, noteValue !== undefined ? noteValue : undefined, button);
     });
   });
+
+  if (saveButton) {
+    saveButton.addEventListener('click', () => {
+      const payload = {};
+      let hasChanges = false;
+
+      const originalTitle = (order.adTitle || '').trim();
+      const newTitle = titleInput ? titleInput.value.trim() : '';
+      if (newTitle !== originalTitle) {
+        payload.adTitle = newTitle;
+        hasChanges = true;
+      }
+
+      const originalText = (order.adText || '').trim();
+      const newText = textInput ? textInput.value.trim() : '';
+      if (newText !== originalText) {
+        payload.adText = newText;
+        hasChanges = true;
+      }
+
+      const originalPriceStr = priceInputValue;
+      const newPriceStr = priceInput ? priceInput.value : '';
+      if (newPriceStr !== originalPriceStr) {
+        if (!newPriceStr.length) {
+          setAdModalEditStatus('مبلغ تبلیغ را وارد کنید.', 'error');
+          return;
+        }
+        const priceNumber = Number(newPriceStr);
+        if (!Number.isFinite(priceNumber) || priceNumber < 0) {
+          setAdModalEditStatus('مبلغ وارد شده معتبر نیست.', 'error');
+          return;
+        }
+        payload.price = priceNumber;
+        hasChanges = true;
+      }
+
+      const originalDisplay = displayedAtInputValue || '';
+      const newDisplay = displayedAtInput ? displayedAtInput.value : '';
+      if (newDisplay !== originalDisplay) {
+        if (newDisplay) {
+          const parsed = new Date(newDisplay);
+          if (Number.isNaN(parsed.getTime())) {
+            setAdModalEditStatus('تاریخ نمایش معتبر نیست.', 'error');
+            return;
+          }
+          payload.displayedAt = parsed.toISOString();
+        } else {
+          payload.displayedAt = null;
+        }
+        hasChanges = true;
+      }
+
+      const currentNote = noteInput ? noteInput.value : '';
+      if ((currentNote || '').trim() !== (adminNoteValue || '').trim()) {
+        payload.adminNote = currentNote;
+        hasChanges = true;
+      }
+
+      if (!hasChanges) {
+        setAdModalEditStatus('تغییری برای ذخیره وجود ندارد.', 'info');
+        return;
+      }
+
+      setAdModalEditStatus('در حال ذخیره تغییرات...', 'info');
+      setButtonLoading(saveButton, true);
+      updateAdOrderDetails(orderId, payload, { silent: true })
+        .then(updated => {
+          if (updated) {
+            renderAdOrderModal(updated);
+            setTimeout(() => setAdModalEditStatus('تغییرات با موفقیت ذخیره شد.', 'success'), 0);
+          }
+          setAdOrdersStatus('جزئیات تبلیغ بروزرسانی شد.', 'success');
+        })
+        .catch(err => {
+          console.error('ad-modal save error:', err);
+          setAdModalEditStatus(err.message || 'خطا در ذخیره تغییرات.', 'error');
+        })
+        .finally(() => setButtonLoading(saveButton, false));
+    });
+  }
+
+  if (deleteButton) {
+    deleteButton.addEventListener('click', () => {
+      if (!confirm('آیا از حذف این تبلیغ مطمئن هستید؟')) {
+        return;
+      }
+      setAdModalEditStatus('در حال حذف تبلیغ...', 'info');
+      setButtonLoading(deleteButton, true);
+      removeAdOrder(orderId, { silent: true })
+        .then(() => {
+          closeAdOrderModal();
+          setAdOrdersStatus('تبلیغ با موفقیت حذف شد.', 'success');
+        })
+        .catch(err => {
+          console.error('ad-modal delete error:', err);
+          setAdModalEditStatus(err.message || 'خطا در حذف تبلیغ.', 'error');
+        })
+        .finally(() => setButtonLoading(deleteButton, false));
+    });
+  }
+}
+
+function setAdModalEditStatus(message = '', type = 'info') {
+  const statusEl = document.getElementById('adModalEditStatus');
+  if (!statusEl) return;
+
+  statusEl.classList.remove('info', 'success', 'error');
+  if (!message) {
+    statusEl.textContent = '';
+    statusEl.style.display = 'none';
+    return;
+  }
+
+  statusEl.textContent = message;
+  statusEl.classList.add(type);
+  statusEl.style.display = 'block';
 }
 
 function handleAdModalAction(orderId, status, note, button) {
