@@ -12,11 +12,25 @@ router.post(
   adOrderController.createAdOrder
 );
 
+// ── دریافت همه سفارش‌های تبلیغ (ادمین) ──
+router.get(
+  '/',
+  authMiddleware('admin'),
+  adOrderController.getAllAdOrders
+);
+
 // ── گرفتن لیست سفارش‌های تبلیغ یک فروشنده (GET) ──
 router.get(
   '/seller',
   authMiddleware('seller'),
   adOrderController.getSellerAdOrders
+);
+
+// ── بروزرسانی وضعیت سفارش تبلیغ توسط ادمین ──
+router.patch(
+  '/:id/status',
+  authMiddleware('admin'),
+  adOrderController.updateAdOrderStatus
 );
 
 // ── گرفتن تبلیغات فعال (حتماً قبل از :id) ──
