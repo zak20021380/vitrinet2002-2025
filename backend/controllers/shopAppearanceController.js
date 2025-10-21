@@ -17,6 +17,37 @@ function escapeRegex(string) {
   return string.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
 }
 
+const persianDigits = ['۰','۱','۲','۳','۴','۵','۶','۷','۸','۹'];
+const arabicDigits  = ['٠','١','٢','٣','٤','٥','٦','٧','٨','٩'];
+
+function normalizeDigits(word) {
+  return word
+    .split('')
+    .map(char => {
+      const persianIndex = persianDigits.indexOf(char);
+      if (persianIndex !== -1) return String(persianIndex);
+      const arabicIndex = arabicDigits.indexOf(char);
+      if (arabicIndex !== -1) return String(arabicIndex);
+      return char;
+    })
+    .join('');
+}
+
+function buildDigitAwareRegex(word) {
+  let pattern = '';
+  for (const char of word) {
+    if (/\d/.test(char)) {
+      const digit = Number(char);
+      const persian = persianDigits[digit];
+      const arabic = arabicDigits[digit];
+      pattern += `[${char}${persian}${arabic}]`;
+    } else {
+      pattern += escapeRegex(char);
+    }
+  }
+  return pattern;
+}
+
 // بازمحاسبهٔ امتیاز فروشگاه فقط بر اساس نظرات تایید شده
 async function recalcShopRating(sellerId) {
   const agg = await Review.aggregate([
@@ -194,26 +225,63 @@ exports.getShopsByCenterTitle = async (req, res) => {
       .join(' ')
       .trim()
       .split(/\s+/)
+      .map(word => normalizeDigits(word))
       .filter(word => word.length > 0);
 
     if (!words.length) {
       return res.json([]);
     }
 
-    const escapedWords = words.map(word => escapeRegex(word));
+    const escapedWords = words.map(word => buildDigitAwareRegex(word));
     const regexPattern = escapedWords.join('|');
 
     console.log('Received centerTitle:', resolvedCenterTitle);
     console.log('Regex pattern:', regexPattern);
 
-    const shops = await ShopAppearance.find({
-      shopAddress: { $regex: regexPattern, $options: 'i' }
-    })
-      .populate({
-        path: 'sellerId',
-        select: 'boardImage storename' // استفاده از boardImage
-      })
-      .lean();
+    const shops = await ShopAppearance.aggregate([
+      {
+        $lookup: {
+          from: 'sellers',
+          localField: 'sellerId',
+          foreignField: '_id',
+          as: 'seller'
+        }
+      },
+      {
+        $unwind: {
+          path: '$seller',
+          preserveNullAndEmptyArrays: true
+        }
+      },
+      {
+        $match: {
+          $or: [
+            { shopAddress: { $regex: regexPattern, $options: 'i' } },
+            { 'seller.address': { $regex: regexPattern, $options: 'i' } },
+            { 'seller.storename': { $regex: regexPattern, $options: 'i' } }
+          ]
+        }
+      },
+      {
+        $project: {
+          _id: 1,
+          customUrl: 1,
+          shopPhone: 1,
+          shopAddress: 1,
+          shopLogoText: 1,
+          shopStatus: 1,
+          shopLogo: 1,
+          slides: 1,
+          sellerId: 1,
+          seller: {
+            storename: '$seller.storename',
+            address: '$seller.address',
+            phone: '$seller.phone',
+            boardImage: '$seller.boardImage'
+          }
+        }
+      }
+    ]);
 
     console.log('Shops found:', shops);
 
@@ -222,14 +290,21 @@ exports.getShopsByCenterTitle = async (req, res) => {
       return res.json([]);
     }
 
-    const updatedShops = shops.map(shop => ({
-      ...shop,
-      shopLogo: makeFullUrl(req, shop.sellerId?.boardImage || ''), // از boardImage استفاده کن
-      slides: shop.slides.map(slide => ({
-        ...slide,
-        img: makeFullUrl(req, slide.img || '')
-      }))
-    }));
+    const updatedShops = shops.map(shop => {
+      const { seller = {}, ...rest } = shop;
+      const shopLogoSource = rest.shopLogo || seller.boardImage || '';
+      return {
+        ...rest,
+        shopAddress: rest.shopAddress || seller.address || '',
+        shopPhone: rest.shopPhone || seller.phone || '',
+        sellerName: seller.storename || '',
+        shopLogo: makeFullUrl(req, shopLogoSource),
+        slides: (rest.slides || []).map(slide => ({
+          ...slide,
+          img: makeFullUrl(req, slide.img || '')
+        }))
+      };
+    });
 
     res.json(updatedShops);
   } catch (err) {
