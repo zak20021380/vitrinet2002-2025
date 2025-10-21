@@ -313,6 +313,105 @@
         text-align: right;
       }
     }
+
+    .centers-modal-badge {
+      display: none;
+    }
+
+    @media (min-width: 641px) {
+      .centers-modal {
+        padding: 3rem 2.5rem;
+        backdrop-filter: blur(14px);
+      }
+
+      .centers-modal-content {
+        border-radius: 2.4rem;
+        padding: 2.75rem 3rem 2.5rem 3rem !important;
+        border: 1.5px solid #bbf7d0;
+        background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 8%, rgba(208, 251, 241, 0.9) 100%);
+        box-shadow: 0 28px 60px -28px #0ea5e955, 0 18px 40px -35px #10b98188;
+        position: relative;
+        overflow: hidden;
+      }
+
+      .centers-modal-content::before {
+        content: '';
+        position: absolute;
+        inset: -55% -10% auto;
+        height: 72%;
+        background: radial-gradient(circle at top left, rgba(14, 165, 233, 0.14), transparent 55%);
+        pointer-events: none;
+      }
+
+      .centers-modal-header {
+        flex-direction: row !important;
+        text-align: right !important;
+        align-items: center;
+        gap: 1.8rem !important;
+      }
+
+      .centers-modal-badge {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 92px;
+        height: 92px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #10b981, #0ea5e9);
+        box-shadow: 0 18px 45px -24px #0ea5e9aa;
+        color: #fff;
+      }
+
+      .centers-modal-title {
+        font-size: 2.2rem !important;
+        color: #0f9a8b !important;
+      }
+
+      .centers-modal-subtitle {
+        font-size: 1.05rem !important;
+        color: #0ea5e9 !important;
+      }
+
+      .centers-modal-list {
+        margin-top: 2.75rem !important;
+        grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+      }
+
+      .modal-area-btn {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        justify-content: center;
+        gap: 0.4rem;
+        padding: 1.1rem 1.35rem;
+        border-radius: 1.4rem;
+        width: 100%;
+        min-height: 108px;
+        text-align: right;
+        background: linear-gradient(135deg, rgba(240, 255, 250, 0.96), rgba(236, 254, 245, 0.96));
+        border-color: #99f6e4;
+        box-shadow: 0 20px 46px -32px rgba(14, 165, 233, 0.55);
+        transition: transform 0.22s ease, box-shadow 0.22s ease, background 0.22s ease;
+      }
+
+      .modal-area-btn span {
+        font-size: 1.05rem;
+        color: #047857;
+      }
+
+      .modal-area-btn small {
+        font-size: 0.82rem;
+      }
+
+      .modal-area-btn small + small {
+        color: #0f9a8b;
+      }
+
+      .modal-area-btn:hover {
+        transform: translateY(-4px) scale(1.015);
+        box-shadow: 0 26px 52px -28px rgba(14, 165, 233, 0.65);
+      }
+    }
     /* هدر شیشه‌ای */
     .glass-bg {
       backdrop-filter: blur(12px);
@@ -474,11 +573,23 @@
       <button id="closeCentersModal" class="absolute top-4 left-4 text-[#0f9a8b] hover:text-[#0ea5e9] transition-colors text-2xl font-bold" aria-label="بستن">
         &times;
       </button>
-      <div class="flex flex-col gap-3 text-center">
-        <h2 class="text-2xl sm:text-3xl font-extrabold text-[#0ea5e9]">مراکز خرید سنندج</h2>
-        <p class="text-sm sm:text-base text-[#0f9a8b] font-semibold">
-          برای مشاهده فروشگاه‌های هر مرکز خرید روی نام آن کلیک کن.
-        </p>
+      <div class="centers-modal-header flex flex-col gap-4 text-center sm:text-right">
+        <div class="centers-modal-badge mx-auto sm:mx-0">
+          <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3 21h18" />
+            <path d="M5 21V7.5a1.5 1.5 0 0 1 1.5-1.5H9" />
+            <path d="M19 21V7.5A1.5 1.5 0 0 0 17.5 6H15" />
+            <rect x="9" y="3" width="6" height="6" rx="1.2" />
+            <path d="M9 12h6" />
+            <path d="M9 16h6" />
+          </svg>
+        </div>
+        <div class="flex flex-col gap-2">
+          <h2 class="centers-modal-title text-2xl sm:text-3xl font-extrabold text-[#0ea5e9]">مراکز خرید سنندج</h2>
+          <p class="centers-modal-subtitle text-sm sm:text-base text-[#0f9a8b] font-semibold">
+            برای مشاهده فروشگاه‌های هر مرکز خرید روی نام آن کلیک کن.
+          </p>
+        </div>
       </div>
       <div id="centersList" class="centers-modal-list mt-6 grid gap-3 sm:gap-4 text-sm"></div>
     </div>
