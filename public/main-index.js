@@ -939,106 +939,151 @@ window.addEventListener('DOMContentLoaded', loadMostVisitedStores);
 // ✔︎ دسته‌بندی فروشگاه در بالای کارت
 // ✔︎ مکان فروشگاه به جای امتیاز ⭐️
 
+
 const POPULAR_PRODUCTS_SECTION_SLUG = 'popular-products';
+const HOME_SECTIONS_CONTAINER_ID = 'home-card-sections-root';
 
-function renderPopularProductsSection(section) {
-  const slider = document.getElementById('popular-products-slider');
-  const titleEl = document.getElementById('popular-products-title');
-  const titleSpan = titleEl?.querySelector('span') || titleEl;
-  const subtitleEl = document.getElementById('popular-products-subtitle');
-  const ctaEl = document.getElementById('popular-products-cta');
+function escapeAttributeValue(value) {
+  return escapeHTML(value || '').replace(/`/g, '&#96;');
+}
 
-  if (titleSpan && section?.title) {
-    titleSpan.textContent = section.title;
+function createHomeSectionSkeleton(section = {}) {
+  const rawSlug = section.slug || '';
+  const slug = rawSlug ? rawSlug.toString().trim().toLowerCase() : `section-${section._id || Date.now()}`;
+  let safeSlug = slug.replace(/[^a-z0-9_-]+/gi, '-').replace(/^-+|-+$/g, '');
+  if (!safeSlug) {
+    safeSlug = `section-${section._id || Date.now()}`;
   }
+  const sliderId = safeSlug === POPULAR_PRODUCTS_SECTION_SLUG ? 'popular-products-slider' : `home-section-slider-${safeSlug}`;
 
-  if (subtitleEl) {
-    const subtitle = section?.subtitle?.trim() || section?.description?.trim() || '';
-    if (subtitle) {
-      subtitleEl.textContent = subtitle;
-      subtitleEl.classList.remove('hidden');
+  const sectionEl = document.createElement('section');
+  sectionEl.className = 'home-card-section max-w-6xl mx-auto w-full mt-8 mb-14 animate-fadein';
+  sectionEl.dataset.sectionSlug = safeSlug;
+  sectionEl.dataset.sliderId = sliderId;
+
+  const titleText = section.title?.trim() || 'کارت‌های ویژه';
+  const subtitleText = section.subtitle?.trim();
+  const descriptionText = section.description?.trim();
+
+  const subtitleMarkup = subtitleText
+    ? `<p class="text-sm sm:text-base text-gray-500 mt-1">${escapeHTML(subtitleText)}</p>`
+    : '';
+  const descriptionMarkup = descriptionText
+    ? `<p class="text-xs sm:text-sm text-gray-400 mt-1">${escapeHTML(descriptionText)}</p>`
+    : '';
+
+  const ctaLabelRaw = section.viewAllText?.trim();
+  const ctaLinkRaw = section.viewAllLink?.trim();
+  const hasCta = Boolean(ctaLabelRaw || ctaLinkRaw);
+  let ctaMarkup = '';
+  if (hasCta) {
+    const label = escapeHTML(ctaLabelRaw || 'مشاهده همه');
+    const hrefValue = ctaLinkRaw ? escapeAttributeValue(ctaLinkRaw) : '#';
+    const isExternal = Boolean(ctaLinkRaw && /^https?:/i.test(ctaLinkRaw));
+    const attrs = [];
+    if (isExternal) {
+      attrs.push('target="_blank"', 'rel="noopener"');
     } else {
-      subtitleEl.textContent = '';
-      subtitleEl.classList.add('hidden');
+      attrs.push('target="_self"');
     }
-  }
-
-  if (ctaEl) {
-    const label = section?.viewAllText?.trim();
-    const href = section?.viewAllLink?.trim();
-    ctaEl.textContent = label || 'مشاهده همه';
-    if (href) {
-      ctaEl.href = href;
-      if (/^https?:/i.test(href)) {
-        ctaEl.target = '_blank';
-        ctaEl.rel = 'noopener';
-      } else {
-        ctaEl.target = '_self';
-        ctaEl.removeAttribute('rel');
-      }
-      ctaEl.classList.remove('pointer-events-none', 'opacity-60');
-    } else {
-      ctaEl.href = '#';
-      ctaEl.target = '_self';
-      ctaEl.rel = 'nofollow noopener';
-      ctaEl.classList.add('pointer-events-none', 'opacity-60');
+    if (!ctaLinkRaw) {
+      attrs.push('aria-disabled="true"');
     }
+    const attrString = attrs.join(' ');
+    const classes = `text-[#10b981] hover:text-[#0ea5e9] font-bold text-sm sm:text-base bg-[#e0fdfa] px-5 py-2 rounded-full shadow transition-all duration-200 whitespace-nowrap${ctaLinkRaw ? '' : ' pointer-events-none opacity-60'}`;
+    ctaMarkup = `<a href="${hrefValue}" class="${classes}"${attrString ? ` ${attrString}` : ''}>${label}</a>`;
   }
 
-  const cards = Array.isArray(section?.cards)
-    ? [...section.cards].filter((card) => card && card.isActive !== false)
-    : [];
+  sectionEl.innerHTML = `
+    <div class="flex items-center justify-between mb-7 px-1">
+      <div>
+        <h3 class="text-2xl sm:text-3xl font-extrabold text-gray-800 tracking-tight leading-relaxed">
+          <span class="bg-gradient-to-l from-[#10b981] to-[#0ea5e9] bg-clip-text text-transparent drop-shadow-md">
+            ${escapeHTML(titleText)}
+          </span>
+        </h3>
+        ${subtitleMarkup}
+        ${descriptionMarkup}
+      </div>
+      ${ctaMarkup || ''}
+    </div>
+    <div class="relative px-0 sm:px-12">
+      <button
+        type="button"
+        class="slider-nav-btn hidden sm:flex items-center justify-center absolute top-1/2 -translate-y-1/2 left-0 w-11 h-11 rounded-full bg-white/90 text-emerald-500 border border-emerald-100 shadow-lg z-10 transition hover:bg-emerald-500 hover:text-white focus:outline-none focus:ring-2 focus:ring-emerald-200"
+        data-scroll-target="${sliderId}"
+        data-direction="prev"
+        aria-label="نمایش کارت قبلی"
+      >
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
+        </svg>
+      </button>
 
-  if (!cards.length) {
-    slider.innerHTML = '<div class="text-gray-400 text-center w-full p-7">هیچ کارت فعالی ثبت نشده است.</div>';
-    updateSliderNavVisibility('popular-products-slider');
-    return false;
-  }
+      <div
+        id="${sliderId}"
+        class="flex overflow-x-auto gap-5 pb-2 hide-scrollbar"
+        style="-webkit-overflow-scrolling:touch;width:100%; user-select:none; -webkit-user-select:none; -moz-user-select:none; -ms-user-select:none;"
+      ></div>
 
-  slider.innerHTML = '';
+      <button
+        type="button"
+        class="slider-nav-btn hidden sm:flex items-center justify-center absolute top-1/2 -translate-y-1/2 right-0 w-11 h-11 rounded-full bg-white/90 text-emerald-500 border border-emerald-100 shadow-lg z-10 transition hover:bg-emerald-500 hover:text-white focus:outline-none focus:ring-2 focus:ring-emerald-200"
+        data-scroll-target="${sliderId}"
+        data-direction="next"
+        aria-label="نمایش کارت بعدی"
+      >
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+        </svg>
+      </button>
+    </div>
+  `;
 
-  cards
-    .sort((a, b) => (Number(a.order) || 0) - (Number(b.order) || 0))
-    .forEach((card) => {
-      const elementTag = card.link ? 'a' : 'div';
-      const cardEl = document.createElement(elementTag);
-      cardEl.className = `
+  return { sectionEl, sliderId };
+}
+
+function createHomeSectionCard(card) {
+  const elementTag = card.link ? 'a' : 'div';
+  const cardEl = document.createElement(elementTag);
+  cardEl.className = `
         group glass min-w-[265px] max-w-xs flex-shrink-0 flex flex-col items-center
         p-4 rounded-2xl shadow-2xl border-2 border-[#0ea5e9]/20 hover:scale-[1.04] hover:shadow-2xl hover:border-[#0ea5e9]/40
         bg-white/95 backdrop-blur-[5px] transition-all duration-300 center-card
       `;
 
-      if (card.link) {
-        cardEl.href = card.link;
-        if (/^https?:/i.test(card.link)) {
-          cardEl.target = '_blank';
-          cardEl.rel = 'noopener';
-        } else {
-          cardEl.target = '_self';
-          cardEl.removeAttribute('rel');
-        }
-      }
+  const link = card.link?.trim();
+  if (link) {
+    cardEl.href = link;
+    if (/^https?:/i.test(link)) {
+      cardEl.target = '_blank';
+      cardEl.rel = 'noopener';
+    } else {
+      cardEl.target = '_self';
+      cardEl.removeAttribute('rel');
+    }
+  }
 
-      const imageUrl = card.imageUrl?.trim() || 'assets/images/no-image.png';
-      const tag = card.tag ? `<span class="absolute top-2 right-2 text-xs font-bold px-3 py-1 rounded-full bg-gradient-to-r from-[#10b981] to-[#0ea5e9] text-white shadow-md">${escapeHTML(card.tag)}</span>` : '';
-      const description = card.description ? `<p class="text-sm text-gray-600 text-center mb-3 leading-relaxed">${escapeHTML(card.description)}</p>` : '';
-      const location = card.location
-        ? `<div class="flex items-center gap-1 mb-3 text-sm text-gray-700 font-bold"><svg width="18" height="18" fill="none" viewBox="0 0 22 22"><circle cx="11" cy="11" r="10" fill="#e0f7fa"/><path d="M11 2.5C7.13 2.5 4 5.61 4 9.45c0 3.52 4.1 7.93 6.2 10.01.46.47 1.2.47 1.66 0 2.1-2.08 6.14-6.49 6.14-10.01C18 5.61 14.87 2.5 11 2.5Z" fill="#10b981"/><circle cx="11" cy="9" r="2.5" fill="#0ea5e9"/></svg><span class="truncate max-w-[160px]">${escapeHTML(card.location)}</span></div>`
-        : '';
-      const price = card.price
-        ? `<div class="inline-block bg-gradient-to-r from-[#10b981]/10 to-[#0ea5e9]/10 px-4 py-1 rounded-full text-[#10b981] font-extrabold text-base shadow-sm">${escapeHTML(card.price)}</div>`
-        : '';
-      const button = card.buttonText
-        ? `<span class="mt-4 inline-flex items-center gap-2 text-sm font-bold text-[#0ea5e9] bg-[#e0fdfa] px-4 py-1.5 rounded-full shadow-sm">${escapeHTML(card.buttonText)}<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M7 17L17 7M7 7h10v10"/></svg></span>`
-        : '';
+  const imageUrl = card.imageUrl?.trim() || 'assets/images/no-image.png';
+  const tag = card.tag ? `<span class="absolute top-2 right-2 text-xs font-bold px-3 py-1 rounded-full bg-gradient-to-r from-[#10b981] to-[#0ea5e9] text-white shadow-md">${escapeHTML(card.tag)}</span>` : '';
+  const description = card.description ? `<p class="text-sm text-gray-600 text-center mb-3 leading-relaxed">${escapeHTML(card.description)}</p>` : '';
+  const location = card.location
+    ? `<div class="flex items-center gap-1 mb-3 text-sm text-gray-700 font-bold"><svg width="18" height="18" fill="none" viewBox="0 0 22 22"><circle cx="11" cy="11" r="10" fill="#e0f7fa"/><path d="M11 2.5C7.13 2.5 4 5.61 4 9.45c0 3.52 4.1 7.93 6.2 10.01.46.47 1.2.47 1.66 0 2.1-2.08 6.14-6.49 6.14-10.01C18 5.61 14.87 2.5 11 2.5Z" fill="#10b981"/><circle cx="11" cy="9" r="2.5" fill="#0ea5e9"/></svg><span class="truncate max-w-[160px]">${escapeHTML(card.location)}</span></div>`
+    : '';
+  const price = card.price
+    ? `<div class="inline-block bg-gradient-to-r from-[#10b981]/10 to-[#0ea5e9]/10 px-4 py-1 rounded-full text-[#10b981] font-extrabold text-base shadow-sm">${escapeHTML(card.price)}</div>`
+    : '';
+  const button = card.buttonText
+    ? `<span class="mt-4 inline-flex items-center gap-2 text-sm font-bold text-[#0ea5e9] bg-[#e0fdfa] px-4 py-1.5 rounded-full shadow-sm">${escapeHTML(card.buttonText)}<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M7 17L17 7M7 7h10v10"/></svg></span>`
+    : '';
 
-      cardEl.innerHTML = `
+  cardEl.innerHTML = `
         <div class="w-full h-[130px] sm:h-[170px] rounded-xl mb-5 flex items-center justify-center relative overflow-hidden" style="background:linear-gradient(120deg,#d4fbe8,#e0fdfa,#c8f7e6); box-shadow:inset 0 2px 10px rgba(16,185,129,0.1);">
           <img src="${imageUrl}" alt="${escapeHTML(card.title)}" class="w-full h-full object-cover group-hover:brightness-105 transition-all duration-300" onerror="this.src='assets/images/no-image.png'"/>
           ${tag}
         </div>
         <h4 class="font-extrabold text-lg sm:text-xl bg-gradient-to-r from-[#10b981] to-[#0ea5e9] bg-clip-text text-transparent text-center mb-2 line-clamp-2">
-          ${escapeHTML(card.title)}
+          ${escapeHTML(card.title || '')}
         </h4>
         ${description}
         ${location}
@@ -1046,14 +1091,16 @@ function renderPopularProductsSection(section) {
         ${button}
       `;
 
-      slider.appendChild(cardEl);
-    });
-
-  updateSliderNavVisibility('popular-products-slider');
-  return true;
+  return cardEl;
 }
 
-async function loadPopularProductsFallback(slider) {
+async function loadPopularProductsFallback(sliderEl) {
+  if (!sliderEl) {
+    return;
+  }
+
+  const sliderId = sliderEl.id || 'popular-products-slider';
+
   try {
     const res = await fetch('http://localhost:5000/api/products/latest-products');
     if (!res.ok) throw new Error('Network error');
@@ -1062,12 +1109,12 @@ async function loadPopularProductsFallback(slider) {
     const products = Array.isArray(payload) ? payload : payload.products;
 
     if (!products?.length) {
-      slider.innerHTML = '<div class="text-gray-400 text-center w-full p-7">محصولی یافت نشد.</div>';
-      updateSliderNavVisibility('popular-products-slider');
+      sliderEl.innerHTML = '<div class="text-gray-400 text-center w-full p-7">محصولی یافت نشد.</div>';
+      updateSliderNavVisibility(sliderId);
       return;
     }
 
-    slider.innerHTML = '';
+    sliderEl.innerHTML = '';
 
     products.forEach((p) => {
       const cat = p.sellerCategory || p.category || 'نامشخص';
@@ -1098,7 +1145,7 @@ async function loadPopularProductsFallback(slider) {
         <div class="flex items-center gap-1 mb-3">
           <svg width="18" height="18" fill="none" viewBox="0 0 22 22">
             <circle cx="11" cy="11" r="10" fill="#e0f7fa"/>
-            <path d="M11 2.5C7.13 2.5 4 5.61 4 9.45c0 3.52 4.1 7.93 6.2 10.01.46.47 1.2.47 1.66 0 2.1-2.08 6.14-6.49 6.14-10.01C18 5.61 14.87 2.5 11 2.5Z" fill="#10b981"/>
+            <path d="M11 2.5C7.13 2.5 4 5.61 4 9.45c0 3.52 4.1 7.93 6.2 10.01.46.47 1.2.47 1.66 0 2.1-2.08 6.14-6.49 6.14-10.01C18 5.61 14.87 2.5 11 2.5Zm0 10.25a2.75 2.75 0 1 1 0-5.5 2.75 2.75 0 0 1 0 5.5Z" fill="#10b981"/>
             <circle cx="11" cy="9" r="2.5" fill="#0ea5e9"/>
           </svg>
           <span class="text-gray-700 text-sm font-bold truncate max-w-[160px]">${escapeHTML(loc)}</span>
@@ -1107,46 +1154,106 @@ async function loadPopularProductsFallback(slider) {
           ${escapeHTML(priceText)}
         </div>
       `;
-      slider.appendChild(card);
+      sliderEl.appendChild(card);
     });
 
-    updateSliderNavVisibility('popular-products-slider');
+    updateSliderNavVisibility(sliderId);
   } catch (err) {
-    slider.innerHTML = '<div class="text-red-500 text-center w-full p-7">مشکلی در بارگذاری محصولات پیش آمد.</div>';
-    updateSliderNavVisibility('popular-products-slider');
+    sliderEl.innerHTML = '<div class="text-red-500 text-center w-full p-7">مشکلی در بارگذاری محصولات پیش آمد.</div>';
+    updateSliderNavVisibility(sliderId);
     console.error(err);
   }
 }
 
-async function loadPopularProducts() {
-  const slider = document.getElementById('popular-products-slider');
-  slider.innerHTML = '<div style="margin: 60px auto;">در حال بارگذاری...</div>';
-  updateSliderNavVisibility('popular-products-slider');
+function populateHomeSectionCards(section, sliderEl) {
+  if (!sliderEl) {
+    return;
+  }
 
-  let customLoaded = false;
-  try {
-    const res = await fetch(`/api/home-card-sections/slug/${POPULAR_PRODUCTS_SECTION_SLUG}`);
-    if (res.ok) {
-      const section = await res.json();
-      if (section && Array.isArray(section.cards) && section.cards.length) {
-        customLoaded = renderPopularProductsSection(section);
-      } else if (section && (!section.cards || !section.cards.length)) {
-        customLoaded = renderPopularProductsSection(section);
-      }
-    } else if (res.status !== 404) {
-      throw new Error(`Failed to fetch custom section: ${res.status}`);
+  const slug = (section?.slug || '').toString().toLowerCase();
+  const cards = Array.isArray(section?.cards)
+    ? section.cards.filter((card) => card && card.isActive !== false)
+    : [];
+
+  if (!cards.length) {
+    if (slug === POPULAR_PRODUCTS_SECTION_SLUG) {
+      sliderEl.innerHTML = '<div style="margin: 60px auto;">در حال بارگذاری...</div>';
+      updateSliderNavVisibility(sliderEl.id);
+      loadPopularProductsFallback(sliderEl);
+    } else {
+      sliderEl.innerHTML = '<div class="text-gray-400 text-center w-full p-7">هیچ کارت فعالی برای این سکشن ثبت نشده است.</div>';
+      updateSliderNavVisibility(sliderEl.id);
     }
-  } catch (err) {
-    console.warn('Custom section load failed, falling back to products.', err);
+    return;
   }
 
-  if (!customLoaded) {
-    await loadPopularProductsFallback(slider);
-  }
+  sliderEl.innerHTML = '';
+  cards
+    .slice()
+    .sort((a, b) => (Number(a.order) || 0) - (Number(b.order) || 0))
+    .forEach((card) => sliderEl.appendChild(createHomeSectionCard(card)));
+
+  updateSliderNavVisibility(sliderEl.id);
 }
 
-// بارگذاری محصولات هنگام آماده‌شدن صفحه
-window.addEventListener('DOMContentLoaded', loadPopularProducts);
+async function loadHomeCardSections() {
+  const container = document.getElementById(HOME_SECTIONS_CONTAINER_ID);
+  if (!container) {
+    return;
+  }
+
+  container.innerHTML = '<div class="text-center text-gray-400 py-16">در حال آماده‌سازی کارت‌های صفحه اصلی...</div>';
+
+  let sections = [];
+  try {
+    const res = await fetch('/api/home-card-sections');
+    if (!res.ok) {
+      throw new Error(`Failed to fetch sections: ${res.status}`);
+    }
+    sections = await res.json();
+  } catch (err) {
+    console.error('Failed to load home card sections:', err);
+    container.innerHTML = '<div class="text-center text-red-500 py-16">خطا در بارگذاری کارت‌های صفحه اصلی.</div>';
+    return;
+  }
+
+  const activeSections = Array.isArray(sections)
+    ? sections.filter((section) => section && section.isActive !== false)
+    : [];
+
+  activeSections.sort((a, b) => (Number(a.order) || 0) - (Number(b.order) || 0));
+
+  container.innerHTML = '';
+
+  if (!activeSections.length) {
+    const { sectionEl, sliderId } = createHomeSectionSkeleton({
+      title: 'محبوب‌ترین محصولات',
+      slug: POPULAR_PRODUCTS_SECTION_SLUG,
+      viewAllText: 'مشاهده همه',
+      viewAllLink: 'all-products.html',
+      subtitle: 'جدیدترین محصولات فروشگاه‌ها',
+      cards: [],
+    });
+    container.appendChild(sectionEl);
+    const sliderEl = sectionEl.querySelector(`#${sliderId}`);
+    if (sliderEl) {
+      sliderEl.innerHTML = '<div style="margin: 60px auto;">در حال بارگذاری...</div>';
+      registerSliderNavigation(sliderId);
+      loadPopularProductsFallback(sliderEl);
+    }
+    return;
+  }
+
+  activeSections.forEach((section) => {
+    const { sectionEl, sliderId } = createHomeSectionSkeleton(section);
+    container.appendChild(sectionEl);
+    const sliderEl = sectionEl.querySelector(`#${sliderId}`);
+    populateHomeSectionCards(section, sliderEl);
+    registerSliderNavigation(sliderId);
+  });
+}
+
+window.addEventListener('DOMContentLoaded', loadHomeCardSections);
 
 // اسکرول روان و drag برای مغازه‌های بانتا
 const bantaSlider = document.getElementById('banta-shops-section');
@@ -1682,13 +1789,13 @@ slider.addEventListener('touchend', () => {
 }, {passive:true});
 
 
-const sliderNavIds = [
+const sliderNavRegistry = new Set([
   'drag-scroll-cards',
   'popular-products-slider',
   'banta-shops-section',
   'shopping-centers-slider',
-  'shoes-bags-slider'
-];
+  'shoes-bags-slider',
+]);
 
 function updateSliderNavVisibility(sliderId) {
   const sliderEl = document.getElementById(sliderId);
@@ -1739,7 +1846,12 @@ function setupSliderNavigation(sliderId) {
 
   updateSliderNavVisibility(sliderId);
 
-  buttons.forEach(button => {
+  if (sliderEl.dataset.navInitialized === 'true') {
+    return;
+  }
+  sliderEl.dataset.navInitialized = 'true';
+
+  buttons.forEach((button) => {
     button.addEventListener('click', () => {
       const dirAttr = button.dataset.direction;
       if (!dirAttr) return;
@@ -1751,7 +1863,13 @@ function setupSliderNavigation(sliderId) {
   });
 }
 
-sliderNavIds.forEach(setupSliderNavigation);
+function registerSliderNavigation(sliderId) {
+  if (!sliderId) return;
+  sliderNavRegistry.add(sliderId);
+  setupSliderNavigation(sliderId);
+}
+
+sliderNavRegistry.forEach(setupSliderNavigation);
 
 
 window.showAdBannerPopup = async function() {
