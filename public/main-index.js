@@ -1826,31 +1826,40 @@ const res = await fetch('http://localhost:5000/api/adOrder/active?planSlug=ad_se
     if (productId) targetUrl = `product.html?id=${productId}`;
     else if (sellerId) targetUrl = `shop.html?id=${sellerId}`;
 
+    const safeAdTitle = escapeHTML(ad.adTitle || 'تبلیغ ویژه فروشگاه');
+    const rawAdText = typeof ad.adText === 'string' ? ad.adText.trim() : '';
+    const safeAdText = rawAdText ? escapeHTML(rawAdText).replace(/\n+/g, '<br>') : '';
+    const safeShopTitle = ad.shopTitle ? escapeHTML(ad.shopTitle) : '';
+    const mediaContent = ad.bannerImage
+      ? `<img src="/uploads/${ad.bannerImage}" alt="${safeAdTitle}" loading="lazy">`
+      : `<div class="ad-popup-placeholder" aria-hidden="true">AD</div>`;
+
     adSlot.innerHTML = `
-      <a href="${targetUrl}" style="display:block;padding:18px;text-align:right;text-decoration:none;">
-        <div style="display:flex;align-items:center;gap:20px;">
-          <div style="
-            width:90px;height:90px;
-            border-radius:0;
-            overflow:hidden;
-            border:1.5px solid #10b98133;
-            display:flex;
-            align-items:center;
-            justify-content:center;
-            flex-shrink:0;
-            background:none;
-            box-shadow:none;
-          ">
-            ${
-              ad.bannerImage
-                ? `<img src="/uploads/${ad.bannerImage}"
-                       style="width:100%;height:100%;object-fit:cover;object-position:center;display:block;">`
-                : `<span style="font-size:22px;color:#10b981;font-weight:bold;">AD</span>`
-            }
+      <a href="${targetUrl}" class="ad-popup-card" rel="noopener sponsored" aria-label="مشاهده تبلیغ پیشنهادی">
+        <div class="ad-popup-header">
+          <span class="ad-popup-badge">
+            <svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+              <path d="M4.5 8.5c0-2.485 2.015-4.5 4.5-4.5h2c2.485 0 4.5 2.015 4.5 4.5v3c0 2.485-2.015 4.5-4.5 4.5h-2c-2.485 0-4.5-2.015-4.5-4.5v-3Z" stroke="#047857" stroke-width="1.4"/>
+              <path d="M7.5 8h5" stroke="#047857" stroke-width="1.4" stroke-linecap="round"/>
+              <path d="M7.5 11h3" stroke="#047857" stroke-width="1.4" stroke-linecap="round"/>
+            </svg>
+            تبلیغ
+          </span>
+          <span class="ad-popup-sponsor">حامی نتایج جستجو</span>
+        </div>
+        <div class="ad-popup-body">
+          <div class="ad-popup-media">
+            ${mediaContent}
           </div>
-          <div style="flex:1;">
-            <div style="font-weight:900;font-size:1.14rem;color:#10b981">${ad.adTitle || 'تبلیغ ویژه فروشگاه'}</div>
-            <div style="font-size:.98rem;color:#555;margin-top:3px;">${ad.adText || ''}</div>
+          <div class="ad-popup-info">
+            ${safeShopTitle ? `<div class="ad-popup-shop">${safeShopTitle}</div>` : ''}
+            <div class="ad-popup-title">${safeAdTitle}</div>
+            ${safeAdText ? `<div class="ad-popup-text">${safeAdText}</div>` : ''}
+            <span class="ad-popup-cta">مشاهده پیشنهاد
+              <svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                <path d="M7 5l6 5-6 5" stroke="#0ea5e9" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </span>
           </div>
         </div>
       </a>
