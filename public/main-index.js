@@ -939,37 +939,146 @@ window.addEventListener('DOMContentLoaded', loadMostVisitedStores);
 // ✔︎ دسته‌بندی فروشگاه در بالای کارت
 // ✔︎ مکان فروشگاه به جای امتیاز ⭐️
 
-async function loadPopularProducts() {
-  const slider = document.getElementById('popular-products-slider');
-  slider.innerHTML = '<div style="margin: 60px auto;">در حال بارگذاری...</div>';
-  updateSliderNavVisibility('popular-products-slider');
+const POPULAR_PRODUCTS_SECTION_SLUG = 'popular-products';
 
+function renderPopularProductsSection(section) {
+  const slider = document.getElementById('popular-products-slider');
+  const titleEl = document.getElementById('popular-products-title');
+  const titleSpan = titleEl?.querySelector('span') || titleEl;
+  const subtitleEl = document.getElementById('popular-products-subtitle');
+  const ctaEl = document.getElementById('popular-products-cta');
+
+  if (titleSpan && section?.title) {
+    titleSpan.textContent = section.title;
+  }
+
+  if (subtitleEl) {
+    const subtitle = section?.subtitle?.trim() || section?.description?.trim() || '';
+    if (subtitle) {
+      subtitleEl.textContent = subtitle;
+      subtitleEl.classList.remove('hidden');
+    } else {
+      subtitleEl.textContent = '';
+      subtitleEl.classList.add('hidden');
+    }
+  }
+
+  if (ctaEl) {
+    const label = section?.viewAllText?.trim();
+    const href = section?.viewAllLink?.trim();
+    ctaEl.textContent = label || 'مشاهده همه';
+    if (href) {
+      ctaEl.href = href;
+      if (/^https?:/i.test(href)) {
+        ctaEl.target = '_blank';
+        ctaEl.rel = 'noopener';
+      } else {
+        ctaEl.target = '_self';
+        ctaEl.removeAttribute('rel');
+      }
+      ctaEl.classList.remove('pointer-events-none', 'opacity-60');
+    } else {
+      ctaEl.href = '#';
+      ctaEl.target = '_self';
+      ctaEl.rel = 'nofollow noopener';
+      ctaEl.classList.add('pointer-events-none', 'opacity-60');
+    }
+  }
+
+  const cards = Array.isArray(section?.cards)
+    ? [...section.cards].filter((card) => card && card.isActive !== false)
+    : [];
+
+  if (!cards.length) {
+    slider.innerHTML = '<div class="text-gray-400 text-center w-full p-7">هیچ کارت فعالی ثبت نشده است.</div>';
+    updateSliderNavVisibility('popular-products-slider');
+    return false;
+  }
+
+  slider.innerHTML = '';
+
+  cards
+    .sort((a, b) => (Number(a.order) || 0) - (Number(b.order) || 0))
+    .forEach((card) => {
+      const elementTag = card.link ? 'a' : 'div';
+      const cardEl = document.createElement(elementTag);
+      cardEl.className = `
+        group glass min-w-[265px] max-w-xs flex-shrink-0 flex flex-col items-center
+        p-4 rounded-2xl shadow-2xl border-2 border-[#0ea5e9]/20 hover:scale-[1.04] hover:shadow-2xl hover:border-[#0ea5e9]/40
+        bg-white/95 backdrop-blur-[5px] transition-all duration-300 center-card
+      `;
+
+      if (card.link) {
+        cardEl.href = card.link;
+        if (/^https?:/i.test(card.link)) {
+          cardEl.target = '_blank';
+          cardEl.rel = 'noopener';
+        } else {
+          cardEl.target = '_self';
+          cardEl.removeAttribute('rel');
+        }
+      }
+
+      const imageUrl = card.imageUrl?.trim() || 'assets/images/no-image.png';
+      const tag = card.tag ? `<span class="absolute top-2 right-2 text-xs font-bold px-3 py-1 rounded-full bg-gradient-to-r from-[#10b981] to-[#0ea5e9] text-white shadow-md">${escapeHTML(card.tag)}</span>` : '';
+      const description = card.description ? `<p class="text-sm text-gray-600 text-center mb-3 leading-relaxed">${escapeHTML(card.description)}</p>` : '';
+      const location = card.location
+        ? `<div class="flex items-center gap-1 mb-3 text-sm text-gray-700 font-bold"><svg width="18" height="18" fill="none" viewBox="0 0 22 22"><circle cx="11" cy="11" r="10" fill="#e0f7fa"/><path d="M11 2.5C7.13 2.5 4 5.61 4 9.45c0 3.52 4.1 7.93 6.2 10.01.46.47 1.2.47 1.66 0 2.1-2.08 6.14-6.49 6.14-10.01C18 5.61 14.87 2.5 11 2.5Z" fill="#10b981"/><circle cx="11" cy="9" r="2.5" fill="#0ea5e9"/></svg><span class="truncate max-w-[160px]">${escapeHTML(card.location)}</span></div>`
+        : '';
+      const price = card.price
+        ? `<div class="inline-block bg-gradient-to-r from-[#10b981]/10 to-[#0ea5e9]/10 px-4 py-1 rounded-full text-[#10b981] font-extrabold text-base shadow-sm">${escapeHTML(card.price)}</div>`
+        : '';
+      const button = card.buttonText
+        ? `<span class="mt-4 inline-flex items-center gap-2 text-sm font-bold text-[#0ea5e9] bg-[#e0fdfa] px-4 py-1.5 rounded-full shadow-sm">${escapeHTML(card.buttonText)}<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M7 17L17 7M7 7h10v10"/></svg></span>`
+        : '';
+
+      cardEl.innerHTML = `
+        <div class="w-full h-[130px] sm:h-[170px] rounded-xl mb-5 flex items-center justify-center relative overflow-hidden" style="background:linear-gradient(120deg,#d4fbe8,#e0fdfa,#c8f7e6); box-shadow:inset 0 2px 10px rgba(16,185,129,0.1);">
+          <img src="${imageUrl}" alt="${escapeHTML(card.title)}" class="w-full h-full object-cover group-hover:brightness-105 transition-all duration-300" onerror="this.src='assets/images/no-image.png'"/>
+          ${tag}
+        </div>
+        <h4 class="font-extrabold text-lg sm:text-xl bg-gradient-to-r from-[#10b981] to-[#0ea5e9] bg-clip-text text-transparent text-center mb-2 line-clamp-2">
+          ${escapeHTML(card.title)}
+        </h4>
+        ${description}
+        ${location}
+        ${price}
+        ${button}
+      `;
+
+      slider.appendChild(cardEl);
+    });
+
+  updateSliderNavVisibility('popular-products-slider');
+  return true;
+}
+
+async function loadPopularProductsFallback(slider) {
   try {
     const res = await fetch('http://localhost:5000/api/products/latest-products');
     if (!res.ok) throw new Error('Network error');
 
-    const payload  = await res.json();
+    const payload = await res.json();
     const products = Array.isArray(payload) ? payload : payload.products;
 
     if (!products?.length) {
-      slider.innerHTML =
-        '<div class="text-gray-400 text-center w-full p-7">محصولی یافت نشد.</div>';
+      slider.innerHTML = '<div class="text-gray-400 text-center w-full p-7">محصولی یافت نشد.</div>';
       updateSliderNavVisibility('popular-products-slider');
       return;
     }
 
-    slider.innerHTML = ''; // پاک کردن لودر
-    updateSliderNavVisibility('popular-products-slider');
+    slider.innerHTML = '';
 
-    products.forEach(p => {
-      const cat  = p.sellerCategory || p.category || 'نامشخص';
-      const loc  = p.sellerLocation || '—';
-      const img  = p.images?.[0] ?? 'assets/images/no-image.png';
+    products.forEach((p) => {
+      const cat = p.sellerCategory || p.category || 'نامشخص';
+      const loc = p.sellerLocation || '—';
+      const img = p.images?.[0] ?? 'assets/images/no-image.png';
       const priceText = (p.price ?? 0).toLocaleString() + ' تومان';
 
       const card = document.createElement('a');
-      card.href = p._id ? `product.html?id=${p._id}` : '#';  // اصلاح: هدایت به صفحه محصول بر اساس ID
-      card.target = '_blank';  // اصلاح: باز شدن در تب جدید
+      card.href = p._id ? `product.html?id=${p._id}` : '#';
+      card.target = '_blank';
+      card.rel = 'noopener';
       card.className = `
         group glass min-w-[265px] max-w-xs flex-shrink-0 flex flex-col items-center
         p-4 rounded-2xl shadow-2xl border-2 border-[#0ea5e9]/20 hover:scale-[1.04] hover:shadow-2xl hover:border-[#0ea5e9]/40
@@ -977,37 +1086,25 @@ async function loadPopularProducts() {
       `;
 
       card.innerHTML = `
-        <!-- تصویر محصول -->
-        <div class="w-full h-[130px] sm:h-[170px] rounded-xl mb-5 flex items-center justify-center relative overflow-hidden"
-             style="background:linear-gradient(120deg,#d4fbe8,#e0fdfa,#c8f7e6); box-shadow:inset 0 2px 10px rgba(16,185,129,0.1);">
-          <img src="${img}" alt="${p.title}"
-               class="w-full h-full object-cover group-hover:brightness-105 transition-all duration-300"/>
-          <!-- تگ دسته‌بندی فروشگاه -->
+        <div class="w-full h-[130px] sm:h-[170px] rounded-xl mb-5 flex items-center justify-center relative overflow-hidden" style="background:linear-gradient(120deg,#d4fbe8,#e0fdfa,#c8f7e6); box-shadow:inset 0 2px 10px rgba(16,185,129,0.1);">
+          <img src="${img}" alt="${escapeHTML(p.title)}" class="w-full h-full object-cover group-hover:brightness-105 transition-all duration-300"/>
           <span class="absolute top-2 right-2 text-xs font-bold px-3 py-1 rounded-full bg-gradient-to-r from-[#10b981] to-[#0ea5e9] text-white shadow-md">
-            ${cat}
+            ${escapeHTML(cat)}
           </span>
         </div>
-
-        <!-- عنوان محصول -->
         <h4 class="font-extrabold text-lg sm:text-xl bg-gradient-to-r from-[#10b981] to-[#0ea5e9] bg-clip-text text-transparent text-center mb-2 line-clamp-2">
-          ${p.title}
+          ${escapeHTML(p.title)}
         </h4>
-
-        <!-- مکان فروشگاه -->
         <div class="flex items-center gap-1 mb-3">
           <svg width="18" height="18" fill="none" viewBox="0 0 22 22">
             <circle cx="11" cy="11" r="10" fill="#e0f7fa"/>
-            <path d="M11 2.5C7.13 2.5 4 5.61 4 9.45c0 3.52 4.1 7.93 6.2 10.01.46.47 1.2.47 1.66 0
-                     2.1-2.08 6.14-6.49 6.14-10.01C18 5.61 14.87 2.5 11 2.5Z"
-                  fill="#10b981"/>
+            <path d="M11 2.5C7.13 2.5 4 5.61 4 9.45c0 3.52 4.1 7.93 6.2 10.01.46.47 1.2.47 1.66 0 2.1-2.08 6.14-6.49 6.14-10.01C18 5.61 14.87 2.5 11 2.5Z" fill="#10b981"/>
             <circle cx="11" cy="9" r="2.5" fill="#0ea5e9"/>
           </svg>
-          <span class="text-gray-700 text-sm font-bold truncate max-w-[160px]">${loc}</span>
+          <span class="text-gray-700 text-sm font-bold truncate max-w-[160px]">${escapeHTML(loc)}</span>
         </div>
-
-        <!-- قیمت -->
         <div class="inline-block bg-gradient-to-r from-[#10b981]/10 to-[#0ea5e9]/10 px-4 py-1 rounded-full text-[#10b981] font-extrabold text-base shadow-sm">
-          ${priceText}
+          ${escapeHTML(priceText)}
         </div>
       `;
       slider.appendChild(card);
@@ -1015,10 +1112,36 @@ async function loadPopularProducts() {
 
     updateSliderNavVisibility('popular-products-slider');
   } catch (err) {
-    slider.innerHTML =
-      '<div class="text-red-500 text-center w-full p-7">مشکلی در بارگذاری محصولات پیش آمد.</div>';
+    slider.innerHTML = '<div class="text-red-500 text-center w-full p-7">مشکلی در بارگذاری محصولات پیش آمد.</div>';
     updateSliderNavVisibility('popular-products-slider');
     console.error(err);
+  }
+}
+
+async function loadPopularProducts() {
+  const slider = document.getElementById('popular-products-slider');
+  slider.innerHTML = '<div style="margin: 60px auto;">در حال بارگذاری...</div>';
+  updateSliderNavVisibility('popular-products-slider');
+
+  let customLoaded = false;
+  try {
+    const res = await fetch(`/api/home-card-sections/slug/${POPULAR_PRODUCTS_SECTION_SLUG}`);
+    if (res.ok) {
+      const section = await res.json();
+      if (section && Array.isArray(section.cards) && section.cards.length) {
+        customLoaded = renderPopularProductsSection(section);
+      } else if (section && (!section.cards || !section.cards.length)) {
+        customLoaded = renderPopularProductsSection(section);
+      }
+    } else if (res.status !== 404) {
+      throw new Error(`Failed to fetch custom section: ${res.status}`);
+    }
+  } catch (err) {
+    console.warn('Custom section load failed, falling back to products.', err);
+  }
+
+  if (!customLoaded) {
+    await loadPopularProductsFallback(slider);
   }
 }
 
