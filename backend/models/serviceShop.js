@@ -62,7 +62,7 @@ const geoLocationSchema = new mongoose.Schema({
 
 const serviceShopSchema = new mongoose.Schema({
   name: { type: String, required: true, trim: true },
-  shopUrl: { type: String, required: true, unique: true, lowercase: true, trim: true },
+  shopUrl: { type: String, required: true, lowercase: true, trim: true },
   ownerName: { type: String, default: '', trim: true },
   ownerPhone: { type: String, required: true, trim: true },
   ownerEmail: { type: String, default: '', trim: true },
