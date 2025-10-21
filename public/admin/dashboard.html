@@ -2611,8 +2611,8 @@ tr:last-child td {
 
 
 <script>
-const API_BASE = "http://localhost:5000/api";
-const API_ORIGIN = "http://localhost:5000";
+const ADMIN_API_BASE = "http://localhost:5000/api";
+const ADMIN_API_ORIGIN = "http://localhost:5000";
 const SHOPPING_CENTER_PLACEHOLDER =
   'data:image/svg+xml;utf8,' +
   encodeURIComponent(
@@ -2689,9 +2689,9 @@ function toAbsoluteMediaUrl(path, fallback = SHOPPING_CENTER_PLACEHOLDER) {
     return str;
   }
   if (str.startsWith('/')) {
-    return `${API_ORIGIN}${str}`;
+    return `${ADMIN_API_ORIGIN}${str}`;
   }
-  return `${API_ORIGIN}/${str.replace(/^\/+/, '')}`;
+  return `${ADMIN_API_ORIGIN}/${str.replace(/^\/+/, '')}`;
 }
 
 function getShoppingCenterId(center) {
@@ -2748,7 +2748,7 @@ function removeShoppingCenterLocal(id) {
 
 async function fetchShoppingCenters() {
   try {
-    const res = await fetch(`${API_BASE}/shopping-centers`, { credentials: 'include' });
+    const res = await fetch(`${ADMIN_API_BASE}/shopping-centers`, { credentials: 'include' });
     if (!res.ok) {
       console.error('fetchShoppingCenters – HTTP-', res.status, await res.text());
       return [];
@@ -2923,7 +2923,7 @@ async function handleShoppingCenterSubmit(event) {
 
   try {
     setShoppingCenterFormMessage('در حال ثبت مرکز خرید...', 'info', 0);
-    const res = await fetch(`${API_BASE}/shopping-centers`, {
+    const res = await fetch(`${ADMIN_API_BASE}/shopping-centers`, {
       method: 'POST',
       credentials: 'include',
       body: formData
@@ -2960,7 +2960,7 @@ window.deleteShoppingCenter = async function(id) {
   if (!confirm('آیا از حذف این مرکز خرید مطمئن هستید؟')) return;
 
   try {
-    const res = await fetch(`${API_BASE}/shopping-centers/${normalisedId}`, {
+    const res = await fetch(`${ADMIN_API_BASE}/shopping-centers/${normalisedId}`, {
       method: 'DELETE',
       credentials: 'include'
     });
@@ -3153,7 +3153,7 @@ function getSellerScoreForShop(shop) {
 
 async function refreshSellerPerformanceMap() {
   try {
-    const res = await fetch(`${API_BASE}/sellers/performance`, {
+    const res = await fetch(`${ADMIN_API_BASE}/sellers/performance`, {
       credentials: 'include'
     });
 
@@ -3210,7 +3210,7 @@ async function setSellerScoreByKey(key, value, note, message) {
     body.message = message;
   }
 
-  const res = await fetch(`${API_BASE}/sellers/performance/${encodeURIComponent(normalised)}`, {
+  const res = await fetch(`${ADMIN_API_BASE}/sellers/performance/${encodeURIComponent(normalised)}`, {
     method: 'PUT',
     headers: { 'Content-Type': 'application/json' },
     credentials: 'include',
@@ -3256,7 +3256,7 @@ async function clearSellerScoreByKey(key) {
   const normalised = normaliseScoreKey(key);
   if (!normalised) throw new Error('شناسه فروشنده معتبر نیست.');
 
-  const res = await fetch(`${API_BASE}/sellers/performance/${encodeURIComponent(normalised)}`, {
+  const res = await fetch(`${ADMIN_API_BASE}/sellers/performance/${encodeURIComponent(normalised)}`, {
     method: 'DELETE',
     credentials: 'include'
   });
@@ -3415,7 +3415,7 @@ function buildNameMaps() {
 async function fetchMessages() {
   console.log('⚙️ fetchMessages called');
 
-const res = await fetch(`${API_BASE}/chats/all`, { credentials: 'include' });
+const res = await fetch(`${ADMIN_API_BASE}/chats/all`, { credentials: 'include' });
 
   const data = await res.json();
 
@@ -3775,7 +3775,7 @@ async function deleteMessage(chatId) {
   if (!confirm('آیا مطمئن هستید که می‌خواهید این چت را حذف کنید؟')) return;
 
   try {
-    const res = await fetch(`${API_BASE}/chats/${chatId}`, {
+    const res = await fetch(`${ADMIN_API_BASE}/chats/${chatId}`, {
       method: 'DELETE',
       credentials: 'include'
     });
@@ -3828,7 +3828,7 @@ async function blockSender(chatId) {
 
   try {
     console.log('blockSender ->', { targetId, targetRole });
-    const res = await fetch(`${API_BASE}/chats/block-target`, {
+    const res = await fetch(`${ADMIN_API_BASE}/chats/block-target`, {
       method: 'POST',
       credentials: 'include',
       headers: { 'Content-Type': 'application/json' },
@@ -3874,7 +3874,7 @@ async function unblockSender(chatId) {
 
   try {
     console.log('unblockSender ->', { targetId, targetRole });
-    const res = await fetch(`${API_BASE}/chats/unblock-target`, {
+    const res = await fetch(`${ADMIN_API_BASE}/chats/unblock-target`, {
       method: 'POST',
       credentials: 'include',
       headers: { 'Content-Type': 'application/json' },
@@ -3904,7 +3904,7 @@ const DASHBOARD_TREND_DAYS = 90;
 
 async function fetchDashboardStats(days = DASHBOARD_TREND_DAYS) {
   try {
-    const res = await fetch(`${API_BASE}/admin/dashboard/stats?days=${encodeURIComponent(days)}`, {
+    const res = await fetch(`${ADMIN_API_BASE}/admin/dashboard/stats?days=${encodeURIComponent(days)}`, {
       credentials: 'include'
     });
 
@@ -3976,7 +3976,7 @@ function applyDashboardStats(stats, { usersFallback = 0, sellersFallback = 0, pr
 
 async function fetchUsers() {
   try {
-    const res = await fetch(`${API_BASE}/user`, {   // ← مسیر مفرد
+    const res = await fetch(`${ADMIN_API_BASE}/user`, {   // ← مسیر مفرد
       credentials: 'include'
       });
     if (!res.ok) {
@@ -3999,7 +3999,7 @@ async function fetchUsers() {
 
 
 async function fetchShops() {
-  const res = await fetch(API_BASE + '/shops', {
+  const res = await fetch(ADMIN_API_BASE + '/shops', {
     credentials: 'include'
   });
   const data = await res.json();
@@ -4019,7 +4019,7 @@ async function sellerExists(phone) {
 /* -------- fetchProducts (FIXED & ROBUST) -------- */
 async function fetchProducts () {
   try {
-    const res = await fetch(`${API_BASE}/products`, { credentials: 'include' });
+    const res = await fetch(`${ADMIN_API_BASE}/products`, { credentials: 'include' });
 
     /* اگر پاسخ خطاست یک آرایهٔ خالی برگردانیم */
     if (!res.ok) {
@@ -4175,7 +4175,7 @@ async function sendUserMessage(e) {
 
   try {
     // ابتدا اطمینان حاصل کن که چت بین ادمین و کاربر وجود دارد
-    const ensureRes = await fetch(`${API_BASE}/chats/ensure`, {
+    const ensureRes = await fetch(`${ADMIN_API_BASE}/chats/ensure`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       credentials: 'include',
@@ -4185,7 +4185,7 @@ async function sendUserMessage(e) {
     if (!ensureRes.ok) throw new Error(chat.error || 'خطا در ایجاد گفتگو');
 
     // سپس پیام را به عنوان ادمین در آن چت ارسال کن
-    const res = await fetch(`${API_BASE}/chats/${chat._id}/admin-reply`, {
+    const res = await fetch(`${ADMIN_API_BASE}/chats/${chat._id}/admin-reply`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       credentials: 'include',
@@ -4263,7 +4263,7 @@ window.deleteSeller = async function(id) {
   console.log('Deleting seller:', sid, name);
 
   try {
-    const res = await fetch(`${API_BASE}/sellers/${encodeURIComponent(sid)}`, {
+    const res = await fetch(`${ADMIN_API_BASE}/sellers/${encodeURIComponent(sid)}`, {
       method: 'DELETE',
       credentials: 'include'
     });
@@ -4376,7 +4376,7 @@ window.deleteProduct = async function (idx) {
   if (!confirm(`آیا مطمئن هستید که می‌خواهید محصول "${prod.title || prod.name || 'نامشخص'}" را حذف کنید؟`)) return;
 
   try {
-    const res = await fetch(`${API_BASE}/products/${prod._id || prod.id}`, {
+    const res = await fetch(`${ADMIN_API_BASE}/products/${prod._id || prod.id}`, {
       method: 'DELETE',
       credentials: 'include'  // برای ارسال کوکی‌های احراز هویت (مثل admin_token)
     });
@@ -4412,7 +4412,7 @@ window.deleteUser = async function (idx) {
 پس از حذف، این شماره دیگر قادر به ورود یا ثبت‌نام نخواهد بود.`)) return;
 
   try {
-    const res  = await fetch(`${API_BASE}/user/${user._id || user.id}`, {
+    const res  = await fetch(`${ADMIN_API_BASE}/user/${user._id || user.id}`, {
       method      : 'DELETE',
       credentials : 'include'
     });
@@ -4437,7 +4437,7 @@ window.blockUser = async function(id, idx) {
   if (!confirm('آیا مطمئن هستید که می‌خواهید این مشتری را مسدود کنید؟')) return;
   try {
     console.log('blockUser ->', { targetId: id, targetRole: 'user' });
-    const res = await fetch(`${API_BASE}/chats/block-target`, {
+    const res = await fetch(`${ADMIN_API_BASE}/chats/block-target`, {
       method: 'POST',
       credentials: 'include',
       headers: { 'Content-Type': 'application/json' },
@@ -4459,7 +4459,7 @@ window.unblockUser = async function(id, idx) {
   if (!confirm('آیا مطمئن هستید که می‌خواهید این مشتری را آزاد کنید؟')) return;
   try {
     console.log('unblockUser ->', { targetId: id, targetRole: 'user' });
-    const res = await fetch(`${API_BASE}/chats/unblock-target`, {
+    const res = await fetch(`${ADMIN_API_BASE}/chats/unblock-target`, {
       method: 'POST',
       credentials: 'include',
       headers: { 'Content-Type': 'application/json' },
@@ -5455,7 +5455,7 @@ async function sendSellerMessage(e) {
   }
 
   try {
-    const res = await fetch(`${API_BASE}/chats`, {
+    const res = await fetch(`${ADMIN_API_BASE}/chats`, {
       method: 'POST',
       headers: {
         'Content-Type':  'application/json'
@@ -5531,7 +5531,7 @@ function findShopBySellerId(sellerId, shopUrl) {
 // تابع اصلاح شده برای دریافت اطلاعات فروشنده
 async function getSellerDetails(sellerId) {
   try {
-    const res = await fetch(`${API_BASE}/sellers/${encodeURIComponent(sellerId)}`, {
+    const res = await fetch(`${ADMIN_API_BASE}/sellers/${encodeURIComponent(sellerId)}`, {
       credentials: 'include'
     });
     
@@ -5693,7 +5693,7 @@ async function loadPlanPrices() {
   try {
     let phone = document.getElementById('seller-phone-plans').value.trim();
     phone = normalizePhone(phone);
-    let url = `${API_BASE}/plans`;
+    let url = `${ADMIN_API_BASE}/plans`;
     if (phone) {
       url += `?sellerPhone=${encodeURIComponent(phone)}`;
     }
@@ -5769,7 +5769,7 @@ async function savePlanPrices(e) {
   try {
     const token = getCookie('admin_token') || getCookie('access_token');
 
-    const res = await fetch(`${API_BASE}/plans/admin`, {
+    const res = await fetch(`${ADMIN_API_BASE}/plans/admin`, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
@@ -5832,7 +5832,7 @@ async function loadAdsPrices() {
   try {
     let phone = document.getElementById('seller-phone-ads').value.trim();
     phone = normalizePhone(phone);
-    let url = `${API_BASE}/adplans`;
+    let url = `${ADMIN_API_BASE}/adplans`;
     if (phone) {
       url += `?sellerPhone=${encodeURIComponent(phone)}`;
     }
@@ -5891,7 +5891,7 @@ async function saveAdsPrices(e) {
 
   try {
     // ۳) PUT
-    const res = await fetch(`${API_BASE}/adplans/admin`, {
+    const res = await fetch(`${ADMIN_API_BASE}/adplans/admin`, {
       method: 'PUT',
       headers: {
         'Content-Type':  'application/json',
@@ -6004,7 +6004,7 @@ window.openChatModal = async function (chatId) {
     if (unreadMsgIds.length > 0) {
       try {
         const token = getCookie('admin_token') || getCookie('access_token');
-        await fetch(`${API_BASE}/chats/${chatId}/mark-read`, {
+        await fetch(`${ADMIN_API_BASE}/chats/${chatId}/mark-read`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -6082,7 +6082,7 @@ window.sendAdminMessage = async function () {
   if (!currentChatId) return alert('چت انتخاب نشده است.');
 
   try {
-    const res = await fetch(`${API_BASE}/chats/${currentChatId}/admin-reply`, {
+    const res = await fetch(`${ADMIN_API_BASE}/chats/${currentChatId}/admin-reply`, {
       method: 'POST',
       credentials: 'include', // ارسال کوکی‌های HttpOnly مثل admin_token
       headers: {
@@ -6150,7 +6150,7 @@ async function blockCurrentSender() {
 
   try {
     console.log('blockCurrentSender ->', { targetId, targetRole });
-    const res = await fetch(`${API_BASE}/chats/block-target`, {
+    const res = await fetch(`${ADMIN_API_BASE}/chats/block-target`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
@@ -6183,7 +6183,7 @@ async function unblockCurrentSender() {
 
   try {
     console.log('unblockCurrentSender ->', { targetId, targetRole });
-    const res = await fetch(`${API_BASE}/chats/unblock-target`, {
+    const res = await fetch(`${ADMIN_API_BASE}/chats/unblock-target`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
@@ -6219,7 +6219,7 @@ async function sendBroadcastMessage() {
   status.textContent = '⏳ در حال ارسال...';
 
   try {
-    const res = await fetch(`${API_BASE}/chats/broadcast`, {
+    const res = await fetch(`${ADMIN_API_BASE}/chats/broadcast`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
@@ -6244,7 +6244,7 @@ async function sendBroadcastMessage() {
 
 async function fetchUnreadCountAndUpdateBadge() {
   try {
-   const res = await fetch(`${API_BASE}/chats/all`, {
+   const res = await fetch(`${ADMIN_API_BASE}/chats/all`, {
   credentials: 'include'
 });
     if (!res.ok) throw new Error("خطا در شمارش پیام‌ها");
