@@ -196,10 +196,22 @@ exports.updateAdOrderStatus = async (req, res) => {
       adOrder.reviewedBy = req.user.id || req.user._id;
     }
 
+    const now = new Date();
     if (status === 'approved') {
-      adOrder.approvedAt = new Date();
-    } else if (status !== 'approved') {
+      adOrder.approvedAt = now;
+      if (!adOrder.displayedAt) {
+        adOrder.displayedAt = now;
+      }
+    } else if (status === 'paid' || status === 'expired') {
+      if (!adOrder.approvedAt) {
+        adOrder.approvedAt = now;
+      }
+      if (!adOrder.displayedAt) {
+        adOrder.displayedAt = now;
+      }
+    } else {
       adOrder.approvedAt = undefined;
+      adOrder.displayedAt = undefined;
     }
 
     await adOrder.save();
@@ -215,6 +227,120 @@ exports.updateAdOrderStatus = async (req, res) => {
     res.status(500).json({
       success: false,
       message: 'خطا در بروزرسانی وضعیت تبلیغ.',
+      error: err.message
+    });
+  }
+};
+
+// بروزرسانی جزئیات تبلیغ توسط ادمین
+exports.updateAdOrder = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const updates = req.body || {};
+
+    const adOrder = await AdOrder.findById(id);
+    if (!adOrder) {
+      return res.status(404).json({ success: false, message: 'سفارش تبلیغ پیدا نشد.' });
+    }
+
+    let hasChanges = false;
+
+    if (Object.prototype.hasOwnProperty.call(updates, 'adTitle')) {
+      const title = updates.adTitle !== undefined && updates.adTitle !== null
+        ? String(updates.adTitle).trim()
+        : '';
+      adOrder.adTitle = title.length ? title : undefined;
+      hasChanges = true;
+    }
+
+    if (Object.prototype.hasOwnProperty.call(updates, 'adText')) {
+      const text = updates.adText !== undefined && updates.adText !== null
+        ? String(updates.adText).trim()
+        : '';
+      adOrder.adText = text.length ? text : undefined;
+      hasChanges = true;
+    }
+
+    if (Object.prototype.hasOwnProperty.call(updates, 'price')) {
+      const price = Number(updates.price);
+      if (!Number.isFinite(price) || price < 0) {
+        return res.status(400).json({ success: false, message: 'مبلغ معتبر نیست.' });
+      }
+      adOrder.price = price;
+      hasChanges = true;
+    }
+
+    if (Object.prototype.hasOwnProperty.call(updates, 'displayedAt')) {
+      const rawDate = updates.displayedAt;
+      if (!rawDate) {
+        adOrder.displayedAt = undefined;
+      } else {
+        const displayDate = new Date(rawDate);
+        if (Number.isNaN(displayDate.getTime())) {
+          return res.status(400).json({ success: false, message: 'تاریخ نمایش معتبر نیست.' });
+        }
+        adOrder.displayedAt = displayDate;
+      }
+      hasChanges = true;
+    }
+
+    if (Object.prototype.hasOwnProperty.call(updates, 'adminNote')) {
+      adOrder.adminNote = normaliseNote(updates.adminNote);
+      hasChanges = true;
+    }
+
+    if (!hasChanges) {
+      return res.status(400).json({ success: false, message: 'هیچ تغییری اعمال نشد.' });
+    }
+
+    await adOrder.save();
+    await populateAdOrder(adOrder);
+
+    res.json({
+      success: true,
+      message: 'جزئیات تبلیغ بروزرسانی شد.',
+      adOrder
+    });
+  } catch (err) {
+    console.error('❌ خطا در بروزرسانی جزئیات تبلیغ:', err);
+    res.status(500).json({
+      success: false,
+      message: 'خطا در بروزرسانی جزئیات تبلیغ.',
+      error: err.message
+    });
+  }
+};
+
+// حذف سفارش تبلیغ توسط ادمین
+exports.deleteAdOrder = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const adOrder = await AdOrder.findById(id);
+
+    if (!adOrder) {
+      return res.status(404).json({ success: false, message: 'سفارش تبلیغ پیدا نشد.' });
+    }
+
+    const bannerPath = adOrder.bannerImage
+      ? path.join(__dirname, '..', 'uploads', adOrder.bannerImage)
+      : null;
+
+    await adOrder.deleteOne();
+
+    if (bannerPath) {
+      fs.promises.unlink(bannerPath).catch(err => {
+        if (err && err.code !== 'ENOENT') {
+          console.warn('⚠️ خطا در حذف بنر تبلیغ:', err.message || err);
+        }
+      });
+    }
+
+    res.json({ success: true, message: 'تبلیغ با موفقیت حذف شد.' });
+  } catch (err) {
+    console.error('❌ خطا در حذف سفارش تبلیغ:', err);
+    res.status(500).json({
+      success: false,
+      message: 'خطا در حذف سفارش تبلیغ.',
       error: err.message
     });
   }

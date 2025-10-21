@@ -43,8 +43,18 @@ router.get(
   adOrderController.getAdOrderById
 );
 
-// ── در صورت نیاز: حذف یا آپدیت وضعیت سفارش (مثلاً توسط ادمین) ──
-// router.delete('/:id', authMiddleware('admin'), adOrderController.deleteAdOrder);
-// router.put('/:id',    authMiddleware('admin'), adOrderController.updateAdOrder);
+// ── حذف کامل سفارش تبلیغ ──
+router.delete(
+  '/:id',
+  authMiddleware('admin'),
+  adOrderController.deleteAdOrder
+);
+
+// ── ویرایش جزئیات سفارش تبلیغ ──
+router.put(
+  '/:id',
+  authMiddleware('admin'),
+  adOrderController.updateAdOrder
+);
 
 module.exports = router;
