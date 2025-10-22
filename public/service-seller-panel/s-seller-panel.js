@@ -95,6 +95,13 @@ const collectBookingKeys = (list) => {
   return set;
 };
 
+const planRenewBtn = document.getElementById('plan-renew-btn');
+if (planRenewBtn) {
+  planRenewBtn.addEventListener('click', () => {
+    window.location.hash = '/plans';
+  });
+}
+
 const API = {
   async _json(res) {
     const txt = await res.text();
@@ -798,6 +805,7 @@ static formatRelativeDate(dateStr) {
 
 static animateCountUp(el) {
   if (!el || !el.dataset || el.dataset.value == null) return;
+  if (el.dataset.empty === 'true') return;
 
   const raw = String(el.dataset.value);
   const isDecimal = raw.includes('.');
@@ -1239,6 +1247,376 @@ BookingPopup.init();
    * Main Application Logic
    * ==============================
    */
+
+// ابزارهای قالب‌بندی و نمایش ایمن داده‌ها برای داشبورد
+const formatFaNumber = (value, fractionDigits = 0) => {
+  if (!Number.isFinite(value)) return null;
+  const options = fractionDigits > 0
+    ? { minimumFractionDigits: fractionDigits, maximumFractionDigits: fractionDigits }
+    : {};
+  return new Intl.NumberFormat('fa-IR', options).format(value);
+};
+
+const formatFaPercent = (value) => {
+  if (!Number.isFinite(value)) return null;
+  const digits = value % 1 === 0 ? 0 : 1;
+  const formatted = formatFaNumber(value, digits);
+  return formatted ? `${formatted}٪` : null;
+};
+
+const formatPlanDate = (date) => {
+  if (!(date instanceof Date) || Number.isNaN(date.getTime())) return null;
+  return new Intl.DateTimeFormat('fa-IR-u-ca-persian', {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit'
+  }).format(date);
+};
+
+const parseDateValue = (value) => {
+  if (!value) return null;
+  if (value instanceof Date && !Number.isNaN(value.getTime())) return value;
+  const normalized = toEn(String(value).trim())
+    .replace(/[\.]/g, '-')
+    .replace(/\//g, '-');
+  if (!normalized) return null;
+  const direct = new Date(normalized);
+  if (!Number.isNaN(direct.getTime())) return direct;
+  const timestamp = Date.parse(normalized);
+  return Number.isNaN(timestamp) ? null : new Date(timestamp);
+};
+
+const showElement = (node) => {
+  if (!node) return;
+  node.removeAttribute('hidden');
+  node.removeAttribute('aria-hidden');
+};
+
+const hideElement = (node) => {
+  if (!node) return;
+  node.setAttribute('hidden', '');
+  node.setAttribute('aria-hidden', 'true');
+};
+
+const resetDatasetValue = (el) => {
+  if (!el) return;
+  el.dataset.value = '0';
+  el.dataset.empty = 'true';
+};
+
+const updatePlanHero = (planInfo) => {
+  const hero = document.getElementById('plan-hero');
+  const tierEl = document.getElementById('plan-tier');
+  const daysLeftEl = document.getElementById('plan-days-left');
+  const expiryEl = document.getElementById('plan-expiry');
+  const statusChip = document.getElementById('plan-status-chip');
+  const progressBar = document.getElementById('plan-progress-bar');
+  const usedEl = document.getElementById('plan-used');
+  const leftEl = document.getElementById('plan-left');
+  const perksEl = document.getElementById('plan-hero-perks');
+
+  if (!hero) return;
+
+  const reset = () => {
+    if (tierEl) tierEl.textContent = '—';
+    if (daysLeftEl) daysLeftEl.textContent = '—';
+    if (expiryEl) expiryEl.textContent = '—';
+    if (statusChip) {
+      statusChip.textContent = '—';
+      statusChip.className = 'chip';
+    }
+    if (progressBar) progressBar.style.width = '0%';
+    if (usedEl) usedEl.textContent = '—';
+    if (leftEl) leftEl.textContent = '—';
+    if (perksEl) {
+      perksEl.innerHTML = '';
+      perksEl.hidden = true;
+    }
+  };
+
+  if (!planInfo || typeof planInfo !== 'object') {
+    reset();
+    hideElement(hero);
+    return;
+  }
+
+  const tier = planInfo.tier || planInfo.name || planInfo.planName || planInfo.title || '';
+  const rawStatus = planInfo.status || planInfo.state || planInfo.planStatus || planInfo.statusLabel || '';
+  const normalizedStatus = typeof rawStatus === 'string' ? rawStatus.trim().toLowerCase() : '';
+  const statusMap = {
+    active: 'فعال',
+    pending: 'در انتظار',
+    trial: 'آزمایشی',
+    expired: 'منقضی',
+    suspended: 'غیرفعال'
+  };
+  const statusLabel = statusMap[normalizedStatus] || (typeof rawStatus === 'string' && rawStatus.trim()) || '';
+
+  const startDate = parseDateValue(planInfo.start || planInfo.startDate || planInfo.startedAt);
+  const endDate = parseDateValue(planInfo.end || planInfo.endDate || planInfo.expireAt || planInfo.expiresAt || planInfo.expiryDate);
+
+  let remainingDays = Number(planInfo.daysLeft ?? planInfo.remainingDays ?? planInfo.daysRemaining);
+  if (!Number.isFinite(remainingDays) && endDate) {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const end = new Date(endDate);
+    end.setHours(0, 0, 0, 0);
+    const diff = Math.ceil((end - today) / 86400000);
+    if (Number.isFinite(diff)) {
+      remainingDays = Math.max(diff, 0);
+    }
+  }
+
+  let totalDays = Number(planInfo.totalDays ?? planInfo.durationDays ?? planInfo.planDays);
+  if (!Number.isFinite(totalDays) && startDate && endDate) {
+    const diff = Math.max(Math.round((endDate - startDate) / 86400000), 0);
+    if (Number.isFinite(diff)) {
+      totalDays = diff;
+    }
+  }
+
+  let usedPercent = Number(planInfo.progress ?? planInfo.progressPercent ?? planInfo.usagePercent ?? planInfo.usedPercent);
+  if (!Number.isFinite(usedPercent) && Number.isFinite(totalDays) && Number.isFinite(remainingDays)) {
+    usedPercent = totalDays === 0 ? 0 : ((totalDays - remainingDays) / Math.max(totalDays, 1)) * 100;
+  } else if (!Number.isFinite(usedPercent) && startDate && endDate) {
+    const now = new Date();
+    if (now <= startDate) {
+      usedPercent = 0;
+    } else if (now >= endDate) {
+      usedPercent = 100;
+    } else {
+      const elapsed = now - startDate;
+      const duration = endDate - startDate;
+      if (duration > 0) {
+        usedPercent = (elapsed / duration) * 100;
+      }
+    }
+  }
+
+  let leftPercent = Number(planInfo.remainingPercent ?? planInfo.leftPercent ?? planInfo.remainingProgress);
+  if (!Number.isFinite(leftPercent) && Number.isFinite(usedPercent)) {
+    leftPercent = Math.max(0, 100 - usedPercent);
+  }
+
+  const perksSource = planInfo.perks ?? planInfo.features ?? planInfo.benefits;
+  const perks = Array.isArray(perksSource)
+    ? perksSource
+    : typeof perksSource === 'string'
+      ? perksSource.split(',').map((item) => item.trim()).filter(Boolean)
+      : [];
+
+  reset();
+
+  let hasContent = false;
+
+  if (tierEl) {
+    tierEl.textContent = tier ? `🎖 ${tier}` : '—';
+    if (tier) hasContent = true;
+  }
+
+  if (daysLeftEl) {
+    const daysText = formatFaNumber(Math.max(0, remainingDays));
+    daysLeftEl.textContent = daysText ? `${daysText} روز` : '—';
+    if (daysText) hasContent = true;
+  }
+
+  if (expiryEl) {
+    const expiryText = formatPlanDate(endDate);
+    expiryEl.textContent = expiryText || '—';
+    if (expiryText) hasContent = true;
+  }
+
+  if (statusChip) {
+    statusChip.textContent = statusLabel || '—';
+    statusChip.className = 'chip';
+    if (normalizedStatus === 'active' || statusLabel === 'فعال') {
+      statusChip.classList.add('chip-live');
+    }
+    if (statusLabel) hasContent = true;
+  }
+
+  const usedClamped = Number.isFinite(usedPercent) ? Math.max(0, Math.min(100, usedPercent)) : null;
+  const leftClamped = Number.isFinite(leftPercent) ? Math.max(0, Math.min(100, leftPercent)) : (usedClamped != null ? Math.max(0, 100 - usedClamped) : null);
+
+  if (progressBar) {
+    progressBar.style.width = usedClamped != null ? `${usedClamped}%` : '0%';
+  }
+  if (usedEl) {
+    const usedText = formatFaPercent(usedClamped ?? NaN);
+    usedEl.textContent = usedText || '—';
+    if (usedText) hasContent = true;
+  }
+  if (leftEl) {
+    const leftText = formatFaPercent(leftClamped ?? NaN);
+    leftEl.textContent = leftText || '—';
+  }
+
+  if (perksEl) {
+    const perkItems = perks.map((item) => String(item).trim()).filter(Boolean);
+    if (perkItems.length) {
+      perksEl.innerHTML = perkItems.map((item) => `<li>${item}</li>`).join('');
+      perksEl.hidden = false;
+      hasContent = true;
+    } else {
+      perksEl.innerHTML = '';
+      perksEl.hidden = true;
+    }
+  }
+
+  if (hasContent) {
+    showElement(hero);
+  } else {
+    hideElement(hero);
+  }
+};
+
+const updateRankCard = (rankingInfo) => {
+  const card = document.getElementById('rank-card');
+  const categoryEl = document.getElementById('rank-category');
+  const rankEl = document.getElementById('current-rank');
+  const totalEl = document.getElementById('total-sellers');
+
+  if (!card) return;
+
+  const reset = () => {
+    if (categoryEl) categoryEl.textContent = '—';
+    if (rankEl) {
+      rankEl.textContent = '—';
+      resetDatasetValue(rankEl);
+    }
+    if (totalEl) {
+      totalEl.textContent = '—';
+      resetDatasetValue(totalEl);
+    }
+    card.querySelectorAll('.metric-item').forEach((item) => {
+      const valueEl = item.querySelector('.metric-value');
+      if (valueEl) valueEl.textContent = '—';
+      item.setAttribute('aria-label', '—');
+    });
+  };
+
+  if (!rankingInfo || typeof rankingInfo !== 'object') {
+    reset();
+    hideElement(card);
+    return;
+  }
+
+  const rankValue = Number(rankingInfo.rank ?? rankingInfo.current ?? rankingInfo.position ?? rankingInfo.currentRank);
+  const totalValue = Number(rankingInfo.total ?? rankingInfo.totalSellers ?? rankingInfo.count ?? rankingInfo.totalVendors ?? rankingInfo.totalVendorsCount);
+  const category = rankingInfo.category || rankingInfo.segment || rankingInfo.scope || rankingInfo.city || rankingInfo.group || '';
+
+  const metricsSource = rankingInfo.metrics || rankingInfo.summary || rankingInfo.stats || null;
+  const metrics = {};
+
+  if (Array.isArray(metricsSource)) {
+    metricsSource.forEach((entry) => {
+      if (!entry) return;
+      const key = String(entry.key || entry.type || entry.name || '').trim().toLowerCase();
+      if (!key) return;
+      metrics[key] = entry.value ?? entry.count ?? entry.total ?? entry.score;
+    });
+  } else if (metricsSource && typeof metricsSource === 'object') {
+    Object.assign(metrics, metricsSource);
+  }
+
+  if (rankingInfo.customers != null && metrics.customers == null) {
+    metrics.customers = rankingInfo.customers;
+  }
+  if (rankingInfo.bookings != null && metrics.bookings == null) {
+    metrics.bookings = rankingInfo.bookings;
+  }
+  if (rankingInfo.rating != null && metrics.rating == null) {
+    metrics.rating = rankingInfo.rating;
+  } else if (rankingInfo.averageRating != null && metrics.rating == null) {
+    metrics.rating = rankingInfo.averageRating;
+  } else if (rankingInfo.score != null && metrics.rating == null) {
+    metrics.rating = rankingInfo.score;
+  }
+
+  const hasRank = Number.isFinite(rankValue);
+  const hasTotal = Number.isFinite(totalValue);
+  const hasCategory = !!category;
+  const hasMetrics = Object.values(metrics).some((value) => {
+    if (value == null) return false;
+    if (typeof value === 'string') return value.trim() !== '';
+    return Number.isFinite(Number(value));
+  });
+
+  if (!hasRank && !hasTotal && !hasCategory && !hasMetrics) {
+    reset();
+    hideElement(card);
+    return;
+  }
+
+  showElement(card);
+
+  if (categoryEl) {
+    categoryEl.textContent = category || '—';
+  }
+
+  if (rankEl) {
+    if (hasRank) {
+      rankEl.dataset.value = String(rankValue);
+      delete rankEl.dataset.empty;
+      rankEl.textContent = formatFaNumber(rankValue) || '—';
+    } else {
+      resetDatasetValue(rankEl);
+      rankEl.textContent = '—';
+    }
+  }
+
+  if (totalEl) {
+    if (hasTotal) {
+      totalEl.dataset.value = String(totalValue);
+      delete totalEl.dataset.empty;
+      totalEl.textContent = formatFaNumber(totalValue) || '—';
+    } else {
+      resetDatasetValue(totalEl);
+      totalEl.textContent = '—';
+    }
+  }
+
+  if (hasRank && hasTotal) {
+    const rankText = `${formatFaNumber(rankValue) || rankValue} از ${formatFaNumber(totalValue) || totalValue}`;
+    card.setAttribute('aria-label', `رتبه فعلی شما ${rankText}`);
+  } else {
+    card.setAttribute('aria-label', 'مشاهده جزئیات رتبه شما');
+  }
+
+  const metricElements = {
+    customers: card.querySelector('[data-metric="customers"]'),
+    bookings: card.querySelector('[data-metric="bookings"]'),
+    rating: card.querySelector('[data-metric="rating"]')
+  };
+
+  Object.entries(metricElements).forEach(([key, item]) => {
+    if (!item) return;
+    const valueEl = item.querySelector('.metric-value');
+    const labelEl = item.querySelector('.metric-label');
+    const rawValue = metrics[key];
+    let display = '—';
+
+    if (valueEl) {
+      const numericValue = Number(rawValue);
+      if (Number.isFinite(numericValue)) {
+        if (key === 'rating') {
+          const decimals = numericValue % 1 === 0 ? 0 : 1;
+          display = formatFaNumber(numericValue, decimals) || '—';
+        } else {
+          display = formatFaNumber(numericValue) || '—';
+        }
+      } else if (typeof rawValue === 'string' && rawValue.trim()) {
+        display = rawValue.trim();
+      }
+      valueEl.textContent = display;
+    }
+
+    const ariaLabelText = display === '—'
+      ? '—'
+      : `${display} ${labelEl?.textContent?.trim() || ''}`.trim();
+    item.setAttribute('aria-label', ariaLabelText || '—');
+  });
+};
 
 // ثبت یک‌باره‌ی لیسنرِ بستن مودال مشتری
 let _closeModalBound = false;
@@ -1686,26 +2064,40 @@ destroy() {
     }
 
     applyDashboardStats(stats = {}) {
-      const toNumber = (value, fallback = 0) => {
-        const num = Number(value);
-        return Number.isFinite(num) ? num : fallback;
-      };
-
       const setValue = (selector, value, { fractionDigits = 0 } = {}) => {
         const el = document.querySelector(selector);
         if (!el) return;
-        const numeric = toNumber(value, 0);
+        const isMissing = value == null || (typeof value === 'string' && value.trim() === '');
+        if (isMissing) {
+          el.textContent = '—';
+          resetDatasetValue(el);
+          return;
+        }
+
+        const numeric = Number(value);
+        if (!Number.isFinite(numeric)) {
+          el.textContent = '—';
+          resetDatasetValue(el);
+          return;
+        }
+
         el.dataset.value = numeric;
-        const formatted = fractionDigits > 0
-          ? UIComponents.formatPersianNumber(numeric.toFixed(fractionDigits))
-          : UIComponents.formatPersianNumber(numeric);
-        el.textContent = formatted;
+        delete el.dataset.empty;
+        const formatted = formatFaNumber(numeric, fractionDigits);
+        el.textContent = formatted || '—';
       };
 
       const applyTrend = (selector, direction, text) => {
         const trendEl = document.querySelector(selector);
         if (!trendEl) return;
         trendEl.classList.remove('trend-up', 'trend-down', 'trend-flat');
+        const hasText = text && String(text).trim() !== '';
+        if (!hasText) {
+          const span = trendEl.querySelector('span');
+          if (span) span.textContent = '—';
+          trendEl.setAttribute('aria-label', '—');
+          return;
+        }
         const dir = direction === 'down' ? 'trend-down' : direction === 'flat' ? 'trend-flat' : 'trend-up';
         trendEl.classList.add(dir);
         const span = trendEl.querySelector('span');
@@ -1713,40 +2105,64 @@ destroy() {
         trendEl.setAttribute('aria-label', text);
       };
 
-      const todayBookings = toNumber(stats.todayBookings);
-      const yesterdayBookings = toNumber(stats.yesterdayBookings);
-      const pendingBookings = toNumber(stats.pendingBookings);
-      const activeCustomers = toNumber(stats.activeCustomers);
-      const previousActiveCustomers = toNumber(stats.previousActiveCustomers);
-      const newCustomers30d = toNumber(stats.newCustomers30d);
-      const ratingAverage = toNumber(stats.ratingAverage);
-      const ratingCount = toNumber(stats.ratingCount);
+      const toNumber = (value) => {
+        const num = Number(value);
+        return Number.isFinite(num) ? num : null;
+      };
 
-      setValue('.stat-bookings .stat-value', todayBookings);
-      setValue('.stat-pending .stat-value', pendingBookings);
-      setValue('.stat-customers .stat-value', activeCustomers);
-      setValue('.stat-rating .stat-value', ratingAverage, { fractionDigits: 1 });
+      const todayBookingsRaw = toNumber(stats.todayBookings);
+      const yesterdayBookingsRaw = toNumber(stats.yesterdayBookings);
+      const pendingBookingsRaw = toNumber(stats.pendingBookings);
+      const activeCustomersRaw = toNumber(stats.activeCustomers);
+      const previousActiveCustomersRaw = toNumber(stats.previousActiveCustomers);
+      const newCustomers30dRaw = toNumber(stats.newCustomers30d);
+      const ratingAverageRaw = toNumber(stats.ratingAverage);
+      const ratingCountRaw = toNumber(stats.ratingCount);
 
-      const bookingsDiff = todayBookings - yesterdayBookings;
-      let bookingsText = 'بدون تغییر';
-      if (bookingsDiff !== 0) {
-        if (yesterdayBookings === 0) {
+      setValue('.stat-bookings .stat-value', todayBookingsRaw);
+      setValue('.stat-pending .stat-value', pendingBookingsRaw);
+      setValue('.stat-customers .stat-value', activeCustomersRaw);
+      setValue('.stat-rating .stat-value', ratingAverageRaw, { fractionDigits: 1 });
+
+      const todayBookingsVal = todayBookingsRaw ?? 0;
+      const yesterdayBookingsVal = yesterdayBookingsRaw ?? 0;
+      let bookingsText = null;
+      let bookingsDirection = 'flat';
+      if (todayBookingsRaw != null && yesterdayBookingsRaw != null) {
+        const bookingsDiff = todayBookingsVal - yesterdayBookingsVal;
+        if (bookingsDiff === 0) {
+          bookingsText = 'بدون تغییر';
+        } else if (yesterdayBookingsVal === 0) {
           bookingsText = `${UIComponents.formatPersianNumber(Math.abs(bookingsDiff))} نوبت جدید`;
         } else {
-          const percent = Math.round((Math.abs(bookingsDiff) / Math.max(yesterdayBookings, 1)) * 100);
+          const percent = Math.round((Math.abs(bookingsDiff) / Math.max(yesterdayBookingsVal, 1)) * 100);
           bookingsText = `${UIComponents.formatPersianNumber(percent)}٪ ${bookingsDiff > 0 ? 'افزایش' : 'کاهش'}`;
         }
+        bookingsDirection = bookingsDiff > 0 ? 'up' : bookingsDiff < 0 ? 'down' : 'flat';
       }
-      const bookingsDirection = bookingsDiff > 0 ? 'up' : bookingsDiff < 0 ? 'down' : 'flat';
       applyTrend('.stat-bookings .stat-trend', bookingsDirection, bookingsText);
 
-      const customersDiff = activeCustomers - previousActiveCustomers;
-      const customersDirection = customersDiff > 0 ? 'up' : customersDiff < 0 ? 'down' : 'flat';
-      const customersText = newCustomers30d > 0
-        ? `${UIComponents.formatPersianNumber(newCustomers30d)} مشتری جدید`
-        : 'مشتری جدیدی ثبت نشد';
+      const activeCustomersVal = activeCustomersRaw ?? 0;
+      const previousActiveCustomersVal = previousActiveCustomersRaw ?? 0;
+      let customersText = null;
+      let customersDirection = 'flat';
+      if (activeCustomersRaw != null && previousActiveCustomersRaw != null) {
+        const customersDiff = activeCustomersVal - previousActiveCustomersVal;
+        customersDirection = customersDiff > 0 ? 'up' : customersDiff < 0 ? 'down' : 'flat';
+        if (newCustomers30dRaw != null) {
+          customersText = newCustomers30dRaw > 0
+            ? `${UIComponents.formatPersianNumber(newCustomers30dRaw)} مشتری جدید`
+            : 'مشتری جدیدی ثبت نشد';
+        } else {
+          customersText = customersDiff === 0
+            ? 'بدون تغییر'
+            : (customersDiff > 0 ? 'افزایش مشتریان' : 'کاهش مشتریان');
+        }
+      }
       applyTrend('.stat-customers .stat-trend', customersDirection, customersText);
 
+      const ratingAverage = ratingAverageRaw ?? 0;
+      const ratingCount = ratingCountRaw ?? 0;
       const badgeConfig = this.getRatingBadgeConfig(ratingAverage, ratingCount);
       const badgeEl = document.querySelector('.stat-rating .stat-badge');
       if (badgeEl) {
@@ -1774,6 +2190,18 @@ destroy() {
           ? `امتیاز کلی (${UIComponents.formatPersianNumber(ratingCount)} نظر)`
           : 'امتیاز کلی';
       }
+
+      const planData = stats?.plan || stats?.subscription || stats?.activePlan || stats?.currentPlan || stats?.package || null;
+      updatePlanHero(planData);
+
+      let rankingData = stats?.ranking || stats?.rankings || stats?.rankInfo || stats?.rank || null;
+      if (rankingData && typeof rankingData !== 'object') {
+        rankingData = {
+          rank: rankingData,
+          total: stats?.rankTotal ?? stats?.totalSellers ?? stats?.totalVendors ?? stats?.totalVendorsCount
+        };
+      }
+      updateRankCard(rankingData);
 
       document.querySelectorAll('.stat-value').forEach(UIComponents.animateCountUp);
     }
@@ -3877,53 +4305,6 @@ function cleanScheduleData() {
     enforce24hTimeInput('work-end');
   })();
 })();
-
-
-
-
-
-  // === Plan Hero: data + wiring ===
-  (function(){
-    // نمونه داده — هر وقت لازم شد از سرور پرش کن
-    const plan = {
-      tier: 'پرمیوم',          // پایه / حرفه‌ای / پرمیوم
-      start: '2025-08-01',     // ISO
-      end:   '2025-09-12',     // ISO
-      perks: ['نمایش ویژه','ابزارهای حرفه‌ای','پشتیبانی سریع']
-    };
-
-    const el = (id)=>document.getElementById(id);
-    const days = (a,b)=> Math.round((b-a)/86400000);
-    const now   = new Date();
-    const start = new Date(plan.start);
-    const end   = new Date(plan.end);
-
-    const totalDays = Math.max(days(start, end), 0);
-    const usedDays  = Math.min(Math.max(days(start, now), 0), totalDays);
-    const leftDays  = Math.max(totalDays - usedDays, 0);
-    const progress  = totalDays ? Math.round((usedDays/totalDays)*100) : 0;
-
-    const faNum = (n)=> new Intl.NumberFormat('fa-IR').format(n);
-    const faDate= (d)=> new Intl.DateTimeFormat('fa-IR-u-nu-latn-ca-persian',{year:'numeric',month:'2-digit',day:'2-digit'}).format(d);
-
-    // پر کردن UI
-    if (el('plan-tier')) el('plan-tier').textContent = `🎖 ${plan.tier}`;
-    if (el('plan-days-left')) el('plan-days-left').textContent = `${faNum(leftDays)} روز`;
-    if (el('plan-expiry')) el('plan-expiry').textContent = faDate(end);
-    if (el('plan-progress-bar')) el('plan-progress-bar').style.width = progress + '%';
-    if (el('plan-used')) el('plan-used').textContent = progress + '%';
-    if (el('plan-left')) el('plan-left').textContent = (100 - progress) + '%';
-
-    // دکمه‌ها
-    const goPlans = ()=>{ window.location.hash = '/plans'; };
-
-    el('plan-renew-btn')?.addEventListener('click', goPlans);
-  })();
-});
-
-
-
-
 
 (() => {
   const root = document;
