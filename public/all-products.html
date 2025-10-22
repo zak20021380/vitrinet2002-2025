@@ -329,6 +329,116 @@
       transform: translateY(-4px);
     }
 
+    .product-card.ad-card {
+      border: 1.5px solid rgba(16,185,129,0.22);
+      background: linear-gradient(145deg, rgba(224,253,250,0.92) 0%, rgba(255,255,255,0.98) 55%, #ffffff 100%);
+      padding: 18px;
+      align-items: stretch;
+    }
+
+    .product-card.ad-card::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      border-radius: 1.25rem;
+      background:
+        radial-gradient(circle at top left, rgba(14,165,233,0.15), transparent 60%),
+        radial-gradient(circle at bottom right, rgba(16,185,129,0.18), transparent 65%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .product-card.ad-card > * {
+      position: relative;
+      z-index: 1;
+    }
+
+    .product-card.ad-card .product-image-container {
+      height: 190px;
+      margin-bottom: 18px;
+      border: 1.5px dashed rgba(14,165,233,0.3);
+      background: linear-gradient(135deg, rgba(14,165,233,0.08), rgba(16,185,129,0.08));
+    }
+
+    .product-card.ad-card .product-details {
+      align-items: stretch;
+      text-align: right;
+      gap: 12px;
+    }
+
+    .product-card.ad-card .product-title {
+      color: #0f172a;
+      font-size: 1.18rem;
+    }
+
+    .ad-card-badge {
+      position: absolute;
+      top: 18px;
+      right: 18px;
+      background: linear-gradient(90deg, #f97316, #f59e0b);
+      color: #fff;
+      padding: 6px 16px;
+      border-radius: 999px;
+      font-weight: 900;
+      font-size: 0.85rem;
+      box-shadow: 0 12px 24px rgba(249,115,22,0.28);
+      letter-spacing: 0.01em;
+    }
+
+    .ad-card-shop {
+      font-size: 0.95rem;
+      font-weight: 800;
+      color: #0ea5e9;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .ad-card-shop i {
+      color: #0ea5e9;
+      font-size: 1rem;
+    }
+
+    .ad-card-text {
+      background: rgba(15, 118, 110, 0.08);
+      border-radius: 14px;
+      padding: 12px 14px;
+      margin-bottom: 12px;
+      color: #1f2937;
+      font-weight: 600;
+      font-size: 0.96rem;
+      line-height: 1.75;
+      border: 1px solid rgba(16,185,129,0.2);
+    }
+
+    .ad-card-price {
+      font-weight: 800;
+      font-size: 1.05rem;
+      color: #16a34a;
+      margin-bottom: 16px;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .ad-card-price i {
+      color: #16a34a;
+    }
+
+    .ad-card-btn {
+      background: linear-gradient(92deg, #0ea5e9 0%, #10b981 100%);
+      box-shadow: 0 10px 24px rgba(14,165,233,0.25);
+      font-size: 1.02rem;
+      font-weight: 900;
+      letter-spacing: 0.01em;
+    }
+
+    .ad-card-btn:hover {
+      box-shadow: 0 12px 32px rgba(16,185,129,0.3);
+      transform: translateY(-1px);
+    }
+
     .product-image-container {
       width: 100%;
       height: 200px;
@@ -342,9 +452,19 @@
     @media (max-width: 640px) {
       .product-card { padding: 14px; }
       .product-image-container { height: 180px; margin-bottom: 12px; }
+      .product-card.ad-card {
+        padding: 16px;
+      }
+      .product-card.ad-card .product-image-container {
+        height: 170px;
+      }
       .product-title { font-size: 1rem; }
+      .product-card.ad-card .product-title { font-size: 1.05rem; }
       .shop-address { font-size: 0.85rem; margin-bottom: 6px; }
       .product-price { font-size: 1rem; }
+      .ad-card-text { font-size: 0.9rem; }
+      .ad-card-badge { top: 14px; right: 14px; font-size: 0.8rem; padding: 5px 14px; }
+      .ad-card-btn { font-size: 0.95rem; }
       .see-product-btn { width: 100%; padding: 12px; font-size: 0.95rem; }
     }
 
@@ -1352,6 +1472,10 @@
 /* ----------------------- داده‌های پایه ----------------------- */
 let allProducts = [];
 let products    = [];
+let featuredAd  = null;
+let featuredAdProductId = null;
+
+const AD_PLAN_SLUG = 'ad_products';
 
 const categories = [
   "همه محصولات","پوشاک","خوراک","خدمات","دیجیتال","زیبایی",
@@ -1363,15 +1487,35 @@ const shops = [
   "پالادیوم","ایران مال","کوروش","هایپرسان"
 ];
 
+function escapeHtml(value) {
+  if (value === null || value === undefined) return '';
+  return String(value)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
+
+function getProductIdFromProduct(product) {
+  if (!product) return '';
+  if (typeof product === 'string') return product;
+  if (typeof product === 'object') {
+    return product._id || product.id || product.slug || '';
+  }
+  return '';
+}
+
 let currentSort        = null;          // cheap | expensive | null
 let currentShop        = "همه مراکز خرید";
 let currentCategory    = "همه محصولات";
 let currentPriceFilter = null;          // {min,max} | null
 
 /* --------------------- آماده‌سازی دراپ‌داون‌ها --------------------- */
-document.addEventListener('DOMContentLoaded',()=>{
+document.addEventListener('DOMContentLoaded', async ()=>{
   // تنظیمات اولیه
   setupEventListeners();
+  await fetchFeaturedAd();
   fetchProductsFromAPI();
 });
 
@@ -1605,6 +1749,28 @@ function parsePriceInput(str){
 }
 
 /* ---------------------- واکشی محصولات ---------------------- */
+async function fetchFeaturedAd(){
+  try{
+    const response = await fetch(`/api/adOrder/active?planSlug=${AD_PLAN_SLUG}`);
+    if(!response.ok) throw new Error('خطا در دریافت تبلیغ فعال');
+    const data = await response.json();
+    if(data.success && Array.isArray(data.ads)){
+      const approvedAd = data.ads.find(ad => ad && ad.status === 'approved');
+      if(approvedAd){
+        featuredAd = approvedAd;
+        featuredAdProductId = getProductIdFromProduct(approvedAd.productId);
+        return;
+      }
+    }
+    featuredAd = null;
+    featuredAdProductId = null;
+  }catch(err){
+    console.warn('خطا در دریافت تبلیغ ویژه محصولات:', err);
+    featuredAd = null;
+    featuredAdProductId = null;
+  }
+}
+
 async function fetchProductsFromAPI(){
   try{
     // واکشی واقعی از بک‌اند (فرض بر این است که endpoint /api/products وجود دارد و JSON برمی‌گرداند)
@@ -1616,12 +1782,18 @@ async function fetchProductsFromAPI(){
     
     filterAndSortProducts();
   }catch(err){
-    document.getElementById('productsList').innerHTML=
+    const wrap = document.getElementById('productsList');
+    const errorHtml =
       `<div style="grid-column:1/-1;text-align:center;padding:40px">
          <i class="fas fa-bug" style="font-size:3rem;color:#e11d48"></i>
          <h4 style="color:#e11d48">خطا در دریافت محصولات از سرور</h4>
          <div style="color:#888">${err.message}</div>
        </div>`;
+    if (featuredAd) {
+      wrap.innerHTML = buildAdCardHtml(featuredAd) + errorHtml;
+    } else {
+      wrap.innerHTML = errorHtml;
+    }
   }
 }
 
@@ -1644,20 +1816,103 @@ function filterAndSortProducts(){
 }
 
 /* -------------------- رندر محصولات -------------------- */
+function buildAdCardHtml(ad){
+  if(!ad) return '';
+
+  const product = (ad.productId && typeof ad.productId === 'object') ? ad.productId : null;
+  const seller  = (ad.sellerId && typeof ad.sellerId === 'object') ? ad.sellerId : null;
+
+  const shopTitle = ad.shopTitle || (seller && seller.storename) || 'فروشگاه ویژه';
+  const adTitleRaw = ad.adTitle && ad.adTitle.trim()
+    ? ad.adTitle
+    : (product && product.title) || shopTitle;
+  const adTextRaw = ad.adText && ad.adText.trim() ? ad.adText : '';
+
+  const numericPrice = product && product.price !== undefined ? Number(product.price) : null;
+  const priceText = Number.isFinite(numericPrice) ? formatPrice(numericPrice) : '';
+
+  const productId = getProductIdFromProduct(ad.productId);
+  const sellerId  = getProductIdFromProduct(ad.sellerId);
+  const safeProductId = productId ? encodeURIComponent(productId) : '';
+  const safeSellerId  = sellerId ? encodeURIComponent(sellerId) : '';
+
+  let targetUrl = '#';
+  if (safeProductId) {
+    targetUrl = `product.html?id=${safeProductId}`;
+  } else if (seller && seller.shopurl) {
+    targetUrl = `shop.html?shopurl=${encodeURIComponent(seller.shopurl)}`;
+  } else if (safeSellerId) {
+    targetUrl = `shop.html?id=${safeSellerId}`;
+  }
+
+  const bannerSrc = ad.bannerImage ? `/uploads/${encodeURIComponent(ad.bannerImage)}` : '';
+
+  let imageHtml = '';
+  if (bannerSrc) {
+    imageHtml = `<img class="product-image object-cover" src="${bannerSrc}" alt="${escapeHtml(shopTitle)}">`;
+  } else if (seller && seller.boardImage) {
+    imageHtml = `<img class="product-image object-cover" src="${escapeHtml(seller.boardImage)}" alt="${escapeHtml(shopTitle)}">`;
+  } else {
+    imageHtml = `<div class="flex items-center justify-center w-full h-full absolute inset-0 text-[#0ea5e9] text-4xl font-black">AD</div>`;
+  }
+
+  const safeAdTitle = escapeHtml(adTitleRaw);
+  const safeShopTitle = escapeHtml(shopTitle);
+  const safeAdText = escapeHtml(adTextRaw).replace(/\n/g, '<br>');
+  const ctaText = productId ? 'مشاهده پیشنهاد ویژه' : 'مشاهده فروشگاه ویژه';
+
+  const priceHtml = priceText ? `<div class="ad-card-price"><i class="fas fa-bolt"></i>${priceText}</div>` : '';
+  const adTextHtml = safeAdText ? `<div class="ad-card-text">${safeAdText}</div>` : '';
+  const shopHtml = `<div class="ad-card-shop"><i class="ri-store-3-line"></i><span>${safeShopTitle}</span></div>`;
+
+  return `
+    <article class="product-card ad-card" data-ad-card="true">
+      <span class="ad-card-badge">تبلیغ ویژه</span>
+      <div class="product-image-container rounded-xl overflow-hidden shadow-sm">
+        ${imageHtml}
+      </div>
+      <div class="product-details">
+        <div class="product-title">${safeAdTitle}</div>
+        ${shopHtml}
+        ${adTextHtml}
+        ${priceHtml}
+        <a href="${targetUrl}" target="_blank" rel="noopener noreferrer" class="see-product-btn ad-card-btn">${ctaText}</a>
+      </div>
+    </article>
+  `;
+}
+
 function renderProducts(list){
   const wrap=document.getElementById('productsList');
   wrap.innerHTML="";
-  if(!list.length){
-    wrap.innerHTML=
-      `<div style="grid-column:1/-1;text-align:center;padding:50px 20px">
-         <i class="fas fa-search" style="font-size:4rem;color:#e2e8f0"></i>
-         <h3 style="color:#94a3b8">محصولی یافت نشد</h3>
-       </div>`;
+
+  const emptyStateHtml=
+    `<div style="grid-column:1/-1;text-align:center;padding:50px 20px">
+       <i class="fas fa-search" style="font-size:4rem;color:#e2e8f0"></i>
+       <h3 style="color:#94a3b8">محصولی یافت نشد</h3>
+     </div>`;
+
+  const hasAd = Boolean(featuredAd);
+
+  if(!list.length && !hasAd){
+    wrap.innerHTML = emptyStateHtml;
     return;
   }
+
+  if(hasAd){
+    wrap.insertAdjacentHTML('beforeend', buildAdCardHtml(featuredAd));
+  }
+
+  const adProductId = featuredAdProductId;
+  let insertedProducts = 0;
+
   list.forEach(p=>{
+    const productId = getProductIdFromProduct(p);
+    if(adProductId && productId && adProductId === productId){
+      return;
+    }
     const img=(p.images?.length)?p.images[0]:'https://placehold.co/320x200?text=NO+IMAGE';
-    wrap.insertAdjacentHTML('beforeend',`
+    const cardHtml = `
       <div class="product-card">
         <div class="product-image-container rounded-xl overflow-hidden shadow-sm">
           <img class="product-image object-cover" src="${img}" alt="${p.title}">
@@ -1669,8 +1924,16 @@ function renderProducts(list){
           <a href="product.html?id=${p._id}" target="_blank" class="see-product-btn">مشاهده محصول</a>
         </div>
         <span class="tag">${p.seller.category || ""}</span>
-      </div>`);
+      </div>`;
+    wrap.insertAdjacentHTML('beforeend', cardHtml);
+    insertedProducts++;
   });
+
+  if(!hasAd && insertedProducts===0){
+    wrap.innerHTML = emptyStateHtml;
+  }else if(hasAd && insertedProducts===0){
+    wrap.insertAdjacentHTML('beforeend', emptyStateHtml);
+  }
 }
 
 function formatPrice(p) {
