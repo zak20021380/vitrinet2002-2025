@@ -50,6 +50,13 @@ document.addEventListener('DOMContentLoaded', async () => {
 const API_BASE = window.__API_BASE__ || '';
 const NO_CACHE = { cache: 'no-store', headers: { 'Cache-Control': 'no-cache' } };
 const bust = (url) => `${url}${url.includes('?') ? '&' : '?'}__=${Date.now()}`;
+const escapeHtml = (str = '') => String(str).replace(/[&<>"']/g, (char) => ({
+  '&': '&amp;',
+  '<': '&lt;',
+  '>': '&gt;',
+  '"': '&quot;',
+  "'": '&#39;'
+}[char] || char));
 
 const DEFAULT_FEATURE_FLAGS = Object.freeze({ sellerPlansEnabled: false });
 const TRUE_FLAG_VALUES = new Set(['1', 'true', 'yes', 'on', 'enable', 'enabled', 'فعال', 'روشن', 'active']);
@@ -360,6 +367,29 @@ const API = {
       console.warn('API.getFeatureFlags failed', err);
       throw err;
     }
+  },
+
+  async getTopPeers(options = {}) {
+    const params = new URLSearchParams();
+    if (options.limit) params.set('limit', options.limit);
+    if (options.scope) params.set('scope', options.scope);
+    const query = params.toString();
+    const url = bust(`${API_BASE}/api/sellers/top-peers${query ? `?${query}` : ''}`);
+    const res = await fetch(url, { credentials: 'include', ...NO_CACHE });
+    if (!res.ok) {
+      throw new Error(`TOP_PEERS_HTTP_${res.status}`);
+    }
+    const data = await this._json(res);
+    const total = Number(data?.total);
+
+    return {
+      top: Array.isArray(data?.top) ? data.top : [],
+      mine: data?.mine || null,
+      total: Number.isFinite(total) ? total : 0,
+      category: data?.category || '',
+      scope: data?.scope || 'category',
+      updatedAt: data?.updatedAt || null
+    };
   },
 
   // ایجاد خدمت جدید
@@ -1519,6 +1549,8 @@ function bindFloatingCloseOnce() {
       this.currentPortfolioImage = '';
       this.dashboardStats = null;
       this._dashboardStatsPromise = null;
+      this.topPeersData = null;
+      this._topPeersPromise = null;
 
       this.setFeatureFlags(flags);
 
@@ -1536,6 +1568,42 @@ function bindFloatingCloseOnce() {
 
     isSellerPlansEnabled() {
       return !!(this.featureFlags && this.featureFlags.sellerPlansEnabled);
+    }
+
+    formatNumber(value, { fractionDigits = 0, fallback = '۰' } = {}) {
+      const numeric = Number(value);
+      if (!Number.isFinite(numeric)) {
+        return fallback;
+      }
+      const formatted = fractionDigits > 0
+        ? numeric.toFixed(fractionDigits)
+        : Math.round(numeric).toString();
+      if (typeof UIComponents?.formatPersianNumber === 'function') {
+        return UIComponents.formatPersianNumber(formatted);
+      }
+      return formatted;
+    }
+
+    setText(id, value) {
+      const el = document.getElementById(id);
+      if (el) {
+        el.textContent = value;
+      }
+    }
+
+    formatDateTime(value) {
+      if (!value) return '';
+      try {
+        const date = value instanceof Date ? value : new Date(value);
+        if (Number.isNaN(date.getTime())) return '';
+        return new Intl.DateTimeFormat('fa-IR', {
+          dateStyle: 'medium',
+          timeStyle: 'short'
+        }).format(date);
+      } catch (err) {
+        console.warn('formatDateTime failed', err);
+        return '';
+      }
     }
 
 // --- FIX: back-compat for old call in init() ---
@@ -1560,22 +1628,25 @@ applyCustomerRules() {
     }
 setupEventListeners() {
   // Cache frequently used elements
-  const elements = {
-    body: this.body,
-    notificationBtn: document.getElementById('notification-btn'),
-    notificationPanel: document.getElementById('notification-panel'),
-    viewStoreBtn: document.getElementById('view-store-btn'),
+    const elements = {
+      body: this.body,
+      notificationBtn: document.getElementById('notification-btn'),
+      notificationPanel: document.getElementById('notification-panel'),
+      viewStoreBtn: document.getElementById('view-store-btn'),
         openReservationsBtn: document.getElementById('open-reservations-btn'),
 
-    plansView: document.getElementById('plans-view'),
-    customerSearch: document.getElementById('customer-search'),
-    bookingsFilter: document.querySelector('#bookings-view .filter-chips'),
-    reviewsFilter: document.querySelector('#reviews-view .filter-chips'),
-    settingsForm: document.getElementById('settings-form'),
-    rankCard: document.getElementById('rank-card'),
-    addCustomerBtn: document.getElementById('add-customer-btn'),
-    addServiceBtn: document.getElementById('add-service-btn'),
-    addPortfolioBtn: document.getElementById('add-portfolio-btn'),
+      plansView: document.getElementById('plans-view'),
+      customerSearch: document.getElementById('customer-search'),
+      bookingsFilter: document.querySelector('#bookings-view .filter-chips'),
+      reviewsFilter: document.querySelector('#reviews-view .filter-chips'),
+      settingsForm: document.getElementById('settings-form'),
+      rankCard: document.getElementById('rank-card'),
+      topRefreshBtn: document.getElementById('top-refresh-btn'),
+      topViewAllBtn: document.getElementById('top-view-all'),
+      topLeaderboardList: document.getElementById('top-leaderboard-list'),
+      addCustomerBtn: document.getElementById('add-customer-btn'),
+      addServiceBtn: document.getElementById('add-service-btn'),
+      addPortfolioBtn: document.getElementById('add-portfolio-btn'),
     serviceForm: document.getElementById('service-form'),
     portfolioForm: document.getElementById('portfolio-form'),
     serviceImageBtn: document.getElementById('service-image-btn'),
@@ -1743,13 +1814,17 @@ if (elements.viewStoreBtn) {
 
   // 7. Button click handlers with null checks
   const buttonHandlers = [
-    { 
-      element: elements.rankCard, 
-      handler: () => UIComponents.openModal('rank-modal') 
+    {
+      element: elements.rankCard,
+      handler: () => UIComponents.openModal('rank-modal')
     },
-    { 
-      element: elements.addCustomerBtn, 
-      handler: () => UIComponents.openDrawer('customer-drawer') 
+    {
+      element: elements.topRefreshBtn,
+      handler: () => this.renderTopPeers(true)
+    },
+    {
+      element: elements.addCustomerBtn,
+      handler: () => UIComponents.openDrawer('customer-drawer')
     },
     { 
       element: elements.addServiceBtn, 
@@ -1789,6 +1864,19 @@ if (elements.viewStoreBtn) {
       element.addEventListener('click', handler);
     }
   });
+
+  if (elements.topLeaderboardList) {
+    elements.topLeaderboardList.addEventListener('click', (e) => {
+      if (e.target.closest('button, a')) {
+        return;
+      }
+      const item = e.target.closest('li[data-shop-url]');
+      if (!item) return;
+      const slug = item.dataset.shopUrl;
+      if (!slug) return;
+      window.open(`/service-shops.html?shopurl=${encodeURIComponent(slug)}`, '_blank', 'noopener,noreferrer');
+    });
+  }
 
   function updateVipToggleBtn() {
     if (!elements.vipToggleBtn) return;
@@ -1903,6 +1991,7 @@ destroy() {
         case 'bookings': this.renderBookings(); break;
         case 'customers': this.renderCustomers(); break;
         case 'reviews': this.renderReviews(); break;
+        case 'top': this.renderTopPeers(); break;
         case 'plans':
           if (this.isSellerPlansEnabled()) {
             this.renderPlans();
@@ -1911,6 +2000,205 @@ destroy() {
         case 'settings': this.renderSettings(); break; // New call for settings
       }
     }
+    async loadTopPeers(force = false) {
+      if (this._topPeersPromise && !force) {
+        return this._topPeersPromise;
+      }
+
+      if (force) {
+        this.topPeersData = null;
+      }
+
+      this._topPeersPromise = (async () => {
+        try {
+          const data = await API.getTopPeers();
+          this.topPeersData = data || {};
+          this.applyRankCard(this.topPeersData);
+          this.applyTopSummary(this.topPeersData);
+          return this.topPeersData;
+        } catch (err) {
+          console.error('loadTopPeers failed', err);
+          if (force) {
+            UIComponents?.showToast?.('خطا در بروزرسانی رتبه‌بندی', 'error');
+          }
+          throw err;
+        } finally {
+          this._topPeersPromise = null;
+        }
+      })();
+
+      return this._topPeersPromise;
+    }
+
+    applyRankCard(data = this.topPeersData || {}) {
+      const mine = data?.mine || {};
+      const metrics = mine.metrics || {};
+      const total = Number(data?.total) || 0;
+      const categoryLabel = data?.category || 'حوزه شما';
+
+      this.setText('rank-category', categoryLabel);
+      this.setText('total-sellers', this.formatNumber(total));
+      this.setText('current-rank', mine.rank ? this.formatNumber(mine.rank) : '—');
+      this.setText('ucw30', this.formatNumber(metrics.uniqueCustomers ?? metrics.completedBookings ?? 0));
+      this.setText('bookingsTotal', this.formatNumber(metrics.totalBookings ?? 0));
+      this.setText('rating30', this.formatNumber(metrics.ratingAverage ?? 0, { fractionDigits: 1, fallback: '۰٫۰' }));
+
+      const modalCurrent = document.getElementById('rank-modal-current');
+      if (modalCurrent) {
+        if (mine.rank) {
+          modalCurrent.textContent = `رتبه فعلی شما: ${this.formatNumber(mine.rank)} از ${this.formatNumber(total)} فروشگاه فعال در ${categoryLabel}.`;
+        } else {
+          modalCurrent.textContent = 'هنوز رتبه‌ای برای فروشگاه شما ثبت نشده است. با افزایش فعالیت می‌توانید وارد فهرست برترین‌ها شوید.';
+        }
+      }
+    }
+
+    applyTopSummary(data = this.topPeersData || {}) {
+      const mine = data?.mine || {};
+      const metrics = mine.metrics || {};
+      const total = Number(data?.total) || 0;
+
+      this.setText('top-my-rank', mine.rank ? this.formatNumber(mine.rank) : '—');
+      this.setText('top-total-peers', this.formatNumber(total));
+
+      const scoreText = Number.isFinite(Number(mine.score))
+        ? this.formatNumber(mine.score, { fractionDigits: 1, fallback: '۰٫۰' })
+        : '—';
+      this.setText('top-my-score', scoreText);
+      this.setText('top-my-rating', this.formatNumber(metrics.ratingAverage ?? 0, { fractionDigits: 1, fallback: '۰٫۰' }));
+      this.setText('top-my-bookings', this.formatNumber(metrics.totalBookings ?? 0));
+      this.setText('top-my-customers', this.formatNumber(metrics.uniqueCustomers ?? metrics.completedBookings ?? 0));
+
+      const badgesEl = document.getElementById('top-my-badges');
+      if (badgesEl) {
+        const badges = [];
+        if (mine.badges?.isPremium) {
+          badges.push('<span class="badge-pill badge-premium">پریمیوم</span>');
+        }
+        if (mine.badges?.isFeatured) {
+          badges.push('<span class="badge-pill badge-featured">ویژه</span>');
+        }
+        badgesEl.innerHTML = badges.length ? badges.join('') : '<span class="badge-pill">بدون نشان ویژه</span>';
+      }
+
+      const updatedAtEl = document.getElementById('top-updated-at');
+      if (updatedAtEl) {
+        const formatted = this.formatDateTime(data?.updatedAt);
+        updatedAtEl.textContent = formatted ? `آخرین بروزرسانی: ${formatted}` : '';
+      }
+
+      const subtitle = document.getElementById('top-subtitle');
+      if (subtitle) {
+        const groupLabel = data?.category ? `حوزه «${data.category}»` : 'همه حوزه‌ها';
+        subtitle.textContent = `رتبه‌بندی برترین فروشگاه‌های ${groupLabel}`;
+      }
+    }
+
+    buildLeaderboardItem(entry, mine = {}) {
+      const metrics = entry.metrics || {};
+      const isMine = entry.isMine || (mine?.shopUrl && entry.shopUrl && mine.shopUrl === entry.shopUrl);
+      const rank = this.formatNumber(entry.rank);
+      const score = this.formatNumber(entry.score ?? 0, { fractionDigits: 1, fallback: '۰٫۰' });
+      const rating = this.formatNumber(metrics.ratingAverage ?? 0, { fractionDigits: 1, fallback: '۰٫۰' });
+      const ratingCount = this.formatNumber(metrics.ratingCount ?? 0);
+      const bookings = this.formatNumber(metrics.totalBookings ?? 0);
+      const customers = this.formatNumber(metrics.uniqueCustomers ?? metrics.completedBookings ?? 0);
+
+      const badges = [];
+      if (entry.badges?.isPremium) {
+        badges.push('<span class="badge-pill badge-premium">پریمیوم</span>');
+      }
+      if (entry.badges?.isFeatured) {
+        badges.push('<span class="badge-pill badge-featured">ویژه</span>');
+      }
+
+      const nameMarkup = entry.shopUrl
+        ? `<a href="/service-shops.html?shopurl=${encodeURIComponent(entry.shopUrl)}" target="_blank" rel="noopener noreferrer">${escapeHtml(entry.name)}</a>`
+        : escapeHtml(entry.name);
+
+      const metaParts = [];
+      if (entry.city) {
+        metaParts.push(`<span>📍 ${escapeHtml(entry.city)}</span>`);
+      }
+      metaParts.push(`<span>⭐ ${rating} (${ratingCount})</span>`);
+      metaParts.push(`<span>📆 ${bookings} نوبت</span>`);
+      metaParts.push(`<span>👥 ${customers} مشتری</span>`);
+
+      const dataAttr = entry.shopUrl ? ` data-shop-url="${escapeHtml(entry.shopUrl)}"` : '';
+
+      return `
+        <li class="leaderboard-item${isMine ? ' is-mine' : ''}" data-rank="${entry.rank || ''}"${dataAttr}>
+          <div class="leaderboard-rank">${rank}</div>
+          <div class="leaderboard-main">
+            <div class="leaderboard-title">
+              ${nameMarkup}
+              ${badges.join('')}
+            </div>
+            <div class="leaderboard-meta">${metaParts.join('')}</div>
+          </div>
+          <div class="leaderboard-score">
+            <span>${score}</span>
+            <span>امتیاز</span>
+          </div>
+        </li>
+      `;
+    }
+
+    applyTopPeers(data = this.topPeersData || {}) {
+      const list = document.getElementById('top-leaderboard-list');
+      const loadingEl = document.getElementById('top-leaderboard-loading');
+      const errorEl = document.getElementById('top-error');
+      const emptyEl = document.getElementById('top-leaderboard-empty');
+      if (!list) return;
+
+      if (loadingEl) loadingEl.hidden = true;
+      if (errorEl) errorEl.hidden = true;
+
+      const top = Array.isArray(data?.top) ? data.top : [];
+      if (!top.length) {
+        list.innerHTML = '';
+        if (emptyEl) emptyEl.hidden = false;
+      } else {
+        if (emptyEl) emptyEl.hidden = true;
+        list.innerHTML = top.map(entry => this.buildLeaderboardItem(entry, data?.mine)).join('');
+      }
+
+      this.applyRankCard(data);
+      this.applyTopSummary(data);
+    }
+
+    async renderTopPeers(force = false) {
+      const list = document.getElementById('top-leaderboard-list');
+      const loadingEl = document.getElementById('top-leaderboard-loading');
+      const errorEl = document.getElementById('top-error');
+      const emptyEl = document.getElementById('top-leaderboard-empty');
+      if (!list) return;
+
+      if (!force && this.topPeersData) {
+        this.applyTopPeers(this.topPeersData);
+        return;
+      }
+
+      if (loadingEl) loadingEl.hidden = false;
+      if (errorEl) errorEl.hidden = true;
+      if (emptyEl) emptyEl.hidden = true;
+      list.innerHTML = '';
+      list.setAttribute('aria-busy', 'true');
+
+      try {
+        const data = await this.loadTopPeers(force);
+        this.applyTopPeers(data);
+      } catch (err) {
+        if (errorEl) {
+          errorEl.textContent = 'خطا در دریافت اطلاعات رتبه‌بندی. لطفاً دوباره تلاش کنید.';
+          errorEl.hidden = false;
+        }
+      } finally {
+        if (loadingEl) loadingEl.hidden = true;
+        list.removeAttribute('aria-busy');
+      }
+    }
+
     // --- Page Rendering ---
     renderWelcomeDate() {
       const el = document.getElementById('welcome-date');
@@ -2055,6 +2343,11 @@ destroy() {
         await this.loadDashboardStats();
       } catch (err) {
         console.error('renderDashboard failed', err);
+      }
+      try {
+        await this.loadTopPeers();
+      } catch (err) {
+        console.error('loadTopPeers dashboard failed', err);
       }
     }
  renderBookings(filter = 'all') {
@@ -3651,6 +3944,8 @@ window.__FEATURE_FLAGS__ = featureFlags;
 const app = new SellerPanelApp(featureFlags);
 app.init();
 if (typeof app.initBrandImages === 'function') app.initBrandImages();
+
+app.loadTopPeers().catch(err => console.warn('initial top peers load failed', err));
 
 loadCustomers();
 
