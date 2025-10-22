@@ -1874,6 +1874,7 @@ destroy() {
       setValue('.stat-pending .stat-value', pendingBookings);
       setValue('.stat-customers .stat-value', activeCustomers);
       setValue('.stat-rating .stat-value', ratingAverage, { fractionDigits: 1 });
+      setValue('#rating30', ratingAverage, { fractionDigits: 1 });
 
       const bookingsDiff = todayBookings - yesterdayBookings;
       let bookingsText = 'بدون تغییر';
