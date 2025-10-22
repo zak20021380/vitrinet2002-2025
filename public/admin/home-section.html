@@ -638,412 +638,426 @@
   </div>
 
   <script>
-    const API_BASE = '/api/home-card-sections';
-    const toastEl = document.getElementById('toast');
-    const sectionsContainer = document.getElementById('sectionsContainer');
-    const sectionCountEl = document.getElementById('sectionCount');
-    const cardsContainer = document.getElementById('cardsContainer');
-    const cardsCountBadge = document.getElementById('cardsCountBadge');
-    const cardModalBackdrop = document.getElementById('cardModalBackdrop');
-    const cardModalTitle = document.getElementById('cardModalTitle');
-    const cardsPanelTitle = document.getElementById('cardsPanelTitle');
-
-    const sectionForm = document.getElementById('sectionForm');
-    const sectionEditor = document.getElementById('sectionEditor');
-    const editorTitle = document.getElementById('editorTitle');
-    const editorSubtitle = document.getElementById('editorSubtitle');
-    const deleteSectionBtn = document.getElementById('deleteSectionBtn');
-    const resetFormBtn = document.getElementById('resetFormBtn');
-    const newSectionBtn = document.getElementById('newSectionBtn');
-    const addCardBtn = document.getElementById('addCardBtn');
-    const cardForm = document.getElementById('cardForm');
-    const cancelCardBtn = document.getElementById('cancelCardBtn');
-
-    let sections = [];
-    let selectedSectionId = null;
-    let editingCardId = null;
-    let toastTimeout = null;
-
-    const sectionFields = {
-      title: document.getElementById('sectionTitle'),
-      slug: document.getElementById('sectionSlug'),
-      viewAllText: document.getElementById('sectionViewAllText'),
-      viewAllLink: document.getElementById('sectionViewAllLink'),
-      subtitle: document.getElementById('sectionSubtitleInput'),
-      order: document.getElementById('sectionOrder'),
-      description: document.getElementById('sectionDescription'),
-      isActive: document.getElementById('sectionIsActive'),
-    };
-
-    const cardFields = {
-      title: document.getElementById('cardTitle'),
-      tag: document.getElementById('cardTag'),
-      location: document.getElementById('cardLocation'),
-      price: document.getElementById('cardPrice'),
-      order: document.getElementById('cardOrder'),
-      buttonText: document.getElementById('cardButtonText'),
-      imageUrl: document.getElementById('cardImageUrl'),
-      link: document.getElementById('cardLink'),
-      description: document.getElementById('cardDescription'),
-      isActive: document.getElementById('cardIsActive'),
-    };
-
-    function showToast(message, type = 'success') {
-      clearTimeout(toastTimeout);
-      toastEl.textContent = message;
-      toastEl.className = `toast ${type}`;
-      requestAnimationFrame(() => toastEl.classList.add('show'));
-      toastTimeout = setTimeout(() => {
-        toastEl.classList.remove('show');
-      }, 3200);
-    }
-
-    function formatCount(count) {
-      return new Intl.NumberFormat('fa-IR').format(count);
-    }
-
-    function sortSections() {
-      sections.sort((a, b) => (Number(a.order) || 0) - (Number(b.order) || 0));
-    }
-
-    function updateSectionCount() {
-      sectionCountEl.textContent = `${formatCount(sections.length)} سکشن`;
-    }
-
-    function renderSectionsList() {
-      updateSectionCount();
-      sectionsContainer.innerHTML = '';
-
-      if (!sections.length) {
-        sectionsContainer.innerHTML = '<div class="empty-state">تا کنون سکشنی ثبت نشده است. با دکمه «سکشن جدید» شروع کنید.</div>';
-        return;
+    (() => {
+      const CLEANUP_KEY = '__homeSectionCleanup';
+      if (typeof window !== 'undefined' && typeof window[CLEANUP_KEY] === 'function') {
+        window[CLEANUP_KEY]();
       }
 
-      sections.forEach((section) => {
-        const item = document.createElement('div');
-        item.className = 'section-item' + (section._id === selectedSectionId ? ' active' : '');
-        item.innerHTML = `
-          <div class="section-item-title">${section.title || 'بدون عنوان'}</div>
-          <div class="section-meta">
-            <span class="badge">${section.slug || 'بدون اسلاگ'}</span>
-            <span>${section.isActive ? 'فعال' : 'غیرفعال'}</span>
-          </div>
-          <div class="section-meta">
-            <span><i class="ri-stack-line"></i> ${formatCount(section.cards?.length || 0)} کارت</span>
-            <span><i class="ri-hashtag"></i> ترتیب ${Number(section.order) || 0}</span>
-          </div>
-        `;
-        item.addEventListener('click', () => selectSection(section._id));
-        sectionsContainer.appendChild(item);
-      });
-    }
+      const API_BASE = '/api/home-card-sections';
+      const toastEl = document.getElementById('toast');
+      const sectionsContainer = document.getElementById('sectionsContainer');
+      const sectionCountEl = document.getElementById('sectionCount');
+      const cardsContainer = document.getElementById('cardsContainer');
+      const cardsCountBadge = document.getElementById('cardsCountBadge');
+      const cardModalBackdrop = document.getElementById('cardModalBackdrop');
+      const cardModalTitle = document.getElementById('cardModalTitle');
+      const cardsPanelTitle = document.getElementById('cardsPanelTitle');
 
-    function resetSectionForm() {
-      sectionForm.reset();
-      sectionFields.order.value = 0;
-      sectionFields.isActive.checked = true;
-      deleteSectionBtn.hidden = true;
-      selectedSectionId = null;
-      editorTitle.textContent = 'افزودن سکشن جدید';
-      editorSubtitle.textContent = 'مشخصات سکشن و محتوای کارت‌ها را در این قسمت ثبت کنید.';
-      cardsContainer.innerHTML = '<div class="empty-state">ابتدا یک سکشن را انتخاب یا ایجاد کنید تا کارت‌ها نمایش داده شوند.</div>';
-      cardsCountBadge.textContent = '۰ کارت';
-      cardsPanelTitle.textContent = 'کارت‌های سکشن';
-    }
+      const sectionForm = document.getElementById('sectionForm');
+      const sectionEditor = document.getElementById('sectionEditor');
+      const editorTitle = document.getElementById('editorTitle');
+      const editorSubtitle = document.getElementById('editorSubtitle');
+      const deleteSectionBtn = document.getElementById('deleteSectionBtn');
+      const resetFormBtn = document.getElementById('resetFormBtn');
+      const newSectionBtn = document.getElementById('newSectionBtn');
+      const addCardBtn = document.getElementById('addCardBtn');
+      const cardForm = document.getElementById('cardForm');
+      const cancelCardBtn = document.getElementById('cancelCardBtn');
 
-    function fillSectionForm(section) {
-      sectionFields.title.value = section.title || '';
-      sectionFields.slug.value = section.slug || '';
-      sectionFields.viewAllText.value = section.viewAllText || '';
-      sectionFields.viewAllLink.value = section.viewAllLink || '';
-      sectionFields.subtitle.value = section.subtitle || '';
-      sectionFields.order.value = Number(section.order) || 0;
-      sectionFields.description.value = section.description || '';
-      sectionFields.isActive.checked = section.isActive !== false;
-    }
+      let sections = [];
+      let selectedSectionId = null;
+      let editingCardId = null;
+      let toastTimeout = null;
 
-    function renderCards(section) {
-      const cards = Array.isArray(section.cards) ? [...section.cards] : [];
-      cards.sort((a, b) => (Number(a.order) || 0) - (Number(b.order) || 0));
-
-      cardsCountBadge.textContent = `${formatCount(cards.length)} کارت`;
-      cardsPanelTitle.textContent = `کارت‌های سکشن: ${section.title || ''}`;
-
-      if (!cards.length) {
-        cardsContainer.innerHTML = '<div class="empty-state">برای این سکشن هنوز کارتی ثبت نشده است.</div>';
-        return;
-      }
-
-      cardsContainer.innerHTML = '';
-      cards.forEach((card) => {
-        const wrapper = document.createElement('div');
-        wrapper.className = 'card-item';
-        wrapper.innerHTML = `
-          <div class="card-item-header">
-            <div class="card-item-title">${card.title || 'بدون عنوان'}</div>
-            <span class="badge">${card.isActive !== false ? 'فعال' : 'غیرفعال'}</span>
-          </div>
-          <div class="card-item-meta">
-            ${card.tag ? `<span><i class="ri-price-tag-3-line"></i> ${card.tag}</span>` : ''}
-            ${card.location ? `<span><i class="ri-map-pin-line"></i> ${card.location}</span>` : ''}
-            ${card.price ? `<span><i class="ri-money-cny-box-line"></i> ${card.price}</span>` : ''}
-            <span><i class="ri-hashtag"></i> ترتیب ${Number(card.order) || 0}</span>
-          </div>
-          ${card.description ? `<div class="muted">${card.description}</div>` : ''}
-          <div class="card-actions">
-            <button class="ghost-btn" data-action="edit" data-id="${card._id}"><i class="ri-edit-line"></i> ویرایش</button>
-            <button class="ghost-btn danger" data-action="delete" data-id="${card._id}"><i class="ri-delete-bin-line"></i> حذف</button>
-            ${card.link ? `<a class="ghost-btn" href="${card.link}" target="_blank" rel="noopener"><i class="ri-external-link-line"></i> مشاهده لینک</a>` : ''}
-          </div>
-        `;
-        wrapper.querySelector('[data-action="edit"]').addEventListener('click', (event) => {
-          event.stopPropagation();
-          openCardModal(card);
-        });
-        wrapper.querySelector('[data-action="delete"]').addEventListener('click', (event) => {
-          event.stopPropagation();
-          deleteCard(card._id);
-        });
-        cardsContainer.appendChild(wrapper);
-      });
-    }
-
-    async function fetchSections() {
-      try {
-        const res = await fetch(`${API_BASE}/admin/all`, { credentials: 'include' });
-        if (!res.ok) throw new Error('خطا در دریافت سکشن‌ها');
-        sections = await res.json();
-        sortSections();
-        renderSectionsList();
-        if (sections.length) {
-          selectSection(sections[0]._id);
-        }
-      } catch (err) {
-        console.error(err);
-        showToast('خطا در دریافت اطلاعات از سرور', 'error');
-      }
-    }
-
-    function selectSection(sectionId) {
-      const target = sections.find((item) => item._id === sectionId);
-      if (!target) return;
-      selectedSectionId = sectionId;
-      renderSectionsList();
-      fillSectionForm(target);
-      renderCards(target);
-      deleteSectionBtn.hidden = false;
-      editorTitle.textContent = `ویرایش سکشن: ${target.title || ''}`;
-      editorSubtitle.textContent = 'تغییرات خود را ذخیره کنید تا در صفحه اصلی اعمال شود.';
-    }
-
-    sectionForm.addEventListener('submit', async (event) => {
-      event.preventDefault();
-      const payload = {
-        title: sectionFields.title.value.trim(),
-        slug: sectionFields.slug.value.trim(),
-        viewAllText: sectionFields.viewAllText.value.trim(),
-        viewAllLink: sectionFields.viewAllLink.value.trim(),
-        subtitle: sectionFields.subtitle.value.trim(),
-        description: sectionFields.description.value.trim(),
-        order: Number(sectionFields.order.value) || 0,
-        isActive: sectionFields.isActive.checked,
+      const sectionFields = {
+        title: document.getElementById('sectionTitle'),
+        slug: document.getElementById('sectionSlug'),
+        viewAllText: document.getElementById('sectionViewAllText'),
+        viewAllLink: document.getElementById('sectionViewAllLink'),
+        subtitle: document.getElementById('sectionSubtitleInput'),
+        order: document.getElementById('sectionOrder'),
+        description: document.getElementById('sectionDescription'),
+        isActive: document.getElementById('sectionIsActive'),
       };
 
-      if (!payload.title || !payload.slug) {
-        showToast('عنوان و اسلاگ سکشن الزامی است.', 'error');
-        return;
+      const cardFields = {
+        title: document.getElementById('cardTitle'),
+        tag: document.getElementById('cardTag'),
+        location: document.getElementById('cardLocation'),
+        price: document.getElementById('cardPrice'),
+        order: document.getElementById('cardOrder'),
+        buttonText: document.getElementById('cardButtonText'),
+        imageUrl: document.getElementById('cardImageUrl'),
+        link: document.getElementById('cardLink'),
+        description: document.getElementById('cardDescription'),
+        isActive: document.getElementById('cardIsActive'),
+      };
+
+      function showToast(message, type = 'success') {
+        clearTimeout(toastTimeout);
+        toastEl.textContent = message;
+        toastEl.className = `toast ${type}`;
+        requestAnimationFrame(() => toastEl.classList.add('show'));
+        toastTimeout = setTimeout(() => {
+          toastEl.classList.remove('show');
+        }, 3200);
       }
 
-      const method = selectedSectionId ? 'PUT' : 'POST';
-      const url = selectedSectionId ? `${API_BASE}/${selectedSectionId}` : API_BASE;
+      function formatCount(count) {
+        return new Intl.NumberFormat('fa-IR').format(count);
+      }
 
-      try {
-        const res = await fetch(url, {
-          method,
-          headers: { 'Content-Type': 'application/json' },
-          credentials: 'include',
-          body: JSON.stringify(payload),
-        });
-        const data = await res.json();
-        if (!res.ok) throw new Error(data?.message || 'خطا در ذخیره سکشن');
+      function sortSections() {
+        sections.sort((a, b) => (Number(a.order) || 0) - (Number(b.order) || 0));
+      }
 
-        const index = sections.findIndex((item) => item._id === data._id);
-        if (index > -1) {
-          sections[index] = data;
-        } else {
-          sections.push(data);
+      function updateSectionCount() {
+        sectionCountEl.textContent = `${formatCount(sections.length)} سکشن`;
+      }
+
+      function renderSectionsList() {
+        updateSectionCount();
+        sectionsContainer.innerHTML = '';
+
+        if (!sections.length) {
+          sectionsContainer.innerHTML = '<div class="empty-state">تا کنون سکشنی ثبت نشده است. با دکمه «سکشن جدید» شروع کنید.</div>';
+          return;
         }
-        sortSections();
-        renderSectionsList();
-        selectSection(data._id);
-        showToast('سکشن با موفقیت ذخیره شد.');
-      } catch (err) {
-        console.error(err);
-        showToast(err.message || 'خطایی رخ داد.', 'error');
-      }
-    });
 
-    deleteSectionBtn.addEventListener('click', async () => {
-      if (!selectedSectionId) return;
-      if (!confirm('آیا از حذف این سکشن مطمئن هستید؟')) return;
-      try {
-        const res = await fetch(`${API_BASE}/${selectedSectionId}`, {
-          method: 'DELETE',
-          credentials: 'include',
+        sections.forEach((section) => {
+          const item = document.createElement('div');
+          item.className = 'section-item' + (section._id === selectedSectionId ? ' active' : '');
+          item.innerHTML = `
+            <div class="section-item-title">${section.title || 'بدون عنوان'}</div>
+            <div class="section-meta">
+              <span class="badge">${section.slug || 'بدون اسلاگ'}</span>
+              <span>${section.isActive ? 'فعال' : 'غیرفعال'}</span>
+            </div>
+            <div class="section-meta">
+              <span><i class="ri-stack-line"></i> ${formatCount(section.cards?.length || 0)} کارت</span>
+              <span><i class="ri-hashtag"></i> ترتیب ${Number(section.order) || 0}</span>
+            </div>
+          `;
+          item.addEventListener('click', () => selectSection(section._id));
+          sectionsContainer.appendChild(item);
         });
-        const data = await res.json();
-        if (!res.ok) throw new Error(data?.message || 'خطا در حذف سکشن');
-        sections = sections.filter((item) => item._id !== selectedSectionId);
+      }
+
+      function resetSectionForm() {
+        sectionForm.reset();
+        sectionFields.order.value = 0;
+        sectionFields.isActive.checked = true;
+        deleteSectionBtn.hidden = true;
+        selectedSectionId = null;
+        editorTitle.textContent = 'افزودن سکشن جدید';
+        editorSubtitle.textContent = 'مشخصات سکشن و محتوای کارت‌ها را در این قسمت ثبت کنید.';
+        cardsContainer.innerHTML = '<div class="empty-state">ابتدا یک سکشن را انتخاب یا ایجاد کنید تا کارت‌ها نمایش داده شوند.</div>';
+        cardsCountBadge.textContent = '۰ کارت';
+        cardsPanelTitle.textContent = 'کارت‌های سکشن';
+      }
+
+      function fillSectionForm(section) {
+        sectionFields.title.value = section.title || '';
+        sectionFields.slug.value = section.slug || '';
+        sectionFields.viewAllText.value = section.viewAllText || '';
+        sectionFields.viewAllLink.value = section.viewAllLink || '';
+        sectionFields.subtitle.value = section.subtitle || '';
+        sectionFields.order.value = Number(section.order) || 0;
+        sectionFields.description.value = section.description || '';
+        sectionFields.isActive.checked = section.isActive !== false;
+      }
+
+      function renderCards(section) {
+        const cards = Array.isArray(section.cards) ? [...section.cards] : [];
+        cards.sort((a, b) => (Number(a.order) || 0) - (Number(b.order) || 0));
+
+        cardsCountBadge.textContent = `${formatCount(cards.length)} کارت`;
+        cardsPanelTitle.textContent = `کارت‌های سکشن: ${section.title || ''}`;
+
+        if (!cards.length) {
+          cardsContainer.innerHTML = '<div class="empty-state">برای این سکشن هنوز کارتی ثبت نشده است.</div>';
+          return;
+        }
+
+        cardsContainer.innerHTML = '';
+        cards.forEach((card) => {
+          const wrapper = document.createElement('div');
+          wrapper.className = 'card-item';
+          wrapper.innerHTML = `
+            <div class="card-item-header">
+              <div class="card-item-title">${card.title || 'بدون عنوان'}</div>
+              <span class="badge">${card.isActive !== false ? 'فعال' : 'غیرفعال'}</span>
+            </div>
+            <div class="card-item-meta">
+              ${card.tag ? `<span><i class="ri-price-tag-3-line"></i> ${card.tag}</span>` : ''}
+              ${card.location ? `<span><i class="ri-map-pin-line"></i> ${card.location}</span>` : ''}
+              ${card.price ? `<span><i class="ri-money-cny-box-line"></i> ${card.price}</span>` : ''}
+              <span><i class="ri-hashtag"></i> ترتیب ${Number(card.order) || 0}</span>
+            </div>
+            ${card.description ? `<div class="muted">${card.description}</div>` : ''}
+            <div class="card-actions">
+              <button class="ghost-btn" data-action="edit" data-id="${card._id}"><i class="ri-edit-line"></i> ویرایش</button>
+              <button class="ghost-btn danger" data-action="delete" data-id="${card._id}"><i class="ri-delete-bin-line"></i> حذف</button>
+              ${card.link ? `<a class="ghost-btn" href="${card.link}" target="_blank" rel="noopener"><i class="ri-external-link-line"></i> مشاهده لینک</a>` : ''}
+            </div>
+          `;
+          wrapper.querySelector('[data-action="edit"]').addEventListener('click', (event) => {
+            event.stopPropagation();
+            openCardModal(card);
+          });
+          wrapper.querySelector('[data-action="delete"]').addEventListener('click', (event) => {
+            event.stopPropagation();
+            deleteCard(card._id);
+          });
+          cardsContainer.appendChild(wrapper);
+        });
+      }
+
+      async function fetchSections() {
+        try {
+          const res = await fetch(`${API_BASE}/admin/all`, { credentials: 'include' });
+          if (!res.ok) throw new Error('خطا در دریافت سکشن‌ها');
+          sections = await res.json();
+          sortSections();
+          renderSectionsList();
+          if (sections.length) {
+            selectSection(sections[0]._id);
+          }
+        } catch (err) {
+          console.error(err);
+          showToast('خطا در دریافت اطلاعات از سرور', 'error');
+        }
+      }
+
+      function selectSection(sectionId) {
+        const target = sections.find((item) => item._id === sectionId);
+        if (!target) return;
+        selectedSectionId = sectionId;
+        renderSectionsList();
+        fillSectionForm(target);
+        renderCards(target);
+        deleteSectionBtn.hidden = false;
+        editorTitle.textContent = `ویرایش سکشن: ${target.title || ''}`;
+        editorSubtitle.textContent = 'تغییرات خود را ذخیره کنید تا در صفحه اصلی اعمال شود.';
+      }
+
+      sectionForm.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        const payload = {
+          title: sectionFields.title.value.trim(),
+          slug: sectionFields.slug.value.trim(),
+          viewAllText: sectionFields.viewAllText.value.trim(),
+          viewAllLink: sectionFields.viewAllLink.value.trim(),
+          subtitle: sectionFields.subtitle.value.trim(),
+          description: sectionFields.description.value.trim(),
+          order: Number(sectionFields.order.value) || 0,
+          isActive: sectionFields.isActive.checked,
+        };
+
+        if (!payload.title || !payload.slug) {
+          showToast('عنوان و اسلاگ سکشن الزامی است.', 'error');
+          return;
+        }
+
+        const method = selectedSectionId ? 'PUT' : 'POST';
+        const url = selectedSectionId ? `${API_BASE}/${selectedSectionId}` : API_BASE;
+
+        try {
+          const res = await fetch(url, {
+            method,
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
+            body: JSON.stringify(payload),
+          });
+          const data = await res.json();
+          if (!res.ok) throw new Error(data?.message || 'خطا در ذخیره سکشن');
+
+          const index = sections.findIndex((item) => item._id === data._id);
+          if (index > -1) {
+            sections[index] = data;
+          } else {
+            sections.push(data);
+          }
+          sortSections();
+          renderSectionsList();
+          selectSection(data._id);
+          showToast('سکشن با موفقیت ذخیره شد.');
+        } catch (err) {
+          console.error(err);
+          showToast(err.message || 'خطایی رخ داد.', 'error');
+        }
+      });
+
+      deleteSectionBtn.addEventListener('click', async () => {
+        if (!selectedSectionId) return;
+        if (!confirm('آیا از حذف این سکشن مطمئن هستید؟')) return;
+        try {
+          const res = await fetch(`${API_BASE}/${selectedSectionId}`, {
+            method: 'DELETE',
+            credentials: 'include',
+          });
+          const data = await res.json();
+          if (!res.ok) throw new Error(data?.message || 'خطا در حذف سکشن');
+          sections = sections.filter((item) => item._id !== selectedSectionId);
+          resetSectionForm();
+          renderSectionsList();
+          showToast('سکشن با موفقیت حذف شد.');
+        } catch (err) {
+          console.error(err);
+          showToast(err.message || 'خطایی رخ داد.', 'error');
+        }
+      });
+
+      resetFormBtn.addEventListener('click', () => {
         resetSectionForm();
         renderSectionsList();
-        showToast('سکشن با موفقیت حذف شد.');
-      } catch (err) {
-        console.error(err);
-        showToast(err.message || 'خطایی رخ داد.', 'error');
-      }
-    });
+      });
 
-    resetFormBtn.addEventListener('click', () => {
-      resetSectionForm();
-      renderSectionsList();
-    });
+      newSectionBtn.addEventListener('click', () => {
+        resetSectionForm();
+        sectionFields.slug.focus();
+      });
 
-    newSectionBtn.addEventListener('click', () => {
-      resetSectionForm();
-      sectionFields.slug.focus();
-    });
+      addCardBtn.addEventListener('click', () => {
+        if (!selectedSectionId) {
+          showToast('ابتدا یک سکشن را انتخاب کنید.', 'error');
+          return;
+        }
+        openCardModal();
+      });
 
-    addCardBtn.addEventListener('click', () => {
-      if (!selectedSectionId) {
-        showToast('ابتدا یک سکشن را انتخاب کنید.', 'error');
-        return;
-      }
-      openCardModal();
-    });
+      function openCardModal(card = null) {
+        editingCardId = card?._id || null;
+        cardModalTitle.textContent = editingCardId ? 'ویرایش کارت' : 'کارت جدید';
+        cardForm.reset();
+        cardFields.order.value = 0;
+        cardFields.isActive.checked = true;
 
-    function openCardModal(card = null) {
-      editingCardId = card?._id || null;
-      cardModalTitle.textContent = editingCardId ? 'ویرایش کارت' : 'کارت جدید';
-      cardForm.reset();
-      cardFields.order.value = 0;
-      cardFields.isActive.checked = true;
+        if (card) {
+          cardFields.title.value = card.title || '';
+          cardFields.tag.value = card.tag || '';
+          cardFields.location.value = card.location || '';
+          cardFields.price.value = card.price || '';
+          cardFields.order.value = Number(card.order) || 0;
+          cardFields.buttonText.value = card.buttonText || '';
+          cardFields.imageUrl.value = card.imageUrl || '';
+          cardFields.link.value = card.link || '';
+          cardFields.description.value = card.description || '';
+          cardFields.isActive.checked = card.isActive !== false;
+        }
 
-      if (card) {
-        cardFields.title.value = card.title || '';
-        cardFields.tag.value = card.tag || '';
-        cardFields.location.value = card.location || '';
-        cardFields.price.value = card.price || '';
-        cardFields.order.value = Number(card.order) || 0;
-        cardFields.buttonText.value = card.buttonText || '';
-        cardFields.imageUrl.value = card.imageUrl || '';
-        cardFields.link.value = card.link || '';
-        cardFields.description.value = card.description || '';
-        cardFields.isActive.checked = card.isActive !== false;
+        cardModalBackdrop.classList.add('active');
       }
 
-      cardModalBackdrop.classList.add('active');
-    }
+      function closeCardModal() {
+        cardModalBackdrop.classList.remove('active');
+        editingCardId = null;
+      }
 
-    function closeCardModal() {
-      cardModalBackdrop.classList.remove('active');
-      editingCardId = null;
-    }
-
-    cancelCardBtn.addEventListener('click', () => {
-      closeCardModal();
-    });
-
-    cardModalBackdrop.addEventListener('click', (event) => {
-      if (event.target === cardModalBackdrop) {
+      cancelCardBtn.addEventListener('click', () => {
         closeCardModal();
-      }
-    });
+      });
 
-    cardForm.addEventListener('submit', async (event) => {
-      event.preventDefault();
-      if (!selectedSectionId) {
-        showToast('ابتدا یک سکشن را انتخاب کنید.', 'error');
-        return;
+      cardModalBackdrop.addEventListener('click', (event) => {
+        if (event.target === cardModalBackdrop) {
+          closeCardModal();
+        }
+      });
+
+      cardForm.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        if (!selectedSectionId) {
+          showToast('ابتدا یک سکشن را انتخاب کنید.', 'error');
+          return;
+        }
+
+        const payload = {
+          title: cardFields.title.value.trim(),
+          tag: cardFields.tag.value.trim(),
+          location: cardFields.location.value.trim(),
+          price: cardFields.price.value.trim(),
+          order: Number(cardFields.order.value) || 0,
+          buttonText: cardFields.buttonText.value.trim(),
+          imageUrl: cardFields.imageUrl.value.trim(),
+          link: cardFields.link.value.trim(),
+          description: cardFields.description.value.trim(),
+          isActive: cardFields.isActive.checked,
+        };
+
+        if (!payload.title) {
+          showToast('عنوان کارت الزامی است.', 'error');
+          return;
+        }
+
+        const method = editingCardId ? 'PUT' : 'POST';
+        const url = editingCardId
+          ? `${API_BASE}/${selectedSectionId}/cards/${editingCardId}`
+          : `${API_BASE}/${selectedSectionId}/cards`;
+
+        try {
+          const res = await fetch(url, {
+            method,
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
+            body: JSON.stringify(payload),
+          });
+          const data = await res.json();
+          if (!res.ok) throw new Error(data?.message || 'خطا در ذخیره کارت');
+
+          const index = sections.findIndex((item) => item._id === data._id);
+          if (index > -1) {
+            sections[index] = data;
+          }
+          sortSections();
+          renderSectionsList();
+          selectSection(data._id);
+          closeCardModal();
+          showToast('کارت با موفقیت ذخیره شد.');
+        } catch (err) {
+          console.error(err);
+          showToast(err.message || 'خطایی رخ داد.', 'error');
+        }
+      });
+
+      async function deleteCard(cardId) {
+        if (!selectedSectionId || !cardId) return;
+        if (!confirm('حذف کارت انتخاب شده؟')) return;
+        try {
+          const res = await fetch(`${API_BASE}/${selectedSectionId}/cards/${cardId}`, {
+            method: 'DELETE',
+            credentials: 'include',
+          });
+          const data = await res.json();
+          if (!res.ok) throw new Error(data?.message || 'خطا در حذف کارت');
+          const index = sections.findIndex((item) => item._id === data._id);
+          if (index > -1) {
+            sections[index] = data;
+          }
+          renderSectionsList();
+          selectSection(data._id);
+          showToast('کارت حذف شد.');
+        } catch (err) {
+          console.error(err);
+          showToast(err.message || 'خطایی رخ داد.', 'error');
+        }
       }
 
-      const payload = {
-        title: cardFields.title.value.trim(),
-        tag: cardFields.tag.value.trim(),
-        location: cardFields.location.value.trim(),
-        price: cardFields.price.value.trim(),
-        order: Number(cardFields.order.value) || 0,
-        buttonText: cardFields.buttonText.value.trim(),
-        imageUrl: cardFields.imageUrl.value.trim(),
-        link: cardFields.link.value.trim(),
-        description: cardFields.description.value.trim(),
-        isActive: cardFields.isActive.checked,
+      const handleKeydown = (event) => {
+        if (event.key === 'Escape' && cardModalBackdrop.classList.contains('active')) {
+          closeCardModal();
+        }
       };
 
-      if (!payload.title) {
-        showToast('عنوان کارت الزامی است.', 'error');
-        return;
-      }
+      document.addEventListener('keydown', handleKeydown);
 
-      const method = editingCardId ? 'PUT' : 'POST';
-      const url = editingCardId
-        ? `${API_BASE}/${selectedSectionId}/cards/${editingCardId}`
-        : `${API_BASE}/${selectedSectionId}/cards`;
+      window[CLEANUP_KEY] = () => {
+        document.removeEventListener('keydown', handleKeydown);
+        delete window[CLEANUP_KEY];
+      };
 
-      try {
-        const res = await fetch(url, {
-          method,
-          headers: { 'Content-Type': 'application/json' },
-          credentials: 'include',
-          body: JSON.stringify(payload),
-        });
-        const data = await res.json();
-        if (!res.ok) throw new Error(data?.message || 'خطا در ذخیره کارت');
-
-        const index = sections.findIndex((item) => item._id === data._id);
-        if (index > -1) {
-          sections[index] = data;
-        }
-        sortSections();
-        renderSectionsList();
-        selectSection(data._id);
-        closeCardModal();
-        showToast('کارت با موفقیت ذخیره شد.');
-      } catch (err) {
-        console.error(err);
-        showToast(err.message || 'خطایی رخ داد.', 'error');
-      }
-    });
-
-    async function deleteCard(cardId) {
-      if (!selectedSectionId || !cardId) return;
-      if (!confirm('حذف کارت انتخاب شده؟')) return;
-      try {
-        const res = await fetch(`${API_BASE}/${selectedSectionId}/cards/${cardId}`, {
-          method: 'DELETE',
-          credentials: 'include',
-        });
-        const data = await res.json();
-        if (!res.ok) throw new Error(data?.message || 'خطا در حذف کارت');
-        const index = sections.findIndex((item) => item._id === data._id);
-        if (index > -1) {
-          sections[index] = data;
-        }
-        renderSectionsList();
-        selectSection(data._id);
-        showToast('کارت حذف شد.');
-      } catch (err) {
-        console.error(err);
-        showToast(err.message || 'خطایی رخ داد.', 'error');
-      }
-    }
-
-    document.addEventListener('keydown', (event) => {
-      if (event.key === 'Escape' && cardModalBackdrop.classList.contains('active')) {
-        closeCardModal();
-      }
-    });
-
-    fetchSections();
+      fetchSections();
+    })();
   </script>
 </body>
 </html>
