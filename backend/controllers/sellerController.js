@@ -3,6 +3,7 @@ const Seller = require('../models/Seller');
 const bcrypt = require('bcryptjs');
 const Product = require('../models/product');
 const ShopAppearance = require('../models/ShopAppearance');
+const ServiceShop = require('../models/serviceShop');
 const SellerPlan = require('../models/sellerPlan');
 const AdOrder = require('../models/AdOrder');
 const Payment = require('../models/payment');
@@ -14,6 +15,10 @@ const Booking = require('../models/booking');
 const Review = require('../models/Review');
 const { calcPremiumUntil } = require('../utils/premium');
 const { clampAdminScore, evaluatePerformance } = require('../utils/performanceStatus');
+
+const escapeRegExp = (str = '') => str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+const log1p = (value) => Math.log1p(Math.max(0, Number(value) || 0));
+const normalizeString = (value) => (value || '').toString().trim().toLowerCase();
 
 function buildPerformancePayload(seller, options = {}) {
   const { includeNote = false } = options;
@@ -429,5 +434,180 @@ exports.getCurrentSellerPerformanceStatus = async (req, res) => {
   } catch (err) {
     console.error('getCurrentSellerPerformanceStatus error:', err);
     return res.status(500).json({ message: 'خطا در دریافت وضعیت عملکرد.' });
+  }
+};
+
+exports.getTopServicePeers = async (req, res) => {
+  try {
+    const sellerId = req.user && (req.user.id || req.user._id);
+    if (!sellerId) {
+      return res.status(401).json({ message: 'احراز هویت نامعتبر است.' });
+    }
+
+    const seller = await Seller.findById(sellerId)
+      .select('storename shopurl category subcategory phone firstname lastname')
+      .lean();
+
+    if (!seller) {
+      return res.status(404).json({ message: 'فروشنده پیدا نشد.' });
+    }
+
+    const limit = Math.min(20, Math.max(3, Number.parseInt(req.query.limit, 10) || 10));
+    const scope = String(req.query.scope || '').trim().toLowerCase();
+
+    const category = (seller.category || '').trim();
+    const subcategory = (seller.subcategory || '').trim();
+
+    const match = {
+      status: 'approved',
+      isVisible: true
+    };
+
+    let scopeApplied = 'category';
+    if (scope === 'subcategory' && subcategory) {
+      scopeApplied = 'subcategory';
+      match.$or = [
+        { subcategories: { $in: [subcategory] } },
+        { tags: { $regex: new RegExp(escapeRegExp(subcategory), 'i') } }
+      ];
+    } else if (category) {
+      match.category = category;
+    }
+
+    const projection = 'name shopUrl city category subcategories tags analytics isPremium isFeatured coverImage ownerPhone ownerName updatedAt createdAt';
+
+    const shops = await ServiceShop.find(match)
+      .sort({
+        'analytics.ratingAverage': -1,
+        'analytics.ratingCount': -1,
+        'analytics.totalBookings': -1,
+        createdAt: -1
+      })
+      .limit(200)
+      .select(projection)
+      .lean();
+
+    const sellerSlug = normalizeString(seller.shopurl);
+    const sellerPhone = normalizeString(seller.phone);
+
+    const computeMetrics = (shop = {}) => {
+      const analytics = shop.analytics || {};
+      const ratingAverage = Number(analytics.ratingAverage) || 0;
+      const ratingCount = Number(analytics.ratingCount) || 0;
+      const totalBookings = Number(analytics.totalBookings) || 0;
+      const completedBookings = Number(analytics.completedBookings) || 0;
+      const uniqueCustomers = Number(analytics.uniqueCustomers) || Math.max(completedBookings, Math.round(totalBookings * 0.6)) || 0;
+
+      const score = (ratingAverage * 25)
+        + (log1p(ratingCount) * 10)
+        + (log1p(totalBookings) * 8)
+        + (shop.isPremium ? 5 : 0)
+        + (shop.isFeatured ? 3 : 0);
+
+      return {
+        ratingAverage,
+        ratingCount,
+        totalBookings,
+        completedBookings,
+        uniqueCustomers,
+        score
+      };
+    };
+
+    const leaderboard = shops.map(shop => {
+      const metrics = computeMetrics(shop);
+      const slug = normalizeString(shop.shopUrl);
+      const phone = normalizeString(shop.ownerPhone);
+      const isMine = (slug && sellerSlug && slug === sellerSlug) || (phone && sellerPhone && phone === sellerPhone);
+
+      return {
+        id: shop._id ? shop._id.toString() : null,
+        name: shop.name || shop.ownerName || shop.shopUrl || 'فروشگاه بدون نام',
+        shopUrl: shop.shopUrl || null,
+        city: shop.city || '',
+        category: shop.category || category || '',
+        badges: {
+          isPremium: !!shop.isPremium,
+          isFeatured: !!shop.isFeatured
+        },
+        metrics,
+        score: Number(metrics.score.toFixed(2)),
+        updatedAt: shop.updatedAt || shop.createdAt || null,
+        isMine
+      };
+    });
+
+    leaderboard.sort((a, b) => {
+      if (b.score !== a.score) return b.score - a.score;
+      if (b.metrics.ratingAverage !== a.metrics.ratingAverage) {
+        return b.metrics.ratingAverage - a.metrics.ratingAverage;
+      }
+      if (b.metrics.ratingCount !== a.metrics.ratingCount) {
+        return b.metrics.ratingCount - a.metrics.ratingCount;
+      }
+      if (b.metrics.totalBookings !== a.metrics.totalBookings) {
+        return b.metrics.totalBookings - a.metrics.totalBookings;
+      }
+      return (a.name || '').localeCompare(b.name || '', 'fa');
+    });
+
+    const total = leaderboard.length;
+    let mine = leaderboard.find(entry => entry.isMine) || null;
+
+    if (!mine) {
+      mine = {
+        id: null,
+        name: seller.storename || seller.shopurl || `${seller.firstname || ''} ${seller.lastname || ''}`.trim() || 'فروشگاه شما',
+        shopUrl: seller.shopurl || null,
+        city: '',
+        category: category || '',
+        badges: { isPremium: false, isFeatured: false },
+        metrics: {
+          ratingAverage: 0,
+          ratingCount: 0,
+          totalBookings: 0,
+          completedBookings: 0,
+          uniqueCustomers: 0
+        },
+        score: 0,
+        updatedAt: null,
+        isMine: true
+      };
+    }
+
+    const ranked = leaderboard.map((entry, index) => ({
+      ...entry,
+      rank: index + 1
+    }));
+
+    const mineWithRank = mine && mine.id
+      ? { ...mine, rank: ranked.findIndex(entry => entry.id === mine.id) + 1 || null }
+      : { ...mine, rank: null };
+
+    const top = ranked.slice(0, limit).map(entry => ({
+      rank: entry.rank,
+      name: entry.name,
+      shopUrl: entry.shopUrl,
+      city: entry.city,
+      score: entry.score,
+      badges: entry.badges,
+      metrics: entry.metrics,
+      updatedAt: entry.updatedAt,
+      isMine: entry.isMine
+    }));
+
+    const response = {
+      top,
+      mine: mineWithRank,
+      total,
+      category: scopeApplied === 'subcategory' && subcategory ? subcategory : (category || 'خدمات'),
+      scope: scopeApplied,
+      updatedAt: new Date().toISOString()
+    };
+
+    return res.json(response);
+  } catch (err) {
+    console.error('getTopServicePeers error:', err);
+    return res.status(500).json({ message: 'خطای داخلی سرور.' });
   }
 };
