@@ -9,7 +9,8 @@ const sellerRoutes = require('./routes/seller');
 const adminRoutes  = require('./routes/adminRoutes');
 const planRoutes   = require('./routes/plans');
 const adPlanRoutes = require('./routes/adPlans');
-const paymentRoutes = require('./routes/payment'); 
+const paymentRoutes = require('./routes/payment');
+const settingsRoutes = require('./routes/settings');
 require('dotenv').config();
 
 const app = express();
@@ -67,6 +68,7 @@ app.use('/api/shopping-centers', require('./routes/shoppingCenter'));
 app.use('/api/shop-appearances', require('./routes/shopAppearance'));
 app.use('/api/payment', paymentRoutes);  // روت‌های پرداخت
 app.use('/api/branding', require('./routes/branding'));
+app.use('/api/settings', settingsRoutes);
 
 // Booking routes
 app.use('/api', require('./routes/bookingRoutes'));

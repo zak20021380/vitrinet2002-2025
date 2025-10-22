@@ -51,6 +51,91 @@ const API_BASE = window.__API_BASE__ || '';
 const NO_CACHE = { cache: 'no-store', headers: { 'Cache-Control': 'no-cache' } };
 const bust = (url) => `${url}${url.includes('?') ? '&' : '?'}__=${Date.now()}`;
 
+const DEFAULT_FEATURE_FLAGS = Object.freeze({ sellerPlansEnabled: false });
+const TRUE_FLAG_VALUES = new Set(['1', 'true', 'yes', 'on', 'enable', 'enabled', 'فعال', 'روشن', 'active']);
+const FALSE_FLAG_VALUES = new Set(['0', 'false', 'no', 'off', 'disable', 'disabled', 'غیرفعال', 'خاموش', 'inactive']);
+
+const parseFlagBoolean = (value, fallback = false) => {
+  if (value === undefined || value === null) return fallback;
+  if (typeof value === 'boolean') return value;
+  if (typeof value === 'number') return value !== 0;
+  if (typeof value === 'string') {
+    const normalized = value.trim().toLowerCase();
+    if (TRUE_FLAG_VALUES.has(normalized)) return true;
+    if (FALSE_FLAG_VALUES.has(normalized)) return false;
+    return fallback;
+  }
+  if (typeof value === 'object') {
+    if (Object.prototype.hasOwnProperty.call(value, 'enabled')) {
+      return parseFlagBoolean(value.enabled, fallback);
+    }
+    if (Object.prototype.hasOwnProperty.call(value, 'value')) {
+      return parseFlagBoolean(value.value, fallback);
+    }
+  }
+  return fallback;
+};
+
+const normalizeFeatureFlags = (raw = {}) => ({
+  sellerPlansEnabled: parseFlagBoolean(raw.sellerPlansEnabled, DEFAULT_FEATURE_FLAGS.sellerPlansEnabled)
+});
+
+function applySellerPlanFeatureFlags(flags = DEFAULT_FEATURE_FLAGS) {
+  const normalized = normalizeFeatureFlags(flags);
+  const planHero = document.getElementById('plan-hero');
+  const plansView = document.getElementById('plans-view');
+  const planNav = document.querySelector('.app-nav [data-page="plans"]');
+  const overlay = plansView?.querySelector('.plan-disabled-overlay');
+  const viewContainer = plansView?.querySelector('.view-container');
+
+  if (normalized.sellerPlansEnabled) {
+    planHero?.removeAttribute('hidden');
+    planHero?.removeAttribute('aria-hidden');
+    planHero?.classList.remove('is-hidden');
+    if (plansView) {
+      plansView.classList.remove('plans-disabled');
+      plansView.removeAttribute('aria-disabled');
+      plansView.removeAttribute('aria-hidden');
+    }
+    overlay?.setAttribute('hidden', '');
+    viewContainer?.removeAttribute('aria-hidden');
+    if (planNav) {
+      planNav.classList.remove('is-hidden');
+      planNav.removeAttribute('hidden');
+      planNav.removeAttribute('aria-hidden');
+      planNav.removeAttribute('tabindex');
+    }
+    if (document.body) {
+      document.body.dataset.sellerPlans = 'enabled';
+    }
+  } else {
+    planHero?.setAttribute('hidden', '');
+    planHero?.setAttribute('aria-hidden', 'true');
+    planHero?.classList.add('is-hidden');
+    if (plansView) {
+      plansView.classList.add('plans-disabled');
+      plansView.setAttribute('aria-disabled', 'true');
+      plansView.setAttribute('aria-hidden', 'true');
+    }
+    overlay?.removeAttribute('hidden');
+    viewContainer?.setAttribute('aria-hidden', 'true');
+    if (planNav) {
+      planNav.classList.add('is-hidden');
+      planNav.setAttribute('hidden', '');
+      planNav.setAttribute('aria-hidden', 'true');
+      planNav.setAttribute('tabindex', '-1');
+    }
+    if (document.body) {
+      document.body.dataset.sellerPlans = 'disabled';
+    }
+    if (window.location.hash === '#/plans') {
+      window.location.hash = '#/dashboard';
+    }
+  }
+
+  return normalized;
+}
+
 const EMPTY_DASHBOARD_STATS = {
   todayBookings: 0,
   yesterdayBookings: 0,
@@ -258,6 +343,23 @@ const API = {
       price: s.price,
       image: s.image || ''
     }));
+  },
+
+  async getFeatureFlags() {
+    try {
+      const res = await fetch(bust(`${API_BASE}/api/settings/public/feature-flags`), {
+        credentials: 'include',
+        ...NO_CACHE
+      });
+      if (!res.ok) {
+        throw new Error(`FEATURE_FLAGS_HTTP_${res.status}`);
+      }
+      const data = await this._json(res);
+      return data?.flags || {};
+    } catch (err) {
+      console.warn('API.getFeatureFlags failed', err);
+      throw err;
+    }
   },
 
   // ایجاد خدمت جدید
@@ -1407,7 +1509,7 @@ function bindFloatingCloseOnce() {
 
 
   class SellerPanelApp {
-    constructor() {
+    constructor(flags = {}) {
       this.root = document.documentElement;
       this.body = document.body;
       this.appNav = document.querySelector('.app-nav');
@@ -1418,12 +1520,22 @@ function bindFloatingCloseOnce() {
       this.dashboardStats = null;
       this._dashboardStatsPromise = null;
 
+      this.setFeatureFlags(flags);
+
       // Initialize Services, Portfolio, VIP & customer features
       this.initServices();
       this.initPortfolio();
       this.initVipSettings();
       this.initCustomerFeatures();
 
+    }
+
+    setFeatureFlags(flags = {}) {
+      this.featureFlags = normalizeFeatureFlags(flags);
+    }
+
+    isSellerPlansEnabled() {
+      return !!(this.featureFlags && this.featureFlags.sellerPlansEnabled);
     }
 
 // --- FIX: back-compat for old call in init() ---
@@ -1758,6 +1870,13 @@ destroy() {
     handleRouteChange() {
       const hash = window.location.hash || '#/dashboard';
       const page = hash.substring(2) || 'dashboard';
+      if (page === 'plans' && !this.isSellerPlansEnabled()) {
+        if (window.location.hash !== '#/dashboard') {
+          window.location.hash = '#/dashboard';
+        }
+        UIComponents?.showToast?.('بخش پلن‌ها به‌زودی فعال می‌شود.', 'info');
+        return;
+      }
       document.querySelectorAll('.view-section').forEach(s => s.classList.remove('active'));
       document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
       document.querySelectorAll('.nav-item').forEach(n => n.removeAttribute('aria-current'));
@@ -1784,7 +1903,11 @@ destroy() {
         case 'bookings': this.renderBookings(); break;
         case 'customers': this.renderCustomers(); break;
         case 'reviews': this.renderReviews(); break;
-        case 'plans': this.renderPlans(); break;
+        case 'plans':
+          if (this.isSellerPlansEnabled()) {
+            this.renderPlans();
+          }
+          break;
         case 'settings': this.renderSettings(); break; // New call for settings
       }
     }
@@ -2297,6 +2420,7 @@ destroy() {
 
 
     renderPlans() {
+      if (!this.isSellerPlansEnabled()) return;
       // Logic is handled by handlePlanDurationChange on load
     }
     // --- NEW: Settings Rendering Logic ---
@@ -3512,12 +3636,23 @@ function showPersonalizedWelcome(sellerData) {
 await fetchInitialData();
 initSellerPersonalization();
 
-  // Run the App
-const app = new SellerPanelApp();
-app.init();
-  if (typeof app.initBrandImages === 'function') app.initBrandImages();
+let featureFlags = { ...DEFAULT_FEATURE_FLAGS };
+try {
+  const rawFlags = await API.getFeatureFlags();
+  featureFlags = normalizeFeatureFlags(rawFlags || {});
+} catch (err) {
+  console.warn('feature flags fetch failed', err);
+  featureFlags = { ...DEFAULT_FEATURE_FLAGS };
+}
 
-  loadCustomers();
+featureFlags = applySellerPlanFeatureFlags(featureFlags);
+window.__FEATURE_FLAGS__ = featureFlags;
+
+const app = new SellerPanelApp(featureFlags);
+app.init();
+if (typeof app.initBrandImages === 'function') app.initBrandImages();
+
+loadCustomers();
 
 
 
