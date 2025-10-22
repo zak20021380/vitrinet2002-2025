@@ -678,6 +678,51 @@ async function getShopUrlFromLocation() {
         بستن
       </button>
     </div>
+</div>
+</div>
+
+
+<!-- Call Modal -->
+<div id="callModal" role="dialog" aria-modal="true" aria-labelledby="call-modal-title"
+     class="hidden fixed inset-0 z-[85] items-center justify-center">
+  <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" data-close></div>
+
+  <div class="modal-card relative w-[92%] max-w-sm overflow-hidden rounded-3xl bg-white/90 backdrop-blur-xl border border-white/70 shadow-2xl p-6 pt-7 transform transition duration-150 scale-95 opacity-0">
+    <div class="absolute inset-0 -z-10 bg-gradient-to-br from-emerald-200/80 via-sky-200/70 to-blue-200/60"></div>
+    <div class="absolute -right-12 -top-16 w-48 h-48 rounded-full bg-emerald-400/30 blur-3xl"></div>
+    <div class="absolute -left-12 -bottom-16 w-48 h-48 rounded-full bg-sky-400/30 blur-3xl"></div>
+
+    <button type="button" data-close class="absolute top-3 left-3 text-slate-500 hover:text-slate-700 text-xl leading-none">
+      &times;
+    </button>
+
+    <div class="flex flex-col items-center text-center gap-3">
+      <span class="inline-flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-tr from-emerald-500 via-sky-500 to-blue-600 text-white shadow-lg">
+        <i class="fa-solid fa-phone-volume text-2xl"></i>
+      </span>
+      <div>
+        <h2 id="call-modal-title" class="text-lg font-extrabold text-slate-900">تماس با فروشنده</h2>
+        <p class="mt-1 text-sm text-slate-600">برای هماهنگی سریع، با شماره زیر تماس بگیرید.</p>
+      </div>
+
+      <div class="w-full rounded-2xl border border-white/60 bg-white/80 px-4 py-3 shadow-inner">
+        <p class="mb-1 text-xs font-semibold text-emerald-600">شماره تماس فروشنده</p>
+        <p id="call-modal-number" class="text-2xl font-black tracking-wider text-slate-900" dir="ltr">—</p>
+      </div>
+
+      <div class="grid w-full grid-cols-1 gap-2 sm:grid-cols-2">
+        <a id="call-modal-action" href="tel:" class="inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-emerald-500 via-sky-500 to-blue-600 px-4 py-3 text-sm font-bold text-white shadow-lg transition hover:shadow-xl">
+          <i class="fa-solid fa-phone"></i>
+          <span>شروع تماس</span>
+        </a>
+        <button id="call-copy-btn" type="button" class="inline-flex items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white/80 px-4 py-3 text-sm font-bold text-slate-700 transition hover:bg-white">
+          <i class="fa-regular fa-copy text-slate-500"></i>
+          <span>کپی شماره</span>
+        </button>
+      </div>
+
+      <p class="text-xs text-slate-500">ساعت پاسخ‌گویی مطابق با اطلاعات ثبت‌شده در پروفایل فروشنده است.</p>
+    </div>
   </div>
 </div>
 
@@ -997,6 +1042,27 @@ function showToastDark(message, {type='success', durationMs=2600} = {}) {
     });
   }
 
+  const callCopyBtn = document.getElementById('call-copy-btn');
+  if (callCopyBtn) {
+    callCopyBtn.addEventListener('click', () => {
+      if (callCopyBtn.disabled) return;
+      const numberEl = document.getElementById('call-modal-number');
+      const raw = numberEl?.dataset?.raw || '';
+      if (!raw) return;
+      navigator.clipboard.writeText(raw)
+        .then(() => {
+          if (typeof showToastDark === 'function') {
+            showToastDark('شماره تماس کپی شد', { type: 'success' });
+          }
+        })
+        .catch(() => {
+          if (typeof showToastDark === 'function') {
+            showToastDark('امکان کپی شماره وجود ندارد', { type: 'error' });
+          }
+        });
+    });
+  }
+
   // ====== Report form + counter ======
   const reportModal   = document.getElementById('reportModal');
   const reportForm    = document.getElementById('report-form');
@@ -1273,7 +1339,7 @@ async function hasPending(){
                 <span>رزرو آنلاین</span>
               </button>
 
-              <a id="hero-call" href="tel:"
+              <button id="hero-call" type="button" data-open="callModal"
                  class="inline-flex items-center justify-center gap-2
                         px-6 sm:px-8 lg:px-8 py-3.5 sm:py-4 lg:py-4
                         rounded-2xl font-bold text-sm sm:text-base lg:text-base
@@ -1284,7 +1350,7 @@ async function hasPending(){
                   <path d="M20.01 15.38c-1.23 0-2.42-.2-3.53-.56a1 1 0 00-1.01.24l-1.57 1.97c-2.83-1.35-5.48-3.9-6.89-6.83l1.95-1.66a1 1 0 00.24-1.02c-.37-1.11-.56-2.3-.56-3.53 0-.54-.45-.99-.99-.99H4.19C3.65 3 3 3.24 3 3.99 3 13.28 10.73 21 20.01 21c.71 0 .99-.63.99-1.18v-3.45c0-.54-.45-.99-.99-.99z"/>
                 </svg>
                 <span>تماس فوری</span>
-              </a>
+              </button>
             </div>
 
             <!-- اعتماد مینیمال -->
@@ -5521,6 +5587,60 @@ function updateSellerProfile(seller) {
     }
   }
 
+  const phoneRaw = (seller.phone || '').toString().trim();
+  const phoneFa  = phoneRaw ? toFa(phoneRaw) : '';
+
+  const heroCall       = document.getElementById('hero-call');
+  const callNumberEl   = document.getElementById('call-modal-number');
+  const callActionEl   = document.getElementById('call-modal-action');
+  const callCopyBtn    = document.getElementById('call-copy-btn');
+
+  if (callNumberEl) {
+    if (phoneRaw) {
+      callNumberEl.textContent = phoneFa;
+      callNumberEl.dataset.raw = phoneRaw;
+      callNumberEl.classList.remove('text-slate-400');
+    } else {
+      callNumberEl.textContent = 'شماره‌ای ثبت نشده است';
+      callNumberEl.dataset.raw = '';
+      callNumberEl.classList.add('text-slate-400');
+    }
+  }
+
+  if (callActionEl) {
+    if (phoneRaw) {
+      callActionEl.href = `tel:${phoneRaw}`;
+      callActionEl.classList.remove('pointer-events-none','opacity-60');
+      callActionEl.setAttribute('aria-disabled', 'false');
+    } else {
+      callActionEl.href = '#';
+      callActionEl.classList.add('pointer-events-none','opacity-60');
+      callActionEl.setAttribute('aria-disabled', 'true');
+    }
+  }
+
+  if (callCopyBtn) {
+    if (phoneRaw) {
+      callCopyBtn.disabled = false;
+      callCopyBtn.classList.remove('opacity-60','cursor-not-allowed');
+    } else {
+      callCopyBtn.disabled = true;
+      callCopyBtn.classList.add('opacity-60','cursor-not-allowed');
+    }
+  }
+
+  if (heroCall) {
+    if (phoneRaw) {
+      heroCall.disabled = false;
+      heroCall.dataset.phone = phoneRaw;
+      heroCall.classList.remove('opacity-60','cursor-not-allowed');
+    } else {
+      heroCall.disabled = true;
+      heroCall.dataset.phone = '';
+      heroCall.classList.add('opacity-60','cursor-not-allowed');
+    }
+  }
+
   // Handle footer image from seller data
   if (seller.footerImage || seller.brandingImage || seller.coverImage) {
     const imageUrl = seller.footerImage || seller.brandingImage || seller.coverImage;
@@ -5538,8 +5658,6 @@ function updateSellerProfile(seller) {
     if (footerEl) footerEl.hidden = false;
   }
 
-  const heroCall = document.getElementById('hero-call');
-  if (heroCall) heroCall.href = seller.phone ? `tel:${seller.phone}` : '#';
 }
 
 
