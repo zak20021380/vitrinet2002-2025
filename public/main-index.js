@@ -765,6 +765,12 @@ async function loadShops() {
           ${adTitleHTML}
         </div>
         ${adTextHTML}
+        <button class="card-action-btn" onclick="event.stopPropagation();">
+          مشاهده
+          <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/>
+          </svg>
+        </button>
       `;
       cardsWrap.appendChild(card);
     }
@@ -816,6 +822,12 @@ async function loadShops() {
         <div class="flex items-center justify-center gap-2 mt-2 w-full">
           ${shopCategoryHTML}
         </div>
+        <button class="card-action-btn" onclick="event.stopPropagation();">
+          مشاهده
+          <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/>
+          </svg>
+        </button>
       `;
       cardsWrap.appendChild(card);
     });
@@ -933,6 +945,12 @@ async function loadMostVisitedStores() {
           <span class="bg-emerald-100 text-emerald-600 text-[11px] px-2 py-1 rounded-full">${category}</span>
           <span class="text-[10px] text-gray-400">${visits} بازدید</span>
         </div>
+        <button class="card-action-btn" onclick="event.stopPropagation();" style="margin-top: 10px;">
+          مشاهده
+          <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/>
+          </svg>
+        </button>
       `;
       container.appendChild(card);
     });
@@ -1059,7 +1077,12 @@ function renderPopularProductsSection(section) {
         ${description}
         ${location}
         ${price}
-        ${button}
+        ${button || `<button class="card-action-btn" onclick="event.stopPropagation();">
+          مشاهده
+          <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/>
+          </svg>
+        </button>`}
       `;
 
       slider.appendChild(cardEl);
@@ -1122,6 +1145,12 @@ async function loadPopularProductsFallback(slider) {
         <div class="inline-block bg-gradient-to-r from-[#10b981]/10 to-[#0ea5e9]/10 px-4 py-1 rounded-full text-[#10b981] font-extrabold text-base shadow-sm">
           ${escapeHTML(priceText)}
         </div>
+        <button class="card-action-btn" onclick="event.stopPropagation();">
+          مشاهده
+          <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/>
+          </svg>
+        </button>
       `;
       slider.appendChild(card);
     });
@@ -1264,6 +1293,12 @@ async function loadBantaShops() {
         <div class="flex items-center justify-center gap-2 mt-2 w-full">
           ${badge}
         </div>
+        <button class="card-action-btn" onclick="event.stopPropagation();">
+          مشاهده
+          <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/>
+          </svg>
+        </button>
       `;
       slider.appendChild(card);
     });
@@ -1376,6 +1411,12 @@ async function loadShoesAndBagsShops() {
         <div class="flex items-center justify-center gap-2 mt-2 w-full">
           ${tagTemplate || `<span class="inline-block bg-[#10b981]/10 text-[#10b981] text-xs font-bold px-3 py-1 rounded-full">${escapeHTML(categoryText)}</span>`}
         </div>
+        <button class="card-action-btn" onclick="event.stopPropagation();">
+          مشاهده
+          <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/>
+          </svg>
+        </button>
       `;
 
       slider.appendChild(card);
@@ -1444,6 +1485,12 @@ card.target = '_blank';  // اصلاح: باز شدن در تب جدید
       <div class="flex items-center justify-center gap-2 mt-2 w-full">
         ${center.description ? `<span class="inline-block bg-[#10b981]/10 text-[#0ea5e9] text-xs font-bold px-3 py-1 rounded-full shadow-sm">${center.description}</span>` : ""}
       </div>
+      <button class="card-action-btn" onclick="event.stopPropagation();">
+        مشاهده
+        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/>
+        </svg>
+      </button>
     `;
     slider.appendChild(card);
   });
