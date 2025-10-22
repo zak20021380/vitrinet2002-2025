@@ -51,6 +51,138 @@ const API_BASE = window.__API_BASE__ || '';
 const NO_CACHE = { cache: 'no-store', headers: { 'Cache-Control': 'no-cache' } };
 const bust = (url) => `${url}${url.includes('?') ? '&' : '?'}__=${Date.now()}`;
 
+const EMPTY_DASHBOARD_STATS = {
+  todayBookings: 0,
+  yesterdayBookings: 0,
+  pendingBookings: 0,
+  activeCustomers: 0,
+  previousActiveCustomers: 0,
+  newCustomers30d: 0,
+  ratingAverage: 0,
+  ratingCount: 0
+};
+
+const ACTIVE_BOOKING_STATUSES = new Set(['pending', 'confirmed', 'completed']);
+
+const toISODateString = (date) => {
+  if (!(date instanceof Date) || Number.isNaN(date.getTime())) {
+    return null;
+  }
+  return new Date(date.getTime() - date.getTimezoneOffset() * 60000)
+    .toISOString()
+    .slice(0, 10);
+};
+
+const parseBookingDate = (booking) => {
+  const raw = booking?.dateISO || booking?.bookingDate || booking?.date;
+  if (!raw) return null;
+
+  const cleaned = String(raw).split('T')[0].replace(/\//g, '-').trim();
+  if (/^\d{4}-\d{2}-\d{2}$/.test(cleaned)) {
+    const [year, month, day] = cleaned.split('-').map(Number);
+    if (Number.isFinite(year) && Number.isFinite(month) && Number.isFinite(day)) {
+      return new Date(Date.UTC(year, month - 1, day));
+    }
+  }
+
+  const parsed = Date.parse(cleaned);
+  if (!Number.isNaN(parsed)) {
+    return new Date(parsed);
+  }
+
+  return null;
+};
+
+const computeFallbackDashboardStats = () => {
+  try {
+    const data = window.MOCK_DATA || {};
+    const bookings = Array.isArray(data.bookings) ? data.bookings : [];
+    const reviews = Array.isArray(data.reviews) ? data.reviews : [];
+
+    const today = new Date();
+    const yesterday = new Date(today);
+    yesterday.setDate(yesterday.getDate() - 1);
+    const thirtyDaysAgo = new Date(today);
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+    const ninetyDaysAgo = new Date(today);
+    ninetyDaysAgo.setDate(ninetyDaysAgo.getDate() - 90);
+    const prevNinetyStart = new Date(ninetyDaysAgo);
+    prevNinetyStart.setDate(prevNinetyStart.getDate() - 90);
+
+    const todayISO = toISODateString(today);
+    const yesterdayISO = toISODateString(yesterday);
+
+    const activeCustomers = new Set();
+    const previousActiveCustomers = new Set();
+    const newCustomers30d = new Set();
+
+    const stats = { ...EMPTY_DASHBOARD_STATS };
+
+    bookings.forEach((booking) => {
+      const status = String(booking?.status || '').toLowerCase();
+      const bookingDate = parseBookingDate(booking);
+      const bookingISO = toISODateString(bookingDate);
+      const customerKey = booking?.customerPhone || booking?.customerId || booking?.customerName || booking?._id || booking?.id;
+
+      if (status === 'pending') {
+        stats.pendingBookings += 1;
+      }
+
+      if (!bookingDate || !customerKey) {
+        return;
+      }
+
+      if (bookingISO === todayISO && ACTIVE_BOOKING_STATUSES.has(status)) {
+        stats.todayBookings += 1;
+      }
+
+      if (bookingISO === yesterdayISO && ACTIVE_BOOKING_STATUSES.has(status)) {
+        stats.yesterdayBookings += 1;
+      }
+
+      if (!ACTIVE_BOOKING_STATUSES.has(status)) {
+        return;
+      }
+
+      if (bookingDate >= ninetyDaysAgo) {
+        activeCustomers.add(customerKey);
+        if (bookingDate >= thirtyDaysAgo) {
+          newCustomers30d.add(customerKey);
+        }
+      } else if (bookingDate >= prevNinetyStart && bookingDate < ninetyDaysAgo) {
+        previousActiveCustomers.add(customerKey);
+      }
+    });
+
+    stats.activeCustomers = activeCustomers.size;
+    stats.previousActiveCustomers = previousActiveCustomers.size;
+    stats.newCustomers30d = newCustomers30d.size;
+
+    const approvedReviews = reviews.filter((review) => {
+      if (!review) return false;
+      if (typeof review.approved === 'boolean') return review.approved;
+      if (typeof review.status === 'string') {
+        return review.status.toLowerCase() === 'approved';
+      }
+      return Number.isFinite(Number(review.rating ?? review.score));
+    });
+
+    if (approvedReviews.length > 0) {
+      const sum = approvedReviews.reduce((acc, review) => {
+        const value = Number(review.rating ?? review.score ?? 0);
+        return Number.isFinite(value) ? acc + value : acc;
+      }, 0);
+      stats.ratingCount = approvedReviews.length;
+      stats.ratingAverage = stats.ratingCount ? Math.round((sum / stats.ratingCount) * 10) / 10 : 0;
+    }
+
+    return stats;
+  } catch (err) {
+    console.error('computeFallbackDashboardStats failed', err);
+    return { ...EMPTY_DASHBOARD_STATS };
+  }
+};
+
 // Convert Persian/Arabic digits to English digits
 const toEn = (s) => (s || '')
   .replace(/[۰-۹]/g, d => '0123456789'['۰۱۲۳۴۵۶۷۸۹'.indexOf(d)])
@@ -241,17 +373,33 @@ async createService(payload) {
 
   async getDashboardStats() {
     const url = bust(`${API_BASE}/api/seller/dashboard/stats`);
-    const r = await fetch(url, {
-      credentials: 'include',
-      ...NO_CACHE
-    });
-    if (r.status === 401) {
-      throw { status: 401, message: 'UNAUTHORIZED' };
+    try {
+      const r = await fetch(url, {
+        credentials: 'include',
+        ...NO_CACHE
+      });
+
+      if (r.status === 401) {
+        throw { status: 401, message: 'UNAUTHORIZED' };
+      }
+
+      if (!r.ok && r.status !== 304) {
+        console.warn('Dashboard stats endpoint unavailable, falling back to local data', r.status);
+        return computeFallbackDashboardStats();
+      }
+
+      const parsed = await this._json(r);
+      if (!parsed || typeof parsed !== 'object') {
+        return computeFallbackDashboardStats();
+      }
+      return parsed;
+    } catch (err) {
+      if (err?.status === 401) {
+        throw err;
+      }
+      console.error('getDashboardStats failed, using fallback data', err);
+      return computeFallbackDashboardStats();
     }
-    if (!r.ok && r.status !== 304) {
-      throw new Error('FETCH_DASHBOARD_STATS_FAILED');
-    }
-    return await this._json(r);
   },
 
   // Portfolio API methods
