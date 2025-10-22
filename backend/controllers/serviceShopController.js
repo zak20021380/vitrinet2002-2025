@@ -4,8 +4,17 @@ const Seller = require('../models/Seller');
 const SellerService = require('../models/seller-services');
 const ShopAppearance = require('../models/ShopAppearance');
 const Booking = require('../models/booking');
+const {
+  MAX_RESULTS,
+  coerceSearchTerm,
+  buildSafeRegex,
+  hasSuspiciousPattern,
+  sanitizePayload,
+  logSuspiciousQuery
+} = require('../utils/searchSecurity');
 
 const STATUS_VALUES = ['draft', 'pending', 'approved', 'suspended', 'archived'];
+const SENSITIVE_SERVICE_SHOP_FIELDS = ['notes', 'seo', 'integrations', 'performance', 'createdBy', 'updatedBy'];
 
 const toNumber = (value, fallback = undefined) => {
   const num = Number(value);
@@ -906,12 +915,20 @@ exports.getOverview = async (req, res) => {
 exports.listServiceShops = async (req, res) => {
   try {
     const page = Math.max(1, toNumber(req.query.page, 1) || 1);
-    const limit = Math.min(100, Math.max(1, toNumber(req.query.limit, 20) || 20));
+    const limit = Math.min(MAX_RESULTS, Math.max(1, toNumber(req.query.limit, 20) || 20));
     const skip = (page - 1) * limit;
 
-    const search = String(req.query.q || req.query.search || '').trim();
-    const status = String(req.query.status || '').trim().toLowerCase();
-    const city = String(req.query.city || '').trim();
+    const rawSearch = coerceSearchTerm(req.query.q ?? req.query.search);
+    if (hasSuspiciousPattern(rawSearch)) {
+      logSuspiciousQuery(req, rawSearch, 'service-shop-search');
+    }
+    const search = rawSearch;
+    const status = coerceSearchTerm(req.query.status, { maxLength: 30 }).toLowerCase();
+    const rawCity = coerceSearchTerm(req.query.city, { maxLength: 120 });
+    if (hasSuspiciousPattern(rawCity)) {
+      logSuspiciousQuery(req, rawCity, 'service-shop-city');
+    }
+    const city = rawCity;
     const useLegacy = (await ServiceShop.countDocuments({})) === 0;
 
     if (useLegacy) {
@@ -934,32 +951,34 @@ exports.listServiceShops = async (req, res) => {
       const overview = await buildLegacyOverviewData(allItems);
 
       return res.json({
-        items,
-        pagination: {
+        items: sanitizePayload(items, { omitKeys: SENSITIVE_SERVICE_SHOP_FIELDS }),
+        pagination: sanitizePayload({
           page,
           limit,
           total,
           pages
-        },
-        summary: {
+        }),
+        summary: sanitizePayload({
           total,
           statusCounts,
           totals: overview.totals
-        }
+        })
       });
     }
 
     const filters = {};
     if (search) {
-      const regex = new RegExp(escapeRegExp(search), 'i');
-      filters.$or = [
-        { name: regex },
-        { shopUrl: regex },
-        { ownerName: regex },
-        { ownerPhone: regex },
-        { city: regex },
-        { tags: regex }
-      ];
+      const regex = buildSafeRegex(search);
+      if (regex) {
+        filters.$or = [
+          { name: regex },
+          { shopUrl: regex },
+          { ownerName: regex },
+          { ownerPhone: regex },
+          { city: regex },
+          { tags: regex }
+        ];
+      }
     }
 
     if (status && STATUS_VALUES.includes(status)) {
@@ -967,7 +986,10 @@ exports.listServiceShops = async (req, res) => {
     }
 
     if (city) {
-      filters.city = new RegExp(escapeRegExp(city), 'i');
+      const cityRegex = buildSafeRegex(city);
+      if (cityRegex) {
+        filters.city = cityRegex;
+      }
     }
 
     if (req.query.isFeatured != null) {
@@ -991,6 +1013,7 @@ exports.listServiceShops = async (req, res) => {
         .sort({ updatedAt: -1 })
         .skip(skip)
         .limit(limit)
+        .select('-seo -integrations -performance -notes -createdBy -updatedBy')
         .lean(),
       ServiceShop.countDocuments(filters),
       ServiceShop.aggregate([
@@ -1001,18 +1024,18 @@ exports.listServiceShops = async (req, res) => {
     ]);
 
     res.json({
-      items,
-      pagination: {
+      items: sanitizePayload(items || [], { omitKeys: SENSITIVE_SERVICE_SHOP_FIELDS }),
+      pagination: sanitizePayload({
         page,
         limit,
         total,
         pages: Math.ceil(total / limit)
-      },
-      summary: {
+      }),
+      summary: sanitizePayload({
         total,
         statusCounts: buildStatusCounts(statusAggregation),
         totals: summaryCounts.totals
-      }
+      })
     });
   } catch (err) {
     console.error('serviceShops.list error:', err);

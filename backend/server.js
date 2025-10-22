@@ -21,6 +21,17 @@ const dailyVisitRoutes = require('./routes/dailyVisitRoutes');
 // ------------------- Middlewares -------------------
 app.use(cookieParser());
 
+app.use((req, res, next) => {
+  res.set({
+    'Content-Security-Policy': "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self'; frame-ancestors 'self'; base-uri 'self'; form-action 'self';",
+    'X-Content-Type-Options': 'nosniff',
+    'Referrer-Policy': 'strict-origin-when-cross-origin',
+    'X-Frame-Options': 'SAMEORIGIN',
+    'Permissions-Policy': 'geolocation=(), microphone=()'
+  });
+  next();
+});
+
 // Updated CORS configuration to allow multiple origins
 app.use(cors({
   origin: ['http://localhost:5173', 'http://localhost:5000', 'http://localhost:3000'],

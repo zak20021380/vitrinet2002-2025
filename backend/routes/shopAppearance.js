@@ -2,11 +2,43 @@
 
 const express = require('express');
 const router = express.Router();
+const rateLimit = require('express-rate-limit');
 const auth = require('../middlewares/authMiddleware');    // اضافه شد
 const shopAppearanceController = require('../controllers/shopAppearanceController');
+const searchDebounceStore = new Map();
+const SEARCH_DEBOUNCE_MS = 300;
+
+const searchLimiter = rateLimit({
+  windowMs: 15 * 1000,
+  limit: 10,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { message: 'درخواست‌های جستجو بیش از حد است. لطفاً کمی صبر کنید.' },
+  keyGenerator: (req) => `shop-search:${req.ip}`,
+  skip: (req) => !req.query.centerTitle && !req.query.centerId
+});
+
+function debounceSearch(req, res, next) {
+  if (!req.query.centerTitle && !req.query.centerId) {
+    return next();
+  }
+  const key = `${req.ip}:shop-search`;
+  const now = Date.now();
+  const last = searchDebounceStore.get(key) || 0;
+  if (now - last < SEARCH_DEBOUNCE_MS) {
+    return res.status(429).json({ message: 'درخواست‌های جستجو بسیار سریع ارسال می‌شوند. لطفاً کمی صبر کنید.' });
+  }
+  searchDebounceStore.set(key, now);
+  setTimeout(() => {
+    if (searchDebounceStore.get(key) === now) {
+      searchDebounceStore.delete(key);
+    }
+  }, SEARCH_DEBOUNCE_MS * 4);
+  next();
+}
 
 // =========== GET ظاهر پیش‌فرض برای تست (بدون پارامتر) یا مغازه‌ها بر اساس centerTitle ===========
-router.get('/', (req, res) => {
+router.get('/', searchLimiter, debounceSearch, (req, res) => {
   if (req.query.centerTitle) {
     return shopAppearanceController.getShopsByCenterTitle(req, res);
   }

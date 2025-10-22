@@ -4,6 +4,14 @@
 const mongoose = require('mongoose');
 const Seller = require('../models/Seller');
 const SellerService = require('../models/seller-services');
+const {
+  MAX_RESULTS,
+  coerceSearchTerm,
+  buildSafeRegex,
+  hasSuspiciousPattern,
+  sanitizePayload,
+  logSuspiciousQuery
+} = require('../utils/searchSecurity');
 
 // -------- Helpers ----------
 const toNumber = (v, def = undefined) => {
@@ -93,18 +101,25 @@ exports.getMyServices = async (req, res) => {
     }
 
     const page = Math.max(1, toNumber(req.query.page, 1));
-    const limit = clamp(toNumber(req.query.limit, 20), 1, 100);
-    const q = String(req.query.q || '').trim();
-    const status = String(req.query.status || '').trim(); // 'active' | 'inactive' | ''
+    const limit = clamp(toNumber(req.query.limit, 20), 1, MAX_RESULTS);
+    const rawQuery = coerceSearchTerm(req.query.q);
+    if (hasSuspiciousPattern(rawQuery)) {
+      logSuspiciousQuery(req, rawQuery, 'seller-services-search');
+    }
+    const q = rawQuery;
+    const status = coerceSearchTerm(req.query.status, { maxLength: 30 }).toLowerCase(); // 'active' | 'inactive' | ''
 
     const where = { sellerId: req.user.id };
     if (q) {
-      where.$or = [
-        { title: { $regex: q, $options: 'i' } },
-        { tags:  { $regex: q, $options: 'i' } },
-        { category: { $regex: q, $options: 'i' } },
-        { subcategory: { $regex: q, $options: 'i' } },
-      ];
+      const regex = buildSafeRegex(q);
+      if (regex) {
+        where.$or = [
+          { title: regex },
+          { tags: regex },
+          { category: regex },
+          { subcategory: regex },
+        ];
+      }
     }
     if (status === 'active') where.isActive = true;
     if (status === 'inactive') where.isActive = false;
@@ -113,12 +128,13 @@ exports.getMyServices = async (req, res) => {
       SellerService.find(where)
         .sort({ createdAt: -1 })
         .skip((page - 1) * limit)
-        .limit(limit),
+        .limit(limit)
+        .lean(),
       SellerService.countDocuments(where),
     ]);
 
     return res.json({
-      items,
+      items: sanitizePayload(items || []),
       pagination: {
         page, limit, total, pages: Math.ceil(total / limit)
       }

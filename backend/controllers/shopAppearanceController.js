@@ -3,6 +3,14 @@ const ShopAppearance = require('../models/ShopAppearance');
 const ShoppingCenter = require('../models/ShoppingCenter');
 const Review = require('../models/Review');
 const ServiceShop = require('../models/serviceShop');
+const {
+  MAX_RESULTS,
+  coerceSearchTerm,
+  hasSuspiciousPattern,
+  sanitizePayload,
+  logSuspiciousQuery,
+  escapeRegex
+} = require('../utils/searchSecurity');
 
 // تابع کمکی برای تبدیل URL نسبی به مطلق
 function makeFullUrl(req, path) {
@@ -12,11 +20,6 @@ function makeFullUrl(req, path) {
   return `${req.protocol}://${req.headers.host}/${path.replace(/^\//, '')}`;
 }
 
-
-// تابع escapeRegex (از مدل کپی شده برای consistency)
-function escapeRegex(string) {
-  return string.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
-}
 
 // بازمحاسبهٔ امتیاز فروشگاه فقط بر اساس نظرات تایید شده
 async function recalcShopRating(sellerId) {
@@ -188,18 +191,19 @@ exports.getAppearanceByUrl = async (req, res) => {
 // ================== دریافت مغازه‌ها بر اساس عنوان مرکز خرید ==================
 exports.getShopsByCenterTitle = async (req, res) => {
   try {
-    const { centerTitle: queryCenterTitle, centerId } = req.query;
+    const queryCenterTitle = coerceSearchTerm(req.query.centerTitle);
+    const centerIdRaw = coerceSearchTerm(req.query.centerId, { maxLength: 48 });
     let resolvedCenterTitle = queryCenterTitle;
     let centerDocument = null;
 
-    if (centerId) {
-      if (mongoose.Types.ObjectId.isValid(centerId)) {
-        centerDocument = await ShoppingCenter.findById(centerId).lean();
+    if (centerIdRaw) {
+      if (mongoose.Types.ObjectId.isValid(centerIdRaw)) {
+        centerDocument = await ShoppingCenter.findById(centerIdRaw).lean();
         if (centerDocument?.title) {
-          resolvedCenterTitle = centerDocument.title;
+          resolvedCenterTitle = coerceSearchTerm(centerDocument.title);
         }
       } else {
-        console.warn('Invalid centerId received for shop lookup:', centerId);
+        logSuspiciousQuery(req, centerIdRaw, 'invalid-center-id');
       }
     }
 
@@ -207,7 +211,14 @@ exports.getShopsByCenterTitle = async (req, res) => {
       return res.status(400).json({ message: "عنوان مرکز خرید ارسال نشده!" });
     }
 
-    const lookupSources = [resolvedCenterTitle, centerDocument?.location].filter(Boolean);
+    if (hasSuspiciousPattern(resolvedCenterTitle)) {
+      logSuspiciousQuery(req, resolvedCenterTitle, 'center-title-suspicious');
+    }
+
+    const locationSource = centerDocument?.location
+      ? coerceSearchTerm(centerDocument.location)
+      : '';
+    const lookupSources = [resolvedCenterTitle, locationSource].filter(Boolean);
     const words = lookupSources
       .join(' ')
       .trim()
@@ -221,35 +232,52 @@ exports.getShopsByCenterTitle = async (req, res) => {
     const escapedWords = words.map(word => escapeRegex(word));
     const regexPattern = escapedWords.join('|');
 
-    console.log('Received centerTitle:', resolvedCenterTitle);
-    console.log('Regex pattern:', regexPattern);
-
     const shops = await ShopAppearance.find({
       shopAddress: { $regex: regexPattern, $options: 'i' }
     })
+      .select('customUrl shopAddress shopPhone shopLogoText shopStatus slides sellerId updatedAt createdAt shopLogo')
       .populate({
         path: 'sellerId',
-        select: 'boardImage storename' // استفاده از boardImage
+        select: 'boardImage storename'
       })
+      .limit(MAX_RESULTS)
       .lean();
 
-    console.log('Shops found:', shops);
-
     if (!shops.length) {
-      console.warn('No shops found for centerTitle:', resolvedCenterTitle);
       return res.json([]);
     }
 
-    const updatedShops = shops.map(shop => ({
-      ...shop,
-      shopLogo: makeFullUrl(req, shop.sellerId?.boardImage || ''), // از boardImage استفاده کن
-      slides: shop.slides.map(slide => ({
-        ...slide,
-        img: makeFullUrl(req, slide.img || '')
-      }))
-    }));
+    const sanitized = shops.map((shop) => {
+      const slides = Array.isArray(shop.slides)
+        ? shop.slides.slice(0, 10).map((slide) => ({
+            title: slide?.title || '',
+            desc: slide?.desc || '',
+            img: makeFullUrl(req, slide?.img || '')
+          }))
+        : [];
 
-    res.json(updatedShops);
+      const payload = {
+        _id: shop._id,
+        customUrl: shop.customUrl || '',
+        shopAddress: shop.shopAddress || '',
+        shopPhone: shop.shopPhone || '',
+        shopLogoText: shop.shopLogoText || shop.sellerId?.storename || '',
+        shopStatus: shop.shopStatus || '',
+        shopLogo: makeFullUrl(req, shop.shopLogo || shop.sellerId?.boardImage || ''),
+        slides,
+        seller: shop.sellerId
+          ? {
+              id: shop.sellerId._id,
+              storename: shop.sellerId.storename || ''
+            }
+          : null,
+        updatedAt: shop.updatedAt || shop.createdAt || null
+      };
+
+      return sanitizePayload(payload);
+    });
+
+    res.json(sanitized);
   } catch (err) {
     console.error("خطا در دریافت مغازه‌ها:", err);
     res.status(500).json({ message: "خطا در دریافت مغازه‌ها!" });
