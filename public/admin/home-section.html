@@ -38,9 +38,9 @@
     }
 
     .content {
-      width: min(1100px, 100%);
-      margin: 0 auto;
-      padding: 2.2rem clamp(1.4rem, 4vw, 3rem) 4rem;
+      width: min(100%, 1240px);
+      margin-inline: auto;
+      padding: 2.2rem clamp(1.2rem, 3vw, 2.8rem) 4rem;
       display: flex;
       flex-direction: column;
       gap: 1.8rem;
@@ -101,8 +101,8 @@
 
     .layout-grid {
       display: grid;
-      grid-template-columns: minmax(280px, 320px) minmax(0, 1fr);
-      gap: clamp(1.2rem, 2vw, 2rem);
+      grid-template-columns: minmax(300px, 340px) minmax(0, 1fr);
+      gap: clamp(1.2rem, 2vw, 2.4rem);
       align-items: start;
     }
 
@@ -290,6 +290,7 @@
     .cards-list {
       display: grid;
       gap: 1rem;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
     }
 
     .card-item {
@@ -435,7 +436,13 @@
       flex-wrap: wrap;
     }
 
-    @media (max-width: 1080px) {
+    @media (max-width: 1280px) {
+      .layout-grid {
+        grid-template-columns: minmax(280px, 320px) minmax(0, 1fr);
+      }
+    }
+
+    @media (max-width: 960px) {
       .layout-grid {
         grid-template-columns: 1fr;
       }
