@@ -10,7 +10,8 @@ const {
   clearAdminScore,
   listSellerPerformance,
   getCurrentSellerPerformanceStatus,
-  getDashboardStats
+  getDashboardStats,
+  getTopServicePeers
 } = require('../controllers/sellerController');
 const Seller = require('../models/Seller');
 const authMiddleware = require('../middlewares/authMiddleware');
@@ -121,6 +122,7 @@ router.put('/working-hours', authMiddleware('seller'), async (req, res) => {
 
 router.get('/profile', authMiddleware('seller'), getCurrentSeller);
 router.get('/dashboard/stats', authMiddleware('seller'), getDashboardStats);
+router.get('/top-peers', authMiddleware('seller'), getTopServicePeers);
 
 // ارتقا حساب فروشنده (خرید اشتراک/پرمیوم)
 router.post('/upgrade', authMiddleware('seller'), upgradeSeller);
