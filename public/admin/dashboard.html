@@ -431,58 +431,107 @@
 
   <!-- ۸) مدیریت تبلیغات ویژه -->
   <div class="section-panel" id="ad-orders-panel" style="display:none;">
-    <div class="content-header">تبلیغات ویژه ثبت شده <span class="header-count" id="header-ad-orders-count"></span></div>
+    <div class="content-header">
+      تبلیغات ویژه ثبت شده <span class="header-count" id="header-ad-orders-count"></span>
+    </div>
+    <p class="ad-orders-subtitle">بر درخواست‌های تبلیغات ویژه نظارت کنید، وضعیت هر سفارش را مشخص نمایید و توضیحات فروشندگان را یکجا ببینید.</p>
 
     <div class="ad-orders-overview">
-      <div class="ad-overview-card">
-        <span class="label">کل تبلیغات</span>
-        <span class="value" id="adTotalCount">0</span>
+      <div class="ad-overview-card total">
+        <div class="ad-overview-icon">
+          <i class="ri-megaphone-line"></i>
+        </div>
+        <div class="ad-overview-body">
+          <span class="label">کل تبلیغات</span>
+          <span class="value" id="adTotalCount">0</span>
+        </div>
       </div>
       <div class="ad-overview-card pending">
-        <span class="label">در انتظار تایید</span>
-        <span class="value" id="adPendingCount">0</span>
+        <div class="ad-overview-icon">
+          <i class="ri-timer-2-line"></i>
+        </div>
+        <div class="ad-overview-body">
+          <span class="label">در انتظار تایید</span>
+          <span class="value" id="adPendingCount">0</span>
+        </div>
       </div>
       <div class="ad-overview-card approved">
-        <span class="label">تایید شده</span>
-        <span class="value" id="adApprovedCount">0</span>
+        <div class="ad-overview-icon">
+          <i class="ri-checkbox-circle-line"></i>
+        </div>
+        <div class="ad-overview-body">
+          <span class="label">تایید شده</span>
+          <span class="value" id="adApprovedCount">0</span>
+        </div>
       </div>
     </div>
 
-    <div class="ad-orders-toolbar">
-      <div class="filters">
-        <button class="ad-filter-btn active" data-filter="all"><i class="ri-list-unordered"></i> همه</button>
-        <button class="ad-filter-btn" data-filter="pending"><i class="ri-timer-line"></i> در انتظار</button>
-        <button class="ad-filter-btn" data-filter="approved"><i class="ri-checkbox-circle-line"></i> تایید شده</button>
-        <button class="ad-filter-btn" data-filter="rejected"><i class="ri-close-circle-line"></i> رد شده</button>
+    <div class="ad-orders-toolbar-card">
+      <div class="ad-orders-toolbar-header">
+        <div class="ad-toolbar-title">
+          <h3>پایش سریع درخواست‌ها</h3>
+          <p>با فیلترها و جستجو سریع‌تر به نتیجه برسید و با بروزرسانی، جدیدترین وضعیت سفارش‌ها را ببینید.</p>
+        </div>
+        <button id="adOrdersRefresh" class="ad-toolbar-refresh"><i class="ri-refresh-line"></i> بروزرسانی</button>
       </div>
-      <div class="ad-orders-controls">
-        <select id="adOrdersPlanFilter">
-          <option value="all">همه پلن‌ها</option>
-          <option value="ad_home">صفحه اصلی</option>
-          <option value="ad_search">جستجو</option>
-          <option value="ad_products">بین محصولات</option>
-        </select>
-        <input type="search" id="adOrdersSearch" class="ad-orders-search" placeholder="جستجو نام فروشنده، عنوان یا شماره" />
-        <button id="adOrdersRefresh"><i class="ri-refresh-line"></i> بروزرسانی</button>
+      <div class="ad-orders-toolbar">
+        <div class="filters" role="tablist" aria-label="فیلتر وضعیت">
+          <button class="ad-filter-btn active" data-filter="all"><i class="ri-list-unordered"></i> همه</button>
+          <button class="ad-filter-btn" data-filter="pending"><i class="ri-timer-line"></i> در انتظار</button>
+          <button class="ad-filter-btn" data-filter="approved"><i class="ri-checkbox-circle-line"></i> تایید شده</button>
+          <button class="ad-filter-btn" data-filter="rejected"><i class="ri-close-circle-line"></i> رد شده</button>
+        </div>
+        <div class="ad-orders-controls">
+          <label class="ad-control ad-control-select" for="adOrdersPlanFilter">
+            <span>نوع پلن</span>
+            <select id="adOrdersPlanFilter">
+              <option value="all">همه پلن‌ها</option>
+              <option value="ad_home">صفحه اصلی</option>
+              <option value="ad_search">جستجو</option>
+              <option value="ad_products">بین محصولات</option>
+            </select>
+          </label>
+          <label class="ad-control ad-control-search" for="adOrdersSearch">
+            <span>جستجو</span>
+            <div class="ad-search-input">
+              <i class="ri-search-line"></i>
+              <input type="search" id="adOrdersSearch" class="ad-orders-search" placeholder="جستجو نام فروشنده، عنوان یا شماره" />
+            </div>
+          </label>
+        </div>
       </div>
     </div>
 
     <div class="ad-orders-status" id="adOrdersStatus" style="display:none;"></div>
 
-    <div class="table-wrap ad-orders-table">
-      <table id="adOrdersTable">
-        <thead>
-          <tr>
-            <th>فروشنده</th>
-            <th>پلن / جزئیات</th>
-            <th>مبلغ</th>
-            <th>ثبت درخواست</th>
-            <th>آخرین وضعیت</th>
-            <th>عملیات</th>
-          </tr>
-        </thead>
-        <tbody></tbody>
-      </table>
+    <div class="ad-orders-table-card">
+      <div class="ad-orders-table-head">
+        <div class="ad-orders-table-title">
+          <h4>فهرست درخواست‌ها</h4>
+          <p>برای مشاهده جزئیات کامل هر تبلیغ، روی ردیف آن کلیک کنید.</p>
+        </div>
+        <div class="ad-orders-table-legend">
+          <span class="legend-title"><i class="ri-flag-2-line"></i> وضعیت‌ها</span>
+          <span class="legend-badge pending">در انتظار</span>
+          <span class="legend-badge approved">تایید شده</span>
+          <span class="legend-badge rejected">رد شده</span>
+        </div>
+      </div>
+      <div class="table-wrap ad-orders-table">
+        <table id="adOrdersTable">
+          <thead>
+            <tr>
+              <th>فروشنده</th>
+              <th>پلن / جزئیات</th>
+              <th>مبلغ</th>
+              <th>ثبت درخواست</th>
+              <th>آخرین وضعیت</th>
+              <th>عملیات</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
     </div>
   </div>
 
