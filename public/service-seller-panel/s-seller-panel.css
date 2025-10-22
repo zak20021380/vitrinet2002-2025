@@ -1408,6 +1408,79 @@ body.has-overlay { overflow: hidden; }
   padding: 0 1rem;
   margin-bottom: 3rem;
 }
+
+#plans-view.plans-disabled {
+  position: relative;
+  isolation: isolate;
+}
+
+#plans-view.plans-disabled .plan-disabled-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: clamp(1.5rem, 5vw, 4rem);
+  text-align: center;
+  z-index: 2;
+}
+
+#plans-view.plans-disabled .plan-disabled-content {
+  max-width: min(480px, 100%);
+  background: linear-gradient(180deg, rgba(28, 28, 30, 0.94), rgba(28, 28, 30, 0.88));
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: var(--border-radius-lg);
+  padding: clamp(1.25rem, 4vw, 2.5rem);
+  box-shadow: 0 30px 50px rgba(0, 0, 0, 0.55);
+  backdrop-filter: blur(8px);
+}
+
+#plans-view.plans-disabled .plan-disabled-icon {
+  width: 3.25rem;
+  height: 3.25rem;
+  margin: 0 auto var(--space-2);
+  border-radius: 999px;
+  display: grid;
+  place-items: center;
+  color: var(--c-warning);
+  background: rgba(255, 214, 10, 0.08);
+  border: 1px solid rgba(255, 214, 10, 0.2);
+}
+
+#plans-view.plans-disabled .plan-disabled-title {
+  margin: 0 0 var(--space-2);
+  font-size: clamp(1.1rem, 2.5vw, 1.4rem);
+  font-weight: var(--font-weight-bold);
+}
+
+#plans-view.plans-disabled .plan-disabled-text,
+#plans-view.plans-disabled .plan-disabled-subtext {
+  margin: 0;
+  color: var(--c-text-secondary);
+  line-height: 1.8;
+}
+
+#plans-view.plans-disabled .plan-disabled-subtext {
+  margin-top: var(--space-2);
+  font-size: 0.9rem;
+}
+
+#plans-view.plans-disabled .view-container {
+  filter: grayscale(1) saturate(0.2);
+  opacity: 0.35;
+  pointer-events: none;
+  user-select: none;
+}
+
+@media (max-width: 640px) {
+  #plans-view.plans-disabled .plan-disabled-content {
+    padding: clamp(1rem, 6vw, 1.75rem);
+  }
+
+  #plans-view.plans-disabled .plan-disabled-subtext {
+    font-size: 0.85rem;
+  }
+}
 .plan-modern {
   position: relative;
   background: var(--c-bg-primary);
