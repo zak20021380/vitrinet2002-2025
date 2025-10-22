@@ -8,20 +8,101 @@ const dailyVisitCtrl = require('../controllers/dailyVisitController');
 // دریافت لیست همه فروشگاه‌ها از مدل Seller
 router.get('/', async (req, res) => {
   try {
-    const sellers = await Seller.find({},
-      'storename category shopurl address desc isPremium boardImage'
-    ).lean();
+    const sellers = await Seller.find({}, {
+      _id: 1,
+      storename: 1,
+      category: 1,
+      shopurl: 1,
+      address: 1,
+      desc: 1,
+      isPremium: 1,
+      boardImage: 1,
+      firstname: 1,
+      lastname: 1,
+      phone: 1,
+      createdAt: 1,
+      subscriptionStart: 1,
+      subscriptionEnd: 1,
+      visits: 1,
+      blockedByAdmin: 1,
+      updatedAt: 1
+    }).lean();
 
-    const result = sellers.map(seller => ({
-      id: seller._id,
-      storename: seller.storename || '',
-      category: seller.category || '',
-      shopurl: seller.shopurl || '',
-      address: seller.address || '',
-      desc: seller.desc || '',
-      isPremium: !!seller.isPremium,
-      image: seller.boardImage || ''
-    }));
+    const sellerIds = sellers.map(seller => seller._id).filter(Boolean);
+    const appearances = await ShopAppearance.find({
+      sellerId: { $in: sellerIds }
+    }, {
+      sellerId: 1,
+      customUrl: 1,
+      shopLogoText: 1,
+      shopAddress: 1,
+      shopPhone: 1,
+      shopStatus: 1,
+      shopVisits: 1,
+      shopRating: 1,
+      averageRating: 1,
+      ratingCount: 1,
+      slides: 1,
+      updatedAt: 1
+    }).lean();
+
+    const appearanceMap = new Map();
+    appearances.forEach(app => {
+      const key = app.sellerId ? app.sellerId.toString() : null;
+      if (key) {
+        appearanceMap.set(key, app);
+      }
+    });
+
+    const result = sellers.map(seller => {
+      const sellerId = seller._id ? seller._id.toString() : '';
+      const appearance = sellerId ? appearanceMap.get(sellerId) : null;
+
+      const ownerFirstname = seller.firstname || '';
+      const ownerLastname = seller.lastname || '';
+      const ownerName = (ownerFirstname || ownerLastname)
+        ? `${ownerFirstname} ${ownerLastname}`.trim()
+        : '';
+      const phone = seller.phone || '';
+
+      const resolvedShopUrl = seller.shopurl || (appearance && appearance.customUrl) || '';
+
+      return {
+        id: seller._id,
+        _id: seller._id,
+        sellerId,
+        storename: seller.storename || '',
+        category: seller.category || '',
+        shopurl: resolvedShopUrl,
+        customUrl: (appearance && appearance.customUrl) || '',
+        address: seller.address || '',
+        shopAddress: (appearance && appearance.shopAddress) || seller.address || '',
+        desc: seller.desc || '',
+        isPremium: !!seller.isPremium,
+        image: seller.boardImage || '',
+        boardImage: seller.boardImage || '',
+        shopLogoText: (appearance && appearance.shopLogoText) || seller.storename || '',
+        shopStatus: (appearance && appearance.shopStatus) || '',
+        ownerFirstname,
+        ownerLastname,
+        ownerName,
+        ownerPhone: phone,
+        ownerMobile: phone,
+        phone,
+        shopPhone: (appearance && appearance.shopPhone) || '',
+        visits: seller.visits || 0,
+        shopVisits: (appearance && appearance.shopVisits) || seller.visits || 0,
+        averageRating: (appearance && (appearance.averageRating ?? appearance.shopRating)) || 0,
+        ratingCount: (appearance && appearance.ratingCount) || 0,
+        createdAt: seller.createdAt || null,
+        subscriptionStart: seller.subscriptionStart || null,
+        subscriptionEnd: seller.subscriptionEnd || null,
+        blockedByAdmin: !!seller.blockedByAdmin,
+        updatedAt: seller.updatedAt || null,
+        appearanceUpdatedAt: (appearance && appearance.updatedAt) || null,
+        slides: (appearance && appearance.slides) || []
+      };
+    });
 
     res.json(result);
   } catch (err) {
