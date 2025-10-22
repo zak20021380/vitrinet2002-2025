@@ -12,7 +12,92 @@ const adPriceElems = {
   products : document.getElementById("price-ad_products"),
 };
 
+const AD_PLAN_TITLES = {
+  ad_search: 'تبلیغ ویژه در جستجو',
+  ad_home: 'تبلیغ ویژه صفحه اول',
+  ad_products: 'تبلیغ لیست محصولات'
+};
+
+const AD_PLAN_BENEFITS = {
+  ad_search: [
+    "نمایش تبلیغ شما در نتایج جستجوی محصولات",
+    "افزایش شانس دیده‌شدن توسط مشتریان واقعی",
+    "بازگشت سرمایه سریع"
+  ],
+  ad_home: [
+    "نمایش بنر شما در صفحه اول سایت",
+    "بالاترین نرخ بازدید از کل کاربران سایت",
+    "برندسازی سریع و هدفمند"
+  ],
+  ad_products: [
+    "نمایش تبلیغ در لیست محصولات منتخب",
+    "جذب خریدار با کمترین هزینه",
+    "افزایش فروش فوری"
+  ]
+};
+
+const AD_PLAN_LOCATIONS = {
+  ad_search: 'نتایج جستجوی محصولات',
+  ad_home: 'صفحه اصلی ویترینت',
+  ad_products: 'لیست محصولات پیشنهادی'
+};
+
+const AD_APPROVAL_SUCCESS_STATUSES = new Set(['approved', 'paid']);
+
+let sellerProfileCache = null;
+let sellerProfilePromise = null;
+
+async function fetchSellerProfile(forceRefresh = false) {
+  if (!forceRefresh && sellerProfileCache) return sellerProfileCache;
+  if (!forceRefresh && sellerProfilePromise) return sellerProfilePromise;
+
+  sellerProfilePromise = (async () => {
+    try {
+      const res = await fetch(`${API_BASE}/auth/me`, { credentials: 'include' });
+      if (!res.ok) {
+        sellerProfileCache = null;
+        return null;
+      }
+      const data = await res.json();
+      sellerProfileCache = data;
+      return data;
+    } catch (err) {
+      console.error('fetchSellerProfile error', err);
+      sellerProfileCache = null;
+      return null;
+    } finally {
+      sellerProfilePromise = null;
+    }
+  })();
+
+  return sellerProfilePromise;
+}
+
+async function getSellerPhone() {
+  const profile = await fetchSellerProfile();
+  return profile?.seller?.phone || null;
+}
+
+async function getSellerId() {
+  const profile = await fetchSellerProfile();
+  return profile?.seller?.id || profile?.seller?._id || null;
+}
+
+let adApprovalStatusCache = new Map();
+let adApprovalWatcherTimer = null;
+
 // نمایش پیغام به‌صورت توست
+function getAdStatusLabel(status) {
+  switch (status) {
+    case 'approved': return 'تایید شده';
+    case 'paid': return 'پرداخت شده';
+    case 'pending': return 'در انتظار';
+    case 'expired': return 'منقضی';
+    case 'rejected': return 'رد شده';
+    default: return status || '-';
+  }
+}
+
 function showToast(message, isError = false) {
   let toast = document.getElementById('toast');
   if (!toast) {
@@ -26,6 +111,176 @@ function showToast(message, isError = false) {
   toast.classList.toggle('text-red-600', isError);
   toast.classList.toggle('text-green-600', !isError);
   setTimeout(() => toast.classList.add('hidden'), 3000);
+}
+
+function showSuccessPopup(options = {}) {
+  const {
+    title = 'عملیات موفق',
+    message = '',
+    details = [],
+    autoCloseMs = 0,
+    highlight = ''
+  } = options;
+
+  const detailItems = Array.isArray(details)
+    ? details.filter(Boolean)
+    : (typeof details === 'string' && details.length ? [details] : []);
+
+  const overlay = document.createElement('div');
+  overlay.className = 'fixed inset-0 z-[120] flex items-center justify-center px-4 py-6 bg-slate-900/60 backdrop-blur-sm transition-opacity duration-200';
+
+  const card = document.createElement('div');
+  card.className = 'success-popup-card relative w-full max-w-md rounded-3xl bg-white px-6 py-8 text-center shadow-2xl';
+
+  const closeBtn = document.createElement('button');
+  closeBtn.type = 'button';
+  closeBtn.className = 'absolute left-4 top-4 text-slate-300 hover:text-rose-400 transition-colors';
+  closeBtn.innerHTML = '<span class="sr-only">بستن</span><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="w-6 h-6"><path fill="currentColor" d="M6.4 5.1 5 6.5 10.5 12 5 17.5l1.4 1.4L12 13.4l5.6 5.5 1.4-1.4L13.4 12 19 6.5 17.6 5.1 12 10.6z"/></svg>';
+
+  const iconWrap = document.createElement('div');
+  iconWrap.className = 'success-popup-icon mx-auto mb-5 flex h-20 w-20 items-center justify-center rounded-full bg-emerald-50 text-emerald-500 shadow-[0_12px_40px_-20px_rgba(16,185,129,0.8)]';
+  iconWrap.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="h-10 w-10"><path fill="currentColor" d="M9.55 16.7 5.3 12.45l1.4-1.4 2.85 2.85 7.8-7.8 1.4 1.4z"/></svg>';
+
+  if (highlight) {
+    const badge = document.createElement('span');
+    badge.className = 'mb-3 inline-flex items-center justify-center rounded-full bg-emerald-100 px-4 py-1 text-xs font-extrabold text-emerald-600';
+    badge.textContent = highlight;
+    card.appendChild(badge);
+  }
+
+  const titleEl = document.createElement('h3');
+  titleEl.className = 'text-xl font-extrabold text-emerald-600';
+  titleEl.textContent = title;
+
+  const messageEl = document.createElement('p');
+  messageEl.className = 'mt-2 text-sm leading-7 text-slate-600';
+  messageEl.textContent = message;
+
+  card.appendChild(closeBtn);
+  card.appendChild(iconWrap);
+  card.appendChild(titleEl);
+  card.appendChild(messageEl);
+
+  if (detailItems.length) {
+    const list = document.createElement('ul');
+    list.className = 'mt-4 space-y-2 text-right text-sm leading-7 text-slate-600';
+    detailItems.forEach(item => {
+      const li = document.createElement('li');
+      li.className = 'flex items-start gap-2';
+      li.innerHTML = `<span class="mt-1 h-2.5 w-2.5 flex-shrink-0 rounded-full bg-emerald-400"></span><span>${item}</span>`;
+      list.appendChild(li);
+    });
+    card.appendChild(list);
+  }
+
+  const actionBtn = document.createElement('button');
+  actionBtn.type = 'button';
+  actionBtn.className = 'btn-grad mt-6 inline-flex w-full items-center justify-center gap-2 rounded-full px-5 py-3 text-base font-black text-white shadow-lg hover:shadow-xl transition';
+  actionBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="h-5 w-5"><path fill="currentColor" d="m12 17 5-5-1.4-1.4-2.6 2.6V6h-2v7.2L8.4 10.6 7 12z"/></svg><span>باشه، متوجه شدم</span>';
+
+  card.appendChild(actionBtn);
+  overlay.appendChild(card);
+  document.body.appendChild(overlay);
+  document.body.classList.add('overflow-hidden');
+
+  let closed = false;
+  const cleanup = () => {
+    if (closed) return;
+    closed = true;
+    overlay.classList.add('opacity-0');
+    card.classList.add('scale-95');
+    setTimeout(() => {
+      overlay.remove();
+    }, 220);
+    document.body.classList.remove('overflow-hidden');
+    document.removeEventListener('keydown', onKeydown);
+  };
+
+  const onKeydown = (event) => {
+    if (event.key === 'Escape') {
+      cleanup();
+    }
+  };
+
+  closeBtn.addEventListener('click', cleanup);
+  actionBtn.addEventListener('click', cleanup);
+  overlay.addEventListener('click', (event) => {
+    if (event.target === overlay) cleanup();
+  });
+  document.addEventListener('keydown', onKeydown);
+
+  if (autoCloseMs && Number.isFinite(autoCloseMs) && autoCloseMs > 0) {
+    setTimeout(() => cleanup(), autoCloseMs);
+  }
+
+  return cleanup;
+}
+
+async function pollSellerAdApprovals(isInitial = false) {
+  try {
+    const sellerId = await getSellerId();
+    if (!sellerId) return;
+
+    const res = await fetch(`${API_BASE}/adOrder/seller?sellerId=${encodeURIComponent(sellerId)}`, {
+      credentials: 'include'
+    });
+
+    if (res.status === 401 || res.status === 403) {
+      if (adApprovalWatcherTimer) {
+        clearInterval(adApprovalWatcherTimer);
+        adApprovalWatcherTimer = null;
+      }
+      return;
+    }
+
+    if (!res.ok) throw new Error(`${res.status} ${res.statusText}`);
+
+    const data = await res.json();
+    const orders = Array.isArray(data.adOrders) ? data.adOrders : [];
+    const nextCache = new Map();
+
+    orders.forEach(order => {
+      const orderId = order?._id || order?.id;
+      if (!orderId) return;
+
+      const status = order.status || 'pending';
+      const prevStatus = adApprovalStatusCache.get(orderId);
+      nextCache.set(orderId, status);
+
+      if (!isInitial && AD_APPROVAL_SUCCESS_STATUSES.has(status) && prevStatus && prevStatus !== status) {
+        const planSlug = order.planSlug || '';
+        const planTitle = order.planTitle || AD_PLAN_TITLES[planSlug] || 'تبلیغ ویژه';
+        const location = AD_PLAN_LOCATIONS[planSlug] || '';
+        const approvedTitle = order.adTitle || planTitle;
+        const detailList = [
+          `پلن: ${planTitle}`,
+          location ? `محل نمایش: ${location}` : '',
+          order.displayedAt ? `زمان نمایش: ${toJalaliDate(order.displayedAt)}` : '',
+          `وضعیت جدید: ${getAdStatusLabel(status)}`
+        ].filter(Boolean);
+
+        showSuccessPopup({
+          title: 'تبلیغ شما تایید شد! ✨',
+          message: `تبلیغ «${approvedTitle}» توسط تیم ویترینت تایید و فعال شد.`,
+          details: detailList,
+          highlight: 'اعلان تایید تبلیغ',
+          autoCloseMs: 9000
+        });
+      }
+    });
+
+    adApprovalStatusCache = nextCache;
+  } catch (err) {
+    if (!isInitial) {
+      console.error('pollSellerAdApprovals error', err);
+    }
+  }
+}
+
+function startAdApprovalWatcher() {
+  if (adApprovalWatcherTimer) return;
+  pollSellerAdApprovals(true);
+  adApprovalWatcherTimer = setInterval(() => pollSellerAdApprovals(false), 20000);
 }
 
 // به‌روزرسانی نشان پرمیوم در رابط کاربری
@@ -90,19 +345,6 @@ function toggleTabs(tab) {
   }
 }
 
-
-/*──────────────── ۲) گرفتن قیمت پلن‌های اشتراک ────────────────*/
-async function getSellerPhone() {
-  try {
-    const res = await fetch(`${API_BASE}/auth/me`, { credentials: 'include' });
-    if (!res.ok) return null;
-    const data = await res.json();
-    return data?.seller?.phone || null;
-  } catch (err) {
-    console.error('getSellerPhone error', err);
-    return null;
-  }
-}
 
 async function fetchPlanPrices () {
   try {
@@ -342,6 +584,12 @@ document.addEventListener('DOMContentLoaded', async () => {
   if (document.getElementById('tab-sub')) {
     initUpgradeDashboard();
   }
+  startAdApprovalWatcher();
+  document.addEventListener('visibilitychange', () => {
+    if (!document.hidden) {
+      pollSellerAdApprovals(false);
+    }
+  });
   try {
     const res = await fetch(`${API_BASE}/auth/me`, { credentials: 'include' });
     if (res.ok) {
@@ -411,11 +659,8 @@ document.getElementById('adModalBackdrop').onclick = function(e) {
 async function fetchMyProducts() {
   const select = document.getElementById('adProductSelect');
   try {
-    const resSeller = await fetch(`${API_BASE}/auth/me`, { credentials: 'include' });
-    if (!resSeller.ok) throw new Error("خطا در دریافت فروشنده");
-    const sellerData = await resSeller.json();
-    const sellerId = sellerData?.seller?.id || sellerData?.seller?._id;
-    if (!sellerId) throw new Error("فروشنده یافت نشد");
+    const sellerId = await getSellerId();
+    if (!sellerId) throw new Error('seller-id-missing');
 
     const res = await fetch(`${API_BASE}/products?sellerId=${sellerId}`);
     const products = await res.json();
@@ -429,6 +674,7 @@ async function fetchMyProducts() {
       select.innerHTML += `<option value="${item._id}">${item.title}</option>`;
     });
   } catch (err) {
+    console.error('fetchMyProducts error', err);
     select.innerHTML = `<option value="">خطا در دریافت لیست!</option>`;
   }
 }
@@ -453,18 +699,6 @@ window.submitAdForm = async function(e) {
     return false;
   }
 
-  let sellerId = '';
-  try {
-    const resSeller = await fetch(`${API_BASE}/auth/me`, { credentials: 'include' });
-    if (!resSeller.ok) throw new Error("خطا در دریافت فروشنده");
-    const sellerData = await resSeller.json();
-    sellerId = sellerData?.seller?.id || sellerData?.seller?._id;
-    if (!sellerId) throw new Error("فروشنده یافت نشد");
-  } catch (err) {
-    alert('خطا در دریافت اطلاعات فروشنده!');
-    return false;
-  }
-
   if (targetType === "product" && !select.value) {
     alert("انتخاب محصول الزامی است.");
     return false;
@@ -478,33 +712,16 @@ window.submitAdForm = async function(e) {
     return false;
   }
 
-  // ---------- مزایای هر پلن تبلیغ ----------
-  const AD_BENEFITS = {
-    'ad_search': [
-      "نمایش تبلیغ شما در نتایج جستجوی محصولات",
-      "افزایش شانس دیده‌شدن توسط مشتریان واقعی",
-      "بازگشت سرمایه سریع"
-    ],
-    'ad_home': [
-      "نمایش بنر شما در صفحه اول سایت",
-      "بالاترین نرخ بازدید از کل کاربران سایت",
-      "برندسازی سریع و هدفمند"
-    ],
-    'ad_products': [
-      "نمایش تبلیغ در لیست محصولات منتخب",
-      "جذب خریدار با کمترین هزینه",
-      "افزایش فروش فوری"
-    ]
-  };
-  const AD_TITLE = {
-    'ad_search': 'تبلیغ ویژه در جستجو',
-    'ad_home': 'تبلیغ ویژه صفحه اول',
-    'ad_products': 'تبلیغ لیست محصولات'
-  };
+  const sellerId = await getSellerId();
+  if (!sellerId) {
+    alert('خطا در دریافت اطلاعات فروشنده!');
+    return false;
+  }
 
   // خلاصه مزایا برای نمایش پاپ‌آپ تایید
-  const adTitle = AD_TITLE[planSlug] || "تبلیغ ویژه";
-  const benefits = AD_BENEFITS[planSlug] || ["جذب مشتری و افزایش فروش فروشگاه شما"];
+  const adTitle = AD_PLAN_TITLES[planSlug] || "تبلیغ ویژه";
+  const benefits = AD_PLAN_BENEFITS[planSlug] || ["جذب مشتری و افزایش فروش فروشگاه شما"];
+  const locationHint = AD_PLAN_LOCATIONS[planSlug] || '';
   const benefitHtml = benefits.map(b => `<li>${b}</li>`).join('');
 
   // ---------- ساخت و نمایش پاپ‌آپ تایید ----------
@@ -543,19 +760,6 @@ window.submitAdForm = async function(e) {
   confirmModal.querySelector('#submitAdAndPayBtn').onclick = async function() {
     confirmModal.style.display = 'none';
 
-    // پیام موفقیت
-    let msgBox = document.getElementById('planSuccessMsg');
-    if (!msgBox) {
-      msgBox = document.createElement('div');
-      msgBox.id = 'planSuccessMsg';
-      msgBox.className = 'fixed top-3 left-1/2 -translate-x-1/2 z-50 bg-white text-green-600 rounded-xl px-5 py-3 shadow text-center font-bold hidden';
-      document.body.appendChild(msgBox);
-    }
-
-    msgBox.innerHTML = `تبلیغ شما با موفقیت ثبت شد (پرداخت تستی)!`;
-    msgBox.classList.remove('hidden');
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-
     try {
       // فقط ثبت سفارش تبلیغ (بدون پرداخت واقعی)
       const formData = new FormData();
@@ -576,19 +780,50 @@ window.submitAdForm = async function(e) {
       const result = await res.json();
 
       if (!res.ok || !result.success || !result.adOrder) {
-        msgBox.classList.add('hidden');
-        alert(result.message || 'ثبت تبلیغ ناموفق بود.');
+        showToast(result.message || 'ثبت تبلیغ ناموفق بود.', true);
         return false;
       }
 
-      setTimeout(() => {
-        msgBox.classList.add('hidden');
-        window.closeAdModal && window.closeAdModal();
-        // می‌تونی بعد از ثبت موفقیت فرم رو ریست یا هر کار دیگه انجام بدی
-      }, 2000);
+      if (typeof window.closeAdModal === 'function') {
+        window.closeAdModal();
+      }
+
+      const order = result.adOrder;
+      const orderId = order?._id || order?.id;
+      if (orderId) {
+        adApprovalStatusCache.set(orderId, order?.status || 'pending');
+      }
+
+      const successDetails = [
+        `پلن انتخابی: ${adTitle}`,
+        locationHint ? `محل نمایش: ${locationHint}` : '',
+        'وضعیت فعلی: در انتظار تایید ادمین'
+      ].filter(Boolean);
+
+      showSuccessPopup({
+        title: 'تبلیغ شما با موفقیت ثبت شد',
+        message: `تبلیغ «${title || adTitle}» ثبت شد و پس از تایید ادمین نمایش داده خواهد شد.`,
+        details: successDetails,
+        highlight: 'ثبت تبلیغ جدید',
+        autoCloseMs: 9000
+      });
+
+      const adForm = document.getElementById('adForm');
+      if (adForm) {
+        adForm.reset();
+        const targetSelect = document.getElementById('adTargetType');
+        if (targetSelect) targetSelect.value = 'product';
+        const productWrap = document.getElementById('adProductSelectWrap');
+        if (productWrap) productWrap.style.display = 'block';
+      }
+
+      const myPlansSection = document.getElementById('content-myplans');
+      if (myPlansSection && !myPlansSection.classList.contains('hidden')) {
+        fetchMyPlans();
+      }
 
     } catch (err) {
-      msgBox.classList.add('hidden');
+      console.error('submitAdForm error', err);
       alert('خطا در ثبت تبلیغ!');
     }
     return false;
