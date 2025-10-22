@@ -666,6 +666,192 @@
       justify-items: stretch;
       align-items: stretch;
     }
+
+    .product-ad-card {
+      grid-column: 1 / -1;
+      position: relative;
+      display: grid;
+      grid-template-columns: minmax(0, 1.2fr) minmax(0, 0.8fr);
+      gap: 28px;
+      align-items: center;
+      padding: 36px;
+      border-radius: 26px;
+      background: radial-gradient(circle at top left, rgba(16, 185, 129, 0.12), rgba(14, 165, 233, 0.08) 55%, #ffffff 90%);
+      box-shadow: 0 18px 48px rgba(15, 118, 110, 0.18);
+      overflow: hidden;
+      isolation: isolate;
+    }
+
+    .product-ad-card::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, rgba(14, 165, 233, 0.08), rgba(16, 185, 129, 0.12));
+      opacity: 0.85;
+      mix-blend-mode: screen;
+      z-index: -2;
+    }
+
+    .product-ad-card::after {
+      content: "";
+      position: absolute;
+      width: 180px;
+      height: 180px;
+      border-radius: 50%;
+      background: rgba(14, 165, 233, 0.14);
+      top: -40px;
+      left: -60px;
+      z-index: -1;
+      filter: blur(0.5px);
+    }
+
+    .product-ad-content {
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+
+    .product-ad-badge {
+      align-self: flex-start;
+      background: linear-gradient(90deg, rgba(16, 185, 129, 0.95), rgba(14, 165, 233, 0.9));
+      color: #fff;
+      padding: 8px 18px;
+      border-radius: 999px;
+      font-weight: 800;
+      font-size: 0.92rem;
+      letter-spacing: 0.5px;
+      box-shadow: 0 8px 18px rgba(16, 185, 129, 0.32);
+    }
+
+    .product-ad-title {
+      font-size: 1.85rem;
+      font-weight: 900;
+      color: #0f172a;
+      line-height: 1.35;
+      text-shadow: 0 1px 0 rgba(255, 255, 255, 0.6);
+    }
+
+    .product-ad-text {
+      color: #0f766e;
+      font-size: 1rem;
+      line-height: 1.9;
+      font-weight: 600;
+      background: rgba(255, 255, 255, 0.65);
+      border-radius: 18px;
+      padding: 16px 20px;
+      box-shadow: inset 0 0 0 1px rgba(16, 185, 129, 0.12);
+    }
+
+    .product-ad-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      color: #0369a1;
+      font-weight: 700;
+      font-size: 0.95rem;
+    }
+
+    .product-ad-meta span {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 14px;
+      border-radius: 999px;
+      background: rgba(14, 165, 233, 0.12);
+      box-shadow: inset 0 0 0 1px rgba(14, 165, 233, 0.25);
+    }
+
+    .product-ad-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-top: 6px;
+    }
+
+    .product-ad-actions a {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 22px;
+      border-radius: 16px;
+      font-weight: 800;
+      text-decoration: none;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .product-ad-actions a.primary {
+      background: linear-gradient(90deg, #10b981, #0ea5e9);
+      color: #fff;
+      box-shadow: 0 12px 28px rgba(16, 185, 129, 0.35);
+    }
+
+    .product-ad-actions a.secondary {
+      background: rgba(255, 255, 255, 0.92);
+      color: #0f766e;
+      box-shadow: inset 0 0 0 1.5px rgba(16, 185, 129, 0.25);
+    }
+
+    .product-ad-actions a:hover {
+      transform: translateY(-2px) scale(1.01);
+    }
+
+    .product-ad-media {
+      position: relative;
+      border-radius: 22px;
+      overflow: hidden;
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.8), rgba(224, 253, 250, 0.8));
+      box-shadow: 0 14px 36px rgba(14, 165, 233, 0.26);
+      min-height: 220px;
+    }
+
+    .product-ad-media img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .product-ad-media .ad-media-overlay {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(180deg, rgba(15, 118, 110, 0) 10%, rgba(15, 118, 110, 0.35) 100%);
+    }
+
+    .product-ad-media .ad-media-badge {
+      position: absolute;
+      bottom: 16px;
+      right: 16px;
+      background: rgba(255, 255, 255, 0.92);
+      color: #0f172a;
+      padding: 6px 14px;
+      border-radius: 999px;
+      font-weight: 800;
+      font-size: 0.9rem;
+      box-shadow: 0 8px 22px rgba(15, 118, 110, 0.25);
+    }
+
+    .products-error {
+      grid-column: 1 / -1;
+      text-align: center;
+      padding: 42px 24px;
+      border-radius: 24px;
+      background: #fff;
+      box-shadow: 0 12px 32px rgba(15, 118, 110, 0.12);
+      border: 1.5px solid rgba(14, 165, 233, 0.12);
+    }
+
+    .products-error h4 {
+      margin-top: 16px;
+      font-size: 1.2rem;
+      color: #dc2626;
+      font-weight: 800;
+    }
+
+    .products-error p {
+      margin-top: 6px;
+      color: #64748b;
+      font-weight: 600;
+    }
     
     /* استایل دکمه مشاهده محصول مطابق کارت‌های صفحه اصلی */
     .see-product-btn {
@@ -794,7 +980,21 @@
       .products-list {
         grid-template-columns: repeat(3, 1fr); /* سه‌تا تو ردیف */
       }
-      
+
+      .product-ad-card {
+        grid-template-columns: 1fr;
+        text-align: center;
+        padding: 30px;
+      }
+
+      .product-ad-badge {
+        align-self: center;
+      }
+
+      .product-ad-actions {
+        justify-content: center;
+      }
+
       .vit-logo-gradient {
         font-size: 1.6rem;
       }
@@ -813,7 +1013,11 @@
       .vit-logo a {
         height: 54px;
       }
-      
+
+      .product-ad-card {
+        padding: 28px;
+      }
+
       .vit-nav {
         display: none;
       }
@@ -853,7 +1057,21 @@
       .vit-logo-gradient {
         font-size: 1.4rem;
       }
-      
+
+      .product-ad-title {
+        font-size: 1.6rem;
+      }
+
+      .product-ad-card {
+        padding: 26px 22px;
+        gap: 22px;
+      }
+
+      .product-ad-actions a {
+        width: 100%;
+        justify-content: center;
+      }
+
       .vit-login-btn,
       .vit-btn {
         font-size: 0.95rem;
@@ -902,7 +1120,16 @@
       .vit-logo-gradient {
         font-size: 1.3rem;
       }
-      
+
+      .product-ad-card {
+        padding: 24px 18px;
+        border-radius: 22px;
+      }
+
+      .product-ad-text {
+        font-size: 0.95rem;
+      }
+
       .footer-content {
         grid-template-columns: 1fr;
       }
@@ -954,7 +1181,16 @@
       .vit-logo-gradient {
         font-size: 1.2rem;
       }
-      
+
+      .product-ad-card {
+        padding: 22px 16px;
+        gap: 18px;
+      }
+
+      .product-ad-meta {
+        justify-content: center;
+      }
+
       .vit-login-btn {
         display: none;
       }
@@ -1352,6 +1588,8 @@
 /* ----------------------- داده‌های پایه ----------------------- */
 let allProducts = [];
 let products    = [];
+let productPageAd = null;
+let productLoadFailed = false;
 
 const categories = [
   "همه محصولات","پوشاک","خوراک","خدمات","دیجیتال","زیبایی",
@@ -1372,8 +1610,19 @@ let currentPriceFilter = null;          // {min,max} | null
 document.addEventListener('DOMContentLoaded',()=>{
   // تنظیمات اولیه
   setupEventListeners();
-  fetchProductsFromAPI();
+  loadInitialData();
 });
+
+async function loadInitialData() {
+  const productsLoaded = await fetchProductsFromAPI();
+  await fetchProductPageAd();
+
+  if (productsLoaded) {
+    filterAndSortProducts();
+  } else if (productPageAd) {
+    injectAdIntoErrorState();
+  }
+}
 
 function setupEventListeners() {
   /* --- جستجو --- */
@@ -1606,34 +1855,106 @@ function parsePriceInput(str){
 
 /* ---------------------- واکشی محصولات ---------------------- */
 async function fetchProductsFromAPI(){
+  const wrap = document.getElementById('productsList');
+  if (!wrap) return false;
+
   try{
     // واکشی واقعی از بک‌اند (فرض بر این است که endpoint /api/products وجود دارد و JSON برمی‌گرداند)
     const response = await fetch('/api/products');
     if (!response.ok) {
       throw new Error('خطا در دریافت محصولات از سرور');
     }
-    allProducts = await response.json();
-    
-    filterAndSortProducts();
+
+    const data = await response.json();
+    allProducts = Array.isArray(data) ? data : [];
+    productLoadFailed = false;
+    return true;
   }catch(err){
-    document.getElementById('productsList').innerHTML=
-      `<div style="grid-column:1/-1;text-align:center;padding:40px">
-         <i class="fas fa-bug" style="font-size:3rem;color:#e11d48"></i>
-         <h4 style="color:#e11d48">خطا در دریافت محصولات از سرور</h4>
-         <div style="color:#888">${err.message}</div>
-       </div>`;
+    productLoadFailed = true;
+    allProducts = [];
+    console.error('❌ خطا در دریافت محصولات:', err);
+    const message = err && err.message ? err.message : 'خطای ناشناخته';
+    wrap.innerHTML = `
+      <div class="products-error">
+        <i class="fas fa-bug" style="font-size:3rem;color:#ef4444"></i>
+        <h4>خطا در دریافت محصولات از سرور</h4>
+        <p>${escapeHTML(message)}</p>
+      </div>
+    `;
+    return false;
   }
+}
+
+async function fetchProductPageAd() {
+  const planSlug = 'ad_products';
+  const targetedAd = await requestActiveAd(planSlug);
+  if (targetedAd) {
+    productPageAd = targetedAd;
+    return true;
+  }
+
+  const fallbackAd = await requestActiveAd();
+  productPageAd = fallbackAd;
+  return !!fallbackAd;
+}
+
+async function requestActiveAd(planSlug) {
+  try {
+    const query = planSlug ? `?planSlug=${encodeURIComponent(planSlug)}` : '';
+    const response = await fetch(`/api/adOrder/active${query}`);
+    if (!response.ok) {
+      throw new Error('خطا در دریافت تبلیغات فعال');
+    }
+
+    const payload = await response.json();
+    const ads = Array.isArray(payload?.ads) ? payload.ads : [];
+    return ads.length ? ads[0] : null;
+  } catch (err) {
+    console.warn('⚠️ دریافت تبلیغ فعال ناموفق بود:', err);
+    return null;
+  }
+}
+
+function injectAdIntoErrorState() {
+  if (!productPageAd) return;
+  const wrap = document.getElementById('productsList');
+  if (!wrap) return;
+  if (wrap.querySelector('.product-ad-card')) return;
+  wrap.insertAdjacentHTML('beforeend', createAdCardMarkup(productPageAd));
 }
 
 /* -------------------- فیلتر و مرتب‌سازی -------------------- */
 function filterAndSortProducts(){
+  if (productLoadFailed) {
+    updateActiveFilters();
+    return;
+  }
+
   const q=document.getElementById('searchInput').value.trim().toLowerCase();
   let list=[...allProducts];
 
-  if(currentShop!=="همه مراکز خرید")   list=list.filter(p=>p.seller.storename===currentShop); // assuming storename is the shop name
-  if(currentCategory!=="همه محصولات")  list=list.filter(p=>p.category===currentCategory);
-  if(currentPriceFilter)               list=list.filter(p=>p.price>=currentPriceFilter.min && p.price<=currentPriceFilter.max);
-  if(q)                                list=list.filter(p=>p.title?.toLowerCase().includes(q));
+  if(currentShop!=="همه مراکز خرید") {
+    list=list.filter(p=>{
+      const seller = p?.seller || {};
+      const shopName = seller.storename || seller.shopName || seller.name || '';
+      return shopName === currentShop;
+    });
+  }
+
+  if(currentCategory!=="همه محصولات") {
+    list=list.filter(p=>(p?.category || '').trim()===currentCategory);
+  }
+
+  if(currentPriceFilter) {
+    list=list.filter(p=>{
+      const price = Number(p?.price ?? 0);
+      return price >= currentPriceFilter.min && price <= currentPriceFilter.max;
+    });
+  }
+
+  if(q) {
+    list=list.filter(p=> (p?.title || '').toString().toLowerCase().includes(q));
+  }
 
   if(currentSort==="cheap")      list.sort((a,b)=>a.price-b.price);
   else if(currentSort==="expensive") list.sort((a,b)=>b.price-a.price);
@@ -1647,34 +1968,164 @@ function filterAndSortProducts(){
 function renderProducts(list){
   const wrap=document.getElementById('productsList');
   wrap.innerHTML="";
+  const hasAd = Boolean(productPageAd);
+
   if(!list.length){
-    wrap.innerHTML=
-      `<div style="grid-column:1/-1;text-align:center;padding:50px 20px">
-         <i class="fas fa-search" style="font-size:4rem;color:#e2e8f0"></i>
-         <h3 style="color:#94a3b8">محصولی یافت نشد</h3>
-       </div>`;
+    if (hasAd) {
+      wrap.insertAdjacentHTML('beforeend', createAdCardMarkup(productPageAd));
+    }
+    wrap.insertAdjacentHTML('beforeend',`
+      <div class="products-error" style="background:#f8fafc;border-color:rgba(148,163,184,0.25);box-shadow:none;">
+        <i class="fas fa-search" style="font-size:3.5rem;color:#cbd5f5;"></i>
+        <h4 style="color:#475569">محصولی یافت نشد</h4>
+        <p style="color:#94a3b8;font-weight:600">فیلترها را تغییر دهید یا دسته دیگری را امتحان کنید.</p>
+      </div>`);
     return;
   }
-  list.forEach(p=>{
-    const img=(p.images?.length)?p.images[0]:'https://placehold.co/320x200?text=NO+IMAGE';
-    wrap.insertAdjacentHTML('beforeend',`
-      <div class="product-card">
-        <div class="product-image-container rounded-xl overflow-hidden shadow-sm">
-          <img class="product-image object-cover" src="${img}" alt="${p.title}">
-        </div>
-        <div class="product-details">
-          <div class="product-title">${p.title}</div>
-          <div class="shop-address"><i class="fas fa-map-marker-alt" style="color:#10b981;margin-left:5px"></i>${p.seller.address || "نامشخص"}</div>
-          <div class="product-price">${formatPrice(p.price)}</div>
-          <a href="product.html?id=${p._id}" target="_blank" class="see-product-btn">مشاهده محصول</a>
-        </div>
-        <span class="tag">${p.seller.category || ""}</span>
-      </div>`);
+
+  const adMarkup = hasAd ? createAdCardMarkup(productPageAd) : '';
+  const insertionIndex = hasAd ? Math.min(Math.max(3, Math.ceil(list.length / 2)), list.length) : null;
+
+  list.forEach((p, index)=>{
+    wrap.insertAdjacentHTML('beforeend', createProductCardMarkup(p));
+    if (hasAd && index === insertionIndex - 1) {
+      wrap.insertAdjacentHTML('beforeend', adMarkup);
+    }
   });
 }
 
 function formatPrice(p) {
-  return p ? p.toLocaleString('fa-IR')+" تومان" : "-";
+  const price = Number(p);
+  if (!Number.isFinite(price)) return '-';
+  return price.toLocaleString('fa-IR')+" تومان";
+}
+
+function createProductCardMarkup(product) {
+  const imageSource = Array.isArray(product?.images) && product.images.length
+    ? product.images[0]
+    : 'https://placehold.co/320x200?text=NO+IMAGE';
+  const productTitle = escapeHTML(product?.title || 'محصول بدون نام');
+  const sellerAddress = escapeHTML(product?.seller?.address || 'نامشخص');
+  const category = escapeHTML(product?.seller?.category || '');
+  const productLink = buildProductLink(product);
+
+  return `
+    <div class="product-card">
+      <div class="product-image-container rounded-xl overflow-hidden shadow-sm">
+        <img class="product-image object-cover" src="${escapeHTML(imageSource)}" alt="${productTitle}">
+      </div>
+      <div class="product-details">
+        <div class="product-title">${productTitle}</div>
+        <div class="shop-address"><i class="fas fa-map-marker-alt" style="color:#10b981;margin-left:5px"></i>${sellerAddress}</div>
+        <div class="product-price">${formatPrice(product?.price)}</div>
+        <a href="${productLink}" target="_blank" class="see-product-btn">مشاهده محصول</a>
+      </div>
+      <span class="tag">${category}</span>
+    </div>
+  `;
+}
+
+function buildProductLink(product) {
+  if (!product) return '#';
+  const productId = product._id || product.id;
+  if (productId) {
+    return `product.html?id=${encodeURIComponent(productId)}`;
+  }
+  if (product.slug) {
+    return `product.html?slug=${encodeURIComponent(product.slug)}`;
+  }
+  return '#';
+}
+
+function createAdCardMarkup(ad) {
+  if (!ad) return '';
+  const adId = ad._id || ad.id || '';
+  const title = escapeHTML(ad.adTitle || ad.planTitle || 'تبلیغ ویژه محصولات');
+  const description = formatAdText(ad.adText);
+  const sellerName = escapeHTML(ad.sellerId?.storename || ad.shopTitle || 'فروشنده ویژه');
+  const productTitle = ad.productId?.title ? escapeHTML(ad.productId.title) : '';
+  const productPrice = ad.productId?.price ? formatPrice(ad.productId.price) : '';
+  const primaryLink = buildAdPrimaryLink(ad);
+  const primaryLabel = ad.productId ? 'مشاهده محصول ویژه' : 'مشاهده فروشگاه';
+  const sellerLink = ad.sellerId?.shopurl
+    ? `shop.html?shopurl=${encodeURIComponent(ad.sellerId.shopurl)}`
+    : '';
+  const hasSecondary = sellerLink && sellerLink !== primaryLink;
+  const planBadge = escapeHTML(ad.planTitle || 'تبلیغ ویژه');
+  const imageSource = resolveAdImage(ad);
+
+  return `
+    <article class="product-ad-card" ${adId ? `data-ad-id="${escapeHTML(adId)}"` : ''}>
+      <div class="product-ad-content">
+        <span class="product-ad-badge">${planBadge}</span>
+        <h3 class="product-ad-title">${title}</h3>
+        <div class="product-ad-text">${description || `فروشگاه ${sellerName} با پیشنهادهای ویژه در انتظار شماست.`}</div>
+        <div class="product-ad-meta">
+          <span><i class="fas fa-store"></i>${sellerName}</span>
+          ${productTitle ? `<span><i class="fas fa-gift"></i>${productTitle}</span>` : ''}
+          ${productPrice ? `<span><i class="fas fa-tag"></i>${productPrice}</span>` : ''}
+        </div>
+        <div class="product-ad-actions">
+          <a href="${primaryLink}" class="primary" target="_blank" rel="noopener">
+            <i class="fas fa-arrow-left"></i>${primaryLabel}
+          </a>
+          ${hasSecondary ? `<a href="${sellerLink}" class="secondary" target="_blank" rel="noopener"><i class="fas fa-store"></i>مشاهده فروشگاه</a>` : ''}
+        </div>
+      </div>
+      <div class="product-ad-media">
+        <img src="${escapeHTML(imageSource)}" alt="${title}">
+        <div class="ad-media-overlay"></div>
+        <span class="ad-media-badge">تبلیغ</span>
+      </div>
+    </article>
+  `;
+}
+
+function resolveAdImage(ad) {
+  if (ad?.bannerImage) return `/uploads/${ad.bannerImage}`;
+  if (ad?.sellerId?.boardImage) return ad.sellerId.boardImage;
+  if (ad?.productId?.images && ad.productId.images.length) return ad.productId.images[0];
+  return 'https://placehold.co/640x360?text=Advertisement';
+}
+
+function buildAdPrimaryLink(ad) {
+  if (!ad) return '#';
+  const product = ad.productId;
+  if (product) {
+    if (typeof product === 'string') {
+      return `product.html?id=${encodeURIComponent(product)}`;
+    }
+    const productId = product?._id || product?.id;
+    if (productId) {
+      return `product.html?id=${encodeURIComponent(productId)}`;
+    }
+    if (product?.slug) {
+      return `product.html?slug=${encodeURIComponent(product.slug)}`;
+    }
+  }
+  if (ad?.sellerId?.shopurl) {
+    return `shop.html?shopurl=${encodeURIComponent(ad.sellerId.shopurl)}`;
+  }
+  return '#';
+}
+
+function formatAdText(text) {
+  if (!text) return '';
+  return escapeHTML(text).replace(/\n+/g, '<br>');
+}
+
+function escapeHTML(value) {
+  const str = value === undefined || value === null ? '' : String(value);
+  return str.replace(/[&<>"']/g, ch => {
+    switch (ch) {
+      case '&': return '&amp;';
+      case '<': return '&lt;';
+      case '>': return '&gt;';
+      case '"': return '&quot;';
+      case "'": return '&#039;';
+      default: return ch;
+    }
+  });
 }
 
 /* -------------------- نمایش فیلترهای فعال -------------------- */
