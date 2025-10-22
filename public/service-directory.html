@@ -1,0 +1,623 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title id="page-title">مراکز خدماتی شهر | Vitreenet</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    * {
+      font-family: 'Vazirmatn', sans-serif;
+    }
+    body {
+      min-height: 100vh;
+      background: linear-gradient(135deg, #f3f9ff 0%, #f8fffb 55%, #e0fdf7 100%);
+      color: #0f172a;
+    }
+    .glass-surface {
+      background: rgba(255, 255, 255, 0.92);
+      border: 1px solid rgba(226, 232, 240, 0.6);
+      border-radius: 24px;
+      box-shadow: 0 20px 55px rgba(14, 165, 233, 0.12);
+      backdrop-filter: blur(18px);
+    }
+    .filter-chip {
+      transition: all 0.2s ease;
+    }
+    .filter-chip:hover {
+      transform: translateY(-2px);
+    }
+    .filter-chip.active {
+      background: linear-gradient(90deg, #10b981, #0ea5e9);
+      color: #fff;
+      box-shadow: 0 10px 25px rgba(16, 185, 129, 0.2);
+    }
+    .sort-button {
+      transition: all 0.2s ease;
+    }
+    .sort-button.active {
+      background: rgba(16, 185, 129, 0.12);
+      color: #047857;
+      border-color: rgba(16, 185, 129, 0.35);
+      box-shadow: 0 10px 20px rgba(16, 185, 129, 0.1);
+    }
+    .service-card {
+      transition: all 0.25s ease;
+    }
+    .service-card:hover {
+      transform: translateY(-6px);
+      box-shadow: 0 22px 40px rgba(14, 165, 233, 0.18);
+    }
+    .badge {
+      background: rgba(14, 165, 233, 0.12);
+      color: #0284c7;
+      border-radius: 9999px;
+      padding: 0.35rem 0.85rem;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+    .badge-emerald {
+      background: rgba(16, 185, 129, 0.14);
+      color: #047857;
+    }
+    .category-chip.active {
+      background: linear-gradient(90deg, #38bdf8, #10b981);
+      color: #fff;
+      box-shadow: 0 12px 24px rgba(56, 189, 248, 0.18);
+    }
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: linear-gradient(180deg, rgba(16,185,129,0.4), rgba(14,165,233,0.4));
+      border-radius: 999px;
+    }
+  </style>
+</head>
+<body class="flex flex-col min-h-screen">
+  <header class="sticky top-0 z-40 backdrop-blur-xl bg-white/80 border-b border-slate-100/70">
+    <div class="max-w-7xl mx-auto flex flex-col lg:flex-row items-center lg:justify-between gap-4 px-4 sm:px-6 py-4">
+      <a href="index.html" class="flex items-center gap-3 text-slate-900">
+        <span class="w-11 h-11 rounded-2xl flex items-center justify-center bg-gradient-to-br from-sky-500 to-emerald-500 text-white shadow-lg">
+          <svg viewBox="0 0 48 48" class="w-8 h-8" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <defs>
+              <linearGradient id="brandMark" x1="0%" y1="100%" x2="100%" y2="0%">
+                <stop offset="0%" stop-color="#0ea5e9" />
+                <stop offset="55%" stop-color="#10b981" />
+                <stop offset="100%" stop-color="#0fb67f" />
+              </linearGradient>
+            </defs>
+            <circle cx="24" cy="24" r="22" fill="url(#brandMark)" />
+            <path d="M15.5 16h4.7l4.3 10.6L28.8 16h4.7L26 33h-4.2L15.5 16Z" fill="#fff" fill-opacity="0.95" />
+          </svg>
+        </span>
+        <div class="flex flex-col">
+          <span class="text-lg font-black tracking-tight">Vitreenet</span>
+          <span class="text-xs font-semibold text-slate-500">ویترینت - سنندج</span>
+        </div>
+      </a>
+      <nav class="flex flex-wrap items-center justify-center gap-2 sm:gap-3 text-sm sm:text-base font-semibold text-slate-500">
+        <a href="index.html" class="px-4 py-2 rounded-full hover:text-emerald-500 hover:bg-emerald-50 transition">خانه</a>
+        <a href="categories.html" class="px-4 py-2 rounded-full hover:text-sky-500 hover:bg-sky-50 transition">دسته‌بندی‌ها</a>
+        <a href="service-directory.html" class="px-4 py-2 rounded-full text-emerald-600 bg-emerald-50 border border-emerald-100 shadow-sm">خدمات شهر</a>
+        <a href="post.html" class="px-4 py-2 rounded-full text-white font-bold bg-gradient-to-l from-emerald-500 to-sky-500 shadow-md hover:shadow-lg transition">ثبت فروشگاه</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="flex-1 w-full">
+    <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-10 pb-6">
+      <div class="glass-surface p-6 sm:p-10 relative overflow-hidden">
+        <div class="absolute -left-10 top-1/2 -translate-y-1/2 w-40 h-40 bg-gradient-to-br from-emerald-200/50 to-sky-200/60 blur-3xl rounded-full"></div>
+        <div class="absolute -right-16 -top-16 w-48 h-48 bg-gradient-to-bl from-sky-200/60 to-emerald-200/60 blur-3xl rounded-full"></div>
+        <div class="relative z-10 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-8">
+          <div class="max-w-2xl">
+            <span class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-emerald-50 text-emerald-600 font-semibold mb-4">
+              <svg viewBox="0 0 24 24" class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 13l4 4L19 7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              انتخاب هوشمند خدمات
+            </span>
+            <h1 id="hero-title" class="text-3xl sm:text-4xl font-black text-slate-800 leading-tight mb-4">مراکز خدماتی برتر سنندج</h1>
+            <p id="hero-subtitle" class="text-slate-600 text-base sm:text-lg leading-relaxed">
+              بهترین سالن‌های زیبایی، کارواش‌ها و ارائه‌دهندگان خدمات شهری با امکان رزرو آنلاین، مشاهده نظرات کاربران و مقایسه قیمت.
+            </p>
+          </div>
+          <div class="glass-surface w-full sm:w-auto lg:min-w-[320px] p-5 sm:p-6 rounded-3xl border border-white/60 shadow-lg bg-white/90">
+            <div class="flex items-center gap-3 mb-4">
+              <span class="w-10 h-10 rounded-full flex items-center justify-center bg-emerald-100 text-emerald-600">
+                <svg viewBox="0 0 24 24" class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2h-2a2 2 0 0 1-2-2v-4H9v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </span>
+              <div>
+                <p class="text-xs text-slate-400">انتخاب شهر</p>
+                <p class="text-base font-bold text-slate-700">سنندج و حومه</p>
+              </div>
+            </div>
+            <div class="grid grid-cols-2 gap-3 text-sm font-semibold text-slate-500">
+              <div class="glass-surface bg-gradient-to-br from-white to-slate-50 border border-slate-100 rounded-2xl px-4 py-3 text-center shadow-sm">
+                <p class="text-xs text-slate-400 mb-1">مراکز فعال</p>
+                <p id="stats-count" class="text-xl font-black text-slate-800">0</p>
+              </div>
+              <div class="glass-surface bg-gradient-to-br from-white to-slate-50 border border-slate-100 rounded-2xl px-4 py-3 text-center shadow-sm">
+                <p class="text-xs text-slate-400 mb-1">میانگین امتیاز</p>
+                <p id="stats-rating" class="text-xl font-black text-emerald-600">0</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-6">
+      <div class="flex flex-wrap gap-2 sm:gap-3 mb-6">
+        <button data-category="all" class="category-chip px-4 py-2 rounded-full border border-slate-200 bg-white text-slate-600 font-semibold transition">
+          همه خدمات
+        </button>
+        <button data-category="barbershop" class="category-chip px-4 py-2 rounded-full border border-slate-200 bg-white text-slate-600 font-semibold transition">
+          سالن‌های زیبایی و آرایشگاه‌ها
+        </button>
+        <button data-category="carwash" class="category-chip px-4 py-2 rounded-full border border-slate-200 bg-white text-slate-600 font-semibold transition">
+          کارواش‌ها و دیتیلینگ خودرو
+        </button>
+      </div>
+
+      <div class="glass-surface border border-slate-100/80 p-5 sm:p-7 rounded-3xl mb-8">
+        <div class="flex flex-col gap-5 lg:gap-6">
+          <div class="flex flex-col lg:flex-row lg:items-center gap-4">
+            <div class="relative flex-1">
+              <input id="search-input" type="search" placeholder="جستجو بر اساس نام، خیابان یا نوع خدمت..." class="w-full rounded-2xl border border-slate-200 bg-white/80 px-5 py-3 text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-emerald-400 focus:border-emerald-300 shadow-sm">
+              <span class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">
+                <svg viewBox="0 0 24 24" class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3-3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </span>
+            </div>
+            <div class="flex items-center gap-2">
+              <label for="rating-select" class="text-sm font-semibold text-slate-500 whitespace-nowrap">حداقل امتیاز:</label>
+              <select id="rating-select" class="rounded-2xl border border-slate-200 bg-white/80 px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-sky-400">
+                <option value="0">بدون محدودیت</option>
+                <option value="4">۴ به بالا</option>
+                <option value="4.5">۴.۵ به بالا</option>
+                <option value="4.7">۴.۷ به بالا</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="flex flex-wrap items-center gap-2 sm:gap-3">
+            <span class="text-sm font-semibold text-slate-500">مرتب‌سازی:</span>
+            <button data-sort="best" class="sort-button border border-slate-200 text-slate-600 rounded-full px-4 py-2 text-sm font-semibold bg-white">بهترین امتیاز</button>
+            <button data-sort="popular" class="sort-button border border-slate-200 text-slate-600 rounded-full px-4 py-2 text-sm font-semibold bg-white">محبوب‌ترین</button>
+            <button data-sort="price" class="sort-button border border-slate-200 text-slate-600 rounded-full px-4 py-2 text-sm font-semibold bg-white">کمترین قیمت</button>
+          </div>
+
+          <div class="flex flex-col gap-4">
+            <div class="flex flex-wrap items-center gap-3">
+              <span class="text-sm font-semibold text-slate-500">سقف بودجه:</span>
+              <div class="flex items-center gap-3 w-full sm:w-auto">
+                <input type="range" id="price-range" class="w-full sm:w-64" min="0" max="0" step="50000">
+                <span id="price-range-label" class="text-sm font-bold text-emerald-600 whitespace-nowrap">تا ۰ تومان</span>
+              </div>
+            </div>
+            <div class="flex flex-wrap gap-2">
+              <span class="text-sm font-semibold text-slate-500">فیلترهای ویژه:</span>
+              <button class="filter-chip px-4 py-2 rounded-full border border-slate-200 bg-white text-sm font-semibold text-slate-600" data-feature="online-booking">رزرو آنلاین</button>
+              <button class="filter-chip px-4 py-2 rounded-full border border-slate-200 bg-white text-sm font-semibold text-slate-600" data-feature="home-service">خدمات در محل</button>
+              <button class="filter-chip px-4 py-2 rounded-full border border-slate-200 bg-white text-sm font-semibold text-slate-600" data-feature="vip">فضای VIP</button>
+              <button class="filter-chip px-4 py-2 rounded-full border border-slate-200 bg-white text-sm font-semibold text-slate-600" data-feature="parking">پارکینگ اختصاصی</button>
+              <button class="filter-chip px-4 py-2 rounded-full border border-slate-200 bg-white text-sm font-semibold text-slate-600" data-feature="detailing">دیتیلینگ حرفه‌ای</button>
+              <button class="filter-chip px-4 py-2 rounded-full border border-slate-200 bg-white text-sm font-semibold text-slate-600" data-feature="eco-friendly">دوستدار محیط زیست</button>
+              <button class="filter-chip px-4 py-2 rounded-full border border-slate-200 bg-white text-sm font-semibold text-slate-600" data-feature="membership">اشتراک ویژه</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-16">
+      <div class="flex items-center justify-between gap-4 mb-6">
+        <div>
+          <h2 class="text-2xl font-extrabold text-slate-800 mb-1">نتایج فیلتر شده</h2>
+          <p id="results-subtitle" class="text-sm text-slate-500">مراکز ارائه‌دهنده خدمات مطابق با معیارهای شما</p>
+        </div>
+        <span class="badge-emerald badge" id="results-count">۰ نتیجه</span>
+      </div>
+
+      <div id="results-grid" class="grid gap-5 sm:gap-6 lg:gap-7 grid-cols-1 sm:grid-cols-2 xl:grid-cols-3">
+      </div>
+
+      <div id="empty-state" class="hidden glass-surface mt-8 p-8 rounded-3xl text-center border border-dashed border-emerald-200/70">
+        <div class="mx-auto w-16 h-16 rounded-full bg-emerald-50 text-emerald-500 flex items-center justify-center mb-4">
+          <svg viewBox="0 0 24 24" class="w-8 h-8" fill="none" stroke="currentColor" stroke-width="1.5">
+            <path d="M9 13h6M12 16V8" stroke-linecap="round" stroke-linejoin="round" />
+            <path d="M20 11.5A8.38 8.38 0 1 1 5.64 6" stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
+        </div>
+        <h3 class="text-xl font-bold text-slate-800 mb-2">خدمتی با این شرایط پیدا نشد</h3>
+        <p class="text-sm text-slate-500 leading-relaxed mb-4">فیلترها را کمی تغییر دهید یا سقف بودجه را افزایش دهید تا گزینه‌های بیشتری ببینید.</p>
+        <button id="reset-filters" class="px-5 py-2 rounded-full bg-gradient-to-l from-emerald-500 to-sky-500 text-white font-semibold shadow-md hover:shadow-lg transition">بازنشانی فیلترها</button>
+      </div>
+    </section>
+  </main>
+
+  <footer class="bg-white/80 border-t border-slate-100 py-8 mt-auto">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 text-center text-sm text-slate-500">
+      <p>ویترینت &copy; ۱۴۰۲ — با عشق برای شهروندان سنندج</p>
+    </div>
+  </footer>
+
+  <script>
+    const serviceShops = [
+      {
+        id: 'royal-barbers',
+        name: 'آرایشگاه رویال',
+        category: 'barbershop',
+        description: 'تخصص در گریم داماد، اصلاح مدرن و مراقبت پوست با استفاده از برندهای پریمیوم.',
+        address: 'سنندج، خیابان فردوسی، کوچه گلستان',
+        rating: 4.9,
+        reviews: 186,
+        popularity: 97,
+        price: 420000,
+        priceLabel: 'شروع پکیج کلاسیک',
+        services: ['گریم داماد', 'اصلاح و فید', 'اسپا صورت', 'پکیج VIP'],
+        features: ['online-booking', 'vip', 'parking'],
+        image: 'https://images.unsplash.com/photo-1503951914875-452162b0f3f1?auto=format&fit=crop&w=800&q=80'
+      },
+      {
+        id: 'kian-beauty',
+        name: 'سالن زیبایی کیان',
+        category: 'barbershop',
+        description: 'خدمات تخصصی مو و پوست، رنگ و لایت، کراتین و کوپ‌های فانتزی با کادر حرفه‌ای.',
+        address: 'سنندج، بلوار شبلی، مجتمع رز',
+        rating: 4.7,
+        reviews: 142,
+        popularity: 88,
+        price: 360000,
+        priceLabel: 'پکیج مراقبت مو',
+        services: ['رنگ و هایلایت', 'کراتین', 'ناخن', 'میکاپ نامزدی'],
+        features: ['online-booking', 'parking'],
+        image: 'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=800&q=80'
+      },
+      {
+        id: 'modern-gent',
+        name: 'سالن مدرن جنت',
+        category: 'barbershop',
+        description: 'پیرایش آقایان با به‌روزترین متدها، ماساژ سر و سرویس در محل برای مجالس.',
+        address: 'سنندج، خیابان آبیدر، روبه‌روی پارک آزادی',
+        rating: 4.8,
+        reviews: 198,
+        popularity: 93,
+        price: 390000,
+        priceLabel: 'پیرایش کامل و فیشیال',
+        services: ['فید تخصصی', 'ماساژ سر', 'خدمات در محل', 'پاکسازی پوست'],
+        features: ['home-service', 'parking'],
+        image: 'https://images.unsplash.com/photo-1519415943484-9fa1873496e0?auto=format&fit=crop&w=800&q=80'
+      },
+      {
+        id: 'glamour-salon',
+        name: 'سالن گلامور',
+        category: 'barbershop',
+        description: 'پکیج کامل عروس، میکاپ آرتیست حرفه‌ای و فضاهای VIP برای ثبت لحظات خاص.',
+        address: 'سنندج، خیابان کشاورز، برج پاستور',
+        rating: 4.6,
+        reviews: 165,
+        popularity: 85,
+        price: 310000,
+        priceLabel: 'پکیج گریم و میکاپ',
+        services: ['پکیج عروس', 'میکاپ سه‌بعدی', 'شینیون مدرن', 'اکستنشن مو'],
+        features: ['online-booking', 'vip'],
+        image: 'https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?auto=format&fit=crop&w=800&q=80'
+      },
+      {
+        id: 'shine-carwash',
+        name: 'کارواش درخشان',
+        category: 'carwash',
+        description: 'شست‌وشوی نانو بخار، دیتیلینگ حرفه‌ای و پولیش سرامیکی با گارانتی درخشش.',
+        address: 'سنندج، بلوار ۲۲ بهمن، بعد از پل ولایت',
+        rating: 4.8,
+        reviews: 210,
+        popularity: 96,
+        price: 250000,
+        priceLabel: 'پکیج شست‌وشوی کامل',
+        services: ['نانو بخار', 'واکس و پولیش', 'صندلی VIP', 'کافی‌بار'],
+        features: ['detailing', 'parking'],
+        image: 'https://images.unsplash.com/photo-1520342868574-5fa3804e551c?auto=format&fit=crop&w=800&q=80'
+      },
+      {
+        id: 'eco-mobile',
+        name: 'کارواش سیار اکوواش',
+        category: 'carwash',
+        description: 'کارواش در محل با دستگاه‌های کم‌مصرف، مناسب مجتمع‌ها و شرکت‌ها با امکان اشتراک.',
+        address: 'سنندج، پوشش سراسر شهر',
+        rating: 4.7,
+        reviews: 184,
+        popularity: 91,
+        price: 280000,
+        priceLabel: 'پکیج سیار لوکس',
+        services: ['کارواش در محل', 'واکس نانو', 'ضدعفونی کابین', 'اشتراک دوره‌ای'],
+        features: ['home-service', 'eco-friendly', 'membership'],
+        image: 'https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=800&q=80'
+      },
+      {
+        id: 'star-carwash',
+        name: 'کارواش ستاره درخشان',
+        category: 'carwash',
+        description: 'شست‌وشوی سریع ۲۰ دقیقه‌ای، صف کوتاه و رزرو تایم VIP برای مدیران پرمشغله.',
+        address: 'سنندج، میدان آزادی، جنب مرکز خرید آفتاب',
+        rating: 4.5,
+        reviews: 158,
+        popularity: 82,
+        price: 220000,
+        priceLabel: 'پکیج اقتصادی',
+        services: ['شست‌وشوی سریع', 'واکس فوری', 'رزرو VIP', 'کارت اشتراک'],
+        features: ['parking', 'membership'],
+        image: 'https://images.unsplash.com/photo-1527515637462-cff94eecc1ac?auto=format&fit=crop&w=800&q=80'
+      },
+      {
+        id: 'diamond-detailing',
+        name: 'مرکز دیتیلینگ دیاموند',
+        category: 'carwash',
+        description: 'دیتیلینگ حرفه‌ای بدنه و کابین، پوشش سرامیک و پولیش چندمرحله‌ای با ضمانت.',
+        address: 'سنندج، شهرک سعدی، خیابان صنعت',
+        rating: 4.9,
+        reviews: 236,
+        popularity: 99,
+        price: 320000,
+        priceLabel: 'پکیج دیتیلینگ نقره‌ای',
+        services: ['پوشش سرامیک', 'آنتی‌باکتریال کابین', 'کارشناسی رنگ', 'دیتیلینگ VIP'],
+        features: ['detailing', 'vip', 'membership'],
+        image: 'https://images.unsplash.com/photo-1524041255072-7da0525d010c?auto=format&fit=crop&w=800&q=80'
+      }
+    ];
+
+    const categoryConfig = {
+      all: {
+        title: 'مراکز خدماتی برتر سنندج',
+        subtitle: 'بهترین سالن‌های زیبایی، کارواش‌ها و خدمات شهری با امکان مقایسه تخصص، قیمت و تجربه کاربران.',
+        resultsSubtitle: 'لیست کامل خدمات شهری پیشنهادی ویترینت'
+      },
+      barbershop: {
+        title: 'آرایشگاه‌ها و سالن‌های زیبایی منتخب سنندج',
+        subtitle: 'سالن‌های حرفه‌ای با خدمات رنگ مو، گریم، پیرایش و اسپا که بالاترین امتیازات کاربران را کسب کرده‌اند.',
+        resultsSubtitle: 'آرایشگاه‌ها و سالن‌های زیبایی مطابق با فیلترهای شما'
+      },
+      carwash: {
+        title: 'کارواش‌ها و دیتیلینگ‌های برتر شهر',
+        subtitle: 'کارواش‌های مجهز و مراکز دیتیلینگ حرفه‌ای با سرویس‌های نانو بخار، سرامیک و سرویس سیار.',
+        resultsSubtitle: 'کارواش‌ها و مراکز دیتیلینگ مطابق با معیارهای شما'
+      }
+    };
+
+    const state = {
+      category: 'all',
+      sort: 'best',
+      search: '',
+      minRating: 0,
+      maxPrice: 0,
+      features: new Set()
+    };
+
+    const categoryButtons = Array.from(document.querySelectorAll('.category-chip'));
+    const sortButtons = Array.from(document.querySelectorAll('.sort-button'));
+    const featureButtons = Array.from(document.querySelectorAll('.filter-chip'));
+    const searchInput = document.getElementById('search-input');
+    const ratingSelect = document.getElementById('rating-select');
+    const priceRange = document.getElementById('price-range');
+    const priceRangeLabel = document.getElementById('price-range-label');
+    const resultsGrid = document.getElementById('results-grid');
+    const resultsCount = document.getElementById('results-count');
+    const resultsSubtitle = document.getElementById('results-subtitle');
+    const statsCount = document.getElementById('stats-count');
+    const statsRating = document.getElementById('stats-rating');
+    const emptyState = document.getElementById('empty-state');
+    const resetFiltersBtn = document.getElementById('reset-filters');
+    const heroTitle = document.getElementById('hero-title');
+    const heroSubtitle = document.getElementById('hero-subtitle');
+    const pageTitle = document.getElementById('page-title');
+
+    function formatPrice(value) {
+      return new Intl.NumberFormat('fa-IR').format(value);
+    }
+
+    function applyCategoryConfig(categoryKey) {
+      const config = categoryConfig[categoryKey] || categoryConfig.all;
+      heroTitle.textContent = config.title;
+      heroSubtitle.textContent = config.subtitle;
+      resultsSubtitle.textContent = config.resultsSubtitle;
+      pageTitle.textContent = `${config.title} | Vitreenet`;
+    }
+
+    function updatePriceBounds() {
+      const filteredByCategory = state.category === 'all' ? serviceShops : serviceShops.filter(shop => shop.category === state.category);
+      const prices = filteredByCategory.map(shop => shop.price);
+      const minPrice = Math.min(...prices);
+      const maxPrice = Math.max(...prices);
+      priceRange.min = minPrice;
+      priceRange.max = maxPrice;
+      if (!state.maxPrice || state.maxPrice > maxPrice || state.maxPrice < minPrice) {
+        state.maxPrice = maxPrice;
+      }
+      priceRange.value = state.maxPrice;
+      priceRangeLabel.textContent = `تا ${formatPrice(state.maxPrice)} تومان`;
+    }
+
+    function renderResults() {
+      const filtered = serviceShops
+        .filter(shop => state.category === 'all' || shop.category === state.category)
+        .filter(shop => !state.search || (shop.name + shop.description + shop.address + shop.services.join(' ')).toLowerCase().includes(state.search.toLowerCase()))
+        .filter(shop => shop.rating >= state.minRating)
+        .filter(shop => shop.price <= state.maxPrice)
+        .filter(shop => {
+          if (state.features.size === 0) return true;
+          return Array.from(state.features).every(feature => shop.features.includes(feature));
+        });
+
+      const sorted = filtered.sort((a, b) => {
+        if (state.sort === 'best') {
+          return b.rating - a.rating || b.reviews - a.reviews;
+        }
+        if (state.sort === 'popular') {
+          return b.popularity - a.popularity;
+        }
+        if (state.sort === 'price') {
+          return a.price - b.price;
+        }
+        return 0;
+      });
+
+      resultsGrid.innerHTML = sorted.map(shop => {
+        const featureBadges = shop.features.slice(0, 3).map(feature => `<span class="badge text-xs">${featureLabels(feature)}</span>`).join('');
+        const servicesList = shop.services.slice(0, 3).map(service => `<span class="inline-flex items-center px-3 py-1 rounded-full bg-slate-50 text-slate-500 text-xs font-semibold border border-slate-200">${service}</span>`).join('');
+        return `
+          <article class="service-card glass-surface border border-white/80 overflow-hidden flex flex-col">
+            <div class="relative h-48">
+              <img src="${shop.image}" alt="${shop.name}" loading="lazy" class="w-full h-full object-cover">
+              <div class="absolute top-3 left-3 flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/90 text-emerald-600 text-sm font-bold shadow">
+                <svg viewBox="0 0 24 24" class="w-4 h-4" fill="currentColor"><path d="M12 .587l3.668 7.431 8.207 1.193-5.938 5.787 1.402 8.168L12 18.896l-7.339 3.87 1.402-8.168L.125 9.211l8.207-1.193z"/></svg>
+                <span>${shop.rating.toFixed(1)}</span>
+                <span class="text-xs text-slate-400">(${shop.reviews})</span>
+              </div>
+            </div>
+            <div class="p-5 sm:p-6 flex-1 flex flex-col gap-4">
+              <div>
+                <h3 class="text-lg sm:text-xl font-extrabold text-slate-800 mb-1">${shop.name}</h3>
+                <p class="text-sm text-slate-500 leading-relaxed">${shop.description}</p>
+              </div>
+              <div class="flex flex-wrap gap-2">${servicesList}</div>
+              <div class="flex items-center justify-between text-sm text-slate-500">
+                <span class="inline-flex items-center gap-1">
+                  <svg viewBox="0 0 24 24" class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 21s-7-5.686-7-11a7 7 0 0 1 14 0c0 5.314-7 11-7 11z" stroke-linecap="round" stroke-linejoin="round"/><circle cx="12" cy="10" r="2"/></svg>
+                  ${shop.address}
+                </span>
+                <span class="font-bold text-emerald-600">${shop.priceLabel}</span>
+              </div>
+            </div>
+            <div class="px-5 sm:px-6 pb-6 flex items-center justify-between">
+              <div class="flex items-center gap-2">${featureBadges}</div>
+              <a href="shop.html?id=${shop.id}" class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-l from-emerald-500 to-sky-500 text-white text-sm font-semibold shadow-md hover:shadow-lg transition">
+                مشاهده پروفایل
+                <svg viewBox="0 0 24 24" class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.5"><path d="m9 5 7 7-7 7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </a>
+            </div>
+          </article>
+        `;
+      }).join('');
+
+      resultsCount.textContent = `${sorted.length} نتیجه`;
+      statsCount.textContent = sorted.length.toLocaleString('fa-IR');
+      const averageRating = sorted.length ? (sorted.reduce((sum, shop) => sum + shop.rating, 0) / sorted.length).toFixed(1) : '۰';
+      statsRating.textContent = sorted.length ? averageRating : '۰';
+
+      if (sorted.length === 0) {
+        emptyState.classList.remove('hidden');
+      } else {
+        emptyState.classList.add('hidden');
+      }
+    }
+
+    function featureLabels(id) {
+      const labels = {
+        'online-booking': 'رزرو آنلاین',
+        'home-service': 'خدمات در محل',
+        'vip': 'فضای VIP',
+        'parking': 'پارکینگ',
+        'detailing': 'دیتیلینگ',
+        'eco-friendly': 'دوستدار محیط زیست',
+        'membership': 'اشتراک ویژه'
+      };
+      return labels[id] || 'ویژه';
+    }
+
+    function setActiveCategory(category) {
+      state.category = category;
+      categoryButtons.forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.category === category);
+      });
+      applyCategoryConfig(category);
+      updatePriceBounds();
+      renderResults();
+      const params = new URLSearchParams(window.location.search);
+      params.set('category', category);
+      history.replaceState({}, '', `${window.location.pathname}?${params.toString()}`);
+    }
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const initialCategory = urlParams.get('category');
+    if (initialCategory && ['all', 'barbershop', 'carwash'].includes(initialCategory)) {
+      state.category = initialCategory;
+    }
+
+    applyCategoryConfig(state.category);
+    categoryButtons.forEach(btn => {
+      if (btn.dataset.category === state.category) {
+        btn.classList.add('active');
+      }
+    });
+
+    const allPrices = serviceShops.map(shop => shop.price);
+    state.maxPrice = Math.max(...allPrices);
+    updatePriceBounds();
+
+    sortButtons.forEach(button => {
+      button.addEventListener('click', () => {
+        state.sort = button.dataset.sort;
+        sortButtons.forEach(btn => btn.classList.toggle('active', btn === button));
+        renderResults();
+      });
+      if (button.dataset.sort === state.sort) {
+        button.classList.add('active');
+      }
+    });
+
+    featureButtons.forEach(button => {
+      button.addEventListener('click', () => {
+        const feature = button.dataset.feature;
+        if (state.features.has(feature)) {
+          state.features.delete(feature);
+          button.classList.remove('active');
+        } else {
+          state.features.add(feature);
+          button.classList.add('active');
+        }
+        renderResults();
+      });
+    });
+
+    categoryButtons.forEach(button => {
+      button.addEventListener('click', () => {
+        categoryButtons.forEach(btn => btn.classList.remove('active'));
+        button.classList.add('active');
+        setActiveCategory(button.dataset.category);
+      });
+    });
+
+    searchInput.addEventListener('input', (event) => {
+      state.search = event.target.value.trim();
+      renderResults();
+    });
+
+    ratingSelect.addEventListener('change', (event) => {
+      state.minRating = Number(event.target.value);
+      renderResults();
+    });
+
+    priceRange.addEventListener('input', (event) => {
+      state.maxPrice = Number(event.target.value);
+      priceRangeLabel.textContent = `تا ${formatPrice(state.maxPrice)} تومان`;
+      renderResults();
+    });
+
+    resetFiltersBtn.addEventListener('click', () => {
+      state.sort = 'best';
+      state.search = '';
+      state.minRating = 0;
+      state.features.clear();
+      searchInput.value = '';
+      ratingSelect.value = '0';
+      sortButtons.forEach(btn => btn.classList.toggle('active', btn.dataset.sort === 'best'));
+      featureButtons.forEach(btn => btn.classList.remove('active'));
+      updatePriceBounds();
+      renderResults();
+    });
+
+    renderResults();
+  </script>
+</body>
+</html>
