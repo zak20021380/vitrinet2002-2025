@@ -10,6 +10,8 @@ const Chat = require('../models/chat');
 const Report = require('../models/Report');
 const BannedPhone = require('../models/BannedPhone');
 const Plan = require('../models/plan');
+const Booking = require('../models/booking');
+const Review = require('../models/Review');
 const { calcPremiumUntil } = require('../utils/premium');
 const { clampAdminScore, evaluatePerformance } = require('../utils/performanceStatus');
 
@@ -89,6 +91,139 @@ exports.registerSeller = async (req, res) => {
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: 'خطا در ثبت‌نام فروشنده' });
+  }
+};
+
+exports.getDashboardStats = async (req, res) => {
+  try {
+    const sellerId = req.user && (req.user.id || req.user._id);
+    if (!sellerId) {
+      return res.status(401).json({ message: 'احراز هویت نامعتبر است.' });
+    }
+
+    const sellerObjectId = new mongoose.Types.ObjectId(sellerId);
+    const now = new Date();
+
+    const toISODate = (date) => {
+      const tzOffset = date.getTimezoneOffset();
+      const local = new Date(date.getTime() - tzOffset * 60000);
+      return local.toISOString().slice(0, 10);
+    };
+
+    const todayStr = toISODate(now);
+    const yesterday = new Date(now);
+    yesterday.setDate(yesterday.getDate() - 1);
+    const yesterdayStr = toISODate(yesterday);
+
+    const thirtyDaysAgo = new Date(now);
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+
+    const ninetyDaysAgo = new Date(now);
+    ninetyDaysAgo.setDate(ninetyDaysAgo.getDate() - 90);
+
+    const prevNinetyStart = new Date(ninetyDaysAgo);
+    prevNinetyStart.setDate(prevNinetyStart.getDate() - 90);
+
+    const activeStatuses = ['pending', 'confirmed', 'completed'];
+
+    const [
+      todayBookings,
+      yesterdayBookings,
+      pendingBookings,
+      activeCustomersAgg,
+      previousActiveCustomersAgg,
+      newCustomersAgg,
+      ratingAgg
+    ] = await Promise.all([
+      Booking.countDocuments({
+        sellerId: sellerObjectId,
+        bookingDate: todayStr,
+        status: { $in: activeStatuses }
+      }),
+      Booking.countDocuments({
+        sellerId: sellerObjectId,
+        bookingDate: yesterdayStr,
+        status: { $in: activeStatuses }
+      }),
+      Booking.countDocuments({ sellerId: sellerObjectId, status: 'pending' }),
+      Booking.aggregate([
+        {
+          $match: {
+            sellerId: sellerObjectId,
+            status: { $in: activeStatuses },
+            createdAt: { $gte: ninetyDaysAgo }
+          }
+        },
+        { $group: { _id: '$customerPhone' } },
+        { $count: 'count' }
+      ]),
+      Booking.aggregate([
+        {
+          $match: {
+            sellerId: sellerObjectId,
+            status: { $in: activeStatuses },
+            createdAt: { $gte: prevNinetyStart, $lt: ninetyDaysAgo }
+          }
+        },
+        { $group: { _id: '$customerPhone' } },
+        { $count: 'count' }
+      ]),
+      Booking.aggregate([
+        {
+          $match: {
+            sellerId: sellerObjectId,
+            status: { $in: activeStatuses }
+          }
+        },
+        {
+          $group: {
+            _id: '$customerPhone',
+            firstBooking: { $min: '$createdAt' }
+          }
+        },
+        { $match: { firstBooking: { $gte: thirtyDaysAgo } } },
+        { $count: 'count' }
+      ]),
+      Review.aggregate([
+        { $match: { sellerId: sellerObjectId, approved: true } },
+        {
+          $group: {
+            _id: null,
+            average: { $avg: '$score' },
+            count: { $sum: 1 }
+          }
+        }
+      ])
+    ]);
+
+    const activeCustomers = Array.isArray(activeCustomersAgg) && activeCustomersAgg.length
+      ? activeCustomersAgg[0].count
+      : 0;
+    const previousActiveCustomers = Array.isArray(previousActiveCustomersAgg) && previousActiveCustomersAgg.length
+      ? previousActiveCustomersAgg[0].count
+      : 0;
+    const newCustomers30d = Array.isArray(newCustomersAgg) && newCustomersAgg.length
+      ? newCustomersAgg[0].count
+      : 0;
+    const ratingStats = Array.isArray(ratingAgg) && ratingAgg.length ? ratingAgg[0] : null;
+
+    const avgRating = ratingStats?.average || 0;
+    const ratingCount = ratingStats?.count || 0;
+    const ratingAverage = ratingCount ? Math.round(avgRating * 10) / 10 : 0;
+
+    return res.json({
+      todayBookings,
+      yesterdayBookings,
+      pendingBookings,
+      activeCustomers,
+      previousActiveCustomers,
+      newCustomers30d,
+      ratingAverage,
+      ratingCount
+    });
+  } catch (err) {
+    console.error('getDashboardStats error:', err);
+    return res.status(500).json({ message: 'خطا در دریافت آمار داشبورد.' });
   }
 };
 

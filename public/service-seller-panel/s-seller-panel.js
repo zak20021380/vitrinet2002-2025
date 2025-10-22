@@ -239,6 +239,21 @@ async createService(payload) {
     });
   },
 
+  async getDashboardStats() {
+    const url = bust(`${API_BASE}/api/seller/dashboard/stats`);
+    const r = await fetch(url, {
+      credentials: 'include',
+      ...NO_CACHE
+    });
+    if (r.status === 401) {
+      throw { status: 401, message: 'UNAUTHORIZED' };
+    }
+    if (!r.ok && r.status !== 304) {
+      throw new Error('FETCH_DASHBOARD_STATS_FAILED');
+    }
+    return await this._json(r);
+  },
+
   // Portfolio API methods
   async getPortfolio() {
     const r = await fetch(bust(`${API_BASE}/api/seller-portfolio/me`), {
@@ -1252,6 +1267,8 @@ function bindFloatingCloseOnce() {
       this.currentBookingFilter = 'all';
       this.currentServiceImage = '';
       this.currentPortfolioImage = '';
+      this.dashboardStats = null;
+      this._dashboardStatsPromise = null;
 
       // Initialize Services, Portfolio, VIP & customer features
       this.initServices();
@@ -1630,9 +1647,143 @@ destroy() {
         el.textContent = UIComponents.formatPersianNumber(new Date().toLocaleDateString('fa-IR'));
       }
     }
-    renderDashboard() {
-        document.querySelectorAll('.stat-value').forEach(UIComponents.animateCountUp);
-  
+    async loadDashboardStats(force = false) {
+      if (this._dashboardStatsPromise && !force) {
+        return this._dashboardStatsPromise;
+      }
+
+      this._dashboardStatsPromise = (async () => {
+        try {
+          const stats = await API.getDashboardStats();
+          this.dashboardStats = stats || {};
+          this.applyDashboardStats(this.dashboardStats);
+          return this.dashboardStats;
+        } catch (err) {
+          console.error('loadDashboardStats failed', err);
+          if (this.dashboardStats) {
+            this.applyDashboardStats(this.dashboardStats);
+          } else {
+            this.applyDashboardStats({});
+          }
+          if (force) {
+            UIComponents?.showToast?.('خطا در بروزرسانی آمار داشبورد', 'error');
+          }
+          throw err;
+        } finally {
+          this._dashboardStatsPromise = null;
+        }
+      })();
+
+      return this._dashboardStatsPromise;
+    }
+
+    getRatingBadgeConfig(rating, count) {
+      if (!count) return { label: 'بدون نظر', className: 'badge-warning' };
+      if (rating >= 4.5) return { label: 'عالی', className: 'badge-premium' };
+      if (rating >= 4) return { label: 'خیلی خوب', className: 'badge-success' };
+      if (rating >= 3) return { label: 'خوب', className: 'badge-warning' };
+      return { label: 'نیاز به بهبود', className: 'badge-warning' };
+    }
+
+    applyDashboardStats(stats = {}) {
+      const toNumber = (value, fallback = 0) => {
+        const num = Number(value);
+        return Number.isFinite(num) ? num : fallback;
+      };
+
+      const setValue = (selector, value, { fractionDigits = 0 } = {}) => {
+        const el = document.querySelector(selector);
+        if (!el) return;
+        const numeric = toNumber(value, 0);
+        el.dataset.value = numeric;
+        const formatted = fractionDigits > 0
+          ? UIComponents.formatPersianNumber(numeric.toFixed(fractionDigits))
+          : UIComponents.formatPersianNumber(numeric);
+        el.textContent = formatted;
+      };
+
+      const applyTrend = (selector, direction, text) => {
+        const trendEl = document.querySelector(selector);
+        if (!trendEl) return;
+        trendEl.classList.remove('trend-up', 'trend-down', 'trend-flat');
+        const dir = direction === 'down' ? 'trend-down' : direction === 'flat' ? 'trend-flat' : 'trend-up';
+        trendEl.classList.add(dir);
+        const span = trendEl.querySelector('span');
+        if (span) span.textContent = text;
+        trendEl.setAttribute('aria-label', text);
+      };
+
+      const todayBookings = toNumber(stats.todayBookings);
+      const yesterdayBookings = toNumber(stats.yesterdayBookings);
+      const pendingBookings = toNumber(stats.pendingBookings);
+      const activeCustomers = toNumber(stats.activeCustomers);
+      const previousActiveCustomers = toNumber(stats.previousActiveCustomers);
+      const newCustomers30d = toNumber(stats.newCustomers30d);
+      const ratingAverage = toNumber(stats.ratingAverage);
+      const ratingCount = toNumber(stats.ratingCount);
+
+      setValue('.stat-bookings .stat-value', todayBookings);
+      setValue('.stat-pending .stat-value', pendingBookings);
+      setValue('.stat-customers .stat-value', activeCustomers);
+      setValue('.stat-rating .stat-value', ratingAverage, { fractionDigits: 1 });
+
+      const bookingsDiff = todayBookings - yesterdayBookings;
+      let bookingsText = 'بدون تغییر';
+      if (bookingsDiff !== 0) {
+        if (yesterdayBookings === 0) {
+          bookingsText = `${UIComponents.formatPersianNumber(Math.abs(bookingsDiff))} نوبت جدید`;
+        } else {
+          const percent = Math.round((Math.abs(bookingsDiff) / Math.max(yesterdayBookings, 1)) * 100);
+          bookingsText = `${UIComponents.formatPersianNumber(percent)}٪ ${bookingsDiff > 0 ? 'افزایش' : 'کاهش'}`;
+        }
+      }
+      const bookingsDirection = bookingsDiff > 0 ? 'up' : bookingsDiff < 0 ? 'down' : 'flat';
+      applyTrend('.stat-bookings .stat-trend', bookingsDirection, bookingsText);
+
+      const customersDiff = activeCustomers - previousActiveCustomers;
+      const customersDirection = customersDiff > 0 ? 'up' : customersDiff < 0 ? 'down' : 'flat';
+      const customersText = newCustomers30d > 0
+        ? `${UIComponents.formatPersianNumber(newCustomers30d)} مشتری جدید`
+        : 'مشتری جدیدی ثبت نشد';
+      applyTrend('.stat-customers .stat-trend', customersDirection, customersText);
+
+      const badgeConfig = this.getRatingBadgeConfig(ratingAverage, ratingCount);
+      const badgeEl = document.querySelector('.stat-rating .stat-badge');
+      if (badgeEl) {
+        badgeEl.textContent = badgeConfig.label;
+        badgeEl.classList.remove('badge-premium', 'badge-success', 'badge-warning');
+        badgeEl.classList.add(badgeConfig.className);
+      }
+
+      const starsEl = document.querySelector('.stat-rating .stars-filled');
+      const starsWrap = document.querySelector('.stat-rating .stat-stars');
+      const clampedRating = Math.max(0, Math.min(5, ratingAverage || 0));
+      if (starsEl) {
+        starsEl.style.setProperty('--rating', clampedRating.toFixed(1));
+      }
+      if (starsWrap) {
+        const label = ratingCount
+          ? `${UIComponents.formatPersianNumber(clampedRating.toFixed(1))} از ۵ بر اساس ${UIComponents.formatPersianNumber(ratingCount)} نظر`
+          : 'هنوز نظری ثبت نشده است';
+        starsWrap.setAttribute('aria-label', label);
+      }
+
+      const ratingLabel = document.querySelector('.stat-rating .stat-label');
+      if (ratingLabel) {
+        ratingLabel.textContent = ratingCount
+          ? `امتیاز کلی (${UIComponents.formatPersianNumber(ratingCount)} نظر)`
+          : 'امتیاز کلی';
+      }
+
+      document.querySelectorAll('.stat-value').forEach(UIComponents.animateCountUp);
+    }
+
+    async renderDashboard() {
+      try {
+        await this.loadDashboardStats();
+      } catch (err) {
+        console.error('renderDashboard failed', err);
+      }
     }
  renderBookings(filter = 'all') {
   this.currentBookingFilter = filter;
@@ -2969,23 +3120,11 @@ openCustomerModal(customer) {
 }
 
 // ADD this new method to update dashboard stats after status changes
-updateDashboardStats() {
-  // Count pending bookings
-  const pendingCount = MOCK_DATA.bookings.filter(b => b.status === 'pending').length;
-  const todayCount = MOCK_DATA.bookings.filter(b => b.status === 'confirmed').length;
-  
-  // Update pending stat card
-  const pendingValue = document.querySelector('.stat-pending .stat-value');
-  if (pendingValue) {
-    pendingValue.dataset.value = pendingCount;
-    pendingValue.textContent = UIComponents.formatPersianNumber(pendingCount);
-  }
-  
-  // Update today's bookings stat card
-  const todayValue = document.querySelector('.stat-bookings .stat-value');
-  if (todayValue) {
-    todayValue.dataset.value = todayCount;
-    todayValue.textContent = UIComponents.formatPersianNumber(todayCount);
+async updateDashboardStats() {
+  try {
+    await this.loadDashboardStats(true);
+  } catch (err) {
+    console.error('updateDashboardStats failed', err);
   }
 }
 
