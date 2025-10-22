@@ -2,6 +2,7 @@ const mongoose = require('mongoose');
 const ShopAppearance = require('../models/ShopAppearance');
 const ShoppingCenter = require('../models/ShoppingCenter');
 const Review = require('../models/Review');
+const ServiceShop = require('../models/serviceShop');
 
 // تابع کمکی برای تبدیل URL نسبی به مطلق
 function makeFullUrl(req, path) {
@@ -33,11 +34,28 @@ async function recalcShopRating(sellerId) {
   const averageRating = agg[0]?.averageRating || 0;
   const ratingCount = agg[0]?.ratingCount || 0;
 
+  // Update ShopAppearance
   await ShopAppearance.findOneAndUpdate(
     { sellerId },
     { averageRating, ratingCount },
     { new: true }
   );
+
+  // Also update ServiceShop analytics if it exists
+  try {
+    const sellerObjectId = new mongoose.Types.ObjectId(sellerId);
+    await ServiceShop.findOneAndUpdate(
+      { legacySellerId: sellerObjectId },
+      {
+        $set: {
+          'analytics.ratingAverage': averageRating,
+          'analytics.ratingCount': ratingCount
+        }
+      }
+    );
+  } catch (err) {
+    console.warn('Could not update ServiceShop rating:', err.message);
+  }
 
   return { averageRating, ratingCount };
 }
@@ -372,5 +390,58 @@ exports.rejectReview = async (req, res) => {
   } catch (err) {
     console.error('❌ rejectReview error:', err.message);
     res.status(500).json({ message: 'خطای سرور در حذف نظر.' });
+  }
+};
+
+// ================== همگام‌سازی امتیازات به ServiceShop ==================
+exports.syncRatingsToServiceShops = async (req, res) => {
+  try {
+    // Get all shop appearances with ratings
+    const shopAppearances = await ShopAppearance.find({}).lean();
+
+    let updated = 0;
+    let skipped = 0;
+    let errors = 0;
+
+    for (const appearance of shopAppearances) {
+      try {
+        if (!appearance.sellerId) {
+          skipped++;
+          continue;
+        }
+
+        const result = await ServiceShop.findOneAndUpdate(
+          { legacySellerId: appearance.sellerId },
+          {
+            $set: {
+              'analytics.ratingAverage': appearance.averageRating || 0,
+              'analytics.ratingCount': appearance.ratingCount || 0
+            }
+          }
+        );
+
+        if (result) {
+          updated++;
+        } else {
+          skipped++;
+        }
+      } catch (err) {
+        console.error(`Error updating ratings for seller ${appearance.sellerId}:`, err.message);
+        errors++;
+      }
+    }
+
+    res.json({
+      message: 'همگام‌سازی امتیازات انجام شد.',
+      stats: {
+        total: shopAppearances.length,
+        updated,
+        skipped,
+        errors
+      }
+    });
+  } catch (err) {
+    console.error('❌ syncRatingsToServiceShops error:', err.message);
+    res.status(500).json({ message: 'خطای سرور در همگام‌سازی امتیازات.' });
   }
 };

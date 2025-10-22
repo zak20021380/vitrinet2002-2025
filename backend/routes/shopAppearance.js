@@ -48,4 +48,11 @@ router.post(
   shopAppearanceController.addReview
 );
 
+// POST همگام‌سازی امتیازات به ServiceShops – فقط ادمین
+router.post(
+  '/admin/sync-ratings',
+  auth('admin'),
+  shopAppearanceController.syncRatingsToServiceShops
+);
+
 module.exports = router;
