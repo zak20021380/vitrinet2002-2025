@@ -709,6 +709,7 @@ function renderAdOrders() {
       ? `<span class="ad-plan-location"><i class="${planIcon}"></i>${escapeHtml(planMeta.location)}</span>`
       : '';
     const statusMeta = getAdStatusMeta(order.status);
+    const statusClass = statusMeta.className || 'unknown';
     const createdAt = formatDateTime(order.createdAt);
     const reviewedAt = order.reviewedAt ? formatDateTime(order.reviewedAt) : '';
     const reviewedBy = order.reviewedBy && order.reviewedBy.name ? order.reviewedBy.name : '';
@@ -763,7 +764,7 @@ function renderAdOrders() {
       : '';
 
     return `
-      <tr class="ad-order-row" data-order-id="${orderId}">
+      <tr class="ad-order-row status-${escapeHtml(statusClass)}" data-order-id="${orderId}" data-status="${escapeHtml(statusClass)}">
         <td>
           <div class="ad-cell-primary">${escapeHtml(sellerName)}</div>
           ${sellerMetaParts.length ? `<div class="ad-cell-secondary">${sellerMetaParts.join('')}</div>` : ''}
