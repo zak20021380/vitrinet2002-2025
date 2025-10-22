@@ -1,5 +1,9 @@
 const mongoose = require('mongoose');
 const ServiceShop = require('../models/serviceShop');
+const Seller = require('../models/Seller');
+const SellerService = require('../models/seller-services');
+const ShopAppearance = require('../models/ShopAppearance');
+const Booking = require('../models/booking');
 
 const STATUS_VALUES = ['draft', 'pending', 'approved', 'suspended', 'archived'];
 
@@ -369,6 +373,450 @@ function normalizePayload(raw = {}, { partial = false } = {}) {
   return data;
 }
 
+const SERVICE_CATEGORY_REGEX = /(خدمات|service|سرویس)/i;
+
+const PERSIAN_DIGITS_MAP = {
+  '۰': '0',
+  '۱': '1',
+  '۲': '2',
+  '۳': '3',
+  '۴': '4',
+  '۵': '5',
+  '۶': '6',
+  '۷': '7',
+  '۸': '8',
+  '۹': '9'
+};
+
+const ARABIC_DIGITS_MAP = {
+  '٠': '0',
+  '١': '1',
+  '٢': '2',
+  '٣': '3',
+  '٤': '4',
+  '٥': '5',
+  '٦': '6',
+  '٧': '7',
+  '٨': '8',
+  '٩': '9'
+};
+
+const normaliseDigits = (value = '') => String(value || '')
+  .replace(/[۰-۹]/g, d => PERSIAN_DIGITS_MAP[d] || d)
+  .replace(/[٠-٩]/g, d => ARABIC_DIGITS_MAP[d] || d);
+
+const normaliseText = (value = '') => normaliseDigits(value).toLowerCase().trim();
+
+const containsNormalized = (haystack, needle) => {
+  const search = normaliseText(needle);
+  if (!search) return true;
+  return normaliseText(haystack).includes(search);
+};
+
+const coerceDate = (value) => {
+  if (!value) return null;
+  const date = value instanceof Date ? value : new Date(value);
+  return Number.isNaN(date.getTime()) ? null : date;
+};
+
+const extractCity = (address = '') => {
+  const text = normaliseDigits(String(address || '').trim());
+  if (!text) return '';
+  const separators = ['،', ',', '\n', '-', '|', '؛'];
+  for (const sep of separators) {
+    const parts = text.split(sep).map(part => part.trim()).filter(Boolean);
+    if (parts.length) {
+      const candidate = parts[0];
+      if (candidate.length <= 40) return candidate;
+    }
+  }
+  return text.split(/\s+/).filter(Boolean).slice(0, 3).join(' ');
+};
+
+const parseLegacyList = (value) => {
+  if (!value) return [];
+  const source = Array.isArray(value)
+    ? value
+    : String(value)
+      .split(/[،,\n]/);
+  return source
+    .map(item => String(item || '').trim())
+    .filter(Boolean)
+    .slice(0, 20);
+};
+
+const mapLegacySellerToItem = (seller, { appearance, services = [], booking = {} } = {}) => {
+  if (!seller) return null;
+
+  const serviceTitles = Array.isArray(services)
+    ? services.filter(Boolean)
+    : [];
+  const highlightServices = serviceTitles.slice(0, 5);
+  const subcategories = parseLegacyList(seller.subcategory);
+  const ownerName = [seller.firstname, seller.lastname]
+    .map(part => String(part || '').trim())
+    .filter(Boolean)
+    .join(' ');
+  const appearanceName = appearance?.shopLogoText ? String(appearance.shopLogoText).trim() : '';
+  const name = String(seller.storename || appearanceName || ownerName || serviceTitles[0] || 'بدون نام').trim();
+  const shopUrl = String(appearance?.customUrl || seller.shopurl || '').trim();
+  const address = String(appearance?.shopAddress || seller.address || '').trim();
+  const city = extractCity(address);
+  const updatedAt = coerceDate(seller.updatedAt)
+    || coerceDate(appearance?.updatedAt)
+    || coerceDate(booking.lastBookingAt)
+    || coerceDate(seller.createdAt)
+    || new Date();
+  const createdAt = coerceDate(seller.createdAt) || new Date();
+  const premiumUntil = coerceDate(seller.premiumUntil);
+  const ratingAverage = Number(appearance?.averageRating ?? 0) || 0;
+  const ratingCount = Number(appearance?.ratingCount ?? 0) || 0;
+
+  return {
+    _id: seller._id,
+    legacySellerId: seller._id,
+    name,
+    shopUrl,
+    ownerName: ownerName || name,
+    ownerPhone: String(seller.phone || appearance?.shopPhone || '').trim(),
+    address,
+    city,
+    province: '',
+    category: seller.category || 'خدماتی',
+    subcategories,
+    tags: [...new Set([...subcategories, ...highlightServices])],
+    description: seller.desc || '',
+    status: seller.blockedByAdmin ? 'suspended' : 'approved',
+    isVisible: !seller.blockedByAdmin,
+    isBookable: serviceTitles.length > 0,
+    isFeatured: false,
+    isPremium: !!seller.isPremium,
+    premiumUntil,
+    bookingSettings: { enabled: serviceTitles.length > 0 },
+    analytics: {
+      totalBookings: booking.total || 0,
+      completedBookings: booking.completed || 0,
+      cancelledBookings: booking.cancelled || 0,
+      pendingBookings: booking.pending || 0,
+      totalRevenue: 0,
+      ratingAverage,
+      ratingCount,
+      lastBookingAt: coerceDate(booking.lastBookingAt)
+    },
+    highlightServices,
+    serviceAreas: [],
+    createdAt,
+    updatedAt,
+    integrations: {},
+    notes: '',
+    legacySource: 'seller'
+  };
+};
+
+async function fetchLegacyServiceShopsItems() {
+  const sellers = await Seller.find({
+    $or: [
+      { category: { $regex: SERVICE_CATEGORY_REGEX } },
+      { subcategory: { $regex: SERVICE_CATEGORY_REGEX } }
+    ]
+  }).sort({ updatedAt: -1 }).lean();
+
+  if (!sellers.length) return [];
+
+  const sellerIds = sellers.map(seller => seller._id);
+
+  const [appearances, services, bookingStats] = await Promise.all([
+    ShopAppearance.find({ sellerId: { $in: sellerIds } }).lean(),
+    SellerService.find({ sellerId: { $in: sellerIds } }).select('sellerId title').lean(),
+    Booking.aggregate([
+      { $match: { sellerId: { $in: sellerIds } } },
+      {
+        $group: {
+          _id: '$sellerId',
+          total: { $sum: 1 },
+          completed: {
+            $sum: {
+              $cond: [{ $eq: ['$status', 'completed'] }, 1, 0]
+            }
+          },
+          cancelled: {
+            $sum: {
+              $cond: [{ $eq: ['$status', 'cancelled'] }, 1, 0]
+            }
+          },
+          pending: {
+            $sum: {
+              $cond: [{ $eq: ['$status', 'pending'] }, 1, 0]
+            }
+          },
+          lastBookingAt: { $max: '$createdAt' }
+        }
+      }
+    ])
+  ]);
+
+  const appearanceMap = new Map();
+  appearances.forEach((item) => {
+    if (item?.sellerId) {
+      appearanceMap.set(String(item.sellerId), item);
+    }
+  });
+
+  const servicesMap = new Map();
+  services.forEach((service) => {
+    const key = String(service.sellerId);
+    if (!servicesMap.has(key)) servicesMap.set(key, []);
+    if (service?.title) {
+      servicesMap.get(key).push(service.title);
+    }
+  });
+
+  const bookingMap = new Map();
+  bookingStats.forEach((stat) => {
+    bookingMap.set(String(stat._id), {
+      total: stat.total || 0,
+      completed: stat.completed || 0,
+      cancelled: stat.cancelled || 0,
+      pending: stat.pending || 0,
+      lastBookingAt: stat.lastBookingAt || null
+    });
+  });
+
+  return sellers
+    .map((seller) => mapLegacySellerToItem(seller, {
+      appearance: appearanceMap.get(String(seller._id)),
+      services: servicesMap.get(String(seller._id)) || [],
+      booking: bookingMap.get(String(seller._id)) || {}
+    }))
+    .filter(Boolean);
+}
+
+const matchesLegacyFilters = (item, filters = {}) => {
+  if (!item) return false;
+  if (filters.search) {
+    const haystack = [
+      item.name,
+      item.shopUrl,
+      item.ownerName,
+      item.ownerPhone,
+      item.address,
+      item.city,
+      item.category,
+      ...(item.highlightServices || []),
+      ...(item.subcategories || []),
+      ...(item.tags || [])
+    ].join(' \u200c ');
+    if (!containsNormalized(haystack, filters.search)) {
+      return false;
+    }
+  }
+
+  if (filters.status && filters.status !== 'all') {
+    if ((item.status || '').toLowerCase() !== filters.status) {
+      return false;
+    }
+  }
+
+  if (filters.city) {
+    const cityMatch = containsNormalized(item.city || '', filters.city)
+      || containsNormalized(item.address || '', filters.city);
+    if (!cityMatch) return false;
+  }
+
+  if (typeof filters.isPremium === 'boolean') {
+    if (!!item.isPremium !== filters.isPremium) return false;
+  }
+
+  if (typeof filters.bookingEnabled === 'boolean') {
+    const enabled = !!item?.bookingSettings?.enabled;
+    if (enabled !== filters.bookingEnabled) return false;
+  }
+
+  if (typeof filters.isFeatured === 'boolean') {
+    if (!!item.isFeatured !== filters.isFeatured) return false;
+  }
+
+  if (typeof filters.visible === 'boolean') {
+    const isVisible = item.isVisible !== false;
+    if (isVisible !== filters.visible) return false;
+  }
+
+  return true;
+};
+
+const buildLegacyStatusCounts = (items = []) => {
+  return items.reduce((acc, item) => {
+    const key = item?.status || 'unknown';
+    acc[key] = (acc[key] || 0) + 1;
+    return acc;
+  }, {});
+};
+
+const computeLegacyTotals = (items = []) => {
+  const now = new Date();
+  const totals = {
+    total: 0,
+    active: 0,
+    pending: 0,
+    suspended: 0,
+    archived: 0,
+    featured: 0,
+    bookingEnabled: 0,
+    premiumActive: 0
+  };
+
+  items.forEach((item) => {
+    if (!item) return;
+    totals.total += 1;
+    const status = (item.status || '').toLowerCase();
+    if (status === 'approved' && item.isVisible !== false) totals.active += 1;
+    if (status === 'pending') totals.pending += 1;
+    if (status === 'suspended') totals.suspended += 1;
+    if (status === 'archived') totals.archived += 1;
+    if (item.isFeatured) totals.featured += 1;
+    if (item?.bookingSettings?.enabled) totals.bookingEnabled += 1;
+    if (item.isPremium) {
+      const until = coerceDate(item.premiumUntil);
+      if (!until || until > now) {
+        totals.premiumActive += 1;
+      }
+    }
+  });
+
+  return totals;
+};
+
+const buildLegacyOverviewData = async (existingItems) => {
+  const items = Array.isArray(existingItems) ? existingItems : await fetchLegacyServiceShopsItems();
+  if (!items.length) {
+    return {
+      totals: {
+        total: 0,
+        active: 0,
+        pending: 0,
+        suspended: 0,
+        archived: 0,
+        featured: 0,
+        bookingEnabled: 0,
+        premiumActive: 0
+      },
+      statusCounts: {},
+      topCities: [],
+      topCategories: [],
+      recent: []
+    };
+  }
+
+  const totals = computeLegacyTotals(items);
+  const statusCounts = buildLegacyStatusCounts(items);
+
+  const cityCounter = new Map();
+  items.forEach((item) => {
+    const city = normaliseText(item.city || '');
+    if (!city) return;
+    cityCounter.set(city, {
+      _id: item.city,
+      count: (cityCounter.get(city)?.count || 0) + 1
+    });
+  });
+
+  const topCities = Array.from(cityCounter.values())
+    .sort((a, b) => b.count - a.count)
+    .slice(0, 6);
+
+  const categoryCounter = new Map();
+  items.forEach((item) => {
+    const categories = (item.subcategories && item.subcategories.length)
+      ? item.subcategories
+      : [item.category];
+    categories.filter(Boolean).forEach((cat) => {
+      const key = normaliseText(cat);
+      if (!key) return;
+      categoryCounter.set(key, {
+        _id: cat,
+        count: (categoryCounter.get(key)?.count || 0) + 1
+      });
+    });
+  });
+
+  const topCategories = Array.from(categoryCounter.values())
+    .sort((a, b) => b.count - a.count)
+    .slice(0, 6);
+
+  const recent = items
+    .slice()
+    .sort((a, b) => {
+      const aDate = coerceDate(a.updatedAt) || coerceDate(a.createdAt) || new Date(0);
+      const bDate = coerceDate(b.updatedAt) || coerceDate(b.createdAt) || new Date(0);
+      return bDate - aDate;
+    })
+    .slice(0, 6)
+    .map((item) => ({
+      name: item.name,
+      status: item.status,
+      city: item.city,
+      ownerName: item.ownerName,
+      ownerPhone: item.ownerPhone,
+      isPremium: item.isPremium,
+      bookingSettings: item.bookingSettings,
+      updatedAt: coerceDate(item.updatedAt) || coerceDate(item.createdAt),
+      shopUrl: item.shopUrl
+    }));
+
+  return {
+    totals,
+    statusCounts,
+    topCities,
+    topCategories,
+    recent
+  };
+};
+
+async function buildLegacyServiceShopBySellerId(id) {
+  const seller = await Seller.findById(id).lean();
+  if (!seller) return null;
+  const categoryText = `${seller.category || ''} ${seller.subcategory || ''}`;
+  if (!SERVICE_CATEGORY_REGEX.test(categoryText)) return null;
+
+  const [appearance, services, bookingStats] = await Promise.all([
+    ShopAppearance.findOne({ sellerId: seller._id }).lean(),
+    SellerService.find({ sellerId: seller._id }).select('title').lean(),
+    Booking.aggregate([
+      { $match: { sellerId: seller._id } },
+      {
+        $group: {
+          _id: '$sellerId',
+          total: { $sum: 1 },
+          completed: {
+            $sum: {
+              $cond: [{ $eq: ['$status', 'completed'] }, 1, 0]
+            }
+          },
+          cancelled: {
+            $sum: {
+              $cond: [{ $eq: ['$status', 'cancelled'] }, 1, 0]
+            }
+          },
+          pending: {
+            $sum: {
+              $cond: [{ $eq: ['$status', 'pending'] }, 1, 0]
+            }
+          },
+          lastBookingAt: { $max: '$createdAt' }
+        }
+      }
+    ])
+  ]);
+
+  const booking = bookingStats && bookingStats.length ? bookingStats[0] : {};
+
+  return mapLegacySellerToItem(seller, {
+    appearance,
+    services: services.map(service => service.title).filter(Boolean),
+    booking
+  });
+}
+
 const buildStatusCounts = (rows = []) => {
   return rows.reduce((acc, row) => {
     if (row && row._id) {
@@ -379,9 +827,13 @@ const buildStatusCounts = (rows = []) => {
 };
 
 async function buildOverview() {
+  const total = await ServiceShop.countDocuments({});
+  if (total === 0) {
+    return buildLegacyOverviewData();
+  }
+
   const now = new Date();
   const [
-    total,
     active,
     pending,
     suspended,
@@ -394,7 +846,6 @@ async function buildOverview() {
     topCategories,
     recent
   ] = await Promise.all([
-    ServiceShop.countDocuments({}),
     ServiceShop.countDocuments({ status: 'approved', isVisible: true }),
     ServiceShop.countDocuments({ status: 'pending' }),
     ServiceShop.countDocuments({ status: 'suspended' }),
@@ -458,8 +909,47 @@ exports.listServiceShops = async (req, res) => {
     const limit = Math.min(100, Math.max(1, toNumber(req.query.limit, 20) || 20));
     const skip = (page - 1) * limit;
 
-    const filters = {};
     const search = String(req.query.q || req.query.search || '').trim();
+    const status = String(req.query.status || '').trim().toLowerCase();
+    const city = String(req.query.city || '').trim();
+    const useLegacy = (await ServiceShop.countDocuments({})) === 0;
+
+    if (useLegacy) {
+      const legacyFilters = {
+        search,
+        status: status && STATUS_VALUES.includes(status) ? status : '',
+        city,
+        isPremium: req.query.isPremium != null ? toBoolean(req.query.isPremium, false) : undefined,
+        bookingEnabled: req.query.bookingEnabled != null ? toBoolean(req.query.bookingEnabled, false) : undefined,
+        isFeatured: req.query.isFeatured != null ? toBoolean(req.query.isFeatured, false) : undefined,
+        visible: req.query.visible != null ? toBoolean(req.query.visible, true) : undefined
+      };
+
+      const allItems = await fetchLegacyServiceShopsItems();
+      const filteredItems = allItems.filter(item => matchesLegacyFilters(item, legacyFilters));
+      const total = filteredItems.length;
+      const pages = total > 0 ? Math.ceil(total / limit) : 0;
+      const items = total > 0 ? filteredItems.slice(skip, skip + limit) : [];
+      const statusCounts = buildLegacyStatusCounts(filteredItems);
+      const overview = await buildLegacyOverviewData(allItems);
+
+      return res.json({
+        items,
+        pagination: {
+          page,
+          limit,
+          total,
+          pages
+        },
+        summary: {
+          total,
+          statusCounts,
+          totals: overview.totals
+        }
+      });
+    }
+
+    const filters = {};
     if (search) {
       const regex = new RegExp(escapeRegExp(search), 'i');
       filters.$or = [
@@ -472,12 +962,10 @@ exports.listServiceShops = async (req, res) => {
       ];
     }
 
-    const status = String(req.query.status || '').trim().toLowerCase();
     if (status && STATUS_VALUES.includes(status)) {
       filters.status = status;
     }
 
-    const city = String(req.query.city || '').trim();
     if (city) {
       filters.city = new RegExp(escapeRegExp(city), 'i');
     }
@@ -540,7 +1028,11 @@ exports.getServiceShop = async (req, res) => {
     }
     const shop = await ServiceShop.findById(id).lean();
     if (!shop) {
-      return res.status(404).json({ message: 'مغازه خدماتی یافت نشد.' });
+      const legacyShop = await buildLegacyServiceShopBySellerId(id);
+      if (!legacyShop) {
+        return res.status(404).json({ message: 'مغازه خدماتی یافت نشد.' });
+      }
+      return res.json({ item: legacyShop });
     }
     res.json({ item: shop });
   } catch (err) {
