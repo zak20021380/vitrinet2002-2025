@@ -319,9 +319,12 @@
       border: 1px solid #e5e7eb;
       display: flex;
       flex-direction: column;
-      align-items: center;
+      align-items: stretch;
+      justify-content: flex-start;
+      gap: 16px;
       transition: transform .2s, box-shadow .2s;
       position: relative;
+      height: 100%;
     }
 
     .product-card:hover {
@@ -332,8 +335,8 @@
     .product-card.ad-card {
       border: 1.5px solid rgba(16,185,129,0.22);
       background: linear-gradient(145deg, rgba(224,253,250,0.92) 0%, rgba(255,255,255,0.98) 55%, #ffffff 100%);
-      padding: 18px;
-      align-items: stretch;
+      padding: 16px;
+      gap: 14px;
     }
 
     .product-card.ad-card::before {
@@ -354,9 +357,8 @@
     }
 
     .product-card.ad-card .product-image-container {
-      height: 190px;
-      margin-bottom: 18px;
-      border: 1.5px dashed rgba(14,165,233,0.3);
+      height: 200px;
+      border: 1.5px dashed rgba(14,165,233,0.28);
       background: linear-gradient(135deg, rgba(14,165,233,0.08), rgba(16,185,129,0.08));
     }
 
@@ -404,19 +406,22 @@
       background: rgba(15, 118, 110, 0.08);
       border-radius: 14px;
       padding: 12px 14px;
-      margin-bottom: 12px;
+      margin-bottom: 4px;
       color: #1f2937;
       font-weight: 600;
-      font-size: 0.96rem;
-      line-height: 1.75;
+      font-size: 0.95rem;
+      line-height: 1.7;
       border: 1px solid rgba(16,185,129,0.2);
+      display: -webkit-box;
+      -webkit-line-clamp: 3;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
     }
 
     .ad-card-price {
       font-weight: 800;
       font-size: 1.05rem;
       color: #16a34a;
-      margin-bottom: 16px;
       display: inline-flex;
       align-items: center;
       gap: 6px;
@@ -443,29 +448,28 @@
       width: 100%;
       height: 200px;
       border-radius: 1.25rem;
-      margin-bottom: 16px;
       overflow: hidden;
       position: relative;
       background: #f1f5f9;
     }
 
     @media (max-width: 640px) {
-      .product-card { padding: 14px; }
-      .product-image-container { height: 180px; margin-bottom: 12px; }
+      .product-card { padding: 14px; gap: 12px; }
+      .product-image-container { height: 180px; }
       .product-card.ad-card {
-        padding: 16px;
+        padding: 14px;
       }
       .product-card.ad-card .product-image-container {
         height: 170px;
       }
       .product-title { font-size: 1rem; }
       .product-card.ad-card .product-title { font-size: 1.05rem; }
-      .shop-address { font-size: 0.85rem; margin-bottom: 6px; }
+      .shop-address { font-size: 0.85rem; }
       .product-price { font-size: 1rem; }
-      .ad-card-text { font-size: 0.9rem; }
+      .ad-card-text { font-size: 0.9rem; -webkit-line-clamp: 4; }
       .ad-card-badge { top: 14px; right: 14px; font-size: 0.8rem; padding: 5px 14px; }
       .ad-card-btn { font-size: 0.95rem; }
-      .see-product-btn { width: 100%; padding: 12px; font-size: 0.95rem; }
+      .see-product-btn { padding: 12px; font-size: 0.95rem; }
     }
 
     .product-image {
@@ -487,16 +491,17 @@
       width: 100%;
       display: flex;
       flex-direction: column;
-      align-items: center;
-      text-align: center;
-      padding: 0;
+      align-items: flex-start;
+      justify-content: space-between;
+      text-align: right;
+      gap: 10px;
+      flex: 1;
     }
 
     .product-title {
       font-size: 1.125rem;
       font-weight: 800;
       color: #10b981;
-      margin-bottom: 4px;
     }
 
     .product-seller {
@@ -732,7 +737,6 @@
 
     /* تغییرات برای نمایش قیمت - بهبود یافته */
     .product-price {
-      margin-top: 8px;
       font-weight: 800;
       font-size: 1rem;
       color: #374151;
@@ -742,10 +746,9 @@
       font-size: 0.9rem;
       color: #64748b;
       font-weight: 700;
-      margin-bottom: 4px;
       display: flex;
       align-items: center;
-      justify-content: center;
+      justify-content: flex-start;
       gap: 4px;
     }
 
@@ -789,7 +792,7 @@
     
     /* استایل دکمه مشاهده محصول مطابق کارت‌های صفحه اصلی */
     .see-product-btn {
-      margin-top: 16px;
+      margin-top: auto;
       background: linear-gradient(90deg,#10b981 10%,#0ea5e9 100%);
       color: #fff;
       border: none;
@@ -802,6 +805,10 @@
       justify-content: center;
       box-shadow: 0 2px 12px rgba(16,185,129,0.2);
       transition: transform .2s, filter .2s;
+    }
+
+    .product-details .see-product-btn {
+      width: 100%;
     }
 
     .see-product-btn:hover {
@@ -1846,12 +1853,13 @@ function buildAdCardHtml(ad){
   }
 
   const bannerSrc = ad.bannerImage ? `/uploads/${encodeURIComponent(ad.bannerImage)}` : '';
+  const safeImageAlt = escapeHtml(shopTitle || adTitleRaw);
 
   let imageHtml = '';
   if (bannerSrc) {
-    imageHtml = `<img class="product-image object-cover" src="${bannerSrc}" alt="${escapeHtml(shopTitle)}">`;
+    imageHtml = `<img class="product-image object-cover" src="${bannerSrc}" alt="${safeImageAlt}" loading="lazy">`;
   } else if (seller && seller.boardImage) {
-    imageHtml = `<img class="product-image object-cover" src="${escapeHtml(seller.boardImage)}" alt="${escapeHtml(shopTitle)}">`;
+    imageHtml = `<img class="product-image object-cover" src="${escapeHtml(seller.boardImage)}" alt="${safeImageAlt}" loading="lazy">`;
   } else {
     imageHtml = `<div class="flex items-center justify-center w-full h-full absolute inset-0 text-[#0ea5e9] text-4xl font-black">AD</div>`;
   }
@@ -1859,10 +1867,11 @@ function buildAdCardHtml(ad){
   const safeAdTitle = escapeHtml(adTitleRaw);
   const safeShopTitle = escapeHtml(shopTitle);
   const safeAdText = escapeHtml(adTextRaw).replace(/\n/g, '<br>');
+  const adTextTooltip = adTextRaw ? escapeHtml(adTextRaw.replace(/\s+/g, ' ').trim()) : '';
   const ctaText = productId ? 'مشاهده پیشنهاد ویژه' : 'مشاهده فروشگاه ویژه';
 
   const priceHtml = priceText ? `<div class="ad-card-price"><i class="fas fa-bolt"></i>${priceText}</div>` : '';
-  const adTextHtml = safeAdText ? `<div class="ad-card-text">${safeAdText}</div>` : '';
+  const adTextHtml = safeAdText ? `<div class="ad-card-text"${adTextTooltip ? ` title="${adTextTooltip}"` : ''}>${safeAdText}</div>` : '';
   const shopHtml = `<div class="ad-card-shop"><i class="ri-store-3-line"></i><span>${safeShopTitle}</span></div>`;
 
   return `
@@ -1915,7 +1924,7 @@ function renderProducts(list){
     const cardHtml = `
       <div class="product-card">
         <div class="product-image-container rounded-xl overflow-hidden shadow-sm">
-          <img class="product-image object-cover" src="${img}" alt="${p.title}">
+          <img class="product-image object-cover" src="${img}" alt="${p.title}" loading="lazy">
         </div>
         <div class="product-details">
           <div class="product-title">${p.title}</div>
