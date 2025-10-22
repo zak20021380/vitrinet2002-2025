@@ -4654,6 +4654,186 @@ const planInputs = {
 };
 const plansMsg  = document.getElementById('plansMsg');
 
+const sellerPlanToggle       = document.getElementById('sellerPlanToggle');
+const sellerPlanToggleSave   = document.getElementById('sellerPlanToggleSave');
+const sellerPlanToggleRefresh= document.getElementById('sellerPlanToggleRefresh');
+const sellerPlanToggleStatus = document.getElementById('sellerPlanToggleStatus');
+const sellerPlanToggleMeta   = document.getElementById('sellerPlanToggleMeta');
+const sellerPlanCard         = document.getElementById('sellerPlanToggleCard');
+
+const SELLER_PLAN_STATUS_CLASSES = ['status-on', 'status-off', 'status-loading', 'status-error', 'status-success'];
+let sellerPlanStatusResetTimer = null;
+
+const formatFeatureDate = (value) => {
+  if (!value) return '';
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return '';
+  try {
+    return new Intl.DateTimeFormat('fa-IR', { dateStyle: 'medium', timeStyle: 'short' }).format(date);
+  } catch (err) {
+    console.warn('formatFeatureDate failed', err);
+    return date.toLocaleString('fa-IR');
+  }
+};
+
+const buildSellerPlanMetaText = (meta) => {
+  if (!meta || (!meta.updatedAt && !meta.updatedBy)) {
+    return 'تغییرات این بخش به صورت آنی برای تمام فروشندگان اعمال می‌شود.';
+  }
+
+  const parts = [];
+  const formattedDate = formatFeatureDate(meta.updatedAt);
+  if (formattedDate) {
+    parts.push(`آخرین بروزرسانی: ${formattedDate}`);
+  }
+
+  const updater = meta.updatedBy?.name || meta.updatedBy?.phone || '';
+  if (updater) {
+    parts.push(`توسط ${updater}`);
+  }
+
+  parts.push('اعمال روی همهٔ فروشندگان');
+  return parts.join(' • ');
+};
+
+const setSellerPlanStatus = (text, className) => {
+  if (!sellerPlanToggleStatus) return;
+  sellerPlanToggleStatus.textContent = text;
+  sellerPlanToggleStatus.classList.remove(...SELLER_PLAN_STATUS_CLASSES);
+  if (className) {
+    sellerPlanToggleStatus.classList.add(className);
+  }
+};
+
+const updateSellerPlanCard = (enabled, meta) => {
+  if (sellerPlanCard) {
+    sellerPlanCard.dataset.enabled = enabled ? 'true' : 'false';
+  }
+  if (sellerPlanToggle) {
+    sellerPlanToggle.checked = !!enabled;
+  }
+  const baseClass = enabled ? 'status-on' : 'status-off';
+  const baseText  = enabled ? 'فعال' : 'غیرفعال';
+  setSellerPlanStatus(baseText, baseClass);
+  if (sellerPlanToggleMeta) {
+    sellerPlanToggleMeta.textContent = buildSellerPlanMetaText(meta);
+  }
+};
+
+const scheduleSellerPlanStatusReset = (enabled) => {
+  clearTimeout(sellerPlanStatusResetTimer);
+  sellerPlanStatusResetTimer = setTimeout(() => {
+    let meta = null;
+    const rawMeta = sellerPlanToggleMeta?.dataset?.meta;
+    if (rawMeta) {
+      try {
+        meta = JSON.parse(rawMeta);
+      } catch (err) {
+        console.warn('scheduleSellerPlanStatusReset meta parse failed', err);
+      }
+    }
+    updateSellerPlanCard(enabled, meta);
+  }, 2200);
+};
+
+const persistSellerPlanMeta = (meta) => {
+  if (!sellerPlanToggleMeta) return;
+  try {
+    sellerPlanToggleMeta.dataset.meta = JSON.stringify(meta || {});
+  } catch (err) {
+    sellerPlanToggleMeta.dataset.meta = '{}';
+  }
+};
+
+const applySellerPlanMeta = (meta) => {
+  persistSellerPlanMeta(meta);
+  if (sellerPlanToggleMeta) {
+    sellerPlanToggleMeta.textContent = buildSellerPlanMetaText(meta);
+  }
+};
+
+async function loadSellerPlanFeatureFlag(silent = false) {
+  if (!sellerPlanToggle) return;
+  try {
+    sellerPlanToggle.disabled = true;
+    sellerPlanToggleSave && (sellerPlanToggleSave.disabled = true);
+    sellerPlanToggleRefresh && (sellerPlanToggleRefresh.disabled = true);
+    if (!silent) {
+      setSellerPlanStatus('در حال دریافت...', 'status-loading');
+    }
+
+    const res = await fetch(`${ADMIN_API_BASE}/settings/feature-flags`, { credentials: 'include' });
+    if (!res.ok) {
+      throw new Error(await res.text());
+    }
+    const json = await res.json();
+    const enabled = !!json?.flags?.sellerPlansEnabled;
+    const meta = json?.meta?.sellerPlans || null;
+
+    updateSellerPlanCard(enabled, meta);
+    applySellerPlanMeta(meta);
+  } catch (err) {
+    console.error('loadSellerPlanFeatureFlag error:', err);
+    setSellerPlanStatus('خطا در دریافت وضعیت', 'status-error');
+    if (sellerPlanToggleMeta) {
+      sellerPlanToggleMeta.textContent = 'امکان دریافت آخرین وضعیت فراهم نشد. دوباره تلاش کنید.';
+    }
+  } finally {
+    sellerPlanToggle.disabled = false;
+    sellerPlanToggleSave && (sellerPlanToggleSave.disabled = false);
+    sellerPlanToggleRefresh && (sellerPlanToggleRefresh.disabled = false);
+  }
+}
+
+async function saveSellerPlanFeatureFlag() {
+  if (!sellerPlanToggle) return;
+  const desired = !!sellerPlanToggle.checked;
+  try {
+    sellerPlanToggle.disabled = true;
+    sellerPlanToggleSave && (sellerPlanToggleSave.disabled = true);
+    sellerPlanToggleRefresh && (sellerPlanToggleRefresh.disabled = true);
+    setSellerPlanStatus('در حال ذخیره...', 'status-loading');
+
+    const token = getCookie('admin_token') || getCookie('access_token');
+    const res = await fetch(`${ADMIN_API_BASE}/settings/feature-flags`, {
+      method: 'PUT',
+      credentials: 'include',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(token && { Authorization: 'Bearer ' + token })
+      },
+      body: JSON.stringify({ sellerPlansEnabled: desired })
+    });
+
+    const text = await res.text();
+    let json = {};
+    try {
+      json = text ? JSON.parse(text) : {};
+    } catch (err) {
+      console.warn('saveSellerPlanFeatureFlag JSON parse failed', err);
+    }
+
+    if (!res.ok || json.success === false) {
+      throw new Error(json.message || text || 'ذخیره انجام نشد.');
+    }
+
+    const enabled = !!json?.flags?.sellerPlansEnabled;
+    const meta = json?.meta?.sellerPlans || null;
+
+    updateSellerPlanCard(enabled, meta);
+    applySellerPlanMeta(meta);
+    setSellerPlanStatus(enabled ? 'فعال شد' : 'غیرفعال شد', 'status-success');
+    scheduleSellerPlanStatusReset(enabled);
+  } catch (err) {
+    console.error('saveSellerPlanFeatureFlag error:', err);
+    setSellerPlanStatus(err.message || 'ذخیره انجام نشد.', 'status-error');
+  } finally {
+    sellerPlanToggle.disabled = false;
+    sellerPlanToggleSave && (sellerPlanToggleSave.disabled = false);
+    sellerPlanToggleRefresh && (sellerPlanToggleRefresh.disabled = false);
+  }
+}
+
 
 
 
@@ -4797,10 +4977,23 @@ if (document.getElementById('plansForm')) {
   loadPlanPrices();                                   // بارگذاری اولیه
   document.getElementById('plansForm')
           .addEventListener('submit', savePlanPrices); // ذخیره روی بک‌اند
-  
+
   // listener روی input شماره تلفن برای reload موقع تغییر
   document.getElementById('seller-phone-plans')
           .addEventListener('input', debounce(loadPlanPrices));
+
+  if (sellerPlanToggle) {
+    loadSellerPlanFeatureFlag();
+    sellerPlanToggleSave && sellerPlanToggleSave.addEventListener('click', saveSellerPlanFeatureFlag);
+    sellerPlanToggleRefresh && sellerPlanToggleRefresh.addEventListener('click', () => loadSellerPlanFeatureFlag(true));
+    sellerPlanToggle.addEventListener('change', () => {
+      const pendingEnabled = !!sellerPlanToggle.checked;
+      setSellerPlanStatus(
+        pendingEnabled ? 'فعال (در انتظار ذخیره)' : 'غیرفعال (در انتظار ذخیره)',
+        pendingEnabled ? 'status-on' : 'status-off'
+      );
+    });
+  }
 }
 
 

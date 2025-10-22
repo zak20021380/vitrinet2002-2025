@@ -3079,6 +3079,215 @@ tr:last-child td {
 
 
 
+/* === کنترل نمایش پلن‌ها ======================================== */
+.plan-flag-card {
+  width: 100%;
+  max-width: 620px;
+  background: linear-gradient(135deg, #f8fafc 0%, #eef7ff 100%);
+  border: 1.6px solid rgba(16, 185, 129, 0.25);
+  border-radius: 28px;
+  box-shadow: 0 10px 38px rgba(14, 165, 233, 0.18);
+  padding: 2.2rem 2rem 1.8rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.6rem;
+  position: relative;
+  animation: fadeIn .35s ease;
+}
+
+.plan-flag-card[data-enabled="false"] {
+  background: linear-gradient(135deg, #fff1f2 0%, #f8fafc 100%);
+  border-color: rgba(239, 68, 68, 0.18);
+  box-shadow: 0 10px 42px rgba(239, 68, 68, 0.15);
+}
+
+.plan-flag-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1.4rem;
+  flex-wrap: wrap;
+}
+
+.plan-flag-copy h3 {
+  margin: 0;
+  font-size: 1.35rem;
+  color: var(--primary);
+}
+
+.plan-flag-copy p {
+  margin: 0.5rem 0 0;
+  line-height: 1.8;
+  color: #1f2937;
+  max-width: 440px;
+}
+
+.plan-flag-switch {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+}
+
+.toggle-switch {
+  position: relative;
+  width: 60px;
+  height: 32px;
+  flex-shrink: 0;
+}
+
+.toggle-switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.toggle-switch .slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: #dbeafe;
+  border-radius: 999px;
+  transition: background 0.25s ease;
+  box-shadow: inset 0 0 0 1px rgba(14, 165, 233, 0.2);
+}
+
+.toggle-switch .slider::before {
+  content: '';
+  position: absolute;
+  height: 26px;
+  width: 26px;
+  left: 4px;
+  top: 3px;
+  background: #fff;
+  border-radius: 50%;
+  box-shadow: 0 4px 10px rgba(15, 23, 42, 0.18);
+  transition: transform 0.25s ease;
+}
+
+.toggle-switch input:checked + .slider {
+  background: linear-gradient(90deg, #10b981 0%, #0ea5e9 100%);
+  box-shadow: inset 0 0 0 1px rgba(16, 185, 129, 0.25);
+}
+
+.toggle-switch input:checked + .slider::before {
+  transform: translateX(26px);
+}
+
+.toggle-switch input:disabled + .slider {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.plan-flag-state {
+  font-weight: 800;
+  font-size: 0.95rem;
+  color: #0f172a;
+  min-width: 64px;
+  text-align: center;
+}
+
+.plan-flag-state.status-on,
+.plan-flag-state.status-success {
+  color: #0f9d58;
+}
+
+.plan-flag-state.status-off {
+  color: #dc2626;
+}
+
+.plan-flag-state.status-loading {
+  color: #f59e0b;
+}
+
+.plan-flag-state.status-error {
+  color: #b91c1c;
+}
+
+.plan-flag-actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.9rem;
+}
+
+.plan-flag-actions .flag-save-btn {
+  background: linear-gradient(90deg, #0ea5e9 0%, #10b981 100%);
+  color: #fff;
+  padding: 0.75rem 1.9rem;
+  border-radius: 14px;
+  border: none;
+  font-weight: 800;
+  cursor: pointer;
+  box-shadow: 0 8px 28px rgba(14, 165, 233, 0.25);
+  transition: transform 0.12s ease, box-shadow 0.2s ease, opacity 0.2s ease;
+}
+
+.plan-flag-actions .flag-save-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 32px rgba(16, 185, 129, 0.25);
+}
+
+.plan-flag-actions .flag-save-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.plan-flag-actions .flag-refresh-btn {
+  background: none;
+  border: none;
+  color: #0ea5e9;
+  font-weight: 700;
+  cursor: pointer;
+  padding: 0.45rem 0.75rem;
+  border-radius: 12px;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+
+.plan-flag-actions .flag-refresh-btn:hover {
+  background: rgba(14, 165, 233, 0.12);
+}
+
+.plan-flag-actions .flag-refresh-btn:disabled {
+  color: #94a3b8;
+  cursor: not-allowed;
+  background: none;
+}
+
+.plan-flag-meta {
+  font-size: 0.85rem;
+  color: #64748b;
+  line-height: 1.7;
+}
+
+.plan-flag-meta strong {
+  color: #0ea5e9;
+}
+
+@media (max-width: 600px) {
+  .plan-flag-card {
+    padding: 1.8rem 1.4rem 1.5rem;
+  }
+
+  .plan-flag-copy p {
+    font-size: 0.95rem;
+  }
+
+  .plan-flag-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .plan-flag-actions .flag-save-btn {
+    width: 100%;
+    text-align: center;
+  }
+}
+
 /* === مدیریت قیمت پلن‌ها  (Plans)  ================================ */
 #plans-panel{
   /* ستونِ وسط‌چین در کل عرضِ Main-Content */
