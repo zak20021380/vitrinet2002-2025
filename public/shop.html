@@ -1744,11 +1744,22 @@ addressModal?.addEventListener('click', e => (e.target === addressModal) && addr
   const toggleFavShopBtn = document.getElementById('toggleFavShopBtn');
 
   async function refreshFavShopInfo() {
+    if (!toggleFavShopBtn) return;
+
     try {
       const res = await fetch(`${API_BASE}/api/favorite-shops/count/${currentSellerId}`);
       const { count = 0 } = await res.json();
       favShopCountEl.textContent = count;
     } catch { favShopCountEl.textContent = 0; }
+
+    const loggedIn = await isLoggedIn();
+    toggleFavShopBtn.dataset.auth = loggedIn ? 'true' : 'false';
+
+    if (!loggedIn) {
+      toggleFavShopBtn.dataset.added = 'false';
+      toggleFavShopBtn.textContent = 'ورود برای افزودن به محبوب‌ها';
+      return;
+    }
 
     let added = false;
     try {
@@ -1763,6 +1774,23 @@ addressModal?.addEventListener('click', e => (e.target === addressModal) && addr
     toggleFavShopBtn.textContent = added ? 'افزوده شد' : 'افزودن به محبوب‌ها';
   }
 
+  async function ensureFavoriteLogin({ silent = false } = {}) {
+    if (await isLoggedIn()) return true;
+
+    if (silent) return false;
+
+    const goLogin = confirm('برای افزودن مغازه به محبوب‌ها باید وارد شوید. آیا مایل به ورود هستید؟');
+    if (goLogin) {
+      if (window.SafeSS && typeof window.SafeSS.setJSON === 'function') {
+        window.SafeSS.setJSON('afterLoginReturn', location.href);
+      }
+      location.href = '/login.html';
+    } else {
+      alert('ابتدا وارد حساب کاربری خود شوید.');
+    }
+    return false;
+  }
+
   favShopBtn?.addEventListener('click', async () => {
     await refreshFavShopInfo();
     favShopModal.classList.remove('hidden');
@@ -1772,16 +1800,32 @@ addressModal?.addEventListener('click', e => (e.target === addressModal) && addr
   favShopModal?.addEventListener('click', e => (e.target === favShopModal) && favShopModal.classList.add('hidden'));
 
   toggleFavShopBtn?.addEventListener('click', async () => {
+    if (!(await ensureFavoriteLogin())) return;
+
     const added = toggleFavShopBtn.dataset.added === 'true';
     toggleFavShopBtn.disabled = true;
+    toggleFavShopBtn.textContent = 'در حال بروزرسانی…';
     try {
-      await fetch(`${API_BASE}/api/favorite-shops/${currentSellerId}`, {
+      const res = await fetch(`${API_BASE}/api/favorite-shops/${currentSellerId}`, {
         method: added ? 'DELETE' : 'POST',
         credentials: 'include'
       });
+      if (res.status === 401) {
+        toggleFavShopBtn.dataset.auth = 'false';
+        toggleFavShopBtn.textContent = 'ورود برای افزودن به محبوب‌ها';
+        await ensureFavoriteLogin();
+        return;
+      }
+      if (!res.ok) throw new Error('خطا در به‌روزرسانی محبوب‌ها');
       await refreshFavShopInfo();
-    } catch {}
-    toggleFavShopBtn.disabled = false;
+    } catch (err) {
+      console.error(err);
+      toggleFavShopBtn.textContent = 'خطا! دوباره تلاش کنید';
+      setTimeout(() => refreshFavShopInfo(), 1500);
+      return;
+    } finally {
+      toggleFavShopBtn.disabled = false;
+    }
   });
 
 }); // پایان DOMContentLoaded
