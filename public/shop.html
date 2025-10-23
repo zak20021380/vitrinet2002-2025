@@ -96,10 +96,11 @@ body {
   height: 22px;
 }
 
+
 .home-link {
   display: inline-flex;
-  align-items: center;
-  gap: 0.9rem;
+  align-items: flex-start;
+  gap: 0.75rem;
   text-decoration: none;
   background: transparent;
   padding: 0;
@@ -112,46 +113,36 @@ body {
   color: var(--primary);
 }
 
-.brand-emblem {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 44px;
-  height: 44px;
-  border-radius: 14px;
-  background: linear-gradient(135deg, var(--primary), rgba(82, 183, 136, 0.9));
-  color: #fff;
-  font-weight: 800;
-  font-size: 1.15rem;
-  letter-spacing: -0.02em;
-  box-shadow: 0 12px 24px rgba(124, 131, 253, 0.2);
-  flex-shrink: 0;
-}
-
 .logo-wrap {
   display: flex;
   flex-direction: column;
-  gap: 0.25rem;
+  align-items: flex-start;
+  gap: 0.2rem;
 }
 
 .brand-label {
-  font-size: 0.7rem;
-  font-weight: 600;
-  color: var(--primary);
-  opacity: 0.85;
+  font-size: clamp(1.2rem, 1.05rem + 1vw, 1.85rem);
+  font-weight: 900;
+  letter-spacing: -0.035em;
+  line-height: 1;
+  background: linear-gradient(120deg, var(--primary), rgba(82, 183, 136, 0.95));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  text-transform: none;
 }
 
 .logo-text {
   font-family: 'Vazirmatn', sans-serif;
-  font-weight: 800;
-  font-size: 1.35rem;
+  font-weight: 700;
+  font-size: clamp(1rem, 0.95rem + 0.55vw, 1.3rem);
   color: var(--text);
-  line-height: 1.2;
+  line-height: 1.25;
   transition: color 0.2s ease;
 }
 
 .logo-caption {
-  font-size: 0.8rem;
+  font-size: clamp(0.75rem, 0.7rem + 0.25vw, 0.85rem);
   color: #6b7280;
   font-weight: 500;
   line-height: 1.35;
@@ -333,15 +324,12 @@ body {
 }
 
 @media (max-width: 540px) {
-  .brand-emblem {
-    width: 40px;
-    height: 40px;
-    font-size: 1rem;
-    border-radius: 12px;
+  .brand-label {
+    font-size: clamp(1.15rem, 0.95rem + 1.5vw, 1.6rem);
   }
 
   .logo-text {
-    font-size: 1.2rem;
+    font-size: clamp(0.95rem, 0.8rem + 1vw, 1.15rem);
   }
 
   .logo-caption {
@@ -364,6 +352,10 @@ body {
 @media (max-width: 420px) {
   .shop-header .header-shell {
     padding: 0.7rem 0.85rem;
+  }
+
+  .brand-label {
+    font-size: clamp(1.05rem, 0.85rem + 2vw, 1.4rem);
   }
 
   .logo-caption {
@@ -845,9 +837,8 @@ body {
         </svg>
       </button>
       <a href="/" class="home-link" title="رفتن به صفحه اصلی" aria-label="خانه">
-        <span class="brand-emblem" aria-hidden="true">NS</span>
         <div class="logo-wrap">
-          <span class="brand-label">ویترینت</span>
+          <span class="brand-label" aria-label="ویترینت">ویترینت</span>
           <span class="logo-text logo-txt" id="shopLogoText">نئون استایل</span>
           <span class="logo-caption logo-tagline">پوشاک مدرن و اکسسوری خاص</span>
         </div>
