@@ -11,6 +11,7 @@ const planRoutes   = require('./routes/plans');
 const adPlanRoutes = require('./routes/adPlans');
 const paymentRoutes = require('./routes/payment');
 const settingsRoutes = require('./routes/settings');
+const categoryRoutes = require('./routes/categoryRoutes');
 require('dotenv').config();
 
 const app = express();
@@ -50,6 +51,7 @@ app.use('/api/slides', require('./routes/slides'));
 app.use('/api/favorite', require('./routes/favorites'));
 app.use('/api/favorite-shops', require('./routes/favoriteShops'));
 app.use('/api/blocked-sellers', require('./routes/blockedSellers'));
+app.use('/api/categories', categoryRoutes);
 app.use('/api/chats', chatRoutes);
 app.use('/api/messages', adminUserMessageRoutes);
 app.use('/api/plans', planRoutes);
