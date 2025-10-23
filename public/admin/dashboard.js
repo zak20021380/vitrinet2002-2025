@@ -464,6 +464,8 @@ function toDatetimeLocalValue(value) {
 const CATEGORY_API_URL = `${ADMIN_API_BASE}/categories`;
 const CATEGORY_STORAGE_KEY = 'admin.categories.list';
 const SERVICE_SUBCATEGORY_STORAGE_KEY = 'admin.categories.services';
+const POST_FORM_CATEGORY_CACHE_KEY = 'post.categories.cache';
+const POST_FORM_SERVICE_CACHE_KEY = 'post.serviceSubcategories.cache';
 const DEFAULT_CATEGORIES = [
   'پوشاک',
   'خوراک',
@@ -704,6 +706,44 @@ function saveCategoryList(key, list) {
   }
 }
 
+function mapForPostFormCache(item) {
+  if (!item) {
+    return null;
+  }
+  const name = getCategoryName(item);
+  if (!name) {
+    return null;
+  }
+  return {
+    id: getCategoryId(item) || '',
+    name,
+    type: getCategoryType(item),
+    isDefault: !!isDefaultCategory(item),
+    parentId: getCategoryParentId(item) || '',
+    parentName: getCategoryParentName(item) || ''
+  };
+}
+
+function savePostFormCache(key, list) {
+  try {
+    if (typeof localStorage === 'undefined') return;
+    const items = Array.isArray(list)
+      ? list
+          .map(mapForPostFormCache)
+          .filter(Boolean)
+      : [];
+    const payload = { items, updatedAt: Date.now() };
+    localStorage.setItem(key, JSON.stringify(payload));
+  } catch (err) {
+    console.warn('savePostFormCache error ->', err);
+  }
+}
+
+function syncPostFormCategoryCache() {
+  savePostFormCache(POST_FORM_CATEGORY_CACHE_KEY, categoryManagerState.categories);
+  savePostFormCache(POST_FORM_SERVICE_CACHE_KEY, categoryManagerState.serviceSubcategories);
+}
+
 function listIncludesCaseInsensitive(list = [], value = '', { parentId = '', parentName = '' } = {}) {
   const compare = value.toLocaleLowerCase('fa-IR');
   const resolvedParentId = parentId ? toIdString(parentId) : '';
@@ -927,6 +967,7 @@ function updateServiceParentOptions() {
 function persistCategoryState() {
   saveCategoryList(CATEGORY_STORAGE_KEY, categoryManagerState.categories);
   saveCategoryList(SERVICE_SUBCATEGORY_STORAGE_KEY, categoryManagerState.serviceSubcategories);
+  syncPostFormCategoryCache();
 }
 
 function showCategoryFeedback(type, message) {
@@ -1105,6 +1146,8 @@ function initCategoryManager() {
     DEFAULT_SERVICE_SUBCATEGORIES,
     'service-subcategory'
   );
+
+  syncPostFormCategoryCache();
 
   const categoryForm = document.getElementById('categoryAddForm');
   const categoryInput = document.getElementById('categoryNameInput');
