@@ -780,13 +780,15 @@
 
   function updateServiceChipsForSelection() {
     const filter = getSelectedCategoryFilter();
+    if (!filter) {
+      renderServiceChips([]);
+      return;
+    }
     if (!categoryState.serviceSubcategories.length) {
       renderServiceChips([]);
       return;
     }
-    const filtered = filter
-      ? categoryState.serviceSubcategories.filter(item => matchesParent(item, filter))
-      : categoryState.serviceSubcategories;
+    const filtered = categoryState.serviceSubcategories.filter(item => matchesParent(item, filter));
     renderServiceChips(filtered);
   }
 
