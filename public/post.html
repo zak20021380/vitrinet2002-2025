@@ -252,14 +252,7 @@
     <!-- START: service examples (visible only for service categories) -->
 <div id="service-examples" class="hidden mt-2 rounded-xl border border-gray-200 bg-gray-50 p-2.5">
   <div class="text-xs text-gray-600 mb-1.5">مثال‌های رایج <span class="font-bold">خدمات</span>:</div>
-  <div class="flex flex-wrap gap-2">
-    <button type="button" data-svc-example="آرایشگاه مردانه" class="px-3 py-1.5 rounded-full text-xs bg-white border border-gray-300 text-gray-700 hover:bg-gray-100 active:scale-[.98]">آرایشگاه مردانه</button>
-    <button type="button" data-svc-example="آرایشگاه زنانه" class="px-3 py-1.5 rounded-full text-xs bg-white border border-gray-300 text-gray-700 hover:bg-gray-100 active:scale-[.98]">آرایشگاه زنانه</button>
-    <button type="button" data-svc-example="کارواش" class="px-3 py-1.5 rounded-full text-xs bg-white border border-gray-300 text-gray-700 hover:bg-gray-100 active:scale-[.98]">کارواش</button>
-    <button type="button" data-svc-example="کلینیک زیبایی" class="px-3 py-1.5 rounded-full text-xs bg-white border border-gray-300 text-gray-700 hover:bg-gray-100 active:scale-[.98]">کلینیک زیبایی</button>
-    <button type="button" data-svc-example="تعمیر موبایل" class="px-3 py-1.5 rounded-full text-xs bg-white border border-gray-300 text-gray-700 hover:bg-gray-100 active:scale-[.98]">تعمیر موبایل</button>
-    <button type="button" data-svc-example="خیاطی" class="px-3 py-1.5 rounded-full text-xs bg-white border border-gray-300 text-gray-700 hover:bg-gray-100 active:scale-[.98]">خیاطی</button>
-  </div>
+  <div id="service-examples-chips" class="flex flex-wrap gap-2"></div>
   <div class="text-[11px] text-gray-500 mt-2">با لمس هر مورد، متن آن به «توضیحات فروشگاه» اضافه می‌شود.</div>
 </div>
 <!-- END: service examples -->
@@ -465,6 +458,8 @@
   const subcatWrapper = document.getElementById("subcategory-wrapper");
   const subcatInput = document.getElementById("subcategory");
   const subcatChipsContainer = document.getElementById('subcategory-chips');
+  const serviceExamplesContainer = document.getElementById('service-examples');
+  const serviceExamplesChipsContainer = document.getElementById('service-examples-chips');
   const categoryState = {
     categories: [],
     serviceSubcategories: []
@@ -695,9 +690,10 @@
   }
 
   function renderServiceChips(list = []) {
+    const normalised = Array.isArray(list) ? list : [];
+    renderServiceExamples(normalised);
     if (!subcatChipsContainer) return;
     const selected = subcatInput ? subcatInput.value : '';
-    const normalised = Array.isArray(list) ? list : [];
     subcatChipsContainer.innerHTML = '';
     if (!normalised.length) {
       const span = document.createElement('span');
@@ -723,6 +719,27 @@
     if (selected) {
       highlightServiceChip(selected);
     }
+  }
+
+  function renderServiceExamples(list = []) {
+    if (!serviceExamplesChipsContainer) return;
+    const normalised = Array.isArray(list) ? list : [];
+    serviceExamplesChipsContainer.innerHTML = '';
+    if (!normalised.length) {
+      const span = document.createElement('span');
+      span.className = 'text-xs text-gray-500';
+      span.textContent = 'مثالی ثبت نشده است.';
+      serviceExamplesChipsContainer.appendChild(span);
+      return;
+    }
+    normalised.forEach(item => {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.dataset.svcExample = item.name;
+      btn.className = 'px-3 py-1.5 rounded-full text-xs bg-white border border-gray-300 text-gray-700 hover:bg-gray-100 active:scale-[.98]';
+      btn.textContent = item.name;
+      serviceExamplesChipsContainer.appendChild(btn);
+    });
   }
 
   function matchesParent(item, filter) {
@@ -826,16 +843,16 @@
   fetchCategoryDataForForm({ silent: true });
 
   // === Service examples: setup ===
-const serviceExamples = document.getElementById("service-examples");
-const svcChipBtns = document.querySelectorAll('[data-svc-example]');
 const SERVICE_CATEGORIES = ["خدمات","زیبایی","تالار و مجالس","خودرو","ورزشی"];
 
-// Add example text into description on tap
-svcChipBtns.forEach(btn => {
-  btn.addEventListener('click', () => {
+if (serviceExamplesChipsContainer) {
+  serviceExamplesChipsContainer.addEventListener('click', event => {
+    const button = event.target.closest('button[data-svc-example]');
+    if (!button) return;
     const ta = document.querySelector("textarea[name='desc']");
     if (!ta) return;
-    const tag = btn.getAttribute('data-svc-example');
+    const tag = button.getAttribute('data-svc-example');
+    if (!tag) return;
     if (!ta.value.includes(tag)) {
       ta.value = ta.value ? (ta.value.trim() + " | " + tag) : tag;
       showToast("به توضیحات اضافه شد: " + tag);
@@ -843,11 +860,11 @@ svcChipBtns.forEach(btn => {
       showToast("قبلاً اضافه شده 😉");
     }
   });
-});
+}
 
 // Initial reveal on load if a service category is preselected
-if (categorySelect && SERVICE_CATEGORIES.includes(categorySelect.value)) {
-  serviceExamples.classList.remove("hidden");
+if (categorySelect && serviceExamplesContainer && SERVICE_CATEGORIES.includes(categorySelect.value)) {
+  serviceExamplesContainer.classList.remove("hidden");
 }
 
 
@@ -867,10 +884,12 @@ if (categorySelect && SERVICE_CATEGORIES.includes(categorySelect.value)) {
       }
 
       // اگر دستهٔ انتخابی از نوع خدمات باشد، مثال‌ها را نشان بده
-      if (SERVICE_CATEGORIES.includes(this.value)) {
-        serviceExamples.classList.remove("hidden");
-      } else {
-        serviceExamples.classList.add("hidden");
+      if (serviceExamplesContainer) {
+        if (SERVICE_CATEGORIES.includes(this.value)) {
+          serviceExamplesContainer.classList.remove("hidden");
+        } else {
+          serviceExamplesContainer.classList.add("hidden");
+        }
       }
 
       updateServiceChipsForSelection();
