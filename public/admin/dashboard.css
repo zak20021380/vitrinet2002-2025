@@ -647,6 +647,57 @@ tr:last-child td {
   margin-bottom: 1.5rem;
 }
 
+.section-panel--service-shops {
+  padding: 0;
+  background: transparent;
+}
+
+.service-shops-embed {
+  position: relative;
+  min-height: 80vh;
+  background: transparent;
+}
+
+.service-shops-embed iframe {
+  width: 100%;
+  min-height: 80vh;
+  border: none;
+  display: block;
+  opacity: 0;
+  transition: opacity 0.25s ease;
+  background: transparent;
+}
+
+.service-shops-embed iframe.is-ready {
+  opacity: 1;
+}
+
+.service-shops-embed__loading {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  color: var(--secondary);
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.08), rgba(14, 165, 233, 0.08));
+  text-align: center;
+  padding: 1.5rem;
+  font-weight: 600;
+}
+
+.service-shops-embed__loading i {
+  font-size: 2.2rem;
+  animation: service-shops-spin 1.2s linear infinite;
+}
+
+@keyframes service-shops-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
 .service-advanced-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));

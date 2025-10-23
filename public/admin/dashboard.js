@@ -3284,6 +3284,8 @@ const SERVICE_STATUS_CLASS = {
 };
 
 const serviceShopsPanelEl = document.getElementById('service-shops-panel');
+const serviceShopsIframe = document.getElementById('service-shops-iframe');
+const serviceShopsEmbedLoading = document.getElementById('service-shops-embed-loading');
 const serviceShopsTableBody = serviceShopsPanelEl ? serviceShopsPanelEl.querySelector('#service-shops-table tbody') : null;
 const serviceShopsLoadingEl = serviceShopsPanelEl ? serviceShopsPanelEl.querySelector('#service-shops-loading') : null;
 const serviceShopsEmptyEl = serviceShopsPanelEl ? serviceShopsPanelEl.querySelector('#service-shops-empty') : null;
@@ -3296,6 +3298,80 @@ const serviceShopsSummaryCards = serviceShopsPanelEl ? Array.from(serviceShopsPa
 const serviceShopsQuickFilters = serviceShopsPanelEl ? Array.from(serviceShopsPanelEl.querySelectorAll('[data-service-quick-filter]')) : [];
 const serviceShopsAdvancedToggle = serviceShopsPanelEl ? serviceShopsPanelEl.querySelector('#service-shops-advanced-toggle') : null;
 const serviceShopsAdvancedWrapper = serviceShopsPanelEl ? serviceShopsPanelEl.querySelector('#service-shops-advanced') : null;
+
+let serviceShopsIframeObserver = null;
+let serviceShopsIframeLoaded = false;
+
+function adjustServiceShopsIframeHeight() {
+  if (!serviceShopsIframe || !serviceShopsIframeLoaded) return;
+  try {
+    const doc = serviceShopsIframe.contentDocument;
+    if (!doc) return;
+    const body = doc.body;
+    const html = doc.documentElement;
+    const height = Math.max(
+      body ? body.scrollHeight : 0,
+      body ? body.offsetHeight : 0,
+      html ? html.scrollHeight : 0,
+      html ? html.offsetHeight : 0
+    );
+    if (height) {
+      const padding = window.innerWidth < 768 ? 24 : 48;
+      serviceShopsIframe.style.height = `${height + padding}px`;
+    }
+  } catch (err) {
+    console.warn('service-shops iframe height adjustment failed:', err);
+  }
+}
+
+function setupServiceShopsIframeListeners() {
+  if (!serviceShopsIframe || serviceShopsIframe.dataset.listeners === 'true') return;
+  serviceShopsIframe.addEventListener('load', () => {
+    if (serviceShopsIframe.dataset.loaded !== 'true') {
+      return;
+    }
+    serviceShopsIframeLoaded = true;
+    if (serviceShopsEmbedLoading) {
+      serviceShopsEmbedLoading.style.display = 'none';
+    }
+    serviceShopsIframe.classList.add('is-ready');
+    adjustServiceShopsIframeHeight();
+    try {
+      const doc = serviceShopsIframe.contentDocument;
+      if (doc?.body) {
+        serviceShopsIframeObserver?.disconnect?.();
+        serviceShopsIframeObserver = new MutationObserver(() => {
+          adjustServiceShopsIframeHeight();
+        });
+        serviceShopsIframeObserver.observe(doc.body, {
+          childList: true,
+          subtree: true,
+          attributes: true,
+          characterData: true
+        });
+      }
+      serviceShopsIframe.contentWindow?.addEventListener('resize', adjustServiceShopsIframeHeight);
+    } catch (err) {
+      console.warn('service-shops iframe observer setup failed:', err);
+    }
+  });
+  serviceShopsIframe.dataset.listeners = 'true';
+  window.addEventListener('resize', adjustServiceShopsIframeHeight);
+}
+
+function ensureServiceShopsIframeLoaded() {
+  if (!serviceShopsIframe) return;
+  setupServiceShopsIframeListeners();
+  if (serviceShopsIframe.dataset.loaded === 'true') {
+    adjustServiceShopsIframeHeight();
+    return;
+  }
+  const src = serviceShopsIframe.dataset.src || 'service-shops.html';
+  serviceShopsIframe.src = src;
+  serviceShopsIframe.dataset.loaded = 'true';
+}
+
+setupServiceShopsIframeListeners();
 
 const serviceShopsSummaryValues = {
   total: document.getElementById('service-summary-total'),
@@ -4336,6 +4412,7 @@ menuLinks.forEach(link => {
     }
 
     if (section === 'service-shops') {
+      ensureServiceShopsIframeLoaded();
       await ensureServiceShopsLoaded();
     }
 
