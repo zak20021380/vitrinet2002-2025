@@ -1,0 +1,1306 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <title>داشبورد درآمدها | ویترینت</title>
+  <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      color-scheme: light;
+    }
+
+    .income-dashboard {
+      font-family: 'Vazirmatn', sans-serif;
+      background: linear-gradient(145deg, #ffffff 0%, #f8fafc 55%, #eef2ff 100%);
+      color: #0f172a;
+      border-radius: 28px;
+      box-shadow: 0 26px 60px rgba(15, 23, 42, 0.12);
+      padding: 2.4rem 2.6rem 2.8rem;
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      gap: 2rem;
+      min-height: 100%;
+    }
+
+    .income-dashboard::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      background: radial-gradient(550px circle at top 10% left 10%, rgba(16, 185, 129, 0.08), transparent 55%),
+                  radial-gradient(480px circle at bottom 15% right 5%, rgba(14, 165, 233, 0.08), transparent 60%);
+      z-index: 0;
+    }
+
+    .income-dashboard * {
+      position: relative;
+      z-index: 1;
+    }
+
+    .income-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 1.4rem;
+    }
+
+    .income-header h1 {
+      font-size: 1.85rem;
+      margin: 0 0 0.6rem;
+      font-weight: 800;
+      color: #0f172a;
+    }
+
+    .income-header p {
+      margin: 0;
+      color: #475569;
+      line-height: 1.7;
+      max-width: 38rem;
+    }
+
+    .income-header-meta {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      justify-content: flex-end;
+    }
+
+    .meta-item {
+      background: rgba(15, 23, 42, 0.04);
+      color: #1e293b;
+      padding: 0.65rem 1rem;
+      border-radius: 999px;
+      display: flex;
+      align-items: center;
+      gap: 0.45rem;
+      font-size: 0.92rem;
+      font-weight: 500;
+    }
+
+    .meta-item i {
+      font-size: 1.1rem;
+      color: #10b981;
+    }
+
+    .ghost-btn,
+    .primary-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.45rem;
+      border-radius: 14px;
+      padding: 0.65rem 1.3rem;
+      border: none;
+      cursor: pointer;
+      font-family: 'Vazirmatn', sans-serif;
+      font-weight: 600;
+      font-size: 0.95rem;
+      transition: all 0.25s ease;
+      box-shadow: 0 10px 25px rgba(15, 23, 42, 0.08);
+    }
+
+    .ghost-btn {
+      background: rgba(15, 23, 42, 0.05);
+      color: #0f172a;
+    }
+
+    .ghost-btn:hover {
+      background: rgba(15, 23, 42, 0.12);
+    }
+
+    .primary-btn {
+      background: linear-gradient(135deg, #10b981, #0ea5e9);
+      color: #fff;
+      border: none;
+    }
+
+    .primary-btn:hover {
+      box-shadow: 0 16px 32px rgba(16, 185, 129, 0.28);
+      transform: translateY(-1px);
+    }
+
+    .income-filter {
+      background: rgba(255, 255, 255, 0.82);
+      border-radius: 22px;
+      backdrop-filter: blur(6px);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.6);
+      padding: 1.1rem 1.4rem;
+    }
+
+    #income-filter-form {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    #income-filter-form label {
+      display: flex;
+      flex-direction: column;
+      font-weight: 600;
+      color: #0f172a;
+      gap: 0.45rem;
+      font-size: 0.95rem;
+    }
+
+    #income-filter-form input[type="date"] {
+      border: 1.5px solid rgba(15, 23, 42, 0.12);
+      border-radius: 14px;
+      padding: 0.6rem 0.75rem;
+      font-family: inherit;
+      font-size: 0.95rem;
+      color: #1e293b;
+      background: #fff;
+      min-width: 12rem;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    #income-filter-form input[type="date"]:focus {
+      outline: none;
+      border-color: rgba(16, 185, 129, 0.55);
+      box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.12);
+    }
+
+    .income-summary-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 1.4rem;
+    }
+
+    .summary-card {
+      background: rgba(255, 255, 255, 0.94);
+      border-radius: 22px;
+      padding: 1.4rem 1.6rem;
+      box-shadow: 0 18px 40px rgba(15, 23, 42, 0.08);
+      display: flex;
+      flex-direction: column;
+      gap: 0.9rem;
+      border: 1px solid rgba(148, 163, 184, 0.18);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .summary-card::after {
+      content: '';
+      position: absolute;
+      inset: auto auto -40px -40px;
+      width: 120px;
+      height: 120px;
+      border-radius: 100%;
+      background: rgba(16, 185, 129, 0.12);
+      opacity: 0.6;
+      z-index: -1;
+      transform: rotate(25deg);
+    }
+
+    .summary-card[data-card="ads"]::after {
+      background: rgba(14, 165, 233, 0.18);
+    }
+
+    .summary-card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.6rem;
+    }
+
+    .summary-card-title {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-weight: 700;
+      color: #0f172a;
+    }
+
+    .summary-card-title i {
+      font-size: 1.35rem;
+      color: #10b981;
+    }
+
+    .summary-card[data-card="ads"] .summary-card-title i {
+      color: #0ea5e9;
+    }
+
+    .summary-card-value {
+      font-size: 1.8rem;
+      font-weight: 800;
+      color: #0f172a;
+    }
+
+    .summary-card-subtext {
+      margin: 0;
+      color: #475569;
+      font-weight: 500;
+      font-size: 0.92rem;
+    }
+
+    .summary-chip {
+      background: rgba(16, 185, 129, 0.12);
+      color: #047857;
+      padding: 0.35rem 0.65rem;
+      border-radius: 999px;
+      font-weight: 600;
+      font-size: 0.85rem;
+    }
+
+    .summary-chip.positive {
+      background: rgba(16, 185, 129, 0.16);
+      color: #047857;
+    }
+
+    .summary-chip.negative {
+      background: rgba(239, 68, 68, 0.12);
+      color: #b91c1c;
+    }
+
+    .summary-chip.neutral {
+      background: rgba(148, 163, 184, 0.2);
+      color: #475569;
+    }
+
+    .income-panels {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1.5rem;
+    }
+
+    .income-chart-card {
+      background: rgba(255, 255, 255, 0.94);
+      border-radius: 22px;
+      padding: 1.5rem 1.6rem 1.9rem;
+      box-shadow: 0 18px 36px rgba(15, 23, 42, 0.08);
+      border: 1px solid rgba(148, 163, 184, 0.18);
+      min-height: 320px;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .chart-card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.8rem;
+    }
+
+    .chart-card-header h3 {
+      margin: 0;
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: #0f172a;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .chart-card-header h3 i {
+      color: #10b981;
+      font-size: 1.3rem;
+    }
+
+    .chart-chip {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: #0f172a;
+      background: rgba(15, 23, 42, 0.08);
+      border-radius: 999px;
+      padding: 0.35rem 0.75rem;
+    }
+
+    .chart-chip.status-success {
+      background: rgba(16, 185, 129, 0.16);
+      color: #047857;
+    }
+
+    .chart-chip.status-warning {
+      background: rgba(249, 115, 22, 0.16);
+      color: #b45309;
+    }
+
+    .plan-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 1.2rem;
+    }
+
+    .plan-card {
+      background: rgba(255, 255, 255, 0.92);
+      border-radius: 20px;
+      padding: 1.2rem 1.4rem;
+      box-shadow: 0 14px 30px rgba(15, 23, 42, 0.06);
+      border: 1px solid rgba(226, 232, 240, 0.9);
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+
+    .plan-card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .plan-card h4 {
+      margin: 0;
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: #0f172a;
+    }
+
+    .plan-card-value {
+      font-size: 1.3rem;
+      font-weight: 700;
+      color: #0f172a;
+    }
+
+    .plan-change {
+      font-size: 0.88rem;
+      font-weight: 600;
+      padding: 0.3rem 0.65rem;
+      border-radius: 999px;
+      background: rgba(16, 185, 129, 0.14);
+      color: #047857;
+    }
+
+    .plan-change.negative {
+      background: rgba(239, 68, 68, 0.14);
+      color: #b91c1c;
+    }
+
+    .plan-progress {
+      height: 8px;
+      border-radius: 999px;
+      overflow: hidden;
+      background: rgba(148, 163, 184, 0.24);
+    }
+
+    .plan-progress span {
+      display: block;
+      height: 100%;
+      background: linear-gradient(135deg, #10b981, #0ea5e9);
+      border-radius: inherit;
+      transition: width 0.4s ease;
+    }
+
+    .plan-change.negative + .plan-progress span {
+      background: linear-gradient(135deg, #f87171, #facc15);
+    }
+
+    .section-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      margin-bottom: 1rem;
+    }
+
+    .section-header h3 {
+      margin: 0;
+      font-size: 1.2rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      color: #0f172a;
+    }
+
+    .section-header h3 i {
+      color: #10b981;
+      font-size: 1.35rem;
+    }
+
+    .section-header span {
+      color: #475569;
+      font-weight: 500;
+    }
+
+    .income-table-section {
+      background: rgba(255, 255, 255, 0.94);
+      border-radius: 22px;
+      padding: 1.5rem 1.6rem 1.9rem;
+      box-shadow: 0 18px 36px rgba(15, 23, 42, 0.08);
+      border: 1px solid rgba(148, 163, 184, 0.18);
+    }
+
+    .table-wrapper {
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 760px;
+    }
+
+    thead th {
+      text-align: right;
+      padding: 0.85rem 0.75rem;
+      font-weight: 700;
+      font-size: 0.9rem;
+      color: #0f172a;
+      border-bottom: 1px solid rgba(226, 232, 240, 0.9);
+      background: rgba(226, 232, 240, 0.32);
+    }
+
+    tbody td {
+      padding: 0.8rem 0.75rem;
+      border-bottom: 1px solid rgba(226, 232, 240, 0.6);
+      color: #475569;
+      font-weight: 500;
+      font-size: 0.9rem;
+      white-space: nowrap;
+    }
+
+    tbody tr:last-child td {
+      border-bottom: none;
+    }
+
+    tbody tr:hover {
+      background: rgba(16, 185, 129, 0.08);
+    }
+
+    .seller-name {
+      font-weight: 700;
+      color: #0f172a;
+    }
+
+    .amount {
+      font-variant-numeric: tabular-nums;
+    }
+
+    #income-error[hidden] {
+      display: none;
+    }
+
+    #income-error {
+      padding: 0.9rem 1.1rem;
+      border-radius: 18px;
+      background: rgba(249, 115, 22, 0.12);
+      color: #b45309;
+      font-weight: 600;
+      font-size: 0.92rem;
+    }
+
+    .loading-overlay {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 0.75rem;
+      background: rgba(255, 255, 255, 0.78);
+      backdrop-filter: blur(6px);
+      z-index: 5;
+      font-weight: 600;
+      color: #0f172a;
+    }
+
+    .loading-overlay[hidden] {
+      display: none;
+    }
+
+    .loading-overlay .spinner {
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      border: 4px solid rgba(148, 163, 184, 0.25);
+      border-top-color: #10b981;
+      animation: spin 0.8s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .income-toast {
+      position: fixed;
+      bottom: 24px;
+      left: 24px;
+      padding: 0.75rem 1.1rem;
+      border-radius: 14px;
+      background: rgba(16, 185, 129, 0.92);
+      color: #fff;
+      font-weight: 600;
+      box-shadow: 0 18px 30px rgba(16, 185, 129, 0.35);
+      z-index: 9999;
+      opacity: 0;
+      transform: translateY(12px);
+      animation: toast-in 0.25s forwards;
+    }
+
+    @keyframes toast-in {
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @media (max-width: 1024px) {
+      .income-dashboard {
+        padding: 2rem;
+      }
+
+      .income-header {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      .income-header-meta {
+        justify-content: flex-start;
+      }
+
+      .income-panels {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 640px) {
+      .income-dashboard {
+        padding: 1.6rem;
+        border-radius: 24px;
+      }
+
+      .income-header h1 {
+        font-size: 1.6rem;
+      }
+
+      #income-filter-form {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      #income-filter-form input[type="date"] {
+        width: 100%;
+        min-width: 0;
+      }
+
+      table {
+        min-width: 100%;
+      }
+    }
+  </style>
+  <script src="/nav-active.js" defer></script>
+</head>
+<body>
+  <div class="income-dashboard">
+    <header class="income-header">
+      <div>
+        <h1>داشبورد درآمدها</h1>
+        <p>نمایی جامع از درآمدهای تبلیغات، اشتراک‌های فروشندگان و عملکرد مالی برتر ویترینت در بازه‌های زمانی دلخواه.</p>
+      </div>
+      <div class="income-header-meta">
+        <div class="meta-item">
+          <i class="ri-calendar-check-line"></i>
+          <span data-income-field="range">۳۰ روز اخیر</span>
+        </div>
+        <div class="meta-item">
+          <i class="ri-time-line"></i>
+          <span>آخرین بروزرسانی: <span data-income-field="updated">—</span></span>
+        </div>
+        <button type="button" class="ghost-btn" id="income-refresh-btn">
+          <i class="ri-refresh-line"></i>
+          بروزرسانی داده‌ها
+        </button>
+      </div>
+    </header>
+
+    <div id="income-error" hidden>در حال حاضر اتصال به سرویس آمار درآمد برقرار نیست؛ داده‌های نمونه در حال نمایش هستند.</div>
+
+    <section class="income-filter">
+      <form id="income-filter-form">
+        <label for="income-start-date">از تاریخ
+          <input type="date" id="income-start-date" name="start">
+        </label>
+        <label for="income-end-date">تا تاریخ
+          <input type="date" id="income-end-date" name="end">
+        </label>
+        <button type="submit" class="primary-btn">
+          <i class="ri-filter-3-line"></i>
+          اعمال فیلتر
+        </button>
+      </form>
+    </section>
+
+    <section class="income-summary-grid">
+      <article class="summary-card" data-card="total">
+        <div class="summary-card-header">
+          <div class="summary-card-title">
+            <i class="ri-line-chart-line"></i>
+            درآمد کل
+          </div>
+          <span class="summary-chip neutral" data-role="change">0%</span>
+        </div>
+        <div class="summary-card-value" data-role="value">۰ تومان</div>
+        <p class="summary-card-subtext" data-role="delta">—</p>
+      </article>
+      <article class="summary-card" data-card="plans">
+        <div class="summary-card-header">
+          <div class="summary-card-title">
+            <i class="ri-vip-diamond-line"></i>
+            درآمد اشتراک فروشندگان
+          </div>
+          <span class="summary-chip neutral" data-role="change">0%</span>
+        </div>
+        <div class="summary-card-value" data-role="value">۰ تومان</div>
+        <p class="summary-card-subtext" data-role="delta">—</p>
+      </article>
+      <article class="summary-card" data-card="ads">
+        <div class="summary-card-header">
+          <div class="summary-card-title">
+            <i class="ri-megaphone-line"></i>
+            درآمد تبلیغات اختصاصی
+          </div>
+          <span class="summary-chip neutral" data-role="change">0%</span>
+        </div>
+        <div class="summary-card-value" data-role="value">۰ تومان</div>
+        <p class="summary-card-subtext" data-role="delta">—</p>
+      </article>
+    </section>
+
+    <section class="income-panels">
+      <div class="income-chart-card">
+        <div class="chart-card-header">
+          <h3><i class="ri-line-chart-line"></i> روند درآمد ترکیبی</h3>
+          <span class="chart-chip status-warning" data-income-field="status">در انتظار داده</span>
+        </div>
+        <canvas id="incomeTrendChart" height="240"></canvas>
+      </div>
+      <div class="income-chart-card">
+        <div class="chart-card-header">
+          <h3><i class="ri-donut-chart-line"></i> سهم هر منبع درآمد</h3>
+        </div>
+        <canvas id="incomeDistributionChart" height="240"></canvas>
+      </div>
+    </section>
+
+    <section>
+      <div class="section-header">
+        <h3><i class="ri-vip-crown-line"></i> جزئیات عملکرد پلن‌ها و تبلیغات</h3>
+        <span>بیشترین فروش: <strong data-income-field="top-seller">—</strong></span>
+      </div>
+      <div class="plan-grid" id="income-plan-breakdown"></div>
+    </section>
+
+    <section class="income-table-section">
+      <div class="section-header">
+        <h3><i class="ri-team-line"></i> فروشندگان برتر بر اساس درآمد</h3>
+      </div>
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>نام فروشنده</th>
+              <th>درآمد از اشتراک‌ها</th>
+              <th>درآمد از تبلیغات</th>
+              <th>کل درآمد</th>
+              <th>پلن ۱ ماهه</th>
+              <th>پلن ۳ ماهه</th>
+              <th>پلن ۱۲ ماهه</th>
+            </tr>
+          </thead>
+          <tbody id="income-sellers-body">
+            <tr>
+              <td colspan="7" style="text-align:center;padding:1.5rem;color:#94a3b8;">در حال بارگیری اطلاعات...</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <div class="loading-overlay" id="income-loading" hidden>
+      <div class="spinner"></div>
+      <span>در حال دریافت داده‌ها...</span>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      const panel = document.getElementById('income-insights-panel');
+      if (!panel) return;
+      const root = panel.querySelector('.income-dashboard');
+      if (!root) return;
+
+      const form = root.querySelector('#income-filter-form');
+      const startInput = root.querySelector('#income-start-date');
+      const endInput = root.querySelector('#income-end-date');
+      const refreshBtn = root.querySelector('#income-refresh-btn');
+      const loadingOverlay = root.querySelector('#income-loading');
+      const errorBanner = root.querySelector('#income-error');
+      const rangeLabel = root.querySelector('[data-income-field="range"]');
+      const updatedLabel = root.querySelector('[data-income-field="updated"]');
+      const statusChip = root.querySelector('[data-income-field="status"]');
+      const topSellerLabel = root.querySelector('[data-income-field="top-seller"]');
+      const planContainer = root.querySelector('#income-plan-breakdown');
+      const sellersBody = root.querySelector('#income-sellers-body');
+
+      const summaryCards = {
+        total: root.querySelector('.summary-card[data-card="total"]'),
+        plans: root.querySelector('.summary-card[data-card="plans"]'),
+        ads: root.querySelector('.summary-card[data-card="ads"]')
+      };
+
+      const trendCanvas = root.querySelector('#incomeTrendChart');
+      const distributionCanvas = root.querySelector('#incomeDistributionChart');
+
+      const numberFormatter = new Intl.NumberFormat('fa-IR');
+      const percentFormatter = new Intl.NumberFormat('fa-IR', { style: 'percent', maximumFractionDigits: 1, signDisplay: 'always' });
+
+      const ensureNumber = (value, fallback = 0) => {
+        const num = Number(value);
+        return Number.isFinite(num) ? num : fallback;
+      };
+
+      const toInputDate = (date) => {
+        const iso = date.toISOString();
+        return iso.slice(0, 10);
+      };
+
+      const toPersianDate = (value) => {
+        if (!value) return '—';
+        try {
+          return new Date(value).toLocaleDateString('fa-IR');
+        } catch (e) {
+          return value;
+        }
+      };
+
+      const toPersianDateTime = (value) => {
+        if (!value) return '—';
+        try {
+          return new Date(value).toLocaleString('fa-IR', {
+            hour12: false,
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit',
+            hour: '2-digit',
+            minute: '2-digit'
+          });
+        } catch (e) {
+          return value;
+        }
+      };
+
+      const formatCurrency = (value) => `${numberFormatter.format(Math.round(ensureNumber(value, 0)))} تومان`;
+
+      const formatPercent = (value) => {
+        const num = ensureNumber(value, 0);
+        if (!Number.isFinite(num)) return '0%';
+        try {
+          return percentFormatter.format(num);
+        } catch (e) {
+          const sign = num > 0 ? '+' : '';
+          return `${sign}${(num * 100).toFixed(1)}%`;
+        }
+      };
+
+      const createFallbackData = () => {
+        const now = new Date();
+        const start = new Date(now);
+        start.setDate(start.getDate() - 29);
+
+        return {
+          generatedAt: now.toISOString(),
+          range: { start: start.toISOString(), end: now.toISOString() },
+          summary: {
+            total: { value: 12840000, change: 0.125, delta: 1420000 },
+            plans: { value: 9260000, change: 0.083, delta: 710000 },
+            ads: { value: 3580000, change: 0.187, delta: 560000 },
+            topSeller: 'محمد حسینی'
+          },
+          planBreakdown: [
+            { key: 'plan1', name: 'پلن ۱ ماهه', value: 2480000, change: 0.152 },
+            { key: 'plan3', name: 'پلن ۳ ماهه', value: 4150000, change: 0.068 },
+            { key: 'plan12', name: 'پلن ۱۲ ماهه', value: 2630000, change: -0.032 },
+            { key: 'ads', name: 'تبلیغات اختصاصی', value: 3580000, change: 0.187 }
+          ],
+          trend: {
+            labels: ['۱', '۵', '۱۰', '۱۵', '۲۰', '۲۵', '۳۰'],
+            plans: [250000, 290000, 310000, 340000, 280000, 320000, 350000],
+            ads: [120000, 100000, 130000, 110000, 140000, 115000, 125000]
+          },
+          distribution: {
+            labels: ['پلن ۱ ماهه', 'پلن ۳ ماهه', 'پلن ۱۲ ماهه', 'تبلیغات اختصاصی'],
+            values: [2480000, 4150000, 2630000, 3580000]
+          },
+          sellers: [
+            { name: 'محمد حسینی', plans: 1840000, ads: 650000, total: 2490000, plan1: 520000, plan3: 890000, plan12: 430000 },
+            { name: 'فاطمه احمدی', plans: 1620000, ads: 580000, total: 2200000, plan1: 430000, plan3: 750000, plan12: 440000 },
+            { name: 'علی رضایی', plans: 1450000, ads: 490000, total: 1940000, plan1: 390000, plan3: 680000, plan12: 380000 },
+            { name: 'زهرا محمدی', plans: 1310000, ads: 430000, total: 1740000, plan1: 350000, plan3: 600000, plan12: 360000 },
+            { name: 'امیر عباسی', plans: 1040000, ads: 380000, total: 1420000, plan1: 280000, plan3: 450000, plan12: 310000 }
+          ]
+        };
+      };
+
+      const fallbackData = createFallbackData();
+
+      const normaliseMetric = (metric, fallbackMetric) => {
+        if (metric == null) return { ...fallbackMetric };
+        if (typeof metric === 'number') {
+          return { value: metric, change: fallbackMetric?.change ?? 0, delta: fallbackMetric?.delta ?? 0 };
+        }
+        return {
+          value: ensureNumber(metric.value ?? metric.amount ?? metric.total ?? fallbackMetric?.value ?? 0,
+            fallbackMetric?.value ?? 0),
+          change: ensureNumber(metric.change ?? metric.growth ?? metric.percent ?? fallbackMetric?.change ?? 0,
+            fallbackMetric?.change ?? 0),
+          delta: ensureNumber(metric.delta ?? metric.diff ?? metric.absolute ?? fallbackMetric?.delta ?? 0,
+            fallbackMetric?.delta ?? 0)
+        };
+      };
+
+      const normaliseData = (raw) => {
+        if (!raw || typeof raw !== 'object') {
+          return { ...fallbackData };
+        }
+
+        const base = { ...fallbackData };
+        const summary = raw.summary || {};
+
+        const totalMetric = normaliseMetric(summary.total ?? raw.totalIncome, base.summary.total);
+        const plansMetric = normaliseMetric(summary.plans ?? raw.plansIncome, base.summary.plans);
+        const adsMetric = normaliseMetric(summary.ads ?? raw.adsIncome, base.summary.ads);
+        const topSeller = summary.topSeller || raw.topSeller || base.summary.topSeller;
+
+        const planBreakdown = Array.isArray(raw.planBreakdown)
+          ? raw.planBreakdown.map(item => ({
+              key: item.key || item.slug || item.code || item.name,
+              name: item.name || item.title || '—',
+              value: ensureNumber(item.value ?? item.amount ?? 0),
+              change: ensureNumber(item.change ?? item.growth ?? item.percent ?? 0)
+            }))
+          : base.planBreakdown;
+
+        const trend = raw.trend && Array.isArray(raw.trend.labels)
+          ? {
+              labels: raw.trend.labels,
+              plans: raw.trend.plans || raw.trend.planIncome || [],
+              ads: raw.trend.ads || raw.trend.adsIncome || []
+            }
+          : base.trend;
+
+        const distribution = raw.distribution && Array.isArray(raw.distribution.values)
+          ? {
+              labels: raw.distribution.labels || planBreakdown.map(item => item.name),
+              values: raw.distribution.values
+            }
+          : {
+              labels: planBreakdown.map(item => item.name),
+              values: planBreakdown.map(item => item.value)
+            };
+
+        const sellers = Array.isArray(raw.sellers)
+          ? raw.sellers.map(item => ({
+              name: item.name || item.sellerName || '—',
+              plans: ensureNumber(item.plans ?? item.planIncome ?? 0),
+              ads: ensureNumber(item.ads ?? item.adsIncome ?? 0),
+              total: ensureNumber(item.total ?? item.totalIncome ?? (ensureNumber(item.plans ?? 0) + ensureNumber(item.ads ?? 0))),
+              plan1: ensureNumber(item.plan1 ?? item.monthly ?? 0),
+              plan3: ensureNumber(item.plan3 ?? item.quarterly ?? 0),
+              plan12: ensureNumber(item.plan12 ?? item.yearly ?? 0)
+            }))
+          : base.sellers;
+
+        return {
+          generatedAt: raw.generatedAt || raw.updatedAt || base.generatedAt,
+          range: raw.range || base.range,
+          summary: {
+            total: totalMetric,
+            plans: plansMetric,
+            ads: adsMetric,
+            topSeller
+          },
+          planBreakdown,
+          trend,
+          distribution,
+          sellers
+        };
+      };
+
+      const state = {
+        charts: {
+          trend: null,
+          distribution: null
+        },
+        data: null
+      };
+
+      const ensureCharts = () => {
+        if (!window.Chart) return;
+
+        if (!state.charts.trend) {
+          state.charts.trend = new Chart(trendCanvas.getContext('2d'), {
+            type: 'line',
+            data: {
+              labels: fallbackData.trend.labels,
+              datasets: [
+                {
+                  label: 'اشتراک‌ها',
+                  data: fallbackData.trend.plans,
+                  borderColor: '#10b981',
+                  backgroundColor: 'rgba(16, 185, 129, 0.15)',
+                  borderWidth: 3,
+                  tension: 0.35,
+                  fill: true,
+                  pointRadius: 4,
+                  pointBackgroundColor: '#fff',
+                  pointBorderColor: '#10b981'
+                },
+                {
+                  label: 'تبلیغات',
+                  data: fallbackData.trend.ads,
+                  borderColor: '#0ea5e9',
+                  backgroundColor: 'rgba(14, 165, 233, 0.15)',
+                  borderWidth: 3,
+                  tension: 0.35,
+                  fill: true,
+                  pointRadius: 4,
+                  pointBackgroundColor: '#fff',
+                  pointBorderColor: '#0ea5e9'
+                }
+              ]
+            },
+            options: {
+              responsive: true,
+              maintainAspectRatio: false,
+              interaction: { mode: 'index', intersect: false },
+              plugins: {
+                legend: {
+                  labels: {
+                    font: { family: 'Vazirmatn', weight: '600' },
+                    color: '#334155'
+                  }
+                },
+                tooltip: {
+                  backgroundColor: 'rgba(255, 255, 255, 0.96)',
+                  borderColor: 'rgba(226, 232, 240, 0.9)',
+                  borderWidth: 1,
+                  titleColor: '#0f172a',
+                  bodyColor: '#0f172a',
+                  titleFont: { family: 'Vazirmatn', weight: '700' },
+                  bodyFont: { family: 'Vazirmatn', weight: '600' },
+                  callbacks: {
+                    label: (context) => `${context.dataset.label}: ${formatCurrency(context.parsed.y)}`
+                  }
+                }
+              },
+              scales: {
+                x: {
+                  grid: { color: 'rgba(148, 163, 184, 0.2)' },
+                  ticks: { color: '#475569', font: { family: 'Vazirmatn' } }
+                },
+                y: {
+                  beginAtZero: true,
+                  grid: { color: 'rgba(226, 232, 240, 0.6)' },
+                  ticks: {
+                    color: '#475569',
+                    font: { family: 'Vazirmatn' },
+                    callback: (value) => numberFormatter.format(value)
+                  }
+                }
+              }
+            }
+          });
+        }
+
+        if (!state.charts.distribution) {
+          state.charts.distribution = new Chart(distributionCanvas.getContext('2d'), {
+            type: 'doughnut',
+            data: {
+              labels: fallbackData.distribution.labels,
+              datasets: [
+                {
+                  data: fallbackData.distribution.values,
+                  backgroundColor: ['#10b981', '#34d399', '#6ee7b7', '#0ea5e9'],
+                  borderColor: '#ffffff',
+                  borderWidth: 2,
+                  hoverOffset: 6
+                }
+              ]
+            },
+            options: {
+              responsive: true,
+              maintainAspectRatio: false,
+              plugins: {
+                legend: {
+                  position: 'bottom',
+                  labels: {
+                    usePointStyle: true,
+                    font: { family: 'Vazirmatn', weight: '600' },
+                    color: '#334155'
+                  }
+                },
+                tooltip: {
+                  backgroundColor: 'rgba(255, 255, 255, 0.96)',
+                  borderColor: 'rgba(226, 232, 240, 0.9)',
+                  borderWidth: 1,
+                  titleColor: '#0f172a',
+                  bodyColor: '#0f172a',
+                  bodyFont: { family: 'Vazirmatn', weight: '600' },
+                  callbacks: {
+                    label: (context) => {
+                      const dataset = context.dataset.data || [];
+                      const total = dataset.reduce((sum, n) => sum + ensureNumber(n, 0), 0) || 1;
+                      return `${context.label}: ${formatCurrency(context.parsed)} (${formatPercent(context.parsed / total)})`;
+                    }
+                  }
+                }
+              },
+              cutout: '58%'
+            }
+          });
+        }
+      };
+
+      const updateSummary = (summary) => {
+        const applyToCard = (key, metric) => {
+          const card = summaryCards[key];
+          if (!card) return;
+          const valueEl = card.querySelector('[data-role="value"]');
+          const changeEl = card.querySelector('[data-role="change"]');
+          const deltaEl = card.querySelector('[data-role="delta"]');
+          const changeValue = ensureNumber(metric.change, 0);
+
+          valueEl.textContent = formatCurrency(metric.value);
+          deltaEl.textContent = metric.delta
+            ? `${formatCurrency(Math.abs(metric.delta))} ${changeValue >= 0 ? 'افزایش' : 'کاهش'} نسبت به ماه قبل`
+            : 'بدون تغییر نسبت به ماه قبل';
+
+          changeEl.textContent = formatPercent(changeValue);
+          changeEl.classList.remove('negative', 'neutral', 'positive');
+          if (changeValue > 0) {
+            changeEl.classList.add('positive');
+          } else if (changeValue < 0) {
+            changeEl.classList.add('negative');
+          } else {
+            changeEl.classList.add('neutral');
+          }
+        };
+
+        applyToCard('total', summary.total);
+        applyToCard('plans', summary.plans);
+        applyToCard('ads', summary.ads);
+
+        if (topSellerLabel) {
+          topSellerLabel.textContent = summary.topSeller || '—';
+        }
+      };
+
+      const updatePlanBreakdown = (items) => {
+        planContainer.innerHTML = '';
+        if (!Array.isArray(items) || !items.length) {
+          planContainer.innerHTML = '<div style="padding:1.5rem;text-align:center;color:#94a3b8;">داده‌ای برای نمایش وجود ندارد.</div>';
+          return;
+        }
+
+        const maxValue = Math.max(...items.map(item => ensureNumber(item.value, 0))) || 1;
+        items.forEach((item) => {
+          const value = ensureNumber(item.value, 0);
+          const change = ensureNumber(item.change, 0);
+          const card = document.createElement('article');
+          card.className = 'plan-card';
+          card.innerHTML = `
+            <div class="plan-card-header">
+              <h4>${item.name || '—'}</h4>
+              <span class="plan-change">${formatPercent(change)}</span>
+            </div>
+            <div class="plan-card-value">${formatCurrency(value)}</div>
+            <div class="plan-progress"><span></span></div>
+          `;
+
+          const changeBadge = card.querySelector('.plan-change');
+          const progressSpan = card.querySelector('.plan-progress span');
+          if (changeBadge) {
+            if (change < 0) {
+              changeBadge.classList.add('negative');
+            } else {
+              changeBadge.classList.remove('negative');
+            }
+          }
+
+          if (progressSpan) {
+            const progressPercent = maxValue ? (value / maxValue) * 100 : 0;
+            const width = value <= 0 ? 0 : Math.min(100, Math.max(progressPercent, 10));
+            progressSpan.style.width = `${width}%`;
+            progressSpan.style.background = change < 0
+              ? 'linear-gradient(135deg, #f87171, #facc15)'
+              : 'linear-gradient(135deg, #10b981, #0ea5e9)';
+          }
+
+          planContainer.appendChild(card);
+        });
+      };
+
+      const updateTrendChart = (trend) => {
+        if (!state.charts.trend || !trend) return;
+        state.charts.trend.data.labels = trend.labels || [];
+        state.charts.trend.data.datasets[0].data = trend.plans || [];
+        state.charts.trend.data.datasets[1].data = trend.ads || [];
+        state.charts.trend.update();
+      };
+
+      const updateDistributionChart = (distribution) => {
+        if (!state.charts.distribution || !distribution) return;
+        state.charts.distribution.data.labels = distribution.labels || [];
+        state.charts.distribution.data.datasets[0].data = distribution.values || [];
+        state.charts.distribution.update();
+      };
+
+      const updateSellersTable = (sellers) => {
+        sellersBody.innerHTML = '';
+        if (!Array.isArray(sellers) || !sellers.length) {
+          sellersBody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:1.4rem;color:#94a3b8;">اطلاعاتی برای این بازه زمانی ثبت نشده است.</td></tr>';
+          return;
+        }
+
+        sellers.forEach((seller) => {
+          const row = document.createElement('tr');
+          row.innerHTML = `
+            <td class="seller-name">${seller.name || '—'}</td>
+            <td class="amount">${formatCurrency(seller.plans)}</td>
+            <td class="amount">${formatCurrency(seller.ads)}</td>
+            <td class="amount">${formatCurrency(seller.total)}</td>
+            <td class="amount">${formatCurrency(seller.plan1)}</td>
+            <td class="amount">${formatCurrency(seller.plan3)}</td>
+            <td class="amount">${formatCurrency(seller.plan12)}</td>
+          `;
+          sellersBody.appendChild(row);
+        });
+      };
+
+      const showToast = (message) => {
+        const toast = document.createElement('div');
+        toast.className = 'income-toast';
+        toast.textContent = message;
+        document.body.appendChild(toast);
+        setTimeout(() => {
+          toast.style.transition = 'opacity 0.4s ease, transform 0.4s ease';
+          toast.style.opacity = '0';
+          toast.style.transform = 'translateY(12px)';
+          setTimeout(() => {
+            if (toast.parentNode) {
+              toast.parentNode.removeChild(toast);
+            }
+          }, 400);
+        }, 2800);
+      };
+
+      const setLoading = (isLoading) => {
+        if (!loadingOverlay) return;
+        loadingOverlay.hidden = !isLoading;
+      };
+
+      const updateStatus = (usingFallback) => {
+        if (!statusChip) return;
+        statusChip.classList.remove('status-success', 'status-warning');
+        if (usingFallback) {
+          statusChip.textContent = 'داده نمونه';
+          statusChip.classList.add('status-warning');
+        } else {
+          statusChip.textContent = 'متصل به سرویس';
+          statusChip.classList.add('status-success');
+        }
+      };
+
+      const applyData = (dataset, { usingFallback } = {}) => {
+        state.data = dataset;
+        updateSummary(dataset.summary);
+        updatePlanBreakdown(dataset.planBreakdown);
+        updateTrendChart(dataset.trend);
+        updateDistributionChart(dataset.distribution);
+        updateSellersTable(dataset.sellers);
+
+        const range = dataset.range || {};
+        if (rangeLabel) {
+          if (range.start && range.end) {
+            rangeLabel.textContent = `${toPersianDate(range.start)} تا ${toPersianDate(range.end)}`;
+          } else {
+            rangeLabel.textContent = '۳۰ روز اخیر';
+          }
+        }
+
+        if (updatedLabel) {
+          updatedLabel.textContent = toPersianDateTime(dataset.generatedAt || new Date());
+        }
+
+        updateStatus(usingFallback);
+        if (errorBanner) {
+          errorBanner.hidden = !usingFallback;
+        }
+      };
+
+      const fetchIncomeData = async ({ start, end }) => {
+        const base = (window.ADMIN_API_BASE || '').replace(/\/$/, '');
+        const endpoint = base ? `${base}/admin/dashboard/income` : '/api/admin/dashboard/income';
+        const params = new URLSearchParams();
+        if (start) params.set('start', start);
+        if (end) params.set('end', end);
+        const url = params.toString() ? `${endpoint}?${params.toString()}` : endpoint;
+
+        const response = await fetch(url, { credentials: 'include' });
+        if (!response.ok) {
+          const error = await response.text();
+          throw new Error(error || 'خطا در دریافت داده‌های درآمد');
+        }
+        const payload = await response.json();
+        return payload?.data || payload;
+      };
+
+      const loadData = async ({ reason } = {}) => {
+        setLoading(true);
+        const selectedStart = startInput?.value || null;
+        const selectedEnd = endInput?.value || null;
+        let remoteData = null;
+        let usingFallback = false;
+
+        try {
+          remoteData = await fetchIncomeData({ start: selectedStart, end: selectedEnd });
+        } catch (error) {
+          console.warn('load income insights failed; falling back to sample data.', error);
+          usingFallback = true;
+        }
+
+        const dataset = remoteData ? normaliseData(remoteData) : { ...createFallbackData() };
+        applyData(dataset, { usingFallback });
+        setLoading(false);
+
+        if (reason === 'filter') {
+          showToast('فیلتر زمانی با موفقیت اعمال شد.');
+        } else if (reason === 'refresh') {
+          showToast('داشبورد درآمد بروزرسانی شد.');
+        }
+      };
+
+      const init = () => {
+        ensureCharts();
+
+        const now = new Date();
+        const start = new Date(now);
+        start.setDate(start.getDate() - 29);
+        if (startInput) startInput.value = toInputDate(start);
+        if (endInput) endInput.value = toInputDate(now);
+
+        if (form) {
+          form.addEventListener('submit', (event) => {
+            event.preventDefault();
+            loadData({ reason: 'filter' });
+          });
+        }
+
+        if (refreshBtn) {
+          refreshBtn.addEventListener('click', () => {
+            loadData({ reason: 'refresh' });
+          });
+        }
+
+        loadData({ reason: 'initial' });
+      };
+
+      init();
+    })();
+  </script>
+</body>
+</html>

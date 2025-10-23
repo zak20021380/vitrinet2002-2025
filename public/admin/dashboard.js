@@ -3472,6 +3472,7 @@ const panels = {
   'shopping-centers': document.getElementById('shopping-centers-panel'),
   plans:     document.getElementById('plans-panel'),
   ads:       document.getElementById('ads-panel'),
+  'income-insights': document.getElementById('income-insights-panel'),
   'ad-orders': document.getElementById('ad-orders-panel'),
   'home-section': document.getElementById('home-section-panel'),
   messages:  document.getElementById('messages-panel'),
@@ -3528,6 +3529,10 @@ menuLinks.forEach(link => {
     // لود محتوای کارت‌های صفحه اصلی
     if (section === 'home-section') {
       loadHomeSectionContent();
+    }
+
+    if (section === 'income-insights') {
+      loadIncomeInsightsContent();
     }
 
     // 5) بستن سایدبار در موبایل
@@ -5529,6 +5534,15 @@ function loadDailyVisContent() {
     loadingMessage: 'در حال بارگیری محتوا...',
     errorMessage: 'خطا در بارگیری محتوا. مسیر فایل رو چک کن یا صفحه رو رفرش کن.',
     scriptKey: 'daily-visits'
+  });
+}
+
+// لود محتوای داشبورد درآمد با AJAX
+function loadIncomeInsightsContent() {
+  loadExternalPanel('income-insights-panel', 'income-insights.html', {
+    loadingMessage: 'در حال آماده‌سازی داشبورد درآمد...',
+    errorMessage: 'خطا در بارگیری داشبورد درآمد. مسیر فایل را بررسی کنید.',
+    scriptKey: 'income-insights'
   });
 }
 
