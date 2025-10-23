@@ -4,6 +4,13 @@ const ShopAppearance = require('../models/ShopAppearance');
 const Seller = require('../models/Seller');
 const Product = require('../models/product'); // اضافه شده برای گرفتن محصولات
 const dailyVisitCtrl = require('../controllers/dailyVisitController');
+const {
+  autocompleteRateLimiter,
+  createAutocompleteDebounce,
+  searchRateLimiter
+} = require('../middlewares/searchRateLimiters');
+
+const topVisitedDebounce = createAutocompleteDebounce();
 
 // دریافت لیست همه فروشگاه‌ها از مدل Seller
 router.get('/', async (req, res) => {
@@ -31,7 +38,13 @@ router.get('/', async (req, res) => {
 });
 
 // پربازدیدترین مغازه‌های شهر
-router.get('/top-visited', dailyVisitCtrl.getTopVisitedShops);
+router.get(
+  '/top-visited',
+  searchRateLimiter,
+  autocompleteRateLimiter,
+  topVisitedDebounce,
+  dailyVisitCtrl.getTopVisitedShops
+);
 
 
 // لیست فروشگاه‌های پریمیوم (فقط فروشندگانی که اشتراک فعال دارند)

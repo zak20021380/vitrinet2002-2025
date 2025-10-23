@@ -4,6 +4,12 @@
 const mongoose = require('mongoose');
 const Seller = require('../models/Seller');
 const SellerService = require('../models/seller-services');
+const {
+  sanitizeSearchInput,
+  buildSafeRegex,
+  flagSuspiciousQuery,
+  sanitizeForOutput
+} = require('../utils/searchSecurity');
 
 // -------- Helpers ----------
 const toNumber = (v, def = undefined) => {
@@ -14,6 +20,23 @@ const isNonEmptyString = (v) => typeof v === 'string' && v.trim().length > 0;
 const pick = (obj = {}, fields = []) =>
   fields.reduce((acc, f) => (obj[f] !== undefined ? (acc[f] = obj[f], acc) : acc), {});
 const clamp = (x, min, max) => Math.max(min, Math.min(max, x));
+
+const SELLER_SERVICE_SAFE_FIELDS = [
+  '_id',
+  'sellerId',
+  'title',
+  'price',
+  'durationMinutes',
+  'category',
+  'tags',
+  'desc',
+  'images',
+  'mainImageIndex',
+  'isActive',
+  'isBookable',
+  'createdAt',
+  'updatedAt'
+];
 
 // فیلدهای قابل‌ویرایش از سمت فروشنده
 const ALLOWED_FIELDS = [
@@ -93,36 +116,43 @@ exports.getMyServices = async (req, res) => {
     }
 
     const page = Math.max(1, toNumber(req.query.page, 1));
-    const limit = clamp(toNumber(req.query.limit, 20), 1, 100);
-    const q = String(req.query.q || '').trim();
+    const limit = clamp(toNumber(req.query.limit, 20), 1, 50);
+    const { value: q, suspicious } = sanitizeSearchInput(req.query.q);
     const status = String(req.query.status || '').trim(); // 'active' | 'inactive' | ''
 
     const where = { sellerId: req.user.id };
     if (q) {
+      const safeRegex = buildSafeRegex(q);
       where.$or = [
-        { title: { $regex: q, $options: 'i' } },
-        { tags:  { $regex: q, $options: 'i' } },
-        { category: { $regex: q, $options: 'i' } },
-        { subcategory: { $regex: q, $options: 'i' } },
+        { title: safeRegex },
+        { tags: safeRegex },
+        { category: safeRegex },
+        { desc: safeRegex }
       ];
+    }
+
+    if (suspicious) {
+      flagSuspiciousQuery(req, req.query.q, 'seller-services:search');
     }
     if (status === 'active') where.isActive = true;
     if (status === 'inactive') where.isActive = false;
 
     const [items, total] = await Promise.all([
       SellerService.find(where)
+        .select(SELLER_SERVICE_SAFE_FIELDS.join(' '))
         .sort({ createdAt: -1 })
         .skip((page - 1) * limit)
-        .limit(limit),
+        .limit(limit)
+        .lean(),
       SellerService.countDocuments(where),
     ]);
 
-    return res.json({
+    return res.json(sanitizeForOutput({
       items,
       pagination: {
         page, limit, total, pages: Math.ceil(total / limit)
       }
-    });
+    }));
   } catch (err) {
     console.error('getMyServices error:', err);
     return res.status(500).json({ message: 'خطای داخلی سرور.' });

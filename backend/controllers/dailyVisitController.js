@@ -1,6 +1,12 @@
 const DailyVisit = require('../models/DailyVisit');
 const mongoose = require('mongoose');
 const Seller = require('../models/Seller');
+const {
+  sanitizeSearchInput,
+  buildSafeRegex,
+  flagSuspiciousQuery,
+  sanitizeForOutput
+} = require('../utils/searchSecurity');
 
 /*  POST /api/daily-visits
  *  اگر برای date و seller رکوردی باشد مقدارش به‌روز می‌شود (upsert) */
@@ -171,12 +177,18 @@ exports.getSellers = async (req, res) => {
 // GET /api/shops/top-visited?city=سنندج&limit=8
 exports.getTopVisitedShops = async (req, res) => {
   try {
-    const { city = '', limit = '8' } = req.query;
+    const cityAnalysis = sanitizeSearchInput(req.query.city, { maxLength: 120 });
+    const city = cityAnalysis.value;
+    const limit = Math.min(50, Math.max(1, parseInt(req.query.limit, 10) || 8));
+
+    if (cityAnalysis.suspicious) {
+      flagSuspiciousQuery(req, req.query.city, 'shops:top-visited:city');
+    }
     const since = new Date();
     since.setDate(since.getDate() - 30);
 
     const sellerFilter = city
-      ? { address: { $regex: city, $options: 'i' } }
+      ? { address: { $regex: buildSafeRegex(city) } }
       : {};
 
     const sellers = await Seller.find(sellerFilter).select(
@@ -191,7 +203,7 @@ exports.getTopVisitedShops = async (req, res) => {
       { $match: { seller: { $in: sellerIds }, date: { $gte: since } } },
       { $group: { _id: '$seller', visits: { $sum: '$count' } } },
       { $sort: { visits: -1 } },
-      { $limit: parseInt(limit, 10) || 8 }
+      { $limit: limit }
     ]);
 
     const visitMap = new Map(stats.map((s) => [s._id.toString(), s.visits]));
@@ -214,7 +226,7 @@ exports.getTopVisitedShops = async (req, res) => {
       };
     }).filter(Boolean);
 
-    res.json(result);
+    res.json(sanitizeForOutput(result));
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: 'خطا در دریافت پربازدیدترین فروشگاه‌ها' });

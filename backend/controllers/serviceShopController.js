@@ -4,8 +4,52 @@ const Seller = require('../models/Seller');
 const SellerService = require('../models/seller-services');
 const ShopAppearance = require('../models/ShopAppearance');
 const Booking = require('../models/booking');
+const {
+  sanitizeSearchInput,
+  buildSafeRegex,
+  flagSuspiciousQuery,
+  sanitizeForOutput
+} = require('../utils/searchSecurity');
 
 const STATUS_VALUES = ['draft', 'pending', 'approved', 'suspended', 'archived'];
+
+const SERVICE_SHOP_SAFE_FIELDS = [
+  '_id',
+  'name',
+  'shopUrl',
+  'ownerName',
+  'ownerPhone',
+  'category',
+  'subcategories',
+  'tags',
+  'description',
+  'address',
+  'city',
+  'province',
+  'status',
+  'isFeatured',
+  'isBookable',
+  'isVisible',
+  'isPremium',
+  'premiumUntil',
+  'bookingSettings.enabled',
+  'bookingSettings.instantConfirmation',
+  'bookingSettings.allowWaitlist',
+  'highlightServices',
+  'serviceAreas',
+  'coverImage',
+  'gallery',
+  'analytics.ratingAverage',
+  'analytics.ratingCount',
+  'analytics.totalBookings',
+  'analytics.completedBookings',
+  'analytics.cancelledBookings',
+  'lastReviewedAt',
+  'createdAt',
+  'updatedAt'
+];
+
+const SERVICE_SHOP_SAFE_PROJECTION = SERVICE_SHOP_SAFE_FIELDS.join(' ');
 
 const toNumber = (value, fallback = undefined) => {
   const num = Number(value);
@@ -21,8 +65,6 @@ const toBoolean = (value, fallback = undefined) => {
   if (['false', '0', 'no', 'off'].includes(str)) return false;
   return fallback;
 };
-
-const escapeRegExp = (str = '') => str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
 const parseList = (value, { unique = true, limit = 50 } = {}) => {
   if (value == null) return undefined;
@@ -906,13 +948,23 @@ exports.getOverview = async (req, res) => {
 exports.listServiceShops = async (req, res) => {
   try {
     const page = Math.max(1, toNumber(req.query.page, 1) || 1);
-    const limit = Math.min(100, Math.max(1, toNumber(req.query.limit, 20) || 20));
+    const limit = Math.min(50, Math.max(1, toNumber(req.query.limit, 20) || 20));
     const skip = (page - 1) * limit;
 
-    const search = String(req.query.q || req.query.search || '').trim();
+    const rawSearch = req.query.q ?? req.query.search;
+    const searchAnalysis = sanitizeSearchInput(rawSearch);
+    const search = searchAnalysis.value;
     const status = String(req.query.status || '').trim().toLowerCase();
-    const city = String(req.query.city || '').trim();
+    const cityAnalysis = sanitizeSearchInput(req.query.city, { maxLength: 120 });
+    const city = cityAnalysis.value;
     const useLegacy = (await ServiceShop.countDocuments({})) === 0;
+
+    if (searchAnalysis.suspicious) {
+      flagSuspiciousQuery(req, rawSearch, 'service-shops:search');
+    }
+    if (cityAnalysis.suspicious) {
+      flagSuspiciousQuery(req, req.query.city, 'service-shops:city');
+    }
 
     if (useLegacy) {
       const legacyFilters = {
@@ -933,7 +985,7 @@ exports.listServiceShops = async (req, res) => {
       const statusCounts = buildLegacyStatusCounts(filteredItems);
       const overview = await buildLegacyOverviewData(allItems);
 
-      return res.json({
+      return res.json(sanitizeForOutput({
         items,
         pagination: {
           page,
@@ -946,12 +998,12 @@ exports.listServiceShops = async (req, res) => {
           statusCounts,
           totals: overview.totals
         }
-      });
+      }));
     }
 
     const filters = {};
     if (search) {
-      const regex = new RegExp(escapeRegExp(search), 'i');
+      const regex = buildSafeRegex(search);
       filters.$or = [
         { name: regex },
         { shopUrl: regex },
@@ -967,7 +1019,7 @@ exports.listServiceShops = async (req, res) => {
     }
 
     if (city) {
-      filters.city = new RegExp(escapeRegExp(city), 'i');
+      filters.city = buildSafeRegex(city);
     }
 
     if (req.query.isFeatured != null) {
@@ -988,6 +1040,7 @@ exports.listServiceShops = async (req, res) => {
 
     const [items, total, statusAggregation, summaryCounts] = await Promise.all([
       ServiceShop.find(filters)
+        .select(SERVICE_SHOP_SAFE_PROJECTION)
         .sort({ updatedAt: -1 })
         .skip(skip)
         .limit(limit)
@@ -1000,7 +1053,7 @@ exports.listServiceShops = async (req, res) => {
       buildOverview()
     ]);
 
-    res.json({
+    const responsePayload = {
       items,
       pagination: {
         page,
@@ -1013,7 +1066,9 @@ exports.listServiceShops = async (req, res) => {
         statusCounts: buildStatusCounts(statusAggregation),
         totals: summaryCounts.totals
       }
-    });
+    };
+
+    res.json(sanitizeForOutput(responsePayload));
   } catch (err) {
     console.error('serviceShops.list error:', err);
     res.status(500).json({ message: 'خطا در دریافت فهرست مغازه‌های خدماتی.', error: err.message || err });

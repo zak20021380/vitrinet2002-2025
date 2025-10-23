@@ -18,8 +18,24 @@ const cookieParser = require('cookie-parser');
 const path = require('path');
 const dailyVisitRoutes = require('./routes/dailyVisitRoutes');
 
+app.on('security:search-query', (payload) => {
+  console.warn('[security][search-query]', payload); // eslint-disable-line no-console
+});
+
 // ------------------- Middlewares -------------------
 app.use(cookieParser());
+
+app.use((req, res, next) => {
+  res.setHeader(
+    'Content-Security-Policy',
+    "default-src 'self'; connect-src 'self' http://localhost:5173 http://localhost:5000 http://localhost:3000; img-src 'self' data: https:; media-src 'self' data: https:; script-src 'self'; style-src 'self' 'unsafe-inline'"
+  );
+  res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
+  res.setHeader('X-Content-Type-Options', 'nosniff');
+  res.setHeader('X-Frame-Options', 'SAMEORIGIN');
+  res.setHeader('Permissions-Policy', 'geolocation=(), microphone=(), camera=()');
+  next();
+});
 
 // Updated CORS configuration to allow multiple origins
 app.use(cors({
