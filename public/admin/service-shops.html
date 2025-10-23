@@ -398,6 +398,8 @@
     .badge.success { background: rgba(16, 185, 129, 0.12); color: var(--primary); }
     .badge.warning { background: rgba(245, 158, 11, 0.12); color: var(--warning); }
     .badge.danger { background: rgba(239, 68, 68, 0.12); color: var(--danger); }
+    .badge.info { background: rgba(14, 165, 233, 0.12); color: var(--secondary); }
+    .plan-badge-row { margin-top: 0.5rem; }
 
     .status-badge {
       display: inline-flex;
@@ -453,6 +455,16 @@
     .actions .edit:hover {
       transform: translateY(-1px);
       box-shadow: 0 8px 18px rgba(14, 165, 233, 0.2);
+    }
+
+    .actions .complimentary {
+      background: rgba(16, 185, 129, 0.12);
+      color: var(--primary);
+    }
+
+    .actions .complimentary:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 8px 18px rgba(16, 185, 129, 0.2);
     }
 
     .actions .archive {
@@ -949,6 +961,25 @@
         </div>
 
         <div class="form-section">
+          <h3>پلن رایگان (مهمان)</h3>
+          <div class="form-grid">
+            <label class="switch-field"><input type="checkbox" id="form-complimentaryActive"> فعال‌سازی پلن رایگان</label>
+            <label>شروع پلن رایگان
+              <input type="datetime-local" id="form-complimentaryStart">
+            </label>
+            <label>پایان پلن رایگان
+              <input type="datetime-local" id="form-complimentaryEnd">
+            </label>
+            <label>مدت پلن رایگان (روز)
+              <input type="number" id="form-complimentaryDuration" min="1" max="365">
+            </label>
+            <label>پیام اختصاصی برای فروشنده
+              <textarea id="form-complimentaryNote" class="short" placeholder="پیام دلخواه برای نمایش به فروشنده"></textarea>
+            </label>
+          </div>
+        </div>
+
+        <div class="form-section">
           <h3>سئو و لینک‌ها</h3>
           <div class="form-grid">
             <label>عنوان سئو
@@ -1031,6 +1062,9 @@
     const API_BASE = `${ADMIN_API_BASE.replace(/\/$/, '')}/service-shops`;
     const numberFormatter = new Intl.NumberFormat('fa-IR');
     const dateFormatter = new Intl.DateTimeFormat('fa-IR', { dateStyle: 'medium', timeStyle: 'short' });
+    const MS_PER_DAY = 86400000;
+    const PERSIAN_DIGITS_MAP = { '۰': '0', '۱': '1', '۲': '2', '۳': '3', '۴': '4', '۵': '5', '۶': '6', '۷': '7', '۸': '8', '۹': '9' };
+    const ARABIC_DIGITS_MAP = { '٠': '0', '١': '1', '٢': '2', '٣': '3', '٤': '4', '٥': '5', '٦': '6', '٧': '7', '٨': '8', '٩': '9' };
     const STATUS_LABELS = {
       draft: 'پیش‌نویس',
       pending: 'در انتظار تایید',
@@ -1126,6 +1160,11 @@
       isBookable: document.getElementById('form-isBookable'),
       isPremium: document.getElementById('form-isPremium'),
       premiumUntil: document.getElementById('form-premiumUntil'),
+      complimentaryActive: document.getElementById('form-complimentaryActive'),
+      complimentaryStart: document.getElementById('form-complimentaryStart'),
+      complimentaryEnd: document.getElementById('form-complimentaryEnd'),
+      complimentaryDuration: document.getElementById('form-complimentaryDuration'),
+      complimentaryNote: document.getElementById('form-complimentaryNote'),
       seoTitle: document.getElementById('form-seoTitle'),
       seoDescription: document.getElementById('form-seoDescription'),
       seoKeywords: document.getElementById('form-seoKeywords'),
@@ -1155,6 +1194,37 @@
       container.appendChild(toast);
       setTimeout(() => toast.classList.add('hide'), 3200);
       setTimeout(() => toast.remove(), 3600);
+    }
+
+    function normalizeDigits(value = '') {
+      return String(value || '')
+        .replace(/[۰-۹]/g, d => PERSIAN_DIGITS_MAP[d] || d)
+        .replace(/[٠-٩]/g, d => ARABIC_DIGITS_MAP[d] || d);
+    }
+
+    function parsePlanDate(value) {
+      if (!value) return null;
+      const date = value instanceof Date ? value : new Date(value);
+      return Number.isNaN(date.getTime()) ? null : date;
+    }
+
+    function computePlanDurationDays(plan = {}) {
+      const duration = Number(plan?.durationDays);
+      if (Number.isFinite(duration) && duration > 0) {
+        return Math.round(duration);
+      }
+      const start = parsePlanDate(plan?.startDate);
+      const end = parsePlanDate(plan?.endDate);
+      if (start && end) {
+        const diff = Math.round((end - start) / MS_PER_DAY);
+        if (diff > 0) return diff;
+      }
+      return 30;
+    }
+
+    function findShopById(id) {
+      if (!id) return null;
+      return state.items.find(item => String(item?._id) === String(id)) || null;
     }
 
     function splitList(value) {
@@ -1354,6 +1424,25 @@
         ? '<span class="badge success"><i class="ri-calendar-check-line"></i> فعال</span>'
         : '<span class="badge">غیرفعال</span>';
 
+      const complimentary = shop?.complimentaryPlan || {};
+      const now = new Date();
+      const complimentaryEnd = complimentary.endDate ? new Date(complimentary.endDate) : null;
+      let complimentaryBadge = '<span class="badge"><i class="ri-gift-line"></i> پلن رایگان غیرفعال</span>';
+      if (complimentary.isActive) {
+        if (complimentaryEnd && complimentaryEnd < now) {
+          complimentaryBadge = '<span class="badge danger"><i class="ri-timer-line"></i> پلن رایگان منقضی شده</span>';
+        } else {
+          let remainingText = '';
+          if (complimentaryEnd) {
+            const diff = Math.ceil((complimentaryEnd - now) / 86400000);
+            if (diff >= 0) {
+              remainingText = ` (${formatNumber(diff)} روز باقی)`;
+            }
+          }
+          complimentaryBadge = `<span class="badge info"><i class="ri-gift-line"></i> پلن رایگان فعال${remainingText}</span>`;
+        }
+      }
+
       const statusClass = `status-badge ${shop.status || 'draft'}`;
       const statusLabel = STATUS_LABELS[shop.status] || shop.status || 'نامشخص';
       const cityLine = [shop.city, shop.province].filter(Boolean).join('، ');
@@ -1388,6 +1477,7 @@
             <div class="switch-field"><input type="checkbox" class="toggle-booking" data-id="${shop._id}" ${bookingEnabled ? 'checked' : ''}> رزرو</div>
             <div class="switch-field"><input type="checkbox" class="toggle-premium" data-id="${shop._id}" ${premiumActive ? 'checked' : ''}> پریمیوم</div>
             <div>${bookingBadge} ${premiumBadge}</div>
+            <div class="plan-badge-row">${complimentaryBadge}</div>
           </td>
           <td>
             <div class="table-metric"><span>رزروها</span><strong>${bookingsText}</strong></div>
@@ -1397,6 +1487,7 @@
           <td>
             <div class="actions">
               <button type="button" class="edit" data-action="edit" data-id="${shop._id}"><i class="ri-edit-2-line"></i> ویرایش</button>
+              <button type="button" class="complimentary" data-action="complimentary" data-id="${shop._id}"><i class="ri-gift-line"></i> پلن رایگان</button>
               <button type="button" class="archive" data-action="archive" data-id="${shop._id}" data-status="${shop.status}">
                 <i class="ri-archive-line"></i> ${shop.status === 'archived' ? 'حذف کامل' : 'بایگانی'}
               </button>
@@ -1404,6 +1495,91 @@
           </td>
         </tr>
       `;
+    }
+
+    async function quickUpdateComplimentaryPlan(shopId) {
+      const shop = findShopById(shopId);
+      if (!shop) {
+        showToast('مغازه مورد نظر یافت نشد.', 'error');
+        return;
+      }
+
+      const plan = shop.complimentaryPlan || {};
+      const defaultDays = computePlanDurationDays(plan);
+      const promptMessage = 'مدت پلن رایگان (بر حسب روز) را وارد کنید. برای غیرفعال‌سازی پلن، ورودی را خالی بگذارید.';
+      const input = prompt(promptMessage, defaultDays ? String(defaultDays) : '');
+      if (input === null) return;
+
+      const normalizedInput = normalizeDigits(input.trim());
+      if (!normalizedInput) {
+        const confirmed = confirm('پلن رایگان این مغازه غیرفعال شود؟');
+        if (!confirmed) return;
+        try {
+          await updateStatus(shopId, {
+            complimentaryPlan: {
+              isActive: false,
+              startDate: null,
+              endDate: null,
+              durationDays: null,
+              note: ''
+            }
+          });
+          showToast('پلن رایگان غیرفعال شد.');
+          loadOverview();
+          loadShops();
+        } catch (err) {
+          showToast(err.message, 'error');
+        }
+        return;
+      }
+
+      const parsedDays = Number(normalizedInput);
+      if (!Number.isFinite(parsedDays) || parsedDays <= 0) {
+        showToast('لطفاً عددی معتبر بزرگتر از صفر وارد کنید.', 'error');
+        return;
+      }
+
+      const extraDays = Math.min(365, Math.max(1, Math.round(parsedDays)));
+      const now = new Date();
+      const existingStart = parsePlanDate(plan.startDate);
+      const existingEnd = parsePlanDate(plan.endDate);
+
+      let startDate = now;
+      let totalDays = extraDays;
+
+      if (plan.isActive && existingStart) {
+        if (existingEnd && existingEnd > now) {
+          const previousDuration = Math.max(0, Math.round((existingEnd - existingStart) / MS_PER_DAY));
+          startDate = existingStart;
+          totalDays = Math.max(1, previousDuration + extraDays);
+        } else if (existingStart > now) {
+          startDate = existingStart;
+        }
+      }
+
+      totalDays = Math.min(365, totalDays);
+
+      let note = plan.note || '';
+      const notePrompt = prompt('پیام دلخواه برای نمایش به فروشنده (اختیاری):', note);
+      if (notePrompt !== null) {
+        note = notePrompt.trim();
+      }
+
+      try {
+        await updateStatus(shopId, {
+          complimentaryPlan: {
+            isActive: true,
+            startDate: startDate.toISOString(),
+            durationDays: totalDays,
+            note
+          }
+        });
+        showToast('پلن رایگان بروزرسانی شد.');
+        loadOverview();
+        loadShops();
+      } catch (err) {
+        showToast(err.message, 'error');
+      }
     }
 
     function renderPagination() {
@@ -1442,6 +1618,12 @@
       if (editBtn) {
         const id = editBtn.dataset.id;
         openForm(id);
+        return;
+      }
+      const complimentaryBtn = e.target.closest('button[data-action="complimentary"]');
+      if (complimentaryBtn) {
+        const id = complimentaryBtn.dataset.id;
+        await quickUpdateComplimentaryPlan(id);
         return;
       }
       const archiveBtn = e.target.closest('button[data-action="archive"]');
@@ -1613,6 +1795,16 @@
         isBookable: formFields.isBookable.checked,
         isPremium: formFields.isPremium.checked,
         premiumUntil: formFields.premiumUntil.value ? new Date(formFields.premiumUntil.value).toISOString() : null,
+        complimentaryPlan: {
+          isActive: formFields.complimentaryActive.checked,
+          startDate: formFields.complimentaryStart.value ? new Date(formFields.complimentaryStart.value).toISOString() : null,
+          endDate: formFields.complimentaryEnd.value ? new Date(formFields.complimentaryEnd.value).toISOString() : null,
+          durationDays: (() => {
+            const value = Number(formFields.complimentaryDuration.value);
+            return Number.isFinite(value) && value > 0 ? Math.round(value) : null;
+          })(),
+          note: formFields.complimentaryNote.value.trim()
+        },
         seo: {
           title: formFields.seoTitle.value.trim(),
           description: formFields.seoDescription.value.trim(),
@@ -1696,6 +1888,12 @@
           formFields.isBookable.checked = shop.isBookable !== false;
           formFields.isPremium.checked = !!shop.isPremium;
           formFields.premiumUntil.value = toInputDateTime(shop.premiumUntil);
+          const complimentaryPlan = shop?.complimentaryPlan || {};
+          formFields.complimentaryActive.checked = !!complimentaryPlan.isActive;
+          formFields.complimentaryStart.value = toInputDateTime(complimentaryPlan.startDate);
+          formFields.complimentaryEnd.value = toInputDateTime(complimentaryPlan.endDate);
+          formFields.complimentaryDuration.value = complimentaryPlan.durationDays != null ? complimentaryPlan.durationDays : '';
+          formFields.complimentaryNote.value = complimentaryPlan.note || '';
           formFields.seoTitle.value = shop?.seo?.title || '';
           formFields.seoDescription.value = shop?.seo?.description || '';
           formFields.seoKeywords.value = (shop?.seo?.keywords || []).join(', ');
@@ -1720,6 +1918,11 @@
         elements.formTitle.textContent = 'افزودن مغازه جدید';
         elements.formSubmit.textContent = 'ایجاد مغازه';
         formFields.status.value = 'pending';
+        formFields.complimentaryActive.checked = false;
+        formFields.complimentaryStart.value = '';
+        formFields.complimentaryEnd.value = '';
+        formFields.complimentaryDuration.value = '';
+        formFields.complimentaryNote.value = '';
       }
 
       elements.dialog.showModal();
@@ -1732,6 +1935,11 @@
       formFields.isVisible.checked = true;
       formFields.isBookable.checked = true;
       formFields.clearGeo.checked = false;
+      formFields.complimentaryActive.checked = false;
+      formFields.complimentaryStart.value = '';
+      formFields.complimentaryEnd.value = '';
+      formFields.complimentaryDuration.value = '';
+      formFields.complimentaryNote.value = '';
       elements.formError.textContent = '';
     }
 
