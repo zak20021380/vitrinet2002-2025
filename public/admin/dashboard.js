@@ -480,16 +480,24 @@ const DEFAULT_CATEGORIES = [
   'کودکان'
 ];
 
+const DEFAULT_SERVICE_CATEGORY_NAME = 'خدمات';
 const DEFAULT_SERVICE_SUBCATEGORIES = [
-  'آرایشگاه مردانه',
-  'آرایشگاه زنانه',
-  'کارواش',
-  'کلینیک زیبایی',
-  'تعمیر موبایل',
-  'آتلیه عکاسی',
-  'خیاطی',
-  'آرایش حیوانات'
+  { name: 'آرایشگاه مردانه', parentName: DEFAULT_SERVICE_CATEGORY_NAME },
+  { name: 'آرایشگاه زنانه', parentName: DEFAULT_SERVICE_CATEGORY_NAME },
+  { name: 'کارواش', parentName: DEFAULT_SERVICE_CATEGORY_NAME },
+  { name: 'کلینیک زیبایی', parentName: DEFAULT_SERVICE_CATEGORY_NAME },
+  { name: 'تعمیر موبایل', parentName: DEFAULT_SERVICE_CATEGORY_NAME },
+  { name: 'آتلیه عکاسی', parentName: DEFAULT_SERVICE_CATEGORY_NAME },
+  { name: 'خیاطی', parentName: DEFAULT_SERVICE_CATEGORY_NAME },
+  { name: 'آرایش حیوانات', parentName: DEFAULT_SERVICE_CATEGORY_NAME }
 ];
+const DEFAULT_SERVICE_SUBCATEGORY_NAMES = DEFAULT_SERVICE_SUBCATEGORIES.map(item => item.name);
+const DEFAULT_SERVICE_PARENT_MAP = DEFAULT_SERVICE_SUBCATEGORIES.reduce((acc, item) => {
+  if (item && item.name) {
+    acc[item.name] = item.parentName || DEFAULT_SERVICE_CATEGORY_NAME;
+  }
+  return acc;
+}, {});
 
 let categoryManagerState = {
   categories: [],
@@ -516,14 +524,77 @@ function getCategoryId(item) {
   return toIdString(item._id || item.id || item.categoryId || item.value || '');
 }
 
+function getCategoryType(item) {
+  if (!item) return 'category';
+  if (typeof item === 'string') return 'category';
+  return item.type || 'category';
+}
+
+function getCategoryParentId(item) {
+  if (!item) return '';
+  if (typeof item === 'string') return '';
+  return toIdString(
+    item.parentId
+      || item.parentID
+      || item.parent
+      || item.parentCategory
+      || item.parentCategoryId
+      || item.parentCategoryID
+      || (item.parent && (item.parent._id || item.parent.id))
+      || ''
+  );
+}
+
+function getCategoryParentName(item) {
+  if (!item) return '';
+  if (typeof item === 'string') return DEFAULT_SERVICE_PARENT_MAP[item] || '';
+  const value = item.parentName
+    || item.parentLabel
+    || item.parentTitle
+    || (item.parent && (item.parent.name || item.parent.title))
+    || '';
+  return normaliseCategoryText(value);
+}
+
+function getCategoryParentKey(item) {
+  const parentId = getCategoryParentId(item);
+  if (parentId) return parentId;
+  const parentName = getCategoryParentName(item);
+  return parentName ? parentName.toLocaleLowerCase('fa-IR') : '';
+}
+
+function matchesParent(item, filter) {
+  if (!filter) return true;
+  const type = getCategoryType(item);
+  if (type !== 'service-subcategory') return true;
+  const itemParentId = getCategoryParentId(item);
+  const itemParentName = getCategoryParentName(item);
+  const filterId = filter.id ? toIdString(filter.id) : filter.parentId ? toIdString(filter.parentId) : '';
+  const filterName = filter.name
+    ? normaliseCategoryText(filter.name)
+    : filter.parentName
+      ? normaliseCategoryText(filter.parentName)
+      : '';
+  if (filterId) {
+    return itemParentId ? itemParentId === filterId : false;
+  }
+  if (itemParentId) {
+    return false;
+  }
+  if (filterName) {
+    return itemParentName ? itemParentName === filterName : false;
+  }
+  return !itemParentName;
+}
+
 function isDefaultCategory(item) {
   const name = getCategoryName(item);
-  const type = (item && item.type) || 'category';
+  const type = getCategoryType(item);
   if (typeof item?.isDefault === 'boolean') {
     return item.isDefault;
   }
   return type === 'service-subcategory'
-    ? DEFAULT_SERVICE_SUBCATEGORIES.includes(name)
+    ? DEFAULT_SERVICE_SUBCATEGORY_NAMES.includes(name)
     : DEFAULT_CATEGORIES.includes(name);
 }
 
@@ -538,8 +609,12 @@ function normalizeCategoryRecord(raw, fallbackType = 'category') {
       name,
       type: fallbackType,
       isDefault: fallbackType === 'service-subcategory'
-        ? DEFAULT_SERVICE_SUBCATEGORIES.includes(name)
-        : DEFAULT_CATEGORIES.includes(name)
+        ? DEFAULT_SERVICE_SUBCATEGORY_NAMES.includes(name)
+        : DEFAULT_CATEGORIES.includes(name),
+      parentId: null,
+      parentName: fallbackType === 'service-subcategory'
+        ? DEFAULT_SERVICE_PARENT_MAP[name] || ''
+        : ''
     };
   }
 
@@ -547,6 +622,10 @@ function normalizeCategoryRecord(raw, fallbackType = 'category') {
   if (!name) return null;
   const type = raw.type || fallbackType;
   const id = getCategoryId(raw);
+  const parentId = getCategoryParentId(raw) || null;
+  const parentName = getCategoryParentName(raw) || (type === 'service-subcategory'
+    ? DEFAULT_SERVICE_PARENT_MAP[name] || ''
+    : '');
 
   return {
     _id: id || null,
@@ -554,7 +633,9 @@ function normalizeCategoryRecord(raw, fallbackType = 'category') {
     name,
     type,
     isDefault: typeof raw.isDefault === 'boolean' ? raw.isDefault : isDefaultCategory({ ...raw, name, type }),
-    slug: raw.slug || null
+    slug: raw.slug || null,
+    parentId: parentId || null,
+    parentName
   };
 }
 
@@ -563,7 +644,9 @@ function normalizeCategoryList(items = [], fallbackType = 'category') {
   items.forEach(item => {
     const record = normalizeCategoryRecord(item, fallbackType);
     if (!record) return;
-    const key = getCategoryName(record).toLocaleLowerCase('fa-IR');
+    const nameKey = getCategoryName(record).toLocaleLowerCase('fa-IR');
+    const parentKey = getCategoryType(record) === 'service-subcategory' ? getCategoryParentKey(record) : '';
+    const key = parentKey ? `${nameKey}__${parentKey}` : nameKey;
     if (!key) return;
     if (!unique.has(key)) {
       unique.set(key, record);
@@ -610,9 +693,11 @@ function saveCategoryList(key, list) {
       ? list.map(item => ({
           _id: getCategoryId(item) || null,
           name: getCategoryName(item),
-          type: (item && item.type) || 'category',
+          type: getCategoryType(item),
           isDefault: !!isDefaultCategory(item),
-          slug: item && item.slug ? item.slug : null
+          slug: item && item.slug ? item.slug : null,
+          parentId: getCategoryParentId(item) || null,
+          parentName: getCategoryParentName(item) || null
         }))
       : [];
     localStorage.setItem(key, JSON.stringify({ items: payload, updatedAt: Date.now() }));
@@ -621,21 +706,50 @@ function saveCategoryList(key, list) {
   }
 }
 
-function listIncludesCaseInsensitive(list = [], value = '') {
+function listIncludesCaseInsensitive(list = [], value = '', { parentId = '', parentName = '' } = {}) {
   const compare = value.toLocaleLowerCase('fa-IR');
-  return list.some(item => getCategoryName(item).toLocaleLowerCase('fa-IR') === compare);
+  const resolvedParentId = parentId ? toIdString(parentId) : '';
+  const resolvedParentName = parentName ? normaliseCategoryText(parentName).toLocaleLowerCase('fa-IR') : '';
+  return list.some(item => {
+    if (getCategoryName(item).toLocaleLowerCase('fa-IR') !== compare) {
+      return false;
+    }
+    if (getCategoryType(item) !== 'service-subcategory') {
+      return true;
+    }
+    const itemParentId = getCategoryParentId(item);
+    const itemParentName = getCategoryParentName(item).toLocaleLowerCase('fa-IR');
+    if (resolvedParentId) {
+      if (itemParentId) {
+        return itemParentId === resolvedParentId;
+      }
+      return false;
+    }
+    if (itemParentId) {
+      return false;
+    }
+    if (resolvedParentName) {
+      return itemParentName === resolvedParentName;
+    }
+    return !itemParentName;
+  });
 }
 
-function renderChipList(container, items = [], { removable = true, type = 'category' } = {}) {
+function renderChipList(
+  container,
+  items = [],
+  { removable = true, type = 'category', filterParent = null, showParent = type === 'service-subcategory' } = {}
+) {
   if (!container) return;
   container.innerHTML = '';
   const normalisedItems = normalizeCategoryList(items, type);
-  if (!normalisedItems.length) {
+  const filteredItems = filterParent ? normalisedItems.filter(item => matchesParent(item, filterParent)) : normalisedItems;
+  if (!filteredItems.length) {
     container.classList.add('empty');
     return;
   }
   container.classList.remove('empty');
-  normalisedItems.forEach(item => {
+  filteredItems.forEach(item => {
     const name = getCategoryName(item);
     if (!name) return;
     const chip = document.createElement('div');
@@ -645,7 +759,8 @@ function renderChipList(container, items = [], { removable = true, type = 'categ
       chip.classList.add('chip-item-default');
     }
     const label = document.createElement('span');
-    label.textContent = name;
+    const parentName = showParent ? getCategoryParentName(item) : '';
+    label.textContent = parentName && type === 'service-subcategory' ? `${name} (${parentName})` : name;
     chip.appendChild(label);
     if (removable) {
       const btn = document.createElement('button');
@@ -684,6 +799,9 @@ function updateCategoryPreview() {
   const select = document.getElementById('categoryPreviewSelect');
   const chips = document.getElementById('servicePreviewChips');
   if (select) {
+    const previousOption = select.options[select.selectedIndex];
+    const previousId = select.dataset.selectedId || (previousOption && previousOption.dataset.id) || '';
+    const previousName = select.dataset.selectedName || (previousOption && previousOption.value) || '';
     select.innerHTML = '';
     if (!categoryManagerState.categories.length) {
       const option = document.createElement('option');
@@ -692,6 +810,8 @@ function updateCategoryPreview() {
       option.selected = true;
       select.appendChild(option);
       select.disabled = true;
+      select.dataset.selectedId = '';
+      select.dataset.selectedName = '';
     } else {
       const placeholder = document.createElement('option');
       placeholder.textContent = 'انتخاب دسته';
@@ -707,14 +827,103 @@ function updateCategoryPreview() {
         if (id) {
           option.dataset.id = id;
         }
+        if (id && previousId && id === previousId) {
+          option.selected = true;
+          placeholder.selected = false;
+        } else if (!previousId && previousName && name === previousName) {
+          option.selected = true;
+          placeholder.selected = false;
+        }
         select.appendChild(option);
       });
       select.disabled = false;
+      const selectedOption = select.options[select.selectedIndex];
+      select.dataset.selectedId = selectedOption?.dataset.id || '';
+      select.dataset.selectedName = selectedOption?.value || '';
+      if (!select.dataset.previewBound) {
+        select.addEventListener('change', () => {
+          const currentOption = select.options[select.selectedIndex];
+          select.dataset.selectedId = currentOption?.dataset.id || '';
+          select.dataset.selectedName = currentOption?.value || '';
+          updateCategoryPreview();
+        });
+        select.dataset.previewBound = 'true';
+      }
     }
   }
   if (chips) {
-    renderChipList(chips, categoryManagerState.serviceSubcategories, { removable: false, type: 'service-subcategory' });
+    const selectedOption = select && select.options[select.selectedIndex];
+    const filterParent = selectedOption && selectedOption.dataset.id
+      ? { id: selectedOption.dataset.id }
+      : selectedOption && selectedOption.value
+        ? { name: selectedOption.value }
+        : null;
+    renderChipList(chips, categoryManagerState.serviceSubcategories, {
+      removable: false,
+      type: 'service-subcategory',
+      filterParent,
+      showParent: false
+    });
   }
+}
+
+function updateServiceParentOptions() {
+  const select = document.getElementById('serviceSubcategoryParent');
+  if (!select) return;
+  const previousId = select.dataset.selectedId || '';
+  const previousName = select.dataset.selectedName || '';
+  select.innerHTML = '';
+
+  const placeholder = document.createElement('option');
+  placeholder.value = '';
+  placeholder.disabled = true;
+  placeholder.textContent = categoryManagerState.categories.length
+    ? 'انتخاب دسته اصلی'
+    : 'ابتدا دسته اصلی را بسازید';
+  select.appendChild(placeholder);
+
+  if (!categoryManagerState.categories.length) {
+    placeholder.selected = true;
+    select.disabled = true;
+    select.dataset.selectedId = '';
+    select.dataset.selectedName = '';
+    return;
+  }
+
+  let matched = false;
+  categoryManagerState.categories.forEach(item => {
+    const option = document.createElement('option');
+    const id = getCategoryId(item);
+    const name = getCategoryName(item);
+    option.value = id || name;
+    if (id) {
+      option.dataset.id = id;
+    }
+    option.dataset.name = name;
+    option.textContent = name;
+    if (!matched) {
+      if (previousId && id && id === previousId) {
+        option.selected = true;
+        matched = true;
+      } else if (!previousId && previousName && name === previousName) {
+        option.selected = true;
+        matched = true;
+      }
+    }
+    select.appendChild(option);
+  });
+
+  if (!matched) {
+    placeholder.selected = true;
+    select.dataset.selectedId = '';
+    select.dataset.selectedName = '';
+  } else {
+    const selectedOption = select.options[select.selectedIndex];
+    select.dataset.selectedId = selectedOption?.dataset.id || '';
+    select.dataset.selectedName = selectedOption?.dataset.name || selectedOption?.textContent || '';
+  }
+
+  select.disabled = false;
 }
 
 function persistCategoryState() {
@@ -766,14 +975,14 @@ async function fetchCategoryListsFromApi({ silent = false } = {}) {
   }
 }
 
-async function createCategoryOnServer(name, type) {
+async function createCategoryOnServer(name, type, extra = {}) {
   const label = type === 'service-subcategory' ? 'زیرگروه' : 'دسته';
   try {
     const res = await fetch(CATEGORY_API_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       credentials: 'include',
-      body: JSON.stringify({ name, type })
+      body: JSON.stringify({ name, type, ...extra })
     });
     const data = await res.json().catch(() => ({}));
     if (!res.ok) {
@@ -823,6 +1032,17 @@ async function deleteCategoryOnServer(id, type, name) {
       categoryManagerState.serviceSubcategories = categoryManagerState.serviceSubcategories.filter(item => !shouldRemove(item));
     } else {
       categoryManagerState.categories = categoryManagerState.categories.filter(item => !shouldRemove(item));
+      categoryManagerState.serviceSubcategories = categoryManagerState.serviceSubcategories.map(item => {
+        const parentId = getCategoryParentId(item);
+        const parentName = getCategoryParentName(item);
+        if (parentId && id && parentId === id) {
+          return { ...item, parentId: null, parentName: '' };
+        }
+        if (!parentId && parentName && parentName === name) {
+          return { ...item, parentId: null, parentName: '' };
+        }
+        return item;
+      });
     }
     persistCategoryState();
     renderCategoryManager();
@@ -864,8 +1084,13 @@ function renderCategoryManager() {
     renderChipList(categoriesContainer, categoryManagerState.categories, { removable: true, type: 'category' });
   }
   if (servicesContainer) {
-    renderChipList(servicesContainer, categoryManagerState.serviceSubcategories, { removable: true, type: 'service-subcategory' });
+    renderChipList(servicesContainer, categoryManagerState.serviceSubcategories, {
+      removable: true,
+      type: 'service-subcategory',
+      showParent: true
+    });
   }
+  updateServiceParentOptions();
   updateCategoryMetrics();
   updateCategoryPreview();
 }
@@ -910,6 +1135,14 @@ function initCategoryManager() {
 
   const serviceForm = document.getElementById('serviceSubcategoryForm');
   const serviceInput = document.getElementById('serviceSubcategoryInput');
+  const serviceParentSelect = document.getElementById('serviceSubcategoryParent');
+  if (serviceParentSelect) {
+    serviceParentSelect.addEventListener('change', () => {
+      const option = serviceParentSelect.options[serviceParentSelect.selectedIndex];
+      serviceParentSelect.dataset.selectedId = option?.dataset.id || '';
+      serviceParentSelect.dataset.selectedName = option?.dataset.name || option?.textContent || '';
+    });
+  }
   if (serviceForm) {
     serviceForm.addEventListener('submit', event => {
       event.preventDefault();
@@ -923,12 +1156,22 @@ function initCategoryManager() {
         showCategoryFeedback('error', 'عنوان زیرگروه باید حداقل ۲ کاراکتر باشد.');
         return;
       }
-      if (listIncludesCaseInsensitive(categoryManagerState.serviceSubcategories, value)) {
+      const parentOption = serviceParentSelect && serviceParentSelect.options[serviceParentSelect.selectedIndex];
+      const parentId = parentOption && parentOption.dataset.id ? parentOption.dataset.id : '';
+      const parentName = parentOption && (parentOption.dataset.name || parentOption.textContent) ?
+        normaliseCategoryText(parentOption.dataset.name || parentOption.textContent) : '';
+      if (!parentId) {
+        showCategoryFeedback('error', 'برای افزودن زیرگروه، ابتدا دسته اصلی معتبر را انتخاب کنید.');
+        return;
+      }
+      if (listIncludesCaseInsensitive(categoryManagerState.serviceSubcategories, value, { parentId, parentName })) {
         showCategoryFeedback('error', `زیرگروه «${value}» از قبل وجود دارد.`);
         return;
       }
-      createCategoryOnServer(value, 'service-subcategory');
-      serviceForm.reset();
+      serviceParentSelect.dataset.selectedId = parentId;
+      serviceParentSelect.dataset.selectedName = parentName;
+      createCategoryOnServer(value, 'service-subcategory', { parentId });
+      serviceInput.value = '';
       serviceInput.focus();
     });
   }

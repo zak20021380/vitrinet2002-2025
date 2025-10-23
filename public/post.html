@@ -446,16 +446,24 @@
     'کودکان'
   ];
 
+  const DEFAULT_SERVICE_CATEGORY_NAME = 'خدمات';
   const DEFAULT_SERVICE_SUBCATEGORIES = [
-    'آرایشگاه مردانه',
-    'آرایشگاه زنانه',
-    'کارواش',
-    'کلینیک زیبایی',
-    'تعمیر موبایل',
-    'آتلیه عکاسی',
-    'خیاطی',
-    'آرایش حیوانات'
+    { name: 'آرایشگاه مردانه', parentName: DEFAULT_SERVICE_CATEGORY_NAME },
+    { name: 'آرایشگاه زنانه', parentName: DEFAULT_SERVICE_CATEGORY_NAME },
+    { name: 'کارواش', parentName: DEFAULT_SERVICE_CATEGORY_NAME },
+    { name: 'کلینیک زیبایی', parentName: DEFAULT_SERVICE_CATEGORY_NAME },
+    { name: 'تعمیر موبایل', parentName: DEFAULT_SERVICE_CATEGORY_NAME },
+    { name: 'آتلیه عکاسی', parentName: DEFAULT_SERVICE_CATEGORY_NAME },
+    { name: 'خیاطی', parentName: DEFAULT_SERVICE_CATEGORY_NAME },
+    { name: 'آرایش حیوانات', parentName: DEFAULT_SERVICE_CATEGORY_NAME }
   ];
+  const DEFAULT_SERVICE_SUBCATEGORY_NAMES = DEFAULT_SERVICE_SUBCATEGORIES.map(item => item.name);
+  const DEFAULT_SERVICE_PARENT_MAP = DEFAULT_SERVICE_SUBCATEGORIES.reduce((acc, item) => {
+    if (item && item.name) {
+      acc[item.name] = item.parentName || DEFAULT_SERVICE_CATEGORY_NAME;
+    }
+    return acc;
+  }, {});
 
   const categorySelect = document.getElementById("category");
   const subcatWrapper = document.getElementById("subcategory-wrapper");
@@ -478,6 +486,38 @@
     return String(value).replace(/\s+/g, ' ').trim();
   }
 
+  function getCategoryParentId(item) {
+    if (!item) return '';
+    if (typeof item === 'string') return '';
+    return toIdString(
+      item.parentId
+        || item.parentID
+        || item.parent
+        || item.parentCategory
+        || item.parentCategoryId
+        || item.parentCategoryID
+        || (item.parent && (item.parent._id || item.parent.id))
+        || ''
+    );
+  }
+
+  function getCategoryParentName(item) {
+    if (!item) return '';
+    if (typeof item === 'string') return DEFAULT_SERVICE_PARENT_MAP[item] || '';
+    const value = item.parentName
+      || item.parentLabel
+      || item.parentTitle
+      || (item.parent && (item.parent.name || item.parent.title))
+      || '';
+    return normaliseCategoryText(value);
+  }
+
+  function getCategoryType(item) {
+    if (!item) return 'category';
+    if (typeof item === 'string') return 'category';
+    return item.type || 'category';
+  }
+
   function normaliseCategoryItem(raw, fallbackType = 'category') {
     if (!raw) return null;
     if (typeof raw === 'string') {
@@ -488,14 +528,22 @@
         name,
         type: fallbackType,
         isDefault: fallbackType === 'service-subcategory'
-          ? DEFAULT_SERVICE_SUBCATEGORIES.includes(name)
-          : DEFAULT_CATEGORIES.includes(name)
+          ? DEFAULT_SERVICE_SUBCATEGORY_NAMES.includes(name)
+          : DEFAULT_CATEGORIES.includes(name),
+        parentId: '',
+        parentName: fallbackType === 'service-subcategory'
+          ? DEFAULT_SERVICE_PARENT_MAP[name] || ''
+          : ''
       };
     }
     const name = normaliseCategoryText(raw.name || raw.title || raw.label || '');
     if (!name) return null;
     const id = toIdString(raw._id || raw.id || raw.value || '');
     const type = raw.type || fallbackType;
+    const parentId = getCategoryParentId(raw);
+    const parentName = getCategoryParentName(raw) || (type === 'service-subcategory'
+      ? DEFAULT_SERVICE_PARENT_MAP[name] || ''
+      : '');
     return {
       id,
       name,
@@ -503,8 +551,10 @@
       isDefault: typeof raw.isDefault === 'boolean'
         ? raw.isDefault
         : (type === 'service-subcategory'
-            ? DEFAULT_SERVICE_SUBCATEGORIES.includes(name)
-            : DEFAULT_CATEGORIES.includes(name))
+            ? DEFAULT_SERVICE_SUBCATEGORY_NAMES.includes(name)
+            : DEFAULT_CATEGORIES.includes(name)),
+      parentId,
+      parentName
     };
   }
 
@@ -513,7 +563,11 @@
     list.forEach(item => {
       const record = normaliseCategoryItem(item, type);
       if (!record) return;
-      const key = record.name.toLocaleLowerCase('fa-IR');
+      const nameKey = record.name.toLocaleLowerCase('fa-IR');
+      const parentKey = getCategoryType(record) === 'service-subcategory'
+        ? (record.parentId || record.parentName.toLocaleLowerCase('fa-IR'))
+        : '';
+      const key = parentKey ? `${nameKey}__${parentKey}` : nameKey;
       if (!unique.has(key) || (!unique.get(key).id && record.id)) {
         unique.set(key, record);
       }
@@ -529,7 +583,9 @@
           id: item.id || '',
           name: item.name,
           type: item.type,
-          isDefault: !!item.isDefault
+          isDefault: !!item.isDefault,
+          parentId: item.parentId || '',
+          parentName: item.parentName || ''
         })) : [],
         updatedAt: Date.now()
       };
@@ -569,7 +625,10 @@
   function renderCategoryOptions(list = []) {
     if (!categorySelect) return;
     const options = normaliseCategoryList(list, 'category');
-    const previous = categorySelect.value;
+    categoryState.categories = options;
+    const previousOption = categorySelect.options[categorySelect.selectedIndex];
+    const previousId = categorySelect.dataset.selectedId || (previousOption && previousOption.dataset.id) || '';
+    const previousName = categorySelect.dataset.selectedName || categorySelect.value || '';
     categorySelect.innerHTML = '';
     const placeholder = document.createElement('option');
     placeholder.value = '';
@@ -577,20 +636,51 @@
     placeholder.selected = true;
     placeholder.textContent = options.length ? 'انتخاب دسته' : 'دسته‌ای یافت نشد';
     categorySelect.appendChild(placeholder);
+
+    let matched = false;
     options.forEach(item => {
       const option = document.createElement('option');
-      option.value = item.name;
-      option.textContent = item.name;
-      if (item.id) {
-        option.dataset.id = item.id;
+      const id = item.id || '';
+      const name = item.name;
+      option.value = name;
+      option.textContent = name;
+      if (id) {
+        option.dataset.id = id;
+      }
+      if (!matched) {
+        if (previousId && id && id === previousId) {
+          option.selected = true;
+          matched = true;
+          placeholder.selected = false;
+        } else if (!previousId && previousName && name === previousName) {
+          option.selected = true;
+          matched = true;
+          placeholder.selected = false;
+        }
       }
       categorySelect.appendChild(option);
     });
+
     categorySelect.disabled = !options.length;
-    if (options.some(item => item.name === previous)) {
-      categorySelect.value = previous;
-      placeholder.selected = false;
+    if (!matched && options.length) {
+      placeholder.selected = true;
     }
+
+    const selectedOption = categorySelect.options[categorySelect.selectedIndex];
+    categorySelect.dataset.selectedId = selectedOption?.dataset.id || '';
+    categorySelect.dataset.selectedName = selectedOption?.value || '';
+
+    if (!categorySelect.dataset.bound) {
+      categorySelect.addEventListener('change', () => {
+        const currentOption = categorySelect.options[categorySelect.selectedIndex];
+        categorySelect.dataset.selectedId = currentOption?.dataset.id || '';
+        categorySelect.dataset.selectedName = currentOption?.value || '';
+        updateServiceChipsForSelection();
+      });
+      categorySelect.dataset.bound = 'true';
+    }
+
+    updateServiceChipsForSelection();
   }
 
   function highlightServiceChip(value = '') {
@@ -607,7 +697,7 @@
   function renderServiceChips(list = []) {
     if (!subcatChipsContainer) return;
     const selected = subcatInput ? subcatInput.value : '';
-    const normalised = normaliseCategoryList(list, 'service-subcategory');
+    const normalised = Array.isArray(list) ? list : [];
     subcatChipsContainer.innerHTML = '';
     if (!normalised.length) {
       const span = document.createElement('span');
@@ -635,24 +725,77 @@
     }
   }
 
+  function matchesParent(item, filter) {
+    if (!filter) return true;
+    if (getCategoryType(item) !== 'service-subcategory') return true;
+    const itemParentId = item.parentId || '';
+    const itemParentName = normaliseCategoryText(item.parentName || '');
+    const filterId = filter.id ? toIdString(filter.id) : filter.parentId ? toIdString(filter.parentId) : '';
+    const filterName = filter.name
+      ? normaliseCategoryText(filter.name)
+      : filter.parentName
+        ? normaliseCategoryText(filter.parentName)
+        : '';
+    if (filterId) {
+      return itemParentId ? itemParentId === filterId : false;
+    }
+    if (itemParentId) {
+      return false;
+    }
+    if (filterName) {
+      return itemParentName ? itemParentName === filterName : false;
+    }
+    return !itemParentName;
+  }
+
+  function getSelectedCategoryFilter() {
+    if (!categorySelect) return null;
+    const option = categorySelect.options[categorySelect.selectedIndex];
+    if (!option || !option.value) return null;
+    if (option.dataset.id) {
+      return { id: option.dataset.id };
+    }
+    return { name: option.value };
+  }
+
+  function updateServiceChipsForSelection() {
+    const filter = getSelectedCategoryFilter();
+    if (!categoryState.serviceSubcategories.length) {
+      renderServiceChips([]);
+      return;
+    }
+    const filtered = filter
+      ? categoryState.serviceSubcategories.filter(item => matchesParent(item, filter))
+      : categoryState.serviceSubcategories;
+    renderServiceChips(filtered);
+  }
+
+  function setServiceSubcategories(list = []) {
+    categoryState.serviceSubcategories = normaliseCategoryList(list, 'service-subcategory');
+    updateServiceChipsForSelection();
+  }
+
   function applyCategoryPayload(data = {}) {
     const payload = data && typeof data === 'object' ? data : {};
     const categories = normaliseCategoryList(payload?.categories, 'category');
     const services = normaliseCategoryList(payload?.serviceSubcategories, 'service-subcategory');
     const categoriesProvided = Object.prototype.hasOwnProperty.call(payload, 'categories');
     const servicesProvided = Object.prototype.hasOwnProperty.call(payload, 'serviceSubcategories');
+
     const categoriesToUse = categoriesProvided
       ? categories
-      : categories.length
-        ? categories
+      : categoryState.categories.length
+        ? categoryState.categories
         : normaliseCategoryList(DEFAULT_CATEGORIES, 'category');
+
     const servicesToUse = servicesProvided
       ? services
-      : services.length
-        ? services
+      : categoryState.serviceSubcategories.length
+        ? categoryState.serviceSubcategories
         : normaliseCategoryList(DEFAULT_SERVICE_SUBCATEGORIES, 'service-subcategory');
+
     renderCategoryOptions(categoriesToUse);
-    renderServiceChips(servicesToUse);
+    setServiceSubcategories(servicesToUse);
     saveCategoryCache(CATEGORY_CACHE_KEY, categoriesToUse);
     saveCategoryCache(SERVICE_CACHE_KEY, servicesToUse);
   }
@@ -679,7 +822,7 @@
   const cachedCategories = loadCategoryCache(CATEGORY_CACHE_KEY, DEFAULT_CATEGORIES, 'category');
   const cachedServices = loadCategoryCache(SERVICE_CACHE_KEY, DEFAULT_SERVICE_SUBCATEGORIES, 'service-subcategory');
   renderCategoryOptions(cachedCategories);
-  renderServiceChips(cachedServices);
+  setServiceSubcategories(cachedServices);
   fetchCategoryDataForForm({ silent: true });
 
   // === Service examples: setup ===
@@ -709,28 +852,30 @@ if (categorySelect && SERVICE_CATEGORIES.includes(categorySelect.value)) {
 
 
 // دسته‌بندی: نشان دادن زیرگروه "کودکان" و مثال‌های خدمات
-if (categorySelect) {
-  categorySelect.addEventListener("change", function () {
-    // بخش کودکان (بدون تغییر منطقی قبلی)
-    if (this.value === "کودکان") {
-      subcatWrapper.classList.remove("hidden");
-    } else {
-      subcatWrapper.classList.add("hidden");
-      if (subcatInput) {
-        subcatInput.value = "";
+  if (categorySelect) {
+    categorySelect.addEventListener("change", function () {
+      // بخش کودکان (بدون تغییر منطقی قبلی)
+      if (this.value === "کودکان") {
+        subcatWrapper.classList.remove("hidden");
+      } else {
+        subcatWrapper.classList.add("hidden");
+        if (subcatInput) {
+          subcatInput.value = "";
+        }
+        highlightServiceChip('');
+        document.getElementById("subcategory-hint").classList.add("hidden");
       }
-      highlightServiceChip('');
-      document.getElementById("subcategory-hint").classList.add("hidden");
-    }
 
-    // اگر دستهٔ انتخابی از نوع خدمات باشد، مثال‌ها را نشان بده
-    if (SERVICE_CATEGORIES.includes(this.value)) {
-      serviceExamples.classList.remove("hidden");
-    } else {
-      serviceExamples.classList.add("hidden");
-    }
-  });
-}
+      // اگر دستهٔ انتخابی از نوع خدمات باشد، مثال‌ها را نشان بده
+      if (SERVICE_CATEGORIES.includes(this.value)) {
+        serviceExamples.classList.remove("hidden");
+      } else {
+        serviceExamples.classList.add("hidden");
+      }
+
+      updateServiceChipsForSelection();
+    });
+  }
 
 
   if (subcatChipsContainer) {

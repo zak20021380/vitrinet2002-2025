@@ -16,15 +16,16 @@ const DEFAULT_CATEGORIES = [
   'کودکان'
 ];
 
+const DEFAULT_SERVICE_CATEGORY_NAME = 'خدمات';
 const DEFAULT_SERVICE_SUBCATEGORIES = [
-  'آرایشگاه مردانه',
-  'آرایشگاه زنانه',
-  'کارواش',
-  'کلینیک زیبایی',
-  'تعمیر موبایل',
-  'آتلیه عکاسی',
-  'خیاطی',
-  'آرایش حیوانات'
+  { name: 'آرایشگاه مردانه', parentName: DEFAULT_SERVICE_CATEGORY_NAME },
+  { name: 'آرایشگاه زنانه', parentName: DEFAULT_SERVICE_CATEGORY_NAME },
+  { name: 'کارواش', parentName: DEFAULT_SERVICE_CATEGORY_NAME },
+  { name: 'کلینیک زیبایی', parentName: DEFAULT_SERVICE_CATEGORY_NAME },
+  { name: 'تعمیر موبایل', parentName: DEFAULT_SERVICE_CATEGORY_NAME },
+  { name: 'آتلیه عکاسی', parentName: DEFAULT_SERVICE_CATEGORY_NAME },
+  { name: 'خیاطی', parentName: DEFAULT_SERVICE_CATEGORY_NAME },
+  { name: 'آرایش حیوانات', parentName: DEFAULT_SERVICE_CATEGORY_NAME }
 ];
 
 const CATEGORY_CACHE_TTL = 1000 * 60; // 1 minute
@@ -65,34 +66,70 @@ async function ensureDefaultEntries() {
     );
   }
 
-  for (const name of DEFAULT_SERVICE_SUBCATEGORIES) {
-    const slug = slugifyName(name);
-    operations.push(
-      Category.updateOne(
-        { type: 'service-subcategory', slug },
-        {
-          $setOnInsert: { name, type: 'service-subcategory' },
-          $set: { isDefault: true }
-        },
-        { upsert: true }
-      )
-    );
-  }
-
   if (operations.length) {
     await Promise.all(operations);
+  }
+
+  const servicesCategory = await Category.findOne({
+    type: 'category',
+    slug: slugifyName(DEFAULT_SERVICE_CATEGORY_NAME)
+  }).lean();
+
+  const parentCategoryId = servicesCategory ? servicesCategory._id : null;
+  const parentCategoryName = servicesCategory ? servicesCategory.name : DEFAULT_SERVICE_CATEGORY_NAME;
+
+  const serviceOperations = DEFAULT_SERVICE_SUBCATEGORIES.map(({ name, parentName }) => {
+    const slug = slugifyName(name);
+    const payload = {
+      $setOnInsert: { name, type: 'service-subcategory' },
+      $set: { isDefault: true }
+    };
+
+    const resolvedParentName = parentCategoryName || parentName || null;
+
+    if (parentCategoryId) {
+      payload.$setOnInsert.parentCategory = parentCategoryId;
+      payload.$set.parentCategory = parentCategoryId;
+    }
+
+    if (resolvedParentName) {
+      payload.$setOnInsert.parentName = resolvedParentName;
+      payload.$set.parentName = resolvedParentName;
+    }
+
+    return Category.updateOne(
+      { type: 'service-subcategory', slug },
+      payload,
+      { upsert: true }
+    );
+  });
+
+  if (serviceOperations.length) {
+    await Promise.all(serviceOperations);
   }
 }
 
 function mapCategory(doc) {
   if (!doc) return null;
+  const parentCategory = doc.parentCategory || null;
+  const parentId = parentCategory
+    ? typeof parentCategory === 'object' && parentCategory !== null
+      ? parentCategory._id || parentCategory.id || parentCategory
+      : parentCategory
+    : null;
+  const parentName = doc.parentName
+    || (typeof parentCategory === 'object' && parentCategory !== null ? parentCategory.name : null)
+    || null;
+
   return {
     id: doc._id,
     _id: doc._id,
     name: doc.name,
     slug: doc.slug,
     type: doc.type,
-    isDefault: Boolean(doc.isDefault)
+    isDefault: Boolean(doc.isDefault),
+    parentId: parentId ? parentId.toString() : null,
+    parentName: parentName
   };
 }
 
@@ -110,7 +147,10 @@ async function getCategoryLists(req, res) {
 
     const [categories, serviceSubcategories] = await Promise.all([
       Category.find({ type: 'category' }).sort({ name: 1 }).lean(),
-      Category.find({ type: 'service-subcategory' }).sort({ name: 1 }).lean()
+      Category.find({ type: 'service-subcategory' })
+        .sort({ name: 1 })
+        .populate('parentCategory', 'name')
+        .lean()
     ]);
 
     const payload = {
@@ -150,10 +190,30 @@ async function createCategory(req, res) {
       return res.status(409).json({ message: 'این عنوان از قبل وجود دارد.' });
     }
 
+    let parentCategory = null;
+    let parentName = null;
+
+    if (categoryType === 'service-subcategory') {
+      const parentId = req.body?.parentId || req.body?.parent || req.body?.parentCategory;
+      const resolvedParentId = parentId ? String(parentId).trim() : '';
+      if (!resolvedParentId) {
+        return res.status(400).json({ message: 'لطفاً دسته اصلی زیرگروه را انتخاب کنید.' });
+      }
+
+      parentCategory = await Category.findOne({ _id: resolvedParentId, type: 'category' });
+      if (!parentCategory) {
+        return res.status(404).json({ message: 'دسته اصلی انتخاب‌شده پیدا نشد.' });
+      }
+
+      parentName = parentCategory.name;
+    }
+
     const category = await Category.create({
       name: normalisedName,
       type: categoryType,
-      isDefault: false
+      isDefault: false,
+      parentCategory: parentCategory ? parentCategory._id : null,
+      parentName
     });
 
     invalidateCache();
@@ -181,6 +241,12 @@ async function deleteCategory(req, res) {
     }
 
     await category.deleteOne();
+    if (category.type === 'category') {
+      await Category.updateMany(
+        { parentCategory: category._id },
+        { $set: { parentCategory: null, parentName: null } }
+      );
+    }
     invalidateCache();
 
     return res.json({
