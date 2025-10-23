@@ -268,7 +268,7 @@
   </div>
 
   <div id="subcategory-wrapper" class="hidden">
-    <label class="block text-sm font-bold mb-1">زیر دسته <span class="text-red-500">*</span></label>
+    <label class="block text-sm font-bold mb-1">زیرگروه <span class="text-red-500">*</span></label>
     <div id="subcategory-chips" class="flex flex-wrap gap-2">
       <span class="text-xs text-gray-500">در حال بارگذاری...</span>
     </div>
@@ -851,11 +851,14 @@ if (categorySelect && SERVICE_CATEGORIES.includes(categorySelect.value)) {
 }
 
 
-// دسته‌بندی: نشان دادن زیرگروه "کودکان" و مثال‌های خدمات
+// دسته‌بندی: نشان دادن زیرگروه‌ها برای همه دسته‌ها به صورت پویا
   if (categorySelect) {
     categorySelect.addEventListener("change", function () {
-      // بخش کودکان (بدون تغییر منطقی قبلی)
-      if (this.value === "کودکان") {
+      // بررسی اینکه آیا دسته انتخاب شده زیرگروه دارد یا نه
+      const filter = getSelectedCategoryFilter();
+      const hasSubcategories = filter && categoryState.serviceSubcategories.some(item => matchesParent(item, filter));
+
+      if (hasSubcategories) {
         subcatWrapper.classList.remove("hidden");
       } else {
         subcatWrapper.classList.add("hidden");
@@ -985,13 +988,16 @@ if (categorySelect && SERVICE_CATEGORIES.includes(categorySelect.value)) {
       categoryHint.classList.add("hidden");
     }
 
-    // زیر دسته در صورت انتخاب دسته کودکان
+    // زیر دسته - بررسی برای همه دسته‌هایی که زیرگروه دارند
     let subcategory = "";
-    if (category === "کودکان") {
+    const filter = getSelectedCategoryFilter();
+    const hasSubcategories = filter && categoryState.serviceSubcategories.some(item => matchesParent(item, filter));
+
+    if (hasSubcategories && !subcatWrapper.classList.contains("hidden")) {
       subcategory = document.getElementById("subcategory").value;
       let subcategoryHint = document.getElementById("subcategory-hint");
       if (!subcategory) {
-        subcategoryHint.innerText = "لطفاً زیر دسته کودکان را انتخاب کنید.";
+        subcategoryHint.innerText = "لطفاً زیرگروه مورد نظر را انتخاب کنید.";
         subcategoryHint.classList.remove("hidden");
         hasError = true;
       } else {
