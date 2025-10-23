@@ -319,6 +319,11 @@
       color: #b45309;
     }
 
+    .chart-chip.status-error {
+      background: rgba(248, 113, 113, 0.18);
+      color: #b91c1c;
+    }
+
     .plan-grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
@@ -607,7 +612,7 @@
       </div>
     </header>
 
-    <div id="income-error" hidden>در حال حاضر اتصال به سرویس آمار درآمد برقرار نیست؛ داده‌های نمونه در حال نمایش هستند.</div>
+    <div id="income-error" hidden>در حال حاضر اتصال به سرویس آمار درآمد برقرار نیست؛ تا زمان برقراری ارتباط داده‌ای نمایش داده نمی‌شود.</div>
 
     <section class="income-filter">
       <form id="income-filter-form">
@@ -796,128 +801,127 @@
         }
       };
 
-      const createFallbackData = () => {
-        const now = new Date();
-        const start = new Date(now);
-        start.setDate(start.getDate() - 29);
+      const createEmptyDataset = () => ({
+        generatedAt: null,
+        range: { start: null, end: null },
+        summary: {
+          total: { value: 0, change: 0, delta: 0 },
+          plans: { value: 0, change: 0, delta: 0 },
+          ads: { value: 0, change: 0, delta: 0 },
+          topSeller: ''
+        },
+        planBreakdown: [],
+        trend: { labels: [], plans: [], ads: [] },
+        distribution: { labels: [], values: [] },
+        sellers: []
+      });
 
-        return {
-          generatedAt: now.toISOString(),
-          range: { start: start.toISOString(), end: now.toISOString() },
-          summary: {
-            total: { value: 12840000, change: 0.125, delta: 1420000 },
-            plans: { value: 9260000, change: 0.083, delta: 710000 },
-            ads: { value: 3580000, change: 0.187, delta: 560000 },
-            topSeller: 'محمد حسینی'
-          },
-          planBreakdown: [
-            { key: 'plan1', name: 'پلن ۱ ماهه', value: 2480000, change: 0.152 },
-            { key: 'plan3', name: 'پلن ۳ ماهه', value: 4150000, change: 0.068 },
-            { key: 'plan12', name: 'پلن ۱۲ ماهه', value: 2630000, change: -0.032 },
-            { key: 'ads', name: 'تبلیغات اختصاصی', value: 3580000, change: 0.187 }
-          ],
-          trend: {
-            labels: ['۱', '۵', '۱۰', '۱۵', '۲۰', '۲۵', '۳۰'],
-            plans: [250000, 290000, 310000, 340000, 280000, 320000, 350000],
-            ads: [120000, 100000, 130000, 110000, 140000, 115000, 125000]
-          },
-          distribution: {
-            labels: ['پلن ۱ ماهه', 'پلن ۳ ماهه', 'پلن ۱۲ ماهه', 'تبلیغات اختصاصی'],
-            values: [2480000, 4150000, 2630000, 3580000]
-          },
-          sellers: [
-            { name: 'محمد حسینی', plans: 1840000, ads: 650000, total: 2490000, plan1: 520000, plan3: 890000, plan12: 430000 },
-            { name: 'فاطمه احمدی', plans: 1620000, ads: 580000, total: 2200000, plan1: 430000, plan3: 750000, plan12: 440000 },
-            { name: 'علی رضایی', plans: 1450000, ads: 490000, total: 1940000, plan1: 390000, plan3: 680000, plan12: 380000 },
-            { name: 'زهرا محمدی', plans: 1310000, ads: 430000, total: 1740000, plan1: 350000, plan3: 600000, plan12: 360000 },
-            { name: 'امیر عباسی', plans: 1040000, ads: 380000, total: 1420000, plan1: 280000, plan3: 450000, plan12: 310000 }
-          ]
-        };
-      };
+      const toNumberArray = (input) => Array.isArray(input)
+        ? input.map((value) => ensureNumber(value, 0))
+        : [];
 
-      const fallbackData = createFallbackData();
-
-      const normaliseMetric = (metric, fallbackMetric) => {
-        if (metric == null) return { ...fallbackMetric };
+      const normaliseMetric = (metric, fallbackMetric = { value: 0, change: 0, delta: 0 }) => {
+        const baseMetric = fallbackMetric || { value: 0, change: 0, delta: 0 };
+        if (metric == null) return { ...baseMetric };
         if (typeof metric === 'number') {
-          return { value: metric, change: fallbackMetric?.change ?? 0, delta: fallbackMetric?.delta ?? 0 };
+          return {
+            value: ensureNumber(metric, baseMetric.value),
+            change: baseMetric.change,
+            delta: baseMetric.delta
+          };
         }
         return {
-          value: ensureNumber(metric.value ?? metric.amount ?? metric.total ?? fallbackMetric?.value ?? 0,
-            fallbackMetric?.value ?? 0),
-          change: ensureNumber(metric.change ?? metric.growth ?? metric.percent ?? fallbackMetric?.change ?? 0,
-            fallbackMetric?.change ?? 0),
-          delta: ensureNumber(metric.delta ?? metric.diff ?? metric.absolute ?? fallbackMetric?.delta ?? 0,
-            fallbackMetric?.delta ?? 0)
+          value: ensureNumber(metric.value ?? metric.amount ?? metric.total ?? baseMetric.value, baseMetric.value),
+          change: ensureNumber(metric.change ?? metric.growth ?? metric.percent ?? baseMetric.change, baseMetric.change),
+          delta: ensureNumber(metric.delta ?? metric.diff ?? metric.absolute ?? baseMetric.delta, baseMetric.delta)
         };
       };
 
       const normaliseData = (raw) => {
+        const base = createEmptyDataset();
         if (!raw || typeof raw !== 'object') {
-          return { ...fallbackData };
+          return base;
         }
 
-        const base = { ...fallbackData };
-        const summary = raw.summary || {};
+        const dataset = createEmptyDataset();
 
+        const summary = raw.summary || {};
         const totalMetric = normaliseMetric(summary.total ?? raw.totalIncome, base.summary.total);
         const plansMetric = normaliseMetric(summary.plans ?? raw.plansIncome, base.summary.plans);
         const adsMetric = normaliseMetric(summary.ads ?? raw.adsIncome, base.summary.ads);
-        const topSeller = summary.topSeller || raw.topSeller || base.summary.topSeller;
+        const topSeller = summary.topSeller || raw.topSeller || '';
+
+        dataset.summary = {
+          total: totalMetric,
+          plans: plansMetric,
+          ads: adsMetric,
+          topSeller
+        };
 
         const planBreakdown = Array.isArray(raw.planBreakdown)
-          ? raw.planBreakdown.map(item => ({
+          ? raw.planBreakdown.map((item) => ({
               key: item.key || item.slug || item.code || item.name,
               name: item.name || item.title || '—',
-              value: ensureNumber(item.value ?? item.amount ?? 0),
-              change: ensureNumber(item.change ?? item.growth ?? item.percent ?? 0)
+              value: ensureNumber(item.value ?? item.amount ?? 0, 0),
+              change: ensureNumber(item.change ?? item.growth ?? item.percent ?? 0, 0)
             }))
-          : base.planBreakdown;
+          : [];
 
-        const trend = raw.trend && Array.isArray(raw.trend.labels)
-          ? {
-              labels: raw.trend.labels,
-              plans: raw.trend.plans || raw.trend.planIncome || [],
-              ads: raw.trend.ads || raw.trend.adsIncome || []
-            }
-          : base.trend;
+        dataset.planBreakdown = planBreakdown;
 
-        const distribution = raw.distribution && Array.isArray(raw.distribution.values)
-          ? {
-              labels: raw.distribution.labels || planBreakdown.map(item => item.name),
-              values: raw.distribution.values
-            }
-          : {
-              labels: planBreakdown.map(item => item.name),
-              values: planBreakdown.map(item => item.value)
-            };
+        const trendSource = raw.trend || {};
+        const trendLabels = Array.isArray(trendSource.labels) ? trendSource.labels : [];
+        const trendPlansRaw = toNumberArray(trendSource.plans ?? trendSource.planIncome);
+        const trendAdsRaw = toNumberArray(trendSource.ads ?? trendSource.adsIncome);
+        const alignWithLabels = (list) => (trendLabels.length ? list.slice(0, trendLabels.length) : list);
+        dataset.trend = {
+          labels: trendLabels,
+          plans: alignWithLabels(trendPlansRaw),
+          ads: alignWithLabels(trendAdsRaw)
+        };
+
+        const distributionSource = raw.distribution || {};
+        const distributionLabels = Array.isArray(distributionSource.labels)
+          ? distributionSource.labels
+          : planBreakdown.map((item) => item.name);
+        const distributionValuesRaw = distributionSource.values ?? distributionSource.data;
+        const distributionValues = toNumberArray(distributionValuesRaw);
+        dataset.distribution = {
+          labels: distributionLabels,
+          values: distributionValues.length
+            ? distributionValues.slice(0, distributionLabels.length)
+            : planBreakdown.map((item) => item.value)
+        };
 
         const sellers = Array.isArray(raw.sellers)
-          ? raw.sellers.map(item => ({
-              name: item.name || item.sellerName || '—',
-              plans: ensureNumber(item.plans ?? item.planIncome ?? 0),
-              ads: ensureNumber(item.ads ?? item.adsIncome ?? 0),
-              total: ensureNumber(item.total ?? item.totalIncome ?? (ensureNumber(item.plans ?? 0) + ensureNumber(item.ads ?? 0))),
-              plan1: ensureNumber(item.plan1 ?? item.monthly ?? 0),
-              plan3: ensureNumber(item.plan3 ?? item.quarterly ?? 0),
-              plan12: ensureNumber(item.plan12 ?? item.yearly ?? 0)
+          ? raw.sellers.map((item) => ({
+              name: item.name || item.sellerName || item.shopName || '—',
+              plans: ensureNumber(item.plans ?? item.planIncome ?? item.subscriptionIncome ?? 0, 0),
+              ads: ensureNumber(item.ads ?? item.adsIncome ?? item.adIncome ?? 0, 0),
+              total: ensureNumber(
+                item.total ?? item.totalIncome ?? (
+                  ensureNumber(item.plans ?? item.planIncome ?? 0, 0) +
+                  ensureNumber(item.ads ?? item.adsIncome ?? 0, 0)
+                ),
+                0
+              ),
+              plan1: ensureNumber(item.plan1 ?? item.planOne ?? item.month1 ?? item.monthly ?? 0, 0),
+              plan3: ensureNumber(item.plan3 ?? item.planThree ?? item.quarterly ?? 0, 0),
+              plan12: ensureNumber(item.plan12 ?? item.planTwelve ?? item.yearly ?? item.annual ?? 0, 0)
             }))
-          : base.sellers;
+          : [];
 
-        return {
-          generatedAt: raw.generatedAt || raw.updatedAt || base.generatedAt,
-          range: raw.range || base.range,
-          summary: {
-            total: totalMetric,
-            plans: plansMetric,
-            ads: adsMetric,
-            topSeller
-          },
-          planBreakdown,
-          trend,
-          distribution,
-          sellers
+        dataset.sellers = sellers;
+
+        const range = raw.range || {};
+        dataset.range = {
+          start: range.start || raw.startDate || raw.start || null,
+          end: range.end || raw.endDate || raw.end || null
         };
+
+        dataset.generatedAt = raw.generatedAt || raw.updatedAt || raw.updated || raw.timestamp || null;
+
+        return dataset;
       };
 
       const state = {
@@ -932,14 +936,15 @@
         if (!window.Chart) return;
 
         if (!state.charts.trend) {
+          const baseTrend = createEmptyDataset().trend;
           state.charts.trend = new Chart(trendCanvas.getContext('2d'), {
             type: 'line',
             data: {
-              labels: fallbackData.trend.labels,
+              labels: baseTrend.labels,
               datasets: [
                 {
                   label: 'اشتراک‌ها',
-                  data: fallbackData.trend.plans,
+                  data: baseTrend.plans,
                   borderColor: '#10b981',
                   backgroundColor: 'rgba(16, 185, 129, 0.15)',
                   borderWidth: 3,
@@ -951,7 +956,7 @@
                 },
                 {
                   label: 'تبلیغات',
-                  data: fallbackData.trend.ads,
+                  data: baseTrend.ads,
                   borderColor: '#0ea5e9',
                   backgroundColor: 'rgba(14, 165, 233, 0.15)',
                   borderWidth: 3,
@@ -1007,13 +1012,14 @@
         }
 
         if (!state.charts.distribution) {
+          const baseDistribution = createEmptyDataset().distribution;
           state.charts.distribution = new Chart(distributionCanvas.getContext('2d'), {
             type: 'doughnut',
             data: {
-              labels: fallbackData.distribution.labels,
+              labels: baseDistribution.labels,
               datasets: [
                 {
-                  data: fallbackData.distribution.values,
+                  data: baseDistribution.values,
                   backgroundColor: ['#10b981', '#34d399', '#6ee7b7', '#0ea5e9'],
                   borderColor: '#ffffff',
                   borderWidth: 2,
@@ -1062,21 +1068,29 @@
           const valueEl = card.querySelector('[data-role="value"]');
           const changeEl = card.querySelector('[data-role="change"]');
           const deltaEl = card.querySelector('[data-role="delta"]');
-          const changeValue = ensureNumber(metric.change, 0);
+          const safeMetric = normaliseMetric(metric);
+          const changeValue = ensureNumber(safeMetric.change, 0);
 
-          valueEl.textContent = formatCurrency(metric.value);
-          deltaEl.textContent = metric.delta
-            ? `${formatCurrency(Math.abs(metric.delta))} ${changeValue >= 0 ? 'افزایش' : 'کاهش'} نسبت به ماه قبل`
-            : 'بدون تغییر نسبت به ماه قبل';
+          if (valueEl) {
+            valueEl.textContent = formatCurrency(safeMetric.value);
+          }
 
-          changeEl.textContent = formatPercent(changeValue);
-          changeEl.classList.remove('negative', 'neutral', 'positive');
-          if (changeValue > 0) {
-            changeEl.classList.add('positive');
-          } else if (changeValue < 0) {
-            changeEl.classList.add('negative');
-          } else {
-            changeEl.classList.add('neutral');
+          if (deltaEl) {
+            deltaEl.textContent = safeMetric.delta
+              ? `${formatCurrency(Math.abs(safeMetric.delta))} ${changeValue >= 0 ? 'افزایش' : 'کاهش'} نسبت به ماه قبل`
+              : 'بدون تغییر نسبت به ماه قبل';
+          }
+
+          if (changeEl) {
+            changeEl.textContent = formatPercent(changeValue);
+            changeEl.classList.remove('negative', 'neutral', 'positive');
+            if (changeValue > 0) {
+              changeEl.classList.add('positive');
+            } else if (changeValue < 0) {
+              changeEl.classList.add('negative');
+            } else {
+              changeEl.classList.add('neutral');
+            }
           }
         };
 
@@ -1193,12 +1207,12 @@
         loadingOverlay.hidden = !isLoading;
       };
 
-      const updateStatus = (usingFallback) => {
+      const updateStatus = (hasError) => {
         if (!statusChip) return;
-        statusChip.classList.remove('status-success', 'status-warning');
-        if (usingFallback) {
-          statusChip.textContent = 'داده نمونه';
-          statusChip.classList.add('status-warning');
+        statusChip.classList.remove('status-success', 'status-warning', 'status-error');
+        if (hasError) {
+          statusChip.textContent = 'خطای اتصال';
+          statusChip.classList.add('status-error');
         } else {
           statusChip.textContent = 'متصل به سرویس';
           statusChip.classList.add('status-success');
@@ -1217,16 +1231,21 @@
         if (rangeLabel) {
           if (range.start && range.end) {
             rangeLabel.textContent = `${toPersianDate(range.start)} تا ${toPersianDate(range.end)}`;
+          } else if (range.start || range.end) {
+            const singleDate = range.start || range.end;
+            rangeLabel.textContent = toPersianDate(singleDate);
           } else {
-            rangeLabel.textContent = '۳۰ روز اخیر';
+            rangeLabel.textContent = 'بدون فیلتر زمانی فعال';
           }
         }
 
         if (updatedLabel) {
-          updatedLabel.textContent = toPersianDateTime(dataset.generatedAt || new Date());
+          updatedLabel.textContent = dataset.generatedAt
+            ? toPersianDateTime(dataset.generatedAt)
+            : '—';
         }
 
-        updateStatus(usingFallback);
+        updateStatus(Boolean(usingFallback));
         if (errorBanner) {
           errorBanner.hidden = !usingFallback;
         }
@@ -1253,19 +1272,34 @@
         setLoading(true);
         const selectedStart = startInput?.value || null;
         const selectedEnd = endInput?.value || null;
-        let remoteData = null;
+        let dataset = createEmptyDataset();
         let usingFallback = false;
 
         try {
-          remoteData = await fetchIncomeData({ start: selectedStart, end: selectedEnd });
+          const remoteData = await fetchIncomeData({ start: selectedStart, end: selectedEnd });
+          dataset = normaliseData(remoteData);
         } catch (error) {
-          console.warn('load income insights failed; falling back to sample data.', error);
+          console.warn('load income insights failed; no data will be displayed.', error);
           usingFallback = true;
         }
 
-        const dataset = remoteData ? normaliseData(remoteData) : { ...createFallbackData() };
+        if (!dataset.range) {
+          dataset.range = { start: null, end: null };
+        }
+        if (!dataset.range.start && selectedStart) {
+          dataset.range.start = selectedStart;
+        }
+        if (!dataset.range.end && selectedEnd) {
+          dataset.range.end = selectedEnd;
+        }
+
         applyData(dataset, { usingFallback });
         setLoading(false);
+
+        if (usingFallback) {
+          showToast('خطا در دریافت داده‌های درآمد. لطفاً اتصال را بررسی کنید.');
+          return;
+        }
 
         if (reason === 'filter') {
           showToast('فیلتر زمانی با موفقیت اعمال شد.');
