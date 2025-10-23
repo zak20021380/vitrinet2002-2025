@@ -4299,6 +4299,40 @@ tr:last-child td {
 
 .chip-item button:hover {
   color: #ef4444;
+  transform: scale(1.1);
+}
+
+.chip-item button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* دسته‌بندی‌های پیش‌فرض (غیر قابل حذف) */
+.chip-item-default {
+  background: rgba(148, 163, 184, 0.1) !important;
+  border-color: rgba(148, 163, 184, 0.25) !important;
+  color: #64748b !important;
+  position: relative;
+}
+
+.chip-item-default::after {
+  content: '🔒';
+  font-size: 0.75rem;
+  margin-right: 0.25rem;
+  opacity: 0.6;
+}
+
+/* دسته‌بندی‌های سفارشی (قابل حذف) */
+.chip-item:not(.chip-item-default) {
+  background: rgba(16, 185, 129, 0.12);
+  border-color: rgba(16, 185, 129, 0.3);
+  color: #047857;
+  transition: all 0.2s ease;
+}
+
+.chip-item:not(.chip-item-default):hover {
+  background: rgba(16, 185, 129, 0.18);
+  box-shadow: 0 2px 8px rgba(16, 185, 129, 0.2);
 }
 
 .chip-list.preview .chip-item {

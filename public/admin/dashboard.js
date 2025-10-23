@@ -837,7 +837,8 @@ function handleChipRemoval(event) {
     return;
   }
   const label = type === 'service-subcategory' ? 'زیرگروه' : 'دسته';
-  if (!confirm(`آیا از حذف ${label} «${name}» مطمئن هستید؟`)) return;
+  const confirmMessage = `⚠️ حذف ${label} «${name}»\n\nآیا از حذف این ${label} مطمئن هستید؟\n\nتوجه: این عملیات غیر قابل بازگشت است و ${label} از لیست دسته‌بندی‌ها حذف خواهد شد.`;
+  if (!confirm(confirmMessage)) return;
   deleteCategoryOnServer(id, type, name);
 }
 
