@@ -640,13 +640,14 @@ function renderChipList(container, items = [], { removable = true, type = 'categ
     if (!name) return;
     const chip = document.createElement('div');
     chip.className = 'chip-item';
-    if (isDefaultCategory(item)) {
+    const isDefault = isDefaultCategory(item);
+    if (isDefault) {
       chip.classList.add('chip-item-default');
     }
     const label = document.createElement('span');
     label.textContent = name;
     chip.appendChild(label);
-    if (removable && !isDefaultCategory(item)) {
+    if (removable) {
       const btn = document.createElement('button');
       btn.type = 'button';
       btn.dataset.action = 'remove-category';
@@ -656,6 +657,8 @@ function renderChipList(container, items = [], { removable = true, type = 'categ
       if (id) {
         btn.dataset.id = id;
       }
+      btn.dataset.isDefault = isDefault ? 'true' : 'false';
+      btn.title = `حذف ${name}`;
       btn.setAttribute('aria-label', `حذف ${name}`);
       const icon = document.createElement('i');
       icon.className = 'ri-close-circle-line';
@@ -737,15 +740,17 @@ async function fetchCategoryListsFromApi({ silent = false } = {}) {
   try {
     const res = await fetch(CATEGORY_API_URL, { credentials: 'include' });
     const data = await res.json().catch(() => ({}));
+    const payload = data && typeof data === 'object' ? data : {};
     if (!res.ok) {
-      throw new Error(data?.message || 'خطا در دریافت دسته‌بندی‌ها.');
+      throw new Error(payload?.message || 'خطا در دریافت دسته‌بندی‌ها.');
     }
-    const categories = sortCategoryList(normalizeCategoryList(data?.categories, 'category'));
-    const serviceSubcategories = sortCategoryList(normalizeCategoryList(data?.serviceSubcategories, 'service-subcategory'));
-    if (categories.length) {
+    const categories = sortCategoryList(normalizeCategoryList(payload?.categories, 'category'));
+    const serviceSubcategories = sortCategoryList(normalizeCategoryList(payload?.serviceSubcategories, 'service-subcategory'));
+
+    if (Object.prototype.hasOwnProperty.call(payload, 'categories')) {
       categoryManagerState.categories = categories;
     }
-    if (serviceSubcategories.length) {
+    if (Object.prototype.hasOwnProperty.call(payload, 'serviceSubcategories')) {
       categoryManagerState.serviceSubcategories = serviceSubcategories;
     }
     persistCategoryState();
@@ -807,17 +812,21 @@ async function deleteCategoryOnServer(id, type, name) {
       credentials: 'include'
     });
     const data = await res.json().catch(() => ({}));
+    const payload = data && typeof data === 'object' ? data : {};
     if (!res.ok) {
-      throw new Error(data?.message || `حذف ${label} انجام نشد.`);
+      throw new Error(payload?.message || `حذف ${label} انجام نشد.`);
     }
-    if (type === 'service-subcategory') {
-      categoryManagerState.serviceSubcategories = categoryManagerState.serviceSubcategories.filter(item => getCategoryId(item) !== id);
+    const deletedType = (payload?.item && payload.item.type) || type;
+    const deletedName = (payload?.item && payload.item.name) || name;
+    const shouldRemove = item => getCategoryId(item) === id || getCategoryName(item) === deletedName;
+    if (deletedType === 'service-subcategory') {
+      categoryManagerState.serviceSubcategories = categoryManagerState.serviceSubcategories.filter(item => !shouldRemove(item));
     } else {
-      categoryManagerState.categories = categoryManagerState.categories.filter(item => getCategoryId(item) !== id);
+      categoryManagerState.categories = categoryManagerState.categories.filter(item => !shouldRemove(item));
     }
     persistCategoryState();
     renderCategoryManager();
-    showCategoryFeedback('success', data?.message || `${label} «${name}» حذف شد.`);
+    showCategoryFeedback('success', payload?.message || `${label} «${name}» حذف شد.`);
   } catch (error) {
     console.error('deleteCategoryOnServer ->', error);
     showCategoryFeedback('error', error.message || 'حذف دسته انجام نشد.');
@@ -832,13 +841,20 @@ function handleChipRemoval(event) {
   const type = rawType === 'service' ? 'service-subcategory' : rawType;
   const name = button.dataset.name || '';
   const id = button.dataset.id;
+  const isDefault = button.dataset.isDefault === 'true';
   if (!id) {
     showCategoryFeedback('error', 'برای حذف ابتدا با سرور همگام‌سازی کنید.');
     return;
   }
   const label = type === 'service-subcategory' ? 'زیرگروه' : 'دسته';
-  if (!confirm(`آیا از حذف ${label} «${name}» مطمئن هستید؟`)) return;
-  deleteCategoryOnServer(id, type, name);
+  const confirmMessage = isDefault
+    ? `این ${label} جزو گزینه‌های پیش‌فرض بوده است و با حذف آن از تمام فرم‌ها حذف می‌شود. آیا از حذف «${name}» مطمئن هستید؟`
+    : `آیا از حذف ${label} «${name}» مطمئن هستید؟`;
+  if (!confirm(confirmMessage)) return;
+  button.disabled = true;
+  deleteCategoryOnServer(id, type, name).finally(() => {
+    button.disabled = false;
+  });
 }
 
 function renderCategoryManager() {

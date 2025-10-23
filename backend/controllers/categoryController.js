@@ -44,6 +44,11 @@ function normaliseName(value = '') {
 }
 
 async function ensureDefaultEntries() {
+  const totalDocuments = await Category.estimatedDocumentCount();
+  if (totalDocuments > 0) {
+    return;
+  }
+
   const operations = [];
 
   for (const name of DEFAULT_CATEGORIES) {
@@ -173,10 +178,6 @@ async function deleteCategory(req, res) {
     const category = await Category.findById(id);
     if (!category) {
       return res.status(404).json({ message: 'دسته پیدا نشد.' });
-    }
-
-    if (category.isDefault) {
-      return res.status(400).json({ message: 'حذف دسته‌بندی‌های پیش‌فرض مجاز نیست.' });
     }
 
     await category.deleteOne();
