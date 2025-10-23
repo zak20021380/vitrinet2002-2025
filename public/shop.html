@@ -112,20 +112,62 @@ body {
   color: var(--primary);
 }
 
-.brand-emblem {
-  display: flex;
+.brand-logo {
+  position: relative;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 44px;
-  height: 44px;
+  width: 48px;
+  height: 48px;
+  padding: 6px;
   border-radius: 14px;
-  background: linear-gradient(135deg, var(--primary), rgba(82, 183, 136, 0.9));
-  color: #fff;
-  font-weight: 800;
-  font-size: 1.15rem;
-  letter-spacing: -0.02em;
-  box-shadow: 0 12px 24px rgba(124, 131, 253, 0.2);
+  background: linear-gradient(135deg, rgba(124, 131, 253, 0.12), rgba(82, 183, 136, 0.08));
+  border: 1px solid rgba(124, 131, 253, 0.25);
+  box-shadow: 0 12px 24px rgba(124, 131, 253, 0.18);
+  overflow: hidden;
   flex-shrink: 0;
+  transition: transform 0.2s ease;
+}
+
+.home-link:hover .brand-logo,
+.home-link:focus-visible .brand-logo {
+  transform: translateY(-1px);
+}
+
+.brand-logo-img {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  filter: drop-shadow(0 8px 16px rgba(124, 131, 253, 0.18));
+  transition: transform 0.2s ease;
+}
+
+.home-link:hover .brand-logo-img,
+.home-link:focus-visible .brand-logo-img {
+  transform: scale(1.05);
+}
+
+.brand-logo-img.is-hidden {
+  display: none;
+}
+
+.logo-fallback {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  font-weight: 800;
+  font-size: 1.05rem;
+  letter-spacing: -0.02em;
+  color: var(--primary);
+  background: rgba(255, 255, 255, 0.85);
+}
+
+.logo-fallback.is-visible {
+  display: flex;
 }
 
 .logo-wrap {
@@ -333,10 +375,10 @@ body {
 }
 
 @media (max-width: 540px) {
-  .brand-emblem {
-    width: 40px;
-    height: 40px;
-    font-size: 1rem;
+  .brand-logo {
+    width: 42px;
+    height: 42px;
+    padding: 5px;
     border-radius: 12px;
   }
 
@@ -845,11 +887,14 @@ body {
         </svg>
       </button>
       <a href="/" class="home-link" title="رفتن به صفحه اصلی" aria-label="خانه">
-        <span class="brand-emblem" aria-hidden="true">NS</span>
+        <span class="brand-logo">
+          <img src="/assets/images/logo.svg" alt="لوگوی ویترینت" class="brand-logo-img" loading="lazy" onerror="this.classList.add('is-hidden'); this.nextElementSibling.classList.add('is-visible');">
+          <span class="logo-fallback" aria-hidden="true">وی</span>
+        </span>
         <div class="logo-wrap">
-          <span class="brand-label">ویترینت</span>
-          <span class="logo-text logo-txt" id="shopLogoText">نئون استایل</span>
-          <span class="logo-caption logo-tagline">پوشاک مدرن و اکسسوری خاص</span>
+          <span class="brand-label">Vitrinet</span>
+          <span class="logo-text logo-txt" id="shopLogoText">ویترینت</span>
+          <span class="logo-caption logo-tagline">بازاری به وسعت ایران</span>
         </div>
       </a>
     </div>
