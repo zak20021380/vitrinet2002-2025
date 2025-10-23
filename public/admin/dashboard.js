@@ -3285,6 +3285,22 @@ const SERVICE_STATUS_CLASS = {
 
 const serviceShopsPanelEl = document.getElementById('service-shops-panel');
 const serviceShopsIframe = document.getElementById('service-shops-iframe');
+function getServiceShopsIframeDocument() {
+  if (!serviceShopsIframe) return null;
+  try {
+    return serviceShopsIframe.contentDocument;
+  } catch (err) {
+    return null;
+  }
+}
+function getServiceShopsIframeWindow() {
+  if (!serviceShopsIframe) return null;
+  try {
+    return serviceShopsIframe.contentWindow;
+  } catch (err) {
+    return null;
+  }
+}
 const serviceShopsEmbedLoading = document.getElementById('service-shops-embed-loading');
 const serviceShopsTableBody = serviceShopsPanelEl ? serviceShopsPanelEl.querySelector('#service-shops-table tbody') : null;
 const serviceShopsLoadingEl = serviceShopsPanelEl ? serviceShopsPanelEl.querySelector('#service-shops-loading') : null;
@@ -3304,23 +3320,19 @@ let serviceShopsIframeLoaded = false;
 
 function adjustServiceShopsIframeHeight() {
   if (!serviceShopsIframe || !serviceShopsIframeLoaded) return;
-  try {
-    const doc = serviceShopsIframe.contentDocument;
-    if (!doc) return;
-    const body = doc.body;
-    const html = doc.documentElement;
-    const height = Math.max(
-      body ? body.scrollHeight : 0,
-      body ? body.offsetHeight : 0,
-      html ? html.scrollHeight : 0,
-      html ? html.offsetHeight : 0
-    );
-    if (height) {
-      const padding = window.innerWidth < 768 ? 24 : 48;
-      serviceShopsIframe.style.height = `${height + padding}px`;
-    }
-  } catch (err) {
-    console.warn('service-shops iframe height adjustment failed:', err);
+  const doc = getServiceShopsIframeDocument();
+  if (!doc) return;
+  const body = doc.body;
+  const html = doc.documentElement;
+  const height = Math.max(
+    body ? body.scrollHeight : 0,
+    body ? body.offsetHeight : 0,
+    html ? html.scrollHeight : 0,
+    html ? html.offsetHeight : 0
+  );
+  if (height) {
+    const padding = window.innerWidth < 768 ? 24 : 48;
+    serviceShopsIframe.style.height = `${height + padding}px`;
   }
 }
 
@@ -3336,24 +3348,21 @@ function setupServiceShopsIframeListeners() {
     }
     serviceShopsIframe.classList.add('is-ready');
     adjustServiceShopsIframeHeight();
-    try {
-      const doc = serviceShopsIframe.contentDocument;
-      if (doc?.body) {
-        serviceShopsIframeObserver?.disconnect?.();
-        serviceShopsIframeObserver = new MutationObserver(() => {
-          adjustServiceShopsIframeHeight();
-        });
-        serviceShopsIframeObserver.observe(doc.body, {
-          childList: true,
-          subtree: true,
-          attributes: true,
-          characterData: true
-        });
-      }
-      serviceShopsIframe.contentWindow?.addEventListener('resize', adjustServiceShopsIframeHeight);
-    } catch (err) {
-      console.warn('service-shops iframe observer setup failed:', err);
+    const doc = getServiceShopsIframeDocument();
+    if (doc?.body) {
+      serviceShopsIframeObserver?.disconnect?.();
+      serviceShopsIframeObserver = new MutationObserver(() => {
+        adjustServiceShopsIframeHeight();
+      });
+      serviceShopsIframeObserver.observe(doc.body, {
+        childList: true,
+        subtree: true,
+        attributes: true,
+        characterData: true
+      });
     }
+    const iframeWindow = getServiceShopsIframeWindow();
+    iframeWindow?.addEventListener('resize', adjustServiceShopsIframeHeight);
   });
   serviceShopsIframe.dataset.listeners = 'true';
   window.addEventListener('resize', adjustServiceShopsIframeHeight);
