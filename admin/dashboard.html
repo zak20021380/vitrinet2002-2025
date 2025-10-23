@@ -72,6 +72,10 @@
             backdrop-filter: blur(12px);
         }
 
+        .card + .card {
+            margin-top: -8px;
+        }
+
         .table-wrapper {
             overflow: hidden;
             border-radius: 16px;
@@ -124,6 +128,22 @@
             display: flex;
             flex-wrap: wrap;
             gap: 12px;
+        }
+
+        .booking-digest {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .booking-digest strong {
+            font-size: 18px;
+            color: var(--primary);
+        }
+
+        .booking-digest span {
+            color: var(--text-muted);
+            font-size: 13px;
         }
 
         .status-chip {
@@ -392,6 +412,96 @@
             color: var(--text-strong);
         }
 
+        .reservations-section {
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 18px;
+        }
+
+        .summary-card {
+            border: 1px solid rgba(112, 128, 176, 0.12);
+            border-radius: 18px;
+            padding: 18px;
+            background: rgba(255, 255, 255, 0.86);
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            transition: transform 160ms ease, box-shadow 160ms ease;
+            cursor: pointer;
+        }
+
+        .summary-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 18px 40px rgba(61, 115, 255, 0.14);
+        }
+
+        .summary-card strong {
+            font-size: 26px;
+            color: var(--primary);
+        }
+
+        .summary-meta {
+            display: flex;
+            gap: 12px;
+            color: var(--text-muted);
+            font-size: 13px;
+        }
+
+        .reservation-table table {
+            border-collapse: collapse;
+            width: 100%;
+        }
+
+        .reservation-table thead {
+            background: rgba(61, 115, 255, 0.1);
+        }
+
+        .reservation-table tbody tr:hover {
+            background: rgba(61, 115, 255, 0.08);
+        }
+
+        .reservation-service {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .reservation-service span {
+            color: var(--text-muted);
+            font-size: 13px;
+        }
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 4px 10px;
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .badge.success {
+            background: rgba(55, 178, 108, 0.14);
+            color: var(--success);
+        }
+
+        .badge.pending {
+            background: rgba(249, 167, 43, 0.16);
+            color: var(--warning);
+        }
+
+        .badge.canceled {
+            background: rgba(242, 87, 100, 0.16);
+            color: var(--danger);
+        }
+
         @media (max-width: 768px) {
             body {
                 padding: 32px 12px;
@@ -410,6 +520,10 @@
                 top: 12px;
                 left: 12px;
             }
+
+            .summary-grid {
+                grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            }
         }
     </style>
 </head>
@@ -427,6 +541,7 @@
                     <thead>
                         <tr>
                             <th>اطلاعات مغازه</th>
+                            <th>وضعیت رزروها</th>
                             <th>وضعیت</th>
                             <th>آخرین بروزرسانی</th>
                             <th>عملیات</th>
@@ -440,6 +555,12 @@
                                     <span>مدیر: ابراهیم اصفهانی</span>
                                     <span>خدمات خودرو</span>
                                     <span>۰۹۱۳۷۱۰۰۰۸۴</span>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="booking-digest">
+                                    <strong>۱۸ رزرو فعال</strong>
+                                    <span>۳ رزرو امروز • ۲ در انتظار تایید</span>
                                 </div>
                             </td>
                             <td>
@@ -465,6 +586,12 @@
                                 </div>
                             </td>
                             <td>
+                                <div class="booking-digest">
+                                    <strong>۱۲ رزرو فعال</strong>
+                                    <span>۲ رزرو امروز • ۳ در انتظار تایید</span>
+                                </div>
+                            </td>
+                            <td>
                                 <span class="status-chip hold">نیازمند پیگیری</span>
                             </td>
                             <td>
@@ -487,6 +614,12 @@
                                 </div>
                             </td>
                             <td>
+                                <div class="booking-digest">
+                                    <strong>۹ رزرو فعال</strong>
+                                    <span>۱ رزرو امروز • ۴ در انتظار تایید</span>
+                                </div>
+                            </td>
+                            <td>
                                 <span class="status-chip risk">ریسک لغو بالا</span>
                             </td>
                             <td>
@@ -500,6 +633,29 @@
                             </td>
                         </tr>
                     </tbody>
+                </table>
+            </div>
+        </section>
+
+        <section class="card reservations-section">
+            <div>
+                <h2 class="page-subtitle" style="font-weight:600;color:var(--text-strong);">پایش لحظه‌ای رزروها</h2>
+                <p class="page-subtitle" style="margin-top:6px;">نمای کلی از وضعیت رزروهای فعال و زمان‌بندی شده برای هر مغازه</p>
+            </div>
+            <div class="summary-grid" id="reservationSummary"></div>
+
+            <div class="reservation-table">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>مشتری</th>
+                            <th>خدمت</th>
+                            <th>تاریخ و ساعت</th>
+                            <th>مغازه</th>
+                            <th>وضعیت</th>
+                        </tr>
+                    </thead>
+                    <tbody id="reservationList"></tbody>
                 </table>
             </div>
         </section>
@@ -593,6 +749,10 @@
                 returningCustomers: "۳۲٪ مشتریان تکراری",
                 avgCompletionTime: "۳ ساعت و ۴۵ دقیقه",
                 ontimeRate: "۸۷٪ سفارش‌ها در زمان مقرر تحویل شد",
+                activeBookings: 18,
+                todayBookings: 3,
+                pendingBookings: 2,
+                nextSlot: "امروز ساعت ۱۵:۰۰",
                 topServices: [
                     { name: "تعمیر سیستم صوتی و برق خودرو", bookings: 156, revenueShare: 42 },
                     { name: "سرامیک بدنه و صفرشویی", bookings: 112, revenueShare: 33 },
@@ -625,6 +785,10 @@
                 returningCustomers: "۴۶٪ مشتریان تکراری",
                 avgCompletionTime: "۴ ساعت و ۱۰ دقیقه",
                 ontimeRate: "۷۸٪ سفارش‌ها در زمان مقرر تحویل شد",
+                activeBookings: 12,
+                todayBookings: 2,
+                pendingBookings: 3,
+                nextSlot: "امروز ساعت ۱۱:۰۰",
                 topServices: [
                     { name: "پشتیبانی شبکه اداری", bookings: 94, revenueShare: 38 },
                     { name: "نصب و راه‌اندازی دوربین", bookings: 76, revenueShare: 34 },
@@ -657,6 +821,10 @@
                 returningCustomers: "۵۳٪ مشتریان تکراری",
                 avgCompletionTime: "۵ ساعت و ۲۰ دقیقه",
                 ontimeRate: "۶۸٪ سفارش‌ها در زمان مقرر تحویل شد",
+                activeBookings: 9,
+                todayBookings: 1,
+                pendingBookings: 4,
+                nextSlot: "امروز ساعت ۱۹:۰۰",
                 topServices: [
                     { name: "نصب خانه هوشمند", bookings: 62, revenueShare: 44 },
                     { name: "سرویس کولر گازی اینورتر", bookings: 54, revenueShare: 31 },
@@ -694,6 +862,8 @@
         const ontimeRate = document.getElementById("ontimeRate");
         const topServices = document.getElementById("topServices");
         const revenueBars = document.getElementById("revenueBars");
+        const reservationSummary = document.getElementById("reservationSummary");
+        const reservationList = document.getElementById("reservationList");
 
         function formatCurrency(amount) {
             return new Intl.NumberFormat("fa-IR", {
@@ -760,6 +930,76 @@
             document.body.style.overflow = "hidden";
         }
 
+        const reservations = [
+            {
+                customer: "سپیده سادات", service: "پکیج صفرشویی کامل", schedule: "۱۸ مرداد - ساعت ۱۵:۰۰",
+                shopId: "wallet", status: "confirmed"
+            },
+            {
+                customer: "محمد رستگار", service: "تعویض سیم‌کشی و رفع اتصالی", schedule: "۱۸ مرداد - ساعت ۱۸:۳۰",
+                shopId: "wallet", status: "pending"
+            },
+            {
+                customer: "الهام زند", service: "پشتیبانی شبکه شعبه غرب", schedule: "۱۸ مرداد - ساعت ۱۱:۰۰",
+                shopId: "mostofi", status: "confirmed"
+            },
+            {
+                customer: "آرمین راد", service: "نصب دوربین مداربسته ۸ کانال", schedule: "۱۹ مرداد - ساعت ۱۰:۳۰",
+                shopId: "mostofi", status: "pending"
+            },
+            {
+                customer: "نگار طاهری", service: "سرویس کولر گازی اینورتر", schedule: "۱۸ مرداد - ساعت ۱۹:۰۰",
+                shopId: "digisir", status: "confirmed"
+            },
+            {
+                customer: "حسن فرجی", service: "عیب‌یابی یخچال سامسونگ", schedule: "۱۹ مرداد - ساعت ۱۳:۴۵",
+                shopId: "digisir", status: "canceled"
+            },
+            {
+                customer: "الناز بهرامی", service: "سرامیک بدنه خودرو", schedule: "۲۰ مرداد - ساعت ۰۹:۱۵",
+                shopId: "wallet", status: "confirmed"
+            },
+            {
+                customer: "میلاد ملکی", service: "تعمیرات تخصصی لپ‌تاپ", schedule: "۲۰ مرداد - ساعت ۱۲:۲۰",
+                shopId: "mostofi", status: "pending"
+            }
+        ];
+
+        function renderReservations() {
+            reservationSummary.innerHTML = Object.entries(shops).map(([shopId, shop]) => `
+                <div class="summary-card" data-shop-id="${shopId}">
+                    <strong>${formatCurrency(shop.activeBookings)} رزرو</strong>
+                    <div class="reservation-service">
+                        <span style="font-weight:600;color:var(--text-strong);">${shop.name}</span>
+                        <span>${shop.todayBookings} مورد امروز • ${shop.pendingBookings} مورد در انتظار</span>
+                    </div>
+                    <div class="summary-meta">
+                        <span>نزدیک‌ترین زمان: ${shop.nextSlot}</span>
+                    </div>
+                </div>
+            `).join("");
+
+            reservationList.innerHTML = reservations.map((item, index) => {
+                const shop = shops[item.shopId];
+                const badgeClass = item.status === "confirmed" ? "success" : item.status === "pending" ? "pending" : "canceled";
+                const badgeText = item.status === "confirmed" ? "تایید شده" : item.status === "pending" ? "در انتظار" : "لغو شده";
+                return `
+                    <tr data-shop-id="${item.shopId}">
+                        <td>${item.customer}</td>
+                        <td>
+                            <div class="reservation-service">
+                                <span style="font-weight:600;color:var(--text-strong);">${item.service}</span>
+                                <span>کد رزرو: ${item.shopId.toUpperCase()}-${index + 1012}</span>
+                            </div>
+                        </td>
+                        <td>${item.schedule}</td>
+                        <td>${shop?.name ?? ""}</td>
+                        <td><span class="badge ${badgeClass}">${badgeText}</span></td>
+                    </tr>
+                `;
+            }).join("");
+        }
+
         function closeModal() {
             modal.classList.remove("active");
             document.body.style.overflow = "";
@@ -780,6 +1020,18 @@
             });
         });
 
+        reservationSummary.addEventListener("click", event => {
+            const card = event.target.closest(".summary-card");
+            if (!card) return;
+            openModal(card.getAttribute("data-shop-id"));
+        });
+
+        reservationList.addEventListener("click", event => {
+            const row = event.target.closest("tr[data-shop-id]");
+            if (!row) return;
+            openModal(row.getAttribute("data-shop-id"));
+        });
+
         document.getElementById("modalClose").addEventListener("click", closeModal);
 
         modal.addEventListener("click", event => {
@@ -793,6 +1045,8 @@
                 closeModal();
             }
         });
+
+        renderReservations();
     </script>
 </body>
 </html>
