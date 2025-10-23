@@ -99,13 +99,14 @@ body {
 
 .home-link {
   display: inline-flex;
-  align-items: flex-start;
-  gap: 0.75rem;
+  align-items: center;
+  gap: 0.85rem;
   text-decoration: none;
   background: transparent;
   padding: 0;
   color: inherit;
   transition: color 0.2s ease;
+  min-width: 0;
 }
 
 .home-link:hover .logo-text,
@@ -113,11 +114,17 @@ body {
   color: var(--primary);
 }
 
+.brand-label {
+  flex: 0 0 auto;
+}
+
 .logo-wrap {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  gap: 0.2rem;
+  justify-content: center;
+  gap: 0.15rem;
+  min-width: 0;
 }
 
 .brand-label {
@@ -270,23 +277,35 @@ body {
     flex-wrap: wrap;
     align-items: flex-start;
     padding: 0.75rem 1rem;
+    row-gap: 0.75rem;
   }
 
   .brand-area {
     order: 1;
     width: 100%;
     justify-content: space-between;
+    align-items: center;
+    gap: 0.75rem;
   }
 
   .home-link {
     flex: 1;
-    gap: 0.75rem;
+    gap: 0.65rem;
+  }
+
+  .brand-label {
+    font-size: clamp(1.1rem, 0.95rem + 1.4vw, 1.65rem);
+  }
+
+  .logo-wrap {
+    gap: 0.1rem;
+    min-width: calc(100% - 3.2rem);
   }
 
   .badge-cluster {
     order: 2;
     width: 100%;
-    justify-content: flex-start;
+    justify-content: center;
     padding-top: 0.5rem;
   }
 
@@ -324,8 +343,13 @@ body {
 }
 
 @media (max-width: 540px) {
-  .brand-label {
-    font-size: clamp(1.15rem, 0.95rem + 1.5vw, 1.6rem);
+  .home-link {
+    gap: 0.6rem;
+  }
+
+  .logo-wrap {
+    gap: 0.05rem;
+    min-width: calc(100% - 2.8rem);
   }
 
   .logo-text {
@@ -352,10 +376,7 @@ body {
 @media (max-width: 420px) {
   .shop-header .header-shell {
     padding: 0.7rem 0.85rem;
-  }
-
-  .brand-label {
-    font-size: clamp(1.05rem, 0.85rem + 2vw, 1.4rem);
+    row-gap: 0.65rem;
   }
 
   .logo-caption {
@@ -837,8 +858,8 @@ body {
         </svg>
       </button>
       <a href="/" class="home-link" title="رفتن به صفحه اصلی" aria-label="خانه">
+        <span class="brand-label" aria-label="ویترینت">ویترینت</span>
         <div class="logo-wrap">
-          <span class="brand-label" aria-label="ویترینت">ویترینت</span>
           <span class="logo-text logo-txt" id="shopLogoText">نئون استایل</span>
           <span class="logo-caption logo-tagline">پوشاک مدرن و اکسسوری خاص</span>
         </div>
