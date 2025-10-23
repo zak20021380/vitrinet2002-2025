@@ -984,17 +984,6 @@ async function fetchInitialData() {
       const svcJson = await servicesRes.json();
       const svcs = svcJson.items || svcJson.services || (Array.isArray(svcJson) ? svcJson : []);
       StorageManager.set('vit_services', svcs);
-      const listEl = document.getElementById('services-list');
-      if (listEl) {
-        listEl.innerHTML = svcs.map(s => `
-          <div class="item-card" data-id="${s._id || s.id}">
-            <div class="item-card-header">
-              <h4 class="item-title">${s.title}</h4>
-            </div>
-            <div class="item-details"><span>قیمت: ${s.price}</span></div>
-          </div>
-        `).join('');
-      }
     }
 
   } catch (err) {
@@ -3052,81 +3041,211 @@ handlePlanDurationChange(e) {
 // ==== REPLACE: initServices (fetch from API, fallback to local) ====
 async initServices() {
   const container = document.getElementById('services-list');
+  const cachedServices = StorageManager.get('vit_services');
+
   if (container) {
-    container.innerHTML = `
-      <div class="loading-inline" style="opacity:.8; font-size:.9rem; padding:.75rem;">
-        در حال بارگذاری خدمات…
-      </div>`;
+    container.classList.add('is-loading');
+  }
+
+  if (Array.isArray(cachedServices) && cachedServices.length) {
+    this.renderServicesList(cachedServices);
   }
 
   try {
-    // 1) تلاش برای دریافت از سرور
     const services = await API.getServices();
-
-    // 2) کش محلی تا بخش‌های دیگر هم کار کنند
     StorageManager.set('vit_services', services);
+    this.renderServicesList(services);
   } catch (err) {
     console.warn('getServices failed; using local fallback', err);
 
-    // اگر دیتای محلی نداریم، مقدار پیش‌فرض بذار
-    if (!StorageManager.get('vit_services')) {
+    if (!Array.isArray(cachedServices) || !cachedServices.length) {
       const defaultServices = [
-        { id: 1, title: 'اصلاح سر',   price: 150000, image: 'https://images.unsplash.com/photo-1598289222863-24d9027b1c39?w=300' },
-        { id: 2, title: 'رنگ مو',     price: 450000, image: 'https://images.unsplash.com/photo-1562259949-b21f254d3a0d?w=300' },
-        { id: 3, title: 'اصلاح ریش',  price: 80000,  image: 'https://images.unsplash.com/photo-1522337660859-02fbefca4702?w=300' }
+        { id: 1, title: 'اصلاح سر', price: 150000, image: 'https://images.unsplash.com/photo-1598289222863-24d9027b1c39?w=300' },
+        { id: 2, title: 'رنگ مو', price: 450000, image: 'https://images.unsplash.com/photo-1562259949-b21f254d3a0d?w=300' },
+        { id: 3, title: 'اصلاح ریش', price: 80000, image: 'https://images.unsplash.com/photo-1522337660859-02fbefca4702?w=300' }
       ];
       StorageManager.set('vit_services', defaultServices);
+      this.renderServicesList(defaultServices);
+    } else {
+      this.renderServicesList(cachedServices);
     }
 
     UIComponents.showToast('اتصال به سرور برقرار نشد؛ دادهٔ محلی نمایش داده شد.', 'error');
+  } finally {
+    if (container) {
+      container.classList.remove('is-loading');
+    }
   }
-
-  // 3) رندر لیست
-  this.renderServicesList();
 }
 // ==== END REPLACE ====
-    renderServicesList() {
-        const services = StorageManager.get('vit_services') || [];
+    renderServicesList(servicesInput) {
         const container = document.getElementById('services-list');
         if (!container) {
             return;
         }
-        container.innerHTML = services.length === 0 ? '<p>هیچ خدمتی تعریف نشده است.</p>' : services.map(service => `
-            <div class="item-card" data-id="${service.id}">
-                <div class="item-card-header">
-                    <h4 class="item-title">${service.title}</h4>
+
+        const services = Array.isArray(servicesInput) ? servicesInput : (StorageManager.get('vit_services') || []);
+        const normalized = services.map((service, index) => this.normalizeService(service, index));
+
+        this.updateServicesSummary(normalized);
+
+        if (!normalized.length) {
+            container.innerHTML = `
+                <div class="services-empty-state" role="status">
+                    <div class="services-empty-illustration" aria-hidden="true">🛠️</div>
+                    <p>هنوز هیچ خدمتی ثبت نکرده‌اید. برای شروع روی «افزودن خدمت» کلیک کنید و vitrin خود را تکمیل کنید.</p>
+                    <button type="button" class="btn-primary" data-action="open-service-drawer">
+                        افزودن اولین خدمت
+                    </button>
                 </div>
-                <div class="item-image-preview">
-                    ${service.image ? `<img src="${service.image}" alt="${service.title}" onerror="this.parentElement.innerHTML='<span>تصویر نامعتبر</span>'">` : '<span>بدون تصویر</span>'}
+            `;
+            this.bindServicesListEvents(container);
+            return;
+        }
+
+        container.innerHTML = normalized.map(service => this.renderServiceCardMarkup(service)).join('');
+        this.bindServicesListEvents(container);
+    }
+
+    normalizeService(service, index = 0) {
+        const id = service?._id || service?.id || `svc-${index}`;
+        const title = (service?.title || service?.name || 'خدمت بدون نام').toString();
+        const description = service?.description || service?.details || service?.subtitle || '';
+        const duration = service?.durationMinutes ?? service?.duration_min ?? service?.duration ?? null;
+        const category = service?.category || service?.group || '';
+        const isActive = service?.isActive ?? service?.active ?? true;
+        const price = Number(service?.price);
+        const image = service?.image || service?.cover || service?.photo || '';
+
+        return {
+            id,
+            title,
+            description,
+            duration: Number.isFinite(Number(duration)) ? Number(duration) : null,
+            category,
+            isActive,
+            price: Number.isFinite(price) ? price : null,
+            image
+        };
+    }
+
+    renderServiceCardMarkup(service) {
+        const safeTitle = escapeHtml(service.title);
+        const safeDescription = service.description ? escapeHtml(service.description) : '';
+        const category = service.category ? escapeHtml(service.category) : '';
+        const statusClass = service.isActive ? 'is-active' : 'is-inactive';
+        const statusLabel = service.isActive ? 'فعال' : 'غیرفعال';
+        const priceLabel = this.formatServicePrice(service.price);
+        const durationLabel = Number.isFinite(service.duration) ? `${faNumber(service.duration)} دقیقه` : '';
+        const metaItems = [];
+
+        if (durationLabel) {
+            metaItems.push(`<div><dt>مدت</dt><dd>${durationLabel}</dd></div>`);
+        }
+        if (category) {
+            metaItems.push(`<div><dt>دسته‌بندی</dt><dd>${category}</dd></div>`);
+        }
+
+        const metaMarkup = metaItems.length ? `<dl class="service-card__meta">${metaItems.join('')}</dl>` : '';
+        const media = service.image
+            ? `<img src="${service.image}" alt="${safeTitle}" loading="lazy">`
+            : `<div class="service-card__placeholder" aria-hidden="true">🛍️</div>`;
+
+        return `
+            <article class="service-card" data-id="${service.id}" role="listitem">
+                <div class="service-card__media">
+                    ${media}
+                    <span class="service-card__price">${priceLabel}</span>
                 </div>
-                <div class="item-details">
-                    <span>قیمت: ${UIComponents.formatPersianNumber(service.price)} تومان</span>
+                <div class="service-card__body">
+                    <div class="service-card__header">
+                        <h4 class="service-card__title" title="${safeTitle}">${safeTitle}</h4>
+                        <span class="service-card__status ${statusClass}">${statusLabel}</span>
+                    </div>
+                    ${safeDescription ? `<p class="service-card__description">${safeDescription}</p>` : ''}
+                    ${metaMarkup}
+                    <div class="service-card__actions">
+                        <button type="button" class="btn-quiet edit-service-btn" data-id="${service.id}" aria-label="ویرایش ${safeTitle}">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4 12.5-12.5z"/></svg>
+                            <span>ویرایش</span>
+                        </button>
+                        <button type="button" class="btn-quiet delete-service-btn" data-id="${service.id}" aria-label="حذف ${safeTitle}">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6m3-3h8a1 1 0 011 1v2H8V4a1 1 0 011-1z"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
+                            <span>حذف</span>
+                        </button>
+                    </div>
                 </div>
-                <div class="item-actions">
-                    <button type="button" class="btn-text-sm edit-service-btn" data-id="${service.id}" aria-label="ویرایش ${service.title}">ویرایش</button>
-                    <button type="button" class="btn-text-sm delete-service-btn" data-id="${service.id}" aria-label="حذف ${service.title}">حذف</button>
-                </div>
-            </div>
-        `).join('');
-        
-        // Add event listeners to the new buttons
-        container.querySelectorAll('.edit-service-btn').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                const id = e.target.dataset.id;
+            </article>
+        `;
+    }
+
+    updateServicesSummary(services) {
+        const summary = document.getElementById('services-summary');
+        if (!summary) return;
+
+        const count = Array.isArray(services) ? services.length : 0;
+        if (count === 0) {
+            summary.innerHTML = 'هنوز خدمتی در ویترین شما ثبت نشده است.';
+            return;
+        }
+
+        const total = services.reduce((acc, service) => {
+            const numeric = Number(service.price);
+            return acc + (Number.isFinite(numeric) && numeric > 0 ? numeric : 0);
+        }, 0);
+        const countLabel = faNumber(count);
+        const totalLabel = this.formatServicePrice(total);
+        summary.innerHTML = `<strong>${countLabel}</strong> خدمت فعال ثبت شده است · مجموع قیمت پایه: <strong>${totalLabel}</strong>`;
+    }
+
+    formatServicePrice(value) {
+        if (value === null || value === undefined) {
+            return 'قیمت توافقی';
+        }
+        const numeric = Number(value);
+        if (!Number.isFinite(numeric) || numeric < 0) {
+            return 'قیمت توافقی';
+        }
+        const formatted = this.formatNumber(numeric, { fractionDigits: 0, fallback: '۰' });
+        return `${formatted} تومان`;
+    }
+
+    bindServicesListEvents(container) {
+        if (!container || container.dataset.bound === 'true') {
+            return;
+        }
+
+        container.addEventListener('click', (event) => {
+            const addBtn = event.target.closest('[data-action="open-service-drawer"]');
+            if (addBtn) {
+                event.preventDefault();
+                const trigger = document.getElementById('add-service-btn');
+                trigger?.click();
+                return;
+            }
+
+            const editBtn = event.target.closest('.edit-service-btn');
+            if (editBtn) {
+                event.preventDefault();
+                const id = editBtn.dataset.id;
                 const services = StorageManager.get('vit_services') || [];
-                const service = services.find(s => String(s.id) === String(id));
+                const service = services.find(s => String(s.id) === String(id) || String(s._id) === String(id));
                 if (service) {
                     this.populateServiceForm(service);
                     UIComponents.openDrawer('service-drawer');
                 }
-            });
-        });
-        container.querySelectorAll('.delete-service-btn').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                const id = e.target.dataset.id;
+                return;
+            }
+
+            const deleteBtn = event.target.closest('.delete-service-btn');
+            if (deleteBtn) {
+                event.preventDefault();
+                const id = deleteBtn.dataset.id;
                 this.deleteService(id);
-            });
+            }
         });
+
+        container.dataset.bound = 'true';
     }
 
     async handleSettingsFormSubmit() {
