@@ -19,8 +19,8 @@
 
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@800&display=swap" rel="stylesheet"/>
 
-<header id="mainHeader" class="w-full bg-white/80 shadow-sm backdrop-blur-md sticky top-0 z-50">
-  <div id="headerInner" class="max-w-7xl mx-auto flex flex-col md:flex-row items-center md:justify-between px-3 sm:px-6 py-3 md:py-4 gap-4 md:gap-6 mt-3 md:mt-0">
+<header id="mainHeader" class="w-full bg-white/95 shadow-md backdrop-blur-md sticky top-0 z-50">
+  <div id="headerInner" class="max-w-7xl mx-auto flex flex-row items-center justify-between px-4 sm:px-6 py-3 md:py-3.5 gap-3">
 
     <!-- لوگو و انتخاب شهر -->
     <div id="logoCityWrap" class="flex items-center gap-2 md:gap-3 flex-shrink-0">
@@ -51,35 +51,40 @@
         </span>
       </a>
 
-      <!-- بج شهر -->
-      <div class="flex items-center gap-1 px-3 py-1 rounded-full shadow-lg ml-2 md:ml-2 mt-0 md:mt-0 header-item"
+      <!-- بج شهر - فقط در دسکتاپ نمایش داده شود -->
+      <div class="hidden md:flex items-center gap-1 px-3 py-1.5 rounded-full shadow-lg header-item"
            style="background:linear-gradient(90deg,#10b981E6 70%,#0ea5e9E6); border: 1.5px solid #fff6; backdrop-filter: blur(5px);">
-        <svg width="18" height="18" fill="none" viewBox="0 0 22 22" class="ml-1 drop-shadow">
+        <svg width="18" height="18" fill="none" viewBox="0 0 22 22" class="ml-1 drop-shadow" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <linearGradient id="city-icon" x1="0%" y1="0%" x2="0%" y2="100%">
+              <stop offset="0%" stop-color="#ffffff" stop-opacity="1" />
+              <stop offset="100%" stop-color="#e0f2fe" stop-opacity="0.9" />
+            </linearGradient>
+          </defs>
           <path d="M11 2.5C7.13 2.5 4 5.61 4 9.45c0 3.52 4.1 7.93 6.2 10.01.46.47 1.2.47 1.66 0 2.1-2.08 6.14-6.49 6.14-10.01C18 5.61 14.87 2.5 11 2.5Zm0 10.25a2.75 2.75 0 1 1 0-5.5 2.75 2.75 0 0 1 0 5.5Z"
             fill="url(#city-icon)"/>
         </svg>
-        <span id="headerCity" class="font-bold text-white text-[13px] sm:text-[14px] drop-shadow-sm" style="letter-spacing:.3px;">سنندج</span>
+        <span id="headerCity" class="font-bold text-white text-[14px] drop-shadow-sm" style="letter-spacing:.3px;">سنندج</span>
       </div>
     </div>
 
-    <!-- منو -->
-    <nav id="desktopNav" class="flex items-center justify-center md:justify-end gap-2 sm:gap-3 flex-nowrap text-sm md:text-base w-full md:w-auto">
-      <a href="index.html" class="main-nav-link text-gray-700 hover:text-[#10b981] font-bold px-2 sm:px-3 transition hide-on-mobile">
-        <svg class="w-5 h-5 md:hidden mb-1" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2h-2a2 2 0 0 1-2-2v-4H9v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
-        <span>خانه</span>
+    <!-- منو - فقط در دسکتاپ -->
+    <nav id="desktopNav" class="hidden md:flex items-center gap-1 text-base flex-1 justify-center">
+      <a href="index.html" class="main-nav-link text-gray-700 hover:text-[#10b981] font-bold px-4 py-2 rounded-lg transition-all hover:bg-emerald-50">
+        خانه
       </a>
-      <a href="categories.html" class="main-nav-link text-gray-700 hover:text-[#0ea5e9] font-bold px-2 sm:px-3 transition hide-on-mobile">
-        <svg class="w-5 h-5 md:hidden mb-1" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 3h7v7H3V3zm11 0h7v7h-7V3zM3 14h7v7H3v-7zm11 0h7v7h-7v-7z"/></svg>
-        <span>دسته‌بندی</span>
+      <a href="categories.html" class="main-nav-link text-gray-700 hover:text-[#0ea5e9] font-bold px-4 py-2 rounded-lg transition-all hover:bg-sky-50">
+        دسته‌بندی
       </a>
-      <a href="login.html" id="loginNavLink" class="main-nav-link text-gray-700 hover:text-[#0ea5e9] font-bold px-2 sm:px-3 transition hide-on-mobile">
-        <svg class="w-5 h-5 md:hidden mb-1" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      <a href="login.html" id="loginNavLink" class="main-nav-link text-gray-700 hover:text-[#0ea5e9] font-bold px-4 py-2 rounded-lg transition-all hover:bg-sky-50">
         <span class="login-link-label">ورود</span>
       </a>
-      <a href="post.html" id="registerShopBtn" class="btn-grad px-3 py-1.5 rounded-full font-black shadow hover:scale-105 transition-all duration-200 whitespace-nowrap text-white text-sm md:text-base header-item">
-        ثبت فروشگاه
-      </a>
     </nav>
+
+    <!-- دکمه ثبت فروشگاه -->
+    <a href="post.html" id="registerShopBtn" class="btn-grad px-4 py-2 md:px-5 md:py-2.5 rounded-full font-extrabold shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-200 whitespace-nowrap text-white text-sm md:text-base header-item">
+      ثبت فروشگاه
+    </a>
   </div>
 </header>
 
