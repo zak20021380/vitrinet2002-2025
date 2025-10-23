@@ -636,10 +636,21 @@
   }
 
   function applyCategoryPayload(data = {}) {
-    const categories = normaliseCategoryList(data?.categories, 'category');
-    const services = normaliseCategoryList(data?.serviceSubcategories, 'service-subcategory');
-    const categoriesToUse = categories.length ? categories : normaliseCategoryList(DEFAULT_CATEGORIES, 'category');
-    const servicesToUse = services.length ? services : normaliseCategoryList(DEFAULT_SERVICE_SUBCATEGORIES, 'service-subcategory');
+    const payload = data && typeof data === 'object' ? data : {};
+    const categories = normaliseCategoryList(payload?.categories, 'category');
+    const services = normaliseCategoryList(payload?.serviceSubcategories, 'service-subcategory');
+    const categoriesProvided = Object.prototype.hasOwnProperty.call(payload, 'categories');
+    const servicesProvided = Object.prototype.hasOwnProperty.call(payload, 'serviceSubcategories');
+    const categoriesToUse = categoriesProvided
+      ? categories
+      : categories.length
+        ? categories
+        : normaliseCategoryList(DEFAULT_CATEGORIES, 'category');
+    const servicesToUse = servicesProvided
+      ? services
+      : services.length
+        ? services
+        : normaliseCategoryList(DEFAULT_SERVICE_SUBCATEGORIES, 'service-subcategory');
     renderCategoryOptions(categoriesToUse);
     renderServiceChips(servicesToUse);
     saveCategoryCache(CATEGORY_CACHE_KEY, categoriesToUse);
