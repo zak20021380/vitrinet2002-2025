@@ -3293,6 +3293,9 @@ const serviceTopCitiesEl = serviceShopsPanelEl ? serviceShopsPanelEl.querySelect
 const serviceTopCategoriesEl = serviceShopsPanelEl ? serviceShopsPanelEl.querySelector('#service-top-categories') : null;
 const serviceRecentListEl = serviceShopsPanelEl ? serviceShopsPanelEl.querySelector('#service-recent-list') : null;
 const serviceShopsSummaryCards = serviceShopsPanelEl ? Array.from(serviceShopsPanelEl.querySelectorAll('.service-summary-card')) : [];
+const serviceShopsQuickFilters = serviceShopsPanelEl ? Array.from(serviceShopsPanelEl.querySelectorAll('[data-service-quick-filter]')) : [];
+const serviceShopsAdvancedToggle = serviceShopsPanelEl ? serviceShopsPanelEl.querySelector('#service-shops-advanced-toggle') : null;
+const serviceShopsAdvancedWrapper = serviceShopsPanelEl ? serviceShopsPanelEl.querySelector('#service-shops-advanced') : null;
 
 const serviceShopsSummaryValues = {
   total: document.getElementById('service-summary-total'),
@@ -3359,6 +3362,15 @@ function isPremiumActive(shop = {}) {
   return !Number.isNaN(date.getTime()) && date.getTime() > Date.now();
 }
 
+function highlightServiceQuickFilters() {
+  if (!serviceShopsQuickFilters?.length) return;
+  const activeStatus = serviceShopsState.filters.status || 'all';
+  serviceShopsQuickFilters.forEach((btn) => {
+    const status = btn.dataset.serviceQuickFilter || 'all';
+    btn.classList.toggle('active', status === activeStatus);
+  });
+}
+
 function highlightServiceSummary() {
   if (!serviceShopsSummaryCards) return;
   const activeStatus = serviceShopsState.filters.status || 'all';
@@ -3370,6 +3382,7 @@ function highlightServiceSummary() {
       card.classList.remove('active');
     }
   });
+  highlightServiceQuickFilters();
 }
 
 function renderServiceShopsOverview() {
@@ -3725,6 +3738,21 @@ function setupServiceShopsPanel() {
   highlightServiceSummary();
   const { search, status, city, featured, premium, booking, refresh, reset } = serviceShopsInputs;
 
+  if (serviceShopsQuickFilters.length) {
+    serviceShopsQuickFilters.forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const statusKey = btn.dataset.serviceQuickFilter || 'all';
+        serviceShopsState.filters.status = statusKey;
+        serviceShopsState.pagination.page = 1;
+        if (serviceShopsInputs.status) {
+          serviceShopsInputs.status.value = statusKey;
+        }
+        highlightServiceSummary();
+        loadServiceShopsList();
+      });
+    });
+  }
+
   if (search) {
     search.addEventListener('input', () => {
       clearTimeout(serviceShopsSearchTimer);
@@ -3753,6 +3781,18 @@ function setupServiceShopsPanel() {
     highlightServiceSummary();
     loadServiceShopsList();
   });
+
+  if (serviceShopsAdvancedToggle && serviceShopsAdvancedWrapper) {
+    serviceShopsAdvancedToggle.addEventListener('click', () => {
+      const isHidden = serviceShopsAdvancedWrapper.hasAttribute('hidden');
+      if (isHidden) {
+        serviceShopsAdvancedWrapper.removeAttribute('hidden');
+      } else {
+        serviceShopsAdvancedWrapper.setAttribute('hidden', '');
+      }
+      serviceShopsAdvancedToggle.setAttribute('aria-expanded', String(isHidden));
+    });
+  }
 
   featured?.addEventListener('change', () => {
     serviceShopsState.filters.featured = featured.value || 'all';
@@ -3817,7 +3857,7 @@ function setupServiceShopsPanel() {
     } else if (action === 'open') {
       const shopUrl = button.dataset.shopUrl;
       if (shopUrl) {
-        window.open(`/service-seller-panel/index.html?shopurl=${encodeURIComponent(shopUrl)}`, '_blank');
+        window.open(`/service-shops.html?shopurl=${encodeURIComponent(shopUrl)}`, '_blank');
       } else {
         alert('شناسه فروشگاه یافت نشد.');
       }

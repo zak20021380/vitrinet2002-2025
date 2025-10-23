@@ -129,7 +129,7 @@
   <div class="section-panel" id="service-shops-panel" style="display:none;">
     <div class="content-header">مدیریت مغازه‌های خدماتی <span class="header-count" id="header-service-shops-count"></span></div>
 
-    <div class="service-shops-summary" id="service-shops-summary">
+    <div class="service-shops-summary service-shops-summary--main" id="service-shops-summary">
       <div class="service-summary-card" id="service-summary-card-total" data-status-filter="all" data-summary-key="total">
         <span class="label">کل مغازه‌ها</span>
         <span class="value" id="service-summary-total">0</span>
@@ -150,7 +150,10 @@
         <span class="value" id="service-summary-suspended">0</span>
         <span class="hint" id="service-summary-hint-suspended"></span>
       </div>
-      <div class="service-summary-card" id="service-summary-card-archived" data-status-filter="archived" data-summary-key="archived">
+    </div>
+
+    <div class="service-shops-summary service-shops-summary--secondary">
+      <div class="service-summary-card" id="service-summary-card-archived" data-summary-key="archived">
         <span class="label">آرشیو شده</span>
         <span class="value" id="service-summary-archived">0</span>
         <span class="hint" id="service-summary-hint-archived"></span>
@@ -202,53 +205,68 @@
       </div>
     </div>
 
-    <div class="service-shops-filters">
-      <div class="service-filter-field" style="flex:2;">
-        <label for="service-shops-search">جستجو</label>
-        <input type="search" id="service-shops-search" placeholder="نام مغازه، شهر، صاحب یا شماره تماس..." autocomplete="off">
+    <div class="service-shops-toolbar">
+      <div class="service-shops-search">
+        <i class="ri-search-line" aria-hidden="true"></i>
+        <input type="search" id="service-shops-search" placeholder="جستجوی سریع در مغازه‌ها" autocomplete="off" aria-label="جستجوی سریع مغازه خدماتی">
       </div>
-      <div class="service-filter-field">
-        <label for="service-shops-status">وضعیت</label>
-        <select id="service-shops-status">
-          <option value="all">همه وضعیت‌ها</option>
-          <option value="approved">تایید شده</option>
-          <option value="pending">در انتظار تایید</option>
-          <option value="suspended">معلق / غیرفعال</option>
-          <option value="archived">آرشیو شده</option>
-          <option value="draft">پیش‌نویس</option>
-        </select>
+      <div class="service-shops-quick" role="group" aria-label="فیلتر وضعیت سریع">
+        <button class="service-quick-filter active" type="button" data-service-quick-filter="all">همه</button>
+        <button class="service-quick-filter" type="button" data-service-quick-filter="approved">تایید شده</button>
+        <button class="service-quick-filter" type="button" data-service-quick-filter="pending">در انتظار</button>
+        <button class="service-quick-filter" type="button" data-service-quick-filter="suspended">معلق / غیرفعال</button>
       </div>
-      <div class="service-filter-field">
-        <label for="service-shops-city">شهر</label>
-        <input type="text" id="service-shops-city" placeholder="مثلاً تهران">
+      <button class="service-advanced-toggle" type="button" id="service-shops-advanced-toggle" aria-expanded="false">
+        <i class="ri-equalizer-line" aria-hidden="true"></i>
+        فیلترهای پیشرفته
+      </button>
+    </div>
+
+    <div class="service-shops-advanced" id="service-shops-advanced" hidden>
+      <div class="service-advanced-grid">
+        <div class="service-filter-field">
+          <label for="service-shops-status">وضعیت (کامل)</label>
+          <select id="service-shops-status">
+            <option value="all">همه وضعیت‌ها</option>
+            <option value="approved">تایید شده</option>
+            <option value="pending">در انتظار تایید</option>
+            <option value="suspended">معلق / غیرفعال</option>
+            <option value="archived">آرشیو شده</option>
+            <option value="draft">پیش‌نویس</option>
+          </select>
+        </div>
+        <div class="service-filter-field">
+          <label for="service-shops-city">شهر</label>
+          <input type="text" id="service-shops-city" placeholder="مثلاً تهران">
+        </div>
+        <div class="service-filter-field">
+          <label for="service-shops-featured">مغازه ویژه</label>
+          <select id="service-shops-featured">
+            <option value="all">همه</option>
+            <option value="yes">فقط ویژه‌ها</option>
+            <option value="no">غیر ویژه</option>
+          </select>
+        </div>
+        <div class="service-filter-field">
+          <label for="service-shops-premium">وضعیت پریمیوم</label>
+          <select id="service-shops-premium">
+            <option value="all">همه</option>
+            <option value="yes">پریمیوم فعال</option>
+            <option value="no">غیر پریمیوم</option>
+          </select>
+        </div>
+        <div class="service-filter-field">
+          <label for="service-shops-booking">رزرو آنلاین</label>
+          <select id="service-shops-booking">
+            <option value="all">همه</option>
+            <option value="yes">فعال</option>
+            <option value="no">غیرفعال</option>
+          </select>
+        </div>
       </div>
-      <div class="service-filter-field">
-        <label for="service-shops-featured">ویژه</label>
-        <select id="service-shops-featured">
-          <option value="all">همه</option>
-          <option value="yes">فقط ویژه‌ها</option>
-          <option value="no">غیر ویژه</option>
-        </select>
-      </div>
-      <div class="service-filter-field">
-        <label for="service-shops-premium">پریمیوم</label>
-        <select id="service-shops-premium">
-          <option value="all">همه</option>
-          <option value="yes">پریمیوم فعال</option>
-          <option value="no">غیر پریمیوم</option>
-        </select>
-      </div>
-      <div class="service-filter-field">
-        <label for="service-shops-booking">رزرو آنلاین</label>
-        <select id="service-shops-booking">
-          <option value="all">همه</option>
-          <option value="yes">فعال</option>
-          <option value="no">غیرفعال</option>
-        </select>
-      </div>
-      <div class="service-filters-actions" style="flex:1;min-width:200px;">
-        <button class="primary" type="button" id="service-shops-refresh"><i class="ri-refresh-line"></i> بروزرسانی</button>
+      <div class="service-advanced-actions">
         <button class="ghost" type="button" id="service-shops-reset"><i class="ri-eraser-line"></i> بازنشانی</button>
+        <button class="primary" type="button" id="service-shops-refresh"><i class="ri-refresh-line"></i> بروزرسانی</button>
       </div>
     </div>
 
