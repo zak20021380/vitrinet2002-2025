@@ -246,36 +246,14 @@
   <div class="relative">
     <label class="block text-sm font-bold mb-1">دسته‌بندی <span class="text-red-500">*</span></label>
     <select required name="category" id="category" class="w-full p-3 border rounded-xl focus:ring-2 focus:ring-green-200 bg-white">
-      <option value="" disabled selected>انتخاب دسته</option>
-      <option>پوشاک</option>
-      <option>خوراک</option>
-      <option>خدمات</option>
-      <option>دیجیتال</option>
-      <option>زیبایی</option>
-      <option>کتاب و تحریر</option>
-      <option>لوازم خانگی</option>
-      <option>ورزشی</option>
-      <option>تالار و مجالس</option>
-      <option>قنادی و شیرینی</option>
-      <option>گل و گیاه</option>
-      <option>خودرو</option>
-      <option>کودکان</option>
+      <option value="" disabled selected data-placeholder="true">انتخاب دسته</option>
     </select>
 
     <!-- START: service examples (visible only for service categories) -->
 <div id="service-examples" class="hidden mt-2 rounded-xl border border-gray-200 bg-gray-50 p-2.5">
-  <div class="text-xs text-gray-600 mb-1.5">مثال‌های رایج <span class="font-bold">خدمات</span>:</div>
-  <div class="flex flex-wrap gap-2">
-    <button type="button" data-svc-example="آرایشگاه مردانه" class="px-3 py-1.5 rounded-full text-xs bg-white border border-gray-300 text-gray-700 hover:bg-gray-100 active:scale-[.98]">آرایشگاه مردانه</button>
-    <button type="button" data-svc-example="آرایشگاه زنانه" class="px-3 py-1.5 rounded-full text-xs bg-white border border-gray-300 text-gray-700 hover:bg-gray-100 active:scale-[.98]">آرایشگاه زنانه</button>
-    <button type="button" data-svc-example="کارواش" class="px-3 py-1.5 rounded-full text-xs bg-white border border-gray-300 text-gray-700 hover:bg-gray-100 active:scale-[.98]">کارواش</button>
-    <button type="button" data-svc-example="کلینیک زیبایی" class="px-3 py-1.5 rounded-full text-xs bg-white border border-gray-300 text-gray-700 hover:bg-gray-100 active:scale-[.98]">کلینیک زیبایی</button>
-    <button type="button" data-svc-example="تعمیر موبایل" class="px-3 py-1.5 rounded-full text-xs bg-white border border-gray-300 text-gray-700 hover:bg-gray-100 active:scale-[.98]">تعمیر موبایل</button>
-    <button type="button" data-svc-example="آتلیه عکاسی" class="px-3 py-1.5 rounded-full text-xs bg-white border border-gray-300 text-gray-700 hover:bg-gray-100 active:scale-[.98]">آتلیه عکاسی</button>
-    <button type="button" data-svc-example="خیاطی" class="px-3 py-1.5 rounded-full text-xs bg-white border border-gray-300 text-gray-700 hover:bg-gray-100 active:scale-[.98]">خیاطی</button>
-    <button type="button" data-svc-example="آرایش حیوانات" class="px-3 py-1.5 rounded-full text-xs bg-white border border-gray-300 text-gray-700 hover:bg-gray-100 active:scale-[.98]">آرایش حیوانات</button>
-  </div>
-  <div class="text-[11px] text-gray-500 mt-2">با لمس هر مورد، متن آن به «توضیحات فروشگاه» اضافه می‌شود.</div>
+  <div class="text-xs text-gray-600 mb-1.5">مثال‌های رایج <span class="font-bold" id="service-examples-title">خدمات</span>:</div>
+  <div class="flex flex-wrap gap-2" id="service-examples-chips"></div>
+  <div class="text-[11px] text-gray-500 mt-2" id="service-examples-hint">با لمس هر مورد، متن آن به «توضیحات فروشگاه» اضافه می‌شود.</div>
 </div>
 <!-- END: service examples -->
 
@@ -438,56 +416,266 @@
     }
   });
 
+  const CATEGORY_API_URL = "http://localhost:5000/api/categories";
+  const CATEGORY_CACHE_TTL = 60 * 1000;
+  const DEFAULT_CATEGORY_LIST = [
+    "پوشاک",
+    "خوراک",
+    "خدمات",
+    "دیجیتال",
+    "زیبایی",
+    "کتاب و تحریر",
+    "لوازم خانگی",
+    "ورزشی",
+    "تالار و مجالس",
+    "قنادی و شیرینی",
+    "گل و گیاه",
+    "خودرو",
+    "کودکان"
+  ];
+  const DEFAULT_SERVICE_SUBCATEGORIES = [
+    "آرایشگاه مردانه",
+    "آرایشگاه زنانه",
+    "کارواش",
+    "کلینیک زیبایی",
+    "تعمیر موبایل",
+    "آتلیه عکاسی",
+    "خیاطی",
+    "آرایش حیوانات"
+  ];
+  const DEFAULT_SERVICE_CATEGORY_NAMES = ["خدمات", "زیبایی", "تالار و مجالس", "خودرو", "ورزشی"];
+
+  let serviceCategoryNames = new Set(DEFAULT_SERVICE_CATEGORY_NAMES);
+  let categoriesCache = { data: null, expiresAt: 0 };
+  let categoriesFetchPromise = null;
+
+  function normaliseCategoryName(value) {
+    if (!value) return "";
+    return String(value).replace(/\s+/g, " ").trim();
+  }
+
+  function normaliseCategoryRecord(raw, fallbackType = "category") {
+    if (raw == null) return null;
+    if (typeof raw === "string") {
+      const name = normaliseCategoryName(raw);
+      if (!name) return null;
+      return { id: `${fallbackType}-${name}`, name, slug: null, type: fallbackType };
+    }
+    if (typeof raw !== "object") return null;
+    const name = normaliseCategoryName(raw.name || raw.title || raw.label || raw.slug || "");
+    if (!name) return null;
+    const id = raw.id || raw._id || raw.slug || `${fallbackType}-${name}`;
+    const type = typeof raw.type === "string" ? raw.type : fallbackType;
+    return {
+      id: String(id),
+      name,
+      slug: raw.slug || null,
+      type
+    };
+  }
+
+  function setServiceCategoryNames(list = []) {
+    const combined = [
+      ...DEFAULT_SERVICE_CATEGORY_NAMES,
+      ...list.map(normaliseCategoryName).filter(Boolean)
+    ];
+    serviceCategoryNames = new Set(combined);
+  }
+
+  function isServiceCategory(name) {
+    const normalised = normaliseCategoryName(name);
+    return normalised && serviceCategoryNames.has(normalised);
+  }
+
+  function renderCategoryOptions(records = []) {
+    const select = document.getElementById("category");
+    if (!select) return;
+    const placeholder = select.querySelector("option[data-placeholder]");
+    select.innerHTML = "";
+    if (placeholder) {
+      placeholder.selected = true;
+      placeholder.disabled = true;
+      select.appendChild(placeholder);
+    } else {
+      const option = document.createElement("option");
+      option.value = "";
+      option.disabled = true;
+      option.selected = true;
+      option.dataset.placeholder = "true";
+      option.textContent = "انتخاب دسته";
+      select.appendChild(option);
+    }
+
+    if (!records.length) {
+      select.disabled = true;
+      return;
+    }
+
+    records
+      .map(item => normaliseCategoryRecord(item, "category"))
+      .filter(Boolean)
+      .sort((a, b) => a.name.localeCompare(b.name, "fa-IR", { sensitivity: "base" }))
+      .forEach(item => {
+        const option = document.createElement("option");
+        option.value = item.name;
+        option.textContent = item.name;
+        option.dataset.categoryId = item.id;
+        if (item.slug) option.dataset.slug = item.slug;
+        select.appendChild(option);
+      });
+
+    select.disabled = false;
+  }
+
+  function handleServiceExampleClick(event) {
+    const button = event.currentTarget;
+    const tag = button?.dataset?.svcExample;
+    if (!tag) return;
+    const textarea = document.querySelector("textarea[name='desc']");
+    if (!textarea) return;
+    if (!textarea.value.includes(tag)) {
+      textarea.value = textarea.value ? `${textarea.value.trim()} | ${tag}` : tag;
+      showToast("به توضیحات اضافه شد: " + tag);
+    } else {
+      showToast("قبلاً اضافه شده 😉");
+    }
+  }
+
+  function renderServiceExampleChips(records = []) {
+    const serviceExamples = document.getElementById("service-examples");
+    const chipsContainer = document.getElementById("service-examples-chips");
+    const titleEl = document.getElementById("service-examples-title");
+    if (!serviceExamples || !chipsContainer) return;
+
+    chipsContainer.innerHTML = "";
+    const chips = records
+      .map(item => normaliseCategoryRecord(item, "service-subcategory"))
+      .filter(Boolean)
+      .sort((a, b) => a.name.localeCompare(b.name, "fa-IR", { sensitivity: "base" }));
+
+    serviceExamples.dataset.hasChips = chips.length ? 'true' : 'false';
+
+    if (!chips.length) {
+      serviceExamples.classList.add("hidden");
+    } else {
+      chips.forEach(item => {
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.dataset.svcExample = item.name;
+        btn.className = "px-3 py-1.5 rounded-full text-xs bg-white border border-gray-300 text-gray-700 hover:bg-gray-100 active:scale-[.98]";
+        btn.textContent = item.name;
+        btn.addEventListener("click", handleServiceExampleClick);
+        chipsContainer.appendChild(btn);
+      });
+    }
+
+    if (titleEl) {
+      const names = Array.from(serviceCategoryNames);
+      titleEl.textContent = names.length ? names.slice(0, 3).join("، ") : "خدمات";
+    }
+  }
+
+  function updateServiceExamplesVisibility(selectedValue) {
+    const serviceExamples = document.getElementById("service-examples");
+    if (!serviceExamples) return;
+    const hasChips = serviceExamples.dataset.hasChips === 'true';
+    if (isServiceCategory(selectedValue) && hasChips) {
+      serviceExamples.classList.remove("hidden");
+    } else {
+      serviceExamples.classList.add("hidden");
+    }
+  }
+
+  async function fetchCategoriesWithCache({ force = false } = {}) {
+    if (!force) {
+      if (categoriesCache.data && categoriesCache.expiresAt > Date.now()) {
+        return categoriesCache.data;
+      }
+      if (categoriesFetchPromise) {
+        return categoriesFetchPromise;
+      }
+    }
+
+    categoriesFetchPromise = fetch(CATEGORY_API_URL, {
+      credentials: "include"
+    })
+      .then(async response => {
+        if (!response.ok) {
+          let message = "خطا در دریافت دسته‌بندی‌ها.";
+          try {
+            const payload = await response.json();
+            if (payload?.message) message = payload.message;
+          } catch (err) {
+            const text = await response.text();
+            if (text) message = text;
+          }
+          throw new Error(message);
+        }
+        return response.json();
+      })
+      .then(payload => {
+        const result = {
+          categories: Array.isArray(payload?.categories) ? payload.categories : [],
+          serviceSubcategories: Array.isArray(payload?.serviceSubcategories) ? payload.serviceSubcategories : [],
+          metadata: payload?.metadata || {}
+        };
+        categoriesCache = {
+          data: result,
+          expiresAt: Date.now() + CATEGORY_CACHE_TTL
+        };
+        return result;
+      })
+      .finally(() => {
+        categoriesFetchPromise = null;
+      });
+
+    return categoriesFetchPromise;
+  }
+
+  async function loadCategoriesIntoForm({ force = false } = {}) {
+    try {
+      const payload = await fetchCategoriesWithCache({ force });
+      renderCategoryOptions(payload.categories);
+      if (Array.isArray(payload?.metadata?.serviceCategoryNames)) {
+        setServiceCategoryNames(payload.metadata.serviceCategoryNames);
+      }
+      renderServiceExampleChips(payload.serviceSubcategories);
+      updateServiceExamplesVisibility(document.getElementById("category")?.value || "");
+    } catch (error) {
+      console.error("loadCategoriesIntoForm error ->", error);
+      setServiceCategoryNames(DEFAULT_SERVICE_CATEGORY_NAMES);
+      renderCategoryOptions(DEFAULT_CATEGORY_LIST);
+      renderServiceExampleChips(DEFAULT_SERVICE_SUBCATEGORIES);
+      updateServiceExamplesVisibility(document.getElementById("category")?.value || "");
+    }
+  }
+
   const categorySelect = document.getElementById("category");
   const subcatWrapper = document.getElementById("subcategory-wrapper");
   const subcatInput = document.getElementById("subcategory");
   const subcatChips = document.querySelectorAll('#subcategory-chips button');
 
-  // === Service examples: setup ===
-const serviceExamples = document.getElementById("service-examples");
-const svcChipBtns = document.querySelectorAll('[data-svc-example]');
-const SERVICE_CATEGORIES = ["خدمات","زیبایی","تالار و مجالس","خودرو","ورزشی"];
+  loadCategoriesIntoForm();
 
-// Add example text into description on tap
-svcChipBtns.forEach(btn => {
-  btn.addEventListener('click', () => {
-    const ta = document.querySelector("textarea[name='desc']");
-    if (!ta) return;
-    const tag = btn.getAttribute('data-svc-example');
-    if (!ta.value.includes(tag)) {
-      ta.value = ta.value ? (ta.value.trim() + " | " + tag) : tag;
-      showToast("به توضیحات اضافه شد: " + tag);
-    } else {
-      showToast("قبلاً اضافه شده 😉");
-    }
-  });
-});
+  if (categorySelect) {
+    updateServiceExamplesVisibility(categorySelect.value);
 
-// Initial reveal on load if a service category is preselected
-if (SERVICE_CATEGORIES.includes(categorySelect.value)) {
-  serviceExamples.classList.remove("hidden");
-}
+    // دسته‌بندی: نشان دادن زیرگروه "کودکان" و مثال‌های خدمات
+    categorySelect.addEventListener("change", function () {
+      if (subcatWrapper && subcatInput) {
+        if (this.value === "کودکان") {
+          subcatWrapper.classList.remove("hidden");
+        } else {
+          subcatWrapper.classList.add("hidden");
+          subcatInput.value = "";
+          subcatChips.forEach(b => b.classList.remove('bg-[#10b981]','text-white','border-[#10b981]'));
+          document.getElementById("subcategory-hint").classList.add("hidden");
+        }
+      }
 
-
-// دسته‌بندی: نشان دادن زیرگروه "کودکان" و مثال‌های خدمات
-categorySelect.addEventListener("change", function () {
-  // بخش کودکان (بدون تغییر منطقی قبلی)
-  if (this.value === "کودکان") {
-    subcatWrapper.classList.remove("hidden");
-  } else {
-    subcatWrapper.classList.add("hidden");
-    subcatInput.value = "";
-    subcatChips.forEach(b => b.classList.remove('bg-[#10b981]','text-white','border-[#10b981]'));
-    document.getElementById("subcategory-hint").classList.add("hidden");
+      updateServiceExamplesVisibility(this.value);
+    });
   }
-
-  // اگر دستهٔ انتخابی از نوع خدمات باشد، مثال‌ها را نشان بده
-  if (SERVICE_CATEGORIES.includes(this.value)) {
-    serviceExamples.classList.remove("hidden");
-  } else {
-    serviceExamples.classList.add("hidden");
-  }
-});
 
 
   subcatChips.forEach(btn => {
@@ -698,9 +886,9 @@ categorySelect.addEventListener("change", function () {
     SafeSS.setJSON('signup_password', data.password); // SafeSS
 
     // ✅ اضافه‌شدن نقش و دسته برای تعیین پنل بعد از وریفای
-    // توجه: SERVICE_CATEGORIES بالاتر در همین فایل تعریف شده.
+    // توجه: نقش از روی داده‌های دریافت شده از سرور تعیین می‌شود.
     SafeSS.setJSON('signup_category', data.category); // SafeSS
-    SafeSS.setJSON('signup_role', SERVICE_CATEGORIES.includes(data.category) ? 'service' : 'seller'); // SafeSS
+    SafeSS.setJSON('signup_role', isServiceCategory(data.category) ? 'service' : 'seller'); // SafeSS
 
     window.location.href = "verify.html?shopurl=" + encodeURIComponent(data.shopurl) + "&phone=" + encodeURIComponent(data.phone);
   }

@@ -11,6 +11,7 @@ const planRoutes   = require('./routes/plans');
 const adPlanRoutes = require('./routes/adPlans');
 const paymentRoutes = require('./routes/payment');
 const settingsRoutes = require('./routes/settings');
+const categoryRoutes = require('./routes/categoryRoutes');
 require('dotenv').config();
 
 const app = express();
@@ -55,6 +56,7 @@ app.use('/api/messages', adminUserMessageRoutes);
 app.use('/api/plans', planRoutes);
 app.use('/api/adPlans', adPlanRoutes);
 app.use('/api/admin', adminRoutes);
+app.use('/api/categories', categoryRoutes);
 app.use('/api/shops', require('./routes/shops'));
 app.use('/api/home-card-sections', require('./routes/homeCardSections'));
 app.use('/api/service-portfolio', require('./routes/sellerPortfolioRoutes'));
