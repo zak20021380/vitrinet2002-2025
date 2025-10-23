@@ -1820,6 +1820,17 @@ function setupSliderNavigation(sliderId) {
 sliderNavIds.forEach(setupSliderNavigation);
 
 
+function toggleAdPopupVisibility(popupEl, shouldShow) {
+  if (!popupEl) return;
+  if (shouldShow) {
+    popupEl.classList.add('is-visible');
+    popupEl.setAttribute('aria-hidden', 'false');
+  } else {
+    popupEl.classList.remove('is-visible');
+    popupEl.setAttribute('aria-hidden', 'true');
+  }
+}
+
 window.showAdBannerPopup = async function() {
   console.log("⏺️ شروع showAdBannerPopup");
   const adSlot = document.getElementById('ad-banner-slot-popup');
@@ -1827,13 +1838,26 @@ window.showAdBannerPopup = async function() {
     console.error("❌ عنصر ad-banner-slot-popup پیدا نشد!");
     return;
   }
-  adSlot.innerHTML = '<div style="padding:32px 0;text-align:center;">در حال دریافت تبلیغ...</div>';
   const popup = document.getElementById('adPopup');
   if (!popup) {
     console.error("❌ عنصر adPopup پیدا نشد!");
     return;
   }
-  popup.style.display = 'block';
+  const alreadyLoaded = adSlot.dataset.loaded === 'true' && adSlot.innerHTML.trim() !== '';
+  if (alreadyLoaded) {
+    toggleAdPopupVisibility(popup, true);
+    return;
+  }
+
+  if (popup.dataset.loading === 'true') {
+    toggleAdPopupVisibility(popup, true);
+    return;
+  }
+
+  adSlot.dataset.loaded = 'false';
+  popup.dataset.loading = 'true';
+  adSlot.innerHTML = '<div class="ad-popup-loading">در حال دریافت تبلیغ...</div>';
+  toggleAdPopupVisibility(popup, true);
 
   try {
     console.log("⏳ ارسال درخواست fetch برای تبلیغ...");
@@ -1843,7 +1867,8 @@ const res = await fetch('http://localhost:5000/api/adOrder/active?planSlug=ad_se
     if (!res.ok) {
       console.error("❌ پاسخ سرور غیرموفق بود:", res.status);
       adSlot.innerHTML = '';
-      popup.style.display = 'none';
+      popup.dataset.loading = 'false';
+      toggleAdPopupVisibility(popup, false);
       return;
     }
 
@@ -1858,7 +1883,8 @@ const res = await fetch('http://localhost:5000/api/adOrder/active?planSlug=ad_se
     if (!data.success || !searchAds.length) {
       console.warn("⚠️ هیچ تبلیغ فعالی مخصوص سرچ دریافت نشد.");
       adSlot.innerHTML = '';
-      popup.style.display = 'none';
+      popup.dataset.loading = 'false';
+      toggleAdPopupVisibility(popup, false);
       return;
     }
 
@@ -1921,11 +1947,16 @@ const res = await fetch('http://localhost:5000/api/adOrder/active?planSlug=ad_se
         </div>
       </a>
     `;
+    adSlot.dataset.loaded = 'true';
   } catch (e) {
     console.error("❌ خطا در دریافت یا نمایش تبلیغ:", e);
     adSlot.innerHTML = '';
-    popup.style.display = 'none';
+    popup.dataset.loading = 'false';
+    toggleAdPopupVisibility(popup, false);
+    return;
   }
+
+  popup.dataset.loading = 'false';
 };
 
 
@@ -1935,6 +1966,13 @@ document.addEventListener('DOMContentLoaded', function() {
   const searchInput = document.querySelector('input[type="text"][placeholder^="جستجو"]');
   const adPopup = document.getElementById('adPopup');
   const closeAdBtn = document.getElementById('closeAdBtn');
+  const adSlot = document.getElementById('ad-banner-slot-popup');
+
+  const hideAdPopup = () => {
+    if (!adPopup) return;
+    adPopup.dataset.loading = 'false';
+    toggleAdPopupVisibility(adPopup, false);
+  };
 
   // رویداد باز شدن پاپ‌آپ
   if (searchInput) {
@@ -1946,9 +1984,11 @@ document.addEventListener('DOMContentLoaded', function() {
 
   // بستن با دکمه
   if (closeAdBtn) {
-    closeAdBtn.onclick = function() {
-      adPopup.style.display = 'none';
-    };
+    closeAdBtn.addEventListener('click', event => {
+      event.preventDefault();
+      event.stopPropagation();
+      hideAdPopup();
+    });
   } else {
     console.error("❌ دکمه بستن تبلیغ پیدا نشد!");
   }
@@ -1956,7 +1996,12 @@ document.addEventListener('DOMContentLoaded', function() {
   // بستن با تایپ در سرچ
   if (searchInput) {
     searchInput.addEventListener('input', () => {
-      adPopup.style.display = 'none';
+      if (!adPopup) return;
+      if (adSlot && adSlot.dataset.loaded === 'true') {
+        toggleAdPopupVisibility(adPopup, false);
+      } else {
+        hideAdPopup();
+      }
     });
   }
 
@@ -1964,11 +2009,18 @@ document.addEventListener('DOMContentLoaded', function() {
   document.addEventListener('mousedown', function(e) {
     // فقط وقتی پاپ‌آپ بازه و روی خود پاپ‌آپ یا محتواش کلیک نشده و روی input سرچ هم کلیک نشده:
     if (
-      adPopup.style.display !== 'none' &&
+      adPopup &&
+      adPopup.classList.contains('is-visible') &&
       !adPopup.contains(e.target) &&
       e.target !== searchInput
     ) {
-      adPopup.style.display = 'none';
+      hideAdPopup();
+    }
+  });
+
+  document.addEventListener('keydown', event => {
+    if (event.key === 'Escape') {
+      hideAdPopup();
     }
   });
 });
