@@ -487,9 +487,7 @@ const DEFAULT_SERVICE_SUBCATEGORIES = [
   { name: 'کارواش', parentName: DEFAULT_SERVICE_CATEGORY_NAME },
   { name: 'کلینیک زیبایی', parentName: DEFAULT_SERVICE_CATEGORY_NAME },
   { name: 'تعمیر موبایل', parentName: DEFAULT_SERVICE_CATEGORY_NAME },
-  { name: 'آتلیه عکاسی', parentName: DEFAULT_SERVICE_CATEGORY_NAME },
-  { name: 'خیاطی', parentName: DEFAULT_SERVICE_CATEGORY_NAME },
-  { name: 'آرایش حیوانات', parentName: DEFAULT_SERVICE_CATEGORY_NAME }
+  { name: 'خیاطی', parentName: DEFAULT_SERVICE_CATEGORY_NAME }
 ];
 const DEFAULT_SERVICE_SUBCATEGORY_NAMES = DEFAULT_SERVICE_SUBCATEGORIES.map(item => item.name);
 const DEFAULT_SERVICE_PARENT_MAP = DEFAULT_SERVICE_SUBCATEGORIES.reduce((acc, item) => {
