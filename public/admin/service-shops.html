@@ -9,335 +9,296 @@
   <style>
     :root {
       --primary: #10b981;
+      --primary-light: #d1fae5;
       --secondary: #0ea5e9;
+      --secondary-light: #e0f2fe;
       --danger: #ef4444;
       --warning: #f59e0b;
       --muted: #6b7280;
       --card-bg: #ffffff;
       --border: #e5e7eb;
       --text: #1f2937;
-      --shadow: 0 18px 38px rgba(16, 185, 129, 0.12);
-      --radius: 20px;
+      --shadow: 0 4px 12px rgba(16, 185, 129, 0.08);
+      --shadow-hover: 0 8px 24px rgba(16, 185, 129, 0.12);
+      --radius: 16px;
     }
 
     * {
       box-sizing: border-box;
+      margin: 0;
+      padding: 0;
     }
 
     body {
       font-family: 'Vazirmatn', sans-serif;
-      margin: 0;
-      min-height: 100vh;
-      background: #f6faf9;
+      background: linear-gradient(135deg, #f6faf9 0%, #e8f5f2 100%);
       color: var(--text);
+      padding: 2rem 1rem;
+      min-height: 100vh;
     }
 
-    .page {
-      max-width: 1300px;
+    .container {
+      max-width: 1400px;
       margin: 0 auto;
-      padding: 2.5rem 1.5rem 4rem;
     }
 
-    .topbar {
+    /* Header */
+    .header {
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      border-radius: var(--radius);
+      padding: 2rem;
+      color: white;
+      box-shadow: var(--shadow-hover);
+      margin-bottom: 2rem;
       display: flex;
-      align-items: center;
       justify-content: space-between;
-      gap: 1.25rem;
-      flex-wrap: wrap;
-      margin-bottom: 1.8rem;
-    }
-
-    .topbar-left {
-      display: flex;
-      flex-direction: column;
-      gap: 0.65rem;
-    }
-
-    .back-btn {
-      display: inline-flex;
       align-items: center;
-      gap: 0.45rem;
-      font-size: 0.95rem;
-      color: var(--secondary);
-      text-decoration: none;
-      font-weight: 600;
-      transition: color 0.2s ease;
+      gap: 1rem;
+      flex-wrap: wrap;
     }
 
-    .back-btn i {
-      font-size: 1.2rem;
-    }
-
-    .back-btn:hover {
-      color: var(--primary);
-    }
-
-    .topbar-left h1 {
+    .header-content h1 {
       font-size: 1.75rem;
-      margin: 0;
-      color: var(--primary);
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
     }
 
-    .subtitle {
-      margin: 0;
-      color: var(--muted);
-      font-size: 0.98rem;
+    .header-content p {
+      opacity: 0.95;
+      font-size: 0.95rem;
     }
 
-    .topbar-actions {
+    .header-actions {
       display: flex;
       gap: 0.75rem;
-      flex-wrap: wrap;
     }
 
-    .primary-btn,
-    .ghost-btn {
-      border: none;
+    /* Buttons */
+    .btn {
+      padding: 0.7rem 1.4rem;
       border-radius: 12px;
-      padding: 0.65rem 1.3rem;
-      font-size: 0.95rem;
+      border: none;
       font-weight: 600;
+      font-size: 0.95rem;
       cursor: pointer;
       display: inline-flex;
       align-items: center;
-      gap: 0.4rem;
-      transition: transform 0.2s ease, box-shadow 0.2s ease;
+      gap: 0.5rem;
+      transition: all 0.2s ease;
+      font-family: inherit;
     }
 
-    .primary-btn {
-      background: linear-gradient(135deg, var(--primary), var(--secondary));
-      color: #fff;
-      box-shadow: 0 10px 25px rgba(14, 165, 233, 0.25);
+    .btn-primary {
+      background: white;
+      color: var(--primary);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
     }
 
-    .primary-btn:hover {
+    .btn-primary:hover {
       transform: translateY(-2px);
-      box-shadow: 0 14px 32px rgba(14, 165, 233, 0.28);
+      box-shadow: 0 6px 16px rgba(0,0,0,0.15);
     }
 
-    .ghost-btn {
-      background: rgba(16, 185, 129, 0.1);
+    .btn-secondary {
+      background: rgba(255,255,255,0.2);
+      color: white;
+      border: 1.5px solid rgba(255,255,255,0.3);
+    }
+
+    .btn-secondary:hover {
+      background: rgba(255,255,255,0.3);
+    }
+
+    .btn-sm {
+      padding: 0.5rem 1rem;
+      font-size: 0.875rem;
+    }
+
+    .btn-edit {
+      background: var(--secondary-light);
+      color: var(--secondary);
+    }
+
+    .btn-edit:hover {
+      background: var(--secondary);
+      color: white;
+    }
+
+    .btn-view {
+      background: var(--primary-light);
       color: var(--primary);
     }
 
-    .ghost-btn:hover {
-      transform: translateY(-2px);
-      background: rgba(14, 165, 233, 0.12);
+    .btn-view:hover {
+      background: var(--primary);
+      color: white;
     }
 
-    .primary-btn.small,
-    .ghost-btn.small {
-      padding: 0.5rem 1.05rem;
-      font-size: 0.88rem;
+    .btn-danger {
+      background: rgba(239, 68, 68, 0.1);
+      color: var(--danger);
     }
 
-    .overview-grid {
+    .btn-danger:hover {
+      background: var(--danger);
+      color: white;
+    }
+
+    /* Stats Grid */
+    .stats-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-      gap: 1rem;
-      margin-bottom: 1.5rem;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 1.25rem;
+      margin-bottom: 2rem;
     }
 
-    .overview-card {
-      background: var(--card-bg);
+    .stat-card {
+      background: white;
       border-radius: var(--radius);
-      padding: 1.2rem 1.4rem;
+      padding: 1.5rem;
       box-shadow: var(--shadow);
-      border: 1px solid rgba(16, 185, 129, 0.08);
-      display: flex;
-      flex-direction: column;
-      gap: 0.55rem;
+      transition: all 0.3s ease;
+      border: 2px solid transparent;
       position: relative;
       overflow: hidden;
     }
 
-    .overview-card::after {
+    .stat-card::before {
       content: '';
       position: absolute;
-      inset-inline-end: -32px;
-      top: -40px;
-      width: 120px;
-      height: 120px;
-      background: radial-gradient(circle at center, rgba(14, 165, 233, 0.12), transparent 60%);
-      transform: rotate(25deg);
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: linear-gradient(90deg, var(--primary), var(--secondary));
     }
 
-    .overview-card__label {
-      font-size: 0.92rem;
+    .stat-card:hover {
+      transform: translateY(-4px);
+      box-shadow: var(--shadow-hover);
+      border-color: var(--primary);
+    }
+
+    .stat-card-header {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 1rem;
       color: var(--muted);
+      font-size: 0.9rem;
+      font-weight: 500;
     }
 
-    .overview-card__value {
-      font-size: 2.1rem;
+    .stat-card-icon {
+      font-size: 1.75rem;
+      color: var(--primary);
+    }
+
+    .stat-card-value {
+      font-size: 2rem;
       font-weight: 800;
       color: var(--text);
+      line-height: 1;
     }
 
-    .overview-card__hint {
-      font-size: 0.9rem;
-      color: var(--muted);
-    }
-
-    .overview-card__hint span {
-      color: var(--primary);
-      font-weight: 700;
-    }
-
-    .insights-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-      gap: 1rem;
-      margin-bottom: 1.8rem;
-    }
-
-    .insight-card {
-      background: var(--card-bg);
+    /* Filters */
+    .filters {
+      background: white;
       border-radius: var(--radius);
-      padding: 1.2rem 1.3rem 1rem;
+      padding: 1.5rem;
       box-shadow: var(--shadow);
-      border: 1px solid rgba(15, 118, 110, 0.08);
-      display: flex;
-      flex-direction: column;
-      gap: 0.75rem;
-      min-height: 200px;
+      margin-bottom: 2rem;
     }
 
-    .insight-card__title {
-      font-size: 1.05rem;
+    .filters-title {
+      font-size: 1.1rem;
       font-weight: 700;
-      color: var(--secondary);
-    }
-
-    .insight-list {
-      list-style: none;
-      padding: 0;
-      margin: 0;
+      color: var(--text);
+      margin-bottom: 1rem;
       display: flex;
-      flex-direction: column;
-      gap: 0.55rem;
-      color: var(--muted);
-      font-size: 0.92rem;
-    }
-
-    .insight-list li {
-      display: flex;
-      justify-content: space-between;
-      gap: 0.5rem;
       align-items: center;
-      padding: 0.4rem 0;
-      border-bottom: 1px dashed rgba(15, 118, 110, 0.1);
-    }
-
-    .insight-list li:last-child {
-      border-bottom: none;
-    }
-
-    .insight-list .value {
-      font-weight: 700;
-      color: var(--primary);
-    }
-
-    .filters-card {
-      background: var(--card-bg);
-      border-radius: var(--radius);
-      padding: 1.2rem 1.4rem;
-      box-shadow: var(--shadow);
-      border: 1px solid rgba(16, 185, 129, 0.08);
-      margin-bottom: 1.6rem;
+      gap: 0.5rem;
     }
 
     .filters-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
       gap: 1rem;
-      align-items: end;
+      margin-bottom: 1rem;
     }
 
-    .filter-field {
+    .filter-group {
       display: flex;
       flex-direction: column;
-      gap: 0.45rem;
-      font-size: 0.92rem;
+      gap: 0.4rem;
+    }
+
+    .filter-group label {
+      font-size: 0.875rem;
+      font-weight: 500;
       color: var(--muted);
     }
 
-    .filter-field input,
-    .filter-field select,
-    .form-grid input,
-    .form-grid select,
-    .form-grid textarea {
-      width: 100%;
-      border-radius: 12px;
-      border: 1.2px solid var(--border);
-      padding: 0.55rem 0.75rem;
+    .filter-group input,
+    .filter-group select {
+      padding: 0.65rem 0.9rem;
+      border-radius: 10px;
+      border: 1.5px solid var(--border);
       font-size: 0.95rem;
       font-family: inherit;
-      background: #fff;
-      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+      transition: all 0.2s ease;
+      background: white;
     }
 
-    .filter-field input:focus,
-    .filter-field select:focus,
-    .form-grid input:focus,
-    .form-grid select:focus,
-    .form-grid textarea:focus {
+    .filter-group input:focus,
+    .filter-group select:focus {
       outline: none;
-      border-color: var(--secondary);
-      box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.15);
-    }
-
-    .filter-toggles {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 0.5rem;
-    }
-
-    .toggle-chip {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.3rem;
-      background: rgba(14, 165, 233, 0.1);
-      padding: 0.35rem 0.75rem;
-      border-radius: 999px;
-      font-size: 0.86rem;
-      font-weight: 600;
-      color: var(--secondary);
-    }
-
-    .toggle-chip input {
-      accent-color: var(--secondary);
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
     }
 
     .filter-actions {
       display: flex;
+      gap: 0.75rem;
+      justify-content: flex-end;
+      flex-wrap: wrap;
+    }
+
+    /* Table Card */
+    .table-card {
+      background: white;
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .table-header {
+      padding: 1.5rem;
+      background: linear-gradient(135deg, var(--primary-light), var(--secondary-light));
+      border-bottom: 2px solid var(--primary);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    .table-header h2 {
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: var(--text);
+      display: flex;
       align-items: center;
       gap: 0.5rem;
     }
 
-    .table-card {
-      background: var(--card-bg);
-      border-radius: var(--radius);
-      padding: 1.2rem 0.8rem 1.4rem;
-      box-shadow: var(--shadow);
-      border: 1px solid rgba(15, 118, 110, 0.08);
-    }
-
-    .table-header {
-      display: flex;
-      align-items: baseline;
-      justify-content: space-between;
-      padding: 0 0.9rem 0.5rem;
-    }
-
-    .table-header h2 {
-      margin: 0;
-      font-size: 1.2rem;
-      color: var(--secondary);
-    }
-
     .table-meta {
-      color: var(--muted);
       font-size: 0.9rem;
+      color: var(--muted);
+      font-weight: 500;
     }
 
     .table-wrapper {
@@ -347,226 +308,251 @@
     table {
       width: 100%;
       border-collapse: collapse;
-      min-width: 960px;
-      color: var(--text);
+      min-width: 900px;
     }
 
     thead th {
       text-align: right;
-      padding: 0.75rem 0.9rem;
-      background: #f1f9f5;
-      font-size: 0.9rem;
+      padding: 1rem 1.25rem;
+      background: #f9fafb;
+      font-size: 0.875rem;
       font-weight: 700;
-      border-bottom: 1px solid rgba(16, 185, 129, 0.15);
+      color: var(--text);
+      border-bottom: 2px solid var(--border);
+      white-space: nowrap;
     }
 
     tbody td {
-      padding: 0.7rem 0.9rem;
+      padding: 1rem 1.25rem;
       font-size: 0.9rem;
-      border-bottom: 1px solid rgba(15, 118, 110, 0.08);
-      vertical-align: top;
+      border-bottom: 1px solid var(--border);
+      vertical-align: middle;
+    }
+
+    tbody tr {
+      transition: background 0.2s ease;
     }
 
     tbody tr:hover {
-      background: rgba(16, 185, 129, 0.05);
+      background: rgba(16, 185, 129, 0.03);
+    }
+
+    .shop-info {
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
     }
 
     .shop-name {
       font-weight: 700;
       color: var(--text);
+      font-size: 1rem;
     }
 
     .shop-meta {
-      font-size: 0.82rem;
+      font-size: 0.8rem;
       color: var(--muted);
-      margin-top: 0.15rem;
+      display: flex;
+      align-items: center;
+      gap: 0.3rem;
     }
 
+    .shop-url {
+      color: var(--secondary);
+      text-decoration: none;
+      font-weight: 500;
+      transition: color 0.2s;
+    }
+
+    .shop-url:hover {
+      color: var(--primary);
+      text-decoration: underline;
+    }
+
+    /* Badges */
     .badge {
       display: inline-flex;
       align-items: center;
-      justify-content: center;
-      border-radius: 999px;
-      padding: 0.25rem 0.7rem;
-      font-size: 0.78rem;
-      font-weight: 600;
-      background: rgba(107, 114, 128, 0.1);
-      color: var(--muted);
       gap: 0.3rem;
-    }
-
-    .badge.success { background: rgba(16, 185, 129, 0.12); color: var(--primary); }
-    .badge.warning { background: rgba(245, 158, 11, 0.12); color: var(--warning); }
-    .badge.danger { background: rgba(239, 68, 68, 0.12); color: var(--danger); }
-    .badge.info { background: rgba(14, 165, 233, 0.12); color: var(--secondary); }
-    .plan-badge-row { margin-top: 0.5rem; }
-
-    .status-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.4rem;
+      padding: 0.35rem 0.75rem;
       border-radius: 999px;
-      padding: 0.25rem 0.75rem;
+      font-size: 0.8rem;
       font-weight: 600;
-      font-size: 0.85rem;
-      margin-bottom: 0.4rem;
+      white-space: nowrap;
     }
 
-    .status-badge.approved { background: rgba(16, 185, 129, 0.15); color: var(--primary); }
-    .status-badge.pending { background: rgba(245, 158, 11, 0.15); color: var(--warning); }
-    .status-badge.draft { background: rgba(107, 114, 128, 0.15); color: var(--muted); }
-    .status-badge.suspended { background: rgba(239, 68, 68, 0.15); color: var(--danger); }
-    .status-badge.archived { background: rgba(31, 41, 55, 0.15); color: #1f2937; }
-
-    .status-select {
-      width: 100%;
-      border-radius: 10px;
-      border: 1px solid rgba(107, 114, 128, 0.25);
-      padding: 0.35rem 0.5rem;
-      font-size: 0.85rem;
-      font-family: inherit;
-      margin-top: 0.3rem;
-    }
-
-    .actions {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 0.4rem;
-    }
-
-    .actions button {
-      border: none;
-      border-radius: 10px;
-      padding: 0.45rem 0.9rem;
-      font-size: 0.85rem;
-      cursor: pointer;
-      font-weight: 600;
-      display: inline-flex;
-      align-items: center;
-      gap: 0.3rem;
-      transition: transform 0.2s ease, box-shadow 0.2s ease;
-    }
-
-    .actions .edit {
-      background: rgba(14, 165, 233, 0.12);
-      color: var(--secondary);
-    }
-
-    .actions .edit:hover {
-      transform: translateY(-1px);
-      box-shadow: 0 8px 18px rgba(14, 165, 233, 0.2);
-    }
-
-    .actions .complimentary {
-      background: rgba(16, 185, 129, 0.12);
+    .badge-success {
+      background: rgba(16, 185, 129, 0.15);
       color: var(--primary);
     }
 
-    .actions .complimentary:hover {
-      transform: translateY(-1px);
-      box-shadow: 0 8px 18px rgba(16, 185, 129, 0.2);
+    .badge-warning {
+      background: rgba(245, 158, 11, 0.15);
+      color: var(--warning);
     }
 
-    .actions .archive {
-      background: rgba(239, 68, 68, 0.1);
+    .badge-danger {
+      background: rgba(239, 68, 68, 0.15);
       color: var(--danger);
     }
 
-    .actions .archive:hover {
-      transform: translateY(-1px);
-      box-shadow: 0 8px 18px rgba(239, 68, 68, 0.18);
-    }
-
-    .switch-field {
-      display: flex;
-      align-items: center;
-      gap: 0.3rem;
-      font-size: 0.85rem;
-      color: var(--muted);
-    }
-
-    .switch-field input {
-      accent-color: var(--primary);
-      transform: scale(1.1);
-    }
-
-    .table-metric {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      font-size: 0.8rem;
-      color: var(--muted);
-    }
-
-    .table-metric strong {
-      color: var(--text);
-      font-size: 0.85rem;
-    }
-
-    .empty {
-      text-align: center;
-      color: var(--muted);
-      padding: 2.5rem 0;
-    }
-
-    .pagination {
-      display: none;
-      margin-top: 1.1rem;
-      padding: 0 1rem;
-      align-items: center;
-      justify-content: center;
-      gap: 0.8rem;
-      flex-wrap: wrap;
-    }
-
-    .pagination button {
-      border: none;
-      border-radius: 999px;
-      padding: 0.4rem 1rem;
-      font-size: 0.9rem;
-      font-weight: 600;
-      cursor: pointer;
-      background: rgba(14, 165, 233, 0.12);
+    .badge-info {
+      background: rgba(14, 165, 233, 0.15);
       color: var(--secondary);
     }
 
-    .pagination button[disabled] {
-      cursor: not-allowed;
-      opacity: 0.6;
+    .badge-muted {
+      background: rgba(107, 114, 128, 0.15);
+      color: var(--muted);
     }
 
+    .badges-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.4rem;
+    }
+
+    /* Actions */
+    .actions {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+
+    /* Status Select */
+    .status-select {
+      padding: 0.4rem 0.6rem;
+      border-radius: 8px;
+      border: 1.5px solid var(--border);
+      font-size: 0.85rem;
+      font-family: inherit;
+      font-weight: 500;
+      cursor: pointer;
+      min-width: 120px;
+    }
+
+    .status-select:focus {
+      outline: none;
+      border-color: var(--primary);
+    }
+
+    /* Empty State */
+    .empty-state {
+      text-align: center;
+      padding: 4rem 2rem;
+      color: var(--muted);
+    }
+
+    .empty-state i {
+      font-size: 4rem;
+      margin-bottom: 1rem;
+      opacity: 0.3;
+    }
+
+    .empty-state p {
+      font-size: 1.1rem;
+      margin-bottom: 0.5rem;
+    }
+
+    /* Toast */
+    #toast-container {
+      position: fixed;
+      bottom: 2rem;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 1000;
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+      min-width: 320px;
+    }
+
+    .toast {
+      background: white;
+      border-radius: 12px;
+      padding: 1rem 1.25rem;
+      box-shadow: 0 12px 32px rgba(0,0,0,0.15);
+      border: 2px solid;
+      font-size: 0.9rem;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      animation: slideUp 0.3s ease;
+    }
+
+    .toast.success {
+      border-color: var(--primary);
+      color: var(--primary);
+    }
+
+    .toast.error {
+      border-color: var(--danger);
+      color: var(--danger);
+    }
+
+    .toast i {
+      font-size: 1.5rem;
+    }
+
+    @keyframes slideUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .toast.hide {
+      animation: slideDown 0.3s ease;
+      opacity: 0;
+    }
+
+    @keyframes slideDown {
+      from {
+        opacity: 1;
+        transform: translateY(0);
+      }
+      to {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+    }
+
+    /* Modal */
     dialog {
       border: none;
-      border-radius: 22px;
+      border-radius: 20px;
       padding: 0;
-      width: min(950px, 96vw);
-      max-height: 92vh;
-      box-shadow: 0 40px 70px rgba(15, 118, 110, 0.25);
+      width: min(600px, 92vw);
+      max-height: 85vh;
+      box-shadow: 0 40px 80px rgba(0,0,0,0.2);
       overflow: hidden;
     }
 
     dialog::backdrop {
-      background: rgba(15, 23, 42, 0.55);
+      background: rgba(15, 23, 42, 0.6);
       backdrop-filter: blur(4px);
     }
 
     .modal-header {
+      padding: 1.5rem;
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      color: white;
       display: flex;
-      align-items: center;
       justify-content: space-between;
-      padding: 1.1rem 1.4rem;
-      background: linear-gradient(135deg, rgba(16, 185, 129, 0.16), rgba(14, 165, 233, 0.12));
-      border-bottom: 1px solid rgba(16, 185, 129, 0.12);
+      align-items: center;
     }
 
     .modal-header h2 {
-      margin: 0;
-      font-size: 1.2rem;
-      color: var(--secondary);
+      font-size: 1.25rem;
+      font-weight: 700;
     }
 
     .modal-close {
-      background: rgba(14, 165, 233, 0.15);
+      background: rgba(255,255,255,0.2);
       border: none;
       border-radius: 50%;
       width: 36px;
@@ -574,206 +560,221 @@
       display: grid;
       place-items: center;
       cursor: pointer;
-      color: var(--secondary);
-      font-size: 1.2rem;
+      color: white;
+      font-size: 1.5rem;
+      transition: background 0.2s;
+    }
+
+    .modal-close:hover {
+      background: rgba(255,255,255,0.3);
     }
 
     .modal-body {
-      padding: 1.4rem 1.6rem;
+      padding: 1.75rem;
       overflow-y: auto;
-      max-height: 70vh;
+      max-height: 60vh;
     }
 
-    .form-section {
-      margin-bottom: 1.6rem;
+    .form-group {
+      margin-bottom: 1.25rem;
     }
 
-    .form-section h3 {
-      margin: 0 0 0.8rem 0;
-      font-size: 1rem;
-      color: var(--secondary);
-    }
-
-    .form-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-      gap: 0.9rem 1rem;
-    }
-
-    .form-grid label {
-      display: flex;
-      flex-direction: column;
-      gap: 0.4rem;
+    .form-group label {
+      display: block;
       font-size: 0.9rem;
-      color: var(--muted);
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 0.5rem;
     }
 
-    .form-grid textarea {
-      min-height: 120px;
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+      width: 100%;
+      padding: 0.75rem 1rem;
+      border-radius: 10px;
+      border: 1.5px solid var(--border);
+      font-size: 0.95rem;
+      font-family: inherit;
+      transition: all 0.2s ease;
+    }
+
+    .form-group input:focus,
+    .form-group select:focus,
+    .form-group textarea:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+    }
+
+    .form-group textarea {
+      min-height: 100px;
       resize: vertical;
     }
 
-    .form-grid textarea.short {
-      min-height: 80px;
+    .form-note {
+      font-size: 0.8rem;
+      color: var(--muted);
+      margin-top: 0.3rem;
     }
 
-    .form-grid .note {
-      font-size: 0.78rem;
-      color: rgba(107, 114, 128, 0.75);
+    .checkbox-group {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-bottom: 1rem;
+    }
+
+    .checkbox-group input {
+      width: auto;
+      accent-color: var(--primary);
+      transform: scale(1.2);
+    }
+
+    .checkbox-group label {
+      margin: 0;
+      font-weight: 500;
+      color: var(--text);
     }
 
     .modal-footer {
-      padding: 1rem 1.5rem 1.4rem;
-      border-top: 1px solid rgba(16, 185, 129, 0.12);
+      padding: 1.25rem 1.75rem;
+      border-top: 2px solid var(--border);
       display: flex;
       justify-content: space-between;
       align-items: center;
       gap: 1rem;
+      background: #f9fafb;
     }
 
     .form-error {
       color: var(--danger);
-      font-size: 0.85rem;
-      min-height: 1.1rem;
+      font-size: 0.875rem;
+      font-weight: 500;
     }
 
     .form-actions {
       display: flex;
-      gap: 0.6rem;
-      align-items: center;
+      gap: 0.75rem;
     }
 
-    .secondary-btn {
-      border: none;
-      border-radius: 10px;
-      padding: 0.55rem 1.1rem;
-      background: rgba(107, 114, 128, 0.15);
-      color: #374151;
-      font-size: 0.9rem;
-      cursor: pointer;
+    /* Loading */
+    .loading {
+      text-align: center;
+      padding: 3rem;
+      color: var(--muted);
     }
 
-    .secondary-btn:hover {
-      background: rgba(107, 114, 128, 0.22);
+    .loading i {
+      font-size: 3rem;
+      animation: spin 1s linear infinite;
     }
 
-    #toast-container {
-      position: fixed;
-      bottom: 1.5rem;
-      left: 50%;
-      transform: translateX(-50%);
-      display: flex;
-      flex-direction: column;
-      gap: 0.6rem;
-      z-index: 1000;
-      width: min(90vw, 420px);
+    @keyframes spin {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
     }
 
-    .toast {
-      background: #ffffff;
-      border-radius: 14px;
-      padding: 0.75rem 1rem;
-      box-shadow: 0 12px 30px rgba(15, 118, 110, 0.18);
-      border: 1px solid rgba(16, 185, 129, 0.15);
-      font-size: 0.9rem;
-      color: var(--text);
-      opacity: 0.98;
-      display: flex;
-      align-items: center;
-      gap: 0.6rem;
-      transition: opacity 0.3s ease, transform 0.3s ease;
-    }
-
-    .toast.success { border-color: rgba(16, 185, 129, 0.35); }
-    .toast.error { border-color: rgba(239, 68, 68, 0.35); color: var(--danger); }
-
-    .toast.hide {
-      opacity: 0;
-      transform: translateY(10px);
-    }
-
-    @media (max-width: 780px) {
-      .page {
-        padding: 1.8rem 1rem 3rem;
+    /* Responsive */
+    @media (max-width: 768px) {
+      body {
+        padding: 1rem 0.5rem;
       }
 
-      .table-card {
-        padding-inline: 0.5rem;
+      .header {
+        padding: 1.5rem;
+      }
+
+      .header-content h1 {
+        font-size: 1.4rem;
+      }
+
+      .stats-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .filters-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .table-wrapper {
+        border-radius: var(--radius);
       }
 
       table {
-        min-width: 720px;
+        min-width: 800px;
       }
     }
   </style>
   <script src="/nav-active.js" defer></script>
 </head>
 <body>
-  <div class="page">
-    <header class="topbar">
-      <div class="topbar-left">
-        <a href="dashboard.html" class="back-btn"><i class="ri-arrow-right-line"></i><span>بازگشت به داشبورد</span></a>
-        <h1>مدیریت مغازه‌های خدماتی</h1>
-        <p class="subtitle">کنترل کامل روی فروشندگان خدماتی، تنظیمات رزرو و وضعیت مغازه‌ها</p>
+  <div class="container">
+    <!-- Header -->
+    <header class="header">
+      <div class="header-content">
+        <h1>
+          <i class="ri-scissors-2-line"></i>
+          مدیریت مغازه‌های خدماتی
+        </h1>
+        <p>کنترل کامل بر مغازه‌های خدماتی، وضعیت و رزروهای آنلاین</p>
       </div>
-      <div class="topbar-actions">
-        <button class="ghost-btn" id="refresh-btn"><i class="ri-refresh-line"></i> به‌روزرسانی</button>
-        <button class="primary-btn" id="create-btn"><i class="ri-add-line"></i> مغازه جدید</button>
+      <div class="header-actions">
+        <button class="btn btn-secondary btn-sm" id="refresh-btn">
+          <i class="ri-refresh-line"></i>
+          بروزرسانی
+        </button>
       </div>
     </header>
 
-    <section class="overview-grid" id="overview-cards">
-      <div class="overview-card">
-        <div class="overview-card__label">مجموع مغازه‌ها</div>
-        <div class="overview-card__value" id="metric-total">۰</div>
-        <div class="overview-card__hint"><span id="metric-active">۰</span> فعال</div>
+    <!-- Stats -->
+    <section class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-card-header">
+          <i class="ri-store-2-line stat-card-icon"></i>
+          <span>مجموع مغازه‌ها</span>
+        </div>
+        <div class="stat-card-value" id="metric-total">۰</div>
       </div>
-      <div class="overview-card">
-        <div class="overview-card__label">در انتظار تایید</div>
-        <div class="overview-card__value" id="metric-pending">۰</div>
-        <div class="overview-card__hint">نیازمند بررسی ادمین</div>
+
+      <div class="stat-card">
+        <div class="stat-card-header">
+          <i class="ri-checkbox-circle-line stat-card-icon"></i>
+          <span>فعال</span>
+        </div>
+        <div class="stat-card-value" id="metric-active">۰</div>
       </div>
-      <div class="overview-card">
-        <div class="overview-card__label">رزرو فعال</div>
-        <div class="overview-card__value" id="metric-booking">۰</div>
-        <div class="overview-card__hint">با امکان دریافت نوبت آنلاین</div>
+
+      <div class="stat-card">
+        <div class="stat-card-header">
+          <i class="ri-time-line stat-card-icon"></i>
+          <span>در انتظار تایید</span>
+        </div>
+        <div class="stat-card-value" id="metric-pending">۰</div>
       </div>
-      <div class="overview-card">
-        <div class="overview-card__label">پریمیوم فعال</div>
-        <div class="overview-card__value" id="metric-premium">۰</div>
-        <div class="overview-card__hint">دارای اشتراک پریمیوم</div>
+
+      <div class="stat-card">
+        <div class="stat-card-header">
+          <i class="ri-calendar-check-line stat-card-icon"></i>
+          <span>رزرو فعال</span>
+        </div>
+        <div class="stat-card-value" id="metric-booking">۰</div>
       </div>
     </section>
 
-    <section class="insights-grid">
-      <div class="insight-card">
-        <div class="insight-card__title">شهرهای برتر</div>
-        <ul class="insight-list" id="list-top-cities">
-          <li><span>—</span></li>
-        </ul>
-      </div>
-      <div class="insight-card">
-        <div class="insight-card__title">دسته‌بندی‌های پرمخاطب</div>
-        <ul class="insight-list" id="list-top-categories">
-          <li><span>—</span></li>
-        </ul>
-      </div>
-      <div class="insight-card">
-        <div class="insight-card__title">آخرین بروزرسانی‌ها</div>
-        <ul class="insight-list" id="list-recent">
-          <li><span>در حال بارگذاری...</span></li>
-        </ul>
-      </div>
-    </section>
-
-    <section class="filters-card">
+    <!-- Filters -->
+    <section class="filters">
+      <h3 class="filters-title">
+        <i class="ri-filter-3-line"></i>
+        فیلتر و جستجو
+      </h3>
       <div class="filters-grid">
-        <label class="filter-field">
-          <span>جستجو</span>
-          <input type="search" id="filter-search" placeholder="نام مغازه، مالک، تگ یا آدرس">
-        </label>
-        <label class="filter-field">
-          <span>وضعیت</span>
+        <div class="filter-group">
+          <label>جستجو</label>
+          <input type="search" id="filter-search" placeholder="نام مغازه، مالک، شهر...">
+        </div>
+        <div class="filter-group">
+          <label>وضعیت</label>
           <select id="filter-status">
             <option value="">همه وضعیت‌ها</option>
             <option value="approved">فعال</option>
@@ -782,30 +783,32 @@
             <option value="suspended">معلق</option>
             <option value="archived">بایگانی</option>
           </select>
-        </label>
-        <label class="filter-field">
-          <span>شهر</span>
-          <input type="text" id="filter-city" placeholder="مثلاً تهران">
-        </label>
-        <label class="filter-field">
-          <span>فیلترهای پیشرفته</span>
-          <div class="filter-toggles">
-            <label class="toggle-chip"><input type="checkbox" id="filter-premium"> فقط پریمیوم</label>
-            <label class="toggle-chip"><input type="checkbox" id="filter-booking"> رزرو فعال</label>
-            <label class="toggle-chip"><input type="checkbox" id="filter-featured"> فروشگاه ویژه</label>
-          </div>
-        </label>
-        <div class="filter-actions">
-          <button class="primary-btn small" id="filters-apply"><i class="ri-filter-3-line"></i> اعمال فیلتر</button>
-          <button class="ghost-btn small" id="filters-reset">پاکسازی</button>
         </div>
+        <div class="filter-group">
+          <label>شهر</label>
+          <input type="text" id="filter-city" placeholder="مثلاً تهران">
+        </div>
+      </div>
+      <div class="filter-actions">
+        <button class="btn btn-secondary btn-sm" id="filters-reset">
+          <i class="ri-close-line"></i>
+          پاکسازی
+        </button>
+        <button class="btn btn-primary btn-sm" id="filters-apply">
+          <i class="ri-search-line"></i>
+          جستجو
+        </button>
       </div>
     </section>
 
+    <!-- Table -->
     <section class="table-card">
       <div class="table-header">
-        <h2>فهرست مغازه‌های خدماتی</h2>
-        <span class="table-meta" id="table-meta"></span>
+        <h2>
+          <i class="ri-list-check"></i>
+          فهرست مغازه‌های خدماتی
+        </h2>
+        <span class="table-meta" id="table-meta">در حال بارگذاری...</span>
       </div>
       <div class="table-wrapper">
         <table>
@@ -813,239 +816,30 @@
             <tr>
               <th>مغازه</th>
               <th>مالک</th>
-              <th>مکان</th>
+              <th>شهر</th>
               <th>وضعیت</th>
-              <th>رزرو / پریمیوم</th>
-              <th>آمار عملکرد</th>
+              <th>امکانات</th>
               <th>عملیات</th>
             </tr>
           </thead>
           <tbody id="shops-table-body">
-            <tr><td colspan="7" class="empty">در حال بارگذاری...</td></tr>
+            <tr>
+              <td colspan="6" class="loading">
+                <i class="ri-loader-4-line"></i>
+                <p>در حال بارگذاری...</p>
+              </td>
+            </tr>
           </tbody>
         </table>
       </div>
-      <div class="pagination" id="pagination" aria-label="صفحات"></div>
     </section>
   </div>
 
-  <dialog id="shop-dialog">
-    <form id="shop-form">
-      <div class="modal-header">
-        <h2 id="shop-form-title">افزودن مغازه جدید</h2>
-        <button type="button" class="modal-close" id="shop-form-close" aria-label="بستن">&times;</button>
-      </div>
-      <div class="modal-body">
-        <div class="form-section">
-          <h3>اطلاعات عمومی</h3>
-          <div class="form-grid">
-            <label>نام مغازه
-              <input type="text" id="form-name" required>
-            </label>
-            <label>شناسه فروشگاه (shopUrl)
-              <input type="text" id="form-shopUrl" placeholder="مثلاً barber-tehran" required>
-              <span class="note">برای ساخت لینک عمومی. فقط حروف انگلیسی و خط تیره.</span>
-            </label>
-            <label>دسته‌بندی اصلی
-              <input type="text" id="form-category" placeholder="مثلاً آرایشگاه">
-            </label>
-            <label>وضعیت
-              <select id="form-status">
-                <option value="pending">در انتظار تایید</option>
-                <option value="approved">فعال</option>
-                <option value="draft">پیش‌نویس</option>
-                <option value="suspended">معلق</option>
-                <option value="archived">بایگانی</option>
-              </select>
-            </label>
-            <label>زیر دسته‌ها
-              <input type="text" id="form-subcategories" placeholder="با , جدا کنید">
-            </label>
-            <label>برچسب‌ها
-              <input type="text" id="form-tags" placeholder="مثلاً اصلاح, رنگ مو">
-            </label>
-            <label>خدمات شاخص
-              <input type="text" id="form-highlightServices" placeholder="مثلاً اصلاح VIP, گریم">
-            </label>
-            <label>توضیحات کوتاه
-              <textarea id="form-description" class="short" placeholder="توضیحات مختصر درباره خدمات"></textarea>
-            </label>
-          </div>
-        </div>
-
-        <div class="form-section">
-          <h3>اطلاعات مالک و تماس</h3>
-          <div class="form-grid">
-            <label>نام مالک
-              <input type="text" id="form-ownerName" placeholder="نام و نام خانوادگی">
-            </label>
-            <label>شماره تماس مالک
-              <input type="text" id="form-ownerPhone" placeholder="مثلاً 0912..." required>
-            </label>
-            <label>ایمیل مالک
-              <input type="email" id="form-ownerEmail" placeholder="اختیاری">
-            </label>
-            <label>آدرس کامل
-              <textarea id="form-address" class="short" placeholder="نشانی دقیق مغازه"></textarea>
-            </label>
-            <label>شهر
-              <input type="text" id="form-city" placeholder="شهر">
-            </label>
-            <label>استان
-              <input type="text" id="form-province" placeholder="استان">
-            </label>
-            <label>مناطق سرویس‌دهی (Delivery)
-              <input type="text" id="form-serviceAreas" placeholder="لیست مناطق با , جدا شود">
-            </label>
-          </div>
-        </div>
-
-        <div class="form-section">
-          <h3>مکان و تصاویر</h3>
-          <div class="form-grid">
-            <label>عرض جغرافیایی (Latitude)
-              <input type="number" step="0.000001" id="form-lat" placeholder="مثلاً 35.6892">
-            </label>
-            <label>طول جغرافیایی (Longitude)
-              <input type="number" step="0.000001" id="form-lng" placeholder="مثلاً 51.3890">
-            </label>
-            <label class="switch-field"><input type="checkbox" id="form-clear-geo"> حذف مختصات ذخیره‌شده</label>
-            <label>تصویر کاور
-              <input type="text" id="form-coverImage" placeholder="لینک تصویر کاور">
-            </label>
-            <label>گالری تصاویر
-              <textarea id="form-gallery" class="short" placeholder="هر لینک در یک خط"></textarea>
-            </label>
-          </div>
-        </div>
-
-        <div class="form-section">
-          <h3>تنظیمات رزرو</h3>
-          <div class="form-grid">
-            <label class="switch-field"><input type="checkbox" id="form-bookingEnabled"> فعال‌سازی سیستم رزرو</label>
-            <label class="switch-field"><input type="checkbox" id="form-instantConfirmation"> تایید خودکار نوبت</label>
-            <label class="switch-field"><input type="checkbox" id="form-allowWaitlist"> فعال‌سازی لیست انتظار</label>
-            <label class="switch-field"><input type="checkbox" id="form-depositRequired"> نیاز به پیش‌پرداخت</label>
-            <label>مبلغ پیش‌پرداخت (تومان)
-              <input type="number" id="form-depositAmount" min="0" step="10000" value="0">
-            </label>
-            <label>قوانین لغو نوبت
-              <textarea id="form-cancellationPolicy" class="short" placeholder="شرایط لغو"></textarea>
-            </label>
-            <label>فاصله زمانی نوبت‌ها (دقیقه)
-              <input type="number" id="form-timeSlotInterval" min="5" max="480" value="30">
-            </label>
-            <label>حداکثر روزهای قابل رزرو
-              <input type="number" id="form-advanceBookingDays" min="1" max="365" value="30">
-            </label>
-            <label>وقفه بین نوبت‌ها (دقیقه)
-              <input type="number" id="form-bufferBetweenAppointments" min="0" max="240" value="0">
-            </label>
-            <label>ساعات کاری (هر خط: شنبه=09:00-18:00 یا تعطیل)
-              <textarea id="form-workingHours" placeholder="شنبه=09:00-18:00&#10;جمعه=تعطیل"></textarea>
-            </label>
-          </div>
-        </div>
-
-        <div class="form-section">
-          <h3>پریمیوم و نمایش</h3>
-          <div class="form-grid">
-            <label class="switch-field"><input type="checkbox" id="form-isFeatured"> نمایش به‌عنوان فروشگاه ویژه</label>
-            <label class="switch-field"><input type="checkbox" id="form-isVisible" checked> نمایش در سایت</label>
-            <label class="switch-field"><input type="checkbox" id="form-isBookable" checked> امکان رزرو برای کاربران</label>
-            <label class="switch-field"><input type="checkbox" id="form-isPremium"> فعال‌سازی پریمیوم</label>
-            <label>انقضای پریمیوم
-              <input type="datetime-local" id="form-premiumUntil">
-            </label>
-          </div>
-        </div>
-
-        <div class="form-section">
-          <h3>پلن رایگان (مهمان)</h3>
-          <div class="form-grid">
-            <label class="switch-field"><input type="checkbox" id="form-complimentaryActive"> فعال‌سازی پلن رایگان</label>
-            <label>شروع پلن رایگان
-              <input type="datetime-local" id="form-complimentaryStart">
-            </label>
-            <label>پایان پلن رایگان
-              <input type="datetime-local" id="form-complimentaryEnd">
-            </label>
-            <label>مدت پلن رایگان (روز)
-              <input type="number" id="form-complimentaryDuration" min="1" max="365">
-            </label>
-            <label>پیام اختصاصی برای فروشنده
-              <textarea id="form-complimentaryNote" class="short" placeholder="پیام دلخواه برای نمایش به فروشنده"></textarea>
-            </label>
-          </div>
-        </div>
-
-        <div class="form-section">
-          <h3>سئو و لینک‌ها</h3>
-          <div class="form-grid">
-            <label>عنوان سئو
-              <input type="text" id="form-seoTitle" placeholder="عنوان صفحه">
-            </label>
-            <label>توضیحات سئو
-              <textarea id="form-seoDescription" class="short" placeholder="Meta Description"></textarea>
-            </label>
-            <label>کلمات کلیدی
-              <input type="text" id="form-seoKeywords" placeholder="keyword1, keyword2">
-            </label>
-            <label>Schema Markup
-              <textarea id="form-schemaMarkup" class="short" placeholder="کد JSON-LD"></textarea>
-            </label>
-            <label>وب‌سایت
-              <input type="url" id="form-integrationWebsite" placeholder="https://">
-            </label>
-            <label>اینستاگرام
-              <input type="text" id="form-integrationInstagram" placeholder="@username یا لینک">
-            </label>
-            <label>تلگرام
-              <input type="text" id="form-integrationTelegram" placeholder="لینک کانال یا آی‌دی">
-            </label>
-            <label>واتساپ
-              <input type="text" id="form-integrationWhatsapp" placeholder="شماره یا لینک">
-            </label>
-            <label>Google Business
-              <input type="url" id="form-integrationGoogle" placeholder="لینک Google Business">
-            </label>
-            <label>لینک رزرو خارجی
-              <input type="url" id="form-integrationBooking" placeholder="در صورت استفاده از سامانه دیگر">
-            </label>
-          </div>
-        </div>
-
-        <div class="form-section">
-          <h3>عملکرد و یادداشت داخلی</h3>
-          <div class="form-grid">
-            <label>میانگین زمان پاسخ (دقیقه)
-              <input type="number" id="form-responseTime" min="0" value="0">
-            </label>
-            <label>امتیاز رضایت (۰ تا ۱۰۰)
-              <input type="number" id="form-satisfactionScore" min="0" max="100" value="0">
-            </label>
-            <label>یادداشت عملکرد تیم پشتیبانی
-              <textarea id="form-performanceNotes" class="short"></textarea>
-            </label>
-            <label>یادداشت داخلی ادمین
-              <textarea id="form-internalNotes" class="short"></textarea>
-            </label>
-          </div>
-        </div>
-      </div>
-      <div class="modal-footer">
-        <span class="form-error" id="shop-form-error"></span>
-        <div class="form-actions">
-          <button type="button" class="secondary-btn" id="shop-form-cancel">انصراف</button>
-          <button type="submit" class="primary-btn" id="shop-form-submit">ذخیره</button>
-        </div>
-      </div>
-    </form>
-  </dialog>
-
+  <!-- Toast Container -->
   <div id="toast-container" aria-live="polite" aria-atomic="true"></div>
 
   <script>
+    // API Configuration
     const ADMIN_API_BASE = (() => {
       const configured = window.ADMIN_API_BASE && String(window.ADMIN_API_BASE).trim();
       if (configured) return configured;
@@ -1060,218 +854,57 @@
     })();
     window.ADMIN_API_BASE = ADMIN_API_BASE;
     const API_BASE = `${ADMIN_API_BASE.replace(/\/$/, '')}/service-shops`;
+
+    // Formatters
     const numberFormatter = new Intl.NumberFormat('fa-IR');
-    const dateFormatter = new Intl.DateTimeFormat('fa-IR', { dateStyle: 'medium', timeStyle: 'short' });
-    const MS_PER_DAY = 86400000;
-    const PERSIAN_DIGITS_MAP = { '۰': '0', '۱': '1', '۲': '2', '۳': '3', '۴': '4', '۵': '5', '۶': '6', '۷': '7', '۸': '8', '۹': '9' };
-    const ARABIC_DIGITS_MAP = { '٠': '0', '١': '1', '٢': '2', '٣': '3', '٤': '4', '٥': '5', '٦': '6', '٧': '7', '٨': '8', '٩': '9' };
-    const STATUS_LABELS = {
-      draft: 'پیش‌نویس',
-      pending: 'در انتظار تایید',
-      approved: 'فعال',
-      suspended: 'معلق',
-      archived: 'بایگانی'
+    const formatNumber = (value) => {
+      const num = Number(value);
+      return numberFormatter.format(Number.isFinite(num) ? num : 0);
     };
 
+    // State
     const state = {
       page: 1,
-      limit: 10,
+      limit: 20,
       filters: {
         q: '',
         status: '',
-        city: '',
-        isPremium: false,
-        bookingEnabled: false,
-        isFeatured: false
+        city: ''
       },
       items: [],
-      pagination: { total: 0, pages: 0 },
       overview: null,
-      loading: false,
-      editingId: null
+      loading: false
     };
 
+    // Elements
     const elements = {
       tableBody: document.getElementById('shops-table-body'),
       tableMeta: document.getElementById('table-meta'),
-      pagination: document.getElementById('pagination'),
       filterSearch: document.getElementById('filter-search'),
       filterStatus: document.getElementById('filter-status'),
       filterCity: document.getElementById('filter-city'),
-      filterPremium: document.getElementById('filter-premium'),
-      filterBooking: document.getElementById('filter-booking'),
-      filterFeatured: document.getElementById('filter-featured'),
       applyFilters: document.getElementById('filters-apply'),
       resetFilters: document.getElementById('filters-reset'),
       refreshBtn: document.getElementById('refresh-btn'),
-      createBtn: document.getElementById('create-btn'),
-      overviewTotals: {
-        total: document.getElementById('metric-total'),
-        active: document.getElementById('metric-active'),
-        pending: document.getElementById('metric-pending'),
-        booking: document.getElementById('metric-booking'),
-        premium: document.getElementById('metric-premium')
-      },
-      insightCities: document.getElementById('list-top-cities'),
-      insightCategories: document.getElementById('list-top-categories'),
-      insightRecent: document.getElementById('list-recent'),
-      dialog: document.getElementById('shop-dialog'),
-      form: document.getElementById('shop-form'),
-      formTitle: document.getElementById('shop-form-title'),
-      formClose: document.getElementById('shop-form-close'),
-      formCancel: document.getElementById('shop-form-cancel'),
-      formSubmit: document.getElementById('shop-form-submit'),
-      formError: document.getElementById('shop-form-error')
+      metricTotal: document.getElementById('metric-total'),
+      metricActive: document.getElementById('metric-active'),
+      metricPending: document.getElementById('metric-pending'),
+      metricBooking: document.getElementById('metric-booking')
     };
 
-    const formFields = {
-      name: document.getElementById('form-name'),
-      shopUrl: document.getElementById('form-shopUrl'),
-      category: document.getElementById('form-category'),
-      status: document.getElementById('form-status'),
-      subcategories: document.getElementById('form-subcategories'),
-      tags: document.getElementById('form-tags'),
-      highlightServices: document.getElementById('form-highlightServices'),
-      description: document.getElementById('form-description'),
-      ownerName: document.getElementById('form-ownerName'),
-      ownerPhone: document.getElementById('form-ownerPhone'),
-      ownerEmail: document.getElementById('form-ownerEmail'),
-      address: document.getElementById('form-address'),
-      city: document.getElementById('form-city'),
-      province: document.getElementById('form-province'),
-      serviceAreas: document.getElementById('form-serviceAreas'),
-      lat: document.getElementById('form-lat'),
-      lng: document.getElementById('form-lng'),
-      clearGeo: document.getElementById('form-clear-geo'),
-      coverImage: document.getElementById('form-coverImage'),
-      gallery: document.getElementById('form-gallery'),
-      bookingEnabled: document.getElementById('form-bookingEnabled'),
-      instantConfirmation: document.getElementById('form-instantConfirmation'),
-      allowWaitlist: document.getElementById('form-allowWaitlist'),
-      depositRequired: document.getElementById('form-depositRequired'),
-      depositAmount: document.getElementById('form-depositAmount'),
-      cancellationPolicy: document.getElementById('form-cancellationPolicy'),
-      timeSlotInterval: document.getElementById('form-timeSlotInterval'),
-      advanceBookingDays: document.getElementById('form-advanceBookingDays'),
-      bufferBetweenAppointments: document.getElementById('form-bufferBetweenAppointments'),
-      workingHours: document.getElementById('form-workingHours'),
-      isFeatured: document.getElementById('form-isFeatured'),
-      isVisible: document.getElementById('form-isVisible'),
-      isBookable: document.getElementById('form-isBookable'),
-      isPremium: document.getElementById('form-isPremium'),
-      premiumUntil: document.getElementById('form-premiumUntil'),
-      complimentaryActive: document.getElementById('form-complimentaryActive'),
-      complimentaryStart: document.getElementById('form-complimentaryStart'),
-      complimentaryEnd: document.getElementById('form-complimentaryEnd'),
-      complimentaryDuration: document.getElementById('form-complimentaryDuration'),
-      complimentaryNote: document.getElementById('form-complimentaryNote'),
-      seoTitle: document.getElementById('form-seoTitle'),
-      seoDescription: document.getElementById('form-seoDescription'),
-      seoKeywords: document.getElementById('form-seoKeywords'),
-      schemaMarkup: document.getElementById('form-schemaMarkup'),
-      integrationWebsite: document.getElementById('form-integrationWebsite'),
-      integrationInstagram: document.getElementById('form-integrationInstagram'),
-      integrationTelegram: document.getElementById('form-integrationTelegram'),
-      integrationWhatsapp: document.getElementById('form-integrationWhatsapp'),
-      integrationGoogle: document.getElementById('form-integrationGoogle'),
-      integrationBooking: document.getElementById('form-integrationBooking'),
-      responseTime: document.getElementById('form-responseTime'),
-      satisfactionScore: document.getElementById('form-satisfactionScore'),
-      performanceNotes: document.getElementById('form-performanceNotes'),
-      internalNotes: document.getElementById('form-internalNotes')
-    };
-
-    function formatNumber(value) {
-      const num = Number(value);
-      return numberFormatter.format(Number.isFinite(num) ? num : 0);
-    }
-
+    // Toast notification
     function showToast(message, type = 'success') {
       const container = document.getElementById('toast-container');
       const toast = document.createElement('div');
       toast.className = `toast ${type}`;
-      toast.innerHTML = `<i class="ri-information-line"></i><span>${message}</span>`;
+      const icon = type === 'success' ? 'ri-checkbox-circle-line' : 'ri-error-warning-line';
+      toast.innerHTML = `<i class="${icon}"></i><span>${message}</span>`;
       container.appendChild(toast);
       setTimeout(() => toast.classList.add('hide'), 3200);
       setTimeout(() => toast.remove(), 3600);
     }
 
-    function normalizeDigits(value = '') {
-      return String(value || '')
-        .replace(/[۰-۹]/g, d => PERSIAN_DIGITS_MAP[d] || d)
-        .replace(/[٠-٩]/g, d => ARABIC_DIGITS_MAP[d] || d);
-    }
-
-    function parsePlanDate(value) {
-      if (!value) return null;
-      const date = value instanceof Date ? value : new Date(value);
-      return Number.isNaN(date.getTime()) ? null : date;
-    }
-
-    function computePlanDurationDays(plan = {}) {
-      const duration = Number(plan?.durationDays);
-      if (Number.isFinite(duration) && duration > 0) {
-        return Math.round(duration);
-      }
-      const start = parsePlanDate(plan?.startDate);
-      const end = parsePlanDate(plan?.endDate);
-      if (start && end) {
-        const diff = Math.round((end - start) / MS_PER_DAY);
-        if (diff > 0) return diff;
-      }
-      return 30;
-    }
-
-    function findShopById(id) {
-      if (!id) return null;
-      return state.items.find(item => String(item?._id) === String(id)) || null;
-    }
-
-    function splitList(value) {
-      if (!value) return [];
-      return value
-        .split(/[\n,]/)
-        .map(item => item.trim())
-        .filter(Boolean);
-    }
-
-    function parseWorkingHoursInput(value) {
-      if (!value) return [];
-      return value
-        .split(/\r?\n/)
-        .map(line => line.trim())
-        .filter(Boolean)
-        .map(line => {
-          const [dayPart, timePart = ''] = line.split('=');
-          const day = (dayPart || '').trim();
-          if (!day) return null;
-          const lower = timePart.trim().toLowerCase();
-          if (!timePart || ['تعطیل', 'بسته', 'off', 'closed'].includes(lower)) {
-            return { day, open: '', close: '', isClosed: true };
-          }
-          const [open = '', close = ''] = timePart.split('-');
-          return { day, open: open.trim(), close: close.trim(), isClosed: false };
-        })
-        .filter(Boolean);
-    }
-
-    function workingHoursToText(hours = []) {
-      if (!Array.isArray(hours) || !hours.length) return '';
-      return hours
-        .map(h => h.isClosed
-          ? `${h.day}=تعطیل`
-          : `${h.day}=${(h.open || '').trim()}-${(h.close || '').trim()}`)
-        .join('\n');
-    }
-
-    function toInputDateTime(value) {
-      if (!value) return '';
-      const date = new Date(value);
-      if (Number.isNaN(date.getTime())) return '';
-      const local = new Date(date.getTime() - date.getTimezoneOffset() * 60000);
-      return local.toISOString().slice(0, 16);
-    }
-
+    // Fetch helper
     async function fetchJSON(url, options = {}) {
       const res = await fetch(url, {
         credentials: 'include',
@@ -1291,6 +924,7 @@
       return data;
     }
 
+    // Load overview stats
     async function loadOverview() {
       try {
         const data = await fetchJSON(`${API_BASE}/overview`);
@@ -1298,33 +932,36 @@
         renderOverview();
       } catch (err) {
         console.error('loadOverview error', err);
-        showToast(err.message, 'error');
       }
     }
 
+    function renderOverview() {
+      const overview = state.overview;
+      if (!overview) return;
+      const totals = overview.totals || {};
+      elements.metricTotal.textContent = formatNumber(totals.total || 0);
+      elements.metricActive.textContent = formatNumber(totals.active || 0);
+      elements.metricPending.textContent = formatNumber(totals.pending || 0);
+      elements.metricBooking.textContent = formatNumber(totals.bookingEnabled || 0);
+    }
+
+    // Load shops
     async function loadShops() {
       state.loading = true;
       renderTableLoading();
+
       const params = new URLSearchParams();
       params.set('page', state.page);
       params.set('limit', state.limit);
       if (state.filters.q) params.set('q', state.filters.q);
       if (state.filters.status) params.set('status', state.filters.status);
       if (state.filters.city) params.set('city', state.filters.city);
-      if (state.filters.isPremium) params.set('isPremium', 'true');
-      if (state.filters.bookingEnabled) params.set('bookingEnabled', 'true');
-      if (state.filters.isFeatured) params.set('isFeatured', 'true');
 
       try {
         const data = await fetchJSON(`${API_BASE}?${params.toString()}`);
         state.items = Array.isArray(data.items) ? data.items : [];
-        state.pagination = data.pagination || { total: 0, pages: 0 };
         renderTable();
-        renderPagination();
         updateMeta(data.summary?.total || 0);
-        if (data.summary?.totals) {
-          updateOverviewFromSummary(data.summary.totals);
-        }
       } catch (err) {
         console.error('loadShops error', err);
         renderErrorRow(err.message);
@@ -1334,162 +971,84 @@
       }
     }
 
-    function renderOverview() {
-      const overview = state.overview;
-      if (!overview) return;
-      const totals = overview.totals || {};
-      elements.overviewTotals.total.textContent = formatNumber(totals.total || 0);
-      elements.overviewTotals.active.textContent = formatNumber(totals.active || 0);
-      elements.overviewTotals.pending.textContent = formatNumber(totals.pending || 0);
-      elements.overviewTotals.booking.textContent = formatNumber(totals.bookingEnabled || 0);
-      elements.overviewTotals.premium.textContent = formatNumber(totals.premiumActive || 0);
-
-      renderInsightList(elements.insightCities, overview.topCities, 'city');
-      renderInsightList(elements.insightCategories, overview.topCategories, 'category');
-      renderRecent(overview.recent || []);
-    }
-
-    function updateOverviewFromSummary(totals = {}) {
-      elements.overviewTotals.total.textContent = formatNumber(totals.total || 0);
-      elements.overviewTotals.active.textContent = formatNumber(totals.active || 0);
-      elements.overviewTotals.pending.textContent = formatNumber(totals.pending || 0);
-      elements.overviewTotals.booking.textContent = formatNumber(totals.bookingEnabled || 0);
-      elements.overviewTotals.premium.textContent = formatNumber(totals.premiumActive || 0);
-    }
-
-    function renderInsightList(container, list = [], field) {
-      container.innerHTML = '';
-      if (!Array.isArray(list) || !list.length) {
-        container.innerHTML = '<li><span>داده‌ای موجود نیست</span></li>';
-        return;
-      }
-      list.forEach(item => {
-        const li = document.createElement('li');
-        li.innerHTML = `<span>${item._id || item[field] || 'نامشخص'}</span><span class="value">${formatNumber(item.count || 0)}</span>`;
-        container.appendChild(li);
-      });
-    }
-
-    function renderRecent(list = []) {
-      elements.insightRecent.innerHTML = '';
-      if (!Array.isArray(list) || !list.length) {
-        elements.insightRecent.innerHTML = '<li>داده‌ای موجود نیست</li>';
-        return;
-      }
-      list.forEach(item => {
-        const li = document.createElement('li');
-        const updatedAt = item.updatedAt ? dateFormatter.format(new Date(item.updatedAt)) : '—';
-        const status = STATUS_LABELS[item.status] || item.status;
-        li.innerHTML = `<span>${item.name || 'بدون نام'}</span><span class="value">${status} • ${updatedAt}</span>`;
-        elements.insightRecent.appendChild(li);
-      });
-    }
-
     function renderTableLoading() {
-      elements.tableBody.innerHTML = '<tr><td colspan="7" class="empty">در حال بارگذاری...</td></tr>';
+      elements.tableBody.innerHTML = '<tr><td colspan="6" class="loading"><i class="ri-loader-4-line"></i><p>در حال بارگذاری...</p></td></tr>';
     }
 
     function renderErrorRow(message) {
-      elements.tableBody.innerHTML = `<tr><td colspan="7" class="empty">${message}</td></tr>`;
+      elements.tableBody.innerHTML = `<tr><td colspan="6" class="empty-state"><i class="ri-error-warning-line"></i><p>${message}</p></td></tr>`;
     }
 
     function updateMeta(total) {
-      const start = (state.page - 1) * state.limit + 1;
-      const end = Math.min(total, state.page * state.limit);
       if (total === 0) {
-        elements.tableMeta.textContent = 'هیچ مغازه‌ای یافت نشد.';
+        elements.tableMeta.textContent = 'هیچ مغازه‌ای یافت نشد';
       } else {
-        elements.tableMeta.textContent = `نمایش ${formatNumber(start)} تا ${formatNumber(end)} از ${formatNumber(total)} مغازه`;
+        elements.tableMeta.textContent = `${formatNumber(total)} مغازه`;
       }
     }
 
     function renderTable() {
       if (!state.items.length) {
-        renderErrorRow('هیچ مغازه‌ای مطابق فیلترها پیدا نشد.');
+        renderErrorRow('هیچ مغازه‌ای مطابق فیلترها پیدا نشد');
         return;
       }
       elements.tableBody.innerHTML = state.items.map(shop => renderRow(shop)).join('');
     }
 
     function renderRow(shop) {
+      const statusLabels = {
+        draft: 'پیش‌نویس',
+        pending: 'در انتظار تایید',
+        approved: 'فعال',
+        suspended: 'معلق',
+        archived: 'بایگانی'
+      };
+
+      const statusBadgeClass = {
+        draft: 'badge-muted',
+        pending: 'badge-warning',
+        approved: 'badge-success',
+        suspended: 'badge-danger',
+        archived: 'badge-muted'
+      };
+
+      const statusLabel = statusLabels[shop.status] || shop.status || 'نامشخص';
+      const badgeClass = statusBadgeClass[shop.status] || 'badge-muted';
       const bookingEnabled = !!shop?.bookingSettings?.enabled;
-      const rating = shop?.analytics?.ratingAverage;
-      const bookings = shop?.analytics?.totalBookings;
-      const revenue = shop?.analytics?.totalRevenue;
-      const premiumActive = !!shop?.isPremium;
-      const premiumBadge = premiumActive
-        ? `<span class="badge warning"><i class="ri-vip-crown-line"></i> پریمیوم</span>`
-        : '<span class="badge">معمولی</span>';
-      const bookingBadge = bookingEnabled
-        ? '<span class="badge success"><i class="ri-calendar-check-line"></i> فعال</span>'
-        : '<span class="badge">غیرفعال</span>';
-
-      const complimentary = shop?.complimentaryPlan || {};
-      const now = new Date();
-      const complimentaryEnd = complimentary.endDate ? new Date(complimentary.endDate) : null;
-      let complimentaryBadge = '<span class="badge"><i class="ri-gift-line"></i> پلن رایگان غیرفعال</span>';
-      if (complimentary.isActive) {
-        if (complimentaryEnd && complimentaryEnd < now) {
-          complimentaryBadge = '<span class="badge danger"><i class="ri-timer-line"></i> پلن رایگان منقضی شده</span>';
-        } else {
-          let remainingText = '';
-          if (complimentaryEnd) {
-            const diff = Math.ceil((complimentaryEnd - now) / 86400000);
-            if (diff >= 0) {
-              remainingText = ` (${formatNumber(diff)} روز باقی)`;
-            }
-          }
-          complimentaryBadge = `<span class="badge info"><i class="ri-gift-line"></i> پلن رایگان فعال${remainingText}</span>`;
-        }
-      }
-
-      const statusClass = `status-badge ${shop.status || 'draft'}`;
-      const statusLabel = STATUS_LABELS[shop.status] || shop.status || 'نامشخص';
-      const cityLine = [shop.city, shop.province].filter(Boolean).join('، ');
-      const ownerLine = shop.ownerPhone ? `${shop.ownerPhone}` : '';
-      const ratingText = rating != null ? Number(rating).toFixed(1) : '—';
-      const bookingsText = formatNumber(bookings || 0);
-      const revenueText = formatNumber(revenue || 0);
+      const shopUrl = shop.shopUrl ? `/service/${shop.shopUrl}` : '#';
+      const sellerPanelUrl = shop.ownerPhone ? `/service-seller-panel/s-seller-panel.html?phone=${shop.ownerPhone}` : '#';
 
       return `
         <tr data-id="${shop._id}">
           <td>
-            <div class="shop-name">${shop.name || 'بدون نام'}</div>
-            <div class="shop-meta">${shop.shopUrl ? `/service/${shop.shopUrl}` : '—'}</div>
+            <div class="shop-info">
+              <div class="shop-name">${shop.name || 'بدون نام'}</div>
+              ${shop.shopUrl ? `<a href="${shopUrl}" target="_blank" class="shop-url"><i class="ri-external-link-line"></i> ${shopUrl}</a>` : '<span class="shop-meta">—</span>'}
+            </div>
           </td>
           <td>
-            <div>${shop.ownerName || 'نامشخص'}</div>
-            <div class="shop-meta">${ownerLine || '—'}</div>
+            <div class="shop-info">
+              <div>${shop.ownerName || 'نامشخص'}</div>
+              <div class="shop-meta">${shop.ownerPhone || '—'}</div>
+            </div>
+          </td>
+          <td>${shop.city || '—'}</td>
+          <td>
+            <div class="badges-group">
+              <span class="badge ${badgeClass}">${statusLabel}</span>
+            </div>
           </td>
           <td>
-            <div>${cityLine || '—'}</div>
-            <div class="shop-meta">${shop.address || ''}</div>
-          </td>
-          <td>
-            <div class="status-badge ${statusClass}">${statusLabel}</div>
-            <select class="status-select" data-id="${shop._id}" data-prev="${shop.status || ''}">
-              ${Object.entries(STATUS_LABELS).map(([value, label]) => `
-                <option value="${value}" ${value === shop.status ? 'selected' : ''}>${label}</option>
-              `).join('')}
-            </select>
-          </td>
-          <td>
-            <div class="switch-field"><input type="checkbox" class="toggle-booking" data-id="${shop._id}" ${bookingEnabled ? 'checked' : ''}> رزرو</div>
-            <div class="switch-field"><input type="checkbox" class="toggle-premium" data-id="${shop._id}" ${premiumActive ? 'checked' : ''}> پریمیوم</div>
-            <div>${bookingBadge} ${premiumBadge}</div>
-            <div class="plan-badge-row">${complimentaryBadge}</div>
-          </td>
-          <td>
-            <div class="table-metric"><span>رزروها</span><strong>${bookingsText}</strong></div>
-            <div class="table-metric"><span>امتیاز</span><strong>${ratingText}</strong></div>
-            <div class="table-metric"><span>درآمد</span><strong>${revenueText}</strong></div>
+            <div class="badges-group">
+              ${bookingEnabled ? '<span class="badge badge-success"><i class="ri-calendar-check-line"></i> رزرو</span>' : '<span class="badge badge-muted">بدون رزرو</span>'}
+              ${shop.isPremium ? '<span class="badge badge-warning"><i class="ri-vip-crown-line"></i> پریمیوم</span>' : ''}
+            </div>
           </td>
           <td>
             <div class="actions">
-              <button type="button" class="edit" data-action="edit" data-id="${shop._id}"><i class="ri-edit-2-line"></i> ویرایش</button>
-              <button type="button" class="complimentary" data-action="complimentary" data-id="${shop._id}"><i class="ri-gift-line"></i> پلن رایگان</button>
-              <button type="button" class="archive" data-action="archive" data-id="${shop._id}" data-status="${shop.status}">
-                <i class="ri-archive-line"></i> ${shop.status === 'archived' ? 'حذف کامل' : 'بایگانی'}
+              ${shop.ownerPhone ? `<a href="${sellerPanelUrl}" target="_blank" class="btn btn-view btn-sm"><i class="ri-external-link-line"></i> پنل فروشنده</a>` : ''}
+              <button type="button" class="btn btn-edit btn-sm" data-action="toggle-status" data-id="${shop._id}" data-status="${shop.status}">
+                <i class="ri-settings-3-line"></i> تغییر وضعیت
               </button>
             </div>
           </td>
@@ -1497,201 +1056,34 @@
       `;
     }
 
-    async function quickUpdateComplimentaryPlan(shopId) {
-      const shop = findShopById(shopId);
-      if (!shop) {
-        showToast('مغازه مورد نظر یافت نشد.', 'error');
-        return;
-      }
-
-      const plan = shop.complimentaryPlan || {};
-      const defaultDays = computePlanDurationDays(plan);
-      const promptMessage = 'مدت پلن رایگان (بر حسب روز) را وارد کنید. برای غیرفعال‌سازی پلن، ورودی را خالی بگذارید.';
-      const input = prompt(promptMessage, defaultDays ? String(defaultDays) : '');
-      if (input === null) return;
-
-      const normalizedInput = normalizeDigits(input.trim());
-      if (!normalizedInput) {
-        const confirmed = confirm('پلن رایگان این مغازه غیرفعال شود؟');
-        if (!confirmed) return;
-        try {
-          await updateStatus(shopId, {
-            complimentaryPlan: {
-              isActive: false,
-              startDate: null,
-              endDate: null,
-              durationDays: null,
-              note: ''
-            }
-          });
-          showToast('پلن رایگان غیرفعال شد.');
-          loadOverview();
-          loadShops();
-        } catch (err) {
-          showToast(err.message, 'error');
-        }
-        return;
-      }
-
-      const parsedDays = Number(normalizedInput);
-      if (!Number.isFinite(parsedDays) || parsedDays <= 0) {
-        showToast('لطفاً عددی معتبر بزرگتر از صفر وارد کنید.', 'error');
-        return;
-      }
-
-      const extraDays = Math.min(365, Math.max(1, Math.round(parsedDays)));
-      const now = new Date();
-      const existingStart = parsePlanDate(plan.startDate);
-      const existingEnd = parsePlanDate(plan.endDate);
-
-      let startDate = now;
-      let totalDays = extraDays;
-
-      if (plan.isActive && existingStart) {
-        if (existingEnd && existingEnd > now) {
-          const previousDuration = Math.max(0, Math.round((existingEnd - existingStart) / MS_PER_DAY));
-          startDate = existingStart;
-          totalDays = Math.max(1, previousDuration + extraDays);
-        } else if (existingStart > now) {
-          startDate = existingStart;
-        }
-      }
-
-      totalDays = Math.min(365, totalDays);
-
-      let note = plan.note || '';
-      const notePrompt = prompt('پیام دلخواه برای نمایش به فروشنده (اختیاری):', note);
-      if (notePrompt !== null) {
-        note = notePrompt.trim();
-      }
-
-      try {
-        await updateStatus(shopId, {
-          complimentaryPlan: {
-            isActive: true,
-            startDate: startDate.toISOString(),
-            durationDays: totalDays,
-            note
-          }
-        });
-        showToast('پلن رایگان بروزرسانی شد.');
-        loadOverview();
-        loadShops();
-      } catch (err) {
-        showToast(err.message, 'error');
-      }
-    }
-
-    function renderPagination() {
-      const totalPages = state.pagination.pages || 0;
-      const current = state.page;
-      if (totalPages <= 1) {
-        elements.pagination.style.display = 'none';
-        elements.pagination.innerHTML = '';
-        return;
-      }
-      elements.pagination.style.display = 'flex';
-      const prevDisabled = current <= 1;
-      const nextDisabled = current >= totalPages;
-      elements.pagination.innerHTML = `
-        <button type="button" ${prevDisabled ? 'disabled' : ''} data-page="prev">قبلی</button>
-        <span>صفحه ${formatNumber(current)} از ${formatNumber(totalPages)}</span>
-        <button type="button" ${nextDisabled ? 'disabled' : ''} data-page="next">بعدی</button>
-      `;
-    }
-
-    elements.pagination.addEventListener('click', (e) => {
-      const btn = e.target.closest('button[data-page]');
-      if (!btn) return;
-      const action = btn.dataset.page;
-      if (action === 'prev' && state.page > 1) {
-        state.page -= 1;
-        loadShops();
-      } else if (action === 'next' && state.page < (state.pagination.pages || 0)) {
-        state.page += 1;
-        loadShops();
-      }
-    });
-
+    // Event listeners
     elements.tableBody.addEventListener('click', async (e) => {
-      const editBtn = e.target.closest('button[data-action="edit"]');
-      if (editBtn) {
-        const id = editBtn.dataset.id;
-        openForm(id);
-        return;
-      }
-      const complimentaryBtn = e.target.closest('button[data-action="complimentary"]');
-      if (complimentaryBtn) {
-        const id = complimentaryBtn.dataset.id;
-        await quickUpdateComplimentaryPlan(id);
-        return;
-      }
-      const archiveBtn = e.target.closest('button[data-action="archive"]');
-      if (archiveBtn) {
-        const id = archiveBtn.dataset.id;
-        const currentStatus = archiveBtn.dataset.status;
-        const hard = currentStatus === 'archived';
-        const confirmed = hard
-          ? confirm('آیا از حذف کامل این مغازه مطمئن هستید؟ این عملیات قابل بازگشت نیست.')
-          : confirm('مغازه به حالت بایگانی منتقل شود؟');
-        if (!confirmed) return;
+      const toggleBtn = e.target.closest('button[data-action="toggle-status"]');
+      if (toggleBtn) {
+        const id = toggleBtn.dataset.id;
+        const currentStatus = toggleBtn.dataset.status;
+
+        const newStatus = prompt(
+          'وضعیت جدید را انتخاب کنید:\n' +
+          '1. approved (فعال)\n' +
+          '2. pending (در انتظار تایید)\n' +
+          '3. suspended (معلق)\n' +
+          '4. archived (بایگانی)',
+          currentStatus
+        );
+
+        if (!newStatus || newStatus === currentStatus) return;
+
         try {
-          await fetchJSON(`${API_BASE}/${id}${hard ? '?hard=true' : ''}`, { method: 'DELETE' });
-          showToast(hard ? 'مغازه حذف شد.' : 'مغازه بایگانی شد.');
+          await fetchJSON(`${API_BASE}/${id}/status`, {
+            method: 'PATCH',
+            body: JSON.stringify({ status: newStatus })
+          });
+          showToast('وضعیت مغازه بروزرسانی شد');
           loadOverview();
           loadShops();
         } catch (err) {
           showToast(err.message, 'error');
-        }
-      }
-    });
-
-    elements.tableBody.addEventListener('change', async (e) => {
-      const select = e.target.closest('.status-select');
-      if (select) {
-        const id = select.dataset.id;
-        const prev = select.dataset.prev;
-        const next = select.value;
-        if (prev === next) return;
-        try {
-          await updateStatus(id, { status: next });
-          select.dataset.prev = next;
-          showToast('وضعیت مغازه بروزرسانی شد.');
-          loadOverview();
-          loadShops();
-        } catch (err) {
-          showToast(err.message, 'error');
-          select.value = prev;
-        }
-        return;
-      }
-
-      const bookingToggle = e.target.closest('.toggle-booking');
-      if (bookingToggle) {
-        const id = bookingToggle.dataset.id;
-        const enabled = bookingToggle.checked;
-        try {
-          await updateStatus(id, { bookingSettings: { enabled } });
-          showToast('تنظیمات رزرو بروزرسانی شد.');
-          loadOverview();
-        } catch (err) {
-          showToast(err.message, 'error');
-          bookingToggle.checked = !enabled;
-        }
-        return;
-      }
-
-      const premiumToggle = e.target.closest('.toggle-premium');
-      if (premiumToggle) {
-        const id = premiumToggle.dataset.id;
-        const isPremium = premiumToggle.checked;
-        try {
-          await updateStatus(id, { isPremium });
-          showToast('وضعیت پریمیوم بروزرسانی شد.');
-          loadOverview();
-        } catch (err) {
-          showToast(err.message, 'error');
-          premiumToggle.checked = !isPremium;
         }
       }
     });
@@ -1701,9 +1093,6 @@
       state.filters.q = elements.filterSearch.value.trim();
       state.filters.status = elements.filterStatus.value;
       state.filters.city = elements.filterCity.value.trim();
-      state.filters.isPremium = elements.filterPremium.checked;
-      state.filters.bookingEnabled = elements.filterBooking.checked;
-      state.filters.isFeatured = elements.filterFeatured.checked;
       loadShops();
     }
 
@@ -1719,9 +1108,6 @@
       elements.filterSearch.value = '';
       elements.filterStatus.value = '';
       elements.filterCity.value = '';
-      elements.filterPremium.checked = false;
-      elements.filterBooking.checked = false;
-      elements.filterFeatured.checked = false;
       applyFilters();
     });
 
@@ -1730,226 +1116,7 @@
       loadShops();
     });
 
-    elements.createBtn.addEventListener('click', () => openForm(null));
-    elements.formClose.addEventListener('click', closeForm);
-    elements.formCancel.addEventListener('click', closeForm);
-
-    elements.dialog.addEventListener('cancel', (e) => e.preventDefault());
-
-    elements.form.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      try {
-        elements.formSubmit.disabled = true;
-        elements.formError.textContent = '';
-        const payload = buildPayload();
-        const isEdit = !!state.editingId;
-        const url = isEdit ? `${API_BASE}/${state.editingId}` : API_BASE;
-        const method = isEdit ? 'PUT' : 'POST';
-        await fetchJSON(url, { method, body: JSON.stringify(payload) });
-        showToast(isEdit ? 'مغازه بروزرسانی شد.' : 'مغازه جدید ایجاد شد.');
-        closeForm();
-        loadOverview();
-        loadShops();
-      } catch (err) {
-        console.error('submit form error', err);
-        elements.formError.textContent = err.message;
-        showToast(err.message, 'error');
-      } finally {
-        elements.formSubmit.disabled = false;
-      }
-    });
-
-    function buildPayload() {
-      const payload = {
-        name: formFields.name.value.trim(),
-        shopUrl: formFields.shopUrl.value.trim(),
-        category: formFields.category.value.trim(),
-        status: formFields.status.value,
-        subcategories: splitList(formFields.subcategories.value),
-        tags: splitList(formFields.tags.value),
-        highlightServices: splitList(formFields.highlightServices.value),
-        description: formFields.description.value.trim(),
-        ownerName: formFields.ownerName.value.trim(),
-        ownerPhone: formFields.ownerPhone.value.trim(),
-        ownerEmail: formFields.ownerEmail.value.trim(),
-        address: formFields.address.value.trim(),
-        city: formFields.city.value.trim(),
-        province: formFields.province.value.trim(),
-        serviceAreas: splitList(formFields.serviceAreas.value),
-        coverImage: formFields.coverImage.value.trim(),
-        gallery: splitList(formFields.gallery.value),
-        bookingSettings: {
-          enabled: formFields.bookingEnabled.checked,
-          instantConfirmation: formFields.instantConfirmation.checked,
-          allowWaitlist: formFields.allowWaitlist.checked,
-          depositRequired: formFields.depositRequired.checked,
-          depositAmount: Number(formFields.depositAmount.value) || 0,
-          cancellationPolicy: formFields.cancellationPolicy.value.trim(),
-          timeSlotInterval: Number(formFields.timeSlotInterval.value) || 30,
-          advanceBookingDays: Number(formFields.advanceBookingDays.value) || 30,
-          bufferBetweenAppointments: Number(formFields.bufferBetweenAppointments.value) || 0
-        },
-        workingHours: parseWorkingHoursInput(formFields.workingHours.value),
-        isFeatured: formFields.isFeatured.checked,
-        isVisible: formFields.isVisible.checked,
-        isBookable: formFields.isBookable.checked,
-        isPremium: formFields.isPremium.checked,
-        premiumUntil: formFields.premiumUntil.value ? new Date(formFields.premiumUntil.value).toISOString() : null,
-        complimentaryPlan: {
-          isActive: formFields.complimentaryActive.checked,
-          startDate: formFields.complimentaryStart.value ? new Date(formFields.complimentaryStart.value).toISOString() : null,
-          endDate: formFields.complimentaryEnd.value ? new Date(formFields.complimentaryEnd.value).toISOString() : null,
-          durationDays: (() => {
-            const value = Number(formFields.complimentaryDuration.value);
-            return Number.isFinite(value) && value > 0 ? Math.round(value) : null;
-          })(),
-          note: formFields.complimentaryNote.value.trim()
-        },
-        seo: {
-          title: formFields.seoTitle.value.trim(),
-          description: formFields.seoDescription.value.trim(),
-          keywords: splitList(formFields.seoKeywords.value),
-          schemaMarkup: formFields.schemaMarkup.value
-        },
-        integrations: {
-          website: formFields.integrationWebsite.value.trim(),
-          instagram: formFields.integrationInstagram.value.trim(),
-          telegram: formFields.integrationTelegram.value.trim(),
-          whatsapp: formFields.integrationWhatsapp.value.trim(),
-          googleBusiness: formFields.integrationGoogle.value.trim(),
-          bookingLink: formFields.integrationBooking.value.trim()
-        },
-        performance: {
-          responseTimeMinutes: Number(formFields.responseTime.value) || 0,
-          satisfactionScore: Number(formFields.satisfactionScore.value) || 0,
-          notes: formFields.performanceNotes.value.trim()
-        },
-        notes: formFields.internalNotes.value.trim()
-      };
-
-      const lat = formFields.lat.value.trim();
-      const lng = formFields.lng.value.trim();
-      if (formFields.clearGeo.checked) {
-        payload.geoLocation = null;
-      } else if (lat || lng) {
-        payload.geoLocation = {
-          lat: lat ? Number(lat) : null,
-          lng: lng ? Number(lng) : null
-        };
-      }
-
-      return payload;
-    }
-
-    async function openForm(id) {
-      state.editingId = id;
-      elements.formError.textContent = '';
-      elements.form.reset();
-      formFields.isVisible.checked = true;
-      formFields.isBookable.checked = true;
-      formFields.bookingEnabled.checked = false;
-      formFields.clearGeo.checked = false;
-
-      if (id) {
-        elements.formTitle.textContent = 'ویرایش مغازه خدماتی';
-        elements.formSubmit.textContent = 'ذخیره تغییرات';
-        try {
-          const data = await fetchJSON(`${API_BASE}/${id}`);
-          const shop = data.item || {};
-          formFields.name.value = shop.name || '';
-          formFields.shopUrl.value = shop.shopUrl || '';
-          formFields.category.value = shop.category || '';
-          formFields.status.value = shop.status || 'pending';
-          formFields.subcategories.value = (shop.subcategories || []).join(', ');
-          formFields.tags.value = (shop.tags || []).join(', ');
-          formFields.highlightServices.value = (shop.highlightServices || []).join(', ');
-          formFields.description.value = shop.description || '';
-          formFields.ownerName.value = shop.ownerName || '';
-          formFields.ownerPhone.value = shop.ownerPhone || '';
-          formFields.ownerEmail.value = shop.ownerEmail || '';
-          formFields.address.value = shop.address || '';
-          formFields.city.value = shop.city || '';
-          formFields.province.value = shop.province || '';
-          formFields.serviceAreas.value = (shop.serviceAreas || []).join(', ');
-          formFields.coverImage.value = shop.coverImage || '';
-          formFields.gallery.value = (shop.gallery || []).join('\n');
-          formFields.bookingEnabled.checked = !!shop?.bookingSettings?.enabled;
-          formFields.instantConfirmation.checked = !!shop?.bookingSettings?.instantConfirmation;
-          formFields.allowWaitlist.checked = !!shop?.bookingSettings?.allowWaitlist;
-          formFields.depositRequired.checked = !!shop?.bookingSettings?.depositRequired;
-          formFields.depositAmount.value = shop?.bookingSettings?.depositAmount ?? 0;
-          formFields.cancellationPolicy.value = shop?.bookingSettings?.cancellationPolicy || '';
-          formFields.timeSlotInterval.value = shop?.bookingSettings?.timeSlotInterval ?? 30;
-          formFields.advanceBookingDays.value = shop?.bookingSettings?.advanceBookingDays ?? 30;
-          formFields.bufferBetweenAppointments.value = shop?.bookingSettings?.bufferBetweenAppointments ?? 0;
-          formFields.workingHours.value = workingHoursToText(shop.workingHours);
-          formFields.isFeatured.checked = !!shop.isFeatured;
-          formFields.isVisible.checked = shop.isVisible !== false;
-          formFields.isBookable.checked = shop.isBookable !== false;
-          formFields.isPremium.checked = !!shop.isPremium;
-          formFields.premiumUntil.value = toInputDateTime(shop.premiumUntil);
-          const complimentaryPlan = shop?.complimentaryPlan || {};
-          formFields.complimentaryActive.checked = !!complimentaryPlan.isActive;
-          formFields.complimentaryStart.value = toInputDateTime(complimentaryPlan.startDate);
-          formFields.complimentaryEnd.value = toInputDateTime(complimentaryPlan.endDate);
-          formFields.complimentaryDuration.value = complimentaryPlan.durationDays != null ? complimentaryPlan.durationDays : '';
-          formFields.complimentaryNote.value = complimentaryPlan.note || '';
-          formFields.seoTitle.value = shop?.seo?.title || '';
-          formFields.seoDescription.value = shop?.seo?.description || '';
-          formFields.seoKeywords.value = (shop?.seo?.keywords || []).join(', ');
-          formFields.schemaMarkup.value = shop?.seo?.schemaMarkup || '';
-          formFields.integrationWebsite.value = shop?.integrations?.website || '';
-          formFields.integrationInstagram.value = shop?.integrations?.instagram || '';
-          formFields.integrationTelegram.value = shop?.integrations?.telegram || '';
-          formFields.integrationWhatsapp.value = shop?.integrations?.whatsapp || '';
-          formFields.integrationGoogle.value = shop?.integrations?.googleBusiness || '';
-          formFields.integrationBooking.value = shop?.integrations?.bookingLink || '';
-          formFields.responseTime.value = shop?.performance?.responseTimeMinutes ?? 0;
-          formFields.satisfactionScore.value = shop?.performance?.satisfactionScore ?? 0;
-          formFields.performanceNotes.value = shop?.performance?.notes || '';
-          formFields.internalNotes.value = shop?.notes || '';
-          formFields.lat.value = shop?.geoLocation?.lat ?? '';
-          formFields.lng.value = shop?.geoLocation?.lng ?? '';
-        } catch (err) {
-          showToast(err.message, 'error');
-          return;
-        }
-      } else {
-        elements.formTitle.textContent = 'افزودن مغازه جدید';
-        elements.formSubmit.textContent = 'ایجاد مغازه';
-        formFields.status.value = 'pending';
-        formFields.complimentaryActive.checked = false;
-        formFields.complimentaryStart.value = '';
-        formFields.complimentaryEnd.value = '';
-        formFields.complimentaryDuration.value = '';
-        formFields.complimentaryNote.value = '';
-      }
-
-      elements.dialog.showModal();
-    }
-
-    function closeForm() {
-      elements.dialog.close();
-      state.editingId = null;
-      elements.form.reset();
-      formFields.isVisible.checked = true;
-      formFields.isBookable.checked = true;
-      formFields.clearGeo.checked = false;
-      formFields.complimentaryActive.checked = false;
-      formFields.complimentaryStart.value = '';
-      formFields.complimentaryEnd.value = '';
-      formFields.complimentaryDuration.value = '';
-      formFields.complimentaryNote.value = '';
-      elements.formError.textContent = '';
-    }
-
-    async function updateStatus(id, payload) {
-      return fetchJSON(`${API_BASE}/${id}/status`, {
-        method: 'PATCH',
-        body: JSON.stringify(payload)
-      });
-    }
-
+    // Initialize
     async function init() {
       await Promise.all([loadOverview(), loadShops()]);
     }
