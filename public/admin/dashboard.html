@@ -21,6 +21,7 @@
         <a href="#" data-section="users"><i class="ri-user-3-line"></i> کاربران <span class="count" id="count-users">0</span></a>
         <a href="#" data-section="sellers"><i class="ri-store-2-line"></i> فروشنده‌ها <span class="count" id="count-sellers">0</span></a>
         <a href="#" data-section="service-shops" id="service-shops-link"><i class="ri-scissors-2-line"></i> مغازه‌های خدماتی <span class="count" id="count-service-shops"></span></a>
+        <a href="#" data-section="categories"><i class="ri-folders-line"></i> مدیریت دسته‌بندی‌ها</a>
         <a href="#" data-section="products"><i class="ri-box-3-line"></i> محصولات <span class="count" id="count-products">0</span></a>
         <a href="#" data-section="shopping-centers"><i class="ri-building-2-line"></i> مراکز خرید <span class="count" id="count-shopping-centers">0</span></a>
         <a href="#" data-section="plans"><i class="ri-money-dollar-circle-line"></i> مدیریت قیمت پلن‌ها</a>
@@ -368,6 +369,84 @@
         </div>
       </div>
     </div>
+  </div>
+
+  <!-- مدیریت دسته‌بندی‌ها -->
+  <div class="section-panel" id="categories-panel" style="display:none;">
+    <div class="content-header">مدیریت حرفه‌ای دسته‌بندی‌ها</div>
+
+    <div class="category-metrics">
+      <div class="category-metric-card">
+        <span class="metric-label">تعداد دسته‌های فعال</span>
+        <span class="metric-value" id="categories-count">0</span>
+      </div>
+      <div class="category-metric-card">
+        <span class="metric-label">زیرگروه‌های خدمات</span>
+        <span class="metric-value" id="service-subcategories-count">0</span>
+      </div>
+      <div class="category-metric-card note">
+        <i class="ri-information-line"></i>
+        <div>
+          <strong>ذخیره‌سازی هوشمند</strong>
+          <p>تغییرات دسته‌بندی‌ها بلافاصله ذخیره شده و در پیش‌نمایش فرم ثبت فروشگاه قابل بررسی است.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="categories-manage-grid">
+      <section class="categories-card">
+        <div class="categories-card-header">
+          <h3>دسته‌بندی‌های اصلی</h3>
+          <p>دسته‌های مورد استفاده در فرم ثبت فروشگاه را مدیریت کنید.</p>
+        </div>
+        <form id="categoryAddForm" class="categories-form" autocomplete="off">
+          <label for="categoryNameInput">افزودن دسته جدید</label>
+          <div class="categories-form-row">
+            <input type="text" id="categoryNameInput" placeholder="مثلاً تعمیرات خانگی" required />
+            <button type="submit" class="primary-btn">افزودن</button>
+          </div>
+        </form>
+        <div id="categoryManagerList" class="chip-list" data-empty-label="هنوز دسته‌ای ثبت نشده است."></div>
+      </section>
+
+      <section class="categories-card">
+        <div class="categories-card-header">
+          <h3>زیرگروه‌های محبوب خدمات</h3>
+          <p>لیست نمونه‌های پیشنهادی برای دسته «خدمات» که در فرم به‌صورت چیپ نمایش داده می‌شود.</p>
+        </div>
+        <form id="serviceSubcategoryForm" class="categories-form" autocomplete="off">
+          <label for="serviceSubcategoryInput">افزودن زیرگروه جدید</label>
+          <div class="categories-form-row">
+            <input type="text" id="serviceSubcategoryInput" placeholder="مثلاً خدمات نظافت" required />
+            <button type="submit" class="primary-btn">افزودن</button>
+          </div>
+        </form>
+        <div id="serviceSubcategoryList" class="chip-list" data-empty-label="هنوز زیرگروهی ثبت نشده است."></div>
+      </section>
+
+      <section class="categories-card preview-card">
+        <div class="categories-card-header">
+          <h3>پیش‌نمایش فرم ثبت فروشگاه</h3>
+          <p>به‌روزرسانی‌ها در همینجا قابل بررسی هستند.</p>
+        </div>
+        <div class="preview-field">
+          <label>دسته‌بندی</label>
+          <select id="categoryPreviewSelect" disabled>
+            <option>در حال بارگیری...</option>
+          </select>
+        </div>
+        <div class="preview-field">
+          <label>نمونه زیرگروه‌های خدمات</label>
+          <div id="servicePreviewChips" class="chip-list preview" data-empty-label="برای نمایش زیرگروه، موردی اضافه کنید."></div>
+        </div>
+        <div class="preview-note">
+          <i class="ri-lightbulb-flash-line"></i>
+          <p>پس از تایید نهایی، این داده‌ها را می‌توانید به بک‌اند منتقل کنید تا در تجربه کاربران اعمال شود.</p>
+        </div>
+      </section>
+    </div>
+
+    <div id="categoryManagerFeedback" class="category-feedback" role="status" aria-live="polite"></div>
   </div>
 
   <!-- ۶) مدیریت قیمت پلن‌ها -->

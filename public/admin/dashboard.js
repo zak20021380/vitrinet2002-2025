@@ -458,6 +458,296 @@ function toDatetimeLocalValue(value) {
 
 
 
+
+
+// -------- مدیریت دسته‌بندی‌ها --------
+const CATEGORY_STORAGE_KEY = 'admin.categories.list';
+const SERVICE_SUBCATEGORY_STORAGE_KEY = 'admin.categories.services';
+const DEFAULT_CATEGORIES = [
+  'پوشاک',
+  'خوراک',
+  'خدمات',
+  'دیجیتال',
+  'زیبایی',
+  'کتاب و تحریر',
+  'لوازم خانگی',
+  'ورزشی',
+  'تالار و مجالس',
+  'قنادی و شیرینی',
+  'گل و گیاه',
+  'خودرو',
+  'کودکان'
+];
+
+const DEFAULT_SERVICE_SUBCATEGORIES = [
+  'آرایشگاه مردانه',
+  'آرایشگاه زنانه',
+  'کارواش',
+  'کلینیک زیبایی',
+  'تعمیر موبایل',
+  'آتلیه عکاسی',
+  'خیاطی',
+  'آرایش حیوانات'
+];
+
+let categoryManagerState = {
+  categories: [],
+  serviceSubcategories: []
+};
+
+let categoryManagerInitialised = false;
+let categoryFeedbackTimer = null;
+
+function normaliseCategoryText(value) {
+  if (!value) return '';
+  return String(value).replace(/\s+/g, ' ').trim();
+}
+
+function sortCategoryList(list = []) {
+  return [...list].sort((a, b) => a.localeCompare(b, 'fa-IR', { sensitivity: 'base' }));
+}
+
+function loadCategoryList(key, fallback = []) {
+  try {
+    if (typeof localStorage === 'undefined') {
+      return [...fallback];
+    }
+    const raw = localStorage.getItem(key);
+    if (!raw) return [...fallback];
+    const parsed = JSON.parse(raw);
+    if (!Array.isArray(parsed)) return [...fallback];
+    const normalised = parsed
+      .map(normaliseCategoryText)
+      .filter(Boolean);
+    if (!normalised.length) return [...fallback];
+    return sortCategoryList([...new Set(normalised)]);
+  } catch (err) {
+    console.warn('loadCategoryList error ->', err);
+    return [...fallback];
+  }
+}
+
+function saveCategoryList(key, list) {
+  try {
+    if (typeof localStorage === 'undefined') return;
+    localStorage.setItem(key, JSON.stringify(list));
+  } catch (err) {
+    console.warn('saveCategoryList error ->', err);
+  }
+}
+
+function listIncludesCaseInsensitive(list = [], value = '') {
+  const compare = value.toLocaleLowerCase('fa-IR');
+  return list.some(item => item.toLocaleLowerCase('fa-IR') === compare);
+}
+
+function renderChipList(container, items = [], { removable = true, type = 'category' } = {}) {
+  if (!container) return;
+  container.innerHTML = '';
+  if (!items.length) {
+    container.classList.add('empty');
+    return;
+  }
+  container.classList.remove('empty');
+  items.forEach(item => {
+    const chip = document.createElement('div');
+    chip.className = 'chip-item';
+    const label = document.createElement('span');
+    label.textContent = item;
+    chip.appendChild(label);
+    if (removable) {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.dataset.action = 'remove-category';
+      btn.dataset.type = type;
+      btn.dataset.name = item;
+      btn.setAttribute('aria-label', `حذف ${item}`);
+      const icon = document.createElement('i');
+      icon.className = 'ri-close-circle-line';
+      btn.appendChild(icon);
+      chip.appendChild(btn);
+    }
+    container.appendChild(chip);
+  });
+}
+
+function updateCategoryMetrics() {
+  const categoriesCountEl = document.getElementById('categories-count');
+  const servicesCountEl = document.getElementById('service-subcategories-count');
+  if (categoriesCountEl) {
+    categoriesCountEl.textContent = numberFormatter.format(categoryManagerState.categories.length);
+  }
+  if (servicesCountEl) {
+    servicesCountEl.textContent = numberFormatter.format(categoryManagerState.serviceSubcategories.length);
+  }
+}
+
+function updateCategoryPreview() {
+  const select = document.getElementById('categoryPreviewSelect');
+  const chips = document.getElementById('servicePreviewChips');
+  if (select) {
+    select.innerHTML = '';
+    if (!categoryManagerState.categories.length) {
+      const option = document.createElement('option');
+      option.textContent = 'دسته‌ای تعریف نشده است';
+      option.disabled = true;
+      option.selected = true;
+      select.appendChild(option);
+      select.disabled = true;
+    } else {
+      const placeholder = document.createElement('option');
+      placeholder.textContent = 'انتخاب دسته';
+      placeholder.disabled = true;
+      placeholder.selected = true;
+      select.appendChild(placeholder);
+      categoryManagerState.categories.forEach(item => {
+        const option = document.createElement('option');
+        option.value = item;
+        option.textContent = item;
+        select.appendChild(option);
+      });
+      select.disabled = false;
+    }
+  }
+  if (chips) {
+    renderChipList(chips, categoryManagerState.serviceSubcategories, { removable: false, type: 'service' });
+  }
+}
+
+function persistCategoryState() {
+  saveCategoryList(CATEGORY_STORAGE_KEY, categoryManagerState.categories);
+  saveCategoryList(SERVICE_SUBCATEGORY_STORAGE_KEY, categoryManagerState.serviceSubcategories);
+}
+
+function showCategoryFeedback(type, message) {
+  const feedback = document.getElementById('categoryManagerFeedback');
+  if (!feedback || !message) return;
+  feedback.textContent = message;
+  feedback.className = `category-feedback show ${type || 'info'}`;
+  if (categoryFeedbackTimer) {
+    clearTimeout(categoryFeedbackTimer);
+  }
+  categoryFeedbackTimer = setTimeout(() => {
+    feedback.className = 'category-feedback';
+    feedback.textContent = '';
+  }, 3500);
+}
+
+function handleChipRemoval(event) {
+  const button = event.target.closest('button[data-action="remove-category"]');
+  if (!button) return;
+  const type = button.dataset.type || 'category';
+  const name = button.dataset.name;
+  if (!name) return;
+  const label = type === 'service' ? 'زیرگروه' : 'دسته';
+  if (!confirm(`آیا از حذف ${label} «${name}» مطمئن هستید؟`)) return;
+  if (type === 'service') {
+    categoryManagerState.serviceSubcategories = categoryManagerState.serviceSubcategories.filter(item => item !== name);
+  } else {
+    categoryManagerState.categories = categoryManagerState.categories.filter(item => item !== name);
+  }
+  persistCategoryState();
+  renderCategoryManager();
+  showCategoryFeedback('success', `${label} «${name}» حذف شد.`);
+}
+
+function renderCategoryManager() {
+  const categoriesContainer = document.getElementById('categoryManagerList');
+  const servicesContainer = document.getElementById('serviceSubcategoryList');
+  if (categoriesContainer) {
+    renderChipList(categoriesContainer, categoryManagerState.categories, { removable: true, type: 'category' });
+  }
+  if (servicesContainer) {
+    renderChipList(servicesContainer, categoryManagerState.serviceSubcategories, { removable: true, type: 'service' });
+  }
+  updateCategoryMetrics();
+  updateCategoryPreview();
+}
+
+function initCategoryManager() {
+  if (categoryManagerInitialised) {
+    renderCategoryManager();
+    return;
+  }
+
+  categoryManagerState.categories = loadCategoryList(CATEGORY_STORAGE_KEY, DEFAULT_CATEGORIES);
+  categoryManagerState.serviceSubcategories = loadCategoryList(
+    SERVICE_SUBCATEGORY_STORAGE_KEY,
+    DEFAULT_SERVICE_SUBCATEGORIES
+  );
+
+  const categoryForm = document.getElementById('categoryAddForm');
+  const categoryInput = document.getElementById('categoryNameInput');
+  if (categoryForm) {
+    categoryForm.addEventListener('submit', event => {
+      event.preventDefault();
+      if (!categoryInput) return;
+      const value = normaliseCategoryText(categoryInput.value);
+      if (!value) {
+        showCategoryFeedback('error', 'عنوان دسته را وارد کنید.');
+        return;
+      }
+      if (value.length < 2) {
+        showCategoryFeedback('error', 'عنوان دسته باید حداقل ۲ کاراکتر باشد.');
+        return;
+      }
+      if (listIncludesCaseInsensitive(categoryManagerState.categories, value)) {
+        showCategoryFeedback('error', `دسته «${value}» از قبل وجود دارد.`);
+        return;
+      }
+      categoryManagerState.categories.push(value);
+      categoryManagerState.categories = sortCategoryList(categoryManagerState.categories);
+      persistCategoryState();
+      renderCategoryManager();
+      showCategoryFeedback('success', `دسته «${value}» با موفقیت اضافه شد.`);
+      categoryForm.reset();
+      categoryInput.focus();
+    });
+  }
+
+  const serviceForm = document.getElementById('serviceSubcategoryForm');
+  const serviceInput = document.getElementById('serviceSubcategoryInput');
+  if (serviceForm) {
+    serviceForm.addEventListener('submit', event => {
+      event.preventDefault();
+      if (!serviceInput) return;
+      const value = normaliseCategoryText(serviceInput.value);
+      if (!value) {
+        showCategoryFeedback('error', 'عنوان زیرگروه را وارد کنید.');
+        return;
+      }
+      if (value.length < 2) {
+        showCategoryFeedback('error', 'عنوان زیرگروه باید حداقل ۲ کاراکتر باشد.');
+        return;
+      }
+      if (listIncludesCaseInsensitive(categoryManagerState.serviceSubcategories, value)) {
+        showCategoryFeedback('error', `زیرگروه «${value}» از قبل وجود دارد.`);
+        return;
+      }
+      categoryManagerState.serviceSubcategories.push(value);
+      categoryManagerState.serviceSubcategories = sortCategoryList(categoryManagerState.serviceSubcategories);
+      persistCategoryState();
+      renderCategoryManager();
+      showCategoryFeedback('success', `زیرگروه «${value}» با موفقیت اضافه شد.`);
+      serviceForm.reset();
+      serviceInput.focus();
+    });
+  }
+
+  const categoriesContainer = document.getElementById('categoryManagerList');
+  if (categoriesContainer) {
+    categoriesContainer.addEventListener('click', handleChipRemoval);
+  }
+  const servicesContainer = document.getElementById('serviceSubcategoryList');
+  if (servicesContainer) {
+    servicesContainer.addEventListener('click', handleChipRemoval);
+  }
+
+  categoryManagerInitialised = true;
+  renderCategoryManager();
+  showCategoryFeedback('info', 'لیست دسته‌بندی‌ها برای مدیریت آماده شد.');
+}
+
 const numberFormatter = new Intl.NumberFormat('fa-IR');
 const persianDateFormatter = new Intl.DateTimeFormat('fa-IR', { month: 'numeric', day: 'numeric' });
 
@@ -3475,6 +3765,7 @@ const panels = {
   users:     document.getElementById('users-panel'),
   sellers:   document.getElementById('sellers-panel'),
   'service-shops': document.getElementById('service-shops-panel'),
+  categories: document.getElementById('categories-panel'),
   products:  document.getElementById('products-panel'),
   'shopping-centers': document.getElementById('shopping-centers-panel'),
   plans:     document.getElementById('plans-panel'),
@@ -3526,6 +3817,10 @@ menuLinks.forEach(link => {
 
     if (section === 'ad-orders') {
       await loadAdOrders();
+    }
+
+    if (section === 'categories') {
+      initCategoryManager();
     }
 
     // لود محتوای AJAX برای آمار روزانه بازدید
@@ -5340,9 +5635,13 @@ document.addEventListener('DOMContentLoaded', () => {
   const header = document.getElementById('broadcastHeader');
   const card   = document.getElementById('broadcastCard');
 
-  header.addEventListener('click', () => {
-    card.classList.toggle('collapsed');
-  });
+  if (header && card) {
+    header.addEventListener('click', () => {
+      card.classList.toggle('collapsed');
+    });
+  }
+
+  initCategoryManager();
 });
 
 
