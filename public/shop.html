@@ -1441,10 +1441,22 @@ document.addEventListener('DOMContentLoaded', function () {
   };
 
   if (shopHeader && headerMenuToggle) {
+    const headerActions = document.getElementById('headerActions');
+
     headerMenuToggle.addEventListener('click', () => {
       const isOpen = shopHeader.classList.toggle('menu-open');
       headerMenuToggle.setAttribute('aria-expanded', String(isOpen));
     });
+
+    if (headerActions) {
+      headerActions.querySelectorAll('.action-item').forEach((actionButton) => {
+        actionButton.addEventListener('click', () => {
+          if (window.innerWidth < 768) {
+            requestAnimationFrame(() => closeHeaderMenu());
+          }
+        });
+      });
+    }
 
     document.addEventListener('click', (event) => {
       if (!shopHeader.contains(event.target)) {
