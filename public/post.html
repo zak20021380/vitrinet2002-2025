@@ -428,6 +428,7 @@
   const CATEGORY_API_URL = `${API_ORIGIN}/api/categories`;
   const CATEGORY_CACHE_KEY = 'post.categories.cache';
   const SERVICE_CACHE_KEY = 'post.serviceSubcategories.cache';
+  const CATEGORY_SYNC_STORAGE_KEY = 'post.categories.invalidate';
   const CATEGORY_CACHE_TTL_MS = 1000 * 60 * 30; // 30 دقیقه
 
   const DEFAULT_CATEGORIES = [
@@ -566,6 +567,16 @@
     }
   }
 
+  function invalidateCategoryCache() {
+    try {
+      if (typeof localStorage === 'undefined') return;
+      localStorage.removeItem(CATEGORY_CACHE_KEY);
+      localStorage.removeItem(SERVICE_CACHE_KEY);
+    } catch (err) {
+      console.warn('invalidateCategoryCache ->', err);
+    }
+  }
+
   function renderCategoryOptions(list = []) {
     if (!categorySelect) return;
     const options = normaliseCategoryList(list, 'category');
@@ -614,8 +625,13 @@
       span.className = 'text-xs text-gray-500';
       span.textContent = 'زیرگروهی ثبت نشده است.';
       subcatChipsContainer.appendChild(span);
+      if (subcatInput) {
+        subcatInput.value = '';
+      }
+      highlightServiceChip('');
       return;
     }
+    let selectedExists = false;
     normalised.forEach(item => {
       const btn = document.createElement('button');
       btn.type = 'button';
@@ -627,11 +643,17 @@
       btn.textContent = item.name;
       if (item.name === selected) {
         btn.classList.add('bg-[#10b981]', 'text-white', 'border-[#10b981]');
+        selectedExists = true;
       }
       subcatChipsContainer.appendChild(btn);
     });
-    if (selected) {
+    if (selected && selectedExists) {
       highlightServiceChip(selected);
+    } else {
+      if (subcatInput) {
+        subcatInput.value = '';
+      }
+      highlightServiceChip('');
     }
   }
 
@@ -646,7 +668,7 @@
     saveCategoryCache(SERVICE_CACHE_KEY, servicesToUse);
   }
 
-  async function fetchCategoryDataForForm({ silent = false } = {}) {
+  async function fetchCategoryDataForForm({ silent = false, successMessage } = {}) {
     try {
       const res = await fetch(CATEGORY_API_URL, { credentials: 'include' });
       const data = await res.json().catch(() => ({}));
@@ -655,7 +677,7 @@
       }
       applyCategoryPayload(data);
       if (!silent) {
-        showToast('دسته‌بندی‌ها به‌روزرسانی شد ✅');
+        showToast(successMessage || 'دسته‌بندی‌ها به‌روزرسانی شد ✅');
       }
     } catch (error) {
       console.warn('fetchCategoryDataForForm ->', error);
@@ -665,11 +687,40 @@
     }
   }
 
+  function parseCategorySyncPayload(raw) {
+    if (!raw) return null;
+    try {
+      return JSON.parse(raw);
+    } catch (error) {
+      console.warn('parseCategorySyncPayload ->', error);
+      return null;
+    }
+  }
+
+  function handleExternalCategoryUpdate(event) {
+    if (!event || event.key !== CATEGORY_SYNC_STORAGE_KEY) {
+      return;
+    }
+    invalidateCategoryCache();
+    const payload = parseCategorySyncPayload(event.newValue);
+    let message = 'دسته‌بندی‌ها به‌روزرسانی شدند ✅';
+    const typeLabel = payload?.type === 'service-subcategory' ? 'زیرگروه' : 'دسته';
+    if (payload?.action === 'delete' && payload?.name) {
+      message = `${typeLabel} «${payload.name}» حذف شد.`;
+    } else if (payload?.action === 'create' && payload?.name) {
+      message = `${typeLabel} جدید «${payload.name}» اضافه شد.`;
+    }
+    fetchCategoryDataForForm({ silent: false, successMessage: message });
+  }
+
   const cachedCategories = loadCategoryCache(CATEGORY_CACHE_KEY, DEFAULT_CATEGORIES, 'category');
   const cachedServices = loadCategoryCache(SERVICE_CACHE_KEY, DEFAULT_SERVICE_SUBCATEGORIES, 'service-subcategory');
   renderCategoryOptions(cachedCategories);
   renderServiceChips(cachedServices);
   fetchCategoryDataForForm({ silent: true });
+  if (typeof window !== 'undefined') {
+    window.addEventListener('storage', handleExternalCategoryUpdate);
+  }
 
   // === Service examples: setup ===
 const serviceExamples = document.getElementById("service-examples");

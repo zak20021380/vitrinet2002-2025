@@ -464,6 +464,7 @@ function toDatetimeLocalValue(value) {
 const CATEGORY_API_URL = `${ADMIN_API_BASE}/categories`;
 const CATEGORY_STORAGE_KEY = 'admin.categories.list';
 const SERVICE_SUBCATEGORY_STORAGE_KEY = 'admin.categories.services';
+const CATEGORY_SYNC_STORAGE_KEY = 'post.categories.invalidate';
 const DEFAULT_CATEGORIES = [
   'پوشاک',
   'خوراک',
@@ -498,6 +499,22 @@ let categoryManagerState = {
 
 let categoryManagerInitialised = false;
 let categoryFeedbackTimer = null;
+
+function notifyCategoryConsumers(payload = {}) {
+  try {
+    if (typeof localStorage === 'undefined') return;
+    const body = {
+      updatedAt: Date.now(),
+      source: 'admin-dashboard',
+      ...payload,
+      // یک مقدار تصادفی کوچک برای تضمین ایجاد رویداد استوریج حتی در حذف‌های متوالی
+      nonce: Math.random().toString(36).slice(2)
+    };
+    localStorage.setItem(CATEGORY_SYNC_STORAGE_KEY, JSON.stringify(body));
+  } catch (error) {
+    console.warn('notifyCategoryConsumers ->', error);
+  }
+}
 
 function normaliseCategoryText(value) {
   if (!value) return '';
@@ -626,6 +643,29 @@ function listIncludesCaseInsensitive(list = [], value = '') {
   return list.some(item => getCategoryName(item).toLocaleLowerCase('fa-IR') === compare);
 }
 
+function setChipActionLoading(button, loading = true) {
+  if (!button) return;
+  const icon = button.querySelector('i');
+  if (loading) {
+    button.disabled = true;
+    button.classList.add('is-loading');
+    button.setAttribute('aria-busy', 'true');
+    if (icon) {
+      button.dataset.icon = icon.className;
+      icon.className = 'ri-loader-4-line';
+    }
+  } else {
+    button.disabled = false;
+    button.classList.remove('is-loading');
+    button.removeAttribute('aria-busy');
+    if (icon) {
+      const previous = button.dataset.icon;
+      icon.className = previous || 'ri-delete-bin-6-line';
+      delete button.dataset.icon;
+    }
+  }
+}
+
 function renderChipList(container, items = [], { removable = true, type = 'category' } = {}) {
   if (!container) return;
   container.innerHTML = '';
@@ -640,28 +680,53 @@ function renderChipList(container, items = [], { removable = true, type = 'categ
     if (!name) return;
     const chip = document.createElement('div');
     chip.className = 'chip-item';
-    if (isDefaultCategory(item)) {
+    const itemId = getCategoryId(item);
+    const isDefault = isDefaultCategory(item);
+    if (itemId) {
+      chip.dataset.id = itemId;
+    }
+    if (isDefault) {
       chip.classList.add('chip-item-default');
+      chip.dataset.default = 'true';
     }
     const label = document.createElement('span');
+    label.className = 'chip-item-label';
     label.textContent = name;
     chip.appendChild(label);
-    if (removable && !isDefaultCategory(item)) {
+
+    if (isDefault) {
+      const badge = document.createElement('span');
+      badge.className = 'chip-default-badge';
+      badge.textContent = 'پیش‌فرض';
+      badge.setAttribute('aria-hidden', 'true');
+      chip.appendChild(badge);
+    }
+
+    if (removable && !isDefault) {
+      const actions = document.createElement('div');
+      actions.className = 'chip-item-actions';
       const btn = document.createElement('button');
       btn.type = 'button';
       btn.dataset.action = 'remove-category';
       btn.dataset.type = type;
       btn.dataset.name = name;
-      const id = getCategoryId(item);
-      if (id) {
-        btn.dataset.id = id;
+      if (itemId) {
+        btn.dataset.id = itemId;
       }
-      btn.setAttribute('aria-label', `حذف ${name}`);
+      btn.className = 'chip-action chip-remove';
+      btn.title = `حذف ${name}`;
       const icon = document.createElement('i');
-      icon.className = 'ri-close-circle-line';
+      icon.className = 'ri-delete-bin-6-line';
+      icon.setAttribute('aria-hidden', 'true');
       btn.appendChild(icon);
-      chip.appendChild(btn);
+      const srOnly = document.createElement('span');
+      srOnly.className = 'sr-only';
+      srOnly.textContent = `حذف ${name}`;
+      btn.appendChild(srOnly);
+      actions.appendChild(btn);
+      chip.appendChild(actions);
     }
+
     container.appendChild(chip);
   });
 }
@@ -793,14 +858,19 @@ async function createCategoryOnServer(name, type) {
       await fetchCategoryListsFromApi({ silent: true });
     }
     showCategoryFeedback('success', data?.message || `${label} «${name}» با موفقیت اضافه شد.`);
+    const createdId = record ? getCategoryId(record) : getCategoryId(data?.item);
+    notifyCategoryConsumers({ action: 'create', type, name, id: createdId });
   } catch (error) {
     console.error('createCategoryOnServer ->', error);
     showCategoryFeedback('error', error.message || 'خطا در ثبت دسته.');
   }
 }
 
-async function deleteCategoryOnServer(id, type, name) {
+async function deleteCategoryOnServer(id, type, name, { triggerButton } = {}) {
   const label = type === 'service-subcategory' ? 'زیرگروه' : 'دسته';
+  if (triggerButton) {
+    setChipActionLoading(triggerButton, true);
+  }
   try {
     const res = await fetch(`${CATEGORY_API_URL}/${encodeURIComponent(id)}`, {
       method: 'DELETE',
@@ -818,9 +888,15 @@ async function deleteCategoryOnServer(id, type, name) {
     persistCategoryState();
     renderCategoryManager();
     showCategoryFeedback('success', data?.message || `${label} «${name}» حذف شد.`);
+    notifyCategoryConsumers({ action: 'delete', type, name, id });
   } catch (error) {
     console.error('deleteCategoryOnServer ->', error);
     showCategoryFeedback('error', error.message || 'حذف دسته انجام نشد.');
+  } finally {
+    if (triggerButton) {
+      setChipActionLoading(triggerButton, false);
+      triggerButton.blur();
+    }
   }
 }
 
@@ -838,7 +914,7 @@ function handleChipRemoval(event) {
   }
   const label = type === 'service-subcategory' ? 'زیرگروه' : 'دسته';
   if (!confirm(`آیا از حذف ${label} «${name}» مطمئن هستید؟`)) return;
-  deleteCategoryOnServer(id, type, name);
+  deleteCategoryOnServer(id, type, name, { triggerButton: button });
 }
 
 function renderCategoryManager() {
