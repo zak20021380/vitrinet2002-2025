@@ -168,6 +168,13 @@
             font-weight: 500;
             font-size: 13px;
             transition: background 150ms ease, color 150ms ease;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border: none;
+            cursor: pointer;
+            font-family: inherit;
+            appearance: none;
         }
 
         .action-link:hover {
@@ -445,7 +452,7 @@
                                 </div>
                             </td>
                             <td>
-                                <span class="action-link">مشاهده آمار</span>
+                                <button type="button" class="action-link" data-shop-id="wallet">مشاهده آمار</button>
                             </td>
                         </tr>
                         <tr class="shop-row" data-shop-id="mostofi">
@@ -467,7 +474,7 @@
                                 </div>
                             </td>
                             <td>
-                                <span class="action-link">مشاهده آمار</span>
+                                <button type="button" class="action-link" data-shop-id="mostofi">مشاهده آمار</button>
                             </td>
                         </tr>
                         <tr class="shop-row" data-shop-id="digisir">
@@ -489,7 +496,7 @@
                                 </div>
                             </td>
                             <td>
-                                <span class="action-link">مشاهده آمار</span>
+                                <button type="button" class="action-link" data-shop-id="digisir">مشاهده آمار</button>
                             </td>
                         </tr>
                     </tbody>
@@ -761,6 +768,14 @@
         document.querySelectorAll(".shop-row").forEach(row => {
             row.addEventListener("click", () => {
                 const shopId = row.getAttribute("data-shop-id");
+                openModal(shopId);
+            });
+        });
+
+        document.querySelectorAll(".action-link").forEach(button => {
+            button.addEventListener("click", event => {
+                event.stopPropagation();
+                const shopId = button.getAttribute("data-shop-id") || button.closest(".shop-row")?.getAttribute("data-shop-id");
                 openModal(shopId);
             });
         });
