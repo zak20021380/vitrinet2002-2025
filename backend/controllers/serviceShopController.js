@@ -1229,9 +1229,25 @@ exports.updateServiceShop = async (req, res) => {
     if (!mongoose.Types.ObjectId.isValid(id)) {
       return res.status(400).json({ message: 'شناسه نامعتبر است.' });
     }
-    const shop = await ServiceShop.findById(id);
+    let shop = await ServiceShop.findById(id);
     if (!shop) {
-      return res.status(404).json({ message: 'مغازه خدماتی یافت نشد.' });
+      const legacyShop = await buildLegacyServiceShopBySellerId(id);
+      if (!legacyShop) {
+        return res.status(404).json({ message: 'مغازه خدماتی یافت نشد.' });
+      }
+
+      const fallbackShopUrl = legacyShop.shopUrl && String(legacyShop.shopUrl).trim()
+        ? legacyShop.shopUrl.trim().toLowerCase()
+        : `legacy-${id}`;
+
+      shop = new ServiceShop({
+        ...legacyShop,
+        _id: new mongoose.Types.ObjectId(id),
+        shopUrl: fallbackShopUrl,
+        createdBy: req.user?.id || null,
+        updatedBy: req.user?.id || null,
+        lastReviewedAt: new Date()
+      });
     }
 
     const data = normalizePayload(req.body, { partial: true, existing: shop });
@@ -1264,9 +1280,25 @@ exports.updateServiceShopStatus = async (req, res) => {
     if (!mongoose.Types.ObjectId.isValid(id)) {
       return res.status(400).json({ message: 'شناسه نامعتبر است.' });
     }
-    const shop = await ServiceShop.findById(id);
+    let shop = await ServiceShop.findById(id);
     if (!shop) {
-      return res.status(404).json({ message: 'مغازه خدماتی یافت نشد.' });
+      const legacyShop = await buildLegacyServiceShopBySellerId(id);
+      if (!legacyShop) {
+        return res.status(404).json({ message: 'مغازه خدماتی یافت نشد.' });
+      }
+
+      const fallbackShopUrl = legacyShop.shopUrl && String(legacyShop.shopUrl).trim()
+        ? legacyShop.shopUrl.trim().toLowerCase()
+        : `legacy-${id}`;
+
+      shop = new ServiceShop({
+        ...legacyShop,
+        _id: new mongoose.Types.ObjectId(id),
+        shopUrl: fallbackShopUrl,
+        createdBy: req.user?.id || null,
+        updatedBy: req.user?.id || null,
+        lastReviewedAt: new Date()
+      });
     }
 
     const updates = {};
