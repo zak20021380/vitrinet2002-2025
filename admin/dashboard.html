@@ -151,6 +151,43 @@
             color: var(--danger);
         }
 
+        .plan-chip {
+            display: inline-flex;
+            flex-direction: column;
+            gap: 4px;
+            background: rgba(61, 115, 255, 0.06);
+            border-radius: 16px;
+            padding: 10px 14px;
+            min-width: 180px;
+            color: var(--primary);
+            font-size: 13px;
+            font-weight: 500;
+        }
+
+        .plan-chip .plan-chip-title {
+            font-size: 14px;
+        }
+
+        .plan-chip .plan-chip-detail {
+            color: var(--text-muted);
+            font-weight: 400;
+        }
+
+        .plan-chip.active {
+            background: rgba(55, 178, 108, 0.08);
+            color: var(--success);
+        }
+
+        .plan-chip.active .plan-chip-detail {
+            color: var(--success);
+            font-weight: 500;
+        }
+
+        .plan-chip.inactive {
+            background: rgba(112, 128, 176, 0.12);
+            color: var(--text-muted);
+        }
+
         .last-update {
             font-size: 13px;
             color: var(--text-muted);
@@ -180,6 +217,188 @@
         .action-link:hover {
             background: var(--primary-strong);
             color: #1641c7;
+        }
+
+        .action-link.primary {
+            background: linear-gradient(135deg, #3d73ff 0%, #5f9dff 100%);
+            color: #fff;
+            box-shadow: 0 12px 24px rgba(61, 115, 255, 0.28);
+        }
+
+        .action-link.primary:hover {
+            background: linear-gradient(135deg, #2f63f0 0%, #4f8cf0 100%);
+            color: #fff;
+        }
+
+        .plan-control {
+            border: 1px solid rgba(61, 115, 255, 0.18);
+            border-radius: 20px;
+            background: rgba(61, 115, 255, 0.04);
+            padding: 20px 22px;
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+        }
+
+        .plan-control-header {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 16px;
+        }
+
+        .plan-control-header h3 {
+            margin: 0 0 6px;
+            font-size: 18px;
+            font-weight: 700;
+        }
+
+        .plan-status-text {
+            margin: 0;
+            font-size: 13px;
+            color: var(--text-muted);
+            line-height: 1.8;
+        }
+
+        .plan-last-update {
+            margin: 6px 0 0;
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        .plan-control-body {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .plan-days-group {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .plan-days-group label {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-strong);
+        }
+
+        .plan-days-input {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .plan-days-input .days-pill {
+            background: rgba(61, 115, 255, 0.16);
+            color: var(--primary);
+            padding: 6px 12px;
+            border-radius: 999px;
+            font-size: 13px;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .plan-days-group small {
+            color: var(--text-muted);
+            font-size: 12px;
+        }
+
+        input[type="range"] {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 100%;
+            height: 6px;
+            background: rgba(61, 115, 255, 0.18);
+            border-radius: 999px;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 18px;
+            height: 18px;
+            background: var(--primary);
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: 0 4px 8px rgba(61, 115, 255, 0.3);
+        }
+
+        input[type="range"]::-moz-range-thumb {
+            width: 18px;
+            height: 18px;
+            background: var(--primary);
+            border-radius: 50%;
+            cursor: pointer;
+            border: none;
+            box-shadow: 0 4px 8px rgba(61, 115, 255, 0.3);
+        }
+
+        input[type="range"]:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+
+        .toggle-switch {
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+            width: 54px;
+            height: 30px;
+        }
+
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .toggle-track {
+            position: absolute;
+            inset: 0;
+            border-radius: 999px;
+            background: rgba(112, 128, 176, 0.28);
+            transition: background 160ms ease;
+        }
+
+        .toggle-track::after {
+            content: "";
+            position: absolute;
+            top: 4px;
+            right: 4px;
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            background: #fff;
+            box-shadow: 0 6px 14px rgba(18, 38, 63, 0.18);
+            transition: transform 160ms ease;
+        }
+
+        .toggle-switch input:checked + .toggle-track {
+            background: linear-gradient(90deg, #3d73ff 0%, #54a0ff 100%);
+        }
+
+        .toggle-switch input:checked + .toggle-track::after {
+            transform: translateX(-24px);
+        }
+
+        .plan-feedback {
+            font-size: 13px;
+            border-radius: 14px;
+            padding: 12px 14px;
+            line-height: 1.8;
+        }
+
+        .plan-feedback.success {
+            background: rgba(55, 178, 108, 0.12);
+            color: var(--success);
+        }
+
+        .plan-feedback.warning {
+            background: rgba(242, 87, 100, 0.12);
+            color: var(--danger);
         }
 
         .modal-backdrop {
@@ -428,6 +647,7 @@
                         <tr>
                             <th>اطلاعات مغازه</th>
                             <th>وضعیت</th>
+                            <th>پلن رایگان</th>
                             <th>آخرین بروزرسانی</th>
                             <th>عملیات</th>
                         </tr>
@@ -444,6 +664,12 @@
                             </td>
                             <td>
                                 <span class="status-chip active">فعال و ممتاز</span>
+                            </td>
+                            <td>
+                                <div class="plan-chip plan-status" data-shop-id="wallet">
+                                    <span class="plan-chip-title">فعال</span>
+                                    <span class="plan-chip-detail">۲۱ روز باقی مانده</span>
+                                </div>
                             </td>
                             <td>
                                 <div class="last-update">
@@ -468,6 +694,12 @@
                                 <span class="status-chip hold">نیازمند پیگیری</span>
                             </td>
                             <td>
+                                <div class="plan-chip plan-status" data-shop-id="mostofi">
+                                    <span class="plan-chip-title">فعال</span>
+                                    <span class="plan-chip-detail">۱۰ روز باقی مانده</span>
+                                </div>
+                            </td>
+                            <td>
                                 <div class="last-update">
                                     <span>دوشنبه ۱۶ مرداد ۱۴۰۲</span>
                                     <span>سرعت پاسخ: ۲۵ دقیقه</span>
@@ -488,6 +720,12 @@
                             </td>
                             <td>
                                 <span class="status-chip risk">ریسک لغو بالا</span>
+                            </td>
+                            <td>
+                                <div class="plan-chip plan-status" data-shop-id="digisir">
+                                    <span class="plan-chip-title">غیرفعال</span>
+                                    <span class="plan-chip-detail">دسترسی رایگان متوقف است</span>
+                                </div>
                             </td>
                             <td>
                                 <div class="last-update">
@@ -513,6 +751,31 @@
                 <div class="modal-subtitle" id="modalSubtitle">آخرین بروزرسانی</div>
             </div>
             <div class="modal-body">
+                <div class="plan-control">
+                    <div class="plan-control-header">
+                        <div>
+                            <h3>مدیریت پلن رایگان</h3>
+                            <p class="plan-status-text" id="planStatusText">پلن رایگان برای این فروشنده فعال است.</p>
+                            <p class="plan-last-update">آخرین بروزرسانی: <span id="planLastUpdate">ثبت نشده</span></p>
+                        </div>
+                        <label class="toggle-switch" aria-label="فعال/غیرفعال کردن پلن رایگان">
+                            <input type="checkbox" id="freePlanToggle">
+                            <span class="toggle-track"></span>
+                        </label>
+                    </div>
+                    <div class="plan-control-body">
+                        <div class="plan-days-group">
+                            <label for="planDaysInput">تمدید دسترسی رایگان به مدت (روز)</label>
+                            <div class="plan-days-input">
+                                <input type="range" id="planDaysInput" min="1" max="60" value="14">
+                                <span class="days-pill"><span>تا</span><strong id="planDaysValue">۱۴</strong><span>روز آینده</span></span>
+                            </div>
+                            <small>حداکثر امکان تمدید ۶۰ روزه فراهم است. برای توقف دسترسی، پلن را غیرفعال کنید.</small>
+                        </div>
+                        <button type="button" class="action-link primary" id="savePlanChanges">ثبت تغییرات پلن</button>
+                    </div>
+                    <div class="plan-feedback" id="planFeedback" hidden></div>
+                </div>
                 <div class="stats-grid">
                     <div class="stat-card">
                         <span>مجموع رزروها</span>
@@ -579,6 +842,11 @@
             wallet: {
                 name: "ولت",
                 subtitle: "آخرین گزارش ثبت شده در ۱۸ مرداد ۱۴۰۲ - پاسخگویی متوسط ۱۲ دقیقه",
+                freePlan: {
+                    isActive: true,
+                    expiresInDays: 21,
+                    lastUpdated: "۱۷ مرداد ۱۴۰۲"
+                },
                 totalBookings: 428,
                 bookingChange: "+۸٪ نسبت به هفته قبل",
                 approvedBookings: 398,
@@ -611,6 +879,11 @@
             mostofi: {
                 name: "mostofi",
                 subtitle: "آخرین گزارش ثبت شده در ۱۷ مرداد ۱۴۰۲ - پاسخگویی متوسط ۲۵ دقیقه",
+                freePlan: {
+                    isActive: true,
+                    expiresInDays: 10,
+                    lastUpdated: "۱۶ مرداد ۱۴۰۲"
+                },
                 totalBookings: 286,
                 bookingChange: "-۵٪ نسبت به هفته قبل",
                 approvedBookings: 241,
@@ -643,6 +916,11 @@
             digisir: {
                 name: "فروشگاه دیجیسیر",
                 subtitle: "آخرین گزارش ثبت شده در ۱۶ مرداد ۱۴۰۲ - پاسخگویی متوسط ۳۲ دقیقه",
+                freePlan: {
+                    isActive: false,
+                    expiresInDays: 0,
+                    lastUpdated: "۱۵ مرداد ۱۴۰۲"
+                },
                 totalBookings: 198,
                 bookingChange: "-۱۲٪ نسبت به هفته قبل",
                 approvedBookings: 149,
@@ -694,6 +972,15 @@
         const ontimeRate = document.getElementById("ontimeRate");
         const topServices = document.getElementById("topServices");
         const revenueBars = document.getElementById("revenueBars");
+        const planStatusText = document.getElementById("planStatusText");
+        const planLastUpdate = document.getElementById("planLastUpdate");
+        const freePlanToggle = document.getElementById("freePlanToggle");
+        const planDaysInput = document.getElementById("planDaysInput");
+        const planDaysValue = document.getElementById("planDaysValue");
+        const planFeedback = document.getElementById("planFeedback");
+        const savePlanChanges = document.getElementById("savePlanChanges");
+
+        let activeShopId = null;
 
         function formatCurrency(amount) {
             return new Intl.NumberFormat("fa-IR", {
@@ -701,12 +988,107 @@
             }).format(amount);
         }
 
+        function renderPlanStatus(shopId) {
+            const shop = shops[shopId];
+            const planChip = document.querySelector(`.plan-status[data-shop-id="${shopId}"]`);
+            if (!shop || !planChip) return;
+
+            const titleElement = planChip.querySelector(".plan-chip-title");
+            const detailElement = planChip.querySelector(".plan-chip-detail");
+            const plan = shop.freePlan || { isActive: false, expiresInDays: 0 };
+            const days = Math.max(plan.expiresInDays || 0, 0);
+
+            planChip.classList.toggle("active", plan.isActive);
+            planChip.classList.toggle("inactive", !plan.isActive);
+
+            if (plan.isActive) {
+                titleElement.textContent = "پلن رایگان فعال";
+                detailElement.textContent = days > 0 ? `${formatCurrency(days)} روز باقی مانده` : "در انتظار تمدید";
+            } else {
+                titleElement.textContent = "پلن رایگان غیرفعال";
+                detailElement.textContent = "دسترسی رایگان متوقف است";
+            }
+        }
+
+        function syncPlanControls(shop) {
+            const plan = shop.freePlan || { isActive: false, expiresInDays: 0, lastUpdated: "" };
+            const fallbackDays = plan.expiresInDays && plan.expiresInDays > 0 ? plan.expiresInDays : 14;
+
+            freePlanToggle.checked = !!plan.isActive;
+            planDaysInput.disabled = !plan.isActive;
+            planDaysInput.value = fallbackDays;
+
+            const displayDays = plan.isActive ? plan.expiresInDays || fallbackDays : fallbackDays;
+            planDaysValue.textContent = formatCurrency(Math.max(displayDays, 1));
+
+            planStatusText.textContent = plan.isActive
+                ? `پلن رایگان فعال است و ${formatCurrency(Math.max(displayDays, 1))} روز دیگر اعتبار دارد.`
+                : "پلن رایگان برای این فروشنده غیرفعال است. برای تمدید رایگان، پلن را فعال کنید.";
+
+            planLastUpdate.textContent = plan.lastUpdated || "ثبت نشده";
+            planFeedback.hidden = true;
+            planFeedback.classList.remove("success", "warning");
+        }
+
+        function handlePlanDaysInput() {
+            const value = parseInt(planDaysInput.value, 10) || 1;
+            planDaysValue.textContent = formatCurrency(Math.max(value, 1));
+            if (freePlanToggle.checked) {
+                planStatusText.textContent = `پلن رایگان فعال است و ${formatCurrency(Math.max(value, 1))} روز دیگر اعتبار خواهد داشت.`;
+            }
+        }
+
+        function handlePlanToggle() {
+            const isActive = freePlanToggle.checked;
+            planDaysInput.disabled = !isActive;
+            const value = parseInt(planDaysInput.value, 10) || 1;
+            planFeedback.hidden = true;
+            planFeedback.classList.remove("success", "warning");
+            if (!isActive) {
+                planStatusText.textContent = "پلن رایگان برای این فروشنده غیرفعال است. برای تمدید رایگان، پلن را فعال کنید.";
+            } else {
+                planStatusText.textContent = `پلن رایگان فعال است و ${formatCurrency(Math.max(value, 1))} روز دیگر اعتبار خواهد داشت.`;
+            }
+        }
+
+        function saveFreePlanSettings() {
+            if (!activeShopId) return;
+
+            const shop = shops[activeShopId];
+            const isActive = freePlanToggle.checked;
+            const selectedDays = parseInt(planDaysInput.value, 10) || 1;
+            const formattedDays = formatCurrency(Math.max(selectedDays, 1));
+            const formattedDate = new Intl.DateTimeFormat("fa-IR", { dateStyle: "medium" }).format(new Date());
+
+            shop.freePlan = shop.freePlan || {};
+            shop.freePlan.isActive = isActive;
+            shop.freePlan.expiresInDays = isActive ? Math.max(selectedDays, 1) : 0;
+            shop.freePlan.lastUpdated = formattedDate;
+
+            planLastUpdate.textContent = formattedDate;
+            planStatusText.textContent = isActive
+                ? `پلن رایگان فعال است و ${formattedDays} روز دیگر اعتبار دارد.`
+                : "پلن رایگان برای این فروشنده غیرفعال است. برای فعال‌سازی مجدد، پلن را دوباره روشن کنید.";
+
+            planFeedback.textContent = isActive
+                ? `پلن رایگان تا ${formattedDays} روز آینده برای ${shop.name} تمدید شد.`
+                : `پلن رایگان برای ${shop.name} غیرفعال شد و دسترسی رایگان متوقف می‌شود.`;
+            planFeedback.classList.toggle("success", isActive);
+            planFeedback.classList.toggle("warning", !isActive);
+            planFeedback.hidden = false;
+
+            renderPlanStatus(activeShopId);
+        }
+
         function openModal(shopId) {
             const shop = shops[shopId];
             if (!shop) return;
 
+            activeShopId = shopId;
             modalTitle.textContent = shop.name;
             modalSubtitle.textContent = shop.subtitle;
+
+            syncPlanControls(shop);
 
             totalBookings.textContent = formatCurrency(shop.totalBookings);
             bookingChange.textContent = shop.bookingChange;
@@ -765,6 +1147,13 @@
             document.body.style.overflow = "";
         }
 
+        Object.keys(shops).forEach(renderPlanStatus);
+
+        planDaysInput.addEventListener("input", handlePlanDaysInput);
+        planDaysInput.addEventListener("change", handlePlanDaysInput);
+        freePlanToggle.addEventListener("change", handlePlanToggle);
+        savePlanChanges.addEventListener("click", saveFreePlanSettings);
+
         document.querySelectorAll(".shop-row").forEach(row => {
             row.addEventListener("click", () => {
                 const shopId = row.getAttribute("data-shop-id");
@@ -772,7 +1161,7 @@
             });
         });
 
-        document.querySelectorAll(".action-link").forEach(button => {
+        document.querySelectorAll(".action-link[data-shop-id]").forEach(button => {
             button.addEventListener("click", event => {
                 event.stopPropagation();
                 const shopId = button.getAttribute("data-shop-id") || button.closest(".shop-row")?.getAttribute("data-shop-id");

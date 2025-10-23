@@ -4463,16 +4463,30 @@ function cleanScheduleData() {
 
   // === Plan Hero: data + wiring ===
   (function(){
-    // نمونه داده — هر وقت لازم شد از سرور پرش کن
-    const plan = {
-      tier: 'پرمیوم',          // پایه / حرفه‌ای / پرمیوم
-      start: '2025-08-01',     // ISO
-      end:   '2025-09-12',     // ISO
-      perks: ['نمایش ویژه','ابزارهای حرفه‌ای','پشتیبانی سریع']
-    };
-
     const el = (id)=>document.getElementById(id);
     const days = (a,b)=> Math.round((b-a)/86400000);
+    const toISODate = (date) => {
+      const tzSafe = new Date(date.getTime() - date.getTimezoneOffset() * 60000);
+      return tzSafe.toISOString().slice(0, 10);
+    };
+
+    const today = new Date();
+    const complimentaryDuration = 14;
+    const complimentaryStart = new Date(today);
+    complimentaryStart.setDate(complimentaryStart.getDate() - 1);
+    const complimentaryEnd = new Date(today);
+    complimentaryEnd.setDate(complimentaryEnd.getDate() + (complimentaryDuration - 1));
+
+    // نمونه داده — هر وقت لازم شد از سرور پرش کن
+    const plan = {
+      tier: 'پلن مهمان (رایگان)',
+      start: toISODate(complimentaryStart),
+      end: toISODate(complimentaryEnd),
+      perks: ['نمایش ویژه در نتایج ویترینت', 'پشتیبانی راه‌اندازی رایگان', 'دسترسی به ابزارهای فروش حرفه‌ای'],
+      complimentary: true,
+      complimentaryDuration
+    };
+
     const now   = new Date();
     const start = new Date(plan.start);
     const end   = new Date(plan.end);
@@ -4485,6 +4499,11 @@ function cleanScheduleData() {
     const faNum = (n)=> new Intl.NumberFormat('fa-IR').format(n);
     const faDate= (d)=> new Intl.DateTimeFormat('fa-IR-u-nu-latn-ca-persian',{year:'numeric',month:'2-digit',day:'2-digit'}).format(d);
 
+    const urgency = leftDays <= 1 ? 'امروز آخرین فرصت شماست تا' : `تا ${faNum(leftDays)} روز دیگر فرصت دارید تا`;
+    const persuasiveMessage = plan.complimentary
+      ? `پلن فعلی شما رایگان است؛ ${urgency} بدون هیچ هزینه‌ای از تمام امکانات ویترینت استفاده کنید. این فرصت طلایی را برای جذب مشتریان جدید از دست ندهید و با ارتقا، مزیت خود را تثبیت کنید.`
+      : '';
+
     // پر کردن UI
     if (el('plan-tier')) el('plan-tier').textContent = `🎖 ${plan.tier}`;
     if (el('plan-days-left')) el('plan-days-left').textContent = `${faNum(leftDays)} روز`;
@@ -4492,6 +4511,23 @@ function cleanScheduleData() {
     if (el('plan-progress-bar')) el('plan-progress-bar').style.width = progress + '%';
     if (el('plan-used')) el('plan-used').textContent = progress + '%';
     if (el('plan-left')) el('plan-left').textContent = (100 - progress) + '%';
+    if (el('plan-hero-message') && persuasiveMessage) el('plan-hero-message').textContent = persuasiveMessage;
+
+    const perksList = document.getElementById('plan-hero-perks');
+    if (perksList && Array.isArray(plan.perks)) {
+      perksList.innerHTML = '';
+      plan.perks.forEach((perk) => {
+        const li = document.createElement('li');
+        li.textContent = perk;
+        perksList.appendChild(li);
+      });
+    }
+
+    const statusChip = el('plan-status-chip');
+    if (statusChip && plan.complimentary) {
+      statusChip.textContent = 'دسترسی رایگان فعال';
+      statusChip.classList.add('chip-live');
+    }
 
     // دکمه‌ها
     const goPlans = ()=>{ window.location.hash = '/plans'; };
