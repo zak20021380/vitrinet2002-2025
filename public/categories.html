@@ -12,78 +12,208 @@
   <style>
     body {
       font-family: 'Vazirmatn', sans-serif;
-      background: linear-gradient(115deg, #e0fdfa 0%, #f8fafc 60%, #d4fbe8 100%);
+      background: linear-gradient(135deg, #e0f9ff 0%, #f8fafc 50%, #e8f5e9 100%);
       min-height: 100vh;
       overflow-x: hidden;
     }
     .glass {
-      background: rgba(255,255,255,0.87);
-      box-shadow: 0 10px 40px #10b98124, 0 3px 12px #0ea5e91a;
-      backdrop-filter: blur(14px);
-      border-radius: 1.5rem;
+      background: rgba(255,255,255,0.95);
+      box-shadow: 0 20px 60px rgba(16, 185, 129, 0.08), 0 8px 24px rgba(14, 165, 233, 0.06);
+      backdrop-filter: blur(20px);
+      border-radius: 2rem;
+      border: 1px solid rgba(255, 255, 255, 0.8);
     }
     .cat-icon {
-      border-radius: 1rem;
-      box-shadow: 0 4px 16px #10b98133;
-      width: 56px;
-      height: 56px;
+      border-radius: 1.25rem;
+      box-shadow: 0 8px 24px rgba(16, 185, 129, 0.15), 0 4px 12px rgba(14, 165, 233, 0.1);
+      width: 72px;
+      height: 72px;
       display: flex;
       align-items: center;
       justify-content: center;
-      margin-bottom: 12px;
-      background: linear-gradient(120deg,#e0fdfa 5%, #f3faf7 70%);
-      transition: .21s cubic-bezier(.43,1.3,.7,1.3);
-      border: 1.5px solid #e0fdfa;
+      margin-bottom: 16px;
+      background: linear-gradient(135deg, #ffffff 0%, #f0fdfa 100%);
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      border: 2px solid rgba(16, 185, 129, 0.15);
       overflow: hidden;
+      position: relative;
+    }
+    .cat-icon::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, rgba(14, 165, 233, 0.1) 100%);
+      transform: rotate(45deg);
+      transition: all 0.4s ease;
+      opacity: 0;
     }
     .cat-icon svg {
-      width: 32px;
-      height: 32px;
+      width: 40px;
+      height: 40px;
       display: block;
+      position: relative;
+      z-index: 1;
+      filter: drop-shadow(0 2px 4px rgba(16, 185, 129, 0.2));
     }
-    .cat-icon:hover, .cat-icon:active { 
-      box-shadow: 0 7px 30px #0ea5e933;
-      border-color: #10b981;
-      transform: scale(1.1) rotate(-2deg);
+    .category-card:hover .cat-icon::before {
+      opacity: 1;
+      transform: rotate(45deg) scale(1.2);
+    }
+    .category-card:hover .cat-icon,
+    .category-card:active .cat-icon {
+      box-shadow: 0 12px 40px rgba(16, 185, 129, 0.25), 0 6px 20px rgba(14, 165, 233, 0.15);
+      border-color: rgba(16, 185, 129, 0.4);
+      transform: translateY(-4px) scale(1.08) rotate(-3deg);
     }
     .category-card {
-      transition: all .18s cubic-bezier(.4,2,.6,1);
-      border: 1px solid #e5e7eb;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      border: 2px solid rgba(229, 231, 235, 0.6);
       display: flex;
       flex-direction: column;
       justify-content: space-between;
       align-items: center;
       text-align: center;
-      min-height: 240px;
-      padding: 1rem;
-      background: #fcf7f3;
-      border-radius: 1.5rem;
+      min-height: 280px;
+      padding: 1.75rem 1.5rem;
+      background: linear-gradient(135deg, #ffffff 0%, #fafafa 100%);
+      border-radius: 1.75rem;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04), 0 2px 8px rgba(0, 0, 0, 0.02);
+      position: relative;
+      overflow: hidden;
     }
-    .category-card:hover, .category-card:active {
-      box-shadow: 0 8px 24px #10b9811a, 0 4px 12px #0ea5e91a;
-      border-color: #10b981;
-      transform: translateY(-4px) scale(1.01);
+    .category-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: linear-gradient(90deg, #10b981 0%, #0ea5e9 100%);
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+    .category-card:hover::before,
+    .category-card:active::before {
+      opacity: 1;
+    }
+    .category-card:hover,
+    .category-card:active {
+      box-shadow: 0 20px 48px rgba(16, 185, 129, 0.12), 0 8px 24px rgba(14, 165, 233, 0.08);
+      border-color: rgba(16, 185, 129, 0.3);
+      transform: translateY(-8px) scale(1.02);
+      background: linear-gradient(135deg, #ffffff 0%, #f8fffe 100%);
+    }
+    .category-title {
+      font-size: 1.375rem;
+      font-weight: 800;
+      color: #1f2937;
+      margin-bottom: 0.5rem;
+      line-height: 1.3;
+      letter-spacing: -0.02em;
+    }
+    .category-desc {
+      font-size: 0.9rem;
+      color: #6b7280;
+      line-height: 1.6;
+      margin-top: 0.5rem;
+      font-weight: 500;
+    }
+    .category-info {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+      margin-top: 1rem;
+      padding-top: 1rem;
+      border-top: 1px solid rgba(229, 231, 235, 0.6);
+      width: 100%;
+    }
+    .shop-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.25rem;
+      padding: 0.375rem 0.75rem;
+      background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+      color: #047857;
+      font-size: 0.8125rem;
+      font-weight: 700;
+      border-radius: 0.75rem;
+      box-shadow: 0 2px 8px rgba(16, 185, 129, 0.15);
+      transition: all 0.2s ease;
+    }
+    .shop-badge:hover {
+      transform: scale(1.05);
+      box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25);
+    }
+    .sample-link {
+      color: #0ea5e9;
+      font-size: 0.8125rem;
+      font-weight: 600;
+      text-decoration: none;
+      border-bottom: 1.5px solid rgba(14, 165, 233, 0.3);
+      transition: all 0.2s ease;
+      padding-bottom: 1px;
+    }
+    .sample-link:hover {
+      color: #0284c7;
+      border-bottom-color: #0284c7;
+    }
+    .no-shop-text {
+      color: #9ca3af;
+      font-size: 0.8125rem;
+      font-weight: 500;
+      font-style: italic;
     }
     .btn-grad {
-      background: linear-gradient(90deg,#10b981 10%,#0ea5e9 100%);
+      background: linear-gradient(135deg, #10b981 0%, #0ea5e9 100%);
       color: #fff !important;
-      box-shadow: 0 2px 12px #10b98133;
-      font-weight: bold;
-      border-radius: 0.75rem;
-      transition: all .17s;
+      box-shadow: 0 4px 16px rgba(16, 185, 129, 0.25), 0 2px 8px rgba(14, 165, 233, 0.2);
+      font-weight: 700;
+      border-radius: 1rem;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
       display: flex;
       align-items: center;
       justify-content: center;
       text-align: center;
-      min-height: 42px;
-      padding: 0.5rem 0;
+      min-height: 48px;
+      padding: 0.75rem 1.5rem;
+      text-decoration: none;
+      position: relative;
+      overflow: hidden;
+    }
+    .btn-grad::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+      transition: left 0.5s ease;
+    }
+    .btn-grad:hover::before {
+      left: 100%;
     }
     .btn-grad span {
       width: 100%;
       display: block;
       text-align: center;
+      position: relative;
+      z-index: 1;
+      font-size: 0.9375rem;
     }
-    .btn-grad:hover { filter: brightness(1.07); }
+    .btn-grad:hover,
+    .btn-grad:active {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(16, 185, 129, 0.35), 0 4px 12px rgba(14, 165, 233, 0.3);
+    }
+    .btn-grad:active {
+      transform: translateY(0);
+    }
     .logo-vitreenet {
       font-family: 'Poppins', sans-serif;
       font-weight: 800;
@@ -107,30 +237,70 @@
     @media (min-width: 1024px) {
       .logo-vitreenet { font-size: 2.05rem; }
     }
+    /* Responsive adjustments */
     @media (max-width: 1024px) {
-      .cat-icon {width: 50px;height: 50px;}
-      .cat-icon svg {width: 28px;height: 28px;}
+      .cat-icon { width: 64px; height: 64px; }
+      .cat-icon svg { width: 36px; height: 36px; }
+      .category-card { min-height: 260px; padding: 1.5rem 1.25rem; }
+      .category-title { font-size: 1.25rem; }
     }
-    @media (max-width: 700px) {
-      .cat-icon {width: 44px;height: 44px;}
+    @media (max-width: 768px) {
+      .cat-icon { width: 56px; height: 56px; margin-bottom: 12px; }
+      .cat-icon svg { width: 32px; height: 32px; }
+      .category-card { min-height: 240px; padding: 1.25rem 1rem; }
+      .category-title { font-size: 1.125rem; }
+      .category-desc { font-size: 0.8125rem; }
+      .btn-grad { min-height: 44px; padding: 0.625rem 1.25rem; }
+      .btn-grad span { font-size: 0.875rem; }
     }
-    @media (max-width: 550px){
-      .cat-icon {width: 32px;height: 32px;}
-      .cat-icon svg {width: 18px;height: 18px;}
-      .btn-grad {min-height:38px; font-size: 13px;}
+    @media (max-width: 640px) {
+      .cat-icon { width: 52px; height: 52px; }
+      .cat-icon svg { width: 28px; height: 28px; }
+      .category-card {
+        min-height: 220px;
+        padding: 1rem 0.875rem;
+        margin: 0 auto;
+        max-width: 360px;
+      }
+      .category-title { font-size: 1.0625rem; }
+      .category-desc { font-size: 0.75rem; line-height: 1.5; }
+      .btn-grad { min-height: 42px; padding: 0.5rem 1rem; }
+    }
+    @media (max-width: 480px) {
+      .cat-icon { width: 48px; height: 48px; margin-bottom: 10px; }
+      .cat-icon svg { width: 26px; height: 26px; }
+      .category-card {
+        min-height: 200px;
+        padding: 0.875rem 0.75rem;
+        border-radius: 1.5rem;
+      }
+      .category-title { font-size: 1rem; margin-bottom: 0.375rem; }
+      .category-desc { font-size: 0.6875rem; }
+      .category-info { margin-top: 0.75rem; padding-top: 0.75rem; }
+      .shop-badge { font-size: 0.75rem; padding: 0.3rem 0.6rem; }
+      .sample-link { font-size: 0.75rem; }
+      .btn-grad {
+        min-height: 40px;
+        padding: 0.5rem 0.875rem;
+        border-radius: 0.875rem;
+      }
+      .btn-grad span { font-size: 0.8125rem; }
     }
     @media (max-width: 639px) {
       #registerShopBtn { box-shadow: none; }
-    }
-    @media (max-width: 640px) {
-      .category-card {min-height:220px;}
     }
     /* mobile adjustments */
     @media (max-width: 768px) {
       .hide-on-mobile { display: none !important; }
     }
-    ::-webkit-scrollbar {width: 7px;}
-    ::-webkit-scrollbar-thumb {background: #c8f7e6;}
+    ::-webkit-scrollbar { width: 7px; }
+    ::-webkit-scrollbar-thumb {
+      background: linear-gradient(135deg, #10b981 0%, #0ea5e9 100%);
+      border-radius: 10px;
+    }
+    ::-webkit-scrollbar-track {
+      background: rgba(16, 185, 129, 0.05);
+    }
     </style>
     <script src="/nav-active.js" defer></script>
 </head>
@@ -177,27 +347,31 @@
 </header>
 
 <main class="max-w-7xl mx-auto mt-24 md:mt-32 mb-14 px-4">
-  <section class="glass rounded-2xl py-10 px-3 sm:px-12 shadow-lg mt-2">
-    <h2 class="text-2xl sm:text-3xl font-extrabold text-gray-800 mb-8 text-center">دسته‌بندی فروشگاه‌ها</h2>
+  <section class="glass rounded-2xl py-12 px-4 sm:px-8 lg:px-12 shadow-lg mt-2">
+    <div class="text-center mb-10">
+      <h1 class="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-gray-900 mb-3 bg-gradient-to-r from-gray-900 via-gray-800 to-gray-900 bg-clip-text text-transparent">دسته‌بندی فروشگاه‌ها</h1>
+      <p class="text-gray-600 text-sm sm:text-base font-medium">فروشگاه مورد نظر خود را از میان دسته‌بندی‌های مختلف پیدا کنید</p>
+    </div>
     <p id="errorMessage" class="text-red-500 text-center mb-4 hidden"></p>
     <!-- سرچ باکس -->
-    <form onsubmit="event.preventDefault(); searchCategories();" class="w-full max-w-md mx-auto mb-10">
-      <div class="flex items-center rounded-full border border-gray-200 shadow-sm bg-white/70 p-2 px-4 w-full">
+    <form onsubmit="event.preventDefault(); searchCategories();" class="w-full max-w-2xl mx-auto mb-12">
+      <div class="flex items-center rounded-2xl border-2 border-gray-200 shadow-lg bg-white p-2 px-5 w-full hover:border-teal-400 focus-within:border-teal-500 transition-all">
         <label for="searchInput" class="sr-only">جستجوی دسته‌ها</label>
         <input type="text" id="searchInput"
-          class="flex-grow w-full bg-transparent px-2 py-1 text-sm sm:text-base outline-none font-bold text-gray-700 placeholder:text-gray-400"
+          class="flex-grow w-full bg-transparent px-3 py-2 text-sm sm:text-base outline-none font-semibold text-gray-700 placeholder:text-gray-400"
           placeholder="جستجو در دسته‌بندی، توضیحات یا فروشگاه نمونه ..." autocomplete="off">
-        <button type="submit" class="btn-grad px-4 py-1 text-sm font-bold flex items-center justify-center">
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <button type="submit" class="btn-grad px-5 py-2 text-sm font-bold flex items-center justify-center gap-2 flex-shrink-0">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
             <circle cx="11" cy="11" r="8" stroke="currentColor"/>
             <path d="M21 21l-3.8-3.8" stroke-linecap="round"/>
           </svg>
+          <span class="hidden sm:inline">جستجو</span>
         </button>
       </div>
     </form>
     <!-- دسته‌بندی‌ها -->
-    <div id="categoriesGrid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 sm:gap-8"></div>
-    <div id="noResult" class="hidden text-center mt-12 text-lg text-gray-400 font-bold">دسته‌ای پیدا نشد!</div>
+    <div id="categoriesGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5 sm:gap-6 lg:gap-7"></div>
+    <div id="noResult" class="hidden text-center mt-16 text-xl text-gray-400 font-bold">دسته‌ای پیدا نشد!</div>
   </section>
 </main>
 <!-- Desktop Footer -->
@@ -252,22 +426,22 @@ function renderCategories(list) {
     const count = cat.shops ? cat.shops.length : 0;
     const sampleShop = count ? cat.shops[0] : null;
     const info = count
-      ? `<a href="shop.html?shopurl=${sampleShop.shopurl}" target="_blank" class="text-blue-600 hover:text-teal-600 underline text-sm">نمونه: ${sampleShop.storename || sampleShop.shopName || ''}</a> <span class="inline-block px-2 py-1 bg-green-100 text-green-700 text-xs rounded-xl font-bold">${count} فروشگاه</span>`
-      : `<span class="text-gray-500 text-xs">بدون فروشگاه</span>`;
+      ? `<a href="shop.html?shopurl=${sampleShop.shopurl}" target="_blank" class="sample-link">نمونه: ${sampleShop.storename || sampleShop.shopName || ''}</a> <span class="shop-badge">${count} فروشگاه</span>`
+      : `<span class="no-shop-text">بدون فروشگاه</span>`;
 
     grid.innerHTML += `
-      <div class="category-card group shadow-md border border-gray-200 w-full max-w-md mx-auto hover:shadow-lg transition-all h-full" data-slug="${cat.catId}">
-        <div class="flex flex-col justify-between flex-1 items-center text-center gap-2">
-          <div class="flex flex-col items-center">
-            <div class="cat-icon bg-gradient-to-br ${cat.color} mb-1 group-hover:scale-105">${getCategoryIcon(cat.catId)}</div>
-            <span class="font-bold text-lg mb-0">${cat.name}</span>
-            <p class="text-sm text-gray-600 leading-tight text-center mt-1">${cat.desc}</p>
+      <div class="category-card group w-full mx-auto h-full" data-slug="${cat.catId}">
+        <div class="flex flex-col justify-between flex-1 items-center text-center w-full">
+          <div class="flex flex-col items-center w-full">
+            <div class="cat-icon bg-gradient-to-br ${cat.color}">${getCategoryIcon(cat.catId)}</div>
+            <h3 class="category-title">${cat.name}</h3>
+            <p class="category-desc">${cat.desc}</p>
           </div>
-          <div class="flex items-center justify-center gap-2 flex-wrap text-sm mt-2">
+          <div class="category-info">
             ${info}
           </div>
         </div>
-        <a href="shops-by-category.html?cat=${cat.catId}" class="btn-grad mt-3 block w-full max-w-[260px] text-sm font-bold">
+        <a href="shops-by-category.html?cat=${cat.catId}" class="btn-grad w-full">
           <span>مشاهده فروشگاه‌ها</span>
         </a>
       </div>
