@@ -1946,9 +1946,11 @@ document.addEventListener('DOMContentLoaded', function() {
 
   // بستن با دکمه
   if (closeAdBtn) {
-    closeAdBtn.onclick = function() {
+    closeAdBtn.addEventListener('click', function(event) {
+      event.preventDefault();
+      event.stopPropagation();
       adPopup.style.display = 'none';
-    };
+    });
   } else {
     console.error("❌ دکمه بستن تبلیغ پیدا نشد!");
   }
