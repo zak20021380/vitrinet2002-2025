@@ -14,6 +14,7 @@ router.get('/profile', authMiddleware('admin'), adminController.profile);
 
 // آمار داشبورد ادمین
 router.get('/dashboard/stats', authMiddleware('admin'), adminController.getDashboardStats);
+router.get('/dashboard/income', authMiddleware('admin'), adminController.getIncomeInsights);
 
 // اگر بخوای روت‌های بیشتر مخصوص ادمین اضافه کنی (مثال)
 // router.get('/dashboard', authMiddleware('admin'), adminController.dashboard);
