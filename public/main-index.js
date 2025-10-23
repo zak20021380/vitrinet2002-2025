@@ -92,6 +92,9 @@ document.addEventListener('visibilitychange', () => {
     updateAuthNavigationState();
   }
 });
+document.addEventListener('mobileNavReady', () => {
+  updateAuthNavigationState();
+});
 
 // نشون دادن پاپ‌آپ
   document.getElementById('cityBtn').onclick = function(e) {
