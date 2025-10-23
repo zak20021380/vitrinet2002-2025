@@ -246,20 +246,7 @@
   <div class="relative">
     <label class="block text-sm font-bold mb-1">دسته‌بندی <span class="text-red-500">*</span></label>
     <select required name="category" id="category" class="w-full p-3 border rounded-xl focus:ring-2 focus:ring-green-200 bg-white">
-      <option value="" disabled selected>انتخاب دسته</option>
-      <option>پوشاک</option>
-      <option>خوراک</option>
-      <option>خدمات</option>
-      <option>دیجیتال</option>
-      <option>زیبایی</option>
-      <option>کتاب و تحریر</option>
-      <option>لوازم خانگی</option>
-      <option>ورزشی</option>
-      <option>تالار و مجالس</option>
-      <option>قنادی و شیرینی</option>
-      <option>گل و گیاه</option>
-      <option>خودرو</option>
-      <option>کودکان</option>
+      <option value="" disabled selected>در حال بارگذاری...</option>
     </select>
 
     <!-- START: service examples (visible only for service categories) -->
@@ -285,8 +272,7 @@
   <div id="subcategory-wrapper" class="hidden">
     <label class="block text-sm font-bold mb-1">زیر دسته <span class="text-red-500">*</span></label>
     <div id="subcategory-chips" class="flex flex-wrap gap-2">
-      <button type="button" data-value="لباس کودک" class="px-4 py-2 border border-gray-300 rounded-full text-sm bg-white text-gray-700 hover:bg-gray-100">لباس کودک</button>
-      <button type="button" data-value="اسباب‌بازی" class="px-4 py-2 border border-gray-300 rounded-full text-sm bg-white text-gray-700 hover:bg-gray-100">اسباب‌بازی</button>
+      <span class="text-xs text-gray-500">در حال بارگذاری...</span>
     </div>
     <input type="hidden" id="subcategory" />
     <div id="subcategory-hint" class="text-xs mt-2 text-red-500 hidden"></div>
@@ -438,10 +424,252 @@
     }
   });
 
+  const API_ORIGIN = window.location.origin.includes('localhost') ? 'http://localhost:5000' : window.location.origin;
+  const CATEGORY_API_URL = `${API_ORIGIN}/api/categories`;
+  const CATEGORY_CACHE_KEY = 'post.categories.cache';
+  const SERVICE_CACHE_KEY = 'post.serviceSubcategories.cache';
+  const CATEGORY_CACHE_TTL_MS = 1000 * 60 * 30; // 30 دقیقه
+
+  const DEFAULT_CATEGORIES = [
+    'پوشاک',
+    'خوراک',
+    'خدمات',
+    'دیجیتال',
+    'زیبایی',
+    'کتاب و تحریر',
+    'لوازم خانگی',
+    'ورزشی',
+    'تالار و مجالس',
+    'قنادی و شیرینی',
+    'گل و گیاه',
+    'خودرو',
+    'کودکان'
+  ];
+
+  const DEFAULT_SERVICE_SUBCATEGORIES = [
+    'آرایشگاه مردانه',
+    'آرایشگاه زنانه',
+    'کارواش',
+    'کلینیک زیبایی',
+    'تعمیر موبایل',
+    'آتلیه عکاسی',
+    'خیاطی',
+    'آرایش حیوانات'
+  ];
+
   const categorySelect = document.getElementById("category");
   const subcatWrapper = document.getElementById("subcategory-wrapper");
   const subcatInput = document.getElementById("subcategory");
-  const subcatChips = document.querySelectorAll('#subcategory-chips button');
+  const subcatChipsContainer = document.getElementById('subcategory-chips');
+
+  function toIdString(raw) {
+    if (!raw) return '';
+    if (typeof raw === 'string') return raw;
+    if (typeof raw === 'object') {
+      if (raw.$oid) return String(raw.$oid);
+      if (raw._id) return String(raw._id);
+      if (raw.id) return String(raw.id);
+    }
+    return String(raw);
+  }
+
+  function normaliseCategoryText(value) {
+    if (!value) return '';
+    return String(value).replace(/\s+/g, ' ').trim();
+  }
+
+  function normaliseCategoryItem(raw, fallbackType = 'category') {
+    if (!raw) return null;
+    if (typeof raw === 'string') {
+      const name = normaliseCategoryText(raw);
+      if (!name) return null;
+      return {
+        id: '',
+        name,
+        type: fallbackType,
+        isDefault: fallbackType === 'service-subcategory'
+          ? DEFAULT_SERVICE_SUBCATEGORIES.includes(name)
+          : DEFAULT_CATEGORIES.includes(name)
+      };
+    }
+    const name = normaliseCategoryText(raw.name || raw.title || raw.label || '');
+    if (!name) return null;
+    const id = toIdString(raw._id || raw.id || raw.value || '');
+    const type = raw.type || fallbackType;
+    return {
+      id,
+      name,
+      type,
+      isDefault: typeof raw.isDefault === 'boolean'
+        ? raw.isDefault
+        : (type === 'service-subcategory'
+            ? DEFAULT_SERVICE_SUBCATEGORIES.includes(name)
+            : DEFAULT_CATEGORIES.includes(name))
+    };
+  }
+
+  function normaliseCategoryList(list = [], type = 'category') {
+    const unique = new Map();
+    list.forEach(item => {
+      const record = normaliseCategoryItem(item, type);
+      if (!record) return;
+      const key = record.name.toLocaleLowerCase('fa-IR');
+      if (!unique.has(key) || (!unique.get(key).id && record.id)) {
+        unique.set(key, record);
+      }
+    });
+    return Array.from(unique.values()).sort((a, b) => a.name.localeCompare(b.name, 'fa-IR', { sensitivity: 'base' }));
+  }
+
+  function saveCategoryCache(key, list) {
+    try {
+      if (typeof localStorage === 'undefined') return;
+      const payload = {
+        items: Array.isArray(list) ? list.map(item => ({
+          id: item.id || '',
+          name: item.name,
+          type: item.type,
+          isDefault: !!item.isDefault
+        })) : [],
+        updatedAt: Date.now()
+      };
+      localStorage.setItem(key, JSON.stringify(payload));
+    } catch (err) {
+      console.warn('saveCategoryCache ->', err);
+    }
+  }
+
+  function loadCategoryCache(key, fallback = [], type = 'category') {
+    try {
+      if (typeof localStorage === 'undefined') {
+        return normaliseCategoryList(fallback, type);
+      }
+      const raw = localStorage.getItem(key);
+      if (!raw) {
+        return normaliseCategoryList(fallback, type);
+      }
+      const parsed = JSON.parse(raw);
+      const updatedAt = Number(parsed?.updatedAt || 0);
+      if (updatedAt && Date.now() - updatedAt > CATEGORY_CACHE_TTL_MS) {
+        localStorage.removeItem(key);
+        return normaliseCategoryList(fallback, type);
+      }
+      const list = Array.isArray(parsed?.items) ? parsed.items : Array.isArray(parsed) ? parsed : [];
+      const normalised = normaliseCategoryList(list, type);
+      if (!normalised.length) {
+        return normaliseCategoryList(fallback, type);
+      }
+      return normalised;
+    } catch (err) {
+      console.warn('loadCategoryCache ->', err);
+      return normaliseCategoryList(fallback, type);
+    }
+  }
+
+  function renderCategoryOptions(list = []) {
+    if (!categorySelect) return;
+    const options = normaliseCategoryList(list, 'category');
+    const previous = categorySelect.value;
+    categorySelect.innerHTML = '';
+    const placeholder = document.createElement('option');
+    placeholder.value = '';
+    placeholder.disabled = true;
+    placeholder.selected = true;
+    placeholder.textContent = options.length ? 'انتخاب دسته' : 'دسته‌ای یافت نشد';
+    categorySelect.appendChild(placeholder);
+    options.forEach(item => {
+      const option = document.createElement('option');
+      option.value = item.name;
+      option.textContent = item.name;
+      if (item.id) {
+        option.dataset.id = item.id;
+      }
+      categorySelect.appendChild(option);
+    });
+    categorySelect.disabled = !options.length;
+    if (options.some(item => item.name === previous)) {
+      categorySelect.value = previous;
+      placeholder.selected = false;
+    }
+  }
+
+  function highlightServiceChip(value = '') {
+    if (!subcatChipsContainer) return;
+    const buttons = subcatChipsContainer.querySelectorAll('button[data-value]');
+    buttons.forEach(btn => {
+      btn.classList.remove('bg-[#10b981]', 'text-white', 'border-[#10b981]');
+      if (btn.dataset.value === value) {
+        btn.classList.add('bg-[#10b981]', 'text-white', 'border-[#10b981]');
+      }
+    });
+  }
+
+  function renderServiceChips(list = []) {
+    if (!subcatChipsContainer) return;
+    const selected = subcatInput ? subcatInput.value : '';
+    const normalised = normaliseCategoryList(list, 'service-subcategory');
+    subcatChipsContainer.innerHTML = '';
+    if (!normalised.length) {
+      const span = document.createElement('span');
+      span.className = 'text-xs text-gray-500';
+      span.textContent = 'زیرگروهی ثبت نشده است.';
+      subcatChipsContainer.appendChild(span);
+      return;
+    }
+    normalised.forEach(item => {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.dataset.value = item.name;
+      if (item.id) {
+        btn.dataset.id = item.id;
+      }
+      btn.className = 'px-4 py-2 border border-gray-300 rounded-full text-sm bg-white text-gray-700 hover:bg-gray-100';
+      btn.textContent = item.name;
+      if (item.name === selected) {
+        btn.classList.add('bg-[#10b981]', 'text-white', 'border-[#10b981]');
+      }
+      subcatChipsContainer.appendChild(btn);
+    });
+    if (selected) {
+      highlightServiceChip(selected);
+    }
+  }
+
+  function applyCategoryPayload(data = {}) {
+    const categories = normaliseCategoryList(data?.categories, 'category');
+    const services = normaliseCategoryList(data?.serviceSubcategories, 'service-subcategory');
+    const categoriesToUse = categories.length ? categories : normaliseCategoryList(DEFAULT_CATEGORIES, 'category');
+    const servicesToUse = services.length ? services : normaliseCategoryList(DEFAULT_SERVICE_SUBCATEGORIES, 'service-subcategory');
+    renderCategoryOptions(categoriesToUse);
+    renderServiceChips(servicesToUse);
+    saveCategoryCache(CATEGORY_CACHE_KEY, categoriesToUse);
+    saveCategoryCache(SERVICE_CACHE_KEY, servicesToUse);
+  }
+
+  async function fetchCategoryDataForForm({ silent = false } = {}) {
+    try {
+      const res = await fetch(CATEGORY_API_URL, { credentials: 'include' });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        throw new Error(data?.message || 'خطا در دریافت دسته‌بندی‌ها.');
+      }
+      applyCategoryPayload(data);
+      if (!silent) {
+        showToast('دسته‌بندی‌ها به‌روزرسانی شد ✅');
+      }
+    } catch (error) {
+      console.warn('fetchCategoryDataForForm ->', error);
+      if (!silent) {
+        showToast(error.message || 'امکان دریافت دسته‌بندی‌ها نبود ❗️');
+      }
+    }
+  }
+
+  const cachedCategories = loadCategoryCache(CATEGORY_CACHE_KEY, DEFAULT_CATEGORIES, 'category');
+  const cachedServices = loadCategoryCache(SERVICE_CACHE_KEY, DEFAULT_SERVICE_SUBCATEGORIES, 'service-subcategory');
+  renderCategoryOptions(cachedCategories);
+  renderServiceChips(cachedServices);
+  fetchCategoryDataForForm({ silent: true });
 
   // === Service examples: setup ===
 const serviceExamples = document.getElementById("service-examples");
@@ -464,40 +692,47 @@ svcChipBtns.forEach(btn => {
 });
 
 // Initial reveal on load if a service category is preselected
-if (SERVICE_CATEGORIES.includes(categorySelect.value)) {
+if (categorySelect && SERVICE_CATEGORIES.includes(categorySelect.value)) {
   serviceExamples.classList.remove("hidden");
 }
 
 
 // دسته‌بندی: نشان دادن زیرگروه "کودکان" و مثال‌های خدمات
-categorySelect.addEventListener("change", function () {
-  // بخش کودکان (بدون تغییر منطقی قبلی)
-  if (this.value === "کودکان") {
-    subcatWrapper.classList.remove("hidden");
-  } else {
-    subcatWrapper.classList.add("hidden");
-    subcatInput.value = "";
-    subcatChips.forEach(b => b.classList.remove('bg-[#10b981]','text-white','border-[#10b981]'));
-    document.getElementById("subcategory-hint").classList.add("hidden");
-  }
+if (categorySelect) {
+  categorySelect.addEventListener("change", function () {
+    // بخش کودکان (بدون تغییر منطقی قبلی)
+    if (this.value === "کودکان") {
+      subcatWrapper.classList.remove("hidden");
+    } else {
+      subcatWrapper.classList.add("hidden");
+      if (subcatInput) {
+        subcatInput.value = "";
+      }
+      highlightServiceChip('');
+      document.getElementById("subcategory-hint").classList.add("hidden");
+    }
 
-  // اگر دستهٔ انتخابی از نوع خدمات باشد، مثال‌ها را نشان بده
-  if (SERVICE_CATEGORIES.includes(this.value)) {
-    serviceExamples.classList.remove("hidden");
-  } else {
-    serviceExamples.classList.add("hidden");
-  }
-});
+    // اگر دستهٔ انتخابی از نوع خدمات باشد، مثال‌ها را نشان بده
+    if (SERVICE_CATEGORIES.includes(this.value)) {
+      serviceExamples.classList.remove("hidden");
+    } else {
+      serviceExamples.classList.add("hidden");
+    }
+  });
+}
 
 
-  subcatChips.forEach(btn => {
-    btn.addEventListener('click', function () {
-      subcatChips.forEach(b => b.classList.remove('bg-[#10b981]','text-white','border-[#10b981]'));
-      this.classList.add('bg-[#10b981]','text-white','border-[#10b981]');
-      subcatInput.value = this.dataset.value;
+  if (subcatChipsContainer) {
+    subcatChipsContainer.addEventListener('click', function (event) {
+      const button = event.target.closest('button[data-value]');
+      if (!button) return;
+      highlightServiceChip(button.dataset.value || '');
+      if (subcatInput) {
+        subcatInput.value = button.dataset.value || '';
+      }
       document.getElementById("subcategory-hint").classList.add("hidden");
     });
-  });
+  }
 
   // force category dropdown to open downward
   categorySelect.addEventListener('focus', function(){
