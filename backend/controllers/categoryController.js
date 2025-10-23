@@ -23,9 +23,7 @@ const DEFAULT_SERVICE_SUBCATEGORIES = [
   { name: 'کارواش', parentName: DEFAULT_SERVICE_CATEGORY_NAME },
   { name: 'کلینیک زیبایی', parentName: DEFAULT_SERVICE_CATEGORY_NAME },
   { name: 'تعمیر موبایل', parentName: DEFAULT_SERVICE_CATEGORY_NAME },
-  { name: 'آتلیه عکاسی', parentName: DEFAULT_SERVICE_CATEGORY_NAME },
-  { name: 'خیاطی', parentName: DEFAULT_SERVICE_CATEGORY_NAME },
-  { name: 'آرایش حیوانات', parentName: DEFAULT_SERVICE_CATEGORY_NAME }
+  { name: 'خیاطی', parentName: DEFAULT_SERVICE_CATEGORY_NAME }
 ];
 
 const CATEGORY_CACHE_TTL = 1000 * 60; // 1 minute
