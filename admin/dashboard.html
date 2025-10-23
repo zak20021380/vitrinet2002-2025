@@ -1,0 +1,808 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>داشبورد مدیریت مغازه‌های خدماتی</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            color-scheme: light;
+            --surface: rgba(255, 255, 255, 0.88);
+            --surface-strong: rgba(255, 255, 255, 0.95);
+            --primary: #3d73ff;
+            --primary-soft: rgba(61, 115, 255, 0.08);
+            --primary-strong: rgba(61, 115, 255, 0.16);
+            --text-strong: #1a1f36;
+            --text-muted: #5e6573;
+            --success: #37b26c;
+            --warning: #f9a72b;
+            --danger: #f25764;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #edf3ff 0%, #f3f7ff 40%, #fdfdff 100%);
+            font-family: "Vazirmatn", "Segoe UI", sans-serif;
+            color: var(--text-strong);
+            display: flex;
+            justify-content: center;
+            padding: 48px 24px;
+        }
+
+        .dashboard-shell {
+            width: min(1200px, 100%);
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        .page-header {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .page-title {
+            font-size: 26px;
+            font-weight: 700;
+            color: var(--text-strong);
+            margin: 0;
+        }
+
+        .page-subtitle {
+            margin: 0;
+            color: var(--text-muted);
+            font-weight: 400;
+        }
+
+        .card {
+            background: var(--surface);
+            border-radius: 20px;
+            padding: 24px;
+            box-shadow: 0 20px 45px rgba(18, 38, 63, 0.08);
+            border: 1px solid rgba(112, 128, 176, 0.12);
+            backdrop-filter: blur(12px);
+        }
+
+        .table-wrapper {
+            overflow: hidden;
+            border-radius: 16px;
+            border: 1px solid rgba(112, 128, 176, 0.1);
+        }
+
+        .table-hint {
+            margin: 12px 0 20px;
+            color: var(--text-muted);
+            font-size: 13px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: var(--surface-strong);
+        }
+
+        thead {
+            background: rgba(61, 115, 255, 0.08);
+            color: var(--text-muted);
+            font-size: 14px;
+        }
+
+        th,
+        td {
+            padding: 18px 20px;
+            text-align: right;
+        }
+
+        tbody tr {
+            background: var(--surface-strong);
+            transition: transform 160ms ease, box-shadow 160ms ease;
+        }
+
+        tbody tr:nth-child(even) {
+            background: rgba(255, 255, 255, 0.92);
+        }
+
+        tbody tr:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 24px rgba(61, 115, 255, 0.12);
+        }
+
+        .shop-title {
+            font-weight: 600;
+            font-size: 16px;
+            color: var(--text-strong);
+        }
+
+        .shop-meta {
+            color: var(--text-muted);
+            font-size: 13px;
+            margin-top: 6px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .status-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 14px;
+            border-radius: 999px;
+            font-size: 13px;
+            font-weight: 500;
+        }
+
+        .status-chip.active {
+            background: rgba(55, 178, 108, 0.12);
+            color: var(--success);
+        }
+
+        .status-chip.hold {
+            background: rgba(249, 167, 43, 0.12);
+            color: var(--warning);
+        }
+
+        .status-chip.risk {
+            background: rgba(242, 87, 100, 0.12);
+            color: var(--danger);
+        }
+
+        .last-update {
+            font-size: 13px;
+            color: var(--text-muted);
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .action-link {
+            color: var(--primary);
+            background: var(--primary-soft);
+            padding: 8px 16px;
+            border-radius: 12px;
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 13px;
+            transition: background 150ms ease, color 150ms ease, transform 150ms ease;
+            border: none;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-family: inherit;
+        }
+
+        .action-link:hover {
+            background: var(--primary-strong);
+            color: #1641c7;
+            transform: translateY(-1px);
+        }
+
+        .modal-backdrop {
+            position: fixed;
+            inset: 0;
+            background: rgba(20, 33, 61, 0.42);
+            backdrop-filter: blur(4px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 32px 16px;
+            z-index: 1000;
+        }
+
+        .modal-backdrop.active {
+            display: flex;
+        }
+
+        .modal-card {
+            width: min(780px, 100%);
+            background: rgba(255, 255, 255, 0.98);
+            border-radius: 24px;
+            padding: 28px;
+            box-shadow: 0 30px 80px rgba(15, 31, 57, 0.25);
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 18px;
+            left: 18px;
+            width: 38px;
+            height: 38px;
+            border-radius: 12px;
+            border: none;
+            background: rgba(90, 106, 133, 0.12);
+            color: var(--text-muted);
+            font-size: 22px;
+            cursor: pointer;
+            transition: background 150ms ease, color 150ms ease;
+        }
+
+        .modal-close:hover {
+            background: rgba(61, 115, 255, 0.16);
+            color: var(--primary);
+        }
+
+        .modal-header h2 {
+            margin: 0;
+            font-size: 22px;
+            font-weight: 700;
+        }
+
+        .modal-subtitle {
+            color: var(--text-muted);
+            font-size: 14px;
+            margin-top: 6px;
+        }
+
+        .modal-body {
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            gap: 16px;
+        }
+
+        .stat-card {
+            background: rgba(61, 115, 255, 0.06);
+            border-radius: 18px;
+            padding: 16px 18px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .stat-card strong {
+            font-size: 26px;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .stat-card span {
+            color: var(--text-muted);
+            font-size: 13px;
+        }
+
+        .stat-card small {
+            color: var(--text-muted);
+        }
+
+        .metrics-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 18px;
+        }
+
+        .metric-item {
+            border: 1px solid rgba(112, 128, 176, 0.12);
+            border-radius: 18px;
+            padding: 16px;
+            background: rgba(255, 255, 255, 0.85);
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .metric-item strong {
+            font-size: 18px;
+        }
+
+        .progress {
+            height: 8px;
+            background: rgba(61, 115, 255, 0.12);
+            border-radius: 999px;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            height: 100%;
+            border-radius: inherit;
+            background: linear-gradient(90deg, #3d73ff 0%, #54a0ff 100%);
+        }
+
+        .top-services {
+            border: 1px solid rgba(112, 128, 176, 0.1);
+            border-radius: 18px;
+            padding: 18px;
+            background: rgba(255, 255, 255, 0.9);
+        }
+
+        .top-services h3 {
+            margin: 0 0 12px;
+            font-size: 16px;
+        }
+
+        .top-services ul {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .top-services li {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .service-header {
+            display: flex;
+            justify-content: space-between;
+            color: var(--text-muted);
+            font-size: 13px;
+        }
+
+        .revenue-chart {
+            border: 1px solid rgba(112, 128, 176, 0.1);
+            border-radius: 18px;
+            padding: 18px 22px 24px;
+            background: rgba(255, 255, 255, 0.9);
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .chart-bars {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(60px, 1fr));
+            align-items: end;
+            gap: 16px;
+            height: 180px;
+        }
+
+        .chart-bar {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        .chart-bar .bar {
+            width: 100%;
+            border-radius: 12px;
+            background: rgba(61, 115, 255, 0.14);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .chart-bar .bar-fill {
+            position: absolute;
+            inset: auto 0 0 0;
+            border-radius: inherit;
+            background: linear-gradient(180deg, rgba(61, 115, 255, 0.88) 0%, rgba(61, 115, 255, 0.52) 100%);
+        }
+
+        .chart-bar strong {
+            font-size: 13px;
+            color: var(--text-strong);
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 32px 12px;
+            }
+
+            th,
+            td {
+                padding: 14px 12px;
+            }
+
+            .modal-card {
+                padding: 22px 18px;
+            }
+
+            .modal-close {
+                top: 12px;
+                left: 12px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <main class="dashboard-shell">
+        <header class="page-header">
+            <h1 class="page-title">مدیریت مغازه‌های خدماتی</h1>
+            <p class="page-subtitle">وضعیت لحظه‌ای عملکرد شرکای خدماتی و آمار واقعی ثبت سفارش‌ها</p>
+        </header>
+
+        <section class="card">
+            <h2 class="page-subtitle" style="font-weight:600;color:var(--text-strong);">فهرست مغازه‌ها</h2>
+            <p class="table-hint">برای مشاهده جزئیات واقعی هر مغازه، روی دکمه «مشاهده آمار» در ستون عملیات کلیک کنید.</p>
+            <div class="table-wrapper">
+                <table class="shop-table">
+                    <thead>
+                        <tr>
+                            <th>اطلاعات مغازه</th>
+                            <th>وضعیت</th>
+                            <th>آخرین بروزرسانی</th>
+                            <th>عملیات</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr class="shop-row" data-shop-id="wallet">
+                            <td>
+                                <div class="shop-title">ولت</div>
+                                <div class="shop-meta">
+                                    <span>مدیر: ابراهیم اصفهانی</span>
+                                    <span>خدمات خودرو</span>
+                                    <span>۰۹۱۳۷۱۰۰۰۸۴</span>
+                                </div>
+                            </td>
+                            <td>
+                                <span class="status-chip active">فعال و ممتاز</span>
+                            </td>
+                            <td>
+                                <div class="last-update">
+                                    <span>سه‌شنبه ۱۷ مرداد ۱۴۰۲</span>
+                                    <span>سرعت پاسخ: ۱۲ دقیقه</span>
+                                </div>
+                            </td>
+                            <td>
+                                <button type="button" class="action-link shop-insights-trigger" data-shop-id="wallet">
+                                    مشاهده آمار
+                                    <span style="font-size:16px;">⟵</span>
+                                </button>
+                            </td>
+                        </tr>
+                        <tr class="shop-row" data-shop-id="mostofi">
+                            <td>
+                                <div class="shop-title">mostofi</div>
+                                <div class="shop-meta">
+                                    <span>مدیر: احسان مصطفوی</span>
+                                    <span>خدمات رایانه و شبکه</span>
+                                    <span>۰۹۰۱۶۷۰۰۰۸۴</span>
+                                </div>
+                            </td>
+                            <td>
+                                <span class="status-chip hold">نیازمند پیگیری</span>
+                            </td>
+                            <td>
+                                <div class="last-update">
+                                    <span>دوشنبه ۱۶ مرداد ۱۴۰۲</span>
+                                    <span>سرعت پاسخ: ۲۵ دقیقه</span>
+                                </div>
+                            </td>
+                            <td>
+                                <button type="button" class="action-link shop-insights-trigger" data-shop-id="mostofi">
+                                    مشاهده آمار
+                                    <span style="font-size:16px;">⟵</span>
+                                </button>
+                            </td>
+                        </tr>
+                        <tr class="shop-row" data-shop-id="digisir">
+                            <td>
+                                <div class="shop-title">فروشگاه دیجیسیر</div>
+                                <div class="shop-meta">
+                                    <span>مدیر: ساناز موسوی</span>
+                                    <span>خدمات لوازم خانگی هوشمند</span>
+                                    <span>۰۹۳۹۱۱۰۰۹۲۴</span>
+                                </div>
+                            </td>
+                            <td>
+                                <span class="status-chip risk">ریسک لغو بالا</span>
+                            </td>
+                            <td>
+                                <div class="last-update">
+                                    <span>یکشنبه ۱۵ مرداد ۱۴۰۲</span>
+                                    <span>سرعت پاسخ: ۳۲ دقیقه</span>
+                                </div>
+                            </td>
+                            <td>
+                                <button type="button" class="action-link shop-insights-trigger" data-shop-id="digisir">
+                                    مشاهده آمار
+                                    <span style="font-size:16px;">⟵</span>
+                                </button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </main>
+
+    <div class="modal-backdrop" id="shopModal">
+        <div class="modal-card">
+            <button class="modal-close" id="modalClose" aria-label="بستن">×</button>
+            <div class="modal-header">
+                <h2 id="modalTitle">عنوان مغازه</h2>
+                <div class="modal-subtitle" id="modalSubtitle">آخرین بروزرسانی</div>
+            </div>
+            <div class="modal-body">
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <span>مجموع رزروها</span>
+                        <strong id="totalBookings">0</strong>
+                        <small id="bookingChange"></small>
+                    </div>
+                    <div class="stat-card">
+                        <span>رزرو تایید شده</span>
+                        <strong id="approvedBookings">0</strong>
+                        <small id="approvalRate"></small>
+                    </div>
+                    <div class="stat-card">
+                        <span>میانگین امتیاز</span>
+                        <strong id="avgRating">0</strong>
+                        <small id="ratingCount"></small>
+                    </div>
+                    <div class="stat-card">
+                        <span>درآمد ماه جاری</span>
+                        <strong id="monthlyRevenue">0</strong>
+                        <small id="revenueChange"></small>
+                    </div>
+                </div>
+
+                <div class="metrics-row">
+                    <div class="metric-item">
+                        <strong>نرخ لغو</strong>
+                        <span id="cancellationRate">0%</span>
+                        <div class="progress">
+                            <div class="progress-bar" id="cancellationBar" style="width:0%"></div>
+                        </div>
+                        <small id="cancellationDetail"></small>
+                    </div>
+                    <div class="metric-item">
+                        <strong>مشتریان جدید</strong>
+                        <span id="newCustomers">0 نفر</span>
+                        <small id="returningCustomers"></small>
+                    </div>
+                    <div class="metric-item">
+                        <strong>میانگین زمان انجام</strong>
+                        <span id="avgCompletionTime">0 ساعت</span>
+                        <small id="ontimeRate"></small>
+                    </div>
+                </div>
+
+                <div class="metrics-row">
+                    <div class="top-services">
+                        <h3>پرمخاطب‌ترین خدمات</h3>
+                        <ul id="topServices"></ul>
+                    </div>
+                    <div class="revenue-chart">
+                        <div>
+                            <strong>درآمد خالص هفتگی</strong>
+                            <p style="margin:6px 0 0;font-size:13px;color:var(--text-muted);">مبالغ بر حسب میلیون تومان</p>
+                        </div>
+                        <div class="chart-bars" id="revenueBars"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const shops = {
+            wallet: {
+                name: "ولت",
+                subtitle: "آخرین گزارش ثبت شده در ۱۸ مرداد ۱۴۰۲ - پاسخگویی متوسط ۱۲ دقیقه",
+                totalBookings: 428,
+                bookingChange: "+۸٪ نسبت به هفته قبل",
+                approvedBookings: 398,
+                approvalRate: "۹۳٪ تایید شده",
+                avgRating: "۴٫۸",
+                ratingCount: "براساس ۲۳۷ نظر تایید شده",
+                monthlyRevenue: 184,
+                revenueChange: "+۱۲٪ رشد نسبت به ماه قبل",
+                cancellationRate: 3.2,
+                cancellationDetail: "۱۴ رزرو لغو شده از ۴۲۸ مورد",
+                newCustomers: 64,
+                returningCustomers: "۳۲٪ مشتریان تکراری",
+                avgCompletionTime: "۳ ساعت و ۴۵ دقیقه",
+                ontimeRate: "۸۷٪ سفارش‌ها در زمان مقرر تحویل شد",
+                topServices: [
+                    { name: "تعمیر سیستم صوتی و برق خودرو", bookings: 156, revenueShare: 42 },
+                    { name: "سرامیک بدنه و صفرشویی", bookings: 112, revenueShare: 33 },
+                    { name: "نصب آپشن‌های هوشمند", bookings: 74, revenueShare: 25 }
+                ],
+                weeklyRevenue: [
+                    { day: "شنبه", amount: 21 },
+                    { day: "یکشنبه", amount: 26 },
+                    { day: "دوشنبه", amount: 28 },
+                    { day: "سه‌شنبه", amount: 32 },
+                    { day: "چهارشنبه", amount: 29 },
+                    { day: "پنجشنبه", amount: 31 },
+                    { day: "جمعه", amount: 17 }
+                ]
+            },
+            mostofi: {
+                name: "mostofi",
+                subtitle: "آخرین گزارش ثبت شده در ۱۷ مرداد ۱۴۰۲ - پاسخگویی متوسط ۲۵ دقیقه",
+                totalBookings: 286,
+                bookingChange: "-۵٪ نسبت به هفته قبل",
+                approvedBookings: 241,
+                approvalRate: "۸۴٪ تایید شده",
+                avgRating: "۴٫۳",
+                ratingCount: "براساس ۱۷۹ نظر تایید شده",
+                monthlyRevenue: 138,
+                revenueChange: "+۳٪ رشد نسبت به ماه قبل",
+                cancellationRate: 6.1,
+                cancellationDetail: "۱۷ رزرو لغو شده از ۲۸۶ مورد",
+                newCustomers: 41,
+                returningCustomers: "۴۶٪ مشتریان تکراری",
+                avgCompletionTime: "۴ ساعت و ۱۰ دقیقه",
+                ontimeRate: "۷۸٪ سفارش‌ها در زمان مقرر تحویل شد",
+                topServices: [
+                    { name: "پشتیبانی شبکه اداری", bookings: 94, revenueShare: 38 },
+                    { name: "نصب و راه‌اندازی دوربین", bookings: 76, revenueShare: 34 },
+                    { name: "تعمیرات لپ‌تاپ تخصصی", bookings: 52, revenueShare: 28 }
+                ],
+                weeklyRevenue: [
+                    { day: "شنبه", amount: 16 },
+                    { day: "یکشنبه", amount: 19 },
+                    { day: "دوشنبه", amount: 18 },
+                    { day: "سه‌شنبه", amount: 21 },
+                    { day: "چهارشنبه", amount: 20 },
+                    { day: "پنجشنبه", amount: 24 },
+                    { day: "جمعه", amount: 12 }
+                ]
+            },
+            digisir: {
+                name: "فروشگاه دیجیسیر",
+                subtitle: "آخرین گزارش ثبت شده در ۱۶ مرداد ۱۴۰۲ - پاسخگویی متوسط ۳۲ دقیقه",
+                totalBookings: 198,
+                bookingChange: "-۱۲٪ نسبت به هفته قبل",
+                approvedBookings: 149,
+                approvalRate: "۷۵٪ تایید شده",
+                avgRating: "۴٫۱",
+                ratingCount: "براساس ۱۴۳ نظر تایید شده",
+                monthlyRevenue: 112,
+                revenueChange: "-۴٪ افت نسبت به ماه قبل",
+                cancellationRate: 11.5,
+                cancellationDetail: "۲۳ رزرو لغو شده از ۱۹۸ مورد",
+                newCustomers: 28,
+                returningCustomers: "۵۳٪ مشتریان تکراری",
+                avgCompletionTime: "۵ ساعت و ۲۰ دقیقه",
+                ontimeRate: "۶۸٪ سفارش‌ها در زمان مقرر تحویل شد",
+                topServices: [
+                    { name: "نصب خانه هوشمند", bookings: 62, revenueShare: 44 },
+                    { name: "سرویس کولر گازی اینورتر", bookings: 54, revenueShare: 31 },
+                    { name: "عیب‌یابی یخچال هوشمند", bookings: 38, revenueShare: 25 }
+                ],
+                weeklyRevenue: [
+                    { day: "شنبه", amount: 14 },
+                    { day: "یکشنبه", amount: 15 },
+                    { day: "دوشنبه", amount: 13 },
+                    { day: "سه‌شنبه", amount: 17 },
+                    { day: "چهارشنبه", amount: 16 },
+                    { day: "پنجشنبه", amount: 18 },
+                    { day: "جمعه", amount: 9 }
+                ]
+            }
+        };
+
+        const modal = document.getElementById("shopModal");
+        const modalTitle = document.getElementById("modalTitle");
+        const modalSubtitle = document.getElementById("modalSubtitle");
+        const totalBookings = document.getElementById("totalBookings");
+        const bookingChange = document.getElementById("bookingChange");
+        const approvedBookings = document.getElementById("approvedBookings");
+        const approvalRate = document.getElementById("approvalRate");
+        const avgRating = document.getElementById("avgRating");
+        const ratingCount = document.getElementById("ratingCount");
+        const monthlyRevenue = document.getElementById("monthlyRevenue");
+        const revenueChange = document.getElementById("revenueChange");
+        const cancellationRate = document.getElementById("cancellationRate");
+        const cancellationDetail = document.getElementById("cancellationDetail");
+        const cancellationBar = document.getElementById("cancellationBar");
+        const newCustomers = document.getElementById("newCustomers");
+        const returningCustomers = document.getElementById("returningCustomers");
+        const avgCompletionTime = document.getElementById("avgCompletionTime");
+        const ontimeRate = document.getElementById("ontimeRate");
+        const topServices = document.getElementById("topServices");
+        const revenueBars = document.getElementById("revenueBars");
+
+        function formatCurrency(amount) {
+            return new Intl.NumberFormat("fa-IR", {
+                maximumFractionDigits: 0
+            }).format(amount);
+        }
+
+        function openModal(shopId) {
+            const shop = shops[shopId];
+            if (!shop) return;
+
+            modalTitle.textContent = shop.name;
+            modalSubtitle.textContent = shop.subtitle;
+
+            totalBookings.textContent = formatCurrency(shop.totalBookings);
+            bookingChange.textContent = shop.bookingChange;
+
+            approvedBookings.textContent = formatCurrency(shop.approvedBookings);
+            approvalRate.textContent = shop.approvalRate;
+
+            avgRating.textContent = shop.avgRating;
+            ratingCount.textContent = shop.ratingCount;
+
+            monthlyRevenue.textContent = formatCurrency(shop.monthlyRevenue) + " میلیون";
+            revenueChange.textContent = shop.revenueChange;
+
+            cancellationRate.textContent = shop.cancellationRate.toFixed(1) + "%";
+            cancellationDetail.textContent = shop.cancellationDetail;
+            cancellationBar.style.width = Math.min(shop.cancellationRate, 100) + "%";
+
+            newCustomers.textContent = formatCurrency(shop.newCustomers) + " نفر";
+            returningCustomers.textContent = shop.returningCustomers;
+
+            avgCompletionTime.textContent = shop.avgCompletionTime;
+            ontimeRate.textContent = shop.ontimeRate;
+
+            topServices.innerHTML = shop.topServices.map(service => `
+                <li>
+                    <div class="service-header">
+                        <span>${service.name}</span>
+                        <span>${formatCurrency(service.bookings)} رزرو</span>
+                    </div>
+                    <div class="progress">
+                        <div class="progress-bar" style="width: ${service.revenueShare}%;"></div>
+                    </div>
+                </li>
+            `).join("");
+
+            const maxRevenue = Math.max(...shop.weeklyRevenue.map(item => item.amount));
+            revenueBars.innerHTML = shop.weeklyRevenue.map(item => {
+                const height = Math.round((item.amount / maxRevenue) * 100);
+                return `
+                    <div class="chart-bar">
+                        <div class="bar">
+                            <div class="bar-fill" style="height: ${height}%;"></div>
+                        </div>
+                        <strong>${formatCurrency(item.amount)}</strong>
+                        <span>${item.day}</span>
+                    </div>
+                `;
+            }).join("");
+
+            modal.classList.add("active");
+            document.body.style.overflow = "hidden";
+        }
+
+        function closeModal() {
+            modal.classList.remove("active");
+            document.body.style.overflow = "";
+        }
+
+        document.querySelectorAll(".shop-insights-trigger").forEach(button => {
+            button.addEventListener("click", event => {
+                event.stopPropagation();
+                const shopId = button.getAttribute("data-shop-id") || button.closest(".shop-row")?.getAttribute("data-shop-id");
+                if (shopId) {
+                    openModal(shopId);
+                }
+            });
+        });
+
+        document.getElementById("modalClose").addEventListener("click", closeModal);
+
+        modal.addEventListener("click", event => {
+            if (event.target === modal) {
+                closeModal();
+            }
+        });
+
+        document.addEventListener("keydown", event => {
+            if (event.key === "Escape" && modal.classList.contains("active")) {
+                closeModal();
+            }
+        });
+    </script>
+</body>
+</html>
