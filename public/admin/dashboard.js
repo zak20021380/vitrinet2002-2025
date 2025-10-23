@@ -3462,6 +3462,13 @@ const sidebar       = document.getElementById('sidebar');
 const sidebarToggle = document.getElementById('sidebarToggle');
 const menuLinks     = document.querySelectorAll('.sidebar-menu a');
 
+const syncSidebarState = () => {
+  if (!sidebar) return;
+  document.body.classList.toggle('sidebar-open', sidebar.classList.contains('open'));
+};
+
+syncSidebarState();
+
 // آبجکت پنل‌ها را قبلاً تعریف کرده‌اید:
 const panels = {
   dashboard: document.getElementById('dashboard-panel'),
@@ -3536,25 +3543,41 @@ menuLinks.forEach(link => {
     }
 
     // 5) بستن سایدبار در موبایل
-    if (window.innerWidth < 700) sidebar.classList.remove('open');
+    if (window.innerWidth < 700 && sidebar) {
+      sidebar.classList.remove('open');
+      syncSidebarState();
+    }
   });
 });
 
-// دکمهٔ برگر در موبایل
-sidebarToggle.addEventListener('click', () => sidebar.classList.toggle('open'));
-document.body.addEventListener('click', e => {
-  if (
-    window.innerWidth < 700 &&
-    sidebar.classList.contains('open') &&
-    !sidebar.contains(e.target) &&
-    e.target !== sidebarToggle
-  ) {
-    sidebar.classList.remove('open');
-  }
-});
-window.addEventListener('resize', () => {
-  if (window.innerWidth > 700) sidebar.classList.remove('open');
-});
+if (sidebar && sidebarToggle) {
+  // دکمهٔ برگر در موبایل
+  sidebarToggle.addEventListener('click', () => {
+    sidebar.classList.toggle('open');
+    syncSidebarState();
+  });
+
+  document.body.addEventListener('click', e => {
+    if (
+      window.innerWidth < 700 &&
+      sidebar.classList.contains('open') &&
+      !sidebar.contains(e.target) &&
+      e.target !== sidebarToggle
+    ) {
+      sidebar.classList.remove('open');
+      syncSidebarState();
+    }
+  });
+
+  window.addEventListener('resize', () => {
+    if (window.innerWidth > 700 && sidebar.classList.contains('open')) {
+      sidebar.classList.remove('open');
+      syncSidebarState();
+    } else if (window.innerWidth <= 700) {
+      syncSidebarState();
+    }
+  });
+}
 
 
 // -------- نمودار داینامیک داشبورد --------

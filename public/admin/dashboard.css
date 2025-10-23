@@ -27,9 +27,12 @@ body {
   overflow-x: hidden;
 }
 
-.dashboard-container { 
-  display: flex; 
-  min-height: 100vh; 
+.dashboard-container {
+  display: flex;
+  min-height: 100vh;
+  width: 100%;
+  background: var(--bg);
+  overflow: hidden;
 }
 
 /* Sidebar - بهبود یافته */
@@ -38,14 +41,15 @@ body {
   background: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(10px);
   box-shadow: var(--shadow);
-  display: flex; 
+  display: flex;
   flex-direction: column;
-  min-height: 100vh; 
+  min-height: 100vh;
   padding: 0;
-  z-index: 100; 
+  z-index: 100;
   position: relative;
   transition: transform var(--transition), width var(--transition);
   border-left: 1px solid var(--border);
+  flex-shrink: 0;
 }
 
 .sidebar-header {
@@ -116,23 +120,42 @@ body {
 }
 
 .sidebar-footer {
-  font-size: 0.85rem; 
+  font-size: 0.85rem;
   color: #aaa;
-  padding: 1rem 0.6rem; 
+  padding: 1rem 0.6rem;
   border-top: 1px solid var(--border);
-  text-align: center; 
+  text-align: center;
   background: inherit;
+}
+
+body.sidebar-open {
+  overflow: hidden;
+}
+
+body.sidebar-open::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.35);
+  backdrop-filter: blur(2px);
+  z-index: 90;
+  pointer-events: none;
 }
 
 /* Main Content */
 .main-content {
-  flex: 1; 
-  padding: 2rem 1.9rem 1.6rem 0.8rem;
+  flex: 1;
+  width: 100%;
+  max-width: 1240px;
+  margin: 0 auto;
+  padding: clamp(1.6rem, 2vw + 1rem, 2.4rem);
   background: var(--bg);
-  display: flex; 
+  display: flex;
   flex-direction: column;
   min-height: 100vh;
   transition: padding var(--transition);
+  gap: 1.5rem;
+  box-sizing: border-box;
 }
 
 .content-header {
@@ -161,8 +184,8 @@ body {
 /* Cards - بهبود یافته برای موبایل */
 .cards {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-  gap: 0.9rem; 
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: clamp(0.9rem, 2vw, 1.4rem);
   margin-bottom: 1.6rem;
 }
 
@@ -2209,20 +2232,30 @@ tr:last-child td {
   }
 }
 
+@media (max-width: 900px) {
+  .cards {
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  }
+
+  .main-content {
+    max-width: 100%;
+  }
+}
+
 /* Responsive - بهینه‌سازی موبایل */
-@media (max-width: 1050px) { 
-  .main-content { 
-    padding: 1.3rem 2vw 1.5rem 2vw; 
-  } 
-  
-  .dashboard-charts { 
-    gap: 0.7rem; 
-  } 
+@media (max-width: 1050px) {
+  .main-content {
+    padding: clamp(1.4rem, 2vw + 0.9rem, 2rem);
+  }
+
+  .dashboard-charts {
+    gap: 0.7rem;
+  }
 }
 
 @media (max-width: 850px) {
-  .main-content { 
-    padding: 1.7rem 2vw 1.7rem 2vw; 
+  .main-content {
+    padding: clamp(1.3rem, 4vw + 0.6rem, 1.8rem);
   }
   
   .dashboard-charts { 
@@ -2235,14 +2268,14 @@ tr:last-child td {
 }
 
 @media (max-width: 700px) {
-  .sidebar { 
-    position: fixed; 
-    top: 0; 
+  .sidebar {
+    position: fixed;
+    top: 0;
     right: 0;
-    height: 100%; 
-    width: 260px;
-    box-shadow: 0 0 30px rgba(0,0,0,0.15); 
-    z-index: 200; 
+    height: 100%;
+    width: min(320px, 88vw);
+    box-shadow: 0 0 30px rgba(0,0,0,0.15);
+    z-index: 200;
     transform: translateX(100%);
     border-left: 1px solid var(--border);
     backdrop-filter: blur(12px);
@@ -2252,8 +2285,8 @@ tr:last-child td {
     transform: translateX(0); 
   }
   
-  .main-content { 
-    padding: 1.7rem 4vw; 
+  .main-content {
+    padding: clamp(1.2rem, 6vw + 0.4rem, 1.6rem);
   }
   
   .sidebar-toggle-btn { 
@@ -2315,7 +2348,7 @@ tr:last-child td {
   }
 
   .main-content {
-    padding: 1.5rem 4vw;
+    padding: clamp(1.1rem, 6vw + 0.3rem, 1.4rem);
   }
 }
 
