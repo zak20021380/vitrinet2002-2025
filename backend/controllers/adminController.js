@@ -8,6 +8,7 @@ const Seller     = require('../models/Seller');
 const Product    = require('../models/product');
 const DailyVisit = require('../models/DailyVisit');
 const ServiceShop = require('../models/serviceShop');
+const Payment = require('../models/payment');
 
 // کلید سری JWT از .env خوانده می‌شود وگرنه مقدار پیش‌فرض
 const JWT_SECRET = "vitrinet_secret_key";
@@ -329,5 +330,457 @@ exports.getDashboardStats = async (req, res) => {
   } catch (err) {
     console.error('❌ dashboard stats error:', err);
     res.status(500).json({ message: 'خطا در دریافت آمار داشبورد.', error: err.message });
+  }
+};
+
+const MS_PER_DAY = 24 * 60 * 60 * 1000;
+
+const SUBSCRIPTION_TITLES = {
+  '1month': 'پلن ۱ ماهه',
+  '3month': 'پلن ۳ ماهه',
+  '12month': 'پلن ۱۲ ماهه'
+};
+
+const parseDateParam = (value, { endOfDay = false } = {}) => {
+  if (!value) return null;
+  let date;
+  if (typeof value === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(value)) {
+    const [year, month, day] = value.split('-').map(Number);
+    date = new Date(Date.UTC(year, month - 1, day));
+  } else {
+    date = new Date(value);
+  }
+  if (Number.isNaN(date?.getTime())) return null;
+  if (endOfDay) {
+    date.setUTCHours(23, 59, 59, 999);
+  } else {
+    date.setUTCHours(0, 0, 0, 0);
+  }
+  return date;
+};
+
+const humanizeSlug = (slug, map = {}) => {
+  if (!slug) return 'سایر';
+  if (map[slug]) return map[slug];
+  const cleaned = String(slug).replace(/[\-_]+/g, ' ').trim();
+  return cleaned.length ? cleaned : 'سایر';
+};
+
+const buildChangeMetric = (currentValue = 0, previousValue = 0) => {
+  const current = Number.isFinite(currentValue) ? currentValue : 0;
+  const previous = Number.isFinite(previousValue) ? previousValue : 0;
+  const delta = current - previous;
+  let change = 0;
+  if (previous > 0) {
+    change = delta / previous;
+  } else if (current > 0) {
+    change = 1;
+  }
+  return { value: current, change, delta };
+};
+
+const aggregateIncome = async (start, end) => {
+  const match = { paymentStatus: 'completed' };
+  if (start || end) {
+    match.createdAt = {};
+    if (start) match.createdAt.$gte = start;
+    if (end) match.createdAt.$lte = end;
+  }
+
+  const [facet] = await Payment.aggregate([
+    { $match: match },
+    {
+      $facet: {
+        byType: [
+          {
+            $group: {
+              _id: '$type',
+              totalAmount: { $sum: '$amount' },
+              count: { $sum: 1 }
+            }
+          }
+        ],
+        plans: [
+          { $match: { type: 'sub', planSlug: { $ne: null } } },
+          {
+            $group: {
+              _id: '$planSlug',
+              totalAmount: { $sum: '$amount' },
+              count: { $sum: 1 }
+            }
+          },
+          { $sort: { totalAmount: -1 } }
+        ],
+        byDay: [
+          {
+            $group: {
+              _id: {
+                $dateToString: { format: '%Y-%m-%d', date: '$createdAt' }
+              },
+              plans: {
+                $sum: {
+                  $cond: [{ $eq: ['$type', 'sub'] }, '$amount', 0]
+                }
+              },
+              ads: {
+                $sum: {
+                  $cond: [{ $eq: ['$type', 'ad'] }, '$amount', 0]
+                }
+              },
+              total: { $sum: '$amount' }
+            }
+          },
+          { $sort: { _id: 1 } }
+        ],
+        sellers: [
+          { $match: { sellerId: { $ne: null } } },
+          {
+            $group: {
+              _id: '$sellerId',
+              plans: {
+                $sum: {
+                  $cond: [{ $eq: ['$type', 'sub'] }, '$amount', 0]
+                }
+              },
+              ads: {
+                $sum: {
+                  $cond: [{ $eq: ['$type', 'ad'] }, '$amount', 0]
+                }
+              },
+              plan1: {
+                $sum: {
+                  $cond: [
+                    {
+                      $and: [
+                        { $eq: ['$type', 'sub'] },
+                        { $eq: ['$planSlug', '1month'] }
+                      ]
+                    },
+                    '$amount',
+                    0
+                  ]
+                }
+              },
+              plan3: {
+                $sum: {
+                  $cond: [
+                    {
+                      $and: [
+                        { $eq: ['$type', 'sub'] },
+                        { $eq: ['$planSlug', '3month'] }
+                      ]
+                    },
+                    '$amount',
+                    0
+                  ]
+                }
+              },
+              plan12: {
+                $sum: {
+                  $cond: [
+                    {
+                      $and: [
+                        { $eq: ['$type', 'sub'] },
+                        { $eq: ['$planSlug', '12month'] }
+                      ]
+                    },
+                    '$amount',
+                    0
+                  ]
+                }
+              },
+              payments: { $sum: 1 }
+            }
+          },
+          {
+            $addFields: {
+              total: { $add: ['$plans', '$ads'] }
+            }
+          },
+          { $sort: { total: -1 } },
+          { $limit: 10 }
+        ],
+        stats: [
+          {
+            $group: {
+              _id: null,
+              totalAmount: { $sum: '$amount' },
+              paymentCount: { $sum: 1 },
+              plansAmount: {
+                $sum: {
+                  $cond: [{ $eq: ['$type', 'sub'] }, '$amount', 0]
+                }
+              },
+              adsAmount: {
+                $sum: {
+                  $cond: [{ $eq: ['$type', 'ad'] }, '$amount', 0]
+                }
+              },
+              plansCount: {
+                $sum: {
+                  $cond: [{ $eq: ['$type', 'sub'] }, 1, 0]
+                }
+              },
+              adsCount: {
+                $sum: {
+                  $cond: [{ $eq: ['$type', 'ad'] }, 1, 0]
+                }
+              },
+              sellers: { $addToSet: '$sellerId' }
+            }
+          },
+          {
+            $addFields: {
+              sellerCount: {
+                $size: {
+                  $filter: {
+                    input: '$sellers',
+                    as: 'sellerId',
+                    cond: { $ne: ['$$sellerId', null] }
+                  }
+                }
+              }
+            }
+          },
+          {
+            $project: {
+              sellers: 0
+            }
+          }
+        ]
+      }
+    }
+  ]);
+
+  const safeFacet = facet || {};
+  const statsDoc = (safeFacet.stats && safeFacet.stats[0]) || {};
+
+  const stats = {
+    totalAmount: statsDoc.totalAmount || 0,
+    paymentCount: statsDoc.paymentCount || 0,
+    plansAmount: statsDoc.plansAmount || 0,
+    adsAmount: statsDoc.adsAmount || 0,
+    plansCount: statsDoc.plansCount || 0,
+    adsCount: statsDoc.adsCount || 0,
+    sellerCount: statsDoc.sellerCount || 0
+  };
+
+  const planTotals = new Map();
+  (safeFacet.plans || []).forEach((item) => {
+    if (!item) return;
+    planTotals.set(String(item._id || 'unknown'), item.totalAmount || 0);
+  });
+
+  const daily = (safeFacet.byDay || []).map((item) => ({
+    date: item?._id,
+    plans: item?.plans || 0,
+    ads: item?.ads || 0,
+    total: item?.total || ((item?.plans || 0) + (item?.ads || 0))
+  }));
+
+  const sellerEntries = (safeFacet.sellers || []).map((item) => ({
+    sellerId: item?._id || null,
+    plans: item?.plans || 0,
+    ads: item?.ads || 0,
+    plan1: item?.plan1 || 0,
+    plan3: item?.plan3 || 0,
+    plan12: item?.plan12 || 0,
+    total: item?.total || ((item?.plans || 0) + (item?.ads || 0))
+  }));
+
+  return { stats, planTotals, daily, sellers: sellerEntries };
+};
+
+exports.getIncomeInsights = async (req, res) => {
+  try {
+    const now = new Date();
+    let endDate = parseDateParam(req.query.end || req.query.endDate, { endOfDay: true }) || new Date(now);
+    endDate.setUTCHours(23, 59, 59, 999);
+
+    let startDate = parseDateParam(req.query.start || req.query.startDate, { endOfDay: false });
+    if (!startDate) {
+      startDate = new Date(endDate);
+      startDate.setUTCDate(startDate.getUTCDate() - 29);
+    }
+    startDate.setUTCHours(0, 0, 0, 0);
+
+    if (startDate > endDate) {
+      const temp = startDate;
+      startDate = endDate;
+      endDate = temp;
+    }
+
+    const rangeDays = Math.max(1, Math.round((endDate - startDate) / MS_PER_DAY) + 1);
+
+    const prevEnd = new Date(startDate);
+    prevEnd.setUTCDate(prevEnd.getUTCDate() - 1);
+    prevEnd.setUTCHours(23, 59, 59, 999);
+    const prevStart = new Date(prevEnd);
+    prevStart.setUTCDate(prevStart.getUTCDate() - (rangeDays - 1));
+    prevStart.setUTCHours(0, 0, 0, 0);
+
+    const [currentAggregation, previousAggregation] = await Promise.all([
+      aggregateIncome(startDate, endDate),
+      aggregateIncome(prevStart, prevEnd)
+    ]);
+
+    const sellerIds = currentAggregation.sellers
+      .map((item) => item.sellerId)
+      .filter(Boolean);
+
+    let sellersMap = new Map();
+    if (sellerIds.length) {
+      const sellers = await Seller.find({ _id: { $in: sellerIds } })
+        .select('storename firstname lastname phone')
+        .lean();
+      sellersMap = new Map(
+        sellers.map((seller) => [String(seller._id), seller])
+      );
+    }
+
+    const resolveSellerName = (seller) => {
+      if (!seller) return '—';
+      if (seller.storename) return seller.storename;
+      const name = [seller.firstname, seller.lastname]
+        .filter(Boolean)
+        .join(' ')
+        .trim();
+      if (name) return name;
+      if (seller.phone) return seller.phone;
+      return '—';
+    };
+
+    const sellers = currentAggregation.sellers.map((entry) => {
+      const sellerDoc = sellersMap.get(String(entry.sellerId));
+      return {
+        name: resolveSellerName(sellerDoc),
+        plans: entry.plans,
+        ads: entry.ads,
+        total: entry.total,
+        plan1: entry.plan1,
+        plan3: entry.plan3,
+        plan12: entry.plan12
+      };
+    });
+
+    const planBreakdown = [];
+    const trackedSlugs = ['1month', '3month', '12month'];
+    trackedSlugs.forEach((slug) => {
+      const value = currentAggregation.planTotals.get(slug) || 0;
+      const previousValue = previousAggregation.planTotals.get(slug) || 0;
+      planBreakdown.push({
+        key: slug,
+        name: humanizeSlug(slug, SUBSCRIPTION_TITLES),
+        value,
+        change: previousValue > 0 ? (value - previousValue) / previousValue : (value > 0 ? 1 : 0)
+      });
+    });
+
+    const otherPlansCurrent = Array.from(currentAggregation.planTotals.entries())
+      .filter(([slug]) => !trackedSlugs.includes(slug));
+    if (otherPlansCurrent.length) {
+      const otherValue = otherPlansCurrent.reduce((sum, [, amount]) => sum + amount, 0);
+      const otherPrevious = Array.from(previousAggregation.planTotals.entries())
+        .filter(([slug]) => !trackedSlugs.includes(slug))
+        .reduce((sum, [, amount]) => sum + amount, 0);
+      planBreakdown.push({
+        key: 'other-plans',
+        name: 'سایر اشتراک‌ها',
+        value: otherValue,
+        change: otherPrevious > 0 ? (otherValue - otherPrevious) / otherPrevious : (otherValue > 0 ? 1 : 0)
+      });
+    }
+
+    const adsValue = currentAggregation.stats.adsAmount;
+    const adsPrevious = previousAggregation.stats.adsAmount;
+    planBreakdown.push({
+      key: 'ads',
+      name: 'تبلیغات ویژه',
+      value: adsValue,
+      change: adsPrevious > 0 ? (adsValue - adsPrevious) / adsPrevious : (adsValue > 0 ? 1 : 0)
+    });
+
+    const dailyMap = new Map(
+      currentAggregation.daily.map((item) => [item.date, item])
+    );
+
+    const dateFormatter = new Intl.DateTimeFormat('fa-IR', {
+      month: '2-digit',
+      day: '2-digit'
+    });
+
+    const labels = [];
+    const plansSeries = [];
+    const adsSeries = [];
+    let bestDay = null;
+
+    const cursor = new Date(startDate);
+    cursor.setUTCHours(0, 0, 0, 0);
+    for (let i = 0; i < rangeDays; i += 1) {
+      const key = cursor.toISOString().slice(0, 10);
+      const entry = dailyMap.get(key) || { plans: 0, ads: 0, total: 0 };
+      labels.push(dateFormatter.format(cursor));
+      plansSeries.push(entry.plans || 0);
+      adsSeries.push(entry.ads || 0);
+      if (!bestDay || (entry.total || 0) > (bestDay.total || 0)) {
+        bestDay = { date: key, total: entry.total || 0 };
+      }
+      cursor.setUTCDate(cursor.getUTCDate() + 1);
+    }
+
+    if (bestDay && (bestDay.total || 0) <= 0) {
+      bestDay = null;
+    }
+
+    const summary = {
+      total: buildChangeMetric(
+        currentAggregation.stats.totalAmount,
+        previousAggregation.stats.totalAmount
+      ),
+      plans: buildChangeMetric(
+        currentAggregation.stats.plansAmount,
+        previousAggregation.stats.plansAmount
+      ),
+      ads: buildChangeMetric(
+        currentAggregation.stats.adsAmount,
+        previousAggregation.stats.adsAmount
+      ),
+      topSeller: sellers[0]?.name || '—'
+    };
+
+    const distribution = {
+      labels: ['اشتراک فروشندگان', 'تبلیغات اختصاصی'],
+      values: [currentAggregation.stats.plansAmount, currentAggregation.stats.adsAmount]
+    };
+
+    res.json({
+      data: {
+        generatedAt: new Date().toISOString(),
+        range: {
+          start: startDate.toISOString(),
+          end: endDate.toISOString()
+        },
+        summary,
+        planBreakdown,
+        trend: {
+          labels,
+          plans: plansSeries,
+          ads: adsSeries
+        },
+        distribution,
+        sellers,
+        meta: {
+          totalPayments: currentAggregation.stats.paymentCount,
+          plansCount: currentAggregation.stats.plansCount,
+          adsCount: currentAggregation.stats.adsCount,
+          sellerCount: currentAggregation.stats.sellerCount,
+          rangeDays,
+          bestDay
+        }
+      }
+    });
+  } catch (err) {
+    console.error('❌ getIncomeInsights error:', err);
+    res.status(500).json({ message: 'خطا در دریافت داشبورد درآمد.', error: err.message });
   }
 };
