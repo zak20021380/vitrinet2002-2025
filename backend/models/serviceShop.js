@@ -60,6 +60,14 @@ const geoLocationSchema = new mongoose.Schema({
   lng: { type: Number, default: null }
 }, { _id: false });
 
+const complimentaryPlanSchema = new mongoose.Schema({
+  isActive: { type: Boolean, default: false },
+  durationDays: { type: Number, default: 14 },
+  startDate: { type: Date, default: null },
+  endDate: { type: Date, default: null },
+  note: { type: String, default: '' }
+}, { _id: false });
+
 const serviceShopSchema = new mongoose.Schema({
   name: { type: String, required: true, trim: true },
   shopUrl: { type: String, required: true, lowercase: true, trim: true },
@@ -87,6 +95,7 @@ const serviceShopSchema = new mongoose.Schema({
   isVisible: { type: Boolean, default: true },
   isPremium: { type: Boolean, default: false },
   premiumUntil: { type: Date, default: null },
+  complimentaryPlan: { type: complimentaryPlanSchema, default: () => ({}) },
   bookingSettings: { type: bookingSettingsSchema, default: () => ({}) },
   workingHours: { type: [workingHourSchema], default: () => [] },
   serviceAreas: [{ type: String, trim: true }],

@@ -5,6 +5,7 @@ const auth = require('../middlewares/authMiddleware');
 const ctrl = require('../controllers/serviceShopController');
 
 router.get('/overview', auth('admin'), ctrl.getOverview);
+router.get('/my/complimentary-plan', auth('seller'), ctrl.getMyComplimentaryPlan);
 router.get('/', auth('admin'), ctrl.listServiceShops);
 router.post('/', auth('admin'), ctrl.createServiceShop);
 router.get('/:id', auth('admin'), ctrl.getServiceShop);

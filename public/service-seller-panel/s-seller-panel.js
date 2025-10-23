@@ -143,6 +143,202 @@ function applySellerPlanFeatureFlags(flags = DEFAULT_FEATURE_FLAGS) {
   return normalized;
 }
 
+const MS_PER_DAY = 24 * 60 * 60 * 1000;
+const PLAN_PERKS_DEFAULT = Object.freeze([
+  'نمایش ویژه در نتایج ویترینت',
+  'پشتیبانی راه‌اندازی رایگان',
+  'دسترسی به ابزارهای فروش حرفه‌ای'
+]);
+
+const faNumber = (value) => {
+  const num = Number(value);
+  if (!Number.isFinite(num)) return '۰';
+  try {
+    return new Intl.NumberFormat('fa-IR').format(Math.max(0, Math.round(num)));
+  } catch {
+    return String(Math.max(0, Math.round(num)));
+  }
+};
+
+const formatPersianDate = (value) => {
+  if (!value) return '—';
+  const date = value instanceof Date ? value : new Date(value);
+  if (Number.isNaN(date.getTime())) return '—';
+  try {
+    return new Intl.DateTimeFormat('fa-IR-u-nu-latn-ca-persian', {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit'
+    }).format(date);
+  } catch {
+    return date.toLocaleDateString('fa-IR');
+  }
+};
+
+const ensureDate = (value) => {
+  if (!value) return null;
+  const date = value instanceof Date ? value : new Date(value);
+  return Number.isNaN(date.getTime()) ? null : date;
+};
+
+const normalizePlanForUI = (raw = {}) => {
+  const plan = {
+    isActive: !!raw.isActive,
+    note: raw.note || '',
+    startDate: ensureDate(raw.startDate),
+    endDate: ensureDate(raw.endDate),
+    durationDays: null,
+    usedDays: null,
+    remainingDays: raw.remainingDays ?? null,
+    totalDays: raw.totalDays ?? null,
+    activeNow: !!raw.activeNow,
+    hasExpired: !!raw.hasExpired,
+    perks: Array.isArray(raw.perks) && raw.perks.length ? raw.perks : PLAN_PERKS_DEFAULT
+  };
+
+  const durationInput = Number(raw.durationDays);
+  if (Number.isFinite(durationInput) && durationInput > 0) {
+    plan.durationDays = Math.round(durationInput);
+  }
+
+  if (plan.startDate && plan.endDate && plan.durationDays == null) {
+    const diff = Math.round((plan.endDate - plan.startDate) / MS_PER_DAY);
+    plan.durationDays = diff > 0 ? diff : 1;
+  }
+
+  if (plan.totalDays == null && plan.durationDays != null) {
+    plan.totalDays = plan.durationDays;
+  }
+
+  const now = new Date();
+  const effectiveEnd = plan.endDate && plan.endDate < now ? plan.endDate : now;
+
+  if (plan.startDate) {
+    const used = Math.max(0, Math.round((effectiveEnd - plan.startDate) / MS_PER_DAY));
+    if (plan.totalDays != null) {
+      plan.usedDays = Math.min(used, Math.max(0, plan.totalDays));
+    } else if (plan.endDate) {
+      const diff = Math.max(0, Math.round((plan.endDate - plan.startDate) / MS_PER_DAY));
+      plan.totalDays = diff;
+      plan.usedDays = Math.min(used, diff);
+    } else {
+      plan.usedDays = used;
+    }
+  }
+
+  if (plan.remainingDays == null) {
+    if (plan.endDate) {
+      plan.remainingDays = Math.max(0, Math.ceil((plan.endDate - now) / MS_PER_DAY));
+    } else if (plan.totalDays != null && plan.usedDays != null) {
+      plan.remainingDays = Math.max(0, plan.totalDays - plan.usedDays);
+    }
+  }
+
+  plan.activeNow = plan.activeNow || (plan.isActive && (!plan.endDate || plan.endDate >= now));
+  plan.hasExpired = plan.hasExpired || (plan.isActive && !!plan.endDate && plan.endDate < now);
+
+  return plan;
+};
+
+const bindPlanHeroActions = (() => {
+  let bound = false;
+  return () => {
+    if (bound) return;
+    bound = true;
+    const goPlans = () => { window.location.hash = '#/plans'; };
+    document.getElementById('plan-renew-btn')?.addEventListener('click', goPlans);
+  };
+})();
+
+function renderComplimentaryPlan(planRaw) {
+  const planHero = document.getElementById('plan-hero');
+  if (!planHero) return;
+
+  const plan = normalizePlanForUI(planRaw || {});
+  const tierEl = document.getElementById('plan-tier');
+  const daysLeftEl = document.getElementById('plan-days-left');
+  const expiryEl = document.getElementById('plan-expiry');
+  const progressBar = document.getElementById('plan-progress-bar');
+  const usedEl = document.getElementById('plan-used');
+  const leftEl = document.getElementById('plan-left');
+  const messageEl = document.getElementById('plan-hero-message');
+  const perksList = document.getElementById('plan-hero-perks');
+  const statusChip = document.getElementById('plan-status-chip');
+
+  bindPlanHeroActions();
+
+  if (tierEl) tierEl.textContent = '🎖 پلن مهمان (رایگان)';
+
+  const remainingDays = plan.remainingDays != null ? Math.max(0, plan.remainingDays) : null;
+  if (daysLeftEl) {
+    daysLeftEl.textContent = remainingDays != null ? `${faNumber(remainingDays)} روز` : '—';
+  }
+
+  const expiryDate = plan.endDate || (plan.startDate && plan.totalDays != null
+    ? new Date(plan.startDate.getTime() + plan.totalDays * MS_PER_DAY)
+    : null);
+  if (expiryEl) {
+    expiryEl.textContent = expiryDate ? formatPersianDate(expiryDate) : 'نامشخص';
+  }
+
+  const progress = plan.totalDays
+    ? Math.min(100, Math.max(0, Math.round(((plan.usedDays || 0) / plan.totalDays) * 100)))
+    : 0;
+  if (progressBar) progressBar.style.width = `${progress}%`;
+  if (usedEl) usedEl.textContent = `${progress}%`;
+  if (leftEl) leftEl.textContent = `${Math.max(0, 100 - progress)}%`;
+
+  if (statusChip) {
+    statusChip.classList.remove('chip-live');
+    if (plan.activeNow) {
+      statusChip.textContent = 'دسترسی رایگان فعال';
+      statusChip.classList.add('chip-live');
+    } else if (plan.hasExpired) {
+      statusChip.textContent = 'پلن رایگان منقضی شده';
+    } else if (plan.isActive) {
+      statusChip.textContent = 'پلن رایگان در انتظار شروع';
+    } else {
+      statusChip.textContent = 'پلن رایگان غیرفعال';
+    }
+  }
+
+  if (perksList) {
+    perksList.innerHTML = '';
+    plan.perks.forEach((perk) => {
+      const li = document.createElement('li');
+      li.textContent = perk;
+      perksList.appendChild(li);
+    });
+  }
+
+  if (messageEl) {
+    if (plan.note) {
+      messageEl.textContent = plan.note;
+    } else if (plan.activeNow) {
+      const urgency = remainingDays != null && remainingDays <= 1
+        ? 'فرصت ارزشمند امروز را از دست ندهید؛'
+        : `تا ${faNumber(remainingDays ?? 0)} روز دیگر می‌توانید`;
+      messageEl.textContent = `پلن فعلی شما رایگان است؛ ${urgency} بدون دغدغه هزینه از ابزارهای ویترینت استفاده کنید و با ارتقا، مزیت رقابتی خود را حفظ نمایید.`;
+    } else if (plan.hasExpired) {
+      messageEl.textContent = 'دوره رایگان شما به پایان رسیده است. برای ادامه استفاده از امکانات، پلن مناسب را انتخاب کنید.';
+    } else {
+      messageEl.textContent = 'در حال حاضر پلن رایگان فعالی برای فروشگاه شما ثبت نشده است. برای فعال‌سازی، از بخش پلن‌ها اقدام کنید.';
+    }
+  }
+}
+
+async function loadComplimentaryPlan() {
+  try {
+    const response = await API.getComplimentaryPlan();
+    const plan = response?.plan || null;
+    renderComplimentaryPlan(plan);
+    window.__COMPLIMENTARY_PLAN__ = plan;
+  } catch (err) {
+    console.warn('loadComplimentaryPlan failed', err);
+    renderComplimentaryPlan(null);
+  }
+}
+
 const EMPTY_DASHBOARD_STATS = {
   todayBookings: 0,
   yesterdayBookings: 0,
@@ -350,6 +546,16 @@ const API = {
       price: s.price,
       image: s.image || ''
     }));
+  },
+
+  async getComplimentaryPlan() {
+    const url = bust(`${API_BASE}/api/service-shops/my/complimentary-plan`);
+    const res = await fetch(url, { credentials: 'include', ...NO_CACHE });
+    if (res.status === 404) return null;
+    if (!res.ok) {
+      throw new Error(`COMPLIMENTARY_PLAN_HTTP_${res.status}`);
+    }
+    return await this._json(res);
   },
 
   async getFeatureFlags() {
@@ -3941,6 +4147,12 @@ try {
 featureFlags = applySellerPlanFeatureFlags(featureFlags);
 window.__FEATURE_FLAGS__ = featureFlags;
 
+if (featureFlags.sellerPlansEnabled) {
+  await loadComplimentaryPlan();
+} else {
+  renderComplimentaryPlan(null);
+}
+
 const app = new SellerPanelApp(featureFlags);
 app.init();
 if (typeof app.initBrandImages === 'function') app.initBrandImages();
@@ -4458,86 +4670,7 @@ function cleanScheduleData() {
 })();
 
 
-
-
-
-  // === Plan Hero: data + wiring ===
-  (function(){
-    const el = (id)=>document.getElementById(id);
-    const days = (a,b)=> Math.round((b-a)/86400000);
-    const toISODate = (date) => {
-      const tzSafe = new Date(date.getTime() - date.getTimezoneOffset() * 60000);
-      return tzSafe.toISOString().slice(0, 10);
-    };
-
-    const today = new Date();
-    const complimentaryDuration = 14;
-    const complimentaryStart = new Date(today);
-    complimentaryStart.setDate(complimentaryStart.getDate() - 1);
-    const complimentaryEnd = new Date(today);
-    complimentaryEnd.setDate(complimentaryEnd.getDate() + (complimentaryDuration - 1));
-
-    // نمونه داده — هر وقت لازم شد از سرور پرش کن
-    const plan = {
-      tier: 'پلن مهمان (رایگان)',
-      start: toISODate(complimentaryStart),
-      end: toISODate(complimentaryEnd),
-      perks: ['نمایش ویژه در نتایج ویترینت', 'پشتیبانی راه‌اندازی رایگان', 'دسترسی به ابزارهای فروش حرفه‌ای'],
-      complimentary: true,
-      complimentaryDuration
-    };
-
-    const now   = new Date();
-    const start = new Date(plan.start);
-    const end   = new Date(plan.end);
-
-    const totalDays = Math.max(days(start, end), 0);
-    const usedDays  = Math.min(Math.max(days(start, now), 0), totalDays);
-    const leftDays  = Math.max(totalDays - usedDays, 0);
-    const progress  = totalDays ? Math.round((usedDays/totalDays)*100) : 0;
-
-    const faNum = (n)=> new Intl.NumberFormat('fa-IR').format(n);
-    const faDate= (d)=> new Intl.DateTimeFormat('fa-IR-u-nu-latn-ca-persian',{year:'numeric',month:'2-digit',day:'2-digit'}).format(d);
-
-    const urgency = leftDays <= 1 ? 'امروز آخرین فرصت شماست تا' : `تا ${faNum(leftDays)} روز دیگر فرصت دارید تا`;
-    const persuasiveMessage = plan.complimentary
-      ? `پلن فعلی شما رایگان است؛ ${urgency} بدون هیچ هزینه‌ای از تمام امکانات ویترینت استفاده کنید. این فرصت طلایی را برای جذب مشتریان جدید از دست ندهید و با ارتقا، مزیت خود را تثبیت کنید.`
-      : '';
-
-    // پر کردن UI
-    if (el('plan-tier')) el('plan-tier').textContent = `🎖 ${plan.tier}`;
-    if (el('plan-days-left')) el('plan-days-left').textContent = `${faNum(leftDays)} روز`;
-    if (el('plan-expiry')) el('plan-expiry').textContent = faDate(end);
-    if (el('plan-progress-bar')) el('plan-progress-bar').style.width = progress + '%';
-    if (el('plan-used')) el('plan-used').textContent = progress + '%';
-    if (el('plan-left')) el('plan-left').textContent = (100 - progress) + '%';
-    if (el('plan-hero-message') && persuasiveMessage) el('plan-hero-message').textContent = persuasiveMessage;
-
-    const perksList = document.getElementById('plan-hero-perks');
-    if (perksList && Array.isArray(plan.perks)) {
-      perksList.innerHTML = '';
-      plan.perks.forEach((perk) => {
-        const li = document.createElement('li');
-        li.textContent = perk;
-        perksList.appendChild(li);
-      });
-    }
-
-    const statusChip = el('plan-status-chip');
-    if (statusChip && plan.complimentary) {
-      statusChip.textContent = 'دسترسی رایگان فعال';
-      statusChip.classList.add('chip-live');
-    }
-
-    // دکمه‌ها
-    const goPlans = ()=>{ window.location.hash = '/plans'; };
-
-    el('plan-renew-btn')?.addEventListener('click', goPlans);
-  })();
 });
-
-
-
 
 
 (() => {

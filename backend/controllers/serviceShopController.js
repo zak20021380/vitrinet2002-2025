@@ -277,7 +277,111 @@ const parseIntegrations = (value) => {
   return Object.keys(integrations).length ? integrations : undefined;
 };
 
-function normalizePayload(raw = {}, { partial = false } = {}) {
+const MS_PER_DAY = 24 * 60 * 60 * 1000;
+
+const clampComplimentaryDuration = (value) => {
+  if (value === undefined) return undefined;
+  if (value === null || value === '') return null;
+  const num = Number(value);
+  if (!Number.isFinite(num) || num <= 0) {
+    throw { status: 400, message: 'مدت پلن رایگان باید بزرگتر از صفر باشد.' };
+  }
+  return Math.min(Math.round(num), 365);
+};
+
+const normaliseComplimentaryPlan = (plan = {}) => {
+  const normalized = {
+    isActive: !!plan.isActive,
+    note: String(plan.note || '').trim()
+  };
+
+  const start = plan.startDate instanceof Date
+    ? plan.startDate
+    : (plan.startDate ? new Date(plan.startDate) : null);
+  const end = plan.endDate instanceof Date
+    ? plan.endDate
+    : (plan.endDate ? new Date(plan.endDate) : null);
+
+  normalized.startDate = (start && !Number.isNaN(start.getTime())) ? start : null;
+  normalized.endDate = (end && !Number.isNaN(end.getTime())) ? end : null;
+
+  const duration = clampComplimentaryDuration(plan.durationDays);
+  normalized.durationDays = duration ?? null;
+
+  if (normalized.startDate && normalized.durationDays && !normalized.endDate) {
+    normalized.endDate = new Date(normalized.startDate.getTime() + normalized.durationDays * MS_PER_DAY);
+  }
+
+  if (normalized.endDate && normalized.durationDays && !normalized.startDate) {
+    normalized.startDate = new Date(normalized.endDate.getTime() - normalized.durationDays * MS_PER_DAY);
+  }
+
+  if (normalized.startDate && normalized.endDate && normalized.durationDays == null) {
+    const diff = Math.round((normalized.endDate - normalized.startDate) / MS_PER_DAY);
+    normalized.durationDays = diff > 0 ? diff : 1;
+  }
+
+  return normalized;
+};
+
+const extractComplimentarySource = (value) => {
+  if (!value || typeof value !== 'object') return null;
+  if (value.complimentaryPlan && typeof value.complimentaryPlan === 'object') {
+    return value.complimentaryPlan;
+  }
+  return value;
+};
+
+const parseComplimentaryPlan = (value, { existing = null, partial = false } = {}) => {
+  const source = extractComplimentarySource(value);
+  if (!source) {
+    return (!partial && existing) ? normaliseComplimentaryPlan(existing) : undefined;
+  }
+
+  const base = existing ? { ...existing } : {};
+  let changed = false;
+
+  if (!partial && Object.keys(base).length === 0) {
+    base.isActive = false;
+    base.durationDays = null;
+    base.startDate = null;
+    base.endDate = null;
+    base.note = '';
+  }
+
+  if (source.isActive !== undefined) {
+    base.isActive = !!toBoolean(source.isActive, source.isActive);
+    changed = true;
+  }
+
+  if (source.startDate !== undefined) {
+    base.startDate = parseDateValue(source.startDate, { allowNull: true }) ?? null;
+    changed = true;
+  }
+
+  if (source.endDate !== undefined) {
+    base.endDate = parseDateValue(source.endDate, { allowNull: true }) ?? null;
+    changed = true;
+  }
+
+  if (source.durationDays !== undefined) {
+    base.durationDays = clampComplimentaryDuration(source.durationDays);
+    changed = true;
+  }
+
+  if (source.note !== undefined) {
+    base.note = String(source.note || '').trim();
+    changed = true;
+  }
+
+  if (!changed && partial) {
+    return undefined;
+  }
+
+  return normaliseComplimentaryPlan(base);
+};
+
+function normalizePayload(raw = {}, { partial = false, existing = null } = {}) {
   if (!raw || typeof raw !== 'object') raw = {};
   const data = {};
 
@@ -365,6 +469,19 @@ function normalizePayload(raw = {}, { partial = false } = {}) {
 
   const integrations = parseIntegrations(raw);
   if (integrations) data.integrations = integrations;
+
+  const existingPlan = existing?.complimentaryPlan
+    ? (typeof existing.complimentaryPlan.toObject === 'function'
+        ? existing.complimentaryPlan.toObject()
+        : { ...existing.complimentaryPlan })
+    : null;
+  const complimentaryPlan = parseComplimentaryPlan(raw.complimentaryPlan ?? raw, {
+    existing: existingPlan,
+    partial
+  });
+  if (complimentaryPlan !== undefined) {
+    data.complimentaryPlan = complimentaryPlan;
+  }
 
   if (raw.lastReviewedAt !== undefined) {
     data.lastReviewedAt = parseDateValue(raw.lastReviewedAt, { allowNull: true }) ?? new Date();
@@ -492,6 +609,13 @@ const mapLegacySellerToItem = (seller, { appearance, services = [], booking = {}
     isFeatured: false,
     isPremium: !!seller.isPremium,
     premiumUntil,
+    complimentaryPlan: {
+      isActive: false,
+      durationDays: null,
+      startDate: null,
+      endDate: null,
+      note: ''
+    },
     bookingSettings: { enabled: serviceTitles.length > 0 },
     analytics: {
       totalBookings: booking.total || 0,
@@ -510,6 +634,43 @@ const mapLegacySellerToItem = (seller, { appearance, services = [], booking = {}
     integrations: {},
     notes: '',
     legacySource: 'seller'
+  };
+};
+
+const buildComplimentaryPlanPayload = (shop) => {
+  const plan = shop?.complimentaryPlan || {};
+  const start = coerceDate(plan.startDate);
+  const end = coerceDate(plan.endDate);
+  const now = new Date();
+
+  const rawDuration = Number(plan.durationDays);
+  const duration = Number.isFinite(rawDuration) && rawDuration > 0
+    ? Math.max(1, Math.round(rawDuration))
+    : (start && end ? Math.max(1, Math.round((end - start) / MS_PER_DAY)) : null);
+
+  let usedDays = null;
+  if (start) {
+    const effectiveEnd = end && end < now ? end : now;
+    usedDays = Math.max(0, Math.round((effectiveEnd - start) / MS_PER_DAY));
+  }
+
+  if (duration != null && usedDays != null) {
+    usedDays = Math.min(usedDays, duration);
+  }
+
+  const remainingDays = end ? Math.max(0, Math.ceil((end - now) / MS_PER_DAY)) : null;
+
+  return {
+    isActive: !!plan.isActive,
+    activeNow: !!plan.isActive && (!end || end >= now),
+    startDate: start ? start.toISOString() : null,
+    endDate: end ? end.toISOString() : null,
+    durationDays: duration,
+    note: plan.note || '',
+    remainingDays,
+    usedDays,
+    totalDays: duration,
+    hasExpired: !!plan.isActive && !!end && end < now
   };
 };
 
@@ -1073,7 +1234,7 @@ exports.updateServiceShop = async (req, res) => {
       return res.status(404).json({ message: 'مغازه خدماتی یافت نشد.' });
     }
 
-    const data = normalizePayload(req.body, { partial: true });
+    const data = normalizePayload(req.body, { partial: true, existing: shop });
     if (Object.keys(data).length === 0) {
       return res.status(400).json({ message: 'هیچ داده‌ای برای بروزرسانی ارسال نشده است.' });
     }
@@ -1109,6 +1270,7 @@ exports.updateServiceShopStatus = async (req, res) => {
     }
 
     const updates = {};
+    let complimentaryPlanUpdated = false;
     if (req.body.status != null) {
       const status = String(req.body.status || '').trim().toLowerCase();
       if (!STATUS_VALUES.includes(status)) {
@@ -1135,11 +1297,25 @@ exports.updateServiceShopStatus = async (req, res) => {
       };
     }
 
+    const existingPlan = shop.complimentaryPlan
+      ? (typeof shop.complimentaryPlan.toObject === 'function'
+        ? shop.complimentaryPlan.toObject()
+        : { ...shop.complimentaryPlan })
+      : null;
+    const planUpdate = parseComplimentaryPlan(req.body.complimentaryPlan ?? req.body, {
+      existing: existingPlan,
+      partial: true
+    });
+    if (planUpdate !== undefined) {
+      shop.complimentaryPlan = planUpdate;
+      complimentaryPlanUpdated = true;
+    }
+
     if (req.body.notes != null) {
       updates.notes = String(req.body.notes || '').trim();
     }
 
-    if (!Object.keys(updates).length && !bookingSettings) {
+    if (!Object.keys(updates).length && !bookingSettings && !complimentaryPlanUpdated) {
       return res.status(400).json({ message: 'هیچ تغییری ارسال نشده است.' });
     }
 
@@ -1156,6 +1332,49 @@ exports.updateServiceShopStatus = async (req, res) => {
       return res.status(err.status).json({ message: err.message });
     }
     res.status(500).json({ message: 'خطا در بروزرسانی وضعیت.', error: err.message || err });
+  }
+};
+
+exports.getMyComplimentaryPlan = async (req, res) => {
+  try {
+    const sellerId = req.user?.id || req.user?._id;
+    if (!sellerId) {
+      return res.status(401).json({ success: false, message: 'احراز هویت نامعتبر است.' });
+    }
+
+    const seller = await Seller.findById(sellerId)
+      .select('phone shopurl storename')
+      .lean();
+    if (!seller) {
+      return res.status(404).json({ success: false, message: 'فروشنده یافت نشد.' });
+    }
+
+    let shop = null;
+    if (seller.phone) {
+      shop = await ServiceShop.findOne({ ownerPhone: seller.phone }).lean();
+    }
+    if (!shop && seller.shopurl) {
+      shop = await ServiceShop.findOne({ shopUrl: seller.shopurl }).lean();
+    }
+
+    if (!shop) {
+      return res.json({ success: true, plan: buildComplimentaryPlanPayload(null) });
+    }
+
+    const plan = buildComplimentaryPlanPayload(shop);
+    return res.json({
+      success: true,
+      plan,
+      shop: {
+        id: shop._id,
+        name: shop.name || seller.storename || '',
+        shopUrl: shop.shopUrl || seller.shopurl || '',
+        ownerPhone: shop.ownerPhone || seller.phone || ''
+      }
+    });
+  } catch (err) {
+    console.error('serviceShops.getMyComplimentaryPlan error:', err);
+    res.status(500).json({ success: false, message: 'خطا در دریافت وضعیت پلن رایگان.' });
   }
 };
 
