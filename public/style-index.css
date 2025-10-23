@@ -46,35 +46,153 @@ body {
     ::-webkit-scrollbar {width: 7px;}
     ::-webkit-scrollbar-thumb {background: #c8f7e6;}
 
+    /* استایل‌های header */
+    #mainHeader {
+      transition: all 0.3s ease-in-out;
+      animation: slideDown 0.5s ease-out;
+    }
+
+    @keyframes slideDown {
+      from {
+        transform: translateY(-100%);
+        opacity: 0;
+      }
+      to {
+        transform: translateY(0);
+        opacity: 1;
+      }
+    }
+
+    /* استایل منوی ناوبری */
+    .main-nav-link {
+      position: relative;
+      transition: all 0.25s ease;
+    }
+
+    .main-nav-link::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      right: 50%;
+      width: 0;
+      height: 2px;
+      background: linear-gradient(90deg, #10b981 0%, #0ea5e9 100%);
+      transition: all 0.3s ease;
+      transform: translateX(50%);
+      border-radius: 999px;
+    }
+
+    .main-nav-link:hover::after {
+      width: 70%;
+    }
+
+    /* انیمیشن دکمه ثبت فروشگاه */
+    #registerShopBtn {
+      position: relative;
+      overflow: hidden;
+    }
+
+    #registerShopBtn::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 0;
+      height: 0;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.3);
+      transform: translate(-50%, -50%);
+      transition: width 0.6s, height 0.6s;
+    }
+
+    #registerShopBtn:hover::before {
+      width: 300px;
+      height: 300px;
+    }
+
+    /* انیمیشن لوگو */
+    .vitreenet-brand {
+      animation: fadeInLogo 0.8s ease-out 0.2s both;
+    }
+
+    @keyframes fadeInLogo {
+      from {
+        opacity: 0;
+        transform: translateX(-20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateX(0);
+      }
+    }
+
+    /* انیمیشن آیتم‌های منو */
+    .main-nav-link:nth-child(1) {
+      animation: fadeInNav 0.5s ease-out 0.3s both;
+    }
+
+    .main-nav-link:nth-child(2) {
+      animation: fadeInNav 0.5s ease-out 0.4s both;
+    }
+
+    .main-nav-link:nth-child(3) {
+      animation: fadeInNav 0.5s ease-out 0.5s both;
+    }
+
+    @keyframes fadeInNav {
+      from {
+        opacity: 0;
+        transform: translateY(-10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* header کوچک شده در زمان اسکرول */
+    #mainHeader.scrolled {
+      padding-top: 0.5rem;
+      padding-bottom: 0.5rem;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    }
+
+    #mainHeader.scrolled .vitreenet-brand__mark svg {
+      width: 38px;
+      height: 38px;
+    }
+
+    #mainHeader.scrolled .vitreenet-brand__title {
+      font-size: 1.25rem;
+    }
+
+    #mainHeader.scrolled .vitreenet-brand__subtitle {
+      font-size: 0.8rem;
+    }
+
+    /* استایل موبایل */
     @media (max-width: 767px) {
       #headerInner {
-        margin-top: 0.75rem;
-        flex-direction: row;
-        gap: 1rem;
-        align-items: center;
-        justify-content: space-between;
+        padding-right: 1rem;
+        padding-left: 1rem;
       }
+
       #logoCityWrap {
-        width: auto;
+        flex: 1;
       }
-      #desktopNav {
-        width: auto;
-        justify-content: flex-start;
-      }
+
       #registerShopBtn {
         font-size: 0.85rem !important;
-        padding: 0.4rem 0.8rem;
+        padding: 0.5rem 1rem !important;
+        flex-shrink: 0;
       }
     }
-    @media (min-width: 768px) {
-      #headerInner { flex-direction: row; margin-top: 0; }
-    }
-    @media (max-width: 540px) {
-      .menu-link { font-size: 13px; padding-left: 7px; padding-right: 7px;}
-      .btn-grad { padding-left: 16px !important; padding-right: 16px !important; font-size: 13px !important;}
-    }
-    @media (max-width: 390px) {
-      .menu-link { font-size: 12px; }
+
+    @media (max-width: 480px) {
+      #registerShopBtn {
+        font-size: 0.8rem !important;
+        padding: 0.45rem 0.85rem !important;
+      }
     }
 
     .vitreenet-brand {

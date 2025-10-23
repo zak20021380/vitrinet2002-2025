@@ -2051,3 +2051,34 @@ document.addEventListener('DOMContentLoaded', () => {
     console.warn('highlightAd parse error', err);
   }
 });
+
+// مدیریت اسکرول header برای کوچک شدن در زمان اسکرول
+document.addEventListener('DOMContentLoaded', () => {
+  const header = document.getElementById('mainHeader');
+  let lastScrollTop = 0;
+  let scrollThreshold = 100; // پیکسل اسکرول برای فعال شدن افکت
+
+  function handleScroll() {
+    const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+
+    if (scrollTop > scrollThreshold) {
+      header.classList.add('scrolled');
+    } else {
+      header.classList.remove('scrolled');
+    }
+
+    lastScrollTop = scrollTop;
+  }
+
+  // استفاده از throttle برای بهینه‌سازی performance
+  let ticking = false;
+  window.addEventListener('scroll', () => {
+    if (!ticking) {
+      window.requestAnimationFrame(() => {
+        handleScroll();
+        ticking = false;
+      });
+      ticking = true;
+    }
+  });
+});
