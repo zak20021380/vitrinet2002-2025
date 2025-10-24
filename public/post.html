@@ -978,77 +978,97 @@
     e.preventDefault(); // همیشه ابتدا قرار بگیره تا فرم ارسال نشه تا بررسی کامل شه
 
     let hasError = false;
+    let firstErrorElement = null;
+    const rememberErrorElement = element => {
+      if (!firstErrorElement && element) {
+        firstErrorElement = element;
+      }
+    };
 
     // نام فروشنده
-    let firstname = document.getElementById("firstname").value.trim();
-    let firstnameHint = document.getElementById("firstname-hint");
+    const firstnameInput = document.getElementById("firstname");
+    const firstname = firstnameInput.value.trim();
+    const firstnameHint = document.getElementById("firstname-hint");
     if (!firstname) {
       firstnameHint.innerText = "لطفاً نام فروشنده را وارد کنید.";
       firstnameHint.classList.remove("hidden");
       hasError = true;
+      rememberErrorElement(firstnameInput);
     } else {
       firstnameHint.classList.add("hidden");
     }
 
     // نام خانوادگی فروشنده
-    let lastname = document.getElementById("lastname").value.trim();
-    let lastnameHint = document.getElementById("lastname-hint");
+    const lastnameInput = document.getElementById("lastname");
+    const lastname = lastnameInput.value.trim();
+    const lastnameHint = document.getElementById("lastname-hint");
     if (!lastname) {
       lastnameHint.innerText = "لطفاً نام خانوادگی فروشنده را وارد کنید.";
       lastnameHint.classList.remove("hidden");
       hasError = true;
+      rememberErrorElement(lastnameInput);
     } else {
       lastnameHint.classList.add("hidden");
     }
 
     // نام فروشگاه
-    let storename = document.getElementById("storename").value.trim();
-    let storenameHint = document.getElementById("storename-hint");
+    const storenameInput = document.getElementById("storename");
+    const storename = storenameInput.value.trim();
+    const storenameHint = document.getElementById("storename-hint");
     if (!storename) {
       storenameHint.innerText = "لطفاً نام فروشگاه را وارد کنید.";
       storenameHint.classList.remove("hidden");
       hasError = true;
+      rememberErrorElement(storenameInput);
     } else {
       storenameHint.classList.add("hidden");
     }
 
     // آدرس فروشگاه
-    let shopurl = document.getElementById("shopurl").value.trim();
-    let shopurlHint = document.getElementById("shopurl-hint");
+    const shopurlInput = document.getElementById("shopurl");
+    const shopurl = shopurlInput.value.trim();
+    const shopurlHint = document.getElementById("shopurl-hint");
     if (shopurl.length < 4) {
       shopurlHint.innerText = "آدرس فروشگاه باید حداقل ۴ کاراکتر باشد.";
       shopurlHint.classList.remove("hidden");
       hasError = true;
+      rememberErrorElement(shopurlInput);
     } else if (shopurl.length > 10) {
       shopurlHint.innerText = "آدرس فروشگاه نباید بیشتر از ۱۰ کاراکتر باشد.";
       shopurlHint.classList.remove("hidden");
       hasError = true;
+      rememberErrorElement(shopurlInput);
     } else if (!/^[a-z0-9]+$/.test(shopurl)) {
       shopurlHint.innerText = "آدرس فقط می‌تواند شامل حروف انگلیسی کوچک و عدد باشد. از فاصله و کاراکترهای خاص مثل # یا ! استفاده نکنید.";
       shopurlHint.classList.remove("hidden");
       hasError = true;
+      rememberErrorElement(shopurlInput);
     } else {
       shopurlHint.classList.add("hidden");
     }
 
     // شماره موبایل
-    let phone = document.getElementById("phone").value.trim();
-    let phoneHint = document.getElementById("phone-hint");
+    const phoneInput = document.getElementById("phone");
+    const phone = phoneInput.value.trim();
+    const phoneHint = document.getElementById("phone-hint");
     if (!/^09\d{9}$/.test(phone)) {
       phoneHint.innerText = "شماره موبایل را به صورت صحیح و کامل وارد کنید (مثلاً 09123456789).";
       phoneHint.classList.remove("hidden");
       hasError = true;
+      rememberErrorElement(phoneInput);
     } else {
       phoneHint.classList.add("hidden");
     }
 
     // دسته‌بندی
-    let category = document.getElementById("category").value;
-    let categoryHint = document.getElementById("category-hint");
+    const categorySelectInput = document.getElementById("category");
+    const category = categorySelectInput.value;
+    const categoryHint = document.getElementById("category-hint");
     if (!category) {
       categoryHint.innerText = "لطفاً دسته‌بندی فروشگاه را انتخاب کنید.";
       categoryHint.classList.remove("hidden");
       hasError = true;
+      rememberErrorElement(categorySelectInput);
     } else {
       categoryHint.classList.add("hidden");
     }
@@ -1062,6 +1082,7 @@
         subcategoryValidationActive = true;
         setSubcategoryRequiredState({ hasItems: true, selectedValue: '' });
         hasError = true;
+        rememberErrorElement(subcatInput || subcatWrapper);
       } else {
         subcategoryValidationActive = false;
         setSubcategoryRequiredState({ hasItems: true, selectedValue: subcategory });
@@ -1072,60 +1093,75 @@
     }
 
     // آدرس دقیق
-    let address = document.getElementById("address").value.trim();
-    let addressHint = document.getElementById("address-hint");
+    const addressInput = document.getElementById("address");
+    const address = addressInput.value.trim();
+    const addressHint = document.getElementById("address-hint");
     if (!address) {
       addressHint.innerText = "لطفاً آدرس دقیق فروشگاه را وارد کنید.";
       addressHint.classList.remove("hidden");
       hasError = true;
+      rememberErrorElement(addressInput);
     } else {
       addressHint.classList.add("hidden");
     }
 
     // رمز عبور
-    let pass1 = document.getElementById("pass1").value;
-    let pass2 = document.getElementById("pass2").value;
-    let passHint = document.getElementById("pass-hint");
+    const pass1Input = document.getElementById("pass1");
+    const pass2Input = document.getElementById("pass2");
+    const pass1 = pass1Input.value;
+    const pass2 = pass2Input.value;
+    const passHint = document.getElementById("pass-hint");
     if (pass1.length < 8) {
       passHint.innerText = "رمز عبور باید حداقل ۸ کاراکتر باشد.";
       passHint.classList.remove("hidden");
       hasError = true;
+      rememberErrorElement(pass1Input);
     } else if (!/[a-zA-Z]/.test(pass1)) {
       passHint.innerText = "رمز عبور باید حداقل یک حرف انگلیسی داشته باشد.";
       passHint.classList.remove("hidden");
       hasError = true;
+      rememberErrorElement(pass1Input);
     } else if (!/\d/.test(pass1)) {
       passHint.innerText = "رمز عبور باید حداقل یک عدد داشته باشد.";
       passHint.classList.remove("hidden");
       hasError = true;
+      rememberErrorElement(pass1Input);
     } else if (!/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(pass1)) {
       passHint.innerText = "رمز عبور باید حداقل یک نماد مثل !@#$% داشته باشد.";
       passHint.classList.remove("hidden");
       hasError = true;
+      rememberErrorElement(pass1Input);
     } else if (pass1 !== pass2) {
       passHint.innerText = "رمز عبور و تکرار آن با هم یکسان نیستند.";
       passHint.classList.remove("hidden");
       hasError = true;
+      rememberErrorElement(pass2Input);
     } else {
       passHint.classList.add("hidden");
     }
 
     // قوانین سایت
-    let rules = document.getElementById("rules");
-    let rulesHint = document.getElementById("rules-hint");
+    const rules = document.getElementById("rules");
+    const rulesHint = document.getElementById("rules-hint");
     if (!rules.checked) {
       rulesHint.innerText = "لطفاً تیک پذیرش قوانین سایت را بزنید.";
       rulesHint.classList.remove("hidden");
       hasError = true;
+      rememberErrorElement(rules);
     } else {
       rulesHint.classList.add("hidden");
     }
 
     // اگر حتی یکی از خطاها وجود داشت، اجازه ارسال فرم نده
     if (hasError) {
+      if (firstErrorElement) {
+        firstErrorElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        if (typeof firstErrorElement.focus === 'function') {
+          firstErrorElement.focus({ preventScroll: true });
+        }
+      }
       return;
     }
-
     // ساخت داده‌ها برای ارسال به بک‌اند
     const data = {
       firstname: firstname,
