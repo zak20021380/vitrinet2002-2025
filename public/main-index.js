@@ -122,15 +122,11 @@ const SEARCH_API_BASE = 'http://localhost:5000/api';
 const searchElements = {
   form: document.getElementById('searchForm'),
   input: document.getElementById('mainSearchInput'),
-  panel: document.getElementById('searchResultsPanel'),
-  container: document.getElementById('searchResultsContainer'),
-  status: document.getElementById('searchStatusText'),
-  queryLabel: document.getElementById('searchQueryLabel'),
-  closeBtn: document.getElementById('closeSearchPanel'),
-  refreshBtn: document.getElementById('refreshSearchBtn')
+  dropdown: document.getElementById('searchResultsDropdown'),
+  wrapper: document.querySelector('.search-wrapper')
 };
 
-const MAX_VISIBLE_SEARCH_RESULTS = 5;
+const MAX_VISIBLE_SEARCH_RESULTS = 8;
 
 const searchState = {
   loading: false,
@@ -350,12 +346,6 @@ async function ensureSearchData(force = false) {
   }
 
   searchState.loading = true;
-  if (searchElements.status) {
-    searchElements.status.textContent = 'در حال آماده‌سازی داده‌های جستجو...';
-  }
-  if (searchElements.panel) {
-    searchElements.panel.classList.remove('hidden');
-  }
 
   const loader = (async () => {
     try {
@@ -376,22 +366,12 @@ async function ensureSearchData(force = false) {
       searchState.loaded = true;
       searchState.lastUpdated = new Date();
 
-      if (searchElements.status) {
-        const { shops: sCount, products: pCount, centers: cCount } = summary;
-        searchElements.status.textContent = `بیش از ${sCount} مغازه، ${pCount} محصول و ${cCount} مرکز خرید برای جستجو آماده است.`;
-      }
-      if (searchElements.refreshBtn) {
-        searchElements.refreshBtn.classList.remove('hidden');
-      }
-
       return items;
     } catch (error) {
       console.error('search preload error', error);
-      if (searchElements.status) {
-        searchElements.status.textContent = 'خطا در آماده‌سازی داده‌های جستجو. لطفاً دوباره تلاش کنید.';
-      }
-      if (searchElements.container) {
-        searchElements.container.innerHTML = '<div class="rounded-2xl border border-dashed border-rose-200 bg-white/80 p-6 text-center text-sm font-bold text-rose-500">در بارگذاری داده‌های جستجو خطایی رخ داد. لطفاً بعداً دوباره تلاش کنید.</div>';
+      if (searchElements.dropdown) {
+        searchElements.dropdown.innerHTML = '<div class="search-empty"><i class="ri-alert-line"></i><div class="search-empty-text">خطا در بارگذاری داده‌ها</div></div>';
+        searchElements.dropdown.classList.add('active');
       }
       throw error;
     } finally {
@@ -474,75 +454,130 @@ function renderResultCard(item, rawTokens) {
 }
 
 function renderDefaultResults() {
-  if (!searchElements.panel) return;
+  if (!searchElements.dropdown) return;
   const { trending, summary } = searchState;
   const typeSequence = ['shop', 'product', 'center', 'category'];
   let remainingSlots = MAX_VISIBLE_SEARCH_RESULTS;
-  const groups = [];
+  const items = [];
 
   typeSequence.forEach(type => {
     if (remainingSlots <= 0) return;
     const source = trending[type] || [];
     if (!source.length) return;
     const limitedItems = source.slice(0, remainingSlots);
-    groups.push(renderGroup(type, limitedItems, []));
+    items.push(...limitedItems);
     remainingSlots -= limitedItems.length;
   });
 
-  if (searchElements.queryLabel) {
-    searchElements.queryLabel.textContent = '';
+  if (items.length > 0) {
+    searchElements.dropdown.innerHTML = items.map(item => renderDropdownItem(item)).join('');
+    searchElements.dropdown.classList.add('active');
+  } else {
+    searchElements.dropdown.classList.remove('active');
   }
-  if (searchElements.status) {
-    if (searchState.loaded) {
-      searchElements.status.textContent = `برای شروع، محبوب‌ترین گزینه‌ها از بین ${summary.shops} مغازه و ${summary.centers} مرکز خرید را ببینید.`;
-    } else {
-      searchElements.status.textContent = 'برای مشاهده نتایج جستجو، عبارت موردنظر خود را تایپ کنید.';
-    }
-  }
-  if (searchElements.container) {
-    searchElements.container.innerHTML = groups.length
-      ? groups.join('')
-      : '<div class="rounded-2xl border border-dashed border-slate-200 bg-white/70 p-8 text-center text-sm font-bold text-slate-400">هنوز داده‌ای برای نمایش وجود ندارد.</div>';
-  }
-  searchElements.panel.classList.remove('hidden');
 }
 
 function renderSearchResults(query, matches, rawTokens, totalMatches = matches.length) {
-  if (!searchElements.panel) return;
-  const grouped = matches.reduce((acc, item) => {
-    (acc[item.type] = acc[item.type] || []).push(item);
-    return acc;
-  }, {});
+  if (!searchElements.dropdown) return;
 
-  const sections = [
-    renderGroup('shop', grouped.shop || [], rawTokens),
-    renderGroup('product', grouped.product || [], rawTokens),
-    renderGroup('center', grouped.center || [], rawTokens),
-    renderGroup('category', grouped.category || [], rawTokens)
-  ].filter(Boolean);
+  if (matches.length === 0) {
+    searchElements.dropdown.innerHTML = `
+      <div class="search-empty">
+        <i class="ri-search-line"></i>
+        <div class="search-empty-text">نتیجه‌ای برای "${escapeHTML(query)}" یافت نشد</div>
+      </div>
+    `;
+    searchElements.dropdown.classList.add('active');
+    return;
+  }
 
-  if (searchElements.container) {
-    if (sections.length) {
-      searchElements.container.innerHTML = sections.join('');
-    } else {
-      searchElements.container.innerHTML = '<div class="rounded-2xl border border-dashed border-slate-200 bg-white/70 p-8 text-center text-sm font-bold text-slate-400">هیچ نتیجه‌ای با این جستجو پیدا نشد. عبارات مشابه یا کوتاه‌تر را امتحان کنید.</div>';
+  let html = '';
+
+  // اضافه کردن تبلیغ بعد از 3 نتیجه اول (اختیاری)
+  const adInsertIndex = 3;
+
+  matches.forEach((item, index) => {
+    html += renderDropdownItem(item, rawTokens);
+
+    // درج تبلیغ بعد از 3 نتیجه اول
+    if (index === adInsertIndex - 1 && Math.random() > 0.5) {
+      html += renderSearchAd();
     }
-  }
+  });
 
-  if (searchElements.queryLabel) {
-    searchElements.queryLabel.textContent = `«${query}»`;
-  }
-  if (searchElements.status) {
-    const displayed = matches.length;
-    if (totalMatches && totalMatches > displayed) {
-      searchElements.status.textContent = `${displayed} نتیجه از ${totalMatches} نتیجه مرتبط با «${query}» نمایش داده شد.`;
-    } else {
-      searchElements.status.textContent = displayed
-        ? `${displayed} نتیجه مرتبط با «${query}» پیدا شد.`
-        : `نتیجه‌ای برای «${query}» پیدا نشد.`;
+  searchElements.dropdown.innerHTML = html;
+  searchElements.dropdown.classList.add('active');
+}
+
+// تابع رندر هر آیتم در dropdown
+function renderDropdownItem(item, highlightTokens = []) {
+  const typeIcons = {
+    shop: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>',
+    product: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>',
+    center: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>',
+    category: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>'
+  };
+
+  const typeBadges = {
+    shop: '<span class="search-result-badge shop">فروشگاه</span>',
+    product: '<span class="search-result-badge product">محصول</span>',
+    center: '<span class="search-result-badge shop">مرکز خرید</span>',
+    category: '<span class="search-result-badge category">دسته‌بندی</span>'
+  };
+
+  const icon = typeIcons[item.type] || typeIcons.shop;
+  const badge = typeBadges[item.type] || typeBadges.shop;
+
+  const title = escapeHTML(item.title || '');
+  const subtitle = escapeHTML(item.subtitle || '');
+  const desc = subtitle ? `${subtitle}` : (item.location ? escapeHTML(item.location) : '');
+
+  return `
+    <a href="${escapeHTML(item.url)}" class="search-result-item">
+      <div class="search-result-icon">${icon}</div>
+      <div class="search-result-content">
+        <div class="search-result-title">${title}</div>
+        <div class="search-result-desc">${desc}</div>
+      </div>
+      ${badge}
+    </a>
+  `;
+}
+
+// تابع رندر تبلیغ در نتایج جستجو
+function renderSearchAd() {
+  // می‌توانید تبلیغات واقعی را از API دریافت کنید
+  const sampleAds = [
+    {
+      title: 'فروشگاه مدرن شیک',
+      desc: 'بهترین محصولات با کیفیت عالی',
+      image: 'https://via.placeholder.com/80',
+      url: '#'
     }
-  }
-  searchElements.panel.classList.remove('hidden');
+  ];
+
+  // انتخاب تصادفی یک تبلیغ
+  const ad = sampleAds[Math.floor(Math.random() * sampleAds.length)];
+
+  return `
+    <div class="search-ad-item">
+      <div class="search-ad-badge">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+        </svg>
+        تبلیغ ویژه
+      </div>
+      <a href="${escapeHTML(ad.url)}" class="search-ad-content" style="text-decoration: none; color: inherit;">
+        <div class="search-ad-media">
+          <img src="${escapeHTML(ad.image)}" alt="${escapeHTML(ad.title)}" onerror="this.style.display='none'">
+        </div>
+        <div class="search-ad-info">
+          <div class="search-ad-title">${escapeHTML(ad.title)}</div>
+          <div class="search-ad-desc">${escapeHTML(ad.desc)}</div>
+        </div>
+      </a>
+    </div>
+  `;
 }
 
 function performSearch(tokens) {
@@ -597,7 +632,7 @@ async function handleSearch(query, { immediate = false } = {}) {
 
   if (immediate && matches.length) {
     setTimeout(() => {
-      const firstLink = searchElements.container?.querySelector('a');
+      const firstLink = searchElements.dropdown?.querySelector('a');
       firstLink?.focus();
     }, 10);
   }
@@ -614,13 +649,14 @@ function attachSearchEvents() {
 
   searchElements.input.addEventListener('focus', () => {
     ensureSearchData().then(() => renderDefaultResults()).catch(() => renderDefaultResults());
-    if (searchElements.panel) {
-      searchElements.panel.classList.remove('hidden');
-    }
   });
 
   searchElements.input.addEventListener('input', (event) => {
     const value = event.target.value;
+    if (!value.trim()) {
+      searchElements.dropdown.classList.remove('active');
+      return;
+    }
     scheduleSearch(value);
   });
 
@@ -630,30 +666,22 @@ function attachSearchEvents() {
     handleSearch(query, { immediate: true });
   });
 
+  // بستن dropdown با کلیک خارج از آن
   document.addEventListener('click', (event) => {
-    if (!searchElements.panel || searchElements.panel.classList.contains('hidden')) return;
-    const isInside = searchElements.panel.contains(event.target) || searchElements.form.contains(event.target);
+    if (!searchElements.dropdown || !searchElements.dropdown.classList.contains('active')) return;
+    const isInside = searchElements.wrapper && searchElements.wrapper.contains(event.target);
     if (!isInside) {
-      searchElements.panel.classList.add('hidden');
+      searchElements.dropdown.classList.remove('active');
     }
   });
 
+  // بستن dropdown با کلید Escape
   document.addEventListener('keydown', (event) => {
-    if (event.key === 'Escape' && searchElements.panel && !searchElements.panel.classList.contains('hidden')) {
-      searchElements.panel.classList.add('hidden');
+    if (event.key === 'Escape' && searchElements.dropdown && searchElements.dropdown.classList.contains('active')) {
+      searchElements.dropdown.classList.remove('active');
+      searchElements.input.blur();
     }
   });
-
-  if (searchElements.closeBtn) {
-    searchElements.closeBtn.addEventListener('click', () => {
-      if (searchElements.panel) searchElements.panel.classList.add('hidden');
-    });
-  }
-
-  if (searchElements.refreshBtn) {
-    searchElements.refreshBtn.addEventListener('click', async () => {
-      try {
-        await ensureSearchData(true);
         handleSearch(searchElements.input.value);
       } catch {
         // خطا از قبل مدیریت شده است
