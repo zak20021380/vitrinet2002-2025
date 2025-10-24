@@ -785,6 +785,12 @@
           </select>
         </div>
         <div class="filter-group">
+          <label>نوع خدمت</label>
+          <select id="filter-category">
+            <option value="">همه خدمات</option>
+          </select>
+        </div>
+        <div class="filter-group">
           <label>شهر</label>
           <input type="text" id="filter-city" placeholder="مثلاً تهران">
         </div>
@@ -869,10 +875,12 @@
       filters: {
         q: '',
         status: '',
+        category: '',
         city: ''
       },
       items: [],
       overview: null,
+      categories: [],
       loading: false
     };
 
@@ -882,6 +890,7 @@
       tableMeta: document.getElementById('table-meta'),
       filterSearch: document.getElementById('filter-search'),
       filterStatus: document.getElementById('filter-status'),
+      filterCategory: document.getElementById('filter-category'),
       filterCity: document.getElementById('filter-city'),
       applyFilters: document.getElementById('filters-apply'),
       resetFilters: document.getElementById('filters-reset'),
@@ -955,6 +964,7 @@
       params.set('limit', state.limit);
       if (state.filters.q) params.set('q', state.filters.q);
       if (state.filters.status) params.set('status', state.filters.status);
+      if (state.filters.category) params.set('category', state.filters.category);
       if (state.filters.city) params.set('city', state.filters.city);
 
       try {
@@ -1058,32 +1068,55 @@
 
     // Event listeners
     elements.tableBody.addEventListener('click', async (e) => {
+      // Handle toggle status button
       const toggleBtn = e.target.closest('button[data-action="toggle-status"]');
       if (toggleBtn) {
+        e.preventDefault();
+        e.stopPropagation();
+
         const id = toggleBtn.dataset.id;
         const currentStatus = toggleBtn.dataset.status;
 
-        const newStatus = prompt(
-          'وضعیت جدید را انتخاب کنید:\n' +
-          '1. approved (فعال)\n' +
-          '2. pending (در انتظار تایید)\n' +
-          '3. suspended (معلق)\n' +
-          '4. archived (بایگانی)',
-          currentStatus
-        );
+        const statusOptions = {
+          'approved': 'فعال',
+          'pending': 'در انتظار تایید',
+          'suspended': 'معلق',
+          'archived': 'بایگانی',
+          'draft': 'پیش‌نویس'
+        };
 
-        if (!newStatus || newStatus === currentStatus) return;
+        const message = 'وضعیت جدید را وارد کنید:\n\n' +
+          Object.entries(statusOptions).map(([key, label]) =>
+            `${key} → ${label}${key === currentStatus ? ' (فعلی)' : ''}`
+          ).join('\n');
+
+        const newStatus = prompt(message, currentStatus);
+
+        if (!newStatus || newStatus === currentStatus) {
+          return;
+        }
+
+        // Validate status
+        if (!Object.keys(statusOptions).includes(newStatus)) {
+          showToast('وضعیت نامعتبر است. لطفاً یکی از مقادیر معتبر را وارد کنید.', 'error');
+          return;
+        }
 
         try {
+          toggleBtn.disabled = true;
+          toggleBtn.innerHTML = '<i class="ri-loader-4-line"></i> در حال بروزرسانی...';
+
           await fetchJSON(`${API_BASE}/${id}/status`, {
             method: 'PATCH',
             body: JSON.stringify({ status: newStatus })
           });
-          showToast('وضعیت مغازه بروزرسانی شد');
-          loadOverview();
-          loadShops();
+
+          showToast('وضعیت مغازه با موفقیت بروزرسانی شد');
+          await Promise.all([loadOverview(), loadShops()]);
         } catch (err) {
-          showToast(err.message, 'error');
+          showToast(err.message || 'خطا در بروزرسانی وضعیت', 'error');
+          toggleBtn.disabled = false;
+          toggleBtn.innerHTML = '<i class="ri-settings-3-line"></i> تغییر وضعیت';
         }
       }
     });
@@ -1092,6 +1125,7 @@
       state.page = 1;
       state.filters.q = elements.filterSearch.value.trim();
       state.filters.status = elements.filterStatus.value;
+      state.filters.category = elements.filterCategory.value;
       state.filters.city = elements.filterCity.value.trim();
       loadShops();
     }
@@ -1107,6 +1141,7 @@
     elements.resetFilters.addEventListener('click', () => {
       elements.filterSearch.value = '';
       elements.filterStatus.value = '';
+      elements.filterCategory.value = '';
       elements.filterCity.value = '';
       applyFilters();
     });
@@ -1116,9 +1151,27 @@
       loadShops();
     });
 
+    // Load categories
+    async function loadCategories() {
+      try {
+        const data = await fetchJSON(`${ADMIN_API_BASE}/categories`);
+        state.categories = Array.isArray(data.serviceSubcategories) ? data.serviceSubcategories : [];
+        renderCategoryOptions();
+      } catch (err) {
+        console.error('loadCategories error', err);
+      }
+    }
+
+    function renderCategoryOptions() {
+      const options = state.categories.map(cat =>
+        `<option value="${cat.name}">${cat.name}</option>`
+      ).join('');
+      elements.filterCategory.innerHTML = `<option value="">همه خدمات</option>${options}`;
+    }
+
     // Initialize
     async function init() {
-      await Promise.all([loadOverview(), loadShops()]);
+      await Promise.all([loadCategories(), loadOverview(), loadShops()]);
     }
 
     init();
