@@ -1101,41 +1101,39 @@
     btn.disabled = true;
     btn.innerText = "در حال ارسال...";
 
-  fetch("http://localhost:5000/api/auth/register", {
-  method: "POST",
-  headers: {
-    "Content-Type": "application/json",
-  },
-  body: JSON.stringify(data),
-})
-.then(res => res.json())
-.then(result => {
-  btn.disabled = false;
-  btn.innerText = "ثبت فروشگاه";
-  if (result.success) {
-    localStorage.setItem('shopurl', data.shopurl);
-    SafeSS.setJSON('signup_password', data.password); // SafeSS
+    fetch(`${API_ORIGIN}/api/auth/register`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(data),
+    })
+      .then(res => res.json())
+      .then(result => {
+        btn.disabled = false;
+        btn.innerText = "ثبت فروشگاه";
+        if (result.success) {
+          localStorage.setItem('shopurl', data.shopurl);
+          SafeSS.setJSON('signup_password', data.password); // SafeSS
 
-    // ✅ اضافه‌شدن نقش و دسته برای تعیین پنل بعد از وریفای
-    // توجه: SERVICE_CATEGORIES بالاتر در همین فایل تعریف شده.
-    SafeSS.setJSON('signup_category', data.category); // SafeSS
-    SafeSS.setJSON('signup_role', SERVICE_CATEGORIES.includes(data.category) ? 'service' : 'seller'); // SafeSS
+          // ✅ اضافه‌شدن نقش و دسته برای تعیین پنل بعد از وریفای
+          // توجه: SERVICE_CATEGORIES بالاتر در همین فایل تعریف شده.
+          SafeSS.setJSON('signup_category', data.category); // SafeSS
+          SafeSS.setJSON('signup_role', SERVICE_CATEGORIES.includes(data.category) ? 'service' : 'seller'); // SafeSS
 
-    window.location.href = "verify.html?shopurl=" + encodeURIComponent(data.shopurl) + "&phone=" + encodeURIComponent(data.phone);
-  }
+          window.location.href = "verify.html?shopurl=" + encodeURIComponent(data.shopurl) + "&phone=" + encodeURIComponent(data.phone);
+        }
 
-  else {
-    alert("خطا در ثبت‌نام: " + (result.message || "لطفاً دوباره تلاش کنید"));
-  }
-})
-
-
-.catch(err => {
-  btn.disabled = false;
-  btn.innerText = "ثبت فروشگاه";
-  console.error("Error:", err);
-  alert("مشکلی در ارتباط با سرور پیش آمد.");
-});
+        else {
+          alert("خطا در ثبت‌نام: " + (result.message || "لطفاً دوباره تلاش کنید"));
+        }
+      })
+      .catch(err => {
+        btn.disabled = false;
+        btn.innerText = "ثبت فروشگاه";
+        console.error("Error:", err);
+        alert("مشکلی در ارتباط با سرور پیش آمد.");
+      });
 
 
   });
@@ -1164,7 +1162,7 @@ document.getElementById("verify-form").addEventListener("submit", function (e) {
     return false;
   }
 
-  fetch("http://localhost:5000/api/auth/verify", {
+  fetch(`${API_ORIGIN}/api/auth/verify`, {
     method: "POST",
     headers: {"Content-Type": "application/json"},
     body: JSON.stringify({ shopurl, phone, code })
@@ -1180,7 +1178,7 @@ document.getElementById("verify-form").addEventListener("submit", function (e) {
         return;
       }
       // درخواست لاگین به سرور
-      fetch("http://localhost:5000/api/auth/login", {
+      fetch(`${API_ORIGIN}/api/auth/login`, {
         method: "POST",
         headers: {"Content-Type": "application/json"},
         body: JSON.stringify({ phone, password })
