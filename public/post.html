@@ -283,14 +283,34 @@
       رمز عبور <span class="text-red-500">*</span>
       <span class="ml-2 text-xs text-gray-500 font-normal">(حداقل ۸ کاراکتر، شامل عدد، حرف انگلیسی و نماد)</span>
     </label>
-    <input required type="password" id="pass1" minlength="8"
-      class="w-full p-3 border rounded-xl focus:ring-2 focus:ring-green-200" placeholder="رمز عبور قوی وارد کنید" autocomplete="new-password" />
+    <div class="relative">
+      <input required type="password" id="pass1" minlength="8"
+        class="w-full p-3 pl-12 border rounded-xl focus:ring-2 focus:ring-green-200" placeholder="رمز عبور قوی وارد کنید" autocomplete="new-password" />
+      <button type="button" data-target="pass1" data-visible="false"
+        class="password-toggle absolute inset-y-0 left-3 flex items-center text-gray-400 hover:text-gray-600 transition focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[#10b981]/60"
+        aria-label="نمایش رمز عبور" aria-pressed="false">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24" aria-hidden="true">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12c1.5-4 5.25-7.5 9.75-7.5s8.25 3.5 9.75 7.5c-1.5 4-5.25 7.5-9.75 7.5S3.75 16 2.25 12z" />
+          <circle cx="12" cy="12" r="3" stroke-linecap="round" stroke-linejoin="round"></circle>
+        </svg>
+      </button>
+    </div>
   </div>
 
   <div>
     <label class="block text-sm font-bold mb-1">تکرار رمز عبور <span class="text-red-500">*</span></label>
-    <input required type="password" id="pass2" minlength="8"
-      class="w-full p-3 border rounded-xl focus:ring-2 focus:ring-green-200" placeholder="رمز را دوباره وارد کنید" autocomplete="new-password" />
+    <div class="relative">
+      <input required type="password" id="pass2" minlength="8"
+        class="w-full p-3 pl-12 border rounded-xl focus:ring-2 focus:ring-green-200" placeholder="رمز را دوباره وارد کنید" autocomplete="new-password" />
+      <button type="button" data-target="pass2" data-visible="false"
+        class="password-toggle absolute inset-y-0 left-3 flex items-center text-gray-400 hover:text-gray-600 transition focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[#10b981]/60"
+        aria-label="نمایش رمز عبور" aria-pressed="false">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24" aria-hidden="true">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12c1.5-4 5.25-7.5 9.75-7.5s8.25 3.5 9.75 7.5c-1.5 4-5.25 7.5-9.75 7.5S3.75 16 2.25 12z" />
+          <circle cx="12" cy="12" r="3" stroke-linecap="round" stroke-linejoin="round"></circle>
+        </svg>
+      </button>
+    </div>
     <div id="pass-hint" class="text-xs mt-2 text-red-500 hidden"></div>
   </div>
 
@@ -406,6 +426,27 @@
       prev.innerText = "آدرس فروشگاه شما: vitreenet.ir/shopgol";
     }
     document.getElementById("shopurl-hint").classList.add("hidden");
+  });
+
+  // Password visibility toggles
+  const passwordIcons = {
+    show: `<svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M3.98 8.223a10.477 10.477 0 0 0-1.72 2.473 2.31 2.31 0 0 0 0 2.608C4.46 16.753 8.08 19.5 12 19.5c1.63 0 3.168-.43 4.542-1.155" /><path stroke-linecap="round" stroke-linejoin="round" d="M19.33 16.63C20.8 15.44 22 13.842 22 12c0-.642-.228-1.27-.655-1.859C19.54 6.621 15.973 4.5 12 4.5c-.977 0-1.927.146-2.836.42" /><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 0 0-3-3" /><path stroke-linecap="round" stroke-linejoin="round" d="M3 3l18 18" /></svg>`,
+    hide: `<svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12c1.5-4 5.25-7.5 9.75-7.5s8.25 3.5 9.75 7.5c-1.5 4-5.25 7.5-9.75 7.5S3.75 16 2.25 12z" /><circle cx="12" cy="12" r="3" stroke-linecap="round" stroke-linejoin="round"></circle></svg>`
+  };
+
+  document.querySelectorAll('.password-toggle').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const targetId = btn.getAttribute('data-target');
+      const input = document.getElementById(targetId);
+      if (!input) return;
+
+      const isVisible = btn.getAttribute('data-visible') === 'true';
+      input.type = isVisible ? 'password' : 'text';
+      btn.setAttribute('data-visible', String(!isVisible));
+      btn.setAttribute('aria-pressed', String(!isVisible));
+      btn.setAttribute('aria-label', isVisible ? 'نمایش رمز عبور' : 'پنهان کردن رمز عبور');
+      btn.innerHTML = isVisible ? passwordIcons.hide : passwordIcons.show;
+    });
   });
 
   // ریست پیام خطا با تغییر هر فیلد
