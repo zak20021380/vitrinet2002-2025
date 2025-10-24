@@ -199,15 +199,17 @@
         }
 
         .modal-card {
-            width: min(780px, 100%);
+            width: min(640px, calc(100% - 48px));
+            max-height: min(90vh, 680px);
             background: rgba(255, 255, 255, 0.98);
-            border-radius: 24px;
-            padding: 28px;
-            box-shadow: 0 30px 80px rgba(15, 31, 57, 0.25);
+            border-radius: 22px;
+            padding: 26px 28px;
+            box-shadow: 0 22px 60px rgba(15, 31, 57, 0.22);
             position: relative;
             display: flex;
             flex-direction: column;
-            gap: 24px;
+            gap: 22px;
+            overflow: hidden;
         }
 
         .modal-close {
@@ -245,7 +247,24 @@
         .modal-body {
             display: flex;
             flex-direction: column;
-            gap: 24px;
+            gap: 22px;
+            overflow-y: auto;
+            padding-inline-end: 4px;
+            scroll-behavior: smooth;
+            flex: 1;
+        }
+
+        .modal-body::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .modal-body::-webkit-scrollbar-thumb {
+            background: rgba(61, 115, 255, 0.25);
+            border-radius: 999px;
+        }
+
+        .modal-body::-webkit-scrollbar-track {
+            background: transparent;
         }
 
         .stats-grid {
@@ -264,7 +283,7 @@
         }
 
         .stat-card strong {
-            font-size: 26px;
+            font-size: 24px;
             font-weight: 700;
             color: var(--primary);
         }
@@ -287,8 +306,8 @@
         .metric-item {
             border: 1px solid rgba(112, 128, 176, 0.12);
             border-radius: 18px;
-            padding: 16px;
-            background: rgba(255, 255, 255, 0.85);
+            padding: 14px 16px;
+            background: rgba(255, 255, 255, 0.9);
             display: flex;
             flex-direction: column;
             gap: 8px;
@@ -360,7 +379,7 @@
             grid-template-columns: repeat(auto-fit, minmax(60px, 1fr));
             align-items: end;
             gap: 16px;
-            height: 180px;
+            height: 160px;
         }
 
         .chart-bar {
@@ -403,12 +422,57 @@
             }
 
             .modal-card {
-                padding: 22px 18px;
+                width: min(540px, calc(100% - 32px));
+                padding: 22px 20px;
+                gap: 18px;
+                max-height: min(92vh, 620px);
             }
 
             .modal-close {
                 top: 12px;
                 left: 12px;
+            }
+        }
+
+        @media (max-width: 560px) {
+            .modal-card {
+                width: min(440px, calc(100% - 24px));
+                padding: 20px 18px 18px;
+                border-radius: 18px;
+            }
+
+            .modal-header h2 {
+                font-size: 18px;
+            }
+
+            .modal-subtitle {
+                font-size: 13px;
+            }
+
+            .stat-card {
+                padding: 14px 16px;
+            }
+
+            .stat-card strong {
+                font-size: 22px;
+            }
+
+            .metrics-row {
+                grid-template-columns: 1fr;
+            }
+
+            .revenue-chart {
+                padding: 16px;
+            }
+
+            .chart-bars {
+                gap: 12px;
+            }
+
+            .modal-close {
+                width: 34px;
+                height: 34px;
+                font-size: 20px;
             }
         }
     </style>
