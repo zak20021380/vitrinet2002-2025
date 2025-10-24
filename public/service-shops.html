@@ -386,6 +386,45 @@
 
 
 
+/* Customer Follow Button Styles */
+.customer-follow-btn {
+  background: linear-gradient(135deg, #3b82f6, #06b6d4);
+  color: white;
+  position: relative;
+  overflow: hidden;
+}
+
+.customer-follow-btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, #2563eb, #0891b2);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.customer-follow-btn:hover::before {
+  opacity: 1;
+}
+
+.customer-follow-btn:disabled {
+  background: linear-gradient(135deg, #10b981, #059669);
+  cursor: not-allowed;
+  opacity: 0.95;
+}
+
+.customer-follow-btn[aria-pressed="true"] {
+  background: linear-gradient(135deg, #10b981, #059669);
+}
+
+.customer-follow-btn > * {
+  position: relative;
+  z-index: 1;
+}
+
 /* Professional booking status styles */
 /* Simple time slot styles */
 .time-slot {
@@ -488,36 +527,36 @@ async function getShopUrlFromLocation() {
     <!-- Sticky Header -->
     <!-- header desktop redesign start -->
 <!-- header desktop redesign start -->
-<!-- ===== Clean, Responsive Header (no "باز است") ===== -->
-<header id="main-header" class="sticky top-0 z-[90] isolate bg-white/95 md:bg-white/70 md:backdrop-blur-lg border-b border-slate-200/70 shadow-sm transition-all duration-300">
-  <!-- hairline -->
-  <div aria-hidden="true" class="h-[2px] w-full bg-gradient-to-l from-cyan-400 via-blue-500 to-purple-500 opacity-70"></div>
+<!-- ===== Modern, Professional Header ===== -->
+<header id="main-header" class="sticky top-0 z-[90] isolate backdrop-blur-2xl bg-gradient-to-b from-white/98 via-white/95 to-white/90 border-b border-slate-200/80 shadow-lg transition-all duration-300">
+  <!-- Elegant gradient line -->
+  <div aria-hidden="true" class="h-[3px] w-full bg-gradient-to-l from-cyan-500 via-blue-600 to-purple-600 shadow-sm"></div>
 
   <!-- ========== Mobile ========== -->
-  <div id="mobile-header" class="md:hidden px-3">
-    <div id="mobile-top" class="flex items-center justify-between h-14 py-2">
-      <!-- Right: Brand -->
-      <a href="/index.html" class="flex items-center gap-2 font-extrabold text-[15px] text-blue-600 tracking-tight select-none">
-        <span class="leading-none">ویترینت</span>
+  <div id="mobile-header" class="md:hidden px-4 py-3">
+    <div id="mobile-top" class="flex items-center justify-between gap-3 mb-3">
+      <!-- Right: Brand with enhanced styling -->
+      <a href="/index.html" class="flex items-center gap-2 font-black text-[16px] bg-gradient-to-l from-blue-600 via-blue-700 to-purple-600 bg-clip-text text-transparent tracking-tight select-none hover:scale-105 transition-transform duration-200">
+        <span class="leading-none drop-shadow-sm">ویترینت</span>
       </a>
 
-      <!-- Center: Shop title -->
+      <!-- Center: Shop title with better prominence -->
       <h1 id="header-shop-name-mobile"
-          class="flex-1 mx-2 min-w-0 text-center text-[14px] sm:text-[15px] font-black text-slate-900 truncate"
+          class="flex-1 mx-2 min-w-0 text-center text-[15px] sm:text-[16px] font-black bg-gradient-to-l from-slate-800 to-slate-900 bg-clip-text text-transparent truncate"
           title="نام فروشگاه">
         نام فروشگاه
       </h1>
 
-      <!-- Left: Address + Report -->
-      <div class="flex items-center gap-1.5 flex-shrink-0">
+      <!-- Left: Action buttons with modern design -->
+      <div class="flex items-center gap-2 flex-shrink-0">
         <button id="mobile-address-chip" data-open="addressModal" aria-label="آدرس"
-                class="h-9 px-3 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 active:scale-95 transition text-[12px] font-bold text-slate-800 flex items-center gap-1.5">
+                class="h-10 px-3.5 rounded-xl bg-gradient-to-br from-blue-50 to-blue-100/80 border border-blue-200/60 hover:from-blue-100 hover:to-blue-200/80 active:scale-95 transition-all duration-200 text-[12px] font-bold text-blue-700 flex items-center gap-2 shadow-sm hover:shadow-md">
           <i class="fa-solid fa-location-dot text-blue-600"></i>
           <span class="max-[360px]:hidden">آدرس</span>
         </button>
         <button id="mobile-report-trigger" data-open="reportModal" aria-label="گزارش"
-                class="h-9 w-9 grid place-items-center rounded-lg border border-slate-200 bg-white hover:bg-slate-50 active:scale-95 transition">
-          <i class="fa-regular fa-flag text-blue-700 text-[13px]"></i>
+                class="h-10 w-10 grid place-items-center rounded-xl bg-gradient-to-br from-slate-50 to-slate-100/80 border border-slate-200/60 hover:from-slate-100 hover:to-slate-200/80 active:scale-95 transition-all duration-200 shadow-sm hover:shadow-md">
+          <i class="fa-regular fa-flag text-blue-700 text-[14px]"></i>
         </button>
       </div>
     </div>
@@ -525,18 +564,19 @@ async function getShopUrlFromLocation() {
     <!-- keep stub for your scroll logic -->
     <div id="mobile-chips" class="hidden h-0 overflow-hidden"></div>
 
-    <div class="mt-3 flex items-center justify-between rounded-xl border border-slate-200 bg-white/90 px-3 py-2 shadow-sm" data-customer-section>
-      <div class="flex items-center gap-2 text-[13px] font-semibold text-slate-700">
-        <span class="inline-flex h-8 w-8 items-center justify-center rounded-full bg-blue-50 text-blue-600">
-          <i class="fa-solid fa-user-group text-sm"></i>
+    <!-- Enhanced customer section with modern card design -->
+    <div class="mt-2 flex items-center justify-between rounded-2xl bg-gradient-to-br from-white via-blue-50/30 to-purple-50/30 border border-blue-200/50 px-4 py-3 shadow-md hover:shadow-lg transition-shadow duration-300" data-customer-section>
+      <div class="flex items-center gap-3">
+        <span class="inline-flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-500 to-blue-600 text-white shadow-lg">
+          <i class="fa-solid fa-user-group text-[15px]"></i>
         </span>
         <div class="flex flex-col leading-tight">
-          <span class="text-[11px] text-slate-500">مشتریان</span>
-          <span class="text-base font-black text-slate-900" data-customer-count>۰</span>
+          <span class="text-[12px] font-semibold text-slate-600">مشتریان</span>
+          <span class="text-xl font-black bg-gradient-to-l from-blue-600 to-purple-600 bg-clip-text text-transparent" data-customer-count>۰</span>
         </div>
       </div>
       <button type="button"
-              class="customer-follow-btn inline-flex items-center justify-center gap-2 rounded-full px-3 py-1.5 text-xs font-bold transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500"
+              class="customer-follow-btn inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2 text-[13px] font-bold transition-all duration-200 shadow-md hover:shadow-lg active:scale-95 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500"
               data-customer-follow>
         دنبال کردن
       </button>
@@ -545,53 +585,53 @@ async function getShopUrlFromLocation() {
 
   <!-- ========== Desktop / Large screens ========== -->
   <div class="hidden md:block">
-    <div class="max-w-screen-xl mx-auto px-3 py-3">
-      <div class="rounded-2xl bg-white/75 backdrop-blur border border-white/60 ring-1 ring-black/5 shadow-sm px-4 lg:px-6 py-2.5">
-        <div class="flex items-center justify-between gap-3">
-          <!-- Right: Brand (RTL) -->
-          <a href="/index.html" class="flex items-center gap-2 font-extrabold text-lg lg:text-xl text-blue-600 tracking-tight flex-shrink-0">
-            <span class="leading-none">ویترینت</span>
+    <div class="max-w-screen-xl mx-auto px-4 py-4">
+      <div class="rounded-3xl bg-gradient-to-br from-white/90 via-white/80 to-blue-50/40 backdrop-blur-xl border border-white/70 ring-1 ring-blue-100/50 shadow-xl px-6 lg:px-8 py-4">
+        <div class="flex items-center justify-between gap-4">
+          <!-- Right: Brand (RTL) with enhanced gradient -->
+          <a href="/index.html" class="flex items-center gap-2 font-black text-xl lg:text-2xl bg-gradient-to-l from-blue-600 via-blue-700 to-purple-600 bg-clip-text text-transparent tracking-tight flex-shrink-0 hover:scale-105 transition-transform duration-200">
+            <span class="leading-none drop-shadow-sm">ویترینت</span>
           </a>
 
-          <!-- Center: identity -->
-          <div class="flex-1 min-w-0 flex items-center justify-center gap-3 text-sm">
+          <!-- Center: identity with improved visual hierarchy -->
+          <div class="flex-1 min-w-0 flex items-center justify-center gap-4 text-sm">
             <h1 id="header-shop-name-lg"
-                class="truncate font-black text-slate-900 max-w-[42vw] lg:max-w-[48vw]"
+                class="truncate font-black text-lg lg:text-xl bg-gradient-to-l from-slate-800 to-slate-900 bg-clip-text text-transparent max-w-[42vw] lg:max-w-[48vw]"
                 title="نام فروشگاه">
               نام فروشگاه
             </h1>
-            <span class="hidden sm:inline text-slate-300">·</span>
+            <span class="hidden sm:inline text-slate-300 text-xl">·</span>
             <button id="desktop-address-chip" data-open="addressModal"
-                    class="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/90 border border-slate-200 shadow-sm hover:bg-white text-[12px] text-slate-700">
+                    class="hidden sm:inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-br from-blue-50 to-blue-100/80 border border-blue-200/60 shadow-md hover:from-blue-100 hover:to-blue-200/80 hover:shadow-lg active:scale-95 transition-all duration-200 text-[13px] font-bold text-blue-700">
               <i class="fa-solid fa-location-dot text-blue-600"></i>
               آدرس
             </button>
-            <span class="hidden sm:inline text-slate-300">·</span>
-            <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-amber-50 border border-amber-200 text-[12px] text-slate-800">
-              <i class="fa-solid fa-star text-amber-400"></i>
-              <span id="header-rating-lg" class="font-bold">0.0</span>
-              <span class="text-slate-500">(<span id="header-count-lg">0</span>)</span>
+            <span class="hidden sm:inline text-slate-300 text-xl">·</span>
+            <span class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-br from-amber-50 to-amber-100/80 border border-amber-200/70 shadow-md text-[13px] font-bold text-amber-900">
+              <i class="fa-solid fa-star text-amber-500 text-base"></i>
+              <span id="header-rating-lg" class="font-black text-amber-900">0.0</span>
+              <span class="text-amber-700/70">(<span id="header-count-lg">0</span>)</span>
             </span>
-            <span class="hidden sm:inline text-slate-300">·</span>
-            <div class="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white/90 px-3 py-1.5 text-[12px] text-slate-700 shadow-sm" data-customer-section>
-              <span class="inline-flex h-7 w-7 items-center justify-center rounded-full bg-blue-50 text-blue-600">
+            <span class="hidden sm:inline text-slate-300 text-xl">·</span>
+            <div class="inline-flex items-center gap-3 rounded-xl border border-blue-200/60 bg-gradient-to-br from-white to-blue-50/50 px-4 py-2 text-[13px] font-semibold text-slate-700 shadow-md hover:shadow-lg transition-shadow duration-200" data-customer-section>
+              <span class="inline-flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 text-white shadow-md">
                 <i class="fa-solid fa-user-group text-sm"></i>
               </span>
-              <div class="flex items-center gap-1 font-semibold">
-                <span>مشتریان</span>
-                <span class="text-base font-black text-slate-900" data-customer-count>۰</span>
+              <div class="flex items-center gap-2">
+                <span class="font-bold text-slate-700">مشتریان</span>
+                <span class="text-lg font-black bg-gradient-to-l from-blue-600 to-purple-600 bg-clip-text text-transparent" data-customer-count>۰</span>
               </div>
               <button type="button"
-                      class="customer-follow-btn inline-flex items-center justify-center gap-2 rounded-full px-3 py-1.5 text-xs font-bold transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500"
+                      class="customer-follow-btn inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2 text-xs font-bold transition-all duration-200 shadow-md hover:shadow-lg active:scale-95 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500"
                       data-customer-follow>
                 دنبال کردن
               </button>
             </div>
           </div>
 
-          <!-- Left: report -->
+          <!-- Left: report button with enhanced styling -->
           <button id="report-trigger" data-open="reportModal"
-                  class="h-10 px-4 rounded-xl border border-slate-200 bg-white text-blue-700 font-bold hover:bg-slate-50 active:scale-95 transition flex-shrink-0">
+                  class="h-11 px-5 rounded-xl bg-gradient-to-br from-slate-50 to-slate-100/80 border border-slate-200/70 text-blue-700 font-bold shadow-md hover:from-slate-100 hover:to-slate-200/80 hover:shadow-lg active:scale-95 transition-all duration-200 flex-shrink-0">
             گزارش
           </button>
         </div>
