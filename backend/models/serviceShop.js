@@ -15,6 +15,7 @@ const analyticsSchema = new mongoose.Schema({
   avgTicketSize: { type: Number, default: 0 },
   ratingAverage: { type: Number, default: 0 },
   ratingCount: { type: Number, default: 0 },
+  customerFollowers: { type: Number, default: 0 },
   lastBookingAt: { type: Date, default: null },
   lastVisitorAt: { type: Date, default: null }
 }, { _id: false });
@@ -106,6 +107,7 @@ const serviceShopSchema = new mongoose.Schema({
   integrations: { type: integrationsSchema, default: () => ({}) },
   notes: { type: String, default: '' },
   lastReviewedAt: { type: Date, default: null },
+  legacySellerId: { type: mongoose.Schema.Types.ObjectId, ref: 'Seller', default: null, index: true },
   createdBy: { type: mongoose.Schema.Types.ObjectId, ref: 'Admin', default: null },
   updatedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'Admin', default: null }
 }, { timestamps: true });

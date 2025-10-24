@@ -524,6 +524,23 @@ async function getShopUrlFromLocation() {
 
     <!-- keep stub for your scroll logic -->
     <div id="mobile-chips" class="hidden h-0 overflow-hidden"></div>
+
+    <div class="mt-3 flex items-center justify-between rounded-xl border border-slate-200 bg-white/90 px-3 py-2 shadow-sm" data-customer-section>
+      <div class="flex items-center gap-2 text-[13px] font-semibold text-slate-700">
+        <span class="inline-flex h-8 w-8 items-center justify-center rounded-full bg-blue-50 text-blue-600">
+          <i class="fa-solid fa-user-group text-sm"></i>
+        </span>
+        <div class="flex flex-col leading-tight">
+          <span class="text-[11px] text-slate-500">مشتریان</span>
+          <span class="text-base font-black text-slate-900" data-customer-count>۰</span>
+        </div>
+      </div>
+      <button type="button"
+              class="customer-follow-btn inline-flex items-center justify-center gap-2 rounded-full px-3 py-1.5 text-xs font-bold transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500"
+              data-customer-follow>
+        دنبال کردن
+      </button>
+    </div>
   </div>
 
   <!-- ========== Desktop / Large screens ========== -->
@@ -555,6 +572,21 @@ async function getShopUrlFromLocation() {
               <span id="header-rating-lg" class="font-bold">0.0</span>
               <span class="text-slate-500">(<span id="header-count-lg">0</span>)</span>
             </span>
+            <span class="hidden sm:inline text-slate-300">·</span>
+            <div class="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white/90 px-3 py-1.5 text-[12px] text-slate-700 shadow-sm" data-customer-section>
+              <span class="inline-flex h-7 w-7 items-center justify-center rounded-full bg-blue-50 text-blue-600">
+                <i class="fa-solid fa-user-group text-sm"></i>
+              </span>
+              <div class="flex items-center gap-1 font-semibold">
+                <span>مشتریان</span>
+                <span class="text-base font-black text-slate-900" data-customer-count>۰</span>
+              </div>
+              <button type="button"
+                      class="customer-follow-btn inline-flex items-center justify-center gap-2 rounded-full px-3 py-1.5 text-xs font-bold transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500"
+                      data-customer-follow>
+                دنبال کردن
+              </button>
+            </div>
           </div>
 
           <!-- Left: report -->
@@ -1145,6 +1177,298 @@ async function hasPending(){
   })();
   // ================== /Booking Gate ==================
 
+})();
+</script>
+
+<script>
+(() => {
+  const API_ROOT = (window.__API_BASE__ || '').replace(/\/$/, '');
+  const DIGITS_FA = '۰۱۲۳۴۵۶۷۸۹';
+
+  const qAll = (selector) => Array.from(document.querySelectorAll(selector));
+  const toFa = (value) => String(value ?? 0).replace(/\d/g, d => DIGITS_FA[d]);
+
+  const toEn = (value = '') => String(value || '')
+    .replace(/[۰-۹]/g, d => String.fromCharCode(d.charCodeAt(0) - 1728))
+    .replace(/[٠-٩]/g, d => String.fromCharCode(d.charCodeAt(0) - 1632));
+
+  const normalisePhone = (value = '') => {
+    let raw = toEn(value).replace(/[\s\-()]/g, '');
+    if (!raw) return '';
+
+    if (raw.startsWith('+')) {
+      raw = raw.slice(1);
+    }
+
+    raw = raw.replace(/[^0-9]/g, '');
+    if (!raw) return '';
+
+    if (raw.startsWith('0098')) {
+      raw = raw.slice(4);
+    }
+
+    if (raw.startsWith('98') && raw.length === 12) {
+      raw = raw.slice(2);
+    }
+
+    if (raw.length === 10 && raw.startsWith('9')) {
+      raw = `0${raw}`;
+    }
+
+    if (raw.length === 11 && !raw.startsWith('0')) {
+      raw = `0${raw.slice(-10)}`;
+    }
+
+    return raw;
+  };
+
+  const showToast = (message, type = 'info') => {
+    if (typeof window.showToastDark === 'function') {
+      window.showToastDark(message, { type, durationMs: 2800 });
+    } else {
+      console[type === 'error' ? 'error' : 'log'](message);
+    }
+  };
+
+  const state = {
+    sellerId: null,
+    count: 0,
+    isFollower: false,
+    hasBooking: false,
+    loading: false,
+    bookingPhone: ''
+  };
+
+  const sectionEls = qAll('[data-customer-section]');
+  const countEls = qAll('[data-customer-count]');
+  const followButtons = qAll('[data-customer-follow]');
+
+  const ensureBaseClasses = (btn) => {
+    if (!btn.dataset.baseClasses) {
+      btn.dataset.baseClasses = btn.className;
+    }
+  };
+
+  const applyButtonVariant = (btn, variant) => {
+    ensureBaseClasses(btn);
+    const base = btn.dataset.baseClasses || '';
+    const variants = {
+      follow: 'bg-blue-50 text-blue-600 hover:bg-blue-100 border border-blue-100',
+      following: 'bg-emerald-500 text-white hover:bg-emerald-600 border border-emerald-500',
+      booking: 'bg-amber-50 text-amber-700 hover:bg-amber-100 border border-amber-200',
+      loading: 'bg-slate-200 text-slate-500 border border-slate-200 cursor-wait'
+    };
+    btn.className = `${base} ${variants[variant] || ''}`.trim();
+  };
+
+  const getSellerId = () => {
+    const id = document.body?.dataset?.sellerId || window.LAST_PUBLIC?.sellerId || '';
+    return /^[0-9a-fA-F]{24}$/.test(id) ? id : '';
+  };
+
+  const readLastBooking = () => {
+    try {
+      return JSON.parse(localStorage.getItem('vt:lastBooking') || 'null');
+    } catch (_) {
+      return null;
+    }
+  };
+
+  const getBookingForSeller = (sellerId) => {
+    if (!sellerId) return null;
+    const booking = readLastBooking();
+    if (!booking) return null;
+    if (booking.sellerId && booking.sellerId !== sellerId) return null;
+    return booking;
+  };
+
+  const updateUI = () => {
+    countEls.forEach(el => {
+      el.textContent = toFa(state.count);
+    });
+
+    sectionEls.forEach(section => {
+      if (!section) return;
+      section.classList.toggle('opacity-60', !state.isFollower && !state.hasBooking);
+    });
+
+    followButtons.forEach(btn => {
+      if (!btn) return;
+      const variant = state.loading
+        ? 'loading'
+        : state.isFollower
+          ? 'following'
+          : state.hasBooking
+            ? 'follow'
+            : 'booking';
+      applyButtonVariant(btn, variant);
+
+      const label = state.loading
+        ? 'در حال پردازش...'
+        : state.isFollower
+          ? 'دنبال شد'
+          : state.hasBooking
+            ? 'دنبال کردن'
+            : 'رزرو نوبت';
+      btn.textContent = label;
+      btn.disabled = state.loading || state.isFollower;
+      btn.setAttribute('aria-pressed', state.isFollower ? 'true' : 'false');
+      btn.dataset.needsBooking = (!state.hasBooking && !state.isFollower) ? '1' : '0';
+    });
+  };
+
+  const buildStatsUrl = (sellerId, phone) => {
+    const params = new URLSearchParams();
+    if (phone) params.set('phone', phone);
+    const qs = params.toString();
+    return `${API_ROOT}/api/service-shops/${encodeURIComponent(sellerId)}/customers${qs ? `?${qs}` : ''}`;
+  };
+
+  const fetchStats = async () => {
+    if (!state.sellerId) return;
+    const booking = getBookingForSeller(state.sellerId);
+    const phone = booking?.phone ? normalisePhone(booking.phone) : '';
+
+    try {
+      const res = await fetch(buildStatsUrl(state.sellerId, phone), { credentials: 'include' });
+      if (!res.ok) {
+        throw new Error('خطا در دریافت اطلاعات مشتریان.');
+      }
+      const data = await res.json();
+      state.count = Number(data.totalCustomers || 0);
+      state.isFollower = !!data.isFollower;
+      state.hasBooking = !!data.hasBooking || state.isFollower || !!phone;
+      if (phone) state.bookingPhone = phone;
+    } catch (err) {
+      console.warn('fetchStats error:', err);
+    } finally {
+      updateUI();
+    }
+  };
+
+  const syncBookingState = (options = {}) => {
+    if (!state.sellerId) return;
+    const booking = getBookingForSeller(state.sellerId);
+    const phone = booking?.phone ? normalisePhone(booking.phone) : '';
+    const phoneChanged = phone && phone !== state.bookingPhone;
+
+    state.hasBooking = !!phone || state.isFollower;
+    if (phone) {
+      state.bookingPhone = phone;
+    }
+    updateUI();
+
+    if (!options.skipFetch && (phoneChanged || options.forceRefresh)) {
+      fetchStats();
+    }
+  };
+
+  const attemptInit = () => {
+    const sellerId = getSellerId();
+    if (!sellerId) {
+      updateUI();
+      return;
+    }
+
+    const sellerChanged = sellerId !== state.sellerId;
+    if (sellerChanged) {
+      state.sellerId = sellerId;
+      state.count = 0;
+      state.isFollower = false;
+      state.hasBooking = false;
+      state.bookingPhone = '';
+      updateUI();
+    }
+
+    fetchStats();
+  };
+
+  const handleFollow = async (event) => {
+    event.preventDefault();
+    if (!state.sellerId || state.loading) return;
+
+    const booking = getBookingForSeller(state.sellerId);
+    const phone = booking?.phone ? normalisePhone(booking.phone) : state.bookingPhone;
+
+    if (!state.isFollower && !phone) {
+      if (typeof window.openBookingWizard === 'function') {
+        window.openBookingWizard();
+      } else {
+        showToast('برای دنبال کردن، ابتدا یک نوبت رزرو کنید.', 'info');
+      }
+      return;
+    }
+
+    if (state.isFollower) {
+      showToast('شما قبلاً به مشتریان این مغازه اضافه شده‌اید.', 'info');
+      return;
+    }
+
+    state.loading = true;
+    updateUI();
+
+    try {
+      const payload = {
+        customerPhone: phone,
+        customerName: booking?.name || booking?.customerName || ''
+      };
+
+      const res = await fetch(`${API_ROOT}/api/service-shops/${encodeURIComponent(state.sellerId)}/customers`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify(payload)
+      });
+
+      const data = await res.json().catch(() => ({}));
+
+      if (!res.ok) {
+        throw new Error(data.message || 'ثبت دنبال کردن با خطا مواجه شد.');
+      }
+
+      state.count = Number(data.totalCustomers || state.count);
+      state.isFollower = true;
+      state.hasBooking = true;
+      state.loading = false;
+      updateUI();
+      showToast('شما به مشتریان این مغازه اضافه شدید.', 'success');
+    } catch (err) {
+      state.loading = false;
+      updateUI();
+      showToast(err.message || 'خطا در ثبت درخواست.', 'error');
+    }
+  };
+
+  const watchBookingChanges = () => {
+    window.addEventListener('storage', (event) => {
+      if (event.key === 'vt:lastBooking') {
+        syncBookingState({ forceRefresh: true });
+      }
+    });
+
+    window.addEventListener('booking:status', () => {
+      syncBookingState({ forceRefresh: true });
+    });
+  };
+
+  const init = () => {
+    followButtons.forEach(btn => {
+      if (!btn) return;
+      ensureBaseClasses(btn);
+      btn.addEventListener('click', handleFollow);
+    });
+
+    updateUI();
+    attemptInit();
+    syncBookingState({ skipFetch: true });
+    watchBookingChanges();
+  };
+
+  document.addEventListener('DOMContentLoaded', init);
+  document.addEventListener('services:loaded', () => {
+    attemptInit();
+    syncBookingState();
+  });
 })();
 </script>
 
