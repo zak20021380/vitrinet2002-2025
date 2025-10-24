@@ -690,6 +690,33 @@ async function getShopUrlFromLocation() {
   </div>
 </div>
 
+<div id="booking-reminder-modal" role="dialog" aria-modal="true" aria-labelledby="booking-reminder-title"
+     class="hidden fixed inset-0 z-[95] items-center justify-center px-4 sm:px-6">
+  <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity duration-200 opacity-0" data-modal-backdrop data-modal-close></div>
+  <div class="relative w-full max-w-sm sm:max-w-md bg-white/95 backdrop-blur-2xl border border-white/60 rounded-3xl shadow-2xl px-6 py-7 sm:px-8 sm:py-8 text-center transition-all duration-200 transform opacity-0 translate-y-4 scale-95" data-modal-card>
+    <div class="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-500 to-teal-400 text-white shadow-lg">
+      <i class="fa-solid fa-calendar-check text-xl"></i>
+    </div>
+    <h2 id="booking-reminder-title" class="text-lg sm:text-xl font-black text-slate-900 mb-2">برای دنبال کردن ابتدا نوبت رزرو کنید</h2>
+    <p class="text-sm sm:text-[15px] leading-7 text-slate-600 mb-6">
+      برای پیوستن به باشگاه مشتریان این مغازه، ابتدا یک نوبت رزرو کنید تا اطلاعات شما با فروشگاه همگام شود و بتوانیم شما را در لیست مشتریان ثبت کنیم.
+    </p>
+    <div class="flex flex-col sm:flex-row gap-2 sm:gap-3">
+      <button type="button"
+              class="inline-flex w-full items-center justify-center gap-2 rounded-full bg-gradient-to-r from-blue-500 to-teal-400 px-5 py-2.5 text-sm sm:text-base font-bold text-white shadow-md transition hover:shadow-lg focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500"
+              data-booking-cta>
+        <i class="fa-solid fa-arrow-up-right-from-square text-xs sm:text-sm"></i>
+        رزرو نوبت
+      </button>
+      <button type="button"
+              class="inline-flex w-full items-center justify-center gap-2 rounded-full border border-slate-200 bg-white px-5 py-2.5 text-sm sm:text-base font-bold text-slate-700 transition hover:bg-slate-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500"
+              data-modal-close>
+        بعداً انجام می‌دم
+      </button>
+    </div>
+  </div>
+</div>
+
 
 
 <!-- Pending Booking Modal -->
@@ -1242,6 +1269,70 @@ async function hasPending(){
   const sectionEls = qAll('[data-customer-section]');
   const countEls = qAll('[data-customer-count]');
   const followButtons = qAll('[data-customer-follow]');
+  const bookingModal = document.getElementById('booking-reminder-modal');
+  const bookingModalBackdrop = bookingModal?.querySelector('[data-modal-backdrop]') || null;
+  const bookingModalCard = bookingModal?.querySelector('[data-modal-card]') || null;
+  const bookingModalCTA = bookingModal?.querySelector('[data-booking-cta]') || null;
+  const bookingModalCloseEls = bookingModal ? Array.from(bookingModal.querySelectorAll('[data-modal-close]')) : [];
+  let bookingModalTimer = null;
+
+  const isBookingModalOpen = () => !!(bookingModal && !bookingModal.classList.contains('hidden'));
+
+  const openBookingReminder = () => {
+    if (!bookingModal) {
+      showToast('برای دنبال کردن، ابتدا یک نوبت رزرو کنید.', 'info');
+      return;
+    }
+
+    if (bookingModalTimer) {
+      clearTimeout(bookingModalTimer);
+      bookingModalTimer = null;
+    }
+
+    bookingModal.classList.remove('hidden');
+    bookingModal.classList.add('flex');
+
+    requestAnimationFrame(() => {
+      if (bookingModalBackdrop) {
+        bookingModalBackdrop.classList.add('opacity-100');
+        bookingModalBackdrop.classList.remove('opacity-0');
+      }
+      if (bookingModalCard) {
+        bookingModalCard.classList.remove('opacity-0', 'translate-y-4', 'scale-95');
+        bookingModalCard.classList.add('opacity-100', 'translate-y-0', 'scale-100');
+      }
+    });
+  };
+
+  const closeBookingReminder = () => {
+    if (!bookingModal || bookingModal.classList.contains('hidden')) return;
+
+    if (bookingModalBackdrop) {
+      bookingModalBackdrop.classList.add('opacity-0');
+      bookingModalBackdrop.classList.remove('opacity-100');
+    }
+
+    if (bookingModalCard) {
+      bookingModalCard.classList.add('opacity-0', 'translate-y-4', 'scale-95');
+      bookingModalCard.classList.remove('opacity-100', 'translate-y-0', 'scale-100');
+    }
+
+    if (bookingModalTimer) {
+      clearTimeout(bookingModalTimer);
+    }
+
+    bookingModalTimer = window.setTimeout(() => {
+      bookingModal.classList.add('hidden');
+      bookingModal.classList.remove('flex');
+      bookingModalTimer = null;
+    }, 220);
+  };
+
+  const handleModalKeydown = (event) => {
+    if (event.key === 'Escape' && isBookingModalOpen()) {
+      closeBookingReminder();
+    }
+  };
 
   const ensureBaseClasses = (btn) => {
     if (!btn.dataset.baseClasses) {
@@ -1307,9 +1398,7 @@ async function hasPending(){
         ? 'در حال پردازش...'
         : state.isFollower
           ? 'دنبال شد'
-          : state.hasBooking
-            ? 'دنبال کردن'
-            : 'رزرو نوبت';
+          : 'دنبال کردن';
       btn.textContent = label;
       btn.disabled = state.loading || state.isFollower;
       btn.setAttribute('aria-pressed', state.isFollower ? 'true' : 'false');
@@ -1391,11 +1480,7 @@ async function hasPending(){
     const phone = booking?.phone ? normalisePhone(booking.phone) : state.bookingPhone;
 
     if (!state.isFollower && !phone) {
-      if (typeof window.openBookingWizard === 'function') {
-        window.openBookingWizard();
-      } else {
-        showToast('برای دنبال کردن، ابتدا یک نوبت رزرو کنید.', 'info');
-      }
+      openBookingReminder();
       return;
     }
 
@@ -1457,6 +1542,35 @@ async function hasPending(){
       ensureBaseClasses(btn);
       btn.addEventListener('click', handleFollow);
     });
+
+    if (bookingModal) {
+      bookingModal.addEventListener('click', (event) => {
+        if (event.target === bookingModal) {
+          closeBookingReminder();
+        }
+      });
+    }
+
+    bookingModalCloseEls.forEach(el => {
+      el.addEventListener('click', (event) => {
+        event.preventDefault();
+        closeBookingReminder();
+      });
+    });
+
+    if (bookingModalCTA) {
+      bookingModalCTA.addEventListener('click', (event) => {
+        event.preventDefault();
+        closeBookingReminder();
+        if (typeof window.openBookingWizard === 'function') {
+          window.openBookingWizard();
+        } else {
+          showToast('برای رزرو نوبت لطفاً با فروشگاه تماس بگیرید.', 'info');
+        }
+      });
+    }
+
+    document.addEventListener('keydown', handleModalKeydown);
 
     updateUI();
     attemptInit();
