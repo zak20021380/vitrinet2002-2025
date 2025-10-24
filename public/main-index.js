@@ -187,8 +187,112 @@ function tokenize(value) {
     .filter(Boolean);
 }
 
+// Enhanced security functions
 function escapeHTML(str) {
-  return (str || '').replace(/[&<>"']/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch]));
+  if (!str) return '';
+  const div = document.createElement('div');
+  div.textContent = str;
+  return div.innerHTML
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;')
+    .replace(/\//g, '&#x2F;');
+}
+
+function sanitizeURL(url) {
+  if (!url) return '#';
+
+  // Remove any control characters, null bytes, and dangerous characters
+  const cleaned = String(url).replace(/[\x00-\x1F\x7F-\x9F]/g, '');
+
+  // Check if URL starts with allowed protocols
+  const allowedProtocols = ['http:', 'https:', '/'];
+  const urlLower = cleaned.toLowerCase().trim();
+
+  // Block javascript:, data:, vbscript:, file: protocols
+  const dangerousPatterns = [
+    /^\s*javascript:/i,
+    /^\s*data:/i,
+    /^\s*vbscript:/i,
+    /^\s*file:/i,
+    /^\s*about:/i
+  ];
+
+  for (const pattern of dangerousPatterns) {
+    if (pattern.test(urlLower)) {
+      console.warn('Blocked potentially dangerous URL:', url);
+      return '#';
+    }
+  }
+
+  // Allow relative URLs or URLs with allowed protocols
+  if (cleaned.startsWith('/') || cleaned.startsWith('./') ||
+      cleaned.startsWith('http://') || cleaned.startsWith('https://')) {
+    return cleaned;
+  }
+
+  // If no protocol specified, treat as relative
+  if (!cleaned.includes(':')) {
+    return cleaned;
+  }
+
+  console.warn('Blocked URL with unrecognized protocol:', url);
+  return '#';
+}
+
+function sanitizeSearchInput(input) {
+  if (!input || typeof input !== 'string') return '';
+
+  // Remove any HTML tags
+  let sanitized = input.replace(/<[^>]*>/g, '');
+
+  // Remove script-related content
+  sanitized = sanitized.replace(/javascript:/gi, '');
+  sanitized = sanitized.replace(/on\w+\s*=/gi, '');
+
+  // Limit length
+  const maxLength = 100;
+  if (sanitized.length > maxLength) {
+    sanitized = sanitized.substring(0, maxLength);
+  }
+
+  // Remove control characters except newlines and tabs
+  sanitized = sanitized.replace(/[\x00-\x08\x0B-\x0C\x0E-\x1F\x7F-\x9F]/g, '');
+
+  return sanitized.trim();
+}
+
+function sanitizeImageURL(url) {
+  if (!url) return '';
+
+  // Clean the URL
+  const cleaned = String(url).trim();
+
+  // Block dangerous protocols in images
+  const dangerousPatterns = [
+    /^\s*javascript:/i,
+    /^\s*data:(?!image\/)/i, // Allow only data:image/
+    /^\s*vbscript:/i,
+    /^\s*file:/i
+  ];
+
+  for (const pattern of dangerousPatterns) {
+    if (pattern.test(cleaned)) {
+      console.warn('Blocked potentially dangerous image URL:', url);
+      return '';
+    }
+  }
+
+  // Allow http(s), relative paths, and data:image URLs
+  if (cleaned.startsWith('http://') || cleaned.startsWith('https://') ||
+      cleaned.startsWith('/') || cleaned.startsWith('./') ||
+      cleaned.startsWith('data:image/')) {
+    return cleaned;
+  }
+
+  return '';
 }
 
 function highlightText(text, rawTokens) {
@@ -466,8 +570,9 @@ function renderResultCard(item, rawTokens) {
     </div>
   `;
 
+  const safeURL = sanitizeURL(item.url);
   return `
-    <a href="${item.url}" class="group block rounded-2xl border border-slate-100 bg-white/90 p-4 shadow-lg transition-all duration-200 hover:-translate-y-1 hover:border-emerald-200 hover:shadow-2xl focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400">
+    <a href="${safeURL}" class="group block rounded-2xl border border-slate-100 bg-white/90 p-4 shadow-lg transition-all duration-200 hover:-translate-y-1 hover:border-emerald-200 hover:shadow-2xl focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400" rel="noopener noreferrer">
       ${body}
     </a>
   `;
@@ -572,7 +677,17 @@ function performSearch(tokens) {
 
 async function handleSearch(query, { immediate = false } = {}) {
   if (!searchElements.input) return;
-  const trimmed = (query || '').trim();
+
+  // Sanitize and validate input
+  const sanitized = sanitizeSearchInput(query);
+  const trimmed = sanitized.trim();
+
+  // Check if search query is valid
+  if (trimmed.length > 0 && trimmed.length < 2) {
+    // Too short to search
+    return;
+  }
+
   try {
     await ensureSearchData();
   } catch {
@@ -603,10 +718,35 @@ async function handleSearch(query, { immediate = false } = {}) {
   }
 }
 
+// Rate limiting for search
+const searchRateLimiter = {
+  requests: [],
+  maxRequests: 30, // Maximum requests
+  timeWindow: 60000, // Per 60 seconds (1 minute)
+
+  isAllowed() {
+    const now = Date.now();
+    // Remove old requests outside time window
+    this.requests = this.requests.filter(time => now - time < this.timeWindow);
+
+    if (this.requests.length >= this.maxRequests) {
+      console.warn('Search rate limit exceeded. Please slow down.');
+      return false;
+    }
+
+    this.requests.push(now);
+    return true;
+  }
+};
+
 let searchDebounce;
 function scheduleSearch(query) {
   clearTimeout(searchDebounce);
-  searchDebounce = setTimeout(() => handleSearch(query), 280);
+  searchDebounce = setTimeout(() => {
+    if (searchRateLimiter.isAllowed()) {
+      handleSearch(query);
+    }
+  }, 280);
 }
 
 function attachSearchEvents() {
@@ -723,12 +863,15 @@ async function loadShops() {
         p-4 rounded-2xl shadow-xl border bg-white/90 backdrop-blur-[3px] transition-all duration-200 special-ad-card
       `;
 
-      const adTitleHTML = ad.adTitle && ad.adTitle.trim()
-        ? `<div class="ad-title">${ad.adTitle}</div>`
+      const safeAdTitle = escapeHTML(ad.adTitle || '');
+      const safeAdText = escapeHTML(ad.adText || '');
+
+      const adTitleHTML = safeAdTitle.trim()
+        ? `<div class="ad-title">${safeAdTitle}</div>`
         : '';
 
       // استایل مدرن adText
-      const adTextHTML = ad.adText && ad.adText.trim()
+      const adTextHTML = safeAdText.trim()
         ? `<div style="
               margin-top: 13px;
               margin-bottom: 0;
@@ -747,24 +890,28 @@ async function loadShops() {
               max-width: 96%;
               margin-left:auto;margin-right:auto;
            ">
-              ${ad.adText}
+              ${safeAdText}
            </div>`
         : '';
+
+      const safeBannerImage = sanitizeImageURL(ad.bannerImage);
+      const safeShopTitle = escapeHTML(ad.shopTitle || 'فروشگاه ویژه');
 
       card.innerHTML = `
         <div class="ad-badge-vip">تبلیغ ویژه</div>
         <div class="w-full h-[120px] sm:h-[160px] rounded-xl mb-5 flex items-center justify-center relative overflow-hidden shop-card-banner"
              style="background:linear-gradient(100deg,#e0fdfa,#d4fbe8);">
           ${
-            ad.bannerImage
-              ? `<img src="/uploads/${ad.bannerImage}"
+            safeBannerImage
+              ? `<img src="/uploads/${safeBannerImage}"
                      class="object-cover w-full h-full absolute inset-0 rounded-xl"
-                     alt="لوگو تبلیغ ویژه">`
+                     alt="لوگو تبلیغ ویژه"
+                     onerror="this.style.display='none'">`
               : `<div class="flex items-center justify-center w-full h-full absolute inset-0 rounded-xl text-[#f59e42] text-4xl font-black">AD</div>`
           }
         </div>
         <div class="w-full flex flex-col items-center mb-2">
-          <span class="font-extrabold text-lg sm:text-xl text-[#10b981] mb-1">${ad.shopTitle || 'فروشگاه ویژه'}</span>
+          <span class="font-extrabold text-lg sm:text-xl text-[#10b981] mb-1">${safeShopTitle}</span>
           ${adTitleHTML}
         </div>
         ${adTextHTML}
@@ -794,33 +941,38 @@ async function loadShops() {
         bg-white/90 backdrop-blur-[3px] transition-all duration-200
       `;
       // برای فروشگاه اگه دسته‌بندی نبود، نشون بده «سایر»
-      const shopCategoryHTML = shop.category && shop.category.trim()
-        ? `<span class="inline-block bg-[#10b981]/10 text-[#10b981] text-xs font-bold px-3 py-1 rounded-full">${shop.category}</span>`
+      const safeCategory = escapeHTML(shop.category || '');
+      const shopCategoryHTML = safeCategory.trim()
+        ? `<span class="inline-block bg-[#10b981]/10 text-[#10b981] text-xs font-bold px-3 py-1 rounded-full">${safeCategory}</span>`
         : `<span class="inline-block bg-[#cbd5e1]/40 text-[#64748b] text-xs font-bold px-3 py-1 rounded-full">سایر</span>`;
+
+      const safeBoardImage = sanitizeImageURL(shop.boardImage);
+      const safeBanner = sanitizeImageURL(shop.banner);
+      const safeStoreName = escapeHTML(shop.storename || 'فروشگاه');
 
       card.innerHTML = `
         <div class="w-full h-[120px] sm:h-[160px] rounded-xl mb-5 flex items-center justify-center relative overflow-hidden"
              style="background:linear-gradient(100deg,#e0fdfa,#d4fbe8);">
           ${
-            shop.boardImage && shop.boardImage.length > 0
-              ? `<img src="${shop.boardImage}" class="object-cover w-full h-full absolute inset-0 rounded-xl" alt="لوگو فروشگاه">`
+            safeBoardImage
+              ? `<img src="${safeBoardImage}" class="object-cover w-full h-full absolute inset-0 rounded-xl" alt="لوگو فروشگاه" onerror="this.style.display='none'">`
               : (
-                  shop.banner
-                    ? `<img src="${shop.banner}" class="object-cover w-full h-full absolute inset-0 rounded-xl" alt="${shop.storename}">`
+                  safeBanner
+                    ? `<img src="${safeBanner}" class="object-cover w-full h-full absolute inset-0 rounded-xl" alt="${safeStoreName}" onerror="this.style.display='none'">`
                     : `<div class="flex items-center justify-center w-full h-full absolute inset-0 rounded-xl text-gray-300 text-4xl font-black">?</div>`
                 )
           }
           <span class="absolute top-2 right-2 text-xs font-bold px-2 py-1 rounded-full bg-[#10b981] text-white bg-opacity-80">جدید</span>
         </div>
         <div class="w-full flex flex-col items-center mb-2">
-          <span class="font-extrabold text-lg sm:text-xl text-[#10b981] mb-1">${shop.storename}</span>
+          <span class="font-extrabold text-lg sm:text-xl text-[#10b981] mb-1">${safeStoreName}</span>
         </div>
         <div class="flex items-center justify-center gap-2 mb-1 w-full">
           <svg width="18" height="18" fill="none" viewBox="0 0 22 22">
             <circle cx="11" cy="11" r="10" fill="#e0f7fa"/>
             <path d="M11 2.5C7.13 2.5 4 5.61 4 9.45c0 3.52 4.1 7.93 6.2 10.01.46.47 1.2.47 1.66 0 2.1-2.08 6.14-6.49 6.14-10.01C18 5.61 14.87 2.5 11 2.5Zm0 10.25a2.75 2.75 0 1 1 0-5.5 2.75 2.75 0 0 1 0 5.5Z" fill="#10b981"/>
           </svg>
-          <span class="text-gray-700 text-sm sm:text-base font-bold truncate max-w-[180px]">${shop.address}</span>
+          <span class="text-gray-700 text-sm sm:text-base font-bold truncate max-w-[180px]">${escapeHTML(shop.address || '')}</span>
         </div>
         <div class="flex items-center justify-center gap-2 mt-2 w-full">
           ${shopCategoryHTML}
@@ -1272,26 +1424,32 @@ async function loadBantaShops() {
       return;
     }
     shops.forEach(shop => {
-      const badge = shop.category && shop.category.trim()
-        ? `<span class="inline-block bg-[#10b981]/10 text-[#10b981] text-xs font-bold px-3 py-1 rounded-full">${shop.category}</span>`
+      const safeCategory = escapeHTML(shop.category || '');
+      const badge = safeCategory.trim()
+        ? `<span class="inline-block bg-[#10b981]/10 text-[#10b981] text-xs font-bold px-3 py-1 rounded-full">${safeCategory}</span>`
         : `<span class="inline-block bg-[#cbd5e1]/40 text-[#64748b] text-xs font-bold px-3 py-1 rounded-full">سایر</span>`;
 
+      const safeBoardImage = sanitizeImageURL(shop.boardImage);
+      const safeBanner = sanitizeImageURL(shop.banner);
+      const safeStoreName = escapeHTML(shop.storename || 'فروشگاه');
+      const safeShopUrl = escapeHTML(shop.shopurl || '');
+
       const card = document.createElement('a');
-      card.href = shop.shopurl ? `shop.html?shopurl=${shop.shopurl}` : '#';
+      card.href = safeShopUrl ? `shop.html?shopurl=${safeShopUrl}` : '#';
       card.className = 'group glass min-w-[265px] max-w-xs flex-shrink-0 flex flex-col items-center p-4 rounded-2xl shadow-xl border hover:scale-[1.04] hover:shadow-2xl bg-white/90 backdrop-blur-[3px] transition-all duration-200';
       card.innerHTML = `
         <div class="w-full h-[120px] sm:h-[160px] rounded-xl mb-5 flex items-center justify-center relative overflow-hidden" style="background:linear-gradient(100deg,#e0fdfa,#d4fbe8);">
-          ${shop.boardImage ? `<img src="${shop.boardImage}" class="object-cover w-full h-full absolute inset-0 rounded-xl" alt="${shop.storename}">` : (shop.banner ? `<img src="${shop.banner}" class="object-cover w-full h-full absolute inset-0 rounded-xl" alt="${shop.storename}">` : `<div class="flex items-center justify-center w-full h-full absolute inset-0 rounded-xl text-gray-300 text-4xl font-black">?</div>`)}
+          ${safeBoardImage ? `<img src="${safeBoardImage}" class="object-cover w-full h-full absolute inset-0 rounded-xl" alt="${safeStoreName}" onerror="this.style.display='none'">` : (safeBanner ? `<img src="${safeBanner}" class="object-cover w-full h-full absolute inset-0 rounded-xl" alt="${safeStoreName}" onerror="this.style.display='none'">` : `<div class="flex items-center justify-center w-full h-full absolute inset-0 rounded-xl text-gray-300 text-4xl font-black">?</div>`)}
         </div>
         <div class="w-full flex flex-col items-center mb-2">
-          <span class="font-extrabold text-lg sm:text-xl text-[#10b981] mb-1">${shop.storename}</span>
+          <span class="font-extrabold text-lg sm:text-xl text-[#10b981] mb-1">${safeStoreName}</span>
         </div>
         <div class="flex items-center justify-center gap-2 mb-1 w-full">
           <svg width="18" height="18" fill="none" viewBox="0 0 22 22">
             <circle cx="11" cy="11" r="10" fill="#e0f7fa"/>
             <path d="M11 2.5C7.13 2.5 4 5.61 4 9.45c0 3.52 4.1 7.93 6.2 10.01.46.47 1.2.47 1.66 0 2.1-2.08 6.14-6.49 6.14-10.01C18 5.61 14.87 2.5 11 2.5Zm0 10.25a2.75 2.75 0 1 1 0-5.5 2.75 2.75 0 0 1 0 5.5Z" fill="#10b981"/>
           </svg>
-          <span class="text-gray-700 text-sm sm:text-base font-bold truncate max-w-[180px]">${shop.address}</span>
+          <span class="text-gray-700 text-sm sm:text-base font-bold truncate max-w-[180px]">${escapeHTML(shop.address || '')}</span>
         </div>
         <div class="flex items-center justify-center gap-2 mt-2 w-full">
           ${badge}

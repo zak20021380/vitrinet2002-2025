@@ -3,21 +3,30 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+
+  <!-- Security Headers -->
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdn.tailwindcss.com 'unsafe-inline'; style-src 'self' https://fonts.googleapis.com https://cdn.tailwindcss.com 'unsafe-inline'; font-src 'self' https://fonts.gstatic.com; img-src 'self' https: data: blob:; connect-src 'self' http://localhost:5000 https:; frame-ancestors 'none'; base-uri 'self'; form-action 'self';">
+  <meta http-equiv="X-Content-Type-Options" content="nosniff">
+  <meta http-equiv="X-Frame-Options" content="DENY">
+  <meta name="referrer" content="strict-origin-when-cross-origin">
+  <meta http-equiv="Permissions-Policy" content="geolocation=(), microphone=(), camera=()">
+  <meta http-equiv="X-XSS-Protection" content="1; mode=block">
+
   <title>ویترینت | Vitreenet</title>
-  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.tailwindcss.com" crossorigin="anonymous"></script>
   <link rel="stylesheet" href="style-index.css" />
     <script src="main-index.js" defer></script>
-    <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;700&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;700&display=swap" rel="stylesheet" crossorigin="anonymous"/>
     <script src="/nav-active.js" defer></script>
 </head>
 <body class="text-gray-800">
 
 <!-- HEADER افقی همیشه باز -->
 <!-- اضافه کردن فونت Poppins -->
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@900&display=swap" rel="stylesheet" />
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@900&display=swap" rel="stylesheet" crossorigin="anonymous" />
 
 
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@800&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@800&display=swap" rel="stylesheet" crossorigin="anonymous"/>
 
 <header id="mainHeader" class="w-full bg-white/95 shadow-md backdrop-blur-md sticky top-0 z-50">
   <div id="headerInner" class="max-w-7xl mx-auto flex flex-row items-center justify-between px-4 sm:px-6 py-3 md:py-3.5 gap-3">
@@ -118,7 +127,18 @@
       <!-- جستجو مغازه یا کالا -->
       <input type="text"
         class="flex-1 py-3 px-5 border border-gray-200 rounded-full text-base sm:text-lg focus:outline-none shadow-sm transition text-right bg-white/80 w-full"
-        placeholder="جستجوی مغازه، محصول یا برند..." id="mainSearchInput" name="q" aria-label="جستجو" />
+        placeholder="جستجوی مغازه، محصول یا برند..."
+        id="mainSearchInput"
+        name="q"
+        aria-label="جستجو"
+        maxlength="100"
+        pattern="^[\u0600-\u06FFa-zA-Z0-9\s\-_.,!?()]+$"
+        spellcheck="false"
+        autocomplete="off"
+        autocorrect="off"
+        autocapitalize="off"
+        data-lpignore="true"
+        data-form-type="other" />
       <!-- دکمه جستجو -->
       <button type="submit"
         class="btn-grad w-full sm:w-auto px-7 py-3 rounded-full text-base sm:text-lg font-extrabold shadow hover:scale-105 transition-all duration-200"
