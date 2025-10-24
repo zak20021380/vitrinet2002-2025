@@ -123,11 +123,7 @@ const searchElements = {
   form: document.getElementById('searchForm'),
   input: document.getElementById('mainSearchInput'),
   panel: document.getElementById('searchResultsPanel'),
-  container: document.getElementById('searchResultsContainer'),
-  status: document.getElementById('searchStatusText'),
-  queryLabel: document.getElementById('searchQueryLabel'),
-  closeBtn: document.getElementById('closeSearchPanel'),
-  refreshBtn: document.getElementById('refreshSearchBtn')
+  list: document.getElementById('searchResultsList')
 };
 
 const MAX_VISIBLE_SEARCH_RESULTS = 5;
@@ -350,11 +346,9 @@ async function ensureSearchData(force = false) {
   }
 
   searchState.loading = true;
-  if (searchElements.status) {
-    searchElements.status.textContent = 'در حال آماده‌سازی داده‌های جستجو...';
-  }
-  if (searchElements.panel) {
-    searchElements.panel.classList.remove('hidden');
+  if (searchElements.panel && searchElements.list) {
+    searchElements.list.innerHTML = '<div class="search-status search-status--loading">در حال آماده‌سازی داده‌های جستجو...</div>';
+    searchElements.panel.classList.add('active');
   }
 
   const loader = (async () => {
@@ -376,22 +370,16 @@ async function ensureSearchData(force = false) {
       searchState.loaded = true;
       searchState.lastUpdated = new Date();
 
-      if (searchElements.status) {
-        const { shops: sCount, products: pCount, centers: cCount } = summary;
-        searchElements.status.textContent = `بیش از ${sCount} مغازه، ${pCount} محصول و ${cCount} مرکز خرید برای جستجو آماده است.`;
-      }
-      if (searchElements.refreshBtn) {
-        searchElements.refreshBtn.classList.remove('hidden');
+      if (!searchElements.input?.value.trim()) {
+        renderDefaultResults();
       }
 
       return items;
     } catch (error) {
       console.error('search preload error', error);
-      if (searchElements.status) {
-        searchElements.status.textContent = 'خطا در آماده‌سازی داده‌های جستجو. لطفاً دوباره تلاش کنید.';
-      }
-      if (searchElements.container) {
-        searchElements.container.innerHTML = '<div class="rounded-2xl border border-dashed border-rose-200 bg-white/80 p-6 text-center text-sm font-bold text-rose-500">در بارگذاری داده‌های جستجو خطایی رخ داد. لطفاً بعداً دوباره تلاش کنید.</div>';
+      if (searchElements.list) {
+        searchElements.list.innerHTML = '<div class="search-status search-status--error">خطا در آماده‌سازی داده‌های جستجو. لطفاً دوباره تلاش کنید.</div>';
+        searchElements.panel?.classList.add('active');
       }
       throw error;
     } finally {
@@ -406,109 +394,86 @@ async function ensureSearchData(force = false) {
 
 function renderGroup(type, items, rawTokens) {
   if (!items || !items.length) return '';
-  const meta = typeMeta[type] || { label: type, accent: 'from-[#94a3b8] to-[#cbd5f5]', icon: '' };
-  const groupCards = items.map(item => renderResultCard(item, rawTokens)).join('');
-  return `
-    <section class="space-y-4">
-      <div class="flex items-center justify-between gap-3">
-        <div class="flex items-center gap-2 text-sm sm:text-base font-extrabold text-slate-600">
-          <span class="flex h-9 w-9 items-center justify-center rounded-2xl bg-gradient-to-br ${meta.accent} text-white shadow-md">
-            ${meta.icon}
-          </span>
-          <span class="text-slate-700">${meta.label}</span>
-        </div>
-      </div>
-      <div class="grid gap-3 sm:gap-4 ${type === 'category' ? 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3' : 'grid-cols-1 sm:grid-cols-2'}">
-        ${groupCards}
-      </div>
-    </section>
-  `;
+  return items.map(item => renderResultRow(item, rawTokens)).join('');
 }
 
-function renderResultCard(item, rawTokens) {
+function renderResultRow(item, rawTokens) {
+  const meta = typeMeta[item.type] || { label: item.type, icon: '' };
   const titleHTML = highlightText(item.title, rawTokens);
   const subtitleHTML = item.subtitle ? highlightText(item.subtitle, rawTokens) : '';
   const locationHTML = item.location ? highlightText(item.location, rawTokens) : '';
   const descriptionHTML = item.description ? highlightText(item.description, rawTokens) : '';
-  const badge = item.badge
-    ? `<span class="inline-flex items-center justify-center rounded-full bg-emerald-100 px-3 py-1 text-[11px] font-extrabold text-emerald-600">${escapeHTML(item.badge)}</span>`
-    : '';
 
-  let footerHTML = '';
+  const details = [];
   if (item.type === 'product') {
-    const price = item.extras?.priceText;
-    const shopName = item.extras?.shopName ? escapeHTML(item.extras.shopName) : '';
-    footerHTML = `
-      <div class="mt-3 flex flex-wrap items-center justify-between gap-2 text-xs sm:text-sm">
-        ${shopName ? `<span class="inline-flex items-center gap-1 rounded-full bg-sky-50 px-3 py-1 font-bold text-sky-600"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 01-2.83 2.83l-.06-.06A1.65 1.65 0 0015 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 008.6 15a1.65 1.65 0 00-1.82-.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 005 8.6a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 008.6 5a1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0015 8.6a1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 15z"></path></svg>${shopName}</span>` : ''}
-        ${price ? `<span class="inline-flex items-center rounded-full bg-emerald-500/10 px-3 py-1 text-[11px] font-extrabold text-emerald-600">${escapeHTML(price)}</span>` : ''}
-      </div>
-    `;
-  } else if (item.type === 'center') {
-    const stores = item.extras?.stores;
-    footerHTML = stores !== undefined
-      ? `<div class="mt-3 inline-flex items-center gap-1 rounded-full bg-indigo-50 px-3 py-1 text-xs font-bold text-indigo-600"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-6 9 6"/><path d="M4 10v10h16V10"/><path d="M9 21V12h6v9"/></svg>${stores || 0} مغازه</div>`
-      : '';
-  } else if (item.type === 'category') {
-    footerHTML = `<div class="mt-3 inline-flex items-center gap-1 rounded-full bg-amber-50 px-3 py-1 text-xs font-bold text-amber-600"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/></svg>${escapeHTML(item.subtitle)}</div>`;
+    const shopName = item.extras?.shopName ? highlightText(item.extras.shopName, rawTokens) : '';
+    const priceText = item.extras?.priceText || formatPrice(item.extras?.price);
+    if (shopName) details.push(shopName);
+    if (subtitleHTML) details.push(subtitleHTML);
+    if (priceText) details.push(escapeHTML(priceText));
+  } else {
+    if (subtitleHTML) details.push(subtitleHTML);
+    if (locationHTML) {
+      details.push(locationHTML);
+    } else if (!subtitleHTML && descriptionHTML) {
+      details.push(descriptionHTML);
+    }
+    if (item.type === 'center' && item.extras?.stores !== undefined) {
+      const stores = escapeHTML(String(item.extras.stores || 0));
+      details.push(`${stores} مغازه`);
+    }
   }
 
-  const body = `
-    <div class="flex flex-col gap-2 text-right">
-      <div class="flex flex-wrap items-center justify-between gap-2">
-        <h4 class="text-base sm:text-lg font-black text-slate-700 leading-7">${titleHTML}</h4>
-        ${badge}
-      </div>
-      ${subtitleHTML ? `<p class="text-xs sm:text-sm font-bold text-slate-500">${subtitleHTML}</p>` : ''}
-      ${locationHTML ? `<p class="flex items-center justify-end gap-1 text-xs text-slate-400"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 5.25-9 13-9 13s-9-7.75-9-13a9 9 0 1 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>${locationHTML}</p>` : ''}
-      ${descriptionHTML ? `<p class="text-[11px] sm:text-xs leading-6 text-slate-400">${descriptionHTML}</p>` : ''}
-      ${footerHTML}
-    </div>
-  `;
+  const badgeText = item.badge || meta.label || '';
+  const description = details.filter(Boolean).join(' • ');
 
   return `
-    <a href="${item.url}" class="group block rounded-2xl border border-slate-100 bg-white/90 p-4 shadow-lg transition-all duration-200 hover:-translate-y-1 hover:border-emerald-200 hover:shadow-2xl focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400">
-      ${body}
+    <a href="${item.url}" class="search-result-item" data-type="${item.type}">
+      <div class="search-result-icon">${meta.icon || ''}</div>
+      <div class="search-result-content">
+        <div class="search-result-title">${titleHTML}</div>
+        ${description ? `<div class="search-result-desc">${description}</div>` : ''}
+      </div>
+      ${badgeText ? `<span class="search-result-badge ${item.type}">${escapeHTML(badgeText)}</span>` : ''}
     </a>
   `;
 }
 
 function renderDefaultResults() {
-  if (!searchElements.panel) return;
-  const { trending, summary } = searchState;
+  if (!searchElements.panel || !searchElements.list) return;
+  const { trending, summary, loaded } = searchState;
   const typeSequence = ['shop', 'product', 'center', 'category'];
   let remainingSlots = MAX_VISIBLE_SEARCH_RESULTS;
-  const groups = [];
+  const sections = [];
 
   typeSequence.forEach(type => {
     if (remainingSlots <= 0) return;
     const source = trending[type] || [];
     if (!source.length) return;
     const limitedItems = source.slice(0, remainingSlots);
-    groups.push(renderGroup(type, limitedItems, []));
+    sections.push(renderGroup(type, limitedItems, []));
     remainingSlots -= limitedItems.length;
   });
 
-  if (searchElements.queryLabel) {
-    searchElements.queryLabel.textContent = '';
-  }
-  if (searchElements.status) {
-    if (searchState.loaded) {
-      searchElements.status.textContent = `برای شروع، محبوب‌ترین گزینه‌ها از بین ${summary.shops} مغازه و ${summary.centers} مرکز خرید را ببینید.`;
-    } else {
-      searchElements.status.textContent = 'برای مشاهده نتایج جستجو، عبارت موردنظر خود را تایپ کنید.';
-    }
-  }
-  if (searchElements.container) {
-    searchElements.container.innerHTML = groups.length
-      ? groups.join('')
-      : '<div class="rounded-2xl border border-dashed border-slate-200 bg-white/70 p-8 text-center text-sm font-bold text-slate-400">هنوز داده‌ای برای نمایش وجود ندارد.</div>';
-  }
-  searchElements.panel.classList.remove('hidden');
+  const shopsCount = Number(summary.shops || 0).toLocaleString('fa-IR');
+  const centersCount = Number(summary.centers || 0).toLocaleString('fa-IR');
+  const introMessage = loaded
+    ? `برای شروع، محبوب‌ترین گزینه‌ها از بین ${shopsCount} مغازه و ${centersCount} مرکز خرید را ببینید.`
+    : 'برای مشاهده نتایج جستجو، عبارت موردنظر خود را تایپ کنید.';
+
+  const content = sections.length
+    ? sections.join('')
+    : '<div class="search-empty">هنوز داده‌ای برای نمایش وجود ندارد.</div>';
+
+  searchElements.list.innerHTML = `
+    <div class="search-status search-status--muted">${introMessage}</div>
+    ${content}
+  `;
+  searchElements.panel.classList.add('active');
 }
 
 function renderSearchResults(query, matches, rawTokens, totalMatches = matches.length) {
-  if (!searchElements.panel) return;
+  if (!searchElements.panel || !searchElements.list) return;
   const grouped = matches.reduce((acc, item) => {
     (acc[item.type] = acc[item.type] || []).push(item);
     return acc;
@@ -521,28 +486,23 @@ function renderSearchResults(query, matches, rawTokens, totalMatches = matches.l
     renderGroup('category', grouped.category || [], rawTokens)
   ].filter(Boolean);
 
-  if (searchElements.container) {
-    if (sections.length) {
-      searchElements.container.innerHTML = sections.join('');
-    } else {
-      searchElements.container.innerHTML = '<div class="rounded-2xl border border-dashed border-slate-200 bg-white/70 p-8 text-center text-sm font-bold text-slate-400">هیچ نتیجه‌ای با این جستجو پیدا نشد. عبارات مشابه یا کوتاه‌تر را امتحان کنید.</div>';
-    }
+  const safeQuery = escapeHTML(query);
+  if (sections.length) {
+    const displayed = matches.length;
+    const displayedText = Number(displayed).toLocaleString('fa-IR');
+    const totalText = Number(totalMatches).toLocaleString('fa-IR');
+    const summaryText = totalMatches && totalMatches > displayed
+      ? `${displayedText} نتیجه از ${totalText} نتیجه مرتبط با «${safeQuery}» نمایش داده شد.`
+      : `${displayedText} نتیجه مرتبط با «${safeQuery}» پیدا شد.`;
+    searchElements.list.innerHTML = `
+      <div class="search-status search-status--muted">${summaryText}</div>
+      ${sections.join('')}
+    `;
+  } else {
+    searchElements.list.innerHTML = `<div class="search-empty">نتیجه‌ای برای «${safeQuery}» یافت نشد.</div>`;
   }
 
-  if (searchElements.queryLabel) {
-    searchElements.queryLabel.textContent = `«${query}»`;
-  }
-  if (searchElements.status) {
-    const displayed = matches.length;
-    if (totalMatches && totalMatches > displayed) {
-      searchElements.status.textContent = `${displayed} نتیجه از ${totalMatches} نتیجه مرتبط با «${query}» نمایش داده شد.`;
-    } else {
-      searchElements.status.textContent = displayed
-        ? `${displayed} نتیجه مرتبط با «${query}» پیدا شد.`
-        : `نتیجه‌ای برای «${query}» پیدا نشد.`;
-    }
-  }
-  searchElements.panel.classList.remove('hidden');
+  searchElements.panel.classList.add('active');
 }
 
 function performSearch(tokens) {
@@ -597,7 +557,7 @@ async function handleSearch(query, { immediate = false } = {}) {
 
   if (immediate && matches.length) {
     setTimeout(() => {
-      const firstLink = searchElements.container?.querySelector('a');
+      const firstLink = searchElements.list?.querySelector('a');
       firstLink?.focus();
     }, 10);
   }
@@ -612,11 +572,37 @@ function scheduleSearch(query) {
 function attachSearchEvents() {
   if (!searchElements.input || !searchElements.form) return;
 
-  searchElements.input.addEventListener('focus', () => {
-    ensureSearchData().then(() => renderDefaultResults()).catch(() => renderDefaultResults());
+  const hidePanel = () => {
     if (searchElements.panel) {
-      searchElements.panel.classList.remove('hidden');
+      searchElements.panel.classList.remove('active');
     }
+    if (searchElements.list) {
+      searchElements.list.innerHTML = '';
+    }
+    const adPopup = document.getElementById('adPopup');
+    if (adPopup) {
+      if (typeof toggleAdPopupVisibility === 'function') {
+        toggleAdPopupVisibility(adPopup, false);
+      } else {
+        adPopup.classList.remove('is-visible');
+        adPopup.setAttribute('aria-hidden', 'true');
+      }
+    }
+  };
+
+  searchElements.input.addEventListener('focus', () => {
+    ensureSearchData()
+      .then(() => {
+        if (!searchElements.input.value.trim()) {
+          renderDefaultResults();
+        }
+      })
+      .catch(() => {
+        if (searchElements.list && !searchElements.list.innerHTML.trim()) {
+          searchElements.list.innerHTML = '<div class="search-status search-status--error">خطا در آماده‌سازی داده‌های جستجو. لطفاً دوباره تلاش کنید.</div>';
+          searchElements.panel?.classList.add('active');
+        }
+      });
   });
 
   searchElements.input.addEventListener('input', (event) => {
@@ -631,35 +617,18 @@ function attachSearchEvents() {
   });
 
   document.addEventListener('click', (event) => {
-    if (!searchElements.panel || searchElements.panel.classList.contains('hidden')) return;
+    if (!searchElements.panel || !searchElements.panel.classList.contains('active')) return;
     const isInside = searchElements.panel.contains(event.target) || searchElements.form.contains(event.target);
     if (!isInside) {
-      searchElements.panel.classList.add('hidden');
+      hidePanel();
     }
   });
 
   document.addEventListener('keydown', (event) => {
-    if (event.key === 'Escape' && searchElements.panel && !searchElements.panel.classList.contains('hidden')) {
-      searchElements.panel.classList.add('hidden');
+    if (event.key === 'Escape' && searchElements.panel?.classList.contains('active')) {
+      hidePanel();
     }
   });
-
-  if (searchElements.closeBtn) {
-    searchElements.closeBtn.addEventListener('click', () => {
-      if (searchElements.panel) searchElements.panel.classList.add('hidden');
-    });
-  }
-
-  if (searchElements.refreshBtn) {
-    searchElements.refreshBtn.addEventListener('click', async () => {
-      try {
-        await ensureSearchData(true);
-        handleSearch(searchElements.input.value);
-      } catch {
-        // خطا از قبل مدیریت شده است
-      }
-    });
-  }
 }
 
 attachSearchEvents();
@@ -1825,9 +1794,15 @@ function toggleAdPopupVisibility(popupEl, shouldShow) {
   if (shouldShow) {
     popupEl.classList.add('is-visible');
     popupEl.setAttribute('aria-hidden', 'false');
+    if (searchElements.panel) {
+      searchElements.panel.classList.add('active');
+    }
   } else {
     popupEl.classList.remove('is-visible');
     popupEl.setAttribute('aria-hidden', 'true');
+    if (searchElements.panel && searchElements.list && !searchElements.list.innerHTML.trim()) {
+      searchElements.panel.classList.remove('active');
+    }
   }
 }
 
