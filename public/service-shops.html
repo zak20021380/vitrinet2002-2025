@@ -388,10 +388,13 @@
 
 /* Customer Follow Button Styles */
 .customer-follow-btn {
-  background: linear-gradient(135deg, #3b82f6, #06b6d4);
-  color: white;
+  background: rgba(255, 255, 255, 0.95);
+  color: #1e40af;
   position: relative;
   overflow: hidden;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
 }
 
 .customer-follow-btn::before {
@@ -401,7 +404,7 @@
   left: 0;
   width: 100%;
   height: 100%;
-  background: linear-gradient(135deg, #2563eb, #0891b2);
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.4));
   opacity: 0;
   transition: opacity 0.3s ease;
 }
@@ -410,19 +413,101 @@
   opacity: 1;
 }
 
-.customer-follow-btn:disabled {
-  background: linear-gradient(135deg, #10b981, #059669);
-  cursor: not-allowed;
-  opacity: 0.95;
+.customer-follow-btn:active {
+  transform: scale(0.95);
 }
 
+.customer-follow-btn:disabled,
 .customer-follow-btn[aria-pressed="true"] {
   background: linear-gradient(135deg, #10b981, #059669);
+  color: white;
+  border-color: rgba(255, 255, 255, 0.4);
+}
+
+.customer-follow-btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.9;
 }
 
 .customer-follow-btn > * {
   position: relative;
   z-index: 1;
+}
+
+/* Mobile Header Enhancements */
+@media (max-width: 768px) {
+  #mobile-header {
+    animation: slideDown 0.4s ease-out;
+  }
+
+  @keyframes slideDown {
+    from {
+      opacity: 0;
+      transform: translateY(-10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  /* Smooth transitions for mobile header elements */
+  #mobile-header .group:hover .w-9 {
+    transform: scale(1.05) rotate(-2deg);
+  }
+
+  /* Enhanced shadow on scroll */
+  #main-header.scrolled #mobile-header {
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+  }
+
+  /* Animated gradient for customer section */
+  @keyframes gradientFlow {
+    0%, 100% {
+      background-position: 0% 50%;
+    }
+    50% {
+      background-position: 100% 50%;
+    }
+  }
+
+  #mobile-header [data-customer-section] {
+    background-size: 200% 200%;
+    animation: gradientFlow 8s ease infinite;
+  }
+
+  /* Pulse effect for customer count */
+  #mobile-header [data-customer-count] {
+    animation: countPulse 2s ease-in-out infinite;
+  }
+
+  @keyframes countPulse {
+    0%, 100% {
+      transform: scale(1);
+    }
+    50% {
+      transform: scale(1.05);
+    }
+  }
+
+  /* Button press feedback */
+  #mobile-header button:active {
+    transform: scale(0.95);
+  }
+
+  /* Shop name card subtle float */
+  #mobile-header .rounded-2xl {
+    animation: subtleFloat 3s ease-in-out infinite;
+  }
+
+  @keyframes subtleFloat {
+    0%, 100% {
+      transform: translateY(0px);
+    }
+    50% {
+      transform: translateY(-2px);
+    }
+  }
 }
 
 /* Professional booking status styles */
@@ -532,54 +617,89 @@ async function getShopUrlFromLocation() {
   <!-- Elegant gradient line -->
   <div aria-hidden="true" class="h-[3px] w-full bg-gradient-to-l from-cyan-500 via-blue-600 to-purple-600 shadow-sm"></div>
 
-  <!-- ========== Mobile ========== -->
-  <div id="mobile-header" class="md:hidden px-3 py-2">
-    <div id="mobile-top" class="flex items-center justify-between gap-2 mb-2">
-      <!-- Right: Brand with enhanced styling -->
-      <a href="/index.html" class="flex items-center font-black text-[14px] bg-gradient-to-l from-blue-600 via-blue-700 to-purple-600 bg-clip-text text-transparent tracking-tight select-none flex-shrink-0">
-        <span class="leading-none">ویترینت</span>
+  <!-- ========== Mobile - Redesigned ========== -->
+  <div id="mobile-header" class="md:hidden">
+    <!-- Top Section: Brand + Actions -->
+    <div class="flex items-center justify-between px-4 py-3 bg-gradient-to-b from-white via-slate-50/50 to-transparent">
+      <!-- Brand Logo with Icon -->
+      <a href="/index.html" class="flex items-center gap-2 group">
+        <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-blue-600 via-blue-700 to-purple-600 flex items-center justify-center shadow-lg shadow-blue-500/30 group-hover:shadow-blue-500/50 transition-all duration-300 group-hover:scale-105">
+          <i class="fa-solid fa-store text-white text-[14px]"></i>
+        </div>
+        <span class="font-black text-[15px] bg-gradient-to-l from-blue-600 via-blue-700 to-purple-600 bg-clip-text text-transparent tracking-tight">
+          ویترینت
+        </span>
       </a>
 
-      <!-- Center: Shop title with better prominence -->
-      <h1 id="header-shop-name-mobile"
-          class="flex-1 mx-2 min-w-0 text-center text-[13px] font-bold text-slate-800 truncate"
-          title="نام فروشگاه">
-        نام فروشگاه
-      </h1>
-
-      <!-- Left: Action buttons with modern design -->
-      <div class="flex items-center gap-1.5 flex-shrink-0">
+      <!-- Action Buttons -->
+      <div class="flex items-center gap-2">
         <button id="mobile-address-chip" data-open="addressModal" aria-label="آدرس"
-                class="h-8 px-2.5 rounded-lg bg-blue-50 border border-blue-200/60 hover:bg-blue-100 active:scale-95 transition-all duration-200 text-[11px] font-semibold text-blue-700 flex items-center gap-1.5">
-          <i class="fa-solid fa-location-dot text-blue-600 text-[11px]"></i>
+                class="h-9 px-3 rounded-xl bg-gradient-to-br from-blue-50 to-blue-100/50 border border-blue-200/70 hover:border-blue-300 active:scale-95 transition-all duration-200 text-[11px] font-bold text-blue-700 flex items-center gap-1.5 shadow-sm hover:shadow-md">
+          <i class="fa-solid fa-location-dot text-blue-600 text-[12px]"></i>
           <span class="max-[360px]:hidden">آدرس</span>
         </button>
         <button id="mobile-report-trigger" data-open="reportModal" aria-label="گزارش"
-                class="h-8 w-8 grid place-items-center rounded-lg bg-slate-50 border border-slate-200/60 hover:bg-slate-100 active:scale-95 transition-all duration-200">
-          <i class="fa-regular fa-flag text-blue-700 text-[12px]"></i>
+                class="h-9 w-9 grid place-items-center rounded-xl bg-gradient-to-br from-slate-50 to-slate-100/50 border border-slate-200/70 hover:border-slate-300 active:scale-95 transition-all duration-200 shadow-sm hover:shadow-md">
+          <i class="fa-regular fa-flag text-slate-700 text-[13px]"></i>
         </button>
+      </div>
+    </div>
+
+    <!-- Shop Name Section - More Prominent -->
+    <div class="px-4 pb-3">
+      <div class="bg-gradient-to-br from-white via-blue-50/30 to-purple-50/20 rounded-2xl border border-blue-100/60 shadow-sm backdrop-blur-sm overflow-hidden">
+        <div class="relative px-4 py-3">
+          <!-- Decorative corner accent -->
+          <div class="absolute top-0 left-0 w-20 h-20 bg-gradient-to-br from-blue-400/10 to-transparent rounded-full blur-2xl"></div>
+          <div class="absolute bottom-0 right-0 w-16 h-16 bg-gradient-to-tl from-purple-400/10 to-transparent rounded-full blur-2xl"></div>
+
+          <div class="relative flex items-center justify-center gap-2">
+            <div class="flex-1 text-center">
+              <h1 id="header-shop-name-mobile"
+                  class="text-[16px] font-black text-slate-900 truncate mb-0.5"
+                  title="نام فروشگاه">
+                نام فروشگاه
+              </h1>
+              <p class="text-[10px] font-medium text-slate-500">صفحه خدمات و محصولات</p>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
 
     <!-- keep stub for your scroll logic -->
     <div id="mobile-chips" class="hidden h-0 overflow-hidden"></div>
 
-    <!-- Enhanced customer section with compact design -->
-    <div class="flex items-center justify-between rounded-lg bg-white border border-blue-200/50 px-3 py-2 shadow-sm" data-customer-section>
-      <div class="flex items-center gap-2">
-        <span class="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-blue-500 to-blue-600 text-white">
-          <i class="fa-solid fa-user-group text-[12px]"></i>
-        </span>
-        <div class="flex flex-col leading-tight">
-          <span class="text-[10px] font-medium text-slate-600">مشتریان</span>
-          <span class="text-base font-bold text-blue-600" data-customer-count>۰</span>
+    <!-- Customer Section - Redesigned -->
+    <div class="px-4 pb-3">
+      <div class="relative overflow-hidden rounded-2xl bg-gradient-to-br from-blue-500 via-blue-600 to-blue-700 shadow-lg shadow-blue-500/30" data-customer-section>
+        <!-- Animated background pattern -->
+        <div class="absolute inset-0 opacity-10">
+          <div class="absolute top-0 right-0 w-32 h-32 bg-white rounded-full blur-3xl"></div>
+          <div class="absolute bottom-0 left-0 w-24 h-24 bg-white rounded-full blur-2xl"></div>
+        </div>
+
+        <div class="relative flex items-center justify-between px-4 py-3">
+          <!-- Customer Count -->
+          <div class="flex items-center gap-3">
+            <div class="w-11 h-11 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center border border-white/30 shadow-inner">
+              <i class="fa-solid fa-user-group text-white text-[14px]"></i>
+            </div>
+            <div class="flex flex-col">
+              <span class="text-[10px] font-semibold text-blue-100 tracking-wide uppercase">مشتریان فعال</span>
+              <span class="text-[20px] font-black text-white leading-none" data-customer-count>۰</span>
+            </div>
+          </div>
+
+          <!-- Follow Button -->
+          <button type="button"
+                  class="customer-follow-btn inline-flex items-center justify-center gap-1.5 rounded-xl px-4 py-2.5 text-[12px] font-bold transition-all duration-200 active:scale-95 shadow-lg hover:shadow-xl"
+                  data-customer-follow>
+            <i class="fa-solid fa-plus text-[11px]"></i>
+            <span>دنبال کردن</span>
+          </button>
         </div>
       </div>
-      <button type="button"
-              class="customer-follow-btn inline-flex items-center justify-center gap-1.5 rounded-lg px-3 py-1.5 text-[11px] font-semibold transition-all duration-200 active:scale-95 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500"
-              data-customer-follow>
-        دنبال کردن
-      </button>
     </div>
   </div>
 
