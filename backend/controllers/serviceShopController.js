@@ -784,6 +784,11 @@ const matchesLegacyFilters = (item, filters = {}) => {
     if (!cityMatch) return false;
   }
 
+  if (filters.category) {
+    const categoryMatch = containsNormalized(item.category || '', filters.category);
+    if (!categoryMatch) return false;
+  }
+
   if (typeof filters.isPremium === 'boolean') {
     if (!!item.isPremium !== filters.isPremium) return false;
   }
@@ -1073,6 +1078,7 @@ exports.listServiceShops = async (req, res) => {
     const search = String(req.query.q || req.query.search || '').trim();
     const status = String(req.query.status || '').trim().toLowerCase();
     const city = String(req.query.city || '').trim();
+    const category = String(req.query.category || '').trim();
     const useLegacy = (await ServiceShop.countDocuments({})) === 0;
 
     if (useLegacy) {
@@ -1080,6 +1086,7 @@ exports.listServiceShops = async (req, res) => {
         search,
         status: status && STATUS_VALUES.includes(status) ? status : '',
         city,
+        category,
         isPremium: req.query.isPremium != null ? toBoolean(req.query.isPremium, false) : undefined,
         bookingEnabled: req.query.bookingEnabled != null ? toBoolean(req.query.bookingEnabled, false) : undefined,
         isFeatured: req.query.isFeatured != null ? toBoolean(req.query.isFeatured, false) : undefined,
@@ -1129,6 +1136,10 @@ exports.listServiceShops = async (req, res) => {
 
     if (city) {
       filters.city = new RegExp(escapeRegExp(city), 'i');
+    }
+
+    if (category) {
+      filters.category = new RegExp(escapeRegExp(category), 'i');
     }
 
     if (req.query.isFeatured != null) {
