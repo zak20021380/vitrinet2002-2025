@@ -710,7 +710,7 @@ async createService(payload) {
   },
 
   async getDashboardStats() {
-    const url = bust(`${API_BASE}/api/seller/dashboard/stats`);
+    const url = bust(`${API_BASE}/api/sellers/dashboard/stats`);
     try {
       const r = await fetch(url, {
         credentials: 'include',
