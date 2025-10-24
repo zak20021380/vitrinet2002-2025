@@ -127,6 +127,32 @@
   </footer>
 
 <script>
+  const API_ORIGIN = window.location.origin.includes('localhost') ? 'http://localhost:5000' : window.location.origin;
+
+  // --- Safe sessionStorage helper (SafeSS) ---
+  const SafeSS = window.SafeSS || {
+    setJSON(key, value) {
+      try {
+        sessionStorage.setItem(key, JSON.stringify(value));
+      } catch (err) {
+        console.warn('SafeSS setJSON failed', err);
+      }
+    },
+    getJSON(key, fallback = null) {
+      try {
+        const raw = sessionStorage.getItem(key);
+        return raw ? JSON.parse(raw) : fallback;
+      } catch (err) {
+        console.warn('SafeSS getJSON failed', err);
+        return fallback;
+      }
+    }
+  };
+
+  if (!window.SafeSS) {
+    window.SafeSS = SafeSS;
+  }
+
   // گرفتن shopurl و phone فقط از query string
   function getQueryParam(name) {
     const url = new URL(window.location.href);
@@ -135,12 +161,9 @@
 
   let shopurl = getQueryParam("shopurl");
   let phone = getQueryParam("phone");
-
-
-if (!shopurl) {
-  window.location.href = "post.html";
-}
-
+  if (!shopurl) {
+    window.location.href = "post.html";
+  }
 
   // انتخاب همه input های کد
   const digits = Array.from(document.querySelectorAll('.input-digit'));
@@ -190,7 +213,7 @@ if (!shopurl) {
     }
 
     // AJAX به سرور برای تایید کد
-    fetch("http://localhost:5000/api/auth/verify", {
+    fetch(`${API_ORIGIN}/api/auth/verify`, {
       method: "POST",
       headers: {"Content-Type": "application/json"},
       body: JSON.stringify({ shopurl, phone, code })
@@ -206,7 +229,7 @@ if (!shopurl) {
           errorText.classList.remove('hidden');
           return;
         }
-        fetch("http://localhost:5000/api/auth/login", {
+        fetch(`${API_ORIGIN}/api/auth/login`, {
           method: "POST",
           headers: {"Content-Type": "application/json"},
           body: JSON.stringify({ phone, password })
