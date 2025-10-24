@@ -483,6 +483,7 @@
     categories: [],
     serviceSubcategories: []
   };
+  let subcategoryValidationActive = false;
 
   function toIdString(raw) {
     if (!raw) return '';
@@ -710,6 +711,23 @@
     });
   }
 
+  function setSubcategoryRequiredState({ hasItems = false, selectedValue = '' } = {}) {
+    const hint = document.getElementById('subcategory-hint');
+    if (subcatWrapper) {
+      subcatWrapper.dataset.hasItems = hasItems ? 'true' : 'false';
+    }
+    if (subcatInput) {
+      subcatInput.dataset.required = hasItems ? 'true' : 'false';
+    }
+    if (!hint) return;
+    if (hasItems && !selectedValue && subcategoryValidationActive) {
+      hint.innerText = 'لطفاً زیر گروه را انتخاب کنید.';
+      hint.classList.remove('hidden');
+    } else {
+      hint.classList.add('hidden');
+    }
+  }
+
   function handleSubcategorySelection(value = '') {
     const cleaned = typeof value === 'string' ? value.trim() : '';
     if (subcatInput) {
@@ -720,15 +738,15 @@
     if (hint) {
       hint.classList.add('hidden');
     }
+    subcategoryValidationActive = false;
+    const hasItems = subcatWrapper ? subcatWrapper.dataset.hasItems === 'true' : false;
+    setSubcategoryRequiredState({ hasItems, selectedValue: cleaned });
   }
 
   function renderServiceChips(list = []) {
     const normalised = Array.isArray(list) ? list : [];
     const hasItems = normalised.length > 0;
 
-    if (subcatWrapper) {
-      subcatWrapper.dataset.hasItems = hasItems ? 'true' : 'false';
-    }
     if (serviceExamplesContainer) {
       serviceExamplesContainer.classList.toggle('hidden', !hasItems);
     }
@@ -736,11 +754,9 @@
       subcatInput.value = '';
     }
     if (!hasItems) {
+      subcategoryValidationActive = false;
       highlightServiceChip('');
-      const hint = document.getElementById('subcategory-hint');
-      if (hint) {
-        hint.classList.add('hidden');
-      }
+      setSubcategoryRequiredState({ hasItems, selectedValue: '' });
     }
 
     if (!subcatChipsContainer) return;
@@ -769,6 +785,8 @@
     if (selected) {
       highlightServiceChip(selected);
     }
+
+    setSubcategoryRequiredState({ hasItems, selectedValue: selected });
   }
 
   function matchesParent(item, filter) {
@@ -993,21 +1011,20 @@
 
     // زیر گروه در صورت نیاز
     let subcategory = "";
-    const subcategoryHint = document.getElementById("subcategory-hint");
     const shouldSelectSubcategory = subcatWrapper && subcatWrapper.dataset.hasItems === 'true';
     if (shouldSelectSubcategory) {
       subcategory = subcatInput ? (subcatInput.value || '').trim() : '';
       if (!subcategory) {
-        if (subcategoryHint) {
-          subcategoryHint.innerText = "لطفاً زیر گروه را انتخاب کنید.";
-          subcategoryHint.classList.remove("hidden");
-        }
+        subcategoryValidationActive = true;
+        setSubcategoryRequiredState({ hasItems: true, selectedValue: '' });
         hasError = true;
-      } else if (subcategoryHint) {
-        subcategoryHint.classList.add("hidden");
+      } else {
+        subcategoryValidationActive = false;
+        setSubcategoryRequiredState({ hasItems: true, selectedValue: subcategory });
       }
-    } else if (subcategoryHint) {
-      subcategoryHint.classList.add("hidden");
+    } else {
+      subcategoryValidationActive = false;
+      setSubcategoryRequiredState({ hasItems: false, selectedValue: '' });
     }
 
     // آدرس دقیق
