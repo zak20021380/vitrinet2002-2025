@@ -339,6 +339,32 @@
   </footer>
 
 <script>
+  // --- Safe sessionStorage helper (SafeSS) ---
+  const SafeSS = window.SafeSS || {
+    setJSON(key, value) {
+      try {
+        const str = JSON.stringify(value);
+        sessionStorage.setItem(key, str);
+        return true;
+      } catch (err) {
+        console.warn('SafeSS setJSON failed', err);
+        return false;
+      }
+    },
+    getJSON(key, fallback = null) {
+      try {
+        const raw = sessionStorage.getItem(key);
+        return raw ? JSON.parse(raw) : fallback;
+      } catch (err) {
+        console.warn('SafeSS getJSON failed', err);
+        return fallback;
+      }
+    }
+  };
+  if (!window.SafeSS) {
+    window.SafeSS = SafeSS;
+  }
+
   // Mobile menu functionality
   const mobileMenuBtn = document.getElementById('mobile-menu-btn');
   const mobileMenu = document.getElementById('mobile-menu');
