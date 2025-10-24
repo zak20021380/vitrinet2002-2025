@@ -234,21 +234,33 @@ exports.login = async (req, res) => {
   // تایید کد پیامک (OTP واقعی)
   exports.verifyCode = async (req, res) => {
     try {
-      const { shopurl, phone, code } = req.body;
+      const rawShopurl = typeof req.body.shopurl === 'string' ? req.body.shopurl.trim().toLowerCase() : '';
+      const rawPhone = typeof req.body.phone === 'string' ? req.body.phone.replace(/\s+/g, '').trim() : '';
+      const rawCode = typeof req.body.code === 'string' ? req.body.code.trim() : '';
 
-      if (!shopurl || !phone || !code) {
+      if (!rawCode) {
+        return res.status(400).json({ success: false, message: 'کد تایید ارسال نشده است.' });
+      }
+
+      const query = {};
+      if (rawShopurl) query.shopurl = rawShopurl;
+      if (rawPhone) query.phone = rawPhone;
+
+      if (!Object.keys(query).length) {
         return res.status(400).json({ success: false, message: 'اطلاعات ناقص ارسال شده.' });
       }
 
-      // پیدا کردن فروشنده با shopurl و phone
-      const seller = await Seller.findOne({ shopurl, phone });
+      // پیدا کردن فروشنده با توجه به اطلاعات موجود
+      const seller = await Seller.findOne(query);
       if (!seller) {
         return res.status(404).json({ success: false, message: 'فروشنده یافت نشد.' });
       }
 
+      const sellerOtp = typeof seller.otp === 'string' ? seller.otp.trim() : '';
+
       // چک کد تایید و انقضا
       if (
-        seller.otp !== code ||
+        sellerOtp !== rawCode ||
         !seller.otpExpire ||
         seller.otpExpire < new Date()
       ) {
