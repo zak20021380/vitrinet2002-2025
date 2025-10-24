@@ -1002,6 +1002,13 @@
     const API_BASE = `${ADMIN_API_BASE.replace(/\/$/, '')}/service-shops`;
 
     // Formatters
+    const escapeHtml = (str = '') => String(str).replace(/[&<>"']/g, (char) => ({
+      '&': '&amp;',
+      '<': '&lt;',
+      '>': '&gt;',
+      '"': '&quot;',
+      "'": '&#39;'
+    }[char] || char));
     const numberFormatter = new Intl.NumberFormat('fa-IR');
     const formatNumber = (value) => {
       const num = Number(value);
@@ -1165,15 +1172,21 @@
       const statusLabel = statusLabels[shop.status] || shop.status || 'نامشخص';
       const badgeClass = statusBadgeClass[shop.status] || 'badge-muted';
       const bookingEnabled = !!shop?.bookingSettings?.enabled;
-      const shopUrl = shop.shopUrl ? `/service/${shop.shopUrl}` : '#';
-      const sellerPanelUrl = shop.ownerPhone ? `/service-seller-panel/s-seller-panel.html?phone=${shop.ownerPhone}` : '#';
+      const shopUrl = shop.shopUrl
+        ? `/service-shops.html?shopurl=${encodeURIComponent(shop.shopUrl)}`
+        : '#';
+      const sellerPanelUrl = shop.shopUrl
+        ? `/service-seller-panel/s-seller-panel.html?shopurl=${encodeURIComponent(shop.shopUrl)}`
+        : '#';
+
+      const shopUrlLabel = escapeHtml(shop.shopUrl || '');
 
       return `
         <tr data-id="${shop._id}">
           <td>
             <div class="shop-info">
               <div class="shop-name">${shop.name || 'بدون نام'}</div>
-              ${shop.shopUrl ? `<a href="${shopUrl}" target="_blank" class="shop-url"><i class="ri-external-link-line"></i> ${shopUrl}</a>` : '<span class="shop-meta">—</span>'}
+              ${shop.shopUrl ? `<a href="${shopUrl}" target="_blank" rel="noopener noreferrer" class="shop-url"><i class="ri-external-link-line"></i> ${shopUrlLabel}</a>` : '<span class="shop-meta">—</span>'}
             </div>
           </td>
           <td>
@@ -1197,7 +1210,7 @@
           </td>
           <td>
             <div class="actions">
-              ${shop.ownerPhone ? `<a href="${sellerPanelUrl}" target="_blank" class="btn btn-view btn-sm"><i class="ri-external-link-line"></i> پنل فروشنده</a>` : ''}
+              ${(shop.shopUrl && shop.ownerPhone) ? `<a href="${sellerPanelUrl}" target="_blank" rel="noopener noreferrer" class="btn btn-view btn-sm"><i class="ri-external-link-line"></i> پنل فروشنده</a>` : ''}
               <button type="button" class="btn btn-edit btn-sm" data-action="view-status" data-id="${shop._id}">
                 <i class="ri-eye-line"></i> مشاهده وضعیت
               </button>
