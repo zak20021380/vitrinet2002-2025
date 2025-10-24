@@ -378,6 +378,182 @@
     ::-webkit-scrollbar-track {
       background: rgba(16, 185, 129, 0.05);
     }
+
+    /* Search Results Dropdown */
+    .search-wrapper {
+      position: relative;
+    }
+    .search-results {
+      position: absolute;
+      top: calc(100% + 0.5rem);
+      left: 0;
+      right: 0;
+      background: white;
+      border-radius: 1.25rem;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15), 0 8px 24px rgba(0, 0, 0, 0.08);
+      max-height: 70vh;
+      overflow-y: auto;
+      z-index: 1000;
+      display: none;
+      border: 1px solid rgba(16, 185, 129, 0.2);
+    }
+    .search-results.active {
+      display: block;
+      animation: slideDown 0.3s ease;
+    }
+    @keyframes slideDown {
+      from { opacity: 0; transform: translateY(-10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .search-result-item {
+      padding: 0.875rem 1.25rem;
+      border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+      cursor: pointer;
+      transition: background 0.2s ease;
+      display: flex;
+      align-items: center;
+      gap: 0.875rem;
+    }
+    .search-result-item:hover {
+      background: linear-gradient(135deg, rgba(16, 185, 129, 0.08), rgba(14, 165, 233, 0.06));
+    }
+    .search-result-item:last-child {
+      border-bottom: none;
+    }
+    .search-result-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 0.75rem;
+      background: linear-gradient(135deg, #10b981, #0ea5e9);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25);
+    }
+    .search-result-icon i {
+      color: white;
+      font-size: 1.25rem;
+    }
+    .search-result-content {
+      flex: 1;
+      min-width: 0;
+    }
+    .search-result-title {
+      font-weight: 700;
+      font-size: 0.9375rem;
+      color: #1f2937;
+      margin-bottom: 0.25rem;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .search-result-desc {
+      font-size: 0.8125rem;
+      color: #6b7280;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .search-result-badge {
+      padding: 0.25rem 0.625rem;
+      border-radius: 999px;
+      font-size: 0.6875rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      flex-shrink: 0;
+    }
+    .search-result-badge.shop {
+      background: linear-gradient(120deg, rgba(16, 185, 129, 0.15), rgba(45, 212, 191, 0.25));
+      color: #047857;
+    }
+    .search-result-badge.category {
+      background: linear-gradient(120deg, rgba(14, 165, 233, 0.15), rgba(59, 130, 246, 0.25));
+      color: #0369a1;
+    }
+    .search-empty {
+      padding: 2.5rem 1.5rem;
+      text-align: center;
+      color: #9ca3af;
+    }
+    .search-empty i {
+      font-size: 3rem;
+      margin-bottom: 0.75rem;
+      opacity: 0.5;
+    }
+    .search-empty-text {
+      font-size: 0.9375rem;
+      font-weight: 600;
+    }
+
+    /* Mobile optimizations for search results */
+    @media (max-width: 768px) {
+      .search-results {
+        max-height: 60vh;
+        border-radius: 1rem;
+      }
+      .search-result-item {
+        padding: 0.75rem 1rem;
+        gap: 0.75rem;
+      }
+      .search-result-icon {
+        width: 38px;
+        height: 38px;
+        border-radius: 0.625rem;
+      }
+      .search-result-icon i {
+        font-size: 1.125rem;
+      }
+      .search-result-title {
+        font-size: 0.875rem;
+      }
+      .search-result-desc {
+        font-size: 0.75rem;
+      }
+      .search-result-badge {
+        font-size: 0.625rem;
+        padding: 0.2rem 0.5rem;
+      }
+      .search-empty {
+        padding: 2rem 1rem;
+      }
+      .search-empty i {
+        font-size: 2.5rem;
+      }
+      .search-empty-text {
+        font-size: 0.875rem;
+      }
+    }
+    @media (max-width: 480px) {
+      .search-results {
+        max-height: 50vh;
+        border-radius: 0.875rem;
+      }
+      .search-result-item {
+        padding: 0.625rem 0.875rem;
+        gap: 0.625rem;
+      }
+      .search-result-icon {
+        width: 34px;
+        height: 34px;
+        border-radius: 0.5rem;
+      }
+      .search-result-icon i {
+        font-size: 1rem;
+      }
+      .search-result-title {
+        font-size: 0.8125rem;
+      }
+      .search-result-desc {
+        font-size: 0.6875rem;
+      }
+      .search-empty {
+        padding: 1.5rem 0.75rem;
+      }
+      .search-empty i {
+        font-size: 2rem;
+      }
+    }
     </style>
     <script src="/nav-active.js" defer></script>
 </head>
@@ -431,21 +607,25 @@
     </div>
     <p id="errorMessage" class="text-red-500 text-center mb-4 hidden"></p>
     <!-- سرچ باکس -->
-    <form onsubmit="event.preventDefault(); searchCategories();" class="w-full max-w-2xl mx-auto mb-12">
-      <div class="flex items-center rounded-2xl border-2 border-gray-200 shadow-lg bg-white p-2 px-5 w-full hover:border-teal-400 focus-within:border-teal-500 transition-all">
-        <label for="searchInput" class="sr-only">جستجوی دسته‌ها</label>
-        <input type="text" id="searchInput"
-          class="flex-grow w-full bg-transparent px-3 py-2 text-sm sm:text-base outline-none font-semibold text-gray-700 placeholder:text-gray-400"
-          placeholder="جستجو در دسته‌بندی، توضیحات یا فروشگاه نمونه ..." autocomplete="off">
-        <button type="submit" class="btn-grad px-5 py-2 text-sm font-bold flex items-center justify-center gap-2 flex-shrink-0">
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
-            <circle cx="11" cy="11" r="8" stroke="currentColor"/>
-            <path d="M21 21l-3.8-3.8" stroke-linecap="round"/>
-          </svg>
-          <span class="hidden sm:inline">جستجو</span>
-        </button>
-      </div>
-    </form>
+    <div class="w-full max-w-2xl mx-auto mb-12 search-wrapper">
+      <form onsubmit="event.preventDefault(); performSearch();">
+        <div class="flex items-center rounded-2xl border-2 border-gray-200 shadow-lg bg-white p-2 px-5 w-full hover:border-teal-400 focus-within:border-teal-500 transition-all">
+          <label for="searchInput" class="sr-only">جستجوی فروشگاه‌ها و دسته‌بندی‌ها</label>
+          <input type="text" id="searchInput"
+            class="flex-grow w-full bg-transparent px-3 py-2 text-sm sm:text-base outline-none font-semibold text-gray-700 placeholder:text-gray-400"
+            placeholder="جستجوی فروشگاه، دسته‌بندی یا محصول ..." autocomplete="off">
+          <button type="submit" class="btn-grad px-5 py-2 text-sm font-bold flex items-center justify-center gap-2 flex-shrink-0">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+              <circle cx="11" cy="11" r="8" stroke="currentColor"/>
+              <path d="M21 21l-3.8-3.8" stroke-linecap="round"/>
+            </svg>
+            <span class="hidden sm:inline">جستجو</span>
+          </button>
+        </div>
+      </form>
+      <!-- نتایج جستجو -->
+      <div id="searchResults" class="search-results"></div>
+    </div>
     <!-- دسته‌بندی‌ها -->
     <div id="categoriesGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5 sm:gap-6 lg:gap-7"></div>
     <div id="noResult" class="hidden text-center mt-16 text-xl text-gray-400 font-bold">دسته‌ای پیدا نشد!</div>
@@ -537,19 +717,112 @@ function renderCategories(list) {
 
 // جستجو
 let activeCategories = [];
+let allShops = [];
 
-function searchCategories() {
-  const value = document.getElementById("searchInput").value.trim();
-  let filtered = activeCategories;
-  if (value !== "") {
-    filtered = activeCategories.filter(cat =>
-      cat.name.includes(value) ||
-      cat.desc.includes(value) ||
-      (cat.shops && cat.shops.some(s => (s.storename || s.shopName || '').includes(value)))
-    );
+// جستجوی حرفه‌ای
+async function performSearch() {
+  const searchInput = document.getElementById("searchInput");
+  const searchResults = document.getElementById("searchResults");
+  const query = searchInput.value.trim().toLowerCase();
+
+  if (!query) {
+    searchResults.classList.remove("active");
+    searchResults.innerHTML = "";
+    return;
   }
-  renderCategories(filtered);
+
+  // جستجو در دسته‌بندی‌ها
+  const matchedCategories = activeCategories.filter(cat =>
+    cat.name.toLowerCase().includes(query) ||
+    cat.desc.toLowerCase().includes(query)
+  ).slice(0, 3); // فقط 3 نتیجه اول
+
+  // جستجو در فروشگاه‌ها
+  const matchedShops = allShops.filter(shop => {
+    const shopName = (shop.storename || shop.shopName || '').toLowerCase();
+    const shopDesc = (shop.description || shop.desc || '').toLowerCase();
+    const shopCategory = (shop.category || '').toLowerCase();
+    return shopName.includes(query) || shopDesc.includes(query) || shopCategory.includes(query);
+  }).slice(0, 8); // حداکثر 8 فروشگاه
+
+  displaySearchResults(matchedCategories, matchedShops, query);
 }
+
+function displaySearchResults(categories, shops, query) {
+  const searchResults = document.getElementById("searchResults");
+
+  if (categories.length === 0 && shops.length === 0) {
+    searchResults.innerHTML = `
+      <div class="search-empty">
+        <i class="ri-search-line"></i>
+        <div class="search-empty-text">نتیجه‌ای برای "${query}" یافت نشد</div>
+      </div>
+    `;
+    searchResults.classList.add("active");
+    return;
+  }
+
+  let html = "";
+
+  // نمایش دسته‌بندی‌ها
+  if (categories.length > 0) {
+    categories.forEach(cat => {
+      const shopCount = cat.shops ? cat.shops.length : 0;
+      html += `
+        <div class="search-result-item" onclick="window.location.href='shops-by-category.html?cat=${cat.catId}'">
+          <div class="search-result-icon">
+            <i class="ri-layout-grid-line"></i>
+          </div>
+          <div class="search-result-content">
+            <div class="search-result-title">${cat.name}</div>
+            <div class="search-result-desc">${cat.desc}</div>
+          </div>
+          <span class="search-result-badge category">${shopCount} فروشگاه</span>
+        </div>
+      `;
+    });
+  }
+
+  // نمایش فروشگاه‌ها
+  if (shops.length > 0) {
+    shops.forEach(shop => {
+      const shopName = shop.storename || shop.shopName || 'بدون نام';
+      const shopDesc = shop.description || shop.desc || 'بدون توضیحات';
+      const shopUrl = shop.shopurl || shop.shopUrl || '';
+      const categoryName = getCategoryNameById(shop.category) || shop.category || 'عمومی';
+
+      html += `
+        <div class="search-result-item" onclick="window.location.href='shop.html?shopurl=${shopUrl}'">
+          <div class="search-result-icon">
+            <i class="ri-store-2-line"></i>
+          </div>
+          <div class="search-result-content">
+            <div class="search-result-title">${shopName}</div>
+            <div class="search-result-desc">${categoryName} • ${shopDesc}</div>
+          </div>
+          <span class="search-result-badge shop">فروشگاه</span>
+        </div>
+      `;
+    });
+  }
+
+  searchResults.innerHTML = html;
+  searchResults.classList.add("active");
+}
+
+function getCategoryNameById(catId) {
+  const cat = categories.find(c => c.catId === catId || c.name === catId);
+  return cat ? cat.name : null;
+}
+
+// بستن نتایج جستجو با کلیک در خارج
+document.addEventListener("click", function(e) {
+  const searchWrapper = document.querySelector(".search-wrapper");
+  const searchResults = document.getElementById("searchResults");
+  if (searchWrapper && !searchWrapper.contains(e.target)) {
+    searchResults.classList.remove("active");
+  }
+});
 
 // اجرا: دریافت اطلاعات واقعی و نمایش کارت‌ها
 async function initCategoriesPage() {
@@ -559,6 +832,7 @@ async function initCategoriesPage() {
   try {
     const res = await fetch('/api/shops');
     const shops = res.ok ? await res.json() : [];
+    allShops = shops; // ذخیره همه فروشگاه‌ها برای جستجو
     activeCategories = categories.map(c => ({
       ...c,
       shops: shops.filter(s =>
@@ -568,6 +842,7 @@ async function initCategoriesPage() {
       )
     }));
   } catch (e) {
+    allShops = [];
     activeCategories = categories.map(c => ({ ...c, shops: [] }));
     errorBox.textContent = "خطا در دریافت اطلاعات. لطفا بعدا تلاش کنید.";
     errorBox.classList.remove("hidden");
@@ -578,8 +853,21 @@ async function initCategoriesPage() {
 
   renderCategories(activeCategories);
 
-  document.getElementById("searchInput").addEventListener("keyup", function(e){
-    if(e.key === "Enter") searchCategories();
+  // جستجوی لحظه‌ای با تایپ
+  const searchInput = document.getElementById("searchInput");
+  let searchTimeout;
+  searchInput.addEventListener("input", function() {
+    clearTimeout(searchTimeout);
+    searchTimeout = setTimeout(() => {
+      performSearch();
+    }, 300); // 300ms تاخیر برای بهبود عملکرد
+  });
+
+  searchInput.addEventListener("keyup", function(e){
+    if(e.key === "Enter") {
+      clearTimeout(searchTimeout);
+      performSearch();
+    }
   });
 }
 
