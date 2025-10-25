@@ -2235,7 +2235,10 @@
         title: '',
         sellerName: '',
         addressInfo: null,
-        copyTimeout: null
+        sellerLinkUrl: '',
+        sellerLinkMessage: '',
+        copyTimeout: null,
+        statusTimeout: null
       };
 
       const persianNumberFormatter = new Intl.NumberFormat('fa-IR');
@@ -2307,6 +2310,10 @@
 
       if (dom.sellerAddressButton) {
         dom.sellerAddressButton.addEventListener('click', openAddressModal);
+      }
+
+      if (dom.sellerLink) {
+        dom.sellerLink.addEventListener('click', handleSellerLinkClick);
       }
 
       const canonical = document.querySelector('link[rel="canonical"]');
@@ -2410,12 +2417,23 @@
       }
 
       function handleCopyAddress() {
-        if (!dom.addressModalCopy || !state.addressInfo) return;
-        const parts = [state.addressInfo.address, state.addressInfo.city].filter(Boolean);
-        const value = parts.join('، ');
+        if (!dom.addressModalCopy) return;
+        const info = state.addressInfo;
+        const parts = info ? [info.address, info.city].filter(Boolean) : [];
+        const value = parts.join('، ').trim();
+
+        if (!value) {
+          showCopyFeedback(false);
+          announce('آدرس قابل کپی برای این فروشنده ثبت نشده است.');
+          return;
+        }
+
         copyToClipboard(value)
           .then(() => showCopyFeedback(true))
-          .catch(() => showCopyFeedback(false));
+          .catch(() => {
+            showCopyFeedback(false);
+            announce('کپی آدرس انجام نشد. لطفاً بعداً دوباره تلاش کنید.', true);
+          });
       }
 
       async function copyToClipboard(text) {
@@ -2461,14 +2479,22 @@
       }
 
       function openAddressModal() {
-        if (!dom.addressModal || !state.addressInfo) return;
+        if (!dom.addressModal) return;
+        const info = state.addressInfo || {
+          address: 'آدرس فروشنده برای این محصول ثبت نشده است.',
+          city: '',
+          mapUrl: '',
+          sellerName: state.sellerName || 'فروشنده',
+          hasAddress: false
+        };
+
         if (dom.addressModalAddress) {
-          dom.addressModalAddress.textContent = state.addressInfo.address;
+          dom.addressModalAddress.textContent = info.address || 'آدرس فروشنده برای این محصول ثبت نشده است.';
         }
 
         if (dom.addressModalCity) {
-          if (state.addressInfo.city) {
-            dom.addressModalCity.textContent = `شهر: ${state.addressInfo.city}`;
+          if (info.hasAddress && info.city) {
+            dom.addressModalCity.textContent = `شهر: ${info.city}`;
             dom.addressModalCity.hidden = false;
           } else {
             dom.addressModalCity.hidden = true;
@@ -2484,40 +2510,72 @@
           dom.addressModalCopy.textContent = dom.addressModalCopy.dataset.originalLabel || 'کپی آدرس';
           dom.addressModalCopy.dataset.originalLabel = dom.addressModalCopy.textContent;
           dom.addressModalCopy.classList.remove('is-success', 'is-error');
+          dom.addressModalCopy.dataset.hasAddress = info.hasAddress ? 'true' : 'false';
         }
 
         if (dom.addressModalTitle) {
-          dom.addressModalTitle.textContent = state.addressInfo.sellerName
-            ? `آدرس مغازه ${state.addressInfo.sellerName}`
+          dom.addressModalTitle.textContent = info.sellerName
+            ? `آدرس مغازه ${info.sellerName}`
             : 'آدرس مغازه';
         }
+
+        dom.addressModal.dataset.hasAddress = info.hasAddress ? 'true' : 'false';
 
         openOverlay(dom.addressModal, dom.addressModalClose || dom.addressModalCopy);
       }
 
+      function handleSellerLinkClick(event) {
+        if (state.sellerLinkUrl) {
+          return;
+        }
+        event.preventDefault();
+        const message = state.sellerLinkMessage || 'صفحه مغازه برای این فروشنده در دسترس نیست.';
+        announce(message);
+      }
+
       function setStatus(message) {
-        if (!dom.status) return;
-        dom.status.textContent = message;
-        dom.status.classList.remove('status-error');
-        dom.status.hidden = false;
+        updateStatus(message, { isError: false, autoHide: false });
       }
 
       function clearStatus() {
         if (!dom.status) return;
+        if (state.statusTimeout) {
+          clearTimeout(state.statusTimeout);
+          state.statusTimeout = null;
+        }
         dom.status.textContent = '';
         dom.status.hidden = true;
         dom.status.classList.remove('status-error');
       }
 
       function showError(message) {
-        if (dom.status) {
-          dom.status.textContent = message;
-          dom.status.hidden = false;
-          dom.status.classList.add('status-error');
-        }
+        updateStatus(message, { isError: true, autoHide: false });
         if (dom.galleryPlaceholder) {
           dom.galleryPlaceholder.hidden = false;
           dom.galleryPlaceholder.innerHTML = `<p>${message}</p>`;
+        }
+      }
+
+      function announce(message, isError = false) {
+        updateStatus(message, { isError, autoHide: true });
+      }
+
+      function updateStatus(message, { isError = false, autoHide = false } = {}) {
+        if (!dom.status) return;
+        if (state.statusTimeout) {
+          clearTimeout(state.statusTimeout);
+          state.statusTimeout = null;
+        }
+        dom.status.textContent = message;
+        dom.status.hidden = false;
+        dom.status.classList.toggle('status-error', Boolean(isError));
+        if (autoHide) {
+          state.statusTimeout = window.setTimeout(() => {
+            dom.status.textContent = '';
+            dom.status.hidden = true;
+            dom.status.classList.remove('status-error');
+            state.statusTimeout = null;
+          }, 4800);
         }
       }
 
@@ -3045,13 +3103,49 @@
         });
       }
 
-function renderSellerCard(seller, product) {
-  const productDesc = product?.desc;
+      function renderSellerCard(seller, productDesc) {
+        const hasSeller = seller && (seller.storename || seller.ownerName || seller.ownerFirstname || seller.ownerLastname || seller.phone || seller.address || seller.category || seller.boardImage || seller.desc);
+        const sellerName = seller && (seller.storename || seller.ownerName || [seller.ownerFirstname, seller.ownerLastname].filter(Boolean).join(' ')) || 'فروشنده نامشخص';
+        state.sellerName = sellerName;
 
-  // اگر بک‌اند فقط id یا اسلاگ داده باشد، از این‌ها هم استفاده می‌کنیم
-  const sellerId = (typeof product?.sellerId === 'string')
-    ? product.sellerId
-    : (seller?._id || '');
+        const fallbackAddress = 'آدرس فروشنده برای این محصول ثبت نشده است.';
+
+        if (!hasSeller) {
+          dom.sellerCard.hidden = true;
+          if (dom.sellerActions) {
+            dom.sellerActions.hidden = false;
+          }
+          if (dom.sellerAddressButton) {
+            dom.sellerAddressButton.hidden = false;
+            dom.sellerAddressButton.disabled = false;
+            dom.sellerAddressButton.classList.remove('is-disabled');
+            dom.sellerAddressButton.dataset.hasAddress = 'false';
+            dom.sellerAddressButton.setAttribute('aria-label', 'آدرس فروشنده برای این محصول ثبت نشده است.');
+          }
+          if (dom.sellerLink) {
+            dom.sellerLink.classList.remove('is-disabled');
+            dom.sellerLink.removeAttribute('aria-disabled');
+            dom.sellerLink.removeAttribute('tabindex');
+            dom.sellerLink.href = '#';
+            dom.sellerLink.setAttribute('aria-label', 'صفحه مغازه برای این فروشنده در دسترس نیست.');
+            dom.sellerLink.dataset.hasShop = 'false';
+          }
+          state.addressInfo = {
+            address: fallbackAddress,
+            city: '',
+            mapUrl: '',
+            sellerName,
+            hasAddress: false
+          };
+          state.sellerLinkUrl = '';
+          state.sellerLinkMessage = 'صفحه مغازه برای این فروشنده در دسترس نیست.';
+          return;
+        }
+
+        dom.sellerCard.hidden = false;
+        dom.sellerName.textContent = sellerName;
+        const addressText = seller && seller.address ? String(seller.address).trim() : '';
+        const cityText = seller && seller.city ? String(seller.city).trim() : '';
 
   const shopSlug = seller?.shopurl || seller?.shopUrl || product?.shopurl || '';
 
@@ -3074,129 +3168,72 @@ function renderSellerCard(seller, product) {
       dom.sellerAddressButton.removeAttribute('aria-label');
     }
 
-    if (dom.sellerLink) {
-      dom.sellerLink.classList.add('is-disabled');
-      dom.sellerLink.setAttribute('aria-disabled', 'true');
-      dom.sellerLink.setAttribute('tabindex', '-1');
-      dom.sellerLink.removeAttribute('href');
-      dom.sellerLink.removeAttribute('aria-label');
-    }
+        if (dom.sellerAddressButton) {
+          dom.sellerAddressButton.hidden = false;
+          dom.sellerAddressButton.disabled = false;
+          dom.sellerAddressButton.classList.remove('is-disabled');
+        }
 
-    state.addressInfo = null;
-    return;
-  }
+        if (addressText) {
+          dom.sellerAddressRow.hidden = false;
+          dom.sellerAddress.textContent = addressText;
 
-  // از اینجا به بعد فروشنده‌ای برای نمایش داریم (یا حداقل id/slug داریم)
-  dom.sellerCard.hidden = false;
+          if (dom.sellerAddressButton) {
+            const mapQuery = [addressText, cityText].filter(Boolean).join('، ');
+            const mapUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(mapQuery || addressText)}`;
+            state.addressInfo = {
+              address: addressText,
+              city: cityText,
+              mapUrl,
+              sellerName,
+              hasAddress: true
+            };
+            dom.sellerAddressButton.setAttribute('aria-label', `مشاهده آدرس ${sellerName} در پنجره مجزا`);
+            dom.sellerAddressButton.dataset.hasAddress = 'true';
+          }
+        } else {
+          dom.sellerAddressRow.hidden = false;
+          dom.sellerAddress.textContent = fallbackAddress;
+          if (dom.sellerAddressButton) {
+            dom.sellerAddressButton.setAttribute('aria-label', fallbackAddress);
+            dom.sellerAddressButton.dataset.hasAddress = 'false';
+          }
+          state.addressInfo = {
+            address: fallbackAddress,
+            city: cityText,
+            mapUrl: '',
+            sellerName,
+            hasAddress: false
+          };
+        }
 
-  const sellerName =
-    seller?.storename ||
-    seller?.ownerName ||
-    [seller?.ownerFirstname, seller?.ownerLastname].filter(Boolean).join(' ') ||
-    'فروشنده نامشخص';
+        const shopUrl = seller && typeof seller.shopurl === 'string' ? seller.shopurl.trim() : '';
+        if (shopUrl) {
+          state.sellerLinkUrl = `/shop.html?shopurl=${encodeURIComponent(shopUrl)}`;
+          state.sellerLinkMessage = '';
+        } else {
+          state.sellerLinkUrl = '';
+          state.sellerLinkMessage = `صفحه مغازه ${sellerName} هنوز در ویترینت ثبت نشده است.`;
+        }
 
-  dom.sellerName.textContent = sellerName;
-  state.sellerName = sellerName;
-
-  // توضیح فروشنده
-  const descriptionParts = [];
-  const sellerBio = typeof seller?.desc === 'string' ? seller.desc.trim() : '';
-  if (sellerBio) {
-    descriptionParts.push(sellerBio);
-  } else if (productDesc) {
-    descriptionParts.push(extractSummary(productDesc, 160));
-  }
-  descriptionParts.push('برای هماهنگی خرید، مستقیماً با فروشنده در ارتباط باشید.');
-  dom.sellerDescription.textContent = descriptionParts.join(' ').trim();
-
-  // دسته/زیر‌دسته
-  const categoryText = [seller?.category, seller?.subcategory].filter(Boolean).join(' - ');
-  dom.sellerCategory.textContent = categoryText || 'اطلاعاتی ثبت نشده است.';
-
-  // آواتار
-  if (seller?.boardImage) {
-    dom.sellerAvatar.hidden = false;
-    dom.sellerImage.src = resolveMediaPath(seller.boardImage);
-    dom.sellerImage.alt = `${sellerName} - تصویر فروشنده`;
-  } else {
-    dom.sellerAvatar.hidden = true;
-    dom.sellerImage.removeAttribute('src');
-  }
-
-  // تلفن
-  if (seller?.phone) {
-    dom.sellerPhoneRow.hidden = false;
-    const phoneText = String(seller.phone);
-    dom.sellerPhone.textContent = phoneText;
-    dom.sellerPhone.href = `tel:${toEnglishDigits(phoneText)}`;
-  } else {
-    dom.sellerPhoneRow.hidden = true;
-    dom.sellerPhone.removeAttribute('href');
-  }
-
-  // اکشن‌ها را نشان بده
-  if (dom.sellerActions) {
-    dom.sellerActions.hidden = false;
-  }
-
-  // آدرس (در صورت نبودن آدرس، اگر فقط شهر داریم باز هم دکمه را فعال و مودال را با شهر باز می‌کنیم)
-  const addressText = seller?.address ? String(seller.address).trim() : '';
-  if (addressText || seller?.city) {
-    dom.sellerAddressRow.hidden = !addressText;
-    dom.sellerAddress.textContent = addressText || '';
-
-    if (dom.sellerAddressButton) {
-      const mapQuery = [addressText, seller?.city].filter(Boolean).join('، ');
-      const mapUrl = mapQuery ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(mapQuery)}` : '';
-      state.addressInfo = {
-        address: addressText || (seller?.city || ''),
-        city: seller?.city || '',
-        mapUrl,
-        sellerName
-      };
-
-      dom.sellerAddressButton.hidden = false;
-      dom.sellerAddressButton.disabled = false;
-      dom.sellerAddressButton.classList.remove('is-disabled');
-      dom.sellerAddressButton.setAttribute('aria-label', `مشاهده آدرس ${sellerName} در پنجره مجزا`);
-    }
-  } else {
-    dom.sellerAddressRow.hidden = true;
-    dom.sellerAddress.textContent = '';
-    if (dom.sellerAddressButton) {
-      dom.sellerAddressButton.removeAttribute('aria-label');
-      dom.sellerAddressButton.disabled = true;
-      dom.sellerAddressButton.classList.add('is-disabled');
-    }
-    state.addressInfo = null;
-  }
-
-  // لینک صفحه‌ی مغازه:
-  // اگر اسلاگ(shopurl) داشتیم با همان می‌سازیم؛ وگرنه اگر فقط id داشتیم با id می‌سازیم.
-  if (dom.sellerLink) {
-    let href = '';
-    if (shopSlug) {
-      href = `/shop.html?shopurl=${encodeURIComponent(shopSlug)}`;
-    } else if (sellerId) {
-      href = `/shop.html?id=${encodeURIComponent(sellerId)}`;
-    }
-
-    if (href) {
-      dom.sellerLink.href = href;
-      dom.sellerLink.setAttribute('aria-label', `مشاهده صفحه مغازه ${sellerName} در ویترینت`);
-      dom.sellerLink.classList.remove('is-disabled');
-      dom.sellerLink.removeAttribute('aria-disabled');
-      dom.sellerLink.removeAttribute('tabindex');
-    } else {
-      dom.sellerLink.removeAttribute('href');
-      dom.sellerLink.removeAttribute('aria-label');
-      dom.sellerLink.classList.add('is-disabled');
-      dom.sellerLink.setAttribute('aria-disabled', 'true');
-      dom.sellerLink.setAttribute('tabindex', '-1');
-    }
-  }
-}
-
+        if (dom.sellerLink) {
+          if (state.sellerLinkUrl) {
+            dom.sellerLink.href = state.sellerLinkUrl;
+            dom.sellerLink.setAttribute('aria-label', `مشاهده صفحه مغازه ${sellerName} در ویترینت`);
+            dom.sellerLink.classList.remove('is-disabled');
+            dom.sellerLink.removeAttribute('aria-disabled');
+            dom.sellerLink.removeAttribute('tabindex');
+            dom.sellerLink.dataset.hasShop = 'true';
+          } else {
+            dom.sellerLink.href = '#';
+            dom.sellerLink.setAttribute('aria-label', `صفحه مغازه ${sellerName} در ویترینت ثبت نشده است.`);
+            dom.sellerLink.classList.remove('is-disabled');
+            dom.sellerLink.removeAttribute('aria-disabled');
+            dom.sellerLink.removeAttribute('tabindex');
+            dom.sellerLink.dataset.hasShop = 'false';
+          }
+        }
+      }
 
       function renderContactPanel(seller) {
         const contactList = dom.contactList;
