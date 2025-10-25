@@ -852,6 +852,44 @@ const computeLegacyTotals = (items = []) => {
   return totals;
 };
 
+const mergeOverviewTotals = (...sources) => {
+  const base = {
+    total: 0,
+    active: 0,
+    pending: 0,
+    suspended: 0,
+    archived: 0,
+    featured: 0,
+    bookingEnabled: 0,
+    premiumActive: 0
+  };
+
+  sources.forEach((source) => {
+    if (!source) return;
+    Object.keys(base).forEach((key) => {
+      const value = Number(source[key]);
+      if (Number.isFinite(value)) {
+        base[key] += value;
+      }
+    });
+  });
+
+  return base;
+};
+
+const sortByRecentActivityDesc = (a, b) => {
+  const resolveDate = (item) => {
+    return coerceDate(item?.updatedAt)
+      || coerceDate(item?.analytics?.lastBookingAt)
+      || coerceDate(item?.createdAt)
+      || null;
+  };
+
+  const aTime = resolveDate(a)?.getTime() || 0;
+  const bTime = resolveDate(b)?.getTime() || 0;
+  return bTime - aTime;
+};
+
 const buildLegacyOverviewData = async (existingItems) => {
   const items = Array.isArray(existingItems) ? existingItems : await fetchLegacyServiceShopsItems();
   if (!items.length) {
@@ -1079,20 +1117,25 @@ exports.listServiceShops = async (req, res) => {
     const status = String(req.query.status || '').trim().toLowerCase();
     const city = String(req.query.city || '').trim();
     const category = String(req.query.category || '').trim();
+
+    const legacyFilters = {
+      search,
+      status: status && STATUS_VALUES.includes(status) ? status : '',
+      city,
+      category,
+      isPremium: req.query.isPremium != null ? toBoolean(req.query.isPremium, false) : undefined,
+      bookingEnabled: req.query.bookingEnabled != null ? toBoolean(req.query.bookingEnabled, false) : undefined,
+      isFeatured: req.query.isFeatured != null ? toBoolean(req.query.isFeatured, false) : undefined,
+      visible: req.query.visible != null ? toBoolean(req.query.visible, true) : undefined
+    };
+
+    const includeLegacy = req.query.includeLegacy == null
+      ? true
+      : !!toBoolean(req.query.includeLegacy, true);
+
     const useLegacy = (await ServiceShop.countDocuments({})) === 0;
 
     if (useLegacy) {
-      const legacyFilters = {
-        search,
-        status: status && STATUS_VALUES.includes(status) ? status : '',
-        city,
-        category,
-        isPremium: req.query.isPremium != null ? toBoolean(req.query.isPremium, false) : undefined,
-        bookingEnabled: req.query.bookingEnabled != null ? toBoolean(req.query.bookingEnabled, false) : undefined,
-        isFeatured: req.query.isFeatured != null ? toBoolean(req.query.isFeatured, false) : undefined,
-        visible: req.query.visible != null ? toBoolean(req.query.visible, true) : undefined
-      };
-
       const allItems = await fetchLegacyServiceShopsItems();
       const filteredItems = allItems.filter(item => matchesLegacyFilters(item, legacyFilters));
       const total = filteredItems.length;
@@ -1156,6 +1199,55 @@ exports.listServiceShops = async (req, res) => {
 
     if (req.query.visible != null) {
       filters.isVisible = toBoolean(req.query.visible, true);
+    }
+
+    if (includeLegacy) {
+      const [matchedItems, legacyAll, overviewTotals, legacyLinkedIds] = await Promise.all([
+        ServiceShop.find(filters)
+          .sort({ updatedAt: -1 })
+          .lean(),
+        fetchLegacyServiceShopsItems(),
+        buildOverview(),
+        ServiceShop.distinct('legacySellerId', { legacySellerId: { $ne: null } })
+      ]);
+
+      const convertedSet = new Set(
+        legacyLinkedIds
+          .filter(id => id)
+          .map(id => String(id))
+      );
+
+      const legacyUnconvertedAll = legacyAll
+        .filter(item => item && !convertedSet.has(String(item.legacySellerId || item._id)));
+
+      const legacyFiltered = legacyUnconvertedAll
+        .filter(item => matchesLegacyFilters(item, legacyFilters));
+
+      const combinedItems = [...matchedItems, ...legacyFiltered]
+        .sort(sortByRecentActivityDesc);
+
+      const total = combinedItems.length;
+      const pages = total > 0 ? Math.ceil(total / limit) : 0;
+      const items = total > 0 ? combinedItems.slice(skip, skip + limit) : [];
+
+      const statusCounts = buildLegacyStatusCounts(combinedItems);
+      const legacyTotals = computeLegacyTotals(legacyUnconvertedAll);
+      const totals = mergeOverviewTotals(overviewTotals?.totals, legacyTotals);
+
+      return res.json({
+        items,
+        pagination: {
+          page,
+          limit,
+          total,
+          pages
+        },
+        summary: {
+          total,
+          statusCounts,
+          totals
+        }
+      });
     }
 
     const [items, total, statusAggregation, summaryCounts] = await Promise.all([

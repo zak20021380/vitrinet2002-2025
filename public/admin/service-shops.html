@@ -1172,6 +1172,12 @@
       const statusLabel = statusLabels[shop.status] || shop.status || 'نامشخص';
       const badgeClass = statusBadgeClass[shop.status] || 'badge-muted';
       const bookingEnabled = !!shop?.bookingSettings?.enabled;
+      const subcategories = Array.isArray(shop.subcategories)
+        ? shop.subcategories.filter(Boolean)
+        : (shop.subcategory ? [shop.subcategory] : []);
+      const subcategoryText = subcategories.length
+        ? subcategories.join('، ')
+        : '';
       const shopUrl = shop.shopUrl
         ? `/service-shops.html?shopurl=${encodeURIComponent(shop.shopUrl)}`
         : '#';
@@ -1179,6 +1185,9 @@
         ? `/service-seller-panel/s-seller-panel.html?shopurl=${encodeURIComponent(shop.shopUrl)}`
         : '#';
 
+      const subcategoryHtml = subcategoryText
+        ? `<div class="shop-meta"><i class="ri-stack-line"></i> ${escapeHtml(subcategoryText)}</div>`
+        : '';
       const shopUrlLabel = escapeHtml(shop.shopUrl || '');
 
       return `
@@ -1186,6 +1195,7 @@
           <td>
             <div class="shop-info">
               <div class="shop-name">${shop.name || 'بدون نام'}</div>
+              ${subcategoryHtml}
               ${shop.shopUrl ? `<a href="${shopUrl}" target="_blank" rel="noopener noreferrer" class="shop-url"><i class="ri-external-link-line"></i> ${shopUrlLabel}</a>` : '<span class="shop-meta">—</span>'}
             </div>
           </td>
