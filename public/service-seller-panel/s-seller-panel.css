@@ -81,6 +81,7 @@ body[data-seller-state="blocked"] { overflow: hidden; }
   align-items: center;
   justify-content: center;
   padding: clamp(1.5rem, 4vw, 3rem);
+  overflow-y: auto;
   background: radial-gradient(circle at top, rgba(36, 36, 40, 0.9), rgba(10, 10, 12, 0.96));
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
@@ -359,6 +360,77 @@ body[data-seller-state="blocked"] { overflow: hidden; }
 
   .status-actions {
     justify-content: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .blocked-card {
+    padding: 1.5rem 1.25rem;
+    border-radius: 20px;
+    gap: 1.25rem;
+  }
+
+  .blocked-icon {
+    width: 76px;
+    height: 76px;
+  }
+
+  .blocked-icon svg {
+    width: 36px;
+    height: 36px;
+  }
+
+  .blocked-message {
+    max-width: none;
+    font-size: 0.95rem;
+    line-height: 1.8;
+  }
+
+  .blocked-steps li {
+    padding: 0.75rem 1rem 0.75rem 0.75rem;
+    font-size: 0.95rem;
+  }
+
+  .blocked-actions {
+    flex-direction: column;
+  }
+
+  .blocked-actions .btn-primary,
+  .blocked-actions .btn-secondary {
+    width: 100%;
+    min-width: 0;
+  }
+}
+
+@media (max-width: 360px) {
+  .blocked-card {
+    padding: 1.25rem 1rem;
+    border-radius: 18px;
+    gap: 1rem;
+  }
+
+  .blocked-title {
+    font-size: 1.2rem;
+  }
+
+  .blocked-chip {
+    padding: 0.45rem 1rem;
+    font-size: 0.9rem;
+  }
+
+  .blocked-steps li {
+    padding-right: 1.75rem;
+  }
+}
+
+@media (max-height: 620px) {
+  .blocked-overlay {
+    align-items: flex-start;
+    padding-block: clamp(1rem, 6vh, 2.5rem);
+  }
+
+  .blocked-card {
+    margin-top: clamp(0.5rem, 4vh, 1.5rem);
   }
 }
 
