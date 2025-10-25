@@ -785,7 +785,13 @@ const matchesLegacyFilters = (item, filters = {}) => {
   }
 
   if (filters.category) {
-    const categoryMatch = containsNormalized(item.category || '', filters.category);
+    const categorySources = [
+      item.category,
+      item.subcategory,
+      ...(Array.isArray(item.subcategories) ? item.subcategories : []),
+      ...(Array.isArray(item.tags) ? item.tags : [])
+    ];
+    const categoryMatch = categorySources.some((value) => containsNormalized(value || '', filters.category));
     if (!categoryMatch) return false;
   }
 
@@ -1160,46 +1166,62 @@ exports.listServiceShops = async (req, res) => {
       });
     }
 
-    const filters = {};
+    const filterConditions = [];
     if (search) {
       const regex = new RegExp(escapeRegExp(search), 'i');
-      filters.$or = [
-        { name: regex },
-        { shopUrl: regex },
-        { ownerName: regex },
-        { ownerPhone: regex },
-        { city: regex },
-        { tags: regex }
-      ];
+      filterConditions.push({
+        $or: [
+          { name: regex },
+          { shopUrl: regex },
+          { ownerName: regex },
+          { ownerPhone: regex },
+          { city: regex },
+          { tags: regex }
+        ]
+      });
     }
 
     if (status && STATUS_VALUES.includes(status)) {
-      filters.status = status;
+      filterConditions.push({ status });
     }
 
     if (city) {
-      filters.city = new RegExp(escapeRegExp(city), 'i');
+      filterConditions.push({ city: new RegExp(escapeRegExp(city), 'i') });
     }
 
     if (category) {
-      filters.category = new RegExp(escapeRegExp(category), 'i');
+      const categoryRegex = new RegExp(escapeRegExp(category), 'i');
+      filterConditions.push({
+        $or: [
+          { category: categoryRegex },
+          { subcategories: categoryRegex },
+          { tags: categoryRegex },
+          { highlightServices: categoryRegex }
+        ]
+      });
     }
 
     if (req.query.isFeatured != null) {
-      filters.isFeatured = toBoolean(req.query.isFeatured, false);
+      filterConditions.push({ isFeatured: toBoolean(req.query.isFeatured, false) });
     }
 
     if (req.query.isPremium != null) {
-      filters.isPremium = toBoolean(req.query.isPremium, false);
+      filterConditions.push({ isPremium: toBoolean(req.query.isPremium, false) });
     }
 
     if (req.query.bookingEnabled != null) {
-      filters['bookingSettings.enabled'] = toBoolean(req.query.bookingEnabled, false);
+      filterConditions.push({ 'bookingSettings.enabled': toBoolean(req.query.bookingEnabled, false) });
     }
 
     if (req.query.visible != null) {
-      filters.isVisible = toBoolean(req.query.visible, true);
+      filterConditions.push({ isVisible: toBoolean(req.query.visible, true) });
     }
+
+    const filters = filterConditions.length === 0
+      ? {}
+      : filterConditions.length === 1
+        ? filterConditions[0]
+        : { $and: filterConditions };
 
     if (includeLegacy) {
       const [matchedItems, legacyAll, overviewTotals, legacyLinkedIds] = await Promise.all([
