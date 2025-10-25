@@ -93,7 +93,26 @@ function applySellerPlanFeatureFlags(flags = DEFAULT_FEATURE_FLAGS) {
   const plansView = document.getElementById('plans-view');
   const planNav = document.querySelector('.app-nav [data-page="plans"]');
   const overlay = plansView?.querySelector('.plan-disabled-overlay');
+  const overlayTitle = overlay?.querySelector('.plan-disabled-title');
+  const overlayText = overlay?.querySelector('.plan-disabled-text');
+  const overlaySubtext = overlay?.querySelector('.plan-disabled-subtext');
   const viewContainer = plansView?.querySelector('.view-container');
+
+  const rememberDefaultText = (element) => {
+    if (!element || !element.dataset) return;
+    if (!element.dataset.defaultText) {
+      element.dataset.defaultText = element.textContent.trim();
+    }
+  };
+
+  const restoreDefaultText = (element) => {
+    if (!element || !element.dataset?.defaultText) return;
+    element.textContent = element.dataset.defaultText;
+  };
+
+  rememberDefaultText(overlayTitle);
+  rememberDefaultText(overlayText);
+  rememberDefaultText(overlaySubtext);
 
   if (normalized.sellerPlansEnabled) {
     planHero?.removeAttribute('hidden');
@@ -105,6 +124,9 @@ function applySellerPlanFeatureFlags(flags = DEFAULT_FEATURE_FLAGS) {
       plansView.removeAttribute('aria-hidden');
     }
     overlay?.setAttribute('hidden', '');
+    restoreDefaultText(overlayTitle);
+    restoreDefaultText(overlayText);
+    restoreDefaultText(overlaySubtext);
     viewContainer?.removeAttribute('aria-hidden');
     if (planNav) {
       planNav.classList.remove('is-hidden');
@@ -134,6 +156,15 @@ function applySellerPlanFeatureFlags(flags = DEFAULT_FEATURE_FLAGS) {
     }
     if (document.body) {
       document.body.dataset.sellerPlans = 'disabled';
+    }
+    if (overlayTitle) {
+      overlayTitle.textContent = 'پلن رایگان غیرفعال است';
+    }
+    if (overlayText) {
+      overlayText.textContent = 'در حال حاضر مدیریت ویترینت دسترسی به پلن رایگان را متوقف کرده است.';
+    }
+    if (overlaySubtext) {
+      overlaySubtext.textContent = 'برای اطلاع از زمان فعال‌سازی دوباره، اعلان‌ها یا پیام‌های پشتیبانی را دنبال کنید.';
     }
     if (window.location.hash === '#/plans') {
       window.location.hash = '#/dashboard';
@@ -264,6 +295,7 @@ function renderComplimentaryPlan(planRaw) {
   const messageEl = document.getElementById('plan-hero-message');
   const perksList = document.getElementById('plan-hero-perks');
   const statusChip = document.getElementById('plan-status-chip');
+  const plansDisabled = document.body?.dataset?.sellerPlans === 'disabled';
 
   bindPlanHeroActions();
 
@@ -315,14 +347,19 @@ function renderComplimentaryPlan(planRaw) {
     if (plan.note) {
       messageEl.textContent = plan.note;
     } else if (plan.activeNow) {
-      const urgency = remainingDays != null && remainingDays <= 1
-        ? 'فرصت ارزشمند امروز را از دست ندهید؛'
-        : `تا ${faNumber(remainingDays ?? 0)} روز دیگر می‌توانید`;
-      messageEl.textContent = `پلن فعلی شما رایگان است؛ ${urgency} بدون دغدغه هزینه از ابزارهای ویترینت استفاده کنید و با ارتقا، مزیت رقابتی خود را حفظ نمایید.`;
+      const urgency = remainingDays != null
+        ? (remainingDays <= 1
+            ? 'امروز آخرین فرصت رایگان شماست،'
+            : `هنوز ${faNumber(remainingDays)} روز از دوره رایگان باقی مانده،`)
+        : '';
+      const urgencyText = urgency ? `${urgency} ` : '';
+      messageEl.textContent = `فعلاً از پلن رایگان ویترینت لذت ببرید! ${urgencyText}بدون دغدغه هزینه از ابزارهای ما استفاده کنید و هر زمان آماده بودید، از بخش پلن‌ها به نسخه‌های حرفه‌ای ارتقا دهید.`;
     } else if (plan.hasExpired) {
       messageEl.textContent = 'دوره رایگان شما به پایان رسیده است. برای ادامه استفاده از امکانات، پلن مناسب را انتخاب کنید.';
+    } else if (plansDisabled) {
+      messageEl.textContent = 'پلن رایگان در حال حاضر توسط مدیریت غیرفعال شده است و به محض فعال شدن مجدد، از همین بخش اطلاع‌رسانی می‌شود.';
     } else {
-      messageEl.textContent = 'در حال حاضر پلن رایگان فعالی برای فروشگاه شما ثبت نشده است. برای فعال‌سازی، از بخش پلن‌ها اقدام کنید.';
+      messageEl.textContent = 'برای استفاده از مزایای پلن رایگان، از بخش پلن‌ها آن را فعال کنید و پس از شروع از همینجا وضعیت آن را دنبال کنید.';
     }
   }
 }
@@ -4150,6 +4187,7 @@ window.__FEATURE_FLAGS__ = featureFlags;
 if (featureFlags.sellerPlansEnabled) {
   await loadComplimentaryPlan();
 } else {
+  window.__COMPLIMENTARY_PLAN__ = null;
   renderComplimentaryPlan(null);
 }
 
