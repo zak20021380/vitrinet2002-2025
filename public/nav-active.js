@@ -104,6 +104,10 @@
           padding-bottom: calc(92px + env(safe-area-inset-bottom, 0px));
         }
 
+        body.${BODY_READY_CLASS}.hide-mobile-nav {
+          padding-bottom: 0 !important;
+        }
+
         footer:not(.mobile-nav) {
           display: none !important;
         }
@@ -123,6 +127,14 @@
           box-shadow: 0 -12px 35px rgba(15, 23, 42, 0.12);
           justify-content: space-between;
           gap: 6px;
+          transition: transform 0.3s ease, opacity 0.3s ease;
+        }
+
+        body.hide-mobile-nav .mobile-nav {
+          transform: translateY(110%);
+          opacity: 0;
+          pointer-events: none;
+          visibility: hidden;
         }
 
         .mobile-nav .nav-item {

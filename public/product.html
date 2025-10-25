@@ -2538,6 +2538,9 @@
 
         overlayState.active = overlay;
         document.body.classList.add('modal-open');
+        if (overlay === dom.lightbox) {
+          document.body.classList.add('hide-mobile-nav');
+        }
 
         const focusable = focusTarget || overlay.querySelector('[data-focus-default], button, [href], input, select, textarea');
         if (focusable instanceof HTMLElement) {
@@ -2558,10 +2561,16 @@
         if (overlayState.active === overlay) {
           overlayState.active = null;
           document.body.classList.remove('modal-open');
+          if (overlay === dom.lightbox) {
+            document.body.classList.remove('hide-mobile-nav');
+          }
           if (restoreFocus && overlayState.lastFocus instanceof HTMLElement) {
             overlayState.lastFocus.focus();
           }
           overlayState.lastFocus = null;
+        }
+        if (overlay === dom.lightbox) {
+          document.body.classList.remove('hide-mobile-nav');
         }
       }
 
