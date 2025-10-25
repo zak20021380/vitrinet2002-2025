@@ -1834,7 +1834,7 @@ function bindFloatingCloseOnce() {
       this.topPeersData = null;
       this._topPeersPromise = null;
       this.topPeersAutoRefreshInterval = null;
-      this.topPeersAutoRefreshMs = 60000;
+      this.topPeersAutoRefreshMs = 30 * 60 * 1000;
 
       this.setFeatureFlags(flags);
 
@@ -1925,7 +1925,6 @@ setupEventListeners() {
       reviewsFilter: document.querySelector('#reviews-view .filter-chips'),
       settingsForm: document.getElementById('settings-form'),
       rankCard: document.getElementById('rank-card'),
-      topRefreshBtn: document.getElementById('top-refresh-btn'),
       topViewAllBtn: document.getElementById('top-view-all'),
       topLeaderboardList: document.getElementById('top-leaderboard-list'),
       addCustomerBtn: document.getElementById('add-customer-btn'),
@@ -2101,13 +2100,6 @@ if (elements.viewStoreBtn) {
     {
       element: elements.rankCard,
       handler: () => UIComponents.openModal('rank-modal')
-    },
-    {
-      element: elements.topRefreshBtn,
-      handler: () => {
-        this.renderTopPeers(true);
-        this.restartTopPeersAutoRefresh();
-      }
     },
     {
       element: elements.addCustomerBtn,
@@ -2311,7 +2303,7 @@ destroy() {
         return;
       }
 
-      const intervalMs = Math.max(15000, Number(this.topPeersAutoRefreshMs) || 60000);
+      const intervalMs = Math.max(15000, Number(this.topPeersAutoRefreshMs) || (30 * 60 * 1000));
       this.topPeersAutoRefreshInterval = window.setInterval(() => {
         const topView = document.getElementById('top-view');
         if (!topView || !topView.classList.contains('active')) {
