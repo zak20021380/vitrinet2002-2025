@@ -2544,7 +2544,7 @@
           dom.badge.hidden = true;
         }
 
-        const sellerName = seller.storename || seller.ownerName || [seller.ownerFirstname, seller.ownerLastname].filter(Boolean).join(' ') || '';
+        const sellerName = seller.storename || [seller.firstname, seller.lastname].filter(Boolean).join(' ') || '';
         dom.meta.seller.textContent = sellerName || 'فروشنده نامشخص';
         dom.meta.category.textContent = product.category || 'نامشخص';
 
@@ -3042,7 +3042,7 @@
       }
 
       function renderSellerCard(seller, productDesc) {
-        const hasSeller = seller && (seller.storename || seller.ownerName || seller.ownerFirstname || seller.ownerLastname || seller.phone || seller.address || seller.category || seller.boardImage || seller.desc);
+        const hasSeller = seller && (seller.storename || seller.firstname || seller.lastname || seller.phone || seller.address || seller.category || seller.boardImage || seller.desc);
         if (!hasSeller) {
           dom.sellerCard.hidden = true;
           if (dom.sellerActions) {
@@ -3065,7 +3065,7 @@
         }
 
         dom.sellerCard.hidden = false;
-        const sellerName = seller.storename || seller.ownerName || [seller.ownerFirstname, seller.ownerLastname].filter(Boolean).join(' ') || 'فروشنده نامشخص';
+        const sellerName = seller.storename || [seller.firstname, seller.lastname].filter(Boolean).join(' ') || 'فروشنده نامشخص';
         dom.sellerName.textContent = sellerName;
         state.sellerName = sellerName;
         state.addressInfo = null;
@@ -3276,10 +3276,10 @@
           data.sku = String(product._id || product.id);
         }
 
-        if (seller && (seller.storename || seller.ownerName)) {
+        if (seller && (seller.storename || seller.firstname || seller.lastname)) {
           data.seller = {
             '@type': 'Organization',
-            name: seller.storename || seller.ownerName
+            name: seller.storename || [seller.firstname, seller.lastname].filter(Boolean).join(' ')
           };
         }
 

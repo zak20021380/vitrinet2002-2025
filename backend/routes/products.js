@@ -58,7 +58,7 @@ router.get('/:id', async (req, res) => {
     const product = await Product.findById(req.params.id)
       .populate({
         path: 'sellerId',
-        select: 'storename firstname lastname ownerName ownerFirstname ownerLastname shopurl phone category subcategory address city desc boardImage'
+        select: 'storename firstname lastname shopurl phone category subcategory address desc boardImage'
       })
       .lean();
 
