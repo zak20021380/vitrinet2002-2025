@@ -537,6 +537,71 @@
       flex-wrap: wrap;
     }
 
+    .actions .btn-action {
+      background: rgba(255, 255, 255, 0.85);
+      border: 1.5px solid rgba(14, 165, 233, 0.35);
+      color: var(--secondary);
+      transition: all 0.2s ease;
+    }
+
+    .actions .btn-action:hover,
+    .actions .btn-action:focus {
+      background: rgba(14, 165, 233, 0.15);
+      color: var(--secondary);
+    }
+
+    .actions .btn-action[data-mode="block"] {
+      border-color: rgba(239, 68, 68, 0.35);
+      color: var(--danger);
+      background: rgba(239, 68, 68, 0.12);
+    }
+
+    .actions .btn-action[data-mode="block"]:hover,
+    .actions .btn-action[data-mode="block"]:focus {
+      background: rgba(239, 68, 68, 0.18);
+    }
+
+    .actions .btn-action[data-mode="unblock"] {
+      border-color: rgba(16, 185, 129, 0.35);
+      color: var(--primary);
+      background: rgba(16, 185, 129, 0.12);
+    }
+
+    .actions .btn-action[data-mode="unblock"]:hover,
+    .actions .btn-action[data-mode="unblock"]:focus {
+      background: rgba(16, 185, 129, 0.18);
+    }
+
+    .actions .btn-action i {
+      font-size: 1rem;
+    }
+
+    .moderation-meta {
+      margin-top: 0.75rem;
+      padding: 0.75rem 0.9rem;
+      border-radius: 12px;
+      border: 1.5px solid rgba(239, 68, 68, 0.2);
+      background: rgba(239, 68, 68, 0.08);
+      color: var(--danger);
+      font-size: 0.85rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.35rem;
+    }
+
+    .moderation-meta[data-status="unblocked"] {
+      border-color: rgba(16, 185, 129, 0.18);
+      background: rgba(16, 185, 129, 0.08);
+      color: var(--primary);
+    }
+
+    .moderation-meta strong {
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
     /* Status Select */
     .status-select {
       padding: 0.4rem 0.6rem;
@@ -765,6 +830,31 @@
       margin: 0;
       font-weight: 500;
       color: var(--text);
+    }
+
+    .moderation-status {
+      padding: 0.9rem 1rem;
+      border-radius: 14px;
+      border: 1.5px solid rgba(14, 165, 233, 0.25);
+      background: rgba(14, 165, 233, 0.1);
+      color: var(--secondary);
+      display: flex;
+      flex-direction: column;
+      gap: 0.35rem;
+      font-size: 0.9rem;
+    }
+
+    .moderation-status[data-status="blocked"] {
+      border-color: rgba(239, 68, 68, 0.25);
+      background: rgba(239, 68, 68, 0.1);
+      color: var(--danger);
+    }
+
+    .moderation-status strong {
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
     }
 
     .modal-footer {
@@ -1382,6 +1472,43 @@
     </div>
   </dialog>
 
+  <dialog id="moderation-dialog">
+    <div class="modal-header">
+      <h2 id="moderation-title"><i class="ri-shield-line"></i> اقدامات فروشنده</h2>
+      <button type="button" class="modal-close" data-close-moderation>
+        <i class="ri-close-line"></i>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label>نام مغازه</label>
+        <input type="text" id="moderation-shop-name" readonly style="background: #f3f4f6;">
+      </div>
+      <div class="form-group">
+        <label>وضعیت مسدودی</label>
+        <div class="moderation-status" id="moderation-status" data-status="unblocked">
+          <strong><i class="ri-shield-check-line"></i> بدون مسدودی فعال</strong>
+        </div>
+      </div>
+      <div class="form-group">
+        <label id="moderation-reason-label" for="moderation-reason">دلیل اقدام</label>
+        <textarea id="moderation-reason" rows="3" placeholder="دلیل اقدام را بنویسید..."></textarea>
+        <p class="form-note" id="moderation-reason-note">ثبت دلیل به تیم پشتیبانی کمک می‌کند.</p>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <span class="form-error" id="moderation-error" style="display: none;"></span>
+      <div class="form-actions">
+        <button type="button" class="btn btn-secondary btn-sm" data-close-moderation>
+          <i class="ri-close-line"></i> لغو
+        </button>
+        <button type="button" class="btn btn-primary btn-sm" id="moderation-submit">
+          <i class="ri-shield-check-line"></i> تایید اقدام
+        </button>
+      </div>
+    </div>
+  </dialog>
+
   <script>
     // API Configuration
     const ADMIN_API_BASE = (() => {
@@ -1413,6 +1540,15 @@
       return numberFormatter.format(Number.isFinite(num) ? num : 0);
     };
 
+    const formatDateTime = (value) => {
+      if (!value) return '';
+      const date = value instanceof Date ? value : new Date(value);
+      if (Number.isNaN(date.getTime())) return '';
+      const datePart = date.toLocaleDateString('fa-IR');
+      const timePart = date.toLocaleTimeString('fa-IR', { hour: '2-digit', minute: '2-digit' });
+      return `${datePart}، ساعت ${timePart}`;
+    };
+
     const sanitizeTel = (value = '') => String(value).replace(/[^0-9+]/g, '');
 
     const PLAN_FILTER_LABELS = {
@@ -1422,6 +1558,56 @@
     };
 
     const MS_IN_DAY = 24 * 60 * 60 * 1000;
+
+    const getModerationInfo = (shop = {}) => {
+      const moderation = shop.adminModeration || {};
+      const seller = shop.seller || {};
+      const isBlocked = !!(moderation.isBlocked || seller.blockedByAdmin);
+      const reasonRaw = moderation.reason != null && String(moderation.reason).trim()
+        ? String(moderation.reason).trim()
+        : (seller.blockedReason != null ? String(seller.blockedReason).trim() : '');
+      return {
+        isBlocked,
+        reason: reasonRaw,
+        blockedAt: moderation.blockedAt || seller.blockedAt || null,
+        unblockedAt: moderation.unblockedAt || seller.unblockedAt || null
+      };
+    };
+
+    const buildModerationMeta = (info) => {
+      if (!info) return '';
+      const segments = [];
+      let status = 'unblocked';
+      let titleIcon = 'ri-shield-check-line';
+      let titleText = 'آخرین وضعیت';
+
+      if (info.isBlocked) {
+        status = 'blocked';
+        titleIcon = 'ri-shield-cross-line';
+        titleText = 'فروشنده مسدود شده';
+        if (info.blockedAt) {
+          segments.push(`<span>مسدود شده در ${escapeHtml(formatDateTime(info.blockedAt))}</span>`);
+        }
+        if (info.reason) {
+          segments.push(`<span>دلیل: ${escapeHtml(info.reason)}</span>`);
+        }
+        if (!segments.length) {
+          segments.push('<span>این فروشنده در حال حاضر توسط تیم ادمین مسدود شده است.</span>');
+        }
+      } else {
+        if (info.unblockedAt) {
+          segments.push(`<span>آخرین رفع مسدودی در ${escapeHtml(formatDateTime(info.unblockedAt))}</span>`);
+        }
+        if (info.reason) {
+          segments.push(`<span>آخرین یادداشت: ${escapeHtml(info.reason)}</span>`);
+        }
+        if (!segments.length) {
+          return '';
+        }
+      }
+
+      return `<div class="moderation-meta" data-status="${status}"><strong><i class="${titleIcon}"></i> ${titleText}</strong>${segments.join('')}</div>`;
+    };
 
     // State
     const state = {
@@ -1467,7 +1653,17 @@
       planExpiryDialog: document.getElementById('plan-expiry-dialog'),
       planExpiryList: document.getElementById('plan-expiry-list'),
       planExpirySubtitle: document.getElementById('plan-expiry-subtitle'),
-      planExpiryClose: document.getElementById('plan-expiry-close')
+      planExpiryClose: document.getElementById('plan-expiry-close'),
+      moderationDialog: document.getElementById('moderation-dialog'),
+      moderationTitle: document.getElementById('moderation-title'),
+      moderationShopName: document.getElementById('moderation-shop-name'),
+      moderationStatus: document.getElementById('moderation-status'),
+      moderationReason: document.getElementById('moderation-reason'),
+      moderationReasonLabel: document.getElementById('moderation-reason-label'),
+      moderationReasonNote: document.getElementById('moderation-reason-note'),
+      moderationError: document.getElementById('moderation-error'),
+      moderationSubmit: document.getElementById('moderation-submit'),
+      moderationCloseButtons: Array.from(document.querySelectorAll('[data-close-moderation]'))
     };
 
     function applyInitialFiltersFromUrl() {
@@ -2014,6 +2210,13 @@
       const shopUrlLabel = escapeHtml(shop.shopUrl || '');
       const planBadgeHtml = buildPlanBadge(shop.complimentaryPlan);
       const planMetaHtml = buildPlanMeta(shop.complimentaryPlan);
+      const moderationInfo = getModerationInfo(shop);
+      const moderationMetaHtml = buildModerationMeta(moderationInfo);
+      const moderationBadgeHtml = moderationInfo.isBlocked
+        ? '<span class="badge badge-danger"><i class="ri-shield-cross-line"></i> مسدود</span>'
+        : '';
+      const moderationActionMode = moderationInfo.isBlocked ? 'unblock' : 'block';
+      const moderationActionIcon = moderationInfo.isBlocked ? 'ri-shield-check-line' : 'ri-shield-off-line';
 
       return `
         <tr data-id="${shop._id}">
@@ -2034,6 +2237,7 @@
           <td>
             <div class="badges-group">
               <span class="badge ${badgeClass}">${statusLabel}</span>
+              ${moderationBadgeHtml}
             </div>
           </td>
           <td>
@@ -2053,7 +2257,11 @@
               <button type="button" class="btn btn-view btn-sm" data-action="manage-plan" data-id="${shop._id}">
                 <i class="ri-vip-crown-line"></i> پلن رایگان
               </button>
+              <button type="button" class="btn btn-action btn-sm" data-action="moderation" data-mode="${moderationActionMode}" data-id="${shop._id}">
+                <i class="${moderationActionIcon}"></i> اقدامات
+              </button>
             </div>
+            ${moderationMetaHtml}
           </td>
         </tr>
       `;
@@ -2117,6 +2325,13 @@
         e.stopPropagation();
         await openPlanModal(managePlanBtn.dataset.id);
         return;
+      }
+
+      const moderationBtn = e.target.closest('button[data-action="moderation"]');
+      if (moderationBtn) {
+        e.preventDefault();
+        e.stopPropagation();
+        await openModerationDialog(moderationBtn.dataset.id, moderationBtn.dataset.mode);
       }
     });
 
@@ -2368,6 +2583,206 @@
         saveBtn.innerHTML = '<i class="ri-save-line"></i> ذخیره پلن';
       }
     });
+
+    function resetModerationDialog() {
+      if (elements.moderationError) {
+        elements.moderationError.style.display = 'none';
+        elements.moderationError.textContent = '';
+      }
+      if (elements.moderationReason) {
+        elements.moderationReason.value = '';
+      }
+      if (elements.moderationStatus) {
+        elements.moderationStatus.innerHTML = '<strong><i class="ri-shield-check-line"></i> بدون مسدودی فعال</strong>';
+        elements.moderationStatus.dataset.status = 'unblocked';
+      }
+      if (elements.moderationDialog) {
+        elements.moderationDialog.dataset.shopId = '';
+        elements.moderationDialog.dataset.mode = '';
+      }
+      if (elements.moderationSubmit) {
+        elements.moderationSubmit.disabled = false;
+        elements.moderationSubmit.dataset.mode = '';
+        elements.moderationSubmit.classList.remove('btn-danger');
+        if (!elements.moderationSubmit.classList.contains('btn-primary')) {
+          elements.moderationSubmit.classList.add('btn-primary');
+        }
+        elements.moderationSubmit.innerHTML = '<i class="ri-shield-check-line"></i> تایید اقدام';
+      }
+    }
+
+    function closeModerationDialog() {
+      if (!elements.moderationDialog) return;
+      resetModerationDialog();
+      if (elements.moderationDialog.open) {
+        elements.moderationDialog.close();
+      }
+    }
+
+    async function openModerationDialog(shopId, mode = 'block') {
+      if (!elements.moderationDialog || !shopId) return;
+
+      try {
+        const data = await fetchJSON(`${API_BASE}/${shopId}`);
+        const shop = data.item;
+        if (!shop) {
+          throw new Error('مغازه خدماتی یافت نشد.');
+        }
+
+        const info = getModerationInfo(shop);
+        let actionMode = mode === 'unblock' ? 'unblock' : 'block';
+        if (info.isBlocked && actionMode === 'block') {
+          actionMode = 'unblock';
+        } else if (!info.isBlocked && actionMode === 'unblock') {
+          actionMode = 'block';
+        }
+
+        elements.moderationDialog.dataset.shopId = shopId;
+        elements.moderationDialog.dataset.mode = actionMode;
+
+        if (elements.moderationTitle) {
+          const icon = actionMode === 'block' ? 'ri-shield-off-line' : 'ri-shield-check-line';
+          const text = actionMode === 'block' ? 'مسدودسازی فروشنده' : 'رفع مسدودی فروشنده';
+          elements.moderationTitle.innerHTML = `<i class="${icon}"></i> ${text}`;
+        }
+
+        if (elements.moderationShopName) {
+          elements.moderationShopName.value = shop.name || 'بدون نام';
+        }
+
+        if (elements.moderationStatus) {
+          const statusParts = [];
+          if (info.isBlocked) {
+            elements.moderationStatus.dataset.status = 'blocked';
+            statusParts.push('<strong><i class="ri-shield-cross-line"></i> فروشنده در حال حاضر مسدود است</strong>');
+            if (info.blockedAt) {
+              statusParts.push(`<span>مسدود شده در ${escapeHtml(formatDateTime(info.blockedAt))}</span>`);
+            }
+            if (info.reason) {
+              statusParts.push(`<span>دلیل ثبت شده: ${escapeHtml(info.reason)}</span>`);
+            }
+          } else {
+            elements.moderationStatus.dataset.status = 'unblocked';
+            statusParts.push('<strong><i class="ri-shield-check-line"></i> فروشنده فعال است</strong>');
+            if (info.unblockedAt) {
+              statusParts.push(`<span>آخرین رفع مسدودی: ${escapeHtml(formatDateTime(info.unblockedAt))}</span>`);
+            }
+            if (info.reason) {
+              statusParts.push(`<span>آخرین یادداشت: ${escapeHtml(info.reason)}</span>`);
+            }
+          }
+          elements.moderationStatus.innerHTML = statusParts.join('');
+        }
+
+        if (elements.moderationReasonLabel) {
+          elements.moderationReasonLabel.textContent = actionMode === 'block'
+            ? 'دلیل مسدودسازی (اختیاری)'
+            : 'یادداشت رفع مسدودی (اختیاری)';
+        }
+
+        if (elements.moderationReasonNote) {
+          elements.moderationReasonNote.textContent = actionMode === 'block'
+            ? 'در صورت امکان دلیل مسدودسازی را وارد کنید تا در سابقه ثبت شود.'
+            : 'می‌توانید توضیح کوتاهی برای رفع مسدودی ثبت کنید.';
+        }
+
+        if (elements.moderationReason) {
+          elements.moderationReason.value = '';
+          setTimeout(() => elements.moderationReason?.focus(), 100);
+        }
+
+        if (elements.moderationError) {
+          elements.moderationError.style.display = 'none';
+          elements.moderationError.textContent = '';
+        }
+
+        if (elements.moderationSubmit) {
+          elements.moderationSubmit.disabled = false;
+          elements.moderationSubmit.dataset.mode = actionMode;
+          elements.moderationSubmit.classList.toggle('btn-danger', actionMode === 'block');
+          elements.moderationSubmit.classList.toggle('btn-primary', actionMode !== 'block');
+          elements.moderationSubmit.innerHTML = actionMode === 'block'
+            ? '<i class="ri-shield-off-line"></i> مسدودسازی فروشنده'
+            : '<i class="ri-shield-check-line"></i> رفع مسدودی';
+        }
+
+        if (!elements.moderationDialog.open) {
+          elements.moderationDialog.showModal();
+        }
+      } catch (err) {
+        console.error('openModerationDialog error', err);
+        showToast(err.message || 'خطا در دریافت اطلاعات مغازه.', 'error');
+      }
+    }
+
+    if (elements.moderationDialog) {
+      elements.moderationDialog.addEventListener('cancel', (event) => {
+        event.preventDefault();
+        closeModerationDialog();
+      });
+    }
+
+    if (elements.moderationCloseButtons && elements.moderationCloseButtons.length) {
+      elements.moderationCloseButtons.forEach((btn) => {
+        btn.addEventListener('click', (event) => {
+          event.preventDefault();
+          closeModerationDialog();
+        });
+      });
+    }
+
+    if (elements.moderationSubmit) {
+      elements.moderationSubmit.addEventListener('click', async () => {
+        if (!elements.moderationDialog) return;
+        const shopId = elements.moderationDialog.dataset.shopId;
+        let mode = elements.moderationDialog.dataset.mode || elements.moderationSubmit.dataset.mode || 'block';
+        if (!shopId) {
+          return;
+        }
+
+        if (mode !== 'block' && mode !== 'unblock') {
+          mode = 'block';
+        }
+
+        const body = {};
+        const reasonValue = elements.moderationReason ? elements.moderationReason.value.trim() : '';
+        if (reasonValue) {
+          body.reason = reasonValue;
+        }
+
+        if (elements.moderationError) {
+          elements.moderationError.style.display = 'none';
+          elements.moderationError.textContent = '';
+        }
+
+        const submitBtn = elements.moderationSubmit;
+        const previousLabel = submitBtn.innerHTML;
+
+        try {
+          submitBtn.disabled = true;
+          submitBtn.innerHTML = '<i class="ri-loader-4-line"></i> در حال انجام...';
+
+          const endpoint = mode === 'block' ? 'block' : 'unblock';
+          const response = await fetchJSON(`${API_BASE}/${encodeURIComponent(shopId)}/${endpoint}`, {
+            method: 'PATCH',
+            body: JSON.stringify(body)
+          });
+
+          closeModerationDialog();
+          showToast(response?.message || (mode === 'block' ? 'فروشنده مسدود شد.' : 'مسدودی فروشنده برداشته شد.'));
+          await Promise.all([loadOverview(), loadShops()]);
+        } catch (err) {
+          console.error('moderationSubmit error', err);
+          if (elements.moderationError) {
+            elements.moderationError.textContent = err.message || 'خطا در انجام عملیات.';
+            elements.moderationError.style.display = 'block';
+          }
+        } finally {
+          submitBtn.disabled = false;
+          submitBtn.innerHTML = previousLabel;
+        }
+      });
+    }
 
     function applyFilters() {
       state.page = 1;
