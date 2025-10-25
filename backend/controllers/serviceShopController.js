@@ -1262,14 +1262,10 @@ exports.listServiceShops = async (req, res) => {
 
     if (planStatus) {
       const now = new Date();
-      const soon = new Date(now.getTime() + 7 * MS_PER_DAY);
       let planFilter = null;
 
       switch (planStatus) {
-        case 'active':
-          planFilter = { 'complimentaryPlan.isActive': true };
-          break;
-        case 'active-now':
+        case 'complimentary':
           planFilter = {
             'complimentaryPlan.isActive': true,
             $and: [
@@ -1290,32 +1286,52 @@ exports.listServiceShops = async (req, res) => {
             ]
           };
           break;
-        case 'scheduled':
+        case 'premium':
           planFilter = {
-            'complimentaryPlan.isActive': true,
-            'complimentaryPlan.startDate': { $gt: now }
-          };
-          break;
-        case 'expiring':
-          planFilter = {
-            'complimentaryPlan.isActive': true,
-            'complimentaryPlan.endDate': { $gte: now, $lte: soon }
-          };
-          break;
-        case 'expired':
-          planFilter = {
-            'complimentaryPlan.isActive': true,
-            'complimentaryPlan.endDate': { $lt: now }
-          };
-          break;
-        case 'none':
-          planFilter = {
+            isPremium: true,
             $or: [
-              { complimentaryPlan: { $exists: false } },
-              { 'complimentaryPlan.isActive': { $ne: true } }
+              { premiumUntil: { $exists: false } },
+              { premiumUntil: null },
+              { premiumUntil: { $gte: now } }
             ]
           };
           break;
+        case 'none': {
+          const activeComplimentary = {
+            'complimentaryPlan.isActive': true,
+            $and: [
+              {
+                $or: [
+                  { 'complimentaryPlan.startDate': { $exists: false } },
+                  { 'complimentaryPlan.startDate': null },
+                  { 'complimentaryPlan.startDate': { $lte: now } }
+                ]
+              },
+              {
+                $or: [
+                  { 'complimentaryPlan.endDate': { $exists: false } },
+                  { 'complimentaryPlan.endDate': null },
+                  { 'complimentaryPlan.endDate': { $gte: now } }
+                ]
+              }
+            ]
+          };
+          const activePremium = {
+            isPremium: true,
+            $or: [
+              { premiumUntil: { $exists: false } },
+              { premiumUntil: null },
+              { premiumUntil: { $gte: now } }
+            ]
+          };
+          planFilter = {
+            $and: [
+              { $nor: [activeComplimentary] },
+              { $nor: [activePremium] }
+            ]
+          };
+          break;
+        }
         default:
           break;
       }

@@ -608,6 +608,18 @@
       color: var(--danger);
     }
 
+    .toast.info {
+      border-color: rgba(61, 115, 255, 0.5);
+      color: #1a2c6d;
+      background: rgba(61, 115, 255, 0.08);
+    }
+
+    .toast.warning {
+      border-color: rgba(249, 167, 43, 0.6);
+      color: #7a4c02;
+      background: rgba(249, 167, 43, 0.12);
+    }
+
     .toast i {
       font-size: 1.5rem;
     }
@@ -765,6 +777,187 @@
       background: #f9fafb;
     }
 
+    .plan-expiry-dialog {
+      border: none;
+      border-radius: 18px;
+      padding: 0;
+      width: min(520px, 92vw);
+      background: rgba(255, 255, 255, 0.98);
+      box-shadow: 0 32px 60px rgba(26, 31, 54, 0.18);
+    }
+
+    .plan-expiry-dialog::backdrop {
+      background: rgba(26, 31, 54, 0.4);
+      backdrop-filter: blur(4px);
+    }
+
+    .plan-expiry-shell {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+    }
+
+    .plan-expiry-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 1rem;
+      padding: 1.5rem 1.75rem 1rem;
+      border-bottom: 1px solid rgba(112, 128, 176, 0.16);
+    }
+
+    .plan-expiry-header h2 {
+      margin: 0;
+      font-size: 1.1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+    }
+
+    .plan-expiry-header p {
+      margin: 0.35rem 0 0;
+      color: var(--muted);
+      font-size: 0.85rem;
+      line-height: 1.8;
+    }
+
+    .plan-expiry-close {
+      border: none;
+      background: transparent;
+      color: var(--muted);
+      font-size: 1.35rem;
+      cursor: pointer;
+      padding: 0.25rem;
+      border-radius: 8px;
+    }
+
+    .plan-expiry-close:hover {
+      background: rgba(61, 115, 255, 0.14);
+      color: var(--primary);
+    }
+
+    .plan-expiry-body {
+      padding: 1rem 1.75rem 1.5rem;
+      max-height: min(60vh, 480px);
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .plan-expiry-list {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .plan-expiry-item {
+      background: rgba(61, 115, 255, 0.06);
+      border-radius: 14px;
+      padding: 1rem 1.15rem;
+      border: 1px solid rgba(61, 115, 255, 0.16);
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+
+    .plan-expiry-item--warning {
+      background: rgba(249, 167, 43, 0.1);
+      border-color: rgba(249, 167, 43, 0.24);
+    }
+
+    .plan-expiry-item--expired {
+      background: rgba(242, 87, 100, 0.1);
+      border-color: rgba(242, 87, 100, 0.3);
+    }
+
+    .plan-expiry-item-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+    }
+
+    .plan-expiry-item-name {
+      font-weight: 700;
+      font-size: 1rem;
+      color: var(--text-strong);
+    }
+
+    .plan-expiry-chip {
+      padding: 0.3rem 0.75rem;
+      border-radius: 999px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    .plan-expiry-chip i {
+      font-size: 1rem;
+    }
+
+    .plan-expiry-chip.complimentary {
+      background: rgba(55, 178, 108, 0.16);
+      color: #116033;
+    }
+
+    .plan-expiry-chip.premium {
+      background: rgba(61, 115, 255, 0.16);
+      color: #1a2c6d;
+    }
+
+    .plan-expiry-item-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem 1.25rem;
+      font-size: 0.85rem;
+      color: var(--muted);
+    }
+
+    .plan-expiry-item-status {
+      font-weight: 600;
+      color: #7a4c02;
+    }
+
+    .plan-expiry-item--expired .plan-expiry-item-status {
+      color: #a61c2e;
+    }
+
+    .plan-expiry-item-contact {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem 1.25rem;
+      font-size: 0.85rem;
+      color: var(--muted);
+    }
+
+    .plan-expiry-item-contact a {
+      color: var(--primary);
+      font-weight: 600;
+      text-decoration: none;
+    }
+
+    .plan-expiry-item-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+
+    .plan-expiry-footer {
+      display: flex;
+      justify-content: flex-end;
+      gap: 0.75rem;
+      padding: 1rem 1.75rem 1.5rem;
+      border-top: 1px solid rgba(112, 128, 176, 0.16);
+      background: rgba(249, 250, 251, 0.9);
+    }
+
     .form-error {
       color: var(--danger);
       font-size: 0.875rem;
@@ -821,6 +1014,32 @@
 
       table {
         min-width: 800px;
+      }
+
+      .plan-expiry-dialog {
+        width: 95vw;
+      }
+
+      .plan-expiry-header {
+        padding: 1.25rem 1.25rem 0.75rem;
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      .plan-expiry-body {
+        padding: 1rem 1.25rem 1.25rem;
+        max-height: 70vh;
+      }
+
+      .plan-expiry-footer {
+        flex-direction: column;
+        align-items: stretch;
+        padding: 0.75rem 1.25rem 1.25rem;
+      }
+
+      .plan-expiry-footer .btn {
+        width: 100%;
+        justify-content: center;
       }
     }
   </style>
@@ -940,12 +1159,9 @@
           <label>وضعیت پلن رایگان</label>
           <select id="filter-plan">
             <option value="">همه وضعیت‌ها</option>
-            <option value="active">دارای پلن فعال</option>
-            <option value="active-now">در حال استفاده</option>
-            <option value="scheduled">پلن در انتظار شروع</option>
-            <option value="expiring">رو به پایان (۷ روز آینده)</option>
-            <option value="expired">پلن منقضی شده</option>
-            <option value="none">بدون پلن رایگان فعال</option>
+            <option value="complimentary">پلن رایگان فعال</option>
+            <option value="premium">پلن پولی فعال</option>
+            <option value="none">بدون پلن فعال</option>
           </select>
         </div>
       </div>
@@ -997,6 +1213,34 @@
 
   <!-- Toast Container -->
   <div id="toast-container" aria-live="polite" aria-atomic="true"></div>
+
+  <!-- Plan Expiry Alert -->
+  <dialog id="plan-expiry-dialog" class="plan-expiry-dialog">
+    <div class="plan-expiry-shell">
+      <div class="plan-expiry-header">
+        <div>
+          <h2><i class="ri-alarm-warning-line"></i> هشدار پایان پلن</h2>
+          <p id="plan-expiry-subtitle">برای فروشندگان زیر کمتر از ۲۴ ساعت تا پایان پلن باقی مانده است.</p>
+        </div>
+        <button type="button" class="plan-expiry-close" data-plan-expiry-action="dismiss" id="plan-expiry-close">
+          <i class="ri-close-line"></i>
+        </button>
+      </div>
+      <div class="plan-expiry-body">
+        <ul id="plan-expiry-list" class="plan-expiry-list"></ul>
+      </div>
+      <div class="plan-expiry-footer">
+        <button type="button" class="btn btn-secondary btn-sm" data-plan-expiry-action="remind-later">
+          <i class="ri-time-line"></i>
+          بعداً یادآوری کن
+        </button>
+        <button type="button" class="btn btn-primary btn-sm" data-plan-expiry-action="dismiss">
+          <i class="ri-check-line"></i>
+          بررسی شد
+        </button>
+      </div>
+    </div>
+  </dialog>
 
   <!-- Status Modal -->
   <dialog id="status-modal">
@@ -1169,13 +1413,12 @@
       return numberFormatter.format(Number.isFinite(num) ? num : 0);
     };
 
+    const sanitizeTel = (value = '') => String(value).replace(/[^0-9+]/g, '');
+
     const PLAN_FILTER_LABELS = {
-      active: 'دارای پلن فعال',
-      'active-now': 'در حال استفاده از پلن رایگان',
-      scheduled: 'پلن رایگان در انتظار شروع',
-      expiring: 'پلن رایگان رو به پایان',
-      expired: 'پلن رایگان منقضی شده',
-      none: 'بدون پلن رایگان فعال'
+      complimentary: 'پلن رایگان فعال',
+      premium: 'پلن پولی فعال',
+      none: 'بدون پلن فعال'
     };
 
     const MS_IN_DAY = 24 * 60 * 60 * 1000;
@@ -1192,7 +1435,10 @@
       items: [],
       overview: null,
       categories: [],
-      loading: false
+      loading: false,
+      expiryDismissed: new Set(),
+      lastExpirySnapshot: '',
+      expiryDialogItems: []
     };
 
     // Elements
@@ -1217,15 +1463,26 @@
       metricPlanCaption: document.getElementById('metric-plan-caption'),
       planCard: document.getElementById('plan-summary-card'),
       planManageBtn: document.getElementById('plan-manage-btn'),
-      planExpiringBtn: document.getElementById('plan-expiring-btn')
+      planExpiringBtn: document.getElementById('plan-expiring-btn'),
+      planExpiryDialog: document.getElementById('plan-expiry-dialog'),
+      planExpiryList: document.getElementById('plan-expiry-list'),
+      planExpirySubtitle: document.getElementById('plan-expiry-subtitle'),
+      planExpiryClose: document.getElementById('plan-expiry-close')
     };
 
     // Toast notification
     function showToast(message, type = 'success') {
       const container = document.getElementById('toast-container');
       const toast = document.createElement('div');
-      toast.className = `toast ${type}`;
-      const icon = type === 'success' ? 'ri-checkbox-circle-line' : 'ri-error-warning-line';
+      const toastType = ['success', 'error', 'info', 'warning'].includes(type) ? type : 'success';
+      toast.className = `toast ${toastType}`;
+      const iconMap = {
+        success: 'ri-checkbox-circle-line',
+        error: 'ri-error-warning-line',
+        info: 'ri-information-line',
+        warning: 'ri-alert-line'
+      };
+      const icon = iconMap[toastType] || iconMap.success;
       toast.innerHTML = `<i class="${icon}"></i><span>${message}</span>`;
       container.appendChild(toast);
       setTimeout(() => toast.classList.add('hide'), 3200);
@@ -1327,6 +1584,8 @@
         state.items = Array.isArray(data.items) ? data.items : [];
         renderTable();
         updateMeta(data.summary?.total || 0);
+        updatePlanExpiryIndicators();
+        maybeShowPlanExpiryDialog();
       } catch (err) {
         console.error('loadShops error', err);
         renderErrorRow(err.message);
@@ -1349,7 +1608,7 @@
       parts.push(total === 0 ? 'هیچ مغازه‌ای یافت نشد' : `${formatNumber(total)} مغازه`);
       if (state.filters.planStatus) {
         const label = PLAN_FILTER_LABELS[state.filters.planStatus] || state.filters.planStatus;
-        parts.push(`پلن رایگان: ${label}`);
+        parts.push(`وضعیت پلن: ${label}`);
       }
       if (state.filters.category) {
         parts.push(`دسته: ${state.filters.category}`);
@@ -1468,6 +1727,214 @@
       }
 
       return `<div class="${classes.join(' ')}"><i class="ri-timer-line"></i> ${segments.join(' • ')}</div>`;
+    }
+
+    function formatPlanExpiryStatus(diffMs) {
+      if (!Number.isFinite(diffMs)) {
+        return 'زمان پایان نامشخص';
+      }
+      if (diffMs < 0) {
+        const absMs = Math.abs(diffMs);
+        if (absMs < 60 * 60 * 1000) {
+          return 'همین لحظه منقضی شد';
+        }
+        if (absMs < MS_IN_DAY) {
+          return 'کمتر از ۲۴ ساعت از انقضا گذشته';
+        }
+        const daysPast = Math.ceil(absMs / MS_IN_DAY);
+        return `${formatNumber(daysPast)} روز از انقضا گذشته`;
+      }
+      if (diffMs === 0) {
+        return 'امروز منقضی می‌شود';
+      }
+      if (diffMs <= 60 * 60 * 1000) {
+        return 'کمتر از یک ساعت تا پایان';
+      }
+      if (diffMs <= MS_IN_DAY) {
+        const hoursLeft = Math.ceil(diffMs / (60 * 60 * 1000));
+        return `کمتر از ${formatNumber(hoursLeft)} ساعت تا پایان`;
+      }
+      const daysLeft = Math.ceil(diffMs / MS_IN_DAY);
+      return `${formatNumber(daysLeft)} روز تا پایان`;
+    }
+
+    function gatherExpiringShops(includeDismissed = false) {
+      const now = new Date();
+      const results = [];
+      const seenKeys = new Set();
+
+      state.items.forEach((shop) => {
+        if (!shop) return;
+        const shopId = shop?._id
+          ? String(shop._id)
+          : shop?.id
+            ? String(shop.id)
+            : shop?.shopId
+              ? String(shop.shopId)
+              : '';
+        if (!shopId) return;
+
+        const plan = shop.complimentaryPlan || null;
+        if (plan && plan.isActive) {
+          const start = parsePlanDate(plan.startDate);
+          if (!start || start <= now) {
+            const end = parsePlanDate(plan.endDate);
+            if (end) {
+              const diff = end.getTime() - now.getTime();
+              if (diff <= MS_IN_DAY && diff >= -MS_IN_DAY) {
+                const key = `complimentary:${shopId}`;
+                if ((includeDismissed || !state.expiryDismissed.has(key)) && !seenKeys.has(key)) {
+                  results.push({ key, id: shopId, type: 'complimentary', end, diff, shop });
+                  seenKeys.add(key);
+                }
+              }
+            }
+          }
+        }
+
+        if (shop.isPremium) {
+          const until = parsePlanDate(shop.premiumUntil);
+          if (until) {
+            const diff = until.getTime() - now.getTime();
+            if (diff <= MS_IN_DAY && diff >= -MS_IN_DAY) {
+              const key = `premium:${shopId}`;
+              if ((includeDismissed || !state.expiryDismissed.has(key)) && !seenKeys.has(key)) {
+                results.push({ key, id: shopId, type: 'premium', end: until, diff, shop });
+                seenKeys.add(key);
+              }
+            }
+          }
+        }
+      });
+
+      results.sort((a, b) => a.diff - b.diff);
+      return results;
+    }
+
+    function renderPlanExpiryDialog(items = []) {
+      if (!elements.planExpiryList) return;
+      if (!items.length) {
+        elements.planExpiryList.innerHTML = '<li class="plan-expiry-item plan-expiry-item--warning"><div>موردی برای نمایش وجود ندارد.</div></li>';
+        if (elements.planExpirySubtitle) {
+          elements.planExpirySubtitle.textContent = 'هیچ پلن رو به پایانی در بازه ۲۴ ساعت اخیر یافت نشد.';
+        }
+        return;
+      }
+
+      const listHtml = items.map((item) => {
+        const { shop, type, end, diff, id } = item;
+        const severityClass = diff < 0 ? 'plan-expiry-item--expired' : 'plan-expiry-item--warning';
+        const chipClass = type === 'premium' ? 'premium' : 'complimentary';
+        const chipIcon = type === 'premium' ? 'ri-vip-crown-line' : 'ri-gift-line';
+        const planLabel = type === 'premium' ? 'پلن پولی' : 'پلن رایگان';
+        const shopName = escapeHtml(shop?.name || 'بدون نام');
+        const endText = formatDate(end);
+        const statusText = formatPlanExpiryStatus(diff);
+        const owner = shop?.ownerName ? `<span><i class="ri-user-3-line"></i>${escapeHtml(shop.ownerName)}</span>` : '';
+        const phone = shop?.ownerPhone
+          ? `<a href="tel:${sanitizeTel(shop.ownerPhone)}"><i class="ri-phone-line"></i>${escapeHtml(shop.ownerPhone)}</a>`
+          : '';
+        const contactParts = [owner, phone].filter(Boolean);
+        const contactHtml = contactParts.length
+          ? `<div class="plan-expiry-item-contact">${contactParts.join('')}</div>`
+          : '';
+        const actions = [];
+        if (type === 'complimentary') {
+          actions.push(`<button type="button" class="btn btn-primary btn-sm" data-plan-expiry-action="manage-plan" data-id="${id}"><i class="ri-vip-crown-line"></i> تمدید پلن رایگان</button>`);
+        }
+        if (shop?.shopUrl) {
+          actions.push(`<button type="button" class="btn btn-secondary btn-sm" data-plan-expiry-action="open-seller" data-shop-url="${escapeHtml(shop.shopUrl)}"><i class="ri-external-link-line"></i> پنل فروشنده</button>`);
+        }
+        const actionsHtml = actions.length
+          ? `<div class="plan-expiry-item-actions">${actions.join('')}</div>`
+          : '';
+
+        return `
+          <li class="plan-expiry-item ${severityClass}">
+            <div class="plan-expiry-item-header">
+              <span class="plan-expiry-item-name">${shopName}</span>
+              <span class="plan-expiry-chip ${chipClass}"><i class="${chipIcon}"></i>${planLabel}</span>
+            </div>
+            <div class="plan-expiry-item-meta">
+              <span><i class="ri-calendar-check-line"></i> پایان: ${endText}</span>
+              <span class="plan-expiry-item-status">${statusText}</span>
+            </div>
+            ${contactHtml}
+            ${actionsHtml}
+          </li>
+        `;
+      }).join('');
+
+      elements.planExpiryList.innerHTML = listHtml;
+
+      if (elements.planExpirySubtitle) {
+        const countText = formatNumber(items.length);
+        const hasExpired = items.some(item => item.diff < 0);
+        elements.planExpirySubtitle.textContent = hasExpired
+          ? `${countText} فروشنده پلن آن‌ها منقضی شده یا تا ۲۴ ساعت آینده منقضی می‌شود.`
+          : `${countText} فروشنده کمتر از ۲۴ ساعت تا پایان پلن دارند.`;
+      }
+    }
+
+    function openPlanExpiryDialog(items, { force = false } = {}) {
+      if (!elements.planExpiryDialog || !items.length) {
+        return;
+      }
+      state.expiryDialogItems = items;
+      renderPlanExpiryDialog(items);
+      const snapshot = items.map(item => item.key).sort().join('|');
+      state.lastExpirySnapshot = snapshot;
+      if (!elements.planExpiryDialog.open) {
+        elements.planExpiryDialog.showModal();
+      }
+    }
+
+    function closePlanExpiryDialog({ dismiss = false, resetSnapshot = false } = {}) {
+      if (!elements.planExpiryDialog) return;
+      if (elements.planExpiryDialog.open) {
+        elements.planExpiryDialog.close();
+      }
+      if (dismiss) {
+        state.expiryDialogItems.forEach((item) => {
+          state.expiryDismissed.add(item.key);
+        });
+      }
+      if (resetSnapshot) {
+        state.lastExpirySnapshot = '';
+      }
+      state.expiryDialogItems = [];
+      if (!resetSnapshot) {
+        maybeShowPlanExpiryDialog();
+      }
+    }
+
+    function maybeShowPlanExpiryDialog() {
+      const warnings = gatherExpiringShops(false);
+      if (!warnings.length) {
+        state.lastExpirySnapshot = '';
+        return;
+      }
+      const snapshot = warnings.map(item => item.key).sort().join('|');
+      if (elements.planExpiryDialog?.open) {
+        return;
+      }
+      if (snapshot === state.lastExpirySnapshot) {
+        return;
+      }
+      state.lastExpirySnapshot = snapshot;
+      openPlanExpiryDialog(warnings);
+    }
+
+    function updatePlanExpiryIndicators() {
+      const warnings = gatherExpiringShops(true);
+      if (elements.planExpiringBtn) {
+        if (warnings.length) {
+          elements.planExpiringBtn.disabled = false;
+          if (elements.planCard) {
+            elements.planCard.dataset.hasWarning = 'true';
+          }
+        }
+      }
     }
 
     function renderRow(shop) {
@@ -1616,6 +2083,36 @@
         return;
       }
     });
+
+    if (elements.planExpiryDialog) {
+      elements.planExpiryDialog.addEventListener('cancel', (event) => {
+        event.preventDefault();
+        closePlanExpiryDialog();
+      });
+
+      elements.planExpiryDialog.addEventListener('click', (event) => {
+        const actionBtn = event.target.closest('[data-plan-expiry-action]');
+        if (!actionBtn) return;
+        const action = actionBtn.dataset.planExpiryAction;
+        if (action === 'dismiss') {
+          closePlanExpiryDialog({ dismiss: true });
+        } else if (action === 'remind-later') {
+          closePlanExpiryDialog({ resetSnapshot: true });
+        } else if (action === 'manage-plan') {
+          const id = actionBtn.dataset.id;
+          closePlanExpiryDialog();
+          if (id) {
+            openPlanModal(id);
+          }
+        } else if (action === 'open-seller') {
+          const shopUrl = actionBtn.dataset.shopUrl;
+          if (shopUrl) {
+            const sellerPanelUrl = `/service-seller-panel/s-seller-panel.html?shopurl=${encodeURIComponent(shopUrl)}`;
+            window.open(sellerPanelUrl, '_blank', 'noopener');
+          }
+        }
+      });
+    }
 
     // Open status modal
     async function openStatusModal(shopId) {
@@ -1877,7 +2374,7 @@
     if (elements.planManageBtn) {
       elements.planManageBtn.addEventListener('click', () => {
         if (elements.filterPlan) {
-          elements.filterPlan.value = 'active';
+          elements.filterPlan.value = 'complimentary';
         }
         applyFilters();
       });
@@ -1886,10 +2383,12 @@
     if (elements.planExpiringBtn) {
       elements.planExpiringBtn.addEventListener('click', () => {
         if (elements.planExpiringBtn.disabled) return;
-        if (elements.filterPlan) {
-          elements.filterPlan.value = 'expiring';
+        const warnings = gatherExpiringShops(true);
+        if (!warnings.length) {
+          showToast('هیچ پلن رو به پایان در فهرست فعلی یافت نشد.', 'info');
+          return;
         }
-        applyFilters();
+        openPlanExpiryDialog(warnings, { force: true });
       });
     }
 
