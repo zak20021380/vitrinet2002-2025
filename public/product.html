@@ -3042,7 +3042,22 @@
       }
 
       function renderSellerCard(seller, productDesc) {
-        const hasSeller = seller && (seller.storename || seller.ownerName || seller.ownerFirstname || seller.ownerLastname || seller.phone || seller.address || seller.category || seller.boardImage || seller.desc);
+        const primarySellerName = seller
+          ? [seller.firstname, seller.lastname].filter(Boolean).join(' ')
+          : '';
+        const hasSeller = !!(seller && (
+          seller.storename ||
+          seller.ownerName ||
+          seller.ownerFirstname ||
+          seller.ownerLastname ||
+          primarySellerName ||
+          seller.phone ||
+          seller.address ||
+          seller.category ||
+          seller.boardImage ||
+          seller.desc ||
+          seller.shopurl
+        ));
         if (!hasSeller) {
           dom.sellerCard.hidden = true;
           if (dom.sellerActions) {
@@ -3065,7 +3080,11 @@
         }
 
         dom.sellerCard.hidden = false;
-        const sellerName = seller.storename || seller.ownerName || [seller.ownerFirstname, seller.ownerLastname].filter(Boolean).join(' ') || 'فروشنده نامشخص';
+        const sellerName = seller.storename ||
+          seller.ownerName ||
+          [seller.ownerFirstname, seller.ownerLastname].filter(Boolean).join(' ') ||
+          primarySellerName ||
+          'فروشنده نامشخص';
         dom.sellerName.textContent = sellerName;
         state.sellerName = sellerName;
         state.addressInfo = null;
