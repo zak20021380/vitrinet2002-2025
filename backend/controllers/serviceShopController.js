@@ -523,6 +523,45 @@ const normaliseDigits = (value = '') => String(value || '')
   .replace(/[۰-۹]/g, d => PERSIAN_DIGITS_MAP[d] || d)
   .replace(/[٠-٩]/g, d => ARABIC_DIGITS_MAP[d] || d);
 
+const buildPhoneVariants = (value) => {
+  const variants = new Set();
+  const raw = String(value || '').trim();
+  if (raw) variants.add(raw);
+
+  const normalised = normaliseDigits(raw);
+  if (normalised) variants.add(normalised);
+
+  const digitsOnly = normalised.replace(/[^0-9+]+/g, '');
+  if (digitsOnly) variants.add(digitsOnly);
+
+  const pureDigits = digitsOnly.replace(/\D+/g, '');
+  if (pureDigits) variants.add(pureDigits);
+
+  const ensureVariants = (phone) => {
+    if (phone) variants.add(phone);
+  };
+
+  if (pureDigits.startsWith('98')) {
+    ensureVariants(`+${pureDigits}`);
+    ensureVariants(pureDigits);
+    if (pureDigits.length > 2) {
+      ensureVariants(`0${pureDigits.slice(2)}`);
+    }
+  } else if (pureDigits.startsWith('0')) {
+    ensureVariants(pureDigits);
+    if (pureDigits.length > 1) {
+      ensureVariants(`98${pureDigits.slice(1)}`);
+      ensureVariants(`+98${pureDigits.slice(1)}`);
+    }
+  } else if (pureDigits && pureDigits.startsWith('9')) {
+    ensureVariants(`0${pureDigits}`);
+    ensureVariants(`98${pureDigits}`);
+    ensureVariants(`+98${pureDigits}`);
+  }
+
+  return Array.from(variants).filter(Boolean);
+};
+
 const normaliseText = (value = '') => normaliseDigits(value).toLowerCase().trim();
 
 const containsNormalized = (haystack, needle) => {
@@ -1139,16 +1178,17 @@ const applyAdminBlock = async ({ shop, seller, adminId = null, reason = '' }) =>
 
     const sellerPhone = savedSeller?.phone || seller.phone;
     if (sellerPhone) {
-      await BannedPhone.updateOne(
-        { phone: sellerPhone },
+      const phoneVariants = buildPhoneVariants(sellerPhone);
+      await Promise.all(phoneVariants.map((phone) => BannedPhone.updateOne(
+        { phone },
         {
           $set: {
-            phone: sellerPhone,
+            phone,
             reason: cleanReason || 'blocked-by-admin'
           }
         },
         { upsert: true }
-      );
+      )));
     }
   }
 
@@ -1213,7 +1253,10 @@ const applyAdminUnblock = async ({ shop, seller, adminId = null, reason = null }
 
     const sellerPhone = savedSeller?.phone || seller.phone;
     if (sellerPhone) {
-      await BannedPhone.deleteOne({ phone: sellerPhone });
+      const phoneVariants = buildPhoneVariants(sellerPhone);
+      if (phoneVariants.length) {
+        await BannedPhone.deleteMany({ phone: { $in: phoneVariants } });
+      }
     }
   }
 
