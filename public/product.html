@@ -3104,11 +3104,18 @@
       }
 
       function renderSellerCard(seller, productDesc) {
-        const hasSeller = seller && (seller.storename || seller.ownerName || seller.ownerFirstname || seller.ownerLastname || seller.phone || seller.address || seller.category || seller.boardImage || seller.desc);
         const sellerName = seller && (seller.storename || seller.ownerName || [seller.ownerFirstname, seller.ownerLastname].filter(Boolean).join(' ')) || 'فروشنده نامشخص';
         state.sellerName = sellerName;
 
         const fallbackAddress = 'آدرس فروشنده برای این محصول ثبت نشده است.';
+
+        const productSellerId = (productDesc && typeof productDesc.sellerId === 'string') ? productDesc.sellerId.trim() : '';
+        const sellerId = productSellerId || document.body?.dataset?.sellerId || window.LAST_PUBLIC?.sellerId || '';
+        const productShopSlug = (productDesc && typeof productDesc.shopurl === 'string') ? productDesc.shopurl.trim() : '';
+        const productShopSlugAlt = (productDesc && typeof productDesc.shopUrl === 'string') ? productDesc.shopUrl.trim() : '';
+        const shopSlug = seller?.shopurl || seller?.shopUrl || productShopSlug || productShopSlugAlt || '';
+
+        const hasSeller = !!(seller && (seller.storename || seller.ownerName || seller.ownerFirstname || seller.ownerLastname || seller.phone || seller.address || seller.category || seller.boardImage || seller.desc)) || !!sellerId || !!shopSlug;
 
         if (!hasSeller) {
           dom.sellerCard.hidden = true;
@@ -3146,27 +3153,6 @@
         dom.sellerName.textContent = sellerName;
         const addressText = seller && seller.address ? String(seller.address).trim() : '';
         const cityText = seller && seller.city ? String(seller.city).trim() : '';
-
-  const shopSlug = seller?.shopurl || seller?.shopUrl || product?.shopurl || '';
-
-  const hasSeller =
-    !!(seller && (seller.storename || seller.ownerName || seller.ownerFirstname || seller.ownerLastname ||
-                  seller.phone || seller.address || seller.category || seller.boardImage || seller.desc))
-    || !!sellerId
-    || !!shopSlug;
-
-  if (!hasSeller) {
-    // کارت فروشنده را پنهان نگه می‌داریم ولی اکشن‌ها را نمایان (غیرفعال) می‌کنیم
-    dom.sellerCard.hidden = true;
-
-    if (dom.sellerActions) dom.sellerActions.hidden = false;
-
-    if (dom.sellerAddressButton) {
-      dom.sellerAddressButton.disabled = true;
-      dom.sellerAddressButton.classList.add('is-disabled');
-      dom.sellerAddressButton.hidden = false;
-      dom.sellerAddressButton.removeAttribute('aria-label');
-    }
 
         if (dom.sellerAddressButton) {
           dom.sellerAddressButton.hidden = false;
