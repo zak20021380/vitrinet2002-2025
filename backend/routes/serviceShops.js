@@ -11,6 +11,8 @@ router.post('/', auth('admin'), ctrl.createServiceShop);
 router.get('/:id', auth('admin'), ctrl.getServiceShop);
 router.put('/:id', auth('admin'), ctrl.updateServiceShop);
 router.patch('/:id/status', auth('admin'), ctrl.updateServiceShopStatus);
+router.patch('/:id/block', auth('admin'), ctrl.blockServiceShop);
+router.patch('/:id/unblock', auth('admin'), ctrl.unblockServiceShop);
 router.delete('/:id', auth('admin'), ctrl.removeServiceShop);
 
 module.exports = router;

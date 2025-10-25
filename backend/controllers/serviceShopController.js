@@ -588,6 +588,21 @@ const mapLegacySellerToItem = (seller, { appearance, services = [], booking = {}
   const premiumUntil = coerceDate(seller.premiumUntil);
   const ratingAverage = Number(appearance?.averageRating ?? 0) || 0;
   const ratingCount = Number(appearance?.ratingCount ?? 0) || 0;
+  const isBlockedByAdmin = !!seller.blockedByAdmin;
+  const baseBookable = serviceTitles.length > 0;
+  const blockedAt = coerceDate(seller.blockedAt) || coerceDate(seller.updatedAt) || null;
+  const adminModeration = {
+    isBlocked: isBlockedByAdmin,
+    reason: String(seller.blockedReason || '').trim(),
+    blockedAt,
+    blockedBy: seller.blockedBy || null,
+    unblockedAt: null,
+    unblockedBy: null,
+    previousStatus: isBlockedByAdmin ? 'approved' : '',
+    previousIsVisible: !isBlockedByAdmin,
+    previousIsBookable: baseBookable,
+    previousBookingEnabled: baseBookable
+  };
 
   return {
     _id: seller._id,
@@ -603,9 +618,9 @@ const mapLegacySellerToItem = (seller, { appearance, services = [], booking = {}
     subcategories,
     tags: [...new Set([...subcategories, ...highlightServices])],
     description: seller.desc || '',
-    status: seller.blockedByAdmin ? 'suspended' : 'approved',
-    isVisible: !seller.blockedByAdmin,
-    isBookable: serviceTitles.length > 0,
+    status: isBlockedByAdmin ? 'suspended' : 'approved',
+    isVisible: !isBlockedByAdmin,
+    isBookable: isBlockedByAdmin ? false : baseBookable,
     isFeatured: false,
     isPremium: !!seller.isPremium,
     premiumUntil,
@@ -616,7 +631,7 @@ const mapLegacySellerToItem = (seller, { appearance, services = [], booking = {}
       endDate: null,
       note: ''
     },
-    bookingSettings: { enabled: serviceTitles.length > 0 },
+    bookingSettings: { enabled: isBlockedByAdmin ? false : baseBookable },
     analytics: {
       totalBookings: booking.total || 0,
       completedBookings: booking.completed || 0,
@@ -633,7 +648,8 @@ const mapLegacySellerToItem = (seller, { appearance, services = [], booking = {}
     updatedAt,
     integrations: {},
     notes: '',
-    legacySource: 'seller'
+    legacySource: 'seller',
+    adminModeration
   };
 };
 
@@ -1026,6 +1042,215 @@ async function buildLegacyServiceShopBySellerId(id) {
     booking
   });
 }
+
+const toPlainDocument = (doc, fallback = {}) => {
+  if (!doc) return { ...fallback };
+  if (typeof doc.toObject === 'function') {
+    return { ...fallback, ...doc.toObject() };
+  }
+  if (typeof doc.toJSON === 'function') {
+    return { ...fallback, ...doc.toJSON() };
+  }
+  return { ...fallback, ...doc };
+};
+
+const toPlainSubdocument = (value, fallback = {}) => {
+  if (!value) return { ...fallback };
+  if (typeof value.toObject === 'function') {
+    return { ...fallback, ...value.toObject() };
+  }
+  return { ...fallback, ...value };
+};
+
+async function findOrCreateServiceShop(id, adminId = null) {
+  let shop = await ServiceShop.findById(id);
+  let createdFromLegacy = false;
+  if (!shop) {
+    const legacyShop = await buildLegacyServiceShopBySellerId(id);
+    if (!legacyShop) {
+      return { shop: null, createdFromLegacy: false };
+    }
+
+    const fallbackShopUrl = legacyShop.shopUrl && String(legacyShop.shopUrl).trim()
+      ? legacyShop.shopUrl.trim().toLowerCase()
+      : `legacy-${id}`;
+
+    shop = new ServiceShop({
+      ...legacyShop,
+      _id: new mongoose.Types.ObjectId(id),
+      shopUrl: fallbackShopUrl,
+      createdBy: adminId || null,
+      updatedBy: adminId || null,
+      lastReviewedAt: new Date()
+    });
+    createdFromLegacy = true;
+  }
+
+  return { shop, createdFromLegacy };
+}
+
+async function findSellerForShop({ shop, providedSellerId, fallbackId }) {
+  const candidates = [];
+  const seen = new Set();
+  const pushCandidate = (value) => {
+    if (!value) return;
+    const idStr = String(value);
+    if (!mongoose.Types.ObjectId.isValid(idStr)) return;
+    if (seen.has(idStr)) return;
+    seen.add(idStr);
+    candidates.push(idStr);
+  };
+
+  pushCandidate(providedSellerId);
+  pushCandidate(shop?.legacySellerId);
+  pushCandidate(fallbackId);
+
+  for (const candidate of candidates) {
+    const seller = await Seller.findById(candidate);
+    if (seller) return seller;
+  }
+
+  if (shop?.ownerPhone) {
+    const sellerByPhone = await Seller.findOne({ phone: shop.ownerPhone });
+    if (sellerByPhone) return sellerByPhone;
+  }
+
+  if (shop?.shopUrl) {
+    const sellerBySlug = await Seller.findOne({ shopurl: shop.shopUrl });
+    if (sellerBySlug) return sellerBySlug;
+  }
+
+  return null;
+}
+
+const applyAdminBlock = async ({ shop, seller, adminId = null, reason = '' }) => {
+  const now = new Date();
+  const cleanReason = String(reason || '').trim();
+  let savedSeller = null;
+  let savedShop = null;
+
+  if (seller) {
+    seller.blockedByAdmin = true;
+    seller.blockedAt = now;
+    seller.blockedBy = adminId || null;
+    seller.blockedReason = cleanReason;
+    savedSeller = await seller.save();
+  }
+
+  if (shop) {
+    const moderation = toPlainSubdocument(shop.adminModeration, {
+      previousStatus: '',
+      previousIsVisible: true,
+      previousIsBookable: true,
+      previousBookingEnabled: true
+    });
+
+    moderation.previousStatus = shop.status || moderation.previousStatus || 'approved';
+    if (shop.isVisible !== undefined) {
+      moderation.previousIsVisible = !!shop.isVisible;
+    }
+    if (shop.isBookable !== undefined) {
+      moderation.previousIsBookable = !!shop.isBookable;
+    }
+    if (shop.bookingSettings && typeof shop.bookingSettings === 'object' && 'enabled' in shop.bookingSettings) {
+      moderation.previousBookingEnabled = !!shop.bookingSettings.enabled;
+    }
+
+    moderation.isBlocked = true;
+    moderation.reason = cleanReason;
+    moderation.blockedAt = now;
+    moderation.blockedBy = adminId || null;
+    moderation.unblockedAt = null;
+    moderation.unblockedBy = null;
+
+    shop.status = 'suspended';
+    shop.isVisible = false;
+    shop.isBookable = false;
+    if (!shop.bookingSettings || typeof shop.bookingSettings !== 'object') {
+      shop.bookingSettings = { enabled: false };
+    } else {
+      shop.bookingSettings.enabled = false;
+    }
+    shop.updatedBy = adminId || shop.updatedBy || null;
+    shop.lastReviewedAt = now;
+    shop.set('adminModeration', moderation);
+
+    savedShop = await shop.save();
+  }
+
+  return { shop: savedShop, seller: savedSeller };
+};
+
+const applyAdminUnblock = async ({ shop, seller, adminId = null, reason = null }) => {
+  const now = new Date();
+  const cleanReason = reason == null ? null : String(reason).trim();
+  let savedSeller = null;
+  let savedShop = null;
+
+  if (seller) {
+    seller.blockedByAdmin = false;
+    seller.blockedAt = null;
+    seller.blockedBy = null;
+    if (cleanReason !== null) {
+      seller.blockedReason = cleanReason;
+    }
+    savedSeller = await seller.save();
+  }
+
+  if (shop) {
+    const moderation = toPlainSubdocument(shop.adminModeration, {
+      previousStatus: 'approved',
+      previousIsVisible: true,
+      previousIsBookable: true,
+      previousBookingEnabled: true
+    });
+
+    const targetStatus = moderation.previousStatus && STATUS_VALUES.includes(moderation.previousStatus)
+      ? moderation.previousStatus
+      : 'approved';
+    const targetVisible = typeof moderation.previousIsVisible === 'boolean'
+      ? moderation.previousIsVisible
+      : true;
+    const targetBookable = typeof moderation.previousIsBookable === 'boolean'
+      ? moderation.previousIsBookable
+      : true;
+    const targetBookingEnabled = typeof moderation.previousBookingEnabled === 'boolean'
+      ? moderation.previousBookingEnabled
+      : undefined;
+
+    shop.status = targetStatus;
+    shop.isVisible = targetVisible;
+    shop.isBookable = targetBookable;
+    if (targetBookingEnabled !== undefined) {
+      if (!shop.bookingSettings || typeof shop.bookingSettings !== 'object') {
+        shop.bookingSettings = { enabled: targetBookingEnabled };
+      } else {
+        shop.bookingSettings.enabled = targetBookingEnabled;
+      }
+    }
+
+    moderation.isBlocked = false;
+    moderation.unblockedAt = now;
+    moderation.unblockedBy = adminId || null;
+    if (cleanReason !== null) {
+      moderation.reason = cleanReason;
+    }
+    moderation.previousStatus = shop.status;
+    moderation.previousIsVisible = shop.isVisible;
+    moderation.previousIsBookable = shop.isBookable;
+    if (shop.bookingSettings && typeof shop.bookingSettings === 'object' && 'enabled' in shop.bookingSettings) {
+      moderation.previousBookingEnabled = !!shop.bookingSettings.enabled;
+    }
+
+    shop.updatedBy = adminId || shop.updatedBy || null;
+    shop.lastReviewedAt = now;
+    shop.set('adminModeration', moderation);
+
+    savedShop = await shop.save();
+  }
+
+  return { shop: savedShop, seller: savedSeller };
+};
 
 const buildStatusCounts = (rows = []) => {
   return rows.reduce((acc, row) => {
@@ -1613,6 +1838,118 @@ exports.updateServiceShopStatus = async (req, res) => {
       return res.status(err.status).json({ message: err.message });
     }
     res.status(500).json({ message: 'خطا در بروزرسانی وضعیت.', error: err.message || err });
+  }
+};
+
+exports.blockServiceShop = async (req, res) => {
+  try {
+    const { id } = req.params;
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ message: 'شناسه نامعتبر است.' });
+    }
+
+    const { shop } = await findOrCreateServiceShop(id, req.user?.id || null);
+    if (!shop) {
+      return res.status(404).json({ message: 'مغازه خدماتی یافت نشد.' });
+    }
+
+    const seller = await findSellerForShop({
+      shop,
+      providedSellerId: req.body?.sellerId,
+      fallbackId: id
+    });
+
+    if (!seller) {
+      return res.status(404).json({ message: 'فروشنده مرتبط با این مغازه یافت نشد.' });
+    }
+
+    const reason = req.body?.reason != null ? String(req.body.reason).trim() : '';
+    const { shop: savedShop, seller: savedSeller } = await applyAdminBlock({
+      shop,
+      seller,
+      adminId: req.user?.id || null,
+      reason
+    });
+
+    res.json({
+      message: 'فروشنده و مغازه با موفقیت مسدود شدند.',
+      item: toPlainDocument(savedShop || shop),
+      seller: savedSeller
+        ? {
+            _id: savedSeller._id,
+            blockedByAdmin: savedSeller.blockedByAdmin,
+            blockedAt: savedSeller.blockedAt,
+            blockedReason: savedSeller.blockedReason
+          }
+        : {
+            _id: seller._id,
+            blockedByAdmin: seller.blockedByAdmin,
+            blockedAt: seller.blockedAt,
+            blockedReason: seller.blockedReason
+          }
+    });
+  } catch (err) {
+    console.error('serviceShops.block error:', err);
+    if (err?.status) {
+      return res.status(err.status).json({ message: err.message });
+    }
+    res.status(500).json({ message: 'خطا در مسدودسازی فروشنده.', error: err.message || err });
+  }
+};
+
+exports.unblockServiceShop = async (req, res) => {
+  try {
+    const { id } = req.params;
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ message: 'شناسه نامعتبر است.' });
+    }
+
+    const { shop } = await findOrCreateServiceShop(id, req.user?.id || null);
+    if (!shop) {
+      return res.status(404).json({ message: 'مغازه خدماتی یافت نشد.' });
+    }
+
+    const seller = await findSellerForShop({
+      shop,
+      providedSellerId: req.body?.sellerId,
+      fallbackId: id
+    });
+
+    if (!seller) {
+      return res.status(404).json({ message: 'فروشنده مرتبط با این مغازه یافت نشد.' });
+    }
+
+    const reason = req.body?.reason != null ? String(req.body.reason).trim() : null;
+    const { shop: savedShop, seller: savedSeller } = await applyAdminUnblock({
+      shop,
+      seller,
+      adminId: req.user?.id || null,
+      reason
+    });
+
+    res.json({
+      message: 'دسترسی فروشنده با موفقیت فعال شد.',
+      item: toPlainDocument(savedShop || shop),
+      seller: savedSeller
+        ? {
+            _id: savedSeller._id,
+            blockedByAdmin: savedSeller.blockedByAdmin,
+            blockedAt: savedSeller.blockedAt,
+            blockedReason: savedSeller.blockedReason
+          }
+        : {
+            _id: seller._id,
+            blockedByAdmin: seller.blockedByAdmin,
+            blockedAt: seller.blockedAt,
+            blockedReason: seller.blockedReason
+          }
+    });
+  } catch (err) {
+    console.error('serviceShops.unblock error:', err);
+    if (err?.status) {
+      return res.status(err.status).json({ message: err.message });
+    }
+    res.status(500).json({ message: 'خطا در فعال‌سازی مجدد فروشنده.', error: err.message || err });
   }
 };
 

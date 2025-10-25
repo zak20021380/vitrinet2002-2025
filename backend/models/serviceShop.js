@@ -56,6 +56,19 @@ const integrationsSchema = new mongoose.Schema({
   bookingLink: { type: String, default: '' }
 }, { _id: false });
 
+const adminModerationSchema = new mongoose.Schema({
+  isBlocked: { type: Boolean, default: false },
+  reason: { type: String, default: '' },
+  blockedAt: { type: Date, default: null },
+  blockedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'Admin', default: null },
+  unblockedAt: { type: Date, default: null },
+  unblockedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'Admin', default: null },
+  previousStatus: { type: String, default: '' },
+  previousIsVisible: { type: Boolean, default: true },
+  previousIsBookable: { type: Boolean, default: true },
+  previousBookingEnabled: { type: Boolean, default: true }
+}, { _id: false });
+
 const geoLocationSchema = new mongoose.Schema({
   lat: { type: Number, default: null },
   lng: { type: Number, default: null }
@@ -105,6 +118,7 @@ const serviceShopSchema = new mongoose.Schema({
   performance: { type: performanceSchema, default: () => ({}) },
   seo: { type: seoSchema, default: () => ({}) },
   integrations: { type: integrationsSchema, default: () => ({}) },
+  adminModeration: { type: adminModerationSchema, default: () => ({}) },
   notes: { type: String, default: '' },
   lastReviewedAt: { type: Date, default: null },
   legacySellerId: { type: mongoose.Schema.Types.ObjectId, ref: 'Seller', default: null, index: true },
