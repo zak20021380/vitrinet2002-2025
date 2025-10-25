@@ -1470,6 +1470,42 @@
       planExpiryClose: document.getElementById('plan-expiry-close')
     };
 
+    function applyInitialFiltersFromUrl() {
+      if (typeof window === 'undefined' || !window.location) return;
+
+      try {
+        const params = new URLSearchParams(window.location.search);
+        const qParam = params.get('q');
+        if (qParam) {
+          state.filters.q = qParam.trim();
+          if (elements.filterSearch) {
+            elements.filterSearch.value = state.filters.q;
+          }
+        }
+
+        const categoryParam = params.get('category');
+        if (categoryParam) {
+          state.filters.category = categoryParam;
+          if (elements.filterCategory) {
+            elements.filterCategory.value = categoryParam;
+          }
+        }
+
+        const planParam = params.get('planStatus') || params.get('plan');
+        if (planParam && ['complimentary', 'premium', 'none'].includes(planParam)) {
+          state.filters.planStatus = planParam;
+          if (elements.filterPlan) {
+            elements.filterPlan.value = planParam;
+          }
+          if (elements.planCard) {
+            elements.planCard.dataset.activeFilter = 'true';
+          }
+        }
+      } catch (err) {
+        console.warn('applyInitialFiltersFromUrl error', err);
+      }
+    }
+
     // Toast notification
     function showToast(message, type = 'success') {
       const container = document.getElementById('toast-container');
@@ -2412,11 +2448,16 @@
       const options = state.categories.map(cat =>
         `<option value="${cat.name}">${cat.name}</option>`
       ).join('');
+      const currentValue = state.filters.category || '';
       elements.filterCategory.innerHTML = `<option value="">همه خدمات</option>${options}`;
+      if (currentValue) {
+        elements.filterCategory.value = currentValue;
+      }
     }
 
     // Initialize
     async function init() {
+      applyInitialFiltersFromUrl();
       await Promise.all([loadCategories(), loadOverview(), loadShops()]);
     }
 
