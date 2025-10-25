@@ -526,10 +526,21 @@
       border: none;
       border-radius: 20px;
       padding: 0;
-      width: min(600px, 92vw);
+      width: min(520px, 94vw);
+      max-width: 94vw;
       max-height: 85vh;
       box-shadow: 0 40px 80px rgba(0,0,0,0.2);
       overflow: hidden;
+      margin: 0;
+    }
+
+    dialog[open] {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      display: flex;
+      flex-direction: column;
     }
 
     dialog::backdrop {
@@ -572,7 +583,8 @@
     .modal-body {
       padding: 1.75rem;
       overflow-y: auto;
-      max-height: 60vh;
+      max-height: none;
+      flex: 1;
     }
 
     .form-group {
@@ -868,32 +880,19 @@
       <div class="form-group">
         <label>وضعیت جدید <span style="color: var(--danger);">*</span></label>
         <select id="status-new-value" class="form-control">
-          <option value="approved">✅ فعال (Approved)</option>
-          <option value="pending">⏳ در انتظار تایید (Pending)</option>
-          <option value="suspended">🚫 معلق (Suspended)</option>
-          <option value="archived">📦 بایگانی (Archived)</option>
-          <option value="draft">📝 پیش‌نویس (Draft)</option>
+          <option value="approved">فعال</option>
+          <option value="pending">در انتظار تایید</option>
+          <option value="suspended">معلق</option>
         </select>
       </div>
 
-      <div class="checkbox-group">
-        <input type="checkbox" id="status-visible">
-        <label for="status-visible">نمایش عمومی (Visible)</label>
-      </div>
-
-      <div class="checkbox-group">
-        <input type="checkbox" id="status-featured">
-        <label for="status-featured">مغازه ویژه (Featured)</label>
-      </div>
-
-      <div class="checkbox-group">
-        <input type="checkbox" id="status-bookable">
-        <label for="status-bookable">قابل رزرو (Bookable)</label>
-      </div>
-
       <div class="form-group">
-        <label>یادداشت</label>
-        <textarea id="status-notes" rows="3" placeholder="یادداشت اختیاری در مورد این تغییر..."></textarea>
+        <label for="status-plan-value">اشتراک رایگان مغازه</label>
+        <select id="status-plan-value">
+          <option value="active">فعال</option>
+          <option value="inactive">غیرفعال</option>
+        </select>
+        <p class="form-note">در صورت فعال بودن، مغازه به صورت خودکار در پلن رایگان قرار می‌گیرد.</p>
       </div>
     </div>
     <div class="modal-footer">
@@ -904,81 +903,6 @@
         </button>
         <button type="button" class="btn btn-primary btn-sm" id="status-save-btn">
           <i class="ri-save-line"></i> ذخیره تغییرات
-        </button>
-      </div>
-    </div>
-  </dialog>
-
-  <!-- Complimentary Plan Modal -->
-  <dialog id="plan-modal">
-    <div class="modal-header">
-      <h2><i class="ri-vip-crown-line"></i> مدیریت پلن رایگان</h2>
-      <button type="button" class="modal-close" onclick="document.getElementById('plan-modal').close()">
-        <i class="ri-close-line"></i>
-      </button>
-    </div>
-    <div class="modal-body">
-      <div class="form-group">
-        <label>نام مغازه</label>
-        <input type="text" id="plan-shop-name" readonly style="background: #f3f4f6;">
-      </div>
-
-      <div class="form-group">
-        <label>مالک</label>
-        <input type="text" id="plan-owner-info" readonly style="background: #f3f4f6;">
-      </div>
-
-      <div class="checkbox-group" style="margin-top: 1.5rem; padding: 1rem; background: #f9fafb; border-radius: 10px;">
-        <input type="checkbox" id="plan-is-active">
-        <label for="plan-is-active" style="font-weight: 700; color: var(--primary);">
-          <i class="ri-checkbox-circle-line"></i> فعال‌سازی پلن رایگان
-        </label>
-      </div>
-
-      <div id="plan-details" style="display: none; margin-top: 1.5rem; padding: 1.5rem; background: #f0fdf4; border: 2px solid var(--primary); border-radius: 12px;">
-        <h4 style="margin-bottom: 1rem; color: var(--primary); font-size: 1rem;">
-          <i class="ri-calendar-line"></i> جزئیات پلن رایگان
-        </h4>
-
-        <div class="form-group">
-          <label>مدت زمان (روز) <span style="color: var(--danger);">*</span></label>
-          <input type="number" id="plan-duration" min="1" max="365" value="14" placeholder="مثال: 14">
-          <p class="form-note">حداکثر 365 روز</p>
-        </div>
-
-        <div class="form-group">
-          <label>تاریخ شروع</label>
-          <input type="date" id="plan-start-date">
-          <p class="form-note">در صورت خالی بودن، تاریخ امروز در نظر گرفته می‌شود</p>
-        </div>
-
-        <div class="form-group">
-          <label>تاریخ پایان</label>
-          <input type="date" id="plan-end-date" readonly style="background: #f3f4f6;">
-          <p class="form-note">به صورت خودکار بر اساس مدت زمان محاسبه می‌شود</p>
-        </div>
-
-        <div class="form-group">
-          <label>یادداشت</label>
-          <textarea id="plan-note" rows="3" placeholder="دلیل اعطای پلن رایگان یا یادداشت‌های مربوطه..."></textarea>
-        </div>
-      </div>
-
-      <div id="plan-current-status" style="margin-top: 1rem; padding: 1rem; background: #fef3c7; border-radius: 10px; display: none;">
-        <h4 style="font-size: 0.9rem; margin-bottom: 0.5rem; color: var(--warning);">
-          <i class="ri-information-line"></i> وضعیت فعلی پلن
-        </h4>
-        <div id="plan-status-text" style="font-size: 0.875rem; color: var(--muted);"></div>
-      </div>
-    </div>
-    <div class="modal-footer">
-      <span class="form-error" id="plan-error" style="display: none;"></span>
-      <div class="form-actions">
-        <button type="button" class="btn btn-secondary btn-sm" onclick="document.getElementById('plan-modal').close()">
-          <i class="ri-close-line"></i> لغو
-        </button>
-        <button type="button" class="btn btn-primary btn-sm" id="plan-save-btn">
-          <i class="ri-save-line"></i> ذخیره پلن
         </button>
       </div>
     </div>
@@ -1214,9 +1138,6 @@
               <button type="button" class="btn btn-edit btn-sm" data-action="view-status" data-id="${shop._id}">
                 <i class="ri-eye-line"></i> مشاهده وضعیت
               </button>
-              <button type="button" class="btn btn-view btn-sm" data-action="manage-plan" data-id="${shop._id}">
-                <i class="ri-vip-crown-line"></i> پلن رایگان
-              </button>
             </div>
           </td>
         </tr>
@@ -1225,7 +1146,6 @@
 
     // Modal state
     let currentShopId = null;
-    let currentShopData = null;
 
     // Status badge helper
     function getStatusBadge(status) {
@@ -1248,21 +1168,6 @@
       return `<span class="badge ${badgeClass}">${label}</span>`;
     }
 
-    // Format date helper
-    function formatDate(dateString) {
-      if (!dateString) return '';
-      const date = new Date(dateString);
-      return date.toLocaleDateString('fa-IR');
-    }
-
-    // Calculate end date based on start and duration
-    function calculateEndDate(startDate, durationDays) {
-      if (!startDate || !durationDays) return '';
-      const start = new Date(startDate);
-      const end = new Date(start.getTime() + durationDays * 24 * 60 * 60 * 1000);
-      return end.toISOString().split('T')[0];
-    }
-
     // Event listeners
     elements.tableBody.addEventListener('click', async (e) => {
       // Handle view status button
@@ -1273,15 +1178,6 @@
         await openStatusModal(viewStatusBtn.dataset.id);
         return;
       }
-
-      // Handle manage plan button
-      const managePlanBtn = e.target.closest('button[data-action="manage-plan"]');
-      if (managePlanBtn) {
-        e.preventDefault();
-        e.stopPropagation();
-        await openPlanModal(managePlanBtn.dataset.id);
-        return;
-      }
     });
 
     // Open status modal
@@ -1290,15 +1186,16 @@
         const data = await fetchJSON(`${API_BASE}/${shopId}`);
         const shop = data.item;
         currentShopId = shopId;
-        currentShopData = shop;
 
         document.getElementById('status-shop-name').value = shop.name || 'بدون نام';
         document.getElementById('status-current-badge').innerHTML = getStatusBadge(shop.status);
-        document.getElementById('status-new-value').value = shop.status || 'draft';
-        document.getElementById('status-visible').checked = shop.isVisible !== false;
-        document.getElementById('status-featured').checked = !!shop.isFeatured;
-        document.getElementById('status-bookable').checked = shop.isBookable !== false;
-        document.getElementById('status-notes').value = shop.notes || '';
+        const statusSelect = document.getElementById('status-new-value');
+        const availableStatuses = Array.from(statusSelect.options).map((option) => option.value);
+        const fallbackStatus = availableStatuses.includes(shop.status) ? shop.status : 'pending';
+        statusSelect.value = fallbackStatus;
+
+        const planSelect = document.getElementById('status-plan-value');
+        planSelect.value = shop.complimentaryPlan?.isActive ? 'active' : 'inactive';
         document.getElementById('status-error').style.display = 'none';
 
         document.getElementById('status-modal').showModal();
@@ -1319,10 +1216,9 @@
 
         const payload = {
           status: document.getElementById('status-new-value').value,
-          isVisible: document.getElementById('status-visible').checked,
-          isFeatured: document.getElementById('status-featured').checked,
-          isBookable: document.getElementById('status-bookable').checked,
-          notes: document.getElementById('status-notes').value.trim()
+          complimentaryPlan: {
+            isActive: document.getElementById('status-plan-value').value === 'active'
+          }
         };
 
         await fetchJSON(`${API_BASE}/${currentShopId}/status`, {
@@ -1339,141 +1235,6 @@
       } finally {
         saveBtn.disabled = false;
         saveBtn.innerHTML = '<i class="ri-save-line"></i> ذخیره تغییرات';
-      }
-    });
-
-    // Open plan modal
-    async function openPlanModal(shopId) {
-      try {
-        const data = await fetchJSON(`${API_BASE}/${shopId}`);
-        const shop = data.item;
-        currentShopId = shopId;
-        currentShopData = shop;
-
-        const plan = shop.complimentaryPlan || {};
-
-        document.getElementById('plan-shop-name').value = shop.name || 'بدون نام';
-        document.getElementById('plan-owner-info').value = `${shop.ownerName || 'نامشخص'} - ${shop.ownerPhone || 'بدون شماره'}`;
-        document.getElementById('plan-is-active').checked = !!plan.isActive;
-        document.getElementById('plan-duration').value = plan.durationDays || 14;
-
-        // Set start date
-        if (plan.startDate) {
-          const startDate = new Date(plan.startDate);
-          document.getElementById('plan-start-date').value = startDate.toISOString().split('T')[0];
-        } else {
-          const today = new Date();
-          document.getElementById('plan-start-date').value = today.toISOString().split('T')[0];
-        }
-
-        // Calculate and set end date
-        updateEndDate();
-
-        document.getElementById('plan-note').value = plan.note || '';
-        document.getElementById('plan-error').style.display = 'none';
-
-        // Show/hide plan details based on active status
-        togglePlanDetails(!!plan.isActive);
-
-        // Show current status if plan exists and is active
-        if (plan.isActive) {
-          const now = new Date();
-          const endDate = plan.endDate ? new Date(plan.endDate) : null;
-          const hasExpired = endDate && endDate < now;
-          const isActiveNow = !hasExpired;
-
-          let statusHtml = '<ul style="margin: 0.5rem 0 0 1.5rem; list-style: disc;">';
-          statusHtml += `<li>وضعیت: ${isActiveNow ? '<strong style="color: var(--primary);">فعال</strong>' : '<strong style="color: var(--danger);">منقضی شده</strong>'}</li>`;
-          if (plan.startDate) statusHtml += `<li>تاریخ شروع: ${formatDate(plan.startDate)}</li>`;
-          if (plan.endDate) statusHtml += `<li>تاریخ پایان: ${formatDate(plan.endDate)}</li>`;
-          if (plan.durationDays) statusHtml += `<li>مدت زمان: ${plan.durationDays} روز</li>`;
-
-          // Calculate remaining days
-          if (endDate && isActiveNow) {
-            const remainingDays = Math.ceil((endDate - now) / (24 * 60 * 60 * 1000));
-            statusHtml += `<li>روزهای باقی‌مانده: ${remainingDays} روز</li>`;
-          }
-          statusHtml += '</ul>';
-
-          document.getElementById('plan-status-text').innerHTML = statusHtml;
-          document.getElementById('plan-current-status').style.display = 'block';
-        } else {
-          document.getElementById('plan-current-status').style.display = 'none';
-        }
-
-        document.getElementById('plan-modal').showModal();
-      } catch (err) {
-        showToast(err.message || 'خطا در دریافت اطلاعات مغازه', 'error');
-      }
-    }
-
-    // Toggle plan details visibility
-    function togglePlanDetails(show) {
-      document.getElementById('plan-details').style.display = show ? 'block' : 'none';
-    }
-
-    // Update end date when duration or start date changes
-    function updateEndDate() {
-      const startDate = document.getElementById('plan-start-date').value;
-      const duration = parseInt(document.getElementById('plan-duration').value) || 14;
-      if (startDate) {
-        document.getElementById('plan-end-date').value = calculateEndDate(startDate, duration);
-      }
-    }
-
-    // Plan checkbox toggle
-    document.getElementById('plan-is-active').addEventListener('change', (e) => {
-      togglePlanDetails(e.target.checked);
-    });
-
-    // Auto-calculate end date
-    document.getElementById('plan-duration').addEventListener('input', updateEndDate);
-    document.getElementById('plan-start-date').addEventListener('change', updateEndDate);
-
-    // Save plan changes
-    document.getElementById('plan-save-btn').addEventListener('click', async () => {
-      const saveBtn = document.getElementById('plan-save-btn');
-      const errorEl = document.getElementById('plan-error');
-
-      try {
-        const isActive = document.getElementById('plan-is-active').checked;
-
-        if (isActive) {
-          const duration = parseInt(document.getElementById('plan-duration').value);
-          if (!duration || duration < 1 || duration > 365) {
-            errorEl.textContent = 'لطفاً مدت زمان معتبر (1 تا 365 روز) وارد کنید.';
-            errorEl.style.display = 'block';
-            return;
-          }
-        }
-
-        saveBtn.disabled = true;
-        saveBtn.innerHTML = '<i class="ri-loader-4-line"></i> در حال ذخیره...';
-        errorEl.style.display = 'none';
-
-        const payload = {
-          complimentaryPlan: {
-            isActive,
-            durationDays: isActive ? parseInt(document.getElementById('plan-duration').value) : null,
-            startDate: isActive ? document.getElementById('plan-start-date').value : null,
-            note: document.getElementById('plan-note').value.trim()
-          }
-        };
-
-        await fetchJSON(`${API_BASE}/${currentShopId}/status`, {
-          method: 'PATCH',
-          body: JSON.stringify(payload)
-        });
-
-        showToast('پلن رایگان با موفقیت بروزرسانی شد');
-        document.getElementById('plan-modal').close();
-        await Promise.all([loadOverview(), loadShops()]);
-      } catch (err) {
-        errorEl.textContent = err.message || 'خطا در بروزرسانی پلن رایگان';
-        errorEl.style.display = 'block';
-      } finally {
-        saveBtn.disabled = false;
-        saveBtn.innerHTML = '<i class="ri-save-line"></i> ذخیره پلن';
       }
     });
 
