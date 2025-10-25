@@ -213,6 +213,64 @@
       margin-bottom: 2rem;
     }
 
+    .plan-default-card {
+      background: white;
+      border-radius: var(--radius);
+      padding: 1.5rem;
+      box-shadow: var(--shadow);
+      margin-bottom: 2rem;
+      display: grid;
+      gap: 1rem;
+    }
+
+    .plan-default-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .plan-default-header h3 {
+      margin: 0;
+      font-size: 1.05rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .plan-default-form {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      align-items: flex-end;
+    }
+
+    .plan-default-form .form-group {
+      min-width: 140px;
+      flex: 1 1 140px;
+    }
+
+    .plan-default-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+    }
+
+    .plan-default-meta {
+      font-size: 0.85rem;
+      color: var(--muted);
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+
+    .plan-default-alert {
+      font-size: 0.85rem;
+      color: var(--danger);
+      display: none;
+    }
+
     .filters-title {
       font-size: 1.1rem;
       font-weight: 700;
@@ -762,6 +820,36 @@
       </div>
     </section>
 
+    <section class="plan-default-card" aria-labelledby="plan-default-title">
+      <div class="plan-default-header">
+        <h3 id="plan-default-title">
+          <i class="ri-gift-line"></i>
+          تنظیم پیش‌فرض پلن رایگان
+        </h3>
+        <div class="plan-default-meta" id="plan-default-meta">حداکثر مدت پلن رایگان ۱۴ روز است.</div>
+      </div>
+
+      <p class="plan-default-alert" id="plan-default-error"></p>
+
+      <div class="plan-default-form">
+        <div class="form-group">
+          <label for="plan-default-duration">مدت پیش‌فرض (روز)</label>
+          <input type="number" id="plan-default-duration" min="1" max="14" value="14">
+          <span class="form-note">حداکثر ۱۴ روز</span>
+        </div>
+        <div class="plan-default-actions">
+          <button type="button" class="btn btn-primary btn-sm" id="plan-default-save">
+            <i class="ri-save-line"></i>
+            ذخیره پیش‌فرض
+          </button>
+          <button type="button" class="btn btn-secondary btn-sm" id="plan-default-apply-all">
+            <i class="ri-team-line"></i>
+            اعمال برای همه فروشنده‌ها
+          </button>
+        </div>
+      </div>
+    </section>
+
     <!-- Filters -->
     <section class="filters">
       <h3 class="filters-title">
@@ -927,8 +1015,8 @@
 
         <div class="form-group">
           <label>مدت زمان (روز) <span style="color: var(--danger);">*</span></label>
-          <input type="number" id="plan-duration" min="1" max="365" value="14" placeholder="مثال: 14">
-          <p class="form-note">حداکثر 365 روز</p>
+          <input type="number" id="plan-duration" min="1" max="14" value="14" placeholder="مثال: 14">
+          <p class="form-note">حداکثر ۱۴ روز</p>
         </div>
 
         <div class="form-group">
@@ -985,6 +1073,7 @@
     })();
     window.ADMIN_API_BASE = ADMIN_API_BASE;
     const API_BASE = `${ADMIN_API_BASE.replace(/\/$/, '')}/service-shops`;
+    const DEFAULT_FREE_PLAN_DAYS = 14;
 
     // Formatters
     const escapeHtml = (str = '') => String(str).replace(/[&<>"']/g, (char) => ({
@@ -1011,7 +1100,9 @@
       items: [],
       overview: null,
       categories: [],
-      loading: false
+      loading: false,
+      complimentaryDefaults: { durationDays: DEFAULT_FREE_PLAN_DAYS },
+      complimentaryDefaultsMeta: { updatedAt: null, updatedBy: null }
     };
 
     // Elements
@@ -1026,7 +1117,12 @@
       metricTotal: document.getElementById('metric-total'),
       metricActive: document.getElementById('metric-active'),
       metricPending: document.getElementById('metric-pending'),
-      metricBooking: document.getElementById('metric-booking')
+      metricBooking: document.getElementById('metric-booking'),
+      planDefaultDuration: document.getElementById('plan-default-duration'),
+      planDefaultSave: document.getElementById('plan-default-save'),
+      planDefaultApplyAll: document.getElementById('plan-default-apply-all'),
+      planDefaultMeta: document.getElementById('plan-default-meta'),
+      planDefaultError: document.getElementById('plan-default-error')
     };
 
     // Toast notification
@@ -1059,6 +1155,132 @@
         throw new Error(message);
       }
       return data;
+    }
+
+    let planDefaultTouched = false;
+
+    function getDefaultComplimentaryDuration() {
+      const duration = Number(state.complimentaryDefaults?.durationDays);
+      if (Number.isFinite(duration) && duration > 0) {
+        return Math.min(Math.round(duration), DEFAULT_FREE_PLAN_DAYS);
+      }
+      return DEFAULT_FREE_PLAN_DAYS;
+    }
+
+    function renderComplimentaryDefaults({ force = false } = {}) {
+      const days = getDefaultComplimentaryDuration();
+
+      if (elements.planDefaultDuration) {
+        if (!planDefaultTouched || force) {
+          elements.planDefaultDuration.value = days;
+          planDefaultTouched = false;
+        }
+        elements.planDefaultDuration.max = DEFAULT_FREE_PLAN_DAYS;
+      }
+
+      if (elements.planDefaultMeta) {
+        const meta = state.complimentaryDefaultsMeta || {};
+        if (meta.updatedAt) {
+          const updatedAt = new Date(meta.updatedAt);
+          const formatted = updatedAt.toLocaleString('fa-IR');
+          const updaterName = meta.updatedBy?.name || null;
+          const updater = updaterName ? `توسط ${updaterName}` : 'سیستم';
+          elements.planDefaultMeta.textContent = `حداکثر مدت پلن رایگان ۱۴ روز است. مقدار فعلی: ${days} روز (${updater} - ${formatted})`;
+        } else {
+          elements.planDefaultMeta.textContent = `حداکثر مدت پلن رایگان ۱۴ روز است. مقدار فعلی: ${days} روز`;
+        }
+      }
+    }
+
+    async function loadComplimentaryDefaults() {
+      if (!elements.planDefaultDuration) return;
+      try {
+        const data = await fetchJSON(`${API_BASE}/complimentary-plan/defaults`);
+        const duration = Number(data?.settings?.durationDays);
+        if (Number.isFinite(duration) && duration > 0) {
+          state.complimentaryDefaults = { durationDays: Math.min(Math.round(duration), DEFAULT_FREE_PLAN_DAYS) };
+        } else {
+          state.complimentaryDefaults = { durationDays: DEFAULT_FREE_PLAN_DAYS };
+        }
+        state.complimentaryDefaultsMeta = data?.meta || { updatedAt: null, updatedBy: null };
+        if (elements.planDefaultError) {
+          elements.planDefaultError.style.display = 'none';
+        }
+        renderComplimentaryDefaults({ force: true });
+      } catch (err) {
+        console.error('loadComplimentaryDefaults error', err);
+        if (elements.planDefaultError) {
+          elements.planDefaultError.textContent = err.message || 'خطا در دریافت تنظیمات پلن رایگان.';
+          elements.planDefaultError.style.display = 'block';
+        }
+      }
+    }
+
+    async function handleSaveComplimentaryDefaults(applyToAll = false) {
+      if (!elements.planDefaultDuration) return;
+
+      const days = parseInt(elements.planDefaultDuration.value, 10);
+      if (!Number.isFinite(days) || days < 1 || days > DEFAULT_FREE_PLAN_DAYS) {
+        if (elements.planDefaultError) {
+          elements.planDefaultError.textContent = `لطفاً عددی بین ۱ تا ${DEFAULT_FREE_PLAN_DAYS} وارد کنید.`;
+          elements.planDefaultError.style.display = 'block';
+        }
+        return;
+      }
+
+      if (elements.planDefaultError) {
+        elements.planDefaultError.style.display = 'none';
+      }
+
+      const saveBtn = applyToAll ? elements.planDefaultApplyAll : elements.planDefaultSave;
+      const originalLabel = saveBtn ? saveBtn.innerHTML : '';
+      if (saveBtn) {
+        saveBtn.disabled = true;
+        saveBtn.innerHTML = '<i class="ri-loader-4-line"></i> در حال ذخیره...';
+      }
+
+      try {
+        const payload = { durationDays: days };
+        if (applyToAll) payload.applyToAll = true;
+
+        const response = await fetchJSON(`${API_BASE}/complimentary-plan/defaults`, {
+          method: 'PUT',
+          body: JSON.stringify(payload)
+        });
+
+        const responseDuration = Number(response?.settings?.durationDays);
+        if (Number.isFinite(responseDuration) && responseDuration > 0) {
+          state.complimentaryDefaults = { durationDays: Math.min(Math.round(responseDuration), DEFAULT_FREE_PLAN_DAYS) };
+        } else {
+          state.complimentaryDefaults = { durationDays: days };
+        }
+        state.complimentaryDefaultsMeta = response?.meta || state.complimentaryDefaultsMeta;
+        planDefaultTouched = false;
+        renderComplimentaryDefaults({ force: true });
+
+        const message = response?.message || (applyToAll
+          ? 'مدت پلن رایگان برای همه فروشنده‌ها بروزرسانی شد.'
+          : 'مدت پیش‌فرض پلن رایگان ذخیره شد.');
+        showToast(message, 'success');
+
+        if (applyToAll && response?.bulk) {
+          const affected = Number(response.bulk.modified) || 0;
+          if (affected > 0) {
+            showToast(`${affected} مغازه بروزرسانی شد.`, 'success');
+          }
+        }
+      } catch (err) {
+        console.error('handleSaveComplimentaryDefaults error', err);
+        if (elements.planDefaultError) {
+          elements.planDefaultError.textContent = err.message || 'ذخیره تنظیمات انجام نشد.';
+          elements.planDefaultError.style.display = 'block';
+        }
+      } finally {
+        if (saveBtn) {
+          saveBtn.disabled = false;
+          saveBtn.innerHTML = originalLabel;
+        }
+      }
     }
 
     // Load overview stats
@@ -1254,6 +1476,30 @@
       return end.toISOString().split('T')[0];
     }
 
+    if (elements.planDefaultDuration) {
+      elements.planDefaultDuration.addEventListener('input', () => {
+        planDefaultTouched = true;
+        if (elements.planDefaultError) {
+          elements.planDefaultError.style.display = 'none';
+        }
+      });
+    }
+
+    if (elements.planDefaultSave) {
+      elements.planDefaultSave.addEventListener('click', () => {
+        handleSaveComplimentaryDefaults(false);
+      });
+    }
+
+    if (elements.planDefaultApplyAll) {
+      elements.planDefaultApplyAll.addEventListener('click', () => {
+        if (!confirm('اعمال این مدت برای همه فروشنده‌ها ممکن است تاریخ پایان پلن فعال را جابجا کند. آیا مطمئن هستید؟')) {
+          return;
+        }
+        handleSaveComplimentaryDefaults(true);
+      });
+    }
+
     // Event listeners
     elements.tableBody.addEventListener('click', async (e) => {
       // Handle view status button
@@ -1346,7 +1592,12 @@
         document.getElementById('plan-shop-name').value = shop.name || 'بدون نام';
         document.getElementById('plan-owner-info').value = `${shop.ownerName || 'نامشخص'} - ${shop.ownerPhone || 'بدون شماره'}`;
         document.getElementById('plan-is-active').checked = !!plan.isActive;
-        document.getElementById('plan-duration').value = plan.durationDays || 14;
+
+        const planDuration = Number(plan.durationDays);
+        const durationValue = Number.isFinite(planDuration) && planDuration > 0
+          ? Math.min(Math.round(planDuration), DEFAULT_FREE_PLAN_DAYS)
+          : getDefaultComplimentaryDuration();
+        document.getElementById('plan-duration').value = durationValue;
 
         // Set start date
         if (plan.startDate) {
@@ -1377,7 +1628,8 @@
           statusHtml += `<li>وضعیت: ${isActiveNow ? '<strong style="color: var(--primary);">فعال</strong>' : '<strong style="color: var(--danger);">منقضی شده</strong>'}</li>`;
           if (plan.startDate) statusHtml += `<li>تاریخ شروع: ${formatDate(plan.startDate)}</li>`;
           if (plan.endDate) statusHtml += `<li>تاریخ پایان: ${formatDate(plan.endDate)}</li>`;
-          if (plan.durationDays) statusHtml += `<li>مدت زمان: ${plan.durationDays} روز</li>`;
+          const statusDuration = Number(plan.durationDays) || getDefaultComplimentaryDuration();
+          if (statusDuration) statusHtml += `<li>مدت زمان: ${statusDuration} روز</li>`;
 
           // Calculate remaining days
           if (endDate && isActiveNow) {
@@ -1406,7 +1658,7 @@
     // Update end date when duration or start date changes
     function updateEndDate() {
       const startDate = document.getElementById('plan-start-date').value;
-      const duration = parseInt(document.getElementById('plan-duration').value) || 14;
+      const duration = parseInt(document.getElementById('plan-duration').value, 10) || getDefaultComplimentaryDuration();
       if (startDate) {
         document.getElementById('plan-end-date').value = calculateEndDate(startDate, duration);
       }
@@ -1430,9 +1682,9 @@
         const isActive = document.getElementById('plan-is-active').checked;
 
         if (isActive) {
-          const duration = parseInt(document.getElementById('plan-duration').value);
-          if (!duration || duration < 1 || duration > 365) {
-            errorEl.textContent = 'لطفاً مدت زمان معتبر (1 تا 365 روز) وارد کنید.';
+          const duration = parseInt(document.getElementById('plan-duration').value, 10);
+          if (!duration || duration < 1 || duration > DEFAULT_FREE_PLAN_DAYS) {
+            errorEl.textContent = `لطفاً مدت زمان معتبر (۱ تا ${DEFAULT_FREE_PLAN_DAYS} روز) وارد کنید.`;
             errorEl.style.display = 'block';
             return;
           }
@@ -1445,7 +1697,9 @@
         const payload = {
           complimentaryPlan: {
             isActive,
-            durationDays: isActive ? parseInt(document.getElementById('plan-duration').value) : null,
+            durationDays: isActive
+              ? Math.max(1, Math.min(parseInt(document.getElementById('plan-duration').value, 10) || DEFAULT_FREE_PLAN_DAYS, DEFAULT_FREE_PLAN_DAYS))
+              : null,
             startDate: isActive ? document.getElementById('plan-start-date').value : null,
             note: document.getElementById('plan-note').value.trim()
           }
@@ -1514,7 +1768,13 @@
 
     // Initialize
     async function init() {
-      await Promise.all([loadCategories(), loadOverview(), loadShops()]);
+      renderComplimentaryDefaults({ force: true });
+      await Promise.all([
+        loadCategories(),
+        loadOverview(),
+        loadShops(),
+        loadComplimentaryDefaults()
+      ]);
     }
 
     init();

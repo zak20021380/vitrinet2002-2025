@@ -6,6 +6,8 @@ const ctrl = require('../controllers/serviceShopController');
 
 router.get('/overview', auth('admin'), ctrl.getOverview);
 router.get('/my/complimentary-plan', auth('seller'), ctrl.getMyComplimentaryPlan);
+router.get('/complimentary-plan/defaults', auth('admin'), ctrl.getComplimentaryPlanDefaults);
+router.put('/complimentary-plan/defaults', auth('admin'), ctrl.updateComplimentaryPlanDefaults);
 router.get('/', auth('admin'), ctrl.listServiceShops);
 router.post('/', auth('admin'), ctrl.createServiceShop);
 router.get('/:id', auth('admin'), ctrl.getServiceShop);
