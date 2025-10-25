@@ -17,7 +17,6 @@ const { calcPremiumUntil } = require('../utils/premium');
 const { clampAdminScore, evaluatePerformance } = require('../utils/performanceStatus');
 
 const escapeRegExp = (str = '') => str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-const log1p = (value) => Math.log1p(Math.max(0, Number(value) || 0));
 const normalizeString = (value) => (value || '').toString().trim().toLowerCase();
 
 function buildPerformancePayload(seller, options = {}) {
@@ -464,7 +463,7 @@ exports.getTopServicePeers = async (req, res) => {
     };
 
     let scopeApplied = 'category';
-    if (scope === 'subcategory' && subcategory) {
+    if ((scope === 'subcategory' || !scope) && subcategory) {
       scopeApplied = 'subcategory';
       match.$or = [
         { subcategories: { $in: [subcategory] } },
@@ -498,11 +497,7 @@ exports.getTopServicePeers = async (req, res) => {
       const completedBookings = Number(analytics.completedBookings) || 0;
       const uniqueCustomers = Number(analytics.uniqueCustomers) || Math.max(completedBookings, Math.round(totalBookings * 0.6)) || 0;
 
-      const score = (ratingAverage * 25)
-        + (log1p(ratingCount) * 10)
-        + (log1p(totalBookings) * 8)
-        + (shop.isPremium ? 5 : 0)
-        + (shop.isFeatured ? 3 : 0);
+      const score = ratingAverage + totalBookings + uniqueCustomers;
 
       return {
         ratingAverage,

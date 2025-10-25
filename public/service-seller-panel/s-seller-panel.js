@@ -2254,7 +2254,7 @@ destroy() {
 
       this._topPeersPromise = (async () => {
         try {
-          const data = await API.getTopPeers();
+          const data = await API.getTopPeers({ scope: 'subcategory' });
           this.topPeersData = data || {};
           this.applyRankCard(this.topPeersData);
           this.applyTopSummary(this.topPeersData);
@@ -2296,6 +2296,13 @@ destroy() {
       }
     }
 
+    calculateAggregateScore(metrics = {}) {
+      const rating = Number(metrics.ratingAverage ?? 0) || 0;
+      const bookings = Number(metrics.totalBookings ?? 0) || 0;
+      const customers = Number(metrics.uniqueCustomers ?? metrics.completedBookings ?? 0) || 0;
+      return rating + bookings + customers;
+    }
+
     applyTopSummary(data = this.topPeersData || {}) {
       const mine = data?.mine || {};
       const metrics = mine.metrics || {};
@@ -2304,9 +2311,8 @@ destroy() {
       this.setText('top-my-rank', mine.rank ? this.formatNumber(mine.rank) : '—');
       this.setText('top-total-peers', this.formatNumber(total));
 
-      const scoreText = Number.isFinite(Number(mine.score))
-        ? this.formatNumber(mine.score, { fractionDigits: 1, fallback: '۰٫۰' })
-        : '—';
+      const aggregateScore = this.calculateAggregateScore(metrics);
+      const scoreText = this.formatNumber(aggregateScore, { fractionDigits: 1, fallback: '۰٫۰' });
       this.setText('top-my-score', scoreText);
       this.setText('top-my-rating', this.formatNumber(metrics.ratingAverage ?? 0, { fractionDigits: 1, fallback: '۰٫۰' }));
       this.setText('top-my-bookings', this.formatNumber(metrics.totalBookings ?? 0));
@@ -2332,7 +2338,8 @@ destroy() {
 
       const subtitle = document.getElementById('top-subtitle');
       if (subtitle) {
-        const groupLabel = data?.category ? `حوزه «${data.category}»` : 'همه حوزه‌ها';
+        const scopeLabel = data?.scope === 'subcategory' ? 'زیرگروه' : 'حوزه';
+        const groupLabel = data?.category ? `${scopeLabel} «${data.category}»` : 'همه حوزه‌ها';
         subtitle.textContent = `رتبه‌بندی برترین فروشگاه‌های ${groupLabel}`;
       }
     }
@@ -2341,7 +2348,8 @@ destroy() {
       const metrics = entry.metrics || {};
       const isMine = entry.isMine || (mine?.shopUrl && entry.shopUrl && mine.shopUrl === entry.shopUrl);
       const rank = this.formatNumber(entry.rank);
-      const score = this.formatNumber(entry.score ?? 0, { fractionDigits: 1, fallback: '۰٫۰' });
+      const aggregateScore = this.calculateAggregateScore(metrics);
+      const score = this.formatNumber(aggregateScore, { fractionDigits: 1, fallback: '۰٫۰' });
       const rating = this.formatNumber(metrics.ratingAverage ?? 0, { fractionDigits: 1, fallback: '۰٫۰' });
       const ratingCount = this.formatNumber(metrics.ratingCount ?? 0);
       const bookings = this.formatNumber(metrics.totalBookings ?? 0);
@@ -2365,7 +2373,7 @@ destroy() {
       }
       metaParts.push(`<span>⭐ ${rating} (${ratingCount})</span>`);
       metaParts.push(`<span>📆 ${bookings} نوبت</span>`);
-      metaParts.push(`<span>👥 ${customers} مشتری</span>`);
+      metaParts.push(`<span>👥 ${customers} مشتری فعال</span>`);
 
       const dataAttr = entry.shopUrl ? ` data-shop-url="${escapeHtml(entry.shopUrl)}"` : '';
 
@@ -2381,7 +2389,7 @@ destroy() {
           </div>
           <div class="leaderboard-score">
             <span>${score}</span>
-            <span>امتیاز</span>
+            <span>مجموع امتیاز</span>
           </div>
         </li>
       `;
