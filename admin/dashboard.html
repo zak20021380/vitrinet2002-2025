@@ -260,6 +260,12 @@
             gap: 4px;
         }
 
+        .row-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
         .action-link {
             color: var(--primary);
             background: var(--primary-soft);
@@ -281,6 +287,16 @@
         .action-link:hover {
             background: var(--primary-strong);
             color: #1641c7;
+        }
+
+        .action-link.secondary {
+            background: rgba(20, 33, 61, 0.08);
+            color: var(--text-strong);
+        }
+
+        .action-link.secondary:hover {
+            background: rgba(20, 33, 61, 0.14);
+            color: var(--text-strong);
         }
 
         .modal-backdrop {
@@ -582,7 +598,10 @@
                                 </div>
                             </td>
                             <td>
-                                <button type="button" class="action-link" data-shop-id="wallet">مشاهده آمار</button>
+                                <div class="row-actions">
+                                    <button type="button" class="action-link" data-modal-target="shop" data-shop-id="wallet">مشاهده آمار</button>
+                                    <a class="action-link secondary" href="../public/admin/service-shops.html?q=ولت" target="_blank" rel="noopener noreferrer">اقدامات</a>
+                                </div>
                             </td>
                         </tr>
                         <tr class="shop-row" data-shop-id="mostofi">
@@ -604,7 +623,10 @@
                                 </div>
                             </td>
                             <td>
-                                <button type="button" class="action-link" data-shop-id="mostofi">مشاهده آمار</button>
+                                <div class="row-actions">
+                                    <button type="button" class="action-link" data-modal-target="shop" data-shop-id="mostofi">مشاهده آمار</button>
+                                    <a class="action-link secondary" href="../public/admin/service-shops.html?q=mostofi" target="_blank" rel="noopener noreferrer">اقدامات</a>
+                                </div>
                             </td>
                         </tr>
                         <tr class="shop-row" data-shop-id="digisir">
@@ -626,7 +648,10 @@
                                 </div>
                             </td>
                             <td>
-                                <button type="button" class="action-link" data-shop-id="digisir">مشاهده آمار</button>
+                                <div class="row-actions">
+                                    <button type="button" class="action-link" data-modal-target="shop" data-shop-id="digisir">مشاهده آمار</button>
+                                    <a class="action-link secondary" href="../public/admin/service-shops.html?q=فروشگاه%20دیجیسیر" target="_blank" rel="noopener noreferrer">اقدامات</a>
+                                </div>
                             </td>
                         </tr>
                     </tbody>
@@ -902,10 +927,17 @@
             });
         });
 
-        document.querySelectorAll(".action-link").forEach(button => {
+        document.querySelectorAll(".row-actions a").forEach(link => {
+            link.addEventListener("click", event => {
+                event.stopPropagation();
+            });
+        });
+
+        document.querySelectorAll(".action-link[data-modal-target=\"shop\"]").forEach(button => {
             button.addEventListener("click", event => {
                 event.stopPropagation();
                 const shopId = button.getAttribute("data-shop-id") || button.closest(".shop-row")?.getAttribute("data-shop-id");
+                if (!shopId) return;
                 openModal(shopId);
             });
         });
