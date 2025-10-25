@@ -69,11 +69,11 @@
     }
 
     header {
-      background: rgba(255, 255, 255, 0.98);
-      backdrop-filter: blur(20px);
-      -webkit-backdrop-filter: blur(20px);
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
       border-bottom: 1px solid rgba(15, 23, 42, 0.06);
-      box-shadow: 0 2px 16px rgba(15, 23, 42, 0.04);
+      box-shadow: 0 2px 12px rgba(15, 23, 42, 0.06);
       position: sticky;
       top: 0;
       z-index: 100;
@@ -82,7 +82,7 @@
 
     header.scrolled {
       box-shadow: 0 4px 24px rgba(15, 23, 42, 0.08);
-      background: rgba(255, 255, 255, 1);
+      background: rgba(255, 255, 255, 0.98);
     }
 
     .layout-width {
@@ -125,12 +125,10 @@
       position: relative;
       width: 40px;
       height: 40px;
-      border-radius: 10px;
-      background: linear-gradient(135deg, #0f766e, #14b8a6);
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      box-shadow: 0 2px 8px rgba(15, 118, 110, 0.2);
+      filter: drop-shadow(0 2px 8px rgba(14, 165, 233, 0.25));
       flex-shrink: 0;
     }
 
@@ -150,9 +148,12 @@
     }
 
     .brand-name {
-      color: var(--text-main);
+      background: linear-gradient(135deg, #0ea5e9, #10b981);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
       font-size: 1.1rem;
-      font-weight: 800;
+      font-weight: 900;
       letter-spacing: -0.01em;
     }
 
@@ -175,21 +176,21 @@
       position: relative;
       padding: 0.5rem 1rem;
       border-radius: 8px;
-      color: var(--text-muted);
+      color: #475569;
       font-weight: 600;
       font-size: 0.95rem;
       transition: all 0.2s ease;
     }
 
     nav a:hover {
-      color: var(--primary);
-      background: rgba(15, 118, 110, 0.08);
+      color: #10b981;
+      background: rgba(16, 185, 129, 0.1);
     }
 
     nav a:focus-visible {
-      outline: 2px solid var(--primary);
+      outline: 2px solid #10b981;
       outline-offset: 2px;
-      color: var(--primary);
+      color: #10b981;
     }
 
     .nav-toggle {
@@ -239,21 +240,21 @@
       justify-content: center;
       gap: 0.5rem;
       padding: 0.65rem 1.25rem;
-      border-radius: 10px;
+      border-radius: 999px;
       border: none;
-      background: linear-gradient(135deg, var(--primary), var(--accent));
+      background: linear-gradient(135deg, #10b981, #0ea5e9);
       color: #fff;
       font-weight: 700;
       font-size: 0.95rem;
-      box-shadow: 0 2px 12px rgba(15, 118, 110, 0.2);
+      box-shadow: 0 4px 16px rgba(16, 185, 129, 0.3);
       transition: all 0.2s ease;
       grid-area: cta;
       white-space: nowrap;
     }
 
     .cta-link:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 4px 16px rgba(15, 118, 110, 0.3);
+      transform: translateY(-2px) scale(1.05);
+      box-shadow: 0 8px 24px rgba(16, 185, 129, 0.4);
     }
 
     .cta-link:focus-visible {
@@ -1850,11 +1851,27 @@
     <div class="layout-width header-inner">
       <a class="brand" href="/index.html" aria-label="صفحه اصلی ویترینت">
         <span class="brand-emblem" aria-hidden="true">
-          <span class="brand-initial">VN</span>
+          <svg viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg" role="presentation" style="width: 100%; height: 100%;">
+            <defs>
+              <linearGradient id="vtMarkGradient" x1="0%" y1="100%" x2="100%" y2="0%">
+                <stop offset="0%" stop-color="#0ea5e9" />
+                <stop offset="55%" stop-color="#10b981" />
+                <stop offset="100%" stop-color="#0fb67f" />
+              </linearGradient>
+              <linearGradient id="vtMarkInner" x1="15%" y1="85%" x2="85%" y2="15%">
+                <stop offset="0%" stop-color="#ffffff" stop-opacity="0.9" />
+                <stop offset="100%" stop-color="#dcfce7" stop-opacity="0.25" />
+              </linearGradient>
+            </defs>
+            <circle cx="24" cy="24" r="22" fill="url(#vtMarkGradient)" />
+            <circle cx="24" cy="24" r="18" fill="url(#vtMarkInner)" />
+            <path d="M15.5 16h4.7l4.3 10.6L28.8 16h4.7L26 33h-4.2L15.5 16Z" fill="#0f172a" fill-opacity="0.9" />
+            <path d="M18.2 17.6 24 31.1l5.8-13.5" fill="none" stroke="#22c55e" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
         </span>
         <span class="brand-text">
           <span class="brand-name">ویترینت</span>
-          <span class="brand-tagline">بازار آنلاین تجهیزات صنعتی</span>
+          <span class="brand-tagline">Vitreenet</span>
         </span>
       </a>
       <a class="cta-link" href="/post.html" aria-label="ثبت فروشگاه در ویترینت">
