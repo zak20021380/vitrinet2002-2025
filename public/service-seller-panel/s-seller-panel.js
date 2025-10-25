@@ -285,6 +285,10 @@ function renderComplimentaryPlan(planRaw) {
   const planHero = document.getElementById('plan-hero');
   if (!planHero) return;
 
+  planHero.removeAttribute('hidden');
+  planHero.setAttribute('aria-hidden', 'false');
+  planHero.classList.remove('is-hidden');
+
   const plan = normalizePlanForUI(planRaw || {});
   const tierEl = document.getElementById('plan-tier');
   const daysLeftEl = document.getElementById('plan-days-left');
@@ -295,7 +299,21 @@ function renderComplimentaryPlan(planRaw) {
   const messageEl = document.getElementById('plan-hero-message');
   const perksList = document.getElementById('plan-hero-perks');
   const statusChip = document.getElementById('plan-status-chip');
+  const subtextEl = document.getElementById('plan-hero-subtext');
   const plansDisabled = document.body?.dataset?.sellerPlans === 'disabled';
+
+  const planState = plan.activeNow
+    ? 'active'
+    : plan.hasExpired
+      ? 'expired'
+      : plan.isActive
+        ? 'scheduled'
+        : 'inactive';
+
+  if (planHero.dataset) {
+    planHero.dataset.planState = planState;
+    planHero.dataset.planDisabled = plansDisabled ? 'true' : 'false';
+  }
 
   bindPlanHeroActions();
 
@@ -309,9 +327,11 @@ function renderComplimentaryPlan(planRaw) {
   const expiryDate = plan.endDate || (plan.startDate && plan.totalDays != null
     ? new Date(plan.startDate.getTime() + plan.totalDays * MS_PER_DAY)
     : null);
+  const expiryLabel = expiryDate ? formatPersianDate(expiryDate) : 'نامشخص';
   if (expiryEl) {
-    expiryEl.textContent = expiryDate ? formatPersianDate(expiryDate) : 'نامشخص';
+    expiryEl.textContent = expiryLabel;
   }
+  const startLabel = plan.startDate ? formatPersianDate(plan.startDate) : null;
 
   const progress = plan.totalDays
     ? Math.min(100, Math.max(0, Math.round(((plan.usedDays || 0) / plan.totalDays) * 100)))
@@ -355,12 +375,31 @@ function renderComplimentaryPlan(planRaw) {
       const urgencyText = urgency ? `${urgency} ` : '';
       messageEl.textContent = `فعلاً از پلن رایگان ویترینت لذت ببرید! ${urgencyText}بدون دغدغه هزینه از ابزارهای ما استفاده کنید و هر زمان آماده بودید، از بخش پلن‌ها به نسخه‌های حرفه‌ای ارتقا دهید.`;
     } else if (plan.hasExpired) {
-      messageEl.textContent = 'دوره رایگان شما به پایان رسیده است. برای ادامه استفاده از امکانات، پلن مناسب را انتخاب کنید.';
+      messageEl.textContent = 'دوره رایگان شما به پایان رسیده است. برای ادامه استفاده از امکانات، پلن مناسب را انتخاب کنید یا با پشتیبانی جهت تمدید رایگان هماهنگ شوید.';
+    } else if (plan.isActive) {
+      const startText = startLabel ? `از ${startLabel}` : 'به‌زودی';
+      messageEl.textContent = `پلن رایگان فروشگاه شما توسط مدیریت زمان‌بندی شده و ${startText} فعال خواهد شد. تا شروع دوره رایگان، اطلاعات از همینجا اعلام می‌شود.`;
     } else if (plansDisabled) {
-      messageEl.textContent = 'پلن رایگان در حال حاضر توسط مدیریت غیرفعال شده است و به محض فعال شدن مجدد، از همین بخش اطلاع‌رسانی می‌شود.';
+      messageEl.textContent = 'پلن رایگان به‌طور سراسری توسط مدیریت غیرفعال شده است. به محض فعال‌سازی دوباره، جزئیات از همین بخش اطلاع‌رسانی می‌شود.';
     } else {
-      messageEl.textContent = 'برای استفاده از مزایای پلن رایگان، از بخش پلن‌ها آن را فعال کنید و پس از شروع از همینجا وضعیت آن را دنبال کنید.';
+      messageEl.textContent = 'در حال حاضر پلن رایگان برای فروشگاه شما فعال نشده است. به محض اعطای دسترسی توسط مدیریت، جزئیات و زمان‌بندی از همین بخش نمایش داده خواهد شد.';
     }
+  }
+
+  let subtext = 'پلن‌های رایگان توسط تیم مدیریت ویترینت کنترل می‌شوند. برای پیگیری وضعیت، با پشتیبانی در ارتباط باشید.';
+  if (plan.activeNow) {
+    subtext = `این دسترسی رایگان توسط مدیریت ویترینت فعال شده${expiryLabel ? ` و تا ${expiryLabel} معتبر است` : ''}.`;
+  } else if (plan.hasExpired) {
+    subtext = 'دوره رایگان قبلی پایان یافته است. برای تمدید یا دریافت مجدد، با تیم پشتیبانی ویترینت هماهنگ کنید.';
+  } else if (plan.isActive) {
+    subtext = startLabel
+      ? `پلن رایگان شما از ${startLabel} توسط مدیریت فعال خواهد شد و در همین صفحه وضعیت آن بروزرسانی می‌شود.`
+      : 'پلن رایگان شما توسط مدیریت زمان‌بندی شده است و پس از شروع در همین صفحه به‌روزرسانی خواهد شد.';
+  } else if (plansDisabled) {
+    subtext = 'تیم مدیریت به طور موقت دسترسی به پلن‌های رایگان را غیرفعال کرده است؛ به محض تغییر وضعیت، اطلاع‌رسانی می‌شود.';
+  }
+  if (subtextEl) {
+    subtextEl.textContent = subtext;
   }
 }
 
@@ -4184,12 +4223,7 @@ try {
 featureFlags = applySellerPlanFeatureFlags(featureFlags);
 window.__FEATURE_FLAGS__ = featureFlags;
 
-if (featureFlags.sellerPlansEnabled) {
-  await loadComplimentaryPlan();
-} else {
-  window.__COMPLIMENTARY_PLAN__ = null;
-  renderComplimentaryPlan(null);
-}
+await loadComplimentaryPlan();
 
 const app = new SellerPanelApp(featureFlags);
 app.init();

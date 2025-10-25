@@ -204,6 +204,124 @@
       line-height: 1;
     }
 
+    .stat-card-header small {
+      display: block;
+      font-size: 0.75rem;
+      font-weight: 500;
+      color: var(--muted);
+      margin-top: 0.25rem;
+    }
+
+    .stat-card.plan-card {
+      border: 1.5px solid rgba(16, 185, 129, 0.25);
+      background: linear-gradient(135deg, rgba(16, 185, 129, 0.08), rgba(14, 165, 233, 0.08));
+      position: relative;
+      overflow: hidden;
+    }
+
+    .stat-card.plan-card::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle at top left, rgba(16, 185, 129, 0.16), transparent 55%);
+      pointer-events: none;
+    }
+
+    .plan-card[data-empty="true"] {
+      opacity: 0.9;
+    }
+
+    .plan-card[data-has-warning="true"] {
+      border-color: rgba(245, 158, 11, 0.75);
+      box-shadow: 0 0 0 1px rgba(245, 158, 11, 0.2), var(--shadow-hover);
+    }
+
+    .plan-card[data-active-filter="true"] {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 1px rgba(16, 185, 129, 0.35), var(--shadow-hover);
+    }
+
+    .plan-card-meta {
+      margin-top: 1rem;
+      display: grid;
+      gap: 0.65rem;
+      grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+      position: relative;
+      z-index: 1;
+    }
+
+    .plan-card-meta div {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 0.35rem;
+      font-size: 0.85rem;
+      color: var(--muted);
+    }
+
+    .plan-card-meta strong {
+      font-size: 1rem;
+      color: var(--text);
+    }
+
+    .plan-card-actions {
+      margin-top: 1.2rem;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      position: relative;
+      z-index: 1;
+    }
+
+    .plan-card-actions .btn {
+      flex: 1 1 180px;
+      justify-content: center;
+    }
+
+    .plan-card-actions .btn[disabled] {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .badge.badge-outline {
+      border: 1px dashed var(--border);
+      background: transparent;
+      color: var(--muted);
+    }
+
+    .badge-secondary {
+      background: rgba(14, 165, 233, 0.12);
+      color: var(--secondary);
+    }
+
+    .plan-meta {
+      margin-top: 0.6rem;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 0.4rem 0.75rem;
+      font-size: 0.82rem;
+      color: var(--muted);
+    }
+
+    .plan-meta i {
+      font-size: 1rem;
+      color: var(--secondary);
+    }
+
+    .plan-meta.plan-meta-warning i {
+      color: var(--warning);
+    }
+
+    .plan-meta.plan-meta-warning {
+      color: var(--warning);
+    }
+
+    .plan-meta .plan-note {
+      color: var(--text);
+      font-weight: 500;
+    }
+
     /* Filters */
     .filters {
       background: white;
@@ -729,6 +847,45 @@
 
     <!-- Stats -->
     <section class="stats-grid">
+      <div class="stat-card plan-card" id="plan-summary-card" data-empty="true" data-has-warning="false" data-active-filter="false">
+        <div class="stat-card-header">
+          <i class="ri-gift-line stat-card-icon"></i>
+          <span>
+            پلن رایگان
+            <small id="metric-plan-caption">مدیریت پلن‌های هدیه برای فروشندگان خدماتی</small>
+          </span>
+        </div>
+        <div class="stat-card-value" id="metric-plan-active">۰</div>
+        <div class="plan-card-meta">
+          <div>
+            <span>در حال استفاده:</span>
+            <strong id="metric-plan-active-now">۰</strong>
+          </div>
+          <div>
+            <span>در انتظار شروع:</span>
+            <strong id="metric-plan-scheduled">۰</strong>
+          </div>
+          <div>
+            <span>رو به پایان (۷ روز آینده):</span>
+            <strong id="metric-plan-expiring">۰</strong>
+          </div>
+          <div>
+            <span>منقضی شده:</span>
+            <strong id="metric-plan-expired">۰</strong>
+          </div>
+        </div>
+        <div class="plan-card-actions">
+          <button type="button" class="btn btn-primary btn-sm" id="plan-manage-btn">
+            <i class="ri-vip-crown-line"></i>
+            مدیریت پلن‌ها
+          </button>
+          <button type="button" class="btn btn-secondary btn-sm" id="plan-expiring-btn" disabled>
+            <i class="ri-timer-line"></i>
+            پلن‌های رو به پایان
+          </button>
+        </div>
+      </div>
+
       <div class="stat-card">
         <div class="stat-card-header">
           <i class="ri-store-2-line stat-card-icon"></i>
@@ -777,6 +934,18 @@
           <label>نوع خدمت</label>
           <select id="filter-category">
             <option value="">همه خدمات</option>
+          </select>
+        </div>
+        <div class="filter-group">
+          <label>وضعیت پلن رایگان</label>
+          <select id="filter-plan">
+            <option value="">همه وضعیت‌ها</option>
+            <option value="active">دارای پلن فعال</option>
+            <option value="active-now">در حال استفاده</option>
+            <option value="scheduled">پلن در انتظار شروع</option>
+            <option value="expiring">رو به پایان (۷ روز آینده)</option>
+            <option value="expired">پلن منقضی شده</option>
+            <option value="none">بدون پلن رایگان فعال</option>
           </select>
         </div>
       </div>
@@ -1000,13 +1169,25 @@
       return numberFormatter.format(Number.isFinite(num) ? num : 0);
     };
 
+    const PLAN_FILTER_LABELS = {
+      active: 'دارای پلن فعال',
+      'active-now': 'در حال استفاده از پلن رایگان',
+      scheduled: 'پلن رایگان در انتظار شروع',
+      expiring: 'پلن رایگان رو به پایان',
+      expired: 'پلن رایگان منقضی شده',
+      none: 'بدون پلن رایگان فعال'
+    };
+
+    const MS_IN_DAY = 24 * 60 * 60 * 1000;
+
     // State
     const state = {
       page: 1,
       limit: 20,
       filters: {
         q: '',
-        category: ''
+        category: '',
+        planStatus: ''
       },
       items: [],
       overview: null,
@@ -1020,13 +1201,23 @@
       tableMeta: document.getElementById('table-meta'),
       filterSearch: document.getElementById('filter-search'),
       filterCategory: document.getElementById('filter-category'),
+      filterPlan: document.getElementById('filter-plan'),
       applyFilters: document.getElementById('filters-apply'),
       resetFilters: document.getElementById('filters-reset'),
       refreshBtn: document.getElementById('refresh-btn'),
       metricTotal: document.getElementById('metric-total'),
       metricActive: document.getElementById('metric-active'),
       metricPending: document.getElementById('metric-pending'),
-      metricBooking: document.getElementById('metric-booking')
+      metricBooking: document.getElementById('metric-booking'),
+      metricPlanActive: document.getElementById('metric-plan-active'),
+      metricPlanActiveNow: document.getElementById('metric-plan-active-now'),
+      metricPlanScheduled: document.getElementById('metric-plan-scheduled'),
+      metricPlanExpiring: document.getElementById('metric-plan-expiring'),
+      metricPlanExpired: document.getElementById('metric-plan-expired'),
+      metricPlanCaption: document.getElementById('metric-plan-caption'),
+      planCard: document.getElementById('plan-summary-card'),
+      planManageBtn: document.getElementById('plan-manage-btn'),
+      planExpiringBtn: document.getElementById('plan-expiring-btn')
     };
 
     // Toast notification
@@ -1080,6 +1271,43 @@
       elements.metricActive.textContent = formatNumber(totals.active || 0);
       elements.metricPending.textContent = formatNumber(totals.pending || 0);
       elements.metricBooking.textContent = formatNumber(totals.bookingEnabled || 0);
+
+      const planTotals = {
+        active: Number(totals.complimentaryActive || 0),
+        activeNow: Number(totals.complimentaryActiveNow || 0),
+        expiring: Number(totals.complimentaryExpiringSoon || 0),
+        expired: Number(totals.complimentaryExpired || 0)
+      };
+      const activeNow = Math.max(0, Math.min(planTotals.active, planTotals.activeNow));
+      const scheduled = Math.max(0, planTotals.active - activeNow);
+
+      if (elements.metricPlanActive) {
+        elements.metricPlanActive.textContent = formatNumber(planTotals.active);
+      }
+      if (elements.metricPlanActiveNow) {
+        elements.metricPlanActiveNow.textContent = formatNumber(activeNow);
+      }
+      if (elements.metricPlanScheduled) {
+        elements.metricPlanScheduled.textContent = formatNumber(scheduled);
+      }
+      if (elements.metricPlanExpiring) {
+        elements.metricPlanExpiring.textContent = formatNumber(planTotals.expiring);
+      }
+      if (elements.metricPlanExpired) {
+        elements.metricPlanExpired.textContent = formatNumber(planTotals.expired);
+      }
+      if (elements.metricPlanCaption) {
+        elements.metricPlanCaption.textContent = planTotals.active > 0
+          ? `برای ${formatNumber(planTotals.active)} فروشنده ثبت شده`
+          : 'فعلاً هیچ پلن رایگانی ثبت نشده است';
+      }
+      if (elements.planCard) {
+        elements.planCard.dataset.empty = planTotals.active > 0 ? 'false' : 'true';
+        elements.planCard.dataset.hasWarning = planTotals.expiring > 0 ? 'true' : 'false';
+      }
+      if (elements.planExpiringBtn) {
+        elements.planExpiringBtn.disabled = planTotals.expiring === 0;
+      }
     }
 
     // Load shops
@@ -1092,6 +1320,7 @@
       params.set('limit', state.limit);
       if (state.filters.q) params.set('q', state.filters.q);
       if (state.filters.category) params.set('category', state.filters.category);
+      if (state.filters.planStatus) params.set('planStatus', state.filters.planStatus);
 
       try {
         const data = await fetchJSON(`${API_BASE}?${params.toString()}`);
@@ -1116,11 +1345,19 @@
     }
 
     function updateMeta(total) {
-      if (total === 0) {
-        elements.tableMeta.textContent = 'هیچ مغازه‌ای یافت نشد';
-      } else {
-        elements.tableMeta.textContent = `${formatNumber(total)} مغازه`;
+      const parts = [];
+      parts.push(total === 0 ? 'هیچ مغازه‌ای یافت نشد' : `${formatNumber(total)} مغازه`);
+      if (state.filters.planStatus) {
+        const label = PLAN_FILTER_LABELS[state.filters.planStatus] || state.filters.planStatus;
+        parts.push(`پلن رایگان: ${label}`);
       }
+      if (state.filters.category) {
+        parts.push(`دسته: ${state.filters.category}`);
+      }
+      if (state.filters.q) {
+        parts.push(`جستجو: ${state.filters.q}`);
+      }
+      elements.tableMeta.textContent = parts.join(' • ');
     }
 
     function renderTable() {
@@ -1129,6 +1366,108 @@
         return;
       }
       elements.tableBody.innerHTML = state.items.map(shop => renderRow(shop)).join('');
+    }
+
+    function parsePlanDate(value) {
+      if (!value) return null;
+      const date = value instanceof Date ? value : new Date(value);
+      return Number.isNaN(date.getTime()) ? null : date;
+    }
+
+    function buildPlanBadge(plan) {
+      if (!plan) {
+        return '<span class="badge badge-outline"><i class="ri-gift-line"></i> بدون پلن رایگان</span>';
+      }
+
+      const now = new Date();
+      const start = parsePlanDate(plan.startDate);
+      const end = parsePlanDate(plan.endDate);
+      const isActive = !!plan.isActive;
+      const hasStarted = !start || start <= now;
+      const hasExpired = isActive && end && end < now;
+      const isScheduled = isActive && start && start > now;
+      let daysLeft = null;
+      if (isActive && end) {
+        daysLeft = Math.ceil((end - now) / MS_IN_DAY);
+      }
+      const isExpiring = isActive && !hasExpired && daysLeft != null && daysLeft >= 0 && daysLeft <= 7;
+
+      const tooltipParts = [];
+      if (start) tooltipParts.push(`شروع: ${formatDate(start)}`);
+      if (end) tooltipParts.push(`پایان: ${formatDate(end)}`);
+      if (isActive && !hasExpired && daysLeft != null && daysLeft >= 0) {
+        tooltipParts.push(`باقی‌مانده: ${formatNumber(daysLeft)} روز`);
+      }
+      if ((plan.note || '').trim()) {
+        tooltipParts.push(`یادداشت: ${(plan.note || '').trim()}`);
+      }
+      const tooltip = tooltipParts.length ? escapeHtml(tooltipParts.join(' | ')) : 'پلن رایگان';
+
+      let badgeClass = 'badge-info';
+      let label = 'پلن رایگان فعال';
+      let suffix = '';
+
+      if (!isActive) {
+        badgeClass = 'badge-outline';
+        label = 'پلن رایگان غیرفعال';
+      } else if (hasExpired) {
+        badgeClass = 'badge-danger';
+        label = 'پلن رایگان منقضی شده';
+      } else if (isScheduled && !hasStarted) {
+        badgeClass = 'badge-secondary';
+        label = 'پلن رایگان در انتظار شروع';
+      } else if (isExpiring) {
+        badgeClass = 'badge-warning';
+        label = 'پلن رایگان رو به پایان';
+        suffix = daysLeft != null && daysLeft >= 0 ? ` (${formatNumber(daysLeft)} روز)` : '';
+      }
+
+      return `<span class="badge ${badgeClass}" title="${tooltip}"><i class="ri-gift-line"></i> ${label}${suffix}</span>`;
+    }
+
+    function buildPlanMeta(plan) {
+      if (!plan) return '';
+
+      const now = new Date();
+      const start = parsePlanDate(plan.startDate);
+      const end = parsePlanDate(plan.endDate);
+      const isActive = !!plan.isActive;
+      const hasExpired = isActive && end && end < now;
+      const segments = [];
+
+      if (isActive && start && start > now) {
+        segments.push(`شروع از ${formatDate(start)}`);
+      } else if (start && isActive) {
+        segments.push(`شروع ${formatDate(start)}`);
+      }
+
+      if (end) {
+        if (hasExpired) {
+          segments.push(`منقضی شده در ${formatDate(end)}`);
+        } else if (isActive) {
+          segments.push(`پایان ${formatDate(end)}`);
+          const remaining = Math.ceil((end - now) / MS_IN_DAY);
+          if (!Number.isNaN(remaining) && remaining >= 0) {
+            segments.push(`${formatNumber(remaining)} روز باقی مانده`);
+          }
+        }
+      }
+
+      const note = (plan.note || '').trim();
+      if (note) {
+        segments.push(`یادداشت: ${escapeHtml(note)}`);
+      }
+
+      if (!segments.length && !hasExpired) {
+        return '';
+      }
+
+      const classes = ['plan-meta'];
+      if (hasExpired || (isActive && end && Math.ceil((end - now) / MS_IN_DAY) <= 7)) {
+        classes.push('plan-meta-warning');
+      }
+
+      return `<div class="${classes.join(' ')}"><i class="ri-timer-line"></i> ${segments.join(' • ')}</div>`;
     }
 
     function renderRow(shop) {
@@ -1170,6 +1509,8 @@
 
       const subcategoryHtml = `<div class="shop-meta"><i class="ri-stack-line"></i> ${escapeHtml(subcategoryText)}</div>`;
       const shopUrlLabel = escapeHtml(shop.shopUrl || '');
+      const planBadgeHtml = buildPlanBadge(shop.complimentaryPlan);
+      const planMetaHtml = buildPlanMeta(shop.complimentaryPlan);
 
       return `
         <tr data-id="${shop._id}">
@@ -1196,8 +1537,9 @@
             <div class="badges-group">
               ${bookingEnabled ? '<span class="badge badge-success"><i class="ri-calendar-check-line"></i> رزرو</span>' : '<span class="badge badge-muted">بدون رزرو</span>'}
               ${shop.isPremium ? '<span class="badge badge-warning"><i class="ri-vip-crown-line"></i> پریمیوم</span>' : ''}
-              ${shop.complimentaryPlan?.isActive ? '<span class="badge badge-info" title="این فروشنده پلن رایگان فعال دارد"><i class="ri-gift-line"></i> پلن رایگان</span>' : ''}
+              ${planBadgeHtml}
             </div>
+            ${planMetaHtml}
           </td>
           <td>
             <div class="actions">
@@ -1400,7 +1742,17 @@
 
     // Toggle plan details visibility
     function togglePlanDetails(show) {
-      document.getElementById('plan-details').style.display = show ? 'block' : 'none';
+      const details = document.getElementById('plan-details');
+      if (!details) return;
+      details.style.display = show ? 'block' : 'none';
+      if (show) {
+        updateEndDate();
+      } else {
+        const endInput = document.getElementById('plan-end-date');
+        if (endInput) {
+          endInput.value = '';
+        }
+      }
     }
 
     // Update end date when duration or start date changes
@@ -1442,11 +1794,27 @@
         saveBtn.innerHTML = '<i class="ri-loader-4-line"></i> در حال ذخیره...';
         errorEl.style.display = 'none';
 
+        const durationValue = parseInt(document.getElementById('plan-duration').value, 10);
+        const safeDuration = Number.isFinite(durationValue) ? durationValue : null;
+        const startDateRaw = document.getElementById('plan-start-date').value || '';
+        let computedEndDate = null;
+        if (isActive) {
+          if (safeDuration && startDateRaw) {
+            computedEndDate = calculateEndDate(startDateRaw, safeDuration);
+          } else {
+            computedEndDate = document.getElementById('plan-end-date').value || null;
+          }
+          if (computedEndDate) {
+            document.getElementById('plan-end-date').value = computedEndDate;
+          }
+        }
+
         const payload = {
           complimentaryPlan: {
             isActive,
-            durationDays: isActive ? parseInt(document.getElementById('plan-duration').value) : null,
-            startDate: isActive ? document.getElementById('plan-start-date').value : null,
+            durationDays: isActive ? safeDuration : null,
+            startDate: isActive ? (startDateRaw || null) : null,
+            endDate: isActive ? (computedEndDate || null) : null,
             note: document.getElementById('plan-note').value.trim()
           }
         };
@@ -1472,6 +1840,12 @@
       state.page = 1;
       state.filters.q = elements.filterSearch.value.trim();
       state.filters.category = elements.filterCategory.value;
+      if (elements.filterPlan) {
+        state.filters.planStatus = elements.filterPlan.value;
+      }
+      if (elements.planCard) {
+        elements.planCard.dataset.activeFilter = state.filters.planStatus ? 'true' : 'false';
+      }
       loadShops();
     }
 
@@ -1486,8 +1860,38 @@
     elements.resetFilters.addEventListener('click', () => {
       elements.filterSearch.value = '';
       elements.filterCategory.value = '';
+      if (elements.filterPlan) {
+        elements.filterPlan.value = '';
+      }
+      state.filters.planStatus = '';
+      if (elements.planCard) {
+        elements.planCard.dataset.activeFilter = 'false';
+      }
       applyFilters();
     });
+
+    if (elements.filterPlan) {
+      elements.filterPlan.addEventListener('change', applyFilters);
+    }
+
+    if (elements.planManageBtn) {
+      elements.planManageBtn.addEventListener('click', () => {
+        if (elements.filterPlan) {
+          elements.filterPlan.value = 'active';
+        }
+        applyFilters();
+      });
+    }
+
+    if (elements.planExpiringBtn) {
+      elements.planExpiringBtn.addEventListener('click', () => {
+        if (elements.planExpiringBtn.disabled) return;
+        if (elements.filterPlan) {
+          elements.filterPlan.value = 'expiring';
+        }
+        applyFilters();
+      });
+    }
 
     elements.refreshBtn.addEventListener('click', () => {
       loadOverview();
