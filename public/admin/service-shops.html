@@ -774,25 +774,10 @@
           <input type="search" id="filter-search" placeholder="نام مغازه، مالک، شهر...">
         </div>
         <div class="filter-group">
-          <label>وضعیت</label>
-          <select id="filter-status">
-            <option value="">همه وضعیت‌ها</option>
-            <option value="approved">فعال</option>
-            <option value="pending">در انتظار تایید</option>
-            <option value="draft">پیش‌نویس</option>
-            <option value="suspended">معلق</option>
-            <option value="archived">بایگانی</option>
-          </select>
-        </div>
-        <div class="filter-group">
           <label>نوع خدمت</label>
           <select id="filter-category">
             <option value="">همه خدمات</option>
           </select>
-        </div>
-        <div class="filter-group">
-          <label>شهر</label>
-          <input type="text" id="filter-city" placeholder="مثلاً تهران">
         </div>
       </div>
       <div class="filter-actions">
@@ -1021,9 +1006,7 @@
       limit: 20,
       filters: {
         q: '',
-        status: '',
-        category: '',
-        city: ''
+        category: ''
       },
       items: [],
       overview: null,
@@ -1036,9 +1019,7 @@
       tableBody: document.getElementById('shops-table-body'),
       tableMeta: document.getElementById('table-meta'),
       filterSearch: document.getElementById('filter-search'),
-      filterStatus: document.getElementById('filter-status'),
       filterCategory: document.getElementById('filter-category'),
-      filterCity: document.getElementById('filter-city'),
       applyFilters: document.getElementById('filters-apply'),
       resetFilters: document.getElementById('filters-reset'),
       refreshBtn: document.getElementById('refresh-btn'),
@@ -1110,9 +1091,7 @@
       params.set('page', state.page);
       params.set('limit', state.limit);
       if (state.filters.q) params.set('q', state.filters.q);
-      if (state.filters.status) params.set('status', state.filters.status);
       if (state.filters.category) params.set('category', state.filters.category);
-      if (state.filters.city) params.set('city', state.filters.city);
 
       try {
         const data = await fetchJSON(`${API_BASE}?${params.toString()}`);
@@ -1175,9 +1154,13 @@
       const subcategories = Array.isArray(shop.subcategories)
         ? shop.subcategories.filter(Boolean)
         : (shop.subcategory ? [shop.subcategory] : []);
-      const subcategoryText = subcategories.length
-        ? subcategories.join('، ')
-        : '';
+      const fallbackCategories = !subcategories.length && shop.category
+        ? [shop.category]
+        : [];
+      const subcategoryOptions = [...subcategories, ...fallbackCategories].filter(Boolean);
+      const subcategoryText = subcategoryOptions.length
+        ? subcategoryOptions.join('، ')
+        : 'زیرگروه مشخص نشده';
       const shopUrl = shop.shopUrl
         ? `/service-shops.html?shopurl=${encodeURIComponent(shop.shopUrl)}`
         : '#';
@@ -1185,9 +1168,7 @@
         ? `/service-seller-panel/s-seller-panel.html?shopurl=${encodeURIComponent(shop.shopUrl)}`
         : '#';
 
-      const subcategoryHtml = subcategoryText
-        ? `<div class="shop-meta"><i class="ri-stack-line"></i> ${escapeHtml(subcategoryText)}</div>`
-        : '';
+      const subcategoryHtml = `<div class="shop-meta"><i class="ri-stack-line"></i> ${escapeHtml(subcategoryText)}</div>`;
       const shopUrlLabel = escapeHtml(shop.shopUrl || '');
 
       return `
@@ -1490,9 +1471,7 @@
     function applyFilters() {
       state.page = 1;
       state.filters.q = elements.filterSearch.value.trim();
-      state.filters.status = elements.filterStatus.value;
       state.filters.category = elements.filterCategory.value;
-      state.filters.city = elements.filterCity.value.trim();
       loadShops();
     }
 
@@ -1506,9 +1485,7 @@
 
     elements.resetFilters.addEventListener('click', () => {
       elements.filterSearch.value = '';
-      elements.filterStatus.value = '';
       elements.filterCategory.value = '';
-      elements.filterCity.value = '';
       applyFilters();
     });
 
