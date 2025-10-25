@@ -723,6 +723,214 @@ const SellerBlockScreen = (() => {
   };
 })();
 
+const BlockStateManager = (() => {
+  const KEY = 'vt:seller:block-state';
+
+  const safeRead = () => {
+    if (typeof localStorage === 'undefined') {
+      return { blocked: false };
+    }
+    try {
+      const raw = localStorage.getItem(KEY);
+      if (!raw) return { blocked: false };
+      const parsed = JSON.parse(raw);
+      return parsed && typeof parsed === 'object' ? parsed : { blocked: false };
+    } catch (err) {
+      console.warn('BlockStateManager.read failed', err);
+      return { blocked: false };
+    }
+  };
+
+  const safeWrite = (value) => {
+    if (typeof localStorage === 'undefined') return;
+    try {
+      localStorage.setItem(KEY, JSON.stringify(value));
+    } catch (err) {
+      console.warn('BlockStateManager.write failed', err);
+    }
+  };
+
+  const cleanMessages = (items = []) => items
+    .map((item) => (typeof item === 'string' ? item.trim() : ''))
+    .filter(Boolean);
+
+  const cleanSources = (items = []) => items
+    .map((item) => (typeof item === 'string' ? item.trim() : ''))
+    .filter(Boolean);
+
+  return {
+    markBlocked(signals = []) {
+      const blockedAt = new Date().toISOString();
+      const messages = cleanMessages(signals.map((signal) => signal?.message));
+      const sources = cleanSources(signals.map((signal) => signal?.source));
+      const info = { blockedAt, messages, sources };
+
+      safeWrite({
+        blocked: true,
+        blockedAt,
+        messages,
+        sources,
+        lastBlockInfo: info,
+        lastUnblockedAt: null,
+        needsUnblockNotice: false
+      });
+
+      return info;
+    },
+    resolveUnblocked() {
+      const state = safeRead();
+      if (state?.blocked) {
+        const info = {
+          blockedAt: state.blockedAt || state.lastBlockInfo?.blockedAt || null,
+          messages: cleanMessages(state.messages?.length ? state.messages : state.lastBlockInfo?.messages),
+          sources: cleanSources(state.sources?.length ? state.sources : state.lastBlockInfo?.sources)
+        };
+        const unblockedAt = new Date().toISOString();
+
+        safeWrite({
+          blocked: false,
+          blockedAt: null,
+          messages: [],
+          sources: [],
+          lastBlockInfo: info,
+          lastUnblockedAt: unblockedAt,
+          needsUnblockNotice: true
+        });
+
+        return { ...info, unblockedAt };
+      }
+
+      if (state?.needsUnblockNotice && state.lastBlockInfo) {
+        return {
+          ...state.lastBlockInfo,
+          messages: cleanMessages(state.lastBlockInfo?.messages),
+          sources: cleanSources(state.lastBlockInfo?.sources),
+          unblockedAt: state.lastUnblockedAt || null
+        };
+      }
+
+      return null;
+    },
+    acknowledge() {
+      const state = safeRead();
+      if (!state?.needsUnblockNotice) return;
+      state.needsUnblockNotice = false;
+      safeWrite(state);
+    }
+  };
+})();
+
+const SellerStatusPopover = (() => {
+  const root = document.getElementById('seller-status-popover');
+  if (!root) {
+    return {
+      show() {},
+      hide() {}
+    };
+  }
+
+  const titleEl = root.querySelector('#status-popover-title');
+  const messageEl = root.querySelector('#status-popover-message');
+  const detailsEl = root.querySelector('#status-popover-details');
+  const closeBtn = root.querySelector('#status-popover-close');
+  let currentKey = '';
+
+  const hide = ({ acknowledge = false } = {}) => {
+    root.classList.remove('is-visible');
+    root.setAttribute('hidden', '');
+    root.setAttribute('aria-hidden', 'true');
+    currentKey = '';
+    if (acknowledge) {
+      BlockStateManager.acknowledge();
+    }
+  };
+
+  const renderDetails = ({ messages, sources } = {}) => {
+    if (!detailsEl) return;
+    const list = Array.isArray(messages) ? messages.filter(Boolean) : [];
+    const extraSources = Array.isArray(sources) ? Array.from(new Set(sources.filter(Boolean))) : [];
+
+    if (!list.length && extraSources.length) {
+      const sourceLabel = extraSources
+        .map((src) => BLOCK_SOURCE_LABELS[src] || BLOCK_SOURCE_LABELS.default || src)
+        .join('، ');
+      list.push(`دسترسی این بخش‌ها دوباره فعال شد: ${sourceLabel}`);
+    }
+
+    if (!list.length) {
+      list.push('برای ادامه فعالیت، خدمات و نوبت‌های خود را بررسی و در صورت نیاز بروزرسانی کنید.');
+    }
+
+    detailsEl.innerHTML = list.map((msg) => `<li>${escapeHtml(msg)}</li>`).join('');
+    detailsEl.removeAttribute('hidden');
+  };
+
+  const show = (info = {}) => {
+    const { blockedAt, unblockedAt, messages, sources } = info || {};
+    const key = [
+      blockedAt || '',
+      unblockedAt || '',
+      Array.isArray(messages) ? messages.join('|') : '',
+      Array.isArray(sources) ? sources.join('|') : ''
+    ].join('|');
+
+    if (currentKey === key && root.classList.contains('is-visible')) {
+      return;
+    }
+
+    currentKey = key;
+
+    if (titleEl) {
+      titleEl.textContent = 'دسترسی فروشگاه فعال شد';
+    }
+
+    if (messageEl) {
+      const blockedText = blockedAt ? formatBlockTimestamp(blockedAt) : '';
+      const unblockedText = unblockedAt ? formatBlockTimestamp(unblockedAt) : '';
+      let text = 'دسترسی شما به پنل فروشنده دوباره برقرار شد.';
+
+      if (blockedText && unblockedText) {
+        text = `دسترسی شما که در ${blockedText} محدود شده بود، در ${unblockedText} دوباره فعال شد.`;
+      } else if (blockedText) {
+        text = `دسترسی شما که در ${blockedText} محدود شده بود، اکنون دوباره فعال شده است.`;
+      } else if (unblockedText) {
+        text = `این پیام در ${unblockedText} ثبت شده است و دسترسی شما اکنون فعال است.`;
+      }
+
+      messageEl.textContent = text;
+    }
+
+    renderDetails({ messages, sources });
+
+    root.removeAttribute('hidden');
+    root.classList.add('is-visible');
+    root.setAttribute('aria-hidden', 'false');
+
+    setTimeout(() => {
+      try {
+        root.focus({ preventScroll: true });
+      } catch {
+        root.focus();
+      }
+    }, 0);
+  };
+
+  if (closeBtn) {
+    closeBtn.addEventListener('click', () => hide({ acknowledge: true }));
+  }
+
+  root.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape') {
+      hide({ acknowledge: true });
+    }
+  });
+
+  return {
+    show,
+    hide
+  };
+})();
+
 function markSellerBlocked(signals = []) {
   const nextSources = new Set(Array.isArray(SELLER_RUNTIME.blockSources) ? SELLER_RUNTIME.blockSources : []);
   const nextMessages = new Set(Array.isArray(SELLER_RUNTIME.blockMessages) ? SELLER_RUNTIME.blockMessages : []);
@@ -739,6 +947,8 @@ function markSellerBlocked(signals = []) {
   SELLER_RUNTIME.blocked = true;
 
   console.warn('Seller account flagged as blocked', SELLER_RUNTIME);
+  BlockStateManager.markBlocked(signals);
+  SellerStatusPopover.hide();
   SellerBlockScreen.show(SELLER_RUNTIME);
 }
 
@@ -1337,6 +1547,16 @@ async function fetchInitialData() {
           </div>
         `).join('');
       }
+    }
+
+    const reactivationInfo = BlockStateManager.resolveUnblocked();
+    if (reactivationInfo) {
+      SellerStatusPopover.show(reactivationInfo);
+      if (typeof UIComponents !== 'undefined' && UIComponents.showToast) {
+        UIComponents.showToast('دسترسی فروشگاه شما فعال شد.', 'success', 6000);
+      }
+    } else {
+      SellerStatusPopover.hide();
     }
 
   } catch (err) {
