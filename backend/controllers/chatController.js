@@ -1106,7 +1106,8 @@ exports.blockSender = async (req, res) => {
       target.blockedByAdmin = !unblock;
       await target.save();
 
-      if (target.phone) {
+      // Only update BannedPhone if phone exists and is not empty
+      if (target.phone && String(target.phone).trim()) {
         if (unblock) {
           await BannedPhone.deleteOne({ phone: target.phone });
         } else {
@@ -1134,7 +1135,8 @@ exports.blockSender = async (req, res) => {
 
       await target.save();
 
-      if (target.phone) {
+      // Only update BannedPhone if phone exists and is not empty
+      if (target.phone && String(target.phone).trim()) {
         if (unblock) {
           await BannedPhone.deleteOne({ phone: target.phone });
         } else {
@@ -1191,7 +1193,8 @@ exports.blockTarget = async (req, res) => {
     await target.save();
 
     const phone = target.phone;
-    if (phone) {
+    // Only add to BannedPhone if phone exists and is not empty
+    if (phone && String(phone).trim()) {
       await BannedPhone.updateOne(
         { phone },
         {
@@ -1245,7 +1248,8 @@ exports.unblockTarget = async (req, res) => {
     await target.save();
 
     const phone = target.phone;
-    if (phone) {
+    // Only delete from BannedPhone if phone exists and is not empty
+    if (phone && String(phone).trim()) {
       await BannedPhone.deleteOne({ phone });
     }
 

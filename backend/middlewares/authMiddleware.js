@@ -70,14 +70,28 @@ module.exports = (requiredRole = null) => {
   /* ۳) ردِ فوری کاربر یا شمارهٔ مسدود */
   if (payload.role === 'user') {
     const u = await User.findById(payload.id).select('deleted phone');
-    if (!u || u.deleted || await BannedPhone.findOne({ phone: u.phone })) {
+    if (!u || u.deleted) {
       return res.status(403).json({ message: 'دسترسی شما مسدود شده است.' });
+    }
+    // Only check BannedPhone if user has a valid phone number
+    if (u.phone && String(u.phone).trim()) {
+      const isBanned = await BannedPhone.findOne({ phone: u.phone });
+      if (isBanned) {
+        return res.status(403).json({ message: 'دسترسی شما مسدود شده است.' });
+      }
     }
   }
   if (payload.role === 'seller') {
     const s = await Seller.findById(payload.id).select('phone blockedByAdmin');
-    if (!s || s.blockedByAdmin || await BannedPhone.findOne({ phone: s.phone })) {
+    if (!s || s.blockedByAdmin) {
       return res.status(403).json({ message: 'دسترسی شما مسدود شده است.' });
+    }
+    // Only check BannedPhone if seller has a valid phone number
+    if (s.phone && String(s.phone).trim()) {
+      const isBanned = await BannedPhone.findOne({ phone: s.phone });
+      if (isBanned) {
+        return res.status(403).json({ message: 'دسترسی شما مسدود شده است.' });
+      }
     }
   }
 

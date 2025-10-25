@@ -9,9 +9,12 @@ const BannedPhone = require('../models/BannedPhone');     // ⬅︎ مدل لی�
 
 // ⬇︎ تابع کمکی؛ بیرون از هر متد export باشد تا همه بتوانند استفاده کنند
 async function ensurePhoneAllowed (phone) {
-  /* اگر در لیست سیاه باشد */
-  if (await BannedPhone.findOne({ phone }))
-    throw new Error('این شماره مسدود شده است.');
+  /* فقط برای شماره‌های معتبر (غیر خالی) بررسی کنید */
+  if (phone && String(phone).trim()) {
+    /* اگر در لیست سیاه باشد */
+    if (await BannedPhone.findOne({ phone }))
+      throw new Error('این شماره مسدود شده است.');
+  }
 
   /* یا کاربری قبلاً حذف شده باشد */
   if (await User.findOne({ phone, deleted: true }))

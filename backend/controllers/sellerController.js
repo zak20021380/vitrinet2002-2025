@@ -261,7 +261,8 @@ exports.deleteSeller = async (req, res) => {
       Seller.deleteOne({ _id: seller._id })
     ]);
 
-    if (phone) {
+    // Only add to BannedPhone if phone exists and is not empty
+    if (phone && String(phone).trim()) {
       await BannedPhone.updateOne(
         { phone },
         { $set: { phone } },

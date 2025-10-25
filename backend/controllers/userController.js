@@ -131,7 +131,8 @@ exports.softDelete = async (req, res) => {
     await user.save();
 
     // ثبت یا به‌روزرسانی شماره در لیست ممنوعه
-    if (user.phone) {
+    // Only add to BannedPhone if phone exists and is not empty
+    if (user.phone && String(user.phone).trim()) {
       await BannedPhone.updateOne(
         { phone: user.phone },
         { $set: { phone: user.phone } },

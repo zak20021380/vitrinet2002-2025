@@ -1138,7 +1138,8 @@ const applyAdminBlock = async ({ shop, seller, adminId = null, reason = '' }) =>
     savedSeller = await seller.save();
 
     const sellerPhone = savedSeller?.phone || seller.phone;
-    if (sellerPhone) {
+    // Only add to BannedPhone if phone exists and is not empty
+    if (sellerPhone && String(sellerPhone).trim()) {
       await BannedPhone.updateOne(
         { phone: sellerPhone },
         {
@@ -1213,12 +1214,14 @@ const applyAdminUnblock = async ({ shop, seller, adminId = null, reason = null }
     savedSeller = await seller.save();
 
     const sellerPhone = savedSeller?.phone || seller.phone;
-    if (sellerPhone) {
+    // Only add to phoneCandidates if phone exists and is not empty
+    if (sellerPhone && String(sellerPhone).trim()) {
       phoneCandidates.add(String(sellerPhone).trim());
     }
   }
 
-  if (shop?.ownerPhone) {
+  // Only add shop owner phone if it exists and is not empty
+  if (shop?.ownerPhone && String(shop.ownerPhone).trim()) {
     phoneCandidates.add(String(shop.ownerPhone).trim());
   }
 
@@ -1276,7 +1279,8 @@ const applyAdminUnblock = async ({ shop, seller, adminId = null, reason = null }
 
   if (phoneCandidates.size) {
     for (const phone of phoneCandidates) {
-      if (phone) {
+      // Only delete if phone is valid and not empty
+      if (phone && String(phone).trim()) {
         await BannedPhone.deleteOne({ phone });
       }
     }
