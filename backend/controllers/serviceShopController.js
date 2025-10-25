@@ -1201,6 +1201,7 @@ const applyAdminUnblock = async ({ shop, seller, adminId = null, reason = null }
   const cleanReason = reason == null ? null : String(reason).trim();
   let savedSeller = null;
   let savedShop = null;
+  const phoneCandidates = new Set();
 
   if (seller) {
     seller.blockedByAdmin = false;
@@ -1213,8 +1214,12 @@ const applyAdminUnblock = async ({ shop, seller, adminId = null, reason = null }
 
     const sellerPhone = savedSeller?.phone || seller.phone;
     if (sellerPhone) {
-      await BannedPhone.deleteOne({ phone: sellerPhone });
+      phoneCandidates.add(String(sellerPhone).trim());
     }
+  }
+
+  if (shop?.ownerPhone) {
+    phoneCandidates.add(String(shop.ownerPhone).trim());
   }
 
   if (shop) {
@@ -1267,6 +1272,14 @@ const applyAdminUnblock = async ({ shop, seller, adminId = null, reason = null }
     shop.set('adminModeration', moderation);
 
     savedShop = await shop.save();
+  }
+
+  if (phoneCandidates.size) {
+    for (const phone of phoneCandidates) {
+      if (phone) {
+        await BannedPhone.deleteOne({ phone });
+      }
+    }
   }
 
   return { shop: savedShop, seller: savedSeller };
@@ -1795,6 +1808,7 @@ exports.updateServiceShopStatus = async (req, res) => {
       });
     }
 
+    const wasBlocked = !!(shop?.adminModeration && shop.adminModeration.isBlocked);
     const updates = {};
     let complimentaryPlanUpdated = false;
     if (req.body.status != null) {
@@ -1815,13 +1829,12 @@ exports.updateServiceShopStatus = async (req, res) => {
       updates.premiumUntil = parseDateValue(req.body.premiumUntil, { allowNull: true });
     }
 
-    const bookingSettings = parseBookingSettings(req.body.bookingSettings, req.body);
-    if (bookingSettings) {
-      shop.bookingSettings = {
-        ...shop.bookingSettings?.toObject?.(),
-        ...bookingSettings
-      };
-    }
+    const existingBookingSettings = (shop.bookingSettings && typeof shop.bookingSettings === 'object')
+      ? (typeof shop.bookingSettings.toObject === 'function'
+        ? shop.bookingSettings.toObject()
+        : { ...shop.bookingSettings })
+      : {};
+    const bookingSettingsDiff = parseBookingSettings(req.body.bookingSettings, req.body);
 
     const existingPlan = shop.complimentaryPlan
       ? (typeof shop.complimentaryPlan.toObject === 'function'
@@ -1841,14 +1854,74 @@ exports.updateServiceShopStatus = async (req, res) => {
       updates.notes = String(req.body.notes || '').trim();
     }
 
-    if (!Object.keys(updates).length && !bookingSettings && !complimentaryPlanUpdated) {
+    if (!Object.keys(updates).length && !bookingSettingsDiff && !complimentaryPlanUpdated) {
       return res.status(400).json({ message: 'هیچ تغییری ارسال نشده است.' });
+    }
+
+    const finalStatus = updates.status ?? shop.status;
+    const finalIsVisible = Object.prototype.hasOwnProperty.call(updates, 'isVisible')
+      ? updates.isVisible
+      : shop.isVisible;
+    const finalIsBookable = Object.prototype.hasOwnProperty.call(updates, 'isBookable')
+      ? updates.isBookable
+      : shop.isBookable;
+    const predictedBookingEnabled = bookingSettingsDiff && Object.prototype.hasOwnProperty.call(bookingSettingsDiff, 'enabled')
+      ? bookingSettingsDiff.enabled
+      : (Object.prototype.hasOwnProperty.call(existingBookingSettings, 'enabled')
+        ? existingBookingSettings.enabled
+        : undefined);
+
+    let autoUnblocked = false;
+    if (wasBlocked && (
+      finalStatus !== 'suspended' ||
+      finalIsVisible === true ||
+      finalIsBookable === true ||
+      predictedBookingEnabled === true
+    )) {
+      const seller = await findSellerForShop({
+        shop,
+        providedSellerId: req.body?.sellerId,
+        fallbackId: id
+      });
+      await applyAdminUnblock({
+        shop,
+        seller,
+        adminId: req.user?.id || null,
+        reason: req.body?.unblockReason ?? null
+      });
+      autoUnblocked = true;
     }
 
     Object.assign(shop, updates, {
       updatedBy: req.user?.id || shop.updatedBy,
       lastReviewedAt: new Date()
     });
+
+    if (bookingSettingsDiff) {
+      const freshBookingSettings = (shop.bookingSettings && typeof shop.bookingSettings === 'object')
+        ? (typeof shop.bookingSettings.toObject === 'function'
+          ? shop.bookingSettings.toObject()
+          : { ...shop.bookingSettings })
+        : {};
+      shop.bookingSettings = {
+        ...freshBookingSettings,
+        ...bookingSettingsDiff
+      };
+    }
+
+    if (autoUnblocked && shop.adminModeration) {
+      shop.adminModeration.previousStatus = shop.status;
+      if (typeof shop.isVisible === 'boolean') {
+        shop.adminModeration.previousIsVisible = shop.isVisible;
+      }
+      if (typeof shop.isBookable === 'boolean') {
+        shop.adminModeration.previousIsBookable = shop.isBookable;
+      }
+      if (shop.bookingSettings && typeof shop.bookingSettings === 'object' && 'enabled' in shop.bookingSettings) {
+        shop.adminModeration.previousBookingEnabled = !!shop.bookingSettings.enabled;
+      }
+    }
+
     await shop.save();
 
     res.json({ message: 'وضعیت مغازه بروزرسانی شد.', item: shop });
