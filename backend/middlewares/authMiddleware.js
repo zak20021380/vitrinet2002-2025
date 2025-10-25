@@ -12,6 +12,16 @@ const BannedPhone = require('../models/BannedPhone');   // ← لیست سیاه
 const Seller      = require('../models/Seller');        // ← مدل فروشنده
 const { buildPhoneCandidates } = require('../utils/phone');
 
+const normalizeRole = (role) => {
+  if (role == null) return '';
+  const value = String(role).trim().toLowerCase();
+  if (!value) return '';
+  if (value === 'service-seller' || value === 'serviceseller') return 'seller';
+  if (value === 'service-user' || value === 'serviceuser' || value === 'service-customer') return 'user';
+  if (value === 'seller' || value === 'user' || value === 'admin') return value;
+  return value;
+};
+
 /**
  * @param {'admin'|'seller'|'user'|null} requiredRole
  *  └─ اگر null باشد، فقط اعتبارِ توکن بررسی می‌شود؛
@@ -61,15 +71,17 @@ module.exports = (requiredRole = null) => {
    try {
   /* ۱) اعتبارسنجی JWT */
   const payload = jwt.verify(token, JWT_SECRET);
+  const payloadRole = normalizeRole(payload.role);
+  const requiredRoleNormalized = normalizeRole(requiredRole);
 
   /* ۲) عدم تطابق نقش ـ اگر route نقش خاصی بخواهد */
-  if (requiredRole && payload.role !== requiredRole) {
+  if (requiredRole && (!payloadRole || payloadRole !== requiredRoleNormalized)) {
     console.warn(`⛔ Role mismatch. Expected: ${requiredRole}, Got: ${payload.role}`);
     return res.status(403).json({ message: 'دسترسی غیرمجاز.' });
   }
 
   /* ۳) ردِ فوری کاربر یا شمارهٔ مسدود */
-  if (payload.role === 'user') {
+  if (payloadRole === 'user') {
     const u = await User.findById(payload.id).select('deleted phone');
     const phoneVariants = buildPhoneCandidates(u?.phone);
     const isBannedPhone = phoneVariants.length
@@ -79,7 +91,7 @@ module.exports = (requiredRole = null) => {
       return res.status(403).json({ message: 'دسترسی شما مسدود شده است.' });
     }
   }
-  if (payload.role === 'seller') {
+  if (payloadRole === 'seller') {
     const s = await Seller.findById(payload.id).select('phone blockedByAdmin');
     const phoneVariants = buildPhoneCandidates(s?.phone);
     const isBannedPhone = phoneVariants.length
@@ -91,7 +103,8 @@ module.exports = (requiredRole = null) => {
   }
 
   /* ۴) تزریق اطلاعات کاربر و ادامهٔ زنجیره */
-  req.user = { id: payload.id, _id: payload.id, role: payload.role };
+  const effectiveRole = payloadRole || (typeof payload.role === 'string' ? payload.role.trim().toLowerCase() : payload.role);
+  req.user = { id: payload.id, _id: payload.id, role: effectiveRole };
   next();
 
 } catch (err) {
