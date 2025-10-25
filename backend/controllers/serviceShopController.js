@@ -4,6 +4,7 @@ const Seller = require('../models/Seller');
 const SellerService = require('../models/seller-services');
 const ShopAppearance = require('../models/ShopAppearance');
 const Booking = require('../models/booking');
+const Setting = require('../models/setting');
 
 const STATUS_VALUES = ['draft', 'pending', 'approved', 'suspended', 'archived'];
 
@@ -278,6 +279,9 @@ const parseIntegrations = (value) => {
 };
 
 const MS_PER_DAY = 24 * 60 * 60 * 1000;
+const MAX_COMPLIMENTARY_DURATION_DAYS = 14;
+const DEFAULT_COMPLIMENTARY_DURATION_DAYS = 14;
+const COMPLIMENTARY_DEFAULTS_KEY = 'serviceShops:complimentaryPlanDefaults';
 
 const clampComplimentaryDuration = (value) => {
   if (value === undefined) return undefined;
@@ -286,7 +290,15 @@ const clampComplimentaryDuration = (value) => {
   if (!Number.isFinite(num) || num <= 0) {
     throw { status: 400, message: 'مدت پلن رایگان باید بزرگتر از صفر باشد.' };
   }
-  return Math.min(Math.round(num), 365);
+  return Math.min(Math.round(num), MAX_COMPLIMENTARY_DURATION_DAYS);
+};
+
+const parseComplimentaryDurationRequired = (value) => {
+  const duration = clampComplimentaryDuration(value);
+  if (duration == null) {
+    throw { status: 400, message: 'مدت پلن رایگان باید عددی معتبر باشد.' };
+  }
+  return duration;
 };
 
 const normaliseComplimentaryPlan = (plan = {}) => {
@@ -637,16 +649,82 @@ const mapLegacySellerToItem = (seller, { appearance, services = [], booking = {}
   };
 };
 
-const buildComplimentaryPlanPayload = (shop) => {
+const ensurePositiveInt = (value, fallback) => {
+  const num = Number(value);
+  if (!Number.isFinite(num) || num <= 0) return fallback;
+  return Math.round(num);
+};
+
+const loadComplimentaryDefaults = async (populate = false) => {
+  const query = Setting.findOne({ key: COMPLIMENTARY_DEFAULTS_KEY });
+  if (populate) {
+    query.populate('updatedBy', 'name phone');
+  }
+  const doc = await query.lean();
+  if (!doc) {
+    return {
+      doc: null,
+      settings: { durationDays: DEFAULT_COMPLIMENTARY_DURATION_DAYS },
+      meta: { updatedAt: null, updatedBy: null }
+    };
+  }
+
+  let duration;
+  try {
+    duration = clampComplimentaryDuration(doc.value?.durationDays ?? doc.value);
+  } catch (err) {
+    duration = null;
+  }
+
+  const settings = {
+    durationDays: ensurePositiveInt(duration, DEFAULT_COMPLIMENTARY_DURATION_DAYS)
+  };
+
+  const updatedBy = doc.updatedBy;
+  const meta = {
+    updatedAt: doc.updatedAt || null,
+    updatedBy: updatedBy
+      ? {
+        id: (() => {
+          const raw = updatedBy._id || updatedBy.id || updatedBy;
+          return raw ? raw.toString() : null;
+        })(),
+        name: updatedBy.name || null,
+        phone: updatedBy.phone || null
+      }
+      : null
+  };
+
+  return { doc, settings, meta };
+};
+
+const buildComplimentaryPlanPayload = (shop, defaults = {}) => {
   const plan = shop?.complimentaryPlan || {};
   const start = coerceDate(plan.startDate);
-  const end = coerceDate(plan.endDate);
+  let end = coerceDate(plan.endDate);
   const now = new Date();
 
+  const fallbackDuration = ensurePositiveInt(
+    defaults?.durationDays,
+    DEFAULT_COMPLIMENTARY_DURATION_DAYS
+  );
+
   const rawDuration = Number(plan.durationDays);
-  const duration = Number.isFinite(rawDuration) && rawDuration > 0
+  let duration = Number.isFinite(rawDuration) && rawDuration > 0
     ? Math.max(1, Math.round(rawDuration))
-    : (start && end ? Math.max(1, Math.round((end - start) / MS_PER_DAY)) : null);
+    : null;
+
+  if (duration == null && start && end) {
+    duration = Math.max(1, Math.round((end - start) / MS_PER_DAY));
+  }
+
+  if (duration == null) {
+    duration = fallbackDuration;
+  }
+
+  if (!end && start && duration != null) {
+    end = new Date(start.getTime() + duration * MS_PER_DAY);
+  }
 
   let usedDays = null;
   if (start) {
@@ -671,6 +749,75 @@ const buildComplimentaryPlanPayload = (shop) => {
     usedDays,
     totalDays: duration,
     hasExpired: !!plan.isActive && !!end && end < now
+  };
+};
+
+const applyComplimentaryDurationToAll = async (durationDays) => {
+  const shops = await ServiceShop.find({}, 'complimentaryPlan').lean();
+  if (!shops.length) {
+    return { matched: 0, modified: 0 };
+  }
+
+  const operations = [];
+
+  shops.forEach((shop) => {
+    const plan = shop.complimentaryPlan || {};
+    const update = {};
+    let hasUpdate = false;
+
+    const currentDuration = Number(plan.durationDays);
+    if (!Number.isFinite(currentDuration) || currentDuration !== durationDays) {
+      update['complimentaryPlan.durationDays'] = durationDays;
+      hasUpdate = true;
+    }
+
+    let start = coerceDate(plan.startDate);
+    let end = coerceDate(plan.endDate);
+
+    if (plan.isActive) {
+      if (!start) {
+        start = new Date();
+      }
+      if (!end) {
+        end = new Date(start.getTime() + durationDays * MS_PER_DAY);
+      }
+    } else {
+      if (start && !end) {
+        end = new Date(start.getTime() + durationDays * MS_PER_DAY);
+      }
+      if (!start && end) {
+        start = new Date(end.getTime() - durationDays * MS_PER_DAY);
+      }
+    }
+
+    if (start && (!plan.startDate || new Date(plan.startDate).getTime() !== start.getTime())) {
+      update['complimentaryPlan.startDate'] = start;
+      hasUpdate = true;
+    }
+
+    if (end && (!plan.endDate || new Date(plan.endDate).getTime() !== end.getTime())) {
+      update['complimentaryPlan.endDate'] = end;
+      hasUpdate = true;
+    }
+
+    if (hasUpdate) {
+      operations.push({
+        updateOne: {
+          filter: { _id: shop._id },
+          update: { $set: update }
+        }
+      });
+    }
+  });
+
+  if (!operations.length) {
+    return { matched: shops.length, modified: 0 };
+  }
+
+  const result = await ServiceShop.bulkWrite(operations);
+  return {
+    matched: result.matchedCount ?? operations.length,
+    modified: result.modifiedCount ?? 0
   };
 };
 
@@ -1499,6 +1646,8 @@ exports.getMyComplimentaryPlan = async (req, res) => {
       return res.status(401).json({ success: false, message: 'احراز هویت نامعتبر است.' });
     }
 
+    const { settings: defaults } = await loadComplimentaryDefaults(false);
+
     const seller = await Seller.findById(sellerId)
       .select('phone shopurl storename')
       .lean();
@@ -1515,10 +1664,10 @@ exports.getMyComplimentaryPlan = async (req, res) => {
     }
 
     if (!shop) {
-      return res.json({ success: true, plan: buildComplimentaryPlanPayload(null) });
+      return res.json({ success: true, plan: buildComplimentaryPlanPayload(null, defaults), defaults });
     }
 
-    const plan = buildComplimentaryPlanPayload(shop);
+    const plan = buildComplimentaryPlanPayload(shop, defaults);
     return res.json({
       success: true,
       plan,
@@ -1527,11 +1676,78 @@ exports.getMyComplimentaryPlan = async (req, res) => {
         name: shop.name || seller.storename || '',
         shopUrl: shop.shopUrl || seller.shopurl || '',
         ownerPhone: shop.ownerPhone || seller.phone || ''
-      }
+      },
+      defaults
     });
   } catch (err) {
     console.error('serviceShops.getMyComplimentaryPlan error:', err);
     res.status(500).json({ success: false, message: 'خطا در دریافت وضعیت پلن رایگان.' });
+  }
+};
+
+exports.getComplimentaryPlanDefaults = async (req, res) => {
+  try {
+    const { settings, meta } = await loadComplimentaryDefaults(true);
+    return res.json({ success: true, settings, meta });
+  } catch (err) {
+    console.error('serviceShops.getComplimentaryPlanDefaults error:', err);
+    return res.status(500).json({ success: false, message: 'خطا در دریافت تنظیمات پلن رایگان.' });
+  }
+};
+
+exports.updateComplimentaryPlanDefaults = async (req, res) => {
+  try {
+    const payload = req.body || {};
+    const duration = parseComplimentaryDurationRequired(
+      payload.durationDays ?? payload.duration ?? payload.days
+    );
+
+    const applyToAll = payload.applyToAll === true || payload.applyToAll === 'true' || payload.applyToAll === 1;
+    const adminId = req.user?.id || null;
+
+    const update = await Setting.findOneAndUpdate(
+      { key: COMPLIMENTARY_DEFAULTS_KEY },
+      {
+        $set: {
+          value: { durationDays: duration },
+          updatedBy: adminId || null
+        }
+      },
+      { new: true, upsert: true, setDefaultsOnInsert: true }
+    ).populate('updatedBy', 'name phone').lean();
+
+    const response = {
+      success: true,
+      message: 'مدت پیش‌فرض پلن رایگان به‌روزرسانی شد.',
+      settings: { durationDays: duration },
+      meta: {
+        updatedAt: update?.updatedAt || null,
+        updatedBy: update?.updatedBy
+          ? {
+            id: (() => {
+              const raw = update.updatedBy._id || update.updatedBy.id || update.updatedBy;
+              return raw ? raw.toString() : null;
+            })(),
+            name: update.updatedBy.name || null,
+            phone: update.updatedBy.phone || null
+          }
+          : null
+      }
+    };
+
+    if (applyToAll) {
+      const bulk = await applyComplimentaryDurationToAll(duration);
+      response.bulk = bulk;
+      response.message = `${response.message} (${bulk.modified} مورد بروزرسانی شد)`;
+    }
+
+    return res.json(response);
+  } catch (err) {
+    if (err?.status) {
+      return res.status(err.status).json({ success: false, message: err.message || 'درخواست نامعتبر است.' });
+    }
+    console.error('serviceShops.updateComplimentaryPlanDefaults error:', err);
+    return res.status(500).json({ success: false, message: 'ذخیره تنظیمات انجام نشد.' });
   }
 };
 
