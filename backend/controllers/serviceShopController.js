@@ -4,6 +4,7 @@ const Seller = require('../models/Seller');
 const SellerService = require('../models/seller-services');
 const ShopAppearance = require('../models/ShopAppearance');
 const Booking = require('../models/booking');
+const BannedPhone = require('../models/BannedPhone');
 
 const STATUS_VALUES = ['draft', 'pending', 'approved', 'suspended', 'archived'];
 
@@ -1135,6 +1136,20 @@ const applyAdminBlock = async ({ shop, seller, adminId = null, reason = '' }) =>
     seller.blockedBy = adminId || null;
     seller.blockedReason = cleanReason;
     savedSeller = await seller.save();
+
+    const sellerPhone = savedSeller?.phone || seller.phone;
+    if (sellerPhone) {
+      await BannedPhone.updateOne(
+        { phone: sellerPhone },
+        {
+          $set: {
+            phone: sellerPhone,
+            reason: cleanReason || 'blocked-by-admin'
+          }
+        },
+        { upsert: true }
+      );
+    }
   }
 
   if (shop) {
@@ -1195,6 +1210,11 @@ const applyAdminUnblock = async ({ shop, seller, adminId = null, reason = null }
       seller.blockedReason = cleanReason;
     }
     savedSeller = await seller.save();
+
+    const sellerPhone = savedSeller?.phone || seller.phone;
+    if (sellerPhone) {
+      await BannedPhone.deleteOne({ phone: sellerPhone });
+    }
   }
 
   if (shop) {
