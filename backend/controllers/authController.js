@@ -6,16 +6,23 @@
   const User = require('../models/user');
   const Admin = require('../models/admin'); // اگه مدل جدا داری
 const BannedPhone = require('../models/BannedPhone');     // ⬅︎ مدل لیست سیاه
+const { buildPhoneCandidates } = require('../utils/phone');
 
 // ⬇︎ تابع کمکی؛ بیرون از هر متد export باشد تا همه بتوانند استفاده کنند
 async function ensurePhoneAllowed (phone) {
-  /* اگر در لیست سیاه باشد */
-  if (await BannedPhone.findOne({ phone }))
-    throw new Error('این شماره مسدود شده است.');
+  const phoneCandidates = buildPhoneCandidates(phone);
 
-  /* یا کاربری قبلاً حذف شده باشد */
-  if (await User.findOne({ phone, deleted: true }))
-    throw new Error('این حساب کاربری حذف و مسدود شده است.');
+  if (phoneCandidates.length) {
+    /* اگر در لیست سیاه باشد */
+    if (await BannedPhone.findOne({ phone: { $in: phoneCandidates } })) {
+      throw new Error('این شماره مسدود شده است.');
+    }
+
+    /* یا کاربری قبلاً حذف شده باشد */
+    if (await User.findOne({ phone: { $in: phoneCandidates }, deleted: true })) {
+      throw new Error('این حساب کاربری حذف و مسدود شده است.');
+    }
+  }
 }
 
 

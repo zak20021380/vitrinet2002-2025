@@ -11,6 +11,84 @@ const User = require('../models/user');
 const Admin = require('../models/admin');
 const BlockedSeller = require('../models/BlockedSeller');
 const BannedPhone = require('../models/BannedPhone');
+const { normalizePhone, buildPhoneCandidates, buildDigitInsensitiveRegex } = require('../utils/phone');
+
+function buildAllPhoneVariants(phone) {
+  const variants = new Set();
+  buildPhoneCandidates(phone).forEach((candidate) => {
+    if (candidate) variants.add(candidate);
+    const normalized = normalizePhone(candidate);
+    if (normalized) variants.add(normalized);
+  });
+  return Array.from(variants).filter(Boolean);
+}
+
+async function addPhoneToBanList(phone, reason = 'blocked-by-admin') {
+  const normalized = normalizePhone(phone);
+  if (!normalized) return;
+  await BannedPhone.updateOne(
+    { phone: normalized },
+    { $set: { phone: normalized, reason } },
+    { upsert: true }
+  );
+}
+
+async function removePhoneFromBanList(phone) {
+  const variants = buildAllPhoneVariants(phone);
+  if (!variants.length) return;
+  await BannedPhone.deleteMany({ phone: { $in: variants } });
+}
+
+async function banSellerPhoneIfUnique(sellerDoc, reason = 'blocked-by-admin') {
+  if (!sellerDoc?.phone) return false;
+  const normalized = normalizePhone(sellerDoc.phone);
+  if (!normalized) return false;
+
+  const regex = buildDigitInsensitiveRegex(sellerDoc.phone);
+  const query = {};
+  if (sellerDoc._id) {
+    query._id = { $ne: sellerDoc._id };
+  }
+  if (regex) {
+    query.phone = { $regex: regex };
+  } else {
+    query.phone = normalized;
+  }
+
+  const duplicates = await Seller.countDocuments(query);
+  if (duplicates > 0) {
+    console.warn(`Skipping phone ban for seller ${sellerDoc._id} because phone is shared with ${duplicates} other seller(s).`);
+    return false;
+  }
+
+  await addPhoneToBanList(sellerDoc.phone, reason || 'blocked-by-admin');
+  return true;
+}
+
+async function unbanSellerPhoneIfNoOtherBlocked(sellerDoc) {
+  if (!sellerDoc?.phone) return;
+
+  const regex = buildDigitInsensitiveRegex(sellerDoc.phone);
+  const query = { blockedByAdmin: true };
+  if (sellerDoc._id) {
+    query._id = { $ne: sellerDoc._id };
+  }
+  if (regex) {
+    query.phone = { $regex: regex };
+  } else {
+    const normalized = normalizePhone(sellerDoc.phone);
+    if (!normalized) {
+      await removePhoneFromBanList(sellerDoc.phone);
+      return;
+    }
+    query.phone = normalized;
+  }
+
+  const stillBlocked = await Seller.exists(query);
+  if (stillBlocked) return;
+
+  await removePhoneFromBanList(sellerDoc.phone);
+}
 
     /**
      * GET /api/chats?sellerId=...
@@ -1108,13 +1186,9 @@ exports.blockSender = async (req, res) => {
 
       if (target.phone) {
         if (unblock) {
-          await BannedPhone.deleteOne({ phone: target.phone });
+          await removePhoneFromBanList(target.phone);
         } else {
-          await BannedPhone.updateOne(
-            { phone: target.phone },
-            { $set: { phone: target.phone, reason: 'blocked-by-admin' } },
-            { upsert: true }
-          );
+          await addPhoneToBanList(target.phone, 'blocked-by-admin');
         }
       }
     } else if (model === 'Seller') {
@@ -1136,18 +1210,9 @@ exports.blockSender = async (req, res) => {
 
       if (target.phone) {
         if (unblock) {
-          await BannedPhone.deleteOne({ phone: target.phone });
+          await unbanSellerPhoneIfNoOtherBlocked(target);
         } else {
-          await BannedPhone.updateOne(
-            { phone: target.phone },
-            {
-              $set: {
-                phone: target.phone,
-                reason: target.blockedReason || 'blocked-by-admin'
-              }
-            },
-            { upsert: true }
-          );
+          await banSellerPhoneIfUnique(target, target.blockedReason || 'blocked-by-admin');
         }
       }
     } else {
@@ -1192,18 +1257,11 @@ exports.blockTarget = async (req, res) => {
 
     const phone = target.phone;
     if (phone) {
-      await BannedPhone.updateOne(
-        { phone },
-        {
-          $set: {
-            phone,
-            reason: targetRole === 'seller'
-              ? (target.blockedReason || 'blocked-by-admin')
-              : 'blocked-by-admin'
-          }
-        },
-        { upsert: true }
-      );
+      if (targetRole === 'seller') {
+        await banSellerPhoneIfUnique(target, target.blockedReason || 'blocked-by-admin');
+      } else {
+        await addPhoneToBanList(phone, 'blocked-by-admin');
+      }
     }
 
     console.log(`🔒 Blocked ${targetRole}: ${targetId}`);
@@ -1246,7 +1304,11 @@ exports.unblockTarget = async (req, res) => {
 
     const phone = target.phone;
     if (phone) {
-      await BannedPhone.deleteOne({ phone });
+      if (targetRole === 'seller') {
+        await unbanSellerPhoneIfNoOtherBlocked(target);
+      } else {
+        await removePhoneFromBanList(phone);
+      }
     }
 
     console.log(`🔓 Unblocked ${targetRole}: ${targetId}`);

@@ -3,6 +3,7 @@ const Block       = require('../models/Block');          // قبلاً خواس�
 const BannedPhone = require('../models/BannedPhone');    // لیست دائمی شماره‌های مسدود
 const Seller      = require('../models/Seller');
 const Report      = require('../models/Report');
+const { normalizePhone } = require('../utils/phone');
 
 // ────────────────────────────────────────────────────────────
 // گرفتن پروفایل کاربر همراه با علاقه‌مندی‌ها پس از احراز هویت
@@ -132,11 +133,14 @@ exports.softDelete = async (req, res) => {
 
     // ثبت یا به‌روزرسانی شماره در لیست ممنوعه
     if (user.phone) {
-      await BannedPhone.updateOne(
-        { phone: user.phone },
-        { $set: { phone: user.phone } },
-        { upsert: true }
-      );
+      const normalized = normalizePhone(user.phone);
+      if (normalized) {
+        await BannedPhone.updateOne(
+          { phone: normalized },
+          { $set: { phone: normalized } },
+          { upsert: true }
+        );
+      }
     }
 
     res.json({ message: 'کاربر با موفقیت حذف و مسدود شد.' });
