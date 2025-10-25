@@ -37,6 +37,7 @@
       --cta-gradient-end: #0ea5e9;
       --cta-shadow: rgba(14, 165, 233, 0.28);
       --cta-hover-shadow: rgba(79, 70, 229, 0.32);
+      --slider-control-offset: -1.75rem;
     }
 
     *, *::before, *::after {
@@ -503,11 +504,11 @@
     }
 
     .slider-control--prev {
-      inset-inline-end: 1.15rem;
+      inset-inline-end: var(--slider-control-offset);
     }
 
     .slider-control--next {
-      inset-inline-start: 1.15rem;
+      inset-inline-start: var(--slider-control-offset);
     }
 
     .slider-control[hidden] {
@@ -1796,6 +1797,10 @@
       .slider-control {
         width: 38px;
         height: 38px;
+      }
+
+      :root {
+        --slider-control-offset: 0.5rem;
       }
 
       .slider-control span {
