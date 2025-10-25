@@ -1043,6 +1043,7 @@ async function buildOverview() {
   }
 
   const now = new Date();
+  const soon = new Date(now.getTime() + 7 * MS_PER_DAY);
   const [
     active,
     pending,
@@ -1051,6 +1052,10 @@ async function buildOverview() {
     featured,
     bookingEnabled,
     premiumActive,
+    complimentaryActive,
+    complimentaryActiveNow,
+    complimentaryExpiringSoon,
+    complimentaryExpired,
     statusAggregation,
     topCities,
     topCategories,
@@ -1063,6 +1068,34 @@ async function buildOverview() {
     ServiceShop.countDocuments({ isFeatured: true }),
     ServiceShop.countDocuments({ 'bookingSettings.enabled': true }),
     ServiceShop.countDocuments({ isPremium: true, premiumUntil: { $gt: now } }),
+    ServiceShop.countDocuments({ 'complimentaryPlan.isActive': true }),
+    ServiceShop.countDocuments({
+      'complimentaryPlan.isActive': true,
+      $and: [
+        {
+          $or: [
+            { 'complimentaryPlan.startDate': { $exists: false } },
+            { 'complimentaryPlan.startDate': null },
+            { 'complimentaryPlan.startDate': { $lte: now } }
+          ]
+        },
+        {
+          $or: [
+            { 'complimentaryPlan.endDate': { $exists: false } },
+            { 'complimentaryPlan.endDate': null },
+            { 'complimentaryPlan.endDate': { $gte: now } }
+          ]
+        }
+      ]
+    }),
+    ServiceShop.countDocuments({
+      'complimentaryPlan.isActive': true,
+      'complimentaryPlan.endDate': { $gte: now, $lte: soon }
+    }),
+    ServiceShop.countDocuments({
+      'complimentaryPlan.isActive': true,
+      'complimentaryPlan.endDate': { $lt: now }
+    }),
     ServiceShop.aggregate([
       { $group: { _id: '$status', count: { $sum: 1 } } }
     ]),
@@ -1094,7 +1127,11 @@ async function buildOverview() {
       archived,
       featured,
       bookingEnabled,
-      premiumActive
+      premiumActive,
+      complimentaryActive,
+      complimentaryActiveNow,
+      complimentaryExpiringSoon,
+      complimentaryExpired
     },
     statusCounts: buildStatusCounts(statusAggregation),
     topCities,
@@ -1124,6 +1161,8 @@ exports.listServiceShops = async (req, res) => {
     const city = String(req.query.city || '').trim();
     const category = String(req.query.category || '').trim();
 
+    const planStatus = String(req.query.planStatus || req.query.plan || '').trim().toLowerCase();
+
     const legacyFilters = {
       search,
       status: status && STATUS_VALUES.includes(status) ? status : '',
@@ -1135,9 +1174,13 @@ exports.listServiceShops = async (req, res) => {
       visible: req.query.visible != null ? toBoolean(req.query.visible, true) : undefined
     };
 
-    const includeLegacy = req.query.includeLegacy == null
+    let includeLegacy = req.query.includeLegacy == null
       ? true
       : !!toBoolean(req.query.includeLegacy, true);
+
+    if (planStatus) {
+      includeLegacy = false;
+    }
 
     const useLegacy = (await ServiceShop.countDocuments({})) === 0;
 
@@ -1215,6 +1258,71 @@ exports.listServiceShops = async (req, res) => {
 
     if (req.query.visible != null) {
       filterConditions.push({ isVisible: toBoolean(req.query.visible, true) });
+    }
+
+    if (planStatus) {
+      const now = new Date();
+      const soon = new Date(now.getTime() + 7 * MS_PER_DAY);
+      let planFilter = null;
+
+      switch (planStatus) {
+        case 'active':
+          planFilter = { 'complimentaryPlan.isActive': true };
+          break;
+        case 'active-now':
+          planFilter = {
+            'complimentaryPlan.isActive': true,
+            $and: [
+              {
+                $or: [
+                  { 'complimentaryPlan.startDate': { $exists: false } },
+                  { 'complimentaryPlan.startDate': null },
+                  { 'complimentaryPlan.startDate': { $lte: now } }
+                ]
+              },
+              {
+                $or: [
+                  { 'complimentaryPlan.endDate': { $exists: false } },
+                  { 'complimentaryPlan.endDate': null },
+                  { 'complimentaryPlan.endDate': { $gte: now } }
+                ]
+              }
+            ]
+          };
+          break;
+        case 'scheduled':
+          planFilter = {
+            'complimentaryPlan.isActive': true,
+            'complimentaryPlan.startDate': { $gt: now }
+          };
+          break;
+        case 'expiring':
+          planFilter = {
+            'complimentaryPlan.isActive': true,
+            'complimentaryPlan.endDate': { $gte: now, $lte: soon }
+          };
+          break;
+        case 'expired':
+          planFilter = {
+            'complimentaryPlan.isActive': true,
+            'complimentaryPlan.endDate': { $lt: now }
+          };
+          break;
+        case 'none':
+          planFilter = {
+            $or: [
+              { complimentaryPlan: { $exists: false } },
+              { 'complimentaryPlan.isActive': { $ne: true } }
+            ]
+          };
+          break;
+        default:
+          break;
+      }
+
+      if (planFilter) {
+        filterConditions.push(planFilter);
+      }
     }
 
     const filters = filterConditions.length === 0

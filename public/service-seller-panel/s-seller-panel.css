@@ -3119,6 +3119,36 @@ body { -webkit-font-smoothing: auto !important; }
   animation: planGlow 18s linear infinite;
   pointer-events: none;
 }
+
+.plan-hero[data-plan-disabled="true"] {
+  border-style: dashed;
+  opacity: 0.92;
+}
+
+.plan-hero[data-plan-disabled="true"] .plan-hero-bg {
+  filter: blur(10px);
+  opacity: 0.6;
+}
+
+.plan-hero[data-plan-state="inactive"] .plan-hero-message,
+.plan-hero[data-plan-state="inactive"] .plan-hero-meta strong {
+  color: var(--c-text-secondary);
+}
+
+.plan-hero[data-plan-state="inactive"] .plan-tier-badge {
+  background: rgba(255,255,255,0.08);
+  color: var(--c-text-secondary);
+  box-shadow: none;
+}
+
+.plan-hero[data-plan-state="scheduled"] .plan-hero-message {
+  color: var(--c-primary-hover);
+}
+
+.plan-hero[data-plan-state="expired"] .plan-hero-message,
+.plan-hero[data-plan-state="expired"] .plan-hero-meta strong {
+  color: var(--c-warning);
+}
 @keyframes planGlow{ from{transform:rotate(0)} to{transform:rotate(360deg)} }
 
 .plan-hero-content{ position: relative; z-index: 1; display: grid; gap: var(--space-3); }
@@ -3144,6 +3174,12 @@ body { -webkit-font-smoothing: auto !important; }
   align-items:flex-start;
   gap:.75rem;
   box-shadow: 0 12px 32px rgba(0,0,0,.18);
+}
+.plan-hero-subtext{
+  margin:0;
+  font-size:0.9rem;
+  line-height:1.8;
+  color:rgba(255,255,255,0.75);
 }
 .plan-hero-message::before{
   content:'🎁';
