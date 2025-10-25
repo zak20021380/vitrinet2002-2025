@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <title>در حال انتقال...</title>
+  <meta http-equiv="refresh" content="0; url=product.html">
+  <meta name="robots" content="noindex">
+  <style>
+    body {
+      font-family: "Vazirmatn", sans-serif;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      margin: 0;
+      background: #f8fafc;
+      color: #0f172a;
+      text-align: center;
+      padding: 2rem;
+    }
+    a {
+      color: #0ea5e9;
+    }
+  </style>
+  <script>
+    (function redirect() {
+      var search = window.location.search || '';
+      var hash = window.location.hash || '';
+      var target = 'product.html' + search + hash;
+      if (window.location.pathname.toLowerCase().endsWith('.htm')) {
+        window.location.replace(target);
+      }
+
+      document.addEventListener('DOMContentLoaded', function () {
+        var fallbackLink = document.getElementById('fallbackLink');
+        if (fallbackLink) {
+          fallbackLink.href = target;
+        }
+      });
+    })();
+  </script>
+</head>
+<body>
+  <div>
+    <h1>در حال انتقال به صفحه جدید محصول</h1>
+    <p>اگر به صورت خودکار منتقل نشدید، لطفاً <a id="fallbackLink" href="product.html">اینجا کلیک کنید</a>.</p>
+  </div>
+</body>
+</html>
