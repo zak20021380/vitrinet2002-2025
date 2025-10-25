@@ -66,11 +66,41 @@ router.get('/:id', async (req, res) => {
       return res.status(404).json({ message: 'محصول پیدا نشد!' });
     }
 
-    // برای سازگاری با فرانت قدیمی، نسخه‌ی ترکیبی seller را نیز برمی‌گردانیم
+    const hasSellerContent = seller => !!(seller && (
+      seller.storename ||
+      seller.ownerName ||
+      seller.ownerFirstname ||
+      seller.ownerLastname ||
+      seller.phone ||
+      seller.address ||
+      seller.category ||
+      seller.subcategory ||
+      seller.desc ||
+      seller.boardImage
+    ));
+
+    let sellerDetails = null;
+
+    if (product.sellerId && typeof product.sellerId === 'object' && !Array.isArray(product.sellerId)) {
+      sellerDetails = product.sellerId;
+    }
+
+    const sellerObjectId = sellerDetails?._id || product.sellerId;
+
+    if (!hasSellerContent(sellerDetails) && sellerObjectId) {
+      sellerDetails = await Seller.findById(sellerObjectId)
+        .select('storename firstname lastname ownerName ownerFirstname ownerLastname shopurl phone category subcategory address city desc boardImage')
+        .lean();
+    }
+
     const responsePayload = {
       ...product,
-      seller: product.sellerId
+      seller: sellerDetails || null
     };
+
+    if (sellerDetails && sellerDetails._id) {
+      responsePayload.sellerId = sellerDetails._id;
+    }
 
     res.json(responsePayload);
   } catch (err) {
