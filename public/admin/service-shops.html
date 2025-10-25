@@ -1048,6 +1048,21 @@
       metricBooking: document.getElementById('metric-booking')
     };
 
+    const planElements = {
+      modal: document.getElementById('plan-modal'),
+      shopName: document.getElementById('plan-shop-name'),
+      ownerInfo: document.getElementById('plan-owner-info'),
+      isActive: document.getElementById('plan-is-active'),
+      duration: document.getElementById('plan-duration'),
+      startDate: document.getElementById('plan-start-date'),
+      endDate: document.getElementById('plan-end-date'),
+      note: document.getElementById('plan-note'),
+      statusWrapper: document.getElementById('plan-current-status'),
+      statusText: document.getElementById('plan-status-text'),
+      error: document.getElementById('plan-error'),
+      saveBtn: document.getElementById('plan-save-btn')
+    };
+
     // Toast notification
     function showToast(message, type = 'success') {
       const container = document.getElementById('toast-container');
@@ -1172,6 +1187,13 @@
       const statusLabel = statusLabels[shop.status] || shop.status || 'نامشخص';
       const badgeClass = statusBadgeClass[shop.status] || 'badge-muted';
       const bookingEnabled = !!shop?.bookingSettings?.enabled;
+      const hasActiveComplimentaryPlan = (() => {
+        const plan = shop?.complimentaryPlan || {};
+        if (!plan.isActive) return false;
+        if (!plan.endDate) return true;
+        const end = new Date(plan.endDate);
+        return !Number.isNaN(end.getTime()) && end >= new Date();
+      })();
       const shopUrl = shop.shopUrl
         ? `/service-shops.html?shopurl=${encodeURIComponent(shop.shopUrl)}`
         : '#';
@@ -1205,7 +1227,7 @@
             <div class="badges-group">
               ${bookingEnabled ? '<span class="badge badge-success"><i class="ri-calendar-check-line"></i> رزرو</span>' : '<span class="badge badge-muted">بدون رزرو</span>'}
               ${shop.isPremium ? '<span class="badge badge-warning"><i class="ri-vip-crown-line"></i> پریمیوم</span>' : ''}
-              ${shop.complimentaryPlan?.isActive ? '<span class="badge badge-info" title="این فروشنده پلن رایگان فعال دارد"><i class="ri-gift-line"></i> پلن رایگان</span>' : ''}
+              ${hasActiveComplimentaryPlan ? '<span class="badge badge-info" title="این فروشنده پلن رایگان فعال دارد"><i class="ri-gift-line"></i> پلن رایگان</span>' : ''}
             </div>
           </td>
           <td>
@@ -1261,6 +1283,12 @@
       const start = new Date(startDate);
       const end = new Date(start.getTime() + durationDays * 24 * 60 * 60 * 1000);
       return end.toISOString().split('T')[0];
+    }
+
+    function toDateInputValue(date) {
+      if (!(date instanceof Date)) return '';
+      if (Number.isNaN(date.getTime())) return '';
+      return date.toISOString().split('T')[0];
     }
 
     // Event listeners
@@ -1352,25 +1380,43 @@
 
         const plan = shop.complimentaryPlan || {};
 
-        document.getElementById('plan-shop-name').value = shop.name || 'بدون نام';
-        document.getElementById('plan-owner-info').value = `${shop.ownerName || 'نامشخص'} - ${shop.ownerPhone || 'بدون شماره'}`;
-        document.getElementById('plan-is-active').checked = !!plan.isActive;
-        document.getElementById('plan-duration').value = plan.durationDays || 14;
+        planElements.shopName.value = shop.name || 'بدون نام';
+        planElements.ownerInfo.value = `${shop.ownerName || 'نامشخص'} - ${shop.ownerPhone || 'بدون شماره'}`;
 
-        // Set start date
-        if (plan.startDate) {
-          const startDate = new Date(plan.startDate);
-          document.getElementById('plan-start-date').value = startDate.toISOString().split('T')[0];
-        } else {
-          const today = new Date();
-          document.getElementById('plan-start-date').value = today.toISOString().split('T')[0];
+        const startDateValue = plan.startDate ? new Date(plan.startDate) : null;
+        const endDateValue = plan.endDate ? new Date(plan.endDate) : null;
+
+        let durationValue = Number(plan.durationDays);
+        if (!Number.isFinite(durationValue) || durationValue <= 0) {
+          if (startDateValue instanceof Date && endDateValue instanceof Date
+            && !Number.isNaN(startDateValue.getTime()) && !Number.isNaN(endDateValue.getTime())) {
+            const diff = Math.max(1, Math.round((endDateValue - startDateValue) / (24 * 60 * 60 * 1000)));
+            durationValue = diff;
+          } else {
+            durationValue = 14;
+          }
         }
 
-        // Calculate and set end date
-        updateEndDate();
+        planElements.isActive.checked = !!plan.isActive;
+        planElements.duration.value = durationValue;
 
-        document.getElementById('plan-note').value = plan.note || '';
-        document.getElementById('plan-error').style.display = 'none';
+        if (startDateValue instanceof Date && !Number.isNaN(startDateValue.getTime())) {
+          planElements.startDate.value = toDateInputValue(startDateValue);
+        } else {
+          const today = new Date();
+          planElements.startDate.value = toDateInputValue(today);
+        }
+
+        if (endDateValue instanceof Date && !Number.isNaN(endDateValue.getTime())) {
+          planElements.endDate.value = toDateInputValue(endDateValue);
+        } else if (planElements.startDate.value) {
+          planElements.endDate.value = calculateEndDate(planElements.startDate.value, durationValue);
+        } else {
+          planElements.endDate.value = '';
+        }
+
+        planElements.note.value = plan.note || '';
+        planElements.error.style.display = 'none';
 
         // Show/hide plan details based on active status
         togglePlanDetails(!!plan.isActive);
@@ -1395,53 +1441,73 @@
           }
           statusHtml += '</ul>';
 
-          document.getElementById('plan-status-text').innerHTML = statusHtml;
-          document.getElementById('plan-current-status').style.display = 'block';
+          planElements.statusText.innerHTML = statusHtml;
+          planElements.statusWrapper.style.display = 'block';
         } else {
-          document.getElementById('plan-current-status').style.display = 'none';
+          planElements.statusText.innerHTML = '';
+          planElements.statusWrapper.style.display = 'none';
         }
 
-        document.getElementById('plan-modal').showModal();
+        planElements.modal.showModal();
       } catch (err) {
         showToast(err.message || 'خطا در دریافت اطلاعات مغازه', 'error');
       }
     }
 
     // Toggle plan details visibility
-    function togglePlanDetails(show) {
+    function togglePlanDetails(show, { forceUpdate = false } = {}) {
       document.getElementById('plan-details').style.display = show ? 'block' : 'none';
+      if (show) {
+        if (!planElements.startDate.value) {
+          const today = new Date();
+          planElements.startDate.value = toDateInputValue(today);
+        }
+        if (forceUpdate || !planElements.endDate.value) {
+          updateEndDate();
+        }
+      } else {
+        planElements.endDate.value = '';
+      }
     }
 
     // Update end date when duration or start date changes
     function updateEndDate() {
-      const startDate = document.getElementById('plan-start-date').value;
-      const duration = parseInt(document.getElementById('plan-duration').value) || 14;
-      if (startDate) {
-        document.getElementById('plan-end-date').value = calculateEndDate(startDate, duration);
+      const startDate = planElements.startDate.value;
+      const duration = parseInt(planElements.duration.value, 10);
+      if (!startDate || !Number.isFinite(duration) || duration <= 0) {
+        planElements.endDate.value = '';
+        return;
       }
+      planElements.endDate.value = calculateEndDate(startDate, duration);
     }
 
     // Plan checkbox toggle
-    document.getElementById('plan-is-active').addEventListener('change', (e) => {
-      togglePlanDetails(e.target.checked);
+    planElements.isActive.addEventListener('change', (e) => {
+      togglePlanDetails(e.target.checked, { forceUpdate: true });
     });
 
     // Auto-calculate end date
-    document.getElementById('plan-duration').addEventListener('input', updateEndDate);
-    document.getElementById('plan-start-date').addEventListener('change', updateEndDate);
+    planElements.duration.addEventListener('input', updateEndDate);
+    planElements.startDate.addEventListener('change', updateEndDate);
 
     // Save plan changes
-    document.getElementById('plan-save-btn').addEventListener('click', async () => {
-      const saveBtn = document.getElementById('plan-save-btn');
-      const errorEl = document.getElementById('plan-error');
+    planElements.saveBtn.addEventListener('click', async () => {
+      const saveBtn = planElements.saveBtn;
+      const errorEl = planElements.error;
 
       try {
-        const isActive = document.getElementById('plan-is-active').checked;
+        const isActive = planElements.isActive.checked;
 
         if (isActive) {
-          const duration = parseInt(document.getElementById('plan-duration').value);
+          const duration = parseInt(planElements.duration.value, 10);
+          const startValue = planElements.startDate.value;
           if (!duration || duration < 1 || duration > 365) {
             errorEl.textContent = 'لطفاً مدت زمان معتبر (1 تا 365 روز) وارد کنید.';
+            errorEl.style.display = 'block';
+            return;
+          }
+          if (!startValue) {
+            errorEl.textContent = 'تاریخ شروع پلن را مشخص کنید.';
             errorEl.style.display = 'block';
             return;
           }
@@ -1454,9 +1520,10 @@
         const payload = {
           complimentaryPlan: {
             isActive,
-            durationDays: isActive ? parseInt(document.getElementById('plan-duration').value) : null,
-            startDate: isActive ? document.getElementById('plan-start-date').value : null,
-            note: document.getElementById('plan-note').value.trim()
+            durationDays: isActive ? parseInt(planElements.duration.value, 10) : null,
+            startDate: isActive ? planElements.startDate.value : null,
+            endDate: isActive ? planElements.endDate.value || null : null,
+            note: planElements.note.value.trim()
           }
         };
 
@@ -1466,7 +1533,7 @@
         });
 
         showToast('پلن رایگان با موفقیت بروزرسانی شد');
-        document.getElementById('plan-modal').close();
+        planElements.modal.close();
         await Promise.all([loadOverview(), loadShops()]);
       } catch (err) {
         errorEl.textContent = err.message || 'خطا در بروزرسانی پلن رایگان';
