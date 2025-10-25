@@ -628,6 +628,13 @@ const API = {
     const url = bust(`${API_BASE}/api/service-shops/my/complimentary-plan`);
     const res = await fetch(url, { credentials: 'include', ...NO_CACHE });
     if (res.status === 404) return null;
+    if (res.status === 403) {
+      console.info('Complimentary plan endpoint forbidden; treating as no complimentary plan');
+      return null;
+    }
+    if (res.status === 401) {
+      throw { status: 401, message: 'UNAUTHORIZED' };
+    }
     if (!res.ok) {
       throw new Error(`COMPLIMENTARY_PLAN_HTTP_${res.status}`);
     }
@@ -658,6 +665,21 @@ const API = {
     const query = params.toString();
     const url = bust(`${API_BASE}/api/sellers/top-peers${query ? `?${query}` : ''}`);
     const res = await fetch(url, { credentials: 'include', ...NO_CACHE });
+    if (res.status === 401) {
+      throw { status: 401, message: 'UNAUTHORIZED' };
+    }
+    if (res.status === 403) {
+      console.info('Top peers endpoint forbidden; returning fallback data');
+      return {
+        top: [],
+        mine: null,
+        total: 0,
+        category: '',
+        scope: options.scope || 'category',
+        updatedAt: null,
+        isRestricted: true
+      };
+    }
     if (!res.ok) {
       throw new Error(`TOP_PEERS_HTTP_${res.status}`);
     }
@@ -756,6 +778,11 @@ async createService(payload) {
       throw { status: 401, message: 'UNAUTHORIZED' };
     }
     
+    if (r.status === 403) {
+      console.warn('Bookings API access forbidden; falling back to local data');
+      return [];
+    }
+
     if (!r.ok && r.status !== 304) {
       console.error('Failed to fetch bookings, status:', r.status);
       throw { status: r.status, message: 'FETCH_BOOKINGS_FAILED' };
