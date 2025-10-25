@@ -1833,6 +1833,8 @@ function bindFloatingCloseOnce() {
       this._dashboardStatsPromise = null;
       this.topPeersData = null;
       this._topPeersPromise = null;
+      this.topPeersAutoRefreshInterval = null;
+      this.topPeersAutoRefreshMs = 60000;
 
       this.setFeatureFlags(flags);
 
@@ -2102,7 +2104,10 @@ if (elements.viewStoreBtn) {
     },
     {
       element: elements.topRefreshBtn,
-      handler: () => this.renderTopPeers(true)
+      handler: () => {
+        this.renderTopPeers(true);
+        this.restartTopPeersAutoRefresh();
+      }
     },
     {
       element: elements.addCustomerBtn,
@@ -2221,6 +2226,7 @@ if (elements.viewStoreBtn) {
   // 9. Cleanup method for memory management (optional)
   this.cleanup = () => {
     window.removeEventListener('hashchange', this.boundHandleRouteChange);
+    this.clearTopPeersAutoRefresh();
     // Remove other event listeners if needed when app is destroyed
   };
 }
@@ -2240,6 +2246,7 @@ destroy() {
     handleRouteChange() {
       const hash = window.location.hash || '#/dashboard';
       const page = hash.substring(2) || 'dashboard';
+      this.clearTopPeersAutoRefresh();
       if (page === 'plans' && !this.isSellerPlansEnabled()) {
         if (window.location.hash !== '#/dashboard') {
           window.location.hash = '#/dashboard';
@@ -2273,7 +2280,10 @@ destroy() {
         case 'bookings': this.renderBookings(); break;
         case 'customers': this.renderCustomers(); break;
         case 'reviews': this.renderReviews(); break;
-        case 'top': this.renderTopPeers(); break;
+        case 'top':
+          this.renderTopPeers();
+          this.scheduleTopPeersAutoRefresh(true);
+          break;
         case 'plans':
           if (this.isSellerPlansEnabled()) {
             this.renderPlans();
@@ -2282,6 +2292,52 @@ destroy() {
         case 'settings': this.renderSettings(); break; // New call for settings
       }
     }
+    clearTopPeersAutoRefresh() {
+      if (this.topPeersAutoRefreshInterval) {
+        clearInterval(this.topPeersAutoRefreshInterval);
+        this.topPeersAutoRefreshInterval = null;
+      }
+    }
+
+    scheduleTopPeersAutoRefresh(reset = false) {
+      if (reset) {
+        this.clearTopPeersAutoRefresh();
+      } else if (this.topPeersAutoRefreshInterval) {
+        return;
+      }
+
+      const topView = document.getElementById('top-view');
+      if (!topView || !topView.classList.contains('active')) {
+        return;
+      }
+
+      const intervalMs = Math.max(15000, Number(this.topPeersAutoRefreshMs) || 60000);
+      this.topPeersAutoRefreshInterval = window.setInterval(() => {
+        const topView = document.getElementById('top-view');
+        if (!topView || !topView.classList.contains('active')) {
+          this.clearTopPeersAutoRefresh();
+          return;
+        }
+        this.refreshTopPeersSilently();
+      }, intervalMs);
+    }
+
+    restartTopPeersAutoRefresh() {
+      this.scheduleTopPeersAutoRefresh(true);
+    }
+
+    async refreshTopPeersSilently() {
+      if (this._topPeersPromise) {
+        return;
+      }
+      try {
+        const data = await this.loadTopPeers(true);
+        this.applyTopPeers(data);
+      } catch (err) {
+        console.warn('Auto refresh top peers failed', err);
+      }
+    }
+
     async loadTopPeers(force = false) {
       if (this._topPeersPromise && !force) {
         return this._topPeersPromise;

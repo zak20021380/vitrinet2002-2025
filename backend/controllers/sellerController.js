@@ -451,7 +451,13 @@ exports.getTopServicePeers = async (req, res) => {
       return res.status(404).json({ message: 'فروشنده پیدا نشد.' });
     }
 
-    const limit = Math.min(20, Math.max(3, Number.parseInt(req.query.limit, 10) || 10));
+    const rawLimit = String(req.query.limit ?? '').trim().toLowerCase();
+    let limit = Number.parseInt(rawLimit, 10);
+    if (!Number.isFinite(limit)) {
+      limit = 10;
+    }
+    limit = Math.min(20, Math.max(3, limit));
+
     const scope = String(req.query.scope || '').trim().toLowerCase();
 
     const category = (seller.category || '').trim();
@@ -475,16 +481,20 @@ exports.getTopServicePeers = async (req, res) => {
 
     const projection = 'name shopUrl city category subcategories tags analytics isPremium isFeatured coverImage ownerPhone ownerName updatedAt createdAt';
 
-    const shops = await ServiceShop.find(match)
+    let query = ServiceShop.find(match)
       .sort({
         'analytics.ratingAverage': -1,
         'analytics.ratingCount': -1,
         'analytics.totalBookings': -1,
         createdAt: -1
       })
-      .limit(200)
-      .select(projection)
-      .lean();
+      .select(projection);
+
+    if (scopeApplied !== 'subcategory') {
+      query = query.limit(200);
+    }
+
+    const shops = await query.lean();
 
     const sellerSlug = normalizeString(seller.shopurl);
     const sellerPhone = normalizeString(seller.phone);
@@ -532,26 +542,9 @@ exports.getTopServicePeers = async (req, res) => {
       };
     });
 
-    leaderboard.sort((a, b) => {
-      if (b.score !== a.score) return b.score - a.score;
-      if (b.metrics.ratingAverage !== a.metrics.ratingAverage) {
-        return b.metrics.ratingAverage - a.metrics.ratingAverage;
-      }
-      if (b.metrics.ratingCount !== a.metrics.ratingCount) {
-        return b.metrics.ratingCount - a.metrics.ratingCount;
-      }
-      if (b.metrics.totalBookings !== a.metrics.totalBookings) {
-        return b.metrics.totalBookings - a.metrics.totalBookings;
-      }
-      return (a.name || '').localeCompare(b.name || '', 'fa');
-    });
-
-    const total = leaderboard.length;
-    let mine = leaderboard.find(entry => entry.isMine) || null;
-
-    if (!mine) {
-      mine = {
-        id: null,
+    if (!leaderboard.some(entry => entry.isMine)) {
+      leaderboard.push({
+        id: sellerId.toString(),
         name: seller.storename || seller.shopurl || `${seller.firstname || ''} ${seller.lastname || ''}`.trim() || 'فروشگاه شما',
         shopUrl: seller.shopurl || null,
         city: '',
@@ -567,19 +560,40 @@ exports.getTopServicePeers = async (req, res) => {
         score: 0,
         updatedAt: null,
         isMine: true
-      };
+      });
     }
+
+    leaderboard.sort((a, b) => {
+      if (b.score !== a.score) return b.score - a.score;
+      if (b.metrics.ratingAverage !== a.metrics.ratingAverage) {
+        return b.metrics.ratingAverage - a.metrics.ratingAverage;
+      }
+      if (b.metrics.ratingCount !== a.metrics.ratingCount) {
+        return b.metrics.ratingCount - a.metrics.ratingCount;
+      }
+      if (b.metrics.totalBookings !== a.metrics.totalBookings) {
+        return b.metrics.totalBookings - a.metrics.totalBookings;
+      }
+      return (a.name || '').localeCompare(b.name || '', 'fa');
+    });
+
+    const total = leaderboard.length;
+    const mine = leaderboard.find(entry => entry.isMine) || null;
 
     const ranked = leaderboard.map((entry, index) => ({
       ...entry,
       rank: index + 1
     }));
 
-    const mineWithRank = mine && mine.id
-      ? { ...mine, rank: ranked.findIndex(entry => entry.id === mine.id) + 1 || null }
-      : { ...mine, rank: null };
+    const mineIndex = mine && mine.id ? ranked.findIndex(entry => entry.id === mine.id) : -1;
+    const mineWithRank = mine
+      ? { ...mine, rank: mineIndex >= 0 ? mineIndex + 1 : ranked.length }
+      : null;
 
-    const top = ranked.slice(0, limit).map(entry => ({
+    const shouldReturnAll = scopeApplied === 'subcategory' && (!rawLimit || rawLimit === 'all');
+    const effectiveLimit = shouldReturnAll ? ranked.length : limit;
+
+    const top = ranked.slice(0, effectiveLimit).map(entry => ({
       rank: entry.rank,
       name: entry.name,
       shopUrl: entry.shopUrl,
