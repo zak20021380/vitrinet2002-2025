@@ -2,14 +2,15 @@
 
 
     // controllers/chatController.js
-    const Chat = require('../models/chat');
-    const Product  = require('../models/product');
-    const mongoose = require('mongoose');
-    const Seller   = require('../models/Seller'); 
+const Chat = require('../models/chat');
+const Product = require('../models/product');
+const mongoose = require('mongoose');
+const Seller = require('../models/Seller');
 const Block = require('../models/Block');
-const User     = require('../models/user');   // ← مطمئن شوید این خط هست
-const Admin = require('../models/admin');  // 👈 اضافه کن
+const User = require('../models/user');
+const Admin = require('../models/admin');
 const BlockedSeller = require('../models/BlockedSeller');
+const BannedPhone = require('../models/BannedPhone');
 
     /**
      * GET /api/chats?sellerId=...
@@ -1099,9 +1100,56 @@ exports.blockSender = async (req, res) => {
     const model = chat.participantsModel[idx];
 
     if (model === 'User') {
-      await User.findByIdAndUpdate(participantId, { blockedByAdmin: !unblock });
+      const target = await User.findById(participantId);
+      if (!target) return res.status(404).json({ error: 'کاربر پیدا نشد' });
+
+      target.blockedByAdmin = !unblock;
+      await target.save();
+
+      if (target.phone) {
+        if (unblock) {
+          await BannedPhone.deleteOne({ phone: target.phone });
+        } else {
+          await BannedPhone.updateOne(
+            { phone: target.phone },
+            { $set: { phone: target.phone, reason: 'blocked-by-admin' } },
+            { upsert: true }
+          );
+        }
+      }
     } else if (model === 'Seller') {
-      await Seller.findByIdAndUpdate(participantId, { blockedByAdmin: !unblock });
+      const target = await Seller.findById(participantId);
+      if (!target) return res.status(404).json({ error: 'فروشنده پیدا نشد' });
+
+      target.blockedByAdmin = !unblock;
+      if (!unblock) {
+        target.blockedAt = new Date();
+        target.blockedBy = req.user?.id || null;
+        target.blockedReason = target.blockedReason || 'blocked-by-admin';
+      } else {
+        target.blockedAt = null;
+        target.blockedBy = null;
+        target.blockedReason = '';
+      }
+
+      await target.save();
+
+      if (target.phone) {
+        if (unblock) {
+          await BannedPhone.deleteOne({ phone: target.phone });
+        } else {
+          await BannedPhone.updateOne(
+            { phone: target.phone },
+            {
+              $set: {
+                phone: target.phone,
+                reason: target.blockedReason || 'blocked-by-admin'
+              }
+            },
+            { upsert: true }
+          );
+        }
+      }
     } else {
       return res.status(400).json({ error: 'امکان مسدودسازی این نقش نیست' });
     }
@@ -1133,7 +1181,30 @@ exports.blockTarget = async (req, res) => {
       return res.status(404).json({ message: 'شناسه یافت نشد' });
 
     target.blockedByAdmin = true;
+
+    if (targetRole === 'seller') {
+      target.blockedAt = new Date();
+      target.blockedBy = req.user?.id || null;
+      target.blockedReason = target.blockedReason || 'blocked-by-admin';
+    }
+
     await target.save();
+
+    const phone = target.phone;
+    if (phone) {
+      await BannedPhone.updateOne(
+        { phone },
+        {
+          $set: {
+            phone,
+            reason: targetRole === 'seller'
+              ? (target.blockedReason || 'blocked-by-admin')
+              : 'blocked-by-admin'
+          }
+        },
+        { upsert: true }
+      );
+    }
 
     console.log(`🔒 Blocked ${targetRole}: ${targetId}`);
 
@@ -1164,7 +1235,19 @@ exports.unblockTarget = async (req, res) => {
       return res.status(404).json({ message: 'شناسه یافت نشد' });
 
     target.blockedByAdmin = false;
+
+    if (targetRole === 'seller') {
+      target.blockedAt = null;
+      target.blockedBy = null;
+      target.blockedReason = '';
+    }
+
     await target.save();
+
+    const phone = target.phone;
+    if (phone) {
+      await BannedPhone.deleteOne({ phone });
+    }
 
     console.log(`🔓 Unblocked ${targetRole}: ${targetId}`);
 
