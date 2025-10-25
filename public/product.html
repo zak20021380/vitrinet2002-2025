@@ -2532,7 +2532,11 @@
         dom.title.textContent = title;
         document.title = `${title} | ویترینت`;
 
-        const seller = product.seller || product.sellerId || {};
+        const seller =
+  (product.seller && typeof product.seller === 'object') ? product.seller :
+  (product.sellerId && typeof product.sellerId === 'object') ? product.sellerId :
+  {};
+
 
         const summary = extractSummary(product.desc);
         dom.subtitle.textContent = summary || 'برای این محصول هنوز توضیح مختصری ثبت نشده است.';
@@ -2577,7 +2581,7 @@
         renderGallery(product, seller);
         renderTags(product.tags);
         renderDescription(product.desc);
-        renderSellerCard(seller, product.desc);
+        renderSellerCard(seller, product);
         renderContactPanel(seller);
         updateMetaTags(product, seller, summary);
         updateStructuredData(product, seller, id);
@@ -3041,117 +3045,158 @@
         });
       }
 
-      function renderSellerCard(seller, productDesc) {
-        const hasSeller = seller && (seller.storename || seller.ownerName || seller.ownerFirstname || seller.ownerLastname || seller.phone || seller.address || seller.category || seller.boardImage || seller.desc);
-        if (!hasSeller) {
-          dom.sellerCard.hidden = true;
-          if (dom.sellerActions) {
-            dom.sellerActions.hidden = true;
-          }
-          if (dom.sellerAddressButton) {
-            dom.sellerAddressButton.disabled = true;
-            dom.sellerAddressButton.classList.add('is-disabled');
-            dom.sellerAddressButton.removeAttribute('aria-label');
-          }
-          if (dom.sellerLink) {
-            dom.sellerLink.classList.add('is-disabled');
-            dom.sellerLink.setAttribute('aria-disabled', 'true');
-            dom.sellerLink.setAttribute('tabindex', '-1');
-            dom.sellerLink.removeAttribute('href');
-            dom.sellerLink.removeAttribute('aria-label');
-          }
-          state.addressInfo = null;
-          return;
-        }
+function renderSellerCard(seller, product) {
+  const productDesc = product?.desc;
 
-        dom.sellerCard.hidden = false;
-        const sellerName = seller.storename || seller.ownerName || [seller.ownerFirstname, seller.ownerLastname].filter(Boolean).join(' ') || 'فروشنده نامشخص';
-        dom.sellerName.textContent = sellerName;
-        state.sellerName = sellerName;
-        state.addressInfo = null;
-        const addressText = seller && seller.address ? String(seller.address).trim() : '';
+  // اگر بک‌اند فقط id یا اسلاگ داده باشد، از این‌ها هم استفاده می‌کنیم
+  const sellerId = (typeof product?.sellerId === 'string')
+    ? product.sellerId
+    : (seller?._id || '');
 
-        const descriptionParts = [];
-        const sellerBio = typeof seller.desc === 'string' ? seller.desc.trim() : '';
-        if (sellerBio) {
-          descriptionParts.push(sellerBio);
-        } else if (productDesc) {
-          descriptionParts.push(extractSummary(productDesc, 160));
-        }
-        descriptionParts.push('برای هماهنگی خرید، مستقیماً با فروشنده در ارتباط باشید.');
-        dom.sellerDescription.textContent = descriptionParts.join(' ').trim();
+  const shopSlug = seller?.shopurl || seller?.shopUrl || product?.shopurl || '';
 
-        const categoryText = [seller.category, seller.subcategory].filter(Boolean).join(' - ');
-        dom.sellerCategory.textContent = categoryText || 'اطلاعاتی ثبت نشده است.';
+  const hasSeller =
+    !!(seller && (seller.storename || seller.ownerName || seller.ownerFirstname || seller.ownerLastname ||
+                  seller.phone || seller.address || seller.category || seller.boardImage || seller.desc))
+    || !!sellerId
+    || !!shopSlug;
 
-        if (seller.boardImage) {
-          dom.sellerAvatar.hidden = false;
-          dom.sellerImage.src = resolveMediaPath(seller.boardImage);
-          dom.sellerImage.alt = `${sellerName} - تصویر فروشنده`;
-        } else {
-          dom.sellerAvatar.hidden = true;
-          dom.sellerImage.removeAttribute('src');
-        }
+  if (!hasSeller) {
+    // کارت فروشنده را پنهان نگه می‌داریم ولی اکشن‌ها را نمایان (غیرفعال) می‌کنیم
+    dom.sellerCard.hidden = true;
 
-        if (seller.phone) {
-          dom.sellerPhoneRow.hidden = false;
-          const phoneText = String(seller.phone);
-          dom.sellerPhone.textContent = phoneText;
-          dom.sellerPhone.href = `tel:${toEnglishDigits(phoneText)}`;
-        } else {
-          dom.sellerPhoneRow.hidden = true;
-          dom.sellerPhone.removeAttribute('href');
-        }
+    if (dom.sellerActions) dom.sellerActions.hidden = false;
 
-        if (dom.sellerActions) {
-          dom.sellerActions.hidden = false;
-        }
+    if (dom.sellerAddressButton) {
+      dom.sellerAddressButton.disabled = true;
+      dom.sellerAddressButton.classList.add('is-disabled');
+      dom.sellerAddressButton.hidden = false;
+      dom.sellerAddressButton.removeAttribute('aria-label');
+    }
 
-        if (addressText) {
-          dom.sellerAddressRow.hidden = false;
-          dom.sellerAddress.textContent = addressText;
+    if (dom.sellerLink) {
+      dom.sellerLink.classList.add('is-disabled');
+      dom.sellerLink.setAttribute('aria-disabled', 'true');
+      dom.sellerLink.setAttribute('tabindex', '-1');
+      dom.sellerLink.removeAttribute('href');
+      dom.sellerLink.removeAttribute('aria-label');
+    }
 
-          if (dom.sellerAddressButton) {
-            const mapQuery = [addressText, seller.city].filter(Boolean).join('، ');
-            const mapUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(mapQuery || addressText)}`;
-            state.addressInfo = {
-              address: addressText,
-              city: seller.city || '',
-              mapUrl,
-              sellerName
-            };
-            dom.sellerAddressButton.hidden = false;
-            dom.sellerAddressButton.setAttribute('aria-label', `مشاهده آدرس ${sellerName} در پنجره مجزا`);
-            dom.sellerAddressButton.disabled = false;
-            dom.sellerAddressButton.classList.remove('is-disabled');
-          }
-        } else {
-          dom.sellerAddressRow.hidden = true;
-          dom.sellerAddress.textContent = '';
-          if (dom.sellerAddressButton) {
-            dom.sellerAddressButton.removeAttribute('aria-label');
-            dom.sellerAddressButton.disabled = true;
-            dom.sellerAddressButton.classList.add('is-disabled');
-          }
-          state.addressInfo = null;
-        }
+    state.addressInfo = null;
+    return;
+  }
 
-        if (dom.sellerLink) {
-          if (seller.shopurl) {
-            dom.sellerLink.href = `/shop.html?shopurl=${encodeURIComponent(seller.shopurl)}`;
-            dom.sellerLink.setAttribute('aria-label', `مشاهده صفحه مغازه ${sellerName} در ویترینت`);
-            dom.sellerLink.classList.remove('is-disabled');
-            dom.sellerLink.removeAttribute('aria-disabled');
-            dom.sellerLink.removeAttribute('tabindex');
-          } else {
-            dom.sellerLink.removeAttribute('href');
-            dom.sellerLink.removeAttribute('aria-label');
-            dom.sellerLink.classList.add('is-disabled');
-            dom.sellerLink.setAttribute('aria-disabled', 'true');
-            dom.sellerLink.setAttribute('tabindex', '-1');
-          }
-        }
-      }
+  // از اینجا به بعد فروشنده‌ای برای نمایش داریم (یا حداقل id/slug داریم)
+  dom.sellerCard.hidden = false;
+
+  const sellerName =
+    seller?.storename ||
+    seller?.ownerName ||
+    [seller?.ownerFirstname, seller?.ownerLastname].filter(Boolean).join(' ') ||
+    'فروشنده نامشخص';
+
+  dom.sellerName.textContent = sellerName;
+  state.sellerName = sellerName;
+
+  // توضیح فروشنده
+  const descriptionParts = [];
+  const sellerBio = typeof seller?.desc === 'string' ? seller.desc.trim() : '';
+  if (sellerBio) {
+    descriptionParts.push(sellerBio);
+  } else if (productDesc) {
+    descriptionParts.push(extractSummary(productDesc, 160));
+  }
+  descriptionParts.push('برای هماهنگی خرید، مستقیماً با فروشنده در ارتباط باشید.');
+  dom.sellerDescription.textContent = descriptionParts.join(' ').trim();
+
+  // دسته/زیر‌دسته
+  const categoryText = [seller?.category, seller?.subcategory].filter(Boolean).join(' - ');
+  dom.sellerCategory.textContent = categoryText || 'اطلاعاتی ثبت نشده است.';
+
+  // آواتار
+  if (seller?.boardImage) {
+    dom.sellerAvatar.hidden = false;
+    dom.sellerImage.src = resolveMediaPath(seller.boardImage);
+    dom.sellerImage.alt = `${sellerName} - تصویر فروشنده`;
+  } else {
+    dom.sellerAvatar.hidden = true;
+    dom.sellerImage.removeAttribute('src');
+  }
+
+  // تلفن
+  if (seller?.phone) {
+    dom.sellerPhoneRow.hidden = false;
+    const phoneText = String(seller.phone);
+    dom.sellerPhone.textContent = phoneText;
+    dom.sellerPhone.href = `tel:${toEnglishDigits(phoneText)}`;
+  } else {
+    dom.sellerPhoneRow.hidden = true;
+    dom.sellerPhone.removeAttribute('href');
+  }
+
+  // اکشن‌ها را نشان بده
+  if (dom.sellerActions) {
+    dom.sellerActions.hidden = false;
+  }
+
+  // آدرس (در صورت نبودن آدرس، اگر فقط شهر داریم باز هم دکمه را فعال و مودال را با شهر باز می‌کنیم)
+  const addressText = seller?.address ? String(seller.address).trim() : '';
+  if (addressText || seller?.city) {
+    dom.sellerAddressRow.hidden = !addressText;
+    dom.sellerAddress.textContent = addressText || '';
+
+    if (dom.sellerAddressButton) {
+      const mapQuery = [addressText, seller?.city].filter(Boolean).join('، ');
+      const mapUrl = mapQuery ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(mapQuery)}` : '';
+      state.addressInfo = {
+        address: addressText || (seller?.city || ''),
+        city: seller?.city || '',
+        mapUrl,
+        sellerName
+      };
+
+      dom.sellerAddressButton.hidden = false;
+      dom.sellerAddressButton.disabled = false;
+      dom.sellerAddressButton.classList.remove('is-disabled');
+      dom.sellerAddressButton.setAttribute('aria-label', `مشاهده آدرس ${sellerName} در پنجره مجزا`);
+    }
+  } else {
+    dom.sellerAddressRow.hidden = true;
+    dom.sellerAddress.textContent = '';
+    if (dom.sellerAddressButton) {
+      dom.sellerAddressButton.removeAttribute('aria-label');
+      dom.sellerAddressButton.disabled = true;
+      dom.sellerAddressButton.classList.add('is-disabled');
+    }
+    state.addressInfo = null;
+  }
+
+  // لینک صفحه‌ی مغازه:
+  // اگر اسلاگ(shopurl) داشتیم با همان می‌سازیم؛ وگرنه اگر فقط id داشتیم با id می‌سازیم.
+  if (dom.sellerLink) {
+    let href = '';
+    if (shopSlug) {
+      href = `/shop.html?shopurl=${encodeURIComponent(shopSlug)}`;
+    } else if (sellerId) {
+      href = `/shop.html?id=${encodeURIComponent(sellerId)}`;
+    }
+
+    if (href) {
+      dom.sellerLink.href = href;
+      dom.sellerLink.setAttribute('aria-label', `مشاهده صفحه مغازه ${sellerName} در ویترینت`);
+      dom.sellerLink.classList.remove('is-disabled');
+      dom.sellerLink.removeAttribute('aria-disabled');
+      dom.sellerLink.removeAttribute('tabindex');
+    } else {
+      dom.sellerLink.removeAttribute('href');
+      dom.sellerLink.removeAttribute('aria-label');
+      dom.sellerLink.classList.add('is-disabled');
+      dom.sellerLink.setAttribute('aria-disabled', 'true');
+      dom.sellerLink.setAttribute('tabindex', '-1');
+    }
+  }
+}
+
 
       function renderContactPanel(seller) {
         const contactList = dom.contactList;
