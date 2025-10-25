@@ -591,6 +591,187 @@ const collectBookingKeys = (list) => {
   return set;
 };
 
+const SELLER_RUNTIME = {
+  blocked: false,
+  blockSources: [],
+  blockMessages: [],
+  detectedAt: null
+};
+
+window.__SELLER_RUNTIME_STATE__ = SELLER_RUNTIME;
+
+const BLOCK_SOURCE_LABELS = Object.freeze({
+  seller: 'اطلاعات فروشنده',
+  services: 'مدیریت خدمات',
+  bookings: 'نوبت‌ها',
+  default: 'پنل فروشنده'
+});
+
+const formatBlockTimestamp = (value) => {
+  if (!value) return '';
+  const date = value instanceof Date ? value : new Date(value);
+  if (Number.isNaN(date.getTime())) return '';
+  try {
+    return new Intl.DateTimeFormat('fa-IR', {
+      dateStyle: 'long',
+      timeStyle: 'short'
+    }).format(date);
+  } catch {
+    return date.toLocaleString('fa-IR');
+  }
+};
+
+const SellerBlockScreen = (() => {
+  const overlay = document.getElementById('blocked-overlay');
+  if (!overlay) {
+    return {
+      show() {},
+      hide() {}
+    };
+  }
+
+  const titleEl = overlay.querySelector('#blocked-title');
+  const messageEl = overlay.querySelector('#blocked-message');
+  const sourcesEl = overlay.querySelector('#blocked-sources');
+  const reasonEl = overlay.querySelector('#blocked-reason');
+  const timestampEl = overlay.querySelector('#blocked-timestamp');
+  const refreshBtn = overlay.querySelector('#blocked-refresh');
+
+  const defaultMessage = 'دسترسی شما به پنل فروشنده موقتاً محدود شده است.';
+
+  if (refreshBtn) {
+    refreshBtn.addEventListener('click', () => {
+      window.location.reload();
+    });
+  }
+
+  return {
+    show(state = SELLER_RUNTIME) {
+      if (!overlay) return;
+
+      const sources = Array.isArray(state.blockSources) && state.blockSources.length
+        ? state.blockSources
+        : ['default'];
+      const sourceLabel = sources
+        .map((src) => BLOCK_SOURCE_LABELS[src] || BLOCK_SOURCE_LABELS.default)
+        .join(' • ');
+
+      const messages = Array.isArray(state.blockMessages)
+        ? state.blockMessages.filter(Boolean)
+        : [];
+
+      if (titleEl) {
+        titleEl.textContent = 'حساب فروشنده محدود شده است';
+      }
+
+      if (messageEl) {
+        messageEl.textContent = defaultMessage;
+      }
+
+      if (sourcesEl) {
+        sourcesEl.textContent = sourceLabel;
+      }
+
+      if (reasonEl) {
+        if (messages.length) {
+          reasonEl.textContent = `پیام سیستم: ${messages.join('، ')}`;
+          reasonEl.removeAttribute('hidden');
+        } else {
+          reasonEl.textContent = '';
+          reasonEl.setAttribute('hidden', '');
+        }
+      }
+
+      if (timestampEl) {
+        const ts = state.detectedAt ? formatBlockTimestamp(state.detectedAt) : '';
+        if (ts) {
+          timestampEl.textContent = `آخرین بررسی: ${ts}`;
+          timestampEl.removeAttribute('hidden');
+        } else {
+          timestampEl.textContent = '';
+          timestampEl.setAttribute('hidden', '');
+        }
+      }
+
+      overlay.removeAttribute('hidden');
+      overlay.classList.add('is-visible');
+      overlay.setAttribute('aria-hidden', 'false');
+
+      if (document.body) {
+        document.body.setAttribute('data-seller-state', 'blocked');
+      }
+
+      setTimeout(() => {
+        if (typeof overlay.focus === 'function') {
+          try {
+            overlay.focus({ preventScroll: true });
+          } catch {
+            overlay.focus();
+          }
+        }
+      }, 0);
+    },
+    hide() {
+      if (!overlay) return;
+      overlay.classList.remove('is-visible');
+      overlay.setAttribute('hidden', '');
+      overlay.setAttribute('aria-hidden', 'true');
+      if (document.body) {
+        document.body.removeAttribute('data-seller-state');
+      }
+    }
+  };
+})();
+
+function markSellerBlocked(signals = []) {
+  const nextSources = new Set(Array.isArray(SELLER_RUNTIME.blockSources) ? SELLER_RUNTIME.blockSources : []);
+  const nextMessages = new Set(Array.isArray(SELLER_RUNTIME.blockMessages) ? SELLER_RUNTIME.blockMessages : []);
+
+  signals.forEach((signal) => {
+    if (signal?.source) nextSources.add(signal.source);
+    const msg = (signal?.message || '').trim();
+    if (msg) nextMessages.add(msg);
+  });
+
+  SELLER_RUNTIME.blockSources = Array.from(nextSources);
+  SELLER_RUNTIME.blockMessages = Array.from(nextMessages);
+  SELLER_RUNTIME.detectedAt = SELLER_RUNTIME.detectedAt || new Date();
+  SELLER_RUNTIME.blocked = true;
+
+  console.warn('Seller account flagged as blocked', SELLER_RUNTIME);
+  SellerBlockScreen.show(SELLER_RUNTIME);
+}
+
+async function parseForbiddenResponse(response, fallbackMessage) {
+  if (!response) {
+    return { message: fallbackMessage, details: null };
+  }
+
+  try {
+    const rawText = await response.text();
+    if (!rawText) {
+      return { message: fallbackMessage, details: null };
+    }
+
+    try {
+      const data = JSON.parse(rawText);
+      return {
+        message: data?.message || fallbackMessage,
+        details: data
+      };
+    } catch {
+      const cleaned = rawText.replace(/\s+/g, ' ').trim();
+      return {
+        message: cleaned || fallbackMessage,
+        details: null
+      };
+    }
+  } catch (err) {
+    console.warn('parseForbiddenResponse failed', err);
+    return { message: fallbackMessage, details: null };
+  }
+}
+
 const API = {
   async _json(res) {
     const txt = await res.text();
@@ -779,8 +960,26 @@ async createService(payload) {
     }
     
     if (r.status === 403) {
-      console.warn('Bookings API access forbidden; falling back to local data');
-      return [];
+      console.warn('Bookings API access forbidden');
+      let message = 'دسترسی شما به مدیریت نوبت‌ها محدود شده است.';
+      try {
+        const rawText = await r.text();
+        if (rawText) {
+          try {
+            const data = JSON.parse(rawText);
+            message = data?.message || message;
+          } catch {
+            const cleaned = rawText.replace(/\s+/g, ' ').trim();
+            if (cleaned) message = cleaned;
+          }
+        }
+      } catch (parseErr) {
+        console.warn('Failed to parse bookings forbidden response', parseErr);
+      }
+      const err = new Error('BOOKINGS_FORBIDDEN');
+      err.status = 403;
+      err.uiMessage = message;
+      throw err;
     }
 
     if (!r.ok && r.status !== 304) {
@@ -968,29 +1167,38 @@ async function fetchInitialData() {
   try {
     console.log('Starting fetchInitialData...');
     
-    const bookingsPromise = API.getBookings().catch(err => {
-      console.error('Bookings promise rejected:', err);
-      if (err && err.status === 401) {
-        console.error('Unauthorized - redirecting to login');
-        throw err;
-      }
-      console.error('FETCH_BOOKINGS_FAILED', err);
-      return [];
-    });
-
     console.log('Making parallel API requests...');
-    
-    const [sellerRes, servicesRes, bookings] = await Promise.all([
+
+    const bookingsPromise = API.getBookings();
+
+    const [sellerRes, servicesRes] = await Promise.all([
       fetch(bust(`${API_BASE}/api/sellers/me`), { credentials: 'include', ...NO_CACHE }),
-      fetch(bust(`${API_BASE}/api/seller-services/me/services`), { credentials: 'include', ...NO_CACHE }),
-      bookingsPromise
+      fetch(bust(`${API_BASE}/api/seller-services/me/services`), { credentials: 'include', ...NO_CACHE })
     ]);
+
+    let bookings = [];
+    let bookingsError = null;
+    try {
+      bookings = await bookingsPromise;
+      console.log('Bookings fetched successfully:', bookings);
+    } catch (err) {
+      bookingsError = err;
+      console.error('Bookings promise rejected:', err);
+    }
+
+    const bookingsLength = Array.isArray(bookings) ? bookings.length : 0;
 
     console.log('API responses received:', {
       sellerResStatus: sellerRes.status,
       servicesResStatus: servicesRes.status,
-      bookingsLength: Array.isArray(bookings) ? bookings.length : 'not array'
+      bookingsStatus: bookingsError ? 'error' : 'ok',
+      bookingsLength
     });
+
+    if (bookingsError?.status === 401) {
+      console.error('Unauthorized bookings access - redirecting to login');
+      throw bookingsError;
+    }
 
     if (sellerRes.status === 401 || servicesRes.status === 401) {
       console.log('Authentication failed - redirecting to login');
@@ -998,15 +1206,46 @@ async function fetchInitialData() {
       return;
     }
 
+    const blockedSignals = [];
+
+    if (sellerRes.status === 403) {
+      const info = await parseForbiddenResponse(sellerRes, 'دسترسی به اطلاعات فروشنده محدود شده است.');
+      blockedSignals.push({ source: 'seller', message: info.message });
+    }
+
+    if (servicesRes.status === 403) {
+      const info = await parseForbiddenResponse(servicesRes, 'دسترسی به مدیریت خدمات محدود شده است.');
+      blockedSignals.push({ source: 'services', message: info.message });
+    }
+
+    if (bookingsError?.status === 403) {
+      blockedSignals.push({
+        source: 'bookings',
+        message: bookingsError.uiMessage || bookingsError.message || 'دسترسی به مدیریت نوبت‌ها محدود شده است.'
+      });
+    }
+
+    if (blockedSignals.length) {
+      markSellerBlocked(blockedSignals);
+      return { blocked: true };
+    }
+
+    if (bookingsError) {
+      console.error('FETCH_BOOKINGS_FAILED', bookingsError);
+      bookings = [];
+    }
+
     const localBookings = JSON.parse(localStorage.getItem('vitreenet-bookings') || '[]');
     const previousBookingKeys = collectBookingKeys(localBookings);
     console.log('Local bookings count:', localBookings.length);
 
     // Enhanced booking data handling with better error logging
-    if (Array.isArray(bookings) && bookings.length) {
-      console.log('Successfully fetched bookings from server:', bookings);
+    const serverBookings = Array.isArray(bookings) ? bookings : [];
+
+    if (serverBookings.length) {
+      console.log('Successfully fetched bookings from server:', serverBookings);
       const statusMap = new Map(localBookings.map(b => [(b._id || b.id), b.status]));
-      MOCK_DATA.bookings = bookings.map(b => {
+      MOCK_DATA.bookings = serverBookings.map(b => {
         const id = b._id || b.id;
         const serverStatus = b.status || 'pending';
         const localStatus = statusMap.get(id);
@@ -1042,7 +1281,7 @@ async function fetchInitialData() {
     }
 
     const currentBookings = Array.isArray(MOCK_DATA.bookings) ? MOCK_DATA.bookings : [];
-    const candidateNewBookings = (Array.isArray(bookings) && bookings.length)
+    const candidateNewBookings = serverBookings.length
       ? currentBookings.filter((b) => {
           const key = createBookingKey(b);
           return key && !previousBookingKeys.has(key);
@@ -4291,7 +4530,12 @@ function showPersonalizedWelcome(sellerData) {
   }
 }
 
-await fetchInitialData();
+const initialState = await fetchInitialData();
+if (SELLER_RUNTIME.blocked || initialState?.blocked) {
+  console.warn('Seller panel initialization halted due to blocked state.');
+  return;
+}
+
 initSellerPersonalization();
 
 let featureFlags = { ...DEFAULT_FEATURE_FLAGS };
@@ -4438,6 +4682,11 @@ loadCustomers();
 
   // open modal
   async function openModal() {
+    if (SELLER_RUNTIME.blocked) {
+      SellerBlockScreen.show(SELLER_RUNTIME);
+      return;
+    }
+
     await load();
     try {
       const bookings = await API.getBookings();
@@ -4463,6 +4712,14 @@ loadCustomers();
       }
       persistBookings();
     } catch (err) {
+      if (err?.status === 401) {
+        window.location.href = 'login.html';
+        return;
+      }
+      if (err?.status === 403) {
+        markSellerBlocked([{ source: 'bookings', message: err.uiMessage || err.message }]);
+        return;
+      }
       console.error('FETCH_BOOKINGS_FAILED', err);
     }
 
