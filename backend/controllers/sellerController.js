@@ -15,6 +15,7 @@ const Booking = require('../models/booking');
 const Review = require('../models/Review');
 const { calcPremiumUntil } = require('../utils/premium');
 const { clampAdminScore, evaluatePerformance } = require('../utils/performanceStatus');
+const { normalizePhone, buildDigitInsensitiveRegex } = require('../utils/phone');
 
 const escapeRegExp = (str = '') => str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 const normalizeString = (value) => (value || '').toString().trim().toLowerCase();
@@ -262,11 +263,27 @@ exports.deleteSeller = async (req, res) => {
     ]);
 
     if (phone) {
-      await BannedPhone.updateOne(
-        { phone },
-        { $set: { phone } },
-        { upsert: true }
-      );
+      const normalizedPhone = normalizePhone(phone);
+      if (normalizedPhone) {
+        const regex = buildDigitInsensitiveRegex(phone);
+        const query = { _id: { $ne: seller._id } };
+        if (regex) {
+          query.phone = { $regex: regex };
+        } else {
+          query.phone = normalizedPhone;
+        }
+
+        const duplicates = await Seller.countDocuments(query);
+        if (duplicates > 0) {
+          console.warn(`Skipping phone ban for seller ${seller._id} deletion because phone is shared with ${duplicates} other seller(s).`);
+        } else {
+          await BannedPhone.updateOne(
+            { phone: normalizedPhone },
+            { $set: { phone: normalizedPhone } },
+            { upsert: true }
+          );
+        }
+      }
     }
 
     res.json({ message: 'فروشنده با موفقیت حذف شد.' });

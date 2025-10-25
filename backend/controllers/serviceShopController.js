@@ -5,6 +5,7 @@ const SellerService = require('../models/seller-services');
 const ShopAppearance = require('../models/ShopAppearance');
 const Booking = require('../models/booking');
 const BannedPhone = require('../models/BannedPhone');
+const { normalizePhone, buildPhoneCandidates, buildDigitInsensitiveRegex } = require('../utils/phone');
 
 const STATUS_VALUES = ['draft', 'pending', 'approved', 'suspended', 'archived'];
 
@@ -1139,16 +1140,36 @@ const applyAdminBlock = async ({ shop, seller, adminId = null, reason = '' }) =>
 
     const sellerPhone = savedSeller?.phone || seller.phone;
     if (sellerPhone) {
-      await BannedPhone.updateOne(
-        { phone: sellerPhone },
-        {
-          $set: {
-            phone: sellerPhone,
-            reason: cleanReason || 'blocked-by-admin'
-          }
-        },
-        { upsert: true }
-      );
+      const normalizedPhone = normalizePhone(sellerPhone);
+      if (normalizedPhone) {
+        const regex = buildDigitInsensitiveRegex(sellerPhone);
+        const sellerId = savedSeller?._id || seller._id;
+        const query = {};
+        if (sellerId) {
+          query._id = { $ne: sellerId };
+        }
+        if (regex) {
+          query.phone = { $regex: regex };
+        } else {
+          query.phone = normalizedPhone;
+        }
+
+        const duplicates = await Seller.countDocuments(query);
+        if (duplicates > 0) {
+          console.warn(`Skipping phone ban for seller ${sellerId} because phone is shared with ${duplicates} other seller(s).`);
+        } else {
+          await BannedPhone.updateOne(
+            { phone: normalizedPhone },
+            {
+              $set: {
+                phone: normalizedPhone,
+                reason: cleanReason || 'blocked-by-admin'
+              }
+            },
+            { upsert: true }
+          );
+        }
+      }
     }
   }
 
@@ -1214,12 +1235,16 @@ const applyAdminUnblock = async ({ shop, seller, adminId = null, reason = null }
 
     const sellerPhone = savedSeller?.phone || seller.phone;
     if (sellerPhone) {
-      phoneCandidates.add(String(sellerPhone).trim());
+      buildPhoneCandidates(sellerPhone).forEach((candidate) => {
+        if (candidate) phoneCandidates.add(candidate);
+      });
     }
   }
 
   if (shop?.ownerPhone) {
-    phoneCandidates.add(String(shop.ownerPhone).trim());
+    buildPhoneCandidates(shop.ownerPhone).forEach((candidate) => {
+      if (candidate) phoneCandidates.add(candidate);
+    });
   }
 
   if (shop) {
@@ -1276,8 +1301,35 @@ const applyAdminUnblock = async ({ shop, seller, adminId = null, reason = null }
 
   if (phoneCandidates.size) {
     for (const phone of phoneCandidates) {
-      if (phone) {
-        await BannedPhone.deleteOne({ phone });
+      if (!phone) continue;
+
+      const normalized = normalizePhone(phone);
+      const phoneRegex = buildDigitInsensitiveRegex(phone);
+      const query = { blockedByAdmin: true };
+      if (seller?._id) {
+        query._id = { $ne: seller._id };
+      }
+      if (phoneRegex) {
+        query.phone = { $regex: phoneRegex };
+      } else if (normalized) {
+        query.phone = normalized;
+      } else {
+        continue;
+      }
+
+      const stillBlocked = await Seller.exists(query);
+      if (stillBlocked) {
+        continue;
+      }
+
+      const variants = new Set();
+      buildPhoneCandidates(phone).forEach((candidate) => {
+        if (candidate) variants.add(candidate);
+        const norm = normalizePhone(candidate);
+        if (norm) variants.add(norm);
+      });
+      if (variants.size) {
+        await BannedPhone.deleteMany({ phone: { $in: Array.from(variants) } });
       }
     }
   }
