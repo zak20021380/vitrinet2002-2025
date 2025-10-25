@@ -38,6 +38,9 @@ const sellerSchema = new mongoose.Schema({
 
   // آیا توسط ادمین برای ارسال پیام مسدود شده است؟
   blockedByAdmin: { type: Boolean, default: false },
+  blockedAt: { type: Date, default: null },
+  blockedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'Admin', default: null },
+  blockedReason: { type: String, default: '' },
 
   // مشتریانی که توسط این فروشنده مسدود شده‌اند
   blockedUsers: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],

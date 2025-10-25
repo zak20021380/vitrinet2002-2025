@@ -75,8 +75,8 @@ module.exports = (requiredRole = null) => {
     }
   }
   if (payload.role === 'seller') {
-    const s = await Seller.findById(payload.id).select('phone');
-    if (!s || await BannedPhone.findOne({ phone: s.phone })) {
+    const s = await Seller.findById(payload.id).select('phone blockedByAdmin');
+    if (!s || s.blockedByAdmin || await BannedPhone.findOne({ phone: s.phone })) {
       return res.status(403).json({ message: 'دسترسی شما مسدود شده است.' });
     }
   }

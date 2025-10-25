@@ -3575,20 +3575,33 @@ function buildServiceShopRow(shop = {}) {
   const slug = shop.shopUrl ? `<span><i class="ri-at-line"></i>${escapeHtml(shop.shopUrl)}</span>` : '';
   const metaParts = [city, category, ownerName, phoneHtml, slug].filter(Boolean).join('');
   const flags = [];
+  const isBlocked = !!(shop?.adminModeration?.isBlocked);
+  const blockReason = String(shop?.adminModeration?.reason || '').trim();
+  const blockedAt = shop?.adminModeration?.blockedAt ? formatDateTime(shop.adminModeration.blockedAt) : '';
+  const blockReasonAttr = blockReason ? ` title="${escapeHtml(blockReason)}"` : '';
   if (shop.isFeatured) flags.push('<span class="service-flag featured"><i class="ri-star-smile-line"></i>ویژه</span>');
   if (isPremiumActive(shop)) flags.push('<span class="service-flag premium"><i class="ri-vip-crown-line"></i>پریمیوم</span>');
   if (shop?.bookingSettings?.enabled) flags.push('<span class="service-flag booking"><i class="ri-calendar-check-line"></i>رزرو فعال</span>');
   if (shop.isVisible === false) flags.push('<span class="service-flag hidden"><i class="ri-eye-off-line"></i>پنهان</span>');
+  if (isBlocked) {
+    flags.push(`<span class="service-flag blocked"${blockReasonAttr}><i class="ri-shield-keyhole-line"></i>مسدود</span>`);
+  }
   const statusLabel = getServiceStatusLabel(shop.status);
   const statusClass = getServiceStatusClass(shop.status);
   const updated = escapeHtml(formatDateTime(shop.updatedAt || shop.lastReviewedAt || shop.createdAt) || '—');
   const shopUrlAttr = shop.shopUrl ? escapeHtml(shop.shopUrl) : '';
+  const shopId = escapeHtml(toIdString(shop?._id || shop?.id || shop?.shopId || shop?.shopID || shop?.legacySellerId || ''));
+  const sellerId = escapeHtml(toIdString(shop?.legacySellerId || shop?.sellerId || ''));
+  const blockInfo = isBlocked
+    ? `<div class="service-shop-block-reason"><i class="ri-shield-keyhole-line"></i><span>مسدود شده${blockedAt ? ` از ${escapeHtml(blockedAt)}` : ''}${blockReason ? ` • ${escapeHtml(blockReason)}` : ''}</span></div>`
+    : '';
 
   return `<tr>
     <td>
       <div class="service-shop-name">${name}</div>
       ${metaParts ? `<div class="service-shop-meta">${metaParts}</div>` : ''}
       ${flags.length ? `<div class="service-shop-flags">${flags.join('')}</div>` : ''}
+      ${blockInfo}
     </td>
     <td class="service-status-cell">
       <span class="service-status-badge ${statusClass}">${statusLabel}</span>
@@ -3599,6 +3612,10 @@ function buildServiceShopRow(shop = {}) {
       <div class="service-shop-actions">
         <button class="action-btn edit" data-service-action="open" data-shop-url="${shopUrlAttr}">نمایه</button>
         ${phone ? `<button class="action-btn" data-service-action="copy-phone" data-phone="${escapeHtml(phone)}">کپی تماس</button>` : ''}
+        ${shopId ? (isBlocked
+          ? `<button class="action-btn unblock" data-service-action="unblock" data-shop-id="${shopId}"${sellerId ? ` data-seller-id="${sellerId}"` : ''}>رفع انسداد</button>`
+          : `<button class="action-btn block" data-service-action="block" data-shop-id="${shopId}"${sellerId ? ` data-seller-id="${sellerId}"` : ''}>مسدودسازی</button>`)
+          : ''}
       </div>
     </td>
   </tr>`;
@@ -3936,6 +3953,61 @@ function setupServiceShopsPanel() {
         window.open(`/service-shops.html?shopurl=${encodeURIComponent(shopUrl)}`, '_blank');
       } else {
         alert('شناسه فروشگاه یافت نشد.');
+      }
+    } else if (action === 'block' || action === 'unblock') {
+      const shopId = button.dataset.shopId;
+      if (!shopId) {
+        alert('شناسه مغازه یافت نشد.');
+        return;
+      }
+      const sellerId = button.dataset.sellerId || '';
+      if (action === 'block') {
+        if (!confirm('آیا مطمئن هستید که می‌خواهید این فروشنده را مسدود کنید؟')) return;
+      } else {
+        if (!confirm('آیا مطمئن هستید که می‌خواهید دسترسی فروشنده را فعال کنید؟')) return;
+      }
+
+      let reason;
+      if (action === 'block') {
+        const input = window.prompt('دلیل مسدودسازی فروشنده (اختیاری):', '');
+        if (input === null) return;
+        reason = input.trim();
+      }
+
+      const originalText = button.textContent;
+      button.disabled = true;
+      button.dataset.loading = 'true';
+      button.textContent = 'در حال پردازش...';
+
+      try {
+        const payload = {};
+        if (sellerId) payload.sellerId = sellerId;
+        if (typeof reason === 'string') payload.reason = reason;
+        const endpoint = action === 'block' ? 'block' : 'unblock';
+        const res = await fetch(`${ADMIN_API_BASE}/service-shops/${encodeURIComponent(shopId)}/${endpoint}`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+          body: JSON.stringify(payload)
+        });
+        let data = null;
+        try {
+          data = await res.json();
+        } catch (parseErr) {
+          data = null;
+        }
+        if (!res.ok) {
+          throw new Error(data?.message || 'عملیات ناموفق بود.');
+        }
+        alert(data?.message || 'عملیات با موفقیت انجام شد.');
+        await ensureServiceShopsLoaded(true);
+      } catch (err) {
+        console.error('serviceShops block/unblock error:', err);
+        alert(err.message || 'خطا در انجام عملیات.');
+      } finally {
+        button.disabled = false;
+        button.textContent = originalText;
+        delete button.dataset.loading;
       }
     }
   });
