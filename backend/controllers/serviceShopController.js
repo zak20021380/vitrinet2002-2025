@@ -4,6 +4,17 @@ const Seller = require('../models/Seller');
 const SellerService = require('../models/seller-services');
 const ShopAppearance = require('../models/ShopAppearance');
 const Booking = require('../models/booking');
+const ServiceShopCustomer = require('../models/serviceShopCustomer');
+const BookingAvailability = require('../models/booking-availability');
+const SellerPortfolio = require('../models/seller-portfolio');
+const Product = require('../models/product');
+const SellerPlan = require('../models/sellerPlan');
+const AdOrder = require('../models/AdOrder');
+const Payment = require('../models/payment');
+const Chat = require('../models/chat');
+const Report = require('../models/Report');
+const Review = require('../models/Review');
+const Block = require('../models/Block');
 const BannedPhone = require('../models/BannedPhone');
 const { normalizePhone, buildPhoneCandidates, buildDigitInsensitiveRegex } = require('../utils/phone');
 
@@ -1195,6 +1206,73 @@ async function findSellerForShop({ shop, providedSellerId, fallbackId }) {
   return null;
 }
 
+async function buildPermanentRemovalContext({ shop, session }) {
+  const sellerIds = new Set();
+  const normalizedPhones = new Set();
+
+  const addPhone = (value) => {
+    if (!value) return;
+    buildPhoneCandidates(value).forEach((candidate) => {
+      if (!candidate) {
+        return;
+      }
+      const normalized = normalizePhone(candidate);
+      if (normalized) {
+        normalizedPhones.add(normalized);
+      }
+    });
+  };
+
+  const addSellerDoc = (doc) => {
+    if (!doc) return;
+    const idStr = doc._id ? String(doc._id) : '';
+    if (idStr) {
+      sellerIds.add(idStr);
+    }
+    if (doc.phone) {
+      addPhone(doc.phone);
+    }
+  };
+
+  if (!shop) {
+    return { sellerIds: [], normalizedPhones: [] };
+  }
+
+  if (shop.ownerPhone) {
+    addPhone(shop.ownerPhone);
+  }
+
+  if (shop.legacySellerId && mongoose.Types.ObjectId.isValid(shop.legacySellerId)) {
+    sellerIds.add(String(shop.legacySellerId));
+    const legacySeller = await Seller.findById(shop.legacySellerId).session(session);
+    addSellerDoc(legacySeller);
+  }
+
+  if (shop.shopUrl) {
+    const sellerBySlug = await Seller.findOne({ shopurl: shop.shopUrl }).session(session);
+    addSellerDoc(sellerBySlug);
+  }
+
+  if (shop.ownerPhone) {
+    const regex = buildDigitInsensitiveRegex(shop.ownerPhone, { allowSeparators: true });
+    let sellersByPhone = [];
+    if (regex) {
+      sellersByPhone = await Seller.find({ phone: { $regex: regex } }).session(session);
+    } else {
+      const normalized = normalizePhone(shop.ownerPhone);
+      if (normalized) {
+        sellersByPhone = await Seller.find({ phone: normalized }).session(session);
+      }
+    }
+    sellersByPhone.forEach(addSellerDoc);
+  }
+
+  return {
+    sellerIds: Array.from(sellerIds),
+    normalizedPhones: Array.from(normalizedPhones)
+  };
+}
+
 const applyAdminBlock = async ({ shop, seller, adminId = null, reason = '' }) => {
   const now = new Date();
   const cleanReason = String(reason || '').trim();
@@ -2357,14 +2435,113 @@ exports.removeServiceShop = async (req, res) => {
       return res.status(400).json({ message: 'شناسه نامعتبر است.' });
     }
     const hard = req.query.hard === '1' || req.query.hard === 'true';
+    const reasonRaw = typeof req.body?.reason === 'string' ? req.body.reason : req.query?.reason;
+    const reason = reasonRaw ? String(reasonRaw).trim() : '';
     const shop = await ServiceShop.findById(id);
     if (!shop) {
       return res.status(404).json({ message: 'مغازه خدماتی یافت نشد.' });
     }
 
     if (hard) {
-      await ServiceShop.deleteOne({ _id: id });
-      return res.json({ message: 'مغازه خدماتی به طور کامل حذف شد.' });
+      const session = await mongoose.startSession();
+      let summary = { sellerIds: [], bannedPhones: [] };
+
+      try {
+        summary = await session.withTransaction(async () => {
+          const { sellerIds, normalizedPhones } = await buildPermanentRemovalContext({ shop, session });
+          const uniqueSellerIds = Array.from(new Set(sellerIds.filter(Boolean)));
+          const sellerObjectIds = uniqueSellerIds
+            .filter((sid) => mongoose.Types.ObjectId.isValid(sid))
+            .map((sid) => new mongoose.Types.ObjectId(sid));
+          const normalizedPhoneSet = new Set(normalizedPhones.filter(Boolean));
+
+          const deletionTasks = [];
+          deletionTasks.push(ServiceShop.deleteOne({ _id: shop._id }, { session }));
+
+          const serviceCustomerFilters = [{ serviceShopId: shop._id }];
+          if (sellerObjectIds.length) {
+            serviceCustomerFilters.push({ sellerId: { $in: sellerObjectIds } });
+          }
+          if (serviceCustomerFilters.length) {
+            const serviceCustomerQuery = serviceCustomerFilters.length === 1
+              ? serviceCustomerFilters[0]
+              : { $or: serviceCustomerFilters };
+            deletionTasks.push(ServiceShopCustomer.deleteMany(serviceCustomerQuery, { session }));
+          }
+
+          if (sellerObjectIds.length) {
+            const sellerFilter = { sellerId: { $in: sellerObjectIds } };
+            deletionTasks.push(
+              SellerService.deleteMany(sellerFilter, { session }),
+              Booking.deleteMany(sellerFilter, { session }),
+              BookingAvailability.deleteMany({ sellerId: { $in: sellerObjectIds } }, { session }),
+              SellerPortfolio.deleteMany(sellerFilter, { session }),
+              Product.deleteMany(sellerFilter, { session }),
+              SellerPlan.deleteMany(sellerFilter, { session }),
+              AdOrder.deleteMany(sellerFilter, { session }),
+              Payment.deleteMany(sellerFilter, { session }),
+              Chat.deleteMany({ sellerId: { $in: sellerObjectIds } }, { session }),
+              Review.deleteMany({ sellerId: { $in: sellerObjectIds } }, { session }),
+              Block.deleteMany({ sellerId: { $in: sellerObjectIds } }, { session }),
+              Seller.deleteMany({ _id: { $in: sellerObjectIds } }, { session })
+            );
+          }
+
+          const shopAppearanceFilters = [];
+          if (sellerObjectIds.length) {
+            shopAppearanceFilters.push({ sellerId: { $in: sellerObjectIds } });
+          }
+          if (shop.shopUrl) {
+            shopAppearanceFilters.push({ customUrl: shop.shopUrl });
+          }
+          if (shopAppearanceFilters.length) {
+            const shopAppearanceQuery = shopAppearanceFilters.length === 1
+              ? shopAppearanceFilters[0]
+              : { $or: shopAppearanceFilters };
+            deletionTasks.push(ShopAppearance.deleteMany(shopAppearanceQuery, { session }));
+          }
+
+          const reportFilters = [];
+          if (sellerObjectIds.length) {
+            reportFilters.push({ sellerId: { $in: sellerObjectIds } });
+          }
+          if (shop.shopUrl) {
+            reportFilters.push({ shopurl: shop.shopUrl });
+          }
+          if (reportFilters.length) {
+            const reportQuery = reportFilters.length === 1
+              ? reportFilters[0]
+              : { $or: reportFilters };
+            deletionTasks.push(Report.deleteMany(reportQuery, { session }));
+          }
+
+          await Promise.all(deletionTasks);
+
+          const banReason = reason || 'permanent-service-shop-removal';
+          for (const normalized of normalizedPhoneSet) {
+            await BannedPhone.updateOne(
+              { phone: normalized },
+              { $set: { phone: normalized, reason: banReason } },
+              { upsert: true, session }
+            );
+          }
+
+          return {
+            sellerIds: uniqueSellerIds,
+            bannedPhones: Array.from(normalizedPhoneSet)
+          };
+        });
+      } finally {
+        await session.endSession();
+      }
+
+      return res.json({
+        message: 'مغازه خدماتی و حساب فروشنده به طور کامل حذف شد.',
+        summary: {
+          sellerIds: Array.isArray(summary?.sellerIds) ? summary.sellerIds : [],
+          bannedPhones: Array.isArray(summary?.bannedPhones) ? summary.bannedPhones : []
+        }
+      });
     }
 
     shop.status = 'archived';
