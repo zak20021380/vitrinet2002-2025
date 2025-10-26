@@ -4,8 +4,11 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>مغازه‌ها و محصولات مرکز خرید | ویترینت</title>
+  <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@800&display=swap" rel="stylesheet"/>
+  <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet" />
   <style>
     * {
       margin: 0;
@@ -36,106 +39,236 @@
     }
     
     /* هدر */
-    .header {
-      background: #fff;
-      color: var(--dark);
-      padding: 0 5%;
-      min-height: 70px;
+    .vit-nav {
       display: flex;
       align-items: center;
-      justify-content: space-between;
-      box-shadow: 0 2px 15px rgba(0, 0, 0, 0.1);
-      position: sticky;
-      top: 0;
-      z-index: 1000;
-      flex-wrap: wrap;
+      gap: 5px;
     }
-    
-    .logo {
-      background: linear-gradient(90deg, var(--secondary), var(--primary));
-      color: white;
-      padding: 8px 20px;
-      border-radius: 12px;
+
+    .vit-nav a {
+      color: var(--text-medium);
       font-weight: 700;
+      font-size: 1.08rem;
       text-decoration: none;
-      transition: var(--transition);
-      font-size: 1.05rem;
+      padding: 8px 18px;
+      border-radius: 12px;
+      transition: .16s;
+      background: none;
+      letter-spacing: 0.01em;
       display: flex;
       align-items: center;
       gap: 8px;
-      box-shadow: 0 4px 10px rgba(14, 165, 233, 0.3);
-    }
-    
-    .logo:hover {
-      background: linear-gradient(90deg, var(--secondary-dark), var(--primary-dark));
-      transform: translateY(-2px);
-      box-shadow: 0 6px 15px rgba(14, 165, 233, 0.4);
     }
 
-    .menu-toggle {
-      display: none;
-      color: var(--dark);
+    .vit-nav a:hover,
+    .vit-nav a.active {
+      background: var(--primary-light);
+      color: var(--primary-color);
+      box-shadow: 0 2px 9px rgba(16, 185, 129, 0.12);
+    }
+
+    .vit-logo {
+      display: flex;
+      align-items: center;
+      z-index: 2;
+      flex-shrink: 0;
+    }
+
+    .vit-logo a {
+      display: flex;
+      align-items: center;
+      text-decoration: none;
+      height: 60px;
+      padding: 0 10px;
+      transition: transform 0.3s ease;
+    }
+
+    .vit-logo a:hover {
+      transform: scale(1.05);
+    }
+
+    .vit-logo-gradient {
+      font-family: 'Vazirmatn', 'Montserrat', Arial, sans-serif;
       font-size: 1.8rem;
+      font-weight: 900;
+      letter-spacing: .01em;
+      background: linear-gradient(90deg, var(--primary-color) 20%, #0ea5e9 80%);
+      color: transparent;
+      -webkit-background-clip: text;
+      background-clip: text;
+      display: block;
+      padding: 0 5px;
+    }
+
+    .vit-actions {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+
+    .vit-btn {
+      display: inline-flex;
+      align-items: center;
+      background: linear-gradient(92deg, var(--primary-color) 0%, #0ea5e9 100%);
+      color: var(--white);
+      font-weight: 800;
+      font-size: 1.05rem;
+      padding: 10px 22px 10px 15px;
+      border-radius: 14px;
+      box-shadow: 0 2px 13px rgba(14, 165, 233, 0.15);
+      text-decoration: none;
+      border: none;
+      outline: none;
       cursor: pointer;
+      letter-spacing: 0.02em;
       transition: var(--transition);
+      position: relative;
+      overflow: hidden;
     }
 
-    .menu-toggle:hover {
-      color: var(--primary);
+    .vit-btn::after {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -60%;
+      width: 20px;
+      height: 200%;
+      background: rgba(255, 255, 255, 0.3);
+      transform: rotate(25deg);
+      transition: all 0.6s;
     }
 
-    .nav-container {
-      display: flex;
-      align-items: center;
-      gap: 28px;
+    .vit-btn:hover::after {
+      left: 120%;
     }
-    
-    .main-menu {
-      display: flex;
-      gap: 28px;
+
+    .vit-btn svg {
+      margin-left: 6px;
+      margin-right: -2px;
+      stroke-width: 2;
     }
-    
-    .main-menu a {
-      color: var(--gray);
-      padding: 8px 20px;
-      font-weight: 500;
-      text-decoration: none;
-      transition: var(--transition);
+
+    .vit-btn:hover {
+      background: linear-gradient(92deg, #0ea5e9 0%, var(--primary-color) 100%);
+      box-shadow: 0 7px 22px rgba(16, 185, 129, 0.3);
+      transform: translateY(-2px) scale(1.03);
+    }
+
+    .vit-login-btn {
+      color: #0ea5e9;
+      font-weight: 800;
       font-size: 1.05rem;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-    
-    .main-menu a:hover {
-      color: var(--primary);
-      transform: translateY(-2px);
-    }
-    
-    .main-menu a.active {
-      color: var(--primary-dark);
-      font-weight: 700;
-    }
-    
-    .btn-register {
-      background: linear-gradient(90deg, var(--secondary), var(--primary));
-      color: white;
-      padding: 8px 20px;
+      padding: 9px 21px;
       border-radius: 12px;
-      font-weight: 700;
-      text-decoration: none;
+      background: none;
       transition: var(--transition);
-      font-size: 1.05rem;
+      text-decoration: none;
+      border: 1.5px solid rgba(14, 165, 233, 0.3);
       display: flex;
       align-items: center;
       gap: 8px;
-      box-shadow: 0 4px 10px rgba(14, 165, 233, 0.3);
     }
-    
-    .btn-register:hover {
-      background: linear-gradient(90deg, var(--secondary-dark), var(--primary-dark));
-      transform: translateY(-2px);
-      box-shadow: 0 6px 15px rgba(14, 165, 233, 0.4);
+
+    .vit-login-btn:hover {
+      background: rgba(14, 165, 233, 0.1);
+      color: var(--primary-dark);
+      border-color: rgba(16, 185, 129, 0.4);
+    }
+
+    .vit-user {
+      display: flex;
+      align-items: center;
+      padding: 8px 15px 8px 12px;
+      border-radius: 12px;
+      background: none;
+      text-decoration: none;
+      color: #0ea5e9;
+      transition: var(--transition);
+      font-weight: 800;
+    }
+
+    .vit-user:hover {
+      background: var(--primary-light);
+      color: var(--primary-color);
+    }
+
+    .vit-avatar {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      margin-left: 8px;
+      background: var(--white);
+      object-fit: cover;
+      border: 1.5px solid rgba(14, 165, 233, 0.2);
+    }
+
+    .vit-username {
+      font-size: 1.05rem;
+      font-weight: 800;
+      margin-left: 2px;
+      letter-spacing: 0.01em;
+      color: var(--text-dark);
+    }
+
+    .logo-vitreenet {
+      font-family: 'Poppins', sans-serif;
+      font-weight: 800;
+      font-size: 1.55rem;
+      background: linear-gradient(90deg,#11d6ad 0%, #10b981 60%, #2db4e8 100%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      letter-spacing: 1.7px;
+      filter: drop-shadow(0 1px 5px #10b98118);
+      white-space: nowrap;
+      display: inline-block;
+      padding-right: 3px;
+      padding-left: 3px;
+      line-height: 1.1;
+      text-shadow: none;
+    }
+
+    .btn-grad {
+      background: linear-gradient(90deg,#10b981 10%,#0ea5e9 100%);
+      color: #fff !important;
+      box-shadow: 0 2px 12px #10b98133;
+      font-weight: bold;
+      border-radius: 0.75rem;
+      transition: all .17s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      min-height: 42px;
+      padding: 0.5rem 0;
+    }
+
+    .btn-grad span {
+      width: 100%;
+      display: block;
+      text-align: center;
+    }
+
+    .btn-grad:hover {
+      filter: brightness(1.07);
+    }
+
+    @media (max-width: 768px) {
+      .hide-on-mobile {
+        display: none !important;
+      }
+    }
+
+    @media (min-width: 640px) {
+      .logo-vitreenet {
+        font-size: 1.9rem;
+      }
+    }
+
+    @media (min-width: 1024px) {
+      .logo-vitreenet {
+        font-size: 2.05rem;
+      }
     }
     
     /* بخش جستجو و فیلتر */
@@ -505,51 +638,15 @@
     }
     
     @media (max-width: 900px) {
-      .menu-toggle {
-        display: block;
-      }
-
-      .header {
-        padding: 15px 20px;
-        min-height: auto;
-      }
-      
-      .nav-container {
-        display: none;
-        position: absolute;
-        top: 100%;
-        right: 0;
-        width: 100%;
-        background: #fff;
-        flex-direction: column;
-        gap: 15px;
-        padding: 20px;
-        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-        z-index: 999;
-      }
-
-      .nav-container.show {
-        display: flex;
-      }
-
-      .main-menu {
-        flex-direction: column;
-        gap: 15px;
-      }
-
-      .btn-register {
-        justify-content: center;
-      }
-      
       .search-filter-bar {
         flex-direction: column;
       }
-      
+
       .search-box, .filter-select {
         width: 100%;
         min-width: auto;
       }
-      
+
       .filter-tabs {
         flex-wrap: wrap;
         justify-content: center;
@@ -598,17 +695,6 @@
     }
     
     @media (max-width: 480px) {
-      .header {
-        padding: 10px;
-      }
-      .logo, .btn-register {
-        font-size: 1rem;
-        padding: 6px 15px;
-      }
-      .main-menu a {
-        font-size: 0.95rem;
-        padding: 6px 15px;
-      }
       .item-img-container {
         height: 180px;
       }
@@ -678,28 +764,43 @@
   <script src="/nav-active.js" defer></script>
 </head>
 <body>
-  <!-- هدر -->
-  <div class="header">
-    <div class="logo">
-      <i class="fas fa-map-marker-alt"></i> ویترینت سنندج
+  <!-- هدر بهبود یافته -->
+<header class="w-full bg-white/30 sm:bg-white/90 backdrop-blur-xl sm:backdrop-blur-md shadow-none sm:shadow-sm sticky top-0 z-50">
+  <div class="max-w-7xl mx-auto flex flex-nowrap sm:flex-wrap items-center justify-between px-4 sm:px-6 py-2 sm:py-3 gap-y-2">
+    <div class="flex items-center gap-2 flex-shrink-0">
+      <a href="index.html" class="logo-vitreenet">Vitreenet</a>
+      <div class="flex items-center gap-1 px-2 py-1 rounded-full ml-2" style="background:linear-gradient(90deg,#10b981E6 70%,#0ea5e9E6); backdrop-filter: blur(5px);">
+        <svg width="16" height="16" fill="none" viewBox="0 0 22 22" class="ml-1 drop-shadow">
+          <defs>
+            <linearGradient id="city-icon" x1="0" y1="0" x2="22" y2="22" gradientUnits="userSpaceOnUse">
+              <stop stop-color="#fff" />
+              <stop offset="1" stop-color="#b2f2e9" />
+            </linearGradient>
+          </defs>
+          <path d="M11 2.5C7.13 2.5 4 5.61 4 9.45c0 3.52 4.1 7.93 6.2 10.01.46.47 1.2.47 1.66 0 2.1-2.08 6.14-6.49 6.14-10.01C18 5.61 14.87 2.5 11 2.5Zm0 10.25a2.75 2.75 0 1 1 0-5.5 2.75 2.75 0 0 1 0 5.5Z" fill="url(#city-icon)"/>
+        </svg>
+        <span class="font-bold text-white text-xs sm:text-sm drop-shadow-sm" style="letter-spacing:.3px;">سنندج</span>
+      </div>
     </div>
-    
-    <div class="menu-toggle">
-      <i class="fas fa-bars"></i>
-    </div>
-
-    <div class="nav-container">
-      <nav class="main-menu">
-        <a href="/"><i class="fas fa-home"></i> خانه</a>
-        <a href="shops.html"><i class="fas fa-shopping-bag"></i> فروشگاه‌ها</a>
-        <a href="about.html"><i class="fas fa-info-circle"></i> درباره ما</a>
-      </nav>
-    
-      <a href="register-shop.html" class="btn-register">
-        <i class="fas fa-plus-circle"></i> ثبت فروشگاه
+    <nav id="desktopNav" class="flex items-center justify-end gap-2 sm:gap-3 flex-nowrap text-sm sm:text-base w-auto">
+      <a href="index.html" class="main-nav-link flex-1 md:flex-none flex flex-col items-center justify-center gap-1 text-gray-600 hover:text-teal-600 font-bold px-2 sm:px-3 transition hide-on-mobile text-[12px] md:text-base">
+        <i class="ri-home-5-line text-lg md:hidden"></i>
+        <span>خانه</span>
       </a>
-    </div>
+      <a href="categories.html" class="main-nav-link flex-1 md:flex-none flex flex-col items-center justify-center gap-1 text-gray-600 hover:text-sky-600 font-bold px-2 sm:px-3 transition hide-on-mobile text-[12px] md:text-base">
+        <i class="ri-layout-grid-line text-lg md:hidden"></i>
+        <span>دسته‌بندی</span>
+      </a>
+      <a href="login.html" class="main-nav-link flex-1 md:flex-none flex flex-col items-center justify-center gap-1 text-gray-600 hover:text-sky-600 font-bold px-2 sm:px-3 transition hide-on-mobile text-[12px] md:text-base">
+        <i class="ri-login-box-line text-lg md:hidden"></i>
+        <span>ورود</span>
+      </a>
+      <a href="post.html" id="registerShopBtn" class="btn-grad px-3 sm:px-4 py-1 rounded-full font-bold text-sm transition sm:shadow sm:hover:scale-105">
+        <span>ثبت فروشگاه</span>
+      </a>
+    </nav>
   </div>
+</header>
 
   <!-- بخش جستجو و فیلتر -->
   <section class="search-section">
@@ -809,16 +910,9 @@
     const priceFilter = document.getElementById('priceFilter');
     const categoryFilter = document.getElementById('categoryFilter'); // اصلاح typo از "categoryFilter"
     const filterTabs = document.querySelectorAll('.filter-tab');
-    const menuToggle = document.querySelector('.menu-toggle'); // اصلاح typo از "menu-toggle"
-    const navContainer = document.querySelector('.nav-container');
-    
+
     let currentType = 'shops';
     let allItems = [];
-    
-    // مدیریت منوی موبایل
-    menuToggle.addEventListener('click', () => {
-      navContainer.classList.toggle('show');
-    });
 
     // لود اولیه با اسکلتون
     function showSkeleton() {
