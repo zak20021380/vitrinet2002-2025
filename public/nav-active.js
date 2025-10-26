@@ -263,6 +263,19 @@
     const body = document.body;
     if (!body) return null;
 
+    const currentPath = getCurrentPath();
+    const disableNav = currentPath.startsWith('/seller/');
+
+    if (disableNav) {
+      const existingNav = document.querySelector('footer.mobile-nav');
+      if (existingNav) {
+        existingNav.remove();
+      }
+      body.classList.remove(BODY_READY_CLASS);
+      body.classList.add('hide-mobile-nav');
+      return null;
+    }
+
     ensureStyle();
 
     let nav = document.querySelector('footer.mobile-nav');
