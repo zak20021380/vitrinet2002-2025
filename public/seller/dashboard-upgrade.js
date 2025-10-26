@@ -3,7 +3,15 @@
     ──────────────────────────────────────────────── */
 console.log('dashboard-upgrade.js loaded ✅');
 
-const API_BASE = 'http://localhost:5000/api';
+const API_CFG = window.VITRINET_API || null;
+const API_BASE = `${API_CFG ? API_CFG.backendOrigin : 'http://localhost:5000'}/api`;
+const withCreds = (init = {}) => {
+  if (API_CFG) return API_CFG.ensureCredentials(init);
+  if (init.credentials === undefined) {
+    return { ...init, credentials: 'include' };
+  }
+  return init;
+};
 
 /* span های قیمت تبلیغ در صفحه */
 const adPriceElems = {
@@ -53,7 +61,7 @@ async function fetchSellerProfile(forceRefresh = false) {
 
   sellerProfilePromise = (async () => {
     try {
-      const res = await fetch(`${API_BASE}/auth/me`, { credentials: 'include' });
+      const res = await fetch(`${API_BASE}/auth/me`, withCreds());
       if (!res.ok) {
         sellerProfileCache = null;
         return null;
@@ -221,9 +229,7 @@ async function pollSellerAdApprovals(isInitial = false) {
     const sellerId = await getSellerId();
     if (!sellerId) return;
 
-    const res = await fetch(`${API_BASE}/adOrder/seller?sellerId=${encodeURIComponent(sellerId)}`, {
-      credentials: 'include'
-    });
+    const res = await fetch(`${API_BASE}/adOrder/seller?sellerId=${encodeURIComponent(sellerId)}`, withCreds());
 
     if (res.status === 401 || res.status === 403) {
       if (adApprovalWatcherTimer) {
@@ -353,7 +359,7 @@ async function fetchPlanPrices () {
     if (phoneRes) {
       url += `?sellerPhone=${encodeURIComponent(phoneRes)}`;
     }
-    const res   = await fetch(url);
+    const res   = await fetch(url, withCreds());
     const json  = await res.json();
     const plans = json.plans || {};
 
@@ -380,7 +386,7 @@ async function fetchAdPrices () {
     const phone = await getSellerPhone();
     let url = `${API_BASE}/adPlans`;
     if (phone) url += `?sellerPhone=${encodeURIComponent(phone)}`;
-    const res = await fetch(url);
+    const res = await fetch(url, withCreds());
     if (!res.ok) throw new Error(`${res.status} ${res.statusText}`);
     const json = await res.json();
     const plansObj = json.adplans || {};
@@ -556,12 +562,11 @@ window.selectPlan = async function (slug) {
     closeModal();
     const premium = premiumToggle && premiumToggle.checked;
     try {
-      const res = await fetch(`${API_BASE}/seller/upgrade`, {
+      const res = await fetch(`${API_BASE}/seller/upgrade`, withCreds({
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
         body: JSON.stringify({ planSlug: slug, premium })
-      });
+      }));
       const data = await res.json();
       if (res.ok && data.success) {
         const msg = premium ? 'حساب شما با موفقیت پرمیوم شد.' : 'اشتراک شما با موفقیت فعال شد.';
@@ -591,7 +596,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   });
   try {
-    const res = await fetch(`${API_BASE}/auth/me`, { credentials: 'include' });
+    const res = await fetch(`${API_BASE}/auth/me`, withCreds());
     if (res.ok) {
       const data = await res.json();
       updatePremiumBadge(data?.seller?.isPremium);
@@ -662,7 +667,7 @@ async function fetchMyProducts() {
     const sellerId = await getSellerId();
     if (!sellerId) throw new Error('seller-id-missing');
 
-    const res = await fetch(`${API_BASE}/products?sellerId=${sellerId}`);
+    const res = await fetch(`${API_BASE}/products?sellerId=${sellerId}`, withCreds());
     const products = await res.json();
 
     if (!products.length) {
@@ -772,11 +777,10 @@ window.submitAdForm = async function(e) {
       formData.append('text', text);
       if (file) formData.append('image', file);
 
-      const res = await fetch(`${API_BASE}/adOrder`, {
+      const res = await fetch(`${API_BASE}/adOrder`, withCreds({
         method: 'POST',
-        body: formData,
-        credentials: 'include'
-      });
+        body: formData
+      }));
       const result = await res.json();
 
       if (!res.ok || !result.success || !result.adOrder) {
@@ -945,7 +949,7 @@ async function fetchMyPlans() {
   }
 
   try {
-    const res = await fetch(`${API_BASE}/sellerPlans/my`, { credentials: 'include' });
+    const res = await fetch(`${API_BASE}/sellerPlans/my`, withCreds());
     const json = await res.json();
 
     if (!res.ok || !json.plans || !json.plans.length) {

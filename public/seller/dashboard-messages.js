@@ -11,6 +11,16 @@ let chatsBox      = null;           // بعداً در DOMContentLoaded مقدا
 let firstLoad     = true;           // فقط بار اول لودینگ را نشان بده
 let chatsData     = [];             // ذخیره لیست چت‌ها برای محاسبه بج
 
+const API = window.VITRINET_API || null;
+const apiUrl = path => API ? API.buildUrl(path) : `http://localhost:5000${path}`;
+const withCreds = (init = {}) => {
+  if (API) return API.ensureCredentials(init);
+  if (init.credentials === undefined) {
+    return { ...init, credentials: 'include' };
+  }
+  return init;
+};
+
 function startChatsPolling() {
   if (chatsInterval) clearInterval(chatsInterval);
   fetchChats().catch(console.error);
@@ -65,12 +75,11 @@ chatReplyForm.addEventListener('submit', async e => {
   const text = chatReplyInput.value.trim();
   if (!text || !currentChatId) return;
   try {
-    const res = await fetch(`http://localhost:5000/api/chats/${currentChatId}/reply`, {
+    const res = await fetch(apiUrl(`/api/chats/${currentChatId}/reply`), withCreds({
       method: 'POST',
-      credentials: 'include',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ text, from: 'seller' })
-    });
+    }));
     if (!res.ok) {
       const err = await res.json().catch(() => ({}));
       throw new Error(err.message || 'خطا در ارسال پیام');
@@ -115,7 +124,7 @@ async function fetchChats() {
     chatsBox.innerHTML = '<div class="text-gray-400 text-center py-8">در حال بارگذاری …</div>';
   }
   try {
-    const res = await fetch('http://localhost:5000/api/chats', { credentials: 'include' });
+  const res = await fetch(apiUrl('/api/chats'), withCreds());
     if (res.status === 401) throw new Error('لطفاً ابتدا وارد شوید.');
     if (!res.ok) throw new Error('خطا در واکشی چت‌ها');
 
@@ -255,7 +264,7 @@ function renderChatListItem(chat) {
   /* باز کردن مدال گفتگو */
   wrapper.addEventListener('click', async () => {
     try {
-      const res = await fetch(`http://localhost:5000/api/chats/${chat._id}`, { credentials: 'include' });
+      const res = await fetch(apiUrl(`/api/chats/${chat._id}`), withCreds());
       if (res.ok) {
         const fresh = await res.json();
         chat = fresh;
@@ -281,10 +290,9 @@ function renderChatListItem(chat) {
     e.stopPropagation();
     if (!confirm('آیا از حذف این چت مطمئن هستید؟')) return;
     try {
-      await fetch(`http://localhost:5000/api/chats/${chat._id}`, {
-        method: 'DELETE',
-        credentials: 'include'
-      });
+      await fetch(apiUrl(`/api/chats/${chat._id}`), withCreds({
+        method: 'DELETE'
+      }));
       if (currentChatId === chat._id) {
         chatModalBg.classList.add('hidden');
         document.body.style.overflow = '';
@@ -461,12 +469,11 @@ contactForm.addEventListener('submit', async e => {
   btn.innerText = 'در حال ارسال…';
 
   try {
-    const res = await fetch('http://localhost:5000/api/chats/contact-admin', {
+    const res = await fetch(apiUrl('/api/chats/contact-admin'), withCreds({
       method: 'POST',
-      credentials: 'include',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ message: text })
-    });
+    }));
     if (!res.ok) {
       const err = await res.json().catch(() => ({}));
       throw new Error(err.error || err.message || 'خطا در ارسال پیام');
@@ -511,12 +518,11 @@ confirmBlockBtn.addEventListener('click', async () => {
   if (!blockUserId) return;
   confirmBlockBtn.disabled = true;
   try {
-    const res = await fetch(`http://localhost:5000/api/user/block/${blockUserId}`, {
+    const res = await fetch(apiUrl(`/api/user/block/${blockUserId}`), withCreds({
       method: 'POST',
-      credentials: 'include',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ reason })
-    });
+    }));
     if (!res.ok) {
       const err = await res.json().catch(() => ({}));
       throw new Error(err.message || 'خطا در مسدودسازی');

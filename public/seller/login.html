@@ -251,7 +251,18 @@
     © 2025 <span class="font-bold text-[#10b981]">ویترینت</span> | همه حقوق محفوظ است.
   </footer>
 
+<script src="api-client.js"></script>
+
 <script>
+  const API = window.VITRINET_API || {
+    buildUrl: path => path,
+    ensureCredentials(init = {}) {
+      if (init.credentials === undefined) {
+        return { ...init, credentials: 'include' };
+      }
+      return init;
+    }
+  };
   // --- المان‌های صفحه ---
   const phoneInput  = document.getElementById('phone');
   const form        = document.getElementById('login-form');
@@ -308,10 +319,11 @@
     }
 
     try {
-      const res = await fetch('http://localhost:5000/api/auth/login', {
+      const res = await fetch(API.buildUrl('/api/auth/login'), {
         method: 'POST',
-        credentials: 'include', // ارسال/دریافت کوکی HttpOnly
-        headers: { 'Content-Type': 'application/json' },
+        ...API.ensureCredentials({
+          headers: { 'Content-Type': 'application/json' },
+        }),
         body: JSON.stringify({ phone, password })
       });
       const data = await res.json();

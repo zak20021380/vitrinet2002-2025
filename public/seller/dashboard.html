@@ -1590,7 +1590,23 @@
 
 
 
+<script src="api-client.js"></script>
 <script>
+const API = window.VITRINET_API || {
+  buildUrl: path => path,
+  ensureCredentials(init = {}) {
+    if (init.credentials === undefined) {
+      return { ...init, credentials: 'include' };
+    }
+    return init;
+  }
+};
+const apiFetch = (path, options = {}) => {
+  const url = API.buildUrl(path);
+  const opts = API.ensureCredentials(options);
+  return fetch(url, opts);
+};
+
 
 
 
@@ -1601,9 +1617,8 @@
  // گرفتن فروشنده جاری
 async function fetchCurrentSeller() {
   try {
-    const res = await fetch('/api/auth/getCurrentSeller', {
-      method: 'GET',
-      credentials: 'include'
+    const res = await apiFetch('/api/auth/getCurrentSeller', {
+      method: 'GET'
     });
     if (!res.ok) {
       window.location.href = 'login.html';
@@ -1622,9 +1637,7 @@ async function fetchCurrentSeller() {
 async function fetchUnreadCount() {
   try {
     if (!window.seller?.id) return 0;
-    const res = await fetch(`/api/chats?sellerId=${window.seller.id}`, {
-      credentials: 'include'
-    });
+    const res = await apiFetch(`/api/chats?sellerId=${window.seller.id}`);
     if (!res.ok) return 0;
     const chats = await res.json();
     // مجموع پیام‌های ادمین که هنوز readBySeller=false هستند
@@ -1675,9 +1688,8 @@ async function markAllRead() {
   try {
     if (!window.seller?.id) return;
 
-    const res = await fetch('/api/chats/markAllRead', {
+    const res = await apiFetch('/api/chats/markAllRead', {
       method: 'POST',
-      credentials: 'include',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ sellerId: window.seller.id })
     });
@@ -1739,8 +1751,7 @@ let lastMsgCount = 0;
 async function fetchNewMsgCount(){
   try{
     if(!window.seller?.id) return 0;
-    const res = await fetch(`/api/chats?sellerId=${window.seller.id}`,
-                            { credentials:'include' });
+    const res = await apiFetch(`/api/chats?sellerId=${window.seller.id}`);
     if(!res.ok) return 0;
     const chats = await res.json();
     return getUnreadTotal(chats);    // ← همان محاسبه‌ی عمومی
@@ -2058,11 +2069,10 @@ document.getElementById("addProductForm").addEventListener("submit", async funct
   };
 
   try {
-    const res = await fetch("/api/products", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(productData),
-      credentials: "include"  // اگر نیاز به ارسال کوکی/توکن دارید
+    const res = await apiFetch('/api/products', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(productData)
     });
     const result = await res.json();
     if (res.ok) {
@@ -2114,7 +2124,7 @@ if (!window.seller?.id) {
 
   try {
     // دریافت محصولات فروشنده
-  const res = await fetch(`/api/products?sellerId=${window.seller.id}`, { credentials: 'include' });
+  const res = await apiFetch(`/api/products?sellerId=${window.seller.id}`);
     if (!res.ok) throw new Error("مشکل در دریافت محصولات");
     const products = await res.json();
 
@@ -2187,7 +2197,7 @@ if (!window.seller?.id) {
 async function deleteProduct(productId) {
   if (!confirm("آیا از حذف این محصول مطمئن هستید؟")) return;
   try {
-    const res = await fetch(`http://localhost:5000/api/products/${productId}`, { method: "DELETE" });
+    const res = await apiFetch(`/api/products/${productId}`, { method: 'DELETE' });
     const result = await res.json();
     if (res.ok) {
       renderProducts();
@@ -2332,9 +2342,9 @@ async function deleteProduct(productId) {
     };
 
     try {
-      const res = await fetch(`http://localhost:5000/api/products/${productId}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
+      const res = await apiFetch(`/api/products/${productId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(updatedFields)
       });
       const result = await res.json();
@@ -2624,7 +2634,7 @@ btn.dataset.listener = '1';
 async function fetchSellerMessages() {
   if (!window.seller?.id) return [];
   try {
-    const res = await fetch(`/api/chats?sellerId=${window.seller.id}`, { credentials: "include" });
+    const res = await apiFetch(`/api/chats?sellerId=${window.seller.id}`);
     if (!res.ok) return [];
     return await res.json();
   } catch (err) {
