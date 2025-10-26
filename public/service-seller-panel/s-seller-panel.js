@@ -591,397 +591,6 @@ const collectBookingKeys = (list) => {
   return set;
 };
 
-const SELLER_RUNTIME = {
-  blocked: false,
-  blockSources: [],
-  blockMessages: [],
-  detectedAt: null
-};
-
-window.__SELLER_RUNTIME_STATE__ = SELLER_RUNTIME;
-
-const BLOCK_SOURCE_LABELS = Object.freeze({
-  seller: 'اطلاعات فروشنده',
-  services: 'مدیریت خدمات',
-  bookings: 'نوبت‌ها',
-  default: 'پنل فروشنده'
-});
-
-const formatBlockTimestamp = (value) => {
-  if (!value) return '';
-  const date = value instanceof Date ? value : new Date(value);
-  if (Number.isNaN(date.getTime())) return '';
-  try {
-    return new Intl.DateTimeFormat('fa-IR', {
-      dateStyle: 'long',
-      timeStyle: 'short'
-    }).format(date);
-  } catch {
-    return date.toLocaleString('fa-IR');
-  }
-};
-
-const SellerBlockScreen = (() => {
-  const overlay = document.getElementById('blocked-overlay');
-  if (!overlay) {
-    return {
-      show() {},
-      hide() {}
-    };
-  }
-
-  const titleEl = overlay.querySelector('#blocked-title');
-  const messageEl = overlay.querySelector('#blocked-message');
-  const sourcesEl = overlay.querySelector('#blocked-sources');
-  const reasonEl = overlay.querySelector('#blocked-reason');
-  const timestampEl = overlay.querySelector('#blocked-timestamp');
-  const refreshBtn = overlay.querySelector('#blocked-refresh');
-
-  const defaultMessage = 'دسترسی شما به پنل فروشنده موقتاً محدود شده است.';
-
-  if (refreshBtn) {
-    refreshBtn.addEventListener('click', () => {
-      window.location.reload();
-    });
-  }
-
-  return {
-    show(state = SELLER_RUNTIME) {
-      if (!overlay) return;
-
-      const sources = Array.isArray(state.blockSources) && state.blockSources.length
-        ? state.blockSources
-        : ['default'];
-      const sourceLabel = sources
-        .map((src) => BLOCK_SOURCE_LABELS[src] || BLOCK_SOURCE_LABELS.default)
-        .join(' • ');
-
-      const messages = Array.isArray(state.blockMessages)
-        ? state.blockMessages.filter(Boolean)
-        : [];
-
-      if (titleEl) {
-        titleEl.textContent = 'حساب فروشنده محدود شده است';
-      }
-
-      if (messageEl) {
-        messageEl.textContent = defaultMessage;
-      }
-
-      if (sourcesEl) {
-        sourcesEl.textContent = sourceLabel;
-      }
-
-      if (reasonEl) {
-        if (messages.length) {
-          reasonEl.textContent = `پیام سیستم: ${messages.join('، ')}`;
-          reasonEl.removeAttribute('hidden');
-        } else {
-          reasonEl.textContent = '';
-          reasonEl.setAttribute('hidden', '');
-        }
-      }
-
-      if (timestampEl) {
-        const ts = state.detectedAt ? formatBlockTimestamp(state.detectedAt) : '';
-        if (ts) {
-          timestampEl.textContent = `آخرین بررسی: ${ts}`;
-          timestampEl.removeAttribute('hidden');
-        } else {
-          timestampEl.textContent = '';
-          timestampEl.setAttribute('hidden', '');
-        }
-      }
-
-      overlay.removeAttribute('hidden');
-      overlay.classList.add('is-visible');
-      overlay.setAttribute('aria-hidden', 'false');
-
-      if (document.body) {
-        document.body.setAttribute('data-seller-state', 'blocked');
-      }
-
-      setTimeout(() => {
-        if (typeof overlay.focus === 'function') {
-          try {
-            overlay.focus({ preventScroll: true });
-          } catch {
-            overlay.focus();
-          }
-        }
-      }, 0);
-    },
-    hide() {
-      if (!overlay) return;
-      overlay.classList.remove('is-visible');
-      overlay.setAttribute('hidden', '');
-      overlay.setAttribute('aria-hidden', 'true');
-      if (document.body) {
-        document.body.removeAttribute('data-seller-state');
-      }
-    }
-  };
-})();
-
-const BlockStateManager = (() => {
-  const KEY = 'vt:seller:block-state';
-
-  const safeRead = () => {
-    if (typeof localStorage === 'undefined') {
-      return { blocked: false };
-    }
-    try {
-      const raw = localStorage.getItem(KEY);
-      if (!raw) return { blocked: false };
-      const parsed = JSON.parse(raw);
-      return parsed && typeof parsed === 'object' ? parsed : { blocked: false };
-    } catch (err) {
-      console.warn('BlockStateManager.read failed', err);
-      return { blocked: false };
-    }
-  };
-
-  const safeWrite = (value) => {
-    if (typeof localStorage === 'undefined') return;
-    try {
-      localStorage.setItem(KEY, JSON.stringify(value));
-    } catch (err) {
-      console.warn('BlockStateManager.write failed', err);
-    }
-  };
-
-  const cleanMessages = (items = []) => items
-    .map((item) => (typeof item === 'string' ? item.trim() : ''))
-    .filter(Boolean);
-
-  const cleanSources = (items = []) => items
-    .map((item) => (typeof item === 'string' ? item.trim() : ''))
-    .filter(Boolean);
-
-  return {
-    markBlocked(signals = []) {
-      const blockedAt = new Date().toISOString();
-      const messages = cleanMessages(signals.map((signal) => signal?.message));
-      const sources = cleanSources(signals.map((signal) => signal?.source));
-      const info = { blockedAt, messages, sources };
-
-      safeWrite({
-        blocked: true,
-        blockedAt,
-        messages,
-        sources,
-        lastBlockInfo: info,
-        lastUnblockedAt: null,
-        needsUnblockNotice: false
-      });
-
-      return info;
-    },
-    resolveUnblocked() {
-      const state = safeRead();
-      if (state?.blocked) {
-        const info = {
-          blockedAt: state.blockedAt || state.lastBlockInfo?.blockedAt || null,
-          messages: cleanMessages(state.messages?.length ? state.messages : state.lastBlockInfo?.messages),
-          sources: cleanSources(state.sources?.length ? state.sources : state.lastBlockInfo?.sources)
-        };
-        const unblockedAt = new Date().toISOString();
-
-        safeWrite({
-          blocked: false,
-          blockedAt: null,
-          messages: [],
-          sources: [],
-          lastBlockInfo: info,
-          lastUnblockedAt: unblockedAt,
-          needsUnblockNotice: true
-        });
-
-        return { ...info, unblockedAt };
-      }
-
-      if (state?.needsUnblockNotice && state.lastBlockInfo) {
-        return {
-          ...state.lastBlockInfo,
-          messages: cleanMessages(state.lastBlockInfo?.messages),
-          sources: cleanSources(state.lastBlockInfo?.sources),
-          unblockedAt: state.lastUnblockedAt || null
-        };
-      }
-
-      return null;
-    },
-    acknowledge() {
-      const state = safeRead();
-      if (!state?.needsUnblockNotice) return;
-      state.needsUnblockNotice = false;
-      safeWrite(state);
-    }
-  };
-})();
-
-const SellerStatusPopover = (() => {
-  const root = document.getElementById('seller-status-popover');
-  if (!root) {
-    return {
-      show() {},
-      hide() {}
-    };
-  }
-
-  const titleEl = root.querySelector('#status-popover-title');
-  const messageEl = root.querySelector('#status-popover-message');
-  const detailsEl = root.querySelector('#status-popover-details');
-  const closeBtn = root.querySelector('#status-popover-close');
-  let currentKey = '';
-
-  const hide = ({ acknowledge = false } = {}) => {
-    root.classList.remove('is-visible');
-    root.setAttribute('hidden', '');
-    root.setAttribute('aria-hidden', 'true');
-    currentKey = '';
-    if (acknowledge) {
-      BlockStateManager.acknowledge();
-    }
-  };
-
-  const renderDetails = ({ messages, sources } = {}) => {
-    if (!detailsEl) return;
-    const list = Array.isArray(messages) ? messages.filter(Boolean) : [];
-    const extraSources = Array.isArray(sources) ? Array.from(new Set(sources.filter(Boolean))) : [];
-
-    if (!list.length && extraSources.length) {
-      const sourceLabel = extraSources
-        .map((src) => BLOCK_SOURCE_LABELS[src] || BLOCK_SOURCE_LABELS.default || src)
-        .join('، ');
-      list.push(`دسترسی این بخش‌ها دوباره فعال شد: ${sourceLabel}`);
-    }
-
-    if (!list.length) {
-      list.push('برای ادامه فعالیت، خدمات و نوبت‌های خود را بررسی و در صورت نیاز بروزرسانی کنید.');
-    }
-
-    detailsEl.innerHTML = list.map((msg) => `<li>${escapeHtml(msg)}</li>`).join('');
-    detailsEl.removeAttribute('hidden');
-  };
-
-  const show = (info = {}) => {
-    const { blockedAt, unblockedAt, messages, sources } = info || {};
-    const key = [
-      blockedAt || '',
-      unblockedAt || '',
-      Array.isArray(messages) ? messages.join('|') : '',
-      Array.isArray(sources) ? sources.join('|') : ''
-    ].join('|');
-
-    if (currentKey === key && root.classList.contains('is-visible')) {
-      return;
-    }
-
-    currentKey = key;
-
-    if (titleEl) {
-      titleEl.textContent = 'دسترسی فروشگاه فعال شد';
-    }
-
-    if (messageEl) {
-      const blockedText = blockedAt ? formatBlockTimestamp(blockedAt) : '';
-      const unblockedText = unblockedAt ? formatBlockTimestamp(unblockedAt) : '';
-      let text = 'دسترسی شما به پنل فروشنده دوباره برقرار شد.';
-
-      if (blockedText && unblockedText) {
-        text = `دسترسی شما که در ${blockedText} محدود شده بود، در ${unblockedText} دوباره فعال شد.`;
-      } else if (blockedText) {
-        text = `دسترسی شما که در ${blockedText} محدود شده بود، اکنون دوباره فعال شده است.`;
-      } else if (unblockedText) {
-        text = `این پیام در ${unblockedText} ثبت شده است و دسترسی شما اکنون فعال است.`;
-      }
-
-      messageEl.textContent = text;
-    }
-
-    renderDetails({ messages, sources });
-
-    root.removeAttribute('hidden');
-    root.classList.add('is-visible');
-    root.setAttribute('aria-hidden', 'false');
-
-    setTimeout(() => {
-      try {
-        root.focus({ preventScroll: true });
-      } catch {
-        root.focus();
-      }
-    }, 0);
-  };
-
-  if (closeBtn) {
-    closeBtn.addEventListener('click', () => hide({ acknowledge: true }));
-  }
-
-  root.addEventListener('keydown', (event) => {
-    if (event.key === 'Escape') {
-      hide({ acknowledge: true });
-    }
-  });
-
-  return {
-    show,
-    hide
-  };
-})();
-
-function markSellerBlocked(signals = []) {
-  const nextSources = new Set(Array.isArray(SELLER_RUNTIME.blockSources) ? SELLER_RUNTIME.blockSources : []);
-  const nextMessages = new Set(Array.isArray(SELLER_RUNTIME.blockMessages) ? SELLER_RUNTIME.blockMessages : []);
-
-  signals.forEach((signal) => {
-    if (signal?.source) nextSources.add(signal.source);
-    const msg = (signal?.message || '').trim();
-    if (msg) nextMessages.add(msg);
-  });
-
-  SELLER_RUNTIME.blockSources = Array.from(nextSources);
-  SELLER_RUNTIME.blockMessages = Array.from(nextMessages);
-  SELLER_RUNTIME.detectedAt = SELLER_RUNTIME.detectedAt || new Date();
-  SELLER_RUNTIME.blocked = true;
-
-  console.warn('Seller account flagged as blocked', SELLER_RUNTIME);
-  BlockStateManager.markBlocked(signals);
-  SellerStatusPopover.hide();
-  SellerBlockScreen.show(SELLER_RUNTIME);
-}
-
-async function parseForbiddenResponse(response, fallbackMessage) {
-  if (!response) {
-    return { message: fallbackMessage, details: null };
-  }
-
-  try {
-    const rawText = await response.text();
-    if (!rawText) {
-      return { message: fallbackMessage, details: null };
-    }
-
-    try {
-      const data = JSON.parse(rawText);
-      return {
-        message: data?.message || fallbackMessage,
-        details: data
-      };
-    } catch {
-      const cleaned = rawText.replace(/\s+/g, ' ').trim();
-      return {
-        message: cleaned || fallbackMessage,
-        details: null
-      };
-    }
-  } catch (err) {
-    console.warn('parseForbiddenResponse failed', err);
-    return { message: fallbackMessage, details: null };
-  }
-}
-
 const API = {
   async _json(res) {
     const txt = await res.text();
@@ -1170,26 +779,8 @@ async createService(payload) {
     }
     
     if (r.status === 403) {
-      console.warn('Bookings API access forbidden');
-      let message = 'دسترسی شما به مدیریت نوبت‌ها محدود شده است.';
-      try {
-        const rawText = await r.text();
-        if (rawText) {
-          try {
-            const data = JSON.parse(rawText);
-            message = data?.message || message;
-          } catch {
-            const cleaned = rawText.replace(/\s+/g, ' ').trim();
-            if (cleaned) message = cleaned;
-          }
-        }
-      } catch (parseErr) {
-        console.warn('Failed to parse bookings forbidden response', parseErr);
-      }
-      const err = new Error('BOOKINGS_FORBIDDEN');
-      err.status = 403;
-      err.uiMessage = message;
-      throw err;
+      console.warn('Bookings API access returned 403; continuing with empty list.');
+      return [];
     }
 
     if (!r.ok && r.status !== 304) {
@@ -1416,28 +1007,12 @@ async function fetchInitialData() {
       return;
     }
 
-    const blockedSignals = [];
-
     if (sellerRes.status === 403) {
-      const info = await parseForbiddenResponse(sellerRes, 'دسترسی به اطلاعات فروشنده محدود شده است.');
-      blockedSignals.push({ source: 'seller', message: info.message });
+      console.warn('Seller info request returned 403; falling back to local data.');
     }
 
     if (servicesRes.status === 403) {
-      const info = await parseForbiddenResponse(servicesRes, 'دسترسی به مدیریت خدمات محدود شده است.');
-      blockedSignals.push({ source: 'services', message: info.message });
-    }
-
-    if (bookingsError?.status === 403) {
-      blockedSignals.push({
-        source: 'bookings',
-        message: bookingsError.uiMessage || bookingsError.message || 'دسترسی به مدیریت نوبت‌ها محدود شده است.'
-      });
-    }
-
-    if (blockedSignals.length) {
-      markSellerBlocked(blockedSignals);
-      return { blocked: true };
+      console.warn('Service list request returned 403; falling back to cached services.');
     }
 
     if (bookingsError) {
@@ -1547,16 +1122,6 @@ async function fetchInitialData() {
           </div>
         `).join('');
       }
-    }
-
-    const reactivationInfo = BlockStateManager.resolveUnblocked();
-    if (reactivationInfo) {
-      SellerStatusPopover.show(reactivationInfo);
-      if (typeof UIComponents !== 'undefined' && UIComponents.showToast) {
-        UIComponents.showToast('دسترسی فروشگاه شما فعال شد.', 'success', 6000);
-      }
-    } else {
-      SellerStatusPopover.hide();
     }
 
   } catch (err) {
@@ -4750,11 +4315,7 @@ function showPersonalizedWelcome(sellerData) {
   }
 }
 
-const initialState = await fetchInitialData();
-if (SELLER_RUNTIME.blocked || initialState?.blocked) {
-  console.warn('Seller panel initialization halted due to blocked state.');
-  return;
-}
+await fetchInitialData();
 
 initSellerPersonalization();
 
@@ -4902,11 +4463,6 @@ loadCustomers();
 
   // open modal
   async function openModal() {
-    if (SELLER_RUNTIME.blocked) {
-      SellerBlockScreen.show(SELLER_RUNTIME);
-      return;
-    }
-
     await load();
     try {
       const bookings = await API.getBookings();

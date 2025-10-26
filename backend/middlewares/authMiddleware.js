@@ -92,13 +92,9 @@ module.exports = (requiredRole = null) => {
     }
   }
   if (payloadRole === 'seller') {
-    const s = await Seller.findById(payload.id).select('phone blockedByAdmin');
-    const phoneVariants = buildPhoneCandidates(s?.phone);
-    const isBannedPhone = phoneVariants.length
-      ? await BannedPhone.findOne({ phone: { $in: phoneVariants } })
-      : null;
-    if (!s || s.blockedByAdmin || isBannedPhone) {
-      return res.status(403).json({ message: 'دسترسی شما مسدود شده است.' });
+    const s = await Seller.findById(payload.id).select('_id');
+    if (!s) {
+      return res.status(403).json({ message: 'حساب فروشنده یافت نشد.' });
     }
   }
 
