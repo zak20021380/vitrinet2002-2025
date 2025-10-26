@@ -20,44 +20,96 @@
     background: linear-gradient(120deg, #212e2b 0%, #23272f 90%);
   }
 
-  .accountant-link {
-    display: inline-flex;
+  /* Floating Accountant Button - Always Visible */
+  .floating-accountant-btn {
+    position: fixed;
+    bottom: 2rem;
+    left: 2rem;
+    display: flex;
     align-items: center;
     justify-content: center;
-    gap: 0.6rem;
-    padding: 0.9rem 1.6rem;
-    border-radius: 1rem;
+    gap: 0.7rem;
+    padding: 1rem 1.5rem;
+    border-radius: 3rem;
     background: linear-gradient(135deg, #0ea5e9 0%, #10b981 100%);
     color: #fff;
     font-weight: 700;
-    font-size: 1rem;
-    box-shadow: 0 12px 30px rgba(14, 165, 233, 0.25);
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    font-size: 0.95rem;
+    box-shadow: 0 8px 24px rgba(14, 165, 233, 0.4), 0 4px 12px rgba(16, 185, 129, 0.3);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     border: none;
     cursor: pointer;
     text-decoration: none;
-    margin: 1.5rem auto 0;
+    z-index: 100;
+    backdrop-filter: blur(10px);
+    white-space: nowrap;
   }
 
-  .accountant-link i {
-    font-size: 1.4rem;
+  .floating-accountant-btn i {
+    font-size: 1.5rem;
+    flex-shrink: 0;
   }
 
-  .accountant-link:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 16px 34px rgba(14, 165, 233, 0.35);
+  .floating-accountant-btn .accountant-text {
+    transition: opacity 0.2s ease, max-width 0.3s ease;
+    max-width: 200px;
+    overflow: hidden;
   }
 
-  .accountant-link:focus {
-    outline: 3px solid rgba(14, 165, 233, 0.35);
+  .floating-accountant-btn:hover {
+    transform: translateY(-4px) scale(1.05);
+    box-shadow: 0 12px 32px rgba(14, 165, 233, 0.5), 0 6px 16px rgba(16, 185, 129, 0.4);
+    background: linear-gradient(135deg, #0284c7 0%, #059669 100%);
+  }
+
+  .floating-accountant-btn:active {
+    transform: translateY(-2px) scale(1.02);
+  }
+
+  .floating-accountant-btn:focus {
+    outline: 3px solid rgba(14, 165, 233, 0.4);
     outline-offset: 3px;
   }
 
-  @media (max-width: 640px) {
-    .accountant-link {
-      width: 100%;
-      padding: 0.85rem 1.2rem;
-      font-size: 0.95rem;
+  /* Mobile Responsive */
+  @media (max-width: 768px) {
+    .floating-accountant-btn {
+      bottom: 1.5rem;
+      left: 1.5rem;
+      padding: 0.9rem 1.3rem;
+      font-size: 0.9rem;
+      border-radius: 2.5rem;
+    }
+
+    .floating-accountant-btn i {
+      font-size: 1.3rem;
+    }
+  }
+
+  /* Extra small screens - icon only */
+  @media (max-width: 480px) {
+    .floating-accountant-btn {
+      padding: 1rem;
+      border-radius: 50%;
+      width: 56px;
+      height: 56px;
+      gap: 0;
+    }
+
+    .floating-accountant-btn .accountant-text {
+      display: none;
+    }
+
+    .floating-accountant-btn i {
+      font-size: 1.4rem;
+    }
+  }
+
+  /* Ensure button doesn't overlap with sidebar on small screens */
+  @media (max-width: 1024px) and (min-width: 481px) {
+    .floating-accountant-btn {
+      left: 1rem;
+      bottom: 1rem;
     }
   }
 
@@ -1237,10 +1289,6 @@
   سلام <span id="seller-welcome" style="color:#0ea5e9;">فروشنده عزیز</span> 👋
 </h1>
       <div class="text-gray-500 text-[15px] mb-8 text-center">آمار و وضعیت فروشگاهت رو یکجا ببین و مدیریت کن!</div>
-      <a class="accountant-link" href="../hesabketab/accountant.html" id="accountantShortcut">
-        <i class="ri-calculator-line" aria-hidden="true"></i>
-        <span>ورود به حسابداری فروشگاه</span>
-      </a>
       <div class="w-full max-w-2xl flex flex-wrap justify-center gap-4 mb-7">
         <div class="stat-card w-full sm:w-auto">
           <div class="icon">
@@ -2722,6 +2770,11 @@ async function loadPerformanceStatus() {
 <script src="performance-status.js"></script>
 <script src="dashboard-content.js"></script>
 
+<!-- Floating Accountant Button -->
+<a class="accountant-link floating-accountant-btn" href="../hesabketab/accountant.html" id="accountantShortcut" title="ورود به حسابداری فروشگاه">
+  <i class="ri-calculator-line" aria-hidden="true"></i>
+  <span class="accountant-text">حسابداری</span>
+</a>
 
 </body>
 </html>
