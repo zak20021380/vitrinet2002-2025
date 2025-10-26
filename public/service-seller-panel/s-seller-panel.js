@@ -58,7 +58,117 @@ const escapeHtml = (str = '') => String(str).replace(/[&<>"']/g, (char) => ({
   "'": '&#39;'
 }[char] || char));
 
-const MODERATION_STORAGE_KEY = 'vt:service-seller:moderation';
+const MODERATION_STORAGE_BASE_KEY = 'vt:service-seller:moderation';
+const MODERATION_STORAGE_VERSION = 'v2';
+const MODERATION_STORAGE_KEY = `${MODERATION_STORAGE_BASE_KEY}:${MODERATION_STORAGE_VERSION}`;
+const MODERATION_CACHE_LIMIT = 20;
+const MODERATION_MAX_AGE_MS = 7 * 24 * 60 * 60 * 1000; // 7 روز
+
+function normalizeString(value) {
+  if (value == null) return '';
+  try {
+    return String(value).trim();
+  } catch {
+    return '';
+  }
+}
+
+function normalizeId(value) {
+  const str = normalizeString(value);
+  return str ? str : null;
+}
+
+function normalizeShopUrl(value) {
+  const str = normalizeString(value).toLowerCase();
+  return str || null;
+}
+
+function normalizePhoneDigits(value) {
+  const str = String(value || '').replace(/[^0-9]/g, '');
+  return str || null;
+}
+
+function getShopUrlQueryParam() {
+  if (typeof getShopUrlQueryParam.cache !== 'undefined') {
+    return getShopUrlQueryParam.cache;
+  }
+  try {
+    const params = new URLSearchParams(window.location.search);
+    const raw = params.get('shopurl') || params.get('shopUrl') || '';
+    const normalized = normalizeShopUrl(raw);
+    getShopUrlQueryParam.cache = normalized;
+    return normalized;
+  } catch (err) {
+    console.warn('getShopUrlQueryParam failed', err);
+    getShopUrlQueryParam.cache = null;
+    return null;
+  }
+}
+
+function buildIdentityKeys({ sellerId, shopId, shopUrl, ownerPhone } = {}) {
+  const keys = new Set();
+  if (sellerId) keys.add(`seller:${sellerId}`);
+  if (shopId) keys.add(`shop:${shopId}`);
+  if (shopUrl) keys.add(`shop-url:${shopUrl}`);
+  if (ownerPhone) keys.add(`phone:${ownerPhone}`);
+  return Array.from(keys);
+}
+
+function getLocalSellerIdentity() {
+  try {
+    const raw = localStorage.getItem('seller');
+    if (!raw) return {};
+    const data = JSON.parse(raw);
+    if (!data || typeof data !== 'object') return {};
+    return {
+      sellerId: normalizeId(data.id || data._id),
+      shopId: normalizeId(data.shopId || data.serviceShopId),
+      shopUrl: normalizeShopUrl(data.shopurl || data.shopUrl),
+      ownerPhone: normalizePhoneDigits(data.phone)
+    };
+  } catch (err) {
+    console.warn('getLocalSellerIdentity failed', err);
+    return {};
+  }
+}
+
+function getRuntimeIdentity() {
+  const base = { ...getLocalSellerIdentity() };
+  const queryShopUrl = getShopUrlQueryParam();
+  if (queryShopUrl) {
+    base.shopUrl = queryShopUrl;
+  }
+  return base;
+}
+
+function readModerationCache() {
+  try {
+    const raw = localStorage.getItem(MODERATION_STORAGE_KEY);
+    if (!raw) return {};
+    const parsed = JSON.parse(raw);
+    return (parsed && typeof parsed === 'object') ? parsed : {};
+  } catch (err) {
+    console.warn('readModerationCache failed', err);
+    return {};
+  }
+}
+
+function writeModerationCache(map) {
+  try {
+    localStorage.setItem(MODERATION_STORAGE_KEY, JSON.stringify(map));
+  } catch (err) {
+    console.warn('writeModerationCache failed', err);
+  }
+}
+
+(function dropLegacyModerationCache() {
+  try {
+    localStorage.removeItem(MODERATION_STORAGE_BASE_KEY);
+  } catch (err) {
+    console.warn('dropLegacyModerationCache failed', err);
+  }
+})();
+
 const moderationElements = {
   overlay: document.getElementById('moderation-overlay'),
   message: document.getElementById('moderation-overlay-message'),
@@ -87,8 +197,27 @@ const formatModerationDateTime = (value) => {
 
 const readStoredModeration = () => {
   try {
-    const raw = localStorage.getItem(MODERATION_STORAGE_KEY);
-    return raw ? JSON.parse(raw) : null;
+    const cache = readModerationCache();
+    const identity = getRuntimeIdentity();
+    const keys = buildIdentityKeys(identity);
+    if (!keys.length) return null;
+    const now = Date.now();
+    for (const key of keys) {
+      const entry = cache[key];
+      if (!entry) continue;
+      const age = entry.timestamp ? now - Number(entry.timestamp) : 0;
+      if (MODERATION_MAX_AGE_MS && age > MODERATION_MAX_AGE_MS) {
+        continue;
+      }
+      if (entry.shopUrl && identity.shopUrl && normalizeShopUrl(entry.shopUrl) !== identity.shopUrl) {
+        continue;
+      }
+      if (entry.sellerId && identity.sellerId && normalizeId(entry.sellerId) !== identity.sellerId) {
+        continue;
+      }
+      return { ...entry };
+    }
+    return null;
   } catch (err) {
     console.warn('readStoredModeration failed', err);
     return null;
@@ -97,13 +226,47 @@ const readStoredModeration = () => {
 
 const persistModeration = (state) => {
   try {
-    localStorage.setItem(MODERATION_STORAGE_KEY, JSON.stringify({
+    const cache = readModerationCache();
+    const identity = {
+      sellerId: normalizeId(state?.seller?.id || state?.seller?._id),
+      shopId: normalizeId(state?.shop?.id || state?.shop?._id),
+      shopUrl: normalizeShopUrl(state?.shop?.shopUrl || state?.seller?.shopurl || getShopUrlQueryParam()),
+      ownerPhone: normalizePhoneDigits(state?.shop?.ownerPhone || state?.seller?.phone)
+    };
+
+    const keys = buildIdentityKeys(identity);
+    if (!keys.length) {
+      keys.push(...buildIdentityKeys(getRuntimeIdentity()));
+    }
+    if (!keys.length) return;
+
+    const entry = {
       isBlocked: !!state?.isBlocked,
-      reason: state?.reason || '',
-      blockedAt: state?.blockedAt || null,
+      reason: (state?.reason || state?.moderation?.reason || '').trim(),
+      blockedAt: state?.blockedAt || state?.moderation?.blockedAt || null,
       unblockedAt: state?.unblockedAt || state?.moderation?.unblockedAt || null,
-      timestamp: Date.now()
-    }));
+      timestamp: Date.now(),
+      sellerId: identity.sellerId || null,
+      shopId: identity.shopId || null,
+      shopUrl: identity.shopUrl || null,
+      ownerPhone: identity.ownerPhone || null
+    };
+
+    const updated = { ...cache };
+    for (const key of keys) {
+      updated[key] = entry;
+    }
+
+    const sorted = Object.entries(updated)
+      .sort((a, b) => (b[1]?.timestamp || 0) - (a[1]?.timestamp || 0))
+      .slice(0, MODERATION_CACHE_LIMIT);
+
+    const trimmed = {};
+    for (const [key, value] of sorted) {
+      trimmed[key] = value;
+    }
+
+    writeModerationCache(trimmed);
   } catch (err) {
     console.warn('persistModeration failed', err);
   }
