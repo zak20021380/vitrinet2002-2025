@@ -79,7 +79,10 @@ router.post('/:sellerId/logo', async (req, res) => {
 // گرفتن لیست همهٔ فروشنده‌ها (فقط ادمین)
 router.get('/', authMiddleware('admin'), async (req, res) => {
   try {
-    const sellers = await Seller.find({}, {
+    // فیلتر کردن فروشنده‌های خدماتی - آنها فقط باید در بخش مغازه‌های خدماتی نمایش داده شوند
+    const sellers = await Seller.find({
+      category: { $ne: 'خدمات' }  // حذف فروشنده‌های با دسته "خدمات"
+    }, {
       _id: 1,
       firstname: 1,
       lastname: 1,

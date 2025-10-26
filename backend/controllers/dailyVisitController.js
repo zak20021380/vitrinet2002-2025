@@ -151,7 +151,10 @@ exports.getSellers = async (req, res) => {
       return res.status(403).json({ message: 'دسترسی غیرمجاز' });
     }
 
-    const sellers = await Seller.find({})
+    // فیلتر کردن فروشنده‌های خدماتی - آنها فقط باید در بخش مغازه‌های خدماتی نمایش داده شوند
+    const sellers = await Seller.find({
+      category: { $ne: 'خدمات' }  // حذف فروشنده‌های با دسته "خدمات"
+    })
       .select('_id firstname lastname storename phone address');
     res.json(sellers.map(s => ({
       id: s._id,
@@ -175,9 +178,10 @@ exports.getTopVisitedShops = async (req, res) => {
     const since = new Date();
     since.setDate(since.getDate() - 30);
 
+    // فیلتر کردن فروشنده‌های خدماتی - آنها فقط باید در بخش مغازه‌های خدماتی نمایش داده شوند
     const sellerFilter = city
-      ? { address: { $regex: city, $options: 'i' } }
-      : {};
+      ? { address: { $regex: city, $options: 'i' }, category: { $ne: 'خدمات' } }
+      : { category: { $ne: 'خدمات' } };
 
     const sellers = await Seller.find(sellerFilter).select(
       '_id storename shopurl address category boardImage'

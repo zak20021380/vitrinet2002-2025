@@ -630,7 +630,11 @@ exports.getIncomeInsights = async (req, res) => {
 
     let sellersMap = new Map();
     if (sellerIds.length) {
-      const sellers = await Seller.find({ _id: { $in: sellerIds } })
+      // فیلتر کردن فروشنده‌های خدماتی - آنها فقط باید در بخش مغازه‌های خدماتی نمایش داده شوند
+      const sellers = await Seller.find({
+        _id: { $in: sellerIds },
+        category: { $ne: 'خدمات' }  // حذف فروشنده‌های با دسته "خدمات"
+      })
         .select('storename firstname lastname phone')
         .lean();
       sellersMap = new Map(

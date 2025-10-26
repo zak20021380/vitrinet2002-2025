@@ -8,7 +8,10 @@ const dailyVisitCtrl = require('../controllers/dailyVisitController');
 // دریافت لیست همه فروشگاه‌ها از مدل Seller
 router.get('/', async (req, res) => {
   try {
-    const sellers = await Seller.find({},
+    // فیلتر کردن فروشنده‌های خدماتی - آنها فقط باید در بخش مغازه‌های خدماتی نمایش داده شوند
+    const sellers = await Seller.find({
+      category: { $ne: 'خدمات' }  // حذف فروشنده‌های با دسته "خدمات"
+    },
       'storename category shopurl address desc isPremium boardImage'
     ).lean();
 
@@ -38,10 +41,11 @@ router.get('/top-visited', dailyVisitCtrl.getTopVisitedShops);
 router.get('/premium', async (req, res) => {
   try {
     const now = new Date();
-    // فقط فروشنده‌هایی که پریمیوم فعال دارند
+    // فقط فروشنده‌هایی که پریمیوم فعال دارند و دسته خدماتی نیستند
     const premiumSellers = await Seller.find({
       isPremium: true,
-      premiumUntil: { $gt: now }
+      premiumUntil: { $gt: now },
+      category: { $ne: 'خدمات' }  // حذف فروشنده‌های با دسته "خدمات"
     }).lean();
 
     const sellerIds = premiumSellers.map(s => s._id);
