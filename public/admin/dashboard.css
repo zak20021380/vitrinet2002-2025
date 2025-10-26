@@ -3007,6 +3007,59 @@ tr:last-child td {
   border-color: #0ea5e9;
 }
 
+.seller-name {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.seller-block-info {
+  margin-top: 0.35rem;
+  font-size: 0.78rem;
+  color: #b91c1c;
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  line-height: 1.5;
+}
+
+.seller-block-info i {
+  font-size: 1rem;
+}
+
+.seller-actions-cell {
+  min-width: 220px;
+}
+
+.seller-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 0.45rem;
+}
+
+.seller-actions .action-btn {
+  flex: 0 0 auto;
+}
+
+.seller-link {
+  color: #0ea5e9;
+  text-decoration: underline;
+  font-weight: 600;
+}
+
+.seller-link:hover {
+  color: #0284c7;
+}
+
+@media (max-width: 768px) {
+  .seller-actions {
+    justify-content: center;
+  }
+}
+
 
 
 
@@ -3072,6 +3125,133 @@ tr:last-child td {
 .seller-modal-success {
   color: #10b981; background: #eafaf4; border-radius: 9px;
   padding: 0.6rem 1rem; margin-top: 1rem; font-weight: 500; text-align: center;
+}
+
+.seller-moderation-card {
+  margin-top: 1.4rem;
+  padding: 1.2rem 1.1rem 1.1rem;
+  border-radius: 1.15rem;
+  border: 1px solid #dbeafe;
+  background: linear-gradient(135deg, rgba(239,246,255,0.95) 0%, rgba(236,253,245,0.92) 100%);
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+}
+.seller-moderation-card[data-status="blocked"] {
+  border-color: rgba(239,68,68,0.32);
+  background: linear-gradient(135deg, rgba(254,242,242,0.95) 0%, rgba(255,251,235,0.9) 100%);
+}
+.seller-moderation-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+.seller-moderation-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.35rem 0.9rem;
+  border-radius: 999px;
+  font-weight: 600;
+  font-size: 0.92rem;
+  background: rgba(16,185,129,0.16);
+  color: #047857;
+}
+.seller-moderation-chip.is-blocked {
+  background: rgba(239,68,68,0.16);
+  color: #dc2626;
+}
+.seller-moderation-chip.is-active {
+  background: rgba(16,185,129,0.16);
+  color: #047857;
+}
+.seller-moderation-meta {
+  flex: 1 1 auto;
+  font-size: 0.85rem;
+  color: #1e293b;
+  text-align: left;
+}
+.seller-moderation-description {
+  margin: 0;
+  font-size: 0.9rem;
+  line-height: 1.7;
+  color: #334155;
+}
+.seller-moderation-label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #0f172a;
+}
+#sellerModerationReason {
+  width: 100%;
+  min-height: 70px;
+  border-radius: 10px;
+  border: 1px solid rgba(148,163,184,0.45);
+  padding: 0.6rem 0.75rem;
+  font-family: inherit;
+  resize: vertical;
+  background: rgba(255,255,255,0.92);
+  transition: border .15s, box-shadow .15s;
+}
+#sellerModerationReason:focus {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37,99,235,0.15);
+  outline: none;
+}
+.seller-moderation-actions {
+  display: flex;
+  gap: 0.7rem;
+  flex-wrap: wrap;
+}
+.seller-moderation-btn {
+  flex: 1 1 48%;
+  min-width: 0;
+  border-radius: 11px;
+  border: none;
+  padding: 0.55rem 0.9rem;
+  font-weight: 600;
+  font-size: 0.95rem;
+  cursor: pointer;
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0.4rem;
+  transition: transform .15s, box-shadow .15s, opacity .2s;
+  font-family: inherit;
+}
+.seller-moderation-btn.danger {
+  background: linear-gradient(135deg, rgba(239,68,68,0.9), rgba(248,113,113,0.85));
+  color: #fff;
+}
+.seller-moderation-btn.success {
+  background: linear-gradient(135deg, rgba(16,185,129,0.92), rgba(14,165,233,0.92));
+  color: #fff;
+}
+.seller-moderation-btn:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 18px rgba(15,118,110,0.18);
+}
+.seller-moderation-btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+  box-shadow: none;
+  transform: none;
+}
+.seller-moderation-alert {
+  display: none;
+  border-radius: 10px;
+  padding: 0.6rem 0.75rem;
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+.seller-moderation-alert.is-success {
+  background: rgba(16,185,129,0.12);
+  color: #047857;
+}
+.seller-moderation-alert.is-error {
+  background: rgba(239,68,68,0.12);
+  color: #dc2626;
 }
 
 .seller-score-block {
@@ -3275,6 +3455,19 @@ tr:last-child td {
   flex-direction: column;
   align-items: flex-start;
   gap: 0.35rem;
+}
+
+.seller-blocked-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  background: rgba(239,68,68,0.18);
+  color: #b91c1c;
+  border-radius: 999px;
+  padding: 0.15rem 0.55rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  box-shadow: inset 0 0 0 1px rgba(239,68,68,0.18);
 }
 
 .seller-status-pill {

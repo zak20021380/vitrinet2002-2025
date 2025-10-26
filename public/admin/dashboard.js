@@ -2234,6 +2234,150 @@ function resolveSellerKeyFromShop(shop) {
   return normaliseScoreKey(candidate);
 }
 
+function collectSellerAliasKeys(shop) {
+  if (!shop || typeof shop !== 'object') return [];
+  const keys = new Set();
+  const addKey = (value) => {
+    const normalised = normaliseScoreKey(value);
+    if (normalised) {
+      keys.add(normalised);
+    }
+  };
+  addKey(shop._sid);
+  addKey(shop.sellerId);
+  addKey(shop.seller_id);
+  addKey(shop._id);
+  addKey(shop.id);
+  if (shop.shopurl) {
+    addKey(`shopurl:${shop.shopurl}`);
+    addKey(shop.shopurl);
+  }
+  return Array.from(keys);
+}
+
+function findShopByAliasKey(key) {
+  const normalised = normaliseScoreKey(key);
+  if (!normalised) return null;
+  return shopsList.find(shop => collectSellerAliasKeys(shop).includes(normalised)) || null;
+}
+
+function applySellerModerationState(keys, state) {
+  if (!state) return false;
+  const list = Array.isArray(keys) ? keys : [keys];
+  const keySet = new Set(
+    list
+      .map(normaliseScoreKey)
+      .filter(Boolean)
+  );
+  if (!keySet.size) return false;
+
+  let updated = false;
+  shopsList.forEach(shop => {
+    const aliases = collectSellerAliasKeys(shop);
+    const shouldUpdate = aliases.some(alias => keySet.has(alias));
+    if (shouldUpdate) {
+      Object.assign(shop, {
+        blockedByAdmin: !!state.blocked,
+        blockedAt: state.blockedAt || null,
+        blockedBy: state.blockedBy || null,
+        blockedReason: state.blockedReason || ''
+      });
+      updated = true;
+    }
+  });
+
+  if (updated) {
+    renderSellers();
+  }
+
+  return updated;
+}
+
+async function requestSellerModeration(sellerKey, mode, reason) {
+  const normalised = normaliseScoreKey(sellerKey);
+  if (!normalised) {
+    throw new Error('شناسه فروشنده معتبر نیست.');
+  }
+
+  const trimmedReason = typeof reason === 'string' ? reason.trim() : '';
+  const endpoint = mode === 'block' ? 'block' : 'unblock';
+  const res = await fetch(`${ADMIN_API_BASE}/sellers/${encodeURIComponent(normalised)}/${endpoint}`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    credentials: 'include',
+    body: JSON.stringify(trimmedReason ? { reason: trimmedReason } : {})
+  });
+
+  let data = null;
+  try {
+    data = await res.json();
+  } catch (err) {
+    data = null;
+  }
+
+  if (!res.ok) {
+    const message = data?.message || data?.error || 'خطا در انجام عملیات.';
+    throw new Error(message);
+  }
+
+  const payload = data?.seller || {};
+  const state = {
+    blocked: payload.blockedByAdmin != null ? !!payload.blockedByAdmin : (mode === 'block'),
+    blockedAt: payload.blockedAt || (mode === 'block' ? new Date().toISOString() : null),
+    blockedBy: payload.blockedBy || null,
+    blockedReason: payload.blockedReason || trimmedReason
+  };
+
+  return {
+    state,
+    message: data?.message || (mode === 'block' ? 'فروشنده مسدود شد.' : 'مسدودی فروشنده برداشته شد.')
+  };
+}
+
+async function handleSellerQuickModeration(button, shop, mode) {
+  if (!button || !shop) return;
+
+  const sellerKey =
+    resolveSellerKeyFromShop(shop) ||
+    (shop.shopurl ? `shopurl:${shop.shopurl}` : '') ||
+    toIdString(shop._id || shop.id || '');
+
+  if (!sellerKey) {
+    alert('شناسه فروشنده معتبر نیست.');
+    return;
+  }
+
+  const confirmMessage = mode === 'block'
+    ? 'آیا مطمئن هستید که می‌خواهید این فروشنده را مسدود کنید؟'
+    : 'آیا مطمئن هستید که می‌خواهید دسترسی فروشنده را فعال کنید؟';
+
+  if (!window.confirm(confirmMessage)) return;
+
+  let reason = '';
+  if (mode === 'block') {
+    const input = window.prompt('دلیل مسدودسازی فروشنده (اختیاری):', '');
+    if (input === null) return;
+    reason = input.trim();
+  }
+
+  const previousHtml = button.innerHTML;
+  button.disabled = true;
+  button.innerHTML = '<i class="ri-loader-4-line ri-spin"></i> در حال انجام...';
+
+  try {
+    const { state, message } = await requestSellerModeration(sellerKey, mode, reason);
+    const aliasKeys = collectSellerAliasKeys(shop);
+    applySellerModerationState(aliasKeys.length ? aliasKeys : sellerKey, state);
+    alert(message);
+  } catch (err) {
+    console.error('seller quick moderation error:', err);
+    alert(err.message || 'خطا در انجام عملیات.');
+  } finally {
+    button.disabled = false;
+    button.innerHTML = previousHtml;
+  }
+}
+
 function parsePerformancePayload(payload) {
   if (!payload || typeof payload !== 'object') return null;
 
@@ -3170,12 +3314,84 @@ async function fetchUsers() {
 }
 
 
+function normaliseSellerRecord(raw) {
+  if (!raw || typeof raw !== 'object') return null;
+
+  const result = { ...raw };
+  const sellerId = toIdString(
+    raw.sellerId ||
+    raw._sid ||
+    raw._id ||
+    raw.id ||
+    (raw.shopurl ? `shopurl:${raw.shopurl}` : '')
+  );
+
+  const ownerFirstname = raw.ownerFirstname || raw.firstname || '';
+  const ownerLastname = raw.ownerLastname || raw.lastname || '';
+  const ownerName = raw.ownerName || [ownerFirstname, ownerLastname].filter(Boolean).join(' ').trim();
+
+  const shopurl = raw.shopurl || raw.shopUrl || '';
+  const storename = raw.storename || raw.shopLogoText || raw.shopName || '';
+  const address = raw.address || raw.shopAddress || '';
+  const phone = raw.phone || raw.ownerPhone || raw.mobile || '';
+
+  result.sellerId = sellerId;
+  result._sid = sellerId;
+  result.ownerFirstname = ownerFirstname;
+  result.ownerLastname = ownerLastname;
+  result.ownerName = ownerName;
+  result.shopurl = shopurl;
+  result.storename = storename;
+  result.shopLogoText = raw.shopLogoText || storename;
+  result.address = address;
+  result.shopAddress = raw.shopAddress || address;
+  result.phone = phone;
+  result.mobile = raw.mobile || phone;
+  result.subscriptionStart = raw.subscriptionStart || null;
+  result.subscriptionEnd = raw.subscriptionEnd || null;
+  if (!result.subscriptionType) {
+    result.subscriptionType = raw.isPremium ? 'premium' : '';
+  }
+  result.blockedByAdmin = !!raw.blockedByAdmin;
+  result.blockedAt = raw.blockedAt || null;
+  result.blockedBy = raw.blockedBy || null;
+  result.blockedReason = raw.blockedReason || '';
+  result.productsCount = raw.productsCount || raw.productCount || 0;
+  result.visits = raw.visits || raw.shopVisits || 0;
+
+  if (!result.createdAt && raw.createdAt) {
+    result.createdAt = raw.createdAt;
+  }
+
+  return result;
+}
+
 async function fetchShops() {
-  const res = await fetch(ADMIN_API_BASE + '/shops', {
-    credentials: 'include'
-  });
-  const data = await res.json();
-  return Array.isArray(data) ? data : (data.shops || data.data || []);
+  try {
+    const res = await fetch(`${ADMIN_API_BASE}/sellers`, { credentials: 'include' });
+    let payload = null;
+    try {
+      payload = await res.json();
+    } catch (err) {
+      payload = null;
+    }
+
+    if (!res.ok) {
+      console.error('fetchShops – HTTP-', res.status, payload);
+      return [];
+    }
+
+    const list = Array.isArray(payload)
+      ? payload
+      : (payload?.sellers || payload?.items || payload?.data?.sellers || payload?.data || []);
+
+    return list
+      .map(normaliseSellerRecord)
+      .filter(Boolean);
+  } catch (err) {
+    console.error('fetchShops – EXCEPTION', err);
+    return [];
+  }
 }
 
 async function ensureShopsLoaded() {
@@ -4947,11 +5163,14 @@ function renderSellers() {
     sellers.sort((a, b) => b._productsCount - a._productsCount);
   }
 
-  sellers.forEach((shop, i) => {
-    let countProducts = shop._productsCount;
-    let ownerName = shop.ownerName || `${shop.ownerFirstname || ''} ${shop.ownerLastname || ''}`.trim() || "-";
-    let shopLink = shop.shopurl
-      ? `<a href="/shop.html?shopurl=${shop.shopurl}" target="_blank" style="color:#0ea5e9;text-decoration:underline">${shop.shopurl}</a>`
+  sellers.forEach((shop) => {
+    const countProducts = shop._productsCount;
+    const ownerName = shop.ownerName || `${shop.ownerFirstname || ''} ${shop.ownerLastname || ''}`.trim() || '-';
+    const address = shop.address || shop.shopAddress || '-';
+    const storeName = shop.storename || shop.shopLogoText || '-';
+    const shopUrl = shop.shopurl || '';
+    const shopLink = shopUrl
+      ? `<a class="seller-link" href="/shop.html?shopurl=${encodeURIComponent(shopUrl)}" target="_blank" rel="noopener noreferrer">${escapeHtml(shopUrl)}</a>`
       : '-';
 
     const sellerKey = resolveSellerKeyFromShop(shop);
@@ -4963,37 +5182,107 @@ function renderSellers() {
     const statusSeverity = performance ? performance.severity || 'neutral' : 'neutral';
     const statusLabel = performance ? performance.statusLabel : 'در انتظار ارزیابی';
     const statusBadge = `<span class="seller-status-pill status-${statusSeverity}">${statusLabel}</span>`;
+    const isBlocked = !!shop.blockedByAdmin;
+    const blockedBadge = isBlocked
+      ? '<span class="seller-blocked-badge"><i class="ri-shield-cross-line"></i>مسدود</span>'
+      : '';
     const eligibilityClass = performance
       ? (performance.canStay ? 'status-eligible' : 'status-ineligible')
       : 'status-neutral';
     const eligibilityText = performance
       ? (performance.canStay ? '✅ مجاز به ادامه فعالیت' : '⛔ امکان ادامه فعالیت در ویترینت وجود ندارد')
       : 'در انتظار ارزیابی ادمین';
-    const combinedStatus = `<div class="seller-score-cell-wrap">${scoreBadge}${statusBadge}<span class="seller-status-note ${eligibilityClass}">${eligibilityText}</span></div>`;
+    const combinedStatus = `<div class="seller-score-cell-wrap">${blockedBadge}${scoreBadge}${statusBadge}<span class="seller-status-note ${eligibilityClass}">${eligibilityText}</span></div>`;
+
+    const blockedAtText = shop.blockedAt ? formatDateTime(shop.blockedAt) : '';
+    const blockReason = (shop.blockedReason || '').trim();
+    const blockInfo = isBlocked
+      ? `<div class="seller-block-info"><i class="ri-shield-keyhole-line"></i><span>مسدود شده${blockedAtText ? ` از ${escapeHtml(blockedAtText)}` : ''}${blockReason ? ` • ${escapeHtml(blockReason)}` : ''}</span></div>`
+      : '';
+
+    const sellerAliases = collectSellerAliasKeys(shop);
+    const sellerActionKey = sellerAliases.length
+      ? sellerAliases[0]
+      : (sellerKey || (shop.shopurl ? `shopurl:${shop.shopurl}` : '') || toIdString(shop._id || shop.id || ''));
+    const sellerActionKeyEscaped = escapeHtml(sellerActionKey || '');
     const sid = toIdString(shop.sellerId || shop.seller_id || shop._id || shop._sid || shop.shopurl);
+
+    const moderationButton = sellerActionKey
+      ? `<button type="button" class="action-btn ${isBlocked ? 'unblock' : 'block'}" data-seller-action="${isBlocked ? 'unblock' : 'block'}" data-seller-key="${sellerActionKeyEscaped}"><i class="ri-${isBlocked ? 'shield-check-line' : 'shield-keyhole-line'}"></i> ${isBlocked ? 'رفع مسدودی' : 'مسدودسازی'}</button>`
+      : '';
+
+    const actionsHtml = `
+      <div class="seller-actions">
+        <button type="button" class="action-btn edit" data-seller-action="details" data-seller-key="${sellerActionKeyEscaped}"><i class="ri-eye-line"></i> جزئیات</button>
+        ${moderationButton}
+        <button type="button" class="action-btn delete" data-seller-action="delete" data-seller-id="${escapeHtml(sid)}"><i class="ri-delete-bin-line"></i> حذف</button>
+      </div>
+    `;
+
     let tr = document.createElement('tr');
+    tr.dataset.sellerKey = sellerKey || '';
+    tr.dataset.sellerBlocked = isBlocked ? 'true' : 'false';
     tr.innerHTML = `
-      <td class="seller-cell seller-modal-trigger" style="cursor:pointer;color:#10b981;font-weight:bold">${shop.storename || shop.shopLogoText || '-'}</td>
-      <td class="seller-cell seller-modal-trigger" style="cursor:pointer">${ownerName}</td>
-      <td class="seller-cell seller-modal-trigger" style="cursor:pointer">${shop.address || shop.shopAddress || '-'}</td>
+      <td class="seller-cell seller-modal-trigger">
+        <div class="seller-name">${escapeHtml(storeName)}</div>
+        ${blockInfo}
+      </td>
+      <td class="seller-cell seller-modal-trigger">${escapeHtml(ownerName)}</td>
+      <td class="seller-cell seller-modal-trigger">${escapeHtml(address)}</td>
       <td>${shopLink}</td>
       <td>${countProducts}</td>
       <td>${shop._visits}</td>
       <td class="seller-cell seller-modal-trigger seller-score-cell" data-score-key="${sellerKey || ''}">${combinedStatus}</td>
-      <td>
-        <button class="action-btn delete">
-          <i class="ri-delete-bin-line"></i> حذف
-        </button>
-      </td>
+      <td class="seller-actions-cell">${actionsHtml}</td>
     `;
-    // اتصال ایندکس فروشنده به هر سلول قابل کلیک
-    Array.from(tr.querySelectorAll('.seller-cell')).forEach(td=>{
-      td.onclick = () => showSellerModal(shop);
+
+    Array.from(tr.querySelectorAll('.seller-cell')).forEach(td => {
+      td.onclick = () => showSellerModal(findShopByAliasKey(sellerActionKey) || shop);
     });
-    const delBtn = tr.querySelector('.action-btn.delete');
-    if (delBtn) {
-      delBtn.addEventListener('click', () => deleteSeller(sid));
+
+    const detailBtn = tr.querySelector('[data-seller-action="details"]');
+    if (detailBtn) {
+      detailBtn.addEventListener('click', (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        const key = detailBtn.dataset.sellerKey || sellerActionKey;
+        const targetShop = findShopByAliasKey(key) || shop;
+        if (targetShop) {
+          showSellerModal(targetShop);
+        } else {
+          alert('فروشنده در لیست یافت نشد.');
+        }
+      });
     }
+
+    const blockBtn = tr.querySelector('[data-seller-action="block"]');
+    if (blockBtn) {
+      blockBtn.addEventListener('click', async (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        await handleSellerQuickModeration(blockBtn, shop, 'block');
+      });
+    }
+
+    const unblockBtn = tr.querySelector('[data-seller-action="unblock"]');
+    if (unblockBtn) {
+      unblockBtn.addEventListener('click', async (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        await handleSellerQuickModeration(unblockBtn, shop, 'unblock');
+      });
+    }
+
+    const deleteBtn = tr.querySelector('[data-seller-action="delete"]');
+    if (deleteBtn) {
+      deleteBtn.addEventListener('click', (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        const targetId = deleteBtn.dataset.sellerId || sid;
+        deleteSeller(targetId);
+      });
+    }
+
     tbody.appendChild(tr);
   });
 
@@ -5020,21 +5309,54 @@ async function showSellerModal (shop) {
         })
       : '—';
 
-  /* شناسهٔ مطمئن فروشنده */
-  const sellerId =
-        (shop._id && shop._id.toString())              ||
-        (shop.sellerId && String(shop.sellerId))       ||
-        (shop._sid && !String(shop._sid).startsWith('shopurl:')
-          ? String(shop._sid)
-          : '')                                        ||
-        (shop.shopurl ? `shopurl:${shop.shopurl}` : '');
+  const sellerKey = resolveSellerKeyFromShop(shop);
+  const fallbackKey = sellerKey || (shop.shopurl ? `shopurl:${shop.shopurl}` : '');
+  const moderationAliasKeys = new Set();
+  collectSellerAliasKeys(shop).forEach(key => moderationAliasKeys.add(key));
+  if (fallbackKey) moderationAliasKeys.add(fallbackKey);
+  let sellerDetails = null;
 
-  const storeName = shop.storename || shop.shopLogoText || '-';
-  const url       = shop.shopurl  || '';
+  if (fallbackKey) {
+    sellerDetails = await getSellerDetails(fallbackKey);
+  }
+
+  if (sellerDetails && sellerKey) {
+    const idx = shopsList.findIndex(s => resolveSellerKeyFromShop(s) === sellerKey);
+    if (idx !== -1) {
+      const target = shopsList[idx];
+      Object.assign(target, {
+        phone: sellerDetails.phone || target.phone,
+        mobile: sellerDetails.mobile || sellerDetails.phone || target.mobile,
+        address: sellerDetails.address || target.address,
+        shopAddress: sellerDetails.address || target.shopAddress,
+        subscriptionStart: sellerDetails.subscriptionStart || target.subscriptionStart,
+        subscriptionEnd: sellerDetails.subscriptionEnd || target.subscriptionEnd,
+        blockedByAdmin: !!sellerDetails.blockedByAdmin,
+        blockedAt: sellerDetails.blockedAt || null,
+        blockedBy: sellerDetails.blockedBy || null,
+        blockedReason: sellerDetails.blockedReason || ''
+      });
+      renderSellers();
+    }
+  }
+
+  if (sellerDetails) {
+    collectSellerAliasKeys(sellerDetails).forEach(key => moderationAliasKeys.add(key));
+  }
+
+  const sellerData = sellerDetails ? { ...shop, ...sellerDetails } : { ...shop };
+
+  const storeName = sellerData.storename || sellerData.shopLogoText || '-';
+  const url       = sellerData.shopurl  || '';
   const phone     =
-        shop.phone || shop.mobile ||
-        shop.ownerPhone || shop.ownerMobile || '-';
-  const sellerScoreKey = resolveSellerKeyFromShop(shop);
+        sellerData.phone || sellerData.mobile ||
+        sellerData.ownerPhone || sellerData.ownerMobile || '-';
+  const sellerScoreKey = sellerKey;
+  const sellerEndpointKey = sellerDetails?._id ? toIdString(sellerDetails._id) : (sellerScoreKey || fallbackKey || '');
+  if (sellerScoreKey) moderationAliasKeys.add(sellerScoreKey);
+  if (sellerEndpointKey) moderationAliasKeys.add(sellerEndpointKey);
+  const subscriptionStart = sellerData.subscriptionStart;
+  const subscriptionEnd = sellerData.subscriptionEnd;
 
   if (sellerScoreKey && !sellerPerformanceLoaded) {
     await refreshSellerPerformanceMap();
@@ -5071,6 +5393,13 @@ async function showSellerModal (shop) {
       : '');
   const defaultNoteMessage = 'یادداشتی ثبت نشده است.';
   const defaultMessageText = 'پیامی برای فروشنده ثبت نشده است.';
+  const moderationStateInitial = {
+    blocked: !!sellerData.blockedByAdmin,
+    blockedAt: sellerData.blockedAt || null,
+    blockedBy: sellerData.blockedBy || null,
+    blockedReason: sellerData.blockedReason || ''
+  };
+  const createdAt = sellerData.createdAt;
   const noteDisplayHtml = existingAdminNote
     ? formatNoteForDisplay(existingAdminNote)
     : escapeHtml(defaultNoteMessage);
@@ -5087,35 +5416,48 @@ async function showSellerModal (shop) {
 
       <div class="seller-modal-title">
         مشخصات فروشگاه:
-        <span style="color:#0ea5e9">${storeName}</span>
+        <span style="color:#0ea5e9">${escapeHtml(storeName)}</span>
       </div>
 
       <div class="seller-modal-row">
         <span class="seller-modal-label">ثبت‌نام:</span>
-        <span class="seller-modal-value">${fDate(shop.createdAt)}</span>
+        <span class="seller-modal-value">${escapeHtml(fDate(createdAt))}</span>
       </div>
 
       <div class="seller-modal-row">
         <span class="seller-modal-label">شماره موبایل:</span>
-        <span class="seller-modal-value">${phone}</span>
+        <span class="seller-modal-value">${escapeHtml(phone)}</span>
       </div>
 
       <div class="seller-modal-row">
         <span class="seller-modal-label">نوع اشتراک:</span>
-        <span class="seller-modal-value">${shop.subscriptionType || '-'}</span>
+        <span class="seller-modal-value">${escapeHtml(sellerData.subscriptionType || (sellerData.isPremium ? 'premium' : '-'))}</span>
       </div>
 
       <div class="seller-modal-row">
         <span class="seller-modal-label">تاریخ خرید:</span>
-        <span class="seller-modal-value">${fDate(shop.subscriptionStart)}</span>
+        <span class="seller-modal-value">${escapeHtml(fDate(subscriptionStart))}</span>
       </div>
 
       <div class="seller-modal-row">
         <span class="seller-modal-label">تاریخ پایان:</span>
-        <span class="seller-modal-value">${fDate(shop.subscriptionEnd)}</span>
+        <span class="seller-modal-value">${escapeHtml(fDate(subscriptionEnd))}</span>
       </div>
 
-      <!-- ردیف پسورد حذف شد -->
+      <section class="seller-moderation-card" id="sellerModerationCard" data-status="${moderationStateInitial.blocked ? 'blocked' : 'active'}">
+        <div class="seller-moderation-header">
+          <span class="seller-moderation-chip" id="sellerModerationChip"></span>
+          <div class="seller-moderation-meta" id="sellerModerationMeta"></div>
+        </div>
+        <p class="seller-moderation-description" id="sellerModerationDescription"></p>
+        <label class="seller-moderation-label" for="sellerModerationReason">دلیل یا یادداشت مدیریتی</label>
+        <textarea id="sellerModerationReason" placeholder="دلیل مسدودسازی یا توضیح مدیریتی..."></textarea>
+        <div class="seller-moderation-actions">
+          <button type="button" class="seller-moderation-btn danger" id="sellerModerationBlock"><i class="ri-shield-off-line"></i> مسدودسازی فروشنده</button>
+          <button type="button" class="seller-moderation-btn success" id="sellerModerationUnblock"><i class="ri-shield-check-line"></i> رفع مسدودی</button>
+        </div>
+        <div class="seller-moderation-alert" id="sellerModerationAlert" style="display:none;"></div>
+      </section>
 
       <div class="seller-score-block" data-score-key="${sellerScoreKey || ''}">
         <span class="seller-modal-label">نمره ارزیابی ادمین</span>
@@ -5159,7 +5501,7 @@ async function showSellerModal (shop) {
 
       <form id="sellerMessageForm"
             class="seller-modal-form"
-            data-seller-id="${sellerId}"
+            data-seller-id="${sellerEndpointKey}"
             data-shopurl="${url}">
         <label for="sellerMessage">ارسال پیام به این فروشنده:</label>
         <textarea id="sellerMessage" name="msg"
@@ -5210,6 +5552,136 @@ async function showSellerModal (shop) {
     messageText: document.getElementById('sellerMessageText'),
     messageContainer: document.getElementById('sellerMessageDisplay')
   };
+
+  const moderationElements = {
+    card: document.getElementById('sellerModerationCard'),
+    chip: document.getElementById('sellerModerationChip'),
+    meta: document.getElementById('sellerModerationMeta'),
+    description: document.getElementById('sellerModerationDescription'),
+    reason: document.getElementById('sellerModerationReason'),
+    blockBtn: document.getElementById('sellerModerationBlock'),
+    unblockBtn: document.getElementById('sellerModerationUnblock'),
+    alert: document.getElementById('sellerModerationAlert')
+  };
+
+  const moderationStateRef = { ...moderationStateInitial };
+  let moderationAlertTimer = null;
+
+  const formatModerationMeta = (state) => {
+    if (!state.blocked) {
+      return 'بدون مسدودی فعال';
+    }
+    const parts = [];
+    if (state.blockedAt) {
+      const dateText = formatDateTime(state.blockedAt);
+      if (dateText) {
+        parts.push(`مسدود شده در ${escapeHtml(dateText)}`);
+      }
+    }
+    if (state.blockedBy) {
+      parts.push(`شناسه مدیر: ${escapeHtml(toIdString(state.blockedBy))}`);
+    }
+    if (!parts.length) {
+      parts.push('مسدود شده توسط تیم ادمین');
+    }
+    return parts.join(' • ');
+  };
+
+  const formatModerationDescription = (state) => {
+    if (!state.blocked) {
+      return 'این فروشنده فعال است و دسترسی کامل دارد.';
+    }
+    const reasonHtml = state.blockedReason
+      ? `<br><strong>دلیل:</strong> ${formatNoteForDisplay(state.blockedReason)}`
+      : '';
+    return `این فروشنده در حال حاضر توسط تیم ادمین مسدود شده است.${reasonHtml}`;
+  };
+
+  const updateModerationUI = (state) => {
+    if (!moderationElements.card) return;
+    const status = state.blocked ? 'blocked' : 'active';
+    moderationElements.card.dataset.status = status;
+    if (moderationElements.chip) {
+      moderationElements.chip.innerHTML = state.blocked
+        ? '<i class="ri-shield-cross-line"></i> مسدود شده'
+        : '<i class="ri-shield-check-line"></i> فعال';
+      moderationElements.chip.classList.toggle('is-blocked', !!state.blocked);
+      moderationElements.chip.classList.toggle('is-active', !state.blocked);
+    }
+    if (moderationElements.meta) {
+      moderationElements.meta.innerHTML = formatModerationMeta(state);
+    }
+    if (moderationElements.description) {
+      moderationElements.description.innerHTML = formatModerationDescription(state);
+    }
+    if (moderationElements.reason) {
+      moderationElements.reason.value = state.blocked ? state.blockedReason : '';
+      moderationElements.reason.placeholder = state.blocked
+        ? 'دلیل مسدودسازی یا یادداشت پیگیری...'
+        : 'یادداشت رفع مسدودی (اختیاری)...';
+    }
+    const hasIdentifier = !!sellerEndpointKey;
+    if (!hasIdentifier && moderationElements.meta) {
+      moderationElements.meta.innerHTML = 'شناسه فروشنده معتبر نیست.';
+    }
+    if (moderationElements.blockBtn) {
+      moderationElements.blockBtn.disabled = state.blocked || !hasIdentifier;
+    }
+    if (moderationElements.unblockBtn) {
+      moderationElements.unblockBtn.disabled = !state.blocked || !hasIdentifier;
+    }
+  };
+
+  const showModerationAlert = (message, type = 'success') => {
+    if (!moderationElements.alert) return;
+    moderationElements.alert.textContent = message;
+    moderationElements.alert.classList.remove('is-success', 'is-error');
+    moderationElements.alert.classList.add(type === 'error' ? 'is-error' : 'is-success');
+    moderationElements.alert.style.display = 'block';
+    clearTimeout(moderationAlertTimer);
+    moderationAlertTimer = setTimeout(() => {
+      if (moderationElements.alert) {
+        moderationElements.alert.style.display = 'none';
+      }
+    }, 3200);
+  };
+
+  const handleModerationAction = async (mode) => {
+    if (!sellerEndpointKey) {
+      showModerationAlert('شناسه فروشنده معتبر نیست.', 'error');
+      return;
+    }
+    const targetBtn = mode === 'block' ? moderationElements.blockBtn : moderationElements.unblockBtn;
+    if (!targetBtn) return;
+
+    const previousLabel = targetBtn.innerHTML;
+    targetBtn.disabled = true;
+    targetBtn.innerHTML = '<i class="ri-loader-4-line"></i> در حال انجام...';
+
+    try {
+      const reasonValue = moderationElements.reason ? moderationElements.reason.value.trim() : '';
+      const { state, message } = await requestSellerModeration(sellerEndpointKey, mode, reasonValue);
+      Object.assign(moderationStateRef, state);
+      updateModerationUI(moderationStateRef);
+      applySellerModerationState(Array.from(moderationAliasKeys), moderationStateRef);
+      showModerationAlert(message);
+    } catch (err) {
+      console.error('seller moderation action error:', err);
+      showModerationAlert(err.message || 'خطا در انجام عملیات.', 'error');
+    } finally {
+      targetBtn.innerHTML = previousLabel;
+      updateModerationUI(moderationStateRef);
+    }
+  };
+
+  if (moderationElements.blockBtn) {
+    moderationElements.blockBtn.addEventListener('click', () => handleModerationAction('block'));
+  }
+  if (moderationElements.unblockBtn) {
+    moderationElements.unblockBtn.addEventListener('click', () => handleModerationAction('unblock'));
+  }
+
+  updateModerationUI(moderationStateRef);
 
   if (scoreInputEl && scoreValueEl) {
     scoreInputEl.value = String(initialAdminScore);

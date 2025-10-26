@@ -15,7 +15,7 @@ const Booking = require('../models/booking');
 const Review = require('../models/Review');
 const { calcPremiumUntil } = require('../utils/premium');
 const { clampAdminScore, evaluatePerformance } = require('../utils/performanceStatus');
-const { normalizePhone, buildDigitInsensitiveRegex } = require('../utils/phone');
+const { normalizePhone, buildDigitInsensitiveRegex, buildPhoneCandidates } = require('../utils/phone');
 
 const escapeRegExp = (str = '') => str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 const normalizeString = (value) => (value || '').toString().trim().toLowerCase();
@@ -66,6 +66,80 @@ async function findSellerByFlexibleId(identifier) {
   }
 
   return Seller.findOne({ shopurl: identifier });
+}
+
+async function addPhoneToBanList(phone, reason = 'blocked-by-admin') {
+  const normalized = normalizePhone(phone);
+  if (!normalized) return;
+  await BannedPhone.updateOne(
+    { phone: normalized },
+    { $set: { phone: normalized, reason } },
+    { upsert: true }
+  );
+}
+
+async function removePhoneFromBanList(phone) {
+  const variants = new Set();
+  buildPhoneCandidates(phone).forEach(candidate => {
+    if (candidate) {
+      variants.add(candidate);
+      const normalised = normalizePhone(candidate);
+      if (normalised) variants.add(normalised);
+    }
+  });
+  if (!variants.size) return;
+  await BannedPhone.deleteMany({ phone: { $in: Array.from(variants) } });
+}
+
+async function banSellerPhoneIfUnique(sellerDoc, reason = 'blocked-by-admin') {
+  if (!sellerDoc?.phone) return false;
+  const normalized = normalizePhone(sellerDoc.phone);
+  if (!normalized) return false;
+
+  const regex = buildDigitInsensitiveRegex(sellerDoc.phone, { allowSeparators: true });
+  const query = {};
+  if (sellerDoc._id) {
+    query._id = { $ne: sellerDoc._id };
+  }
+  if (regex) {
+    query.phone = { $regex: regex };
+  } else {
+    query.phone = normalized;
+  }
+
+  const duplicates = await Seller.countDocuments(query);
+  if (duplicates > 0) {
+    console.warn(`Skipping phone ban for seller ${sellerDoc._id} because phone is shared with ${duplicates} other seller(s).`);
+    return false;
+  }
+
+  await addPhoneToBanList(sellerDoc.phone, reason || 'blocked-by-admin');
+  return true;
+}
+
+async function unbanSellerPhoneIfNoOtherBlocked(sellerDoc) {
+  if (!sellerDoc?.phone) return;
+
+  const regex = buildDigitInsensitiveRegex(sellerDoc.phone, { allowSeparators: true });
+  const query = { blockedByAdmin: true };
+  if (sellerDoc._id) {
+    query._id = { $ne: sellerDoc._id };
+  }
+  if (regex) {
+    query.phone = { $regex: regex };
+  } else {
+    const normalized = normalizePhone(sellerDoc.phone);
+    if (!normalized) {
+      await removePhoneFromBanList(sellerDoc.phone);
+      return;
+    }
+    query.phone = normalized;
+  }
+
+  const stillBlocked = await Seller.exists(query);
+  if (stillBlocked) return;
+
+  await removePhoneFromBanList(sellerDoc.phone);
 }
 
 exports.registerSeller = async (req, res) => {
@@ -403,6 +477,81 @@ exports.clearAdminScore = async (req, res) => {
   } catch (err) {
     console.error('clearAdminScore error:', err);
     return res.status(500).json({ message: 'خطا در حذف نمره فروشنده.' });
+  }
+};
+
+exports.blockSeller = async (req, res) => {
+  try {
+    const { sellerId } = req.params;
+    const seller = await findSellerByFlexibleId(sellerId);
+
+    if (!seller) {
+      return res.status(404).json({ message: 'فروشنده پیدا نشد.' });
+    }
+
+    const reason = typeof req.body?.reason === 'string' ? req.body.reason.trim() : '';
+    const now = new Date();
+
+    seller.blockedByAdmin = true;
+    seller.blockedAt = now;
+    seller.blockedBy = req.user?.id || null;
+    seller.blockedReason = reason;
+
+    const savedSeller = await seller.save();
+    await banSellerPhoneIfUnique(savedSeller, reason || 'blocked-by-admin');
+
+    return res.json({
+      message: 'فروشنده مسدود شد.',
+      seller: {
+        id: savedSeller._id,
+        storename: savedSeller.storename,
+        shopurl: savedSeller.shopurl,
+        blockedByAdmin: true,
+        blockedAt: savedSeller.blockedAt,
+        blockedBy: savedSeller.blockedBy,
+        blockedReason: savedSeller.blockedReason
+      }
+    });
+  } catch (err) {
+    console.error('blockSeller error:', err);
+    return res.status(500).json({ message: 'خطا در مسدودسازی فروشنده.' });
+  }
+};
+
+exports.unblockSeller = async (req, res) => {
+  try {
+    const { sellerId } = req.params;
+    const seller = await findSellerByFlexibleId(sellerId);
+
+    if (!seller) {
+      return res.status(404).json({ message: 'فروشنده پیدا نشد.' });
+    }
+
+    const reason = typeof req.body?.reason === 'string' ? req.body.reason.trim() : '';
+
+    seller.blockedByAdmin = false;
+    seller.blockedAt = null;
+    seller.blockedBy = null;
+    seller.blockedReason = reason;
+
+    const savedSeller = await seller.save();
+    await unbanSellerPhoneIfNoOtherBlocked(savedSeller);
+
+    return res.json({
+      message: 'مسدودی فروشنده برداشته شد.',
+      seller: {
+        id: savedSeller._id,
+        storename: savedSeller.storename,
+        shopurl: savedSeller.shopurl,
+        blockedByAdmin: false,
+        blockedAt: savedSeller.blockedAt,
+        blockedBy: savedSeller.blockedBy,
+        blockedReason: savedSeller.blockedReason
+      }
+    });
+  } catch (err) {
+    console.error('unblockSeller error:', err);
+    return res.status(500).json({ message: 'خطا در رفع مسدودی فروشنده.' });
   }
 };
 
