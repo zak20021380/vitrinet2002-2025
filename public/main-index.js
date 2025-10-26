@@ -1436,6 +1436,268 @@ async function loadShoesAndBagsShops() {
 window.addEventListener('DOMContentLoaded', loadShoesAndBagsShops);
 
 
+const HOME_SECTIONS_EXCLUDED_SLUGS = new Set([POPULAR_PRODUCTS_SECTION_SLUG]);
+const HOME_SECTION_LOCATION_ICON = `
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+    <path d="M12 21s-7-7.58-7-12a7 7 0 0 1 14 0c0 4.42-7 12-7 12Z"></path>
+    <circle cx="12" cy="9" r="2.5"></circle>
+  </svg>
+`;
+const HOME_SECTION_PRICE_ICON = `
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+    <path d="M12 1v22"></path>
+    <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 1 1 0 7H6"></path>
+  </svg>
+`;
+
+function isExternalLink(url) {
+  return /^https?:\/\//i.test(url || '');
+}
+
+function createHomeCardMetaItem(icon, text) {
+  const value = (text || '').trim();
+  if (!value) return null;
+
+  const item = document.createElement('span');
+  item.className = 'home-card-meta-item';
+  item.innerHTML = `${icon}<span>${escapeHTML(value)}</span>`;
+  return item;
+}
+
+function buildHomeCardElement(card) {
+  if (!card || !card.title) return null;
+
+  const link = card.link;
+  const cardElement = document.createElement(link ? 'a' : 'div');
+  cardElement.className = 'home-card';
+  cardElement.setAttribute('aria-label', card.title);
+
+  if (card._id) {
+    cardElement.dataset.cardId = card._id;
+  }
+
+  if (link) {
+    cardElement.href = link;
+    if (isExternalLink(link)) {
+      cardElement.target = '_blank';
+      cardElement.rel = 'noopener noreferrer';
+    }
+  }
+
+  const media = document.createElement('div');
+  media.className = 'home-card-media';
+  if (card.imageUrl) {
+    const img = document.createElement('img');
+    img.src = card.imageUrl;
+    img.alt = card.title;
+    img.loading = 'lazy';
+    media.appendChild(img);
+  } else {
+    media.classList.add('home-card-media--placeholder');
+    const placeholder = document.createElement('span');
+    placeholder.className = 'home-card-placeholder-icon';
+    placeholder.textContent = '🏬';
+    media.appendChild(placeholder);
+  }
+  cardElement.appendChild(media);
+
+  if (card.tag) {
+    const chip = document.createElement('span');
+    chip.className = 'home-card-chip';
+    chip.textContent = card.tag;
+    cardElement.appendChild(chip);
+  }
+
+  const title = document.createElement('h4');
+  title.className = 'home-card-title';
+  title.textContent = card.title;
+  cardElement.appendChild(title);
+
+  if (card.description) {
+    const description = document.createElement('p');
+    description.className = 'home-card-description';
+    description.textContent = card.description;
+    cardElement.appendChild(description);
+  }
+
+  const metaItems = [];
+  const locationItem = createHomeCardMetaItem(HOME_SECTION_LOCATION_ICON, card.location);
+  if (locationItem) metaItems.push(locationItem);
+  const priceItem = createHomeCardMetaItem(HOME_SECTION_PRICE_ICON, card.price);
+  if (priceItem) metaItems.push(priceItem);
+
+  if (metaItems.length) {
+    const metaWrapper = document.createElement('div');
+    metaWrapper.className = 'home-card-meta';
+    metaItems.forEach((item) => metaWrapper.appendChild(item));
+    cardElement.appendChild(metaWrapper);
+  }
+
+  if (link) {
+    const footer = document.createElement('div');
+    footer.className = 'home-card-footer';
+
+    const cta = document.createElement('span');
+    cta.className = 'home-card-cta';
+    cta.textContent = card.buttonText || 'مشاهده';
+    footer.appendChild(cta);
+
+    cardElement.appendChild(footer);
+  }
+
+  return cardElement;
+}
+
+function buildHomeSectionElement(section) {
+  if (!section || !section.cards?.length) return null;
+
+  const sectionElement = document.createElement('section');
+  sectionElement.className = 'home-section-block animate-fadein';
+
+  if (section.slug) {
+    sectionElement.id = `home-section-${section.slug}`;
+  }
+
+  const header = document.createElement('div');
+  header.className = 'home-section-header';
+
+  const headerText = document.createElement('div');
+  headerText.className = 'home-section-header-text';
+
+  const title = document.createElement('h3');
+  title.className = 'home-section-title';
+  title.textContent = section.title || 'سکشن بدون عنوان';
+  headerText.appendChild(title);
+
+  if (section.subtitle) {
+    const subtitle = document.createElement('p');
+    subtitle.className = 'home-section-subtitle';
+    subtitle.textContent = section.subtitle;
+    headerText.appendChild(subtitle);
+  }
+
+  header.appendChild(headerText);
+
+  if (section.viewAllLink) {
+    const viewAll = document.createElement('a');
+    viewAll.className = 'home-section-cta';
+    viewAll.href = section.viewAllLink;
+    if (isExternalLink(section.viewAllLink)) {
+      viewAll.target = '_blank';
+      viewAll.rel = 'noopener noreferrer';
+    }
+
+    const label = document.createElement('span');
+    label.textContent = section.viewAllText || 'مشاهده همه';
+    viewAll.appendChild(label);
+    viewAll.insertAdjacentHTML('beforeend', '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg>');
+
+    header.appendChild(viewAll);
+  }
+
+  sectionElement.appendChild(header);
+
+  const cardsWrapper = document.createElement('div');
+  cardsWrapper.className = 'home-cards-row';
+
+  section.cards.forEach((card) => {
+    const cardElement = buildHomeCardElement(card);
+    if (cardElement) {
+      cardsWrapper.appendChild(cardElement);
+    }
+  });
+
+  sectionElement.appendChild(cardsWrapper);
+  return sectionElement;
+}
+
+function normaliseHomeSection(section) {
+  if (!section) return null;
+
+  const cards = Array.isArray(section.cards)
+    ? section.cards
+        .filter((card) => card && card.isActive !== false)
+        .map((card) => ({
+          ...card,
+          _id: card._id,
+          title: (card.title || '').trim(),
+          tag: (card.tag || '').trim(),
+          description: (card.description || '').trim(),
+          location: (card.location || '').trim(),
+          price: (card.price || '').trim(),
+          buttonText: (card.buttonText || '').trim(),
+          imageUrl: (card.imageUrl || '').trim(),
+          link: (card.link || '').trim(),
+          order: Number(card.order) || 0,
+        }))
+        .filter((card) => card.title)
+        .sort((a, b) => a.order - b.order)
+    : [];
+
+  return {
+    ...section,
+    title: (section.title || '').trim(),
+    subtitle: (section.subtitle || '').trim(),
+    viewAllText: (section.viewAllText || '').trim(),
+    viewAllLink: (section.viewAllLink || '').trim(),
+    slug: (section.slug || '').trim(),
+    order: Number(section.order) || 0,
+    cards,
+  };
+}
+
+async function loadDynamicHomeSections() {
+  const wrapper = document.getElementById('home-sections-wrapper');
+  const root = document.getElementById('home-sections-root');
+  const loading = document.getElementById('home-sections-loading');
+  const empty = document.getElementById('home-sections-empty');
+
+  if (!wrapper || !root) return;
+
+  if (loading) loading.hidden = false;
+  if (empty) empty.hidden = true;
+  wrapper.style.display = '';
+
+  try {
+    const res = await fetch('/api/home-card-sections');
+    if (!res.ok) throw new Error(`Failed to fetch sections (${res.status})`);
+
+    const payload = await res.json();
+    const sections = (Array.isArray(payload) ? payload : [])
+      .filter((section) => section && section.isActive !== false && !HOME_SECTIONS_EXCLUDED_SLUGS.has(section.slug))
+      .map(normaliseHomeSection)
+      .filter((section) => section && section.cards.length);
+
+    if (!sections.length) {
+      root.innerHTML = '';
+      wrapper.style.display = 'none';
+      return;
+    }
+
+    sections.sort((a, b) => a.order - b.order);
+
+    root.innerHTML = '';
+    sections.forEach((section) => {
+      const sectionElement = buildHomeSectionElement(section);
+      if (sectionElement) {
+        root.appendChild(sectionElement);
+      }
+    });
+  } catch (err) {
+    console.error('Error loading home sections:', err);
+    root.innerHTML = '';
+    if (empty) {
+      empty.textContent = 'خطا در بارگذاری سکشن‌ها. لطفاً صفحه را مجدداً بارگذاری کنید.';
+      empty.hidden = false;
+    }
+  } finally {
+    if (loading) loading.hidden = true;
+  }
+}
+
+window.addEventListener('DOMContentLoaded', loadDynamicHomeSections);
+
+
 // ====== آدرس API سرور (در صورت نیاز کامل کن: http://yourdomain.com/api/shopping-centers) ======
 const API_URL = '/api/shopping-centers';
 
