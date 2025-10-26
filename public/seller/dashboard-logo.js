@@ -3,6 +3,16 @@ async function initLogoDashboard() {  // اضافه کردن async اینجا
   if (window._logoDashboardInited) return;
   window._logoDashboardInited = true;
 
+  const API = window.VITRINET_API || null;
+  const apiUrl = path => API ? API.buildUrl(path) : `http://localhost:5000${path}`;
+  const withCreds = (init = {}) => {
+    if (API) return API.ensureCredentials(init);
+    if (init.credentials === undefined) {
+      return { ...init, credentials: 'include' };
+    }
+    return init;
+  };
+
   // المنت‌ها
   const logoInput      = document.getElementById("logo-file-input");
   const logoPreview    = document.getElementById("shop-logo-preview");
@@ -21,10 +31,7 @@ async function initLogoDashboard() {  // اضافه کردن async اینجا
   // تابع جدید fetchCurrentSellerLogo (جایگزین نسخه قدیمی)
   async function fetchCurrentSellerLogo() {
     try {
-      let res = await fetch(`http://localhost:5000/api/auth/me`, {
-        method: "GET",
-        credentials: 'include'
-      });
+      let res = await fetch(apiUrl('/api/auth/me'), withCreds({ method: 'GET' }));
       if (res.status === 401 || res.status === 403) { // اگر unauthorized یا forbidden
         window.location.href = "login.html";
         return;
@@ -118,12 +125,11 @@ async function initLogoDashboard() {  // اضافه کردن async اینجا
     logoSaveBtn.disabled = true;
     logoFileError.classList.add('hidden');
     try {
-      let res = await fetch(`http://localhost:5000/api/sellers/${seller.id}/logo`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: 'include',
+      let res = await fetch(apiUrl(`/api/sellers/${seller.id}/logo`), withCreds({
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ logo: selectedLogoBase64 })
-      });
+      }));
       const data = await res.json();
       if (res.ok) {
         seller.boardImage = selectedLogoBase64;

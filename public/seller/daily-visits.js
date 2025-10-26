@@ -1,7 +1,15 @@
 /* daily-visits.js – نسخهٔ نهایی: مقایسهٔ دقیق روز/هفته/ماه در منطقهٔ محلی */
 (() => {
   /* ─── ثابت‌ها ─── */
-  const API = '/api/daily-visits';
+  const API_CFG = window.VITRINET_API || null;
+  const API_URL = API_CFG ? API_CFG.buildUrl('/api/daily-visits') : 'http://localhost:5000/api/daily-visits';
+  const withCreds = (init = {}) => {
+    if (API_CFG) return API_CFG.ensureCredentials(init);
+    if (init.credentials === undefined) {
+      return { ...init, credentials: 'include' };
+    }
+    return init;
+  };
   const DAY = 86_400_000; // ms
 
   /* ─── فانکشن‌های کمکی ─── */
@@ -44,7 +52,7 @@
   /* ─── بارگیری از API ─── */
   async function loadVisits () {
     try {
-      const res = await fetch(API, { credentials: 'include' });
+      const res = await fetch(API_URL, withCreds());
       if (!res.ok) throw new Error(res.status);
 
       const data = await res.json();
@@ -147,12 +155,11 @@
     const payload = { date: todayStr(), count: cnt };
 
     try {
-      const res = await fetch(API, {
-        method      : 'POST',
-        headers     : { 'Content-Type': 'application/json' },
-        credentials : 'include',
-        body        : JSON.stringify(payload)
-      });
+      const res = await fetch(API_URL, withCreds({
+        method  : 'POST',
+        headers : { 'Content-Type': 'application/json' },
+        body    : JSON.stringify(payload)
+      }));
       if (!res.ok) {
         const { message } = await res.json().catch(()=>({}));
         throw new Error(message || 'خطای سرور');

@@ -1,6 +1,16 @@
 (function () {
   'use strict';
 
+  const API = window.VITRINET_API || null;
+  const apiUrl = path => API ? API.buildUrl(path) : `http://localhost:5000${path}`;
+  const withCreds = (init = {}) => {
+    if (API) return API.ensureCredentials(init);
+    if (init.credentials === undefined) {
+      return { ...init, credentials: 'include' };
+    }
+    return init;
+  };
+
   function formatDateTime(value) {
     if (!value) return '';
     try {
@@ -109,7 +119,7 @@
   }
 
   async function fetchPerformancePayload() {
-    const res = await fetch('/api/seller/performance/status', { credentials: 'include' });
+    const res = await fetch(apiUrl('/api/seller/performance/status'), withCreds());
     let payload = null;
     try {
       payload = await res.json();

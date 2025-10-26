@@ -13,8 +13,18 @@ function initContentDashboard() {
   }
 
   /* ---- API ---- */
-  const API_GET = `http://localhost:5000/api/shopAppearance/${sellerId}`;
-  const API_POST = `http://localhost:5000/api/shopAppearance/${sellerId}/save`;
+  const API = window.VITRINET_API || null;
+  const API_BASE = API ? API.backendOrigin : 'http://localhost:5000';
+  const withCreds = (init = {}) => {
+    if (API) return API.ensureCredentials(init);
+    if (init.credentials === undefined) {
+      return { ...init, credentials: 'include' };
+    }
+    return init;
+  };
+
+  const API_GET = `${API_BASE}/api/shopAppearance/${sellerId}`;
+  const API_POST = `${API_BASE}/api/shopAppearance/${sellerId}/save`;
 
   /* ---- لوگوی متنی ---- */
   const shopLogoText = document.getElementById('shopLogoText');
@@ -93,7 +103,7 @@ function initContentDashboard() {
       return;
     }
     try {
-      const res = await fetch(API_GET, { credentials: 'include' });
+      const res = await fetch(API_GET, withCreds());
       if (!res.ok) throw new Error("خطا در دریافت اطلاعات فروشگاه");
       const data = await res.json();
       document.getElementById('shopPhone').value = data.shopPhone || '';
@@ -142,10 +152,9 @@ function initContentDashboard() {
   }
 
   try {
-    const res = await fetch(API_POST, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      credentials: 'include',
+    const res = await fetch(API_POST, withCreds({
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         sellerId,
         shopurl, // این باید باشه حتماً!
@@ -155,7 +164,7 @@ function initContentDashboard() {
         shopStatus,
         slides
       })
-    });
+    }));
     const result = await res.json();
     if (!res.ok) throw new Error(result.message || "ذخیره ناموفق بود");
     // نمایش پاپ‌آپ موفقیت
