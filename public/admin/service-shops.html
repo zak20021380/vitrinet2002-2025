@@ -2074,9 +2074,6 @@
         if (type === 'complimentary') {
           actions.push(`<button type="button" class="btn btn-primary btn-sm" data-plan-expiry-action="manage-plan" data-id="${id}"><i class="ri-vip-crown-line"></i> تمدید پلن رایگان</button>`);
         }
-        if (shop?.shopUrl) {
-          actions.push(`<button type="button" class="btn btn-secondary btn-sm" data-plan-expiry-action="open-seller" data-shop-url="${escapeHtml(shop.shopUrl)}"><i class="ri-external-link-line"></i> پنل فروشنده</button>`);
-        }
         const actionsHtml = actions.length
           ? `<div class="plan-expiry-item-actions">${actions.join('')}</div>`
           : '';
@@ -2202,10 +2199,6 @@
       const shopUrl = shop.shopUrl
         ? `/service-shops.html?shopurl=${encodeURIComponent(shop.shopUrl)}`
         : '#';
-      const sellerPanelUrl = shop.shopUrl
-        ? `/service-seller-panel/s-seller-panel.html?shopurl=${encodeURIComponent(shop.shopUrl)}`
-        : '#';
-
       const subcategoryHtml = `<div class="shop-meta"><i class="ri-stack-line"></i> ${escapeHtml(subcategoryText)}</div>`;
       const shopUrlLabel = escapeHtml(shop.shopUrl || '');
       const planBadgeHtml = buildPlanBadge(shop.complimentaryPlan);
@@ -2250,7 +2243,6 @@
           </td>
           <td>
             <div class="actions">
-              ${(shop.shopUrl && shop.ownerPhone) ? `<a href="${sellerPanelUrl}" target="_blank" rel="noopener noreferrer" class="btn btn-view btn-sm"><i class="ri-external-link-line"></i> پنل فروشنده</a>` : ''}
               <button type="button" class="btn btn-edit btn-sm" data-action="view-status" data-id="${shop._id}">
                 <i class="ri-eye-line"></i> مشاهده وضعیت
               </button>
@@ -2354,12 +2346,6 @@
           closePlanExpiryDialog();
           if (id) {
             openPlanModal(id);
-          }
-        } else if (action === 'open-seller') {
-          const shopUrl = actionBtn.dataset.shopUrl;
-          if (shopUrl) {
-            const sellerPanelUrl = `/service-seller-panel/s-seller-panel.html?shopurl=${encodeURIComponent(shopUrl)}`;
-            window.open(sellerPanelUrl, '_blank', 'noopener');
           }
         }
       });
