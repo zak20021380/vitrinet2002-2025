@@ -39,6 +39,45 @@
 
 
 <body class="app-body">
+  <div id="moderation-overlay" class="moderation-overlay" hidden>
+    <div class="moderation-overlay__card" role="alert" aria-live="assertive">
+      <div class="moderation-overlay__icon" aria-hidden="true">
+        <svg width="56" height="56" viewBox="0 0 56 56" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect x="2" y="2" width="52" height="52" rx="18" fill="url(#grad-stop)" opacity="0.16"/>
+          <rect x="6" y="6" width="44" height="44" rx="14" fill="#2A2A2E" stroke="rgba(255,255,255,0.16)" stroke-width="2"/>
+          <path d="M28 17c6.075 0 11 4.925 11 11s-4.925 11-11 11-11-4.925-11-11 4.925-11 11-11zm0 4c-.512 0-.935.386-.993.883L27 22v6a1 1 0 0 0 .883.993L28 29h3a1 1 0 0 0 .117-1.993L31 27h-2v-5a1 1 0 0 0-1-1zm0 12a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3z" fill="#FF6B6B"/>
+          <defs>
+            <linearGradient id="grad-stop" x1="10" y1="8" x2="46" y2="50" gradientUnits="userSpaceOnUse">
+              <stop stop-color="#FF8A8A" />
+              <stop offset="1" stop-color="#FF3D68" />
+            </linearGradient>
+          </defs>
+        </svg>
+      </div>
+      <h1 class="moderation-overlay__title" id="moderation-overlay-title">دسترسی فروشگاه شما موقتاً متوقف شده است</h1>
+      <p class="moderation-overlay__message" id="moderation-overlay-message">
+        برای حفظ کیفیت خدمات، مدیریت ویترینت دسترسی این فروشگاه را به صورت موقت غیرفعال کرده است.
+      </p>
+      <div class="moderation-overlay__meta" id="moderation-overlay-meta"></div>
+      <div class="moderation-overlay__actions">
+        <button type="button" class="moderation-overlay__refresh" id="moderation-overlay-refresh">
+          <span class="moderation-overlay__refresh-icon" aria-hidden="true">⟳</span>
+          بررسی مجدد وضعیت
+        </button>
+        <a class="moderation-overlay__support" href="tel:02191009900">تماس با پشتیبانی</a>
+      </div>
+    </div>
+  </div>
+  <div id="moderation-banner" class="moderation-banner" hidden role="status" aria-live="polite">
+    <div class="moderation-banner__content">
+      <span class="moderation-banner__icon" aria-hidden="true">✔︎</span>
+      <div>
+        <strong>دسترسی فروشگاه فعال شد</strong>
+        <p id="moderation-banner-text">حالا می‌توانید دوباره از تمام امکانات پنل استفاده کنید.</p>
+      </div>
+    </div>
+    <button type="button" class="moderation-banner__close" aria-label="بستن پیام" data-dismiss="moderation-banner">×</button>
+  </div>
   <a class="skip-link" href="#app">پرش به محتوای اصلی</a>
   <header class="app-header" role="banner">
     <div class="header-container">

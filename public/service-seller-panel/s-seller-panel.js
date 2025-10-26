@@ -58,6 +58,166 @@ const escapeHtml = (str = '') => String(str).replace(/[&<>"']/g, (char) => ({
   "'": '&#39;'
 }[char] || char));
 
+const MODERATION_STORAGE_KEY = 'vt:service-seller:moderation';
+const moderationElements = {
+  overlay: document.getElementById('moderation-overlay'),
+  message: document.getElementById('moderation-overlay-message'),
+  meta: document.getElementById('moderation-overlay-meta'),
+  refresh: document.getElementById('moderation-overlay-refresh'),
+  banner: document.getElementById('moderation-banner'),
+  bannerText: document.getElementById('moderation-banner-text'),
+  bannerClose: document.querySelector('[data-dismiss="moderation-banner"]')
+};
+let moderationSnapshot = null;
+
+const formatModerationDateTime = (value) => {
+  if (!value) return '';
+  try {
+    const date = value instanceof Date ? value : new Date(value);
+    if (Number.isNaN(date.getTime())) return '';
+    return new Intl.DateTimeFormat('fa-IR', {
+      dateStyle: 'medium',
+      timeStyle: 'short'
+    }).format(date);
+  } catch (err) {
+    console.warn('formatModerationDateTime failed', err);
+    return '';
+  }
+};
+
+const readStoredModeration = () => {
+  try {
+    const raw = localStorage.getItem(MODERATION_STORAGE_KEY);
+    return raw ? JSON.parse(raw) : null;
+  } catch (err) {
+    console.warn('readStoredModeration failed', err);
+    return null;
+  }
+};
+
+const persistModeration = (state) => {
+  try {
+    localStorage.setItem(MODERATION_STORAGE_KEY, JSON.stringify({
+      isBlocked: !!state?.isBlocked,
+      reason: state?.reason || '',
+      blockedAt: state?.blockedAt || null,
+      unblockedAt: state?.unblockedAt || state?.moderation?.unblockedAt || null,
+      timestamp: Date.now()
+    }));
+  } catch (err) {
+    console.warn('persistModeration failed', err);
+  }
+};
+
+const hideModerationBanner = () => {
+  if (moderationElements.banner) {
+    moderationElements.banner.setAttribute('hidden', '');
+  }
+};
+
+const showModerationBanner = (info) => {
+  if (!moderationElements.banner) return;
+  const text = info?.moderation?.unblockedAt
+    ? `آخرین بازبینی در ${formatModerationDateTime(info.moderation.unblockedAt)}`
+    : (info?.unblockedAt ? `آخرین بازبینی در ${formatModerationDateTime(info.unblockedAt)}` : 'تمام امکانات پنل دوباره فعال است.');
+  if (moderationElements.bannerText) {
+    moderationElements.bannerText.textContent = text;
+  }
+  moderationElements.banner.removeAttribute('hidden');
+};
+
+const renderModerationMeta = (info) => {
+  if (!moderationElements.meta) return;
+  const parts = [];
+  const blockedAtText = formatModerationDateTime(info?.blockedAt || info?.moderation?.blockedAt);
+  if (blockedAtText) {
+    parts.push(`<span>مسدود شده از ${escapeHtml(blockedAtText)}</span>`);
+  }
+  const reasonText = (info?.reason || info?.moderation?.reason || '').trim();
+  if (reasonText) {
+    parts.push(`<span>${escapeHtml(reasonText)}</span>`);
+  } else {
+    parts.push('<span>برای پیگیری با پشتیبانی ویترینت در ارتباط باشید.</span>');
+  }
+  const reviewedAtText = formatModerationDateTime(info?.moderation?.unblockedAt || info?.shop?.lastReviewedAt);
+  if (reviewedAtText) {
+    parts.push(`<span>آخرین بررسی: ${escapeHtml(reviewedAtText)}</span>`);
+  }
+  moderationElements.meta.innerHTML = parts.join('');
+};
+
+const applyModerationState = (info) => {
+  if (!info) return;
+  moderationSnapshot = info;
+  const prev = readStoredModeration();
+  const isBlocked = !!info.isBlocked;
+
+  if (isBlocked) {
+    document.body.dataset.shopBlocked = 'true';
+    if (moderationElements.overlay) {
+      moderationElements.overlay.removeAttribute('hidden');
+    }
+    if (moderationElements.message) {
+      const reasonText = (info.reason || '').trim();
+      moderationElements.message.textContent = reasonText
+        ? `دلیل مسدودسازی: ${reasonText}`
+        : 'برای حفظ کیفیت خدمات، دسترسی این فروشگاه موقتاً غیرفعال شده است.';
+    }
+    renderModerationMeta(info);
+    hideModerationBanner();
+  } else {
+    delete document.body.dataset.shopBlocked;
+    if (moderationElements.overlay) {
+      moderationElements.overlay.setAttribute('hidden', '');
+    }
+    if (prev?.isBlocked) {
+      showModerationBanner(info);
+      if (typeof UIComponents !== 'undefined' && typeof UIComponents.showToast === 'function') {
+        UIComponents.showToast('دسترسی فروشگاه دوباره فعال شد.', 'success');
+      }
+    } else {
+      hideModerationBanner();
+    }
+  }
+
+  persistModeration(info);
+};
+
+const fetchModerationStatus = async () => {
+  try {
+    const res = await fetch(bust(`${API_BASE}/api/service-shops/my/moderation`), {
+      credentials: 'include',
+      ...NO_CACHE
+    });
+    if (!res.ok) {
+      throw new Error('MODERATION_STATUS_FAILED');
+    }
+    const data = await res.json();
+    applyModerationState(data);
+    return data;
+  } catch (err) {
+    console.error('fetchModerationStatus error', err);
+    return null;
+  }
+};
+
+if (moderationElements.refresh) {
+  moderationElements.refresh.addEventListener('click', async () => {
+    moderationElements.refresh.disabled = true;
+    moderationElements.refresh.classList.add('is-loading');
+    await fetchModerationStatus();
+    moderationElements.refresh.classList.remove('is-loading');
+    moderationElements.refresh.disabled = false;
+  });
+}
+
+if (moderationElements.bannerClose) {
+  moderationElements.bannerClose.addEventListener('click', () => hideModerationBanner());
+}
+
+applyModerationState(readStoredModeration());
+await fetchModerationStatus();
+
 const DEFAULT_FEATURE_FLAGS = Object.freeze({ sellerPlansEnabled: false });
 const TRUE_FLAG_VALUES = new Set(['1', 'true', 'yes', 'on', 'enable', 'enabled', 'فعال', 'روشن', 'active']);
 const FALSE_FLAG_VALUES = new Set(['0', 'false', 'no', 'off', 'disable', 'disabled', 'غیرفعال', 'خاموش', 'inactive']);
