@@ -11,6 +11,7 @@ const {
   listSellerPerformance,
   getCurrentSellerPerformanceStatus,
   getDashboardStats,
+  getMonthlyBookingInsights,
   getTopServicePeers,
   blockSeller,
   unblockSeller
@@ -146,6 +147,7 @@ router.put('/working-hours', authMiddleware('seller'), async (req, res) => {
 
 router.get('/profile', authMiddleware('seller'), getCurrentSeller);
 router.get('/dashboard/stats', authMiddleware('seller'), getDashboardStats);
+router.get('/dashboard/bookings/monthly', authMiddleware('seller'), getMonthlyBookingInsights);
 router.get('/top-peers', authMiddleware('seller'), getTopServicePeers);
 
 // ارتقا حساب فروشنده (خرید اشتراک/پرمیوم)
