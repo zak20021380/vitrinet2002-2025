@@ -33,7 +33,7 @@
           <i class="ri-add-circle-line" aria-hidden="true"></i>
           <h2>ثبت تراکنش جدید</h2>
         </div>
-        <p class="card-subtitle">فقط داده‌های واقعی شما ذخیره می‌شوند و در گزارش پایین قابل مشاهده هستند.</p>
+        <p class="card-subtitle">تمام اطلاعات شما در پایگاه داده امن ذخیره شده و در گزارش‌ها قابل مشاهده است.</p>
         <form id="entryForm" novalidate>
           <div class="form-grid">
             <label class="form-field">
@@ -62,10 +62,81 @@
               <input type="date" name="recordedAt" />
             </label>
           </div>
+
+          <div class="form-grid form-grid--balanced">
+            <label class="form-field">
+              <span>دسته‌بندی تراکنش</span>
+              <select name="category">
+                <option value="عمومی">عمومی</option>
+                <option value="فروش محصول">فروش محصول</option>
+                <option value="هزینه ثابت">هزینه ثابت</option>
+                <option value="هزینه متغیر">هزینه متغیر</option>
+                <option value="حقوق و دستمزد">حقوق و دستمزد</option>
+                <option value="تبلیغات و بازاریابی">تبلیغات و بازاریابی</option>
+                <option value="هزینه انبار">هزینه انبار</option>
+                <option value="سایر">سایر</option>
+              </select>
+            </label>
+            <label class="form-field">
+              <span>روش پرداخت</span>
+              <select name="paymentMethod">
+                <option value="cash">نقدی</option>
+                <option value="card">دستگاه کارتخوان</option>
+                <option value="transfer">کارت به کارت / حواله</option>
+                <option value="online">پرداخت آنلاین</option>
+                <option value="cheque">چک</option>
+                <option value="other">سایر</option>
+              </select>
+            </label>
+            <label class="form-field">
+              <span>وضعیت پرداخت</span>
+              <select name="status">
+                <option value="paid">تسویه شده</option>
+                <option value="pending">در انتظار پرداخت</option>
+                <option value="overdue">سررسید گذشته</option>
+                <option value="refunded">مرجوعی / بازگشتی</option>
+              </select>
+            </label>
+            <label class="form-field">
+              <span>تاریخ سررسید</span>
+              <input type="date" name="dueDate" />
+            </label>
+          </div>
+
+          <div class="form-grid form-grid--balanced">
+            <label class="form-field">
+              <span>نوع طرف حساب</span>
+              <select name="counterpartyType">
+                <option value="customer">مشتری</option>
+                <option value="supplier">تأمین‌کننده</option>
+                <option value="other">سایر</option>
+              </select>
+            </label>
+            <label class="form-field">
+              <span>نام طرف حساب</span>
+              <input type="text" name="counterpartyName" placeholder="مثال: علی رضایی" />
+            </label>
+            <label class="form-field">
+              <span>شماره مرجع / فاکتور</span>
+              <input type="text" name="referenceNumber" placeholder="مثال: INV-4582" />
+            </label>
+            <label class="form-field">
+              <span>برچسب‌ها</span>
+              <input type="text" name="tags" placeholder="مثال: قسط، فروش ویژه" />
+              <small class="field-hint">برچسب‌ها را با ویرگول یا کاما جدا کنید (حداکثر ۸ مورد).</small>
+            </label>
+          </div>
+
           <label class="form-field">
             <span>توضیحات تکمیلی</span>
             <textarea name="description" rows="3" placeholder="جزئیات بیشتر (اختیاری)"></textarea>
           </label>
+
+          <div class="form-helper" role="note">
+            <i class="ri-lightbulb-flash-line" aria-hidden="true"></i>
+            <p>برای مدیریت بهتر گزارش‌ها، حتماً دسته‌بندی و وضعیت پرداخت را دقیق انتخاب کنید تا در خلاصه‌ها و سررسیدها نمایش داده شود.</p>
+          </div>
+
           <div class="form-actions">
             <button type="submit" class="primary-btn">
               <i class="ri-save-3-line" aria-hidden="true"></i>
@@ -76,11 +147,90 @@
         </form>
       </section>
 
+      <section class="card" id="filtersSection">
+        <div class="card-title">
+          <i class="ri-equalizer-line" aria-hidden="true"></i>
+          <h2>فیلتر و جستجوی تراکنش‌ها</h2>
+        </div>
+        <p class="card-subtitle">با استفاده از فیلترهای زیر گزارش‌ها را دقیق‌تر بررسی کنید.</p>
+        <form id="filtersForm">
+          <div class="filters-grid">
+            <label class="form-field">
+              <span>جستجوی سریع</span>
+              <input type="search" name="search" id="searchQuery" placeholder="جستجو بر اساس عنوان، طرف حساب یا برچسب" />
+            </label>
+            <label class="form-field">
+              <span>نوع تراکنش</span>
+              <select name="type">
+                <option value="">همه</option>
+                <option value="income">درآمد</option>
+                <option value="expense">هزینه</option>
+              </select>
+            </label>
+            <label class="form-field">
+              <span>دسته‌بندی</span>
+              <select name="category">
+                <option value="">همه دسته‌ها</option>
+                <option value="عمومی">عمومی</option>
+                <option value="فروش محصول">فروش محصول</option>
+                <option value="هزینه ثابت">هزینه ثابت</option>
+                <option value="هزینه متغیر">هزینه متغیر</option>
+                <option value="حقوق و دستمزد">حقوق و دستمزد</option>
+                <option value="تبلیغات و بازاریابی">تبلیغات و بازاریابی</option>
+                <option value="هزینه انبار">هزینه انبار</option>
+                <option value="سایر">سایر</option>
+              </select>
+            </label>
+            <label class="form-field">
+              <span>روش پرداخت</span>
+              <select name="paymentMethod">
+                <option value="">همه روش‌ها</option>
+                <option value="cash">نقدی</option>
+                <option value="card">دستگاه کارتخوان</option>
+                <option value="transfer">کارت به کارت / حواله</option>
+                <option value="online">پرداخت آنلاین</option>
+                <option value="cheque">چک</option>
+                <option value="other">سایر</option>
+              </select>
+            </label>
+            <label class="form-field">
+              <span>وضعیت پرداخت</span>
+              <select name="status">
+                <option value="">همه وضعیت‌ها</option>
+                <option value="paid">تسویه شده</option>
+                <option value="pending">در انتظار پرداخت</option>
+                <option value="overdue">سررسید گذشته</option>
+                <option value="refunded">مرجوعی / بازگشتی</option>
+              </select>
+            </label>
+            <label class="form-field">
+              <span>از تاریخ</span>
+              <input type="date" name="from" />
+            </label>
+            <label class="form-field">
+              <span>تا تاریخ</span>
+              <input type="date" name="to" />
+            </label>
+          </div>
+          <div class="filter-actions">
+            <button type="submit" class="primary-btn">
+              <i class="ri-filter-3-line" aria-hidden="true"></i>
+              اعمال فیلترها
+            </button>
+            <button type="reset" class="ghost-btn" id="resetFilters">
+              <i class="ri-refresh-line" aria-hidden="true"></i>
+              پاک‌سازی فیلترها
+            </button>
+          </div>
+        </form>
+      </section>
+
       <section class="card" id="reportsSection">
         <div class="card-title">
           <i class="ri-file-list-3-line" aria-hidden="true"></i>
           <h2>گزارش تراکنش‌های ثبت شده</h2>
         </div>
+        <p class="card-subtitle">گزارش زیر بر اساس داده‌های ذخیره شده در بک‌اند تولید شده است.</p>
         <div class="totals-grid">
           <div class="total-box total-income">
             <span class="total-label">کل درآمد</span>
@@ -95,14 +245,67 @@
             <strong id="totalBalance">۰ تومان</strong>
           </div>
         </div>
+
+        <div class="status-summary">
+          <div class="status-box status-pending">
+            <span class="status-label">در انتظار تسویه</span>
+            <strong id="pendingAmount">۰ تومان</strong>
+            <small><span id="pendingCount">۰</span> تراکنش</small>
+          </div>
+          <div class="status-box status-overdue">
+            <span class="status-label">سررسید گذشته</span>
+            <strong id="overdueAmount">۰ تومان</strong>
+            <small><span id="overdueCount">۰</span> تراکنش</small>
+          </div>
+          <div class="status-box status-paid">
+            <span class="status-label">تسویه شده</span>
+            <strong id="paidAmount">۰ تومان</strong>
+            <small><span id="paidCount">۰</span> تراکنش</small>
+          </div>
+        </div>
+
+        <div class="active-filters" id="activeFilters" aria-live="polite"></div>
+        <p class="entries-count">در حال نمایش <strong id="totalEntriesCount">۰</strong> تراکنش ثبت شده.</p>
+
+        <div class="insights-grid">
+          <div class="insight-card">
+            <div class="insight-card__header">
+              <i class="ri-pie-chart-2-line" aria-hidden="true"></i>
+              <h3>دسته‌بندی‌های پرتکرار</h3>
+            </div>
+            <ul id="categoryBreakdown" class="insight-list"></ul>
+          </div>
+          <div class="insight-card">
+            <div class="insight-card__header">
+              <i class="ri-bank-card-line" aria-hidden="true"></i>
+              <h3>سهم روش‌های پرداخت</h3>
+            </div>
+            <ul id="paymentBreakdown" class="insight-list"></ul>
+          </div>
+          <div class="insight-card">
+            <div class="insight-card__header">
+              <i class="ri-timer-line" aria-hidden="true"></i>
+              <h3>سررسیدهای پیشِ‌رو</h3>
+            </div>
+            <ul id="upcomingDueList" class="insight-list insight-list--timeline"></ul>
+          </div>
+        </div>
+
         <div class="table-wrapper">
           <table class="entries-table">
             <thead>
               <tr>
                 <th>عنوان</th>
                 <th>نوع</th>
+                <th>دسته‌بندی</th>
                 <th>مبلغ</th>
-                <th>تاریخ</th>
+                <th>روش پرداخت</th>
+                <th>وضعیت</th>
+                <th>طرف حساب</th>
+                <th>شماره مرجع</th>
+                <th>تاریخ ثبت</th>
+                <th>تاریخ سررسید</th>
+                <th>برچسب‌ها</th>
                 <th>توضیحات</th>
               </tr>
             </thead>
@@ -110,7 +313,7 @@
           </table>
           <div class="empty-state" id="emptyState">
             <i class="ri-database-2-line" aria-hidden="true"></i>
-            <p>هنوز هیچ تراکنشی ثبت نشده است. فرم بالا را تکمیل کنید.</p>
+            <p>تراکنشی با شرایط فعلی پیدا نشد. فیلترها را تغییر دهید یا تراکنش جدید ثبت کنید.</p>
           </div>
         </div>
       </section>
@@ -124,6 +327,10 @@
       <button class="bottom-toolbar__button is-active" type="button" data-action="add">
         <i class="ri-add-circle-line" aria-hidden="true"></i>
         <span>ثبت تراکنش</span>
+      </button>
+      <button class="bottom-toolbar__button" type="button" data-action="filters">
+        <i class="ri-equalizer-line" aria-hidden="true"></i>
+        <span>فیلترها</span>
       </button>
       <button class="bottom-toolbar__button" type="button" data-action="report">
         <i class="ri-bar-chart-2-line" aria-hidden="true"></i>
