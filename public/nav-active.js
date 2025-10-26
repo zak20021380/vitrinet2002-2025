@@ -265,6 +265,7 @@
 
     const currentPath = getCurrentPath();
     const disableNav = currentPath.startsWith('/seller/');
+    const isAccountantPage = currentPath.includes('accountant.html');
 
     if (disableNav) {
       const existingNav = document.querySelector('footer.mobile-nav');
@@ -289,10 +290,13 @@
       nav.innerHTML = '';
     }
 
-    NAV_ITEMS.forEach(config => {
-      const item = createNavItem(config);
-      nav.appendChild(item);
-    });
+    // Skip adding nav items for accountant page, but keep the nav bar structure
+    if (!isAccountantPage) {
+      NAV_ITEMS.forEach(config => {
+        const item = createNavItem(config);
+        nav.appendChild(item);
+      });
+    }
 
     nav.classList.remove('hidden');
     nav.classList.add(NAV_READY_CLASS);
