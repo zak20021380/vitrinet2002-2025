@@ -264,7 +264,7 @@
     if (!body) return null;
 
     const currentPath = getCurrentPath();
-    const disableNav = currentPath.startsWith('/seller/');
+    const disableNav = currentPath.startsWith('/seller/') || currentPath.startsWith('/hesabketab/');
 
     if (disableNav) {
       const existingNav = document.querySelector('footer.mobile-nav');
