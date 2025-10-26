@@ -173,6 +173,561 @@
             font-weight: 600;
         }
 
+        .home-rows-card {
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+        }
+
+        .home-rows-header {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+        }
+
+        .home-rows-title {
+            margin: 0;
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--text-strong);
+        }
+
+        .home-rows-subtitle {
+            margin: 4px 0 0;
+            color: var(--text-muted);
+            font-size: 14px;
+        }
+
+        .home-rows-actions {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .home-rows-actions button {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 10px 16px;
+            border-radius: 999px;
+            border: 1px solid rgba(61, 115, 255, 0.18);
+            background: rgba(61, 115, 255, 0.08);
+            color: #1a3e9a;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            transition: background 0.2s ease;
+        }
+
+        .home-rows-actions button:hover {
+            background: rgba(61, 115, 255, 0.16);
+        }
+
+        .home-rows-actions button.primary-action {
+            background: var(--primary);
+            border-color: var(--primary);
+            color: #fff;
+            box-shadow: 0 12px 24px rgba(61, 115, 255, 0.18);
+        }
+
+        .home-rows-actions button.primary-action:hover {
+            background: #355fe2;
+        }
+
+        .home-rows-status {
+            border-radius: 12px;
+            padding: 10px 16px;
+            font-size: 14px;
+            display: none;
+        }
+
+        .home-rows-status[data-visible="true"] {
+            display: block;
+        }
+
+        .home-rows-status.info {
+            background: rgba(61, 115, 255, 0.08);
+            color: #1a3e9a;
+        }
+
+        .home-rows-status.success {
+            background: rgba(55, 178, 108, 0.12);
+            color: var(--success);
+        }
+
+        .home-rows-status.error {
+            background: rgba(242, 87, 100, 0.12);
+            color: var(--danger);
+        }
+
+        .home-rows-body {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .home-rows-empty {
+            border: 1px dashed rgba(61, 115, 255, 0.3);
+            border-radius: 16px;
+            padding: 28px;
+            text-align: center;
+            color: var(--text-muted);
+            font-weight: 500;
+            background: rgba(61, 115, 255, 0.05);
+        }
+
+        .home-rows-list {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+
+        .home-rows-item {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            padding: 18px;
+            border-radius: 16px;
+            border: 1px solid rgba(112, 128, 176, 0.14);
+            background: var(--surface-strong);
+            box-shadow: 0 12px 28px rgba(18, 38, 63, 0.08);
+            position: relative;
+        }
+
+        .home-rows-item[draggable="true"] {
+            cursor: move;
+        }
+
+        .home-rows-item.is-dragging {
+            opacity: 0.6;
+        }
+
+        .home-rows-item.drop-target {
+            border-color: var(--primary);
+            background: rgba(61, 115, 255, 0.08);
+        }
+
+        .home-rows-item.is-pending::after {
+            content: "در حال ذخیره...";
+            position: absolute;
+            top: 12px;
+            left: 18px;
+            font-size: 12px;
+            color: var(--primary);
+        }
+
+        .home-row-item-header {
+            display: flex;
+            gap: 14px;
+            align-items: flex-start;
+        }
+
+        .home-row-drag-handle {
+            border: none;
+            background: rgba(61, 115, 255, 0.1);
+            color: var(--primary);
+            border-radius: 12px;
+            padding: 12px 10px;
+            font-size: 18px;
+            cursor: grab;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.2s ease;
+        }
+
+        .home-row-drag-handle:active {
+            cursor: grabbing;
+        }
+
+        .home-row-item-main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .home-row-item-title {
+            font-weight: 700;
+            font-size: 18px;
+            color: var(--text-strong);
+        }
+
+        .home-row-item-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            color: var(--text-muted);
+            font-size: 13px;
+        }
+
+        .home-row-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 4px 10px;
+            border-radius: 999px;
+            background: rgba(61, 115, 255, 0.14);
+            color: var(--primary);
+            font-weight: 600;
+        }
+
+        .home-row-item-cards {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+
+        .home-row-card-chip {
+            padding: 4px 8px;
+            border-radius: 999px;
+            background: rgba(18, 38, 63, 0.08);
+            color: var(--text-muted);
+            font-size: 12px;
+        }
+
+        .home-row-item-actions {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-top: 4px;
+        }
+
+        .home-row-item-actions button {
+            border: none;
+            border-radius: 12px;
+            padding: 8px 12px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(61, 115, 255, 0.08);
+            color: #1a3e9a;
+            transition: background 0.2s ease;
+        }
+
+        .home-row-item-actions button:hover {
+            background: rgba(61, 115, 255, 0.16);
+        }
+
+        .home-row-item-actions .danger {
+            background: rgba(242, 87, 100, 0.14);
+            color: var(--danger);
+        }
+
+        .home-row-item-actions .danger:hover {
+            background: rgba(242, 87, 100, 0.22);
+        }
+
+        .home-row-item-actions .ghost {
+            background: rgba(18, 38, 63, 0.06);
+            color: var(--text-muted);
+        }
+
+        .home-row-item-actions .ghost:hover {
+            background: rgba(18, 38, 63, 0.1);
+        }
+
+        .home-rows-item.skeleton::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            border-radius: 16px;
+            background: linear-gradient(120deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.6) 50%, rgba(255,255,255,0) 100%);
+            animation: shimmer 1.2s infinite;
+        }
+
+        @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+
+        .home-row-dialog {
+            border: none;
+            padding: 0;
+            border-radius: 24px;
+            max-width: min(720px, 92vw);
+            width: 100%;
+            background: var(--surface-strong);
+            box-shadow: 0 30px 80px rgba(18, 38, 63, 0.2);
+        }
+
+        .home-row-dialog::backdrop {
+            background: rgba(15, 23, 42, 0.35);
+            backdrop-filter: blur(4px);
+        }
+
+        .home-row-form {
+            display: flex;
+            flex-direction: column;
+            gap: 0;
+            max-height: 80vh;
+        }
+
+        .home-row-dialog header {
+            padding: 22px 28px 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 12px;
+        }
+
+        .home-row-dialog header h2 {
+            margin: 0;
+            font-size: 20px;
+            font-weight: 700;
+        }
+
+        .home-row-dialog header button {
+            border: none;
+            background: rgba(18, 38, 63, 0.08);
+            color: var(--text-muted);
+            border-radius: 999px;
+            width: 34px;
+            height: 34px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        .home-row-dialog main {
+            padding: 0 28px;
+            overflow-y: auto;
+            scrollbar-width: thin;
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+        }
+
+        .home-row-form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .home-row-form-group label {
+            font-weight: 600;
+            color: var(--text-strong);
+        }
+
+        .home-row-form-group input,
+        .home-row-form-group textarea {
+            border-radius: 14px;
+            border: 1px solid rgba(112, 128, 176, 0.2);
+            padding: 10px 12px;
+            font-size: 14px;
+            font-family: inherit;
+            resize: vertical;
+        }
+
+        .home-row-form-group input:focus,
+        .home-row-form-group textarea:focus {
+            outline: 2px solid rgba(61, 115, 255, 0.3);
+            border-color: rgba(61, 115, 255, 0.5);
+        }
+
+        .home-row-input-hint {
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        .home-row-cards-toolbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+        }
+
+        .home-row-cards-toolbar button {
+            border: none;
+            background: rgba(55, 178, 108, 0.14);
+            color: var(--success);
+            border-radius: 999px;
+            padding: 8px 14px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .home-row-cards-toolbar button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .home-row-card-editor {
+            border-radius: 18px;
+            border: 1px solid rgba(112, 128, 176, 0.18);
+            padding: 18px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            background: rgba(255, 255, 255, 0.85);
+        }
+
+        .home-row-cards {
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+
+        .home-row-card-editor legend {
+            font-weight: 700;
+            color: var(--text-strong);
+            font-size: 15px;
+            margin-bottom: 4px;
+        }
+
+        .home-row-card-editor .card-fields {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 12px;
+        }
+
+        .home-row-card-editor textarea {
+            min-height: 70px;
+        }
+
+        .home-row-card-controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .home-row-card-controls button {
+            border: none;
+            background: rgba(242, 87, 100, 0.14);
+            color: var(--danger);
+            border-radius: 999px;
+            padding: 6px 12px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .home-row-card-controls button:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+
+        .home-row-dialog footer {
+            padding: 18px 28px 24px;
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            border-top: 1px solid rgba(112, 128, 176, 0.12);
+            background: rgba(255, 255, 255, 0.9);
+        }
+
+        .home-row-dialog footer button {
+            border: none;
+            border-radius: 12px;
+            padding: 10px 18px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .home-row-dialog footer .secondary {
+            background: rgba(18, 38, 63, 0.08);
+            color: var(--text-muted);
+        }
+
+        .home-row-dialog footer .primary {
+            background: var(--primary);
+            color: #fff;
+            box-shadow: 0 14px 30px rgba(61, 115, 255, 0.2);
+        }
+
+        .home-row-dialog footer .primary:disabled {
+            opacity: 0.6;
+            cursor: progress;
+        }
+
+        .home-row-confirm {
+            border: none;
+            border-radius: 20px;
+            padding: 0;
+            max-width: 420px;
+            width: 92vw;
+            background: var(--surface-strong);
+            box-shadow: 0 25px 60px rgba(18, 38, 63, 0.22);
+        }
+
+        .home-row-confirm::backdrop {
+            background: rgba(15, 23, 42, 0.35);
+            backdrop-filter: blur(4px);
+        }
+
+        .home-row-confirm form {
+            padding: 26px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .home-row-confirm h3 {
+            margin: 0;
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--danger);
+        }
+
+        .home-row-confirm p {
+            margin: 0;
+            color: var(--text-muted);
+            font-size: 14px;
+        }
+
+        .home-row-confirm .dialog-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+
+        .home-row-confirm button {
+            border: none;
+            border-radius: 12px;
+            padding: 8px 16px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .home-row-confirm .dismiss {
+            background: rgba(18, 38, 63, 0.08);
+            color: var(--text-muted);
+        }
+
+        .home-row-confirm .danger {
+            background: var(--danger);
+            color: #fff;
+            box-shadow: 0 12px 24px rgba(242, 87, 100, 0.2);
+        }
+
+        @media (max-width: 768px) {
+            .home-row-item-header {
+                flex-direction: column;
+            }
+
+            .home-rows-actions {
+                width: 100%;
+                justify-content: flex-start;
+            }
+
+            .home-rows-actions button {
+                flex: 1 1 auto;
+                justify-content: center;
+            }
+
+            .home-row-card-editor .card-fields {
+                grid-template-columns: 1fr;
+            }
+        }
+
         .table-wrapper {
             overflow: hidden;
             border-radius: 16px;
@@ -566,6 +1121,32 @@
             </div>
         </section>
 
+        <section class="card home-rows-card" id="homeRowsManager" data-max-cards="6" aria-labelledby="homeRowsManagerTitle">
+            <div class="home-rows-header">
+                <div>
+                    <h2 id="homeRowsManagerTitle" class="home-rows-title">مدیریت ردیف‌های صفحه اصلی</h2>
+                    <p class="home-rows-subtitle">سفارشی‌سازی ردیف‌های کارت که در صفحه اصلی نمایش داده می‌شوند.</p>
+                </div>
+                <div class="home-rows-actions">
+                    <button type="button" data-action="refresh">
+                        <span aria-hidden="true">⟳</span>
+                        به‌روزرسانی
+                    </button>
+                    <button type="button" class="primary-action" data-action="add-row">
+                        <span aria-hidden="true">＋</span>
+                        افزودن ردیف جدید
+                    </button>
+                </div>
+            </div>
+            <div class="home-rows-status info" role="status" aria-live="polite" data-status></div>
+            <div class="home-rows-body">
+                <div class="home-rows-empty" data-empty>
+                    هنوز هیچ ردیفی تعریف نشده است. با انتخاب «افزودن ردیف جدید» شروع کنید.
+                </div>
+                <ul class="home-rows-list" data-list aria-describedby="homeRowsManagerTitle"></ul>
+            </div>
+        </section>
+
         <section class="card">
             <h2 class="page-subtitle" style="font-weight:600;color:var(--text-strong);">فهرست مغازه‌ها</h2>
             <div class="table-wrapper">
@@ -659,6 +1240,50 @@
             </div>
         </section>
     </main>
+
+    <dialog id="homeRowEditor" class="home-row-dialog" aria-labelledby="homeRowEditorTitle">
+        <form id="homeRowForm" class="home-row-form" novalidate>
+            <header>
+                <div>
+                    <h2 id="homeRowEditorTitle">افزودن ردیف</h2>
+                    <p class="home-rows-subtitle" id="homeRowEditorSubtitle">عنوان و کارت‌های ردیف را مشخص کنید.</p>
+                </div>
+                <button type="button" data-action="close-editor" aria-label="بستن">×</button>
+            </header>
+            <main>
+                <div class="home-row-form-group">
+                    <label for="homeRowTitle">عنوان ردیف <span aria-hidden="true">*</span></label>
+                    <input id="homeRowTitle" name="rowTitle" type="text" required maxlength="120" autocomplete="off" />
+                    <p class="home-row-input-hint">عنوان باید یکتا باشد و در صفحه اصلی نمایش داده می‌شود.</p>
+                </div>
+                <div class="home-row-form-group">
+                    <div class="home-row-cards-toolbar">
+                        <h3 class="home-rows-title" style="font-size:16px;">کارت‌ها</h3>
+                        <button type="button" data-action="add-card">کارت جدید</button>
+                    </div>
+                    <p class="home-row-input-hint">حداقل یک کارت و حداکثر <span data-max-cards-label>6</span> کارت مجاز است.</p>
+                    <div class="home-row-cards" id="homeRowCardsContainer"></div>
+                </div>
+            </main>
+            <footer>
+                <button type="button" class="secondary" data-action="cancel-editor">انصراف</button>
+                <button type="submit" class="primary" data-action="submit-editor">ذخیره</button>
+            </footer>
+        </form>
+    </dialog>
+
+    <dialog id="homeRowConfirm" class="home-row-confirm" aria-labelledby="homeRowConfirmTitle">
+        <form method="dialog">
+            <h3 id="homeRowConfirmTitle">حذف ردیف</h3>
+            <p id="homeRowConfirmMessage">آیا از حذف این ردیف مطمئن هستید؟</p>
+            <div class="dialog-actions">
+                <button type="submit" value="cancel" class="dismiss">انصراف</button>
+                <button type="submit" value="confirm" class="danger">حذف</button>
+            </div>
+        </form>
+    </dialog>
+
+    <script type="module" src="./home-rows-manager.js"></script>
 
     <div class="modal-backdrop" id="shopModal">
         <div class="modal-card">
