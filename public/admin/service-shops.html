@@ -1561,16 +1561,15 @@
 
     const getModerationInfo = (shop = {}) => {
       const moderation = shop.adminModeration || {};
-      const seller = shop.seller || {};
-      const isBlocked = !!(moderation.isBlocked || seller.blockedByAdmin);
-      const reasonRaw = moderation.reason != null && String(moderation.reason).trim()
+      const isBlocked = !!moderation.isBlocked;
+      const reason = moderation.reason != null && String(moderation.reason).trim()
         ? String(moderation.reason).trim()
-        : (seller.blockedReason != null ? String(seller.blockedReason).trim() : '');
+        : '';
       return {
         isBlocked,
-        reason: reasonRaw,
-        blockedAt: moderation.blockedAt || seller.blockedAt || null,
-        unblockedAt: moderation.unblockedAt || seller.unblockedAt || null
+        reason,
+        blockedAt: moderation.blockedAt || null,
+        unblockedAt: moderation.unblockedAt || null
       };
     };
 
