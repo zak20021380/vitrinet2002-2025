@@ -229,6 +229,21 @@
                   </svg>
                   <span></span>
                 </div>
+                <div class="stat-action">
+                  <button
+                    type="button"
+                    id="booking-history-btn"
+                    class="btn-text-sm booking-history-btn"
+                    aria-haspopup="dialog"
+                    aria-controls="booking-history-modal"
+                  >
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                      <path d="M3 3v18h18"/>
+                      <path d="M7 14l4-4 3 3 4-6"/>
+                    </svg>
+                    <span>آمار ۳۰ روز اخیر</span>
+                  </button>
+                </div>
               </div>
             </article>
             <article class="stat-card stat-pending" role="listitem">
@@ -941,7 +956,138 @@
         </div>
     </div>
   </div>
-<div id="vip-modal" class="modal vip-modal" role="dialog" aria-modal="true" aria-labelledby="vip-modal-title" hidden>
+  <div
+    id="booking-history-modal"
+    class="modal booking-history-modal"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="booking-history-title"
+    hidden
+  >
+    <div class="modal-backdrop" data-dismiss="modal"></div>
+    <div class="modal-content card booking-history-card" role="document">
+      <div class="modal-header">
+        <h3 id="booking-history-title" class="modal-title">آمار رزرو ۳۰ روز اخیر</h3>
+        <button type="button" class="btn-icon modal-close-btn" data-dismiss="modal" aria-label="بستن">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <line x1="18" y1="6" x2="6" y2="18"/>
+            <line x1="6" y1="6" x2="18" y2="18"/>
+          </svg>
+        </button>
+      </div>
+      <div class="modal-body booking-history-body">
+        <div class="booking-history-meta">
+          <div>
+            <span class="booking-history-range-label">دوره</span>
+            <strong id="bh-range">۳۰ روز اخیر</strong>
+          </div>
+          <div class="booking-history-actions">
+            <span class="booking-history-updated" id="bh-last-updated">—</span>
+            <button type="button" class="btn-secondary btn-xs" id="booking-history-refresh">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <polyline points="23 4 23 10 17 10"/>
+                <polyline points="1 20 1 14 7 14"/>
+                <path d="M3.51 9a9 9 0 0 1 14.88-3.36L23 10M1 14l4.62 4.62A9 9 0 0 0 20.49 15"/>
+              </svg>
+              <span>بروزرسانی</span>
+            </button>
+          </div>
+        </div>
+        <div id="booking-history-loading" class="booking-history-loading">
+          <span>در حال دریافت آمار واقعی از سرور…</span>
+        </div>
+        <div id="booking-history-error" class="booking-history-error" role="alert" hidden></div>
+        <div id="booking-history-content" class="booking-history-content" hidden>
+          <section class="booking-history-summary" aria-label="وضعیت رزرو در ۳۰ روز اخیر">
+            <article class="bh-summary-card">
+              <span class="bh-summary-label">کل رزروها</span>
+              <strong class="bh-summary-value" id="bh-total">۰</strong>
+            </article>
+            <article class="bh-summary-card">
+              <span class="bh-summary-label">انجام شده</span>
+              <strong class="bh-summary-value" id="bh-completed">۰</strong>
+            </article>
+            <article class="bh-summary-card">
+              <span class="bh-summary-label">تایید شده</span>
+              <strong class="bh-summary-value" id="bh-confirmed">۰</strong>
+            </article>
+            <article class="bh-summary-card">
+              <span class="bh-summary-label">در انتظار</span>
+              <strong class="bh-summary-value" id="bh-pending">۰</strong>
+            </article>
+            <article class="bh-summary-card">
+              <span class="bh-summary-label">لغو شده</span>
+              <strong class="bh-summary-value" id="bh-cancelled">۰</strong>
+            </article>
+          </section>
+
+          <section class="booking-history-highlights" aria-label="نکات کلیدی">
+            <article class="bh-highlight-card">
+              <span class="bh-highlight-label">میانگین روزانه</span>
+              <strong class="bh-highlight-value" id="bh-average-per-day">۰</strong>
+              <span class="bh-highlight-hint">بر اساس تمام روزهای بازه</span>
+            </article>
+            <article class="bh-highlight-card">
+              <span class="bh-highlight-label">نرخ انجام</span>
+              <strong class="bh-highlight-value" id="bh-fulfillment-rate">۰٪</strong>
+              <span class="bh-highlight-hint">رزروهای تکمیل‌شده نسبت به کل</span>
+            </article>
+            <article class="bh-highlight-card">
+              <span class="bh-highlight-label">نرخ لغو</span>
+              <strong class="bh-highlight-value" id="bh-cancellation-rate">۰٪</strong>
+              <span class="bh-highlight-hint">لغو شده نسبت به کل</span>
+            </article>
+            <article class="bh-highlight-card">
+              <span class="bh-highlight-label">روزهای فعال</span>
+              <strong class="bh-highlight-value" id="bh-active-days">۰</strong>
+              <span class="bh-highlight-hint">روزهایی که حداقل یک رزرو داشته‌اند</span>
+            </article>
+            <article class="bh-highlight-card">
+              <span class="bh-highlight-label">بهترین روز</span>
+              <strong class="bh-highlight-value" id="bh-best-day">—</strong>
+              <span class="bh-highlight-hint">بیشترین رزرو ثبت‌شده در یک روز</span>
+            </article>
+          </section>
+
+          <section class="booking-history-trends" aria-label="روند رزروها">
+            <article class="bh-trend-card" id="bh-today-trend" data-direction="flat">
+              <div class="bh-trend-header">
+                <span class="bh-trend-label">امروز</span>
+                <span class="bh-trend-delta" data-role="delta">بدون تغییر</span>
+              </div>
+              <div class="bh-trend-value" data-role="total">۰</div>
+              <div class="bh-trend-percent" data-role="percent">—</div>
+            </article>
+            <article class="bh-trend-card" id="bh-week-trend" data-direction="flat">
+              <div class="bh-trend-header">
+                <span class="bh-trend-label">۷ روز اخیر</span>
+                <span class="bh-trend-delta" data-role="delta">بدون تغییر</span>
+              </div>
+              <div class="bh-trend-value" data-role="total">۰</div>
+              <div class="bh-trend-percent" data-role="percent">—</div>
+            </article>
+          </section>
+
+          <section class="booking-history-breakdown" aria-label="جزئیات رزروها">
+            <div class="booking-history-chart-wrapper">
+              <h4 class="booking-history-subtitle">تقویم رزرو روزانه</h4>
+              <ul id="bh-chart" class="booking-history-chart" role="list" aria-live="polite"></ul>
+              <div id="booking-history-empty" class="booking-history-empty" hidden>
+                در این بازه زمانی رزروی ثبت نشده است.
+              </div>
+            </div>
+            <div class="booking-history-lists">
+              <div class="bh-list">
+                <h4 class="booking-history-subtitle">پرمخاطب‌ترین خدمات</h4>
+                <ul id="bh-service-list"></ul>
+              </div>
+            </div>
+          </section>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div id="vip-modal" class="modal vip-modal" role="dialog" aria-modal="true" aria-labelledby="vip-modal-title" hidden>
     <div class="modal-backdrop" data-dismiss="modal"></div>
   <div class="modal-content card" role="document">
       <div class="modal-header">

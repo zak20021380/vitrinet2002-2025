@@ -306,6 +306,198 @@ exports.getDashboardStats = async (req, res) => {
   }
 };
 
+exports.getMonthlyBookingInsights = async (req, res) => {
+  try {
+    const sellerId = req.user && (req.user.id || req.user._id);
+    if (!sellerId) {
+      return res.status(401).json({ message: 'احراز هویت نامعتبر است.' });
+    }
+
+    const sellerObjectId = new mongoose.Types.ObjectId(sellerId);
+    const toISODate = (date) => {
+      const tzOffset = date.getTimezoneOffset();
+      const local = new Date(date.getTime() - tzOffset * 60000);
+      return local.toISOString().slice(0, 10);
+    };
+
+    const now = new Date();
+    const endDate = toISODate(now);
+    const startDateObj = new Date(now);
+    startDateObj.setDate(startDateObj.getDate() - 29);
+    const startDate = toISODate(startDateObj);
+
+    const [dailyStats, serviceLeadersRaw] = await Promise.all([
+      Booking.aggregate([
+        {
+          $match: {
+            sellerId: sellerObjectId,
+            bookingDate: { $gte: startDate, $lte: endDate }
+          }
+        },
+        {
+          $group: {
+            _id: '$bookingDate',
+            total: { $sum: 1 },
+            completed: {
+              $sum: {
+                $cond: [{ $eq: ['$status', 'completed'] }, 1, 0]
+              }
+            },
+            confirmed: {
+              $sum: {
+                $cond: [{ $eq: ['$status', 'confirmed'] }, 1, 0]
+              }
+            },
+            pending: {
+              $sum: {
+                $cond: [{ $eq: ['$status', 'pending'] }, 1, 0]
+              }
+            },
+            cancelled: {
+              $sum: {
+                $cond: [{ $eq: ['$status', 'cancelled'] }, 1, 0]
+              }
+            }
+          }
+        },
+        { $sort: { _id: 1 } }
+      ]),
+      Booking.aggregate([
+        {
+          $match: {
+            sellerId: sellerObjectId,
+            bookingDate: { $gte: startDate, $lte: endDate }
+          }
+        },
+        {
+          $group: {
+            _id: '$service',
+            total: { $sum: 1 }
+          }
+        },
+        { $sort: { total: -1 } },
+        { $limit: 6 }
+      ])
+    ]);
+
+    const dailyMap = new Map();
+    dailyStats.forEach((entry) => {
+      dailyMap.set(entry._id, {
+        date: entry._id,
+        total: entry.total || 0,
+        completed: entry.completed || 0,
+        confirmed: entry.confirmed || 0,
+        pending: entry.pending || 0,
+        cancelled: entry.cancelled || 0
+      });
+    });
+
+    const daily = [];
+    const tempDate = new Date(startDateObj);
+    const totals = {
+      total: 0,
+      completed: 0,
+      confirmed: 0,
+      pending: 0,
+      cancelled: 0,
+      activeDays: 0
+    };
+    let bestDay = null;
+
+    while (tempDate <= now) {
+      const iso = toISODate(tempDate);
+      const entry = dailyMap.get(iso) || {
+        date: iso,
+        total: 0,
+        completed: 0,
+        confirmed: 0,
+        pending: 0,
+        cancelled: 0
+      };
+
+      daily.push(entry);
+      totals.total += entry.total;
+      totals.completed += entry.completed;
+      totals.confirmed += entry.confirmed;
+      totals.pending += entry.pending;
+      totals.cancelled += entry.cancelled;
+      if (entry.total > 0) {
+        totals.activeDays += 1;
+      }
+      if (!bestDay || entry.total > bestDay.total) {
+        bestDay = entry.total > 0 ? { date: entry.date, total: entry.total } : bestDay;
+      }
+
+      tempDate.setDate(tempDate.getDate() + 1);
+    }
+
+    const averages = {
+      perDay: daily.length ? totals.total / daily.length : 0,
+      fulfillmentRate: totals.total ? totals.completed / totals.total : 0,
+      confirmationRate: totals.total ? (totals.completed + totals.confirmed) / totals.total : 0,
+      cancellationRate: totals.total ? totals.cancelled / totals.total : 0
+    };
+
+    const todayEntry = daily[daily.length - 1] || { total: 0 };
+    const yesterdayEntry = daily.length > 1 ? daily[daily.length - 2] : { total: 0 };
+    const todayDelta = todayEntry.total - (yesterdayEntry.total || 0);
+    const todayPercent = (yesterdayEntry.total || 0)
+      ? (todayDelta / yesterdayEntry.total) * 100
+      : null;
+
+    const lastSeven = daily.slice(-7);
+    const previousSeven = daily.slice(-14, -7);
+    const sumReducer = (acc, item) => acc + (item?.total || 0);
+    const lastSevenTotal = lastSeven.reduce(sumReducer, 0);
+    const previousSevenTotal = previousSeven.reduce(sumReducer, 0);
+    const weekDelta = lastSevenTotal - previousSevenTotal;
+    const weekPercent = previousSevenTotal
+      ? (weekDelta / previousSevenTotal) * 100
+      : null;
+
+    const direction = (value) => {
+      if (value > 0) return 'up';
+      if (value < 0) return 'down';
+      return 'flat';
+    };
+
+    return res.json({
+      range: {
+        start: startDate,
+        end: endDate,
+        days: daily.length
+      },
+      lastUpdated: now.toISOString(),
+      totals,
+      averages,
+      trend: {
+        today: {
+          total: todayEntry.total || 0,
+          delta: todayDelta,
+          percent: todayPercent,
+          direction: direction(todayDelta)
+        },
+        weekOverWeek: {
+          current: lastSevenTotal,
+          previous: previousSevenTotal,
+          delta: weekDelta,
+          percent: weekPercent,
+          direction: direction(weekDelta)
+        }
+      },
+      bestDay: bestDay || null,
+      serviceLeaders: serviceLeadersRaw.map((item) => ({
+        service: item._id || 'بدون عنوان',
+        total: item.total || 0
+      })),
+      daily
+    });
+  } catch (err) {
+    console.error('getMonthlyBookingInsights error:', err);
+    return res.status(500).json({ message: 'خطا در دریافت آمار ماهانه رزرو.' });
+  }
+};
+
 // حذف کامل فروشنده و تمام داده‌های مرتبط
 exports.deleteSeller = async (req, res) => {
   try {

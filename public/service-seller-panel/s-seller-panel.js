@@ -1003,6 +1003,25 @@ async createService(payload) {
     }
   },
 
+  async getMonthlyBookingInsights() {
+    const url = bust(`${API_BASE}/api/sellers/dashboard/bookings/monthly`);
+    const r = await fetch(url, {
+      credentials: 'include',
+      ...NO_CACHE
+    });
+    if (r.status === 401) {
+      throw { status: 401, message: 'UNAUTHORIZED' };
+    }
+    if (!r.ok && r.status !== 304) {
+      throw new Error('FETCH_MONTHLY_BOOKING_INSIGHTS_FAILED');
+    }
+    const parsed = await this._json(r);
+    if (!parsed || typeof parsed !== 'object') {
+      throw new Error('INVALID_MONTHLY_BOOKING_INSIGHTS');
+    }
+    return parsed;
+  },
+
   // Portfolio API methods
   async getPortfolio() {
     const r = await fetch(bust(`${API_BASE}/api/seller-portfolio/me`), {
@@ -2042,6 +2061,9 @@ function bindFloatingCloseOnce() {
       this.currentPortfolioImage = '';
       this.dashboardStats = null;
       this._dashboardStatsPromise = null;
+      this.bookingInsights = null;
+      this._bookingInsightsPromise = null;
+      this.bookingInsightsFetchedAt = 0;
       this.topPeersData = null;
       this._topPeersPromise = null;
       this.topPeersAutoRefreshInterval = null;
@@ -2128,7 +2150,9 @@ setupEventListeners() {
       notificationBtn: document.getElementById('notification-btn'),
       notificationPanel: document.getElementById('notification-panel'),
       viewStoreBtn: document.getElementById('view-store-btn'),
-        openReservationsBtn: document.getElementById('open-reservations-btn'),
+      openReservationsBtn: document.getElementById('open-reservations-btn'),
+      bookingHistoryBtn: document.getElementById('booking-history-btn'),
+      bookingHistoryRefresh: document.getElementById('booking-history-refresh'),
 
       plansView: document.getElementById('plans-view'),
       customerSearch: document.getElementById('customer-search'),
@@ -2313,6 +2337,10 @@ if (elements.viewStoreBtn) {
       handler: () => UIComponents.openModal('rank-modal')
     },
     {
+      element: elements.bookingHistoryBtn,
+      handler: () => this.openBookingHistoryModal()
+    },
+    {
       element: elements.addCustomerBtn,
       handler: () => UIComponents.openDrawer('customer-drawer')
     },
@@ -2354,6 +2382,14 @@ if (elements.viewStoreBtn) {
       element.addEventListener('click', handler);
     }
   });
+
+  if (elements.bookingHistoryRefresh) {
+    elements.bookingHistoryRefresh.addEventListener('click', () => {
+      this.renderBookingHistory(true).catch((err) => {
+        console.error('bookingHistoryRefresh error', err);
+      });
+    });
+  }
 
   if (elements.topLeaderboardList) {
     elements.topLeaderboardList.addEventListener('click', (e) => {
@@ -2783,6 +2819,262 @@ destroy() {
       })();
 
       return this._dashboardStatsPromise;
+    }
+
+    shouldRefreshBookingInsights(maxAgeMs = 5 * 60 * 1000) {
+      if (!this.bookingInsights || !this.bookingInsightsFetchedAt) {
+        return true;
+      }
+      return (Date.now() - this.bookingInsightsFetchedAt) > maxAgeMs;
+    }
+
+    async loadBookingInsights(force = false) {
+      if (this._bookingInsightsPromise && !force) {
+        return this._bookingInsightsPromise;
+      }
+
+      if (!force && !this.shouldRefreshBookingInsights()) {
+        return this.bookingInsights;
+      }
+
+      this._bookingInsightsPromise = (async () => {
+        try {
+          const data = await API.getMonthlyBookingInsights();
+          this.bookingInsights = data || {};
+          this.bookingInsightsFetchedAt = Date.now();
+          return this.bookingInsights;
+        } finally {
+          this._bookingInsightsPromise = null;
+        }
+      })();
+
+      return this._bookingInsightsPromise;
+    }
+
+    async renderBookingHistory(force = false) {
+      const content = document.getElementById('booking-history-content');
+      const loadingEl = document.getElementById('booking-history-loading');
+      const errorEl = document.getElementById('booking-history-error');
+      const refreshBtn = document.getElementById('booking-history-refresh');
+
+      if (errorEl) {
+        errorEl.hidden = true;
+        errorEl.textContent = '';
+      }
+
+      const hasCachedData = !!this.bookingInsights;
+      const willFetchFresh = force || this.shouldRefreshBookingInsights();
+      if (content && hasCachedData && !force) {
+        this.applyBookingInsights(this.bookingInsights);
+        content.hidden = false;
+      }
+
+      if (loadingEl) {
+        loadingEl.hidden = hasCachedData && !willFetchFresh;
+      }
+      if (refreshBtn) {
+        refreshBtn.disabled = true;
+        refreshBtn.setAttribute('aria-busy', 'true');
+      }
+
+      try {
+        const data = await this.loadBookingInsights(force);
+        if (data) {
+          this.applyBookingInsights(data);
+          if (content) {
+            content.hidden = false;
+          }
+        }
+      } catch (err) {
+        console.error('renderBookingHistory failed', err);
+        if (this.bookingInsights && content) {
+          this.applyBookingInsights(this.bookingInsights);
+          content.hidden = false;
+        }
+        if (errorEl) {
+          const message = err?.status === 401
+            ? 'برای مشاهده آمار رزرو لازم است دوباره وارد شوید.'
+            : 'خطا در دریافت آمار ماهانه رزرو. لطفاً دوباره تلاش کنید.';
+          errorEl.textContent = message;
+          errorEl.hidden = false;
+        }
+      } finally {
+        if (loadingEl) {
+          loadingEl.hidden = true;
+        }
+        if (refreshBtn) {
+          refreshBtn.disabled = false;
+          refreshBtn.removeAttribute('aria-busy');
+        }
+      }
+    }
+
+    applyBookingInsights(data = {}) {
+      const totals = data?.totals || {};
+      const averages = data?.averages || {};
+      const trend = data?.trend || {};
+      const todayTrend = trend?.today || {};
+      const weekTrend = trend?.weekOverWeek || {};
+      const bestDay = data?.bestDay || null;
+      const range = data?.range || {};
+      const daily = Array.isArray(data?.daily) ? data.daily : [];
+      const services = Array.isArray(data?.serviceLeaders) ? data.serviceLeaders : [];
+
+      const formatNumber = (value, fractionDigits = 0, fallback = '۰') => {
+        const num = Number(value);
+        if (!Number.isFinite(num)) return fallback;
+        const fixed = Number(num.toFixed(fractionDigits));
+        return UIComponents.formatPersianNumber(fixed);
+      };
+
+      const formatPercent = (ratio) => {
+        const num = Number(ratio);
+        if (!Number.isFinite(num)) return '—';
+        const percent = num * 100;
+        const digits = Math.abs(percent) < 10 ? 1 : 0;
+        return `${formatNumber(percent, digits, '—')}٪`;
+      };
+
+      const formatAbsolutePercent = (value) => {
+        const num = Number(value);
+        if (!Number.isFinite(num)) return '—';
+        const digits = Math.abs(num) < 10 ? 1 : 0;
+        return `${formatNumber(Math.abs(num), digits, '—')}٪`;
+      };
+
+      const formatDelta = (value) => {
+        const num = Number(value);
+        if (!Number.isFinite(num) || num === 0) return 'بدون تغییر';
+        const sign = num > 0 ? '+' : '−';
+        return `${sign}${formatNumber(Math.abs(num), 0, '۰')}`;
+      };
+
+      const setText = (id, value) => {
+        const el = document.getElementById(id);
+        if (el) {
+          el.textContent = value;
+        }
+      };
+
+      const rangeEl = document.getElementById('bh-range');
+      if (rangeEl) {
+        const startLabel = UIComponents?.formatPersianDayMonth?.(range.start) || '';
+        const endLabel = UIComponents?.formatPersianDayMonth?.(range.end) || '';
+        rangeEl.textContent = startLabel && endLabel
+          ? `${startLabel} تا ${endLabel}`
+          : '۳۰ روز اخیر';
+      }
+
+      const updatedEl = document.getElementById('bh-last-updated');
+      if (updatedEl) {
+        const label = data?.lastUpdated
+          ? UIComponents?.formatRelativeDate?.(data.lastUpdated)
+          : '';
+        updatedEl.textContent = label ? `آخرین بروزرسانی: ${label}` : '—';
+      }
+
+      setText('bh-total', formatNumber(totals.total || 0));
+      setText('bh-completed', formatNumber(totals.completed || 0));
+      setText('bh-confirmed', formatNumber(totals.confirmed || 0));
+      setText('bh-pending', formatNumber(totals.pending || 0));
+      setText('bh-cancelled', formatNumber(totals.cancelled || 0));
+
+      setText('bh-average-per-day', formatNumber(averages.perDay || 0, 1, '۰'));
+      setText('bh-fulfillment-rate', formatPercent(averages.fulfillmentRate));
+      setText('bh-cancellation-rate', formatPercent(averages.cancellationRate));
+      setText('bh-active-days', formatNumber(totals.activeDays || 0));
+
+      const bestDayEl = document.getElementById('bh-best-day');
+      if (bestDayEl) {
+        if (bestDay && bestDay.date) {
+          const dateLabel = UIComponents?.formatPersianDayMonth?.(bestDay.date) || '';
+          const countLabel = formatNumber(bestDay.total || 0);
+          bestDayEl.textContent = dateLabel
+            ? `${dateLabel} (${countLabel})`
+            : countLabel;
+        } else {
+          bestDayEl.textContent = '—';
+        }
+      }
+
+      const applyTrendCard = (id, dataPoint, percentSuffix) => {
+        const card = document.getElementById(id);
+        if (!card) return;
+        const direction = dataPoint?.direction || 'flat';
+        card.dataset.direction = direction;
+        const totalEl = card.querySelector('[data-role="total"]');
+        if (totalEl) {
+          totalEl.textContent = formatNumber(dataPoint?.total || 0);
+        }
+        const deltaEl = card.querySelector('[data-role="delta"]');
+        if (deltaEl) {
+          deltaEl.textContent = formatDelta(dataPoint?.delta || 0);
+        }
+        const percentEl = card.querySelector('[data-role="percent"]');
+        if (percentEl) {
+          const percent = dataPoint?.percent;
+          if (percent == null || !Number.isFinite(Number(percent))) {
+            percentEl.textContent = '—';
+          } else {
+            const percentText = formatAbsolutePercent(percent);
+            percentEl.textContent = percentSuffix ? `${percentText} ${percentSuffix}` : percentText;
+          }
+        }
+      };
+
+      applyTrendCard('bh-today-trend', todayTrend, 'نسبت به دیروز');
+      applyTrendCard('bh-week-trend', weekTrend, 'نسبت به هفته قبل');
+
+      const chartEl = document.getElementById('bh-chart');
+      const emptyEl = document.getElementById('booking-history-empty');
+      if (chartEl) {
+        const maxTotal = daily.reduce((max, item) => Math.max(max, Number(item?.total) || 0), 0);
+        if (!daily.length || maxTotal === 0) {
+          chartEl.innerHTML = '';
+          if (emptyEl) emptyEl.hidden = false;
+        } else {
+          if (emptyEl) emptyEl.hidden = true;
+          chartEl.innerHTML = daily.map((day) => {
+            const total = Number(day?.total) || 0;
+            const iso = day?.date || '';
+            const dayNumber = iso ? Number(iso.split('-')[2] || iso.split('/')[2] || 0) : 0;
+            const percentage = maxTotal ? Math.max((total / maxTotal) * 100, total > 0 ? 6 : 0) : 0;
+            const tooltip = `${UIComponents?.formatPersianDayMonth?.(iso) || ''} • ${formatNumber(total)} رزرو`;
+            const isToday = iso && iso === (range?.end || '');
+            const dayLabel = Number.isFinite(dayNumber) && dayNumber > 0
+              ? UIComponents.formatPersianNumber(dayNumber)
+              : '—';
+            return `
+              <li class="bh-bar" data-value="${total}" data-today="${isToday ? 'true' : 'false'}" aria-label="${escapeHtml(tooltip)}">
+                <div class="bh-bar-track"><span class="bh-bar-fill" style="height:${percentage.toFixed(1)}%"></span></div>
+                <span class="bh-bar-day">${dayLabel}</span>
+              </li>
+            `;
+          }).join('');
+        }
+      }
+
+      const serviceList = document.getElementById('bh-service-list');
+      if (serviceList) {
+        if (!services.length) {
+          serviceList.innerHTML = '<li>هنوز خدمتی ثبت نشده است.</li>';
+        } else {
+          serviceList.innerHTML = services.map((service) => {
+            const name = service?.service ? escapeHtml(service.service) : '—';
+            const count = formatNumber(service?.total || 0);
+            return `<li><span>${name}</span><span>${count}</span></li>`;
+          }).join('');
+        }
+      }
+    }
+
+    async openBookingHistoryModal(force = false) {
+      UIComponents.openModal('booking-history-modal');
+      try {
+        await this.renderBookingHistory(force);
+      } catch (err) {
+        // renderBookingHistory already logs and surfaces the error state.
+      }
     }
 
     getRatingBadgeConfig(rating, count) {
