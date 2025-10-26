@@ -162,9 +162,29 @@
             border: 1px solid var(--border-color);
             overflow: hidden;
         }
-        
+
         .card:hover {
             box-shadow: var(--shadow-md);
+        }
+
+        .card.highlight {
+            border-right: 3px solid var(--primary);
+        }
+
+        .card-subtitle {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            margin-top: 4px;
+        }
+
+        .card-section-title {
+            font-weight: 600;
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
         }
         
         .card-header {
@@ -188,7 +208,267 @@
         .card-title i {
             color: var(--primary);
         }
-        
+
+        .quick-actions {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 12px;
+        }
+
+        .quick-action {
+            background: var(--light);
+            border: 1px dashed var(--border-color);
+            border-radius: var(--radius);
+            padding: 16px 12px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+            transition: var(--transition);
+            font-weight: 600;
+            color: var(--text-primary);
+            text-align: center;
+        }
+
+        .quick-action i {
+            font-size: 1.5rem;
+            color: var(--primary);
+            transition: var(--transition);
+        }
+
+        .quick-action:hover,
+        .quick-action:focus-visible {
+            background: rgba(79, 70, 229, 0.08);
+            border-color: var(--primary-light);
+            box-shadow: var(--shadow-md);
+            transform: translateY(-2px);
+        }
+
+        .quick-action:hover i,
+        .quick-action:focus-visible i {
+            transform: scale(1.05);
+        }
+
+        .quick-action-description {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            text-align: center;
+            line-height: 1.4;
+            display: block;
+        }
+
+        .quick-action-title {
+            font-size: 0.95rem;
+        }
+
+        .summary-grid {
+            display: grid;
+            gap: 16px;
+        }
+
+        .summary-item {
+            background: var(--light);
+            padding: 12px;
+            border-radius: var(--radius);
+            border: 1px solid var(--border-color);
+        }
+
+        .summary-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 0.875rem;
+            margin-bottom: 8px;
+            color: var(--text-secondary);
+        }
+
+        .summary-value {
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .progress {
+            background: rgba(79, 70, 229, 0.08);
+            border-radius: 999px;
+            overflow: hidden;
+            height: 8px;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary) 0%, var(--primary-light) 100%);
+            border-radius: 999px;
+            transition: width 0.4s ease;
+        }
+
+        .progress-label {
+            margin-top: 8px;
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .task-list {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .task-item {
+            padding: 12px;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius);
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 12px;
+            background: var(--white);
+            transition: var(--transition);
+        }
+
+        .task-item:hover {
+            border-color: var(--primary-light);
+            box-shadow: var(--shadow-md);
+        }
+
+        .task-label {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            line-height: 1.5;
+            color: var(--text-primary);
+            font-weight: 500;
+        }
+
+        .task-checkbox {
+            width: 20px;
+            height: 20px;
+            border-radius: 6px;
+            border: 2px solid var(--border-color);
+            accent-color: var(--primary);
+            margin-top: 2px;
+        }
+
+        .task-meta {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            align-items: flex-end;
+        }
+
+        .task-progress {
+            margin-bottom: 16px;
+        }
+
+        .task-progress-value {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            margin-top: 6px;
+            text-align: left;
+        }
+
+        .timeline {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            position: relative;
+        }
+
+        .timeline::before {
+            content: '';
+            position: absolute;
+            inset-inline-start: 12px;
+            top: 4px;
+            bottom: 4px;
+            width: 2px;
+            background: var(--border-color);
+        }
+
+        .timeline-item {
+            display: flex;
+            gap: 16px;
+            padding-inline-start: 28px;
+            position: relative;
+        }
+
+        .timeline-indicator {
+            position: absolute;
+            inset-inline-start: 4px;
+            top: 0;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: var(--white);
+            border: 2px solid var(--primary);
+        }
+
+        .timeline-content {
+            background: var(--light);
+            border-radius: var(--radius);
+            padding: 12px;
+            border: 1px solid var(--border-color);
+            flex: 1;
+        }
+
+        .timeline-title {
+            font-weight: 600;
+            margin-bottom: 4px;
+            color: var(--text-primary);
+        }
+
+        .timeline-meta {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            display: flex;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+
+        .supplier-list {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .supplier-list th,
+        .supplier-list td {
+            padding: 10px 12px;
+            border-bottom: 1px solid var(--border-color);
+            text-align: right;
+            font-size: 0.875rem;
+        }
+
+        .supplier-list tbody tr:hover {
+            background: rgba(79, 70, 229, 0.05);
+        }
+
+        .supplier-actions {
+            display: flex;
+            gap: 8px;
+            justify-content: flex-end;
+        }
+
+        .mini-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 8px;
+            border-radius: 999px;
+            font-size: 0.75rem;
+            background: rgba(59, 130, 246, 0.12);
+            color: var(--info);
+        }
+
+        .card-divider {
+            height: 1px;
+            background: var(--border-color);
+            margin: 16px 0;
+        }
+
         /* Buttons */
         .btn {
             display: inline-flex;
@@ -1143,7 +1423,89 @@
                     <div class="stat-label">اعتباری</div>
                 </div>
             </div>
-            
+
+            <div class="card highlight">
+                <div class="card-header">
+                    <h2 class="card-title">
+                        <i class="fas fa-bolt"></i>
+                        میانبرهای روزانه
+                    </h2>
+                </div>
+                <p class="card-subtitle">کارهای تکراری فروشگاه را فقط با یک لمس انجام دهید.</p>
+                <div class="quick-actions" role="group" aria-label="میانبرهای مدیریت فروشگاه">
+                    <button type="button" class="quick-action" data-action="sale">
+                        <i class="fas fa-cash-register" aria-hidden="true"></i>
+                        <span class="quick-action-title">ثبت فروش سریع</span>
+                        <span class="quick-action-description">محصولات محبوب را در لحظه ثبت کنید</span>
+                    </button>
+                    <button type="button" class="quick-action" data-action="expense">
+                        <i class="fas fa-receipt" aria-hidden="true"></i>
+                        <span class="quick-action-title">ثبت هزینه روزانه</span>
+                        <span class="quick-action-description">مصرف صندوق و خریدهای فوری</span>
+                    </button>
+                    <button type="button" class="quick-action" data-action="inventory">
+                        <i class="fas fa-boxes" aria-hidden="true"></i>
+                        <span class="quick-action-title">بررسی انبار</span>
+                        <span class="quick-action-description">وضعیت کالاهای پرفروش را ببینید</span>
+                    </button>
+                    <button type="button" class="quick-action" data-action="customer">
+                        <i class="fas fa-user-check" aria-hidden="true"></i>
+                        <span class="quick-action-title">بدهی مشتری</span>
+                        <span class="quick-action-description">مشتری بدهکار را سریع تسویه کنید</span>
+                    </button>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">
+                        <i class="fas fa-wallet"></i>
+                        وضعیت صندوق و بدهی
+                    </h2>
+                </div>
+                <div class="summary-grid">
+                    <div class="summary-item">
+                        <div class="summary-header">
+                            <span>پیشرفت فروش روزانه</span>
+                            <span class="summary-value">۶۱٪</span>
+                        </div>
+                        <div class="progress" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="61">
+                            <div class="progress-bar" style="width: 61%;"></div>
+                        </div>
+                        <div class="progress-label">
+                            <span>هدف: ۲۰,۰۰۰,۰۰۰ تومان</span>
+                            <span>ثبت شده: ۱۲,۳۴۵,۰۰۰ تومان</span>
+                        </div>
+                    </div>
+                    <div class="summary-item">
+                        <div class="summary-header">
+                            <span>موجودی صندوق نقدی</span>
+                            <span class="summary-value">۵,۶۷۸,۰۰۰ تومان</span>
+                        </div>
+                        <div class="progress" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="72">
+                            <div class="progress-bar" style="width: 72%;"></div>
+                        </div>
+                        <div class="progress-label">
+                            <span>حد اطمینان: ۸,۰۰۰,۰۰۰ تومان</span>
+                            <span>باقی‌مانده: ۲,۳۲۲,۰۰۰ تومان</span>
+                        </div>
+                    </div>
+                    <div class="summary-item">
+                        <div class="summary-header">
+                            <span>وضعیت مطالبات اعتباری</span>
+                            <span class="summary-value">۳ سررسید نزدیک</span>
+                        </div>
+                        <div class="progress" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="40">
+                            <div class="progress-bar" style="width: 40%; background: linear-gradient(90deg, var(--warning) 0%, var(--danger) 100%);"></div>
+                        </div>
+                        <div class="progress-label">
+                            <span>بدهی فعال: ۱۸,۰۰۰,۰۰۰ تومان</span>
+                            <span>قابل دریافت امروز: ۷,۲۰۰,۰۰۰ تومان</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <div class="card">
                 <div class="card-header">
                     <h2 class="card-title">
@@ -1155,7 +1517,54 @@
                     <canvas id="salesChart"></canvas>
                 </div>
             </div>
-            
+
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">
+                        <i class="fas fa-clipboard-check"></i>
+                        کارهای امروز فروشگاه
+                    </h2>
+                </div>
+                <div class="task-progress">
+                    <div class="progress" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+                        <div class="progress-bar" id="taskProgressBar" style="width: 0%;"></div>
+                    </div>
+                    <div class="task-progress-value" id="taskProgressText">۰٪ تکمیل شده</div>
+                </div>
+                <ul class="task-list" id="taskList">
+                    <li class="task-item">
+                        <label class="task-label" for="task-cash">
+                            <input type="checkbox" id="task-cash" class="task-checkbox" data-task-id="cash-check">
+                            جمع‌آوری و شمارش موجودی صندوق پایان شیفت
+                        </label>
+                        <div class="task-meta">
+                            <span class="badge badge-warning">تا ساعت ۲۱:۰۰</span>
+                            <button type="button" class="btn btn-outline btn-sm" data-action="expense">ثبت هزینه</button>
+                        </div>
+                    </li>
+                    <li class="task-item">
+                        <label class="task-label" for="task-stock">
+                            <input type="checkbox" id="task-stock" class="task-checkbox" data-task-id="stock-review">
+                            بررسی کالاهای پرفروش و سفارش مجدد در صورت نیاز
+                        </label>
+                        <div class="task-meta">
+                            <span class="badge badge-success">۵ قلم بررسی شد</span>
+                            <button type="button" class="btn btn-outline btn-sm" data-action="inventory">لیست کالاها</button>
+                        </div>
+                    </li>
+                    <li class="task-item">
+                        <label class="task-label" for="task-credit">
+                            <input type="checkbox" id="task-credit" class="task-checkbox" data-task-id="credit-reminder">
+                            پیگیری تماس با مشتریان بدهکار سررسید امروز
+                        </label>
+                        <div class="task-meta">
+                            <span class="badge badge-danger">۳ نفر منتظر تماس</span>
+                            <button type="button" class="btn btn-outline btn-sm" data-action="customer">فهرست مشتریان</button>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+
             <div class="card">
                 <div class="card-header">
                     <h2 class="card-title">
@@ -1196,6 +1605,101 @@
                         </div>
                     </li>
                 </ul>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">
+                        <i class="fas fa-truck-loading"></i>
+                        یادآوری تامین‌کنندگان
+                    </h2>
+                </div>
+                <table class="supplier-list">
+                    <thead>
+                        <tr>
+                            <th>تامین‌کننده</th>
+                            <th>کالاهای پیشنهادی</th>
+                            <th>آخرین خرید</th>
+                            <th>اقدام</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>شرکت لبنیات تندرست</td>
+                            <td>
+                                <div class="mini-badge"><i class="fas fa-bottle-water" aria-hidden="true"></i> شیر ۲۴ عدد</div>
+                                <div class="mini-badge"><i class="fas fa-cheese" aria-hidden="true"></i> پنیر ۱۲ عدد</div>
+                            </td>
+                            <td>۱۰ روز پیش</td>
+                            <td class="supplier-actions">
+                                <button type="button" class="btn btn-outline btn-sm" data-action="supplier-call">تماس</button>
+                                <button type="button" class="btn btn-primary btn-sm" data-action="supplier-order">ثبت سفارش</button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>پخش مواد غذایی نوین</td>
+                            <td>
+                                <div class="mini-badge"><i class="fas fa-bread-slice" aria-hidden="true"></i> نان بسته‌ای ۳۰ عدد</div>
+                            </td>
+                            <td>۷ روز پیش</td>
+                            <td class="supplier-actions">
+                                <button type="button" class="btn btn-outline btn-sm" data-action="supplier-call">پیگیری</button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>سوپر عمده خشکبار</td>
+                            <td>
+                                <div class="mini-badge"><i class="fas fa-seedling" aria-hidden="true"></i> پسته ۸ کیلو</div>
+                                <div class="mini-badge"><i class="fas fa-cookie" aria-hidden="true"></i> خشکبار مخلوط ۵ کیلو</div>
+                            </td>
+                            <td>۲۰ روز پیش</td>
+                            <td class="supplier-actions">
+                                <button type="button" class="btn btn-outline btn-sm" data-action="supplier-order">پیشنهاد قیمت</button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">
+                        <i class="fas fa-calendar-check"></i>
+                        تسویه‌های پیش‌رو
+                    </h2>
+                </div>
+                <div class="timeline">
+                    <div class="timeline-item">
+                        <span class="timeline-indicator"></span>
+                        <div class="timeline-content">
+                            <div class="timeline-title">تسویه با صندوق قرض‌الحسنه</div>
+                            <div class="timeline-meta">
+                                <span>موعد: امروز ساعت ۱۸:۰۰</span>
+                                <span>مبلغ: ۲,۰۰۰,۰۰۰ تومان</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="timeline-item">
+                        <span class="timeline-indicator"></span>
+                        <div class="timeline-content">
+                            <div class="timeline-title">پرداخت اجاره فروشگاه</div>
+                            <div class="timeline-meta">
+                                <span>موعد: ۳ روز دیگر</span>
+                                <span>مبلغ: ۷,۵۰۰,۰۰۰ تومان</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="timeline-item">
+                        <span class="timeline-indicator"></span>
+                        <div class="timeline-content">
+                            <div class="timeline-title">تسویه حساب با تامین‌کننده خشکبار</div>
+                            <div class="timeline-meta">
+                                <span>موعد: ۵ روز دیگر</span>
+                                <span>مبلغ: ۳,۴۵۰,۰۰۰ تومان</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
         
@@ -1938,10 +2442,16 @@
         const paymentMethods = Array.from(document.querySelectorAll('.payment-method'));
         const customerSelect = document.getElementById('customerSelect');
         const reportPeriodTabs = Array.from(document.querySelectorAll('[data-period]'));
+        const quickActionButtons = Array.from(document.querySelectorAll('[data-action]'));
+        const taskCheckboxes = Array.from(document.querySelectorAll('.task-checkbox'));
+        const taskProgressBar = document.getElementById('taskProgressBar');
+        const taskProgressText = document.getElementById('taskProgressText');
+        const taskProgressContainer = taskProgressBar ? taskProgressBar.closest('.progress') : null;
         const isRTL = document.documentElement.dir === 'rtl';
         let toastTimeout;
         let salesChartInstance = null;
         let salesReportChartInstance = null;
+        const TASK_STORAGE_KEY = 'accountantDailyTasks';
 
         function safeLocalStorageGet(key) {
             try {
@@ -2165,7 +2675,34 @@
             checkEmptyStates(viewId);
             closeSpeedDial();
         }
-        
+
+        function handleQuickAction(action) {
+            switch (action) {
+                case 'sale':
+                    openModal(newSaleModal);
+                    break;
+                case 'expense':
+                    showToast('هزینه روزانه را در پایان شیفت ثبت کنید.');
+                    break;
+                case 'inventory':
+                    setActiveView('inventoryView');
+                    showToast('وضعیت انبار به‌روز شد.');
+                    break;
+                case 'customer':
+                    setActiveView('creditView');
+                    showToast('فهرست بدهی مشتریان نمایش داده شد.');
+                    break;
+                case 'supplier-call':
+                    showToast('یادآوری: با تامین‌کننده تماس بگیرید.');
+                    break;
+                case 'supplier-order':
+                    showToast('پیش‌نویس سفارش برای تامین‌کننده آماده شد.');
+                    break;
+                default:
+                    showToast('این بخش به زودی فعال می‌شود.');
+            }
+        }
+
         // Check for empty states
         function checkEmptyStates(viewId) {
             // Hide all empty states first
@@ -2200,6 +2737,15 @@
 
             item.addEventListener('keydown', (event) => {
                 handleNavKeydown(event, index);
+            });
+        });
+
+        quickActionButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                const action = button.getAttribute('data-action');
+                if (action) {
+                    handleQuickAction(action);
+                }
             });
         });
 
@@ -2524,7 +3070,54 @@
             closeModal(newSaleModal);
             showToast('فاکتور فروش با موفقیت ثبت شد');
         });
-        
+
+        function loadTaskStates() {
+            try {
+                const stored = safeLocalStorageGet(TASK_STORAGE_KEY);
+                return stored ? JSON.parse(stored) : {};
+            } catch (error) {
+                return {};
+            }
+        }
+
+        function saveTaskStates(states) {
+            safeLocalStorageSet(TASK_STORAGE_KEY, JSON.stringify(states));
+        }
+
+        function updateTaskProgress() {
+            if (!taskProgressBar || !taskProgressText) return;
+
+            const total = taskCheckboxes.length;
+            const completed = taskCheckboxes.filter(checkbox => checkbox.checked).length;
+            const percent = total === 0 ? 0 : Math.round((completed / total) * 100);
+
+            taskProgressBar.style.width = `${percent}%`;
+            if (taskProgressContainer) {
+                taskProgressContainer.setAttribute('aria-valuenow', percent);
+                taskProgressContainer.setAttribute('aria-valuetext', `${percent.toLocaleString('fa-IR')} درصد`);
+            }
+            taskProgressText.textContent = `${percent.toLocaleString('fa-IR')}٪ تکمیل شده`;
+        }
+
+        const taskStates = loadTaskStates();
+
+        taskCheckboxes.forEach(checkbox => {
+            const taskId = checkbox.dataset.taskId;
+            if (taskId && taskStates[taskId]) {
+                checkbox.checked = true;
+            }
+
+            checkbox.addEventListener('change', () => {
+                if (taskId) {
+                    taskStates[taskId] = checkbox.checked;
+                    saveTaskStates(taskStates);
+                    updateTaskProgress();
+                }
+            });
+        });
+
+        updateTaskProgress();
+
         // Product form functions
         function resetProductForm() {
             // Reset form fields
