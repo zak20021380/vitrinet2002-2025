@@ -147,6 +147,49 @@
       color: white;
     }
 
+    .danger-dialog .modal-header {
+      background: linear-gradient(135deg, rgba(239, 68, 68, 0.92), rgba(248, 113, 113, 0.85));
+    }
+
+    .danger-alert {
+      background: rgba(239, 68, 68, 0.08);
+      border: 1.5px solid rgba(239, 68, 68, 0.22);
+      color: var(--danger);
+      padding: 1rem 1.25rem;
+      border-radius: 12px;
+      margin-bottom: 1.25rem;
+      line-height: 1.7;
+    }
+
+    .danger-alert strong {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 1rem;
+      margin-bottom: 0.35rem;
+    }
+
+    .danger-list {
+      margin: 0 0 1.25rem;
+      padding: 0 1.1rem;
+      color: var(--muted);
+      line-height: 1.8;
+    }
+
+    .danger-list li {
+      margin-bottom: 0.35rem;
+    }
+
+    .confirm-input-warning {
+      background: rgba(239, 68, 68, 0.05);
+      border-color: rgba(239, 68, 68, 0.35);
+    }
+
+    .confirm-input-warning:focus {
+      border-color: var(--danger);
+      box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.18);
+    }
+
     /* Stats Grid */
     .stats-grid {
       display: grid;
@@ -1509,6 +1552,62 @@
     </div>
   </dialog>
 
+  <dialog id="hard-delete-dialog" class="danger-dialog">
+    <div class="modal-header danger">
+      <h2><i class="ri-delete-bin-5-line"></i> حذف دائمی فروشنده خدماتی</h2>
+      <button type="button" class="modal-close" data-close-hard-delete>
+        <i class="ri-close-line"></i>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div class="danger-alert">
+        <strong><i class="ri-error-warning-line"></i> هشدار حذف دائمی</strong>
+        با تایید این عملیات، صفحه مغازه، حساب فروشنده و تمامی داده‌های وابسته برای همیشه حذف می‌شود و شماره مالک در لیست سیاه قرار می‌گیرد.
+      </div>
+      <div class="form-group" style="margin-bottom: 0.75rem;">
+        <label>نام مغازه</label>
+        <div><strong id="hard-delete-shop-name">—</strong></div>
+      </div>
+      <div class="form-group" style="margin-bottom: 0.75rem;">
+        <label>مالک</label>
+        <div id="hard-delete-owner-name">—</div>
+      </div>
+      <div class="form-group" style="margin-bottom: 0.75rem;">
+        <label>شماره تماس</label>
+        <div><code id="hard-delete-shop-phone">—</code></div>
+      </div>
+      <div class="form-group" style="margin-bottom: 1.25rem;">
+        <label>آدرس اختصاصی</label>
+        <div><code id="hard-delete-shop-url">—</code></div>
+      </div>
+      <ul class="danger-list">
+        <li>تمام نوبت‌ها، خدمات، محتوای ظاهری و تراکنش‌های مرتبط حذف می‌شود.</li>
+        <li>شماره تلفن مالک در لیست سیاه قرار می‌گیرد و امکان ثبت‌نام مجدد وجود نخواهد داشت.</li>
+        <li>این اقدام غیرقابل بازگشت است؛ لطفاً قبل از تایید از نهایی بودن تصمیم مطمئن شوید.</li>
+      </ul>
+      <div class="form-group">
+        <label for="hard-delete-reason">دلیل حذف (اختیاری)</label>
+        <textarea id="hard-delete-reason" rows="3" placeholder="این توضیح در سوابق ادمین ثبت می‌شود..."></textarea>
+      </div>
+      <div class="form-group">
+        <label for="hard-delete-confirm">برای تایید، عبارت «حذف» را وارد کنید</label>
+        <input type="text" id="hard-delete-confirm" class="confirm-input-warning" placeholder="حذف">
+        <p class="form-note">پس از تایید، امکان بازگشت یا بازیابی فروشنده وجود ندارد.</p>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <span class="form-error" id="hard-delete-error" style="display: none;"></span>
+      <div class="form-actions">
+        <button type="button" class="btn btn-secondary btn-sm" data-close-hard-delete>
+          <i class="ri-close-line"></i> لغو
+        </button>
+        <button type="button" class="btn btn-danger btn-sm" id="hard-delete-submit" disabled>
+          <i class="ri-delete-bin-5-line"></i> تایید حذف دائمی
+        </button>
+      </div>
+    </div>
+  </dialog>
+
   <script>
     // API Configuration
     const ADMIN_API_BASE = (() => {
@@ -1627,6 +1726,8 @@
       expiryDialogItems: []
     };
 
+    const HARD_DELETE_CONFIRM_VALUE = 'حذف';
+
     // Elements
     const elements = {
       tableBody: document.getElementById('shops-table-body'),
@@ -1663,7 +1764,17 @@
       moderationReasonNote: document.getElementById('moderation-reason-note'),
       moderationError: document.getElementById('moderation-error'),
       moderationSubmit: document.getElementById('moderation-submit'),
-      moderationCloseButtons: Array.from(document.querySelectorAll('[data-close-moderation]'))
+      moderationCloseButtons: Array.from(document.querySelectorAll('[data-close-moderation]')),
+      hardDeleteDialog: document.getElementById('hard-delete-dialog'),
+      hardDeleteShopName: document.getElementById('hard-delete-shop-name'),
+      hardDeleteOwnerName: document.getElementById('hard-delete-owner-name'),
+      hardDeleteShopPhone: document.getElementById('hard-delete-shop-phone'),
+      hardDeleteShopUrl: document.getElementById('hard-delete-shop-url'),
+      hardDeleteReason: document.getElementById('hard-delete-reason'),
+      hardDeleteConfirm: document.getElementById('hard-delete-confirm'),
+      hardDeleteError: document.getElementById('hard-delete-error'),
+      hardDeleteSubmit: document.getElementById('hard-delete-submit'),
+      hardDeleteCloseButtons: Array.from(document.querySelectorAll('[data-close-hard-delete]'))
     };
 
     function applyInitialFiltersFromUrl() {
@@ -2252,6 +2363,9 @@
               <button type="button" class="btn btn-action btn-sm" data-action="moderation" data-mode="${moderationActionMode}" data-id="${shop._id}">
                 <i class="${moderationActionIcon}"></i> اقدامات
               </button>
+              <button type="button" class="btn btn-danger btn-sm" data-action="hard-delete" data-id="${shop._id}">
+                <i class="ri-delete-bin-5-line"></i> حذف دائمی
+              </button>
             </div>
             ${moderationMetaHtml}
           </td>
@@ -2316,6 +2430,14 @@
         e.preventDefault();
         e.stopPropagation();
         await openPlanModal(managePlanBtn.dataset.id);
+        return;
+      }
+
+      const hardDeleteBtn = e.target.closest('button[data-action="hard-delete"]');
+      if (hardDeleteBtn) {
+        e.preventDefault();
+        e.stopPropagation();
+        await openHardDeleteDialog(hardDeleteBtn.dataset.id);
         return;
       }
 
@@ -2597,6 +2719,90 @@
       }
     }
 
+    function updateHardDeleteSubmitState() {
+      if (!elements.hardDeleteSubmit) return;
+      const value = elements.hardDeleteConfirm ? elements.hardDeleteConfirm.value.trim() : '';
+      elements.hardDeleteSubmit.disabled = value !== HARD_DELETE_CONFIRM_VALUE;
+    }
+
+    function resetHardDeleteDialog() {
+      if (elements.hardDeleteDialog) {
+        elements.hardDeleteDialog.dataset.shopId = '';
+      }
+      if (elements.hardDeleteShopName) {
+        elements.hardDeleteShopName.textContent = '—';
+      }
+      if (elements.hardDeleteOwnerName) {
+        elements.hardDeleteOwnerName.textContent = '—';
+      }
+      if (elements.hardDeleteShopPhone) {
+        elements.hardDeleteShopPhone.textContent = '—';
+      }
+      if (elements.hardDeleteShopUrl) {
+        elements.hardDeleteShopUrl.textContent = '—';
+      }
+      if (elements.hardDeleteReason) {
+        elements.hardDeleteReason.value = '';
+      }
+      if (elements.hardDeleteConfirm) {
+        elements.hardDeleteConfirm.value = '';
+      }
+      if (elements.hardDeleteError) {
+        elements.hardDeleteError.style.display = 'none';
+        elements.hardDeleteError.textContent = '';
+      }
+      if (elements.hardDeleteSubmit) {
+        elements.hardDeleteSubmit.innerHTML = '<i class="ri-delete-bin-5-line"></i> تایید حذف دائمی';
+      }
+      updateHardDeleteSubmitState();
+    }
+
+    function closeHardDeleteDialog() {
+      resetHardDeleteDialog();
+      if (elements.hardDeleteDialog?.open) {
+        elements.hardDeleteDialog.close();
+      }
+    }
+
+    async function openHardDeleteDialog(shopId) {
+      if (!elements.hardDeleteDialog || !shopId) return;
+
+      try {
+        const data = await fetchJSON(`${API_BASE}/${shopId}`);
+        const shop = data.item;
+        if (!shop) {
+          throw new Error('مغازه خدماتی یافت نشد.');
+        }
+
+        resetHardDeleteDialog();
+        elements.hardDeleteDialog.dataset.shopId = shopId;
+
+        if (elements.hardDeleteShopName) {
+          elements.hardDeleteShopName.textContent = shop.name || 'بدون نام';
+        }
+        if (elements.hardDeleteOwnerName) {
+          elements.hardDeleteOwnerName.textContent = shop.ownerName || 'نامشخص';
+        }
+        if (elements.hardDeleteShopPhone) {
+          elements.hardDeleteShopPhone.textContent = shop.ownerPhone || '—';
+        }
+        if (elements.hardDeleteShopUrl) {
+          elements.hardDeleteShopUrl.textContent = shop.shopUrl || '—';
+        }
+
+        if (!elements.hardDeleteDialog.open) {
+          elements.hardDeleteDialog.showModal();
+        }
+
+        if (elements.hardDeleteConfirm) {
+          requestAnimationFrame(() => elements.hardDeleteConfirm?.focus());
+        }
+      } catch (err) {
+        console.error('openHardDeleteDialog error', err);
+        showToast(err.message || 'خطا در دریافت اطلاعات مغازه.', 'error');
+      }
+    }
+
     function closeModerationDialog() {
       if (!elements.moderationDialog) return;
       resetModerationDialog();
@@ -2766,6 +2972,92 @@
         } finally {
           submitBtn.disabled = false;
           submitBtn.innerHTML = previousLabel;
+        }
+      });
+    }
+
+    if (elements.hardDeleteDialog) {
+      elements.hardDeleteDialog.addEventListener('cancel', (event) => {
+        event.preventDefault();
+        closeHardDeleteDialog();
+      });
+    }
+
+    if (elements.hardDeleteCloseButtons && elements.hardDeleteCloseButtons.length) {
+      elements.hardDeleteCloseButtons.forEach((btn) => {
+        btn.addEventListener('click', (event) => {
+          event.preventDefault();
+          closeHardDeleteDialog();
+        });
+      });
+    }
+
+    if (elements.hardDeleteConfirm) {
+      elements.hardDeleteConfirm.addEventListener('input', () => {
+        if (elements.hardDeleteError) {
+          elements.hardDeleteError.style.display = 'none';
+          elements.hardDeleteError.textContent = '';
+        }
+        updateHardDeleteSubmitState();
+      });
+    }
+
+    if (elements.hardDeleteSubmit) {
+      elements.hardDeleteSubmit.addEventListener('click', async () => {
+        if (!elements.hardDeleteDialog) return;
+        const shopId = elements.hardDeleteDialog.dataset.shopId;
+        if (!shopId) {
+          return;
+        }
+
+        const confirmValue = elements.hardDeleteConfirm ? elements.hardDeleteConfirm.value.trim() : '';
+        if (confirmValue !== HARD_DELETE_CONFIRM_VALUE) {
+          if (elements.hardDeleteError) {
+            elements.hardDeleteError.textContent = 'برای تایید حذف، عبارت «حذف» را وارد کنید.';
+            elements.hardDeleteError.style.display = 'block';
+          }
+          updateHardDeleteSubmitState();
+          return;
+        }
+
+        if (elements.hardDeleteError) {
+          elements.hardDeleteError.style.display = 'none';
+          elements.hardDeleteError.textContent = '';
+        }
+
+        const submitBtn = elements.hardDeleteSubmit;
+        const previousLabel = submitBtn.innerHTML;
+
+        try {
+          submitBtn.disabled = true;
+          submitBtn.innerHTML = '<i class="ri-loader-4-line"></i> در حال حذف...';
+
+          const payload = {};
+          if (elements.hardDeleteReason) {
+            const reasonValue = elements.hardDeleteReason.value.trim();
+            if (reasonValue) {
+              payload.reason = reasonValue;
+            }
+          }
+
+          const options = { method: 'DELETE' };
+          if (Object.keys(payload).length) {
+            options.body = JSON.stringify(payload);
+          }
+
+          const response = await fetchJSON(`${API_BASE}/${encodeURIComponent(shopId)}?hard=1`, options);
+          closeHardDeleteDialog();
+          showToast(response?.message || 'فروشنده و مغازه به طور کامل حذف شد.');
+          await Promise.all([loadOverview(), loadShops()]);
+        } catch (err) {
+          console.error('hardDeleteSubmit error', err);
+          if (elements.hardDeleteError) {
+            elements.hardDeleteError.textContent = err.message || 'خطا در حذف دائمی مغازه.';
+            elements.hardDeleteError.style.display = 'block';
+          }
+        } finally {
+          submitBtn.innerHTML = previousLabel;
+          updateHardDeleteSubmitState();
         }
       });
     }
