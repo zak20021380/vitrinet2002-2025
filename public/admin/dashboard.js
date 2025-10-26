@@ -3366,6 +3366,116 @@ function normaliseSellerRecord(raw) {
   return result;
 }
 
+const RAW_SERVICE_CATEGORY_KEYWORDS = [
+  'خدمات',
+  'زیبایی',
+  'تالار و مجالس',
+  'خودرو',
+  'ورزشی',
+  'service',
+  'services',
+  'service shop',
+  'service shops',
+  'service-seller',
+  'service seller',
+  'service_seller',
+  'serviceseller',
+  'serviceShop',
+  'serviceshop',
+  'serviceshops',
+  'beauty',
+  'beauty salon',
+  'car services',
+  'car service',
+  'auto service',
+  'sports',
+  'sport'
+];
+
+const SERVICE_CATEGORY_SLUGS = new Set(
+  RAW_SERVICE_CATEGORY_KEYWORDS
+    .map((keyword) => normaliseSlug(keyword))
+    .filter(Boolean)
+);
+
+function normaliseServiceText(value) {
+  if (typeof value !== 'string') return '';
+  return value.normalize('NFC').replace(/\s+/g, ' ').trim();
+}
+
+function isServiceCategoryValue(value) {
+  const text = normaliseServiceText(value);
+  if (!text) return false;
+  const slug = normaliseSlug(text);
+  if (!slug) return false;
+  if (SERVICE_CATEGORY_SLUGS.has(slug)) return true;
+  if (slug.includes('service')) return true;
+  return false;
+}
+
+function checkServiceCandidate(value) {
+  if (!value) return false;
+  if (Array.isArray(value)) {
+    return value.some(checkServiceCandidate);
+  }
+  if (typeof value === 'object') {
+    if (checkServiceCandidate(value.type) || checkServiceCandidate(value.categoryType)) return true;
+    const nested = value.name || value.label || value.title || value.slug || value.value;
+    return checkServiceCandidate(nested);
+  }
+  return isServiceCategoryValue(value);
+}
+
+function isServiceSellerRecord(shop) {
+  if (!shop || typeof shop !== 'object') return false;
+  if (shop.isService === true || shop.isServiceSeller === true) return true;
+
+  const typeCandidates = [
+    shop.type,
+    shop.accountType,
+    shop.panelType,
+    shop.sellerType,
+    shop.storeType,
+    shop.shopType
+  ];
+  if (typeCandidates.some(checkServiceCandidate)) return true;
+
+  if (Array.isArray(shop.serviceCategories) && shop.serviceCategories.length) return true;
+  if (Array.isArray(shop.serviceSubcategories) && shop.serviceSubcategories.length) return true;
+
+  const categoryCandidates = [
+    shop.category,
+    shop.categoryName,
+    shop.primaryCategory,
+    shop.mainCategory,
+    shop.categoryLabel,
+    shop.categorySlug,
+    shop.categories,
+    shop.categoryList,
+    shop.categoryLabels,
+    shop.subcategory,
+    shop.subCategory,
+    shop.subcategoryName,
+    shop.subcategoryLabel,
+    shop.subcategorySlug,
+    shop.tags
+  ];
+
+  if (categoryCandidates.some(checkServiceCandidate)) return true;
+
+  return false;
+}
+
+function getVisibleSellersList(source = shopsList) {
+  if (!Array.isArray(source)) return [];
+  return source.filter((shop) => !isServiceSellerRecord(shop));
+}
+
+function getVisibleSellersCount(source = shopsList) {
+  if (!Array.isArray(source)) return 0;
+  return source.reduce((count, shop) => count + (isServiceSellerRecord(shop) ? 0 : 1), 0);
+}
+
 async function fetchShops() {
   try {
     const res = await fetch(`${ADMIN_API_BASE}/sellers`, { credentials: 'include' });
@@ -3447,8 +3557,9 @@ function updateDashboardCards() {
   }
 }
 function updateSidebarCounts() {
+  const visibleSellersCount = getVisibleSellersCount();
   document.getElementById('count-users').textContent    = formatNumber(usersList.length);
-  document.getElementById('count-sellers').textContent  = formatNumber(shopsList.length);
+  document.getElementById('count-sellers').textContent  = formatNumber(visibleSellersCount);
   document.getElementById('count-products').textContent = formatNumber(productsList.length);
   const serviceCountEl = document.getElementById('count-service-shops');
   if (serviceCountEl) {
@@ -3463,8 +3574,9 @@ function updateSidebarCounts() {
   updateAdOrdersSummary();
 }
 function updateHeaderCounts() {
+  const visibleSellersCount = getVisibleSellersCount();
   document.getElementById('header-users-count').textContent    = `(${formatNumber(usersList.length)} کاربر)`;
-  document.getElementById('header-sellers-count').textContent  = `(${formatNumber(shopsList.length)} فروشگاه)`;
+  document.getElementById('header-sellers-count').textContent  = `(${formatNumber(visibleSellersCount)} فروشگاه)`;
   document.getElementById('header-products-count').textContent = `(${formatNumber(productsList.length)} محصول)`;
   const serviceHeaderEl = document.getElementById('header-service-shops-count');
   if (serviceHeaderEl) {
@@ -5036,7 +5148,7 @@ console.groupEnd();
     // ۳) به‌روزرسانی آمار داشبورد
     applyDashboardStats(stats, {
       usersFallback: usersList.length,
-      sellersFallback: shopsList.length,
+      sellersFallback: getVisibleSellersCount(shopsList),
       productsFallback: productsList.length
     });
 
@@ -5125,13 +5237,15 @@ function renderSellers() {
   const tbody = document.querySelector('#sellersTable tbody');
   tbody.innerHTML = '';
 
-  if (!shopsList.length) {
-    tbody.innerHTML = `<tr><td colspan="8" style="color:#888;text-align:center">هیچ فروشگاهی ثبت نشده است.</td></tr>`;
+  const baseSellers = getVisibleSellersList();
+
+  if (!baseSellers.length) {
+    tbody.innerHTML = `<tr><td colspan="8" style="color:#888;text-align:center">هیچ فروشندهٔ غیرخدماتی ثبت نشده است.</td></tr>`;
     return;
   }
 
   // فیلتر جستجو (نام فروشگاه، نام صاحب، آدرس)
-  let sellers = shopsList.filter(shop => {
+  let sellers = baseSellers.filter(shop => {
     const storeName = (shop.storename || shop.shopLogoText || '').toLowerCase();
     const ownerName = (shop.ownerName || `${shop.ownerFirstname || ''} ${shop.ownerLastname || ''}`.trim()).toLowerCase();
     const storeAddr = (shop.address || shop.shopAddress || '').toLowerCase();
