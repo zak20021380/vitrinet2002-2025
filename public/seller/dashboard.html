@@ -13,11 +13,23 @@
     font-family: 'Vazirmatn', sans-serif;
     background: linear-gradient(115deg, #e0fdfa 0%, #f8fafc 65%, #d4fbe8 100%);
     min-height: 100vh;
-    transition: background 0.3s ease;
+    transition: background 0.3s ease, padding-right 0.3s ease;
     margin: 0;
+    padding-right: 140px;
   }
   .dark body {
     background: linear-gradient(120deg, #212e2b 0%, #23272f 90%);
+  }
+
+  body.sidebar-expanded {
+    padding-right: 320px;
+  }
+
+  @media (max-width: 1024px) {
+    body,
+    body.sidebar-expanded {
+      padding-right: 0;
+    }
   }
 
   /* Sidebar Styles */
@@ -230,19 +242,19 @@
   }
 
   .sidebar-overlay {
-    display: none;
     position: fixed;
     inset: 0;
     background: rgba(0, 0, 0, 0.5);
     z-index: 100;
-    transition: opacity 0.3s ease-in-out;
+    transition: opacity 0.3s ease-in-out, visibility 0.3s ease-in-out;
     opacity: 0;
+    visibility: hidden;
     pointer-events: none;
   }
 
   .sidebar-overlay.active {
-    display: block;
     opacity: 1;
+    visibility: visible;
     pointer-events: auto;
   }
 
@@ -293,8 +305,11 @@
       z-index: 300;
     }
 
+  }
+
+  @media (min-width: 769px) {
     .sidebar-overlay {
-      display: block;
+      display: none;
     }
   }
 
@@ -1879,13 +1894,48 @@ function toggleSidebar() {
   const overlay = document.getElementById('sidebarOverlay');
   const hamburger = document.querySelector('.sidebar-hamburger');
   const toggleBtn = document.querySelector('.sidebar-toggle');
+  if (!sidebar || !overlay) return;
+
   const isExpanded = sidebar.classList.toggle('expanded');
-  overlay.classList.toggle('active', isExpanded);
-  hamburger.setAttribute('aria-expanded', isExpanded);
-  toggleBtn.setAttribute('aria-expanded', isExpanded);
-  if (isExpanded) toggleBtn.focus();
-  else hamburger.focus();
+  const isMobile = window.matchMedia('(max-width: 768px)').matches;
+
+  overlay.classList.toggle('active', isExpanded && isMobile);
+  document.body.classList.toggle('sidebar-expanded', isExpanded && !isMobile);
+
+  if (hamburger) {
+    hamburger.setAttribute('aria-expanded', isExpanded);
+  }
+
+  if (toggleBtn) {
+    toggleBtn.setAttribute('aria-expanded', isExpanded);
+    if (isExpanded) {
+      toggleBtn.focus();
+    } else if (hamburger && isMobile) {
+      hamburger.focus();
+    }
+  }
 }
+
+function handleSidebarOnResize() {
+  const sidebar = document.getElementById('sidebar');
+  const overlay = document.getElementById('sidebarOverlay');
+  if (!sidebar || !overlay) return;
+
+  const isMobile = window.matchMedia('(max-width: 768px)').matches;
+  const isExpanded = sidebar.classList.contains('expanded');
+
+  if (isMobile) {
+    document.body.classList.remove('sidebar-expanded');
+    overlay.classList.toggle('active', isExpanded);
+  } else {
+    overlay.classList.remove('active');
+    document.body.classList.toggle('sidebar-expanded', isExpanded);
+  }
+}
+
+window.addEventListener('resize', handleSidebarOnResize);
+window.addEventListener('orientationchange', handleSidebarOnResize);
+handleSidebarOnResize();
 
 // ----------- بخش سوییچ بین بخش‌ها و چارت بازدید ----------
 function showSection(section) {
