@@ -44,7 +44,7 @@ async function banSellerPhoneIfUnique(sellerDoc, reason = 'blocked-by-admin') {
   const normalized = normalizePhone(sellerDoc.phone);
   if (!normalized) return false;
 
-  const regex = buildDigitInsensitiveRegex(sellerDoc.phone);
+  const regex = buildDigitInsensitiveRegex(sellerDoc.phone, { allowSeparators: true });
   const query = {};
   if (sellerDoc._id) {
     query._id = { $ne: sellerDoc._id };
@@ -68,7 +68,7 @@ async function banSellerPhoneIfUnique(sellerDoc, reason = 'blocked-by-admin') {
 async function unbanSellerPhoneIfNoOtherBlocked(sellerDoc) {
   if (!sellerDoc?.phone) return;
 
-  const regex = buildDigitInsensitiveRegex(sellerDoc.phone);
+  const regex = buildDigitInsensitiveRegex(sellerDoc.phone, { allowSeparators: true });
   const query = { blockedByAdmin: true };
   if (sellerDoc._id) {
     query._id = { $ne: sellerDoc._id };
