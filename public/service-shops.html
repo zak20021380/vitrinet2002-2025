@@ -197,6 +197,210 @@
         .cta-button:active {
             transform: translateY(0) scale(0.98);
         }
+
+        .shop-blocked-overlay {
+            position: fixed;
+            inset: 0;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: clamp(1.5rem, 4vw, 3.5rem);
+            background: linear-gradient(135deg, rgba(15, 23, 42, 0.85), rgba(15, 23, 42, 0.92));
+            backdrop-filter: blur(18px);
+            z-index: 2000;
+        }
+
+        .shop-blocked-overlay[hidden] {
+            display: none !important;
+        }
+
+        body[data-shop-blocked="true"] .shop-blocked-overlay {
+            display: flex;
+        }
+
+        .shop-blocked-card {
+            width: min(560px, 100%);
+            background: linear-gradient(180deg, rgba(9, 16, 31, 0.95), rgba(13, 20, 40, 0.92));
+            border-radius: 28px;
+            padding: clamp(1.75rem, 4vw, 3rem);
+            box-shadow: 0 48px 160px rgba(15, 23, 42, 0.55);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            text-align: center;
+            color: #f8fafc;
+            display: flex;
+            flex-direction: column;
+            gap: clamp(1.2rem, 3vw, 2rem);
+        }
+
+        .shop-blocked-icon {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto;
+            filter: drop-shadow(0 24px 52px rgba(249, 115, 22, 0.35));
+        }
+
+        .shop-blocked-title {
+            font-size: clamp(1.4rem, 3vw, 1.9rem);
+            font-weight: 800;
+            margin: 0;
+            line-height: 1.6;
+        }
+
+        .shop-blocked-message {
+            margin: 0;
+            font-size: clamp(1rem, 2.2vw, 1.1rem);
+            color: rgba(226, 232, 240, 0.82);
+            line-height: 1.9;
+        }
+
+        .shop-blocked-meta {
+            display: grid;
+            gap: 0.65rem;
+            padding: 1rem;
+            border-radius: 18px;
+            background: rgba(15, 23, 42, 0.65);
+            color: rgba(226, 232, 240, 0.8);
+            font-size: 0.95rem;
+        }
+
+        .shop-blocked-meta span {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .shop-blocked-actions {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 0.75rem;
+        }
+
+        .shop-blocked-refresh,
+        .shop-blocked-support {
+            border-radius: 14px;
+            border: none;
+            padding: 0.85rem 1.8rem;
+            font-weight: 600;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            font-family: inherit;
+            text-decoration: none;
+        }
+
+        .shop-blocked-refresh {
+            background: rgba(148, 163, 184, 0.15);
+            color: #e2e8f0;
+            border: 1px solid rgba(226, 232, 240, 0.2);
+        }
+
+        .shop-blocked-refresh:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 18px 40px rgba(148, 163, 184, 0.22);
+        }
+
+        .shop-blocked-support {
+            background: linear-gradient(135deg, #f97316, #fb923c);
+            color: #fff;
+            box-shadow: 0 20px 44px rgba(249, 115, 22, 0.35);
+        }
+
+        .shop-blocked-support:hover {
+            transform: translateY(-2px) scale(1.01);
+            box-shadow: 0 24px 54px rgba(249, 115, 22, 0.4);
+        }
+
+        .shop-blocked-refresh.is-loading {
+            opacity: 0.6;
+            cursor: progress;
+        }
+
+        .shop-moderation-banner {
+            position: sticky;
+            top: 0;
+            inset-inline: 0;
+            display: none;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+            padding: 0.85rem 1.25rem;
+            background: linear-gradient(90deg, rgba(16, 185, 129, 0.12), rgba(56, 189, 248, 0.12));
+            border-bottom: 1px solid rgba(56, 189, 248, 0.25);
+            color: #0f766e;
+            z-index: 1200;
+            backdrop-filter: blur(12px);
+        }
+
+        .shop-moderation-banner[hidden] {
+            display: none !important;
+        }
+
+        .shop-moderation-banner__content {
+            display: flex;
+            align-items: center;
+            gap: 0.85rem;
+        }
+
+        .shop-moderation-banner__icon {
+            width: 34px;
+            height: 34px;
+            border-radius: 12px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(16, 185, 129, 0.18);
+            font-size: 1.15rem;
+        }
+
+        .shop-moderation-banner__close {
+            border: none;
+            background: transparent;
+            color: inherit;
+            font-size: 1.2rem;
+            cursor: pointer;
+            padding: 0.25rem;
+            line-height: 1;
+        }
+
+        body[data-shop-blocked="true"] {
+            overflow: hidden;
+        }
+
+        body[data-shop-blocked="true"] main,
+        body[data-shop-blocked="true"] header,
+        body[data-shop-blocked="true"] footer {
+            filter: blur(3px);
+            pointer-events: none;
+            user-select: none;
+        }
+
+        @media (max-width: 640px) {
+            .shop-blocked-card {
+                border-radius: 22px;
+                padding: 1.6rem;
+            }
+
+            .shop-blocked-actions {
+                flex-direction: column;
+            }
+
+            .shop-blocked-refresh,
+            .shop-blocked-support {
+                width: 100%;
+            }
+
+            .shop-moderation-banner {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+        }
         
         /* Portfolio Section Styles */
         .portfolio-section {
@@ -588,6 +792,40 @@
   <script src="/nav-active.js" defer></script>
 </head>
 <body class="bg-gray-50 text-gray-800" data-seller-id="123" data-store-id="123" data-shopurl="demo-shop">
+<div id="shop-blocked-overlay" class="shop-blocked-overlay" hidden>
+  <div class="shop-blocked-card" role="alert" aria-live="assertive">
+    <div class="shop-blocked-icon" aria-hidden="true">
+      <svg width="64" height="64" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect x="4" y="4" width="56" height="56" rx="20" fill="url(#shop-blocked-gradient)" opacity="0.18"/>
+        <rect x="10" y="10" width="44" height="44" rx="16" fill="#0f172a" stroke="rgba(255,255,255,0.18)" stroke-width="2"/>
+        <path d="M32 20c6.627 0 12 5.373 12 12s-5.373 12-12 12-12-5.373-12-12 5.373-12 12-12zm0 5c-.552 0-1 .448-1 1v6.586l4.293 4.293a1 1 0 0 0 1.414-1.414L33 31.586V26a1 1 0 0 0-1-1zm0 13a1.75 1.75 0 1 0 0 3.5 1.75 1.75 0 0 0 0-3.5z" fill="#f97316"/>
+        <defs>
+          <linearGradient id="shop-blocked-gradient" x1="14" y1="10" x2="54" y2="58" gradientUnits="userSpaceOnUse">
+            <stop stop-color="#fb923c" />
+            <stop offset="1" stop-color="#f97316" />
+          </linearGradient>
+        </defs>
+      </svg>
+    </div>
+    <h1 class="shop-blocked-title">این فروشگاه موقتاً در دسترس نیست</h1>
+    <p class="shop-blocked-message" id="shop-blocked-message">دسترسی به صفحه این فروشگاه به صورت موقت توسط مدیریت ویترینت متوقف شده است.</p>
+    <div class="shop-blocked-meta" id="shop-blocked-meta"></div>
+    <div class="shop-blocked-actions">
+      <button type="button" id="shop-blocked-refresh" class="shop-blocked-refresh">تلاش دوباره</button>
+      <a class="shop-blocked-support" href="tel:02191009900">ارتباط با پشتیبانی</a>
+    </div>
+  </div>
+</div>
+<div id="shop-moderation-banner" class="shop-moderation-banner" hidden role="status" aria-live="polite">
+  <div class="shop-moderation-banner__content">
+    <span class="shop-moderation-banner__icon" aria-hidden="true">✓</span>
+    <div>
+      <strong>این فروشگاه دوباره فعال شد</strong>
+      <p id="shop-moderation-banner-text">خدمات و زمان‌بندی‌ها به‌روزرسانی شده‌اند.</p>
+    </div>
+  </div>
+  <button type="button" class="shop-moderation-banner__close" data-dismiss="shop-moderation-banner" aria-label="بستن پیام">×</button>
+</div>
 <script>
 async function getShopUrlFromLocation() {
   const API_ROOT = window.__API_BASE__ || '';
@@ -608,6 +846,198 @@ async function getShopUrlFromLocation() {
     return '';
   }
 }
+
+(() => {
+  const API_ROOT = (window.__API_BASE__ || '').replace(/\/$/, '');
+  const overlay = document.getElementById('shop-blocked-overlay');
+  const messageEl = document.getElementById('shop-blocked-message');
+  const metaEl = document.getElementById('shop-blocked-meta');
+  const refreshBtn = document.getElementById('shop-blocked-refresh');
+  const banner = document.getElementById('shop-moderation-banner');
+  const bannerText = document.getElementById('shop-moderation-banner-text');
+  const bannerClose = document.querySelector('[data-dismiss="shop-moderation-banner"]');
+  const STORAGE_PREFIX = 'vt:shop-moderation:';
+  let identifiers = { slug: '', sellerId: '' };
+
+  const formatDateTime = (value) => {
+    if (!value) return '';
+    try {
+      const date = value instanceof Date ? value : new Date(value);
+      if (Number.isNaN(date.getTime())) return '';
+      return new Intl.DateTimeFormat('fa-IR', { dateStyle: 'medium', timeStyle: 'short' }).format(date);
+    } catch (err) {
+      console.warn('formatDateTime failed', err);
+      return '';
+    }
+  };
+
+  const buildKey = (ids = identifiers) => {
+    if (ids.slug) return `${STORAGE_PREFIX}slug:${ids.slug.toLowerCase()}`;
+    if (ids.sellerId) return `${STORAGE_PREFIX}seller:${ids.sellerId}`;
+    return `${STORAGE_PREFIX}global`;
+  };
+
+  const readStored = (ids = identifiers) => {
+    try {
+      const raw = localStorage.getItem(buildKey(ids));
+      return raw ? JSON.parse(raw) : null;
+    } catch (err) {
+      console.warn('readStored moderation failed', err);
+      return null;
+    }
+  };
+
+  const persistState = (state, ids = identifiers) => {
+    try {
+      localStorage.setItem(buildKey(ids), JSON.stringify({
+        isBlocked: !!state?.isBlocked,
+        reason: state?.reason || '',
+        blockedAt: state?.blockedAt || state?.moderation?.blockedAt || null,
+        unblockedAt: state?.unblockedAt || state?.moderation?.unblockedAt || null,
+        timestamp: Date.now()
+      }));
+    } catch (err) {
+      console.warn('persist moderation failed', err);
+    }
+  };
+
+  const renderMeta = (info) => {
+    if (!metaEl) return;
+    const parts = [];
+    const blockedAt = formatDateTime(info?.blockedAt || info?.moderation?.blockedAt);
+    if (blockedAt) {
+      parts.push(`<span>مسدود شده از ${blockedAt}</span>`);
+    }
+    const reason = (info?.reason || info?.moderation?.reason || '').trim();
+    if (reason) {
+      parts.push(`<span>${reason}</span>`);
+    } else {
+      parts.push('<span>برای پیگیری با پشتیبانی ویترینت تماس بگیرید.</span>');
+    }
+    const reviewed = formatDateTime(info?.moderation?.unblockedAt || info?.shop?.lastReviewedAt);
+    if (reviewed) {
+      parts.push(`<span>آخرین بررسی: ${reviewed}</span>`);
+    }
+    metaEl.innerHTML = parts.join('');
+  };
+
+  const showBanner = (info) => {
+    if (!banner) return;
+    const text = info?.moderation?.unblockedAt
+      ? `آخرین بازبینی در ${formatDateTime(info.moderation.unblockedAt)}`
+      : info?.unblockedAt
+        ? `آخرین بازبینی در ${formatDateTime(info.unblockedAt)}`
+        : 'این فروشگاه دوباره فعال شده است.';
+    if (bannerText) {
+      bannerText.textContent = text;
+    }
+    banner.removeAttribute('hidden');
+  };
+
+  const hideBanner = () => {
+    if (banner) {
+      banner.setAttribute('hidden', '');
+    }
+  };
+
+  const applyState = (info) => {
+    if (!info) return;
+    const previous = readStored();
+    if (info.isBlocked) {
+      document.body.dataset.shopBlocked = 'true';
+      overlay?.removeAttribute('hidden');
+      if (messageEl) {
+        const reason = (info.reason || '').trim();
+        messageEl.textContent = reason
+          ? `به دلیل «${reason}» نمایش این فروشگاه موقتاً متوقف شده است.`
+          : 'برای حفظ کیفیت خدمات، نمایش این فروشگاه موقتاً متوقف شده است.';
+      }
+      renderMeta(info);
+      hideBanner();
+    } else {
+      delete document.body.dataset.shopBlocked;
+      overlay?.setAttribute('hidden', '');
+      if (previous?.isBlocked) {
+        showBanner(info);
+      } else {
+        hideBanner();
+      }
+    }
+    persistState(info);
+  };
+
+  const resolveIdentifiers = async () => {
+    const slugFromBody = (document.body?.dataset?.shopurl || '').trim();
+    const sellerId = (document.body?.dataset?.sellerId || '').trim();
+    let slug = slugFromBody;
+    if (!slug && typeof getShopUrlFromLocation === 'function') {
+      try {
+        slug = await getShopUrlFromLocation();
+      } catch (err) {
+        console.warn('resolve shop url failed', err);
+      }
+    }
+    identifiers = { slug: slug || '', sellerId };
+    return identifiers;
+  };
+
+  const fetchStatus = async () => {
+    try {
+      const ids = identifiers.slug || identifiers.sellerId ? identifiers : await resolveIdentifiers();
+      let url = '';
+      if (ids.slug) {
+        url = `${API_ROOT}/api/service-shops/status/by-shopurl/${encodeURIComponent(ids.slug)}`;
+      } else if (ids.sellerId && /^[0-9a-fA-F]{24}$/.test(ids.sellerId)) {
+        url = `${API_ROOT}/api/service-shops/status/by-seller/${encodeURIComponent(ids.sellerId)}`;
+      }
+      if (!url) {
+        return null;
+      }
+      const res = await fetch(url, { credentials: 'include' });
+      if (!res.ok) {
+        throw new Error(`moderation status failed: ${res.status}`);
+      }
+      const data = await res.json();
+      applyState(data);
+      return data;
+    } catch (err) {
+      console.error('fetchPublicModeration error', err);
+      return null;
+    }
+  };
+
+  const handleRefresh = async () => {
+    if (refreshBtn) {
+      refreshBtn.disabled = true;
+      refreshBtn.classList.add('is-loading');
+    }
+    await fetchStatus();
+    if (refreshBtn) {
+      refreshBtn.disabled = false;
+      refreshBtn.classList.remove('is-loading');
+    }
+  };
+
+  if (refreshBtn) {
+    refreshBtn.addEventListener('click', (event) => {
+      event.preventDefault();
+      handleRefresh();
+    });
+  }
+
+  if (bannerClose) {
+    bannerClose.addEventListener('click', () => hideBanner());
+  }
+
+  document.addEventListener('DOMContentLoaded', async () => {
+    await resolveIdentifiers();
+    const cached = readStored();
+    if (cached) {
+      applyState(cached);
+    }
+    await fetchStatus();
+  });
+})();
 </script>
     <!-- Sticky Header -->
     <!-- header desktop redesign start -->

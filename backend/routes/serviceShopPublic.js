@@ -1,9 +1,13 @@
 const express = require('express');
 const router = express.Router({ mergeParams: true });
 
-const ctrl = require('../controllers/serviceShopCustomerController');
+const customerCtrl = require('../controllers/serviceShopCustomerController');
+const serviceShopCtrl = require('../controllers/serviceShopController');
 
-router.get('/:sellerId/customers', ctrl.getCustomerStats);
-router.post('/:sellerId/customers', ctrl.followShop);
+router.get('/status/by-shopurl/:shopUrl', serviceShopCtrl.getPublicModerationStatusBySlug);
+router.get('/status/by-seller/:sellerId', serviceShopCtrl.getPublicModerationStatusBySeller);
+
+router.get('/:sellerId/customers', customerCtrl.getCustomerStats);
+router.post('/:sellerId/customers', customerCtrl.followShop);
 
 module.exports = router;

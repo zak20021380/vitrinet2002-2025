@@ -7,6 +7,9 @@ const Booking = require('../models/booking');
 const BannedPhone = require('../models/BannedPhone');
 const { normalizePhone, buildPhoneCandidates, buildDigitInsensitiveRegex } = require('../utils/phone');
 
+const SELLER_MODERATION_FIELDS = 'storename shopurl phone blockedByAdmin blockedAt blockedReason blockedBy';
+const SHOP_MODERATION_FIELDS = 'name shopUrl ownerPhone adminModeration status isVisible isBookable bookingSettings lastReviewedAt legacySellerId';
+
 const STATUS_VALUES = ['draft', 'pending', 'approved', 'suspended', 'archived'];
 
 const toNumber = (value, fallback = undefined) => {
@@ -1062,6 +1065,73 @@ const toPlainSubdocument = (value, fallback = {}) => {
     return { ...fallback, ...value.toObject() };
   }
   return { ...fallback, ...value };
+};
+
+const buildModerationPayload = ({ seller = null, shop = null } = {}) => {
+  const moderation = toPlainSubdocument(shop?.adminModeration, {});
+  const isSellerBlocked = !!(seller && seller.blockedByAdmin);
+  const isBlocked = !!moderation.isBlocked || isSellerBlocked;
+  const reason = (moderation.reason || seller?.blockedReason || '').trim();
+  const blockedAt = moderation.blockedAt || seller?.blockedAt || null;
+  const unblockedAt = moderation.unblockedAt || null;
+  const blockedBy = moderation.blockedBy || seller?.blockedBy || null;
+
+  const shopSummary = shop
+    ? {
+        id: shop._id,
+        name: shop.name || seller?.storename || '',
+        shopUrl: shop.shopUrl || seller?.shopurl || '',
+        ownerPhone: shop.ownerPhone || seller?.phone || '',
+        status: shop.status || null,
+        isVisible: shop.isVisible,
+        isBookable: shop.isBookable,
+        bookingEnabled: shop.bookingSettings && typeof shop.bookingSettings === 'object'
+          ? !!shop.bookingSettings.enabled
+          : undefined,
+        lastReviewedAt: shop.lastReviewedAt || null
+      }
+    : null;
+
+  const sellerSummary = seller
+    ? {
+        id: seller._id,
+        storename: seller.storename || '',
+        shopurl: seller.shopurl || '',
+        phone: seller.phone || '',
+        blockedByAdmin: !!seller.blockedByAdmin,
+        blockedAt: seller.blockedAt || null,
+        blockedReason: seller.blockedReason || '',
+        blockedBy: seller.blockedBy || null
+      }
+    : null;
+
+  const moderationSummary = shop
+    ? {
+        isBlocked: !!moderation.isBlocked,
+        reason: moderation.reason || '',
+        blockedAt: moderation.blockedAt || null,
+        blockedBy: moderation.blockedBy || null,
+        unblockedAt: moderation.unblockedAt || null,
+        unblockedBy: moderation.unblockedBy || null,
+        previousStatus: moderation.previousStatus || '',
+        previousIsVisible: moderation.previousIsVisible,
+        previousIsBookable: moderation.previousIsBookable,
+        previousBookingEnabled: moderation.previousBookingEnabled
+      }
+    : null;
+
+  return {
+    success: true,
+    isBlocked,
+    status: isBlocked ? 'blocked' : 'active',
+    reason,
+    blockedAt,
+    blockedBy,
+    unblockedAt,
+    shop: shopSummary,
+    seller: sellerSummary,
+    moderation: moderationSummary
+  };
 };
 
 async function findOrCreateServiceShop(id, adminId = null) {
@@ -2138,6 +2208,145 @@ exports.getMyComplimentaryPlan = async (req, res) => {
   } catch (err) {
     console.error('serviceShops.getMyComplimentaryPlan error:', err);
     res.status(500).json({ success: false, message: 'خطا در دریافت وضعیت پلن رایگان.' });
+  }
+};
+
+exports.getMyModerationStatus = async (req, res) => {
+  try {
+    const sellerId = req.user?.id || req.user?._id;
+    if (!sellerId) {
+      return res.status(401).json({ message: 'احراز هویت نامعتبر است.' });
+    }
+
+    const seller = await Seller.findById(sellerId)
+      .select(SELLER_MODERATION_FIELDS)
+      .lean();
+    if (!seller) {
+      return res.status(404).json({ message: 'فروشنده یافت نشد.' });
+    }
+
+    const clauses = [];
+    clauses.push({ legacySellerId: seller._id });
+    if (seller.shopurl) {
+      clauses.push({ shopUrl: seller.shopurl });
+    }
+    if (seller.phone) {
+      clauses.push({ ownerPhone: seller.phone });
+    }
+
+    let shop = null;
+    if (clauses.length) {
+      shop = await ServiceShop.findOne({ $or: clauses })
+        .select(SHOP_MODERATION_FIELDS)
+        .lean();
+    }
+    if (!shop) {
+      shop = await ServiceShop.findById(sellerId)
+        .select(SHOP_MODERATION_FIELDS)
+        .lean();
+    }
+
+    const payload = buildModerationPayload({ seller, shop });
+    return res.json(payload);
+  } catch (err) {
+    console.error('serviceShops.getMyModerationStatus error:', err);
+    res.status(500).json({ message: 'خطا در دریافت وضعیت دسترسی.' });
+  }
+};
+
+exports.getPublicModerationStatusBySlug = async (req, res) => {
+  try {
+    const rawSlug = String(req.params?.shopUrl || '').trim();
+    if (!rawSlug) {
+      return res.status(400).json({ message: 'آدرس فروشگاه نامعتبر است.' });
+    }
+
+    const shopUrl = rawSlug.toLowerCase();
+    let shop = await ServiceShop.findOne({ shopUrl })
+      .select(SHOP_MODERATION_FIELDS)
+      .lean();
+
+    let seller = null;
+    if (shop) {
+      seller = await findSellerForShop({
+        shop,
+        providedSellerId: shop.legacySellerId,
+        fallbackId: shop.legacySellerId
+      });
+      if (seller) {
+        seller = await Seller.findById(seller._id).select(SELLER_MODERATION_FIELDS).lean();
+      }
+    }
+
+    if (!seller) {
+      seller = await Seller.findOne({ shopurl: shopUrl })
+        .select(SELLER_MODERATION_FIELDS)
+        .lean();
+    }
+
+    if (!seller && shop?.ownerPhone) {
+      seller = await Seller.findOne({ phone: shop.ownerPhone })
+        .select(SELLER_MODERATION_FIELDS)
+        .lean();
+    }
+
+    if (!shop && seller) {
+      const clauses = [{ legacySellerId: seller._id }];
+      if (seller.shopurl) clauses.push({ shopUrl: seller.shopurl });
+      if (seller.phone) clauses.push({ ownerPhone: seller.phone });
+      shop = await ServiceShop.findOne({ $or: clauses })
+        .select(SHOP_MODERATION_FIELDS)
+        .lean();
+    }
+
+    if (!shop && !seller) {
+      return res.status(404).json({ message: 'فروشگاه یافت نشد.' });
+    }
+
+    const payload = buildModerationPayload({ seller, shop });
+    return res.json(payload);
+  } catch (err) {
+    console.error('serviceShops.getPublicModerationStatusBySlug error:', err);
+    res.status(500).json({ message: 'خطا در دریافت وضعیت فروشگاه.' });
+  }
+};
+
+exports.getPublicModerationStatusBySeller = async (req, res) => {
+  try {
+    const rawId = String(req.params?.sellerId || '').trim();
+    if (!rawId) {
+      return res.status(400).json({ message: 'شناسه فروشنده نامعتبر است.' });
+    }
+
+    let seller = null;
+    if (mongoose.Types.ObjectId.isValid(rawId)) {
+      seller = await Seller.findById(rawId)
+        .select(SELLER_MODERATION_FIELDS)
+        .lean();
+    }
+    if (!seller) {
+      seller = await Seller.findOne({ shopurl: rawId })
+        .select(SELLER_MODERATION_FIELDS)
+        .lean();
+    }
+
+    if (!seller) {
+      return res.status(404).json({ message: 'فروشنده یافت نشد.' });
+    }
+
+    const clauses = [{ legacySellerId: seller._id }];
+    if (seller.shopurl) clauses.push({ shopUrl: seller.shopurl });
+    if (seller.phone) clauses.push({ ownerPhone: seller.phone });
+
+    const shop = await ServiceShop.findOne({ $or: clauses })
+      .select(SHOP_MODERATION_FIELDS)
+      .lean();
+
+    const payload = buildModerationPayload({ seller, shop });
+    return res.json(payload);
+  } catch (err) {
+    console.error('serviceShops.getPublicModerationStatusBySeller error:', err);
+    res.status(500).json({ message: 'خطا در دریافت وضعیت فروشنده.' });
   }
 };
 
