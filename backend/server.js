@@ -11,6 +11,7 @@ const planRoutes   = require('./routes/plans');
 const adPlanRoutes = require('./routes/adPlans');
 const paymentRoutes = require('./routes/payment');
 const settingsRoutes = require('./routes/settings');
+const accountantRoutes = require('./routes/accountant');
 const categoryRoutes = require('./routes/categoryRoutes');
 require('dotenv').config();
 
@@ -72,6 +73,7 @@ app.use('/api/shop-appearances', require('./routes/shopAppearance'));
 app.use('/api/payment', paymentRoutes);  // روت‌های پرداخت
 app.use('/api/branding', require('./routes/branding'));
 app.use('/api/settings', settingsRoutes);
+app.use('/api/accountant', accountantRoutes);
 
 // Booking routes
 app.use('/api', require('./routes/bookingRoutes'));
