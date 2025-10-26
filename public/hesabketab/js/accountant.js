@@ -17,7 +17,11 @@
     totalIncome: document.getElementById('totalIncome'),
     totalExpense: document.getElementById('totalExpense'),
     totalBalance: document.getElementById('totalBalance'),
-    backButton: document.getElementById('backToDashboard')
+    backButton: document.getElementById('backToDashboard'),
+    toolbar: document.querySelector('.bottom-toolbar'),
+    toolbarButtons: document.querySelectorAll('.bottom-toolbar__button'),
+    newEntrySection: document.getElementById('newEntrySection'),
+    reportsSection: document.getElementById('reportsSection')
   };
 
   const formatCurrency = (value) => {
@@ -205,18 +209,88 @@
     }
   };
 
+  const setActiveToolbar = (action) => {
+    if (!elements.toolbarButtons?.length) return;
+    elements.toolbarButtons.forEach((button) => {
+      if (button.dataset.action === action) {
+        button.classList.add('is-active');
+      } else {
+        button.classList.remove('is-active');
+      }
+    });
+  };
+
+  const scrollToSection = (section) => {
+    if (!section) return;
+    section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  };
+
   document.addEventListener('DOMContentLoaded', async () => {
     if (!ensureAccessFlag()) {
       window.location.replace(DASHBOARD_URL);
       return;
     }
 
+    const handleBackNavigation = () => {
+      removeAccessFlag();
+      window.location.href = DASHBOARD_URL;
+    };
+
     if (elements.backButton) {
-      elements.backButton.addEventListener('click', () => {
-        removeAccessFlag();
-        window.location.href = DASHBOARD_URL;
-      });
+      elements.backButton.addEventListener('click', handleBackNavigation);
     }
+
+    if (elements.toolbar && elements.toolbarButtons?.length) {
+      setActiveToolbar('add');
+      elements.toolbarButtons.forEach((button) => {
+        button.addEventListener('click', () => {
+          const { action } = button.dataset;
+          switch (action) {
+            case 'back':
+              handleBackNavigation();
+              break;
+            case 'add':
+              scrollToSection(elements.newEntrySection);
+              setActiveToolbar('add');
+              break;
+            case 'report':
+              scrollToSection(elements.reportsSection);
+              setActiveToolbar('report');
+              break;
+            default:
+              break;
+          }
+        });
+      });
+
+      if (typeof IntersectionObserver === 'function') {
+        const observer = new IntersectionObserver(
+          (entries) => {
+            entries.forEach((entry) => {
+              if (!entry.isIntersecting) return;
+              if (entry.target.id === 'reportsSection') {
+                setActiveToolbar('report');
+              } else if (entry.target.id === 'newEntrySection') {
+                setActiveToolbar('add');
+              }
+            });
+          },
+          {
+            rootMargin: '-45% 0px -45% 0px',
+            threshold: 0
+          }
+        );
+
+        if (elements.newEntrySection) observer.observe(elements.newEntrySection);
+        if (elements.reportsSection) observer.observe(elements.reportsSection);
+      }
+    }
+
+    window.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape') {
+        handleBackNavigation();
+      }
+    });
 
     try {
       const seller = await fetchCurrentSeller();
