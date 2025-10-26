@@ -1142,7 +1142,7 @@ const applyAdminBlock = async ({ shop, seller, adminId = null, reason = '' }) =>
     if (sellerPhone) {
       const normalizedPhone = normalizePhone(sellerPhone);
       if (normalizedPhone) {
-        const regex = buildDigitInsensitiveRegex(sellerPhone);
+        const regex = buildDigitInsensitiveRegex(sellerPhone, { allowSeparators: true });
         const sellerId = savedSeller?._id || seller._id;
         const query = {};
         if (sellerId) {
@@ -1304,7 +1304,7 @@ const applyAdminUnblock = async ({ shop, seller, adminId = null, reason = null }
       if (!phone) continue;
 
       const normalized = normalizePhone(phone);
-      const phoneRegex = buildDigitInsensitiveRegex(phone);
+      const phoneRegex = buildDigitInsensitiveRegex(phone, { allowSeparators: true });
       const query = { blockedByAdmin: true };
       if (seller?._id) {
         query._id = { $ne: seller._id };

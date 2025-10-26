@@ -26,9 +26,26 @@ function buildPhoneCandidates(value) {
   return Array.from(set);
 }
 
-function buildDigitInsensitiveRegex(value) {
+function buildDigitInsensitiveRegex(value, options = {}) {
+  const { allowSeparators = false } = options || {};
   const normalized = normalizePhone(value);
   if (!normalized) return null;
+
+  if (allowSeparators) {
+    const digitsOnly = normalized.replace(/\D+/g, '');
+    if (!digitsOnly) return null;
+    const parts = digitsOnly.split('').map((d) => {
+      const variants = DIGIT_VARIANTS.get(d) || [d];
+      return `[${variants.join('')}]`;
+    });
+
+    try {
+      return new RegExp(`^\\D*${parts.join('\\D*')}\\D*$`);
+    } catch {
+      return null;
+    }
+  }
+
   const pattern = normalized.replace(DIGIT_ESCAPE_REGEX, '\\$&').replace(/\d/g, (d) => {
     const variants = DIGIT_VARIANTS.get(d) || [d];
     return `[${variants.join('')}]`;
