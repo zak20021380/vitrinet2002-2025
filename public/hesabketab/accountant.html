@@ -1,1067 +1,120 @@
 <!DOCTYPE html>
 <html lang="fa" dir="rtl">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>حسابداری حرفه‌ای فروشگاه</title>
-    <meta name="description" content="سیستم حسابداری حرفه‌ای برای فروشگاه‌داران">
-    <meta name="theme-color" content="#4F46E5">
-    
-    <!-- Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    
-    <!-- Icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" crossorigin="anonymous" referrerpolicy="no-referrer">
-    
-    <!-- Chart.js -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js" defer></script>
-    
-    <link rel="preload" href="css/accountant.min.css" as="style">
-    <link rel="stylesheet" href="css/accountant.min.css">
-    <link rel="preload" href="js/accountant.js" as="script">
-    <script src="/nav-active.js" defer></script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>دفتر حسابداری فروشگاه</title>
+  <meta name="description" content="ثبت و مدیریت تراکنش‌های مالی فروشنده" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link href="https://cdn.jsdelivr.net/npm/remixicon@4.3.0/fonts/remixicon.css" rel="stylesheet" />
+  <link rel="stylesheet" href="css/accountant.min.css" />
+  <script src="/nav-active.js" defer></script>
+  <script src="js/accountant.js" defer></script>
 </head>
 <body>
-    <div class="app-container">
-        <!-- Header -->
-        <header class="app-header">
-            <div class="shop-name">
-                <i class="fas fa-store" aria-hidden="true"></i>
-                فروشگاه من
-            </div>
-            <div class="header-actions">
-                <div class="date-display" id="currentDate">
-                    <i class="far fa-calendar-alt" aria-hidden="true"></i>
-                    <span id="currentDateText" class="date-text">در حال بارگذاری...</span>
-                </div>
-                <button type="button" class="dark-mode-toggle" id="darkModeToggle" aria-pressed="false" aria-label="فعال‌سازی حالت تاریک">
-                    <i class="fas fa-moon" aria-hidden="true"></i>
-                </button>
-            </div>
-        </header>
-        
-        <!-- Sales View -->
-        <div class="view-container active" id="salesView" role="tabpanel" aria-labelledby="navSales" aria-hidden="false" tabindex="0">
-            <div class="stats-grid">
-                <div class="stat-card">
-                    <div class="stat-value">۱۲,۳۴۵,۰۰۰</div>
-                    <div class="stat-label">فروش امروز</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-value">۸</div>
-                    <div class="stat-label">تعداد فاکتور</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-value">۵,۶۷۸,۰۰۰</div>
-                    <div class="stat-label">نقدی</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-value">۶,۶۶۷,۰۰۰</div>
-                    <div class="stat-label">اعتباری</div>
-                </div>
-            </div>
+  <div class="page">
+    <header class="page-header">
+      <div class="header-intro">
+        <span class="header-badge">حسابداری فروشگاه</span>
+        <h1>سلام <span id="sellerName">فروشنده عزیز</span> 👋</h1>
+        <p>تراکنش‌های مالی خود را در این بخش ثبت، ذخیره و پیگیری کنید.</p>
+      </div>
+      <button class="back-btn" id="backToDashboard" type="button">
+        <i class="ri-arrow-right-line" aria-hidden="true"></i>
+        بازگشت به پنل فروشنده
+      </button>
+    </header>
 
-            <div class="card highlight">
-                <div class="card-header">
-                    <h2 class="card-title">
-                        <i class="fas fa-bolt"></i>
-                        میانبرهای روزانه
-                    </h2>
-                </div>
-                <p class="card-subtitle">کارهای تکراری فروشگاه را فقط با یک لمس انجام دهید.</p>
-                <div class="quick-actions" role="group" aria-label="میانبرهای مدیریت فروشگاه">
-                    <button type="button" class="quick-action" data-action="sale">
-                        <i class="fas fa-cash-register" aria-hidden="true"></i>
-                        <span class="quick-action-title">ثبت فروش سریع</span>
-                        <span class="quick-action-description">محصولات محبوب را در لحظه ثبت کنید</span>
-                    </button>
-                    <button type="button" class="quick-action" data-action="expense">
-                        <i class="fas fa-receipt" aria-hidden="true"></i>
-                        <span class="quick-action-title">ثبت هزینه روزانه</span>
-                        <span class="quick-action-description">مصرف صندوق و خریدهای فوری</span>
-                    </button>
-                    <button type="button" class="quick-action" data-action="inventory">
-                        <i class="fas fa-boxes" aria-hidden="true"></i>
-                        <span class="quick-action-title">بررسی انبار</span>
-                        <span class="quick-action-description">وضعیت کالاهای پرفروش را ببینید</span>
-                    </button>
-                    <button type="button" class="quick-action" data-action="customer">
-                        <i class="fas fa-user-check" aria-hidden="true"></i>
-                        <span class="quick-action-title">بدهی مشتری</span>
-                        <span class="quick-action-description">مشتری بدهکار را سریع تسویه کنید</span>
-                    </button>
-                </div>
-            </div>
-
-            <div class="card">
-                <div class="card-header">
-                    <h2 class="card-title">
-                        <i class="fas fa-wallet"></i>
-                        وضعیت صندوق و بدهی
-                    </h2>
-                </div>
-                <div class="summary-grid">
-                    <div class="summary-item">
-                        <div class="summary-header">
-                            <span>پیشرفت فروش روزانه</span>
-                            <span class="summary-value">۶۱٪</span>
-                        </div>
-                        <div class="progress" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="61">
-                            <div class="progress-bar" style="width: 61%;"></div>
-                        </div>
-                        <div class="progress-label">
-                            <span>هدف: ۲۰,۰۰۰,۰۰۰ تومان</span>
-                            <span>ثبت شده: ۱۲,۳۴۵,۰۰۰ تومان</span>
-                        </div>
-                    </div>
-                    <div class="summary-item">
-                        <div class="summary-header">
-                            <span>موجودی صندوق نقدی</span>
-                            <span class="summary-value">۵,۶۷۸,۰۰۰ تومان</span>
-                        </div>
-                        <div class="progress" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="72">
-                            <div class="progress-bar" style="width: 72%;"></div>
-                        </div>
-                        <div class="progress-label">
-                            <span>حد اطمینان: ۸,۰۰۰,۰۰۰ تومان</span>
-                            <span>باقی‌مانده: ۲,۳۲۲,۰۰۰ تومان</span>
-                        </div>
-                    </div>
-                    <div class="summary-item">
-                        <div class="summary-header">
-                            <span>وضعیت مطالبات اعتباری</span>
-                            <span class="summary-value">۳ سررسید نزدیک</span>
-                        </div>
-                        <div class="progress" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="40">
-                            <div class="progress-bar" style="width: 40%; background: linear-gradient(90deg, var(--warning) 0%, var(--danger) 100%);"></div>
-                        </div>
-                        <div class="progress-label">
-                            <span>بدهی فعال: ۱۸,۰۰۰,۰۰۰ تومان</span>
-                            <span>قابل دریافت امروز: ۷,۲۰۰,۰۰۰ تومان</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="card">
-                <div class="card-header">
-                    <h2 class="card-title">
-                        <i class="fas fa-chart-bar"></i>
-                        نمودار فروش هفتگی
-                    </h2>
-                </div>
-                <div class="chart-container">
-                    <canvas id="salesChart"></canvas>
-                </div>
-            </div>
-
-            <div class="card">
-                <div class="card-header">
-                    <h2 class="card-title">
-                        <i class="fas fa-clipboard-check"></i>
-                        کارهای امروز فروشگاه
-                    </h2>
-                </div>
-                <div class="task-progress">
-                    <div class="progress" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
-                        <div class="progress-bar" id="taskProgressBar" style="width: 0%;"></div>
-                    </div>
-                    <div class="task-progress-value" id="taskProgressText">۰٪ تکمیل شده</div>
-                </div>
-                <ul class="task-list" id="taskList">
-                    <li class="task-item">
-                        <label class="task-label" for="task-cash">
-                            <input type="checkbox" id="task-cash" class="task-checkbox" data-task-id="cash-check">
-                            جمع‌آوری و شمارش موجودی صندوق پایان شیفت
-                        </label>
-                        <div class="task-meta">
-                            <span class="badge badge-warning">تا ساعت ۲۱:۰۰</span>
-                            <button type="button" class="btn btn-outline btn-sm" data-action="expense">ثبت هزینه</button>
-                        </div>
-                    </li>
-                    <li class="task-item">
-                        <label class="task-label" for="task-stock">
-                            <input type="checkbox" id="task-stock" class="task-checkbox" data-task-id="stock-review">
-                            بررسی کالاهای پرفروش و سفارش مجدد در صورت نیاز
-                        </label>
-                        <div class="task-meta">
-                            <span class="badge badge-success">۵ قلم بررسی شد</span>
-                            <button type="button" class="btn btn-outline btn-sm" data-action="inventory">لیست کالاها</button>
-                        </div>
-                    </li>
-                    <li class="task-item">
-                        <label class="task-label" for="task-credit">
-                            <input type="checkbox" id="task-credit" class="task-checkbox" data-task-id="credit-reminder">
-                            پیگیری تماس با مشتریان بدهکار سررسید امروز
-                        </label>
-                        <div class="task-meta">
-                            <span class="badge badge-danger">۳ نفر منتظر تماس</span>
-                            <button type="button" class="btn btn-outline btn-sm" data-action="customer">فهرست مشتریان</button>
-                        </div>
-                    </li>
-                </ul>
-            </div>
-
-            <div class="card">
-                <div class="card-header">
-                    <h2 class="card-title">
-                        <i class="fas fa-receipt"></i>
-                        آخرین فروش‌ها
-                    </h2>
-                    <button type="button" class="btn btn-outline btn-sm" id="viewAllSalesBtn">مشاهده همه</button>
-                </div>
-                <ul class="list-group">
-                    <li class="list-item">
-                        <div>
-                            <div class="list-item-title">فاکتور #۱۲۳۴</div>
-                            <div class="list-item-subtitle">۱۴:۳۰ - ۳ کالا</div>
-                        </div>
-                        <div>
-                            <div class="list-item-title">۱۲۵,۰۰۰ تومان</div>
-                            <div class="list-item-subtitle">نقدی</div>
-                        </div>
-                    </li>
-                    <li class="list-item">
-                        <div>
-                            <div class="list-item-title">فاکتور #۱۲۳۳</div>
-                            <div class="list-item-subtitle">۱۲:۱۵ - ۵ کالا</div>
-                        </div>
-                        <div>
-                            <div class="list-item-title">۲۸۰,۰۰۰ تومان</div>
-                            <div class="list-item-subtitle">اعتباری</div>
-                        </div>
-                    </li>
-                    <li class="list-item">
-                        <div>
-                            <div class="list-item-title">فاکتور #۱۲۳۲</div>
-                            <div class="list-item-subtitle">۱۰:۴۵ - ۲ کالا</div>
-                        </div>
-                        <div>
-                            <div class="list-item-title">۷۵,۰۰۰ تومان</div>
-                            <div class="list-item-subtitle">کارت</div>
-                        </div>
-                    </li>
-                </ul>
-            </div>
-
-            <div class="card">
-                <div class="card-header">
-                    <h2 class="card-title">
-                        <i class="fas fa-truck-loading"></i>
-                        یادآوری تامین‌کنندگان
-                    </h2>
-                </div>
-                <table class="supplier-list">
-                    <thead>
-                        <tr>
-                            <th>تامین‌کننده</th>
-                            <th>کالاهای پیشنهادی</th>
-                            <th>آخرین خرید</th>
-                            <th>اقدام</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td>شرکت لبنیات تندرست</td>
-                            <td>
-                                <div class="mini-badge"><i class="fas fa-bottle-water" aria-hidden="true"></i> شیر ۲۴ عدد</div>
-                                <div class="mini-badge"><i class="fas fa-cheese" aria-hidden="true"></i> پنیر ۱۲ عدد</div>
-                            </td>
-                            <td>۱۰ روز پیش</td>
-                            <td class="supplier-actions">
-                                <button type="button" class="btn btn-outline btn-sm" data-action="supplier-call">تماس</button>
-                                <button type="button" class="btn btn-primary btn-sm" data-action="supplier-order">ثبت سفارش</button>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>پخش مواد غذایی نوین</td>
-                            <td>
-                                <div class="mini-badge"><i class="fas fa-bread-slice" aria-hidden="true"></i> نان بسته‌ای ۳۰ عدد</div>
-                            </td>
-                            <td>۷ روز پیش</td>
-                            <td class="supplier-actions">
-                                <button type="button" class="btn btn-outline btn-sm" data-action="supplier-call">پیگیری</button>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>سوپر عمده خشکبار</td>
-                            <td>
-                                <div class="mini-badge"><i class="fas fa-seedling" aria-hidden="true"></i> پسته ۸ کیلو</div>
-                                <div class="mini-badge"><i class="fas fa-cookie" aria-hidden="true"></i> خشکبار مخلوط ۵ کیلو</div>
-                            </td>
-                            <td>۲۰ روز پیش</td>
-                            <td class="supplier-actions">
-                                <button type="button" class="btn btn-outline btn-sm" data-action="supplier-order">پیشنهاد قیمت</button>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-
-            <div class="card">
-                <div class="card-header">
-                    <h2 class="card-title">
-                        <i class="fas fa-calendar-check"></i>
-                        تسویه‌های پیش‌رو
-                    </h2>
-                </div>
-                <div class="timeline">
-                    <div class="timeline-item">
-                        <span class="timeline-indicator"></span>
-                        <div class="timeline-content">
-                            <div class="timeline-title">تسویه با صندوق قرض‌الحسنه</div>
-                            <div class="timeline-meta">
-                                <span>موعد: امروز ساعت ۱۸:۰۰</span>
-                                <span>مبلغ: ۲,۰۰۰,۰۰۰ تومان</span>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="timeline-item">
-                        <span class="timeline-indicator"></span>
-                        <div class="timeline-content">
-                            <div class="timeline-title">پرداخت اجاره فروشگاه</div>
-                            <div class="timeline-meta">
-                                <span>موعد: ۳ روز دیگر</span>
-                                <span>مبلغ: ۷,۵۰۰,۰۰۰ تومان</span>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="timeline-item">
-                        <span class="timeline-indicator"></span>
-                        <div class="timeline-content">
-                            <div class="timeline-title">تسویه حساب با تامین‌کننده خشکبار</div>
-                            <div class="timeline-meta">
-                                <span>موعد: ۵ روز دیگر</span>
-                                <span>مبلغ: ۳,۴۵۰,۰۰۰ تومان</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+    <main class="page-content">
+      <section class="card">
+        <div class="card-title">
+          <i class="ri-add-circle-line" aria-hidden="true"></i>
+          <h2>ثبت تراکنش جدید</h2>
         </div>
-        
-        <!-- Inventory View -->
-        <div class="view-container" id="inventoryView" role="tabpanel" aria-labelledby="navInventory" aria-hidden="true" tabindex="-1">
-            <div class="search-box">
-                <span class="search-icon"><i class="fas fa-search"></i></span>
-                <input type="text" class="search-input" placeholder="جستجوی کالا..." id="inventorySearch">
-            </div>
-            
-            <div class="card">
-                <div class="card-header">
-                    <h2 class="card-title">
-                        <i class="fas fa-box"></i>
-                        کالاهای موجود
-                    </h2>
-                    <button type="button" class="btn btn-primary btn-sm" id="addProductBtn">افزودن کالا</button>
-                </div>
-                
-                <div id="productList">
-                    <div class="product-card">
-                        <div class="product-image">
-                            <i class="fas fa-wine-bottle"></i>
-                        </div>
-                        <div class="product-info">
-                            <div class="product-name">شیر پاستوریزه</div>
-                            <div class="product-code">کد: ۱۲۳۴۵۶۷۸۹</div>
-                            <div class="product-price">۲۵,۰۰۰ تومان</div>
-                            <div class="product-stock">موجودی: ۲۴ عدد</div>
-                        </div>
-                        <div class="product-actions">
-                            <button type="button" class="btn btn-outline btn-sm"><i class="fas fa-edit"></i></button>
-                            <button type="button" class="btn btn-outline btn-sm"><i class="fas fa-trash"></i></button>
-                        </div>
-                    </div>
-                    
-                    <div class="product-card">
-                        <div class="product-image">
-                            <i class="fas fa-bread-slice"></i>
-                        </div>
-                        <div class="product-info">
-                            <div class="product-name">نان سنگک</div>
-                            <div class="product-code">کد: ۹۸۷۶۵۴۳۲۱</div>
-                            <div class="product-price">۵,۰۰۰ تومان</div>
-                            <div class="product-stock">موجودی: ۱۲ عدد</div>
-                        </div>
-                        <div class="product-actions">
-                            <button type="button" class="btn btn-outline btn-sm"><i class="fas fa-edit"></i></button>
-                            <button type="button" class="btn btn-outline btn-sm"><i class="fas fa-trash"></i></button>
-                        </div>
-                    </div>
-                    
-                    <div class="product-card">
-                        <div class="product-image">
-                            <i class="fas fa-oil-can"></i>
-                        </div>
-                        <div class="product-info">
-                            <div class="product-name">روغن مایع</div>
-                            <div class="product-code">کد: ۵۶۷۸۹۱۲۳۴</div>
-                            <div class="product-price">۸۵,۰۰۰ تومان</div>
-                            <div class="product-stock badge badge-warning">موجودی: ۳ عدد</div>
-                        </div>
-                        <div class="product-actions">
-                            <button type="button" class="btn btn-outline btn-sm"><i class="fas fa-edit"></i></button>
-                            <button type="button" class="btn btn-outline btn-sm"><i class="fas fa-trash"></i></button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="card">
-                <div class="card-header">
-                    <h2 class="card-title">
-                        <i class="fas fa-exclamation-triangle"></i>
-                        کالاهای کم‌موجود
-                    </h2>
-                </div>
-                <table class="data-table">
-                    <thead>
-                        <tr>
-                            <th>نام کالا</th>
-                            <th>موجودی</th>
-                            <th>حداقل موجودی</th>
-                            <th>عملیات</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td>روغن مایع</td>
-                            <td>۳ عدد</td>
-                            <td>۵ عدد</td>
-                            <td>
-                                <button type="button" class="btn btn-primary btn-sm">سفارش</button>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>ماست</td>
-                            <td>۷ عدد</td>
-                            <td>۱۰ عدد</td>
-                            <td>
-                                <button type="button" class="btn btn-primary btn-sm">سفارش</button>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
-        
-        <!-- Credit View -->
-        <div class="view-container" id="creditView" role="tabpanel" aria-labelledby="navCredit" aria-hidden="true" tabindex="-1">
-            <div class="stats-grid">
-                <div class="stat-card">
-                    <div class="stat-value">۴۵,۶۷۸,۰۰۰</div>
-                    <div class="stat-label">کل مطالبات</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-value">۱۲</div>
-                    <div class="stat-label">مشتریان بدهکار</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-value">۸</div>
-                    <div class="stat-label">سررسید گذشته</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-value">۱۵,۴۳۲,۰۰۰</div>
-                    <div class="stat-label">دریافت امروز</div>
-                </div>
-            </div>
-            
-            <div class="card">
-                <div class="card-header">
-                    <h2 class="card-title">
-                        <i class="fas fa-users"></i>
-                        حساب‌های اعتباری
-                    </h2>
-                    <button type="button" class="btn btn-primary btn-sm" id="addCustomerBtn">افزودن مشتری</button>
-                </div>
-                <ul class="list-group">
-                    <li class="list-item">
-                        <div>
-                            <div class="list-item-title">احمد محمدی</div>
-                            <div class="list-item-subtitle">سررسید: ۱۴۰۲/۰۵/۲۰</div>
-                        </div>
-                        <div>
-                            <div class="list-item-title">۲,۵۰۰,۰۰۰ تومان</div>
-                            <div class="badge badge-danger">سررسید گذشته</div>
-                        </div>
-                    </li>
-                    <li class="list-item">
-                        <div>
-                            <div class="list-item-title">رضا رضایی</div>
-                            <div class="list-item-subtitle">سررسید: ۱۴۰۲/۰۵/۲۵</div>
-                        </div>
-                        <div>
-                            <div class="list-item-title">۵,۰۰۰,۰۰۰ تومان</div>
-                            <div class="badge badge-warning">۵ روز مانده</div>
-                        </div>
-                    </li>
-                    <li class="list-item">
-                        <div>
-                            <div class="list-item-title">مریم احمدی</div>
-                            <div class="list-item-subtitle">سررسید: ۱۴۰۲/۰۶/۱۰</div>
-                        </div>
-                        <div>
-                            <div class="list-item-title">۱,۲۰۰,۰۰۰ تومان</div>
-                            <div class="badge badge-success">منظم</div>
-                        </div>
-                    </li>
-                </ul>
-            </div>
-            
-            <div class="card">
-                <div class="card-header">
-                    <h2 class="card-title">
-                        <i class="fas fa-money-bill-wave"></i>
-                        پرداخت‌های امروز
-                    </h2>
-                </div>
-                <table class="data-table">
-                    <thead>
-                        <tr>
-                            <th>مشتری</th>
-                            <th>مبلغ</th>
-                            <th>زمان</th>
-                            <th>عملیات</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td>علی رضایی</td>
-                            <td>۱,۲۰۰,۰۰۰ تومان</td>
-                            <td>۱۰:۳۰</td>
-                            <td>
-                                <button type="button" class="btn btn-outline btn-sm">مشاهده</button>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>سارا محمدی</td>
-                            <td>۸۵۰,۰۰۰ تومان</td>
-                            <td>۰۹:۱۵</td>
-                            <td>
-                                <button type="button" class="btn btn-outline btn-sm">مشاهده</button>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
-        
-        <!-- Reports View -->
-        <div class="view-container" id="reportsView" role="tabpanel" aria-labelledby="navReports" aria-hidden="true" tabindex="-1">
-            <div class="card">
-                <div class="card-header">
-                    <h2 class="card-title">
-                        <i class="fas fa-chart-line"></i>
-                        گزارش فروش
-                    </h2>
-                    <div style="display: flex; gap: 8px;">
-                        <button type="button" class="btn btn-outline btn-sm active" data-period="day" aria-pressed="true">روز</button>
-                        <button type="button" class="btn btn-outline btn-sm" data-period="week" aria-pressed="false">هفته</button>
-                        <button type="button" class="btn btn-outline btn-sm" data-period="month" aria-pressed="false">ماه</button>
-                    </div>
-                </div>
-                
-                <div class="stats-grid">
-                    <div class="stat-card">
-                        <div class="stat-value">۱۲,۳۴۵,۰۰۰</div>
-                        <div class="stat-label">کل فروش</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-value">۸,۷۶۵,۰۰۰</div>
-                        <div class="stat-label">سود خالص</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-value">۳,۵۸۰,۰۰۰</div>
-                        <div class="stat-label">هزینه‌ها</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-value">۴۵</div>
-                        <div class="stat-label">فاکتورها</div>
-                    </div>
-                </div>
-                
-                <div class="chart-container">
-                    <canvas id="salesReportChart"></canvas>
-                </div>
-                
-                <div class="card" style="background: var(--light);">
-                    <div class="card-header">
-                        <h2 class="card-title">
-                            <i class="fas fa-star"></i>
-                            پرفروش‌ترین کالاها
-                        </h2>
-                    </div>
-                    <ul class="list-group">
-                        <li class="list-item">
-                            <div>
-                                <div class="list-item-title">شیر پاستوریزه</div>
-                                <div class="list-item-subtitle">۲۴ عدد فروخته شده</div>
-                            </div>
-                            <div>
-                                <div class="list-item-title">۶۰۰,۰۰۰ تومان</div>
-                            </div>
-                        </li>
-                        <li class="list-item">
-                            <div>
-                                <div class="list-item-title">نان سنگک</div>
-                                <div class="list-item-subtitle">۴۰ عدد فروخته شده</div>
-                            </div>
-                            <div>
-                                <div class="list-item-title">۲۰۰,۰۰۰ تومان</div>
-                            </div>
-                        </li>
-                        <li class="list-item">
-                            <div>
-                                <div class="list-item-title">روغن مایع</div>
-                                <div class="list-item-subtitle">۸ عدد فروخته شده</div>
-                            </div>
-                            <div>
-                                <div class="list-item-title">۶۸۰,۰۰۰ تومان</div>
-                            </div>
-                        </li>
-                    </ul>
-                </div>
-                
-                <div class="form-group">
-                    <button type="button" class="btn btn-primary btn-block" id="exportBtn">
-                        <i class="fas fa-file-excel"></i>
-                        خروجی اکسل
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
-    
-    <!-- FAB -->
-    <button type="button" class="fab pulse" id="fabBtn" aria-label="نمایش میانبرهای سریع" aria-expanded="false">
-        <i class="fas fa-plus" aria-hidden="true"></i>
-    </button>
-    
-    <!-- Speed Dial -->
-    <div class="speed-dial" id="speedDial">
-        <div class="speed-dial-item">
-            <span class="speed-dial-label">فروش جدید</span>
-            <button type="button" class="speed-dial-btn" id="newSaleBtn">
-                <i class="fas fa-shopping-cart"></i>
+        <p class="card-subtitle">فقط داده‌های واقعی شما ذخیره می‌شوند و در گزارش پایین قابل مشاهده هستند.</p>
+        <form id="entryForm" novalidate>
+          <div class="form-grid">
+            <label class="form-field">
+              <span>عنوان تراکنش <span class="required">*</span></span>
+              <input type="text" name="title" placeholder="مثال: فروش نقدی امروز" required />
+            </label>
+            <label class="form-field">
+              <span>نوع تراکنش</span>
+              <div class="type-options" role="radiogroup">
+                <label>
+                  <input type="radio" name="type" value="income" checked />
+                  <span>درآمد</span>
+                </label>
+                <label>
+                  <input type="radio" name="type" value="expense" />
+                  <span>هزینه</span>
+                </label>
+              </div>
+            </label>
+            <label class="form-field">
+              <span>مبلغ (تومان) <span class="required">*</span></span>
+              <input type="number" name="amount" min="0" step="1000" placeholder="مثال: 2500000" required />
+            </label>
+            <label class="form-field">
+              <span>تاریخ ثبت</span>
+              <input type="date" name="recordedAt" />
+            </label>
+          </div>
+          <label class="form-field">
+            <span>توضیحات تکمیلی</span>
+            <textarea name="description" rows="3" placeholder="جزئیات بیشتر (اختیاری)"></textarea>
+          </label>
+          <div class="form-actions">
+            <button type="submit" class="primary-btn">
+              <i class="ri-save-3-line" aria-hidden="true"></i>
+              ذخیره تراکنش
             </button>
-        </div>
-        <div class="speed-dial-item">
-            <span class="speed-dial-label">افزودن کالا</span>
-            <button type="button" class="speed-dial-btn" id="newProductBtn">
-                <i class="fas fa-box"></i>
-            </button>
-        </div>
-        <div class="speed-dial-item">
-            <span class="speed-dial-label">ثبت هزینه</span>
-            <button type="button" class="speed-dial-btn" id="newExpenseBtn">
-                <i class="fas fa-receipt"></i>
-            </button>
-        </div>
-        <div class="speed-dial-item">
-            <span class="speed-dial-label">مشتری جدید</span>
-            <button type="button" class="speed-dial-btn" id="newCustomerBtn">
-                <i class="fas fa-user-plus"></i>
-            </button>
-        </div>
-    </div>
-    
-    <!-- Bottom Navigation -->
-    <nav class="bottom-nav" role="tablist" aria-label="نمایش صفحات حسابداری">
-        <button type="button" class="nav-item active" id="navSales" role="tab" data-view="salesView" aria-controls="salesView" aria-pressed="true" aria-selected="true">
-            <span class="nav-icon" aria-hidden="true"><i class="fas fa-shopping-cart"></i></span>
-            <span class="nav-label">فروش</span>
-        </button>
-        <button type="button" class="nav-item" id="navInventory" role="tab" data-view="inventoryView" aria-controls="inventoryView" aria-pressed="false" aria-selected="false">
-            <span class="nav-icon" aria-hidden="true"><i class="fas fa-boxes"></i></span>
-            <span class="nav-label">انبار</span>
-        </button>
-        <button type="button" class="nav-item" id="navCredit" role="tab" data-view="creditView" aria-controls="creditView" aria-pressed="false" aria-selected="false">
-            <span class="nav-icon" aria-hidden="true"><i class="fas fa-file-invoice"></i></span>
-            <span class="nav-label">حساب‌ها</span>
-        </button>
-        <button type="button" class="nav-item" id="navReports" role="tab" data-view="reportsView" aria-controls="reportsView" aria-pressed="false" aria-selected="false">
-            <span class="nav-icon" aria-hidden="true"><i class="fas fa-chart-line"></i></span>
-            <span class="nav-label">گزارش‌ها</span>
-        </button>
-    </nav>
-    
-    <!-- New Sale Modal -->
-    <div class="modal" id="newSaleModal" role="dialog" aria-modal="true" aria-labelledby="newSaleModalTitle" aria-hidden="true" tabindex="-1">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3 class="modal-title" id="newSaleModalTitle">فروش جدید</h3>
-                <button type="button" class="modal-close" aria-label="بستن پنجره">
-                    <i class="fas fa-times" aria-hidden="true"></i>
-                </button>
-            </div>
-            <div class="modal-body">
-                <div class="form-group">
-                    <label class="form-label">جستجوی کالا یا اسکن بارکد</label>
-                    <div class="search-box">
-                        <span class="search-icon"><i class="fas fa-search"></i></span>
-                        <input type="text" class="search-input" placeholder="نام کالا یا بارکد" id="productSearchInput">
-                    </div>
-                </div>
-                
-                <div class="card">
-                    <div class="card-header">
-                        <h3 class="card-title">کالاهای انتخاب شده</h3>
-                    </div>
-                    <ul class="list-group" id="selectedProducts">
-                        <li class="list-item">
-                            <div>
-                                <div class="list-item-title">شیر پاستوریزه</div>
-                                <div class="list-item-subtitle">۲ عدد × ۲۵,۰۰۰ تومان</div>
-                            </div>
-                            <div>
-                                <div class="list-item-title">۵۰,۰۰۰ تومان</div>
-                            </div>
-                        </li>
-                    </ul>
-                    <div class="form-group">
-                        <div class="list-item">
-                            <div class="list-item-title">جمع کل:</div>
-                            <div class="list-item-title">۵۰,۰۰۰ تومان</div>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="form-group">
-                    <label class="form-label">نوع پرداخت</label>
-                    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px;">
-                        <button type="button" class="btn btn-primary payment-method" data-method="cash" aria-pressed="true">
-                            <i class="fas fa-money-bill-wave"></i>
-                            نقدی
-                        </button>
-                        <button type="button" class="btn btn-outline payment-method" data-method="card" aria-pressed="false">
-                            <i class="fas fa-credit-card"></i>
-                            کارت
-                        </button>
-                        <button type="button" class="btn btn-outline payment-method" data-method="credit" aria-pressed="false">
-                            <i class="fas fa-user-clock"></i>
-                            اعتباری
-                        </button>
-                        <button type="button" class="btn btn-outline payment-method" data-method="qr" aria-pressed="false">
-                            <i class="fas fa-qrcode"></i>
-                            QR
-                        </button>
-                    </div>
-                </div>
-                
-                <div class="form-group" id="customerSelect" style="display: none;">
-                    <label class="form-label">انتخاب مشتری</label>
-                    <select class="form-control">
-                        <option>احمد محمدی</option>
-                        <option>رضا رضایی</option>
-                        <option>مریم احمدی</option>
-                    </select>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-outline" id="cancelSaleBtn">انصراف</button>
-                <button type="button" class="btn btn-primary" id="confirmSaleBtn">ثبت فروش</button>
-            </div>
-        </div>
-    </div>
-    
-    <!-- Add Product Modal - Multi-step Form -->
-    <div class="modal" id="addProductModal" role="dialog" aria-modal="true" aria-labelledby="addProductModalTitle" aria-hidden="true" tabindex="-1">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3 class="modal-title" id="addProductModalTitle">افزودن کالای جدید</h3>
-                <button type="button" class="modal-close" aria-label="بستن پنجره">
-                    <i class="fas fa-times" aria-hidden="true"></i>
-                </button>
-            </div>
-            <div class="modal-body">
-                <!-- Steps Indicator -->
-                <div class="steps">
-                    <div class="step active" id="step1">
-                        <div class="step-number">1</div>
-                        <div class="step-title">اطلاعات پایه</div>
-                    </div>
-                    <div class="step" id="step2">
-                        <div class="step-number">2</div>
-                        <div class="step-title">موجودی و قیمت</div>
-                    </div>
-                    <div class="step" id="step3">
-                        <div class="step-number">3</div>
-                        <div class="step-title">تایید نهایی</div>
-                    </div>
-                </div>
-                
-                <!-- Step 1: Basic Information -->
-                <div id="formStep1" class="form-step">
-                    <div class="form-group">
-                        <label class="form-label">نام کالا *</label>
-                        <input type="text" class="form-control" id="productName" placeholder="نام کالا را وارد کنید">
-                        <div class="error-message" id="productNameError">نام کالا را وارد کنید</div>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label class="form-label">کد کالا *</label>
-                        <input type="text" class="form-control" id="productCode" placeholder="کد کالا را وارد کنید">
-                        <div class="error-message" id="productCodeError">کد کالا را وارد کنید</div>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label class="form-label">دسته‌بندی *</label>
-                        <select class="form-control" id="productCategory">
-                            <option value="">انتخاب کنید</option>
-                            <option>لبنیات</option>
-                            <option>نانوایی</option>
-                            <option>خشکبار</option>
-                            <option>نوشیدنی</option>
-                            <option>کنسرو</option>
-                            <option>سایر</option>
-                        </select>
-                        <div class="error-message" id="productCategoryError">دسته‌بندی را انتخاب کنید</div>
-                    </div>
-                </div>
-                
-                <!-- Step 2: Inventory and Price -->
-                <div id="formStep2" class="form-step" style="display: none;">
-                    <div class="form-group">
-                        <label class="form-label">قیمت فروش (تومان) *</label>
-                        <input type="number" class="form-control" id="productPrice" placeholder="قیمت فروش را وارد کنید">
-                        <div class="error-message" id="productPriceError">قیمت فروش را وارد کنید</div>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label class="form-label">قیمت خرید (تومان) *</label>
-                        <input type="number" class="form-control" id="productCost" placeholder="قیمت خرید را وارد کنید">
-                        <div class="error-message" id="productCostError">قیمت خرید را وارد کنید</div>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label class="form-label">موجودی اولیه *</label>
-                        <input type="number" class="form-control" id="productStock" placeholder="موجودی اولیه را وارد کنید">
-                        <div class="error-message" id="productStockError">موجودی اولیه را وارد کنید</div>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label class="form-label">حداقل موجودی *</label>
-                        <input type="number" class="form-control" id="productMinStock" placeholder="حداقل موجودی را وارد کنید">
-                        <div class="error-message" id="productMinStockError">حداقل موجودی را وارد کنید</div>
-                    </div>
-                </div>
-                
-                <!-- Step 3: Confirmation -->
-                <div id="formStep3" class="form-step" style="display: none;">
-                    <div class="card">
-                        <div class="card-header">
-                            <h3 class="card-title">اطلاعات کالا</h3>
-                        </div>
-                        <ul class="list-group">
-                            <li class="list-item">
-                                <div class="list-item-title">نام کالا</div>
-                                <div id="confirmName">-</div>
-                            </li>
-                            <li class="list-item">
-                                <div class="list-item-title">کد کالا</div>
-                                <div id="confirmCode">-</div>
-                            </li>
-                            <li class="list-item">
-                                <div class="list-item-title">دسته‌بندی</div>
-                                <div id="confirmCategory">-</div>
-                            </li>
-                            <li class="list-item">
-                                <div class="list-item-title">قیمت فروش</div>
-                                <div id="confirmPrice">-</div>
-                            </li>
-                            <li class="list-item">
-                                <div class="list-item-title">قیمت خرید</div>
-                                <div id="confirmCost">-</div>
-                            </li>
-                            <li class="list-item">
-                                <div class="list-item-title">موجودی اولیه</div>
-                                <div id="confirmStock">-</div>
-                            </li>
-                            <li class="list-item">
-                                <div class="list-item-title">حداقل موجودی</div>
-                                <div id="confirmMinStock">-</div>
-                            </li>
-                        </ul>
-                    </div>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-outline" id="prevStepBtn" style="display: none;">قبلی</button>
-                <button type="button" class="btn btn-primary" id="nextStepBtn">بعدی</button>
-                <button type="button" class="btn btn-success" id="saveProductBtn" style="display: none;">ذخیره کالا</button>
-                <button type="button" class="btn btn-outline" id="cancelProductBtn">انصراف</button>
-            </div>
-        </div>
-    </div>
-    
-    <!-- Add Customer Modal - Multi-step Form -->
-    <div class="modal" id="addCustomerModal" role="dialog" aria-modal="true" aria-labelledby="addCustomerModalTitle" aria-hidden="true" tabindex="-1">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3 class="modal-title" id="addCustomerModalTitle">افزودن مشتری جدید</h3>
-                <button type="button" class="modal-close" aria-label="بستن پنجره">
-                    <i class="fas fa-times" aria-hidden="true"></i>
-                </button>
-            </div>
-            <div class="modal-body">
-                <!-- Steps Indicator -->
-                <div class="steps">
-                    <div class="step active" id="customerStep1">
-                        <div class="step-number">1</div>
-                        <div class="step-title">اطلاعات شخصی</div>
-                    </div>
-                    <div class="step" id="customerStep2">
-                        <div class="step-number">2</div>
-                        <div class="step-title">اطلاعات مالی</div>
-                    </div>
-                    <div class="step" id="customerStep3">
-                        <div class="step-number">3</div>
-                        <div class="step-title">تایید نهایی</div>
-                    </div>
-                </div>
-                
-                <!-- Step 1: Personal Information -->
-                <div id="customerFormStep1" class="form-step">
-                    <div class="form-group">
-                        <label class="form-label">نام و نام خانوادگی *</label>
-                        <input type="text" class="form-control" id="customerName" placeholder="نام و نام خانوادگی را وارد کنید">
-                        <div class="error-message" id="customerNameError">نام و نام خانوادگی را وارد کنید</div>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label class="form-label">شماره تماس *</label>
-                        <input type="tel" class="form-control" id="customerPhone" placeholder="شماره تماس را وارد کنید">
-                        <div class="error-message" id="customerPhoneError">شماره تماس را وارد کنید</div>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label class="form-label">آدرس</label>
-                        <textarea class="form-control" rows="3" id="customerAddress" placeholder="آدرس را وارد کنید"></textarea>
-                    </div>
-                </div>
-                
-                <!-- Step 2: Financial Information -->
-                <div id="customerFormStep2" class="form-step" style="display: none;">
-                    <div class="form-group">
-                        <label class="form-label">حد اعتباری (تومان) *</label>
-                        <input type="number" class="form-control" id="customerCredit" placeholder="حد اعتباری را وارد کنید">
-                        <div class="error-message" id="customerCreditError">حد اعتباری را وارد کنید</div>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label class="form-label">توضیحات</label>
-                        <textarea class="form-control" rows="2" id="customerNotes" placeholder="توضیحات اختیاری"></textarea>
-                    </div>
-                </div>
-                
-                <!-- Step 3: Confirmation -->
-                <div id="customerFormStep3" class="form-step" style="display: none;">
-                    <div class="card">
-                        <div class="card-header">
-                            <h3 class="card-title">اطلاعات مشتری</h3>
-                        </div>
-                        <ul class="list-group">
-                            <li class="list-item">
-                                <div class="list-item-title">نام و نام خانوادگی</div>
-                                <div id="confirmCustomerName">-</div>
-                            </li>
-                            <li class="list-item">
-                                <div class="list-item-title">شماره تماس</div>
-                                <div id="confirmCustomerPhone">-</div>
-                            </li>
-                            <li class="list-item">
-                                <div class="list-item-title">آدرس</div>
-                                <div id="confirmCustomerAddress">-</div>
-                            </li>
-                            <li class="list-item">
-                                <div class="list-item-title">حد اعتباری</div>
-                                <div id="confirmCustomerCredit">-</div>
-                            </li>
-                            <li class="list-item">
-                                <div class="list-item-title">توضیحات</div>
-                                <div id="confirmCustomerNotes">-</div>
-                            </li>
-                        </ul>
-                    </div>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-outline" id="customerPrevStepBtn" style="display: none;">قبلی</button>
-                <button type="button" class="btn btn-primary" id="customerNextStepBtn">بعدی</button>
-                <button type="button" class="btn btn-success" id="saveCustomerBtn" style="display: none;">ذخیره مشتری</button>
-                <button type="button" class="btn btn-outline" id="cancelCustomerBtn">انصراف</button>
-            </div>
-        </div>
-    </div>
-    
-    <!-- Empty State for Sales -->
-    <div class="empty-state" id="salesEmptyState" style="display: none;">
-        <div class="empty-state-icon">
-            <i class="fas fa-shopping-cart"></i>
-        </div>
-        <h3 class="empty-state-title">هنوز فروشی ثبت نشده</h3>
-        <p class="empty-state-description">
-            برای شروع، روی دکمه + کلیک کرده و فروش جدیدی ثبت کنید
-        </p>
-        <button type="button" class="btn btn-primary" id="emptyStateNewSaleBtn">
-            <i class="fas fa-plus"></i>
-            فروش جدید
-        </button>
-    </div>
-    
-    <!-- Empty State for Inventory -->
-    <div class="empty-state" id="inventoryEmptyState" style="display: none;">
-        <div class="empty-state-icon">
-            <i class="fas fa-boxes"></i>
-        </div>
-        <h3 class="empty-state-title">هیچ کالایی ثبت نشده</h3>
-        <p class="empty-state-description">
-            برای شروع، کالاهای خود را به سیستم اضافه کنید
-        </p>
-        <button type="button" class="btn btn-primary" id="emptyStateAddProductBtn">
-            <i class="fas fa-plus"></i>
-            افزودن کالا
-        </button>
-    </div>
-    
-    <!-- Empty State for Credit -->
-    <div class="empty-state" id="creditEmptyState" style="display: none;">
-        <div class="empty-state-icon">
-            <i class="fas fa-users"></i>
-        </div>
-        <h3 class="empty-state-title">هیچ مشتری اعتباری ثبت نشده</h3>
-        <p class="empty-state-description">
-            برای شروع، مشتریان اعتباری خود را به سیستم اضافه کنید
-        </p>
-        <button type="button" class="btn btn-primary" id="emptyStateAddCustomerBtn">
-            <i class="fas fa-plus"></i>
-            افزودن مشتری
-        </button>
-    </div>
-    
-    <!-- Empty State for Reports -->
-    <div class="empty-state" id="reportsEmptyState" style="display: none;">
-        <div class="empty-state-icon">
-            <i class="fas fa-chart-line"></i>
-        </div>
-        <h3 class="empty-state-title">هیچ داده‌ای برای گزارش وجود ندارد</h3>
-        <p class="empty-state-description">
-            برای مشاهده گزارش‌ها، ابتدا فروش‌ها و کالاهای خود را ثبت کنید
-        </p>
-    </div>
-    
-    <!-- Toast Notification -->
-    <div class="toast" id="toast" role="status" aria-live="polite" aria-atomic="true" aria-hidden="true">
-        <div class="toast-message" id="toastMessage">
-            <i class="fas fa-check-circle toast-icon" aria-hidden="true"></i>
-            <span id="toastText">عملیات با موفقیت انجام شد</span>
-        </div>
-        <button type="button" class="toast-action" id="toastAction" hidden>بازگشت</button>
-    </div>
+          </div>
+          <p class="form-message" id="formMessage" role="alert" aria-live="polite"></p>
+        </form>
+      </section>
 
-    <script src="js/accountant.js" defer></script>
+      <section class="card">
+        <div class="card-title">
+          <i class="ri-file-list-3-line" aria-hidden="true"></i>
+          <h2>گزارش تراکنش‌های ثبت شده</h2>
+        </div>
+        <div class="totals-grid">
+          <div class="total-box total-income">
+            <span class="total-label">کل درآمد</span>
+            <strong id="totalIncome">۰ تومان</strong>
+          </div>
+          <div class="total-box total-expense">
+            <span class="total-label">کل هزینه</span>
+            <strong id="totalExpense">۰ تومان</strong>
+          </div>
+          <div class="total-box total-balance">
+            <span class="total-label">مانده شما</span>
+            <strong id="totalBalance">۰ تومان</strong>
+          </div>
+        </div>
+        <div class="table-wrapper">
+          <table class="entries-table">
+            <thead>
+              <tr>
+                <th>عنوان</th>
+                <th>نوع</th>
+                <th>مبلغ</th>
+                <th>تاریخ</th>
+                <th>توضیحات</th>
+              </tr>
+            </thead>
+            <tbody id="entriesBody"></tbody>
+          </table>
+          <div class="empty-state" id="emptyState">
+            <i class="ri-database-2-line" aria-hidden="true"></i>
+            <p>هنوز هیچ تراکنشی ثبت نشده است. فرم بالا را تکمیل کنید.</p>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
 </body>
 </html>
