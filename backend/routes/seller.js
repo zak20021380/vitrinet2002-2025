@@ -11,7 +11,9 @@ const {
   listSellerPerformance,
   getCurrentSellerPerformanceStatus,
   getDashboardStats,
-  getTopServicePeers
+  getTopServicePeers,
+  blockSeller,
+  unblockSeller
 } = require('../controllers/sellerController');
 const Seller = require('../models/Seller');
 const authMiddleware = require('../middlewares/authMiddleware');
@@ -87,13 +89,35 @@ router.get('/', authMiddleware('admin'), async (req, res) => {
       createdAt: 1,
       productsCount: 1,
       visits: 1,
-      blockedByAdmin: 1
+      blockedByAdmin: 1,
+      blockedAt: 1,
+      blockedBy: 1,
+      blockedReason: 1,
+      address: 1,
+      category: 1,
+      desc: 1,
+      subscriptionStart: 1,
+      subscriptionEnd: 1,
+      isPremium: 1
     }).lean();
 
-    const sellersWithId = sellers.map(seller => ({
-      ...seller,
-      sellerId: seller._id.toString()
-    }));
+    const sellersWithId = sellers.map(seller => {
+      const ownerFirstname = seller.firstname || '';
+      const ownerLastname = seller.lastname || '';
+      const ownerName = [ownerFirstname, ownerLastname].filter(Boolean).join(' ').trim();
+
+      return {
+        ...seller,
+        sellerId: seller._id.toString(),
+        ownerFirstname,
+        ownerLastname,
+        ownerName,
+        shopAddress: seller.address || '',
+        shopLogoText: seller.storename || '',
+        subscriptionType: seller.isPremium ? 'premium' : '',
+        mobile: seller.phone || ''
+      };
+    });
 
     res.json(sellersWithId);
   } catch (err) {
@@ -132,6 +156,9 @@ router.post('/upgrade', authMiddleware('seller'), upgradeSeller);
 router.get('/performance', authMiddleware('admin'), listSellerPerformance);
 router.put('/performance/:sellerId', authMiddleware('admin'), updateAdminScore);
 router.delete('/performance/:sellerId', authMiddleware('admin'), clearAdminScore);
+
+router.patch('/:sellerId/block', authMiddleware('admin'), blockSeller);
+router.patch('/:sellerId/unblock', authMiddleware('admin'), unblockSeller);
 
 // وضعیت عملکرد برای خود فروشنده
 router.get('/performance/status', authMiddleware('seller'), getCurrentSellerPerformanceStatus);
@@ -172,8 +199,9 @@ router.get(
 
       // ─── واکشی فروشنده + پسورد ───
       const seller = await Seller.findOne(query).select(
-        '+password firstname lastname storename shopurl phone ' +
-        'createdAt productsCount visits'
+        '+password firstname lastname storename shopurl phone address ' +
+        'createdAt productsCount visits blockedByAdmin blockedAt blockedBy blockedReason ' +
+        'subscriptionStart subscriptionEnd isPremium category desc'
       ).lean();
 
       if (!seller)
