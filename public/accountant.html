@@ -43,6 +43,9 @@
             --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             --fab-size: 56px;
             --bottom-nav-height: 70px;
+            --safe-area-inset-top: env(safe-area-inset-top, 0px);
+            --safe-area-inset-bottom: env(safe-area-inset-bottom, 0px);
+            color-scheme: light dark;
         }
         
         /* Reduced motion for accessibility */
@@ -67,8 +70,11 @@
             min-height: 100vh;
             display: flex;
             flex-direction: column;
-            padding-bottom: var(--bottom-nav-height);
+            padding-bottom: calc(var(--bottom-nav-height) + var(--safe-area-inset-bottom));
             overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+            text-rendering: optimizeLegibility;
+            -webkit-tap-highlight-color: transparent;
         }
         
         .app-container {
@@ -92,7 +98,7 @@
             justify-content: space-between;
             align-items: center;
             position: sticky;
-            top: 0;
+            top: var(--safe-area-inset-top);
             z-index: 50;
             transition: var(--transition);
         }
@@ -268,6 +274,26 @@
             display: flex;
             width: 100%;
         }
+
+        .btn:focus-visible,
+        .nav-item:focus-visible,
+        .speed-dial-btn:focus-visible,
+        .dark-mode-toggle:focus-visible,
+        .modal-close:focus-visible,
+        .toast-action:focus-visible {
+            outline: 2px solid var(--primary);
+            outline-offset: 2px;
+        }
+
+        .btn,
+        .nav-item,
+        .speed-dial-btn,
+        .dark-mode-toggle,
+        .modal-close,
+        .toast-action,
+        .fab {
+            touch-action: manipulation;
+        }
         
         /* Stats */
         .stats-grid {
@@ -410,8 +436,9 @@
         /* FAB */
         .fab {
             position: fixed;
-            bottom: calc(var(--bottom-nav-height) + 20px);
+            bottom: calc(var(--bottom-nav-height) + 20px + var(--safe-area-inset-bottom));
             left: 20px;
+            inset-inline-start: 20px;
             width: var(--fab-size);
             height: var(--fab-size);
             border-radius: 50%;
@@ -439,12 +466,17 @@
             bottom: 0;
             left: 0;
             right: 0;
-            background: var(--white);
+            background: rgba(255, 255, 255, 0.96);
             box-shadow: 0 -4px 6px -1px rgba(0, 0, 0, 0.1);
             display: flex;
             justify-content: space-around;
             height: var(--bottom-nav-height);
             z-index: 100;
+            padding-bottom: var(--safe-area-inset-bottom);
+            padding-inline: 8px;
+            align-items: stretch;
+            gap: 4px;
+            backdrop-filter: blur(12px);
         }
         
         .nav-item {
@@ -458,6 +490,14 @@
             transition: var(--transition);
             color: var(--text-secondary);
             position: relative;
+            background: transparent;
+            border: none;
+            font: inherit;
+            height: 100%;
+            width: 100%;
+            gap: 4px;
+            -webkit-appearance: none;
+            appearance: none;
         }
         
         .nav-item.active {
@@ -505,6 +545,7 @@
             justify-content: center;
             padding: 16px;
             animation: fadeIn 0.3s ease;
+            outline: none;
         }
         
         .modal.active {
@@ -622,9 +663,11 @@
         /* Toast */
         .toast {
             position: fixed;
-            bottom: calc(var(--bottom-nav-height) + 20px);
+            bottom: calc(var(--bottom-nav-height) + 20px + var(--safe-area-inset-bottom));
             left: 20px;
             right: 20px;
+            inset-inline-start: 20px;
+            inset-inline-end: 20px;
             background: var(--dark);
             color: var(--white);
             padding: 16px;
@@ -637,11 +680,13 @@
             opacity: 0;
             transition: var(--transition);
             z-index: 1000;
+            pointer-events: none;
         }
-        
+
         .toast.show {
             transform: translateY(0);
             opacity: 1;
+            pointer-events: auto;
         }
         
         .toast-message {
@@ -834,11 +879,56 @@
         }
         
         /* Responsive */
+        @media (max-width: 768px) {
+            :root {
+                --bottom-nav-height: 68px;
+                --fab-size: 52px;
+            }
+
+            .app-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 12px;
+            }
+
+            .header-actions {
+                width: 100%;
+                justify-content: space-between;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .bottom-nav {
+                padding-inline: 16px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .app-container {
+                padding: 0 12px;
+            }
+
+            .card {
+                padding: 16px;
+            }
+
+            .fab {
+                inset-inline-start: 16px;
+            }
+
+            .toast {
+                inset-inline-start: 16px;
+                inset-inline-end: 16px;
+            }
+        }
+
         @media (min-width: 768px) {
             .app-container {
                 padding: 0 24px;
             }
-            
+
             .stats-grid {
                 grid-template-columns: repeat(4, 1fr);
             }
@@ -859,6 +949,15 @@
             --border-color: #374151;
             --light: #1F2937;
             --white: #1F2937;
+        }
+
+        .dark-mode .bottom-nav {
+            background: rgba(17, 24, 39, 0.9);
+            box-shadow: 0 -4px 12px -1px rgba(0, 0, 0, 0.6);
+        }
+
+        .dark-mode .toast {
+            background: rgba(17, 24, 39, 0.92);
         }
         
         .dark-mode-toggle {
@@ -893,8 +992,9 @@
         /* Speed Dial */
         .speed-dial {
             position: fixed;
-            bottom: calc(var(--bottom-nav-height) + 90px);
+            bottom: calc(var(--bottom-nav-height) + 90px + var(--safe-area-inset-bottom));
             left: 20px;
+            inset-inline-start: 20px;
             display: flex;
             flex-direction: column;
             gap: 12px;
@@ -903,11 +1003,13 @@
             transform: translateY(20px);
             transition: var(--transition);
             z-index: 90;
+            pointer-events: none;
         }
-        
+
         .speed-dial.active {
             opacity: 1;
             transform: translateY(0);
+            pointer-events: auto;
         }
         
         .speed-dial-btn {
@@ -1007,22 +1109,22 @@
         <!-- Header -->
         <header class="app-header">
             <div class="shop-name">
-                <i class="fas fa-store"></i>
+                <i class="fas fa-store" aria-hidden="true"></i>
                 فروشگاه من
             </div>
             <div class="header-actions">
                 <div class="date-display" id="currentDate">
-                    <i class="far fa-calendar-alt"></i>
-                    ۱۴۰۲/۰۵/۱۵
+                    <i class="far fa-calendar-alt" aria-hidden="true"></i>
+                    <span id="currentDateText" class="date-text">در حال بارگذاری...</span>
                 </div>
-                <button class="dark-mode-toggle" id="darkModeToggle">
-                    <i class="fas fa-moon"></i>
+                <button type="button" class="dark-mode-toggle" id="darkModeToggle" aria-pressed="false" aria-label="فعال‌سازی حالت تاریک">
+                    <i class="fas fa-moon" aria-hidden="true"></i>
                 </button>
             </div>
         </header>
         
         <!-- Sales View -->
-        <div class="view-container active" id="salesView">
+        <div class="view-container active" id="salesView" role="tabpanel" aria-labelledby="navSales" aria-hidden="false" tabindex="0">
             <div class="stats-grid">
                 <div class="stat-card">
                     <div class="stat-value">۱۲,۳۴۵,۰۰۰</div>
@@ -1060,7 +1162,7 @@
                         <i class="fas fa-receipt"></i>
                         آخرین فروش‌ها
                     </h2>
-                    <button class="btn btn-outline btn-sm" id="viewAllSalesBtn">مشاهده همه</button>
+                    <button type="button" class="btn btn-outline btn-sm" id="viewAllSalesBtn">مشاهده همه</button>
                 </div>
                 <ul class="list-group">
                     <li class="list-item">
@@ -1098,7 +1200,7 @@
         </div>
         
         <!-- Inventory View -->
-        <div class="view-container" id="inventoryView">
+        <div class="view-container" id="inventoryView" role="tabpanel" aria-labelledby="navInventory" aria-hidden="true" tabindex="-1">
             <div class="search-box">
                 <span class="search-icon"><i class="fas fa-search"></i></span>
                 <input type="text" class="search-input" placeholder="جستجوی کالا..." id="inventorySearch">
@@ -1110,7 +1212,7 @@
                         <i class="fas fa-box"></i>
                         کالاهای موجود
                     </h2>
-                    <button class="btn btn-primary btn-sm" id="addProductBtn">افزودن کالا</button>
+                    <button type="button" class="btn btn-primary btn-sm" id="addProductBtn">افزودن کالا</button>
                 </div>
                 
                 <div id="productList">
@@ -1125,8 +1227,8 @@
                             <div class="product-stock">موجودی: ۲۴ عدد</div>
                         </div>
                         <div class="product-actions">
-                            <button class="btn btn-outline btn-sm"><i class="fas fa-edit"></i></button>
-                            <button class="btn btn-outline btn-sm"><i class="fas fa-trash"></i></button>
+                            <button type="button" class="btn btn-outline btn-sm"><i class="fas fa-edit"></i></button>
+                            <button type="button" class="btn btn-outline btn-sm"><i class="fas fa-trash"></i></button>
                         </div>
                     </div>
                     
@@ -1141,8 +1243,8 @@
                             <div class="product-stock">موجودی: ۱۲ عدد</div>
                         </div>
                         <div class="product-actions">
-                            <button class="btn btn-outline btn-sm"><i class="fas fa-edit"></i></button>
-                            <button class="btn btn-outline btn-sm"><i class="fas fa-trash"></i></button>
+                            <button type="button" class="btn btn-outline btn-sm"><i class="fas fa-edit"></i></button>
+                            <button type="button" class="btn btn-outline btn-sm"><i class="fas fa-trash"></i></button>
                         </div>
                     </div>
                     
@@ -1157,8 +1259,8 @@
                             <div class="product-stock badge badge-warning">موجودی: ۳ عدد</div>
                         </div>
                         <div class="product-actions">
-                            <button class="btn btn-outline btn-sm"><i class="fas fa-edit"></i></button>
-                            <button class="btn btn-outline btn-sm"><i class="fas fa-trash"></i></button>
+                            <button type="button" class="btn btn-outline btn-sm"><i class="fas fa-edit"></i></button>
+                            <button type="button" class="btn btn-outline btn-sm"><i class="fas fa-trash"></i></button>
                         </div>
                     </div>
                 </div>
@@ -1186,7 +1288,7 @@
                             <td>۳ عدد</td>
                             <td>۵ عدد</td>
                             <td>
-                                <button class="btn btn-primary btn-sm">سفارش</button>
+                                <button type="button" class="btn btn-primary btn-sm">سفارش</button>
                             </td>
                         </tr>
                         <tr>
@@ -1194,7 +1296,7 @@
                             <td>۷ عدد</td>
                             <td>۱۰ عدد</td>
                             <td>
-                                <button class="btn btn-primary btn-sm">سفارش</button>
+                                <button type="button" class="btn btn-primary btn-sm">سفارش</button>
                             </td>
                         </tr>
                     </tbody>
@@ -1203,7 +1305,7 @@
         </div>
         
         <!-- Credit View -->
-        <div class="view-container" id="creditView">
+        <div class="view-container" id="creditView" role="tabpanel" aria-labelledby="navCredit" aria-hidden="true" tabindex="-1">
             <div class="stats-grid">
                 <div class="stat-card">
                     <div class="stat-value">۴۵,۶۷۸,۰۰۰</div>
@@ -1229,7 +1331,7 @@
                         <i class="fas fa-users"></i>
                         حساب‌های اعتباری
                     </h2>
-                    <button class="btn btn-primary btn-sm" id="addCustomerBtn">افزودن مشتری</button>
+                    <button type="button" class="btn btn-primary btn-sm" id="addCustomerBtn">افزودن مشتری</button>
                 </div>
                 <ul class="list-group">
                     <li class="list-item">
@@ -1287,7 +1389,7 @@
                             <td>۱,۲۰۰,۰۰۰ تومان</td>
                             <td>۱۰:۳۰</td>
                             <td>
-                                <button class="btn btn-outline btn-sm">مشاهده</button>
+                                <button type="button" class="btn btn-outline btn-sm">مشاهده</button>
                             </td>
                         </tr>
                         <tr>
@@ -1295,7 +1397,7 @@
                             <td>۸۵۰,۰۰۰ تومان</td>
                             <td>۰۹:۱۵</td>
                             <td>
-                                <button class="btn btn-outline btn-sm">مشاهده</button>
+                                <button type="button" class="btn btn-outline btn-sm">مشاهده</button>
                             </td>
                         </tr>
                     </tbody>
@@ -1304,7 +1406,7 @@
         </div>
         
         <!-- Reports View -->
-        <div class="view-container" id="reportsView">
+        <div class="view-container" id="reportsView" role="tabpanel" aria-labelledby="navReports" aria-hidden="true" tabindex="-1">
             <div class="card">
                 <div class="card-header">
                     <h2 class="card-title">
@@ -1312,9 +1414,9 @@
                         گزارش فروش
                     </h2>
                     <div style="display: flex; gap: 8px;">
-                        <button class="btn btn-outline btn-sm active" data-period="day">روز</button>
-                        <button class="btn btn-outline btn-sm" data-period="week">هفته</button>
-                        <button class="btn btn-outline btn-sm" data-period="month">ماه</button>
+                        <button type="button" class="btn btn-outline btn-sm active" data-period="day" aria-pressed="true">روز</button>
+                        <button type="button" class="btn btn-outline btn-sm" data-period="week" aria-pressed="false">هفته</button>
+                        <button type="button" class="btn btn-outline btn-sm" data-period="month" aria-pressed="false">ماه</button>
                     </div>
                 </div>
                 
@@ -1380,7 +1482,7 @@
                 </div>
                 
                 <div class="form-group">
-                    <button class="btn btn-primary btn-block" id="exportBtn">
+                    <button type="button" class="btn btn-primary btn-block" id="exportBtn">
                         <i class="fas fa-file-excel"></i>
                         خروجی اکسل
                     </button>
@@ -1390,64 +1492,66 @@
     </div>
     
     <!-- FAB -->
-    <button class="fab pulse" id="fabBtn">
-        <i class="fas fa-plus"></i>
+    <button type="button" class="fab pulse" id="fabBtn" aria-label="نمایش میانبرهای سریع" aria-expanded="false">
+        <i class="fas fa-plus" aria-hidden="true"></i>
     </button>
     
     <!-- Speed Dial -->
     <div class="speed-dial" id="speedDial">
         <div class="speed-dial-item">
             <span class="speed-dial-label">فروش جدید</span>
-            <button class="speed-dial-btn" id="newSaleBtn">
+            <button type="button" class="speed-dial-btn" id="newSaleBtn">
                 <i class="fas fa-shopping-cart"></i>
             </button>
         </div>
         <div class="speed-dial-item">
             <span class="speed-dial-label">افزودن کالا</span>
-            <button class="speed-dial-btn" id="newProductBtn">
+            <button type="button" class="speed-dial-btn" id="newProductBtn">
                 <i class="fas fa-box"></i>
             </button>
         </div>
         <div class="speed-dial-item">
             <span class="speed-dial-label">ثبت هزینه</span>
-            <button class="speed-dial-btn" id="newExpenseBtn">
+            <button type="button" class="speed-dial-btn" id="newExpenseBtn">
                 <i class="fas fa-receipt"></i>
             </button>
         </div>
         <div class="speed-dial-item">
             <span class="speed-dial-label">مشتری جدید</span>
-            <button class="speed-dial-btn" id="newCustomerBtn">
+            <button type="button" class="speed-dial-btn" id="newCustomerBtn">
                 <i class="fas fa-user-plus"></i>
             </button>
         </div>
     </div>
     
     <!-- Bottom Navigation -->
-    <nav class="bottom-nav">
-        <div class="nav-item active" data-view="salesView">
-            <span class="nav-icon"><i class="fas fa-shopping-cart"></i></span>
+    <nav class="bottom-nav" role="tablist" aria-label="نمایش صفحات حسابداری">
+        <button type="button" class="nav-item active" id="navSales" role="tab" data-view="salesView" aria-controls="salesView" aria-pressed="true" aria-selected="true">
+            <span class="nav-icon" aria-hidden="true"><i class="fas fa-shopping-cart"></i></span>
             <span class="nav-label">فروش</span>
-        </div>
-        <div class="nav-item" data-view="inventoryView">
-            <span class="nav-icon"><i class="fas fa-boxes"></i></span>
+        </button>
+        <button type="button" class="nav-item" id="navInventory" role="tab" data-view="inventoryView" aria-controls="inventoryView" aria-pressed="false" aria-selected="false">
+            <span class="nav-icon" aria-hidden="true"><i class="fas fa-boxes"></i></span>
             <span class="nav-label">انبار</span>
-        </div>
-        <div class="nav-item" data-view="creditView">
-            <span class="nav-icon"><i class="fas fa-file-invoice"></i></span>
+        </button>
+        <button type="button" class="nav-item" id="navCredit" role="tab" data-view="creditView" aria-controls="creditView" aria-pressed="false" aria-selected="false">
+            <span class="nav-icon" aria-hidden="true"><i class="fas fa-file-invoice"></i></span>
             <span class="nav-label">حساب‌ها</span>
-        </div>
-        <div class="nav-item" data-view="reportsView">
-            <span class="nav-icon"><i class="fas fa-chart-line"></i></span>
+        </button>
+        <button type="button" class="nav-item" id="navReports" role="tab" data-view="reportsView" aria-controls="reportsView" aria-pressed="false" aria-selected="false">
+            <span class="nav-icon" aria-hidden="true"><i class="fas fa-chart-line"></i></span>
             <span class="nav-label">گزارش‌ها</span>
-        </div>
+        </button>
     </nav>
     
     <!-- New Sale Modal -->
-    <div class="modal" id="newSaleModal">
+    <div class="modal" id="newSaleModal" role="dialog" aria-modal="true" aria-labelledby="newSaleModalTitle" aria-hidden="true" tabindex="-1">
         <div class="modal-content">
             <div class="modal-header">
-                <h3 class="modal-title">فروش جدید</h3>
-                <button class="modal-close"><i class="fas fa-times"></i></button>
+                <h3 class="modal-title" id="newSaleModalTitle">فروش جدید</h3>
+                <button type="button" class="modal-close" aria-label="بستن پنجره">
+                    <i class="fas fa-times" aria-hidden="true"></i>
+                </button>
             </div>
             <div class="modal-body">
                 <div class="form-group">
@@ -1484,19 +1588,19 @@
                 <div class="form-group">
                     <label class="form-label">نوع پرداخت</label>
                     <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px;">
-                        <button class="btn btn-outline payment-method" data-method="cash">
+                        <button type="button" class="btn btn-primary payment-method" data-method="cash" aria-pressed="true">
                             <i class="fas fa-money-bill-wave"></i>
                             نقدی
                         </button>
-                        <button class="btn btn-outline payment-method" data-method="card">
+                        <button type="button" class="btn btn-outline payment-method" data-method="card" aria-pressed="false">
                             <i class="fas fa-credit-card"></i>
                             کارت
                         </button>
-                        <button class="btn btn-outline payment-method" data-method="credit">
+                        <button type="button" class="btn btn-outline payment-method" data-method="credit" aria-pressed="false">
                             <i class="fas fa-user-clock"></i>
                             اعتباری
                         </button>
-                        <button class="btn btn-outline payment-method" data-method="qr">
+                        <button type="button" class="btn btn-outline payment-method" data-method="qr" aria-pressed="false">
                             <i class="fas fa-qrcode"></i>
                             QR
                         </button>
@@ -1513,18 +1617,20 @@
                 </div>
             </div>
             <div class="modal-footer">
-                <button class="btn btn-outline" id="cancelSaleBtn">انصراف</button>
-                <button class="btn btn-primary" id="confirmSaleBtn">ثبت فروش</button>
+                <button type="button" class="btn btn-outline" id="cancelSaleBtn">انصراف</button>
+                <button type="button" class="btn btn-primary" id="confirmSaleBtn">ثبت فروش</button>
             </div>
         </div>
     </div>
     
     <!-- Add Product Modal - Multi-step Form -->
-    <div class="modal" id="addProductModal">
+    <div class="modal" id="addProductModal" role="dialog" aria-modal="true" aria-labelledby="addProductModalTitle" aria-hidden="true" tabindex="-1">
         <div class="modal-content">
             <div class="modal-header">
-                <h3 class="modal-title">افزودن کالای جدید</h3>
-                <button class="modal-close"><i class="fas fa-times"></i></button>
+                <h3 class="modal-title" id="addProductModalTitle">افزودن کالای جدید</h3>
+                <button type="button" class="modal-close" aria-label="بستن پنجره">
+                    <i class="fas fa-times" aria-hidden="true"></i>
+                </button>
             </div>
             <div class="modal-body">
                 <!-- Steps Indicator -->
@@ -1639,20 +1745,22 @@
                 </div>
             </div>
             <div class="modal-footer">
-                <button class="btn btn-outline" id="prevStepBtn" style="display: none;">قبلی</button>
-                <button class="btn btn-primary" id="nextStepBtn">بعدی</button>
-                <button class="btn btn-success" id="saveProductBtn" style="display: none;">ذخیره کالا</button>
-                <button class="btn btn-outline" id="cancelProductBtn">انصراف</button>
+                <button type="button" class="btn btn-outline" id="prevStepBtn" style="display: none;">قبلی</button>
+                <button type="button" class="btn btn-primary" id="nextStepBtn">بعدی</button>
+                <button type="button" class="btn btn-success" id="saveProductBtn" style="display: none;">ذخیره کالا</button>
+                <button type="button" class="btn btn-outline" id="cancelProductBtn">انصراف</button>
             </div>
         </div>
     </div>
     
     <!-- Add Customer Modal - Multi-step Form -->
-    <div class="modal" id="addCustomerModal">
+    <div class="modal" id="addCustomerModal" role="dialog" aria-modal="true" aria-labelledby="addCustomerModalTitle" aria-hidden="true" tabindex="-1">
         <div class="modal-content">
             <div class="modal-header">
-                <h3 class="modal-title">افزودن مشتری جدید</h3>
-                <button class="modal-close"><i class="fas fa-times"></i></button>
+                <h3 class="modal-title" id="addCustomerModalTitle">افزودن مشتری جدید</h3>
+                <button type="button" class="modal-close" aria-label="بستن پنجره">
+                    <i class="fas fa-times" aria-hidden="true"></i>
+                </button>
             </div>
             <div class="modal-body">
                 <!-- Steps Indicator -->
@@ -1737,10 +1845,10 @@
                 </div>
             </div>
             <div class="modal-footer">
-                <button class="btn btn-outline" id="customerPrevStepBtn" style="display: none;">قبلی</button>
-                <button class="btn btn-primary" id="customerNextStepBtn">بعدی</button>
-                <button class="btn btn-success" id="saveCustomerBtn" style="display: none;">ذخیره مشتری</button>
-                <button class="btn btn-outline" id="cancelCustomerBtn">انصراف</button>
+                <button type="button" class="btn btn-outline" id="customerPrevStepBtn" style="display: none;">قبلی</button>
+                <button type="button" class="btn btn-primary" id="customerNextStepBtn">بعدی</button>
+                <button type="button" class="btn btn-success" id="saveCustomerBtn" style="display: none;">ذخیره مشتری</button>
+                <button type="button" class="btn btn-outline" id="cancelCustomerBtn">انصراف</button>
             </div>
         </div>
     </div>
@@ -1754,7 +1862,7 @@
         <p class="empty-state-description">
             برای شروع، روی دکمه + کلیک کرده و فروش جدیدی ثبت کنید
         </p>
-        <button class="btn btn-primary" id="emptyStateNewSaleBtn">
+        <button type="button" class="btn btn-primary" id="emptyStateNewSaleBtn">
             <i class="fas fa-plus"></i>
             فروش جدید
         </button>
@@ -1769,7 +1877,7 @@
         <p class="empty-state-description">
             برای شروع، کالاهای خود را به سیستم اضافه کنید
         </p>
-        <button class="btn btn-primary" id="emptyStateAddProductBtn">
+        <button type="button" class="btn btn-primary" id="emptyStateAddProductBtn">
             <i class="fas fa-plus"></i>
             افزودن کالا
         </button>
@@ -1784,7 +1892,7 @@
         <p class="empty-state-description">
             برای شروع، مشتریان اعتباری خود را به سیستم اضافه کنید
         </p>
-        <button class="btn btn-primary" id="emptyStateAddCustomerBtn">
+        <button type="button" class="btn btn-primary" id="emptyStateAddCustomerBtn">
             <i class="fas fa-plus"></i>
             افزودن مشتری
         </button>
@@ -1802,31 +1910,128 @@
     </div>
     
     <!-- Toast Notification -->
-    <div class="toast" id="toast">
+    <div class="toast" id="toast" role="status" aria-live="polite" aria-atomic="true" aria-hidden="true">
         <div class="toast-message" id="toastMessage">
-            <i class="fas fa-check-circle toast-icon"></i>
-            عملیات با موفقیت انجام شد
+            <i class="fas fa-check-circle toast-icon" aria-hidden="true"></i>
+            <span id="toastText">عملیات با موفقیت انجام شد</span>
         </div>
-        <button class="toast-action" id="toastAction">بازگشت</button>
+        <button type="button" class="toast-action" id="toastAction" hidden>بازگشت</button>
     </div>
     
     <script>
         // DOM Elements
-        const navItems = document.querySelectorAll('.nav-item');
-        const views = document.querySelectorAll('.view-container');
+        const navItems = Array.from(document.querySelectorAll('.nav-item'));
+        const views = Array.from(document.querySelectorAll('.view-container'));
         const fabBtn = document.getElementById('fabBtn');
         const speedDial = document.getElementById('speedDial');
         const newSaleModal = document.getElementById('newSaleModal');
         const addProductModal = document.getElementById('addProductModal');
         const addCustomerModal = document.getElementById('addCustomerModal');
-        const modalCloses = document.querySelectorAll('.modal-close');
+        const modalCloses = Array.from(document.querySelectorAll('.modal-close'));
+        const modals = Array.from(document.querySelectorAll('.modal'));
         const toast = document.getElementById('toast');
+        const toastText = document.getElementById('toastText');
+        const toastActionButton = document.getElementById('toastAction');
         const darkModeToggle = document.getElementById('darkModeToggle');
-        const currentDate = document.getElementById('currentDate');
-        const paymentMethods = document.querySelectorAll('.payment-method');
+        const darkModeIcon = darkModeToggle ? darkModeToggle.querySelector('i') : null;
+        const currentDateText = document.getElementById('currentDateText');
+        const paymentMethods = Array.from(document.querySelectorAll('.payment-method'));
         const customerSelect = document.getElementById('customerSelect');
-        const reportPeriodTabs = document.querySelectorAll('[data-period]');
-        
+        const reportPeriodTabs = Array.from(document.querySelectorAll('[data-period]'));
+        const isRTL = document.documentElement.dir === 'rtl';
+        let toastTimeout;
+        let salesChartInstance = null;
+        let salesReportChartInstance = null;
+
+        function safeLocalStorageGet(key) {
+            try {
+                return window.localStorage.getItem(key);
+            } catch (error) {
+                return null;
+            }
+        }
+
+        function safeLocalStorageSet(key, value) {
+            try {
+                window.localStorage.setItem(key, value);
+            } catch (error) {
+                // Storage might be unavailable (private mode, etc.)
+            }
+        }
+
+        function closeSpeedDial() {
+            if (!speedDial || !fabBtn) return;
+            speedDial.classList.remove('active');
+            fabBtn.classList.remove('active');
+            fabBtn.setAttribute('aria-expanded', 'false');
+        }
+
+        function openModal(modal) {
+            if (!modal) return;
+            if (modal === newSaleModal) {
+                resetSaleModal();
+            }
+            modal.classList.add('active');
+            modal.setAttribute('aria-hidden', 'false');
+            document.body.style.overflow = 'hidden';
+
+            const focusableElement = modal.querySelector('input, select, textarea, button, [tabindex]:not([tabindex="-1"])');
+            if (focusableElement) {
+                focusableElement.focus({ preventScroll: true });
+            } else {
+                modal.focus({ preventScroll: true });
+            }
+        }
+
+        function closeModal(modal) {
+            if (!modal) return;
+            modal.classList.remove('active');
+            modal.setAttribute('aria-hidden', 'true');
+
+            if (modal === newSaleModal) {
+                resetSaleModal();
+            }
+
+            if (!document.querySelector('.modal.active')) {
+                document.body.style.overflow = '';
+            }
+        }
+
+        function closeAllModals() {
+            modals.forEach(closeModal);
+        }
+
+        function hideToast() {
+            if (!toast) return;
+            clearTimeout(toastTimeout);
+            toastTimeout = null;
+            toast.classList.remove('show');
+            toast.setAttribute('aria-hidden', 'true');
+            if (toastActionButton) {
+                toastActionButton.hidden = true;
+                toastActionButton.onclick = null;
+            }
+        }
+
+        function resetSaleModal() {
+            if (customerSelect) {
+                customerSelect.style.display = 'none';
+            }
+
+            paymentMethods.forEach(method => {
+                method.classList.remove('btn-primary');
+                method.classList.add('btn-outline');
+                method.setAttribute('aria-pressed', 'false');
+            });
+
+            const defaultMethod = paymentMethods.find(method => method.dataset.method === 'cash') || paymentMethods[0];
+            if (defaultMethod) {
+                defaultMethod.classList.add('btn-primary');
+                defaultMethod.classList.remove('btn-outline');
+                defaultMethod.setAttribute('aria-pressed', 'true');
+            }
+        }
+
         // Product form elements
         const productSteps = {
             step1: document.getElementById('step1'),
@@ -1911,178 +2116,287 @@
         
         // Set current date (Shamsi)
         function setCurrentDate() {
-            const date = new Date();
-            const shamsiDate = '۱۴۰۲/۰۵/۱۵'; // Placeholder
-            currentDate.textContent = shamsiDate;
+            if (!currentDateText) return;
+
+            try {
+                const formatter = new Intl.DateTimeFormat('fa-IR-u-ca-persian', {
+                    year: 'numeric',
+                    month: '2-digit',
+                    day: '2-digit'
+                });
+                currentDateText.textContent = formatter.format(new Date());
+            } catch (error) {
+                currentDateText.textContent = new Date().toLocaleDateString('fa-IR');
+            }
         }
         setCurrentDate();
         
         // Navigation
-        function setActiveView(viewId) {
-            // Update active nav item
-            navItems.forEach(nav => nav.classList.remove('active'));
-            document.querySelector(`.nav-item[data-view="${viewId}"]`).classList.add('active');
-            
-            // Update active view
-            views.forEach(view => view.classList.remove('active'));
-            document.getElementById(viewId).classList.add('active');
-            
-            // Initialize charts if reports view
+        function setActiveView(viewId, { focus = false } = {}) {
+            const targetView = document.getElementById(viewId);
+            if (!targetView) return;
+
+            navItems.forEach(nav => {
+                const isActive = nav.dataset.view === viewId;
+                nav.classList.toggle('active', isActive);
+                nav.setAttribute('aria-pressed', isActive ? 'true' : 'false');
+                nav.setAttribute('aria-selected', isActive ? 'true' : 'false');
+
+                if (isActive && focus) {
+                    nav.focus();
+                }
+            });
+
+            views.forEach(view => {
+                const isActive = view.id === viewId;
+                view.classList.toggle('active', isActive);
+                view.setAttribute('aria-hidden', isActive ? 'false' : 'true');
+                view.setAttribute('tabindex', isActive ? '0' : '-1');
+
+                if (isActive) {
+                    view.scrollTop = 0;
+                }
+            });
+
             if (viewId === 'reportsView') {
                 initSalesReportChart();
             }
-            
-            // Check for empty states
+
             checkEmptyStates(viewId);
+            closeSpeedDial();
         }
         
         // Check for empty states
         function checkEmptyStates(viewId) {
             // Hide all empty states first
-            Object.values(emptyStates).forEach(state => state.style.display = 'none');
+            Object.values(emptyStates).forEach(state => {
+                if (state) {
+                    state.style.display = 'none';
+                }
+            });
             
             // Show appropriate empty state if needed
             // In a real app, this would check actual data
             // For demo purposes, we'll simulate empty states
             if (viewId === 'salesView' && document.querySelectorAll('#salesView .list-item').length === 0) {
-                emptyStates.sales.style.display = 'block';
+                emptyStates.sales && (emptyStates.sales.style.display = 'block');
             } else if (viewId === 'inventoryView' && document.querySelectorAll('#productList .product-card').length === 0) {
-                emptyStates.inventory.style.display = 'block';
+                emptyStates.inventory && (emptyStates.inventory.style.display = 'block');
             } else if (viewId === 'creditView' && document.querySelectorAll('#creditView .list-item').length === 0) {
-                emptyStates.credit.style.display = 'block';
+                emptyStates.credit && (emptyStates.credit.style.display = 'block');
             } else if (viewId === 'reportsView' && document.querySelectorAll('#reportsView .list-item').length === 0) {
-                emptyStates.reports.style.display = 'block';
+                emptyStates.reports && (emptyStates.reports.style.display = 'block');
             }
         }
         
         // Nav item click event
-        navItems.forEach(item => {
+        navItems.forEach((item, index) => {
             item.addEventListener('click', () => {
-                const targetView = item.getAttribute('data-view');
-                setActiveView(targetView);
+                const targetView = item.dataset.view;
+                if (targetView) {
+                    setActiveView(targetView);
+                }
+            });
+
+            item.addEventListener('keydown', (event) => {
+                handleNavKeydown(event, index);
             });
         });
+
+        function handleNavKeydown(event, index) {
+            const { key } = event;
+
+            if (key === 'ArrowLeft' || key === 'ArrowRight') {
+                event.preventDefault();
+                const direction = (key === 'ArrowLeft') ? (isRTL ? 1 : -1) : (isRTL ? -1 : 1);
+                const nextIndex = (index + direction + navItems.length) % navItems.length;
+                const nextNav = navItems[nextIndex];
+                if (nextNav && nextNav.dataset.view) {
+                    setActiveView(nextNav.dataset.view, { focus: true });
+                }
+            } else if (key === 'Home') {
+                event.preventDefault();
+                const firstNav = navItems[0];
+                if (firstNav && firstNav.dataset.view) {
+                    setActiveView(firstNav.dataset.view, { focus: true });
+                }
+            } else if (key === 'End') {
+                event.preventDefault();
+                const lastNav = navItems[navItems.length - 1];
+                if (lastNav && lastNav.dataset.view) {
+                    setActiveView(lastNav.dataset.view, { focus: true });
+                }
+            }
+        }
+
+        resetSaleModal();
+        const defaultView = navItems[0]?.dataset.view || 'salesView';
+        setActiveView(defaultView);
         
         // FAB click event
-        fabBtn.addEventListener('click', () => {
-            speedDial.classList.toggle('active');
-            fabBtn.classList.toggle('active');
-        });
+        if (fabBtn && speedDial) {
+            fabBtn.addEventListener('click', () => {
+                const isOpen = speedDial.classList.toggle('active');
+                fabBtn.classList.toggle('active', isOpen);
+                fabBtn.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+            });
+
+            document.addEventListener('click', (event) => {
+                if (!speedDial.contains(event.target) && event.target !== fabBtn && !fabBtn.contains(event.target)) {
+                    closeSpeedDial();
+                }
+            });
+        }
         
         // Speed dial buttons
         document.getElementById('newSaleBtn').addEventListener('click', () => {
-            newSaleModal.classList.add('active');
-            speedDial.classList.remove('active');
-            fabBtn.classList.remove('active');
+            openModal(newSaleModal);
+            closeSpeedDial();
         });
-        
+
         document.getElementById('newProductBtn').addEventListener('click', () => {
-            addProductModal.classList.add('active');
             resetProductForm();
-            speedDial.classList.remove('active');
-            fabBtn.classList.remove('active');
+            openModal(addProductModal);
+            closeSpeedDial();
         });
-        
+
         document.getElementById('newCustomerBtn').addEventListener('click', () => {
-            addCustomerModal.classList.add('active');
             resetCustomerForm();
-            speedDial.classList.remove('active');
-            fabBtn.classList.remove('active');
+            openModal(addCustomerModal);
+            closeSpeedDial();
         });
-        
+
         document.getElementById('newExpenseBtn').addEventListener('click', () => {
             showToast('ثبت هزینه به زودی اضافه می‌شود');
-            speedDial.classList.remove('active');
-            fabBtn.classList.remove('active');
+            closeSpeedDial();
         });
         
         // Modal close
         modalCloses.forEach(closeBtn => {
             closeBtn.addEventListener('click', () => {
-                closeBtn.closest('.modal').classList.remove('active');
+                const modal = closeBtn.closest('.modal');
+                closeModal(modal);
             });
         });
-        
+
         // Close modal when clicking outside
-        document.querySelectorAll('.modal').forEach(modal => {
-            modal.addEventListener('click', (e) => {
-                if (e.target === modal) {
-                    modal.classList.remove('active');
+        modals.forEach(modal => {
+            modal.addEventListener('click', (event) => {
+                if (event.target === modal) {
+                    closeModal(modal);
                 }
             });
         });
         
-        // Dark mode toggle
-        darkModeToggle.addEventListener('click', () => {
-            document.body.classList.toggle('dark-mode');
-            const icon = darkModeToggle.querySelector('i');
-            
-            if (document.body.classList.contains('dark-mode')) {
-                icon.classList.remove('fa-moon');
-                icon.classList.add('fa-sun');
-                localStorage.setItem('darkMode', 'enabled');
-            } else {
-                icon.classList.remove('fa-sun');
-                icon.classList.add('fa-moon');
-                localStorage.setItem('darkMode', 'disabled');
+        const darkModeMedia = window.matchMedia('(prefers-color-scheme: dark)');
+        let storedDarkModePreference = safeLocalStorageGet('darkMode');
+
+        function applyDarkMode(isEnabled, { persist = false } = {}) {
+            document.body.classList.toggle('dark-mode', Boolean(isEnabled));
+
+            if (darkModeToggle) {
+                darkModeToggle.setAttribute('aria-pressed', isEnabled ? 'true' : 'false');
+                darkModeToggle.setAttribute('aria-label', isEnabled ? 'فعال‌سازی حالت روشن' : 'فعال‌سازی حالت تاریک');
             }
-        });
-        
-        // Check for saved dark mode preference
-        if (localStorage.getItem('darkMode') === 'enabled') {
-            document.body.classList.add('dark-mode');
-            const icon = darkModeToggle.querySelector('i');
-            icon.classList.remove('fa-moon');
-            icon.classList.add('fa-sun');
+
+            if (darkModeIcon) {
+                darkModeIcon.classList.toggle('fa-sun', Boolean(isEnabled));
+                darkModeIcon.classList.toggle('fa-moon', !Boolean(isEnabled));
+            }
+
+            if (persist) {
+                safeLocalStorageSet('darkMode', isEnabled ? 'enabled' : 'disabled');
+                storedDarkModePreference = isEnabled ? 'enabled' : 'disabled';
+            }
+        }
+
+        if (darkModeToggle) {
+            darkModeToggle.addEventListener('click', () => {
+                const shouldEnable = !document.body.classList.contains('dark-mode');
+                applyDarkMode(shouldEnable, { persist: true });
+            });
+        }
+
+        if (storedDarkModePreference === 'enabled') {
+            applyDarkMode(true);
+        } else if (storedDarkModePreference === 'disabled') {
+            applyDarkMode(false);
+        } else {
+            applyDarkMode(darkModeMedia.matches);
+        }
+
+        const handleDarkModeChange = (event) => {
+            if (!storedDarkModePreference) {
+                applyDarkMode(event.matches);
+            }
+        };
+
+        if (typeof darkModeMedia.addEventListener === 'function') {
+            darkModeMedia.addEventListener('change', handleDarkModeChange);
+        } else if (typeof darkModeMedia.addListener === 'function') {
+            darkModeMedia.addListener(handleDarkModeChange);
         }
         
         // Payment method selection
         paymentMethods.forEach(method => {
             method.addEventListener('click', () => {
-                paymentMethods.forEach(m => m.classList.remove('btn-primary'));
+                paymentMethods.forEach(m => {
+                    m.classList.remove('btn-primary');
+                    m.classList.add('btn-outline');
+                    m.setAttribute('aria-pressed', 'false');
+                });
+
                 method.classList.add('btn-primary');
-                
-                // Show customer select for credit payments
-                if (method.getAttribute('data-method') === 'credit') {
-                    customerSelect.style.display = 'block';
-                } else {
-                    customerSelect.style.display = 'none';
+                method.classList.remove('btn-outline');
+                method.setAttribute('aria-pressed', 'true');
+
+                const selectedMethod = method.getAttribute('data-method');
+                if (customerSelect) {
+                    customerSelect.style.display = selectedMethod === 'credit' ? 'block' : 'none';
                 }
             });
         });
         
         // Show toast notification
         function showToast(message, actionText = null, actionCallback = null) {
-            const toastMessage = document.getElementById('toastMessage');
-            const toastAction = document.getElementById('toastAction');
-            
-            toastMessage.innerHTML = `<i class="fas fa-check-circle toast-icon"></i> ${message}`;
-            
-            if (actionText) {
-                toastAction.textContent = actionText;
-                toastAction.style.display = 'block';
-                
-                toastAction.onclick = () => {
-                    if (actionCallback) actionCallback();
-                    toast.classList.remove('show');
-                };
-            } else {
-                toastAction.style.display = 'none';
-            }
-            
+            if (!toast || !toastText) return;
+
+            toastText.textContent = message;
+            toast.setAttribute('aria-hidden', 'false');
             toast.classList.add('show');
-            
-            setTimeout(() => {
-                toast.classList.remove('show');
-            }, 3000);
+
+            if (toastActionButton) {
+                if (actionText) {
+                    toastActionButton.textContent = actionText;
+                    toastActionButton.hidden = false;
+                    toastActionButton.onclick = () => {
+                        if (typeof actionCallback === 'function') {
+                            actionCallback();
+                        }
+                        hideToast();
+                    };
+                } else {
+                    toastActionButton.hidden = true;
+                    toastActionButton.onclick = null;
+                }
+            }
+
+            clearTimeout(toastTimeout);
+            toastTimeout = window.setTimeout(() => {
+                hideToast();
+            }, 3200);
         }
         
         // Initialize Sales Chart
         function initSalesChart() {
             const ctx = document.getElementById('salesChart');
             if (!ctx) return;
-            
-            new Chart(ctx, {
+
+            if (salesChartInstance) {
+                salesChartInstance.destroy();
+            }
+
+            salesChartInstance = new Chart(ctx, {
                 type: 'line',
                 data: {
                     labels: ['شنبه', 'یکشنبه', 'دوشنبه', 'سه‌شنبه', 'چهارشنبه', 'پنج‌شنبه', 'جمعه'],
@@ -2125,8 +2439,12 @@
         function initSalesReportChart() {
             const ctx = document.getElementById('salesReportChart');
             if (!ctx) return;
-            
-            new Chart(ctx, {
+
+            if (salesReportChartInstance) {
+                salesReportChartInstance.destroy();
+            }
+
+            salesReportChartInstance = new Chart(ctx, {
                 type: 'bar',
                 data: {
                     labels: ['فروردین', 'اردیبهشت', 'خرداد', 'تیر', 'مرداد', 'شهریور'],
@@ -2163,9 +2481,13 @@
         // Report period tabs
         reportPeriodTabs.forEach(tab => {
             tab.addEventListener('click', () => {
-                reportPeriodTabs.forEach(t => t.classList.remove('active'));
+                reportPeriodTabs.forEach(t => {
+                    t.classList.remove('active');
+                    t.setAttribute('aria-pressed', 'false');
+                });
                 tab.classList.add('active');
-                
+                tab.setAttribute('aria-pressed', 'true');
+
                 // Update chart based on selected period
                 const period = tab.getAttribute('data-period');
                 showToast(`نمایش گزارش ${period === 'day' ? 'روزانه' : period === 'week' ? 'هفتگی' : 'ماهانه'}`);
@@ -2178,13 +2500,13 @@
         });
         
         document.getElementById('addProductBtn').addEventListener('click', () => {
-            addProductModal.classList.add('active');
             resetProductForm();
+            openModal(addProductModal);
         });
-        
+
         document.getElementById('addCustomerBtn').addEventListener('click', () => {
-            addCustomerModal.classList.add('active');
             resetCustomerForm();
+            openModal(addCustomerModal);
         });
         
         document.getElementById('exportBtn').addEventListener('click', () => {
@@ -2195,11 +2517,11 @@
         });
         
         document.getElementById('cancelSaleBtn').addEventListener('click', () => {
-            newSaleModal.classList.remove('active');
+            closeModal(newSaleModal);
         });
-        
+
         document.getElementById('confirmSaleBtn').addEventListener('click', () => {
-            newSaleModal.classList.remove('active');
+            closeModal(newSaleModal);
             showToast('فاکتور فروش با موفقیت ثبت شد');
         });
         
@@ -2360,12 +2682,12 @@
         
         productFormButtons.save.addEventListener('click', () => {
             // In a real app, this would save the product to the database
-            addProductModal.classList.remove('active');
+            closeModal(addProductModal);
             showToast('کالای جدید با موفقیت اضافه شد');
         });
-        
+
         productFormButtons.cancel.addEventListener('click', () => {
-            addProductModal.classList.remove('active');
+            closeModal(addProductModal);
         });
         
         // Customer form functions
@@ -2487,12 +2809,12 @@
         
         customerFormButtons.save.addEventListener('click', () => {
             // In a real app, this would save the customer to the database
-            addCustomerModal.classList.remove('active');
+            closeModal(addCustomerModal);
             showToast('مشتری جدید با موفقیت اضافه شد');
         });
-        
+
         customerFormButtons.cancel.addEventListener('click', () => {
-            addCustomerModal.classList.remove('active');
+            closeModal(addCustomerModal);
         });
         
         // Product search
@@ -2523,19 +2845,33 @@
         
         // Empty state buttons
         document.getElementById('emptyStateNewSaleBtn').addEventListener('click', () => {
-            newSaleModal.classList.add('active');
+            openModal(newSaleModal);
         });
-        
+
         document.getElementById('emptyStateAddProductBtn').addEventListener('click', () => {
-            addProductModal.classList.add('active');
             resetProductForm();
+            openModal(addProductModal);
         });
-        
+
         document.getElementById('emptyStateAddCustomerBtn').addEventListener('click', () => {
-            addCustomerModal.classList.add('active');
             resetCustomerForm();
+            openModal(addCustomerModal);
         });
-        
+
+        document.addEventListener('keydown', (event) => {
+            if (event.key === 'Escape') {
+                if (speedDial && speedDial.classList.contains('active')) {
+                    closeSpeedDial();
+                }
+
+                if (document.querySelector('.modal.active')) {
+                    closeAllModals();
+                }
+
+                hideToast();
+            }
+        });
+
         // Initialize app
         document.addEventListener('DOMContentLoaded', () => {
             // Initialize sales chart
