@@ -4,6 +4,7 @@
   const SELLER_API = '/api/auth/getCurrentSeller';
   const DASHBOARD_URL = '../seller/dashboard.html';
   const LOGIN_URL = '../seller/login.html';
+  const THEME_KEY = 'accountant-preferred-theme';
 
   const paymentMethodLabels = {
     cash: 'نقدی',
@@ -87,7 +88,10 @@
     toolbar: document.querySelector('.bottom-toolbar'),
     toolbarButtons: document.querySelectorAll('.bottom-toolbar__button'),
     newEntrySection: document.getElementById('newEntrySection'),
-    reportsSection: document.getElementById('reportsSection')
+    reportsSection: document.getElementById('reportsSection'),
+    quickActionsSection: document.getElementById('quickActionsSection'),
+    advisorSection: document.getElementById('advisorSection'),
+    themeToggle: document.getElementById('themeToggle')
   };
 
   const formatCurrency = (value) => {
@@ -146,6 +150,60 @@
     if (!elements.formMessage) return;
     elements.formMessage.textContent = '';
     elements.formMessage.classList.remove('error', 'success');
+  };
+
+  const applyTheme = (theme = 'light') => {
+    const nextTheme = theme === 'dark' ? 'dark' : 'light';
+    document.documentElement.setAttribute('data-theme', nextTheme);
+
+    if (elements.themeToggle) {
+      const isLight = nextTheme === 'light';
+      elements.themeToggle.setAttribute('aria-pressed', String(isLight));
+      elements.themeToggle.classList.toggle('is-light', isLight);
+
+      const icon = elements.themeToggle.querySelector('i');
+      const label = elements.themeToggle.querySelector('.theme-toggle__label');
+      if (icon) {
+        icon.className = isLight ? 'ri-sun-line' : 'ri-moon-clear-line';
+      }
+      if (label) {
+        label.textContent = isLight ? 'حالت روشن' : 'حالت تیره';
+      }
+    }
+  };
+
+  const storeThemePreference = (theme) => {
+    try {
+      localStorage.setItem(THEME_KEY, theme);
+    } catch (error) {
+      /* noop */
+    }
+  };
+
+  const hasStoredThemePreference = () => {
+    try {
+      const stored = localStorage.getItem(THEME_KEY);
+      return stored === 'light' || stored === 'dark';
+    } catch (error) {
+      return false;
+    }
+  };
+
+  const resolveInitialTheme = () => {
+    try {
+      const stored = localStorage.getItem(THEME_KEY);
+      if (stored === 'light' || stored === 'dark') {
+        return stored;
+      }
+    } catch (error) {
+      /* ignore */
+    }
+
+    if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+      return 'dark';
+    }
+
+    return 'light';
   };
 
   const fetchCurrentSeller = async () => {
@@ -591,6 +649,34 @@
   };
 
   document.addEventListener('DOMContentLoaded', async () => {
+    let explicitTheme = hasStoredThemePreference();
+    let activeTheme = resolveInitialTheme();
+    applyTheme(activeTheme);
+
+    if (elements.themeToggle) {
+      elements.themeToggle.addEventListener('click', () => {
+        activeTheme = activeTheme === 'light' ? 'dark' : 'light';
+        explicitTheme = true;
+        applyTheme(activeTheme);
+        storeThemePreference(activeTheme);
+      });
+    }
+
+    if (window.matchMedia) {
+      const darkQuery = window.matchMedia('(prefers-color-scheme: dark)');
+      const handleSystemThemeChange = (event) => {
+        if (explicitTheme) return;
+        activeTheme = event.matches ? 'dark' : 'light';
+        applyTheme(activeTheme);
+      };
+
+      if (typeof darkQuery.addEventListener === 'function') {
+        darkQuery.addEventListener('change', handleSystemThemeChange);
+      } else if (typeof darkQuery.addListener === 'function') {
+        darkQuery.addListener(handleSystemThemeChange);
+      }
+    }
+
     if (!ensureAccessFlag()) {
       window.location.replace(DASHBOARD_URL);
       return;
@@ -611,12 +697,17 @@
         button.addEventListener('click', () => {
           const { action } = button.dataset;
           switch (action) {
-            case 'back':
-              handleBackNavigation();
-              break;
             case 'add':
               scrollToSection(elements.newEntrySection);
               setActiveToolbar('add');
+              break;
+            case 'shortcuts':
+              scrollToSection(elements.quickActionsSection);
+              setActiveToolbar('shortcuts');
+              break;
+            case 'advisor':
+              scrollToSection(elements.advisorSection);
+              setActiveToolbar('advisor');
               break;
             case 'filters':
               scrollToSection(elements.filtersSection);
@@ -639,6 +730,10 @@
               if (!entry.isIntersecting) return;
               if (entry.target.id === 'reportsSection') {
                 setActiveToolbar('report');
+              } else if (entry.target.id === 'advisorSection') {
+                setActiveToolbar('advisor');
+              } else if (entry.target.id === 'quickActionsSection') {
+                setActiveToolbar('shortcuts');
               } else if (entry.target.id === 'filtersSection') {
                 setActiveToolbar('filters');
               } else if (entry.target.id === 'newEntrySection') {
@@ -654,9 +749,46 @@
 
         if (elements.newEntrySection) observer.observe(elements.newEntrySection);
         if (elements.filtersSection) observer.observe(elements.filtersSection);
+        if (elements.quickActionsSection) observer.observe(elements.quickActionsSection);
+        if (elements.advisorSection) observer.observe(elements.advisorSection);
         if (elements.reportsSection) observer.observe(elements.reportsSection);
       }
     }
+
+    const featureActionHandlers = {
+      'open-profit': () => {
+        scrollToSection(elements.reportsSection);
+        setActiveToolbar('report');
+        showFormMessage('برای تحلیل سود و زیان از گزارش تراکنش‌ها و جمع مبالغ استفاده کنید.', 'info');
+      },
+      'sync-inventory': () => {
+        scrollToSection(elements.quickActionsSection);
+        setActiveToolbar('shortcuts');
+        showFormMessage('جهت همگام‌سازی با انبار، لیست تراکنش‌های خرید را به‌روزرسانی و گزارش موجودی را صادر کنید.', 'info');
+      },
+      'create-reminder': () => {
+        scrollToSection(elements.newEntrySection);
+        setActiveToolbar('add');
+        showFormMessage('برای یادآور سررسید، تراکنش را با وضعیت "در انتظار پرداخت" و تاریخ سررسید دقیق ثبت کنید.', 'info');
+      },
+      'segment-customers': () => {
+        scrollToSection(elements.advisorSection);
+        setActiveToolbar('advisor');
+        showFormMessage('گزارش مشتریان وفادار بر اساس تراکنش‌های دوره‌ای به‌صورت خودکار دسته‌بندی می‌شود.', 'info');
+      }
+    };
+
+    document.querySelectorAll('.feature-action').forEach((button) => {
+      button.addEventListener('click', () => {
+        const { action } = button.dataset;
+        const handler = featureActionHandlers[action];
+        if (typeof handler === 'function') {
+          handler();
+        } else {
+          showFormMessage('این قابلیت به زودی در دسترس قرار می‌گیرد.', 'info');
+        }
+      });
+    });
 
     window.addEventListener('keydown', (event) => {
       if (event.key === 'Escape') {
