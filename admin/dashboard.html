@@ -231,6 +231,94 @@
             gap: 16px;
         }
 
+        .form-section {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .inline-field-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+
+        .inline-field-group .form-field {
+            flex: 1 1 200px;
+        }
+
+        .pricing-period-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            gap: 12px;
+        }
+
+        .inline-input {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            padding: 12px;
+            border: 1px solid rgba(112, 128, 176, 0.14);
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.95);
+        }
+
+        .inline-input-label {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-muted);
+        }
+
+        .pricing-summary-card {
+            border: 1px dashed rgba(61, 115, 255, 0.3);
+            border-radius: 14px;
+            padding: 16px;
+            background: rgba(61, 115, 255, 0.06);
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .pricing-summary-card strong {
+            font-size: 15px;
+        }
+
+        .pricing-summary-card ul {
+            margin: 0;
+            padding-inline-start: 18px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .pricing-summary-card li {
+            font-size: 13px;
+            color: var(--text-muted);
+            line-height: 1.8;
+        }
+
+        .summary-value {
+            display: block;
+            color: var(--text-strong);
+            font-weight: 700;
+        }
+
+        .summary-highlight {
+            padding: 10px 12px;
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.78);
+            color: var(--primary);
+            font-size: 13px;
+            line-height: 1.7;
+        }
+
+        .checkbox-field label {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+        }
+
         .form-field {
             display: flex;
             flex-direction: column;
@@ -877,6 +965,107 @@
                             <button type="submit" class="action-link">
                                 <i class="ri-save-3-line"></i>
                                 ذخیره پلن
+                            </button>
+                        </div>
+                    </form>
+
+                    <form class="form-card" id="servicePricingControlForm" autocomplete="off">
+                        <div>
+                            <h3>تنظیم قیمت‌های پلن فروشگاه‌های خدماتی</h3>
+                            <p class="section-subtitle">کنترل متمرکز قیمت‌گذاری برای انواع بازه‌های زمانی و امکانات ویژه</p>
+                        </div>
+
+                        <div class="form-section">
+                            <div class="form-field">
+                                <label for="pricingSegment">بازه اعمال قیمت</label>
+                                <select id="pricingSegment" name="segment" class="form-control">
+                                    <option value="all">همه فروشگاه‌های خدماتی</option>
+                                    <option value="premium">فروشگاه‌های خدماتی ممتاز</option>
+                                    <option value="newcomers">فروشگاه‌های تازه‌پیوسته</option>
+                                    <option value="manual">انتخاب دستی توسط مدیر</option>
+                                </select>
+                                <span class="form-helper">با انتخاب هر گروه، قیمت‌ها برای همان دسته اعمال می‌شوند.</span>
+                            </div>
+
+                            <div class="form-field">
+                                <label>ساختار قیمت اشتراک (تومان)</label>
+                                <div class="pricing-period-grid">
+                                    <div class="inline-input">
+                                        <label for="pricingMonthly" class="inline-input-label">اشتراک ۱ ماهه</label>
+                                        <input type="number" id="pricingMonthly" class="form-control" data-duration="monthly" min="0" step="1000" value="850000" required>
+                                    </div>
+                                    <div class="inline-input">
+                                        <label for="pricingQuarterly" class="inline-input-label">اشتراک ۳ ماهه</label>
+                                        <input type="number" id="pricingQuarterly" class="form-control" data-duration="quarterly" min="0" step="1000" value="2400000">
+                                    </div>
+                                    <div class="inline-input">
+                                        <label for="pricingBiannual" class="inline-input-label">اشتراک ۶ ماهه</label>
+                                        <input type="number" id="pricingBiannual" class="form-control" data-duration="biannual" min="0" step="1000" value="4200000">
+                                    </div>
+                                    <div class="inline-input">
+                                        <label for="pricingAnnual" class="inline-input-label">اشتراک ۱۲ ماهه</label>
+                                        <input type="number" id="pricingAnnual" class="form-control" data-duration="annual" min="0" step="1000" value="7800000">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="inline-field-group">
+                                <div class="form-field">
+                                    <label for="pricingExtraFee">قیمت امکانات ویژه (تومان)</label>
+                                    <input type="number" id="pricingExtraFee" min="0" step="1000" value="95000" class="form-control" placeholder="مثلاً 95000">
+                                    <span class="form-helper">برای بسته‌های ویژه مانند «ویترین‌پلاس» یا افزونه‌های اختصاصی.</span>
+                                </div>
+                                <div class="form-field">
+                                    <label for="pricingDiscount">درصد تخفیف کمپین</label>
+                                    <input type="number" id="pricingDiscount" min="0" max="100" step="1" value="10" class="form-control" placeholder="مثلاً 10">
+                                    <span class="form-helper">در صورت صفر بودن، قیمت بدون تخفیف محاسبه می‌شود.</span>
+                                </div>
+                            </div>
+
+                            <div class="inline-field-group">
+                                <div class="form-field">
+                                    <label for="pricingEffectiveDate">تاریخ شروع اعمال</label>
+                                    <input type="date" id="pricingEffectiveDate" class="form-control">
+                                </div>
+                                <div class="form-field">
+                                    <label for="pricingAutoRenew">سیاست تمدید خودکار</label>
+                                    <select id="pricingAutoRenew" class="form-control">
+                                        <option value="standard" selected>تمدید خودکار با اطلاع‌رسانی ۷ روزه</option>
+                                        <option value="manual">تمدید دستی توسط مدیر</option>
+                                        <option value="seller-opt-in">تمدید با تایید فروشنده</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="form-field checkbox-field">
+                                <label for="pricingAffectsNew">
+                                    <input type="checkbox" id="pricingAffectsNew" checked>
+                                    اعمال خودکار برای فروشگاه‌های جدید و پلن‌های تازه ایجاد شده
+                                </label>
+                            </div>
+
+                            <div class="form-field">
+                                <label for="pricingNotes">یادداشت مدیریتی</label>
+                                <textarea id="pricingNotes" rows="3" class="form-control" placeholder="توضیحات تکمیلی برای تیم مالی یا حسابداری"></textarea>
+                            </div>
+                        </div>
+
+                        <div class="pricing-summary-card" aria-live="polite">
+                            <strong>پیش‌نمایش قیمت‌های نهایی</strong>
+                            <ul id="servicePricingPreview"></ul>
+                            <div class="summary-highlight" id="servicePricingHighlight"></div>
+                        </div>
+
+                        <p class="form-status" id="servicePricingStatus" aria-live="polite"></p>
+
+                        <div class="form-actions">
+                            <button type="button" class="action-link secondary" id="servicePricingReset">
+                                <i class="ri-refresh-line"></i>
+                                بازنشانی تنظیمات
+                            </button>
+                            <button type="submit" class="action-link">
+                                <i class="ri-money-dollar-circle-line"></i>
+                                اعمال قیمت‌ها
                             </button>
                         </div>
                     </form>
@@ -1753,6 +1942,169 @@
 
             resetPlanFormUI();
             refreshData(true);
+        })();
+
+        (() => {
+            const pricingForm = document.getElementById('servicePricingControlForm');
+            if (!pricingForm) {
+                return;
+            }
+
+            const previewList = document.getElementById('servicePricingPreview');
+            const highlight = document.getElementById('servicePricingHighlight');
+            const pricingStatus = document.getElementById('servicePricingStatus');
+            const resetBtn = document.getElementById('servicePricingReset');
+            const priceInputs = Array.from(pricingForm.querySelectorAll('input[data-duration]'));
+            const extraFeeInput = document.getElementById('pricingExtraFee');
+            const discountInput = document.getElementById('pricingDiscount');
+            const segmentSelect = document.getElementById('pricingSegment');
+            const effectiveDateInput = document.getElementById('pricingEffectiveDate');
+            const autoRenewSelect = document.getElementById('pricingAutoRenew');
+            const affectsNewInput = document.getElementById('pricingAffectsNew');
+            const notesInput = document.getElementById('pricingNotes');
+
+            const autoRenewMap = {
+                standard: 'تمدید خودکار با اطلاع‌رسانی ۷ روزه',
+                manual: 'تمدید توسط مدیر',
+                'seller-opt-in': 'تمدید با تایید فروشنده'
+            };
+
+            const durationLabels = {
+                monthly: 'اشتراک ۱ ماهه',
+                quarterly: 'اشتراک ۳ ماهه',
+                biannual: 'اشتراک ۶ ماهه',
+                annual: 'اشتراک ۱۲ ماهه'
+            };
+
+            const faNumber = (value) => new Intl.NumberFormat('fa-IR', { maximumFractionDigits: 0 }).format(value);
+            const formatDate = (value) => {
+                if (!value) return '';
+                try {
+                    return new Intl.DateTimeFormat('fa-IR', { dateStyle: 'medium' }).format(new Date(value));
+                } catch (error) {
+                    return value;
+                }
+            };
+
+            const clearStatus = () => {
+                pricingStatus.textContent = '';
+                pricingStatus.className = 'form-status';
+            };
+
+            const setStatus = (message, type = '') => {
+                pricingStatus.textContent = message;
+                pricingStatus.className = `form-status${type ? ` ${type}` : ''}`;
+            };
+
+            const buildPreview = () => {
+                const discount = discountInput?.value ? Number(discountInput.value) : 0;
+                const extraFee = extraFeeInput?.value ? Number(extraFeeInput.value) : 0;
+
+                const items = priceInputs.map((input) => {
+                    const label = durationLabels[input.dataset.duration] || input.placeholder || 'پلن';
+                    const baseValue = input.value ? Number(input.value) : null;
+                    if (baseValue == null || Number.isNaN(baseValue)) {
+                        return `<li>${label}<span class="summary-value">قیمت تعیین نشده</span></li>`;
+                    }
+
+                    const adjusted = Math.max(
+                        Math.round((baseValue + extraFee) * (1 - (discount > 0 ? discount : 0) / 100)),
+                        0
+                    );
+                    const baseText = faNumber(baseValue);
+                    const adjustedText = faNumber(adjusted);
+
+                    return `
+                        <li>
+                            ${label}
+                            <span class="summary-value">${adjustedText} تومان</span>
+                            <span class="subtle-text">قیمت پایه: ${baseText} تومان</span>
+                        </li>
+                    `;
+                });
+
+                previewList.innerHTML = items.join('') || '<li class="subtle-text">برای مشاهده پیش‌نمایش، حداقل یکی از قیمت‌ها را وارد کنید.</li>';
+
+                const segmentText = segmentSelect?.options[segmentSelect.selectedIndex]?.textContent || '';
+                const startText = effectiveDateInput?.value ? formatDate(effectiveDateInput.value) : 'از همین لحظه';
+                const renewalText = autoRenewMap[autoRenewSelect?.value] || 'سیاست تمدید مشخص نشده است';
+                const autoApplyText = affectsNewInput?.checked
+                    ? 'قیمت‌ها به‌صورت خودکار برای فروشگاه‌های جدید اعمال می‌شوند.'
+                    : 'اعمال خودکار برای فروشگاه‌های جدید غیرفعال است.';
+                const discountText = discount
+                    ? `تخفیف کمپین ${faNumber(discount)}٪`
+                    : 'بدون تخفیف کمپین';
+                const extraFeeText = extraFee
+                    ? `امکانات ویژه: +${faNumber(extraFee)} تومان`
+                    : 'امکانات ویژه غیرفعال است';
+
+                highlight.textContent = `${segmentText} | آغاز ${startText} | ${renewalText}. ${discountText}، ${extraFeeText}. ${autoApplyText}`;
+            };
+
+            priceInputs.forEach((input) => {
+                input.addEventListener('input', buildPreview);
+            });
+
+            [extraFeeInput, discountInput].forEach((input) => {
+                input?.addEventListener('input', buildPreview);
+            });
+
+            [segmentSelect, autoRenewSelect].forEach((select) => {
+                select?.addEventListener('change', buildPreview);
+            });
+
+            effectiveDateInput?.addEventListener('change', buildPreview);
+            affectsNewInput?.addEventListener('change', buildPreview);
+
+            pricingForm.addEventListener('submit', (event) => {
+                event.preventDefault();
+                clearStatus();
+
+                const prices = {};
+                let hasPrice = false;
+
+                priceInputs.forEach((input) => {
+                    if (input.value) {
+                        const numericValue = Number(input.value);
+                        if (Number.isNaN(numericValue) || numericValue < 0) {
+                            return;
+                        }
+                        prices[input.dataset.duration] = numericValue;
+                        hasPrice = true;
+                    }
+                });
+
+                if (!hasPrice) {
+                    setStatus('حداقل قیمت یکی از پلن‌ها باید تعیین شود.', 'error');
+                    return;
+                }
+
+                const payload = {
+                    segment: segmentSelect?.value || 'all',
+                    prices,
+                    extraFee: extraFeeInput?.value ? Number(extraFeeInput.value) : 0,
+                    discount: discountInput?.value ? Number(discountInput.value) : 0,
+                    effectiveDate: effectiveDateInput?.value || null,
+                    autoRenewPolicy: autoRenewSelect?.value || 'standard',
+                    autoApplyForNew: Boolean(affectsNewInput?.checked),
+                    notes: notesInput?.value.trim() || null
+                };
+
+                setStatus('در حال اعمال تنظیمات قیمت‌گذاری...', '');
+
+                setTimeout(() => {
+                    console.table(payload);
+                    setStatus('قیمت‌ها با موفقیت به‌روزرسانی شدند و به فروشگاه‌های مرتبط اعلام گردید.', 'success');
+                }, 400);
+            });
+
+            resetBtn?.addEventListener('click', () => {
+                pricingForm.reset();
+                clearStatus();
+                buildPreview();
+            });
+
+            buildPreview();
         })();
     </script>
 </body>

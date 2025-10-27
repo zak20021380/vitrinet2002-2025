@@ -156,6 +156,258 @@
         هر تغییری روی پلن رایگان، پیام اطلاع‌رسانی واضحی در پنل فروشنده نمایش می‌دهد.
       </p>
     </section>
+
+    <section class="service-plan-management" id="service-plan-management">
+      <div class="plan-management-header">
+        <div>
+          <h3>مدیریت پلن‌های فروشگاه‌های خدماتی</h3>
+          <p>تعریف پلن‌ها، مدیریت قیمت‌گذاری و اختصاص به فروشندگان از همین بخش انجام می‌شود.</p>
+        </div>
+        <button type="button" class="action-link secondary" id="refreshPlanData">
+          <i class="ri-refresh-line" aria-hidden="true"></i>
+          بروزرسانی داده‌ها
+        </button>
+      </div>
+
+      <div class="plan-management-grid">
+        <div class="plan-management-column">
+          <div>
+            <h4>پلن‌های فعال</h4>
+            <p class="section-subtitle">فهرست پلن‌های آماده برای مغازه‌های خدماتی</p>
+          </div>
+          <div class="table-wrap">
+            <table aria-describedby="service-plan-table-caption" class="plan-table">
+              <caption id="service-plan-table-caption" class="visually-hidden">جدول پلن‌های خدماتی</caption>
+              <thead>
+                <tr>
+                  <th scope="col">عنوان پلن</th>
+                  <th scope="col">قیمت / مدت</th>
+                  <th scope="col">وضعیت</th>
+                  <th scope="col">اقدامات</th>
+                </tr>
+              </thead>
+              <tbody id="servicePlanTableBody">
+                <tr><td colspan="4" class="table-empty">در حال بارگذاری...</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <form class="form-card" id="servicePlanForm" autocomplete="off">
+            <div>
+              <h4 id="planFormTitle">ایجاد پلن جدید</h4>
+              <p class="section-subtitle">با تکمیل فرم زیر می‌توانید پلن جدیدی برای فروشگاه‌های خدماتی تعریف کنید.</p>
+            </div>
+            <div class="form-field">
+              <label for="planTitle">عنوان پلن</label>
+              <input type="text" id="planTitle" name="title" class="form-control" required placeholder="مثال: پلن حرفه‌ای">
+            </div>
+            <div class="form-field">
+              <label for="planSlug">اسلاگ پلن</label>
+              <input type="text" id="planSlug" name="slug" class="form-control" required placeholder="مثال: premium-service">
+              <span class="form-helper">از حروف لاتین و خط تیره استفاده کنید.</span>
+            </div>
+            <div class="inline-field-group">
+              <div class="form-field">
+                <label for="planPrice">قیمت پایه (تومان)</label>
+                <input type="number" id="planPrice" name="price" class="form-control" min="0" step="1000" required>
+              </div>
+              <div class="form-field">
+                <label for="planDuration">مدت پلن (روز)</label>
+                <input type="number" id="planDuration" name="durationDays" class="form-control" min="0" step="1" value="30">
+              </div>
+            </div>
+            <div class="form-field">
+              <label for="planDescription">توضیحات</label>
+              <textarea id="planDescription" name="description" rows="3" placeholder="توضیحات تکمیلی پلن"></textarea>
+            </div>
+            <div class="form-field">
+              <label for="planFeatures">ویژگی‌ها</label>
+              <textarea id="planFeatures" name="features" rows="3" placeholder="هر ویژگی را در یک خط بنویسید"></textarea>
+            </div>
+            <div class="form-field checkbox-field">
+              <label for="planIsActive">
+                <input type="checkbox" id="planIsActive" name="isActive" checked>
+                پلن فعال باشد
+              </label>
+            </div>
+            <p class="form-status" id="planFormStatus" aria-live="polite"></p>
+            <div class="form-actions">
+              <button type="button" class="action-link secondary" id="planFormReset">
+                <i class="ri-arrow-go-back-line" aria-hidden="true"></i>
+                انصراف از ویرایش
+              </button>
+              <button type="submit" class="action-link">
+                <i class="ri-save-3-line" aria-hidden="true"></i>
+                ذخیره پلن
+              </button>
+            </div>
+          </form>
+
+          <form class="form-card" id="servicePricingControlForm" autocomplete="off">
+            <div>
+              <h4>تنظیم قیمت پلن‌های خدماتی</h4>
+              <p class="section-subtitle">قیمت‌گذاری متمرکز برای بازه‌های زمانی مختلف و امکانات ویژه</p>
+            </div>
+
+            <div class="form-section">
+              <div class="form-field">
+                <label for="pricingSegment">بازه اعمال قیمت</label>
+                <select id="pricingSegment" name="segment" class="form-control">
+                  <option value="all">همه فروشگاه‌های خدماتی</option>
+                  <option value="premium">فروشگاه‌های ممتاز</option>
+                  <option value="newcomers">فروشگاه‌های تازه‌پیوسته</option>
+                  <option value="manual">انتخاب دستی توسط مدیر</option>
+                </select>
+                <span class="form-helper">قیمت‌ها فقط برای گروه انتخاب‌شده اعمال می‌شود.</span>
+              </div>
+
+              <div class="form-field">
+                <label>ساختار قیمت اشتراک (تومان)</label>
+                <div class="pricing-period-grid">
+                  <div class="inline-input">
+                    <label for="pricingMonthly" class="inline-input-label">اشتراک ۱ ماهه</label>
+                    <input type="number" id="pricingMonthly" class="form-control" data-duration="monthly" min="0" step="1000" value="850000" required>
+                  </div>
+                  <div class="inline-input">
+                    <label for="pricingQuarterly" class="inline-input-label">اشتراک ۳ ماهه</label>
+                    <input type="number" id="pricingQuarterly" class="form-control" data-duration="quarterly" min="0" step="1000" value="2400000">
+                  </div>
+                  <div class="inline-input">
+                    <label for="pricingBiannual" class="inline-input-label">اشتراک ۶ ماهه</label>
+                    <input type="number" id="pricingBiannual" class="form-control" data-duration="biannual" min="0" step="1000" value="4200000">
+                  </div>
+                  <div class="inline-input">
+                    <label for="pricingAnnual" class="inline-input-label">اشتراک ۱۲ ماهه</label>
+                    <input type="number" id="pricingAnnual" class="form-control" data-duration="annual" min="0" step="1000" value="7800000">
+                  </div>
+                </div>
+              </div>
+
+              <div class="inline-field-group">
+                <div class="form-field">
+                  <label for="pricingExtraFee">امکانات ویژه (تومان)</label>
+                  <input type="number" id="pricingExtraFee" min="0" step="1000" value="95000" class="form-control" placeholder="مثلاً 95000">
+                  <span class="form-helper">برای بسته‌های ویژه مانند افزونه‌های اختصاصی.</span>
+                </div>
+                <div class="form-field">
+                  <label for="pricingDiscount">درصد تخفیف کمپین</label>
+                  <input type="number" id="pricingDiscount" min="0" max="100" step="1" value="10" class="form-control" placeholder="مثلاً 10">
+                  <span class="form-helper">در صورت صفر بودن، قیمت بدون تخفیف محاسبه می‌شود.</span>
+                </div>
+              </div>
+
+              <div class="inline-field-group">
+                <div class="form-field">
+                  <label for="pricingEffectiveDate">تاریخ شروع اعمال</label>
+                  <input type="date" id="pricingEffectiveDate" class="form-control">
+                </div>
+                <div class="form-field">
+                  <label for="pricingAutoRenew">سیاست تمدید خودکار</label>
+                  <select id="pricingAutoRenew" class="form-control">
+                    <option value="standard" selected>تمدید خودکار با اطلاع‌رسانی ۷ روزه</option>
+                    <option value="manual">تمدید دستی توسط مدیر</option>
+                    <option value="seller-opt-in">تمدید با تایید فروشنده</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="form-field checkbox-field">
+                <label for="pricingAffectsNew">
+                  <input type="checkbox" id="pricingAffectsNew" checked>
+                  اعمال خودکار برای فروشگاه‌های جدید
+                </label>
+              </div>
+
+              <div class="form-field">
+                <label for="pricingNotes">یادداشت مدیریتی</label>
+                <textarea id="pricingNotes" rows="3" class="form-control" placeholder="توضیحات برای تیم مالی یا حسابداری"></textarea>
+              </div>
+            </div>
+
+            <div class="pricing-summary-card" aria-live="polite">
+              <strong>پیش‌نمایش قیمت‌های نهایی</strong>
+              <ul id="servicePricingPreview"></ul>
+              <div class="summary-highlight" id="servicePricingHighlight"></div>
+            </div>
+
+            <p class="form-status" id="servicePricingStatus" aria-live="polite"></p>
+
+            <div class="form-actions">
+              <button type="button" class="action-link secondary" id="servicePricingReset">
+                <i class="ri-refresh-line" aria-hidden="true"></i>
+                بازنشانی تنظیمات
+              </button>
+              <button type="submit" class="action-link">
+                <i class="ri-money-dollar-circle-line" aria-hidden="true"></i>
+                اعمال قیمت‌ها
+              </button>
+            </div>
+          </form>
+        </div>
+
+        <div class="plan-management-column">
+          <div>
+            <h4>اختصاص پلن به فروشنده</h4>
+            <p class="section-subtitle">پلن انتخابی را با قیمت سفارشی برای فروشنده ثبت کنید.</p>
+          </div>
+          <form class="form-card" id="planAssignmentForm" autocomplete="off">
+            <div class="form-field">
+              <label for="sellerPhone">شماره تلفن فروشنده</label>
+              <input type="tel" id="sellerPhone" name="phone" class="form-control" required placeholder="مثال: 09120000000">
+              <span class="form-helper">شماره مالک مغازه خدماتی را وارد کنید. جستجو به‌صورت خودکار انجام می‌شود.</span>
+            </div>
+            <div class="form-field">
+              <label for="assignmentPlanSelect">انتخاب پلن</label>
+              <select id="assignmentPlanSelect" name="planId" required>
+                <option value="" disabled selected>ابتدا پلن را انتخاب کنید</option>
+              </select>
+            </div>
+            <div class="form-field">
+              <label for="customPrice">قیمت اختصاصی (تومان)</label>
+              <input type="number" id="customPrice" name="customPrice" class="form-control" min="0" step="1000" placeholder="در صورت خالی، قیمت پایه پلن ثبت می‌شود">
+            </div>
+            <div class="form-field">
+              <label for="assignmentDuration">مدت سفارشی (روز)</label>
+              <input type="number" id="assignmentDuration" name="durationDays" class="form-control" min="0" step="1" placeholder="در صورت خالی، مدت پیش‌فرض پلن اعمال می‌شود">
+            </div>
+            <div class="form-field">
+              <label for="assignmentStart">تاریخ شروع</label>
+              <input type="date" id="assignmentStart" name="startDate" class="form-control">
+            </div>
+            <div class="form-field">
+              <label for="assignmentNotes">یادداشت مدیریتی</label>
+              <textarea id="assignmentNotes" name="notes" rows="3" placeholder="توضیحات برای تیم پشتیبانی یا فروشنده"></textarea>
+            </div>
+            <p class="form-status" id="assignmentFormStatus" aria-live="polite"></p>
+            <div class="form-actions">
+              <button type="submit" class="action-link">
+                <i class="ri-shield-check-line" aria-hidden="true"></i>
+                ثبت پلن اختصاصی
+              </button>
+            </div>
+          </form>
+
+          <div class="table-wrap">
+            <table aria-describedby="plan-assignment-table-caption" class="assignment-table">
+              <caption id="plan-assignment-table-caption" class="visually-hidden">جدول پلن‌های اختصاص داده شده</caption>
+              <thead>
+                <tr>
+                  <th scope="col">فروشنده</th>
+                  <th scope="col">پلن</th>
+                  <th scope="col">قیمت نهایی</th>
+                  <th scope="col">وضعیت</th>
+                  <th scope="col">اقدامات</th>
+                </tr>
+              </thead>
+              <tbody id="planAssignmentTableBody">
+                <tr><td colspan="5" class="table-empty">در حال بارگذاری پلن‌های اختصاصی...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+
     <div class="service-shops-embed" id="service-shops-embed">
       <div class="service-shops-embed__loading" id="service-shops-embed-loading">
         <i class="ri-loader-4-line" aria-hidden="true"></i>

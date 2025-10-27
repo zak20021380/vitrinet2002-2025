@@ -1234,6 +1234,16 @@ function initCategoryManager() {
 
 const numberFormatter = new Intl.NumberFormat('fa-IR');
 const persianDateFormatter = new Intl.DateTimeFormat('fa-IR', { month: 'numeric', day: 'numeric' });
+const persianFullDateFormatter = new Intl.DateTimeFormat('fa-IR', { dateStyle: 'medium' });
+
+function formatPersianDate(value) {
+  if (!value) return '—';
+  try {
+    return persianFullDateFormatter.format(new Date(value));
+  } catch (err) {
+    return '—';
+  }
+}
 
 let dashboardSummary = {
   visitsToday: 0,
@@ -3515,6 +3525,636 @@ const serviceShopsQuickFilters = serviceShopsPanelEl ? Array.from(serviceShopsPa
 const serviceShopsAdvancedToggle = serviceShopsPanelEl ? serviceShopsPanelEl.querySelector('#service-shops-advanced-toggle') : null;
 const serviceShopsAdvancedWrapper = serviceShopsPanelEl ? serviceShopsPanelEl.querySelector('#service-shops-advanced') : null;
 
+const servicePlanManagementSection = serviceShopsPanelEl ? serviceShopsPanelEl.querySelector('#service-plan-management') : null;
+let servicePlanManagerInitialised = false;
+
+function initServicePlanManagement() {
+  if (servicePlanManagerInitialised || !servicePlanManagementSection) {
+    return;
+  }
+
+  const SERVICE_PLAN_API_BASE = `${ADMIN_API_BASE}/service-plans`;
+  const planTableBody = servicePlanManagementSection.querySelector('#servicePlanTableBody');
+  const planForm = servicePlanManagementSection.querySelector('#servicePlanForm');
+  const planFormStatus = servicePlanManagementSection.querySelector('#planFormStatus');
+  const planFormTitle = servicePlanManagementSection.querySelector('#planFormTitle');
+  const planResetBtn = servicePlanManagementSection.querySelector('#planFormReset');
+  const planTitleInput = servicePlanManagementSection.querySelector('#planTitle');
+  const planSlugInput = servicePlanManagementSection.querySelector('#planSlug');
+  const planPriceInput = servicePlanManagementSection.querySelector('#planPrice');
+  const planDurationInput = servicePlanManagementSection.querySelector('#planDuration');
+  const planDescriptionInput = servicePlanManagementSection.querySelector('#planDescription');
+  const planFeaturesInput = servicePlanManagementSection.querySelector('#planFeatures');
+  const planIsActiveInput = servicePlanManagementSection.querySelector('#planIsActive');
+  const planSubmitBtn = planForm?.querySelector('button[type="submit"]');
+
+  const assignmentForm = servicePlanManagementSection.querySelector('#planAssignmentForm');
+  const assignmentStatus = servicePlanManagementSection.querySelector('#assignmentFormStatus');
+  const sellerPhoneInput = servicePlanManagementSection.querySelector('#sellerPhone');
+  const assignmentPlanSelect = servicePlanManagementSection.querySelector('#assignmentPlanSelect');
+  const assignmentPriceInput = servicePlanManagementSection.querySelector('#customPrice');
+  const assignmentDurationInput = servicePlanManagementSection.querySelector('#assignmentDuration');
+  const assignmentStartInput = servicePlanManagementSection.querySelector('#assignmentStart');
+  const assignmentNotesInput = servicePlanManagementSection.querySelector('#assignmentNotes');
+  const assignmentTableBody = servicePlanManagementSection.querySelector('#planAssignmentTableBody');
+  const refreshBtn = servicePlanManagementSection.querySelector('#refreshPlanData');
+
+  if (!planTableBody || !planForm || !assignmentForm || !assignmentTableBody) {
+    return;
+  }
+
+  servicePlanManagerInitialised = true;
+
+  const state = {
+    plans: [],
+    assignments: [],
+    editingPlanId: null,
+    loading: false
+  };
+
+  const formatFaNumber = (value) => formatNumber(value ?? 0);
+
+  const clearStatus = (element) => {
+    if (!element) return;
+    element.textContent = '';
+    element.classList.remove('error', 'success');
+  };
+
+  const setStatus = (element, message, type = '') => {
+    if (!element) return;
+    element.textContent = message || '';
+    element.classList.remove('error', 'success');
+    if (type) {
+      element.classList.add(type);
+    }
+  };
+
+  const resetPlanFormUI = () => {
+    state.editingPlanId = null;
+    planForm.reset();
+    if (planIsActiveInput) {
+      planIsActiveInput.checked = true;
+    }
+    planFormTitle.textContent = 'ایجاد پلن جدید';
+    if (planSubmitBtn) {
+      planSubmitBtn.innerHTML = '<i class="ri-save-3-line"></i> ذخیره پلن';
+    }
+    if (planResetBtn) {
+      planResetBtn.disabled = true;
+      planResetBtn.style.visibility = 'hidden';
+    }
+    clearStatus(planFormStatus);
+  };
+
+  const applyPlanFormValues = (plan) => {
+    state.editingPlanId = plan?.id != null ? String(plan.id) : null;
+    planTitleInput.value = plan?.title || '';
+    planSlugInput.value = plan?.slug || '';
+    planPriceInput.value = plan?.price != null ? Number(plan.price) : '';
+    planDurationInput.value = plan?.durationDays != null ? Number(plan.durationDays) : '';
+    planDescriptionInput.value = plan?.description || '';
+    planFeaturesInput.value = Array.isArray(plan?.features) ? plan.features.join('\n') : '';
+    if (planIsActiveInput) {
+      planIsActiveInput.checked = plan?.isActive !== false;
+    }
+    planFormTitle.textContent = plan?.title ? `ویرایش پلن «${plan.title}»` : 'ایجاد پلن جدید';
+    if (planSubmitBtn) {
+      planSubmitBtn.innerHTML = plan?.id
+        ? '<i class="ri-save-3-line"></i> بروزرسانی پلن'
+        : '<i class="ri-save-3-line"></i> ذخیره پلن';
+    }
+    if (planResetBtn) {
+      planResetBtn.disabled = !plan?.id;
+      planResetBtn.style.visibility = plan?.id ? 'visible' : 'hidden';
+    }
+    clearStatus(planFormStatus);
+  };
+
+  const renderPlanTable = () => {
+    if (!planTableBody) return;
+    if (!state.plans.length) {
+      planTableBody.innerHTML = '<tr><td colspan="4" class="table-empty">هنوز پلنی ثبت نشده است.</td></tr>';
+      return;
+    }
+
+    planTableBody.innerHTML = state.plans.map((plan) => {
+      const durationText = plan?.durationDays ? `${formatFaNumber(plan.durationDays)} روز` : 'بدون محدودیت';
+      const featuresText = Array.isArray(plan?.features) && plan.features.length
+        ? `<div class="subtle-text">ویژگی‌ها: ${plan.features.map((item) => escapeHtml(String(item || ''))).join('، ')}</div>`
+        : '';
+      const descriptionText = plan?.description
+        ? `<div class="subtle-text">${escapeHtml(plan.description)}</div>`
+        : '';
+      const statusClass = plan?.isActive === false ? 'status-pill expired' : 'status-pill active';
+      const statusLabel = plan?.isActive === false ? 'غیرفعال' : 'فعال';
+      const planIdAttr = escapeHtml(plan?.id != null ? String(plan.id) : '');
+      return `
+        <tr>
+          <td>
+            <strong>${escapeHtml(plan?.title || '')}</strong>
+            <div class="subtle-text">اسلاگ: ${escapeHtml(plan?.slug || '')}</div>
+            ${descriptionText}
+            ${featuresText}
+          </td>
+          <td>
+            <div>${formatFaNumber(plan?.price)} تومان</div>
+            <div class="subtle-text">مدت: ${durationText}</div>
+          </td>
+          <td>
+            <span class="${statusClass}">${statusLabel}</span>
+          </td>
+          <td>
+            <div class="inline-actions">
+              <button type="button" class="link-button" data-action="edit-plan" data-plan-id="${planIdAttr}">
+                <i class="ri-edit-line"></i>
+                ویرایش
+              </button>
+              <button type="button" class="link-button danger" data-action="delete-plan" data-plan-id="${planIdAttr}">
+                <i class="ri-delete-bin-line"></i>
+                حذف
+              </button>
+            </div>
+          </td>
+        </tr>
+      `;
+    }).join('');
+  };
+
+  const renderAssignmentTable = () => {
+    if (!assignmentTableBody) return;
+    if (!state.assignments.length) {
+      assignmentTableBody.innerHTML = '<tr><td colspan="5" class="table-empty">تاکنون پلنی به فروشنده‌ای اختصاص داده نشده است.</td></tr>';
+      return;
+    }
+
+    assignmentTableBody.innerHTML = state.assignments.map((assignment) => {
+      const shop = assignment?.serviceShop || {};
+      const plan = assignment?.plan || {};
+      const finalPrice = assignment?.customPrice != null ? assignment.customPrice : assignment?.basePrice;
+      const baseText = assignment?.customPrice != null
+        ? `<div class="subtle-text">قیمت پایه: ${formatFaNumber(assignment.basePrice)} تومان</div>`
+        : '<div class="subtle-text">قیمت پایه اعمال شده است</div>';
+      const statusKey = assignment?.status === 'scheduled' || assignment?.status === 'expired'
+        ? assignment.status
+        : 'active';
+      const statusLabel = statusKey === 'scheduled'
+        ? 'در انتظار شروع'
+        : statusKey === 'expired'
+          ? 'منقضی شده'
+          : 'فعال';
+      const durationText = assignment?.durationDays
+        ? `${formatFaNumber(assignment.durationDays)} روز`
+        : 'بدون محدودیت زمانی';
+      const assignmentIdAttr = escapeHtml(assignment?.id != null ? String(assignment.id) : '');
+      const phoneText = shop?.ownerPhone || assignment?.assignedPhone || '';
+      const cityText = shop?.city ? `<div class="subtle-text">شهر: ${escapeHtml(shop.city)}</div>` : '';
+      return `
+        <tr>
+          <td>
+            <strong>${escapeHtml(shop?.name || 'بدون نام')}</strong>
+            <div class="subtle-text">${phoneText ? escapeHtml(phoneText) : '—'}</div>
+            ${cityText}
+          </td>
+          <td>
+            <strong>${escapeHtml(plan?.title || 'پلن ناشناخته')}</strong>
+            <div class="subtle-text">مدت: ${durationText}</div>
+            <div class="subtle-text">شروع: ${formatPersianDate(assignment?.startDate)} - پایان: ${formatPersianDate(assignment?.endDate)}</div>
+          </td>
+          <td>
+            <div>${formatFaNumber(finalPrice)} تومان</div>
+            ${baseText}
+          </td>
+          <td>
+            <span class="status-pill ${statusKey}">${statusLabel}</span>
+          </td>
+          <td>
+            <div class="inline-actions">
+              <button type="button" class="link-button danger" data-action="delete-assignment" data-assignment-id="${assignmentIdAttr}">
+                <i class="ri-close-circle-line"></i>
+                لغو پلن
+              </button>
+            </div>
+          </td>
+        </tr>
+      `;
+    }).join('');
+  };
+
+  const populatePlanSelect = () => {
+    if (!assignmentPlanSelect) return;
+    const currentValue = assignmentPlanSelect.value;
+    assignmentPlanSelect.innerHTML = '<option value="" disabled selected>ابتدا پلن را انتخاب کنید</option>';
+    state.plans.forEach((plan) => {
+      const planId = plan?.id != null ? String(plan.id) : '';
+      if (!planId) return;
+      const option = document.createElement('option');
+      option.value = planId;
+      option.textContent = `${plan?.title || 'پلن'} — ${formatFaNumber(plan?.price)} تومان`;
+      assignmentPlanSelect.appendChild(option);
+    });
+    if (currentValue) {
+      assignmentPlanSelect.value = currentValue;
+    }
+  };
+
+  const fetchPlans = async () => {
+    const response = await fetch(SERVICE_PLAN_API_BASE, { credentials: 'include' });
+    if (!response.ok) {
+      throw new Error('SERVICE_PLAN_LIST_FAILED');
+    }
+    let data = {};
+    try {
+      data = await response.json();
+    } catch (err) {
+      data = {};
+    }
+    const plans = Array.isArray(data?.plans)
+      ? data.plans
+      : Array.isArray(data?.items)
+        ? data.items
+        : Array.isArray(data)
+          ? data
+          : [];
+    state.plans = plans;
+    renderPlanTable();
+    populatePlanSelect();
+  };
+
+  const fetchAssignments = async () => {
+    const response = await fetch(`${SERVICE_PLAN_API_BASE}/assignments`, { credentials: 'include' });
+    if (!response.ok) {
+      throw new Error('SERVICE_PLAN_ASSIGNMENTS_FAILED');
+    }
+    let data = {};
+    try {
+      data = await response.json();
+    } catch (err) {
+      data = {};
+    }
+    const assignments = Array.isArray(data?.assignments)
+      ? data.assignments
+      : Array.isArray(data?.items)
+        ? data.items
+        : Array.isArray(data)
+          ? data
+          : [];
+    state.assignments = assignments;
+    renderAssignmentTable();
+  };
+
+  const refreshData = async (silent = false) => {
+    if (state.loading) return;
+    state.loading = true;
+    refreshBtn?.classList.add('is-loading');
+    try {
+      await Promise.all([fetchPlans(), fetchAssignments()]);
+      if (!silent) {
+        setStatus(planFormStatus, 'اطلاعات با موفقیت بروزرسانی شد.', 'success');
+      }
+    } catch (error) {
+      console.error('Service plan refresh failed', error);
+      setStatus(planFormStatus, 'امکان دریافت اطلاعات وجود ندارد. لطفاً دوباره تلاش کنید.', 'error');
+    } finally {
+      state.loading = false;
+      refreshBtn?.classList.remove('is-loading');
+    }
+  };
+
+  planForm.addEventListener('submit', async (event) => {
+    event.preventDefault();
+    clearStatus(planFormStatus);
+
+    const payload = {
+      title: planTitleInput.value.trim(),
+      slug: planSlugInput.value.trim(),
+      price: planPriceInput.value ? Number(planPriceInput.value) : null,
+      durationDays: planDurationInput.value ? Number(planDurationInput.value) : null,
+      description: planDescriptionInput.value.trim(),
+      isActive: planIsActiveInput?.checked !== false,
+      features: planFeaturesInput.value
+        .split('\n')
+        .map((item) => item.trim())
+        .filter(Boolean)
+    };
+
+    if (!payload.title || !payload.slug || payload.price == null) {
+      setStatus(planFormStatus, 'لطفاً فیلدهای الزامی را تکمیل کنید.', 'error');
+      return;
+    }
+
+    try {
+      const url = state.editingPlanId
+        ? `${SERVICE_PLAN_API_BASE}/${encodeURIComponent(state.editingPlanId)}`
+        : SERVICE_PLAN_API_BASE;
+      const response = await fetch(url, {
+        method: state.editingPlanId ? 'PUT' : 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify(payload)
+      });
+
+      if (!response.ok) {
+        let errorBody = null;
+        try {
+          errorBody = await response.json();
+        } catch (err) {
+          errorBody = null;
+        }
+        const message = errorBody?.message || 'خطا در ذخیره پلن';
+        throw new Error(message);
+      }
+
+      resetPlanFormUI();
+      await fetchPlans();
+      setStatus(planFormStatus, 'پلن با موفقیت ذخیره شد.', 'success');
+    } catch (error) {
+      console.error('Save service plan failed', error);
+      setStatus(planFormStatus, error.message || 'ذخیره پلن با خطا مواجه شد.', 'error');
+    }
+  });
+
+  planResetBtn?.addEventListener('click', () => {
+    resetPlanFormUI();
+  });
+
+  planTableBody.addEventListener('click', async (event) => {
+    const editBtn = event.target.closest('button[data-action="edit-plan"]');
+    const deleteBtn = event.target.closest('button[data-action="delete-plan"]');
+
+    if (editBtn) {
+      const planId = editBtn.dataset.planId;
+      if (!planId) return;
+      const plan = state.plans.find((item) => String(item?.id) === planId);
+      if (plan) {
+        applyPlanFormValues(plan);
+        planForm.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    }
+
+    if (deleteBtn) {
+      const planId = deleteBtn.dataset.planId;
+      if (!planId) return;
+      if (!confirm('آیا از حذف این پلن اطمینان دارید؟')) {
+        return;
+      }
+      try {
+        const response = await fetch(`${SERVICE_PLAN_API_BASE}/${encodeURIComponent(planId)}`, {
+          method: 'DELETE',
+          credentials: 'include'
+        });
+        if (!response.ok && response.status !== 204) {
+          throw new Error('DELETE_PLAN_FAILED');
+        }
+        await fetchPlans();
+        if (state.editingPlanId && String(state.editingPlanId) === planId) {
+          resetPlanFormUI();
+        }
+        setStatus(planFormStatus, 'پلن حذف شد.', 'success');
+      } catch (error) {
+        console.error('Delete service plan failed', error);
+        setStatus(planFormStatus, 'حذف پلن با خطا مواجه شد.', 'error');
+      }
+    }
+  });
+
+  assignmentForm.addEventListener('submit', async (event) => {
+    event.preventDefault();
+    clearStatus(assignmentStatus);
+
+    const payload = {
+      phone: sellerPhoneInput.value.trim(),
+      planId: assignmentPlanSelect.value,
+      customPrice: assignmentPriceInput.value ? Number(assignmentPriceInput.value) : undefined,
+      durationDays: assignmentDurationInput.value ? Number(assignmentDurationInput.value) : undefined,
+      startDate: assignmentStartInput.value || undefined,
+      notes: assignmentNotesInput.value.trim()
+    };
+
+    if (!payload.phone || !payload.planId) {
+      setStatus(assignmentStatus, 'شماره تلفن و پلن انتخابی الزامی است.', 'error');
+      return;
+    }
+
+    try {
+      const response = await fetch(`${SERVICE_PLAN_API_BASE}/assignments`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify(payload)
+      });
+
+      if (!response.ok) {
+        let errorBody = null;
+        try {
+          errorBody = await response.json();
+        } catch (err) {
+          errorBody = null;
+        }
+        const message = errorBody?.message || 'خطا در ثبت پلن اختصاصی';
+        throw new Error(message);
+      }
+
+      assignmentForm.reset();
+      setStatus(assignmentStatus, 'پلن اختصاصی با موفقیت ثبت شد.', 'success');
+      await fetchAssignments();
+    } catch (error) {
+      console.error('Plan assignment failed', error);
+      setStatus(assignmentStatus, error.message || 'خطا در ثبت پلن اختصاصی.', 'error');
+    }
+  });
+
+  assignmentTableBody.addEventListener('click', async (event) => {
+    const deleteBtn = event.target.closest('button[data-action="delete-assignment"]');
+    if (!deleteBtn) return;
+    const assignmentId = deleteBtn.dataset.assignmentId;
+    if (!assignmentId) return;
+    if (!confirm('آیا از لغو این پلن اختصاصی اطمینان دارید؟')) {
+      return;
+    }
+    try {
+      const response = await fetch(`${SERVICE_PLAN_API_BASE}/assignments/${encodeURIComponent(assignmentId)}`, {
+        method: 'DELETE',
+        credentials: 'include'
+      });
+      if (!response.ok && response.status !== 204) {
+        throw new Error('DELETE_ASSIGNMENT_FAILED');
+      }
+      await fetchAssignments();
+      setStatus(assignmentStatus, 'پلن اختصاصی حذف شد.', 'success');
+    } catch (error) {
+      console.error('Delete plan assignment failed', error);
+      setStatus(assignmentStatus, 'حذف پلن اختصاصی با مشکل مواجه شد.', 'error');
+    }
+  });
+
+  refreshBtn?.addEventListener('click', () => {
+    refreshData();
+  });
+
+  const setupPricingControls = () => {
+    const pricingForm = servicePlanManagementSection.querySelector('#servicePricingControlForm');
+    if (!pricingForm || pricingForm.dataset.initialised === 'true') {
+      return;
+    }
+
+    pricingForm.dataset.initialised = 'true';
+
+    const previewList = pricingForm.querySelector('#servicePricingPreview');
+    const highlight = pricingForm.querySelector('#servicePricingHighlight');
+    const pricingStatus = pricingForm.querySelector('#servicePricingStatus');
+    const resetBtn = pricingForm.querySelector('#servicePricingReset');
+    const priceInputs = Array.from(pricingForm.querySelectorAll('input[data-duration]'));
+    const extraFeeInput = pricingForm.querySelector('#pricingExtraFee');
+    const discountInput = pricingForm.querySelector('#pricingDiscount');
+    const segmentSelect = pricingForm.querySelector('#pricingSegment');
+    const effectiveDateInput = pricingForm.querySelector('#pricingEffectiveDate');
+    const autoRenewSelect = pricingForm.querySelector('#pricingAutoRenew');
+    const affectsNewInput = pricingForm.querySelector('#pricingAffectsNew');
+    const notesInput = pricingForm.querySelector('#pricingNotes');
+
+    const autoRenewMap = {
+      standard: 'تمدید خودکار با اطلاع‌رسانی ۷ روزه',
+      manual: 'تمدید توسط مدیر',
+      'seller-opt-in': 'تمدید با تایید فروشنده'
+    };
+
+    const durationLabels = {
+      monthly: 'اشتراک ۱ ماهه',
+      quarterly: 'اشتراک ۳ ماهه',
+      biannual: 'اشتراک ۶ ماهه',
+      annual: 'اشتراک ۱۲ ماهه'
+    };
+
+    const clearPricingStatus = () => {
+      if (!pricingStatus) return;
+      pricingStatus.textContent = '';
+      pricingStatus.className = 'form-status';
+    };
+
+    const setPricingStatus = (message, type = '') => {
+      if (!pricingStatus) return;
+      pricingStatus.textContent = message;
+      pricingStatus.className = `form-status${type ? ` ${type}` : ''}`;
+    };
+
+    const buildPreview = () => {
+      const discount = discountInput?.value ? Number(discountInput.value) : 0;
+      const extraFee = extraFeeInput?.value ? Number(extraFeeInput.value) : 0;
+
+      const items = priceInputs.map((input) => {
+        const label = durationLabels[input.dataset.duration] || input.placeholder || 'پلن';
+        const baseValue = input.value ? Number(input.value) : null;
+        if (baseValue == null || Number.isNaN(baseValue)) {
+          return `<li>${label}<span class="summary-value">قیمت تعیین نشده</span></li>`;
+        }
+
+        const adjusted = Math.max(
+          Math.round((baseValue + extraFee) * (1 - (discount > 0 ? discount : 0) / 100)),
+          0
+        );
+        return `
+          <li>
+            ${label}
+            <span class="summary-value">${formatFaNumber(adjusted)} تومان</span>
+            <span class="subtle-text">قیمت پایه: ${formatFaNumber(baseValue)} تومان</span>
+          </li>
+        `;
+      });
+
+      if (previewList) {
+        previewList.innerHTML = items.join('') || '<li class="subtle-text">برای مشاهده پیش‌نمایش، حداقل یکی از قیمت‌ها را وارد کنید.</li>';
+      }
+
+      const segmentText = segmentSelect?.options[segmentSelect.selectedIndex]?.textContent || '';
+      const startText = effectiveDateInput?.value ? formatPersianDate(effectiveDateInput.value) : 'از همین لحظه';
+      const renewalText = autoRenewMap[autoRenewSelect?.value] || 'سیاست تمدید مشخص نشده است';
+      const autoApplyText = affectsNewInput?.checked
+        ? 'قیمت‌ها به‌صورت خودکار برای فروشگاه‌های جدید اعمال می‌شوند.'
+        : 'اعمال خودکار برای فروشگاه‌های جدید غیرفعال است.';
+      const discountText = discount
+        ? `تخفیف کمپین ${formatFaNumber(discount)}٪`
+        : 'بدون تخفیف کمپین';
+      const extraFeeText = extraFee
+        ? `امکانات ویژه: +${formatFaNumber(extraFee)} تومان`
+        : 'امکانات ویژه غیرفعال است';
+
+      if (highlight) {
+        highlight.textContent = `${segmentText} | آغاز ${startText} | ${renewalText}. ${discountText}، ${extraFeeText}. ${autoApplyText}`;
+      }
+    };
+
+    priceInputs.forEach((input) => {
+      input.addEventListener('input', buildPreview);
+    });
+
+    [extraFeeInput, discountInput].forEach((input) => {
+      input?.addEventListener('input', buildPreview);
+    });
+
+    [segmentSelect, autoRenewSelect].forEach((select) => {
+      select?.addEventListener('change', buildPreview);
+    });
+
+    effectiveDateInput?.addEventListener('change', buildPreview);
+    affectsNewInput?.addEventListener('change', buildPreview);
+
+    pricingForm.addEventListener('submit', (event) => {
+      event.preventDefault();
+      clearPricingStatus();
+
+      const prices = {};
+      let hasPrice = false;
+
+      priceInputs.forEach((input) => {
+        if (input.value) {
+          const numericValue = Number(input.value);
+          if (!Number.isNaN(numericValue) && numericValue >= 0) {
+            prices[input.dataset.duration] = numericValue;
+            hasPrice = true;
+          }
+        }
+      });
+
+      if (!hasPrice) {
+        setPricingStatus('حداقل قیمت یکی از پلن‌ها باید تعیین شود.', 'error');
+        return;
+      }
+
+      const payload = {
+        segment: segmentSelect?.value || 'all',
+        prices,
+        extraFee: extraFeeInput?.value ? Number(extraFeeInput.value) : 0,
+        discount: discountInput?.value ? Number(discountInput.value) : 0,
+        effectiveDate: effectiveDateInput?.value || null,
+        autoRenewPolicy: autoRenewSelect?.value || 'standard',
+        autoApplyForNew: Boolean(affectsNewInput?.checked),
+        notes: notesInput?.value.trim() || null
+      };
+
+      setPricingStatus('در حال اعمال تنظیمات قیمت‌گذاری...', '');
+
+      setTimeout(() => {
+        console.table(payload);
+        setPricingStatus('قیمت‌ها با موفقیت به‌روزرسانی شدند و به فروشگاه‌های مرتبط اعلام گردید.', 'success');
+      }, 400);
+    });
+
+    resetBtn?.addEventListener('click', () => {
+      pricingForm.reset();
+      clearPricingStatus();
+      buildPreview();
+    });
+
+    buildPreview();
+  };
+
+  setupPricingControls();
+  resetPlanFormUI();
+  refreshData(true).catch((error) => {
+    console.error('Initial service plan load failed', error);
+  });
+}
+
 let serviceShopsIframeObserver = null;
 let serviceShopsIframeLoaded = false;
 
@@ -4702,6 +5342,7 @@ menuLinks.forEach(link => {
     if (section === 'service-shops') {
       ensureServiceShopsIframeLoaded();
       await ensureServiceShopsLoaded();
+      initServicePlanManagement();
     }
 
     if (section === 'ad-orders') {
