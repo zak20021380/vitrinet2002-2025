@@ -73,6 +73,7 @@ app.use('/api/service-shops', require('./routes/serviceShopPublic'));
 app.use('/api/service-shops', require('./routes/serviceShops'));
 app.use('/api/adOrder', require('./routes/adOrder'));
 app.use('/api/sellerPlans', require('./routes/sellerPlans'));
+app.use('/api/service-plans', require('./routes/servicePlans'));
 app.use('/api/shopping-centers', require('./routes/shoppingCenter'));
 app.use('/api/shop-appearances', require('./routes/shopAppearance'));
 app.use('/api/payment', paymentRoutes);  // روت‌های پرداخت
