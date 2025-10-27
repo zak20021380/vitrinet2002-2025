@@ -883,69 +883,12 @@ async function loadShops() {
 
 window.addEventListener('DOMContentLoaded', loadShops);
 
-
-// اسکرول نرم و Drag برای فروشگاه‌های منتخب شهر
-const shopSlider = document.getElementById('drag-scroll-cards');
-function momentumShop() {
-  if (Math.abs(velocity) > 0.4) {
-    shopSlider.scrollLeft -= velocity;
-    velocity *= 0.93;
-    momentumID = requestAnimationFrame(momentumShop);
-  } else {
-    cancelAnimationFrame(momentumID);
-    velocity = 0;
-  }
-}
-shopSlider.addEventListener('mousedown', (e) => {
-  isDown = true; drag = false;
-  shopSlider.classList.add('grabbing');
-  startX = e.pageX - shopSlider.offsetLeft;
-  lastX = e.pageX;
-  scrollLeft = shopSlider.scrollLeft;
-  velocity = 0;
-  cancelAnimationFrame(momentumID);
-});
-shopSlider.addEventListener('mousemove', (e) => {
-  if (!isDown) return;
-  drag = true;
-  const x = e.pageX - shopSlider.offsetLeft;
-  shopSlider.scrollLeft = scrollLeft - (x - startX);
-  velocity = (e.pageX - lastX);
-  lastX = e.pageX;
-});
-shopSlider.addEventListener('mouseup', () => {
-  isDown = false;
-  shopSlider.classList.remove('grabbing');
-  if (Math.abs(velocity) > 1) momentumShop();
-});
-shopSlider.addEventListener('mouseleave', () => {
-  isDown = false;
-  shopSlider.classList.remove('grabbing');
-  if (Math.abs(velocity) > 1) momentumShop();
-});
-shopSlider.addEventListener('touchstart', (e) => {
-  isDown = true;
-  startX = e.touches[0].pageX - shopSlider.offsetLeft;
-  lastX = e.touches[0].pageX;
-  scrollLeft = shopSlider.scrollLeft;
-  velocity = 0;
-  cancelAnimationFrame(momentumID);
-}, {passive:true});
-shopSlider.addEventListener('touchmove', (e) => {
-  if (!isDown) return;
-  const x = e.touches[0].pageX - shopSlider.offsetLeft;
-  shopSlider.scrollLeft = scrollLeft - (x - startX);
-  velocity = (e.touches[0].pageX - lastX);
-  lastX = e.touches[0].pageX;
-}, {passive:false});
-shopSlider.addEventListener('touchend', () => {
-  isDown = false;
-  if (Math.abs(velocity) > 2) momentumShop();
-}, {passive:true});
-
-
 async function loadMostVisitedStores() {
   const container = document.getElementById('most-visited-shops');
+  if (!container) {
+    console.warn('Most visited stores container not found. Skipping load.');
+    return;
+  }
   container.innerHTML = '<div class="w-full text-center py-8 text-gray-500">در حال بارگذاری...</div>';
   try {
     const res = await fetch('/api/shops/top-visited?city=سنندج&limit=8');
@@ -1211,16 +1154,18 @@ async function loadPopularProducts() {
 
   let customLoaded = false;
   try {
-    const res = await fetch(`/api/home-card-sections/slug/${POPULAR_PRODUCTS_SECTION_SLUG}`);
-    if (res.ok) {
-      const section = await res.json();
-      if (section && Array.isArray(section.cards) && section.cards.length) {
-        customLoaded = renderPopularProductsSection(section);
-      } else if (section && (!section.cards || !section.cards.length)) {
-        customLoaded = renderPopularProductsSection(section);
-      }
-    } else if (res.status !== 404) {
-      throw new Error(`Failed to fetch custom section: ${res.status}`);
+    const res = await fetch('/api/home-card-sections');
+    if (!res.ok) {
+      throw new Error(`Failed to fetch home sections: ${res.status}`);
+    }
+
+    const sections = await res.json();
+    const section = Array.isArray(sections)
+      ? sections.find((item) => item?.slug === POPULAR_PRODUCTS_SECTION_SLUG)
+      : null;
+
+    if (section) {
+      customLoaded = renderPopularProductsSection(section);
     }
   } catch (err) {
     console.warn('Custom section load failed, falling back to products.', err);
@@ -1773,59 +1718,61 @@ centersSlider.addEventListener('touchend', () => {
 
 
 const shoesBagsSlider = document.getElementById('shoes-bags-slider');
-let shoesBagsDown = false, shoesBagsStartX, shoesBagsScrollLeft, shoesBagsLastX, shoesBagsVelocity = 0, shoesBagsMomentumID;
-function shoesBagsMomentum() {
-  if (Math.abs(shoesBagsVelocity) > 0.4) {
-    shoesBagsSlider.scrollLeft -= shoesBagsVelocity;
-    shoesBagsVelocity *= 0.93;
-    shoesBagsMomentumID = requestAnimationFrame(shoesBagsMomentum);
-  } else {
-    cancelAnimationFrame(shoesBagsMomentumID);
-    shoesBagsVelocity = 0;
+if (shoesBagsSlider) {
+  let shoesBagsDown = false, shoesBagsStartX, shoesBagsScrollLeft, shoesBagsLastX, shoesBagsVelocity = 0, shoesBagsMomentumID;
+  function shoesBagsMomentum() {
+    if (Math.abs(shoesBagsVelocity) > 0.4) {
+      shoesBagsSlider.scrollLeft -= shoesBagsVelocity;
+      shoesBagsVelocity *= 0.93;
+      shoesBagsMomentumID = requestAnimationFrame(shoesBagsMomentum);
+    } else {
+      cancelAnimationFrame(shoesBagsMomentumID);
+      shoesBagsVelocity = 0;
+    }
   }
+  shoesBagsSlider.addEventListener('mousedown', (e) => {
+    shoesBagsDown = true;
+    shoesBagsStartX = e.pageX - shoesBagsSlider.offsetLeft;
+    shoesBagsLastX = e.pageX;
+    shoesBagsScrollLeft = shoesBagsSlider.scrollLeft;
+    shoesBagsVelocity = 0;
+    cancelAnimationFrame(shoesBagsMomentumID);
+  });
+  shoesBagsSlider.addEventListener('mousemove', (e) => {
+    if (!shoesBagsDown) return;
+    const x = e.pageX - shoesBagsSlider.offsetLeft;
+    shoesBagsSlider.scrollLeft = shoesBagsScrollLeft - (x - shoesBagsStartX);
+    shoesBagsVelocity = (e.pageX - shoesBagsLastX);
+    shoesBagsLastX = e.pageX;
+  });
+  shoesBagsSlider.addEventListener('mouseup', () => {
+    shoesBagsDown = false;
+    if (Math.abs(shoesBagsVelocity) > 1) shoesBagsMomentum();
+  });
+  shoesBagsSlider.addEventListener('mouseleave', () => {
+    shoesBagsDown = false;
+    if (Math.abs(shoesBagsVelocity) > 1) shoesBagsMomentum();
+  });
+  shoesBagsSlider.addEventListener('touchstart', (e) => {
+    shoesBagsDown = true;
+    shoesBagsStartX = e.touches[0].pageX - shoesBagsSlider.offsetLeft;
+    shoesBagsLastX = e.touches[0].pageX;
+    shoesBagsScrollLeft = shoesBagsSlider.scrollLeft;
+    shoesBagsVelocity = 0;
+    cancelAnimationFrame(shoesBagsMomentumID);
+  }, {passive:true});
+  shoesBagsSlider.addEventListener('touchmove', (e) => {
+    if (!shoesBagsDown) return;
+    const x = e.touches[0].pageX - shoesBagsSlider.offsetLeft;
+    shoesBagsSlider.scrollLeft = shoesBagsScrollLeft - (x - shoesBagsStartX);
+    shoesBagsVelocity = (e.touches[0].pageX - shoesBagsLastX);
+    shoesBagsLastX = e.touches[0].pageX;
+  }, {passive:false});
+  shoesBagsSlider.addEventListener('touchend', () => {
+    shoesBagsDown = false;
+    if (Math.abs(shoesBagsVelocity) > 2) shoesBagsMomentum();
+  }, {passive:true});
 }
-shoesBagsSlider.addEventListener('mousedown', (e) => {
-  shoesBagsDown = true;
-  shoesBagsStartX = e.pageX - shoesBagsSlider.offsetLeft;
-  shoesBagsLastX = e.pageX;
-  shoesBagsScrollLeft = shoesBagsSlider.scrollLeft;
-  shoesBagsVelocity = 0;
-  cancelAnimationFrame(shoesBagsMomentumID);
-});
-shoesBagsSlider.addEventListener('mousemove', (e) => {
-  if (!shoesBagsDown) return;
-  const x = e.pageX - shoesBagsSlider.offsetLeft;
-  shoesBagsSlider.scrollLeft = shoesBagsScrollLeft - (x - shoesBagsStartX);
-  shoesBagsVelocity = (e.pageX - shoesBagsLastX);
-  shoesBagsLastX = e.pageX;
-});
-shoesBagsSlider.addEventListener('mouseup', () => {
-  shoesBagsDown = false;
-  if (Math.abs(shoesBagsVelocity) > 1) shoesBagsMomentum();
-});
-shoesBagsSlider.addEventListener('mouseleave', () => {
-  shoesBagsDown = false;
-  if (Math.abs(shoesBagsVelocity) > 1) shoesBagsMomentum();
-});
-shoesBagsSlider.addEventListener('touchstart', (e) => {
-  shoesBagsDown = true;
-  shoesBagsStartX = e.touches[0].pageX - shoesBagsSlider.offsetLeft;
-  shoesBagsLastX = e.touches[0].pageX;
-  shoesBagsScrollLeft = shoesBagsSlider.scrollLeft;
-  shoesBagsVelocity = 0;
-  cancelAnimationFrame(shoesBagsMomentumID);
-}, {passive:true});
-shoesBagsSlider.addEventListener('touchmove', (e) => {
-  if (!shoesBagsDown) return;
-  const x = e.touches[0].pageX - shoesBagsSlider.offsetLeft;
-  shoesBagsSlider.scrollLeft = shoesBagsScrollLeft - (x - shoesBagsStartX);
-  shoesBagsVelocity = (e.touches[0].pageX - shoesBagsLastX);
-  shoesBagsLastX = e.touches[0].pageX;
-}, {passive:false});
-shoesBagsSlider.addEventListener('touchend', () => {
-  shoesBagsDown = false;
-  if (Math.abs(shoesBagsVelocity) > 2) shoesBagsMomentum();
-}, {passive:true});
 
 
 const slider2 = document.getElementById('popular-products-slider');
