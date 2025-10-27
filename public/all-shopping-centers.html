@@ -163,45 +163,6 @@
       color: #0ea5e9;
     }
 
-    .price-range {
-      display: grid;
-      gap: 12px;
-      padding: 12px 18px;
-      background: linear-gradient(135deg, rgba(224, 253, 250, 0.7), rgba(230, 244, 253, 0.8));
-    }
-
-    .price-range input {
-      width: 100%;
-      border: 1px solid rgba(14, 165, 233, 0.35);
-      border-radius: 12px;
-      padding: 10px 12px;
-      font-size: 0.95rem;
-      background: rgba(255, 255, 255, 0.95);
-      transition: border 0.2s ease, box-shadow 0.2s ease;
-      font-family: inherit;
-    }
-
-    .price-range input:focus {
-      border-color: rgba(16, 185, 129, 0.65);
-      box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.18);
-      outline: none;
-    }
-
-    #applyPriceFilter {
-      background: linear-gradient(90deg, var(--primary-color), #0ea5e9);
-      color: #ffffff;
-      border: none;
-      border-radius: 10px;
-      cursor: pointer;
-      width: 100%;
-      padding: 10px 0;
-      font-weight: 800;
-    }
-
-    #applyPriceFilter:hover {
-      background: var(--primary-dark);
-    }
-
     .active-filters {
       display: none;
       flex-wrap: wrap;
@@ -285,21 +246,26 @@
 
     .mobile-filters {
       width: 100%;
-      max-width: 480px;
+      max-width: 420px;
       background: rgba(255, 255, 255, 0.97);
       overflow-y: auto;
-      max-height: calc(100vh - 24px);
-      padding: 28px 22px 24px;
-      padding-bottom: calc(28px + env(safe-area-inset-bottom));
+      scrollbar-width: none;
+      max-height: calc(100vh - 60px);
+      padding: 22px 18px 20px;
+      padding-bottom: calc(22px + env(safe-area-inset-bottom));
       transform: translateY(110%);
       transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1);
       display: flex;
       flex-direction: column;
-      gap: 20px;
-      border-radius: 28px 28px 20px 20px;
-      box-shadow: 0 -18px 50px rgba(15, 118, 110, 0.22);
+      gap: 18px;
+      border-radius: 24px 24px 18px 18px;
+      box-shadow: 0 -18px 44px rgba(15, 118, 110, 0.2);
       position: relative;
       backdrop-filter: blur(14px);
+    }
+
+    .mobile-filters::-webkit-scrollbar {
+      display: none;
     }
 
     .mobile-filters::before {
@@ -508,55 +474,6 @@
       transform: rotate(180deg);
     }
 
-    .mobile-filter-group .price-range {
-      background: rgba(240, 249, 255, 0.75);
-      border-radius: 14px;
-      padding: 14px;
-      gap: 12px;
-    }
-
-    .mobile-filter-group .price-range label {
-      font-size: 0.8rem;
-      font-weight: 700;
-      color: var(--text-medium);
-    }
-
-    .mobile-filter-group .price-range input {
-      border: 1px solid rgba(14, 165, 233, 0.35);
-      border-radius: 12px;
-      padding: 10px 12px;
-      font-size: 0.95rem;
-      background: rgba(255, 255, 255, 0.95);
-      transition: border 0.2s ease, box-shadow 0.2s ease;
-    }
-
-    .mobile-filter-group .price-range input:focus {
-      border-color: rgba(16, 185, 129, 0.65);
-      box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.18);
-      outline: none;
-    }
-
-    #applyPriceFilterMobile {
-      background: linear-gradient(120deg, rgba(16, 185, 129, 0.18) 0%, rgba(14, 165, 233, 0.4) 100%);
-      border: 1px solid rgba(14, 165, 233, 0.4);
-      color: var(--primary-dark);
-      border-radius: 14px;
-      padding: 10px 18px;
-      font-weight: 800;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      cursor: pointer;
-      transition: transform 0.2s ease, box-shadow 0.2s ease;
-      width: 100%;
-    }
-
-    #applyPriceFilterMobile:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 12px 24px rgba(14, 165, 233, 0.18);
-    }
-
     .mobile-filter-actions {
       display: flex;
       flex-direction: column;
@@ -609,7 +526,6 @@
     .filters-section.mobile .filter-btn:focus-visible,
     .mobile-filter-btn:focus-visible,
     #applyFiltersMobile:focus-visible,
-    #applyPriceFilterMobile:focus-visible,
     .mobile-dropdown .dropdown-item:focus-visible {
       outline: 2px solid rgba(14, 165, 233, 0.55);
       outline-offset: 3px;
@@ -1521,23 +1437,13 @@
       </button>
 
       <div class="dropdown-filter" style="position: relative; display:inline-block;">
-        <button class="filter-btn" id="priceFilterBtn">
-          <i class="fas fa-layer-group"></i>
-          فیلتر تعداد مغازه
+        <button class="filter-btn" id="goodsFilterBtn">
+          <i class="fas fa-tags"></i>
+          دسته‌بندی کالاها
           <i class="fas fa-chevron-down" style="margin-right:7px;font-size:0.95em"></i>
         </button>
-        <div class="dropdown-menu" id="priceFilterMenu" style="display:none; position:absolute; right:0; top:110%; z-index:9; min-width:200px; background:#fff; border-radius:16px; box-shadow:0 8px 24px rgba(16,185,129,0.14); overflow:hidden; border:1.5px solid #0ea5e95b;">
-          <div class="price-range">
-            <label for="minStores">حداقل تعداد مغازه:</label>
-            <input type="number" id="minStores" placeholder="حداقل تعداد" min="0">
-          </div>
-          <div class="price-range">
-            <label for="maxStores">حداکثر تعداد مغازه:</label>
-            <input type="number" id="maxStores" placeholder="حداکثر تعداد" min="0">
-          </div>
-          <button class="filter-btn" id="applyPriceFilter">
-            اعمال فیلتر
-          </button>
+        <div class="dropdown-menu" id="goodsFilterDropdown" style="display:none; position:absolute; right:0; top:110%; z-index:9; min-width:220px; background:#fff; border-radius:16px; box-shadow:0 8px 24px rgba(16,185,129,0.14); overflow:hidden; border:1.5px solid #0ea5e95b;">
+          <!-- گزینه‌های فیلتر دسته‌بندی کالا به‌صورت داینامیک اضافه می‌شود -->
         </div>
       </div>
     </div>
@@ -1625,32 +1531,21 @@
         <section class="mobile-filter-group">
           <div class="mobile-group-header">
             <span class="mobile-group-icon">
-              <i class="fas fa-layer-group"></i>
+              <i class="fas fa-tags"></i>
             </span>
             <div>
-              <h4>بازه تعداد مغازه</h4>
-              <p>حداقل و حداکثر تعداد مغازه را مشخص کنید</p>
+              <h4>دسته‌بندی کالاها</h4>
+              <p>نوع کالا یا خدمت موردنظر را انتخاب کنید</p>
             </div>
           </div>
           <div class="mobile-group-body">
-            <button class="filter-btn" id="priceFilterBtnMobile" aria-expanded="false" type="button">
-              <i class="fas fa-layer-group"></i>
-              <span>فیلتر تعداد مغازه</span>
+            <button class="filter-btn" id="goodsFilterBtnMobile" aria-expanded="false" type="button">
+              <i class="fas fa-tags"></i>
+              <span>همه دسته‌بندی‌ها</span>
               <i class="fas fa-chevron-down"></i>
             </button>
-            <div class="dropdown-menu mobile-dropdown" id="priceFilterMenuMobile" style="display:none;">
-              <div class="price-range">
-                <label for="minStoresMobile">حداقل تعداد مغازه:</label>
-                <input type="number" id="minStoresMobile" placeholder="حداقل تعداد" min="0">
-              </div>
-              <div class="price-range">
-                <label for="maxStoresMobile">حداکثر تعداد مغازه:</label>
-                <input type="number" id="maxStoresMobile" placeholder="حداکثر تعداد" min="0">
-              </div>
-              <button id="applyPriceFilterMobile" type="button">
-                <i class="fas fa-check"></i>
-                اعمال فیلتر تعداد
-              </button>
+            <div class="dropdown-menu mobile-dropdown" id="goodsFilterDropdownMobile" style="display:none;">
+              <!-- گزینه‌های دسته‌بندی کالا موبایل -->
             </div>
           </div>
         </section>
@@ -1729,11 +1624,8 @@
     const shopsDropdown = document.getElementById('shopsDropdown');
     const sortCheapBtn = document.getElementById('sort-cheap');
     const sortExpensiveBtn = document.getElementById('sort-expensive');
-    const priceFilterBtn = document.getElementById('priceFilterBtn');
-    const priceFilterMenu = document.getElementById('priceFilterMenu');
-    const minStoresInput = document.getElementById('minStores');
-    const maxStoresInput = document.getElementById('maxStores');
-    const applyPriceFilterBtn = document.getElementById('applyPriceFilter');
+    const goodsFilterBtn = document.getElementById('goodsFilterBtn');
+    const goodsFilterDropdown = document.getElementById('goodsFilterDropdown');
 
     const mobileFilterBtn = document.getElementById('mobileFilterBtn');
     const mobileFiltersOverlay = document.getElementById('mobileFiltersOverlay');
@@ -1745,40 +1637,51 @@
     const shopsDropdownMobile = document.getElementById('shopsDropdownMobile');
     const sortCheapMobileBtn = document.getElementById('sort-cheap-mobile');
     const sortExpensiveMobileBtn = document.getElementById('sort-expensive-mobile');
-    const priceFilterBtnMobile = document.getElementById('priceFilterBtnMobile');
-    const priceFilterMenuMobile = document.getElementById('priceFilterMenuMobile');
-    const minStoresMobileInput = document.getElementById('minStoresMobile');
-    const maxStoresMobileInput = document.getElementById('maxStoresMobile');
-    const applyPriceFilterMobileBtn = document.getElementById('applyPriceFilterMobile');
+    const goodsFilterBtnMobile = document.getElementById('goodsFilterBtnMobile');
+    const goodsFilterDropdownMobile = document.getElementById('goodsFilterDropdownMobile');
     const applyFiltersMobileBtn = document.getElementById('applyFiltersMobile');
 
     let centersData = [];
     let filteredCenters = [];
-    let categories = [];
+    let centerCategories = [];
+    let goodsCategories = [];
     let locations = [];
 
     let currentCategory = 'همه مراکز خرید';
     let currentLocation = 'همه مناطق';
-    let currentStoresFilter = null;
+    let currentGoodsCategory = 'همه دسته‌بندی‌ها';
     let currentSort = null;
     let searchTerm = '';
 
     showSkeleton();
 
     setTimeout(() => {
-      fetch(API_URL)
-        .then(res => res.json())
-        .then(data => {
-          centersData = (Array.isArray(data) ? data : []).map((center, index) => ({
+      Promise.all([
+        fetch(API_URL)
+          .then(res => {
+            if (!res.ok) throw new Error('centers');
+            return res.json();
+          }),
+        fetch('/api/categories')
+          .then(res => (res.ok ? res.json() : Promise.reject(new Error('categories'))))
+          .catch(err => {
+            console.warn('بارگذاری دسته‌بندی کالاها ناموفق بود:', err);
+            return null;
+          })
+      ])
+        .then(([centersResponse, categoriesPayload]) => {
+          centersData = (Array.isArray(centersResponse) ? centersResponse : []).map((center, index) => ({
             ...center,
             __index: index
           }));
-          categories = buildCategories(centersData);
+          centerCategories = buildCategories(centersData);
+          goodsCategories = buildGoodsCategories(categoriesPayload);
           locations = buildLocations(centersData);
           populateDropdowns();
+          populateGoodsDropdowns();
           updateCategorySelection('همه مراکز خرید', { skipFilter: true });
           updateLocationSelection('همه مناطق', { skipFilter: true });
-          updateStoresFilterLabel();
+          updateGoodsCategorySelection('همه دسته‌بندی‌ها', { skipFilter: true });
           filterAndRender();
         })
         .catch(() => {
@@ -1826,6 +1729,25 @@
       return ['همه مراکز خرید', ...unique];
     }
 
+    function buildGoodsCategories(payload) {
+      if (!payload || typeof payload !== 'object') {
+        return ['همه دسته‌بندی‌ها'];
+      }
+
+      const rawList = Array.isArray(payload.categories) ? payload.categories : [];
+      const mapped = rawList
+        .map(item => {
+          if (!item) return '';
+          if (typeof item === 'string') return item.trim();
+          if (typeof item.name === 'string') return item.name.trim();
+          return '';
+        })
+        .filter(Boolean);
+
+      const unique = Array.from(new Set(mapped));
+      return ['همه دسته‌بندی‌ها', ...unique];
+    }
+
     function buildLocations(data) {
       const locs = data
         .map(item => (item.location || '').trim())
@@ -1841,10 +1763,15 @@
       populateLocationDropdown(shopsDropdownMobile, true);
     }
 
+    function populateGoodsDropdowns() {
+      populateGoodsCategoryDropdown(goodsFilterDropdown, false);
+      populateGoodsCategoryDropdown(goodsFilterDropdownMobile, true);
+    }
+
     function populateCategoryDropdown(container, isMobile) {
       if (!container) return;
       container.innerHTML = '';
-      categories.forEach(category => {
+      centerCategories.forEach(category => {
         const option = document.createElement('button');
         option.type = 'button';
         option.className = 'dropdown-item';
@@ -1867,6 +1794,38 @@
       if (!container.children.length) {
         const empty = document.createElement('div');
         empty.textContent = 'گزینه‌ای موجود نیست';
+        empty.style.padding = '12px 20px';
+        empty.style.color = '#64748b';
+        container.appendChild(empty);
+      }
+    }
+
+    function populateGoodsCategoryDropdown(container, isMobile) {
+      if (!container) return;
+      container.innerHTML = '';
+      goodsCategories.forEach(category => {
+        const option = document.createElement('button');
+        option.type = 'button';
+        option.className = 'dropdown-item';
+        option.dataset.value = category;
+        option.textContent = category;
+        option.addEventListener('click', () => {
+          updateGoodsCategorySelection(category);
+          if (isMobile) {
+            container.style.display = 'none';
+            if (goodsFilterBtnMobile) {
+              goodsFilterBtnMobile.setAttribute('aria-expanded', 'false');
+            }
+          } else {
+            closeDesktopDropdowns();
+          }
+        });
+        container.appendChild(option);
+      });
+
+      if (!container.children.length) {
+        const empty = document.createElement('div');
+        empty.textContent = 'دسته‌بندی‌ای ثبت نشده است';
         empty.style.padding = '12px 20px';
         empty.style.color = '#64748b';
         container.appendChild(empty);
@@ -1911,6 +1870,20 @@
       return Number.isNaN(numeric) ? 0 : numeric;
     }
 
+    function getCenterGoodsCategories(center = {}) {
+      const collected = [];
+      if (Array.isArray(center.categories)) collected.push(...center.categories);
+      if (Array.isArray(center.goodsCategories)) collected.push(...center.goodsCategories);
+      if (Array.isArray(center.shopCategories)) collected.push(...center.shopCategories);
+      if (Array.isArray(center.tags)) collected.push(...center.tags);
+      if (center.category) collected.push(center.category);
+      if (center.tag) collected.push(center.tag);
+
+      return Array.from(new Set(collected
+        .map(value => (typeof value === 'string' ? value.trim() : ''))
+        .filter(Boolean)));
+    }
+
     function getOrderValue(center) {
       if (!center) return 0;
       if (typeof center.order === 'number') return center.order;
@@ -1927,6 +1900,7 @@
 
       const normalizedCategory = (currentCategory || '').toLowerCase();
       const normalizedLocation = (currentLocation || '').toLowerCase();
+      const normalizedGoodsCategory = (currentGoodsCategory || '').toLowerCase();
 
       filteredCenters = centersData.filter(center => {
         const title = (center.title || '').toLowerCase();
@@ -1945,15 +1919,10 @@
           (normalizedLocation === 'نامشخص' && !location) ||
           location.includes(normalizedLocation);
 
-        let storesMatch = true;
-        if (currentStoresFilter) {
-          const stores = getStoresValue(center);
-          const minOk = currentStoresFilter.min == null || stores >= currentStoresFilter.min;
-          const maxOk = currentStoresFilter.max == null || stores <= currentStoresFilter.max;
-          storesMatch = minOk && maxOk;
-        }
+        const goodsMatch = normalizedGoodsCategory === 'همه دسته‌بندی‌ها'.toLowerCase() ||
+          getCenterGoodsCategories(center).some(category => category.toLowerCase() === normalizedGoodsCategory);
 
-        return searchMatch && categoryMatch && locationMatch && storesMatch;
+        return searchMatch && categoryMatch && locationMatch && goodsMatch;
       });
 
       if (currentSort === 'cheap') {
@@ -2034,6 +2003,7 @@
           ${label}
           <i class="fas fa-chevron-down" style="margin-right:7px;font-size:0.95em"></i>
         `;
+        mainFilterBtn.classList.toggle('active', currentCategory !== 'همه مراکز خرید');
       }
       if (mainFilterBtnMobile) {
         mainFilterBtnMobile.innerHTML = `
@@ -2070,39 +2040,31 @@
       }
     }
 
-    function updateStoresFilterLabel() {
-      const hasFilter = currentStoresFilter && (currentStoresFilter.min != null || currentStoresFilter.max != null);
-      const minLabel = currentStoresFilter && currentStoresFilter.min != null
-        ? currentStoresFilter.min.toLocaleString('fa-IR')
-        : 'بدون حداقل';
-      const maxLabel = currentStoresFilter && currentStoresFilter.max != null
-        ? currentStoresFilter.max.toLocaleString('fa-IR')
-        : 'بدون حداکثر';
+    function updateGoodsCategorySelection(category, options = {}) {
+      currentGoodsCategory = category || 'همه دسته‌بندی‌ها';
+      const label = currentGoodsCategory;
 
-      if (priceFilterBtn) {
-        priceFilterBtn.innerHTML = hasFilter
-          ? `<i class="fas fa-layer-group"></i> فیلتر تعداد (${minLabel} - ${maxLabel})<i class="fas fa-chevron-down" style="margin-right:7px;font-size:0.95em"></i>`
-          : `<i class="fas fa-layer-group"></i> فیلتر تعداد مغازه<i class="fas fa-chevron-down" style="margin-right:7px;font-size:0.95em"></i>`;
-        priceFilterBtn.classList.toggle('active', !!hasFilter);
+      if (goodsFilterBtn) {
+        goodsFilterBtn.innerHTML = `
+          <i class="fas fa-tags"></i>
+          ${label}
+          <i class="fas fa-chevron-down" style="margin-right:7px;font-size:0.95em"></i>
+        `;
+        goodsFilterBtn.classList.toggle('active', currentGoodsCategory !== 'همه دسته‌بندی‌ها');
       }
 
-      if (priceFilterBtnMobile) {
-        priceFilterBtnMobile.innerHTML = hasFilter
-          ? `<i class="fas fa-layer-group"></i><span>فیلتر تعداد مغازه (${minLabel} - ${maxLabel})</span><i class="fas fa-chevron-down"></i>`
-          : `<i class="fas fa-layer-group"></i><span>فیلتر تعداد مغازه</span><i class="fas fa-chevron-down"></i>`;
+      if (goodsFilterBtnMobile) {
+        goodsFilterBtnMobile.innerHTML = `
+          <i class="fas fa-tags"></i>
+          <span>${label}</span>
+          <i class="fas fa-chevron-down"></i>
+        `;
+        goodsFilterBtnMobile.classList.toggle('active', currentGoodsCategory !== 'همه دسته‌بندی‌ها');
+        goodsFilterBtnMobile.setAttribute('aria-expanded', 'false');
       }
 
-      if (minStoresInput) {
-        minStoresInput.value = currentStoresFilter && currentStoresFilter.min != null ? currentStoresFilter.min : '';
-      }
-      if (maxStoresInput) {
-        maxStoresInput.value = currentStoresFilter && currentStoresFilter.max != null ? currentStoresFilter.max : '';
-      }
-      if (minStoresMobileInput) {
-        minStoresMobileInput.value = currentStoresFilter && currentStoresFilter.min != null ? currentStoresFilter.min : '';
-      }
-      if (maxStoresMobileInput) {
-        maxStoresMobileInput.value = currentStoresFilter && currentStoresFilter.max != null ? currentStoresFilter.max : '';
+      if (!options.skipFilter) {
+        filterAndRender();
       }
     }
 
@@ -2146,16 +2108,10 @@
         });
       }
 
-      if (currentStoresFilter && (currentStoresFilter.min != null || currentStoresFilter.max != null)) {
-        const minLabel = currentStoresFilter.min != null ? currentStoresFilter.min.toLocaleString('fa-IR') : 'بدون حداقل';
-        const maxLabel = currentStoresFilter.max != null ? currentStoresFilter.max.toLocaleString('fa-IR') : 'بدون حداکثر';
+      if (currentGoodsCategory && currentGoodsCategory !== 'همه دسته‌بندی‌ها') {
         chips.push({
-          label: `تعداد مغازه: ${minLabel} تا ${maxLabel}`,
-          remove: () => {
-            currentStoresFilter = null;
-            updateStoresFilterLabel();
-            filterAndRender();
-          }
+          label: `دسته‌بندی کالا: ${currentGoodsCategory}`,
+          remove: () => updateGoodsCategorySelection('همه دسته‌بندی‌ها')
         });
       }
 
@@ -2196,7 +2152,7 @@
     function closeDesktopDropdowns() {
       if (filterDropdown) filterDropdown.style.display = 'none';
       if (shopsDropdown) shopsDropdown.style.display = 'none';
-      if (priceFilterMenu) priceFilterMenu.style.display = 'none';
+      if (goodsFilterDropdown) goodsFilterDropdown.style.display = 'none';
     }
 
     function closeMobileDropdowns() {
@@ -2208,13 +2164,13 @@
         shopsDropdownMobile.style.display = 'none';
         shopsDropdownMobile.scrollTop = 0;
       }
-      if (priceFilterMenuMobile) {
-        priceFilterMenuMobile.style.display = 'none';
-        priceFilterMenuMobile.scrollTop = 0;
+      if (goodsFilterDropdownMobile) {
+        goodsFilterDropdownMobile.style.display = 'none';
+        goodsFilterDropdownMobile.scrollTop = 0;
       }
       if (mainFilterBtnMobile) mainFilterBtnMobile.setAttribute('aria-expanded', 'false');
       if (shopsBtnMobile) shopsBtnMobile.setAttribute('aria-expanded', 'false');
-      if (priceFilterBtnMobile) priceFilterBtnMobile.setAttribute('aria-expanded', 'false');
+      if (goodsFilterBtnMobile) goodsFilterBtnMobile.setAttribute('aria-expanded', 'false');
     }
 
     function openMobileFilters() {
@@ -2236,26 +2192,6 @@
       if (mobileFilterBtn) mobileFilterBtn.setAttribute('aria-expanded', 'false');
       document.body.style.overflow = '';
       closeMobileDropdowns();
-    }
-
-    function setStoresFilter(minValue, maxValue) {
-      const min = minValue === '' || minValue == null ? null : Number(minValue);
-      const max = maxValue === '' || maxValue == null ? null : Number(maxValue);
-
-      if ((min != null && Number.isNaN(min)) || (max != null && Number.isNaN(max))) {
-        alert('لطفاً فقط عدد وارد کنید.');
-        return false;
-      }
-
-      if (min != null && max != null && min > max) {
-        alert('حداقل تعداد نمی‌تواند از حداکثر بیشتر باشد!');
-        return false;
-      }
-
-      currentStoresFilter = (min == null && max == null) ? null : { min, max };
-      updateStoresFilterLabel();
-      filterAndRender();
-      return true;
     }
 
     if (searchInput) {
@@ -2287,22 +2223,13 @@
       });
     }
 
-    if (priceFilterBtn) {
-      priceFilterBtn.addEventListener('click', (event) => {
+    if (goodsFilterBtn) {
+      goodsFilterBtn.addEventListener('click', (event) => {
         event.stopPropagation();
-        const isOpen = priceFilterMenu && priceFilterMenu.style.display === 'block';
+        const isOpen = goodsFilterDropdown && goodsFilterDropdown.style.display === 'block';
         closeDesktopDropdowns();
-        if (priceFilterMenu) {
-          priceFilterMenu.style.display = isOpen ? 'none' : 'block';
-        }
-      });
-    }
-
-    if (applyPriceFilterBtn) {
-      applyPriceFilterBtn.addEventListener('click', () => {
-        const success = setStoresFilter(minStoresInput ? minStoresInput.value : '', maxStoresInput ? maxStoresInput.value : '');
-        if (success) {
-          closeDesktopDropdowns();
+        if (goodsFilterDropdown) {
+          goodsFilterDropdown.style.display = isOpen ? 'none' : 'block';
         }
       });
     }
@@ -2363,26 +2290,14 @@
       });
     }
 
-    if (priceFilterBtnMobile) {
-      priceFilterBtnMobile.addEventListener('click', (event) => {
+    if (goodsFilterBtnMobile) {
+      goodsFilterBtnMobile.addEventListener('click', (event) => {
         event.stopPropagation();
-        const isOpen = priceFilterMenuMobile && priceFilterMenuMobile.style.display === 'block';
+        const isOpen = goodsFilterDropdownMobile && goodsFilterDropdownMobile.style.display === 'block';
         closeMobileDropdowns();
-        if (priceFilterMenuMobile) {
-          priceFilterMenuMobile.style.display = isOpen ? 'none' : 'block';
-          priceFilterBtnMobile.setAttribute('aria-expanded', isOpen ? 'false' : 'true');
-        }
-      });
-    }
-
-    if (applyPriceFilterMobileBtn) {
-      applyPriceFilterMobileBtn.addEventListener('click', () => {
-        const success = setStoresFilter(
-          minStoresMobileInput ? minStoresMobileInput.value : '',
-          maxStoresMobileInput ? maxStoresMobileInput.value : ''
-        );
-        if (success) {
-          closeMobileDropdowns();
+        if (goodsFilterDropdownMobile) {
+          goodsFilterDropdownMobile.style.display = isOpen ? 'none' : 'block';
+          goodsFilterBtnMobile.setAttribute('aria-expanded', isOpen ? 'false' : 'true');
         }
       });
     }
