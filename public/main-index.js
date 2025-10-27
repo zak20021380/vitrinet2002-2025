@@ -1,5 +1,9 @@
 const SERVICE_PANEL_KEYWORDS = ['خدمات', 'زیبایی', 'تالار', 'مجالس', 'خودرو', 'ورزشی', 'پزشکی', 'سلامت', 'آرایش'];
 
+const isLocalhost = ['localhost', '127.0.0.1'].includes(window.location.hostname);
+const API_ORIGIN = isLocalhost ? 'http://localhost:5000' : window.location.origin;
+const API_BASE = `${API_ORIGIN}/api`;
+
 function safeParseLocalStorage(key) {
   try {
     const raw = localStorage.getItem(key);
@@ -118,7 +122,7 @@ document.addEventListener('mobileNavReady', () => {
 // -----------------------------
 // جستجوی پیشرفته صفحه اصلی
 // -----------------------------
-const SEARCH_API_BASE = 'http://localhost:5000/api';
+const SEARCH_API_BASE = API_BASE;
 const searchElements = {
   form: document.getElementById('searchForm'),
   input: document.getElementById('mainSearchInput'),
@@ -709,7 +713,7 @@ let adHomeData = null;
 // گرفتن تبلیغ ad_home فقط یکبار برای هر بار بارگذاری فروشگاه‌ها
 async function fetchAdHome() {
   try {
-    const res = await fetch('http://localhost:5000/api/adOrder/active?planSlug=ad_home');
+    const res = await fetch(`${API_BASE}/adOrder/active?planSlug=ad_home`);
     const data = await res.json();
     if (data.success && Array.isArray(data.ads)) {
       const approved = data.ads.filter(ad => ad && ad.status === 'approved');
@@ -731,7 +735,7 @@ async function loadShops() {
   await fetchAdHome();
 
   try {
-    const res = await fetch('http://localhost:5000/api/shops');
+    const res = await fetch(`${API_BASE}/shops`);
     const shops = await res.json();
     cardsWrap.innerHTML = '';
     updateSliderNavVisibility('drag-scroll-cards');
@@ -1078,7 +1082,7 @@ function renderPopularProductsSection(section) {
 
 async function loadPopularProductsFallback(slider) {
   try {
-    const res = await fetch('http://localhost:5000/api/products/latest-products');
+    const res = await fetch(`${API_BASE}/products/latest-products`);
     if (!res.ok) throw new Error('Network error');
 
     const payload = await res.json();
@@ -2011,7 +2015,7 @@ window.showAdBannerPopup = async function() {
 
   try {
     console.log("⏳ ارسال درخواست fetch برای تبلیغ...");
-const res = await fetch('http://localhost:5000/api/adOrder/active?planSlug=ad_search');
+    const res = await fetch(`${API_BASE}/adOrder/active?planSlug=ad_search`);
     console.log("✅ پاسخ اولیه fetch دریافت شد", res);
 
     if (!res.ok) {
