@@ -244,8 +244,22 @@ function buildSearchIndex(dataset) {
   const shops = Array.isArray(dataset.shops) ? dataset.shops : [];
   const products = Array.isArray(dataset.products) ? dataset.products : [];
   const centers = Array.isArray(dataset.centers) ? dataset.centers : [];
+  const rawCategories = Array.isArray(dataset.categories)
+    ? dataset.categories
+    : Array.isArray(dataset.categories?.categories)
+      ? dataset.categories.categories
+      : [];
+  const rawServiceSubcategories = Array.isArray(dataset.categories?.serviceSubcategories)
+    ? dataset.categories.serviceSubcategories
+    : [];
+  const combinedCategories = [...rawCategories, ...rawServiceSubcategories];
   const items = [];
   const categoryMap = new Map();
+
+  const normaliseCategoryKey = (name) => {
+    const key = normalizeText(name);
+    return key.trim();
+  };
 
   shops.forEach(shop => {
     const item = buildSearchItem('shop', {
@@ -260,10 +274,18 @@ function buildSearchIndex(dataset) {
     items.push(item);
     const categoryName = (shop.category || '').trim();
     if (categoryName) {
-      const normalizedName = categoryName;
-      const entry = categoryMap.get(normalizedName) || { name: categoryName, count: 0 };
-      entry.count += 1;
-      categoryMap.set(normalizedName, entry);
+      const key = normaliseCategoryKey(categoryName);
+      if (key) {
+        const entry = categoryMap.get(key) || {
+          name: categoryName,
+          count: 0,
+          slug: categoryName.replace(/\s+/g, '-')
+        };
+        entry.name = entry.name || categoryName;
+        entry.count += 1;
+        entry.slug = entry.slug || categoryName.replace(/\s+/g, '-');
+        categoryMap.set(key, entry);
+      }
     }
   });
 
@@ -302,13 +324,27 @@ function buildSearchIndex(dataset) {
     items.push(item);
   });
 
+  combinedCategories.forEach(cat => {
+    const displayName = (cat?.name || '').toString().trim();
+    if (!displayName) return;
+    const key = normaliseCategoryKey(displayName);
+    if (!key) return;
+    const entry = categoryMap.get(key) || { name: displayName, count: 0 };
+    entry.name = displayName || entry.name;
+    entry.slug = (cat.slug || entry.slug || displayName.replace(/\s+/g, '-')).trim();
+    if (cat.parentName) entry.parentName = cat.parentName;
+    if (cat.type) entry.typeLabel = cat.type;
+    categoryMap.set(key, entry);
+  });
+
   const categories = Array.from(categoryMap.values())
     .map(cat => buildSearchItem('category', {
       title: cat.name,
       subtitle: `${cat.count} فروشگاه`,
       description: 'مشاهده مغازه‌های این دسته',
-      url: `shops-by-category.html?cat=${encodeURIComponent(cat.name.trim().replace(/\s+/g, '-'))}`,
+      url: `shops-by-category.html?cat=${encodeURIComponent((cat.slug || cat.name || '').trim().replace(/\s+/g, '-'))}`,
       badge: 'دسته‌بندی',
+      extraKeywords: [cat.parentName, cat.slug, cat.typeLabel].filter(Boolean).join(' '),
       rawCount: cat.count
     }))
     .sort((a, b) => (b.rawCount || 0) - (a.rawCount || 0));
@@ -359,17 +395,19 @@ async function ensureSearchData(force = false) {
 
   const loader = (async () => {
     try {
-      const [shopsRes, productsRes, centersRes] = await Promise.allSettled([
+      const [shopsRes, productsRes, centersRes, categoriesRes] = await Promise.allSettled([
         fetchJSON(`${SEARCH_API_BASE}/shops`),
         fetchJSON(`${SEARCH_API_BASE}/products`),
-        fetchJSON(`${SEARCH_API_BASE}/shopping-centers`)
+        fetchJSON(`${SEARCH_API_BASE}/shopping-centers`),
+        fetchJSON(`${SEARCH_API_BASE}/categories`)
       ]);
 
       const shops = shopsRes.status === 'fulfilled' ? shopsRes.value : [];
       const products = productsRes.status === 'fulfilled' ? productsRes.value : [];
       const centers = centersRes.status === 'fulfilled' ? centersRes.value : [];
+      const categories = categoriesRes.status === 'fulfilled' ? categoriesRes.value : [];
 
-      const { items, summary, trending } = buildSearchIndex({ shops, products, centers });
+      const { items, summary, trending } = buildSearchIndex({ shops, products, centers, categories });
       searchState.items = items;
       searchState.summary = summary;
       searchState.trending = trending;
@@ -377,8 +415,8 @@ async function ensureSearchData(force = false) {
       searchState.lastUpdated = new Date();
 
       if (searchElements.status) {
-        const { shops: sCount, products: pCount, centers: cCount } = summary;
-        searchElements.status.textContent = `بیش از ${sCount} مغازه، ${pCount} محصول و ${cCount} مرکز خرید برای جستجو آماده است.`;
+        const { shops: sCount, products: pCount, centers: cCount, categories: catCount } = summary;
+        searchElements.status.textContent = `بیش از ${sCount} مغازه، ${pCount} محصول، ${cCount} مرکز خرید و ${catCount} دسته‌بندی برای جستجو آماده است.`;
       }
       if (searchElements.refreshBtn) {
         searchElements.refreshBtn.classList.remove('hidden');
@@ -494,7 +532,7 @@ function renderDefaultResults() {
   }
   if (searchElements.status) {
     if (searchState.loaded) {
-      searchElements.status.textContent = `برای شروع، محبوب‌ترین گزینه‌ها از بین ${summary.shops} مغازه و ${summary.centers} مرکز خرید را ببینید.`;
+      searchElements.status.textContent = `برای شروع، محبوب‌ترین گزینه‌ها از بین ${summary.shops} مغازه، ${summary.products} محصول، ${summary.centers} مرکز خرید و ${summary.categories} دسته‌بندی را ببینید.`;
     } else {
       searchElements.status.textContent = 'برای مشاهده نتایج جستجو، عبارت موردنظر خود را تایپ کنید.';
     }
