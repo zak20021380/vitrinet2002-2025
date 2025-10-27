@@ -9,6 +9,10 @@
     <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
     <style>
+        html {
+            scroll-behavior: smooth;
+        }
+
         :root {
             color-scheme: light;
             --surface: rgba(255, 255, 255, 0.88);
@@ -38,11 +42,111 @@
             padding: 48px 24px;
         }
 
-        .dashboard-shell {
-            width: min(1200px, 100%);
+        .dashboard-layout {
+            width: min(1240px, 100%);
+            display: grid;
+            grid-template-columns: 260px 1fr;
+            gap: 24px;
+        }
+
+        .sidebar {
+            background: var(--surface);
+            border-radius: 24px;
+            padding: 24px 22px;
+            box-shadow: 0 24px 60px rgba(18, 38, 63, 0.08);
+            border: 1px solid rgba(112, 128, 176, 0.12);
+            backdrop-filter: blur(12px);
             display: flex;
             flex-direction: column;
             gap: 24px;
+            position: sticky;
+            top: 32px;
+            align-self: start;
+            max-height: calc(100vh - 64px);
+        }
+
+        .sidebar-header {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .sidebar-title {
+            margin: 0;
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--text-strong);
+        }
+
+        .sidebar-subtitle {
+            margin: 0;
+            font-size: 13px;
+            color: var(--text-muted);
+        }
+
+        .sidebar-nav {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .sidebar-link {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 14px;
+            border-radius: 16px;
+            color: var(--text-muted);
+            text-decoration: none;
+            font-weight: 500;
+            transition: background 160ms ease, color 160ms ease, transform 160ms ease;
+        }
+
+        .sidebar-link i {
+            font-size: 18px;
+        }
+
+        .sidebar-link:hover,
+        .sidebar-link:focus-visible {
+            background: rgba(61, 115, 255, 0.12);
+            color: var(--primary);
+            outline: none;
+            transform: translateX(-2px);
+        }
+
+        .sidebar-link.active {
+            background: rgba(61, 115, 255, 0.16);
+            color: var(--primary);
+            font-weight: 600;
+        }
+
+        .sidebar-metric {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            padding: 16px;
+            border-radius: 18px;
+            background: linear-gradient(135deg, rgba(61, 115, 255, 0.12), rgba(55, 178, 108, 0.12));
+        }
+
+        .sidebar-metric span {
+            color: var(--text-muted);
+            font-size: 13px;
+        }
+
+        .sidebar-metric strong {
+            font-size: 22px;
+        }
+
+        .dashboard-shell {
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        section[id],
+        header[id] {
+            scroll-margin-top: 48px;
         }
 
         .page-header {
@@ -740,6 +844,17 @@
             color: var(--text-strong);
         }
 
+        @media (max-width: 1024px) {
+            .dashboard-layout {
+                grid-template-columns: 1fr;
+            }
+
+            .sidebar {
+                position: static;
+                max-height: none;
+            }
+        }
+
         @media (max-width: 768px) {
             body {
                 padding: 32px 12px;
@@ -762,191 +877,377 @@
     </style>
 </head>
 <body>
-    <main class="dashboard-shell">
-        <header class="page-header">
-            <h1 class="page-title">مدیریت مغازه‌های خدماتی</h1>
-            <p class="page-subtitle">وضعیت لحظه‌ای عملکرد شرکای خدماتی و آمار واقعی ثبت سفارش‌ها</p>
-        </header>
+    <div class="dashboard-layout">
+        <aside class="sidebar" aria-label="ناوبری داشبورد">
+            <div class="sidebar-header">
+                <h2 class="sidebar-title">داشبورد مدیریت</h2>
+                <p class="sidebar-subtitle">کنترل کامل پلن‌ها و عملکرد مغازه‌ها</p>
+            </div>
+            <nav class="sidebar-nav" id="dashboardSidebar">
+                <a class="sidebar-link active" href="#overview"><i class="ri-dashboard-line" aria-hidden="true"></i><span>نمای کلی</span></a>
+                <a class="sidebar-link" href="#service-plan-management"><i class="ri-service-line" aria-hidden="true"></i><span>مدیریت پلن مغازه خدماتی</span></a>
+                <a class="sidebar-link" href="#retail-plan-management"><i class="ri-store-3-line" aria-hidden="true"></i><span>مدیریت پلن مغازه عادی</span></a>
+                <a class="sidebar-link" href="#shop-directory"><i class="ri-store-line" aria-hidden="true"></i><span>فهرست مغازه‌ها</span></a>
+            </nav>
+            <div class="sidebar-metric" aria-live="polite">
+                <span>درآمد ماه جاری از پلن‌ها</span>
+                <strong>۱۸۹٬۵۰۰٬۰۰۰ تومان</strong>
+                <small class="subtle-text">افزایش ۱۲٪ نسبت به ماه گذشته</small>
+            </div>
+        </aside>
+        <main class="dashboard-shell">
+            <header class="page-header" id="overview">
+                <h1 class="page-title">مدیریت مغازه‌های خدماتی</h1>
+                <p class="page-subtitle">وضعیت لحظه‌ای عملکرد شرکای خدماتی و آمار واقعی ثبت سفارش‌ها</p>
+            </header>
 
-        <section class="card plan-ops-card">
-            <div class="plan-ops-header">
-                <h2><i class="ri-gift-line"></i> مدیریت پلن رایگان فروشندگان خدماتی</h2>
-                <span class="plan-ops-chip">ویژه</span>
-            </div>
-            <p class="plan-ops-text">
-                برای اعطای دسترسی رایگان به فروشندگان، از پنل مدیریت مغازه‌های خدماتی استفاده کنید. در همان صفحه می‌توانید مدت پلن را مشخص کنید، وضعیت را لغو یا تمدید کنید و یادداشت مدیریتی ثبت کنید.
-            </p>
-            <ul class="plan-ops-list">
-                <li><i class="ri-check-line"></i> فعال‌سازی فوری پلن رایگان با تعیین مدت ۱ تا ۳۶۵ روز</li>
-                <li><i class="ri-check-line"></i> لغو یا تمدید پلن در لحظه با ثبت خودکار تاریخ پایان</li>
-                <li><i class="ri-check-line"></i> مشاهده وضعیت فروشنده (روزهای باقی‌مانده، تاریخ شروع و پایان) بدون ترک داشبورد</li>
-            </ul>
-            <div class="plan-ops-actions">
-                <a class="action-link" href="../public/admin/service-shops.html" target="_blank" rel="noopener noreferrer">
-                    <i class="ri-external-link-line"></i>
-                    ورود به مدیریت پلن‌های رایگان
-                </a>
-                <button type="button" class="action-link plan-ops-secondary" onclick="window.open('../public/service-seller-panel/s-seller-panel.html','_blank')">
-                    <i class="ri-user-smile-line"></i>
-                    مشاهده نمای فروشنده
-                </button>
-            </div>
-            <div class="plan-ops-footnote">
-                <span><i class="ri-lightbulb-flash-line"></i> یادآور</span>
-                <p>هر تغییر در پلن رایگان بلافاصله در پنل فروشنده با برچسب «پلن رایگان» و پیام توضیحی نمایش داده می‌شود.</p>
-            </div>
-        </section>
-
-        <section class="card plan-management-card" id="service-plan-management">
-            <div class="plan-management-header">
-                <div>
-                    <h2>مدیریت پلن‌های مغازه‌های خدماتی</h2>
-                    <p>تعریف پلن‌های اشتراک، مدیریت قیمت و اختصاص آنها به فروشندگان از طریق شماره تلفن</p>
+            <section class="card plan-ops-card" id="free-plan-operations">
+                <div class="plan-ops-header">
+                    <h2><i class="ri-gift-line"></i> مدیریت پلن رایگان فروشندگان خدماتی</h2>
+                    <span class="plan-ops-chip">ویژه</span>
                 </div>
-                <button type="button" class="action-link plan-ops-secondary" id="refreshPlanData">
-                    <i class="ri-refresh-line"></i>
-                    بروزرسانی داده‌ها
-                </button>
-            </div>
+                <p class="plan-ops-text">
+                    برای اعطای دسترسی رایگان به فروشندگان، از پنل مدیریت مغازه‌های خدماتی استفاده کنید. در همان صفحه می‌توانید مدت پلن را مشخص کنید، وضعیت را لغو یا تمدید کنید و یادداشت مدیریتی ثبت کنید.
+                </p>
+                <ul class="plan-ops-list">
+                    <li><i class="ri-check-line"></i> فعال‌سازی فوری پلن رایگان با تعیین مدت ۱ تا ۳۶۵ روز</li>
+                    <li><i class="ri-check-line"></i> لغو یا تمدید پلن در لحظه با ثبت خودکار تاریخ پایان</li>
+                    <li><i class="ri-check-line"></i> مشاهده وضعیت فروشنده (روزهای باقی‌مانده، تاریخ شروع و پایان) بدون ترک داشبورد</li>
+                </ul>
+                <div class="plan-ops-actions">
+                    <a class="action-link" href="../public/admin/service-shops.html" target="_blank" rel="noopener noreferrer">
+                        <i class="ri-external-link-line"></i>
+                        ورود به مدیریت پلن‌های رایگان
+                    </a>
+                    <button type="button" class="action-link plan-ops-secondary" onclick="window.open('../public/service-seller-panel/s-seller-panel.html','_blank')">
+                        <i class="ri-user-smile-line"></i>
+                        مشاهده نمای فروشنده
+                    </button>
+                </div>
+                <div class="plan-ops-footnote">
+                    <span><i class="ri-lightbulb-flash-line"></i> یادآور</span>
+                    <p>هر تغییر در پلن رایگان بلافاصله در پنل فروشنده با برچسب «پلن رایگان» و پیام توضیحی نمایش داده می‌شود.</p>
+                </div>
+            </section>
 
-            <div class="plan-management-grid">
-                <div class="plan-management-column">
+            <section class="card plan-management-card" id="service-plan-management">
+                <div class="plan-management-header">
                     <div>
-                        <h3>پلن‌های فعال</h3>
-                        <p class="section-subtitle">لیست پلن‌های تعریف شده برای مغازه‌های خدماتی</p>
+                        <h2>مدیریت پلن‌های مغازه‌های خدماتی</h2>
+                        <p>تعریف پلن‌های اشتراک، مدیریت قیمت و اختصاص آنها به فروشندگان از طریق شماره تلف</p>
                     </div>
-                    <div class="table-wrapper">
-                        <table class="plan-table" aria-describedby="planTableCaption">
-                            <caption id="planTableCaption" class="visually-hidden">جدول پلن‌های خدماتی</caption>
-                            <thead>
-                                <tr>
-                                    <th scope="col">عنوان پلن</th>
-                                    <th scope="col">قیمت / مدت</th>
-                                    <th scope="col">وضعیت</th>
-                                    <th scope="col">اقدامات</th>
-                                </tr>
-                            </thead>
-                            <tbody id="servicePlanTableBody">
-                                <tr><td colspan="4" class="table-empty">در حال بارگذاری داده‌ها...</td></tr>
-                            </tbody>
-                        </table>
-                    </div>
+                    <button type="button" class="action-link plan-ops-secondary" id="refreshPlanData">
+                        <i class="ri-refresh-line"></i>
+                        بروزرسانی داده‌ها
+                    </button>
+                </div>
 
-                    <form class="form-card" id="servicePlanForm" autocomplete="off">
+                <div class="plan-management-grid">
+                    <div class="plan-management-column">
                         <div>
-                            <h3 id="planFormTitle">ایجاد پلن جدید</h3>
-                            <p class="section-subtitle">عنوان، اسلاگ و قیمت پلن الزامی هستند</p>
+                            <h3>پلن‌های خدماتی فعال</h3>
+                            <p class="section-subtitle">لیست پلن‌های تعریف شده برای مغازه‌های خدماتی</p>
                         </div>
-                        <div class="form-field">
-                            <label for="planTitle">عنوان پلن</label>
-                            <input type="text" id="planTitle" name="title" class="form-control" required>
+                        <div class="table-wrapper">
+                            <table class="plan-table" aria-describedby="planTableCaption">
+                                <caption id="planTableCaption" class="visually-hidden">جدول پلن‌های خدماتی</caption>
+                                <thead>
+                                    <tr>
+                                        <th scope="col">عنوان پلن</th>
+                                        <th scope="col">قیمت / مدت</th>
+                                        <th scope="col">وضعیت</th>
+                                        <th scope="col">اقدامات</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="servicePlanTableBody">
+                                    <tr><td colspan="4" class="table-empty">در حال بارگذاری داده‌ها...</td></tr>
+                                </tbody>
+                            </table>
                         </div>
-                        <div class="form-field">
-                            <label for="planSlug">اسلاگ پلن</label>
-                            <input type="text" id="planSlug" name="slug" class="form-control" required placeholder="مثال: premium-service">
-                            <span class="form-helper">این مقدار در آدرس‌ها استفاده می‌شود و باید یکتا باشد.</span>
-                        </div>
-                        <div class="form-field">
-                            <label for="planPrice">قیمت پایه (تومان)</label>
-                            <input type="number" id="planPrice" name="price" class="form-control" min="0" step="1000" required>
-                        </div>
-                        <div class="form-field">
-                            <label for="planDuration">مدت پلن (روز)</label>
-                            <input type="number" id="planDuration" name="durationDays" class="form-control" min="0" step="1" value="30">
-                        </div>
-                        <div class="form-field">
-                            <label for="planDescription">توضیحات</label>
-                            <textarea id="planDescription" name="description" rows="3" placeholder="توضیحات تکمیلی پلن"></textarea>
-                        </div>
-                        <div class="form-field">
-                            <label for="planFeatures">ویژگی‌ها</label>
-                            <textarea id="planFeatures" name="features" rows="3" placeholder="هر ویژگی را در یک خط بنویسید"></textarea>
-                        </div>
-                        <div class="form-field">
-                            <label for="planIsActive">
-                                <input type="checkbox" id="planIsActive" name="isActive" checked>
-                                پلن فعال باشد
-                            </label>
-                        </div>
-                        <p class="form-status" id="planFormStatus" aria-live="polite"></p>
-                        <div class="form-actions">
-                            <button type="button" class="action-link secondary" id="planFormReset">
-                                <i class="ri-arrow-go-back-line"></i>
-                                انصراف از ویرایش
-                            </button>
-                            <button type="submit" class="action-link">
-                                <i class="ri-save-3-line"></i>
-                                ذخیره پلن
-                            </button>
-                        </div>
-                    </form>
-                </div>
 
-                <div class="plan-management-column">
+                        <form class="form-card" id="servicePlanForm" autocomplete="off">
+                            <div>
+                                <h3 id="planFormTitle">ایجاد پلن جدید</h3>
+                                <p class="section-subtitle">عنوان، اسلاگ و قیمت پلن الزامی هستند</p>
+                            </div>
+                            <div class="form-field">
+                                <label for="planTitle">عنوان پلن</label>
+                                <input type="text" id="planTitle" name="title" class="form-control" required>
+                            </div>
+                            <div class="form-field">
+                                <label for="planSlug">اسلاگ پلن</label>
+                                <input type="text" id="planSlug" name="slug" class="form-control" required placeholder="مثال: premium-service">
+                                <span class="form-helper">این مقدار در آدرس‌ها استفاده می‌شود و باید یکتا باشد.</span>
+                            </div>
+                            <div class="form-field">
+                                <label for="planPrice">قیمت پایه (تومان)</label>
+                                <input type="number" id="planPrice" name="price" class="form-control" min="0" step="1000" required>
+                            </div>
+                            <div class="form-field">
+                                <label for="planDuration">مدت پلن (روز)</label>
+                                <input type="number" id="planDuration" name="durationDays" class="form-control" min="0" step="1" value="30">
+                            </div>
+                            <div class="form-field">
+                                <label for="planDescription">توضیحات</label>
+                                <textarea id="planDescription" name="description" rows="3" placeholder="توضیحات تکمیلی پلن"></textarea>
+                            </div>
+                            <div class="form-field">
+                                <label for="planFeatures">ویژگی‌ها</label>
+                                <textarea id="planFeatures" name="features" rows="3" placeholder="هر ویژگی را در یک خط بنویسید"></textarea>
+                            </div>
+                            <div class="form-field">
+                                <label for="planIsActive">
+                                    <input type="checkbox" id="planIsActive" name="isActive" checked>
+                                    پلن فعال باشد
+                                </label>
+                            </div>
+                            <p class="form-status" id="planFormStatus" aria-live="polite"></p>
+                            <div class="form-actions">
+                                <button type="button" class="action-link secondary" id="planFormReset">
+                                    <i class="ri-arrow-go-back-line"></i>
+                                    انصراف از ویرایش
+                                </button>
+                                <button type="submit" class="action-link">
+                                    <i class="ri-save-3-line"></i>
+                                    ذخیره پلن
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <div class="plan-management-column">
+                        <div>
+                            <h3>اختصاص پلن به فروشنده</h3>
+                            <p class="section-subtitle">ثبت پلن اختصاصی با تعیین قیمت دلخواه از طریق شماره تماس</p>
+                        </div>
+                        <form class="form-card" id="planAssignmentForm" autocomplete="off">
+                            <div class="form-field">
+                                <label for="sellerPhone">شماره تلفن فروشنده</label>
+                                <input type="tel" id="sellerPhone" name="phone" class="form-control" required placeholder="مثال: 09120000000">
+                                <span class="form-helper">شماره مالک مغازه خدماتی را وارد کنید. جستجو به صورت خودکار انجام می‌شود.</span>
+                            </div>
+                            <div class="form-field">
+                                <label for="assignmentPlanSelect">انتخاب پلن</label>
+                                <select id="assignmentPlanSelect" name="planId" required>
+                                    <option value="" disabled selected>ابتدا پلن را انتخاب کنید</option>
+                                </select>
+                            </div>
+                            <div class="form-field">
+                                <label for="customPrice">قیمت اختصاصی (تومان)</label>
+                                <input type="number" id="customPrice" name="customPrice" class="form-control" min="0" step="1000" placeholder="در صورت خالی، قیمت پایه پلن ثبت می‌شود">
+                            </div>
+                            <div class="form-field">
+                                <label for="assignmentDuration">مدت سفارشی (روز)</label>
+                                <input type="number" id="assignmentDuration" name="durationDays" class="form-control" min="0" step="1" placeholder="در صورت خالی، مدت پیش‌فرض پلن اعمال می‌شود">
+                            </div>
+                            <div class="form-field">
+                                <label for="assignmentStart">تاریخ شروع</label>
+                                <input type="date" id="assignmentStart" name="startDate" class="form-control">
+                            </div>
+                            <div class="form-field">
+                                <label for="assignmentNotes">یادداشت مدیریتی</label>
+                                <textarea id="assignmentNotes" name="notes" rows="3" placeholder="توضیحات برای تیم پشتیبانی یا فروشنده"></textarea>
+                            </div>
+                            <p class="form-status" id="assignmentFormStatus" aria-live="polite"></p>
+                            <div class="form-actions">
+                                <button type="submit" class="action-link">
+                                    <i class="ri-shield-check-line"></i>
+                                    ثبت پلن اختصاصی
+                                </button>
+                            </div>
+                        </form>
+
+                        <div class="table-wrapper">
+                            <table class="assignment-table" aria-describedby="assignmentTableCaption">
+                                <caption id="assignmentTableCaption" class="visually-hidden">جدول پلن‌های اختصاص داده شده</caption>
+                                <thead>
+                                    <tr>
+                                        <th scope="col">فروشنده</th>
+                                        <th scope="col">پلن</th>
+                                        <th scope="col">قیمت نهایی</th>
+                                        <th scope="col">وضعیت</th>
+                                        <th scope="col">اقدامات</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="planAssignmentTableBody">
+                                    <tr><td colspan="5" class="table-empty">در حال بارگذاری پلن‌های اختصاصی...</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="card plan-management-card" id="retail-plan-management">
+                <div class="plan-management-header">
                     <div>
-                        <h3>اختصاص پلن به فروشنده</h3>
-                        <p class="section-subtitle">ثبت پلن اختصاصی با تعیین قیمت دلخواه از طریق شماره تماس</p>
+                        <h2>مدیریت پلن‌های مغازه‌های عادی</h2>
+                        <p>طراحی تعرفه‌های فروشگاهی با ساختار قیمتی مجزا، بودجه تبلیغات و حق اشتراک vitrin</p>
                     </div>
-                    <form class="form-card" id="planAssignmentForm" autocomplete="off">
-                        <div class="form-field">
-                            <label for="sellerPhone">شماره تلفن فروشنده</label>
-                            <input type="tel" id="sellerPhone" name="phone" class="form-control" required placeholder="مثال: 09120000000">
-                            <span class="form-helper">شماره مالک مغازه خدماتی را وارد کنید. جستجو به صورت خودکار انجام می‌شود.</span>
-                        </div>
-                        <div class="form-field">
-                            <label for="assignmentPlanSelect">انتخاب پلن</label>
-                            <select id="assignmentPlanSelect" name="planId" required>
-                                <option value="" disabled selected>ابتدا پلن را انتخاب کنید</option>
-                            </select>
-                        </div>
-                        <div class="form-field">
-                            <label for="customPrice">قیمت اختصاصی (تومان)</label>
-                            <input type="number" id="customPrice" name="customPrice" class="form-control" min="0" step="1000" placeholder="در صورت خالی، قیمت پایه پلن ثبت می‌شود">
-                        </div>
-                        <div class="form-field">
-                            <label for="assignmentDuration">مدت سفارشی (روز)</label>
-                            <input type="number" id="assignmentDuration" name="durationDays" class="form-control" min="0" step="1" placeholder="در صورت خالی، مدت پیش‌فرض پلن اعمال می‌شود">
-                        </div>
-                        <div class="form-field">
-                            <label for="assignmentStart">تاریخ شروع</label>
-                            <input type="date" id="assignmentStart" name="startDate" class="form-control">
-                        </div>
-                        <div class="form-field">
-                            <label for="assignmentNotes">یادداشت مدیریتی</label>
-                            <textarea id="assignmentNotes" name="notes" rows="3" placeholder="توضیحات برای تیم پشتیبانی یا فروشنده"></textarea>
-                        </div>
-                        <p class="form-status" id="assignmentFormStatus" aria-live="polite"></p>
-                        <div class="form-actions">
-                            <button type="submit" class="action-link">
-                                <i class="ri-shield-check-line"></i>
-                                ثبت پلن اختصاصی
-                            </button>
-                        </div>
-                    </form>
+                    <button type="button" class="action-link plan-ops-secondary" id="refreshRetailPlanData">
+                        <i class="ri-refresh-line"></i>
+                        بروزرسانی داده‌های فروشگاهی
+                    </button>
+                </div>
 
-                    <div class="table-wrapper">
-                        <table class="assignment-table" aria-describedby="assignmentTableCaption">
-                            <caption id="assignmentTableCaption" class="visually-hidden">جدول پلن‌های اختصاص داده شده</caption>
-                            <thead>
-                                <tr>
-                                    <th scope="col">فروشنده</th>
-                                    <th scope="col">پلن</th>
-                                    <th scope="col">قیمت نهایی</th>
-                                    <th scope="col">وضعیت</th>
-                                    <th scope="col">اقدامات</th>
-                                </tr>
-                            </thead>
-                            <tbody id="planAssignmentTableBody">
-                                <tr><td colspan="5" class="table-empty">در حال بارگذاری پلن‌های اختصاصی...</td></tr>
-                            </tbody>
-                        </table>
+                <div class="plan-management-grid">
+                    <div class="plan-management-column">
+                        <div>
+                            <h3>پلن‌های فروشگاهی فعال</h3>
+                            <p class="section-subtitle">تعرفه‌های vitrin برای مغازه‌های عادی با تفکیک کمیسیون و خدمات تبلیغاتی</p>
+                        </div>
+                        <div class="table-wrapper">
+                            <table class="plan-table" aria-describedby="retailPlanTableCaption">
+                                <caption id="retailPlanTableCaption" class="visually-hidden">جدول پلن‌های مغازه‌های عادی</caption>
+                                <thead>
+                                    <tr>
+                                        <th scope="col">عنوان پلن</th>
+                                        <th scope="col">قیمت پایه / راه‌اندازی</th>
+                                        <th scope="col">کمیسیون و مزایا</th>
+                                        <th scope="col">وضعیت</th>
+                                        <th scope="col">اقدامات</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="retailPlanTableBody">
+                                    <tr><td colspan="5" class="table-empty">در حال بارگذاری پلن‌های فروشگاهی...</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <form class="form-card" id="retailPlanForm" autocomplete="off">
+                            <div>
+                                <h3 id="retailPlanFormTitle">پلن فروشگاهی جدید</h3>
+                                <p class="section-subtitle">قیمت پایه، کارمزد تراکنش و نوع نمایش در vitrin را مشخص کنید</p>
+                            </div>
+                            <div class="form-field">
+                                <label for="retailPlanTitle">عنوان پلن</label>
+                                <input type="text" id="retailPlanTitle" name="title" class="form-control" required>
+                            </div>
+                            <div class="form-field">
+                                <label for="retailPlanSlug">اسلاگ پلن</label>
+                                <input type="text" id="retailPlanSlug" name="slug" class="form-control" required placeholder="مثال: premium-retail">
+                                <span class="form-helper">برای جلوگیری از تداخل با پلن‌های خدماتی حتماً اسلاگ اختصاصی انتخاب کنید.</span>
+                            </div>
+                            <div class="form-field">
+                                <label for="retailBasePrice">اشتراک ماهانه (تومان)</label>
+                                <input type="number" id="retailBasePrice" name="basePrice" class="form-control" min="0" step="1000" required>
+                            </div>
+                            <div class="form-field">
+                                <label for="retailSetupFee">هزینه راه‌اندازی (تومان)</label>
+                                <input type="number" id="retailSetupFee" name="setupFee" class="form-control" min="0" step="1000" placeholder="در صورت خالی، هزینه راه‌اندازی صفر در نظر گرفته می‌شود">
+                            </div>
+                            <div class="form-field">
+                                <label for="retailCommission">درصد کمیسیون تراکنش</label>
+                                <input type="number" id="retailCommission" name="commission" class="form-control" min="0" max="100" step="0.5" value="7.5">
+                            </div>
+                            <div class="form-field">
+                                <label for="retailVisibility">نوع نمایش در vitrin</label>
+                                <select id="retailVisibility" name="visibility">
+                                    <option value="standard">استاندارد (نمایش در نتایج جستجو)</option>
+                                    <option value="highlighted">هایلایت شده (نمایش در vitrin ویژه)</option>
+                                    <option value="exclusive">اختصاصی vitrin پرو</option>
+                                </select>
+                            </div>
+                            <div class="form-field">
+                                <label for="retailPlanFeatures">مزایای پلن</label>
+                                <textarea id="retailPlanFeatures" name="features" rows="3" placeholder="هر مزیت را در یک خط بنویسید"></textarea>
+                            </div>
+                            <div class="form-field">
+                                <label for="retailPriorityPlacement">
+                                    <input type="checkbox" id="retailPriorityPlacement" name="priorityPlacement">
+                                    شامل جایگاه اولویت‌دار در vitrin باشد
+                                </label>
+                            </div>
+                            <div class="form-field">
+                                <label for="retailPlanIsActive">
+                                    <input type="checkbox" id="retailPlanIsActive" name="isActive" checked>
+                                    پلن برای فروشندگان فعال باشد
+                                </label>
+                            </div>
+                            <p class="form-status" id="retailPlanFormStatus" aria-live="polite"></p>
+                            <div class="form-actions">
+                                <button type="button" class="action-link secondary" id="retailPlanFormReset">
+                                    <i class="ri-arrow-go-back-line"></i>
+                                    انصراف از ویرایش
+                                </button>
+                                <button type="submit" class="action-link">
+                                    <i class="ri-save-3-line"></i>
+                                    ذخیره پلن فروشگاهی
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <div class="plan-management-column">
+                        <div>
+                            <h3>قراردادهای فروشگاهی فعال</h3>
+                            <p class="section-subtitle">ثبت پلن اختصاصی برای مغازه‌های عادی به همراه بودجه تبلیغات vitrin</p>
+                        </div>
+                        <form class="form-card" id="retailPlanAssignmentForm" autocomplete="off">
+                            <div class="form-field">
+                                <label for="retailShopCode">کد فروشگاه یا شناسه قرارداد</label>
+                                <input type="text" id="retailShopCode" name="shopCode" class="form-control" required placeholder="مثال: shop-4581">
+                                <span class="form-helper">شناسه یکتای فروشگاه در vitrin را وارد کنید.</span>
+                            </div>
+                            <div class="form-field">
+                                <label for="retailAssignmentPlanSelect">انتخاب پلن فروشگاهی</label>
+                                <select id="retailAssignmentPlanSelect" name="planId" required>
+                                    <option value="" disabled selected>پلن مورد نظر را انتخاب کنید</option>
+                                </select>
+                            </div>
+                            <div class="form-field">
+                                <label for="retailCustomPrice">حق اشتراک نهایی (تومان)</label>
+                                <input type="number" id="retailCustomPrice" name="customPrice" class="form-control" min="0" step="1000" placeholder="می‌توانید مبلغی متفاوت از قیمت پایه تعیین کنید">
+                            </div>
+                            <div class="form-field">
+                                <label for="retailMarketingBudget">بودجه تبلیغات ماهانه (تومان)</label>
+                                <input type="number" id="retailMarketingBudget" name="marketingBudget" class="form-control" min="0" step="1000" placeholder="بودجه vitrin ads برای این قرارداد">
+                            </div>
+                            <div class="form-field">
+                                <label for="retailBranchCount">تعداد شعب تحت پوشش</label>
+                                <input type="number" id="retailBranchCount" name="branchCount" class="form-control" min="1" step="1" value="1">
+                            </div>
+                            <div class="form-field">
+                                <label for="retailAssignmentStart">تاریخ شروع قرارداد</label>
+                                <input type="date" id="retailAssignmentStart" name="startDate" class="form-control">
+                            </div>
+                            <div class="form-field">
+                                <label for="retailAssignmentNotes">یادداشت مدیریتی</label>
+                                <textarea id="retailAssignmentNotes" name="notes" rows="3" placeholder="توضیحات مربوط به شرایط قرارداد"></textarea>
+                            </div>
+                            <p class="form-status" id="retailAssignmentStatus" aria-live="polite"></p>
+                            <div class="form-actions">
+                                <button type="submit" class="action-link">
+                                    <i class="ri-shield-check-line"></i>
+                                    ثبت قرارداد فروشگاهی
+                                </button>
+                            </div>
+                        </form>
+
+                        <div class="table-wrapper">
+                            <table class="assignment-table" aria-describedby="retailAssignmentCaption">
+                                <caption id="retailAssignmentCaption" class="visually-hidden">جدول قراردادهای فروشگاهی</caption>
+                                <thead>
+                                    <tr>
+                                        <th scope="col">فروشگاه</th>
+                                        <th scope="col">پلن</th>
+                                        <th scope="col">حق اشتراک</th>
+                                        <th scope="col">تبلیغات</th>
+                                        <th scope="col">وضعیت</th>
+                                        <th scope="col">اقدامات</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="retailAssignmentTableBody">
+                                    <tr><td colspan="6" class="table-empty">در حال بارگذاری قراردادها...</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
-            </div>
-        </section>
+            </section>
 
-        <section class="card">
-            <h2 class="page-subtitle" style="font-weight:600;color:var(--text-strong);">فهرست مغازه‌ها</h2>
+            <section class="card" id="shop-directory">
+                <h2 class="page-subtitle" style="font-weight:600;color:var(--text-strong);">فهرست مغازه‌ها</h2>
             <div class="table-wrapper">
                 <table class="shop-table">
                     <thead>
@@ -1038,6 +1339,7 @@
             </div>
         </section>
     </main>
+    </div>
 
     <div class="modal-backdrop" id="shopModal">
         <div class="modal-card">
@@ -1334,6 +1636,65 @@
                 closeModal();
             }
         });
+
+        // -----------------------------
+        // ناوبری سایدبار
+        // -----------------------------
+        (function initSidebarNavigation() {
+            const sidebar = document.getElementById('dashboardSidebar');
+            if (!sidebar) return;
+
+            const links = Array.from(sidebar.querySelectorAll('.sidebar-link'));
+            if (!links.length) return;
+
+            const sections = links.map((link) => {
+                const hash = link.getAttribute('href');
+                if (!hash || !hash.startsWith('#')) {
+                    return null;
+                }
+                const section = document.getElementById(hash.slice(1));
+                return section ? { link, section } : null;
+            }).filter(Boolean);
+
+            if (!sections.length) return;
+
+            const setActiveLink = (targetLink) => {
+                links.forEach((item) => item.classList.remove('active'));
+                if (targetLink) {
+                    targetLink.classList.add('active');
+                }
+            };
+
+            links.forEach((link) => {
+                const hash = link.getAttribute('href');
+                if (!hash || !hash.startsWith('#')) {
+                    return;
+                }
+                link.addEventListener('click', (event) => {
+                    event.preventDefault();
+                    const targetSection = document.getElementById(hash.slice(1));
+                    if (!targetSection) return;
+                    targetSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    setActiveLink(link);
+                });
+            });
+
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach((entry) => {
+                    if (entry.isIntersecting) {
+                        const matched = sections.find((item) => item.section === entry.target);
+                        if (matched) {
+                            setActiveLink(matched.link);
+                        }
+                    }
+                });
+            }, {
+                rootMargin: '-45% 0px -45% 0px',
+                threshold: 0.1
+            });
+
+            sections.forEach((item) => observer.observe(item.section));
+        })();
 
         // -----------------------------
         // مدیریت پلن‌های خدماتی
@@ -1744,6 +2105,431 @@
                 } catch (error) {
                     console.error('Delete plan assignment failed', error);
                     setStatus(assignmentStatus, 'حذف پلن اختصاصی با مشکل مواجه شد.', 'error');
+                }
+            });
+
+            refreshBtn?.addEventListener('click', () => {
+                refreshData();
+            });
+
+            resetPlanFormUI();
+            refreshData(true);
+        })();
+
+        // -----------------------------
+        // مدیریت پلن‌های مغازه‌های عادی
+        // -----------------------------
+        (function initRetailPlanManagement() {
+            const planTableBody = document.getElementById('retailPlanTableBody');
+            const planForm = document.getElementById('retailPlanForm');
+            const planFormStatus = document.getElementById('retailPlanFormStatus');
+            const planFormTitle = document.getElementById('retailPlanFormTitle');
+            const planResetBtn = document.getElementById('retailPlanFormReset');
+            const planTitleInput = document.getElementById('retailPlanTitle');
+            const planSlugInput = document.getElementById('retailPlanSlug');
+            const planBasePriceInput = document.getElementById('retailBasePrice');
+            const planSetupFeeInput = document.getElementById('retailSetupFee');
+            const planCommissionInput = document.getElementById('retailCommission');
+            const planVisibilitySelect = document.getElementById('retailVisibility');
+            const planFeaturesInput = document.getElementById('retailPlanFeatures');
+            const planPriorityInput = document.getElementById('retailPriorityPlacement');
+            const planIsActiveInput = document.getElementById('retailPlanIsActive');
+            const planSubmitBtn = planForm?.querySelector('button[type="submit"]');
+
+            const assignmentForm = document.getElementById('retailPlanAssignmentForm');
+            const assignmentStatus = document.getElementById('retailAssignmentStatus');
+            const shopCodeInput = document.getElementById('retailShopCode');
+            const assignmentPlanSelect = document.getElementById('retailAssignmentPlanSelect');
+            const assignmentCustomPriceInput = document.getElementById('retailCustomPrice');
+            const assignmentMarketingInput = document.getElementById('retailMarketingBudget');
+            const assignmentBranchInput = document.getElementById('retailBranchCount');
+            const assignmentStartInput = document.getElementById('retailAssignmentStart');
+            const assignmentNotesInput = document.getElementById('retailAssignmentNotes');
+            const assignmentTableBody = document.getElementById('retailAssignmentTableBody');
+            const refreshBtn = document.getElementById('refreshRetailPlanData');
+
+            if (!planTableBody || !planForm || !assignmentForm || !assignmentTableBody) {
+                return;
+            }
+
+            const API_BASE = '/api/retail-plans';
+            const state = {
+                plans: [],
+                assignments: [],
+                editingPlanId: null,
+                loading: false
+            };
+
+            const clearStatus = (element) => {
+                if (!element) return;
+                element.textContent = '';
+                element.classList.remove('error', 'success');
+            };
+
+            const setStatus = (element, message, type = '') => {
+                if (!element) return;
+                element.textContent = message || '';
+                element.classList.remove('error', 'success');
+                if (type) {
+                    element.classList.add(type);
+                }
+            };
+
+            const formatMoney = (value) => {
+                if (value == null || Number.isNaN(Number(value))) {
+                    return '—';
+                }
+                return `${formatCurrency(Number(value))} تومان`;
+            };
+
+            const resetPlanFormUI = () => {
+                state.editingPlanId = null;
+                planForm.reset();
+                if (planVisibilitySelect) {
+                    planVisibilitySelect.value = 'standard';
+                }
+                if (planPriorityInput) {
+                    planPriorityInput.checked = false;
+                }
+                if (planIsActiveInput) {
+                    planIsActiveInput.checked = true;
+                }
+                planFormTitle.textContent = 'پلن فروشگاهی جدید';
+                if (planSubmitBtn) {
+                    planSubmitBtn.innerHTML = '<i class="ri-save-3-line"></i> ذخیره پلن فروشگاهی';
+                }
+                clearStatus(planFormStatus);
+            };
+
+            const renderPlanTable = () => {
+                if (!state.plans.length) {
+                    planTableBody.innerHTML = '<tr><td colspan="5" class="table-empty">هنوز پلنی برای مغازه‌های عادی ثبت نشده است.</td></tr>';
+                    return;
+                }
+
+                const visibilityLabels = {
+                    standard: 'نمایش استاندارد',
+                    highlighted: 'هایلایت vitrin',
+                    exclusive: 'vitrin پرو'
+                };
+
+                planTableBody.innerHTML = state.plans.map((plan) => {
+                    const features = Array.isArray(plan.features) ? plan.features : [];
+                    const visibilityLabel = visibilityLabels[plan.visibility] || 'نمایش سفارشی';
+                    const benefits = [
+                        plan.commission != null ? `${plan.commission}% کمیسیون` : 'بدون کمیسیون',
+                        plan.priorityPlacement ? 'جایگاه اولویت‌دار' : visibilityLabel
+                    ];
+                    if (features.length) {
+                        benefits.push(`ویژگی‌ها: ${features.slice(0, 3).join('، ')}`);
+                    }
+                    const statusClass = plan.isActive === false ? 'status-pill expired' : 'status-pill active';
+                    const statusText = plan.isActive === false ? 'غیرفعال' : 'فعال';
+
+                    return `
+                        <tr>
+                            <td>
+                                <div class="shop-title">${plan.title || '---'}</div>
+                                <div class="subtle-text">${plan.slug || ''}</div>
+                            </td>
+                            <td>
+                                <strong>${formatMoney(plan.basePrice)}</strong>
+                                <div class="subtle-text">${plan.setupFee ? `هزینه راه‌اندازی: ${formatMoney(plan.setupFee)}` : 'بدون هزینه راه‌اندازی'}</div>
+                            </td>
+                            <td>
+                                <div class="subtle-text">${benefits.join('<br>')}</div>
+                            </td>
+                            <td>
+                                <span class="${statusClass}">${statusText}</span>
+                            </td>
+                            <td>
+                                <div class="inline-actions">
+                                    <button type="button" class="link-button" data-action="edit-retail-plan" data-plan-id="${plan.id}"><i class="ri-edit-line"></i>ویرایش</button>
+                                    <button type="button" class="link-button danger" data-action="delete-retail-plan" data-plan-id="${plan.id}"><i class="ri-delete-bin-6-line"></i>حذف</button>
+                                </div>
+                            </td>
+                        </tr>
+                    `;
+                }).join('');
+            };
+
+            const populatePlanSelect = () => {
+                if (!assignmentPlanSelect) return;
+                const options = state.plans
+                    .filter((plan) => plan.isActive !== false)
+                    .map((plan) => `<option value="${plan.id}">${plan.title || plan.slug}</option>`)
+                    .join('');
+                assignmentPlanSelect.innerHTML = `<option value="" disabled selected>پلن مورد نظر را انتخاب کنید</option>${options}`;
+            };
+
+            const applyPlanFormValues = (plan) => {
+                state.editingPlanId = plan.id;
+                planTitleInput.value = plan.title || '';
+                planSlugInput.value = plan.slug || '';
+                planBasePriceInput.value = plan.basePrice != null ? plan.basePrice : '';
+                planSetupFeeInput.value = plan.setupFee != null ? plan.setupFee : '';
+                planCommissionInput.value = plan.commission != null ? plan.commission : '';
+                if (planVisibilitySelect) {
+                    planVisibilitySelect.value = plan.visibility || 'standard';
+                }
+                planFeaturesInput.value = Array.isArray(plan.features) ? plan.features.join('\n') : (plan.features || '');
+                if (planPriorityInput) {
+                    planPriorityInput.checked = Boolean(plan.priorityPlacement);
+                }
+                if (planIsActiveInput) {
+                    planIsActiveInput.checked = plan.isActive !== false;
+                }
+                planFormTitle.textContent = plan.title ? `ویرایش پلن «${plan.title}»` : 'پلن فروشگاهی جدید';
+                if (planSubmitBtn) {
+                    planSubmitBtn.innerHTML = '<i class="ri-save-3-line"></i> بروزرسانی پلن';
+                }
+            };
+
+            const renderAssignmentTable = () => {
+                if (!state.assignments.length) {
+                    assignmentTableBody.innerHTML = '<tr><td colspan="6" class="table-empty">قرارداد فعالی ثبت نشده است.</td></tr>';
+                    return;
+                }
+
+                const statusMap = {
+                    active: { className: 'status-pill active', label: 'فعال' },
+                    pending: { className: 'status-pill scheduled', label: 'در انتظار' },
+                    expired: { className: 'status-pill expired', label: 'پایان یافته' }
+                };
+
+                assignmentTableBody.innerHTML = state.assignments.map((item) => {
+                    const status = statusMap[item.status] || statusMap.active;
+                    const plan = state.plans.find((planItem) => planItem.id === item.planId) || {};
+                    const finalPrice = item.customPrice != null ? item.customPrice : plan.basePrice;
+
+                    return `
+                        <tr>
+                            <td>
+                                <div class="shop-title">${item.shopName || item.shopCode || '---'}</div>
+                                <div class="subtle-text">${item.shopCode || ''}</div>
+                            </td>
+                            <td>
+                                <div>${plan.title || '---'}</div>
+                                <div class="subtle-text">${plan.slug || ''}</div>
+                            </td>
+                            <td>
+                                <strong>${formatMoney(finalPrice)}</strong>
+                                ${item.branchCount ? `<div class="subtle-text">برای ${formatCurrency(item.branchCount)} شعبه</div>` : ''}
+                            </td>
+                            <td>
+                                ${item.marketingBudget ? `<strong>${formatMoney(item.marketingBudget)}</strong>` : '<span class="subtle-text">بدون بودجه تبلیغات</span>'}
+                                ${item.startDate ? `<div class="subtle-text">شروع: ${item.startDate}</div>` : ''}
+                            </td>
+                            <td>
+                                <span class="${status.className}">${status.label}</span>
+                            </td>
+                            <td>
+                                <div class="inline-actions">
+                                    <button type="button" class="link-button danger" data-action="delete-retail-assignment" data-assignment-id="${item.id}"><i class="ri-close-circle-line"></i>لغو</button>
+                                </div>
+                            </td>
+                        </tr>
+                    `;
+                }).join('');
+            };
+
+            const fetchPlans = async () => {
+                const response = await fetch(API_BASE, { credentials: 'include' });
+                if (!response.ok) {
+                    throw new Error('RETAIL_PLANS_FETCH_FAILED');
+                }
+                const data = await response.json().catch(() => ({}));
+                const plans = Array.isArray(data?.plans) ? data.plans : [];
+                state.plans = plans;
+                renderPlanTable();
+                populatePlanSelect();
+            };
+
+            const fetchAssignments = async () => {
+                const response = await fetch(`${API_BASE}/assignments`, { credentials: 'include' });
+                if (!response.ok) {
+                    throw new Error('RETAIL_ASSIGNMENTS_FETCH_FAILED');
+                }
+                const data = await response.json().catch(() => ({}));
+                const assignments = Array.isArray(data?.assignments) ? data.assignments : [];
+                state.assignments = assignments;
+                renderAssignmentTable();
+            };
+
+            const refreshData = async (silent = false) => {
+                if (state.loading) return;
+                state.loading = true;
+                refreshBtn?.classList.add('is-loading');
+                try {
+                    await Promise.all([fetchPlans(), fetchAssignments()]);
+                    if (!silent) {
+                        setStatus(planFormStatus, 'اطلاعات قراردادهای فروشگاهی بروزرسانی شد.', 'success');
+                    }
+                } catch (error) {
+                    console.error('Retail plan refresh failed', error);
+                    setStatus(planFormStatus, 'بروزرسانی اطلاعات فروشگاهی با خطا مواجه شد.', 'error');
+                } finally {
+                    state.loading = false;
+                    refreshBtn?.classList.remove('is-loading');
+                }
+            };
+
+            planForm.addEventListener('submit', async (event) => {
+                event.preventDefault();
+                clearStatus(planFormStatus);
+
+                const payload = {
+                    title: planTitleInput.value.trim(),
+                    slug: planSlugInput.value.trim(),
+                    basePrice: planBasePriceInput.value ? Number(planBasePriceInput.value) : null,
+                    setupFee: planSetupFeeInput.value ? Number(planSetupFeeInput.value) : 0,
+                    commission: planCommissionInput.value ? Number(planCommissionInput.value) : null,
+                    visibility: planVisibilitySelect?.value || 'standard',
+                    features: planFeaturesInput.value
+                        .split('\n')
+                        .map((item) => item.trim())
+                        .filter(Boolean),
+                    priorityPlacement: Boolean(planPriorityInput?.checked),
+                    isActive: planIsActiveInput ? Boolean(planIsActiveInput.checked) : true
+                };
+
+                if (!payload.title || !payload.slug || payload.basePrice == null) {
+                    setStatus(planFormStatus, 'عنوان، اسلاگ و مبلغ اشتراک الزامی است.', 'error');
+                    return;
+                }
+
+                try {
+                    const method = state.editingPlanId ? 'PUT' : 'POST';
+                    const endpoint = state.editingPlanId ? `${API_BASE}/${state.editingPlanId}` : API_BASE;
+                    const response = await fetch(endpoint, {
+                        method,
+                        headers: { 'Content-Type': 'application/json' },
+                        credentials: 'include',
+                        body: JSON.stringify(payload)
+                    });
+
+                    if (!response.ok) {
+                        const errorBody = await response.json().catch(() => ({}));
+                        const message = errorBody?.message || 'ذخیره‌سازی پلن فروشگاهی امکان‌پذیر نبود.';
+                        throw new Error(message);
+                    }
+
+                    await refreshData(true);
+                    setStatus(planFormStatus, 'پلن فروشگاهی با موفقیت ذخیره شد.', 'success');
+                    resetPlanFormUI();
+                } catch (error) {
+                    console.error('Retail plan save failed', error);
+                    setStatus(planFormStatus, error.message || 'خطا در ذخیره‌سازی پلن فروشگاهی.', 'error');
+                }
+            });
+
+            planResetBtn?.addEventListener('click', () => {
+                resetPlanFormUI();
+            });
+
+            planTableBody.addEventListener('click', async (event) => {
+                const button = event.target.closest('button[data-action]');
+                if (!button) return;
+                const planId = button.dataset.planId;
+                if (!planId) return;
+
+                if (button.dataset.action === 'edit-retail-plan') {
+                    const plan = state.plans.find((item) => item.id === planId);
+                    if (plan) {
+                        applyPlanFormValues(plan);
+                        clearStatus(planFormStatus);
+                    }
+                }
+
+                if (button.dataset.action === 'delete-retail-plan') {
+                    if (!confirm('آیا از حذف این پلن فروشگاهی اطمینان دارید؟')) {
+                        return;
+                    }
+                    try {
+                        const response = await fetch(`${API_BASE}/${planId}`, {
+                            method: 'DELETE',
+                            credentials: 'include'
+                        });
+                        if (!response.ok && response.status !== 204) {
+                            throw new Error('RETAIL_PLAN_DELETE_FAILED');
+                        }
+                        if (state.editingPlanId === planId) {
+                            resetPlanFormUI();
+                        }
+                        await refreshData(true);
+                        setStatus(planFormStatus, 'پلن فروشگاهی حذف شد.', 'success');
+                    } catch (error) {
+                        console.error('Delete retail plan failed', error);
+                        setStatus(planFormStatus, 'حذف پلن فروشگاهی با خطا مواجه شد.', 'error');
+                    }
+                }
+            });
+
+            assignmentForm.addEventListener('submit', async (event) => {
+                event.preventDefault();
+                clearStatus(assignmentStatus);
+
+                const payload = {
+                    shopCode: shopCodeInput.value.trim(),
+                    planId: assignmentPlanSelect.value,
+                    customPrice: assignmentCustomPriceInput.value ? Number(assignmentCustomPriceInput.value) : undefined,
+                    marketingBudget: assignmentMarketingInput.value ? Number(assignmentMarketingInput.value) : undefined,
+                    branchCount: assignmentBranchInput.value ? Number(assignmentBranchInput.value) : undefined,
+                    startDate: assignmentStartInput.value || undefined,
+                    notes: assignmentNotesInput.value.trim()
+                };
+
+                if (!payload.shopCode || !payload.planId) {
+                    setStatus(assignmentStatus, 'کد فروشگاه و انتخاب پلن الزامی است.', 'error');
+                    return;
+                }
+
+                try {
+                    const response = await fetch(`${API_BASE}/assignments`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        credentials: 'include',
+                        body: JSON.stringify(payload)
+                    });
+
+                    if (!response.ok) {
+                        const errorBody = await response.json().catch(() => ({}));
+                        const message = errorBody?.message || 'ثبت قرارداد فروشگاهی انجام نشد.';
+                        throw new Error(message);
+                    }
+
+                    assignmentForm.reset();
+                    setStatus(assignmentStatus, 'قرارداد فروشگاهی با موفقیت ثبت شد.', 'success');
+                    await fetchAssignments();
+                } catch (error) {
+                    console.error('Retail plan assignment failed', error);
+                    setStatus(assignmentStatus, error.message || 'خطا در ثبت قرارداد فروشگاهی.', 'error');
+                }
+            });
+
+            assignmentTableBody.addEventListener('click', async (event) => {
+                const button = event.target.closest('button[data-action="delete-retail-assignment"]');
+                if (!button) return;
+                const assignmentId = button.dataset.assignmentId;
+                if (!assignmentId) return;
+
+                if (!confirm('آیا از لغو این قرارداد فروشگاهی مطمئن هستید؟')) {
+                    return;
+                }
+
+                try {
+                    const response = await fetch(`${API_BASE}/assignments/${assignmentId}`, {
+                        method: 'DELETE',
+                        credentials: 'include'
+                    });
+                    if (!response.ok && response.status !== 204) {
+                        throw new Error('RETAIL_ASSIGNMENT_DELETE_FAILED');
+                    }
+                    await fetchAssignments();
+                    setStatus(assignmentStatus, 'قرارداد فروشگاهی حذف شد.', 'success');
+                } catch (error) {
+                    console.error('Delete retail assignment failed', error);
+                    setStatus(assignmentStatus, 'حذف قرارداد فروشگاهی با خطا روبرو شد.', 'error');
                 }
             });
 
