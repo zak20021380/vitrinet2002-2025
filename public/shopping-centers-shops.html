@@ -277,7 +277,7 @@
       margin: 30px auto 40px;
       padding: 0 20px;
     }
-    
+
     .search-filter-container {
       background: #fff;
       border-radius: 18px;
@@ -286,7 +286,7 @@
       position: relative;
       z-index: 10;
     }
-    
+
     .section-title {
       color: white;
       font-weight: 700;
@@ -305,14 +305,14 @@
       -webkit-text-fill-color: transparent;
       text-align: center;
     }
-    
+
     .filter-tabs {
       display: flex;
       justify-content: center;
       gap: 20px;
       margin-bottom: 20px;
     }
-    
+
     .filter-tab {
       padding: 10px 20px;
       border-radius: 20px;
@@ -323,19 +323,19 @@
       color: var(--gray);
       background: var(--light-gray);
     }
-    
+
     .filter-tab.active {
       background: linear-gradient(90deg, var(--secondary), var(--primary));
       color: white;
     }
-    
+
     .search-filter-bar {
       display: flex;
       flex-wrap: wrap;
       gap: 16px;
       margin-top: 15px;
     }
-    
+
     .search-box {
       flex: 1;
       min-width: 300px;
@@ -348,12 +348,12 @@
       box-shadow: 0 2px 10px rgba(14, 165, 233, 0.1);
       transition: var(--transition);
     }
-    
+
     .search-box:focus-within {
       border-color: var(--primary);
       box-shadow: 0 2px 15px rgba(14, 165, 233, 0.2);
     }
-    
+
     .search-box input {
       border: none;
       background: transparent;
@@ -364,11 +364,11 @@
       padding: 14px 10px;
       color: var(--primary-dark);
     }
-    
+
     .search-box input::placeholder {
       color: #94a3b8;
     }
-    
+
     .search-icon {
       font-size: 1.4rem;
       margin-left: 10px;
@@ -389,6 +389,235 @@
 
     .filter-select:hover {
       border-color: var(--primary);
+    }
+
+    /* فیلترهای پیشرفته */
+    .advanced-filters {
+      margin-top: 20px;
+      padding-top: 20px;
+      border-top: 2px dashed #e0fdfa;
+    }
+
+    .filter-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 15px;
+      align-items: center;
+    }
+
+    .filter-label {
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--primary-dark);
+      min-width: 100px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .filter-label i {
+      color: var(--secondary);
+    }
+
+    .filter-chips-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      flex: 1;
+    }
+
+    .filter-chip {
+      padding: 7px 16px;
+      border-radius: 16px;
+      background: var(--light-gray);
+      color: var(--gray);
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: var(--transition);
+      border: 2px solid transparent;
+      user-select: none;
+    }
+
+    .filter-chip:hover {
+      background: var(--light);
+      border-color: var(--primary);
+      color: var(--primary-dark);
+      transform: translateY(-2px);
+    }
+
+    .filter-chip.active {
+      background: linear-gradient(90deg, var(--secondary), var(--primary));
+      color: white;
+      border-color: transparent;
+      box-shadow: 0 3px 10px rgba(14, 165, 233, 0.3);
+    }
+
+    .filter-actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 15px;
+      justify-content: center;
+    }
+
+    .filter-btn {
+      padding: 10px 25px;
+      border-radius: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: var(--transition);
+      border: none;
+      font-size: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .filter-btn-clear {
+      background: var(--light-gray);
+      color: var(--gray);
+    }
+
+    .filter-btn-clear:hover {
+      background: #e2e8f0;
+      color: var(--dark);
+    }
+
+    /* نمای موبایل برای فیلترها */
+    .mobile-filter-toggle {
+      display: none;
+      width: 100%;
+      padding: 14px 20px;
+      border-radius: 12px;
+      background: linear-gradient(90deg, var(--secondary), var(--primary));
+      color: white;
+      font-weight: 700;
+      font-size: 1.1rem;
+      border: none;
+      cursor: pointer;
+      transition: var(--transition);
+      margin-top: 15px;
+      gap: 10px;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .mobile-filter-toggle:active {
+      transform: scale(0.98);
+    }
+
+    .filters-overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 999;
+      animation: fadeIn 0.3s ease;
+    }
+
+    .filters-drawer {
+      position: fixed;
+      top: 0;
+      right: -100%;
+      width: 85%;
+      max-width: 400px;
+      height: 100%;
+      background: white;
+      z-index: 1000;
+      transition: right 0.3s ease;
+      overflow-y: auto;
+      padding: 20px;
+      box-shadow: -4px 0 15px rgba(0, 0, 0, 0.2);
+    }
+
+    .filters-drawer.open {
+      right: 0;
+    }
+
+    .filters-drawer-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 25px;
+      padding-bottom: 15px;
+      border-bottom: 2px solid #e0fdfa;
+    }
+
+    .filters-drawer-title {
+      font-size: 1.4rem;
+      font-weight: 800;
+      background: linear-gradient(90deg, var(--secondary), var(--primary));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .filters-drawer-close {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: var(--light-gray);
+      border: none;
+      cursor: pointer;
+      transition: var(--transition);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.3rem;
+      color: var(--gray);
+    }
+
+    .filters-drawer-close:hover {
+      background: #e2e8f0;
+      color: var(--dark);
+    }
+
+    .active-filters-count {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 24px;
+      height: 24px;
+      padding: 0 8px;
+      border-radius: 12px;
+      background: #ef4444;
+      color: white;
+      font-size: 0.85rem;
+      font-weight: 700;
+      margin-right: 8px;
+    }
+
+    @media (max-width: 900px) {
+      .advanced-filters {
+        display: none;
+      }
+
+      .mobile-filter-toggle {
+        display: flex;
+      }
+
+      .filters-overlay.open {
+        display: block;
+      }
+
+      .search-box, .filter-select {
+        min-width: 100%;
+      }
+    }
+
+    @media (max-width: 600px) {
+      .filters-drawer {
+        width: 100%;
+        max-width: 100%;
+      }
+
+      .filter-chip {
+        font-size: 0.85rem;
+        padding: 6px 14px;
+      }
     }
     
     /* لیست مغازه‌ها و محصولات */
@@ -813,29 +1042,152 @@
         <div class="filter-tab active" data-type="shops">مغازه‌ها</div>
         <div class="filter-tab" data-type="products">محصولات</div>
       </div>
-      
+
       <div class="search-filter-bar">
         <div class="search-box">
           <span class="search-icon"><i class="fas fa-search"></i></span>
           <input id="searchInput" type="text" placeholder="جستجوی نام مغازه یا محصول..." autocomplete="off">
         </div>
-        <select id="priceFilter" class="filter-select">
-          <option value="">فیلتر قیمت</option>
-          <option value="0-100000">زیر ۱۰۰,۰۰۰ تومان</option>
-          <option value="100000-500000">۱۰۰,۰۰۰ تا ۵۰۰,۰۰۰ تومان</option>
-          <option value="500000-1000000">۵۰۰,۰۰۰ تا ۱,۰۰۰,۰۰۰ تومان</option>
-          <option value="1000000">بالای ۱,۰۰۰,۰۰۰ تومان</option>
-        </select>
-        <select id="categoryFilter" class="filter-select">
-          <option value="">فیلتر دسته‌بندی</option>
-          <option value="electronics">الکترونیک</option>
-          <option value="clothing">پوشاک</option>
-          <option value="books">کتاب</option>
-          <option value="other">سایر</option>
-        </select>
       </div>
+
+      <!-- فیلترهای پیشرفته (دسکتاپ) -->
+      <div class="advanced-filters" id="advancedFilters">
+        <!-- فیلترهای محصولات -->
+        <div id="productFilters" style="display: none;">
+          <div class="filter-group">
+            <div class="filter-label">
+              <i class="fas fa-tags"></i>
+              قیمت:
+            </div>
+            <div class="filter-chips-container">
+              <div class="filter-chip" data-filter="price" data-value="0-100000">زیر ۱۰۰ هزار</div>
+              <div class="filter-chip" data-filter="price" data-value="100000-500000">۱۰۰ تا ۵۰۰ هزار</div>
+              <div class="filter-chip" data-filter="price" data-value="500000-1000000">۵۰۰ هزار تا ۱ میلیون</div>
+              <div class="filter-chip" data-filter="price" data-value="1000000-">بالای ۱ میلیون</div>
+            </div>
+          </div>
+
+          <div class="filter-group">
+            <div class="filter-label">
+              <i class="fas fa-th-large"></i>
+              دسته‌بندی:
+            </div>
+            <div class="filter-chips-container">
+              <div class="filter-chip" data-filter="category" data-value="الکترونیک">الکترونیک</div>
+              <div class="filter-chip" data-filter="category" data-value="پوشاک">پوشاک</div>
+              <div class="filter-chip" data-filter="category" data-value="کتاب">کتاب</div>
+              <div class="filter-chip" data-filter="category" data-value="لوازم خانگی">لوازم خانگی</div>
+              <div class="filter-chip" data-filter="category" data-value="آرایشی">آرایشی</div>
+              <div class="filter-chip" data-filter="category" data-value="غذا">غذا</div>
+              <div class="filter-chip" data-filter="category" data-value="سایر">سایر</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- فیلترهای مغازه‌ها -->
+        <div id="shopFilters">
+          <div class="filter-group">
+            <div class="filter-label">
+              <i class="fas fa-store"></i>
+              نوع فروشگاه:
+            </div>
+            <div class="filter-chips-container">
+              <div class="filter-chip" data-filter="shopType" data-value="الکترونیک">الکترونیک</div>
+              <div class="filter-chip" data-filter="shopType" data-value="پوشاک">پوشاک</div>
+              <div class="filter-chip" data-filter="shopType" data-value="کتاب">کتاب</div>
+              <div class="filter-chip" data-filter="shopType" data-value="غذا">غذا و نوشیدنی</div>
+              <div class="filter-chip" data-filter="shopType" data-value="لوازم">لوازم خانگی</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="filter-actions">
+          <button class="filter-btn filter-btn-clear" id="clearFilters">
+            <i class="fas fa-times"></i>
+            پاک کردن فیلترها
+          </button>
+        </div>
+      </div>
+
+      <!-- دکمه فیلتر موبایل -->
+      <button class="mobile-filter-toggle" id="mobileFilterToggle">
+        <i class="fas fa-filter"></i>
+        فیلترهای پیشرفته
+        <span class="active-filters-count" id="activeFiltersCount" style="display: none;">0</span>
+      </button>
     </div>
   </section>
+
+  <!-- کشوی فیلتر موبایل -->
+  <div class="filters-overlay" id="filtersOverlay"></div>
+  <div class="filters-drawer" id="filtersDrawer">
+    <div class="filters-drawer-header">
+      <div class="filters-drawer-title">فیلترهای پیشرفته</div>
+      <button class="filters-drawer-close" id="closeFiltersDrawer">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+
+    <!-- فیلترهای محصولات در موبایل -->
+    <div id="productFiltersMobile" style="display: none;">
+      <div class="filter-group">
+        <div class="filter-label">
+          <i class="fas fa-tags"></i>
+          قیمت:
+        </div>
+        <div class="filter-chips-container">
+          <div class="filter-chip" data-filter="price" data-value="0-100000">زیر ۱۰۰ هزار</div>
+          <div class="filter-chip" data-filter="price" data-value="100000-500000">۱۰۰ تا ۵۰۰ هزار</div>
+          <div class="filter-chip" data-filter="price" data-value="500000-1000000">۵۰۰ هزار تا ۱ میلیون</div>
+          <div class="filter-chip" data-filter="price" data-value="1000000-">بالای ۱ میلیون</div>
+        </div>
+      </div>
+
+      <div class="filter-group">
+        <div class="filter-label">
+          <i class="fas fa-th-large"></i>
+          دسته‌بندی:
+        </div>
+        <div class="filter-chips-container">
+          <div class="filter-chip" data-filter="category" data-value="الکترونیک">الکترونیک</div>
+          <div class="filter-chip" data-filter="category" data-value="پوشاک">پوشاک</div>
+          <div class="filter-chip" data-filter="category" data-value="کتاب">کتاب</div>
+          <div class="filter-chip" data-filter="category" data-value="لوازم خانگی">لوازم خانگی</div>
+          <div class="filter-chip" data-filter="category" data-value="آرایشی">آرایشی</div>
+          <div class="filter-chip" data-filter="category" data-value="غذا">غذا</div>
+          <div class="filter-chip" data-filter="category" data-value="سایر">سایر</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- فیلترهای مغازه‌ها در موبایل -->
+    <div id="shopFiltersMobile">
+      <div class="filter-group">
+        <div class="filter-label">
+          <i class="fas fa-store"></i>
+          نوع فروشگاه:
+        </div>
+        <div class="filter-chips-container">
+          <div class="filter-chip" data-filter="shopType" data-value="الکترونیک">الکترونیک</div>
+          <div class="filter-chip" data-filter="shopType" data-value="پوشاک">پوشاک</div>
+          <div class="filter-chip" data-filter="shopType" data-value="کتاب">کتاب</div>
+          <div class="filter-chip" data-filter="shopType" data-value="غذا">غذا و نوشیدنی</div>
+          <div class="filter-chip" data-filter="shopType" data-value="لوازم">لوازم خانگی</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="filter-actions">
+      <button class="filter-btn filter-btn-clear" id="clearFiltersMobile">
+        <i class="fas fa-times"></i>
+        پاک کردن
+      </button>
+      <button class="filter-btn filter-btn-apply" id="applyFiltersMobile">
+        <i class="fas fa-check"></i>
+        اعمال فیلترها
+      </button>
+    </div>
+  </div>
 
   <!-- لیست آیتم‌ها -->
   <div class="main-container">
@@ -906,13 +1258,29 @@
 
     const centerTitleElement = document.getElementById('center-title');
     const listDiv = document.getElementById('items-list');
-    const searchInput = document.getElementById('searchInput'); // اصلاح typo از "searchInput"
-    const priceFilter = document.getElementById('priceFilter');
-    const categoryFilter = document.getElementById('categoryFilter'); // اصلاح typo از "categoryFilter"
+    const searchInput = document.getElementById('searchInput');
     const filterTabs = document.querySelectorAll('.filter-tab');
+    const filterChips = document.querySelectorAll('.filter-chip');
+    const clearFiltersBtn = document.getElementById('clearFilters');
+    const clearFiltersMobileBtn = document.getElementById('clearFiltersMobile');
+    const mobileFilterToggle = document.getElementById('mobileFilterToggle');
+    const filtersOverlay = document.getElementById('filtersOverlay');
+    const filtersDrawer = document.getElementById('filtersDrawer');
+    const closeFiltersDrawer = document.getElementById('closeFiltersDrawer');
+    const applyFiltersMobile = document.getElementById('applyFiltersMobile');
+    const activeFiltersCount = document.getElementById('activeFiltersCount');
+    const productFilters = document.getElementById('productFilters');
+    const shopFilters = document.getElementById('shopFilters');
+    const productFiltersMobile = document.getElementById('productFiltersMobile');
+    const shopFiltersMobile = document.getElementById('shopFiltersMobile');
 
     let currentType = 'shops';
     let allItems = [];
+    let activeFilters = {
+      price: null,
+      category: null,
+      shopType: null
+    };
 
     // لود اولیه با اسکلتون
     function showSkeleton() {
@@ -934,28 +1302,59 @@
         `;
       }
     }
-    
+
+    // به‌روزرسانی تعداد فیلترهای فعال
+    function updateActiveFiltersCount() {
+      const count = Object.values(activeFilters).filter(v => v !== null).length;
+      if (count > 0) {
+        activeFiltersCount.textContent = count;
+        activeFiltersCount.style.display = 'inline-flex';
+      } else {
+        activeFiltersCount.style.display = 'none';
+      }
+    }
+
     // فیلتر کردن آیتم‌ها
     function filterItems(items) {
       let filtered = items;
       const term = searchInput.value.trim().toLowerCase();
+
+      // فیلتر جستجو
       if (term) {
-        filtered = filtered.filter(item => (item.customUrl || item.title || '').toLowerCase().includes(term));
+        filtered = filtered.filter(item =>
+          (item.customUrl || item.title || '').toLowerCase().includes(term)
+        );
       }
 
+      // فیلترهای محصولات
       if (currentType === 'products') {
-        const priceRange = priceFilter.value;
-        if (priceRange) {
-          const [min, max] = priceRange.split('-').map(v => v ? parseInt(v) : Infinity);
+        // فیلتر قیمت
+        if (activeFilters.price) {
+          const priceValue = activeFilters.price;
           filtered = filtered.filter(item => {
             const price = parseInt(item.price) || 0;
-            return price >= (min || 0) && price < (max || Infinity);
+            if (priceValue === '0-100000') return price < 100000;
+            if (priceValue === '100000-500000') return price >= 100000 && price < 500000;
+            if (priceValue === '500000-1000000') return price >= 500000 && price < 1000000;
+            if (priceValue === '1000000-') return price >= 1000000;
+            return true;
           });
         }
 
-        const category = categoryFilter.value;
-        if (category) {
-          filtered = filtered.filter(item => (item.category || '').toLowerCase() === category.toLowerCase());
+        // فیلتر دسته‌بندی
+        if (activeFilters.category) {
+          filtered = filtered.filter(item =>
+            (item.category || '').includes(activeFilters.category)
+          );
+        }
+      }
+
+      // فیلترهای مغازه‌ها
+      if (currentType === 'shops') {
+        if (activeFilters.shopType) {
+          filtered = filtered.filter(item =>
+            (item.shopCategory || item.customUrl || '').includes(activeFilters.shopType)
+          );
         }
       }
 
@@ -1047,19 +1446,91 @@
       }
     }
     
+    // مدیریت کلیک روی چیپ فیلتر
+    filterChips.forEach(chip => {
+      chip.addEventListener('click', function() {
+        const filterType = this.dataset.filter;
+        const filterValue = this.dataset.value;
+
+        // اگر این فیلتر قبلاً فعال بود، غیرفعال می‌شود
+        if (this.classList.contains('active')) {
+          this.classList.remove('active');
+          activeFilters[filterType] = null;
+        } else {
+          // غیرفعال کردن سایر فیلترهای همان نوع
+          document.querySelectorAll(`.filter-chip[data-filter="${filterType}"]`).forEach(c => {
+            c.classList.remove('active');
+          });
+          this.classList.add('active');
+          activeFilters[filterType] = filterValue;
+        }
+
+        renderItems(allItems);
+        updateActiveFiltersCount();
+      });
+    });
+
+    // پاک کردن تمام فیلترها
+    function clearAllFilters() {
+      activeFilters = {
+        price: null,
+        category: null,
+        shopType: null
+      };
+      filterChips.forEach(chip => chip.classList.remove('active'));
+      renderItems(allItems);
+      updateActiveFiltersCount();
+    }
+
+    clearFiltersBtn.addEventListener('click', clearAllFilters);
+    clearFiltersMobileBtn.addEventListener('click', clearAllFilters);
+
     // سوئیچ تب
     filterTabs.forEach(tab => {
       tab.addEventListener('click', () => {
         filterTabs.forEach(t => t.classList.remove('active'));
         tab.classList.add('active');
-        loadData(tab.dataset.type);
+
+        const type = tab.dataset.type;
+        currentType = type;
+
+        // نمایش/مخفی کردن فیلترهای مناسب
+        if (type === 'products') {
+          if (productFilters) productFilters.style.display = 'block';
+          if (shopFilters) shopFilters.style.display = 'none';
+          if (productFiltersMobile) productFiltersMobile.style.display = 'block';
+          if (shopFiltersMobile) shopFiltersMobile.style.display = 'none';
+        } else {
+          if (productFilters) productFilters.style.display = 'none';
+          if (shopFilters) shopFilters.style.display = 'block';
+          if (productFiltersMobile) productFiltersMobile.style.display = 'none';
+          if (shopFiltersMobile) shopFiltersMobile.style.display = 'block';
+        }
+
+        loadData(type);
       });
     });
-    
-    // جستجو و فیلترها
+
+    // جستجو
     searchInput.addEventListener('input', () => renderItems(allItems));
-    priceFilter.addEventListener('change', () => renderItems(allItems));
-    categoryFilter.addEventListener('change', () => renderItems(allItems));
+
+    // مدیریت کشوی موبایل
+    function openFiltersDrawer() {
+      filtersDrawer.classList.add('open');
+      filtersOverlay.classList.add('open');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeFiltersDrawerFunc() {
+      filtersDrawer.classList.remove('open');
+      filtersOverlay.classList.remove('open');
+      document.body.style.overflow = '';
+    }
+
+    mobileFilterToggle.addEventListener('click', openFiltersDrawer);
+    closeFiltersDrawer.addEventListener('click', closeFiltersDrawerFunc);
+    filtersOverlay.addEventListener('click', closeFiltersDrawerFunc);
+    applyFiltersMobile.addEventListener('click', closeFiltersDrawerFunc);
     
     async function loadCenterInfo() {
       try {
