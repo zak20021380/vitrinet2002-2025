@@ -2,17 +2,19 @@ const express = require('express');
 const router = express.Router();
 const ShopAppearance = require('../models/ShopAppearance');
 const Seller = require('../models/Seller');
+const ServiceShop = require('../models/serviceShop');
 const Product = require('../models/product'); // اضافه شده برای گرفتن محصولات
 const dailyVisitCtrl = require('../controllers/dailyVisitController');
 
-// دریافت لیست همه فروشگاه‌ها از مدل Seller
+// دریافت لیست همه فروشگاه‌ها از مدل Seller و ServiceShop
 router.get('/', async (req, res) => {
   try {
+    // دریافت فروشگاه‌های عادی از Seller
     const sellers = await Seller.find({},
       'storename category subcategory shopurl address desc isPremium boardImage'
     ).lean();
 
-    const result = sellers.map(seller => ({
+    const sellerResults = sellers.map(seller => ({
       id: seller._id,
       storename: seller.storename || '',
       category: seller.category || '',
@@ -21,8 +23,34 @@ router.get('/', async (req, res) => {
       address: seller.address || '',
       desc: seller.desc || '',
       isPremium: !!seller.isPremium,
-      image: seller.boardImage || ''
+      image: seller.boardImage || '',
+      tags: []
     }));
+
+    // دریافت سرویس‌شاپ‌ها (آرایشگاه‌ها، کارواش‌ها، و...)
+    const serviceShops = await ServiceShop.find(
+      { status: { $in: ['approved', 'pending'] }, isVisible: true },
+      'name category subcategories tags shopUrl address description city isPremium coverImage premiumUntil'
+    ).lean();
+
+    const serviceShopResults = serviceShops.map(shop => ({
+      id: shop._id,
+      storename: shop.name || '',
+      category: shop.category || '',
+      subcategory: (shop.subcategories && shop.subcategories.length > 0)
+        ? shop.subcategories.join(', ')
+        : '',
+      shopurl: shop.shopUrl || '',
+      address: shop.address || '',
+      city: shop.city || '',
+      desc: shop.description || '',
+      isPremium: !!(shop.isPremium && shop.premiumUntil && new Date(shop.premiumUntil) > new Date()),
+      image: shop.coverImage || '',
+      tags: shop.tags || []
+    }));
+
+    // ترکیب هر دو لیست
+    const result = [...sellerResults, ...serviceShopResults];
 
     res.json(result);
   } catch (err) {
