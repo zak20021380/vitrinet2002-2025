@@ -676,7 +676,12 @@
   <script>
     // تنظیم تاریخ امروز
     const today = new Date();
-    const persianDate = today.toLocaleDateString('fa-IR');
+    const persianDate = new Intl.DateTimeFormat('fa-IR', {
+      calendar: 'persian',
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit'
+    }).format(today);
     document.getElementById('currentDate').textContent = `امروز: ${persianDate}`;
     
     // تنظیم تاریخ‌های پیش‌فرض برای فیلتر

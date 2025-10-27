@@ -615,7 +615,13 @@
         tbody.innerHTML = '';
         visits.sort((a, b) => b.date.localeCompare(a.date)).forEach(v => {
           const tr = document.createElement('tr');
-          tr.innerHTML = `<td>${new Date(v.date).toLocaleDateString('fa-IR')}</td><td>${toFa(v.count)}</td>`;
+          const persianDate = new Intl.DateTimeFormat('fa-IR', {
+            calendar: 'persian',
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit'
+          }).format(new Date(v.date));
+          tr.innerHTML = `<td>${persianDate}</td><td>${toFa(v.count)}</td>`;
           tbody.appendChild(tr);
         });
       }
@@ -631,7 +637,11 @@
         });
         Object.entries(groups).sort((a, b) => b[0].localeCompare(a[0])).forEach(([m, cnt]) => {
           const [y, mon] = m.split('-');
-          const faDate = new Intl.DateTimeFormat('fa-IR', { year: 'numeric', month: 'long' }).format(new Date(y, mon - 1, 1));
+          const faDate = new Intl.DateTimeFormat('fa-IR', {
+            calendar: 'persian',
+            year: 'numeric',
+            month: 'long'
+          }).format(new Date(y, mon - 1, 1));
           const tr = document.createElement('tr');
           tr.innerHTML = `<td>${faDate}</td><td>${toFa(cnt)}</td>`;
           tbody.appendChild(tr);

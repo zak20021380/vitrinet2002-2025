@@ -41,7 +41,12 @@ async function fetchMsgs(){
     const sender = isAdminSender
       ? 'مدیر سایت'
       : (m.senderId?.firstname?`${m.senderId.firstname} ${m.senderId.lastname}`.trim():m.senderId?.phone||'مشتری');
-    return `<div class="${isAdminSender?'text-right':'text-left'}"><div class="inline-block px-2 py-1 rounded ${isAdminSender?'bg-blue-100':'bg-gray-200'}">${sender}: ${m.message}</div><div class="text-xs text-gray-400">${new Date(m.timestamp).toLocaleString('fa-IR')}</div></div>`;
+    const persianDateTime = new Intl.DateTimeFormat('fa-IR', {
+      calendar: 'persian',
+      dateStyle: 'medium',
+      timeStyle: 'short'
+    }).format(new Date(m.timestamp));
+    return `<div class="${isAdminSender?'text-right':'text-left'}"><div class="inline-block px-2 py-1 rounded ${isAdminSender?'bg-blue-100':'bg-gray-200'}">${sender}: ${m.message}</div><div class="text-xs text-gray-400">${persianDateTime}</div></div>`;
   }).join('');
   box.scrollTop=box.scrollHeight;
 }

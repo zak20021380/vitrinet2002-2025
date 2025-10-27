@@ -428,10 +428,7 @@ function formatNoteForDisplay(note) {
 function formatDateTime(value) {
   if (!value) return '';
   try {
-    return new Date(value).toLocaleString('fa-IR', {
-      dateStyle: 'medium',
-      timeStyle: 'short'
-    });
+    return persianDateTimeFormatter.format(new Date(value));
   } catch (err) {
     return '';
   }
@@ -1233,7 +1230,16 @@ function initCategoryManager() {
 }
 
 const numberFormatter = new Intl.NumberFormat('fa-IR');
-const persianDateFormatter = new Intl.DateTimeFormat('fa-IR', { month: 'numeric', day: 'numeric' });
+const persianDateFormatter = new Intl.DateTimeFormat('fa-IR', {
+  calendar: 'persian',
+  month: 'numeric',
+  day: 'numeric'
+});
+const persianDateTimeFormatter = new Intl.DateTimeFormat('fa-IR', {
+  calendar: 'persian',
+  dateStyle: 'medium',
+  timeStyle: 'short'
+});
 
 let dashboardSummary = {
   visitsToday: 0,
@@ -1372,7 +1378,7 @@ function formatCurrency(amount) {
 function formatDateTime(value) {
   if (!value) return '—';
   try {
-    return new Date(value).toLocaleString('fa-IR', { dateStyle: 'medium', timeStyle: 'short' });
+    return persianDateTimeFormatter.format(new Date(value));
   } catch (err) {
     return '—';
   }
@@ -2981,14 +2987,15 @@ function renderMessages() {
     const raw = lastMsg && (lastMsg.createdAt || lastMsg.date);
     const dt = raw ? new Date(raw) : null;
     const faDate = (dt && !isNaN(dt.valueOf()))
-      ? dt.toLocaleString('fa-IR', {
+      ? new Intl.DateTimeFormat('fa-IR', {
+          calendar: 'persian',
           hour12: false,
           year: 'numeric',
           month: '2-digit',
           day: '2-digit',
           hour: '2-digit',
           minute: '2-digit'
-        })
+        }).format(dt)
       : '—';
 
     const tr = document.createElement('tr');
@@ -4267,7 +4274,14 @@ function showUserModal(user) {
   const overlay = document.getElementById('user-modal-overlay');
   const uid = toIdString(user._id || user.id || '');
   const fullName = `${user.firstname || ''} ${user.lastname || ''}`.trim() || user.name || '-';
-  const fDate = d => d ? new Date(d).toLocaleDateString('fa-IR',{year:'numeric',month:'long',day:'numeric'}) : '—';
+  const fDate = d => d
+    ? new Intl.DateTimeFormat('fa-IR', {
+        calendar: 'persian',
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+      }).format(new Date(d))
+    : '—';
 
   const modalHtml = `
     <div class="user-modal">
@@ -5304,9 +5318,12 @@ async function showSellerModal (shop) {
   /* تبدیل تاریخ میلادی به شمسی */
   const fDate = d =>
     d
-      ? new Date(d).toLocaleDateString('fa-IR', {
-          year: 'numeric', month: 'long', day: 'numeric'
-        })
+      ? new Intl.DateTimeFormat('fa-IR', {
+          calendar: 'persian',
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric'
+        }).format(new Date(d))
       : '—';
 
   const sellerKey = resolveSellerKeyFromShop(shop);
@@ -6137,10 +6154,14 @@ const formatFeatureDate = (value) => {
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return '';
   try {
-    return new Intl.DateTimeFormat('fa-IR', { dateStyle: 'medium', timeStyle: 'short' }).format(date);
+    return new Intl.DateTimeFormat('fa-IR', {
+      calendar: 'persian',
+      dateStyle: 'medium',
+      timeStyle: 'short'
+    }).format(date);
   } catch (err) {
     console.warn('formatFeatureDate failed', err);
-    return date.toLocaleString('fa-IR');
+    return persianDateTimeFormatter.format(date);
   }
 };
 
@@ -6683,7 +6704,8 @@ window.openChatModal = async function (chatId) {
      const sender = getSenderName(chat, msg);
 
 
-      const date = new Date(msg.createdAt || msg.date).toLocaleString('fa-IR', {
+      const date = new Intl.DateTimeFormat('fa-IR', {
+        calendar: 'persian',
         hour12: false,
         year: 'numeric',
         month: '2-digit',
@@ -6691,7 +6713,7 @@ window.openChatModal = async function (chatId) {
         hour: '2-digit',
         minute: '2-digit',
         second: '2-digit'
-      });
+      }).format(new Date(msg.createdAt || msg.date));
 
       const div = document.createElement('div');
       div.className = 'chat-bubble ' + msg.from;
