@@ -378,6 +378,54 @@
             color: var(--success);
         }
 
+        .benefits-chip-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            padding: 8px 0;
+            min-height: 34px;
+        }
+
+        .benefit-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            border-radius: 999px;
+            background: rgba(61, 115, 255, 0.12);
+            color: var(--primary);
+            font-size: 13px;
+            font-weight: 500;
+        }
+
+        .benefit-chip button {
+            border: none;
+            background: transparent;
+            color: inherit;
+            cursor: pointer;
+            padding: 0;
+            display: inline-flex;
+            align-items: center;
+        }
+
+        .benefits-input-row {
+            display: flex;
+            gap: 12px;
+            margin-top: 8px;
+        }
+
+        .benefits-input-row .form-control {
+            flex: 1;
+        }
+
+        .preview-benefits {
+            margin: 8px 0 0;
+            padding-inline-start: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
         .section-subtitle {
             margin: 0;
             font-size: 14px;
@@ -971,87 +1019,64 @@
 
                     <form class="form-card" id="servicePricingControlForm" autocomplete="off">
                         <div>
-                            <h3>تنظیم قیمت‌های پلن فروشگاه‌های خدماتی</h3>
-                            <p class="section-subtitle">کنترل متمرکز قیمت‌گذاری برای انواع بازه‌های زمانی و امکانات ویژه</p>
+                            <h3>فرم سریع مدیریت قیمت و مزایا</h3>
+                            <p class="section-subtitle">تنظیم یکجای قیمت و مزایای هر پلن برای همه یا گروهی از فروشندگان خدماتی</p>
                         </div>
 
                         <div class="form-section">
                             <div class="form-field">
-                                <label for="pricingSegment">بازه اعمال قیمت</label>
-                                <select id="pricingSegment" name="segment" class="form-control">
-                                    <option value="all">همه فروشگاه‌های خدماتی</option>
-                                    <option value="premium">فروشگاه‌های خدماتی ممتاز</option>
-                                    <option value="newcomers">فروشگاه‌های تازه‌پیوسته</option>
-                                    <option value="manual">انتخاب دستی توسط مدیر</option>
+                                <label for="pricingPlanSelect">انتخاب پلن</label>
+                                <select id="pricingPlanSelect" class="form-control" required>
+                                    <option value="" disabled selected>ابتدا یکی از پلن‌های فعال را انتخاب کنید</option>
                                 </select>
-                                <span class="form-helper">با انتخاب هر گروه، قیمت‌ها برای همان دسته اعمال می‌شوند.</span>
+                                <span class="form-helper">تمام پلن‌های فعال از طریق پایگاه داده بارگذاری می‌شوند.</span>
+                            </div>
+
+                            <div class="inline-field-group">
+                                <div class="form-field">
+                                    <label for="pricingBasePrice">قیمت پایه جدید (تومان)</label>
+                                    <input type="number" id="pricingBasePrice" class="form-control" min="0" step="1000" placeholder="مثلاً 1250000">
+                                </div>
+                                <div class="form-field">
+                                    <label for="pricingDuration">مدت پلن (روز)</label>
+                                    <input type="number" id="pricingDuration" class="form-control" min="0" step="1" placeholder="مثلاً 30">
+                                </div>
                             </div>
 
                             <div class="form-field">
-                                <label>ساختار قیمت اشتراک (تومان)</label>
-                                <div class="pricing-period-grid">
-                                    <div class="inline-input">
-                                        <label for="pricingMonthly" class="inline-input-label">اشتراک ۱ ماهه</label>
-                                        <input type="number" id="pricingMonthly" class="form-control" data-duration="monthly" min="0" step="1000" value="850000" required>
-                                    </div>
-                                    <div class="inline-input">
-                                        <label for="pricingQuarterly" class="inline-input-label">اشتراک ۳ ماهه</label>
-                                        <input type="number" id="pricingQuarterly" class="form-control" data-duration="quarterly" min="0" step="1000" value="2400000">
-                                    </div>
-                                    <div class="inline-input">
-                                        <label for="pricingBiannual" class="inline-input-label">اشتراک ۶ ماهه</label>
-                                        <input type="number" id="pricingBiannual" class="form-control" data-duration="biannual" min="0" step="1000" value="4200000">
-                                    </div>
-                                    <div class="inline-input">
-                                        <label for="pricingAnnual" class="inline-input-label">اشتراک ۱۲ ماهه</label>
-                                        <input type="number" id="pricingAnnual" class="form-control" data-duration="annual" min="0" step="1000" value="7800000">
-                                    </div>
+                                <label for="pricingBenefitInput">مزایای پلن</label>
+                                <div class="benefits-chip-list" id="pricingBenefitsChips" aria-live="polite"></div>
+                                <div class="benefits-input-row">
+                                    <input type="text" id="pricingBenefitInput" class="form-control" placeholder="مزیت جدید را وارد و سپس اضافه کنید">
+                                    <button type="button" class="action-link secondary" id="pricingBenefitAdd">
+                                        <i class="ri-add-circle-line"></i>
+                                        افزودن مزیت
+                                    </button>
                                 </div>
-                            </div>
-
-                            <div class="inline-field-group">
-                                <div class="form-field">
-                                    <label for="pricingExtraFee">قیمت امکانات ویژه (تومان)</label>
-                                    <input type="number" id="pricingExtraFee" min="0" step="1000" value="95000" class="form-control" placeholder="مثلاً 95000">
-                                    <span class="form-helper">برای بسته‌های ویژه مانند «ویترین‌پلاس» یا افزونه‌های اختصاصی.</span>
-                                </div>
-                                <div class="form-field">
-                                    <label for="pricingDiscount">درصد تخفیف کمپین</label>
-                                    <input type="number" id="pricingDiscount" min="0" max="100" step="1" value="10" class="form-control" placeholder="مثلاً 10">
-                                    <span class="form-helper">در صورت صفر بودن، قیمت بدون تخفیف محاسبه می‌شود.</span>
-                                </div>
-                            </div>
-
-                            <div class="inline-field-group">
-                                <div class="form-field">
-                                    <label for="pricingEffectiveDate">تاریخ شروع اعمال</label>
-                                    <input type="date" id="pricingEffectiveDate" class="form-control">
-                                </div>
-                                <div class="form-field">
-                                    <label for="pricingAutoRenew">سیاست تمدید خودکار</label>
-                                    <select id="pricingAutoRenew" class="form-control">
-                                        <option value="standard" selected>تمدید خودکار با اطلاع‌رسانی ۷ روزه</option>
-                                        <option value="manual">تمدید دستی توسط مدیر</option>
-                                        <option value="seller-opt-in">تمدید با تایید فروشنده</option>
-                                    </select>
-                                </div>
+                                <span class="form-helper">برای حذف هر مزیت روی دکمه × آن کلیک کنید.</span>
                             </div>
 
                             <div class="form-field checkbox-field">
-                                <label for="pricingAffectsNew">
-                                    <input type="checkbox" id="pricingAffectsNew" checked>
-                                    اعمال خودکار برای فروشگاه‌های جدید و پلن‌های تازه ایجاد شده
+                                <label for="pricingApplyAll">
+                                    <input type="checkbox" id="pricingApplyAll" checked>
+                                    اعمال برای تمامی فروشندگان خدماتی
                                 </label>
+                            </div>
+
+                            <div class="form-field" id="pricingTargetedWrapper" hidden>
+                                <label for="pricingTargetedSellers">فروشندگان هدف</label>
+                                <textarea id="pricingTargetedSellers" class="form-control" rows="3" placeholder="شماره تلفن یا شناسه فروشندگان را با ویرگول یا خط جدید جدا کنید"></textarea>
+                                <span class="form-helper">در صورت خالی بودن این لیست، تنظیمات تنها بر فروشندگان انتخاب‌شده اعمال می‌شود.</span>
                             </div>
 
                             <div class="form-field">
                                 <label for="pricingNotes">یادداشت مدیریتی</label>
-                                <textarea id="pricingNotes" rows="3" class="form-control" placeholder="توضیحات تکمیلی برای تیم مالی یا حسابداری"></textarea>
+                                <textarea id="pricingNotes" rows="2" class="form-control" placeholder="پیام یا توضیحی که برای تیم پشتیبانی نمایش داده شود"></textarea>
                             </div>
                         </div>
 
                         <div class="pricing-summary-card" aria-live="polite">
-                            <strong>پیش‌نمایش قیمت‌های نهایی</strong>
+                            <strong>پیش‌نمایش تنظیمات</strong>
                             <ul id="servicePricingPreview"></ul>
                             <div class="summary-highlight" id="servicePricingHighlight"></div>
                         </div>
@@ -1061,14 +1086,15 @@
                         <div class="form-actions">
                             <button type="button" class="action-link secondary" id="servicePricingReset">
                                 <i class="ri-refresh-line"></i>
-                                بازنشانی تنظیمات
+                                بازنشانی فرم
                             </button>
                             <button type="submit" class="action-link">
                                 <i class="ri-money-dollar-circle-line"></i>
-                                اعمال قیمت‌ها
+                                ذخیره تغییرات قیمت و مزایا
                             </button>
                         </div>
                     </form>
+
                 </div>
 
                 <div class="plan-management-column">
@@ -1744,6 +1770,7 @@
                 state.plans = plans;
                 renderPlanTable();
                 populatePlanSelect();
+                document.dispatchEvent(new CustomEvent('servicePlanStore:updated', { detail: { plans } }));
             };
 
             const fetchAssignments = async () => {
@@ -1940,6 +1967,10 @@
                 refreshData();
             });
 
+            document.addEventListener('servicePlanPricingApplied', () => {
+                refreshData(true);
+            });
+
             resetPlanFormUI();
             refreshData(true);
         })();
@@ -1950,41 +1981,28 @@
                 return;
             }
 
+            const planSelect = document.getElementById('pricingPlanSelect');
+            const basePriceInput = document.getElementById('pricingBasePrice');
+            const durationInput = document.getElementById('pricingDuration');
+            const benefitInput = document.getElementById('pricingBenefitInput');
+            const addBenefitBtn = document.getElementById('pricingBenefitAdd');
+            const chipsContainer = document.getElementById('pricingBenefitsChips');
+            const applyAllInput = document.getElementById('pricingApplyAll');
+            const targetedWrapper = document.getElementById('pricingTargetedWrapper');
+            const targetedInput = document.getElementById('pricingTargetedSellers');
+            const notesInput = document.getElementById('pricingNotes');
             const previewList = document.getElementById('servicePricingPreview');
             const highlight = document.getElementById('servicePricingHighlight');
             const pricingStatus = document.getElementById('servicePricingStatus');
             const resetBtn = document.getElementById('servicePricingReset');
-            const priceInputs = Array.from(pricingForm.querySelectorAll('input[data-duration]'));
-            const extraFeeInput = document.getElementById('pricingExtraFee');
-            const discountInput = document.getElementById('pricingDiscount');
-            const segmentSelect = document.getElementById('pricingSegment');
-            const effectiveDateInput = document.getElementById('pricingEffectiveDate');
-            const autoRenewSelect = document.getElementById('pricingAutoRenew');
-            const affectsNewInput = document.getElementById('pricingAffectsNew');
-            const notesInput = document.getElementById('pricingNotes');
 
-            const autoRenewMap = {
-                standard: 'تمدید خودکار با اطلاع‌رسانی ۷ روزه',
-                manual: 'تمدید توسط مدیر',
-                'seller-opt-in': 'تمدید با تایید فروشنده'
-            };
+            const API_BASE = '/api/service-plans';
+            let benefits = [];
+            let plans = [];
 
-            const durationLabels = {
-                monthly: 'اشتراک ۱ ماهه',
-                quarterly: 'اشتراک ۳ ماهه',
-                biannual: 'اشتراک ۶ ماهه',
-                annual: 'اشتراک ۱۲ ماهه'
-            };
-
+            const toKey = (value) => String(value ?? '');
+            const findPlan = (id) => plans.find((plan) => toKey(plan.id) === toKey(id));
             const faNumber = (value) => new Intl.NumberFormat('fa-IR', { maximumFractionDigits: 0 }).format(value);
-            const formatDate = (value) => {
-                if (!value) return '';
-                try {
-                    return new Intl.DateTimeFormat('fa-IR', { dateStyle: 'medium' }).format(new Date(value));
-                } catch (error) {
-                    return value;
-                }
-            };
 
             const clearStatus = () => {
                 pricingStatus.textContent = '';
@@ -1992,120 +2010,321 @@
             };
 
             const setStatus = (message, type = '') => {
-                pricingStatus.textContent = message;
+                pricingStatus.textContent = message || '';
                 pricingStatus.className = `form-status${type ? ` ${type}` : ''}`;
             };
 
-            const buildPreview = () => {
-                const discount = discountInput?.value ? Number(discountInput.value) : 0;
-                const extraFee = extraFeeInput?.value ? Number(extraFeeInput.value) : 0;
-
-                const items = priceInputs.map((input) => {
-                    const label = durationLabels[input.dataset.duration] || input.placeholder || 'پلن';
-                    const baseValue = input.value ? Number(input.value) : null;
-                    if (baseValue == null || Number.isNaN(baseValue)) {
-                        return `<li>${label}<span class="summary-value">قیمت تعیین نشده</span></li>`;
-                    }
-
-                    const adjusted = Math.max(
-                        Math.round((baseValue + extraFee) * (1 - (discount > 0 ? discount : 0) / 100)),
-                        0
-                    );
-                    const baseText = faNumber(baseValue);
-                    const adjustedText = faNumber(adjusted);
-
-                    return `
-                        <li>
-                            ${label}
-                            <span class="summary-value">${adjustedText} تومان</span>
-                            <span class="subtle-text">قیمت پایه: ${baseText} تومان</span>
-                        </li>
-                    `;
-                });
-
-                previewList.innerHTML = items.join('') || '<li class="subtle-text">برای مشاهده پیش‌نمایش، حداقل یکی از قیمت‌ها را وارد کنید.</li>';
-
-                const segmentText = segmentSelect?.options[segmentSelect.selectedIndex]?.textContent || '';
-                const startText = effectiveDateInput?.value ? formatDate(effectiveDateInput.value) : 'از همین لحظه';
-                const renewalText = autoRenewMap[autoRenewSelect?.value] || 'سیاست تمدید مشخص نشده است';
-                const autoApplyText = affectsNewInput?.checked
-                    ? 'قیمت‌ها به‌صورت خودکار برای فروشگاه‌های جدید اعمال می‌شوند.'
-                    : 'اعمال خودکار برای فروشگاه‌های جدید غیرفعال است.';
-                const discountText = discount
-                    ? `تخفیف کمپین ${faNumber(discount)}٪`
-                    : 'بدون تخفیف کمپین';
-                const extraFeeText = extraFee
-                    ? `امکانات ویژه: +${faNumber(extraFee)} تومان`
-                    : 'امکانات ویژه غیرفعال است';
-
-                highlight.textContent = `${segmentText} | آغاز ${startText} | ${renewalText}. ${discountText}، ${extraFeeText}. ${autoApplyText}`;
+            const renderBenefits = () => {
+                if (!chipsContainer) {
+                    return;
+                }
+                if (!benefits.length) {
+                    chipsContainer.innerHTML = '<span class="subtle-text">مزیتی ثبت نشده است.</span>';
+                    return;
+                }
+                chipsContainer.innerHTML = benefits.map((benefit, index) => `
+                    <span class="benefit-chip">
+                        ${benefit}
+                        <button type="button" data-index="${index}" aria-label="حذف ${benefit}">
+                            <i class="ri-close-line"></i>
+                        </button>
+                    </span>
+                `).join('');
             };
 
-            priceInputs.forEach((input) => {
-                input.addEventListener('input', buildPreview);
+            const parseTargets = () => {
+                if (!targetedInput || !targetedInput.value) {
+                    return [];
+                }
+                return targetedInput.value
+                    .replace(/\n/g, ',')
+                    .split(/[\s,;،]+/)
+                    .map((item) => item.trim())
+                    .filter(Boolean);
+            };
+
+            const buildPreview = () => {
+                if (!previewList || !highlight) {
+                    return;
+                }
+                const selectedPlanId = planSelect.value;
+                const plan = findPlan(selectedPlanId);
+                const planLabel = plan?.title || 'پلن انتخاب نشده';
+
+                const priceValue = basePriceInput.value
+                    ? `${faNumber(Number(basePriceInput.value))} تومان`
+                    : plan?.price != null
+                        ? `${faNumber(plan.price)} تومان (بدون تغییر)`
+                        : 'تعیین نشده';
+
+                const durationValue = durationInput.value
+                    ? `${faNumber(Number(durationInput.value))} روز`
+                    : plan?.durationDays != null
+                        ? `${faNumber(plan.durationDays)} روز (بدون تغییر)`
+                        : 'بدون تغییر';
+
+                const benefitsPreview = benefits.length
+                    ? benefits.map((benefit) => `<li>${benefit}</li>`).join('')
+                    : '<li class="subtle-text">مزیتی ثبت نشده است.</li>';
+
+                previewList.innerHTML = `
+                    <li>پلن انتخابی: <span class="summary-value">${planLabel}</span></li>
+                    <li>قیمت جدید: <span class="summary-value">${priceValue}</span></li>
+                    <li>مدت پلن: <span class="summary-value">${durationValue}</span></li>
+                    <li>مزایا:
+                        <ul class="preview-benefits">${benefitsPreview}</ul>
+                    </li>
+                `;
+
+                const targets = parseTargets();
+                const scopeText = applyAllInput.checked
+                    ? 'اعمال برای تمامی فروشندگان خدماتی'
+                    : targets.length
+                        ? `اعمال برای ${faNumber(targets.length)} فروشنده انتخابی`
+                        : 'برای فعال‌سازی، فروشندگان هدف را مشخص کنید';
+
+                const notesText = notesInput.value.trim()
+                    ? `یادداشت: ${notesInput.value.trim()}`
+                    : 'یادداشت ثبت نشده است.';
+
+                highlight.textContent = `${scopeText} • ${notesText}`;
+            };
+
+            const renderPlanOptions = () => {
+                if (!planSelect) {
+                    return;
+                }
+                const currentValue = planSelect.value;
+                planSelect.innerHTML = '';
+                const placeholder = document.createElement('option');
+                placeholder.value = '';
+                placeholder.disabled = true;
+                const hasSelection = currentValue && plans.some((plan) => toKey(plan.id) === toKey(currentValue));
+                placeholder.selected = !hasSelection;
+                placeholder.textContent = 'ابتدا یکی از پلن‌های فعال را انتخاب کنید';
+                planSelect.appendChild(placeholder);
+
+                plans.forEach((plan) => {
+                    const option = document.createElement('option');
+                    option.value = toKey(plan.id);
+                    const priceText = plan.price != null ? `${faNumber(plan.price)} تومان` : 'بدون قیمت';
+                    option.textContent = `${plan.title} — ${priceText}`;
+                    planSelect.appendChild(option);
+                });
+
+                if (currentValue && plans.some((plan) => toKey(plan.id) === toKey(currentValue))) {
+                    planSelect.value = currentValue;
+                }
+            };
+
+            const loadPlan = (planId) => {
+                const plan = findPlan(planId);
+                if (plan) {
+                    basePriceInput.value = plan.price != null ? plan.price : '';
+                    durationInput.value = plan.durationDays != null ? plan.durationDays : '';
+                    benefits = Array.isArray(plan.features) ? [...plan.features] : [];
+                } else {
+                    basePriceInput.value = '';
+                    durationInput.value = '';
+                    benefits = [];
+                }
+                renderBenefits();
+                buildPreview();
+            };
+
+            const syncPlanOptions = (newPlans) => {
+                plans = Array.isArray(newPlans) ? newPlans : [];
+                renderPlanOptions();
+                if (planSelect.value) {
+                    loadPlan(planSelect.value);
+                } else if (plans.length) {
+                    planSelect.value = toKey(plans[0].id);
+                    loadPlan(planSelect.value);
+                } else {
+                    loadPlan('');
+                }
+            };
+
+            const fetchPlans = async () => {
+                try {
+                    const response = await fetch(API_BASE, { credentials: 'include' });
+                    if (!response.ok) {
+                        throw new Error('SERVICE_PLAN_LIST_FAILED');
+                    }
+                    const data = await response.json();
+                    syncPlanOptions(data?.plans || []);
+                } catch (error) {
+                    console.error('Quick pricing fetch failed', error);
+                    setStatus('دریافت اطلاعات پلن‌ها با مشکل مواجه شد.', 'error');
+                }
+            };
+
+            const applyScopeToggle = () => {
+                const applyAll = applyAllInput.checked;
+                if (targetedWrapper) {
+                    targetedWrapper.hidden = applyAll;
+                }
+                if (targetedInput) {
+                    targetedInput.disabled = applyAll;
+                    if (applyAll) {
+                        targetedInput.value = '';
+                    }
+                }
+                buildPreview();
+            };
+
+            addBenefitBtn?.addEventListener('click', () => {
+                const value = benefitInput.value.trim();
+                if (!value) {
+                    return;
+                }
+                benefits.push(value);
+                benefitInput.value = '';
+                renderBenefits();
+                buildPreview();
             });
 
-            [extraFeeInput, discountInput].forEach((input) => {
-                input?.addEventListener('input', buildPreview);
+            benefitInput?.addEventListener('keydown', (event) => {
+                if (event.key === 'Enter') {
+                    event.preventDefault();
+                    addBenefitBtn?.click();
+                }
             });
 
-            [segmentSelect, autoRenewSelect].forEach((select) => {
-                select?.addEventListener('change', buildPreview);
+            chipsContainer?.addEventListener('click', (event) => {
+                const button = event.target.closest('button[data-index]');
+                if (!button) {
+                    return;
+                }
+                const index = Number(button.dataset.index);
+                if (Number.isNaN(index)) {
+                    return;
+                }
+                benefits.splice(index, 1);
+                renderBenefits();
+                buildPreview();
             });
 
-            effectiveDateInput?.addEventListener('change', buildPreview);
-            affectsNewInput?.addEventListener('change', buildPreview);
+            planSelect?.addEventListener('change', (event) => {
+                clearStatus();
+                loadPlan(event.target.value);
+            });
 
-            pricingForm.addEventListener('submit', (event) => {
+            basePriceInput?.addEventListener('input', buildPreview);
+            durationInput?.addEventListener('input', buildPreview);
+            notesInput?.addEventListener('input', buildPreview);
+            targetedInput?.addEventListener('input', buildPreview);
+            applyAllInput?.addEventListener('change', applyScopeToggle);
+
+            resetBtn?.addEventListener('click', () => {
+                const currentPlanId = planSelect.value;
+                pricingForm.reset();
+                if (currentPlanId) {
+                    planSelect.value = currentPlanId;
+                }
+                benefits = [];
+                renderBenefits();
+                applyScopeToggle();
+                clearStatus();
+                loadPlan(planSelect.value);
+            });
+
+            pricingForm.addEventListener('submit', async (event) => {
                 event.preventDefault();
                 clearStatus();
 
-                const prices = {};
-                let hasPrice = false;
+                const planId = planSelect.value;
+                if (!planId) {
+                    setStatus('ابتدا یک پلن را انتخاب کنید.', 'error');
+                    return;
+                }
 
-                priceInputs.forEach((input) => {
-                    if (input.value) {
-                        const numericValue = Number(input.value);
-                        if (Number.isNaN(numericValue) || numericValue < 0) {
-                            return;
-                        }
-                        prices[input.dataset.duration] = numericValue;
-                        hasPrice = true;
-                    }
-                });
-
-                if (!hasPrice) {
-                    setStatus('حداقل قیمت یکی از پلن‌ها باید تعیین شود.', 'error');
+                const targets = parseTargets();
+                if (!applyAllInput.checked && !targets.length) {
+                    setStatus('برای اعمال تکی، حداقل یک فروشنده را مشخص کنید.', 'error');
                     return;
                 }
 
                 const payload = {
-                    segment: segmentSelect?.value || 'all',
-                    prices,
-                    extraFee: extraFeeInput?.value ? Number(extraFeeInput.value) : 0,
-                    discount: discountInput?.value ? Number(discountInput.value) : 0,
-                    effectiveDate: effectiveDateInput?.value || null,
-                    autoRenewPolicy: autoRenewSelect?.value || 'standard',
-                    autoApplyForNew: Boolean(affectsNewInput?.checked),
-                    notes: notesInput?.value.trim() || null
+                    planId,
+                    price: basePriceInput.value ? Number(basePriceInput.value) : null,
+                    durationDays: durationInput.value ? Number(durationInput.value) : null,
+                    benefits,
+                    applyToAll: applyAllInput.checked,
+                    targetSellers: applyAllInput.checked ? [] : targets,
+                    notes: notesInput.value.trim() || null
                 };
 
-                setStatus('در حال اعمال تنظیمات قیمت‌گذاری...', '');
+                if (payload.price != null && payload.price < 0) {
+                    setStatus('قیمت نمی‌تواند مقدار منفی باشد.', 'error');
+                    return;
+                }
 
-                setTimeout(() => {
-                    console.table(payload);
-                    setStatus('قیمت‌ها با موفقیت به‌روزرسانی شدند و به فروشگاه‌های مرتبط اعلام گردید.', 'success');
-                }, 400);
+                if (payload.price == null && payload.durationDays == null && !payload.benefits.length) {
+                    setStatus('برای ثبت تغییر، حداقل یکی از قیمت، مدت یا مزایا را مشخص کنید.', 'error');
+                    return;
+                }
+
+                try {
+                    setStatus('در حال ذخیره تغییرات...', '');
+                    const response = await fetch(`${API_BASE}/${planId}/pricing`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        credentials: 'include',
+                        body: JSON.stringify(payload)
+                    });
+
+                    if (!response.ok) {
+                        const errorBody = await response.json().catch(() => ({}));
+                        const message = errorBody?.message || 'ذخیره‌سازی تغییرات انجام نشد.';
+                        throw new Error(message);
+                    }
+
+                    setStatus('تغییرات قیمت و مزایا با موفقیت ذخیره شد.', 'success');
+                    document.dispatchEvent(new CustomEvent('servicePlanPricingApplied', {
+                        detail: {
+                            planId,
+                            price: payload.price,
+                            durationDays: payload.durationDays,
+                            benefits: payload.benefits
+                        }
+                    }));
+                } catch (error) {
+                    console.error('Service pricing update failed', error);
+                    setStatus(error.message || 'ذخیره‌سازی تغییرات انجام نشد.', 'error');
+                }
             });
 
-            resetBtn?.addEventListener('click', () => {
-                pricingForm.reset();
-                clearStatus();
-                buildPreview();
+            document.addEventListener('servicePlanStore:updated', (event) => {
+                syncPlanOptions(event.detail?.plans || []);
             });
 
-            buildPreview();
+            document.addEventListener('servicePlanPricingApplied', (event) => {
+                const detail = event.detail || {};
+                if (!detail?.planId) {
+                    return;
+                }
+                const plan = findPlan(detail.planId);
+                if (plan) {
+                    if (typeof detail.price === 'number') {
+                        plan.price = detail.price;
+                    }
+                    if (typeof detail.durationDays === 'number') {
+                        plan.durationDays = detail.durationDays;
+                    }
+                    if (Array.isArray(detail.benefits)) {
+                        plan.features = detail.benefits;
+                    }
+                    renderPlanOptions();
+                    loadPlan(plan.id);
+                }
+            });
+
+            renderBenefits();
+            applyScopeToggle();
+            fetchPlans();
         })();
+
     </script>
 </body>
 </html>
