@@ -1726,17 +1726,10 @@
       <div class="dropdown-filter" style="position: relative; display:inline-block;">
         <button class="filter-btn" id="shopsBtn">
           <i class="fas fa-store"></i>
-          مراکز خرید
+          همه مراکز خرید
           <i class="fas fa-chevron-down" style="margin-right:7px;font-size:0.95em"></i>
         </button>
-        <div class="dropdown-menu" id="shopsDropdown" style="display:none; position:absolute; right:0; top:110%; z-index:9; min-width:200px; background:#fff; border-radius:16px; box-shadow:0 8px 24px rgba(16,185,129,0.14); overflow:hidden; border:1.5px solid #0ea5e95b;">
-          <button class="dropdown-item shop-item" data-shop="مرکز خرید اپال">مرکز خرید اپال</button>
-          <button class="dropdown-item shop-item" data-shop="ارگ تجریش">ارگ تجریش</button>
-          <button class="dropdown-item shop-item" data-shop="پالادیوم">پالادیوم</button>
-          <button class="dropdown-item shop-item" data-shop="ایران مال">ایران مال</button>
-          <button class="dropdown-item shop-item" data-shop="کوروش">کوروش</button>
-          <button class="dropdown-item shop-item" data-shop="هایپرسان">هایپرسان</button>
-        </div>
+        <div class="dropdown-menu" id="shopsDropdown" style="display:none; position:absolute; right:0; top:110%; z-index:9; min-width:200px; background:#fff; border-radius:16px; box-shadow:0 8px 24px rgba(16,185,129,0.14); overflow:hidden; border:1.5px solid #0ea5e95b;"></div>
       </div>
 
       <!-- مرتب‌سازی -->
@@ -1837,17 +1830,10 @@
           <div class="mobile-group-body">
             <button class="filter-btn" id="shopsBtnMobile" aria-expanded="false" type="button">
               <i class="fas fa-store"></i>
-              <span>مراکز خرید</span>
+              <span>همه مراکز خرید</span>
               <i class="fas fa-chevron-down"></i>
             </button>
-            <div class="dropdown-menu mobile-dropdown" id="shopsDropdownMobile" style="display:none;">
-              <button class="dropdown-item shop-item" data-shop="مرکز خرید اپال">مرکز خرید اپال</button>
-              <button class="dropdown-item shop-item" data-shop="ارگ تجریش">ارگ تجریش</button>
-              <button class="dropdown-item shop-item" data-shop="پالادیوم">پالادیوم</button>
-              <button class="dropdown-item shop-item" data-shop="ایران مال">ایران مال</button>
-              <button class="dropdown-item shop-item" data-shop="کوروش">کوروش</button>
-              <button class="dropdown-item shop-item" data-shop="هایپرسان">هایپرسان</button>
-            </div>
+            <div class="dropdown-menu mobile-dropdown" id="shopsDropdownMobile" style="display:none;"></div>
           </div>
         </section>
 
@@ -1938,10 +1924,8 @@ const categories = [
   "کتاب و تحریر","لوازم خانگی","ورزشی","تالار و مجالس",
   "قنادی و شیرینی","گل و گیاه","خودرو"
 ];
-const shops = [
-  "همه مراکز خرید","مرکز خرید اپال","ارگ تجریش",
-  "پالادیوم","ایران مال","کوروش","هایپرسان"
-];
+const DEFAULT_SHOP_LABEL = "همه مراکز خرید";
+let shoppingCenters = [];
 
 function escapeHtml(value) {
   if (value === null || value === undefined) return '';
@@ -1963,7 +1947,7 @@ function getProductIdFromProduct(product) {
 }
 
 let currentSort        = null;          // cheap | expensive | null
-let currentShop        = "همه مراکز خرید";
+let currentShop        = DEFAULT_SHOP_LABEL;
 let currentCategory    = "همه محصولات";
 let currentPriceFilter = null;          // {min,max} | null
 
@@ -1971,9 +1955,90 @@ let currentPriceFilter = null;          // {min,max} | null
 document.addEventListener('DOMContentLoaded', async ()=>{
   // تنظیمات اولیه
   setupEventListeners();
+  setCurrentShop(DEFAULT_SHOP_LABEL);
+  populateShopDropdowns();
+  await fetchShoppingCenters();
   await fetchFeaturedAd();
   fetchProductsFromAPI();
 });
+
+async function fetchShoppingCenters(){
+  try {
+    const response = await fetch('/api/shopping-centers');
+    if(!response.ok) {
+      throw new Error('Failed to load shopping centers');
+    }
+    const data = await response.json();
+    shoppingCenters = Array.isArray(data) ? data : [];
+  } catch (err) {
+    console.warn('خطا در دریافت مراکز خرید:', err);
+    shoppingCenters = [];
+  }
+
+  populateShopDropdowns();
+}
+
+function populateShopDropdowns(){
+  const options = getAvailableShopTitles();
+  const desktopMenu = document.getElementById('shopsDropdown');
+  const mobileMenu = document.getElementById('shopsDropdownMobile');
+
+  createShopDropdownItems(desktopMenu, options);
+  createShopDropdownItems(mobileMenu, options);
+
+  if(!options.includes(currentShop)){
+    setCurrentShop(DEFAULT_SHOP_LABEL);
+    filterAndSortProducts();
+  }else{
+    updateShopButtonLabels();
+  }
+}
+
+function getAvailableShopTitles(){
+  const titles = shoppingCenters
+    .map(center => (center && typeof center.title === 'string') ? center.title.trim() : '')
+    .filter(Boolean)
+    .filter(title => title !== DEFAULT_SHOP_LABEL);
+
+  const uniqueTitles = Array.from(new Set(titles));
+  uniqueTitles.sort((a, b) => a.localeCompare(b, 'fa', { sensitivity: 'base' }));
+
+  return [DEFAULT_SHOP_LABEL, ...uniqueTitles];
+}
+
+function createShopDropdownItems(container, options){
+  if(!container) return;
+  container.innerHTML = '';
+
+  options.forEach(option => {
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'dropdown-item shop-item';
+    btn.dataset.shop = option;
+    btn.textContent = option;
+    container.appendChild(btn);
+  });
+}
+
+function setCurrentShop(shopName){
+  const nextShop = (shopName && typeof shopName === 'string') ? shopName.trim() : '';
+  currentShop = nextShop || DEFAULT_SHOP_LABEL;
+  updateShopButtonLabels();
+}
+
+function updateShopButtonLabels(){
+  const safeShop = escapeHtml(currentShop);
+
+  const desktopBtn = document.getElementById('shopsBtn');
+  if(desktopBtn){
+    desktopBtn.innerHTML = `<i class="fas fa-store"></i>${safeShop}<i class="fas fa-chevron-down" style="margin-right:7px;font-size:0.95em"></i>`;
+  }
+
+  const mobileBtn = document.getElementById('shopsBtnMobile');
+  if(mobileBtn){
+    mobileBtn.innerHTML = `<i class="fas fa-store"></i><span>${safeShop}</span><i class="fas fa-chevron-down"></i>`;
+  }
+}
 
 function setupEventListeners() {
   /* --- جستجو --- */
@@ -2056,7 +2121,7 @@ function setupDesktopFilters() {
     catMenu.style.display = 'none';
     document.getElementById('priceFilterMenu').style.display = 'none';
   });
-  
+
   // فیلتر دسته‌بندی
   document.querySelectorAll('#filterDropdown .dropdown-item').forEach(item => {
     item.addEventListener('click', function() {
@@ -2067,16 +2132,15 @@ function setupDesktopFilters() {
       updateActiveFilters();
     });
   });
-  
-  // فیلتر فروشگاه
-  document.querySelectorAll('#shopsDropdown .dropdown-item').forEach(item => {
-    item.addEventListener('click', function() {
-      currentShop = this.dataset.shop;
-      document.getElementById('shopsBtn').innerHTML = 
-        `<i class="fas fa-store"></i>${currentShop}<i class="fas fa-chevron-down" style="margin-right:7px;font-size:0.95em"></i>`;
-      filterAndSortProducts();
-      updateActiveFilters();
-    });
+
+  shopMenu.addEventListener('click', event => {
+    const target = event.target.closest('.dropdown-item');
+    if(!target) return;
+    event.stopPropagation();
+    setCurrentShop(target.dataset.shop);
+    filterAndSortProducts();
+    updateActiveFilters();
+    shopMenu.style.display = 'none';
   });
 }
 
@@ -2136,16 +2200,14 @@ function setupMobileFilters() {
     });
   });
 
-  // فیلتر فروشگاه موبایل
-  document.querySelectorAll('#shopsDropdownMobile .dropdown-item').forEach(item => {
-    item.addEventListener('click', function() {
-      currentShop = this.dataset.shop;
-      shopsBtnMobile.innerHTML =
-        `<i class="fas fa-store"></i><span>${currentShop}</span><i class="fas fa-chevron-down"></i>`;
-      updateActiveFilters();
-      shopMenuMobile.style.display = 'none';
-      shopsBtnMobile.setAttribute('aria-expanded', 'false');
-    });
+  shopMenuMobile.addEventListener('click', event => {
+    const target = event.target.closest('.dropdown-item');
+    if(!target) return;
+    event.stopPropagation();
+    setCurrentShop(target.dataset.shop);
+    updateActiveFilters();
+    shopMenuMobile.style.display = 'none';
+    shopsBtnMobile.setAttribute('aria-expanded', 'false');
   });
 
   // فیلتر قیمت موبایل
@@ -2317,7 +2379,12 @@ function filterAndSortProducts(){
   const q=document.getElementById('searchInput').value.trim().toLowerCase();
   let list=[...allProducts];
 
-  if(currentShop!=="همه مراکز خرید")   list=list.filter(p=>p.seller.storename===currentShop); // assuming storename is the shop name
+  if(currentShop!==DEFAULT_SHOP_LABEL) {
+    list=list.filter(p=>{
+      const sellerName = p?.seller?.storename || p?.shopName || '';
+      return sellerName === currentShop;
+    });
+  }
   if(currentCategory!=="همه محصولات")  list=list.filter(p=>p.category===currentCategory);
   if(currentPriceFilter)               list=list.filter(p=>p.price>=currentPriceFilter.min && p.price<=currentPriceFilter.max);
   if(q)                                list=list.filter(p=>p.title?.toLowerCase().includes(q));
@@ -2477,10 +2544,11 @@ function updateActiveFilters() {
     `;
   }
   
-  if (currentShop !== "همه مراکز خرید") {
+  if (currentShop !== DEFAULT_SHOP_LABEL) {
+    const safeShop = escapeHtml(currentShop);
     activeFiltersContainer.innerHTML += `
       <div class="active-filter">
-        <span>مرکز خرید: ${currentShop}</span>
+        <span>مرکز خرید: ${safeShop}</span>
         <span class="remove" onclick="removeFilter('shop')">×</span>
       </div>
     `;
@@ -2517,11 +2585,7 @@ function removeFilter(type) {
       document.getElementById('mainFilterBtnMobile').setAttribute('aria-expanded', 'false');
       break;
     case 'shop':
-      currentShop = "همه مراکز خرید";
-      document.getElementById('shopsBtn').innerHTML =
-        `<i class="fas fa-store"></i>مراکز خرید<i class="fas fa-chevron-down" style="margin-right:7px;font-size:0.95em"></i>`;
-      document.getElementById('shopsBtnMobile').innerHTML =
-        `<i class="fas fa-store"></i><span>مراکز خرید</span><i class="fas fa-chevron-down"></i>`;
+      setCurrentShop(DEFAULT_SHOP_LABEL);
       document.getElementById('shopsBtnMobile').setAttribute('aria-expanded', 'false');
       break;
     case 'price':
