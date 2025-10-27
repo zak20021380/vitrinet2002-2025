@@ -154,6 +154,143 @@
             color: #142b73;
         }
 
+        .plan-pricing-card {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .plan-pricing-header {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+        }
+
+        .plan-pricing-header h2 {
+            margin: 0;
+            font-size: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: var(--text-strong);
+        }
+
+        .plan-pricing-header span {
+            font-size: 13px;
+            color: var(--success);
+            background: rgba(55, 178, 108, 0.16);
+            padding: 6px 14px;
+            border-radius: 999px;
+            font-weight: 600;
+        }
+
+        .plan-pricing-description {
+            margin: 0;
+            color: var(--text-muted);
+            line-height: 1.8;
+        }
+
+        .plan-price-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+        }
+
+        .plan-price-item {
+            background: rgba(255, 255, 255, 0.86);
+            border: 1px solid rgba(61, 115, 255, 0.12);
+            border-radius: 16px;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .plan-price-item header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+        }
+
+        .plan-price-item strong {
+            font-size: 18px;
+            color: var(--text-strong);
+        }
+
+        .plan-price-item span {
+            color: var(--primary);
+            font-weight: 600;
+        }
+
+        .plan-price-controls {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .plan-price-controls label {
+            font-size: 13px;
+            color: var(--text-muted);
+        }
+
+        .plan-price-input {
+            width: 100%;
+            padding: 10px 12px;
+            border-radius: 10px;
+            border: 1px solid rgba(112, 128, 176, 0.18);
+            font-family: inherit;
+            font-size: 14px;
+        }
+
+        .plan-price-actions {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .plan-custom-section {
+            border-top: 1px solid rgba(112, 128, 176, 0.12);
+            padding-top: 16px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 16px;
+        }
+
+        .custom-form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .custom-form-group label {
+            font-size: 13px;
+            color: var(--text-muted);
+        }
+
+        .custom-form-group input,
+        .custom-form-group select {
+            padding: 10px 12px;
+            border-radius: 10px;
+            border: 1px solid rgba(112, 128, 176, 0.18);
+            font-family: inherit;
+            font-size: 14px;
+        }
+
+        .custom-pricing-note {
+            grid-column: 1 / -1;
+            background: rgba(61, 115, 255, 0.08);
+            border-radius: 14px;
+            padding: 12px 14px;
+            font-size: 13px;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
         .plan-ops-footnote {
             background: rgba(255, 255, 255, 0.7);
             border-radius: 14px;
@@ -527,6 +664,14 @@
                 top: 12px;
                 left: 12px;
             }
+
+            .plan-price-grid {
+                grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            }
+
+            .plan-price-actions {
+                flex-direction: column;
+            }
         }
     </style>
 </head>
@@ -563,6 +708,88 @@
             <div class="plan-ops-footnote">
                 <span><i class="ri-lightbulb-flash-line"></i> یادآور</span>
                 <p>هر تغییر در پلن رایگان بلافاصله در پنل فروشنده با برچسب «پلن رایگان» و پیام توضیحی نمایش داده می‌شود.</p>
+            </div>
+        </section>
+
+        <section class="card plan-pricing-card">
+            <div class="plan-pricing-header">
+                <h2><i class="ri-price-tag-3-line"></i> مدیریت قیمت پلن‌های مغازه‌های خدماتی</h2>
+                <span>پوشش تمامی پلن‌ها</span>
+            </div>
+            <p class="plan-pricing-description">
+                در این بخش می‌توانید قیمت‌های پیش‌فرض تمامی پلن‌های مغازه‌های خدماتی را تنظیم و به روز کنید. علاوه بر این امکان تعیین قیمت
+                اختصاصی برای هر فروشنده بر اساس شماره تلفن همراه فراهم شده است تا انعطاف‌پذیری کامل در پیشنهادها داشته باشید.
+            </p>
+            <div class="plan-price-grid">
+                <article class="plan-price-item">
+                    <header>
+                        <strong>پلن پایه</strong>
+                        <span>ماهانه</span>
+                    </header>
+                    <div class="plan-price-controls">
+                        <label for="basic-plan-price">قیمت ماهانه (تومان)</label>
+                        <input id="basic-plan-price" class="plan-price-input" type="number" value="190000" min="0" step="10000">
+                    </div>
+                    <div class="plan-price-actions">
+                        <button type="button" class="action-link">ثبت تغییر قیمت</button>
+                        <button type="button" class="action-link secondary">مشاهده فروشندگان این پلن</button>
+                    </div>
+                </article>
+                <article class="plan-price-item">
+                    <header>
+                        <strong>پلن حرفه‌ای</strong>
+                        <span>سه ماهه</span>
+                    </header>
+                    <div class="plan-price-controls">
+                        <label for="pro-plan-price">قیمت سه ماهه (تومان)</label>
+                        <input id="pro-plan-price" class="plan-price-input" type="number" value="540000" min="0" step="10000">
+                    </div>
+                    <div class="plan-price-actions">
+                        <button type="button" class="action-link">ثبت تغییر قیمت</button>
+                        <button type="button" class="action-link secondary">گزارش فروش پلن</button>
+                    </div>
+                </article>
+                <article class="plan-price-item">
+                    <header>
+                        <strong>پلن ویژه</strong>
+                        <span>سالانه</span>
+                    </header>
+                    <div class="plan-price-controls">
+                        <label for="vip-plan-price">قیمت سالانه (تومان)</label>
+                        <input id="vip-plan-price" class="plan-price-input" type="number" value="1890000" min="0" step="10000">
+                    </div>
+                    <div class="plan-price-actions">
+                        <button type="button" class="action-link">ثبت تغییر قیمت</button>
+                        <button type="button" class="action-link secondary">شرایط تخفیف پلن</button>
+                    </div>
+                </article>
+            </div>
+            <div class="plan-custom-section">
+                <div class="custom-form-group">
+                    <label for="custom-phone">شماره موبایل فروشنده</label>
+                    <input id="custom-phone" type="tel" placeholder="مثلاً 09120000000">
+                </div>
+                <div class="custom-form-group">
+                    <label for="custom-plan">انتخاب پلن</label>
+                    <select id="custom-plan">
+                        <option>پلن پایه</option>
+                        <option>پلن حرفه‌ای</option>
+                        <option>پلن ویژه</option>
+                        <option>پلن سفارشی</option>
+                    </select>
+                </div>
+                <div class="custom-form-group">
+                    <label for="custom-price">قیمت اختصاصی (تومان)</label>
+                    <input id="custom-price" type="number" min="0" step="10000" placeholder="تعیین قیمت توافقی">
+                </div>
+                <div class="custom-form-group" style="align-self: end;">
+                    <label style="visibility:hidden;">تایید</label>
+                    <button type="button" class="action-link" style="width:100%;justify-content:center;">ثبت قیمت اختصاصی</button>
+                </div>
+                <div class="custom-pricing-note">
+                    <i class="ri-information-line"></i>
+                    ثبت قیمت اختصاصی به صورت خودکار روی فاکتور فروشنده اعمال و در تاریخچه قیمت پلن او ذخیره می‌شود.
+                </div>
             </div>
         </section>
 
