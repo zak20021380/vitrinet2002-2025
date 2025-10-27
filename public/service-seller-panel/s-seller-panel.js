@@ -341,6 +341,39 @@ const PLAN_PERKS_DEFAULT = Object.freeze([
   'دسترسی به ابزارهای فروش حرفه‌ای'
 ]);
 
+const getShopContextId = (() => {
+  let cached = null;
+  return () => {
+    if (cached) return cached;
+    const params = new URLSearchParams(window.location.search);
+    const queryId = params.get('shopId');
+    const bodyId = document.body?.dataset?.shopId;
+    const dataset = window.ServiceShopPlans?.shops || {};
+    const firstDatasetId = Object.keys(dataset)[0];
+    cached = queryId || bodyId || firstDatasetId || 'wallet';
+    return cached;
+  };
+})();
+
+const getFallbackComplimentaryPlan = () => {
+  const dataset = window.ServiceShopPlans?.shops || {};
+  const shop = dataset[getShopContextId()];
+  if (!shop || !shop.plan) return null;
+  const plan = shop.plan;
+  const perks = Array.isArray(plan.perks) && plan.perks.length ? plan.perks.slice() : undefined;
+  return {
+    isActive: !!plan.isActive,
+    activeNow: plan.isActive,
+    startDate: plan.startDate,
+    endDate: plan.endDate,
+    durationDays: plan.durationDays,
+    totalDays: plan.durationDays,
+    perks,
+    note: plan.note || '',
+    lastUpdated: plan.lastUpdated
+  };
+};
+
 const faNumber = (value) => {
   const num = Number(value);
   if (!Number.isFinite(num)) return '۰';
@@ -356,13 +389,13 @@ const formatPersianDate = (value) => {
   const date = value instanceof Date ? value : new Date(value);
   if (Number.isNaN(date.getTime())) return '—';
   try {
-    return new Intl.DateTimeFormat('fa-IR-u-nu-latn-ca-persian', {
+    return new Intl.DateTimeFormat('fa-IR-u-nu-arabext-ca-persian', {
       year: 'numeric',
       month: '2-digit',
       day: '2-digit'
     }).format(date);
   } catch {
-    return date.toLocaleDateString('fa-IR');
+    return date.toLocaleDateString('fa-IR-u-ca-persian');
   }
 };
 
@@ -564,15 +597,23 @@ function renderComplimentaryPlan(planRaw) {
 }
 
 async function loadComplimentaryPlan() {
+  let plan = null;
   try {
     const response = await API.getComplimentaryPlan();
-    const plan = response?.plan || null;
-    renderComplimentaryPlan(plan);
-    window.__COMPLIMENTARY_PLAN__ = plan;
+    plan = response?.plan || null;
   } catch (err) {
     console.warn('loadComplimentaryPlan failed', err);
-    renderComplimentaryPlan(null);
   }
+
+  if (!plan) {
+    const fallbackPlan = getFallbackComplimentaryPlan();
+    if (fallbackPlan) {
+      plan = fallbackPlan;
+    }
+  }
+
+  renderComplimentaryPlan(plan);
+  window.__COMPLIMENTARY_PLAN__ = plan;
 }
 
 const EMPTY_DASHBOARD_STATS = {
@@ -1511,7 +1552,7 @@ class UIComponents {
 
   static formatPersianDate() {
     const options = { year: 'numeric', month: 'long', day: 'numeric', weekday: 'long' };
-    return new Intl.DateTimeFormat('fa-IR-u-nu-latn', options).format(new Date());
+    return new Intl.DateTimeFormat('fa-IR-u-nu-arabext-ca-persian', options).format(new Date());
   }
 
   // ⬇️ متد جدید: خروجی به فرم «شنبه ۲۳ شهریور»
@@ -2788,7 +2829,7 @@ destroy() {
     renderWelcomeDate() {
       const el = document.getElementById('welcome-date');
       if (el) {
-        el.textContent = UIComponents.formatPersianNumber(new Date().toLocaleDateString('fa-IR'));
+        el.textContent = UIComponents.formatPersianNumber(new Date().toLocaleDateString('fa-IR-u-ca-persian'));
       }
     }
     async loadDashboardStats(force = false) {
