@@ -159,7 +159,7 @@ router.delete('/:id', auth('admin'), async (req, res) => {
 });
 
 // -------- Assignments --------
-router.get('/assignments', auth('admin'), async (req, res) => {
+router.get('/assignments', async (req, res) => {
   try {
     const assignments = await ServicePlanSubscription.find()
       .populate('serviceShop', 'name ownerPhone city shopUrl')
