@@ -135,7 +135,15 @@
       position: relative;
       z-index: 10;
     }
-    
+
+    .search-filter-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
     .section-title {
       color: white;
       font-weight: 700;
@@ -154,14 +162,34 @@
       -webkit-text-fill-color: transparent;
       text-align: center;
     }
-    
+
+    .mobile-filter-trigger {
+      display: none;
+      align-items: center;
+      gap: 8px;
+      background: linear-gradient(90deg, var(--primary), var(--secondary));
+      color: #fff;
+      border: none;
+      border-radius: 12px;
+      padding: 10px 18px;
+      font-weight: 600;
+      cursor: pointer;
+      box-shadow: 0 6px 16px rgba(14, 165, 233, 0.16);
+      transition: var(--transition);
+    }
+
+    .mobile-filter-trigger:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 8px 20px rgba(14, 165, 233, 0.22);
+    }
+
     .search-filter-bar {
       display: flex;
       flex-wrap: wrap;
       gap: 16px;
       margin-top: 15px;
     }
-    
+
     .search-box {
       flex: 1; /* جعبه جستجو بزرگتر شده */
       min-width: 300px;
@@ -193,6 +221,303 @@
     
     .search-box input::placeholder {
       color: #94a3b8;
+    }
+
+    .desktop-filter-grid {
+      flex: 2;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 16px;
+    }
+
+    .filter-card {
+      background: var(--light-gray);
+      border-radius: 16px;
+      padding: 16px;
+      border: 1px solid rgba(148, 163, 184, 0.2);
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.3);
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      min-height: 100px;
+    }
+
+    .filter-card-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--primary-dark);
+      font-weight: 700;
+      font-size: 1rem;
+    }
+
+    .filter-card-header i {
+      font-size: 1.1rem;
+    }
+
+    .filter-card-body {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .filter-chip-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .filter-chip {
+      border: 1px solid rgba(14, 165, 233, 0.35);
+      background: rgba(14, 165, 233, 0.08);
+      color: var(--primary-dark);
+      padding: 8px 14px;
+      border-radius: 999px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: var(--transition);
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      user-select: none;
+    }
+
+    .filter-chip i {
+      font-size: 0.85rem;
+    }
+
+    .filter-chip:hover {
+      background: rgba(14, 165, 233, 0.16);
+      transform: translateY(-1px);
+    }
+
+    .filter-chip.active {
+      background: linear-gradient(90deg, var(--secondary), var(--primary));
+      color: #fff;
+      border-color: transparent;
+      box-shadow: 0 6px 18px rgba(14, 165, 233, 0.24);
+    }
+
+    .price-range {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .price-range-inputs {
+      position: relative;
+      height: 36px;
+      display: flex;
+      align-items: center;
+    }
+
+    .price-range input[type="range"] {
+      -webkit-appearance: none;
+      width: 100%;
+      background: transparent;
+      position: absolute;
+      pointer-events: none;
+      height: 36px;
+    }
+
+    .price-range input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      height: 18px;
+      width: 18px;
+      border-radius: 50%;
+      background: var(--secondary);
+      border: 3px solid #fff;
+      box-shadow: 0 4px 12px rgba(16, 185, 129, 0.32);
+      pointer-events: auto;
+      cursor: pointer;
+    }
+
+    .price-range input[type="range"]::-moz-range-thumb {
+      height: 18px;
+      width: 18px;
+      border-radius: 50%;
+      background: var(--secondary);
+      border: 3px solid #fff;
+      box-shadow: 0 4px 12px rgba(16, 185, 129, 0.32);
+      pointer-events: auto;
+      cursor: pointer;
+    }
+
+    .price-range-track {
+      position: absolute;
+      height: 6px;
+      width: 100%;
+      border-radius: 999px;
+      background: rgba(148, 163, 184, 0.35);
+      overflow: hidden;
+    }
+
+    .price-range-track::after {
+      content: "";
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      left: var(--track-min, 0%);
+      right: calc(100% - var(--track-max, 100%));
+      background: linear-gradient(90deg, var(--secondary), var(--primary));
+    }
+
+    .price-range-values {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      color: var(--gray);
+      font-size: 0.95rem;
+    }
+
+    .price-range-values strong {
+      font-size: 1.05rem;
+      color: var(--primary-dark);
+    }
+
+    .range-output {
+      color: var(--primary-dark);
+      font-weight: 600;
+      text-align: left;
+    }
+
+    .feature-options {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .feature-pill {
+      display: inline-flex;
+      align-items: center;
+      background: rgba(16, 185, 129, 0.08);
+      border-radius: 999px;
+      padding: 8px 14px;
+      gap: 8px;
+      border: 1px solid transparent;
+      cursor: pointer;
+      transition: var(--transition);
+      font-weight: 600;
+      color: var(--secondary-dark);
+    }
+
+    .feature-pill input {
+      display: none;
+    }
+
+    .feature-pill span {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.95rem;
+    }
+
+    .feature-pill:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(5, 150, 105, 0.18);
+    }
+
+    .feature-pill.active {
+      background: linear-gradient(90deg, rgba(16, 185, 129, 0.9), rgba(14, 165, 233, 0.9));
+      color: #fff;
+      border-color: transparent;
+      box-shadow: 0 6px 18px rgba(14, 165, 233, 0.25);
+    }
+
+    .feature-pill.active i {
+      color: #fff;
+    }
+
+    .sort-select {
+      width: 100%;
+      border-radius: 12px;
+      border: 1px solid rgba(148, 163, 184, 0.35);
+      padding: 10px 14px;
+      font-family: inherit;
+      font-weight: 600;
+      color: var(--primary-dark);
+      background: rgba(255, 255, 255, 0.9);
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.6);
+      transition: var(--transition);
+    }
+
+    .sort-select:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 4px rgba(14, 165, 233, 0.2);
+    }
+
+    .filters-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-top: 20px;
+      padding-top: 16px;
+      border-top: 1px dashed rgba(148, 163, 184, 0.35);
+    }
+
+    .reset-filters {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      border: 1px solid rgba(148, 163, 184, 0.4);
+      background: #fff;
+      color: var(--gray);
+      font-weight: 600;
+      border-radius: 12px;
+      padding: 10px 18px;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+
+    .reset-filters:hover {
+      color: var(--primary-dark);
+      border-color: rgba(14, 165, 233, 0.6);
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(148, 163, 184, 0.25);
+    }
+
+    .results-count {
+      font-weight: 700;
+      color: var(--primary-dark);
+      font-size: 1rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .active-filters {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 18px;
+    }
+
+    .active-filter-chip {
+      background: rgba(14, 165, 233, 0.12);
+      border-radius: 999px;
+      padding: 8px 14px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--primary-dark);
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      border: 1px solid rgba(14, 165, 233, 0.3);
+    }
+
+    .active-filter-chip button {
+      background: transparent;
+      border: none;
+      color: inherit;
+      font-size: 1rem;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      padding: 0;
     }
     
     .search-icon {
@@ -305,7 +630,51 @@
       flex: 1;
       text-align: center;
     }
-    
+
+    .center-categories {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      justify-content: center;
+      margin-bottom: 12px;
+    }
+
+    .center-category {
+      background: rgba(14, 165, 233, 0.12);
+      color: var(--primary-dark);
+      padding: 6px 12px;
+      border-radius: 999px;
+      font-size: 0.85rem;
+      font-weight: 600;
+    }
+
+    .center-price-badge {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      background: rgba(16, 185, 129, 0.1);
+      border-radius: 12px;
+      padding: 8px 14px;
+      margin-bottom: 16px;
+      color: var(--secondary-dark);
+      font-weight: 600;
+    }
+
+    .center-price-badge i {
+      color: var(--secondary-dark);
+    }
+
+    .center-price-badge .price-label {
+      font-weight: 800;
+    }
+
+    .center-price-badge .price-range-text {
+      color: var(--primary-dark);
+      font-weight: 600;
+    }
+
     .center-meta {
       display: flex;
       flex-direction: column;
@@ -315,12 +684,36 @@
       color: var(--gray);
       font-size: 0.95rem;
     }
-    
+
     .center-meta span {
       display: flex;
       align-items: center;
       justify-content: center;
       gap: 6px;
+    }
+
+    .center-feature-icons {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 10px;
+      margin-top: 12px;
+    }
+
+    .center-feature-icons span {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(14, 165, 233, 0.12);
+      color: var(--primary-dark);
+      padding: 6px 12px;
+      border-radius: 999px;
+      font-size: 0.85rem;
+      font-weight: 600;
+    }
+
+    .center-feature-icons span i {
+      color: inherit;
     }
     
     .center-actions {
@@ -418,13 +811,144 @@
     .footer-links i {
       font-size: 0.9rem;
     }
-    
+
     .social-links {
       display: flex;
       gap: 15px;
       margin-top: 20px;
     }
-    
+
+    .mobile-filter-overlay {
+      position: fixed;
+      inset: 0;
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      background: rgba(15, 23, 42, 0.35);
+      backdrop-filter: blur(4px);
+      z-index: 2000;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s ease;
+    }
+
+    .mobile-filter-overlay.open {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .mobile-filter-backdrop {
+      position: absolute;
+      inset: 0;
+    }
+
+    .mobile-filter-panel {
+      width: 100%;
+      max-width: 540px;
+      background: #fff;
+      border-radius: 24px 24px 0 0;
+      box-shadow: 0 -12px 40px rgba(15, 23, 42, 0.2);
+      padding: 24px 22px 16px;
+      transform: translateY(100%);
+      transition: transform 0.35s ease;
+      position: relative;
+      max-height: 92vh;
+      overflow-y: auto;
+    }
+
+    .mobile-filter-overlay.open .mobile-filter-panel {
+      transform: translateY(0);
+    }
+
+    .mobile-filter-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 18px;
+      color: var(--primary-dark);
+    }
+
+    .mobile-filter-header h3 {
+      font-size: 1.2rem;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .mobile-filter-close {
+      background: rgba(14, 165, 233, 0.1);
+      border: none;
+      color: var(--primary-dark);
+      border-radius: 12px;
+      width: 40px;
+      height: 40px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.1rem;
+      transition: var(--transition);
+    }
+
+    .mobile-filter-close:hover {
+      background: rgba(14, 165, 233, 0.18);
+    }
+
+    .mobile-filter-body {
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+
+    .mobile-filter-group h4 {
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: var(--primary-dark);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+
+    .mobile-filter-group .filter-chip-list {
+      gap: 8px;
+    }
+
+    .price-range.mobile .price-range-inputs {
+      height: 40px;
+    }
+
+    .mobile-filter-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-top: 24px;
+    }
+
+    .apply-filters {
+      flex: 1;
+      background: linear-gradient(90deg, var(--secondary), var(--primary));
+      color: #fff;
+      border: none;
+      border-radius: 14px;
+      padding: 12px 18px;
+      font-weight: 700;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      cursor: pointer;
+      box-shadow: 0 8px 24px rgba(14, 165, 233, 0.3);
+      transition: var(--transition);
+    }
+
+    .apply-filters:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 12px 28px rgba(14, 165, 233, 0.35);
+    }
+
     .social-icon {
       width: 40px;
       height: 40px;
@@ -478,6 +1002,18 @@
       .centers-list {
         grid-template-columns: repeat(2, 1fr);
       }
+
+      .desktop-filter-grid {
+        display: none;
+      }
+
+      .mobile-filter-trigger {
+        display: inline-flex;
+      }
+
+      .filters-footer {
+        justify-content: space-between;
+      }
     }
     
     @media (max-width: 900px) {
@@ -530,6 +1066,21 @@
 
       .section-title {
         font-size: 1.6rem;
+      }
+
+      .filters-footer {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 10px;
+      }
+
+      .reset-filters {
+        width: 100%;
+        justify-content: center;
+      }
+
+      .results-count {
+        justify-content: center;
       }
     }
 
@@ -907,18 +1458,208 @@
   <!-- بخش جستجو و فیلتر مدرن -->
   <section class="search-section">
     <div class="search-filter-container">
-      <h2 class="section-title">
-        مراکز خرید سنندج
-      </h2>
-      
+      <div class="search-filter-header">
+        <h2 class="section-title">
+          مراکز خرید سنندج
+        </h2>
+        <button class="mobile-filter-trigger" id="mobileFilterTrigger" type="button">
+          <i class="fas fa-sliders-h"></i>
+          فیلترها
+        </button>
+      </div>
+
       <div class="search-filter-bar">
         <div class="search-box">
           <span class="search-icon"><i class="fas fa-search"></i></span>
-          <input id="searchInput" type="text" placeholder="جستجوی نام مرکز خرید..." autocomplete="off">
+          <input id="searchInput" type="text" placeholder="جستجوی نام یا آدرس مرکز خرید..." autocomplete="off">
+        </div>
+
+        <div class="desktop-filter-grid">
+          <div class="filter-card">
+            <div class="filter-card-header">
+              <i class="fas fa-tags"></i>
+              <span>دسته‌بندی محصولات</span>
+            </div>
+            <div class="filter-chip-list" id="categoryChips"></div>
+          </div>
+
+          <div class="filter-card">
+            <div class="filter-card-header">
+              <i class="fas fa-money-bill-wave"></i>
+              <span>محدوده قیمت</span>
+            </div>
+            <div class="filter-card-body">
+              <div class="price-range">
+                <div class="price-range-inputs">
+                  <input type="range" id="priceMin" min="0" max="100" value="0" step="50000">
+                  <input type="range" id="priceMax" min="0" max="100" value="100" step="50000">
+                  <div class="price-range-track"></div>
+                </div>
+                <div class="price-range-values">
+                  <div>
+                    <span>از</span>
+                    <strong id="priceMinValue">۰</strong>
+                  </div>
+                  <div>
+                    <span>تا</span>
+                    <strong id="priceMaxValue">∞</strong>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="filter-card">
+            <div class="filter-card-header">
+              <i class="fas fa-store"></i>
+              <span>حداقل تعداد فروشگاه</span>
+            </div>
+            <div class="filter-card-body">
+              <input type="range" id="storesRange" min="0" max="30" value="0" step="1">
+              <div class="range-output"><strong id="storesValue">همه</strong></div>
+            </div>
+          </div>
+
+          <div class="filter-card">
+            <div class="filter-card-header">
+              <i class="fas fa-star"></i>
+              <span>ویژگی‌های مرکز</span>
+            </div>
+            <div class="filter-card-body feature-options" id="featureOptions">
+              <label class="feature-pill">
+                <input type="checkbox" value="parking">
+                <span><i class="fas fa-parking"></i> پارکینگ</span>
+              </label>
+              <label class="feature-pill">
+                <input type="checkbox" value="food">
+                <span><i class="fas fa-utensils"></i> فودکورت</span>
+              </label>
+              <label class="feature-pill">
+                <input type="checkbox" value="family">
+                <span><i class="fas fa-children"></i> مناسب خانواده</span>
+              </label>
+              <label class="feature-pill">
+                <input type="checkbox" value="discount">
+                <span><i class="fas fa-percent"></i> جشنواره و تخفیف</span>
+              </label>
+            </div>
+          </div>
+
+          <div class="filter-card">
+            <div class="filter-card-header">
+              <i class="fas fa-sort-amount-down"></i>
+              <span>مرتب‌سازی</span>
+            </div>
+            <div class="filter-card-body">
+              <select id="sortSelect" class="sort-select">
+                <option value="recommended">پیشنهادی</option>
+                <option value="mostStores">بیشترین فروشگاه</option>
+                <option value="leastStores">کمترین فروشگاه</option>
+                <option value="priceLow">ارزان‌ترین محدوده</option>
+                <option value="priceHigh">گران‌ترین محدوده</option>
+                <option value="alphabetical">حروف الفبا</option>
+              </select>
+            </div>
+          </div>
         </div>
       </div>
+
+      <div class="filters-footer">
+        <button class="reset-filters" id="resetFilters" type="button">
+          <i class="fas fa-undo"></i>
+          بازنشانی فیلترها
+        </button>
+        <div class="results-count" id="resultsCount">در حال بارگذاری...</div>
+      </div>
+
+      <div class="active-filters" id="activeFilters"></div>
     </div>
   </section>
+
+  <div class="mobile-filter-overlay" id="mobileFilterOverlay" aria-hidden="true">
+    <div class="mobile-filter-backdrop" id="mobileFilterBackdrop"></div>
+    <div class="mobile-filter-panel" id="mobileFilterPanel" role="dialog" aria-modal="true">
+      <div class="mobile-filter-header">
+        <h3><i class="fas fa-sliders-h"></i> فیلتر مراکز خرید</h3>
+        <button type="button" class="mobile-filter-close" id="mobileFilterClose" aria-label="بستن فیلترها">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      <div class="mobile-filter-body">
+        <div class="mobile-filter-group">
+          <h4><i class="fas fa-tags"></i> دسته‌بندی محصولات</h4>
+          <div class="filter-chip-list" id="categoryChipsMobile"></div>
+        </div>
+        <div class="mobile-filter-group">
+          <h4><i class="fas fa-money-bill-wave"></i> محدوده قیمت</h4>
+          <div class="price-range mobile">
+            <div class="price-range-inputs">
+              <input type="range" id="priceMinMobile" min="0" max="100" value="0" step="50000">
+              <input type="range" id="priceMaxMobile" min="0" max="100" value="100" step="50000">
+              <div class="price-range-track"></div>
+            </div>
+            <div class="price-range-values">
+              <div>
+                <span>از</span>
+                <strong id="priceMinValueMobile">۰</strong>
+              </div>
+              <div>
+                <span>تا</span>
+                <strong id="priceMaxValueMobile">∞</strong>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="mobile-filter-group">
+          <h4><i class="fas fa-store"></i> حداقل تعداد فروشگاه</h4>
+          <input type="range" id="storesRangeMobile" min="0" max="30" value="0" step="1">
+          <div class="range-output"><strong id="storesValueMobile">همه</strong></div>
+        </div>
+        <div class="mobile-filter-group">
+          <h4><i class="fas fa-star"></i> ویژگی‌های مرکز</h4>
+          <div class="filter-card-body feature-options" id="featureOptionsMobile">
+            <label class="feature-pill">
+              <input type="checkbox" value="parking">
+              <span><i class="fas fa-parking"></i> پارکینگ</span>
+            </label>
+            <label class="feature-pill">
+              <input type="checkbox" value="food">
+              <span><i class="fas fa-utensils"></i> فودکورت</span>
+            </label>
+            <label class="feature-pill">
+              <input type="checkbox" value="family">
+              <span><i class="fas fa-children"></i> مناسب خانواده</span>
+            </label>
+            <label class="feature-pill">
+              <input type="checkbox" value="discount">
+              <span><i class="fas fa-percent"></i> جشنواره و تخفیف</span>
+            </label>
+          </div>
+        </div>
+        <div class="mobile-filter-group">
+          <h4><i class="fas fa-sort-amount-down"></i> مرتب‌سازی</h4>
+          <select id="sortSelectMobile" class="sort-select">
+            <option value="recommended">پیشنهادی</option>
+            <option value="mostStores">بیشترین فروشگاه</option>
+            <option value="leastStores">کمترین فروشگاه</option>
+            <option value="priceLow">ارزان‌ترین محدوده</option>
+            <option value="priceHigh">گران‌ترین محدوده</option>
+            <option value="alphabetical">حروف الفبا</option>
+          </select>
+        </div>
+      </div>
+      <div class="mobile-filter-footer">
+        <button type="button" class="reset-filters" id="resetFiltersMobile">
+          <i class="fas fa-undo"></i>
+          بازنشانی
+        </button>
+        <button type="button" class="apply-filters" id="mobileApplyFilters">
+          <i class="fas fa-check"></i>
+          نمایش نتایج
+        </button>
+      </div>
+    </div>
+  </div>
 
   <!-- کارت‌های مراکز خرید شیک و جذاب -->
   <div class="main-container">
@@ -970,122 +1711,7 @@
     </div>
   </footer>
 
-<script>
-  document.addEventListener('DOMContentLoaded', function() {
-    // --- تنظیمات API ---
-    const API_URL = '/api/shopping-centers'; // همان API پنل مدیریت
-
-    const listDiv = document.getElementById('all-centers-list');
-    
-    // ابتدا اسکلتون لودر نمایش داده می‌شود
-    listDiv.innerHTML = '';
-    for (let i = 0; i < 6; i++) {
-      listDiv.innerHTML += `
-        <div class="center-card fade-in delay-${i % 3}">
-          <div class="skeleton skeleton-img"></div>
-          <div class="center-info">
-            <div class="skeleton skeleton-line" style="height: 28px; margin-bottom: 15px;"></div>
-            <div class="skeleton skeleton-line short" style="height: 22px; margin-bottom: 10px;"></div>
-            <div class="skeleton skeleton-line" style="height: 18px; margin-bottom: 8px;"></div>
-            <div class="skeleton skeleton-line" style="height: 18px; margin-bottom: 8px;"></div>
-            <div class="skeleton skeleton-line medium" style="height: 18px; margin-bottom: 20px;"></div>
-            <div style="display: flex; gap: 10px; margin-top: auto;">
-              <div class="skeleton" style="height: 40px; flex: 1; border-radius: 12px;"></div>
-            </div>
-          </div>
-        </div>
-      `;
-    }
-    
-    // fetch داده‌ها از API (پس از تاخیر برای اسکلتون)
-    setTimeout(() => {
-      fetch(API_URL)
-        .then(res => res.json())
-        .then(centers => {
-          renderCenters(centers);
-        })
-        .catch(() => {
-          listDiv.innerHTML = `
-            <div style="grid-column: 1/-1; text-align: center; padding: 50px 20px;">
-              <i class="fas fa-exclamation-triangle" style="font-size: 4rem; color: #cbd5e1; margin-bottom: 20px;"></i>
-              <h3 style="color: #64748b; font-size: 1.5rem;">خطا در بارگذاری مراکز خرید!</h3>
-            </div>
-          `;
-        });
-    }, 1500);
-    
-    function renderCenters(centers) {
-      listDiv.innerHTML = '';
-      
-      if (!centers.length) {
-        listDiv.innerHTML = `
-          <div style="grid-column: 1/-1; text-align: center; padding: 50px 20px;">
-            <i class="fas fa-store-slash" style="font-size: 4rem; color: #cbd5e1; margin-bottom: 20px;"></i>
-            <h3 style="color: #64748b; font-size: 1.5rem;">مرکز خریدی یافت نشد!</h3>
-            <p style="color: #94a3b8; margin-top: 10px;">لطفاً عبارت جستجو را تغییر دهید</p>
-          </div>
-        `;
-        return;
-      }
-
-      centers.forEach((center, index) => {
-        const card = document.createElement('div');
-        card.className = `center-card fade-in delay-${index % 3}`;
-        card.innerHTML = `
-          <div class="center-img-container">
-            <img class="center-img" src="${center.image || 'https://via.placeholder.com/800x600?text=تصویر+مرکز+خرید'}" alt="${center.title}">
-            ${center.tag ? `<div class="center-tag">${center.tag}</div>` : ''}
-          </div>
-          <div class="center-info">
-            <h3 class="center-title">${center.title}</h3>
-            <div class="center-address">
-              <i class="fas fa-map-marker-alt"></i> ${center.location || 'نامشخص'}
-            </div>
-            <p class="center-desc">${center.description || ''}</p>
-            
-            <div class="center-meta">
-              <!-- تعداد مغازه‌ها را نمایش می‌دهیم -->
-              <span><i class="fas fa-store"></i> ${center.stores || 0} مغازه</span>
-              <span><i class="fas fa-clock"></i> ساعات کاری: ${center.hours || 'نامشخص'}</span>
-              <span><i class="fas fa-calendar-times"></i> روزهای تعطیل: ${center.holidays || 'هیچ'}</span>
-            </div>
-            
-            <div class="center-actions">
-              <div class="action-btn btn-primary" onclick="goToShops('${center._id}', '${center.title}')">
-                <i class="fas fa-list"></i> مشاهده فروشگاه‌ها
-              </div>
-            </div>
-          </div>
-        `;
-        listDiv.appendChild(card);
-      });
-    }
-
-    window.goToShops = function(id, title) {
-      window.location.href = `shopping-centers-shops.html?centerId=${id}&title=${encodeURIComponent(title)}`;
-    };
-
-    // جستجو فقط بر اساس نام مرکز خرید
-    document.getElementById('searchInput').addEventListener('input', function() {
-      const searchTerm = this.value.trim().toLowerCase();
-      if (searchTerm === '') {
-        fetch(API_URL)
-          .then(res => res.json())
-          .then(centers => renderCenters(centers));
-        return;
-      }
-      
-      fetch(API_URL)
-        .then(res => res.json())
-        .then(centers => {
-          const filtered = centers.filter(center => 
-            center.title.toLowerCase().includes(searchTerm)
-          );
-          renderCenters(filtered);
-        });
-    });
-  });
-</script>
+<script src="all-shopping-centers.js" defer></script>
 
 </body>
 </html>
