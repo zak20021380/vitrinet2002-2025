@@ -1436,16 +1436,6 @@
         بیشترین تعداد مغازه
       </button>
 
-      <div class="dropdown-filter" style="position: relative; display:inline-block;">
-        <button class="filter-btn" id="goodsFilterBtn">
-          <i class="fas fa-tags"></i>
-          دسته‌بندی کالاها
-          <i class="fas fa-chevron-down" style="margin-right:7px;font-size:0.95em"></i>
-        </button>
-        <div class="dropdown-menu" id="goodsFilterDropdown" style="display:none; position:absolute; right:0; top:110%; z-index:9; min-width:220px; background:#fff; border-radius:16px; box-shadow:0 8px 24px rgba(16,185,129,0.14); overflow:hidden; border:1.5px solid #0ea5e95b;">
-          <!-- گزینه‌های فیلتر دسته‌بندی کالا به‌صورت داینامیک اضافه می‌شود -->
-        </div>
-      </div>
     </div>
   </div>
 
@@ -1528,27 +1518,6 @@
           </div>
         </section>
 
-        <section class="mobile-filter-group">
-          <div class="mobile-group-header">
-            <span class="mobile-group-icon">
-              <i class="fas fa-tags"></i>
-            </span>
-            <div>
-              <h4>دسته‌بندی کالاها</h4>
-              <p>نوع کالا یا خدمت موردنظر را انتخاب کنید</p>
-            </div>
-          </div>
-          <div class="mobile-group-body">
-            <button class="filter-btn" id="goodsFilterBtnMobile" aria-expanded="false" type="button">
-              <i class="fas fa-tags"></i>
-              <span>همه دسته‌بندی‌ها</span>
-              <i class="fas fa-chevron-down"></i>
-            </button>
-            <div class="dropdown-menu mobile-dropdown" id="goodsFilterDropdownMobile" style="display:none;">
-              <!-- گزینه‌های دسته‌بندی کالا موبایل -->
-            </div>
-          </div>
-        </section>
       </div>
 
       <div class="mobile-filter-actions">
@@ -1624,8 +1593,6 @@
     const shopsDropdown = document.getElementById('shopsDropdown');
     const sortCheapBtn = document.getElementById('sort-cheap');
     const sortExpensiveBtn = document.getElementById('sort-expensive');
-    const goodsFilterBtn = document.getElementById('goodsFilterBtn');
-    const goodsFilterDropdown = document.getElementById('goodsFilterDropdown');
 
     const mobileFilterBtn = document.getElementById('mobileFilterBtn');
     const mobileFiltersOverlay = document.getElementById('mobileFiltersOverlay');
@@ -1637,51 +1604,36 @@
     const shopsDropdownMobile = document.getElementById('shopsDropdownMobile');
     const sortCheapMobileBtn = document.getElementById('sort-cheap-mobile');
     const sortExpensiveMobileBtn = document.getElementById('sort-expensive-mobile');
-    const goodsFilterBtnMobile = document.getElementById('goodsFilterBtnMobile');
-    const goodsFilterDropdownMobile = document.getElementById('goodsFilterDropdownMobile');
     const applyFiltersMobileBtn = document.getElementById('applyFiltersMobile');
 
     let centersData = [];
     let filteredCenters = [];
     let centerCategories = [];
-    let goodsCategories = [];
     let locations = [];
 
     let currentCategory = 'همه مراکز خرید';
     let currentLocation = 'همه مناطق';
-    let currentGoodsCategory = 'همه دسته‌بندی‌ها';
     let currentSort = null;
     let searchTerm = '';
 
     showSkeleton();
 
     setTimeout(() => {
-      Promise.all([
-        fetch(API_URL)
-          .then(res => {
-            if (!res.ok) throw new Error('centers');
-            return res.json();
-          }),
-        fetch('/api/categories')
-          .then(res => (res.ok ? res.json() : Promise.reject(new Error('categories'))))
-          .catch(err => {
-            console.warn('بارگذاری دسته‌بندی کالاها ناموفق بود:', err);
-            return null;
-          })
-      ])
-        .then(([centersResponse, categoriesPayload]) => {
+      fetch(API_URL)
+        .then(res => {
+          if (!res.ok) throw new Error('centers');
+          return res.json();
+        })
+        .then((centersResponse) => {
           centersData = (Array.isArray(centersResponse) ? centersResponse : []).map((center, index) => ({
             ...center,
             __index: index
           }));
           centerCategories = buildCategories(centersData);
-          goodsCategories = buildGoodsCategories(categoriesPayload);
           locations = buildLocations(centersData);
           populateDropdowns();
-          populateGoodsDropdowns();
           updateCategorySelection('همه مراکز خرید', { skipFilter: true });
           updateLocationSelection('همه مناطق', { skipFilter: true });
-          updateGoodsCategorySelection('همه دسته‌بندی‌ها', { skipFilter: true });
           filterAndRender();
         })
         .catch(() => {
@@ -1729,25 +1681,6 @@
       return ['همه مراکز خرید', ...unique];
     }
 
-    function buildGoodsCategories(payload) {
-      if (!payload || typeof payload !== 'object') {
-        return ['همه دسته‌بندی‌ها'];
-      }
-
-      const rawList = Array.isArray(payload.categories) ? payload.categories : [];
-      const mapped = rawList
-        .map(item => {
-          if (!item) return '';
-          if (typeof item === 'string') return item.trim();
-          if (typeof item.name === 'string') return item.name.trim();
-          return '';
-        })
-        .filter(Boolean);
-
-      const unique = Array.from(new Set(mapped));
-      return ['همه دسته‌بندی‌ها', ...unique];
-    }
-
     function buildLocations(data) {
       const locs = data
         .map(item => (item.location || '').trim())
@@ -1761,11 +1694,6 @@
       populateCategoryDropdown(filterDropdownMobile, true);
       populateLocationDropdown(shopsDropdown, false);
       populateLocationDropdown(shopsDropdownMobile, true);
-    }
-
-    function populateGoodsDropdowns() {
-      populateGoodsCategoryDropdown(goodsFilterDropdown, false);
-      populateGoodsCategoryDropdown(goodsFilterDropdownMobile, true);
     }
 
     function populateCategoryDropdown(container, isMobile) {
@@ -1800,37 +1728,6 @@
       }
     }
 
-    function populateGoodsCategoryDropdown(container, isMobile) {
-      if (!container) return;
-      container.innerHTML = '';
-      goodsCategories.forEach(category => {
-        const option = document.createElement('button');
-        option.type = 'button';
-        option.className = 'dropdown-item';
-        option.dataset.value = category;
-        option.textContent = category;
-        option.addEventListener('click', () => {
-          updateGoodsCategorySelection(category);
-          if (isMobile) {
-            container.style.display = 'none';
-            if (goodsFilterBtnMobile) {
-              goodsFilterBtnMobile.setAttribute('aria-expanded', 'false');
-            }
-          } else {
-            closeDesktopDropdowns();
-          }
-        });
-        container.appendChild(option);
-      });
-
-      if (!container.children.length) {
-        const empty = document.createElement('div');
-        empty.textContent = 'دسته‌بندی‌ای ثبت نشده است';
-        empty.style.padding = '12px 20px';
-        empty.style.color = '#64748b';
-        container.appendChild(empty);
-      }
-    }
 
     function populateLocationDropdown(container, isMobile) {
       if (!container) return;
@@ -1870,20 +1767,6 @@
       return Number.isNaN(numeric) ? 0 : numeric;
     }
 
-    function getCenterGoodsCategories(center = {}) {
-      const collected = [];
-      if (Array.isArray(center.categories)) collected.push(...center.categories);
-      if (Array.isArray(center.goodsCategories)) collected.push(...center.goodsCategories);
-      if (Array.isArray(center.shopCategories)) collected.push(...center.shopCategories);
-      if (Array.isArray(center.tags)) collected.push(...center.tags);
-      if (center.category) collected.push(center.category);
-      if (center.tag) collected.push(center.tag);
-
-      return Array.from(new Set(collected
-        .map(value => (typeof value === 'string' ? value.trim() : ''))
-        .filter(Boolean)));
-    }
-
     function getOrderValue(center) {
       if (!center) return 0;
       if (typeof center.order === 'number') return center.order;
@@ -1900,8 +1783,6 @@
 
       const normalizedCategory = (currentCategory || '').toLowerCase();
       const normalizedLocation = (currentLocation || '').toLowerCase();
-      const normalizedGoodsCategory = (currentGoodsCategory || '').toLowerCase();
-
       filteredCenters = centersData.filter(center => {
         const title = (center.title || '').toLowerCase();
         const description = (center.description || '').toLowerCase();
@@ -1919,10 +1800,7 @@
           (normalizedLocation === 'نامشخص' && !location) ||
           location.includes(normalizedLocation);
 
-        const goodsMatch = normalizedGoodsCategory === 'همه دسته‌بندی‌ها'.toLowerCase() ||
-          getCenterGoodsCategories(center).some(category => category.toLowerCase() === normalizedGoodsCategory);
-
-        return searchMatch && categoryMatch && locationMatch && goodsMatch;
+        return searchMatch && categoryMatch && locationMatch;
       });
 
       if (currentSort === 'cheap') {
@@ -2040,34 +1918,6 @@
       }
     }
 
-    function updateGoodsCategorySelection(category, options = {}) {
-      currentGoodsCategory = category || 'همه دسته‌بندی‌ها';
-      const label = currentGoodsCategory;
-
-      if (goodsFilterBtn) {
-        goodsFilterBtn.innerHTML = `
-          <i class="fas fa-tags"></i>
-          ${label}
-          <i class="fas fa-chevron-down" style="margin-right:7px;font-size:0.95em"></i>
-        `;
-        goodsFilterBtn.classList.toggle('active', currentGoodsCategory !== 'همه دسته‌بندی‌ها');
-      }
-
-      if (goodsFilterBtnMobile) {
-        goodsFilterBtnMobile.innerHTML = `
-          <i class="fas fa-tags"></i>
-          <span>${label}</span>
-          <i class="fas fa-chevron-down"></i>
-        `;
-        goodsFilterBtnMobile.classList.toggle('active', currentGoodsCategory !== 'همه دسته‌بندی‌ها');
-        goodsFilterBtnMobile.setAttribute('aria-expanded', 'false');
-      }
-
-      if (!options.skipFilter) {
-        filterAndRender();
-      }
-    }
-
     function updateSortButtons() {
       const cheapActive = currentSort === 'cheap';
       const expensiveActive = currentSort === 'expensive';
@@ -2108,13 +1958,6 @@
         });
       }
 
-      if (currentGoodsCategory && currentGoodsCategory !== 'همه دسته‌بندی‌ها') {
-        chips.push({
-          label: `دسته‌بندی کالا: ${currentGoodsCategory}`,
-          remove: () => updateGoodsCategorySelection('همه دسته‌بندی‌ها')
-        });
-      }
-
       if (currentSort) {
         const sortLabel = currentSort === 'cheap' ? 'کمترین تعداد مغازه' : 'بیشترین تعداد مغازه';
         chips.push({
@@ -2152,7 +1995,6 @@
     function closeDesktopDropdowns() {
       if (filterDropdown) filterDropdown.style.display = 'none';
       if (shopsDropdown) shopsDropdown.style.display = 'none';
-      if (goodsFilterDropdown) goodsFilterDropdown.style.display = 'none';
     }
 
     function closeMobileDropdowns() {
@@ -2164,13 +2006,8 @@
         shopsDropdownMobile.style.display = 'none';
         shopsDropdownMobile.scrollTop = 0;
       }
-      if (goodsFilterDropdownMobile) {
-        goodsFilterDropdownMobile.style.display = 'none';
-        goodsFilterDropdownMobile.scrollTop = 0;
-      }
       if (mainFilterBtnMobile) mainFilterBtnMobile.setAttribute('aria-expanded', 'false');
       if (shopsBtnMobile) shopsBtnMobile.setAttribute('aria-expanded', 'false');
-      if (goodsFilterBtnMobile) goodsFilterBtnMobile.setAttribute('aria-expanded', 'false');
     }
 
     function openMobileFilters() {
@@ -2219,17 +2056,6 @@
         closeDesktopDropdowns();
         if (shopsDropdown) {
           shopsDropdown.style.display = isOpen ? 'none' : 'block';
-        }
-      });
-    }
-
-    if (goodsFilterBtn) {
-      goodsFilterBtn.addEventListener('click', (event) => {
-        event.stopPropagation();
-        const isOpen = goodsFilterDropdown && goodsFilterDropdown.style.display === 'block';
-        closeDesktopDropdowns();
-        if (goodsFilterDropdown) {
-          goodsFilterDropdown.style.display = isOpen ? 'none' : 'block';
         }
       });
     }
@@ -2286,18 +2112,6 @@
         if (shopsDropdownMobile) {
           shopsDropdownMobile.style.display = isOpen ? 'none' : 'block';
           shopsBtnMobile.setAttribute('aria-expanded', isOpen ? 'false' : 'true');
-        }
-      });
-    }
-
-    if (goodsFilterBtnMobile) {
-      goodsFilterBtnMobile.addEventListener('click', (event) => {
-        event.stopPropagation();
-        const isOpen = goodsFilterDropdownMobile && goodsFilterDropdownMobile.style.display === 'block';
-        closeMobileDropdowns();
-        if (goodsFilterDropdownMobile) {
-          goodsFilterDropdownMobile.style.display = isOpen ? 'none' : 'block';
-          goodsFilterBtnMobile.setAttribute('aria-expanded', isOpen ? 'false' : 'true');
         }
       });
     }
