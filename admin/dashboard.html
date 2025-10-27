@@ -221,6 +221,161 @@
             color: var(--text-strong);
         }
 
+        .retail-plan-card {
+            background: linear-gradient(135deg, rgba(61, 115, 255, 0.04), rgba(20, 33, 61, 0.04));
+        }
+
+        .retail-plan-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 24px;
+        }
+
+        .retail-plan-column {
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+        }
+
+        .retail-header-actions {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .retail-highlight-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 14px;
+            border-radius: 999px;
+            background: rgba(20, 33, 61, 0.08);
+            color: #16244a;
+            font-weight: 600;
+            font-size: 13px;
+        }
+
+        .retail-pricing-summary {
+            border: 1px solid rgba(112, 128, 176, 0.12);
+            border-radius: 18px;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.9);
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+        }
+
+        .pricing-preview {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 16px;
+        }
+
+        .preview-metric {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            background: rgba(61, 115, 255, 0.08);
+            border-radius: 14px;
+            padding: 12px 14px;
+        }
+
+        .preview-metric strong {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .preview-metric small {
+            color: var(--text-muted);
+            font-size: 12px;
+        }
+
+        .preview-controls {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .preview-control-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .preview-slider {
+            flex: 1;
+            direction: ltr;
+        }
+
+        .preview-value {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 40px;
+            padding: 6px 10px;
+            border-radius: 999px;
+            background: rgba(20, 33, 61, 0.08);
+            font-weight: 600;
+            font-size: 13px;
+        }
+
+        .toggle-control {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            padding: 10px 14px;
+            border: 1px solid rgba(112, 128, 176, 0.12);
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.85);
+        }
+
+        .toggle-control input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            accent-color: var(--primary);
+        }
+
+        .toggle-control.is-disabled {
+            opacity: 0.6;
+        }
+
+        .retail-plan-table td strong {
+            display: block;
+            margin-bottom: 6px;
+            color: var(--text-strong);
+        }
+
+        .retail-plan-table .pricing-breakdown {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .retail-plan-table .pricing-breakdown span {
+            color: var(--text-muted);
+            font-size: 13px;
+        }
+
+        .retail-plan-table .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 10px;
+            border-radius: 999px;
+            background: rgba(61, 115, 255, 0.12);
+            color: var(--primary);
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .retail-plan-table .status-pill.inactive {
+            background: rgba(90, 106, 133, 0.14);
+            color: var(--text-muted);
+        }
+
         .form-card {
             border: 1px solid rgba(112, 128, 176, 0.12);
             border-radius: 16px;
@@ -750,6 +905,10 @@
                 padding: 14px 12px;
             }
 
+            .retail-plan-grid {
+                grid-template-columns: 1fr;
+            }
+
             .modal-card {
                 padding: 22px 18px;
             }
@@ -941,6 +1100,170 @@
                             </tbody>
                         </table>
                     </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="card plan-management-card retail-plan-card" id="retail-plan-management">
+            <div class="plan-management-header">
+                <div>
+                    <h2>مدیریت پلن‌های مغازه‌های عادی</h2>
+                    <p>قیمت‌گذاری چندبخشی ویژه فروشگاه‌های کالایی با ساختاری مستقل از پلن‌های خدماتی</p>
+                </div>
+                <div class="retail-header-actions">
+                    <span class="retail-highlight-badge">
+                        <i class="ri-sparkling-2-line"></i>
+                        ساختار قیمت‌گذاری مستقل
+                    </span>
+                    <button type="button" class="action-link plan-ops-secondary" id="retailPlanRefresh">
+                        <i class="ri-refresh-line"></i>
+                        بروزرسانی داده‌ها
+                    </button>
+                </div>
+            </div>
+
+            <div class="retail-plan-grid">
+                <div class="retail-plan-column">
+                    <div class="retail-pricing-summary">
+                        <div>
+                            <h3>فرمول قیمت‌گذاری پویا</h3>
+                            <p class="section-subtitle">محاسبه هزینه براساس تعداد شعب فعال و ماژول‌های انتخابی</p>
+                        </div>
+                        <div class="pricing-preview">
+                            <div class="preview-metric">
+                                <span>پرداخت دوره‌ای</span>
+                                <strong id="retailMonthlyPreview">۰ تومان</strong>
+                                <small>شامل هزینه پایه و ماژول‌های انتخابی</small>
+                            </div>
+                            <div class="preview-metric">
+                                <span>ودیعه اولیه</span>
+                                <strong id="retailUpfrontPreview">۰ تومان</strong>
+                                <small>قابل بازگشت در پایان قرارداد</small>
+                            </div>
+                            <div class="preview-metric">
+                                <span>کمیسیون</span>
+                                <strong id="retailCommissionPreview">۰٪</strong>
+                                <small>از فروش حضوری و حضوری-آنلاین</small>
+                            </div>
+                        </div>
+                        <div class="preview-controls">
+                            <label for="retailPreviewBranches">تعداد شعب فعال</label>
+                            <div class="preview-control-row">
+                                <input type="range" min="1" max="10" value="1" id="retailPreviewBranches" class="preview-slider">
+                                <span class="preview-value" id="retailPreviewBranchesValue">۱</span>
+                            </div>
+                            <div class="toggle-control" id="retailPreviewMarketingWrapper">
+                                <label for="retailPreviewMarketing">محاسبه با ماژول بازاریابی</label>
+                                <input type="checkbox" id="retailPreviewMarketing" checked>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="table-wrapper">
+                        <table class="plan-table retail-plan-table" aria-describedby="retailPlanTableCaption">
+                            <caption id="retailPlanTableCaption" class="visually-hidden">جدول پلن‌های مغازه‌های عادی</caption>
+                            <thead>
+                                <tr>
+                                    <th scope="col">پلن</th>
+                                    <th scope="col">ساختار قیمت</th>
+                                    <th scope="col">شرایط مالی</th>
+                                    <th scope="col">اقدامات</th>
+                                </tr>
+                            </thead>
+                            <tbody id="retailPlanTableBody">
+                                <tr><td colspan="4" class="table-empty">در حال بارگذاری پلن‌های مغازه‌های عادی...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="retail-plan-column">
+                    <form class="form-card" id="retailPlanForm" autocomplete="off">
+                        <div>
+                            <h3 id="retailPlanFormTitle">ایجاد پلن جدید</h3>
+                            <p class="section-subtitle">این پلن به صورت کاملاً مجزا از مدل خدماتی محاسبه می‌شود.</p>
+                        </div>
+                        <div class="form-field">
+                            <label for="retailPlanTitle">عنوان پلن</label>
+                            <input type="text" id="retailPlanTitle" name="title" class="form-control" required>
+                        </div>
+                        <div class="form-field">
+                            <label for="retailPlanSlug">اسلاگ پلن</label>
+                            <input type="text" id="retailPlanSlug" name="slug" class="form-control" required placeholder="مثال: prime-retail">
+                            <span class="form-helper">در آدرس‌ها استفاده می‌شود و باید منحصر به فرد باشد.</span>
+                        </div>
+                        <div class="form-field">
+                            <label for="retailBasePrice">هزینه پایه (تومان)</label>
+                            <input type="number" id="retailBasePrice" name="basePrice" class="form-control" min="0" step="1000" required>
+                        </div>
+                        <div class="form-field">
+                            <label for="retailPerBranchFee">هزینه هر شعبه اضافه (تومان)</label>
+                            <input type="number" id="retailPerBranchFee" name="perBranchFee" class="form-control" min="0" step="1000" value="0">
+                            <span class="form-helper">هزینه‌ای که برای هر شعبه فراتر از شعبه اصلی دریافت می‌شود.</span>
+                        </div>
+                        <div class="form-field">
+                            <label for="retailMarketingFee">هزینه ماژول بازاریابی (تومان)</label>
+                            <input type="number" id="retailMarketingFee" name="marketingFee" class="form-control" min="0" step="1000" value="0">
+                        </div>
+                        <div class="form-field">
+                            <label for="retailMarketingMode">نحوه ارائه ماژول بازاریابی</label>
+                            <select id="retailMarketingMode" name="marketingMode">
+                                <option value="bundled">اجباری و فعال برای همه</option>
+                                <option value="optional">اختیاری برای فروشنده</option>
+                            </select>
+                        </div>
+                        <div class="form-field">
+                            <label for="retailDeposit">ودیعه ضمانت (تومان)</label>
+                            <input type="number" id="retailDeposit" name="deposit" class="form-control" min="0" step="1000" value="0">
+                        </div>
+                        <div class="form-field">
+                            <label for="retailCommissionPercent">درصد کمیسیون فروش</label>
+                            <input type="number" id="retailCommissionPercent" name="commissionPercent" class="form-control" min="0" max="100" step="0.5" value="0">
+                            <span class="form-helper">درصدی که بر فروش حضوری یا حضوری-آنلاین اعمال می‌شود.</span>
+                        </div>
+                        <div class="form-field">
+                            <label for="retailBillingCycle">چرخه پرداخت</label>
+                            <select id="retailBillingCycle" name="billingCycle">
+                                <option value="monthly">ماهانه</option>
+                                <option value="quarterly">سه‌ماهه</option>
+                                <option value="semiannual">شش‌ماهه</option>
+                                <option value="yearly">سالانه</option>
+                            </select>
+                        </div>
+                        <div class="form-field">
+                            <label for="retailSupportLevel">سطح پشتیبانی</label>
+                            <select id="retailSupportLevel" name="supportLevel">
+                                <option value="standard">استاندارد</option>
+                                <option value="premium">پریمیوم</option>
+                                <option value="enterprise">پشتیبانی ۲۴/۷</option>
+                            </select>
+                        </div>
+                        <div class="form-field">
+                            <label for="retailPlanDescription">توضیحات</label>
+                            <textarea id="retailPlanDescription" name="description" rows="3" placeholder="توضیحات کوتاه درباره شرایط پلن"></textarea>
+                        </div>
+                        <div class="form-field">
+                            <label for="retailPlanHighlights">نکات متمایز</label>
+                            <textarea id="retailPlanHighlights" name="highlights" rows="3" placeholder="هر خط یک مزیت یا شرط خاص"></textarea>
+                        </div>
+                        <div class="form-field">
+                            <label for="retailPlanIsActive">
+                                <input type="checkbox" id="retailPlanIsActive" name="isActive" checked>
+                                پلن فعال باشد
+                            </label>
+                        </div>
+                        <p class="form-status" id="retailPlanFormStatus" aria-live="polite"></p>
+                        <div class="form-actions">
+                            <button type="button" class="action-link secondary" id="retailPlanFormReset" style="visibility:hidden" disabled>
+                                <i class="ri-arrow-go-back-line"></i>
+                                انصراف از ویرایش
+                            </button>
+                            <button type="submit" class="action-link">
+                                <i class="ri-shield-check-line"></i>
+                                ذخیره پلن مغازه عادی
+                            </button>
+                        </div>
+                    </form>
                 </div>
             </div>
         </section>
@@ -1233,6 +1556,32 @@
             return new Intl.NumberFormat("fa-IR", {
                 maximumFractionDigits: 0
             }).format(amount);
+        }
+
+        function faNumber(value) {
+            if (value === null || value === undefined || value === '') {
+                return '۰';
+            }
+            const number = typeof value === 'number' ? value : Number(value);
+            if (!Number.isFinite(number)) {
+                return String(value);
+            }
+            return new Intl.NumberFormat('fa-IR', { maximumFractionDigits: 0 }).format(number);
+        }
+
+        function formatPersianDate(value) {
+            if (!value) {
+                return '';
+            }
+            const date = value instanceof Date ? value : new Date(value);
+            if (Number.isNaN(date.getTime())) {
+                return String(value);
+            }
+            return new Intl.DateTimeFormat('fa-IR-u-ca-persian', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+            }).format(date);
         }
 
         function openModal(shopId) {
@@ -1753,6 +2102,440 @@
 
             resetPlanFormUI();
             refreshData(true);
+        })();
+
+        // -----------------------------
+        // مدیریت پلن‌های مغازه‌های عادی
+        // -----------------------------
+        (function initRetailStorePlans() {
+            const planTableBody = document.getElementById('retailPlanTableBody');
+            const planForm = document.getElementById('retailPlanForm');
+            if (!planTableBody || !planForm) {
+                return;
+            }
+
+            const planFormStatus = document.getElementById('retailPlanFormStatus');
+            const planFormTitle = document.getElementById('retailPlanFormTitle');
+            const planResetBtn = document.getElementById('retailPlanFormReset');
+            const refreshBtn = document.getElementById('retailPlanRefresh');
+
+            const planTitleInput = document.getElementById('retailPlanTitle');
+            const planSlugInput = document.getElementById('retailPlanSlug');
+            const basePriceInput = document.getElementById('retailBasePrice');
+            const perBranchFeeInput = document.getElementById('retailPerBranchFee');
+            const marketingFeeInput = document.getElementById('retailMarketingFee');
+            const marketingModeSelect = document.getElementById('retailMarketingMode');
+            const depositInput = document.getElementById('retailDeposit');
+            const commissionInput = document.getElementById('retailCommissionPercent');
+            const billingCycleSelect = document.getElementById('retailBillingCycle');
+            const supportLevelSelect = document.getElementById('retailSupportLevel');
+            const descriptionInput = document.getElementById('retailPlanDescription');
+            const highlightsInput = document.getElementById('retailPlanHighlights');
+            const planIsActiveInput = document.getElementById('retailPlanIsActive');
+
+            const monthlyPreviewEl = document.getElementById('retailMonthlyPreview');
+            const upfrontPreviewEl = document.getElementById('retailUpfrontPreview');
+            const commissionPreviewEl = document.getElementById('retailCommissionPreview');
+            const previewBranchesInput = document.getElementById('retailPreviewBranches');
+            const previewBranchesValue = document.getElementById('retailPreviewBranchesValue');
+            const previewMarketingToggle = document.getElementById('retailPreviewMarketing');
+            const previewMarketingWrapper = document.getElementById('retailPreviewMarketingWrapper');
+
+            const API_BASE = '/api/retail-plans';
+            const percentFormatter = new Intl.NumberFormat('fa-IR', { maximumFractionDigits: 1 });
+
+            const state = {
+                plans: [],
+                editingPlanId: null,
+                loading: false
+            };
+
+            const clearStatus = (element) => {
+                if (!element) return;
+                element.textContent = '';
+                element.classList.remove('error', 'success');
+            };
+
+            const setStatus = (element, message, type = '') => {
+                if (!element) return;
+                element.textContent = message || '';
+                element.classList.remove('error', 'success');
+                if (type) {
+                    element.classList.add(type);
+                }
+            };
+
+            const parsePrice = (value) => {
+                const number = Number(value);
+                if (!Number.isFinite(number) || number < 0) {
+                    return 0;
+                }
+                return Math.round(number);
+            };
+
+            const parsePercent = (value) => {
+                const number = Number(value);
+                if (!Number.isFinite(number)) {
+                    return 0;
+                }
+                return Math.min(Math.max(number, 0), 100);
+            };
+
+            const formatPercentValue = (value) => `${percentFormatter.format(parsePercent(value))}٪`;
+
+            const getHighlights = (rawValue) => {
+                if (!rawValue) return [];
+                return rawValue
+                    .split('\n')
+                    .map((item) => item.trim())
+                    .filter(Boolean);
+            };
+
+            const syncMarketingPreview = () => {
+                const mode = marketingModeSelect?.value || 'bundled';
+                if (previewMarketingToggle) {
+                    if (mode !== 'optional') {
+                        previewMarketingToggle.checked = true;
+                        previewMarketingToggle.disabled = true;
+                        previewMarketingWrapper?.classList.add('is-disabled');
+                    } else {
+                        previewMarketingToggle.disabled = false;
+                        previewMarketingWrapper?.classList.remove('is-disabled');
+                    }
+                }
+                return mode;
+            };
+
+            const updatePreview = () => {
+                const branches = Math.max(1, Number(previewBranchesInput?.value) || 1);
+                const basePrice = parsePrice(basePriceInput?.value);
+                const perBranchFee = parsePrice(perBranchFeeInput?.value);
+                const marketingMode = syncMarketingPreview();
+                const marketingFee = parsePrice(marketingFeeInput?.value);
+                const marketingActive = marketingMode === 'bundled' || previewMarketingToggle?.checked;
+                const marketingCost = marketingActive ? marketingFee : 0;
+                const additionalBranches = Math.max(branches - 1, 0);
+                const monthlyCost = basePrice + (additionalBranches * perBranchFee) + marketingCost;
+
+                if (monthlyPreviewEl) {
+                    monthlyPreviewEl.textContent = `${faNumber(monthlyCost)} تومان`;
+                }
+
+                if (upfrontPreviewEl) {
+                    upfrontPreviewEl.textContent = `${faNumber(parsePrice(depositInput?.value))} تومان`;
+                }
+
+                if (commissionPreviewEl) {
+                    commissionPreviewEl.textContent = formatPercentValue(commissionInput?.value);
+                }
+
+                if (previewBranchesValue) {
+                    previewBranchesValue.textContent = faNumber(branches);
+                }
+            };
+
+            const billingCycleLabels = {
+                monthly: 'ماهانه',
+                quarterly: 'سه‌ماهه',
+                semiannual: 'شش‌ماهه',
+                yearly: 'سالانه'
+            };
+
+            const supportLabels = {
+                standard: 'استاندارد',
+                premium: 'پریمیوم',
+                enterprise: 'پشتیبانی ۲۴/۷'
+            };
+
+            const marketingModeLabels = {
+                bundled: 'بازاریابی اجباری',
+                optional: 'بازاریابی اختیاری'
+            };
+
+            const renderPlanTable = () => {
+                if (!state.plans.length) {
+                    planTableBody.innerHTML = '<tr><td colspan="4" class="table-empty">هنوز پلنی برای مغازه‌های عادی ثبت نشده است.</td></tr>';
+                    return;
+                }
+
+                planTableBody.innerHTML = state.plans.map((plan) => {
+                    const highlights = Array.isArray(plan?.highlights)
+                        ? plan.highlights.filter(Boolean)
+                        : typeof plan?.highlights === 'string'
+                            ? getHighlights(plan.highlights)
+                            : [];
+                    const highlightsText = highlights.length
+                        ? `<div class="subtle-text">${highlights.join('، ')}</div>`
+                        : '';
+                    const descriptionText = plan?.description
+                        ? `<div class="subtle-text">${plan.description}</div>`
+                        : '';
+                    const marketingFee = plan?.marketingFee != null ? Number(plan.marketingFee) : 0;
+                    const marketingText = marketingFee
+                        ? `${plan?.marketingMode === 'optional' ? 'اختیاری' : 'اجباری'}: ${faNumber(marketingFee)} تومان`
+                        : 'هزینه بازاریابی ندارد';
+                    const perBranchText = plan?.perBranchFee
+                        ? `هر شعبه اضافه: ${faNumber(plan.perBranchFee)} تومان`
+                        : 'بدون هزینه شعبه اضافه';
+                    const depositText = plan?.deposit
+                        ? `${faNumber(plan.deposit)} تومان`
+                        : 'بدون ودیعه ضمانت';
+                    const basePriceText = plan?.basePrice != null
+                        ? `${faNumber(plan.basePrice)} تومان`
+                        : '—';
+                    const statusClass = plan?.isActive === false ? 'status-pill inactive' : 'status-pill active';
+                    const statusLabel = plan?.isActive === false ? 'غیرفعال' : 'فعال';
+                    const supportLabel = supportLabels[plan?.supportLevel] || supportLabels.standard;
+                    const billingLabel = billingCycleLabels[plan?.billingCycle] || billingCycleLabels.monthly;
+                    const marketingModeLabel = marketingModeLabels[plan?.marketingMode] || marketingModeLabels.bundled;
+                    const commissionText = `کمیسیون: ${formatPercentValue(plan?.commissionPercent)}`;
+
+                    return `
+                        <tr>
+                            <td>
+                                <strong>${plan?.title || 'پلن بدون نام'}</strong>
+                                <div class="subtle-text">اسلاگ: ${plan?.slug || '—'}</div>
+                                <div class="subtle-text">سطح پشتیبانی: ${supportLabel}</div>
+                                <span class="badge"><i class="ri-megaphone-line"></i>${marketingModeLabel}</span>
+                                ${descriptionText}
+                                ${highlightsText}
+                            </td>
+                            <td>
+                                <div class="pricing-breakdown">
+                                    <span>هزینه پایه: ${basePriceText}</span>
+                                    <span>${perBranchText}</span>
+                                    <span>${marketingText}</span>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="pricing-breakdown">
+                                    <span>چرخه پرداخت: ${billingLabel}</span>
+                                    <span>${commissionText}</span>
+                                    <span>ودیعه: ${depositText}</span>
+                                </div>
+                                <span class="${statusClass}">${statusLabel}</span>
+                            </td>
+                            <td>
+                                <div class="inline-actions">
+                                    <button type="button" class="link-button" data-action="edit-plan" data-plan-id="${plan?.id ?? ''}">
+                                        <i class="ri-edit-line"></i>
+                                        ویرایش
+                                    </button>
+                                    <button type="button" class="link-button danger" data-action="delete-plan" data-plan-id="${plan?.id ?? ''}">
+                                        <i class="ri-delete-bin-line"></i>
+                                        حذف
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    `;
+                }).join('');
+            };
+
+            const applyPlanFormValues = (plan) => {
+                state.editingPlanId = plan?.id || null;
+                planTitleInput.value = plan?.title || '';
+                planSlugInput.value = plan?.slug || '';
+                basePriceInput.value = plan?.basePrice != null ? plan.basePrice : '';
+                perBranchFeeInput.value = plan?.perBranchFee != null ? plan.perBranchFee : '';
+                marketingFeeInput.value = plan?.marketingFee != null ? plan.marketingFee : '';
+                marketingModeSelect.value = plan?.marketingMode === 'optional' ? 'optional' : 'bundled';
+                depositInput.value = plan?.deposit != null ? plan.deposit : '';
+                commissionInput.value = plan?.commissionPercent != null ? plan.commissionPercent : '';
+                billingCycleSelect.value = plan?.billingCycle && billingCycleLabels[plan.billingCycle] ? plan.billingCycle : 'monthly';
+                supportLevelSelect.value = plan?.supportLevel && supportLabels[plan.supportLevel] ? plan.supportLevel : 'standard';
+                descriptionInput.value = plan?.description || '';
+                const highlights = Array.isArray(plan?.highlights)
+                    ? plan.highlights
+                    : typeof plan?.highlights === 'string'
+                        ? getHighlights(plan.highlights)
+                        : [];
+                highlightsInput.value = highlights.join('\n');
+                if (planIsActiveInput) {
+                    planIsActiveInput.checked = plan?.isActive !== false;
+                }
+                planFormTitle.textContent = plan?.title ? `ویرایش پلن «${plan.title}»` : 'ایجاد پلن جدید';
+                if (planResetBtn) {
+                    planResetBtn.disabled = !plan?.id;
+                    planResetBtn.style.visibility = plan?.id ? 'visible' : 'hidden';
+                }
+                syncMarketingPreview();
+                updatePreview();
+            };
+
+            const resetPlanFormUI = () => {
+                state.editingPlanId = null;
+                planForm.reset();
+                planTitleInput.value = '';
+                planSlugInput.value = '';
+                basePriceInput.value = '';
+                perBranchFeeInput.value = '0';
+                marketingFeeInput.value = '0';
+                marketingModeSelect.value = 'bundled';
+                depositInput.value = '0';
+                commissionInput.value = '0';
+                billingCycleSelect.value = 'monthly';
+                supportLevelSelect.value = 'standard';
+                descriptionInput.value = '';
+                highlightsInput.value = '';
+                if (planIsActiveInput) {
+                    planIsActiveInput.checked = true;
+                }
+                if (previewBranchesInput) {
+                    previewBranchesInput.value = '1';
+                }
+                if (previewMarketingToggle) {
+                    previewMarketingToggle.checked = true;
+                }
+                planFormTitle.textContent = 'ایجاد پلن جدید';
+                if (planResetBtn) {
+                    planResetBtn.disabled = true;
+                    planResetBtn.style.visibility = 'hidden';
+                }
+                clearStatus(planFormStatus);
+                syncMarketingPreview();
+                updatePreview();
+            };
+
+            const fetchPlans = async () => {
+                const response = await fetch(API_BASE, { credentials: 'include' });
+                if (!response.ok) {
+                    throw new Error('RETAIL_PLAN_LIST_FAILED');
+                }
+                const data = await response.json();
+                state.plans = Array.isArray(data?.plans) ? data.plans : [];
+                renderPlanTable();
+            };
+
+            const refreshPlans = async (silent = false) => {
+                if (state.loading) return;
+                state.loading = true;
+                refreshBtn?.classList.add('is-loading');
+                try {
+                    await fetchPlans();
+                    if (!silent) {
+                        setStatus(planFormStatus, 'اطلاعات پلن‌های مغازه عادی بروزرسانی شد.', 'success');
+                    }
+                } catch (error) {
+                    console.error('Retail plan refresh failed', error);
+                    setStatus(planFormStatus, 'امکان دریافت پلن‌های مغازه عادی وجود ندارد.', 'error');
+                } finally {
+                    state.loading = false;
+                    refreshBtn?.classList.remove('is-loading');
+                }
+            };
+
+            planForm.addEventListener('submit', async (event) => {
+                event.preventDefault();
+                clearStatus(planFormStatus);
+
+                const payload = {
+                    title: planTitleInput.value.trim(),
+                    slug: planSlugInput.value.trim(),
+                    basePrice: parsePrice(basePriceInput.value),
+                    perBranchFee: parsePrice(perBranchFeeInput.value),
+                    marketingFee: parsePrice(marketingFeeInput.value),
+                    marketingMode: marketingModeSelect.value,
+                    deposit: parsePrice(depositInput.value),
+                    commissionPercent: parsePercent(commissionInput.value),
+                    billingCycle: billingCycleSelect.value,
+                    supportLevel: supportLevelSelect.value,
+                    description: descriptionInput.value.trim(),
+                    highlights: getHighlights(highlightsInput.value),
+                    isActive: planIsActiveInput?.checked !== false
+                };
+
+                if (!payload.title || !payload.slug) {
+                    setStatus(planFormStatus, 'عنوان و اسلاگ پلن الزامی است.', 'error');
+                    return;
+                }
+
+                try {
+                    const method = state.editingPlanId ? 'PUT' : 'POST';
+                    const endpoint = state.editingPlanId ? `${API_BASE}/${state.editingPlanId}` : API_BASE;
+                    const response = await fetch(endpoint, {
+                        method,
+                        headers: { 'Content-Type': 'application/json' },
+                        credentials: 'include',
+                        body: JSON.stringify(payload)
+                    });
+
+                    if (!response.ok) {
+                        const errorBody = await response.json().catch(() => ({}));
+                        const message = errorBody?.message || 'خطا در ذخیره‌سازی پلن مغازه عادی';
+                        throw new Error(message);
+                    }
+
+                    await refreshPlans(true);
+                    setStatus(planFormStatus, 'پلن مغازه عادی با موفقیت ذخیره شد.', 'success');
+                    resetPlanFormUI();
+                } catch (error) {
+                    console.error('Retail plan save failed', error);
+                    setStatus(planFormStatus, error.message || 'ذخیره پلن با مشکل مواجه شد.', 'error');
+                }
+            });
+
+            planTableBody.addEventListener('click', async (event) => {
+                const target = event.target.closest('button[data-action]');
+                if (!target) return;
+
+                const action = target.dataset.action;
+                const planId = target.dataset.planId;
+                if (!planId) return;
+
+                if (action === 'edit-plan') {
+                    const plan = state.plans.find((item) => String(item?.id) === planId);
+                    if (plan) {
+                        applyPlanFormValues(plan);
+                        clearStatus(planFormStatus);
+                    }
+                }
+
+                if (action === 'delete-plan') {
+                    if (!confirm('آیا از حذف این پلن مغازه عادی اطمینان دارید؟')) {
+                        return;
+                    }
+                    try {
+                        const response = await fetch(`${API_BASE}/${planId}`, {
+                            method: 'DELETE',
+                            credentials: 'include'
+                        });
+                        if (!response.ok && response.status !== 204) {
+                            throw new Error('DELETE_RETAIL_PLAN_FAILED');
+                        }
+                        if (String(state.editingPlanId) === planId) {
+                            resetPlanFormUI();
+                        }
+                        await refreshPlans(true);
+                        setStatus(planFormStatus, 'پلن حذف شد.', 'success');
+                    } catch (error) {
+                        console.error('Delete retail plan failed', error);
+                        setStatus(planFormStatus, 'حذف پلن با مشکل مواجه شد.', 'error');
+                    }
+                }
+            });
+
+            planResetBtn?.addEventListener('click', () => {
+                resetPlanFormUI();
+            });
+
+            refreshBtn?.addEventListener('click', () => {
+                refreshPlans();
+            });
+
+            previewBranchesInput?.addEventListener('input', updatePreview);
+            previewMarketingToggle?.addEventListener('change', updatePreview);
+            marketingModeSelect?.addEventListener('change', () => {
+                syncMarketingPreview();
+                updatePreview();
+            });
+
+            [basePriceInput, perBranchFeeInput, marketingFeeInput, depositInput, commissionInput].forEach((input) => {
+                input?.addEventListener('input', updatePreview);
+            });
+
+            resetPlanFormUI();
+            refreshPlans(true);
         })();
     </script>
 </body>
