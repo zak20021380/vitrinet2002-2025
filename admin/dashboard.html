@@ -183,6 +183,16 @@
             display: flex;
             flex-direction: column;
             gap: 24px;
+            position: relative;
+            border-top: 4px solid transparent;
+        }
+
+        .plan-management-card--service {
+            border-top-color: rgba(61, 115, 255, 0.6);
+        }
+
+        .plan-management-card--retail {
+            border-top-color: rgba(249, 167, 43, 0.65);
         }
 
         .plan-management-header {
@@ -196,6 +206,29 @@
             margin: 0;
             font-size: 20px;
             color: var(--text-strong);
+        }
+
+        .plan-management-header-tools {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .plan-category-badge {
+            padding: 6px 14px;
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 600;
+            letter-spacing: 0.4px;
+            background: rgba(61, 115, 255, 0.12);
+            color: #1a3e9a;
+            border: 1px solid rgba(61, 115, 255, 0.25);
+        }
+
+        .plan-management-card--retail .plan-category-badge {
+            background: rgba(249, 167, 43, 0.14);
+            color: #a35a00;
+            border-color: rgba(249, 167, 43, 0.28);
         }
 
         .plan-management-header p {
@@ -394,7 +427,7 @@
             pointer-events: none;
         }
 
-        #refreshPlanData {
+        .refresh-plan-data {
             align-self: flex-start;
         }
 
@@ -797,16 +830,19 @@
             </div>
         </section>
 
-        <section class="card plan-management-card" id="service-plan-management">
+        <section class="card plan-management-card plan-management-card--service" id="service-plan-management">
             <div class="plan-management-header">
                 <div>
                     <h2>مدیریت پلن‌های مغازه‌های خدماتی</h2>
                     <p>تعریف پلن‌های اشتراک، مدیریت قیمت و اختصاص آنها به فروشندگان از طریق شماره تلفن</p>
                 </div>
-                <button type="button" class="action-link plan-ops-secondary" id="refreshPlanData">
-                    <i class="ri-refresh-line"></i>
-                    بروزرسانی داده‌ها
-                </button>
+                <div class="plan-management-header-tools">
+                    <span class="plan-category-badge">مغازه‌های خدماتی</span>
+                    <button type="button" class="action-link plan-ops-secondary refresh-plan-data" id="serviceRefreshPlanData">
+                        <i class="ri-refresh-line"></i>
+                        بروزرسانی داده‌ها
+                    </button>
+                </div>
             </div>
 
             <div class="plan-management-grid">
@@ -816,8 +852,8 @@
                         <p class="section-subtitle">لیست پلن‌های تعریف شده برای مغازه‌های خدماتی</p>
                     </div>
                     <div class="table-wrapper">
-                        <table class="plan-table" aria-describedby="planTableCaption">
-                            <caption id="planTableCaption" class="visually-hidden">جدول پلن‌های خدماتی</caption>
+                        <table class="plan-table" aria-describedby="servicePlanTableCaption">
+                            <caption id="servicePlanTableCaption" class="visually-hidden">جدول پلن‌های خدماتی</caption>
                             <thead>
                                 <tr>
                                     <th scope="col">عنوان پلن</th>
@@ -834,43 +870,43 @@
 
                     <form class="form-card" id="servicePlanForm" autocomplete="off">
                         <div>
-                            <h3 id="planFormTitle">ایجاد پلن جدید</h3>
+                            <h3 id="servicePlanFormTitle">ایجاد پلن جدید</h3>
                             <p class="section-subtitle">عنوان، اسلاگ و قیمت پلن الزامی هستند</p>
                         </div>
                         <div class="form-field">
-                            <label for="planTitle">عنوان پلن</label>
-                            <input type="text" id="planTitle" name="title" class="form-control" required>
+                            <label for="servicePlanTitle">عنوان پلن</label>
+                            <input type="text" id="servicePlanTitle" name="title" class="form-control" required>
                         </div>
                         <div class="form-field">
-                            <label for="planSlug">اسلاگ پلن</label>
-                            <input type="text" id="planSlug" name="slug" class="form-control" required placeholder="مثال: premium-service">
+                            <label for="servicePlanSlug">اسلاگ پلن</label>
+                            <input type="text" id="servicePlanSlug" name="slug" class="form-control" required placeholder="مثال: premium-service">
                             <span class="form-helper">این مقدار در آدرس‌ها استفاده می‌شود و باید یکتا باشد.</span>
                         </div>
                         <div class="form-field">
-                            <label for="planPrice">قیمت پایه (تومان)</label>
-                            <input type="number" id="planPrice" name="price" class="form-control" min="0" step="1000" required>
+                            <label for="servicePlanPrice">قیمت پایه (تومان)</label>
+                            <input type="number" id="servicePlanPrice" name="price" class="form-control" min="0" step="1000" required>
                         </div>
                         <div class="form-field">
-                            <label for="planDuration">مدت پلن (روز)</label>
-                            <input type="number" id="planDuration" name="durationDays" class="form-control" min="0" step="1" value="30">
+                            <label for="servicePlanDuration">مدت پلن (روز)</label>
+                            <input type="number" id="servicePlanDuration" name="durationDays" class="form-control" min="0" step="1" value="30">
                         </div>
                         <div class="form-field">
-                            <label for="planDescription">توضیحات</label>
-                            <textarea id="planDescription" name="description" rows="3" placeholder="توضیحات تکمیلی پلن"></textarea>
+                            <label for="servicePlanDescription">توضیحات</label>
+                            <textarea id="servicePlanDescription" name="description" rows="3" placeholder="توضیحات تکمیلی پلن"></textarea>
                         </div>
                         <div class="form-field">
-                            <label for="planFeatures">ویژگی‌ها</label>
-                            <textarea id="planFeatures" name="features" rows="3" placeholder="هر ویژگی را در یک خط بنویسید"></textarea>
+                            <label for="servicePlanFeatures">ویژگی‌ها</label>
+                            <textarea id="servicePlanFeatures" name="features" rows="3" placeholder="هر ویژگی را در یک خط بنویسید"></textarea>
                         </div>
                         <div class="form-field">
-                            <label for="planIsActive">
-                                <input type="checkbox" id="planIsActive" name="isActive" checked>
+                            <label for="servicePlanIsActive">
+                                <input type="checkbox" id="servicePlanIsActive" name="isActive" checked>
                                 پلن فعال باشد
                             </label>
                         </div>
-                        <p class="form-status" id="planFormStatus" aria-live="polite"></p>
+                        <p class="form-status" id="servicePlanFormStatus" aria-live="polite"></p>
                         <div class="form-actions">
-                            <button type="button" class="action-link secondary" id="planFormReset">
+                            <button type="button" class="action-link secondary" id="servicePlanFormReset">
                                 <i class="ri-arrow-go-back-line"></i>
                                 انصراف از ویرایش
                             </button>
@@ -887,46 +923,46 @@
                         <h3>اختصاص پلن به فروشنده</h3>
                         <p class="section-subtitle">ثبت پلن اختصاصی با تعیین قیمت دلخواه از طریق شماره تماس</p>
                     </div>
-                    <form class="form-card" id="planAssignmentForm" autocomplete="off">
+                    <form class="form-card" id="servicePlanAssignmentForm" autocomplete="off">
                         <div class="form-field">
-                            <label for="sellerPhone">شماره تلفن فروشنده</label>
-                            <input type="tel" id="sellerPhone" name="phone" class="form-control" required placeholder="مثال: 09120000000">
+                            <label for="serviceSellerPhone">شماره تلفن فروشنده</label>
+                            <input type="tel" id="serviceSellerPhone" name="phone" class="form-control" required placeholder="مثال: 09120000000">
                             <span class="form-helper">شماره مالک مغازه خدماتی را وارد کنید. جستجو به صورت خودکار انجام می‌شود.</span>
                         </div>
                         <div class="form-field">
-                            <label for="assignmentPlanSelect">انتخاب پلن</label>
-                            <select id="assignmentPlanSelect" name="planId" required>
+                            <label for="serviceAssignmentPlanSelect">انتخاب پلن</label>
+                            <select id="serviceAssignmentPlanSelect" name="planId" required>
                                 <option value="" disabled selected>ابتدا پلن را انتخاب کنید</option>
                             </select>
                         </div>
                         <div class="form-field">
-                            <label for="customPrice">قیمت اختصاصی (تومان)</label>
-                            <input type="number" id="customPrice" name="customPrice" class="form-control" min="0" step="1000" placeholder="در صورت خالی، قیمت پایه پلن ثبت می‌شود">
+                            <label for="serviceCustomPrice">قیمت اختصاصی (تومان)</label>
+                            <input type="number" id="serviceCustomPrice" name="customPrice" class="form-control" min="0" step="1000" placeholder="در صورت خالی، قیمت پایه پلن ثبت می‌شود">
                         </div>
                         <div class="form-field">
-                            <label for="assignmentDuration">مدت سفارشی (روز)</label>
-                            <input type="number" id="assignmentDuration" name="durationDays" class="form-control" min="0" step="1" placeholder="در صورت خالی، مدت پیش‌فرض پلن اعمال می‌شود">
+                            <label for="serviceAssignmentDuration">مدت سفارشی (روز)</label>
+                            <input type="number" id="serviceAssignmentDuration" name="durationDays" class="form-control" min="0" step="1" placeholder="در صورت خالی، مدت پیش‌فرض پلن اعمال می‌شود">
                         </div>
                         <div class="form-field">
-                            <label for="assignmentStart">تاریخ شروع</label>
-                            <input type="date" id="assignmentStart" name="startDate" class="form-control">
+                            <label for="serviceAssignmentStart">تاریخ شروع</label>
+                            <input type="date" id="serviceAssignmentStart" name="startDate" class="form-control">
                         </div>
                         <div class="form-field">
-                            <label for="assignmentNotes">یادداشت مدیریتی</label>
-                            <textarea id="assignmentNotes" name="notes" rows="3" placeholder="توضیحات برای تیم پشتیبانی یا فروشنده"></textarea>
+                            <label for="serviceAssignmentNotes">یادداشت داخلی</label>
+                            <textarea id="serviceAssignmentNotes" name="notes" rows="3" placeholder="نکات یا توافقات را بنویسید"></textarea>
                         </div>
-                        <p class="form-status" id="assignmentFormStatus" aria-live="polite"></p>
+                        <p class="form-status" id="serviceAssignmentFormStatus" aria-live="polite"></p>
                         <div class="form-actions">
                             <button type="submit" class="action-link">
-                                <i class="ri-shield-check-line"></i>
+                                <i class="ri-user-add-line"></i>
                                 ثبت پلن اختصاصی
                             </button>
                         </div>
                     </form>
 
                     <div class="table-wrapper">
-                        <table class="assignment-table" aria-describedby="assignmentTableCaption">
-                            <caption id="assignmentTableCaption" class="visually-hidden">جدول پلن‌های اختصاص داده شده</caption>
+                        <table class="assignment-table" aria-describedby="serviceAssignmentTableCaption">
+                            <caption id="serviceAssignmentTableCaption" class="visually-hidden">جدول پلن‌های اختصاص داده شده</caption>
                             <thead>
                                 <tr>
                                     <th scope="col">فروشنده</th>
@@ -936,7 +972,158 @@
                                     <th scope="col">اقدامات</th>
                                 </tr>
                             </thead>
-                            <tbody id="planAssignmentTableBody">
+                            <tbody id="servicePlanAssignmentTableBody">
+                                <tr><td colspan="5" class="table-empty">در حال بارگذاری پلن‌های اختصاصی...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="card plan-management-card plan-management-card--retail" id="retail-plan-management">
+            <div class="plan-management-header">
+                <div>
+                    <h2>مدیریت پلن‌های مغازه‌های عادی</h2>
+                    <p>طراحی پلن‌های فروشگاهی با قیمت‌گذاری مستقل از مغازه‌های خدماتی و اختصاص سریع به فروشندگان</p>
+                </div>
+                <div class="plan-management-header-tools">
+                    <span class="plan-category-badge">مغازه‌های عادی</span>
+                    <button type="button" class="action-link plan-ops-secondary refresh-plan-data" id="retailRefreshPlanData">
+                        <i class="ri-refresh-line"></i>
+                        بروزرسانی داده‌ها
+                    </button>
+                </div>
+            </div>
+
+            <div class="plan-management-grid">
+                <div class="plan-management-column">
+                    <div>
+                        <h3>پلن‌های فعال</h3>
+                        <p class="section-subtitle">لیست پلن‌های تعریف شده برای مغازه‌های عادی</p>
+                    </div>
+                    <div class="table-wrapper">
+                        <table class="plan-table" aria-describedby="retailPlanTableCaption">
+                            <caption id="retailPlanTableCaption" class="visually-hidden">جدول پلن‌های مغازه‌های عادی</caption>
+                            <thead>
+                                <tr>
+                                    <th scope="col">عنوان پلن</th>
+                                    <th scope="col">قیمت / مدت</th>
+                                    <th scope="col">وضعیت</th>
+                                    <th scope="col">اقدامات</th>
+                                </tr>
+                            </thead>
+                            <tbody id="retailPlanTableBody">
+                                <tr><td colspan="4" class="table-empty">در حال بارگذاری داده‌ها...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <form class="form-card" id="retailPlanForm" autocomplete="off">
+                        <div>
+                            <h3 id="retailPlanFormTitle">ایجاد پلن فروشگاهی</h3>
+                            <p class="section-subtitle">عنوان، اسلاگ و قیمت پلن الزامی هستند</p>
+                        </div>
+                        <div class="form-field">
+                            <label for="retailPlanTitle">عنوان پلن</label>
+                            <input type="text" id="retailPlanTitle" name="title" class="form-control" required>
+                        </div>
+                        <div class="form-field">
+                            <label for="retailPlanSlug">اسلاگ پلن</label>
+                            <input type="text" id="retailPlanSlug" name="slug" class="form-control" required placeholder="مثال: premium-retail">
+                            <span class="form-helper">این مقدار در آدرس‌ها استفاده می‌شود و باید یکتا باشد.</span>
+                        </div>
+                        <div class="form-field">
+                            <label for="retailPlanPrice">قیمت پایه (تومان)</label>
+                            <input type="number" id="retailPlanPrice" name="price" class="form-control" min="0" step="1000" required>
+                        </div>
+                        <div class="form-field">
+                            <label for="retailPlanDuration">مدت پلن (روز)</label>
+                            <input type="number" id="retailPlanDuration" name="durationDays" class="form-control" min="0" step="1" value="30">
+                        </div>
+                        <div class="form-field">
+                            <label for="retailPlanDescription">توضیحات</label>
+                            <textarea id="retailPlanDescription" name="description" rows="3" placeholder="توضیحات تکمیلی پلن"></textarea>
+                        </div>
+                        <div class="form-field">
+                            <label for="retailPlanFeatures">ویژگی‌ها</label>
+                            <textarea id="retailPlanFeatures" name="features" rows="3" placeholder="هر ویژگی را در یک خط بنویسید"></textarea>
+                        </div>
+                        <div class="form-field">
+                            <label for="retailPlanIsActive">
+                                <input type="checkbox" id="retailPlanIsActive" name="isActive" checked>
+                                پلن فعال باشد
+                            </label>
+                        </div>
+                        <p class="form-status" id="retailPlanFormStatus" aria-live="polite"></p>
+                        <div class="form-actions">
+                            <button type="button" class="action-link secondary" id="retailPlanFormReset">
+                                <i class="ri-arrow-go-back-line"></i>
+                                انصراف از ویرایش
+                            </button>
+                            <button type="submit" class="action-link">
+                                <i class="ri-save-3-line"></i>
+                                ذخیره پلن
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <div class="plan-management-column">
+                    <div>
+                        <h3>اختصاص پلن به فروشگاه</h3>
+                        <p class="section-subtitle">ثبت پلن اختصاصی برای شعبه‌ها با تعیین قیمت ویژه و تاریخ شروع</p>
+                    </div>
+                    <form class="form-card" id="retailPlanAssignmentForm" autocomplete="off">
+                        <div class="form-field">
+                            <label for="retailSellerPhone">شماره تماس فروشگاه</label>
+                            <input type="tel" id="retailSellerPhone" name="phone" class="form-control" required placeholder="مثال: 09120000000">
+                            <span class="form-helper">شماره مدیر یا مالک فروشگاه عادی را وارد کنید. جستجو به صورت خودکار انجام می‌شود.</span>
+                        </div>
+                        <div class="form-field">
+                            <label for="retailAssignmentPlanSelect">انتخاب پلن</label>
+                            <select id="retailAssignmentPlanSelect" name="planId" required>
+                                <option value="" disabled selected>ابتدا پلن را انتخاب کنید</option>
+                            </select>
+                        </div>
+                        <div class="form-field">
+                            <label for="retailCustomPrice">قیمت اختصاصی (تومان)</label>
+                            <input type="number" id="retailCustomPrice" name="customPrice" class="form-control" min="0" step="1000" placeholder="در صورت خالی، قیمت پایه پلن ثبت می‌شود">
+                        </div>
+                        <div class="form-field">
+                            <label for="retailAssignmentDuration">مدت سفارشی (روز)</label>
+                            <input type="number" id="retailAssignmentDuration" name="durationDays" class="form-control" min="0" step="1" placeholder="در صورت خالی، مدت پیش‌فرض پلن اعمال می‌شود">
+                        </div>
+                        <div class="form-field">
+                            <label for="retailAssignmentStart">تاریخ شروع</label>
+                            <input type="date" id="retailAssignmentStart" name="startDate" class="form-control">
+                        </div>
+                        <div class="form-field">
+                            <label for="retailAssignmentNotes">یادداشت داخلی</label>
+                            <textarea id="retailAssignmentNotes" name="notes" rows="3" placeholder="نکات یا توافقات را بنویسید"></textarea>
+                        </div>
+                        <p class="form-status" id="retailAssignmentFormStatus" aria-live="polite"></p>
+                        <div class="form-actions">
+                            <button type="submit" class="action-link">
+                                <i class="ri-user-add-line"></i>
+                                ثبت پلن اختصاصی
+                            </button>
+                        </div>
+                    </form>
+
+                    <div class="table-wrapper">
+                        <table class="assignment-table" aria-describedby="retailAssignmentTableCaption">
+                            <caption id="retailAssignmentTableCaption" class="visually-hidden">جدول پلن‌های اختصاص داده شده به مغازه‌های عادی</caption>
+                            <thead>
+                                <tr>
+                                    <th scope="col">فروشگاه</th>
+                                    <th scope="col">پلن</th>
+                                    <th scope="col">قیمت نهایی</th>
+                                    <th scope="col">وضعیت</th>
+                                    <th scope="col">اقدامات</th>
+                                </tr>
+                            </thead>
+                            <tbody id="retailPlanAssignmentTableBody">
                                 <tr><td colspan="5" class="table-empty">در حال بارگذاری پلن‌های اختصاصی...</td></tr>
                             </tbody>
                         </table>
@@ -1336,39 +1523,161 @@
         });
 
         // -----------------------------
-        // مدیریت پلن‌های خدماتی
+        // مدیریت پلن‌های اشتراکی
         // -----------------------------
-        (function initServicePlanManagement() {
-            const planTableBody = document.getElementById('servicePlanTableBody');
-            const planForm = document.getElementById('servicePlanForm');
-            const planFormStatus = document.getElementById('planFormStatus');
-            const planFormTitle = document.getElementById('planFormTitle');
-            const planResetBtn = document.getElementById('planFormReset');
-            const planTitleInput = document.getElementById('planTitle');
-            const planSlugInput = document.getElementById('planSlug');
-            const planPriceInput = document.getElementById('planPrice');
-            const planDurationInput = document.getElementById('planDuration');
-            const planDescriptionInput = document.getElementById('planDescription');
-            const planFeaturesInput = document.getElementById('planFeatures');
-            const planIsActiveInput = document.getElementById('planIsActive');
-            const planSubmitBtn = planForm?.querySelector('button[type="submit"]');
+        const faNumber = (value) => {
+            const num = Number(value);
+            if (!Number.isFinite(num)) return '۰';
+            try {
+                return new Intl.NumberFormat('fa-IR').format(Math.max(0, Math.round(num)));
+            } catch {
+                return String(Math.max(0, Math.round(num)));
+            }
+        };
 
-            const assignmentForm = document.getElementById('planAssignmentForm');
-            const assignmentStatus = document.getElementById('assignmentFormStatus');
-            const sellerPhoneInput = document.getElementById('sellerPhone');
-            const assignmentPlanSelect = document.getElementById('assignmentPlanSelect');
-            const assignmentPriceInput = document.getElementById('customPrice');
-            const assignmentDurationInput = document.getElementById('assignmentDuration');
-            const assignmentStartInput = document.getElementById('assignmentStart');
-            const assignmentNotesInput = document.getElementById('assignmentNotes');
-            const assignmentTableBody = document.getElementById('planAssignmentTableBody');
-            const refreshBtn = document.getElementById('refreshPlanData');
+        const formatPersianDate = (value) => {
+            if (!value) return '—';
+            const date = value instanceof Date ? value : new Date(value);
+            if (Number.isNaN(date.getTime())) return '—';
+            try {
+                return new Intl.DateTimeFormat('fa-IR-u-nu-latn-ca-persian', {
+                    year: 'numeric',
+                    month: '2-digit',
+                    day: '2-digit'
+                }).format(date);
+            } catch {
+                return date.toLocaleDateString('fa-IR');
+            }
+        };
+
+        const clearStatusMessage = (element) => {
+            if (!element) return;
+            element.textContent = '';
+            element.classList.remove('error', 'success');
+        };
+
+        const setStatusMessage = (element, message, type = '') => {
+            if (!element) return;
+            element.textContent = message || '';
+            element.classList.remove('error', 'success');
+            if (type) {
+                element.classList.add(type);
+            }
+        };
+
+        const defaultShopResolver = (assignment) => {
+            if (!assignment || typeof assignment !== 'object') {
+                return {};
+            }
+            return assignment.serviceShop
+                || assignment.retailShop
+                || assignment.shop
+                || assignment.store
+                || assignment.vendor
+                || {};
+        };
+
+        function initializePlanManager(config) {
+            const {
+                apiBase,
+                elements,
+                labels = {},
+                resolveAssignmentShop = defaultShopResolver,
+                logPrefix = 'Plan manager'
+            } = config || {};
+
+            if (!apiBase || !elements) {
+                return;
+            }
+
+            const {
+                planTableBody,
+                planForm,
+                planFormTitle,
+                planFormStatus,
+                planResetBtn,
+                planTitleInput,
+                planSlugInput,
+                planPriceInput,
+                planDurationInput,
+                planDescriptionInput,
+                planFeaturesInput,
+                planIsActiveInput,
+                planSubmitBtn,
+                assignmentForm,
+                assignmentStatus,
+                sellerPhoneInput,
+                assignmentPlanSelect,
+                assignmentPriceInput,
+                assignmentDurationInput,
+                assignmentStartInput,
+                assignmentNotesInput,
+                assignmentTableBody,
+                refreshBtn
+            } = elements;
 
             if (!planTableBody || !planForm || !assignmentForm || !assignmentTableBody) {
                 return;
             }
 
-            const API_BASE = '/api/service-plans';
+            const defaultLabels = {
+                planEmpty: 'هنوز پلنی ثبت نشده است.',
+                assignmentEmpty: 'تاکنون پلنی به فروشنده‌ای اختصاص داده نشده است.',
+                planValidationError: 'لطفاً فیلدهای الزامی را تکمیل کنید.',
+                planSaveSuccess: 'پلن با موفقیت ذخیره شد.',
+                planSaveError: 'خطا در ذخیره‌سازی پلن.',
+                planDeleteConfirm: 'آیا از حذف این پلن اطمینان دارید؟ این عملیات بازگشت‌پذیر نیست.',
+                planDeleteSuccess: 'پلن حذف شد.',
+                planDeleteError: 'حذف پلن با مشکل مواجه شد.',
+                assignmentValidationError: 'شماره تلفن و پلن انتخابی الزامی است.',
+                assignmentSaveSuccess: 'پلن اختصاصی با موفقیت ثبت شد.',
+                assignmentSaveError: 'خطا در ثبت پلن اختصاصی.',
+                assignmentDeleteConfirm: 'آیا از لغو این پلن اختصاصی اطمینان دارید؟',
+                assignmentDeleteSuccess: 'پلن اختصاصی حذف شد.',
+                assignmentDeleteError: 'حذف پلن اختصاصی با مشکل مواجه شد.',
+                refreshSuccess: 'اطلاعات با موفقیت بروزرسانی شد.',
+                refreshError: 'امکان دریافت اطلاعات وجود ندارد. لطفاً دوباره تلاش کنید.',
+                basePriceLabel: (price) => `قیمت پایه: ${faNumber(price)} تومان`,
+                basePriceApplied: 'قیمت پایه اعمال شده است',
+                durationUnlimited: 'بدون محدودیت',
+                durationUnlimitedAssignment: 'بدون محدودیت زمانی',
+                unknownShopName: 'بدون نام',
+                planFormCreateTitle: 'ایجاد پلن جدید',
+                planFormEditTitle: (title) => `ویرایش پلن «${title}»`,
+                planSubmitDefaultLabel: '<i class="ri-save-3-line"></i> ذخیره پلن',
+                planSubmitUpdateLabel: '<i class="ri-save-3-line"></i> بروزرسانی پلن'
+            };
+
+            const messages = { ...defaultLabels, ...labels };
+
+            const resolveBasePriceLabel = (price) => {
+                const override = messages.basePriceLabel;
+                if (typeof override === 'function') {
+                    return override(price);
+                }
+                if (typeof override === 'string') {
+                    return override.replace('%s', faNumber(price));
+                }
+                return defaultLabels.basePriceLabel(price);
+            };
+
+            const resolveEditTitle = (title) => {
+                const editLabel = messages.planFormEditTitle;
+                if (typeof editLabel === 'function') {
+                    return editLabel(title);
+                }
+                if (typeof editLabel === 'string') {
+                    return editLabel.replace('%s', title);
+                }
+                return defaultLabels.planFormEditTitle(title);
+            };
+
+            const defaultSubmitLabel = planSubmitBtn?.innerHTML?.trim() ? planSubmitBtn.innerHTML : messages.planSubmitDefaultLabel;
+            const updateSubmitLabel = typeof messages.planSubmitUpdateLabel === 'function'
+                ? messages.planSubmitUpdateLabel()
+                : (messages.planSubmitUpdateLabel || defaultLabels.planSubmitUpdateLabel);
+            const initialFormTitle = planFormTitle?.textContent?.trim() || messages.planFormCreateTitle;
+
             const state = {
                 plans: [],
                 assignments: [],
@@ -1376,19 +1685,26 @@
                 loading: false
             };
 
-            const clearStatus = (element) => {
-                if (!element) return;
-                element.textContent = '';
-                element.classList.remove('error', 'success');
+            const getShopDetails = (assignment) => {
+                try {
+                    const resolved = resolveAssignmentShop(assignment);
+                    if (resolved && typeof resolved === 'object') {
+                        return resolved;
+                    }
+                } catch (error) {
+                    console.warn(`${logPrefix}: assignment resolver failed`, error);
+                }
+                return defaultShopResolver(assignment);
             };
 
-            const setStatus = (element, message, type = '') => {
-                if (!element) return;
-                element.textContent = message || '';
-                element.classList.remove('error', 'success');
-                if (type) {
-                    element.classList.add(type);
-                }
+            const getShopPhone = (shop, assignment) => {
+                return shop?.ownerPhone
+                    || shop?.phone
+                    || assignment?.assignedPhone
+                    || assignment?.ownerPhone
+                    || assignment?.phone
+                    || assignment?.sellerPhone
+                    || '—';
             };
 
             const resetPlanFormUI = () => {
@@ -1397,33 +1713,37 @@
                 if (planIsActiveInput) {
                     planIsActiveInput.checked = true;
                 }
-                planFormTitle.textContent = 'ایجاد پلن جدید';
+                if (planFormTitle) {
+                    planFormTitle.textContent = initialFormTitle;
+                }
                 if (planSubmitBtn) {
-                    planSubmitBtn.innerHTML = '<i class="ri-save-3-line"></i> ذخیره پلن';
+                    planSubmitBtn.innerHTML = defaultSubmitLabel;
                 }
                 if (planResetBtn) {
                     planResetBtn.disabled = true;
                     planResetBtn.style.visibility = 'hidden';
                 }
-                clearStatus(planFormStatus);
+                clearStatusMessage(planFormStatus);
             };
 
             const applyPlanFormValues = (plan) => {
                 state.editingPlanId = plan?.id || null;
-                planTitleInput.value = plan?.title || '';
-                planSlugInput.value = plan?.slug || '';
-                planPriceInput.value = plan?.price != null ? plan.price : '';
-                planDurationInput.value = plan?.durationDays != null ? plan.durationDays : '';
-                planDescriptionInput.value = plan?.description || '';
-                planFeaturesInput.value = Array.isArray(plan?.features) ? plan.features.join('\n') : '';
+                if (planTitleInput) planTitleInput.value = plan?.title || '';
+                if (planSlugInput) planSlugInput.value = plan?.slug || '';
+                if (planPriceInput) planPriceInput.value = plan?.price != null ? plan.price : '';
+                if (planDurationInput) planDurationInput.value = plan?.durationDays != null ? plan.durationDays : '';
+                if (planDescriptionInput) planDescriptionInput.value = plan?.description || '';
+                if (planFeaturesInput) {
+                    planFeaturesInput.value = Array.isArray(plan?.features) ? plan.features.join('\n') : '';
+                }
                 if (planIsActiveInput) {
                     planIsActiveInput.checked = plan?.isActive !== false;
                 }
-                planFormTitle.textContent = plan?.title ? `ویرایش پلن «${plan.title}»` : 'ایجاد پلن جدید';
+                if (planFormTitle) {
+                    planFormTitle.textContent = plan?.title ? resolveEditTitle(plan.title) : initialFormTitle;
+                }
                 if (planSubmitBtn) {
-                    planSubmitBtn.innerHTML = plan?.id
-                        ? '<i class="ri-save-3-line"></i> بروزرسانی پلن'
-                        : '<i class="ri-save-3-line"></i> ذخیره پلن';
+                    planSubmitBtn.innerHTML = plan?.id ? updateSubmitLabel : defaultSubmitLabel;
                 }
                 if (planResetBtn) {
                     planResetBtn.disabled = !plan?.id;
@@ -1432,14 +1752,13 @@
             };
 
             const renderPlanTable = () => {
-                if (!planTableBody) return;
                 if (!state.plans.length) {
-                    planTableBody.innerHTML = '<tr><td colspan="4" class="table-empty">هنوز پلنی ثبت نشده است.</td></tr>';
+                    planTableBody.innerHTML = `<tr><td colspan="4" class="table-empty">${messages.planEmpty}</td></tr>`;
                     return;
                 }
 
                 planTableBody.innerHTML = state.plans.map((plan) => {
-                    const durationText = plan.durationDays ? `${faNumber(plan.durationDays)} روز` : 'بدون محدودیت';
+                    const durationText = plan.durationDays ? `${faNumber(plan.durationDays)} روز` : messages.durationUnlimited;
                     const featuresText = Array.isArray(plan.features) && plan.features.length
                         ? `<div class="subtle-text">ویژگی‌ها: ${plan.features.join('، ')}</div>`
                         : '';
@@ -1481,29 +1800,32 @@
             };
 
             const renderAssignmentTable = () => {
-                if (!assignmentTableBody) return;
                 if (!state.assignments.length) {
-                    assignmentTableBody.innerHTML = '<tr><td colspan="5" class="table-empty">تاکنون پلنی به فروشنده‌ای اختصاص داده نشده است.</td></tr>';
+                    assignmentTableBody.innerHTML = `<tr><td colspan="5" class="table-empty">${messages.assignmentEmpty}</td></tr>`;
                     return;
                 }
 
                 assignmentTableBody.innerHTML = state.assignments.map((assignment) => {
-                    const shop = assignment.serviceShop;
+                    const shop = getShopDetails(assignment);
                     const plan = assignment.plan || {};
                     const finalPrice = assignment.customPrice != null ? assignment.customPrice : assignment.basePrice;
                     const baseText = assignment.customPrice != null
-                        ? `<div class="subtle-text">قیمت پایه: ${faNumber(assignment.basePrice)} تومان</div>`
-                        : '<div class="subtle-text">قیمت پایه اعمال شده است</div>';
+                        ? `<div class="subtle-text">${resolveBasePriceLabel(assignment.basePrice)}</div>`
+                        : `<div class="subtle-text">${messages.basePriceApplied}</div>`;
                     const statusClass = `status-pill ${assignment.status || 'active'}`;
+                    const statusLabel = assignment.status === 'scheduled' ? 'در انتظار شروع' : assignment.status === 'expired' ? 'منقضی شده' : 'فعال';
                     const startDate = assignment.startDate ? formatPersianDate(assignment.startDate) : '—';
                     const endDate = assignment.endDate ? formatPersianDate(assignment.endDate) : '—';
-                    const durationText = assignment.durationDays ? `${faNumber(assignment.durationDays)} روز` : 'بدون محدودیت زمانی';
+                    const durationText = assignment.durationDays ? `${faNumber(assignment.durationDays)} روز` : messages.durationUnlimitedAssignment;
+                    const shopName = shop?.name || messages.unknownShopName;
+                    const shopPhone = getShopPhone(shop, assignment);
+                    const shopCity = shop?.city ? `<div class="subtle-text">شهر: ${shop.city}</div>` : '';
                     return `
                         <tr>
                             <td>
-                                <strong>${shop?.name || 'بدون نام'}</strong>
-                                <div class="subtle-text">${shop?.ownerPhone || assignment.assignedPhone || '—'}</div>
-                                ${shop?.city ? `<div class="subtle-text">شهر: ${shop.city}</div>` : ''}
+                                <strong>${shopName}</strong>
+                                <div class="subtle-text">${shopPhone}</div>
+                                ${shopCity}
                             </td>
                             <td>
                                 <strong>${plan.title || 'پلن ناشناخته'}</strong>
@@ -1515,7 +1837,7 @@
                                 ${baseText}
                             </td>
                             <td>
-                                <span class="${statusClass}">${assignment.status === 'scheduled' ? 'در انتظار شروع' : assignment.status === 'expired' ? 'منقضی شده' : 'فعال'}</span>
+                                <span class="${statusClass}">${statusLabel}</span>
                             </td>
                             <td>
                                 <div class="inline-actions">
@@ -1546,9 +1868,9 @@
             };
 
             const fetchPlans = async () => {
-                const response = await fetch(API_BASE, { credentials: 'include' });
+                const response = await fetch(apiBase, { credentials: 'include' });
                 if (!response.ok) {
-                    throw new Error('SERVICE_PLAN_LIST_FAILED');
+                    throw new Error('PLAN_LIST_FAILED');
                 }
                 const data = await response.json();
                 const plans = Array.isArray(data?.plans) ? data.plans : [];
@@ -1558,9 +1880,9 @@
             };
 
             const fetchAssignments = async () => {
-                const response = await fetch(`${API_BASE}/assignments`, { credentials: 'include' });
+                const response = await fetch(`${apiBase}/assignments`, { credentials: 'include' });
                 if (!response.ok) {
-                    throw new Error('SERVICE_PLAN_ASSIGNMENTS_FAILED');
+                    throw new Error('PLAN_ASSIGNMENTS_FAILED');
                 }
                 const data = await response.json();
                 const assignments = Array.isArray(data?.assignments) ? data.assignments : [];
@@ -1577,11 +1899,11 @@
                 try {
                     await Promise.all([fetchPlans(), fetchAssignments()]);
                     if (!silent) {
-                        setStatus(planFormStatus, 'اطلاعات با موفقیت بروزرسانی شد.', 'success');
+                        setStatusMessage(planFormStatus, messages.refreshSuccess, 'success');
                     }
                 } catch (error) {
-                    console.error('Service plan refresh failed', error);
-                    setStatus(planFormStatus, 'امکان دریافت اطلاعات وجود ندارد. لطفاً دوباره تلاش کنید.', 'error');
+                    console.error(`${logPrefix}: refresh failed`, error);
+                    setStatusMessage(planFormStatus, messages.refreshError, 'error');
                 } finally {
                     state.loading = false;
                     if (refreshBtn) {
@@ -1592,29 +1914,28 @@
 
             planForm.addEventListener('submit', async (event) => {
                 event.preventDefault();
-                clearStatus(planFormStatus);
+                clearStatusMessage(planFormStatus);
 
                 const payload = {
-                    title: planTitleInput.value.trim(),
-                    slug: planSlugInput.value.trim(),
-                    price: planPriceInput.value ? Number(planPriceInput.value) : null,
-                    durationDays: planDurationInput.value ? Number(planDurationInput.value) : null,
-                    description: planDescriptionInput.value.trim(),
-                    isActive: planIsActiveInput.checked,
-                    features: planFeaturesInput.value
-                        .split('\n')
-                        .map((item) => item.trim())
-                        .filter(Boolean)
+                    title: planTitleInput?.value.trim(),
+                    slug: planSlugInput?.value.trim(),
+                    price: planPriceInput?.value ? Number(planPriceInput.value) : null,
+                    durationDays: planDurationInput?.value ? Number(planDurationInput.value) : null,
+                    description: planDescriptionInput?.value.trim(),
+                    isActive: planIsActiveInput ? planIsActiveInput.checked : true,
+                    features: planFeaturesInput?.value
+                        ? planFeaturesInput.value.split('\n').map((item) => item.trim()).filter(Boolean)
+                        : []
                 };
 
                 if (!payload.title || !payload.slug || payload.price == null) {
-                    setStatus(planFormStatus, 'لطفاً فیلدهای الزامی را تکمیل کنید.', 'error');
+                    setStatusMessage(planFormStatus, messages.planValidationError, 'error');
                     return;
                 }
 
                 try {
                     const method = state.editingPlanId ? 'PUT' : 'POST';
-                    const endpoint = state.editingPlanId ? `${API_BASE}/${state.editingPlanId}` : API_BASE;
+                    const endpoint = state.editingPlanId ? `${apiBase}/${state.editingPlanId}` : apiBase;
                     const response = await fetch(endpoint, {
                         method,
                         headers: { 'Content-Type': 'application/json' },
@@ -1624,16 +1945,16 @@
 
                     if (!response.ok) {
                         const errorBody = await response.json().catch(() => ({}));
-                        const message = errorBody?.message || 'خطا در ذخیره‌سازی پلن';
+                        const message = errorBody?.message || messages.planSaveError;
                         throw new Error(message);
                     }
 
                     await refreshData(true);
-                    setStatus(planFormStatus, 'پلن با موفقیت ذخیره شد.', 'success');
+                    setStatusMessage(planFormStatus, messages.planSaveSuccess, 'success');
                     resetPlanFormUI();
                 } catch (error) {
-                    console.error('Service plan save failed', error);
-                    setStatus(planFormStatus, error.message || 'خطا در ذخیره‌سازی پلن.', 'error');
+                    console.error(`${logPrefix}: plan save failed`, error);
+                    setStatusMessage(planFormStatus, error.message || messages.planSaveError, 'error');
                 }
             });
 
@@ -1652,16 +1973,16 @@
                     const plan = state.plans.find((item) => item.id === planId);
                     if (plan) {
                         applyPlanFormValues(plan);
-                        clearStatus(planFormStatus);
+                        clearStatusMessage(planFormStatus);
                     }
                 }
 
                 if (action === 'delete-plan') {
-                    if (!confirm('آیا از حذف این پلن اطمینان دارید؟ این عملیات بازگشت‌پذیر نیست.')) {
+                    if (!confirm(messages.planDeleteConfirm)) {
                         return;
                     }
                     try {
-                        const response = await fetch(`${API_BASE}/${planId}`, {
+                        const response = await fetch(`${apiBase}/${planId}`, {
                             method: 'DELETE',
                             credentials: 'include'
                         });
@@ -1672,34 +1993,34 @@
                             resetPlanFormUI();
                         }
                         await refreshData(true);
-                        setStatus(planFormStatus, 'پلن حذف شد.', 'success');
+                        setStatusMessage(planFormStatus, messages.planDeleteSuccess, 'success');
                     } catch (error) {
-                        console.error('Delete plan failed', error);
-                        setStatus(planFormStatus, 'حذف پلن با مشکل مواجه شد.', 'error');
+                        console.error(`${logPrefix}: delete plan failed`, error);
+                        setStatusMessage(planFormStatus, messages.planDeleteError, 'error');
                     }
                 }
             });
 
             assignmentForm.addEventListener('submit', async (event) => {
                 event.preventDefault();
-                clearStatus(assignmentStatus);
+                clearStatusMessage(assignmentStatus);
 
                 const payload = {
-                    phone: sellerPhoneInput.value.trim(),
-                    planId: assignmentPlanSelect.value,
-                    customPrice: assignmentPriceInput.value ? Number(assignmentPriceInput.value) : undefined,
-                    durationDays: assignmentDurationInput.value ? Number(assignmentDurationInput.value) : undefined,
-                    startDate: assignmentStartInput.value || undefined,
-                    notes: assignmentNotesInput.value.trim()
+                    phone: sellerPhoneInput?.value.trim(),
+                    planId: assignmentPlanSelect?.value,
+                    customPrice: assignmentPriceInput?.value ? Number(assignmentPriceInput.value) : undefined,
+                    durationDays: assignmentDurationInput?.value ? Number(assignmentDurationInput.value) : undefined,
+                    startDate: assignmentStartInput?.value || undefined,
+                    notes: assignmentNotesInput?.value.trim()
                 };
 
                 if (!payload.phone || !payload.planId) {
-                    setStatus(assignmentStatus, 'شماره تلفن و پلن انتخابی الزامی است.', 'error');
+                    setStatusMessage(assignmentStatus, messages.assignmentValidationError, 'error');
                     return;
                 }
 
                 try {
-                    const response = await fetch(`${API_BASE}/assignments`, {
+                    const response = await fetch(`${apiBase}/assignments`, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         credentials: 'include',
@@ -1708,16 +2029,16 @@
 
                     if (!response.ok) {
                         const errorBody = await response.json().catch(() => ({}));
-                        const message = errorBody?.message || 'خطا در ثبت پلن اختصاصی';
+                        const message = errorBody?.message || messages.assignmentSaveError;
                         throw new Error(message);
                     }
 
                     assignmentForm.reset();
-                    setStatus(assignmentStatus, 'پلن اختصاصی با موفقیت ثبت شد.', 'success');
+                    setStatusMessage(assignmentStatus, messages.assignmentSaveSuccess, 'success');
                     await fetchAssignments();
                 } catch (error) {
-                    console.error('Plan assignment failed', error);
-                    setStatus(assignmentStatus, error.message || 'خطا در ثبت پلن اختصاصی.', 'error');
+                    console.error(`${logPrefix}: plan assignment failed`, error);
+                    setStatusMessage(assignmentStatus, error.message || messages.assignmentSaveError, 'error');
                 }
             });
 
@@ -1727,12 +2048,12 @@
                 const assignmentId = target.dataset.assignmentId;
                 if (!assignmentId) return;
 
-                if (!confirm('آیا از لغو این پلن اختصاصی اطمینان دارید؟')) {
+                if (!confirm(messages.assignmentDeleteConfirm)) {
                     return;
                 }
 
                 try {
-                    const response = await fetch(`${API_BASE}/assignments/${assignmentId}`, {
+                    const response = await fetch(`${apiBase}/assignments/${assignmentId}`, {
                         method: 'DELETE',
                         credentials: 'include'
                     });
@@ -1740,10 +2061,10 @@
                         throw new Error('DELETE_ASSIGNMENT_FAILED');
                     }
                     await fetchAssignments();
-                    setStatus(assignmentStatus, 'پلن اختصاصی حذف شد.', 'success');
+                    setStatusMessage(assignmentStatus, messages.assignmentDeleteSuccess, 'success');
                 } catch (error) {
-                    console.error('Delete plan assignment failed', error);
-                    setStatus(assignmentStatus, 'حذف پلن اختصاصی با مشکل مواجه شد.', 'error');
+                    console.error(`${logPrefix}: delete assignment failed`, error);
+                    setStatusMessage(assignmentStatus, messages.assignmentDeleteError, 'error');
                 }
             });
 
@@ -1753,7 +2074,82 @@
 
             resetPlanFormUI();
             refreshData(true);
-        })();
+        }
+
+        initializePlanManager({
+            apiBase: '/api/service-plans',
+            logPrefix: 'Service plan manager',
+            elements: {
+                planTableBody: document.getElementById('servicePlanTableBody'),
+                planForm: document.getElementById('servicePlanForm'),
+                planFormTitle: document.getElementById('servicePlanFormTitle'),
+                planFormStatus: document.getElementById('servicePlanFormStatus'),
+                planResetBtn: document.getElementById('servicePlanFormReset'),
+                planTitleInput: document.getElementById('servicePlanTitle'),
+                planSlugInput: document.getElementById('servicePlanSlug'),
+                planPriceInput: document.getElementById('servicePlanPrice'),
+                planDurationInput: document.getElementById('servicePlanDuration'),
+                planDescriptionInput: document.getElementById('servicePlanDescription'),
+                planFeaturesInput: document.getElementById('servicePlanFeatures'),
+                planIsActiveInput: document.getElementById('servicePlanIsActive'),
+                planSubmitBtn: document.querySelector('#servicePlanForm button[type="submit"]'),
+                assignmentForm: document.getElementById('servicePlanAssignmentForm'),
+                assignmentStatus: document.getElementById('serviceAssignmentFormStatus'),
+                sellerPhoneInput: document.getElementById('serviceSellerPhone'),
+                assignmentPlanSelect: document.getElementById('serviceAssignmentPlanSelect'),
+                assignmentPriceInput: document.getElementById('serviceCustomPrice'),
+                assignmentDurationInput: document.getElementById('serviceAssignmentDuration'),
+                assignmentStartInput: document.getElementById('serviceAssignmentStart'),
+                assignmentNotesInput: document.getElementById('serviceAssignmentNotes'),
+                assignmentTableBody: document.getElementById('servicePlanAssignmentTableBody'),
+                refreshBtn: document.getElementById('serviceRefreshPlanData')
+            },
+            labels: {
+                planEmpty: 'هنوز پلنی برای مغازه‌های خدماتی ثبت نشده است.',
+                assignmentEmpty: 'تاکنون پلنی به فروشنده‌ای اختصاص داده نشده است.'
+            },
+            resolveAssignmentShop: (assignment) => assignment?.serviceShop || assignment?.shop || {}
+        });
+
+        initializePlanManager({
+            apiBase: '/api/retail-plans',
+            logPrefix: 'Retail plan manager',
+            elements: {
+                planTableBody: document.getElementById('retailPlanTableBody'),
+                planForm: document.getElementById('retailPlanForm'),
+                planFormTitle: document.getElementById('retailPlanFormTitle'),
+                planFormStatus: document.getElementById('retailPlanFormStatus'),
+                planResetBtn: document.getElementById('retailPlanFormReset'),
+                planTitleInput: document.getElementById('retailPlanTitle'),
+                planSlugInput: document.getElementById('retailPlanSlug'),
+                planPriceInput: document.getElementById('retailPlanPrice'),
+                planDurationInput: document.getElementById('retailPlanDuration'),
+                planDescriptionInput: document.getElementById('retailPlanDescription'),
+                planFeaturesInput: document.getElementById('retailPlanFeatures'),
+                planIsActiveInput: document.getElementById('retailPlanIsActive'),
+                planSubmitBtn: document.querySelector('#retailPlanForm button[type="submit"]'),
+                assignmentForm: document.getElementById('retailPlanAssignmentForm'),
+                assignmentStatus: document.getElementById('retailAssignmentFormStatus'),
+                sellerPhoneInput: document.getElementById('retailSellerPhone'),
+                assignmentPlanSelect: document.getElementById('retailAssignmentPlanSelect'),
+                assignmentPriceInput: document.getElementById('retailCustomPrice'),
+                assignmentDurationInput: document.getElementById('retailAssignmentDuration'),
+                assignmentStartInput: document.getElementById('retailAssignmentStart'),
+                assignmentNotesInput: document.getElementById('retailAssignmentNotes'),
+                assignmentTableBody: document.getElementById('retailPlanAssignmentTableBody'),
+                refreshBtn: document.getElementById('retailRefreshPlanData')
+            },
+            labels: {
+                planEmpty: 'هنوز پلنی برای مغازه‌های عادی ثبت نشده است.',
+                assignmentEmpty: 'تاکنون پلنی به فروشگاه یا شعبه‌ای اختصاص داده نشده است.',
+                refreshSuccess: 'پلن‌های مغازه‌های عادی بروزرسانی شد.',
+                refreshError: 'امکان بروزرسانی پلن‌های مغازه‌های عادی وجود ندارد.',
+                assignmentValidationError: 'شماره تماس و انتخاب پلن الزامی است.'
+            },
+            resolveAssignmentShop: (assignment) => assignment?.retailShop || assignment?.store || assignment?.shop || {}
+        });
+
+
     </script>
 </body>
 </html>
