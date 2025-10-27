@@ -400,115 +400,233 @@
     
     .items-list {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
-      gap: 30px;
+      grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
+      gap: 26px;
+      align-items: stretch;
     }
-    
+
     .item-card {
+      position: relative;
+      border-radius: 26px;
+      padding: 1px;
+      background: linear-gradient(135deg, rgba(14, 165, 233, 0.18), rgba(16, 185, 129, 0.18));
+      transition: transform 0.35s ease, box-shadow 0.35s ease;
+    }
+
+    .item-card::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: 26px;
+      background: linear-gradient(135deg, rgba(14, 165, 233, 0.35), rgba(16, 185, 129, 0.25));
+      opacity: 0;
+      transition: opacity 0.35s ease;
+      z-index: 0;
+    }
+
+    .item-card-inner {
+      position: relative;
+      z-index: 1;
       background: #fff;
-      border-radius: 20px;
+      border-radius: 25px;
       overflow: hidden;
-      transition: var(--transition);
       display: flex;
       flex-direction: column;
-      height: 100%;
-      position: relative;
-      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
-      border: 1px solid #e2e8f0;
+      min-height: 100%;
+      box-shadow: 0 18px 40px rgba(15, 23, 42, 0.08);
+      transition: transform 0.35s ease;
     }
-    
+
     .item-card:hover {
-      transform: translateY(-8px);
-      box-shadow: 0 12px 30px rgba(14, 165, 233, 0.2);
+      transform: translateY(-12px);
+      box-shadow: 0 30px 60px rgba(15, 23, 42, 0.15);
     }
-    
+
+    .item-card:hover::after {
+      opacity: 1;
+    }
+
+    .item-card:hover .item-card-inner {
+      transform: translateY(-2px);
+    }
+
     .item-img-container {
       position: relative;
-      height: 220px;
+      height: 200px;
       overflow: hidden;
+      background: linear-gradient(135deg, rgba(14, 165, 233, 0.1), rgba(16, 185, 129, 0.15));
     }
-    
+
     .item-img {
       width: 100%;
       height: 100%;
       object-fit: cover;
-      transition: var(--transition);
+      transition: transform 0.45s ease;
+      filter: saturate(110%);
     }
-    
+
+    .item-img-container::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(180deg, rgba(15, 23, 42, 0) 35%, rgba(15, 23, 42, 0.55) 100%);
+      opacity: 0.35;
+      transition: opacity 0.4s ease;
+    }
+
     .item-card:hover .item-img {
-      transform: scale(1.05);
+      transform: scale(1.08);
     }
-    
-    .item-info {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      padding: 22px;
-      text-align: center;
+
+    .item-card:hover .item-img-container::after {
+      opacity: 0.5;
     }
-    
-    .item-title {
-      font-size: 1.3rem;
-      font-weight: 800;
-      color: var(--dark);
-      margin-bottom: 8px;
-      line-height: 1.4;
+
+    .item-badge {
+      position: absolute;
+      top: 16px;
+      right: 16px;
+      padding: 6px 14px;
+      border-radius: 999px;
+      font-size: 0.85rem;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      backdrop-filter: blur(8px);
+      color: #0f172a;
+      box-shadow: 0 8px 16px rgba(15, 23, 42, 0.08);
     }
-    
-    .item-desc {
-      font-size: 1.05rem;
-      color: var(--gray);
-      line-height: 1.7;
-      margin-bottom: 18px;
-      flex: 1;
-    }
-    
-    .item-meta {
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-      padding-top: 12px;
-      border-top: 1px dashed #e2e8f0;
-      color: var(--gray);
+
+    .item-badge i {
       font-size: 0.95rem;
     }
-    
-    .item-meta span {
+
+    .item-badge--shops {
+      background: rgba(16, 185, 129, 0.85);
+      color: #fff;
+    }
+
+    .item-badge--products {
+      background: rgba(14, 165, 233, 0.85);
+      color: #fff;
+    }
+
+    .item-info {
+      padding: 24px 24px 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+      text-align: right;
+    }
+
+    .item-title {
+      font-size: 1.28rem;
+      font-weight: 800;
+      color: var(--dark);
+      line-height: 1.5;
+    }
+
+    .item-desc {
+      font-size: 1rem;
+      color: var(--gray);
+      line-height: 1.8;
+      margin: 0;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      min-height: 3.2em;
+    }
+
+    .item-meta-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 12px;
+    }
+
+    .item-meta-chip {
       display: flex;
       align-items: center;
-      justify-content: center;
-      gap: 6px;
+      gap: 8px;
+      padding: 10px 12px;
+      border-radius: 14px;
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      font-size: 0.95rem;
+      color: #475569;
+      min-height: 44px;
+      transition: border-color 0.3s ease, transform 0.3s ease;
+      word-break: break-word;
     }
-    
+
+    .item-meta-chip i {
+      color: var(--primary);
+    }
+
+    .item-card:hover .item-meta-chip {
+      border-color: rgba(14, 165, 233, 0.35);
+      transform: translateY(-2px);
+    }
+
     .item-actions {
+      margin-top: auto;
       display: flex;
-      gap: 10px;
-      margin-top: 15px;
+      flex-wrap: wrap;
+      gap: 12px;
+      padding: 0 24px 24px;
     }
-    
+
     .action-btn {
-      flex: 1;
-      padding: 12px;
-      text-align: center;
-      border-radius: 12px;
-      font-weight: 700;
-      cursor: pointer;
-      transition: var(--transition);
-      display: flex;
+      flex: 1 1 160px;
+      display: inline-flex;
       align-items: center;
       justify-content: center;
       gap: 8px;
+      padding: 12px 18px;
+      border-radius: 14px;
+      font-weight: 700;
+      font-size: 0.98rem;
+      text-decoration: none;
+      border: none;
+      cursor: pointer;
+      transition: transform 0.25s ease, box-shadow 0.25s ease, background 0.25s ease;
     }
-    
+
+    .action-btn i {
+      font-size: 1rem;
+    }
+
     .btn-primary {
       background: linear-gradient(90deg, var(--secondary), var(--primary));
-      color: white;
+      color: #fff;
+      box-shadow: 0 10px 25px rgba(14, 165, 233, 0.25);
     }
-    
+
     .btn-primary:hover {
       background: linear-gradient(90deg, var(--secondary-dark), var(--primary-dark));
+      transform: translateY(-3px);
+      box-shadow: 0 18px 35px rgba(14, 165, 233, 0.35);
+    }
+
+    .btn-ghost {
+      background: rgba(14, 165, 233, 0.08);
+      color: var(--primary-dark);
+      border: 1px solid rgba(14, 165, 233, 0.25);
+    }
+
+    .btn-ghost:hover {
+      background: rgba(14, 165, 233, 0.14);
       transform: translateY(-2px);
-      box-shadow: 0 4px 12px rgba(14, 165, 233, 0.3);
+      box-shadow: 0 12px 24px rgba(14, 165, 233, 0.18);
+    }
+
+    .btn-ghost:disabled {
+      opacity: 0.5;
+      cursor: default;
+      transform: none;
+      box-shadow: none;
     }
     
     /* فوتر */
@@ -614,29 +732,31 @@
       .main-container {
         max-width: 1100px;
       }
-      
+
       .items-list {
-        grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-        gap: 25px;
+        grid-template-columns: repeat(auto-fill, minmax(270px, 1fr));
+        gap: 24px;
       }
+
       .search-filter-bar {
         justify-content: center;
       }
     }
-    
-    @media (max-width: 1100px) {
+
+    @media (max-width: 992px) {
       .items-list {
-        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
       }
-      
+
       .item-img-container {
-        height: 200px;
+        height: 190px;
       }
+
       .filter-tabs {
         gap: 15px;
       }
     }
-    
+
     @media (max-width: 900px) {
       .search-filter-bar {
         flex-direction: column;
@@ -652,67 +772,106 @@
         justify-content: center;
         gap: 10px;
       }
+
       .filter-tab {
         padding: 8px 16px;
       }
     }
-    
-    @media (max-width: 600px) {
+
+    @media (max-width: 768px) {
+      .items-list {
+        grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+        gap: 22px;
+      }
+
+      .item-info {
+        padding: 22px 20px 18px;
+      }
+
+      .item-actions {
+        padding: 0 20px 22px;
+      }
+
+      .item-meta-grid {
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      }
+    }
+
+    @media (max-width: 640px) {
       .items-list {
         grid-template-columns: 1fr;
         gap: 20px;
       }
-      
+
       .item-card {
-        max-width: 100%;
+        max-width: 420px;
         margin: 0 auto;
       }
-      
+
+      .item-img-container {
+        height: 190px;
+      }
+
+      .item-meta-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .action-btn {
+        flex: 1 1 100%;
+      }
+
       .section-title {
         font-size: 1.4rem;
       }
-      
+
       .filter-tab {
         padding: 8px 16px;
         font-size: 0.95rem;
       }
-      .item-title {
-        font-size: 1.2rem;
-      }
-      .item-desc {
-        font-size: 1rem;
-      }
-      .item-meta span {
-        font-size: 0.9rem;
-      }
-      .action-btn {
-        padding: 10px;
-        font-size: 0.95rem;
-      }
+
       .search-filter-container {
         padding: 20px 15px;
       }
     }
-    
+
     @media (max-width: 480px) {
       .item-img-container {
-        height: 180px;
+        height: 170px;
       }
+
       .item-info {
-        padding: 18px;
+        padding: 20px 18px 16px;
+      }
+
+      .item-actions {
+        padding: 0 18px 20px;
+      }
+
+      .item-title {
+        font-size: 1.15rem;
+      }
+
+      .item-desc {
+        font-size: 0.95rem;
       }
     }
-    
-    @media (max-width: 320px) {
+
+    @media (max-width: 360px) {
       .section-title {
         font-size: 1.3rem;
       }
+
       .filter-tab {
         padding: 6px 12px;
         font-size: 0.9rem;
       }
+
       .item-img-container {
-        height: 160px;
+        height: 150px;
+      }
+
+      .item-actions {
+        padding: 0 16px 18px;
       }
     }
     
@@ -731,34 +890,34 @@
     .delay-3 { animation-delay: 0.3s; }
     
     .skeleton {
-      background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+      background: linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 50%, #f1f5f9 75%);
       background-size: 200% 100%;
       animation: loading 1.5s infinite;
-      border-radius: 8px;
+      border-radius: 12px;
     }
-    
+
     @keyframes loading {
       0% { background-position: 200% 0; }
       100% { background-position: -200% 0; }
     }
-    
+
     .skeleton-img {
-      height: 220px;
+      height: 200px;
       width: 100%;
-      margin-bottom: 15px;
+      border-radius: 22px 22px 0 0;
     }
-    
+
     .skeleton-line {
-      height: 20px;
+      height: 18px;
       margin-bottom: 12px;
     }
-    
+
     .skeleton-line.short {
-      width: 60%;
+      width: 55%;
     }
-    
+
     .skeleton-line.medium {
-      width: 80%;
+      width: 75%;
     }
   </style>
   <script src="/nav-active.js" defer></script>
@@ -920,14 +1079,18 @@
       for (let i = 0; i < 6; i++) {
         listDiv.innerHTML += `
           <div class="item-card fade-in delay-${i % 3}">
-            <div class="skeleton skeleton-img"></div>
-            <div class="item-info">
-              <div class="skeleton skeleton-line" style="height: 28px; margin-bottom: 15px;"></div>
-              <div class="skeleton skeleton-line short" style="height: 22px; margin-bottom: 10px;"></div>
-              <div class="skeleton skeleton-line" style="height: 18px; margin-bottom: 8px;"></div>
-              <div class="skeleton skeleton-line medium" style="height: 18px; margin-bottom: 20px;"></div>
-              <div style="display: flex; gap: 10px; margin-top: auto;">
-                <div class="skeleton" style="height: 40px; flex: 1; border-radius: 12px;"></div>
+            <div class="item-card-inner">
+              <div class="skeleton skeleton-img"></div>
+              <div class="item-info">
+                <div class="skeleton skeleton-line" style="height: 26px; width: 70%;"></div>
+                <div class="skeleton skeleton-line medium" style="margin-bottom: 6px;"></div>
+                <div class="item-meta-grid">
+                  <div class="skeleton" style="height: 42px; border-radius: 14px;"></div>
+                  <div class="skeleton" style="height: 42px; border-radius: 14px;"></div>
+                </div>
+              </div>
+              <div class="item-actions">
+                <div class="skeleton" style="height: 46px; flex: 1; border-radius: 14px;"></div>
               </div>
             </div>
           </div>
@@ -980,43 +1143,76 @@
       filtered.forEach((item, index) => {
         const card = document.createElement('div');
         card.className = `item-card fade-in delay-${index % 3}`;
-        let html = `
-          <div class="item-img-container">
-            <img class="item-img" loading="lazy" src="${item.shopLogo || item.image || 'https://via.placeholder.com/800x600?text=تصویر'}" alt="${item.customUrl || item.title}">
-          </div>
-          <div class="item-info">
-            <h3 class="item-title">${item.customUrl || item.title}</h3>
-            <p class="item-desc">${item.shopAddress || item.description || ''}</p>
-        `;
-        
+
+        const title = (item.customUrl || item.title || 'بدون عنوان').toString();
+        const image = item.shopLogo || item.image || 'https://via.placeholder.com/800x600?text=تصویر';
+        const rawPhone = (item.shopPhone || '').toString().trim();
+        const phoneLink = rawPhone ? rawPhone.replace(/[^0-9+]/g, '') : '';
+        const badgeLabel = currentType === 'shops' ? 'فروشگاه' : 'محصول';
+        const badgeClass = currentType === 'shops' ? 'item-badge--shops' : 'item-badge--products';
+        const badgeIcon = currentType === 'shops' ? 'fa-bag-shopping' : 'fa-cubes';
+        const description = (currentType === 'shops'
+          ? (item.shopDescription || item.shopAddress || '')
+          : (item.description || item.shopAddress || '')).toString().trim();
+
+        const metaRows = [];
         if (currentType === 'shops') {
-          html += `
-            <div class="item-meta">
-              <span><i class="fas fa-phone"></i> ${item.shopPhone || 'نامشخص'}</span>
-              <span><i class="fas fa-map-marker-alt"></i> ${item.shopAddress || 'نامشخص'}</span>
-            </div>
-            <div class="item-actions">
-              <div class="action-btn btn-primary" onclick="window.open('/shop.html?id=${item._id}', '_blank')">
-                <i class="fas fa-eye"></i> مشاهده فروشگاه
-              </div>
-            </div>
-          `;
+          if (rawPhone) {
+            metaRows.push(`<div class="item-meta-chip"><i class="fas fa-phone"></i><span>${rawPhone}</span></div>`);
+          }
+          if (item.shopAddress) {
+            metaRows.push(`<div class="item-meta-chip"><i class="fas fa-location-dot"></i><span>${item.shopAddress}</span></div>`);
+          }
+          if (item.centerTitle || item.centerName) {
+            metaRows.push(`<div class="item-meta-chip"><i class="fas fa-building"></i><span>${item.centerTitle || item.centerName}</span></div>`);
+          }
         } else {
-          html += `
-            <div class="item-meta">
-              <span><i class="fas fa-tag"></i> قیمت: ${item.price || 'نامشخص'}</span>
-              <span><i class="fas fa-store"></i> فروشگاه: ${item.shopName || 'نامشخص'}</span>
+          if (item.price) {
+            metaRows.push(`<div class="item-meta-chip"><i class="fas fa-tag"></i><span>${item.price}</span></div>`);
+          }
+          if (item.shopName) {
+            metaRows.push(`<div class="item-meta-chip"><i class="fas fa-store"></i><span>${item.shopName}</span></div>`);
+          }
+          if (item.category) {
+            metaRows.push(`<div class="item-meta-chip"><i class="fas fa-layer-group"></i><span>${item.category}</span></div>`);
+          }
+        }
+
+        if (!metaRows.length) {
+          metaRows.push(`<div class="item-meta-chip"><i class="fas fa-circle-info"></i><span>اطلاعات تکمیلی ثبت نشده</span></div>`);
+        }
+
+        let actionsHtml = '';
+        if (currentType === 'shops') {
+          if (phoneLink) {
+            actionsHtml += `<a class="action-btn btn-ghost" href="tel:${phoneLink}" aria-label="تماس با ${title}"><i class="fas fa-phone"></i> تماس سریع</a>`;
+          }
+          actionsHtml += `<a class="action-btn btn-primary" href="/shop.html?id=${item._id}" target="_blank" rel="noopener" aria-label="مشاهده ${title}"><i class="fas fa-eye"></i> مشاهده فروشگاه</a>`;
+        } else {
+          if (item.shopId) {
+            actionsHtml += `<a class="action-btn btn-ghost" href="/shop.html?id=${item.shopId}" target="_blank" rel="noopener" aria-label="مشاهده فروشگاه ${item.shopName || ''}"><i class="fas fa-store"></i> صفحه فروشگاه</a>`;
+          }
+          actionsHtml += `<a class="action-btn btn-primary" href="/product.html?id=${item._id}" target="_blank" rel="noopener" aria-label="مشاهده ${title}"><i class="fas fa-eye"></i> مشاهده محصول</a>`;
+        }
+
+        card.innerHTML = `
+          <div class="item-card-inner">
+            <div class="item-img-container">
+              <img class="item-img" loading="lazy" src="${image}" alt="${title}">
+              <span class="item-badge ${badgeClass}"><i class="fas ${badgeIcon}"></i>${badgeLabel}</span>
             </div>
-            <div class="item-actions">
-              <div class="action-btn btn-primary" onclick="window.open('/product.html?id=${item._id}', '_blank')">
-                <i class="fas fa-eye"></i> مشاهده محصول
+            <div class="item-info">
+              <h3 class="item-title">${title}</h3>
+              ${description ? `<p class="item-desc">${description}</p>` : '<p class="item-desc">اطلاعاتی ثبت نشده است</p>'}
+              <div class="item-meta-grid">
+                ${metaRows.join('')}
               </div>
             </div>
-          `;
-        }
-        
-        html += `</div>`;
-        card.innerHTML = html;
+            <div class="item-actions">
+              ${actionsHtml}
+            </div>
+          </div>
+        `;
         listDiv.appendChild(card);
       });
     }
