@@ -185,6 +185,190 @@
             gap: 24px;
         }
 
+        .pricing-center-card {
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+            background: linear-gradient(135deg, rgba(61, 115, 255, 0.06), rgba(55, 178, 108, 0.06));
+            border: 1px solid rgba(61, 115, 255, 0.14);
+        }
+
+        .pricing-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .pricing-header h2 {
+            margin: 0;
+            font-size: 20px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .pricing-tagline {
+            margin: 0;
+            color: var(--text-muted);
+            font-size: 14px;
+        }
+
+        .pricing-metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            gap: 16px;
+        }
+
+        .pricing-metric {
+            background: rgba(255, 255, 255, 0.82);
+            border-radius: 16px;
+            padding: 14px 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            border: 1px solid rgba(112, 128, 176, 0.12);
+        }
+
+        .pricing-metric span {
+            color: var(--text-muted);
+            font-size: 13px;
+        }
+
+        .pricing-metric strong {
+            font-size: 18px;
+            color: var(--text-strong);
+        }
+
+        .pricing-content {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+        }
+
+        .price-adjust-card,
+        .pricing-side-card {
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 18px;
+            padding: 18px;
+            border: 1px solid rgba(112, 128, 176, 0.14);
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .price-adjust-card h3,
+        .pricing-side-card h3 {
+            margin: 0;
+            font-size: 18px;
+        }
+
+        .price-adjust-form {
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+
+        .price-adjust-summary {
+            background: rgba(61, 115, 255, 0.08);
+            border-radius: 14px;
+            padding: 12px 14px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            font-size: 13px;
+        }
+
+        .price-adjust-summary strong {
+            font-size: 20px;
+            color: var(--primary);
+        }
+
+        .price-adjust-range {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .price-adjust-range input[type="range"] {
+            width: 100%;
+        }
+
+        .price-adjust-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .pricing-recommendations {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .pricing-recommendations button {
+            background: rgba(61, 115, 255, 0.12);
+            border: 1px solid rgba(61, 115, 255, 0.24);
+            color: #123caa;
+            border-radius: 999px;
+            padding: 6px 14px;
+            cursor: pointer;
+            font-family: inherit;
+            font-size: 13px;
+            transition: background 150ms ease, transform 150ms ease;
+        }
+
+        .pricing-recommendations button:hover {
+            background: rgba(61, 115, 255, 0.2);
+            transform: translateY(-1px);
+        }
+
+        .pricing-history {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .pricing-history li {
+            list-style: none;
+            border: 1px solid rgba(112, 128, 176, 0.14);
+            border-radius: 14px;
+            padding: 12px 14px;
+            background: rgba(255, 255, 255, 0.85);
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .pricing-history li strong {
+            font-size: 14px;
+        }
+
+        .pricing-history li span {
+            color: var(--text-muted);
+            font-size: 12px;
+        }
+
+        .pricing-empty {
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 13px;
+        }
+
+        .price-adjust-status {
+            font-size: 13px;
+            color: var(--text-muted);
+            min-height: 18px;
+        }
+
+        .price-adjust-status.error {
+            color: var(--danger);
+        }
+
+        .price-adjust-status.success {
+            color: var(--success);
+        }
+
         .plan-management-header {
             display: flex;
             align-items: flex-start;
@@ -797,6 +981,103 @@
             </div>
         </section>
 
+        <section class="card pricing-center-card" id="service-plan-pricing">
+            <div class="pricing-header">
+                <div>
+                    <h2><i class="ri-money-dollar-circle-line"></i> مرکز کنترل قیمت پلن‌ها</h2>
+                    <p class="pricing-tagline">پایش هوشمند قیمت‌گذاری، تنظیم سریع تعرفه و ثبت تصمیم‌های مدیریتی</p>
+                </div>
+                <button type="button" class="action-link" id="priceAnalyticsRefresh">
+                    <i class="ri-bar-chart-line"></i>
+                    محاسبه دوباره تحلیل قیمت
+                </button>
+            </div>
+
+            <div class="pricing-metrics-grid">
+                <div class="pricing-metric">
+                    <span>میانگین قیمت پایه</span>
+                    <strong id="planPriceAverage">—</strong>
+                </div>
+                <div class="pricing-metric">
+                    <span>بیشترین قیمت فعال</span>
+                    <strong id="planPriceHighest">—</strong>
+                </div>
+                <div class="pricing-metric">
+                    <span>کمترین قیمت فعال</span>
+                    <strong id="planPriceLowest">—</strong>
+                </div>
+                <div class="pricing-metric">
+                    <span>پلن‌های فعال</span>
+                    <strong id="planActiveCount">—</strong>
+                </div>
+                <div class="pricing-metric">
+                    <span>پلن‌های غیرفعال</span>
+                    <strong id="planInactiveCount">—</strong>
+                </div>
+                <div class="pricing-metric">
+                    <span>انحراف قیمت از میانگین</span>
+                    <strong id="planPriceSpread">—</strong>
+                </div>
+            </div>
+
+            <div class="pricing-content">
+                <div class="price-adjust-card">
+                    <div>
+                        <h3>تنظیم سریع قیمت پلن</h3>
+                        <p class="section-subtitle">انتخاب پلن، تعیین درصد تغییر و اعمال فوری بر بستر API</p>
+                    </div>
+                    <form id="priceAdjustForm" class="price-adjust-form">
+                        <div class="form-field">
+                            <label for="priceAdjustPlan">انتخاب پلن</label>
+                            <select id="priceAdjustPlan" required>
+                                <option value="" disabled selected>پلن مدنظر را انتخاب کنید</option>
+                            </select>
+                        </div>
+                        <div class="price-adjust-summary">
+                            <span>قیمت جدید پس از اعمال تغییر</span>
+                            <strong id="priceAdjustResult">—</strong>
+                            <span id="priceAdjustDelta" class="subtle-text">درصد تغییر: 0%</span>
+                        </div>
+                        <div class="price-adjust-range">
+                            <label for="priceAdjustRange">درصد تغییر قیمت</label>
+                            <input type="range" id="priceAdjustRange" min="-30" max="50" step="1" value="0">
+                            <div class="pricing-recommendations" id="priceAdjustmentRecommendations">
+                                <button type="button" data-percent="-10">کاهش ۱۰٪</button>
+                                <button type="button" data-percent="-5">کاهش ۵٪</button>
+                                <button type="button" data-percent="5">افزایش ۵٪</button>
+                                <button type="button" data-percent="10">افزایش ۱۰٪</button>
+                            </div>
+                        </div>
+                        <div class="form-field">
+                            <label for="priceAdjustNotes">توضیح تصمیم</label>
+                            <textarea id="priceAdjustNotes" rows="2" placeholder="دلیل تغییر قیمت برای ثبت در تاریخچه داخلی"></textarea>
+                        </div>
+                        <p class="price-adjust-status" id="priceAdjustStatus" aria-live="polite"></p>
+                        <div class="price-adjust-actions">
+                            <button type="reset" class="action-link secondary" id="priceAdjustReset">
+                                <i class="ri-restart-line"></i>
+                                بازنشانی تنظیمات
+                            </button>
+                            <button type="submit" class="action-link" id="priceAdjustApply">
+                                <i class="ri-currency-line"></i>
+                                اعمال تغییر قیمت
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <div class="pricing-side-card">
+                    <div>
+                        <h3>تاریخچه تصمیم‌های قیمت‌گذاری</h3>
+                        <p class="section-subtitle">ثبت خودکار هر تغییر برای پیگیری‌های بعدی تیم فروش</p>
+                    </div>
+                    <ul class="pricing-history" id="priceAdjustHistory">
+                        <li class="pricing-empty">هنوز تصمیمی ثبت نشده است.</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
         <section class="card plan-management-card" id="service-plan-management">
             <div class="plan-management-header">
                 <div>
@@ -1363,6 +1644,23 @@
             const assignmentNotesInput = document.getElementById('assignmentNotes');
             const assignmentTableBody = document.getElementById('planAssignmentTableBody');
             const refreshBtn = document.getElementById('refreshPlanData');
+            const priceAverageEl = document.getElementById('planPriceAverage');
+            const priceHighestEl = document.getElementById('planPriceHighest');
+            const priceLowestEl = document.getElementById('planPriceLowest');
+            const priceActiveCountEl = document.getElementById('planActiveCount');
+            const priceInactiveCountEl = document.getElementById('planInactiveCount');
+            const priceSpreadEl = document.getElementById('planPriceSpread');
+            const priceAdjustForm = document.getElementById('priceAdjustForm');
+            const priceAdjustSelect = document.getElementById('priceAdjustPlan');
+            const priceAdjustRange = document.getElementById('priceAdjustRange');
+            const priceAdjustResult = document.getElementById('priceAdjustResult');
+            const priceAdjustDelta = document.getElementById('priceAdjustDelta');
+            const priceAdjustNotes = document.getElementById('priceAdjustNotes');
+            const priceAdjustStatus = document.getElementById('priceAdjustStatus');
+            const priceAdjustHistory = document.getElementById('priceAdjustHistory');
+            const priceAdjustResetBtn = document.getElementById('priceAdjustReset');
+            const priceAnalyticsRefreshBtn = document.getElementById('priceAnalyticsRefresh');
+            const priceAdjustmentRecommendations = document.getElementById('priceAdjustmentRecommendations');
 
             if (!planTableBody || !planForm || !assignmentForm || !assignmentTableBody) {
                 return;
@@ -1372,8 +1670,32 @@
             const state = {
                 plans: [],
                 assignments: [],
+                priceAdjustments: [],
                 editingPlanId: null,
                 loading: false
+            };
+
+            const faNumber = (value) => {
+                const numeric = Number(value || 0);
+                if (Number.isNaN(numeric)) {
+                    return '۰';
+                }
+                return new Intl.NumberFormat('fa-IR').format(numeric);
+            };
+
+            const formatPersianDate = (value) => {
+                if (!value) {
+                    return '';
+                }
+                try {
+                    return new Intl.DateTimeFormat('fa-IR', {
+                        year: 'numeric',
+                        month: '2-digit',
+                        day: '2-digit'
+                    }).format(new Date(value));
+                } catch (error) {
+                    return value;
+                }
             };
 
             const clearStatus = (element) => {
@@ -1389,6 +1711,149 @@
                 if (type) {
                     element.classList.add(type);
                 }
+            };
+
+            const formatHistoryTimestamp = (date) => {
+                try {
+                    return new Intl.DateTimeFormat('fa-IR', {
+                        dateStyle: 'short',
+                        timeStyle: 'short'
+                    }).format(date);
+                } catch (error) {
+                    return date.toLocaleString('fa-IR');
+                }
+            };
+
+            const getSelectedPlan = () => {
+                const planId = priceAdjustSelect?.value;
+                if (!planId) return null;
+                return state.plans.find((plan) => String(plan.id) === String(planId)) || null;
+            };
+
+            const getAdjustmentPercent = () => {
+                if (!priceAdjustRange) {
+                    return 0;
+                }
+                const value = Number(priceAdjustRange.value);
+                return Number.isNaN(value) ? 0 : value;
+            };
+
+            const calculateAdjustedPrice = () => {
+                const plan = getSelectedPlan();
+                const percent = getAdjustmentPercent();
+                if (!plan) {
+                    return { plan: null, percent, rawPrice: null, newPrice: null };
+                }
+                const rawPrice = plan.price != null ? Number(plan.price) : 0;
+                const multiplier = 1 + (percent / 100);
+                const newPrice = Math.max(0, Math.round(rawPrice * multiplier));
+                return { plan, percent, rawPrice, newPrice };
+            };
+
+            const updatePriceAdjustPreview = () => {
+                if (!priceAdjustResult || !priceAdjustDelta) {
+                    return;
+                }
+                const { plan, percent, rawPrice, newPrice } = calculateAdjustedPrice();
+                if (!plan || newPrice == null) {
+                    priceAdjustResult.textContent = '—';
+                    priceAdjustDelta.textContent = 'درصد تغییر: 0%';
+                    return;
+                }
+                const sign = percent > 0 ? '+' : '';
+                priceAdjustResult.textContent = `${faNumber(newPrice)} تومان`;
+                priceAdjustDelta.textContent = `درصد تغییر: ${sign}${percent}% (قیمت فعلی: ${faNumber(rawPrice)} تومان)`;
+            };
+
+            const updatePriceAnalytics = () => {
+                if (!priceAverageEl || !priceHighestEl || !priceLowestEl || !priceActiveCountEl || !priceInactiveCountEl || !priceSpreadEl) {
+                    return;
+                }
+                if (!state.plans.length) {
+                    priceAverageEl.textContent = '—';
+                    priceHighestEl.textContent = '—';
+                    priceLowestEl.textContent = '—';
+                    priceActiveCountEl.textContent = '—';
+                    priceInactiveCountEl.textContent = '—';
+                    priceSpreadEl.textContent = '—';
+                    return;
+                }
+
+                const numericPrices = state.plans
+                    .map((plan) => (plan.price != null ? Number(plan.price) : 0));
+                const sum = numericPrices.reduce((acc, value) => acc + value, 0);
+                const average = Math.round(sum / state.plans.length);
+
+                const activePlans = state.plans.filter((plan) => plan.isActive !== false);
+                const inactiveCount = state.plans.length - activePlans.length;
+                const activePrices = activePlans
+                    .map((plan) => (plan.price != null ? Number(plan.price) : 0))
+                    .filter((value) => !Number.isNaN(value));
+
+                const highest = activePrices.length ? Math.max(...activePrices) : null;
+                const lowest = activePrices.length ? Math.min(...activePrices) : null;
+                const spread = (highest != null && lowest != null) ? Math.max(0, highest - lowest) : null;
+
+                priceAverageEl.textContent = `${faNumber(average)} تومان`;
+                priceHighestEl.textContent = highest != null ? `${faNumber(highest)} تومان` : '—';
+                priceLowestEl.textContent = lowest != null ? `${faNumber(lowest)} تومان` : '—';
+                priceActiveCountEl.textContent = faNumber(activePlans.length);
+                priceInactiveCountEl.textContent = faNumber(inactiveCount);
+                priceSpreadEl.textContent = spread != null ? `${faNumber(spread)} تومان` : '—';
+            };
+
+            const populatePriceAdjustSelect = () => {
+                if (!priceAdjustSelect) {
+                    return;
+                }
+                const currentValue = priceAdjustSelect.value;
+                priceAdjustSelect.innerHTML = '<option value="" disabled selected>پلن مدنظر را انتخاب کنید</option>';
+                state.plans.forEach((plan) => {
+                    const option = document.createElement('option');
+                    option.value = plan.id;
+                    option.textContent = `${plan.title} — ${faNumber(plan.price)} تومان`;
+                    priceAdjustSelect.appendChild(option);
+                });
+                if (currentValue) {
+                    priceAdjustSelect.value = currentValue;
+                }
+            };
+
+            const renderPriceAdjustHistory = () => {
+                if (!priceAdjustHistory) {
+                    return;
+                }
+                if (!state.priceAdjustments.length) {
+                    priceAdjustHistory.innerHTML = '<li class="pricing-empty">هنوز تصمیمی ثبت نشده است.</li>';
+                    return;
+                }
+                priceAdjustHistory.innerHTML = state.priceAdjustments.map((entry) => {
+                    const sign = entry.percent > 0 ? '+' : '';
+                    const notesText = entry.notes ? `<span>${entry.notes}</span>` : '';
+                    return `
+                        <li>
+                            <strong>${entry.planTitle}</strong>
+                            <span>تغییر ${sign}${entry.percent}% — از ${faNumber(entry.oldPrice)} به ${faNumber(entry.newPrice)} تومان</span>
+                            <span>${entry.timestamp}</span>
+                            ${notesText}
+                        </li>
+                    `;
+                }).join('');
+            };
+
+            const recordPriceAdjustment = ({ plan, rawPrice, newPrice, percent, notes }) => {
+                if (!plan) return;
+                state.priceAdjustments.unshift({
+                    planId: plan.id,
+                    planTitle: plan.title,
+                    oldPrice: rawPrice,
+                    newPrice,
+                    percent,
+                    notes,
+                    timestamp: formatHistoryTimestamp(new Date())
+                });
+                state.priceAdjustments = state.priceAdjustments.slice(0, 10);
+                renderPriceAdjustHistory();
             };
 
             const resetPlanFormUI = () => {
@@ -1555,6 +2020,9 @@
                 state.plans = plans;
                 renderPlanTable();
                 populatePlanSelect();
+                populatePriceAdjustSelect();
+                updatePriceAnalytics();
+                updatePriceAdjustPreview();
             };
 
             const fetchAssignments = async () => {
@@ -1589,6 +2057,108 @@
                     }
                 }
             };
+
+            priceAdjustSelect?.addEventListener('change', () => {
+                if (priceAdjustRange) {
+                    priceAdjustRange.value = '0';
+                }
+                updatePriceAdjustPreview();
+                clearStatus(priceAdjustStatus);
+            });
+
+            priceAdjustRange?.addEventListener('input', () => {
+                updatePriceAdjustPreview();
+            });
+
+            priceAdjustmentRecommendations?.addEventListener('click', (event) => {
+                const button = event.target.closest('button[data-percent]');
+                if (!button || !priceAdjustRange) {
+                    return;
+                }
+                event.preventDefault();
+                const percent = Number(button.dataset.percent);
+                if (Number.isNaN(percent)) {
+                    return;
+                }
+                priceAdjustRange.value = String(percent);
+                updatePriceAdjustPreview();
+            });
+
+            priceAdjustForm?.addEventListener('reset', () => {
+                setTimeout(() => {
+                    if (priceAdjustRange) {
+                        priceAdjustRange.value = '0';
+                    }
+                    clearStatus(priceAdjustStatus);
+                    updatePriceAdjustPreview();
+                }, 0);
+            });
+
+            priceAdjustForm?.addEventListener('submit', async (event) => {
+                event.preventDefault();
+                clearStatus(priceAdjustStatus);
+
+                const { plan, percent, rawPrice, newPrice } = calculateAdjustedPrice();
+                if (!plan) {
+                    setStatus(priceAdjustStatus, 'لطفاً پلن مدنظر را انتخاب کنید.', 'error');
+                    return;
+                }
+                if (newPrice == null) {
+                    setStatus(priceAdjustStatus, 'امکان محاسبه قیمت جدید وجود ندارد.', 'error');
+                    return;
+                }
+                if (newPrice === rawPrice) {
+                    setStatus(priceAdjustStatus, 'قیمت جدید با قیمت فعلی برابر است.', 'error');
+                    return;
+                }
+
+                try {
+                    const payload = {
+                        title: plan.title,
+                        slug: plan.slug,
+                        price: newPrice,
+                        durationDays: plan.durationDays,
+                        description: plan.description,
+                        isActive: plan.isActive !== false,
+                        features: Array.isArray(plan.features) ? plan.features : []
+                    };
+
+                    const response = await fetch(`${API_BASE}/${plan.id}`, {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'application/json' },
+                        credentials: 'include',
+                        body: JSON.stringify(payload)
+                    });
+
+                    if (!response.ok) {
+                        const errorBody = await response.json().catch(() => ({}));
+                        const message = errorBody?.message || 'خطا در بروزرسانی قیمت پلن';
+                        throw new Error(message);
+                    }
+
+                    const notes = priceAdjustNotes?.value.trim() || '';
+                    recordPriceAdjustment({ plan, rawPrice, newPrice, percent, notes });
+                    if (priceAdjustNotes) {
+                        priceAdjustNotes.value = '';
+                    }
+                    if (priceAdjustRange) {
+                        priceAdjustRange.value = '0';
+                    }
+                    await refreshData(true);
+                    updatePriceAdjustPreview();
+                    updatePriceAnalytics();
+                    setStatus(priceAdjustStatus, 'قیمت پلن با موفقیت بروزرسانی شد.', 'success');
+                } catch (error) {
+                    console.error('Service plan price update failed', error);
+                    setStatus(priceAdjustStatus, error.message || 'خطا در بروزرسانی قیمت پلن.', 'error');
+                }
+            });
+
+            priceAnalyticsRefreshBtn?.addEventListener('click', () => {
+                updatePriceAnalytics();
+                updatePriceAdjustPreview();
+                setStatus(priceAdjustStatus, 'تحلیل قیمت با داده‌های فعلی بروزرسانی شد.', 'success');
+            });
 
             planForm.addEventListener('submit', async (event) => {
                 event.preventDefault();
@@ -1751,6 +2321,7 @@
                 refreshData();
             });
 
+            renderPriceAdjustHistory();
             resetPlanFormUI();
             refreshData(true);
         })();
