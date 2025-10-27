@@ -1002,20 +1002,41 @@
     /* منوی فیلتر برای موبایل */
     .mobile-filter-btn {
       display: none;
-      background: white;
-      border: 2px solid #0ea5e9;
-      border-radius: 12px;
-      padding: 12px 20px;
-      font-weight: 700;
+      width: calc(100% - 40px);
+      margin: 0 auto 24px;
+      padding: 14px 18px;
+      border: none;
+      border-radius: 18px;
+      background: linear-gradient(115deg, #10b981 0%, #0ea5e9 100%);
+      color: #ffffff;
+      font-weight: 800;
+      font-size: 0.95rem;
       cursor: pointer;
-      box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
+      box-shadow: 0 18px 36px rgba(14, 165, 233, 0.28);
       align-items: center;
-      gap: 10px;
-      color: var(--text-medium);
+      justify-content: center;
+      gap: 12px;
+      letter-spacing: 0.01em;
+      position: sticky;
+      top: 76px;
+      z-index: 40;
+      backdrop-filter: blur(8px);
+      transition: transform 0.25s ease, box-shadow 0.25s ease;
     }
-    
+
     .mobile-filter-btn i {
-      font-size: 1.2rem;
+      font-size: 1.1rem;
+    }
+
+    .mobile-filter-btn span {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .mobile-filter-btn:hover {
+      box-shadow: 0 22px 44px rgba(14, 165, 233, 0.32);
+      transform: translateY(-2px);
     }
     
     .mobile-filters-overlay {
@@ -1024,50 +1045,347 @@
       left: 0;
       right: 0;
       bottom: 0;
-      background: rgba(0,0,0,0.7);
+      background: linear-gradient(180deg, rgba(15, 23, 42, 0.15) 0%, rgba(15, 23, 42, 0.75) 100%);
       z-index: 999;
       display: none;
-      justify-content: flex-end;
+      justify-content: center;
+      align-items: flex-end;
+      padding: 0 14px 16px;
     }
-    
+
     .mobile-filters {
-      width: 85%;
-      max-width: 320px;
-      background: white;
-      height: 100%;
+      width: 100%;
+      max-width: 480px;
+      background: rgba(255, 255, 255, 0.97);
       overflow-y: auto;
-      padding: 20px;
-      transform: translateX(100%);
-      transition: transform 0.3s ease;
+      max-height: calc(100vh - 24px);
+      padding: 28px 22px 24px;
+      padding-bottom: 28px;
+      padding-bottom: calc(28px + env(safe-area-inset-bottom));
+      transform: translateY(110%);
+      transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1);
       display: flex;
       flex-direction: column;
       gap: 20px;
+      border-radius: 28px 28px 20px 20px;
+      box-shadow: 0 -18px 50px rgba(15, 118, 110, 0.22);
+      position: relative;
+      backdrop-filter: blur(14px);
     }
-    
+
+    .mobile-filters::before {
+      content: '';
+      position: absolute;
+      top: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 62px;
+      height: 5px;
+      border-radius: 999px;
+      background: #d4d4d8;
+      opacity: 0.75;
+    }
+
     .mobile-filters.active {
-      transform: translateX(0);
+      transform: translateY(0);
     }
-    
+
     .mobile-filters-header {
       display: flex;
       justify-content: space-between;
-      align-items: center;
-      padding-bottom: 15px;
-      border-bottom: 1px solid #eee;
-      margin-bottom: 10px;
+      align-items: flex-start;
+      padding-bottom: 18px;
+      border-bottom: 1px dashed rgba(148, 163, 184, 0.4);
+      margin-bottom: 6px;
+      gap: 12px;
     }
-    
+
     .mobile-filters-header h3 {
-      font-size: 1.3rem;
+      font-size: 1.2rem;
+      font-weight: 800;
       color: var(--text-dark);
+      margin: 0;
     }
-    
+
+    .mobile-filters-header p {
+      font-size: 0.8rem;
+      color: var(--text-light);
+      margin-top: 4px;
+      line-height: 1.6;
+    }
+
     .close-filters {
-      background: none;
+      background: rgba(15, 118, 110, 0.12);
       border: none;
-      font-size: 1.5rem;
+      font-size: 1.15rem;
       color: var(--text-medium);
       cursor: pointer;
+      width: 38px;
+      height: 38px;
+      border-radius: 14px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.2s ease, color 0.2s ease;
+    }
+
+    .close-filters:hover {
+      background: rgba(14, 165, 233, 0.15);
+      color: var(--primary-dark);
+    }
+
+    .mobile-filter-group {
+      background: rgba(240, 253, 250, 0.9);
+      border-radius: 20px;
+      padding: 16px 18px;
+      box-shadow: 0 14px 32px rgba(14, 165, 233, 0.12);
+      border: 1px solid rgba(14, 165, 233, 0.08);
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .mobile-filter-group::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.65), rgba(255, 255, 255, 0));
+      opacity: 0.45;
+      pointer-events: none;
+    }
+
+    .mobile-filter-group > * {
+      position: relative;
+      z-index: 1;
+    }
+
+    .mobile-group-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .mobile-group-header > div {
+      flex: 1;
+    }
+
+    .mobile-group-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 16px;
+      background: linear-gradient(140deg, rgba(16, 185, 129, 0.2) 0%, rgba(14, 165, 233, 0.3) 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--primary-dark);
+      font-size: 1.2rem;
+      flex-shrink: 0;
+    }
+
+    .mobile-group-header h4 {
+      font-size: 1rem;
+      font-weight: 800;
+      color: var(--text-dark);
+      margin-bottom: 2px;
+    }
+
+    .mobile-group-header p {
+      font-size: 0.78rem;
+      color: var(--text-light);
+      margin: 0;
+      line-height: 1.6;
+    }
+
+    .mobile-group-body {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .mobile-chip-row {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .mobile-chip-row .filter-btn {
+      flex: 1 1 calc(50% - 12px);
+      justify-content: center;
+    }
+
+    .mobile-chip-row .filter-btn i {
+      font-size: 1rem;
+    }
+
+    .mobile-dropdown {
+      display: none;
+      position: static;
+      width: 100%;
+      margin-top: 2px;
+      border-radius: 16px;
+      border: 1px solid rgba(14, 165, 233, 0.18);
+      box-shadow: 0 16px 32px rgba(14, 165, 233, 0.12);
+      background: #ffffff;
+      padding: 10px 0;
+      max-height: 240px;
+      overflow-y: auto;
+    }
+
+    .mobile-dropdown::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    .mobile-dropdown::-webkit-scrollbar-thumb {
+      background: rgba(14, 165, 233, 0.4);
+      border-radius: 999px;
+    }
+
+    .mobile-dropdown .dropdown-item {
+      padding: 12px 20px 12px 16px;
+      border: none;
+      font-size: 0.95rem;
+    }
+
+    .mobile-dropdown .dropdown-item + .dropdown-item {
+      border-top: 1px solid rgba(226, 232, 240, 0.7);
+    }
+
+    .mobile-filter-group .filter-btn {
+      width: 100%;
+    }
+
+    .mobile-filter-group .filter-btn i:last-child {
+      margin-right: auto;
+      transition: transform 0.25s ease;
+    }
+
+    .mobile-filter-group .filter-btn[aria-expanded="true"] i:last-child {
+      transform: rotate(180deg);
+    }
+
+    .mobile-filter-group .price-range {
+      background: rgba(240, 249, 255, 0.75);
+      border-radius: 14px;
+      padding: 14px;
+      gap: 12px;
+    }
+
+    .mobile-filter-group .price-range label {
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: var(--text-medium);
+    }
+
+    .mobile-filter-group .price-range input {
+      border: 1px solid rgba(14, 165, 233, 0.35);
+      border-radius: 12px;
+      padding: 10px 12px;
+      font-size: 0.95rem;
+      background: rgba(255, 255, 255, 0.95);
+      transition: border 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .mobile-filter-group .price-range input:focus {
+      border-color: rgba(16, 185, 129, 0.65);
+      box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.18);
+      outline: none;
+    }
+
+    #applyPriceFilterMobile {
+      background: linear-gradient(120deg, rgba(16, 185, 129, 0.18) 0%, rgba(14, 165, 233, 0.4) 100%);
+      border: 1px solid rgba(14, 165, 233, 0.4);
+      color: var(--primary-dark);
+      border-radius: 14px;
+      padding: 10px 18px;
+      font-weight: 800;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      cursor: pointer;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+      width: 100%;
+    }
+
+    #applyPriceFilterMobile:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 24px rgba(14, 165, 233, 0.18);
+    }
+
+    .mobile-filter-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-top: auto;
+      padding-top: 8px;
+    }
+
+    #applyFiltersMobile {
+      width: 100%;
+      justify-content: center;
+      font-size: 1.05rem;
+      gap: 10px;
+      padding: 12px 18px;
+      border-radius: 18px;
+      box-shadow: 0 18px 40px rgba(16, 185, 129, 0.28);
+    }
+
+    .filters-section.mobile {
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+
+    .filters-section.mobile .filter-btn {
+      background: rgba(255, 255, 255, 0.82);
+      border: 1px solid rgba(14, 165, 233, 0.22);
+      box-shadow: 0 12px 22px rgba(14, 165, 233, 0.12);
+      color: var(--text-dark);
+      justify-content: space-between;
+      padding: 12px 16px;
+      transition: background 0.25s ease, color 0.25s ease, box-shadow 0.25s ease;
+    }
+
+    .filters-section.mobile .filter-btn span {
+      flex: 1;
+      padding: 0 8px;
+      font-weight: 800;
+      text-align: right;
+    }
+
+    .filters-section.mobile .filter-btn:hover,
+    .filters-section.mobile .filter-btn.active {
+      background: linear-gradient(120deg, rgba(16, 185, 129, 0.2) 0%, rgba(14, 165, 233, 0.35) 100%);
+      color: var(--primary-dark);
+      box-shadow: 0 18px 32px rgba(14, 165, 233, 0.22);
+      transform: none;
+    }
+
+    .mobile-chip-row .filter-btn {
+      background: rgba(255, 255, 255, 0.92);
+      border-radius: 14px;
+      border: 1px solid rgba(14, 165, 233, 0.28);
+      box-shadow: none;
+      color: var(--text-medium);
+      padding: 12px 14px;
+    }
+
+    .mobile-chip-row .filter-btn:hover,
+    .mobile-chip-row .filter-btn.active {
+      background: linear-gradient(120deg, #10b981 0%, #0ea5e9 100%);
+      color: #ffffff;
+      box-shadow: 0 16px 30px rgba(14, 165, 233, 0.24);
+    }
+
+    .filters-section.mobile .filter-btn:focus-visible,
+    .mobile-filter-btn:focus-visible,
+    #applyFiltersMobile:focus-visible,
+    #applyPriceFilterMobile:focus-visible,
+    .mobile-dropdown .dropdown-item:focus-visible {
+      outline: 2px solid rgba(14, 165, 233, 0.55);
+      outline-offset: 3px;
     }
 
     /* رسپانسیو برای دستگاه‌های مختلف */
@@ -1108,24 +1426,24 @@
       }
       
       /* بهبود فیلترها در تبلت */
-      .filters-section {
+      .filters-section.desktop {
         justify-content: flex-start;
         overflow-x: auto;
         padding-bottom: 8px;
         margin: 20px -15px;
         scrollbar-width: thin;
       }
-      
-      .filters-section::-webkit-scrollbar {
+
+      .filters-section.desktop::-webkit-scrollbar {
         height: 6px;
       }
-      
-      .filters-section::-webkit-scrollbar-thumb {
+
+      .filters-section.desktop::-webkit-scrollbar-thumb {
         background: #c5c5c5;
         border-radius: 10px;
       }
-      
-      .filter-btn {
+
+      .filters-section.desktop .filter-btn {
         flex-shrink: 0;
       }
     }
@@ -1154,26 +1472,29 @@
         font-size: 1.6rem;
       }
 
-      .filters-section {
+      .filters-section.desktop {
         gap: 10px;
         margin: 20px 0;
       }
 
-      .filter-btn {
+      .filters-section.desktop .filter-btn {
         padding: 8px 16px;
         font-size: 0.9rem;
       }
-      
+
+      .filters-section.mobile {
+        gap: 18px;
+      }
+
       .products-list {
         grid-template-columns: repeat(2, 1fr); /* دوتا تو ردیف */
       }
-      
+
       /* نمایش دکمه فیلتر موبایل */
       .mobile-filter-btn {
         display: flex;
-        margin: 0 auto 20px;
       }
-      
+
       .filters-section.desktop {
         display: none;
       }
@@ -1201,9 +1522,14 @@
         padding: 12px 18px;
       }
 
-      .filter-btn {
+      .filters-section.desktop .filter-btn {
         padding: 7px 14px;
         font-size: 0.85rem;
+      }
+
+      .mobile-filter-btn {
+        width: calc(100% - 24px);
+        top: 72px;
       }
       
       .products-list {
@@ -1230,7 +1556,7 @@
         display: none;
       }
     }
-    
+
     @media (max-width: 480px) {
       .vit-logo-gradient {
         font-size: 1.2rem;
@@ -1247,31 +1573,14 @@
       .vit-btn span {
         display: none;
       }
-      
+
       .vit-btn i {
         margin: 0;
         font-size: 1.2rem;
       }
 
-      .filters-section {
-        justify-content: flex-start;
-        overflow-x: auto;
-        padding-bottom: 5px;
-        margin: 15px -10px 20px;
-        padding: 0 10px 5px;
-      }
-
-      .filters-section::-webkit-scrollbar {
-        height: 5px;
-      }
-
-      .filters-section::-webkit-scrollbar-thumb {
-        background: #c5c5c5;
-        border-radius: 10px;
-      }
-
-      .filter-btn {
-        flex-shrink: 0;
+      .mobile-filter-btn {
+        top: 68px;
       }
     }
   </style>
@@ -1380,9 +1689,9 @@
     </div>
     
     <!-- دکمه فیلتر موبایل -->
-    <button class="mobile-filter-btn" id="mobileFilterBtn">
-      <i class="fas fa-filter"></i>
-      فیلترها
+    <button class="mobile-filter-btn" id="mobileFilterBtn" type="button" aria-controls="mobileFilters" aria-haspopup="dialog" aria-expanded="false">
+      <i class="fas fa-sliders-h"></i>
+      <span>فیلتر و مرتب‌سازی</span>
     </button>
     
     <!-- نمایش فیلترهای فعال -->
@@ -1470,89 +1779,140 @@
 
   <!-- منوی فیلتر موبایل -->
   <div class="mobile-filters-overlay" id="mobileFiltersOverlay">
-    <div class="mobile-filters" id="mobileFilters">
+    <div class="mobile-filters" id="mobileFilters" role="dialog" aria-modal="true" aria-labelledby="mobileFiltersTitle" tabindex="-1">
       <div class="mobile-filters-header">
-        <h3>فیلترها</h3>
-        <button class="close-filters" id="closeFilters">×</button>
+        <div>
+          <h3 id="mobileFiltersTitle">فیلترها</h3>
+          <p>با تنظیم گزینه‌های زیر، محصولات مناسب‌تری ببینید</p>
+        </div>
+        <button class="close-filters" id="closeFilters" aria-label="بستن فیلترها" type="button">
+          <i class="fas fa-times"></i>
+        </button>
       </div>
-      
+
       <div class="filters-section mobile">
-        <!-- فیلتر اصلی همه محصولات -->
-        <div class="dropdown-filter" style="position: relative; display:block; width:100%;">
-          <button class="filter-btn active" id="mainFilterBtnMobile" data-filter="all">
-            <i class="fas fa-boxes"></i>
-            همه محصولات
-            <i class="fas fa-chevron-down" style="margin-right:7px;font-size:0.95em"></i>
-          </button>
-          <div class="dropdown-menu" id="filterDropdownMobile" style="display:none; position:relative; right:0; top:0; z-index:9; width:100%; background:#fff; border-radius:16px; box-shadow:0 8px 24px rgba(16,185,129,0.14); overflow:hidden; border:1.5px solid #0ea5e95b; margin-top:10px;">
-            <button class="dropdown-item" data-filter="پوشاک">پوشاک</button>
-            <button class="dropdown-item" data-filter="خوراک">خوراک</button>
-            <button class="dropdown-item" data-filter="خدمات">خدمات</button>
-            <button class="dropdown-item" data-filter="دیجیتال">دیجیتال</button>
-            <button class="dropdown-item" data-filter="زیبایی">زیبایی</button>
-            <button class="dropdown-item" data-filter="کتاب و تحریر">کتاب و تحریر</button>
-            <button class="dropdown-item" data-filter="لوازم خانگی">لوازم خانگی</button>
-            <button class="dropdown-item" data-filter="ورزشی">ورزشی</button>
-            <button class="dropdown-item" data-filter="تالار و مجالس">تالار و مجالس</button>
-            <button class="dropdown-item" data-filter="قنادی و شیرینی">قنادی و شیرینی</button>
-            <button class="dropdown-item" data-filter="گل و گیاه">گل و گیاه</button>
-            <button class="dropdown-item" data-filter="خودرو">خودرو</button>
-          </div>
-        </div>
-
-        <!-- مراکز خرید -->
-        <div class="dropdown-filter" style="position: relative; display:block; width:100%;">
-          <button class="filter-btn" id="shopsBtnMobile">
-            <i class="fas fa-store"></i>
-            مراکز خرید
-            <i class="fas fa-chevron-down" style="margin-right:7px;font-size:0.95em"></i>
-          </button>
-          <div class="dropdown-menu" id="shopsDropdownMobile" style="display:none; position:relative; right:0; top:0; z-index:9; width:100%; background:#fff; border-radius:16px; box-shadow:0 8px 24px rgba(16,185,129,0.14); overflow:hidden; border:1.5px solid #0ea5e95b; margin-top:10px;">
-            <button class="dropdown-item shop-item" data-shop="مرکز خرید اپال">مرکز خرید اپال</button>
-            <button class="dropdown-item shop-item" data-shop="ارگ تجریش">ارگ تجریش</button>
-            <button class="dropdown-item shop-item" data-shop="پالادیوم">پالادیوم</button>
-            <button class="dropdown-item shop-item" data-shop="ایران مال">ایران مال</button>
-            <button class="dropdown-item shop-item" data-shop="کوروش">کوروش</button>
-            <button class="dropdown-item shop-item" data-shop="هایپرسان">هایپرسان</button>
-          </div>
-        </div>
-
-        <!-- مرتب‌سازی -->
-        <button class="filter-btn" id="sort-cheap-mobile">
-          <i class="fas fa-sort-amount-down-alt"></i>
-          ارزان‌ترین
-        </button>
-        <button class="filter-btn" id="sort-expensive-mobile">
-          <i class="fas fa-sort-amount-up"></i>
-          گران‌ترین
-        </button>
-
-        <!-- فیلتر قیمت -->
-        <div class="dropdown-filter" style="position: relative; display:block; width:100%;">
-          <button class="filter-btn" id="priceFilterBtnMobile">
-            <i class="fas fa-dollar-sign"></i>
-            فیلتر قیمت
-            <i class="fas fa-chevron-down" style="margin-right:7px;font-size:0.95em"></i>
-          </button>
-          <div class="dropdown-menu" id="priceFilterMenuMobile" style="display:none; position:relative; right:0; top:0; z-index:9; width:100%; background:#fff; border-radius:16px; box-shadow:0 8px 24px rgba(16,185,129,0.14); overflow:hidden; border:1.5px solid #0ea5e95b; margin-top:10px;">
-            <div class="price-range">
-              <label for="minPriceMobile">حداقل قیمت:</label>
-              <input type="number" id="minPriceMobile" placeholder="حداقل قیمت" min="0">
+        <section class="mobile-filter-group">
+          <div class="mobile-group-header">
+            <span class="mobile-group-icon">
+              <i class="fas fa-boxes"></i>
+            </span>
+            <div>
+              <h4>دسته‌بندی محصولات</h4>
+              <p>انتخاب کنید چه نوع محصولی نمایش داده شود</p>
             </div>
-            <div class="price-range">
-              <label for="maxPriceMobile">حداکثر قیمت:</label>
-              <input type="number" id="maxPriceMobile" placeholder="حداکثر قیمت" min="0">
+          </div>
+          <div class="mobile-group-body">
+            <button class="filter-btn" id="mainFilterBtnMobile" data-filter="all" aria-expanded="false" type="button">
+              <i class="fas fa-boxes"></i>
+              <span>همه محصولات</span>
+              <i class="fas fa-chevron-down"></i>
+            </button>
+            <div class="dropdown-menu mobile-dropdown" id="filterDropdownMobile" style="display:none;">
+              <button class="dropdown-item" data-filter="پوشاک">پوشاک</button>
+              <button class="dropdown-item" data-filter="خوراک">خوراک</button>
+              <button class="dropdown-item" data-filter="خدمات">خدمات</button>
+              <button class="dropdown-item" data-filter="دیجیتال">دیجیتال</button>
+              <button class="dropdown-item" data-filter="زیبایی">زیبایی</button>
+              <button class="dropdown-item" data-filter="کتاب و تحریر">کتاب و تحریر</button>
+              <button class="dropdown-item" data-filter="لوازم خانگی">لوازم خانگی</button>
+              <button class="dropdown-item" data-filter="ورزشی">ورزشی</button>
+              <button class="dropdown-item" data-filter="تالار و مجالس">تالار و مجالس</button>
+              <button class="dropdown-item" data-filter="قنادی و شیرینی">قنادی و شیرینی</button>
+              <button class="dropdown-item" data-filter="گل و گیاه">گل و گیاه</button>
+              <button class="dropdown-item" data-filter="خودرو">خودرو</button>
             </div>
-            <button class="filter-btn" id="applyPriceFilterMobile">
-              اعمال فیلتر
+          </div>
+        </section>
+
+        <section class="mobile-filter-group">
+          <div class="mobile-group-header">
+            <span class="mobile-group-icon">
+              <i class="fas fa-store"></i>
+            </span>
+            <div>
+              <h4>مراکز خرید</h4>
+              <p>محصولات را از فروشگاه دلخواه ببینید</p>
+            </div>
+          </div>
+          <div class="mobile-group-body">
+            <button class="filter-btn" id="shopsBtnMobile" aria-expanded="false" type="button">
+              <i class="fas fa-store"></i>
+              <span>مراکز خرید</span>
+              <i class="fas fa-chevron-down"></i>
+            </button>
+            <div class="dropdown-menu mobile-dropdown" id="shopsDropdownMobile" style="display:none;">
+              <button class="dropdown-item shop-item" data-shop="مرکز خرید اپال">مرکز خرید اپال</button>
+              <button class="dropdown-item shop-item" data-shop="ارگ تجریش">ارگ تجریش</button>
+              <button class="dropdown-item shop-item" data-shop="پالادیوم">پالادیوم</button>
+              <button class="dropdown-item shop-item" data-shop="ایران مال">ایران مال</button>
+              <button class="dropdown-item shop-item" data-shop="کوروش">کوروش</button>
+              <button class="dropdown-item shop-item" data-shop="هایپرسان">هایپرسان</button>
+            </div>
+          </div>
+        </section>
+
+        <section class="mobile-filter-group">
+          <div class="mobile-group-header">
+            <span class="mobile-group-icon">
+              <i class="fas fa-sort-amount-down-alt"></i>
+            </span>
+            <div>
+              <h4>مرتب‌سازی نتایج</h4>
+              <p>اولویت نمایش محصولات را مشخص کنید</p>
+            </div>
+          </div>
+          <div class="mobile-group-body mobile-chip-row">
+            <button class="filter-btn" id="sort-cheap-mobile" type="button">
+              <i class="fas fa-sort-amount-down-alt"></i>
+              ارزان‌ترین
+            </button>
+            <button class="filter-btn" id="sort-expensive-mobile" type="button">
+              <i class="fas fa-sort-amount-up"></i>
+              گران‌ترین
             </button>
           </div>
-        </div>
+        </section>
+
+        <section class="mobile-filter-group">
+          <div class="mobile-group-header">
+            <span class="mobile-group-icon">
+              <i class="fas fa-dollar-sign"></i>
+            </span>
+            <div>
+              <h4>بازه قیمت</h4>
+              <p>حداقل و حداکثر قیمت دلخواه را مشخص کنید</p>
+            </div>
+          </div>
+          <div class="mobile-group-body">
+            <button class="filter-btn" id="priceFilterBtnMobile" aria-expanded="false" type="button">
+              <i class="fas fa-dollar-sign"></i>
+              <span>فیلتر قیمت</span>
+              <i class="fas fa-chevron-down"></i>
+            </button>
+            <div class="dropdown-menu mobile-dropdown" id="priceFilterMenuMobile" style="display:none;">
+              <div class="price-range">
+                <label for="minPriceMobile">حداقل قیمت:</label>
+                <input type="number" id="minPriceMobile" placeholder="حداقل قیمت" min="0">
+              </div>
+              <div class="price-range">
+                <label for="maxPriceMobile">حداکثر قیمت:</label>
+                <input type="number" id="maxPriceMobile" placeholder="حداکثر قیمت" min="0">
+              </div>
+              <button id="applyPriceFilterMobile" type="button">
+                <i class="fas fa-check"></i>
+                اعمال فیلتر قیمت
+              </button>
+            </div>
+          </div>
+        </section>
       </div>
-      
-      <button class="vit-btn" style="margin-top: auto; width: 100%;" id="applyFiltersMobile">
-        اعمال فیلترها
-      </button>
+
+      <div class="mobile-filter-actions">
+        <button class="vit-btn" id="applyFiltersMobile" type="button">
+          <i class="fas fa-check-circle"></i>
+          اعمال فیلترها
+        </button>
+      </div>
     </div>
   </div>
 
@@ -1569,6 +1929,7 @@ let allProducts = [];
 let products    = [];
 let featuredAd  = null;
 let featuredAdProductId = null;
+let mobileFiltersCloseTimer = null;
 
 const AD_PLAN_SLUG = 'ad_products';
 
@@ -1637,13 +1998,37 @@ function setupEventListeners() {
   });
   
   /* --- منوی فیلتر موبایل --- */
-  document.getElementById('mobileFilterBtn').addEventListener('click', () => {
-    document.getElementById('mobileFiltersOverlay').style.display = 'flex';
+  const mobileFilterBtn = document.getElementById('mobileFilterBtn');
+  const mobileFiltersOverlay = document.getElementById('mobileFiltersOverlay');
+  const mobileFiltersPanel = document.getElementById('mobileFilters');
+
+  mobileFilterBtn.addEventListener('click', () => {
+    if (mobileFiltersCloseTimer) {
+      clearTimeout(mobileFiltersCloseTimer);
+      mobileFiltersCloseTimer = null;
+    }
+    mobileFiltersOverlay.style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+    mobileFiltersPanel.scrollTop = 0;
+    mobileFilterBtn.setAttribute('aria-expanded', 'true');
     setTimeout(() => {
-      document.getElementById('mobileFilters').classList.add('active');
+      mobileFiltersPanel.classList.add('active');
+      mobileFiltersPanel.focus({ preventScroll: true });
     }, 10);
   });
-  
+
+  mobileFiltersOverlay.addEventListener('click', event => {
+    if (event.target === mobileFiltersOverlay) {
+      closeMobileFilters();
+    }
+  });
+
+  document.addEventListener('keydown', event => {
+    if ((event.key === 'Escape' || event.key === 'Esc') && mobileFiltersOverlay.style.display === 'flex') {
+      closeMobileFilters();
+    }
+  });
+
   document.getElementById('closeFilters').addEventListener('click', closeMobileFilters);
   document.getElementById('applyFiltersMobile').addEventListener('click', () => {
     filterAndSortProducts();
@@ -1698,53 +2083,70 @@ function setupMobileFilters() {
   const catMenuMobile = document.getElementById('filterDropdownMobile');
   const shopMenuMobile = document.getElementById('shopsDropdownMobile');
   const priceMenuMobile = document.getElementById('priceFilterMenuMobile');
-  
+  const mainFilterBtnMobile = document.getElementById('mainFilterBtnMobile');
+  const shopsBtnMobile = document.getElementById('shopsBtnMobile');
+  const priceFilterBtnMobile = document.getElementById('priceFilterBtnMobile');
+
   // فیلتر دسته‌بندی موبایل
-  document.getElementById('mainFilterBtnMobile').addEventListener('click', e => {
+  mainFilterBtnMobile.addEventListener('click', e => {
     e.stopPropagation();
-    catMenuMobile.style.display = catMenuMobile.style.display === 'block' ? 'none' : 'block';
+    const isOpen = catMenuMobile.style.display === 'block';
+    catMenuMobile.style.display = isOpen ? 'none' : 'block';
     shopMenuMobile.style.display = 'none';
     priceMenuMobile.style.display = 'none';
+    mainFilterBtnMobile.setAttribute('aria-expanded', isOpen ? 'false' : 'true');
+    shopsBtnMobile.setAttribute('aria-expanded', 'false');
+    priceFilterBtnMobile.setAttribute('aria-expanded', 'false');
   });
-  
+
   // فیلتر فروشگاه موبایل
-  document.getElementById('shopsBtnMobile').addEventListener('click', e => {
+  shopsBtnMobile.addEventListener('click', e => {
     e.stopPropagation();
-    shopMenuMobile.style.display = shopMenuMobile.style.display === 'block' ? 'none' : 'block';
+    const isOpen = shopMenuMobile.style.display === 'block';
+    shopMenuMobile.style.display = isOpen ? 'none' : 'block';
     catMenuMobile.style.display = 'none';
     priceMenuMobile.style.display = 'none';
+    shopsBtnMobile.setAttribute('aria-expanded', isOpen ? 'false' : 'true');
+    mainFilterBtnMobile.setAttribute('aria-expanded', 'false');
+    priceFilterBtnMobile.setAttribute('aria-expanded', 'false');
   });
-  
+
   // فیلتر قیمت موبایل
-  document.getElementById('priceFilterBtnMobile').addEventListener('click', e => {
+  priceFilterBtnMobile.addEventListener('click', e => {
     e.stopPropagation();
-    priceMenuMobile.style.display = priceMenuMobile.style.display === 'block' ? 'none' : 'block';
+    const isOpen = priceMenuMobile.style.display === 'block';
+    priceMenuMobile.style.display = isOpen ? 'none' : 'block';
     catMenuMobile.style.display = 'none';
     shopMenuMobile.style.display = 'none';
+    priceFilterBtnMobile.setAttribute('aria-expanded', isOpen ? 'false' : 'true');
+    mainFilterBtnMobile.setAttribute('aria-expanded', 'false');
+    shopsBtnMobile.setAttribute('aria-expanded', 'false');
   });
-  
+
   // فیلتر دسته‌بندی موبایل
   document.querySelectorAll('#filterDropdownMobile .dropdown-item').forEach(item => {
     item.addEventListener('click', function() {
       currentCategory = this.dataset.filter;
-      document.getElementById('mainFilterBtnMobile').innerHTML = 
-        `<i class="fas fa-boxes"></i>${currentCategory}<i class="fas fa-chevron-down" style="margin-right:7px;font-size:0.95em"></i>`;
+      mainFilterBtnMobile.innerHTML =
+        `<i class="fas fa-boxes"></i><span>${currentCategory}</span><i class="fas fa-chevron-down"></i>`;
       updateActiveFilters();
-      document.getElementById('filterDropdownMobile').style.display = 'none';
+      catMenuMobile.style.display = 'none';
+      mainFilterBtnMobile.setAttribute('aria-expanded', 'false');
     });
   });
-  
+
   // فیلتر فروشگاه موبایل
   document.querySelectorAll('#shopsDropdownMobile .dropdown-item').forEach(item => {
     item.addEventListener('click', function() {
       currentShop = this.dataset.shop;
-      document.getElementById('shopsBtnMobile').innerHTML = 
-        `<i class="fas fa-store"></i>${currentShop}<i class="fas fa-chevron-down" style="margin-right:7px;font-size:0.95em"></i>`;
+      shopsBtnMobile.innerHTML =
+        `<i class="fas fa-store"></i><span>${currentShop}</span><i class="fas fa-chevron-down"></i>`;
       updateActiveFilters();
-      document.getElementById('shopsDropdownMobile').style.display = 'none';
+      shopMenuMobile.style.display = 'none';
+      shopsBtnMobile.setAttribute('aria-expanded', 'false');
     });
   });
-  
+
   // فیلتر قیمت موبایل
   document.getElementById('applyPriceFilterMobile').addEventListener('click', function() {
     const min = parseFloat(document.getElementById('minPriceMobile').value) || 0;
@@ -1756,10 +2158,11 @@ function setupMobileFilters() {
     }
     
     currentPriceFilter = { min, max };
-    document.getElementById('priceFilterBtnMobile').innerHTML = 
-      `<i class="fas fa-dollar-sign"></i>فیلتر قیمت (${min.toLocaleString('fa-IR')} - ${max.toLocaleString('fa-IR')})<i class="fas fa-chevron-down" style="margin-right:7px;font-size:0.95em"></i>`;
+    priceFilterBtnMobile.innerHTML =
+      `<i class="fas fa-dollar-sign"></i><span>فیلتر قیمت (${min.toLocaleString('fa-IR')} - ${max.toLocaleString('fa-IR')})</span><i class="fas fa-chevron-down"></i>`;
     updateActiveFilters();
-    document.getElementById('priceFilterMenuMobile').style.display = 'none';
+    priceMenuMobile.style.display = 'none';
+    priceFilterBtnMobile.setAttribute('aria-expanded', 'false');
   });
 }
 
@@ -1828,9 +2231,24 @@ function setupPriceFilter() {
 }
 
 function closeMobileFilters() {
-  document.getElementById('mobileFilters').classList.remove('active');
-  setTimeout(() => {
-    document.getElementById('mobileFiltersOverlay').style.display = 'none';
+  const mobileFiltersPanel = document.getElementById('mobileFilters');
+  const overlay = document.getElementById('mobileFiltersOverlay');
+  mobileFiltersPanel.classList.remove('active');
+  document.getElementById('mobileFilterBtn').setAttribute('aria-expanded', 'false');
+  document.getElementById('filterDropdownMobile').style.display = 'none';
+  document.getElementById('shopsDropdownMobile').style.display = 'none';
+  document.getElementById('priceFilterMenuMobile').style.display = 'none';
+  document.getElementById('mainFilterBtnMobile').setAttribute('aria-expanded', 'false');
+  document.getElementById('shopsBtnMobile').setAttribute('aria-expanded', 'false');
+  document.getElementById('priceFilterBtnMobile').setAttribute('aria-expanded', 'false');
+  if (mobileFiltersCloseTimer) {
+    clearTimeout(mobileFiltersCloseTimer);
+  }
+  mobileFiltersCloseTimer = setTimeout(() => {
+    overlay.style.display = 'none';
+    document.body.style.overflow = '';
+    document.getElementById('mobileFilterBtn').focus({ preventScroll: true });
+    mobileFiltersCloseTimer = null;
   }, 300);
 }
 
@@ -2090,24 +2508,27 @@ function removeFilter(type) {
   switch(type) {
     case 'category':
       currentCategory = "همه محصولات";
-      document.getElementById('mainFilterBtn').innerHTML = 
+      document.getElementById('mainFilterBtn').innerHTML =
         `<i class="fas fa-boxes"></i>همه محصولات<i class="fas fa-chevron-down" style="margin-right:7px;font-size:0.95em"></i>`;
-      document.getElementById('mainFilterBtnMobile').innerHTML = 
-        `<i class="fas fa-boxes"></i>همه محصولات<i class="fas fa-chevron-down" style="margin-right:7px;font-size:0.95em"></i>`;
+      document.getElementById('mainFilterBtnMobile').innerHTML =
+        `<i class="fas fa-boxes"></i><span>همه محصولات</span><i class="fas fa-chevron-down"></i>`;
+      document.getElementById('mainFilterBtnMobile').setAttribute('aria-expanded', 'false');
       break;
     case 'shop':
       currentShop = "همه مراکز خرید";
-      document.getElementById('shopsBtn').innerHTML = 
+      document.getElementById('shopsBtn').innerHTML =
         `<i class="fas fa-store"></i>مراکز خرید<i class="fas fa-chevron-down" style="margin-right:7px;font-size:0.95em"></i>`;
-      document.getElementById('shopsBtnMobile').innerHTML = 
-        `<i class="fas fa-store"></i>مراکز خرید<i class="fas fa-chevron-down" style="margin-right:7px;font-size:0.95em"></i>`;
+      document.getElementById('shopsBtnMobile').innerHTML =
+        `<i class="fas fa-store"></i><span>مراکز خرید</span><i class="fas fa-chevron-down"></i>`;
+      document.getElementById('shopsBtnMobile').setAttribute('aria-expanded', 'false');
       break;
     case 'price':
       currentPriceFilter = null;
-      document.getElementById('priceFilterBtn').innerHTML = 
+      document.getElementById('priceFilterBtn').innerHTML =
         `<i class="fas fa-dollar-sign"></i>فیلتر قیمت<i class="fas fa-chevron-down" style="margin-right:7px;font-size:0.95em"></i>`;
-      document.getElementById('priceFilterBtnMobile').innerHTML = 
-        `<i class="fas fa-dollar-sign"></i>فیلتر قیمت<i class="fas fa-chevron-down" style="margin-right:7px;font-size:0.95em"></i>`;
+      document.getElementById('priceFilterBtnMobile').innerHTML =
+        `<i class="fas fa-dollar-sign"></i><span>فیلتر قیمت</span><i class="fas fa-chevron-down"></i>`;
+      document.getElementById('priceFilterBtnMobile').setAttribute('aria-expanded', 'false');
       document.getElementById('minPrice').value = '';
       document.getElementById('maxPrice').value = '';
       document.getElementById('minPriceMobile').value = '';
