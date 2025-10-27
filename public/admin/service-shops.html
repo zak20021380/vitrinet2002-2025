@@ -3106,6 +3106,12 @@
           elements.filterPlan.value = 'complimentary';
         }
         applyFilters();
+        if (window.parent && window.parent !== window) {
+          window.parent.postMessage(
+            { type: 'admin-open-panel', value: 'plans' },
+            '*'
+          );
+        }
       });
     }
 

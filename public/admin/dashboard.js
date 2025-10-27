@@ -4665,6 +4665,70 @@ const panels = {
   'daily-visits': document.getElementById('daily-visits-panel')
 };
 
+async function activateSection(section) {
+  if (!section || !panels[section]) {
+    return;
+  }
+
+  const targetLink = Array.from(menuLinks).find(l => l.dataset.section === section);
+
+  menuLinks.forEach(l => l.classList.remove('active'));
+  if (targetLink) {
+    targetLink.classList.add('active');
+  }
+
+  Object.values(panels).forEach(panel => {
+    if (panel) {
+      panel.style.display = 'none';
+    }
+  });
+
+  const targetPanel = panels[section];
+  targetPanel.style.display = 'block';
+
+  updateHeaderCounts();
+
+  if (section === 'messages') {
+    startMessagesPolling();
+  } else {
+    stopMessagesPolling();
+  }
+
+  if (section === 'shopping-centers') {
+    await ensureShoppingCentersLoaded();
+  }
+
+  if (section === 'service-shops') {
+    ensureServiceShopsIframeLoaded();
+    await ensureServiceShopsLoaded();
+  }
+
+  if (section === 'ad-orders') {
+    await loadAdOrders();
+  }
+
+  if (section === 'categories') {
+    initCategoryManager();
+  }
+
+  if (section === 'daily-visits') {
+    loadDailyVisContent();
+  }
+
+  if (section === 'home-section') {
+    loadHomeSectionContent();
+  }
+
+  if (section === 'income-insights') {
+    loadIncomeInsightsContent();
+  }
+
+  if (window.innerWidth < 700 && sidebar) {
+    sidebar.classList.remove('open');
+    syncSidebarState();
+  }
+}
+
 menuLinks.forEach(link => {
   link.addEventListener('click', async e => {
     const section = link.dataset.section;
@@ -4674,64 +4738,24 @@ menuLinks.forEach(link => {
     }
 
     e.preventDefault();
-
-    // 1) استایلِ active در منو
-    menuLinks.forEach(l => l.classList.remove('active'));
-    link.classList.add('active');
-
-    // 2) مخفی/نمایشِ پنل‌ها
-    Object.values(panels).forEach(p => p.style.display = 'none');
-    if (!panels[section]) return;
-    panels[section].style.display = 'block';
-
-    // 3) به‌روزرسانی شمارندهٔ هدر
-    updateHeaderCounts();
-
-    // 4) وقتی وارد بخش پیام‌ها شدیم، polling را استارت کن؛
-    //    وقتی خارج شدیم، polling را متوقف کن.
-    if (section === 'messages') {
-      startMessagesPolling();
-    } else {
-      stopMessagesPolling();
-    }
-
-    if (section === 'shopping-centers') {
-      await ensureShoppingCentersLoaded();
-    }
-
-    if (section === 'service-shops') {
-      ensureServiceShopsIframeLoaded();
-      await ensureServiceShopsLoaded();
-    }
-
-    if (section === 'ad-orders') {
-      await loadAdOrders();
-    }
-
-    if (section === 'categories') {
-      initCategoryManager();
-    }
-
-    // لود محتوای AJAX برای آمار روزانه بازدید
-    if (section === 'daily-visits') {
-      loadDailyVisContent();
-    }
-
-    // لود محتوای کارت‌های صفحه اصلی
-    if (section === 'home-section') {
-      loadHomeSectionContent();
-    }
-
-    if (section === 'income-insights') {
-      loadIncomeInsightsContent();
-    }
-
-    // 5) بستن سایدبار در موبایل
-    if (window.innerWidth < 700 && sidebar) {
-      sidebar.classList.remove('open');
-      syncSidebarState();
-    }
+    await activateSection(section);
   });
+});
+
+window.addEventListener('message', event => {
+  const { data } = event;
+  if (!data || typeof data !== 'object') {
+    return;
+  }
+
+  const sameOrigin = !event.origin || event.origin === 'null' || event.origin === window.location.origin;
+  if (!sameOrigin) {
+    return;
+  }
+
+  if (data.type === 'admin-open-panel' && data.value === 'plans') {
+    activateSection('plans').catch(console.error);
+  }
 });
 
 if (sidebar && sidebarToggle) {
