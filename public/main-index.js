@@ -1474,6 +1474,162 @@ async function loadShoesAndBagsShops() {
 window.addEventListener('DOMContentLoaded', loadShoesAndBagsShops);
 
 
+const SERVICE_SHOWCASE_CONFIGS = [
+  {
+    sliderId: 'hair-salon-slider',
+    keywords: ['آرایشگاه', 'سالن', 'زیبایی', 'پیرایش', 'کراتین', 'میکاپ'],
+    tonePalette: ['emerald', 'rose', 'mint', 'purple'],
+    chipFallback: 'سالن ثبت‌شده',
+    emptyMessage: 'هیچ آرایشگاه ثبت‌شده‌ای یافت نشد.',
+    city: 'سنندج'
+  },
+  {
+    sliderId: 'carwash-slider',
+    keywords: ['کارواش', 'carwash', 'کار واش', 'دیتیلینگ', 'سرامیک', 'خودرو'],
+    tonePalette: ['sky', 'teal', 'mint', 'indigo'],
+    chipFallback: 'کارواش ثبت‌شده',
+    emptyMessage: 'هیچ کارواش ثبت‌شده‌ای یافت نشد.',
+    city: 'سنندج'
+  }
+];
+
+function truncateText(input, maxLength) {
+  const text = (input || '').toString().trim();
+  if (!text) return '';
+  if (text.length <= maxLength) return text;
+  return `${text.slice(0, maxLength - 1)}…`;
+}
+
+function shopMatchesConfig(shop, config) {
+  if (!shop) return false;
+
+  const normalizedKeywords = config.keywords.map(normalizeText);
+  const haystackSource = [
+    shop.storename,
+    shop.name,
+    shop.category,
+    shop.subcategory,
+    Array.isArray(shop.tags) ? shop.tags.join(' ') : shop.tags,
+    shop.desc
+  ]
+    .filter(Boolean)
+    .join(' ');
+
+  if (!haystackSource) return false;
+
+  const haystack = normalizeText(haystackSource);
+  const matchesKeyword = normalizedKeywords.some(keyword => keyword && haystack.includes(keyword));
+  if (!matchesKeyword) return false;
+
+  const cityNeedle = normalizeText(config.city || '');
+  if (!cityNeedle) return true;
+
+  const addressHaystack = [shop.address, shop.city, shop.region, shop.desc]
+    .filter(Boolean)
+    .map(normalizeText)
+    .join(' ');
+
+  return addressHaystack.includes(cityNeedle) || haystack.includes(cityNeedle);
+}
+
+function renderServiceShowcase(config, shops) {
+  const slider = document.getElementById(config.sliderId);
+  if (!slider) return;
+
+  slider.innerHTML = '';
+
+  if (!shops.length) {
+    slider.innerHTML = `<p class="w-full text-center text-sm sm:text-base text-gray-400 py-6">${escapeHTML(config.emptyMessage)}</p>`;
+    updateSliderNavVisibility(config.sliderId);
+    return;
+  }
+
+  shops.forEach((shop, index) => {
+    const tone = config.tonePalette[index % config.tonePalette.length];
+    const card = document.createElement('a');
+    card.className = 'featured-service-card group';
+    card.dataset.tone = tone;
+
+    const href = shop?.shopurl ? `shop.html?shopurl=${encodeURIComponent(shop.shopurl)}` : '#';
+    card.href = href;
+
+    const chipText = shop?.subcategory || shop?.category || config.chipFallback;
+    const description = truncateText(shop?.desc || 'این کسب‌وکار در ویترینت ثبت شده است.', 110);
+    const locationText = shop?.address || shop?.city || config.city || '';
+    const imageSrc = resolveShopImage(shop);
+    const altText = shop?.storename
+      ? `تصویر ${shop.storename}`
+      : `کسب‌وکار ثبت‌شده در ویترینت`;
+
+    card.innerHTML = `
+      <div class="featured-service-card__media">
+        <span class="featured-service-card__chip">${escapeHTML(chipText)}</span>
+        <img class="featured-service-card__image" loading="lazy" src="${escapeHTML(imageSrc)}" alt="${escapeHTML(altText)}" onerror="this.src='assets/images/no-image.png'" />
+      </div>
+      <div class="featured-service-card__body">
+        <h4 class="featured-service-card__title">${escapeHTML(shop?.storename || shop?.name || 'فروشگاه بدون نام')}</h4>
+        <p class="featured-service-card__description">${escapeHTML(description)}</p>
+      </div>
+      <div class="featured-service-card__footer">
+        <span class="featured-service-card__location">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7Zm0 9.5a2.5 2.5 0 1 1 0-5 2.5 2.5 0 0 1 0 5Z" />
+          </svg>
+          ${escapeHTML(locationText)}
+        </span>
+        <div class="featured-service-card__actions">
+          <span class="featured-service-card__quick-book" aria-label="رزرو سریع">رزرو سریع</span>
+        </div>
+      </div>
+    `;
+
+    slider.appendChild(card);
+  });
+
+  updateSliderNavVisibility(config.sliderId);
+}
+
+async function loadServiceShowcases() {
+  const activeConfigs = SERVICE_SHOWCASE_CONFIGS
+    .map(config => ({ ...config, element: document.getElementById(config.sliderId) }))
+    .filter(entry => entry.element);
+
+  if (!activeConfigs.length) return;
+
+  activeConfigs.forEach(entry => {
+    entry.element.innerHTML = '<p class="w-full text-center text-sm sm:text-base text-gray-400 py-6">در حال بارگذاری...</p>';
+  });
+
+  let shops = [];
+  try {
+    const res = await fetch('/api/shops');
+    if (!res.ok) throw new Error('network');
+    const raw = await res.json();
+    shops = Array.isArray(raw)
+      ? raw
+      : Array.isArray(raw?.shops)
+        ? raw.shops
+        : [];
+  } catch (err) {
+    activeConfigs.forEach(entry => {
+      entry.element.innerHTML = '<p class="w-full text-center text-sm sm:text-base text-red-500 py-6">خطا در دریافت کسب‌وکارهای ثبت‌شده.</p>';
+      updateSliderNavVisibility(entry.sliderId);
+    });
+    console.error('loadServiceShowcases error', err);
+    return;
+  }
+
+  const validShops = shops.filter(shop => shop && (shop.storename || shop.name || shop.shopurl));
+
+  activeConfigs.forEach(config => {
+    const matched = validShops.filter(shop => shopMatchesConfig(shop, config)).slice(0, config.tonePalette.length);
+    renderServiceShowcase(config, matched);
+  });
+}
+
+window.addEventListener('DOMContentLoaded', loadServiceShowcases);
+
+
 // ====== آدرس API سرور (در صورت نیاز کامل کن: http://yourdomain.com/api/shopping-centers) ======
 const API_URL = '/api/shopping-centers';
 
