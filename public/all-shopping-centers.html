@@ -157,14 +157,21 @@
     
     .search-filter-bar {
       display: flex;
-      flex-wrap: wrap;
-      gap: 16px;
+      flex-direction: column;
+      gap: 18px;
       margin-top: 15px;
     }
-    
+
+    .search-filter-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px;
+      align-items: stretch;
+    }
+
     .search-box {
-      flex: 1; /* جعبه جستجو بزرگتر شده */
-      min-width: 300px;
+      flex: 1;
+      min-width: 260px;
       display: flex;
       align-items: center;
       background: var(--light);
@@ -174,30 +181,184 @@
       box-shadow: 0 2px 10px rgba(14, 165, 233, 0.1);
       transition: var(--transition);
     }
-    
+
     .search-box:focus-within {
       border-color: var(--primary);
       box-shadow: 0 2px 15px rgba(14, 165, 233, 0.2);
     }
-    
+
     .search-box input {
       border: none;
       background: transparent;
       font-family: inherit;
-      font-size: 1.1rem;
+      font-size: 1.05rem;
       flex: 1;
       outline: none;
       padding: 14px 10px;
       color: var(--primary-dark);
     }
-    
+
     .search-box input::placeholder {
       color: #94a3b8;
     }
-    
+
     .search-icon {
       font-size: 1.4rem;
       margin-left: 10px;
+      color: var(--primary);
+    }
+
+    .filters-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 16px;
+    }
+
+    .filter-group {
+      background: #f8fbff;
+      border-radius: 14px;
+      padding: 14px 16px;
+      border: 1px solid rgba(14, 165, 233, 0.1);
+      box-shadow: 0 2px 12px rgba(15, 23, 42, 0.04);
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      transition: var(--transition);
+    }
+
+    .filter-group:hover {
+      box-shadow: 0 6px 18px rgba(14, 165, 233, 0.12);
+      border-color: rgba(14, 165, 233, 0.25);
+      transform: translateY(-2px);
+    }
+
+    .filter-label {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--primary-dark);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .filter-select {
+      width: 100%;
+      border: 1px solid rgba(148, 163, 184, 0.4);
+      border-radius: 10px;
+      padding: 10px 12px;
+      font-family: inherit;
+      font-size: 0.98rem;
+      color: var(--dark);
+      background: #fff;
+      transition: var(--transition);
+    }
+
+    .filter-select:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.15);
+    }
+
+    .range-inputs {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .range-slider {
+      -webkit-appearance: none;
+      width: 100%;
+      height: 6px;
+      border-radius: 999px;
+      background: linear-gradient(90deg, rgba(14, 165, 233, 0.15), rgba(14, 165, 233, 0.4));
+      outline: none;
+      transition: opacity 0.2s ease;
+    }
+
+    .range-slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: var(--primary);
+      cursor: pointer;
+      box-shadow: 0 3px 8px rgba(14, 165, 233, 0.35);
+      border: 3px solid #fff;
+      transition: var(--transition);
+    }
+
+    .range-slider::-moz-range-thumb {
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: var(--primary);
+      cursor: pointer;
+      box-shadow: 0 3px 8px rgba(14, 165, 233, 0.35);
+      border: 3px solid #fff;
+      transition: var(--transition);
+    }
+
+    .range-values {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.92rem;
+      color: var(--gray);
+      font-weight: 600;
+    }
+
+    .active-filters {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .filter-chip {
+      background: rgba(14, 165, 233, 0.08);
+      color: var(--primary-dark);
+      padding: 6px 14px;
+      border-radius: 999px;
+      font-weight: 600;
+      font-size: 0.9rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      box-shadow: 0 2px 6px rgba(14, 165, 233, 0.12);
+      border: 1px solid rgba(14, 165, 233, 0.2);
+    }
+
+    .filter-chip button {
+      background: none;
+      border: none;
+      color: inherit;
+      cursor: pointer;
+      font-size: 0.85rem;
+      padding: 0;
+      display: inline-flex;
+      align-items: center;
+      transition: var(--transition);
+    }
+
+    .filter-chip button:hover {
+      transform: scale(1.05);
+      color: var(--primary);
+    }
+
+    .clear-filters {
+      margin-right: auto;
+      background: none;
+      border: none;
+      color: var(--gray);
+      font-weight: 600;
+      cursor: pointer;
+      display: none;
+      align-items: center;
+      gap: 6px;
+      transition: var(--transition);
+    }
+
+    .clear-filters:hover {
       color: var(--primary);
     }
     
@@ -528,6 +689,19 @@
         width: 100%;
       }
 
+      .search-filter-row {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .filters-grid {
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      }
+
+      .clear-filters {
+        margin-right: 0;
+      }
+
       .section-title {
         font-size: 1.6rem;
       }
@@ -570,6 +744,19 @@
       .action-btn {
         padding: 10px;
         font-size: 0.95rem;
+      }
+
+      .filters-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .filter-group {
+        padding: 12px;
+      }
+
+      .clear-filters {
+        width: 100%;
+        justify-content: center;
       }
     }
     
@@ -912,9 +1099,58 @@
       </h2>
       
       <div class="search-filter-bar">
-        <div class="search-box">
-          <span class="search-icon"><i class="fas fa-search"></i></span>
-          <input id="searchInput" type="text" placeholder="جستجوی نام مرکز خرید..." autocomplete="off">
+        <div class="search-filter-row">
+          <div class="search-box">
+            <span class="search-icon"><i class="fas fa-search"></i></span>
+            <input id="searchInput" type="text" placeholder="جستجوی نام مرکز خرید، توضیحات یا آدرس..." autocomplete="off">
+          </div>
+
+          <div class="filter-group" style="min-width: 200px;">
+            <label for="sortSelect" class="filter-label"><i class="fas fa-sort"></i> ترتیب نمایش</label>
+            <select id="sortSelect" class="filter-select">
+              <option value="featured">ویژه‌ترین</option>
+              <option value="alphabet">حروف الفبا (الف تا ی)</option>
+              <option value="stores-desc">بیشترین تعداد مغازه</option>
+              <option value="stores-asc">کمترین تعداد مغازه</option>
+              <option value="newest">جدیدترین مراکز</option>
+              <option value="oldest">قدیمی‌ترین مراکز</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="filters-grid">
+          <div class="filter-group">
+            <label for="locationSelect" class="filter-label"><i class="fas fa-map-marker-alt"></i> موقعیت</label>
+            <select id="locationSelect" class="filter-select">
+              <option value="all">همه موقعیت‌ها</option>
+            </select>
+          </div>
+
+          <div class="filter-group">
+            <label for="tagSelect" class="filter-label"><i class="fas fa-award"></i> برچسب</label>
+            <select id="tagSelect" class="filter-select">
+              <option value="all">همه برچسب‌ها</option>
+            </select>
+          </div>
+
+          <div class="filter-group">
+            <label class="filter-label"><i class="fas fa-store"></i> تعداد مغازه</label>
+            <div class="range-inputs">
+              <input type="range" id="minStoresRange" class="range-slider" min="0" max="200" value="0" step="1">
+              <input type="range" id="maxStoresRange" class="range-slider" min="0" max="200" value="200" step="1">
+            </div>
+            <div class="range-values">
+              <span>حداقل: <span id="minStoresValue">0</span></span>
+              <span>حداکثر: <span id="maxStoresValue">200</span></span>
+            </div>
+          </div>
+        </div>
+
+        <div class="active-filters" id="activeFilters">
+          <button id="clearFiltersBtn" class="clear-filters" type="button">
+            <i class="fas fa-undo"></i>
+            حذف همه فیلترها
+          </button>
         </div>
       </div>
     </div>
@@ -971,58 +1207,353 @@
   </footer>
 
 <script>
-  document.addEventListener('DOMContentLoaded', function() {
-    // --- تنظیمات API ---
-    const API_URL = '/api/shopping-centers'; // همان API پنل مدیریت
+  document.addEventListener('DOMContentLoaded', () => {
+    const API_URL = '/api/shopping-centers';
 
     const listDiv = document.getElementById('all-centers-list');
-    
-    // ابتدا اسکلتون لودر نمایش داده می‌شود
-    listDiv.innerHTML = '';
-    for (let i = 0; i < 6; i++) {
-      listDiv.innerHTML += `
-        <div class="center-card fade-in delay-${i % 3}">
-          <div class="skeleton skeleton-img"></div>
-          <div class="center-info">
-            <div class="skeleton skeleton-line" style="height: 28px; margin-bottom: 15px;"></div>
-            <div class="skeleton skeleton-line short" style="height: 22px; margin-bottom: 10px;"></div>
-            <div class="skeleton skeleton-line" style="height: 18px; margin-bottom: 8px;"></div>
-            <div class="skeleton skeleton-line" style="height: 18px; margin-bottom: 8px;"></div>
-            <div class="skeleton skeleton-line medium" style="height: 18px; margin-bottom: 20px;"></div>
-            <div style="display: flex; gap: 10px; margin-top: auto;">
-              <div class="skeleton" style="height: 40px; flex: 1; border-radius: 12px;"></div>
+    const searchInput = document.getElementById('searchInput');
+    const locationSelect = document.getElementById('locationSelect');
+    const tagSelect = document.getElementById('tagSelect');
+    const sortSelect = document.getElementById('sortSelect');
+    const minStoresRange = document.getElementById('minStoresRange');
+    const maxStoresRange = document.getElementById('maxStoresRange');
+    const minStoresValue = document.getElementById('minStoresValue');
+    const maxStoresValue = document.getElementById('maxStoresValue');
+    const activeFiltersEl = document.getElementById('activeFilters');
+    const clearFiltersBtn = document.getElementById('clearFiltersBtn');
+
+    const skeletonCount = 6;
+
+    const state = {
+      allCenters: [],
+      filters: {
+        search: '',
+        location: 'all',
+        tag: 'all',
+        minStores: 0,
+        maxStores: 0,
+        sort: 'featured'
+      },
+      meta: {
+        minStores: 0,
+        maxStores: 0
+      }
+    };
+
+    showSkeleton();
+    loadCenters();
+    attachEventListeners();
+    renderActiveFilters();
+
+    function showSkeleton() {
+      listDiv.innerHTML = '';
+      for (let i = 0; i < skeletonCount; i++) {
+        listDiv.innerHTML += `
+          <div class="center-card fade-in delay-${i % 3}">
+            <div class="skeleton skeleton-img"></div>
+            <div class="center-info">
+              <div class="skeleton skeleton-line" style="height: 28px; margin-bottom: 15px;"></div>
+              <div class="skeleton skeleton-line short" style="height: 22px; margin-bottom: 10px;"></div>
+              <div class="skeleton skeleton-line" style="height: 18px; margin-bottom: 8px;"></div>
+              <div class="skeleton skeleton-line" style="height: 18px; margin-bottom: 8px;"></div>
+              <div class="skeleton skeleton-line medium" style="height: 18px; margin-bottom: 20px;"></div>
+              <div style="display: flex; gap: 10px; margin-top: auto;">
+                <div class="skeleton" style="height: 40px; flex: 1; border-radius: 12px;"></div>
+              </div>
             </div>
           </div>
-        </div>
-      `;
+        `;
+      }
     }
-    
-    // fetch داده‌ها از API (پس از تاخیر برای اسکلتون)
-    setTimeout(() => {
-      fetch(API_URL)
-        .then(res => res.json())
-        .then(centers => {
-          renderCenters(centers);
-        })
-        .catch(() => {
-          listDiv.innerHTML = `
-            <div style="grid-column: 1/-1; text-align: center; padding: 50px 20px;">
-              <i class="fas fa-exclamation-triangle" style="font-size: 4rem; color: #cbd5e1; margin-bottom: 20px;"></i>
-              <h3 style="color: #64748b; font-size: 1.5rem;">خطا در بارگذاری مراکز خرید!</h3>
-            </div>
-          `;
+
+    async function loadCenters() {
+      try {
+        const response = await fetch(API_URL);
+        const centers = await response.json();
+        const normalised = Array.isArray(centers) ? centers.map(normaliseCenter) : [];
+
+        state.allCenters = normalised;
+        initialiseFilters(normalised);
+        applyFilters();
+      } catch (error) {
+        console.error('خطا در دریافت مراکز خرید:', error);
+        showErrorState();
+      }
+    }
+
+    function normaliseCenter(center) {
+      const title = String(center.title || '').trim();
+      const description = String(center.description || '').trim();
+      const location = String(center.location || '').trim();
+      const tag = String(center.tag || '').trim();
+      const stores = Number(center.stores ?? center.storeCount ?? 0) || 0;
+      const order = Number(center.order ?? 0) || 0;
+      const createdAt = center.createdAt ? new Date(center.createdAt) : null;
+      const holidays = String(center.holidays || '').trim();
+      const hours = String(center.hours || '').trim();
+
+      const searchKeywords = [title, description, location, tag]
+        .map(part => part.toLowerCase())
+        .join(' ');
+
+      return {
+        ...center,
+        title,
+        description,
+        location,
+        tag,
+        stores,
+        order,
+        createdAt,
+        holidays,
+        hours,
+        searchKeywords
+      };
+    }
+
+    function initialiseFilters(centers) {
+      const locations = new Set();
+      const tags = new Set();
+      let minStores = Number.POSITIVE_INFINITY;
+      let maxStores = Number.NEGATIVE_INFINITY;
+
+      centers.forEach(center => {
+        if (center.location) {
+          locations.add(center.location);
+        }
+        if (center.tag) {
+          tags.add(center.tag);
+        }
+
+        if (center.stores < minStores) {
+          minStores = center.stores;
+        }
+        if (center.stores > maxStores) {
+          maxStores = center.stores;
+        }
+      });
+
+      if (!Number.isFinite(minStores)) {
+        minStores = 0;
+      }
+      if (!Number.isFinite(maxStores)) {
+        maxStores = 0;
+      }
+
+      state.meta.minStores = minStores;
+      state.meta.maxStores = maxStores;
+      state.filters.minStores = minStores;
+      state.filters.maxStores = maxStores;
+
+      populateSelect(locationSelect, Array.from(locations));
+      populateSelect(tagSelect, Array.from(tags));
+      updateRangeBounds(minStores, maxStores);
+      updateRangeLabels();
+      toggleRangeDisabled(minStores === maxStores);
+    }
+
+    function populateSelect(selectEl, values) {
+      const currentValue = selectEl.value;
+      const defaultOption = selectEl.querySelector('option[value="all"]');
+      selectEl.innerHTML = '';
+      if (defaultOption) {
+        selectEl.appendChild(defaultOption);
+      } else {
+        const option = document.createElement('option');
+        option.value = 'all';
+        option.textContent = selectEl.id === 'locationSelect' ? 'همه موقعیت‌ها' : 'همه برچسب‌ها';
+        selectEl.appendChild(option);
+      }
+
+      values
+        .sort((a, b) => a.localeCompare(b, 'fa', { sensitivity: 'base' }))
+        .forEach(value => {
+          const option = document.createElement('option');
+          option.value = value;
+          option.textContent = value;
+          selectEl.appendChild(option);
         });
-    }, 1500);
-    
+
+      if (values.includes(currentValue)) {
+        selectEl.value = currentValue;
+      } else {
+        selectEl.value = 'all';
+      }
+    }
+
+    function updateRangeBounds(min, max) {
+      const minValue = Math.min(min, max);
+      const maxValue = Math.max(max, minValue);
+
+      minStoresRange.min = minValue;
+      minStoresRange.max = maxValue;
+      maxStoresRange.min = minValue;
+      maxStoresRange.max = maxValue;
+
+      minStoresRange.value = minValue;
+      maxStoresRange.value = maxValue;
+    }
+
+    function updateRangeLabels() {
+      minStoresValue.textContent = formatNumber(state.filters.minStores);
+      maxStoresValue.textContent = formatNumber(state.filters.maxStores);
+    }
+
+    function toggleRangeDisabled(disabled) {
+      minStoresRange.disabled = disabled;
+      maxStoresRange.disabled = disabled;
+      const text = disabled ? 'بدون محدودیت' : formatNumber(state.filters.maxStores);
+      if (disabled) {
+        state.filters.minStores = state.meta.minStores;
+        state.filters.maxStores = state.meta.maxStores;
+      }
+      maxStoresValue.textContent = disabled ? text : formatNumber(state.filters.maxStores);
+      minStoresValue.textContent = formatNumber(state.filters.minStores);
+    }
+
+    function attachEventListeners() {
+      const debouncedSearch = debounce(value => {
+        state.filters.search = value.trim();
+        applyFilters();
+      }, 250);
+
+      searchInput.addEventListener('input', event => {
+        debouncedSearch(event.target.value);
+      });
+
+      locationSelect.addEventListener('change', event => {
+        state.filters.location = event.target.value;
+        applyFilters();
+      });
+
+      tagSelect.addEventListener('change', event => {
+        state.filters.tag = event.target.value;
+        applyFilters();
+      });
+
+      sortSelect.addEventListener('change', event => {
+        state.filters.sort = event.target.value;
+        applyFilters();
+      });
+
+      minStoresRange.addEventListener('input', event => {
+        const value = Number(event.target.value);
+        if (value > state.filters.maxStores) {
+          state.filters.minStores = state.filters.maxStores;
+          minStoresRange.value = state.filters.maxStores;
+        } else {
+          state.filters.minStores = value;
+        }
+        updateRangeLabels();
+      });
+
+      maxStoresRange.addEventListener('input', event => {
+        const value = Number(event.target.value);
+        if (value < state.filters.minStores) {
+          state.filters.maxStores = state.filters.minStores;
+          maxStoresRange.value = state.filters.minStores;
+        } else {
+          state.filters.maxStores = value;
+        }
+        updateRangeLabels();
+      });
+
+      minStoresRange.addEventListener('change', applyFilters);
+      maxStoresRange.addEventListener('change', applyFilters);
+
+      clearFiltersBtn.addEventListener('click', () => {
+        resetFilters();
+        applyFilters();
+      });
+    }
+
+    function resetFilters() {
+      state.filters = {
+        search: '',
+        location: 'all',
+        tag: 'all',
+        minStores: state.meta.minStores,
+        maxStores: state.meta.maxStores,
+        sort: 'featured'
+      };
+
+      searchInput.value = '';
+      locationSelect.value = 'all';
+      tagSelect.value = 'all';
+      sortSelect.value = 'featured';
+      updateRangeBounds(state.meta.minStores, state.meta.maxStores);
+      updateRangeLabels();
+      toggleRangeDisabled(state.meta.minStores === state.meta.maxStores);
+    }
+
+    function applyFilters() {
+      if (!state.allCenters.length) {
+        return;
+      }
+
+      const searchTerm = state.filters.search.toLowerCase();
+      const selectedLocation = state.filters.location;
+      const selectedTag = state.filters.tag;
+      const minStores = Number(state.filters.minStores);
+      const maxStores = Number(state.filters.maxStores);
+
+      let results = state.allCenters.filter(center => {
+        const matchesSearch = !searchTerm || center.searchKeywords.includes(searchTerm);
+        const matchesLocation = selectedLocation === 'all' || center.location === selectedLocation;
+        const matchesTag = selectedTag === 'all' || center.tag === selectedTag;
+        const matchesStores = center.stores >= minStores && center.stores <= maxStores;
+
+        return matchesSearch && matchesLocation && matchesTag && matchesStores;
+      });
+
+      results = sortResults(results, state.filters.sort);
+      renderCenters(results);
+      renderActiveFilters();
+    }
+
+    function sortResults(results, sortKey) {
+      const sorted = [...results];
+      switch (sortKey) {
+        case 'alphabet':
+          sorted.sort((a, b) => a.title.localeCompare(b.title, 'fa', { sensitivity: 'base' }));
+          break;
+        case 'stores-desc':
+          sorted.sort((a, b) => b.stores - a.stores || a.title.localeCompare(b.title, 'fa'));
+          break;
+        case 'stores-asc':
+          sorted.sort((a, b) => a.stores - b.stores || a.title.localeCompare(b.title, 'fa'));
+          break;
+        case 'newest':
+          sorted.sort((a, b) => {
+            const aTime = a.createdAt ? a.createdAt.getTime() : 0;
+            const bTime = b.createdAt ? b.createdAt.getTime() : 0;
+            return bTime - aTime;
+          });
+          break;
+        case 'oldest':
+          sorted.sort((a, b) => {
+            const aTime = a.createdAt ? a.createdAt.getTime() : 0;
+            const bTime = b.createdAt ? b.createdAt.getTime() : 0;
+            return aTime - bTime;
+          });
+          break;
+        case 'featured':
+        default:
+          sorted.sort((a, b) => (a.order - b.order) || (b.stores - a.stores));
+          break;
+      }
+      return sorted;
+    }
+
     function renderCenters(centers) {
       listDiv.innerHTML = '';
-      
+
       if (!centers.length) {
         listDiv.innerHTML = `
           <div style="grid-column: 1/-1; text-align: center; padding: 50px 20px;">
             <i class="fas fa-store-slash" style="font-size: 4rem; color: #cbd5e1; margin-bottom: 20px;"></i>
-            <h3 style="color: #64748b; font-size: 1.5rem;">مرکز خریدی یافت نشد!</h3>
-            <p style="color: #94a3b8; margin-top: 10px;">لطفاً عبارت جستجو را تغییر دهید</p>
+            <h3 style="color: #64748b; font-size: 1.5rem;">مرکز خریدی مطابق فیلترها یافت نشد!</h3>
+            <p style="color: #94a3b8; margin-top: 10px;">فیلترها را تغییر دهید یا پاک کنید.</p>
           </div>
         `;
         return;
@@ -1031,27 +1562,30 @@
       centers.forEach((center, index) => {
         const card = document.createElement('div');
         card.className = `center-card fade-in delay-${index % 3}`;
+        const storesText = formatNumber(center.stores);
+        const hoursText = center.hours || 'نامشخص';
+        const holidaysText = center.holidays || 'هیچ';
+
         card.innerHTML = `
           <div class="center-img-container">
-            <img class="center-img" src="${center.image || 'https://via.placeholder.com/800x600?text=تصویر+مرکز+خرید'}" alt="${center.title}">
-            ${center.tag ? `<div class="center-tag">${center.tag}</div>` : ''}
+            <img class="center-img" src="${center.image || 'https://via.placeholder.com/800x600?text=تصویر+مرکز+خرید'}" alt="${escapeHtml(center.title)}">
+            ${center.tag ? `<div class="center-tag">${escapeHtml(center.tag)}</div>` : ''}
           </div>
           <div class="center-info">
-            <h3 class="center-title">${center.title}</h3>
+            <h3 class="center-title">${escapeHtml(center.title)}</h3>
             <div class="center-address">
-              <i class="fas fa-map-marker-alt"></i> ${center.location || 'نامشخص'}
+              <i class="fas fa-map-marker-alt"></i> ${escapeHtml(center.location || 'نامشخص')}
             </div>
-            <p class="center-desc">${center.description || ''}</p>
-            
+            <p class="center-desc">${escapeHtml(center.description || '')}</p>
+
             <div class="center-meta">
-              <!-- تعداد مغازه‌ها را نمایش می‌دهیم -->
-              <span><i class="fas fa-store"></i> ${center.stores || 0} مغازه</span>
-              <span><i class="fas fa-clock"></i> ساعات کاری: ${center.hours || 'نامشخص'}</span>
-              <span><i class="fas fa-calendar-times"></i> روزهای تعطیل: ${center.holidays || 'هیچ'}</span>
+              <span><i class="fas fa-store"></i> ${storesText} مغازه</span>
+              <span><i class="fas fa-clock"></i> ساعات کاری: ${escapeHtml(hoursText)}</span>
+              <span><i class="fas fa-calendar-times"></i> روزهای تعطیل: ${escapeHtml(holidaysText)}</span>
             </div>
-            
+
             <div class="center-actions">
-              <div class="action-btn btn-primary" onclick="goToShops('${center._id}', '${center.title}')">
+              <div class="action-btn btn-primary" onclick="goToShops('${center._id}', '${encodeURIComponent(center.title)}')">
                 <i class="fas fa-list"></i> مشاهده فروشگاه‌ها
               </div>
             </div>
@@ -1061,29 +1595,112 @@
       });
     }
 
-    window.goToShops = function(id, title) {
-      window.location.href = `shopping-centers-shops.html?centerId=${id}&title=${encodeURIComponent(title)}`;
-    };
+    function renderActiveFilters() {
+      const chips = [];
 
-    // جستجو فقط بر اساس نام مرکز خرید
-    document.getElementById('searchInput').addEventListener('input', function() {
-      const searchTerm = this.value.trim().toLowerCase();
-      if (searchTerm === '') {
-        fetch(API_URL)
-          .then(res => res.json())
-          .then(centers => renderCenters(centers));
+      if (state.filters.search) {
+        chips.push(createFilterChip(`جستجو: ${state.filters.search}`, () => {
+          state.filters.search = '';
+          searchInput.value = '';
+          applyFilters();
+        }));
+      }
+
+      if (state.filters.location !== 'all') {
+        chips.push(createFilterChip(`موقعیت: ${state.filters.location}`, () => {
+          state.filters.location = 'all';
+          locationSelect.value = 'all';
+          applyFilters();
+        }));
+      }
+
+      if (state.filters.tag !== 'all') {
+        chips.push(createFilterChip(`برچسب: ${state.filters.tag}`, () => {
+          state.filters.tag = 'all';
+          tagSelect.value = 'all';
+          applyFilters();
+        }));
+      }
+
+      if (state.filters.minStores > state.meta.minStores) {
+        chips.push(createFilterChip(`حداقل ${formatNumber(state.filters.minStores)} مغازه`, () => {
+          state.filters.minStores = state.meta.minStores;
+          minStoresRange.value = state.meta.minStores;
+          updateRangeLabels();
+          applyFilters();
+        }));
+      }
+
+      if (state.filters.maxStores < state.meta.maxStores) {
+        chips.push(createFilterChip(`حداکثر ${formatNumber(state.filters.maxStores)} مغازه`, () => {
+          state.filters.maxStores = state.meta.maxStores;
+          maxStoresRange.value = state.meta.maxStores;
+          updateRangeLabels();
+          applyFilters();
+        }));
+      }
+
+      activeFiltersEl.querySelectorAll('.filter-chip').forEach(chip => chip.remove());
+
+      if (!chips.length) {
+        clearFiltersBtn.style.display = 'none';
         return;
       }
-      
-      fetch(API_URL)
-        .then(res => res.json())
-        .then(centers => {
-          const filtered = centers.filter(center => 
-            center.title.toLowerCase().includes(searchTerm)
-          );
-          renderCenters(filtered);
-        });
-    });
+
+      clearFiltersBtn.style.display = 'flex';
+      chips.forEach(chip => activeFiltersEl.appendChild(chip));
+    }
+
+    function createFilterChip(label, onRemove) {
+      const chip = document.createElement('span');
+      chip.className = 'filter-chip';
+      chip.innerHTML = `
+        <span>${escapeHtml(label)}</span>
+        <button type="button" aria-label="حذف فیلتر">
+          <i class="fas fa-times"></i>
+        </button>
+      `;
+
+      const removeBtn = chip.querySelector('button');
+      removeBtn.addEventListener('click', onRemove);
+      return chip;
+    }
+
+    function showErrorState() {
+      listDiv.innerHTML = `
+        <div style="grid-column: 1/-1; text-align: center; padding: 60px 20px;">
+          <i class="fas fa-exclamation-triangle" style="font-size: 4rem; color: #cbd5e1; margin-bottom: 20px;"></i>
+          <h3 style="color: #64748b; font-size: 1.5rem;">خطا در بارگذاری مراکز خرید!</h3>
+          <p style="color: #94a3b8; margin-top: 10px;">لطفاً صفحه را مجدداً بارگیری کنید.</p>
+        </div>
+      `;
+    }
+
+    function formatNumber(value) {
+      const number = Number(value) || 0;
+      return number.toLocaleString('fa-IR');
+    }
+
+    function debounce(callback, delay = 300) {
+      let timeoutId;
+      return value => {
+        clearTimeout(timeoutId);
+        timeoutId = setTimeout(() => callback(value), delay);
+      };
+    }
+
+    function escapeHtml(value) {
+      return String(value)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    }
+
+    window.goToShops = function(id, title) {
+      window.location.href = `shopping-centers-shops.html?centerId=${id}&title=${title}`;
+    };
   });
 </script>
 
