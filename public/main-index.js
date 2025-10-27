@@ -1477,10 +1477,19 @@ window.addEventListener('DOMContentLoaded', loadShoesAndBagsShops);
 const SERVICE_SHOWCASE_CONFIGS = [
   {
     sliderId: 'hair-salon-slider',
-    keywords: ['آرایشگاه', 'سالن', 'زیبایی', 'پیرایش', 'کراتین', 'میکاپ'],
-    tonePalette: ['emerald', 'rose', 'mint', 'purple'],
-    chipFallback: 'سالن ثبت‌شده',
-    emptyMessage: 'هیچ آرایشگاه ثبت‌شده‌ای یافت نشد.',
+    keywords: [
+      'آرایشگاه مردانه',
+      'پیرایش مردانه',
+      'سالن پیرایش مردانه',
+      'آرایشگاه آقایان',
+      'پیرایش آقایان',
+      'barbershop',
+      'barber shop',
+      'barber'
+    ],
+    tonePalette: ['emerald', 'rose', 'mint', 'purple', 'sky', 'teal'],
+    chipFallback: 'آرایشگاه مردانه ثبت‌شده',
+    emptyMessage: 'هیچ آرایشگاه مردانه ثبت‌شده‌ای یافت نشد.',
     city: 'سنندج'
   },
   {
