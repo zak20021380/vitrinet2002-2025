@@ -34,6 +34,10 @@
       direction: rtl;
       padding-bottom: 80px;
     }
+
+    body.filters-open {
+      overflow: hidden;
+    }
     
     /* هدر ساده و مدرن با بهبود رسپانسیو */
     .header {
@@ -157,8 +161,8 @@
     
     .search-filter-bar {
       display: flex;
-      flex-wrap: wrap;
-      gap: 16px;
+      flex-direction: column;
+      gap: 18px;
       margin-top: 15px;
     }
     
@@ -464,6 +468,238 @@
       }
     }
 
+    .filter-toolbar {
+      display: flex;
+      align-items: flex-end;
+      gap: 18px;
+      flex-wrap: wrap;
+    }
+
+    .filters-desktop {
+      display: flex;
+      gap: 16px;
+      flex: 1;
+      flex-wrap: wrap;
+    }
+
+    .filter-field {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      min-width: 160px;
+      flex: 1;
+    }
+
+    .filter-label {
+      font-size: 0.9rem;
+      font-weight: 700;
+      color: var(--gray);
+    }
+
+    .filter-select {
+      border: 1px solid #dbeafe;
+      border-radius: 12px;
+      padding: 12px 14px;
+      background: var(--light);
+      color: var(--dark);
+      font-family: inherit;
+      font-size: 0.95rem;
+      transition: var(--transition);
+      cursor: pointer;
+    }
+
+    .filter-select:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 4px rgba(14, 165, 233, 0.15);
+    }
+
+    .filter-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .clear-filters {
+      border: none;
+      background: transparent;
+      color: var(--primary);
+      font-weight: 700;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 10px 14px;
+      border-radius: 10px;
+      transition: var(--transition);
+    }
+
+    .clear-filters:hover {
+      background: rgba(14, 165, 233, 0.08);
+      color: var(--primary-dark);
+    }
+
+    .mobile-filter-toggle {
+      display: none;
+      align-items: center;
+      gap: 8px;
+      background: linear-gradient(90deg, var(--secondary), var(--primary));
+      color: white;
+      border: none;
+      border-radius: 12px;
+      padding: 12px 16px;
+      font-weight: 700;
+      cursor: pointer;
+      box-shadow: 0 4px 12px rgba(14, 165, 233, 0.2);
+      transition: var(--transition);
+    }
+
+    .mobile-filter-toggle:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(14, 165, 233, 0.28);
+    }
+
+    .filter-summary {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      flex-wrap: wrap;
+      background: #f8fafc;
+      border-radius: 14px;
+      padding: 12px 16px;
+      border: 1px solid #e2e8f0;
+    }
+
+    .filter-summary span {
+      color: var(--gray);
+      font-weight: 600;
+    }
+
+    .active-filters {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .filter-badge {
+      background: rgba(14, 165, 233, 0.12);
+      color: var(--primary-dark);
+      padding: 6px 12px;
+      border-radius: 999px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .filter-badge i {
+      font-size: 0.75rem;
+      color: var(--primary);
+    }
+
+    .filter-badge--inactive {
+      background: rgba(148, 163, 184, 0.15);
+      color: var(--gray);
+    }
+
+    .filter-badge--inactive i {
+      color: var(--gray);
+    }
+
+    .mobile-filter-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.45);
+      opacity: 0;
+      visibility: hidden;
+      transition: var(--transition);
+      z-index: 1200;
+    }
+
+    .mobile-filter-backdrop.active {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .filters-mobile-panel {
+      position: fixed;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: #fff;
+      border-radius: 24px 24px 0 0;
+      box-shadow: 0 -10px 30px rgba(15, 23, 42, 0.18);
+      transform: translateY(110%);
+      transition: var(--transition);
+      z-index: 1300;
+      max-height: 85vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .filters-mobile-panel.active {
+      transform: translateY(0);
+    }
+
+    .mobile-filter-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 18px 20px 12px;
+      border-bottom: 1px solid #e2e8f0;
+    }
+
+    .mobile-filter-header h3 {
+      font-size: 1.1rem;
+      font-weight: 800;
+      color: var(--dark);
+    }
+
+    .mobile-filter-close {
+      border: none;
+      background: none;
+      color: var(--gray);
+      font-size: 1.3rem;
+      cursor: pointer;
+    }
+
+    .mobile-filter-content {
+      padding: 18px 20px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+
+    .mobile-filter-actions {
+      padding: 16px 20px 24px;
+      border-top: 1px solid #e2e8f0;
+      display: flex;
+      gap: 12px;
+    }
+
+    .apply-filters {
+      flex: 1;
+      border: none;
+      border-radius: 14px;
+      padding: 12px 16px;
+      font-weight: 700;
+      background: linear-gradient(90deg, var(--secondary), var(--primary));
+      color: white;
+      cursor: pointer;
+      box-shadow: 0 4px 12px rgba(14, 165, 233, 0.25);
+      transition: var(--transition);
+    }
+
+    .apply-filters:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(14, 165, 233, 0.3);
+    }
+
     @media (max-width: 1100px) {
       .centers-list {
         grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
@@ -489,7 +725,24 @@
         justify-content: center;
         min-height: auto;
       }
-      
+
+      .filters-desktop {
+        display: none;
+      }
+
+      .filter-toolbar {
+        align-items: stretch;
+      }
+
+      .mobile-filter-toggle {
+        display: inline-flex;
+      }
+
+      .filter-summary {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
       .logo {
         order: 1;
         width: auto;
@@ -528,12 +781,26 @@
         width: 100%;
       }
 
+      .filter-actions {
+        width: 100%;
+        justify-content: space-between;
+      }
+
       .section-title {
         font-size: 1.6rem;
       }
     }
 
     @media (max-width: 640px) {
+      .filter-summary {
+        gap: 12px;
+        align-items: stretch;
+      }
+
+      .active-filters {
+        justify-content: flex-start;
+      }
+
       .centers-list {
         grid-template-columns: 1fr;
         gap: 20px;
@@ -916,9 +1183,88 @@
           <span class="search-icon"><i class="fas fa-search"></i></span>
           <input id="searchInput" type="text" placeholder="جستجوی نام مرکز خرید..." autocomplete="off">
         </div>
+        <div class="filter-toolbar">
+          <button id="openFilters" class="mobile-filter-toggle">
+            <i class="fas fa-sliders"></i>
+            فیلترها
+          </button>
+          <div class="filters-desktop">
+            <div class="filter-field">
+              <label class="filter-label" for="tagFilterDesktop">نوع مرکز</label>
+              <select id="tagFilterDesktop" class="filter-select" data-filter="tag"></select>
+            </div>
+            <div class="filter-field">
+              <label class="filter-label" for="locationFilterDesktop">محدوده جغرافیایی</label>
+              <select id="locationFilterDesktop" class="filter-select" data-filter="location"></select>
+            </div>
+            <div class="filter-field">
+              <label class="filter-label" for="storeFilterDesktop">تعداد فروشگاه</label>
+              <select id="storeFilterDesktop" class="filter-select" data-filter="stores"></select>
+            </div>
+            <div class="filter-field">
+              <label class="filter-label" for="sortFilterDesktop">مرتب‌سازی</label>
+              <select id="sortFilterDesktop" class="filter-select" data-filter="sort">
+                <option value="recommended">پیشنهادی</option>
+                <option value="alphabetical">مرتب‌سازی الفبایی</option>
+                <option value="stores-desc">بیشترین تعداد فروشگاه</option>
+                <option value="newest">جدیدترین مراکز</option>
+              </select>
+            </div>
+          </div>
+          <div class="filter-actions">
+            <button class="clear-filters" data-clear-filters>
+              <i class="fas fa-rotate-left"></i>
+              حذف فیلترها
+            </button>
+          </div>
+        </div>
+        <div class="filter-summary">
+          <span id="resultCount">در حال بارگذاری نتایج...</span>
+          <div class="active-filters" id="activeFilterBadges"></div>
+        </div>
       </div>
     </div>
   </section>
+
+  <div id="filterBackdrop" class="mobile-filter-backdrop"></div>
+  <div id="mobileFilterPanel" class="filters-mobile-panel" role="dialog" aria-modal="true" aria-labelledby="mobileFilterTitle">
+    <div class="mobile-filter-header">
+      <h3 id="mobileFilterTitle">فیلتر مراکز خرید</h3>
+      <button id="closeFilters" class="mobile-filter-close" aria-label="بستن فیلترها">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+    <div class="mobile-filter-content">
+      <div class="filter-field">
+        <label class="filter-label" for="tagFilterMobile">نوع مرکز</label>
+        <select id="tagFilterMobile" class="filter-select" data-filter="tag"></select>
+      </div>
+      <div class="filter-field">
+        <label class="filter-label" for="locationFilterMobile">محدوده جغرافیایی</label>
+        <select id="locationFilterMobile" class="filter-select" data-filter="location"></select>
+      </div>
+      <div class="filter-field">
+        <label class="filter-label" for="storeFilterMobile">تعداد فروشگاه</label>
+        <select id="storeFilterMobile" class="filter-select" data-filter="stores"></select>
+      </div>
+      <div class="filter-field">
+        <label class="filter-label" for="sortFilterMobile">مرتب‌سازی</label>
+        <select id="sortFilterMobile" class="filter-select" data-filter="sort">
+          <option value="recommended">پیشنهادی</option>
+          <option value="alphabetical">مرتب‌سازی الفبایی</option>
+          <option value="stores-desc">بیشترین تعداد فروشگاه</option>
+          <option value="newest">جدیدترین مراکز</option>
+        </select>
+      </div>
+    </div>
+    <div class="mobile-filter-actions">
+      <button class="clear-filters" data-clear-filters>
+        <i class="fas fa-rotate-left"></i>
+        حذف فیلترها
+      </button>
+      <button id="applyFilters" class="apply-filters">اعمال فیلترها</button>
+    </div>
+  </div>
 
   <!-- کارت‌های مراکز خرید شیک و جذاب -->
   <div class="main-container">
@@ -971,58 +1317,285 @@
   </footer>
 
 <script>
-  document.addEventListener('DOMContentLoaded', function() {
-    // --- تنظیمات API ---
-    const API_URL = '/api/shopping-centers'; // همان API پنل مدیریت
+  document.addEventListener('DOMContentLoaded', () => {
+    const API_URL = '/api/shopping-centers';
 
     const listDiv = document.getElementById('all-centers-list');
-    
-    // ابتدا اسکلتون لودر نمایش داده می‌شود
-    listDiv.innerHTML = '';
-    for (let i = 0; i < 6; i++) {
-      listDiv.innerHTML += `
-        <div class="center-card fade-in delay-${i % 3}">
-          <div class="skeleton skeleton-img"></div>
-          <div class="center-info">
-            <div class="skeleton skeleton-line" style="height: 28px; margin-bottom: 15px;"></div>
-            <div class="skeleton skeleton-line short" style="height: 22px; margin-bottom: 10px;"></div>
-            <div class="skeleton skeleton-line" style="height: 18px; margin-bottom: 8px;"></div>
-            <div class="skeleton skeleton-line" style="height: 18px; margin-bottom: 8px;"></div>
-            <div class="skeleton skeleton-line medium" style="height: 18px; margin-bottom: 20px;"></div>
-            <div style="display: flex; gap: 10px; margin-top: auto;">
-              <div class="skeleton" style="height: 40px; flex: 1; border-radius: 12px;"></div>
+    const searchInput = document.getElementById('searchInput');
+    const resultCount = document.getElementById('resultCount');
+    const activeFilterBadges = document.getElementById('activeFilterBadges');
+    const mobileToggle = document.getElementById('openFilters');
+    const mobilePanel = document.getElementById('mobileFilterPanel');
+    const mobileBackdrop = document.getElementById('filterBackdrop');
+    const closeFiltersBtn = document.getElementById('closeFilters');
+    const applyFiltersBtn = document.getElementById('applyFilters');
+    const clearFilterButtons = Array.from(document.querySelectorAll('[data-clear-filters]'));
+
+    const filterControls = {
+      tag: Array.from(document.querySelectorAll('[data-filter="tag"]')),
+      location: Array.from(document.querySelectorAll('[data-filter="location"]')),
+      stores: Array.from(document.querySelectorAll('[data-filter="stores"]')),
+      sort: Array.from(document.querySelectorAll('[data-filter="sort"]'))
+    };
+
+    const storeRanges = [
+      { value: 'all', label: 'همه بازه‌ها', matcher: () => true },
+      { value: '0-10', label: 'تا ۱۰ فروشگاه', matcher: count => count <= 10 },
+      { value: '10-30', label: 'بین ۱۰ تا ۳۰ فروشگاه', matcher: count => count > 10 && count <= 30 },
+      { value: '30-50', label: 'بین ۳۰ تا ۵۰ فروشگاه', matcher: count => count > 30 && count <= 50 },
+      { value: '50+', label: 'بیش از ۵۰ فروشگاه', matcher: count => count >= 50 }
+    ];
+
+    const filterOptionLabels = {
+      tag: { all: 'همه انواع مراکز' },
+      location: { all: 'همه محدوده‌ها' },
+      stores: storeRanges.reduce((acc, range) => {
+        acc[range.value] = range.label;
+        return acc;
+      }, {}),
+      sort: {
+        recommended: 'پیشنهادی',
+        alphabetical: 'مرتب‌سازی الفبایی',
+        'stores-desc': 'بیشترین فروشگاه',
+        newest: 'جدیدترین مراکز'
+      }
+    };
+
+    const badgeIcons = {
+      tag: 'fa-layer-group',
+      location: 'fa-location-dot',
+      stores: 'fa-store',
+      sort: 'fa-arrow-down-a-z'
+    };
+
+    const filterState = {
+      search: '',
+      tag: 'all',
+      location: 'all',
+      stores: 'all',
+      sort: 'recommended'
+    };
+
+    let allCenters = [];
+    let filteredCenters = [];
+    const skeletonCount = 6;
+
+    showSkeleton();
+
+    fetch(API_URL)
+      .then(res => res.json())
+      .then(centers => {
+        allCenters = Array.isArray(centers) ? centers : [];
+        setupFilters(allCenters);
+        filterCenters();
+      })
+      .catch(() => {
+        showError();
+      });
+
+    searchInput.addEventListener('input', event => {
+      filterState.search = event.target.value.trim();
+      filterCenters();
+    });
+
+    Object.entries(filterControls).forEach(([name, controls]) => {
+      controls.forEach(control => {
+        control.addEventListener('change', event => {
+          const value = event.target.value || 'all';
+          filterState[name] = value;
+          syncControls(name, value, control);
+          if (name === 'sort' && !value) {
+            filterState.sort = 'recommended';
+            syncControls(name, 'recommended');
+          }
+          filterCenters();
+        });
+      });
+    });
+
+    clearFilterButtons.forEach(button => {
+      button.addEventListener('click', () => {
+        resetFilters();
+        closeMobileFilters();
+      });
+    });
+
+    mobileToggle.addEventListener('click', openMobileFilters);
+    closeFiltersBtn.addEventListener('click', closeMobileFilters);
+    mobileBackdrop.addEventListener('click', closeMobileFilters);
+    applyFiltersBtn.addEventListener('click', () => {
+      closeMobileFilters();
+      filterCenters();
+    });
+
+    function setupFilters(centers) {
+      const tagOptions = Array.from(new Set(centers.map(center => center.tag).filter(Boolean)));
+      populateSelect('tag', tagOptions, 'همه انواع مراکز');
+
+      const locationOptions = Array.from(new Set(centers.map(center => extractLocation(center.location)).filter(Boolean)));
+      populateSelect('location', locationOptions, 'همه محدوده‌ها');
+
+      const rangeOptions = storeRanges.filter(range => range.value !== 'all');
+      populateSelect('stores', rangeOptions, 'همه بازه‌ها');
+
+      filterControls.sort.forEach(control => {
+        control.value = filterState.sort;
+      });
+    }
+
+    function populateSelect(name, options, defaultLabel) {
+      const normalized = options.map(option => {
+        if (typeof option === 'string') {
+          return { value: option, label: option };
+        }
+        return option;
+      }).filter(option => option && option.value && option.label);
+
+      const hasOptions = normalized.length > 0;
+      const defaultText = defaultLabel || 'همه';
+
+      filterOptionLabels[name] = { all: defaultText };
+
+      filterControls[name].forEach(select => {
+        select.innerHTML = `<option value="all">${defaultText}</option>`;
+
+        if (hasOptions) {
+          normalized.forEach(option => {
+            select.innerHTML += `<option value="${option.value}">${option.label}</option>`;
+            filterOptionLabels[name][option.value] = option.label;
+          });
+          select.value = filterState[name];
+          select.disabled = false;
+        } else {
+          select.innerHTML = `<option value="all">${defaultText} در دسترس نیست</option>`;
+          select.value = 'all';
+          select.disabled = true;
+        }
+      });
+
+      if (!hasOptions) {
+        filterState[name] = 'all';
+      }
+    }
+
+    function showSkeleton() {
+      listDiv.innerHTML = '';
+      for (let i = 0; i < skeletonCount; i++) {
+        listDiv.innerHTML += `
+          <div class="center-card fade-in delay-${i % 3}">
+            <div class="skeleton skeleton-img"></div>
+            <div class="center-info">
+              <div class="skeleton skeleton-line" style="height: 28px; margin-bottom: 15px;"></div>
+              <div class="skeleton skeleton-line short" style="height: 22px; margin-bottom: 10px;"></div>
+              <div class="skeleton skeleton-line" style="height: 18px; margin-bottom: 8px;"></div>
+              <div class="skeleton skeleton-line" style="height: 18px; margin-bottom: 8px;"></div>
+              <div class="skeleton skeleton-line medium" style="height: 18px; margin-bottom: 20px;"></div>
+              <div style="display: flex; gap: 10px; margin-top: auto;">
+                <div class="skeleton" style="height: 40px; flex: 1; border-radius: 12px;"></div>
+              </div>
             </div>
           </div>
+        `;
+      }
+      resultCount.textContent = 'در حال بارگذاری نتایج...';
+      activeFilterBadges.innerHTML = '';
+    }
+
+    function showError() {
+      listDiv.innerHTML = `
+        <div style="grid-column: 1/-1; text-align: center; padding: 50px 20px;">
+          <i class="fas fa-exclamation-triangle" style="font-size: 4rem; color: #cbd5e1; margin-bottom: 20px;"></i>
+          <h3 style="color: #64748b; font-size: 1.5rem;">خطا در بارگذاری مراکز خرید!</h3>
+          <p style="color: #94a3b8; margin-top: 10px;">لطفاً اتصال اینترنت یا وضعیت سرور را بررسی کنید.</p>
         </div>
       `;
+      resultCount.textContent = 'خطا در دریافت اطلاعات مراکز خرید';
+      activeFilterBadges.innerHTML = '';
     }
-    
-    // fetch داده‌ها از API (پس از تاخیر برای اسکلتون)
-    setTimeout(() => {
-      fetch(API_URL)
-        .then(res => res.json())
-        .then(centers => {
-          renderCenters(centers);
-        })
-        .catch(() => {
-          listDiv.innerHTML = `
-            <div style="grid-column: 1/-1; text-align: center; padding: 50px 20px;">
-              <i class="fas fa-exclamation-triangle" style="font-size: 4rem; color: #cbd5e1; margin-bottom: 20px;"></i>
-              <h3 style="color: #64748b; font-size: 1.5rem;">خطا در بارگذاری مراکز خرید!</h3>
-            </div>
-          `;
-        });
-    }, 1500);
-    
+
+    function extractLocation(location) {
+      if (!location) return '';
+      const cleaned = String(location).trim();
+      if (!cleaned) return '';
+      const parts = cleaned.split(/[،,\-|]/);
+      const main = parts.length ? parts[0].trim() : cleaned;
+      return main || cleaned;
+    }
+
+    function matchesStoreRange(center) {
+      const range = storeRanges.find(item => item.value === filterState.stores);
+      if (!range || range.value === 'all') {
+        return true;
+      }
+      const storeCount = Number(center.stores) || 0;
+      return range.matcher(storeCount);
+    }
+
+    function filterCenters() {
+      if (!allCenters.length) {
+        renderCenters([]);
+        updateResultSummary(0);
+        updateActiveBadges();
+        return;
+      }
+
+      const searchTerm = filterState.search.toLowerCase();
+
+      filteredCenters = allCenters.filter(center => {
+        const title = (center.title || '').toLowerCase();
+        if (searchTerm && !title.includes(searchTerm)) {
+          return false;
+        }
+
+        if (filterState.tag !== 'all' && (center.tag || '') !== filterState.tag) {
+          return false;
+        }
+
+        if (filterState.location !== 'all') {
+          const locationValue = extractLocation(center.location);
+          if (locationValue !== filterState.location) {
+            return false;
+          }
+        }
+
+        if (!matchesStoreRange(center)) {
+          return false;
+        }
+
+        return true;
+      });
+
+      const sorted = [...filteredCenters];
+      switch (filterState.sort) {
+        case 'alphabetical':
+          sorted.sort((a, b) => (a.title || '').localeCompare(b.title || '', 'fa'));
+          break;
+        case 'stores-desc':
+          sorted.sort((a, b) => (b.stores || 0) - (a.stores || 0));
+          break;
+        case 'newest':
+          sorted.sort((a, b) => new Date(b.createdAt || b.updatedAt || 0) - new Date(a.createdAt || a.updatedAt || 0));
+          break;
+        default:
+          sorted.sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
+          break;
+      }
+
+      filteredCenters = sorted;
+      renderCenters(filteredCenters);
+      updateResultSummary(filteredCenters.length);
+      updateActiveBadges();
+    }
+
     function renderCenters(centers) {
       listDiv.innerHTML = '';
-      
+
       if (!centers.length) {
         listDiv.innerHTML = `
           <div style="grid-column: 1/-1; text-align: center; padding: 50px 20px;">
             <i class="fas fa-store-slash" style="font-size: 4rem; color: #cbd5e1; margin-bottom: 20px;"></i>
             <h3 style="color: #64748b; font-size: 1.5rem;">مرکز خریدی یافت نشد!</h3>
-            <p style="color: #94a3b8; margin-top: 10px;">لطفاً عبارت جستجو را تغییر دهید</p>
+            <p style="color: #94a3b8; margin-top: 10px;">لطفاً فیلترها را تغییر دهید یا عبارت دیگری جستجو کنید.</p>
           </div>
         `;
         return;
@@ -1042,14 +1615,13 @@
               <i class="fas fa-map-marker-alt"></i> ${center.location || 'نامشخص'}
             </div>
             <p class="center-desc">${center.description || ''}</p>
-            
+
             <div class="center-meta">
-              <!-- تعداد مغازه‌ها را نمایش می‌دهیم -->
               <span><i class="fas fa-store"></i> ${center.stores || 0} مغازه</span>
               <span><i class="fas fa-clock"></i> ساعات کاری: ${center.hours || 'نامشخص'}</span>
               <span><i class="fas fa-calendar-times"></i> روزهای تعطیل: ${center.holidays || 'هیچ'}</span>
             </div>
-            
+
             <div class="center-actions">
               <div class="action-btn btn-primary" onclick="goToShops('${center._id}', '${center.title}')">
                 <i class="fas fa-list"></i> مشاهده فروشگاه‌ها
@@ -1061,29 +1633,89 @@
       });
     }
 
+    function updateResultSummary(count) {
+      if (!allCenters.length) {
+        resultCount.textContent = 'مرکزی برای نمایش ثبت نشده است.';
+        return;
+      }
+
+      if (!count) {
+        resultCount.textContent = 'هیچ مرکز مطابق با فیلترهای فعلی پیدا نشد.';
+        return;
+      }
+
+      const total = allCenters.length.toLocaleString('fa-IR');
+      const current = count.toLocaleString('fa-IR');
+      resultCount.textContent = `${current} مرکز از ${total} مرکز ثبت شده`;
+    }
+
+    function updateActiveBadges() {
+      activeFilterBadges.innerHTML = '';
+      const activeEntries = [
+        ['tag', filterState.tag],
+        ['location', filterState.location],
+        ['stores', filterState.stores],
+        ['sort', filterState.sort]
+      ].filter(([name, value]) => value && value !== 'all' && !(name === 'sort' && value === 'recommended'));
+
+      if (!activeEntries.length) {
+        const badge = document.createElement('span');
+        badge.className = 'filter-badge filter-badge--inactive';
+        badge.innerHTML = `<i class="fas fa-magic"></i>بدون فیلتر فعال`;
+        activeFilterBadges.appendChild(badge);
+        return;
+      }
+
+      activeEntries.forEach(([name, value]) => {
+        const badge = document.createElement('span');
+        badge.className = 'filter-badge';
+        const label = filterOptionLabels[name]?.[value] || value;
+        const icon = badgeIcons[name] || 'fa-filter';
+        badge.innerHTML = `<i class="fas ${icon}"></i>${label}`;
+        activeFilterBadges.appendChild(badge);
+      });
+    }
+
+    function syncControls(name, value, origin) {
+      filterControls[name].forEach(control => {
+        if (control !== origin) {
+          control.value = value;
+        }
+      });
+    }
+
+    function resetFilters() {
+      filterState.search = '';
+      filterState.tag = 'all';
+      filterState.location = 'all';
+      filterState.stores = 'all';
+      filterState.sort = 'recommended';
+      searchInput.value = '';
+
+      Object.entries(filterControls).forEach(([name, controls]) => {
+        controls.forEach(control => {
+          control.value = name === 'sort' ? 'recommended' : 'all';
+        });
+      });
+
+      filterCenters();
+    }
+
+    function openMobileFilters() {
+      mobilePanel.classList.add('active');
+      mobileBackdrop.classList.add('active');
+      document.body.classList.add('filters-open');
+    }
+
+    function closeMobileFilters() {
+      mobilePanel.classList.remove('active');
+      mobileBackdrop.classList.remove('active');
+      document.body.classList.remove('filters-open');
+    }
+
     window.goToShops = function(id, title) {
       window.location.href = `shopping-centers-shops.html?centerId=${id}&title=${encodeURIComponent(title)}`;
     };
-
-    // جستجو فقط بر اساس نام مرکز خرید
-    document.getElementById('searchInput').addEventListener('input', function() {
-      const searchTerm = this.value.trim().toLowerCase();
-      if (searchTerm === '') {
-        fetch(API_URL)
-          .then(res => res.json())
-          .then(centers => renderCenters(centers));
-        return;
-      }
-      
-      fetch(API_URL)
-        .then(res => res.json())
-        .then(centers => {
-          const filtered = centers.filter(center => 
-            center.title.toLowerCase().includes(searchTerm)
-          );
-          renderCenters(filtered);
-        });
-    });
   });
 </script>
 
