@@ -1046,7 +1046,7 @@
       right: 0;
       bottom: 0;
       background: linear-gradient(180deg, rgba(15, 23, 42, 0.15) 0%, rgba(15, 23, 42, 0.75) 100%);
-      z-index: 999;
+      z-index: 1200;
       display: none;
       justify-content: center;
       align-items: flex-end;
@@ -2009,6 +2009,7 @@ function setupEventListeners() {
     }
     mobileFiltersOverlay.style.display = 'flex';
     document.body.style.overflow = 'hidden';
+    document.body.classList.add('hide-mobile-nav');
     mobileFiltersPanel.scrollTop = 0;
     mobileFilterBtn.setAttribute('aria-expanded', 'true');
     setTimeout(() => {
@@ -2247,6 +2248,7 @@ function closeMobileFilters() {
   mobileFiltersCloseTimer = setTimeout(() => {
     overlay.style.display = 'none';
     document.body.style.overflow = '';
+    document.body.classList.remove('hide-mobile-nav');
     document.getElementById('mobileFilterBtn').focus({ preventScroll: true });
     mobileFiltersCloseTimer = null;
   }, 300);
