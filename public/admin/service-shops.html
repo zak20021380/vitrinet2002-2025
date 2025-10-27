@@ -856,6 +856,17 @@
       margin-top: 0.3rem;
     }
 
+    .jalali-date {
+      display: none;
+      margin-top: 0.25rem;
+      color: var(--primary);
+      font-weight: 600;
+    }
+
+    .jalali-date.is-visible {
+      display: block;
+    }
+
     .checkbox-group {
       display: flex;
       align-items: center;
@@ -1480,13 +1491,19 @@
         <div class="form-group">
           <label>تاریخ شروع</label>
           <input type="date" id="plan-start-date">
-          <p class="form-note">در صورت خالی بودن، تاریخ امروز در نظر گرفته می‌شود</p>
+          <p class="form-note">
+            در صورت خالی بودن، تاریخ امروز در نظر گرفته می‌شود
+            <span class="jalali-date" id="plan-start-date-display"></span>
+          </p>
         </div>
 
         <div class="form-group">
           <label>تاریخ پایان</label>
           <input type="date" id="plan-end-date" readonly style="background: #f3f4f6;">
-          <p class="form-note">به صورت خودکار بر اساس مدت زمان محاسبه می‌شود</p>
+          <p class="form-note">
+            به صورت خودکار بر اساس مدت زمان محاسبه می‌شود
+            <span class="jalali-date" id="plan-end-date-display"></span>
+          </p>
         </div>
 
         <div class="form-group">
@@ -1634,16 +1651,28 @@
       "'": '&#39;'
     }[char] || char));
     const numberFormatter = new Intl.NumberFormat('fa-IR');
+    const persianDateFormatter = new Intl.DateTimeFormat('fa-IR-u-ca-persian', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    });
     const formatNumber = (value) => {
       const num = Number(value);
       return numberFormatter.format(Number.isFinite(num) ? num : 0);
+    };
+
+    const formatPersianDate = (value) => {
+      if (!value) return '';
+      const date = value instanceof Date ? value : new Date(value);
+      if (Number.isNaN(date.getTime())) return '';
+      return persianDateFormatter.format(date);
     };
 
     const formatDateTime = (value) => {
       if (!value) return '';
       const date = value instanceof Date ? value : new Date(value);
       if (Number.isNaN(date.getTime())) return '';
-      const datePart = date.toLocaleDateString('fa-IR');
+      const datePart = formatPersianDate(date);
       const timePart = date.toLocaleTimeString('fa-IR', { hour: '2-digit', minute: '2-digit' });
       return `${datePart}، ساعت ${timePart}`;
     };
@@ -2400,17 +2429,51 @@
 
     // Format date helper
     function formatDate(dateString) {
-      if (!dateString) return '';
-      const date = new Date(dateString);
-      return date.toLocaleDateString('fa-IR');
+      return formatPersianDate(dateString);
     }
 
     // Calculate end date based on start and duration
     function calculateEndDate(startDate, durationDays) {
-      if (!startDate || !durationDays) return '';
+      if (!startDate || !durationDays) {
+        return '';
+      }
       const start = new Date(startDate);
       const end = new Date(start.getTime() + durationDays * 24 * 60 * 60 * 1000);
       return end.toISOString().split('T')[0];
+    }
+
+    function setJalaliDisplay(elementId, dateValue, prefix = 'تاریخ شمسی: ') {
+      const element = document.getElementById(elementId);
+      if (!element) return;
+      const formatted = formatPersianDate(dateValue);
+      if (formatted) {
+        element.textContent = `${prefix}${formatted}`;
+        element.classList.add('is-visible');
+      } else {
+        element.textContent = '';
+        element.classList.remove('is-visible');
+      }
+    }
+
+    function updatePlanDateDisplays() {
+      const startInput = document.getElementById('plan-start-date');
+      const endInput = document.getElementById('plan-end-date');
+      if (startInput) {
+        setJalaliDisplay('plan-start-date-display', startInput.value, 'تاریخ شمسی شروع: ');
+      }
+      if (endInput) {
+        setJalaliDisplay('plan-end-date-display', endInput.value, 'تاریخ شمسی پایان: ');
+      }
+    }
+
+    function resetPlanDateDisplays() {
+      ['plan-start-date-display', 'plan-end-date-display'].forEach((id) => {
+        const element = document.getElementById(id);
+        if (element) {
+          element.textContent = '';
+          element.classList.remove('is-visible');
+        }
+      });
     }
 
     // Event listeners
@@ -2608,16 +2671,26 @@
         if (endInput) {
           endInput.value = '';
         }
+        resetPlanDateDisplays();
       }
     }
 
     // Update end date when duration or start date changes
     function updateEndDate() {
-      const startDate = document.getElementById('plan-start-date').value;
-      const duration = parseInt(document.getElementById('plan-duration').value) || 14;
-      if (startDate) {
-        document.getElementById('plan-end-date').value = calculateEndDate(startDate, duration);
+      const startInput = document.getElementById('plan-start-date');
+      const endInput = document.getElementById('plan-end-date');
+      const durationInput = document.getElementById('plan-duration');
+      if (!startInput || !endInput || !durationInput) {
+        return;
       }
+      const startDate = startInput.value;
+      const duration = parseInt(durationInput.value, 10) || 14;
+      if (startDate) {
+        endInput.value = calculateEndDate(startDate, duration);
+      } else {
+        endInput.value = '';
+      }
+      updatePlanDateDisplays();
     }
 
     // Plan checkbox toggle
@@ -2662,6 +2735,7 @@
           }
           if (computedEndDate) {
             document.getElementById('plan-end-date').value = computedEndDate;
+            updatePlanDateDisplays();
           }
         }
 
