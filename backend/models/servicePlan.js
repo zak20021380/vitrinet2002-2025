@@ -6,7 +6,7 @@ const featureSchema = new mongoose.Schema({
 
 const servicePlanSchema = new mongoose.Schema({
   title: { type: String, required: true, trim: true },
-  slug: { type: String, required: true, trim: true, lowercase: true, unique: true },
+  slug: { type: String, required: true, trim: true, lowercase: true },
   description: { type: String, default: '', trim: true },
   price: { type: Number, required: true, min: 0 },
   durationDays: { type: Number, default: 30, min: 0 },
