@@ -24,6 +24,13 @@
       --light-gray: #f1f5f9;
       --shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
       --transition: all 0.3s ease;
+      --primary-color: #10b981;
+      --primary-light: #e0fdfa;
+      --text-dark: #243241;
+      --text-medium: #374151;
+      --text-light: #6b7280;
+      --background: #f2f6f5;
+      --white: #ffffff;
     }
     
     body {
@@ -120,85 +127,652 @@
       box-shadow: 0 6px 15px rgba(14, 165, 233, 0.4);
     }
     
-    /* بخش جستجو */
-    .search-section {
-      max-width: 1200px;
+    /* بخش جستجو و فیلتر مشابه صفحه همه محصولات */
+    .container {
+      max-width: 1280px;
       margin: 30px auto 40px;
       padding: 0 20px;
     }
-    
-    .search-filter-container {
-      background: #fff;
-      border-radius: 18px;
-      box-shadow: 0 8px 30px rgba(5, 150, 105, 0.1);
-      padding: 25px;
-      position: relative;
-      z-index: 10;
+
+    .search-container {
+      display: flex;
+      max-width: 500px;
+      width: 100%;
+      margin: 0 auto;
     }
-    
-    .section-title {
-      color: white;
+
+    .search-box {
+      width: 100%;
+      border: 2px solid #0ea5e9;
+      border-radius: 30px;
+      overflow: hidden;
+      background: #ffffff;
+      box-shadow: 0 4px 15px rgba(14, 165, 233, 0.1);
+      transition: all 0.3s ease;
+    }
+
+    .search-box:focus-within {
+      box-shadow: 0 6px 20px rgba(14, 165, 233, 0.25);
+      border-color: var(--primary-color);
+    }
+
+    .search-box input {
+      width: 100%;
+      border: 0;
+      padding: 14px 22px;
+      outline: none;
+      font-family: inherit;
+      font-size: 1rem;
+      color: var(--text-dark);
+      background: transparent;
+    }
+
+    .filters-section {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 15px;
+      margin: 25px 0;
+      justify-content: center;
+    }
+
+    .filters-section.desktop {
+      align-items: center;
+    }
+
+    .filter-btn {
+      padding: 10px 22px;
+      border: none;
+      background: #ffffff;
+      border-radius: 12px;
+      cursor: pointer;
+      font-family: inherit;
       font-weight: 700;
-      font-size: 1.8rem;
+      transition: all 0.3s;
+      box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--text-medium);
+      position: relative;
+    }
+
+    .filter-btn:hover,
+    .filter-btn.active {
+      background: linear-gradient(92deg, var(--primary-color) 0%, #0ea5e9 100%);
+      color: #ffffff;
+      box-shadow: 0 5px 15px rgba(16, 185, 129, 0.3);
+      transform: translateY(-2px);
+    }
+
+    .filter-btn i {
+      font-size: 1.1rem;
+    }
+
+    .dropdown-menu {
+      padding: 7px 0;
+      animation: fadeIn .18s;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(14px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .dropdown-item {
+      display: block;
+      width: 100%;
+      background: none;
+      border: none;
+      padding: 12px 25px 12px 18px;
+      text-align: right;
+      font-size: 1rem;
+      color: #374151;
+      font-family: inherit;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background .12s, color .14s;
+    }
+
+    .dropdown-item:hover {
+      background: linear-gradient(90deg, #e0fdfa 0%, #e6f4fd 100%);
+      color: #0ea5e9;
+    }
+
+    .price-range {
+      display: grid;
+      gap: 12px;
+      padding: 12px 18px;
+      background: linear-gradient(135deg, rgba(224, 253, 250, 0.7), rgba(230, 244, 253, 0.8));
+    }
+
+    .price-range input {
+      width: 100%;
+      border: 1px solid rgba(14, 165, 233, 0.35);
+      border-radius: 12px;
+      padding: 10px 12px;
+      font-size: 0.95rem;
+      background: rgba(255, 255, 255, 0.95);
+      transition: border 0.2s ease, box-shadow 0.2s ease;
+      font-family: inherit;
+    }
+
+    .price-range input:focus {
+      border-color: rgba(16, 185, 129, 0.65);
+      box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.18);
+      outline: none;
+    }
+
+    #applyPriceFilter {
+      background: linear-gradient(90deg, var(--primary-color), #0ea5e9);
+      color: #ffffff;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      width: 100%;
+      padding: 10px 0;
+      font-weight: 800;
+    }
+
+    #applyPriceFilter:hover {
+      background: var(--primary-dark);
+    }
+
+    .active-filters {
+      display: none;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin: 15px 0 25px;
+      padding: 0 15px;
+      justify-content: center;
+    }
+
+    .active-filter {
+      background: #e0fdfa;
+      color: #0f766e;
+      padding: 8px 16px;
+      border-radius: 12px;
+      font-size: 0.9rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      border: 1px solid #a7f3d0;
+    }
+
+    .active-filter .remove {
+      cursor: pointer;
+      color: #0d9488;
+      font-weight: 900;
+    }
+
+    .mobile-filter-btn {
+      display: none;
+      width: calc(100% - 40px);
+      margin: 0 auto 24px;
+      padding: 14px 18px;
+      border: none;
+      border-radius: 18px;
+      background: linear-gradient(115deg, #10b981 0%, #0ea5e9 100%);
+      color: #ffffff;
+      font-weight: 800;
+      font-size: 0.95rem;
+      cursor: pointer;
+      box-shadow: 0 18px 36px rgba(14, 165, 233, 0.28);
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      letter-spacing: 0.01em;
+      position: sticky;
+      top: 76px;
+      z-index: 40;
+      backdrop-filter: blur(8px);
+      transition: transform 0.25s ease, box-shadow 0.25s ease;
+    }
+
+    .mobile-filter-btn i {
+      font-size: 1.1rem;
+    }
+
+    .mobile-filter-btn span {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .mobile-filter-btn:hover {
+      box-shadow: 0 22px 44px rgba(14, 165, 233, 0.32);
+      transform: translateY(-2px);
+    }
+
+    .mobile-filters-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: linear-gradient(180deg, rgba(15, 23, 42, 0.15) 0%, rgba(15, 23, 42, 0.75) 100%);
+      z-index: 1200;
+      display: none;
+      justify-content: center;
+      align-items: flex-end;
+      padding: 0 14px 16px;
+    }
+
+    .mobile-filters {
+      width: 100%;
+      max-width: 480px;
+      background: rgba(255, 255, 255, 0.97);
+      overflow-y: auto;
+      max-height: calc(100vh - 24px);
+      padding: 28px 22px 24px;
+      padding-bottom: calc(28px + env(safe-area-inset-bottom));
+      transform: translateY(110%);
+      transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      border-radius: 28px 28px 20px 20px;
+      box-shadow: 0 -18px 50px rgba(15, 118, 110, 0.22);
+      position: relative;
+      backdrop-filter: blur(14px);
+    }
+
+    .mobile-filters::before {
+      content: '';
+      position: absolute;
+      top: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 62px;
+      height: 5px;
+      border-radius: 999px;
+      background: #d4d4d8;
+      opacity: 0.75;
+    }
+
+    .mobile-filters.active {
+      transform: translateY(0);
+    }
+
+    .mobile-filters-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      padding-bottom: 18px;
+      border-bottom: 1px dashed rgba(148, 163, 184, 0.4);
+      margin-bottom: 6px;
+      gap: 12px;
+    }
+
+    .mobile-filters-header h3 {
+      font-size: 1.2rem;
+      font-weight: 800;
+      color: var(--text-dark);
+      margin: 0;
+    }
+
+    .mobile-filters-header p {
+      font-size: 0.8rem;
+      color: var(--text-light);
+      margin-top: 4px;
+      line-height: 1.6;
+    }
+
+    .close-filters {
+      background: rgba(15, 118, 110, 0.12);
+      border: none;
+      font-size: 1.15rem;
+      color: var(--text-medium);
+      cursor: pointer;
+      width: 38px;
+      height: 38px;
+      border-radius: 14px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.2s ease, color 0.2s ease;
+    }
+
+    .close-filters:hover {
+      background: rgba(14, 165, 233, 0.15);
+      color: var(--primary-dark);
+    }
+
+    .mobile-filter-group {
+      background: rgba(240, 253, 250, 0.9);
+      border-radius: 20px;
+      padding: 16px 18px;
+      box-shadow: 0 14px 32px rgba(14, 165, 233, 0.12);
+      border: 1px solid rgba(14, 165, 233, 0.08);
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .mobile-filter-group::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.65), rgba(255, 255, 255, 0));
+      opacity: 0.45;
+      pointer-events: none;
+    }
+
+    .mobile-filter-group > * {
+      position: relative;
+      z-index: 1;
+    }
+
+    .mobile-group-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .mobile-group-header > div {
+      flex: 1;
+    }
+
+    .mobile-group-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 16px;
+      background: linear-gradient(140deg, rgba(16, 185, 129, 0.2) 0%, rgba(14, 165, 233, 0.3) 100%);
       display: flex;
       align-items: center;
       justify-content: center;
-      margin-bottom: 25px;
-      background: transparent;
-      padding: 0;
-      border-radius: 0;
-      box-shadow: none;
-      transition: none;
-      background: linear-gradient(90deg, var(--secondary), var(--primary));
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      text-align: center;
-    }
-    
-    .search-filter-bar {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 16px;
-      margin-top: 15px;
-    }
-    
-    .search-box {
-      flex: 1; /* جعبه جستجو بزرگتر شده */
-      min-width: 300px;
-      display: flex;
-      align-items: center;
-      background: var(--light);
-      border-radius: 12px;
-      padding: 0 16px;
-      border: 2px solid #e0fdfa;
-      box-shadow: 0 2px 10px rgba(14, 165, 233, 0.1);
-      transition: var(--transition);
-    }
-    
-    .search-box:focus-within {
-      border-color: var(--primary);
-      box-shadow: 0 2px 15px rgba(14, 165, 233, 0.2);
-    }
-    
-    .search-box input {
-      border: none;
-      background: transparent;
-      font-family: inherit;
-      font-size: 1.1rem;
-      flex: 1;
-      outline: none;
-      padding: 14px 10px;
       color: var(--primary-dark);
+      font-size: 1.2rem;
+      flex-shrink: 0;
     }
-    
-    .search-box input::placeholder {
-      color: #94a3b8;
+
+    .mobile-group-header h4 {
+      font-size: 1rem;
+      font-weight: 800;
+      color: var(--text-dark);
+      margin-bottom: 2px;
     }
-    
-    .search-icon {
-      font-size: 1.4rem;
-      margin-left: 10px;
-      color: var(--primary);
+
+    .mobile-group-header p {
+      font-size: 0.78rem;
+      color: var(--text-light);
+      margin: 0;
+      line-height: 1.6;
+    }
+
+    .mobile-group-body {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .mobile-chip-row {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .mobile-chip-row .filter-btn {
+      flex: 1 1 calc(50% - 12px);
+      justify-content: center;
+      background: rgba(255, 255, 255, 0.92);
+      border-radius: 14px;
+      border: 1px solid rgba(14, 165, 233, 0.28);
+      box-shadow: none;
+      color: var(--text-medium);
+      padding: 12px 14px;
+    }
+
+    .mobile-chip-row .filter-btn i {
+      font-size: 1rem;
+    }
+
+    .mobile-chip-row .filter-btn:hover,
+    .mobile-chip-row .filter-btn.active {
+      background: linear-gradient(120deg, #10b981 0%, #0ea5e9 100%);
+      color: #ffffff;
+      box-shadow: 0 16px 30px rgba(14, 165, 233, 0.24);
+    }
+
+    .mobile-dropdown {
+      display: none;
+      position: static;
+      width: 100%;
+      margin-top: 2px;
+      border-radius: 16px;
+      border: 1px solid rgba(14, 165, 233, 0.18);
+      box-shadow: 0 16px 32px rgba(14, 165, 233, 0.12);
+      background: #ffffff;
+      padding: 10px 0;
+      max-height: 240px;
+      overflow-y: auto;
+    }
+
+    .mobile-dropdown::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    .mobile-dropdown::-webkit-scrollbar-thumb {
+      background: rgba(14, 165, 233, 0.4);
+      border-radius: 999px;
+    }
+
+    .mobile-dropdown .dropdown-item {
+      padding: 12px 20px 12px 16px;
+      border: none;
+      font-size: 0.95rem;
+    }
+
+    .mobile-dropdown .dropdown-item + .dropdown-item {
+      border-top: 1px solid rgba(226, 232, 240, 0.7);
+    }
+
+    .mobile-filter-group .filter-btn {
+      width: 100%;
+      justify-content: space-between;
+    }
+
+    .mobile-filter-group .filter-btn i:last-child {
+      margin-right: auto;
+      transition: transform 0.25s ease;
+    }
+
+    .mobile-filter-group .filter-btn[aria-expanded="true"] i:last-child {
+      transform: rotate(180deg);
+    }
+
+    .mobile-filter-group .price-range {
+      background: rgba(240, 249, 255, 0.75);
+      border-radius: 14px;
+      padding: 14px;
+      gap: 12px;
+    }
+
+    .mobile-filter-group .price-range label {
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: var(--text-medium);
+    }
+
+    .mobile-filter-group .price-range input {
+      border: 1px solid rgba(14, 165, 233, 0.35);
+      border-radius: 12px;
+      padding: 10px 12px;
+      font-size: 0.95rem;
+      background: rgba(255, 255, 255, 0.95);
+      transition: border 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .mobile-filter-group .price-range input:focus {
+      border-color: rgba(16, 185, 129, 0.65);
+      box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.18);
+      outline: none;
+    }
+
+    #applyPriceFilterMobile {
+      background: linear-gradient(120deg, rgba(16, 185, 129, 0.18) 0%, rgba(14, 165, 233, 0.4) 100%);
+      border: 1px solid rgba(14, 165, 233, 0.4);
+      color: var(--primary-dark);
+      border-radius: 14px;
+      padding: 10px 18px;
+      font-weight: 800;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      cursor: pointer;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+      width: 100%;
+    }
+
+    #applyPriceFilterMobile:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 24px rgba(14, 165, 233, 0.18);
+    }
+
+    .mobile-filter-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-top: auto;
+      padding-top: 8px;
+    }
+
+    #applyFiltersMobile {
+      width: 100%;
+      justify-content: center;
+      font-size: 1.05rem;
+      gap: 10px;
+      padding: 12px 18px;
+      border-radius: 18px;
+      box-shadow: 0 18px 40px rgba(16, 185, 129, 0.28);
+    }
+
+    .filters-section.mobile {
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+
+    .filters-section.mobile .filter-btn {
+      background: rgba(255, 255, 255, 0.82);
+      border: 1px solid rgba(14, 165, 233, 0.22);
+      box-shadow: 0 12px 22px rgba(14, 165, 233, 0.12);
+      color: var(--text-dark);
+      justify-content: space-between;
+      padding: 12px 16px;
+      transition: background 0.25s ease, color 0.25s ease, box-shadow 0.25s ease;
+    }
+
+    .filters-section.mobile .filter-btn span {
+      flex: 1;
+      padding: 0 8px;
+      font-weight: 800;
+      text-align: right;
+    }
+
+    .filters-section.mobile .filter-btn:hover,
+    .filters-section.mobile .filter-btn.active {
+      background: linear-gradient(120deg, rgba(16, 185, 129, 0.2) 0%, rgba(14, 165, 233, 0.35) 100%);
+      color: var(--primary-dark);
+      box-shadow: 0 18px 32px rgba(14, 165, 233, 0.22);
+      transform: none;
+    }
+
+    .filters-section.mobile .filter-btn:focus-visible,
+    .mobile-filter-btn:focus-visible,
+    #applyFiltersMobile:focus-visible,
+    #applyPriceFilterMobile:focus-visible,
+    .mobile-dropdown .dropdown-item:focus-visible {
+      outline: 2px solid rgba(14, 165, 233, 0.55);
+      outline-offset: 3px;
+    }
+
+    @media (max-width: 1100px) {
+      .filters-section {
+        gap: 12px;
+      }
+
+      .filter-btn {
+        padding: 8px 18px;
+        font-size: 0.95rem;
+      }
+    }
+
+    @media (max-width: 850px) {
+      .search-container {
+        max-width: 400px;
+      }
+
+      .filters-section.desktop {
+        justify-content: flex-start;
+        overflow-x: auto;
+        padding-bottom: 8px;
+        margin: 20px -15px;
+        scrollbar-width: thin;
+      }
+
+      .filters-section.desktop::-webkit-scrollbar {
+        height: 6px;
+      }
+
+      .filters-section.desktop::-webkit-scrollbar-thumb {
+        background: #c5c5c5;
+        border-radius: 999px;
+      }
+
+      .filters-section.desktop::-webkit-scrollbar-track {
+        background: rgba(226, 232, 240, 0.6);
+        border-radius: 999px;
+      }
+
+      .filters-section.desktop .filter-btn {
+        padding: 8px 16px;
+        font-size: 0.9rem;
+      }
+
+      .mobile-filter-btn {
+        display: flex;
+      }
+
+      .filters-section.desktop {
+        display: none;
+      }
+    }
+
+    @media (max-width: 576px) {
+      .search-container {
+        max-width: 100%;
+        padding: 0 10px;
+      }
+
+      .search-box input {
+        padding: 12px 18px;
+      }
+
+      .filters-section.desktop .filter-btn {
+        padding: 7px 14px;
+        font-size: 0.85rem;
+      }
+
+      .mobile-filter-btn {
+        width: calc(100% - 24px);
+        top: 72px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .mobile-filter-btn {
+        top: 68px;
+      }
     }
     
     /* کارت‌های مراکز خرید شیک و جذاب */
@@ -904,21 +1478,198 @@
     </a>
   </div>
 
-  <!-- بخش جستجو و فیلتر مدرن -->
-  <section class="search-section">
-    <div class="search-filter-container">
-      <h2 class="section-title">
-        مراکز خرید سنندج
-      </h2>
-      
-      <div class="search-filter-bar">
+  <div class="container">
+    <div style="margin: 0 auto 28px; max-width: 500px;">
+      <div class="search-container">
         <div class="search-box">
-          <span class="search-icon"><i class="fas fa-search"></i></span>
-          <input id="searchInput" type="text" placeholder="جستجوی نام مرکز خرید..." autocomplete="off">
+          <input id="searchInput" type="text" placeholder="جستجوی مراکز خرید..." autocomplete="off">
         </div>
       </div>
     </div>
-  </section>
+
+    <button class="mobile-filter-btn" id="mobileFilterBtn" type="button" aria-controls="mobileFilters" aria-haspopup="dialog" aria-expanded="false">
+      <i class="fas fa-sliders-h"></i>
+      <span>فیلتر و مرتب‌سازی</span>
+    </button>
+
+    <div class="active-filters" id="activeFilters"></div>
+
+    <div class="filters-section desktop">
+      <div class="dropdown-filter" style="position: relative; display:inline-block;">
+        <button class="filter-btn active" id="mainFilterBtn" data-filter="all">
+          <i class="fas fa-building"></i>
+          همه مراکز خرید
+          <i class="fas fa-chevron-down" style="margin-right:7px;font-size:0.95em"></i>
+        </button>
+        <div class="dropdown-menu" id="filterDropdown" style="display:none; position:absolute; right:0; top:110%; z-index:9; min-width:200px; background:#fff; border-radius:16px; box-shadow:0 8px 24px rgba(16,185,129,0.14); overflow:hidden; border:1.5px solid #0ea5e95b;">
+          <!-- گزینه‌های فیلتر دسته‌بندی به‌صورت داینامیک اضافه می‌شود -->
+        </div>
+      </div>
+
+      <div class="dropdown-filter" style="position: relative; display:inline-block;">
+        <button class="filter-btn" id="shopsBtn">
+          <i class="fas fa-map-marker-alt"></i>
+          مناطق و محله‌ها
+          <i class="fas fa-chevron-down" style="margin-right:7px;font-size:0.95em"></i>
+        </button>
+        <div class="dropdown-menu" id="shopsDropdown" style="display:none; position:absolute; right:0; top:110%; z-index:9; min-width:200px; background:#fff; border-radius:16px; box-shadow:0 8px 24px rgba(16,185,129,0.14); overflow:hidden; border:1.5px solid #0ea5e95b;">
+          <!-- گزینه‌های محله‌ها به‌صورت داینامیک اضافه می‌شود -->
+        </div>
+      </div>
+
+      <button class="filter-btn" id="sort-cheap">
+        <i class="fas fa-sort-amount-down-alt"></i>
+        کمترین تعداد مغازه
+      </button>
+      <button class="filter-btn" id="sort-expensive">
+        <i class="fas fa-sort-amount-up"></i>
+        بیشترین تعداد مغازه
+      </button>
+
+      <div class="dropdown-filter" style="position: relative; display:inline-block;">
+        <button class="filter-btn" id="priceFilterBtn">
+          <i class="fas fa-layer-group"></i>
+          فیلتر تعداد مغازه
+          <i class="fas fa-chevron-down" style="margin-right:7px;font-size:0.95em"></i>
+        </button>
+        <div class="dropdown-menu" id="priceFilterMenu" style="display:none; position:absolute; right:0; top:110%; z-index:9; min-width:200px; background:#fff; border-radius:16px; box-shadow:0 8px 24px rgba(16,185,129,0.14); overflow:hidden; border:1.5px solid #0ea5e95b;">
+          <div class="price-range">
+            <label for="minStores">حداقل تعداد مغازه:</label>
+            <input type="number" id="minStores" placeholder="حداقل تعداد" min="0">
+          </div>
+          <div class="price-range">
+            <label for="maxStores">حداکثر تعداد مغازه:</label>
+            <input type="number" id="maxStores" placeholder="حداکثر تعداد" min="0">
+          </div>
+          <button class="filter-btn" id="applyPriceFilter">
+            اعمال فیلتر
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="mobile-filters-overlay" id="mobileFiltersOverlay">
+    <div class="mobile-filters" id="mobileFilters" role="dialog" aria-modal="true" aria-labelledby="mobileFiltersTitle" tabindex="-1">
+      <div class="mobile-filters-header">
+        <div>
+          <h3 id="mobileFiltersTitle">فیلترها</h3>
+          <p>با تنظیم گزینه‌های زیر، مراکز خرید مناسب‌تری ببینید</p>
+        </div>
+        <button class="close-filters" id="closeFilters" aria-label="بستن فیلترها" type="button">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+
+      <div class="filters-section mobile">
+        <section class="mobile-filter-group">
+          <div class="mobile-group-header">
+            <span class="mobile-group-icon">
+              <i class="fas fa-building"></i>
+            </span>
+            <div>
+              <h4>دسته‌بندی مراکز خرید</h4>
+              <p>نوع مرکز خرید دلخواه را انتخاب کنید</p>
+            </div>
+          </div>
+          <div class="mobile-group-body">
+            <button class="filter-btn" id="mainFilterBtnMobile" aria-expanded="false" type="button">
+              <i class="fas fa-building"></i>
+              <span>همه مراکز خرید</span>
+              <i class="fas fa-chevron-down"></i>
+            </button>
+            <div class="dropdown-menu mobile-dropdown" id="filterDropdownMobile" style="display:none;">
+              <!-- گزینه‌های دسته‌بندی موبایل -->
+            </div>
+          </div>
+        </section>
+
+        <section class="mobile-filter-group">
+          <div class="mobile-group-header">
+            <span class="mobile-group-icon">
+              <i class="fas fa-map-marker-alt"></i>
+            </span>
+            <div>
+              <h4>مناطق و محله‌ها</h4>
+              <p>موقعیت جغرافیایی مرکز خرید را مشخص کنید</p>
+            </div>
+          </div>
+          <div class="mobile-group-body">
+            <button class="filter-btn" id="shopsBtnMobile" aria-expanded="false" type="button">
+              <i class="fas fa-map-marker-alt"></i>
+              <span>همه مناطق</span>
+              <i class="fas fa-chevron-down"></i>
+            </button>
+            <div class="dropdown-menu mobile-dropdown" id="shopsDropdownMobile" style="display:none;">
+              <!-- گزینه‌های مناطق موبایل -->
+            </div>
+          </div>
+        </section>
+
+        <section class="mobile-filter-group">
+          <div class="mobile-group-header">
+            <span class="mobile-group-icon">
+              <i class="fas fa-sort-amount-down-alt"></i>
+            </span>
+            <div>
+              <h4>مرتب‌سازی نتایج</h4>
+              <p>اولویت نمایش مراکز خرید را مشخص کنید</p>
+            </div>
+          </div>
+          <div class="mobile-group-body mobile-chip-row">
+            <button class="filter-btn" id="sort-cheap-mobile" type="button">
+              <i class="fas fa-sort-amount-down-alt"></i>
+              کمترین تعداد مغازه
+            </button>
+            <button class="filter-btn" id="sort-expensive-mobile" type="button">
+              <i class="fas fa-sort-amount-up"></i>
+              بیشترین تعداد مغازه
+            </button>
+          </div>
+        </section>
+
+        <section class="mobile-filter-group">
+          <div class="mobile-group-header">
+            <span class="mobile-group-icon">
+              <i class="fas fa-layer-group"></i>
+            </span>
+            <div>
+              <h4>بازه تعداد مغازه</h4>
+              <p>حداقل و حداکثر تعداد مغازه را مشخص کنید</p>
+            </div>
+          </div>
+          <div class="mobile-group-body">
+            <button class="filter-btn" id="priceFilterBtnMobile" aria-expanded="false" type="button">
+              <i class="fas fa-layer-group"></i>
+              <span>فیلتر تعداد مغازه</span>
+              <i class="fas fa-chevron-down"></i>
+            </button>
+            <div class="dropdown-menu mobile-dropdown" id="priceFilterMenuMobile" style="display:none;">
+              <div class="price-range">
+                <label for="minStoresMobile">حداقل تعداد مغازه:</label>
+                <input type="number" id="minStoresMobile" placeholder="حداقل تعداد" min="0">
+              </div>
+              <div class="price-range">
+                <label for="maxStoresMobile">حداکثر تعداد مغازه:</label>
+                <input type="number" id="maxStoresMobile" placeholder="حداکثر تعداد" min="0">
+              </div>
+              <button id="applyPriceFilterMobile" type="button">
+                <i class="fas fa-check"></i>
+                اعمال فیلتر تعداد
+              </button>
+            </div>
+          </div>
+        </section>
+      </div>
+
+      <div class="mobile-filter-actions">
+        <button class="filter-btn" id="applyFiltersMobile" type="button" style="background: linear-gradient(90deg,#10b981,#0ea5e9); color:#fff;">
+          <i class="fas fa-check-circle"></i>
+          اعمال فیلترها
+        </button>
+      </div>
+    </div>
+  </div>
 
   <!-- کارت‌های مراکز خرید شیک و جذاب -->
   <div class="main-container">
@@ -972,57 +1723,268 @@
 
 <script>
   document.addEventListener('DOMContentLoaded', function() {
-    // --- تنظیمات API ---
-    const API_URL = '/api/shopping-centers'; // همان API پنل مدیریت
+    const API_URL = '/api/shopping-centers';
 
     const listDiv = document.getElementById('all-centers-list');
-    
-    // ابتدا اسکلتون لودر نمایش داده می‌شود
-    listDiv.innerHTML = '';
-    for (let i = 0; i < 6; i++) {
-      listDiv.innerHTML += `
-        <div class="center-card fade-in delay-${i % 3}">
-          <div class="skeleton skeleton-img"></div>
-          <div class="center-info">
-            <div class="skeleton skeleton-line" style="height: 28px; margin-bottom: 15px;"></div>
-            <div class="skeleton skeleton-line short" style="height: 22px; margin-bottom: 10px;"></div>
-            <div class="skeleton skeleton-line" style="height: 18px; margin-bottom: 8px;"></div>
-            <div class="skeleton skeleton-line" style="height: 18px; margin-bottom: 8px;"></div>
-            <div class="skeleton skeleton-line medium" style="height: 18px; margin-bottom: 20px;"></div>
-            <div style="display: flex; gap: 10px; margin-top: auto;">
-              <div class="skeleton" style="height: 40px; flex: 1; border-radius: 12px;"></div>
-            </div>
-          </div>
-        </div>
-      `;
-    }
-    
-    // fetch داده‌ها از API (پس از تاخیر برای اسکلتون)
+    const searchInput = document.getElementById('searchInput');
+    const activeFiltersContainer = document.getElementById('activeFilters');
+
+    const mainFilterBtn = document.getElementById('mainFilterBtn');
+    const filterDropdown = document.getElementById('filterDropdown');
+    const shopsBtn = document.getElementById('shopsBtn');
+    const shopsDropdown = document.getElementById('shopsDropdown');
+    const sortCheapBtn = document.getElementById('sort-cheap');
+    const sortExpensiveBtn = document.getElementById('sort-expensive');
+    const priceFilterBtn = document.getElementById('priceFilterBtn');
+    const priceFilterMenu = document.getElementById('priceFilterMenu');
+    const minStoresInput = document.getElementById('minStores');
+    const maxStoresInput = document.getElementById('maxStores');
+    const applyPriceFilterBtn = document.getElementById('applyPriceFilter');
+
+    const mobileFilterBtn = document.getElementById('mobileFilterBtn');
+    const mobileFiltersOverlay = document.getElementById('mobileFiltersOverlay');
+    const mobileFiltersPanel = document.getElementById('mobileFilters');
+    const closeFiltersBtn = document.getElementById('closeFilters');
+    const mainFilterBtnMobile = document.getElementById('mainFilterBtnMobile');
+    const filterDropdownMobile = document.getElementById('filterDropdownMobile');
+    const shopsBtnMobile = document.getElementById('shopsBtnMobile');
+    const shopsDropdownMobile = document.getElementById('shopsDropdownMobile');
+    const sortCheapMobileBtn = document.getElementById('sort-cheap-mobile');
+    const sortExpensiveMobileBtn = document.getElementById('sort-expensive-mobile');
+    const priceFilterBtnMobile = document.getElementById('priceFilterBtnMobile');
+    const priceFilterMenuMobile = document.getElementById('priceFilterMenuMobile');
+    const minStoresMobileInput = document.getElementById('minStoresMobile');
+    const maxStoresMobileInput = document.getElementById('maxStoresMobile');
+    const applyPriceFilterMobileBtn = document.getElementById('applyPriceFilterMobile');
+    const applyFiltersMobileBtn = document.getElementById('applyFiltersMobile');
+
+    let centersData = [];
+    let filteredCenters = [];
+    let categories = [];
+    let locations = [];
+
+    let currentCategory = 'همه مراکز خرید';
+    let currentLocation = 'همه مناطق';
+    let currentStoresFilter = null;
+    let currentSort = null;
+    let searchTerm = '';
+
+    showSkeleton();
+
     setTimeout(() => {
       fetch(API_URL)
         .then(res => res.json())
-        .then(centers => {
-          renderCenters(centers);
+        .then(data => {
+          centersData = (Array.isArray(data) ? data : []).map((center, index) => ({
+            ...center,
+            __index: index
+          }));
+          categories = buildCategories(centersData);
+          locations = buildLocations(centersData);
+          populateDropdowns();
+          updateCategorySelection('همه مراکز خرید', { skipFilter: true });
+          updateLocationSelection('همه مناطق', { skipFilter: true });
+          updateStoresFilterLabel();
+          filterAndRender();
         })
         .catch(() => {
-          listDiv.innerHTML = `
-            <div style="grid-column: 1/-1; text-align: center; padding: 50px 20px;">
-              <i class="fas fa-exclamation-triangle" style="font-size: 4rem; color: #cbd5e1; margin-bottom: 20px;"></i>
-              <h3 style="color: #64748b; font-size: 1.5rem;">خطا در بارگذاری مراکز خرید!</h3>
-            </div>
-          `;
+          showError('خطا در بارگذاری مراکز خرید!');
         });
-    }, 1500);
-    
-    function renderCenters(centers) {
+    }, 800);
+
+    function showSkeleton() {
+      if (!listDiv) return;
       listDiv.innerHTML = '';
-      
-      if (!centers.length) {
+      for (let i = 0; i < 6; i++) {
+        listDiv.innerHTML += `
+          <div class="center-card fade-in delay-${i % 3}">
+            <div class="skeleton skeleton-img"></div>
+            <div class="center-info">
+              <div class="skeleton skeleton-line" style="height: 28px; margin-bottom: 15px;"></div>
+              <div class="skeleton skeleton-line short" style="height: 22px; margin-bottom: 10px;"></div>
+              <div class="skeleton skeleton-line" style="height: 18px; margin-bottom: 8px;"></div>
+              <div class="skeleton skeleton-line" style="height: 18px; margin-bottom: 8px;"></div>
+              <div class="skeleton skeleton-line medium" style="height: 18px; margin-bottom: 20px;"></div>
+              <div style="display: flex; gap: 10px; margin-top: auto;">
+                <div class="skeleton" style="height: 40px; flex: 1; border-radius: 12px;"></div>
+              </div>
+            </div>
+          </div>
+        `;
+      }
+    }
+
+    function showError(message) {
+      if (!listDiv) return;
+      listDiv.innerHTML = `
+        <div style="grid-column: 1 / -1; text-align: center; padding: 50px 20px;">
+          <i class="fas fa-exclamation-triangle" style="font-size: 4rem; color: #cbd5e1; margin-bottom: 20px;"></i>
+          <h3 style="color: #64748b; font-size: 1.5rem;">${message}</h3>
+        </div>
+      `;
+    }
+
+    function buildCategories(data) {
+      const tags = data
+        .map(item => (item.tag || '').trim())
+        .filter(tag => tag.length);
+      const unique = Array.from(new Set(tags));
+      return ['همه مراکز خرید', ...unique];
+    }
+
+    function buildLocations(data) {
+      const locs = data
+        .map(item => (item.location || '').trim())
+        .map(loc => loc || 'نامشخص');
+      const unique = Array.from(new Set(locs));
+      return ['همه مناطق', ...unique];
+    }
+
+    function populateDropdowns() {
+      populateCategoryDropdown(filterDropdown, false);
+      populateCategoryDropdown(filterDropdownMobile, true);
+      populateLocationDropdown(shopsDropdown, false);
+      populateLocationDropdown(shopsDropdownMobile, true);
+    }
+
+    function populateCategoryDropdown(container, isMobile) {
+      if (!container) return;
+      container.innerHTML = '';
+      categories.forEach(category => {
+        const option = document.createElement('button');
+        option.type = 'button';
+        option.className = 'dropdown-item';
+        option.dataset.value = category;
+        option.textContent = category;
+        option.addEventListener('click', () => {
+          updateCategorySelection(category);
+          if (isMobile) {
+            container.style.display = 'none';
+            if (mainFilterBtnMobile) {
+              mainFilterBtnMobile.setAttribute('aria-expanded', 'false');
+            }
+          } else {
+            closeDesktopDropdowns();
+          }
+        });
+        container.appendChild(option);
+      });
+
+      if (!container.children.length) {
+        const empty = document.createElement('div');
+        empty.textContent = 'گزینه‌ای موجود نیست';
+        empty.style.padding = '12px 20px';
+        empty.style.color = '#64748b';
+        container.appendChild(empty);
+      }
+    }
+
+    function populateLocationDropdown(container, isMobile) {
+      if (!container) return;
+      container.innerHTML = '';
+      locations.forEach(location => {
+        const option = document.createElement('button');
+        option.type = 'button';
+        option.className = 'dropdown-item';
+        option.dataset.value = location;
+        option.textContent = location;
+        option.addEventListener('click', () => {
+          updateLocationSelection(location);
+          if (isMobile) {
+            container.style.display = 'none';
+            if (shopsBtnMobile) {
+              shopsBtnMobile.setAttribute('aria-expanded', 'false');
+            }
+          } else {
+            closeDesktopDropdowns();
+          }
+        });
+        container.appendChild(option);
+      });
+
+      if (!container.children.length) {
+        const empty = document.createElement('div');
+        empty.textContent = 'گزینه‌ای موجود نیست';
+        empty.style.padding = '12px 20px';
+        empty.style.color = '#64748b';
+        container.appendChild(empty);
+      }
+    }
+
+    function getStoresValue(center) {
+      const raw = center && typeof center.stores !== 'undefined' ? center.stores : 0;
+      const numeric = typeof raw === 'number' ? raw : parseInt(raw, 10);
+      return Number.isNaN(numeric) ? 0 : numeric;
+    }
+
+    function getOrderValue(center) {
+      if (!center) return 0;
+      if (typeof center.order === 'number') return center.order;
+      const parsed = parseInt(center.order, 10);
+      if (!Number.isNaN(parsed)) return parsed;
+      return typeof center.__index === 'number' ? center.__index : 0;
+    }
+
+    function filterAndRender() {
+      if (!Array.isArray(centersData)) {
+        renderCenters([]);
+        return;
+      }
+
+      const normalizedCategory = (currentCategory || '').toLowerCase();
+      const normalizedLocation = (currentLocation || '').toLowerCase();
+
+      filteredCenters = centersData.filter(center => {
+        const title = (center.title || '').toLowerCase();
+        const description = (center.description || '').toLowerCase();
+        const location = (center.location || '').toLowerCase();
+
+        const searchMatch = !searchTerm ||
+          title.includes(searchTerm) ||
+          description.includes(searchTerm) ||
+          location.includes(searchTerm);
+
+        const categoryMatch = normalizedCategory === 'همه مراکز خرید'.toLowerCase() ||
+          ((center.tag || '').toLowerCase() === normalizedCategory);
+
+        const locationMatch = normalizedLocation === 'همه مناطق'.toLowerCase() ||
+          (normalizedLocation === 'نامشخص' && !location) ||
+          location.includes(normalizedLocation);
+
+        let storesMatch = true;
+        if (currentStoresFilter) {
+          const stores = getStoresValue(center);
+          const minOk = currentStoresFilter.min == null || stores >= currentStoresFilter.min;
+          const maxOk = currentStoresFilter.max == null || stores <= currentStoresFilter.max;
+          storesMatch = minOk && maxOk;
+        }
+
+        return searchMatch && categoryMatch && locationMatch && storesMatch;
+      });
+
+      if (currentSort === 'cheap') {
+        filteredCenters.sort((a, b) => getStoresValue(a) - getStoresValue(b));
+      } else if (currentSort === 'expensive') {
+        filteredCenters.sort((a, b) => getStoresValue(b) - getStoresValue(a));
+      } else {
+        filteredCenters.sort((a, b) => getOrderValue(a) - getOrderValue(b));
+      }
+
+      renderCenters(filteredCenters);
+      updateSortButtons();
+      updateActiveFilters();
+    }
+
+    function renderCenters(centers) {
+      if (!listDiv) return;
+      listDiv.innerHTML = '';
+
+      if (!centers || !centers.length) {
         listDiv.innerHTML = `
           <div style="grid-column: 1/-1; text-align: center; padding: 50px 20px;">
             <i class="fas fa-store-slash" style="font-size: 4rem; color: #cbd5e1; margin-bottom: 20px;"></i>
-            <h3 style="color: #64748b; font-size: 1.5rem;">مرکز خریدی یافت نشد!</h3>
-            <p style="color: #94a3b8; margin-top: 10px;">لطفاً عبارت جستجو را تغییر دهید</p>
+            <h3 style="color: #64748b; font-size: 1.5rem;">مرکز خریدی مطابق فیلترها یافت نشد!</h3>
+            <p style="color: #94a3b8; margin-top: 10px;">لطفاً فیلترها یا عبارت جستجو را تغییر دهید</p>
           </div>
         `;
         return;
@@ -1031,27 +1993,31 @@
       centers.forEach((center, index) => {
         const card = document.createElement('div');
         card.className = `center-card fade-in delay-${index % 3}`;
+        const imageSrc = center.image || 'https://via.placeholder.com/800x600?text=تصویر+مرکز+خرید';
+        const stores = getStoresValue(center);
+        const locationText = center.location ? center.location : 'نامشخص';
+        const hours = center.hours ? center.hours : 'نامشخص';
+        const holidays = center.holidays ? center.holidays : 'هیچ';
+        const rawTitle = center.title || '';
+        const safeTitle = rawTitle.replace(/\\/g, '\\\\').replace(/'/g, "\\'");
         card.innerHTML = `
           <div class="center-img-container">
-            <img class="center-img" src="${center.image || 'https://via.placeholder.com/800x600?text=تصویر+مرکز+خرید'}" alt="${center.title}">
+            <img class="center-img" src="${imageSrc}" alt="${rawTitle}">
             ${center.tag ? `<div class="center-tag">${center.tag}</div>` : ''}
           </div>
           <div class="center-info">
-            <h3 class="center-title">${center.title}</h3>
+            <h3 class="center-title">${rawTitle}</h3>
             <div class="center-address">
-              <i class="fas fa-map-marker-alt"></i> ${center.location || 'نامشخص'}
+              <i class="fas fa-map-marker-alt"></i> ${locationText}
             </div>
             <p class="center-desc">${center.description || ''}</p>
-            
             <div class="center-meta">
-              <!-- تعداد مغازه‌ها را نمایش می‌دهیم -->
-              <span><i class="fas fa-store"></i> ${center.stores || 0} مغازه</span>
-              <span><i class="fas fa-clock"></i> ساعات کاری: ${center.hours || 'نامشخص'}</span>
-              <span><i class="fas fa-calendar-times"></i> روزهای تعطیل: ${center.holidays || 'هیچ'}</span>
+              <span><i class="fas fa-store"></i> ${stores.toLocaleString('fa-IR')} مغازه</span>
+              <span><i class="fas fa-clock"></i> ساعات کاری: ${hours}</span>
+              <span><i class="fas fa-calendar-times"></i> روزهای تعطیل: ${holidays}</span>
             </div>
-            
             <div class="center-actions">
-              <div class="action-btn btn-primary" onclick="goToShops('${center._id}', '${center.title}')">
+              <div class="action-btn btn-primary" onclick="goToShops('${center._id}', '${safeTitle}')">
                 <i class="fas fa-list"></i> مشاهده فروشگاه‌ها
               </div>
             </div>
@@ -1065,24 +2031,402 @@
       window.location.href = `shopping-centers-shops.html?centerId=${id}&title=${encodeURIComponent(title)}`;
     };
 
-    // جستجو فقط بر اساس نام مرکز خرید
-    document.getElementById('searchInput').addEventListener('input', function() {
-      const searchTerm = this.value.trim().toLowerCase();
-      if (searchTerm === '') {
-        fetch(API_URL)
-          .then(res => res.json())
-          .then(centers => renderCenters(centers));
+    function updateCategorySelection(category, options = {}) {
+      currentCategory = category || 'همه مراکز خرید';
+      const label = currentCategory;
+      if (mainFilterBtn) {
+        mainFilterBtn.innerHTML = `
+          <i class="fas fa-building"></i>
+          ${label}
+          <i class="fas fa-chevron-down" style="margin-right:7px;font-size:0.95em"></i>
+        `;
+      }
+      if (mainFilterBtnMobile) {
+        mainFilterBtnMobile.innerHTML = `
+          <i class="fas fa-building"></i>
+          <span>${label}</span>
+          <i class="fas fa-chevron-down"></i>
+        `;
+      }
+      if (!options.skipFilter) {
+        filterAndRender();
+      }
+    }
+
+    function updateLocationSelection(location, options = {}) {
+      currentLocation = location || 'همه مناطق';
+      const label = currentLocation;
+      if (shopsBtn) {
+        shopsBtn.innerHTML = `
+          <i class="fas fa-map-marker-alt"></i>
+          ${label}
+          <i class="fas fa-chevron-down" style="margin-right:7px;font-size:0.95em"></i>
+        `;
+        shopsBtn.classList.toggle('active', currentLocation !== 'همه مناطق');
+      }
+      if (shopsBtnMobile) {
+        shopsBtnMobile.innerHTML = `
+          <i class="fas fa-map-marker-alt"></i>
+          <span>${label}</span>
+          <i class="fas fa-chevron-down"></i>
+        `;
+      }
+      if (!options.skipFilter) {
+        filterAndRender();
+      }
+    }
+
+    function updateStoresFilterLabel() {
+      const hasFilter = currentStoresFilter && (currentStoresFilter.min != null || currentStoresFilter.max != null);
+      const minLabel = currentStoresFilter && currentStoresFilter.min != null
+        ? currentStoresFilter.min.toLocaleString('fa-IR')
+        : 'بدون حداقل';
+      const maxLabel = currentStoresFilter && currentStoresFilter.max != null
+        ? currentStoresFilter.max.toLocaleString('fa-IR')
+        : 'بدون حداکثر';
+
+      if (priceFilterBtn) {
+        priceFilterBtn.innerHTML = hasFilter
+          ? `<i class="fas fa-layer-group"></i> فیلتر تعداد (${minLabel} - ${maxLabel})<i class="fas fa-chevron-down" style="margin-right:7px;font-size:0.95em"></i>`
+          : `<i class="fas fa-layer-group"></i> فیلتر تعداد مغازه<i class="fas fa-chevron-down" style="margin-right:7px;font-size:0.95em"></i>`;
+        priceFilterBtn.classList.toggle('active', !!hasFilter);
+      }
+
+      if (priceFilterBtnMobile) {
+        priceFilterBtnMobile.innerHTML = hasFilter
+          ? `<i class="fas fa-layer-group"></i><span>فیلتر تعداد مغازه (${minLabel} - ${maxLabel})</span><i class="fas fa-chevron-down"></i>`
+          : `<i class="fas fa-layer-group"></i><span>فیلتر تعداد مغازه</span><i class="fas fa-chevron-down"></i>`;
+      }
+
+      if (minStoresInput) {
+        minStoresInput.value = currentStoresFilter && currentStoresFilter.min != null ? currentStoresFilter.min : '';
+      }
+      if (maxStoresInput) {
+        maxStoresInput.value = currentStoresFilter && currentStoresFilter.max != null ? currentStoresFilter.max : '';
+      }
+      if (minStoresMobileInput) {
+        minStoresMobileInput.value = currentStoresFilter && currentStoresFilter.min != null ? currentStoresFilter.min : '';
+      }
+      if (maxStoresMobileInput) {
+        maxStoresMobileInput.value = currentStoresFilter && currentStoresFilter.max != null ? currentStoresFilter.max : '';
+      }
+    }
+
+    function updateSortButtons() {
+      const cheapActive = currentSort === 'cheap';
+      const expensiveActive = currentSort === 'expensive';
+      if (sortCheapBtn) sortCheapBtn.classList.toggle('active', cheapActive);
+      if (sortExpensiveBtn) sortExpensiveBtn.classList.toggle('active', expensiveActive);
+      if (sortCheapMobileBtn) sortCheapMobileBtn.classList.toggle('active', cheapActive);
+      if (sortExpensiveMobileBtn) sortExpensiveMobileBtn.classList.toggle('active', expensiveActive);
+    }
+
+    function updateActiveFilters() {
+      if (!activeFiltersContainer) return;
+      activeFiltersContainer.innerHTML = '';
+
+      const chips = [];
+
+      if (searchTerm) {
+        chips.push({
+          label: `جستجو: ${searchInput.value.trim()}`,
+          remove: () => {
+            searchTerm = '';
+            if (searchInput) searchInput.value = '';
+            filterAndRender();
+          }
+        });
+      }
+
+      if (currentCategory && currentCategory !== 'همه مراکز خرید') {
+        chips.push({
+          label: `دسته‌بندی: ${currentCategory}`,
+          remove: () => updateCategorySelection('همه مراکز خرید')
+        });
+      }
+
+      if (currentLocation && currentLocation !== 'همه مناطق') {
+        chips.push({
+          label: `منطقه: ${currentLocation}`,
+          remove: () => updateLocationSelection('همه مناطق')
+        });
+      }
+
+      if (currentStoresFilter && (currentStoresFilter.min != null || currentStoresFilter.max != null)) {
+        const minLabel = currentStoresFilter.min != null ? currentStoresFilter.min.toLocaleString('fa-IR') : 'بدون حداقل';
+        const maxLabel = currentStoresFilter.max != null ? currentStoresFilter.max.toLocaleString('fa-IR') : 'بدون حداکثر';
+        chips.push({
+          label: `تعداد مغازه: ${minLabel} تا ${maxLabel}`,
+          remove: () => {
+            currentStoresFilter = null;
+            updateStoresFilterLabel();
+            filterAndRender();
+          }
+        });
+      }
+
+      if (currentSort) {
+        const sortLabel = currentSort === 'cheap' ? 'کمترین تعداد مغازه' : 'بیشترین تعداد مغازه';
+        chips.push({
+          label: `مرتب‌سازی: ${sortLabel}`,
+          remove: () => {
+            currentSort = null;
+            updateSortButtons();
+            filterAndRender();
+          }
+        });
+      }
+
+      if (!chips.length) {
+        activeFiltersContainer.style.display = 'none';
         return;
       }
-      
-      fetch(API_URL)
-        .then(res => res.json())
-        .then(centers => {
-          const filtered = centers.filter(center => 
-            center.title.toLowerCase().includes(searchTerm)
-          );
-          renderCenters(filtered);
-        });
+
+      activeFiltersContainer.style.display = 'flex';
+      chips.forEach(chip => {
+        const chipElement = document.createElement('div');
+        chipElement.className = 'active-filter';
+        const textSpan = document.createElement('span');
+        textSpan.textContent = chip.label;
+        const removeBtn = document.createElement('button');
+        removeBtn.type = 'button';
+        removeBtn.className = 'remove';
+        removeBtn.innerHTML = '&times;';
+        removeBtn.addEventListener('click', chip.remove);
+        chipElement.appendChild(textSpan);
+        chipElement.appendChild(removeBtn);
+        activeFiltersContainer.appendChild(chipElement);
+      });
+    }
+
+    function closeDesktopDropdowns() {
+      if (filterDropdown) filterDropdown.style.display = 'none';
+      if (shopsDropdown) shopsDropdown.style.display = 'none';
+      if (priceFilterMenu) priceFilterMenu.style.display = 'none';
+    }
+
+    function closeMobileDropdowns() {
+      if (filterDropdownMobile) {
+        filterDropdownMobile.style.display = 'none';
+        filterDropdownMobile.scrollTop = 0;
+      }
+      if (shopsDropdownMobile) {
+        shopsDropdownMobile.style.display = 'none';
+        shopsDropdownMobile.scrollTop = 0;
+      }
+      if (priceFilterMenuMobile) {
+        priceFilterMenuMobile.style.display = 'none';
+        priceFilterMenuMobile.scrollTop = 0;
+      }
+      if (mainFilterBtnMobile) mainFilterBtnMobile.setAttribute('aria-expanded', 'false');
+      if (shopsBtnMobile) shopsBtnMobile.setAttribute('aria-expanded', 'false');
+      if (priceFilterBtnMobile) priceFilterBtnMobile.setAttribute('aria-expanded', 'false');
+    }
+
+    function openMobileFilters() {
+      if (!mobileFiltersOverlay || !mobileFiltersPanel) return;
+      mobileFiltersOverlay.style.display = 'flex';
+      requestAnimationFrame(() => {
+        mobileFiltersPanel.classList.add('active');
+      });
+      if (mobileFilterBtn) mobileFilterBtn.setAttribute('aria-expanded', 'true');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeMobileFilters() {
+      if (!mobileFiltersOverlay || !mobileFiltersPanel) return;
+      mobileFiltersPanel.classList.remove('active');
+      setTimeout(() => {
+        mobileFiltersOverlay.style.display = 'none';
+      }, 250);
+      if (mobileFilterBtn) mobileFilterBtn.setAttribute('aria-expanded', 'false');
+      document.body.style.overflow = '';
+      closeMobileDropdowns();
+    }
+
+    function setStoresFilter(minValue, maxValue) {
+      const min = minValue === '' || minValue == null ? null : Number(minValue);
+      const max = maxValue === '' || maxValue == null ? null : Number(maxValue);
+
+      if ((min != null && Number.isNaN(min)) || (max != null && Number.isNaN(max))) {
+        alert('لطفاً فقط عدد وارد کنید.');
+        return false;
+      }
+
+      if (min != null && max != null && min > max) {
+        alert('حداقل تعداد نمی‌تواند از حداکثر بیشتر باشد!');
+        return false;
+      }
+
+      currentStoresFilter = (min == null && max == null) ? null : { min, max };
+      updateStoresFilterLabel();
+      filterAndRender();
+      return true;
+    }
+
+    if (searchInput) {
+      searchInput.addEventListener('input', (event) => {
+        searchTerm = event.target.value.trim().toLowerCase();
+        filterAndRender();
+      });
+    }
+
+    if (mainFilterBtn) {
+      mainFilterBtn.addEventListener('click', (event) => {
+        event.stopPropagation();
+        const isOpen = filterDropdown && filterDropdown.style.display === 'block';
+        closeDesktopDropdowns();
+        if (filterDropdown) {
+          filterDropdown.style.display = isOpen ? 'none' : 'block';
+        }
+      });
+    }
+
+    if (shopsBtn) {
+      shopsBtn.addEventListener('click', (event) => {
+        event.stopPropagation();
+        const isOpen = shopsDropdown && shopsDropdown.style.display === 'block';
+        closeDesktopDropdowns();
+        if (shopsDropdown) {
+          shopsDropdown.style.display = isOpen ? 'none' : 'block';
+        }
+      });
+    }
+
+    if (priceFilterBtn) {
+      priceFilterBtn.addEventListener('click', (event) => {
+        event.stopPropagation();
+        const isOpen = priceFilterMenu && priceFilterMenu.style.display === 'block';
+        closeDesktopDropdowns();
+        if (priceFilterMenu) {
+          priceFilterMenu.style.display = isOpen ? 'none' : 'block';
+        }
+      });
+    }
+
+    if (applyPriceFilterBtn) {
+      applyPriceFilterBtn.addEventListener('click', () => {
+        const success = setStoresFilter(minStoresInput ? minStoresInput.value : '', maxStoresInput ? maxStoresInput.value : '');
+        if (success) {
+          closeDesktopDropdowns();
+        }
+      });
+    }
+
+    if (sortCheapBtn) {
+      sortCheapBtn.addEventListener('click', () => {
+        currentSort = currentSort === 'cheap' ? null : 'cheap';
+        updateSortButtons();
+        filterAndRender();
+      });
+    }
+
+    if (sortExpensiveBtn) {
+      sortExpensiveBtn.addEventListener('click', () => {
+        currentSort = currentSort === 'expensive' ? null : 'expensive';
+        updateSortButtons();
+        filterAndRender();
+      });
+    }
+
+    if (mobileFilterBtn) {
+      mobileFilterBtn.addEventListener('click', openMobileFilters);
+    }
+
+    if (closeFiltersBtn) {
+      closeFiltersBtn.addEventListener('click', closeMobileFilters);
+    }
+
+    if (mobileFiltersOverlay) {
+      mobileFiltersOverlay.addEventListener('click', (event) => {
+        if (event.target === mobileFiltersOverlay) {
+          closeMobileFilters();
+        }
+      });
+    }
+
+    if (mainFilterBtnMobile) {
+      mainFilterBtnMobile.addEventListener('click', (event) => {
+        event.stopPropagation();
+        const isOpen = filterDropdownMobile && filterDropdownMobile.style.display === 'block';
+        closeMobileDropdowns();
+        if (filterDropdownMobile) {
+          filterDropdownMobile.style.display = isOpen ? 'none' : 'block';
+          mainFilterBtnMobile.setAttribute('aria-expanded', isOpen ? 'false' : 'true');
+        }
+      });
+    }
+
+    if (shopsBtnMobile) {
+      shopsBtnMobile.addEventListener('click', (event) => {
+        event.stopPropagation();
+        const isOpen = shopsDropdownMobile && shopsDropdownMobile.style.display === 'block';
+        closeMobileDropdowns();
+        if (shopsDropdownMobile) {
+          shopsDropdownMobile.style.display = isOpen ? 'none' : 'block';
+          shopsBtnMobile.setAttribute('aria-expanded', isOpen ? 'false' : 'true');
+        }
+      });
+    }
+
+    if (priceFilterBtnMobile) {
+      priceFilterBtnMobile.addEventListener('click', (event) => {
+        event.stopPropagation();
+        const isOpen = priceFilterMenuMobile && priceFilterMenuMobile.style.display === 'block';
+        closeMobileDropdowns();
+        if (priceFilterMenuMobile) {
+          priceFilterMenuMobile.style.display = isOpen ? 'none' : 'block';
+          priceFilterBtnMobile.setAttribute('aria-expanded', isOpen ? 'false' : 'true');
+        }
+      });
+    }
+
+    if (applyPriceFilterMobileBtn) {
+      applyPriceFilterMobileBtn.addEventListener('click', () => {
+        const success = setStoresFilter(
+          minStoresMobileInput ? minStoresMobileInput.value : '',
+          maxStoresMobileInput ? maxStoresMobileInput.value : ''
+        );
+        if (success) {
+          closeMobileDropdowns();
+        }
+      });
+    }
+
+    if (sortCheapMobileBtn) {
+      sortCheapMobileBtn.addEventListener('click', () => {
+        currentSort = currentSort === 'cheap' ? null : 'cheap';
+        updateSortButtons();
+        filterAndRender();
+      });
+    }
+
+    if (sortExpensiveMobileBtn) {
+      sortExpensiveMobileBtn.addEventListener('click', () => {
+        currentSort = currentSort === 'expensive' ? null : 'expensive';
+        updateSortButtons();
+        filterAndRender();
+      });
+    }
+
+    if (applyFiltersMobileBtn) {
+      applyFiltersMobileBtn.addEventListener('click', () => {
+        filterAndRender();
+        closeMobileFilters();
+      });
+    }
+
+    document.addEventListener('click', (event) => {
+      if (!event.target.closest('.filters-section.desktop')) {
+        closeDesktopDropdowns();
+      }
+    });
+
+    document.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape') {
+        closeDesktopDropdowns();
+        closeMobileFilters();
+      }
     });
   });
 </script>
