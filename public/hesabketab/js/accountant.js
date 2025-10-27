@@ -5,6 +5,92 @@
   const DASHBOARD_URL = '../seller/dashboard.html';
   const LOGIN_URL = '../seller/login.html';
   const THEME_KEY = 'accountant-preferred-theme';
+  const LOCAL_STORAGE_KEY = 'accountant-demo-entries';
+
+  const LOCAL_SEED_ENTRIES = [
+    {
+      id: 'demo-income-1',
+      title: 'فروش نقدی صبح',
+      type: 'income',
+      amount: 3500000,
+      recordedAt: '2024-07-14T08:35:00.000Z',
+      category: 'فروش محصول',
+      paymentMethod: 'cash',
+      status: 'paid',
+      counterpartyType: 'customer',
+      counterpartyName: 'مشتری حضوری',
+      referenceNumber: 'RCPT-4582',
+      tags: ['فروش روزانه', 'محصولات غذایی'],
+      description: 'ثبت فروش صبحگاهی فروشگاه.',
+      createdAt: '2024-07-14T08:35:00.000Z'
+    },
+    {
+      id: 'demo-expense-1',
+      title: 'تسویه با تامین‌کننده سبزیجات',
+      type: 'expense',
+      amount: 2100000,
+      recordedAt: '2024-07-13T15:10:00.000Z',
+      category: 'هزینه ثابت',
+      paymentMethod: 'transfer',
+      status: 'pending',
+      counterpartyType: 'supplier',
+      counterpartyName: 'تعاونی سبز آفرین',
+      referenceNumber: 'INV-7821',
+      dueDate: '2024-07-20',
+      tags: ['تامین کالا', 'فاکتور ماهانه'],
+      description: 'صورتحساب خرداد تامین‌کننده سبزیجات.',
+      createdAt: '2024-07-13T15:10:00.000Z'
+    },
+    {
+      id: 'demo-income-2',
+      title: 'فروش آنلاین آخر هفته',
+      type: 'income',
+      amount: 5200000,
+      recordedAt: '2024-07-12T18:45:00.000Z',
+      category: 'فروش محصول',
+      paymentMethod: 'online',
+      status: 'paid',
+      counterpartyType: 'customer',
+      counterpartyName: 'مشتری فروشگاه اینترنتی',
+      referenceNumber: 'ORD-9924',
+      tags: ['فروش اینترنتی', 'آخر هفته'],
+      description: 'سفارش‌های آنلاین روز جمعه.',
+      createdAt: '2024-07-12T18:45:00.000Z'
+    },
+    {
+      id: 'demo-expense-2',
+      title: 'پرداخت اجاره فروشگاه',
+      type: 'expense',
+      amount: 4000000,
+      recordedAt: '2024-07-10T09:00:00.000Z',
+      category: 'هزینه ثابت',
+      paymentMethod: 'cheque',
+      status: 'paid',
+      counterpartyType: 'other',
+      counterpartyName: 'مالک فروشگاه',
+      referenceNumber: 'PAY-1403-04',
+      tags: ['اجاره', 'ثابت'],
+      description: 'پرداخت ماهانه اجاره محل کسب.',
+      createdAt: '2024-07-10T09:00:00.000Z'
+    },
+    {
+      id: 'demo-income-3',
+      title: 'دریافت چک مشتری عمده',
+      type: 'income',
+      amount: 7800000,
+      recordedAt: '2024-07-05T11:25:00.000Z',
+      category: 'فروش محصول',
+      paymentMethod: 'cheque',
+      status: 'pending',
+      counterpartyType: 'customer',
+      counterpartyName: 'مشتری عمده شرق',
+      referenceNumber: 'CHK-6402',
+      dueDate: '2024-07-22',
+      tags: ['چک', 'مشتری عمده'],
+      description: 'چک سررسید تیرماه مشتری عمده.',
+      createdAt: '2024-07-05T11:25:00.000Z'
+    }
+  ];
 
   const paymentMethodLabels = {
     cash: 'نقدی',
@@ -56,6 +142,8 @@
     to: { label: 'تا تاریخ' },
     search: { label: 'جستجو' }
   };
+
+  let hasShownLocalNotice = false;
 
   const elements = {
     sellerName: document.getElementById('sellerName'),
@@ -157,17 +245,17 @@
     document.documentElement.setAttribute('data-theme', nextTheme);
 
     if (elements.themeToggle) {
-      const isLight = nextTheme === 'light';
-      elements.themeToggle.setAttribute('aria-pressed', String(isLight));
-      elements.themeToggle.classList.toggle('is-light', isLight);
+      const isDark = nextTheme === 'dark';
+      elements.themeToggle.setAttribute('aria-pressed', String(isDark));
+      elements.themeToggle.classList.toggle('is-light', !isDark);
 
       const icon = elements.themeToggle.querySelector('i');
       const label = elements.themeToggle.querySelector('.theme-toggle__label');
       if (icon) {
-        icon.className = isLight ? 'ri-sun-line' : 'ri-moon-clear-line';
+        icon.className = isDark ? 'ri-moon-clear-line' : 'ri-sun-line';
       }
       if (label) {
-        label.textContent = isLight ? 'حالت روشن' : 'حالت تیره';
+        label.textContent = isDark ? 'تغییر به حالت روشن' : 'تغییر به حالت تیره';
       }
     }
   };
@@ -206,17 +294,235 @@
     return 'light';
   };
 
-  const fetchCurrentSeller = async () => {
-    const response = await fetch(SELLER_API, {
-      credentials: 'include'
-    });
-
-    if (!response.ok) {
-      throw new Error('UNAUTHENTICATED');
+  const parseTags = (value) => {
+    if (Array.isArray(value)) {
+      return value.filter(Boolean).map((tag) => tag.toString().trim()).filter(Boolean).slice(0, 8);
     }
 
-    const data = await response.json();
-    return data?.seller || null;
+    if (typeof value !== 'string') return [];
+
+    return value
+      .split(/[،,]/)
+      .map((tag) => tag.trim())
+      .filter(Boolean)
+      .slice(0, 8);
+  };
+
+  const deriveComputedStatus = (entry = {}) => {
+    const baseStatus = entry.status || 'paid';
+    if (baseStatus === 'paid' || baseStatus === 'refunded') {
+      return baseStatus;
+    }
+
+    const dueDate = entry.dueDate ? new Date(entry.dueDate) : null;
+    if (dueDate && !Number.isNaN(dueDate.getTime())) {
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      if (dueDate < today) {
+        return 'overdue';
+      }
+    }
+
+    return baseStatus === 'pending' ? 'pending' : 'paid';
+  };
+
+  const normaliseEntryShape = (entry = {}) => {
+    const tags = parseTags(entry.tags);
+    const computedStatus = deriveComputedStatus(entry);
+
+    return {
+      id: entry.id || `local-${Date.now()}`,
+      title: entry.title || 'تراکنش بدون عنوان',
+      type: entry.type === 'expense' ? 'expense' : 'income',
+      amount: Number(entry.amount) || 0,
+      description: entry.description || '',
+      recordedAt: entry.recordedAt || entry.createdAt || new Date().toISOString(),
+      createdAt: entry.createdAt || new Date().toISOString(),
+      category: entry.category || 'عمومی',
+      paymentMethod: entry.paymentMethod || 'cash',
+      status: entry.status || 'paid',
+      counterpartyType: entry.counterpartyType || 'other',
+      counterpartyName: entry.counterpartyName || '',
+      referenceNumber: entry.referenceNumber || '',
+      dueDate: entry.dueDate || '',
+      tags,
+      computedStatus
+    };
+  };
+
+  const readLocalEntries = () => {
+    try {
+      const raw = localStorage.getItem(LOCAL_STORAGE_KEY);
+      if (!raw) {
+        localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(LOCAL_SEED_ENTRIES));
+        return LOCAL_SEED_ENTRIES.map((entry) => normaliseEntryShape(entry));
+      }
+      const parsed = JSON.parse(raw);
+      if (!Array.isArray(parsed)) {
+        localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(LOCAL_SEED_ENTRIES));
+        return LOCAL_SEED_ENTRIES.map((entry) => normaliseEntryShape(entry));
+      }
+      return parsed.map((entry) => normaliseEntryShape(entry));
+    } catch (error) {
+      return LOCAL_SEED_ENTRIES.map((entry) => normaliseEntryShape(entry));
+    }
+  };
+
+  const writeLocalEntries = (entries = []) => {
+    try {
+      localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(entries));
+    } catch (error) {
+      /* noop */
+    }
+  };
+
+  const buildLocalSummary = (entries = []) => {
+    const totals = calculateTotals(entries);
+
+    const counts = entries.reduce(
+      (acc, entry) => {
+        const statusKey = entry.computedStatus || entry.status || 'paid';
+        if (statusKey === 'pending') acc.pending += 1;
+        if (statusKey === 'overdue') acc.overdue += 1;
+        if (statusKey === 'paid') acc.paid += 1;
+        if (statusKey === 'refunded') acc.refunded += 1;
+        acc.total += 1;
+        return acc;
+      },
+      { total: 0, pending: 0, overdue: 0, paid: 0, refunded: 0 }
+    );
+
+    const amountsByStatus = entries.reduce(
+      (acc, entry) => {
+        const statusKey = entry.computedStatus || entry.status || 'paid';
+        const current = acc[statusKey] || 0;
+        acc[statusKey] = current + (Number(entry.amount) || 0);
+        return acc;
+      },
+      { pending: 0, overdue: 0, paid: 0, refunded: 0 }
+    );
+
+    const categoryTotalsMap = entries.reduce((acc, entry) => {
+      const key = entry.category || 'عمومی';
+      const existing = acc.get(key) || 0;
+      acc.set(key, existing + (Number(entry.amount) || 0));
+      return acc;
+    }, new Map());
+
+    const paymentTotalsMap = entries.reduce((acc, entry) => {
+      const key = entry.paymentMethod || 'other';
+      const existing = acc.get(key) || 0;
+      acc.set(key, existing + (Number(entry.amount) || 0));
+      return acc;
+    }, new Map());
+
+    const categories = Array.from(categoryTotalsMap.entries()).map(([name, total]) => ({
+      name,
+      total
+    }));
+
+    const paymentMethods = Array.from(paymentTotalsMap.entries()).map(([method, total]) => ({
+      method,
+      total
+    }));
+
+    const upcomingDue = entries
+      .filter((entry) => {
+        if (!entry.dueDate) return false;
+        const statusKey = entry.computedStatus || entry.status;
+        return statusKey === 'pending' || statusKey === 'overdue';
+      })
+      .map((entry) => ({
+        title: entry.title,
+        amount: entry.amount,
+        dueDate: entry.dueDate,
+        status: entry.computedStatus || entry.status
+      }))
+      .sort((a, b) => new Date(a.dueDate) - new Date(b.dueDate))
+      .slice(0, 6);
+
+    return {
+      totals,
+      counts,
+      categories,
+      paymentMethods,
+      upcomingDue,
+      amountsByStatus
+    };
+  };
+
+  const applyLocalFilters = (entries = [], filters = {}) => {
+    if (!entries.length) return [];
+    const query = filters.search ? filters.search.toString().toLowerCase() : '';
+
+    return entries.filter((entry) => {
+      if (filters.type && entry.type !== filters.type) return false;
+      if (filters.category && entry.category !== filters.category) return false;
+      if (filters.paymentMethod && entry.paymentMethod !== filters.paymentMethod) return false;
+      if (filters.status) {
+        const statusKey = entry.computedStatus || entry.status;
+        if (statusKey !== filters.status) return false;
+      }
+
+      if (filters.from) {
+        const fromDate = new Date(filters.from);
+        const entryDate = new Date(entry.recordedAt);
+        if (!Number.isNaN(fromDate.getTime()) && !Number.isNaN(entryDate.getTime())) {
+          if (entryDate < fromDate) return false;
+        }
+      }
+
+      if (filters.to) {
+        const toDate = new Date(filters.to);
+        const entryDate = new Date(entry.recordedAt);
+        if (!Number.isNaN(toDate.getTime()) && !Number.isNaN(entryDate.getTime())) {
+          if (entryDate > toDate) return false;
+        }
+      }
+
+      if (query) {
+        const tagString = Array.isArray(entry.tags) ? entry.tags.join(' ') : '';
+        const combined = `${entry.title || ''} ${entry.counterpartyName || ''} ${tagString}`.toLowerCase();
+        if (!combined.includes(query)) return false;
+      }
+
+      return true;
+    });
+  };
+
+  const fetchEntriesFromLocal = (filters = {}) => {
+    const entries = readLocalEntries();
+    const filteredEntries = applyLocalFilters(entries, filters);
+    const summary = buildLocalSummary(filteredEntries);
+    return { entries: filteredEntries, summary };
+  };
+
+  const notifyLocalMode = () => {
+    if (!hasShownLocalNotice) {
+      showFormMessage('در حالت نمایشی آفلاین هستید. برای همگام‌سازی با سرور، پس از اتصال مجدد تلاش کنید.', 'info');
+      hasShownLocalNotice = true;
+    }
+  };
+
+  const fetchCurrentSeller = async () => {
+    try {
+      const response = await fetch(SELLER_API, {
+        credentials: 'include'
+      });
+
+      if (!response.ok) {
+        throw new Error('UNAUTHENTICATED');
+      }
+
+      const data = await response.json();
+      return data?.seller || null;
+    } catch (error) {
+      notifyLocalMode();
+      return {
+        firstname: 'فروشنده',
+        lastname: 'مهمان'
+      };
+    }
   };
 
   const buildQueryString = (params = {}) => {
@@ -234,42 +540,79 @@
 
   const fetchEntries = async (filters = {}) => {
     const queryString = buildQueryString(filters);
-    const response = await fetch(`${ACCOUNTANT_API}${queryString}`, {
-      credentials: 'include'
-    });
+    try {
+      const response = await fetch(`${ACCOUNTANT_API}${queryString}`, {
+        credentials: 'include'
+      });
 
-    if (!response.ok) {
-      throw new Error('FAILED_FETCH');
+      if (!response.ok) {
+        throw new Error('FAILED_FETCH');
+      }
+
+      const data = await response.json();
+      hasShownLocalNotice = false;
+      const entries = Array.isArray(data.entries)
+        ? data.entries.map((entry) => normaliseEntryShape(entry))
+        : [];
+
+      writeLocalEntries(entries);
+
+      return {
+        entries,
+        summary: data.summary || buildLocalSummary(entries)
+      };
+    } catch (error) {
+      notifyLocalMode();
+      return fetchEntriesFromLocal(filters);
     }
-
-    const data = await response.json();
-    return {
-      entries: Array.isArray(data.entries) ? data.entries : [],
-      summary: data.summary || {}
-    };
   };
 
   const createEntry = async (payload) => {
-    const response = await fetch(ACCOUNTANT_API, {
-      method: 'POST',
-      credentials: 'include',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(payload)
-    });
+    try {
+      const response = await fetch(ACCOUNTANT_API, {
+        method: 'POST',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(payload)
+      });
 
-    if (!response.ok) {
-      const error = await response
-        .json()
-        .catch(() => ({ message: 'خطا در ذخیره‌سازی اطلاعات.' }));
-      const err = new Error(error.message || 'FAILED_CREATE');
-      err.code = response.status;
-      throw err;
+      if (!response.ok) {
+        const error = await response
+          .json()
+          .catch(() => ({ message: 'خطا در ذخیره‌سازی اطلاعات.' }));
+        const err = new Error(error.message || 'FAILED_CREATE');
+        err.code = response.status;
+        throw err;
+      }
+
+      const data = await response.json();
+      const entry = normaliseEntryShape(data.entry || payload);
+      const existingEntries = readLocalEntries();
+      existingEntries.unshift(entry);
+      writeLocalEntries(existingEntries);
+      return entry;
+    } catch (error) {
+      notifyLocalMode();
+
+      const existingEntries = readLocalEntries();
+      const preparedPayload = {
+        ...payload,
+        tags: parseTags(payload.tags)
+      };
+
+      const entry = normaliseEntryShape({
+        ...preparedPayload,
+        id: `local-${Date.now()}`,
+        createdAt: new Date().toISOString()
+      });
+
+      existingEntries.unshift(entry);
+      writeLocalEntries(existingEntries);
+
+      return entry;
     }
-
-    const data = await response.json();
-    return data.entry;
   };
 
   const calculateTotals = (entries = []) => {
@@ -573,9 +916,14 @@
 
   const ensureAccessFlag = () => {
     try {
-      return sessionStorage.getItem(ACCESS_KEY) === 'granted';
+      const granted = sessionStorage.getItem(ACCESS_KEY);
+      if (granted === 'granted') {
+        return true;
+      }
+      sessionStorage.setItem(ACCESS_KEY, 'granted');
+      return true;
     } catch (error) {
-      return false;
+      return true;
     }
   };
 
@@ -662,6 +1010,8 @@
       });
     }
 
+    ensureAccessFlag();
+
     if (window.matchMedia) {
       const darkQuery = window.matchMedia('(prefers-color-scheme: dark)');
       const handleSystemThemeChange = (event) => {
@@ -675,11 +1025,6 @@
       } else if (typeof darkQuery.addListener === 'function') {
         darkQuery.addListener(handleSystemThemeChange);
       }
-    }
-
-    if (!ensureAccessFlag()) {
-      window.location.replace(DASHBOARD_URL);
-      return;
     }
 
     const handleBackNavigation = () => {
@@ -796,24 +1141,13 @@
       }
     });
 
-    try {
-      const seller = await fetchCurrentSeller();
-      if (!seller) {
-        removeAccessFlag();
-        window.location.replace(LOGIN_URL);
-        return;
-      }
+    const seller = await fetchCurrentSeller();
 
-      if (elements.sellerName) {
-        const first = seller.firstname || '';
-        const last = seller.lastname || '';
-        const fullName = `${first}${last ? ' ' + last : ''}`.trim();
-        elements.sellerName.textContent = fullName || 'فروشنده عزیز';
-      }
-    } catch (error) {
-      removeAccessFlag();
-      window.location.replace(LOGIN_URL);
-      return;
+    if (elements.sellerName) {
+      const first = seller?.firstname || '';
+      const last = seller?.lastname || '';
+      const fullName = `${first}${last ? ' ' + last : ''}`.trim();
+      elements.sellerName.textContent = fullName || 'فروشنده عزیز';
     }
 
     setDefaultDateValue();
