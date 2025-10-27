@@ -619,148 +619,273 @@
     
     .centers-list {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-      gap: 24px;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 28px;
     }
-    
+
     .center-card {
-      background: #fff;
-      border-radius: 20px;
+      background: linear-gradient(160deg, rgba(255, 255, 255, 0.95) 0%, rgba(241, 248, 255, 0.98) 100%);
+      border-radius: 26px;
       overflow: hidden;
       transition: var(--transition);
       display: flex;
       flex-direction: column;
       height: 100%;
       position: relative;
-      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
-      border: 1px solid #e2e8f0;
+      box-shadow: 0 18px 45px rgba(15, 23, 42, 0.12);
+      border: 1px solid rgba(148, 163, 184, 0.25);
+      isolation: isolate;
     }
-    
+
+    .center-card::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle at top right, rgba(14, 165, 233, 0.18), transparent 50%),
+        radial-gradient(circle at bottom left, rgba(16, 185, 129, 0.12), transparent 45%);
+      opacity: 0;
+      transition: var(--transition);
+      z-index: -1;
+    }
+
     .center-card:hover {
-      transform: translateY(-8px);
-      box-shadow: 0 12px 30px rgba(14, 165, 233, 0.2);
+      transform: translateY(-10px);
+      box-shadow: 0 25px 55px rgba(14, 165, 233, 0.25);
     }
-    
+
+    .center-card:hover::before {
+      opacity: 1;
+    }
+
     .center-img-container {
       position: relative;
-      height: 220px;
+      height: 230px;
       overflow: hidden;
+      border-bottom: 1px solid rgba(226, 232, 240, 0.7);
     }
-    
+
+    .center-img-container::after {
+      content: '';
+      position: absolute;
+      inset: auto 0 0 0;
+      height: 45%;
+      background: linear-gradient(180deg, rgba(15, 23, 42, 0) 0%, rgba(15, 23, 42, 0.65) 100%);
+      pointer-events: none;
+      transition: var(--transition);
+    }
+
     .center-img {
       width: 100%;
       height: 100%;
       object-fit: cover;
-      transition: var(--transition);
+      transition: transform 0.45s ease;
     }
-    
+
     .center-card:hover .center-img {
-      transform: scale(1.05);
+      transform: scale(1.07);
     }
-    
+
+    .center-card:hover .center-img-container::after {
+      background: linear-gradient(180deg, rgba(15, 23, 42, 0) 0%, rgba(14, 165, 233, 0.55) 100%);
+    }
+
     .center-tag {
       position: absolute;
-      top: 16px;
-      left: 16px;
-      background: linear-gradient(90deg, var(--secondary), var(--primary));
+      top: 18px;
+      left: 18px;
+      background: linear-gradient(100deg, #f97316, #fb923c);
       color: white;
       font-size: 0.9rem;
       font-weight: 700;
       padding: 6px 18px;
-      border-radius: 20px;
-      box-shadow: 0 3px 10px rgba(0, 0, 0, 0.15);
+      border-radius: 999px;
+      box-shadow: 0 12px 30px rgba(249, 115, 22, 0.35);
       z-index: 2;
     }
-    
+
+    .center-badges {
+      position: absolute;
+      bottom: 18px;
+      right: 20px;
+      left: 20px;
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      z-index: 2;
+    }
+
+    .center-badge {
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      background: rgba(15, 23, 42, 0.55);
+      color: #fff;
+      padding: 8px 14px;
+      border-radius: 999px;
+      font-size: 0.95rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-weight: 600;
+      box-shadow: 0 10px 25px rgba(15, 23, 42, 0.18);
+    }
+
+    .center-badge i {
+      font-size: 0.95rem;
+    }
+
     .center-info {
       flex: 1;
       display: flex;
       flex-direction: column;
-      padding: 22px;
-      text-align: center;
+      padding: 26px 26px 24px;
+      text-align: right;
+      position: relative;
     }
-    
+
+    .center-info::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.95) 0%, rgba(248, 250, 252, 0.8) 100%);
+      opacity: 0.75;
+      z-index: -1;
+    }
+
     .center-title {
-      font-size: 1.3rem;
+      font-size: 1.35rem;
       font-weight: 800;
-      color: var(--dark);
-      margin-bottom: 8px;
-      line-height: 1.4;
-      text-align: center;
+      color: var(--text-dark);
+      margin-bottom: 10px;
+      line-height: 1.5;
     }
-    
+
     .center-address {
-      color: var(--gray);
-      font-size: 1.02rem;
-      margin-bottom: 14px;
-      line-height: 1.6;
-      display: flex;
+      color: var(--text-light);
+      font-size: 1rem;
+      margin-bottom: 16px;
+      line-height: 1.7;
+      display: inline-flex;
       align-items: center;
-      justify-content: center;
       gap: 8px;
-      text-align: center;
+      background: rgba(226, 232, 240, 0.55);
+      border-radius: 999px;
+      padding: 8px 14px;
+      font-weight: 600;
     }
-    
+
     .center-address i {
       color: var(--secondary);
-      font-size: 1.1rem;
+      font-size: 1rem;
     }
-    
+
     .center-desc {
-      font-size: 1.05rem;
-      color: var(--dark);
-      line-height: 1.7;
-      margin-bottom: 18px;
+      font-size: 1rem;
+      color: var(--text-medium);
+      line-height: 1.8;
+      margin-bottom: 22px;
       flex: 1;
-      text-align: center;
+      display: -webkit-box;
+      -webkit-line-clamp: 3;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      min-height: 72px;
     }
-    
+
     .center-meta {
+      display: grid;
+      gap: 14px;
+      padding: 20px;
+      border-radius: 20px;
+      background: rgba(226, 232, 240, 0.55);
+      border: 1px dashed rgba(148, 163, 184, 0.55);
+      color: var(--text-medium);
+      margin-bottom: 22px;
+    }
+
+    .meta-item {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .meta-icon {
+      width: 46px;
+      height: 46px;
+      border-radius: 14px;
+      display: grid;
+      place-items: center;
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      color: #fff;
+      font-size: 1.15rem;
+      box-shadow: 0 10px 20px rgba(14, 165, 233, 0.25);
+    }
+
+    .meta-text {
       display: flex;
       flex-direction: column;
-      gap: 8px;
-      padding-top: 12px;
-      border-top: 1px dashed #e2e8f0;
-      color: var(--gray);
-      font-size: 0.95rem;
+      gap: 4px;
+      font-weight: 600;
     }
-    
-    .center-meta span {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 6px;
+
+    .meta-label {
+      font-size: 0.9rem;
+      color: var(--text-light);
     }
-    
+
+    .meta-value {
+      font-size: 1.05rem;
+      color: var(--text-dark);
+    }
+
     .center-actions {
       display: flex;
-      gap: 10px;
-      margin-top: 15px;
+      margin-top: auto;
     }
-    
+
     .action-btn {
       flex: 1;
-      padding: 12px;
-      text-align: center;
-      border-radius: 12px;
-      font-weight: 700;
+      padding: 14px 16px;
+      border-radius: 16px;
+      font-weight: 800;
       cursor: pointer;
       transition: var(--transition);
-      display: flex;
+      display: inline-flex;
       align-items: center;
       justify-content: center;
-      gap: 8px;
+      gap: 10px;
+      color: #fff;
+      border: none;
+      position: relative;
+      overflow: hidden;
     }
-    
+
+    .action-btn i {
+      font-size: 1.05rem;
+    }
+
     .btn-primary {
-      background: linear-gradient(90deg, var(--secondary), var(--primary));
-      color: white;
+      background: linear-gradient(110deg, var(--secondary) 0%, var(--primary) 100%);
+      box-shadow: 0 18px 28px rgba(14, 165, 233, 0.22);
     }
-    
+
+    .btn-primary::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(120deg, rgba(255, 255, 255, 0.2), transparent 55%);
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+
     .btn-primary:hover {
-      background: linear-gradient(90deg, var(--secondary-dark), var(--primary-dark));
-      transform: translateY(-2px);
-      box-shadow: 0 4px 12px rgba(14, 165, 233, 0.3);
+      transform: translateY(-3px);
+      box-shadow: 0 25px 35px rgba(14, 165, 233, 0.3);
+    }
+
+    .btn-primary:hover::after {
+      opacity: 1;
     }
     
     /* فوتر ساده و مدرن */
@@ -871,6 +996,10 @@
         grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
         gap: 24px;
       }
+
+      .center-img-container {
+        height: 210px;
+      }
     }
 
     @media (max-width: 1100px) {
@@ -881,11 +1010,19 @@
       .center-img-container {
         height: 200px;
       }
+
+      .center-info {
+        padding: 22px;
+      }
     }
 
     @media (max-width: 1024px) {
       .centers-list {
         grid-template-columns: repeat(2, 1fr);
+      }
+
+      .center-meta {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
       }
     }
     
@@ -940,6 +1077,25 @@
       .section-title {
         font-size: 1.6rem;
       }
+
+      .center-badges {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+      }
+
+      .center-badge {
+        width: fit-content;
+      }
+
+      .center-meta {
+        grid-template-columns: 1fr;
+        padding: 18px;
+      }
+
+      .meta-item {
+        gap: 12px;
+      }
     }
 
     @media (max-width: 640px) {
@@ -969,6 +1125,17 @@
       .center-address,
       .center-desc {
         font-size: 0.95rem;
+      }
+
+      .center-address {
+        width: 100%;
+        justify-content: center;
+      }
+
+      .center-meta {
+        font-size: 0.92rem;
+        gap: 12px;
+        padding: 16px;
       }
 
       .center-actions {
@@ -1003,7 +1170,11 @@
       .center-desc {
         font-size: 0.95rem;
       }
-      
+
+      .center-meta {
+        padding: 14px;
+      }
+
       .footer-content {
         grid-template-columns: 1fr;
         text-align: center;
@@ -1836,31 +2007,58 @@
         card.className = `center-card fade-in delay-${index % 3}`;
         const imageSrc = center.image || 'https://via.placeholder.com/800x600?text=تصویر+مرکز+خرید';
         const stores = getStoresValue(center);
+        const storesText = stores.toLocaleString('fa-IR');
         const locationText = center.location ? center.location : 'نامشخص';
         const hours = center.hours ? center.hours : 'نامشخص';
         const holidays = center.holidays ? center.holidays : 'هیچ';
         const rawTitle = center.title || '';
         const safeTitle = rawTitle.replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+        const description = center.description && center.description.trim().length
+          ? center.description
+          : 'برای این مرکز خرید هنوز توضیحاتی ثبت نشده است.';
         card.innerHTML = `
           <div class="center-img-container">
             <img class="center-img" src="${imageSrc}" alt="${rawTitle}">
             ${center.tag ? `<div class="center-tag">${center.tag}</div>` : ''}
+            <div class="center-badges">
+              <span class="center-badge"><i class="fas fa-location-dot"></i>${locationText}</span>
+              <span class="center-badge"><i class="fas fa-store"></i>${storesText} مغازه</span>
+            </div>
           </div>
           <div class="center-info">
             <h3 class="center-title">${rawTitle}</h3>
             <div class="center-address">
-              <i class="fas fa-map-marker-alt"></i> ${locationText}
+              <i class="fas fa-map-marker-alt"></i>${locationText}
             </div>
-            <p class="center-desc">${center.description || ''}</p>
+            <p class="center-desc">${description}</p>
             <div class="center-meta">
-              <span><i class="fas fa-store"></i> ${stores.toLocaleString('fa-IR')} مغازه</span>
-              <span><i class="fas fa-clock"></i> ساعات کاری: ${hours}</span>
-              <span><i class="fas fa-calendar-times"></i> روزهای تعطیل: ${holidays}</span>
+              <div class="meta-item">
+                <div class="meta-icon"><i class="fas fa-store"></i></div>
+                <div class="meta-text">
+                  <span class="meta-label">تعداد مغازه‌ها</span>
+                  <span class="meta-value">${storesText} مغازه</span>
+                </div>
+              </div>
+              <div class="meta-item">
+                <div class="meta-icon"><i class="fas fa-clock"></i></div>
+                <div class="meta-text">
+                  <span class="meta-label">ساعات کاری</span>
+                  <span class="meta-value">${hours}</span>
+                </div>
+              </div>
+              <div class="meta-item">
+                <div class="meta-icon"><i class="fas fa-calendar-times"></i></div>
+                <div class="meta-text">
+                  <span class="meta-label">روزهای تعطیلی</span>
+                  <span class="meta-value">${holidays}</span>
+                </div>
+              </div>
             </div>
             <div class="center-actions">
-              <div class="action-btn btn-primary" onclick="goToShops('${center._id}', '${safeTitle}')">
-                <i class="fas fa-list"></i> مشاهده فروشگاه‌ها
-              </div>
+              <button class="action-btn btn-primary" type="button" onclick="goToShops('${center._id}', '${safeTitle}')">
+                <i class="fas fa-list"></i>
+                <span>مشاهده فروشگاه‌ها</span>
+              </button>
             </div>
           </div>
         `;
