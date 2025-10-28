@@ -14,7 +14,8 @@ const mapPlan = (plan) => ({
   description: plan.description || '',
   price: plan.price,
   durationDays: plan.durationDays,
-  isActive: !!plan.isActive,
+  // Treat plans with a missing flag as active to remain backwards compatible
+  isActive: plan.isActive !== false,
   features: Array.isArray(plan.features)
     ? plan.features.map((feature) => typeof feature === 'string' ? feature : feature?.value).filter(Boolean)
     : [],
