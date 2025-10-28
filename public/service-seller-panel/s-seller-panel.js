@@ -369,6 +369,7 @@ const formatPersianDate = (value) => {
 
 const planUI = {
   grid: document.getElementById('seller-plans-grid'),
+  feedback: document.getElementById('seller-plans-feedback'),
   states: {
     loading: document.getElementById('seller-plans-loading'),
     empty: document.getElementById('seller-plans-empty'),
@@ -394,10 +395,33 @@ const normalizePlanSlugForDisplay = (value, fallback) => {
 
 const setPlansState = (state) => {
   const states = planUI.states || {};
+  let matchedState = false;
+
   Object.entries(states).forEach(([key, el]) => {
     if (!el) return;
-    el.hidden = state !== key;
+    const isActive = state === key;
+    if (isActive) matchedState = true;
+    el.hidden = !isActive;
+    if (isActive) {
+      el.setAttribute('aria-hidden', 'false');
+      el.classList.add('is-active');
+    } else {
+      el.setAttribute('aria-hidden', 'true');
+      el.classList.remove('is-active');
+    }
   });
+
+  if (planUI.feedback) {
+    const shouldHideFeedback = state === 'ready' || !matchedState;
+    planUI.feedback.dataset.state = state;
+    planUI.feedback.setAttribute('aria-hidden', shouldHideFeedback ? 'true' : 'false');
+    if (shouldHideFeedback) {
+      planUI.feedback.setAttribute('hidden', '');
+    } else {
+      planUI.feedback.removeAttribute('hidden');
+    }
+  }
+
   if (planUI.grid) {
     if (state === 'ready') {
       planUI.grid.removeAttribute('hidden');
@@ -405,6 +429,7 @@ const setPlansState = (state) => {
       planUI.grid.setAttribute('hidden', '');
     }
   }
+
   if (planUI.socialProof && state !== 'ready') {
     planUI.socialProof.textContent = '';
   }
