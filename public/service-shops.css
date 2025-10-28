@@ -982,22 +982,43 @@
   width: 100%;
   max-width: 800px;
   margin: 0 auto;
+  border-radius: 1.5rem;
+  overflow: hidden;
+  background: linear-gradient(135deg, rgba(15, 23, 42, 0.05), rgba(14, 165, 233, 0.08));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: clamp(16px, 4vw, 32px);
 }
 
 .footer-image-map::before {
   content: '';
   position: absolute;
   inset: 0;
-  background: linear-gradient(to bottom, transparent, rgba(0,0,0,0.4));
+  border-radius: inherit;
+  background: linear-gradient(to bottom, rgba(15, 23, 42, 0.08), rgba(15, 23, 42, 0.18));
   pointer-events: none;
 }
 
 .footer-image-map img {
-  width: 100%;
+  position: relative;
+  width: min(100%, 520px);
   height: auto;
+  max-height: 320px;
   display: block;
-  max-height: none;
   object-fit: contain;
+  object-position: center;
+  filter: drop-shadow(0 20px 35px rgba(15, 23, 42, 0.18));
+}
+
+@media (min-width: 1024px) {
+  .footer-image-map {
+    max-width: 720px;
+  }
+
+  .footer-image-map img {
+    max-height: 280px;
+  }
 }
 
 /* Fallback text styling when no image */
