@@ -19,7 +19,6 @@ const servicePlanDiscountCodeSchema = new mongoose.Schema({
   usages: { type: [usageSchema], default: () => [] }
 }, { timestamps: true });
 
-servicePlanDiscountCodeSchema.index({ code: 1 }, { unique: true });
 servicePlanDiscountCodeSchema.index({ expiresAt: 1 });
 
 module.exports = mongoose.models.ServicePlanDiscountCode
