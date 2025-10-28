@@ -482,6 +482,63 @@
           </div>
         </div>
       </section>
+      <section class="service-plan-discount-card" aria-labelledby="servicePlanDiscountTitle">
+        <header class="service-plan-discount-header">
+          <div>
+            <h3 id="servicePlanDiscountTitle"><i class="ri-price-tag-3-line"></i> مدیریت کدهای تخفیف</h3>
+            <p>کد تخفیف برای پلن‌های خدماتی بسازید، سقف مصرف و تاریخ انقضا تعیین کنید.</p>
+          </div>
+          <div class="service-plan-discount-actions">
+            <button type="button" id="servicePlanCouponRefresh"><i class="ri-refresh-line"></i> بروزرسانی</button>
+          </div>
+        </header>
+        <form id="servicePlanCouponForm" class="service-plan-coupon-form" novalidate>
+          <div class="service-plan-coupon-grid">
+            <div class="form-group">
+              <label for="servicePlanCouponCode">کد تخفیف *</label>
+              <input type="text" id="servicePlanCouponCode" name="code" placeholder="مثلاً VITRINET20" inputmode="latin" dir="ltr" required />
+              <span class="form-helper">از حروف انگلیسی و اعداد استفاده کنید.</span>
+            </div>
+            <div class="form-group">
+              <label for="servicePlanCouponPercent">درصد تخفیف *</label>
+              <div class="input-with-addon">
+                <input type="number" id="servicePlanCouponPercent" name="discountPercent" min="1" max="100" step="1" placeholder="10" required />
+                <span class="addon">٪</span>
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="servicePlanCouponUsage">حداکثر تعداد استفاده</label>
+              <input type="number" id="servicePlanCouponUsage" name="maxUsages" min="1" step="1" placeholder="مثلاً 50" />
+              <span class="form-helper">خالی بماند تا بدون محدودیت باشد.</span>
+            </div>
+            <div class="form-group">
+              <label for="servicePlanCouponExpiresIn">انقضا پس از</label>
+              <div class="input-multi">
+                <input type="number" id="servicePlanCouponExpiresIn" name="expiresInValue" min="1" step="1" placeholder="۷" />
+                <select id="servicePlanCouponExpiresUnit" name="expiresInUnit">
+                  <option value="days" selected>روز</option>
+                  <option value="hours">ساعت</option>
+                </select>
+              </div>
+              <span class="form-helper">در صورت نیاز می‌توانید بعداً تاریخ دقیق را تنظیم یا حذف کنید.</span>
+            </div>
+            <div class="form-group full-width">
+              <label for="servicePlanCouponNotes">یادداشت داخلی (اختیاری)</label>
+              <textarea id="servicePlanCouponNotes" name="notes" rows="2" placeholder="توضیحات برای تیم پشتیبانی..."></textarea>
+            </div>
+          </div>
+          <div class="service-plan-coupon-actions">
+            <button type="submit" id="servicePlanCouponSubmit"><i class="ri-add-circle-line"></i> ذخیره کد تخفیف</button>
+          </div>
+          <div class="service-plan-coupon-message" id="servicePlanCouponMessage" role="status" aria-live="polite" hidden></div>
+        </form>
+        <div class="service-plan-coupon-list" id="servicePlanCouponsList" aria-live="polite">
+          <div class="service-plan-coupon-empty">
+            <i class="ri-ticket-line"></i>
+            <p>هنوز هیچ کد تخفیفی ثبت نشده است.</p>
+          </div>
+        </div>
+      </section>
     </div>
   </div>
 

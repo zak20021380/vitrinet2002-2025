@@ -3,6 +3,7 @@ const router = express.Router();
 
 const ServicePlan = require('../models/servicePlan');
 const ServicePlanSubscription = require('../models/servicePlanSubscription');
+const ServicePlanDiscountCode = require('../models/servicePlanDiscountCode');
 const ServiceShop = require('../models/serviceShop');
 const auth = require('../middlewares/authMiddleware');
 const { normalizePhone, buildDigitInsensitiveRegex, buildPhoneCandidates } = require('../utils/phone');
@@ -45,6 +46,63 @@ const mapAssignment = (assignment) => ({
   createdAt: assignment.createdAt,
   updatedAt: assignment.updatedAt
 });
+
+const mapDiscountCode = (code) => {
+  if (!code) return null;
+  const maxUsages = Number.isFinite(code.maxUsages) ? Number(code.maxUsages) : null;
+  const usedCount = Number.isFinite(code.usedCount) ? Number(code.usedCount) : 0;
+  const remainingUses = maxUsages == null ? null : Math.max(maxUsages - usedCount, 0);
+  return {
+    id: String(code._id),
+    code: code.code,
+    discountPercent: code.discountPercent,
+    maxUsages,
+    usedCount,
+    remainingUses,
+    expiresAt: code.expiresAt,
+    isActive: code.isActive !== false,
+    notes: code.notes || '',
+    createdAt: code.createdAt,
+    updatedAt: code.updatedAt
+  };
+};
+
+const normalizeDiscountCode = (value) => {
+  return String(value || '')
+    .trim()
+    .toUpperCase()
+    .replace(/[^A-Z0-9-_]/g, '');
+};
+
+const toPositiveInt = (value) => {
+  const num = Number(value);
+  if (!Number.isFinite(num) || num <= 0) return null;
+  return Math.floor(num);
+};
+
+const resolveExpiry = ({ expiresAt, expiresInValue, expiresInUnit }) => {
+  if (expiresAt) {
+    const parsed = new Date(expiresAt);
+    if (!Number.isNaN(parsed.getTime())) {
+      return parsed;
+    }
+  }
+  const value = toPositiveInt(expiresInValue);
+  if (!value) return null;
+  const unit = String(expiresInUnit || '').toLowerCase();
+  const now = Date.now();
+  if (unit === 'hour' || unit === 'hours' || unit === 'h') {
+    return new Date(now + value * 60 * 60 * 1000);
+  }
+  const days = unit === 'day' || unit === 'days' || unit === 'd'
+    ? value
+    : null;
+  if (days != null) {
+    return new Date(now + days * 24 * 60 * 60 * 1000);
+  }
+  // پیش‌فرض: روز
+  return new Date(now + value * 24 * 60 * 60 * 1000);
+};
 
 const computeStatus = (startDate, endDate) => {
   const now = Date.now();
@@ -156,6 +214,225 @@ router.delete('/:id', auth('admin'), async (req, res) => {
   } catch (error) {
     console.error('Failed to delete service plan:', error);
     res.status(500).json({ message: 'خطا در حذف پلن' });
+  }
+});
+
+// -------- Discount Codes --------
+router.get('/discount-codes', auth('admin'), async (req, res) => {
+  try {
+    const codes = await ServicePlanDiscountCode.find().sort({ createdAt: -1 }).lean();
+    res.json({ discountCodes: codes.map(mapDiscountCode) });
+  } catch (error) {
+    console.error('Failed to list service plan discount codes:', error);
+    res.status(500).json({ message: 'خطا در دریافت کدهای تخفیف' });
+  }
+});
+
+router.post('/discount-codes', auth('admin'), async (req, res) => {
+  try {
+    const { code, discountPercent, maxUsages, expiresAt, expiresInValue, expiresInUnit, notes } = req.body || {};
+
+    const normalizedCode = normalizeDiscountCode(code);
+    if (!normalizedCode) {
+      return res.status(400).json({ message: 'کد تخفیف را وارد کنید.' });
+    }
+
+    const percent = Number(discountPercent);
+    if (!Number.isFinite(percent) || percent <= 0 || percent > 100) {
+      return res.status(400).json({ message: 'درصد تخفیف باید بین ۱ تا ۱۰۰ باشد.' });
+    }
+
+    let normalizedMaxUsages = null;
+    if (maxUsages !== undefined && maxUsages !== null && String(maxUsages).trim() !== '') {
+      normalizedMaxUsages = toPositiveInt(maxUsages);
+      if (!normalizedMaxUsages) {
+        return res.status(400).json({ message: 'تعداد دفعات مجاز باید عددی بزرگتر از صفر باشد.' });
+      }
+    }
+
+    let expiry = null;
+    if (expiresAt || expiresInValue) {
+      expiry = resolveExpiry({ expiresAt, expiresInValue, expiresInUnit });
+      if (!expiry) {
+        return res.status(400).json({ message: 'تاریخ انقضای وارد شده معتبر نیست.' });
+      }
+      if (expiry.getTime() <= Date.now()) {
+        return res.status(400).json({ message: 'تاریخ انقضا باید در آینده باشد.' });
+      }
+    }
+
+    const discount = await ServicePlanDiscountCode.create({
+      code: normalizedCode,
+      discountPercent: percent,
+      maxUsages: normalizedMaxUsages,
+      expiresAt: expiry,
+      notes: notes ? String(notes).trim() : '',
+      createdBy: req.user?.id || null,
+      updatedBy: req.user?.id || null
+    });
+
+    res.status(201).json({ discountCode: mapDiscountCode(discount) });
+  } catch (error) {
+    if (error.code === 11000) {
+      return res.status(409).json({ message: 'این کد تخفیف قبلاً ثبت شده است.' });
+    }
+    console.error('Failed to create service plan discount code:', error);
+    res.status(500).json({ message: 'خطا در ثبت کد تخفیف' });
+  }
+});
+
+router.patch('/discount-codes/:id', auth('admin'), async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { discountPercent, maxUsages, isActive, expiresAt, expiresInValue, expiresInUnit, notes } = req.body || {};
+
+    const discount = await ServicePlanDiscountCode.findById(id);
+    if (!discount) {
+      return res.status(404).json({ message: 'کد تخفیف مورد نظر یافت نشد.' });
+    }
+
+    if (discountPercent != null) {
+      const percent = Number(discountPercent);
+      if (!Number.isFinite(percent) || percent <= 0 || percent > 100) {
+        return res.status(400).json({ message: 'درصد تخفیف باید بین ۱ تا ۱۰۰ باشد.' });
+      }
+      discount.discountPercent = percent;
+    }
+
+    if (maxUsages !== undefined) {
+      if (maxUsages === null || String(maxUsages).trim() === '') {
+        discount.maxUsages = null;
+      } else {
+        const normalizedMaxUsages = toPositiveInt(maxUsages);
+        if (!normalizedMaxUsages) {
+          return res.status(400).json({ message: 'تعداد دفعات مجاز باید عددی بزرگتر از صفر باشد.' });
+        }
+        if (discount.usedCount > normalizedMaxUsages) {
+          return res.status(400).json({ message: 'تعداد استفاده‌های ثبت‌شده بیشتر از سقف جدید است.' });
+        }
+        discount.maxUsages = normalizedMaxUsages;
+      }
+    }
+
+    if (isActive != null) {
+      discount.isActive = Boolean(isActive);
+    }
+
+    if ('expiresAt' in req.body || 'expiresInValue' in req.body || 'expiresInUnit' in req.body) {
+      if (expiresAt === null || expiresAt === '' || expiresInValue === '' || expiresInValue === null) {
+        discount.expiresAt = null;
+      } else {
+        const expiry = resolveExpiry({ expiresAt, expiresInValue, expiresInUnit });
+        if (!expiry) {
+          return res.status(400).json({ message: 'تاریخ انقضای وارد شده معتبر نیست.' });
+        }
+        if (expiry.getTime() <= Date.now()) {
+          return res.status(400).json({ message: 'تاریخ انقضا باید در آینده باشد.' });
+        }
+        discount.expiresAt = expiry;
+      }
+    }
+
+    if (notes !== undefined) {
+      discount.notes = notes ? String(notes).trim() : '';
+    }
+
+    discount.updatedBy = req.user?.id || discount.updatedBy;
+    await discount.save();
+
+    res.json({ discountCode: mapDiscountCode(discount) });
+  } catch (error) {
+    console.error('Failed to update service plan discount code:', error);
+    res.status(500).json({ message: 'خطا در بروزرسانی کد تخفیف' });
+  }
+});
+
+router.delete('/discount-codes/:id', auth('admin'), async (req, res) => {
+  try {
+    const { id } = req.params;
+    const deleted = await ServicePlanDiscountCode.findByIdAndDelete(id);
+    if (!deleted) {
+      return res.status(404).json({ message: 'کد تخفیف مورد نظر یافت نشد.' });
+    }
+    res.status(204).send();
+  } catch (error) {
+    console.error('Failed to delete service plan discount code:', error);
+    res.status(500).json({ message: 'خطا در حذف کد تخفیف' });
+  }
+});
+
+router.post('/discount-codes/validate', auth('seller'), async (req, res) => {
+  try {
+    const { code } = req.body || {};
+    const normalizedCode = normalizeDiscountCode(code);
+    if (!normalizedCode) {
+      return res.status(400).json({ message: 'کد تخفیف را وارد کنید.' });
+    }
+
+    const discount = await ServicePlanDiscountCode.findOne({ code: normalizedCode }).lean();
+    if (!discount) {
+      return res.status(404).json({ message: 'کد تخفیف یافت نشد.' });
+    }
+    if (discount.isActive === false) {
+      return res.status(410).json({ message: 'این کد تخفیف غیرفعال شده است.' });
+    }
+    if (discount.expiresAt && new Date(discount.expiresAt).getTime() <= Date.now()) {
+      return res.status(410).json({ message: 'تاریخ انقضای این کد گذشته است.' });
+    }
+    if (discount.maxUsages != null && Number(discount.usedCount || 0) >= Number(discount.maxUsages)) {
+      return res.status(409).json({ message: 'سقف استفاده از این کد تکمیل شده است.' });
+    }
+
+    res.json({ discountCode: mapDiscountCode(discount) });
+  } catch (error) {
+    console.error('Failed to validate service plan discount code:', error);
+    res.status(500).json({ message: 'خطا در بررسی کد تخفیف' });
+  }
+});
+
+router.post('/discount-codes/:code/redeem', auth('seller'), async (req, res) => {
+  try {
+    const { code } = req.params;
+    const { planId } = req.body || {};
+    const normalizedCode = normalizeDiscountCode(code);
+    if (!normalizedCode) {
+      return res.status(400).json({ message: 'کد تخفیف معتبر نیست.' });
+    }
+
+    const discount = await ServicePlanDiscountCode.findOne({ code: normalizedCode });
+    if (!discount) {
+      return res.status(404).json({ message: 'کد تخفیف یافت نشد.' });
+    }
+    if (discount.isActive === false) {
+      return res.status(410).json({ message: 'این کد تخفیف غیرفعال شده است.' });
+    }
+    if (discount.expiresAt && discount.expiresAt.getTime() <= Date.now()) {
+      return res.status(410).json({ message: 'تاریخ انقضای این کد گذشته است.' });
+    }
+    if (discount.maxUsages != null && Number(discount.usedCount || 0) >= Number(discount.maxUsages)) {
+      return res.status(409).json({ message: 'سقف استفاده از این کد تکمیل شده است.' });
+    }
+
+    const sellerId = req.user?.id ? String(req.user.id) : null;
+    if (sellerId) {
+      const hasAlreadyUsed = discount.usages?.some((usage) => usage.seller && String(usage.seller) === sellerId);
+      if (hasAlreadyUsed) {
+        return res.status(409).json({ message: 'این کد قبلاً برای حساب شما استفاده شده است.' });
+      }
+    }
+
+    discount.usages.push({
+      seller: req.user?.id || null,
+      plan: planId || null,
+      usedAt: new Date()
+    });
+    discount.usedCount = Array.isArray(discount.usages) ? discount.usages.length : Number(discount.usedCount || 0) + 1;
+    await discount.save();
+
+    res.json({ discountCode: mapDiscountCode(discount) });
+  } catch (error) {
+    console.error('Failed to redeem service plan discount code:', error);
+    res.status(500).json({ message: 'خطا در ثبت استفاده از کد تخفیف' });
   }
 });
 

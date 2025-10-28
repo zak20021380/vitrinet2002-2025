@@ -201,7 +201,8 @@ body.sidebar-open::before {
 }
 
 .service-plan-form-card,
-.service-plan-list-card {
+.service-plan-list-card,
+.service-plan-discount-card {
   background: var(--card);
   border-radius: 24px;
   box-shadow: var(--shadow);
@@ -213,7 +214,8 @@ body.sidebar-open::before {
 }
 
 .service-plan-form-header,
-.service-plan-list-header {
+.service-plan-list-header,
+.service-plan-discount-header {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
@@ -221,7 +223,8 @@ body.sidebar-open::before {
 }
 
 .service-plan-form-header h3,
-.service-plan-list-header h3 {
+.service-plan-list-header h3,
+.service-plan-discount-header h3 {
   margin: 0;
   font-size: 1.2rem;
   font-weight: 800;
@@ -232,7 +235,8 @@ body.sidebar-open::before {
 }
 
 .service-plan-form-header p,
-.service-plan-list-header p {
+.service-plan-list-header p,
+.service-plan-discount-header p {
   margin: 0.35rem 0 0 0;
   color: #475569;
   line-height: 1.7;
@@ -240,7 +244,8 @@ body.sidebar-open::before {
 }
 
 .service-plan-form-actions button,
-.service-plan-list-actions button {
+.service-plan-list-actions button,
+.service-plan-discount-actions button {
   display: inline-flex;
   align-items: center;
   gap: 0.4rem;
@@ -255,7 +260,8 @@ body.sidebar-open::before {
 }
 
 .service-plan-form-actions button:hover,
-.service-plan-list-actions button:hover {
+.service-plan-list-actions button:hover,
+.service-plan-discount-actions button:hover {
   transform: translateY(-2px);
   box-shadow: 0 8px 20px rgba(14, 165, 233, 0.15);
   background: rgba(14, 165, 233, 0.2);
@@ -270,6 +276,275 @@ body.sidebar-open::before {
 .service-plan-form-actions button.outline:hover {
   background: rgba(15, 23, 42, 0.07);
   box-shadow: 0 8px 20px rgba(15, 23, 42, 0.08);
+}
+
+.service-plan-coupon-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+}
+
+.service-plan-coupon-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+  gap: 1rem 1.2rem;
+}
+
+.service-plan-coupon-grid .form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.service-plan-coupon-grid .form-group label {
+  font-weight: 600;
+  color: var(--primary);
+}
+
+.service-plan-coupon-grid .form-group input,
+.service-plan-coupon-grid .form-group select,
+.service-plan-coupon-grid .form-group textarea {
+  border-radius: 14px;
+  border: 1.5px solid rgba(148, 163, 184, 0.6);
+  padding: 0.6rem 0.9rem;
+  font-size: 0.95rem;
+  transition: border var(--transition), box-shadow var(--transition);
+  background: #f8fafc;
+}
+
+.service-plan-coupon-grid .form-group input:focus,
+.service-plan-coupon-grid .form-group select:focus,
+.service-plan-coupon-grid .form-group textarea:focus {
+  border-color: rgba(14, 165, 233, 0.6);
+  box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.12);
+  outline: none;
+}
+
+.service-plan-coupon-grid .form-group textarea {
+  resize: vertical;
+  min-height: 68px;
+}
+
+.service-plan-coupon-grid .form-group .form-helper {
+  font-size: 0.8rem;
+  color: #6b7280;
+}
+
+.service-plan-coupon-grid .full-width {
+  grid-column: 1 / -1;
+}
+
+.input-with-addon {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.input-with-addon input {
+  width: 100%;
+  padding-right: 2.4rem;
+}
+
+.input-with-addon .addon {
+  position: absolute;
+  right: 0.65rem;
+  font-weight: 700;
+  color: var(--secondary);
+}
+
+.input-multi {
+  display: flex;
+  gap: 0.6rem;
+  align-items: center;
+}
+
+.input-multi input {
+  flex: 1 1 auto;
+}
+
+.input-multi select {
+  flex: 0 0 120px;
+  border-radius: 14px;
+  border: 1.5px solid rgba(148, 163, 184, 0.6);
+  padding: 0.55rem 0.85rem;
+  font-size: 0.9rem;
+  background: #f8fafc;
+}
+
+.service-plan-coupon-actions {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.service-plan-coupon-actions button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.7rem 1.4rem;
+  border-radius: 16px;
+  border: none;
+  background: linear-gradient(135deg, #0ea5e9, #22d3ee);
+  color: white;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 12px 24px rgba(14, 165, 233, 0.18);
+  transition: transform var(--transition), box-shadow var(--transition), filter var(--transition);
+}
+
+.service-plan-coupon-actions button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 16px 28px rgba(14, 165, 233, 0.24);
+}
+
+.service-plan-coupon-message {
+  border-radius: 14px;
+  padding: 0.75rem 1rem;
+  font-size: 0.9rem;
+  line-height: 1.6;
+  display: none;
+}
+
+.service-plan-coupon-message.show {
+  display: block;
+}
+
+.service-plan-coupon-message.success {
+  background: rgba(16, 185, 129, 0.12);
+  color: #047857;
+}
+
+.service-plan-coupon-message.error {
+  background: rgba(248, 113, 113, 0.15);
+  color: #b91c1c;
+}
+
+.service-plan-coupon-message.info {
+  background: rgba(14, 165, 233, 0.12);
+  color: #0369a1;
+}
+
+.service-plan-coupon-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+.service-plan-coupon-empty {
+  text-align: center;
+  color: #64748b;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 1.4rem 0;
+}
+
+.service-plan-coupon-empty i {
+  font-size: 2rem;
+  color: rgba(14, 165, 233, 0.55);
+}
+
+.service-plan-coupon-item {
+  border-radius: 18px;
+  border: 1px solid rgba(148, 163, 184, 0.25);
+  padding: 1rem 1.2rem;
+  background: rgba(15, 118, 110, 0.02);
+  display: grid;
+  grid-template-columns: 1.2fr 1fr auto;
+  gap: 1rem;
+  align-items: center;
+}
+
+.service-plan-coupon-item.inactive {
+  opacity: 0.65;
+  background: rgba(148, 163, 184, 0.08);
+}
+
+.service-plan-coupon-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  font-size: 0.85rem;
+  color: #475569;
+}
+
+.service-plan-coupon-note {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.35rem;
+  color: #334155;
+}
+
+.service-plan-coupon-note i {
+  color: #0f766e;
+  margin-top: 0.1rem;
+}
+
+.service-plan-coupon-code {
+  font-size: 1.25rem;
+  font-family: 'Vazirmatn FD', 'IRANSans', sans-serif;
+  font-weight: 800;
+  color: #0f766e;
+  letter-spacing: 1px;
+}
+
+.service-plan-coupon-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  font-size: 0.78rem;
+  color: #0f172a;
+}
+
+.service-plan-coupon-badge {
+  background: rgba(16, 185, 129, 0.12);
+  color: #047857;
+  padding: 0.25rem 0.55rem;
+  border-radius: 999px;
+  font-weight: 600;
+}
+
+.service-plan-coupon-badge.warning {
+  background: rgba(248, 113, 113, 0.15);
+  color: #b91c1c;
+}
+
+.service-plan-coupon-actions-inline {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.service-plan-coupon-actions-inline button {
+  border: none;
+  border-radius: 12px;
+  padding: 0.4rem 0.8rem;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  background: rgba(14, 165, 233, 0.14);
+  color: #0369a1;
+  transition: transform var(--transition), box-shadow var(--transition);
+}
+
+.service-plan-coupon-actions-inline button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(14, 165, 233, 0.18);
+}
+
+.service-plan-coupon-actions-inline button.danger {
+  background: rgba(248, 113, 113, 0.16);
+  color: #b91c1c;
+}
+
+@media (max-width: 900px) {
+  .service-plan-coupon-item {
+    grid-template-columns: 1fr;
+    align-items: flex-start;
+  }
+
+  .service-plan-coupon-actions-inline {
+    justify-content: flex-start;
+  }
 }
 
 .service-plan-form-grid {
