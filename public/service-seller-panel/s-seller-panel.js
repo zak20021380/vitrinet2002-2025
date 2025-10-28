@@ -401,6 +401,9 @@ const PlanCheckoutController = (() => {
   const state = {
     selectedPlanKey: null,
     couponPct: 0,
+    coupon: null,
+    couponRedeemed: false,
+    couponLoading: false,
     dismissed: false
   };
 
@@ -415,6 +418,8 @@ const PlanCheckoutController = (() => {
   let couponInput = null;
   let couponApply = null;
   let cbClose = null;
+  let couponStatus = null;
+  let checkoutCTA = null;
 
   const ensureElements = () => {
     plansView = document.getElementById('plans-view');
@@ -432,6 +437,8 @@ const PlanCheckoutController = (() => {
     couponInput = checkoutBar.querySelector('#coupon-input');
     couponApply = checkoutBar.querySelector('.cb-apply');
     cbClose = checkoutBar.querySelector('.cb-close');
+    couponStatus = checkoutBar.querySelector('#cb-coupon-status');
+    checkoutCTA = checkoutBar.querySelector('.cb-cta');
     return true;
   };
 
@@ -446,6 +453,19 @@ const PlanCheckoutController = (() => {
       );
     }
     return null;
+  };
+
+  const setCouponStatus = (message, type = 'info') => {
+    if (!couponStatus) return;
+    couponStatus.classList.remove('success', 'error', 'info');
+    if (!message) {
+      couponStatus.hidden = true;
+      couponStatus.textContent = '';
+      return;
+    }
+    couponStatus.hidden = false;
+    couponStatus.textContent = message;
+    couponStatus.classList.add(type);
   };
 
   const basePriceOf = (card) => {
@@ -498,13 +518,16 @@ const PlanCheckoutController = (() => {
       cbSaving.style.display = 'none';
     }
     if (cbTotal) cbTotal.textContent = '—';
+    setCouponStatus('');
   };
 
   const showCheckout = (card) => {
     if (!checkoutBar || !card) return;
 
     const base = basePriceOf(card);
-    const finalPrice = base * (1 - state.couponPct / 100);
+    const coupon = state.coupon;
+    const discountPercent = Number(coupon?.discountPercent ?? state.couponPct ?? 0);
+    const finalPrice = Math.max(0, base * (1 - discountPercent / 100));
 
     if (cbPlan) {
       cbPlan.textContent = card.querySelector('.plan-title-card')?.textContent?.trim() || '—';
@@ -513,8 +536,9 @@ const PlanCheckoutController = (() => {
       cbDuration.textContent = durationStatusOf(card);
     }
     if (cbSaving) {
-      if (state.couponPct > 0) {
-        cbSaving.textContent = `تخفیف: ${state.couponPct}%`;
+      if (discountPercent > 0) {
+        const codeLabel = coupon?.code ? ` با کد ${escapeHtml(coupon.code)}` : '';
+        cbSaving.innerHTML = `تخفیف ${faNumber(discountPercent)}٪${codeLabel}`;
         cbSaving.style.display = 'inline-block';
       } else {
         cbSaving.textContent = '';
@@ -535,6 +559,7 @@ const PlanCheckoutController = (() => {
       hideCheckout();
       return;
     }
+    state.couponPct = Number(state.coupon?.discountPercent || 0);
     showCheckout(selected);
   };
 
@@ -548,6 +573,7 @@ const PlanCheckoutController = (() => {
       }
     });
     state.selectedPlanKey = card.dataset.plan || card.dataset.id || card.dataset.slug || null;
+    state.couponRedeemed = false;
     state.dismissed = false;
     updateCheckout();
   };
@@ -567,15 +593,116 @@ const PlanCheckoutController = (() => {
     couponToggle.setAttribute('aria-expanded', String(willShow));
   };
 
-  const handleCouponApply = () => {
-    const code = couponInput?.value?.trim();
-    state.couponPct = code ? 10 : 0;
-    updateCheckout();
-    if (window.UIComponents?.showToast) {
-      window.UIComponents.showToast(
-        state.couponPct ? 'کد تخفیف ۱۰٪ اعمال شد.' : 'کد نامعتبر بود.',
-        state.couponPct ? 'success' : 'error'
-      );
+  const handleCouponApply = async () => {
+    if (state.couponLoading) return;
+    const raw = couponInput?.value?.trim() || '';
+
+    if (!raw) {
+      state.coupon = null;
+      state.couponPct = 0;
+      state.couponRedeemed = false;
+      setCouponStatus('کد تخفیف غیرفعال شد.', 'info');
+      updateCheckout();
+      window.UIComponents?.showToast?.('کد تخفیف حذف شد.', 'info');
+      return;
+    }
+
+    if (!state.selectedPlanKey) {
+      setCouponStatus('برای اعمال کد، ابتدا یک پلن را انتخاب کنید.', 'info');
+      window.UIComponents?.showToast?.('ابتدا پلن مورد نظر را انتخاب کنید.', 'info');
+      return;
+    }
+
+    const code = raw.toUpperCase().replace(/[^A-Z0-9-_]/g, '');
+    if (couponInput) {
+      couponInput.value = code;
+    }
+
+    if (!code) {
+      setCouponStatus('کد وارد شده معتبر نیست.', 'error');
+      window.UIComponents?.showToast?.('کد وارد شده معتبر نیست.', 'error');
+      return;
+    }
+
+    const originalLabel = couponApply?.textContent ?? '';
+
+    try {
+      state.couponLoading = true;
+      setCouponStatus('در حال بررسی کد...', 'info');
+      if (couponApply) {
+        couponApply.disabled = true;
+        couponApply.dataset.originalLabel = originalLabel;
+        couponApply.textContent = 'در حال بررسی...';
+      }
+
+      const result = await API.validatePlanDiscountCode({ code, planKey: state.selectedPlanKey });
+      if (!result) {
+        throw new Error('کد تخفیف نامعتبر است.');
+      }
+
+      state.coupon = result;
+      state.couponPct = Number(result.discountPercent || 0);
+      state.couponRedeemed = false;
+      setCouponStatus(`کد ${result.code} فعال شد.`, 'success');
+      updateCheckout();
+      window.UIComponents?.showToast?.(`کد ${result.code} اعمال شد.`, 'success');
+    } catch (err) {
+      state.coupon = null;
+      state.couponPct = 0;
+      state.couponRedeemed = false;
+      const message = err?.message || 'کد تخفیف نامعتبر است.';
+      setCouponStatus(message, 'error');
+      updateCheckout();
+      window.UIComponents?.showToast?.(message, 'error');
+    } finally {
+      state.couponLoading = false;
+      if (couponApply) {
+        couponApply.disabled = false;
+        if (couponApply.dataset.originalLabel != null) {
+          couponApply.textContent = couponApply.dataset.originalLabel;
+          delete couponApply.dataset.originalLabel;
+        } else {
+          couponApply.textContent = originalLabel;
+        }
+      }
+    }
+  };
+
+  const handleCheckoutCTA = async () => {
+    if (!checkoutCTA) return;
+    if (!state.selectedPlanKey) {
+      window.UIComponents?.showToast?.('ابتدا پلن مورد نظر را انتخاب کنید.', 'info');
+      return;
+    }
+
+    const originalLabel = checkoutCTA.textContent ?? '';
+    checkoutCTA.disabled = true;
+    checkoutCTA.setAttribute('aria-busy', 'true');
+    checkoutCTA.textContent = 'در حال پردازش...';
+
+    try {
+      if (state.coupon?.code && !state.couponRedeemed) {
+        setCouponStatus(`در حال ثبت کد ${state.coupon.code}...`, 'info');
+        const updated = await API.redeemPlanDiscountCode(state.coupon.code, {});
+        if (updated) {
+          state.coupon = updated;
+          state.couponPct = Number(updated.discountPercent || 0);
+        }
+        state.couponRedeemed = true;
+        setCouponStatus(`ثبت کد ${state.coupon.code} انجام شد.`, 'success');
+        updateCheckout();
+      }
+
+      window.UIComponents?.showToast?.('درگاه پرداخت به‌زودی متصل می‌شود.', 'success');
+    } catch (err) {
+      const message = err?.message || 'ثبت استفاده از کد تخفیف ناموفق بود.';
+      setCouponStatus(message, 'error');
+      window.UIComponents?.showToast?.(message, 'error');
+      state.couponRedeemed = false;
+    } finally {
+      checkoutCTA.disabled = false;
+      checkoutCTA.removeAttribute('aria-busy');
+      checkoutCTA.textContent = originalLabel;
     }
   };
 
@@ -620,9 +747,7 @@ const PlanCheckoutController = (() => {
     cbClose?.addEventListener('click', handleClose);
     document.addEventListener('click', handleDocumentClick, true);
     window.addEventListener('hashchange', handleHashChange);
-    checkoutBar.querySelector('.cb-cta')?.addEventListener('click', () => {
-      window.UIComponents?.showToast?.('درگاه پرداخت به‌زودی متصل می‌شود.', 'success');
-    });
+    checkoutCTA?.addEventListener('click', handleCheckoutCTA);
 
     updateCards();
     updateCheckout();
@@ -1400,6 +1525,41 @@ const API = {
     }
     const fallback = this._unwrap(data);
     return Array.isArray(fallback) ? fallback : [];
+  },
+
+  async validatePlanDiscountCode(payload = {}) {
+    const body = {
+      code: payload.code,
+      planKey: payload.planKey || null
+    };
+    const res = await fetch(bust(`${API_BASE}/api/service-plans/discount-codes/validate`), {
+      method: 'POST',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body)
+    });
+    const data = await this._json(res);
+    if (!res.ok) {
+      const message = data?.message || 'کد تخفیف نامعتبر است.';
+      throw new Error(message);
+    }
+    return data?.discountCode || null;
+  },
+
+  async redeemPlanDiscountCode(code, payload = {}) {
+    if (!code) throw new Error('کد تخفیف نامعتبر است.');
+    const res = await fetch(bust(`${API_BASE}/api/service-plans/discount-codes/${encodeURIComponent(code)}/redeem`), {
+      method: 'POST',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ planId: payload.planId || null })
+    });
+    const data = await this._json(res);
+    if (!res.ok) {
+      const message = data?.message || 'ثبت استفاده از کد تخفیف با خطا مواجه شد.';
+      throw new Error(message);
+    }
+    return data?.discountCode || null;
   },
 
   async getFeatureFlags() {

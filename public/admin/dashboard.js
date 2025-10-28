@@ -1287,6 +1287,10 @@ let servicePlanManagerInitialised = false;
 let servicePlansLoaded = false;
 let servicePlansLoading = false;
 let servicePlanEditingId = null;
+let servicePlanCouponsLoaded = false;
+let servicePlanCouponsLoading = false;
+let servicePlanCoupons = [];
+let servicePlanCouponSaving = false;
 
 const AD_PLAN_META = {
   ad_home: {
@@ -4928,6 +4932,17 @@ const servicePlanPriceInput = document.getElementById('servicePlanPrice');
 const servicePlanDurationInput = document.getElementById('servicePlanDuration');
 const servicePlanDescriptionInput = document.getElementById('servicePlanDescription');
 const servicePlanFeaturesInput = document.getElementById('servicePlanFeatures');
+const servicePlanCouponForm = document.getElementById('servicePlanCouponForm');
+const servicePlanCouponMessageEl = document.getElementById('servicePlanCouponMessage');
+const servicePlanCouponsListEl = document.getElementById('servicePlanCouponsList');
+const servicePlanCouponRefreshBtn = document.getElementById('servicePlanCouponRefresh');
+const servicePlanCouponCodeInput = document.getElementById('servicePlanCouponCode');
+const servicePlanCouponPercentInput = document.getElementById('servicePlanCouponPercent');
+const servicePlanCouponUsageInput = document.getElementById('servicePlanCouponUsage');
+const servicePlanCouponExpiresValueInput = document.getElementById('servicePlanCouponExpiresIn');
+const servicePlanCouponExpiresUnitSelect = document.getElementById('servicePlanCouponExpiresUnit');
+const servicePlanCouponNotesInput = document.getElementById('servicePlanCouponNotes');
+const servicePlanCouponSubmitBtn = document.getElementById('servicePlanCouponSubmit');
 
 function normaliseServicePlanSlug(value) {
   return String(value || '')
@@ -4936,6 +4951,13 @@ function normaliseServicePlanSlug(value) {
     .replace(/[^a-z0-9-\s]/g, '')
     .replace(/\s+/g, '-')
     .replace(/-+/g, '-');
+}
+
+function normaliseServicePlanDiscountCode(value) {
+  return String(value || '')
+    .trim()
+    .toUpperCase()
+    .replace(/[^A-Z0-9-_]/g, '');
 }
 
 function setServicePlanMessage(message, type = 'info') {
@@ -4949,6 +4971,19 @@ function setServicePlanMessage(message, type = 'info') {
   servicePlanMessageEl.hidden = false;
   servicePlanMessageEl.textContent = message;
   servicePlanMessageEl.classList.add('show', type);
+}
+
+function setServicePlanCouponMessage(message, type = 'info') {
+  if (!servicePlanCouponMessageEl) return;
+  servicePlanCouponMessageEl.classList.remove('success', 'error', 'info', 'show');
+  if (!message) {
+    servicePlanCouponMessageEl.hidden = true;
+    servicePlanCouponMessageEl.textContent = '';
+    return;
+  }
+  servicePlanCouponMessageEl.hidden = false;
+  servicePlanCouponMessageEl.textContent = message;
+  servicePlanCouponMessageEl.classList.add('show', type);
 }
 
 function resetServicePlanForm(showInfo = false) {
@@ -4968,6 +5003,19 @@ function resetServicePlanForm(showInfo = false) {
     setServicePlanMessage('برای ثبت پلن جدید، فیلدها را تکمیل کنید.', 'info');
   } else {
     setServicePlanMessage('');
+  }
+}
+
+function resetServicePlanCouponForm(showInfo = false) {
+  if (!servicePlanCouponForm) return;
+  servicePlanCouponForm.reset();
+  if (servicePlanCouponExpiresUnitSelect) {
+    servicePlanCouponExpiresUnitSelect.value = 'days';
+  }
+  if (showInfo) {
+    setServicePlanCouponMessage('برای ثبت کد تخفیف جدید، فیلدها را تکمیل کنید.', 'info');
+  } else {
+    setServicePlanCouponMessage('');
   }
 }
 
@@ -4997,6 +5045,31 @@ function collectServicePlanFormData() {
     description,
     features
   };
+}
+
+function collectServicePlanCouponFormData() {
+  const code = normaliseServicePlanDiscountCode(servicePlanCouponCodeInput?.value || '');
+  const percentRaw = (servicePlanCouponPercentInput?.value || '').trim();
+  const usageRaw = (servicePlanCouponUsageInput?.value || '').trim();
+  const expiresValueRaw = (servicePlanCouponExpiresValueInput?.value || '').trim();
+  const expiresUnit = (servicePlanCouponExpiresUnitSelect?.value || 'days').toLowerCase();
+  const notes = (servicePlanCouponNotesInput?.value || '').trim();
+
+  const payload = {
+    code,
+    discountPercent: percentRaw === '' ? null : Number(percentRaw),
+    expiresInUnit: expiresUnit,
+    notes
+  };
+
+  if (usageRaw) {
+    payload.maxUsages = Number(usageRaw);
+  }
+  if (expiresValueRaw) {
+    payload.expiresInValue = Number(expiresValueRaw);
+  }
+
+  return payload;
 }
 
 function populateServicePlanForm(plan) {
@@ -5106,6 +5179,113 @@ async function handleServicePlanSubmit(event) {
   }
 }
 
+async function handleServicePlanCouponSubmit(event) {
+  event.preventDefault();
+  if (servicePlanCouponSaving) return;
+
+  const formData = collectServicePlanCouponFormData();
+
+  if (!formData.code) {
+    setServicePlanCouponMessage('کد تخفیف را وارد کنید.', 'error');
+    servicePlanCouponCodeInput?.focus();
+    return;
+  }
+
+  if (formData.discountPercent == null || Number.isNaN(formData.discountPercent)) {
+    setServicePlanCouponMessage('درصد تخفیف را وارد کنید.', 'error');
+    servicePlanCouponPercentInput?.focus();
+    return;
+  }
+
+  if (formData.discountPercent <= 0 || formData.discountPercent > 100) {
+    setServicePlanCouponMessage('درصد تخفیف باید بین ۱ تا ۱۰۰ باشد.', 'error');
+    servicePlanCouponPercentInput?.focus();
+    return;
+  }
+
+  if (formData.maxUsages != null && (Number.isNaN(formData.maxUsages) || formData.maxUsages <= 0)) {
+    setServicePlanCouponMessage('تعداد استفاده باید بزرگتر از صفر باشد.', 'error');
+    servicePlanCouponUsageInput?.focus();
+    return;
+  }
+
+  if (formData.expiresInValue != null && (Number.isNaN(formData.expiresInValue) || formData.expiresInValue <= 0)) {
+    setServicePlanCouponMessage('مقدار انقضا باید بزرگتر از صفر باشد.', 'error');
+    servicePlanCouponExpiresValueInput?.focus();
+    return;
+  }
+
+  const payload = {
+    code: formData.code,
+    discountPercent: formData.discountPercent
+  };
+
+  if (formData.maxUsages != null && !Number.isNaN(formData.maxUsages)) {
+    payload.maxUsages = formData.maxUsages;
+  }
+  if (formData.expiresInValue != null && !Number.isNaN(formData.expiresInValue)) {
+    payload.expiresInValue = formData.expiresInValue;
+    payload.expiresInUnit = formData.expiresInUnit;
+  }
+  if (formData.notes) {
+    payload.notes = formData.notes;
+  }
+
+  const token = getCookie('admin_token') || getCookie('access_token');
+
+  try {
+    servicePlanCouponSaving = true;
+    setServicePlanCouponMessage('در حال ثبت کد تخفیف...', 'info');
+    if (servicePlanCouponSubmitBtn) {
+      servicePlanCouponSubmitBtn.disabled = true;
+      servicePlanCouponSubmitBtn.setAttribute('aria-busy', 'true');
+    }
+
+    const res = await fetch(`${ADMIN_API_BASE}/service-plans/discount-codes`, {
+      method: 'POST',
+      credentials: 'include',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(token ? { Authorization: `Bearer ${token}` } : {})
+      },
+      body: JSON.stringify(payload)
+    });
+
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) {
+      throw new Error(data?.message || 'خطا در ثبت کد تخفیف');
+    }
+
+    const discountCode = data?.discountCode;
+    if (discountCode) {
+      const id = toIdString(discountCode.id || discountCode._id);
+      const existingIndex = servicePlanCoupons.findIndex((item) => toIdString(item?.id || item?._id) === id);
+      if (existingIndex >= 0) {
+        servicePlanCoupons[existingIndex] = discountCode;
+      } else {
+        servicePlanCoupons.unshift(discountCode);
+      }
+      servicePlanCouponsLoaded = true;
+      renderServicePlanCoupons();
+    } else {
+      servicePlanCouponsLoaded = false;
+      await loadServicePlanCoupons(true);
+    }
+
+    resetServicePlanCouponForm(false);
+    setServicePlanCouponMessage(`کد تخفیف «${formData.code}» ثبت شد.`, 'success');
+  } catch (err) {
+    console.error('❌ handleServicePlanCouponSubmit error:', err);
+    setServicePlanCouponMessage(err.message || 'خطا در ثبت کد تخفیف', 'error');
+  } finally {
+    servicePlanCouponSaving = false;
+    if (servicePlanCouponSubmitBtn) {
+      servicePlanCouponSubmitBtn.disabled = false;
+      servicePlanCouponSubmitBtn.removeAttribute('aria-busy');
+    }
+  }
+}
+
 function renderServicePlans() {
   if (!servicePlansListEl) return;
   if (!Array.isArray(servicePlansList) || servicePlansList.length === 0) {
@@ -5172,6 +5352,263 @@ function renderServicePlans() {
         </div>
       </article>`;
   }).join('');
+}
+
+function renderServicePlanCoupons() {
+  if (!servicePlanCouponsListEl) return;
+  if (!Array.isArray(servicePlanCoupons) || servicePlanCoupons.length === 0) {
+    servicePlanCouponsListEl.innerHTML = `
+      <div class="service-plan-coupon-empty">
+        <i class="ri-ticket-line"></i>
+        <p>هنوز هیچ کد تخفیفی ثبت نشده است.</p>
+      </div>`;
+    return;
+  }
+
+  const now = Date.now();
+
+  servicePlanCouponsListEl.innerHTML = servicePlanCoupons.map((coupon) => {
+    const id = toIdString(coupon?.id || coupon?._id || '');
+    const code = coupon?.code || '';
+    const percent = Number(coupon?.discountPercent || 0);
+    const maxUsages = coupon?.maxUsages != null ? Number(coupon.maxUsages) : null;
+    const usedCount = Number(coupon?.usedCount || 0);
+    const remainingUsesRaw = coupon?.remainingUses != null ? Number(coupon.remainingUses) : null;
+    const remainingUses = maxUsages == null
+      ? null
+      : Math.max(remainingUsesRaw != null ? remainingUsesRaw : maxUsages - usedCount, 0);
+    const expiresAt = coupon?.expiresAt ? new Date(coupon.expiresAt) : null;
+    const expiresAtTime = expiresAt ? expiresAt.getTime() : null;
+    const expired = expiresAtTime != null && expiresAtTime <= now;
+    const createdAt = formatDateTime(coupon?.createdAt);
+    const updatedAt = formatDateTime(coupon?.updatedAt);
+    const notes = coupon?.notes || '';
+
+    const badges = [];
+    badges.push(`<span class="service-plan-coupon-badge">تخفیف ${escapeHtml(formatNumber(percent))}٪</span>`);
+
+    if (maxUsages == null) {
+      badges.push('<span class="service-plan-coupon-badge">بدون محدودیت مصرف</span>');
+    } else {
+      const remainingLabel = `مانده ${formatNumber(remainingUses)} از ${formatNumber(maxUsages)}`;
+      badges.push(`<span class="service-plan-coupon-badge${remainingUses <= 0 ? ' warning' : ''}">${escapeHtml(remainingLabel)}</span>`);
+    }
+
+    if (usedCount > 0) {
+      badges.push(`<span class="service-plan-coupon-badge">استفاده شده: ${escapeHtml(formatNumber(usedCount))}</span>`);
+    }
+
+    if (coupon?.isActive === false) {
+      badges.push('<span class="service-plan-coupon-badge warning">غیرفعال</span>');
+    }
+
+    if (expiresAt) {
+      const expiresText = formatDateTime(expiresAt) || '—';
+      const label = expired ? `منقضی شده (${expiresText})` : `انقضا: ${expiresText}`;
+      badges.push(`<span class="service-plan-coupon-badge${expired ? ' warning' : ''}">${escapeHtml(label)}</span>`);
+    }
+
+    const metaParts = [];
+    if (createdAt) {
+      metaParts.push(`<div><i class="ri-calendar-check-line"></i>ایجاد: ${escapeHtml(createdAt)}</div>`);
+    }
+    if (updatedAt && updatedAt !== createdAt) {
+      metaParts.push(`<div><i class="ri-refresh-line"></i>آخرین بروزرسانی: ${escapeHtml(updatedAt)}</div>`);
+    }
+    if (notes) {
+      metaParts.push(`<div class="service-plan-coupon-note"><i class="ri-chat-1-line"></i>${escapeHtml(notes).replace(/\n/g, '<br>')}</div>`);
+    }
+
+    const metaHtml = metaParts.length ? metaParts.join('') : '<div>—</div>';
+
+    const toggleLabel = coupon?.isActive === false ? 'فعال‌سازی' : 'غیرفعال‌سازی';
+
+    return `
+      <div class="service-plan-coupon-item${coupon?.isActive === false ? ' inactive' : ''}" data-coupon-id="${escapeHtml(id)}">
+        <div>
+          <div class="service-plan-coupon-code">${escapeHtml(code)}</div>
+          <div class="service-plan-coupon-badges">${badges.join('')}</div>
+        </div>
+        <div class="service-plan-coupon-meta">${metaHtml}</div>
+        <div class="service-plan-coupon-actions-inline">
+          <button type="button" data-action="toggle" data-coupon-id="${escapeHtml(id)}">${toggleLabel}</button>
+          <button type="button" class="danger" data-action="delete" data-coupon-id="${escapeHtml(id)}">حذف</button>
+        </div>
+      </div>`;
+  }).join('');
+}
+
+async function loadServicePlanCoupons(force = false) {
+  if (!servicePlanCouponsListEl) return;
+  if (servicePlanCouponsLoading && !force) return;
+  if (servicePlanCouponsLoaded && !force) {
+    renderServicePlanCoupons();
+    return;
+  }
+
+  servicePlanCouponsLoading = true;
+  servicePlanCouponsListEl.innerHTML = `
+    <div class="service-plan-coupon-empty">
+      <i class="ri-loader-4-line" style="animation:spin 0.9s linear infinite;"></i>
+      <p>در حال دریافت کدهای تخفیف...</p>
+    </div>`;
+
+  const token = getCookie('admin_token') || getCookie('access_token');
+
+  try {
+    const res = await fetch(`${ADMIN_API_BASE}/service-plans/discount-codes`, {
+      credentials: 'include',
+      headers: {
+        ...(token ? { Authorization: `Bearer ${token}` } : {})
+      }
+    });
+
+    if (!res.ok) {
+      const text = await res.text();
+      throw new Error(text || 'خطا در دریافت کدهای تخفیف');
+    }
+
+    const data = await res.json().catch(() => ({}));
+    const list = Array.isArray(data?.discountCodes) ? data.discountCodes : [];
+    servicePlanCoupons = list;
+    servicePlanCouponsLoaded = true;
+    renderServicePlanCoupons();
+  } catch (err) {
+    console.error('❌ loadServicePlanCoupons error:', err);
+    servicePlanCouponsLoaded = false;
+    servicePlanCouponsListEl.innerHTML = `
+      <div class="service-plan-coupon-empty">
+        <i class="ri-error-warning-line"></i>
+        <p>${escapeHtml(err.message || 'خطا در دریافت کدهای تخفیف')}</p>
+      </div>`;
+    setServicePlanCouponMessage(err.message || 'خطا در دریافت کدهای تخفیف', 'error');
+  } finally {
+    servicePlanCouponsLoading = false;
+  }
+}
+
+async function toggleServicePlanCoupon(couponId, triggerButton = null) {
+  if (!couponId) return;
+  const coupon = servicePlanCoupons.find((item) => toIdString(item?.id || item?._id) === toIdString(couponId));
+  if (!coupon) {
+    setServicePlanCouponMessage('کد تخفیف انتخابی یافت نشد.', 'error');
+    return;
+  }
+
+  const nextState = coupon.isActive === false;
+  const token = getCookie('admin_token') || getCookie('access_token');
+
+  try {
+    setServicePlanCouponMessage(`در حال ${nextState ? 'فعال‌سازی' : 'غیرفعال‌سازی'} کد «${coupon.code}»...`, 'info');
+    if (triggerButton) {
+      triggerButton.disabled = true;
+      triggerButton.setAttribute('aria-busy', 'true');
+    }
+
+    const res = await fetch(`${ADMIN_API_BASE}/service-plans/discount-codes/${encodeURIComponent(couponId)}`, {
+      method: 'PATCH',
+      credentials: 'include',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(token ? { Authorization: `Bearer ${token}` } : {})
+      },
+      body: JSON.stringify({ isActive: nextState })
+    });
+
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) {
+      throw new Error(data?.message || 'خطا در بروزرسانی کد تخفیف');
+    }
+
+    const updated = data?.discountCode;
+    if (updated) {
+      const id = toIdString(updated.id || updated._id);
+      const index = servicePlanCoupons.findIndex((item) => toIdString(item?.id || item?._id) === id);
+      if (index >= 0) {
+        servicePlanCoupons[index] = updated;
+      }
+    } else {
+      await loadServicePlanCoupons(true);
+    }
+
+    setServicePlanCouponMessage(`کد «${coupon.code}» ${nextState ? 'فعال شد' : 'غیرفعال شد'}.`, 'success');
+    renderServicePlanCoupons();
+  } catch (err) {
+    console.error('❌ toggleServicePlanCoupon error:', err);
+    setServicePlanCouponMessage(err.message || 'خطا در بروزرسانی کد تخفیف', 'error');
+  } finally {
+    if (triggerButton) {
+      triggerButton.disabled = false;
+      triggerButton.removeAttribute('aria-busy');
+    }
+  }
+}
+
+async function deleteServicePlanCoupon(couponId, triggerButton = null) {
+  if (!couponId) return;
+  const coupon = servicePlanCoupons.find((item) => toIdString(item?.id || item?._id) === toIdString(couponId));
+  const code = coupon?.code || 'کد انتخابی';
+  if (!confirm(`آیا از حذف کد «${code}» مطمئن هستید؟`)) return;
+
+  const token = getCookie('admin_token') || getCookie('access_token');
+
+  try {
+    setServicePlanCouponMessage(`در حال حذف کد «${code}»...`, 'info');
+    if (triggerButton) {
+      triggerButton.disabled = true;
+      triggerButton.setAttribute('aria-busy', 'true');
+    }
+
+    const res = await fetch(`${ADMIN_API_BASE}/service-plans/discount-codes/${encodeURIComponent(couponId)}`, {
+      method: 'DELETE',
+      credentials: 'include',
+      headers: {
+        ...(token ? { Authorization: `Bearer ${token}` } : {})
+      }
+    });
+
+    if (!res.ok) {
+      let data = null;
+      try {
+        data = await res.json();
+      } catch (err) {
+        data = null;
+      }
+      throw new Error(data?.message || 'خطا در حذف کد تخفیف');
+    }
+
+    servicePlanCoupons = servicePlanCoupons.filter((item) => toIdString(item?.id || item?._id) !== toIdString(couponId));
+    if (!servicePlanCoupons.length) {
+      servicePlanCouponsLoaded = false;
+    }
+    renderServicePlanCoupons();
+    setServicePlanCouponMessage(`کد «${code}» حذف شد.`, 'success');
+  } catch (err) {
+    console.error('❌ deleteServicePlanCoupon error:', err);
+    setServicePlanCouponMessage(err.message || 'خطا در حذف کد تخفیف', 'error');
+  } finally {
+    if (triggerButton) {
+      triggerButton.disabled = false;
+      triggerButton.removeAttribute('aria-busy');
+    }
+  }
+}
+
+function handleServicePlanCouponsListClick(event) {
+  const button = event.target.closest('button');
+  if (!button) return;
+  const action = button.dataset.action;
+  const couponId = button.dataset.couponId;
+  if (!couponId) return;
+
+  if (action === 'toggle') {
+    toggleServicePlanCoupon(couponId, button);
+    return;
+  }
+
+  if (action === 'delete') {
+    deleteServicePlanCoupon(couponId, button);
+  }
 }
 
 async function loadServicePlans(force = false) {
@@ -5305,8 +5742,18 @@ function initServicePlanManager() {
     });
   }
 
+  servicePlanCouponForm?.addEventListener('submit', handleServicePlanCouponSubmit);
+  servicePlanCouponRefreshBtn?.addEventListener('click', () => {
+    if (!servicePlanCouponsLoading) {
+      loadServicePlanCoupons(true);
+    }
+  });
+  servicePlanCouponsListEl?.addEventListener('click', handleServicePlanCouponsListClick);
+
   resetServicePlanForm(true);
+  resetServicePlanCouponForm(true);
   servicePlanManagerInitialised = true;
+  loadServicePlanCoupons();
 }
 
 async function ensureServicePlanManager(forceReload = false) {
@@ -5315,9 +5762,18 @@ async function ensureServicePlanManager(forceReload = false) {
     initServicePlanManager();
   }
   if (forceReload) {
-    await loadServicePlans(true);
-  } else if (!servicePlansLoaded) {
+    await Promise.all([
+      loadServicePlans(true),
+      loadServicePlanCoupons(true)
+    ]);
+    return;
+  }
+
+  if (!servicePlansLoaded) {
     await loadServicePlans();
+  }
+  if (!servicePlanCouponsLoaded) {
+    await loadServicePlanCoupons();
   }
 }
 
