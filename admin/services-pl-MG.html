@@ -1,0 +1,1113 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>مدیریت پلن‌های خدماتی | پنل ادمین</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            color-scheme: light dark;
+            --bg: #0f172a;
+            --bg-card: rgba(15, 23, 42, 0.72);
+            --bg-card-solid: #111c38;
+            --surface: rgba(255, 255, 255, 0.08);
+            --surface-hover: rgba(255, 255, 255, 0.16);
+            --border: rgba(148, 163, 184, 0.25);
+            --accent: #38bdf8;
+            --accent-strong: #0ea5e9;
+            --accent-soft: rgba(56, 189, 248, 0.16);
+            --success: #22c55e;
+            --danger: #f87171;
+            --warning: #fbbf24;
+            --text: #e2e8f0;
+            --text-muted: #94a3b8;
+            --text-weak: rgba(226, 232, 240, 0.64);
+            --shadow: 0 18px 60px rgba(15, 23, 42, 0.55);
+            font-size: 16px;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: "Vazirmatn", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+            background: linear-gradient(160deg, #020617 0%, #0f172a 40%, #1e293b 100%);
+            color: var(--text);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        body.locked {
+            overflow: hidden;
+        }
+
+        header {
+            padding: clamp(1rem, 2vw, 2rem) clamp(1.5rem, 4vw, 4rem);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            backdrop-filter: blur(16px);
+            background: rgba(15, 23, 42, 0.8);
+            border-bottom: 1px solid rgba(148, 163, 184, 0.1);
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        header h1 {
+            margin: 0;
+            font-size: clamp(1.35rem, 2.4vw, 1.9rem);
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 0.65rem;
+        }
+
+        header h1 span {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 36px;
+            height: 36px;
+            border-radius: 12px;
+            background: var(--accent-soft);
+            color: var(--accent);
+            font-size: 1.35rem;
+        }
+
+        header nav {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            color: var(--text-muted);
+        }
+
+        header nav span {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            background: rgba(148, 163, 184, 0.08);
+            padding: 0.4rem 0.8rem;
+            border-radius: 999px;
+            font-size: 0.9rem;
+        }
+
+        main {
+            width: min(1200px, 94vw);
+            margin: 2rem auto 4rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1.8rem;
+        }
+
+        .card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: clamp(1.5rem, 3vw, 2.25rem);
+            box-shadow: var(--shadow);
+            backdrop-filter: blur(18px);
+        }
+
+        .card-title {
+            margin: 0 0 1.2rem;
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--text);
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 1rem;
+        }
+
+        .stat-card {
+            background: linear-gradient(140deg, rgba(56, 189, 248, 0.18), rgba(14, 165, 233, 0.05));
+            border: 1px solid rgba(56, 189, 248, 0.25);
+            border-radius: 18px;
+            padding: 1.2rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.4rem;
+        }
+
+        .stat-card strong {
+            font-size: 1.65rem;
+        }
+
+        .stat-card small {
+            color: var(--text-muted);
+        }
+
+        .toolbar {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.8rem;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .toolbar-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.6rem;
+        }
+
+        .input {
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid rgba(148, 163, 184, 0.25);
+            color: var(--text);
+            border-radius: 12px;
+            padding: 0.7rem 0.85rem;
+            min-width: 200px;
+            font-size: 0.95rem;
+        }
+
+        .input::placeholder {
+            color: var(--text-muted);
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            background: var(--accent);
+            border: none;
+            color: #0f172a;
+            border-radius: 12px;
+            padding: 0.65rem 1.2rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+            font-size: 0.95rem;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 25px rgba(14, 165, 233, 0.35);
+            background: var(--accent-strong);
+        }
+
+        .btn.secondary {
+            background: rgba(148, 163, 184, 0.15);
+            color: var(--text);
+            border: 1px solid rgba(148, 163, 184, 0.2);
+        }
+
+        .btn.danger {
+            background: rgba(248, 113, 113, 0.2);
+            color: #fecaca;
+            border: 1px solid rgba(248, 113, 113, 0.4);
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .plans-table {
+            width: 100%;
+            border-collapse: collapse;
+            border-radius: 16px;
+            overflow: hidden;
+        }
+
+        .plans-table thead {
+            background: rgba(148, 163, 184, 0.12);
+        }
+
+        .plans-table th,
+        .plans-table td {
+            padding: 0.85rem 0.75rem;
+            text-align: right;
+            font-size: 0.92rem;
+        }
+
+        .plans-table tbody tr {
+            border-bottom: 1px solid rgba(148, 163, 184, 0.06);
+            transition: background 0.2s ease;
+        }
+
+        .plans-table tbody tr:hover {
+            background: rgba(148, 163, 184, 0.08);
+        }
+
+        .tag {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.35rem 0.75rem;
+            border-radius: 999px;
+            background: rgba(56, 189, 248, 0.12);
+            color: var(--accent);
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+
+        .status-chip {
+            padding: 0.3rem 0.7rem;
+            border-radius: 999px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.3rem;
+        }
+
+        .status-chip.active {
+            background: rgba(34, 197, 94, 0.2);
+            color: #bbf7d0;
+        }
+
+        .status-chip.inactive {
+            background: rgba(148, 163, 184, 0.18);
+            color: var(--text-muted);
+        }
+
+        .actions {
+            display: flex;
+            gap: 0.4rem;
+            flex-wrap: wrap;
+        }
+
+        form {
+            display: grid;
+            gap: 1rem;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 1rem;
+        }
+
+        label {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            font-size: 0.9rem;
+            color: var(--text-muted);
+        }
+
+        textarea.input {
+            min-height: 120px;
+            resize: vertical;
+        }
+
+        .features {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .feature-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.55rem;
+        }
+
+        .feature-chip {
+            background: rgba(148, 163, 184, 0.15);
+            border: 1px solid rgba(148, 163, 184, 0.25);
+            border-radius: 12px;
+            padding: 0.35rem 0.6rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            font-size: 0.85rem;
+        }
+
+        .feature-chip button {
+            background: transparent;
+            border: none;
+            color: var(--text);
+            cursor: pointer;
+            font-size: 0.9rem;
+            line-height: 1;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 2.5rem 1rem;
+            color: var(--text-muted);
+        }
+
+        .status-banner {
+            border-radius: 14px;
+            padding: 0.85rem 1rem;
+            font-size: 0.88rem;
+            display: flex;
+            align-items: flex-start;
+            gap: 0.65rem;
+            border: 1px solid transparent;
+        }
+
+        .status-banner.success {
+            background: rgba(34, 197, 94, 0.12);
+            color: #bbf7d0;
+            border-color: rgba(34, 197, 94, 0.35);
+        }
+
+        .status-banner.error {
+            background: rgba(248, 113, 113, 0.14);
+            color: #fecaca;
+            border-color: rgba(248, 113, 113, 0.4);
+        }
+
+        .status-banner.info {
+            background: rgba(56, 189, 248, 0.12);
+            color: rgba(125, 211, 252, 1);
+            border-color: rgba(56, 189, 248, 0.3);
+        }
+
+        .login-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(2, 6, 23, 0.92);
+            backdrop-filter: blur(12px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 50;
+        }
+
+        .login-card {
+            background: rgba(15, 23, 42, 0.88);
+            border: 1px solid rgba(56, 189, 248, 0.25);
+            border-radius: 24px;
+            padding: clamp(2rem, 6vw, 3rem);
+            width: min(420px, 92vw);
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+            box-shadow: 0 25px 70px rgba(2, 6, 23, 0.55);
+            text-align: center;
+        }
+
+        .login-card h2 {
+            margin: 0;
+            font-size: 1.45rem;
+            color: var(--text);
+        }
+
+        .login-card p {
+            margin: 0;
+            color: var(--text-muted);
+            line-height: 1.7;
+        }
+
+        .login-card .input {
+            width: 100%;
+            text-align: center;
+            font-size: 1.1rem;
+            letter-spacing: 0.25rem;
+        }
+
+        .login-error {
+            color: #fca5a5;
+            font-size: 0.9rem;
+            min-height: 1.2rem;
+        }
+
+        @media (max-width: 768px) {
+            header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 0.8rem;
+            }
+
+            header nav {
+                width: 100%;
+                justify-content: space-between;
+            }
+
+            .toolbar {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .toolbar-actions {
+                width: 100%;
+                justify-content: stretch;
+            }
+
+            .toolbar .input,
+            .toolbar .btn {
+                width: 100%;
+            }
+
+            .plans-table th,
+            .plans-table td {
+                font-size: 0.85rem;
+            }
+        }
+
+        @media (max-width: 520px) {
+            .plans-table,
+            .plans-table thead,
+            .plans-table tbody,
+            .plans-table th,
+            .plans-table td,
+            .plans-table tr {
+                display: block;
+                width: 100%;
+            }
+
+            .plans-table thead {
+                display: none;
+            }
+
+            .plans-table tr {
+                margin-bottom: 1rem;
+                border: 1px solid rgba(148, 163, 184, 0.15);
+                border-radius: 16px;
+                padding: 1rem;
+            }
+
+            .plans-table td {
+                padding: 0.4rem 0;
+            }
+
+            .plans-table td::before {
+                content: attr(data-label);
+                display: block;
+                font-size: 0.8rem;
+                color: var(--text-muted);
+                margin-bottom: 0.2rem;
+            }
+
+            .actions {
+                justify-content: flex-start;
+            }
+        }
+    </style>
+</head>
+<body class="locked">
+    <div class="login-overlay" id="loginOverlay">
+        <div class="login-card">
+            <h2>ورود به مرکز کنترل پلن‌ها</h2>
+            <p>برای دسترسی به اطلاعات حساس سامانه فروشندگان خدماتی لطفاً رمز عبور یکبار مصرف امروز را وارد کنید.</p>
+            <input type="password" class="input" id="loginPassword" inputmode="numeric" maxlength="6" placeholder="••••••" autocomplete="current-password">
+            <button class="btn" id="loginSubmit">ورود</button>
+            <div class="login-error" id="loginError" aria-live="polite"></div>
+        </div>
+    </div>
+
+    <header>
+        <h1>
+            <span>⚙️</span>
+            مدیریت پیشرفته پلن‌های خدماتی
+        </h1>
+        <nav>
+            <span id="lastSync">آخرین بروزرسانی: --</span>
+            <span id="activeUser">ادمین فعال: مدیریت مرکزی</span>
+        </nav>
+    </header>
+
+    <main>
+        <section class="card">
+            <h2 class="card-title">مرکز فرمان پلن‌ها</h2>
+            <div class="stats-grid" id="statsGrid">
+                <div class="stat-card">
+                    <small>مجموع پلن‌های فعال</small>
+                    <strong id="activePlansCount">۰</strong>
+                    <small>پلن‌هایی که در حال حاضر قابل فروش هستند.</small>
+                </div>
+                <div class="stat-card">
+                    <small>میانگین قیمت</small>
+                    <strong id="avgPrice">۰ تومان</strong>
+                    <small>میانگین قیمت پلن‌های فعال</small>
+                </div>
+                <div class="stat-card">
+                    <small>مدت زمان محبوب</small>
+                    <strong id="popularDuration">-- روز</strong>
+                    <small>رایج‌ترین بازه زمانی در پلن‌ها</small>
+                </div>
+                <div class="stat-card">
+                    <small>آخرین بروزرسانی</small>
+                    <strong id="lastUpdatedPlan">--</strong>
+                    <small>مشخصات آخرین پلن ویرایش شده</small>
+                </div>
+            </div>
+        </section>
+
+        <section class="card">
+            <div class="toolbar">
+                <input type="search" class="input" id="searchInput" placeholder="جستجوی پلن بر اساس نام یا برچسب">
+                <div class="toolbar-actions">
+                    <button class="btn secondary" id="refreshBtn">بروزرسانی داده‌ها</button>
+                    <button class="btn" id="newPlanBtn">ثبت پلن جدید</button>
+                </div>
+            </div>
+            <div class="table-wrapper">
+                <table class="plans-table" id="plansTable">
+                    <thead>
+                        <tr>
+                            <th>عنوان</th>
+                            <th>قیمت</th>
+                            <th>مدت</th>
+                            <th>برچسب</th>
+                            <th>آخرین تغییر</th>
+                            <th>وضعیت</th>
+                            <th>عملیات</th>
+                        </tr>
+                    </thead>
+                    <tbody id="plansTableBody">
+                        <tr>
+                            <td colspan="7" class="empty-state">در حال بارگذاری اطلاعات از پایگاه داده...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <section class="card" id="planFormCard" hidden>
+            <h2 class="card-title" id="planFormTitle">ثبت پلن جدید</h2>
+            <form id="planForm" novalidate>
+                <div id="formStatus" class="status-banner info" hidden></div>
+                <div class="form-grid">
+                    <label>
+                        عنوان پلن
+                        <input type="text" class="input" id="planTitle" name="title" required placeholder="مثلاً: پلن حرفه‌ای">
+                    </label>
+                    <label>
+                        شناسه یکتا (Slug)
+                        <input type="text" class="input" id="planSlug" name="slug" required placeholder="مثلاً: pro-plan">
+                    </label>
+                    <label>
+                        قیمت (تومان)
+                        <input type="number" class="input" id="planPrice" name="price" min="0" step="1000" required>
+                    </label>
+                    <label>
+                        مدت اعتبار (روز)
+                        <input type="number" class="input" id="planDuration" name="duration" min="0" step="1" placeholder="مثلاً: ۳۰">
+                    </label>
+                    <label>
+                        برچسب (Label)
+                        <input type="text" class="input" id="planLabel" name="label" placeholder="مثلاً: پیشنهادی مدیر">
+                    </label>
+                    <label>
+                        وضعیت نمایش
+                        <select class="input" id="planStatus" name="status">
+                            <option value="true">فعال</option>
+                            <option value="false">غیرفعال</option>
+                        </select>
+                    </label>
+                </div>
+                <label>
+                    توضیحات کوتاه
+                    <textarea class="input" id="planDescription" name="description" placeholder="توضیحات تکمیلی برای نمایش در پنل فروشنده"></textarea>
+                </label>
+                <div class="features">
+                    <label for="featureInput">مزایا و امکانات پلن</label>
+                    <div class="feature-input-row" style="display:flex;gap:0.6rem;flex-wrap:wrap;">
+                        <input type="text" id="featureInput" class="input" placeholder="افزودن ویژگی جدید">
+                        <button type="button" class="btn secondary" id="addFeatureBtn">افزودن</button>
+                    </div>
+                    <div class="feature-list" id="featureList"></div>
+                </div>
+                <div style="display:flex;gap:0.75rem;flex-wrap:wrap;justify-content:flex-start;">
+                    <button type="submit" class="btn" id="planSubmitBtn">ذخیره پلن</button>
+                    <button type="button" class="btn secondary" id="planCancelBtn">انصراف</button>
+                </div>
+            </form>
+        </section>
+
+        <section class="card">
+            <h2 class="card-title">دفترچه ثبت وقایع</h2>
+            <div id="activityLog" class="empty-state">هنوز عملیاتی انجام نشده است.</div>
+        </section>
+    </main>
+
+    <template id="planRowTemplate">
+        <tr>
+            <td data-label="عنوان">
+                <div style="display:flex;flex-direction:column;gap:0.35rem;">
+                    <strong class="plan-title"></strong>
+                    <small class="plan-slug" style="color:var(--text-muted);"></small>
+                </div>
+            </td>
+            <td data-label="قیمت" class="plan-price"></td>
+            <td data-label="مدت" class="plan-duration"></td>
+            <td data-label="برچسب"><span class="tag plan-label"></span></td>
+            <td data-label="آخرین تغییر" class="plan-updated"></td>
+            <td data-label="وضعیت"><span class="status-chip"></span></td>
+            <td data-label="عملیات">
+                <div class="actions">
+                    <button class="btn secondary" data-action="edit">ویرایش</button>
+                    <button class="btn secondary" data-action="toggle"></button>
+                    <button class="btn danger" data-action="delete">حذف</button>
+                </div>
+            </td>
+        </tr>
+    </template>
+
+    <script>
+        (function () {
+            const API_BASE = '/api/service-plans';
+            const LOGIN_PASSWORD = '332588';
+            const loginOverlay = document.getElementById('loginOverlay');
+            const loginSubmit = document.getElementById('loginSubmit');
+            const loginPassword = document.getElementById('loginPassword');
+            const loginError = document.getElementById('loginError');
+
+            const plansTableBody = document.getElementById('plansTableBody');
+            const planRowTemplate = document.getElementById('planRowTemplate');
+            const planFormCard = document.getElementById('planFormCard');
+            const planFormTitle = document.getElementById('planFormTitle');
+            const planForm = document.getElementById('planForm');
+            const planCancelBtn = document.getElementById('planCancelBtn');
+            const planSubmitBtn = document.getElementById('planSubmitBtn');
+            const formStatus = document.getElementById('formStatus');
+            const featureInput = document.getElementById('featureInput');
+            const featureList = document.getElementById('featureList');
+            const addFeatureBtn = document.getElementById('addFeatureBtn');
+            const planTitle = document.getElementById('planTitle');
+            const planSlug = document.getElementById('planSlug');
+            const planPrice = document.getElementById('planPrice');
+            const planDuration = document.getElementById('planDuration');
+            const planLabel = document.getElementById('planLabel');
+            const planStatusSelect = document.getElementById('planStatus');
+            const planDescription = document.getElementById('planDescription');
+            const searchInput = document.getElementById('searchInput');
+            const refreshBtn = document.getElementById('refreshBtn');
+            const newPlanBtn = document.getElementById('newPlanBtn');
+            const activePlansCount = document.getElementById('activePlansCount');
+            const avgPrice = document.getElementById('avgPrice');
+            const popularDuration = document.getElementById('popularDuration');
+            const lastUpdatedPlan = document.getElementById('lastUpdatedPlan');
+            const lastSync = document.getElementById('lastSync');
+            const activityLog = document.getElementById('activityLog');
+
+            let state = {
+                plans: [],
+                filter: '',
+                editingId: null,
+                features: [],
+                activity: []
+            };
+
+            const intlPrice = new Intl.NumberFormat('fa-IR');
+            const intlDate = new Intl.DateTimeFormat('fa-IR', {
+                dateStyle: 'medium',
+                timeStyle: 'short'
+            });
+
+            function persistSession() {
+                sessionStorage.setItem('sp-admin-authenticated', 'true');
+            }
+
+            function hasSession() {
+                return sessionStorage.getItem('sp-admin-authenticated') === 'true';
+            }
+
+            function authenticate() {
+                const value = loginPassword.value.trim();
+                if (value === LOGIN_PASSWORD) {
+                    loginError.textContent = '';
+                    document.body.classList.remove('locked');
+                    loginOverlay.style.display = 'none';
+                    persistSession();
+                    refreshData(true);
+                } else {
+                    loginError.textContent = 'رمز وارد شده معتبر نیست. دوباره تلاش کنید.';
+                    loginPassword.value = '';
+                    loginPassword.focus();
+                }
+            }
+
+            function ensureLogin() {
+                if (hasSession()) {
+                    loginOverlay.style.display = 'none';
+                    document.body.classList.remove('locked');
+                    refreshData(true);
+                } else {
+                    document.body.classList.add('locked');
+                    loginOverlay.style.display = 'flex';
+                }
+            }
+
+            loginSubmit.addEventListener('click', authenticate);
+            loginPassword.addEventListener('keydown', (event) => {
+                if (event.key === 'Enter') {
+                    authenticate();
+                }
+            });
+
+            function setFormStatus(message, type = 'info') {
+                if (!message) {
+                    formStatus.hidden = true;
+                    formStatus.textContent = '';
+                    formStatus.className = 'status-banner';
+                    return;
+                }
+                formStatus.hidden = false;
+                formStatus.textContent = message;
+                formStatus.className = `status-banner ${type}`;
+            }
+
+            function logActivity(message, type = 'info') {
+                const entry = {
+                    message,
+                    type,
+                    timestamp: new Date()
+                };
+                state.activity.unshift(entry);
+                if (state.activity.length > 20) {
+                    state.activity.pop();
+                }
+                renderActivity();
+            }
+
+            function renderActivity() {
+                if (!state.activity.length) {
+                    activityLog.className = 'empty-state';
+                    activityLog.textContent = 'هنوز عملیاتی انجام نشده است.';
+                    return;
+                }
+                activityLog.className = 'activity-list';
+                activityLog.innerHTML = state.activity
+                    .map((item) => `
+                        <div class="status-banner ${item.type}" style="margin-bottom:0.6rem;">
+                            <div style="display:flex;flex-direction:column;gap:0.2rem;">
+                                <strong style="font-size:0.92rem;">${item.message}</strong>
+                                <small style="color:var(--text-weak);">${intlDate.format(item.timestamp)}</small>
+                            </div>
+                        </div>
+                    `)
+                    .join('');
+            }
+
+            function resetForm() {
+                state.editingId = null;
+                planForm.reset();
+                state.features = [];
+                renderFeatures();
+                planFormTitle.textContent = 'ثبت پلن جدید';
+                planSubmitBtn.textContent = 'ذخیره پلن';
+                setFormStatus('', 'info');
+                planFormCard.hidden = true;
+            }
+
+            function renderFeatures() {
+                featureList.innerHTML = '';
+                if (!state.features.length) {
+                    featureList.innerHTML = '<span style="color:var(--text-muted);font-size:0.85rem;">هیچ ویژگی ثبت نشده است.</span>';
+                    return;
+                }
+                const fragment = document.createDocumentFragment();
+                state.features.forEach((feature, index) => {
+                    const chip = document.createElement('span');
+                    chip.className = 'feature-chip';
+                    chip.innerHTML = `
+                        <span>${feature}</span>
+                        <button type="button" data-index="${index}" aria-label="حذف">×</button>
+                    `;
+                    fragment.appendChild(chip);
+                });
+                featureList.appendChild(fragment);
+            }
+
+            featureList.addEventListener('click', (event) => {
+                const button = event.target.closest('button[data-index]');
+                if (!button) return;
+                const index = Number(button.dataset.index);
+                if (!Number.isNaN(index)) {
+                    state.features.splice(index, 1);
+                    renderFeatures();
+                }
+            });
+
+            function addFeature() {
+                const value = featureInput.value.trim();
+                if (!value) return;
+                state.features.push(value);
+                featureInput.value = '';
+                renderFeatures();
+            }
+
+            addFeatureBtn.addEventListener('click', addFeature);
+            featureInput.addEventListener('keydown', (event) => {
+                if (event.key === 'Enter') {
+                    event.preventDefault();
+                    addFeature();
+                }
+            });
+
+            planCancelBtn.addEventListener('click', () => {
+                resetForm();
+            });
+
+            newPlanBtn.addEventListener('click', () => {
+                planFormCard.hidden = false;
+                planFormTitle.textContent = 'ثبت پلن جدید';
+                planSubmitBtn.textContent = 'ذخیره پلن';
+                setFormStatus('لطفاً تمام فیلدهای ضروری را تکمیل کنید.', 'info');
+                planTitle.focus();
+            });
+
+            function renderPlans() {
+                plansTableBody.innerHTML = '';
+                const filtered = state.plans.filter((plan) => {
+                    if (!state.filter) return true;
+                    const query = state.filter.toLowerCase();
+                    return (
+                        plan.title?.toLowerCase().includes(query) ||
+                        plan.slug?.toLowerCase().includes(query) ||
+                        plan.label?.toLowerCase().includes(query)
+                    );
+                });
+
+                if (!filtered.length) {
+                    plansTableBody.innerHTML = '<tr><td colspan="7" class="empty-state">پلنی با این مشخصات یافت نشد.</td></tr>';
+                    return;
+                }
+
+                const fragment = document.createDocumentFragment();
+                filtered.forEach((plan) => {
+                    const row = planRowTemplate.content.firstElementChild.cloneNode(true);
+                    row.dataset.planId = plan.id;
+                    row.querySelector('.plan-title').textContent = plan.title || 'بدون عنوان';
+                    row.querySelector('.plan-slug').textContent = plan.slug || '---';
+                    row.querySelector('.plan-price').textContent = plan.price ? `${intlPrice.format(plan.price)} تومان` : 'تعریف نشده';
+                    row.querySelector('.plan-duration').textContent = plan.durationDays ? `${intlPrice.format(plan.durationDays)} روز` : 'نامحدود';
+                    row.querySelector('.plan-label').textContent = plan.label || '---';
+                    row.querySelector('.plan-updated').textContent = plan.updatedAt ? intlDate.format(new Date(plan.updatedAt)) : '---';
+
+                    const statusChip = row.querySelector('.status-chip');
+                    if (plan.isActive === false) {
+                        statusChip.textContent = 'غیرفعال';
+                        statusChip.classList.add('inactive');
+                    } else {
+                        statusChip.textContent = 'فعال';
+                        statusChip.classList.add('active');
+                    }
+
+                    const toggleBtn = row.querySelector('button[data-action="toggle"]');
+                    toggleBtn.textContent = plan.isActive === false ? 'فعال‌سازی' : 'توقف';
+                    fragment.appendChild(row);
+                });
+
+                plansTableBody.appendChild(fragment);
+            }
+
+            function updateStats() {
+                const activePlans = state.plans.filter((plan) => plan.isActive !== false);
+                activePlansCount.textContent = intlPrice.format(activePlans.length);
+
+                if (activePlans.length) {
+                    const sum = activePlans.reduce((acc, plan) => acc + (Number(plan.price) || 0), 0);
+                    const avg = Math.round(sum / activePlans.length);
+                    avgPrice.textContent = `${intlPrice.format(avg)} تومان`;
+                } else {
+                    avgPrice.textContent = '۰ تومان';
+                }
+
+                const durationMap = new Map();
+                state.plans.forEach((plan) => {
+                    if (!plan.durationDays) return;
+                    const key = plan.durationDays;
+                    durationMap.set(key, (durationMap.get(key) || 0) + 1);
+                });
+
+                if (durationMap.size) {
+                    let popular = { key: 0, count: 0 };
+                    for (const [key, count] of durationMap.entries()) {
+                        if (count > popular.count) {
+                            popular = { key, count };
+                        }
+                    }
+                    popularDuration.textContent = `${intlPrice.format(popular.key)} روز`;
+                } else {
+                    popularDuration.textContent = '-- روز';
+                }
+
+                if (state.plans.length) {
+                    const latest = [...state.plans].sort((a, b) => new Date(b.updatedAt || b.createdAt || 0) - new Date(a.updatedAt || a.createdAt || 0))[0];
+                    if (latest) {
+                        const label = latest.title ? `«${latest.title}»` : 'آخرین پلن';
+                        lastUpdatedPlan.textContent = `${label} - ${latest.updatedAt ? intlDate.format(new Date(latest.updatedAt)) : intlDate.format(new Date(latest.createdAt || Date.now()))}`;
+                    }
+                } else {
+                    lastUpdatedPlan.textContent = '--';
+                }
+
+                lastSync.textContent = `آخرین بروزرسانی: ${intlDate.format(new Date())}`;
+            }
+
+            async function refreshData(force = false) {
+                if (!force && !state.plans.length) {
+                    planFormCard.hidden = true;
+                }
+                plansTableBody.innerHTML = '<tr><td colspan="7" class="empty-state">در حال همگام‌سازی با سرور...</td></tr>';
+                try {
+                    const response = await fetch(API_BASE, { credentials: 'include' });
+                    if (!response.ok) {
+                        throw new Error('دریافت اطلاعات پلن‌ها با خطا مواجه شد');
+                    }
+                    const data = await response.json();
+                    state.plans = Array.isArray(data) ? data : [];
+                    renderPlans();
+                    updateStats();
+                    logActivity('داده‌های پلن‌ها با موفقیت از پایگاه مرکزی دریافت شد.', 'success');
+                } catch (error) {
+                    console.error(error);
+                    plansTableBody.innerHTML = '<tr><td colspan="7" class="empty-state">امکان دریافت اطلاعات وجود ندارد. لطفاً دوباره تلاش کنید.</td></tr>';
+                    logActivity('بارگذاری داده‌ها با خطا مواجه شد.', 'error');
+                }
+            }
+
+            async function savePlan(event) {
+                event.preventDefault();
+                if (planSubmitBtn.disabled) return;
+                setFormStatus('در حال ارسال اطلاعات به سرور...', 'info');
+                planSubmitBtn.disabled = true;
+
+                const payload = {
+                    title: planTitle.value.trim(),
+                    slug: planSlug.value.trim(),
+                    price: planPrice.value ? Number(planPrice.value) : null,
+                    durationDays: planDuration.value ? Number(planDuration.value) : null,
+                    label: planLabel.value.trim() || null,
+                    description: planDescription.value.trim(),
+                    isActive: planStatusSelect.value === 'true',
+                    features: state.features
+                };
+
+                if (!payload.title || !payload.slug) {
+                    setFormStatus('عنوان و شناسه یکتا الزامی است.', 'error');
+                    planSubmitBtn.disabled = false;
+                    return;
+                }
+
+                const method = state.editingId ? 'PUT' : 'POST';
+                const endpoint = state.editingId ? `${API_BASE}/${state.editingId}` : API_BASE;
+
+                try {
+                    const response = await fetch(endpoint, {
+                        method,
+                        headers: { 'Content-Type': 'application/json' },
+                        credentials: 'include',
+                        body: JSON.stringify(payload)
+                    });
+
+                    if (!response.ok) {
+                        const errorBody = await response.json().catch(() => ({}));
+                        throw new Error(errorBody?.message || 'ثبت پلن با خطا مواجه شد');
+                    }
+
+                    setFormStatus('اطلاعات پلن با موفقیت ذخیره شد.', 'success');
+                    logActivity(state.editingId ? `پلن ${payload.title} بروزرسانی شد.` : `پلن جدید ${payload.title} ایجاد شد.`, 'success');
+                    await refreshData(true);
+                    setTimeout(() => resetForm(), 900);
+                } catch (error) {
+                    console.error(error);
+                    setFormStatus(error.message || 'بروزرسانی پلن انجام نشد.', 'error');
+                } finally {
+                    planSubmitBtn.disabled = false;
+                }
+            }
+
+            async function togglePlan(plan) {
+                if (!plan) return;
+                const newStatus = plan.isActive === false;
+                try {
+                    const response = await fetch(`${API_BASE}/${plan.id}`, {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'application/json' },
+                        credentials: 'include',
+                        body: JSON.stringify({ ...plan, isActive: newStatus })
+                    });
+                    if (!response.ok) {
+                        throw new Error('تغییر وضعیت پلن با مشکل روبه‌رو شد.');
+                    }
+                    logActivity(`وضعیت پلن ${plan.title} به ${newStatus ? 'فعال' : 'غیرفعال'} تغییر کرد.`, 'success');
+                    await refreshData(true);
+                } catch (error) {
+                    console.error(error);
+                    logActivity('امکان تغییر وضعیت پلن وجود ندارد.', 'error');
+                }
+            }
+
+            async function deletePlan(plan) {
+                if (!plan || !confirm(`آیا از حذف پلن «${plan.title}» مطمئن هستید؟ این عملیات قابل بازگشت نیست.`)) {
+                    return;
+                }
+                try {
+                    const response = await fetch(`${API_BASE}/${plan.id}`, {
+                        method: 'DELETE',
+                        credentials: 'include'
+                    });
+                    if (!response.ok && response.status !== 204) {
+                        throw new Error('امکان حذف پلن وجود ندارد.');
+                    }
+                    logActivity(`پلن ${plan.title} از سیستم حذف شد.`, 'warning');
+                    await refreshData(true);
+                } catch (error) {
+                    console.error(error);
+                    logActivity('حذف پلن با خطا مواجه شد.', 'error');
+                }
+            }
+
+            function populateForm(plan) {
+                state.editingId = plan.id;
+                planFormCard.hidden = false;
+                planFormTitle.textContent = `ویرایش پلن ${plan.title}`;
+                planSubmitBtn.textContent = 'بروزرسانی پلن';
+                planTitle.value = plan.title || '';
+                planSlug.value = plan.slug || '';
+                planPrice.value = plan.price ?? '';
+                planDuration.value = plan.durationDays ?? '';
+                planLabel.value = plan.label || '';
+                planStatusSelect.value = plan.isActive === false ? 'false' : 'true';
+                planDescription.value = plan.description || '';
+                state.features = Array.isArray(plan.features) ? [...plan.features] : [];
+                renderFeatures();
+                setFormStatus('در حال ویرایش پلن انتخاب شده هستید.', 'info');
+                planTitle.focus();
+            }
+
+            plansTableBody.addEventListener('click', (event) => {
+                const button = event.target.closest('button[data-action]');
+                if (!button) return;
+                const row = button.closest('tr');
+                const planId = row?.dataset.planId;
+                if (!planId) return;
+                const plan = state.plans.find((item) => String(item.id) === String(planId));
+                if (!plan) return;
+
+                const action = button.dataset.action;
+                if (action === 'edit') {
+                    populateForm(plan);
+                } else if (action === 'toggle') {
+                    togglePlan(plan);
+                } else if (action === 'delete') {
+                    deletePlan(plan);
+                }
+            });
+
+            planForm.addEventListener('submit', savePlan);
+
+            searchInput.addEventListener('input', () => {
+                state.filter = searchInput.value.trim();
+                renderPlans();
+            });
+
+            refreshBtn.addEventListener('click', () => refreshData(true));
+
+            ensureLogin();
+        })();
+    </script>
+</body>
+</html>
