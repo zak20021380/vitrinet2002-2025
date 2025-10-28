@@ -172,8 +172,9 @@ const applyModerationState = (info) => {
     }
     if (prev?.isBlocked) {
       showModerationBanner(info);
-      if (typeof UIComponents !== 'undefined' && typeof UIComponents.showToast === 'function') {
-        UIComponents.showToast('دسترسی فروشگاه دوباره فعال شد.', 'success');
+      const toast = window.UIComponents?.showToast;
+      if (typeof toast === 'function') {
+        toast('دسترسی فروشگاه دوباره فعال شد.', 'success');
       }
     } else {
       hideModerationBanner();
