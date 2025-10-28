@@ -4928,7 +4928,6 @@ const servicePlanPriceInput = document.getElementById('servicePlanPrice');
 const servicePlanDurationInput = document.getElementById('servicePlanDuration');
 const servicePlanDescriptionInput = document.getElementById('servicePlanDescription');
 const servicePlanFeaturesInput = document.getElementById('servicePlanFeatures');
-const servicePlanIsActiveInput = document.getElementById('servicePlanIsActive');
 
 function normaliseServicePlanSlug(value) {
   return String(value || '')
@@ -4959,9 +4958,6 @@ function resetServicePlanForm(showInfo = false) {
   if (servicePlanFormModeEl) {
     servicePlanFormModeEl.textContent = 'ثبت پلن جدید';
   }
-  if (servicePlanIsActiveInput) {
-    servicePlanIsActiveInput.checked = true;
-  }
   if (servicePlanDurationInput) {
     servicePlanDurationInput.value = '';
   }
@@ -4977,7 +4973,7 @@ function resetServicePlanForm(showInfo = false) {
 
 function collectServicePlanFormData() {
   const title = (servicePlanTitleInput?.value || '').trim();
-  const slug = normaliseServicePlanSlug(servicePlanSlugInput?.value || '');
+  let slug = normaliseServicePlanSlug(servicePlanSlugInput?.value || '');
   const priceRaw = (servicePlanPriceInput?.value || '').trim();
   const durationRaw = (servicePlanDurationInput?.value || '').trim();
   const description = (servicePlanDescriptionInput?.value || '').trim();
@@ -4986,14 +4982,20 @@ function collectServicePlanFormData() {
     .map((feature) => feature.trim())
     .filter(Boolean);
 
+  if (!slug && title) {
+    slug = normaliseServicePlanSlug(title);
+    if (servicePlanSlugInput) {
+      servicePlanSlugInput.value = slug;
+    }
+  }
+
   return {
     title,
     slug,
     price: priceRaw === '' ? null : Number(priceRaw),
     durationDays: durationRaw === '' ? null : Number(durationRaw),
     description,
-    features,
-    isActive: !!servicePlanIsActiveInput?.checked
+    features
   };
 }
 
@@ -5011,7 +5013,6 @@ function populateServicePlanForm(plan) {
       : [];
     servicePlanFeaturesInput.value = features.join('\n');
   }
-  if (servicePlanIsActiveInput) servicePlanIsActiveInput.checked = !!plan.isActive;
   if (servicePlanFormModeEl) {
     const label = plan.title || plan.slug || 'پلن انتخابی';
     servicePlanFormModeEl.textContent = `ویرایش پلن: ${label}`;
@@ -5058,7 +5059,6 @@ async function handleServicePlanSubmit(event) {
     slug: formData.slug,
     description: formData.description,
     price: formData.price,
-    isActive: formData.isActive,
     features: formData.features
   };
 
