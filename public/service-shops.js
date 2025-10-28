@@ -4548,3 +4548,85 @@ function render(items) {
       closeContactPopup();
     }
   });
+
+const initScrollRegions = () => {
+  const regions = document.querySelectorAll('[data-scroll-region]');
+  if (!regions.length) return;
+
+  regions.forEach((region) => {
+    const scroller = region.querySelector('.scroll-container');
+    if (!scroller) return;
+
+    const hint = region.querySelector('.scroll-hint');
+    let rafId = null;
+
+    const setFlag = (key, value) => {
+      if (value) {
+        region.dataset[key] = 'true';
+      } else {
+        delete region.dataset[key];
+      }
+    };
+
+    const update = () => {
+      rafId = null;
+      const maxScrollLeft = scroller.scrollWidth - scroller.clientWidth;
+      if (maxScrollLeft <= 4) {
+        region.classList.add('scroll-region--no-overflow');
+        setFlag('atStart', true);
+        setFlag('atEnd', true);
+        if (hint) {
+          hint.setAttribute('hidden', '');
+        }
+        return;
+      }
+
+      region.classList.remove('scroll-region--no-overflow');
+      if (hint) {
+        hint.removeAttribute('hidden');
+      }
+
+      const atStart = scroller.scrollLeft <= 8;
+      const atEnd = scroller.scrollLeft >= (maxScrollLeft - 8);
+      setFlag('atStart', atStart);
+      setFlag('atEnd', atEnd);
+    };
+
+    const requestUpdate = () => {
+      if (rafId) return;
+      rafId = requestAnimationFrame(update);
+    };
+
+    const markScrolled = () => {
+      if (!region.dataset.scrolled) {
+        region.dataset.scrolled = 'true';
+      }
+      requestUpdate();
+    };
+
+    scroller.addEventListener('scroll', markScrolled, { passive: true });
+    scroller.addEventListener('touchstart', markScrolled, { passive: true });
+    scroller.addEventListener('pointerdown', markScrolled, { passive: true });
+
+    if (typeof ResizeObserver === 'function') {
+      const resizeObserver = new ResizeObserver(() => requestUpdate());
+      resizeObserver.observe(scroller);
+    } else {
+      window.addEventListener('resize', requestUpdate);
+    }
+
+    if (typeof MutationObserver === 'function') {
+      const mutationObserver = new MutationObserver(() => requestUpdate());
+      mutationObserver.observe(scroller, { childList: true });
+    }
+
+    requestUpdate();
+  });
+};
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initScrollRegions, { once: true });
+} else {
+  initScrollRegions();
+}
+

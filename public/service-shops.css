@@ -20,15 +20,126 @@
         .portfolio-card {
             scroll-snap-align: start;
         }
+        .scroll-region {
+            position: relative;
+            isolation: isolate;
+            margin-inline: -0.5rem;
+            padding-inline: 0.5rem;
+        }
+        .scroll-region--no-overflow::before,
+        .scroll-region--no-overflow::after,
+        .scroll-region--no-overflow .scroll-hint {
+            display: none;
+        }
+        .scroll-region::before,
+        .scroll-region::after {
+            content: "";
+            position: absolute;
+            inset-block: 0;
+            width: clamp(2rem, 10vw, 3rem);
+            pointer-events: none;
+            z-index: 10;
+            transition: opacity 0.35s ease;
+            opacity: 0.85;
+        }
+        .scroll-region::before {
+            inset-inline-start: 0;
+            background: linear-gradient(90deg, rgba(248, 250, 252, 0.96), rgba(248, 250, 252, 0));
+        }
+        .scroll-region::after {
+            inset-inline-end: 0;
+            background: linear-gradient(-90deg, rgba(248, 250, 252, 0.96), rgba(248, 250, 252, 0));
+        }
+        .scroll-region[data-at-start="true"]::before,
+        .scroll-region[data-at-end="true"]::after {
+            opacity: 0;
+        }
         .scroll-container {
             scroll-snap-type: x mandatory;
             -webkit-overflow-scrolling: touch;
             scrollbar-width: none;
             -ms-overflow-style: none;
             scroll-behavior: smooth;
+            touch-action: pan-x;
+            scroll-snap-stop: always;
         }
         .scroll-container::-webkit-scrollbar {
             display: none;
+        }
+        .scroll-hint {
+            position: absolute;
+            inset-inline: 0;
+            inset-block-end: -0.25rem;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: #1d4ed8;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 9999px;
+            padding: 0.4rem 0.85rem;
+            box-shadow: 0 10px 25px rgba(30, 64, 175, 0.12);
+            transform: translateY(50%);
+            pointer-events: none;
+            z-index: 20;
+            text-wrap: nowrap;
+            transition: opacity 0.35s ease, transform 0.35s ease;
+        }
+        .scroll-hint__icon {
+            display: inline-flex;
+            width: 1.75rem;
+            height: 1.75rem;
+            align-items: center;
+            justify-content: center;
+            border-radius: 9999px;
+            background: linear-gradient(135deg, #3b82f6, #6366f1);
+            color: #fff;
+            box-shadow: 0 10px 25px rgba(59, 130, 246, 0.25);
+            animation: scrollHintPulse 2.6s ease-in-out infinite;
+        }
+        .scroll-hint__text {
+            letter-spacing: -0.01em;
+        }
+        .scroll-region[data-scrolled="true"] .scroll-hint {
+            opacity: 0;
+            transform: translateY(75%);
+        }
+        @keyframes scrollHintPulse {
+            0%, 100% {
+                transform: translateX(0);
+                opacity: 0.9;
+            }
+            40% {
+                transform: translateX(-6px);
+                opacity: 1;
+            }
+            60% {
+                transform: translateX(6px);
+                opacity: 1;
+            }
+        }
+        @media (min-width: 768px) {
+            .scroll-region {
+                margin-inline: 0;
+                padding-inline: 0;
+            }
+            .scroll-region::before,
+            .scroll-region::after,
+            .scroll-hint {
+                display: none;
+            }
+        }
+        @media (prefers-reduced-motion: reduce) {
+            .scroll-container {
+                scroll-behavior: auto;
+            }
+            .scroll-hint,
+            .scroll-hint__icon {
+                animation: none;
+                transition: none;
+            }
         }
         .bounce-animation {
             animation: bounce 2s infinite;
