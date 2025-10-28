@@ -1263,6 +1263,7 @@ let serviceShopsPerDay = [];
 let usersList = [];
 let shopsList = [];
 let productsList = [];
+let servicePlansList = [];
 let shoppingCentersList = [];
 let shoppingCentersLoaded = false;
 let shoppingCentersLoadingPromise = null;
@@ -1281,6 +1282,11 @@ let adModalOverlayHandler = null;
 
 let sellerPerformanceMap = {};
 let sellerPerformanceLoaded = false;
+
+let servicePlanManagerInitialised = false;
+let servicePlansLoaded = false;
+let servicePlansLoading = false;
+let servicePlanEditingId = null;
 
 const AD_PLAN_META = {
   ad_home: {
@@ -3454,6 +3460,10 @@ function updateSidebarCounts() {
   if (serviceCountEl) {
     serviceCountEl.textContent = formatNumber(dashboardSummary.totalServiceShops || 0);
   }
+  const servicePlansCountEl = document.getElementById('count-service-plans');
+  if (servicePlansCountEl) {
+    servicePlansCountEl.textContent = formatNumber(servicePlansList.length || 0);
+  }
   const centersCountEl = document.getElementById('count-shopping-centers');
   if (centersCountEl) centersCountEl.textContent = formatNumber(shoppingCentersList.length);
 
@@ -3469,6 +3479,10 @@ function updateHeaderCounts() {
   const serviceHeaderEl = document.getElementById('header-service-shops-count');
   if (serviceHeaderEl) {
     serviceHeaderEl.textContent = `(${formatNumber(dashboardSummary.totalServiceShops || 0)} مغازه)`;
+  }
+  const servicePlanHeaderEl = document.getElementById('header-service-plans-count');
+  if (servicePlanHeaderEl) {
+    servicePlanHeaderEl.textContent = `(${formatNumber(servicePlansList.length || 0)} پلن)`;
   }
   const centersHeaderEl = document.getElementById('header-shopping-centers-count');
   if (centersHeaderEl) centersHeaderEl.textContent = `(${formatNumber(shoppingCentersList.length)} مرکز خرید)`;
@@ -4901,6 +4915,412 @@ window.unblockUser = async function(id, idx) {
 
 
 
+/* -------- مدیریت پلن‌های خدماتی -------- */
+const servicePlanForm = document.getElementById('servicePlanForm');
+const servicePlanMessageEl = document.getElementById('servicePlanMessage');
+const servicePlansListEl = document.getElementById('servicePlansList');
+const servicePlanResetBtn = document.getElementById('servicePlanReset');
+const servicePlanRefreshBtn = document.getElementById('servicePlanRefresh');
+const servicePlanFormModeEl = document.getElementById('servicePlanFormMode');
+const servicePlanTitleInput = document.getElementById('servicePlanTitle');
+const servicePlanSlugInput = document.getElementById('servicePlanSlug');
+const servicePlanPriceInput = document.getElementById('servicePlanPrice');
+const servicePlanDurationInput = document.getElementById('servicePlanDuration');
+const servicePlanDescriptionInput = document.getElementById('servicePlanDescription');
+const servicePlanFeaturesInput = document.getElementById('servicePlanFeatures');
+const servicePlanIsActiveInput = document.getElementById('servicePlanIsActive');
+
+function normaliseServicePlanSlug(value) {
+  return String(value || '')
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9-\s]/g, '')
+    .replace(/\s+/g, '-')
+    .replace(/-+/g, '-');
+}
+
+function setServicePlanMessage(message, type = 'info') {
+  if (!servicePlanMessageEl) return;
+  servicePlanMessageEl.classList.remove('success', 'error', 'info', 'show');
+  if (!message) {
+    servicePlanMessageEl.hidden = true;
+    servicePlanMessageEl.textContent = '';
+    return;
+  }
+  servicePlanMessageEl.hidden = false;
+  servicePlanMessageEl.textContent = message;
+  servicePlanMessageEl.classList.add('show', type);
+}
+
+function resetServicePlanForm(showInfo = false) {
+  if (!servicePlanForm) return;
+  servicePlanForm.reset();
+  servicePlanEditingId = null;
+  if (servicePlanFormModeEl) {
+    servicePlanFormModeEl.textContent = 'ثبت پلن جدید';
+  }
+  if (servicePlanIsActiveInput) {
+    servicePlanIsActiveInput.checked = true;
+  }
+  if (servicePlanDurationInput) {
+    servicePlanDurationInput.value = '';
+  }
+  if (servicePlanFeaturesInput) {
+    servicePlanFeaturesInput.value = '';
+  }
+  if (showInfo) {
+    setServicePlanMessage('برای ثبت پلن جدید، فیلدها را تکمیل کنید.', 'info');
+  } else {
+    setServicePlanMessage('');
+  }
+}
+
+function collectServicePlanFormData() {
+  const title = (servicePlanTitleInput?.value || '').trim();
+  const slug = normaliseServicePlanSlug(servicePlanSlugInput?.value || '');
+  const priceRaw = (servicePlanPriceInput?.value || '').trim();
+  const durationRaw = (servicePlanDurationInput?.value || '').trim();
+  const description = (servicePlanDescriptionInput?.value || '').trim();
+  const features = (servicePlanFeaturesInput?.value || '')
+    .split(/\r?\n/)
+    .map((feature) => feature.trim())
+    .filter(Boolean);
+
+  return {
+    title,
+    slug,
+    price: priceRaw === '' ? null : Number(priceRaw),
+    durationDays: durationRaw === '' ? null : Number(durationRaw),
+    description,
+    features,
+    isActive: !!servicePlanIsActiveInput?.checked
+  };
+}
+
+function populateServicePlanForm(plan) {
+  if (!plan) return;
+  servicePlanEditingId = plan.id || plan._id || null;
+  if (servicePlanTitleInput) servicePlanTitleInput.value = plan.title || '';
+  if (servicePlanSlugInput) servicePlanSlugInput.value = plan.slug || '';
+  if (servicePlanPriceInput) servicePlanPriceInput.value = plan.price != null ? Number(plan.price) : '';
+  if (servicePlanDurationInput) servicePlanDurationInput.value = plan.durationDays != null ? Number(plan.durationDays) : '';
+  if (servicePlanDescriptionInput) servicePlanDescriptionInput.value = plan.description || '';
+  if (servicePlanFeaturesInput) {
+    const features = Array.isArray(plan.features)
+      ? plan.features.map((feature) => (typeof feature === 'string' ? feature : feature?.value)).filter(Boolean)
+      : [];
+    servicePlanFeaturesInput.value = features.join('\n');
+  }
+  if (servicePlanIsActiveInput) servicePlanIsActiveInput.checked = !!plan.isActive;
+  if (servicePlanFormModeEl) {
+    const label = plan.title || plan.slug || 'پلن انتخابی';
+    servicePlanFormModeEl.textContent = `ویرایش پلن: ${label}`;
+  }
+  setServicePlanMessage('در حال ویرایش پلن. پس از اعمال تغییرات روی «ذخیره پلن» کلیک کنید.', 'info');
+  const panel = document.getElementById('service-plan-management-panel');
+  if (panel && typeof panel.scrollIntoView === 'function') {
+    panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+  if (servicePlanTitleInput && typeof servicePlanTitleInput.focus === 'function') {
+    servicePlanTitleInput.focus();
+  }
+}
+
+async function handleServicePlanSubmit(event) {
+  event.preventDefault();
+  if (servicePlansLoading) return;
+
+  const formData = collectServicePlanFormData();
+
+  if (!formData.title) {
+    setServicePlanMessage('عنوان پلن الزامی است.', 'error');
+    servicePlanTitleInput?.focus();
+    return;
+  }
+  if (!formData.slug) {
+    setServicePlanMessage('برای پلن یک اسلاگ یکتا وارد کنید.', 'error');
+    servicePlanSlugInput?.focus();
+    return;
+  }
+  if (formData.price == null || Number.isNaN(formData.price) || formData.price < 0) {
+    setServicePlanMessage('قیمت معتبر وارد کنید.', 'error');
+    servicePlanPriceInput?.focus();
+    return;
+  }
+  if (formData.durationDays != null && (Number.isNaN(formData.durationDays) || formData.durationDays < 0)) {
+    setServicePlanMessage('مدت اعتبار نمی‌تواند منفی باشد.', 'error');
+    servicePlanDurationInput?.focus();
+    return;
+  }
+
+  const payload = {
+    title: formData.title,
+    slug: formData.slug,
+    description: formData.description,
+    price: formData.price,
+    isActive: formData.isActive,
+    features: formData.features
+  };
+
+  if (formData.durationDays != null && !Number.isNaN(formData.durationDays)) {
+    payload.durationDays = formData.durationDays;
+  }
+
+  const token = getCookie('admin_token') || getCookie('access_token');
+
+  try {
+    servicePlansLoading = true;
+    setServicePlanMessage(servicePlanEditingId ? 'در حال بروزرسانی پلن...' : 'در حال ثبت پلن جدید...', 'info');
+
+    const url = servicePlanEditingId
+      ? `${ADMIN_API_BASE}/service-plans/${encodeURIComponent(servicePlanEditingId)}`
+      : `${ADMIN_API_BASE}/service-plans`;
+    const method = servicePlanEditingId ? 'PUT' : 'POST';
+
+    const res = await fetch(url, {
+      method,
+      credentials: 'include',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(token ? { Authorization: `Bearer ${token}` } : {})
+      },
+      body: JSON.stringify(payload)
+    });
+
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) {
+      throw new Error(data?.message || 'خطا در ذخیره پلن');
+    }
+
+    const successMessage = servicePlanEditingId
+      ? `پلن «${formData.title}» با موفقیت بروزرسانی شد.`
+      : `پلن جدید «${formData.title}» با موفقیت ایجاد شد.`;
+    await loadServicePlans(true);
+    resetServicePlanForm(false);
+    setServicePlanMessage(successMessage, 'success');
+  } catch (err) {
+    console.error('❌ handleServicePlanSubmit error:', err);
+    setServicePlanMessage(err.message || 'خطا در ذخیره پلن', 'error');
+  } finally {
+    servicePlansLoading = false;
+  }
+}
+
+function renderServicePlans() {
+  if (!servicePlansListEl) return;
+  if (!Array.isArray(servicePlansList) || servicePlansList.length === 0) {
+    servicePlansListEl.innerHTML = `
+      <div class="service-plan-empty">
+        <i class="ri-inbox-archive-line"></i>
+        <p>هنوز هیچ پلن خدماتی ثبت نشده است.</p>
+      </div>`;
+    return;
+  }
+
+  servicePlansListEl.innerHTML = servicePlansList.map((plan) => {
+    const planId = toIdString(plan?.id || plan?._id || '');
+    const title = plan?.title || 'بدون عنوان';
+    const slug = plan?.slug || '';
+    const priceText = formatCurrency(plan?.price);
+    const durationText = plan?.durationDays != null
+      ? `${formatNumber(plan.durationDays)} روز`
+      : 'بدون محدودیت زمانی';
+    const createdAt = formatDateTime(plan?.createdAt);
+    const updatedAt = formatDateTime(plan?.updatedAt);
+    const features = Array.isArray(plan?.features)
+      ? plan.features.map((feature) => (typeof feature === 'string' ? feature : feature?.value)).filter(Boolean)
+      : [];
+
+    const metaParts = [
+      `<span><i class="ri-copper-coin-line"></i>${escapeHtml(priceText)}</span>`,
+      `<span><i class="ri-timer-line"></i>${escapeHtml(durationText)}</span>`
+    ];
+    if (features.length) {
+      metaParts.push(`<span><i class="ri-list-check"></i>${escapeHtml(`${formatNumber(features.length)} ویژگی`)}</span>`);
+    }
+
+    const featuresList = features.length
+      ? `<ul class="service-plan-card__features">${features.map((item) => `<li>${escapeHtml(item)}</li>`).join('')}</ul>`
+      : '';
+
+    const descriptionHtml = plan?.description
+      ? `<p class="service-plan-card__description">${escapeHtml(plan.description)}</p>`
+      : '';
+
+    return `
+      <article class="service-plan-card" data-plan-id="${escapeHtml(planId)}">
+        <div class="service-plan-card__head">
+          <div class="service-plan-card__title">
+            <h4>${escapeHtml(title)}</h4>
+            <span class="service-plan-card__slug"><i class="ri-at-line"></i>${escapeHtml(slug)}</span>
+          </div>
+          <span class="service-plan-card__badge ${plan?.isActive ? '' : 'inactive'}">
+            <i class="${plan?.isActive ? 'ri-checkbox-circle-line' : 'ri-forbid-2-line'}"></i>
+            ${plan?.isActive ? 'فعال' : 'غیرفعال'}
+          </span>
+        </div>
+        ${descriptionHtml}
+        <div class="service-plan-card__meta">${metaParts.join('')}</div>
+        ${featuresList}
+        <div class="service-plan-card__timestamps">
+          <span><i class="ri-calendar-line"></i> ایجاد: ${escapeHtml(createdAt)}</span>
+          <span><i class="ri-refresh-line"></i> بروزرسانی: ${escapeHtml(updatedAt)}</span>
+        </div>
+        <div class="service-plan-card__footer">
+          <button type="button" data-action="edit" data-plan-id="${escapeHtml(planId)}"><i class="ri-pencil-line"></i> ویرایش</button>
+          <button type="button" data-action="delete" data-plan-id="${escapeHtml(planId)}"><i class="ri-delete-bin-line"></i> حذف</button>
+        </div>
+      </article>`;
+  }).join('');
+}
+
+async function loadServicePlans(force = false) {
+  if (!servicePlansListEl) return;
+  if (servicePlansLoading && !force) return;
+  if (servicePlansLoaded && !force) {
+    renderServicePlans();
+    return;
+  }
+
+  servicePlansLoading = true;
+  servicePlansListEl.innerHTML = `
+    <div class="service-plan-empty">
+      <i class="ri-loader-4-line" style="animation:spin 0.9s linear infinite;"></i>
+      <p>در حال دریافت لیست پلن‌ها...</p>
+    </div>`;
+
+  try {
+    const res = await fetch(`${ADMIN_API_BASE}/service-plans`, { credentials: 'include' });
+    if (!res.ok) {
+      const text = await res.text();
+      throw new Error(text || 'خطا در دریافت پلن‌ها');
+    }
+    const data = await res.json();
+    const plans = Array.isArray(data?.plans) ? data.plans : [];
+    servicePlansList = plans;
+    servicePlansLoaded = true;
+    renderServicePlans();
+    updateSidebarCounts();
+    updateHeaderCounts();
+  } catch (err) {
+    console.error('❌ loadServicePlans error:', err);
+    servicePlansListEl.innerHTML = `
+      <div class="service-plan-error-state">
+        <i class="ri-error-warning-line"></i>
+        <p>${escapeHtml(err.message || 'خطا در دریافت پلن‌ها')}</p>
+        <button type="button" data-action="retry" class="service-plan-retry">تلاش دوباره</button>
+      </div>`;
+    setServicePlanMessage(err.message || 'خطا در دریافت پلن‌ها', 'error');
+  } finally {
+    servicePlansLoading = false;
+  }
+}
+
+async function deleteServicePlan(planId) {
+  if (!planId) return;
+  const plan = servicePlansList.find((item) => toIdString(item?.id || item?._id) === toIdString(planId));
+  const title = plan?.title || plan?.slug || 'پلن انتخابی';
+  if (!confirm(`آیا از حذف پلن «${title}» مطمئن هستید؟`)) return;
+
+  const token = getCookie('admin_token') || getCookie('access_token');
+
+  try {
+    servicePlansLoading = true;
+    setServicePlanMessage(`در حال حذف پلن «${title}»...`, 'info');
+    const res = await fetch(`${ADMIN_API_BASE}/service-plans/${encodeURIComponent(planId)}`, {
+      method: 'DELETE',
+      credentials: 'include',
+      headers: {
+        ...(token ? { Authorization: `Bearer ${token}` } : {})
+      }
+    });
+    if (!res.ok) {
+      let data = null;
+      try {
+        data = await res.json();
+      } catch (error) {
+        data = null;
+      }
+      throw new Error(data?.message || 'خطا در حذف پلن');
+    }
+    if (servicePlanEditingId && toIdString(servicePlanEditingId) === toIdString(planId)) {
+      resetServicePlanForm(false);
+    }
+    setServicePlanMessage(`پلن «${title}» حذف شد.`, 'success');
+    await loadServicePlans(true);
+  } catch (err) {
+    console.error('❌ deleteServicePlan error:', err);
+    setServicePlanMessage(err.message || 'خطا در حذف پلن', 'error');
+  } finally {
+    servicePlansLoading = false;
+  }
+}
+
+function handleServicePlanListClick(event) {
+  const targetButton = event.target.closest('button');
+  if (!targetButton) return;
+  const action = targetButton.dataset.action;
+  if (action === 'retry') {
+    loadServicePlans(true);
+    return;
+  }
+  const planId = targetButton.dataset.planId;
+  if (!planId) return;
+  const plan = servicePlansList.find((item) => toIdString(item?.id || item?._id) === toIdString(planId));
+  if (action === 'edit') {
+    if (plan) {
+      populateServicePlanForm(plan);
+    } else {
+      setServicePlanMessage('پلن انتخابی یافت نشد.', 'error');
+    }
+    return;
+  }
+  if (action === 'delete') {
+    deleteServicePlan(planId);
+  }
+}
+
+function initServicePlanManager() {
+  if (servicePlanManagerInitialised) return;
+  if (!servicePlanForm) return;
+
+  servicePlanForm.addEventListener('submit', handleServicePlanSubmit);
+  servicePlanResetBtn?.addEventListener('click', () => resetServicePlanForm(true));
+  servicePlanRefreshBtn?.addEventListener('click', () => {
+    if (!servicePlansLoading) {
+      loadServicePlans(true);
+    }
+  });
+  servicePlansListEl?.addEventListener('click', handleServicePlanListClick);
+  if (servicePlanSlugInput) {
+    servicePlanSlugInput.addEventListener('blur', () => {
+      servicePlanSlugInput.value = normaliseServicePlanSlug(servicePlanSlugInput.value);
+    });
+  }
+  if (servicePlanTitleInput && servicePlanSlugInput) {
+    servicePlanTitleInput.addEventListener('blur', () => {
+      if (!(servicePlanSlugInput.value || '').trim()) {
+        servicePlanSlugInput.value = normaliseServicePlanSlug(servicePlanTitleInput.value);
+      }
+    });
+  }
+
+  resetServicePlanForm(true);
+  servicePlanManagerInitialised = true;
+}
+
+async function ensureServicePlanManager(forceReload = false) {
+  if (!servicePlanForm) return;
+  if (!servicePlanManagerInitialised) {
+    initServicePlanManager();
+  }
+  if (forceReload) {
+    await loadServicePlans(true);
+  } else if (!servicePlansLoaded) {
+    await loadServicePlans();
+  }
+}
+
 // -------- Nav & Responsive (FIXED) --------
 // -------- Nav & Responsive (FIXED) --------
 const sidebar       = document.getElementById('sidebar');
@@ -4920,6 +5340,7 @@ const panels = {
   users:     document.getElementById('users-panel'),
   sellers:   document.getElementById('sellers-panel'),
   'service-shops': document.getElementById('service-shops-panel'),
+  'service-plan-management': document.getElementById('service-plan-management-panel'),
   categories: document.getElementById('categories-panel'),
   products:  document.getElementById('products-panel'),
   'shopping-centers': document.getElementById('shopping-centers-panel'),
@@ -4969,6 +5390,10 @@ menuLinks.forEach(link => {
     if (section === 'service-shops') {
       ensureServiceShopsIframeLoaded();
       await ensureServiceShopsLoaded();
+    }
+
+    if (section === 'service-plan-management') {
+      await ensureServicePlanManager();
     }
 
     if (section === 'ad-orders') {

@@ -21,6 +21,7 @@
         <a href="#" data-section="users"><i class="ri-user-3-line"></i> کاربران <span class="count" id="count-users">0</span></a>
         <a href="#" data-section="sellers"><i class="ri-store-2-line"></i> فروشنده‌ها <span class="count" id="count-sellers">0</span></a>
         <a href="#" data-section="service-shops" id="service-shops-link"><i class="ri-scissors-2-line"></i> مغازه‌های خدماتی <span class="count" id="count-service-shops"></span></a>
+        <a href="#" data-section="service-plan-management"><i class="ri-hand-heart-line"></i> مدیریت پلن‌های خدماتی <span class="count" id="count-service-plans">0</span></a>
         <a href="#" data-section="categories"><i class="ri-folders-line"></i> مدیریت دسته‌بندی‌ها</a>
         <a href="#" data-section="products"><i class="ri-box-3-line"></i> محصولات <span class="count" id="count-products">0</span></a>
         <a href="#" data-section="shopping-centers"><i class="ri-building-2-line"></i> مراکز خرید <span class="count" id="count-shopping-centers">0</span></a>
@@ -409,6 +410,85 @@
         referrerpolicy="same-origin"
         sandbox="allow-same-origin allow-scripts allow-forms allow-popups"
       ></iframe>
+    </div>
+  </div>
+
+  <!-- مدیریت پلن‌های خدماتی -->
+  <div class="section-panel" id="service-plan-management-panel" style="display:none;">
+    <div class="content-header">
+      مدیریت پلن‌های خدماتی
+      <span class="header-count" id="header-service-plans-count"></span>
+    </div>
+    <div class="service-plan-manager">
+      <section class="service-plan-form-card" aria-labelledby="servicePlanFormTitle">
+        <header class="service-plan-form-header">
+          <div>
+            <h3 id="servicePlanFormTitle"><i class="ri-edit-2-line"></i> <span id="servicePlanFormMode">ثبت پلن جدید</span></h3>
+            <p>پلن‌های فروشندگان خدماتی را با یک فرم یکپارچه ایجاد یا ویرایش کنید.</p>
+          </div>
+          <div class="service-plan-form-actions">
+            <button type="button" id="servicePlanReset" class="outline"><i class="ri-refresh-line"></i> شروع فرم جدید</button>
+          </div>
+        </header>
+        <form id="servicePlanForm" novalidate>
+          <div class="service-plan-form-grid">
+            <div class="service-plan-form-group">
+              <label for="servicePlanTitle">عنوان پلن *</label>
+              <input type="text" id="servicePlanTitle" name="title" placeholder="مثلاً پلن حرفه‌ای" required />
+            </div>
+            <div class="service-plan-form-group">
+              <label for="servicePlanSlug">اسلاگ یکتا *</label>
+              <input type="text" id="servicePlanSlug" name="slug" placeholder="مثلاً pro-plan" required dir="ltr" />
+            </div>
+            <div class="service-plan-form-group">
+              <label for="servicePlanPrice">قیمت پلن (تومان) *</label>
+              <input type="number" id="servicePlanPrice" name="price" min="0" step="1000" placeholder="مثلاً 350000" required />
+            </div>
+            <div class="service-plan-form-group">
+              <label for="servicePlanDuration">مدت اعتبار (روز)</label>
+              <input type="number" id="servicePlanDuration" name="durationDays" min="0" step="1" placeholder="مثلاً 30" />
+              <span class="form-helper">در صورت خالی بودن، مقدار پیش‌فرض (۳۰ روز) استفاده می‌شود.</span>
+            </div>
+          </div>
+          <div class="service-plan-form-group">
+            <label for="servicePlanDescription">توضیحات تکمیلی</label>
+            <textarea id="servicePlanDescription" name="description" rows="3" placeholder="توضیحات کوتاه برای نمایش در پنل فروشنده"></textarea>
+          </div>
+          <div class="service-plan-form-group">
+            <label for="servicePlanFeatures">ویژگی‌ها</label>
+            <textarea id="servicePlanFeatures" name="features" rows="4" placeholder="هر ویژگی را در یک خط بنویسید"></textarea>
+            <span class="form-helper">این ویژگی‌ها به‌صورت لیست در کارت پلن نمایش داده می‌شوند.</span>
+          </div>
+          <div class="service-plan-form-footer">
+            <label class="toggle-switch">
+              <input type="checkbox" id="servicePlanIsActive" name="isActive" checked />
+              <span class="slider"></span>
+            </label>
+            <span>نمایش پلن برای فروشندگان فعال باشد</span>
+          </div>
+          <div class="service-plan-form-submit">
+            <button type="submit" id="servicePlanSubmit"><i class="ri-save-3-line"></i> ذخیره پلن</button>
+          </div>
+          <div class="service-plan-message" id="servicePlanMessage" role="status" aria-live="polite" hidden></div>
+        </form>
+      </section>
+      <section class="service-plan-list-card" aria-labelledby="servicePlanListTitle">
+        <header class="service-plan-list-header">
+          <div>
+            <h3 id="servicePlanListTitle"><i class="ri-stack-line"></i> پلن‌های ثبت‌شده</h3>
+            <p>لیست پلن‌های فعال و غیرفعال را در یک نگاه مدیریت کنید.</p>
+          </div>
+          <div class="service-plan-list-actions">
+            <button type="button" id="servicePlanRefresh"><i class="ri-refresh-line"></i> بروزرسانی لیست</button>
+          </div>
+        </header>
+        <div class="service-plan-list" id="servicePlansList">
+          <div class="service-plan-empty">
+            <i class="ri-information-line"></i>
+            <p>برای شروع، یک پلن جدید ثبت کنید یا لیست را بروزرسانی نمایید.</p>
+          </div>
+        </div>
+      </section>
     </div>
   </div>
 
