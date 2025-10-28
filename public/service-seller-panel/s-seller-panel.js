@@ -1293,7 +1293,8 @@ const EMPTY_DASHBOARD_STATS = {
   previousActiveCustomers: 0,
   newCustomers30d: 0,
   ratingAverage: 0,
-  ratingCount: 0
+  ratingCount: 0,
+  totalBookings: 0
 };
 
 const ACTIVE_BOOKING_STATUSES = new Set(['pending', 'confirmed', 'completed']);
@@ -1351,6 +1352,8 @@ const computeFallbackDashboardStats = () => {
     const newCustomers30d = new Set();
 
     const stats = { ...EMPTY_DASHBOARD_STATS };
+
+    stats.totalBookings = bookings.length;
 
     bookings.forEach((booking) => {
       const status = String(booking?.status || '').toLowerCase();
@@ -3856,6 +3859,7 @@ destroy() {
         trendEl.setAttribute('aria-label', text);
       };
 
+      const totalBookings = toNumber(stats.totalBookings);
       const todayBookings = toNumber(stats.todayBookings);
       const yesterdayBookings = toNumber(stats.yesterdayBookings);
       const pendingBookings = toNumber(stats.pendingBookings);
@@ -3865,6 +3869,7 @@ destroy() {
       const ratingAverage = toNumber(stats.ratingAverage);
       const ratingCount = toNumber(stats.ratingCount);
 
+      setValue('.stat-total-bookings .stat-value', totalBookings);
       setValue('.stat-bookings .stat-value', todayBookings);
       setValue('.stat-pending .stat-value', pendingBookings);
       setValue('.stat-customers .stat-value', activeCustomers);

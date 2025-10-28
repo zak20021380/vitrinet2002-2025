@@ -1018,6 +1018,25 @@ button:disabled, .btn:disabled {
   flex-direction: column;
   gap: var(--space-3);
 }
+.stat-total-bookings {
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(135deg, rgba(var(--c-primary-rgb), 0.16), rgba(191, 90, 242, 0.12));
+  border: none;
+  box-shadow: 0 10px 30px rgba(10, 132, 255, 0.08);
+}
+.stat-total-bookings::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at top right, rgba(191, 90, 242, 0.25), transparent 65%);
+  opacity: 0.8;
+  pointer-events: none;
+}
+.stat-total-bookings > * {
+  position: relative;
+  z-index: 1;
+}
 .stat-header { display: flex; justify-content: space-between; align-items: flex-start; }
 .stat-icon {
   background-color: var(--c-bg-tertiary);
@@ -1025,6 +1044,16 @@ button:disabled, .btn:disabled {
   width: 40px; height: 40px;
   border-radius: var(--border-radius-md);
   display: flex; align-items: center; justify-content: center;
+}
+.stat-total-bookings .stat-icon {
+  background: rgba(255, 255, 255, 0.2);
+  color: #fff;
+  box-shadow: 0 6px 16px rgba(10, 132, 255, 0.2);
+}
+.stat-total-bookings .stat-badge {
+  background-color: rgba(255, 255, 255, 0.16);
+  color: var(--c-text-primary);
+  backdrop-filter: blur(10px);
 }
 .stat-badge { font-size: 12px; font-weight: 500; padding: 4px 8px; border-radius: 20px; background-color: var(--c-bg-tertiary); }
 .stat-bookings .stat-icon { background-color: rgba(var(--c-primary-rgb), 0.1); color: var(--c-primary); }
@@ -1034,6 +1063,7 @@ button:disabled, .btn:disabled {
 .stat-body { display: flex; flex-direction: column; gap: var(--space-1); }
 .stat-value { font-size: 2rem; font-weight: var(--font-weight-bold); line-height: 1.2; }
 .stat-label { color: var(--c-text-secondary); font-size: var(--font-size-sm); }
+.stat-helper { color: rgba(242, 242, 247, 0.7); font-size: 0.8rem; margin: 0; }
 .stat-trend { display: flex; align-items: center; gap: var(--space-1); font-size: var(--font-size-sm); font-weight: 500; }
 .trend-up { color: var(--c-success); }
 .trend-down { color: var(--c-danger); }

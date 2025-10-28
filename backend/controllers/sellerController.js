@@ -206,6 +206,7 @@ exports.getDashboardStats = async (req, res) => {
     const activeStatuses = ['pending', 'confirmed', 'completed'];
 
     const [
+      totalBookings,
       todayBookings,
       yesterdayBookings,
       pendingBookings,
@@ -214,6 +215,9 @@ exports.getDashboardStats = async (req, res) => {
       newCustomersAgg,
       ratingAgg
     ] = await Promise.all([
+      Booking.countDocuments({
+        sellerId: sellerObjectId
+      }),
       Booking.countDocuments({
         sellerId: sellerObjectId,
         bookingDate: todayStr,
@@ -298,7 +302,8 @@ exports.getDashboardStats = async (req, res) => {
       previousActiveCustomers,
       newCustomers30d,
       ratingAverage,
-      ratingCount
+      ratingCount,
+      totalBookings
     });
   } catch (err) {
     console.error('getDashboardStats error:', err);
