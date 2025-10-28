@@ -3507,6 +3507,59 @@ function updateSummary(avg, count, ratings) {
   const toFa = n => String(n ?? 0).replace(/\d/g, d => '۰۱۲۳۴۵۶۷۸۹'[d]);
 
   const likeCache = new Map(); // id -> {liked, count}
+  const guestLikes = (() => {
+    const KEY = 'vit_portfolio_guest_likes';
+    let cache = null;
+
+    function load() {
+      if (cache) return cache;
+      try {
+        const raw = localStorage.getItem(KEY);
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          cache = (parsed && typeof parsed === 'object') ? parsed : {};
+        } else {
+          cache = {};
+        }
+      } catch (_) {
+        cache = {};
+      }
+      return cache;
+    }
+
+    function persist() {
+      try {
+        localStorage.setItem(KEY, JSON.stringify(cache || {}));
+      } catch (_) {}
+    }
+
+    return {
+      isLiked(id) {
+        const store = load();
+        return !!store[id];
+      },
+      toggle(id) {
+        const store = load();
+        const next = !store[id];
+        if (next) store[id] = 1; else delete store[id];
+        persist();
+        return next;
+      },
+      set(id, liked) {
+        const store = load();
+        if (liked) {
+          store[id] = 1;
+        } else {
+          delete store[id];
+        }
+        persist();
+      },
+      clear() {
+        cache = {};
+        persist();
+      }
+    };
+  })();
   const pendingLikes = new Set();
   let authPromise = null;
   let lastAuthCheckedAt = 0;
@@ -3583,16 +3636,25 @@ function updateSummary(avg, count, ratings) {
     }
   }
 
+  function applyGuestToggle(id, baseState){
+    const prev = baseState || likeCache.get(id) || { liked:false, count:0 };
+    const nextLiked = guestLikes.toggle(id);
+    let nextCount = prev.count;
+    if (nextLiked !== prev.liked) {
+      nextCount = Math.max(0, prev.count + (nextLiked ? 1 : -1));
+    }
+    likeCache.set(id, { liked: nextLiked, count: nextCount });
+    updateUI(id);
+  }
+
   async function toggle(id){
     if (!id || pendingLikes.has(id)) return;
+    const prev = likeCache.get(id) || { liked:false, count:0 };
     const loggedIn = await ensureLoggedIn();
     if (!loggedIn) {
-      if (typeof window.showToastDark === 'function') {
-        showToastDark('برای لایک ابتدا وارد شوید', { type:'info' });
-      }
+      applyGuestToggle(id, prev);
       return;
     }
-    const prev = likeCache.get(id) || { liked:false, count:0 };
     const optimistic = { liked: !prev.liked, count: Math.max(0, prev.count + (prev.liked ? -1 : 1)) };
     likeCache.set(id, optimistic);
     pendingLikes.add(id);
@@ -3609,9 +3671,7 @@ function updateSummary(avg, count, ratings) {
         lastAuthCheckedAt = Date.now();
         window.__APP_USER__ = null;
         likeCache.set(id, prev);
-        if (typeof window.showToastDark === 'function') {
-          showToastDark('برای لایک ابتدا وارد شوید', { type:'info' });
-        }
+        applyGuestToggle(id, prev);
         return;
       }
       if (res.ok && data && typeof data.likeCount === 'number') {
@@ -3653,10 +3713,15 @@ function updateSummary(avg, count, ratings) {
 
   function init(ev){
     const items = ev?.detail?.items || [];
+    const isGuestUser = !(window.__APP_USER__ && window.__APP_USER__.id);
     items.forEach(it => {
       const rawCount = Number(it.likes);
       const count = Number.isFinite(rawCount) ? rawCount : 0;
-      likeCache.set(it.id, { liked: !!it.liked, count });
+      let state = { liked: !!it.liked, count };
+      if (isGuestUser && !state.liked && guestLikes.isLiked(it.id)) {
+        state = { liked: true, count: Math.max(0, count + 1) };
+      }
+      likeCache.set(it.id, state);
     });
     document.querySelectorAll('.portfolio-card').forEach(card => {
       bind(card);
