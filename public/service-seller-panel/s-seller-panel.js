@@ -366,6 +366,249 @@ const formatPersianDate = (value) => {
   }
 };
 
+const planUI = {
+  grid: document.getElementById('seller-plans-grid'),
+  states: {
+    loading: document.getElementById('seller-plans-loading'),
+    empty: document.getElementById('seller-plans-empty'),
+    error: document.getElementById('seller-plans-error')
+  },
+  socialProof: document.getElementById('plans-social-proof')
+};
+
+const PLAN_CARD_ICONS = Object.freeze([
+  '<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>',
+  '<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>',
+  '<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5m4 0v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>'
+]);
+
+const PLAN_FEATURE_CHECK_ICON = '<svg class="feature-check" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>';
+const PLAN_CTA_ARROW_ICON = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14m-7-7l7 7-7 7"/></svg>';
+
+const normalizePlanSlugForDisplay = (value, fallback) => {
+  const raw = (value || '').toString().trim().toLowerCase();
+  if (!raw) return fallback;
+  return raw.replace(/[^a-z0-9-\s]/g, '').replace(/\s+/g, '-').replace(/-+/g, '-');
+};
+
+const setPlansState = (state) => {
+  const states = planUI.states || {};
+  Object.entries(states).forEach(([key, el]) => {
+    if (!el) return;
+    el.hidden = state !== key;
+  });
+  if (planUI.grid) {
+    if (state === 'ready') {
+      planUI.grid.removeAttribute('hidden');
+    } else {
+      planUI.grid.setAttribute('hidden', '');
+    }
+  }
+  if (planUI.socialProof && state !== 'ready') {
+    planUI.socialProof.textContent = '';
+  }
+};
+
+const resolvePlanStatus = (plan, meta) => {
+  if (meta.featured) return 'پیشنهاد ویژه';
+  if (meta.index === 0) return 'اقتصادی';
+  if (meta.index === meta.total - 1 && meta.total > 1) return 'پیشرفته';
+  if (Number.isFinite(plan.durationDays) && plan.durationDays > 0) {
+    return `${faNumber(plan.durationDays)} روزه`;
+  }
+  return 'پلن فعال';
+};
+
+const pickPlanIcon = (index = 0) => PLAN_CARD_ICONS[index % PLAN_CARD_ICONS.length];
+
+const normalisePlanForDisplay = (plan, index) => {
+  const fallbackId = `plan-${index}`;
+  const rawFeatures = Array.isArray(plan?.features) ? plan.features : [];
+  const features = rawFeatures
+    .map((feature) => (typeof feature === 'string' ? feature : feature?.value))
+    .filter(Boolean);
+
+  const price = Number(plan?.price);
+  const duration = Number(plan?.durationDays);
+
+  const title = (plan?.title || '').toString().trim();
+  const description = (plan?.description || '').toString().trim();
+  const slug = normalizePlanSlugForDisplay(plan?.slug, fallbackId);
+
+  return {
+    id: plan?.id || plan?._id || slug || fallbackId,
+    slug: slug || fallbackId,
+    title: title || 'پلن خدماتی',
+    description: description || 'جزئیات این پلن به‌زودی تکمیل می‌شود.',
+    price: Number.isFinite(price) && price >= 0 ? price : 0,
+    durationDays: Number.isFinite(duration) && duration > 0 ? duration : null,
+    features: features.length ? features : PLAN_PERKS_DEFAULT.slice()
+  };
+};
+
+const createPlanCard = (plan, meta) => {
+  const article = document.createElement('article');
+  article.className = 'plan-modern';
+  article.dataset.plan = plan.slug || plan.id;
+  article.setAttribute('role', 'listitem');
+
+  if (meta.featured) {
+    article.classList.add('featured');
+  }
+
+  const status = document.createElement('div');
+  status.className = 'plan-status';
+  if (meta.featured) {
+    status.classList.add('featured');
+  }
+  status.textContent = meta.status;
+  article.appendChild(status);
+
+  if (meta.featured) {
+    const glow = document.createElement('div');
+    glow.className = 'plan-featured-glow';
+    glow.setAttribute('aria-hidden', 'true');
+    article.appendChild(glow);
+  }
+
+  const content = document.createElement('div');
+  content.className = 'plan-content-modern';
+  article.appendChild(content);
+
+  const icon = document.createElement('div');
+  icon.className = 'plan-icon-modern';
+  icon.setAttribute('aria-hidden', 'true');
+  icon.innerHTML = pickPlanIcon(meta.index);
+  content.appendChild(icon);
+
+  const titleEl = document.createElement('h3');
+  titleEl.className = 'plan-title-card';
+  titleEl.textContent = plan.title;
+  content.appendChild(titleEl);
+
+  const descEl = document.createElement('p');
+  descEl.className = 'plan-desc';
+  descEl.textContent = plan.description;
+  content.appendChild(descEl);
+
+  const priceWrap = document.createElement('div');
+  priceWrap.className = 'plan-price-modern';
+  content.appendChild(priceWrap);
+
+  const priceMain = document.createElement('div');
+  priceMain.className = 'price-main';
+  priceWrap.appendChild(priceMain);
+
+  const priceValue = document.createElement('span');
+  priceValue.className = 'price-value';
+  priceValue.dataset['1'] = String(Math.max(0, plan.price));
+  priceValue.textContent = faNumber(plan.price);
+  priceMain.appendChild(priceValue);
+
+  const currency = document.createElement('span');
+  currency.className = 'price-currency';
+  currency.textContent = 'تومان';
+  priceMain.appendChild(currency);
+
+  const period = document.createElement('div');
+  period.className = 'price-period';
+  period.textContent = 'برای ';
+  const periodValue = document.createElement('span');
+  periodValue.className = 'period-value';
+  periodValue.textContent = '۳ ماه';
+  period.appendChild(periodValue);
+  priceWrap.appendChild(period);
+
+  const savings = document.createElement('div');
+  savings.className = 'price-savings hidden';
+  const savingsAmount = document.createElement('span');
+  savingsAmount.className = 'savings-amount';
+  savings.appendChild(savingsAmount);
+  priceWrap.appendChild(savings);
+
+  const featuresWrap = document.createElement('div');
+  featuresWrap.className = 'plan-features-modern';
+  content.appendChild(featuresWrap);
+
+  plan.features.forEach((text) => {
+    const item = document.createElement('div');
+    item.className = 'feature-modern';
+    item.innerHTML = PLAN_FEATURE_CHECK_ICON;
+    const span = document.createElement('span');
+    span.textContent = text;
+    item.appendChild(span);
+    featuresWrap.appendChild(item);
+  });
+
+  const cta = document.createElement('button');
+  cta.type = 'button';
+  cta.className = meta.featured ? 'plan-cta-modern primary' : 'plan-cta-modern';
+  cta.setAttribute('aria-label', `انتخاب پلن ${plan.title}`);
+  if (meta.featured) {
+    cta.innerHTML = `<span>انتخاب پلن</span>${PLAN_CTA_ARROW_ICON}`;
+  } else {
+    cta.textContent = 'انتخاب پلن';
+  }
+  content.appendChild(cta);
+
+  return article;
+};
+
+const renderSellerPlans = (plansRaw = []) => {
+  if (!planUI.grid) return [];
+
+  const activePlans = Array.isArray(plansRaw)
+    ? plansRaw.filter((plan) => plan && plan.isActive !== false)
+    : [];
+
+  if (!activePlans.length) {
+    planUI.grid.innerHTML = '';
+    setPlansState('empty');
+    window.__SELLER_SERVICE_PLANS__ = [];
+    return [];
+  }
+
+  const normalised = activePlans.map((plan, index) => normalisePlanForDisplay(plan, index));
+  normalised.sort((a, b) => a.price - b.price || a.title.localeCompare(b.title, 'fa-IR'));
+
+  const featuredIndex = normalised.length > 1 ? Math.min(1, normalised.length - 1) : 0;
+
+  planUI.grid.innerHTML = '';
+  normalised.forEach((plan, index) => {
+    const card = createPlanCard(plan, {
+      index,
+      total: normalised.length,
+      featured: index === featuredIndex,
+      status: resolvePlanStatus(plan, { index, total: normalised.length, featured: index === featuredIndex })
+    });
+    planUI.grid.appendChild(card);
+  });
+
+  setPlansState('ready');
+
+  if (planUI.socialProof) {
+    planUI.socialProof.textContent = `${faNumber(normalised.length)} پلن فعال برای انتخاب آماده است.`;
+  }
+
+  window.__SELLER_SERVICE_PLANS__ = normalised;
+  return normalised;
+};
+
+async function loadSellerPlans() {
+  if (!planUI.grid) return [];
+  try {
+    setPlansState('loading');
+    const plans = await API.getServicePlans();
+    return renderSellerPlans(plans);
+  } catch (err) {
+    console.error('loadSellerPlans failed', err);
+    planUI.grid.innerHTML = '';
+    setPlansState('error');
+    window.__SELLER_SERVICE_PLANS__ = [];
+    return [];
+  }
+}
+
 const ensureDate = (value) => {
   if (!value) return null;
   const date = value instanceof Date ? value : new Date(value);
@@ -799,6 +1042,22 @@ const API = {
       throw new Error(`COMPLIMENTARY_PLAN_HTTP_${res.status}`);
     }
     return await this._json(res);
+  },
+
+  async getServicePlans() {
+    const res = await fetch(bust(`${API_BASE}/api/service-plans`), {
+      credentials: 'include',
+      ...NO_CACHE
+    });
+    if (!res.ok) {
+      throw new Error(`SERVICE_PLANS_HTTP_${res.status}`);
+    }
+    const data = await this._json(res);
+    if (Array.isArray(data?.plans)) {
+      return data.plans;
+    }
+    const fallback = this._unwrap(data);
+    return Array.isArray(fallback) ? fallback : [];
   },
 
   async getFeatureFlags() {
@@ -4783,6 +5042,8 @@ try {
 featureFlags = applySellerPlanFeatureFlags(featureFlags);
 window.__FEATURE_FLAGS__ = featureFlags;
 
+await loadSellerPlans();
+
 await loadComplimentaryPlan();
 
 const app = new SellerPanelApp(featureFlags);
@@ -5333,6 +5594,12 @@ function cleanScheduleData() {
   const cards = Array.from(plansView.querySelectorAll('.plan-modern'));
   const checkoutBar = plansView.querySelector('#checkout-bar');
   if (!checkoutBar) { window.__PLANS_CHECKOUT_CONTROLLER_INITIALIZED__ = true; return; }
+  if (!cards.length) {
+    checkoutBar.classList.remove('visible');
+    checkoutBar.setAttribute('aria-hidden', 'true');
+    window.__PLANS_CHECKOUT_CONTROLLER_INITIALIZED__ = true;
+    return;
+  }
   const cbPlan = checkoutBar.querySelector('.cb-plan');
   const cbDuration = checkoutBar.querySelector('.cb-duration');
   const cbSaving = checkoutBar.querySelector('.cb-saving');
