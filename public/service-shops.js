@@ -3504,91 +3504,172 @@ function updateSummary(avg, count, ratings) {
 (function(){
   'use strict';
   const API_BASE = (window.API_BASE || '').replace(/\/+$/, '');
-  const isLoggedIn = () => { try { return !!JSON.parse(localStorage.getItem('auth_user')||'null'); } catch(_) { return false; } };
   const toFa = n => String(n ?? 0).replace(/\d/g, d => '۰۱۲۳۴۵۶۷۸۹'[d]);
 
   const likeCache = new Map(); // id -> {liked, count}
+  const pendingLikes = new Set();
+  let authPromise = null;
+  let lastAuthCheckedAt = 0;
+  let lastAuthResult = window.__APP_USER__?.id ? true : null;
+
+  async function ensureLoggedIn(){
+    if (window.__APP_USER__?.id) {
+      lastAuthResult = true;
+      return true;
+    }
+    if (authPromise) return authPromise;
+    const now = Date.now();
+    if (lastAuthResult === false && now - lastAuthCheckedAt < 3000) {
+      return false;
+    }
+    lastAuthCheckedAt = now;
+    authPromise = (async () => {
+      try {
+        const res = await fetch(`${API_BASE}/api/auth/getCurrentUser`, {
+          credentials: 'include'
+        });
+        if (!res.ok) return false;
+        const data = await res.json().catch(() => null);
+        if (data?.success && data.user) {
+          window.__APP_USER__ = Object.assign({}, window.__APP_USER__ || {}, data.user);
+          return true;
+        }
+      } catch (_) {}
+      return false;
+    })();
+    const ok = await authPromise;
+    authPromise = null;
+    lastAuthResult = ok;
+    return ok;
+  }
+
+  function updateWrapState(wrap, state, busy, counterEl){
+    if (!wrap) return;
+    const icon = wrap.querySelector('.fa-heart');
+    if (icon) {
+      icon.classList.toggle('far', !state.liked);
+      icon.classList.toggle('fas', state.liked);
+    }
+    const counter = counterEl || wrap.querySelector('.js-likes');
+    if (counter) counter.textContent = toFa(state.count);
+    wrap.classList.toggle('text-red-500', state.liked);
+    wrap.classList.toggle('text-rose-500', state.liked);
+    if (wrap.tagName !== 'BUTTON') {
+      wrap.setAttribute('role','button');
+      wrap.setAttribute('tabindex','0');
+    }
+    wrap.setAttribute('aria-pressed', state.liked ? 'true' : 'false');
+    wrap.title = state.liked ? 'لغو لایک' : 'پسندیدن';
+    if ('disabled' in wrap) {
+      wrap.disabled = busy;
+    }
+    wrap.classList.toggle('opacity-70', busy);
+    wrap.classList.toggle('pointer-events-none', busy && wrap.tagName !== 'BUTTON');
+    wrap.setAttribute('aria-busy', busy ? 'true' : 'false');
+  }
 
   function updateUI(id){
     const state = likeCache.get(id) || { liked:false, count:0 };
-    document.querySelectorAll(`.portfolio-card[data-item-id="${id}"]`).forEach(card=>{
-      const wrap = card.querySelector('.fa-heart')?.parentElement;
-      const icon = wrap?.querySelector('.fa-heart');
-      const cnt  = wrap?.querySelector('span');
-      if(!wrap||!icon||!cnt) return;
-      icon.classList.toggle('far', !state.liked);
-      icon.classList.toggle('fas', state.liked);
-      wrap.classList.toggle('text-red-500', state.liked);
-      cnt.textContent = toFa(state.count);
-      wrap.setAttribute('role','button');
-      wrap.setAttribute('tabindex','0');
-      wrap.setAttribute('aria-pressed', state.liked ? 'true' : 'false');
-      wrap.title = state.liked ? 'لغو لایک' : 'پسندیدن';
+    const busy = pendingLikes.has(id);
+    document.querySelectorAll(`.portfolio-card[data-item-id="${id}"]`).forEach(card => {
+      const wrap = card.querySelector('[data-portfolio-like]') || card.querySelector('.fa-heart')?.parentElement;
+      updateWrapState(wrap, state, busy);
     });
 
-    if(window.__PF_ACTIVE_ID===id){
-      const mWrap  = document.querySelector('#imageModal .fa-heart')?.parentElement;
-      const mIcon  = mWrap?.querySelector('.fa-heart');
+    if (window.__PF_ACTIVE_ID === id) {
+      const mWrap = document.querySelector('#imageModal [data-portfolio-like]') || document.querySelector('#imageModal .fa-heart')?.parentElement;
       const mLikes = document.getElementById('modalLikes');
-      if(mWrap && mIcon && mLikes){
-        mIcon.classList.toggle('far', !state.liked);
-        mIcon.classList.toggle('fas', state.liked);
-        mWrap.classList.toggle('text-red-500', state.liked);
-        mLikes.textContent = toFa(state.count);
-        mWrap.setAttribute('aria-pressed', state.liked ? 'true' : 'false');
-        mWrap.title = state.liked ? 'لغو لایک' : 'پسندیدن';
-      }
+      updateWrapState(mWrap, state, busy, mLikes);
     }
   }
 
   async function toggle(id){
-    if(!isLoggedIn()){
-      if(typeof window.showToastDark === 'function') showToastDark('برای لایک ابتدا وارد شوید', {type:'info'});
+    if (!id || pendingLikes.has(id)) return;
+    const loggedIn = await ensureLoggedIn();
+    if (!loggedIn) {
+      if (typeof window.showToastDark === 'function') {
+        showToastDark('برای لایک ابتدا وارد شوید', { type:'info' });
+      }
       return;
     }
     const prev = likeCache.get(id) || { liked:false, count:0 };
-    const optimistic = { liked: !prev.liked, count: prev.count + (prev.liked ? -1 : 1) };
+    const optimistic = { liked: !prev.liked, count: Math.max(0, prev.count + (prev.liked ? -1 : 1)) };
     likeCache.set(id, optimistic);
+    pendingLikes.add(id);
     updateUI(id);
-    try{
+    try {
       const res = await fetch(`${API_BASE}/api/portfolio/${id}/like`, {
         method:'POST',
         credentials:'include'
       });
-      const data = await res.json();
-      if(res.ok){
-        likeCache.set(id, { liked: data.liked, count: data.likeCount });
+      let data = null;
+      try { data = await res.json(); } catch (_) {}
+      if (res.status === 401) {
+        lastAuthResult = false;
+        lastAuthCheckedAt = Date.now();
+        window.__APP_USER__ = null;
+        likeCache.set(id, prev);
+        if (typeof window.showToastDark === 'function') {
+          showToastDark('برای لایک ابتدا وارد شوید', { type:'info' });
+        }
+        return;
+      }
+      if (res.ok && data && typeof data.likeCount === 'number') {
+        likeCache.set(id, { liked: !!data.liked, count: Math.max(0, data.likeCount) });
       } else {
         likeCache.set(id, prev);
+        if (typeof window.showToastDark === 'function') {
+          const msg = data?.message || 'ثبت پسند انجام نشد. دوباره تلاش کنید.';
+          showToastDark(msg, { type:'danger' });
+        }
       }
-    }catch(_){ likeCache.set(id, prev); }
-    updateUI(id);
+    } catch (_) {
+      likeCache.set(id, prev);
+      if (typeof window.showToastDark === 'function') {
+        showToastDark('ثبت پسند انجام نشد. ارتباط برقرار نشد.', { type:'danger' });
+      }
+    } finally {
+      pendingLikes.delete(id);
+      updateUI(id);
+    }
   }
 
   function bind(card){
     const id = card.dataset.itemId;
-    if(!id || card.dataset.likeBound) return;
+    if (!id || card.dataset.likeBound) return;
     card.dataset.likeBound = '1';
-    const wrap = card.querySelector('.fa-heart')?.parentElement;
-    if(!wrap) return;
-    wrap.addEventListener('click', e=>{ e.preventDefault(); toggle(id); });
-    wrap.addEventListener('keydown', e=>{ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); toggle(id); }});
+    const wrap = card.querySelector('[data-portfolio-like]') || card.querySelector('.fa-heart')?.parentElement;
+    if (!wrap) return;
+    wrap.addEventListener('click', e => { e.preventDefault(); toggle(id); });
+    if (wrap.tagName !== 'BUTTON') {
+      wrap.addEventListener('keydown', e => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          toggle(id);
+        }
+      });
+    }
   }
 
   function init(ev){
     const items = ev?.detail?.items || [];
-    items.forEach(it => likeCache.set(it.id, { liked: !!it.liked, count: it.likes }));
-    document.querySelectorAll('.portfolio-card').forEach(card=>{
+    items.forEach(it => {
+      const rawCount = Number(it.likes);
+      const count = Number.isFinite(rawCount) ? rawCount : 0;
+      likeCache.set(it.id, { liked: !!it.liked, count });
+    });
+    document.querySelectorAll('.portfolio-card').forEach(card => {
       bind(card);
       const id = card.dataset.itemId;
-      if(id && likeCache.has(id)) updateUI(id);
+      if (id && likeCache.has(id)) updateUI(id);
     });
-    const mWrap = document.querySelector('#imageModal .fa-heart')?.parentElement;
-    if(mWrap && !mWrap.dataset.likeBound){
+    const mWrap = document.querySelector('#imageModal [data-portfolio-like]') || document.querySelector('#imageModal .fa-heart')?.parentElement;
+    if (mWrap && !mWrap.dataset.likeBound) {
       mWrap.dataset.likeBound = '1';
-      mWrap.style.cursor = 'pointer';
-      mWrap.addEventListener('click', e=>{ e.preventDefault(); if(window.__PF_ACTIVE_ID) toggle(window.__PF_ACTIVE_ID); });
-      mWrap.addEventListener('keydown', e=>{ if((e.key==='Enter'||e.key===' ') && window.__PF_ACTIVE_ID){ e.preventDefault(); toggle(window.__PF_ACTIVE_ID); }});
+      mWrap.addEventListener('click', e => { e.preventDefault(); if (window.__PF_ACTIVE_ID) toggle(window.__PF_ACTIVE_ID); });
+      if (mWrap.tagName !== 'BUTTON') {
+        mWrap.addEventListener('keydown', e => { if ((e.key === 'Enter' || e.key === ' ') && window.__PF_ACTIVE_ID) { e.preventDefault(); toggle(window.__PF_ACTIVE_ID); }});
+      }
     }
   }
 
