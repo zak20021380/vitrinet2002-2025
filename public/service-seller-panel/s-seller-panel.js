@@ -352,6 +352,298 @@ const faNumber = (value) => {
   }
 };
 
+const describePlanDuration = (days) => {
+  const duration = Number(days);
+  const result = {
+    label: 'بدون محدودیت',
+    status: 'بدون محدودیت',
+    rawDays: null
+  };
+
+  if (!Number.isFinite(duration) || duration <= 0) {
+    return result;
+  }
+
+  const suffixStatus = (label) => {
+    if (!label) return '';
+    if (label.endsWith('روز') || label.endsWith('ماه') || label.endsWith('سال')) {
+      return `${label}ه`;
+    }
+    if (label.endsWith('هفته')) {
+      return `${label}‌ای`;
+    }
+    return label;
+  };
+
+  if (duration % 365 === 0) {
+    const years = duration / 365;
+    const label = years === 1 ? '۱ سال' : `${faNumber(years)} سال`;
+    return { label, status: suffixStatus(label), rawDays: duration };
+  }
+
+  if (duration % 30 === 0) {
+    const months = duration / 30;
+    const label = months === 1 ? '۱ ماه' : `${faNumber(months)} ماه`;
+    return { label, status: suffixStatus(label), rawDays: duration };
+  }
+
+  if (duration % 7 === 0) {
+    const weeks = duration / 7;
+    const label = weeks === 1 ? '۱ هفته' : `${faNumber(weeks)} هفته`;
+    return { label, status: suffixStatus(label), rawDays: duration };
+  }
+
+  const label = `${faNumber(duration)} روز`;
+  return { label, status: suffixStatus(label), rawDays: duration };
+};
+
+const PlanCheckoutController = (() => {
+  const state = {
+    selectedPlanKey: null,
+    couponPct: 0,
+    dismissed: false
+  };
+
+  let plansView = null;
+  let checkoutBar = null;
+  let cbPlan = null;
+  let cbDuration = null;
+  let cbSaving = null;
+  let cbTotal = null;
+  let couponToggle = null;
+  let couponRow = null;
+  let couponInput = null;
+  let couponApply = null;
+  let cbClose = null;
+
+  const ensureElements = () => {
+    plansView = document.getElementById('plans-view');
+    if (!plansView) return false;
+
+    checkoutBar = plansView.querySelector('#checkout-bar');
+    if (!checkoutBar) return false;
+
+    cbPlan = checkoutBar.querySelector('.cb-plan');
+    cbDuration = checkoutBar.querySelector('.cb-duration');
+    cbSaving = checkoutBar.querySelector('.cb-saving');
+    cbTotal = checkoutBar.querySelector('.cb-total');
+    couponToggle = checkoutBar.querySelector('.cb-coupon-toggle');
+    couponRow = checkoutBar.querySelector('.cb-coupon');
+    couponInput = checkoutBar.querySelector('#coupon-input');
+    couponApply = checkoutBar.querySelector('.cb-apply');
+    cbClose = checkoutBar.querySelector('.cb-close');
+    return true;
+  };
+
+  const getCards = () => (plansView ? Array.from(plansView.querySelectorAll('.plan-modern')) : []);
+
+  const getSelectedCard = () => {
+    if (!plansView) return null;
+    if (state.selectedPlanKey) {
+      return (
+        plansView.querySelector(`.plan-modern[data-plan="${state.selectedPlanKey}"]`) ||
+        plansView.querySelector(`.plan-modern[data-id="${state.selectedPlanKey}"]`)
+      );
+    }
+    return null;
+  };
+
+  const basePriceOf = (card) => {
+    const priceEl = card?.querySelector('.price-value');
+    const value = Number(priceEl?.dataset?.basePrice ?? priceEl?.dataset?.['1']);
+    return Number.isFinite(value) ? value : 0;
+  };
+
+  const durationLabelOf = (card) => card?.dataset?.durationLabel || 'بدون محدودیت';
+  const durationStatusOf = (card) => card?.dataset?.durationStatus || durationLabelOf(card);
+
+  const formatPrice = (value) => {
+    const amount = Number.isFinite(value) ? Math.max(0, Math.round(value)) : 0;
+    return `${faNumber(amount)} تومان`;
+  };
+
+  const updateCard = (card) => {
+    if (!card) return;
+    const priceEl = card.querySelector('.price-value');
+    const periodValue = card.querySelector('.period-value');
+    const savingsWrap = card.querySelector('.price-savings');
+    const savingsAmount = card.querySelector('.savings-amount');
+
+    if (priceEl) {
+      priceEl.textContent = faNumber(basePriceOf(card));
+    }
+    if (periodValue) {
+      periodValue.textContent = durationLabelOf(card);
+    }
+    if (savingsWrap) {
+      savingsWrap.classList.add('hidden');
+    }
+    if (savingsAmount) {
+      savingsAmount.textContent = '';
+    }
+  };
+
+  const updateCards = () => {
+    getCards().forEach(updateCard);
+  };
+
+  const hideCheckout = () => {
+    if (!checkoutBar) return;
+    checkoutBar.classList.remove('visible');
+    checkoutBar.setAttribute('aria-hidden', 'true');
+    if (cbPlan) cbPlan.textContent = '—';
+    if (cbDuration) cbDuration.textContent = '—';
+    if (cbSaving) {
+      cbSaving.textContent = '';
+      cbSaving.style.display = 'none';
+    }
+    if (cbTotal) cbTotal.textContent = '—';
+  };
+
+  const showCheckout = (card) => {
+    if (!checkoutBar || !card) return;
+
+    const base = basePriceOf(card);
+    const finalPrice = base * (1 - state.couponPct / 100);
+
+    if (cbPlan) {
+      cbPlan.textContent = card.querySelector('.plan-title-card')?.textContent?.trim() || '—';
+    }
+    if (cbDuration) {
+      cbDuration.textContent = durationStatusOf(card);
+    }
+    if (cbSaving) {
+      if (state.couponPct > 0) {
+        cbSaving.textContent = `تخفیف: ${state.couponPct}%`;
+        cbSaving.style.display = 'inline-block';
+      } else {
+        cbSaving.textContent = '';
+        cbSaving.style.display = 'none';
+      }
+    }
+    if (cbTotal) {
+      cbTotal.textContent = formatPrice(finalPrice);
+    }
+
+    checkoutBar.classList.add('visible');
+    checkoutBar.setAttribute('aria-hidden', 'false');
+  };
+
+  const updateCheckout = () => {
+    const selected = getSelectedCard();
+    if (!selected || state.dismissed) {
+      hideCheckout();
+      return;
+    }
+    showCheckout(selected);
+  };
+
+  const selectPlan = (card) => {
+    if (!card) return;
+    getCards().forEach((c) => {
+      if (c === card) {
+        c.classList.add('selected');
+      } else {
+        c.classList.remove('selected');
+      }
+    });
+    state.selectedPlanKey = card.dataset.plan || card.dataset.id || card.dataset.slug || null;
+    state.dismissed = false;
+    updateCheckout();
+  };
+
+  const handlePlansClick = (event) => {
+    if (!plansView) return;
+    const card = event.target.closest('.plan-modern');
+    if (!card || !plansView.contains(card)) return;
+    event.stopPropagation();
+    selectPlan(card);
+  };
+
+  const handleCouponToggle = () => {
+    if (!couponRow || !couponToggle) return;
+    const willShow = couponRow.hasAttribute('hidden');
+    couponRow.toggleAttribute('hidden');
+    couponToggle.setAttribute('aria-expanded', String(willShow));
+  };
+
+  const handleCouponApply = () => {
+    const code = couponInput?.value?.trim();
+    state.couponPct = code ? 10 : 0;
+    updateCheckout();
+    if (window.UIComponents?.showToast) {
+      window.UIComponents.showToast(
+        state.couponPct ? 'کد تخفیف ۱۰٪ اعمال شد.' : 'کد نامعتبر بود.',
+        state.couponPct ? 'success' : 'error'
+      );
+    }
+  };
+
+  const handleClose = (event) => {
+    event?.stopPropagation();
+    state.dismissed = true;
+    updateCheckout();
+  };
+
+  const handleDocumentClick = (event) => {
+    if (!checkoutBar?.classList.contains('visible')) return;
+    if (checkoutBar.contains(event.target)) return;
+    if (event.target.closest('.plan-modern')) return;
+    state.dismissed = true;
+    updateCheckout();
+  };
+
+  const handleHashChange = () => {
+    if (window.location.hash === '#/plans') {
+      if (!state.dismissed) {
+        updateCheckout();
+      }
+    } else {
+      hideCheckout();
+    }
+  };
+
+  const init = () => {
+    if (!ensureElements()) return;
+
+    if (checkoutBar.dataset.controllerBound === 'true') {
+      updateCards();
+      updateCheckout();
+      return;
+    }
+
+    checkoutBar.dataset.controllerBound = 'true';
+
+    plansView.addEventListener('click', handlePlansClick);
+    couponToggle?.addEventListener('click', handleCouponToggle);
+    couponApply?.addEventListener('click', handleCouponApply);
+    cbClose?.addEventListener('click', handleClose);
+    document.addEventListener('click', handleDocumentClick, true);
+    window.addEventListener('hashchange', handleHashChange);
+    checkoutBar.querySelector('.cb-cta')?.addEventListener('click', () => {
+      window.UIComponents?.showToast?.('درگاه پرداخت به‌زودی متصل می‌شود.', 'success');
+    });
+
+    updateCards();
+    updateCheckout();
+  };
+
+  const refresh = () => {
+    if (!ensureElements()) return;
+    updateCards();
+    if (state.selectedPlanKey) {
+      const selected = getSelectedCard();
+      if (!selected) {
+        state.selectedPlanKey = null;
+        state.dismissed = false;
+      }
+    }
+    updateCheckout();
+  };
+
+  return { init, refresh, state };
+})();
+
 const formatPersianDate = (value) => {
   if (!value) return '—';
   const date = value instanceof Date ? value : new Date(value);
@@ -437,11 +729,14 @@ const setPlansState = (state) => {
 
 const resolvePlanStatus = (plan, meta) => {
   if (meta.featured) return 'پیشنهاد ویژه';
-  if (meta.index === 0) return 'اقتصادی';
-  if (meta.index === meta.total - 1 && meta.total > 1) return 'پیشرفته';
-  if (Number.isFinite(plan.durationDays) && plan.durationDays > 0) {
-    return `${faNumber(plan.durationDays)} روزه`;
+  if (plan.durationInfo?.rawDays != null) {
+    return plan.durationInfo.status;
   }
+  if (plan.durationInfo?.label) {
+    return plan.durationInfo.label;
+  }
+  if (meta.index === 0 && meta.total > 1) return 'اقتصادی';
+  if (meta.index === meta.total - 1 && meta.total > 1) return 'پیشرفته';
   return 'پلن فعال';
 };
 
@@ -455,7 +750,9 @@ const normalisePlanForDisplay = (plan, index) => {
     .filter(Boolean);
 
   const price = Number(plan?.price);
-  const duration = Number(plan?.durationDays);
+  const durationRaw = Number(plan?.durationDays);
+  const durationDays = Number.isFinite(durationRaw) && durationRaw > 0 ? Math.round(durationRaw) : null;
+  const durationInfo = describePlanDuration(durationDays);
 
   const title = (plan?.title || '').toString().trim();
   const description = (plan?.description || '').toString().trim();
@@ -467,7 +764,10 @@ const normalisePlanForDisplay = (plan, index) => {
     title: title || 'پلن خدماتی',
     description: description || 'جزئیات این پلن به‌زودی تکمیل می‌شود.',
     price: Number.isFinite(price) && price >= 0 ? price : 0,
-    durationDays: Number.isFinite(duration) && duration > 0 ? duration : null,
+    durationDays,
+    durationInfo,
+    durationLabel: durationInfo.label,
+    durationStatus: durationInfo.status,
     features: features.length ? features : PLAN_PERKS_DEFAULT.slice()
   };
 };
@@ -476,6 +776,14 @@ const createPlanCard = (plan, meta) => {
   const article = document.createElement('article');
   article.className = 'plan-modern';
   article.dataset.plan = plan.slug || plan.id;
+  article.dataset.price = String(Math.max(0, plan.price));
+  if (plan.durationDays != null) {
+    article.dataset.durationDays = String(plan.durationDays);
+  }
+  if (plan.durationInfo) {
+    article.dataset.durationLabel = plan.durationInfo.label || '';
+    article.dataset.durationStatus = plan.durationInfo.status || '';
+  }
   article.setAttribute('role', 'listitem');
 
   if (meta.featured) {
@@ -528,6 +836,7 @@ const createPlanCard = (plan, meta) => {
   const priceValue = document.createElement('span');
   priceValue.className = 'price-value';
   priceValue.dataset['1'] = String(Math.max(0, plan.price));
+  priceValue.dataset.basePrice = String(Math.max(0, plan.price));
   priceValue.textContent = faNumber(plan.price);
   priceMain.appendChild(priceValue);
 
@@ -538,10 +847,11 @@ const createPlanCard = (plan, meta) => {
 
   const period = document.createElement('div');
   period.className = 'price-period';
-  period.textContent = 'برای ';
+  const hasFiniteDuration = plan.durationInfo?.rawDays != null;
+  period.textContent = hasFiniteDuration ? 'برای ' : 'مدت پلن: ';
   const periodValue = document.createElement('span');
   periodValue.className = 'period-value';
-  periodValue.textContent = '۳ ماه';
+  periodValue.textContent = plan.durationInfo?.label || 'بدون محدودیت';
   period.appendChild(periodValue);
   priceWrap.appendChild(period);
 
@@ -591,6 +901,8 @@ const renderSellerPlans = (plansRaw = []) => {
     planUI.grid.innerHTML = '';
     setPlansState('empty');
     window.__SELLER_SERVICE_PLANS__ = [];
+    PlanCheckoutController.refresh();
+    PlanCheckoutController.init();
     return [];
   }
 
@@ -617,6 +929,8 @@ const renderSellerPlans = (plansRaw = []) => {
   }
 
   window.__SELLER_SERVICE_PLANS__ = normalised;
+  PlanCheckoutController.refresh();
+  PlanCheckoutController.init();
   return normalised;
 };
 
@@ -631,6 +945,8 @@ async function loadSellerPlans() {
     planUI.grid.innerHTML = '';
     setPlansState('error');
     window.__SELLER_SERVICE_PLANS__ = [];
+    PlanCheckoutController.refresh();
+    PlanCheckoutController.init();
     return [];
   }
 }
@@ -2729,24 +3045,6 @@ if (elements.viewStoreBtn) {
     }
   });
 
-  // === PATCH: checkout bar close/open (plans) — DO NOT TOUCH ANYTHING ELSE ===
-  const checkoutBar = document.getElementById('checkout-bar');
-  if (checkoutBar) {
-    // close (X) on sticky checkout bar
-    checkoutBar.querySelector('.cb-close')?.addEventListener('click', () => {
-      checkoutBar.classList.remove('visible');
-      checkoutBar.setAttribute('aria-hidden', 'true');
-    });
-
-    // open the bar when any plan CTA is clicked
-    document.querySelectorAll('.plan-cta-modern').forEach(btn => {
-      btn.addEventListener('click', () => {
-        checkoutBar.classList.add('visible');
-        checkoutBar.setAttribute('aria-hidden', 'false');
-      });
-    });
-  }
-
   // 9. Cleanup method for memory management (optional)
   this.cleanup = () => {
     window.removeEventListener('hashchange', this.boundHandleRouteChange);
@@ -3851,82 +4149,8 @@ destroy() {
     }
     // --- Event Handlers ---
 
-handlePlanDurationChange(e) {
-    const selector = document.querySelector('.duration-selector-modern');
-    if (!selector) return;
-    
-    let selectedTab;
-    if (e && e.target) {
-        selectedTab = e.target.closest('.duration-tab');
-        if (!selectedTab) return;
-    } else {
-        selectedTab = selector.querySelector('.duration-tab.active');
-    }
-    
-    // Update active states
-    selector.querySelectorAll('.duration-tab').forEach(tab => {
-        tab.classList.remove('active');
-    });
-    selectedTab.classList.add('active');
-    
-    // Move indicator
-    const tabs = Array.from(selector.querySelectorAll('.duration-tab'));
-    const index = tabs.indexOf(selectedTab);
-    const indicator = selector.querySelector('.duration-indicator');
-    if (indicator) {
-        indicator.style.left = `${4 + (index * 33.333)}%`;
-    }
-    
-    // Get duration
-    const duration = parseInt(selectedTab.dataset.duration);
-    
-    // Update all plan cards
-    document.querySelectorAll('.plan-modern').forEach(card => {
-        const priceEl = card.querySelector('.price-value');
-        const periodEl = card.querySelector('.period-value');
-        const savingsEl = card.querySelector('.price-savings');
-        const savingsAmountEl = card.querySelector('.savings-amount');
-        
-        if (!priceEl) return;
-        
-        const basePrice = parseInt(priceEl.dataset['1']);
-        let totalPrice, periodText, discount = 0;
-        
-        switch(duration) {
-            case 1:
-                totalPrice = basePrice;
-                periodText = '۱ ماه';
-                break;
-            case 2:
-                totalPrice = basePrice * 2 * 0.9; // 10% discount
-                periodText = '۲ ماه';
-                discount = 10;
-                break;
-            case 3:
-                totalPrice = basePrice * 3 * 0.8; // 20% discount
-                periodText = '۳ ماه';
-                discount = 20;
-                break;
-        }
-        
-        // Update price display with animation
-        priceEl.style.transform = 'scale(0.9)';
-        setTimeout(() => {
-            priceEl.textContent = new Intl.NumberFormat('fa-IR').format(Math.round(totalPrice));
-            priceEl.style.transform = 'scale(1)';
-        }, 150);
-        
-        if (periodEl) periodEl.textContent = periodText;
-        
-        // Show/hide savings
-        if (discount > 0 && savingsEl) {
-            savingsEl.classList.remove('hidden');
-            const saved = (basePrice * duration) - totalPrice;
-            savingsAmountEl.textContent = `${new Intl.NumberFormat('fa-IR').format(Math.round(saved))} تومان صرفه‌جویی`;
-        } else if (savingsEl) {
-            savingsEl.classList.add('hidden');
-        }
-    });
+handlePlanDurationChange() {
+    PlanCheckoutController.refresh();
 }
 
 
@@ -5600,405 +5824,7 @@ function cleanScheduleData() {
 });
 
 
-(() => {
-  const root = document;
-  const plansView = root.getElementById('plans-view');
-  if (!plansView) return;
 
-  const nf = (n) => new Intl.NumberFormat('fa-IR').format(Math.round(n));
-
-  // State
-  const state = {
-    duration: 3,          // پیش‌فرض: فقط مدت، نه انتخاب پلن
-    selectedPlanKey: null,
-    couponPct: 0
-  };
-
-  // Elements
-  const tabs = Array.from(plansView.querySelectorAll('.duration-tab'));
-  const indicator = plansView.querySelector('.duration-indicator');
-  const cards = Array.from(plansView.querySelectorAll('.plan-modern'));
-  const checkoutBar = plansView.querySelector('#checkout-bar');
-  if (!checkoutBar) { window.__PLANS_CHECKOUT_CONTROLLER_INITIALIZED__ = true; return; }
-  if (!cards.length) {
-    checkoutBar.classList.remove('visible');
-    checkoutBar.setAttribute('aria-hidden', 'true');
-    window.__PLANS_CHECKOUT_CONTROLLER_INITIALIZED__ = true;
-    return;
-  }
-  const cbPlan = checkoutBar.querySelector('.cb-plan');
-  const cbDuration = checkoutBar.querySelector('.cb-duration');
-  const cbSaving = checkoutBar.querySelector('.cb-saving');
-  const cbTotal = checkoutBar.querySelector('.cb-total');
-  const couponToggle = checkoutBar.querySelector('.cb-coupon-toggle');
-  const couponRow = checkoutBar.querySelector('.cb-coupon');
-  const couponInput = checkoutBar.querySelector('#coupon-input');
-  const couponApply = checkoutBar.querySelector('.cb-apply');
-
-  // Helpers
-  const getBasePrice = (card) => {
-    const el = card.querySelector('.price-value');
-    return el ? parseInt(el.dataset['1'], 10) : 0;
-  };
-  const getDiscountPct = (duration) => (duration === 2 ? 10 : duration === 3 ? 20 : 0);
-  const calcTotal = (base, duration) => {
-    const disc = getDiscountPct(duration);
-    const gross = base * duration * (1 - disc/100);
-    const afterCoupon = gross * (1 - state.couponPct/100);
-    return { gross, afterCoupon, disc };
-  };
-  const updateIndicator = () => {
-    if (!indicator) return;
-    const activeIndex = Math.max(0, tabs.findIndex(t => t.classList.contains('active')));
-    indicator.style.transform = `translateX(${activeIndex * 100}%)`;
-  };
-
-  const updateCard = (card) => {
-    const priceEl = card.querySelector('.price-value');
-    const periodEl = card.querySelector('.period-value');
-    const savingsWrap = card.querySelector('.price-savings');
-    const savingsAmountEl = card.querySelector('.savings-amount');
-    if (!priceEl || !periodEl) return;
-
-    const base = getBasePrice(card);
-    const { gross, disc } = calcTotal(base, state.duration);
-
-    periodEl.textContent = state.duration === 1 ? '۱ ماه' : (state.duration === 2 ? '۲ ماه' : '۳ ماه');
-
-    priceEl.style.transform = 'scale(0.92)';
-    setTimeout(() => {
-      priceEl.textContent = nf(gross);
-      priceEl.style.transform = 'scale(1)';
-    }, 130);
-
-    if (savingsWrap && savingsAmountEl) {
-      if (disc > 0) {
-        const saved = base * state.duration - gross;
-        savingsWrap.classList.remove('hidden');
-        savingsAmountEl.textContent = `${nf(saved)} تومان صرفه‌جویی`;
-      } else {
-        savingsWrap.classList.add('hidden');
-      }
-    }
-  };
-
-  const updateAllCards = () => cards.forEach(updateCard);
-
-  // فقط وقتی پلنی انتخاب شده باشه نوار رو نشون بده
-  const updateCheckout = () => {
-    const selected = plansView.querySelector('.plan-modern.selected');
-
-    if (!selected) {
-      checkoutBar.classList.remove('visible');
-      checkoutBar.setAttribute('aria-hidden', 'true');
-      cbPlan.textContent = '—';
-      cbDuration.textContent = state.duration === 1 ? '۱ ماهه' : (state.duration === 2 ? '۲ ماهه' : '۳ ماهه');
-      cbSaving.textContent = '';
-      cbSaving.style.display = 'none';
-      cbTotal.textContent = '—';
-      return;
-    }
-
-    const name = selected.querySelector('.plan-title-card')?.textContent?.trim() || '-';
-    const base = getBasePrice(selected);
-    const { afterCoupon, disc } = calcTotal(base, state.duration);
-
-    cbPlan.textContent = name;
-    cbDuration.textContent = state.duration === 1 ? '۱ ماهه' : (state.duration === 2 ? '۲ ماهه' : '۳ ماهه');
-
-    const parts = [];
-    if (disc > 0) parts.push(`${disc}%`);
-    if (state.couponPct > 0) parts.push(`+ ${state.couponPct}% کد`);
-    cbSaving.textContent = parts.length ? `تخفیف: ${parts.join(' ')}` : '';
-    cbSaving.style.display = parts.length ? 'inline-block' : 'none';
-
-    cbTotal.textContent = nf(afterCoupon) + ' تومان';
-
-    checkoutBar.classList.add('visible');
-    checkoutBar.setAttribute('aria-hidden', 'false');
-  };
-
-  const selectPlan = (card) => {
-    cards.forEach(c => c.classList.remove('selected'));
-    card.classList.add('selected');
-    state.selectedPlanKey = card.dataset.plan || null;
-    updateCheckout();
-  };
-
-  // Tabs (مدت اشتراک)
-  tabs.forEach((tab) => {
-    tab.addEventListener('click', () => {
-      tabs.forEach(t => t.classList.remove('active'));
-      tab.classList.add('active');
-      state.duration = parseInt(tab.dataset.duration, 10) || 1;
-      updateIndicator();
-      updateAllCards();
-      updateCheckout(); // اگر پلنی انتخاب نشده باشه مخفی می‌مونه
-    });
-  });
-
-  // انتخاب/لغو انتخاب پلن (toggle)
-  cards.forEach(card => {
-    card.addEventListener('click', (e) => {
-      const actionable = e.target.closest('.plan-cta-modern') || e.currentTarget === card;
-      if (!actionable) return;
-
-      if (card.classList.contains('selected')) {
-        // دسیلکت → نوار بسته شود
-        card.classList.remove('selected');
-        state.selectedPlanKey = null;
-        updateCheckout();
-      } else {
-        selectPlan(card);
-      }
-    });
-  });
-
-  // Coupon
-  couponToggle.addEventListener('click', () => {
-    const open = !couponRow.hasAttribute('hidden');
-    if (open) {
-      couponRow.setAttribute('hidden', '');
-      couponToggle.setAttribute('aria-expanded', 'false');
-    } else {
-      couponRow.removeAttribute('hidden');
-      couponToggle.setAttribute('aria-expanded', 'true');
-      couponInput.focus();
-    }
-  });
-
-  couponApply.addEventListener('click', () => {
-    const code = (couponInput.value || '').trim().toUpperCase();
-    const map = { 'OFF10': 10, 'VIP15': 15 }; // دموی تست
-    state.couponPct = map[code] || 0;
-    (window.UIComponents?.showToast) && UIComponents.showToast(
-      map[code] ? 'کد تخفیف اعمال شد.' : 'کد معتبر نیست.',
-      map[code] ? 'success' : 'error'
-    );
-    updateAllCards();
-    updateCheckout();
-  });
-
-  // CTA Demo
-  checkoutBar.querySelector('.cb-cta')?.addEventListener('click', () => {
-    (window.UIComponents?.showToast) && UIComponents.showToast('درگاه پرداخت به‌زودی متصل می‌شود.', 'success');
-  });
-
-  // === Init ===
-  // فقط مدت را تنظیم کن؛ هیچ پلنی را پیش‌فرض انتخاب نکن
-  const defaultTab = tabs.find(t => t.classList.contains('active')) || tabs[2] || tabs[0];
-defaultTab?.click();
-  updateCheckout();             // چون چیزی انتخاب نشده، نوار مخفی می‌ماند
-
-  window.__PLANS_CHECKOUT_CONTROLLER_INITIALIZED__ = true;
-})();
-
-(function(){
-  if (window.__PLANS_CHECKOUT_CONTROLLER_INITIALIZED__) return;
-
-  const plansView   = document.getElementById('plans-view');
-  const checkoutBar = document.getElementById('checkout-bar');
-  if (!plansView || !checkoutBar) return;
-
-  // عناصر نوار پرداخت
-  const cbPlan        = checkoutBar.querySelector('.cb-plan');
-  const cbDuration    = checkoutBar.querySelector('.cb-duration');
-  const cbSaving      = checkoutBar.querySelector('.cb-saving');
-  const cbTotal       = checkoutBar.querySelector('.cb-total');
-  const cbClose       = checkoutBar.querySelector('.cb-close');
-  const couponToggle  = checkoutBar.querySelector('.cb-coupon-toggle');
-  const couponRow     = checkoutBar.querySelector('.cb-coupon');
-  const couponInput   = document.getElementById('coupon-input');
-  const couponApply   = checkoutBar.querySelector('.cb-apply');
-
-  // کارت‌ها و تب‌های مدت
-  const cards         = Array.from(plansView.querySelectorAll('.plan-modern'));
-  const durationRoot  = plansView.querySelector('.duration-selector-modern');
-  const durationTabs  = Array.from(plansView.querySelectorAll('.duration-tab'));
-
-  // ابزارک‌ها
-  const nf = (n) => new Intl.NumberFormat('fa-IR').format(Math.round(n));
-
-  // وضعیت داخلی صفحه پلن‌ها
-  const state = {
-    duration: parseInt(plansView.querySelector('.duration-tab.active')?.dataset.duration || '3', 10),
-    selectedPlanKey: null,   // 'professional' | 'essential' | 'enterprise' | null
-    couponPct: 0,            // درصد تخفیف کد
-    dismissed: false         // کاربر دستی بسته؟ (بله = true)
-  };
-
-  // قیمت پایه هر کارت از data-1
-  const getBasePrice = (card) => {
-    const el = card.querySelector('.price-value');
-    return parseInt(el?.dataset['1'] || '0', 10) || 0;
-  };
-
-  // محاسبه مجموع با تخفیف مدت و کوپن
-  const calcTotal = (base, months) => {
-    let gross = base * months;
-    let disc = months === 2 ? 10 : months === 3 ? 20 : 0; // 2 ماه =10% ، 3 ماه =20%
-    let afterDuration = gross * (1 - disc / 100);
-    let afterCoupon   = afterDuration * (1 - state.couponPct / 100);
-    return { gross, disc, afterDuration, afterCoupon };
-  };
-
-  // به‌روزرسانی نمایش قیمت روی خودِ کارت‌ها هم (برای وقتی مدت عوض میشه)
-  const updateCardsForDuration = (months) => {
-    plansView.querySelectorAll('.plan-modern').forEach(card => {
-      const priceEl        = card.querySelector('.price-value');
-      const periodEl       = card.querySelector('.period-value');
-      const savingsWrap    = card.querySelector('.price-savings');
-      const savingsAmount  = card.querySelector('.savings-amount');
-      if (!priceEl) return;
-
-      const base = getBasePrice(card);
-      const disc = months === 2 ? 10 : months === 3 ? 20 : 0;
-      const total = base * months * (1 - disc/100);
-      priceEl.style.transform = 'scale(0.9)';
-      setTimeout(() => {
-        priceEl.textContent = nf(total);
-        priceEl.style.transform = 'scale(1)';
-      }, 120);
-
-      if (periodEl) periodEl.textContent = (months===1?'۱ ماه': months===2?'۲ ماه':'۳ ماه');
-      if (savingsWrap) {
-        if (disc > 0) {
-          const saved = (base * months) - total;
-          savingsWrap.classList.remove('hidden');
-          if (savingsAmount) savingsAmount.textContent = `${nf(saved)} تومان صرفه‌جویی`;
-        } else {
-          savingsWrap.classList.add('hidden');
-        }
-      }
-    });
-  };
-
-  // باز/بسته کردن نوار پرداخت بر اساس state
-  const updateCheckout = () => {
-    const selected = state.selectedPlanKey
-      ? plansView.querySelector(`.plan-modern[data-plan="${state.selectedPlanKey}"]`)
-      : null;
-
-    if (state.dismissed || !selected) {
-      checkoutBar.classList.remove('visible');
-      checkoutBar.setAttribute('aria-hidden','true');
-      return;
-    }
-
-    const name = selected.querySelector('.plan-title-card')?.textContent?.trim() || '—';
-    const base = getBasePrice(selected);
-    const { afterCoupon, disc } = calcTotal(base, state.duration);
-
-    cbPlan.textContent = name;
-    cbDuration.textContent = (state.duration===1?'۱ ماهه': state.duration===2?'۲ ماهه':'۳ ماهه');
-
-    const tags = [];
-    if (disc > 0) tags.push(`${disc}%`);
-    if (state.couponPct > 0) tags.push(`+ ${state.couponPct}% کد`);
-    cbSaving.textContent = tags.length ? `تخفیف: ${tags.join(' ')}` : '';
-    cbSaving.style.display = tags.length ? 'inline-block' : 'none';
-
-    cbTotal.textContent = `${nf(afterCoupon)} تومان`;
-
-    checkoutBar.classList.add('visible');
-    checkoutBar.setAttribute('aria-hidden','false');
-  };
-
-  // انتخاب یک کارت پلن
-  const selectPlan = (card) => {
-    cards.forEach(c => c.classList.remove('selected'));
-    card.classList.add('selected');
-    state.selectedPlanKey = card.dataset.plan || null;
-    state.dismissed = false; // انتخابِ پلن = اجازه بده نوار باز شه
-    updateCheckout();
-  };
-
-  // کلیک روی کارت‌ها/CTA → انتخاب پلن
-  cards.forEach(card => {
-    card.addEventListener('click', (e) => {
-      // فقط وقتی روی خود کارت یا CTA کلیک شد
-      if (!(e.target.closest('.plan-cta-modern') || e.currentTarget === card)) return;
-      e.stopPropagation(); // نذار کلیک بیرون، همون لحظه ببندتش
-      selectPlan(card);
-    });
-  });
-
-  // تغییر مدت (۱/۲/۳)
-  if (durationRoot) {
-    durationRoot.addEventListener('click', (e) => {
-      const tab = e.target.closest('.duration-tab');
-      if (!tab) return;
-
-      // Active state تب‌ها
-      durationTabs.forEach(t => t.classList.remove('active'));
-      tab.classList.add('active');
-
-      // حرکت اسلایدر مدت
-      const tabs = Array.from(durationTabs);
-      const index = tabs.indexOf(tab);
-      const indicator = durationRoot.querySelector('.duration-indicator');
-      if (indicator) indicator.style.left = `${4 + (index * 33.333)}%`;
-
-      // آپدیت وضعیت و UI
-      state.duration = parseInt(tab.dataset.duration, 10) || 3;
-      updateCardsForDuration(state.duration);
-      updateCheckout(); // اگر نوار باز است، مبلغش هم عوض شود
-    });
-  }
-
-  // باز/بستن فُرم کد تخفیف
-  couponToggle?.addEventListener('click', () => {
-    const isOpen = !couponRow?.hasAttribute('hidden');
-    if (couponRow) couponRow.toggleAttribute('hidden');
-    couponToggle.setAttribute('aria-expanded', String(!isOpen));
-  });
-
-  // اعمال کد تخفیف (دموی ساده: هر متنی = ۱۰٪)
-  couponApply?.addEventListener('click', () => {
-    const code = couponInput?.value?.trim();
-    state.couponPct = code ? 10 : 0;
-    updateCheckout();
-    if (window.UIComponents?.showToast) {
-      UIComponents.showToast(
-        state.couponPct ? 'کد تخفیف ۱۰٪ اعمال شد.' : 'کد نامعتبر بود.',
-        state.couponPct ? 'success' : 'error'
-      );
-    }
-  });
-
-  // دکمه ضربدر
-  cbClose?.addEventListener('click', (e) => {
-    e.stopPropagation();
-    state.dismissed = true;
-    updateCheckout();
-  });
-
-  // کلیک بیرون از نوار → ببند
-  document.addEventListener('click', (e) => {
-    if (!checkoutBar.classList.contains('visible')) return;
-    if (checkoutBar.contains(e.target)) return;      // کلیک داخل خود نوار
-    if (e.target.closest('.plan-modern')) return;    // کلیک روی کارت‌ها (اون‌ها خودشون مدیریت می‌کنن)
-    state.dismissed = true;
-    updateCheckout();
-  }, true); // useCapture برای جلوگیری از تداخل با bubbling
-
-  // جابه‌جایی سکشن‌ها (hashchange)
-  window.addEventListener('hashchange', () => {
-    const onPlans = location.hash === '#/plans';
-    if (!onPlans) {
-      // از صفحه پلن‌ها رفتی بیرون → بسته باشه
-      checkoutBar.classList.remove('visible');
-      checkoutBar.setAttribute('aria-hidden','true');
-    } else {
-      // برگشتی به پلن‌ها → اگر قبلاً دستی بسته بودی، بسته می‌مونه
-      updateCheckout();
-    }
-  });
-
-  // مقداردهی اولیه: کارت‌ها/قیمت‌ها برای مدت پیش‌فرض
-  updateCardsForDuration(state.duration);
-  updateCheckout(); // خودکار باز نمی‌کنیم تا کاربر انتخاب کند
-})();
 
 
 window.customersData = window.customersData || [];
