@@ -575,6 +575,221 @@ async function loadComplimentaryPlan() {
   }
 }
 
+const PLAN_FEATURE_ICON = '<svg class="feature-check" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>';
+
+const formatPlanPrice = (value) => {
+  const numeric = Number(value);
+  if (!Number.isFinite(numeric)) return '۰';
+  try {
+    return new Intl.NumberFormat('fa-IR').format(Math.round(numeric));
+  } catch {
+    return String(Math.round(numeric));
+  }
+};
+
+const slugifyPlanKey = (value, fallback = '') => {
+  const source = value != null ? String(value) : fallback;
+  return source
+    .trim()
+    .toLowerCase()
+    .replace(/[\s_]+/g, '-')
+    .replace(/[^a-z0-9\u0600-\u06FF-]/g, '')
+    .replace(/-+/g, '-')
+    .replace(/^-|-$/g, '');
+};
+
+const collectFallbackPlanMeta = (cards) => {
+  const metaMap = new Map();
+  cards.forEach((card, index) => {
+    const titleText = card.querySelector('.plan-title-card')?.textContent || '';
+    const key = slugifyPlanKey(card.dataset.plan || titleText || `plan-${index}`);
+    if (!key) return;
+    const badgeEl = card.querySelector('.plan-status');
+    const features = Array.from(card.querySelectorAll('.plan-features-modern .feature-modern span'))
+      .map((span) => span.textContent?.trim())
+      .filter(Boolean);
+    metaMap.set(key, {
+      order: index,
+      badgeText: badgeEl?.textContent?.trim() || '',
+      badgeFeatured: badgeEl?.classList.contains('featured') || false,
+      isFeatured: card.classList.contains('featured'),
+      description: card.querySelector('.plan-desc')?.textContent?.trim() || '',
+      features,
+    });
+  });
+  return metaMap;
+};
+
+async function syncServicePlansWithCards() {
+  const plansView = document.getElementById('plans-view');
+  if (!plansView) return;
+
+  const cards = Array.from(plansView.querySelectorAll('.plan-modern'));
+  if (!cards.length) return;
+
+  const fallbackMeta = collectFallbackPlanMeta(cards);
+
+  let plans;
+  try {
+    plans = await API.getServicePlans();
+  } catch (err) {
+    return;
+  }
+
+  const activePlans = Array.isArray(plans)
+    ? plans.filter((plan) => plan && plan.isActive !== false)
+    : [];
+
+  if (!activePlans.length) {
+    window.__SERVICE_PLANS__ = Array.isArray(plans) ? plans : [];
+    return;
+  }
+
+  const activeDuration = Number(plansView.querySelector('.duration-tab.active')?.dataset.duration) || 3;
+  const discountPct = activeDuration === 2 ? 10 : (activeDuration === 3 ? 20 : 0);
+  const durationLabel = activeDuration === 1 ? '۱ ماه' : (activeDuration === 2 ? '۲ ماه' : '۳ ماه');
+
+  const normalizedPlans = activePlans.map((plan) => {
+    const key = slugifyPlanKey(plan?.slug || plan?.title || plan?.id);
+    const fallbackOrder = key != null ? fallbackMeta.get(key)?.order : undefined;
+    return {
+      plan,
+      key,
+      order: fallbackOrder !== undefined ? fallbackOrder : Number.MAX_SAFE_INTEGER,
+      price: Number(plan.price) || 0,
+    };
+  });
+
+  const keyMap = new Map();
+  normalizedPlans.forEach((entry) => {
+    if (entry.key && !keyMap.has(entry.key)) {
+      keyMap.set(entry.key, entry);
+    }
+  });
+
+  const fallbackQueue = normalizedPlans.slice().sort((a, b) => {
+    if (a.order !== b.order) return a.order - b.order;
+    return a.price - b.price;
+  });
+
+  const usedEntries = new Set();
+  const takeFallbackEntry = () => {
+    while (fallbackQueue.length) {
+      const candidate = fallbackQueue.shift();
+      if (!usedEntries.has(candidate)) {
+        usedEntries.add(candidate);
+        return candidate;
+      }
+    }
+    return null;
+  };
+
+  const selectedKeys = cards
+    .filter((card) => card.classList.contains('selected'))
+    .map((card) => card.dataset.plan)
+    .filter(Boolean);
+
+  cards.forEach((card, index) => {
+    const titleText = card.querySelector('.plan-title-card')?.textContent || '';
+    const cardKey = slugifyPlanKey(card.dataset.plan || titleText || `plan-${index}`);
+    let entry = cardKey ? keyMap.get(cardKey) : null;
+    if (entry && usedEntries.has(entry)) {
+      entry = null;
+    }
+    if (!entry) {
+      entry = takeFallbackEntry();
+    } else {
+      usedEntries.add(entry);
+    }
+    if (!entry) return;
+
+    const plan = entry.plan;
+
+    const meta = fallbackMeta.get(cardKey) || (entry.key ? fallbackMeta.get(entry.key) : null) || {};
+
+    card.dataset.planId = plan.id || '';
+    card.dataset.planSlug = plan.slug || '';
+
+    const titleEl = card.querySelector('.plan-title-card');
+    if (titleEl && plan.title) {
+      titleEl.textContent = plan.title;
+    }
+
+    const descEl = card.querySelector('.plan-desc');
+    if (descEl) {
+      descEl.textContent = (plan.description || '').trim() || meta.description || '';
+    }
+
+    const badgeEl = card.querySelector('.plan-status');
+    if (badgeEl) {
+      const badgeText = meta.badgeText || (plan.isActive ? 'فعال' : 'غیرفعال');
+      badgeEl.textContent = badgeText;
+      const shouldFeature = meta.badgeFeatured ?? badgeEl.classList.contains('featured');
+      badgeEl.classList.toggle('featured', !!shouldFeature);
+    }
+
+    const shouldHighlight = meta.isFeatured ?? card.classList.contains('featured');
+    card.classList.toggle('featured', !!shouldHighlight);
+
+    const priceValueEl = card.querySelector('.price-value');
+    if (priceValueEl) {
+      const basePrice = Number(plan.price) || 0;
+      priceValueEl.dataset['1'] = basePrice.toString();
+      const discountedTotal = basePrice * activeDuration * (1 - discountPct / 100);
+      priceValueEl.textContent = formatPlanPrice(discountedTotal);
+    }
+
+    const periodEl = card.querySelector('.period-value');
+    if (periodEl) {
+      periodEl.textContent = durationLabel;
+    }
+
+    const savingsWrap = card.querySelector('.price-savings');
+    const savingsAmountEl = card.querySelector('.savings-amount');
+    if (savingsWrap && savingsAmountEl) {
+      if (discountPct > 0) {
+        const basePrice = Number(plan.price) || 0;
+        const gross = basePrice * activeDuration;
+        const saved = Math.max(0, gross - (basePrice * activeDuration * (1 - discountPct / 100)));
+        savingsWrap.classList.remove('hidden');
+        savingsAmountEl.textContent = `${formatPlanPrice(saved)} تومان صرفه‌جویی`;
+      } else {
+        savingsWrap.classList.add('hidden');
+        savingsAmountEl.textContent = '';
+      }
+    }
+
+    const featuresWrap = card.querySelector('.plan-features-modern');
+    if (featuresWrap) {
+      const features = Array.isArray(plan.features) && plan.features.length
+        ? plan.features
+        : (meta.features || []);
+      if (features.length) {
+        featuresWrap.innerHTML = '';
+        features.forEach((featureText) => {
+          const item = document.createElement('div');
+          item.className = 'feature-modern';
+          item.innerHTML = `${PLAN_FEATURE_ICON}<span></span>`;
+          const span = item.querySelector('span');
+          if (span) {
+            span.textContent = featureText;
+          }
+          featuresWrap.appendChild(item);
+        });
+      }
+    }
+  });
+
+  selectedKeys.forEach((key) => {
+    const card = key ? plansView.querySelector(`.plan-modern[data-plan="${key}"]`) : null;
+    if (!card) return;
+    card.classList.remove('selected');
+    card.dispatchEvent(new Event('click', { bubbles: true }));
+  });
+
+  window.__SERVICE_PLANS__ = activePlans;
+}
+
 const EMPTY_DASHBOARD_STATS = {
   todayBookings: 0,
   yesterdayBookings: 0,
@@ -782,6 +997,24 @@ const API = {
       price: s.price,
       image: s.image || ''
     }));
+  },
+
+  async getServicePlans() {
+    try {
+      const res = await fetch(bust(`${API_BASE}/api/service-plans`), {
+        credentials: 'include',
+        ...NO_CACHE
+      });
+      if (!res.ok) {
+        throw new Error(`SERVICE_PLANS_HTTP_${res.status}`);
+      }
+      const data = await this._json(res);
+      const plans = Array.isArray(data?.plans) ? data.plans : [];
+      return plans;
+    } catch (err) {
+      console.warn('API.getServicePlans failed', err);
+      throw err;
+    }
   },
 
   async getComplimentaryPlan() {
@@ -4782,6 +5015,12 @@ try {
 
 featureFlags = applySellerPlanFeatureFlags(featureFlags);
 window.__FEATURE_FLAGS__ = featureFlags;
+
+try {
+  await syncServicePlansWithCards();
+} catch (err) {
+  console.warn('syncServicePlansWithCards failed', err);
+}
 
 await loadComplimentaryPlan();
 
