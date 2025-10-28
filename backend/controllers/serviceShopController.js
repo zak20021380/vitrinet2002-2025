@@ -2261,11 +2261,35 @@ exports.getMyComplimentaryPlan = async (req, res) => {
     }
 
     let shop = null;
+
+    const shopQueries = [];
+
     if (seller.phone) {
-      shop = await ServiceShop.findOne({ ownerPhone: seller.phone }).lean();
+      const phoneCandidates = buildPhoneCandidates(seller.phone).filter(Boolean);
+      if (phoneCandidates.length) {
+        shopQueries.push({ ownerPhone: { $in: phoneCandidates } });
+      }
+
+      const phoneRegex = buildDigitInsensitiveRegex(seller.phone, { allowSeparators: true });
+      if (phoneRegex) {
+        shopQueries.push({ ownerPhone: phoneRegex });
+      }
     }
-    if (!shop && seller.shopurl) {
-      shop = await ServiceShop.findOne({ shopUrl: seller.shopurl }).lean();
+
+    if (seller.shopurl) {
+      const rawShopUrl = String(seller.shopurl).trim();
+      if (rawShopUrl) {
+        shopQueries.push({ shopUrl: rawShopUrl });
+        shopQueries.push({ shopUrl: rawShopUrl.toLowerCase() });
+      }
+    }
+
+    if (sellerId && mongoose.Types.ObjectId.isValid(sellerId)) {
+      shopQueries.push({ legacySellerId: sellerId });
+    }
+
+    if (shopQueries.length) {
+      shop = await ServiceShop.findOne({ $or: shopQueries }).lean();
     }
 
     if (!shop) {
