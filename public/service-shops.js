@@ -3282,22 +3282,6 @@ function updateSummary(avg, count, ratings) {
     });
   })();
 
-document.getElementById('imageModal')?.addEventListener('click', function(e) {
-            if (e.target === this) {
-                this.classList.add('hidden');
-                document.body.style.overflow = '';
-            }
-        });
-        document.addEventListener('keydown', function(e) {
-            if (e.key === 'Escape') {
-                const modal = document.getElementById('imageModal');
-                if (modal && !modal.classList.contains('hidden')) {
-                    modal.classList.add('hidden');
-                    document.body.style.overflow = '';
-                }
-            }
-        });
-
 (() => {
   const nav = document.getElementById('mobile-bottom-nav');
   if (!nav) return;
@@ -4366,6 +4350,7 @@ function render(items) {
   const imageModal = $('#imageModal');
   const imageEl    = $('#modalImage');
   const titleEl    = $('#modalTitle');
+  const modalDescEl = $('#modalDescription');
   const mViews     = $('#modalViews');
   const mLikes     = $('#modalLikes');
   const closeBtn   = $('#imageModalClose');
@@ -4374,6 +4359,11 @@ function render(items) {
   function openImageModal(it) {
     if (!imageModal) return;
     titleEl.textContent = it.title || '';
+    if (modalDescEl) {
+      const desc = (it.desc || '').trim();
+      modalDescEl.textContent = desc;
+      modalDescEl.classList.toggle('hidden', !desc);
+    }
     imageEl.src = it.image || '';
     imageEl.alt = it.title || '';
     mViews.textContent = toFa(it.views ?? 0);
@@ -4384,6 +4374,7 @@ function render(items) {
     imageModal.classList.add('flex');
     modalContent?.classList.remove('scale-95','opacity-0');
     modalContent?.classList.add('scale-100','opacity-100');
+    document.body.classList.add('image-modal-open');
     document.addEventListener('keydown', onEsc);
   }
 
@@ -4393,6 +4384,11 @@ function render(items) {
     imageModal.classList.add('hidden');
     imageModal.classList.remove('flex');
     imageEl.src = '';
+    if (modalDescEl) {
+      modalDescEl.textContent = '';
+      modalDescEl.classList.remove('hidden');
+    }
+    document.body.classList.remove('image-modal-open');
     document.removeEventListener('keydown', onEsc);
   }
 
