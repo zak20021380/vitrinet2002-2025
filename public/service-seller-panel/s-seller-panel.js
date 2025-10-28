@@ -1289,6 +1289,7 @@ const EMPTY_DASHBOARD_STATS = {
   todayBookings: 0,
   yesterdayBookings: 0,
   pendingBookings: 0,
+  totalBookings: 0,
   activeCustomers: 0,
   previousActiveCustomers: 0,
   newCustomers30d: 0,
@@ -1351,6 +1352,7 @@ const computeFallbackDashboardStats = () => {
     const newCustomers30d = new Set();
 
     const stats = { ...EMPTY_DASHBOARD_STATS };
+    stats.totalBookings = bookings.length;
 
     bookings.forEach((booking) => {
       const status = String(booking?.status || '').toLowerCase();
@@ -3859,6 +3861,7 @@ destroy() {
       const todayBookings = toNumber(stats.todayBookings);
       const yesterdayBookings = toNumber(stats.yesterdayBookings);
       const pendingBookings = toNumber(stats.pendingBookings);
+      const totalBookings = toNumber(stats.totalBookings);
       const activeCustomers = toNumber(stats.activeCustomers);
       const previousActiveCustomers = toNumber(stats.previousActiveCustomers);
       const newCustomers30d = toNumber(stats.newCustomers30d);
@@ -3867,9 +3870,17 @@ destroy() {
 
       setValue('.stat-bookings .stat-value', todayBookings);
       setValue('.stat-pending .stat-value', pendingBookings);
+      setValue('.stat-total-bookings .stat-value', totalBookings);
       setValue('.stat-customers .stat-value', activeCustomers);
       setValue('.stat-rating .stat-value', ratingAverage, { fractionDigits: 1 });
       setValue('#rating30', ratingAverage, { fractionDigits: 1 });
+
+      const totalBookingsSubtext = document.getElementById('total-bookings-subtext');
+      if (totalBookingsSubtext) {
+        totalBookingsSubtext.textContent = totalBookings > 0
+          ? `${UIComponents.formatPersianNumber(totalBookings)} نوبت در مجموع ثبت شده است.`
+          : 'هنوز نوبتی ثبت نشده است.';
+      }
 
       const bookingsDiff = todayBookings - yesterdayBookings;
       let bookingsText = 'بدون تغییر';

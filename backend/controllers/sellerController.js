@@ -209,6 +209,7 @@ exports.getDashboardStats = async (req, res) => {
       todayBookings,
       yesterdayBookings,
       pendingBookings,
+      totalBookings,
       activeCustomersAgg,
       previousActiveCustomersAgg,
       newCustomersAgg,
@@ -225,6 +226,7 @@ exports.getDashboardStats = async (req, res) => {
         status: { $in: activeStatuses }
       }),
       Booking.countDocuments({ sellerId: sellerObjectId, status: 'pending' }),
+      Booking.countDocuments({ sellerId: sellerObjectId }),
       Booking.aggregate([
         {
           $match: {
@@ -294,6 +296,7 @@ exports.getDashboardStats = async (req, res) => {
       todayBookings,
       yesterdayBookings,
       pendingBookings,
+      totalBookings,
       activeCustomers,
       previousActiveCustomers,
       newCustomers30d,
