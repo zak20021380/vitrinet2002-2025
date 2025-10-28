@@ -3714,6 +3714,91 @@ window.addEventListener('load', () => {
   const priceFa = n => (Number(n)||0).toLocaleString('fa-IR');
   const clamp = (x,min,max)=>Math.max(min,Math.min(max,x));
 
+  const bookingSummaryCard = document.querySelector('[data-booking-summary]');
+  const bookingCountEl = bookingSummaryCard?.querySelector('[data-booking-count]') || null;
+  const bookingStatusEl = bookingSummaryCard?.querySelector('[data-booking-status]') || null;
+
+  const formatFaDateTime = (value) => {
+    if (!value) return '';
+    try {
+      const date = value instanceof Date ? value : new Date(value);
+      if (Number.isNaN(date.getTime())) return '';
+      return new Intl.DateTimeFormat('fa-IR', { dateStyle: 'medium', timeStyle: 'short' }).format(date);
+    } catch (err) {
+      console.warn('formatFaDateTime failed:', err);
+      return '';
+    }
+  };
+
+  const setBookingSummaryLoading = () => {
+    if (!bookingSummaryCard) return;
+    bookingSummaryCard.classList.add('animate-pulse');
+    bookingSummaryCard.setAttribute('aria-busy', 'true');
+    if (bookingStatusEl) {
+      bookingStatusEl.textContent = 'در حال دریافت اطلاعات...';
+    }
+  };
+
+  const setBookingSummaryData = (payload = {}) => {
+    if (!bookingSummaryCard) return;
+    bookingSummaryCard.classList.remove('animate-pulse');
+    bookingSummaryCard.setAttribute('aria-busy', 'false');
+
+    const total = Math.max(0, Number(payload.totalBookings ?? payload.total ?? 0) || 0);
+    if (bookingCountEl) {
+      bookingCountEl.textContent = toFa(total);
+    }
+
+    const lastBookingText = formatFaDateTime(payload.lastBookingAt);
+    if (bookingStatusEl) {
+      if (total > 0 && lastBookingText) {
+        bookingStatusEl.textContent = `آخرین نوبت ثبت شده: ${lastBookingText}`;
+      } else if (total > 0) {
+        bookingStatusEl.textContent = 'نوبت‌های این فروشگاه در حال مدیریت هستند.';
+      } else {
+        bookingStatusEl.textContent = 'هنوز نوبتی ثبت نشده است.';
+      }
+    }
+  };
+
+  const setBookingSummaryError = () => {
+    if (!bookingSummaryCard) return;
+    bookingSummaryCard.classList.remove('animate-pulse');
+    bookingSummaryCard.setAttribute('aria-busy', 'false');
+    if (bookingStatusEl) {
+      bookingStatusEl.textContent = 'امکان دریافت اطلاعات نوبت‌ها وجود ندارد.';
+    }
+  };
+
+  async function loadBookingSummary(sellerId) {
+    if (!bookingSummaryCard || !sellerId) return;
+    setBookingSummaryLoading();
+    try {
+      const res = await fetch(`${API_ROOT}/api/service-shops/${encodeURIComponent(sellerId)}/bookings/summary`, {
+        credentials: 'include'
+      });
+      if (!res.ok) {
+        throw new Error(`HTTP ${res.status}`);
+      }
+      const data = await res.json().catch(() => ({}));
+      setBookingSummaryData(data || {});
+    } catch (err) {
+      console.warn('loadBookingSummary error:', err);
+      setBookingSummaryError();
+    }
+  }
+
+  if (bookingSummaryCard) {
+    bookingSummaryCard.setAttribute('aria-busy', 'true');
+  }
+
+  window.refreshBookingSummary = (sellerId) => {
+    const targetId = sellerId || document.body?.dataset?.sellerId || '';
+    if (targetId) {
+      loadBookingSummary(targetId);
+    }
+  };
+
   function toast(msg, type='info') {
     if (typeof showToastDark === 'function') showToastDark(msg, {type});
     else alert(msg);
@@ -4090,23 +4175,26 @@ async function renderAll() {
       apiGetSeller(shopurl)
     ]);
 
-LAST_PUBLIC = data; // { items, sellerId }
-window.LAST_PUBLIC = LAST_PUBLIC; // keep global in sync
-updateSellerProfile(seller);
+    LAST_PUBLIC = data; // { items, sellerId }
+    window.LAST_PUBLIC = LAST_PUBLIC; // keep global in sync
+    updateSellerProfile(seller);
 
-// ensure sellerId is available for later requests
-document.body.dataset.sellerId = data.sellerId || seller._id || seller.id;
+    const resolvedSellerId = data.sellerId || seller._id || seller.id || '';
+    if (resolvedSellerId) {
+      document.body.dataset.sellerId = resolvedSellerId;
+    } else {
+      delete document.body.dataset.sellerId;
+    }
 
-// Store seller data for s-profile.html navigation
-localStorage.setItem('seller', JSON.stringify({
-  ...seller,
-  sellerId: data.sellerId || seller._id || seller.id
-}));
-    
-    
-    // Load footer image using sellerId
-    if (data.sellerId || seller._id || seller.id) {
-      await loadFooterImage(data.sellerId || seller._id || seller.id);
+    // Store seller data for s-profile.html navigation
+    localStorage.setItem('seller', JSON.stringify({
+      ...seller,
+      sellerId: resolvedSellerId
+    }));
+
+    if (resolvedSellerId) {
+      loadBookingSummary(resolvedSellerId);
+      await loadFooterImage(resolvedSellerId);
     }
     
     renderList();

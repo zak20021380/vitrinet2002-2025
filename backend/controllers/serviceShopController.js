@@ -1078,6 +1078,83 @@ const toPlainSubdocument = (value, fallback = {}) => {
   return { ...fallback, ...value };
 };
 
+const summarizeBookingsForSeller = async (sellerId) => {
+  if (!mongoose.Types.ObjectId.isValid(sellerId)) {
+    return {
+      total: 0,
+      completed: 0,
+      cancelled: 0,
+      pending: 0,
+      lastBookingAt: null
+    };
+  }
+
+  try {
+    const objectId = new mongoose.Types.ObjectId(sellerId);
+    const [summary] = await Booking.aggregate([
+      { $match: { sellerId: objectId } },
+      {
+        $group: {
+          _id: '$sellerId',
+          total: { $sum: 1 },
+          completed: {
+            $sum: {
+              $cond: [{ $eq: ['$status', 'completed'] }, 1, 0]
+            }
+          },
+          cancelled: {
+            $sum: {
+              $cond: [{ $eq: ['$status', 'cancelled'] }, 1, 0]
+            }
+          },
+          pending: {
+            $sum: {
+              $cond: [
+                {
+                  $or: [
+                    { $eq: ['$status', 'pending'] },
+                    { $eq: ['$status', 'confirmed'] }
+                  ]
+                },
+                1,
+                0
+              ]
+            }
+          },
+          lastBookingAt: { $max: '$createdAt' }
+        }
+      }
+    ]);
+
+    if (!summary) {
+      return {
+        total: 0,
+        completed: 0,
+        cancelled: 0,
+        pending: 0,
+        lastBookingAt: null
+      };
+    }
+
+    return {
+      total: Number(summary.total) || 0,
+      completed: Number(summary.completed) || 0,
+      cancelled: Number(summary.cancelled) || 0,
+      pending: Number(summary.pending) || 0,
+      lastBookingAt: summary.lastBookingAt || null
+    };
+  } catch (err) {
+    console.warn('summarizeBookingsForSeller failed:', err?.message || err);
+    return {
+      total: 0,
+      completed: 0,
+      cancelled: 0,
+      pending: 0,
+      lastBookingAt: null
+    };
+  }
+};
+
 const buildModerationPayload = ({ seller = null, shop = null } = {}) => {
   const moderation = toPlainSubdocument(shop?.adminModeration, {});
   const isSellerBlocked = !!(seller && seller.blockedByAdmin);
@@ -2449,6 +2526,28 @@ exports.getPublicModerationStatusBySeller = async (req, res) => {
   } catch (err) {
     console.error('serviceShops.getPublicModerationStatusBySeller error:', err);
     res.status(500).json({ message: 'خطا در دریافت وضعیت فروشنده.' });
+  }
+};
+
+exports.getPublicBookingSummary = async (req, res) => {
+  try {
+    const { sellerId } = req.params;
+    if (!mongoose.Types.ObjectId.isValid(sellerId)) {
+      return res.status(400).json({ message: 'شناسه فروشنده نامعتبر است.' });
+    }
+
+    const summary = await summarizeBookingsForSeller(sellerId);
+
+    return res.json({
+      totalBookings: summary.total,
+      completedBookings: summary.completed,
+      cancelledBookings: summary.cancelled,
+      pendingBookings: summary.pending,
+      lastBookingAt: summary.lastBookingAt
+    });
+  } catch (err) {
+    console.error('serviceShops.getPublicBookingSummary error:', err);
+    res.status(500).json({ message: 'خطا در دریافت اطلاعات نوبت‌ها.' });
   }
 };
 
