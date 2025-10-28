@@ -197,6 +197,50 @@
         .cta-button:active {
             transform: translateY(0) scale(0.98);
         }
+        .customer-highlight {
+            position: relative;
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.16), rgba(129, 140, 248, 0.18));
+            border: 1px solid rgba(59, 130, 246, 0.35);
+            box-shadow: 0 12px 28px rgba(59, 130, 246, 0.18);
+            border-radius: 1.25rem;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        .customer-highlight::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: inherit;
+            padding: 1px;
+            background: linear-gradient(135deg, rgba(191, 219, 254, 0.65), rgba(199, 210, 254, 0.45));
+            -webkit-mask:
+                    linear-gradient(#fff 0 0) content-box,
+                    linear-gradient(#fff 0 0);
+            -webkit-mask-composite: xor;
+            mask-composite: exclude;
+            pointer-events: none;
+        }
+        .customer-highlight:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 16px 32px rgba(59, 130, 246, 0.24);
+        }
+        .customer-highlight .customer-follow-btn {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.92), rgba(219, 234, 254, 0.9));
+            color: #1d4ed8;
+            border: 1px solid rgba(59, 130, 246, 0.35);
+            box-shadow: 0 8px 20px rgba(59, 130, 246, 0.2);
+        }
+        .customer-highlight .customer-follow-btn:hover {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.96), rgba(191, 219, 254, 0.95));
+            box-shadow: 0 12px 28px rgba(37, 99, 235, 0.22);
+        }
+        .customer-highlight .customer-follow-btn:focus-visible {
+            outline: 2px solid rgba(96, 165, 250, 0.8);
+            outline-offset: 2px;
+        }
+        .customer-highlight .customer-count {
+            color: #1d4ed8;
+            text-shadow: 0 1px 4px rgba(191, 219, 254, 0.8);
+        }
 
         .shop-blocked-overlay {
             position: fixed;
@@ -1163,16 +1207,16 @@ async function getShopUrlFromLocation() {
               <span class="text-amber-700/70">(<span id="header-count-lg">0</span>)</span>
             </span>
             <span class="hidden sm:inline text-slate-300 text-xl">·</span>
-            <div class="inline-flex items-center gap-3 rounded-xl border border-blue-200/60 bg-gradient-to-br from-white to-blue-50/50 px-4 py-2 text-[13px] font-semibold text-slate-700 shadow-md hover:shadow-lg transition-shadow duration-200" data-customer-section>
-              <span class="inline-flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 text-white shadow-md">
+            <div class="customer-highlight inline-flex items-center gap-4 px-5 py-3 text-[13px] font-semibold text-slate-700 transition-all duration-200" data-customer-section>
+              <span class="inline-flex h-10 w-10 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-500 to-indigo-500 text-white shadow-lg ring-2 ring-white/60">
                 <i class="fa-solid fa-user-group text-sm"></i>
               </span>
-              <div class="flex items-center gap-2">
-                <span class="font-bold text-slate-700">مشتریان</span>
-                <span class="text-lg font-black bg-gradient-to-l from-blue-600 to-purple-600 bg-clip-text text-transparent" data-customer-count>۰</span>
+              <div class="flex items-center gap-3">
+                <span class="font-extrabold text-slate-800">مشتریان</span>
+                <span class="customer-count text-lg font-black" data-customer-count>۰</span>
               </div>
               <button type="button"
-                      class="customer-follow-btn inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2 text-xs font-bold transition-all duration-200 shadow-md hover:shadow-lg active:scale-95 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500"
+                      class="customer-follow-btn inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2 text-xs font-bold transition-all duration-200 active:scale-95"
                       data-customer-follow>
                 دنبال کردن
               </button>
