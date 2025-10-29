@@ -377,6 +377,9 @@ const applyBadgeStyle = (el, variant) => {
 
 let planCardRegistry = {};
 let subscriptionPlanStore = {};
+let planPricePromise = null;
+let lastPlanFetchTimestamp = 0;
+const PLAN_FETCH_TTL = 60 * 1000; // هر ۶۰ ثانیه حداقل یکبار از سرور بخوان
 
 function refreshPlanCardRegistry() {
   planCardRegistry = {};
@@ -477,7 +480,7 @@ function initUpgradeDashboard () {
   refreshPlanCardRegistry();
   toggleTabs('sub');
 
-  fetchPlanPrices();
+  fetchPlanPrices(true);
   fetchAdPrices();
 }
 
@@ -495,6 +498,7 @@ function toggleTabs(tab) {
     case 'sub':
       document.getElementById('tab-sub').classList.add('tab-active');
       document.getElementById('content-sub').classList.remove('hidden');
+      fetchPlanPrices();
       break;
     case 'ads':
       document.getElementById('tab-ads').classList.add('tab-active');
@@ -510,49 +514,68 @@ function toggleTabs(tab) {
 }
 
 
-async function fetchPlanPrices () {
-  try {
-    if (!Object.keys(planCardRegistry).length) {
-      refreshPlanCardRegistry();
-    }
-
-    const phoneRes = await getSellerPhone();
-    let url = `${API_BASE}/plans`;
-    if (phoneRes) {
-      url += `?sellerPhone=${encodeURIComponent(phoneRes)}`;
-    }
-    const res = await fetch(url, withCreds());
-    if (!res.ok) throw new Error(`${res.status} ${res.statusText}`);
-    const json = await res.json();
-    const plans = json.plans || {};
-
-    subscriptionPlanStore = {};
-    SUBSCRIPTION_PLAN_SLUGS.forEach(slug => {
-      const defaults = PLAN_DEFAULTS[slug] || {};
-      const plan = plans[slug] || {};
-      const descriptor = {
-        slug,
-        title: plan.title || defaults.title || slug,
-        price: plan.price ?? null,
-        durationDays: plan.durationDays ?? defaults.durationDays ?? null,
-        description: plan.description || defaults.description || '',
-        features: Array.isArray(plan.features) && plan.features.length ? plan.features : (defaults.features || [])
-      };
-      const badgeLabel = (plan.badgeLabel ?? plan.badge?.label ?? defaults.badge?.label ?? '').toString().trim();
-      const badgeVariant = normalizeBadgeVariant(plan.badgeVariant ?? plan.badge?.variant ?? defaults.badge?.variant);
-      const badgeVisibleRaw = plan.badgeVisible ?? plan.badge?.visible ?? defaults.badge?.visible;
-      const badgeVisible = badgeVisibleRaw === undefined ? !!badgeLabel : !!badgeVisibleRaw;
-      descriptor.badge = {
-        label: badgeLabel,
-        variant: badgeVariant,
-        visible: badgeVisible && !!badgeLabel
-      };
-      subscriptionPlanStore[slug] = descriptor;
-      applyPlanCardDescriptor(descriptor);
-    });
-  } catch (err) {
-    console.error('❌ خطا در دریافت پلن‌های اشتراک:', err);
+async function fetchPlanPrices (force = false) {
+  const now = Date.now();
+  if (!force && lastPlanFetchTimestamp && now - lastPlanFetchTimestamp < PLAN_FETCH_TTL) {
+    return subscriptionPlanStore;
   }
+  if (!force && planPricePromise) {
+    return planPricePromise;
+  }
+
+  planPricePromise = (async () => {
+    try {
+      if (!Object.keys(planCardRegistry).length) {
+        refreshPlanCardRegistry();
+      }
+
+      const phoneRes = await getSellerPhone();
+      let url = `${API_BASE}/plans`;
+      if (phoneRes) {
+        url += `?sellerPhone=${encodeURIComponent(phoneRes)}`;
+      }
+      const res = await fetch(url, withCreds());
+      if (!res.ok) throw new Error(`${res.status} ${res.statusText}`);
+      const json = await res.json();
+      const plans = json.plans || {};
+
+      subscriptionPlanStore = {};
+      SUBSCRIPTION_PLAN_SLUGS.forEach(slug => {
+        const defaults = PLAN_DEFAULTS[slug] || {};
+        const plan = plans[slug] || {};
+        const descriptor = {
+          slug,
+          title: plan.title || defaults.title || slug,
+          price: plan.price ?? null,
+          durationDays: plan.durationDays ?? defaults.durationDays ?? null,
+          description: plan.description || defaults.description || '',
+          features: Array.isArray(plan.features) && plan.features.length ? plan.features : (defaults.features || [])
+        };
+        const badgeLabel = (plan.badgeLabel ?? plan.badge?.label ?? defaults.badge?.label ?? '').toString().trim();
+        const badgeVariant = normalizeBadgeVariant(plan.badgeVariant ?? plan.badge?.variant ?? defaults.badge?.variant);
+        const badgeVisibleRaw = plan.badgeVisible ?? plan.badge?.visible ?? defaults.badge?.visible;
+        const badgeVisible = badgeVisibleRaw === undefined ? !!badgeLabel : !!badgeVisibleRaw;
+        descriptor.badge = {
+          label: badgeLabel,
+          variant: badgeVariant,
+          visible: badgeVisible && !!badgeLabel
+        };
+        subscriptionPlanStore[slug] = descriptor;
+        applyPlanCardDescriptor(descriptor);
+      });
+
+      lastPlanFetchTimestamp = Date.now();
+      return subscriptionPlanStore;
+    } catch (err) {
+      console.error('❌ خطا در دریافت پلن‌های اشتراک:', err);
+      lastPlanFetchTimestamp = 0;
+      return subscriptionPlanStore;
+    } finally {
+      planPricePromise = null;
+    }
+  })();
+
+  return planPricePromise;
 }
 
 /*──────────────── ۳) گرفتن قیمت تبلیغات ویژه ────────────────*/
@@ -818,6 +841,8 @@ document.addEventListener('DOMContentLoaded', async () => {
   startAdApprovalWatcher();
   document.addEventListener('visibilitychange', () => {
     if (!document.hidden) {
+      fetchPlanPrices();
+      fetchAdPrices();
       pollSellerAdApprovals(false);
     }
   });
