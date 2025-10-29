@@ -16,6 +16,7 @@ const Review = require('../models/Review');
 const { calcPremiumUntil } = require('../utils/premium');
 const { clampAdminScore, evaluatePerformance } = require('../utils/performanceStatus');
 const { normalizePhone, buildDigitInsensitiveRegex, buildPhoneCandidates } = require('../utils/phone');
+const { cascadeDeleteSeller, cascadeDeleteSellerById } = require('../utils/sellerDeletion');
 
 const escapeRegExp = (str = '') => str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 const normalizeString = (value) => (value || '').toString().trim().toLowerCase();
@@ -502,54 +503,21 @@ exports.getMonthlyBookingInsights = async (req, res) => {
 exports.deleteSeller = async (req, res) => {
   try {
     const { sellerId } = req.params;
+    let result;
 
-    let seller;
     if (typeof sellerId === 'string' && sellerId.startsWith('shopurl:')) {
       const shopurl = sellerId.replace(/^shopurl:/, '');
-      seller = await Seller.findOne({ shopurl });
-    } else {
-      seller = await Seller.findById(sellerId);
-    }
-
-    if (!seller) {
-      return res.status(404).json({ message: 'فروشنده پیدا نشد.' });
-    }
-
-    const phone = seller.phone;
-
-    await Promise.all([
-      Product.deleteMany({ sellerId: seller._id }),
-      ShopAppearance.deleteMany({ sellerId: seller._id }),
-      SellerPlan.deleteMany({ sellerId: seller._id }),
-      AdOrder.deleteMany({ sellerId: seller._id }),
-      Payment.deleteMany({ sellerId: seller._id }),
-      Chat.deleteMany({ sellerId: seller._id }),
-      Report.deleteMany({ sellerId: seller._id }),
-      Seller.deleteOne({ _id: seller._id })
-    ]);
-
-    if (phone) {
-      const normalizedPhone = normalizePhone(phone);
-      if (normalizedPhone) {
-        const regex = buildDigitInsensitiveRegex(phone);
-        const query = { _id: { $ne: seller._id } };
-        if (regex) {
-          query.phone = { $regex: regex };
-        } else {
-          query.phone = normalizedPhone;
-        }
-
-        const duplicates = await Seller.countDocuments(query);
-        if (duplicates > 0) {
-          console.warn(`Skipping phone ban for seller ${seller._id} deletion because phone is shared with ${duplicates} other seller(s).`);
-        } else {
-          await BannedPhone.updateOne(
-            { phone: normalizedPhone },
-            { $set: { phone: normalizedPhone } },
-            { upsert: true }
-          );
-        }
+      const seller = await Seller.findOne({ shopurl });
+      if (!seller) {
+        return res.status(404).json({ message: 'فروشنده پیدا نشد.' });
       }
+      result = await cascadeDeleteSeller(seller, { banReason: 'deleted-by-admin' });
+    } else {
+      result = await cascadeDeleteSellerById(sellerId, { banReason: 'deleted-by-admin' });
+    }
+
+    if (!result || !result.success) {
+      return res.status(400).json({ message: 'امکان حذف فروشنده وجود ندارد.' });
     }
 
     res.json({ message: 'فروشنده با موفقیت حذف شد.' });

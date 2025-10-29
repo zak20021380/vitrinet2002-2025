@@ -1010,12 +1010,20 @@ async function fetchMyPlans() {
     const progress = duration > 0 ? (elapsed / duration) * 100 : 0;
     const remainingDays = Math.ceil((end - now) / DAY_IN_MS);
     const daysToStart = started ? 0 : Math.ceil((start - now) / DAY_IN_MS);
+    const graceDeadline = new Date(end + (3 * DAY_IN_MS));
+    const graceRemainingDays = Math.ceil((graceDeadline.getTime() - now) / DAY_IN_MS);
+    const expiredSinceDays = Math.ceil((now - end) / DAY_IN_MS);
 
     return {
       progress: Math.min(100, Math.max(0, progress)),
       remainingDays,
       started,
-      daysToStart: Math.max(0, daysToStart)
+      daysToStart: Math.max(0, daysToStart),
+      endedAt: new Date(end),
+      gracePeriodDays: 3,
+      graceDeadline,
+      graceRemainingDays: remainingDays > 0 ? null : Math.max(0, graceRemainingDays),
+      expiredSinceDays: remainingDays > 0 ? 0 : Math.max(0, expiredSinceDays)
     };
   }
 
@@ -1030,11 +1038,58 @@ async function fetchMyPlans() {
     }
 
     if (info.remainingDays <= 0) {
+      if (info.graceRemainingDays != null && info.graceRemainingDays > 0) {
+        const value = info.graceRemainingDays === 1 ? '۱' : toFaDigits(info.graceRemainingDays);
+        return `این اشتراک منقضی شده است • <strong>${value}</strong> روز تا حذف کامل`;
+      }
       return 'این اشتراک به پایان رسیده است';
     }
 
     const value = info.remainingDays === 1 ? '۱' : toFaDigits(info.remainingDays);
     return `<strong>${value}</strong> روز تا پایان اشتراک`;
+  }
+
+  function buildExpiryWarning(plan, info) {
+    if (!plan || !info || info.remainingDays > 0) return '';
+
+    const graceDaysLeft = info.graceRemainingDays != null
+      ? Math.max(0, info.graceRemainingDays)
+      : 0;
+    const expiryDateText = toJalaliDate(plan.endDate) || '';
+    const deadlineText = info.graceDeadline ? toJalaliDate(info.graceDeadline) : '';
+
+    const countdownText = graceDaysLeft > 0
+      ? `تنها ${graceDaysLeft === 1 ? '۱ روز' : `${toFaDigits(graceDaysLeft)} روز`} تا حذف کامل باقی مانده است`
+      : 'امروز آخرین فرصت شما برای جلوگیری از حذف کامل است';
+
+    const deadlineBadge = deadlineText
+      ? `<div class="plan-expiry-warning__deadline">مهلت نهایی: ${deadlineText}</div>`
+      : '';
+
+    return `
+      <div class="plan-expiry-warning" role="alert">
+        <div class="plan-expiry-warning__header">
+          <span class="plan-expiry-warning__icon" aria-hidden="true">⚠️</span>
+          <span>هشدار تمدید اشتراک</span>
+        </div>
+        <p class="plan-expiry-warning__body">
+          پلن اشتراک فروشگاه شما در تاریخ <strong>${expiryDateText || '-'}</strong> منقضی شده است. ${countdownText}.
+        </p>
+        <p class="plan-expiry-warning__cta">
+          اگر طی ۳ روز آینده تمدید انجام نشود، پنل و صفحه فروشگاه شما به طور کامل حذف خواهد شد.
+        </p>
+        <div class="plan-expiry-warning__actions">
+          <a class="plan-expiry-warning__btn" href="#content-sub">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 5v14"></path>
+              <path d="m18 11-6-6-6 6"></path>
+            </svg>
+            <span>تمدید اشتراک فروشگاه</span>
+          </a>
+          ${deadlineBadge}
+        </div>
+      </div>
+    `;
   }
 
   try {
@@ -1086,6 +1141,8 @@ async function fetchMyPlans() {
     `;
 
     // کارت‌های پلن اشتراک
+    let expiryWarningRendered = false;
+
     const subCards = subPlans.length
       ? subPlans.map(plan => {
           const statusMarkup = subStatusBadge(plan);
@@ -1109,6 +1166,13 @@ async function fetchMyPlans() {
                 </div>` : ''}
               </div>`
             : '';
+          let expiryWarning = '';
+          if (!expiryWarningRendered && progressInfo && progressInfo.remainingDays <= 0) {
+            expiryWarning = buildExpiryWarning(plan, progressInfo);
+            if (expiryWarning) {
+              expiryWarningRendered = true;
+            }
+          }
 
           const description = plan.description
             ? `<p class="my-plan-card__description">${plan.description}</p>`
@@ -1166,6 +1230,7 @@ async function fetchMyPlans() {
                 </div>
               </div>
               ${progressSection}
+              ${expiryWarning}
               ${description}
             </article>
           `;
