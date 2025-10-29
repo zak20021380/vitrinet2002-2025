@@ -20,6 +20,9 @@ const adPriceElems = {
   products : document.getElementById("price-ad_products"),
 };
 
+let adPlanPriceCache = null;
+let adPlanPricePromise = null;
+
 const AD_PLAN_TITLES = {
   ad_search: 'تبلیغ ویژه در جستجو',
   ad_home: 'تبلیغ ویژه صفحه اول',
@@ -381,33 +384,47 @@ async function fetchPlanPrices () {
 /*──────────────── ۳) گرفتن قیمت تبلیغات ویژه ────────────────*/
 /*──────────────── ۳) گرفتن قیمت تبلیغات ویژه ────────────────*/
 /*──────────────── ۳) گرفتن قیمت تبلیغات ویژه ────────────────*/
-async function fetchAdPrices () {
-  try {
-    const phone = await getSellerPhone();
-    let url = `${API_BASE}/adPlans`;
-    if (phone) url += `?sellerPhone=${encodeURIComponent(phone)}`;
-    const res = await fetch(url, withCreds());
-    if (!res.ok) throw new Error(`${res.status} ${res.statusText}`);
-    const json = await res.json();
-    const plansObj = json.adplans || {};
+async function fetchAdPrices (force = false) {
+  if (!force && adPlanPriceCache) return adPlanPriceCache;
+  if (!force && adPlanPricePromise) return adPlanPricePromise;
 
-    const map = {
-      ad_search: 'price-ad_search',
-      ad_home: 'price-ad_home',
-      ad_products: 'price-ad_products',
-    };
+  adPlanPricePromise = (async () => {
+    try {
+      const phone = await getSellerPhone();
+      let url = `${API_BASE}/adPlans`;
+      if (phone) url += `?sellerPhone=${encodeURIComponent(phone)}`;
+      const res = await fetch(url, withCreds());
+      if (!res.ok) throw new Error(`${res.status} ${res.statusText}`);
+      const json = await res.json();
+      const plansObj = json.adplans || {};
 
-    Object.keys(map).forEach(slug => {
-      const id = map[slug];
-      const el = document.getElementById(id);
-      if (el && plansObj[slug] != null) {
-        el.textContent = toFaPrice(plansObj[slug]);
-      }
-    });
+      adPlanPriceCache = plansObj;
 
-  } catch (err) {
-    console.error('❌ خطا در دریافت قیمت تبلیغات:', err);
-  }
+      const map = {
+        ad_search: 'price-ad_search',
+        ad_home: 'price-ad_home',
+        ad_products: 'price-ad_products',
+      };
+
+      Object.keys(map).forEach(slug => {
+        const id = map[slug];
+        const el = document.getElementById(id);
+        if (el && plansObj[slug] != null) {
+          el.textContent = toFaPrice(plansObj[slug]);
+        }
+      });
+
+      return adPlanPriceCache;
+    } catch (err) {
+      console.error('❌ خطا در دریافت قیمت تبلیغات:', err);
+      adPlanPriceCache = null;
+      return null;
+    } finally {
+      adPlanPricePromise = null;
+    }
+  })();
+
+  return adPlanPricePromise;
 }
 
 
@@ -422,6 +439,15 @@ function toFaPrice (num) {
 
 function faToEn(str) {
   return (str || '').replace(/[۰-۹]/g, d => '0123456789'.charAt('۰۱۲۳۴۵۶۷۸۹'.indexOf(d)));
+}
+
+function getEffectivePlanPrice(plan, adPriceMap) {
+  const map = adPriceMap || adPlanPriceCache || {};
+  const slug = plan?.slug || plan?.planSlug || '';
+  if (slug && map[slug] != null) {
+    return map[slug];
+  }
+  return plan?.price || 0;
 }
 
 let offerTimer;
@@ -949,8 +975,10 @@ async function fetchMyPlans() {
   }
 
   try {
+    const adPriceMapPromise = fetchAdPrices();
     const res = await fetch(`${API_BASE}/sellerPlans/my`, withCreds());
     const json = await res.json();
+    const adPriceMap = (await adPriceMapPromise) || {};
 
     if (!res.ok || !json.plans || !json.plans.length) {
       box.innerHTML = `<div class="text-center text-gray-400 py-8">پلن فعالی یافت نشد!</div>`;
@@ -1000,7 +1028,7 @@ async function fetchMyPlans() {
         <div class="my-plan-card mb-4">
           ${subStatusBadge(plan)}
           <div class="text-lg font-bold mb-1">${plan.title || '-'}</div>
-          <div class="text-2xl font-extrabold text-[#10B981] mb-3">${toFaPrice(plan.price)} <span class="text-sm font-normal text-gray-300">تومان</span></div>
+          <div class="text-2xl font-extrabold text-[#10B981] mb-3">${toFaPrice(getEffectivePlanPrice(plan, adPriceMap))} <span class="text-sm font-normal text-gray-300">تومان</span></div>
           <div class="flex flex-col items-end gap-1 text-gray-300 text-xs sm:text-sm">
             <div>شروع: <span dir="ltr">${toJalaliDate(plan.startDate) || '-'}</span></div>
             <div>پایان: <span dir="ltr">${toJalaliDate(plan.endDate) || '-'}</span></div>
@@ -1071,7 +1099,7 @@ async function fetchMyPlans() {
               </div>
               ${img}
               <div class="font-bold text-orange-700 text-base mb-1">${plan.title || '-'}</div>
-              <div class="text-base text-orange-800 font-extrabold mb-2">${toFaPrice(plan.price)} <span class="text-xs font-normal">تومان</span></div>
+              <div class="text-base text-orange-800 font-extrabold mb-2">${toFaPrice(getEffectivePlanPrice(plan, adPriceMap))} <span class="text-xs font-normal">تومان</span></div>
               <div class="flex flex-col items-center gap-1 text-gray-500 text-xs sm:text-sm mb-2">
                 <div>شروع: <span dir="ltr">${toJalaliDate(plan.startDate) || '-'}</span></div>
                 <div>پایان: <span dir="ltr">${getAdEndDate(plan)}</span></div>
