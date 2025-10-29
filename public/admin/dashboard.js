@@ -7417,12 +7417,33 @@ panels['home-section'] = document.getElementById('home-section-panel');
 
 /* المان‌های ورودی */
 const PLAN_SLUGS = ['1month', '3month', '12month'];
+const VALID_BADGE_VARIANTS = ['emerald', 'amber', 'sky', 'violet', 'rose', 'slate'];
+const PLAN_BADGE_STYLES = {
+  emerald: { background: 'linear-gradient(90deg,#10b981 10%,#0ea5e9 100%)', color: '#ffffff' },
+  amber:   { background: 'linear-gradient(90deg,#f59e0b 10%,#f97316 100%)', color: '#ffffff' },
+  sky:     { background: 'linear-gradient(90deg,#0ea5e9 10%,#38bdf8 100%)', color: '#ffffff' },
+  violet:  { background: 'linear-gradient(90deg,#6366f1 10%,#8b5cf6 100%)', color: '#ffffff' },
+  rose:    { background: 'linear-gradient(90deg,#f43f5e 10%,#ec4899 100%)', color: '#ffffff' },
+  slate:   { background: 'linear-gradient(90deg,#1e293b 0%,#0f172a 100%)', color: '#e2e8f0' }
+};
+
+const normalizeBadgeVariant = (variant) => {
+  const value = (variant || '').toString().trim();
+  return VALID_BADGE_VARIANTS.includes(value) ? value : VALID_BADGE_VARIANTS[0];
+};
+
 const planFormRefs = PLAN_SLUGS.reduce((acc, slug) => {
   acc[slug] = {
+    title: document.getElementById(`plan-${slug}-title`),
     price: document.getElementById(`plan-${slug}-price`),
     duration: document.getElementById(`plan-${slug}-duration`),
     description: document.getElementById(`plan-${slug}-description`),
     features: document.getElementById(`plan-${slug}-features`),
+    badgeLabel: document.getElementById(`plan-${slug}-badge-label`),
+    badgeVariant: document.getElementById(`plan-${slug}-badge-variant`),
+    badgeVisible: document.getElementById(`plan-${slug}-badge-visible`),
+    badgeChip: document.querySelector(`[data-plan-badge-chip="${slug}"]`),
+    badgeStatus: document.querySelector(`[data-plan-badge-status="${slug}"]`),
     source: document.querySelector(`[data-plan-source="${slug}"]`),
     updated: document.querySelector(`[data-plan-updated="${slug}"]`)
   };
@@ -7448,6 +7469,46 @@ const sanitizeFeaturesInput = (value) => {
     .map(item => item.trim())
     .filter(Boolean)
     .slice(0, 12);
+};
+
+const applyBadgeChipStyle = (chipEl, variant) => {
+  if (!chipEl) return;
+  const style = PLAN_BADGE_STYLES[variant] || PLAN_BADGE_STYLES[VALID_BADGE_VARIANTS[0]];
+  chipEl.style.background = style.background;
+  chipEl.style.color = style.color;
+};
+
+const updateBadgePreview = (slug, overrides = {}) => {
+  const refs = planFormRefs[slug];
+  if (!refs) return;
+
+  const label = overrides.badgeLabel !== undefined
+    ? overrides.badgeLabel
+    : (refs.badgeLabel?.value || '').trim();
+
+  const variant = normalizeBadgeVariant(
+    overrides.badgeVariant !== undefined
+      ? overrides.badgeVariant
+      : refs.badgeVariant?.value
+  );
+
+  const visible = overrides.badgeVisible !== undefined
+    ? !!overrides.badgeVisible
+    : (refs.badgeVisible ? refs.badgeVisible.checked : !!label);
+
+  if (refs.badgeVariant) {
+    refs.badgeVariant.value = variant;
+  }
+
+  if (refs.badgeChip) {
+    refs.badgeChip.textContent = label || 'برچسب غیرفعال';
+    applyBadgeChipStyle(refs.badgeChip, variant);
+    refs.badgeChip.style.opacity = visible && label ? '1' : '0.35';
+  }
+
+  if (refs.badgeStatus) {
+    refs.badgeStatus.textContent = visible && label ? 'نمایش فعال' : 'نمایش غیرفعال';
+  }
 };
 
 const sellerPlanToggle       = document.getElementById('sellerPlanToggle');
@@ -7672,6 +7733,10 @@ async function loadPlanPrices() {
     PLAN_SLUGS.forEach(slug => {
       const refs = planFormRefs[slug];
       const plan = plans[slug] || {};
+      const normalizedVariant = normalizeBadgeVariant(plan.badgeVariant || plan.badge?.variant);
+      const badgeLabel = (plan.badgeLabel ?? plan.badge?.label ?? '').trim();
+      const badgeVisible = plan.badgeVisible ?? plan.badge?.visible ?? !!badgeLabel;
+      if (refs.title) refs.title.value = plan.title || '';
       if (refs.price) refs.price.value = plan.price ?? '';
       if (refs.duration) refs.duration.value = plan.durationDays ?? '';
       if (refs.description) refs.description.value = plan.description || '';
@@ -7679,6 +7744,14 @@ async function loadPlanPrices() {
         const features = Array.isArray(plan.features) ? plan.features.filter(Boolean) : [];
         refs.features.value = features.join('\n');
       }
+      if (refs.badgeLabel) refs.badgeLabel.value = badgeLabel;
+      if (refs.badgeVariant) refs.badgeVariant.value = normalizedVariant;
+      if (refs.badgeVisible) refs.badgeVisible.checked = !!badgeVisible && !!badgeLabel;
+      updateBadgePreview(slug, {
+        badgeLabel,
+        badgeVariant: normalizedVariant,
+        badgeVisible: !!badgeVisible && !!badgeLabel
+      });
       if (refs.source) {
         refs.source.textContent = formatPlanOrigin(plan.origin, meta.sellerPhone || phone);
       }
@@ -7713,6 +7786,17 @@ async function savePlanPrices(e) {
     const refs = planFormRefs[slug];
     if (!refs || !refs.price) continue;
 
+    const title = (refs.title?.value || '').trim();
+    const planName = refs.title?.placeholder || slug;
+    if (!title) {
+      showPlansMsg(`عنوان پلن ${planName} را وارد کنید.`, false);
+      return;
+    }
+    if (title.length > 120) {
+      showPlansMsg(`عنوان پلن ${planName} نمی‌تواند بیش از ۱۲۰ کاراکتر باشد.`, false);
+      return;
+    }
+
     const price = Number(refs.price.value);
     if (!Number.isFinite(price) || price <= 0) {
       showPlansMsg(`قیمت پلن ${slug} نامعتبر است.`, false);
@@ -7728,11 +7812,24 @@ async function savePlanPrices(e) {
     const description = (refs.description?.value || '').trim();
     const features = sanitizeFeaturesInput(refs.features?.value || '');
 
+    const badgeLabel = (refs.badgeLabel?.value || '').trim();
+    if (badgeLabel.length > 60) {
+      showPlansMsg(`عنوان برچسب پلن ${planName} باید حداکثر ۶۰ کاراکتر باشد.`, false);
+      return;
+    }
+    const badgeVariant = normalizeBadgeVariant(refs.badgeVariant?.value);
+    const badgeVisible = !!(refs.badgeVisible ? refs.badgeVisible.checked : badgeLabel);
+    const effectiveBadgeVisible = badgeVisible && !!badgeLabel;
+
     plansPayload[slug] = {
+      title,
       price,
       durationDays: duration,
       description,
-      features
+      features,
+      badgeLabel,
+      badgeVariant,
+      badgeVisible: effectiveBadgeVisible
     };
   }
 
@@ -7807,6 +7904,14 @@ if (document.getElementById('plansForm')) {
   // listener روی input شماره تلفن برای reload موقع تغییر
   document.getElementById('seller-phone-plans')
           .addEventListener('input', debounce(loadPlanPrices));
+
+  PLAN_SLUGS.forEach(slug => {
+    const refs = planFormRefs[slug];
+    if (!refs) return;
+    refs.badgeLabel?.addEventListener('input', () => updateBadgePreview(slug));
+    refs.badgeVariant?.addEventListener('change', () => updateBadgePreview(slug));
+    refs.badgeVisible?.addEventListener('change', () => updateBadgePreview(slug));
+  });
 
   if (sellerPlanToggle) {
     loadSellerPlanFeatureFlag();
