@@ -117,12 +117,40 @@
     .view-toggle-button:not([data-active="true"]):hover {
       background: rgba(14, 165, 233, 0.08);
     }
+    .service-card-cover {
+      position: relative;
+      overflow: hidden;
+      aspect-ratio: 4 / 3;
+    }
+    @media (min-width: 640px) {
+      .service-card-cover {
+        aspect-ratio: 3 / 2;
+      }
+    }
+    @media (min-width: 1024px) {
+      .service-card-cover {
+        aspect-ratio: 16 / 9;
+      }
+    }
     .portfolio-card {
       transition: transform 0.25s ease, box-shadow 0.25s ease;
     }
     .portfolio-card:hover {
       transform: translateY(-6px);
       box-shadow: 0 24px 45px rgba(15, 118, 110, 0.16);
+    }
+    .portfolio-card-media {
+      aspect-ratio: 4 / 3;
+    }
+    @media (min-width: 640px) {
+      .portfolio-card-media {
+        aspect-ratio: 3 / 2;
+      }
+    }
+    @media (min-width: 1024px) {
+      .portfolio-card-media {
+        aspect-ratio: 16 / 10;
+      }
     }
     .loading-spinner {
       width: 3rem;
@@ -692,18 +720,6 @@
     return `<div class="flex flex-wrap gap-2">${limited.map(service => `<span class="chip"><i class="ri-sparkling-2-line"></i>${service}</span>`).join('')}</div>`;
   }
 
-  function renderPortfolioPreview(preview = [], shopName = '') {
-    if (!Array.isArray(preview) || !preview.length) {
-      return '<div class="rounded-2xl border border-dashed border-slate-200 bg-slate-50 px-4 py-6 text-center text-xs text-slate-500">هنوز نمونه‌کاری ثبت نشده است.</div>';
-    }
-    return `<div class="grid grid-cols-3 gap-2">${preview.slice(0, 3).map((item, index) => `
-      <figure class="relative overflow-hidden rounded-2xl group">
-        <img src="${item.image}" alt="${item.title || shopName}" loading="lazy" class="w-full h-24 object-cover transition-transform duration-300 group-hover:scale-105" />
-        ${index === 0 ? `<figcaption class="absolute inset-0 bg-slate-900/50 text-white text-xs font-semibold flex items-end p-2 opacity-0 group-hover:opacity-100 transition">${item.title || 'نمونه‌کار'}</figcaption>` : ''}
-      </figure>
-    `).join('')}</div>`;
-  }
-
   function renderFeatureBadges(shop = {}) {
     const badges = [];
     if (shop.isPremium) badges.push('<span class="badge-emerald badge">پریمیوم</span>');
@@ -752,14 +768,13 @@
       const bookings = Number(shop?.stats?.totalBookings || 0).toLocaleString('fa-IR');
       const featureBadges = renderFeatureBadges(shop);
       const highlights = renderHighlightChips(shop.highlightServices);
-      const portfolioPreview = renderPortfolioPreview(shop.portfolioPreview, shop.name);
       const coverMedia = shop.coverImage
         ? `<img src="${shop.coverImage}" alt="${shop.name}" loading="lazy" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />`
         : '<div class="w-full h-full bg-gradient-to-br from-emerald-100 via-sky-100 to-white flex items-center justify-center text-emerald-500 text-sm font-extrabold">Vitreenet</div>';
 
       return `
         <article class="service-card rounded-3xl border border-slate-100 bg-white overflow-hidden shadow-sm flex flex-col group">
-          <div class="relative h-48 overflow-hidden">
+          <div class="service-card-cover">
             ${coverMedia}
             <div class="absolute top-3 left-3 flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/90 text-emerald-600 text-sm font-semibold shadow-sm">
               <i class="ri-star-fill text-amber-400"></i>
@@ -778,7 +793,6 @@
             </div>
             <p class="text-sm text-slate-500 leading-relaxed">${shop.description || 'معرفی این مرکز به زودی به‌روزرسانی می‌شود.'}</p>
             ${highlights}
-            ${portfolioPreview}
             <div class="mt-auto flex flex-col sm:flex-row sm:justify-between gap-3 pt-4 border-t border-slate-100 text-xs text-slate-400">
               <div class="flex items-center gap-3">
                 <span class="flex items-center gap-1"><i class="ri-user-follow-line text-slate-300"></i>${followers} دنبال‌کننده</span>
@@ -887,8 +901,8 @@
       const ratingText = Number(item.shop?.rating || 0).toLocaleString('fa-IR', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
       const reviews = Number(item.shop?.reviewCount || 0).toLocaleString('fa-IR');
       return `
-        <article class="portfolio-card overflow-hidden rounded-3xl border border-slate-100 bg-white shadow-sm">
-          <div class="relative aspect-[4/3] overflow-hidden group">
+        <article class="portfolio-card overflow-hidden rounded-3xl border border-slate-100 bg-white shadow-sm flex flex-col">
+          <div class="relative overflow-hidden group portfolio-card-media">
             <img src="${item.image}" alt="${item.title || item.shop?.name || 'نمونه کار'}" loading="lazy" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
             <div class="absolute inset-0 bg-gradient-to-t from-slate-900/80 via-slate-900/20 to-transparent opacity-0 group-hover:opacity-100 transition"></div>
             <div class="absolute bottom-0 left-0 right-0 p-4 text-white opacity-0 group-hover:opacity-100 transition">
@@ -900,7 +914,7 @@
               <span>${likes}</span>
             </div>
           </div>
-          <div class="p-4 flex items-start justify-between gap-3">
+          <div class="p-4 flex items-start justify-between gap-3 mt-auto">
             <div class="space-y-1">
               <p class="text-sm font-bold text-slate-800">${item.shop?.name || ''}</p>
               <div class="flex items-center gap-2 text-xs text-slate-400">
