@@ -314,7 +314,12 @@ const PLAN_DEFAULTS = {
       'نمایش فروشگاه در نتایج جستجو و دسته‌بندی‌ها',
       'پشتیبانی استاندارد تیم ویترینت',
       'امکان فعالسازی سرویس‌های پرمیوم (VitriPlus)'
-    ]
+    ],
+    badge: {
+      label: 'پیشنهاد اقتصادی',
+      variant: 'emerald',
+      visible: true
+    }
   },
   '3month': {
     title: 'اشتراک ۳ ماهه',
@@ -324,7 +329,12 @@ const PLAN_DEFAULTS = {
       'همه امکانات پلن یک‌ماهه',
       'اولویت نمایش در لیست فروشگاه‌ها',
       'پشتیبانی سریع‌تر تیم ویترینت'
-    ]
+    ],
+    badge: {
+      label: 'پیشنهاد محبوب',
+      variant: 'amber',
+      visible: true
+    }
   },
   '12month': {
     title: 'اشتراک ۱ ساله',
@@ -334,8 +344,35 @@ const PLAN_DEFAULTS = {
       'همه امکانات پلن‌های قبلی',
       'نمایش ویژه و پروموشن‌های اختصاصی',
       'پشتیبانی VIP و گزارش‌های تحلیلی دوره‌ای'
-    ]
+    ],
+    badge: {
+      label: 'بیشترین صرفه‌جویی',
+      variant: 'sky',
+      visible: true
+    }
   }
+};
+
+const BADGE_VARIANTS = ['emerald', 'amber', 'sky', 'violet', 'rose', 'slate'];
+const PLAN_BADGE_STYLE_MAP = {
+  emerald: { background: 'linear-gradient(90deg,#10b981 10%,#0ea5e9 100%)', color: '#ffffff' },
+  amber:   { background: 'linear-gradient(90deg,#f59e0b 10%,#f97316 100%)', color: '#ffffff' },
+  sky:     { background: 'linear-gradient(90deg,#0ea5e9 10%,#38bdf8 100%)', color: '#ffffff' },
+  violet:  { background: 'linear-gradient(90deg,#6366f1 10%,#8b5cf6 100%)', color: '#ffffff' },
+  rose:    { background: 'linear-gradient(90deg,#f43f5e 10%,#ec4899 100%)', color: '#ffffff' },
+  slate:   { background: 'linear-gradient(90deg,#1e293b 0%,#0f172a 100%)', color: '#e2e8f0' }
+};
+
+const normalizeBadgeVariant = (value) => {
+  const variant = (value || '').toString().trim();
+  return BADGE_VARIANTS.includes(variant) ? variant : BADGE_VARIANTS[0];
+};
+
+const applyBadgeStyle = (el, variant) => {
+  if (!el) return;
+  const style = PLAN_BADGE_STYLE_MAP[variant] || PLAN_BADGE_STYLE_MAP[BADGE_VARIANTS[0]];
+  el.style.background = style.background;
+  el.style.color = style.color;
 };
 
 let planCardRegistry = {};
@@ -353,6 +390,7 @@ function refreshPlanCardRegistry() {
       duration: root.querySelector(`[data-plan-duration="${slug}"]`),
       description: root.querySelector(`[data-plan-description="${slug}"]`),
       features: root.querySelector(`[data-plan-features="${slug}"]`),
+      badge: root.querySelector(`[data-plan-badge="${slug}"]`),
       cta: root.querySelector(`[data-plan-select="${slug}"]`)
     };
   });
@@ -361,7 +399,12 @@ function refreshPlanCardRegistry() {
 function applyPlanCardDescriptor(plan) {
   const refs = planCardRegistry[plan.slug];
   if (!refs) return;
-  if (refs.title) refs.title.textContent = plan.title || PLAN_DEFAULTS[plan.slug]?.title || plan.slug;
+  const defaults = PLAN_DEFAULTS[plan.slug] || {};
+  const fallbackBadge = defaults.badge || {};
+  const badge = plan.badge || fallbackBadge;
+
+  if (refs.title) refs.title.textContent = plan.title || defaults.title || plan.slug;
+
   if (refs.price) {
     if (plan.price != null) {
       refs.price.textContent = toFaPrice(plan.price);
@@ -369,18 +412,26 @@ function applyPlanCardDescriptor(plan) {
       refs.price.textContent = '—';
     }
   }
+
   if (refs.duration) {
-    refs.duration.textContent = plan.durationDays ? `اعتبار: ${toFaDigits(plan.durationDays)} روز` : 'اعتبار: —';
+    const duration = plan.durationDays ?? defaults.durationDays;
+    refs.duration.textContent = duration ? `اعتبار: ${toFaDigits(duration)} روز` : 'اعتبار: —';
   }
+
   if (refs.description) {
-    refs.description.textContent = plan.description || 'جزئیاتی برای این پلن ثبت نشده است.';
+    refs.description.textContent = plan.description || defaults.description || 'جزئیاتی برای این پلن ثبت نشده است.';
   }
+
   if (refs.features) {
     refs.features.innerHTML = '';
-    const list = plan.features && plan.features.length ? plan.features : ['جزئیاتی برای این پلن ثبت نشده است.'];
-    list.forEach(item => {
+    const list = plan.features && plan.features.length ? plan.features : (defaults.features || []);
+    if (!list.length) {
       const li = document.createElement('li');
-      if (plan.features && plan.features.length) {
+      li.textContent = 'جزئیاتی برای این پلن ثبت نشده است.';
+      refs.features.appendChild(li);
+    } else {
+      list.forEach(item => {
+        const li = document.createElement('li');
         const icon = document.createElement('span');
         icon.className = 'plan-feature-icon';
         icon.textContent = '✔';
@@ -388,11 +439,22 @@ function applyPlanCardDescriptor(plan) {
         span.textContent = item;
         li.appendChild(icon);
         li.appendChild(span);
-      } else {
-        li.textContent = item;
-      }
-      refs.features.appendChild(li);
-    });
+        refs.features.appendChild(li);
+      });
+    }
+  }
+
+  if (refs.badge) {
+    const label = badge.label || fallbackBadge.label || '';
+    const variant = normalizeBadgeVariant(badge.variant || fallbackBadge.variant);
+    const visible = badge.visible !== false && !!label;
+    if (visible) {
+      refs.badge.textContent = label;
+      applyBadgeStyle(refs.badge, variant);
+      refs.badge.classList.remove('hidden');
+    } else {
+      refs.badge.classList.add('hidden');
+    }
   }
 }
 
@@ -475,6 +537,15 @@ async function fetchPlanPrices () {
         durationDays: plan.durationDays ?? defaults.durationDays ?? null,
         description: plan.description || defaults.description || '',
         features: Array.isArray(plan.features) && plan.features.length ? plan.features : (defaults.features || [])
+      };
+      const badgeLabel = (plan.badgeLabel ?? plan.badge?.label ?? defaults.badge?.label ?? '').toString().trim();
+      const badgeVariant = normalizeBadgeVariant(plan.badgeVariant ?? plan.badge?.variant ?? defaults.badge?.variant);
+      const badgeVisibleRaw = plan.badgeVisible ?? plan.badge?.visible ?? defaults.badge?.visible;
+      const badgeVisible = badgeVisibleRaw === undefined ? !!badgeLabel : !!badgeVisibleRaw;
+      descriptor.badge = {
+        label: badgeLabel,
+        variant: badgeVariant,
+        visible: badgeVisible && !!badgeLabel
       };
       subscriptionPlanStore[slug] = descriptor;
       applyPlanCardDescriptor(descriptor);
@@ -595,18 +666,29 @@ window.selectPlan = async function (slug) {
   }
 
   const defaults = PLAN_DEFAULTS[slug] || {};
+  const fallbackBadge = defaults.badge ? {
+    label: defaults.badge.label || '',
+    variant: normalizeBadgeVariant(defaults.badge.variant),
+    visible: defaults.badge.visible !== false && !!defaults.badge.label
+  } : { label: '', variant: BADGE_VARIANTS[0], visible: false };
   const planData = subscriptionPlanStore[slug] || {
     slug,
     title: defaults.title || slug,
     price: defaults.price ?? null,
     durationDays: defaults.durationDays ?? null,
     description: defaults.description || '',
-    features: defaults.features || []
+    features: defaults.features || [],
+    badge: fallbackBadge
   };
 
   const title = planData.title || defaults.title || slug;
   const featureList = planData.features && planData.features.length ? planData.features : (defaults.features || []);
   const description = planData.description || defaults.description || '';
+  const badgeInfo = planData.badge ? {
+    label: planData.badge.label || fallbackBadge.label || '',
+    variant: normalizeBadgeVariant(planData.badge.variant || fallbackBadge.variant),
+    visible: planData.badge.visible !== false && !!(planData.badge.label || fallbackBadge.label)
+  } : fallbackBadge;
 
   const modal = document.getElementById('upgradeModal');
   if (!modal) return;
@@ -669,14 +751,19 @@ window.selectPlan = async function (slug) {
         }
       }
     }
-    if (badge) {
-      badge.textContent = slug === '3month' ? 'پرفروش‌ترین' : 'پیشنهاد طلایی';
-      badge.classList.remove('hidden');
-    }
   } else {
     oldPriceEl?.classList.add('hidden');
-    badge?.classList.add('hidden');
     saveBadge?.classList.add('hidden');
+  }
+
+  if (badge) {
+    if (badgeInfo.visible && badgeInfo.label) {
+      badge.textContent = badgeInfo.label;
+      applyBadgeStyle(badge, badgeInfo.variant || fallbackBadge.variant);
+      badge.classList.remove('hidden');
+    } else {
+      badge.classList.add('hidden');
+    }
   }
 
   if (premiumToggle) {

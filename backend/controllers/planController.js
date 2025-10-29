@@ -1,9 +1,11 @@
 const Plan = require('../models/plan');
 const {
   SUBSCRIPTION_PLANS,
+  BADGE_VARIANTS,
   getDefaultDurationDays,
   getDefaultDescription,
-  getDefaultFeatures
+  getDefaultFeatures,
+  getDefaultBadge
 } = require('../config/subscriptionPlans');
 
 const SUBSCRIPTION_PLAN_SLUGS = SUBSCRIPTION_PLANS.map(plan => plan.slug);
@@ -20,23 +22,52 @@ const sanitizeFeatures = (rawValue) => {
     .slice(0, 12);
 };
 
-const buildBasePlan = (definition) => ({
-  slug: definition.slug,
-  title: definition.title,
-  price: null,
-  durationDays: definition.defaultDurationDays ?? null,
-  description: definition.defaultDescription || '',
-  features: [...(definition.defaultFeatures || [])],
-  origin: 'default',
-  lastUpdatedAt: null
-});
+const parseOptionalBoolean = (value) => {
+  if (value === undefined) return undefined;
+  if (typeof value === 'boolean') return value;
+  if (typeof value === 'number') return value !== 0;
+  if (typeof value === 'string') {
+    const normalized = value.trim().toLowerCase();
+    if (!normalized) return false;
+    if (['false', '0', 'no', 'off', 'غیر فعال', 'غیرفعال'].includes(normalized)) {
+      return false;
+    }
+    return true;
+  }
+  return Boolean(value);
+};
+
+const buildBasePlan = (definition) => {
+  const badge = getDefaultBadge(definition.slug) || {};
+  return {
+    slug: definition.slug,
+    title: definition.title,
+    price: null,
+    durationDays: definition.defaultDurationDays ?? null,
+    description: definition.defaultDescription || '',
+    features: [...(definition.defaultFeatures || [])],
+    badgeLabel: badge.label || '',
+    badgeVariant: badge.variant || BADGE_VARIANTS[0],
+    badgeVisible: badge.visible !== undefined ? !!badge.visible : !!badge.label,
+    origin: 'default',
+    lastUpdatedAt: null
+  };
+};
 
 const applyDocumentToPlan = (plan, doc) => {
   if (!doc) return plan;
+  if (doc.title) plan.title = doc.title;
   if (doc.price != null) plan.price = doc.price;
   if (doc.durationDays != null) plan.durationDays = doc.durationDays;
   if (doc.description != null) plan.description = doc.description;
   if (Array.isArray(doc.features)) plan.features = doc.features;
+  if (doc.badgeLabel != null) plan.badgeLabel = doc.badgeLabel;
+  if (doc.badgeVariant) {
+    plan.badgeVariant = BADGE_VARIANTS.includes(doc.badgeVariant)
+      ? doc.badgeVariant
+      : plan.badgeVariant;
+  }
+  if (doc.badgeVisible != null) plan.badgeVisible = !!doc.badgeVisible;
   plan.lastUpdatedAt = doc.updatedAt || doc.createdAt || plan.lastUpdatedAt;
   plan.origin = doc.sellerPhone ? 'seller-override' : 'global';
   return plan;
@@ -138,6 +169,11 @@ exports.updatePlans = async (req, res) => {
       const payload = incoming[slug] || (legacyPrices[slug] != null ? { price: legacyPrices[slug] } : null);
       if (!payload) continue;
 
+      const rawTitle = Object.prototype.hasOwnProperty.call(payload, 'title')
+        ? String(payload.title ?? '').trim()
+        : definition.title;
+      const title = (rawTitle || definition.title).slice(0, 120);
+
       const price = Number(payload.price);
       if (!Number.isFinite(price) || price <= 0) {
         return res.status(400).json({ success:false, message:`قیمت پلن «${definition.title}» نامعتبر است.` });
@@ -162,12 +198,52 @@ exports.updatePlans = async (req, res) => {
         ? sanitizeFeatures(payload.features)
         : getDefaultFeatures(slug);
 
+      const defaultBadge = getDefaultBadge(slug) || {};
+      const badgePayload = payload.badge || {};
+
+      const rawBadgeLabel = Object.prototype.hasOwnProperty.call(payload, 'badgeLabel')
+        ? payload.badgeLabel
+        : Object.prototype.hasOwnProperty.call(badgePayload, 'label')
+          ? badgePayload.label
+          : defaultBadge.label;
+
+      const badgeLabel = (rawBadgeLabel ?? '').toString().trim().slice(0, 60);
+
+      let badgeVariant = Object.prototype.hasOwnProperty.call(payload, 'badgeVariant')
+        ? payload.badgeVariant
+        : Object.prototype.hasOwnProperty.call(badgePayload, 'variant')
+          ? badgePayload.variant
+          : defaultBadge.variant;
+
+      badgeVariant = (badgeVariant ?? '').toString().trim();
+      if (!BADGE_VARIANTS.includes(badgeVariant)) {
+        badgeVariant = defaultBadge.variant || BADGE_VARIANTS[0];
+      }
+
+      let badgeVisibleRaw;
+      if (Object.prototype.hasOwnProperty.call(payload, 'badgeVisible')) {
+        badgeVisibleRaw = payload.badgeVisible;
+      } else if (Object.prototype.hasOwnProperty.call(badgePayload, 'visible')) {
+        badgeVisibleRaw = badgePayload.visible;
+      } else if (Object.prototype.hasOwnProperty.call(defaultBadge, 'visible')) {
+        badgeVisibleRaw = defaultBadge.visible;
+      }
+
+      const parsedVisible = parseOptionalBoolean(badgeVisibleRaw);
+      const fallbackVisible = defaultBadge.visible !== undefined
+        ? !!defaultBadge.visible
+        : !!badgeLabel;
+      const badgeVisible = parsedVisible === undefined ? fallbackVisible : parsedVisible;
+
       planPayload[slug] = {
-        title: definition.title,
+        title,
         price,
         durationDays,
         description: description || getDefaultDescription(slug),
-        features: features.length ? features : getDefaultFeatures(slug)
+        features: features.length ? features : getDefaultFeatures(slug),
+        badgeLabel,
+        badgeVariant,
+        badgeVisible: badgeVisible && !!badgeLabel
       };
     }
 
@@ -188,6 +264,9 @@ exports.updatePlans = async (req, res) => {
             durationDays: payload.durationDays,
             description: payload.description,
             features: payload.features,
+            badgeLabel: payload.badgeLabel,
+            badgeVariant: payload.badgeVariant,
+            badgeVisible: payload.badgeVisible,
             sellerPhone
           }
         },

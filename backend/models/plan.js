@@ -7,9 +7,12 @@ const mongoose = require('mongoose');
 
 const {
   SUBSCRIPTION_PLANS,
+  BADGE_VARIANTS,
+  getPlanDefinition,
   getDefaultDurationDays,
   getDefaultDescription,
-  getDefaultFeatures
+  getDefaultFeatures,
+  getDefaultBadge
 } = require('../config/subscriptionPlans');
 
 const VALID_SLUGS = SUBSCRIPTION_PLANS.map(plan => plan.slug);
@@ -26,7 +29,11 @@ const planSchema = new mongoose.Schema(
     title: {
       type:     String,
       required: true,
-      trim:     true
+      trim:     true,
+      maxlength: 120,
+      default() {
+        return (this.slug && getPlanDefinition(this.slug)?.title) || '';
+      }
     },
 
     price: {
@@ -78,6 +85,32 @@ const planSchema = new mongoose.Schema(
         let p = String(v).trim().replace(/\D/g, '');  // فقط اعداد
         if (p.length === 10 && p.startsWith('9')) p = '0' + p;
         return (p.length === 11 && p.startsWith('09')) ? p : null;
+      }
+    },
+
+    badgeLabel: {
+      type: String,
+      trim: true,
+      maxlength: 60,
+      default() {
+        return getDefaultBadge(this.slug)?.label || '';
+      }
+    },
+
+    badgeVariant: {
+      type: String,
+      enum: BADGE_VARIANTS,
+      default() {
+        return getDefaultBadge(this.slug)?.variant || BADGE_VARIANTS[0];
+      }
+    },
+
+    badgeVisible: {
+      type: Boolean,
+      default() {
+        const badge = getDefaultBadge(this.slug);
+        if (!badge) return false;
+        return badge.visible !== undefined ? !!badge.visible : !!badge.label;
       }
     }
   },

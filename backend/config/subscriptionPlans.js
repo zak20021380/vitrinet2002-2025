@@ -1,3 +1,12 @@
+const BADGE_VARIANTS = Object.freeze([
+  'emerald',
+  'amber',
+  'sky',
+  'violet',
+  'rose',
+  'slate'
+]);
+
 const SUBSCRIPTION_PLANS = [
   {
     slug: '1month',
@@ -8,7 +17,12 @@ const SUBSCRIPTION_PLANS = [
       'نمایش فروشگاه در نتایج جستجو و دسته‌بندی‌ها',
       'پشتیبانی استاندارد تیم ویترینت',
       'امکان فعالسازی سرویس‌های پرمیوم (VitriPlus)'
-    ]
+    ],
+    defaultBadge: {
+      label: 'پیشنهاد اقتصادی',
+      variant: 'emerald',
+      visible: true
+    }
   },
   {
     slug: '3month',
@@ -19,7 +33,12 @@ const SUBSCRIPTION_PLANS = [
       'همه امکانات پلن یک‌ماهه',
       'اولویت نمایش در لیست فروشگاه‌ها',
       'دسترسی سریع‌تر به تیم پشتیبانی'
-    ]
+    ],
+    defaultBadge: {
+      label: 'پیشنهاد محبوب',
+      variant: 'amber',
+      visible: true
+    }
   },
   {
     slug: '12month',
@@ -30,7 +49,12 @@ const SUBSCRIPTION_PLANS = [
       'همه امکانات پلن‌های قبلی',
       'برندسازی و نمایش ویژه در کمپین‌های ویترینت',
       'پشتیبانی اختصاصی و گزارش‌های تحلیلی دوره‌ای'
-    ]
+    ],
+    defaultBadge: {
+      label: 'بیشترین صرفه‌جویی',
+      variant: 'sky',
+      visible: true
+    }
   }
 ];
 
@@ -52,10 +76,22 @@ function getDefaultFeatures(slug) {
   return [...(getPlanDefinition(slug)?.defaultFeatures ?? [])];
 }
 
+function getDefaultBadge(slug) {
+  const badge = getPlanDefinition(slug)?.defaultBadge;
+  if (!badge) return null;
+  return {
+    label: badge.label || '',
+    variant: BADGE_VARIANTS.includes(badge.variant) ? badge.variant : 'emerald',
+    visible: badge.visible !== undefined ? !!badge.visible : !!badge.label
+  };
+}
+
 module.exports = {
   SUBSCRIPTION_PLANS,
+  BADGE_VARIANTS,
   getPlanDefinition,
   getDefaultDurationDays,
   getDefaultDescription,
-  getDefaultFeatures
+  getDefaultFeatures,
+  getDefaultBadge
 };
