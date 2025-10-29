@@ -2680,4 +2680,253 @@ exports.removeServiceShop = async (req, res) => {
   }
 };
 
+const normaliseText = (value = '') => String(value || '').replace(/\s+/g, ' ').trim();
+
+exports.getPublicShowcase = async (req, res) => {
+  try {
+    const limitRaw = Number(req.query?.limit);
+    const limit = Number.isFinite(limitRaw) ? Math.min(Math.max(limitRaw, 1), 40) : 18;
+    const minRatingRaw = Number(req.query?.minRating);
+    const minRating = Number.isFinite(minRatingRaw) ? Math.min(Math.max(minRatingRaw, 0), 5) : 0;
+    const sortKey = String(req.query?.sort || 'best').trim().toLowerCase();
+    const searchRaw = normaliseText(req.query?.search || '');
+    const categorySlug = normaliseText(req.query?.category || '');
+    const categoryNameRaw = normaliseText(req.query?.categoryName || '');
+    const cityRaw = normaliseText(req.query?.city || '');
+
+    const categoryName = categoryNameRaw || categorySlug.replace(/[-_]+/g, ' ');
+
+    const match = {
+      status: 'approved',
+      isVisible: true,
+      'adminModeration.isBlocked': { $ne: true }
+    };
+
+    if (minRating > 0) {
+      match['analytics.ratingAverage'] = { $gte: minRating };
+    }
+
+    if (cityRaw) {
+      match.city = { $regex: new RegExp(escapeRegExp(cityRaw), 'i') };
+    }
+
+    const orFilters = [];
+
+    if (categoryName && categoryName.toLowerCase() !== 'all') {
+      const catRegex = new RegExp(escapeRegExp(categoryName), 'i');
+      orFilters.push({ category: { $regex: catRegex } });
+      orFilters.push({ subcategories: { $elemMatch: { $regex: catRegex } } });
+      orFilters.push({ tags: { $elemMatch: { $regex: catRegex } } });
+    }
+
+    if (searchRaw) {
+      const searchRegex = new RegExp(escapeRegExp(searchRaw), 'i');
+      orFilters.push({ name: { $regex: searchRegex } });
+      orFilters.push({ description: { $regex: searchRegex } });
+      orFilters.push({ address: { $regex: searchRegex } });
+      orFilters.push({ tags: { $elemMatch: { $regex: searchRegex } } });
+    }
+
+    let query = ServiceShop.find(match)
+      .select('name shopUrl category subcategories tags description address city coverImage gallery highlightServices analytics isPremium isFeatured isBookable bookingSettings legacySellerId createdAt updatedAt');
+
+    if (orFilters.length) {
+      query = query.where({ $or: orFilters });
+    }
+
+    const sortOptions = {
+      best: { isFeatured: -1, 'analytics.ratingAverage': -1, 'analytics.ratingCount': -1, createdAt: -1 },
+      popular: { 'analytics.ratingCount': -1, 'analytics.ratingAverage': -1, createdAt: -1 },
+      recent: { createdAt: -1 },
+      featured: { isFeatured: -1, updatedAt: -1 }
+    };
+
+    const sort = sortOptions[sortKey] || sortOptions.best;
+
+    const shops = await query
+      .sort(sort)
+      .limit(limit)
+      .lean();
+
+    if (!shops.length) {
+      return res.json({ items: [], meta: { total: 0, categories: [], tags: [], generatedAt: new Date().toISOString() }, portfolios: [] });
+    }
+
+    const categoryLookup = new Map();
+    const tagLookup = new Map();
+    const sellerIds = new Set();
+    const sellerByShopUrl = new Map();
+    const fallbackUrls = [];
+
+    shops.forEach((shop) => {
+      const mainCategory = normaliseText(shop.category);
+      if (mainCategory) {
+        const slug = slugify(mainCategory);
+        if (!categoryLookup.has(slug)) {
+          categoryLookup.set(slug, { name: mainCategory, slug });
+        }
+      }
+
+      (shop.subcategories || []).forEach((sub) => {
+        const cleaned = normaliseText(sub);
+        if (!cleaned) return;
+        const slug = slugify(cleaned);
+        if (!categoryLookup.has(slug)) {
+          categoryLookup.set(slug, { name: cleaned, slug, parentName: mainCategory });
+        }
+      });
+
+      (shop.tags || []).forEach((tag) => {
+        const cleaned = normaliseText(tag);
+        if (!cleaned) return;
+        const slug = slugify(cleaned);
+        if (!tagLookup.has(slug)) {
+          tagLookup.set(slug, { name: cleaned, slug });
+        }
+      });
+
+      if (shop.legacySellerId && mongoose.Types.ObjectId.isValid(shop.legacySellerId)) {
+        sellerIds.add(shop.legacySellerId.toString());
+      } else if (shop.shopUrl) {
+        fallbackUrls.push(shop.shopUrl.trim().toLowerCase());
+      }
+    });
+
+    if (fallbackUrls.length) {
+      const sellers = await Seller.find({ shopurl: { $in: fallbackUrls } })
+        .select('_id shopurl')
+        .lean();
+      sellers.forEach((seller) => {
+        if (!seller?._id || !seller?.shopurl) return;
+        sellerIds.add(seller._id.toString());
+        sellerByShopUrl.set(String(seller.shopurl).trim().toLowerCase(), seller._id.toString());
+      });
+    }
+
+    const sellerIdList = Array.from(sellerIds)
+      .filter((id) => mongoose.Types.ObjectId.isValid(id))
+      .map((id) => new mongoose.Types.ObjectId(id));
+
+    let portfolioMap = new Map();
+    if (sellerIdList.length) {
+      const aggregated = await SellerPortfolio.aggregate([
+        { $match: { sellerId: { $in: sellerIdList }, isActive: true } },
+        { $sort: { order: 1, createdAt: -1 } },
+        {
+          $group: {
+            _id: '$sellerId',
+            items: {
+              $push: {
+                _id: '$_id',
+                title: '$title',
+                description: '$description',
+                image: '$image',
+                likeCount: { $ifNull: ['$likeCount', 0] }
+              }
+            }
+          }
+        },
+        { $project: { items: { $slice: ['$items', 6] } } }
+      ]);
+
+      portfolioMap = new Map(
+        aggregated.map((entry) => [
+          entry._id.toString(),
+          entry.items.map((item) => ({
+            id: item._id.toString(),
+            title: normaliseText(item.title),
+            description: normaliseText(item.description),
+            image: item.image,
+            likeCount: item.likeCount || 0
+          }))
+        ])
+      );
+    }
+
+    const items = shops.map((shop) => {
+      const sellerId = shop.legacySellerId && mongoose.Types.ObjectId.isValid(shop.legacySellerId)
+        ? shop.legacySellerId.toString()
+        : sellerByShopUrl.get(String(shop.shopUrl || '').trim().toLowerCase());
+
+      const portfolioPreview = sellerId ? (portfolioMap.get(sellerId) || []) : [];
+      const rating = Number(shop?.analytics?.ratingAverage || 0);
+      const reviewCount = Number(shop?.analytics?.ratingCount || 0);
+      const highlightServices = Array.isArray(shop?.highlightServices)
+        ? shop.highlightServices.map((svc) => normaliseText(svc)).filter(Boolean).slice(0, 6)
+        : [];
+
+      const mainCategory = normaliseText(shop.category) || (shop.subcategories || []).map(normaliseText).find(Boolean) || '';
+      const categorySlugResolved = mainCategory ? slugify(mainCategory) : '';
+
+      return {
+        id: shop._id.toString(),
+        name: shop.name,
+        shopUrl: shop.shopUrl,
+        categoryName: mainCategory,
+        categorySlug: categorySlugResolved,
+        subcategories: (shop.subcategories || []).map(normaliseText).filter(Boolean),
+        tags: (shop.tags || []).map(normaliseText).filter(Boolean),
+        description: normaliseText(shop.description),
+        address: normaliseText(shop.address),
+        city: normaliseText(shop.city),
+        rating,
+        reviewCount,
+        isPremium: !!shop.isPremium,
+        isFeatured: !!shop.isFeatured,
+        isBookable: !!shop.isBookable,
+        instantConfirmation: !!shop?.bookingSettings?.instantConfirmation,
+        coverImage: shop.coverImage || (portfolioPreview[0]?.image || ''),
+        highlightServices,
+        portfolioPreview,
+        stats: {
+          followers: Number(shop?.analytics?.customerFollowers || 0),
+          totalBookings: Number(shop?.analytics?.totalBookings || 0)
+        }
+      };
+    });
+
+    const filteredItems = categorySlug && categorySlug.toLowerCase() !== 'all'
+      ? items.filter((item) => {
+        const slug = slugify(categorySlug);
+        return item.categorySlug === slug || item.subcategories.some((sub) => slugify(sub) === slug);
+      })
+      : items;
+
+    const flattenPortfolios = filteredItems.flatMap((shop) =>
+      shop.portfolioPreview.map((item) => ({
+        id: item.id,
+        title: item.title,
+        description: item.description,
+        image: item.image,
+        likeCount: item.likeCount,
+        categorySlug: shop.categorySlug,
+        categoryName: shop.categoryName,
+        shop: {
+          id: shop.id,
+          name: shop.name,
+          shopUrl: shop.shopUrl,
+          rating: shop.rating,
+          reviewCount: shop.reviewCount
+        }
+      }))
+    );
+
+    const response = {
+      items: filteredItems,
+      meta: {
+        total: filteredItems.length,
+        categories: Array.from(categoryLookup.values()),
+        tags: Array.from(tagLookup.values()),
+        generatedAt: new Date().toISOString()
+      },
+      portfolios: flattenPortfolios
+    };
+
+    return res.json(response);
+  } catch (err) {
+    console.error('serviceShops.getPublicShowcase error:', err);
+    return res.status(500).json({ message: 'خطا در دریافت نمونه‌کارها.' });
+  }
+};
+
 exports.buildOverview = buildOverview;
