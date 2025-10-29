@@ -5,6 +5,7 @@ const AdPlan = require('../models/adPlan');
 const fs = require('fs');
 const path = require('path');
 const { calculateExpiry } = require('../utils/adDisplay');
+const { parseDurationHours } = require('../utils/adDisplayConfig');
 
 const ALLOWED_STATUSES = ['pending', 'approved', 'paid', 'rejected', 'expired'];
 const POPULATE_SPEC = [
@@ -297,6 +298,7 @@ exports.updateAdOrder = async (req, res) => {
 
     let hasChanges = false;
     let displayedAtChanged = false;
+    let durationChanged = false;
 
     if (Object.prototype.hasOwnProperty.call(updates, 'adTitle')) {
       const title = updates.adTitle !== undefined && updates.adTitle !== null
@@ -338,6 +340,27 @@ exports.updateAdOrder = async (req, res) => {
       displayedAtChanged = true;
     }
 
+    if (Object.prototype.hasOwnProperty.call(updates, 'displayDurationHours')) {
+      const rawDuration = updates.displayDurationHours;
+      if (rawDuration === null || rawDuration === undefined || rawDuration === '') {
+        if (adOrder.displayDurationHours !== undefined) {
+          adOrder.displayDurationHours = undefined;
+          durationChanged = true;
+          hasChanges = true;
+        }
+      } else {
+        const parsedDuration = parseDurationHours(rawDuration);
+        if (!parsedDuration) {
+          return res.status(400).json({ success: false, message: 'مدت نمایش معتبر نیست.' });
+        }
+        if (adOrder.displayDurationHours !== parsedDuration) {
+          adOrder.displayDurationHours = parsedDuration;
+          durationChanged = true;
+          hasChanges = true;
+        }
+      }
+    }
+
     if (Object.prototype.hasOwnProperty.call(updates, 'adminNote')) {
       adOrder.adminNote = normaliseNote(updates.adminNote);
       hasChanges = true;
@@ -347,7 +370,7 @@ exports.updateAdOrder = async (req, res) => {
       return res.status(400).json({ success: false, message: 'هیچ تغییری اعمال نشد.' });
     }
 
-    if (displayedAtChanged) {
+    if (displayedAtChanged || durationChanged) {
       if (['approved', 'paid'].includes(adOrder.status)) {
         refreshExpiryMetadata(adOrder, { force: true });
       } else if (adOrder.status === 'expired') {
@@ -356,8 +379,9 @@ exports.updateAdOrder = async (req, res) => {
           adOrder.expiresAt = adOrder.expiredAt;
         }
       } else if (!adOrder.displayedAt) {
-        adOrder.displayDurationHours = undefined;
-        adOrder.expiresAt = undefined;
+        if (durationChanged || displayedAtChanged) {
+          adOrder.expiresAt = undefined;
+        }
       }
     }
 

@@ -452,6 +452,75 @@ function toDatetimeLocalValue(value) {
   }
 }
 
+function formatInputNumberValue(value) {
+  const num = Number(value);
+  if (!Number.isFinite(num)) return '';
+  let str = num.toFixed(2);
+  str = str.replace(/\.0+$/, '');
+  str = str.replace(/\.([0-9]*?)0+$/, '.$1');
+  if (str.endsWith('.')) {
+    str = str.slice(0, -1);
+  }
+  return str;
+}
+
+function hasCustomAdDuration(value) {
+  const num = Number(value);
+  return Number.isFinite(num) && num > 0;
+}
+
+function formatAdDuration(hours) {
+  const num = Number(hours);
+  if (!Number.isFinite(num) || num <= 0) return '';
+  const days = Math.floor(num / 24);
+  const remainderRaw = num - days * 24;
+  const remainder = Math.round(remainderRaw * 100) / 100;
+  const parts = [];
+  if (days > 0) {
+    parts.push(`${formatDecimal(days)} روز`);
+  }
+  if (remainder > 0 || parts.length === 0) {
+    const hoursValue = parts.length === 0 ? num : remainder;
+    parts.push(`${formatDecimal(hoursValue)} ساعت`);
+  }
+  return parts.join(' و ');
+}
+
+function prepareAdDurationInput(hours) {
+  const result = { value: '', unit: DEFAULT_AD_DURATION_UNIT };
+  const num = Number(hours);
+  if (!Number.isFinite(num) || num <= 0) {
+    return result;
+  }
+  if (Math.abs(num % 24) < 1e-6) {
+    result.value = formatInputNumberValue(num / 24);
+    result.unit = 'days';
+    return result;
+  }
+  result.value = formatInputNumberValue(num);
+  result.unit = 'hours';
+  return result;
+}
+
+function parseAdDurationForm(valueInput, unitInput) {
+  const rawValue = valueInput ? valueInput.value.trim() : '';
+  const unit = (unitInput ? unitInput.value : DEFAULT_AD_DURATION_UNIT) || DEFAULT_AD_DURATION_UNIT;
+  if (!rawValue) {
+    return { hours: null, isEmpty: true };
+  }
+  const numericValue = Number(rawValue);
+  if (!Number.isFinite(numericValue) || numericValue <= 0) {
+    return { error: 'مدت نمایش وارد شده معتبر نیست.' };
+  }
+  const hours = unit === 'hours' ? numericValue : numericValue * 24;
+  return { hours, isEmpty: false };
+}
+
+function durationsNearlyEqual(a, b) {
+  if (!Number.isFinite(a) || !Number.isFinite(b)) return false;
+  return Math.abs(a - b) < 0.01;
+}
+
 
 
 
@@ -1321,6 +1390,8 @@ const AD_STATUS_META = {
   expired:  { label: 'منقضی شده',       icon: 'ri-time-line', className: 'expired' }
 };
 
+const DEFAULT_AD_DURATION_UNIT = 'days';
+
 function normaliseSlug(value) {
   return String(value || '')
     .trim()
@@ -1371,12 +1442,19 @@ const adPendingCountEl = document.getElementById('adPendingCount');
 const adApprovedCountEl = document.getElementById('adApprovedCount');
 
 const currencyFormatter = new Intl.NumberFormat('fa-IR', { maximumFractionDigits: 0 });
+const decimalFormatter = new Intl.NumberFormat('fa-IR', { maximumFractionDigits: 2 });
 
 function formatCurrency(amount) {
   if (amount === null || amount === undefined || Number.isNaN(Number(amount))) {
     return '—';
   }
   return `${currencyFormatter.format(Math.round(Number(amount)))} تومان`;
+}
+
+function formatDecimal(value) {
+  const num = Number(value);
+  if (!Number.isFinite(num)) return '';
+  return decimalFormatter.format(num);
 }
 
 function formatDateTime(value) {
@@ -1500,11 +1578,25 @@ function renderAdOrders() {
     const displayedAt = order.displayedAt
       ? formatDateTime(order.displayedAt)
       : (order.approvedAt ? formatDateTime(order.approvedAt) : '');
+    const expiresAt = order.expiresAt ? formatDateTime(order.expiresAt) : '';
     const orderId = escapeHtml(getOrderId(order));
 
     const product = order && typeof order.productId === 'object' && order.productId !== null ? order.productId : null;
     const productBadge = product
       ? `<span class="ad-cell-secondary"><i class="ri-shopping-bag-3-line"></i>${escapeHtml(product.title || 'محصول ویژه')}</span>`
+      : '';
+
+    const durationHours = Number(order.displayDurationHours);
+    const hasCustomDuration = hasCustomAdDuration(durationHours);
+    const durationBadges = [];
+    if (hasCustomDuration) {
+      durationBadges.push(`<span><i class="ri-timer-line"></i>${escapeHtml(formatAdDuration(durationHours))}</span>`);
+    }
+    if (expiresAt) {
+      durationBadges.push(`<span><i class="ri-calendar-event-line"></i>پایان: ${escapeHtml(expiresAt)}</span>`);
+    }
+    const durationMetaHtml = durationBadges.length
+      ? `<div class="ad-cell-secondary ad-duration-badges">${durationBadges.join('')}</div>`
       : '';
 
     const sellerMetaParts = [];
@@ -1559,6 +1651,7 @@ function renderAdOrders() {
           ${productBadge}
           <div class="ad-title">${escapeHtml(order.adTitle || order.planTitle || 'بدون عنوان')}</div>
           ${adText}
+          ${durationMetaHtml}
         </td>
         <td data-column="مبلغ"><div class="ad-price">${formatCurrency(order.price)}</div></td>
         <td data-column="ثبت درخواست">
@@ -1914,6 +2007,17 @@ function renderAdOrderModal(order) {
   const previewTitle = order.adTitle || order.planTitle || planLabel;
   const textValue = order.adText || '';
   const priceInputValue = order.price !== undefined && order.price !== null ? String(order.price) : '';
+  const expiresAt = order.expiresAt ? formatDateTime(order.expiresAt) : '';
+  const durationHours = Number(order.displayDurationHours);
+  const hasCustomDuration = hasCustomAdDuration(durationHours);
+  const durationDisplay = hasCustomDuration ? formatAdDuration(durationHours) : '';
+  const durationSummaryText = hasCustomDuration ? `${durationDisplay} (سفارشی)` : 'پیش‌فرض پلن';
+  const durationPreset = prepareAdDurationInput(durationHours);
+  const durationInputValue = durationPreset.value;
+  const durationInputUnit = durationPreset.unit;
+  const durationHintText = hasCustomDuration
+    ? `مدت سفارشی فعلی: ${durationDisplay}. برای بازگشت به تنظیمات پلن مقدار را خالی بگذارید یا روی «پیش‌فرض پلن» کلیک کنید.`
+    : 'برای تعیین مدت نمایش سفارشی عدد مورد نظر را وارد کنید؛ در صورت خالی بودن، مدت پیش‌فرض پلن اعمال می‌شود.';
 
   overlay.innerHTML = `
     <div class="ad-modal" role="dialog" aria-modal="true">
@@ -1944,6 +2048,8 @@ function renderAdOrderModal(order) {
             <span><span class="label">آخرین بررسی:</span> ${reviewedAt ? `${reviewedAt}${reviewedBy ? ` توسط ${escapeHtml(reviewedBy)}` : ''}` : 'در انتظار بررسی'}</span>
             ${approvedAt ? `<span><span class="label">تاریخ تایید:</span> ${approvedAt}</span>` : ''}
             ${displayedAt ? `<span><span class="label">تاریخ نمایش:</span> ${displayedAt}</span>` : '<span><span class="label">تاریخ نمایش:</span> در انتظار تعیین</span>'}
+            <span><span class="label">مدت نمایش:</span> ${escapeHtml(durationSummaryText)}</span>
+            ${expiresAt ? `<span><span class="label">پایان نمایش:</span> ${expiresAt}</span>` : ''}
             ${planLocationRow}
           </div>
         </div>
@@ -1969,6 +2075,16 @@ function renderAdOrderModal(order) {
           <input type="number" id="adModalPrice" min="0" step="1000" value="${escapeHtml(priceInputValue)}" />
           <label for="adModalDisplayedAt">تاریخ نمایش در سایت</label>
           <input type="datetime-local" id="adModalDisplayedAt" value="${escapeHtml(displayedAtInputValue)}" />
+          <label for="adModalDurationValue">مدت نمایش سفارشی</label>
+          <div class="ad-duration-control">
+            <input type="number" id="adModalDurationValue" min="1" step="0.5" value="${escapeHtml(durationInputValue)}" placeholder="مثلاً 3" />
+            <select id="adModalDurationUnit">
+              <option value="days" ${durationInputUnit === 'days' ? 'selected' : ''}>روز</option>
+              <option value="hours" ${durationInputUnit === 'hours' ? 'selected' : ''}>ساعت</option>
+            </select>
+            <button type="button" class="ad-action-btn ghost ad-duration-reset" id="adModalDurationReset"><i class="ri-arrow-go-back-line"></i> پیش‌فرض پلن</button>
+          </div>
+          <div class="ad-duration-hint">${escapeHtml(durationHintText)}</div>
         </div>
         <div class="ad-edit-actions">
           <button type="button" id="adModalSave" class="ad-action-btn ghost"><i class="ri-save-3-line"></i> ذخیره تغییرات</button>
@@ -1993,6 +2109,7 @@ function renderAdOrderModal(order) {
         ${reviewedAt ? `<span>آخرین بررسی: ${reviewedAt}${reviewedBy ? ` توسط ${escapeHtml(reviewedBy)}` : ''}</span>` : ''}
         ${approvedAt ? `<span>تایید نهایی: ${approvedAt}</span>` : ''}
         ${displayedAt ? `<span>نمایش در سایت: ${displayedAt}</span>` : '<span>نمایش در سایت: در انتظار نمایش</span>'}
+        ${expiresAt ? `<span>پایان نمایش: ${expiresAt}</span>` : ''}
       </div>
 
       <div class="ad-modal-status">
@@ -2007,8 +2124,13 @@ function renderAdOrderModal(order) {
   const textInput = overlay.querySelector('#adModalText');
   const priceInput = overlay.querySelector('#adModalPrice');
   const displayedAtInput = overlay.querySelector('#adModalDisplayedAt');
+  const durationValueInput = overlay.querySelector('#adModalDurationValue');
+  const durationUnitSelect = overlay.querySelector('#adModalDurationUnit');
+  const durationResetButton = overlay.querySelector('#adModalDurationReset');
   const saveButton = overlay.querySelector('#adModalSave');
   const deleteButton = overlay.querySelector('#adModalDelete');
+  const originalDurationHours = hasCustomDuration ? durationHours : null;
+  const hasOriginalDuration = hasCustomDuration;
 
   overlay.querySelectorAll('.ad-modal-actions button').forEach(button => {
     button.addEventListener('click', () => {
@@ -2074,6 +2196,26 @@ function renderAdOrderModal(order) {
         hasChanges = true;
       }
 
+      const durationResult = parseAdDurationForm(durationValueInput, durationUnitSelect);
+      if (durationResult && durationResult.error) {
+        setAdModalEditStatus(durationResult.error, 'error');
+        return;
+      }
+      if (durationResult) {
+        if (durationResult.isEmpty) {
+          if (hasOriginalDuration) {
+            payload.displayDurationHours = null;
+            hasChanges = true;
+          }
+        } else {
+          const newDurationHours = durationResult.hours;
+          if (!hasOriginalDuration || !durationsNearlyEqual(newDurationHours, originalDurationHours)) {
+            payload.displayDurationHours = newDurationHours;
+            hasChanges = true;
+          }
+        }
+      }
+
       const currentNote = noteInput ? noteInput.value : '';
       if ((currentNote || '').trim() !== (adminNoteValue || '').trim()) {
         payload.adminNote = currentNote;
@@ -2100,6 +2242,18 @@ function renderAdOrderModal(order) {
           setAdModalEditStatus(err.message || 'خطا در ذخیره تغییرات.', 'error');
         })
         .finally(() => setButtonLoading(saveButton, false));
+    });
+  }
+
+  if (durationResetButton) {
+    durationResetButton.addEventListener('click', () => {
+      if (durationValueInput) {
+        durationValueInput.value = '';
+      }
+      if (durationUnitSelect) {
+        durationUnitSelect.value = DEFAULT_AD_DURATION_UNIT;
+      }
+      setAdModalEditStatus('مدت نمایش به حالت پیش‌فرض پلن بازنشانی شد. برای اعمال تغییر روی «ذخیره تغییرات» کلیک کنید.', 'info');
     });
   }
 
