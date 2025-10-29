@@ -287,23 +287,26 @@
     .portfolio-metric-chip {
       display: inline-flex;
       align-items: center;
+      justify-content: center;
       gap: 0.55rem;
-      padding: 0.45rem 0.85rem;
-      border-radius: 9999px;
-      background: linear-gradient(135deg, rgba(15, 118, 110, 0.14), rgba(14, 165, 233, 0.12));
-      border: 1px solid rgba(14, 165, 233, 0.18);
+      padding: 0.6rem 1rem;
+      border-radius: 18px;
+      background: linear-gradient(135deg, rgba(15, 118, 110, 0.16), rgba(14, 165, 233, 0.15));
+      border: 1px solid rgba(14, 165, 233, 0.22);
       color: #0f172a;
-      font-size: 0.8rem;
+      font-size: 0.82rem;
       font-weight: 700;
       white-space: nowrap;
+      min-width: 148px;
+      box-shadow: 0 12px 22px rgba(14, 165, 233, 0.12);
     }
     .portfolio-metric-chip[data-variant="likes"] {
-      background: linear-gradient(135deg, rgba(16, 185, 129, 0.18), rgba(52, 211, 153, 0.2));
-      color: #047857;
+      background: linear-gradient(135deg, rgba(16, 185, 129, 0.2), rgba(52, 211, 153, 0.22));
+      color: #065f46;
     }
     .portfolio-metric-chip[data-variant="views"] {
-      background: linear-gradient(135deg, rgba(14, 165, 233, 0.16), rgba(59, 130, 246, 0.18));
-      color: #0369a1;
+      background: linear-gradient(135deg, rgba(14, 165, 233, 0.18), rgba(59, 130, 246, 0.2));
+      color: #0c4a6e;
     }
     .portfolio-metric-label {
       font-size: 0.7rem;
@@ -311,9 +314,29 @@
       opacity: 0.8;
     }
     .portfolio-metric-value {
-      font-size: 0.95rem;
+      font-size: 1.05rem;
       font-weight: 800;
       line-height: 1;
+    }
+    @media (max-width: 640px) {
+      .portfolio-modal-header {
+        width: 100%;
+      }
+      .portfolio-modal-metrics {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 0.75rem;
+        width: 100%;
+      }
+      .portfolio-metric-chip {
+        width: 100%;
+        min-width: 0;
+        font-size: 0.85rem;
+        padding: 0.75rem 0.5rem;
+      }
+      .portfolio-metric-value {
+        font-size: 1.2rem;
+      }
     }
     .portfolio-sort-group {
       display: inline-flex;
@@ -363,6 +386,12 @@
         padding: 2rem;
       }
     }
+    @media (max-width: 640px) {
+      .portfolio-modal-backdrop {
+        align-items: flex-end;
+        padding: 0.75rem;
+      }
+    }
     .portfolio-modal-container {
       width: min(100%, 640px);
       max-height: min(90vh, 720px);
@@ -373,6 +402,16 @@
       overflow: hidden;
       display: grid;
       grid-template-rows: auto 1fr;
+    }
+    @media (max-width: 640px) {
+      .portfolio-modal-container {
+        width: 100%;
+        max-height: 85vh;
+        border-radius: 28px 28px 18px 18px;
+        box-shadow: 0 -8px 45px rgba(15, 118, 110, 0.24);
+        animation: portfolio-modal-slide-up 0.35s cubic-bezier(0.18, 0.89, 0.32, 1.28) forwards;
+        transform-origin: center bottom;
+      }
     }
     @media (min-width: 1024px) {
       .portfolio-modal-container {
@@ -386,6 +425,11 @@
       width: 100%;
       min-height: 240px;
       overflow: hidden;
+    }
+    @media (max-width: 640px) {
+      .portfolio-modal-media {
+        min-height: 220px;
+      }
     }
     @media (min-width: 640px) {
       .portfolio-modal-media {
@@ -410,6 +454,11 @@
       gap: 1.25rem;
       overflow-y: auto;
     }
+    @media (max-width: 640px) {
+      .portfolio-modal-body {
+        padding: 1.5rem 1.5rem 1.75rem;
+      }
+    }
     @media (min-width: 768px) {
       .portfolio-modal-body {
         padding: 2rem;
@@ -418,7 +467,7 @@
     .portfolio-modal-close {
       position: absolute;
       top: 1rem;
-      left: 1rem;
+      inset-inline-start: 1rem;
       display: inline-flex;
       align-items: center;
       justify-content: center;
@@ -436,13 +485,33 @@
       transform: scale(1.05);
       background: rgba(15, 23, 42, 0.9);
     }
+    @media (max-width: 640px) {
+      .portfolio-modal-close {
+        top: 0.75rem;
+        inset-inline-start: auto;
+        inset-inline-end: 0.75rem;
+        width: 42px;
+        height: 42px;
+        background: rgba(15, 23, 42, 0.82);
+      }
+    }
     @media (max-width: 540px) {
       .portfolio-modal-body {
-        padding: 1.25rem;
+        padding: 1.25rem 1.25rem 1.75rem;
       }
       .portfolio-modal-close {
         width: 40px;
         height: 40px;
+      }
+    }
+    @keyframes portfolio-modal-slide-up {
+      from {
+        opacity: 0;
+        transform: translateY(40px) scale(0.98);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
       }
     }
   </style>
