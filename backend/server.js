@@ -19,6 +19,7 @@ const app = express();
 const cookieParser = require('cookie-parser');
 const path = require('path');
 const dailyVisitRoutes = require('./routes/dailyVisitRoutes');
+const { startAdCleanupScheduler } = require('./utils/adCleanupScheduler');
 
 // ------------------- Middlewares -------------------
 app.use(cookieParser());
@@ -102,6 +103,15 @@ const MONGO_URI = process.env.MONGO_URI;
 mongoose.connect(MONGO_URI)
   .then(() => {
     console.log('✅ MongoDB connected');
+    const cleanupHandle = startAdCleanupScheduler();
+    if (cleanupHandle) {
+      app.locals.adCleanupHandle = cleanupHandle;
+      const stopCleanup = () => {
+        clearInterval(cleanupHandle);
+      };
+      process.once('SIGINT', stopCleanup);
+      process.once('SIGTERM', stopCleanup);
+    }
     app.listen(PORT, () => {
       console.log(`🚀 Server running on port ${PORT}`);
     });
