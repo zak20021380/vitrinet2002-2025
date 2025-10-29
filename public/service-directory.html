@@ -312,6 +312,24 @@
       return Array.isArray(list) ? list.map(item => ({ ...item })) : [];
     }
 
+    function buildCategoryLookups(list = []) {
+      const slugLookup = {};
+      const nameLookup = {};
+      list.forEach(item => {
+        if (!item) return;
+        const slug = normaliseText(item.slug || '');
+        const nameKey = normaliseText(item.name || '').toLowerCase();
+        if (slug) {
+          slugLookup[slug] = { ...item };
+          slugLookup[slug.toLowerCase()] = { ...item };
+        }
+        if (slug && nameKey) {
+          nameLookup[nameKey] = slug;
+        }
+      });
+      return { bySlug: slugLookup, byName: nameLookup };
+    }
+
     const API_ORIGIN = window.location.origin.includes('localhost') ? 'http://localhost:5000' : window.location.origin;
     const CATEGORY_API_URL = `${API_ORIGIN}/api/categories`;
 
@@ -327,12 +345,13 @@
 
     const FALLBACK_SERVICE_SUBCATEGORIES = normaliseCategoryList(RAW_DEFAULT_SERVICE_SUBCATEGORIES);
 
+    const initialServiceSubcategories = cloneCategoryList(FALLBACK_SERVICE_SUBCATEGORIES);
+    const initialLookups = buildCategoryLookups(initialServiceSubcategories);
+
     const categoryState = {
-      serviceSubcategories: cloneCategoryList(FALLBACK_SERVICE_SUBCATEGORIES),
-      lookup: FALLBACK_SERVICE_SUBCATEGORIES.reduce((acc, item) => {
-        if (item.slug) acc[item.slug] = { ...item };
-        return acc;
-      }, {})
+      serviceSubcategories: initialServiceSubcategories,
+      lookup: initialLookups.bySlug,
+      nameToSlug: initialLookups.byName
     };
 
     const serviceShops = [
@@ -488,6 +507,25 @@
       }
     ];
 
+    function updateShopCategorySlugs() {
+      const lookupByName = categoryState.nameToSlug || {};
+      const lookupBySlug = categoryState.lookup || {};
+      serviceShops.forEach(shop => {
+        if (!shop) return;
+        const currentSlug = normaliseText(shop.categorySlug || '');
+        const currentSlugKey = currentSlug.toLowerCase();
+        if (currentSlug && (lookupBySlug[currentSlug] || lookupBySlug[currentSlugKey])) {
+          return;
+        }
+        const nameKey = normaliseText(shop.categoryName || '').toLowerCase();
+        if (nameKey && lookupByName[nameKey]) {
+          shop.categorySlug = lookupByName[nameKey];
+        }
+      });
+    }
+
+    updateShopCategorySlugs();
+
     const defaultCategoryContent = {
       title: 'مراکز خدماتی برتر سنندج',
       subtitle: 'بهترین سالن‌های زیبایی، کارواش‌ها و خدمات شهری با امکان مقایسه تخصص، قیمت و تجربه کاربران.',
@@ -519,13 +557,11 @@
 
     function setCategoryState(list) {
       const records = cloneCategoryList(list);
+      const lookups = buildCategoryLookups(records);
       categoryState.serviceSubcategories = records;
-      categoryState.lookup = records.reduce((acc, item) => {
-        if (item && item.slug) {
-          acc[item.slug] = { ...item };
-        }
-        return acc;
-      }, {});
+      categoryState.lookup = lookups.bySlug;
+      categoryState.nameToSlug = lookups.byName;
+      updateShopCategorySlugs();
     }
 
     function populateCategoryOptions(list) {
