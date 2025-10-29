@@ -1490,13 +1490,17 @@ function renderServiceShowcase(config, shops) {
   const slider = document.getElementById(config.sliderId);
   if (!slider) return;
 
+  const section = slider.closest('section');
+
   slider.innerHTML = '';
 
   if (!shops.length) {
-    slider.innerHTML = `<p class="w-full text-center text-sm sm:text-base text-gray-400 py-6">${escapeHTML(config.emptyMessage)}</p>`;
+    if (section) section.classList.add('hidden');
     updateSliderNavVisibility(config.sliderId);
     return;
   }
+
+  if (section) section.classList.remove('hidden');
 
   shops.forEach((shop, index) => {
     const tone = config.tonePalette[index % config.tonePalette.length];
@@ -1545,7 +1549,14 @@ function renderServiceShowcase(config, shops) {
 
 async function loadServiceShowcases() {
   const activeConfigs = SERVICE_SHOWCASE_CONFIGS
-    .map(config => ({ ...config, element: document.getElementById(config.sliderId) }))
+    .map(config => {
+      const element = document.getElementById(config.sliderId);
+      if (!element) return null;
+      const section = element.closest('section');
+      if (section) section.classList.add('hidden');
+      return { ...config, element, section };
+    })
+    .filter(Boolean)
     .filter(entry => entry.element);
 
   if (!activeConfigs.length) return;
@@ -1567,6 +1578,7 @@ async function loadServiceShowcases() {
   } catch (err) {
     activeConfigs.forEach(entry => {
       entry.element.innerHTML = '<p class="w-full text-center text-sm sm:text-base text-red-500 py-6">خطا در دریافت کسب‌وکارهای ثبت‌شده.</p>';
+      if (entry.section) entry.section.classList.remove('hidden');
       updateSliderNavVisibility(entry.sliderId);
     });
     console.error('loadServiceShowcases error', err);
