@@ -84,6 +84,39 @@
       border-color: rgba(14, 165, 233, 0.45);
       box-shadow: 0 8px 18px rgba(14, 165, 233, 0.16);
     }
+    .view-toggle-group {
+      display: inline-flex;
+      align-items: center;
+      background: rgba(255, 255, 255, 0.9);
+      border-radius: 9999px;
+      border: 1px solid rgba(14, 165, 233, 0.25);
+      box-shadow: 0 8px 18px rgba(14, 165, 233, 0.14);
+      overflow: hidden;
+    }
+    .view-toggle-button {
+      border: none;
+      background: transparent;
+      padding: 0.45rem 0.95rem;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: #0369a1;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      transition: all 0.2s ease;
+      cursor: pointer;
+    }
+    .view-toggle-button i {
+      font-size: 0.95rem;
+    }
+    .view-toggle-button[data-active="true"] {
+      background: linear-gradient(90deg,#10b981,#0ea5e9);
+      color: #fff;
+      box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.2);
+    }
+    .view-toggle-button:not([data-active="true"]):hover {
+      background: rgba(14, 165, 233, 0.08);
+    }
     .portfolio-card {
       transition: transform 0.25s ease, box-shadow 0.25s ease;
     }
@@ -294,32 +327,50 @@
       </div>
     </section>
 
-    <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-16">
-      <div class="flex items-center justify-between gap-4 mb-6">
+    <section id="shops-section" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-16">
+      <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-6">
         <div>
           <h2 class="text-2xl font-extrabold text-slate-800 mb-1">نتایج فیلتر شده</h2>
           <p id="results-subtitle" class="text-sm text-slate-500">مراکز ارائه‌دهنده خدمات مطابق با معیارهای شما</p>
         </div>
-        <span class="badge-emerald badge" id="results-count">۰ نتیجه</span>
-      </div>
-
-      <div id="results-loading" class="hidden py-14 flex justify-center">
-        <div class="loading-spinner" role="status" aria-label="در حال بارگذاری"></div>
-      </div>
-
-      <div id="results-grid" class="grid gap-5 sm:gap-6 lg:gap-7 grid-cols-1 sm:grid-cols-2 xl:grid-cols-3">
-      </div>
-
-      <div id="empty-state" class="hidden glass-surface mt-8 p-8 rounded-3xl text-center border border-dashed border-emerald-200/70">
-        <div class="mx-auto w-16 h-16 rounded-full bg-emerald-50 text-emerald-500 flex items-center justify-center mb-4">
-          <svg viewBox="0 0 24 24" class="w-8 h-8" fill="none" stroke="currentColor" stroke-width="1.5">
-            <path d="M9 13h6M12 16V8" stroke-linecap="round" stroke-linejoin="round" />
-            <path d="M20 11.5A8.38 8.38 0 1 1 5.64 6" stroke-linecap="round" stroke-linejoin="round" />
-          </svg>
+        <div class="flex flex-wrap items-center justify-end gap-3 sm:gap-4">
+          <span class="badge-emerald badge" id="results-count">۰ نتیجه</span>
+          <div id="view-mode-toggle" class="view-toggle-group">
+            <button type="button" class="view-toggle-button" data-mode="all" data-active="true">
+              <i class="ri-layout-grid-line"></i>
+              <span>همه</span>
+            </button>
+            <button type="button" class="view-toggle-button" data-mode="shops" data-active="false">
+              <i class="ri-store-2-line"></i>
+              <span>فقط مغازه‌ها</span>
+            </button>
+            <button type="button" class="view-toggle-button" data-mode="portfolios" data-active="false">
+              <i class="ri-gallery-line"></i>
+              <span>فقط نمونه‌کارها</span>
+            </button>
+          </div>
         </div>
-        <h3 class="text-xl font-bold text-slate-800 mb-2">خدمتی با این شرایط پیدا نشد</h3>
-        <p class="text-sm text-slate-500 leading-relaxed mb-4">فیلترها را کمی تغییر دهید یا دسته‌بندی دیگری را انتخاب کنید تا گزینه‌های بیشتری ببینید.</p>
-        <button id="reset-filters" class="px-5 py-2 rounded-full bg-gradient-to-l from-emerald-500 to-sky-500 text-white font-semibold shadow-md hover:shadow-lg transition">بازنشانی فیلترها</button>
+      </div>
+
+      <div id="shops-content" class="space-y-0">
+        <div id="results-loading" class="hidden py-14 flex justify-center">
+          <div class="loading-spinner" role="status" aria-label="در حال بارگذاری"></div>
+        </div>
+
+        <div id="results-grid" class="grid gap-5 sm:gap-6 lg:gap-7 grid-cols-1 sm:grid-cols-2 xl:grid-cols-3">
+        </div>
+
+        <div id="empty-state" class="hidden glass-surface mt-8 p-8 rounded-3xl text-center border border-dashed border-emerald-200/70">
+          <div class="mx-auto w-16 h-16 rounded-full bg-emerald-50 text-emerald-500 flex items-center justify-center mb-4">
+            <svg viewBox="0 0 24 24" class="w-8 h-8" fill="none" stroke="currentColor" stroke-width="1.5">
+              <path d="M9 13h6M12 16V8" stroke-linecap="round" stroke-linejoin="round" />
+              <path d="M20 11.5A8.38 8.38 0 1 1 5.64 6" stroke-linecap="round" stroke-linejoin="round" />
+            </svg>
+          </div>
+          <h3 class="text-xl font-bold text-slate-800 mb-2">خدمتی با این شرایط پیدا نشد</h3>
+          <p class="text-sm text-slate-500 leading-relaxed mb-4">فیلترها را کمی تغییر دهید یا دسته‌بندی دیگری را انتخاب کنید تا گزینه‌های بیشتری ببینید.</p>
+          <button id="reset-filters" class="px-5 py-2 rounded-full bg-gradient-to-l from-emerald-500 to-sky-500 text-white font-semibold shadow-md hover:shadow-lg transition">بازنشانی فیلترها</button>
+        </div>
       </div>
     </section>
 
@@ -420,24 +471,10 @@
   const CATEGORY_API_URL = `${API_ORIGIN}/api/categories`;
   const SHOWCASE_API_URL = `${API_ORIGIN}/api/service-shops/showcase`;
 
-  const DEFAULT_SERVICE_CATEGORY_NAME = 'خدمات';
-  const RAW_DEFAULT_SERVICE_SUBCATEGORIES = [
-    { name: 'آرایشگاه مردانه', parentName: DEFAULT_SERVICE_CATEGORY_NAME },
-    { name: 'آرایشگاه زنانه', parentName: DEFAULT_SERVICE_CATEGORY_NAME },
-    { name: 'کارواش', parentName: DEFAULT_SERVICE_CATEGORY_NAME },
-    { name: 'کلینیک زیبایی', parentName: DEFAULT_SERVICE_CATEGORY_NAME },
-    { name: 'تعمیر موبایل', parentName: DEFAULT_SERVICE_CATEGORY_NAME },
-    { name: 'خیاطی', parentName: DEFAULT_SERVICE_CATEGORY_NAME }
-  ];
-
-  const FALLBACK_SERVICE_SUBCATEGORIES = normaliseCategoryList(RAW_DEFAULT_SERVICE_SUBCATEGORIES);
-
   const categoryState = {
-    serviceSubcategories: cloneCategoryList(FALLBACK_SERVICE_SUBCATEGORIES),
-    lookup: FALLBACK_SERVICE_SUBCATEGORIES.reduce((acc, item) => {
-      if (item.slug) acc[item.slug] = { ...item };
-      return acc;
-    }, {})
+    serviceSubcategories: [],
+    lookup: {},
+    authoritative: []
   };
 
   const defaultCategoryContent = {
@@ -455,6 +492,8 @@
     items: [],
     portfolios: [],
     portfolioCategory: 'all',
+    viewMode: 'all',
+    visiblePortfolioCount: 0,
     meta: { categories: [] },
     loading: false
   };
@@ -477,15 +516,21 @@
     resultsLoading: document.getElementById('results-loading'),
     portfolioGrid: document.getElementById('portfolio-grid'),
     portfolioEmpty: document.getElementById('portfolio-empty'),
-    portfolioChips: document.getElementById('portfolio-chip-container')
+    portfolioChips: document.getElementById('portfolio-chip-container'),
+    viewModeToggle: document.getElementById('view-mode-toggle'),
+    shopsContent: document.getElementById('shops-content'),
+    portfolioSection: document.getElementById('portfolio-section')
   };
 
-  function setCategoryState(list = []) {
+  function setCategoryState(list = [], options = {}) {
     categoryState.serviceSubcategories = cloneCategoryList(list);
     categoryState.lookup = categoryState.serviceSubcategories.reduce((acc, item) => {
       if (item.slug) acc[item.slug] = { ...item };
       return acc;
     }, {});
+    if (options.updateAuthoritative) {
+      categoryState.authoritative = cloneCategoryList(categoryState.serviceSubcategories);
+    }
   }
 
   function populateCategoryOptions(list = []) {
@@ -505,12 +550,22 @@
 
   function mergeCategoryOptions(list = []) {
     if (!Array.isArray(list) || !list.length) return;
+    const metaList = normaliseCategoryList(list);
+    if (!metaList.length) return;
+
+    const allowedSlugs = Array.isArray(categoryState.authoritative) && categoryState.authoritative.length
+      ? new Set(categoryState.authoritative.filter(item => item?.slug).map(item => item.slug))
+      : null;
+
     const combined = normaliseCategoryList([
       ...categoryState.serviceSubcategories,
-      ...list
+      ...metaList
     ]);
+    const filtered = allowedSlugs
+      ? combined.filter(item => allowedSlugs.has(item.slug))
+      : combined;
     const previous = state.category;
-    setCategoryState(combined);
+    setCategoryState(filtered);
     populateCategoryOptions(categoryState.serviceSubcategories);
     if (elements.categorySelect) {
       if (previous && categoryState.lookup[previous]) {
@@ -572,9 +627,6 @@
 
   function updateStats(items = []) {
     const total = items.length;
-    if (elements.resultsCount) {
-      elements.resultsCount.textContent = `${total.toLocaleString('fa-IR')} نتیجه`;
-    }
     if (elements.statsCount) {
       elements.statsCount.textContent = total.toLocaleString('fa-IR');
     }
@@ -584,6 +636,54 @@
         ? average.toLocaleString('fa-IR', { minimumFractionDigits: 1, maximumFractionDigits: 1 })
         : '۰';
     }
+  }
+
+  function updateResultsBadge() {
+    if (!elements.resultsCount) return;
+    const shopCount = Array.isArray(state.items) ? state.items.length : 0;
+    const portfolioCount = Number.isFinite(state.visiblePortfolioCount) ? state.visiblePortfolioCount : 0;
+    let label = 'نتیجه';
+    let count = shopCount;
+
+    if (state.viewMode === 'portfolios') {
+      label = 'نمونه‌کار';
+      count = portfolioCount;
+    } else if (state.viewMode === 'all') {
+      label = 'مورد';
+      count = shopCount + portfolioCount;
+    }
+
+    elements.resultsCount.textContent = `${count.toLocaleString('fa-IR')} ${label}`;
+  }
+
+  function applyViewMode(mode = 'all') {
+    const allowed = ['all', 'shops', 'portfolios'];
+    const next = allowed.includes(mode) ? mode : 'all';
+    state.viewMode = next;
+
+    if (elements.viewModeToggle) {
+      elements.viewModeToggle.querySelectorAll('button[data-mode]').forEach(btn => {
+        btn.dataset.active = btn.dataset.mode === next ? 'true' : 'false';
+      });
+    }
+
+    if (elements.shopsContent) {
+      if (next === 'portfolios') {
+        elements.shopsContent.classList.add('hidden');
+      } else {
+        elements.shopsContent.classList.remove('hidden');
+      }
+    }
+
+    if (elements.portfolioSection) {
+      if (next === 'shops') {
+        elements.portfolioSection.classList.add('hidden');
+      } else {
+        elements.portfolioSection.classList.remove('hidden');
+      }
+    }
+
+    updateResultsBadge();
   }
 
   function renderHighlightChips(services = []) {
@@ -616,26 +716,30 @@
     const grid = elements.resultsGrid;
     if (!grid) return;
 
-    if (state.loading && state.items.length) {
+    const items = Array.isArray(state.items) ? state.items : [];
+
+    if (state.loading && items.length) {
       if (elements.resultsLoading) elements.resultsLoading.classList.remove('hidden');
+      updateResultsBadge();
       return;
     }
 
-    if (state.loading && !state.items.length) {
+    if (state.loading && !items.length) {
       if (elements.resultsLoading) elements.resultsLoading.classList.remove('hidden');
       grid.innerHTML = '';
       if (elements.emptyState) elements.emptyState.classList.add('hidden');
+      updateStats([]);
+      updateResultsBadge();
       return;
     }
 
     if (elements.resultsLoading) elements.resultsLoading.classList.add('hidden');
 
-    const items = Array.isArray(state.items) ? state.items : [];
-
     if (!items.length) {
       grid.innerHTML = '';
       if (elements.emptyState) elements.emptyState.classList.remove('hidden');
       updateStats([]);
+      updateResultsBadge();
       return;
     }
 
@@ -691,6 +795,7 @@
     }).join('');
 
     updateStats(items);
+    updateResultsBadge();
   }
 
   function renderPortfolioChips() {
@@ -725,24 +830,32 @@
     const grid = elements.portfolioGrid;
     if (!grid) return;
 
-    if (state.loading && !state.portfolios.length) {
+    const items = Array.isArray(state.portfolios) ? state.portfolios : [];
+
+    if (state.loading && !items.length) {
+      state.visiblePortfolioCount = 0;
+      updateResultsBadge();
       grid.innerHTML = '<div class="col-span-full flex justify-center py-12"><div class="loading-spinner" role="status" aria-label="در حال بارگذاری نمونه‌کارها"></div></div>';
       if (elements.portfolioEmpty) elements.portfolioEmpty.classList.add('hidden');
       return;
     }
 
-    if (state.loading && state.portfolios.length) {
-      return;
-    }
-
-    const items = Array.isArray(state.portfolios) ? state.portfolios : [];
     const filtered = state.portfolioCategory && state.portfolioCategory !== 'all'
       ? items.filter(item => item.categorySlug === state.portfolioCategory)
       : items;
 
+    if (state.loading && items.length) {
+      state.visiblePortfolioCount = filtered.length;
+      updateResultsBadge();
+      return;
+    }
+
+    state.visiblePortfolioCount = filtered.length;
+
     if (!filtered.length) {
       grid.innerHTML = '';
       if (elements.portfolioEmpty) elements.portfolioEmpty.classList.remove('hidden');
+      updateResultsBadge();
       return;
     }
 
@@ -783,6 +896,8 @@
         </article>
       `;
     }).join('');
+
+    updateResultsBadge();
   }
 
   async function fetchShowcase() {
@@ -859,7 +974,7 @@
       elements.categorySelect.disabled = true;
     }
 
-    let resolvedList = cloneCategoryList(FALLBACK_SERVICE_SUBCATEGORIES);
+    let resolvedList = [];
     try {
       const response = await fetch(CATEGORY_API_URL);
       if (response.ok) {
@@ -875,7 +990,7 @@
       console.error('خطا در دریافت دسته‌بندی خدمات:', error);
     }
 
-    setCategoryState(resolvedList);
+    setCategoryState(resolvedList, { updateAuthoritative: true });
     populateCategoryOptions(categoryState.serviceSubcategories);
 
     const desired = preferredSlug && categoryState.lookup[preferredSlug]
@@ -941,9 +1056,18 @@
         if (elements.sortSelect) elements.sortSelect.value = 'best';
         if (elements.ratingSelect) elements.ratingSelect.value = '0';
 
+        applyViewMode('all');
         applyCategoryConfig('all');
         syncCategoryUrlParam();
         fetchShowcase();
+      });
+    }
+
+    if (elements.viewModeToggle) {
+      elements.viewModeToggle.querySelectorAll('button[data-mode]').forEach(button => {
+        button.addEventListener('click', () => {
+          applyViewMode(button.dataset.mode || 'all');
+        });
       });
     }
   }
@@ -978,6 +1102,7 @@
   if (elements.sortSelect) elements.sortSelect.value = state.sort;
 
   applyCategoryConfig(state.category);
+  applyViewMode(state.viewMode);
   attachEventListeners();
   loadCategoryOptions(pendingCategoryFromUrl);
 </script>
