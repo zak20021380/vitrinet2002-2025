@@ -1549,31 +1549,31 @@ function renderAdOrders() {
 
     return `
       <tr class="ad-order-row status-${escapeHtml(statusClass)}" data-order-id="${orderId}" data-status="${escapeHtml(statusClass)}">
-        <td>
+        <td data-column="فروشنده">
           <div class="ad-cell-primary">${escapeHtml(sellerName)}</div>
           ${sellerMetaParts.length ? `<div class="ad-cell-secondary">${sellerMetaParts.join('')}</div>` : ''}
         </td>
-        <td>
+        <td data-column="پلن / جزئیات">
           <span class="ad-plan-pill"><i class="ri-megaphone-line"></i>${escapeHtml(planLabel)}</span>
           ${planLocationBadge}
           ${productBadge}
           <div class="ad-title">${escapeHtml(order.adTitle || order.planTitle || 'بدون عنوان')}</div>
           ${adText}
         </td>
-        <td><div class="ad-price">${formatCurrency(order.price)}</div></td>
-        <td>
+        <td data-column="مبلغ"><div class="ad-price">${formatCurrency(order.price)}</div></td>
+        <td data-column="ثبت درخواست">
           <div class="ad-date">
             <span><i class="ri-calendar-line"></i> ثبت: ${createdAt}</span>
             ${displayDateHtml}
           </div>
         </td>
-        <td>
+        <td data-column="آخرین وضعیت">
           <div class="ad-status-cell">
             <span class="ad-status-badge ${statusMeta.className}"><i class="${statusMeta.icon}"></i>${statusMeta.label}</span>
             <div class="ad-status-note">${reviewText}</div>
           </div>
         </td>
-        <td>
+        <td data-column="عملیات">
           <div class="ad-actions">
             ${viewLocationButton}
             <button class="ad-action-btn ghost" data-action="view" data-id="${orderId}"><i class="ri-eye-line"></i> جزئیات</button>
