@@ -22,32 +22,12 @@
       box-shadow: 0 20px 55px rgba(14, 165, 233, 0.12);
       backdrop-filter: blur(18px);
     }
-    .filter-chip {
-      transition: all 0.2s ease;
-    }
-    .filter-chip:hover {
-      transform: translateY(-2px);
-    }
-    .filter-chip.active {
-      background: linear-gradient(90deg, #10b981, #0ea5e9);
-      color: #fff;
-      box-shadow: 0 10px 25px rgba(16, 185, 129, 0.2);
-    }
-    .sort-button {
-      transition: all 0.2s ease;
-    }
-    .sort-button.active {
-      background: rgba(16, 185, 129, 0.12);
-      color: #047857;
-      border-color: rgba(16, 185, 129, 0.35);
-      box-shadow: 0 10px 20px rgba(16, 185, 129, 0.1);
-    }
     .service-card {
-      transition: all 0.25s ease;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
     }
     .service-card:hover {
-      transform: translateY(-6px);
-      box-shadow: 0 22px 40px rgba(14, 165, 233, 0.18);
+      transform: translateY(-4px);
+      box-shadow: 0 18px 36px rgba(14, 165, 233, 0.14);
     }
     .badge {
       background: rgba(14, 165, 233, 0.12);
@@ -60,11 +40,6 @@
     .badge-emerald {
       background: rgba(16, 185, 129, 0.14);
       color: #047857;
-    }
-    .category-chip.active {
-      background: linear-gradient(90deg, #38bdf8, #10b981);
-      color: #fff;
-      box-shadow: 0 12px 24px rgba(56, 189, 248, 0.18);
     }
     ::-webkit-scrollbar {
       width: 6px;
@@ -110,63 +85,41 @@
 
   <main class="flex-1 w-full">
     <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 pb-8">
-      <div class="flex flex-wrap gap-2 sm:gap-3 mb-6">
-        <button data-category="all" class="category-chip px-4 py-2 rounded-full border border-slate-200 bg-white text-slate-600 font-semibold transition">
-          همه خدمات
-        </button>
-        <button data-category="barbershop" class="category-chip px-4 py-2 rounded-full border border-slate-200 bg-white text-slate-600 font-semibold transition">
-          سالن‌های زیبایی و آرایشگاه‌ها
-        </button>
-        <button data-category="carwash" class="category-chip px-4 py-2 rounded-full border border-slate-200 bg-white text-slate-600 font-semibold transition">
-          کارواش‌ها و دیتیلینگ خودرو
-        </button>
-      </div>
-
-      <div class="glass-surface border border-slate-100/80 p-5 sm:p-7 rounded-3xl mb-8">
-        <div class="flex flex-col gap-5 lg:gap-6">
-          <div class="flex flex-col lg:flex-row lg:items-center gap-4">
-            <div class="relative flex-1">
-              <input id="search-input" type="search" placeholder="جستجو بر اساس نام، خیابان یا نوع خدمت..." class="w-full rounded-2xl border border-slate-200 bg-white/80 px-5 py-3 text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-emerald-400 focus:border-emerald-300 shadow-sm">
+      <div class="glass-surface border border-slate-100/80 p-6 sm:p-8 rounded-3xl">
+        <div class="grid gap-5 lg:grid-cols-12 items-end">
+          <div class="lg:col-span-5">
+            <label for="search-input" class="text-sm font-semibold text-slate-500">جستجو در خدمات</label>
+            <div class="relative mt-2">
+              <input id="search-input" type="search" placeholder="نام خدمت یا محله را وارد کنید" class="w-full rounded-2xl border border-slate-200 bg-white/80 px-5 py-3 text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-emerald-400 focus:border-emerald-300 shadow-sm">
               <span class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">
                 <svg viewBox="0 0 24 24" class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3-3" stroke-linecap="round" stroke-linejoin="round"/></svg>
               </span>
             </div>
-            <div class="flex items-center gap-2">
-              <label for="rating-select" class="text-sm font-semibold text-slate-500 whitespace-nowrap">حداقل امتیاز:</label>
-              <select id="rating-select" class="rounded-2xl border border-slate-200 bg-white/80 px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-sky-400">
-                <option value="0">بدون محدودیت</option>
-                <option value="4">۴ به بالا</option>
-                <option value="4.5">۴.۵ به بالا</option>
-                <option value="4.7">۴.۷ به بالا</option>
-              </select>
-            </div>
           </div>
-
-          <div class="flex flex-wrap items-center gap-2 sm:gap-3">
-            <span class="text-sm font-semibold text-slate-500">مرتب‌سازی:</span>
-            <button data-sort="best" class="sort-button border border-slate-200 text-slate-600 rounded-full px-4 py-2 text-sm font-semibold bg-white">بهترین امتیاز</button>
-            <button data-sort="popular" class="sort-button border border-slate-200 text-slate-600 rounded-full px-4 py-2 text-sm font-semibold bg-white">محبوب‌ترین</button>
-            <button data-sort="price" class="sort-button border border-slate-200 text-slate-600 rounded-full px-4 py-2 text-sm font-semibold bg-white">کمترین قیمت</button>
+          <div class="lg:col-span-3">
+            <label for="category-select" class="text-sm font-semibold text-slate-500">دسته‌بندی</label>
+            <select id="category-select" class="mt-2 w-full rounded-2xl border border-slate-200 bg-white/80 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400">
+              <option value="all">همه خدمات</option>
+              <option value="barbershop">سالن‌های زیبایی</option>
+              <option value="carwash">کارواش و دیتیلینگ</option>
+            </select>
           </div>
-
-          <div class="flex flex-col gap-4">
-            <div class="flex flex-wrap items-center gap-3">
-              <span class="text-sm font-semibold text-slate-500">سقف بودجه:</span>
-              <div class="flex items-center gap-3 w-full sm:w-auto">
-                <input type="range" id="price-range" class="w-full sm:w-64" min="0" max="0" step="50000">
-                <span id="price-range-label" class="text-sm font-bold text-emerald-600 whitespace-nowrap">تا ۰ تومان</span>
-              </div>
-            </div>
-            <div class="flex flex-wrap gap-2">
-              <span class="text-sm font-semibold text-slate-500">فیلترهای ویژه:</span>
-              <button class="filter-chip px-4 py-2 rounded-full border border-slate-200 bg-white text-sm font-semibold text-slate-600" data-feature="online-booking">رزرو آنلاین</button>
-              <button class="filter-chip px-4 py-2 rounded-full border border-slate-200 bg-white text-sm font-semibold text-slate-600" data-feature="home-service">خدمات در محل</button>
-              <button class="filter-chip px-4 py-2 rounded-full border border-slate-200 bg-white text-sm font-semibold text-slate-600" data-feature="vip">فضای VIP</button>
-              <button class="filter-chip px-4 py-2 rounded-full border border-slate-200 bg-white text-sm font-semibold text-slate-600" data-feature="parking">پارکینگ اختصاصی</button>
-              <button class="filter-chip px-4 py-2 rounded-full border border-slate-200 bg-white text-sm font-semibold text-slate-600" data-feature="detailing">دیتیلینگ حرفه‌ای</button>
-              <button class="filter-chip px-4 py-2 rounded-full border border-slate-200 bg-white text-sm font-semibold text-slate-600" data-feature="eco-friendly">دوستدار محیط زیست</button>
-              <button class="filter-chip px-4 py-2 rounded-full border border-slate-200 bg-white text-sm font-semibold text-slate-600" data-feature="membership">اشتراک ویژه</button>
-            </div>
+          <div class="lg:col-span-2">
+            <label for="sort-select" class="text-sm font-semibold text-slate-500">مرتب‌سازی</label>
+            <select id="sort-select" class="mt-2 w-full rounded-2xl border border-slate-200 bg-white/80 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400">
+              <option value="best">بهترین امتیاز</option>
+              <option value="popular">محبوب‌ترین</option>
+              <option value="price">کمترین هزینه</option>
+            </select>
+          </div>
+          <div class="lg:col-span-2">
+            <label for="rating-select" class="text-sm font-semibold text-slate-500">حداقل امتیاز</label>
+            <select id="rating-select" class="mt-2 w-full rounded-2xl border border-slate-200 bg-white/80 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400">
+              <option value="0">همه امتیازها</option>
+              <option value="4">۴ به بالا</option>
+              <option value="4.5">۴.۵ به بالا</option>
+              <option value="4.7">۴.۷ به بالا</option>
+            </select>
           </div>
         </div>
       </div>
@@ -232,7 +185,7 @@
           </svg>
         </div>
         <h3 class="text-xl font-bold text-slate-800 mb-2">خدمتی با این شرایط پیدا نشد</h3>
-        <p class="text-sm text-slate-500 leading-relaxed mb-4">فیلترها را کمی تغییر دهید یا سقف بودجه را افزایش دهید تا گزینه‌های بیشتری ببینید.</p>
+        <p class="text-sm text-slate-500 leading-relaxed mb-4">فیلترها را کمی تغییر دهید یا دسته‌بندی دیگری را انتخاب کنید تا گزینه‌های بیشتری ببینید.</p>
         <button id="reset-filters" class="px-5 py-2 rounded-full bg-gradient-to-l from-emerald-500 to-sky-500 text-white font-semibold shadow-md hover:shadow-lg transition">بازنشانی فیلترها</button>
       </div>
     </section>
@@ -390,18 +343,13 @@
       category: 'all',
       sort: 'best',
       search: '',
-      minRating: 0,
-      maxPrice: 0,
-      features: new Set()
+      minRating: 0
     };
 
-    const categoryButtons = Array.from(document.querySelectorAll('.category-chip'));
-    const sortButtons = Array.from(document.querySelectorAll('.sort-button'));
-    const featureButtons = Array.from(document.querySelectorAll('.filter-chip'));
     const searchInput = document.getElementById('search-input');
+    const categorySelect = document.getElementById('category-select');
+    const sortSelect = document.getElementById('sort-select');
     const ratingSelect = document.getElementById('rating-select');
-    const priceRange = document.getElementById('price-range');
-    const priceRangeLabel = document.getElementById('price-range-label');
     const resultsGrid = document.getElementById('results-grid');
     const resultsCount = document.getElementById('results-count');
     const resultsSubtitle = document.getElementById('results-subtitle');
@@ -413,10 +361,6 @@
     const heroSubtitle = document.getElementById('hero-subtitle');
     const pageTitle = document.getElementById('page-title');
 
-    function formatPrice(value) {
-      return new Intl.NumberFormat('fa-IR').format(value);
-    }
-
     function applyCategoryConfig(categoryKey) {
       const config = categoryConfig[categoryKey] || categoryConfig.all;
       heroTitle.textContent = config.title;
@@ -425,32 +369,13 @@
       pageTitle.textContent = `${config.title} | Vitreenet`;
     }
 
-    function updatePriceBounds() {
-      const filteredByCategory = state.category === 'all' ? serviceShops : serviceShops.filter(shop => shop.category === state.category);
-      const prices = filteredByCategory.map(shop => shop.price);
-      const minPrice = Math.min(...prices);
-      const maxPrice = Math.max(...prices);
-      priceRange.min = minPrice;
-      priceRange.max = maxPrice;
-      if (!state.maxPrice || state.maxPrice > maxPrice || state.maxPrice < minPrice) {
-        state.maxPrice = maxPrice;
-      }
-      priceRange.value = state.maxPrice;
-      priceRangeLabel.textContent = `تا ${formatPrice(state.maxPrice)} تومان`;
-    }
-
     function renderResults() {
       const filtered = serviceShops
         .filter(shop => state.category === 'all' || shop.category === state.category)
         .filter(shop => !state.search || (shop.name + shop.description + shop.address + shop.services.join(' ')).toLowerCase().includes(state.search.toLowerCase()))
-        .filter(shop => shop.rating >= state.minRating)
-        .filter(shop => shop.price <= state.maxPrice)
-        .filter(shop => {
-          if (state.features.size === 0) return true;
-          return Array.from(state.features).every(feature => shop.features.includes(feature));
-        });
+        .filter(shop => shop.rating >= state.minRating);
 
-      const sorted = filtered.sort((a, b) => {
+      const sorted = [...filtered].sort((a, b) => {
         if (state.sort === 'best') {
           return b.rating - a.rating || b.reviews - a.reviews;
         }
@@ -464,38 +389,36 @@
       });
 
       resultsGrid.innerHTML = sorted.map(shop => {
-        const featureBadges = shop.features.slice(0, 3).map(feature => `<span class="badge text-xs">${featureLabels(feature)}</span>`).join('');
-        const servicesList = shop.services.slice(0, 3).map(service => `<span class="inline-flex items-center px-3 py-1 rounded-full bg-slate-50 text-slate-500 text-xs font-semibold border border-slate-200">${service}</span>`).join('');
+        const highlightedServices = shop.services.slice(0, 3).join('، ');
         return `
-          <article class="service-card glass-surface border border-white/80 overflow-hidden flex flex-col">
-            <div class="relative h-48">
+          <article class="service-card rounded-3xl border border-slate-100 bg-white overflow-hidden shadow-sm flex flex-col">
+            <div class="relative h-44">
               <img src="${shop.image}" alt="${shop.name}" loading="lazy" class="w-full h-full object-cover">
-              <div class="absolute top-3 left-3 flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/90 text-emerald-600 text-sm font-bold shadow">
-                <svg viewBox="0 0 24 24" class="w-4 h-4" fill="currentColor"><path d="M12 .587l3.668 7.431 8.207 1.193-5.938 5.787 1.402 8.168L12 18.896l-7.339 3.87 1.402-8.168L.125 9.211l8.207-1.193z"/></svg>
+              <div class="absolute top-3 left-3 flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/90 text-emerald-600 text-sm font-semibold shadow-sm">
+                <svg viewBox="0 0 24 24" class="w-4 h-4" fill="currentColor"><path d="M12 .587 15.668 8.018l8.207 1.193-5.938 5.787 1.402 8.168L12 18.896l-7.339 3.87 1.402-8.168L.125 9.211l8.207-1.193z"/></svg>
                 <span>${shop.rating.toFixed(1)}</span>
-                <span class="text-xs text-slate-400">(${shop.reviews})</span>
+                <span class="text-xs text-slate-400">(${shop.reviews.toLocaleString('fa-IR')})</span>
               </div>
             </div>
-            <div class="p-5 sm:p-6 flex-1 flex flex-col gap-4">
-              <div>
-                <h3 class="text-lg sm:text-xl font-extrabold text-slate-800 mb-1">${shop.name}</h3>
-                <p class="text-sm text-slate-500 leading-relaxed">${shop.description}</p>
-              </div>
-              <div class="flex flex-wrap gap-2">${servicesList}</div>
-              <div class="flex items-center justify-between text-sm text-slate-500">
-                <span class="inline-flex items-center gap-1">
+            <div class="p-5 sm:p-6 flex flex-col gap-4 flex-1">
+              <div class="space-y-1">
+                <h3 class="text-lg sm:text-xl font-extrabold text-slate-800">${shop.name}</h3>
+                <div class="flex items-center gap-2 text-xs sm:text-sm text-slate-400">
                   <svg viewBox="0 0 24 24" class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 21s-7-5.686-7-11a7 7 0 0 1 14 0c0 5.314-7 11-7 11z" stroke-linecap="round" stroke-linejoin="round"/><circle cx="12" cy="10" r="2"/></svg>
-                  ${shop.address}
-                </span>
-                <span class="font-bold text-emerald-600">${shop.priceLabel}</span>
+                  <span>${shop.address}</span>
+                </div>
               </div>
-            </div>
-            <div class="px-5 sm:px-6 pb-6 flex items-center justify-between">
-              <div class="flex items-center gap-2">${featureBadges}</div>
-              <a href="service-shops.html?id=${shop.id}" class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-l from-emerald-500 to-sky-500 text-white text-sm font-semibold shadow-md hover:shadow-lg transition">
-                مشاهده پروفایل
-                <svg viewBox="0 0 24 24" class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.5"><path d="m9 5 7 7-7 7" stroke-linecap="round" stroke-linejoin="round"/></svg>
-              </a>
+              <p class="text-sm text-slate-500 leading-relaxed">${shop.description}</p>
+              <div class="text-xs sm:text-sm text-slate-500 bg-slate-50 border border-slate-200 rounded-2xl px-3 py-2">
+                خدمات شاخص: <span class="font-semibold text-slate-600">${highlightedServices}</span>
+              </div>
+              <div class="mt-auto flex items-center justify-between pt-4 border-t border-slate-100 text-sm text-slate-500">
+                <span class="font-semibold text-emerald-600">${shop.priceLabel}</span>
+                <a href="service-shops.html?id=${shop.id}" class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-l from-emerald-500 to-sky-500 text-white text-sm font-semibold shadow-md hover:shadow-lg transition">
+                  مشاهده پروفایل
+                  <svg viewBox="0 0 24 24" class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.5"><path d="m9 5 7 7-7 7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </a>
+              </div>
             </div>
           </article>
         `;
@@ -503,40 +426,14 @@
 
       resultsCount.textContent = `${sorted.length.toLocaleString('fa-IR')} نتیجه`;
       statsCount.textContent = sorted.length.toLocaleString('fa-IR');
-      const averageRating = sorted.length ? (sorted.reduce((sum, shop) => sum + shop.rating, 0) / sorted.length).toFixed(1) : '۰';
-      statsRating.textContent = sorted.length ? averageRating : '۰';
+      const averageRating = sorted.length ? sorted.reduce((sum, shop) => sum + shop.rating, 0) / sorted.length : 0;
+      statsRating.textContent = sorted.length ? Number(averageRating.toFixed(1)).toLocaleString('fa-IR', { minimumFractionDigits: 1, maximumFractionDigits: 1 }) : '۰';
 
       if (sorted.length === 0) {
         emptyState.classList.remove('hidden');
       } else {
         emptyState.classList.add('hidden');
       }
-    }
-
-    function featureLabels(id) {
-      const labels = {
-        'online-booking': 'رزرو آنلاین',
-        'home-service': 'خدمات در محل',
-        'vip': 'فضای VIP',
-        'parking': 'پارکینگ',
-        'detailing': 'دیتیلینگ',
-        'eco-friendly': 'دوستدار محیط زیست',
-        'membership': 'اشتراک ویژه'
-      };
-      return labels[id] || 'ویژه';
-    }
-
-    function setActiveCategory(category) {
-      state.category = category;
-      categoryButtons.forEach(btn => {
-        btn.classList.toggle('active', btn.dataset.category === category);
-      });
-      applyCategoryConfig(category);
-      updatePriceBounds();
-      renderResults();
-      const params = new URLSearchParams(window.location.search);
-      params.set('category', category);
-      history.replaceState({}, '', `${window.location.pathname}?${params.toString()}`);
     }
 
     const urlParams = new URLSearchParams(window.location.search);
@@ -546,51 +443,26 @@
     }
 
     applyCategoryConfig(state.category);
-    categoryButtons.forEach(btn => {
-      if (btn.dataset.category === state.category) {
-        btn.classList.add('active');
-      }
-    });
-
-    const allPrices = serviceShops.map(shop => shop.price);
-    state.maxPrice = Math.max(...allPrices);
-    updatePriceBounds();
-
-    sortButtons.forEach(button => {
-      button.addEventListener('click', () => {
-        state.sort = button.dataset.sort;
-        sortButtons.forEach(btn => btn.classList.toggle('active', btn === button));
-        renderResults();
-      });
-      if (button.dataset.sort === state.sort) {
-        button.classList.add('active');
-      }
-    });
-
-    featureButtons.forEach(button => {
-      button.addEventListener('click', () => {
-        const feature = button.dataset.feature;
-        if (state.features.has(feature)) {
-          state.features.delete(feature);
-          button.classList.remove('active');
-        } else {
-          state.features.add(feature);
-          button.classList.add('active');
-        }
-        renderResults();
-      });
-    });
-
-    categoryButtons.forEach(button => {
-      button.addEventListener('click', () => {
-        categoryButtons.forEach(btn => btn.classList.remove('active'));
-        button.classList.add('active');
-        setActiveCategory(button.dataset.category);
-      });
-    });
+    categorySelect.value = state.category;
+    sortSelect.value = state.sort;
+    ratingSelect.value = state.minRating;
 
     searchInput.addEventListener('input', (event) => {
       state.search = event.target.value.trim();
+      renderResults();
+    });
+
+    categorySelect.addEventListener('change', (event) => {
+      state.category = event.target.value;
+      applyCategoryConfig(state.category);
+      renderResults();
+      const params = new URLSearchParams(window.location.search);
+      params.set('category', state.category);
+      history.replaceState({}, '', `${window.location.pathname}?${params.toString()}`);
+    });
+
+    sortSelect.addEventListener('change', (event) => {
+      state.sort = event.target.value;
       renderResults();
     });
 
@@ -599,22 +471,19 @@
       renderResults();
     });
 
-    priceRange.addEventListener('input', (event) => {
-      state.maxPrice = Number(event.target.value);
-      priceRangeLabel.textContent = `تا ${formatPrice(state.maxPrice)} تومان`;
-      renderResults();
-    });
-
     resetFiltersBtn.addEventListener('click', () => {
       state.sort = 'best';
       state.search = '';
       state.minRating = 0;
-      state.features.clear();
       searchInput.value = '';
+      categorySelect.value = 'all';
+      sortSelect.value = 'best';
       ratingSelect.value = '0';
-      sortButtons.forEach(btn => btn.classList.toggle('active', btn.dataset.sort === 'best'));
-      featureButtons.forEach(btn => btn.classList.remove('active'));
-      updatePriceBounds();
+      state.category = 'all';
+      applyCategoryConfig(state.category);
+      const params = new URLSearchParams(window.location.search);
+      params.set('category', state.category);
+      history.replaceState({}, '', `${window.location.pathname}?${params.toString()}`);
       renderResults();
     });
 
