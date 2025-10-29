@@ -437,6 +437,13 @@ function toFaPrice (num) {
   return (+num || 0).toLocaleString('fa-IR');
 }
 
+function toFaDigits(num) {
+  if (num === null || num === undefined) return '';
+  const parsed = Number(num);
+  if (Number.isNaN(parsed)) return '';
+  return parsed.toLocaleString('fa-IR');
+}
+
 function faToEn(str) {
   return (str || '').replace(/[۰-۹]/g, d => '0123456789'.charAt('۰۱۲۳۴۵۶۷۸۹'.indexOf(d)));
 }
@@ -894,53 +901,67 @@ async function fetchMyPlans() {
   // وضعیت پلن (active, expired, ...)
   function statusBadge(plan) {
     if (!plan.status) return "";
-    let bg = "bg-gray-400", text = "text-white", txt = "";
+    let background = "#94a3b8";
+    let textColor = "#fff";
+    let label = "";
     switch (plan.status) {
       case "active":
-        bg = "bg-green-500";
-        txt = "فعال";
+        background = "#10B981";
+        label = "فعال";
         break;
       case "approved":
-        bg = "bg-emerald-500";
-        txt = "تایید شده";
+        background = "#14b8a6";
+        label = "تایید شده";
         break;
       case "expired":
-        bg = "bg-red-400";
-        txt = "منقضی";
+        background = "#ef4444";
+        label = "منقضی";
         break;
       case "pending":
-        bg = "bg-[#F59E0B]";
-        text = "text-white";
-        txt = "در انتظار";
+        background = "#f59e0b";
+        label = "در انتظار";
         break;
       case "paid":
-        bg = "bg-blue-500";
-        txt = "پرداخت شده";
+        background = "#3b82f6";
+        label = "پرداخت شده";
         break;
       case "review":
       case "under_review":
-        bg = "bg-gray-200";
-        text = "text-gray-600";
-        txt = "زیر نظر";
+        background = "#e2e8f0";
+        textColor = "#475569";
+        label = "زیر نظر";
         break;
       default:
-        txt = plan.status;
+        label = plan.status;
     }
-    return `<div class="absolute left-3 top-3 text-xs ${bg} ${text} rounded-full px-3 py-0.5 shadow status-badge">${txt}</div>`;
+    return `<span class="plan-status-badge" style="--badge-bg:${background}; --badge-text:${textColor};">${label}</span>`;
   }
 
   function subStatusBadge(plan) {
-    let status = plan.status || (plan.active ? 'active' : '');
+    const status = plan.status || (plan.active ? 'active' : '');
     if (!status) return '';
-    let color = '#3B82F6', label = 'فعال';
+    let background = '#3B82F6';
+    let textColor = '#fff';
+    let label = 'فعال';
     switch (status) {
-      case 'expired': color = '#EF4444'; label = 'منقضی'; break;
-      case 'approved': color = '#10B981'; label = 'تایید شده'; break;
-      case 'pending': color = '#F59E0B'; label = 'در انتظار'; break;
+      case 'expired':
+        background = '#EF4444';
+        label = 'منقضی';
+        break;
+      case 'approved':
+        background = '#10B981';
+        label = 'تایید شده';
+        break;
+      case 'pending':
+        background = '#F59E0B';
+        label = 'در انتظار';
+        break;
       case 'active':
-      default: color = '#3B82F6'; label = 'فعال';
+      default:
+        background = '#3B82F6';
+        label = 'فعال';
     }
-    return `<span class="my-plan-status" style="background:${color}">${label}</span>`;
+    return `<span class="plan-status-badge" style="--badge-bg:${background}; --badge-text:${textColor};">${label}</span>`;
   }
 
   function getAdLocationHint(plan) {
@@ -972,6 +993,48 @@ async function fetchMyPlans() {
     if (sellerId) return `/shop.html?id=${encodeURIComponent(sellerId)}`;
 
     return '';
+  }
+
+  const DAY_IN_MS = 24 * 60 * 60 * 1000;
+
+  function calculateSubscriptionProgress(plan) {
+    if (!plan?.startDate || !plan?.endDate) return null;
+    const start = new Date(plan.startDate).getTime();
+    const end = new Date(plan.endDate).getTime();
+    if (Number.isNaN(start) || Number.isNaN(end) || end <= start) return null;
+
+    const now = Date.now();
+    const started = now >= start;
+    const elapsed = started ? now - start : 0;
+    const duration = end - start;
+    const progress = duration > 0 ? (elapsed / duration) * 100 : 0;
+    const remainingDays = Math.ceil((end - now) / DAY_IN_MS);
+    const daysToStart = started ? 0 : Math.ceil((start - now) / DAY_IN_MS);
+
+    return {
+      progress: Math.min(100, Math.max(0, progress)),
+      remainingDays,
+      started,
+      daysToStart: Math.max(0, daysToStart)
+    };
+  }
+
+  function buildTimelineMeta(info) {
+    if (!info) return '';
+    if (!info.started) {
+      if (info.daysToStart <= 0) {
+        return 'این اشتراک از امروز فعال می‌شود';
+      }
+      const value = info.daysToStart === 1 ? '۱' : toFaDigits(info.daysToStart);
+      return `<strong>${value}</strong> روز تا شروع اشتراک`;
+    }
+
+    if (info.remainingDays <= 0) {
+      return 'این اشتراک به پایان رسیده است';
+    }
+
+    const value = info.remainingDays === 1 ? '۱' : toFaDigits(info.remainingDays);
+    return `<strong>${value}</strong> روز تا پایان اشتراک`;
   }
 
   try {
@@ -1024,29 +1087,100 @@ async function fetchMyPlans() {
 
     // کارت‌های پلن اشتراک
     const subCards = subPlans.length
-      ? subPlans.map(plan => `
-        <div class="my-plan-card mb-4">
-          ${subStatusBadge(plan)}
-          <div class="text-lg font-bold mb-1">${plan.title || '-'}</div>
-          <div class="text-2xl font-extrabold text-[#10B981] mb-3">${toFaPrice(getEffectivePlanPrice(plan, adPriceMap))} <span class="text-sm font-normal text-gray-300">تومان</span></div>
-          <div class="flex flex-col items-end gap-1 text-gray-300 text-xs sm:text-sm">
-            <div>شروع: <span dir="ltr">${toJalaliDate(plan.startDate) || '-'}</span></div>
-            <div>پایان: <span dir="ltr">${toJalaliDate(plan.endDate) || '-'}</span></div>
-          </div>
-          ${plan.description ? `<div class="text-xs text-gray-400 mt-3 text-right">${plan.description}</div>` : ''}
-        </div>
-      `).join('')
+      ? subPlans.map(plan => {
+          const statusMarkup = subStatusBadge(plan);
+          const price = toFaPrice(getEffectivePlanPrice(plan, adPriceMap));
+          const startDate = toJalaliDate(plan.startDate) || '-';
+          const endDate = toJalaliDate(plan.endDate) || '-';
+          const progressInfo = calculateSubscriptionProgress(plan);
+          const timelineMeta = buildTimelineMeta(progressInfo);
+          const progressValue = progressInfo ? Math.max(0, Math.min(100, Math.round(progressInfo.progress))) : 0;
+          const progressSection = progressInfo
+            ? `<div class="my-plan-card__progress" style="--progress:${progressValue}%">
+                <div class="plan-progress-track">
+                  <span class="plan-progress-bar"></span>
+                </div>
+                ${timelineMeta ? `<div class="progress-meta">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="8"></circle>
+                    <path d="M12 8v4l2.5 1.5"></path>
+                  </svg>
+                  ${timelineMeta}
+                </div>` : ''}
+              </div>`
+            : '';
+
+          const description = plan.description
+            ? `<p class="my-plan-card__description">${plan.description}</p>`
+            : '';
+
+          return `
+            <article class="my-plan-card plan-card-surface subscription-card mb-4">
+              <div class="my-plan-card__header">
+                <div class="plan-pill">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="3" y="4" width="18" height="17" rx="2" fill="none"></rect>
+                    <path d="M8 2v4"></path>
+                    <path d="M16 2v4"></path>
+                    <path d="M3 9h18"></path>
+                    <path d="M9 15l2 2 4-4"></path>
+                  </svg>
+                  پلن اشتراک فروشگاه
+                </div>
+                ${statusMarkup || ''}
+              </div>
+              <div>
+                <h3 class="my-plan-card__title">${plan.title || '-'}</h3>
+                <div class="my-plan-card__price">
+                  <span class="price-amount">${price}</span>
+                  <span class="price-unit">تومان</span>
+                </div>
+              </div>
+              <div class="my-plan-card__dates">
+                <div class="info-row">
+                  <span class="info-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                      <rect x="4" y="5" width="16" height="15" rx="2" fill="none"></rect>
+                      <path d="M8 3v4"></path>
+                      <path d="M16 3v4"></path>
+                      <path d="M4 9h16"></path>
+                      <path d="M9 14h2"></path>
+                    </svg>
+                  </span>
+                  <div>
+                    <div class="info-label">تاریخ شروع</div>
+                    <div class="info-value" dir="ltr">${startDate}</div>
+                  </div>
+                </div>
+                <div class="info-row info-row--end">
+                  <span class="info-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M6 4v16"></path>
+                      <path d="M6 5h10l-2.5 3L16 11H6"></path>
+                    </svg>
+                  </span>
+                  <div>
+                    <div class="info-label">تاریخ پایان</div>
+                    <div class="info-value" dir="ltr">${endDate}</div>
+                  </div>
+                </div>
+              </div>
+              ${progressSection}
+              ${description}
+            </article>
+          `;
+        }).join('')
       : `<div class="text-xs text-gray-400 py-5 text-center">هیچ پلن اشتراکی نداری!</div>`;
 
     // کارت تبلیغات (با نوع، عکس، تاریخ شروع و پایان وسط‌چین)
     const adCards = adPlans.length
       ? adPlans.map(plan => {
-          let img = '';
+          let mediaMarkup = '';
           if (plan.bannerImage) {
             let imgSrc = plan.bannerImage.startsWith('http')
               ? plan.bannerImage
               : UPLOADS_BASE + plan.bannerImage.replace(/^\/?uploads\//, '');
-            img = `<img src="${imgSrc}" alt="بنر تبلیغ" class="w-full h-32 sm:h-36 object-cover rounded-xl mb-2 border shadow-sm">`;
+            mediaMarkup = `<div class="plan-card__media-wrapper"><img src="${imgSrc}" alt="بنر تبلیغ"></div>`;
           }
           const status = statusBadge(plan);
           const adType = getAdTypeLabel(plan);
@@ -1088,26 +1222,76 @@ async function fetchMyPlans() {
           ].filter(Boolean);
 
           const actionsMarkup = actions.length
-            ? `<div class="flex flex-col sm:flex-row sm:flex-wrap sm:items-center gap-2 mt-3">${actions.join('')}</div>`
+            ? `<div class="plan-card__actions">${actions.join('')}</div>`
+            : '';
+
+          const locationMarkup = locationHint
+            ? `<div class="plan-card__hint">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M12 21s6-5.25 6-10.5A6 6 0 0 0 6 10.5C6 15.75 12 21 12 21z"></path>
+                  <circle cx="12" cy="10.5" r="1.8"></circle>
+                </svg>
+                ${locationHint}
+              </div>`
+            : '';
+
+          const description = plan.description
+            ? `<p class="my-plan-card__description my-plan-card__description--ad">${plan.description}</p>`
             : '';
 
           return `
-            <div class="plan-card border border-orange-200 rounded-xl bg-white p-4 sm:p-5 shadow-sm mb-4 hover:shadow-lg hover:border-orange-400 transition-all relative">
-              ${status}
-              <div class="flex items-center gap-2 mb-2">
-                <span class="inline-block px-2 py-0.5 rounded bg-orange-100 text-orange-600 text-xs font-bold">${adType}</span>
+            <article class="plan-card plan-card-surface plan-card--ad mb-4">
+              <div class="my-plan-card__header">
+                <div class="plan-pill plan-pill--ad">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <path d="M12 7v6l3 2"></path>
+                  </svg>
+                  ${adType}
+                </div>
+                ${status || ''}
               </div>
-              ${img}
-              <div class="font-bold text-orange-700 text-base mb-1">${plan.title || '-'}</div>
-              <div class="text-base text-orange-800 font-extrabold mb-2">${toFaPrice(getEffectivePlanPrice(plan, adPriceMap))} <span class="text-xs font-normal">تومان</span></div>
-              <div class="flex flex-col items-center gap-1 text-gray-500 text-xs sm:text-sm mb-2">
-                <div>شروع: <span dir="ltr">${toJalaliDate(plan.startDate) || '-'}</span></div>
-                <div>پایان: <span dir="ltr">${getAdEndDate(plan)}</span></div>
+              <div>
+                <h3 class="my-plan-card__title">${plan.title || '-'}</h3>
+                <div class="my-plan-card__price">
+                  <span class="price-amount">${toFaPrice(getEffectivePlanPrice(plan, adPriceMap))}</span>
+                  <span class="price-unit">تومان</span>
+                </div>
               </div>
-              ${plan.description ? `<div class="text-xs text-gray-400 mt-1 text-center">${plan.description}</div>` : ''}
-              ${locationHint ? `<div class="text-[11px] text-gray-400 mt-2 text-center">${locationHint}</div>` : ''}
+              ${mediaMarkup}
+              <div class="my-plan-card__dates">
+                <div class="info-row">
+                  <span class="info-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                      <rect x="4" y="5" width="16" height="15" rx="2" fill="none"></rect>
+                      <path d="M8 3v4"></path>
+                      <path d="M16 3v4"></path>
+                      <path d="M4 9h16"></path>
+                      <path d="M9 14h2"></path>
+                    </svg>
+                  </span>
+                  <div>
+                    <div class="info-label">تاریخ شروع</div>
+                    <div class="info-value" dir="ltr">${toJalaliDate(plan.startDate) || '-'}</div>
+                  </div>
+                </div>
+                <div class="info-row info-row--end">
+                  <span class="info-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M6 4v16"></path>
+                      <path d="M6 5h10l-2.5 3L16 11H6"></path>
+                    </svg>
+                  </span>
+                  <div>
+                    <div class="info-label">تاریخ پایان</div>
+                    <div class="info-value" dir="ltr">${getAdEndDate(plan)}</div>
+                  </div>
+                </div>
+              </div>
+              ${locationMarkup}
+              ${description}
               ${actionsMarkup}
-            </div>
+            </article>
           `;
         }).join('')
       : `<div class="text-xs text-gray-400 py-5 text-center">هنوز پلن تبلیغی نخریدی!</div>`;

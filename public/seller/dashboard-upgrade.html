@@ -160,20 +160,7 @@
       background: linear-gradient(90deg,#ec4899,#f59e0b);
     }
 
-    /* کارت نمایش پلن‌های من */
-    #content-myplans .my-plan-card {
-      background: #F9FAFB;
-      border: 1px solid #e5e7eb;
-      border-radius: 1rem;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-      color: #1f2937;
-      padding: 1.25rem;
-      text-align: right;
-      position: relative;
-      overflow: hidden;
-      animation: myCardIn 0.4s ease;
-      transition: transform 0.2s ease, box-shadow 0.2s ease;
-    }
+    /* کارت نمایش پلن‌های من - طراحی جدید */
     #content-sub .plan-card,
     #content-ads .plan-card,
     #content-myplans .plan-card,
@@ -184,66 +171,245 @@
       min-width: 0;
       box-sizing: border-box;
     }
-    #content-myplans .my-plan-card:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 8px 16px rgba(0,0,0,0.15);
+    #content-myplans .plan-card-surface {
+      position: relative;
+      background: linear-gradient(140deg, rgba(236,253,245,0.95), rgba(219,234,254,0.9));
+      border-radius: 1.5rem;
+      border: 1px solid rgba(14,165,233,0.16);
+      box-shadow: 0 20px 40px rgba(13,148,136,0.12);
+      color: #0f172a;
+      padding: 1.5rem;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      gap: 1.1rem;
+      transition: transform 0.2s ease, box-shadow 0.3s ease;
+      animation: myCardIn 0.45s ease;
     }
-    #content-myplans .my-plan-status {
+    #content-myplans .plan-card--ad {
+      background: linear-gradient(140deg, rgba(255,248,237,0.95), rgba(255,237,213,0.9));
+      border: 1px solid rgba(249,115,22,0.22);
+      box-shadow: 0 24px 52px rgba(249,115,22,0.16);
+    }
+    #content-myplans .plan-card--ad::before {
+      background: linear-gradient(120deg, rgba(249,115,22,0.35), rgba(249,168,37,0.35));
+    }
+    #content-myplans .plan-card-surface::before {
+      content: "";
       position: absolute;
-      top: 0.75rem;
-      right: 0.75rem;
-      background: #3B82F6;
-      color: #fff;
-      padding: 0.2rem 0.6rem;
-      border-radius: 9999px;
-      font-size: 0.75rem;
-      font-weight: 700;
+      inset: 0;
+      border-radius: inherit;
+      padding: 1px;
+      background: linear-gradient(120deg, rgba(14,165,233,0.4), rgba(16,185,129,0.4));
+      -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+      -webkit-mask-composite: xor;
+      mask-composite: exclude;
+      pointer-events: none;
+      opacity: 0.6;
+    }
+    #content-myplans .plan-card-surface:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 28px 60px rgba(14,165,233,0.18);
+    }
+    #content-myplans .my-plan-card__header {
       display: flex;
       align-items: center;
-      justify-content: center;
+      justify-content: space-between;
+      gap: 0.75rem;
+      flex-wrap: wrap;
     }
-    #content-myplans .plan-card {
-      background: #F9FAFB;
-      border: 1px solid #e5e7eb;
-      border-radius: 1rem;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-      padding: 1.25rem;
-      text-align: right;
-      transition: transform 0.2s ease, box-shadow 0.2s ease;
-    }
-    #content-myplans .plan-card:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 8px 16px rgba(0,0,0,0.15);
-    }
-    #content-myplans .plan-card img {
-      padding: 1rem;
-      margin: 0 auto;
-      object-fit: contain;
-    }
-    #content-myplans .plan-card .flex {
-      align-items: flex-end;
-    }
-    #content-myplans .plan-card span.bg-orange-100.text-orange-600 {
-      background: #F59E0B;
-      color: #fff;
+    #content-myplans .plan-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.45rem;
+      padding: 0.45rem 1rem;
       border-radius: 9999px;
-    }
-    #content-myplans .my-plan-card .text-lg,
-    #content-myplans .plan-card .text-base.font-bold {
-      font-weight: 500;
-    }
-    #content-myplans .status-badge {
-      color: #fff;
+      font-size: 0.85rem;
       font-weight: 700;
+      background: rgba(16,185,129,0.12);
+      color: #047857;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.8);
+    }
+    #content-myplans .plan-pill svg {
+      width: 18px;
+      height: 18px;
+    }
+    #content-myplans .plan-pill--ad {
+      background: rgba(249,115,22,0.12);
+      color: #c2410c;
+    }
+    #content-myplans .plan-status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.4rem 1rem;
       border-radius: 9999px;
+      font-size: 0.78rem;
+      font-weight: 800;
+      background: var(--badge-bg, rgba(14,165,233,0.18));
+      color: var(--badge-text, #0f172a);
+      box-shadow: 0 14px 30px rgba(14,165,233,0.18);
+      white-space: nowrap;
     }
-    #content-myplans .status-badge.bg-yellow-400 {
-      background: #F59E0B;
-      color: #fff;
+    #content-myplans .plan-status-badge::before {
+      content: "";
+      width: 0.55rem;
+      height: 0.55rem;
+      border-radius: 9999px;
+      background: rgba(255,255,255,0.85);
+      box-shadow: 0 0 0 4px rgba(255,255,255,0.25);
     }
-    #content-myplans .status-badge.bg-gray-400 {
-      background: #9ca3af;
-      color: #f3f4f6;
+    #content-myplans .my-plan-card__title {
+      font-size: 1.1rem;
+      font-weight: 800;
+      color: #0f172a;
+      margin: 0;
+    }
+    #content-myplans .my-plan-card__price {
+      display: flex;
+      align-items: baseline;
+      gap: 0.45rem;
+      font-weight: 900;
+      color: #047857;
+      font-size: 1.8rem;
+    }
+    #content-myplans .my-plan-card__price .price-unit {
+      font-size: 0.85rem;
+      color: #64748b;
+      font-weight: 600;
+    }
+    #content-myplans .my-plan-card__dates {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 0.75rem;
+    }
+    #content-myplans .info-row {
+      display: flex;
+      align-items: center;
+      gap: 0.7rem;
+      padding: 0.6rem 0.85rem;
+      border-radius: 1.1rem;
+      background: rgba(255,255,255,0.9);
+      border: 1px solid rgba(148,163,184,0.2);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.8);
+    }
+    #content-myplans .info-icon {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 36px;
+      height: 36px;
+      border-radius: 9999px;
+      background: rgba(16,185,129,0.15);
+      color: #047857;
+      flex-shrink: 0;
+    }
+    #content-myplans .info-row--end .info-icon {
+      background: rgba(14,165,233,0.15);
+      color: #0ea5e9;
+    }
+    #content-myplans .info-label {
+      font-size: 0.7rem;
+      color: #64748b;
+      margin-bottom: 0.1rem;
+    }
+    #content-myplans .info-value {
+      font-size: 0.92rem;
+      font-weight: 700;
+      color: #1f2937;
+    }
+    #content-myplans .my-plan-card__progress {
+      display: flex;
+      flex-direction: column;
+      gap: 0.45rem;
+    }
+    #content-myplans .plan-progress-track {
+      width: 100%;
+      height: 8px;
+      border-radius: 999px;
+      background: rgba(14,165,233,0.12);
+      overflow: hidden;
+    }
+    #content-myplans .plan-progress-bar {
+      display: block;
+      height: 100%;
+      border-radius: inherit;
+      width: var(--progress, 0%);
+      background: linear-gradient(90deg, #0ea5e9, #10b981);
+      transition: width 0.35s ease;
+    }
+    #content-myplans .progress-meta {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: #0f172a;
+    }
+    #content-myplans .progress-meta svg {
+      width: 16px;
+      height: 16px;
+      color: #0ea5e9;
+    }
+    #content-myplans .progress-meta strong {
+      color: #0ea5e9;
+      font-weight: 800;
+    }
+    #content-myplans .my-plan-card__description {
+      font-size: 0.78rem;
+      line-height: 1.9;
+      color: #475569;
+      background: rgba(255,255,255,0.92);
+      border: 1px dashed rgba(148,163,184,0.35);
+      border-radius: 1.25rem;
+      padding: 0.75rem 0.95rem;
+    }
+    #content-myplans .plan-card--ad .my-plan-card__price {
+      color: #c2410c;
+    }
+    #content-myplans .plan-card__media-wrapper {
+      border-radius: 1.25rem;
+      overflow: hidden;
+      border: 1px solid rgba(249,115,22,0.25);
+      box-shadow: 0 16px 36px rgba(249,115,22,0.18);
+    }
+    #content-myplans .plan-card__media-wrapper img {
+      display: block;
+      width: 100%;
+      height: auto;
+    }
+    #content-myplans .plan-card__hint {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.55rem;
+      font-size: 0.75rem;
+      color: #c2410c;
+      background: rgba(249,115,22,0.1);
+      border-radius: 1rem;
+      padding: 0.65rem 0.85rem;
+    }
+    #content-myplans .plan-card__hint svg {
+      width: 16px;
+      height: 16px;
+      margin-top: 2px;
+      color: #f97316;
+      flex-shrink: 0;
+    }
+    #content-myplans .plan-card__actions {
+      display: flex;
+      flex-direction: column;
+      gap: 0.6rem;
+    }
+    #content-myplans .plan-card__actions a {
+      border-radius: 0.9rem !important;
+      padding: 0.75rem 1rem;
+      font-weight: 700;
+      transition: transform 0.2s ease, box-shadow 0.3s ease;
+      box-shadow: 0 14px 28px rgba(15,118,110,0.08);
+    }
+    #content-myplans .plan-card__actions a:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 18px 34px rgba(14,165,233,0.2);
     }
     @keyframes myCardIn {
       from {opacity:0; transform: translateY(10px);}
@@ -269,11 +435,31 @@
       .tab-actions .tab-btn:last-child {
         flex-basis: 100%;
       }
-      .plan-card,
-      #content-myplans .plan-card,
-      #content-myplans .my-plan-card {
+      .plan-card {
         padding: 1.25rem 1.15rem;
         border-radius: 1.25rem;
+      }
+      #content-myplans .plan-card-surface {
+        padding: 1.25rem 1.15rem;
+        border-radius: 1.25rem;
+        gap: 0.95rem;
+      }
+      #content-myplans .plan-pill {
+        font-size: 0.75rem;
+        padding: 0.4rem 0.85rem;
+      }
+      #content-myplans .plan-status-badge {
+        font-size: 0.72rem;
+        padding: 0.35rem 0.85rem;
+      }
+      #content-myplans .my-plan-card__price {
+        font-size: 1.45rem;
+      }
+      #content-myplans .my-plan-card__dates {
+        grid-template-columns: 1fr;
+      }
+      #content-myplans .plan-card__actions {
+        flex-direction: column;
       }
       .plan-card svg {
         width: 36px;
@@ -329,6 +515,12 @@
       }
       .plan-card {
         min-height: auto !important;
+      }
+      #content-myplans .plan-card-surface {
+        padding: 1.15rem 1rem;
+      }
+      #content-myplans .plan-card__actions a {
+        width: 100%;
       }
       .plan-card ul {
         line-height: 1.7;
