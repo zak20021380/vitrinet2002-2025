@@ -87,6 +87,60 @@ function refreshExpiryMetadata(order, { force = false } = {}) {
   order.expiresAt = undefined;
   return null;
 }
+
+function extractSellerPhone(order) {
+  if (!order) return null;
+  const seller = order.sellerId;
+  if (seller && typeof seller === 'object' && seller !== null && seller.phone) {
+    return seller.phone;
+  }
+  if (order.sellerPhone) {
+    return order.sellerPhone;
+  }
+  return null;
+}
+
+async function resolveEffectivePlanPrice(slug, sellerPhone, cache) {
+  if (!slug) return null;
+
+  const normalisedPhone = normalisePhone(sellerPhone) || '';
+  const cacheKey = `${slug}::${normalisedPhone}`;
+
+  if (cache && cache.has(cacheKey)) {
+    return cache.get(cacheKey);
+  }
+
+  const plan = await findEffectiveAdPlan(slug, normalisedPhone || null);
+  const price = plan ? plan.price : null;
+
+  if (cache) {
+    cache.set(cacheKey, price);
+  }
+
+  return price;
+}
+
+async function buildAdOrderResponse(doc, { cache } = {}) {
+  if (!doc) return doc;
+
+  const order = typeof doc.toObject === 'function'
+    ? doc.toObject({ virtuals: true })
+    : { ...doc };
+
+  const slug = order.planSlug || '';
+  if (slug) {
+    const sellerPhone = extractSellerPhone(order);
+    const effectivePrice = await resolveEffectivePlanPrice(slug, sellerPhone, cache);
+    if (effectivePrice !== null && effectivePrice !== undefined) {
+      order.effectivePrice = effectivePrice;
+      if (sellerPhone || order.price === undefined || order.price === null) {
+        order.price = effectivePrice;
+      }
+    }
+  }
+
+  return order;
+}
 // ثبت سفارش تبلیغ ویژه
 exports.createAdOrder = async (req, res) => {
   try {
@@ -152,11 +206,12 @@ exports.createAdOrder = async (req, res) => {
     });
 
     await adOrder.save();
+    const responseOrder = await buildAdOrderResponse(adOrder);
 
     res.status(201).json({
       success: true,
       message: 'سفارش تبلیغ ثبت شد.',
-      adOrder
+      adOrder: responseOrder
     });
   } catch (err) {
     console.error('❌ خطا در ثبت سفارش تبلیغ:', err);
@@ -175,7 +230,9 @@ exports.getSellerAdOrders = async (req, res) => {
     if (!sellerId)
       return res.status(400).json({ success: false, message: 'sellerId الزامی است.' });
 
-    const adOrders = await AdOrder.find({ sellerId }).sort({ createdAt: -1 });
+    const docs = await AdOrder.find({ sellerId }).sort({ createdAt: -1 });
+    const cache = new Map();
+    const adOrders = await Promise.all(docs.map(doc => buildAdOrderResponse(doc, { cache })));
     res.json({ success: true, adOrders });
   } catch (err) {
     res.status(500).json({ success: false, message: 'خطا در دریافت سفارشات تبلیغ', error: err.message });
@@ -206,9 +263,12 @@ exports.getAllAdOrders = async (req, res) => {
       filter.sellerId = sellerId;
     }
 
-    const adOrders = await AdOrder.find(filter)
+    const docs = await AdOrder.find(filter)
       .sort({ createdAt: -1 })
       .populate(POPULATE_SPEC);
+
+    const cache = new Map();
+    const adOrders = await Promise.all(docs.map(doc => buildAdOrderResponse(doc, { cache })));
 
     res.json({ success: true, adOrders });
   } catch (err) {
@@ -230,7 +290,8 @@ exports.getAdOrderById = async (req, res) => {
     if (!adOrder) return res.status(404).json({ success: false, message: 'سفارش تبلیغ پیدا نشد.' });
 
     await populateAdOrder(adOrder);
-    res.json({ success: true, adOrder });
+    const responseOrder = await buildAdOrderResponse(adOrder);
+    res.json({ success: true, adOrder: responseOrder });
   } catch (err) {
     res.status(500).json({ success: false, message: 'خطا در دریافت سفارش تبلیغ', error: err.message });
   }
@@ -303,11 +364,12 @@ exports.updateAdOrderStatus = async (req, res) => {
 
     await adOrder.save();
     await populateAdOrder(adOrder);
+    const responseOrder = await buildAdOrderResponse(adOrder);
 
     res.json({
       success: true,
       message: 'وضعیت تبلیغ بروزرسانی شد.',
-      adOrder
+      adOrder: responseOrder
     });
   } catch (err) {
     console.error('❌ خطا در بروزرسانی وضعیت تبلیغ:', err);
@@ -421,11 +483,12 @@ exports.updateAdOrder = async (req, res) => {
 
     await adOrder.save();
     await populateAdOrder(adOrder);
+    const responseOrder = await buildAdOrderResponse(adOrder);
 
     res.json({
       success: true,
       message: 'جزئیات تبلیغ بروزرسانی شد.',
-      adOrder
+      adOrder: responseOrder
     });
   } catch (err) {
     console.error('❌ خطا در بروزرسانی جزئیات تبلیغ:', err);
