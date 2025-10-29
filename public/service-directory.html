@@ -798,18 +798,39 @@
     updateResultsBadge();
   }
 
+  function isAllPortfolioCategory(category = {}) {
+    const slug = normaliseText(category.slug || '').toLowerCase();
+    const name = normaliseText(category.name || '').toLowerCase();
+    const allSlugMatches = ['all', 'services', 'service'];
+    const allNameMatches = ['همه', 'همه خدمات', 'خدمات', 'همه نمونه‌کارها'];
+    return allSlugMatches.includes(slug) || allNameMatches.includes(name);
+  }
+
   function renderPortfolioChips() {
     const container = elements.portfolioChips;
     if (!container) return;
     const categories = Array.isArray(state.meta?.categories) ? state.meta.categories : [];
     const unique = categories.filter(cat => cat && cat.slug && cat.name);
-    const active = unique.some(cat => cat.slug === state.portfolioCategory) ? state.portfolioCategory : 'all';
+    const hasAllEquivalent = unique.some(isAllPortfolioCategory);
+    const fallbackCategory = hasAllEquivalent
+      ? (unique.find(isAllPortfolioCategory)?.slug || unique[0]?.slug || 'all')
+      : 'all';
+    const active = unique.some(cat => cat.slug === state.portfolioCategory)
+      ? state.portfolioCategory
+      : fallbackCategory;
     state.portfolioCategory = active;
 
-    const chips = [
-      { slug: 'all', name: 'همه نمونه‌کارها' },
-      ...unique
-    ];
+    const chipsSource = hasAllEquivalent && fallbackCategory !== 'all'
+      ? unique
+      : [{ slug: 'all', name: 'همه نمونه‌کارها' }, ...unique];
+
+    const seen = new Set();
+    const chips = chipsSource.filter(cat => {
+      if (!cat || !cat.slug) return false;
+      if (seen.has(cat.slug)) return false;
+      seen.add(cat.slug);
+      return true;
+    });
 
     container.innerHTML = chips.map(cat => `
       <button type="button" class="filter-chip" data-slug="${cat.slug}" data-active="${state.portfolioCategory === cat.slug}">
