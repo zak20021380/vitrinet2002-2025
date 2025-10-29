@@ -20,6 +20,9 @@ const adOrderSchema = new mongoose.Schema({
   reviewedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'Admin' }, // شناسه ادمین بررسی کننده
   approvedAt: { type: Date },                           // تاریخ تایید نهایی
   displayedAt: { type: Date },                          // تاریخ نمایش در سایت
+  displayDurationHours: { type: Number },               // مدت نمایش تبلیغ (ساعت)
+  expiresAt: { type: Date },                            // زمان پایان نمایش تبلیغ
+  expiredAt: { type: Date },                            // زمان منقضی شدن تبلیغ
   createdAt: { type: Date, default: Date.now }
 });
 

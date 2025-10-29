@@ -4,6 +4,7 @@ const Seller = require('../models/Seller');
 const AdPlan = require('../models/adPlan');
 const fs = require('fs');
 const path = require('path');
+const { calculateExpiry } = require('../utils/adDisplay');
 
 const ALLOWED_STATUSES = ['pending', 'approved', 'paid', 'rejected', 'expired'];
 const POPULATE_SPEC = [
@@ -28,6 +29,28 @@ async function populateAdOrder(doc) {
   if (!doc) return doc;
   await doc.populate(POPULATE_SPEC);
   return doc;
+}
+
+function refreshExpiryMetadata(order, { force = false } = {}) {
+  if (!order) return null;
+
+  const shouldApply = force || ['approved', 'paid', 'expired'].includes(order.status);
+  if (!shouldApply) {
+    order.displayDurationHours = undefined;
+    order.expiresAt = undefined;
+    return null;
+  }
+
+  const { durationHours, expiresAt } = calculateExpiry(order);
+  if (durationHours && expiresAt) {
+    order.displayDurationHours = durationHours;
+    order.expiresAt = expiresAt;
+    return expiresAt;
+  }
+
+  order.displayDurationHours = undefined;
+  order.expiresAt = undefined;
+  return null;
 }
 // ثبت سفارش تبلیغ ویژه
 exports.createAdOrder = async (req, res) => {
@@ -130,8 +153,16 @@ exports.getAllAdOrders = async (req, res) => {
     const { status, planSlug, sellerId } = req.query;
 
     const filter = {};
-    if (status && ALLOWED_STATUSES.includes(status)) {
-      filter.status = status;
+    if (status) {
+      if (status === 'all') {
+        // no status filter
+      } else if (ALLOWED_STATUSES.includes(status)) {
+        filter.status = status;
+      } else {
+        filter.status = { $ne: 'expired' };
+      }
+    } else {
+      filter.status = { $ne: 'expired' };
     }
     if (planSlug) {
       filter.planSlug = planSlug;
@@ -207,16 +238,32 @@ exports.updateAdOrderStatus = async (req, res) => {
       if (!adOrder.displayedAt) {
         adOrder.displayedAt = now;
       }
-    } else if (status === 'paid' || status === 'expired') {
+      adOrder.expiredAt = undefined;
+      refreshExpiryMetadata(adOrder, { force: true });
+    } else if (status === 'paid') {
       if (!adOrder.approvedAt) {
         adOrder.approvedAt = now;
       }
       if (!adOrder.displayedAt) {
         adOrder.displayedAt = now;
       }
+      adOrder.expiredAt = undefined;
+      refreshExpiryMetadata(adOrder, { force: true });
+    } else if (status === 'expired') {
+      if (!adOrder.displayedAt) {
+        adOrder.displayedAt = adOrder.approvedAt || now;
+      }
+      const expiresAt = refreshExpiryMetadata(adOrder, { force: true });
+      adOrder.expiredAt = now;
+      if (!expiresAt) {
+        adOrder.expiresAt = now;
+      }
     } else {
       adOrder.approvedAt = undefined;
       adOrder.displayedAt = undefined;
+      adOrder.displayDurationHours = undefined;
+      adOrder.expiresAt = undefined;
+      adOrder.expiredAt = undefined;
     }
 
     await adOrder.save();
@@ -249,6 +296,7 @@ exports.updateAdOrder = async (req, res) => {
     }
 
     let hasChanges = false;
+    let displayedAtChanged = false;
 
     if (Object.prototype.hasOwnProperty.call(updates, 'adTitle')) {
       const title = updates.adTitle !== undefined && updates.adTitle !== null
@@ -287,6 +335,7 @@ exports.updateAdOrder = async (req, res) => {
         adOrder.displayedAt = displayDate;
       }
       hasChanges = true;
+      displayedAtChanged = true;
     }
 
     if (Object.prototype.hasOwnProperty.call(updates, 'adminNote')) {
@@ -296,6 +345,20 @@ exports.updateAdOrder = async (req, res) => {
 
     if (!hasChanges) {
       return res.status(400).json({ success: false, message: 'هیچ تغییری اعمال نشد.' });
+    }
+
+    if (displayedAtChanged) {
+      if (['approved', 'paid'].includes(adOrder.status)) {
+        refreshExpiryMetadata(adOrder, { force: true });
+      } else if (adOrder.status === 'expired') {
+        const expiresAt = refreshExpiryMetadata(adOrder, { force: true });
+        if (!expiresAt && adOrder.expiredAt) {
+          adOrder.expiresAt = adOrder.expiredAt;
+        }
+      } else if (!adOrder.displayedAt) {
+        adOrder.displayDurationHours = undefined;
+        adOrder.expiresAt = undefined;
+      }
     }
 
     await adOrder.save();
@@ -362,12 +425,26 @@ exports.getActiveAds = async (req, res) => {
     if (planSlug) query.planSlug = planSlug;
 
     // فقط جدیدترین تبلیغ رو بفرست (می‌تونی چندتا هم بدی، ولی معمولاً یکی کافیه)
-    const ads = await AdOrder.find(query)
+    const rawAds = await AdOrder.find(query)
       .sort({ approvedAt: -1, createdAt: -1 })
-      .limit(1)
+      .limit(5)
       .populate(PUBLIC_POPULATE_SPEC);
 
-    res.json({ success: true, ads });
+    const now = Date.now();
+    const validAds = [];
+
+    for (const ad of rawAds) {
+      const { expiresAt } = calculateExpiry(ad);
+      if (expiresAt && expiresAt.getTime() <= now) {
+        continue;
+      }
+      validAds.push(ad);
+      if (validAds.length >= 1) {
+        break;
+      }
+    }
+
+    res.json({ success: true, ads: validAds });
   } catch (err) {
     res.status(500).json({ success: false, message: 'خطا در دریافت تبلیغات فعال', error: err.message });
   }
