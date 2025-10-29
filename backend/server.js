@@ -20,6 +20,7 @@ const cookieParser = require('cookie-parser');
 const path = require('path');
 const dailyVisitRoutes = require('./routes/dailyVisitRoutes');
 const { startAdCleanupScheduler } = require('./utils/adCleanupScheduler');
+const { startSellerSubscriptionEnforcer } = require('./utils/sellerSubscriptionEnforcer');
 
 // ------------------- Middlewares -------------------
 app.use(cookieParser());
@@ -111,6 +112,16 @@ mongoose.connect(MONGO_URI)
       };
       process.once('SIGINT', stopCleanup);
       process.once('SIGTERM', stopCleanup);
+    }
+
+    const subscriptionHandle = startSellerSubscriptionEnforcer();
+    if (subscriptionHandle) {
+      app.locals.sellerSubscriptionHandle = subscriptionHandle;
+      const stopSubscription = () => {
+        clearInterval(subscriptionHandle);
+      };
+      process.once('SIGINT', stopSubscription);
+      process.once('SIGTERM', stopSubscription);
     }
     app.listen(PORT, () => {
       console.log(`🚀 Server running on port ${PORT}`);
