@@ -387,9 +387,7 @@
         }
         return 0;
       });
-
       resultsGrid.innerHTML = sorted.map(shop => {
-        const highlightedServices = shop.services.slice(0, 3).join('، ');
         return `
           <article class="service-card rounded-3xl border border-slate-100 bg-white overflow-hidden shadow-sm flex flex-col">
             <div class="relative h-44">
@@ -409,14 +407,10 @@
                 </div>
               </div>
               <p class="text-sm text-slate-500 leading-relaxed">${shop.description}</p>
-              <div class="text-xs sm:text-sm text-slate-500 bg-slate-50 border border-slate-200 rounded-2xl px-3 py-2">
-                خدمات شاخص: <span class="font-semibold text-slate-600">${highlightedServices}</span>
-              </div>
-              <div class="mt-auto flex items-center justify-between pt-4 border-t border-slate-100 text-sm text-slate-500">
+              <div class="mt-auto flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pt-4 border-t border-slate-100 text-sm text-slate-500">
                 <span class="font-semibold text-emerald-600">${shop.priceLabel}</span>
-                <a href="service-shops.html?id=${shop.id}" class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-l from-emerald-500 to-sky-500 text-white text-sm font-semibold shadow-md hover:shadow-lg transition">
-                  مشاهده پروفایل
-                  <svg viewBox="0 0 24 24" class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.5"><path d="m9 5 7 7-7 7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                <a href="service-shops.html?id=${shop.id}" class="inline-flex justify-center w-full sm:w-auto px-5 py-2.5 rounded-full bg-gradient-to-l from-emerald-500 to-sky-500 text-white text-sm font-semibold shadow-md hover:shadow-lg transition">
+                  رزرو نوبت
                 </a>
               </div>
             </div>
