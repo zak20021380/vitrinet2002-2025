@@ -248,26 +248,34 @@
       }
     }
     .portfolio-action-button {
-      border-radius: 9999px;
-      font-size: 0.75rem;
+      border-radius: 16px;
+      font-size: 0.875rem;
       font-weight: 700;
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      gap: 0.35rem;
-      padding: 0.55rem 1rem;
+      gap: 0.5rem;
+      padding: 0.875rem 1.25rem;
       transition: transform 0.18s ease, box-shadow 0.18s ease;
       cursor: pointer;
       white-space: nowrap;
+      text-decoration: none;
+    }
+    @media (min-width: 640px) {
+      .portfolio-action-button {
+        border-radius: 9999px;
+        font-size: 0.8rem;
+        padding: 0.65rem 1.1rem;
+      }
     }
     .portfolio-action-button[data-variant="primary"] {
       background: linear-gradient(90deg,#1d4ed8,#0ea5e9);
       color: #fff;
-      box-shadow: 0 12px 24px rgba(14, 165, 233, 0.24);
+      box-shadow: 0 8px 20px rgba(14, 165, 233, 0.28);
     }
     .portfolio-action-button[data-variant="primary"]:hover {
       transform: translateY(-1px);
-      box-shadow: 0 16px 32px rgba(14, 165, 233, 0.28);
+      box-shadow: 0 12px 28px rgba(14, 165, 233, 0.32);
     }
     .portfolio-action-button[data-variant="secondary"] {
       background: rgba(14, 165, 233, 0.12);
@@ -276,44 +284,91 @@
     }
     .portfolio-action-button[data-variant="secondary"]:hover {
       transform: translateY(-1px);
-      box-shadow: 0 12px 24px rgba(14, 165, 233, 0.22);
+      box-shadow: 0 8px 20px rgba(14, 165, 233, 0.22);
+      background: rgba(14, 165, 233, 0.16);
     }
     .portfolio-modal-metrics {
-      display: inline-flex;
-      align-items: center;
+      display: flex;
+      align-items: stretch;
       flex-wrap: wrap;
-      gap: 0.65rem;
+      gap: 0.75rem;
+      width: 100%;
+    }
+    @media (min-width: 640px) {
+      .portfolio-modal-metrics {
+        width: auto;
+      }
     }
     .portfolio-metric-chip {
-      display: inline-flex;
+      display: flex;
+      flex-direction: column;
       align-items: center;
-      gap: 0.55rem;
-      padding: 0.45rem 0.85rem;
-      border-radius: 9999px;
+      justify-content: center;
+      gap: 0.35rem;
+      padding: 0.85rem 1.15rem;
+      border-radius: 16px;
       background: linear-gradient(135deg, rgba(15, 118, 110, 0.14), rgba(14, 165, 233, 0.12));
       border: 1px solid rgba(14, 165, 233, 0.18);
       color: #0f172a;
       font-size: 0.8rem;
       font-weight: 700;
       white-space: nowrap;
+      flex: 1;
+      min-width: 110px;
+      box-shadow: 0 4px 12px rgba(14, 165, 233, 0.08);
+    }
+    @media (min-width: 640px) {
+      .portfolio-metric-chip {
+        flex-direction: row;
+        gap: 0.55rem;
+        padding: 0.65rem 1rem;
+        border-radius: 9999px;
+        min-width: auto;
+        flex: 0;
+      }
     }
     .portfolio-metric-chip[data-variant="likes"] {
       background: linear-gradient(135deg, rgba(16, 185, 129, 0.18), rgba(52, 211, 153, 0.2));
       color: #047857;
+      border-color: rgba(16, 185, 129, 0.25);
     }
     .portfolio-metric-chip[data-variant="views"] {
       background: linear-gradient(135deg, rgba(14, 165, 233, 0.16), rgba(59, 130, 246, 0.18));
       color: #0369a1;
+      border-color: rgba(14, 165, 233, 0.25);
     }
     .portfolio-metric-label {
       font-size: 0.7rem;
       font-weight: 600;
-      opacity: 0.8;
+      opacity: 0.75;
+      order: 2;
+    }
+    @media (min-width: 640px) {
+      .portfolio-metric-label {
+        order: 0;
+        font-size: 0.7rem;
+      }
     }
     .portfolio-metric-value {
-      font-size: 0.95rem;
-      font-weight: 800;
+      font-size: 1.5rem;
+      font-weight: 900;
       line-height: 1;
+      order: 1;
+    }
+    @media (min-width: 640px) {
+      .portfolio-metric-value {
+        font-size: 1rem;
+        order: 0;
+      }
+    }
+    .portfolio-metric-chip i {
+      font-size: 1.25rem;
+      order: 0;
+    }
+    @media (min-width: 640px) {
+      .portfolio-metric-chip i {
+        font-size: 1rem;
+      }
     }
     .portfolio-sort-group {
       display: inline-flex;
@@ -350,29 +405,43 @@
     .portfolio-modal-backdrop {
       position: fixed;
       inset: 0;
-      background: rgba(15, 23, 42, 0.55);
+      background: rgba(15, 23, 42, 0.65);
       backdrop-filter: blur(12px);
       display: flex;
-      align-items: center;
+      align-items: flex-end;
       justify-content: center;
-      padding: 1rem;
+      padding: 0;
       z-index: 50;
     }
     @media (min-width: 640px) {
+      .portfolio-modal-backdrop {
+        align-items: center;
+        padding: 1.5rem;
+      }
+    }
+    @media (min-width: 1024px) {
       .portfolio-modal-backdrop {
         padding: 2rem;
       }
     }
     .portfolio-modal-container {
-      width: min(100%, 640px);
-      max-height: min(90vh, 720px);
+      width: 100%;
+      max-height: 92vh;
       background: #ffffff;
-      border-radius: 24px;
+      border-radius: 28px 28px 0 0;
       border: 1px solid rgba(226, 232, 240, 0.65);
-      box-shadow: 0 24px 60px rgba(15, 118, 110, 0.22);
+      box-shadow: 0 -8px 40px rgba(15, 118, 110, 0.18);
       overflow: hidden;
       display: grid;
       grid-template-rows: auto 1fr;
+    }
+    @media (min-width: 640px) {
+      .portfolio-modal-container {
+        width: min(100%, 640px);
+        max-height: min(88vh, 720px);
+        border-radius: 24px;
+        box-shadow: 0 24px 60px rgba(15, 118, 110, 0.22);
+      }
     }
     @media (min-width: 1024px) {
       .portfolio-modal-container {
@@ -404,11 +473,19 @@
       display: block;
     }
     .portfolio-modal-body {
-      padding: 1.5rem;
+      padding: 1.75rem 1.25rem 1.5rem;
       display: flex;
       flex-direction: column;
-      gap: 1.25rem;
+      gap: 1.5rem;
       overflow-y: auto;
+      max-height: calc(92vh - 240px);
+    }
+    @media (min-width: 640px) {
+      .portfolio-modal-body {
+        padding: 2rem 1.75rem;
+        gap: 1.5rem;
+        max-height: none;
+      }
     }
     @media (min-width: 768px) {
       .portfolio-modal-body {
@@ -425,24 +502,54 @@
       width: 44px;
       height: 44px;
       border-radius: 9999px;
-      background: rgba(15, 23, 42, 0.75);
+      background: rgba(15, 23, 42, 0.8);
       color: #fff;
       border: 1px solid rgba(255, 255, 255, 0.2);
       cursor: pointer;
-      box-shadow: 0 10px 30px rgba(15, 23, 42, 0.28);
+      box-shadow: 0 8px 24px rgba(15, 23, 42, 0.32);
       transition: transform 0.18s ease, background 0.18s ease;
+      z-index: 10;
     }
     .portfolio-modal-close:hover {
-      transform: scale(1.05);
-      background: rgba(15, 23, 42, 0.9);
+      transform: scale(1.08);
+      background: rgba(15, 23, 42, 0.95);
+      box-shadow: 0 10px 30px rgba(15, 23, 42, 0.4);
     }
-    @media (max-width: 540px) {
-      .portfolio-modal-body {
-        padding: 1.25rem;
+    .portfolio-modal-header {
+      padding-bottom: 1.25rem;
+      border-bottom: 1px solid rgba(226, 232, 240, 0.6);
+    }
+    @media (min-width: 640px) {
+      .portfolio-modal-header {
+        padding-bottom: 1.5rem;
+      }
+    }
+    .portfolio-modal-handle {
+      position: absolute;
+      top: 0.5rem;
+      right: 50%;
+      transform: translateX(50%);
+      width: 40px;
+      height: 5px;
+      border-radius: 999px;
+      background: rgba(148, 163, 184, 0.4);
+      display: block;
+    }
+    @media (min-width: 640px) {
+      .portfolio-modal-handle {
+        display: none;
+      }
+    }
+    @media (max-width: 639px) {
+      .portfolio-modal-media {
+        min-height: 220px;
+        padding-top: 1.5rem;
       }
       .portfolio-modal-close {
-        width: 40px;
-        height: 40px;
+        width: 42px;
+        height: 42px;
+        top: 1.25rem;
+        left: 0.75rem;
       }
     }
   </style>
@@ -660,6 +767,7 @@
   <div id="portfolio-modal" class="hidden">
     <div class="portfolio-modal-backdrop" data-portfolio-modal-backdrop>
       <div class="portfolio-modal-container" role="dialog" aria-modal="true" aria-labelledby="portfolio-modal-title">
+        <span class="portfolio-modal-handle" aria-hidden="true"></span>
         <div class="portfolio-modal-media">
           <img id="portfolio-modal-image" src="" alt="نمونه‌کار" loading="lazy">
           <button type="button" class="portfolio-modal-close" data-portfolio-modal-close aria-label="بستن">
@@ -667,10 +775,10 @@
           </button>
         </div>
         <div class="portfolio-modal-body">
-          <div class="portfolio-modal-header flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+          <div class="portfolio-modal-header flex flex-col gap-4">
             <div>
-              <h3 id="portfolio-modal-title" class="text-xl font-black text-slate-800"></h3>
-              <p id="portfolio-modal-shop" class="mt-1 text-sm font-semibold text-slate-500"></p>
+              <h3 id="portfolio-modal-title" class="text-xl sm:text-2xl font-black text-slate-800 leading-tight"></h3>
+              <p id="portfolio-modal-shop" class="mt-1.5 text-sm sm:text-base font-semibold text-slate-500"></p>
             </div>
             <div class="portfolio-modal-metrics">
               <span class="portfolio-metric-chip" data-variant="likes">
@@ -685,17 +793,17 @@
               </span>
             </div>
           </div>
-          <p id="portfolio-modal-description" class="text-sm leading-relaxed text-slate-600"></p>
-          <div class="flex flex-wrap gap-3 items-center text-xs text-slate-500">
-            <span id="portfolio-modal-rating" class="inline-flex items-center gap-1"></span>
-            <span id="portfolio-modal-category" class="inline-flex items-center gap-1"></span>
+          <p id="portfolio-modal-description" class="text-sm sm:text-base leading-relaxed text-slate-600"></p>
+          <div class="flex flex-wrap gap-3 items-center text-xs sm:text-sm text-slate-500">
+            <span id="portfolio-modal-rating" class="inline-flex items-center gap-1.5 font-semibold"></span>
+            <span id="portfolio-modal-category" class="inline-flex items-center gap-1.5 font-semibold"></span>
           </div>
-          <div class="portfolio-card-actions w-full sm:justify-end">
-            <button type="button" class="portfolio-action-button" data-variant="secondary" data-portfolio-modal-close>
+          <div class="portfolio-card-actions w-full sm:justify-end pt-2">
+            <button type="button" class="portfolio-action-button w-full sm:w-auto" data-variant="secondary" data-portfolio-modal-close>
               <i class="ri-close-circle-line"></i>
               <span>بستن</span>
             </button>
-            <a id="portfolio-modal-link" href="#" class="portfolio-action-button" data-variant="primary">
+            <a id="portfolio-modal-link" href="#" class="portfolio-action-button w-full sm:w-auto" data-variant="primary">
               <span>مشاهده صفحه</span>
               <i class="ri-external-link-line"></i>
             </a>
