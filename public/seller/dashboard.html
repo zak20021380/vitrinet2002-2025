@@ -17,6 +17,173 @@
     margin: 0;
     padding-right: 140px;
   }
+  .subscription-modal {
+    position: fixed;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1.5rem;
+    background: rgba(15, 23, 42, 0.55);
+    backdrop-filter: blur(6px);
+    z-index: 400;
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition: opacity 0.28s ease, visibility 0.28s ease;
+  }
+
+  .subscription-modal.active {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+  }
+
+  .subscription-modal__card {
+    position: relative;
+    width: min(480px, 100%);
+    border-radius: 1.75rem;
+    background: linear-gradient(145deg, #ffffff 10%, #f5fffb 90%);
+    box-shadow: 0 24px 50px rgba(45, 212, 191, 0.22);
+    padding: 2.75rem 2.5rem 2.25rem;
+    color: #0f172a;
+    direction: rtl;
+    text-align: right;
+    overflow: hidden;
+  }
+
+  .subscription-modal__icon-wrap {
+    width: 62px;
+    height: 62px;
+    border-radius: 1.5rem;
+    background: linear-gradient(140deg, rgba(14, 165, 233, 0.12), rgba(16, 185, 129, 0.18));
+    color: #0ea5e9;
+    display: grid;
+    place-items: center;
+    font-size: 30px;
+    margin-bottom: 1.5rem;
+  }
+
+  .subscription-modal__title {
+    font-size: 1.3rem;
+    font-weight: 800;
+    margin: 0 0 0.75rem;
+    color: #0f172a;
+  }
+
+  .subscription-modal__description {
+    margin: 0;
+    font-size: 0.95rem;
+    line-height: 1.9;
+    color: #334155;
+  }
+
+  .subscription-modal__badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    margin: 1.5rem 0 1rem;
+    padding: 0.45rem 0.9rem;
+    border-radius: 999px;
+    background: rgba(234, 179, 8, 0.12);
+    color: #b45309;
+    font-size: 0.87rem;
+    font-weight: 600;
+  }
+
+  .subscription-modal__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-top: 1.5rem;
+  }
+
+  .subscription-modal__btn {
+    flex: 1 1 160px;
+    border: none;
+    border-radius: 0.9rem;
+    padding: 0.9rem 1.4rem;
+    font-size: 0.95rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: transform 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
+  }
+
+  .subscription-modal__btn--primary {
+    background: linear-gradient(135deg, #0ea5e9, #10b981);
+    color: #fff;
+    box-shadow: 0 16px 30px rgba(14, 165, 233, 0.25);
+  }
+
+  .subscription-modal__btn--primary:hover,
+  .subscription-modal__btn--primary:focus {
+    transform: translateY(-2px);
+    box-shadow: 0 22px 36px rgba(14, 165, 233, 0.35);
+    outline: none;
+  }
+
+  .subscription-modal__btn--ghost {
+    background: #f8fafc;
+    color: #0f172a;
+    box-shadow: inset 0 0 0 1px rgba(15, 23, 42, 0.08);
+  }
+
+  .subscription-modal__btn--ghost:hover,
+  .subscription-modal__btn--ghost:focus {
+    background: #e2e8f0;
+    transform: translateY(-1px);
+    outline: none;
+  }
+
+  .subscription-modal__close {
+    position: absolute;
+    top: 1rem;
+    left: 1rem;
+    display: grid;
+    place-items: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: none;
+    background: rgba(241, 245, 249, 0.9);
+    color: #0f172a;
+    cursor: pointer;
+    transition: background 0.18s ease, transform 0.18s ease;
+  }
+
+  .subscription-modal__close:hover,
+  .subscription-modal__close:focus {
+    background: rgba(226, 232, 240, 0.95);
+    transform: rotate(-90deg);
+    outline: none;
+  }
+
+  .subscription-modal__note {
+    margin-top: 0.75rem;
+    font-size: 0.82rem;
+    color: #64748b;
+  }
+
+  @media (max-width: 640px) {
+    .subscription-modal__card {
+      padding: 2.5rem 1.6rem 2rem;
+      border-radius: 1.25rem;
+    }
+
+    .subscription-modal__actions {
+      flex-direction: column;
+    }
+
+    .subscription-modal__btn {
+      width: 100%;
+      flex: 1 1 auto;
+    }
+
+    .subscription-modal__close {
+      left: 0.75rem;
+      top: 0.75rem;
+    }
+  }
   .dark body {
     background: linear-gradient(120deg, #212e2b 0%, #23272f 90%);
   }
@@ -1623,6 +1790,121 @@ const apiFetch = (path, options = {}) => {
   return fetch(url, opts);
 };
 
+const SUBSCRIPTION_MODAL_DISMISSED_KEY = 'seller-subscription-expired-dismissed';
+
+function readBodySubscriptionFlag() {
+  const flag = document.body?.dataset?.subscriptionExpired;
+  if (flag === undefined) return null;
+  if (flag === 'true' || flag === '1') return true;
+  if (flag === 'false' || flag === '0') return false;
+  return null;
+}
+
+function shouldShowSubscriptionExpiryModal(seller) {
+  try {
+    if (sessionStorage.getItem(SUBSCRIPTION_MODAL_DISMISSED_KEY) === '1') {
+      return false;
+    }
+  } catch (err) {
+    console.warn('Unable to read subscription modal preference:', err);
+  }
+
+  const bodyFlag = readBodySubscriptionFlag();
+  if (bodyFlag !== null) {
+    return bodyFlag;
+  }
+
+  if (!seller) return false;
+
+  if (seller.subscriptionExpired === true) return true;
+
+  const status = (seller.subscriptionStatus || seller.planStatus || seller.plan_state || '')
+    .toString()
+    .toLowerCase();
+  if (status) {
+    const expiredStatuses = ['expired', 'inactive', 'ended', 'past_due', 'canceled', 'cancelled'];
+    if (expiredStatuses.some(state => status.includes(state))) {
+      return true;
+    }
+  }
+
+  const expiryField =
+    seller.subscriptionExpiresAt ||
+    seller.subscriptionExpiry ||
+    seller.planExpiresAt ||
+    seller.planExpiryDate ||
+    seller.planExpiration;
+
+  if (expiryField) {
+    const expiryDate = new Date(expiryField);
+    if (!Number.isNaN(expiryDate.getTime())) {
+      return expiryDate.getTime() < Date.now();
+    }
+  }
+
+  return false;
+}
+
+function openSubscriptionExpiryModal() {
+  const modal = document.getElementById('subscriptionExpiredModal');
+  if (!modal) return;
+  modal.classList.add('active');
+  const focusTarget = modal.querySelector('[data-focus-default]') || modal;
+  requestAnimationFrame(() => {
+    focusTarget.focus?.({ preventScroll: true });
+  });
+}
+
+function closeSubscriptionExpiryModal({ persistDismissal = true } = {}) {
+  const modal = document.getElementById('subscriptionExpiredModal');
+  if (!modal) return;
+  modal.classList.remove('active');
+  if (persistDismissal) {
+    try {
+      sessionStorage.setItem(SUBSCRIPTION_MODAL_DISMISSED_KEY, '1');
+    } catch (err) {
+      console.warn('Unable to persist subscription modal dismissal:', err);
+    }
+  }
+}
+
+function setupSubscriptionExpiryModal() {
+  const modal = document.getElementById('subscriptionExpiredModal');
+  if (!modal || modal.dataset.bound === '1') return;
+
+  const dismissBtn = modal.querySelector('[data-action="dismiss"]');
+  if (dismissBtn) {
+    dismissBtn.addEventListener('click', () => closeSubscriptionExpiryModal({ persistDismissal: true }));
+  }
+
+  const upgradeBtn = modal.querySelector('[data-action="upgrade"]');
+  if (upgradeBtn) {
+    upgradeBtn.addEventListener('click', () => {
+      closeSubscriptionExpiryModal({ persistDismissal: true });
+      window.location.href = 'dashboard-upgrade.html';
+    });
+  }
+
+  const closeBtn = modal.querySelector('[data-action="close"]');
+  if (closeBtn) {
+    closeBtn.addEventListener('click', () => closeSubscriptionExpiryModal({ persistDismissal: false }));
+  }
+
+  modal.addEventListener('click', event => {
+    if (event.target === modal) {
+      closeSubscriptionExpiryModal({ persistDismissal: false });
+    }
+  });
+
+  document.addEventListener('keydown', event => {
+    if (event.key === 'Escape' && modal.classList.contains('active')) {
+      closeSubscriptionExpiryModal({ persistDismissal: false });
+    }
+  });
+
+  modal.dataset.bound = '1';
+}
+
 
 
 
@@ -1803,9 +2085,15 @@ function startMessagePolling() {
 
 // ————————— راه‌اندازی اولیه —————————
 document.addEventListener('DOMContentLoaded', async () => {
+  setupSubscriptionExpiryModal();
+
   // ۱) دریافت فروشنده
   window.seller = await fetchCurrentSeller();
   console.log('🚀 seller object:', window.seller);
+
+  if (shouldShowSubscriptionExpiryModal(window.seller)) {
+    setTimeout(() => openSubscriptionExpiryModal(), 160);
+  }
 
   const accountantShortcut = document.getElementById('accountantShortcut');
   if (accountantShortcut) {
@@ -2750,6 +3038,30 @@ async function loadPerformanceStatus() {
 
 
 
+
+<div id="subscriptionExpiredModal" class="subscription-modal" role="dialog" aria-modal="true" aria-labelledby="subscription-modal-title" aria-describedby="subscription-modal-description" tabindex="-1">
+  <div class="subscription-modal__card">
+    <button class="subscription-modal__close" type="button" data-action="close" aria-label="بستن پیام تمدید">
+      <i class="ri-close-line" aria-hidden="true"></i>
+    </button>
+    <div class="subscription-modal__icon-wrap" aria-hidden="true">
+      <i class="ri-vip-crown-line"></i>
+    </div>
+    <h2 class="subscription-modal__title" id="subscription-modal-title">فروشندهٔ گرامی، پلن اشتراکی شما به پایان رسیده است</h2>
+    <p class="subscription-modal__description" id="subscription-modal-description">
+      لطفاً حداکثر تا سه روز آینده نسبت به تمدید اشتراک خود اقدام فرمایید. در صورت عدم تمدید، ناچار به قطع دسترسی شما به داشبورد خواهیم بود.
+    </p>
+    <div class="subscription-modal__badge">
+      <i class="ri-timer-line" aria-hidden="true"></i>
+      تنها ۳ روز برای تمدید باقی مانده است
+    </div>
+    <p class="subscription-modal__note">با تمدید به‌موقع، خدمات و مشتریان ارزشمند شما بدون وقفه ادامه خواهند داشت.</p>
+    <div class="subscription-modal__actions">
+      <button class="subscription-modal__btn subscription-modal__btn--primary" type="button" data-action="upgrade" data-focus-default>تمدید اشتراک</button>
+      <button class="subscription-modal__btn subscription-modal__btn--ghost" type="button" data-action="dismiss">بعداً یادآوری کن</button>
+    </div>
+  </div>
+</div>
 
 <!-- Success Popup -->
 <!-- Success Popup (اصلاح برای RTL و تداخل container) -->
