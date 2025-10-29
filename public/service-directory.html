@@ -1207,6 +1207,9 @@
       elements.portfolioModalImage.alt = 'نمونه‌کار';
     }
     document.body.style.overflow = '';
+    if (document.body?.classList) {
+      document.body.classList.remove('hide-mobile-nav');
+    }
     if (activePortfolioModalTrigger && typeof activePortfolioModalTrigger.focus === 'function') {
       activePortfolioModalTrigger.focus();
     }
@@ -1253,6 +1256,9 @@
     if (elements.portfolioModal) {
       elements.portfolioModal.classList.remove('hidden');
       document.body.style.overflow = 'hidden';
+      if (document.body?.classList) {
+        document.body.classList.add('hide-mobile-nav');
+      }
       const focusable = elements.portfolioModal.querySelector('a, button');
       if (focusable && typeof focusable.focus === 'function') {
         focusable.focus();
