@@ -20,13 +20,97 @@
       box-shadow: 0 4px 24px #10b98122;
     }
     .plan-card {
-      border-radius: 1rem;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-      transition: transform 0.2s, box-shadow 0.2s;
+      position: relative;
+      background: #fff;
+      border: 2px solid #e0e8e7;
+      border-radius: 1.5rem;
+      padding: 2.5rem 2rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      gap: 0.85rem;
+      min-height: 300px;
+      box-shadow: 0 10px 30px rgba(15,118,110,0.08);
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
     }
     .plan-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 18px 38px rgba(15,118,110,0.16);
+    }
+    .plan-card__icon {
+      margin-bottom: 0.4rem;
+    }
+    .plan-card__title {
+      margin: 0;
+      font-size: 1.25rem;
+      font-weight: 800;
+      color: #0f172a;
+    }
+    .plan-card__price {
+      display: flex;
+      align-items: baseline;
+      gap: 0.35rem;
+      font-size: 1.6rem;
+      font-weight: 800;
+      color: #0ea5e9;
+    }
+    .plan-card__price-unit {
+      font-size: 0.9rem;
+      color: #475569;
+    }
+    .plan-card__duration {
+      font-size: 0.85rem;
+      color: #94a3b8;
+    }
+    .plan-card__description {
+      margin: 0;
+      font-size: 0.92rem;
+      color: #334155;
+      min-height: 48px;
+    }
+    .plan-card__features {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 0.45rem;
+      width: 100%;
+    }
+    .plan-card__features li {
+      display: flex;
+      align-items: center;
+      justify-content: flex-start;
+      text-align: right;
+      font-size: 0.9rem;
+      color: #1f2937;
+    }
+    .plan-feature-icon {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 22px;
+      height: 22px;
+      margin-left: 0.5rem;
+      border-radius: 999px;
+      background: rgba(16,185,129,0.12);
+      color: #0f766e;
+      font-size: 0.75rem;
+      font-weight: 700;
+    }
+    .plan-card__cta {
+      margin-top: auto;
+      width: 100%;
+      padding: 0.75rem 1rem;
+      border-radius: 1rem;
+      font-weight: 800;
+      color: #fff;
+      transition: transform 0.15s ease, box-shadow 0.2s ease;
+    }
+    .plan-card__cta:hover {
       transform: translateY(-2px);
-      box-shadow: 0 8px 16px rgba(0,0,0,0.15);
+      box-shadow: 0 12px 32px rgba(14,165,233,0.25);
     }
     .badge {
       background: linear-gradient(90deg, #f59e0b 70%, #10b981 100%);
@@ -513,6 +597,12 @@
         padding: 1.25rem 1.15rem;
         border-radius: 1.25rem;
       }
+      .plan-card__features {
+        align-items: center;
+      }
+      .plan-card__features li {
+        justify-content: center;
+      }
       #content-myplans .plan-card-surface {
         padding: 1.25rem 1.15rem;
         border-radius: 1.25rem;
@@ -634,68 +724,67 @@
     <div id="content-sub" class="">
       <div class="grid grid-cols-1 sm:grid-cols-3 gap-6">
         <!-- پلن یک ماهه -->
-        <div class="plan-card relative bg-white border-2 border-[#e0e8e7] rounded-2xl px-7 py-8 flex flex-col items-center shadow-lg text-center min-h-[280px] sm:min-h-[330px]">
+        <div class="plan-card plan-card--sub" data-plan-card="1month">
           <div class="badge">پیشنهاد اقتصادی</div>
-          <svg width="42" height="42" fill="none" viewBox="0 0 24 24" class="mb-2">
+          <svg width="42" height="42" fill="none" viewBox="0 0 24 24" class="plan-card__icon">
             <circle cx="12" cy="12" r="10" stroke="#10b981" stroke-width="2"/>
             <path d="M12 6v6l3 2" stroke="#0ea5e9" stroke-width="2" stroke-linecap="round"/>
           </svg>
-          <h2 class="font-extrabold text-xl text-[#10b981] mb-2">اشتراک ۱ ماهه</h2>
-<div class="text-2xl font-bold text-[#0ea5e9] mb-1">
-  <span id="price-1month">۴۹,۰۰۰</span> <span class="text-base font-normal">تومان</span>
-</div>
-
-          <div class="text-xs text-gray-400 mb-3">تمدید خودکار ندارد</div>
-          <ul class="text-gray-700 text-sm text-right mb-5 space-y-1 px-0.5">
-            <li>➕ ثبت نام فروشگاه بدون محدودیت محصول</li>
-            <li>👁 نمایش در لیست فروشگاه‌ها</li>
-            <li>🛡 پشتیبانی استاندارد</li>
-            <li>⏱ اعتبار: ۳۰ روز</li>
+          <h2 class="plan-card__title" data-plan-title="1month">اشتراک ۱ ماهه</h2>
+          <div class="plan-card__price">
+            <span id="price-1month" data-plan-price="1month">۴۹,۰۰۰</span>
+            <span class="plan-card__price-unit">تومان</span>
+          </div>
+          <div class="plan-card__duration" data-plan-duration="1month">اعتبار: ۳۰ روز</div>
+          <p class="plan-card__description" data-plan-description="1month">شروع سریع با یک ماه حضور فعال در ویترینت.</p>
+          <ul class="plan-card__features" data-plan-features="1month">
+            <li><span class="plan-feature-icon">✔</span><span>نمایش فروشگاه در نتایج جستجو</span></li>
+            <li><span class="plan-feature-icon">✔</span><span>پشتیبانی استاندارد تیم ویترینت</span></li>
+            <li><span class="plan-feature-icon">✔</span><span>امکان فعالسازی VitriPlus</span></li>
           </ul>
-          <button class="w-full py-2 text-sm sm:text-lg bg-[#10b981] hover:bg-[#0ea5e9] text-white font-bold rounded-xl transition shadow"
-                  onclick="selectPlan('1month')">خرید این پلن</button>
+          <button class="plan-card__cta bg-[#10b981] hover:bg-[#0ea5e9]" data-plan-select="1month" onclick="selectPlan('1month')">خرید این پلن</button>
         </div>
         <!-- پلن سه ماهه -->
-        <div class="plan-card relative bg-white border-2 border-[#e0e8e7] rounded-2xl px-7 py-8 flex flex-col items-center shadow-lg text-center min-h-[280px] sm:min-h-[330px]">
+        <div class="plan-card plan-card--sub" data-plan-card="3month">
           <div class="badge" style="background:linear-gradient(90deg,#f59e0b 65%,#10b981 100%)">پیشنهاد محبوب</div>
-          <svg width="42" height="42" fill="none" viewBox="0 0 24 24" class="mb-2">
+          <svg width="42" height="42" fill="none" viewBox="0 0 24 24" class="plan-card__icon">
             <circle cx="12" cy="12" r="10" stroke="#f59e0b" stroke-width="2"/>
             <path d="M12 8v8" stroke="#10b981" stroke-width="2" stroke-linecap="round"/>
           </svg>
-          <h2 class="font-extrabold text-xl text-[#f59e0b] mb-2">اشتراک ۳ ماهه</h2>
-<div class="text-2xl font-bold text-[#0ea5e9] mb-1">
-  <span id="price-3month">۱۲۹,۰۰۰</span> <span class="text-base font-normal">تومان</span>
-</div>
-          <div class="text-xs text-gray-400 mb-3">تمدید خودکار ندارد</div>
-          <ul class="text-gray-700 text-sm text-right mb-5 space-y-1 px-0.5">
-            <li>➕ ثبت نام فروشگاه بدون محدودیت محصول</li>
-            <li>👁 نمایش اولویت‌دار در فروشگاه‌ها</li>
-            <li>💬 پشتیبانی سریع</li>
-            <li>⏱ اعتبار: ۹۰ روز</li>
+          <h2 class="plan-card__title" data-plan-title="3month">اشتراک ۳ ماهه</h2>
+          <div class="plan-card__price">
+            <span id="price-3month" data-plan-price="3month">۱۲۹,۰۰۰</span>
+            <span class="plan-card__price-unit">تومان</span>
+          </div>
+          <div class="plan-card__duration" data-plan-duration="3month">اعتبار: ۹۰ روز</div>
+          <p class="plan-card__description" data-plan-description="3month">پوشش یک فصل کامل با تمرکز بر رشد پایدار.</p>
+          <ul class="plan-card__features" data-plan-features="3month">
+            <li><span class="plan-feature-icon">✔</span><span>همه امکانات پلن یک‌ماهه</span></li>
+            <li><span class="plan-feature-icon">✔</span><span>اولویت نمایش در لیست فروشگاه‌ها</span></li>
+            <li><span class="plan-feature-icon">✔</span><span>پشتیبانی سریع‌تر</span></li>
           </ul>
-          <button class="w-full py-2 text-sm sm:text-lg bg-[#f59e0b] hover:bg-[#0ea5e9] text-white font-bold rounded-xl transition shadow"
-                  onclick="selectPlan('3month')">خرید این پلن</button>
+          <button class="plan-card__cta bg-[#f59e0b] hover:bg-[#0ea5e9]" data-plan-select="3month" onclick="selectPlan('3month')">خرید این پلن</button>
         </div>
         <!-- پلن یک‌ساله -->
-        <div class="plan-card relative bg-white border-2 border-[#e0e8e7] rounded-2xl px-7 py-8 flex flex-col items-center shadow-lg text-center min-h-[280px] sm:min-h-[330px]">
+        <div class="plan-card plan-card--sub" data-plan-card="12month">
           <div class="badge" style="background:linear-gradient(90deg,#10b981 65%,#0ea5e9 100%)">بیشترین صرفه‌جویی</div>
-          <svg width="42" height="42" fill="none" viewBox="0 0 24 24" class="mb-2">
+          <svg width="42" height="42" fill="none" viewBox="0 0 24 24" class="plan-card__icon">
             <circle cx="12" cy="12" r="10" stroke="#0ea5e9" stroke-width="2"/>
             <path d="M12 4v14" stroke="#0ea5e9" stroke-width="2" stroke-linecap="round"/>
           </svg>
-          <h2 class="font-extrabold text-xl text-[#0ea5e9] mb-2">اشتراک ۱ ساله</h2>
-<div class="text-2xl font-bold text-[#10b981] mb-1">
-  <span id="price-12month">۳۸۹,۰۰۰</span> <span class="text-base font-normal">تومان</span>
-</div>
-          <div class="text-xs text-gray-400 mb-3">تمدید خودکار ندارد</div>
-          <ul class="text-gray-700 text-sm text-right mb-5 space-y-1 px-0.5">
-            <li>➕ ثبت نام فروشگاه بدون محدودیت محصول</li>
-            <li>👑 نمایش ویژه در لیست فروشگاه‌ها</li>
-            <li>⭐️ پشتیبانی VIP</li>
-            <li>⏱ اعتبار: ۳۶۵ روز</li>
+          <h2 class="plan-card__title" data-plan-title="12month">اشتراک ۱ ساله</h2>
+          <div class="plan-card__price">
+            <span id="price-12month" data-plan-price="12month">۳۸۹,۰۰۰</span>
+            <span class="plan-card__price-unit">تومان</span>
+          </div>
+          <div class="plan-card__duration" data-plan-duration="12month">اعتبار: ۳۶۵ روز</div>
+          <p class="plan-card__description" data-plan-description="12month">راهکار یک‌ساله برای فروشگاه‌های حرفه‌ای.</p>
+          <ul class="plan-card__features" data-plan-features="12month">
+            <li><span class="plan-feature-icon">✔</span><span>همه امکانات پلن‌های قبلی</span></li>
+            <li><span class="plan-feature-icon">✔</span><span>نمایش ویژه و پروموشن‌های اختصاصی</span></li>
+            <li><span class="plan-feature-icon">✔</span><span>پشتیبانی VIP و گزارش‌های تحلیلی</span></li>
           </ul>
-          <button class="w-full py-2 text-sm sm:text-lg bg-[#0ea5e9] hover:bg-[#10b981] text-white font-bold rounded-xl transition shadow"
-                  onclick="selectPlan('12month')">خرید این پلن</button>
+          <button class="plan-card__cta bg-[#0ea5e9] hover:bg-[#10b981]" data-plan-select="12month" onclick="selectPlan('12month')">خرید این پلن</button>
         </div>
       </div>
     </div>

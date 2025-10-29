@@ -168,7 +168,7 @@ exports.handlePaymentCallback = async (req, res) => {
           const seller = await Seller.findById(payment.sellerId);
           if (seller) {
             const now = new Date();
-            const premiumUntil = calcPremiumUntil(plan.slug, now);
+            const premiumUntil = calcPremiumUntil(plan, now);
             seller.isPremium = true;
             seller.premiumUntil = premiumUntil;
             await seller.save();

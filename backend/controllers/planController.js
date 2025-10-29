@@ -1,14 +1,49 @@
 const Plan = require('../models/plan');
+const {
+  SUBSCRIPTION_PLANS,
+  getDefaultDurationDays,
+  getDefaultDescription,
+  getDefaultFeatures
+} = require('../config/subscriptionPlans');
 
-// لیست ثابتِ پلن‌های اشتراک
-const SUBSCRIPTION_PLANS = [
-  { slug: '1month',  title: 'اشتراک ۱ ماهه'  },
-  { slug: '3month',  title: 'اشتراک ۳ ماهه'  },
-  { slug: '12month', title: 'اشتراک ۱۲ ماهه' }
-];
+const SUBSCRIPTION_PLAN_SLUGS = SUBSCRIPTION_PLANS.map(plan => plan.slug);
+
+const sanitizeFeatures = (rawValue) => {
+  if (!rawValue) return [];
+  const list = Array.isArray(rawValue)
+    ? rawValue
+    : String(rawValue).split(/\r?\n/);
+
+  return list
+    .map(item => String(item || '').trim())
+    .filter(Boolean)
+    .slice(0, 12);
+};
+
+const buildBasePlan = (definition) => ({
+  slug: definition.slug,
+  title: definition.title,
+  price: null,
+  durationDays: definition.defaultDurationDays ?? null,
+  description: definition.defaultDescription || '',
+  features: [...(definition.defaultFeatures || [])],
+  origin: 'default',
+  lastUpdatedAt: null
+});
+
+const applyDocumentToPlan = (plan, doc) => {
+  if (!doc) return plan;
+  if (doc.price != null) plan.price = doc.price;
+  if (doc.durationDays != null) plan.durationDays = doc.durationDays;
+  if (doc.description != null) plan.description = doc.description;
+  if (Array.isArray(doc.features)) plan.features = doc.features;
+  plan.lastUpdatedAt = doc.updatedAt || doc.createdAt || plan.lastUpdatedAt;
+  plan.origin = doc.sellerPhone ? 'seller-override' : 'global';
+  return plan;
+};
 
 /* ── GET  /api/plans ─────────────────────────────── */
-/* خروجی: { plans : { "1month": 49000, ... } }       */
+/* خروجی جدید: { plans : { "1month": { price, durationDays, ... } } } */
 exports.getPlans = async (req, res) => {
   try {
     let { sellerPhone } = req.query;
@@ -17,31 +52,38 @@ exports.getPlans = async (req, res) => {
       if (sellerPhone.length === 10 && sellerPhone.startsWith('9')) sellerPhone = '0' + sellerPhone;
     }
 
-    // ۱) پلن‌های سراسری
     const globalPlans = await Plan.find({
-      slug: { $in: SUBSCRIPTION_PLANS.map(p => p.slug) },
+      slug: { $in: SUBSCRIPTION_PLAN_SLUGS },
       sellerPhone: null
     }).lean();
 
-    // ۲) override‌های اختصاصی برای شماره‌ی داده‌شده
     const overridePlans = sellerPhone
       ? await Plan.find({
-          slug: { $in: SUBSCRIPTION_PLANS.map(p => p.slug) },
+          slug: { $in: SUBSCRIPTION_PLAN_SLUGS },
           sellerPhone
         }).lean()
       : [];
 
-    // ۳) merge (overrideها اولویت دارند)
-    const merged = {};
-    globalPlans.forEach(p => { merged[p.slug] = p.price; });
-    overridePlans.forEach(p => { merged[p.slug] = p.price; });
+    const globalMap = new Map(globalPlans.map(doc => [doc.slug, doc]));
+    const overrideMap = new Map(overridePlans.map(doc => [doc.slug, doc]));
 
-    // ۴) اگر رکوردی نداشتیم، مقدار را null برگردانیم
-    SUBSCRIPTION_PLANS.forEach(p => {
-      if (merged[p.slug] === undefined) merged[p.slug] = null;
+    const merged = {};
+
+    SUBSCRIPTION_PLANS.forEach(definition => {
+      const basePlan = buildBasePlan(definition);
+      const appliedGlobal = applyDocumentToPlan(basePlan, globalMap.get(definition.slug));
+      const finalPlan = applyDocumentToPlan(appliedGlobal, overrideMap.get(definition.slug));
+
+      merged[definition.slug] = finalPlan;
     });
 
-    return res.json({ success: true, plans: merged });
+    return res.json({
+      success: true,
+      plans: merged,
+      meta: {
+        sellerPhone: sellerPhone || null
+      }
+    });
   } catch (err) {
     console.error('getPlans ❌', err);
     return res.status(500).json({ success:false, message:'خطا در دریافت پلن‌ها' });
@@ -49,24 +91,36 @@ exports.getPlans = async (req, res) => {
 };
 
 /* ── PUT /api/plans/admin ─────────────────────────── */
-/* بدنهٔ نمونه (global) :
-   { "1month": 59000, "3month": 149000, "12month": 399000 }
+/* بدنهٔ جدید (گلوبال):
+   {
+     "plans": {
+       "1month": {
+         "price": 69000,
+         "durationDays": 30,
+         "description": "...",
+         "features": ["..."]
+       }
+     }
+   }
 
-   بدنهٔ نمونه (اختصاصی فروشنده) :
-   { "sellerPhone": "09121234567", "1month": 69000, "3month": 179000 }
+   بدنهٔ نمونه (اختصاصی فروشنده):
+   {
+     "sellerPhone": "09121234567",
+     "plans": {
+       "1month": { "price": 79000, "durationDays": 35, "features": ["..."] }
+     }
+   }
 */
 exports.updatePlans = async (req, res) => {
   try {
     const body        = req.body || {};
+    const incoming    = body.plans || {};
+    const legacyPrices = body.prices || {};
 
-    // مقادیر قیمت‌ها در شیٔ جداگانه "prices" قرار دارند
-    const prices      = body.prices || {};
+    let sellerPhone = (body.sellerPhone || '').toString().trim() || null;  // «» → null
 
-    let   sellerPhone = (body.sellerPhone || '').toString().trim() || null;  // «» → null
-
-    /* اگر شماره موبایل فرستاده شد، نرمالایز کن */
     if (sellerPhone) {
-      sellerPhone = sellerPhone.replace(/\D/g, '');  // حذف غیرعددی
+      sellerPhone = sellerPhone.replace(/\D/g, '');
       if (sellerPhone.length === 10 && sellerPhone.startsWith('9')) {
         sellerPhone = '0' + sellerPhone;
       }
@@ -77,29 +131,69 @@ exports.updatePlans = async (req, res) => {
       }
     }
 
-    const updates = [];
+    const planPayload = {};
 
-    /* فقط پلن‌هایی که قیمت معتبر (عدد > 0) دارند ذخیره می‌شوند */
-    for (const planDef of SUBSCRIPTION_PLANS) {
-      const price = Number(prices[planDef.slug]);
-      if (Number.isNaN(price) || price <= 0) continue;
+    for (const definition of SUBSCRIPTION_PLANS) {
+      const slug = definition.slug;
+      const payload = incoming[slug] || (legacyPrices[slug] != null ? { price: legacyPrices[slug] } : null);
+      if (!payload) continue;
 
-      updates.push(
-        Plan.findOneAndUpdate(
-          { slug: planDef.slug, sellerPhone },         // ← فیلتر منحصربه‌فرد
-          { $set: { title: planDef.title, price, sellerPhone } },
-          { upsert: true, new: true }
-        )
-      );
+      const price = Number(payload.price);
+      if (!Number.isFinite(price) || price <= 0) {
+        return res.status(400).json({ success:false, message:`قیمت پلن «${definition.title}» نامعتبر است.` });
+      }
+
+      let durationDays;
+      if (Object.prototype.hasOwnProperty.call(payload, 'durationDays')) {
+        durationDays = Number(payload.durationDays);
+      } else {
+        durationDays = getDefaultDurationDays(slug) ?? 30;
+      }
+
+      if (!Number.isFinite(durationDays) || durationDays <= 0 || durationDays > 3650) {
+        return res.status(400).json({ success:false, message:`مدت زمان پلن «${definition.title}» باید بین ۱ تا ۳۶۵۰ روز باشد.` });
+      }
+
+      const description = Object.prototype.hasOwnProperty.call(payload, 'description')
+        ? (payload.description ?? '').toString().trim()
+        : getDefaultDescription(slug);
+
+      const features = Object.prototype.hasOwnProperty.call(payload, 'features')
+        ? sanitizeFeatures(payload.features)
+        : getDefaultFeatures(slug);
+
+      planPayload[slug] = {
+        title: definition.title,
+        price,
+        durationDays,
+        description: description || getDefaultDescription(slug),
+        features: features.length ? features : getDefaultFeatures(slug)
+      };
     }
 
-    if (!updates.length) {
+    const entries = Object.entries(planPayload);
+    if (!entries.length) {
       return res
         .status(400)
-        .json({ success:false, message:'هیچ قیمت معتبری ارسال نشد.' });
+        .json({ success:false, message:'هیچ دادهٔ معتبری برای پلن‌ها ارسال نشد.' });
     }
 
-    await Promise.all(updates);
+    await Promise.all(entries.map(([slug, payload]) =>
+      Plan.findOneAndUpdate(
+        { slug, sellerPhone },
+        {
+          $set: {
+            title: payload.title,
+            price: payload.price,
+            durationDays: payload.durationDays,
+            description: payload.description,
+            features: payload.features,
+            sellerPhone
+          }
+        },
+        { upsert: true, new: true, setDefaultsOnInsert: true }
+      )
+    ));
 
     return res.json({
       success : true,

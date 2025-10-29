@@ -7416,13 +7416,39 @@ panels['home-section'] = document.getElementById('home-section-panel');
 
 
 /* المان‌های ورودی */
-const planInputs = {
-  "1month":  document.getElementById('plan-1month'),
-  "3month":  document.getElementById('plan-3month'),
-  "12month": document.getElementById('plan-12month'),
-  "vitriPlus": document.getElementById('vitriPlusPrice')
-};
+const PLAN_SLUGS = ['1month', '3month', '12month'];
+const planFormRefs = PLAN_SLUGS.reduce((acc, slug) => {
+  acc[slug] = {
+    price: document.getElementById(`plan-${slug}-price`),
+    duration: document.getElementById(`plan-${slug}-duration`),
+    description: document.getElementById(`plan-${slug}-description`),
+    features: document.getElementById(`plan-${slug}-features`),
+    source: document.querySelector(`[data-plan-source="${slug}"]`),
+    updated: document.querySelector(`[data-plan-updated="${slug}"]`)
+  };
+  return acc;
+}, {});
 const plansMsg  = document.getElementById('plansMsg');
+let planCache   = {};
+
+const formatPlanOrigin = (origin, sellerPhone) => {
+  if (origin === 'seller-override') {
+    return sellerPhone ? `اختصاصی ${sellerPhone}` : 'پلن اختصاصی';
+  }
+  if (origin === 'global') {
+    return 'پلن عمومی';
+  }
+  return 'پیش‌فرض سیستم';
+};
+
+const sanitizeFeaturesInput = (value) => {
+  if (!value) return [];
+  return value
+    .split(/\r?\n/)
+    .map(item => item.trim())
+    .filter(Boolean)
+    .slice(0, 12);
+};
 
 const sellerPlanToggle       = document.getElementById('sellerPlanToggle');
 const sellerPlanToggleSave   = document.getElementById('sellerPlanToggleSave');
@@ -7640,21 +7666,33 @@ async function loadPlanPrices() {
     const res = await fetch(url, { credentials: 'include' });
     if (!res.ok) throw new Error(await res.text());
 
-    const { plans } = await res.json();  // { "1month": ..., "3month": ..., ... }
+    const { plans = {}, meta = {} } = await res.json();
+    planCache = plans;
 
-    // پر کردن فیلدها
-    planInputs['1month'].value  = plans['1month']  ?? '';
-    planInputs['3month'].value  = plans['3month']  ?? '';
-    planInputs['12month'].value = plans['12month'] ?? '';
-    planInputs['vitriPlus'].value = plans['vitriPlus'] ?? '';
+    PLAN_SLUGS.forEach(slug => {
+      const refs = planFormRefs[slug];
+      const plan = plans[slug] || {};
+      if (refs.price) refs.price.value = plan.price ?? '';
+      if (refs.duration) refs.duration.value = plan.durationDays ?? '';
+      if (refs.description) refs.description.value = plan.description || '';
+      if (refs.features) {
+        const features = Array.isArray(plan.features) ? plan.features.filter(Boolean) : [];
+        refs.features.value = features.join('\n');
+      }
+      if (refs.source) {
+        refs.source.textContent = formatPlanOrigin(plan.origin, meta.sellerPhone || phone);
+      }
+      if (refs.updated) {
+        refs.updated.textContent = plan.lastUpdatedAt ? formatFeatureDate(plan.lastUpdatedAt) : '—';
+      }
+    });
 
-    // اگر همه خالی (یعنی override نداره)، پیام بدید
-    if (phone && !Object.values(plans).some(p => p !== null)) {
-      showPlansMsg('قیمت اختصاصی برای این فروشنده تعریف نشده؛ از قیمت عمومی استفاده می‌شود.', true, phone);
+    if (phone && !Object.values(plans).some(p => p && p.origin === 'seller-override')) {
+      showPlansMsg('قیمت و جزئیات اختصاصی برای این فروشنده تعریف نشده؛ از پلن عمومی استفاده می‌شود.', true, phone);
     }
   } catch (err) {
     console.error('خطا در دریافت قیمت پلن‌ها:', err);
-    showPlansMsg('❌ خطا در دریافت قیمت‌ها!', false);
+    showPlansMsg('❌ خطا در دریافت پلن‌ها!', false);
   }
 }
 
@@ -7669,26 +7707,41 @@ function getCookie(name) {
 async function savePlanPrices(e) {
   e.preventDefault();
 
-  // آماده‌سازی payload
-  const prices = {
-    '1month':  Number(planInputs['1month'].value),
-    '3month':  Number(planInputs['3month'].value),
-    '12month': Number(planInputs['12month'].value),
-    'vitriPlus': Number(planInputs['vitriPlus'].value)
-  };
+  const plansPayload = {};
 
-  const validPrices = {};
-  Object.keys(prices).forEach(k => {
-    const val = prices[k];
-    if (!Number.isNaN(val) && val > 0) validPrices[k] = val;
-  });
+  for (const slug of PLAN_SLUGS) {
+    const refs = planFormRefs[slug];
+    if (!refs || !refs.price) continue;
 
-  if (!Object.keys(validPrices).length) {
-    showPlansMsg('هیچ قیمت معتبری ارسال نشد', false);
+    const price = Number(refs.price.value);
+    if (!Number.isFinite(price) || price <= 0) {
+      showPlansMsg(`قیمت پلن ${slug} نامعتبر است.`, false);
+      return;
+    }
+
+    const duration = Number(refs.duration?.value);
+    if (!Number.isFinite(duration) || duration <= 0 || duration > 3650) {
+      showPlansMsg(`مدت زمان پلن ${slug} باید بین ۱ تا ۳۶۵۰ روز باشد.`, false);
+      return;
+    }
+
+    const description = (refs.description?.value || '').trim();
+    const features = sanitizeFeaturesInput(refs.features?.value || '');
+
+    plansPayload[slug] = {
+      price,
+      durationDays: duration,
+      description,
+      features
+    };
+  }
+
+  if (!Object.keys(plansPayload).length) {
+    showPlansMsg('هیچ داده‌ای برای ذخیره ارسال نشد.', false);
     return;
   }
 
-  const body = { prices: validPrices };
+  const body = { plans: plansPayload };
 
 
   const rawPhone = document.getElementById('seller-phone-plans').value.trim();
@@ -7724,7 +7777,7 @@ async function savePlanPrices(e) {
     }
 
     await loadPlanPrices();
-    showPlansMsg('✅ ' + (data.message || 'قیمت‌ها با موفقیت ذخیره شدند.'), true, phone);
+    showPlansMsg('✅ ' + (data.message || 'پلن‌ها با موفقیت ذخیره شدند.'), true, phone);
   } catch (err) {
     console.error('خطا در ذخیره قیمت‌ها:', err);
     showPlansMsg('❌ ' + err.message, false, phone);
@@ -7734,12 +7787,15 @@ async function savePlanPrices(e) {
 
 /* ---------- 3) نمایش پیام موفقیت / خطا ---------- */
 function showPlansMsg(txt, ok, phone = '') {
-  const plansMsg = document.getElementById('plansMsg');
-  plansMsg.textContent      = txt + (phone ? ` (اختصاصی برای ${phone})` : ' (عمومی)');
-  plansMsg.style.display    = 'block';
-  plansMsg.style.background = ok ? '#e0fdfa' : '#fee2e2';
-  plansMsg.style.color      = ok ? '#10b981' : '#b91c1c';
-  setTimeout(() => plansMsg.style.display = 'none', 3000);
+  if (!plansMsg) return;
+  plansMsg.textContent = txt + (phone ? ` (${phone})` : '');
+  plansMsg.classList.add('is-visible');
+  plansMsg.style.background = ok ? '#ecfdf5' : '#fee2e2';
+  plansMsg.style.color = ok ? '#047857' : '#b91c1c';
+  clearTimeout(showPlansMsg.timer);
+  showPlansMsg.timer = setTimeout(() => {
+    plansMsg.classList.remove('is-visible');
+  }, 3200);
 }
 
 /* ---------- 4) اتصال رویدادها ---------- */

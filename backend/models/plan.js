@@ -1,12 +1,18 @@
 //-------------------------------------------------------------
 //  مدل پلن‌های اشتراک (Global + Seller‑Specific)
-//  • اگر sellerPhone === null  ⇒  قیمت عمومی (برای همه فروشنده‌ها)
-//  • اگر sellerPhone یک شماره معتبر باشد ⇒  قیمت اختصاصی همان فروشنده
+//  • اگر sellerPhone === null  ⇒  قیمت و جزئیات عمومی (برای همه فروشنده‌ها)
+//  • اگر sellerPhone یک شماره معتبر باشد ⇒  قیمت/جزئیات اختصاصی همان فروشنده
 //-------------------------------------------------------------
 const mongoose = require('mongoose');
 
-/* اسلاگ‌های مجاز – فقط برای جلوگیری از اشتباه تایپی در سرور  */
-const VALID_SLUGS = ['1month', '3month', '12month'];
+const {
+  SUBSCRIPTION_PLANS,
+  getDefaultDurationDays,
+  getDefaultDescription,
+  getDefaultFeatures
+} = require('../config/subscriptionPlans');
+
+const VALID_SLUGS = SUBSCRIPTION_PLANS.map(plan => plan.slug);
 
 const planSchema = new mongoose.Schema(
   {
@@ -27,6 +33,38 @@ const planSchema = new mongoose.Schema(
       type:     Number,
       required: true,
       min:      [0, 'قیمت باید بزرگتر از ۰ باشد.']
+    },
+
+    durationDays: {
+      type: Number,
+      min : [1, 'مدت زمان پلن باید حداقل ۱ روز باشد.'],
+      max : [3650, 'مدت زمان پلن نمی‌تواند بیش از ۳۶۵۰ روز باشد.'],
+      default() {
+        return getDefaultDurationDays(this.slug) ?? 30;
+      }
+    },
+
+    description: {
+      type: String,
+      trim: true,
+      default() {
+        return getDefaultDescription(this.slug);
+      }
+    },
+
+    features: {
+      type: [String],
+      default() {
+        return getDefaultFeatures(this.slug);
+      },
+      set(values) {
+        if (!values) return [];
+        const list = Array.isArray(values) ? values : String(values).split(/\r?\n/);
+        return list
+          .map(item => String(item || '').trim())
+          .filter(Boolean)
+          .slice(0, 12);
+      }
     },
 
     /* null  ⇒  پلن سراسری    |    "09..." ⇒  پلن فروشنده */

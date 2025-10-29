@@ -749,32 +749,114 @@
         </div>
         <div class="plan-flag-meta" id="sellerPlanToggleMeta">در حال آماده‌سازی اطلاعات...</div>
       </div>
-      <form id="plansForm">
-        <div>
-          <input id="seller-phone-plans" type="text" placeholder="شماره موبایل فروشنده (اختیاری برای قیمت اختصاصی)" style="width:100%;margin-bottom:1rem;padding:0.9rem 1.2rem;font-size:1.15rem;background:#f8fafc;border:1.8px solid #e0fdfa;border-radius:16px;outline:none;"/>
+      <form id="plansForm" class="plan-config-form" novalidate>
+        <section class="plan-config-target">
+          <label for="seller-phone-plans">شماره موبایل فروشنده (اختیاری برای تعریف قیمت و مزایای اختصاصی)</label>
+          <div class="plan-config-target__input">
+            <input id="seller-phone-plans" type="text" inputmode="numeric" placeholder="مثلاً 09121234567">
+            <p class="plan-config-target__hint">اگر این فیلد خالی بماند تغییرات برای تمام فروشندگان اعمال می‌شود.</p>
+          </div>
+        </section>
+
+        <div class="plan-config-grid">
+          <article class="plan-config-card" data-plan-config="1month">
+            <header class="plan-config-card__header">
+              <div>
+                <h3>اشتراک ۱ ماهه</h3>
+                <p class="plan-config-card__subtitle">پلن شروع سریع برای فروشندگان تازه‌وارد.</p>
+              </div>
+              <div class="plan-config-card__meta">
+                <span class="plan-config-card__meta-source" data-plan-source="1month">پیش‌فرض سیستم</span>
+                <span class="plan-config-card__meta-updated" data-plan-updated="1month">—</span>
+              </div>
+            </header>
+            <div class="plan-config-fields">
+              <div class="plan-config-field">
+                <label for="plan-1month-price">قیمت (تومان)</label>
+                <input type="number" id="plan-1month-price" min="1000" step="1000" inputmode="numeric">
+              </div>
+              <div class="plan-config-field plan-config-field--inline">
+                <label for="plan-1month-duration">مدت (روز)</label>
+                <input type="number" id="plan-1month-duration" min="1" max="3650" inputmode="numeric">
+              </div>
+              <div class="plan-config-field">
+                <label for="plan-1month-description">توضیح کوتاه</label>
+                <textarea id="plan-1month-description" rows="2" placeholder="مثلاً حضور فعال در ویترینت طی یک ماه"></textarea>
+              </div>
+              <div class="plan-config-field">
+                <label for="plan-1month-features">مزایا (هر خط یک مورد)</label>
+                <textarea id="plan-1month-features" rows="4" placeholder="نمایش در نتایج جستجو"></textarea>
+              </div>
+            </div>
+          </article>
+
+          <article class="plan-config-card" data-plan-config="3month">
+            <header class="plan-config-card__header">
+              <div>
+                <h3>اشتراک ۳ ماهه</h3>
+                <p class="plan-config-card__subtitle">پوشش یک فصل کامل با تمرکز بر رشد پایدار.</p>
+              </div>
+              <div class="plan-config-card__meta">
+                <span class="plan-config-card__meta-source" data-plan-source="3month">پیش‌فرض سیستم</span>
+                <span class="plan-config-card__meta-updated" data-plan-updated="3month">—</span>
+              </div>
+            </header>
+            <div class="plan-config-fields">
+              <div class="plan-config-field">
+                <label for="plan-3month-price">قیمت (تومان)</label>
+                <input type="number" id="plan-3month-price" min="1000" step="1000" inputmode="numeric">
+              </div>
+              <div class="plan-config-field plan-config-field--inline">
+                <label for="plan-3month-duration">مدت (روز)</label>
+                <input type="number" id="plan-3month-duration" min="1" max="3650" inputmode="numeric">
+              </div>
+              <div class="plan-config-field">
+                <label for="plan-3month-description">توضیح کوتاه</label>
+                <textarea id="plan-3month-description" rows="2" placeholder="مثلاً مناسب برای برنامه‌ریزی فصلی"></textarea>
+              </div>
+              <div class="plan-config-field">
+                <label for="plan-3month-features">مزایا (هر خط یک مورد)</label>
+                <textarea id="plan-3month-features" rows="4" placeholder="اولویت نمایش در دسته‌بندی‌ها"></textarea>
+              </div>
+            </div>
+          </article>
+
+          <article class="plan-config-card" data-plan-config="12month">
+            <header class="plan-config-card__header">
+              <div>
+                <h3>اشتراک ۱۲ ماهه</h3>
+                <p class="plan-config-card__subtitle">راهکار یک‌ساله برای فروشگاه‌های حرفه‌ای.</p>
+              </div>
+              <div class="plan-config-card__meta">
+                <span class="plan-config-card__meta-source" data-plan-source="12month">پیش‌فرض سیستم</span>
+                <span class="plan-config-card__meta-updated" data-plan-updated="12month">—</span>
+              </div>
+            </header>
+            <div class="plan-config-fields">
+              <div class="plan-config-field">
+                <label for="plan-12month-price">قیمت (تومان)</label>
+                <input type="number" id="plan-12month-price" min="1000" step="1000" inputmode="numeric">
+              </div>
+              <div class="plan-config-field plan-config-field--inline">
+                <label for="plan-12month-duration">مدت (روز)</label>
+                <input type="number" id="plan-12month-duration" min="1" max="3650" inputmode="numeric">
+              </div>
+              <div class="plan-config-field">
+                <label for="plan-12month-description">توضیح کوتاه</label>
+                <textarea id="plan-12month-description" rows="2" placeholder="مثلاً بهترین گزینه برای توسعه برند"></textarea>
+              </div>
+              <div class="plan-config-field">
+                <label for="plan-12month-features">مزایا (هر خط یک مورد)</label>
+                <textarea id="plan-12month-features" rows="4" placeholder="پشتیبانی اختصاصی و گزارش تحلیلی"></textarea>
+              </div>
+            </div>
+          </article>
         </div>
-        <div>
-          <label for="plan-1month">اشتراک ۱ ماهه</label>
-          <input id="plan-1month" type="number" />
-        </div>
-        <div>
-          <label for="plan-3month">اشتراک ۳ ماهه</label>
-          <input id="plan-3month" type="number" />
-        </div>
-        <div>
-          <label for="plan-12month">اشتراک ۱۲ ماهه</label>
-          <input id="plan-12month" type="number" />
-        </div>
-        <!-- VitriPlus Price Input -->
-        <div class="mb-4">
-          <label class="block text-right text-sm text-green-900 mb-1">قیمت امکانات ویژه (ویتری‌پلاس)</label>
-          <input type="number" id="vitriPlusPrice" name="vitriPlusPrice"
-                 placeholder="مثلاً 30000"
-                 class="w-full p-2 rounded-xl bg-green-100 text-green-800 text-sm text-right outline-none focus:ring-2 focus:ring-green-500"
-                 dir="rtl">
-        </div>
-        <button type="submit">ذخیره قیمت پلن‌ها</button>
-        <div id="plansMsg" style="display:none;"></div>
+
+        <footer class="plan-config-footer">
+          <button type="submit" class="plan-config-submit">ذخیره پلن‌ها</button>
+          <div id="plansMsg" class="plan-config-message" role="alert" aria-live="polite"></div>
+        </footer>
       </form>
     </div>
   </div>
