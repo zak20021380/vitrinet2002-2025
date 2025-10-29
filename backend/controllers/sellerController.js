@@ -548,7 +548,7 @@ exports.upgradeSeller = async (req, res) => {
         return res.status(404).json({ success: false, message: 'پلن موردنظر یافت نشد.' });
       }
       const now = new Date();
-      const premiumUntil = calcPremiumUntil(plan.slug, now);
+      const premiumUntil = calcPremiumUntil(plan, now);
       seller.isPremium = true;
       seller.premiumUntil = premiumUntil;
       await SellerPlan.create({

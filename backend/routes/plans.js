@@ -14,8 +14,12 @@ router.get('/', planCtl.getPlans);
 
 // -------- PUT /api/plans/admin -----------------------------
 // بدنهٔ نمونه:
-// { "1month": 59000, "3month": 179000 }         ← قیمت عمومی
-// { "sellerPhone": "09121234567", "1month": 69000 } ← قیمت ویژهٔ یک فروشنده
+// {
+//   "plans": {
+//     "1month": { "price": 59000, "durationDays": 30, "description": "...", "features": ["..."] }
+//   }
+// }
+// { "sellerPhone": "09121234567", "plans": { "1month": { "price": 69000 } } } ← قیمت ویژهٔ یک فروشنده
 router.put('/admin', auth('admin'), planCtl.updatePlans);
 
 module.exports = router;

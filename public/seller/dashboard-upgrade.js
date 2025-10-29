@@ -304,6 +304,98 @@ function updatePremiumBadge(isPremium) {
 }
 
 
+const SUBSCRIPTION_PLAN_SLUGS = ['1month', '3month', '12month'];
+const PLAN_DEFAULTS = {
+  '1month': {
+    title: 'اشتراک ۱ ماهه',
+    durationDays: 30,
+    description: 'شروع سریع فروشگاه در ویترینت طی یک ماه کامل حضور.',
+    features: [
+      'نمایش فروشگاه در نتایج جستجو و دسته‌بندی‌ها',
+      'پشتیبانی استاندارد تیم ویترینت',
+      'امکان فعالسازی سرویس‌های پرمیوم (VitriPlus)'
+    ]
+  },
+  '3month': {
+    title: 'اشتراک ۳ ماهه',
+    durationDays: 90,
+    description: 'پوشش یک فصل کامل با تمرکز بر رشد پایدار.',
+    features: [
+      'همه امکانات پلن یک‌ماهه',
+      'اولویت نمایش در لیست فروشگاه‌ها',
+      'پشتیبانی سریع‌تر تیم ویترینت'
+    ]
+  },
+  '12month': {
+    title: 'اشتراک ۱ ساله',
+    durationDays: 365,
+    description: 'راهکار یک‌ساله برای فروشگاه‌های حرفه‌ای و توسعه برند.',
+    features: [
+      'همه امکانات پلن‌های قبلی',
+      'نمایش ویژه و پروموشن‌های اختصاصی',
+      'پشتیبانی VIP و گزارش‌های تحلیلی دوره‌ای'
+    ]
+  }
+};
+
+let planCardRegistry = {};
+let subscriptionPlanStore = {};
+
+function refreshPlanCardRegistry() {
+  planCardRegistry = {};
+  SUBSCRIPTION_PLAN_SLUGS.forEach(slug => {
+    const root = document.querySelector(`[data-plan-card="${slug}"]`);
+    if (!root) return;
+    planCardRegistry[slug] = {
+      root,
+      title: root.querySelector(`[data-plan-title="${slug}"]`) || root.querySelector('.plan-card__title'),
+      price: document.getElementById(`price-${slug}`) || root.querySelector(`[data-plan-price="${slug}"]`),
+      duration: root.querySelector(`[data-plan-duration="${slug}"]`),
+      description: root.querySelector(`[data-plan-description="${slug}"]`),
+      features: root.querySelector(`[data-plan-features="${slug}"]`),
+      cta: root.querySelector(`[data-plan-select="${slug}"]`)
+    };
+  });
+}
+
+function applyPlanCardDescriptor(plan) {
+  const refs = planCardRegistry[plan.slug];
+  if (!refs) return;
+  if (refs.title) refs.title.textContent = plan.title || PLAN_DEFAULTS[plan.slug]?.title || plan.slug;
+  if (refs.price) {
+    if (plan.price != null) {
+      refs.price.textContent = toFaPrice(plan.price);
+    } else if (!refs.price.textContent) {
+      refs.price.textContent = '—';
+    }
+  }
+  if (refs.duration) {
+    refs.duration.textContent = plan.durationDays ? `اعتبار: ${toFaDigits(plan.durationDays)} روز` : 'اعتبار: —';
+  }
+  if (refs.description) {
+    refs.description.textContent = plan.description || 'جزئیاتی برای این پلن ثبت نشده است.';
+  }
+  if (refs.features) {
+    refs.features.innerHTML = '';
+    const list = plan.features && plan.features.length ? plan.features : ['جزئیاتی برای این پلن ثبت نشده است.'];
+    list.forEach(item => {
+      const li = document.createElement('li');
+      if (plan.features && plan.features.length) {
+        const icon = document.createElement('span');
+        icon.className = 'plan-feature-icon';
+        icon.textContent = '✔';
+        const span = document.createElement('span');
+        span.textContent = item;
+        li.appendChild(icon);
+        li.appendChild(span);
+      } else {
+        li.textContent = item;
+      }
+      refs.features.appendChild(li);
+    });
+  }
+}
+
 /*──────────────── ۱) تب‌بندی و مقداردهی اولیه ────────────────*/
 function initUpgradeDashboard () {
   const tabSub     = document.getElementById('tab-sub');
@@ -320,6 +412,7 @@ function initUpgradeDashboard () {
   tabMyPlans.addEventListener('click',() => toggleTabs('myplans'));
 
   // پیش‌فرض نمایش اشتراک فروشگاه
+  refreshPlanCardRegistry();
   toggleTabs('sub');
 
   fetchPlanPrices();
@@ -357,22 +450,35 @@ function toggleTabs(tab) {
 
 async function fetchPlanPrices () {
   try {
+    if (!Object.keys(planCardRegistry).length) {
+      refreshPlanCardRegistry();
+    }
+
     const phoneRes = await getSellerPhone();
     let url = `${API_BASE}/plans`;
     if (phoneRes) {
       url += `?sellerPhone=${encodeURIComponent(phoneRes)}`;
     }
-    const res   = await fetch(url, withCreds());
-    const json  = await res.json();
+    const res = await fetch(url, withCreds());
+    if (!res.ok) throw new Error(`${res.status} ${res.statusText}`);
+    const json = await res.json();
     const plans = json.plans || {};
 
-    const p1 = document.getElementById('price-1month');
-    const p3 = document.getElementById('price-3month');
-    const p12 = document.getElementById('price-12month');
-
-    if (p1 && plans['1month'] != null) p1.textContent = toFaPrice(plans['1month']);
-    if (p3 && plans['3month'] != null) p3.textContent = toFaPrice(plans['3month']);
-    if (p12 && plans['12month'] != null) p12.textContent = toFaPrice(plans['12month']);
+    subscriptionPlanStore = {};
+    SUBSCRIPTION_PLAN_SLUGS.forEach(slug => {
+      const defaults = PLAN_DEFAULTS[slug] || {};
+      const plan = plans[slug] || {};
+      const descriptor = {
+        slug,
+        title: plan.title || defaults.title || slug,
+        price: plan.price ?? null,
+        durationDays: plan.durationDays ?? defaults.durationDays ?? null,
+        description: plan.description || defaults.description || '',
+        features: Array.isArray(plan.features) && plan.features.length ? plan.features : (defaults.features || [])
+      };
+      subscriptionPlanStore[slug] = descriptor;
+      applyPlanCardDescriptor(descriptor);
+    });
   } catch (err) {
     console.error('❌ خطا در دریافت پلن‌های اشتراک:', err);
   }
@@ -483,55 +589,49 @@ function startOfferCountdown(seconds = 45) {
 // زکی – نسخه نهایی selectPlan با تشخیص تبلیغ و بازکردن مدال تبلیغ ویژه
 
 window.selectPlan = async function (slug) {
-  // اگر نوع پلن تبلیغ ویژه بود، مستقیم مدال تبلیغ رو باز کن و ادامه نده
   if (slug === 'ad_search' || slug === 'ad_home' || slug === 'ad_products') {
-    window.openAdModal(slug); // مدال تبلیغ ویژه باز شود
+    window.openAdModal(slug);
     return;
   }
 
-  // بقیه کد مخصوص پلن‌های اشتراک
-  const PLAN_BENEFITS = {
-    '1month':  [
-      "قرار گرفتن فروشگاه شما در نتایج جستجو", 
-      "ساخت ویترین اختصاصی", 
-      "<span class='text-amber-300 font-bold'>امکان فعالسازی VitriPlus</span>"
-    ],
-    '3month': [
-      "همه امکانات پلن ۱ ماهه +", 
-      "۳ ماه حضور فعال", 
-      "<span class='text-amber-300 font-bold'>تخفیف ویژه VitriPlus</span>"
-    ],
-    '12month': [
-      "همه امکانات پلن‌های قبلی +",
-      "نمایش بیشتر فروشگاه",
-      "<span class='text-amber-300 font-bold'>ویژگی‌های اختصاصی VitriPlus</span>"
-    ],
+  const defaults = PLAN_DEFAULTS[slug] || {};
+  const planData = subscriptionPlanStore[slug] || {
+    slug,
+    title: defaults.title || slug,
+    price: defaults.price ?? null,
+    durationDays: defaults.durationDays ?? null,
+    description: defaults.description || '',
+    features: defaults.features || []
   };
 
-  const PLAN_TITLE = {
-    '1month'     : 'اشتراک ۱ ماهه',
-    '3month'     : 'اشتراک ۳ ماهه',
-    '12month'    : 'اشتراک ۱ ساله',
-  };
+  const title = planData.title || defaults.title || slug;
+  const featureList = planData.features && planData.features.length ? planData.features : (defaults.features || []);
+  const description = planData.description || defaults.description || '';
 
-  // مزایای پلن
-  const title = PLAN_TITLE[slug] || slug;
-  const benefits = PLAN_BENEFITS[slug] || [];
-  let price = document.querySelector(`[data-plan-price="${slug}"]`)?.textContent
-           || document.getElementById(`price-${slug}`)?.textContent
-           || "";
-
-  // استفاده از مدال موجود در صفحه
   const modal = document.getElementById('upgradeModal');
   if (!modal) return;
   modal.querySelector('#upgrade-title').textContent = title;
   const featuresUl = modal.querySelector('#featureList');
   if (featuresUl) {
-    featuresUl.innerHTML = benefits.map(b => `\
-      <li>\
-        <svg class="w-4 h-4 text-emerald-400" fill="none" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>\
-        <span>${b}</span>\
-      </li>`).join('');
+    featuresUl.innerHTML = '';
+    const details = description ? [description, ...featureList] : featureList;
+    if (!details.length) {
+      const li = document.createElement('li');
+      li.textContent = 'جزئیاتی برای این پلن ثبت نشده است.';
+      featuresUl.appendChild(li);
+    } else {
+      details.forEach(item => {
+        const li = document.createElement('li');
+        const icon = document.createElement('span');
+        icon.className = 'inline-flex items-center justify-center w-5 h-5 rounded-full bg-emerald-500/20 text-emerald-300 text-xs font-bold';
+        icon.textContent = '✔';
+        const span = document.createElement('span');
+        span.textContent = item;
+        li.appendChild(icon);
+        li.appendChild(span);
+        featuresUl.appendChild(li);
+      });
+    }
   }
   const priceEl = modal.querySelector('#upgrade-price');
   const oldPriceEl = modal.querySelector('#old-price');
@@ -539,19 +639,24 @@ window.selectPlan = async function (slug) {
   const saveBadge = modal.querySelector('#saveBadge');
   const premiumToggle = modal.querySelector('#premiumToggle');
 
-  const priceNum = +faToEn(price).replace(/,/g, '');
-  if (priceEl) {
-    priceEl.dataset.base = priceNum;
-    priceEl.textContent = price ? `${price} تومان` : '';
+  let priceNum = planData.price != null ? Number(planData.price) : 0;
+  if (!priceNum) {
+    const fallbackPrice = document.querySelector(`[data-plan-price="${slug}"]`)?.textContent
+      || document.getElementById(`price-${slug}`)?.textContent
+      || '';
+    priceNum = +faToEn(fallbackPrice).replace(/,/g, '') || 0;
   }
 
-  // نمایش قیمت قدیم و برچسب‌ها برای پلن‌های چندماهه
+  if (priceEl) {
+    priceEl.dataset.base = priceNum;
+    priceEl.textContent = priceNum ? `${toFaPrice(priceNum)} تومان` : '';
+  }
+
   if (slug === '3month' || slug === '12month') {
     const months = slug === '3month' ? 3 : 12;
-    const oneMonthEl = document.getElementById('price-1month');
-    const oneMonthPrice = oneMonthEl ? +faToEn(oneMonthEl.textContent).replace(/,/g, '') : 0;
-    if (oneMonthPrice && oldPriceEl) {
-      const oldNum = oneMonthPrice * months;
+    const basePrice = subscriptionPlanStore['1month']?.price ?? Number(faToEn(document.getElementById('price-1month')?.textContent || '').replace(/,/g, '')) || 0;
+    if (basePrice && oldPriceEl) {
+      const oldNum = basePrice * months;
       oldPriceEl.textContent = toFaPrice(oldNum) + ' تومان';
       oldPriceEl.classList.remove('hidden');
       if (saveBadge) {
@@ -578,6 +683,7 @@ window.selectPlan = async function (slug) {
     premiumToggle.checked = false;
     premiumToggle.dispatchEvent(new Event('change'));
   }
+
   modal.classList.remove('hidden');
   modal.scrollTop = 0;
   document.body.classList.add('overflow-hidden');
