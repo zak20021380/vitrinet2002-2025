@@ -234,6 +234,156 @@
     @media (max-width: 550px){
       .btn-grad {min-height:38px; font-size:13px;}
     }
+    .portfolio-card-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      min-width: 140px;
+    }
+    @media (min-width: 480px) {
+      .portfolio-card-actions {
+        flex-direction: row;
+        align-items: center;
+        justify-content: flex-end;
+      }
+    }
+    .portfolio-action-button {
+      border-radius: 9999px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.35rem;
+      padding: 0.55rem 1rem;
+      transition: transform 0.18s ease, box-shadow 0.18s ease;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+    .portfolio-action-button[data-variant="primary"] {
+      background: linear-gradient(90deg,#1d4ed8,#0ea5e9);
+      color: #fff;
+      box-shadow: 0 12px 24px rgba(14, 165, 233, 0.24);
+    }
+    .portfolio-action-button[data-variant="primary"]:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 16px 32px rgba(14, 165, 233, 0.28);
+    }
+    .portfolio-action-button[data-variant="secondary"] {
+      background: rgba(14, 165, 233, 0.12);
+      color: #0369a1;
+      border: 1px solid rgba(14, 165, 233, 0.22);
+    }
+    .portfolio-action-button[data-variant="secondary"]:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 12px 24px rgba(14, 165, 233, 0.22);
+    }
+    .portfolio-metric-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      padding: 0.35rem 0.75rem;
+      border-radius: 9999px;
+      background: rgba(15, 118, 110, 0.1);
+      color: #0f766e;
+      font-size: 0.7rem;
+      font-weight: 700;
+    }
+    .portfolio-sort-group {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.35rem;
+      border-radius: 9999px;
+      background: rgba(240, 253, 250, 0.85);
+      border: 1px solid rgba(14, 165, 233, 0.22);
+    }
+    .portfolio-sort-button {
+      border: none;
+      background: transparent;
+      border-radius: 9999px;
+      padding: 0.45rem 0.9rem;
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: #0369a1;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      cursor: pointer;
+      transition: all 0.18s ease;
+      white-space: nowrap;
+    }
+    .portfolio-sort-button[data-active="true"] {
+      background: linear-gradient(90deg,#10b981,#0ea5e9);
+      color: #fff;
+      box-shadow: 0 12px 24px rgba(14, 165, 233, 0.2);
+    }
+    .portfolio-sort-button:not([data-active="true"]):hover {
+      background: rgba(14, 165, 233, 0.12);
+    }
+    .portfolio-modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.55);
+      backdrop-filter: blur(10px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1.5rem;
+      z-index: 50;
+    }
+    .portfolio-modal-container {
+      width: 100%;
+      max-width: 720px;
+      background: rgba(255, 255, 255, 0.98);
+      border-radius: 28px;
+      border: 1px solid rgba(226, 232, 240, 0.6);
+      box-shadow: 0 28px 60px rgba(15, 118, 110, 0.18);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+    .portfolio-modal-media {
+      position: relative;
+      width: 100%;
+      overflow: hidden;
+    }
+    .portfolio-modal-media img {
+      width: 100%;
+      height: auto;
+      object-fit: cover;
+      display: block;
+    }
+    .portfolio-modal-body {
+      padding: 1.75rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+    .portfolio-modal-close {
+      position: absolute;
+      top: 1rem;
+      left: 1rem;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 40px;
+      height: 40px;
+      border-radius: 9999px;
+      background: rgba(15, 23, 42, 0.7);
+      color: #fff;
+      border: none;
+      cursor: pointer;
+      transition: transform 0.18s ease;
+    }
+    .portfolio-modal-close:hover {
+      transform: scale(1.05);
+    }
+    @media (max-width: 540px) {
+      .portfolio-modal-body {
+        padding: 1.25rem;
+      }
+    }
   </style>
   <script src="/nav-active.js" defer></script>
 </head>
@@ -413,8 +563,20 @@
             <h2 class="text-2xl sm:text-3xl font-black text-slate-800 mb-2">گالری پروژه‌های تازه ثبت‌شده</h2>
             <p class="text-sm sm:text-base text-slate-500 leading-relaxed">نمونه‌های تایید شده از سالن‌های زیبایی، کلینیک‌ها و سایر مراکز خدماتی که توسط فروشندگان ویترینت بارگذاری شده‌اند. همه تصاویر مستقیماً از پایگاه داده بارگذاری می‌شوند.</p>
           </div>
-          <div class="flex items-center gap-2 w-full lg:w-auto h-scrollbar overflow-x-auto">
-            <div id="portfolio-chip-container" class="flex items-center gap-2"></div>
+          <div class="flex flex-col sm:flex-row sm:items-center gap-3 w-full lg:w-auto">
+            <div class="flex items-center gap-2 w-full lg:w-auto h-scrollbar overflow-x-auto">
+              <div id="portfolio-chip-container" class="flex items-center gap-2"></div>
+            </div>
+            <div id="portfolio-sort-container" class="portfolio-sort-group">
+              <button type="button" class="portfolio-sort-button" data-sort="likes" data-active="true">
+                <i class="ri-heart-3-line"></i>
+                <span>بیشترین لایک</span>
+              </button>
+              <button type="button" class="portfolio-sort-button" data-sort="views" data-active="false">
+                <i class="ri-bar-chart-fill"></i>
+                <span>بیشترین بازدید</span>
+              </button>
+            </div>
           </div>
         </div>
 
@@ -433,6 +595,46 @@
       <p>ویترینت &copy; ۱۴۰۲ — با عشق برای شهروندان سنندج</p>
     </div>
   </footer>
+
+  <div id="portfolio-modal" class="hidden">
+    <div class="portfolio-modal-backdrop" data-portfolio-modal-backdrop>
+      <div class="portfolio-modal-container" role="dialog" aria-modal="true" aria-labelledby="portfolio-modal-title">
+        <div class="portfolio-modal-media">
+          <img id="portfolio-modal-image" src="" alt="نمونه‌کار" loading="lazy">
+          <button type="button" class="portfolio-modal-close" data-portfolio-modal-close aria-label="بستن">
+            <i class="ri-close-line text-xl"></i>
+          </button>
+        </div>
+        <div class="portfolio-modal-body">
+          <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
+            <div>
+              <h3 id="portfolio-modal-title" class="text-xl font-black text-slate-800"></h3>
+              <p id="portfolio-modal-shop" class="mt-1 text-sm font-semibold text-slate-500"></p>
+            </div>
+            <div class="flex flex-wrap gap-2 text-xs">
+              <span id="portfolio-modal-likes" class="portfolio-metric-chip"></span>
+              <span id="portfolio-modal-views" class="portfolio-metric-chip"></span>
+            </div>
+          </div>
+          <p id="portfolio-modal-description" class="text-sm leading-relaxed text-slate-600"></p>
+          <div class="flex flex-wrap gap-3 items-center text-xs text-slate-500">
+            <span id="portfolio-modal-rating" class="inline-flex items-center gap-1"></span>
+            <span id="portfolio-modal-category" class="inline-flex items-center gap-1"></span>
+          </div>
+          <div class="portfolio-card-actions w-full sm:justify-end">
+            <button type="button" class="portfolio-action-button" data-variant="secondary" data-portfolio-modal-close>
+              <i class="ri-close-circle-line"></i>
+              <span>بستن</span>
+            </button>
+            <a id="portfolio-modal-link" href="#" class="portfolio-action-button" data-variant="primary">
+              <span>مشاهده صفحه</span>
+              <i class="ri-external-link-line"></i>
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 
 <script>
   function slugify(value = '') {
@@ -520,6 +722,7 @@
     items: [],
     portfolios: [],
     portfolioCategory: 'all',
+    portfolioSort: 'likes',
     viewMode: 'all',
     visiblePortfolioCount: 0,
     meta: { categories: [] },
@@ -545,9 +748,20 @@
     portfolioGrid: document.getElementById('portfolio-grid'),
     portfolioEmpty: document.getElementById('portfolio-empty'),
     portfolioChips: document.getElementById('portfolio-chip-container'),
+    portfolioSortContainer: document.getElementById('portfolio-sort-container'),
     viewModeToggle: document.getElementById('view-mode-toggle'),
     shopsContent: document.getElementById('shops-content'),
-    portfolioSection: document.getElementById('portfolio-section')
+    portfolioSection: document.getElementById('portfolio-section'),
+    portfolioModal: document.getElementById('portfolio-modal'),
+    portfolioModalImage: document.getElementById('portfolio-modal-image'),
+    portfolioModalTitle: document.getElementById('portfolio-modal-title'),
+    portfolioModalShop: document.getElementById('portfolio-modal-shop'),
+    portfolioModalDescription: document.getElementById('portfolio-modal-description'),
+    portfolioModalRating: document.getElementById('portfolio-modal-rating'),
+    portfolioModalCategory: document.getElementById('portfolio-modal-category'),
+    portfolioModalLikes: document.getElementById('portfolio-modal-likes'),
+    portfolioModalViews: document.getElementById('portfolio-modal-views'),
+    portfolioModalLink: document.getElementById('portfolio-modal-link')
   };
 
   function setCategoryState(list = [], options = {}) {
@@ -861,9 +1075,127 @@
     });
   }
 
+  function normalisePortfolioItems(items = []) {
+    const source = Array.isArray(items) ? items : [];
+    const shopLookup = new Map(
+      (Array.isArray(state.items) ? state.items : [])
+        .filter(shop => shop && shop.id)
+        .map(shop => [String(shop.id), shop])
+    );
+
+    return source.map(item => {
+      if (!item || typeof item !== 'object') return null;
+
+      const shopId = item.shop?.id || item.shopId || item.sellerId || '';
+      const shopSource = shopId ? shopLookup.get(String(shopId)) : null;
+      const statsSource = (item.shop && item.shop.stats) || (shopSource && shopSource.stats) || {};
+      const likeCount = Number(item.likeCount || 0);
+      const viewSource = item.viewCount ?? statsSource.totalBookings ?? 0;
+      const ratingSource = item.shop?.rating ?? shopSource?.rating ?? 0;
+      const reviewSource = item.shop?.reviewCount ?? shopSource?.reviewCount ?? 0;
+
+      return {
+        ...item,
+        likeCount,
+        viewCount: Number(viewSource || 0),
+        categoryName: item.categoryName || shopSource?.categoryName || '',
+        shop: {
+          ...item.shop,
+          id: item.shop?.id || shopSource?.id || String(shopId || ''),
+          name: item.shop?.name || shopSource?.name || '',
+          shopUrl: item.shop?.shopUrl || shopSource?.shopUrl || '',
+          rating: Number(ratingSource || 0),
+          reviewCount: Number(reviewSource || 0),
+          stats: {
+            followers: Number((statsSource && statsSource.followers) || 0),
+            totalBookings: Number((statsSource && statsSource.totalBookings) || 0)
+          }
+        }
+      };
+    }).filter(Boolean);
+  }
+
+  function renderPortfolioSortControls() {
+    if (!elements.portfolioSortContainer) return;
+    elements.portfolioSortContainer.querySelectorAll('button[data-sort]').forEach(btn => {
+      const sortValue = btn.dataset.sort;
+      const isActive = sortValue === state.portfolioSort;
+      btn.dataset.active = isActive ? 'true' : 'false';
+    });
+  }
+
+  function formatPortfolioNumber(value = 0) {
+    return Number(value || 0).toLocaleString('fa-IR');
+  }
+
+  let activePortfolioModalTrigger = null;
+
+  function closePortfolioModal() {
+    if (!elements.portfolioModal) return;
+    elements.portfolioModal.classList.add('hidden');
+    if (elements.portfolioModalImage) {
+      elements.portfolioModalImage.src = '';
+      elements.portfolioModalImage.alt = 'نمونه‌کار';
+    }
+    document.body.style.overflow = '';
+    if (activePortfolioModalTrigger && typeof activePortfolioModalTrigger.focus === 'function') {
+      activePortfolioModalTrigger.focus();
+    }
+    activePortfolioModalTrigger = null;
+  }
+
+  function openPortfolioModalById(id) {
+    if (!id) return;
+    const item = (Array.isArray(state.portfolios) ? state.portfolios : []).find(entry => String(entry.id) === String(id));
+    if (!item) return;
+
+    if (elements.portfolioModalImage) {
+      elements.portfolioModalImage.src = item.image || '';
+      elements.portfolioModalImage.alt = item.title || item.shop?.name || 'نمونه‌کار';
+    }
+    if (elements.portfolioModalTitle) {
+      elements.portfolioModalTitle.textContent = item.title || 'نمونه‌کار انتخابی';
+    }
+    if (elements.portfolioModalShop) {
+      elements.portfolioModalShop.textContent = item.shop?.name ? `از ${item.shop.name}` : '';
+    }
+    if (elements.portfolioModalDescription) {
+      elements.portfolioModalDescription.textContent = item.description || 'توضیحاتی برای این نمونه‌کار ثبت نشده است.';
+    }
+    if (elements.portfolioModalRating) {
+      const ratingText = Number(item.shop?.rating || 0).toLocaleString('fa-IR', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+      const reviewsText = formatPortfolioNumber(item.shop?.reviewCount || 0);
+      elements.portfolioModalRating.innerHTML = `<i class="ri-star-fill text-amber-400"></i><span>${ratingText}</span><span>(${reviewsText})</span>`;
+    }
+    if (elements.portfolioModalCategory) {
+      elements.portfolioModalCategory.innerHTML = `<i class="ri-price-tag-3-line"></i><span>${item.categoryName || 'خدمات'}</span>`;
+    }
+    if (elements.portfolioModalLikes) {
+      elements.portfolioModalLikes.innerHTML = `<i class="ri-heart-3-fill"></i><span>${formatPortfolioNumber(item.likeCount)}</span>`;
+    }
+    if (elements.portfolioModalViews) {
+      elements.portfolioModalViews.innerHTML = `<i class="ri-bar-chart-fill"></i><span>${formatPortfolioNumber(item.viewCount)}</span>`;
+    }
+    if (elements.portfolioModalLink) {
+      elements.portfolioModalLink.href = item.shop?.shopUrl ? `service-shops.html?shopurl=${item.shop.shopUrl}` : '#';
+    }
+
+    activePortfolioModalTrigger = document.activeElement;
+    if (elements.portfolioModal) {
+      elements.portfolioModal.classList.remove('hidden');
+      document.body.style.overflow = 'hidden';
+      const focusable = elements.portfolioModal.querySelector('a, button');
+      if (focusable && typeof focusable.focus === 'function') {
+        focusable.focus();
+      }
+    }
+  }
+
   function renderPortfolioShowcase() {
     const grid = elements.portfolioGrid;
     if (!grid) return;
+
+    renderPortfolioSortControls();
 
     const items = Array.isArray(state.portfolios) ? state.portfolios : [];
 
@@ -885,9 +1217,26 @@
       return;
     }
 
-    state.visiblePortfolioCount = filtered.length;
+    const sorted = [...filtered].sort((a, b) => {
+      const likesA = Number(a.likeCount || 0);
+      const likesB = Number(b.likeCount || 0);
+      const viewsA = Number(a.viewCount || 0);
+      const viewsB = Number(b.viewCount || 0);
+      if (state.portfolioSort === 'views') {
+        if (viewsB !== viewsA) return viewsB - viewsA;
+        if (likesB !== likesA) return likesB - likesA;
+      } else {
+        if (likesB !== likesA) return likesB - likesA;
+        if (viewsB !== viewsA) return viewsB - viewsA;
+      }
+      const ratingA = Number(a.shop?.rating || 0);
+      const ratingB = Number(b.shop?.rating || 0);
+      return ratingB - ratingA;
+    });
 
-    if (!filtered.length) {
+    state.visiblePortfolioCount = sorted.length;
+
+    if (!sorted.length) {
       grid.innerHTML = '';
       if (elements.portfolioEmpty) elements.portfolioEmpty.classList.remove('hidden');
       updateResultsBadge();
@@ -896,8 +1245,9 @@
 
     if (elements.portfolioEmpty) elements.portfolioEmpty.classList.add('hidden');
 
-    grid.innerHTML = filtered.map(item => {
-      const likes = Number(item.likeCount || 0).toLocaleString('fa-IR');
+    grid.innerHTML = sorted.map(item => {
+      const likes = formatPortfolioNumber(item.likeCount);
+      const views = formatPortfolioNumber(item.viewCount);
       const ratingText = Number(item.shop?.rating || 0).toLocaleString('fa-IR', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
       const reviews = Number(item.shop?.reviewCount || 0).toLocaleString('fa-IR');
       return `
@@ -913,20 +1263,32 @@
               <i class="ri-heart-3-fill text-emerald-500"></i>
               <span>${likes}</span>
             </div>
-          </div>
-          <div class="p-4 flex items-start justify-between gap-3 mt-auto">
-            <div class="space-y-1">
-              <p class="text-sm font-bold text-slate-800">${item.shop?.name || ''}</p>
-              <div class="flex items-center gap-2 text-xs text-slate-400">
-                <span class="inline-flex items-center gap-1"><i class="ri-star-fill text-amber-400"></i>${ratingText}</span>
-                <span>(${reviews})</span>
-              </div>
-              <p class="text-xs text-slate-500">${item.categoryName || 'خدمات'}</p>
+            <div class="absolute top-3 right-3 flex items-center gap-1 rounded-full bg-white/85 px-3 py-1 text-xs font-semibold text-sky-600 shadow-md">
+              <i class="ri-bar-chart-fill text-sky-500"></i>
+              <span>${views}</span>
             </div>
-            <a href="service-shops.html?shopurl=${item.shop?.shopUrl || ''}" class="inline-flex items-center gap-1 rounded-full bg-gradient-to-l from-emerald-500 to-sky-500 px-3 py-1.5 text-xs font-semibold text-white shadow-md hover:shadow-lg transition" aria-label="مشاهده پروفایل ${item.shop?.name || ''}">
-              مشاهده
-              <i class="ri-arrow-left-line text-sm"></i>
-            </a>
+          </div>
+          <div class="p-4 flex flex-col gap-3 mt-auto">
+            <div class="flex items-start justify-between gap-3">
+              <div class="space-y-1">
+                <p class="text-sm font-bold text-slate-800">${item.shop?.name || ''}</p>
+                <div class="flex items-center gap-2 text-xs text-slate-400">
+                  <span class="inline-flex items-center gap-1"><i class="ri-star-fill text-amber-400"></i>${ratingText}</span>
+                  <span>(${reviews})</span>
+                </div>
+                <p class="text-xs text-slate-500">${item.categoryName || 'خدمات'}</p>
+              </div>
+            </div>
+            <div class="portfolio-card-actions">
+              <button type="button" class="portfolio-action-button" data-variant="secondary" data-portfolio-id="${item.id}" aria-label="مشاهده دقیق‌تر ${item.title || item.shop?.name || 'نمونه‌کار'}">
+                <i class="ri-eye-line"></i>
+                <span>مشاهده دقیق‌تر</span>
+              </button>
+              <a href="service-shops.html?shopurl=${item.shop?.shopUrl || ''}" class="portfolio-action-button" data-variant="primary" aria-label="مشاهده صفحه ${item.shop?.name || ''}">
+                <span>مشاهده صفحه</span>
+                <i class="ri-arrow-left-line text-sm"></i>
+              </a>
+            </div>
           </div>
         </article>
       `;
@@ -974,6 +1336,7 @@
               description: item.description,
               image: item.image,
               likeCount: item.likeCount,
+              viewCount: Number(shop.stats?.totalBookings || 0),
               categorySlug: shop.categorySlug,
               categoryName: shop.categoryName,
               shop: {
@@ -981,12 +1344,13 @@
                 name: shop.name,
                 shopUrl: shop.shopUrl,
                 rating: shop.rating,
-                reviewCount: shop.reviewCount
+                reviewCount: shop.reviewCount,
+                stats: { ...(shop.stats || {}) }
               }
             }))
           : []);
       }
-      state.portfolios = portfolios;
+      state.portfolios = normalisePortfolioItems(portfolios);
       mergeCategoryOptions(Array.isArray(state.meta?.categories) ? state.meta.categories : []);
       if (!Array.isArray(state.meta?.categories) || !state.meta.categories.some(cat => cat.slug === state.portfolioCategory)) {
         state.portfolioCategory = 'all';
@@ -1085,6 +1449,7 @@
         state.minRating = 0;
         state.search = '';
         state.portfolioCategory = 'all';
+        state.portfolioSort = 'likes';
 
         if (elements.searchInput) elements.searchInput.value = '';
         if (elements.categorySelect) elements.categorySelect.value = 'all';
@@ -1094,6 +1459,7 @@
         applyViewMode('all');
         applyCategoryConfig('all');
         syncCategoryUrlParam();
+        renderPortfolioSortControls();
         fetchShowcase();
       });
     }
@@ -1105,6 +1471,48 @@
         });
       });
     }
+
+    if (elements.portfolioSortContainer) {
+      elements.portfolioSortContainer.addEventListener('click', (event) => {
+        const button = event.target.closest('button[data-sort]');
+        if (!button) return;
+        const sortValue = button.dataset.sort;
+        if (!['likes', 'views'].includes(sortValue)) return;
+        if (state.portfolioSort === sortValue) return;
+        state.portfolioSort = sortValue;
+        renderPortfolioSortControls();
+        renderPortfolioShowcase();
+      });
+    }
+
+    if (elements.portfolioGrid) {
+      elements.portfolioGrid.addEventListener('click', (event) => {
+        const trigger = event.target.closest('button[data-portfolio-id]');
+        if (!trigger) return;
+        const portfolioId = trigger.dataset.portfolioId;
+        openPortfolioModalById(portfolioId);
+      });
+    }
+
+    if (elements.portfolioModal) {
+      elements.portfolioModal.addEventListener('click', (event) => {
+        if (event.target.matches('[data-portfolio-modal-backdrop]')) {
+          closePortfolioModal();
+          return;
+        }
+        const closer = event.target.closest('[data-portfolio-modal-close]');
+        if (closer) {
+          event.preventDefault();
+          closePortfolioModal();
+        }
+      });
+    }
+
+    document.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape' && elements.portfolioModal && !elements.portfolioModal.classList.contains('hidden')) {
+        closePortfolioModal();
+      }
+    });
   }
 
   const urlParams = new URLSearchParams(window.location.search);

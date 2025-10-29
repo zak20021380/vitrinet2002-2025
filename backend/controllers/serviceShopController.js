@@ -2899,6 +2899,7 @@ exports.getPublicShowcase = async (req, res) => {
         description: item.description,
         image: item.image,
         likeCount: item.likeCount,
+        viewCount: Number(shop?.stats?.totalBookings || shop?.analytics?.totalBookings || 0),
         categorySlug: shop.categorySlug,
         categoryName: shop.categoryName,
         shop: {
@@ -2906,7 +2907,8 @@ exports.getPublicShowcase = async (req, res) => {
           name: shop.name,
           shopUrl: shop.shopUrl,
           rating: shop.rating,
-          reviewCount: shop.reviewCount
+          reviewCount: shop.reviewCount,
+          stats: { ...(shop.stats || {}) }
         }
       }))
     );
