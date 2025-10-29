@@ -26,6 +26,40 @@ function normaliseNote(note) {
   return trimmed.length ? trimmed : undefined;
 }
 
+function normalisePhone(phone) {
+  if (!phone) return null;
+  const digits = String(phone).replace(/\D/g, '');
+  if (!digits) return null;
+  if (digits.length === 10 && digits.startsWith('9')) {
+    return `0${digits}`;
+  }
+  if (digits.length === 11 && digits.startsWith('09')) {
+    return digits;
+  }
+  return null;
+}
+
+async function findEffectiveAdPlan(slug, sellerPhone) {
+  if (!slug) return null;
+
+  let normalisedPhone = normalisePhone(sellerPhone);
+  let plan = null;
+
+  if (normalisedPhone) {
+    plan = await AdPlan.findOne({ slug, sellerPhone: normalisedPhone });
+  }
+
+  if (!plan) {
+    plan = await AdPlan.findOne({ slug, sellerPhone: null });
+  }
+
+  if (!plan) {
+    plan = await AdPlan.findOne({ slug });
+  }
+
+  return plan;
+}
+
 async function populateAdOrder(doc) {
   if (!doc) return doc;
   await doc.populate(POPULATE_SPEC);
@@ -74,14 +108,14 @@ exports.createAdOrder = async (req, res) => {
       return res.status(400).json({ success: false, message: 'sellerId و planSlug الزامی است.' });
     }
 
-    const plan = await AdPlan.findOne({ slug: planSlug });
-    if (!plan) {
-      return res.status(404).json({ success: false, message: 'پلن تبلیغ پیدا نشد.' });
-    }
-
     const seller = await Seller.findById(sellerId);
     if (!seller) {
       return res.status(404).json({ success: false, message: 'فروشنده پیدا نشد.' });
+    }
+
+    const plan = await findEffectiveAdPlan(planSlug, seller.phone);
+    if (!plan) {
+      return res.status(404).json({ success: false, message: 'پلن تبلیغ پیدا نشد.' });
     }
 
     let product = null;
