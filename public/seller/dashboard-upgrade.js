@@ -318,7 +318,7 @@ const PLAN_DEFAULTS = {
   },
   '3month': {
     title: 'اشتراک ۳ ماهه',
-    durationDays: 90,
+    durationDays: 95,
     description: 'پوشش یک فصل کامل با تمرکز بر رشد پایدار.',
     features: [
       'همه امکانات پلن یک‌ماهه',
