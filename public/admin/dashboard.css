@@ -1870,11 +1870,117 @@ tr:last-child td {
 }
 
 /* Ad orders management */
+.ad-orders-hero {
+  position: relative;
+  display: grid;
+  gap: 0.75rem;
+  padding: clamp(1.4rem, 1.2rem + 0.6vw, 1.9rem);
+  background: linear-gradient(135deg, rgba(14, 165, 233, 0.08), rgba(16, 185, 129, 0.06));
+  border-radius: 24px;
+  border: 1px solid rgba(148, 163, 184, 0.26);
+  box-shadow: 0 22px 42px rgba(15, 23, 42, 0.07);
+  overflow: hidden;
+}
+
+.ad-orders-hero::after {
+  content: '';
+  position: absolute;
+  inset-inline-end: -60px;
+  inset-block-start: -40px;
+  width: 180px;
+  height: 180px;
+  background: radial-gradient(circle at center, rgba(14, 165, 233, 0.18), rgba(14, 165, 233, 0));
+  opacity: 0.7;
+  pointer-events: none;
+}
+
+.ad-orders-hero .content-header {
+  margin-bottom: 0.1rem;
+}
+
+.ad-orders-hero .header-count {
+  background: rgba(255, 255, 255, 0.8);
+  border: 1px solid rgba(148, 163, 184, 0.35);
+  font-weight: 600;
+}
+
 .ad-orders-subtitle {
-  margin: -0.6rem 0 1.4rem;
-  color: #64748b;
-  font-size: 0.92rem;
-  line-height: 1.8;
+  margin: 0;
+  color: #1e293b;
+  font-size: 0.95rem;
+  line-height: 1.9;
+  max-width: 60ch;
+}
+
+.ad-orders-guide {
+  margin: 1.4rem 0 1.8rem;
+  background: #fff;
+  border-radius: 20px;
+  border: 1px solid rgba(226, 232, 240, 0.9);
+  box-shadow: 0 18px 36px rgba(148, 163, 184, 0.12);
+  padding: 0;
+  overflow: hidden;
+}
+
+.ad-orders-guide[open] {
+  box-shadow: 0 22px 45px rgba(15, 23, 42, 0.12);
+}
+
+.ad-orders-guide summary {
+  cursor: pointer;
+  list-style: none;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 1rem 1.4rem;
+  font-weight: 800;
+  font-size: 0.95rem;
+  color: #0f172a;
+  background: linear-gradient(135deg, rgba(14, 165, 233, 0.12), rgba(16, 185, 129, 0.08));
+}
+
+.ad-orders-guide summary::-webkit-details-marker {
+  display: none;
+}
+
+.ad-orders-guide summary i {
+  font-size: 1.25rem;
+  color: #0ea5e9;
+}
+
+.ad-orders-guide summary::after {
+  content: '\25BE';
+  margin-inline-start: auto;
+  font-size: 0.9rem;
+  color: #0ea5e9;
+  transition: transform 0.25s ease;
+}
+
+.ad-orders-guide[open] summary::after {
+  transform: rotate(180deg);
+}
+
+.ad-orders-guide ul {
+  margin: 0;
+  padding: 1rem 1.7rem 1.4rem;
+  display: grid;
+  gap: 0.65rem;
+  color: #475569;
+  font-size: 0.9rem;
+  line-height: 1.9;
+}
+
+.ad-orders-guide li {
+  position: relative;
+  padding-inline-start: 1.4rem;
+}
+
+.ad-orders-guide li::before {
+  content: '\2022';
+  position: absolute;
+  inset-inline-start: 0.2rem;
+  color: #0ea5e9;
+  font-weight: 900;
 }
 
 .ad-orders-overview {
@@ -2018,6 +2124,7 @@ tr:last-child td {
   display: flex;
   flex-direction: column;
   gap: 1.2rem;
+  align-items: stretch;
 }
 
 .ad-orders-toolbar .filters {
@@ -2028,6 +2135,22 @@ tr:last-child td {
   background: #f8fafc;
   border-radius: 999px;
   border: 1px solid rgba(148, 163, 184, 0.25);
+  overflow-x: auto;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(148, 163, 184, 0.4) transparent;
+}
+
+.ad-orders-toolbar .filters::-webkit-scrollbar {
+  height: 5px;
+}
+
+.ad-orders-toolbar .filters::-webkit-scrollbar-thumb {
+  background: rgba(148, 163, 184, 0.4);
+  border-radius: 999px;
+}
+
+.ad-orders-toolbar .filters::-webkit-scrollbar-track {
+  background: transparent;
 }
 
 .ad-filter-btn {
@@ -2042,6 +2165,8 @@ tr:last-child td {
   display: inline-flex;
   align-items: center;
   gap: 0.4rem;
+  white-space: nowrap;
+  scroll-snap-align: start;
 }
 
 .ad-filter-btn i {
@@ -2064,6 +2189,24 @@ tr:last-child td {
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
   gap: 1rem;
   align-items: stretch;
+}
+
+@media (min-width: 992px) {
+  .ad-orders-toolbar {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .ad-orders-toolbar .filters {
+    flex-wrap: nowrap;
+    padding-inline: 0.75rem;
+    scroll-snap-type: x proximity;
+  }
+
+  .ad-orders-controls {
+    max-width: 460px;
+  }
 }
 
 .ad-control {
@@ -2624,6 +2767,85 @@ tr:last-child td {
 
   .ad-orders-table-legend {
     justify-content: flex-start;
+  }
+}
+
+@media (max-width: 920px) {
+  .ad-orders-hero {
+    padding: 1.2rem 1.2rem 1.45rem;
+  }
+
+  .ad-orders-hero::after {
+    width: 120px;
+    height: 120px;
+    inset-inline-end: -40px;
+  }
+
+  .ad-orders-guide {
+    margin: 1.1rem 0 1.5rem;
+  }
+
+  .ad-orders-table-card {
+    padding: 1.3rem 1.2rem 1.6rem;
+  }
+
+  .ad-orders-table.table-wrap {
+    overflow: visible;
+  }
+
+  .ad-orders-table.table-wrap table {
+    min-width: 100%;
+    border-spacing: 0;
+  }
+
+  .ad-orders-table table thead {
+    display: none;
+  }
+
+  .ad-orders-table table,
+  .ad-orders-table table tbody,
+  .ad-orders-table table tr,
+  .ad-orders-table table td {
+    display: block;
+    width: 100%;
+  }
+
+  .ad-orders-table table tbody tr {
+    margin-bottom: 1.2rem;
+  }
+
+  .ad-orders-table table tbody tr.ad-order-row {
+    border-radius: 18px;
+    box-shadow: 0 18px 34px rgba(15, 23, 42, 0.12);
+    padding: 1rem 0.9rem 0.7rem;
+  }
+
+  .ad-orders-table table tbody tr.ad-order-row td {
+    padding: 0.75rem 0.9rem;
+    position: relative;
+  }
+
+  .ad-orders-table table tbody tr.ad-order-row td::before {
+    content: attr(data-column);
+    display: block;
+    font-size: 0.78rem;
+    font-weight: 800;
+    color: #0f172a;
+    margin-bottom: 0.3rem;
+    opacity: 0.75;
+  }
+
+  .ad-orders-table table tbody tr.ad-order-row td[colspan]::before {
+    display: none;
+  }
+
+  .ad-orders-table .ad-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .ad-orders-table .ad-action-btn {
+    justify-content: center;
   }
 }
 
