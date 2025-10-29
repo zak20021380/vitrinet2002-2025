@@ -538,12 +538,12 @@ const normaliseDigits = (value = '') => String(value || '')
   .replace(/[۰-۹]/g, d => PERSIAN_DIGITS_MAP[d] || d)
   .replace(/[٠-٩]/g, d => ARABIC_DIGITS_MAP[d] || d);
 
-const normaliseText = (value = '') => normaliseDigits(value).toLowerCase().trim();
+const normaliseSearchText = (value = '') => normaliseDigits(value).toLowerCase().trim();
 
 const containsNormalized = (haystack, needle) => {
-  const search = normaliseText(needle);
+  const search = normaliseSearchText(needle);
   if (!search) return true;
-  return normaliseText(haystack).includes(search);
+  return normaliseSearchText(haystack).includes(search);
 };
 
 const coerceDate = (value) => {
@@ -954,7 +954,7 @@ const buildLegacyOverviewData = async (existingItems) => {
 
   const cityCounter = new Map();
   items.forEach((item) => {
-    const city = normaliseText(item.city || '');
+    const city = normaliseSearchText(item.city || '');
     if (!city) return;
     cityCounter.set(city, {
       _id: item.city,
@@ -972,7 +972,7 @@ const buildLegacyOverviewData = async (existingItems) => {
       ? item.subcategories
       : [item.category];
     categories.filter(Boolean).forEach((cat) => {
-      const key = normaliseText(cat);
+      const key = normaliseSearchText(cat);
       if (!key) return;
       categoryCounter.set(key, {
         _id: cat,
