@@ -6,7 +6,7 @@ const { REPORT_TYPES } = require('../models/Report');
 // ➊ ثبت گزارش
 exports.createReport = async (req, res) => {
   try {
-    const { type, description, sellerId, shopurl } = req.body;
+    const { type, description, sellerId, shopurl, contact } = req.body;
 
     // ۱) نوع گزارش را بررسی می‌کنیم
     if (!type || !REPORT_TYPES.includes(type)) {
@@ -32,14 +32,29 @@ exports.createReport = async (req, res) => {
       return res.status(429).json({ message: 'لطفاً یک دقیقه بعد دوباره تلاش کنید.' });
     }
 
-    // ۵) ایجاد گزارش جدید
-    const report = await Report.create({
+    const contactInfo = typeof contact === 'string' ? contact.trim() : '';
+    if (contactInfo.length > 160) {
+      return res.status(400).json({ message: 'اطلاعات تماس حداکثر ۱۶۰ کاراکتر باشد.' });
+    }
+
+    const normalizedShopurl = typeof shopurl === 'string' ? shopurl.trim() : '';
+
+    const payload = {
       sellerId:  sellerId || undefined,
-      shopurl:   shopurl  || undefined,
+      shopurl:   normalizedShopurl || undefined,
       userId:    req.user.id,
       ip:        req.ip,
       type,
       description
+    };
+
+    if (contactInfo) {
+      payload.contact = contactInfo;
+    }
+
+    // ۵) ایجاد گزارش جدید
+    const report = await Report.create({
+      ...payload
     });
 
     // ۶) پاسخ موفق

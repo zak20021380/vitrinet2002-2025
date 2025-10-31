@@ -17,6 +17,7 @@ const reportSchema = new mongoose.Schema(
     // گزارش‌دهنده
     userId:  { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
     ip:      { type: String },       // برای بلاک کردن مهمان‌ها (در صورت نیاز)
+    contact: { type: String, trim: true, maxlength: 160 },
 
     // جزئیات گزارش
     type:        { type: String, enum: REPORT_TYPES, required: true },
