@@ -323,12 +323,12 @@ const PLAN_DEFAULTS = {
   },
   '3month': {
     title: 'اشتراک ۳ ماهه',
-    durationDays: 95,
-    description: 'پوشش یک فصل کامل با تمرکز بر رشد پایدار.',
+    durationDays: 90,
+    description: 'پوشش یک فصل کامل با تمرکز بر جذب مشتریان وفادار.',
     features: [
       'همه امکانات پلن یک‌ماهه',
       'اولویت نمایش در لیست فروشگاه‌ها',
-      'پشتیبانی سریع‌تر تیم ویترینت'
+      'دسترسی سریع‌تر به تیم پشتیبانی'
     ],
     badge: {
       label: 'پیشنهاد محبوب',
@@ -339,11 +339,11 @@ const PLAN_DEFAULTS = {
   '12month': {
     title: 'اشتراک ۱ ساله',
     durationDays: 365,
-    description: 'راهکار یک‌ساله برای فروشگاه‌های حرفه‌ای و توسعه برند.',
+    description: 'راهکاری پایدار برای یک سال حضور مستمر و رشد پیوسته.',
     features: [
       'همه امکانات پلن‌های قبلی',
-      'نمایش ویژه و پروموشن‌های اختصاصی',
-      'پشتیبانی VIP و گزارش‌های تحلیلی دوره‌ای'
+      'برندسازی و نمایش ویژه در کمپین‌های ویترینت',
+      'پشتیبانی اختصاصی و گزارش‌های تحلیلی دوره‌ای'
     ],
     badge: {
       label: 'بیشترین صرفه‌جویی',
@@ -406,7 +406,7 @@ function applyPlanCardDescriptor(plan) {
   const fallbackBadge = defaults.badge || {};
   const badge = plan.badge || fallbackBadge;
 
-  if (refs.title) refs.title.textContent = plan.title || defaults.title || plan.slug;
+  if (refs.title) refs.title.textContent = plan.title ?? defaults.title ?? plan.slug;
 
   if (refs.price) {
     if (plan.price != null) {
@@ -422,12 +422,19 @@ function applyPlanCardDescriptor(plan) {
   }
 
   if (refs.description) {
-    refs.description.textContent = plan.description || defaults.description || 'جزئیاتی برای این پلن ثبت نشده است.';
+    const description = plan.description !== undefined
+      ? plan.description
+      : (defaults.description || '');
+    refs.description.textContent = description || '';
   }
 
   if (refs.features) {
     refs.features.innerHTML = '';
-    const list = plan.features && plan.features.length ? plan.features : (defaults.features || []);
+    const list = Array.isArray(plan.features)
+      ? plan.features
+      : Array.isArray(defaults.features)
+        ? defaults.features
+        : [];
     if (!list.length) {
       const li = document.createElement('li');
       li.textContent = 'جزئیاتی برای این پلن ثبت نشده است.';
@@ -545,11 +552,15 @@ async function fetchPlanPrices (force = false) {
         const plan = plans[slug] || {};
         const descriptor = {
           slug,
-          title: plan.title || defaults.title || slug,
-          price: plan.price ?? null,
+          title: plan.title !== undefined ? plan.title : (defaults.title || slug),
+          price: plan.price ?? (defaults.price ?? null),
           durationDays: plan.durationDays ?? defaults.durationDays ?? null,
-          description: plan.description || defaults.description || '',
-          features: Array.isArray(plan.features) && plan.features.length ? plan.features : (defaults.features || [])
+          description: plan.description !== undefined ? plan.description : (defaults.description || ''),
+          features: Array.isArray(plan.features)
+            ? plan.features
+            : Array.isArray(defaults.features)
+              ? defaults.features
+              : []
         };
         const badgeLabel = (plan.badgeLabel ?? plan.badge?.label ?? defaults.badge?.label ?? '').toString().trim();
         const badgeVariant = normalizeBadgeVariant(plan.badgeVariant ?? plan.badge?.variant ?? defaults.badge?.variant);
@@ -694,23 +705,19 @@ window.selectPlan = async function (slug) {
     variant: normalizeBadgeVariant(defaults.badge.variant),
     visible: defaults.badge.visible !== false && !!defaults.badge.label
   } : { label: '', variant: BADGE_VARIANTS[0], visible: false };
-  const planData = subscriptionPlanStore[slug] || {
-    slug,
-    title: defaults.title || slug,
-    price: defaults.price ?? null,
-    durationDays: defaults.durationDays ?? null,
-    description: defaults.description || '',
-    features: defaults.features || [],
-    badge: fallbackBadge
-  };
+  const planData = subscriptionPlanStore[slug] || {};
 
-  const title = planData.title || defaults.title || slug;
-  const featureList = planData.features && planData.features.length ? planData.features : (defaults.features || []);
-  const description = planData.description || defaults.description || '';
+  const title = planData.title !== undefined ? planData.title : (defaults.title || slug);
+  const featureList = Array.isArray(planData.features)
+    ? planData.features
+    : Array.isArray(defaults.features)
+      ? defaults.features
+      : [];
+  const description = planData.description !== undefined ? planData.description : (defaults.description || '');
   const badgeInfo = planData.badge ? {
-    label: planData.badge.label || fallbackBadge.label || '',
+    label: planData.badge.label || '',
     variant: normalizeBadgeVariant(planData.badge.variant || fallbackBadge.variant),
-    visible: planData.badge.visible !== false && !!(planData.badge.label || fallbackBadge.label)
+    visible: planData.badge.visible !== false && !!planData.badge.label
   } : fallbackBadge;
 
   const modal = document.getElementById('upgradeModal');
@@ -744,7 +751,7 @@ window.selectPlan = async function (slug) {
   const saveBadge = modal.querySelector('#saveBadge');
   const premiumToggle = modal.querySelector('#premiumToggle');
 
-  let priceNum = planData.price != null ? Number(planData.price) : 0;
+  let priceNum = planData.price != null ? Number(planData.price) : Number(defaults.price ?? 0);
   if (!priceNum) {
     const fallbackPrice = document.querySelector(`[data-plan-price="${slug}"]`)?.textContent
       || document.getElementById(`price-${slug}`)?.textContent
