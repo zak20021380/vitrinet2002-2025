@@ -239,8 +239,8 @@ exports.updatePlans = async (req, res) => {
         title,
         price,
         durationDays,
-        description: description || getDefaultDescription(slug),
-        features: features.length ? features : getDefaultFeatures(slug),
+        description,
+        features,
         badgeLabel,
         badgeVariant,
         badgeVisible: badgeVisible && !!badgeLabel
