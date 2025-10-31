@@ -7450,7 +7450,48 @@ const planFormRefs = PLAN_SLUGS.reduce((acc, slug) => {
   return acc;
 }, {});
 const plansMsg  = document.getElementById('plansMsg');
+const planSaveModal = document.getElementById('plan-save-success-modal');
+const planSaveModalClose = document.getElementById('plan-save-success-close');
 let planCache   = {};
+let lastFocusedBeforePlanSaveModal = null;
+
+function openPlanSaveModal() {
+  if (!planSaveModal) return;
+  lastFocusedBeforePlanSaveModal = document.activeElement instanceof HTMLElement
+    ? document.activeElement
+    : null;
+  planSaveModal.classList.add('is-visible');
+  planSaveModal.setAttribute('aria-hidden', 'false');
+  planSaveModalClose?.focus({ preventScroll: true });
+}
+
+function closePlanSaveModal() {
+  if (!planSaveModal) return;
+  planSaveModal.classList.remove('is-visible');
+  planSaveModal.setAttribute('aria-hidden', 'true');
+  if (lastFocusedBeforePlanSaveModal && typeof lastFocusedBeforePlanSaveModal.focus === 'function') {
+    lastFocusedBeforePlanSaveModal.focus({ preventScroll: true });
+  }
+  lastFocusedBeforePlanSaveModal = null;
+}
+
+if (planSaveModal) {
+  planSaveModal.addEventListener('click', (event) => {
+    if (event.target === planSaveModal) {
+      closePlanSaveModal();
+    }
+  });
+}
+
+planSaveModalClose?.addEventListener('click', () => closePlanSaveModal());
+
+if (planSaveModal) {
+  document.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape' && planSaveModal.classList.contains('is-visible')) {
+      closePlanSaveModal();
+    }
+  });
+}
 
 const formatPlanOrigin = (origin, sellerPhone) => {
   if (origin === 'seller-override') {
@@ -7875,6 +7916,7 @@ async function savePlanPrices(e) {
 
     await loadPlanPrices();
     showPlansMsg('✅ ' + (data.message || 'پلن‌ها با موفقیت ذخیره شدند.'), true, phone);
+    openPlanSaveModal();
   } catch (err) {
     console.error('خطا در ذخیره قیمت‌ها:', err);
     showPlansMsg('❌ ' + err.message, false, phone);
