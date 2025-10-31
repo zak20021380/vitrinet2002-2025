@@ -7945,7 +7945,7 @@ async function loadAdsPrices() {
   try {
     let phone = document.getElementById('seller-phone-ads').value.trim();
     phone = normalizePhone(phone);
-    let url = `${ADMIN_API_BASE}/adplans`;
+    let url = `${ADMIN_API_BASE}/adPlans`;
     if (phone) {
       url += `?sellerPhone=${encodeURIComponent(phone)}`;
     }
@@ -8004,7 +8004,7 @@ async function saveAdsPrices(e) {
 
   try {
     // ۳) PUT
-    const res = await fetch(`${ADMIN_API_BASE}/adplans/admin`, {
+    const res = await fetch(`${ADMIN_API_BASE}/adPlans/admin`, {
       method: 'PUT',
       headers: {
         'Content-Type':  'application/json',
