@@ -397,29 +397,158 @@ function showToastDark(message, {type='success', durationMs=2600} = {}) {
   }
 
   // ====== Report form + counter ======
-  const reportModal   = document.getElementById('reportModal');
-  const reportForm    = document.getElementById('report-form');
-  const reportText    = document.getElementById('report-text');
-  const reportCounter = document.getElementById('report-counter');
+  const reportModal     = document.getElementById('reportModal');
+  const reportForm      = document.getElementById('report-form');
+  const reportText      = document.getElementById('report-text');
+  const reportCounter   = document.getElementById('report-counter');
+  const reportType      = document.getElementById('report-type');
+  const reportContact   = document.getElementById('report-contact');
+  const reportFeedback  = document.getElementById('report-feedback');
+  const feedbackBaseCls = 'text-xs sm:text-sm font-medium mt-1';
+  let updateReportCounter = null;
+
+  const setReportFeedback = (message, tone = 'info') => {
+    if (!reportFeedback) return;
+    if (!message) {
+      reportFeedback.textContent = '';
+      reportFeedback.className = `${feedbackBaseCls} hidden`;
+      return;
+    }
+    let toneClass = 'text-slate-600';
+    if (tone === 'error') toneClass = 'text-red-600';
+    else if (tone === 'success') toneClass = 'text-emerald-600';
+    reportFeedback.className = `${feedbackBaseCls} ${toneClass}`;
+    reportFeedback.textContent = message;
+  };
+
+  if (reportFeedback) {
+    reportFeedback.className = `${feedbackBaseCls} hidden`;
+  }
 
   if (reportText && reportCounter) {
-    const updateCounter = () => {
+    updateReportCounter = () => {
       const len = reportText.value.length;
       reportCounter.textContent = `${len.toLocaleString('fa-IR')}/۵۰۰`;
     };
-    reportText.addEventListener('input', updateCounter);
-    updateCounter();
+    reportText.addEventListener('input', updateReportCounter);
+    updateReportCounter();
   }
 
   if (reportForm && reportModal) {
     const inst = modalCache.get('reportModal') || setupModal(reportModal);
+    const originalOpen = inst.open;
+    inst.open = () => {
+      setReportFeedback('');
+      updateReportCounter?.();
+      originalOpen();
+    };
     modalCache.set('reportModal', inst);
-    reportForm.addEventListener('submit', (e) => {
+
+    reportForm.addEventListener('submit', async (e) => {
       e.preventDefault();
-      inst.close();
-      showToastDark('گزارش شما ثبت شد', {type:'success'});
-      reportForm.reset();
-      if (reportCounter) reportCounter.textContent = '۰/۵۰۰';
+      setReportFeedback('');
+
+      const selectedType = (reportType?.value || '').trim();
+      const description = (reportText?.value || '').trim();
+      const contact = (reportContact?.value || '').trim();
+
+      if (!selectedType) {
+        setReportFeedback('لطفاً دلیل گزارش را انتخاب کنید.', 'error');
+        return;
+      }
+      if (description.length < 5) {
+        setReportFeedback('توضیح گزارش باید حداقل ۵ کاراکتر باشد.', 'error');
+        return;
+      }
+      if (contact.length > 160) {
+        setReportFeedback('اطلاعات تماس باید کمتر از ۱۶۰ کاراکتر باشد.', 'error');
+        return;
+      }
+
+      const submitBtn = reportForm.querySelector('.report-submit-btn');
+      const originalLabel = submitBtn?.textContent;
+      if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.dataset.loading = 'true';
+        submitBtn.textContent = 'در حال ارسال…';
+      }
+
+      try {
+        const ids = (identifiers.slug || identifiers.sellerId)
+          ? identifiers
+          : await resolveIdentifiers();
+
+        const payload = {
+          type: selectedType,
+          description
+        };
+
+        const slugFromBody = (document.body?.dataset?.shopurl || '').trim();
+        if (ids?.sellerId) payload.sellerId = ids.sellerId;
+        if (ids?.slug) payload.shopurl = ids.slug;
+        else if (slugFromBody) payload.shopurl = slugFromBody;
+        else if (typeof getShopUrlFromLocation === 'function') {
+          const slug = await getShopUrlFromLocation();
+          if (slug) payload.shopurl = slug;
+        }
+
+        if (!payload.sellerId && !payload.shopurl) {
+          setReportFeedback('شناسه فروشگاه یافت نشد. لطفاً صفحه را دوباره بارگذاری کنید.', 'error');
+          return;
+        }
+
+        if (contact) {
+          payload.contact = contact;
+        }
+
+        const res = await fetch(`${API_ROOT}/api/reports`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+          body: JSON.stringify(payload)
+        });
+
+        if (res.ok) {
+          inst.close();
+          showToastDark('گزارش شما ثبت شد و برای تیم پشتیبانی ارسال گردید.', { type: 'success' });
+          reportForm.reset();
+          reportType && (reportType.value = '');
+          updateReportCounter?.();
+          setReportFeedback('');
+        } else {
+          let message = 'ارسال گزارش ناموفق بود. لطفاً دوباره تلاش کنید.';
+          const contentType = res.headers.get('Content-Type') || '';
+          if (contentType.includes('application/json')) {
+            try {
+              const data = await res.json();
+              if (data?.message) message = data.message;
+            } catch (err) {
+              console.warn('report response parse failed', err);
+            }
+          }
+
+          if (res.status === 401) {
+            inst.close();
+            if (typeof requireLogin === 'function') {
+              requireLogin();
+            } else {
+              showToastDark('برای ارسال گزارش ابتدا وارد حساب کاربری شوید.', { type: 'error' });
+            }
+            return;
+          }
+
+          setReportFeedback(message, 'error');
+        }
+      } catch (err) {
+        console.error('report submit failed', err);
+        setReportFeedback('در ارسال گزارش خطایی رخ داد. لطفاً اتصال اینترنت خود را بررسی کنید.', 'error');
+      } finally {
+        if (submitBtn) {
+          submitBtn.disabled = false;
+          submitBtn.removeAttribute('data-loading');
+          submitBtn.textContent = originalLabel || 'ارسال گزارش';
+        }
+      }
     });
   }
 

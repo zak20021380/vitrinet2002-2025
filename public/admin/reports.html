@@ -69,6 +69,7 @@
     .badge-new { background:#bfdbfe; color:#1d4ed8;}
     .badge-progress { background:#fef08a; color:#92400e;}
     .badge-rejected { background:#fecaca; color:#b91c1c;}
+    .badge-resolved { background:#bbf7d0; color:#166534;}
     .cat { border-radius: .8rem; background: #f3f4f6; color: #0ea5e9; font-size: 13px; font-weight: 700; padding: 4px 16px;}
     .modal-body { max-height:65vh; overflow-y:auto;}
     @keyframes fadeIn { from { opacity: 0; transform: translateY(16px);} to { opacity:1; transform: translateY(0);} }
@@ -139,14 +140,16 @@
           <option value="">دسته‌بندی همه</option>
           <option value="عدم تطابق قیمت">عدم تطابق قیمت</option>
           <option value="پاسخ‌ندادن به مشتری">پاسخ‌ندادن به مشتری</option>
-          <option value="عدم تطابق کالا با مغازه">عدم تطابق کالا با مغازه</option>
+          <option value="گران‌فروشی یا هزینهٔ اضافی">گران‌فروشی یا هزینهٔ اضافی</option>
+          <option value="مسدودسازی یا رفتار نامناسب">مسدودسازی یا رفتار نامناسب</option>
           <option value="سایر">سایر</option>
         </select>
         <select id="statusFilter" class="w-full p-2 border rounded-xl text-sm xs:text-base">
           <option value="">همه وضعیت‌ها</option>
-          <option value="جدید">جدید</option>
-          <option value="بررسی‌شده">بررسی‌شده</option>
-          <option value="رد شد">رد شد</option>
+          <option value="pending">جدید</option>
+          <option value="reviewing">بررسی‌شده</option>
+          <option value="resolved">رسیدگی شد</option>
+          <option value="rejected">رد شد</option>
         </select>
       </div>
     </div>
@@ -170,6 +173,7 @@
           <th>نام فروشنده/مغازه</th>
           <th>دسته</th>
           <th>متن گزارش</th>
+          <th>گزارش‌دهنده</th>
           <th>تاریخ</th>
           <th>وضعیت</th>
           <th>عملیات</th>
@@ -230,7 +234,8 @@
   const typeMap = {
     'price_mismatch': 'عدم تطابق قیمت',
     'no_response': 'پاسخ‌ندادن به مشتری',
-    'overpricing': 'عدم تطابق کالا با مغازه',
+    'overpricing': 'گران‌فروشی یا هزینهٔ اضافی',
+    'block': 'مسدودسازی یا رفتار نامناسب',
     'other': 'سایر'
   };
 
@@ -238,6 +243,7 @@
   const statusMap = {
     'pending': 'جدید',
     'reviewing': 'بررسی‌شده',
+    'resolved': 'رسیدگی شد',
     'rejected': 'رد شد'
   };
 
@@ -246,9 +252,16 @@
     const mappedStatus = statusMap[status] || status;
     if (mappedStatus === "جدید") return "badge badge-new";
     if (mappedStatus === "بررسی‌شده") return "badge badge-progress";
+    if (mappedStatus === "رسیدگی شد") return "badge badge-resolved";
     if (mappedStatus === "رد شد") return "badge badge-rejected";
     return "badge";
   }
+
+  const faDigits = ['۰','۱','۲','۳','۴','۵','۶','۷','۸','۹'];
+  const toFaDigits = (value) => {
+    const str = (value ?? '').toString();
+    return str.replace(/[0-9]/g, d => faDigits[Number(d)]);
+  };
 
   // تبدیل تاریخ میلادی به شمسی ساده (بدون کتابخانه)
   function toJalaliDate(isoDate) {
@@ -259,6 +272,15 @@
 
   let reports = []; // داده‌ها از بک‌اند
 
+  const updateReportsCount = () => {
+    const countEl = document.getElementById('count-reports');
+    if (countEl) {
+      countEl.textContent = toFaDigits(reports.length);
+    }
+  };
+
+  updateReportsCount();
+
   // دریافت گزارش‌ها از API
   async function fetchReports() {
     try {
@@ -266,34 +288,36 @@
       if (!response.ok) throw new Error('خطا در دریافت داده‌ها');
       const data = await response.json();
 
-     reports = data.map(r => {
-        // ساخت نام کامل فروشنده
+      reports = data.map(r => {
         const fullName = `${r.sellerId?.firstname || ''} ${r.sellerId?.lastname || ''}`.trim();
+        const reporterName = r.userId
+          ? `${r.userId.firstname || ''} ${r.userId.lastname || ''}`.trim()
+          : '';
+        const contactInfo = (typeof r.contact === 'string' && r.contact.trim())
+          ? r.contact.trim()
+          : (r.userId?.phone || '');
 
         return {
           id: r._id,
-
-          // ← اولویت: نام کامل فروشنده → storename → shopurl → "-"
           seller: r.sellerId
                   ? (fullName || r.sellerId.storename || r.sellerId.shopurl || '-')
                   : (r.shopurl || '-'),
-
-          shopurl:   r.sellerId?.shopurl || r.shopurl || '-',
+          shopurl: (r.sellerId?.shopurl || r.shopurl || '').trim(),
           sellerPhone: r.sellerId?.phone || '-',
           sellerAddress: r.sellerId?.address || '-',
-          category:  typeMap[r.type] || r.type,
-          message:   r.description,
-          date:      toJalaliDate(r.createdAt),
-          status:    statusMap[r.status] || r.status,
+          category: typeMap[r.type] || r.type,
+          message: r.description,
+          date: toJalaliDate(r.createdAt),
+          status: statusMap[r.status] || r.status,
           rawStatus: r.status,
-          user:      r.userId
-                     ? `${r.userId.firstname || ''} ${r.userId.lastname || ''}`.trim()
-                     : '-',
-          contact:   r.userId?.phone      || '-'
+          user: reporterName || '-',
+          contact: contactInfo || '-',
+          type: r.type
         };
       });
 
       filterReports();
+      updateReportsCount();
     } catch (err) {
       console.error('خطا در fetch:', err);
       alert('خطایی در بارگذاری گزارش‌ها رخ داد.');
@@ -302,23 +326,45 @@
 
   async function updateReportStatus(id, status) {
     try {
-      await fetch(`/api/reports/${id}`, {
-        method: 'PUT',
+      const res = await fetch(`/api/reports/${id}`, {
+        method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ status })
       });
+      if (!res.ok) {
+        let message = 'خطا در بروزرسانی وضعیت';
+        const contentType = res.headers.get('Content-Type') || '';
+        if (contentType.includes('application/json')) {
+          const data = await res.json().catch(() => ({}));
+          if (data?.message) message = data.message;
+        }
+        throw new Error(message);
+      }
+      return true;
     } catch (err) {
       console.error(err);
-      alert('خطا در بروزرسانی وضعیت');
+      alert(err.message || 'خطا در بروزرسانی وضعیت');
+      return false;
     }
   }
 
   async function deleteReport(id) {
     try {
-      await fetch(`/api/reports/${id}`, { method: 'DELETE' });
+      const res = await fetch(`/api/reports/${id}`, { method: 'DELETE' });
+      if (!res.ok) {
+        let message = 'خطا در حذف گزارش';
+        const contentType = res.headers.get('Content-Type') || '';
+        if (contentType.includes('application/json')) {
+          const data = await res.json().catch(() => ({}));
+          if (data?.message) message = data.message;
+        }
+        throw new Error(message);
+      }
+      return true;
     } catch (err) {
       console.error(err);
-      alert('خطا در حذف گزارش');
+      alert(err.message || 'خطا در حذف گزارش');
+      return false;
     }
   }
 
@@ -352,6 +398,14 @@
       msgTd.textContent = r.message.length > 46 ? r.message.slice(0, 46) + "..." : r.message;
       row.appendChild(msgTd);
 
+      // گزارش‌دهنده
+      const reporterTd = document.createElement('td');
+      reporterTd.innerHTML = `
+        <div class="font-semibold text-slate-700">${r.user || '-'}</div>
+        <div class="text-xs text-slate-500">${r.contact || '-'}</div>
+      `;
+      row.appendChild(reporterTd);
+
       // تاریخ
       const dateTd = document.createElement('td');
       dateTd.textContent = r.date;
@@ -375,10 +429,14 @@
         checkbox.onclick = async (e) => {
           e.stopPropagation();
           const newStatus = checkbox.checked ? 'reviewing' : 'pending';
-          await updateReportStatus(r.id, newStatus);
-          r.rawStatus = newStatus;
-          r.status = statusMap[newStatus];
-          filterReports();
+          const ok = await updateReportStatus(r.id, newStatus);
+          if (ok) {
+            r.rawStatus = newStatus;
+            r.status = statusMap[newStatus];
+            filterReports();
+          } else {
+            checkbox.checked = !checkbox.checked;
+          }
         };
         actionsTd.appendChild(checkbox);
       }
@@ -391,13 +449,33 @@
         rejectBtn.onclick = async (e) => {
           e.stopPropagation();
           if (confirm('آیا مطمئن هستید از رد این گزارش؟')) {
-            await updateReportStatus(r.id, 'rejected');
-            r.rawStatus = 'rejected';
-            r.status = statusMap['rejected'];
-            filterReports();
+            const ok = await updateReportStatus(r.id, 'rejected');
+            if (ok) {
+              r.rawStatus = 'rejected';
+              r.status = statusMap['rejected'];
+              filterReports();
+            }
           }
         };
         actionsTd.appendChild(rejectBtn);
+      }
+
+      if (!['resolved', 'rejected'].includes(r.rawStatus)) {
+        const resolveBtn = document.createElement('button');
+        resolveBtn.textContent = 'رسیدگی شد';
+        resolveBtn.className = 'border border-emerald-600 bg-emerald-100 text-emerald-700 font-bold px-4 py-1.5 rounded-lg hover:bg-emerald-600 hover:text-white text-sm shadow hover:shadow-md';
+        resolveBtn.onclick = async (e) => {
+          e.stopPropagation();
+          if (confirm('پس از تأیید به وضعیت «رسیدگی شد» تغییر می‌کند. ادامه می‌دهید؟')) {
+            const ok = await updateReportStatus(r.id, 'resolved');
+            if (ok) {
+              r.rawStatus = 'resolved';
+              r.status = statusMap['resolved'];
+              filterReports();
+            }
+          }
+        };
+        actionsTd.appendChild(resolveBtn);
       }
 
       // دکمه حذف (بدون تغییر، اما فاصله حفظ می‌شه)
@@ -407,9 +485,12 @@
       deleteBtn.onclick = async (e) => {
         e.stopPropagation();
         if (confirm('آیا مطمئن هستید از حذف این گزارش؟')) {
-          await deleteReport(r.id);
-          reports = reports.filter(rep => rep.id !== r.id);
-          filterReports();
+          const ok = await deleteReport(r.id);
+          if (ok) {
+            reports = reports.filter(rep => rep.id !== r.id);
+            updateReportsCount();
+            filterReports();
+          }
         }
       };
       actionsTd.appendChild(deleteBtn);
@@ -422,18 +503,20 @@
 
   // فیلتر کردن
   function filterReports() {
-    const search = document.getElementById('searchInput').value.trim();
+    const searchInput = document.getElementById('searchInput');
+    const search = (searchInput?.value || '').trim().toLowerCase();
     const category = document.getElementById('categoryFilter').value;
     const status = document.getElementById('statusFilter').value;
 
-    const filtered = reports.filter(r =>
-      (!search ||
-        r.seller.includes(search) ||
-        (r.sellerPhone && r.sellerPhone.includes(search))
-      ) &&
-      (!category || r.category === category) &&
-      (!status || r.status === status)
-    );
+    const filtered = reports.filter(r => {
+      const haystacks = [r.seller, r.sellerPhone, r.user, r.contact, r.message, r.shopurl];
+      const matchesSearch = !search || haystacks.some(val =>
+        (val || '').toString().toLowerCase().includes(search)
+      );
+      const matchesCategory = !category || r.category === category;
+      const matchesStatus = !status || r.rawStatus === status;
+      return matchesSearch && matchesCategory && matchesStatus;
+    });
     renderReports(filtered);
     drawPieChart(filtered);
   }
@@ -475,6 +558,14 @@
     document.getElementById('modalDetailOverlay').classList.add('active');
     document.getElementById('modalDetailTitle').textContent = "جزئیات کامل گزارش";
 
+    const hasShopUrl = report.shopurl && report.shopurl !== '-';
+    const shopLink = hasShopUrl
+      ? `/service-shops.html?shopurl=${encodeURIComponent(report.shopurl)}`
+      : '';
+    const shopUrlHtml = hasShopUrl
+      ? `<a href="${shopLink}" target="_blank" class="text-blue-600 hover:underline">${report.shopurl}</a>`
+      : '-';
+
     document.getElementById('modalDetailBody').innerHTML = `
       <div class="modal-detail-row"><span class="modal-detail-label">نام فروشنده:</span> <span class="modal-detail-value">${report.seller}</span></div>
       <div class="modal-detail-row"><span class="modal-detail-label">شماره موبایل فروشنده:</span> <span class="modal-detail-value">${report.sellerPhone}</span></div>
@@ -483,8 +574,8 @@
       <div class="modal-detail-row"><span class="modal-detail-label">وضعیت:</span> <span class="modal-detail-value"><span class="${badgeClass(report.rawStatus)}">${report.status}</span></span></div>
       <div class="modal-detail-row"><span class="modal-detail-label">تاریخ:</span> <span class="modal-detail-value">${report.date}</span></div>
       <div class="modal-detail-row"><span class="modal-detail-label">نام کاربر:</span> <span class="modal-detail-value">${report.user || '-'}</span></div>
-      <div class="modal-detail-row"><span class="modal-detail-label">شماره کاربر:</span> <span class="modal-detail-value">${report.contact || '-'}</span></div>
-      <div class="modal-detail-row"><span class="modal-detail-label">لینک فروشگاه:</span> <span class="modal-detail-value"><a href="${report.shopurl}" target="_blank" class="text-blue-600 hover:underline">${report.shopurl}</a></span></div>
+      <div class="modal-detail-row"><span class="modal-detail-label">اطلاعات تماس کاربر:</span> <span class="modal-detail-value">${report.contact || '-'}</span></div>
+      <div class="modal-detail-row"><span class="modal-detail-label">لینک فروشگاه:</span> <span class="modal-detail-value">${shopUrlHtml}</span></div>
       <div class="modal-detail-row"><span class="modal-detail-label">متن گزارش:</span> <span class="modal-detail-value">${report.message}</span></div>
     `;
   }
