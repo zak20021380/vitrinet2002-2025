@@ -3,7 +3,23 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <!-- Security Headers -->
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdn.tailwindcss.com https://cdn.jsdelivr.net 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' http://localhost:5000 https://api.vitrinet.ir; frame-ancestors 'none'; base-uri 'self'; form-action 'self';">
+  <meta http-equiv="X-Frame-Options" content="DENY">
+  <meta http-equiv="X-Content-Type-Options" content="nosniff">
+  <meta http-equiv="X-XSS-Protection" content="1; mode=block">
+  <meta name="referrer" content="no-referrer">
+  <meta http-equiv="Permissions-Policy" content="geolocation=(), microphone=(), camera=(), payment=()">
+
   <title>ثبت‌نام کاربر - ویترینت</title>
+
+  <!-- DOMPurify for HTML Sanitization -->
+  <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.6/dist/purify.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+  <!-- Security Utils -->
+  <script src="/security-utils.js"></script>
+
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;700&display=swap" rel="stylesheet" />
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@800&display=swap" rel="stylesheet" />
@@ -134,7 +150,7 @@
           <input type="checkbox" id="terms" required class="accent-[#10b981] w-4 h-4 rounded border-gray-300" />
           <label for="terms" class="select-none text-gray-700">
             <span>قوانین و مقررات ویترینت را می‌پذیرم.</span>
-            <a href="terms.html" class="text-[#0ea5e9] font-extrabold hover:underline ml-1">مطالعه قوانین</a>
+            <a href="terms.html" rel="noopener" class="text-[#0ea5e9] font-extrabold hover:underline ml-1">مطالعه قوانین</a>
           </label>
         </div>
         <div class="text-center mt-8">
@@ -164,29 +180,44 @@
   });
 
   // فرم اعتبارسنجی ساده و فارسی
-// فرم اعتبارسنجی ساده و فارسی
-document.getElementById('signupForm').addEventListener('submit', function(e){
+// فرم اعتبارسنجی ساده و فارسی با امنیت پیشرفته
+document.getElementById('signupForm').addEventListener('submit', async function(e){
   e.preventDefault();
   let valid = true;
+
+  // Clear previous errors
   this.querySelectorAll('input').forEach(inp=>{
     inp.classList.remove('input-error');
     let err = inp.parentNode.querySelector('.err-text');
     if (err) err.classList.add('hidden');
   });
 
-  let fn = this.firstname, ln = this.lastname, phone = this.phone, pass = this.password, pass2 = this.password2;
-  if (!fn.value.trim()) {
+  const fn = this.firstname;
+  const ln = this.lastname;
+  const phone = this.phone;
+  const pass = this.password;
+  const pass2 = this.password2;
+  const terms = this.terms;
+
+  // Validate and sanitize inputs using SecurityUtils
+  const firstnameValidation = SecurityUtils.validateInput(fn.value, 'text');
+  if (!firstnameValidation.valid || !fn.value.trim()) {
     setError(fn, 'لطفا نام خود را وارد کنید');
     valid = false;
   }
-  if (!ln.value.trim()) {
+
+  const lastnameValidation = SecurityUtils.validateInput(ln.value, 'text');
+  if (!lastnameValidation.valid || !ln.value.trim()) {
     setError(ln, 'لطفا نام خانوادگی خود را وارد کنید');
     valid = false;
   }
-  if (!/^09\d{9}$/.test(phone.value)) {
-    setError(phone, 'شماره موبایل معتبر وارد کنید');
+
+  const phoneValidation = SecurityUtils.validateInput(phone.value, 'phone');
+  if (!phoneValidation.valid) {
+    setError(phone, SecurityUtils.escapeHTML(phoneValidation.error));
     valid = false;
   }
+
   if (!pass.value) {
     setError(pass, 'رمز عبور را وارد کنید');
     valid = false;
@@ -194,6 +225,7 @@ document.getElementById('signupForm').addEventListener('submit', function(e){
     setError(pass, 'رمز عبور باید حداقل ۸ کاراکتر باشد');
     valid = false;
   }
+
   if (!pass2.value) {
     setError(pass2, 'تکرار رمز عبور را وارد کنید');
     valid = false;
@@ -201,34 +233,39 @@ document.getElementById('signupForm').addEventListener('submit', function(e){
     setError(pass2, 'رمزهای عبور یکسان نیستند');
     valid = false;
   }
-  let terms = this.terms;
+
   if (!terms.checked) {
     alert("لطفا قوانین و مقررات را بپذیرید.");
     valid = false;
   }
 
-  if (valid) {
-    // ارسال اطلاعات ثبت‌نام به سرور (API جدید)
-    fetch("http://localhost:5000/api/auth/register-user", {
+  if (!valid) return;
+
+  try {
+    // Use secureFetch with CSRF token
+    const response = await SecurityUtils.secureFetch("/api/auth/register-user", {
       method: "POST",
       headers: {"Content-Type": "application/json"},
       body: JSON.stringify({
-        firstname: fn.value,
-        lastname: ln.value,
-        phone: phone.value,
+        firstname: firstnameValidation.sanitized,
+        lastname: lastnameValidation.sanitized,
+        phone: phoneValidation.sanitized,
         password: pass.value
       })
-    })
-    .then(res => res.json())
-    .then(data => {
-      if (data.success) {
-        // بعد از موفقیت ثبت‌نام، هدایت به صفحه وریفای
-        window.location.href = "verify-user.html?phone=" + encodeURIComponent(phone.value);
-      } else {
-        alert(data.message || "خطا در ثبت‌نام");
-      }
-    })
-    .catch(() => alert("ارتباط با سرور برقرار نشد!"));
+    });
+
+    const data = await response.json();
+
+    if (data.success) {
+      // Redirect to verify page with sanitized phone
+      const sanitizedPhone = encodeURIComponent(phoneValidation.sanitized);
+      window.location.href = "verify-user.html?phone=" + sanitizedPhone;
+    } else {
+      alert(SecurityUtils.escapeHTML(data.message || "خطا در ثبت‌نام"));
+    }
+  } catch (error) {
+    alert("ارتباط با سرور برقرار نشد!");
+    console.error('Registration error:', error);
   }
 });
 

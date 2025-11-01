@@ -3,7 +3,23 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+
+  <!-- Security Headers -->
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdn.tailwindcss.com https://cdn.jsdelivr.net 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' http://localhost:5000 https://api.vitrinet.ir; frame-ancestors 'none'; base-uri 'self'; form-action 'self';">
+  <meta http-equiv="X-Frame-Options" content="DENY">
+  <meta http-equiv="X-Content-Type-Options" content="nosniff">
+  <meta http-equiv="X-XSS-Protection" content="1; mode=block">
+  <meta name="referrer" content="no-referrer">
+  <meta http-equiv="Permissions-Policy" content="geolocation=(), microphone=(), camera=(), payment=()">
+
   <title>ورود به ویترینت</title>
+
+  <!-- DOMPurify for HTML Sanitization -->
+  <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.6/dist/purify.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+  <!-- Security Utils -->
+  <script src="/security-utils.js"></script>
+
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;700&display=swap" rel="stylesheet"/>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@800&display=swap" rel="stylesheet" />
@@ -167,7 +183,7 @@
   </div>
   <div id="error-message" class="hidden mt-2 text-red-500 text-sm font-bold transition-all"></div>
   <div id="forgot-link" class="hidden mt-2 text-sm">
-    <a href="recover.html" class="text-[#0ea5e9] font-extrabold hover:underline transition">رمز عبور را فراموش کرده‌اید؟</a>
+    <a href="recover.html" rel="noopener" class="text-[#0ea5e9] font-extrabold hover:underline transition">رمز عبور را فراموش کرده‌اید؟</a>
   </div>
 </div>
 
@@ -247,42 +263,63 @@ if (!window.SafeSS) {
 
 document.getElementById('loginForm').addEventListener('submit', async function(e) {
   e.preventDefault();
-  const phone = document.getElementById('mobile').value.trim();
-  const password = document.getElementById('password').value.trim();
+
+  const phoneInput = document.getElementById('mobile').value.trim();
+  const passwordInput = document.getElementById('password').value.trim();
   const errorMsg = document.getElementById('error-message');
   const forgotLink = document.getElementById('forgot-link');
 
+  // Clear previous errors
+  errorMsg.classList.add('hidden');
+  forgotLink.classList.add('hidden');
+
+  // Validate and sanitize inputs
+  const phoneValidation = SecurityUtils.validateInput(phoneInput, 'phone');
+  if (!phoneValidation.valid) {
+    errorMsg.textContent = SecurityUtils.escapeHTML(phoneValidation.error);
+    errorMsg.classList.remove('hidden');
+    return;
+  }
+
+  if (!passwordInput || passwordInput.length < 8) {
+    errorMsg.textContent = 'رمز عبور باید حداقل ۸ کاراکتر باشد';
+    errorMsg.classList.remove('hidden');
+    return;
+  }
+
+  const phone = phoneValidation.sanitized;
+  const password = passwordInput;
+
   try {
-    const res = await fetch('/api/auth/login-user', {
+    // Use secureFetch with automatic CSRF token
+    const res = await SecurityUtils.secureFetch('/api/auth/login-user', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
       },
-      credentials: 'include',
       body: JSON.stringify({ phone, password })
     });
 
     const data = await res.json();
-    if (!res.ok) throw new Error(data.message || 'خطا در ورود!');
+    if (!res.ok) {
+      throw new Error(SecurityUtils.escapeHTML(data.message || 'خطا در ورود!'));
+    }
 
-    // --- ذخیره توکن در کوکی ---
-
-    // === ریدایرکت بعد از لاگین ===
-// === ریدایرکت بعد از لاگین ===
-const back = SafeSS.getJSON('afterLoginReturn'); // SafeSS اگر از صفحه گزارش آمده‌ایم
-if (back) {
-  sessionStorage.removeItem('afterLoginReturn');
-  window.location.href = back;           // ⇠ بازگشت به همان فروشگاه
-} else {
-  // رفتار قبلی: ?redirect=... یا داشبورد کاربر
-  const urlParams  = new URLSearchParams(window.location.search);
-  const redirectUrl = urlParams.get('redirect');
-  window.location.href = redirectUrl || '/user/dashboard.html';
-}
-
+    // Redirect after login (sanitize redirect URL to prevent open redirects)
+    const back = SafeSS.getJSON('afterLoginReturn');
+    if (back) {
+      sessionStorage.removeItem('afterLoginReturn');
+      const sanitizedBack = SecurityUtils.sanitizeURL(back);
+      window.location.href = sanitizedBack || '/user/dashboard.html';
+    } else {
+      const urlParams = new URLSearchParams(window.location.search);
+      const redirectUrl = urlParams.get('redirect');
+      const sanitizedRedirect = SecurityUtils.sanitizeURL(redirectUrl);
+      window.location.href = sanitizedRedirect || '/user/dashboard.html';
+    }
 
   } catch(err) {
-    errorMsg.innerText = err.message || 'خطا در ورود!';
+    errorMsg.textContent = SecurityUtils.escapeHTML(err.message || 'خطا در ورود!');
     errorMsg.classList.remove('hidden');
     forgotLink.classList.remove('hidden');
   }
