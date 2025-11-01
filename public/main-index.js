@@ -1236,7 +1236,11 @@ bantaSlider.addEventListener('touchend', () => {
 }, {passive:true});
 
 async function loadBantaShops() {
+  const wrapper = document.getElementById('banta-shops-wrapper');
   const slider = document.getElementById('banta-shops-section');
+  if (!wrapper || !slider) return;
+
+  wrapper.classList.add('hidden');
   slider.innerHTML = '<div style="margin:60px auto;">در حال بارگذاری...</div>';
   updateSliderNavVisibility('banta-shops-section');
   try {
@@ -1250,10 +1254,10 @@ async function loadBantaShops() {
     slider.innerHTML = '';
     updateSliderNavVisibility('banta-shops-section');
     if (!shops.length) {
-      slider.innerHTML = '<p class="text-gray-500 text-center py-8">هیچ مغازه‌ای برای بانتا یافت نشد.</p>';
-      updateSliderNavVisibility('banta-shops-section');
       return;
     }
+
+    wrapper.classList.remove('hidden');
     shops.forEach(shop => {
       const badge = shop.category && shop.category.trim()
         ? `<span class="inline-block bg-[#10b981]/10 text-[#10b981] text-xs font-bold px-3 py-1 rounded-full">${shop.category}</span>`
@@ -1291,7 +1295,7 @@ async function loadBantaShops() {
 
     updateSliderNavVisibility('banta-shops-section');
   } catch (err) {
-    slider.innerHTML = '<p class="text-red-500 text-center py-8">خطا در دریافت اطلاعات. لطفا دوباره تلاش کنید.</p>';
+    slider.innerHTML = '';
     updateSliderNavVisibility('banta-shops-section');
   }
 }
