@@ -823,7 +823,18 @@ async function loadShops() {
       return;
     }
 
-    shops.forEach(shop => {
+    const filteredShops = shops.filter(shop => {
+      const category = (shop.category || '').trim();
+      return category !== 'خدمات';
+    });
+
+    if (!filteredShops.length) {
+      cardsWrap.innerHTML = '<div class="text-gray-400 text-center w-full p-7">فعلاً فروشگاه منتخب برای نمایش وجود ندارد.</div>';
+      updateSliderNavVisibility('drag-scroll-cards');
+      return;
+    }
+
+    filteredShops.forEach(shop => {
       const card = document.createElement('a');
       card.href = `shop.html?shopurl=${shop.shopurl}`;
       card.className = `
