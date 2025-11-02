@@ -1027,6 +1027,36 @@ nav.fixed.bottom-0 a {
   transform: translateX(-2px);
 }
 
+.popular-products-wrapper {
+  position: relative;
+}
+
+.popular-products-scroller {
+  scroll-snap-type: x mandatory;
+  padding-inline: 0.5rem;
+}
+
+.popular-products-scroller > * {
+  scroll-snap-align: center;
+}
+
+@media (min-width: 1024px) {
+  .popular-products-scroller {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 1.5rem;
+    overflow: visible;
+    padding-inline: 0;
+    padding-bottom: 0;
+  }
+
+  .popular-products-scroller > .center-card {
+    min-width: 0 !important;
+    max-width: none !important;
+    width: 100%;
+  }
+}
+
 /* ریسپانسیو برای موبایل */
 @media (max-width: 640px) {
   .card-action-btn {
