@@ -40,6 +40,20 @@
 
       // Allow only relative URLs or whitelisted protocols
       const allowedProtocols = ['http:', 'https:', 'mailto:', 'tel:'];
+      const sameOriginProtocols = ['http:', 'https:'];
+
+      const isSameOrigin = (parsedUrl) => {
+        if (!sameOriginProtocols.includes(parsedUrl.protocol)) {
+          return true;
+        }
+
+        if (parsedUrl.origin === window.location.origin) {
+          return true;
+        }
+
+        console.warn('Blocked cross-origin URL redirect:', parsedUrl.href);
+        return false;
+      };
 
       try {
         // Relative URLs are safe
@@ -57,6 +71,10 @@
 
         // Prevent javascript: and data: URLs
         if (parsed.protocol === 'javascript:' || parsed.protocol === 'data:') {
+          return null;
+        }
+
+        if (!isSameOrigin(parsed)) {
           return null;
         }
 
