@@ -4,6 +4,37 @@
   const BODY_READY_CLASS = 'has-mobile-nav';
   const NAV_READY_CLASS = 'vitreenet-mobile-nav';
 
+  const SVG_NS = 'http://www.w3.org/2000/svg';
+  const parser = typeof DOMParser !== 'undefined' ? new DOMParser() : null;
+
+  function appendSvgContent(svgElement, markup) {
+    if (!svgElement || !markup) return;
+
+    if (!parser) {
+      // Fallback: attempt to set innerHTML for environments without DOMParser support
+      svgElement.innerHTML = markup;
+      return;
+    }
+
+    try {
+      const doc = parser.parseFromString(`<svg xmlns="${SVG_NS}">${markup}</svg>`, 'image/svg+xml');
+      const parserError = doc.getElementsByTagName('parsererror');
+      if (parserError && parserError.length > 0) {
+        console.warn('[Vitreenet] Failed to parse SVG markup for mobile nav icon.');
+        return;
+      }
+
+      const nodes = doc.documentElement ? Array.from(doc.documentElement.childNodes) : [];
+      nodes.forEach((node) => {
+        if (typeof Node === 'undefined' || node.nodeType === Node.ELEMENT_NODE) {
+          svgElement.appendChild(document.importNode(node, true));
+        }
+      });
+    } catch (error) {
+      console.warn('[Vitreenet] Error while parsing SVG markup for mobile nav icon.', error);
+    }
+  }
+
   const NAV_ITEMS = [
     {
       id: 'mobileNavHome',
@@ -203,7 +234,7 @@
     icon.setAttribute('viewBox', '0 0 24 24');
     icon.setAttribute('fill', 'none');
     icon.setAttribute('aria-hidden', 'true');
-    icon.innerHTML = config.icon;
+    appendSvgContent(icon, config.icon);
     icon.classList.add('nav-icon');
 
     const label = document.createElement('span');
