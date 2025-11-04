@@ -118,8 +118,8 @@
     window.SafeSS = SafeSS;
   }
 
-  if (!SafeSS.getJSON('signup_password')) { // SafeSS
-    SafeSS.setJSON('signup_password', 'testpassword'); // SafeSS
+  if (!SafeSS.getJSON('signup_pwd')) { // SafeSS
+    SafeSS.setJSON('signup_pwd', 'testpassword'); // SafeSS
   }
 
   const digits = Array.from(document.querySelectorAll('.input-digit'));
@@ -171,14 +171,14 @@
 
     if (code === "12345") {
       // پسورد موقع ثبت‌نام باید تو sessionStorage باشه (حتی اگر نبود، بالا مقداردهی کردیم)
-      const password = SafeSS.getJSON('signup_password'); // SafeSS
+      const password = SafeSS.getJSON('signup_pwd'); // SafeSS
       // ذخیره اطلاعات کاربر ساختگی تو localStorage
       localStorage.setItem('token', 'fake-user-token');
       localStorage.setItem('user', JSON.stringify({
         phone: phone,
         name: 'کاربر ویترینت'
       }));
-      sessionStorage.removeItem('signup_password');
+      sessionStorage.removeItem('signup_pwd');
       sessionStorage.removeItem('signup_phone');
       successMsg.classList.remove('hidden');
       goDashboardBtn.onclick = function() {

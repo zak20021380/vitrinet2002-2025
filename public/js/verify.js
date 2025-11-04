@@ -123,7 +123,7 @@
       return;
     }
 
-    const password = SafeSS.getJSON('signup_password');
+    const password = SafeSS.getJSON('signup_pwd');
     if (!password) {
       showError('خطای ورود: رمز ثبت‌نام پیدا نشد. لطفا مجدد وارد شوید.');
       return;
@@ -152,7 +152,7 @@
     localStorage.setItem('token', loginResult.token);
     localStorage.setItem('seller', JSON.stringify(loginResult.seller));
 
-    sessionStorage.removeItem('signup_password');
+    sessionStorage.removeItem('signup_pwd');
     sessionStorage.removeItem('signup_phone');
 
     const SERVICE_CATEGORIES = ['خدمات', 'زیبایی', 'تالار و مجالس', 'خودرو', 'ورزشی'];
