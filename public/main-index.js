@@ -1032,9 +1032,9 @@ function renderPopularProductsSection(section) {
       const elementTag = card.link ? 'a' : 'div';
       const cardEl = document.createElement(elementTag);
       cardEl.className = `
-        group glass min-w-[265px] max-w-xs flex-shrink-0 flex flex-col items-center
-        p-4 rounded-2xl shadow-2xl border-2 border-[#0ea5e9]/20 hover:scale-[1.04] hover:shadow-2xl hover:border-[#0ea5e9]/40
-        bg-white/95 backdrop-blur-[5px] transition-all duration-300 center-card
+        group glass popular-product-card min-w-[265px] max-w-[280px] flex-shrink-0 flex flex-col
+        p-4 rounded-3xl shadow-xl border border-[#0ea5e9]/20 bg-white/95 backdrop-blur-[5px]
+        hover:-translate-y-1 hover:shadow-2xl hover:border-[#0ea5e9]/40 transition-all duration-300
       `;
 
       if (card.link) {
@@ -1050,34 +1050,47 @@ function renderPopularProductsSection(section) {
 
       const imageUrl = card.imageUrl?.trim() || 'assets/images/no-image.png';
       const tag = card.tag ? `<span class="absolute top-2 right-2 text-xs font-bold px-3 py-1 rounded-full bg-gradient-to-r from-[#10b981] to-[#0ea5e9] text-white shadow-md">${escapeHTML(card.tag)}</span>` : '';
-      const description = card.description ? `<p class="text-sm text-gray-600 text-center mb-3 leading-relaxed">${escapeHTML(card.description)}</p>` : '';
+      const description = card.description
+        ? `<p class="popular-card-description text-sm text-gray-600 leading-relaxed">${escapeHTML(card.description)}</p>`
+        : '';
       const location = card.location
-        ? `<div class="flex items-center gap-1 mb-3 text-sm text-gray-700 font-bold"><svg width="18" height="18" fill="none" viewBox="0 0 22 22"><circle cx="11" cy="11" r="10" fill="#e0f7fa"/><path d="M11 2.5C7.13 2.5 4 5.61 4 9.45c0 3.52 4.1 7.93 6.2 10.01.46.47 1.2.47 1.66 0 2.1-2.08 6.14-6.49 6.14-10.01C18 5.61 14.87 2.5 11 2.5Z" fill="#10b981"/><circle cx="11" cy="9" r="2.5" fill="#0ea5e9"/></svg><span class="truncate max-w-[160px]">${escapeHTML(card.location)}</span></div>`
+        ? `<div class="popular-card-location flex flex-row-reverse items-center justify-end gap-2 text-sm text-gray-700 font-bold">
+            <svg width="18" height="18" fill="none" viewBox="0 0 22 22">
+              <circle cx="11" cy="11" r="10" fill="#e0f7fa"/>
+              <path d="M11 2.5C7.13 2.5 4 5.61 4 9.45c0 3.52 4.1 7.93 6.2 10.01.46.47 1.2.47 1.66 0 2.1-2.08 6.14-6.49 6.14-10.01C18 5.61 14.87 2.5 11 2.5Z" fill="#10b981"/>
+              <circle cx="11" cy="9" r="2.5" fill="#0ea5e9"/>
+            </svg>
+            <span class="truncate">${escapeHTML(card.location)}</span>
+          </div>`
         : '';
       const price = card.price
-        ? `<div class="inline-block bg-gradient-to-r from-[#10b981]/10 to-[#0ea5e9]/10 px-4 py-1 rounded-full text-[#10b981] font-extrabold text-base shadow-sm">${escapeHTML(card.price)}</div>`
+        ? `<div class="popular-card-price inline-flex items-center justify-center bg-gradient-to-r from-[#10b981]/10 to-[#0ea5e9]/10 px-4 py-1 rounded-full text-[#10b981] font-extrabold text-base shadow-sm">${escapeHTML(card.price)}</div>`
         : '';
       const button = card.buttonText
-        ? `<span class="mt-4 inline-flex items-center gap-2 text-sm font-bold text-[#0ea5e9] bg-[#e0fdfa] px-4 py-1.5 rounded-full shadow-sm">${escapeHTML(card.buttonText)}<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M7 17L17 7M7 7h10v10"/></svg></span>`
+        ? `<span class="popular-card-link inline-flex items-center gap-2 text-sm font-bold text-[#0ea5e9] bg-[#e0fdfa] px-4 py-1.5 rounded-full shadow-sm">${escapeHTML(card.buttonText)}<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M7 17L17 7M7 7h10v10"/></svg></span>`
         : '';
 
       cardEl.innerHTML = `
-        <div class="w-full h-[130px] sm:h-[170px] rounded-xl mb-5 flex items-center justify-center relative overflow-hidden" style="background:linear-gradient(120deg,#d4fbe8,#e0fdfa,#c8f7e6); box-shadow:inset 0 2px 10px rgba(16,185,129,0.1);">
+        <div class="popular-card-image w-full h-[130px] sm:h-[170px] rounded-2xl mb-5 flex items-center justify-center relative overflow-hidden" style="background:linear-gradient(120deg,#d4fbe8,#e0fdfa,#c8f7e6); box-shadow:inset 0 2px 10px rgba(16,185,129,0.1);">
           <img src="${imageUrl}" alt="${escapeHTML(card.title)}" class="w-full h-full object-cover group-hover:brightness-105 transition-all duration-300" onerror="this.src='assets/images/no-image.png'"/>
           ${tag}
         </div>
-        <h4 class="font-extrabold text-lg sm:text-xl bg-gradient-to-r from-[#10b981] to-[#0ea5e9] bg-clip-text text-transparent text-center mb-2 line-clamp-2">
-          ${escapeHTML(card.title)}
-        </h4>
-        ${description}
-        ${location}
-        ${price}
-        ${button || `<button class="card-action-btn" onclick="event.stopPropagation();">
-          مشاهده
-          <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/>
-          </svg>
-        </button>`}
+        <div class="popular-card-body flex flex-col gap-3 w-full text-right">
+          <h4 class="font-extrabold text-lg sm:text-xl bg-gradient-to-r from-[#10b981] to-[#0ea5e9] bg-clip-text text-transparent leading-8">
+            ${escapeHTML(card.title)}
+          </h4>
+          ${description}
+          ${location}
+          ${price}
+        </div>
+        <div class="popular-card-footer w-full">
+          ${button || `<button class="card-action-btn w-full justify-center" onclick="event.stopPropagation();">
+            مشاهده
+            <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/>
+            </svg>
+          </button>`}
+        </div>
       `;
 
       slider.appendChild(cardEl);
@@ -1114,38 +1127,42 @@ async function loadPopularProductsFallback(slider) {
       card.target = '_blank';
       card.rel = 'noopener';
       card.className = `
-        group glass min-w-[265px] max-w-xs flex-shrink-0 flex flex-col items-center
-        p-4 rounded-2xl shadow-2xl border-2 border-[#0ea5e9]/20 hover:scale-[1.04] hover:shadow-2xl hover:border-[#0ea5e9]/40
-        bg-white/95 backdrop-blur-[5px] transition-all duration-300 center-card
+        group glass popular-product-card min-w-[265px] max-w-[280px] flex-shrink-0 flex flex-col
+        p-4 rounded-3xl shadow-xl border border-[#0ea5e9]/20 bg-white/95 backdrop-blur-[5px]
+        hover:-translate-y-1 hover:shadow-2xl hover:border-[#0ea5e9]/40 transition-all duration-300
       `;
 
       card.innerHTML = `
-        <div class="w-full h-[130px] sm:h-[170px] rounded-xl mb-5 flex items-center justify-center relative overflow-hidden" style="background:linear-gradient(120deg,#d4fbe8,#e0fdfa,#c8f7e6); box-shadow:inset 0 2px 10px rgba(16,185,129,0.1);">
+        <div class="popular-card-image w-full h-[130px] sm:h-[170px] rounded-2xl mb-5 flex items-center justify-center relative overflow-hidden" style="background:linear-gradient(120deg,#d4fbe8,#e0fdfa,#c8f7e6); box-shadow:inset 0 2px 10px rgba(16,185,129,0.1);">
           <img src="${img}" alt="${escapeHTML(p.title)}" class="w-full h-full object-cover group-hover:brightness-105 transition-all duration-300"/>
           <span class="absolute top-2 right-2 text-xs font-bold px-3 py-1 rounded-full bg-gradient-to-r from-[#10b981] to-[#0ea5e9] text-white shadow-md">
             ${escapeHTML(cat)}
           </span>
         </div>
-        <h4 class="font-extrabold text-lg sm:text-xl bg-gradient-to-r from-[#10b981] to-[#0ea5e9] bg-clip-text text-transparent text-center mb-2 line-clamp-2">
-          ${escapeHTML(p.title)}
-        </h4>
-        <div class="flex items-center gap-1 mb-3">
-          <svg width="18" height="18" fill="none" viewBox="0 0 22 22">
-            <circle cx="11" cy="11" r="10" fill="#e0f7fa"/>
-            <path d="M11 2.5C7.13 2.5 4 5.61 4 9.45c0 3.52 4.1 7.93 6.2 10.01.46.47 1.2.47 1.66 0 2.1-2.08 6.14-6.49 6.14-10.01C18 5.61 14.87 2.5 11 2.5Z" fill="#10b981"/>
-            <circle cx="11" cy="9" r="2.5" fill="#0ea5e9"/>
-          </svg>
-          <span class="text-gray-700 text-sm font-bold truncate max-w-[160px]">${escapeHTML(loc)}</span>
+        <div class="popular-card-body flex flex-col gap-3 w-full text-right">
+          <h4 class="font-extrabold text-lg sm:text-xl bg-gradient-to-r from-[#10b981] to-[#0ea5e9] bg-clip-text text-transparent leading-8">
+            ${escapeHTML(p.title)}
+          </h4>
+          <div class="popular-card-location flex flex-row-reverse items-center justify-end gap-2 text-sm text-gray-700 font-bold">
+            <svg width="18" height="18" fill="none" viewBox="0 0 22 22">
+              <circle cx="11" cy="11" r="10" fill="#e0f7fa"/>
+              <path d="M11 2.5C7.13 2.5 4 5.61 4 9.45c0 3.52 4.1 7.93 6.2 10.01.46.47 1.2.47 1.66 0 2.1-2.08 6.14-6.49 6.14-10.01C18 5.61 14.87 2.5 11 2.5Z" fill="#10b981"/>
+              <circle cx="11" cy="9" r="2.5" fill="#0ea5e9"/>
+            </svg>
+            <span class="truncate">${escapeHTML(loc)}</span>
+          </div>
+          <div class="popular-card-price inline-flex items-center justify-center bg-gradient-to-r from-[#10b981]/10 to-[#0ea5e9]/10 px-4 py-1 rounded-full text-[#10b981] font-extrabold text-base shadow-sm">
+            ${escapeHTML(priceText)}
+          </div>
         </div>
-        <div class="inline-block bg-gradient-to-r from-[#10b981]/10 to-[#0ea5e9]/10 px-4 py-1 rounded-full text-[#10b981] font-extrabold text-base shadow-sm">
-          ${escapeHTML(priceText)}
+        <div class="popular-card-footer w-full">
+          <button class="card-action-btn w-full justify-center" onclick="event.stopPropagation();">
+            مشاهده
+            <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/>
+            </svg>
+          </button>
         </div>
-        <button class="card-action-btn" onclick="event.stopPropagation();">
-          مشاهده
-          <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/>
-          </svg>
-        </button>
       `;
       slider.appendChild(card);
     });
