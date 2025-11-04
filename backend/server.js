@@ -13,6 +13,7 @@ const paymentRoutes = require('./routes/payment');
 const settingsRoutes = require('./routes/settings');
 const accountantRoutes = require('./routes/accountant');
 const categoryRoutes = require('./routes/categoryRoutes');
+const securityRoutes = require('./routes/security');
 require('dotenv').config();
 
 const app = express();
@@ -82,6 +83,7 @@ app.use('/api/payment', paymentRoutes);  // روت‌های پرداخت
 app.use('/api/branding', require('./routes/branding'));
 app.use('/api/settings', settingsRoutes);
 app.use('/api/accountant', accountantRoutes);
+app.use('/api/security', securityRoutes);
 
 // Booking routes
 app.use('/api', require('./routes/bookingRoutes'));
