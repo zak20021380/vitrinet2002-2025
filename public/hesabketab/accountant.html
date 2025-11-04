@@ -21,6 +21,7 @@
   <link href="https://cdn.jsdelivr.net/npm/remixicon@4.3.0/fonts/remixicon.css" rel="stylesheet" />
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
   <link rel="stylesheet" href="css/accountant.min.css" />
+  <link rel="stylesheet" href="css/accountant-overrides.css" />
   <script src="/nav-active.js" defer></script>
   <script src="js/accountant.js" defer></script>
 </head>
@@ -33,9 +34,15 @@
       <h1 id="sellerName">فروشنده عزیز</h1>
       <p>دفتر حسابداری</p>
     </div>
-    <button class="theme-toggle-modern" id="themeToggle" type="button" aria-label="تغییر تم">
-      <i class="ri-sun-line"></i>
-    </button>
+    <div class="header-actions">
+      <button class="header-calculator-btn" id="calculatorQuickAccess" type="button">
+        <i class="ri-calculator-line" aria-hidden="true"></i>
+        <span>ماشین حساب</span>
+      </button>
+      <button class="theme-toggle-modern" id="themeToggle" type="button" aria-label="تغییر تم">
+        <i class="ri-sun-line"></i>
+      </button>
+    </div>
   </header>
 
   <main class="modern-container">
@@ -265,47 +272,43 @@
 
         <div class="calculator-body">
           <div class="calculator-display">
+            <span class="calc-label">عبارت جاری</span>
             <div class="calc-expression" id="calcExpression">0</div>
+            <span class="calc-label calc-label-result">نتیجه</span>
             <div class="calc-result" id="calcResult">0</div>
           </div>
 
-          <div class="calculator-buttons">
-            <button type="button" class="calc-btn calc-btn-function" data-action="clear">C</button>
-            <button type="button" class="calc-btn calc-btn-function" data-action="backspace">
-              <i class="ri-arrow-go-back-line"></i>
+          <div class="calculator-buttons calculator-grid">
+            <button type="button" class="calc-btn calc-btn-function" data-action="clear">پاک کردن</button>
+            <button type="button" class="calc-btn calc-btn-function" data-action="backspace" aria-label="حذف رقم آخر">
+              <i class="ri-arrow-go-back-line" aria-hidden="true"></i>
             </button>
-            <button type="button" class="calc-btn calc-btn-function" data-action="percent">%</button>
             <button type="button" class="calc-btn calc-btn-operator" data-action="divide">÷</button>
+            <button type="button" class="calc-btn calc-btn-operator" data-action="multiply">×</button>
 
             <button type="button" class="calc-btn calc-btn-number" data-value="7">۷</button>
             <button type="button" class="calc-btn calc-btn-number" data-value="8">۸</button>
             <button type="button" class="calc-btn calc-btn-number" data-value="9">۹</button>
-            <button type="button" class="calc-btn calc-btn-operator" data-action="multiply">×</button>
+            <button type="button" class="calc-btn calc-btn-operator" data-action="subtract">−</button>
 
             <button type="button" class="calc-btn calc-btn-number" data-value="4">۴</button>
             <button type="button" class="calc-btn calc-btn-number" data-value="5">۵</button>
             <button type="button" class="calc-btn calc-btn-number" data-value="6">۶</button>
-            <button type="button" class="calc-btn calc-btn-operator" data-action="subtract">−</button>
+            <button type="button" class="calc-btn calc-btn-operator" data-action="add">+</button>
 
             <button type="button" class="calc-btn calc-btn-number" data-value="1">۱</button>
             <button type="button" class="calc-btn calc-btn-number" data-value="2">۲</button>
             <button type="button" class="calc-btn calc-btn-number" data-value="3">۳</button>
-            <button type="button" class="calc-btn calc-btn-operator" data-action="add">+</button>
-
-            <button type="button" class="calc-btn calc-btn-number" data-value="00">۰۰</button>
-            <button type="button" class="calc-btn calc-btn-number" data-value="0">۰</button>
-            <button type="button" class="calc-btn calc-btn-number" data-value=".">.</button>
             <button type="button" class="calc-btn calc-btn-equals" data-action="equals">=</button>
+
+            <button type="button" class="calc-btn calc-btn-number calc-btn-zero" data-value="0">۰</button>
+            <button type="button" class="calc-btn calc-btn-number" data-value=".">.</button>
           </div>
 
           <div class="calculator-actions">
-            <button type="button" class="calc-action-btn calc-action-copy" id="calcCopy">
-              <i class="ri-file-copy-line"></i>
-              کپی نتیجه
-            </button>
             <button type="button" class="calc-action-btn calc-action-use" id="calcUse">
-              <i class="ri-check-line"></i>
-              استفاده در فرم
+              <i class="ri-check-line" aria-hidden="true"></i>
+              استفاده از مبلغ
             </button>
           </div>
         </div>

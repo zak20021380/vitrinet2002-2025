@@ -117,6 +117,7 @@
     // Calculator elements
     calculatorModal: document.getElementById('calculatorModal'),
     calculatorTrigger: document.getElementById('calculatorTrigger'),
+    calculatorQuickAccess: document.getElementById('calculatorQuickAccess'),
     calculatorClose: document.getElementById('calculatorClose'),
     calcExpression: document.getElementById('calcExpression'),
     calcResult: document.getElementById('calcResult'),
@@ -1139,12 +1140,20 @@
       elements.advancedToggle.addEventListener('click', toggleAdvanced);
     }
 
-    // Calculator trigger
-    if (elements.calculatorTrigger) {
-      elements.calculatorTrigger.addEventListener('click', (e) => {
+    // Calculator triggers
+    const openCalculator = (e) => {
+      if (e) {
         e.preventDefault();
-        openCalculatorModal();
-      });
+      }
+      openCalculatorModal();
+    };
+
+    if (elements.calculatorTrigger) {
+      elements.calculatorTrigger.addEventListener('click', openCalculator);
+    }
+
+    if (elements.calculatorQuickAccess) {
+      elements.calculatorQuickAccess.addEventListener('click', openCalculator);
     }
 
     // Calculator close
