@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="fa" dir="rtl">
 <head>
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdn.tailwindcss.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; connect-src 'self'; img-src 'self' data:; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; upgrade-insecure-requests; block-all-mixed-content">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdn.tailwindcss.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.jsdelivr.net; font-src 'self' https://fonts.gstatic.com https://cdn.jsdelivr.net; connect-src 'self'; img-src 'self' data:; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; upgrade-insecure-requests; block-all-mixed-content">
 <meta http-equiv="Strict-Transport-Security" content="max-age=63072000; includeSubDomains; preload">
 <meta http-equiv="X-Frame-Options" content="DENY">
 <meta http-equiv="Referrer-Policy" content="no-referrer">
@@ -9,450 +9,396 @@
 <meta http-equiv="X-XSS-Protection" content="1; mode=block">
 <meta name="referrer" content="no-referrer">
 <meta http-equiv="Permissions-Policy" content="geolocation=(), microphone=(), camera=()">
-    <script src="/security.js" defer></script>
+  <script src="/security.js" defer></script>
 
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0" />
   <title>دفتر حسابداری فروشگاه</title>
-  <meta name="description" content="ثبت و مدیریت تراکنش‌های مالی فروشنده" />
+  <meta name="description" content="مدیریت آسان درآمد و هزینه فروشگاه" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
   <link href="https://cdn.jsdelivr.net/npm/remixicon@4.3.0/fonts/remixicon.css" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
   <link rel="stylesheet" href="css/accountant.min.css" />
   <script src="/nav-active.js" defer></script>
   <script src="js/accountant.js" defer></script>
 </head>
 <body>
-  <div class="page">
-    <header class="page-header">
-      <div class="header-intro">
-        <span class="header-badge">حسابداری فروشگاه</span>
-        <h1>
-          سلام <span id="sellerName">فروشنده عزیز</span>
-          <span aria-hidden="true">👋</span>
-        </h1>
-        <p>تراکنش‌های مالی خود را در این بخش ثبت، ذخیره و پیگیری کنید.</p>
-      </div>
-      <div class="header-actions">
-        <button class="back-btn" id="backToDashboard" type="button">
-          <i class="ri-arrow-right-line" aria-hidden="true"></i>
-          بازگشت به پنل فروشنده
-        </button>
-      </div>
-    </header>
+  <header class="modern-header">
+    <button class="back-btn-modern" id="backToDashboard" type="button" aria-label="بازگشت به پنل">
+      <i class="ri-arrow-right-line"></i>
+    </button>
+    <div class="header-info">
+      <h1 id="sellerName">فروشنده عزیز</h1>
+      <p>دفتر حسابداری</p>
+    </div>
+    <button class="theme-toggle-modern" id="themeToggle" type="button" aria-label="تغییر تم">
+      <i class="ri-sun-line"></i>
+    </button>
+  </header>
 
-    <main class="page-content">
-      <section class="card" id="newEntrySection">
-        <div class="card-title">
-          <i class="ri-add-circle-line" aria-hidden="true"></i>
-          <h2>ثبت تراکنش جدید</h2>
+  <main class="modern-container">
+    <section class="summary-section" id="dashboardSection">
+      <div class="summary-card summary-income">
+        <div class="summary-icon">
+          <i class="ri-arrow-down-circle-line"></i>
         </div>
-        <p class="card-subtitle">تمام اطلاعات شما در پایگاه داده امن ذخیره شده و در گزارش‌ها قابل مشاهده است.</p>
+        <div class="summary-content">
+          <span class="summary-label">کل درآمد</span>
+          <strong class="summary-value" id="totalIncome">۰ تومان</strong>
+        </div>
+      </div>
+
+      <div class="summary-card summary-expense">
+        <div class="summary-icon">
+          <i class="ri-arrow-up-circle-line"></i>
+        </div>
+        <div class="summary-content">
+          <span class="summary-label">کل هزینه</span>
+          <strong class="summary-value" id="totalExpense">۰ تومان</strong>
+        </div>
+      </div>
+
+      <div class="summary-card summary-balance">
+        <div class="summary-icon">
+          <i class="ri-wallet-3-line"></i>
+        </div>
+        <div class="summary-content">
+          <span class="summary-label">سود خالص</span>
+          <strong class="summary-value" id="totalBalance">۰ تومان</strong>
+        </div>
+      </div>
+    </section>
+
+    <section class="stats-section">
+      <div class="stat-box stat-pending">
+        <i class="ri-time-line"></i>
+        <div>
+          <strong id="pendingAmount">۰</strong>
+          <span>در انتظار</span>
+        </div>
+      </div>
+      <div class="stat-box stat-overdue">
+        <i class="ri-alarm-warning-line"></i>
+        <div>
+          <strong id="overdueAmount">۰</strong>
+          <span>سررسید گذشته</span>
+        </div>
+      </div>
+      <div class="stat-box stat-paid">
+        <i class="ri-checkbox-circle-line"></i>
+        <div>
+          <strong id="paidCount">۰</strong>
+          <span>تسویه شده</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="charts-section">
+      <div class="chart-card">
+        <h3><i class="ri-pie-chart-line"></i> توزیع دسته‌بندی‌ها</h3>
+        <canvas id="categoryChart"></canvas>
+      </div>
+      <div class="chart-card">
+        <h3><i class="ri-bar-chart-line"></i> روش‌های پرداخت</h3>
+        <canvas id="paymentChart"></canvas>
+      </div>
+    </section>
+
+    <button class="fab-button" id="fabAdd" type="button" aria-label="ثبت تراکنش جدید">
+      <i class="ri-add-line"></i>
+    </button>
+
+    <div class="modal-overlay" id="addModal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2><i class="ri-add-circle-line"></i> ثبت تراکنش جدید</h2>
+          <button class="modal-close" id="modalClose" type="button" aria-label="بستن">
+            <i class="ri-close-line"></i>
+          </button>
+        </div>
+        
         <form id="entryForm" novalidate>
-          <div class="form-grid">
-            <label class="form-field">
-              <span>عنوان تراکنش <span class="required">*</span></span>
-              <input type="text" name="title" placeholder="مثال: فروش نقدی امروز" required />
-            </label>
-            <label class="form-field">
-              <span>نوع تراکنش</span>
-              <div class="type-options" role="radiogroup">
-                <label>
-                  <input type="radio" name="type" value="income" checked />
-                  <span>درآمد</span>
-                </label>
-                <label>
-                  <input type="radio" name="type" value="expense" />
-                  <span>هزینه</span>
-                </label>
+          <div class="type-selector">
+            <label class="type-option type-income">
+              <input type="radio" name="type" value="income" checked />
+              <div class="type-content">
+                <i class="ri-arrow-down-circle-line"></i>
+                <span>درآمد</span>
               </div>
             </label>
-            <label class="form-field">
+            <label class="type-option type-expense">
+              <input type="radio" name="type" value="expense" />
+              <div class="type-content">
+                <i class="ri-arrow-up-circle-line"></i>
+                <span>هزینه</span>
+              </div>
+            </label>
+          </div>
+
+          <div class="form-group">
+            <label>
+              <span>عنوان تراکنش <span class="required">*</span></span>
+              <input type="text" name="title" placeholder="مثال: فروش امروز" required />
+            </label>
+          </div>
+
+          <div class="form-group">
+            <label>
               <span>مبلغ (تومان) <span class="required">*</span></span>
-              <input type="number" name="amount" min="0" step="1000" placeholder="مثال: 2500000" required />
-            </label>
-            <label class="form-field">
-              <span>تاریخ ثبت</span>
-              <input type="date" name="recordedAt" />
-            </label>
-          </div>
-
-          <div class="form-grid form-grid--balanced">
-            <label class="form-field">
-              <span>دسته‌بندی تراکنش</span>
-              <select name="category">
-                <option value="عمومی">عمومی</option>
-                <option value="فروش محصول">فروش محصول</option>
-                <option value="هزینه ثابت">هزینه ثابت</option>
-                <option value="هزینه متغیر">هزینه متغیر</option>
-                <option value="حقوق و دستمزد">حقوق و دستمزد</option>
-                <option value="تبلیغات و بازاریابی">تبلیغات و بازاریابی</option>
-                <option value="هزینه انبار">هزینه انبار</option>
-                <option value="سایر">سایر</option>
-              </select>
-            </label>
-            <label class="form-field">
-              <span>روش پرداخت</span>
-              <select name="paymentMethod">
-                <option value="cash">نقدی</option>
-                <option value="card">دستگاه کارتخوان</option>
-                <option value="transfer">کارت به کارت / حواله</option>
-                <option value="online">پرداخت آنلاین</option>
-                <option value="cheque">چک</option>
-                <option value="other">سایر</option>
-              </select>
-            </label>
-            <label class="form-field">
-              <span>وضعیت پرداخت</span>
-              <select name="status">
-                <option value="paid">تسویه شده</option>
-                <option value="pending">در انتظار پرداخت</option>
-                <option value="overdue">سررسید گذشته</option>
-                <option value="refunded">مرجوعی / بازگشتی</option>
-              </select>
-            </label>
-            <label class="form-field">
-              <span>تاریخ سررسید</span>
-              <input type="date" name="dueDate" />
+              <div class="input-with-calculator">
+                <input type="number" name="amount" id="amountInput" min="0" step="1000" placeholder="۱۰۰۰۰۰" required />
+                <button type="button" class="calculator-trigger" id="calculatorTrigger" aria-label="ماشین حساب">
+                  <i class="ri-calculator-line"></i>
+                </button>
+              </div>
             </label>
           </div>
 
-          <div class="form-grid form-grid--balanced">
-            <label class="form-field">
-              <span>نوع طرف حساب</span>
-              <select name="counterpartyType">
-                <option value="customer">مشتری</option>
-                <option value="supplier">تأمین‌کننده</option>
-                <option value="other">سایر</option>
-              </select>
-            </label>
-            <label class="form-field">
-              <span>نام طرف حساب</span>
-              <input type="text" name="counterpartyName" placeholder="مثال: علی رضایی" />
-            </label>
-            <label class="form-field">
-              <span>شماره مرجع / فاکتور</span>
-              <input type="text" name="referenceNumber" placeholder="مثال: INV-4582" />
-            </label>
-            <label class="form-field">
-              <span>برچسب‌ها</span>
-              <input type="text" name="tags" placeholder="مثال: قسط، فروش ویژه" />
-              <small class="field-hint">برچسب‌ها را با ویرگول یا کاما جدا کنید (حداکثر ۸ مورد).</small>
-            </label>
+          <div class="form-row">
+            <div class="form-group">
+              <label>
+                <span>دسته‌بندی</span>
+                <select name="category">
+                  <option value="فروش محصول">فروش محصول</option>
+                  <option value="هزینه ثابت">هزینه ثابت</option>
+                  <option value="حقوق و دستمزد">حقوق و دستمزد</option>
+                  <option value="تبلیغات">تبلیغات</option>
+                  <option value="خرید کالا">خرید کالا</option>
+                  <option value="عمومی">عمومی</option>
+                </select>
+              </label>
+            </div>
+            <div class="form-group">
+              <label>
+                <span>روش پرداخت</span>
+                <select name="paymentMethod">
+                  <option value="cash">نقدی</option>
+                  <option value="card">کارتخوان</option>
+                  <option value="transfer">کارت به کارت</option>
+                  <option value="online">آنلاین</option>
+                  <option value="cheque">چک</option>
+                </select>
+              </label>
+            </div>
           </div>
 
-          <label class="form-field">
-            <span>توضیحات تکمیلی</span>
-            <textarea name="description" rows="3" placeholder="جزئیات بیشتر (اختیاری)"></textarea>
-          </label>
+          <button type="button" class="advanced-toggle" id="advancedToggle">
+            <i class="ri-arrow-down-s-line"></i>
+            <span>اطلاعات بیشتر (اختیاری)</span>
+          </button>
 
-          <div class="form-helper" role="note">
-            <i class="ri-lightbulb-flash-line" aria-hidden="true"></i>
-            <p>برای مدیریت بهتر گزارش‌ها، حتماً دسته‌بندی و وضعیت پرداخت را دقیق انتخاب کنید تا در خلاصه‌ها و سررسیدها نمایش داده شود.</p>
+          <div class="advanced-fields" id="advancedFields">
+            <div class="form-row">
+              <div class="form-group">
+                <label>
+                  <span>تاریخ ثبت</span>
+                  <input type="date" name="recordedAt" />
+                </label>
+              </div>
+              <div class="form-group">
+                <label>
+                  <span>وضعیت</span>
+                  <select name="status">
+                    <option value="paid">تسویه شده</option>
+                    <option value="pending">در انتظار</option>
+                    <option value="overdue">سررسید گذشته</option>
+                  </select>
+                </label>
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label>
+                  <span>نام طرف حساب</span>
+                  <input type="text" name="counterpartyName" placeholder="نام مشتری یا تامین‌کننده" />
+                </label>
+              </div>
+              <div class="form-group">
+                <label>
+                  <span>شماره فاکتور</span>
+                  <input type="text" name="referenceNumber" placeholder="INV-123" />
+                </label>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label>
+                <span>تاریخ سررسید</span>
+                <input type="date" name="dueDate" />
+              </label>
+            </div>
+
+            <div class="form-group">
+              <label>
+                <span>توضیحات</span>
+                <textarea name="description" rows="3" placeholder="جزئیات بیشتر (اختیاری)"></textarea>
+              </label>
+            </div>
+
+            <input type="hidden" name="counterpartyType" value="customer" />
+            <input type="hidden" name="tags" value="" />
           </div>
+
+          <p class="form-message" id="formMessage" role="alert"></p>
 
           <div class="form-actions">
-            <button type="submit" class="primary-btn">
-              <i class="ri-save-3-line" aria-hidden="true"></i>
+            <button type="submit" class="btn-primary">
+              <i class="ri-save-line"></i>
               ذخیره تراکنش
             </button>
           </div>
-          <p class="form-message" id="formMessage" role="alert" aria-live="polite"></p>
         </form>
-      </section>
+      </div>
+    </div>
 
-      <section class="card" id="filtersSection">
-        <div class="card-title">
-          <i class="ri-equalizer-line" aria-hidden="true"></i>
-          <h2>فیلتر و جستجوی تراکنش‌ها</h2>
+    <div class="modal-overlay" id="calculatorModal">
+      <div class="calculator-wrapper">
+        <div class="calculator-header">
+          <h3><i class="ri-calculator-line"></i> ماشین حساب</h3>
+          <button class="calculator-close" id="calculatorClose" type="button" aria-label="بستن">
+            <i class="ri-close-line"></i>
+          </button>
         </div>
-        <p class="card-subtitle">با استفاده از فیلترهای زیر گزارش‌ها را دقیق‌تر بررسی کنید.</p>
+
+        <div class="calculator-body">
+          <div class="calculator-display">
+            <div class="calc-expression" id="calcExpression">0</div>
+            <div class="calc-result" id="calcResult">0</div>
+          </div>
+
+          <div class="calculator-buttons">
+            <button type="button" class="calc-btn calc-btn-function" data-action="clear">C</button>
+            <button type="button" class="calc-btn calc-btn-function" data-action="backspace">
+              <i class="ri-arrow-go-back-line"></i>
+            </button>
+            <button type="button" class="calc-btn calc-btn-function" data-action="percent">%</button>
+            <button type="button" class="calc-btn calc-btn-operator" data-action="divide">÷</button>
+
+            <button type="button" class="calc-btn calc-btn-number" data-value="7">۷</button>
+            <button type="button" class="calc-btn calc-btn-number" data-value="8">۸</button>
+            <button type="button" class="calc-btn calc-btn-number" data-value="9">۹</button>
+            <button type="button" class="calc-btn calc-btn-operator" data-action="multiply">×</button>
+
+            <button type="button" class="calc-btn calc-btn-number" data-value="4">۴</button>
+            <button type="button" class="calc-btn calc-btn-number" data-value="5">۵</button>
+            <button type="button" class="calc-btn calc-btn-number" data-value="6">۶</button>
+            <button type="button" class="calc-btn calc-btn-operator" data-action="subtract">−</button>
+
+            <button type="button" class="calc-btn calc-btn-number" data-value="1">۱</button>
+            <button type="button" class="calc-btn calc-btn-number" data-value="2">۲</button>
+            <button type="button" class="calc-btn calc-btn-number" data-value="3">۳</button>
+            <button type="button" class="calc-btn calc-btn-operator" data-action="add">+</button>
+
+            <button type="button" class="calc-btn calc-btn-number" data-value="00">۰۰</button>
+            <button type="button" class="calc-btn calc-btn-number" data-value="0">۰</button>
+            <button type="button" class="calc-btn calc-btn-number" data-value=".">.</button>
+            <button type="button" class="calc-btn calc-btn-equals" data-action="equals">=</button>
+          </div>
+
+          <div class="calculator-actions">
+            <button type="button" class="calc-action-btn calc-action-copy" id="calcCopy">
+              <i class="ri-file-copy-line"></i>
+              کپی نتیجه
+            </button>
+            <button type="button" class="calc-action-btn calc-action-use" id="calcUse">
+              <i class="ri-check-line"></i>
+              استفاده در فرم
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <section class="transactions-section" id="transactionsSection">
+      <div class="section-header">
+        <h2><i class="ri-file-list-3-line"></i> تراکنش‌های اخیر</h2>
+        <button class="btn-filter" id="filterToggle" type="button">
+          <i class="ri-filter-3-line"></i>
+          فیلتر
+        </button>
+      </div>
+
+      <div class="filters-panel" id="filtersPanel">
         <form id="filtersForm">
-          <div class="filters-grid">
-            <label class="form-field">
-              <span>جستجوی سریع</span>
-              <input type="search" name="search" id="searchQuery" placeholder="جستجو بر اساس عنوان، طرف حساب یا برچسب" />
-            </label>
-            <label class="form-field">
-              <span>نوع تراکنش</span>
-              <select name="type">
-                <option value="">همه</option>
-                <option value="income">درآمد</option>
-                <option value="expense">هزینه</option>
-              </select>
-            </label>
-            <label class="form-field">
-              <span>دسته‌بندی</span>
-              <select name="category">
-                <option value="">همه دسته‌ها</option>
-                <option value="عمومی">عمومی</option>
-                <option value="فروش محصول">فروش محصول</option>
-                <option value="هزینه ثابت">هزینه ثابت</option>
-                <option value="هزینه متغیر">هزینه متغیر</option>
-                <option value="حقوق و دستمزد">حقوق و دستمزد</option>
-                <option value="تبلیغات و بازاریابی">تبلیغات و بازاریابی</option>
-                <option value="هزینه انبار">هزینه انبار</option>
-                <option value="سایر">سایر</option>
-              </select>
-            </label>
-            <label class="form-field">
-              <span>روش پرداخت</span>
-              <select name="paymentMethod">
-                <option value="">همه روش‌ها</option>
-                <option value="cash">نقدی</option>
-                <option value="card">دستگاه کارتخوان</option>
-                <option value="transfer">کارت به کارت / حواله</option>
-                <option value="online">پرداخت آنلاین</option>
-                <option value="cheque">چک</option>
-                <option value="other">سایر</option>
-              </select>
-            </label>
-            <label class="form-field">
-              <span>وضعیت پرداخت</span>
-              <select name="status">
-                <option value="">همه وضعیت‌ها</option>
-                <option value="paid">تسویه شده</option>
-                <option value="pending">در انتظار پرداخت</option>
-                <option value="overdue">سررسید گذشته</option>
-                <option value="refunded">مرجوعی / بازگشتی</option>
-              </select>
-            </label>
-            <label class="form-field">
-              <span>از تاریخ</span>
-              <input type="date" name="from" />
-            </label>
-            <label class="form-field">
-              <span>تا تاریخ</span>
-              <input type="date" name="to" />
-            </label>
+          <div class="filter-row">
+            <input type="search" name="search" id="searchQuery" placeholder="جستجو..." />
+            <select name="type">
+              <option value="">همه انواع</option>
+              <option value="income">درآمد</option>
+              <option value="expense">هزینه</option>
+            </select>
+          </div>
+          <div class="filter-row">
+            <select name="category">
+              <option value="">همه دسته‌ها</option>
+              <option value="فروش محصول">فروش محصول</option>
+              <option value="هزینه ثابت">هزینه ثابت</option>
+              <option value="حقوق و دستمزد">حقوق و دستمزد</option>
+              <option value="تبلیغات">تبلیغات</option>
+              <option value="خرید کالا">خرید کالا</option>
+            </select>
+            <select name="status">
+              <option value="">همه وضعیت‌ها</option>
+              <option value="paid">تسویه شده</option>
+              <option value="pending">در انتظار</option>
+              <option value="overdue">سررسید گذشته</option>
+            </select>
           </div>
           <div class="filter-actions">
-            <button type="submit" class="primary-btn">
-              <i class="ri-filter-3-line" aria-hidden="true"></i>
-              اعمال فیلترها
-            </button>
-            <button type="reset" class="ghost-btn" id="resetFilters">
-              <i class="ri-refresh-line" aria-hidden="true"></i>
-              پاک‌سازی فیلترها
-            </button>
+            <button type="submit" class="btn-apply">اعمال</button>
+            <button type="reset" class="btn-reset" id="resetFilters">پاک کردن</button>
           </div>
+          <input type="hidden" name="from" />
+          <input type="hidden" name="to" />
+          <input type="hidden" name="paymentMethod" />
         </form>
-      </section>
+      </div>
 
-      <section class="card card--feature" id="quickActionsSection">
-        <div class="card-title">
-          <i class="ri-flashlight-line" aria-hidden="true"></i>
-          <h2>میانبرهای هوشمند فروشگاهی</h2>
-        </div>
-        <p class="card-subtitle">
-          برای مدیریت سریع امور روزانه فروشگاه، از ابزارهای حرفه‌ای زیر استفاده کنید.
-        </p>
-        <div class="feature-grid">
-          <article class="feature-tile">
-            <i class="ri-calculator-line" aria-hidden="true"></i>
-            <div>
-              <h3>محاسبه‌گر سود و زیان روزانه</h3>
-              <p>به سرعت سود ناخالص هر روز را بر اساس تراکنش‌های درآمد و هزینه بسنجید.</p>
-            </div>
-            <button type="button" class="feature-action" data-action="open-profit">
-              شروع تحلیل
-            </button>
-          </article>
-          <article class="feature-tile">
-            <i class="ri-store-2-line" aria-hidden="true"></i>
-            <div>
-              <h3>سینک موجودی با انبار</h3>
-              <p>گزارش فروش و خرید را با انبار همگام کنید تا کمبود کالا را پیش‌بینی کنید.</p>
-            </div>
-            <button type="button" class="feature-action" data-action="sync-inventory">
-              همگام‌سازی
-            </button>
-          </article>
-          <article class="feature-tile">
-            <i class="ri-coin-line" aria-hidden="true"></i>
-            <div>
-              <h3>یادآور سررسید بدهی و چک</h3>
-              <p>برای چک‌ها و بدهی‌ها اعلان تنظیم کنید و قبل از سررسید پیام یادآوری دریافت کنید.</p>
-            </div>
-            <button type="button" class="feature-action" data-action="create-reminder">
-              ساخت یادآور
-            </button>
-          </article>
-          <article class="feature-tile">
-            <i class="ri-user-star-line" aria-hidden="true"></i>
-            <div>
-              <h3>تحلیل عملکرد مشتریان وفادار</h3>
-              <p>بهترین مشتریان را بر اساس خرید دوره‌ای بشناسید و کمپین ویژه طراحی کنید.</p>
-            </div>
-            <button type="button" class="feature-action" data-action="segment-customers">
-              مشاهده گزارش
-            </button>
-          </article>
-        </div>
-      </section>
+      <div class="active-filters" id="activeFilters"></div>
 
-      <section class="card card--feature" id="advisorSection">
-        <div class="card-title">
-          <i class="ri-magic-line" aria-hidden="true"></i>
-          <h2>دستیار مالی هوشمند</h2>
+      <div class="transactions-list" id="transactionsList">
+        <div id="entriesBody"></div>
+        <div class="empty-state" id="emptyState">
+          <i class="ri-inbox-line"></i>
+          <p>هنوز تراکنشی ثبت نشده</p>
+          <button class="btn-empty-add" onclick="document.getElementById('fabAdd').click()">
+            <i class="ri-add-line"></i>
+            ثبت اولین تراکنش
+          </button>
         </div>
-        <p class="card-subtitle">
-          پیشنهادهای تخصصی برای رشد فروشگاه شما بر اساس الگوهای فروش و هزینه‌ها.
-        </p>
-        <div class="advisor-grid">
-          <article class="advisor-tip">
-            <h3>بودجه‌بندی فصل آینده</h3>
-            <p>
-              بر اساس روند سه ماه گذشته، سقف هزینه هر دسته را تعیین کنید تا جریان نقدینگی منفی نشود.
-            </p>
-            <ul>
-              <li>تعیین سقف هزینه تبلیغات و بازاریابی</li>
-              <li>پیشنهاد خرید عمده برای کالاهای پرفروش</li>
-              <li>برآورد دقیق نقدینگی در پایان ماه</li>
-            </ul>
-          </article>
-          <article class="advisor-tip">
-            <h3>تحلیل جریان نقد</h3>
-            <p>
-              با تطبیق سررسید دریافت‌ها و پرداخت‌ها، کمبود نقدینگی را ۱۰ روز قبل شناسایی کنید.
-            </p>
-            <ul>
-              <li>یادآوری خودکار برای دریافت از مشتریان عمده</li>
-              <li>پیشنهاد تقسیط برای بدهی‌های سنگین</li>
-              <li>گزارش روزانه از وضعیت نقدینگی</li>
-            </ul>
-          </article>
-          <article class="advisor-tip">
-            <h3>پشتیبانی مالیاتی</h3>
-            <p>
-              اسناد فروش و خرید را دسته‌بندی کنید تا در پایان فصل گزارش مالیاتی آماده داشته باشید.
-            </p>
-            <ul>
-              <li>تولید فایل خروجی اکسل برای حسابرس</li>
-              <li>ثبت سریع فاکتورهای خرید و هزینه</li>
-              <li>گزارش تجمیعی ارزش افزوده</li>
-            </ul>
-          </article>
-        </div>
-      </section>
+      </div>
 
-      <section class="card" id="reportsSection">
-        <div class="card-title">
-          <i class="ri-file-list-3-line" aria-hidden="true"></i>
-          <h2>گزارش تراکنش‌های ثبت شده</h2>
-        </div>
-        <p class="card-subtitle">گزارش زیر بر اساس داده‌های ذخیره شده در بک‌اند تولید شده است.</p>
-        <div class="totals-grid">
-          <div class="total-box total-income">
-            <span class="total-label">کل درآمد</span>
-            <strong id="totalIncome">۰ تومان</strong>
-          </div>
-          <div class="total-box total-expense">
-            <span class="total-label">کل هزینه</span>
-            <strong id="totalExpense">۰ تومان</strong>
-          </div>
-          <div class="total-box total-balance">
-            <span class="total-label">مانده شما</span>
-            <strong id="totalBalance">۰ تومان</strong>
-          </div>
-        </div>
+      <div style="display: none;">
+        <span id="totalEntriesCount">0</span>
+        <span id="pendingCount">0</span>
+        <span id="overdueCount">0</span>
+        <span id="paidAmount">0</span>
+        <div id="categoryBreakdown"></div>
+        <div id="paymentBreakdown"></div>
+        <div id="upcomingDueList"></div>
+        <table class="entries-table"><tbody></tbody></table>
+      </div>
+    </section>
 
-        <div class="status-summary">
-          <div class="status-box status-pending">
-            <span class="status-label">در انتظار تسویه</span>
-            <strong id="pendingAmount">۰ تومان</strong>
-            <small><span id="pendingCount">۰</span> تراکنش</small>
-          </div>
-          <div class="status-box status-overdue">
-            <span class="status-label">سررسید گذشته</span>
-            <strong id="overdueAmount">۰ تومان</strong>
-            <small><span id="overdueCount">۰</span> تراکنش</small>
-          </div>
-          <div class="status-box status-paid">
-            <span class="status-label">تسویه شده</span>
-            <strong id="paidAmount">۰ تومان</strong>
-            <small><span id="paidCount">۰</span> تراکنش</small>
-          </div>
-        </div>
+  </main>
 
-        <div class="active-filters" id="activeFilters" aria-live="polite"></div>
-        <p class="entries-count">در حال نمایش <strong id="totalEntriesCount">۰</strong> تراکنش ثبت شده.</p>
+  <nav class="bottom-nav" aria-label="ناوبری اصلی">
+    <button class="nav-item is-active" type="button" data-action="dashboard">
+      <i class="ri-dashboard-line"></i>
+      <span>خانه</span>
+    </button>
+    <button class="nav-item" type="button" data-action="add">
+      <i class="ri-add-circle-line"></i>
+      <span>ثبت</span>
+    </button>
+    <button class="nav-item" type="button" data-action="report">
+      <i class="ri-bar-chart-2-line"></i>
+      <span>گزارش</span>
+    </button>
+  </nav>
 
-        <div class="insights-grid">
-          <div class="insight-card">
-            <div class="insight-card__header">
-              <i class="ri-pie-chart-2-line" aria-hidden="true"></i>
-              <h3>دسته‌بندی‌های پرتکرار</h3>
-            </div>
-            <ul id="categoryBreakdown" class="insight-list"></ul>
-          </div>
-          <div class="insight-card">
-            <div class="insight-card__header">
-              <i class="ri-bank-card-line" aria-hidden="true"></i>
-              <h3>سهم روش‌های پرداخت</h3>
-            </div>
-            <ul id="paymentBreakdown" class="insight-list"></ul>
-          </div>
-          <div class="insight-card">
-            <div class="insight-card__header">
-              <i class="ri-timer-line" aria-hidden="true"></i>
-              <h3>سررسیدهای پیشِ‌رو</h3>
-            </div>
-            <ul id="upcomingDueList" class="insight-list insight-list--timeline"></ul>
-          </div>
-        </div>
-
-        <div class="table-wrapper">
-          <table class="entries-table">
-            <thead>
-              <tr>
-                <th>عنوان</th>
-                <th>نوع</th>
-                <th>دسته‌بندی</th>
-                <th>مبلغ</th>
-                <th>روش پرداخت</th>
-                <th>وضعیت</th>
-                <th>طرف حساب</th>
-                <th>شماره مرجع</th>
-                <th>تاریخ ثبت</th>
-                <th>تاریخ سررسید</th>
-                <th>برچسب‌ها</th>
-                <th>توضیحات</th>
-              </tr>
-            </thead>
-            <tbody id="entriesBody"></tbody>
-          </table>
-          <div class="empty-state" id="emptyState">
-            <i class="ri-database-2-line" aria-hidden="true"></i>
-            <p>تراکنشی با شرایط فعلی پیدا نشد. فیلترها را تغییر دهید یا تراکنش جدید ثبت کنید.</p>
-          </div>
-        </div>
-      </section>
-    </main>
-
-    <nav class="bottom-toolbar" aria-label="ناوبری سریع حسابداری">
-      <button class="bottom-toolbar__button is-active" type="button" data-action="add">
-        <i class="ri-add-circle-line" aria-hidden="true"></i>
-        <span>ثبت تراکنش</span>
-      </button>
-      <button class="bottom-toolbar__button" type="button" data-action="shortcuts">
-        <i class="ri-flashlight-line" aria-hidden="true"></i>
-        <span>میانبرها</span>
-      </button>
-      <button class="bottom-toolbar__button" type="button" data-action="advisor">
-        <i class="ri-magic-line" aria-hidden="true"></i>
-        <span>دستیار</span>
-      </button>
-      <button class="bottom-toolbar__button" type="button" data-action="filters">
-        <i class="ri-equalizer-line" aria-hidden="true"></i>
-        <span>فیلترها</span>
-      </button>
-      <button class="bottom-toolbar__button" type="button" data-action="report">
-        <i class="ri-bar-chart-2-line" aria-hidden="true"></i>
-        <span>گزارش‌ها</span>
-      </button>
-    </nav>
-  </div>
 </body>
 </html>

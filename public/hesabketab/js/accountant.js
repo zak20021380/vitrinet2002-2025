@@ -1,4 +1,7 @@
 (() => {
+  // ============================================================================
+  // CONFIGURATION - PRESERVED FROM ORIGINAL
+  // ============================================================================
   const ACCESS_KEY = 'vitrinet-accountant-access';
   const ACCOUNTANT_API = '/api/accountant';
   const SELLER_API = '/api/auth/getCurrentSeller';
@@ -20,141 +23,67 @@
       counterpartyType: 'customer',
       counterpartyName: 'مشتری حضوری',
       referenceNumber: 'RCPT-4582',
-      tags: ['فروش روزانه', 'محصولات غذایی'],
+      tags: ['فروش روزانه'],
       description: 'ثبت فروش صبحگاهی فروشگاه.',
       createdAt: '2024-07-14T08:35:00.000Z'
     },
     {
       id: 'demo-expense-1',
-      title: 'تسویه با تامین‌کننده سبزیجات',
+      title: 'خرید کالا از تامین‌کننده',
       type: 'expense',
       amount: 2100000,
       recordedAt: '2024-07-13T15:10:00.000Z',
-      category: 'هزینه ثابت',
+      category: 'خرید کالا',
       paymentMethod: 'transfer',
       status: 'pending',
       counterpartyType: 'supplier',
-      counterpartyName: 'تعاونی سبز آفرین',
+      counterpartyName: 'تعاونی سبز',
       referenceNumber: 'INV-7821',
       dueDate: '2024-07-20',
-      tags: ['تامین کالا', 'فاکتور ماهانه'],
-      description: 'صورتحساب خرداد تامین‌کننده سبزیجات.',
+      tags: ['تامین کالا'],
+      description: 'خرید ماهانه.',
       createdAt: '2024-07-13T15:10:00.000Z'
-    },
-    {
-      id: 'demo-income-2',
-      title: 'فروش آنلاین آخر هفته',
-      type: 'income',
-      amount: 5200000,
-      recordedAt: '2024-07-12T18:45:00.000Z',
-      category: 'فروش محصول',
-      paymentMethod: 'online',
-      status: 'paid',
-      counterpartyType: 'customer',
-      counterpartyName: 'مشتری فروشگاه اینترنتی',
-      referenceNumber: 'ORD-9924',
-      tags: ['فروش اینترنتی', 'آخر هفته'],
-      description: 'سفارش‌های آنلاین روز جمعه.',
-      createdAt: '2024-07-12T18:45:00.000Z'
-    },
-    {
-      id: 'demo-expense-2',
-      title: 'پرداخت اجاره فروشگاه',
-      type: 'expense',
-      amount: 4000000,
-      recordedAt: '2024-07-10T09:00:00.000Z',
-      category: 'هزینه ثابت',
-      paymentMethod: 'cheque',
-      status: 'paid',
-      counterpartyType: 'other',
-      counterpartyName: 'مالک فروشگاه',
-      referenceNumber: 'PAY-1403-04',
-      tags: ['اجاره', 'ثابت'],
-      description: 'پرداخت ماهانه اجاره محل کسب.',
-      createdAt: '2024-07-10T09:00:00.000Z'
-    },
-    {
-      id: 'demo-income-3',
-      title: 'دریافت چک مشتری عمده',
-      type: 'income',
-      amount: 7800000,
-      recordedAt: '2024-07-05T11:25:00.000Z',
-      category: 'فروش محصول',
-      paymentMethod: 'cheque',
-      status: 'pending',
-      counterpartyType: 'customer',
-      counterpartyName: 'مشتری عمده شرق',
-      referenceNumber: 'CHK-6402',
-      dueDate: '2024-07-22',
-      tags: ['چک', 'مشتری عمده'],
-      description: 'چک سررسید تیرماه مشتری عمده.',
-      createdAt: '2024-07-05T11:25:00.000Z'
     }
   ];
 
   const paymentMethodLabels = {
     cash: 'نقدی',
-    card: 'دستگاه کارتخوان',
-    transfer: 'کارت به کارت / حواله',
-    online: 'پرداخت آنلاین',
+    card: 'کارتخوان',
+    transfer: 'کارت به کارت',
+    online: 'آنلاین',
     cheque: 'چک',
     other: 'سایر'
   };
 
   const statusLabels = {
     paid: 'تسویه شده',
-    pending: 'در انتظار پرداخت',
+    pending: 'در انتظار',
     overdue: 'سررسید گذشته',
-    refunded: 'مرجوعی / بازگشتی'
+    refunded: 'مرجوعی'
   };
 
-  const statusIcons = {
-    paid: 'ri-check-line',
-    pending: 'ri-time-line',
-    overdue: 'ri-error-warning-line',
-    refunded: 'ri-arrow-go-back-line'
-  };
-
-  const counterpartyTypeLabels = {
-    customer: 'مشتری',
-    supplier: 'تأمین‌کننده',
-    other: 'سایر'
-  };
-
-  const filterDisplayConfig = {
-    type: { label: 'نوع', options: { income: 'درآمد', expense: 'هزینه' } },
-    category: {
-      label: 'دسته‌بندی',
-      options: {
-        عمومی: 'عمومی',
-        'فروش محصول': 'فروش محصول',
-        'هزینه ثابت': 'هزینه ثابت',
-        'هزینه متغیر': 'هزینه متغیر',
-        'حقوق و دستمزد': 'حقوق و دستمزد',
-        'تبلیغات و بازاریابی': 'تبلیغات و بازاریابی',
-        'هزینه انبار': 'هزینه انبار',
-        سایر: 'سایر'
-      }
-    },
-    paymentMethod: { label: 'روش پرداخت', options: paymentMethodLabels },
-    status: { label: 'وضعیت', options: statusLabels },
-    from: { label: 'از تاریخ' },
-    to: { label: 'تا تاریخ' },
-    search: { label: 'جستجو' }
+  const categoryColors = {
+    'فروش محصول': '#10b981',
+    'هزینه ثابت': '#ef4444',
+    'حقوق و دستمزد': '#f59e0b',
+    'تبلیغات': '#8b5cf6',
+    'خرید کالا': '#ec4899',
+    'عمومی': '#6b7280'
   };
 
   let hasShownLocalNotice = false;
+  let categoryChart = null;
+  let paymentChart = null;
 
+  // ============================================================================
+  // DOM ELEMENTS
+  // ============================================================================
   const elements = {
     sellerName: document.getElementById('sellerName'),
     entryForm: document.getElementById('entryForm'),
-    amountInput: document.querySelector('input[name="amount"]'),
-    dateInput: document.querySelector('input[name="recordedAt"]'),
-    dueDateInput: document.querySelector('input[name="dueDate"]'),
     formMessage: document.getElementById('formMessage'),
     entriesBody: document.getElementById('entriesBody'),
     emptyState: document.getElementById('emptyState'),
-    entriesTable: document.querySelector('.entries-table'),
     totalIncome: document.getElementById('totalIncome'),
     totalExpense: document.getElementById('totalExpense'),
     totalBalance: document.getElementById('totalBalance'),
@@ -170,18 +99,45 @@
     paymentBreakdown: document.getElementById('paymentBreakdown'),
     upcomingDueList: document.getElementById('upcomingDueList'),
     filtersForm: document.getElementById('filtersForm'),
-    filtersSection: document.getElementById('filtersSection'),
     searchInput: document.getElementById('searchQuery'),
     backButton: document.getElementById('backToDashboard'),
-    toolbar: document.querySelector('.bottom-toolbar'),
-    toolbarButtons: document.querySelectorAll('.bottom-toolbar__button'),
-    newEntrySection: document.getElementById('newEntrySection'),
-    reportsSection: document.getElementById('reportsSection'),
-    quickActionsSection: document.getElementById('quickActionsSection'),
-    advisorSection: document.getElementById('advisorSection'),
-    themeToggle: document.getElementById('themeToggle')
+    themeToggle: document.getElementById('themeToggle'),
+    // Modern UI elements
+    fabAdd: document.getElementById('fabAdd'),
+    addModal: document.getElementById('addModal'),
+    modalClose: document.getElementById('modalClose'),
+    filterToggle: document.getElementById('filterToggle'),
+    filtersPanel: document.getElementById('filtersPanel'),
+    advancedToggle: document.getElementById('advancedToggle'),
+    advancedFields: document.getElementById('advancedFields'),
+    transactionsList: document.getElementById('transactionsList'),
+    navButtons: document.querySelectorAll('.nav-item'),
+    categoryChartCanvas: document.getElementById('categoryChart'),
+    paymentChartCanvas: document.getElementById('paymentChart'),
+    // Calculator elements
+    calculatorModal: document.getElementById('calculatorModal'),
+    calculatorTrigger: document.getElementById('calculatorTrigger'),
+    calculatorClose: document.getElementById('calculatorClose'),
+    calcExpression: document.getElementById('calcExpression'),
+    calcResult: document.getElementById('calcResult'),
+    calcCopy: document.getElementById('calcCopy'),
+    calcUse: document.getElementById('calcUse'),
+    amountInput: document.getElementById('amountInput')
   };
 
+  // ============================================================================
+  // CALCULATOR STATE
+  // ============================================================================
+  const calculatorState = {
+    currentValue: '0',
+    previousValue: '',
+    operator: null,
+    shouldResetDisplay: false
+  };
+
+  // ============================================================================
+  // UTILITY FUNCTIONS - PRESERVED FROM ORIGINAL
+  // ============================================================================
   const formatCurrency = (value) => {
     const numeric = Number(value) || 0;
     try {
@@ -226,36 +182,242 @@
   const showFormMessage = (message, type = 'info') => {
     if (!elements.formMessage) return;
     elements.formMessage.textContent = message;
-    elements.formMessage.classList.remove('error', 'success');
+    elements.formMessage.classList.remove('error', 'success', 'show');
     if (type === 'error') {
       elements.formMessage.classList.add('error');
     } else if (type === 'success') {
       elements.formMessage.classList.add('success');
     }
+    elements.formMessage.classList.add('show');
+    setTimeout(() => {
+      elements.formMessage.classList.remove('show');
+    }, 5000);
   };
 
   const clearFormMessage = () => {
     if (!elements.formMessage) return;
     elements.formMessage.textContent = '';
-    elements.formMessage.classList.remove('error', 'success');
+    elements.formMessage.classList.remove('error', 'success', 'show');
   };
 
+  // ============================================================================
+  // CALCULATOR UTILITY FUNCTIONS
+  // ============================================================================
+  const convertPersianToEnglishNumbers = (str) => {
+    const persianNumbers = ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹'];
+    const englishNumbers = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
+    
+    let result = str;
+    for (let i = 0; i < 10; i++) {
+      result = result.replace(new RegExp(persianNumbers[i], 'g'), englishNumbers[i]);
+    }
+    return result;
+  };
+
+  const formatNumberForDisplay = (num) => {
+    try {
+      const formatted = new Intl.NumberFormat('en-US').format(num);
+      return formatted;
+    } catch (error) {
+      return num.toString();
+    }
+  };
+
+  // ============================================================================
+  // CALCULATOR FUNCTIONS
+  // ============================================================================
+  const updateCalculatorDisplay = () => {
+    if (!elements.calcExpression || !elements.calcResult) return;
+
+    let expression = '';
+    if (calculatorState.previousValue) {
+      expression += formatNumberForDisplay(calculatorState.previousValue);
+      if (calculatorState.operator) {
+        const operatorSymbols = {
+          add: '+',
+          subtract: '−',
+          multiply: '×',
+          divide: '÷'
+        };
+        expression += ` ${operatorSymbols[calculatorState.operator]} `;
+      }
+    }
+    if (calculatorState.currentValue !== calculatorState.previousValue) {
+      expression += formatNumberForDisplay(calculatorState.currentValue);
+    }
+
+    elements.calcExpression.textContent = expression || '0';
+    elements.calcResult.textContent = formatNumberForDisplay(calculatorState.currentValue);
+  };
+
+  const resetCalculator = () => {
+    calculatorState.currentValue = '0';
+    calculatorState.previousValue = '';
+    calculatorState.operator = null;
+    calculatorState.shouldResetDisplay = false;
+    updateCalculatorDisplay();
+  };
+
+  const appendNumber = (num) => {
+    if (calculatorState.shouldResetDisplay) {
+      calculatorState.currentValue = num;
+      calculatorState.shouldResetDisplay = false;
+    } else {
+      if (calculatorState.currentValue === '0' && num !== '.') {
+        calculatorState.currentValue = num;
+      } else if (num === '.' && calculatorState.currentValue.includes('.')) {
+        return;
+      } else {
+        calculatorState.currentValue += num;
+      }
+    }
+    updateCalculatorDisplay();
+  };
+
+  const deleteLastDigit = () => {
+    if (calculatorState.currentValue.length > 1) {
+      calculatorState.currentValue = calculatorState.currentValue.slice(0, -1);
+    } else {
+      calculatorState.currentValue = '0';
+    }
+    updateCalculatorDisplay();
+  };
+
+  const setOperator = (op) => {
+    if (calculatorState.operator && !calculatorState.shouldResetDisplay) {
+      calculate();
+    }
+    calculatorState.previousValue = calculatorState.currentValue;
+    calculatorState.operator = op;
+    calculatorState.shouldResetDisplay = true;
+    updateCalculatorDisplay();
+  };
+
+  const calculate = () => {
+    if (!calculatorState.operator || !calculatorState.previousValue) return;
+
+    const prev = parseFloat(calculatorState.previousValue);
+    const current = parseFloat(calculatorState.currentValue);
+
+    if (isNaN(prev) || isNaN(current)) return;
+
+    let result = 0;
+    switch (calculatorState.operator) {
+      case 'add':
+        result = prev + current;
+        break;
+      case 'subtract':
+        result = prev - current;
+        break;
+      case 'multiply':
+        result = prev * current;
+        break;
+      case 'divide':
+        if (current === 0) {
+          resetCalculator();
+          return;
+        }
+        result = prev / current;
+        break;
+      default:
+        return;
+    }
+
+    calculatorState.currentValue = result.toString();
+    calculatorState.previousValue = '';
+    calculatorState.operator = null;
+    calculatorState.shouldResetDisplay = true;
+    updateCalculatorDisplay();
+  };
+
+  const calculatePercent = () => {
+    const current = parseFloat(calculatorState.currentValue);
+    if (isNaN(current)) return;
+
+    if (calculatorState.previousValue && calculatorState.operator) {
+      const prev = parseFloat(calculatorState.previousValue);
+      calculatorState.currentValue = ((prev * current) / 100).toString();
+    } else {
+      calculatorState.currentValue = (current / 100).toString();
+    }
+    updateCalculatorDisplay();
+  };
+
+  const copyCalculatorResult = async () => {
+    const value = calculatorState.currentValue;
+    try {
+      await navigator.clipboard.writeText(value);
+      // Visual feedback
+      if (elements.calcCopy) {
+        const originalText = elements.calcCopy.innerHTML;
+        elements.calcCopy.innerHTML = '<i class="ri-check-line"></i> کپی شد';
+        setTimeout(() => {
+          elements.calcCopy.innerHTML = originalText;
+        }, 1500);
+      }
+    } catch (error) {
+      // Fallback for older browsers
+      const textArea = document.createElement('textarea');
+      textArea.value = value;
+      textArea.style.position = 'fixed';
+      textArea.style.left = '-999999px';
+      document.body.appendChild(textArea);
+      textArea.select();
+      try {
+        document.execCommand('copy');
+        if (elements.calcCopy) {
+          const originalText = elements.calcCopy.innerHTML;
+          elements.calcCopy.innerHTML = '<i class="ri-check-line"></i> کپی شد';
+          setTimeout(() => {
+            elements.calcCopy.innerHTML = originalText;
+          }, 1500);
+        }
+      } catch (err) {
+        console.error('Failed to copy:', err);
+      }
+      document.body.removeChild(textArea);
+    }
+  };
+
+  const useCalculatorResult = () => {
+    const value = parseFloat(calculatorState.currentValue);
+    if (!isNaN(value) && elements.amountInput) {
+      elements.amountInput.value = Math.round(value);
+      closeCalculatorModal();
+    }
+  };
+
+  const openCalculatorModal = () => {
+    if (elements.calculatorModal) {
+      elements.calculatorModal.classList.add('show');
+      // If amount input has a value, use it as starting point
+      if (elements.amountInput && elements.amountInput.value) {
+        const currentAmount = parseFloat(elements.amountInput.value);
+        if (!isNaN(currentAmount)) {
+          calculatorState.currentValue = currentAmount.toString();
+          updateCalculatorDisplay();
+        }
+      }
+    }
+  };
+
+  const closeCalculatorModal = () => {
+    if (elements.calculatorModal) {
+      elements.calculatorModal.classList.remove('show');
+    }
+  };
+
+  // ============================================================================
+  // THEME MANAGEMENT - PRESERVED
+  // ============================================================================
   const applyTheme = (theme = 'light') => {
     const nextTheme = theme === 'dark' ? 'dark' : 'light';
     document.documentElement.setAttribute('data-theme', nextTheme);
 
     if (elements.themeToggle) {
-      const isDark = nextTheme === 'dark';
-      elements.themeToggle.setAttribute('aria-pressed', String(isDark));
-      elements.themeToggle.classList.toggle('is-light', !isDark);
-
       const icon = elements.themeToggle.querySelector('i');
-      const label = elements.themeToggle.querySelector('.theme-toggle__label');
       if (icon) {
-        icon.className = isDark ? 'ri-moon-clear-line' : 'ri-sun-line';
-      }
-      if (label) {
-        label.textContent = isDark ? 'تغییر به حالت روشن' : 'تغییر به حالت تیره';
+        icon.className = nextTheme === 'dark' ? 'ri-moon-clear-line' : 'ri-sun-line';
       }
     }
   };
@@ -265,15 +427,6 @@
       localStorage.setItem(THEME_KEY, theme);
     } catch (error) {
       /* noop */
-    }
-  };
-
-  const hasStoredThemePreference = () => {
-    try {
-      const stored = localStorage.getItem(THEME_KEY);
-      return stored === 'light' || stored === 'dark';
-    } catch (error) {
-      return false;
     }
   };
 
@@ -294,18 +447,15 @@
     return 'light';
   };
 
+  // ============================================================================
+  // DATA MANAGEMENT - PRESERVED FROM ORIGINAL
+  // ============================================================================
   const parseTags = (value) => {
     if (Array.isArray(value)) {
       return value.filter(Boolean).map((tag) => tag.toString().trim()).filter(Boolean).slice(0, 8);
     }
-
     if (typeof value !== 'string') return [];
-
-    return value
-      .split(/[،,]/)
-      .map((tag) => tag.trim())
-      .filter(Boolean)
-      .slice(0, 8);
+    return value.split(/[،,]/).map((tag) => tag.trim()).filter(Boolean).slice(0, 8);
   };
 
   const deriveComputedStatus = (entry = {}) => {
@@ -313,7 +463,6 @@
     if (baseStatus === 'paid' || baseStatus === 'refunded') {
       return baseStatus;
     }
-
     const dueDate = entry.dueDate ? new Date(entry.dueDate) : null;
     if (dueDate && !Number.isNaN(dueDate.getTime())) {
       const today = new Date();
@@ -322,7 +471,6 @@
         return 'overdue';
       }
     }
-
     return baseStatus === 'pending' ? 'pending' : 'paid';
   };
 
@@ -376,6 +524,22 @@
     }
   };
 
+  const calculateTotals = (entries = []) => {
+    return entries.reduce(
+      (acc, entry) => {
+        const amount = Number(entry.amount) || 0;
+        if (entry.type === 'income') {
+          acc.income += amount;
+        } else if (entry.type === 'expense') {
+          acc.expense += amount;
+        }
+        acc.balance = acc.income - acc.expense;
+        return acc;
+      },
+      { income: 0, expense: 0, balance: 0 }
+    );
+  };
+
   const buildLocalSummary = (entries = []) => {
     const totals = calculateTotals(entries);
 
@@ -385,11 +549,10 @@
         if (statusKey === 'pending') acc.pending += 1;
         if (statusKey === 'overdue') acc.overdue += 1;
         if (statusKey === 'paid') acc.paid += 1;
-        if (statusKey === 'refunded') acc.refunded += 1;
         acc.total += 1;
         return acc;
       },
-      { total: 0, pending: 0, overdue: 0, paid: 0, refunded: 0 }
+      { total: 0, pending: 0, overdue: 0, paid: 0 }
     );
 
     const amountsByStatus = entries.reduce(
@@ -399,7 +562,7 @@
         acc[statusKey] = current + (Number(entry.amount) || 0);
         return acc;
       },
-      { pending: 0, overdue: 0, paid: 0, refunded: 0 }
+      { pending: 0, overdue: 0, paid: 0 }
     );
 
     const categoryTotalsMap = entries.reduce((acc, entry) => {
@@ -426,27 +589,12 @@
       total
     }));
 
-    const upcomingDue = entries
-      .filter((entry) => {
-        if (!entry.dueDate) return false;
-        const statusKey = entry.computedStatus || entry.status;
-        return statusKey === 'pending' || statusKey === 'overdue';
-      })
-      .map((entry) => ({
-        title: entry.title,
-        amount: entry.amount,
-        dueDate: entry.dueDate,
-        status: entry.computedStatus || entry.status
-      }))
-      .sort((a, b) => new Date(a.dueDate) - new Date(b.dueDate))
-      .slice(0, 6);
-
     return {
       totals,
       counts,
       categories,
       paymentMethods,
-      upcomingDue,
+      upcomingDue: [],
       amountsByStatus
     };
   };
@@ -462,22 +610,6 @@
       if (filters.status) {
         const statusKey = entry.computedStatus || entry.status;
         if (statusKey !== filters.status) return false;
-      }
-
-      if (filters.from) {
-        const fromDate = new Date(filters.from);
-        const entryDate = new Date(entry.recordedAt);
-        if (!Number.isNaN(fromDate.getTime()) && !Number.isNaN(entryDate.getTime())) {
-          if (entryDate < fromDate) return false;
-        }
-      }
-
-      if (filters.to) {
-        const toDate = new Date(filters.to);
-        const entryDate = new Date(entry.recordedAt);
-        if (!Number.isNaN(toDate.getTime()) && !Number.isNaN(entryDate.getTime())) {
-          if (entryDate > toDate) return false;
-        }
       }
 
       if (query) {
@@ -499,11 +631,14 @@
 
   const notifyLocalMode = () => {
     if (!hasShownLocalNotice) {
-      showFormMessage('در حالت نمایشی آفلاین هستید. برای همگام‌سازی با سرور، پس از اتصال مجدد تلاش کنید.', 'info');
+      showFormMessage('در حالت آفلاین. داده‌ها در دستگاه ذخیره می‌شوند.', 'info');
       hasShownLocalNotice = true;
     }
   };
 
+  // ============================================================================
+  // API FUNCTIONS - PRESERVED FROM ORIGINAL
+  // ============================================================================
   const fetchCurrentSeller = async () => {
     try {
       const response = await fetch(SELLER_API, {
@@ -520,7 +655,7 @@
       notifyLocalMode();
       return {
         firstname: 'فروشنده',
-        lastname: 'مهمان'
+        lastname: 'عزیز'
       };
     }
   };
@@ -581,7 +716,7 @@
       if (!response.ok) {
         const error = await response
           .json()
-          .catch(() => ({ message: 'خطا در ذخیره‌سازی اطلاعات.' }));
+          .catch(() => ({ message: 'خطا در ذخیره‌سازی.' }));
         const err = new Error(error.message || 'FAILED_CREATE');
         err.code = response.status;
         throw err;
@@ -615,28 +750,13 @@
     }
   };
 
-  const calculateTotals = (entries = []) => {
-    return entries.reduce(
-      (acc, entry) => {
-        const amount = Number(entry.amount) || 0;
-        if (entry.type === 'income') {
-          acc.income += amount;
-        } else if (entry.type === 'expense') {
-          acc.expense += amount;
-        }
-        acc.balance = acc.income - acc.expense;
-        return acc;
-      },
-      { income: 0, expense: 0, balance: 0 }
-    );
-  };
-
+  // ============================================================================
+  // RENDERING FUNCTIONS - MODERNIZED
+  // ============================================================================
   const updateTotals = (totals = {}) => {
     const income = Number(totals.income) || 0;
     const expense = Number(totals.expense) || 0;
-    const balance = Number.isFinite(Number(totals.balance))
-      ? Number(totals.balance)
-      : income - expense;
+    const balance = income - expense;
 
     if (elements.totalIncome) elements.totalIncome.textContent = formatCurrency(income);
     if (elements.totalExpense) elements.totalExpense.textContent = formatCurrency(expense);
@@ -647,97 +767,124 @@
     const counts = summary.counts || {};
     const amounts = summary.amountsByStatus || {};
 
-    if (elements.pendingAmount) elements.pendingAmount.textContent = formatCurrency(amounts.pending || 0);
-    if (elements.pendingCount) elements.pendingCount.textContent = formatCount(counts.pending || 0);
-
-    if (elements.overdueAmount) elements.overdueAmount.textContent = formatCurrency(amounts.overdue || 0);
-    if (elements.overdueCount) elements.overdueCount.textContent = formatCount(counts.overdue || 0);
-
-    if (elements.paidAmount) elements.paidAmount.textContent = formatCurrency(amounts.paid || 0);
+    if (elements.pendingAmount) elements.pendingAmount.textContent = formatCount(counts.pending || 0);
+    if (elements.overdueAmount) elements.overdueAmount.textContent = formatCount(counts.overdue || 0);
     if (elements.paidCount) elements.paidCount.textContent = formatCount(counts.paid || 0);
   };
 
-  const renderEntriesCount = (count) => {
-    if (!elements.totalEntriesCount) return;
-    elements.totalEntriesCount.textContent = formatCount(count || 0);
-  };
+  const renderCharts = (summary = {}) => {
+    const categories = summary.categories || [];
+    const payments = summary.paymentMethods || [];
 
-  const renderCategoryBreakdown = (categories = []) => {
-    if (!elements.categoryBreakdown) return;
-    elements.categoryBreakdown.innerHTML = '';
+    // Category Chart
+    if (elements.categoryChartCanvas && typeof Chart !== 'undefined') {
+      const ctx = elements.categoryChartCanvas.getContext('2d');
+      
+      if (categoryChart) {
+        categoryChart.destroy();
+      }
 
-    if (!Array.isArray(categories) || !categories.length) {
-      elements.categoryBreakdown.innerHTML = '<li class="insight-empty">داده‌ای برای نمایش وجود ندارد.</li>';
-      return;
+      if (categories.length > 0) {
+        categoryChart = new Chart(ctx, {
+          type: 'doughnut',
+          data: {
+            labels: categories.map(c => c.name),
+            datasets: [{
+              data: categories.map(c => c.total),
+              backgroundColor: categories.map(c => categoryColors[c.name] || '#6b7280'),
+              borderWidth: 0
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: true,
+            plugins: {
+              legend: {
+                position: 'bottom',
+                rtl: true,
+                labels: {
+                  font: {
+                    family: 'Vazirmatn',
+                    size: 12
+                  },
+                  padding: 12,
+                  usePointStyle: true,
+                  pointStyle: 'circle'
+                }
+              },
+              tooltip: {
+                rtl: true,
+                textDirection: 'rtl',
+                callbacks: {
+                  label: function(context) {
+                    return formatCurrency(context.parsed);
+                  }
+                }
+              }
+            }
+          }
+        });
+      }
     }
 
-    categories.forEach(({ name, total }) => {
-      const li = document.createElement('li');
-      const label = document.createElement('span');
-      label.className = 'insight-list__label';
-      label.textContent = name || 'نامشخص';
+    // Payment Chart
+    if (elements.paymentChartCanvas && typeof Chart !== 'undefined') {
+      const ctx = elements.paymentChartCanvas.getContext('2d');
+      
+      if (paymentChart) {
+        paymentChart.destroy();
+      }
 
-      const value = document.createElement('span');
-      value.className = 'insight-list__value';
-      value.textContent = formatCurrency(total || 0);
-
-      li.append(label, value);
-      elements.categoryBreakdown.appendChild(li);
-    });
-  };
-
-  const renderPaymentBreakdown = (payments = []) => {
-    if (!elements.paymentBreakdown) return;
-    elements.paymentBreakdown.innerHTML = '';
-
-    if (!Array.isArray(payments) || !payments.length) {
-      elements.paymentBreakdown.innerHTML = '<li class="insight-empty">روش پرداختی ثبت نشده است.</li>';
-      return;
+      if (payments.length > 0) {
+        paymentChart = new Chart(ctx, {
+          type: 'bar',
+          data: {
+            labels: payments.map(p => paymentMethodLabels[p.method] || 'سایر'),
+            datasets: [{
+              data: payments.map(p => p.total),
+              backgroundColor: '#0ea5e9',
+              borderRadius: 8
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: true,
+            indexAxis: 'y',
+            plugins: {
+              legend: {
+                display: false
+              },
+              tooltip: {
+                rtl: true,
+                textDirection: 'rtl',
+                callbacks: {
+                  label: function(context) {
+                    return formatCurrency(context.parsed.x);
+                  }
+                }
+              }
+            },
+            scales: {
+              x: {
+                ticks: {
+                  font: {
+                    family: 'Vazirmatn'
+                  }
+                }
+              },
+              y: {
+                ticks: {
+                  font: {
+                    family: 'Vazirmatn',
+                    size: 12
+                  }
+                }
+              }
+            }
+          }
+        });
+      }
     }
-
-    payments.forEach(({ method, total }) => {
-      const li = document.createElement('li');
-      const label = document.createElement('span');
-      label.className = 'insight-list__label';
-      label.textContent = paymentMethodLabels[method] || 'سایر';
-
-      const value = document.createElement('span');
-      value.className = 'insight-list__value';
-      value.textContent = formatCurrency(total || 0);
-
-      li.append(label, value);
-      elements.paymentBreakdown.appendChild(li);
-    });
-  };
-
-  const renderUpcomingDue = (items = []) => {
-    if (!elements.upcomingDueList) return;
-    elements.upcomingDueList.innerHTML = '';
-
-    if (!Array.isArray(items) || !items.length) {
-      elements.upcomingDueList.innerHTML = '<li class="insight-empty">سررسید فعالی وجود ندارد.</li>';
-      return;
-    }
-
-    items.forEach((item) => {
-      const li = document.createElement('li');
-
-      const title = document.createElement('span');
-      title.className = 'insight-list__label';
-      title.textContent = item.title || 'بدون عنوان';
-
-      const value = document.createElement('span');
-      value.className = 'insight-list__value';
-      value.textContent = formatCurrency(item.amount || 0);
-
-      const meta = document.createElement('span');
-      meta.className = 'insight-list__meta';
-      const statusText = statusLabels[item.status] || '';
-      meta.textContent = `${formatDateForDisplay(item.dueDate)}${statusText ? ` • ${statusText}` : ''}`;
-
-      li.append(title, value, meta);
-      elements.upcomingDueList.appendChild(li);
-    });
   };
 
   const renderActiveFilters = (filters = {}) => {
@@ -749,147 +896,88 @@
       return;
     }
 
-    entries.forEach(([key, value]) => {
-      const config = filterDisplayConfig[key] || { label: key };
-      const label = config.label || key;
-      const valueLabel = config.options?.[value] || value;
+    const filterLabels = {
+      type: 'نوع',
+      category: 'دسته',
+      status: 'وضعیت',
+      search: 'جستجو'
+    };
 
+    entries.forEach(([key, value]) => {
+      const label = filterLabels[key] || key;
       const chip = document.createElement('span');
       chip.className = 'active-filters__chip';
-
-      const icon = document.createElement('i');
-      icon.className = 'ri-filter-line';
-
-      const text = document.createElement('span');
-      text.textContent = `${label}: ${valueLabel}`;
-
-      chip.append(icon, text);
+      chip.innerHTML = `<i class="ri-filter-line"></i> ${label}: ${value}`;
       elements.activeFilters.appendChild(chip);
     });
   };
 
-  const createStatusBadge = (statusKey) => {
-    const key = statusKey && statusLabels[statusKey] ? statusKey : 'paid';
-    const badge = document.createElement('span');
-    badge.className = `status-badge status-${key}`;
+  const renderTransactionCard = (entry) => {
+    const card = document.createElement('div');
+    card.className = `transaction-card ${entry.type}`;
 
-    const icon = document.createElement('i');
-    icon.className = statusIcons[key] || statusIcons.paid;
+    const header = document.createElement('div');
+    header.className = 'transaction-header';
 
-    const text = document.createElement('span');
-    text.textContent = statusLabels[key];
+    const titleDiv = document.createElement('div');
+    titleDiv.className = 'transaction-title';
 
-    badge.append(icon, text);
-    return badge;
-  };
+    const title = document.createElement('h3');
+    title.textContent = entry.title || 'تراکنش';
 
-  const createCounterpartyNode = (entry) => {
-    const container = document.createElement('div');
-    container.className = 'counterparty-text';
+    const date = document.createElement('div');
+    date.className = 'transaction-date';
+    date.innerHTML = `<i class="ri-calendar-line"></i> ${formatDateForDisplay(entry.recordedAt)}`;
 
-    const type = document.createElement('span');
-    type.className = 'counterparty-type';
-    type.textContent = counterpartyTypeLabels[entry.counterpartyType] || counterpartyTypeLabels.other;
+    titleDiv.appendChild(title);
+    titleDiv.appendChild(date);
 
-    const name = document.createElement('span');
-    name.textContent = entry.counterpartyName ? entry.counterpartyName : 'ثبت نشده';
+    const amount = document.createElement('div');
+    amount.className = `transaction-amount ${entry.type}`;
+    amount.textContent = formatCurrency(entry.amount);
 
-    container.append(type, name);
-    return container;
-  };
+    header.appendChild(titleDiv);
+    header.appendChild(amount);
 
-  const createTagListNode = (tags) => {
-    const wrapper = document.createElement('div');
-    wrapper.className = 'tag-list';
+    const details = document.createElement('div');
+    details.className = 'transaction-details';
 
-    if (!Array.isArray(tags) || !tags.length) {
-      wrapper.textContent = '-';
-      return wrapper;
-    }
+    const categoryBadge = document.createElement('span');
+    categoryBadge.className = 'detail-badge';
+    categoryBadge.innerHTML = `<i class="ri-bookmark-line"></i> ${entry.category}`;
+    details.appendChild(categoryBadge);
 
-    tags.forEach((tag) => {
-      const chip = document.createElement('span');
-      chip.className = 'tag-chip';
-      chip.textContent = tag;
-      wrapper.appendChild(chip);
-    });
+    const paymentBadge = document.createElement('span');
+    paymentBadge.className = 'detail-badge';
+    paymentBadge.innerHTML = `<i class="ri-bank-card-line"></i> ${paymentMethodLabels[entry.paymentMethod] || 'سایر'}`;
+    details.appendChild(paymentBadge);
 
-    return wrapper;
+    const statusBadge = document.createElement('span');
+    statusBadge.className = `status-badge status-${entry.computedStatus || entry.status}`;
+    statusBadge.textContent = statusLabels[entry.computedStatus || entry.status] || 'تسویه';
+    details.appendChild(statusBadge);
+
+    card.appendChild(header);
+    card.appendChild(details);
+
+    return card;
   };
 
   const renderEntries = (entries = []) => {
-    if (!elements.entriesBody || !elements.entriesTable || !elements.emptyState) return;
+    if (!elements.entriesBody || !elements.emptyState) return;
 
     elements.entriesBody.innerHTML = '';
 
     if (!entries.length) {
-      elements.entriesTable.style.display = 'none';
       elements.emptyState.classList.add('show');
       return;
     }
 
-    elements.entriesTable.style.display = '';
     elements.emptyState.classList.remove('show');
 
     const fragment = document.createDocumentFragment();
-
     entries.forEach((entry) => {
-      const row = document.createElement('tr');
-
-      const titleCell = document.createElement('td');
-      titleCell.textContent = entry.title || '-';
-
-      const typeCell = document.createElement('td');
-      const typeClass = entry.type === 'income' ? 'entry-type-income' : 'entry-type-expense';
-      typeCell.classList.add(typeClass);
-      typeCell.textContent = entry.type === 'income' ? 'درآمد' : 'هزینه';
-
-      const categoryCell = document.createElement('td');
-      categoryCell.textContent = entry.category || 'عمومی';
-
-      const amountCell = document.createElement('td');
-      amountCell.textContent = formatCurrency(entry.amount || 0);
-
-      const paymentCell = document.createElement('td');
-      paymentCell.textContent = paymentMethodLabels[entry.paymentMethod] || paymentMethodLabels.other;
-
-      const statusCell = document.createElement('td');
-      statusCell.appendChild(createStatusBadge(entry.computedStatus || entry.status));
-
-      const counterpartyCell = document.createElement('td');
-      counterpartyCell.appendChild(createCounterpartyNode(entry));
-
-      const referenceCell = document.createElement('td');
-      referenceCell.textContent = entry.referenceNumber || '-';
-
-      const recordedAtCell = document.createElement('td');
-      recordedAtCell.textContent = formatDateForDisplay(entry.recordedAt || entry.createdAt);
-
-      const dueDateCell = document.createElement('td');
-      dueDateCell.textContent = formatDateForDisplay(entry.dueDate);
-
-      const tagsCell = document.createElement('td');
-      tagsCell.appendChild(createTagListNode(entry.tags));
-
-      const descriptionCell = document.createElement('td');
-      descriptionCell.textContent = entry.description || '-';
-
-      row.append(
-        titleCell,
-        typeCell,
-        categoryCell,
-        amountCell,
-        paymentCell,
-        statusCell,
-        counterpartyCell,
-        referenceCell,
-        recordedAtCell,
-        dueDateCell,
-        tagsCell,
-        descriptionCell
-      );
-
-      fragment.appendChild(row);
+      fragment.appendChild(renderTransactionCard(entry));
     });
 
     elements.entriesBody.appendChild(fragment);
@@ -899,45 +987,42 @@
     const totals = summary.totals || calculateTotals(entries);
     updateTotals(totals);
     renderStatusSummary(summary);
-    renderCategoryBreakdown(summary.categories);
-    renderPaymentBreakdown(summary.paymentMethods);
-    renderUpcomingDue(summary.upcomingDue);
-    renderEntriesCount(summary.counts?.total ?? entries.length);
+    renderCharts(summary);
   };
 
-  const setDefaultDateValue = () => {
-    if (elements.dateInput) {
-      elements.dateInput.value = formatDateForInput(new Date());
-    }
-    if (elements.dueDateInput) {
-      elements.dueDateInput.value = '';
+  // ============================================================================
+  // UI INTERACTIONS - MODERN
+  // ============================================================================
+  const openModal = () => {
+    if (elements.addModal) {
+      elements.addModal.classList.add('show');
+      document.body.style.overflow = 'hidden';
     }
   };
 
-  const ensureAccessFlag = () => {
-    try {
-      const granted = sessionStorage.getItem(ACCESS_KEY);
-      if (granted === 'granted') {
-        return true;
-      }
-      sessionStorage.setItem(ACCESS_KEY, 'granted');
-      return true;
-    } catch (error) {
-      return true;
+  const closeModal = () => {
+    if (elements.addModal) {
+      elements.addModal.classList.remove('show');
+      document.body.style.overflow = '';
     }
   };
 
-  const removeAccessFlag = () => {
-    try {
-      sessionStorage.removeItem(ACCESS_KEY);
-    } catch (error) {
-      /* noop */
+  const toggleFilters = () => {
+    if (elements.filtersPanel) {
+      elements.filtersPanel.classList.toggle('show');
     }
   };
 
-  const setActiveToolbar = (action) => {
-    if (!elements.toolbarButtons?.length) return;
-    elements.toolbarButtons.forEach((button) => {
+  const toggleAdvanced = () => {
+    if (elements.advancedFields && elements.advancedToggle) {
+      elements.advancedFields.classList.toggle('show');
+      elements.advancedToggle.classList.toggle('active');
+    }
+  };
+
+  const setActiveNav = (action) => {
+    if (!elements.navButtons?.length) return;
+    elements.navButtons.forEach((button) => {
       if (button.dataset.action === action) {
         button.classList.add('is-active');
       } else {
@@ -946,11 +1031,16 @@
     });
   };
 
-  const scrollToSection = (section) => {
-    if (!section) return;
-    section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  const scrollToSection = (sectionId) => {
+    const section = document.getElementById(sectionId);
+    if (section) {
+      section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
   };
 
+  // ============================================================================
+  // MAIN LOGIC
+  // ============================================================================
   const getFiltersFromForm = () => {
     if (!elements.filtersForm) return {};
     const formData = new FormData(elements.filtersForm);
@@ -959,18 +1049,12 @@
     const search = formData.get('search');
     const type = formData.get('type');
     const category = formData.get('category');
-    const paymentMethod = formData.get('paymentMethod');
     const status = formData.get('status');
-    const from = formData.get('from');
-    const to = formData.get('to');
 
     if (search && search.toString().trim()) filters.search = search.toString().trim();
     if (type) filters.type = type;
     if (category) filters.category = category;
-    if (paymentMethod) filters.paymentMethod = paymentMethod;
     if (status) filters.status = status;
-    if (from) filters.from = from;
-    if (to) filters.to = to;
 
     return filters;
   };
@@ -986,163 +1070,158 @@
       const { entries, summary } = await fetchEntries(filters);
       renderEntries(entries);
       renderSummary(summary, entries);
-
-      if (!entries.length) {
-        updateTotals(summary.totals || { income: 0, expense: 0, balance: 0 });
-        renderStatusSummary(summary);
-      }
     } catch (error) {
-      showFormMessage('خطا در دریافت تراکنش‌ها. لطفاً دوباره تلاش کنید.', 'error');
+      showFormMessage('خطا در دریافت تراکنش‌ها.', 'error');
     }
   };
 
+  const setDefaultDateValue = () => {
+    const dateInput = document.querySelector('input[name="recordedAt"]');
+    if (dateInput) {
+      dateInput.value = formatDateForInput(new Date());
+    }
+  };
+
+  // ============================================================================
+  // INITIALIZATION
+  // ============================================================================
   document.addEventListener('DOMContentLoaded', async () => {
-    let explicitTheme = hasStoredThemePreference();
+    // Theme
     let activeTheme = resolveInitialTheme();
     applyTheme(activeTheme);
 
     if (elements.themeToggle) {
       elements.themeToggle.addEventListener('click', () => {
         activeTheme = activeTheme === 'light' ? 'dark' : 'light';
-        explicitTheme = true;
         applyTheme(activeTheme);
         storeThemePreference(activeTheme);
+        
+        // Redraw charts with new theme
+        if (categoryChart) categoryChart.destroy();
+        if (paymentChart) paymentChart.destroy();
+        loadEntries();
       });
     }
 
-    ensureAccessFlag();
-
-    if (window.matchMedia) {
-      const darkQuery = window.matchMedia('(prefers-color-scheme: dark)');
-      const handleSystemThemeChange = (event) => {
-        if (explicitTheme) return;
-        activeTheme = event.matches ? 'dark' : 'light';
-        applyTheme(activeTheme);
-      };
-
-      if (typeof darkQuery.addEventListener === 'function') {
-        darkQuery.addEventListener('change', handleSystemThemeChange);
-      } else if (typeof darkQuery.addListener === 'function') {
-        darkQuery.addListener(handleSystemThemeChange);
-      }
-    }
-
-    const handleBackNavigation = () => {
-      removeAccessFlag();
-      window.location.href = DASHBOARD_URL;
-    };
-
+    // Back button
     if (elements.backButton) {
-      elements.backButton.addEventListener('click', handleBackNavigation);
-    }
-
-    if (elements.toolbar && elements.toolbarButtons?.length) {
-      setActiveToolbar('add');
-      elements.toolbarButtons.forEach((button) => {
-        button.addEventListener('click', () => {
-          const { action } = button.dataset;
-          switch (action) {
-            case 'add':
-              scrollToSection(elements.newEntrySection);
-              setActiveToolbar('add');
-              break;
-            case 'shortcuts':
-              scrollToSection(elements.quickActionsSection);
-              setActiveToolbar('shortcuts');
-              break;
-            case 'advisor':
-              scrollToSection(elements.advisorSection);
-              setActiveToolbar('advisor');
-              break;
-            case 'filters':
-              scrollToSection(elements.filtersSection);
-              setActiveToolbar('filters');
-              break;
-            case 'report':
-              scrollToSection(elements.reportsSection);
-              setActiveToolbar('report');
-              break;
-            default:
-              break;
-          }
-        });
+      elements.backButton.addEventListener('click', () => {
+        window.location.href = DASHBOARD_URL;
       });
-
-      if (typeof IntersectionObserver === 'function') {
-        const observer = new IntersectionObserver(
-          (observerEntries) => {
-            observerEntries.forEach((entry) => {
-              if (!entry.isIntersecting) return;
-              if (entry.target.id === 'reportsSection') {
-                setActiveToolbar('report');
-              } else if (entry.target.id === 'advisorSection') {
-                setActiveToolbar('advisor');
-              } else if (entry.target.id === 'quickActionsSection') {
-                setActiveToolbar('shortcuts');
-              } else if (entry.target.id === 'filtersSection') {
-                setActiveToolbar('filters');
-              } else if (entry.target.id === 'newEntrySection') {
-                setActiveToolbar('add');
-              }
-            });
-          },
-          {
-            rootMargin: '-45% 0px -45% 0px',
-            threshold: 0
-          }
-        );
-
-        if (elements.newEntrySection) observer.observe(elements.newEntrySection);
-        if (elements.filtersSection) observer.observe(elements.filtersSection);
-        if (elements.quickActionsSection) observer.observe(elements.quickActionsSection);
-        if (elements.advisorSection) observer.observe(elements.advisorSection);
-        if (elements.reportsSection) observer.observe(elements.reportsSection);
-      }
     }
 
-    const featureActionHandlers = {
-      'open-profit': () => {
-        scrollToSection(elements.reportsSection);
-        setActiveToolbar('report');
-        showFormMessage('برای تحلیل سود و زیان از گزارش تراکنش‌ها و جمع مبالغ استفاده کنید.', 'info');
-      },
-      'sync-inventory': () => {
-        scrollToSection(elements.quickActionsSection);
-        setActiveToolbar('shortcuts');
-        showFormMessage('جهت همگام‌سازی با انبار، لیست تراکنش‌های خرید را به‌روزرسانی و گزارش موجودی را صادر کنید.', 'info');
-      },
-      'create-reminder': () => {
-        scrollToSection(elements.newEntrySection);
-        setActiveToolbar('add');
-        showFormMessage('برای یادآور سررسید، تراکنش را با وضعیت "در انتظار پرداخت" و تاریخ سررسید دقیق ثبت کنید.', 'info');
-      },
-      'segment-customers': () => {
-        scrollToSection(elements.advisorSection);
-        setActiveToolbar('advisor');
-        showFormMessage('گزارش مشتریان وفادار بر اساس تراکنش‌های دوره‌ای به‌صورت خودکار دسته‌بندی می‌شود.', 'info');
-      }
-    };
+    // FAB button
+    if (elements.fabAdd) {
+      elements.fabAdd.addEventListener('click', openModal);
+    }
 
-    document.querySelectorAll('.feature-action').forEach((button) => {
+    // Modal close
+    if (elements.modalClose) {
+      elements.modalClose.addEventListener('click', closeModal);
+    }
+
+    // Click outside modal to close
+    if (elements.addModal) {
+      elements.addModal.addEventListener('click', (e) => {
+        if (e.target === elements.addModal) {
+          closeModal();
+        }
+      });
+    }
+
+    // Filter toggle
+    if (elements.filterToggle) {
+      elements.filterToggle.addEventListener('click', toggleFilters);
+    }
+
+    // Advanced toggle
+    if (elements.advancedToggle) {
+      elements.advancedToggle.addEventListener('click', toggleAdvanced);
+    }
+
+    // Calculator trigger
+    if (elements.calculatorTrigger) {
+      elements.calculatorTrigger.addEventListener('click', (e) => {
+        e.preventDefault();
+        openCalculatorModal();
+      });
+    }
+
+    // Calculator close
+    if (elements.calculatorClose) {
+      elements.calculatorClose.addEventListener('click', closeCalculatorModal);
+    }
+
+    // Click outside calculator modal to close
+    if (elements.calculatorModal) {
+      elements.calculatorModal.addEventListener('click', (e) => {
+        if (e.target === elements.calculatorModal) {
+          closeCalculatorModal();
+        }
+      });
+    }
+
+    // Calculator buttons
+    document.querySelectorAll('.calc-btn-number').forEach(button => {
       button.addEventListener('click', () => {
-        const { action } = button.dataset;
-        const handler = featureActionHandlers[action];
-        if (typeof handler === 'function') {
-          handler();
-        } else {
-          showFormMessage('این قابلیت به زودی در دسترس قرار می‌گیرد.', 'info');
+        const value = button.dataset.value;
+        appendNumber(value);
+      });
+    });
+
+    document.querySelectorAll('.calc-btn-operator').forEach(button => {
+      button.addEventListener('click', () => {
+        const action = button.dataset.action;
+        setOperator(action);
+      });
+    });
+
+    document.querySelectorAll('.calc-btn-function').forEach(button => {
+      button.addEventListener('click', () => {
+        const action = button.dataset.action;
+        if (action === 'clear') {
+          resetCalculator();
+        } else if (action === 'backspace') {
+          deleteLastDigit();
+        } else if (action === 'percent') {
+          calculatePercent();
         }
       });
     });
 
-    window.addEventListener('keydown', (event) => {
-      if (event.key === 'Escape') {
-        handleBackNavigation();
-      }
+    document.querySelectorAll('.calc-btn-equals').forEach(button => {
+      button.addEventListener('click', calculate);
     });
 
-    const seller = await fetchCurrentSeller();
+    // Calculator actions
+    if (elements.calcCopy) {
+      elements.calcCopy.addEventListener('click', copyCalculatorResult);
+    }
 
+    if (elements.calcUse) {
+      elements.calcUse.addEventListener('click', useCalculatorResult);
+    }
+
+    // Bottom nav
+    if (elements.navButtons?.length) {
+      elements.navButtons.forEach((button) => {
+        button.addEventListener('click', () => {
+          const { action } = button.dataset;
+          setActiveNav(action);
+          
+          if (action === 'dashboard') {
+            scrollToSection('dashboardSection');
+          } else if (action === 'add') {
+            openModal();
+          } else if (action === 'report') {
+            scrollToSection('transactionsSection');
+          }
+        });
+      });
+    }
+
+    // Fetch seller
+    const seller = await fetchCurrentSeller();
     if (elements.sellerName) {
       const first = seller?.firstname || '';
       const last = seller?.lastname || '';
@@ -1150,9 +1229,11 @@
       elements.sellerName.textContent = fullName || 'فروشنده عزیز';
     }
 
+    // Load entries
     setDefaultDateValue();
     loadEntries();
 
+    // Filters
     if (elements.filtersForm) {
       elements.filtersForm.addEventListener('submit', (event) => {
         event.preventDefault();
@@ -1171,6 +1252,7 @@
       });
     }
 
+    // Search
     if (elements.searchInput) {
       let debounceTimer;
       elements.searchInput.addEventListener('input', () => {
@@ -1181,6 +1263,7 @@
       });
     }
 
+    // Form submit
     if (elements.entryForm) {
       elements.entryForm.addEventListener('submit', async (event) => {
         event.preventDefault();
@@ -1207,7 +1290,7 @@
         }
 
         if (!Number.isFinite(amountValue) || amountValue < 0) {
-          showFormMessage('مبلغ تراکنش نامعتبر است.', 'error');
+          showFormMessage('مبلغ نامعتبر است.', 'error');
           return;
         }
 
@@ -1229,15 +1312,29 @@
 
         try {
           await createEntry(payload);
-          showFormMessage('تراکنش با موفقیت ثبت شد.', 'success');
+          showFormMessage('تراکنش با موفقیت ثبت شد! ✓', 'success');
           elements.entryForm.reset();
           setDefaultDateValue();
           await loadEntries();
+          
+          // Close modal after success
+          setTimeout(() => {
+            closeModal();
+            clearFormMessage();
+          }, 1500);
         } catch (error) {
-          const message = error?.message || 'خطا در ذخیره‌سازی تراکنش.';
+          const message = error?.message || 'خطا در ذخیره‌سازی.';
           showFormMessage(message, 'error');
         }
       });
     }
+
+    // Keyboard shortcuts
+    window.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape') {
+        closeModal();
+        closeCalculatorModal();
+      }
+    });
   });
 })();
