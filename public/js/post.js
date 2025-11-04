@@ -88,6 +88,26 @@ document.querySelectorAll('.password-toggle').forEach(btn => {
   });
 });
 
+const PERSIAN_TEXT_REGEX = /^[\u0600-\u06FF\u06F0-\u06F9\s\u200c.,\-]+$/;
+const ENGLISH_CHARS_REGEX = /[A-Za-z0-9]/g;
+const isPersianText = value => PERSIAN_TEXT_REGEX.test(value);
+
+document.querySelectorAll('[data-only-persian="true"]').forEach(element => {
+  element.addEventListener('input', () => {
+    const value = element.value;
+    const cleaned = value.replace(ENGLISH_CHARS_REGEX, '');
+    if (cleaned !== value) {
+      const selectionEnd = element.selectionEnd;
+      element.value = cleaned;
+      if (typeof selectionEnd === 'number') {
+        const removed = value.length - cleaned.length;
+        const newPos = Math.max(0, selectionEnd - removed);
+        element.setSelectionRange(newPos, newPos);
+      }
+    }
+  });
+});
+
 // ریست پیام خطا با تغییر هر فیلد
 [
   ["firstname", "firstname-hint"],
@@ -99,6 +119,7 @@ document.querySelectorAll('.password-toggle').forEach(btn => {
   ["phone", "phone-hint"],
   ["category", "category-hint"],
   ["address", "address-hint"],
+  ["desc", "desc-hint"],
   ["rules", "rules-hint"]
 ].forEach(function (pair) {
   let el = document.getElementById(pair[0]);
@@ -640,6 +661,11 @@ document.getElementById("signup-form").addEventListener("submit", function (e) {
     firstnameHint.classList.remove("hidden");
     hasError = true;
     rememberErrorElement(firstnameInput);
+  } else if (!isPersianText(firstname)) {
+    firstnameHint.innerText = "نام فروشنده باید فقط با حروف فارسی نوشته شود.";
+    firstnameHint.classList.remove("hidden");
+    hasError = true;
+    rememberErrorElement(firstnameInput);
   } else {
     firstnameHint.classList.add("hidden");
   }
@@ -650,6 +676,11 @@ document.getElementById("signup-form").addEventListener("submit", function (e) {
   const lastnameHint = document.getElementById("lastname-hint");
   if (!lastname) {
     lastnameHint.innerText = "لطفاً نام خانوادگی فروشنده را وارد کنید.";
+    lastnameHint.classList.remove("hidden");
+    hasError = true;
+    rememberErrorElement(lastnameInput);
+  } else if (!isPersianText(lastname)) {
+    lastnameHint.innerText = "نام خانوادگی باید فقط با حروف فارسی نوشته شود.";
     lastnameHint.classList.remove("hidden");
     hasError = true;
     rememberErrorElement(lastnameInput);
@@ -747,8 +778,28 @@ document.getElementById("signup-form").addEventListener("submit", function (e) {
     addressHint.classList.remove("hidden");
     hasError = true;
     rememberErrorElement(addressInput);
+  } else if (!isPersianText(address)) {
+    addressHint.innerText = "آدرس باید فقط با حروف فارسی نوشته شود.";
+    addressHint.classList.remove("hidden");
+    hasError = true;
+    rememberErrorElement(addressInput);
   } else {
     addressHint.classList.add("hidden");
+  }
+
+  // توضیحات فروشگاه
+  const descInput = document.getElementById("desc");
+  const descHint = document.getElementById("desc-hint");
+  const descValue = descInput ? descInput.value.trim() : "";
+  if (descValue && !isPersianText(descValue)) {
+    if (descHint) {
+      descHint.innerText = "توضیحات باید فقط با حروف فارسی نوشته شود.";
+      descHint.classList.remove("hidden");
+    }
+    hasError = true;
+    rememberErrorElement(descInput);
+  } else if (descHint) {
+    descHint.classList.add("hidden");
   }
 
   // رمز عبور
@@ -818,7 +869,7 @@ document.getElementById("signup-form").addEventListener("submit", function (e) {
     category: category,
     subcategory: subcategory,
     address: address,
-    desc: document.querySelector("textarea[name='desc']").value.trim(),
+    desc: descValue,
     password: pass1,
   };
 
