@@ -605,7 +605,14 @@
           : ''
       };
     }
-    const name = normaliseCategoryText(raw.name || raw.title || raw.label || '');
+    const name = normaliseCategoryText(
+      raw.name
+      || raw.title
+      || raw.label
+      || raw.desc
+      || raw.description
+      || ''
+    );
     if (!name) return null;
     const id = toIdString(raw._id || raw.id || raw.value || '');
     const type = raw.type || fallbackType;
