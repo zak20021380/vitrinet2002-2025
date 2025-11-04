@@ -122,7 +122,7 @@
     calcExpression: document.getElementById('calcExpression'),
     calcResult: document.getElementById('calcResult'),
     calcCopy: document.getElementById('calcCopy'),
-    calcUse: document.getElementById('calcUse'),
+    calcClear: document.getElementById('calcClear'),
     amountInput: document.getElementById('amountInput')
   };
 
@@ -1207,8 +1207,11 @@
       elements.calcCopy.addEventListener('click', copyCalculatorResult);
     }
 
-    if (elements.calcUse) {
-      elements.calcUse.addEventListener('click', useCalculatorResult);
+    if (elements.calcClear) {
+      elements.calcClear.addEventListener('click', () => {
+        resetCalculator();
+        closeCalculatorModal();
+      });
     }
 
     // Bottom nav
