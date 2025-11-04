@@ -891,7 +891,7 @@ document.getElementById("signup-form").addEventListener("submit", function (e) {
       btn.innerText = "ثبت فروشگاه";
       if (result.success) {
         localStorage.setItem('shopurl', data.shopurl);
-        SafeSS.setJSON('signup_password', data.password); // SafeSS
+        SafeSS.setJSON('signup_pwd', data.password); // SafeSS
 
         // ✅ اضافه‌شدن نقش و دسته برای تعیین پنل بعد از وریفای
         // توجه: SERVICE_CATEGORIES بالاتر در همین فایل تعریف شده.
@@ -948,7 +948,7 @@ fetch(`${API_ORIGIN}/api/auth/verify`, {
 .then(result => {
   if (result.success) {
     // رمز رو از sessionStorage بخون برای لاگین
-    var password = SafeSS.getJSON('signup_password'); // SafeSS
+    var password = SafeSS.getJSON('signup_pwd'); // SafeSS
     if (!password) {
       codeHint.innerText = "خطا: رمز ثبت‌نام پیدا نشد. لطفا مجدد ثبت‌نام کنید.";
       codeHint.classList.remove("hidden");
@@ -967,7 +967,7 @@ fetch(`${API_ORIGIN}/api/auth/verify`, {
         localStorage.setItem('token', loginRes.token);
         localStorage.setItem('seller', JSON.stringify(loginRes.seller));
         // sessionStorage رو پاک کن
-        sessionStorage.removeItem('signup_password');
+        sessionStorage.removeItem('signup_pwd');
         // ریدایرکت به داشبورد
         window.location.href = "seller/dashboard.html?shopurl=" + encodeURIComponent(loginRes.seller.shopurl);
       } else {
