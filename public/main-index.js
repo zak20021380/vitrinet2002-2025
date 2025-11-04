@@ -1064,7 +1064,7 @@ function renderPopularProductsSection(section) {
           </div>`
         : '';
       const price = card.price
-        ? `<div class="popular-card-price inline-flex items-center justify-center bg-gradient-to-r from-[#10b981]/10 to-[#0ea5e9]/10 px-4 py-1 rounded-full text-[#10b981] font-extrabold text-base shadow-sm">${escapeHTML(card.price)}</div>`
+        ? `<div class="popular-card-price self-center inline-flex items-center justify-center bg-gradient-to-r from-[#10b981]/10 to-[#0ea5e9]/10 px-4 py-1 rounded-full text-[#10b981] font-extrabold text-base shadow-sm text-center">${escapeHTML(card.price)}</div>`
         : '';
       const button = card.buttonText
         ? `<span class="popular-card-link inline-flex items-center gap-2 text-sm font-bold text-[#0ea5e9] bg-[#e0fdfa] px-4 py-1.5 rounded-full shadow-sm">${escapeHTML(card.buttonText)}<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M7 17L17 7M7 7h10v10"/></svg></span>`
@@ -1151,7 +1151,7 @@ async function loadPopularProductsFallback(slider) {
             </svg>
             <span class="truncate">${escapeHTML(loc)}</span>
           </div>
-          <div class="popular-card-price inline-flex items-center justify-center bg-gradient-to-r from-[#10b981]/10 to-[#0ea5e9]/10 px-4 py-1 rounded-full text-[#10b981] font-extrabold text-base shadow-sm">
+          <div class="popular-card-price self-center inline-flex items-center justify-center bg-gradient-to-r from-[#10b981]/10 to-[#0ea5e9]/10 px-4 py-1 rounded-full text-[#10b981] font-extrabold text-base shadow-sm text-center">
             ${escapeHTML(priceText)}
           </div>
         </div>
