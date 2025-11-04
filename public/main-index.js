@@ -1032,7 +1032,7 @@ function renderPopularProductsSection(section) {
       const elementTag = card.link ? 'a' : 'div';
       const cardEl = document.createElement(elementTag);
       cardEl.className = `
-        group glass min-w-[265px] max-w-xs flex-shrink-0 flex flex-col items-center
+        group glass min-w-[265px] max-w-xs flex-shrink-0 flex flex-col items-stretch text-center
         p-4 rounded-2xl shadow-2xl border-2 border-[#0ea5e9]/20 hover:scale-[1.04] hover:shadow-2xl hover:border-[#0ea5e9]/40
         bg-white/95 backdrop-blur-[5px] transition-all duration-300 center-card
       `;
@@ -1058,7 +1058,10 @@ function renderPopularProductsSection(section) {
         ? `<div class="inline-block bg-gradient-to-r from-[#10b981]/10 to-[#0ea5e9]/10 px-4 py-1 rounded-full text-[#10b981] font-extrabold text-base shadow-sm">${escapeHTML(card.price)}</div>`
         : '';
       const button = card.buttonText
-        ? `<span class="mt-4 inline-flex items-center gap-2 text-sm font-bold text-[#0ea5e9] bg-[#e0fdfa] px-4 py-1.5 rounded-full shadow-sm">${escapeHTML(card.buttonText)}<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M7 17L17 7M7 7h10v10"/></svg></span>`
+        ? `<span class="card-cta inline-flex items-center gap-2 text-sm font-bold text-[#0ea5e9] bg-[#e0fdfa] px-4 py-1.5 rounded-full shadow-sm">
+            ${escapeHTML(card.buttonText)}
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M7 17L17 7M7 7h10v10"/></svg>
+          </span>`
         : '';
 
       cardEl.innerHTML = `
@@ -1072,7 +1075,7 @@ function renderPopularProductsSection(section) {
         ${description}
         ${location}
         ${price}
-        ${button || `<button class="card-action-btn" onclick="event.stopPropagation();">
+        ${button || `<button class="card-action-btn card-cta" onclick="event.stopPropagation();">
           مشاهده
           <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/>
@@ -1114,7 +1117,7 @@ async function loadPopularProductsFallback(slider) {
       card.target = '_blank';
       card.rel = 'noopener';
       card.className = `
-        group glass min-w-[265px] max-w-xs flex-shrink-0 flex flex-col items-center
+        group glass min-w-[265px] max-w-xs flex-shrink-0 flex flex-col items-stretch text-center
         p-4 rounded-2xl shadow-2xl border-2 border-[#0ea5e9]/20 hover:scale-[1.04] hover:shadow-2xl hover:border-[#0ea5e9]/40
         bg-white/95 backdrop-blur-[5px] transition-all duration-300 center-card
       `;
@@ -1140,7 +1143,7 @@ async function loadPopularProductsFallback(slider) {
         <div class="inline-block bg-gradient-to-r from-[#10b981]/10 to-[#0ea5e9]/10 px-4 py-1 rounded-full text-[#10b981] font-extrabold text-base shadow-sm">
           ${escapeHTML(priceText)}
         </div>
-        <button class="card-action-btn" onclick="event.stopPropagation();">
+        <button class="card-action-btn card-cta" onclick="event.stopPropagation();">
           مشاهده
           <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/>
