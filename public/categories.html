@@ -390,10 +390,26 @@
 
     /* Grid improvements for proper card display */
     #categoriesGrid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 1.75rem;
+      align-items: stretch;
       grid-auto-rows: auto;
     }
     #categoriesGrid .category-card {
       height: 100%;
+    }
+    @media (max-width: 768px) {
+      #categoriesGrid {
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 1.35rem;
+      }
+    }
+    @media (max-width: 480px) {
+      #categoriesGrid {
+        grid-template-columns: 1fr;
+        gap: 1.1rem;
+      }
     }
 
     /* Search Results Dropdown */
