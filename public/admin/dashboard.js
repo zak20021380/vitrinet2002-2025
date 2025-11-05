@@ -8575,8 +8575,12 @@ function loadReportsContent () {
       /* 5) اجرای تمام <script>‌های reports.html */
       doc.querySelectorAll('script').forEach(old => {
         const s = document.createElement('script');
-        if (old.src) s.src = old.src;
-        else         s.textContent = old.textContent;
+        if (old.src) {
+          s.src = old.src;
+        } else {
+          console.warn('Skipping inline script due to CSP restrictions', old);
+          return;
+        }
         document.body.appendChild(s);
       });
 
