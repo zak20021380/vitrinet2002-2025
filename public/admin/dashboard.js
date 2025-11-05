@@ -8436,6 +8436,25 @@ function startBadgePolling() {
 }
 startBadgePolling();
 
+function cloneAndAppendScript(oldScript, scriptKey) {
+  const newScript = document.createElement('script');
+
+  Array.from(oldScript.attributes).forEach(attr => {
+    if (attr.name === 'data-external-section') return;
+    newScript.setAttribute(attr.name, attr.value);
+  });
+
+  if (!oldScript.src) {
+    newScript.textContent = oldScript.textContent || '';
+  }
+
+  if (scriptKey) {
+    newScript.dataset.externalSection = scriptKey;
+  }
+
+  document.body.appendChild(newScript);
+}
+
 function loadExternalPanel(panelId, url, {
   loadingMessage = 'در حال بارگیری محتوا...',
   errorMessage = 'خطا در بارگیری محتوا.',
@@ -8481,16 +8500,7 @@ function loadExternalPanel(panelId, url, {
 
       const scripts = doc.querySelectorAll('script');
       scripts.forEach(oldScript => {
-        const newScript = document.createElement('script');
-        if (oldScript.src) {
-          newScript.src = oldScript.src;
-        } else {
-          newScript.textContent = oldScript.textContent;
-        }
-        if (scriptKey) {
-          newScript.dataset.externalSection = scriptKey;
-        }
-        document.body.appendChild(newScript);
+        cloneAndAppendScript(oldScript, scriptKey);
       });
     } else {
       panel.innerHTML = `<p style="text-align:center;color:#ef4444">${errorMessage}</p>`;
@@ -8574,14 +8584,7 @@ function loadReportsContent () {
 
       /* 5) اجرای تمام <script>‌های reports.html */
       doc.querySelectorAll('script').forEach(old => {
-        const s = document.createElement('script');
-        if (old.src) {
-          s.src = old.src;
-        } else {
-          console.warn('Skipping inline script due to CSP restrictions', old);
-          return;
-        }
-        document.body.appendChild(s);
+        cloneAndAppendScript(old);
       });
 
     } else {
