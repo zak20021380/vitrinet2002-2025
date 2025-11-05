@@ -79,7 +79,7 @@
         const categoryDesc = escapeHtml(cat.desc);
 
         return `
-          <article class="category-card group w-full mx-auto" data-slug="${categoryId}">
+          <article class="category-card group" data-slug="${categoryId}">
             <div class="category-card__top bg-gradient-to-br ${cat.color}">
               <div class="cat-icon">${getCategoryIcon(categoryId)}</div>
               <div class="category-card__headline">
