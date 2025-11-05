@@ -1044,7 +1044,310 @@
     window.addEventListener('keydown', (event) => {
       if (event.key === 'Escape') {
         closeModal();
+        closeCalculator();
       }
     });
+
+    // ============================================================================
+    // CALCULATOR FUNCTIONALITY
+    // ============================================================================
+    const calculatorModal = document.getElementById('calculatorModal');
+    const calculatorToggle = document.getElementById('calculatorToggle');
+    const calculatorClose = document.getElementById('calculatorClose');
+    const calcResult = document.getElementById('calcResult');
+    const calcHistory = document.getElementById('calcHistory');
+    const copyResultBtn = document.getElementById('copyResult');
+    const calcButtons = document.querySelectorAll('.calc-btn');
+
+    let calcState = {
+      currentValue: '0',
+      previousValue: '',
+      operation: null,
+      shouldResetScreen: false
+    };
+
+    const openCalculator = () => {
+      if (calculatorModal) {
+        calculatorModal.classList.add('show');
+        document.body.style.overflow = 'hidden';
+      }
+    };
+
+    const closeCalculator = () => {
+      if (calculatorModal) {
+        calculatorModal.classList.remove('show');
+        if (!elements.addModal?.classList.contains('show')) {
+          document.body.style.overflow = '';
+        }
+      }
+    };
+
+    const updateDisplay = () => {
+      if (calcResult) {
+        calcResult.textContent = formatNumber(calcState.currentValue);
+      }
+      if (calcHistory) {
+        if (calcState.previousValue && calcState.operation) {
+          const opSymbol = getOperationSymbol(calcState.operation);
+          calcHistory.textContent = `${formatNumber(calcState.previousValue)} ${opSymbol}`;
+        } else {
+          calcHistory.textContent = '';
+        }
+      }
+    };
+
+    const formatNumber = (num) => {
+      const str = num.toString();
+      if (str.length > 15) {
+        return parseFloat(str).toExponential(8);
+      }
+      return str;
+    };
+
+    const getOperationSymbol = (operation) => {
+      const symbols = {
+        add: '+',
+        subtract: '−',
+        multiply: '×',
+        divide: '÷'
+      };
+      return symbols[operation] || '';
+    };
+
+    const handleNumber = (num) => {
+      if (calcState.shouldResetScreen) {
+        calcState.currentValue = num;
+        calcState.shouldResetScreen = false;
+      } else {
+        if (calcState.currentValue === '0') {
+          calcState.currentValue = num;
+        } else {
+          calcState.currentValue += num;
+        }
+      }
+      updateDisplay();
+    };
+
+    const handleDecimal = () => {
+      if (calcState.shouldResetScreen) {
+        calcState.currentValue = '0.';
+        calcState.shouldResetScreen = false;
+      } else if (!calcState.currentValue.includes('.')) {
+        calcState.currentValue += '.';
+      }
+      updateDisplay();
+    };
+
+    const handleOperation = (nextOperation) => {
+      const inputValue = parseFloat(calcState.currentValue);
+
+      if (calcState.previousValue === '') {
+        calcState.previousValue = calcState.currentValue;
+      } else if (calcState.operation) {
+        const result = performCalculation();
+        calcState.currentValue = String(result);
+        calcState.previousValue = String(result);
+      }
+
+      calcState.shouldResetScreen = true;
+      calcState.operation = nextOperation;
+      updateDisplay();
+    };
+
+    const performCalculation = () => {
+      const prev = parseFloat(calcState.previousValue);
+      const current = parseFloat(calcState.currentValue);
+
+      if (isNaN(prev) || isNaN(current)) return 0;
+
+      switch (calcState.operation) {
+        case 'add':
+          return prev + current;
+        case 'subtract':
+          return prev - current;
+        case 'multiply':
+          return prev * current;
+        case 'divide':
+          return current !== 0 ? prev / current : 0;
+        default:
+          return current;
+      }
+    };
+
+    const handleEquals = () => {
+      if (calcState.operation && calcState.previousValue !== '') {
+        const result = performCalculation();
+        calcState.currentValue = String(result);
+        calcState.previousValue = '';
+        calcState.operation = null;
+        calcState.shouldResetScreen = true;
+        updateDisplay();
+      }
+    };
+
+    const handleClear = () => {
+      calcState.currentValue = '0';
+      calcState.previousValue = '';
+      calcState.operation = null;
+      calcState.shouldResetScreen = false;
+      updateDisplay();
+    };
+
+    const handleDelete = () => {
+      if (calcState.currentValue.length > 1) {
+        calcState.currentValue = calcState.currentValue.slice(0, -1);
+      } else {
+        calcState.currentValue = '0';
+      }
+      updateDisplay();
+    };
+
+    const handlePercent = () => {
+      const current = parseFloat(calcState.currentValue);
+      calcState.currentValue = String(current / 100);
+      updateDisplay();
+    };
+
+    const handleCopyResult = async () => {
+      try {
+        await navigator.clipboard.writeText(calcState.currentValue);
+
+        // Visual feedback
+        if (copyResultBtn) {
+          const originalText = copyResultBtn.innerHTML;
+          copyResultBtn.innerHTML = '<i class="ri-check-line"></i> کپی شد';
+          copyResultBtn.style.background = '#10b981';
+          copyResultBtn.style.color = 'white';
+
+          setTimeout(() => {
+            copyResultBtn.innerHTML = originalText;
+            copyResultBtn.style.background = '';
+            copyResultBtn.style.color = '';
+          }, 1500);
+        }
+      } catch (error) {
+        // Fallback for older browsers
+        const textArea = document.createElement('textarea');
+        textArea.value = calcState.currentValue;
+        textArea.style.position = 'fixed';
+        textArea.style.left = '-999999px';
+        document.body.appendChild(textArea);
+        textArea.select();
+        try {
+          document.execCommand('copy');
+          if (copyResultBtn) {
+            const originalText = copyResultBtn.innerHTML;
+            copyResultBtn.innerHTML = '<i class="ri-check-line"></i> کپی شد';
+            setTimeout(() => {
+              copyResultBtn.innerHTML = originalText;
+            }, 1500);
+          }
+        } catch (err) {
+          console.error('Failed to copy:', err);
+        }
+        document.body.removeChild(textArea);
+      }
+    };
+
+    // Event Listeners
+    if (calculatorToggle) {
+      calculatorToggle.addEventListener('click', openCalculator);
+    }
+
+    if (calculatorClose) {
+      calculatorClose.addEventListener('click', closeCalculator);
+    }
+
+    if (calculatorModal) {
+      calculatorModal.addEventListener('click', (e) => {
+        if (e.target === calculatorModal) {
+          closeCalculator();
+        }
+      });
+    }
+
+    if (copyResultBtn) {
+      copyResultBtn.addEventListener('click', handleCopyResult);
+    }
+
+    // Calculator buttons
+    calcButtons.forEach((button) => {
+      button.addEventListener('click', () => {
+        const { value, action } = button.dataset;
+
+        if (value) {
+          handleNumber(value);
+        } else if (action) {
+          switch (action) {
+            case 'clear':
+              handleClear();
+              break;
+            case 'delete':
+              handleDelete();
+              break;
+            case 'percent':
+              handlePercent();
+              break;
+            case 'divide':
+            case 'multiply':
+            case 'subtract':
+            case 'add':
+              handleOperation(action);
+              break;
+            case 'decimal':
+              handleDecimal();
+              break;
+            case 'equals':
+              handleEquals();
+              break;
+          }
+        }
+      });
+    });
+
+    // Keyboard support for calculator
+    window.addEventListener('keydown', (event) => {
+      if (!calculatorModal?.classList.contains('show')) return;
+
+      const { key } = event;
+
+      if (/^[0-9]$/.test(key)) {
+        event.preventDefault();
+        handleNumber(key);
+      } else if (key === '.') {
+        event.preventDefault();
+        handleDecimal();
+      } else if (key === '+') {
+        event.preventDefault();
+        handleOperation('add');
+      } else if (key === '-') {
+        event.preventDefault();
+        handleOperation('subtract');
+      } else if (key === '*') {
+        event.preventDefault();
+        handleOperation('multiply');
+      } else if (key === '/') {
+        event.preventDefault();
+        handleOperation('divide');
+      } else if (key === 'Enter' || key === '=') {
+        event.preventDefault();
+        handleEquals();
+      } else if (key === 'Backspace') {
+        event.preventDefault();
+        handleDelete();
+      } else if (key === 'Escape') {
+        event.preventDefault();
+        closeCalculator();
+      } else if (key.toLowerCase() === 'c') {
+        event.preventDefault();
+        handleClear();
+      } else if (key === '%') {
+        event.preventDefault();
+        handlePercent();
+      }
+    });
+
+    // Initialize calculator display
+    updateDisplay();
   });
 })();
