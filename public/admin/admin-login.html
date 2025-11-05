@@ -1,17 +1,11 @@
 <!DOCTYPE html>
 <html lang="fa" dir="rtl">
 <head>
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdn.tailwindcss.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; connect-src 'self'; img-src 'self' data:; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; upgrade-insecure-requests; block-all-mixed-content">
-<meta http-equiv="Strict-Transport-Security" content="max-age=63072000; includeSubDomains; preload">
-<meta http-equiv="X-Frame-Options" content="DENY">
-<meta http-equiv="Referrer-Policy" content="no-referrer">
-<meta http-equiv="X-Content-Type-Options" content="nosniff">
-<meta http-equiv="X-XSS-Protection" content="1; mode=block">
-<meta name="referrer" content="no-referrer">
-<meta http-equiv="Permissions-Policy" content="geolocation=(), microphone=(), camera=()">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdn.tailwindcss.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.jsdelivr.net; font-src 'self' https://fonts.gstatic.com; connect-src 'self'; img-src 'self' data:; base-uri 'self'; form-action 'self'; upgrade-insecure-requests; block-all-mixed-content">
     <script src="/security.js" defer></script>
 
   <meta charset="UTF-8">
+  <meta name="referrer" content="no-referrer">
   <title>ورود ادمین | ویترینت</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;700&display=swap" rel="stylesheet">
@@ -250,52 +244,7 @@
     </div>
   </div>
   <script src="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.js"></script>
-<script>
-  // تم شب/روز
-  const body = document.body;
-  const themeBtn = document.getElementById('toggleTheme');
-  let dark = localStorage.getItem('admin_theme_dark') === '1';
-  if (dark) body.classList.add('dark');
-  themeBtn.onclick = function() {
-    body.classList.toggle('dark');
-    dark = body.classList.contains('dark');
-    localStorage.setItem('admin_theme_dark', dark ? '1' : '0');
-    themeBtn.innerHTML = dark
-      ? '<i class="ri-sun-line"></i>'
-      : '<i class="ri-moon-clear-line"></i>';
-  };
-  themeBtn.innerHTML = dark
-    ? '<i class="ri-sun-line"></i>'
-    : '<i class="ri-moon-clear-line"></i>';
-
-  // فرم لاگین ادمین
-  document.getElementById('adminLoginForm').addEventListener('submit', async function(e) {
-    e.preventDefault();
-    const phone = document.getElementById('phone').value.trim();
-    const password = document.getElementById('password').value;
-    const errorDiv = document.getElementById('loginError');
-    errorDiv.textContent = '';
-    try {
-      // اتصال به بک‌اند روی پورت 5000
-      const res = await fetch('http://localhost:5000/api/admin/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-          credentials: 'include',
-        body: JSON.stringify({ phone, password })
-      });
-      const data = await res.json();
-if (res.ok) {
-        // ذخیره توکن با کلید admin_token
-        // انتقال به داشبورد ادمین
-        window.location.href = 'dashboard.html';
-      } else {
-        errorDiv.textContent = data.message || 'ورود ناموفق بود. لطفاً اطلاعات را درست وارد کنید.';
-      }
-    } catch (err) {
-      errorDiv.textContent = 'ارتباط با سرور برقرار نشد!';
-    }
-  });
-</script>
+  <script src="/admin/js/admin-login.js" defer></script>
 
 </body>
 </html>
