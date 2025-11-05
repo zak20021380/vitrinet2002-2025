@@ -74,6 +74,11 @@
   let hasShownLocalNotice = false;
   let categoryChart = null;
   let paymentChart = null;
+  const clearFormMessage = () => {
+    if (!elements.formMessage) return;
+    elements.formMessage.textContent = '';
+    elements.formMessage.classList.remove('error', 'success', 'show');
+  };
 
   // ============================================================================
   // DOM ELEMENTS
@@ -114,26 +119,7 @@
     navButtons: document.querySelectorAll('.nav-item'),
     categoryChartCanvas: document.getElementById('categoryChart'),
     paymentChartCanvas: document.getElementById('paymentChart'),
-    // Calculator elements
-    calculatorModal: document.getElementById('calculatorModal'),
-    calculatorTrigger: document.getElementById('calculatorTrigger'),
-    calculatorQuickAccess: document.getElementById('calculatorQuickAccess'),
-    calculatorClose: document.getElementById('calculatorClose'),
-    calcExpression: document.getElementById('calcExpression'),
-    calcResult: document.getElementById('calcResult'),
-    calcCopy: document.getElementById('calcCopy'),
-    calcClear: document.getElementById('calcClear'),
     amountInput: document.getElementById('amountInput')
-  };
-
-  // ============================================================================
-  // CALCULATOR STATE
-  // ============================================================================
-  const calculatorState = {
-    currentValue: '0',
-    previousValue: '',
-    operator: null,
-    shouldResetDisplay: false
   };
 
   // ============================================================================
@@ -193,219 +179,6 @@
     setTimeout(() => {
       elements.formMessage.classList.remove('show');
     }, 5000);
-  };
-
-  const clearFormMessage = () => {
-    if (!elements.formMessage) return;
-    elements.formMessage.textContent = '';
-    elements.formMessage.classList.remove('error', 'success', 'show');
-  };
-
-  // ============================================================================
-  // CALCULATOR UTILITY FUNCTIONS
-  // ============================================================================
-  const convertPersianToEnglishNumbers = (str) => {
-    const persianNumbers = ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹'];
-    const englishNumbers = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
-    
-    let result = str;
-    for (let i = 0; i < 10; i++) {
-      result = result.replace(new RegExp(persianNumbers[i], 'g'), englishNumbers[i]);
-    }
-    return result;
-  };
-
-  const formatNumberForDisplay = (num) => {
-    try {
-      const formatted = new Intl.NumberFormat('en-US').format(num);
-      return formatted;
-    } catch (error) {
-      return num.toString();
-    }
-  };
-
-  // ============================================================================
-  // CALCULATOR FUNCTIONS
-  // ============================================================================
-  const updateCalculatorDisplay = () => {
-    if (!elements.calcExpression || !elements.calcResult) return;
-
-    let expression = '';
-    if (calculatorState.previousValue) {
-      expression += formatNumberForDisplay(calculatorState.previousValue);
-      if (calculatorState.operator) {
-        const operatorSymbols = {
-          add: '+',
-          subtract: '−',
-          multiply: '×',
-          divide: '÷'
-        };
-        expression += ` ${operatorSymbols[calculatorState.operator]} `;
-      }
-    }
-    if (calculatorState.currentValue !== calculatorState.previousValue) {
-      expression += formatNumberForDisplay(calculatorState.currentValue);
-    }
-
-    elements.calcExpression.textContent = expression || '0';
-    elements.calcResult.textContent = formatNumberForDisplay(calculatorState.currentValue);
-  };
-
-  const resetCalculator = () => {
-    calculatorState.currentValue = '0';
-    calculatorState.previousValue = '';
-    calculatorState.operator = null;
-    calculatorState.shouldResetDisplay = false;
-    updateCalculatorDisplay();
-  };
-
-  const appendNumber = (num) => {
-    if (calculatorState.shouldResetDisplay) {
-      calculatorState.currentValue = num;
-      calculatorState.shouldResetDisplay = false;
-    } else {
-      if (calculatorState.currentValue === '0' && num !== '.') {
-        calculatorState.currentValue = num;
-      } else if (num === '.' && calculatorState.currentValue.includes('.')) {
-        return;
-      } else {
-        calculatorState.currentValue += num;
-      }
-    }
-    updateCalculatorDisplay();
-  };
-
-  const deleteLastDigit = () => {
-    if (calculatorState.currentValue.length > 1) {
-      calculatorState.currentValue = calculatorState.currentValue.slice(0, -1);
-    } else {
-      calculatorState.currentValue = '0';
-    }
-    updateCalculatorDisplay();
-  };
-
-  const setOperator = (op) => {
-    if (calculatorState.operator && !calculatorState.shouldResetDisplay) {
-      calculate();
-    }
-    calculatorState.previousValue = calculatorState.currentValue;
-    calculatorState.operator = op;
-    calculatorState.shouldResetDisplay = true;
-    updateCalculatorDisplay();
-  };
-
-  const calculate = () => {
-    if (!calculatorState.operator || !calculatorState.previousValue) return;
-
-    const prev = parseFloat(calculatorState.previousValue);
-    const current = parseFloat(calculatorState.currentValue);
-
-    if (isNaN(prev) || isNaN(current)) return;
-
-    let result = 0;
-    switch (calculatorState.operator) {
-      case 'add':
-        result = prev + current;
-        break;
-      case 'subtract':
-        result = prev - current;
-        break;
-      case 'multiply':
-        result = prev * current;
-        break;
-      case 'divide':
-        if (current === 0) {
-          resetCalculator();
-          return;
-        }
-        result = prev / current;
-        break;
-      default:
-        return;
-    }
-
-    calculatorState.currentValue = result.toString();
-    calculatorState.previousValue = '';
-    calculatorState.operator = null;
-    calculatorState.shouldResetDisplay = true;
-    updateCalculatorDisplay();
-  };
-
-  const calculatePercent = () => {
-    const current = parseFloat(calculatorState.currentValue);
-    if (isNaN(current)) return;
-
-    if (calculatorState.previousValue && calculatorState.operator) {
-      const prev = parseFloat(calculatorState.previousValue);
-      calculatorState.currentValue = ((prev * current) / 100).toString();
-    } else {
-      calculatorState.currentValue = (current / 100).toString();
-    }
-    updateCalculatorDisplay();
-  };
-
-  const copyCalculatorResult = async () => {
-    const value = calculatorState.currentValue;
-    try {
-      await navigator.clipboard.writeText(value);
-      // Visual feedback
-      if (elements.calcCopy) {
-        const originalText = elements.calcCopy.innerHTML;
-        elements.calcCopy.innerHTML = '<i class="ri-check-line"></i> کپی شد';
-        setTimeout(() => {
-          elements.calcCopy.innerHTML = originalText;
-        }, 1500);
-      }
-    } catch (error) {
-      // Fallback for older browsers
-      const textArea = document.createElement('textarea');
-      textArea.value = value;
-      textArea.style.position = 'fixed';
-      textArea.style.left = '-999999px';
-      document.body.appendChild(textArea);
-      textArea.select();
-      try {
-        document.execCommand('copy');
-        if (elements.calcCopy) {
-          const originalText = elements.calcCopy.innerHTML;
-          elements.calcCopy.innerHTML = '<i class="ri-check-line"></i> کپی شد';
-          setTimeout(() => {
-            elements.calcCopy.innerHTML = originalText;
-          }, 1500);
-        }
-      } catch (err) {
-        console.error('Failed to copy:', err);
-      }
-      document.body.removeChild(textArea);
-    }
-  };
-
-  const useCalculatorResult = () => {
-    const value = parseFloat(calculatorState.currentValue);
-    if (!isNaN(value) && elements.amountInput) {
-      elements.amountInput.value = Math.round(value);
-      closeCalculatorModal();
-    }
-  };
-
-  const openCalculatorModal = () => {
-    if (elements.calculatorModal) {
-      elements.calculatorModal.classList.add('show');
-      // If amount input has a value, use it as starting point
-      if (elements.amountInput && elements.amountInput.value) {
-        const currentAmount = parseFloat(elements.amountInput.value);
-        if (!isNaN(currentAmount)) {
-          calculatorState.currentValue = currentAmount.toString();
-          updateCalculatorDisplay();
-        }
-      }
-    }
-  };
-
-  const closeCalculatorModal = () => {
-    if (elements.calculatorModal) {
-      elements.calculatorModal.classList.remove('show');
-    }
   };
 
   // ============================================================================
@@ -1140,80 +913,6 @@
       elements.advancedToggle.addEventListener('click', toggleAdvanced);
     }
 
-    // Calculator triggers
-    const openCalculator = (e) => {
-      if (e) {
-        e.preventDefault();
-      }
-      openCalculatorModal();
-    };
-
-    if (elements.calculatorTrigger) {
-      elements.calculatorTrigger.addEventListener('click', openCalculator);
-    }
-
-    if (elements.calculatorQuickAccess) {
-      elements.calculatorQuickAccess.addEventListener('click', openCalculator);
-    }
-
-    // Calculator close
-    if (elements.calculatorClose) {
-      elements.calculatorClose.addEventListener('click', closeCalculatorModal);
-    }
-
-    // Click outside calculator modal to close
-    if (elements.calculatorModal) {
-      elements.calculatorModal.addEventListener('click', (e) => {
-        if (e.target === elements.calculatorModal) {
-          closeCalculatorModal();
-        }
-      });
-    }
-
-    // Calculator buttons
-    document.querySelectorAll('.calc-btn-number').forEach(button => {
-      button.addEventListener('click', () => {
-        const value = button.dataset.value;
-        appendNumber(value);
-      });
-    });
-
-    document.querySelectorAll('.calc-btn-operator').forEach(button => {
-      button.addEventListener('click', () => {
-        const action = button.dataset.action;
-        setOperator(action);
-      });
-    });
-
-    document.querySelectorAll('.calc-btn-function').forEach(button => {
-      button.addEventListener('click', () => {
-        const action = button.dataset.action;
-        if (action === 'clear') {
-          resetCalculator();
-        } else if (action === 'backspace') {
-          deleteLastDigit();
-        } else if (action === 'percent') {
-          calculatePercent();
-        }
-      });
-    });
-
-    document.querySelectorAll('.calc-btn-equals').forEach(button => {
-      button.addEventListener('click', calculate);
-    });
-
-    // Calculator actions
-    if (elements.calcCopy) {
-      elements.calcCopy.addEventListener('click', copyCalculatorResult);
-    }
-
-    if (elements.calcClear) {
-      elements.calcClear.addEventListener('click', () => {
-        resetCalculator();
-        closeCalculatorModal();
-      });
-    }
-
     // Bottom nav
     if (elements.navButtons?.length) {
       elements.navButtons.forEach((button) => {
@@ -1345,7 +1044,6 @@
     window.addEventListener('keydown', (event) => {
       if (event.key === 'Escape') {
         closeModal();
-        closeCalculatorModal();
       }
     });
   });
