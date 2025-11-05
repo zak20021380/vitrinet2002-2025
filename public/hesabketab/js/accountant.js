@@ -2,49 +2,11 @@
   // ============================================================================
   // CONFIGURATION - PRESERVED FROM ORIGINAL
   // ============================================================================
-  const ACCESS_KEY = 'vitrinet-accountant-access';
   const ACCOUNTANT_API = '/api/accountant';
   const SELLER_API = '/api/auth/getCurrentSeller';
   const DASHBOARD_URL = '../seller/dashboard.html';
   const LOGIN_URL = '../seller/login.html';
   const THEME_KEY = 'accountant-preferred-theme';
-  const LOCAL_STORAGE_KEY = 'accountant-demo-entries';
-
-  const LOCAL_SEED_ENTRIES = [
-    {
-      id: 'demo-income-1',
-      title: 'فروش نقدی صبح',
-      type: 'income',
-      amount: 3500000,
-      recordedAt: '2024-07-14T08:35:00.000Z',
-      category: 'فروش محصول',
-      paymentMethod: 'cash',
-      status: 'paid',
-      counterpartyType: 'customer',
-      counterpartyName: 'مشتری حضوری',
-      referenceNumber: 'RCPT-4582',
-      tags: ['فروش روزانه'],
-      description: 'ثبت فروش صبحگاهی فروشگاه.',
-      createdAt: '2024-07-14T08:35:00.000Z'
-    },
-    {
-      id: 'demo-expense-1',
-      title: 'خرید کالا از تامین‌کننده',
-      type: 'expense',
-      amount: 2100000,
-      recordedAt: '2024-07-13T15:10:00.000Z',
-      category: 'خرید کالا',
-      paymentMethod: 'transfer',
-      status: 'pending',
-      counterpartyType: 'supplier',
-      counterpartyName: 'تعاونی سبز',
-      referenceNumber: 'INV-7821',
-      dueDate: '2024-07-20',
-      tags: ['تامین کالا'],
-      description: 'خرید ماهانه.',
-      createdAt: '2024-07-13T15:10:00.000Z'
-    }
-  ];
 
   const paymentMethodLabels = {
     cash: 'نقدی',
@@ -71,7 +33,6 @@
     'عمومی': '#6b7280'
   };
 
-  let hasShownLocalNotice = false;
   let categoryChart = null;
   let paymentChart = null;
   const clearFormMessage = () => {
@@ -181,6 +142,17 @@
     }, 5000);
   };
 
+  const redirectToLogin = () => {
+    window.location.href = LOGIN_URL;
+  };
+
+  const handleUnauthorized = (message = 'برای ادامه لطفاً وارد حساب کاربری شوید.') => {
+    showFormMessage(message, 'error');
+    setTimeout(() => {
+      redirectToLogin();
+    }, 1500);
+  };
+
   // ============================================================================
   // THEME MANAGEMENT - PRESERVED
   // ============================================================================
@@ -253,7 +225,7 @@
     const computedStatus = deriveComputedStatus(entry);
 
     return {
-      id: entry.id || `local-${Date.now()}`,
+      id: entry._id || entry.id || `entry-${Date.now()}`,
       title: entry.title || 'تراکنش بدون عنوان',
       type: entry.type === 'expense' ? 'expense' : 'income',
       amount: Number(entry.amount) || 0,
@@ -272,32 +244,6 @@
     };
   };
 
-  const readLocalEntries = () => {
-    try {
-      const raw = localStorage.getItem(LOCAL_STORAGE_KEY);
-      if (!raw) {
-        localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(LOCAL_SEED_ENTRIES));
-        return LOCAL_SEED_ENTRIES.map((entry) => normaliseEntryShape(entry));
-      }
-      const parsed = JSON.parse(raw);
-      if (!Array.isArray(parsed)) {
-        localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(LOCAL_SEED_ENTRIES));
-        return LOCAL_SEED_ENTRIES.map((entry) => normaliseEntryShape(entry));
-      }
-      return parsed.map((entry) => normaliseEntryShape(entry));
-    } catch (error) {
-      return LOCAL_SEED_ENTRIES.map((entry) => normaliseEntryShape(entry));
-    }
-  };
-
-  const writeLocalEntries = (entries = []) => {
-    try {
-      localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(entries));
-    } catch (error) {
-      /* noop */
-    }
-  };
-
   const calculateTotals = (entries = []) => {
     return entries.reduce(
       (acc, entry) => {
@@ -314,101 +260,25 @@
     );
   };
 
-  const buildLocalSummary = (entries = []) => {
-    const totals = calculateTotals(entries);
-
-    const counts = entries.reduce(
-      (acc, entry) => {
-        const statusKey = entry.computedStatus || entry.status || 'paid';
-        if (statusKey === 'pending') acc.pending += 1;
-        if (statusKey === 'overdue') acc.overdue += 1;
-        if (statusKey === 'paid') acc.paid += 1;
-        acc.total += 1;
-        return acc;
-      },
-      { total: 0, pending: 0, overdue: 0, paid: 0 }
-    );
-
-    const amountsByStatus = entries.reduce(
-      (acc, entry) => {
-        const statusKey = entry.computedStatus || entry.status || 'paid';
-        const current = acc[statusKey] || 0;
-        acc[statusKey] = current + (Number(entry.amount) || 0);
-        return acc;
-      },
-      { pending: 0, overdue: 0, paid: 0 }
-    );
-
-    const categoryTotalsMap = entries.reduce((acc, entry) => {
-      const key = entry.category || 'عمومی';
-      const existing = acc.get(key) || 0;
-      acc.set(key, existing + (Number(entry.amount) || 0));
-      return acc;
-    }, new Map());
-
-    const paymentTotalsMap = entries.reduce((acc, entry) => {
-      const key = entry.paymentMethod || 'other';
-      const existing = acc.get(key) || 0;
-      acc.set(key, existing + (Number(entry.amount) || 0));
-      return acc;
-    }, new Map());
-
-    const categories = Array.from(categoryTotalsMap.entries()).map(([name, total]) => ({
-      name,
-      total
-    }));
-
-    const paymentMethods = Array.from(paymentTotalsMap.entries()).map(([method, total]) => ({
-      method,
-      total
-    }));
-
-    return {
-      totals,
-      counts,
-      categories,
-      paymentMethods,
-      upcomingDue: [],
-      amountsByStatus
-    };
-  };
-
-  const applyLocalFilters = (entries = [], filters = {}) => {
-    if (!entries.length) return [];
-    const query = filters.search ? filters.search.toString().toLowerCase() : '';
-
-    return entries.filter((entry) => {
-      if (filters.type && entry.type !== filters.type) return false;
-      if (filters.category && entry.category !== filters.category) return false;
-      if (filters.paymentMethod && entry.paymentMethod !== filters.paymentMethod) return false;
-      if (filters.status) {
-        const statusKey = entry.computedStatus || entry.status;
-        if (statusKey !== filters.status) return false;
-      }
-
-      if (query) {
-        const tagString = Array.isArray(entry.tags) ? entry.tags.join(' ') : '';
-        const combined = `${entry.title || ''} ${entry.counterpartyName || ''} ${tagString}`.toLowerCase();
-        if (!combined.includes(query)) return false;
-      }
-
-      return true;
-    });
-  };
-
-  const fetchEntriesFromLocal = (filters = {}) => {
-    const entries = readLocalEntries();
-    const filteredEntries = applyLocalFilters(entries, filters);
-    const summary = buildLocalSummary(filteredEntries);
-    return { entries: filteredEntries, summary };
-  };
-
-  const notifyLocalMode = () => {
-    if (!hasShownLocalNotice) {
-      showFormMessage('در حالت آفلاین. داده‌ها در دستگاه ذخیره می‌شوند.', 'info');
-      hasShownLocalNotice = true;
-    }
-  };
+  const buildDefaultSummary = (entries = []) => ({
+    totals: calculateTotals(entries),
+    counts: {
+      total: entries.length,
+      paid: 0,
+      pending: 0,
+      overdue: 0,
+      refunded: 0
+    },
+    amountsByStatus: {
+      paid: 0,
+      pending: 0,
+      overdue: 0,
+      refunded: 0
+    },
+    categories: [],
+    paymentMethods: [],
+    upcomingDue: []
+  });
 
   // ============================================================================
   // API FUNCTIONS - PRESERVED FROM ORIGINAL
@@ -419,18 +289,21 @@
         credentials: 'include'
       });
 
-      if (!response.ok) {
+      if (response.status === 401) {
+        handleUnauthorized('لطفاً ابتدا وارد حساب کاربری خود شوید.');
         throw new Error('UNAUTHENTICATED');
+      }
+
+      if (!response.ok) {
+        throw new Error('FAILED_FETCH');
       }
 
       const data = await response.json();
       return data?.seller || null;
     } catch (error) {
-      notifyLocalMode();
-      return {
-        firstname: 'فروشنده',
-        lastname: 'عزیز'
-      };
+      console.error('Failed to fetch current seller:', error);
+      showFormMessage('امکان برقراری ارتباط با سرور وجود ندارد. لطفاً دوباره تلاش کنید.', 'error');
+      throw error;
     }
   };
 
@@ -454,25 +327,30 @@
         credentials: 'include'
       });
 
+      if (response.status === 401) {
+        handleUnauthorized('برای مشاهده تراکنش‌ها وارد حساب کاربری شوید.');
+        throw new Error('UNAUTHENTICATED');
+      }
+
       if (!response.ok) {
-        throw new Error('FAILED_FETCH');
+        const error = await response
+          .json()
+          .catch(() => ({ message: 'خطا در دریافت اطلاعات.' }));
+        throw new Error(error.message || 'FAILED_FETCH');
       }
 
       const data = await response.json();
-      hasShownLocalNotice = false;
       const entries = Array.isArray(data.entries)
         ? data.entries.map((entry) => normaliseEntryShape(entry))
         : [];
 
-      writeLocalEntries(entries);
-
       return {
         entries,
-        summary: data.summary || buildLocalSummary(entries)
+        summary: data.summary || buildDefaultSummary(entries)
       };
     } catch (error) {
-      notifyLocalMode();
-      return fetchEntriesFromLocal(filters);
+      console.error('Failed to fetch accountant entries:', error);
+      throw error;
     }
   };
 
@@ -487,6 +365,13 @@
         body: JSON.stringify(payload)
       });
 
+      if (response.status === 401) {
+        handleUnauthorized('برای ثبت تراکنش ابتدا وارد حساب خود شوید.');
+        const err = new Error('UNAUTHENTICATED');
+        err.code = 401;
+        throw err;
+      }
+
       if (!response.ok) {
         const error = await response
           .json()
@@ -497,30 +382,10 @@
       }
 
       const data = await response.json();
-      const entry = normaliseEntryShape(data.entry || payload);
-      const existingEntries = readLocalEntries();
-      existingEntries.unshift(entry);
-      writeLocalEntries(existingEntries);
-      return entry;
+      return normaliseEntryShape(data.entry || payload);
     } catch (error) {
-      notifyLocalMode();
-
-      const existingEntries = readLocalEntries();
-      const preparedPayload = {
-        ...payload,
-        tags: parseTags(payload.tags)
-      };
-
-      const entry = normaliseEntryShape({
-        ...preparedPayload,
-        id: `local-${Date.now()}`,
-        createdAt: new Date().toISOString()
-      });
-
-      existingEntries.unshift(entry);
-      writeLocalEntries(existingEntries);
-
-      return entry;
+      console.error('Failed to create accountant entry:', error);
+      throw error;
     }
   };
 
@@ -932,7 +797,13 @@
     }
 
     // Fetch seller
-    const seller = await fetchCurrentSeller();
+    let seller = null;
+    try {
+      seller = await fetchCurrentSeller();
+    } catch (error) {
+      return;
+    }
+
     if (elements.sellerName) {
       const first = seller?.firstname || '';
       const last = seller?.lastname || '';
