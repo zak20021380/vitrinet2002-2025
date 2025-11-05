@@ -2,8 +2,25 @@
   // ============================================================================
   // CONFIGURATION - PRESERVED FROM ORIGINAL
   // ============================================================================
-  const ACCOUNTANT_API = '/api/accountant';
-  const SELLER_API = '/api/auth/getCurrentSeller';
+  const resolveApiBase = () => {
+    const base = window.__API_BASE__ || window.API_BASE || '';
+    if (!base) return '';
+    const trimmed = String(base).trim();
+    return trimmed.replace(/\/+$/, '');
+  };
+
+  const API_BASE = resolveApiBase();
+
+  const withApiBase = (path) => {
+    const suffix = path.startsWith('/') ? path : `/${path}`;
+    if (!API_BASE) {
+      return suffix;
+    }
+    return `${API_BASE}${suffix}`;
+  };
+
+  const ACCOUNTANT_API = withApiBase('/api/accountant');
+  const SELLER_API = withApiBase('/api/auth/getCurrentSeller');
   const DASHBOARD_URL = '../seller/dashboard.html';
   const LOGIN_URL = '../seller/login.html';
   const THEME_KEY = 'accountant-preferred-theme';
@@ -301,6 +318,13 @@
       const data = await response.json();
       return data?.seller || null;
     } catch (error) {
+      const isNetworkIssue = error?.message === 'FAILED_FETCH' || error?.name === 'TypeError';
+      if (isNetworkIssue) {
+        console.warn('Falling back after failing to fetch current seller:', error);
+        showFormMessage('امکان برقراری ارتباط با سرور وجود ندارد. لطفاً دوباره تلاش کنید.', 'error');
+        return null;
+      }
+
       console.error('Failed to fetch current seller:', error);
       showFormMessage('امکان برقراری ارتباط با سرور وجود ندارد. لطفاً دوباره تلاش کنید.', 'error');
       throw error;
