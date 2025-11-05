@@ -8,6 +8,23 @@
 <meta http-equiv="X-XSS-Protection" content="1; mode=block">
 <meta name="referrer" content="no-referrer">
 <meta http-equiv="Permissions-Policy" content="geolocation=(), microphone=(), camera=()">
+  <script>
+    window.__ENV__ = Object.assign({
+      isProd: location.hostname.endsWith("{{DOMAIN}}"),
+      analyticsEnabled: true
+    }, window.__ENV__ || {});
+    window.__CONSENT__ = Object.assign({ analytics: true }, window.__CONSENT__ || {});
+    window.__ANALYTICS_CONFIG__ = Object.assign({
+      PRODUCTION_DOMAIN: "{{DOMAIN}}",
+      GTM_ID: "{{GTM_ID}}",
+      GA4_ID: "{{GA4_ID}}",
+      POSTHOG_HOST: "{{POSTHOG_HOST}}",
+      POSTHOG_KEY: "{{POSTHOG_KEY}}",
+      PLAUSIBLE_DOMAIN: "{{PLAUSIBLE_DOMAIN}}"
+    }, window.__ANALYTICS_CONFIG__ || {});
+  </script>
+  <script src="/js/analytics.js" defer></script>
+  <script src="/js/admin-dashboard.js" defer></script>
   <meta charset="UTF-8">
   <title>داشبورد مدیریت | ویترینت</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
