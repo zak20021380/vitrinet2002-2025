@@ -10,6 +10,23 @@
 <meta name="referrer" content="no-referrer">
 <meta http-equiv="Permissions-Policy" content="geolocation=(), microphone=(), camera=()">
     <script src="/security.js" defer></script>
+  <script>
+    window.__ENV__ = Object.assign({
+      isProd: location.hostname.endsWith("{{DOMAIN}}"),
+      analyticsEnabled: true
+    }, window.__ENV__ || {});
+    window.__CONSENT__ = Object.assign({ analytics: true }, window.__CONSENT__ || {});
+    window.__ANALYTICS_CONFIG__ = Object.assign({
+      PRODUCTION_DOMAIN: "{{DOMAIN}}",
+      GTM_ID: "{{GTM_ID}}",
+      GA4_ID: "{{GA4_ID}}",
+      POSTHOG_HOST: "{{POSTHOG_HOST}}",
+      POSTHOG_KEY: "{{POSTHOG_KEY}}",
+      PLAUSIBLE_DOMAIN: "{{PLAUSIBLE_DOMAIN}}"
+    }, window.__ANALYTICS_CONFIG__ || {});
+  </script>
+  <script src="/js/analytics.js" defer></script>
+  <script src="/js/product.js" defer></script>
 
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -2405,9 +2422,19 @@
         activeIndex: 0,
         title: '',
         sellerName: '',
+        productId: '',
+        sellerId: '',
+        shopId: '',
+        shopName: '',
+        shopType: '',
+        category: '',
+        priceValue: undefined,
+        currency: 'IRR',
+        transactionId: undefined,
         addressInfo: null,
         sellerLinkUrl: '',
         sellerLinkMessage: '',
+        sellerLinkReady: false,
         copyTimeout: null,
         statusTimeout: null
       };
@@ -2430,6 +2457,14 @@
         active: null,
         lastFocus: null
       };
+
+      function notifyProductAnalytics(detail) {
+        try {
+          document.dispatchEvent(new CustomEvent('product:updated', { detail }));
+        } catch (error) {
+          console.warn('product analytics dispatch failed', error);
+        }
+      }
 
       if (dom.sliderPrev) {
         dom.sliderPrev.addEventListener('click', () => showPreviousImage());
@@ -2789,6 +2824,9 @@
         const sellerName = seller.storename || seller.ownerName || [seller.ownerFirstname, seller.ownerLastname].filter(Boolean).join(' ') || '';
         dom.meta.seller.textContent = sellerName || 'فروشنده نامشخص';
         dom.meta.category.textContent = product.category || 'نامشخص';
+        state.productId = product._id || product.id || id || '';
+        state.category = product.category || '';
+        state.shopName = sellerName || '';
 
         const priceValue = normaliseNumber(product.price);
         if (priceValue !== null) {
@@ -2798,6 +2836,7 @@
           dom.meta.priceCard.hidden = true;
           dom.meta.price.textContent = '';
         }
+        state.priceValue = priceValue !== null ? priceValue : undefined;
 
         const location = seller.address || seller.city || '';
         if (location && dom.meta.locationCard) {
@@ -2823,6 +2862,37 @@
         renderContactPanel(seller);
         updateMetaTags(product, seller, summary);
         updateStructuredData(product, seller, id);
+
+        const analyticsState = {
+          item_id: state.productId,
+          item_name: title,
+          category: state.category,
+          price: state.priceValue,
+          currency: state.currency,
+          seller_id: state.sellerId || '',
+          shop_id: state.shopId || '',
+          shop_name: state.shopName || '',
+          shop_type: state.shopType || '',
+          sellerLinkReady: Boolean(state.sellerLinkUrl)
+        };
+
+        notifyProductAnalytics({
+          state: analyticsState,
+          viewItem: {
+            item_id: analyticsState.item_id,
+            item_name: analyticsState.item_name,
+            category: analyticsState.category,
+            price: analyticsState.price,
+            currency: analyticsState.currency,
+            seller_id: analyticsState.seller_id || undefined,
+            shop_id: analyticsState.shop_id || undefined
+          },
+          viewShop: analyticsState.shop_id ? {
+            shop_id: analyticsState.shop_id,
+            shop_name: analyticsState.shop_name,
+            shop_type: analyticsState.shop_type
+          } : undefined
+        });
       }
 
       function renderGallery(product, seller) {
@@ -3294,6 +3364,18 @@
         const productShopSlug = (productDesc && typeof productDesc.shopurl === 'string') ? productDesc.shopurl.trim() : '';
         const productShopSlugAlt = (productDesc && typeof productDesc.shopUrl === 'string') ? productDesc.shopUrl.trim() : '';
         const shopSlug = seller?.shopurl || seller?.shopUrl || productShopSlug || productShopSlugAlt || '';
+        const rawSellerId = seller && (seller._id || seller.id || seller.sellerId);
+        const resolvedSellerId = rawSellerId && typeof rawSellerId === 'object'
+          ? (rawSellerId.$oid || rawSellerId._id || rawSellerId.id || '')
+          : rawSellerId;
+        state.sellerId = resolvedSellerId ? String(resolvedSellerId) : String(sellerId || '');
+        const rawShopId = seller && (seller.shopid || seller.shopId);
+        const resolvedShopId = rawShopId && typeof rawShopId === 'object'
+          ? (rawShopId.$oid || rawShopId._id || rawShopId.id || '')
+          : rawShopId;
+        state.shopId = String(resolvedShopId || shopSlug || '');
+        state.shopType = seller?.category || productDesc?.category || state.category;
+        state.shopName = sellerName;
 
         const hasSeller = !!(seller && (seller.storename || seller.ownerName || seller.ownerFirstname || seller.ownerLastname || seller.phone || seller.address || seller.category || seller.boardImage || seller.desc)) || !!sellerId || !!shopSlug;
 
@@ -3326,6 +3408,7 @@
           };
           state.sellerLinkUrl = '';
           state.sellerLinkMessage = 'صفحه مغازه برای این فروشنده در دسترس نیست.';
+          state.sellerLinkReady = false;
           return;
         }
 
@@ -3381,6 +3464,7 @@
           state.sellerLinkUrl = '';
           state.sellerLinkMessage = `صفحه مغازه ${sellerName} هنوز در ویترینت ثبت نشده است.`;
         }
+        state.sellerLinkReady = Boolean(state.sellerLinkUrl);
 
         if (dom.sellerLink) {
           if (state.sellerLinkUrl) {
