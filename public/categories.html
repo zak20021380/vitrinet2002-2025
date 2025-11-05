@@ -1,9 +1,8 @@
 <!DOCTYPE html>
 <html lang="fa" dir="rtl">
 <head>
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdn.tailwindcss.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com https://cdn.jsdelivr.net data:; connect-src 'self'; img-src 'self' data:; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; upgrade-insecure-requests; block-all-mixed-content">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdn.tailwindcss.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.jsdelivr.net; font-src 'self' https://fonts.gstatic.com https://cdn.jsdelivr.net data:; connect-src 'self'; img-src 'self' data:; base-uri 'self'; form-action 'self'; upgrade-insecure-requests; block-all-mixed-content">
 <meta http-equiv="Strict-Transport-Security" content="max-age=63072000; includeSubDomains; preload">
-<meta http-equiv="X-Frame-Options" content="DENY">
 <meta http-equiv="Referrer-Policy" content="no-referrer">
 <meta http-equiv="X-Content-Type-Options" content="nosniff">
 <meta http-equiv="X-XSS-Protection" content="1; mode=block">
@@ -423,6 +422,8 @@
       display: flex;
       align-items: center;
       gap: 0.875rem;
+      text-decoration: none;
+      color: inherit;
     }
     .search-result-item:hover {
       background: linear-gradient(135deg, rgba(16, 185, 129, 0.08), rgba(14, 165, 233, 0.06));
@@ -618,7 +619,7 @@
     <p id="errorMessage" class="text-red-500 text-center mb-4 hidden"></p>
     <!-- سرچ باکس -->
     <div class="w-full max-w-2xl mx-auto mb-12 search-wrapper">
-      <form onsubmit="event.preventDefault(); performSearch();">
+      <form>
         <div class="flex items-center rounded-2xl border-2 border-gray-200 shadow-lg bg-white p-2 px-5 w-full hover:border-teal-400 focus-within:border-teal-500 transition-all">
           <label for="searchInput" class="sr-only">جستجوی فروشگاه‌ها و دسته‌بندی‌ها</label>
           <input type="text" id="searchInput"
@@ -646,244 +647,7 @@
     © 2025 ویترینت | همه حقوق محفوظ است.
   </footer>
 
-<script>
-// لیست دسته‌بندی‌ها (کد ثابت)
-const categories = [
-  { name: "خوراک", color: "from-[#22d3ee] to-[#43e97b]", desc: "مواد غذایی، سوپرمارکت، رستوران، فست‌فود، کافه", catId: "food" },
-  { name: "پوشاک", color: "from-[#36d1c4] to-[#49e7b7]", desc: "لباس مردانه، زنانه، بچگانه، کفش و کیف", catId: "clothing" },
-  { name: "زیبایی", color: "from-[#15e6c8] to-[#0ea5e9]", desc: "آرایشی، بهداشتی، سالن زیبایی و سلامت", catId: "beauty" },
-  { name: "خدمات", color: "from-[#0ea5e9] to-[#0bd6b3]", desc: "تعمیرات، آموزشی، رفاهی، خدمات شهری", catId: "service" },
-  { name: "دیجیتال", color: "from-[#22d3ee] to-[#16e387]", desc: "موبایل، لپ‌تاپ، کالای دیجیتال، لوازم جانبی", catId: "digital" },
-  { name: "کتاب و تحریر", color: "from-[#c4b5fd] to-[#8b5cf6]", desc: "کتاب، لوازم تحریر، لوازم اداری", catId: "book" },
-  { name: "خودرو", color: "from-[#21d4fd] to-[#2152ff]", desc: "قطعات یدکی، خدمات خودرو، لوازم جانبی", catId: "auto" },
-  { name: "قنادی و شیرینی", color: "from-[#fbbf24] to-[#f59e0b]", desc: "قنادی، شیرینی فروشی، نان فانتزی", catId: "sweets" },
-  { name: "گل و گیاه", color: "from-[#bbf7d0] to-[#10b981]", desc: "گل فروشی، گیاهان آپارتمانی", catId: "flower" },
-  { name: "لوازم خانگی", color: "from-[#fee2e2] to-[#fecdd3]", desc: "لوازم منزل، برقی، آشپزخانه", catId: "home" },
-  { name: "ورزشی", color: "from-[#21d4fd] to-[#43e97b]", desc: "پوشاک ورزشی، باشگاه، لوازم ورزش", catId: "sport" },
-  { name: "تالار و مجالس", color: "from-[#fecdd3] to-[#fef9c3]", desc: "تالار پذیرایی، خدمات مجالس", catId: "talar" }
-];
-
-// SVG جایگزین موقت آیکون
-function getCategoryIcon(id) {
-  return `
-    <svg viewBox="0 0 48 48" fill="none">
-      <rect x="4" y="7" width="40" height="27" rx="7" fill="url(#g${id})"/>
-      <defs>
-        <linearGradient id="g${id}" x1="0" y1="0" x2="48" y2="44" gradientUnits="userSpaceOnUse">
-          <stop stop-color="#10b981"/>
-          <stop offset="1" stop-color="#0ea5e9"/>
-        </linearGradient>
-      </defs>
-      <rect x="13" y="17" width="22" height="6" rx="2.3" fill="#fff" opacity=".6"/>
-      <rect x="17" y="26" width="14" height="3" rx="1.2" fill="#fff" opacity=".4"/>
-    </svg>
-  `;
-}
-
-// رندر کارت‌های دسته‌بندی
-function renderCategories(list) {
-  const grid = document.getElementById("categoriesGrid");
-  grid.innerHTML = "";
-  if (list.length === 0) {
-    document.getElementById("noResult").classList.remove("hidden");
-    return;
-  }
-  document.getElementById("noResult").classList.add("hidden");
-  list.forEach(cat => {
-    const count = cat.shops ? cat.shops.length : 0;
-    const sampleShop = count ? cat.shops[0] : null;
-    const info = count
-      ? `
-          <span class="shop-badge"><i class="ri-store-2-line"></i>${count} فروشگاه</span>
-          ${sampleShop ? `<a href="shop.html?shopurl=${sampleShop.shopurl}" target="_blank" rel="noopener noreferrer" class="sample-link" aria-label="نمونه فروشگاه ${sampleShop.storename || sampleShop.shopName || ''}">نمونه: ${sampleShop.storename || sampleShop.shopName || ''}</a>` : ''}
-        `
-      : `<span class="no-shop-text">بدون فروشگاه</span>`;
-
-    grid.innerHTML += `
-      <article class="category-card group w-full mx-auto h-full" data-slug="${cat.catId}">
-        <div class="category-card__top bg-gradient-to-br ${cat.color}">
-          <div class="cat-icon">${getCategoryIcon(cat.catId)}</div>
-          <div class="category-card__headline">
-            <span class="category-chip">#${cat.catId}</span>
-            <h3 class="category-title">${cat.name}</h3>
-          </div>
-        </div>
-        <div class="category-card__content">
-          <p class="category-desc">${cat.desc}</p>
-        </div>
-        <div class="category-meta">
-          ${info}
-        </div>
-        <a href="shops-by-category.html?cat=${cat.catId}" class="btn-grad category-card__cta" aria-label="مشاهده فروشگاه‌های ${cat.name}">
-          <span>
-            مشاهده فروشگاه‌ها
-            <i class="ri-arrow-left-down-line text-lg"></i>
-          </span>
-        </a>
-      </article>
-    `;
-  });
-}
-
-// جستجو
-let activeCategories = [];
-let allShops = [];
-
-// جستجوی حرفه‌ای
-async function performSearch() {
-  const searchInput = document.getElementById("searchInput");
-  const searchResults = document.getElementById("searchResults");
-  const query = searchInput.value.trim().toLowerCase();
-
-  if (!query) {
-    searchResults.classList.remove("active");
-    searchResults.innerHTML = "";
-    return;
-  }
-
-  // جستجو در دسته‌بندی‌ها
-  const matchedCategories = activeCategories.filter(cat =>
-    cat.name.toLowerCase().includes(query) ||
-    cat.desc.toLowerCase().includes(query)
-  ).slice(0, 3); // فقط 3 نتیجه اول
-
-  // جستجو در فروشگاه‌ها
-  const matchedShops = allShops.filter(shop => {
-    const shopName = (shop.storename || shop.shopName || '').toLowerCase();
-    const shopDesc = (shop.description || shop.desc || '').toLowerCase();
-    const shopCategory = (shop.category || '').toLowerCase();
-    return shopName.includes(query) || shopDesc.includes(query) || shopCategory.includes(query);
-  }).slice(0, 8); // حداکثر 8 فروشگاه
-
-  displaySearchResults(matchedCategories, matchedShops, query);
-}
-
-function displaySearchResults(categories, shops, query) {
-  const searchResults = document.getElementById("searchResults");
-
-  if (categories.length === 0 && shops.length === 0) {
-    searchResults.innerHTML = `
-      <div class="search-empty">
-        <i class="ri-search-line"></i>
-        <div class="search-empty-text">نتیجه‌ای برای "${query}" یافت نشد</div>
-      </div>
-    `;
-    searchResults.classList.add("active");
-    return;
-  }
-
-  let html = "";
-
-  // نمایش دسته‌بندی‌ها
-  if (categories.length > 0) {
-    categories.forEach(cat => {
-      const shopCount = cat.shops ? cat.shops.length : 0;
-      html += `
-        <div class="search-result-item" onclick="window.location.href='shops-by-category.html?cat=${cat.catId}'">
-          <div class="search-result-icon">
-            <i class="ri-layout-grid-line"></i>
-          </div>
-          <div class="search-result-content">
-            <div class="search-result-title">${cat.name}</div>
-            <div class="search-result-desc">${cat.desc}</div>
-          </div>
-          <span class="search-result-badge category">${shopCount} فروشگاه</span>
-        </div>
-      `;
-    });
-  }
-
-  // نمایش فروشگاه‌ها
-  if (shops.length > 0) {
-    shops.forEach(shop => {
-      const shopName = shop.storename || shop.shopName || 'بدون نام';
-      const shopDesc = shop.description || shop.desc || 'بدون توضیحات';
-      const shopUrl = shop.shopurl || shop.shopUrl || '';
-      const categoryName = getCategoryNameById(shop.category) || shop.category || 'عمومی';
-
-      html += `
-        <div class="search-result-item" onclick="window.location.href='shop.html?shopurl=${shopUrl}'">
-          <div class="search-result-icon">
-            <i class="ri-store-2-line"></i>
-          </div>
-          <div class="search-result-content">
-            <div class="search-result-title">${shopName}</div>
-            <div class="search-result-desc">${categoryName} • ${shopDesc}</div>
-          </div>
-          <span class="search-result-badge shop">فروشگاه</span>
-        </div>
-      `;
-    });
-  }
-
-  searchResults.innerHTML = html;
-  searchResults.classList.add("active");
-}
-
-function getCategoryNameById(catId) {
-  const cat = categories.find(c => c.catId === catId || c.name === catId);
-  return cat ? cat.name : null;
-}
-
-// بستن نتایج جستجو با کلیک در خارج
-document.addEventListener("click", function(e) {
-  const searchWrapper = document.querySelector(".search-wrapper");
-  const searchResults = document.getElementById("searchResults");
-  if (searchWrapper && !searchWrapper.contains(e.target)) {
-    searchResults.classList.remove("active");
-  }
-});
-
-// اجرا: دریافت اطلاعات واقعی و نمایش کارت‌ها
-async function initCategoriesPage() {
-  const errorBox = document.getElementById("errorMessage");
-  errorBox.textContent = "";
-  errorBox.classList.add("hidden");
-  try {
-    const res = await fetch('/api/shops');
-    const shops = res.ok ? await res.json() : [];
-    allShops = shops; // ذخیره همه فروشگاه‌ها برای جستجو
-    activeCategories = categories.map(c => ({
-      ...c,
-      shops: shops.filter(s =>
-        s.category === c.catId ||
-        s.category === c.name ||
-        s.categorySlug === c.catId
-      )
-    }));
-  } catch (e) {
-    allShops = [];
-    activeCategories = categories.map(c => ({ ...c, shops: [] }));
-    errorBox.textContent = "خطا در دریافت اطلاعات. لطفا بعدا تلاش کنید.";
-    errorBox.classList.remove("hidden");
-  }
-
-  // مرتب‌سازی بر اساس تعداد فروشگاه‌ها (نزولی)
-  activeCategories.sort((a, b) => (b.shops ? b.shops.length : 0) - (a.shops ? a.shops.length : 0));
-
-  renderCategories(activeCategories);
-
-  // جستجوی لحظه‌ای با تایپ
-  const searchInput = document.getElementById("searchInput");
-  let searchTimeout;
-  searchInput.addEventListener("input", function() {
-    clearTimeout(searchTimeout);
-    searchTimeout = setTimeout(() => {
-      performSearch();
-    }, 300); // 300ms تاخیر برای بهبود عملکرد
-  });
-
-  searchInput.addEventListener("keyup", function(e){
-    if(e.key === "Enter") {
-      clearTimeout(searchTimeout);
-      performSearch();
-    }
-  });
-}
-
-
-document.addEventListener("DOMContentLoaded", initCategoriesPage);
-</script>
+<script src="js/categories.js" defer></script>
 
 </body>
 </html>
