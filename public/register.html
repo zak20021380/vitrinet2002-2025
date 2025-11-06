@@ -20,64 +20,235 @@
   <style>
     body {
       font-family: 'Vazirmatn', sans-serif;
-      background: linear-gradient(110deg, #e0f7fa 0%, #f9fafb 100%);
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 25%, #f093fb 50%, #4facfe 75%, #00f2fe 100%);
+      background-size: 400% 400%;
+      animation: gradientShift 15s ease infinite;
       min-height: 100vh;
+      position: relative;
     }
+
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: radial-gradient(circle at 20% 50%, rgba(16, 185, 129, 0.15) 0%, transparent 50%),
+                  radial-gradient(circle at 80% 80%, rgba(14, 165, 233, 0.15) 0%, transparent 50%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    @keyframes gradientShift {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
     .glass {
-      background: rgba(255,255,255,0.96);
-      backdrop-filter: blur(13px);
-      box-shadow: 0 7px 32px #10b98129, 0 3px 11px #0ea5e91a;
-      border-radius: 1.7rem;
+      background: rgba(255,255,255,0.98);
+      backdrop-filter: blur(20px);
+      box-shadow: 0 8px 32px rgba(16, 185, 129, 0.2),
+                  0 4px 16px rgba(14, 165, 233, 0.15),
+                  inset 0 1px 0 rgba(255, 255, 255, 0.5);
+      border-radius: 2rem;
+      border: 1px solid rgba(255, 255, 255, 0.3);
     }
+
+    header {
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(20px);
+      box-shadow: 0 4px 30px rgba(16, 185, 129, 0.15),
+                  0 2px 12px rgba(14, 165, 233, 0.1),
+                  inset 0 -1px 0 rgba(16, 185, 129, 0.1);
+      border-bottom: 1px solid rgba(16, 185, 129, 0.1);
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    header:hover {
+      box-shadow: 0 6px 40px rgba(16, 185, 129, 0.2),
+                  0 3px 16px rgba(14, 165, 233, 0.15);
+    }
+
+    .logo-container {
+      position: relative;
+      padding: 0.5rem;
+      border-radius: 1rem;
+      background: linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, rgba(14, 165, 233, 0.1) 100%);
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .logo-container:hover {
+      background: linear-gradient(135deg, rgba(16, 185, 129, 0.15) 0%, rgba(14, 165, 233, 0.15) 100%);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 20px rgba(16, 185, 129, 0.2);
+    }
+
+    .brand-text {
+      background: linear-gradient(135deg, #10b981 0%, #0ea5e9 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      font-weight: 900;
+      letter-spacing: -0.5px;
+      position: relative;
+      display: inline-block;
+    }
+
+    .brand-text::after {
+      content: '';
+      position: absolute;
+      bottom: -2px;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, #10b981 0%, #0ea5e9 100%);
+      border-radius: 2px;
+      transform: scaleX(0);
+      transition: transform 0.3s ease;
+    }
+
+    .logo-container:hover .brand-text::after {
+      transform: scaleX(1);
+    }
+
+    nav a {
+      position: relative;
+      padding: 0.5rem 1rem;
+      border-radius: 0.75rem;
+      font-weight: 700;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      overflow: hidden;
+    }
+
+    nav a::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: linear-gradient(135deg, #10b981 0%, #0ea5e9 100%);
+      opacity: 0;
+      transition: opacity 0.3s ease;
+      border-radius: 0.75rem;
+      z-index: -1;
+    }
+
+    nav a:hover {
+      color: white !important;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+    }
+
+    nav a:hover::before {
+      opacity: 1;
+    }
+
     .brand-btn {
-      background: linear-gradient(91deg, #10b981 0%, #0ea5e9 85%);
+      background: linear-gradient(135deg, #10b981 0%, #0ea5e9 100%);
       color: #fff !important;
-      box-shadow: 0 2px 14px #10b98125;
-      transition: all .16s;
+      box-shadow: 0 4px 20px rgba(16, 185, 129, 0.4);
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+      overflow: hidden;
     }
-    .brand-btn:hover { filter:brightness(1.08);}
+
+    .brand-btn::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+      transition: left 0.5s ease;
+    }
+
+    .brand-btn:hover::before {
+      left: 100%;
+    }
+
+    .brand-btn:hover {
+      filter: brightness(1.1);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 28px rgba(16, 185, 129, 0.5);
+    }
+
+    .brand-btn:active {
+      transform: translateY(0);
+    }
+
     .primary-text { color: #10b981;}
-    ::placeholder {color:#a0aec0;}
+
+    ::placeholder {
+      color: #a0aec0;
+      font-weight: 500;
+    }
+
     .hide-scrollbar::-webkit-scrollbar { display: none; }
     .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-    header { box-shadow: 0 4px 22px #14b8a631;}
+
     .input-error {
       border-color: #ef4444 !important;
       background-color: #fef2f2 !important;
     }
-    .err-text { color: #ef4444; font-size: 13px; margin-top: 0.3rem; font-weight: 600;}
+
+    .err-text {
+      color: #ef4444;
+      font-size: 13px;
+      margin-top: 0.3rem;
+      font-weight: 600;
+    }
+
+    input:not([readonly]):focus {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 20px rgba(16, 185, 129, 0.15);
+    }
+
+    label {
+      background: linear-gradient(135deg, #10b981 0%, #0ea5e9 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
     #toast {
       position: fixed;
       top: 50%;
       right: 50%;
       transform: translate(50%,-50%);
-      background: linear-gradient(93deg,#10b981,#0ea5e9 92%);
+      background: linear-gradient(135deg, #10b981 0%, #0ea5e9 100%);
       color: #fff;
       font-weight: bold;
       font-size: 15px;
-      padding: 13px 32px;
-      border-radius: 18px;
-      box-shadow: 0 6px 32px #10b98137;
+      padding: 16px 36px;
+      border-radius: 1.5rem;
+      box-shadow: 0 8px 40px rgba(16, 185, 129, 0.4);
       opacity: 0;
       z-index: 9999;
       pointer-events: none;
-      transition: all .23s cubic-bezier(.4,0,.2,1);
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
       min-width: 200px;
       text-align: center;
       line-height: 2.1;
     }
+
     #toast.active {
       opacity: 1;
       pointer-events: auto;
+      transform: translate(50%, -50%) scale(1.05);
     }
+
     @media (max-width:640px){
       header .text-lg {font-size: 16px!important;}
       header .md\:text-2xl {font-size:18px!important;}
       header .gap-4 {gap:9px!important;}
       header .px-6 {padding-left: 0.9rem!important; padding-right:0.9rem!important;}
-      header .py-3 {padding-top:0.45rem!important; padding-bottom:0.45rem!important;}
+      header .py-3 {padding-top:0.5rem!important; padding-bottom:0.5rem!important;}
       main {margin-top:94px!important;}
-      #toast { font-size: 13px; padding:10px 12px; min-width:120px; }
+      #toast { font-size: 13px; padding:12px 16px; min-width:120px; }
     }
   </style>
   <script src="/nav-active.js" defer></script>
@@ -87,23 +258,26 @@
   <!-- Toast -->
   <div id="toast">ویترینت فعلا فقط در سنندج فعال است.</div>
 
-  <!-- Header شیشه‌ای و ریسپانسیو -->
-  <header class="fixed top-0 inset-x-0 z-20 glass border-b shadow flex items-center justify-between px-6 py-3">
-    <a href="index.html" class="flex items-center gap-2 select-none shrink-0">
-      <img src="assets/images/logo.svg" alt="ویترینت" class="w-9 h-9 sm:w-10 sm:h-10 hidden sm:block" onerror="this.style.display='none';this.nextElementSibling.style.display='block'"/>
-      <span class="font-extrabold text-lg md:text-2xl primary-text" style="display:none; font-family:'Poppins',sans-serif;">Vitrinet</span>
-      <span class="font-extrabold text-lg md:text-2xl primary-text sm:hidden block" style="font-family:'Vazirmatn',sans-serif;">ویترینت</span>
+  <!-- Header شیشه‌ای و ریسپانسیو با استایل بهبود یافته -->
+  <header class="fixed top-0 inset-x-0 z-20 border-b shadow flex items-center justify-between px-6 py-4">
+    <a href="index.html" class="logo-container flex items-center gap-3 select-none shrink-0">
+      <img src="assets/images/logo.svg" alt="ویترینت" class="w-11 h-11 sm:w-12 sm:h-12 hidden sm:block" onerror="this.style.display='none';this.nextElementSibling.style.display='block'"/>
+      <span class="brand-text font-extrabold text-xl md:text-3xl" style="display:none; font-family:'Poppins',sans-serif;">Vitrinet</span>
+      <span class="brand-text font-extrabold text-xl md:text-3xl sm:hidden block" style="font-family:'Vazirmatn',sans-serif;">ویترینت</span>
     </a>
-    <nav class="flex items-center gap-4 text-base flex-shrink-0">
-      <a href="index.html" class="text-gray-700 hover:text-[#10b981] font-bold">خانه</a>
-      <a href="login.html" class="text-gray-700 hover:text-[#0ea5e9] font-bold">ورود</a>
+    <nav class="flex items-center gap-3 text-base flex-shrink-0">
+      <a href="index.html" class="text-gray-700">خانه</a>
+      <a href="login.html" class="text-gray-700">ورود</a>
     </nav>
   </header>
 
   <!-- فرم ثبت‌نام کاربر -->
-  <main class="max-w-xl mx-auto mt-40 mb-10 px-2 sm:px-0">
-    <section class="glass border rounded-2xl shadow-2xl p-6 sm:p-8">
-      <h2 class="text-2xl sm:text-3xl font-black bg-gradient-to-l from-[#10b981] to-[#0ea5e9] text-transparent bg-clip-text text-center mb-8 tracking-tight">ثبت‌نام کاربر در ویترینت</h2>
+  <main class="max-w-xl mx-auto mt-40 mb-10 px-2 sm:px-0 relative z-10">
+    <section class="glass border rounded-2xl shadow-2xl p-8 sm:p-10">
+      <div class="text-center mb-8">
+        <h2 class="text-3xl sm:text-4xl font-black bg-gradient-to-l from-[#10b981] to-[#0ea5e9] text-transparent bg-clip-text mb-2 tracking-tight">ثبت‌نام در ویترینت</h2>
+        <p class="text-gray-600 text-sm mt-2">به جامعه ویترینت خوش آمدید</p>
+      </div>
       <form id="signupForm" class="space-y-5" autocomplete="off" novalidate>
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div>
@@ -159,8 +333,8 @@
   </main>
 
   <!-- فوتر شیک و جمع و جور -->
-  <footer class="mt-20 bg-white border-t text-center text-xs sm:text-sm text-gray-400 py-5 rounded-t-3xl animate-fadein" style="animation-delay:.4s;">
-    © 2025 <span class="text-[#10b981] font-bold">Vitrinet</span> - همه حقوق محفوظ است.
+  <footer class="mt-20 bg-white/80 backdrop-filter backdrop-blur-lg border-t border-gray-200 text-center text-xs sm:text-sm text-gray-500 py-6 rounded-t-3xl relative z-10" style="box-shadow: 0 -4px 20px rgba(16, 185, 129, 0.1);">
+    © 2025 <span class="font-extrabold" style="background: linear-gradient(135deg, #10b981 0%, #0ea5e9 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">Vitrinet</span> - همه حقوق محفوظ است.
   </footer>
 
 <script>
