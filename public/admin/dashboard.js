@@ -6593,6 +6593,26 @@ async function handleRewardActiveChange() {
   }
 }
 
+async function handleRewardShowButtonChange() {
+  if (!rewardShowButtonInput) return;
+  const showButton = Boolean(rewardShowButtonInput.checked);
+  setRewardFormMessage('در حال ذخیره تنظیمات نمایش دکمه...', 'info');
+
+  try {
+    await updateRewardCampaign({ showButton });
+    renderRewardSummary();
+    setRewardFormMessage(
+      showButton ? 'دکمه جایزه نمایش داده می‌شود.' : 'دکمه جایزه مخفی شد.',
+      'success'
+    );
+  } catch (error) {
+    console.error('handleRewardShowButtonChange failed', error);
+    // Revert the checkbox to previous state on error
+    rewardShowButtonInput.checked = !showButton;
+    setRewardFormMessage(error.message || 'خطا در تغییر تنظیمات نمایش دکمه.', 'error');
+  }
+}
+
 async function handleRewardCodeFormSubmit(event) {
   event.preventDefault();
   const code = rewardNewCodeInput?.value?.replace(/[^0-9]/g, '').slice(0, 6) || '';
@@ -6691,6 +6711,9 @@ async function ensureRewardCampaignPanel(forceReload = false) {
     });
     rewardActiveInput?.addEventListener('change', () => {
       handleRewardActiveChange().catch(err => console.error(err));
+    });
+    rewardShowButtonInput?.addEventListener('change', () => {
+      handleRewardShowButtonChange().catch(err => console.error(err));
     });
     rewardCodeForm?.addEventListener('submit', (event) => {
       handleRewardCodeFormSubmit(event).catch(err => console.error(err));
