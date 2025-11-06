@@ -93,6 +93,7 @@ app.use('/api/daily-visits', dailyVisitRoutes);
 app.use('/api/reports', require('./routes/report'));
 app.use('/api/notifications', require('./routes/notifications'));
 app.use('/api/loyalty', require('./routes/loyalty'));
+app.use('/api/rewards', require('./routes/rewardCampaign'));
 
 // ------------------- Health Check -------------------
 app.get('/', (req, res) => {
