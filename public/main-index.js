@@ -16,6 +16,7 @@ const DEFAULT_REWARD_CAMPAIGN = {
   capacity: 0,
   winnersClaimed: 0,
   active: false,
+  showButton: true,
   codes: [],
   winners: [],
   updatedAt: null
@@ -75,6 +76,7 @@ function normaliseRewardCampaign(raw) {
     capacity,
     winnersClaimed,
     active: source.active !== undefined ? Boolean(source.active) : DEFAULT_REWARD_CAMPAIGN.active,
+    showButton: source.showButton !== undefined ? Boolean(source.showButton) : true,
     codes,
     winners,
     updatedAt: source.updatedAt || DEFAULT_REWARD_CAMPAIGN.updatedAt
@@ -308,6 +310,13 @@ function applyRewardCampaignToUI(campaign = rewardCampaignState) {
         ? `ارزش جایزه ${formatRewardPrize(campaignState.prizeValue, campaignState.currency)} • ${rewardNumberFormatter.format(Math.min(campaignState.winnersClaimed, campaignState.capacity || campaignState.winnersClaimed))} از ${rewardNumberFormatter.format(Math.max(campaignState.capacity, campaignState.winnersClaimed))} برنده`
         : 'کمپین جوایز'
     );
+
+    // نمایش یا مخفی کردن دکمه بر اساس تنظیمات ادمین
+    if (campaignState.showButton === false) {
+      rewardElements.openBtn.style.display = 'none';
+    } else {
+      rewardElements.openBtn.style.display = '';
+    }
   }
 
   if (!campaignState.active) {
