@@ -2,6 +2,11 @@ const SERVICE_PANEL_KEYWORDS = ['خدمات', 'زیبایی', 'تالار', 'م�
 const REWARD_API_BASE = '/api/rewards';
 const REWARD_USER_CLAIM_KEY = 'vt_reward_user_claim';
 const rewardNumberFormatter = new Intl.NumberFormat('fa-IR', { maximumFractionDigits: 0 });
+const rewardDateFormatter = new Intl.DateTimeFormat('fa-IR', {
+  year: 'numeric',
+  month: 'short',
+  day: 'numeric'
+});
 
 const DEFAULT_REWARD_CAMPAIGN = {
   title: '',
@@ -12,6 +17,7 @@ const DEFAULT_REWARD_CAMPAIGN = {
   winnersClaimed: 0,
   active: false,
   codes: [],
+  winners: [],
   updatedAt: null
 };
 
@@ -32,6 +38,20 @@ function normaliseRewardCampaign(raw) {
             createdAt: item.createdAt || null,
             usedAt: item.usedAt || null
           };
+        })
+        .filter(Boolean)
+    : [];
+  const winners = Array.isArray(source.winners)
+    ? source.winners
+        .map(item => {
+          if (!item) return null;
+          const firstName = item.firstName ? String(item.firstName).trim() : '';
+          const lastName = item.lastName ? String(item.lastName).trim() : '';
+          const phoneMasked = item.phoneMasked
+            ? String(item.phoneMasked).trim()
+            : maskPhoneForPublic(item.phone);
+          const createdAt = item.createdAt || null;
+          return { firstName, lastName, phoneMasked, createdAt };
         })
         .filter(Boolean)
     : [];
@@ -56,8 +76,26 @@ function normaliseRewardCampaign(raw) {
     winnersClaimed,
     active: source.active !== undefined ? Boolean(source.active) : DEFAULT_REWARD_CAMPAIGN.active,
     codes,
+    winners,
     updatedAt: source.updatedAt || DEFAULT_REWARD_CAMPAIGN.updatedAt
   };
+}
+
+function maskPhoneForPublic(phone) {
+  const digits = String(phone || '').replace(/[^0-9]/g, '');
+  if (!digits) return '';
+  const first = digits.slice(0, Math.min(4, digits.length));
+  const last = digits.length > 4 ? digits.slice(-4) : '';
+  const revealed = first.length + last.length;
+  const maskLength = Math.max(4, Math.max(0, digits.length - revealed));
+  return `${first}${'•'.repeat(maskLength)}${last}`;
+}
+
+function formatRewardDate(value) {
+  if (!value) return '';
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return '';
+  return rewardDateFormatter.format(date);
 }
 
 function formatRewardPrize(amount, currency) {
@@ -96,7 +134,10 @@ const rewardElements = {
   progressBar: document.getElementById('rewardProgressBar'),
   submitBtn: document.getElementById('rewardModalSubmitBtn'),
   helpToggle: document.getElementById('rewardHelpToggle'),
-  helpContent: document.getElementById('rewardHelpContent')
+  helpContent: document.getElementById('rewardHelpContent'),
+  winnersSection: document.getElementById('rewardPublicWinnersSection'),
+  winnersList: document.getElementById('rewardPublicWinnersList'),
+  winnersEmpty: document.getElementById('rewardPublicWinnersEmpty')
 };
 
 let rewardCampaignState = null;
@@ -133,6 +174,53 @@ function setRewardMessage(message, type = 'info') {
   } else if (type === 'error') {
     rewardElements.message.classList.add('is-error');
   }
+}
+
+function renderRewardWinners(campaignState = rewardCampaignState) {
+  if (!rewardElements.winnersSection || !rewardElements.winnersList || !rewardElements.winnersEmpty) {
+    return;
+  }
+  const winners = Array.isArray(campaignState?.winners) ? campaignState.winners : [];
+  rewardElements.winnersList.innerHTML = '';
+
+  if (!winners.length) {
+    rewardElements.winnersEmpty.hidden = false;
+    return;
+  }
+
+  rewardElements.winnersEmpty.hidden = true;
+  const limited = winners.slice(0, 10);
+  limited.forEach((winner) => {
+    const item = document.createElement('li');
+    item.className = 'reward-modal__winner-item';
+
+    const info = document.createElement('div');
+    info.className = 'reward-modal__winner-info';
+    const nameEl = document.createElement('span');
+    nameEl.className = 'reward-modal__winner-name';
+    nameEl.textContent = `${winner.firstName || ''} ${winner.lastName || ''}`.trim() || 'برنده';
+    info.appendChild(nameEl);
+
+    if (winner.phoneMasked) {
+      const phoneEl = document.createElement('span');
+      phoneEl.className = 'reward-modal__winner-phone';
+      phoneEl.textContent = `شماره: ${winner.phoneMasked}`;
+      info.appendChild(phoneEl);
+    }
+
+    if (winner.createdAt) {
+      const dateEl = document.createElement('span');
+      dateEl.className = 'reward-modal__winner-date';
+      const formatted = formatRewardDate(winner.createdAt);
+      if (formatted) {
+        dateEl.textContent = `ثبت: ${formatted}`;
+        info.appendChild(dateEl);
+      }
+    }
+
+    item.appendChild(info);
+    rewardElements.winnersList.appendChild(item);
+  });
 }
 
 async function fetchRewardCampaign(force = false) {
@@ -199,6 +287,7 @@ function applyRewardCampaignToUI(campaign = rewardCampaignState) {
   if (rewardElements.progressBar) {
     rewardElements.progressBar.style.width = `${stats.completion}%`;
   }
+  renderRewardWinners(campaignState);
   if (rewardElements.openBtn) {
     rewardElements.openBtn.setAttribute('data-available-codes', stats.availableCodes);
     rewardElements.openBtn.setAttribute(

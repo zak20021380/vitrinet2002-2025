@@ -5960,6 +5960,13 @@ const rewardNewCodeNoteInput = document.getElementById('rewardNewCodeNote');
 const rewardCodesListEl = document.getElementById('rewardCodesList');
 const rewardCodesMessageEl = document.getElementById('rewardCodesMessage');
 const rewardCodesEmptyStateEl = document.getElementById('rewardCodesEmptyState');
+const rewardWinnersForm = document.getElementById('rewardWinnerForm');
+const rewardWinnerFirstNameInput = document.getElementById('rewardWinnerFirstName');
+const rewardWinnerLastNameInput = document.getElementById('rewardWinnerLastName');
+const rewardWinnerPhoneInput = document.getElementById('rewardWinnerPhone');
+const rewardWinnersMessageEl = document.getElementById('rewardWinnersMessage');
+const rewardWinnersListEl = document.getElementById('rewardWinnersList');
+const rewardWinnersEmptyStateEl = document.getElementById('rewardWinnersEmptyState');
 
 const DEFAULT_REWARD_CAMPAIGN = {
   title: '',
@@ -5970,12 +5977,15 @@ const DEFAULT_REWARD_CAMPAIGN = {
   winnersClaimed: 0,
   active: false,
   codes: [],
+  winners: [],
   updatedAt: null
 };
 
 let rewardCampaignState = null;
 let rewardCampaignFetchPromise = null;
 let rewardPanelInitialised = false;
+let rewardWinnersState = [];
+let rewardWinnersFetchPromise = null;
 
 function normaliseRewardCampaign(raw) {
   const source = raw && typeof raw === 'object' ? raw : {};
@@ -5996,6 +6006,9 @@ function normaliseRewardCampaign(raw) {
           };
         })
         .filter(Boolean)
+    : [];
+  const winners = Array.isArray(source.winners)
+    ? source.winners.map(normaliseAdminWinner).filter(Boolean)
     : [];
 
   const prizeValue = Number.isFinite(Number(source.prizeValue)) ? Number(source.prizeValue) : DEFAULT_REWARD_CAMPAIGN.prizeValue;
@@ -6018,6 +6031,7 @@ function normaliseRewardCampaign(raw) {
     winnersClaimed,
     active: source.active !== undefined ? Boolean(source.active) : DEFAULT_REWARD_CAMPAIGN.active,
     codes,
+    winners,
     updatedAt: source.updatedAt || DEFAULT_REWARD_CAMPAIGN.updatedAt
   };
 }
@@ -6025,8 +6039,12 @@ function normaliseRewardCampaign(raw) {
 function syncRewardCampaignTotals(campaign) {
   if (!campaign) return;
   const usedCount = Array.isArray(campaign.codes) ? campaign.codes.filter(item => item.used).length : 0;
+  const winnersCount = Array.isArray(campaign.winners) ? campaign.winners.length : 0;
   if (campaign.winnersClaimed < usedCount) {
     campaign.winnersClaimed = usedCount;
+  }
+  if (campaign.winnersClaimed < winnersCount) {
+    campaign.winnersClaimed = winnersCount;
   }
   if (campaign.capacity > 0 && campaign.winnersClaimed > campaign.capacity) {
     campaign.winnersClaimed = campaign.capacity;
@@ -6069,6 +6087,215 @@ function setRewardCodesMessage(message, type = 'info') {
     rewardCodesMessageEl.classList.add('is-success');
   } else if (type === 'error') {
     rewardCodesMessageEl.classList.add('is-error');
+  }
+}
+
+function setRewardWinnersMessage(message, type = 'info') {
+  if (!rewardWinnersMessageEl) return;
+  rewardWinnersMessageEl.textContent = message || '';
+  rewardWinnersMessageEl.classList.remove('is-success', 'is-error');
+  if (type === 'success') {
+    rewardWinnersMessageEl.classList.add('is-success');
+  } else if (type === 'error') {
+    rewardWinnersMessageEl.classList.add('is-error');
+  }
+}
+
+function maskPhoneDisplay(phone) {
+  const digits = String(phone || '').replace(/[^0-9]/g, '');
+  if (!digits) return '';
+  const first = digits.slice(0, Math.min(4, digits.length));
+  const last = digits.length > 4 ? digits.slice(-4) : '';
+  const revealed = first.length + last.length;
+  const maskLength = Math.max(4, Math.max(0, digits.length - revealed));
+  return `${first}${'•'.repeat(maskLength)}${last}`;
+}
+
+function normaliseAdminWinner(raw) {
+  if (!raw || typeof raw !== 'object') return null;
+  const id = raw.id ? String(raw.id) : raw._id ? String(raw._id) : '';
+  if (!id) return null;
+  const firstName = raw.firstName ? String(raw.firstName).trim() : '';
+  const lastName = raw.lastName ? String(raw.lastName).trim() : '';
+  const phone = raw.phone ? String(raw.phone).trim() : '';
+  const phoneMasked = raw.phoneMasked ? String(raw.phoneMasked).trim() : maskPhoneDisplay(phone);
+  const createdAt = raw.createdAt || null;
+  return { id, firstName, lastName, phone, phoneMasked, createdAt };
+}
+
+function sortRewardWinners(list = []) {
+  return [...list].sort((a, b) => {
+    const timeA = new Date(a?.createdAt || 0).getTime();
+    const timeB = new Date(b?.createdAt || 0).getTime();
+    return timeB - timeA;
+  });
+}
+
+function renderRewardWinnersList() {
+  if (!rewardWinnersListEl || !rewardWinnersEmptyStateEl) return;
+  rewardWinnersListEl.innerHTML = '';
+  const list = Array.isArray(rewardWinnersState) ? sortRewardWinners(rewardWinnersState) : [];
+  if (!list.length) {
+    rewardWinnersEmptyStateEl.hidden = false;
+    return;
+  }
+  rewardWinnersEmptyStateEl.hidden = true;
+
+  list.forEach((winner) => {
+    const card = document.createElement('div');
+    card.className = 'reward-winner-card';
+    card.dataset.id = winner.id;
+
+    const info = document.createElement('div');
+    info.className = 'reward-winner-card__info';
+    const name = document.createElement('div');
+    name.className = 'reward-winner-card__name';
+    name.textContent = `${winner.firstName || ''} ${winner.lastName || ''}`.trim() || 'برنده';
+    info.appendChild(name);
+
+    if (winner.phone) {
+      const phoneEl = document.createElement('div');
+      phoneEl.className = 'reward-winner-card__meta';
+      phoneEl.textContent = `شماره تماس: ${winner.phone}`;
+      info.appendChild(phoneEl);
+    }
+
+    if (winner.createdAt) {
+      const createdEl = document.createElement('div');
+      createdEl.className = 'reward-winner-card__meta';
+      createdEl.textContent = `تاریخ ثبت: ${formatDateTime(winner.createdAt) || '—'}`;
+      info.appendChild(createdEl);
+    }
+
+    const actions = document.createElement('div');
+    actions.className = 'reward-winner-card__actions';
+    const deleteBtn = document.createElement('button');
+    deleteBtn.type = 'button';
+    deleteBtn.dataset.action = 'delete';
+    deleteBtn.textContent = 'حذف';
+    actions.appendChild(deleteBtn);
+
+    card.appendChild(info);
+    card.appendChild(actions);
+    rewardWinnersListEl.appendChild(card);
+  });
+}
+
+async function fetchRewardWinners(force = false) {
+  if (!force && Array.isArray(rewardWinnersState) && rewardWinnersState.length) {
+    return rewardWinnersState;
+  }
+  if (rewardWinnersFetchPromise && !force) {
+    return rewardWinnersFetchPromise;
+  }
+  rewardWinnersFetchPromise = fetch(`${REWARD_API_BASE}/winners`, {
+    credentials: 'include'
+  })
+    .then(async (response) => {
+      if (!response.ok) {
+        const errorText = await response.text().catch(() => '');
+        throw new Error(errorText || `HTTP ${response.status}`);
+      }
+      return response.json();
+    })
+    .then((payload) => {
+      const winners = Array.isArray(payload?.winners)
+        ? payload.winners.map(normaliseAdminWinner).filter(Boolean)
+        : [];
+      rewardWinnersState = winners;
+      return winners;
+    })
+    .catch((error) => {
+      rewardWinnersState = [];
+      throw error;
+    })
+    .finally(() => {
+      rewardWinnersFetchPromise = null;
+    });
+
+  return rewardWinnersFetchPromise;
+}
+
+async function createRewardWinner(data) {
+  const response = await fetch(`${REWARD_API_BASE}/winners`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    credentials: 'include',
+    body: JSON.stringify(data)
+  });
+  const payload = await response.json().catch(() => ({}));
+  if (!response.ok) {
+    throw new Error(payload?.message || 'خطا در ثبت برنده جدید.');
+  }
+  rewardCampaignState = normaliseRewardCampaign(payload?.campaign);
+  rewardWinnersState = Array.isArray(payload?.winners)
+    ? payload.winners.map(normaliseAdminWinner).filter(Boolean)
+    : [];
+  return payload;
+}
+
+async function removeRewardWinner(id) {
+  const response = await fetch(`${REWARD_API_BASE}/winners/${id}`, {
+    method: 'DELETE',
+    credentials: 'include'
+  });
+  const payload = await response.json().catch(() => ({}));
+  if (!response.ok) {
+    throw new Error(payload?.message || 'خطا در حذف برنده.');
+  }
+  rewardCampaignState = normaliseRewardCampaign(payload?.campaign);
+  rewardWinnersState = Array.isArray(payload?.winners)
+    ? payload.winners.map(normaliseAdminWinner).filter(Boolean)
+    : [];
+  return payload;
+}
+
+async function handleRewardWinnerFormSubmit(event) {
+  event.preventDefault();
+  const firstName = rewardWinnerFirstNameInput?.value?.trim() || '';
+  const lastName = rewardWinnerLastNameInput?.value?.trim() || '';
+  const phone = rewardWinnerPhoneInput?.value?.trim() || '';
+  if (!firstName || !lastName || !phone) {
+    setRewardWinnersMessage('لطفاً نام، نام خانوادگی و شماره تلفن را تکمیل کنید.', 'error');
+    return;
+  }
+
+  setRewardWinnersMessage('در حال ثبت برنده جدید...', 'info');
+  try {
+    await createRewardWinner({ firstName, lastName, phone });
+    renderRewardSummary();
+    renderRewardWinnersList();
+    populateRewardFormFields();
+    setRewardWinnersMessage('برنده جدید با موفقیت ثبت شد.', 'success');
+    if (rewardWinnerFirstNameInput) rewardWinnerFirstNameInput.value = '';
+    if (rewardWinnerLastNameInput) rewardWinnerLastNameInput.value = '';
+    if (rewardWinnerPhoneInput) rewardWinnerPhoneInput.value = '';
+    rewardWinnerFirstNameInput?.focus();
+  } catch (error) {
+    console.error('createRewardWinner failed', error);
+    setRewardWinnersMessage(error.message || 'خطا در ثبت برنده جدید.', 'error');
+  }
+}
+
+async function handleRewardWinnersListClick(event) {
+  const button = event.target.closest('button[data-action]');
+  if (!button || button.dataset.action !== 'delete') return;
+  const card = button.closest('[data-id]');
+  if (!card) return;
+  const winnerId = card.dataset.id;
+  const confirmed = window.confirm('آیا از حذف این برنده مطمئن هستید؟');
+  if (!confirmed) return;
+
+  setRewardWinnersMessage('در حال حذف برنده...', 'info');
+  try {
+    await removeRewardWinner(winnerId);
+    renderRewardSummary();
+    renderRewardWinnersList();
+    populateRewardFormFields();
+    setRewardWinnersMessage('برنده انتخابی حذف شد.', 'success');
+  } catch (error) {
+    console.error('removeRewardWinner failed', error);
+    setRewardWinnersMessage(error.message || 'خطا در حذف برنده.', 'error');
   }
 }
 
@@ -6422,6 +6649,15 @@ async function ensureRewardCampaignPanel(forceReload = false) {
     return;
   }
 
+  try {
+    await fetchRewardWinners(forceReload);
+    renderRewardWinnersList();
+    setRewardWinnersMessage('');
+  } catch (error) {
+    console.error('fetchRewardWinners failed', error);
+    setRewardWinnersMessage(error.message || 'خطا در دریافت فهرست برندگان.', 'error');
+  }
+
   if (!rewardPanelInitialised) {
     rewardPanelInitialised = true;
     rewardCampaignForm?.addEventListener('submit', (event) => {
@@ -6442,11 +6678,24 @@ async function ensureRewardCampaignPanel(forceReload = false) {
         rewardNewCodeInput.value = digitsOnly;
       }
     });
+    rewardWinnersForm?.addEventListener('submit', (event) => {
+      handleRewardWinnerFormSubmit(event).catch(err => console.error(err));
+    });
+    rewardWinnersListEl?.addEventListener('click', (event) => {
+      handleRewardWinnersListClick(event).catch(err => console.error(err));
+    });
+    rewardWinnerPhoneInput?.addEventListener('input', () => {
+      const digitsOnly = rewardWinnerPhoneInput.value.replace(/[^0-9+]/g, '');
+      if (rewardWinnerPhoneInput.value !== digitsOnly) {
+        rewardWinnerPhoneInput.value = digitsOnly;
+      }
+    });
   }
 
   populateRewardFormFields();
   renderRewardSummary();
   renderRewardCodesList();
+  renderRewardWinnersList();
 }
 
 if (rewardPanelEl) {

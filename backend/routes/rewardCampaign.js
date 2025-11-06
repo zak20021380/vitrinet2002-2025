@@ -8,15 +8,53 @@ async function getOrCreateCampaign() {
   return campaign.toObject();
 }
 
-function normaliseCampaign(doc = {}) {
+function maskPhoneNumber(raw) {
+  const digits = String(raw || '').replace(/[^0-9]/g, '');
+  if (!digits) return '';
+  const first = digits.slice(0, Math.min(4, digits.length));
+  const last = digits.length > 4 ? digits.slice(-4) : '';
+  const revealedLength = first.length + last.length;
+  let hiddenLength = Math.max(0, digits.length - revealedLength);
+  if (hiddenLength === 0) {
+    hiddenLength = digits.length >= 8 ? 4 : Math.max(0, 8 - revealedLength);
+  }
+  const mask = '•'.repeat(Math.max(hiddenLength, 4));
+  return `${first}${mask}${last}`;
+}
+
+function normaliseWinner(entry = {}, { includePhone = false } = {}) {
+  if (!entry) return null;
+  const id = entry._id ? String(entry._id) : entry.id ? String(entry.id) : '';
+  const firstName = entry.firstName ? String(entry.firstName).trim() : '';
+  const lastName = entry.lastName ? String(entry.lastName).trim() : '';
+  const digits = String(entry.phone || '').replace(/[^0-9]/g, '');
+  const masked = maskPhoneNumber(digits || entry.phone);
+
+  const payload = {
+    id,
+    firstName,
+    lastName,
+    phoneMasked: masked || '',
+    createdAt: entry.createdAt || null
+  };
+
+  if (includePhone) {
+    payload.phone = digits || String(entry.phone || '').trim();
+  }
+
+  return payload;
+}
+
+function normaliseCampaign(doc = {}, { includePrivateWinners = false } = {}) {
   const plain = typeof doc.toObject === 'function' ? doc.toObject() : doc;
   const usedCodes = Array.isArray(plain.codes)
     ? plain.codes.filter(code => code && code.used).length
     : 0;
+  const winnersList = buildWinnerList(plain, includePrivateWinners);
   const capacity = Math.max(0, Number(plain.capacity || 0));
   const winnersClaimed = Math.min(
     capacity,
-    Math.max(Number(plain.winnersClaimed || 0), usedCodes)
+    Math.max(Number(plain.winnersClaimed || 0), usedCodes, winnersList.length)
   );
 
   return {
@@ -39,9 +77,17 @@ function normaliseCampaign(doc = {}) {
             usedAt: code.usedAt || null
           }))
       : [],
+    winners: winnersList,
     updatedAt: plain.updatedAt || null,
     createdAt: plain.createdAt || null
   };
+}
+
+function buildWinnerList(doc, includePhone = false) {
+  if (!doc || !Array.isArray(doc.winners)) return [];
+  return doc.winners
+    .map(winner => normaliseWinner(winner, { includePhone }))
+    .filter(Boolean);
 }
 
 async function syncCampaignState() {
@@ -51,8 +97,9 @@ async function syncCampaignState() {
     return doc;
   }
   const usedCodes = doc.codes.filter(code => code.used).length;
+  const winnersCount = Array.isArray(doc.winners) ? doc.winners.length : 0;
   const normalisedCapacity = Math.max(0, Number(doc.capacity || 0));
-  const desiredWinners = Math.max(Number(doc.winnersClaimed || 0), usedCodes);
+  const desiredWinners = Math.max(Number(doc.winnersClaimed || 0), usedCodes, winnersCount);
   let changed = false;
   if (doc.capacity !== normalisedCapacity) {
     doc.capacity = normalisedCapacity;
@@ -77,6 +124,16 @@ router.get('/campaign', async (req, res, next) => {
   try {
     const campaign = await getOrCreateCampaign();
     res.json({ campaign: normaliseCampaign(campaign) });
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.get('/winners', async (req, res, next) => {
+  try {
+    const doc = await syncCampaignState();
+    const winners = buildWinnerList(doc, true);
+    res.json({ winners });
   } catch (error) {
     next(error);
   }
@@ -114,6 +171,55 @@ router.put('/campaign', async (req, res, next) => {
 
     await doc.save();
     res.json({ campaign: normaliseCampaign(doc) });
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.post('/winners', async (req, res, next) => {
+  try {
+    const { firstName = '', lastName = '', phone = '' } = req.body || {};
+    const normalisedFirstName = String(firstName || '').trim();
+    const normalisedLastName = String(lastName || '').trim();
+    const phoneDigits = String(phone || '').replace(/[^0-9]/g, '');
+
+    if (!normalisedFirstName) {
+      return res.status(400).json({ message: 'نام برنده الزامی است.' });
+    }
+    if (!normalisedLastName) {
+      return res.status(400).json({ message: 'نام خانوادگی برنده الزامی است.' });
+    }
+    if (phoneDigits.length < 8) {
+      return res.status(400).json({ message: 'شماره تلفن وارد شده معتبر نیست.' });
+    }
+
+    const doc = await syncCampaignState();
+    doc.winners.push({
+      firstName: normalisedFirstName,
+      lastName: normalisedLastName,
+      phone: phoneDigits,
+      createdAt: new Date()
+    });
+    doc.markModified('winners');
+    const usedCodes = doc.codes.filter(code => code.used).length;
+    const winnersCount = doc.winners.length;
+    doc.winnersClaimed = Math.max(Number(doc.winnersClaimed || 0), winnersCount, usedCodes);
+    if (doc.capacity > 0 && doc.winnersClaimed > doc.capacity) {
+      doc.winnersClaimed = doc.capacity;
+    }
+    doc.updatedAt = new Date();
+
+    await doc.save();
+
+    const winners = buildWinnerList(doc, true);
+    const latestWinner = winners[winners.length - 1] || null;
+
+    res.status(201).json({
+      message: 'برنده جدید با موفقیت ثبت شد.',
+      winner: latestWinner,
+      winners,
+      campaign: normaliseCampaign(doc)
+    });
   } catch (error) {
     next(error);
   }
@@ -224,6 +330,45 @@ router.delete('/codes/:code', async (req, res, next) => {
     res.json({
       campaign: normaliseCampaign(doc),
       message: 'کد انتخابی حذف شد.'
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.delete('/winners/:id', async (req, res, next) => {
+  try {
+    const winnerId = String(req.params.id || '').trim();
+    if (!winnerId) {
+      return res.status(400).json({ message: 'شناسه برنده معتبر نیست.' });
+    }
+
+    const doc = await syncCampaignState();
+    const winnerDoc = doc.winners.id(winnerId);
+    if (!winnerDoc) {
+      return res.status(404).json({ message: 'برنده مورد نظر یافت نشد.' });
+    }
+
+    winnerDoc.deleteOne();
+    doc.markModified('winners');
+
+    const usedCodes = doc.codes.filter(code => code.used).length;
+    const winnersCount = doc.winners.length;
+    let desiredWinners = Math.max(Number(doc.winnersClaimed || 0), usedCodes, winnersCount);
+    if (doc.capacity > 0 && desiredWinners > doc.capacity) {
+      desiredWinners = doc.capacity;
+    }
+    doc.winnersClaimed = desiredWinners;
+
+    doc.updatedAt = new Date();
+    await doc.save();
+
+    const winners = buildWinnerList(doc, true);
+
+    res.json({
+      message: 'برنده انتخابی حذف شد.',
+      winners,
+      campaign: normaliseCampaign(doc)
     });
   } catch (error) {
     next(error);
