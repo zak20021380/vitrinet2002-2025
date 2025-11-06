@@ -1,0 +1,68 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200">
+  <defs>
+    <linearGradient id="brandGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#10b981;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#0ea5e9;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="glassGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#ffffff;stop-opacity:0.3" />
+      <stop offset="100%" style="stop-color:#ffffff;stop-opacity:0.1" />
+    </linearGradient>
+    <filter id="shadow">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="3"/>
+      <feOffset dx="0" dy="2" result="offsetblur"/>
+      <feComponentTransfer>
+        <feFuncA type="linear" slope="0.3"/>
+      </feComponentTransfer>
+      <feMerge>
+        <feMergeNode/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+
+  <!-- Background Circle -->
+  <circle cx="100" cy="100" r="95" fill="url(#brandGradient)" opacity="0.1"/>
+
+  <!-- Main Showcase/Display Window Shape -->
+  <g filter="url(#shadow)">
+    <!-- Outer Frame -->
+    <rect x="40" y="50" width="120" height="100" rx="12"
+          fill="url(#brandGradient)" stroke="none"/>
+
+    <!-- Inner Glass Panel -->
+    <rect x="50" y="60" width="100" height="80" rx="8"
+          fill="white" opacity="0.95"/>
+
+    <!-- Glass Shine Effect -->
+    <rect x="50" y="60" width="100" height="80" rx="8"
+          fill="url(#glassGradient)" opacity="0.6"/>
+
+    <!-- Display Items (Abstract shapes representing products) -->
+    <g opacity="0.8">
+      <!-- Left Item -->
+      <circle cx="75" cy="95" r="12" fill="url(#brandGradient)" opacity="0.6"/>
+      <rect x="69" y="100" width="12" height="20" rx="2" fill="url(#brandGradient)" opacity="0.6"/>
+
+      <!-- Center Item -->
+      <circle cx="100" cy="90" r="15" fill="url(#brandGradient)" opacity="0.7"/>
+      <rect x="93" y="95" width="14" height="25" rx="2" fill="url(#brandGradient)" opacity="0.7"/>
+
+      <!-- Right Item -->
+      <circle cx="125" cy="95" r="12" fill="url(#brandGradient)" opacity="0.6"/>
+      <rect x="119" y="100" width="12" height="20" rx="2" fill="url(#brandGradient)" opacity="0.6"/>
+    </g>
+
+    <!-- Frame Dividers -->
+    <line x1="100" y1="60" x2="100" y2="140" stroke="url(#brandGradient)" stroke-width="2" opacity="0.3"/>
+    <line x1="50" y1="100" x2="150" y2="100" stroke="url(#brandGradient)" stroke-width="2" opacity="0.3"/>
+  </g>
+
+  <!-- Decorative Corner Elements -->
+  <path d="M 35 45 L 45 35 M 155 35 L 165 45 M 35 155 L 45 165 M 155 165 L 165 155"
+        stroke="url(#brandGradient)" stroke-width="3" stroke-linecap="round" opacity="0.6"/>
+
+  <!-- Bottom Base/Stand -->
+  <rect x="80" y="150" width="40" height="8" rx="4" fill="url(#brandGradient)" opacity="0.8"/>
+  <rect x="70" y="158" width="60" height="6" rx="3" fill="url(#brandGradient)" opacity="0.6"/>
+</svg>
