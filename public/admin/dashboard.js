@@ -5977,6 +5977,7 @@ const DEFAULT_REWARD_CAMPAIGN = {
   capacity: 0,
   winnersClaimed: 0,
   active: false,
+  showButton: true,
   codes: [],
   winners: [],
   updatedAt: null
@@ -6031,6 +6032,7 @@ function normaliseRewardCampaign(raw) {
     capacity,
     winnersClaimed,
     active: source.active !== undefined ? Boolean(source.active) : DEFAULT_REWARD_CAMPAIGN.active,
+    showButton: source.showButton !== undefined ? Boolean(source.showButton) : DEFAULT_REWARD_CAMPAIGN.showButton,
     codes,
     winners,
     updatedAt: source.updatedAt || DEFAULT_REWARD_CAMPAIGN.updatedAt
