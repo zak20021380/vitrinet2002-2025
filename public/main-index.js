@@ -1,4 +1,335 @@
 const SERVICE_PANEL_KEYWORDS = ['خدمات', 'زیبایی', 'تالار', 'مجالس', 'خودرو', 'ورزشی', 'پزشکی', 'سلامت', 'آرایش'];
+const REWARD_CAMPAIGN_STORAGE_KEY = 'vt_reward_campaign';
+const REWARD_USER_CLAIM_KEY = 'vt_reward_user_claim';
+const rewardNumberFormatter = new Intl.NumberFormat('fa-IR', { maximumFractionDigits: 0 });
+
+function getDefaultRewardCampaign() {
+  return {
+    title: 'هدیه ویژه کاربران وفادار',
+    description: 'کد ۶ رقمی خود را وارد کنید و شانس دریافت جایزه نقدی را امتحان کنید.',
+    prizeValue: 4000000,
+    currency: 'تومان',
+    capacity: 120,
+    winnersClaimed: 48,
+    active: true,
+    codes: [
+      { code: '924615', used: false },
+      { code: '583201', used: false },
+      { code: '198774', used: true },
+      { code: '470392', used: false }
+    ],
+    updatedAt: null
+  };
+}
+
+function normaliseRewardCampaign(raw) {
+  const defaults = getDefaultRewardCampaign();
+  const source = raw && typeof raw === 'object' ? raw : {};
+  const codes = Array.isArray(source.codes)
+    ? source.codes
+        .map(item => {
+          if (!item) return null;
+          const codeStr = String(item.code || '')
+            .replace(/[^0-9]/g, '')
+            .slice(0, 6);
+          if (!codeStr || codeStr.length !== 6) return null;
+          return {
+            code: codeStr,
+            used: Boolean(item.used),
+            note: item.note ? String(item.note) : undefined,
+            createdAt: item.createdAt || null,
+            usedAt: item.usedAt || null
+          };
+        })
+        .filter(Boolean)
+    : defaults.codes;
+
+  const campaign = {
+    title: String(source.title || defaults.title),
+    description: String(source.description || defaults.description),
+    prizeValue: Number.isFinite(Number(source.prizeValue)) ? Number(source.prizeValue) : defaults.prizeValue,
+    currency: source.currency ? String(source.currency) : defaults.currency,
+    capacity: Math.max(1, Number.isFinite(Number(source.capacity)) ? Number(source.capacity) : defaults.capacity),
+    winnersClaimed: Math.max(0, Number.isFinite(Number(source.winnersClaimed)) ? Number(source.winnersClaimed) : defaults.winnersClaimed),
+    active: source.active !== undefined ? Boolean(source.active) : defaults.active,
+    codes,
+    updatedAt: source.updatedAt || defaults.updatedAt
+  };
+
+  const usedCount = campaign.codes.filter(item => item.used).length;
+  if (campaign.winnersClaimed < usedCount) {
+    campaign.winnersClaimed = usedCount;
+  }
+  if (campaign.winnersClaimed > campaign.capacity) {
+    campaign.winnersClaimed = campaign.capacity;
+  }
+
+  return campaign;
+}
+
+function loadRewardCampaignConfig() {
+  try {
+    const stored = localStorage.getItem(REWARD_CAMPAIGN_STORAGE_KEY);
+    if (!stored) {
+      return normaliseRewardCampaign(getDefaultRewardCampaign());
+    }
+    const parsed = JSON.parse(stored);
+    return normaliseRewardCampaign(parsed);
+  } catch (err) {
+    console.warn('loadRewardCampaignConfig failed', err);
+    return normaliseRewardCampaign(getDefaultRewardCampaign());
+  }
+}
+
+function saveRewardCampaignConfig(config) {
+  try {
+    localStorage.setItem(REWARD_CAMPAIGN_STORAGE_KEY, JSON.stringify(config));
+  } catch (err) {
+    console.warn('saveRewardCampaignConfig failed', err);
+  }
+}
+
+function formatRewardPrize(amount, currency) {
+  if (amount == null || Number.isNaN(Number(amount))) {
+    return '—';
+  }
+  const formatted = rewardNumberFormatter.format(Math.round(Number(amount)));
+  return currency ? `${formatted} ${currency}` : formatted;
+}
+
+function computeRewardStats(campaign) {
+  const codes = Array.isArray(campaign?.codes) ? campaign.codes : [];
+  const totalCodes = codes.length;
+  const usedCodes = codes.filter(code => code.used).length;
+  const availableCodes = Math.max(0, totalCodes - usedCodes);
+  const completion = campaign?.capacity > 0
+    ? Math.min(100, Math.round((Math.min(campaign.winnersClaimed, campaign.capacity) / campaign.capacity) * 100))
+    : 0;
+  return { totalCodes, usedCodes, availableCodes, completion };
+}
+
+const rewardElements = {
+  openBtn: document.getElementById('rewardClaimBtn'),
+  backdrop: document.getElementById('rewardModalBackdrop'),
+  modal: document.getElementById('rewardModal'),
+  title: document.getElementById('rewardModalTitle'),
+  subtitle: document.getElementById('rewardModalSubtitle'),
+  closeBtn: document.getElementById('rewardModalCloseBtn'),
+  dismissBtn: document.getElementById('rewardModalDismissBtn'),
+  form: document.getElementById('rewardClaimForm'),
+  codeInput: document.getElementById('rewardCodeInput'),
+  message: document.getElementById('rewardMessage'),
+  prizeValue: document.getElementById('rewardPrizeValue'),
+  capacityValue: document.getElementById('rewardCapacityValue'),
+  winnersValue: document.getElementById('rewardWinnersValue'),
+  progressBar: document.getElementById('rewardProgressBar'),
+  submitBtn: document.getElementById('rewardModalSubmitBtn')
+};
+
+let rewardCampaignState = null;
+let rewardModalInitialised = false;
+
+function setRewardMessage(message, type = 'info') {
+  if (!rewardElements.message) return;
+  rewardElements.message.textContent = message || '';
+  rewardElements.message.classList.remove('is-success', 'is-error');
+  if (type === 'success') {
+    rewardElements.message.classList.add('is-success');
+  } else if (type === 'error') {
+    rewardElements.message.classList.add('is-error');
+  }
+}
+
+function updateRewardModalUI() {
+  if (!rewardElements.modal) return;
+  if (!rewardCampaignState) {
+    rewardCampaignState = loadRewardCampaignConfig();
+  }
+  const { prizeValue, currency, capacity, winnersClaimed, active } = rewardCampaignState;
+  if (rewardElements.title) {
+    rewardElements.title.textContent = rewardCampaignState.title || 'هدیه ویژه کاربران وفادار';
+  }
+  if (rewardElements.subtitle) {
+    rewardElements.subtitle.textContent = rewardCampaignState.description || 'کد ۶ رقمی خود را وارد کنید و شانس دریافت جایزه نقدی را امتحان کنید.';
+  }
+  if (rewardElements.prizeValue) {
+    rewardElements.prizeValue.textContent = formatRewardPrize(prizeValue, currency);
+  }
+  if (rewardElements.capacityValue) {
+    rewardElements.capacityValue.textContent = `${rewardNumberFormatter.format(capacity)} نفر`;
+  }
+  if (rewardElements.winnersValue) {
+    rewardElements.winnersValue.textContent = `${rewardNumberFormatter.format(Math.min(winnersClaimed, capacity))} نفر`;
+  }
+  const stats = computeRewardStats(rewardCampaignState);
+  if (rewardElements.progressBar) {
+    rewardElements.progressBar.style.width = `${stats.completion}%`;
+  }
+  if (rewardElements.openBtn) {
+    rewardElements.openBtn.setAttribute('data-available-codes', stats.availableCodes);
+    rewardElements.openBtn.setAttribute(
+      'title',
+      `ارزش جایزه ${formatRewardPrize(prizeValue, currency)} • ${rewardNumberFormatter.format(Math.min(winnersClaimed, capacity))} از ${rewardNumberFormatter.format(capacity)} برنده`
+    );
+  }
+
+  if (!active) {
+    setRewardMessage('کمپین در حال حاضر فعال نیست. لطفاً بعداً دوباره تلاش کنید.', 'error');
+    if (rewardElements.codeInput) {
+      rewardElements.codeInput.disabled = true;
+    }
+    if (rewardElements.submitBtn) {
+      rewardElements.submitBtn.disabled = true;
+    }
+  } else if (rewardElements.codeInput) {
+    rewardElements.codeInput.disabled = false;
+    if (rewardElements.submitBtn) {
+      rewardElements.submitBtn.disabled = false;
+    }
+  }
+}
+
+function closeRewardModal(focusTarget) {
+  if (!rewardElements.backdrop) return;
+  rewardElements.backdrop.classList.remove('active');
+  rewardElements.backdrop.setAttribute('aria-hidden', 'true');
+  if (rewardElements.openBtn) {
+    rewardElements.openBtn.setAttribute('aria-expanded', 'false');
+  }
+  if (focusTarget && typeof focusTarget.focus === 'function') {
+    focusTarget.focus();
+  }
+}
+
+function openRewardModal() {
+  if (!rewardElements.backdrop) return;
+  rewardCampaignState = loadRewardCampaignConfig();
+  updateRewardModalUI();
+  if (rewardElements.codeInput) {
+    rewardElements.codeInput.value = '';
+    rewardElements.codeInput.readOnly = false;
+  }
+  const userClaim = safeParseLocalStorage(REWARD_USER_CLAIM_KEY);
+  if (userClaim && userClaim.code) {
+    rewardElements.codeInput.value = userClaim.code;
+    rewardElements.codeInput.readOnly = true;
+    if (rewardElements.submitBtn) {
+      rewardElements.submitBtn.disabled = true;
+    }
+    setRewardMessage('شما قبلاً جایزه خود را دریافت کرده‌اید. برای اطلاعات بیشتر با پشتیبانی در تماس باشید.', 'info');
+  } else {
+    if (rewardElements.submitBtn) {
+      rewardElements.submitBtn.disabled = false;
+    }
+    setRewardMessage('');
+  }
+  rewardElements.backdrop.classList.add('active');
+  rewardElements.backdrop.setAttribute('aria-hidden', 'false');
+  if (rewardElements.openBtn) {
+    rewardElements.openBtn.setAttribute('aria-expanded', 'true');
+  }
+  if (rewardElements.codeInput) {
+    setTimeout(() => rewardElements.codeInput?.focus({ preventScroll: true }), 40);
+  }
+}
+
+function handleRewardSubmit(event) {
+  if (!rewardCampaignState || !rewardCampaignState.active) {
+    return;
+  }
+  event.preventDefault();
+  if (!rewardElements.codeInput) return;
+  const rawCode = rewardElements.codeInput.value || '';
+  const normalisedCode = rawCode.replace(/[^0-9]/g, '').slice(0, 6);
+  rewardElements.codeInput.value = normalisedCode;
+
+  if (normalisedCode.length !== 6) {
+    setRewardMessage('لطفاً یک کد ۶ رقمی معتبر وارد کنید.', 'error');
+    rewardElements.codeInput.focus();
+    return;
+  }
+
+  const userClaim = safeParseLocalStorage(REWARD_USER_CLAIM_KEY);
+  if (userClaim && userClaim.code && userClaim.code === normalisedCode) {
+    setRewardMessage('شما قبلاً با همین کد جایزه خود را دریافت کرده‌اید.', 'info');
+    return;
+  }
+
+  const codeEntry = rewardCampaignState.codes.find(item => item.code === normalisedCode);
+  if (!codeEntry) {
+    setRewardMessage('کد وارد شده یافت نشد. لطفاً دوباره تلاش کنید.', 'error');
+    return;
+  }
+  if (codeEntry.used) {
+    setRewardMessage('این کد قبلاً استفاده شده است.', 'error');
+    return;
+  }
+
+  codeEntry.used = true;
+  codeEntry.usedAt = new Date().toISOString();
+  const usedCodes = rewardCampaignState.codes.filter(item => item.used).length;
+  rewardCampaignState.winnersClaimed = Math.min(rewardCampaignState.capacity, Math.max(rewardCampaignState.winnersClaimed + 1, usedCodes));
+  rewardCampaignState.updatedAt = new Date().toISOString();
+  saveRewardCampaignConfig(rewardCampaignState);
+
+  try {
+    localStorage.setItem(REWARD_USER_CLAIM_KEY, JSON.stringify({ code: normalisedCode, claimedAt: new Date().toISOString() }));
+  } catch (err) {
+    console.warn('reward user claim storage failed', err);
+  }
+
+  if (rewardElements.codeInput) {
+    rewardElements.codeInput.readOnly = true;
+  }
+  if (rewardElements.submitBtn) {
+    rewardElements.submitBtn.disabled = true;
+  }
+  setRewardMessage('تبریک! جایزه برای شما ثبت شد. همکاران ما به زودی با شما تماس می‌گیرند.', 'success');
+  updateRewardModalUI();
+}
+
+function initRewardModal() {
+  if (rewardModalInitialised) return;
+  rewardModalInitialised = true;
+  if (rewardElements.openBtn) {
+    rewardElements.openBtn.addEventListener('click', () => openRewardModal());
+  }
+  if (rewardElements.closeBtn) {
+    rewardElements.closeBtn.addEventListener('click', () => closeRewardModal(rewardElements.openBtn));
+  }
+  if (rewardElements.dismissBtn) {
+    rewardElements.dismissBtn.addEventListener('click', () => closeRewardModal(rewardElements.openBtn));
+  }
+  if (rewardElements.backdrop) {
+    rewardElements.backdrop.addEventListener('click', (event) => {
+      if (event.target === rewardElements.backdrop) {
+        closeRewardModal(rewardElements.openBtn);
+      }
+    });
+  }
+  if (rewardElements.form) {
+    rewardElements.form.addEventListener('submit', handleRewardSubmit);
+  }
+  if (rewardElements.codeInput) {
+    rewardElements.codeInput.addEventListener('input', () => {
+      const digitsOnly = rewardElements.codeInput.value.replace(/[^0-9]/g, '').slice(0, 6);
+      if (rewardElements.codeInput.value !== digitsOnly) {
+        rewardElements.codeInput.value = digitsOnly;
+      }
+    });
+  }
+  document.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape' && rewardElements.backdrop?.classList.contains('active')) {
+      closeRewardModal(rewardElements.openBtn);
+    }
+  });
+  window.addEventListener('storage', (event) => {
+    if (event.key === REWARD_CAMPAIGN_STORAGE_KEY) {
+      rewardCampaignState = loadRewardCampaignConfig();
+      updateRewardModalUI();
+    }
+  });
+}
 
 function safeParseLocalStorage(key) {
   try {
@@ -95,6 +426,8 @@ document.addEventListener('visibilitychange', () => {
 document.addEventListener('mobileNavReady', () => {
   updateAuthNavigationState();
 });
+
+initRewardModal();
 
 // نشون دادن پاپ‌آپ
   document.getElementById('cityBtn').onclick = function(e) {

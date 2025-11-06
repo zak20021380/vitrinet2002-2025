@@ -109,10 +109,25 @@
       </a>
     </nav>
 
-    <!-- دکمه ثبت فروشگاه -->
-    <a href="post.html" id="registerShopBtn" class="btn-grad px-4 py-2 md:px-5 md:py-2.5 rounded-full font-extrabold shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-200 whitespace-nowrap text-white text-sm md:text-base header-item">
-      ثبت فروشگاه
-    </a>
+    <!-- دکمه‌های اکشن هدر -->
+    <div class="flex items-center gap-2 header-item">
+      <button type="button" id="rewardClaimBtn"
+        class="reward-header-btn inline-flex items-center gap-2 px-4 py-2 md:px-5 md:py-2.5 rounded-full font-extrabold shadow-lg hover:shadow-xl transition-all duration-200 whitespace-nowrap text-white text-sm md:text-base header-item"
+        aria-haspopup="dialog" aria-controls="rewardModal" aria-expanded="false">
+        <span class="reward-header-icon" aria-hidden="true">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M5 8h14v12H5z" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M3 8h18" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+            <path d="M12 4c.8-1.3 2.5-2 3.8-1 .7.5 1.2 1.3 1.2 2.1 0 1.5-1.2 2.9-3 2.9h-2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M12 4c-.8-1.3-2.5-2-3.8-1-.7.5-1.2 1.3-1.2 2.1 0 1.5 1.2 2.9 3 2.9h2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </span>
+        <span>دریافت جایزه</span>
+      </button>
+      <a href="post.html" id="registerShopBtn" class="btn-grad px-4 py-2 md:px-5 md:py-2.5 rounded-full font-extrabold shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-200 whitespace-nowrap text-white text-sm md:text-base header-item">
+        ثبت فروشگاه
+      </a>
+    </div>
   </div>
 </header>
 
@@ -193,6 +208,51 @@
 
   </div>
 </section>
+
+<!-- پاپ‌آپ دریافت جایزه -->
+<div id="rewardModalBackdrop" class="reward-modal-backdrop" role="presentation" aria-hidden="true">
+  <div id="rewardModal" class="reward-modal" role="dialog" aria-modal="true" aria-labelledby="rewardModalTitle" aria-describedby="rewardModalSubtitle">
+    <button type="button" id="rewardModalCloseBtn" class="reward-modal__close" aria-label="بستن پنجره">
+      <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
+        <path d="M6 6l12 12M6 18L18 6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </button>
+    <div class="reward-modal__header">
+      <div class="reward-modal__badge">کمپین ویژه</div>
+      <h2 id="rewardModalTitle">هدیه ویژه کاربران وفادار</h2>
+      <p id="rewardModalSubtitle">کد ۶ رقمی خود را وارد کنید و شانس دریافت جایزه نقدی را امتحان کنید.</p>
+    </div>
+    <div class="reward-modal__stats" id="rewardModalStats">
+      <div class="reward-modal__stat">
+        <span class="label">ارزش جایزه</span>
+        <span class="value" id="rewardPrizeValue">۴,۰۰۰,۰۰۰ تومان</span>
+      </div>
+      <div class="reward-modal__stat">
+        <span class="label">ظرفیت کل</span>
+        <span class="value" id="rewardCapacityValue">۱۰۰ نفر</span>
+      </div>
+      <div class="reward-modal__stat">
+        <span class="label">برندگان تاکنون</span>
+        <span class="value" id="rewardWinnersValue">۰ نفر</span>
+      </div>
+    </div>
+    <div class="reward-modal__progress" aria-hidden="true">
+      <div class="reward-modal__progress-bar" id="rewardProgressBar"></div>
+    </div>
+    <form id="rewardClaimForm" class="reward-modal__form" autocomplete="off">
+      <label for="rewardCodeInput" class="reward-modal__label">کد ۶ رقمی خود را وارد کنید</label>
+      <div class="reward-modal__input-group">
+        <input type="text" inputmode="numeric" pattern="\d{6}" maxlength="6" id="rewardCodeInput" name="rewardCode" placeholder="مثلاً 123456" required aria-required="true" aria-describedby="rewardMessage" />
+        <button type="submit" class="reward-modal__submit" id="rewardModalSubmitBtn">دریافت جایزه</button>
+      </div>
+      <p id="rewardMessage" class="reward-modal__message" role="status"></p>
+    </form>
+    <div class="reward-modal__footer">
+      <button type="button" id="rewardModalDismissBtn" class="reward-modal__secondary">بعداً امتحان می‌کنم</button>
+      <p class="reward-modal__hint">کد‌ها یکتا هستند و پس از استفاده غیرفعال می‌شوند.</p>
+    </div>
+  </div>
+</div>
 
 <!-- پاپ‌آپ شهر -->
 <div id="cityModalBackdrop" class="city-modal-backdrop">
