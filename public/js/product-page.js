@@ -1426,47 +1426,25 @@
       return;
     }
 
-    // Fetch and display prize code
-    async function fetchPrizeCode() {
-      try {
-        codeDisplay.innerHTML = '<div class="prize-loading">در حال بارگذاری...</div>';
-
-        const response = await fetch('/api/rewards/campaign');
-        if (!response.ok) {
-          throw new Error('خطا در دریافت اطلاعات کمپین');
-        }
-
-        const data = await response.json();
-        const campaign = data.campaign;
-
-        // Check if campaign is active and showButton is true
-        if (!campaign.active || !campaign.showButton) {
-          prizeBtn.style.display = 'none';
-          return;
-        }
-
-        // Find first unused code
-        const availableCode = campaign.codes?.find(code => !code.used);
-
-        if (availableCode) {
-          codeDisplay.innerHTML = `
-            <div class="prize-code-label">کد جایزه شما:</div>
-            <div class="prize-code-value">${availableCode.code}</div>
-          `;
-        } else {
-          codeDisplay.innerHTML = '<div class="prize-error">کد جایزه‌ای در دسترس نیست</div>';
-        }
-      } catch (error) {
-        console.error('Error fetching prize code:', error);
-        codeDisplay.innerHTML = '<div class="prize-error">خطا در دریافت کد جایزه</div>';
-      }
+    function generatePrizeCode() {
+      const digits = ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹'];
+      const randomIndex = Math.floor(Math.random() * digits.length);
+      return digits[randomIndex];
     }
 
-    // Open modal
+    function renderPrizeCode() {
+      const code = generatePrizeCode();
+      codeDisplay.innerHTML = `
+        <div class="prize-code-label">کد جایزه شما:</div>
+        <div class="prize-code-value">${code}</div>
+      `;
+    }
+
     function openModal() {
       modal.classList.add('active');
       document.body.style.overflow = 'hidden';
-      fetchPrizeCode();
+      codeDisplay.innerHTML = '<div class="prize-loading">در حال بارگذاری...</div>';
+      setTimeout(renderPrizeCode, 500);
     }
 
     // Close modal
@@ -1493,18 +1471,5 @@
       }
     });
 
-    // Check if button should be visible on page load
-    fetch('/api/rewards/campaign')
-      .then(res => res.json())
-      .then(data => {
-        const campaign = data.campaign;
-        if (!campaign.active || !campaign.showButton) {
-          prizeBtn.style.display = 'none';
-        }
-      })
-      .catch(err => {
-        console.error('Error checking campaign status:', err);
-        prizeBtn.style.display = 'none';
-      });
   })();
 })();

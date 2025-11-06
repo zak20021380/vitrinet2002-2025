@@ -1997,42 +1997,93 @@
 
     /* Prize Code Button */
     .prize-code-btn {
+      position: relative;
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      padding: 0.75rem 1.5rem;
-      border-radius: 8px;
-      border: 1px solid #e5e7eb;
-      background: #ffffff;
-      color: #1f2937;
-      font-weight: 600;
+      padding: 0.75rem 1.6rem;
+      border-radius: 999px;
+      border: none;
+      background: linear-gradient(135deg, #fb923c 0%, #f97316 35%, #f43f5e 100%);
+      background-size: 200% 200%;
+      color: #ffffff;
+      font-weight: 700;
       font-size: 0.95rem;
       cursor: pointer;
-      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
-      transition: all 0.2s ease;
+      box-shadow: 0 12px 30px rgba(249, 115, 22, 0.35);
+      transition: transform 0.25s ease, box-shadow 0.25s ease;
       white-space: nowrap;
       grid-area: prize;
-      letter-spacing: 0.01em;
+      letter-spacing: 0.04em;
+      isolation: isolate;
+      overflow: hidden;
+      animation: prizeButtonGlow 6s ease-in-out infinite;
+      z-index: 0;
     }
 
-    .prize-code-btn:hover {
-      background: #f9fafb;
-      border-color: #d1d5db;
-      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
+    .prize-code-btn::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle at 20% 20%, rgba(255, 255, 255, 0.4), transparent 55%),
+        radial-gradient(circle at 80% 30%, rgba(254, 215, 170, 0.45), transparent 60%);
+      opacity: 0;
+      transition: opacity 0.3s ease;
+      z-index: -1;
+    }
+
+    .prize-code-btn::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: -40%;
+      width: 120%;
+      height: 160%;
+      background: linear-gradient(120deg, transparent 0%, rgba(255, 255, 255, 0.35) 45%, transparent 90%);
+      transform: translateY(-50%) rotate(12deg);
+      transition: transform 0.6s ease;
+      pointer-events: none;
+    }
+
+    .prize-code-btn:hover,
+    .prize-code-btn:focus-visible {
+      transform: translateY(-2px) scale(1.02);
+      box-shadow: 0 18px 40px rgba(249, 115, 22, 0.45);
+    }
+
+    .prize-code-btn:hover::before,
+    .prize-code-btn:focus-visible::before {
+      opacity: 1;
+    }
+
+    .prize-code-btn:hover::after,
+    .prize-code-btn:focus-visible::after {
+      transform: translate(90%, -50%) rotate(12deg);
     }
 
     .prize-code-btn:focus-visible {
-      outline: 2px solid #3b82f6;
-      outline-offset: 2px;
+      outline: none;
     }
 
     .prize-code-btn:active {
-      background: #f3f4f6;
-      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
+      transform: translateY(0);
+      box-shadow: 0 10px 24px rgba(249, 115, 22, 0.35);
     }
 
     .prize-text {
-      font-weight: 600;
+      font-weight: 700;
+      font-size: 1rem;
+      text-shadow: 0 2px 8px rgba(15, 23, 42, 0.35);
+    }
+
+    @keyframes prizeButtonGlow {
+      0%,
+      100% {
+        background-position: 0% 50%;
+      }
+      50% {
+        background-position: 100% 50%;
+      }
     }
 
     /* Prize Code Modal */
