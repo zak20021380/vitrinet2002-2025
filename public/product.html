@@ -120,11 +120,11 @@
 
     .header-inner {
       display: grid;
-      grid-template-columns: auto 1fr auto;
+      grid-template-columns: auto auto 1fr auto;
       align-items: center;
       gap: 2rem;
       padding: 0.85rem 0;
-      grid-template-areas: 'brand nav cta';
+      grid-template-areas: 'brand prize nav cta';
       position: relative;
     }
 
@@ -1677,9 +1677,9 @@
 
     @media (min-width: 768px) {
       .header-inner {
-        grid-template-columns: auto 1fr auto;
+        grid-template-columns: auto auto 1fr auto;
         align-items: center;
-        grid-template-areas: 'brand nav cta';
+        grid-template-areas: 'brand prize nav cta';
       }
 
       nav {
@@ -2010,6 +2010,395 @@
       }
     }
 
+    /* Prize Code Button */
+    .prize-code-btn {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      padding: 0.7rem 1.4rem;
+      border-radius: 999px;
+      border: 2px solid transparent;
+      background: linear-gradient(135deg, #f59e0b, #ef4444, #f59e0b);
+      background-size: 200% 200%;
+      color: #fff;
+      font-weight: 800;
+      font-size: 0.95rem;
+      cursor: pointer;
+      box-shadow: 0 6px 20px rgba(245, 158, 11, 0.4);
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      animation: prizeGradient 3s ease infinite, prizePulse 2s ease-in-out infinite;
+      overflow: hidden;
+      white-space: nowrap;
+      grid-area: prize;
+    }
+
+    .prize-code-btn::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 0;
+      height: 0;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.4);
+      transform: translate(-50%, -50%);
+      transition: width 0.6s, height 0.6s;
+    }
+
+    .prize-code-btn:hover::before {
+      width: 300px;
+      height: 300px;
+    }
+
+    .prize-code-btn:hover {
+      transform: translateY(-3px) scale(1.08);
+      box-shadow: 0 10px 30px rgba(245, 158, 11, 0.6);
+      border-color: rgba(255, 255, 255, 0.3);
+    }
+
+    .prize-code-btn:focus-visible {
+      outline: 3px solid #f59e0b;
+      outline-offset: 3px;
+    }
+
+    .prize-code-btn:active {
+      transform: translateY(-1px) scale(1.02);
+    }
+
+    .prize-icon {
+      width: 22px;
+      height: 22px;
+      position: relative;
+      z-index: 1;
+      animation: prizeRotate 3s linear infinite;
+    }
+
+    .prize-text {
+      position: relative;
+      z-index: 1;
+    }
+
+    @keyframes prizeGradient {
+      0%, 100% {
+        background-position: 0% 50%;
+      }
+      50% {
+        background-position: 100% 50%;
+      }
+    }
+
+    @keyframes prizePulse {
+      0%, 100% {
+        box-shadow: 0 6px 20px rgba(245, 158, 11, 0.4), 0 0 0 0 rgba(245, 158, 11, 0.7);
+      }
+      50% {
+        box-shadow: 0 8px 25px rgba(245, 158, 11, 0.5), 0 0 0 8px rgba(245, 158, 11, 0);
+      }
+    }
+
+    @keyframes prizeRotate {
+      0%, 100% {
+        transform: rotate(0deg);
+      }
+      25% {
+        transform: rotate(-10deg);
+      }
+      75% {
+        transform: rotate(10deg);
+      }
+    }
+
+    /* Prize Code Modal */
+    .prize-modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(15, 23, 42, 0.7);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      z-index: 10000;
+      align-items: center;
+      justify-content: center;
+      padding: 1rem;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+
+    .prize-modal.active {
+      display: flex;
+      opacity: 1;
+    }
+
+    .prize-modal-content {
+      background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+      border-radius: 24px;
+      padding: 2.5rem;
+      max-width: 500px;
+      width: 100%;
+      position: relative;
+      box-shadow: 0 25px 50px rgba(15, 23, 42, 0.3);
+      transform: scale(0.9);
+      transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+      border: 2px solid rgba(245, 158, 11, 0.2);
+    }
+
+    .prize-modal.active .prize-modal-content {
+      transform: scale(1);
+    }
+
+    .prize-modal-header {
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+
+    .prize-modal-icon {
+      width: 80px;
+      height: 80px;
+      margin: 0 auto 1.5rem;
+      background: linear-gradient(135deg, #f59e0b, #ef4444);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 10px 30px rgba(245, 158, 11, 0.3);
+      animation: modalIconFloat 3s ease-in-out infinite;
+    }
+
+    .prize-modal-icon svg {
+      width: 45px;
+      height: 45px;
+      color: white;
+    }
+
+    @keyframes modalIconFloat {
+      0%, 100% {
+        transform: translateY(0);
+      }
+      50% {
+        transform: translateY(-10px);
+      }
+    }
+
+    .prize-modal-title {
+      font-size: 1.8rem;
+      font-weight: 900;
+      background: linear-gradient(135deg, #f59e0b, #ef4444);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin: 0;
+    }
+
+    .prize-modal-body {
+      text-align: center;
+    }
+
+    .prize-code-display {
+      background: linear-gradient(135deg, #fef3c7, #fecaca);
+      border: 3px dashed #f59e0b;
+      border-radius: 16px;
+      padding: 2rem 1.5rem;
+      margin: 1.5rem 0;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .prize-code-display::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.5), transparent);
+      animation: prizeShine 3s linear infinite;
+    }
+
+    @keyframes prizeShine {
+      0% {
+        transform: translateX(-100%) translateY(-100%) rotate(45deg);
+      }
+      100% {
+        transform: translateX(100%) translateY(100%) rotate(45deg);
+      }
+    }
+
+    .prize-code-label {
+      font-size: 0.9rem;
+      color: #78350f;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+      position: relative;
+      z-index: 1;
+    }
+
+    .prize-code-value {
+      font-size: 3rem;
+      font-weight: 900;
+      color: #dc2626;
+      letter-spacing: 0.3rem;
+      font-family: 'Courier New', monospace;
+      text-shadow: 2px 2px 4px rgba(220, 38, 38, 0.2);
+      position: relative;
+      z-index: 1;
+      direction: ltr;
+    }
+
+    .prize-loading {
+      font-size: 1.5rem;
+      color: #f59e0b;
+      position: relative;
+      z-index: 1;
+    }
+
+    .prize-error {
+      font-size: 1rem;
+      color: #dc2626;
+      position: relative;
+      z-index: 1;
+    }
+
+    .prize-modal-desc {
+      color: #64748b;
+      font-size: 0.95rem;
+      line-height: 1.6;
+      margin: 1rem 0;
+    }
+
+    .prize-modal-close {
+      position: absolute;
+      top: 1.2rem;
+      left: 1.2rem;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      border: none;
+      background: rgba(239, 68, 68, 0.1);
+      color: #dc2626;
+      font-size: 1.5rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s ease;
+      font-weight: 700;
+    }
+
+    .prize-modal-close:hover {
+      background: #dc2626;
+      color: white;
+      transform: rotate(90deg);
+    }
+
+    .prize-modal-footer {
+      margin-top: 2rem;
+      padding-top: 1.5rem;
+      border-top: 2px solid rgba(245, 158, 11, 0.2);
+      text-align: center;
+    }
+
+    .prize-info {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      color: #64748b;
+      font-size: 0.85rem;
+      background: rgba(245, 158, 11, 0.1);
+      padding: 0.5rem 1rem;
+      border-radius: 999px;
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 767px) {
+      .header-inner {
+        grid-template-areas: 'brand prize cta toggle';
+        grid-template-columns: auto auto 1fr auto;
+      }
+
+      .prize-code-btn {
+        padding: 0.6rem 1rem;
+        font-size: 0.85rem;
+      }
+
+      .prize-icon {
+        width: 20px;
+        height: 20px;
+      }
+
+      .prize-modal-content {
+        padding: 2rem 1.5rem;
+      }
+
+      .prize-code-value {
+        font-size: 2.5rem;
+        letter-spacing: 0.2rem;
+      }
+
+      .prize-modal-title {
+        font-size: 1.5rem;
+      }
+    }
+
+    @media (max-width: 640px) {
+      .prize-code-btn {
+        padding: 0.55rem 0.85rem;
+        font-size: 0.8rem;
+      }
+
+      .prize-text {
+        display: none;
+      }
+
+      .prize-icon {
+        width: 18px;
+        height: 18px;
+      }
+
+      .prize-modal-content {
+        padding: 1.5rem 1rem;
+      }
+
+      .prize-modal-icon {
+        width: 60px;
+        height: 60px;
+      }
+
+      .prize-modal-icon svg {
+        width: 35px;
+        height: 35px;
+      }
+
+      .prize-code-value {
+        font-size: 2rem;
+        letter-spacing: 0.15rem;
+      }
+
+      .prize-modal-title {
+        font-size: 1.3rem;
+      }
+
+      .prize-modal-close {
+        width: 36px;
+        height: 36px;
+        font-size: 1.3rem;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .prize-code-btn {
+        padding: 0.5rem 0.7rem;
+      }
+
+      .prize-code-value {
+        font-size: 1.8rem;
+      }
+    }
+
     @media (prefers-reduced-motion: reduce) {
       *, *::before, *::after {
         animation-duration: 0.01ms !important;
@@ -2020,6 +2409,12 @@
 
       .slider-track {
         transition: none !important;
+      }
+
+      .prize-code-btn,
+      .prize-icon,
+      .prize-modal-icon {
+        animation: none !important;
       }
     }
   </style>
@@ -2053,6 +2448,14 @@
           <span class="brand-tagline">Vitreenet</span>
         </span>
       </a>
+      <button class="prize-code-btn" id="prizeCodeBtn" type="button" aria-label="مشاهده کد جایزه">
+        <span class="prize-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" fill="currentColor"/>
+          </svg>
+        </span>
+        <span class="prize-text">کد جایزه</span>
+      </button>
       <a class="cta-link" href="/post.html" aria-label="ثبت فروشگاه در ویترینت">
         <span class="cta-text">
           <span class="cta-title">ثبت فروشگاه</span>
@@ -3674,7 +4077,136 @@
           })
           .join('');
       }
+
+      // Prize Code Modal Functionality
+      (function initializePrizeCodeModal() {
+        const prizeBtn = document.getElementById('prizeCodeBtn');
+        const modal = document.getElementById('prizeModal');
+        const closeBtn = document.getElementById('prizeModalClose');
+        const codeDisplay = document.getElementById('prizeCodeDisplay');
+
+        if (!prizeBtn || !modal || !closeBtn || !codeDisplay) {
+          console.warn('Prize code modal elements not found');
+          return;
+        }
+
+        // Fetch and display prize code
+        async function fetchPrizeCode() {
+          try {
+            codeDisplay.innerHTML = '<div class="prize-loading">در حال بارگذاری...</div>';
+
+            const response = await fetch('/api/rewards/campaign');
+            if (!response.ok) {
+              throw new Error('خطا در دریافت اطلاعات کمپین');
+            }
+
+            const data = await response.json();
+            const campaign = data.campaign;
+
+            // Check if campaign is active and showButton is true
+            if (!campaign.active || !campaign.showButton) {
+              prizeBtn.style.display = 'none';
+              return;
+            }
+
+            // Find first unused code
+            const availableCode = campaign.codes?.find(code => !code.used);
+
+            if (availableCode) {
+              codeDisplay.innerHTML = `
+                <div class="prize-code-label">کد جایزه شما:</div>
+                <div class="prize-code-value">${availableCode.code}</div>
+              `;
+            } else {
+              codeDisplay.innerHTML = '<div class="prize-error">کد جایزه‌ای در دسترس نیست</div>';
+            }
+          } catch (error) {
+            console.error('Error fetching prize code:', error);
+            codeDisplay.innerHTML = '<div class="prize-error">خطا در دریافت کد جایزه</div>';
+          }
+        }
+
+        // Open modal
+        function openModal() {
+          modal.classList.add('active');
+          document.body.style.overflow = 'hidden';
+          fetchPrizeCode();
+        }
+
+        // Close modal
+        function closeModal() {
+          modal.classList.remove('active');
+          document.body.style.overflow = '';
+        }
+
+        // Event listeners
+        prizeBtn.addEventListener('click', openModal);
+        closeBtn.addEventListener('click', closeModal);
+
+        // Close modal when clicking outside
+        modal.addEventListener('click', function(e) {
+          if (e.target === modal) {
+            closeModal();
+          }
+        });
+
+        // Close modal with Escape key
+        document.addEventListener('keydown', function(e) {
+          if (e.key === 'Escape' && modal.classList.contains('active')) {
+            closeModal();
+          }
+        });
+
+        // Check if button should be visible on page load
+        fetch('/api/rewards/campaign')
+          .then(res => res.json())
+          .then(data => {
+            const campaign = data.campaign;
+            if (!campaign.active || !campaign.showButton) {
+              prizeBtn.style.display = 'none';
+            }
+          })
+          .catch(err => {
+            console.error('Error checking campaign status:', err);
+            prizeBtn.style.display = 'none';
+          });
+      })();
     })();
   </script>
+
+  <!-- Prize Code Modal -->
+  <div class="prize-modal" id="prizeModal">
+    <div class="prize-modal-content">
+      <button class="prize-modal-close" id="prizeModalClose" type="button" aria-label="بستن">×</button>
+
+      <div class="prize-modal-header">
+        <div class="prize-modal-icon">
+          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" fill="currentColor"/>
+          </svg>
+        </div>
+        <h2 class="prize-modal-title">کد جایزه ویترینت</h2>
+      </div>
+
+      <div class="prize-modal-body">
+        <div class="prize-code-display" id="prizeCodeDisplay">
+          <div class="prize-loading">در حال بارگذاری...</div>
+        </div>
+        <p class="prize-modal-desc">
+          این کد را یادداشت کنید و برای شرکت در قرعه‌کشی از آن استفاده نمایید.
+        </p>
+      </div>
+
+      <div class="prize-modal-footer">
+        <div class="prize-info">
+          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="width: 18px; height: 18px;">
+            <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/>
+            <path d="M12 16v-4m0-4h.01" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+          <span>کمپین جوایز ویترینت</span>
+        </div>
+      </div>
+    </div>
+  </div>
 </body>
 </html>
