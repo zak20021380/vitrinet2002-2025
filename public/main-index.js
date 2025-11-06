@@ -204,7 +204,19 @@ function renderRewardWinners(campaignState = rewardCampaignState) {
     if (winner.phoneMasked) {
       const phoneEl = document.createElement('span');
       phoneEl.className = 'reward-modal__winner-phone';
-      phoneEl.textContent = `شماره: ${winner.phoneMasked}`;
+
+      const phoneLabelEl = document.createElement('span');
+      phoneLabelEl.className = 'reward-modal__winner-phone-label';
+      phoneLabelEl.textContent = 'شماره:';
+
+      const phoneNumberEl = document.createElement('span');
+      phoneNumberEl.className = 'reward-modal__winner-phone-number';
+      phoneNumberEl.textContent = winner.phoneMasked;
+
+      phoneEl.appendChild(phoneLabelEl);
+      phoneEl.append(' ');
+      phoneEl.appendChild(phoneNumberEl);
+
       info.appendChild(phoneEl);
     }
 
