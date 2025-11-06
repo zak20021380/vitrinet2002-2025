@@ -86,6 +86,10 @@ const rewardCampaignSchema = new mongoose.Schema({
     type: Boolean,
     default: false
   },
+  showButton: {
+    type: Boolean,
+    default: true
+  },
   codes: {
     type: [rewardCodeSchema],
     default: []

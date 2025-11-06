@@ -5953,6 +5953,7 @@ const rewardCurrencyInput = document.getElementById('rewardCurrencyInput');
 const rewardCapacityInput = document.getElementById('rewardCapacityInput');
 const rewardWinnersInput = document.getElementById('rewardWinnersInput');
 const rewardActiveInput = document.getElementById('rewardActiveInput');
+const rewardShowButtonInput = document.getElementById('rewardShowButtonInput');
 const rewardResetBtn = document.getElementById('rewardResetBtn');
 const rewardCodeForm = document.getElementById('rewardCodeForm');
 const rewardNewCodeInput = document.getElementById('rewardNewCodeInput');
@@ -6350,6 +6351,7 @@ function populateRewardFormFields() {
   if (rewardCapacityInput) rewardCapacityInput.value = rewardCampaignState.capacity != null ? rewardCampaignState.capacity : '';
   if (rewardWinnersInput) rewardWinnersInput.value = rewardCampaignState.winnersClaimed != null ? rewardCampaignState.winnersClaimed : '';
   if (rewardActiveInput) rewardActiveInput.checked = Boolean(rewardCampaignState.active);
+  if (rewardShowButtonInput) rewardShowButtonInput.checked = rewardCampaignState.showButton !== undefined ? Boolean(rewardCampaignState.showButton) : true;
 }
 
 function renderRewardCodesList() {
@@ -6528,7 +6530,8 @@ async function handleRewardFormSubmit(event) {
     currency: rewardCurrencyInput?.value?.trim() || 'تومان',
     capacity: Math.max(0, Number(rewardCapacityInput?.value || 0) || 0),
     winnersClaimed: Math.max(0, Number(rewardWinnersInput?.value || 0) || 0),
-    active: Boolean(rewardActiveInput?.checked)
+    active: Boolean(rewardActiveInput?.checked),
+    showButton: Boolean(rewardShowButtonInput?.checked)
   };
 
   try {

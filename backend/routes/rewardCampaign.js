@@ -66,6 +66,7 @@ function normaliseCampaign(doc = {}, { includePrivateWinners = false } = {}) {
     capacity,
     winnersClaimed,
     active: Boolean(plain.active),
+    showButton: plain.showButton !== undefined ? Boolean(plain.showButton) : true,
     codes: Array.isArray(plain.codes)
       ? plain.codes
           .filter(code => code && code.code)
@@ -149,7 +150,8 @@ router.put('/campaign', async (req, res, next) => {
       currency = 'تومان',
       capacity = 0,
       winnersClaimed = 0,
-      active = false
+      active = false,
+      showButton
     } = req.body || {};
 
     doc.title = String(title || '').trim();
@@ -159,6 +161,9 @@ router.put('/campaign', async (req, res, next) => {
     doc.capacity = Math.max(0, Number(capacity) || 0);
     doc.winnersClaimed = Math.max(0, Number(winnersClaimed) || 0);
     doc.active = Boolean(active);
+    if (showButton !== undefined) {
+      doc.showButton = Boolean(showButton);
+    }
     doc.updatedAt = new Date();
 
     const usedCodes = doc.codes.filter(code => code.used).length;
