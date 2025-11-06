@@ -26,6 +26,28 @@ const rewardCodeSchema = new mongoose.Schema({
   }
 }, { _id: false });
 
+const winnerSchema = new mongoose.Schema({
+  firstName: {
+    type: String,
+    required: true,
+    trim: true
+  },
+  lastName: {
+    type: String,
+    required: true,
+    trim: true
+  },
+  phone: {
+    type: String,
+    required: true,
+    trim: true
+  },
+  createdAt: {
+    type: Date,
+    default: Date.now
+  }
+});
+
 const rewardCampaignSchema = new mongoose.Schema({
   slug: {
     type: String,
@@ -66,6 +88,10 @@ const rewardCampaignSchema = new mongoose.Schema({
   },
   codes: {
     type: [rewardCodeSchema],
+    default: []
+  },
+  winners: {
+    type: [winnerSchema],
     default: []
   },
   updatedAt: {

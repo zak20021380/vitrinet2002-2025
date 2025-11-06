@@ -484,6 +484,168 @@ body.sidebar-open::before {
   color: #dc2626;
 }
 
+.reward-winners-manager {
+  background: #ffffff;
+  border-radius: 24px;
+  padding: clamp(1.6rem, 2.5vw, 2.2rem);
+  box-shadow: 0 18px 45px rgba(15, 118, 110, 0.08);
+  border: 1px solid rgba(16, 185, 129, 0.12);
+  display: flex;
+  flex-direction: column;
+  gap: 1.3rem;
+  margin-top: 2.5rem;
+}
+
+.reward-winners-manager__header h3 {
+  margin: 0;
+  font-size: 1.2rem;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  color: #0f172a;
+}
+
+.reward-winners-manager__header h3 i {
+  color: #f59e0b;
+  font-size: 1.4rem;
+}
+
+.reward-winners-manager__header p {
+  margin: 0.3rem 0 0;
+  color: #64748b;
+  font-size: 0.95rem;
+}
+
+.reward-winners-form__row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+  align-items: end;
+}
+
+.reward-winners-form__group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.reward-winners-form__group label {
+  font-weight: 600;
+  color: #0f172a;
+}
+
+.reward-winners-form__group input {
+  border-radius: 14px;
+  border: 1.5px solid rgba(16, 185, 129, 0.28);
+  padding: 0.75rem 0.95rem;
+  font-size: 0.95rem;
+  background: rgba(255, 255, 255, 0.96);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.reward-winners-form__group input:focus {
+  outline: none;
+  border-color: rgba(16, 185, 129, 0.6);
+  box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.15);
+}
+
+.reward-winners-form__group--button {
+  display: flex;
+  align-items: stretch;
+}
+
+.reward-winners-message {
+  min-height: 1.1rem;
+  font-size: 0.9rem;
+  color: #0f172a;
+}
+
+.reward-winners-message.is-success {
+  color: #047857;
+}
+
+.reward-winners-message.is-error {
+  color: #dc2626;
+}
+
+.reward-winners-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 1rem;
+}
+
+.reward-winner-card {
+  border-radius: 18px;
+  border: 1px solid rgba(16, 185, 129, 0.22);
+  background: rgba(236, 253, 245, 0.8);
+  padding: 1rem 1.25rem;
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  align-items: center;
+}
+
+.reward-winner-card__info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.reward-winner-card__name {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #064e3b;
+}
+
+.reward-winner-card__meta {
+  font-size: 0.9rem;
+  color: #0f766e;
+}
+
+.reward-winner-card__actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.reward-winner-card__actions button {
+  border: none;
+  border-radius: 999px;
+  padding: 0.45rem 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.reward-winner-card__actions button[data-action="delete"] {
+  background: rgba(254, 202, 202, 0.85);
+  color: #b91c1c;
+}
+
+.reward-winner-card__actions button[data-action="delete"]:hover,
+.reward-winner-card__actions button[data-action="delete"]:focus-visible {
+  transform: translateY(-1px);
+  box-shadow: 0 15px 25px rgba(185, 28, 28, 0.2);
+  outline: none;
+}
+
+.reward-winners-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  color: #0f766e;
+  font-size: 0.95rem;
+  padding: 1.6rem;
+  border-radius: 18px;
+  border: 1px dashed rgba(16, 185, 129, 0.35);
+  background: rgba(236, 253, 245, 0.6);
+}
+
+.reward-winners-empty i {
+  font-size: 2rem;
+}
+
 .reward-code-manager {
   background: rgba(255, 255, 255, 0.97);
   border-radius: 24px;
@@ -708,11 +870,25 @@ body.sidebar-open::before {
   .reward-admin-layout {
     grid-template-columns: 1fr;
   }
+
+  .reward-winners-form__row {
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  }
 }
 
 @media (max-width: 640px) {
   .reward-code-card__actions button {
     min-width: 100%;
+  }
+
+  .reward-winner-card {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .reward-winner-card__actions {
+    width: 100%;
+    justify-content: flex-end;
   }
 }
 
