@@ -401,12 +401,14 @@ body {
   .reward-modal {
     position: relative;
     width: min(480px, 100%);
+    max-height: min(90vh, 640px);
     background: linear-gradient(160deg, rgba(255, 255, 255, 0.92), rgba(250, 255, 253, 0.88));
     border-radius: 28px;
     padding: clamp(1.8rem, 4vw, 2.4rem);
     box-shadow: 0 24px 60px rgba(15, 118, 110, 0.25);
     border: 1px solid rgba(14, 165, 233, 0.18);
     color: #0f172a;
+    overflow-y: auto;
   }
   .reward-modal__close {
     position: absolute;
@@ -438,6 +440,68 @@ body {
     align-items: flex-start;
     gap: 0.7rem;
     margin-bottom: 1.4rem;
+  }
+  .reward-modal__help {
+    width: 100%;
+    background: rgba(240, 253, 250, 0.6);
+    border: 1px solid rgba(16, 185, 129, 0.2);
+    border-radius: 20px;
+    padding: 0.6rem 0.9rem;
+    margin-bottom: 1.2rem;
+  }
+  .reward-modal__help-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    font-weight: 800;
+    font-size: 0.95rem;
+    color: #0f766e;
+    background: transparent;
+    border: none;
+    padding: 0.4rem 0;
+    cursor: pointer;
+    gap: 0.75rem;
+  }
+  .reward-modal__help-toggle svg {
+    width: 18px;
+    height: 18px;
+    transition: transform 0.25s ease;
+  }
+  .reward-modal__help-toggle.is-active svg {
+    transform: rotate(180deg);
+  }
+  .reward-modal__help-content {
+    margin-top: 0.75rem;
+    padding-top: 0.65rem;
+    border-top: 1px dashed rgba(16, 185, 129, 0.3);
+    color: #0f172a;
+    line-height: 1.8;
+    font-size: 0.9rem;
+  }
+  .reward-modal__help-content.is-visible {
+    animation: reward-help-slide 0.25s ease;
+  }
+  .reward-modal__help-content ol {
+    margin: 0 0 0.6rem;
+    padding-right: 1.25rem;
+    display: grid;
+    gap: 0.4rem;
+  }
+  .reward-modal__help-content p {
+    margin: 0;
+    color: #0369a1;
+    font-weight: 600;
+  }
+  @keyframes reward-help-slide {
+    from {
+      opacity: 0;
+      transform: translateY(-6px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
   }
   .reward-modal__badge {
     font-size: 0.85rem;
@@ -599,6 +663,166 @@ body {
     }
     .reward-modal__submit {
       width: 100%;
+    }
+  }
+  @media (max-width: 520px) {
+    .reward-modal {
+      width: min(440px, 96vw);
+      padding: clamp(1.4rem, 5vw, 1.7rem);
+      border-radius: 24px;
+    }
+    .reward-modal__header {
+      gap: 0.55rem;
+    }
+    .reward-modal__stats {
+      gap: 0.55rem;
+    }
+    .reward-modal__stat {
+      padding: 0.7rem 0.85rem;
+    }
+    .reward-modal__help-content {
+      font-size: 0.88rem;
+    }
+  }
+  @media (max-width: 360px) {
+    .reward-modal {
+      padding: 1.35rem;
+    }
+    .reward-modal__stats {
+      grid-template-columns: 1fr;
+    }
+    .reward-modal__stat {
+      text-align: center;
+      align-items: center;
+    }
+    .reward-modal__help-content ol {
+      padding-right: 1rem;
+    }
+  }
+
+  .auth-prompt-backdrop {
+    position: fixed;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1.5rem;
+    background: rgba(15, 23, 42, 0.45);
+    backdrop-filter: blur(6px);
+    z-index: 80;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.25s ease;
+  }
+  .auth-prompt-backdrop.active {
+    opacity: 1;
+    pointer-events: auto;
+  }
+  .auth-prompt {
+    position: relative;
+    width: min(420px, 100%);
+    background: linear-gradient(160deg, rgba(255, 255, 255, 0.98), rgba(240, 253, 250, 0.92));
+    border-radius: 24px;
+    padding: 2rem 1.8rem;
+    box-shadow: 0 24px 60px rgba(14, 116, 144, 0.25);
+    border: 1px solid rgba(14, 165, 233, 0.18);
+  }
+  .auth-prompt__close {
+    position: absolute;
+    top: 1rem;
+    left: 1rem;
+    background: rgba(224, 242, 254, 0.85);
+    border-radius: 999px;
+    border: none;
+    padding: 0.35rem;
+    cursor: pointer;
+    color: #0f172a;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .auth-prompt__close:hover,
+  .auth-prompt__close:focus-visible {
+    box-shadow: 0 6px 16px rgba(14, 165, 233, 0.28);
+    transform: scale(1.05);
+  }
+  .auth-prompt__body {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    text-align: center;
+    color: #0f172a;
+  }
+  .auth-prompt__body h3 {
+    margin: 0;
+    font-size: 1.25rem;
+    font-weight: 800;
+    color: #0f172a;
+  }
+  .auth-prompt__body p {
+    margin: 0;
+    font-size: 0.95rem;
+    line-height: 1.7;
+    color: #334155;
+  }
+  .auth-prompt__actions {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+  .auth-prompt__action {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 16px;
+    font-weight: 800;
+    font-size: 1rem;
+    text-decoration: none;
+    padding: 0.9rem 1.2rem;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+  .auth-prompt__action--primary {
+    background: linear-gradient(120deg, #0ea5e9, #10b981);
+    color: #fff;
+    box-shadow: 0 12px 24px rgba(14, 165, 233, 0.25);
+  }
+  .auth-prompt__action--primary:hover,
+  .auth-prompt__action--primary:focus-visible {
+    transform: translateY(-2px);
+    box-shadow: 0 16px 32px rgba(16, 185, 129, 0.3);
+  }
+  .auth-prompt__action--outline {
+    background: #fff;
+    color: #0ea5e9;
+    border: 1.5px solid rgba(14, 165, 233, 0.35);
+  }
+  .auth-prompt__action--outline:hover,
+  .auth-prompt__action--outline:focus-visible {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 24px rgba(14, 165, 233, 0.18);
+  }
+  .auth-prompt__secondary {
+    background: transparent;
+    border: none;
+    color: #0ea5e9;
+    font-weight: 700;
+    cursor: pointer;
+  }
+  .auth-prompt__secondary:hover,
+  .auth-prompt__secondary:focus-visible {
+    color: #0284c7;
+    text-decoration: underline;
+  }
+  @media (max-width: 420px) {
+    .auth-prompt {
+      padding: 1.6rem 1.4rem;
+      border-radius: 22px;
+    }
+    .auth-prompt__actions {
+      gap: 0.6rem;
+    }
+    .auth-prompt__action {
+      font-size: 0.95rem;
     }
   }
 
@@ -1244,6 +1468,7 @@ nav.fixed.bottom-0 a {
   padding: 8px 12px;
   font-family: 'Vazirmatn', sans-serif;
   border-radius: 1.5rem 1.5rem 0 0;
+  transition: transform 0.25s ease, opacity 0.25s ease;
 }
 .mobile-bottom-nav ul {
   display: flex;
@@ -1301,6 +1526,16 @@ nav.fixed.bottom-0 a {
 
 @media (max-width: 768px) {
   body { padding-bottom: 78px; }
+}
+
+body.hide-mobile-nav {
+  padding-bottom: 0 !important;
+}
+
+body.hide-mobile-nav .mobile-bottom-nav {
+  transform: translateY(120%);
+  opacity: 0;
+  pointer-events: none;
 }
 
 /* دکمه مشاهده در کارت‌ها */

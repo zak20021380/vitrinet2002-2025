@@ -123,11 +123,34 @@ const rewardElements = {
   capacityValue: document.getElementById('rewardCapacityValue'),
   winnersValue: document.getElementById('rewardWinnersValue'),
   progressBar: document.getElementById('rewardProgressBar'),
-  submitBtn: document.getElementById('rewardModalSubmitBtn')
+  submitBtn: document.getElementById('rewardModalSubmitBtn'),
+  helpToggle: document.getElementById('rewardHelpToggle'),
+  helpContent: document.getElementById('rewardHelpContent')
 };
 
 let rewardCampaignState = null;
 let rewardModalInitialised = false;
+let authPromptInitialised = false;
+
+const authPromptElements = {
+  backdrop: document.getElementById('authPromptBackdrop'),
+  closeBtn: document.getElementById('authPromptCloseBtn'),
+  dismissBtn: document.getElementById('authPromptDismissBtn'),
+  loginBtn: document.getElementById('authPromptLoginBtn'),
+  registerBtn: document.getElementById('authPromptRegisterBtn')
+};
+
+function setRewardHelpState(expanded) {
+  if (!rewardElements.helpToggle || !rewardElements.helpContent) return;
+  rewardElements.helpToggle.setAttribute('aria-expanded', expanded ? 'true' : 'false');
+  rewardElements.helpToggle.classList.toggle('is-active', expanded);
+  rewardElements.helpContent.hidden = !expanded;
+  rewardElements.helpContent.classList.toggle('is-visible', expanded);
+}
+
+function isAuthPromptOpen() {
+  return Boolean(authPromptElements.backdrop?.classList.contains('active'));
+}
 
 function setRewardMessage(message, type = 'info') {
   if (!rewardElements.message) return;
@@ -193,8 +216,12 @@ function closeRewardModal(focusTarget) {
   if (!rewardElements.backdrop) return;
   rewardElements.backdrop.classList.remove('active');
   rewardElements.backdrop.setAttribute('aria-hidden', 'true');
+  setRewardHelpState(false);
   if (rewardElements.openBtn) {
     rewardElements.openBtn.setAttribute('aria-expanded', 'false');
+  }
+  if (!isAuthPromptOpen()) {
+    document.body.classList.remove('hide-mobile-nav');
   }
   if (focusTarget && typeof focusTarget.focus === 'function') {
     focusTarget.focus();
@@ -209,6 +236,8 @@ function openRewardModal() {
     rewardElements.codeInput.value = '';
     rewardElements.codeInput.readOnly = false;
   }
+  document.body.classList.add('hide-mobile-nav');
+  setRewardHelpState(false);
   const userClaim = safeParseLocalStorage(REWARD_USER_CLAIM_KEY);
   if (userClaim && userClaim.code) {
     rewardElements.codeInput.value = userClaim.code;
@@ -238,6 +267,11 @@ function handleRewardSubmit(event) {
     return;
   }
   event.preventDefault();
+  if (!isUserAuthenticated()) {
+    setRewardMessage('برای دریافت جایزه ابتدا وارد حساب کاربری خود شوید.', 'error');
+    openAuthPrompt();
+    return;
+  }
   if (!rewardElements.codeInput) return;
   const rawCode = rewardElements.codeInput.value || '';
   const normalisedCode = rawCode.replace(/[^0-9]/g, '').slice(0, 6);
@@ -291,6 +325,7 @@ function handleRewardSubmit(event) {
 function initRewardModal() {
   if (rewardModalInitialised) return;
   rewardModalInitialised = true;
+  setRewardHelpState(false);
   if (rewardElements.openBtn) {
     rewardElements.openBtn.addEventListener('click', () => openRewardModal());
   }
@@ -318,9 +353,21 @@ function initRewardModal() {
       }
     });
   }
+  if (rewardElements.helpToggle) {
+    rewardElements.helpToggle.addEventListener('click', () => {
+      const expanded = rewardElements.helpToggle.getAttribute('aria-expanded') === 'true';
+      setRewardHelpState(!expanded);
+    });
+  }
   document.addEventListener('keydown', (event) => {
-    if (event.key === 'Escape' && rewardElements.backdrop?.classList.contains('active')) {
-      closeRewardModal(rewardElements.openBtn);
+    if (event.key === 'Escape') {
+      if (isAuthPromptOpen()) {
+        closeAuthPrompt();
+        return;
+      }
+      if (rewardElements.backdrop?.classList.contains('active')) {
+        closeRewardModal(rewardElements.openBtn);
+      }
     }
   });
   window.addEventListener('storage', (event) => {
@@ -339,6 +386,70 @@ function safeParseLocalStorage(key) {
     console.warn('خطا در خواندن localStorage برای', key, err);
     return null;
   }
+}
+
+function isUserAuthenticated() {
+  try {
+    const token = localStorage.getItem('token');
+    return Boolean(token);
+  } catch (err) {
+    console.warn('خطا در بررسی وضعیت احراز هویت کاربر', err);
+    return false;
+  }
+}
+
+function openAuthPrompt() {
+  if (!authPromptElements.backdrop) return;
+  authPromptElements.backdrop.classList.add('active');
+  authPromptElements.backdrop.setAttribute('aria-hidden', 'false');
+  document.body.classList.add('hide-mobile-nav');
+  setTimeout(() => {
+    if (authPromptElements.loginBtn) {
+      authPromptElements.loginBtn.focus({ preventScroll: true });
+    }
+  }, 40);
+}
+
+function closeAuthPrompt() {
+  if (!authPromptElements.backdrop) return;
+  authPromptElements.backdrop.classList.remove('active');
+  authPromptElements.backdrop.setAttribute('aria-hidden', 'true');
+  if (!rewardElements.backdrop?.classList.contains('active')) {
+    document.body.classList.remove('hide-mobile-nav');
+  } else if (rewardElements.codeInput) {
+    setTimeout(() => {
+      if (!rewardElements.codeInput.readOnly) {
+        rewardElements.codeInput.focus({ preventScroll: true });
+      }
+    }, 40);
+  }
+}
+
+function initAuthPrompt() {
+  if (authPromptInitialised) return;
+  authPromptInitialised = true;
+  if (!authPromptElements.backdrop) return;
+
+  const closeHandler = () => closeAuthPrompt();
+
+  if (authPromptElements.closeBtn) {
+    authPromptElements.closeBtn.addEventListener('click', closeHandler);
+  }
+  if (authPromptElements.dismissBtn) {
+    authPromptElements.dismissBtn.addEventListener('click', closeHandler);
+  }
+  authPromptElements.backdrop.addEventListener('click', (event) => {
+    if (event.target === authPromptElements.backdrop) {
+      closeAuthPrompt();
+    }
+  });
+
+  document.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape' && isAuthPromptOpen()) {
+      closeAuthPrompt();
+      event.stopImmediatePropagation();
+    }
+  });
 }
 
 function isServiceSellerAccount(seller) {
@@ -428,6 +539,7 @@ document.addEventListener('mobileNavReady', () => {
 });
 
 initRewardModal();
+initAuthPrompt();
 
 // نشون دادن پاپ‌آپ
   document.getElementById('cityBtn').onclick = function(e) {
