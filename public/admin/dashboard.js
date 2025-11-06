@@ -6573,6 +6573,26 @@ async function handleRewardReset() {
   }
 }
 
+async function handleRewardActiveChange() {
+  if (!rewardActiveInput) return;
+  const isActive = Boolean(rewardActiveInput.checked);
+  setRewardFormMessage('در حال ذخیره وضعیت کمپین...', 'info');
+
+  try {
+    await updateRewardCampaign({ active: isActive });
+    renderRewardSummary();
+    setRewardFormMessage(
+      isActive ? 'کمپین فعال شد.' : 'کمپین غیرفعال شد.',
+      'success'
+    );
+  } catch (error) {
+    console.error('handleRewardActiveChange failed', error);
+    // Revert the checkbox to previous state on error
+    rewardActiveInput.checked = !isActive;
+    setRewardFormMessage(error.message || 'خطا در تغییر وضعیت کمپین.', 'error');
+  }
+}
+
 async function handleRewardCodeFormSubmit(event) {
   event.preventDefault();
   const code = rewardNewCodeInput?.value?.replace(/[^0-9]/g, '').slice(0, 6) || '';
@@ -6668,6 +6688,9 @@ async function ensureRewardCampaignPanel(forceReload = false) {
     });
     rewardResetBtn?.addEventListener('click', () => {
       handleRewardReset().catch(err => console.error(err));
+    });
+    rewardActiveInput?.addEventListener('change', () => {
+      handleRewardActiveChange().catch(err => console.error(err));
     });
     rewardCodeForm?.addEventListener('submit', (event) => {
       handleRewardCodeFormSubmit(event).catch(err => console.error(err));
