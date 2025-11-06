@@ -41,6 +41,7 @@
       <div class="sidebar-header">ویترینت</div>
       <div class="sidebar-menu">
         <a href="#" class="active" data-section="dashboard"><i class="ri-dashboard-line"></i> داشبورد</a>
+        <a href="#" data-section="rewards"><i class="ri-gift-line"></i> کمپین جوایز <span class="count" id="count-rewards"></span></a>
         <a href="#" data-section="daily-visits"><i class="ri-eye-line"></i> آمار روزانه بازدید</a>
         <a href="#" data-section="users"><i class="ri-user-3-line"></i> کاربران <span class="count" id="count-users">0</span></a>
         <a href="#" data-section="sellers"><i class="ri-store-2-line"></i> فروشنده‌ها <span class="count" id="count-sellers">0</span></a>
@@ -100,6 +101,122 @@
       </div>
     </div>
     <div id="dashboard-dynamic-chart-wrap"></div>
+  </div>
+
+  <div class="section-panel" id="rewards-panel" style="display:none;">
+    <div class="content-header">مدیریت کمپین جوایز</div>
+    <div class="reward-admin-layout">
+      <section class="reward-admin-card" aria-live="polite">
+        <header class="reward-admin-card__header">
+          <h3><i class="ri-gift-line" aria-hidden="true"></i> وضعیت کمپین</h3>
+          <span class="reward-admin-chip" id="rewardCampaignStatusChip">فعال</span>
+        </header>
+        <div class="reward-admin-stats">
+          <div class="reward-admin-stat">
+            <span class="label">ارزش جایزه</span>
+            <span class="value" id="rewardAdminPrizeValue">—</span>
+          </div>
+          <div class="reward-admin-stat">
+            <span class="label">ظرفیت کل</span>
+            <span class="value" id="rewardAdminCapacityValue">—</span>
+          </div>
+          <div class="reward-admin-stat">
+            <span class="label">برندگان تاکنون</span>
+            <span class="value" id="rewardAdminWinnersValue">—</span>
+          </div>
+        </div>
+        <div class="reward-admin-progress">
+          <div class="reward-admin-progress__bar">
+            <div class="reward-admin-progress__value" id="rewardAdminProgressBar"></div>
+          </div>
+          <span class="reward-admin-progress__label" id="rewardAdminProgressLabel">ظرفیت استفاده نشده</span>
+        </div>
+        <div class="reward-admin-meta">
+          <div class="reward-admin-meta__item"><i class="ri-timer-line" aria-hidden="true"></i><span id="rewardAdminUpdatedAt">به‌روزرسانی نشده</span></div>
+          <div class="reward-admin-meta__item"><i class="ri-hashtag" aria-hidden="true"></i><span id="rewardAdminCodesCount">۰ کد ذخیره شده</span></div>
+        </div>
+      </section>
+
+      <form id="rewardCampaignForm" class="reward-admin-form" autocomplete="off">
+        <div class="reward-admin-form__group">
+          <label for="rewardTitleInput">عنوان کمپین</label>
+          <input type="text" id="rewardTitleInput" name="rewardTitle" placeholder="مثلاً هدیه نوروزی مشتریان" required>
+        </div>
+        <div class="reward-admin-form__group">
+          <label for="rewardDescriptionInput">توضیحات کوتاه</label>
+          <textarea id="rewardDescriptionInput" name="rewardDescription" rows="3" placeholder="این توضیحات در پاپ‌آپ نمایش داده می‌شود."></textarea>
+        </div>
+        <div class="reward-admin-form__row">
+          <div class="reward-admin-form__group">
+            <label for="rewardPrizeInput">ارزش جایزه (تومان)</label>
+            <input type="number" id="rewardPrizeInput" name="rewardPrize" min="0" step="100000" required>
+          </div>
+          <div class="reward-admin-form__group">
+            <label for="rewardCurrencyInput">واحد پول</label>
+            <input type="text" id="rewardCurrencyInput" name="rewardCurrency" value="تومان">
+          </div>
+        </div>
+        <div class="reward-admin-form__row">
+          <div class="reward-admin-form__group">
+            <label for="rewardCapacityInput">ظرفیت کل (نفر)</label>
+            <input type="number" id="rewardCapacityInput" name="rewardCapacity" min="1" step="1" required>
+          </div>
+          <div class="reward-admin-form__group">
+            <label for="rewardWinnersInput">برندگان تاکنون</label>
+            <input type="number" id="rewardWinnersInput" name="rewardWinners" min="0" step="1" required>
+          </div>
+        </div>
+        <div class="reward-admin-form__switch">
+          <label class="switch">
+            <input type="checkbox" id="rewardActiveInput" name="rewardActive">
+            <span class="switch-slider"></span>
+          </label>
+          <div>
+            <strong>کمپین فعال باشد</strong>
+            <p>در صورت غیرفعال شدن، پاپ‌آپ به کاربران پیام توقف نمایش می‌دهد.</p>
+          </div>
+        </div>
+        <div class="reward-admin-form__actions">
+          <button type="submit" class="reward-admin-btn primary">ذخیره تنظیمات</button>
+          <button type="button" id="rewardResetBtn" class="reward-admin-btn ghost">بازنشانی به پیش‌فرض</button>
+        </div>
+        <p class="reward-admin-form__message" id="rewardFormMessage" role="status"></p>
+      </form>
+    </div>
+
+    <section class="reward-code-manager" aria-label="مدیریت کدهای جایزه">
+      <header class="reward-code-manager__header">
+        <div>
+          <h3><i class="ri-shield-star-line" aria-hidden="true"></i> کدهای جایزه</h3>
+          <p>کدها را مدیریت کنید و وضعیت استفاده‌شان را تغییر دهید.</p>
+        </div>
+        <div class="reward-code-manager__badges">
+          <span class="reward-code-badge" id="rewardCodesAvailableBadge">۰ کد فعال</span>
+          <span class="reward-code-badge reward-code-badge--muted" id="rewardCodesUsedBadge">۰ کد استفاده شده</span>
+        </div>
+      </header>
+      <form id="rewardCodeForm" class="reward-code-form" autocomplete="off">
+        <div class="reward-code-form__row">
+          <div class="reward-code-form__group">
+            <label for="rewardNewCodeInput">کد ۶ رقمی جدید</label>
+            <input type="text" id="rewardNewCodeInput" name="rewardCode" inputmode="numeric" pattern="\d{6}" maxlength="6" placeholder="مثلاً 752910" required>
+          </div>
+          <div class="reward-code-form__group">
+            <label for="rewardNewCodeNote">یادداشت (اختیاری)</label>
+            <input type="text" id="rewardNewCodeNote" name="rewardNote" placeholder="مثلاً مخصوص فروشگاه‌های منتخب">
+          </div>
+          <div class="reward-code-form__group reward-code-form__group--button">
+            <button type="submit" class="reward-admin-btn secondary">افزودن کد</button>
+          </div>
+        </div>
+      </form>
+      <div id="rewardCodesMessage" class="reward-codes-message" role="status"></div>
+      <div id="rewardCodesList" class="reward-codes-list" role="list"></div>
+      <div id="rewardCodesEmptyState" class="reward-codes-empty" hidden>
+        <i class="ri-emotion-unhappy-line" aria-hidden="true"></i>
+        <p>هنوز کدی ثبت نشده است. اولین کد را اضافه کنید!</p>
+      </div>
+    </section>
   </div>
 
   <!-- پنل جدید برای آمار روزانه بازدید -->

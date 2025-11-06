@@ -360,6 +360,248 @@ body {
     pointer-events: all;
   }
 
+  .reward-header-btn {
+    background: linear-gradient(120deg, #0ea5e9, #10b981);
+    box-shadow: 0 8px 24px rgba(14, 165, 233, 0.25);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+  }
+  .reward-header-btn:hover,
+  .reward-header-btn:focus-visible {
+    background: linear-gradient(120deg, #0fb67f, #0ea5e9);
+    box-shadow: 0 10px 30px rgba(16, 185, 129, 0.32);
+  }
+  .reward-header-btn:focus-visible {
+    outline: 3px solid rgba(16, 185, 129, 0.25);
+    outline-offset: 2px;
+  }
+  .reward-header-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .reward-modal-backdrop {
+    position: fixed;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1.5rem;
+    background: rgba(15, 23, 42, 0.4);
+    backdrop-filter: blur(6px);
+    z-index: 60;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.25s ease;
+  }
+  .reward-modal-backdrop.active {
+    opacity: 1;
+    pointer-events: auto;
+  }
+  .reward-modal {
+    position: relative;
+    width: min(480px, 100%);
+    background: linear-gradient(160deg, rgba(255, 255, 255, 0.92), rgba(250, 255, 253, 0.88));
+    border-radius: 28px;
+    padding: clamp(1.8rem, 4vw, 2.4rem);
+    box-shadow: 0 24px 60px rgba(15, 118, 110, 0.25);
+    border: 1px solid rgba(14, 165, 233, 0.18);
+    color: #0f172a;
+  }
+  .reward-modal__close {
+    position: absolute;
+    top: 1.1rem;
+    left: 1.1rem;
+    background: rgba(240, 249, 255, 0.8);
+    border-radius: 999px;
+    border: none;
+    color: #0f172a;
+    padding: 0.35rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+  .reward-modal__close:hover,
+  .reward-modal__close:focus-visible {
+    transform: scale(1.05);
+    box-shadow: 0 6px 16px rgba(14, 165, 233, 0.28);
+  }
+  .reward-modal__close:focus-visible {
+    outline: 3px solid rgba(14, 165, 233, 0.3);
+    outline-offset: 2px;
+  }
+  .reward-modal__header {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.7rem;
+    margin-bottom: 1.4rem;
+  }
+  .reward-modal__badge {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: #047857;
+    background: rgba(16, 185, 129, 0.12);
+    border: 1px solid rgba(16, 185, 129, 0.2);
+    border-radius: 999px;
+    padding: 0.2rem 0.8rem;
+  }
+  .reward-modal__header h2 {
+    font-size: clamp(1.3rem, 3.4vw, 1.7rem);
+    font-weight: 800;
+    color: #0f172a;
+    margin: 0;
+  }
+  .reward-modal__header p {
+    margin: 0;
+    color: #475569;
+    line-height: 1.7;
+    font-size: 0.98rem;
+  }
+  .reward-modal__stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+  }
+  .reward-modal__stat {
+    background: rgba(240, 253, 250, 0.65);
+    border-radius: 18px;
+    padding: 0.8rem 1rem;
+    border: 1px solid rgba(16, 185, 129, 0.15);
+    display: flex;
+    flex-direction: column;
+    gap: 0.45rem;
+  }
+  .reward-modal__stat .label {
+    font-size: 0.82rem;
+    color: #0f766e;
+    font-weight: 600;
+  }
+  .reward-modal__stat .value {
+    font-size: 1.05rem;
+    font-weight: 800;
+    color: #0f172a;
+  }
+  .reward-modal__progress {
+    height: 6px;
+    width: 100%;
+    background: rgba(226, 232, 240, 0.7);
+    border-radius: 999px;
+    overflow: hidden;
+    margin-bottom: 1.4rem;
+  }
+  .reward-modal__progress-bar {
+    height: 100%;
+    width: 0;
+    background: linear-gradient(90deg, #0ea5e9, #10b981);
+    transition: width 0.35s ease;
+  }
+  .reward-modal__form {
+    display: flex;
+    flex-direction: column;
+    gap: 0.8rem;
+  }
+  .reward-modal__label {
+    font-weight: 700;
+    color: #0f172a;
+  }
+  .reward-modal__input-group {
+    display: flex;
+    gap: 0.6rem;
+    flex-wrap: wrap;
+  }
+  .reward-modal__input-group input {
+    flex: 1;
+    min-width: 180px;
+    border-radius: 16px;
+    border: 1.5px solid rgba(14, 165, 233, 0.25);
+    padding: 0.9rem 1.1rem;
+    font-size: 1.05rem;
+    font-weight: 700;
+    letter-spacing: 4px;
+    text-align: center;
+    background: rgba(255, 255, 255, 0.85);
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  }
+  .reward-modal__input-group input:focus-visible {
+    outline: none;
+    border-color: rgba(14, 165, 233, 0.7);
+    box-shadow: 0 0 0 4px rgba(14, 165, 233, 0.16);
+  }
+  .reward-modal__submit {
+    flex-shrink: 0;
+    border: none;
+    border-radius: 16px;
+    padding: 0.85rem 1.8rem;
+    background: linear-gradient(120deg, #0ea5e9, #10b981);
+    color: #fff;
+    font-weight: 800;
+    font-size: 1rem;
+    cursor: pointer;
+    box-shadow: 0 12px 24px rgba(14, 165, 233, 0.25);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+  .reward-modal__submit:hover,
+  .reward-modal__submit:focus-visible {
+    transform: translateY(-2px);
+    box-shadow: 0 16px 32px rgba(16, 185, 129, 0.3);
+    outline: none;
+  }
+  .reward-modal__message {
+    min-height: 1.2rem;
+    font-size: 0.95rem;
+    font-weight: 600;
+    margin: 0;
+    color: #0f172a;
+  }
+  .reward-modal__message.is-success {
+    color: #047857;
+  }
+  .reward-modal__message.is-error {
+    color: #dc2626;
+  }
+  .reward-modal__footer {
+    margin-top: 1.6rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+    align-items: flex-start;
+  }
+  .reward-modal__secondary {
+    background: transparent;
+    border: none;
+    color: #0ea5e9;
+    font-weight: 700;
+    cursor: pointer;
+    padding: 0;
+  }
+  .reward-modal__secondary:hover,
+  .reward-modal__secondary:focus-visible {
+    color: #0284c7;
+    text-decoration: underline;
+  }
+  .reward-modal__hint {
+    font-size: 0.85rem;
+    color: #64748b;
+    margin: 0;
+  }
+  @media (max-width: 420px) {
+    .reward-modal {
+      padding: 1.6rem;
+      border-radius: 24px;
+    }
+    .reward-modal__input-group {
+      flex-direction: column;
+      align-items: stretch;
+    }
+    .reward-modal__submit {
+      width: 100%;
+    }
+  }
+
   /* سلکت ریسپانسیو واقعی */
   .city-btn-responsive {
     display: flex;
