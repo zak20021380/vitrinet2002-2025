@@ -1,29 +1,21 @@
 const SERVICE_PANEL_KEYWORDS = ['خدمات', 'زیبایی', 'تالار', 'مجالس', 'خودرو', 'ورزشی', 'پزشکی', 'سلامت', 'آرایش'];
-const REWARD_CAMPAIGN_STORAGE_KEY = 'vt_reward_campaign';
+const REWARD_API_BASE = '/api/rewards';
 const REWARD_USER_CLAIM_KEY = 'vt_reward_user_claim';
 const rewardNumberFormatter = new Intl.NumberFormat('fa-IR', { maximumFractionDigits: 0 });
 
-function getDefaultRewardCampaign() {
-  return {
-    title: 'هدیه ویژه کاربران وفادار',
-    description: 'کد ۶ رقمی خود را وارد کنید و شانس دریافت جایزه نقدی را امتحان کنید.',
-    prizeValue: 4000000,
-    currency: 'تومان',
-    capacity: 120,
-    winnersClaimed: 48,
-    active: true,
-    codes: [
-      { code: '924615', used: false },
-      { code: '583201', used: false },
-      { code: '198774', used: true },
-      { code: '470392', used: false }
-    ],
-    updatedAt: null
-  };
-}
+const DEFAULT_REWARD_CAMPAIGN = {
+  title: '',
+  description: '',
+  prizeValue: 0,
+  currency: 'تومان',
+  capacity: 0,
+  winnersClaimed: 0,
+  active: false,
+  codes: [],
+  updatedAt: null
+};
 
 function normaliseRewardCampaign(raw) {
-  const defaults = getDefaultRewardCampaign();
   const source = raw && typeof raw === 'object' ? raw : {};
   const codes = Array.isArray(source.codes)
     ? source.codes
@@ -42,51 +34,30 @@ function normaliseRewardCampaign(raw) {
           };
         })
         .filter(Boolean)
-    : defaults.codes;
+    : [];
 
-  const campaign = {
-    title: String(source.title || defaults.title),
-    description: String(source.description || defaults.description),
-    prizeValue: Number.isFinite(Number(source.prizeValue)) ? Number(source.prizeValue) : defaults.prizeValue,
-    currency: source.currency ? String(source.currency) : defaults.currency,
-    capacity: Math.max(1, Number.isFinite(Number(source.capacity)) ? Number(source.capacity) : defaults.capacity),
-    winnersClaimed: Math.max(0, Number.isFinite(Number(source.winnersClaimed)) ? Number(source.winnersClaimed) : defaults.winnersClaimed),
-    active: source.active !== undefined ? Boolean(source.active) : defaults.active,
+  const prizeValue = Number.isFinite(Number(source.prizeValue)) ? Number(source.prizeValue) : DEFAULT_REWARD_CAMPAIGN.prizeValue;
+  const capacity = Math.max(0, Number.isFinite(Number(source.capacity)) ? Number(source.capacity) : DEFAULT_REWARD_CAMPAIGN.capacity);
+  let winnersClaimed = Math.max(0, Number.isFinite(Number(source.winnersClaimed)) ? Number(source.winnersClaimed) : DEFAULT_REWARD_CAMPAIGN.winnersClaimed);
+  const usedCount = codes.filter(item => item.used).length;
+  if (winnersClaimed < usedCount) {
+    winnersClaimed = usedCount;
+  }
+  if (capacity > 0 && winnersClaimed > capacity) {
+    winnersClaimed = capacity;
+  }
+
+  return {
+    title: source.title ? String(source.title) : DEFAULT_REWARD_CAMPAIGN.title,
+    description: source.description ? String(source.description) : DEFAULT_REWARD_CAMPAIGN.description,
+    prizeValue,
+    currency: source.currency ? String(source.currency) : DEFAULT_REWARD_CAMPAIGN.currency,
+    capacity,
+    winnersClaimed,
+    active: source.active !== undefined ? Boolean(source.active) : DEFAULT_REWARD_CAMPAIGN.active,
     codes,
-    updatedAt: source.updatedAt || defaults.updatedAt
+    updatedAt: source.updatedAt || DEFAULT_REWARD_CAMPAIGN.updatedAt
   };
-
-  const usedCount = campaign.codes.filter(item => item.used).length;
-  if (campaign.winnersClaimed < usedCount) {
-    campaign.winnersClaimed = usedCount;
-  }
-  if (campaign.winnersClaimed > campaign.capacity) {
-    campaign.winnersClaimed = campaign.capacity;
-  }
-
-  return campaign;
-}
-
-function loadRewardCampaignConfig() {
-  try {
-    const stored = localStorage.getItem(REWARD_CAMPAIGN_STORAGE_KEY);
-    if (!stored) {
-      return normaliseRewardCampaign(getDefaultRewardCampaign());
-    }
-    const parsed = JSON.parse(stored);
-    return normaliseRewardCampaign(parsed);
-  } catch (err) {
-    console.warn('loadRewardCampaignConfig failed', err);
-    return normaliseRewardCampaign(getDefaultRewardCampaign());
-  }
-}
-
-function saveRewardCampaignConfig(config) {
-  try {
-    localStorage.setItem(REWARD_CAMPAIGN_STORAGE_KEY, JSON.stringify(config));
-  } catch (err) {
-    console.warn('saveRewardCampaignConfig failed', err);
-  }
 }
 
 function formatRewardPrize(amount, currency) {
@@ -129,6 +100,7 @@ const rewardElements = {
 };
 
 let rewardCampaignState = null;
+let rewardCampaignFetchPromise = null;
 let rewardModalInitialised = false;
 let authPromptInitialised = false;
 
@@ -163,28 +135,67 @@ function setRewardMessage(message, type = 'info') {
   }
 }
 
-function updateRewardModalUI() {
-  if (!rewardElements.modal) return;
-  if (!rewardCampaignState) {
-    rewardCampaignState = loadRewardCampaignConfig();
+async function fetchRewardCampaign(force = false) {
+  if (!force && rewardCampaignState) {
+    return rewardCampaignState;
   }
-  const { prizeValue, currency, capacity, winnersClaimed, active } = rewardCampaignState;
+  if (rewardCampaignFetchPromise && !force) {
+    return rewardCampaignFetchPromise;
+  }
+  rewardCampaignFetchPromise = fetch(`${REWARD_API_BASE}/campaign`, {
+    credentials: 'include'
+  })
+    .then(async (response) => {
+      if (!response.ok) {
+        const errorText = await response.text().catch(() => '');
+        throw new Error(errorText || `HTTP ${response.status}`);
+      }
+      return response.json();
+    })
+    .then((payload) => {
+      const campaign = normaliseRewardCampaign(payload?.campaign);
+      rewardCampaignState = campaign;
+      return campaign;
+    })
+    .catch((error) => {
+      rewardCampaignState = null;
+      throw error;
+    })
+    .finally(() => {
+      rewardCampaignFetchPromise = null;
+    });
+
+  return rewardCampaignFetchPromise;
+}
+
+function applyRewardCampaignToUI(campaign = rewardCampaignState) {
+  rewardCampaignState = campaign ? normaliseRewardCampaign(campaign) : null;
+  const campaignState = rewardCampaignState || normaliseRewardCampaign(DEFAULT_REWARD_CAMPAIGN);
+  const titleText = campaignState.title?.trim() || 'کمپین جوایز ویترینت';
+  const subtitleText = campaignState.description?.trim() || 'به محض فعال شدن کمپین، جزئیات اینجا نمایش داده می‌شود.';
+
   if (rewardElements.title) {
-    rewardElements.title.textContent = rewardCampaignState.title || 'هدیه ویژه کاربران وفادار';
+    rewardElements.title.textContent = titleText;
   }
   if (rewardElements.subtitle) {
-    rewardElements.subtitle.textContent = rewardCampaignState.description || 'کد ۶ رقمی خود را وارد کنید و شانس دریافت جایزه نقدی را امتحان کنید.';
+    rewardElements.subtitle.textContent = subtitleText;
   }
   if (rewardElements.prizeValue) {
-    rewardElements.prizeValue.textContent = formatRewardPrize(prizeValue, currency);
+    rewardElements.prizeValue.textContent = campaignState.prizeValue > 0
+      ? formatRewardPrize(campaignState.prizeValue, campaignState.currency)
+      : '—';
   }
   if (rewardElements.capacityValue) {
-    rewardElements.capacityValue.textContent = `${rewardNumberFormatter.format(capacity)} نفر`;
+    rewardElements.capacityValue.textContent = campaignState.capacity > 0
+      ? `${rewardNumberFormatter.format(campaignState.capacity)} نفر`
+      : 'ظرفیت اعلام نشده';
   }
   if (rewardElements.winnersValue) {
-    rewardElements.winnersValue.textContent = `${rewardNumberFormatter.format(Math.min(winnersClaimed, capacity))} نفر`;
+    const winnersLabel = Math.min(campaignState.winnersClaimed, campaignState.capacity || campaignState.winnersClaimed);
+    rewardElements.winnersValue.textContent = `${rewardNumberFormatter.format(winnersLabel)} نفر`;
   }
-  const stats = computeRewardStats(rewardCampaignState);
+
+  const stats = computeRewardStats(campaignState);
   if (rewardElements.progressBar) {
     rewardElements.progressBar.style.width = `${stats.completion}%`;
   }
@@ -192,27 +203,50 @@ function updateRewardModalUI() {
     rewardElements.openBtn.setAttribute('data-available-codes', stats.availableCodes);
     rewardElements.openBtn.setAttribute(
       'title',
-      `ارزش جایزه ${formatRewardPrize(prizeValue, currency)} • ${rewardNumberFormatter.format(Math.min(winnersClaimed, capacity))} از ${rewardNumberFormatter.format(capacity)} برنده`
+      stats.totalCodes > 0
+        ? `ارزش جایزه ${formatRewardPrize(campaignState.prizeValue, campaignState.currency)} • ${rewardNumberFormatter.format(Math.min(campaignState.winnersClaimed, campaignState.capacity || campaignState.winnersClaimed))} از ${rewardNumberFormatter.format(Math.max(campaignState.capacity, campaignState.winnersClaimed))} برنده`
+        : 'کمپین جوایز'
     );
   }
 
-  if (!active) {
-    setRewardMessage('کمپین در حال حاضر فعال نیست. لطفاً بعداً دوباره تلاش کنید.', 'error');
+  if (!campaignState.active) {
     if (rewardElements.codeInput) {
       rewardElements.codeInput.disabled = true;
     }
     if (rewardElements.submitBtn) {
       rewardElements.submitBtn.disabled = true;
     }
-  } else if (rewardElements.codeInput) {
-    rewardElements.codeInput.disabled = false;
+    if (rewardElements.backdrop?.classList.contains('active')) {
+      setRewardMessage('کمپین در حال حاضر فعال نیست. لطفاً بعداً دوباره تلاش کنید.', 'error');
+    }
+  } else {
+    if (rewardElements.codeInput) {
+      rewardElements.codeInput.disabled = false;
+    }
     if (rewardElements.submitBtn) {
       rewardElements.submitBtn.disabled = false;
+    }
+    if (rewardElements.backdrop?.classList.contains('active')) {
+      setRewardMessage('');
     }
   }
 }
 
-function closeRewardModal(focusTarget) {
+async function refreshRewardCampaignState(force = false) {
+  try {
+    const campaign = await fetchRewardCampaign(force);
+    applyRewardCampaignToUI(campaign);
+    return rewardCampaignState;
+  } catch (error) {
+    console.error('fetchRewardCampaign failed', error);
+    if (rewardElements.backdrop?.classList.contains('active')) {
+      setRewardMessage('خطا در دریافت اطلاعات کمپین. لطفاً دوباره تلاش کنید.', 'error');
+    }
+    throw error;
+  }
+}
+
+  function closeRewardModal(focusTarget) {
   if (!rewardElements.backdrop) return;
   rewardElements.backdrop.classList.remove('active');
   rewardElements.backdrop.setAttribute('aria-hidden', 'true');
@@ -228,30 +262,36 @@ function closeRewardModal(focusTarget) {
   }
 }
 
-function openRewardModal() {
+async function openRewardModal() {
   if (!rewardElements.backdrop) return;
-  rewardCampaignState = loadRewardCampaignConfig();
-  updateRewardModalUI();
+  document.body.classList.add('hide-mobile-nav');
+  setRewardHelpState(false);
   if (rewardElements.codeInput) {
     rewardElements.codeInput.value = '';
     rewardElements.codeInput.readOnly = false;
   }
-  document.body.classList.add('hide-mobile-nav');
-  setRewardHelpState(false);
+
+  try {
+    await refreshRewardCampaignState(true);
+  } catch (error) {
+    setRewardMessage('خطا در بارگذاری اطلاعات کمپین. لطفاً کمی بعد دوباره تلاش کنید.', 'error');
+  }
+
   const userClaim = safeParseLocalStorage(REWARD_USER_CLAIM_KEY);
-  if (userClaim && userClaim.code) {
+  if (userClaim && userClaim.code && rewardElements.codeInput) {
     rewardElements.codeInput.value = userClaim.code;
     rewardElements.codeInput.readOnly = true;
     if (rewardElements.submitBtn) {
       rewardElements.submitBtn.disabled = true;
     }
     setRewardMessage('شما قبلاً جایزه خود را دریافت کرده‌اید. برای اطلاعات بیشتر با پشتیبانی در تماس باشید.', 'info');
-  } else {
+  } else if (rewardCampaignState?.active) {
+    setRewardMessage('');
     if (rewardElements.submitBtn) {
       rewardElements.submitBtn.disabled = false;
     }
-    setRewardMessage('');
   }
+
   rewardElements.backdrop.classList.add('active');
   rewardElements.backdrop.setAttribute('aria-hidden', 'false');
   if (rewardElements.openBtn) {
@@ -262,17 +302,27 @@ function openRewardModal() {
   }
 }
 
-function handleRewardSubmit(event) {
-  if (!rewardCampaignState || !rewardCampaignState.active) {
+async function handleRewardSubmit(event) {
+  event.preventDefault();
+
+  try {
+    await refreshRewardCampaignState();
+  } catch (error) {
+    setRewardMessage('خطا در دریافت اطلاعات کمپین. لطفاً بعداً تلاش کنید.', 'error');
     return;
   }
-  event.preventDefault();
+
+  if (!rewardCampaignState || !rewardCampaignState.active) {
+    setRewardMessage('کمپین در حال حاضر فعال نیست.', 'error');
+    return;
+  }
   if (!isUserAuthenticated()) {
     setRewardMessage('برای دریافت جایزه ابتدا وارد حساب کاربری خود شوید.', 'error');
     openAuthPrompt();
     return;
   }
   if (!rewardElements.codeInput) return;
+
   const rawCode = rewardElements.codeInput.value || '';
   const normalisedCode = rawCode.replace(/[^0-9]/g, '').slice(0, 6);
   rewardElements.codeInput.value = normalisedCode;
@@ -289,37 +339,54 @@ function handleRewardSubmit(event) {
     return;
   }
 
-  const codeEntry = rewardCampaignState.codes.find(item => item.code === normalisedCode);
-  if (!codeEntry) {
-    setRewardMessage('کد وارد شده یافت نشد. لطفاً دوباره تلاش کنید.', 'error');
-    return;
-  }
-  if (codeEntry.used) {
-    setRewardMessage('این کد قبلاً استفاده شده است.', 'error');
-    return;
-  }
-
-  codeEntry.used = true;
-  codeEntry.usedAt = new Date().toISOString();
-  const usedCodes = rewardCampaignState.codes.filter(item => item.used).length;
-  rewardCampaignState.winnersClaimed = Math.min(rewardCampaignState.capacity, Math.max(rewardCampaignState.winnersClaimed + 1, usedCodes));
-  rewardCampaignState.updatedAt = new Date().toISOString();
-  saveRewardCampaignConfig(rewardCampaignState);
-
-  try {
-    localStorage.setItem(REWARD_USER_CLAIM_KEY, JSON.stringify({ code: normalisedCode, claimedAt: new Date().toISOString() }));
-  } catch (err) {
-    console.warn('reward user claim storage failed', err);
-  }
-
-  if (rewardElements.codeInput) {
-    rewardElements.codeInput.readOnly = true;
-  }
+  setRewardMessage('در حال بررسی کد شما...', 'info');
   if (rewardElements.submitBtn) {
     rewardElements.submitBtn.disabled = true;
   }
-  setRewardMessage('تبریک! جایزه برای شما ثبت شد. همکاران ما به زودی با شما تماس می‌گیرند.', 'success');
-  updateRewardModalUI();
+
+  try {
+    const response = await fetch(`${REWARD_API_BASE}/claim`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      credentials: 'include',
+      body: JSON.stringify({ code: normalisedCode })
+    });
+    const payload = await response.json().catch(() => ({}));
+    if (!response.ok) {
+      const message = payload?.message || (response.status === 404
+        ? 'کد وارد شده یافت نشد. لطفاً دوباره تلاش کنید.'
+        : response.status === 409
+          ? 'امکان استفاده از این کد وجود ندارد.'
+          : 'خطا در ثبت کد.');
+      setRewardMessage(message, 'error');
+      if (rewardElements.submitBtn) {
+        rewardElements.submitBtn.disabled = false;
+      }
+      return;
+    }
+
+    rewardCampaignState = normaliseRewardCampaign(payload?.campaign);
+    applyRewardCampaignToUI(rewardCampaignState);
+
+    try {
+      localStorage.setItem(REWARD_USER_CLAIM_KEY, JSON.stringify({ code: normalisedCode, claimedAt: new Date().toISOString() }));
+    } catch (err) {
+      console.warn('reward user claim storage failed', err);
+    }
+
+    if (rewardElements.codeInput) {
+      rewardElements.codeInput.readOnly = true;
+    }
+    setRewardMessage(payload?.message || 'تبریک! جایزه برای شما ثبت شد. همکاران ما به زودی با شما تماس می‌گیرند.', 'success');
+  } catch (error) {
+    console.error('handleRewardSubmit failed', error);
+    setRewardMessage('خطا در اتصال به سرور. لطفاً دوباره تلاش کنید.', 'error');
+    if (rewardElements.submitBtn) {
+      rewardElements.submitBtn.disabled = false;
+    }
+  }
 }
 
 function initRewardModal() {
@@ -327,7 +394,11 @@ function initRewardModal() {
   rewardModalInitialised = true;
   setRewardHelpState(false);
   if (rewardElements.openBtn) {
-    rewardElements.openBtn.addEventListener('click', () => openRewardModal());
+    rewardElements.openBtn.addEventListener('click', () => {
+      openRewardModal().catch(err => {
+        console.error('openRewardModal failed', err);
+      });
+    });
   }
   if (rewardElements.closeBtn) {
     rewardElements.closeBtn.addEventListener('click', () => closeRewardModal(rewardElements.openBtn));
@@ -343,7 +414,11 @@ function initRewardModal() {
     });
   }
   if (rewardElements.form) {
-    rewardElements.form.addEventListener('submit', handleRewardSubmit);
+    rewardElements.form.addEventListener('submit', event => {
+      handleRewardSubmit(event).catch(err => {
+        console.error('handleRewardSubmit failed', err);
+      });
+    });
   }
   if (rewardElements.codeInput) {
     rewardElements.codeInput.addEventListener('input', () => {
@@ -370,11 +445,8 @@ function initRewardModal() {
       }
     }
   });
-  window.addEventListener('storage', (event) => {
-    if (event.key === REWARD_CAMPAIGN_STORAGE_KEY) {
-      rewardCampaignState = loadRewardCampaignConfig();
-      updateRewardModalUI();
-    }
+  refreshRewardCampaignState().catch(err => {
+    console.warn('initial reward campaign fetch failed', err);
   });
 }
 

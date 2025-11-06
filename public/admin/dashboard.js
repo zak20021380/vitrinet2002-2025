@@ -1,7 +1,5 @@
 const ADMIN_API_BASE = "http://localhost:5000/api";
 const ADMIN_API_ORIGIN = "http://localhost:5000";
-const REWARD_CAMPAIGN_STORAGE_KEY = 'vt_reward_campaign';
-const REWARD_USER_CLAIM_KEY = 'vt_reward_user_claim';
 const SHOPPING_CENTER_PLACEHOLDER =
   'data:image/svg+xml;utf8,' +
   encodeURIComponent(
@@ -5933,6 +5931,7 @@ async function ensureServicePlanManager(forceReload = false) {
   }
 }
 
+const REWARD_API_BASE = `${ADMIN_API_BASE}/rewards`;
 const rewardSidebarCountEl = document.getElementById('count-rewards');
 const rewardPanelEl = document.getElementById('rewards-panel');
 const rewardAdminPrizeEl = document.getElementById('rewardAdminPrizeValue');
@@ -5962,30 +5961,23 @@ const rewardCodesListEl = document.getElementById('rewardCodesList');
 const rewardCodesMessageEl = document.getElementById('rewardCodesMessage');
 const rewardCodesEmptyStateEl = document.getElementById('rewardCodesEmptyState');
 
+const DEFAULT_REWARD_CAMPAIGN = {
+  title: '',
+  description: '',
+  prizeValue: 0,
+  currency: 'تومان',
+  capacity: 0,
+  winnersClaimed: 0,
+  active: false,
+  codes: [],
+  updatedAt: null
+};
+
 let rewardCampaignState = null;
+let rewardCampaignFetchPromise = null;
 let rewardPanelInitialised = false;
 
-function getDefaultRewardCampaign() {
-  return {
-    title: 'هدیه ویژه کاربران وفادار',
-    description: 'کد ۶ رقمی خود را وارد کنید و شانس دریافت جایزه نقدی را امتحان کنید.',
-    prizeValue: 4000000,
-    currency: 'تومان',
-    capacity: 120,
-    winnersClaimed: 48,
-    active: true,
-    codes: [
-      { code: '924615', used: false, createdAt: new Date().toISOString() },
-      { code: '583201', used: false, createdAt: new Date().toISOString() },
-      { code: '198774', used: true, createdAt: new Date().toISOString(), usedAt: new Date().toISOString() },
-      { code: '470392', used: false, createdAt: new Date().toISOString() }
-    ],
-    updatedAt: null
-  };
-}
-
 function normaliseRewardCampaign(raw) {
-  const defaults = getDefaultRewardCampaign();
   const source = raw && typeof raw === 'object' ? raw : {};
   const codes = Array.isArray(source.codes)
     ? source.codes
@@ -6004,22 +5996,30 @@ function normaliseRewardCampaign(raw) {
           };
         })
         .filter(Boolean)
-    : defaults.codes;
+    : [];
 
-  const campaign = {
-    title: String(source.title || defaults.title),
-    description: String(source.description || defaults.description),
-    prizeValue: Number.isFinite(Number(source.prizeValue)) ? Number(source.prizeValue) : defaults.prizeValue,
-    currency: source.currency ? String(source.currency) : defaults.currency,
-    capacity: Math.max(1, Number.isFinite(Number(source.capacity)) ? Number(source.capacity) : defaults.capacity),
-    winnersClaimed: Math.max(0, Number.isFinite(Number(source.winnersClaimed)) ? Number(source.winnersClaimed) : defaults.winnersClaimed),
-    active: source.active !== undefined ? Boolean(source.active) : defaults.active,
+  const prizeValue = Number.isFinite(Number(source.prizeValue)) ? Number(source.prizeValue) : DEFAULT_REWARD_CAMPAIGN.prizeValue;
+  const capacity = Math.max(0, Number.isFinite(Number(source.capacity)) ? Number(source.capacity) : DEFAULT_REWARD_CAMPAIGN.capacity);
+  let winnersClaimed = Math.max(0, Number.isFinite(Number(source.winnersClaimed)) ? Number(source.winnersClaimed) : DEFAULT_REWARD_CAMPAIGN.winnersClaimed);
+  const usedCount = codes.filter(item => item.used).length;
+  if (winnersClaimed < usedCount) {
+    winnersClaimed = usedCount;
+  }
+  if (capacity > 0 && winnersClaimed > capacity) {
+    winnersClaimed = capacity;
+  }
+
+  return {
+    title: source.title ? String(source.title) : DEFAULT_REWARD_CAMPAIGN.title,
+    description: source.description ? String(source.description) : DEFAULT_REWARD_CAMPAIGN.description,
+    prizeValue,
+    currency: source.currency ? String(source.currency) : DEFAULT_REWARD_CAMPAIGN.currency,
+    capacity,
+    winnersClaimed,
+    active: source.active !== undefined ? Boolean(source.active) : DEFAULT_REWARD_CAMPAIGN.active,
     codes,
-    updatedAt: source.updatedAt || defaults.updatedAt
+    updatedAt: source.updatedAt || DEFAULT_REWARD_CAMPAIGN.updatedAt
   };
-
-  syncRewardCampaignTotals(campaign);
-  return campaign;
 }
 
 function syncRewardCampaignTotals(campaign) {
@@ -6028,30 +6028,8 @@ function syncRewardCampaignTotals(campaign) {
   if (campaign.winnersClaimed < usedCount) {
     campaign.winnersClaimed = usedCount;
   }
-  if (campaign.winnersClaimed > campaign.capacity) {
+  if (campaign.capacity > 0 && campaign.winnersClaimed > campaign.capacity) {
     campaign.winnersClaimed = campaign.capacity;
-  }
-}
-
-function loadRewardCampaignConfig() {
-  try {
-    const stored = localStorage.getItem(REWARD_CAMPAIGN_STORAGE_KEY);
-    if (!stored) {
-      return normaliseRewardCampaign(getDefaultRewardCampaign());
-    }
-    const parsed = JSON.parse(stored);
-    return normaliseRewardCampaign(parsed);
-  } catch (err) {
-    console.warn('loadRewardCampaignConfig (admin) failed', err);
-    return normaliseRewardCampaign(getDefaultRewardCampaign());
-  }
-}
-
-function saveRewardCampaignConfig(config) {
-  try {
-    localStorage.setItem(REWARD_CAMPAIGN_STORAGE_KEY, JSON.stringify(config));
-  } catch (err) {
-    console.warn('saveRewardCampaignConfig (admin) failed', err);
   }
 }
 
@@ -6096,16 +6074,17 @@ function setRewardCodesMessage(message, type = 'info') {
 
 function renderRewardSummary() {
   if (!rewardCampaignState) return;
+  const summary = rewardCampaignState;
   if (rewardAdminPrizeEl) {
-    rewardAdminPrizeEl.textContent = formatRewardPrize(rewardCampaignState.prizeValue, rewardCampaignState.currency);
+    rewardAdminPrizeEl.textContent = summary.prizeValue > 0 ? formatRewardPrize(summary.prizeValue, summary.currency) : '—';
   }
   if (rewardAdminCapacityEl) {
-    rewardAdminCapacityEl.textContent = formatNumber(rewardCampaignState.capacity);
+    rewardAdminCapacityEl.textContent = summary.capacity > 0 ? formatNumber(summary.capacity) : 'ظرفیت اعلام نشده';
   }
   if (rewardAdminWinnersEl) {
-    rewardAdminWinnersEl.textContent = formatNumber(Math.min(rewardCampaignState.winnersClaimed, rewardCampaignState.capacity));
+    rewardAdminWinnersEl.textContent = formatNumber(Math.min(summary.winnersClaimed, summary.capacity || summary.winnersClaimed));
   }
-  const stats = computeRewardStats(rewardCampaignState);
+  const stats = computeRewardStats(summary);
   if (rewardAdminProgressBarEl) {
     rewardAdminProgressBarEl.style.width = `${stats.completion}%`;
   }
@@ -6113,12 +6092,12 @@ function renderRewardSummary() {
     rewardAdminProgressLabelEl.textContent = `${stats.completion}% ظرفیت تکمیل شده`;
   }
   if (rewardAdminStatusChipEl) {
-    rewardAdminStatusChipEl.textContent = rewardCampaignState.active ? 'فعال' : 'غیرفعال';
-    rewardAdminStatusChipEl.classList.toggle('is-inactive', !rewardCampaignState.active);
+    rewardAdminStatusChipEl.textContent = summary.active ? 'فعال' : 'غیرفعال';
+    rewardAdminStatusChipEl.classList.toggle('is-inactive', !summary.active);
   }
   if (rewardAdminUpdatedAtEl) {
-    rewardAdminUpdatedAtEl.textContent = rewardCampaignState.updatedAt
-      ? formatDateTime(rewardCampaignState.updatedAt)
+    rewardAdminUpdatedAtEl.textContent = summary.updatedAt
+      ? formatDateTime(summary.updatedAt)
       : 'به‌روزرسانی نشده';
   }
   if (rewardAdminCodesCountEl) {
@@ -6155,112 +6134,217 @@ function renderRewardCodesList() {
     return;
   }
   rewardCodesEmptyStateEl.hidden = true;
-  codes
-    .slice()
-    .sort((a, b) => {
-      const aDate = new Date(a.createdAt || 0).getTime();
-      const bDate = new Date(b.createdAt || 0).getTime();
-      return bDate - aDate;
+  codes.forEach(code => {
+    const card = document.createElement('article');
+    card.className = 'reward-code-card';
+    card.dataset.code = code.code;
+
+    const header = document.createElement('header');
+    header.className = 'reward-code-card__header';
+
+    const codeLabel = document.createElement('span');
+    codeLabel.className = 'reward-code-card__code';
+    codeLabel.textContent = code.code;
+
+    const status = document.createElement('span');
+    status.className = `reward-code-card__status ${code.used ? 'is-used' : 'is-active'}`;
+    status.textContent = code.used ? 'استفاده شده' : 'فعال';
+
+    header.appendChild(codeLabel);
+    header.appendChild(status);
+
+    const meta = document.createElement('div');
+    meta.className = 'reward-code-card__meta';
+
+    if (code.createdAt) {
+      const created = document.createElement('span');
+      created.textContent = `ایجاد: ${formatDateTime(code.createdAt)}`;
+      meta.appendChild(created);
+    }
+    if (code.used && code.usedAt) {
+      const used = document.createElement('span');
+      used.textContent = `استفاده: ${formatDateTime(code.usedAt)}`;
+      meta.appendChild(used);
+    }
+    if (code.note) {
+      const noteEl = document.createElement('p');
+      noteEl.className = 'reward-code-card__note';
+      noteEl.textContent = code.note;
+      meta.appendChild(noteEl);
+    }
+
+    const actions = document.createElement('div');
+    actions.className = 'reward-code-card__actions';
+
+    const toggleBtn = document.createElement('button');
+    toggleBtn.type = 'button';
+    toggleBtn.dataset.action = 'toggle';
+    toggleBtn.className = 'reward-code-card__action';
+    toggleBtn.textContent = code.used ? 'فعال‌سازی مجدد' : 'علامت به عنوان استفاده شده';
+
+    const deleteBtn = document.createElement('button');
+    deleteBtn.type = 'button';
+    deleteBtn.dataset.action = 'delete';
+    deleteBtn.className = 'reward-code-card__action reward-code-card__action--danger';
+    deleteBtn.textContent = 'حذف';
+
+    actions.appendChild(toggleBtn);
+    actions.appendChild(deleteBtn);
+
+    card.appendChild(header);
+    card.appendChild(meta);
+    card.appendChild(actions);
+
+    rewardCodesListEl.appendChild(card);
+  });
+}
+
+async function fetchRewardCampaign(force = false) {
+  if (!force && rewardCampaignState) {
+    return rewardCampaignState;
+  }
+  if (rewardCampaignFetchPromise && !force) {
+    return rewardCampaignFetchPromise;
+  }
+  rewardCampaignFetchPromise = fetch(`${REWARD_API_BASE}/campaign`, {
+    credentials: 'include'
+  })
+    .then(async (response) => {
+      if (!response.ok) {
+        const errorText = await response.text().catch(() => '');
+        throw new Error(errorText || `HTTP ${response.status}`);
+      }
+      return response.json();
     })
-    .forEach(code => {
-      const card = document.createElement('article');
-      card.className = 'reward-code-card';
-      card.setAttribute('role', 'listitem');
-      card.dataset.code = code.code;
-
-      const header = document.createElement('div');
-      header.className = 'reward-code-card__header';
-
-      const codeLabel = document.createElement('span');
-      codeLabel.className = 'reward-code-card__code';
-      codeLabel.textContent = code.code;
-      header.appendChild(codeLabel);
-
-      const status = document.createElement('span');
-      status.className = `reward-code-card__status ${code.used ? 'is-used' : 'is-active'}`;
-      status.textContent = code.used ? 'استفاده شده' : 'فعال';
-      header.appendChild(status);
-
-      const meta = document.createElement('div');
-      meta.className = 'reward-code-card__meta';
-      if (code.note) {
-        const note = document.createElement('span');
-        note.textContent = `یادداشت: ${code.note}`;
-        meta.appendChild(note);
-      }
-      if (code.createdAt) {
-        const created = document.createElement('span');
-        created.textContent = `ثبت: ${formatDateTime(code.createdAt)}`;
-        meta.appendChild(created);
-      }
-      if (code.used && code.usedAt) {
-        const used = document.createElement('span');
-        used.textContent = `استفاده: ${formatDateTime(code.usedAt)}`;
-        meta.appendChild(used);
-      }
-
-      const actions = document.createElement('div');
-      actions.className = 'reward-code-card__actions';
-
-      const toggleBtn = document.createElement('button');
-      toggleBtn.type = 'button';
-      toggleBtn.dataset.action = 'toggle';
-      toggleBtn.textContent = code.used ? 'علامت به‌عنوان استفاده نشده' : 'ثبت استفاده شده';
-      actions.appendChild(toggleBtn);
-
-      const deleteBtn = document.createElement('button');
-      deleteBtn.type = 'button';
-      deleteBtn.dataset.action = 'delete';
-      deleteBtn.textContent = 'حذف کد';
-      actions.appendChild(deleteBtn);
-
-      card.appendChild(header);
-      card.appendChild(meta);
-      card.appendChild(actions);
-      rewardCodesListEl.appendChild(card);
+    .then((payload) => {
+      const campaign = normaliseRewardCampaign(payload?.campaign);
+      rewardCampaignState = campaign;
+      return campaign;
+    })
+    .catch((error) => {
+      rewardCampaignState = null;
+      throw error;
+    })
+    .finally(() => {
+      rewardCampaignFetchPromise = null;
     });
+
+  return rewardCampaignFetchPromise;
 }
 
-function handleRewardFormSubmit(event) {
-  event.preventDefault();
-  if (!rewardCampaignState) {
-    rewardCampaignState = loadRewardCampaignConfig();
+async function updateRewardCampaign(partial) {
+  const response = await fetch(`${REWARD_API_BASE}/campaign`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    credentials: 'include',
+    body: JSON.stringify(partial)
+  });
+  const payload = await response.json().catch(() => ({}));
+  if (!response.ok) {
+    throw new Error(payload?.message || 'خطا در ذخیره تنظیمات کمپین.');
   }
-  const updates = { ...rewardCampaignState };
-  updates.title = rewardTitleInput?.value?.trim() || updates.title;
-  updates.description = rewardDescriptionInput?.value?.trim() || '';
-  updates.prizeValue = Number(rewardPrizeInput?.value ?? updates.prizeValue) || 0;
-  updates.currency = rewardCurrencyInput?.value?.trim() || 'تومان';
-  updates.capacity = Math.max(1, Number(rewardCapacityInput?.value ?? updates.capacity) || updates.capacity || 1);
-  updates.winnersClaimed = Math.max(0, Number(rewardWinnersInput?.value ?? updates.winnersClaimed) || 0);
-  updates.active = Boolean(rewardActiveInput?.checked);
-  updates.updatedAt = new Date().toISOString();
-  rewardCampaignState = normaliseRewardCampaign(updates);
-  saveRewardCampaignConfig(rewardCampaignState);
-  renderRewardSummary();
-  populateRewardFormFields();
-  setRewardFormMessage('تنظیمات کمپین با موفقیت ذخیره شد.', 'success');
+  rewardCampaignState = normaliseRewardCampaign(payload?.campaign);
+  return payload;
 }
 
-function handleRewardReset() {
+async function addRewardCode(data) {
+  const response = await fetch(`${REWARD_API_BASE}/codes`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    credentials: 'include',
+    body: JSON.stringify(data)
+  });
+  const payload = await response.json().catch(() => ({}));
+  if (!response.ok) {
+    throw new Error(payload?.message || 'خطا در ثبت کد جدید.');
+  }
+  rewardCampaignState = normaliseRewardCampaign(payload?.campaign);
+  return payload;
+}
+
+async function toggleRewardCode(code) {
+  const response = await fetch(`${REWARD_API_BASE}/codes/${code}`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    credentials: 'include',
+    body: JSON.stringify({ action: 'toggle' })
+  });
+  const payload = await response.json().catch(() => ({}));
+  if (!response.ok) {
+    throw new Error(payload?.message || 'خطا در به‌روزرسانی وضعیت کد.');
+  }
+  rewardCampaignState = normaliseRewardCampaign(payload?.campaign);
+  return payload;
+}
+
+async function removeRewardCode(code) {
+  const response = await fetch(`${REWARD_API_BASE}/codes/${code}`, {
+    method: 'DELETE',
+    credentials: 'include'
+  });
+  const payload = await response.json().catch(() => ({}));
+  if (!response.ok) {
+    throw new Error(payload?.message || 'خطا در حذف کد.');
+  }
+  rewardCampaignState = normaliseRewardCampaign(payload?.campaign);
+  return payload;
+}
+
+async function handleRewardFormSubmit(event) {
+  event.preventDefault();
   if (!rewardCampaignForm) return;
-  const confirmReset = window.confirm('بازنشانی کمپین به حالت پیش‌فرض؟ تمام تغییرات فعلی حذف خواهند شد.');
-  if (!confirmReset) return;
-  rewardCampaignState = normaliseRewardCampaign(getDefaultRewardCampaign());
-  rewardCampaignState.updatedAt = new Date().toISOString();
-  saveRewardCampaignConfig(rewardCampaignState);
-  populateRewardFormFields();
-  renderRewardSummary();
-  renderRewardCodesList();
-  setRewardFormMessage('کمپین به تنظیمات پیش‌فرض بازنشانی شد.', 'success');
-  setRewardCodesMessage('تمام کدهای نمونه مجدداً بارگذاری شدند.', 'info');
+  setRewardFormMessage('در حال ذخیره تنظیمات...', 'info');
+  const updates = {
+    title: rewardTitleInput?.value?.trim() || '',
+    description: rewardDescriptionInput?.value?.trim() || '',
+    prizeValue: Number(rewardPrizeInput?.value || 0) || 0,
+    currency: rewardCurrencyInput?.value?.trim() || 'تومان',
+    capacity: Math.max(0, Number(rewardCapacityInput?.value || 0) || 0),
+    winnersClaimed: Math.max(0, Number(rewardWinnersInput?.value || 0) || 0),
+    active: Boolean(rewardActiveInput?.checked)
+  };
+
+  try {
+    await updateRewardCampaign(updates);
+    syncRewardCampaignTotals(rewardCampaignState);
+    renderRewardSummary();
+    populateRewardFormFields();
+    renderRewardCodesList();
+    setRewardFormMessage('تنظیمات کمپین با موفقیت ذخیره شد.', 'success');
+  } catch (error) {
+    console.error('handleRewardFormSubmit failed', error);
+    setRewardFormMessage(error.message || 'خطا در ذخیره تنظیمات کمپین.', 'error');
+  }
 }
 
-function handleRewardCodeFormSubmit(event) {
-  event.preventDefault();
-  if (!rewardCampaignState) {
-    rewardCampaignState = loadRewardCampaignConfig();
+async function handleRewardReset() {
+  if (!rewardCampaignForm) return;
+  const confirmed = window.confirm('آیا از بازنشانی تنظیمات کمپین مطمئن هستید؟');
+  if (!confirmed) return;
+  setRewardFormMessage('در حال بازنشانی تنظیمات...', 'info');
+  const defaults = {
+    title: '',
+    description: '',
+    prizeValue: 0,
+    currency: 'تومان',
+    capacity: 0,
+    winnersClaimed: 0,
+    active: false
+  };
+  try {
+    await updateRewardCampaign(defaults);
+    renderRewardSummary();
+    populateRewardFormFields();
+    renderRewardCodesList();
+    setRewardFormMessage('تنظیمات کمپین بازنشانی شد.', 'success');
+  } catch (error) {
+    console.error('handleRewardReset failed', error);
+    setRewardFormMessage(error.message || 'خطا در بازنشانی تنظیمات.', 'error');
   }
+}
+
+async function handleRewardCodeFormSubmit(event) {
+  event.preventDefault();
   const code = rewardNewCodeInput?.value?.replace(/[^0-9]/g, '').slice(0, 6) || '';
   if (rewardNewCodeInput) rewardNewCodeInput.value = code;
   if (code.length !== 6) {
@@ -6268,75 +6352,90 @@ function handleRewardCodeFormSubmit(event) {
     rewardNewCodeInput?.focus();
     return;
   }
-  if (rewardCampaignState.codes.some(item => item.code === code)) {
-    setRewardCodesMessage('این کد قبلاً ثبت شده است.', 'error');
-    rewardNewCodeInput?.focus();
-    return;
-  }
   const note = rewardNewCodeNoteInput?.value?.trim();
-  rewardCampaignState.codes.push({
-    code,
-    used: false,
-    note: note || undefined,
-    createdAt: new Date().toISOString(),
-    usedAt: null
-  });
-  rewardCampaignState.updatedAt = new Date().toISOString();
-  saveRewardCampaignConfig(rewardCampaignState);
-  renderRewardSummary();
-  renderRewardCodesList();
-  populateRewardFormFields();
-  setRewardCodesMessage('کد جدید با موفقیت افزوده شد.', 'success');
-  if (rewardNewCodeInput) rewardNewCodeInput.value = '';
-  if (rewardNewCodeNoteInput) rewardNewCodeNoteInput.value = '';
+  setRewardCodesMessage('در حال ثبت کد جدید...', 'info');
+  try {
+    const payload = await addRewardCode({ code, note });
+    syncRewardCampaignTotals(rewardCampaignState);
+    renderRewardSummary();
+    renderRewardCodesList();
+    populateRewardFormFields();
+    setRewardCodesMessage(payload?.message || 'کد جدید با موفقیت افزوده شد.', 'success');
+    if (rewardNewCodeInput) rewardNewCodeInput.value = '';
+    if (rewardNewCodeNoteInput) rewardNewCodeNoteInput.value = '';
+  } catch (error) {
+    console.error('handleRewardCodeFormSubmit failed', error);
+    setRewardCodesMessage(error.message || 'خطا در افزودن کد جدید.', 'error');
+  }
 }
 
-function handleRewardCodesListClick(event) {
+async function handleRewardCodesListClick(event) {
   const actionBtn = event.target.closest('button[data-action]');
   if (!actionBtn || !rewardCampaignState) return;
   const card = actionBtn.closest('[data-code]');
   if (!card) return;
   const codeValue = card.dataset.code;
-  const entry = rewardCampaignState.codes.find(item => item.code === codeValue);
-  if (!entry) return;
   const action = actionBtn.dataset.action;
+
   if (action === 'toggle') {
-    entry.used = !entry.used;
-    entry.usedAt = entry.used ? new Date().toISOString() : null;
-    syncRewardCampaignTotals(rewardCampaignState);
-    rewardCampaignState.updatedAt = new Date().toISOString();
-    saveRewardCampaignConfig(rewardCampaignState);
-    renderRewardSummary();
-    renderRewardCodesList();
-    populateRewardFormFields();
-    setRewardCodesMessage(entry.used ? 'کد به عنوان استفاده شده علامت خورد.' : 'کد دوباره فعال شد.', 'success');
+    setRewardCodesMessage('در حال به‌روزرسانی وضعیت کد...', 'info');
+    try {
+      const payload = await toggleRewardCode(codeValue);
+      syncRewardCampaignTotals(rewardCampaignState);
+      renderRewardSummary();
+      renderRewardCodesList();
+      populateRewardFormFields();
+      setRewardCodesMessage(payload?.message || 'وضعیت کد به‌روزرسانی شد.', 'success');
+    } catch (error) {
+      console.error('toggleRewardCode failed', error);
+      setRewardCodesMessage(error.message || 'خطا در به‌روزرسانی وضعیت کد.', 'error');
+    }
     return;
   }
+
   if (action === 'delete') {
-    const confirmDelete = window.confirm('آیا از حذف این کد مطمئن هستید؟');
-    if (!confirmDelete) return;
-    rewardCampaignState.codes = rewardCampaignState.codes.filter(item => item.code !== codeValue);
-    syncRewardCampaignTotals(rewardCampaignState);
-    rewardCampaignState.updatedAt = new Date().toISOString();
-    saveRewardCampaignConfig(rewardCampaignState);
-    renderRewardSummary();
-    renderRewardCodesList();
-    populateRewardFormFields();
-    setRewardCodesMessage('کد انتخابی حذف شد.', 'success');
+    const confirmed = window.confirm('آیا از حذف این کد مطمئن هستید؟');
+    if (!confirmed) return;
+    setRewardCodesMessage('در حال حذف کد...', 'info');
+    try {
+      const payload = await removeRewardCode(codeValue);
+      syncRewardCampaignTotals(rewardCampaignState);
+      renderRewardSummary();
+      renderRewardCodesList();
+      populateRewardFormFields();
+      setRewardCodesMessage(payload?.message || 'کد انتخابی حذف شد.', 'success');
+    } catch (error) {
+      console.error('removeRewardCode failed', error);
+      setRewardCodesMessage(error.message || 'خطا در حذف کد.', 'error');
+    }
   }
 }
 
-function ensureRewardCampaignPanel(forceReload = false) {
+async function ensureRewardCampaignPanel(forceReload = false) {
   if (!rewardPanelEl) return;
-  if (!rewardCampaignState || forceReload) {
-    rewardCampaignState = loadRewardCampaignConfig();
+  try {
+    await fetchRewardCampaign(forceReload);
+  } catch (error) {
+    console.error('fetchRewardCampaign (admin) failed', error);
+    setRewardFormMessage('خطا در دریافت اطلاعات کمپین.', 'error');
+    setRewardCodesMessage('خطا در دریافت اطلاعات کمپین.', 'error');
+    return;
   }
+
   if (!rewardPanelInitialised) {
     rewardPanelInitialised = true;
-    rewardCampaignForm?.addEventListener('submit', handleRewardFormSubmit);
-    rewardResetBtn?.addEventListener('click', handleRewardReset);
-    rewardCodeForm?.addEventListener('submit', handleRewardCodeFormSubmit);
-    rewardCodesListEl?.addEventListener('click', handleRewardCodesListClick);
+    rewardCampaignForm?.addEventListener('submit', (event) => {
+      handleRewardFormSubmit(event).catch(err => console.error(err));
+    });
+    rewardResetBtn?.addEventListener('click', () => {
+      handleRewardReset().catch(err => console.error(err));
+    });
+    rewardCodeForm?.addEventListener('submit', (event) => {
+      handleRewardCodeFormSubmit(event).catch(err => console.error(err));
+    });
+    rewardCodesListEl?.addEventListener('click', (event) => {
+      handleRewardCodesListClick(event).catch(err => console.error(err));
+    });
     rewardNewCodeInput?.addEventListener('input', () => {
       const digitsOnly = rewardNewCodeInput.value.replace(/[^0-9]/g, '').slice(0, 6);
       if (rewardNewCodeInput.value !== digitsOnly) {
@@ -6344,25 +6443,14 @@ function ensureRewardCampaignPanel(forceReload = false) {
       }
     });
   }
+
   populateRewardFormFields();
   renderRewardSummary();
   renderRewardCodesList();
 }
 
-window.addEventListener('storage', (event) => {
-  if (event.key === REWARD_CAMPAIGN_STORAGE_KEY) {
-    rewardCampaignState = loadRewardCampaignConfig();
-    if (rewardPanelInitialised) {
-      populateRewardFormFields();
-      renderRewardSummary();
-      renderRewardCodesList();
-    }
-  }
-});
-
 if (rewardPanelEl) {
-  rewardCampaignState = loadRewardCampaignConfig();
-  renderRewardSummary();
+  ensureRewardCampaignPanel().catch(err => console.error(err));
 }
 
 // -------- Nav & Responsive (FIXED) --------
