@@ -1521,8 +1521,11 @@
       }
 
       .header-inner {
-        grid-template-columns: 1fr auto auto;
-        grid-template-areas: 'brand cta toggle';
+        grid-template-columns: 1fr auto;
+        grid-template-areas:
+          'brand toggle'
+          'prize prize'
+          'cta cta';
         gap: 0.75rem;
         padding: 0.75rem;
       }
@@ -1558,6 +1561,16 @@
       .nav-toggle {
         display: inline-flex;
         justify-self: end;
+      }
+
+      .prize-code-btn,
+      .cta-link {
+        justify-self: stretch;
+        width: 100%;
+      }
+
+      .prize-code-btn {
+        padding: 0.75rem 1.35rem;
       }
 
       nav {
@@ -1997,42 +2010,72 @@
 
     /* Prize Code Button */
     .prize-code-btn {
+      position: relative;
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      padding: 0.75rem 1.5rem;
-      border-radius: 8px;
-      border: 1px solid #e5e7eb;
-      background: #ffffff;
-      color: #1f2937;
-      font-weight: 600;
+      padding: 0.85rem 1.85rem;
+      border-radius: 999px;
+      border: none;
+      background: linear-gradient(135deg, #f59e0b, #f97316);
+      color: #fff;
+      font-weight: 700;
       font-size: 0.95rem;
       cursor: pointer;
-      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
-      transition: all 0.2s ease;
+      box-shadow: 0 12px 28px rgba(249, 115, 22, 0.35);
+      transition: transform 0.25s ease, box-shadow 0.25s ease;
       white-space: nowrap;
       grid-area: prize;
-      letter-spacing: 0.01em;
+      letter-spacing: 0.02em;
+      overflow: hidden;
+      isolation: isolate;
+    }
+
+    .prize-code-btn::before {
+      content: '';
+      position: absolute;
+      inset: -60%;
+      background: conic-gradient(from 0deg, rgba(255, 255, 255, 0.35), rgba(255, 255, 255, 0));
+      animation: prizeBtnSweep 4s linear infinite;
+      z-index: -1;
+    }
+
+    .prize-code-btn::after {
+      content: '';
+      position: absolute;
+      inset: 2px;
+      border-radius: inherit;
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.24), rgba(255, 255, 255, 0));
+      opacity: 0.7;
     }
 
     .prize-code-btn:hover {
-      background: #f9fafb;
-      border-color: #d1d5db;
-      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
+      transform: translateY(-2px) scale(1.02);
+      box-shadow: 0 18px 32px rgba(249, 115, 22, 0.4);
     }
 
     .prize-code-btn:focus-visible {
-      outline: 2px solid #3b82f6;
-      outline-offset: 2px;
+      outline: 3px solid rgba(245, 158, 11, 0.35);
+      outline-offset: 4px;
     }
 
     .prize-code-btn:active {
-      background: #f3f4f6;
-      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
+      transform: translateY(0);
+      box-shadow: 0 10px 20px rgba(249, 115, 22, 0.3);
     }
 
     .prize-text {
-      font-weight: 600;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+    }
+
+    @keyframes prizeBtnSweep {
+      0% {
+        transform: rotate(0deg);
+      }
+      100% {
+        transform: rotate(360deg);
+      }
     }
 
     /* Prize Code Modal */
@@ -2241,8 +2284,11 @@
     /* Responsive adjustments */
     @media (max-width: 767px) {
       .header-inner {
-        grid-template-areas: 'brand prize cta toggle';
-        grid-template-columns: auto auto 1fr auto;
+        grid-template-columns: 1fr auto;
+        grid-template-areas:
+          'brand toggle'
+          'prize prize'
+          'cta cta';
       }
 
       .prize-code-btn {
@@ -2320,6 +2366,10 @@
 
       .slider-track {
         transition: none !important;
+      }
+
+      .prize-code-btn::before {
+        animation: none !important;
       }
 
       .prize-modal-icon {
