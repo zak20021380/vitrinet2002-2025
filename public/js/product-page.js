@@ -1430,25 +1430,66 @@
     codeDisplay.setAttribute('role', 'status');
     codeDisplay.setAttribute('aria-live', 'polite');
 
-    function generatePrizeCode() {
-      const randomDigit = Math.floor(Math.random() * 9) + 1; // 1-9
-      return {
-        digit: randomDigit,
-        persian: persianDigits[randomDigit] || String(randomDigit)
-      };
+    function toPersianDigits(code) {
+      if (!code) return '';
+      return String(code)
+        .split('')
+        .map(char => {
+          const digit = parseInt(char, 10);
+          return !isNaN(digit) ? persianDigits[digit] : char;
+        })
+        .join('');
+    }
+
+    async function fetchPrizeCode() {
+      const productId = state.productId || new URLSearchParams(window.location.search).get('id');
+
+      if (!productId) {
+        throw new Error('شناسه محصول یافت نشد');
+      }
+
+      const response = await fetch(`/api/rewards/product-code?productId=${encodeURIComponent(productId)}`);
+
+      if (!response.ok) {
+        throw new Error(`خطا در دریافت کد: ${response.status}`);
+      }
+
+      const data = await response.json();
+      return data;
     }
 
     function revealPrizeCode() {
-      codeDisplay.innerHTML = '<div class="prize-loading">در حال بارگذاری...</div>';
+      codeDisplay.innerHTML = '<div class="prize-loading">در حال دریافت کد جایزه...</div>';
 
-      setTimeout(() => {
-        const { digit, persian } = generatePrizeCode();
-        codeDisplay.innerHTML = `
-          <div class="prize-code-label">کد جایزه شما:</div>
-          <div class="prize-code-value" aria-live="polite">${persian}</div>
-        `;
-        codeDisplay.setAttribute('data-code', digit);
-      }, 500);
+      fetchPrizeCode()
+        .then(data => {
+          if (!data.active) {
+            codeDisplay.innerHTML = `
+              <div class="prize-error">${data.message || 'کمپین جوایز در حال حاضر فعال نیست.'}</div>
+            `;
+            return;
+          }
+
+          if (!data.code) {
+            codeDisplay.innerHTML = `
+              <div class="prize-error">${data.message || 'در حال حاضر کد جایزه‌ای موجود نیست.'}</div>
+            `;
+            return;
+          }
+
+          const persianCode = toPersianDigits(data.code);
+          codeDisplay.innerHTML = `
+            <div class="prize-code-label">کد جایزه این محصول:</div>
+            <div class="prize-code-value" aria-live="polite">${persianCode}</div>
+          `;
+          codeDisplay.setAttribute('data-code', data.code);
+        })
+        .catch(error => {
+          console.error('Error fetching prize code:', error);
+          codeDisplay.innerHTML = `
+            <div class="prize-error">خطا در دریافت کد جایزه. لطفاً دوباره تلاش کنید.</div>
+          `;
+        });
     }
 
     function openModal() {

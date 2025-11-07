@@ -424,4 +424,85 @@ router.post('/claim', async (req, res, next) => {
   }
 });
 
+function hashString(str) {
+  let hash = 0;
+  if (!str || str.length === 0) return hash;
+  for (let i = 0; i < str.length; i++) {
+    const char = str.charCodeAt(i);
+    hash = ((hash << 5) - hash) + char;
+    hash = hash & hash;
+  }
+  return Math.abs(hash);
+}
+
+router.get('/product-code', async (req, res, next) => {
+  try {
+    const { productId } = req.query;
+
+    if (!productId || typeof productId !== 'string' || productId.trim().length === 0) {
+      return res.status(400).json({
+        message: 'شناسه محصول الزامی است.',
+        code: null,
+        active: false
+      });
+    }
+
+    const doc = await syncCampaignState();
+
+    if (!doc.active) {
+      return res.json({
+        message: 'کمپین جوایز در حال حاضر فعال نیست.',
+        code: null,
+        active: false,
+        showButton: doc.showButton !== undefined ? doc.showButton : true
+      });
+    }
+
+    if (!doc.showButton) {
+      return res.json({
+        message: 'دکمه کد جایزه غیرفعال است.',
+        code: null,
+        active: doc.active,
+        showButton: false
+      });
+    }
+
+    const availableCodes = doc.codes.filter(code => code && code.code && !code.used);
+
+    if (availableCodes.length === 0) {
+      return res.json({
+        message: 'در حال حاضر کد جایزه‌ای موجود نیست.',
+        code: null,
+        active: doc.active,
+        showButton: doc.showButton !== undefined ? doc.showButton : true,
+        campaign: {
+          title: doc.title || '',
+          description: doc.description || '',
+          prizeValue: doc.prizeValue || 0,
+          currency: doc.currency || 'تومان'
+        }
+      });
+    }
+
+    const productHash = hashString(String(productId).trim());
+    const index = productHash % availableCodes.length;
+    const selectedCode = availableCodes[index];
+
+    res.json({
+      code: selectedCode.code,
+      active: true,
+      showButton: doc.showButton !== undefined ? doc.showButton : true,
+      campaign: {
+        title: doc.title || '',
+        description: doc.description || '',
+        prizeValue: doc.prizeValue || 0,
+        currency: doc.currency || 'تومان'
+      }
+    });
+  } catch (error) {
+    console.error('Error fetching product code:', error);
+    next(error);
+  }
+});
+
 module.exports = router;
