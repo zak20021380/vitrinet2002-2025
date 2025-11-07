@@ -2029,6 +2029,7 @@
       letter-spacing: 0.02em;
       overflow: hidden;
       isolation: isolate;
+      gap: 0.65rem;
     }
 
     .prize-code-btn::before {
@@ -2064,9 +2065,40 @@
       box-shadow: 0 10px 20px rgba(249, 115, 22, 0.3);
     }
 
+    .prize-code-btn[disabled] {
+      cursor: not-allowed;
+      opacity: 0.75;
+      box-shadow: 0 10px 18px rgba(249, 115, 22, 0.25);
+    }
+
     .prize-text {
       font-weight: 700;
       letter-spacing: 0.04em;
+    }
+
+    .prize-code-preview {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 6ch;
+      padding: 0.25rem 0.8rem;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.22);
+      color: #ffffff;
+      font-weight: 800;
+      letter-spacing: 0.35em;
+      font-family: 'Courier New', monospace;
+      font-size: 0.9rem;
+      transition: opacity 0.2s ease;
+    }
+
+    .prize-code-preview[data-state="loading"] {
+      letter-spacing: 0.15em;
+      opacity: 0.85;
+    }
+
+    .prize-code-preview[data-state="hidden"] {
+      display: none;
     }
 
     @keyframes prizeBtnSweep {
@@ -2217,6 +2249,16 @@
       direction: ltr;
     }
 
+    .prize-code-note {
+      margin-top: 1.25rem;
+      font-size: 0.95rem;
+      color: #1f2937;
+      font-weight: 600;
+      position: relative;
+      z-index: 1;
+      line-height: 1.7;
+    }
+
     .prize-loading {
       font-size: 1.5rem;
       color: #f59e0b;
@@ -2236,6 +2278,100 @@
       font-size: 0.95rem;
       line-height: 1.6;
       margin: 1rem 0;
+    }
+
+    .prize-modal-guide {
+      text-align: right;
+      background: linear-gradient(135deg, rgba(250, 250, 250, 0.95), rgba(254, 249, 195, 0.6));
+      border-radius: 18px;
+      padding: 1.35rem 1.5rem;
+      box-shadow: inset 0 0 0 1px rgba(248, 196, 113, 0.35);
+      margin: 1.5rem 0 0;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .prize-modal-guide::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle at top left, rgba(249, 115, 22, 0.15), transparent 60%),
+                  radial-gradient(circle at bottom right, rgba(234, 179, 8, 0.2), transparent 55%);
+      pointer-events: none;
+    }
+
+    .prize-guide-title {
+      margin: 0 0 1rem;
+      font-size: 1.05rem;
+      color: #92400e;
+      font-weight: 800;
+      position: relative;
+      z-index: 1;
+    }
+
+    .prize-guide-list {
+      margin: 0;
+      padding: 0 1.25rem 0 0;
+      list-style: none;
+      counter-reset: prize-step;
+      display: grid;
+      gap: 0.65rem;
+      position: relative;
+      z-index: 1;
+    }
+
+    .prize-guide-list li {
+      counter-increment: prize-step;
+      background: rgba(254, 240, 138, 0.65);
+      border-radius: 14px;
+      padding: 0.75rem 3.4rem 0.75rem 0.9rem;
+      font-size: 0.92rem;
+      color: #7c2d12;
+      font-weight: 600;
+      position: relative;
+      line-height: 1.7;
+    }
+
+    .prize-guide-list li::before {
+      content: counter(prize-step);
+      position: absolute;
+      top: 50%;
+      right: 0.9rem;
+      transform: translateY(-50%);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 2.1rem;
+      height: 2.1rem;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #f97316, #f59e0b);
+      color: #fff;
+      font-weight: 800;
+      box-shadow: 0 10px 18px rgba(245, 158, 11, 0.25);
+    }
+
+    .prize-guide-footer {
+      margin-top: 1.25rem;
+      background: rgba(254, 243, 199, 0.6);
+      border-radius: 14px;
+      padding: 1rem 1.1rem;
+      color: #78350f;
+      font-size: 0.95rem;
+      font-weight: 600;
+      position: relative;
+      z-index: 1;
+      box-shadow: inset 0 0 0 1px rgba(250, 204, 21, 0.25);
+    }
+
+    .prize-guide-footer strong {
+      display: block;
+      margin-bottom: 0.45rem;
+      font-size: 1rem;
+    }
+
+    .prize-guide-footer p {
+      margin: 0;
+      line-height: 1.7;
     }
 
     .prize-modal-close {
@@ -2407,8 +2543,9 @@
           <span class="brand-tagline">Vitreenet</span>
         </span>
       </a>
-      <button class="prize-code-btn" id="prizeCodeBtn" type="button" aria-label="مشاهده کد جایزه">
+      <button class="prize-code-btn" id="prizeCodeBtn" type="button" aria-label="مشاهده کد جایزه" aria-haspopup="dialog" aria-expanded="false">
         <span class="prize-text">کد جایزه</span>
+        <span class="prize-code-preview" id="prizeCodePreview" data-state="hidden" aria-live="polite" aria-hidden="true"></span>
       </button>
       <a class="cta-link" href="/post.html" aria-label="ثبت فروشگاه در ویترینت">
         <span class="cta-text">
@@ -2637,9 +2774,21 @@
         <div class="prize-code-display" id="prizeCodeDisplay">
           <div class="prize-loading">در حال بارگذاری...</div>
         </div>
-        <p class="prize-modal-desc">
+        <p class="prize-modal-desc" id="prizeModalDesc">
           این کد را یادداشت کنید و برای شرکت در قرعه‌کشی از آن استفاده نمایید.
         </p>
+        <div class="prize-modal-guide" id="prizeModalGuide">
+          <h3 class="prize-guide-title">چطور کدهای دیگر را پیدا کنم؟</h3>
+          <ol class="prize-guide-list">
+            <li>در صفحات مختلف محصول به دنبال دکمه «کد جایزه» بگردید و آن را باز کنید.</li>
+            <li>با تازه‌سازی صفحات و بررسی محصولات جدید، شانس دریافت کدهای تازه را بالا ببرید.</li>
+            <li>کدهای پیدا شده را در جایی مطمئن یادداشت کنید تا هنگام ثبت، هیچ موردی را از دست ندهید.</li>
+          </ol>
+          <div class="prize-guide-footer">
+            <strong>کجا باید کد را وارد کنم؟</strong>
+            <p>به صفحه اصلی ویترینت بروید و از دکمه «کمپین جوایز» در هدر برای باز کردن فرم ثبت کد استفاده کنید، سپس کد ۶ رقمی خود را ثبت نمایید.</p>
+          </div>
+        </div>
       </div>
 
       <div class="prize-modal-footer">

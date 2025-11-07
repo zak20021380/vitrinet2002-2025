@@ -1420,6 +1420,9 @@
     const modal = document.getElementById('prizeModal');
     const closeBtn = document.getElementById('prizeModalClose');
     const codeDisplay = document.getElementById('prizeCodeDisplay');
+    const preview = document.getElementById('prizeCodePreview');
+    const title = document.querySelector('.prize-modal-title');
+    const description = document.getElementById('prizeModalDesc');
 
     if (!prizeBtn || !modal || !closeBtn || !codeDisplay) {
       console.warn('Prize code modal elements not found');
@@ -1427,56 +1430,249 @@
     }
 
     const persianDigits = ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹'];
+    const state = {
+      status: 'idle',
+      code: '',
+      note: '',
+      message: '',
+      campaign: null
+    };
+
     codeDisplay.setAttribute('role', 'status');
     codeDisplay.setAttribute('aria-live', 'polite');
 
-    function generatePrizeCode() {
-      const randomDigit = Math.floor(Math.random() * 9) + 1; // 1-9
-      return {
-        digit: randomDigit,
-        persian: persianDigits[randomDigit] || String(randomDigit)
-      };
+    function toPersianDigits(value = '') {
+      return String(value)
+        .split('')
+        .map((char) => {
+          const digit = Number(char);
+          if (Number.isNaN(digit)) {
+            return char;
+          }
+          return persianDigits[digit] || char;
+        })
+        .join('');
     }
 
-    function revealPrizeCode() {
-      codeDisplay.innerHTML = '<div class="prize-loading">در حال بارگذاری...</div>';
+    function escapeHtml(input = '') {
+      return String(input).replace(/[&<>"']/g, (char) => {
+        switch (char) {
+          case '&':
+            return '&amp;';
+          case '<':
+            return '&lt;';
+          case '>':
+            return '&gt;';
+          case '"':
+            return '&quot;';
+          case '\'':
+            return '&#39;';
+          default:
+            return char;
+        }
+      });
+    }
 
-      setTimeout(() => {
-        const { digit, persian } = generatePrizeCode();
-        codeDisplay.innerHTML = `
-          <div class="prize-code-label">کد جایزه شما:</div>
-          <div class="prize-code-value" aria-live="polite">${persian}</div>
-        `;
-        codeDisplay.setAttribute('data-code', digit);
-      }, 500);
+    function defaultDescription() {
+      return 'این کد را یادداشت کنید و برای شرکت در قرعه‌کشی از آن استفاده نمایید.';
+    }
+
+    function updatePreview() {
+      if (!preview) {
+        return;
+      }
+
+      if (state.status === 'ready' && state.code) {
+        preview.textContent = toPersianDigits(state.code);
+        preview.dataset.state = 'ready';
+        preview.removeAttribute('hidden');
+        preview.setAttribute('aria-hidden', 'false');
+      } else if (state.status === 'loading') {
+        preview.textContent = '...';
+        preview.dataset.state = 'loading';
+        preview.removeAttribute('hidden');
+        preview.setAttribute('aria-hidden', 'true');
+      } else {
+        preview.textContent = '';
+        preview.dataset.state = 'hidden';
+        preview.setAttribute('hidden', 'true');
+        preview.setAttribute('aria-hidden', 'true');
+      }
+    }
+
+    function renderModalContent() {
+      if (!codeDisplay) {
+        return;
+      }
+
+      if (state.status === 'loading') {
+        codeDisplay.innerHTML = '<div class="prize-loading">در حال بارگذاری...</div>';
+        return;
+      }
+
+      if (state.status !== 'ready' || !state.code) {
+        const message = state.message || 'در حال حاضر کدی در دسترس نیست.';
+        codeDisplay.innerHTML = `<div class="prize-error">${escapeHtml(message)}</div>`;
+        return;
+      }
+
+      const noteMarkup = state.note
+        ? `<div class="prize-code-note">${escapeHtml(state.note)}</div>`
+        : '';
+
+      codeDisplay.innerHTML = `
+        <div class="prize-code-label">کد جایزه شما:</div>
+        <div class="prize-code-value" aria-live="polite">${toPersianDigits(state.code)}</div>
+        ${noteMarkup}
+      `;
+    }
+
+    function updateCampaignContent() {
+      if (state.campaign) {
+        if (title && state.campaign.title) {
+          title.textContent = state.campaign.title;
+        }
+        if (description) {
+          const descText = String(state.campaign.description || '').trim();
+          description.textContent = descText || defaultDescription();
+        }
+      } else if (description) {
+        description.textContent = defaultDescription();
+      }
+    }
+
+    function applyVisibilityRules() {
+      const campaignActive = state.campaign ? Boolean(state.campaign.active) : true;
+      const showButton = state.campaign ? state.campaign.showButton !== false : true;
+
+      if (!campaignActive || !showButton || state.status === 'empty') {
+        prizeBtn.hidden = true;
+        return;
+      }
+
+      prizeBtn.hidden = false;
+      prizeBtn.setAttribute('aria-expanded', modal.classList.contains('active') ? 'true' : 'false');
+
+      if (state.status === 'error' || state.status === 'empty') {
+        prizeBtn.setAttribute('aria-label', 'کد جایزه در دسترس نیست، لطفاً بعداً تلاش کنید.');
+      } else {
+        prizeBtn.setAttribute('aria-label', 'مشاهده کد جایزه');
+      }
+    }
+
+    async function fetchRandomCode() {
+      if (state.status === 'loading') {
+        return;
+      }
+
+      state.status = 'loading';
+      state.message = '';
+      updatePreview();
+      renderModalContent();
+      applyVisibilityRules();
+
+      try {
+        const response = await fetch('/api/rewards/codes/random', {
+          method: 'GET',
+          credentials: 'include',
+          headers: {
+            Accept: 'application/json'
+          }
+        });
+
+        let payload = {};
+        try {
+          payload = await response.json();
+        } catch (error) {
+          payload = {};
+        }
+
+        state.campaign = payload.campaign || state.campaign;
+
+        if (!response.ok) {
+          state.status = 'error';
+          state.message = payload.message || 'خطایی در دریافت کد جایزه رخ داد.';
+          state.code = '';
+          state.note = '';
+          updateCampaignContent();
+          updatePreview();
+          renderModalContent();
+          applyVisibilityRules();
+          return;
+        }
+
+        const value = payload.code && (payload.code.value || payload.code.code) ? String(payload.code.value || payload.code.code) : '';
+        state.code = value;
+        state.note = payload.code && payload.code.note ? String(payload.code.note).trim() : '';
+
+        if (!value) {
+          state.status = 'empty';
+          state.message = 'کدی برای نمایش وجود ندارد.';
+        } else {
+          state.status = 'ready';
+          state.message = '';
+        }
+
+        updateCampaignContent();
+        updatePreview();
+        renderModalContent();
+        applyVisibilityRules();
+      } catch (error) {
+        state.status = 'error';
+        state.message = 'خطایی در ارتباط با سرور رخ داد.';
+        state.code = '';
+        state.note = '';
+        updatePreview();
+        renderModalContent();
+        applyVisibilityRules();
+      }
     }
 
     function openModal() {
-      modal.classList.add('active');
-      document.body.style.overflow = 'hidden';
-      revealPrizeCode();
-      prizeBtn.blur();
+      if (!modal.classList.contains('active')) {
+        modal.classList.add('active');
+        document.body.style.overflow = 'hidden';
+        prizeBtn.setAttribute('aria-expanded', 'true');
+        prizeBtn.blur();
+      }
+
+      renderModalContent();
+
+      if (state.status === 'idle' || state.status === 'error') {
+        fetchRandomCode().catch(() => {});
+      }
     }
 
     function closeModal() {
+      if (!modal.classList.contains('active')) {
+        return;
+      }
       modal.classList.remove('active');
       document.body.style.overflow = '';
-      prizeBtn.focus({ preventScroll: true });
+      prizeBtn.setAttribute('aria-expanded', 'false');
+      if (typeof prizeBtn.focus === 'function') {
+        prizeBtn.focus({ preventScroll: true });
+      }
     }
 
-    prizeBtn.addEventListener('click', openModal);
+    prizeBtn.addEventListener('click', () => {
+      openModal();
+    });
+
     closeBtn.addEventListener('click', closeModal);
 
-    modal.addEventListener('click', function(e) {
-      if (e.target === modal) {
+    modal.addEventListener('click', function (event) {
+      if (event.target === modal) {
         closeModal();
       }
     });
 
-    document.addEventListener('keydown', function(e) {
-      if (e.key === 'Escape' && modal.classList.contains('active')) {
+    document.addEventListener('keydown', function (event) {
+      if (event.key === 'Escape' && modal.classList.contains('active')) {
         closeModal();
       }
     });
+
+    fetchRandomCode().catch(() => {});
   })();
 })();

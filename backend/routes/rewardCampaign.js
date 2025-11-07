@@ -130,6 +130,50 @@ router.get('/campaign', async (req, res, next) => {
   }
 });
 
+router.get('/codes/random', async (req, res, next) => {
+  try {
+    const doc = await syncCampaignState();
+    const campaign = normaliseCampaign(doc);
+
+    if (!campaign.active || campaign.showButton === false) {
+      return res.status(404).json({
+        message: 'کمپین جوایز در حال حاضر فعال نیست.',
+        campaign
+      });
+    }
+
+    const codes = Array.isArray(doc.codes) ? doc.codes : [];
+    const available = codes.filter(code => code && code.code && !code.used);
+
+    if (available.length === 0) {
+      return res.status(404).json({
+        message: 'کدی برای نمایش وجود ندارد.',
+        campaign,
+        meta: {
+          total: codes.length,
+          remaining: 0
+        }
+      });
+    }
+
+    const randomEntry = available[Math.floor(Math.random() * available.length)];
+
+    res.json({
+      code: {
+        value: randomEntry.code,
+        note: randomEntry.note || ''
+      },
+      campaign,
+      meta: {
+        total: codes.length,
+        remaining: available.length
+      }
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
 router.get('/winners', async (req, res, next) => {
   try {
     const doc = await syncCampaignState();
