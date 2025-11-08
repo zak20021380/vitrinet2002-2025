@@ -455,6 +455,7 @@ function showToastDark(message, {type='success', durationMs=2600} = {}) {
   }
 
   if (reportForm && reportModal) {
+    const API_ROOT = window.__API_BASE__ || '';
     const inst = modalCache.get('reportModal') || setupModal(reportModal);
     const originalOpen = inst.open;
     inst.open = () => {
