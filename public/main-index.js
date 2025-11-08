@@ -2094,6 +2094,7 @@ const SERVICE_SHOWCASE_CONFIGS = [
       'barber'
     ],
     tonePalette: ['emerald', 'rose', 'mint', 'purple', 'sky', 'teal'],
+    maxItems: 6,
     chipFallback: 'آرایشگاه مردانه ثبت‌شده',
     emptyMessage: 'هیچ آرایشگاه مردانه ثبت‌شده‌ای یافت نشد.'
     // city: 'سنندج' // Removed city filter to show all barber shops
@@ -2155,7 +2156,13 @@ function renderServiceShowcase(config, shops) {
 
   slider.innerHTML = '';
 
-  if (!shops.length) {
+  const maxItems = Number.isFinite(config.maxItems)
+    ? Math.max(0, Math.floor(config.maxItems))
+    : null;
+
+  const limitedShops = maxItems != null ? shops.slice(0, maxItems) : shops;
+
+  if (!limitedShops.length) {
     if (section) section.classList.add('hidden');
     updateSliderNavVisibility(config.sliderId);
     return;
@@ -2163,8 +2170,12 @@ function renderServiceShowcase(config, shops) {
 
   if (section) section.classList.remove('hidden');
 
-  shops.forEach((shop, index) => {
-    const tone = config.tonePalette[index % config.tonePalette.length];
+  const palette = Array.isArray(config.tonePalette) && config.tonePalette.length
+    ? config.tonePalette
+    : ['emerald'];
+
+  limitedShops.forEach((shop, index) => {
+    const tone = palette[index % palette.length];
     const card = document.createElement('a');
     card.className = 'featured-service-card group';
     card.dataset.tone = tone;
@@ -2249,7 +2260,7 @@ async function loadServiceShowcases() {
   const validShops = shops.filter(shop => shop && (shop.storename || shop.name || shop.shopurl));
 
   activeConfigs.forEach(config => {
-    const matched = validShops.filter(shop => shopMatchesConfig(shop, config)).slice(0, config.tonePalette.length);
+    const matched = validShops.filter(shop => shopMatchesConfig(shop, config));
     renderServiceShowcase(config, matched);
   });
 }
