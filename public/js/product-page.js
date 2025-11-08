@@ -1430,6 +1430,42 @@
     codeDisplay.setAttribute('role', 'status');
     codeDisplay.setAttribute('aria-live', 'polite');
 
+    // Check campaign status and hide button if needed
+    async function checkCampaignStatus() {
+      try {
+        const productId = state.productId || new URLSearchParams(window.location.search).get('id');
+
+        if (!productId) {
+          return;
+        }
+
+        const response = await fetch(`/api/rewards/product-code?productId=${encodeURIComponent(productId)}`);
+
+        if (!response.ok) {
+          return;
+        }
+
+        const data = await response.json();
+
+        // Hide button if campaign is inactive OR showButton is false
+        if (!data.active || data.showButton === false) {
+          prizeBtn.style.display = 'none';
+          prizeBtn.setAttribute('hidden', 'true');
+          prizeBtn.setAttribute('aria-hidden', 'true');
+        } else {
+          prizeBtn.style.display = '';
+          prizeBtn.removeAttribute('hidden');
+          prizeBtn.setAttribute('aria-hidden', 'false');
+        }
+      } catch (error) {
+        console.error('Error checking campaign status:', error);
+        // On error, keep button visible to avoid breaking existing functionality
+      }
+    }
+
+    // Check status when page loads
+    checkCampaignStatus();
+
     function toPersianDigits(code) {
       if (!code) return '';
       return String(code)
