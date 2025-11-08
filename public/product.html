@@ -1530,6 +1530,12 @@
         padding: 0.75rem;
       }
 
+      .header-inner:has(.prize-code-btn[hidden]) {
+        grid-template-areas:
+          'brand toggle'
+          'cta cta';
+      }
+
       .brand {
         justify-self: start;
         gap: 0.6rem;
@@ -1678,6 +1684,11 @@
         grid-template-columns: auto auto 1fr auto;
         align-items: center;
         grid-template-areas: 'brand prize nav cta';
+      }
+
+      .header-inner:has(.prize-code-btn[hidden]) {
+        grid-template-columns: auto 1fr auto;
+        grid-template-areas: 'brand nav cta';
       }
 
       nav {
@@ -2029,6 +2040,10 @@
       letter-spacing: 0.02em;
       overflow: hidden;
       isolation: isolate;
+    }
+
+    .prize-code-btn[hidden] {
+      display: none !important;
     }
 
     .prize-code-btn::before {
