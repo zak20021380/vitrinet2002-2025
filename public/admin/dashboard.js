@@ -5875,6 +5875,38 @@ function initServicePlanManager() {
   if (servicePlanManagerInitialised) return;
   if (!servicePlanForm) return;
 
+  // Tab switching functionality
+  const tabButtons = document.querySelectorAll('.service-plan-tab');
+  const tabContents = document.querySelectorAll('.service-plan-tab-content');
+
+  tabButtons.forEach(button => {
+    button.addEventListener('click', () => {
+      const targetTab = button.dataset.tab;
+
+      // Remove active class from all tabs and contents
+      tabButtons.forEach(btn => {
+        btn.classList.remove('active');
+        btn.setAttribute('aria-selected', 'false');
+      });
+      tabContents.forEach(content => {
+        content.classList.remove('active');
+        content.hidden = true;
+      });
+
+      // Add active class to clicked tab and corresponding content
+      button.classList.add('active');
+      button.setAttribute('aria-selected', 'true');
+
+      const targetContent = document.getElementById(
+        targetTab === 'plans' ? 'plan-management-tab' : 'discount-codes-tab'
+      );
+      if (targetContent) {
+        targetContent.classList.add('active');
+        targetContent.hidden = false;
+      }
+    });
+  });
+
   servicePlanForm.addEventListener('submit', handleServicePlanSubmit);
   servicePlanResetBtn?.addEventListener('click', () => resetServicePlanForm(true));
   servicePlanRefreshBtn?.addEventListener('click', () => {
