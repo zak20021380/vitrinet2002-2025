@@ -2316,7 +2316,7 @@ async function loadServiceShowcases() {
 
   let shops = [];
   try {
-    const res = await fetch('/api/service-shops/showcase?limit=40');
+    const res = await fetch('http://localhost:5000/api/shops');
     if (!res.ok) throw new Error('network');
     const raw = await res.json();
     shops = Array.isArray(raw)
