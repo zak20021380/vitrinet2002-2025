@@ -1,7 +1,8 @@
 // controllers/reportController.js
 
-const Report      = require('../models/Report');
-const { REPORT_TYPES } = require('../models/Report');
+const mongoose          = require('mongoose');
+const Report            = require('../models/Report');
+const { REPORT_TYPES }  = require('../models/Report');
 
 // ➊ ثبت گزارش
 exports.createReport = async (req, res) => {
@@ -38,15 +39,25 @@ exports.createReport = async (req, res) => {
     }
 
     const normalizedShopurl = typeof shopurl === 'string' ? shopurl.trim() : '';
+    const normalizedSellerId = typeof sellerId === 'string' ? sellerId.trim() : '';
+
+    if (normalizedSellerId) {
+      if (!mongoose.Types.ObjectId.isValid(normalizedSellerId)) {
+        return res.status(400).json({ message: 'شناسه فروشنده معتبر نیست.' });
+      }
+    }
 
     const payload = {
-      sellerId:  sellerId || undefined,
       shopurl:   normalizedShopurl || undefined,
       userId:    req.user.id,
       ip:        req.ip,
       type,
       description
     };
+
+    if (normalizedSellerId) {
+      payload.sellerId = normalizedSellerId;
+    }
 
     if (contactInfo) {
       payload.contact = contactInfo;
