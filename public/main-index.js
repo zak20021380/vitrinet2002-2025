@@ -1981,7 +1981,10 @@ function shopMatchesShoesBags(shop) {
 }
 
 function resolveShopImage(shop) {
-  const candidate = shop?.boardImage || shop?.banner || (Array.isArray(shop?.images) ? shop.images[0] : shop?.image);
+  const candidate = shop?.coverImage
+    || shop?.boardImage
+    || shop?.banner
+    || (Array.isArray(shop?.images) ? shop.images[0] : shop?.image);
   let src = candidate || 'assets/images/no-image.png';
   if (/^https?:/i.test(src) || src.startsWith('data:') || src.startsWith('//')) {
     return src;
@@ -2176,11 +2179,12 @@ function filterRegisteredShops(shops) {
   return shops.filter(shop => {
     if (!shop) return false;
 
-    const shopUrl = (shop.shopurl || '').toString().trim();
+    const shopUrl = (shop.shopurl || shop.shopUrl || '').toString().trim();
     const storeName = (shop.storename || shop.name || '').toString().trim();
 
     if (!shopUrl || !storeName) return false;
-    if (looksLikePlaceholder(shopUrl) || looksLikePlaceholder(storeName) || looksLikePlaceholder(shop.desc)) {
+    const description = shop.desc || shop.description;
+    if (looksLikePlaceholder(shopUrl) || looksLikePlaceholder(storeName) || looksLikePlaceholder(description)) {
       return false;
     }
 
@@ -2234,11 +2238,12 @@ function renderServiceShowcase(config, shops) {
     card.className = 'featured-service-card group';
     card.dataset.tone = tone;
 
-    const href = shop?.shopurl ? `shop.html?shopurl=${encodeURIComponent(shop.shopurl)}` : '#';
+    const slug = shop?.shopurl || shop?.shopUrl;
+    const href = slug ? `shop.html?shopurl=${encodeURIComponent(slug)}` : '#';
     card.href = href;
 
     const chipText = (shop?.subcategory || shop?.category || config.chipFallback || '').toString().trim();
-    const rawDescription = (shop?.desc || '').toString().trim();
+    const rawDescription = (shop?.desc || shop?.description || '').toString().trim();
     const hasDescription = rawDescription.length > 0;
     const descriptionMarkup = hasDescription
       ? `<p class="featured-service-card__description">${escapeHTML(truncateText(rawDescription, 110))}</p>`
@@ -2307,7 +2312,9 @@ async function loadServiceShowcases() {
       ? raw
       : Array.isArray(raw?.shops)
         ? raw.shops
-        : [];
+        : Array.isArray(raw?.items)
+          ? raw.items
+          : [];
   } catch (err) {
     activeConfigs.forEach(entry => {
       entry.element.innerHTML = '<p class="w-full text-center text-sm sm:text-base text-red-500 py-6">خطا در دریافت کسب‌وکارهای ثبت‌شده.</p>';
