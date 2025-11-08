@@ -9,6 +9,8 @@ const sellerSchema = new mongoose.Schema({
   category: String,
   subcategory: String,
   address: String,
+  city: String,
+  region: String,
   desc: String,
   startTime: { type: String, default: '' },
   endTime: { type: String, default: '' },
