@@ -9,7 +9,7 @@ const dailyVisitCtrl = require('../controllers/dailyVisitController');
 router.get('/', async (req, res) => {
   try {
     const sellers = await Seller.find({},
-      'storename category subcategory shopurl address desc isPremium boardImage'
+      'storename category subcategory shopurl address desc city region isPremium boardImage'
     ).lean();
 
     const result = sellers.map(seller => ({
@@ -19,6 +19,8 @@ router.get('/', async (req, res) => {
       subcategory: seller.subcategory || '',
       shopurl: seller.shopurl || '',
       address: seller.address || '',
+      city: seller.city || '',
+      region: seller.region || '',
       desc: seller.desc || '',
       isPremium: !!seller.isPremium,
       image: seller.boardImage || ''
