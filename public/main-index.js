@@ -2248,7 +2248,14 @@ function renderServiceShowcase(config, shops) {
     card.dataset.tone = tone;
 
     const slug = shop?.shopurl || shop?.shopUrl;
-    const href = slug ? `shop.html?shopurl=${encodeURIComponent(slug)}` : '#';
+    let href = '#';
+
+    if (slug) {
+      const targetPage = config.sliderId === 'hair-salon-slider'
+        ? 'service-shops.html'
+        : 'shop.html';
+      href = `${targetPage}?shopurl=${encodeURIComponent(slug)}`;
+    }
     card.href = href;
 
     const chipText = (() => {
