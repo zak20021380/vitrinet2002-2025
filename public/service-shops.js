@@ -474,19 +474,16 @@ function showToastDark(message, {type='success', durationMs=2600} = {}) {
       }
 
       try {
-        const ids = (identifiers.slug || identifiers.sellerId)
-          ? identifiers
-          : await resolveIdentifiers();
-
         const payload = {
           type: selectedType,
           description
         };
 
+        const sellerIdFromBody = (document.body?.dataset?.sellerId || '').trim();
         const slugFromBody = (document.body?.dataset?.shopurl || '').trim();
-        if (ids?.sellerId) payload.sellerId = ids.sellerId;
-        if (ids?.slug) payload.shopurl = ids.slug;
-        else if (slugFromBody) payload.shopurl = slugFromBody;
+
+        if (sellerIdFromBody) payload.sellerId = sellerIdFromBody;
+        if (slugFromBody) payload.shopurl = slugFromBody;
         else if (typeof getShopUrlFromLocation === 'function') {
           const slug = await getShopUrlFromLocation();
           if (slug) payload.shopurl = slug;
