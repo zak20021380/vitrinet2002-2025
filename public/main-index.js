@@ -2087,20 +2087,26 @@ const SERVICE_SHOWCASE_CONFIGS = [
   {
     sliderId: 'hair-salon-slider',
     keywords: [
+      'خدمات',           // ✅ Added - matches your API response!
+      'آرایشگاه',         // More flexible (without 'مردانه')
       'آرایشگاه مردانه',
+      'پیرایش',           // More flexible
       'پیرایش مردانه',
       'سالن پیرایش مردانه',
       'آرایشگاه آقایان',
       'پیرایش آقایان',
+      'سالن',
       'barbershop',
       'barber shop',
-      'barber'
+      'barber',
+      'salon',
+      'hair'
     ],
     tonePalette: ['emerald', 'rose', 'mint', 'purple', 'sky', 'teal'],
     maxItems: 6,
-    chipFallback: 'آرایشگاه مردانه ثبت‌شده',
-    emptyMessage: 'هیچ آرایشگاه مردانه ثبت‌شده‌ای یافت نشد.',
-    city: 'سنندج'
+    chipFallback: 'خدمات ثبت‌شده',
+    emptyMessage: 'هیچ خدماتی ثبت نشد.'
+    // city: 'سنندج'  ← Removed! Your shops don't have city in address field
   },
   {
     sliderId: 'carwash-slider',
