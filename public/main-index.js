@@ -2096,6 +2096,7 @@ const SERVICE_SHOWCASE_CONFIGS = [
       'barber shop',
       'barber'
     ],
+    categoryNeedles: ['service', 'خدمات', 'barbershop', 'آرایشگاه مردانه'],
     tonePalette: ['emerald', 'rose', 'mint', 'purple', 'sky', 'teal'],
     maxItems: 6,
     chipFallback: 'آرایشگاه مردانه ثبت‌شده',
@@ -2144,6 +2145,27 @@ function shopMatchesConfig(shop, config) {
   const haystack = normalizeText(haystackSource);
   const matchesKeyword = normalizedKeywords.some(keyword => keyword && haystack.includes(keyword));
   if (!matchesKeyword) return false;
+
+  const categoryNeedles = Array.isArray(config.categoryNeedles)
+    ? config.categoryNeedles.map(normalizeText).filter(Boolean)
+    : [];
+
+  if (categoryNeedles.length) {
+    const categoryHaystack = [
+      shop.category,
+      shop.categoryName,
+      shop.categorySlug,
+      shop.subcategory,
+      Array.isArray(shop.subcategories) ? shop.subcategories.join(' ') : shop.subcategories,
+      Array.isArray(shop.tags) ? shop.tags.join(' ') : shop.tags
+    ]
+      .filter(Boolean)
+      .map(normalizeText)
+      .join(' ');
+
+    const matchesCategory = categoryNeedles.some(needle => needle && categoryHaystack.includes(needle));
+    if (!matchesCategory) return false;
+  }
 
   const cityNeedle = normalizeText(config.city || '');
   if (!cityNeedle) return true;
@@ -2316,7 +2338,7 @@ async function loadServiceShowcases() {
 
   let shops = [];
   try {
-    const res = await fetch('/api/service-shops/showcase?limit=40');
+    const res = await fetch('/api/shops');
     if (!res.ok) throw new Error('network');
     const raw = await res.json();
     shops = Array.isArray(raw)
@@ -2662,6 +2684,7 @@ slider.addEventListener('touchend', () => {
 
 
 const sliderNavIds = [
+  'hair-salon-slider',
   'drag-scroll-cards',
   'popular-products-slider',
   'banta-shops-section',
