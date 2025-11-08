@@ -2125,8 +2125,10 @@ function shopMatchesConfig(shop, config) {
     shop.name,
     shop.category,
     shop.subcategory,
+    Array.isArray(shop.subcategories) ? shop.subcategories.join(' ') : shop.subcategories,
     Array.isArray(shop.tags) ? shop.tags.join(' ') : shop.tags,
-    shop.desc
+    shop.desc,
+    shop.description
   ]
     .filter(Boolean)
     .join(' ');
@@ -2140,7 +2142,7 @@ function shopMatchesConfig(shop, config) {
   const cityNeedle = normalizeText(config.city || '');
   if (!cityNeedle) return true;
 
-  const addressHaystack = [shop.address, shop.city, shop.region, shop.desc]
+  const addressHaystack = [shop.address, shop.city, shop.region, shop.desc, shop.description]
     .filter(Boolean)
     .map(normalizeText)
     .join(' ');
@@ -2298,7 +2300,7 @@ async function loadServiceShowcases() {
 
   let shops = [];
   try {
-    const res = await fetch('/api/shops');
+    const res = await fetch('/api/service-shops/showcase?limit=40');
     if (!res.ok) throw new Error('network');
     const raw = await res.json();
     shops = Array.isArray(raw)
