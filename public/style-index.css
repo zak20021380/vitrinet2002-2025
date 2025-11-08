@@ -1806,20 +1806,38 @@ body.hide-mobile-nav .mobile-bottom-nav {
 }
 
 /* کارت‌های خدمات ویژه (آرایشگاه و کارواش) */
+
 .featured-service-scroller {
+  display: flex;
+  align-items: stretch;
+  gap: 1rem;
   scroll-snap-type: x mandatory;
-  padding-inline: 0.5rem;
+  padding-inline: 0.75rem;
+  padding-bottom: 0.75rem;
   -webkit-overflow-scrolling: touch;
+  overflow-x: auto;
 }
 
 .featured-service-scroller > .featured-service-card {
   scroll-snap-align: center;
 }
 
+@media (min-width: 640px) {
+  .featured-service-scroller {
+    gap: 1.25rem;
+    padding-inline: 1rem;
+  }
+}
+
 @media (min-width: 1024px) {
   .featured-service-scroller {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 1.5rem;
     scroll-snap-type: none;
     padding-inline: 0;
+    padding-bottom: 0;
+    overflow: visible;
   }
   .featured-service-scroller > .featured-service-card {
     scroll-snap-align: unset;
@@ -1837,6 +1855,7 @@ body.hide-mobile-nav .mobile-bottom-nav {
   justify-content: space-between;
   gap: 1rem;
   width: 100%;
+  height: 100%;
   padding: 1.25rem;
   border-radius: 20px;
   background: linear-gradient(160deg, rgba(255, 255, 255, 0.96) 0%, rgba(236, 253, 245, 0.94) 100%);
@@ -2020,6 +2039,8 @@ body.hide-mobile-nav .mobile-bottom-nav {
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
+  flex: 1 1 auto;
+  min-height: 0;
 }
 
 @media (min-width: 640px) {
@@ -2110,14 +2131,13 @@ body.hide-mobile-nav .mobile-bottom-nav {
 }
 
 .featured-service-card__location {
-  display: inline-flex;
-  align-items: center;
+  display: flex;
+  align-items: flex-start;
   gap: 0.35rem;
   font-weight: 700;
   color: #0f766e;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  flex-wrap: wrap;
+  line-height: 1.6;
   max-width: 100%;
 }
 
@@ -2131,6 +2151,11 @@ body.hide-mobile-nav .mobile-bottom-nav {
   width: 16px;
   height: 16px;
   flex-shrink: 0;
+}
+
+.featured-service-card__location-placeholder {
+  color: #94a3b8;
+  font-weight: 600;
 }
 
 @media (min-width: 640px) {
