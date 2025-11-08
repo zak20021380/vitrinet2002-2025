@@ -1,3 +1,8 @@
+const serviceShopIdentifiers = window.__serviceShopIdentifiers = window.__serviceShopIdentifiers || {
+  slug: '',
+  sellerId: ''
+};
+
 async function getShopUrlFromLocation() {
   const API_ROOT = window.__API_BASE__ || '';
   const u = new URL(location.href);
@@ -28,7 +33,7 @@ async function getShopUrlFromLocation() {
   const bannerText = document.getElementById('shop-moderation-banner-text');
   const bannerClose = document.querySelector('[data-dismiss="shop-moderation-banner"]');
   const STORAGE_PREFIX = 'vt:shop-moderation:';
-  let identifiers = { slug: '', sellerId: '' };
+  const identifiers = serviceShopIdentifiers;
 
   const formatDateTime = (value) => {
     if (!value) return '';
@@ -137,7 +142,7 @@ async function getShopUrlFromLocation() {
     persistState(info);
   };
 
-  const resolveIdentifiers = async () => {
+  const resolveIdentifiers = window.resolveServiceShopIdentifiers = async () => {
     const slugFromBody = (document.body?.dataset?.shopurl || '').trim();
     const sellerId = (document.body?.dataset?.sellerId || '').trim();
     let slug = slugFromBody;
@@ -148,7 +153,8 @@ async function getShopUrlFromLocation() {
         console.warn('resolve shop url failed', err);
       }
     }
-    identifiers = { slug: slug || '', sellerId };
+    identifiers.slug = slug || '';
+    identifiers.sellerId = sellerId;
     return identifiers;
   };
 
@@ -258,6 +264,20 @@ function showToastDark(message, {type='success', durationMs=2600} = {}) {
   // ====== Sticky header + toast ======
   const header = document.getElementById('main-header');
   const toast  = document.getElementById('headerToast');
+  const sharedIdentifiers = window.__serviceShopIdentifiers || { slug: '', sellerId: '' };
+  const ensureIdentifiers = async () => {
+    if (sharedIdentifiers.slug || sharedIdentifiers.sellerId) {
+      return sharedIdentifiers;
+    }
+    if (typeof window.resolveServiceShopIdentifiers === 'function') {
+      try {
+        return await window.resolveServiceShopIdentifiers();
+      } catch (err) {
+        console.warn('resolveServiceShopIdentifiers failed', err);
+      }
+    }
+    return sharedIdentifiers;
+  };
 
   function showToast(msg) {
     if (!toast) return;
@@ -474,9 +494,9 @@ function showToastDark(message, {type='success', durationMs=2600} = {}) {
       }
 
       try {
-        const ids = (identifiers.slug || identifiers.sellerId)
-          ? identifiers
-          : await resolveIdentifiers();
+        const ids = (sharedIdentifiers.slug || sharedIdentifiers.sellerId)
+          ? sharedIdentifiers
+          : await ensureIdentifiers();
 
         const payload = {
           type: selectedType,
