@@ -390,9 +390,23 @@
 
       // فروشنده (کلیک خور)
       const sellerTd = document.createElement('td');
-      sellerTd.className = "font-bold text-blue-700 cursor-pointer hover:underline";
-      sellerTd.textContent = r.seller;
-      sellerTd.onclick = e => { e.stopPropagation(); showSellerModal(r.seller); };
+      const hasShopUrl = r.shopurl && r.shopurl !== '-';
+
+      if (hasShopUrl) {
+        const sellerLink = document.createElement('a');
+        sellerLink.href = `/service-shops.html?shopurl=${encodeURIComponent(r.shopurl)}`;
+        sellerLink.target = '_blank';
+        sellerLink.rel = 'noopener noreferrer';
+        sellerLink.textContent = r.seller;
+        sellerLink.className = 'font-bold text-blue-700 hover:underline';
+        sellerLink.onclick = e => e.stopPropagation();
+        sellerTd.appendChild(sellerLink);
+      } else {
+        sellerTd.className = "font-bold text-blue-700 cursor-pointer hover:underline";
+        sellerTd.textContent = r.seller;
+        sellerTd.onclick = e => { e.stopPropagation(); showSellerModal(r.seller); };
+      }
+
       row.appendChild(sellerTd);
 
       // دسته
