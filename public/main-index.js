@@ -2139,12 +2139,29 @@ function shopMatchesConfig(shop, config) {
   const cityNeedle = normalizeText(config.city || '');
   if (!cityNeedle) return true;
 
-  const addressHaystack = [shop.address, shop.city, shop.region, shop.desc]
-    .filter(Boolean)
-    .map(normalizeText)
-    .join(' ');
+  const locationParts = [shop.address, shop.city, shop.region]
+    .map(part => normalizeText(part))
+    .filter(Boolean);
 
-  return addressHaystack.includes(cityNeedle) || haystack.includes(cityNeedle);
+  const locationHaystack = locationParts.join(' ');
+
+  if (locationHaystack.includes(cityNeedle) || haystack.includes(cityNeedle)) {
+    return true;
+  }
+
+  if (!locationParts.length) {
+    // برخی از فروشگاه‌های تازه ثبت‌شده هنوز شهر خود را وارد نکرده‌اند.
+    // در حال حاضر تنها شهر فعال پلتفرم سنندج است، بنابراین در صورت نبود
+    // اطلاعات لوکیشن، فروشگاه را مطابقت می‌دهیم تا در vitrine دیده شود.
+    return true;
+  }
+
+  const locationTokens = locationParts
+    .flatMap(part => part.split(/[،,]/))
+    .map(token => token.trim())
+    .filter(Boolean);
+
+  return locationTokens.some(token => token.includes(cityNeedle));
 }
 
 function renderServiceShowcase(config, shops) {
