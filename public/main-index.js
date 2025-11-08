@@ -2096,8 +2096,8 @@ const SERVICE_SHOWCASE_CONFIGS = [
     tonePalette: ['emerald', 'rose', 'mint', 'purple', 'sky', 'teal'],
     maxItems: 6,
     chipFallback: 'آرایشگاه مردانه ثبت‌شده',
-    emptyMessage: 'هیچ آرایشگاه مردانه ثبت‌شده‌ای یافت نشد.'
-    // city: 'سنندج' // Removed city filter to show all barber shops
+    emptyMessage: 'هیچ آرایشگاه مردانه ثبت‌شده‌ای یافت نشد.',
+    city: 'سنندج'
   },
   {
     sliderId: 'carwash-slider',
@@ -2148,6 +2148,56 @@ function shopMatchesConfig(shop, config) {
   return addressHaystack.includes(cityNeedle) || haystack.includes(cityNeedle);
 }
 
+function looksLikePlaceholder(value) {
+  const normalized = normalizeText(value);
+  if (!normalized) return false;
+  const placeholderTokens = [
+    'test',
+    'demo',
+    'sample',
+    'placeholder',
+    'fake',
+    'تست',
+    'آزمایشی',
+    'دمو',
+    'نمونه',
+    'نمایشی',
+    'جعلی'
+  ].map(normalizeText);
+
+  return placeholderTokens.some(token => token && normalized.includes(token));
+}
+
+function filterRegisteredShops(shops) {
+  const seen = new Set();
+
+  return shops.filter(shop => {
+    if (!shop) return false;
+
+    const shopUrl = (shop.shopurl || '').toString().trim();
+    const storeName = (shop.storename || shop.name || '').toString().trim();
+
+    if (!shopUrl || !storeName) return false;
+    if (looksLikePlaceholder(shopUrl) || looksLikePlaceholder(storeName) || looksLikePlaceholder(shop.desc)) {
+      return false;
+    }
+
+    const key = normalizeText(shopUrl);
+    if (seen.has(key)) return false;
+
+    seen.add(key);
+    return true;
+  });
+}
+
+function buildShopLocation(shop) {
+  const parts = [shop?.address, shop?.region, shop?.city]
+    .map(part => (part || '').toString().trim())
+    .filter(Boolean);
+
+  return parts.join('، ');
+}
+
 function renderServiceShowcase(config, shops) {
   const slider = document.getElementById(config.sliderId);
   if (!slider) return;
@@ -2160,7 +2210,9 @@ function renderServiceShowcase(config, shops) {
     ? Math.max(0, Math.floor(config.maxItems))
     : null;
 
-  const limitedShops = maxItems != null ? shops.slice(0, maxItems) : shops;
+  const registeredShops = filterRegisteredShops(Array.isArray(shops) ? shops : []);
+
+  const limitedShops = maxItems != null ? registeredShops.slice(0, maxItems) : registeredShops;
 
   if (!limitedShops.length) {
     if (section) section.classList.add('hidden');
@@ -2183,9 +2235,16 @@ function renderServiceShowcase(config, shops) {
     const href = shop?.shopurl ? `shop.html?shopurl=${encodeURIComponent(shop.shopurl)}` : '#';
     card.href = href;
 
-    const chipText = shop?.subcategory || shop?.category || config.chipFallback;
-    const description = truncateText(shop?.desc || 'این کسب‌وکار در ویترینت ثبت شده است.', 110);
-    const locationText = shop?.address || shop?.city || config.city || '';
+    const chipText = (shop?.subcategory || shop?.category || config.chipFallback || '').toString().trim();
+    const rawDescription = (shop?.desc || '').toString().trim();
+    const hasDescription = rawDescription.length > 0;
+    const descriptionMarkup = hasDescription
+      ? `<p class="featured-service-card__description">${escapeHTML(truncateText(rawDescription, 110))}</p>`
+      : '';
+    const resolvedLocation = buildShopLocation(shop) || (config.city || '').toString().trim();
+    const locationMarkup = resolvedLocation
+      ? escapeHTML(resolvedLocation)
+      : '<span class="featured-service-card__location-placeholder">آدرس ثبت نشده</span>';
     const imageSrc = resolveShopImage(shop);
     const altText = shop?.storename
       ? `تصویر ${shop.storename}`
@@ -2198,17 +2257,17 @@ function renderServiceShowcase(config, shops) {
       </div>
       <div class="featured-service-card__body">
         <h4 class="featured-service-card__title">${escapeHTML(shop?.storename || shop?.name || 'فروشگاه بدون نام')}</h4>
-        <p class="featured-service-card__description">${escapeHTML(description)}</p>
+        ${descriptionMarkup}
       </div>
       <div class="featured-service-card__footer">
         <span class="featured-service-card__location">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
             <path stroke-linecap="round" stroke-linejoin="round" d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7Zm0 9.5a2.5 2.5 0 1 1 0-5 2.5 2.5 0 0 1 0 5Z" />
           </svg>
-          ${escapeHTML(locationText)}
+          ${locationMarkup}
         </span>
         <div class="featured-service-card__actions">
-          <span class="featured-service-card__quick-book" aria-label="رزرو سریع">رزرو سریع</span>
+          <span class="featured-service-card__quick-book" aria-label="مشاهده فروشگاه">مشاهده فروشگاه</span>
         </div>
       </div>
     `;
