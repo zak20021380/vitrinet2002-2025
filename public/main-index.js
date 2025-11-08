@@ -2127,9 +2127,12 @@ function shopMatchesConfig(shop, config) {
     shop.storename,
     shop.name,
     shop.category,
+    shop.categoryName,
     shop.subcategory,
     Array.isArray(shop.subcategories) ? shop.subcategories.join(' ') : shop.subcategories,
     Array.isArray(shop.tags) ? shop.tags.join(' ') : shop.tags,
+    Array.isArray(shop.highlightServices) ? shop.highlightServices.join(' ') : shop.highlightServices,
+    shop.categorySlug,
     shop.desc,
     shop.description
   ]
@@ -2242,7 +2245,15 @@ function renderServiceShowcase(config, shops) {
     const href = slug ? `shop.html?shopurl=${encodeURIComponent(slug)}` : '#';
     card.href = href;
 
-    const chipText = (shop?.subcategory || shop?.category || config.chipFallback || '').toString().trim();
+    const chipText = (() => {
+      if (Array.isArray(shop?.subcategories) && shop.subcategories.length) {
+        return shop.subcategories[0];
+      }
+      if (shop?.subcategory) return shop.subcategory;
+      if (shop?.categoryName) return shop.categoryName;
+      if (shop?.category) return shop.category;
+      return config.chipFallback || '';
+    })().toString().trim();
     const rawDescription = (shop?.desc || shop?.description || '').toString().trim();
     const hasDescription = rawDescription.length > 0;
     const descriptionMarkup = hasDescription
