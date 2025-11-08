@@ -2291,7 +2291,7 @@ function renderServiceShowcase(config, shops) {
           ${locationMarkup}
         </span>
         <div class="featured-service-card__actions">
-          <span class="featured-service-card__quick-book" aria-label="مشاهده فروشگاه">مشاهده فروشگاه</span>
+          <span class="featured-service-card__quick-book" aria-label="${config.sliderId === 'hair-salon-slider' ? 'رزرو نوبت' : 'مشاهده فروشگاه'}">${config.sliderId === 'hair-salon-slider' ? 'رزرو نوبت' : 'مشاهده فروشگاه'}</span>
         </div>
       </div>
     `;
