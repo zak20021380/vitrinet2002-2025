@@ -467,7 +467,14 @@ router.get('/product-code', async (req, res, next) => {
       });
     }
 
-    const availableCodes = doc.codes.filter(code => code && code.code && !code.used);
+    const availableCodes = doc.codes
+      .filter(code => code && code.code && !code.used)
+      .map((entry, index) => ({
+        entry,
+        order: hashString(`${entry.code}-${index}-${doc.updatedAt || ''}`)
+      }))
+      .sort((a, b) => a.order - b.order)
+      .map(item => item.entry);
 
     if (availableCodes.length === 0) {
       return res.json({
@@ -484,9 +491,32 @@ router.get('/product-code', async (req, res, next) => {
       });
     }
 
-    const productHash = hashString(String(productId).trim());
-    const index = productHash % availableCodes.length;
-    const selectedCode = availableCodes[index];
+    const saltSource = [
+      doc.updatedAt ? new Date(doc.updatedAt).getTime() : 0,
+      availableCodes.map(code => `${code.code}-${code.createdAt ? new Date(code.createdAt).getTime() : 0}`).join('|'),
+      doc.codes.length
+    ].join('|');
+
+    const productHash = hashString(`${String(productId).trim()}-${saltSource}`);
+    const distributionSpan = Math.max(availableCodes.length * 4, availableCodes.length + 1);
+    const slot = distributionSpan > 0 ? productHash % distributionSpan : 0;
+
+    if (slot >= availableCodes.length) {
+      return res.json({
+        message: 'این صفحه کد جایزه نداره، باید بری صفحه های دیگه رو بگردی',
+        code: null,
+        active: true,
+        showButton: doc.showButton !== undefined ? doc.showButton : true,
+        campaign: {
+          title: doc.title || '',
+          description: doc.description || '',
+          prizeValue: doc.prizeValue || 0,
+          currency: doc.currency || 'تومان'
+        }
+      });
+    }
+
+    const selectedCode = availableCodes[slot];
 
     res.json({
       code: selectedCode.code,

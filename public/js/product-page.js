@@ -1472,7 +1472,7 @@
 
           if (!data.code) {
             codeDisplay.innerHTML = `
-              <div class="prize-error">${data.message || 'در حال حاضر کد جایزه‌ای موجود نیست.'}</div>
+              <div class="prize-error">${data.message || 'این صفحه کد جایزه نداره، باید بری صفحه های دیگه رو بگردی'}</div>
             `;
             return;
           }
