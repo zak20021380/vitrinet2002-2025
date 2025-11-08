@@ -2095,16 +2095,16 @@ const SERVICE_SHOWCASE_CONFIGS = [
     ],
     tonePalette: ['emerald', 'rose', 'mint', 'purple', 'sky', 'teal'],
     chipFallback: 'آرایشگاه مردانه ثبت‌شده',
-    emptyMessage: 'هیچ آرایشگاه مردانه ثبت‌شده‌ای یافت نشد.',
-    city: 'سنندج'
+    emptyMessage: 'هیچ آرایشگاه مردانه ثبت‌شده‌ای یافت نشد.'
+    // city: 'سنندج' // Removed city filter to show all barber shops
   },
   {
     sliderId: 'carwash-slider',
     keywords: ['کارواش', 'carwash', 'کار واش', 'دیتیلینگ', 'سرامیک', 'خودرو'],
     tonePalette: ['sky', 'teal', 'mint', 'indigo'],
     chipFallback: 'کارواش ثبت‌شده',
-    emptyMessage: 'هیچ کارواش ثبت‌شده‌ای یافت نشد.',
-    city: 'سنندج'
+    emptyMessage: 'هیچ کارواش ثبت‌شده‌ای یافت نشد.'
+    // city: 'سنندج' // Removed city filter to show all car washes
   }
 ];
 
