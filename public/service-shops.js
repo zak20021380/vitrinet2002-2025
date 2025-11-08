@@ -3,6 +3,23 @@ const serviceShopIdentifiers = window.__serviceShopIdentifiers = window.__servic
   sellerId: ''
 };
 
+const toTrimmedString = (value) => {
+  if (typeof value === 'string') {
+    return value.trim();
+  }
+  if (value == null) {
+    return '';
+  }
+  return String(value).trim();
+};
+
+const isValidObjectId = (value) => /^[0-9a-fA-F]{24}$/.test(toTrimmedString(value));
+
+const normaliseObjectId = (value) => {
+  const trimmed = toTrimmedString(value);
+  return isValidObjectId(trimmed) ? trimmed : '';
+};
+
 async function getShopUrlFromLocation() {
   const API_ROOT = window.__API_BASE__ || '';
   const u = new URL(location.href);
@@ -143,8 +160,7 @@ async function getShopUrlFromLocation() {
   };
 
   const resolveIdentifiers = window.resolveServiceShopIdentifiers = async () => {
-    const slugFromBody = (document.body?.dataset?.shopurl || '').trim();
-    const sellerId = (document.body?.dataset?.sellerId || '').trim();
+    const slugFromBody = toTrimmedString(document.body?.dataset?.shopurl);
     let slug = slugFromBody;
     if (!slug && typeof getShopUrlFromLocation === 'function') {
       try {
@@ -153,7 +169,21 @@ async function getShopUrlFromLocation() {
         console.warn('resolve shop url failed', err);
       }
     }
-    identifiers.slug = slug || '';
+    const sellerCandidates = [
+      identifiers.sellerId,
+      document.body?.dataset?.sellerId,
+      window.LAST_PUBLIC?.sellerId
+    ];
+    if (Array.isArray(window.LAST_PUBLIC?.items)) {
+      window.LAST_PUBLIC.items.forEach(item => {
+        if (item?.sellerId) {
+          sellerCandidates.push(item.sellerId);
+        }
+      });
+    }
+    const sellerId = sellerCandidates.reduce((acc, candidate) => acc || normaliseObjectId(candidate), '');
+
+    identifiers.slug = slug ? slug : '';
     identifiers.sellerId = sellerId;
     return identifiers;
   };
@@ -164,7 +194,7 @@ async function getShopUrlFromLocation() {
       let url = '';
       if (ids.slug) {
         url = `${API_ROOT}/api/service-shops/status/by-shopurl/${encodeURIComponent(ids.slug)}`;
-      } else if (ids.sellerId && /^[0-9a-fA-F]{24}$/.test(ids.sellerId)) {
+      } else if (isValidObjectId(ids.sellerId)) {
         url = `${API_ROOT}/api/service-shops/status/by-seller/${encodeURIComponent(ids.sellerId)}`;
       }
       if (!url) {
@@ -504,12 +534,17 @@ function showToastDark(message, {type='success', durationMs=2600} = {}) {
           description
         };
 
-        const slugFromBody = (document.body?.dataset?.shopurl || '').trim();
-        if (ids?.sellerId) payload.sellerId = ids.sellerId;
-        if (ids?.slug) payload.shopurl = ids.slug;
-        else if (slugFromBody) payload.shopurl = slugFromBody;
-        else if (typeof getShopUrlFromLocation === 'function') {
-          const slug = await getShopUrlFromLocation();
+        const slugFromBody = toTrimmedString(document.body?.dataset?.shopurl);
+        const sellerId = normaliseObjectId(ids?.sellerId);
+        if (sellerId) payload.sellerId = sellerId;
+
+        const slugCandidate = toTrimmedString(ids?.slug);
+        if (slugCandidate) {
+          payload.shopurl = slugCandidate;
+        } else if (slugFromBody) {
+          payload.shopurl = slugFromBody;
+        } else if (typeof getShopUrlFromLocation === 'function') {
+          const slug = toTrimmedString(await getShopUrlFromLocation());
           if (slug) payload.shopurl = slug;
         }
 
@@ -885,7 +920,7 @@ async function hasPending(){
 
   const getSellerId = () => {
     const id = document.body?.dataset?.sellerId || window.LAST_PUBLIC?.sellerId || '';
-    return /^[0-9a-fA-F]{24}$/.test(id) ? id : '';
+    return normaliseObjectId(id);
   };
 
   const readLastBooking = () => {
@@ -4459,7 +4494,9 @@ async function renderAll() {
     window.LAST_PUBLIC = LAST_PUBLIC; // keep global in sync
     updateSellerProfile(seller);
 
-    const resolvedSellerId = data.sellerId || seller._id || seller.id || '';
+    const resolvedSellerId = normaliseObjectId(
+      data.sellerId || seller._id || seller.id || ''
+    );
     if (resolvedSellerId) {
       document.body.dataset.sellerId = resolvedSellerId;
     } else {
@@ -4721,10 +4758,12 @@ function render(items) {
 (function () {
   // 1) تزریق shopurl / sellerId از URL به دیتاستِ بدنه
   const params   = new URLSearchParams(location.search);
-  const shopurl  = params.get('shopurl');
-  const sellerId = params.get('sellerId');
+  const shopurl  = toTrimmedString(params.get('shopurl'));
+  const sellerId = normaliseObjectId(params.get('sellerId'));
 
-  if (shopurl)  document.body.dataset.shopurl  = shopurl;
+  if (shopurl) {
+    document.body.dataset.shopurl = shopurl;
+  }
   if (sellerId) {
     document.body.dataset.sellerId = sellerId;
     document.body.dataset.storeId  = sellerId;
