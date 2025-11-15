@@ -409,8 +409,15 @@
       async function loadBookings() {
         try {
           const token = localStorage.getItem('token');
+
+          // Check if user is actually logged in
           if (!token) {
-            console.log('No token, skipping bookings load');
+            console.log('No auth token found, skipping bookings');
+            bookingsLoaded = false;
+            allBookings = [];
+            bookingsData = [];
+            renderBookings([]);
+            updateBookingsBadge();
             return;
           }
 
@@ -434,7 +441,13 @@
             renderBookings(allBookings);
             updateBookingsBadge();
           } else if (response.status === 401) {
-            console.log('Unauthorized - user may not be logged in');
+            // User not authenticated - this is OK, just don't show bookings
+            console.log('User not authenticated for bookings');
+            allBookings = [];
+            bookingsData = [];
+            bookingsLoaded = false;
+            renderBookings([]);
+            updateBookingsBadge();
           } else {
             console.error('Failed to load bookings:', response.status);
           }
