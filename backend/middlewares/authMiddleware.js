@@ -27,7 +27,7 @@ const normalizeRole = (role) => {
  *  └─ اگر null باشد، فقط اعتبارِ توکن بررسی می‌شود؛
  *     در غیر این صورت، علاوه بر اعتبار، نقش هم باید منطبق باشد.
  */
-module.exports = (requiredRole = null) => {
+const createAuthMiddleware = (requiredRole = null) => {
   return async (req, res, next) => {
   
     let token = null;
@@ -110,3 +110,8 @@ module.exports = (requiredRole = null) => {
 
   };
 };
+
+const authMiddleware = createAuthMiddleware;
+authMiddleware.protect = createAuthMiddleware('user');
+
+module.exports = authMiddleware;
