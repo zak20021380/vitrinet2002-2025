@@ -157,15 +157,15 @@ router.get('/bookings', protect, async (req, res) => {
     const bookings = await Booking.find({
       userId: req.user.id
     })
-      .populate('sellerId', 'shopName shopUrl')
+      .populate('sellerId', 'storename shopurl')
       .sort({ bookingDate: -1, startTime: -1 });
 
     // Format for frontend
     const formatted = bookings.map(b => ({
       _id: b._id,
       service: b.service,
-      sellerName: b.sellerId?.shopName || 'فروشگاه',
-      sellerUrl: b.sellerId?.shopUrl,
+      sellerName: b.sellerId?.storename || 'فروشگاه',
+      sellerUrl: b.sellerId?.shopurl,
       bookingDate: b.bookingDate,
       startTime: b.startTime,
       status: b.status,
