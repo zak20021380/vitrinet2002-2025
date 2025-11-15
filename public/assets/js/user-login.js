@@ -46,6 +46,20 @@ document.getElementById('loginForm').addEventListener('submit', async function (
     const data = await res.json();
     if (!res.ok) throw new Error(data.message || 'خطا در ورود!');
 
+    console.log('✅ Login response received:', data);
+    console.log('Token from server:', data.token ? 'EXISTS' : 'MISSING');
+    console.log('User from server:', data.user);
+
+    // Clear old data
+    localStorage.clear();
+
+    // Save new token and user
+    localStorage.setItem('token', data.token);
+    localStorage.setItem('user', JSON.stringify(data.user));
+
+    console.log('💾 Token saved to localStorage');
+    console.log('Saved token:', localStorage.getItem('token') ? 'SUCCESS' : 'FAILED');
+
     const back = SafeSS.getJSON('afterLoginReturn');
     if (back) {
       sessionStorage.removeItem('afterLoginReturn');
