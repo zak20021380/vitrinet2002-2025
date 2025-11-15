@@ -9,6 +9,12 @@ const serviceShopCustomerSchema = new mongoose.Schema({
     required: true,
     index: true
   },
+  userId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+    index: true,
+    required: false
+  },
   serviceShopId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'ServiceShop',
