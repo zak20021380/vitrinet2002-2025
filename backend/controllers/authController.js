@@ -418,6 +418,9 @@ exports.loginUser = async (req, res) => {
       { expiresIn: '7d' }
     );
 
+    console.log('✅ Login successful for user:', user.phone);
+    console.log('Token created:', token.substring(0, 20) + '...');
+
     /* ۶) ست‌کردن کوکی Http‑Only برای کاربر
           در محیط توسعه (HTTP) →  secure=false , sameSite='lax'
           در محیط Production (HTTPS) → secure=true , sameSite='none' برای کراس‌سایت */

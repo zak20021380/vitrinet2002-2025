@@ -10,7 +10,7 @@ const isAdmin = require('../middlewares/authMiddleware')('admin');
 
 // ✳️ به‌جای خودِ تابع، خروجی فراخوانی‌اش را می‌دهیم
 const auth = require('../middlewares/authMiddleware');
-const protect = auth('user');
+const { protect } = require('../middlewares/authMiddleware');
 
 // ───────────────────────────────
 // GET /api/user/profile
@@ -149,6 +149,8 @@ router.get('/favorites', auth(), async (req, res) => {
 
 // Get user's bookings
 router.get('/bookings', protect, async (req, res) => {
+  console.log('📅 Bookings endpoint hit');
+  console.log('User from token:', req.user);
   try {
     const Booking = require('../models/booking');
 
