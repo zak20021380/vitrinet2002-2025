@@ -2110,6 +2110,18 @@ function persistCustomer(){
         alert('درخواست ثبت شد و در انتظار تأیید فروشنده است.');
       }
 
+      // ===== POST-BOOKING ACCOUNT SUGGESTION FOR GUEST USERS =====
+      // Check if user is logged in
+      const userToken = localStorage.getItem('token');
+      const isUserLoggedIn = !!userToken;
+
+      if (!isUserLoggedIn) {
+        // Show account creation suggestion modal after a delay
+        setTimeout(() => {
+          showAccountSuggestionModal(name, phone);
+        }, 1500);
+      }
+
       // ریست ویزارد
       resetWizardState();
 
@@ -2146,6 +2158,192 @@ function persistCustomer(){
     confirmBtn.disabled = true;
     confirmBtn.setAttribute('disabled','disabled');
     showStep(1);
+  }
+
+  // ===== POST-BOOKING ACCOUNT SUGGESTION MODAL =====
+  function showAccountSuggestionModal(customerName, customerPhone) {
+    // Remove existing modal if any
+    const existingModal = document.getElementById('account-suggestion-modal');
+    if (existingModal) {
+      existingModal.remove();
+    }
+
+    // Create modal HTML
+    const modal = document.createElement('div');
+    modal.id = 'account-suggestion-modal';
+    modal.style.cssText = `
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.5);
+      backdrop-filter: blur(4px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 99999;
+      animation: fadeIn 0.3s ease;
+    `;
+
+    modal.innerHTML = `
+      <div class="modal-content" style="
+        background: white;
+        border-radius: 24px;
+        padding: 32px;
+        max-width: 500px;
+        width: 90%;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        animation: slideUp 0.3s ease;
+        position: relative;
+      ">
+        <!-- Icon -->
+        <div style="text-align: center; margin-bottom: 20px;">
+          <div style="
+            display: inline-block;
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, #10b981 0%, #0ea5e9 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 48px;
+            margin: 0 auto;
+          ">🎉</div>
+        </div>
+
+        <!-- Title -->
+        <h3 style="
+          text-align: center;
+          font-size: 24px;
+          font-weight: 800;
+          background: linear-gradient(135deg, #10b981 0%, #0ea5e9 100%);
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+          background-clip: text;
+          margin-bottom: 12px;
+        ">رزرو شما با موفقیت ثبت شد!</h3>
+
+        <!-- Message -->
+        <p style="
+          text-align: center;
+          color: #4b5563;
+          font-size: 16px;
+          margin-bottom: 24px;
+          line-height: 1.6;
+        ">می‌خواهید حساب کاربری بسازید تا تمام رزروهاتون رو در یک جا ببینید؟</p>
+
+        <!-- Benefits -->
+        <div style="
+          background: linear-gradient(135deg, rgba(16, 185, 129, 0.05) 0%, rgba(14, 165, 233, 0.05) 100%);
+          border-radius: 16px;
+          padding: 20px;
+          margin-bottom: 24px;
+        ">
+          <div style="margin-bottom: 12px; display: flex; align-items: start; gap: 12px;">
+            <span style="color: #10b981; font-size: 20px; flex-shrink: 0;">✓</span>
+            <span style="color: #374151; font-size: 14px;">مشاهده تاریخچه رزروها</span>
+          </div>
+          <div style="margin-bottom: 12px; display: flex; align-items: start; gap: 12px;">
+            <span style="color: #10b981; font-size: 20px; flex-shrink: 0;">✓</span>
+            <span style="color: #374151; font-size: 14px;">مدیریت و لغو رزروها</span>
+          </div>
+          <div style="display: flex; align-items: start; gap: 12px;">
+            <span style="color: #10b981; font-size: 20px; flex-shrink: 0;">✓</span>
+            <span style="color: #374151; font-size: 14px;">رزرو سریع‌تر در دفعات بعد</span>
+          </div>
+        </div>
+
+        <!-- Buttons -->
+        <div style="display: flex; gap: 12px; flex-direction: column;">
+          <button id="create-account-btn" style="
+            background: linear-gradient(135deg, #10b981 0%, #0ea5e9 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            padding: 14px 24px;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+          " onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 20px rgba(16, 185, 129, 0.4)'"
+             onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 12px rgba(16, 185, 129, 0.3)'">
+            ساخت حساب کاربری
+          </button>
+
+          <button id="close-suggestion-btn" style="
+            background: transparent;
+            color: #6b7280;
+            border: 2px solid #e5e7eb;
+            border-radius: 12px;
+            padding: 12px 24px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+          " onmouseover="this.style.borderColor='#d1d5db'; this.style.color='#4b5563'"
+             onmouseout="this.style.borderColor='#e5e7eb'; this.style.color='#6b7280'">
+            الان نه، ممنون
+          </button>
+        </div>
+      </div>
+
+      <style>
+        @keyframes fadeIn {
+          from { opacity: 0; }
+          to { opacity: 1; }
+        }
+        @keyframes slideUp {
+          from {
+            opacity: 0;
+            transform: translateY(30px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+      </style>
+    `;
+
+    // Append to body
+    document.body.appendChild(modal);
+
+    // Button handlers
+    const createAccountBtn = document.getElementById('create-account-btn');
+    const closeSuggestionBtn = document.getElementById('close-suggestion-btn');
+
+    createAccountBtn.addEventListener('click', () => {
+      // Redirect to register page with pre-filled data
+      const registerUrl = `/register.html?phone=${encodeURIComponent(customerPhone)}&name=${encodeURIComponent(customerName)}`;
+      window.location.href = registerUrl;
+    });
+
+    closeSuggestionBtn.addEventListener('click', () => {
+      modal.style.animation = 'fadeOut 0.3s ease';
+      setTimeout(() => {
+        modal.remove();
+      }, 300);
+    });
+
+    // Close on backdrop click
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal) {
+        closeSuggestionBtn.click();
+      }
+    });
+
+    // Add fadeOut animation
+    const style = document.createElement('style');
+    style.textContent = `
+      @keyframes fadeOut {
+        from { opacity: 1; }
+        to { opacity: 0; }
+      }
+    `;
+    document.head.appendChild(style);
   }
 
   // ===== Compose slot
@@ -2196,12 +2394,98 @@ function persistCustomer(){
     name: localStorage.getItem('vt_user_name') || decodeURIComponent(getCookie('customerName') || ''),
     phone: localStorage.getItem('vt_user_phone') || getCookie('customerPhone')
   };
+
+  // ===== AUTO-FILL FOR LOGGED-IN USERS =====
+  let isLoggedIn = false;
+  try {
+    const userToken = localStorage.getItem('token');
+    const userData = localStorage.getItem('user');
+
+    if (userToken && userData) {
+      const user = JSON.parse(userData);
+      isLoggedIn = true;
+
+      // Auto-fill name and phone from logged-in user
+      const fullName = `${user.firstname || ''} ${user.lastname || ''}`.trim();
+      const userPhone = user.phone || '';
+
+      if (fullName) {
+        nameInp.value = fullName;
+        st.name = fullName;
+        saved.name = fullName;
+      }
+
+      if (userPhone) {
+        phoneInp.value = userPhone;
+        st.phone = toEn(userPhone);
+        saved.phone = userPhone;
+      }
+
+      // Make fields readonly and style them
+      if (fullName) {
+        nameInp.setAttribute('readonly', 'readonly');
+        nameInp.style.backgroundColor = '#f9fafb';
+        nameInp.style.cursor = 'not-allowed';
+        nameInp.style.color = '#374151';
+
+        // Add badge
+        const nameLabel = nameInp.previousElementSibling;
+        if (nameLabel && nameLabel.tagName === 'LABEL' && !nameLabel.querySelector('.user-badge')) {
+          const badge = document.createElement('span');
+          badge.className = 'user-badge';
+          badge.style.cssText = 'display: inline-block; margin-right: 8px; background: linear-gradient(135deg, #10b981 0%, #0ea5e9 100%); color: white; font-size: 11px; padding: 2px 8px; border-radius: 10px; font-weight: 600;';
+          badge.textContent = 'از حساب کاربری شما';
+          nameLabel.appendChild(badge);
+        }
+
+        // Add checkmark icon
+        if (!nameInp.nextElementSibling || !nameInp.nextElementSibling.classList.contains('autofill-check')) {
+          const checkIcon = document.createElement('span');
+          checkIcon.className = 'autofill-check';
+          checkIcon.style.cssText = 'color: #10b981; font-size: 18px; margin-right: 8px; position: absolute; left: 10px; top: 50%; transform: translateY(-50%);';
+          checkIcon.innerHTML = '✓';
+          nameInp.parentNode.style.position = 'relative';
+          nameInp.parentNode.appendChild(checkIcon);
+        }
+      }
+
+      if (userPhone) {
+        phoneInp.setAttribute('readonly', 'readonly');
+        phoneInp.style.backgroundColor = '#f9fafb';
+        phoneInp.style.cursor = 'not-allowed';
+        phoneInp.style.color = '#374151';
+
+        // Add badge
+        const phoneLabel = document.querySelector('label[for="phone-number"]');
+        if (phoneLabel && !phoneLabel.querySelector('.user-badge')) {
+          const badge = document.createElement('span');
+          badge.className = 'user-badge';
+          badge.style.cssText = 'display: inline-block; margin-right: 8px; background: linear-gradient(135deg, #10b981 0%, #0ea5e9 100%); color: white; font-size: 11px; padding: 2px 8px; border-radius: 10px; font-weight: 600;';
+          badge.textContent = 'از حساب کاربری شما';
+          phoneLabel.appendChild(badge);
+        }
+
+        // Add checkmark icon to phone container
+        const phoneContainer = phoneInp.parentNode;
+        if (phoneContainer && !phoneContainer.querySelector('.autofill-check')) {
+          const checkIcon = document.createElement('span');
+          checkIcon.className = 'autofill-check';
+          checkIcon.style.cssText = 'color: #10b981; font-size: 18px; padding: 0 8px; display: flex; align-items: center;';
+          checkIcon.innerHTML = '✓';
+          phoneContainer.insertBefore(checkIcon, phoneContainer.firstChild);
+        }
+      }
+    }
+  } catch (err) {
+    console.warn('Auto-fill check failed:', err);
+  }
+
 if (saved.cid)  st.customerId = saved.cid;
-  if (saved.name) {
+  if (!isLoggedIn && saved.name) {
     nameInp.value = saved.name;
     st.name = saved.name;
   }
-  if (saved.phone) {
+  if (!isLoggedIn && saved.phone) {
     phoneInp.value = saved.phone;
     st.phone = saved.phone;
   }
