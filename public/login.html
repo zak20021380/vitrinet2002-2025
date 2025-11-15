@@ -1,9 +1,7 @@
 <!DOCTYPE html>
 <html lang="fa" dir="rtl">
 <head>
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdn.tailwindcss.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com https://cdn.jsdelivr.net data:; connect-src 'self'; img-src 'self' data:; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; upgrade-insecure-requests; block-all-mixed-content">
 <meta http-equiv="Strict-Transport-Security" content="max-age=63072000; includeSubDomains; preload">
-<meta http-equiv="X-Frame-Options" content="DENY">
 <meta http-equiv="Referrer-Policy" content="no-referrer">
 <meta http-equiv="X-Content-Type-Options" content="nosniff">
 <meta http-equiv="X-XSS-Protection" content="1; mode=block">
@@ -246,95 +244,7 @@
 
 <!-- جاوااسکریپت برای نمایش پیام خطا و ریکاوری -->
 <!-- جاوااسکریپت برای نمایش پیام خطا و ریکاوری -->
-<script>
-// --- Safe sessionStorage helper (SafeSS) ---
-// Ensures SafeSS is available even if shared utilities are not loaded
-const SafeSS = window.SafeSS || {
-  setJSON(key, value) {
-    try {
-      const str = JSON.stringify(value);
-      sessionStorage.setItem(key, str);
-      return true;
-    } catch (err) {
-      console.warn('SafeSS setJSON failed', err);
-      return false;
-    }
-  },
-  getJSON(key, fallback = null) {
-    try {
-      const raw = sessionStorage.getItem(key);
-      return raw ? JSON.parse(raw) : fallback;
-    } catch (err) {
-      console.warn('SafeSS getJSON failed', err);
-      return fallback;
-    }
-  }
-};
-if (!window.SafeSS) {
-  window.SafeSS = SafeSS;
-}
-
-document.getElementById('loginForm').addEventListener('submit', async function(e) {
-  e.preventDefault();
-  const phone = document.getElementById('mobile').value.trim();
-  const password = document.getElementById('password').value.trim();
-  const errorMsg = document.getElementById('error-message');
-  const forgotLink = document.getElementById('forgot-link');
-
-  try {
-    const res = await fetch('/api/auth/login-user', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      credentials: 'include',
-      body: JSON.stringify({ phone, password })
-    });
-
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.message || 'خطا در ورود!');
-
-    // --- ذخیره توکن در کوکی ---
-
-    // === ریدایرکت بعد از لاگین ===
-// === ریدایرکت بعد از لاگین ===
-const back = SafeSS.getJSON('afterLoginReturn'); // SafeSS اگر از صفحه گزارش آمده‌ایم
-if (back) {
-  sessionStorage.removeItem('afterLoginReturn');
-  window.location.href = back;           // ⇠ بازگشت به همان فروشگاه
-} else {
-  // رفتار قبلی: ?redirect=... یا داشبورد کاربر
-  const urlParams  = new URLSearchParams(window.location.search);
-  const redirectUrl = urlParams.get('redirect');
-  window.location.href = redirectUrl || '/user/dashboard.html';
-}
-
-
-  } catch(err) {
-    errorMsg.innerText = err.message || 'خطا در ورود!';
-    errorMsg.classList.remove('hidden');
-    forgotLink.classList.remove('hidden');
-  }
-});
-
-
-// 👁 نمایش/مخفی‌کردن رمز عبور
-document.getElementById('togglePassword').addEventListener('click', function() {
-  const passwordInput = document.getElementById('password');
-  const eyeOpen = document.getElementById('eyeOpen');
-  const eyeClosed = document.getElementById('eyeClosed');
-
-  if (passwordInput.type === 'password') {
-    passwordInput.type = 'text';
-    eyeOpen.classList.add('hidden');
-    eyeClosed.classList.remove('hidden');
-  } else {
-    passwordInput.type = 'password';
-    eyeOpen.classList.remove('hidden');
-    eyeClosed.classList.add('hidden');
-  }
-});
-</script>
+<script src="/assets/js/user-login.js"></script>
 
 
 
