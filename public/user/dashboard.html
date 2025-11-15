@@ -63,6 +63,276 @@
         transition: transform .25s cubic-bezier(.8,.2,.3,1.2);
       }
       .mobile-sidebar.open { transform:translateX(0);}
+
+      /* Modern Booking Modal Styles */
+      .booking-modal-backdrop {
+        position: fixed;
+        inset: 0;
+        z-index: 9999;
+        background: rgba(0, 0, 0, 0.6);
+        backdrop-filter: blur(8px);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 16px;
+        animation: modalBackdropFadeIn 0.3s ease-out;
+      }
+
+      @keyframes modalBackdropFadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+      }
+
+      @keyframes modalBackdropFadeOut {
+        from { opacity: 1; }
+        to { opacity: 0; }
+      }
+
+      .booking-modal-container {
+        position: relative;
+        z-index: 10000;
+        background: white;
+        border-radius: 24px;
+        width: 100%;
+        max-width: 600px;
+        max-height: calc(100vh - 32px);
+        overflow: hidden;
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+        display: flex;
+        flex-col;
+      }
+
+      /* Desktop animation */
+      @media (min-width: 768px) {
+        .booking-modal-container {
+          animation: modalSlideInDesktop 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        @keyframes modalSlideInDesktop {
+          from {
+            opacity: 0;
+            transform: scale(0.95) translateY(-10px);
+          }
+          to {
+            opacity: 1;
+            transform: scale(1) translateY(0);
+          }
+        }
+      }
+
+      /* Mobile animation - slide up */
+      @media (max-width: 767px) {
+        .booking-modal-backdrop {
+          padding: 0;
+          align-items: flex-end;
+        }
+
+        .booking-modal-container {
+          max-height: calc(100vh - 20px);
+          border-radius: 24px 24px 0 0;
+          animation: modalSlideInMobile 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        @keyframes modalSlideInMobile {
+          from {
+            opacity: 0;
+            transform: translateY(100%);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+      }
+
+      .booking-modal-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        padding: 20px 24px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        border-radius: 24px 24px 0 0;
+        position: relative;
+        overflow: hidden;
+      }
+
+      .booking-modal-header::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 100%);
+        pointer-events: none;
+      }
+
+      .booking-modal-body {
+        overflow-y: auto;
+        padding: 24px;
+        flex: 1;
+        scrollbar-width: thin;
+        scrollbar-color: #cbd5e0 #f7fafc;
+      }
+
+      .booking-modal-body::-webkit-scrollbar {
+        width: 6px;
+      }
+
+      .booking-modal-body::-webkit-scrollbar-track {
+        background: #f7fafc;
+      }
+
+      .booking-modal-body::-webkit-scrollbar-thumb {
+        background: #cbd5e0;
+        border-radius: 3px;
+      }
+
+      .booking-modal-body::-webkit-scrollbar-thumb:hover {
+        background: #a0aec0;
+      }
+
+      .booking-info-card {
+        padding: 16px;
+        border-radius: 16px;
+        margin-bottom: 16px;
+        border-width: 1px;
+        transition: all 0.2s ease;
+        position: relative;
+        overflow: hidden;
+      }
+
+      .booking-info-card::before {
+        content: '';
+        position: absolute;
+        right: 0;
+        top: 0;
+        bottom: 0;
+        width: 4px;
+        transition: width 0.2s ease;
+      }
+
+      .booking-info-card:hover::before {
+        width: 6px;
+      }
+
+      .booking-info-card.card-blue {
+        background: linear-gradient(135deg, #ebf8ff 0%, #e6f7ff 100%);
+        border-color: #90cdf4;
+      }
+
+      .booking-info-card.card-blue::before {
+        background: linear-gradient(180deg, #3182ce 0%, #2c5282 100%);
+      }
+
+      .booking-info-card.card-purple {
+        background: linear-gradient(135deg, #faf5ff 0%, #f3e8ff 100%);
+        border-color: #d6bcfa;
+      }
+
+      .booking-info-card.card-purple::before {
+        background: linear-gradient(180deg, #805ad5 0%, #6b46c1 100%);
+      }
+
+      .booking-info-card.card-green {
+        background: linear-gradient(135deg, #f0fff4 0%, #e6fffa 100%);
+        border-color: #9ae6b4;
+      }
+
+      .booking-info-card.card-green::before {
+        background: linear-gradient(180deg, #38a169 0%, #2f855a 100%);
+      }
+
+      .booking-info-card.card-gray {
+        background: linear-gradient(135deg, #f7fafc 0%, #edf2f7 100%);
+        border-color: #cbd5e0;
+      }
+
+      .booking-info-card.card-gray::before {
+        background: linear-gradient(180deg, #718096 0%, #4a5568 100%);
+      }
+
+      .booking-info-card.card-indigo {
+        background: linear-gradient(135deg, #ebf4ff 0%, #e0e7ff 100%);
+        border-color: #a3bffa;
+      }
+
+      .booking-info-card.card-indigo::before {
+        background: linear-gradient(180deg, #5a67d8 0%, #4c51bf 100%);
+      }
+
+      .booking-info-card.card-yellow {
+        background: linear-gradient(135deg, #fffff0 0%, #fefcbf 100%);
+        border-color: #fbd38d;
+      }
+
+      .booking-info-card.card-yellow::before {
+        background: linear-gradient(180deg, #d69e2e 0%, #b7791f 100%);
+      }
+
+      .booking-modal-footer {
+        padding: 20px 24px;
+        background: linear-gradient(180deg, #ffffff 0%, #f7fafc 100%);
+        border-top: 1px solid #e2e8f0;
+        display: flex;
+        justify-content: flex-end;
+        gap: 12px;
+        border-radius: 0 0 24px 24px;
+      }
+
+      .modal-close-btn {
+        min-height: 44px;
+        padding: 12px 24px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border: none;
+        border-radius: 12px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+        font-family: 'Vazirmatn', sans-serif;
+      }
+
+      .modal-close-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 16px rgba(102, 126, 234, 0.4);
+      }
+
+      .modal-close-btn:active {
+        transform: translateY(0);
+      }
+
+      .modal-header-close-btn {
+        background: rgba(255, 255, 255, 0.2);
+        border: none;
+        border-radius: 50%;
+        width: 36px;
+        height: 36px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        color: white;
+        flex-shrink: 0;
+      }
+
+      .modal-header-close-btn:hover {
+        background: rgba(255, 255, 255, 0.3);
+        transform: rotate(90deg);
+      }
+
+      @media (max-width: 767px) {
+        .booking-modal-body {
+          padding: 20px 16px;
+          max-height: calc(100vh - 180px);
+        }
+
+        .booking-modal-footer {
+          padding: 16px;
+        }
+      }
     </style>
     <script src="/nav-active.js" defer></script>
 
@@ -817,119 +1087,136 @@
         // Remove any existing modal
         document.getElementById('bookingDetailsModal')?.remove();
 
-        // Create and insert modal
+        // Create and insert modal with modern design
         document.body.insertAdjacentHTML('beforeend', `
-          <div id="bookingDetailsModal" class="fixed inset-0 z-50 flex items-center justify-center p-4" style="backdrop-filter:blur(6px);background:rgba(0,0,0,0.5);animation:fadein .3s">
-            <div class="bg-white rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-2xl border border-gray-200 transform transition-all">
+          <div id="bookingDetailsModal" class="booking-modal-backdrop">
+            <div class="booking-modal-container">
 
-              <!-- Header -->
-              <div class="sticky top-0 bg-gradient-to-r from-blue-500 to-blue-600 px-6 py-4 flex justify-between items-center rounded-t-2xl">
-                <h2 class="text-xl font-bold text-white">جزئیات رزرو</h2>
-                <button class="close-booking-modal text-white hover:bg-white/20 rounded-full p-2 transition-all duration-200">
-                  <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+              <!-- Modern Gradient Header -->
+              <div class="booking-modal-header">
+                <h2 class="text-2xl font-bold text-white" style="position: relative; z-index: 1;">✨ جزئیات رزرو</h2>
+                <button class="close-booking-modal modal-header-close-btn" aria-label="بستن">
+                  <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"/>
                   </svg>
                 </button>
               </div>
 
-              <!-- Content -->
-              <div class="p-6 space-y-5">
+              <!-- Scrollable Body -->
+              <div class="booking-modal-body">
 
-                <!-- Booking ID Section -->
-                <div class="bg-gray-50 rounded-lg p-4 border border-gray-200">
-                  <div class="flex items-center gap-2 mb-2">
-                    <span class="text-2xl">🆔</span>
-                    <h3 class="font-bold text-gray-700">شناسه رزرو</h3>
+                <!-- Booking ID Card -->
+                <div class="booking-info-card card-gray">
+                  <div class="flex items-center gap-3 mb-3">
+                    <div class="w-10 h-10 rounded-full bg-gradient-to-br from-gray-400 to-gray-600 flex items-center justify-center text-white text-xl font-bold">
+                      🆔
+                    </div>
+                    <h3 class="text-lg font-bold text-gray-800">شناسه رزرو</h3>
                   </div>
-                  <p class="text-gray-600 font-mono text-sm mr-9">${escapeHtml(booking._id)}</p>
+                  <p class="text-gray-700 font-mono text-sm mr-14 bg-white/50 px-3 py-2 rounded-lg break-all">${escapeHtml(booking._id)}</p>
                 </div>
 
-                <!-- Service Info Section -->
-                <div class="bg-blue-50 rounded-lg p-4 border border-blue-200">
-                  <div class="flex items-center gap-2 mb-2">
-                    <span class="text-2xl">🛎️</span>
-                    <h3 class="font-bold text-blue-700">خدمت</h3>
+                <!-- Service Info Card -->
+                <div class="booking-info-card card-blue">
+                  <div class="flex items-center gap-3 mb-3">
+                    <div class="w-10 h-10 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center text-white text-xl font-bold">
+                      🛎️
+                    </div>
+                    <h3 class="text-lg font-bold text-blue-800">خدمت درخواستی</h3>
                   </div>
-                  <p class="text-gray-700 text-lg mr-9 font-medium">${escapeHtml(booking.service)}</p>
+                  <p class="text-gray-800 text-lg mr-14 font-semibold">${escapeHtml(booking.service)}</p>
                 </div>
 
-                <!-- Seller Info Section -->
-                <div class="bg-purple-50 rounded-lg p-4 border border-purple-200">
-                  <div class="flex items-center gap-2 mb-2">
-                    <span class="text-2xl">📍</span>
-                    <h3 class="font-bold text-purple-700">فروشگاه</h3>
+                <!-- Seller Info Card -->
+                <div class="booking-info-card card-purple">
+                  <div class="flex items-center gap-3 mb-3">
+                    <div class="w-10 h-10 rounded-full bg-gradient-to-br from-purple-400 to-purple-600 flex items-center justify-center text-white text-xl font-bold">
+                      🏪
+                    </div>
+                    <h3 class="text-lg font-bold text-purple-800">فروشگاه</h3>
                   </div>
-                  <p class="text-gray-700 mr-9">
+                  <p class="text-gray-800 mr-14 text-base">
                     ${booking.sellerUrl ?
                       `<a href="/shop.html?shopurl=${encodeURIComponent(booking.sellerUrl)}"
-                         class="text-blue-600 hover:text-blue-800 hover:underline transition-all duration-200 font-medium"
+                         class="inline-flex items-center gap-2 text-blue-600 hover:text-blue-800 font-semibold transition-all duration-200 hover:gap-3"
                          target="_blank">
-                        ${escapeHtml(booking.sellerName || 'فروشگاه')} ↗
+                        <span>${escapeHtml(booking.sellerName || 'فروشگاه')}</span>
+                        <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
+                        </svg>
                       </a>` :
-                      `<span class="font-medium">${escapeHtml(booking.sellerName || 'فروشگاه')}</span>`
+                      `<span class="font-semibold">${escapeHtml(booking.sellerName || 'فروشگاه')}</span>`
                     }
                   </p>
                 </div>
 
-                <!-- Date & Time Section -->
-                <div class="bg-green-50 rounded-lg p-4 border border-green-200">
-                  <div class="flex items-center gap-2 mb-3">
-                    <span class="text-2xl">📅</span>
-                    <h3 class="font-bold text-green-700">زمان رزرو</h3>
+                <!-- Date & Time Card -->
+                <div class="booking-info-card card-green">
+                  <div class="flex items-center gap-3 mb-3">
+                    <div class="w-10 h-10 rounded-full bg-gradient-to-br from-green-400 to-green-600 flex items-center justify-center text-white text-xl font-bold">
+                      📅
+                    </div>
+                    <h3 class="text-lg font-bold text-green-800">زمان رزرو</h3>
                   </div>
-                  <div class="mr-9 space-y-2">
-                    <p class="text-gray-700">
-                      <span class="font-semibold">تاریخ:</span>
-                      <span class="mr-2">${escapeHtml(booking.bookingDate)}</span>
-                    </p>
-                    <p class="text-gray-700">
-                      <span class="font-semibold">ساعت:</span>
-                      <span class="mr-2">${escapeHtml(booking.startTime)}</span>
-                    </p>
+                  <div class="mr-14 space-y-3">
+                    <div class="flex items-center gap-3 bg-white/50 px-3 py-2 rounded-lg">
+                      <span class="text-green-600 font-bold text-sm">تاریخ:</span>
+                      <span class="text-gray-800 font-semibold">${escapeHtml(booking.bookingDate)}</span>
+                    </div>
+                    <div class="flex items-center gap-3 bg-white/50 px-3 py-2 rounded-lg">
+                      <span class="text-green-600 font-bold text-sm">ساعت:</span>
+                      <span class="text-gray-800 font-semibold">${escapeHtml(booking.startTime)}</span>
+                    </div>
                   </div>
                 </div>
 
-                <!-- Status Section -->
-                <div class="bg-yellow-50 rounded-lg p-4 border border-yellow-200">
-                  <div class="flex items-center gap-2 mb-2">
-                    <span class="text-2xl">📊</span>
-                    <h3 class="font-bold text-yellow-700">وضعیت</h3>
+                <!-- Status Card -->
+                <div class="booking-info-card card-yellow">
+                  <div class="flex items-center gap-3 mb-3">
+                    <div class="w-10 h-10 rounded-full bg-gradient-to-br from-yellow-400 to-yellow-600 flex items-center justify-center text-white text-xl font-bold">
+                      📊
+                    </div>
+                    <h3 class="text-lg font-bold text-yellow-800">وضعیت رزرو</h3>
                   </div>
-                  <div class="mr-9">
-                    <span class="inline-block px-4 py-2 rounded-full text-sm font-bold ${getStatusBadgeClass(booking.status)}">
+                  <div class="mr-14">
+                    <span class="inline-block px-5 py-2.5 rounded-xl text-base font-bold ${getStatusBadgeClass(booking.status)} shadow-sm">
                       ${getStatusLabel(booking.status)}
                     </span>
                   </div>
                 </div>
 
-                <!-- Created Date Section -->
-                <div class="bg-gray-50 rounded-lg p-4 border border-gray-200">
-                  <div class="flex items-center gap-2 mb-2">
-                    <span class="text-2xl">🕐</span>
-                    <h3 class="font-bold text-gray-700">تاریخ ثبت رزرو</h3>
+                <!-- Created Date Card -->
+                <div class="booking-info-card card-gray">
+                  <div class="flex items-center gap-3 mb-3">
+                    <div class="w-10 h-10 rounded-full bg-gradient-to-br from-gray-400 to-gray-600 flex items-center justify-center text-white text-xl font-bold">
+                      🕐
+                    </div>
+                    <h3 class="text-lg font-bold text-gray-800">تاریخ ثبت</h3>
                   </div>
-                  <p class="text-gray-600 mr-9">${escapeHtml(createdDate)}</p>
+                  <p class="text-gray-700 mr-14 bg-white/50 px-3 py-2 rounded-lg">${escapeHtml(createdDate)}</p>
                 </div>
 
                 ${booking.customerName || booking.customerPhone ? `
-                  <!-- Customer Info Section -->
-                  <div class="bg-indigo-50 rounded-lg p-4 border border-indigo-200">
-                    <div class="flex items-center gap-2 mb-3">
-                      <span class="text-2xl">👤</span>
-                      <h3 class="font-bold text-indigo-700">اطلاعات مشتری</h3>
+                  <!-- Customer Info Card -->
+                  <div class="booking-info-card card-indigo">
+                    <div class="flex items-center gap-3 mb-3">
+                      <div class="w-10 h-10 rounded-full bg-gradient-to-br from-indigo-400 to-indigo-600 flex items-center justify-center text-white text-xl font-bold">
+                        👤
+                      </div>
+                      <h3 class="text-lg font-bold text-indigo-800">اطلاعات مشتری</h3>
                     </div>
-                    <div class="mr-9 space-y-2">
+                    <div class="mr-14 space-y-3">
                       ${booking.customerName ? `
-                        <p class="text-gray-700">
-                          <span class="font-semibold">نام:</span>
-                          <span class="mr-2">${escapeHtml(booking.customerName)}</span>
-                        </p>
+                        <div class="flex items-center gap-3 bg-white/50 px-3 py-2 rounded-lg">
+                          <span class="text-indigo-600 font-bold text-sm">نام:</span>
+                          <span class="text-gray-800 font-semibold">${escapeHtml(booking.customerName)}</span>
+                        </div>
                       ` : ''}
                       ${booking.customerPhone ? `
-                        <p class="text-gray-700">
-                          <span class="font-semibold">تلفن:</span>
-                          <span class="mr-2 font-mono">${escapeHtml(booking.customerPhone)}</span>
-                        </p>
+                        <div class="flex items-center gap-3 bg-white/50 px-3 py-2 rounded-lg">
+                          <span class="text-indigo-600 font-bold text-sm">تلفن:</span>
+                          <span class="text-gray-800 font-mono font-semibold" dir="ltr">${escapeHtml(booking.customerPhone)}</span>
+                        </div>
                       ` : ''}
                     </div>
                   </div>
@@ -937,10 +1224,9 @@
 
               </div>
 
-              <!-- Footer -->
-              <div class="sticky bottom-0 bg-gray-50 px-6 py-4 border-t border-gray-200 rounded-b-2xl flex justify-end">
-                <button
-                  class="close-booking-modal px-6 py-2.5 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-all duration-200 font-medium shadow-sm hover:shadow-md">
+              <!-- Modern Footer -->
+              <div class="booking-modal-footer">
+                <button class="close-booking-modal modal-close-btn" aria-label="بستن">
                   بستن
                 </button>
               </div>
@@ -954,7 +1240,7 @@
           btn.addEventListener('click', closeBookingDetails);
         });
 
-        // Also close when clicking the backdrop
+        // Close when clicking the backdrop
         const modal = document.getElementById('bookingDetailsModal');
         if (modal) {
           modal.addEventListener('click', (e) => {
@@ -963,11 +1249,37 @@
             }
           });
         }
+
+        // Close on Escape key press (accessibility)
+        const handleEscapeKey = (e) => {
+          if (e.key === 'Escape') {
+            closeBookingDetails();
+          }
+        };
+        document.addEventListener('keydown', handleEscapeKey);
+
+        // Store the escape handler reference for cleanup
+        if (modal) {
+          modal._escapeHandler = handleEscapeKey;
+        }
       }
 
       // Close booking details modal
       function closeBookingDetails() {
-        document.getElementById('bookingDetailsModal')?.remove();
+        const modal = document.getElementById('bookingDetailsModal');
+
+        // Remove escape key listener if it exists
+        if (modal && modal._escapeHandler) {
+          document.removeEventListener('keydown', modal._escapeHandler);
+        }
+
+        // Add fade-out animation before removing
+        if (modal) {
+          modal.style.animation = 'modalBackdropFadeOut 0.2s ease-out';
+          setTimeout(() => {
+            modal.remove();
+          }, 200);
+        }
       }
 
       // Helper to escape HTML
