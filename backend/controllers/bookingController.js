@@ -124,7 +124,7 @@ exports.createBooking = async (req, res) => {
 
     let booking;
     try {
-      booking = await Booking.create({
+      const bookingData = {
         sellerId: sid,
         serviceId: serviceId || undefined,
         service: serviceTitle,
@@ -132,7 +132,22 @@ exports.createBooking = async (req, res) => {
         customerPhone,
         bookingDate: date,
         startTime: time
-      });
+      };
+
+      // If user is authenticated, link booking to user
+      if (req.user) {
+        bookingData.userId = req.user.id;
+      }
+
+      booking = await Booking.create(bookingData);
+
+      // If user is authenticated, update user's bookings array and userType
+      if (req.user) {
+        await User.findByIdAndUpdate(req.user.id, {
+          $addToSet: { bookings: booking._id },
+          $set: { userType: 'both' }
+        });
+      }
     } catch (err) {
       console.error('Booking.create error:', {
         sellerId: sid,
