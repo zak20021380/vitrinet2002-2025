@@ -157,7 +157,7 @@ router.get('/bookings', protect, async (req, res) => {
     const bookings = await Booking.find({
       userId: req.user.id
     })
-      .populate('sellerId', 'shopName shopUrl')
+      .populate('sellerId', '_id shopName shopUrl')
       .sort({ bookingDate: -1, startTime: -1 });
 
     // Format for frontend
@@ -166,6 +166,7 @@ router.get('/bookings', protect, async (req, res) => {
       service: b.service,
       sellerName: b.sellerId?.shopName || 'فروشگاه',
       sellerUrl: b.sellerId?.shopUrl,
+      sellerId: b.sellerId?._id?.toString() || undefined,
       bookingDate: b.bookingDate,
       startTime: b.startTime,
       status: b.status,
