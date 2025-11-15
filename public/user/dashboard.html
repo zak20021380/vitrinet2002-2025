@@ -34,6 +34,34 @@
       .menu-btn.active { background: #e6fcf7; color: #10b981; }
       .filter-btn { transition: all .2s ease; }
       .filter-btn.active { background-color: #3b82f6; color: #fff; border-color: transparent; }
+      .quick-action {
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 1.25rem;
+        min-height: 96px;
+        padding: 1.1rem;
+        text-align: center;
+        color: #1f2937;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 0.45rem;
+        font-weight: 700;
+        text-decoration: none;
+        transition: transform .18s ease, box-shadow .18s ease, background .18s ease;
+        cursor: pointer;
+      }
+      .quick-action:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 12px 24px #0ea5e91a;
+        background: #f1f5f9;
+      }
+      .quick-action:focus-visible {
+        outline: 2px solid #0ea5e9;
+        outline-offset: 3px;
+      }
+      .quick-action span { line-height: 1.35; }
       /* همبرگر */
       .ham {
         width: 2.3rem; height: 2.3rem; display: flex; align-items: center; justify-content: center;
@@ -1012,6 +1040,42 @@
       <div class="text-gray-500 text-sm md:text-base">امیدواریم تجربه‌ی خوبی داشته باشید.</div>
     </div>
   </div>
+  <div class="glass p-5 md:p-6 fadein">
+    <div class="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-3 md:gap-4">
+      <a href="/all-products.html" class="quick-action">
+        <span class="text-2xl md:text-3xl">🛍️</span>
+        <span class="text-sm md:text-base">مشاهده محصولات</span>
+      </a>
+      <a href="/all-shops.html" class="quick-action">
+        <span class="text-2xl md:text-3xl">🏪</span>
+        <span class="text-sm md:text-base">مشاهده فروشگاه‌ها</span>
+      </a>
+      <a href="/service-directory.html" class="quick-action">
+        <span class="text-2xl md:text-3xl">💇</span>
+        <span class="text-sm md:text-base">رزرو خدمات</span>
+      </a>
+      <button type="button" class="quick-action" data-section="bookings">
+        <span class="text-2xl md:text-3xl">📅</span>
+        <span class="text-sm md:text-base">رزروهای من</span>
+      </button>
+      <button type="button" class="quick-action" data-section="favorites">
+        <span class="text-2xl md:text-3xl">❤️</span>
+        <span class="text-sm md:text-base">علاقه‌مندی‌ها</span>
+      </button>
+      <button type="button" class="quick-action" data-section="messages">
+        <span class="text-2xl md:text-3xl">💬</span>
+        <span class="text-sm md:text-base">پیام‌ها</span>
+      </button>
+      <a href="/search.html" class="quick-action">
+        <span class="text-2xl md:text-3xl">🔍</span>
+        <span class="text-sm md:text-base">جستجو</span>
+      </a>
+      <button type="button" class="quick-action" data-section="profile">
+        <span class="text-2xl md:text-3xl">⚙️</span>
+        <span class="text-sm md:text-base">تنظیمات</span>
+      </button>
+    </div>
+  </div>
   <div class="grid grid-cols-1 md:grid-cols-2 gap-5 fadein">
     <div id="favBoxClick" class="glass p-6 flex flex-col items-center text-center min-h-[135px] justify-center cursor-pointer hover:shadow-lg transition">
       <div class="text-[#0ea5e9] font-bold text-base mb-1">علاقه‌مندی‌های ثبت‌شده</div>
@@ -1027,6 +1091,18 @@
 
 
 
+
+  function setupQuickActions() {
+    document.querySelectorAll('.quick-action[data-section]').forEach(action => {
+      action.addEventListener('click', (event) => {
+        event.preventDefault();
+        const target = action.getAttribute('data-section');
+        if (target) {
+          showSection(target);
+        }
+      });
+    });
+  }
 
   async function renderRecentFavorites() {
     const container = document.getElementById('recentFavsContainer');
@@ -1095,6 +1171,7 @@
     // محتوا
     if(section === 'dashboard') {
       mainContent.innerHTML = dashboardSection;
+      setupQuickActions();
       renderRecentFavorites(); // اینجا رندر داینامیک رو صدا بزن
       updateDashboardFavCount(); // اینم اضافه کن تا تعداد علاقه‌مندی درست بشه
     }
