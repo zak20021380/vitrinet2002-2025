@@ -73,6 +73,43 @@ async function linkBookingsToUsers() {
   console.log(`   ✅ Linked ${stats.bookingsMatched} bookings\n`);
 }
 
+async function updateUserTypes() {
+  console.log('👤 Step 2: Updating user types...');
+
+  const users = await User.find({});
+  console.log(`   Found ${users.length} users to analyze\n`);
+
+  for (const user of users) {
+    try {
+      const hasFavorites = user.favorites && user.favorites.length > 0;
+      const favoriteShopsCount = await FavoriteShop.countDocuments({ user: user._id });
+      const bookingsCount = user.bookings ? user.bookings.length : 0;
+
+      let newUserType = 'both';
+
+      if ((hasFavorites || favoriteShopsCount > 0) && bookingsCount > 0) {
+        newUserType = 'both';
+      } else if (hasFavorites || favoriteShopsCount > 0) {
+        newUserType = 'product';
+      } else if (bookingsCount > 0) {
+        newUserType = 'service';
+      }
+
+      if (user.userType !== newUserType) {
+        if (!isDryRun) {
+          user.userType = newUserType;
+          await user.save();
+        }
+        stats.userTypesUpdated++;
+      }
+    } catch (error) {
+      stats.errors.push(`User ${user._id}: ${error.message}`);
+    }
+  }
+
+  console.log(`   ✅ Updated ${stats.userTypesUpdated} user types\n`);
+}
+
 async function migrateUserProfiles() {
   try {
     console.log('🚀 Starting user profile migration...');
@@ -81,10 +118,11 @@ async function migrateUserProfiles() {
     // Connect to MongoDB
     await mongoose.connect(process.env.MONGO_URI);
     console.log('✅ Connected to database\n');
-    
+
     // Migration steps will go here
     await linkBookingsToUsers();
-    
+    await updateUserTypes();
+
     console.log('\n📊 MIGRATION SUMMARY:');
     console.log(`   Bookings matched: ${stats.bookingsMatched}`);
     console.log(`   Users created: ${stats.usersCreated}`);
