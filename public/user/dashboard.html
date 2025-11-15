@@ -63,6 +63,551 @@
         transition: transform .25s cubic-bezier(.8,.2,.3,1.2);
       }
       .mobile-sidebar.open { transform:translateX(0);}
+
+      /* --- Booking details modal redesign --- */
+      body.booking-modal-open { overflow: hidden; }
+
+      .mobile-bottom-nav,
+      .bottom-nav { z-index: 1000; }
+
+      .booking-modal-backdrop {
+        position: fixed;
+        inset: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 1.5rem;
+        background: rgba(15, 23, 42, 0.62);
+        backdrop-filter: blur(18px);
+        -webkit-backdrop-filter: blur(18px);
+        z-index: 9999;
+        animation: booking-modal-backdrop-fade-in 0.2s ease-out forwards;
+      }
+
+      .booking-modal-backdrop.is-mobile {
+        align-items: flex-end;
+        padding: 0;
+      }
+
+      .booking-modal-backdrop.closing {
+        animation: booking-modal-backdrop-fade-out 0.2s ease-in forwards;
+      }
+
+      .booking-modal-content {
+        position: relative;
+        width: min(100%, 600px);
+        max-height: calc(100vh - 120px);
+        background: linear-gradient(135deg, #f8fafc 0%, #ffffff 80%);
+        border-radius: 28px;
+        box-shadow: 0 22px 70px rgba(15, 23, 42, 0.25), 0 10px 28px rgba(14, 165, 233, 0.12);
+        border: 1px solid rgba(226, 232, 240, 0.8);
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+        transform-origin: center;
+        animation: booking-modal-scale-in 0.28s cubic-bezier(0.25, 0.9, 0.35, 1) forwards;
+      }
+
+      .booking-modal-content:focus {
+        outline: none;
+      }
+
+      .booking-modal-content.closing {
+        animation: booking-modal-scale-out 0.24s cubic-bezier(0.35, 0, 0.8, 0.4) forwards;
+      }
+
+      .booking-modal-header {
+        background: linear-gradient(135deg, #2563eb 0%, #7c3aed 48%, #0ea5e9 100%);
+        padding: 1.8rem 2rem 1.6rem;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+        color: #fff;
+      }
+
+      .booking-modal-header .header-info {
+        display: flex;
+        align-items: center;
+        gap: 1.1rem;
+      }
+
+      .booking-modal-header .header-icon {
+        width: 3.25rem;
+        height: 3.25rem;
+        border-radius: 1.2rem;
+        background: rgba(255, 255, 255, 0.18);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.8rem;
+        box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.22);
+      }
+
+      .booking-modal-title {
+        font-size: 1.5rem;
+        font-weight: 800;
+        margin-bottom: 0.25rem;
+      }
+
+      .booking-modal-subtitle {
+        font-size: 0.95rem;
+        opacity: 0.85;
+      }
+
+      .booking-modal-header button {
+        width: 2.75rem;
+        height: 2.75rem;
+        border-radius: 9999px;
+        background: rgba(255, 255, 255, 0.16);
+        color: #fff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: transform 0.2s ease, background 0.2s ease;
+        min-height: 44px;
+      }
+
+      .booking-modal-header button:hover {
+        transform: scale(1.04);
+        background: rgba(255, 255, 255, 0.28);
+      }
+
+      .booking-modal-header button:focus-visible,
+      .booking-modal-footer button:focus-visible,
+      .booking-modal-body button:focus-visible,
+      .booking-modal-body a:focus-visible {
+        outline: 3px solid rgba(14, 165, 233, 0.4);
+        outline-offset: 3px;
+      }
+
+      .booking-modal-body {
+        padding: 1.9rem 2rem 2.4rem;
+        overflow-y: auto;
+        display: flex;
+        flex-direction: column;
+        gap: 1.2rem;
+        scroll-behavior: smooth;
+        max-height: calc(100vh - 228px);
+      }
+
+      .booking-modal-body::-webkit-scrollbar {
+        width: 7px;
+      }
+
+      .booking-modal-body::-webkit-scrollbar-track {
+        background: transparent;
+      }
+
+      .booking-modal-body::-webkit-scrollbar-thumb {
+        background: rgba(148, 163, 184, 0.45);
+        border-radius: 9999px;
+      }
+
+      .booking-modal-body:hover::-webkit-scrollbar-thumb {
+        background: rgba(79, 70, 229, 0.55);
+      }
+
+      .modal-section {
+        position: relative;
+        background: rgba(255, 255, 255, 0.92);
+        border-radius: 22px;
+        padding: 1.4rem 1.4rem 1.35rem 1.25rem;
+        border: 1px solid rgba(226, 232, 240, 0.9);
+        box-shadow: 0 16px 32px rgba(15, 23, 42, 0.05);
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+      }
+
+      .modal-section::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        right: 0;
+        width: 8px;
+        height: 100%;
+        border-radius: 0 22px 22px 0;
+        background: linear-gradient(180deg, #38bdf8, #0ea5e9);
+        opacity: 0.8;
+      }
+
+      .modal-section:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 28px 44px rgba(15, 23, 42, 0.08);
+      }
+
+      .modal-section-header {
+        display: flex;
+        align-items: center;
+        gap: 0.85rem;
+        margin-bottom: 0.85rem;
+      }
+
+      .modal-section-icon {
+        width: 2.75rem;
+        height: 2.75rem;
+        border-radius: 1.1rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.4rem;
+        background: linear-gradient(145deg, rgba(14, 165, 233, 0.18), rgba(79, 70, 229, 0.18));
+        color: #1e293b;
+      }
+
+      .modal-section h3 {
+        font-size: 1.05rem;
+        font-weight: 800;
+        color: #1f2937;
+        margin-bottom: 0.2rem;
+      }
+
+      .modal-section p {
+        color: #475569;
+        line-height: 1.65;
+      }
+
+      .modal-field {
+        display: flex;
+        flex-direction: column;
+        gap: 0.3rem;
+        margin-bottom: 0.65rem;
+      }
+
+      .modal-field:last-child {
+        margin-bottom: 0;
+      }
+
+      .modal-field-label {
+        font-weight: 700;
+        color: #1e293b;
+        font-size: 0.95rem;
+      }
+
+      .modal-field-value {
+        font-size: 0.97rem;
+        color: #334155;
+        word-break: break-word;
+      }
+
+      .modal-field-value strong {
+        font-weight: 800;
+        color: #0f172a;
+      }
+
+      .booking-id-wrap {
+        display: flex;
+        align-items: center;
+        gap: 0.8rem;
+        flex-wrap: wrap;
+      }
+
+      .booking-id-value {
+        font-family: 'Poppins', 'Vazirmatn', sans-serif;
+        font-weight: 700;
+        background: #0ea5e90d;
+        border: 1px dashed rgba(14, 165, 233, 0.4);
+        color: #0f172a;
+        border-radius: 14px;
+        padding: 0.55rem 1.1rem;
+        font-size: 0.95rem;
+        letter-spacing: 0.03em;
+        direction: ltr;
+      }
+
+      .booking-id-copy {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        min-height: 44px;
+        padding: 0.55rem 1.1rem;
+        border-radius: 14px;
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.16), rgba(59, 130, 246, 0.28));
+        color: #1d4ed8;
+        font-weight: 700;
+        border: 1px solid rgba(59, 130, 246, 0.35);
+        transition: transform 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
+      }
+
+      .booking-id-copy:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 12px 22px rgba(59, 130, 246, 0.18);
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.28), rgba(14, 165, 233, 0.32));
+      }
+
+      .booking-id-copy svg {
+        width: 1.1rem;
+        height: 1.1rem;
+      }
+
+      .copy-feedback {
+        font-size: 0.78rem;
+        color: #0ea5e9;
+        opacity: 0;
+        transform: translateY(4px);
+        transition: opacity 0.2s ease, transform 0.2s ease;
+      }
+
+      .copy-feedback.visible {
+        opacity: 1;
+        transform: translateY(0);
+      }
+
+      .modal-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        color: #2563eb;
+        font-weight: 700;
+        text-decoration: none;
+        transition: color 0.2s ease, transform 0.2s ease;
+      }
+
+      .modal-link:hover {
+        color: #0f172a;
+        transform: translateY(-1px);
+      }
+
+      .modal-link svg {
+        width: 0.95rem;
+        height: 0.95rem;
+      }
+
+      .modal-status-badge {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 40px;
+        padding: 0.4rem 1.1rem;
+        border-radius: 9999px;
+        font-size: 0.95rem;
+        font-weight: 800;
+        letter-spacing: 0.01em;
+      }
+
+      .booking-modal-footer {
+        position: sticky;
+        bottom: 0;
+        padding: 1.4rem 2rem 1.8rem;
+        background: linear-gradient(0deg, rgba(248, 250, 252, 0.92) 0%, rgba(248, 250, 252, 0.6) 100%);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        display: flex;
+        justify-content: flex-end;
+      }
+
+      .booking-close-btn {
+        min-height: 48px;
+        padding: 0.75rem 2.6rem;
+        border-radius: 9999px;
+        background: linear-gradient(135deg, #0ea5e9 0%, #6366f1 45%, #10b981 100%);
+        color: #fff;
+        font-weight: 800;
+        font-size: 1rem;
+        box-shadow: 0 18px 32px rgba(79, 70, 229, 0.25);
+        transition: transform 0.2s ease, box-shadow 0.2s ease, filter 0.2s ease;
+      }
+
+      .booking-close-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 26px 38px rgba(99, 102, 241, 0.25);
+        filter: brightness(1.05);
+      }
+
+      .booking-close-btn:active {
+        transform: translateY(0);
+      }
+
+      .modal-section.accent-blue::before {
+        background: linear-gradient(180deg, rgba(37, 99, 235, 0.95), rgba(14, 165, 233, 0.75));
+      }
+
+      .modal-section.accent-blue .modal-section-icon {
+        background: linear-gradient(145deg, rgba(37, 99, 235, 0.15), rgba(14, 165, 233, 0.22));
+      }
+
+      .modal-section.accent-emerald::before {
+        background: linear-gradient(180deg, rgba(16, 185, 129, 0.9), rgba(34, 197, 94, 0.8));
+      }
+
+      .modal-section.accent-emerald .modal-section-icon {
+        background: linear-gradient(145deg, rgba(16, 185, 129, 0.18), rgba(45, 212, 191, 0.2));
+      }
+
+      .modal-section.accent-purple::before {
+        background: linear-gradient(180deg, rgba(139, 92, 246, 0.9), rgba(168, 85, 247, 0.75));
+      }
+
+      .modal-section.accent-purple .modal-section-icon {
+        background: linear-gradient(145deg, rgba(139, 92, 246, 0.18), rgba(168, 85, 247, 0.2));
+      }
+
+      .modal-section.accent-amber::before {
+        background: linear-gradient(180deg, rgba(251, 191, 36, 0.9), rgba(249, 115, 22, 0.85));
+      }
+
+      .modal-section.accent-amber .modal-section-icon {
+        background: linear-gradient(145deg, rgba(251, 191, 36, 0.2), rgba(249, 115, 22, 0.18));
+      }
+
+      .modal-section.accent-slate::before {
+        background: linear-gradient(180deg, rgba(100, 116, 139, 0.88), rgba(15, 23, 42, 0.75));
+      }
+
+      .modal-section.accent-slate .modal-section-icon {
+        background: linear-gradient(145deg, rgba(100, 116, 139, 0.22), rgba(148, 163, 184, 0.18));
+      }
+
+      .modal-section.accent-rose::before {
+        background: linear-gradient(180deg, rgba(244, 63, 94, 0.9), rgba(236, 72, 153, 0.8));
+      }
+
+      .modal-section.accent-rose .modal-section-icon {
+        background: linear-gradient(145deg, rgba(244, 63, 94, 0.22), rgba(236, 72, 153, 0.18));
+      }
+
+      .modal-section-note {
+        font-size: 0.9rem;
+        color: #475569;
+        margin-top: 0.4rem;
+      }
+
+      .booking-meta-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        gap: 0.9rem;
+      }
+
+      .booking-meta-grid .modal-field {
+        background: rgba(248, 250, 252, 0.9);
+        border-radius: 16px;
+        padding: 0.8rem 1rem;
+        border: 1px solid rgba(226, 232, 240, 0.7);
+      }
+
+      @keyframes booking-modal-backdrop-fade-in {
+        from { opacity: 0; }
+        to { opacity: 1; }
+      }
+
+      @keyframes booking-modal-backdrop-fade-out {
+        from { opacity: 1; }
+        to { opacity: 0; }
+      }
+
+      @keyframes booking-modal-scale-in {
+        from { opacity: 0; transform: scale(0.94); }
+        to { opacity: 1; transform: scale(1); }
+      }
+
+      @keyframes booking-modal-scale-out {
+        from { opacity: 1; transform: scale(1); }
+        to { opacity: 0; transform: scale(0.92); }
+      }
+
+      @keyframes booking-modal-slide-up {
+        from { opacity: 0; transform: translateY(64px); }
+        to { opacity: 1; transform: translateY(0); }
+      }
+
+      @keyframes booking-modal-slide-down {
+        from { opacity: 1; transform: translateY(0); }
+        to { opacity: 0; transform: translateY(72px); }
+      }
+
+      @media (max-width: 1023px) {
+        .booking-modal-header {
+          padding: 1.5rem 1.6rem 1.3rem;
+        }
+
+        .booking-modal-body {
+          padding: 1.4rem 1.35rem 2rem;
+          max-height: calc(100vh - 210px);
+        }
+
+        .booking-modal-footer {
+          padding: 1.2rem 1.4rem 1.6rem;
+        }
+      }
+
+      @media (max-width: 767px) {
+        .booking-modal-backdrop {
+          padding: 0;
+          align-items: flex-end;
+        }
+
+        .booking-modal-content {
+          width: 100%;
+          max-height: calc(100vh - 110px);
+          border-radius: 26px 26px 0 0;
+          margin: 0;
+          animation: booking-modal-slide-up 0.3s cubic-bezier(0.24, 0.82, 0.25, 1) forwards;
+          box-shadow: 0 -8px 34px rgba(15, 23, 42, 0.2);
+        }
+
+        .booking-modal-content.closing {
+          animation: booking-modal-slide-down 0.28s cubic-bezier(0.42, 0, 0.58, 1) forwards;
+        }
+
+        .booking-modal-body {
+          max-height: calc(100vh - 220px);
+          padding: 1.4rem 1.1rem 2.6rem;
+        }
+
+        .booking-modal-footer {
+          padding: 1.1rem 1.2rem calc(1.1rem + env(safe-area-inset-bottom, 1.4rem));
+          justify-content: center;
+        }
+
+        .booking-modal-footer .booking-close-btn {
+          width: 100%;
+          border-radius: 18px;
+        }
+
+        .booking-modal-header {
+          padding: 1.4rem 1.4rem 1.2rem;
+        }
+
+        .booking-modal-header .booking-modal-title {
+          font-size: 1.35rem;
+        }
+
+        .booking-modal-header .header-icon {
+          width: 3rem;
+          height: 3rem;
+        }
+
+        .modal-section {
+          padding: 1.25rem 1.1rem 1.15rem 1rem;
+        }
+
+        .modal-section::before {
+          width: 6px;
+        }
+
+        .booking-modal-backdrop.is-mobile .booking-modal-content {
+          margin-bottom: calc(88px + env(safe-area-inset-bottom, 28px));
+        }
+      }
+
+      @media (max-width: 480px) {
+        .booking-modal-body {
+          max-height: calc(100vh - 230px);
+        }
+
+        .booking-id-wrap {
+          flex-direction: column;
+          align-items: stretch;
+        }
+
+        .booking-id-copy {
+          justify-content: center;
+        }
+
+        .booking-id-value {
+          width: 100%;
+          text-align: center;
+        }
+      }
     </style>
     <script src="/nav-active.js" defer></script>
 
@@ -209,6 +754,7 @@
 
       let pollHandle = null;
       let bookingsData = [];
+      let bookingModalCleanup = null;
       let bookingsLoaded = false;
       // داده‌ی دموی پروفایل
   async function loadProfileSection() {
@@ -731,6 +1277,17 @@
         return classes[key] || 'bg-gray-100 text-gray-600';
       }
 
+      function getStatusAccentClass(status) {
+        const accents = {
+          'pending': 'accent-amber',
+          'confirmed': 'accent-emerald',
+          'completed': 'accent-slate',
+          'cancelled': 'accent-rose'
+        };
+        const key = (status || '').toLowerCase();
+        return accents[key] || 'accent-slate';
+      }
+
       function getStatusLabel(status) {
         const labels = {
           'pending': 'در انتظار تایید',
@@ -814,160 +1371,407 @@
           }
         }
 
-        // Remove any existing modal
-        document.getElementById('bookingDetailsModal')?.remove();
+        if (typeof bookingModalCleanup === 'function') {
+          bookingModalCleanup();
+        }
 
-        // Create and insert modal
-        document.body.insertAdjacentHTML('beforeend', `
-          <div id="bookingDetailsModal" class="fixed inset-0 z-50 flex items-center justify-center p-4" style="backdrop-filter:blur(6px);background:rgba(0,0,0,0.5);animation:fadein .3s">
-            <div class="bg-white rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-2xl border border-gray-200 transform transition-all">
+        const isMobile = window.matchMedia('(max-width: 767px)').matches;
+        const bookingIdRaw = booking._id == null ? '' : String(booking._id);
+        const bookingIdSafe = escapeHtml(bookingIdRaw || 'نامشخص');
+        const bookingIdAttr = escapeHtml(bookingIdRaw);
+        const serviceName = escapeHtml(booking.service || 'نامشخص');
+        const sellerName = escapeHtml(booking.sellerName || 'فروشگاه');
+        const bookingDateSafe = escapeHtml(booking.bookingDate || 'نامشخص');
+        const bookingTimeSafe = escapeHtml(booking.startTime || 'نامشخص');
+        const createdDateSafe = escapeHtml(createdDate);
+        const customerNameSafe = booking.customerName ? escapeHtml(booking.customerName) : '';
+        const customerPhoneSafe = booking.customerPhone ? escapeHtml(booking.customerPhone) : '';
+        const statusLabelSafe = escapeHtml(getStatusLabel(booking.status));
+        const statusBadgeClass = `modal-status-badge ${getStatusBadgeClass(booking.status)}`;
+        const statusAccentClass = getStatusAccentClass(booking.status);
+        const sellerUrl = booking.sellerUrl ? `/shop.html?shopurl=${encodeURIComponent(booking.sellerUrl)}` : '';
+        const sellerLinkHtml = sellerUrl
+          ? `<a href="${sellerUrl}" class="modal-link" target="_blank" rel="noopener noreferrer">${sellerName}<svg viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path d="M5.5 5.5a.75.75 0 0 1 .75-.75h8a.75.75 0 0 1 .75.75v8a.75.75 0 0 1-1.5 0V7.56l-8.22 8.22a.75.75 0 0 1-1.06-1.06l8.22-8.22H6.25a.75.75 0 0 1-.75-.75Z"></path></svg></a>`
+          : `<span class="modal-field-value">${sellerName}</span>`;
 
-              <!-- Header -->
-              <div class="sticky top-0 bg-gradient-to-r from-blue-500 to-blue-600 px-6 py-4 flex justify-between items-center rounded-t-2xl">
-                <h2 class="text-xl font-bold text-white">جزئیات رزرو</h2>
-                <button class="close-booking-modal text-white hover:bg-white/20 rounded-full p-2 transition-all duration-200">
-                  <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+        const subtitleParts = [];
+        if (booking.service) subtitleParts.push(`رزرو شما برای ${serviceName}`);
+        if (booking.sellerName) subtitleParts.push(`در ${sellerName}`);
+        const subtitleText = subtitleParts.length ? subtitleParts.join(' ') : 'جزئیات کامل رزرو شما';
+
+        const customerSection = (customerNameSafe || customerPhoneSafe) ? `
+              <section class="modal-section accent-purple">
+                <div class="modal-section-header">
+                  <div class="modal-section-icon">👤</div>
+                  <div>
+                    <h3>اطلاعات مشتری</h3>
+                    <p class="modal-section-note">راه‌های ارتباط با شما</p>
+                  </div>
+                </div>
+                <div class="booking-meta-grid">
+                  ${customerNameSafe ? `
+                    <div class="modal-field">
+                      <span class="modal-field-label">نام</span>
+                      <span class="modal-field-value">${customerNameSafe}</span>
+                    </div>
+                  ` : ''}
+                  ${customerPhoneSafe ? `
+                    <div class="modal-field">
+                      <span class="modal-field-label">شماره تماس</span>
+                      <span class="modal-field-value" dir="ltr">${customerPhoneSafe}</span>
+                    </div>
+                  ` : ''}
+                </div>
+              </section>
+        ` : '';
+
+        const modalClasses = `booking-modal-backdrop${isMobile ? ' is-mobile' : ''}`;
+        const modalHtml = `
+          <div id="bookingDetailsModal" class="${modalClasses}" role="dialog" aria-modal="true" aria-labelledby="bookingModalTitle">
+            <div class="booking-modal-content" tabindex="-1">
+              <header class="booking-modal-header">
+                <div class="header-info">
+                  <div class="header-icon">🗓️</div>
+                  <div>
+                    <h2 id="bookingModalTitle" class="booking-modal-title">جزئیات رزرو</h2>
+                    <p class="booking-modal-subtitle">${subtitleText}</p>
+                  </div>
+                </div>
+                <button type="button" class="close-booking-modal" aria-label="بستن جزئیات رزرو">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 6l12 12M6 18L18 6" />
                   </svg>
                 </button>
-              </div>
+              </header>
 
-              <!-- Content -->
-              <div class="p-6 space-y-5">
-
-                <!-- Booking ID Section -->
-                <div class="bg-gray-50 rounded-lg p-4 border border-gray-200">
-                  <div class="flex items-center gap-2 mb-2">
-                    <span class="text-2xl">🆔</span>
-                    <h3 class="font-bold text-gray-700">شناسه رزرو</h3>
-                  </div>
-                  <p class="text-gray-600 font-mono text-sm mr-9">${escapeHtml(booking._id)}</p>
-                </div>
-
-                <!-- Service Info Section -->
-                <div class="bg-blue-50 rounded-lg p-4 border border-blue-200">
-                  <div class="flex items-center gap-2 mb-2">
-                    <span class="text-2xl">🛎️</span>
-                    <h3 class="font-bold text-blue-700">خدمت</h3>
-                  </div>
-                  <p class="text-gray-700 text-lg mr-9 font-medium">${escapeHtml(booking.service)}</p>
-                </div>
-
-                <!-- Seller Info Section -->
-                <div class="bg-purple-50 rounded-lg p-4 border border-purple-200">
-                  <div class="flex items-center gap-2 mb-2">
-                    <span class="text-2xl">📍</span>
-                    <h3 class="font-bold text-purple-700">فروشگاه</h3>
-                  </div>
-                  <p class="text-gray-700 mr-9">
-                    ${booking.sellerUrl ?
-                      `<a href="/shop.html?shopurl=${encodeURIComponent(booking.sellerUrl)}"
-                         class="text-blue-600 hover:text-blue-800 hover:underline transition-all duration-200 font-medium"
-                         target="_blank">
-                        ${escapeHtml(booking.sellerName || 'فروشگاه')} ↗
-                      </a>` :
-                      `<span class="font-medium">${escapeHtml(booking.sellerName || 'فروشگاه')}</span>`
-                    }
-                  </p>
-                </div>
-
-                <!-- Date & Time Section -->
-                <div class="bg-green-50 rounded-lg p-4 border border-green-200">
-                  <div class="flex items-center gap-2 mb-3">
-                    <span class="text-2xl">📅</span>
-                    <h3 class="font-bold text-green-700">زمان رزرو</h3>
-                  </div>
-                  <div class="mr-9 space-y-2">
-                    <p class="text-gray-700">
-                      <span class="font-semibold">تاریخ:</span>
-                      <span class="mr-2">${escapeHtml(booking.bookingDate)}</span>
-                    </p>
-                    <p class="text-gray-700">
-                      <span class="font-semibold">ساعت:</span>
-                      <span class="mr-2">${escapeHtml(booking.startTime)}</span>
-                    </p>
-                  </div>
-                </div>
-
-                <!-- Status Section -->
-                <div class="bg-yellow-50 rounded-lg p-4 border border-yellow-200">
-                  <div class="flex items-center gap-2 mb-2">
-                    <span class="text-2xl">📊</span>
-                    <h3 class="font-bold text-yellow-700">وضعیت</h3>
-                  </div>
-                  <div class="mr-9">
-                    <span class="inline-block px-4 py-2 rounded-full text-sm font-bold ${getStatusBadgeClass(booking.status)}">
-                      ${getStatusLabel(booking.status)}
-                    </span>
-                  </div>
-                </div>
-
-                <!-- Created Date Section -->
-                <div class="bg-gray-50 rounded-lg p-4 border border-gray-200">
-                  <div class="flex items-center gap-2 mb-2">
-                    <span class="text-2xl">🕐</span>
-                    <h3 class="font-bold text-gray-700">تاریخ ثبت رزرو</h3>
-                  </div>
-                  <p class="text-gray-600 mr-9">${escapeHtml(createdDate)}</p>
-                </div>
-
-                ${booking.customerName || booking.customerPhone ? `
-                  <!-- Customer Info Section -->
-                  <div class="bg-indigo-50 rounded-lg p-4 border border-indigo-200">
-                    <div class="flex items-center gap-2 mb-3">
-                      <span class="text-2xl">👤</span>
-                      <h3 class="font-bold text-indigo-700">اطلاعات مشتری</h3>
-                    </div>
-                    <div class="mr-9 space-y-2">
-                      ${booking.customerName ? `
-                        <p class="text-gray-700">
-                          <span class="font-semibold">نام:</span>
-                          <span class="mr-2">${escapeHtml(booking.customerName)}</span>
-                        </p>
-                      ` : ''}
-                      ${booking.customerPhone ? `
-                        <p class="text-gray-700">
-                          <span class="font-semibold">تلفن:</span>
-                          <span class="mr-2 font-mono">${escapeHtml(booking.customerPhone)}</span>
-                        </p>
-                      ` : ''}
+              <div class="booking-modal-body" id="bookingModalBody">
+                <section class="modal-section accent-slate">
+                  <div class="modal-section-header">
+                    <div class="modal-section-icon">📋</div>
+                    <div>
+                      <h3>شناسه رزرو</h3>
+                      <p class="modal-section-note">برای پیگیری‌های بعدی در ویترینت</p>
                     </div>
                   </div>
-                ` : ''}
+                  <div class="booking-id-wrap">
+                    <code class="booking-id-value" dir="ltr">${bookingIdSafe}</code>
+                    <button type="button" class="booking-id-copy" data-booking-id="${bookingIdAttr}" aria-label="کپی شناسه رزرو">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 9.75A2.25 2.25 0 0 1 11.25 7.5h7.5A2.25 2.25 0 0 1 21 9.75v7.5A2.25 2.25 0 0 1 18.75 19.5h-7.5A2.25 2.25 0 0 1 9 17.25v-7.5Z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 14.25H5.25A2.25 2.25 0 0 1 3 12V5.25A2.25 2.25 0 0 1 5.25 3h6.75a2.25 2.25 0 0 1 2.25 2.25V6" />
+                      </svg>
+                      <span>کپی</span>
+                    </button>
+                  </div>
+                  <span class="copy-feedback" role="status" aria-live="polite"></span>
+                </section>
 
+                <section class="modal-section accent-blue">
+                  <div class="modal-section-header">
+                    <div class="modal-section-icon">🏪</div>
+                    <div>
+                      <h3>جزئیات خدمت و فروشگاه</h3>
+                      <p class="modal-section-note">نام خدمت و فروشنده</p>
+                    </div>
+                  </div>
+                  <div class="modal-field">
+                    <span class="modal-field-label">خدمت</span>
+                    <span class="modal-field-value">${serviceName}</span>
+                  </div>
+                  <div class="modal-field">
+                    <span class="modal-field-label">فروشگاه</span>
+                    ${sellerLinkHtml}
+                  </div>
+                </section>
+
+                <section class="modal-section accent-emerald">
+                  <div class="modal-section-header">
+                    <div class="modal-section-icon">📅</div>
+                    <div>
+                      <h3>زمان رزرو</h3>
+                      <p class="modal-section-note">تاریخ و ساعت حضور شما</p>
+                    </div>
+                  </div>
+                  <div class="booking-meta-grid">
+                    <div class="modal-field">
+                      <span class="modal-field-label">تاریخ</span>
+                      <span class="modal-field-value">${bookingDateSafe}</span>
+                    </div>
+                    <div class="modal-field">
+                      <span class="modal-field-label">ساعت</span>
+                      <span class="modal-field-value" dir="ltr">${bookingTimeSafe}</span>
+                    </div>
+                  </div>
+                </section>
+
+                <section class="modal-section ${statusAccentClass}">
+                  <div class="modal-section-header">
+                    <div class="modal-section-icon">📊</div>
+                    <div>
+                      <h3>وضعیت رزرو</h3>
+                      <p class="modal-section-note">پیگیری وضعیت آخرین درخواست</p>
+                    </div>
+                  </div>
+                  <div class="modal-field">
+                    <span class="${statusBadgeClass}">${statusLabelSafe}</span>
+                  </div>
+                </section>
+
+                <section class="modal-section accent-slate">
+                  <div class="modal-section-header">
+                    <div class="modal-section-icon">🕐</div>
+                    <div>
+                      <h3>تاریخ ثبت رزرو</h3>
+                      <p class="modal-section-note">زمان ثبت در سیستم ویترینت</p>
+                    </div>
+                  </div>
+                  <div class="modal-field">
+                    <span class="modal-field-label">ثبت شده در</span>
+                    <span class="modal-field-value">${createdDateSafe}</span>
+                  </div>
+                </section>
+
+                ${customerSection}
               </div>
 
-              <!-- Footer -->
-              <div class="sticky bottom-0 bg-gray-50 px-6 py-4 border-t border-gray-200 rounded-b-2xl flex justify-end">
-                <button
-                  class="close-booking-modal px-6 py-2.5 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-all duration-200 font-medium shadow-sm hover:shadow-md">
-                  بستن
-                </button>
-              </div>
-
+              <footer class="booking-modal-footer">
+                <button type="button" class="booking-close-btn close-booking-modal">بستن</button>
+              </footer>
             </div>
           </div>
-        `);
+        `;
 
-        // Add event listeners for modal close buttons
-        document.querySelectorAll('.close-booking-modal').forEach(btn => {
-          btn.addEventListener('click', closeBookingDetails);
-        });
+        document.body.insertAdjacentHTML('beforeend', modalHtml);
 
-        // Also close when clicking the backdrop
         const modal = document.getElementById('bookingDetailsModal');
-        if (modal) {
-          modal.addEventListener('click', (e) => {
-            if (e.target === modal) {
-              closeBookingDetails();
+        if (!modal) {
+          return;
+        }
+
+        const content = modal.querySelector('.booking-modal-content');
+        const closeButtons = modal.querySelectorAll('.close-booking-modal');
+        closeButtons.forEach(btn => btn.addEventListener('click', closeBookingDetails));
+
+        const onBackdropClick = (event) => {
+          if (event.target === modal) {
+            closeBookingDetails();
+          }
+        };
+        modal.addEventListener('click', onBackdropClick);
+
+        const focusableSelectors = 'a[href], button:not([disabled]), textarea, input, select, [tabindex]:not([tabindex="-1"])';
+        const focusableElements = content ? Array.from(content.querySelectorAll(focusableSelectors)) : [];
+        const firstFocusable = focusableElements[0] || content;
+        const lastFocusable = focusableElements[focusableElements.length - 1] || content;
+
+        setTimeout(() => {
+          if (firstFocusable) {
+            firstFocusable.focus();
+          } else if (content) {
+            content.focus();
+          }
+        }, 30);
+
+        const trapListener = (event) => {
+          if (event.key !== 'Tab') {
+            return;
+          }
+          if (!focusableElements.length) {
+            event.preventDefault();
+            content?.focus();
+            return;
+          }
+          if (event.shiftKey) {
+            if (document.activeElement === firstFocusable) {
+              event.preventDefault();
+              (lastFocusable || firstFocusable).focus();
+            }
+          } else if (document.activeElement === lastFocusable) {
+            event.preventDefault();
+            (firstFocusable || lastFocusable).focus();
+          }
+        };
+
+        const escListener = (event) => {
+          if (event.key === 'Escape') {
+            event.preventDefault();
+            closeBookingDetails();
+          }
+        };
+
+        modal.addEventListener('keydown', trapListener);
+        document.addEventListener('keydown', escListener);
+
+        const copyButton = modal.querySelector('.booking-id-copy');
+        const copyFeedback = modal.querySelector('.copy-feedback');
+        let copyFeedbackTimeout = null;
+
+        if (copyButton) {
+          copyButton.addEventListener('click', async () => {
+            const value = copyButton.dataset.bookingId || '';
+            if (!value) {
+              return;
+            }
+
+            const showFeedback = (message, color = '#0ea5e9') => {
+              if (!copyFeedback) return;
+              copyFeedback.textContent = message;
+              copyFeedback.style.color = color;
+              copyFeedback.classList.add('visible');
+              if (copyFeedbackTimeout) {
+                clearTimeout(copyFeedbackTimeout);
+              }
+              copyFeedbackTimeout = setTimeout(() => {
+                copyFeedback?.classList.remove('visible');
+              }, 2200);
+            };
+
+            try {
+              if (navigator.clipboard?.writeText) {
+                await navigator.clipboard.writeText(value);
+              } else {
+                throw new Error('clipboard unavailable');
+              }
+              showFeedback('شناسه رزرو کپی شد ✅');
+            } catch (error) {
+              try {
+                const tempInput = document.createElement('textarea');
+                tempInput.value = value;
+                tempInput.setAttribute('readonly', '');
+                tempInput.style.position = 'absolute';
+                tempInput.style.left = '-9999px';
+                document.body.appendChild(tempInput);
+                tempInput.select();
+                const successful = document.execCommand('copy');
+                document.body.removeChild(tempInput);
+                if (successful) {
+                  showFeedback('شناسه رزرو کپی شد ✅');
+                } else {
+                  showFeedback('امکان کپی وجود ندارد', '#ef4444');
+                }
+              } catch (fallbackError) {
+                console.error('Copy booking id failed:', fallbackError);
+                showFeedback('امکان کپی وجود ندارد', '#ef4444');
+              }
             }
           });
         }
+
+        let touchStartY = null;
+        let currentTranslateY = 0;
+
+        const resetTranslate = () => {
+          if (content) {
+            content.style.transition = '';
+            content.style.transform = '';
+          }
+        };
+
+        const handleTouchStart = (event) => {
+          if (!content || !isMobile) return;
+          if (event.touches.length !== 1) return;
+          if (content.scrollTop > 0) return;
+          touchStartY = event.touches[0].clientY;
+          currentTranslateY = 0;
+          content.style.transition = 'none';
+        };
+
+        const handleTouchMove = (event) => {
+          if (!content || !isMobile) return;
+          if (touchStartY === null) return;
+          const diff = event.touches[0].clientY - touchStartY;
+          if (diff > 0 && content.scrollTop <= 0) {
+            event.preventDefault();
+            currentTranslateY = Math.min(diff, 180);
+            content.style.transform = `translateY(${currentTranslateY}px)`;
+          }
+        };
+
+        const handleTouchEnd = () => {
+          if (!content || !isMobile) return;
+          content.style.transition = '';
+          if (currentTranslateY > 130) {
+            resetTranslate();
+            closeBookingDetails();
+          } else {
+            resetTranslate();
+          }
+          touchStartY = null;
+          currentTranslateY = 0;
+        };
+
+        if (content && isMobile) {
+          content.addEventListener('touchstart', handleTouchStart, { passive: true });
+          content.addEventListener('touchmove', handleTouchMove, { passive: false });
+          content.addEventListener('touchend', handleTouchEnd);
+          content.addEventListener('touchcancel', handleTouchEnd);
+        }
+
+        document.body.classList.add('booking-modal-open');
+
+        const cleanup = (removeNode = true) => {
+          modal.removeEventListener('click', onBackdropClick);
+          modal.removeEventListener('keydown', trapListener);
+          document.removeEventListener('keydown', escListener);
+          if (content && isMobile) {
+            content.removeEventListener('touchstart', handleTouchStart);
+            content.removeEventListener('touchmove', handleTouchMove);
+            content.removeEventListener('touchend', handleTouchEnd);
+            content.removeEventListener('touchcancel', handleTouchEnd);
+          }
+          if (copyFeedbackTimeout) {
+            clearTimeout(copyFeedbackTimeout);
+            copyFeedbackTimeout = null;
+          }
+          document.body.classList.remove('booking-modal-open');
+          if (removeNode && modal.parentNode) {
+            modal.parentNode.removeChild(modal);
+          }
+          bookingModalCleanup = null;
+        };
+
+        bookingModalCleanup = cleanup;
       }
 
       // Close booking details modal
       function closeBookingDetails() {
-        document.getElementById('bookingDetailsModal')?.remove();
+        const modal = document.getElementById('bookingDetailsModal');
+        if (!modal) {
+          if (typeof bookingModalCleanup === 'function') {
+            bookingModalCleanup();
+          }
+          return;
+        }
+
+        if (modal.classList.contains('closing')) {
+          return;
+        }
+
+        const content = modal.querySelector('.booking-modal-content');
+        if (content) {
+          content.style.transform = '';
+          content.style.transition = '';
+          content.classList.add('closing');
+        }
+        modal.classList.add('closing');
+
+        const handleAnimationEnd = (event) => {
+          if (event.target !== modal) return;
+          modal.removeEventListener('animationend', handleAnimationEnd);
+          if (typeof bookingModalCleanup === 'function') {
+            bookingModalCleanup();
+          }
+        };
+
+        modal.addEventListener('animationend', handleAnimationEnd);
+
+        setTimeout(() => {
+          if (document.getElementById('bookingDetailsModal')) {
+            if (typeof bookingModalCleanup === 'function') {
+              bookingModalCleanup();
+            }
+          }
+        }, 400);
       }
 
       // Helper to escape HTML
