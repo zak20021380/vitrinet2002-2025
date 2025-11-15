@@ -333,6 +333,9 @@ exports.registerUser = async (req, res) => {
       password : hashedPassword
     });
     await user.save();
+    // TODO: پس از فعال‌سازی PostHog این خط را از حالت توضیح خارج کنید | TODO: Uncomment after enabling PostHog
+    // const { trackUserRegistered } = require('../utils/posthog-tracking');
+    // await trackUserRegistered(user);
 
     return res.status(201).json({
       success: true,

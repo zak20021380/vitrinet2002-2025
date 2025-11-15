@@ -34,6 +34,9 @@ exports.addProduct = async (req, res) => {
     });
 
     await product.save();
+    // TODO: ثبت محصول منتشر شده در PostHog بعد از فعال‌سازی | TODO: Capture product_published after enabling PostHog
+    // const { trackProductPublished } = require('../utils/posthog-tracking');
+    // await trackProductPublished(product);
     res.status(201).json({ message: 'محصول با موفقیت اضافه شد', product });
   } catch (err) {
     console.error('خطا در افزودن محصول:', err);
