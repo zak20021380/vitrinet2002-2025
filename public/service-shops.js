@@ -3536,7 +3536,7 @@ function updateSummary(avg, count, ratings) {
 
       if (key === 'profile') {
         // انتقال به صفحه پروفایل کاربر
-        window.location.href = 'service-seller-panel/s-profile.html';
+        window.location.href = '/user/dashboard.html';
         return;
       }
 
