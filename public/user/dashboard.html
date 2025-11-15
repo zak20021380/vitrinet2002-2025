@@ -633,7 +633,9 @@
         container.classList.remove('hidden');
         noBookings.classList.add('hidden');
 
-        container.innerHTML = bookings.map(booking => `
+        container.innerHTML = bookings.map(booking => {
+          const sellerLink = getSellerLink(booking);
+          return `
     <div class="booking-card border rounded-lg p-5 transition-all duration-300 ease-out transform hover:shadow-xl hover:-translate-y-1 ${getBookingStatusClass(booking.status)}">
       <div class="flex justify-between items-start flex-wrap gap-4">
         <div class="flex-1 min-w-0">
@@ -642,10 +644,10 @@
           <div class="space-y-2 text-sm">
             <p class="text-gray-700 flex items-center gap-2">
               <span class="text-lg">📍</span>
-              ${booking.sellerUrl ?
-                `<a href="/shop.html?shopurl=${encodeURIComponent(booking.sellerUrl)}"
+              ${sellerLink ?
+                `<a href="${sellerLink}"
                    class="text-blue-600 hover:text-blue-800 hover:underline transition-all duration-200 cursor-pointer font-medium"
-                   target="_blank">
+                   target="_blank" rel="noopener noreferrer">
                   ${escapeHtml(booking.sellerName || 'فروشگاه')}
                 </a>` :
                 `<span class="missing-seller-link text-blue-600 hover:text-blue-800 hover:underline cursor-pointer">
@@ -686,7 +688,8 @@
         </div>
       </div>
     </div>
-  `).join('');
+  `;
+        }).join('');
 
         // Add event listeners for booking action buttons
         container.querySelectorAll('.show-booking-details').forEach(btn => {
@@ -741,6 +744,33 @@
         };
         const key = (status || '').toLowerCase();
         return labels[key] || (status || 'نامشخص');
+      }
+
+      function getSellerLink(booking) {
+        if (!booking) return '';
+
+        const slug = typeof booking.sellerUrl === 'string'
+          ? booking.sellerUrl.trim()
+          : '';
+        if (slug) {
+          return `/service-shops.html?shopurl=${encodeURIComponent(slug)}`;
+        }
+
+        let sellerId = booking.sellerId;
+        if (sellerId && typeof sellerId === 'object') {
+          if (sellerId._id || sellerId.id) {
+            sellerId = sellerId._id || sellerId.id;
+          } else if (typeof sellerId.toString === 'function') {
+            sellerId = sellerId.toString();
+          } else {
+            sellerId = '';
+          }
+        }
+        if (typeof sellerId === 'string' && sellerId.trim()) {
+          return `/service-shops.html?sellerId=${encodeURIComponent(sellerId.trim())}`;
+        }
+
+        return '';
       }
 
       async function cancelBooking(id) {
@@ -846,17 +876,20 @@
                 <div class="border-b border-gray-100 pb-4">
                   <div class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">فروشگاه</div>
                   <div class="text-gray-800">
-                    ${booking.sellerUrl ?
-                      `<a href="/shop.html?shopurl=${encodeURIComponent(booking.sellerUrl)}"
-                         class="text-blue-600 hover:text-blue-700 font-medium inline-flex items-center gap-1"
-                         target="_blank">
-                        ${escapeHtml(booking.sellerName || 'فروشگاه')}
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
-                        </svg>
-                      </a>` :
-                      `<span class="font-medium">${escapeHtml(booking.sellerName || 'فروشگاه')}</span>`
-                    }
+                    ${(() => {
+                      const sellerLink = getSellerLink(booking);
+                      if (sellerLink) {
+                        return `<a href="${sellerLink}"
+                                   class="text-blue-600 hover:text-blue-700 font-medium inline-flex items-center gap-1"
+                                   target="_blank" rel="noopener noreferrer">
+                                  ${escapeHtml(booking.sellerName || 'فروشگاه')}
+                                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
+                                  </svg>
+                                </a>`;
+                      }
+                      return `<span class="font-medium">${escapeHtml(booking.sellerName || 'فروشگاه')}</span>`;
+                    })()}
                   </div>
                 </div>
 
