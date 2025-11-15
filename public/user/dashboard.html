@@ -449,6 +449,39 @@
         }
       }
 
+      // Cancel a booking
+      async function cancelBooking(bookingId) {
+        // Confirm with user
+        if (!confirm('آیا مطمئن هستید که می‌خواهید این رزرو را لغو کنید؟')) {
+          return;
+        }
+
+        try {
+          const token = localStorage.getItem('token');
+
+          const response = await fetch(`/api/bookings/${bookingId}/cancel`, {
+            method: 'PUT',
+            headers: {
+              'Authorization': `Bearer ${token}`,
+              'Content-Type': 'application/json'
+            }
+          });
+
+          if (response.ok) {
+            alert('رزرو با موفقیت لغو شد');
+
+            // Reload bookings to show updated status
+            await loadBookings();
+          } else {
+            const error = await response.json();
+            alert(error.message || 'خطا در لغو رزرو');
+          }
+        } catch (error) {
+          console.error('Error cancelling booking:', error);
+          alert('خطا در ارتباط با سرور. لطفاً دوباره تلاش کنید.');
+        }
+      }
+
       async function loadBookingsSection() {
         const mainContent = document.getElementById('mainContent');
         mainContent.innerHTML = `
