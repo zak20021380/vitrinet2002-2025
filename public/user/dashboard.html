@@ -117,39 +117,37 @@
   <body class="text-gray-800 overflow-x-hidden">
 
     <!-- Header -->
-    <header class="fixed top-0 inset-x-0 z-20 glass border-b shadow flex items-center justify-between px-6 py-3">
-      <a href="index.html" class="flex items-center gap-2 select-none shrink-0">
-        <img src="assets/images/logo.svg" alt="ویترینت" class="w-9 h-9 sm:w-10 sm:h-10 hidden sm:block" onerror="this.style.display='none';this.nextElementSibling.style.display='block'"/>
-        <span class="font-extrabold text-lg md:text-2xl primary-text" style="display:none; font-family:'Poppins',sans-serif;">Vitrinet</span>
-        <span class="font-extrabold text-lg md:text-2xl primary-text sm:hidden block" style="font-family:'Vazirmatn',sans-serif;">ویترینت</span>
+    <header class="fixed top-0 inset-x-0 z-20 glass border-b shadow flex items-center justify-between px-6 py-3 gap-4">
+      <a href="index.html" class="inline-flex items-center justify-center select-none shrink-0" aria-label="بازگشت به خانه">
+        <span class="inline-flex items-center justify-center w-10 h-10 rounded-2xl avatar-bg text-white text-xl font-black tracking-tight">کو</span>
       </a>
-      <nav class="flex items-center gap-4 text-base flex-shrink-0">
-    <!-- همبرگر موبایل + بَج -->
-<button id="hamBtn"
-        class="ham lg:hidden mr-1 relative"   
-        title="منو">
-  <!-- آیکون سه‌خط -->
-  <svg width="24" height="24" fill="none" viewBox="0 0 24 24">
-    <rect x="5" y="7" width="14" height="2" rx="1" fill="#10b981"/>
-    <rect x="5" y="11" width="14" height="2" rx="1" fill="#10b981"/>
-    <rect x="5" y="15" width="14" height="2" rx="1" fill="#10b981"/>
-  </svg>
-
-  <!-- 🏷️   نشان تعداد پیام‌ها (در ابتدا خالی و پنهان) -->
-  <span id="hamBadge"
-        class="absolute -top-1.5 -left-1.5     
-               bg-red-500 text-white text-[10px]
-               w-4 h-4 rounded-full font-extrabold
-               flex items-center justify-center
-               hidden">0</span>
-</button>
-
+      <nav class="flex-1 hidden md:flex items-center justify-center gap-5 text-base">
         <a href="index.html" class="text-gray-700 hover:text-[#10b981] font-bold">خانه</a>
-        <button id="profileBtn" type="button" class="ml-2 flex items-center gap-2 px-3 py-1.5 rounded-2xl avatar-bg text-white font-bold text-base shadow-lg focus:outline-none hover:scale-105 transition-all" style="font-family:'Vazirmatn',sans-serif;">
+      </nav>
+      <div class="flex items-center gap-2">
+        <button id="profileBtn" type="button" class="flex items-center gap-2 px-3 py-1.5 rounded-2xl avatar-bg text-white font-bold text-base shadow-lg focus:outline-none hover:scale-105 transition-all" style="font-family:'Vazirmatn',sans-serif;">
           <span class="w-9 h-9 flex items-center justify-center rounded-full bg-white/10 text-2xl font-extrabold">ک‌و</span>
           <span class="hidden sm:inline-block font-bold">پروفایل من</span>
         </button>
-      </nav>
+        <!-- همبرگر موبایل + بَج -->
+        <button id="hamBtn"
+                class="ham lg:hidden relative"
+                title="منو">
+          <!-- آیکون سه‌خط -->
+          <svg width="24" height="24" fill="none" viewBox="0 0 24 24">
+            <rect x="5" y="7" width="14" height="2" rx="1" fill="#10b981"/>
+            <rect x="5" y="11" width="14" height="2" rx="1" fill="#10b981"/>
+            <rect x="5" y="15" width="14" height="2" rx="1" fill="#10b981"/>
+          </svg>
+
+          <!-- 🏷️   نشان تعداد پیام‌ها (در ابتدا خالی و پنهان) -->
+          <span id="hamBadge"
+                class="absolute -top-1.5 -right-1.5 w-5 h-5
+                       bg-red-500 text-white text-[11px] font-extrabold
+                       flex items-center justify-center rounded-full border-2 border-white
+                       hidden">0</span>
+        </button>
+      </div>
     </header>
 
     <!-- سایدبار موبایل -->
@@ -1235,6 +1233,7 @@
 
       // همبرگر موبایل
       function openSidebar(){
+        markNotificationsViewed();
         document.getElementById('mobileSidebar').classList.add('open');
         document.getElementById('sidebarOverlay').classList.add('open');
         document.body.style.overflow='hidden';
@@ -1244,7 +1243,10 @@
         document.getElementById('sidebarOverlay').classList.remove('open');
         document.body.style.overflow='';
       }
-      document.getElementById('hamBtn').onclick = openSidebar;
+      const hamBtn = document.getElementById('hamBtn');
+      if (hamBtn) {
+        hamBtn.addEventListener('click', openSidebar);
+      }
       document.getElementById('closeSidebar').onclick = closeSidebar;
       document.getElementById('sidebarOverlay').onclick = closeSidebar;
       document.addEventListener('keydown', function(e){
@@ -1403,6 +1405,23 @@
   /* ───────── بخش پیام‌های حرفه‌ای کاربر ───────── */
   const API_BASE  = '/api';           // طبق سرورت
   let chatsList   = [];               // لیست چت‌ها
+  const LAST_NOTIF_KEY = 'userDashboard.lastNotificationsViewedAt';
+
+  function getLastNotificationsViewedAt() {
+    try {
+      return Number(localStorage.getItem(LAST_NOTIF_KEY)) || 0;
+    } catch (_) {
+      return 0;
+    }
+  }
+
+  function setLastNotificationsViewedNow() {
+    try {
+      localStorage.setItem(LAST_NOTIF_KEY, String(Date.now()));
+    } catch (_) {
+      /* ignore storage errors */
+    }
+  }
   let currentCid  = null;             // آی‌دی چت انتخاب شده
   let blockedSellers = [];            // فروشندگان مسدودشده
 
@@ -2137,23 +2156,62 @@ async function deleteChat(cid) {
 
 
   /* badge پیام‌های خوانده نشده */
+function getMessageTimestamp(message) {
+  if (!message) return 0;
+  const stamp = message.createdAt || message.sentAt || message.timestamp;
+  if (stamp) {
+    const date = new Date(stamp);
+    const time = date.getTime();
+    if (!Number.isNaN(time)) return time;
+  }
+  if (typeof message._id === 'string' && message._id.length >= 8) {
+    const hex = message._id.slice(0, 8);
+    const parsed = parseInt(hex, 16);
+    if (!Number.isNaN(parsed)) return parsed * 1000;
+  }
+  return 0;
+}
+
 function updateBadge() {
-  const total = chatsList.reduce(
-      (n, c) => n + (c.messages || []).filter(m => !m.read && m.from !== 'user').length,
-      0);
+  const lastViewed = getLastNotificationsViewedAt();
+  const total = chatsList.reduce((count, chat) => {
+    const messages = Array.isArray(chat.messages) ? chat.messages : [];
+    const unread = messages.filter(m => {
+      if (!m || m.from === 'user' || m.read) return false;
+      const ts = getMessageTimestamp(m);
+      if (ts === 0) return lastViewed === 0;
+      return ts > lastViewed;
+    });
+    return count + unread.length;
+  }, 0);
 
-  /* 🔸 نشان کنار گزینهٔ «پیام‌ها» در سایدبار (همان کد قبلی) */
-  document.getElementById('msgBadge').textContent = total > 0 ? total : '';
+  const msgBadge = document.getElementById('msgBadge');
+  if (msgBadge) {
+    msgBadge.textContent = total > 0 ? total : '';
+  }
 
-  /* 🔸 نشان روی همبرگر – افزوده شده */
   const hamBadge = document.getElementById('hamBadge');
   if (hamBadge) {
     if (total > 0) {
       hamBadge.textContent = total;
-      hamBadge.classList.remove('hidden');   // نمایش
+      hamBadge.classList.remove('hidden');
     } else {
-      hamBadge.classList.add('hidden');      // پنهان‌سازی
+      hamBadge.textContent = '';
+      hamBadge.classList.add('hidden');
     }
+  }
+}
+
+function markNotificationsViewed() {
+  setLastNotificationsViewedNow();
+  const msgBadge = document.getElementById('msgBadge');
+  if (msgBadge) {
+    msgBadge.textContent = '';
+  }
+  const hamBadge = document.getElementById('hamBadge');
+  if (hamBadge) {
+    hamBadge.textContent = '';
+    hamBadge.classList.add('hidden');
   }
 }
 
