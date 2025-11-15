@@ -2,7 +2,7 @@
   const ShopAppearance = require('../models/ShopAppearance');
   const bcrypt = require('bcryptjs');
   const jwt = require('jsonwebtoken');
-  const JWT_SECRET = 'vitrinet_secret_key';
+  const JWT_SECRET = process.env.JWT_SECRET || 'vitrinet_secret_key';
   const User = require('../models/user');
   const Admin = require('../models/admin'); // اگه مدل جدا داری
 const BannedPhone = require('../models/BannedPhone');     // ⬅︎ مدل لیست سیاه
@@ -47,7 +47,11 @@ async function ensurePhoneAllowed (phone) {
 
       // ۳) ساخت توکن با نقشِ admin
 const token = jwt.sign(
-  { id: admin._id, role: 'admin' },
+  {
+    id: admin._id,
+    role: 'admin',
+    userType: admin.userType || 'both',
+  },
   JWT_SECRET,
   { expiresIn: '7d' }
 );
@@ -188,7 +192,11 @@ exports.login = async (req, res) => {
 
     // JWT
     const token = jwt.sign(
-      { id: seller._id.toString(), role: 'seller' },
+      {
+        id: seller._id.toString(),
+        role: 'seller',
+        userType: seller.userType || 'both',
+      },
       JWT_SECRET,
       { expiresIn: '7d' }
     );
@@ -401,7 +409,11 @@ exports.loginUser = async (req, res) => {
 
     /* ۵) تولید JWT */
     const token = jwt.sign(
-      { id: user._id, role: 'user' },
+      {
+        id: user._id,
+        role: 'user',
+        userType: user.userType || 'both',
+      },
       JWT_SECRET,
       { expiresIn: '7d' }
     );
