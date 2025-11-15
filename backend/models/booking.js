@@ -7,6 +7,12 @@ const bookingSchema = new mongoose.Schema({
     required: true,
     index: true
   },
+  userId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+    index: true,
+    required: false
+  },
   serviceId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'SellerService',
