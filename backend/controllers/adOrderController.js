@@ -206,6 +206,9 @@ exports.createAdOrder = async (req, res) => {
     });
 
     await adOrder.save();
+    // TODO: ارسال رخداد ایجاد سفارش به PostHog پس از فعال‌سازی | TODO: Send order_created event to PostHog once enabled
+    // const { trackOrderCreated } = require('../utils/posthog-tracking');
+    // await trackOrderCreated(adOrder);
     const responseOrder = await buildAdOrderResponse(adOrder);
 
     res.status(201).json({

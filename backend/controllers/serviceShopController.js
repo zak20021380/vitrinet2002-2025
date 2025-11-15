@@ -2200,6 +2200,11 @@ exports.updateServiceShopStatus = async (req, res) => {
     }
 
     await shop.save();
+    // TODO: در صورت تایید فروشنده این رخداد PostHog را فعال کنید | TODO: Fire PostHog event when approving sellers
+    // if ((updates.status ?? shop.status) === 'approved') {
+    //   const { trackSellerApproved } = require('../utils/posthog-tracking');
+    //   await trackSellerApproved(shop);
+    // }
 
     res.json({ message: 'وضعیت مغازه بروزرسانی شد.', item: shop });
   } catch (err) {

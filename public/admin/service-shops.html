@@ -1186,6 +1186,25 @@
     }
   </style>
   <script src="/nav-active.js" defer></script>
+
+<!-- TODO: فعال‌سازی پست‌هاگ را هنگام انتشار فراموش نکنید | TODO: Enable PostHog analytics when going live -->
+<!--
+<script>
+  (function () {
+    var config = window.POSTHOG_CONFIG || { enabled: false, apiKey: 'phc_YOUR_KEY_HERE', apiHost: 'https://analytics.vitreenet.ir' };
+    if (!config.enabled) {
+      return; // فعال نیست | Not enabled yet
+    }
+    try {
+      (function(t,e){var o,n,p,r;e.__SV||(window.posthog=e,e._i=[],e.init=function(i,s,a){function g(t,e){var o=e.split(".");2==o.length&&(t=t[o[0]],e=o[1]),t[e]=function(){t.push([e].concat(Array.prototype.slice.call(arguments,0)))}}(p=t.createElement("script")),p.type="text/javascript",p.async=!0,p.src=s.api_host+"/static/array.js";(r=t.getElementsByTagName("script")[0]),r.parentNode.insertBefore(p,r);var u=e;for(void 0!==a?u=e[a]=[]:u=e,u.people=u.people||[],u.toString=function(t){var e="posthog";return"posthog"!==u._i&&(e+="."+u._i),t||(e+=" (stub)"),e},u.people.toString=function(){return u.toString(1)+".people (stub)"};n="capture identify alias people.set people.set_once people.unset people.increment people.append people.union people.remove people.clear_opt_out_outcome register register_once unregister opt_out_capturing opt_in_capturing has_opted_out_capturing reset isFeatureEnabled onFeatureFlags reloadFeatureFlags group".split(" ");for(o=0;o<n.length;o++)g(u,n[o]);e._i.push([i,s,a])},e.__SV=1.1)})(document, window.posthog || []);
+      window.posthog.init(config.apiKey, { api_host: config.apiHost, capture_pageview: true, advanced_disable_decide: true });
+    } catch (error) {
+      console.warn('PostHog init failed (preview mode):', error);
+    }
+  })();
+</script>
+-->
+
 </head>
 <body>
   <div class="container">
@@ -3165,5 +3184,16 @@
 
     init();
   </script>
+
+<!-- TODO: افزودن رویدادهای PostHog پس از فعال‌سازی | TODO: Enable PostHog events after activation -->
+<!--
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const safeCapture = window.safePosthogCapture || function () {};
+    // safeCapture('event_name', { /* داده‌های تکمیلی */ });
+  });
+</script>
+-->
+
 </body>
 </html>

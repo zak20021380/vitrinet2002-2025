@@ -151,6 +151,9 @@ exports.handlePaymentCallback = async (req, res) => {
       payment.paymentStatus = 'completed';
       payment.transactionId = transactionId;
       await payment.save();
+      // TODO: ثبت رویداد پردازش پرداخت در PostHog پس از فعال‌سازی | TODO: Capture payment_processed after enabling PostHog
+      // const { trackPaymentProcessed } = require('../utils/posthog-tracking');
+      // await trackPaymentProcessed({ orderId: adOrder?._id || payment._id, status: payment.paymentStatus, amount: payment.amount });
 
       if (adOrder) {
         adOrder.status = 'paid';
@@ -201,6 +204,9 @@ exports.handlePaymentCallback = async (req, res) => {
     } else {
       payment.paymentStatus = 'failed';
       await payment.save();
+      // TODO: اطلاع‌رسانی وضعیت ناموفق به PostHog | TODO: Report failed payment to PostHog
+      // const { trackPaymentProcessed } = require('../utils/posthog-tracking');
+      // await trackPaymentProcessed({ orderId: adOrder?._id || payment._id, status: payment.paymentStatus, amount: payment.amount });
 
       return res.status(200).json({
         success: false,

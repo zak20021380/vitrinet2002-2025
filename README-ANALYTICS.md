@@ -119,3 +119,86 @@ Add any additional hosts you integrate in the future. For Plausible self-hosting
 * Use the shared helpers in `/js/analytics.js` to maintain consent/performance guarantees.
 * Document any new high-level events in this file so future contributors understand the payload contract.
 
+## 8. PostHog quick-start (commented integration)
+
+> ⚠️ تمام کدهای PostHog در حال حاضر کاملاً کامنت شده‌اند تا عملکرد فعلی سایت بدون تغییر بماند. | All PostHog code is currently commented out so the existing site keeps working. Remove the comments only when you are ready to enable analytics.
+
+### Front-end template
+
+1. **پیکربندی یک‌جا** – `assets/js/posthog-config.js` حاوی نمونه تنظیمات زیر است:
+
+   ```js
+   // const POSTHOG_ENABLED = false;
+   // window.POSTHOG_CONFIG = {
+   //   enabled: POSTHOG_ENABLED,
+   //   apiKey: 'phc_YOUR_KEY_HERE',
+   //   apiHost: 'https://analytics.vitreenet.ir'
+   // };
+   // window.safePosthogCapture = function (eventName, properties = {}) { ... };
+   ```
+
+   تنظیم این فایل باعث می‌شود همه صفحات از همان کلید و میزبان استفاده کنند و بتوانید با تغییر یک مقدار (`POSTHOG_ENABLED`) ردگیری را فعال/غیرفعال کنید.
+
+2. **اسنیپت `<head>`** – تمام ۵۲ فایل HTML اکنون این قطعه را در `<head>` دارند:
+
+   ```html
+   <!-- TODO: فعال‌سازی پست‌هاگ را هنگام انتشار فراموش نکنید | TODO: Enable PostHog analytics when going live -->
+   <!--
+   <script>
+     (function () {
+       var config = window.POSTHOG_CONFIG || { enabled: false, apiKey: 'phc_YOUR_KEY_HERE', apiHost: 'https://analytics.vitreenet.ir' };
+       if (!config.enabled) {
+         return;
+       }
+       // ... standard async loader ...
+     })();
+   </script>
+   -->
+   ```
+
+   این اسنیپت از `window.POSTHOG_CONFIG` استفاده می‌کند، پس در زمان فعال‌سازی باید فایل پیکربندی را قبل از آن لود کنید.
+
+3. **رویدادهای صفحه** – انتهای هر فایل HTML شامل یک اسکریپت کامنت‌شده است که نشان می‌دهد کدام رخدادها باید ارسال شوند. مثال برای صفحه محصول:
+
+   ```html
+   <!--
+   <script>
+     document.addEventListener('DOMContentLoaded', function () {
+       const safeCapture = window.safePosthogCapture || function () {};
+       // const productId = document.body.getAttribute('data-product-id') || 'PRODUCT_ID';
+       // safeCapture('product_viewed', { product_id: productId });
+       // document.querySelectorAll('[data-track="add-to-cart"]').forEach(...);
+       // safeCapture('purchase_completed', { order_id: 'ORDER_ID', ... });
+     });
+   </script>
+   -->
+   ```
+
+   صفحات کلیدی (خانه، محصول، فروشگاه، ورود/ثبت‌نام، داشبورد فروشنده/کاربر/ادمین و صفحات مدیریت فروشنده) همگی دارای رخدادهای اختصاصی ذکر شده در بریف هستند.
+
+### Backend helpers
+
+* `backend/utils/posthog-tracking.js` یک ماژول کمکی کامنت‌شده است که پس از فعال‌سازی می‌تواند رخدادهای زیر را ارسال کند: `user_registered`, `seller_approved`, `order_created`, `payment_processed`, `product_published`.
+* هر کنترلر مربوطه یک نمونه استفاده‌ی کامنت‌شده دارد (بعد از ذخیره‌سازی موفق). برای فعال‌سازی کافیست `require` را از حالت توضیح خارج کرده و فراخوانی کمکی را نگه دارید.
+* متغیر محیطی `POSTHOG_ENABLED` باید روی `true` قرار گیرد تا کلاس `PostHog` ساخته شود.
+
+### Activation checklist
+
+1. **Front-end**
+   - `assets/js/posthog-config.js` را از حالت توضیح خارج کرده و کلید/میزبان واقعی را قرار دهید.
+   - فایل پیکربندی را قبل از اسنیپت در هر صفحه بارگذاری کنید (به‌صورت `<script src="/assets/js/posthog-config.js"></script>`).
+   - بلوک‌های اسکریپت رویداد در صفحات موردنظر را از کامنت خارج کرده و سلکتورها را با DOM واقعی هماهنگ کنید.
+
+2. **Backend**
+   - دستور `npm install posthog-node` را در دایرکتوری `backend/` اجرا کنید (در این محیط به دلیل محدودیت شبکه انجام نشد).
+   - متغیرهای `POSTHOG_ENABLED`, `POSTHOG_API_KEY`, `POSTHOG_HOST` را در `.env` مقداردهی کنید.
+   - `require('../utils/posthog-tracking')` را در کنترلرهای مرتبط فعال کرده و فراخوانی‌ها را از حالت کامنت خارج سازید.
+
+3. **Deploy toggle** – با تغییر مقدار `POSTHOG_ENABLED` (در فرانت و بک‌اند) می‌توانید به سرعت بین حالت توسعه (غیرفعال) و تولید (فعال) جابه‌جا شوید.
+
+### Testing tips
+
+* **Front-end** – پس از فعال‌سازی، در DevTools دستور `posthog.debug()` را اجرا کنید تا رخدادهای ارسال‌شده در کنسول نشان داده شود. همچنین رویدادهای نمونه‌ی موجود (مثلاً `featured_product_clicked`) را بررسی کنید.
+* **Backend** – در حالت فعال، لاگ‌های سرور باید بدون خطا اجرا شوند. برای اطمینان از ارسال رخدادها می‌توانید یک پراکسی مانند `tcpdump` یا PostHog Live Events را در محیط staging بررسی کنید.
+* **Fail-safe** – تمام فراخوانی‌ها در بلوک‌های `try/catch` قرار دارند تا در صورت در دسترس نبودن PostHog عملکرد اصلی سامانه مختل نشود.
+
