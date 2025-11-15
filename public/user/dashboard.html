@@ -374,6 +374,10 @@
         });
       }
 
+      function updateBookingsBadge() {
+        updateBookingsBadgeDisplay();
+      }
+
       async function refreshBookingsBadge(force = false) {
         const badges = document.querySelectorAll('#bookings-badge');
         if (!badges.length) return;
@@ -394,6 +398,44 @@
             b.textContent = '';
             b.classList.add('hidden');
           });
+        }
+      }
+
+      // Load user's bookings
+      async function loadBookings() {
+        try {
+          const token = localStorage.getItem('token');
+          if (!token) {
+            console.log('No token, skipping bookings load');
+            return;
+          }
+
+          const response = await fetch('/api/user/bookings', {
+            method: 'GET',
+            headers: {
+              'Authorization': `Bearer ${token}`,
+              'Content-Type': 'application/json'
+            }
+          });
+
+          if (response.ok) {
+            const payload = await response.json();
+            const bookings = Array.isArray(payload)
+              ? payload
+              : (Array.isArray(payload?.items) ? payload.items : []);
+
+            allBookings = bookings;
+            bookingsData = bookings;
+            bookingsLoaded = true;
+            renderBookings(allBookings);
+            updateBookingsBadge();
+          } else if (response.status === 401) {
+            console.log('Unauthorized - user may not be logged in');
+          } else {
+            console.error('Failed to load bookings:', response.status);
+          }
+        } catch (error) {
+          console.error('Error loading bookings:', error);
         }
       }
 
@@ -489,10 +531,18 @@
         renderBookings(status);
       }
 
-      function renderBookings(status) {
+      function renderBookings(input) {
+        if (Array.isArray(input)) {
+          bookingsData = input;
+          bookingsLoaded = true;
+          input = currentBookingFilter || 'all';
+        }
+
         const container = document.getElementById('bookings-container');
         const emptyState = document.getElementById('no-bookings');
         if (!container || !emptyState) return;
+
+        const status = input || 'all';
 
         if (!Array.isArray(bookingsData) || bookingsData.length === 0) {
           container.innerHTML = '';
@@ -747,17 +797,6 @@
   }
 
 
-      // بارگذاری پیش‌فرض
-      showSection('dashboard');
-      updateSidebarUser(); 
-
-      // --------   مقداردهیِ نشان پیام‌ها در اولین بارگذاری   --------
-(async () => {
-  await fetchUserChats();  // فقط لیست چت‌ها را می‌گیرد
-  updateBadge();           // عدد را روی همبرگر و منو می‌نویسد
-})();
-
-
       // منوهای دسکتاپ و موبایل
 
   /* ——— هندل منوهای سایدبار (مستقیم) ——— */
@@ -1000,6 +1039,15 @@ async function fetchUserChats() {
 
   } catch (e) {
     chatsList = [];
+  }
+}
+
+async function loadMessages() {
+  try {
+    await fetchUserChats();
+    updateBadge();
+  } catch (error) {
+    console.error('Error loading messages:', error);
   }
 }
 
@@ -1660,6 +1708,17 @@ async function fetchChatDetails(cid) {
     return null;
   }
 }
+
+  document.addEventListener('DOMContentLoaded', async () => {
+    try {
+      showSection('dashboard');
+      updateSidebarUser();
+      await loadMessages();
+      await loadBookings();
+    } catch (error) {
+      console.error('Initialization error:', error);
+    }
+  });
 
 
 
