@@ -366,6 +366,52 @@
     setTimeout(()=>toast.classList.remove('active'), 2000);
   });
 
+  // ===== PRE-FILL FROM URL PARAMS (from booking flow) =====
+  (function preFillFromURL() {
+    try {
+      const urlParams = new URLSearchParams(window.location.search);
+      const phoneParam = urlParams.get('phone');
+      const nameParam = urlParams.get('name');
+
+      if (phoneParam || nameParam) {
+        // Show message about booking
+        const formSection = document.querySelector('section.glass');
+        if (formSection && !document.getElementById('booking-message')) {
+          const message = document.createElement('div');
+          message.id = 'booking-message';
+          message.style.cssText = 'background: linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, rgba(14, 165, 233, 0.1) 100%); border-radius: 12px; padding: 16px; margin-bottom: 20px; text-align: center; border: 2px solid rgba(16, 185, 129, 0.2);';
+          message.innerHTML = '<p style="color: #374151; font-size: 14px; font-weight: 600; margin: 0;">با ساخت حساب، رزرو اخیر شما نیز ثبت خواهد شد ✓</p>';
+          formSection.insertBefore(message, formSection.querySelector('form'));
+        }
+      }
+
+      if (phoneParam) {
+        const phoneInput = document.querySelector('input[name="phone"]');
+        if (phoneInput) {
+          phoneInput.value = decodeURIComponent(phoneParam);
+        }
+      }
+
+      if (nameParam) {
+        const decodedName = decodeURIComponent(nameParam);
+        const nameParts = decodedName.trim().split(' ');
+
+        const firstnameInput = document.querySelector('input[name="firstname"]');
+        const lastnameInput = document.querySelector('input[name="lastname"]');
+
+        if (firstnameInput && nameParts.length > 0) {
+          firstnameInput.value = nameParts[0];
+        }
+
+        if (lastnameInput && nameParts.length > 1) {
+          lastnameInput.value = nameParts.slice(1).join(' ');
+        }
+      }
+    } catch (err) {
+      console.warn('URL param pre-fill failed:', err);
+    }
+  })();
+
   // فرم اعتبارسنجی ساده و فارسی
 // فرم اعتبارسنجی ساده و فارسی
 document.getElementById('signupForm').addEventListener('submit', function(e){

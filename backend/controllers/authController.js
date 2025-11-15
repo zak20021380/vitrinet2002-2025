@@ -345,6 +345,58 @@ exports.registerUser = async (req, res) => {
     // const { trackUserRegistered } = require('../utils/posthog-tracking');
     // await trackUserRegistered(user);
 
+    // ===== LINK OLD BOOKINGS TO NEW USER =====
+    try {
+      const Booking = require('../models/booking');
+      const { buildPhoneCandidates } = require('../utils/phone');
+
+      // Get all phone variations
+      const phoneCandidates = buildPhoneCandidates(phone);
+
+      // Find all bookings with this phone that don't have a userId yet
+      const oldBookings = await Booking.find({
+        customerPhone: { $in: phoneCandidates },
+        $or: [
+          { userId: { $exists: false } },
+          { userId: null }
+        ]
+      });
+
+      if (oldBookings.length > 0) {
+        console.log(`Found ${oldBookings.length} old bookings for phone ${phone}`);
+
+        // Update all old bookings with the new userId
+        await Booking.updateMany(
+          {
+            customerPhone: { $in: phoneCandidates },
+            $or: [
+              { userId: { $exists: false } },
+              { userId: null }
+            ]
+          },
+          {
+            $set: { userId: user._id }
+          }
+        );
+
+        // Add booking IDs to user's bookings array
+        const bookingIds = oldBookings.map(b => b._id);
+        user.bookings = bookingIds;
+
+        // Update userType based on booking history
+        if (oldBookings.length > 0 && (!user.userType || user.userType === 'product')) {
+          user.userType = user.userType === 'product' ? 'both' : 'service';
+        }
+
+        await user.save();
+
+        console.log(`✅ Linked ${oldBookings.length} bookings to new user ${user._id}`);
+      }
+    } catch (linkErr) {
+      // Non-critical error - just log it
+      console.error('Failed to link old bookings:', linkErr);
+    }
+
     return res.status(201).json({
       success: true,
       message: 'ثبت‌نام با موفقیت انجام شد.',
