@@ -10,6 +10,7 @@ const isAdmin = require('../middlewares/authMiddleware')('admin');
 
 // ✳️ به‌جای خودِ تابع، خروجی فراخوانی‌اش را می‌دهیم
 const auth = require('../middlewares/authMiddleware');
+const protect = auth('user');
 
 // ───────────────────────────────
 // GET /api/user/profile
@@ -143,6 +144,36 @@ router.get('/favorites', auth(), async (req, res) => {
     res.json({ favorites: user.favorites });
   } catch (err) {
     res.status(500).json({ message: 'خطا در دریافت علاقه‌مندی‌ها' });
+  }
+});
+
+// Get user's bookings
+router.get('/bookings', protect, async (req, res) => {
+  try {
+    const Booking = require('../models/booking');
+
+    const bookings = await Booking.find({
+      userId: req.user.id
+    })
+      .populate('sellerId', 'shopName shopUrl')
+      .sort({ bookingDate: -1, startTime: -1 });
+
+    // Format for frontend
+    const formatted = bookings.map(b => ({
+      _id: b._id,
+      service: b.service,
+      sellerName: b.sellerId?.shopName || 'فروشگاه',
+      sellerUrl: b.sellerId?.shopUrl,
+      bookingDate: b.bookingDate,
+      startTime: b.startTime,
+      status: b.status,
+      createdAt: b.createdAt
+    }));
+
+    res.json(formatted);
+  } catch (error) {
+    console.error('Error fetching user bookings:', error);
+    res.status(500).json({ message: 'خطا در بارگذاری رزروها' });
   }
 });
 
