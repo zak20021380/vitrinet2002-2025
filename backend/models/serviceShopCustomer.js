@@ -29,6 +29,15 @@ const serviceShopCustomerSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Booking',
     default: null
+  },
+
+  /* ─── فیلد جدید برای اتصال به کاربر ─── */
+  // ارتباط با کاربر (اختیاری برای سازگاری با گذشته)
+  userId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+    index: true,
+    required: false
   }
 }, { timestamps: true });
 

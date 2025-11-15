@@ -25,7 +25,22 @@ const userSchema = new mongoose.Schema({
   }],
 
   // آیا توسط ادمین برای ارسال پیام مسدود شده است؟
-  blockedByAdmin: { type: Boolean, default: false }
+  blockedByAdmin: { type: Boolean, default: false },
+
+  /* ─── فیلدهای جدید برای سیستم یکپارچه کاربری ─── */
+  // نوع کاربر: محصولات، سرویس‌ها، یا هر دو
+  userType: {
+    type: String,
+    enum: ['product', 'service', 'both'],
+    default: 'both',  // پیش‌فرض برای کاربران جدید
+    index: true
+  },
+
+  // رزروهای سرویس مرتبط با این کاربر
+  bookings: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Booking'
+  }]
 }, { timestamps: true });
 
 module.exports = mongoose.model('User', userSchema);

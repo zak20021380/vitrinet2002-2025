@@ -22,6 +22,15 @@ const bookingSchema = new mongoose.Schema({
     type: String,
     enum: ['pending', 'confirmed', 'completed', 'cancelled'],
     default: 'pending'
+  },
+
+  /* ─── فیلد جدید برای اتصال به کاربر ─── */
+  // ارتباط با کاربر (اختیاری برای سازگاری با گذشته)
+  userId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+    index: true,
+    required: false  // اختیاری برای مایگریشن
   }
 }, { timestamps: true });
 
