@@ -37,6 +37,8 @@
       .avatar-bg { background:linear-gradient(120deg,#10b981 65%,#0ea5e9 100%); }
       .menu-btn { transition: background .16s; }
       .menu-btn.active { background: #e6fcf7; color: #10b981; }
+      .filter-btn { transition: all .2s ease; }
+      .filter-btn.active { background-color: #3b82f6; color: #fff; border-color: transparent; }
       /* همبرگر */
       .ham {
         width: 2.3rem; height: 2.3rem; display: flex; align-items: center; justify-content: center;
@@ -207,7 +209,10 @@
     </footer>
     <script>
 
-      let pollHandle = null; 
+      let pollHandle = null;
+      let bookingsData = [];
+      let bookingsLoaded = false;
+      let currentBookingFilter = 'all';
       // داده‌ی دموی پروفایل
   async function loadProfileSection() {
     let html = `
@@ -285,6 +290,329 @@
 
 
 
+
+      async function ensureUserPhone() {
+        if (window.currentUserPhone) return window.currentUserPhone;
+
+        try {
+          const res = await fetch('/api/user/profile', {
+            method: 'GET',
+            credentials: 'include',
+            headers: { 'Content-Type': 'application/json' }
+          });
+
+          if (!res.ok) return '';
+
+          const user = await res.json();
+          const phone = user.phone || user.mobile || '';
+          window.currentUserPhone = phone;
+          return phone;
+        } catch (_) {
+          return '';
+        }
+      }
+
+      async function fetchBookings(phone) {
+        const res = await fetch(`/api/bookings?phone=${encodeURIComponent(phone)}`, {
+          method: 'GET',
+          credentials: 'include',
+          headers: { 'Content-Type': 'application/json' }
+        });
+
+        if (!res.ok) {
+          let message = 'خطا در دریافت رزروها';
+          try {
+            const data = await res.json();
+            if (data && data.message) message = data.message;
+          } catch (_) {}
+          throw new Error(message);
+        }
+
+        const data = await res.json();
+        return Array.isArray(data.items) ? data.items : [];
+      }
+
+      async function getBookings(force = false) {
+        if (!force && bookingsLoaded) {
+          return { data: bookingsData, hasPhone: true };
+        }
+
+        const phone = await ensureUserPhone();
+        if (!phone) {
+          bookingsData = [];
+          bookingsLoaded = false;
+          return { data: [], hasPhone: false };
+        }
+
+        try {
+          bookingsData = await fetchBookings(phone);
+          bookingsLoaded = true;
+          return { data: bookingsData, hasPhone: true };
+        } catch (err) {
+          bookingsData = [];
+          bookingsLoaded = false;
+          throw err;
+        }
+      }
+
+      function updateBookingsBadgeDisplay() {
+        const badges = document.querySelectorAll('#bookings-badge');
+        if (!badges.length) return;
+
+        const pendingCount = (bookingsData || []).filter(b => (b.status || '').toLowerCase() === 'pending').length;
+        badges.forEach(badge => {
+          if (pendingCount > 0) {
+            badge.textContent = pendingCount.toLocaleString('fa-IR');
+            badge.classList.remove('hidden');
+          } else {
+            badge.textContent = '';
+            badge.classList.add('hidden');
+          }
+        });
+      }
+
+      async function refreshBookingsBadge(force = false) {
+        const badges = document.querySelectorAll('#bookings-badge');
+        if (!badges.length) return;
+
+        try {
+          const result = await getBookings(force);
+          if (!result.hasPhone) {
+            badges.forEach(b => {
+              b.textContent = '';
+              b.classList.add('hidden');
+            });
+            return;
+          }
+          updateBookingsBadgeDisplay();
+        } catch (err) {
+          console.error('refreshBookingsBadge error:', err);
+          badges.forEach(b => {
+            b.textContent = '';
+            b.classList.add('hidden');
+          });
+        }
+      }
+
+      async function loadBookingsSection() {
+        const mainContent = document.getElementById('mainContent');
+        mainContent.innerHTML = `
+    <!-- Bookings Section -->
+    <div id="bookings-section" class="section hidden">
+      <div class="bg-white rounded-lg shadow-md p-6">
+        <h2 class="text-2xl font-bold mb-6 text-gray-800">رزروهای من</h2>
+        
+        <!-- Status Filter Buttons -->
+        <div class="flex flex-wrap gap-3 mb-6">
+          <button data-status="all" onclick="filterBookings('all')" class="filter-btn active px-4 py-2 rounded-lg bg-blue-500 text-white hover:bg-blue-600 transition">
+            همه
+          </button>
+          <button data-status="pending" onclick="filterBookings('pending')" class="filter-btn px-4 py-2 rounded-lg border border-gray-300 hover:bg-gray-50 transition">
+            در انتظار تایید
+          </button>
+          <button data-status="confirmed" onclick="filterBookings('confirmed')" class="filter-btn px-4 py-2 rounded-lg border border-gray-300 hover:bg-gray-50 transition">
+            تایید شده
+          </button>
+          <button data-status="completed" onclick="filterBookings('completed')" class="filter-btn px-4 py-2 rounded-lg border border-gray-300 hover:bg-gray-50 transition">
+            انجام شده
+          </button>
+          <button data-status="cancelled" onclick="filterBookings('cancelled')" class="filter-btn px-4 py-2 rounded-lg border border-gray-300 hover:bg-gray-50 transition">
+            لغو شده
+          </button>
+        </div>
+        
+        <!-- Bookings Container -->
+        <div id="bookings-container" class="space-y-4">
+          <div class="text-center text-gray-400 py-12">در حال دریافت رزروها...</div>
+        </div>
+        
+        <!-- Empty State -->
+        <div id="no-bookings" class="text-center py-12 hidden">
+          <div class="text-6xl mb-4">📅</div>
+          <p class="text-gray-500 text-lg mb-2">شما هنوز رزروی ندارید</p>
+          <p class="text-gray-400 mb-6">برای رزرو خدمات، از صفحه دایرکتوری سرویس‌ها بازدید کنید</p>
+          <a href="/service-directory.html" class="inline-block px-6 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition">
+            مشاهده خدمات
+          </a>
+        </div>
+      </div>
+    </div>
+  `;
+
+        const section = document.getElementById('bookings-section');
+        if (section) section.classList.remove('hidden');
+
+        const container = document.getElementById('bookings-container');
+        const emptyState = document.getElementById('no-bookings');
+        if (container) container.innerHTML = `<div class="text-center text-gray-400 py-12">در حال دریافت رزروها...</div>`;
+        if (emptyState) emptyState.classList.add('hidden');
+
+        try {
+          const result = await getBookings(true);
+          if (!result.hasPhone) {
+            if (container) {
+              container.innerHTML = `<div class="text-center text-red-400 py-12">برای مشاهده رزروها ابتدا وارد شوید یا شماره تماس خود را در پروفایل ثبت کنید.</div>`;
+            }
+            updateBookingsBadgeDisplay();
+            return;
+          }
+
+          updateBookingsBadgeDisplay();
+          filterBookings('all');
+        } catch (err) {
+          console.error('loadBookingsSection error:', err);
+          if (container) {
+            container.innerHTML = `<div class="text-center text-red-400 py-12">خطا در دریافت رزروها. لطفاً بعداً دوباره تلاش کنید.</div>`;
+          }
+          updateBookingsBadgeDisplay();
+        }
+      }
+
+      function setActiveFilterButton(status) {
+        document.querySelectorAll('#bookings-section .filter-btn').forEach(btn => {
+          const isActive = btn.dataset.status === status;
+          btn.classList.remove('active', 'bg-blue-500', 'text-white', 'hover:bg-blue-600', 'border-transparent');
+          btn.classList.add('border', 'border-gray-300', 'text-gray-700', 'hover:bg-gray-50', 'bg-white');
+          if (isActive) {
+            btn.classList.add('active', 'bg-blue-500', 'text-white', 'hover:bg-blue-600', 'border-transparent');
+            btn.classList.remove('border-gray-300', 'hover:bg-gray-50', 'text-gray-700', 'bg-white');
+          }
+        });
+      }
+
+      function filterBookings(status) {
+        currentBookingFilter = status;
+        setActiveFilterButton(status);
+        renderBookings(status);
+      }
+
+      function renderBookings(status) {
+        const container = document.getElementById('bookings-container');
+        const emptyState = document.getElementById('no-bookings');
+        if (!container || !emptyState) return;
+
+        if (!Array.isArray(bookingsData) || bookingsData.length === 0) {
+          container.innerHTML = '';
+          emptyState.classList.remove('hidden');
+          return;
+        }
+
+        const filtered = status === 'all'
+          ? bookingsData
+          : bookingsData.filter(item => (item.status || '').toLowerCase() === status);
+
+        if (!filtered.length) {
+          emptyState.classList.add('hidden');
+          container.innerHTML = `<div class="text-center text-gray-400 py-10">رزروی با این وضعیت پیدا نشد.</div>`;
+          return;
+        }
+
+        emptyState.classList.add('hidden');
+        container.innerHTML = filtered.map(renderBookingCard).join('');
+      }
+
+      function renderBookingCard(booking) {
+        const meta = getBookingStatusMeta(booking.status);
+        const service = escapeHtml(booking.service || '—');
+        const customer = escapeHtml(booking.customerName || '—');
+        const reference = booking._id ? escapeHtml(String(booking._id).slice(-6)) : '—';
+
+        return `
+    <div class="border border-gray-200 rounded-xl p-5 bg-white shadow-sm">
+      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+        <div>
+          <div class="text-lg font-bold text-gray-800">${service}</div>
+          <div class="text-xs text-gray-400" dir="ltr">کد پیگیری: ${reference}</div>
+        </div>
+        <span class="px-3 py-1 text-sm font-bold rounded-full ${meta.classes}">${meta.label}</span>
+      </div>
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4 text-sm text-gray-600">
+        <div class="flex items-center gap-2">
+          <span class="text-gray-500">تاریخ:</span>
+          <span class="font-bold text-gray-700">${formatBookingDate(booking.bookingDate)}</span>
+        </div>
+        <div class="flex items-center gap-2">
+          <span class="text-gray-500">ساعت:</span>
+          <span class="font-bold text-gray-700">${formatBookingTime(booking.startTime)}</span>
+        </div>
+        <div class="flex items-center gap-2">
+          <span class="text-gray-500">نام شما:</span>
+          <span class="font-bold text-gray-700">${customer}</span>
+        </div>
+        <div class="flex items-center gap-2">
+          <span class="text-gray-500">ثبت شده در:</span>
+          <span class="font-bold text-gray-700">${formatBookingDateTime(booking.createdAt)}</span>
+        </div>
+      </div>
+    </div>
+  `;
+      }
+
+      function getBookingStatusMeta(status) {
+        const key = (status || '').toLowerCase();
+        const map = {
+          pending: { label: 'در انتظار تایید', classes: 'bg-yellow-100 text-yellow-700 border border-yellow-200' },
+          confirmed: { label: 'تایید شده', classes: 'bg-emerald-100 text-emerald-700 border border-emerald-200' },
+          completed: { label: 'انجام شده', classes: 'bg-blue-100 text-blue-700 border border-blue-200' },
+          cancelled: { label: 'لغو شده', classes: 'bg-red-100 text-red-600 border border-red-200' }
+        };
+        return map[key] || { label: 'نامشخص', classes: 'bg-gray-100 text-gray-600 border border-gray-200' };
+      }
+
+      function formatBookingDate(dateStr) {
+        const date = parseDateSafely(dateStr);
+        if (!date) return dateStr || '—';
+        return new Intl.DateTimeFormat('fa-IR', {
+          weekday: 'long',
+          year: 'numeric',
+          month: 'long',
+          day: '2-digit'
+        }).format(date);
+      }
+
+      function formatBookingTime(timeStr) {
+        if (!timeStr) return '—';
+        const [hour, minute] = String(timeStr).split(':').map(part => parseInt(part, 10));
+        if (Number.isNaN(hour) || Number.isNaN(minute)) return timeStr;
+        const date = new Date();
+        date.setHours(hour, minute, 0, 0);
+        return new Intl.DateTimeFormat('fa-IR', {
+          hour: '2-digit',
+          minute: '2-digit'
+        }).format(date);
+      }
+
+      function formatBookingDateTime(value) {
+        const date = value ? new Date(value) : null;
+        if (!date || Number.isNaN(date.getTime())) return '—';
+        return new Intl.DateTimeFormat('fa-IR', {
+          year: 'numeric',
+          month: 'long',
+          day: '2-digit',
+          hour: '2-digit',
+          minute: '2-digit'
+        }).format(date);
+      }
+
+      function parseDateSafely(value) {
+        if (!value) return null;
+        const normalized = String(value).trim();
+        const parts = normalized.split(/[-/]/).map(part => parseInt(part, 10));
+        if (parts.length >= 3 && parts.every(num => !Number.isNaN(num))) {
+          return new Date(parts[0], parts[1] - 1, parts[2]);
+        }
+        const parsed = new Date(normalized);
+        return Number.isNaN(parsed.getTime()) ? null : parsed;
+      }
+
+      function escapeHtml(value) {
+        return String(value || '')
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;')
+          .replace(/'/g, '&#39;');
+      }
 
       // داشبورد پیش‌فرض
   const dashboardSection = `
@@ -383,6 +711,7 @@
     else if(section === 'profile') loadProfileSection();
     else if(section === 'favorites') loadFavoritesSection();
     else if(section === 'favshops') loadFavShopsSection();
+    else if(section === 'bookings') loadBookingsSection();
     else if(section === 'messages') loadMessagesSection();
 
     if(section === 'messages') startMsgPolling(); else stopMsgPolling();
@@ -499,6 +828,9 @@
 
       document.querySelectorAll('.sidebar-user-mobile')
               .forEach(el => (el.textContent = masked));
+
+      window.currentUserPhone = phone;
+      refreshBookingsBadge();
     } catch (_) {
       /* اگر خطا بود، سایدبار را بدون تغییر رها کن */
     }
@@ -621,7 +953,7 @@
 async function loadMessagesSection() {
   const box = document.getElementById('mainContent');
   box.innerHTML = `
-    <div class="glass px-4 py-7 fadein">
+    <div id="messages-section" class="glass px-4 py-7 fadein">
       <div class="flex items-center justify-between mb-4">
         <span class="text-xl font-black primary-text">پیام‌های من</span>
         <button class="brand-btn text-sm px-3 py-1.5 rounded-xl" onclick="openAdminMsgModal()">چت با مدیر سایت</button>
