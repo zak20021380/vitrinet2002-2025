@@ -110,6 +110,32 @@ async function updateUserTypes() {
   console.log(`   ✅ Updated ${stats.userTypesUpdated} user types\n`);
 }
 
+async function linkServiceCustomers() {
+  console.log('🏪 Step 3: Linking service customers to users...');
+
+  const customers = await ServiceShopCustomer.find({ userId: { $exists: false } });
+  console.log(`   Found ${customers.length} service customers without userId\n`);
+
+  for (const customer of customers) {
+    try {
+      const user = await User.findOne({ phone: customer.customerPhone });
+
+      if (user) {
+        if (!isDryRun) {
+          customer.userId = user._id;
+          await customer.save();
+        }
+        stats.customersLinked++;
+      }
+
+    } catch (error) {
+      stats.errors.push(`Customer ${customer._id}: ${error.message}`);
+    }
+  }
+
+  console.log(`   ✅ Linked ${stats.customersLinked} service customers\n`);
+}
+
 async function migrateUserProfiles() {
   try {
     console.log('🚀 Starting user profile migration...');
@@ -122,6 +148,7 @@ async function migrateUserProfiles() {
     // Migration steps will go here
     await linkBookingsToUsers();
     await updateUserTypes();
+    await linkServiceCustomers();
 
     console.log('\n📊 MIGRATION SUMMARY:');
     console.log(`   Bookings matched: ${stats.bookingsMatched}`);
