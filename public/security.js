@@ -17,7 +17,8 @@
     document.querySelector('meta[http-equiv="Content-Security-Policy"][data-runtime="1"]').setAttribute('content', "default-src 'self'");
   }
 
-  const SENSITIVE_KEYS = ['token','auth','password','secret'];
+  // Token storage is necessary for authentication - only block plaintext passwords and secrets
+  const SENSITIVE_KEYS = ['password','secret'];
   const storageGuard = (storage) => {
     if (!storage) return;
     const originalSet = storage.setItem;
