@@ -987,10 +987,15 @@
         // Remove any existing modal
         document.getElementById('bookingDetailsModal')?.remove();
 
+        const isMobileViewport = window.matchMedia('(max-width: 640px)').matches;
+        const modalMaxHeight = isMobileViewport ? '96vh' : '92vh';
+        const contentOffset = isMobileViewport ? 150 : 180;
+        const contentMaxHeight = `calc(${modalMaxHeight} - ${contentOffset}px)`;
+
         // Create and insert modal
         document.body.insertAdjacentHTML('beforeend', `
           <div id="bookingDetailsModal" class="fixed inset-0 flex items-end sm:items-center justify-center p-0 sm:p-4" style="z-index:9999;background:rgba(0,0,0,0.5);backdrop-filter:blur(4px);animation:fadein .2s">
-            <div class="bg-gradient-to-br from-white to-gray-50 rounded-t-3xl sm:rounded-3xl w-full sm:max-w-[650px] max-h-[92vh] overflow-hidden shadow-2xl" style="z-index:10000;animation:slideUp .3s ease-out">
+            <div class="bg-gradient-to-br from-white to-gray-50 rounded-t-3xl sm:rounded-3xl w-full sm:max-w-[650px] overflow-hidden shadow-2xl" style="z-index:10000;animation:slideUp .3s ease-out;max-height:${modalMaxHeight}">
 
               <!-- Header with Gradient -->
               <div class="sticky top-0 bg-gradient-to-r from-blue-600 via-blue-500 to-indigo-600 px-6 py-5 flex justify-between items-center shadow-lg" style="z-index:100">
@@ -1010,7 +1015,7 @@
               </div>
 
               <!-- Content with Card Design -->
-              <div class="p-5 sm:p-7 space-y-5 pb-28 sm:pb-7 overflow-y-auto" style="max-height:calc(92vh - 180px)">
+              <div class="p-5 sm:p-7 space-y-5 pb-28 sm:pb-7 overflow-y-auto" style="max-height:${contentMaxHeight}">
 
                 <!-- Service Card -->
                 <div class="bg-white rounded-2xl p-5 shadow-md border border-gray-100 hover:shadow-lg transition-shadow duration-200">
@@ -1160,7 +1165,7 @@
               </div>
 
               <!-- Footer - Mobile Fixed with Gradient -->
-              <div class="fixed sm:sticky bottom-0 left-0 right-0 bg-gradient-to-t from-white via-white to-transparent px-6 pt-4 pb-5 border-t border-gray-200 sm:rounded-b-3xl backdrop-blur-sm" style="box-shadow: 0 -4px 20px rgba(0,0,0,0.08)">
+              <div class="fixed sm:sticky bottom-0 left-0 right-0 bg-gradient-to-t from-white via-white to-transparent px-6 pt-4 pb-5 border-t border-gray-200 sm:rounded-b-3xl backdrop-blur-sm" style="box-shadow: 0 -4px 20px rgba(0,0,0,0.08);padding-bottom:calc(env(safe-area-inset-bottom,0px) + 20px)">
                 <button
                   class="close-booking-modal w-full sm:w-auto px-8 py-3.5 bg-gradient-to-r from-gray-700 to-gray-900 text-white rounded-xl hover:from-gray-800 hover:to-black transition-all font-bold shadow-lg hover:shadow-xl transform hover:scale-[1.02] active:scale-[0.98] duration-200">
                   بستن
