@@ -984,12 +984,43 @@
           }
         }
 
+        // Format booking date to Shamsi (Persian) calendar
+        let bookingDateShamsi = booking.bookingDate;
+        if (booking.bookingDate) {
+          try {
+            // Try to parse the date - it might be in format like "2024-01-15" or "15/01/2024"
+            let dateObj;
+            if (booking.bookingDate.includes('-')) {
+              // Format: YYYY-MM-DD
+              dateObj = new Date(booking.bookingDate);
+            } else if (booking.bookingDate.includes('/')) {
+              // Format: DD/MM/YYYY or MM/DD/YYYY
+              const parts = booking.bookingDate.split('/');
+              if (parts.length === 3) {
+                // Assume DD/MM/YYYY format
+                dateObj = new Date(parts[2], parts[1] - 1, parts[0]);
+              }
+            }
+
+            if (dateObj && !isNaN(dateObj.getTime())) {
+              bookingDateShamsi = dateObj.toLocaleDateString('fa-IR', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+              });
+            }
+          } catch (e) {
+            // Keep original value if conversion fails
+            bookingDateShamsi = booking.bookingDate;
+          }
+        }
+
         // Remove any existing modal
         document.getElementById('bookingDetailsModal')?.remove();
 
         const isMobileViewport = window.matchMedia('(max-width: 640px)').matches;
-        const modalMaxHeight = isMobileViewport ? '96vh' : '92vh';
-        const contentOffset = isMobileViewport ? 150 : 180;
+        const modalMaxHeight = isMobileViewport ? '98vh' : '92vh';
+        const contentOffset = isMobileViewport ? 120 : 180;
         const contentMaxHeight = `calc(${modalMaxHeight} - ${contentOffset}px)`;
 
         // Create and insert modal
@@ -1079,7 +1110,7 @@
                               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
                             </svg>
                           </div>
-                          <span class="text-gray-900 font-semibold">${escapeHtml(booking.bookingDate)}</span>
+                          <span class="text-gray-900 font-semibold">${escapeHtml(bookingDateShamsi)}</span>
                         </div>
                         <div class="flex items-center gap-3 bg-gray-50 rounded-xl p-3">
                           <div class="bg-white p-2 rounded-lg shadow-sm">
