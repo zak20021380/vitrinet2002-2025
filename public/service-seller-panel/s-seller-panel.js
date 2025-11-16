@@ -2023,14 +2023,18 @@ async function fetchInitialData() {
     if (sellerRes.ok) {
       const data = await sellerRes.json();
       const seller = data.seller || data;
-      const store = {
-        id: seller.id || seller._id,
-        storename: seller.storename,
-        shopurl: seller.shopurl,
-        category: seller.category,
-        phone: seller.phone,
-        address: seller.address
-      };
+        const store = {
+          id: seller.id || seller._id,
+          storename: seller.storename,
+          shopurl: seller.shopurl,
+          firstname: seller.firstname || '',
+          lastname: seller.lastname || '',
+          category: seller.category,
+          phone: seller.phone,
+          address: seller.address,
+          startTime: seller.startTime || '',
+          endTime: seller.endTime || ''
+        };
       localStorage.setItem('seller', JSON.stringify(store));
       const fullName = `${seller.firstname || ''} ${seller.lastname || ''}`.trim();
 
@@ -2072,14 +2076,18 @@ async function fetchInitialData() {
     console.error('Error loading initial data', err);
 
     // Fallback seller info when API is unreachable
-    const defaultSeller = {
-      id: 1,
-      storename: 'فروشگاه آزمایشی',
-      shopurl: '',
-      category: 'سرویس',
-      phone: '۰۹۱۲۳۴۵۶۷۸۹',
-      address: 'آدرس نامشخص'
-    };
+      const defaultSeller = {
+        id: 1,
+        storename: 'فروشگاه آزمایشی',
+        shopurl: '',
+        firstname: 'فروشنده',
+        lastname: '',
+        category: 'سرویس',
+        phone: '۰۹۱۲۳۴۵۶۷۸۹',
+        address: 'آدرس نامشخص',
+        startTime: '09:00',
+        endTime: '18:00'
+      };
     const storedSeller = JSON.parse(localStorage.getItem('seller') || 'null') || defaultSeller;
     localStorage.setItem('seller', JSON.stringify(storedSeller));
 
