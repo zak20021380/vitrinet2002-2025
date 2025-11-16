@@ -320,9 +320,17 @@ exports.getCustomerBookings = async (req, res) => {
 
     const items = await Booking.find({ customerPhone: { $regex: regex } })
       .sort({ createdAt: -1 })
+      .populate('sellerId', 'storename shopurl')
       .lean();
 
-    return res.json({ items });
+    // Map seller information to make it easier to access on frontend
+    const bookingsWithSellerInfo = items.map(booking => ({
+      ...booking,
+      sellerName: booking.sellerId?.storename || '',
+      sellerUrl: booking.sellerId?.shopurl || ''
+    }));
+
+    return res.json({ items: bookingsWithSellerInfo });
   } catch (err) {
     console.error('getCustomerBookings error:', err);
     return res.status(500).json({ message: 'خطای داخلی سرور.' });
