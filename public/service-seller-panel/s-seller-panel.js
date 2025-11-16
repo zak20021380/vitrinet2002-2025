@@ -2054,11 +2054,30 @@ async function fetchInitialData() {
     if (servicesRes.ok) {
       const svcJson = await servicesRes.json();
       const svcs = svcJson.items || svcJson.services || (Array.isArray(svcJson) ? svcJson : []);
-      StorageManager.set('vit_services', svcs);
+
+      const normalizedServices = svcs.map((svc, index) => {
+        const fallbackId = `svc-${index}`;
+        const normalizedId = svc?.id ?? svc?._id ?? svc?.serviceId ?? fallbackId;
+        const rawPrice = typeof svc?.price === 'string'
+          ? Number(svc.price.replace(/[^\d.-]/g, ''))
+          : svc?.price;
+        const normalizedPrice = Number.isFinite(rawPrice) ? rawPrice : 0;
+        const primaryImage = svc?.image || (Array.isArray(svc?.images) ? svc.images[0] : '');
+
+        return {
+          ...svc,
+          id: normalizedId,
+          price: normalizedPrice,
+          image: primaryImage
+        };
+      });
+
+      StorageManager.set('vit_services', normalizedServices);
+
       const listEl = document.getElementById('services-list');
       if (listEl) {
-        listEl.innerHTML = svcs.map(s => `
-          <div class="item-card" data-id="${s._id || s.id}">
+        listEl.innerHTML = normalizedServices.map(s => `
+          <div class="item-card" data-id="${s.id}">
             <div class="item-card-header">
               <h4 class="item-title">${s.title}</h4>
             </div>
