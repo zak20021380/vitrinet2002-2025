@@ -205,6 +205,42 @@
         transition: transform .25s cubic-bezier(.8,.2,.3,1.2);
       }
       .mobile-sidebar.open { transform:translateX(0);}
+
+      /* استایل‌های بهبود یافته هدر */
+      header .glass {
+        background: rgba(255, 255, 255, 0.98);
+        backdrop-filter: blur(20px);
+      }
+
+      /* بهبود responsive برای موبایل */
+      @media (max-width: 640px) {
+        header .h-16 {
+          height: 60px;
+        }
+      }
+
+      /* انیمیشن نوار جستجوی موبایل */
+      #mobileSearchBar {
+        transition: all 0.3s ease;
+        max-height: 0;
+        opacity: 0;
+        overflow: hidden;
+      }
+
+      #mobileSearchBar:not(.hidden) {
+        max-height: 100px;
+        opacity: 1;
+        overflow: visible;
+      }
+
+      /* بهبود hover states */
+      header button:active {
+        transform: scale(0.95);
+      }
+
+      header a:active {
+        transform: scale(0.98);
+      }
     </style>
     <script src="/nav-active.js" defer></script>
 
@@ -230,36 +266,150 @@
   <body class="text-gray-800 overflow-x-hidden">
 
     <!-- Header -->
-    <header class="fixed top-0 inset-x-0 z-20 glass border-b shadow flex items-center justify-between px-6 py-3 gap-4">
-      <a href="index.html" class="inline-flex items-center justify-center select-none shrink-0" aria-label="بازگشت به خانه">
-        <span class="inline-flex items-center justify-center w-10 h-10 rounded-2xl avatar-bg text-white text-xl font-black tracking-tight">کو</span>
-      </a>
-      <nav class="flex-1 hidden md:flex items-center justify-center gap-5 text-base">
-        <a href="index.html" class="text-gray-700 hover:text-[#10b981] font-bold">خانه</a>
-      </nav>
-      <div class="flex items-center gap-2">
-        <button id="profileBtn" type="button" class="flex items-center gap-2 px-3 py-1.5 rounded-2xl avatar-bg text-white font-bold text-base shadow-lg focus:outline-none hover:scale-105 transition-all" style="font-family:'Vazirmatn',sans-serif;">
-          <span class="w-9 h-9 flex items-center justify-center rounded-full bg-white/10 text-2xl font-extrabold">ک‌و</span>
-          <span class="hidden sm:inline-block font-bold">پروفایل من</span>
-        </button>
-        <!-- همبرگر موبایل + بَج -->
-        <button id="hamBtn"
-                class="ham lg:hidden relative"
-                title="منو">
-          <!-- آیکون سه‌خط -->
-          <svg width="24" height="24" fill="none" viewBox="0 0 24 24">
-            <rect x="5" y="7" width="14" height="2" rx="1" fill="#10b981"/>
-            <rect x="5" y="11" width="14" height="2" rx="1" fill="#10b981"/>
-            <rect x="5" y="15" width="14" height="2" rx="1" fill="#10b981"/>
-          </svg>
+    <header class="fixed top-0 inset-x-0 z-20 glass border-b border-gray-200/60 shadow-sm">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex items-center justify-between h-16 lg:h-18">
 
-          <!-- 🏷️   نشان تعداد پیام‌ها (در ابتدا خالی و پنهان) -->
-          <span id="hamBadge"
-                class="absolute -top-1.5 -right-1.5 w-5 h-5
-                       bg-red-500 text-white text-[11px] font-extrabold
-                       flex items-center justify-center rounded-full border-2 border-white
-                       hidden">0</span>
-        </button>
+          <!-- بخش راست: لوگو و نام برند -->
+          <div class="flex items-center gap-4 lg:gap-6">
+            <!-- لوگو -->
+            <a href="index.html" class="inline-flex items-center gap-2.5 select-none group" aria-label="بازگشت به خانه">
+              <span class="inline-flex items-center justify-center w-11 h-11 rounded-2xl avatar-bg text-white text-lg font-black tracking-tight shadow-md group-hover:scale-105 transition-transform">
+                VN
+              </span>
+              <div class="hidden sm:flex flex-col">
+                <span class="text-lg font-extrabold text-gray-800 leading-tight">ویترینت</span>
+                <span class="text-[10px] font-medium text-gray-500">داشبورد کاربری</span>
+              </div>
+            </a>
+
+            <!-- جداکننده -->
+            <div class="hidden lg:block w-px h-8 bg-gray-200"></div>
+
+            <!-- نوار جستجو - فقط دسکتاپ -->
+            <div class="hidden lg:flex items-center">
+              <div class="relative">
+                <input
+                  type="search"
+                  placeholder="جستجو در مغازه‌ها، محصولات و خدمات..."
+                  class="w-80 xl:w-96 px-4 py-2.5 pr-11 rounded-xl border border-gray-200 bg-gray-50/50 text-sm font-medium text-gray-700 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500 focus:bg-white transition-all"
+                  id="headerSearch"
+                />
+                <svg class="absolute right-3.5 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <circle cx="11" cy="11" r="8" stroke-width="2"/>
+                  <path d="M21 21l-4.35-4.35" stroke-width="2" stroke-linecap="round"/>
+                </svg>
+              </div>
+            </div>
+          </div>
+
+          <!-- بخش وسط: منوی ناوبری - فقط دسکتاپ -->
+          <nav class="hidden xl:flex items-center gap-1">
+            <a href="index.html" class="px-4 py-2 rounded-lg text-sm font-bold text-gray-700 hover:text-emerald-600 hover:bg-emerald-50/80 transition-colors">
+              خانه
+            </a>
+            <a href="#bookings" class="px-4 py-2 rounded-lg text-sm font-bold text-gray-700 hover:text-emerald-600 hover:bg-emerald-50/80 transition-colors">
+              رزروها
+            </a>
+            <a href="#favorites" class="px-4 py-2 rounded-lg text-sm font-bold text-gray-700 hover:text-emerald-600 hover:bg-emerald-50/80 transition-colors">
+              علاقه‌مندی‌ها
+            </a>
+            <a href="#profile" class="px-4 py-2 rounded-lg text-sm font-bold text-gray-700 hover:text-emerald-600 hover:bg-emerald-50/80 transition-colors">
+              پروفایل
+            </a>
+          </nav>
+
+          <!-- بخش چپ: اکشن‌ها -->
+          <div class="flex items-center gap-2 lg:gap-3">
+
+            <!-- دکمه جستجو موبایل -->
+            <button
+              id="mobileSearchBtn"
+              class="lg:hidden w-10 h-10 rounded-xl bg-gray-100 hover:bg-gray-200 flex items-center justify-center transition-colors"
+              title="جستجو"
+            >
+              <svg class="w-5 h-5 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <circle cx="11" cy="11" r="8" stroke-width="2"/>
+                <path d="M21 21l-4.35-4.35" stroke-width="2" stroke-linecap="round"/>
+              </svg>
+            </button>
+
+            <!-- آیکون پیام‌ها -->
+            <button
+              id="messagesBtn"
+              class="hidden sm:flex relative w-10 h-10 rounded-xl bg-gray-100 hover:bg-gray-200 items-center justify-center transition-colors group"
+              title="پیام‌ها"
+            >
+              <svg class="w-5 h-5 text-gray-600 group-hover:text-emerald-600 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-4 4v-4z"/>
+              </svg>
+              <span id="headerMsgBadge" class="absolute -top-1 -left-1 w-5 h-5 bg-red-500 text-white text-[10px] font-extrabold flex items-center justify-center rounded-full border-2 border-white hidden">0</span>
+            </button>
+
+            <!-- آیکون اعلانات -->
+            <button
+              id="notificationsBtn"
+              class="hidden sm:flex relative w-10 h-10 rounded-xl bg-gray-100 hover:bg-gray-200 items-center justify-center transition-colors group"
+              title="اعلانات"
+            >
+              <svg class="w-5 h-5 text-gray-600 group-hover:text-emerald-600 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
+              </svg>
+              <span id="headerNotifBadge" class="absolute -top-1 -left-1 w-5 h-5 bg-red-500 text-white text-[10px] font-extrabold flex items-center justify-center rounded-full border-2 border-white hidden">0</span>
+            </button>
+
+            <!-- جداکننده -->
+            <div class="hidden sm:block w-px h-8 bg-gray-200"></div>
+
+            <!-- دکمه پروفایل -->
+            <button
+              id="profileBtn"
+              type="button"
+              class="flex items-center gap-2 px-2.5 lg:px-3 py-1.5 lg:py-2 rounded-xl bg-gradient-to-r from-emerald-500 to-cyan-500 hover:from-emerald-600 hover:to-cyan-600 text-white font-bold text-sm shadow-lg shadow-emerald-500/25 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 hover:shadow-xl hover:shadow-emerald-500/30 transition-all"
+            >
+              <span class="w-8 h-8 lg:w-9 lg:h-9 flex items-center justify-center rounded-xl bg-white/20 backdrop-blur-sm text-base lg:text-lg font-extrabold">
+                VN
+              </span>
+              <span class="hidden md:inline-block font-bold text-sm">پروفایل من</span>
+              <svg class="hidden md:block w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"/>
+              </svg>
+            </button>
+
+            <!-- همبرگر موبایل + بَج -->
+            <button
+              id="hamBtn"
+              class="lg:hidden relative w-10 h-10 rounded-xl bg-emerald-500 hover:bg-emerald-600 flex items-center justify-center transition-colors shadow-md"
+              title="منو"
+            >
+              <svg width="20" height="20" fill="none" viewBox="0 0 24 24">
+                <rect x="5" y="6" width="14" height="2" rx="1" fill="#ffffff"/>
+                <rect x="5" y="11" width="14" height="2" rx="1" fill="#ffffff"/>
+                <rect x="5" y="16" width="14" height="2" rx="1" fill="#ffffff"/>
+              </svg>
+              <span
+                id="hamBadge"
+                class="absolute -top-1.5 -right-1.5 w-5 h-5 bg-red-500 text-white text-[10px] font-extrabold flex items-center justify-center rounded-full border-2 border-white shadow-sm hidden"
+              >0</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- نوار جستجوی موبایل (مخفی به صورت پیش‌فرض) -->
+      <div id="mobileSearchBar" class="lg:hidden border-t border-gray-200/60 bg-white/95 backdrop-blur-sm px-4 py-3 hidden">
+        <div class="relative">
+          <input
+            type="search"
+            placeholder="جستجو در مغازه‌ها، محصولات و خدمات..."
+            class="w-full px-4 py-2.5 pr-11 rounded-xl border border-gray-200 bg-gray-50/50 text-sm font-medium text-gray-700 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500 focus:bg-white transition-all"
+            id="mobileHeaderSearch"
+          />
+          <svg class="absolute right-3.5 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <circle cx="11" cy="11" r="8" stroke-width="2"/>
+            <path d="M21 21l-4.35-4.35" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+        </div>
       </div>
     </header>
 
@@ -1575,6 +1725,39 @@
         }
       };
 
+      // دکمه جستجوی موبایل
+      const mobileSearchBtn = document.getElementById('mobileSearchBtn');
+      const mobileSearchBar = document.getElementById('mobileSearchBar');
+      if (mobileSearchBtn && mobileSearchBar) {
+        mobileSearchBtn.addEventListener('click', function() {
+          mobileSearchBar.classList.toggle('hidden');
+          if (!mobileSearchBar.classList.contains('hidden')) {
+            document.getElementById('mobileHeaderSearch').focus();
+          }
+        });
+      }
+
+      // دکمه پیام‌ها - نمایش بخش پیام‌ها
+      const messagesBtn = document.getElementById('messagesBtn');
+      if (messagesBtn) {
+        messagesBtn.addEventListener('click', function() {
+          showSection('messages');
+          if(window.innerWidth < 1024) {
+            openSidebar();
+          }
+        });
+      }
+
+      // دکمه اعلانات - می‌تواند به سیستم اعلانات متصل شود
+      const notificationsBtn = document.getElementById('notificationsBtn');
+      if (notificationsBtn) {
+        notificationsBtn.addEventListener('click', function() {
+          // می‌توانید اینجا یک مودال یا منوی اعلانات باز کنید
+          console.log('Notifications clicked');
+          // برای مثال می‌توان به بخش پیام‌ها هدایت کرد یا یک دراپ‌داون نمایش داد
+        });
+      }
+
       // همبرگر موبایل
       function openSidebar(){
         markNotificationsViewed();
@@ -2544,6 +2727,29 @@ function updateBadge() {
       hamBadge.classList.add('hidden');
     }
   }
+
+  // همگام‌سازی با بَج‌های هدر
+  const headerMsgBadge = document.getElementById('headerMsgBadge');
+  if (headerMsgBadge) {
+    if (total > 0) {
+      headerMsgBadge.textContent = total;
+      headerMsgBadge.classList.remove('hidden');
+    } else {
+      headerMsgBadge.textContent = '';
+      headerMsgBadge.classList.add('hidden');
+    }
+  }
+
+  const headerNotifBadge = document.getElementById('headerNotifBadge');
+  if (headerNotifBadge) {
+    if (total > 0) {
+      headerNotifBadge.textContent = total;
+      headerNotifBadge.classList.remove('hidden');
+    } else {
+      headerNotifBadge.textContent = '';
+      headerNotifBadge.classList.add('hidden');
+    }
+  }
 }
 
 function markNotificationsViewed() {
@@ -2556,6 +2762,18 @@ function markNotificationsViewed() {
   if (hamBadge) {
     hamBadge.textContent = '';
     hamBadge.classList.add('hidden');
+  }
+
+  // پاک کردن بَج‌های هدر
+  const headerMsgBadge = document.getElementById('headerMsgBadge');
+  if (headerMsgBadge) {
+    headerMsgBadge.textContent = '';
+    headerMsgBadge.classList.add('hidden');
+  }
+  const headerNotifBadge = document.getElementById('headerNotifBadge');
+  if (headerNotifBadge) {
+    headerNotifBadge.textContent = '';
+    headerNotifBadge.classList.add('hidden');
   }
 }
 
