@@ -35,33 +35,146 @@
       .filter-btn { transition: all .2s ease; }
       .filter-btn.active { background-color: #3b82f6; color: #fff; border-color: transparent; }
       .quick-action {
-        background: #f8fafc;
-        border: 1px solid #e2e8f0;
-        border-radius: 1.25rem;
-        min-height: 96px;
-        padding: 1.1rem;
+        background: #ffffff;
+        border: 1px solid #e5e7eb;
+        border-radius: 1rem;
+        min-height: 110px;
+        padding: 1.25rem 1rem;
         text-align: center;
-        color: #1f2937;
+        color: #374151;
         display: flex;
         flex-direction: column;
         align-items: center;
         justify-content: center;
-        gap: 0.45rem;
-        font-weight: 700;
+        gap: 0.65rem;
+        font-weight: 600;
+        font-size: 0.9rem;
         text-decoration: none;
-        transition: transform .18s ease, box-shadow .18s ease, background .18s ease;
+        transition: all .2s cubic-bezier(0.4, 0, 0.2, 1);
         cursor: pointer;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
       }
       .quick-action:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 12px 24px #0ea5e91a;
-        background: #f1f5f9;
+        transform: translateY(-3px);
+        box-shadow: 0 8px 20px rgba(16, 185, 129, 0.12);
+        background: #fafafa;
+        border-color: #10b98120;
       }
       .quick-action:focus-visible {
-        outline: 2px solid #0ea5e9;
-        outline-offset: 3px;
+        outline: 2px solid #10b981;
+        outline-offset: 2px;
       }
-      .quick-action span { line-height: 1.35; }
+      .quick-action-icon {
+        width: 36px;
+        height: 36px;
+        stroke: #10b981;
+        stroke-width: 1.5;
+        fill: none;
+        transition: all .2s ease;
+      }
+      .quick-action:hover .quick-action-icon {
+        stroke: #059669;
+        transform: scale(1.08);
+      }
+      .quick-action-label {
+        line-height: 1.4;
+        letter-spacing: -0.01em;
+      }
+      .quick-action-more {
+        background: #f9fafb;
+        border: 1px dashed #d1d5db;
+        color: #6b7280;
+        font-size: 0.85rem;
+      }
+      .quick-action-more:hover {
+        background: #f3f4f6;
+        border-color: #9ca3af;
+        color: #4b5563;
+      }
+      .quick-action-more .quick-action-icon {
+        stroke: #9ca3af;
+      }
+      /* مودال اقدامات بیشتر */
+      .more-actions-modal {
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.4);
+        backdrop-filter: blur(4px);
+        z-index: 100;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        padding: 1rem;
+      }
+      .more-actions-modal.active {
+        display: flex;
+        animation: fadein .2s ease;
+      }
+      .more-actions-content {
+        background: white;
+        border-radius: 1.25rem;
+        padding: 1.75rem 1.5rem;
+        max-width: 500px;
+        width: 100%;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+        animation: slideUp .3s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+      .more-actions-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1.25rem;
+        padding-bottom: 1rem;
+        border-bottom: 1px solid #e5e7eb;
+      }
+      .more-actions-close {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        background: #f3f4f6;
+        border: none;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: background .2s;
+      }
+      .more-actions-close:hover {
+        background: #e5e7eb;
+      }
+      .more-actions-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0.75rem;
+      }
+      .more-action-item {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 0.875rem 1rem;
+        border-radius: 0.75rem;
+        background: #f9fafb;
+        border: 1px solid #e5e7eb;
+        text-decoration: none;
+        color: #374151;
+        font-weight: 500;
+        font-size: 0.875rem;
+        transition: all .2s ease;
+        cursor: pointer;
+      }
+      .more-action-item:hover {
+        background: #f3f4f6;
+        border-color: #10b98130;
+        transform: translateY(-1px);
+      }
+      .more-action-icon {
+        width: 22px;
+        height: 22px;
+        stroke: #6b7280;
+        stroke-width: 1.8;
+        fill: none;
+        flex-shrink: 0;
+      }
       /* همبرگر */
       .ham {
         width: 2.3rem; height: 2.3rem; display: flex; align-items: center; justify-content: center;
@@ -1038,42 +1151,119 @@
       <div class="text-gray-500 text-sm md:text-base">امیدواریم تجربه‌ی خوبی داشته باشید.</div>
     </div>
   </div>
-  <div class="glass p-5 md:p-6 fadein">
-    <div class="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-3 md:gap-4">
-      <a href="/all-products.html" class="quick-action">
-        <span class="text-2xl md:text-3xl">🛍️</span>
-        <span class="text-sm md:text-base">مشاهده محصولات</span>
-      </a>
-      <a href="/all-shops.html" class="quick-action">
-        <span class="text-2xl md:text-3xl">🏪</span>
-        <span class="text-sm md:text-base">مشاهده فروشگاه‌ها</span>
-      </a>
+  <div class="glass p-5 md:p-7 fadein">
+    <h2 class="text-base md:text-lg font-bold text-gray-700 mb-4 md:mb-5">دسترسی سریع</h2>
+    <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 md:gap-4">
+      <!-- رزرو خدمات -->
       <a href="/service-directory.html" class="quick-action">
-        <span class="text-2xl md:text-3xl">💇</span>
-        <span class="text-sm md:text-base">رزرو خدمات</span>
+        <svg class="quick-action-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+          <line x1="16" y1="2" x2="16" y2="6"></line>
+          <line x1="8" y1="2" x2="8" y2="6"></line>
+          <line x1="3" y1="10" x2="21" y2="10"></line>
+          <path d="M8 14h.01"></path>
+          <path d="M12 14h.01"></path>
+          <path d="M16 14h.01"></path>
+          <path d="M8 18h.01"></path>
+          <path d="M12 18h.01"></path>
+        </svg>
+        <span class="quick-action-label">رزرو خدمات</span>
       </a>
-      <button type="button" class="quick-action" data-section="bookings">
-        <span class="text-2xl md:text-3xl">📅</span>
-        <span class="text-sm md:text-base">رزروهای من</span>
-      </button>
-      <button type="button" class="quick-action" data-section="favorites">
-        <span class="text-2xl md:text-3xl">❤️</span>
-        <span class="text-sm md:text-base">علاقه‌مندی‌ها</span>
-      </button>
+
+      <!-- فروشگاه / محصولات -->
+      <a href="/all-products.html" class="quick-action">
+        <svg class="quick-action-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="9" cy="21" r="1"></circle>
+          <circle cx="20" cy="21" r="1"></circle>
+          <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+        </svg>
+        <span class="quick-action-label">فروشگاه / محصولات</span>
+      </a>
+
+      <!-- پیام‌ها -->
       <button type="button" class="quick-action" data-section="messages">
-        <span class="text-2xl md:text-3xl">💬</span>
-        <span class="text-sm md:text-base">پیام‌ها</span>
+        <svg class="quick-action-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+          <line x1="9" y1="10" x2="15" y2="10"></line>
+          <line x1="9" y1="14" x2="13" y2="14"></line>
+        </svg>
+        <span class="quick-action-label">پیام‌ها</span>
       </button>
-      <a href="/search.html" class="quick-action">
-        <span class="text-2xl md:text-3xl">🔍</span>
-        <span class="text-sm md:text-base">جستجو</span>
-      </a>
-      <button type="button" class="quick-action" data-section="profile">
-        <span class="text-2xl md:text-3xl">⚙️</span>
-        <span class="text-sm md:text-base">تنظیمات</span>
+
+      <!-- علاقه‌مندی‌ها -->
+      <button type="button" class="quick-action" data-section="favorites">
+        <svg class="quick-action-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+        </svg>
+        <span class="quick-action-label">علاقه‌مندی‌ها</span>
+      </button>
+
+      <!-- بیشتر... -->
+      <button type="button" class="quick-action quick-action-more" id="moreActionsBtn">
+        <svg class="quick-action-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="1"></circle>
+          <circle cx="19" cy="12" r="1"></circle>
+          <circle cx="5" cy="12" r="1"></circle>
+        </svg>
+        <span class="quick-action-label">بیشتر…</span>
       </button>
     </div>
   </div>
+
+  <!-- مودال اقدامات بیشتر -->
+  <div id="moreActionsModal" class="more-actions-modal">
+    <div class="more-actions-content">
+      <div class="more-actions-header">
+        <h3 class="text-lg font-bold text-gray-800">اقدامات بیشتر</h3>
+        <button type="button" class="more-actions-close" id="closeMoreActions">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+      <div class="more-actions-grid">
+        <!-- رزروهای من -->
+        <button type="button" class="more-action-item" data-section="bookings">
+          <svg class="more-action-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+            <line x1="16" y1="2" x2="16" y2="6"></line>
+            <line x1="8" y1="2" x2="8" y2="6"></line>
+            <line x1="3" y1="10" x2="21" y2="10"></line>
+          </svg>
+          <span>رزروهای من</span>
+        </button>
+
+        <!-- فروشگاه‌ها -->
+        <a href="/all-shops.html" class="more-action-item">
+          <svg class="more-action-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+            <polyline points="9 22 9 12 15 12 15 22"></polyline>
+          </svg>
+          <span>فروشگاه‌ها</span>
+        </a>
+
+        <!-- جستجو -->
+        <a href="/search.html" class="more-action-item">
+          <svg class="more-action-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="11" cy="11" r="8"></circle>
+            <path d="m21 21-4.35-4.35"></path>
+          </svg>
+          <span>جستجو</span>
+        </a>
+
+        <!-- تنظیمات -->
+        <button type="button" class="more-action-item" data-section="profile">
+          <svg class="more-action-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="3"></circle>
+            <path d="M12 1v6m0 6v6m5.2-13.2l-4.2 4.2m0 6l-4.2 4.2M23 12h-6m-6 0H5m13.2 5.2l-4.2-4.2m0-6l-4.2-4.2"></path>
+          </svg>
+          <span>تنظیمات</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
   <div class="grid grid-cols-1 md:grid-cols-2 gap-5 fadein">
     <div id="favBoxClick" class="glass p-6 flex flex-col items-center text-center min-h-[135px] justify-center cursor-pointer hover:shadow-lg transition">
       <div class="text-[#0ea5e9] font-bold text-base mb-1">علاقه‌مندی‌های ثبت‌شده</div>
@@ -1091,6 +1281,7 @@
 
 
   function setupQuickActions() {
+    // اقدامات سریع با data-section
     document.querySelectorAll('.quick-action[data-section]').forEach(action => {
       action.addEventListener('click', (event) => {
         event.preventDefault();
@@ -1099,6 +1290,51 @@
           showSection(target);
         }
       });
+    });
+
+    // دکمه "بیشتر..."
+    const moreBtn = document.getElementById('moreActionsBtn');
+    const modal = document.getElementById('moreActionsModal');
+    const closeBtn = document.getElementById('closeMoreActions');
+
+    if (moreBtn && modal) {
+      moreBtn.addEventListener('click', () => {
+        modal.classList.add('active');
+      });
+    }
+
+    if (closeBtn && modal) {
+      closeBtn.addEventListener('click', () => {
+        modal.classList.remove('active');
+      });
+    }
+
+    // بستن مودال با کلیک روی پس‌زمینه
+    if (modal) {
+      modal.addEventListener('click', (e) => {
+        if (e.target === modal) {
+          modal.classList.remove('active');
+        }
+      });
+    }
+
+    // اقدامات بیشتر در مودال
+    document.querySelectorAll('.more-action-item[data-section]').forEach(item => {
+      item.addEventListener('click', (event) => {
+        event.preventDefault();
+        const target = item.getAttribute('data-section');
+        if (target) {
+          modal.classList.remove('active');
+          showSection(target);
+        }
+      });
+    });
+
+    // بستن مودال با کلید ESC
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && modal && modal.classList.contains('active')) {
+        modal.classList.remove('active');
+      }
     });
   }
 
