@@ -246,35 +246,65 @@
     .portfolio-card-actions {
       display: flex;
       flex-direction: column;
-      gap: 0.5rem;
+      gap: 0.625rem;
       min-width: 140px;
+      width: 100%;
     }
     @media (min-width: 480px) {
       .portfolio-card-actions {
         flex-direction: row;
         align-items: center;
         justify-content: flex-end;
+        gap: 0.75rem;
+      }
+    }
+    @media (min-width: 640px) {
+      .portfolio-card-actions {
+        width: auto;
+        gap: 0.875rem;
+      }
+    }
+    @media (max-width: 400px) {
+      .portfolio-card-actions {
+        gap: 0.5rem;
       }
     }
     .portfolio-action-button {
-      border-radius: 16px;
-      font-size: 0.875rem;
+      border-radius: 14px;
+      font-size: clamp(0.8125rem, 3vw, 0.875rem);
       font-weight: 700;
       display: inline-flex;
       align-items: center;
       justify-content: center;
       gap: 0.5rem;
-      padding: 0.875rem 1.25rem;
+      padding: 0.75rem 1.125rem;
+      min-height: 44px;
       transition: transform 0.18s ease, box-shadow 0.18s ease;
       cursor: pointer;
       white-space: nowrap;
       text-decoration: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+    @media (min-width: 480px) {
+      .portfolio-action-button {
+        padding: 0.875rem 1.25rem;
+        border-radius: 16px;
+        font-size: 0.875rem;
+      }
     }
     @media (min-width: 640px) {
       .portfolio-action-button {
         border-radius: 9999px;
         font-size: 0.8rem;
         padding: 0.65rem 1.1rem;
+        min-height: auto;
+      }
+    }
+    @media (max-width: 400px) {
+      .portfolio-action-button {
+        padding: 0.625rem 1rem;
+        font-size: clamp(0.75rem, 2.75vw, 0.8125rem);
+        border-radius: 12px;
       }
     }
     .portfolio-action-button[data-variant="primary"] {
@@ -286,6 +316,10 @@
       transform: translateY(-1px);
       box-shadow: 0 12px 28px rgba(14, 165, 233, 0.32);
     }
+    .portfolio-action-button[data-variant="primary"]:active {
+      transform: scale(0.97);
+      box-shadow: 0 4px 12px rgba(14, 165, 233, 0.24);
+    }
     .portfolio-action-button[data-variant="secondary"] {
       background: rgba(14, 165, 233, 0.12);
       color: #0369a1;
@@ -296,16 +330,31 @@
       box-shadow: 0 8px 20px rgba(14, 165, 233, 0.22);
       background: rgba(14, 165, 233, 0.16);
     }
+    .portfolio-action-button[data-variant="secondary"]:active {
+      transform: scale(0.97);
+      box-shadow: 0 4px 12px rgba(14, 165, 233, 0.18);
+    }
     .portfolio-modal-metrics {
       display: flex;
       align-items: stretch;
       flex-wrap: wrap;
-      gap: 0.75rem;
+      gap: 0.625rem;
       width: 100%;
+    }
+    @media (min-width: 480px) {
+      .portfolio-modal-metrics {
+        gap: 0.75rem;
+      }
     }
     @media (min-width: 640px) {
       .portfolio-modal-metrics {
         width: auto;
+        gap: 0.875rem;
+      }
+    }
+    @media (max-width: 400px) {
+      .portfolio-modal-metrics {
+        gap: 0.5rem;
       }
     }
     .portfolio-metric-chip {
@@ -313,18 +362,27 @@
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      gap: 0.35rem;
-      padding: 0.85rem 1.15rem;
-      border-radius: 16px;
+      gap: 0.25rem;
+      padding: 0.75rem 0.875rem;
+      border-radius: 14px;
       background: linear-gradient(135deg, rgba(15, 118, 110, 0.14), rgba(14, 165, 233, 0.12));
       border: 1px solid rgba(14, 165, 233, 0.18);
       color: #0f172a;
-      font-size: 0.8rem;
+      font-size: clamp(0.7rem, 2.5vw, 0.8rem);
       font-weight: 700;
       white-space: nowrap;
       flex: 1;
-      min-width: 110px;
-      box-shadow: 0 4px 12px rgba(14, 165, 233, 0.08);
+      min-width: 100px;
+      box-shadow: 0 2px 8px rgba(14, 165, 233, 0.08);
+    }
+    @media (min-width: 480px) {
+      .portfolio-metric-chip {
+        gap: 0.35rem;
+        padding: 0.85rem 1.15rem;
+        border-radius: 16px;
+        min-width: 110px;
+        box-shadow: 0 4px 12px rgba(14, 165, 233, 0.08);
+      }
     }
     @media (min-width: 640px) {
       .portfolio-metric-chip {
@@ -334,6 +392,15 @@
         border-radius: 9999px;
         min-width: auto;
         flex: 0;
+        font-size: 0.8rem;
+      }
+    }
+    @media (max-width: 400px) {
+      .portfolio-metric-chip {
+        min-width: 90px;
+        padding: 0.625rem 0.75rem;
+        gap: 0.2rem;
+        border-radius: 12px;
       }
     }
     .portfolio-metric-chip[data-variant="likes"] {
@@ -347,7 +414,7 @@
       border-color: rgba(14, 165, 233, 0.25);
     }
     .portfolio-metric-label {
-      font-size: 0.7rem;
+      font-size: clamp(0.625rem, 2vw, 0.7rem);
       font-weight: 600;
       opacity: 0.75;
       order: 2;
@@ -359,7 +426,7 @@
       }
     }
     .portfolio-metric-value {
-      font-size: 1.5rem;
+      font-size: clamp(1.25rem, 5vw, 1.5rem);
       font-weight: 900;
       line-height: 1;
       order: 1;
@@ -370,13 +437,23 @@
         order: 0;
       }
     }
+    @media (max-width: 400px) {
+      .portfolio-metric-value {
+        font-size: clamp(1.125rem, 4.5vw, 1.25rem);
+      }
+    }
     .portfolio-metric-chip i {
-      font-size: 1.25rem;
+      font-size: clamp(1.125rem, 4vw, 1.25rem);
       order: 0;
     }
     @media (min-width: 640px) {
       .portfolio-metric-chip i {
         font-size: 1rem;
+      }
+    }
+    @media (max-width: 400px) {
+      .portfolio-metric-chip i {
+        font-size: clamp(1rem, 3.5vw, 1.125rem);
       }
     }
     .portfolio-sort-group {
@@ -414,13 +491,40 @@
     .portfolio-modal-backdrop {
       position: fixed;
       inset: 0;
-      background: rgba(15, 23, 42, 0.65);
-      backdrop-filter: blur(12px);
+      background: rgba(15, 23, 42, 0.7);
+      backdrop-filter: blur(16px);
       display: flex;
       align-items: flex-end;
       justify-content: center;
       padding: 0;
       z-index: 50;
+      animation: fadeIn 0.2s ease-in-out;
+    }
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+      }
+      to {
+        opacity: 1;
+      }
+    }
+    @keyframes slideUp {
+      from {
+        transform: translateY(100%);
+      }
+      to {
+        transform: translateY(0);
+      }
+    }
+    @keyframes scaleIn {
+      from {
+        transform: scale(0.95);
+        opacity: 0;
+      }
+      to {
+        transform: scale(1);
+        opacity: 1;
+      }
     }
     @media (min-width: 640px) {
       .portfolio-modal-backdrop {
@@ -435,6 +539,7 @@
     }
     .portfolio-modal-container {
       width: 100%;
+      max-width: 90vw;
       max-height: 92vh;
       background: #ffffff;
       border-radius: 28px 28px 0 0;
@@ -443,20 +548,30 @@
       overflow: hidden;
       display: grid;
       grid-template-rows: auto 1fr;
+      animation: slideUp 0.3s ease-out;
     }
     @media (min-width: 640px) {
       .portfolio-modal-container {
-        width: min(100%, 640px);
+        width: min(90vw, 640px);
+        max-width: 640px;
         max-height: min(88vh, 720px);
         border-radius: 24px;
         box-shadow: 0 24px 60px rgba(15, 118, 110, 0.22);
+        animation: scaleIn 0.3s ease-out;
       }
     }
     @media (min-width: 1024px) {
       .portfolio-modal-container {
-        width: min(100%, 860px);
+        width: min(90vw, 860px);
+        max-width: 860px;
         grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr);
         grid-template-rows: minmax(0, 1fr);
+      }
+    }
+    @media (max-width: 400px) {
+      .portfolio-modal-container {
+        max-width: 95vw;
+        border-radius: 24px 24px 0 0;
       }
     }
     .portfolio-modal-media {
@@ -482,12 +597,18 @@
       display: block;
     }
     .portfolio-modal-body {
-      padding: 1.75rem 1.25rem 1.5rem;
+      padding: 1.5rem 1rem 1.25rem;
       display: flex;
       flex-direction: column;
-      gap: 1.5rem;
+      gap: 1.25rem;
       overflow-y: auto;
       max-height: calc(92vh - 240px);
+    }
+    @media (min-width: 480px) {
+      .portfolio-modal-body {
+        padding: 1.75rem 1.5rem 1.5rem;
+        gap: 1.5rem;
+      }
     }
     @media (min-width: 640px) {
       .portfolio-modal-body {
@@ -499,38 +620,78 @@
     @media (min-width: 768px) {
       .portfolio-modal-body {
         padding: 2rem;
+        gap: 1.75rem;
+      }
+    }
+    @media (max-width: 400px) {
+      .portfolio-modal-body {
+        padding: 1.25rem 0.875rem 1rem;
+        gap: 1rem;
       }
     }
     .portfolio-modal-close {
       position: absolute;
-      top: 1rem;
-      left: 1rem;
+      top: 0.75rem;
+      left: 0.75rem;
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      width: 44px;
-      height: 44px;
+      width: 40px;
+      height: 40px;
       border-radius: 9999px;
-      background: rgba(15, 23, 42, 0.8);
+      background: rgba(15, 23, 42, 0.85);
       color: #fff;
       border: 1px solid rgba(255, 255, 255, 0.2);
       cursor: pointer;
-      box-shadow: 0 8px 24px rgba(15, 23, 42, 0.32);
-      transition: transform 0.18s ease, background 0.18s ease;
+      box-shadow: 0 4px 12px rgba(15, 23, 42, 0.3);
+      transition: transform 0.18s ease, background 0.18s ease, box-shadow 0.18s ease;
       z-index: 10;
+      -webkit-tap-highlight-color: transparent;
     }
     .portfolio-modal-close:hover {
       transform: scale(1.08);
       background: rgba(15, 23, 42, 0.95);
       box-shadow: 0 10px 30px rgba(15, 23, 42, 0.4);
     }
+    .portfolio-modal-close:active {
+      transform: scale(0.95);
+    }
+    @media (min-width: 640px) {
+      .portfolio-modal-close {
+        top: 1rem;
+        left: 1rem;
+        width: 44px;
+        height: 44px;
+        box-shadow: 0 8px 24px rgba(15, 23, 42, 0.32);
+      }
+    }
+    @media (max-width: 400px) {
+      .portfolio-modal-close {
+        width: 36px;
+        height: 36px;
+        top: 0.625rem;
+        left: 0.625rem;
+      }
+    }
     .portfolio-modal-header {
-      padding-bottom: 1.25rem;
+      padding-bottom: 1rem;
       border-bottom: 1px solid rgba(226, 232, 240, 0.6);
+    }
+    .portfolio-modal-header h3 {
+      font-size: clamp(1.125rem, 4.5vw, 1.5rem);
+      line-height: 1.3;
+    }
+    .portfolio-modal-header p {
+      font-size: clamp(0.875rem, 3vw, 1rem);
     }
     @media (min-width: 640px) {
       .portfolio-modal-header {
         padding-bottom: 1.5rem;
+      }
+    }
+    @media (max-width: 400px) {
+      .portfolio-modal-header {
+        padding-bottom: 0.875rem;
       }
     }
     .portfolio-modal-handle {
@@ -547,6 +708,56 @@
     @media (min-width: 640px) {
       .portfolio-modal-handle {
         display: none;
+      }
+    }
+    /* Modal description and text sizing */
+    .portfolio-modal-body > p {
+      font-size: clamp(0.875rem, 3vw, 1rem);
+      line-height: 1.65;
+    }
+    .portfolio-modal-body > div {
+      font-size: clamp(0.8125rem, 2.75vw, 0.875rem);
+    }
+    /* Ensure proper contrast for accessibility */
+    .portfolio-modal-container {
+      color: #0f172a;
+    }
+    /* Smooth closing animation */
+    .portfolio-modal-backdrop.closing {
+      animation: fadeOut 0.2s ease-in-out forwards;
+    }
+    .portfolio-modal-container.closing {
+      animation: slideDown 0.3s ease-in forwards;
+    }
+    @keyframes fadeOut {
+      from {
+        opacity: 1;
+      }
+      to {
+        opacity: 0;
+      }
+    }
+    @keyframes slideDown {
+      from {
+        transform: translateY(0);
+      }
+      to {
+        transform: translateY(100%);
+      }
+    }
+    @media (min-width: 640px) {
+      .portfolio-modal-container.closing {
+        animation: scaleOut 0.3s ease-in forwards;
+      }
+    }
+    @keyframes scaleOut {
+      from {
+        transform: scale(1);
+        opacity: 1;
+      }
+      to {
+        transform: scale(0.95);
+        opacity: 0;
       }
     }
     @media (max-width: 639px) {
