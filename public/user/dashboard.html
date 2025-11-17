@@ -94,6 +94,184 @@
       .quick-action-more .quick-action-icon {
         stroke: #9ca3af;
       }
+      /* کارت های رزرو مدرن */
+      .booking-card {
+        position: relative;
+        overflow: hidden;
+        border-radius: 1.75rem;
+        padding: 1.75rem;
+        background: radial-gradient(circle at top right, rgba(14, 165, 233, 0.08), transparent 45%),
+                    radial-gradient(circle at bottom left, rgba(16, 185, 129, 0.08), transparent 55%),
+                    #ffffff;
+        border: 1px solid rgba(15, 23, 42, 0.07);
+        box-shadow: 0 24px 55px rgba(15, 23, 42, 0.08);
+        transition: transform .35s cubic-bezier(0.4, 0, 0.2, 1),
+                    box-shadow .35s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+
+      .booking-card::before {
+        content: '';
+        position: absolute;
+        inset-inline-start: 0;
+        top: 0;
+        width: 6px;
+        height: 100%;
+        border-radius: 0 999px 999px 0;
+        background: linear-gradient(180deg, #0ea5e9, #10b981);
+        opacity: 0.8;
+      }
+
+      .booking-card::after {
+        content: '';
+        position: absolute;
+        inset: 12% 15%;
+        border-radius: 2rem;
+        background: rgba(255, 255, 255, 0.8);
+        filter: blur(40px);
+        z-index: 0;
+        pointer-events: none;
+      }
+
+      .booking-card:hover {
+        transform: translateY(-8px) scale(1.01);
+        box-shadow: 0 35px 65px rgba(15, 23, 42, 0.14);
+      }
+
+      .booking-card > * {
+        position: relative;
+        z-index: 1;
+      }
+
+      .booking-card--pending::before {
+        background: linear-gradient(180deg, #fbbf24, #f97316);
+      }
+      .booking-card--confirmed::before {
+        background: linear-gradient(180deg, #10b981, #059669);
+      }
+      .booking-card--completed::before {
+        background: linear-gradient(180deg, #6366f1, #2563eb);
+      }
+      .booking-card--cancelled::before {
+        background: linear-gradient(180deg, #ef4444, #dc2626);
+      }
+      .booking-card--default::before {
+        background: linear-gradient(180deg, #94a3b8, #64748b);
+      }
+
+      .status-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        padding: 0.4rem 1.2rem;
+        border-radius: 999px;
+        font-size: 0.85rem;
+        font-weight: 700;
+        letter-spacing: -0.01em;
+        border: 1px solid transparent;
+        box-shadow: 0 5px 15px rgba(15, 23, 42, 0.08);
+      }
+
+      .status-badge svg {
+        width: 16px;
+        height: 16px;
+      }
+
+      .status-badge--pending { color: #92400e; background: #fef3c7; border-color: #fcd34d; }
+      .status-badge--confirmed { color: #065f46; background: #d1fae5; border-color: #34d399; }
+      .status-badge--completed { color: #312e81; background: #e0e7ff; border-color: #a5b4fc; }
+      .status-badge--cancelled { color: #991b1b; background: #fee2e2; border-color: #fca5a5; }
+      .status-badge--default { color: #1f2937; background: #f3f4f6; border-color: #e5e7eb; }
+
+      .booking-meta-tile {
+        border-radius: 1.1rem;
+        padding: 0.85rem 1rem;
+        background: rgba(241, 245, 249, 0.65);
+        border: 1px solid rgba(148, 163, 184, 0.25);
+        display: flex;
+        flex-direction: column;
+        gap: 0.3rem;
+        min-height: 88px;
+      }
+
+      .booking-meta-label {
+        font-size: 0.78rem;
+        color: #94a3b8;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+
+      .booking-meta-value {
+        font-weight: 600;
+        color: #0f172a;
+        display: flex;
+        gap: 0.45rem;
+        align-items: center;
+        flex-wrap: wrap;
+      }
+
+      .booking-meta-value i {
+        font-size: 1rem;
+      }
+
+      .booking-action-btn {
+        border-radius: 999px;
+        padding: 0.7rem 1.45rem;
+        font-weight: 700;
+        font-size: 0.9rem;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.4rem;
+        transition: all .2s ease;
+        border: none;
+        cursor: pointer;
+        white-space: nowrap;
+      }
+
+      .booking-action-btn--primary {
+        background: linear-gradient(135deg, #2563eb, #7c3aed);
+        color: #fff;
+        box-shadow: 0 10px 25px rgba(79, 70, 229, 0.25);
+      }
+
+      .booking-action-btn--primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 18px 32px rgba(79, 70, 229, 0.35);
+      }
+
+      .booking-action-btn--danger {
+        background: linear-gradient(135deg, #ef4444, #f97316);
+        color: #fff;
+        box-shadow: 0 10px 22px rgba(239, 68, 68, 0.25);
+      }
+
+      .booking-action-btn--danger:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 18px 30px rgba(239, 68, 68, 0.35);
+      }
+
+      .booking-action-btn--ghost {
+        background: rgba(255, 255, 255, 0.9);
+        color: #b91c1c;
+        border: 1px dashed rgba(185, 28, 28, 0.5);
+      }
+
+      .booking-action-btn--ghost:hover {
+        background: #fee2e2;
+      }
+
+      .booking-service-icon {
+        width: 60px;
+        height: 60px;
+        border-radius: 1.3rem;
+        background: linear-gradient(135deg, #ecfeff, #f0fdf4);
+        color: #0f172a;
+        font-size: 1.5rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 600;
+      }
       /* مودال اقدامات بیشتر */
       .more-actions-modal {
         position: fixed;
@@ -774,54 +952,68 @@
 
         container.innerHTML = bookings.map(booking => {
           const sellerLink = getSellerLink(booking);
+          const normalizedStatus = (booking.status || '').toLowerCase();
           return `
-    <div class="booking-card border rounded-lg p-5 transition-all duration-300 ease-out transform hover:shadow-xl hover:-translate-y-1 ${getBookingStatusClass(booking.status)}">
-      <div class="flex justify-between items-start flex-wrap gap-4">
-        <div class="flex-1 min-w-0">
-          <h3 class="font-bold text-lg mb-3 text-gray-800">${escapeHtml(booking.service)}</h3>
-
-          <div class="space-y-2 text-sm">
-            <p class="text-gray-700 flex items-center gap-2">
-              <span class="text-lg">📍</span>
-              ${sellerLink ?
-                `<a href="${sellerLink}"
-                   class="text-blue-600 hover:text-blue-800 hover:underline transition-all duration-200 cursor-pointer font-medium"
-                   target="_blank" rel="noopener noreferrer">
-                  ${escapeHtml(booking.sellerName || 'فروشگاه')}
-                </a>` :
-                `<span class="missing-seller-link text-blue-600 hover:text-blue-800 hover:underline cursor-pointer">
-                  ${escapeHtml(booking.sellerName || 'فروشگاه')}
-                </span>`
-              }
-            </p>
-            <p class="text-gray-700 flex items-center gap-2">
-              <span class="text-lg">📅</span>
-              <span>${escapeHtml(booking.bookingDate)}</span>
-            </p>
-            <p class="text-gray-700 flex items-center gap-2">
-              <span class="text-lg">⏰</span>
-              <span>${escapeHtml(booking.startTime)}</span>
-            </p>
-          </div>
-
-          <div class="mt-3">
-            <span class="inline-block px-3 py-1 rounded-full text-sm font-medium ${getStatusBadgeClass(booking.status)}">
-              ${getStatusLabel(booking.status)}
-            </span>
+    <div class="booking-card fadein ${getBookingStatusClass(booking.status)}">
+      <div class="flex flex-col gap-6 lg:flex-row lg:items-center">
+        <div class="flex items-start gap-4 flex-1 min-w-0">
+          <div class="booking-service-icon shadow-inner shadow-slate-100">🗓️</div>
+          <div class="flex-1 min-w-0 space-y-4">
+            <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <div>
+                <p class="text-xs tracking-[0.35em] uppercase text-slate-400 font-semibold">خدمت</p>
+                <h3 class="text-2xl font-black text-slate-800 leading-snug">${escapeHtml(booking.service)}</h3>
+              </div>
+              <span class="${getStatusBadgeClass(booking.status)}">
+                ${getStatusLabel(booking.status)}
+              </span>
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-sm">
+              <div class="booking-meta-tile">
+                <span class="booking-meta-label">فروشگاه</span>
+                <div class="booking-meta-value">
+                  <span class="text-lg">📍</span>
+                  ${sellerLink ?
+                    `<a href="${sellerLink}"
+                       class="text-blue-600 hover:text-blue-800 hover:underline transition-all duration-200 cursor-pointer font-medium"
+                       target="_blank" rel="noopener noreferrer">
+                      ${escapeHtml(booking.sellerName || 'فروشگاه')}
+                    </a>` :
+                    `<span class="missing-seller-link text-blue-600 hover:text-blue-800 hover:underline cursor-pointer">
+                      ${escapeHtml(booking.sellerName || 'فروشگاه')}
+                    </span>`
+                  }
+                </div>
+              </div>
+              <div class="booking-meta-tile">
+                <span class="booking-meta-label">تاریخ</span>
+                <div class="booking-meta-value">
+                  <span class="text-lg">📅</span>
+                  <span>${escapeHtml(booking.bookingDate)}</span>
+                </div>
+              </div>
+              <div class="booking-meta-tile">
+                <span class="booking-meta-label">ساعت</span>
+                <div class="booking-meta-value">
+                  <span class="text-lg">⏰</span>
+                  <span>${escapeHtml(booking.startTime)}</span>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
-
-        <div class="flex gap-2 flex-wrap">
-          <button
-            data-booking-id="${booking._id}"
-            class="show-booking-details px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition text-sm font-medium shadow-sm hover:shadow-md">
-            جزئیات رزرو
+        <div class="flex flex-col gap-3 min-w-[200px] w-full sm:w-auto">
+          <button type="button" data-booking-id="${booking._id}" class="booking-action-btn booking-action-btn--primary show-booking-details">
+            <span>جزئیات رزرو</span>
           </button>
-          ${(booking.status === 'pending' || booking.status === 'confirmed') ? `
-            <button
-              data-booking-id="${booking._id}"
-              class="cancel-booking px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition text-sm font-medium shadow-sm hover:shadow-md">
+          ${(normalizedStatus === 'pending' || normalizedStatus === 'confirmed') ? `
+            <button type="button" data-booking-id="${booking._id}" class="booking-action-btn booking-action-btn--danger cancel-booking">
               لغو رزرو
+            </button>
+          ` : ''}
+          ${normalizedStatus === 'cancelled' ? `
+            <button type="button" data-booking-id="${booking._id}" class="booking-action-btn booking-action-btn--ghost delete-booking">
+              حذف دائمی
             </button>
           ` : ''}
         </div>
@@ -845,6 +1037,13 @@
           });
         });
 
+        container.querySelectorAll('.delete-booking').forEach(btn => {
+          btn.addEventListener('click', () => {
+            const bookingId = btn.dataset.bookingId;
+            deleteBooking(bookingId);
+          });
+        });
+
         container.querySelectorAll('.missing-seller-link').forEach(span => {
           span.addEventListener('click', () => {
             alert('لینک فروشگاه موجود نیست');
@@ -854,24 +1053,24 @@
 
       function getBookingStatusClass(status) {
         const classes = {
-          'pending': 'border-yellow-400/70 bg-yellow-50/80 backdrop-blur-sm shadow-sm',
-          'confirmed': 'border-green-400/70 bg-green-50/80 backdrop-blur-sm shadow-sm',
-          'completed': 'border-slate-300 bg-slate-50/90 backdrop-blur-sm shadow-sm',
-          'cancelled': 'border-red-400/70 bg-red-50/80 backdrop-blur-sm shadow-sm'
+          'pending': 'booking-card--pending',
+          'confirmed': 'booking-card--confirmed',
+          'completed': 'booking-card--completed',
+          'cancelled': 'booking-card--cancelled'
         };
         const key = (status || '').toLowerCase();
-        return classes[key] || 'border-gray-300 bg-white/90 backdrop-blur-sm';
+        return classes[key] || 'booking-card--default';
       }
 
       function getStatusBadgeClass(status) {
         const classes = {
-          'pending': 'bg-yellow-200 text-yellow-800 border border-yellow-400 shadow-sm',
-          'confirmed': 'bg-green-200 text-green-800 border border-green-400 shadow-sm',
-          'completed': 'bg-gray-200 text-gray-800 border border-gray-400 shadow-sm',
-          'cancelled': 'bg-red-200 text-red-800 border border-red-400 shadow-sm'
+          'pending': 'status-badge status-badge--pending',
+          'confirmed': 'status-badge status-badge--confirmed',
+          'completed': 'status-badge status-badge--completed',
+          'cancelled': 'status-badge status-badge--cancelled'
         };
         const key = (status || '').toLowerCase();
-        return classes[key] || 'bg-gray-100 text-gray-600';
+        return classes[key] || 'status-badge status-badge--default';
       }
 
       function getStatusLabel(status) {
@@ -953,6 +1152,49 @@
         } catch (error) {
           console.error('cancelBooking error:', error);
           alert('لغو رزرو با خطای غیرمنتظره مواجه شد.');
+        }
+      }
+
+      async function deleteBooking(id) {
+        if (!id) return;
+
+        const confirmed = window.confirm('با حذف دائمی، امکان بازیابی این رزرو وجود نخواهد داشت. ادامه می‌دهید؟');
+        if (!confirmed) return;
+
+        const token = localStorage.getItem('token');
+        if (!token) {
+          alert('برای حذف رزرو ابتدا وارد حساب کاربری خود شوید.');
+          return;
+        }
+
+        try {
+          const response = await fetch(`/api/bookings/${encodeURIComponent(id)}`, {
+            method: 'DELETE',
+            credentials: 'include',
+            headers: {
+              'Authorization': `Bearer ${token}`
+            }
+          });
+
+          if (!response.ok) {
+            const errorData = await response.json().catch(() => ({}));
+            const message = errorData.message || 'حذف رزرو با خطا مواجه شد.';
+            alert(message);
+            return;
+          }
+
+          bookingsData = Array.isArray(bookingsData)
+            ? bookingsData.filter(booking => booking._id !== id)
+            : [];
+          allBookings = bookingsData;
+
+          filterBookings(currentBookingFilter || 'all');
+          updateBookingsBadge();
+
+          alert('رزرو برای همیشه حذف شد.');
+        } catch (error) {
+          console.error('deleteBooking error:', error);
+          alert('حذف رزرو با خطای غیرمنتظره مواجه شد.');
         }
       }
 
