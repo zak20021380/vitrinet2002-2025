@@ -555,15 +555,25 @@
 #results-grid,
 #portfolio-grid {
   display: grid !important;
-  grid-template-columns: 1fr;
+  grid-template-columns: 1fr !important;
   gap: 1.25rem;
+  width: 100%;
 }
 
-/* تبلت و بالاتر: 2 ستون */
+/* تبلت کوچک و بالاتر: 2 ستون */
 @media (min-width: 640px) {
   #results-grid,
   #portfolio-grid {
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 1.5rem;
+  }
+}
+
+/* تبلت بزرگ و دسکتاپ کوچک: 2 ستون */
+@media (min-width: 768px) {
+  #results-grid,
+  #portfolio-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
     gap: 1.5rem;
   }
 }
@@ -572,8 +582,17 @@
 @media (min-width: 1024px) {
   #results-grid,
   #portfolio-grid {
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(3, 1fr) !important;
     gap: 1.75rem;
+  }
+}
+
+/* دسکتاپ بزرگ: 3 ستون با فاصله بیشتر */
+@media (min-width: 1280px) {
+  #results-grid,
+  #portfolio-grid {
+    grid-template-columns: repeat(3, 1fr) !important;
+    gap: 2rem;
   }
 }
 
