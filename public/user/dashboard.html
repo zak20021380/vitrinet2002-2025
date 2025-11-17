@@ -94,86 +94,112 @@
       .quick-action-more .quick-action-icon {
         stroke: #9ca3af;
       }
-      /* کارت های رزرو مدرن */
+      /* کارت های رزرو حرفه‌ای و مدرن */
       .booking-card {
         position: relative;
         overflow: hidden;
-        border-radius: 1.75rem;
-        padding: 1.75rem;
-        background: radial-gradient(circle at top right, rgba(14, 165, 233, 0.08), transparent 45%),
-                    radial-gradient(circle at bottom left, rgba(16, 185, 129, 0.08), transparent 55%),
-                    #ffffff;
-        border: 1px solid rgba(15, 23, 42, 0.07);
-        box-shadow: 0 24px 55px rgba(15, 23, 42, 0.08);
-        transition: transform .35s cubic-bezier(0.4, 0, 0.2, 1),
-                    box-shadow .35s cubic-bezier(0.4, 0, 0.2, 1);
+        border-radius: 1.5rem;
+        padding: 0;
+        background: #ffffff;
+        border: 2px solid rgba(15, 23, 42, 0.06);
+        box-shadow: 0 4px 20px rgba(15, 23, 42, 0.06);
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        margin-bottom: 1.5rem;
       }
 
       .booking-card::before {
         content: '';
         position: absolute;
-        inset-inline-start: 0;
+        right: 0;
         top: 0;
-        width: 6px;
+        width: 5px;
         height: 100%;
-        border-radius: 0 999px 999px 0;
         background: linear-gradient(180deg, #0ea5e9, #10b981);
-        opacity: 0.8;
-      }
-
-      .booking-card::after {
-        content: '';
-        position: absolute;
-        inset: 12% 15%;
-        border-radius: 2rem;
-        background: rgba(255, 255, 255, 0.8);
-        filter: blur(40px);
-        z-index: 0;
-        pointer-events: none;
+        opacity: 1;
       }
 
       .booking-card:hover {
-        transform: translateY(-8px) scale(1.01);
-        box-shadow: 0 35px 65px rgba(15, 23, 42, 0.14);
+        transform: translateY(-4px);
+        box-shadow: 0 12px 40px rgba(15, 23, 42, 0.12);
+        border-color: rgba(15, 23, 42, 0.1);
       }
 
-      .booking-card > * {
-        position: relative;
-        z-index: 1;
+      .booking-card--pending::before { background: linear-gradient(180deg, #fbbf24, #f97316); }
+      .booking-card--confirmed::before { background: linear-gradient(180deg, #10b981, #059669); }
+      .booking-card--completed::before { background: linear-gradient(180deg, #6366f1, #2563eb); }
+      .booking-card--cancelled::before { background: linear-gradient(180deg, #ef4444, #dc2626); }
+      .booking-card--default::before { background: linear-gradient(180deg, #94a3b8, #64748b); }
+
+      /* Header Section */
+      .booking-card-header {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        padding: 1.5rem;
+        background: linear-gradient(135deg, rgba(241, 245, 249, 0.4), rgba(248, 250, 252, 0.4));
+        border-bottom: 1px solid rgba(15, 23, 42, 0.05);
       }
 
-      .booking-card--pending::before {
-        background: linear-gradient(180deg, #fbbf24, #f97316);
+      .booking-service-icon-wrapper {
+        flex-shrink: 0;
       }
-      .booking-card--confirmed::before {
-        background: linear-gradient(180deg, #10b981, #059669);
+
+      .booking-service-icon {
+        width: 56px;
+        height: 56px;
+        border-radius: 1rem;
+        background: linear-gradient(135deg, #dbeafe, #ddd6fe);
+        color: #4f46e5;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 4px 12px rgba(79, 70, 229, 0.15);
       }
-      .booking-card--completed::before {
-        background: linear-gradient(180deg, #6366f1, #2563eb);
+
+      .booking-header-content {
+        flex: 1;
+        min-width: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
       }
-      .booking-card--cancelled::before {
-        background: linear-gradient(180deg, #ef4444, #dc2626);
+
+      .booking-service-name {
+        flex: 1;
+        min-width: 0;
       }
-      .booking-card--default::before {
-        background: linear-gradient(180deg, #94a3b8, #64748b);
+
+      .booking-service-label {
+        display: block;
+        font-size: 0.75rem;
+        font-weight: 600;
+        color: #94a3b8;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        margin-bottom: 0.25rem;
+      }
+
+      .booking-service-title {
+        font-size: 1.35rem;
+        font-weight: 800;
+        color: #1e293b;
+        line-height: 1.3;
+        margin: 0;
+        word-wrap: break-word;
       }
 
       .status-badge {
         display: inline-flex;
         align-items: center;
         gap: 0.35rem;
-        padding: 0.4rem 1.2rem;
+        padding: 0.5rem 1rem;
         border-radius: 999px;
-        font-size: 0.85rem;
+        font-size: 0.8rem;
         font-weight: 700;
-        letter-spacing: -0.01em;
-        border: 1px solid transparent;
-        box-shadow: 0 5px 15px rgba(15, 23, 42, 0.08);
-      }
-
-      .status-badge svg {
-        width: 16px;
-        height: 16px;
+        letter-spacing: 0.02em;
+        border: 2px solid transparent;
+        white-space: nowrap;
+        align-self: flex-start;
       }
 
       .status-badge--pending { color: #92400e; background: #fef3c7; border-color: #fcd34d; }
@@ -182,95 +208,223 @@
       .status-badge--cancelled { color: #991b1b; background: #fee2e2; border-color: #fca5a5; }
       .status-badge--default { color: #1f2937; background: #f3f4f6; border-color: #e5e7eb; }
 
-      .booking-meta-tile {
-        border-radius: 1.1rem;
-        padding: 0.85rem 1rem;
-        background: rgba(241, 245, 249, 0.65);
-        border: 1px solid rgba(148, 163, 184, 0.25);
+      /* Info Grid */
+      .booking-info-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1px;
+        background: rgba(15, 23, 42, 0.05);
+        border-bottom: 1px solid rgba(15, 23, 42, 0.05);
+      }
+
+      .booking-info-item {
+        display: flex;
+        align-items: flex-start;
+        gap: 0.875rem;
+        padding: 1.25rem 1.5rem;
+        background: #ffffff;
+      }
+
+      .booking-info-icon {
+        flex-shrink: 0;
+        width: 40px;
+        height: 40px;
+        border-radius: 0.75rem;
+        background: linear-gradient(135deg, #f1f5f9, #e2e8f0);
+        color: #64748b;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .booking-info-content {
+        flex: 1;
+        min-width: 0;
         display: flex;
         flex-direction: column;
-        gap: 0.3rem;
-        min-height: 88px;
+        gap: 0.25rem;
       }
 
-      .booking-meta-label {
-        font-size: 0.78rem;
-        color: #94a3b8;
-        letter-spacing: 0.08em;
-        text-transform: uppercase;
-      }
-
-      .booking-meta-value {
+      .booking-info-label {
+        font-size: 0.75rem;
         font-weight: 600;
-        color: #0f172a;
-        display: flex;
-        gap: 0.45rem;
-        align-items: center;
-        flex-wrap: wrap;
+        color: #94a3b8;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
       }
 
-      .booking-meta-value i {
-        font-size: 1rem;
+      .booking-info-value {
+        font-size: 0.95rem;
+        font-weight: 700;
+        color: #1e293b;
+        word-wrap: break-word;
+      }
+
+      .booking-info-link {
+        color: #3b82f6;
+        text-decoration: none;
+        transition: color 0.2s;
+      }
+
+      .booking-info-link:hover {
+        color: #2563eb;
+        text-decoration: underline;
+      }
+
+      /* Actions */
+      .booking-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.75rem;
+        padding: 1.5rem;
+        background: #fafbfc;
       }
 
       .booking-action-btn {
-        border-radius: 999px;
-        padding: 0.7rem 1.45rem;
+        flex: 1;
+        min-width: 140px;
+        border-radius: 0.75rem;
+        padding: 0.875rem 1.25rem;
         font-weight: 700;
-        font-size: 0.9rem;
+        font-size: 0.875rem;
         display: inline-flex;
         align-items: center;
         justify-content: center;
-        gap: 0.4rem;
-        transition: all .2s ease;
+        gap: 0.5rem;
+        transition: all 0.2s ease;
         border: none;
         cursor: pointer;
         white-space: nowrap;
       }
 
       .booking-action-btn--primary {
-        background: linear-gradient(135deg, #2563eb, #7c3aed);
+        background: linear-gradient(135deg, #3b82f6, #6366f1);
         color: #fff;
-        box-shadow: 0 10px 25px rgba(79, 70, 229, 0.25);
+        box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
       }
 
       .booking-action-btn--primary:hover {
         transform: translateY(-2px);
-        box-shadow: 0 18px 32px rgba(79, 70, 229, 0.35);
+        box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4);
       }
 
       .booking-action-btn--danger {
-        background: linear-gradient(135deg, #ef4444, #f97316);
+        background: linear-gradient(135deg, #ef4444, #dc2626);
         color: #fff;
-        box-shadow: 0 10px 22px rgba(239, 68, 68, 0.25);
+        box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
       }
 
       .booking-action-btn--danger:hover {
         transform: translateY(-2px);
-        box-shadow: 0 18px 30px rgba(239, 68, 68, 0.35);
+        box-shadow: 0 6px 20px rgba(239, 68, 68, 0.4);
       }
 
       .booking-action-btn--ghost {
-        background: rgba(255, 255, 255, 0.9);
+        background: #ffffff;
         color: #b91c1c;
-        border: 1px dashed rgba(185, 28, 28, 0.5);
+        border: 2px solid #fca5a5;
       }
 
       .booking-action-btn--ghost:hover {
         background: #fee2e2;
+        border-color: #dc2626;
       }
 
-      .booking-service-icon {
-        width: 60px;
-        height: 60px;
-        border-radius: 1.3rem;
-        background: linear-gradient(135deg, #ecfeff, #f0fdf4);
-        color: #0f172a;
-        font-size: 1.5rem;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-weight: 600;
+      /* Mobile Responsive */
+      @media (max-width: 768px) {
+        .booking-card {
+          border-radius: 1.25rem;
+          margin-bottom: 1.25rem;
+        }
+
+        .booking-card-header {
+          flex-direction: column;
+          align-items: flex-start;
+          padding: 1.25rem;
+          gap: 1rem;
+        }
+
+        .booking-header-content {
+          width: 100%;
+          gap: 0.75rem;
+        }
+
+        .booking-service-icon {
+          width: 50px;
+          height: 50px;
+        }
+
+        .booking-service-title {
+          font-size: 1.15rem;
+        }
+
+        .status-badge {
+          width: 100%;
+          justify-content: center;
+          padding: 0.625rem 1rem;
+        }
+
+        .booking-info-grid {
+          grid-template-columns: 1fr;
+        }
+
+        .booking-info-item {
+          padding: 1rem 1.25rem;
+        }
+
+        .booking-info-icon {
+          width: 36px;
+          height: 36px;
+        }
+
+        .booking-actions {
+          flex-direction: column;
+          padding: 1.25rem;
+        }
+
+        .booking-action-btn {
+          width: 100%;
+          min-width: auto;
+          padding: 1rem 1.25rem;
+          font-size: 0.9rem;
+        }
+      }
+
+      @media (max-width: 480px) {
+        .booking-card-header {
+          padding: 1rem;
+        }
+
+        .booking-service-icon {
+          width: 44px;
+          height: 44px;
+        }
+
+        .booking-service-title {
+          font-size: 1.05rem;
+        }
+
+        .booking-info-item {
+          padding: 0.875rem 1rem;
+          gap: 0.75rem;
+        }
+
+        .booking-info-icon {
+          width: 32px;
+          height: 32px;
+        }
+
+        .booking-info-label {
+          font-size: 0.7rem;
+        }
+
+        .booking-info-value {
+          font-size: 0.875rem;
+        }
+
+        .booking-actions {
+          padding: 1rem;
+        }
       }
       /* مودال اقدامات بیشتر */
       .more-actions-modal {
@@ -931,6 +1085,57 @@
         renderBookings(filtered);
       }
 
+      // تبدیل تاریخ میلادی به شمسی
+      function gregorianToJalali(gDate) {
+        try {
+          let date;
+          if (typeof gDate === 'string') {
+            // Handle different date formats
+            if (gDate.includes('/')) {
+              const parts = gDate.split('/');
+              if (parts.length === 3) {
+                date = new Date(parts[2], parts[1] - 1, parts[0]);
+              } else {
+                date = new Date(gDate);
+              }
+            } else {
+              date = new Date(gDate);
+            }
+          } else {
+            date = new Date(gDate);
+          }
+
+          if (isNaN(date.getTime())) {
+            return gDate; // Return original if invalid
+          }
+
+          const gy = date.getFullYear();
+          const gm = date.getMonth() + 1;
+          const gd = date.getDate();
+
+          const g_d_m = [0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334];
+          let jy = (gy <= 1600) ? 0 : 979;
+          gy > 1600 ? (jy += 1, gy -= 1601) : gy -= 621;
+          const gy2 = (gm > 2) ? (gy + 1) : gy;
+          let days = (365 * gy) + (parseInt((gy2 + 3) / 4)) - (parseInt((gy2 + 99) / 100)) + (parseInt((gy2 + 399) / 400)) - 80 + gd + g_d_m[gm - 1];
+          jy += 33 * (parseInt(days / 12053));
+          days %= 12053;
+          jy += 4 * (parseInt(days / 1461));
+          days %= 1461;
+          jy += parseInt((days - 1) / 365);
+          if (days > 365) days = (days - 1) % 365;
+
+          const jm = (days < 186) ? 1 + parseInt(days / 31) : 7 + parseInt((days - 186) / 30);
+          const jd = 1 + ((days < 186) ? (days % 31) : ((days - 186) % 30));
+
+          const monthNames = ['فروردین', 'اردیبهشت', 'خرداد', 'تیر', 'مرداد', 'شهریور', 'مهر', 'آبان', 'آذر', 'دی', 'بهمن', 'اسفند'];
+          return `${jd} ${monthNames[jm - 1]} ${jy}`;
+        } catch (err) {
+          console.error('Error converting date:', err);
+          return gDate;
+        }
+      }
+
       // Render bookings to the page
       function renderBookings(bookings) {
         const container = document.getElementById('bookings-container');
@@ -953,70 +1158,101 @@
         container.innerHTML = bookings.map(booking => {
           const sellerLink = getSellerLink(booking);
           const normalizedStatus = (booking.status || '').toLowerCase();
+          const persianDate = gregorianToJalali(booking.bookingDate);
+
           return `
     <div class="booking-card fadein ${getBookingStatusClass(booking.status)}">
-      <div class="flex flex-col gap-6 lg:flex-row lg:items-center">
-        <div class="flex items-start gap-4 flex-1 min-w-0">
-          <div class="booking-service-icon shadow-inner shadow-slate-100">🗓️</div>
-          <div class="flex-1 min-w-0 space-y-4">
-            <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-              <div>
-                <p class="text-xs tracking-[0.35em] uppercase text-slate-400 font-semibold">خدمت</p>
-                <h3 class="text-2xl font-black text-slate-800 leading-snug">${escapeHtml(booking.service)}</h3>
-              </div>
-              <span class="${getStatusBadgeClass(booking.status)}">
-                ${getStatusLabel(booking.status)}
-              </span>
-            </div>
-            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-sm">
-              <div class="booking-meta-tile">
-                <span class="booking-meta-label">فروشگاه</span>
-                <div class="booking-meta-value">
-                  <span class="text-lg">📍</span>
-                  ${sellerLink ?
-                    `<a href="${sellerLink}"
-                       class="text-blue-600 hover:text-blue-800 hover:underline transition-all duration-200 cursor-pointer font-medium"
-                       target="_blank" rel="noopener noreferrer">
-                      ${escapeHtml(booking.sellerName || 'فروشگاه')}
-                    </a>` :
-                    `<span class="missing-seller-link text-blue-600 hover:text-blue-800 hover:underline cursor-pointer">
-                      ${escapeHtml(booking.sellerName || 'فروشگاه')}
-                    </span>`
-                  }
-                </div>
-              </div>
-              <div class="booking-meta-tile">
-                <span class="booking-meta-label">تاریخ</span>
-                <div class="booking-meta-value">
-                  <span class="text-lg">📅</span>
-                  <span>${escapeHtml(booking.bookingDate)}</span>
-                </div>
-              </div>
-              <div class="booking-meta-tile">
-                <span class="booking-meta-label">ساعت</span>
-                <div class="booking-meta-value">
-                  <span class="text-lg">⏰</span>
-                  <span>${escapeHtml(booking.startTime)}</span>
-                </div>
-              </div>
-            </div>
+      <!-- Header Section -->
+      <div class="booking-card-header">
+        <div class="booking-service-icon-wrapper">
+          <div class="booking-service-icon">
+            <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+            </svg>
           </div>
         </div>
-        <div class="flex flex-col gap-3 min-w-[200px] w-full sm:w-auto">
-          <button type="button" data-booking-id="${booking._id}" class="booking-action-btn booking-action-btn--primary show-booking-details">
-            <span>جزئیات رزرو</span>
-          </button>
-          ${(normalizedStatus === 'pending' || normalizedStatus === 'confirmed') ? `
-            <button type="button" data-booking-id="${booking._id}" class="booking-action-btn booking-action-btn--danger cancel-booking">
-              لغو رزرو
-            </button>
-          ` : ''}
-          ${normalizedStatus === 'cancelled' ? `
-            <button type="button" data-booking-id="${booking._id}" class="booking-action-btn booking-action-btn--ghost delete-booking">
-              حذف دائمی
-            </button>
-          ` : ''}
+        <div class="booking-header-content">
+          <div class="booking-service-name">
+            <span class="booking-service-label">نام خدمت</span>
+            <h3 class="booking-service-title">${escapeHtml(booking.service)}</h3>
+          </div>
+          <span class="${getStatusBadgeClass(booking.status)}">
+            ${getStatusLabel(booking.status)}
+          </span>
         </div>
+      </div>
+
+      <!-- Info Grid -->
+      <div class="booking-info-grid">
+        <div class="booking-info-item">
+          <div class="booking-info-icon">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+            </svg>
+          </div>
+          <div class="booking-info-content">
+            <span class="booking-info-label">فروشگاه</span>
+            ${sellerLink ?
+              `<a href="${sellerLink}" class="booking-info-value booking-info-link" target="_blank" rel="noopener noreferrer">
+                ${escapeHtml(booking.sellerName || 'فروشگاه')}
+              </a>` :
+              `<span class="booking-info-value missing-seller-link cursor-pointer">
+                ${escapeHtml(booking.sellerName || 'فروشگاه')}
+              </span>`
+            }
+          </div>
+        </div>
+
+        <div class="booking-info-item">
+          <div class="booking-info-icon">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+            </svg>
+          </div>
+          <div class="booking-info-content">
+            <span class="booking-info-label">تاریخ رزرو</span>
+            <span class="booking-info-value">${escapeHtml(persianDate)}</span>
+          </div>
+        </div>
+
+        <div class="booking-info-item">
+          <div class="booking-info-icon">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+          </div>
+          <div class="booking-info-content">
+            <span class="booking-info-label">ساعت شروع</span>
+            <span class="booking-info-value">${escapeHtml(booking.startTime)}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Actions -->
+      <div class="booking-actions">
+        <button type="button" data-booking-id="${booking._id}" class="booking-action-btn booking-action-btn--primary show-booking-details">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+          </svg>
+          <span>جزئیات رزرو</span>
+        </button>
+        ${(normalizedStatus === 'pending' || normalizedStatus === 'confirmed') ? `
+          <button type="button" data-booking-id="${booking._id}" class="booking-action-btn booking-action-btn--danger cancel-booking">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+            </svg>
+            <span>لغو رزرو</span>
+          </button>
+        ` : ''}
+        ${normalizedStatus === 'cancelled' ? `
+          <button type="button" data-booking-id="${booking._id}" class="booking-action-btn booking-action-btn--ghost delete-booking">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+            </svg>
+            <span>حذف دائمی</span>
+          </button>
+        ` : ''}
       </div>
     </div>
   `;
