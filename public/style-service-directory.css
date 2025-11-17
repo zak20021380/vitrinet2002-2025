@@ -551,28 +551,29 @@
   flex-direction: column;
 }
 
-/* تضمین نمایش کارت‌ها به صورت گرید در صفحه‌نمایش‌های بزرگتر از موبایل */
+/* چیدمان کارت‌ها مشابه index.html روی نمایشگرهای بزرگ */
 #results-grid,
 #portfolio-grid {
   display: grid !important;
-  grid-template-columns: 1fr;
+  grid-template-columns: minmax(0, 1fr);
   gap: 1.25rem;
+  align-items: stretch;
 }
 
-/* تبلت و بالاتر: 2 ستون */
+/* تبلت: ۲ ستون کلاسیک برای خوانایی */
 @media (min-width: 640px) {
   #results-grid,
   #portfolio-grid {
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 1.5rem;
   }
 }
 
-/* دسکتاپ: 3 ستون */
+/* دسکتاپ و بالاتر: همان الگوی auto-fit صفحه اصلی */
 @media (min-width: 1024px) {
   #results-grid,
   #portfolio-grid {
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
     gap: 1.75rem;
   }
 }
