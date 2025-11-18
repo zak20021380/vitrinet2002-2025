@@ -13,7 +13,6 @@
     sort: 'popular',
     rating: 'all',
     subcategory: 'all',
-    view: 'all',
     serviceCategoryName: DEFAULT_SERVICE_CATEGORY_NAME,
     serviceCategorySlug: 'service',
     serviceSubcategoryMap: new Map(),
@@ -35,8 +34,8 @@
     service: {
       badge: 'خدمات شهری',
       title: 'کسب‌وکارهای خدماتی سنندج',
-      subtitle: 'لیست کامل سرویس‌دهنده‌ها، نمونه‌کار و مغازه‌های خدماتی.',
-      results: 'لیست سرویس‌دهنده‌ها و نمونه‌کارها',
+      subtitle: 'لیست کامل مغازه‌های خدماتی همراه با تصویر و اطلاعات دقیق.',
+      results: 'لیست مغازه‌های خدماتی',
     },
   };
 
@@ -164,14 +163,6 @@
         <p class="text-xs font-black text-slate-500 tracking-wide uppercase">زیردسته‌ها</p>
         <div class="flex flex-wrap gap-3 mt-3" id="subcategoryChips"></div>
       </div>
-      <div class="mt-6">
-        <p class="text-xs font-black text-slate-500 tracking-wide uppercase mb-3">نوع نمایش</p>
-        <div class="view-toggle" role="tablist" id="viewToggle">
-          <button type="button" data-view="all" class="active">همه</button>
-          <button type="button" data-view="shops">فقط مغازه‌ها</button>
-          <button type="button" data-view="portfolios">فقط نمونه‌کارها</button>
-        </div>
-      </div>
     `;
 
     const chipsContainer = document.getElementById('subcategoryChips');
@@ -206,7 +197,6 @@
     const sortSelect = wrapper.querySelector('#sortSelect');
     const ratingSelect = wrapper.querySelector('#ratingSelect');
     const chipsContainer = wrapper.querySelector('#subcategoryChips');
-    const viewToggle = wrapper.querySelector('#viewToggle');
 
     searchInput.addEventListener('input', (event) => {
       state.search = event.target.value.trim();
@@ -233,13 +223,6 @@
       }
     });
 
-    viewToggle.addEventListener('click', (event) => {
-      if (event.target.matches('button[data-view]')) {
-        state.view = event.target.dataset.view;
-        viewToggle.querySelectorAll('button').forEach((btn) => btn.classList.toggle('active', btn === event.target));
-        applyServiceFilters();
-      }
-    });
   }
 
   let serviceFilterTimeout;
@@ -288,14 +271,13 @@
   }
 
   function applyServiceFilters() {
-    const { items, portfolios } = state.serviceData;
-    if (!Array.isArray(items) && !Array.isArray(portfolios)) {
+    const { items } = state.serviceData;
+    if (!Array.isArray(items)) {
       showEmptyState('اطلاعاتی برای نمایش وجود ندارد.');
       return;
     }
 
-    let filteredShops = Array.isArray(items) ? [...items] : [];
-    let filteredPortfolios = Array.isArray(portfolios) ? [...portfolios] : [];
+    let filteredShops = [...items];
 
     if (state.search) {
       const term = state.search.toLowerCase();
@@ -304,38 +286,24 @@
           .filter(Boolean)
           .some((field) => field.toString().toLowerCase().includes(term));
       });
-      filteredPortfolios = filteredPortfolios.filter((item) => {
-        return [item.title, item.description, item.shopName, item.shop?.name, ...(item.tags || [])]
-          .filter(Boolean)
-          .some((field) => field.toString().toLowerCase().includes(term));
-      });
     }
 
     if (state.rating !== 'all') {
       const threshold = Number(state.rating);
       filteredShops = filteredShops.filter((shop) => Number(shop.rating || 0) >= threshold);
-      filteredPortfolios = filteredPortfolios.filter((item) => Number(item.rating || 0) >= threshold);
     }
 
     filteredShops = sortCollection(filteredShops, state.sort);
-    filteredPortfolios = sortCollection(filteredPortfolios, state.sort);
 
-    const cards = [];
-    if (state.view !== 'portfolios') {
-      filteredShops.forEach((shop) => cards.push(createShopCard(shop)));
-    }
-    if (state.view !== 'shops') {
-      filteredPortfolios.forEach((portfolio) => cards.push(createPortfolioCard(portfolio)));
-    }
-
-    if (!cards.length) {
+    if (!filteredShops.length) {
       showEmptyState('هیچ موردی مطابق فیلترها پیدا نشد.');
       setResultsMeta('بدون نتیجه');
       return;
     }
 
+    const cards = filteredShops.map((shop) => createShopCard(shop));
     renderCards(cards.join(''));
-    setResultsMeta(`${cards.length} مورد`);
+    setResultsMeta(`${filteredShops.length} مغازه`);
   }
 
   function renderStandardFilters() {
@@ -447,8 +415,13 @@
     const address = shop.address || 'آدرس ثبت نشده';
     const phone = shop.phone || 'شماره ثبت نشده';
     const tags = (shop.tags || []).slice(0, 3).map((tag) => `<span class="card-badge bg-emerald-50 text-emerald-600">${tag}</span>`).join('');
+    const imageSrc = resolveShopImage(shop);
+    const altText = shop.name ? `نمایی از ${shop.name}` : 'تصویر مغازه';
     return `
       <article class="card-shell" data-type="shop">
+        <div class="shop-card-image">
+          <img src="${imageSrc}" alt="${altText}" loading="lazy" decoding="async" />
+        </div>
         <div class="flex items-center justify-between">
           <span class="card-badge">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l3 7h7l-5.5 4.5L18 21l-6-4-6 4 1.5-7.5L2 9h7z"></path></svg>
@@ -469,42 +442,22 @@
     `;
   }
 
-  function createPortfolioCard(portfolio) {
-    const ratingSource = portfolio.rating || portfolio.shop?.rating || 0;
-    const rating = Number(ratingSource || 0).toFixed(1);
-    const description = portfolio.description || portfolio.previewText || '';
-    const shopName = portfolio.shop?.name || portfolio.shopName || 'نام فروشگاه';
-    const shopId = portfolio.shop?.id || portfolio.shopId || portfolio.shopName;
-    const imageSection = portfolio.image
-      ? `<div class="portfolio-preview with-image"><img src="${portfolio.image}" alt="${portfolio.title || 'نمونه‌کار'}" loading="lazy" /></div>`
-      : `<div class="portfolio-preview">${description || 'پیش‌نمایش نمونه‌کار'}</div>`;
-    const stats = [];
-    if (typeof portfolio.likeCount === 'number') {
-      stats.push(`<span>❤️ ${portfolio.likeCount}</span>`);
+  function resolveShopImage(shop) {
+    const candidate = shop?.coverImage
+      || shop?.image
+      || (Array.isArray(shop?.gallery) ? shop.gallery[0] : null)
+      || (Array.isArray(shop?.portfolioPreview) && shop.portfolioPreview[0]?.image)
+      || 'assets/images/shop-placeholder.svg';
+    if (!candidate) {
+      return 'assets/images/shop-placeholder.svg';
     }
-    if (typeof portfolio.viewCount === 'number') {
-      stats.push(`<span>👁 ${portfolio.viewCount}</span>`);
+    if (/^(https?:|data:|\/\/)/i.test(candidate)) {
+      return candidate;
     }
-    return `
-      <article class="card-shell" data-type="portfolio">
-        <div class="flex items-center justify-between">
-          <span class="card-badge bg-sky-50 text-sky-700">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7h16M4 12h16M4 17h16"></path></svg>
-            نمونه‌کار
-          </span>
-          <span class="card-meta">⭐ ${rating}</span>
-        </div>
-        ${imageSection}
-        <h3 class="card-title">${portfolio.title}</h3>
-        <p class="text-sm text-slate-500 font-semibold">${shopName}</p>
-        ${description ? `<p class="text-xs text-slate-500 leading-relaxed">${description}</p>` : ''}
-        <div class="flex flex-wrap gap-2">${(portfolio.tags || []).map((tag) => `<span class="card-badge bg-sky-50 text-sky-700">${tag}</span>`).join('')}</div>
-        ${stats.length ? `<div class="portfolio-stats">${stats.join('')}</div>` : ''}
-        <div class="card-actions mt-auto">
-          <a href="shop.html?id=${encodeURIComponent(shopId)}">مشاهده نمونه‌کار</a>
-        </div>
-      </article>
-    `;
+    if (candidate.startsWith('/')) {
+      return candidate;
+    }
+    return `/${candidate.replace(/^\/+/, '')}`;
   }
 
   function renderCards(cardsHTML) {
@@ -545,6 +498,7 @@
         tags: ['برنامه بدنسازی', 'مشاوره تغذیه'],
         subcategory: 'gym',
         updatedAt: '2025-01-15',
+        coverImage: 'assets/images/shop-placeholder.svg',
       },
       {
         id: 'srv-2',
@@ -555,6 +509,7 @@
         tags: ['طراحی سه‌بعدی', 'اجرای سریع'],
         subcategory: 'decor',
         updatedAt: '2025-02-01',
+        coverImage: 'assets/images/shop-placeholder.svg',
       },
       {
         id: 'srv-3',
@@ -565,6 +520,7 @@
         tags: ['خدمات در محل', 'گارانتی سه‌ماهه'],
         subcategory: 'repair',
         updatedAt: '2025-02-12',
+        coverImage: 'assets/images/shop-placeholder.svg',
       },
     ];
 
