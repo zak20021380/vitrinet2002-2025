@@ -460,17 +460,24 @@
     return `/${candidate.replace(/^\/+/, '')}`;
   }
 
-  function renderCards(cardsHTML) {
-    const grid = document.getElementById('results-grid');
-    if (!grid) return;
-    grid.innerHTML = '';
-    if (!cardsHTML) return;
-    const temp = document.createElement('div');
-    temp.innerHTML = cardsHTML;
-    while (temp.firstChild) {
-      grid.appendChild(temp.firstChild);
-    }
+function renderCards(cardsHTML) {
+  const grid = document.getElementById('results-grid');
+  if (!grid) return;
+  grid.innerHTML = '';
+  if (!cardsHTML) return;
+  const temp = document.createElement('div');
+  temp.innerHTML = cardsHTML.trim();
+  
+  // DEBUG: Check what temp contains
+  console.log('=== TEMP DIV DEBUG ===');
+  console.log('Temp children count:', temp.children.length);
+  console.log('First child tag:', temp.children[0]?.tagName);
+  console.log('Second child tag:', temp.children[1]?.tagName);
+  
+  while (temp.firstChild) {
+    grid.appendChild(temp.firstChild);
   }
+}
 
   function showLoadingState() {
     renderCards(`<div class="loading-state card-shell">در حال بارگذاری...</div>`);
