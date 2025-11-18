@@ -417,29 +417,27 @@
     const tags = (shop.tags || []).slice(0, 3).map((tag) => `<span class="card-badge bg-emerald-50 text-emerald-600">${tag}</span>`).join('');
     const imageSrc = resolveShopImage(shop);
     const altText = shop.name ? `نمایی از ${shop.name}` : 'تصویر مغازه';
-    return `
-      <article class="card-shell" data-type="shop">
-        <div class="shop-card-image">
-          <img src="${imageSrc}" alt="${altText}" loading="lazy" decoding="async" />
-        </div>
-        <div class="flex items-center justify-between">
-          <span class="card-badge">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l3 7h7l-5.5 4.5L18 21l-6-4-6 4 1.5-7.5L2 9h7z"></path></svg>
-            مغازه خدماتی
-          </span>
-          <span class="card-meta">
-            ⭐ ${rating}
-          </span>
-        </div>
-        <h3 class="card-title">${shop.name}</h3>
-        <p class="text-sm text-slate-500 font-semibold leading-relaxed">${address}</p>
-        <p class="text-sm text-slate-500 font-semibold">${phone}</p>
-        <div class="flex flex-wrap gap-2">${tags}</div>
-        <div class="card-actions mt-auto">
-          <a href="shop.html?id=${encodeURIComponent(shop.id || shop.slug || shop.name)}">مشاهده پروفایل</a>
-        </div>
-      </article>
-    `;
+    return `<article class="card-shell" data-type="shop">
+      <div class="shop-card-image">
+        <img src="${imageSrc}" alt="${altText}" loading="lazy" decoding="async" />
+      </div>
+      <div class="flex items-center justify-between">
+        <span class="card-badge">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l3 7h7l-5.5 4.5L18 21l-6-4-6 4 1.5-7.5L2 9h7z"></path></svg>
+          مغازه خدماتی
+        </span>
+        <span class="card-meta">
+          ⭐ ${rating}
+        </span>
+      </div>
+      <h3 class="card-title">${shop.name}</h3>
+      <p class="text-sm text-slate-500 font-semibold leading-relaxed">${address}</p>
+      <p class="text-sm text-slate-500 font-semibold">${phone}</p>
+      <div class="flex flex-wrap gap-2">${tags}</div>
+      <div class="card-actions mt-auto">
+        <a href="shop.html?id=${encodeURIComponent(shop.id || shop.slug || shop.name)}">مشاهده پروفایل</a>
+      </div>
+    </article>`;
   }
 
   function resolveShopImage(shop) {
