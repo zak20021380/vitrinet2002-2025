@@ -383,7 +383,12 @@ function renderResults() {
     `;
   }).join('');
 
-  grid.innerHTML = cardsHTML;
+  grid.innerHTML = '';
+  const temp = document.createElement('div');
+  temp.innerHTML = cardsHTML;
+  while (temp.firstChild) {
+    grid.appendChild(temp.firstChild);
+  }
   updateStats(items);
   updateResultsBadge();
 }
@@ -662,7 +667,12 @@ function renderPortfolioShowcase() {
     `;
   }).join('');
 
-  grid.innerHTML = portfolioHTML;
+  grid.innerHTML = '';
+  const temp = document.createElement('div');
+  temp.innerHTML = portfolioHTML;
+  while (temp.firstChild) {
+    grid.appendChild(temp.firstChild);
+  }
   updateResultsBadge();
 }
 
