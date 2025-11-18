@@ -303,6 +303,17 @@ function renderFeatureBadges(shop = {}) {
   return badges.length ? `<div class="flex flex-wrap gap-2">${badges.join('')}</div>` : '';
 }
 
+function applyResponsiveGridLayout(container) {
+  if (!container) return;
+  const w = window.innerWidth;
+  let cols = 1;
+  if (w >= 1024) cols = 3;
+  else if (w >= 640) cols = 2;
+  container.style.display = "grid";
+  container.style.gridTemplateColumns = `repeat(${cols}, minmax(0,1fr))`;
+  container.style.gap = "1.5rem";
+}
+
 function renderResults() {
   const grid = elements.resultsGrid;
   if (!grid) return;
@@ -382,6 +393,8 @@ function renderResults() {
       </article>
     `;
   }).join('');
+
+  applyResponsiveGridLayout(grid);
 
   updateStats(items);
   updateResultsBadge();
@@ -661,6 +674,8 @@ function renderPortfolioShowcase() {
     `;
   }).join('');
 
+  applyResponsiveGridLayout(grid);
+
   updateResultsBadge();
 }
 
@@ -860,6 +875,13 @@ function attachEventListeners() {
       openPortfolioModalById(portfolioId);
     });
   }
+
+  const debouncedLayout = debounce(() => {
+    applyResponsiveGridLayout(elements.resultsGrid);
+    applyResponsiveGridLayout(elements.portfolioGrid);
+  }, 200);
+
+  window.addEventListener('resize', debouncedLayout);
 
   if (elements.portfolioModal) {
     elements.portfolioModal.addEventListener('click', (event) => {
