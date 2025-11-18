@@ -255,15 +255,39 @@
 
   <script>
     (function () {
-      const categoryParam = new URLSearchParams(window.location.search).get('cat') || 'general';
-      
+      const CATEGORY_META = {
+        general: { title: 'همه مغازه‌ها', badge: 'دسته‌بندی', subtitle: 'لیست فروشگاه‌های ثبت‌شده در ویترینت' },
+        food: { title: 'کسب‌وکارهای خوراک', badge: 'خوراک' },
+        clothing: { title: 'پوشاک و مد', badge: 'پوشاک' },
+        beauty: { title: 'زیبایی و سلامت', badge: 'زیبایی' },
+        service: { title: 'کسب‌وکارهای خدماتی', badge: 'خدمات', subtitle: 'نمایش فروشگاه‌های خدماتی همراه با نمونه‌کار' },
+        digital: { title: 'کالاهای دیجیتال', badge: 'دیجیتال' },
+        book: { title: 'کتاب و تحریر', badge: 'کتاب و تحریر' },
+        auto: { title: 'خودرو و لوازم یدکی', badge: 'خودرو' },
+        sweets: { title: 'قنادی و شیرینی', badge: 'شیرینی' },
+        flower: { title: 'گل و گیاه', badge: 'گل و گیاه' },
+        home: { title: 'لوازم خانگی', badge: 'خانه' },
+        sport: { title: 'پوشاک و لوازم ورزشی', badge: 'ورزشی' },
+        talar: { title: 'تالار و مجالس', badge: 'مجالس' }
+      };
+
+      const SERVICE_CATEGORY_KEYS = new Set(['service', 'services', 'service-shop', 'service-shops', 'service-category', 'khadamat', 'خدمات', 'خدماتی', 'مغازه-های-خدماتی']);
+      const CATEGORY_ALIASES = {
+        service: ['services', 'service-shop', 'service-shops', 'service-category', 'khadamat', 'خدمات', 'خدماتی', 'مغازه-های-خدماتی']
+      };
+
+      const rawCategoryParam = new URLSearchParams(window.location.search).get('cat') || 'general';
+      const normalizedCategory = normalizeCategorySlug(rawCategoryParam || 'general');
+
       const state = {
-        category: categoryParam,
-        isServiceCategory: false, // Will detect based on data
+        category: normalizedCategory || 'general',
+        rawCategoryValue: rawCategoryParam,
+        isServiceCategory: isServiceCategorySlug(normalizedCategory),
         search: '',
         sort: 'popular',
         activeSubcategory: 'all',
         shops: [],
+        portfolios: []
       };
 
       document.addEventListener('DOMContentLoaded', async () => {
@@ -273,138 +297,219 @@
       });
 
       function hydrateHero() {
+        const meta = CATEGORY_META[state.category] || {};
         const title = document.getElementById('categoryTitle');
-        if(state.category === 'general') {
-             title.textContent = "همه مغازه‌ها";
-        } else {
-             title.textContent = state.category.replace('-', ' ');
-        }
+        const badge = document.getElementById('categoryBadge');
+        const subtitle = document.getElementById('categorySubtitle');
+
+        title.textContent = meta.title || formatCategoryLabel(state.rawCategoryValue) || 'فروشگاه‌ها';
+        badge.textContent = meta.badge || 'دسته‌بندی';
+        subtitle.textContent = meta.subtitle || 'در حال بارگذاری...';
       }
 
       async function fetchRealShops() {
+        resetSubcategoryFilters();
+        state.portfolios = [];
+        renderPortfolioFromData();
+
+        if (isServiceCategorySlug(state.category)) {
+          state.isServiceCategory = true;
+          await fetchServiceShops();
+        } else {
+          state.isServiceCategory = false;
+          await fetchStandardShops();
+        }
+      }
+
+      async function fetchStandardShops() {
         try {
-          let apiUrl = `/api/shops`; 
-          if(state.category && state.category !== 'general') {
-              apiUrl += `?category=${encodeURIComponent(state.category)}`;
+          let apiUrl = `/api/shops`;
+          if (state.category && state.category !== 'general') {
+            apiUrl += `?category=${encodeURIComponent(state.category)}`;
           }
 
           const response = await fetch(apiUrl);
-          if (!response.ok) throw new Error(`Server Error`);
+          if (!response.ok) throw new Error('Server Error');
 
           const data = await response.json();
           const shopList = Array.isArray(data) ? data : (data.shops || []);
           state.shops = shopList;
 
-          // Detect if this is a service category (check if any item has 'خدمات')
-          const hasService = shopList.some(s => s.category && s.category.includes('خدمات'));
-          // Or check URL param
-          if (hasService || state.category.includes('service') || state.category === 'خدمات') {
-             state.isServiceCategory = true;
-             setupServiceView(shopList);
-          }
-
-          document.getElementById('categorySubtitle').textContent = `لیست بروزرسانی شد`;
+          document.getElementById('categorySubtitle').textContent = `لیست با ${shopList.length} فروشگاه بروزرسانی شد`;
           applyFiltersAndRender();
-
         } catch (error) {
           console.error(error);
-          document.getElementById('results-grid').innerHTML = `
-            <div class="col-span-full text-center py-10 text-red-500 font-bold">خطا در برقراری ارتباط با سرور</div>
-          `;
+          renderErrorState();
         }
       }
 
-      // --- Special View for Services ---
-      function setupServiceView(allShops) {
-         // 1. Extract Subcategories
-         const subcats = [...new Set(allShops.map(s => s.subcategory).filter(Boolean))];
-         
-         if (subcats.length > 0) {
-             const container = document.getElementById('subcatContainer');
-             container.classList.remove('hidden');
-             
-             subcats.forEach(sub => {
-                 const btn = document.createElement('button');
-                 btn.className = 'subcat-chip';
-                 btn.textContent = sub;
-                 btn.onclick = () => {
-                     // Remove active from all
-                     container.querySelectorAll('.subcat-chip').forEach(b => b.classList.remove('active'));
-                     btn.classList.add('active');
-                     state.activeSubcategory = sub; // Set filter
-                     applyFiltersAndRender();
-                 };
-                 container.appendChild(btn);
-             });
-             
-             // Click event for "All" button
-             container.firstElementChild.onclick = () => {
-                 container.querySelectorAll('.subcat-chip').forEach(b => b.classList.remove('active'));
-                 container.firstElementChild.classList.add('active');
-                 state.activeSubcategory = 'all';
-                 applyFiltersAndRender();
-             }
-         }
+      async function fetchServiceShops() {
+        try {
+          const params = new URLSearchParams({ limit: 60 });
+          if (state.category && state.category !== 'general') {
+            params.set('category', state.category);
+          }
 
-         // 2. Show Portfolio Section
-         const portfolioSec = document.getElementById('portfolioSection');
-         portfolioSec.classList.remove('hidden');
-         
-         // Generate Dummy Portfolios based on Shops
-         const portfolioGrid = document.getElementById('portfolioGrid');
-         const sampleShops = allShops.slice(0, 5); // Take first 5 shops to show as portfolio
-         
-         if(sampleShops.length > 0) {
-             portfolioGrid.innerHTML = sampleShops.map(shop => `
-                <div class="portfolio-card">
-                    <img src="${resolveShopImage(shop)}" alt="${shop.storename}" onerror="this.src='https://placehold.co/400?text=Portfolio'">
-                    <div class="portfolio-overlay">
-                        <h4 class="text-white font-bold text-sm">${shop.storename}</h4>
-                        <span class="text-emerald-400 text-xs font-bold">مشاهده نمونه</span>
-                    </div>
+          const response = await fetch(`/api/service-shops/showcase?${params.toString()}`);
+          if (!response.ok) throw new Error('Server Error');
+
+          const payload = await response.json();
+          const items = Array.isArray(payload && payload.items)
+            ? payload.items
+            : Array.isArray(payload)
+              ? payload
+              : [];
+
+          state.shops = items.map(mapServiceShopToCard);
+          state.portfolios = Array.isArray(payload && payload.portfolios) ? payload.portfolios : [];
+
+          document.getElementById('categorySubtitle').textContent = `لیست با ${state.shops.length} کسب‌وکار خدماتی بروزرسانی شد`;
+          setupServiceView(state.shops);
+          applyFiltersAndRender();
+        } catch (error) {
+          console.error(error);
+          renderErrorState();
+        }
+      }
+
+      function setupServiceView(allShops) {
+        buildSubcategoryFilters(allShops);
+        renderPortfolioFromData();
+      }
+
+      function buildSubcategoryFilters(allShops) {
+        const container = document.getElementById('subcatContainer');
+        if (!container) return;
+
+        const subcats = Array.from(new Set(
+          allShops
+            .flatMap(shop => {
+              const entries = [];
+              if (shop.subcategory) entries.push(shop.subcategory);
+              if (Array.isArray(shop.subcategories)) entries.push(...shop.subcategories);
+              return entries;
+            })
+            .filter(Boolean)
+        ));
+
+        container.innerHTML = '';
+        state.activeSubcategory = 'all';
+
+        if (!subcats.length) {
+          container.classList.add('hidden');
+          return;
+        }
+
+        const allChip = createSubcategoryChip('همه', 'all', container);
+        allChip.classList.add('active');
+        container.appendChild(allChip);
+
+        subcats.forEach(sub => {
+          container.appendChild(createSubcategoryChip(sub, sub, container));
+        });
+
+        container.classList.remove('hidden');
+      }
+
+      function createSubcategoryChip(label, value, container) {
+        const btn = document.createElement('button');
+        btn.className = 'subcat-chip';
+        btn.dataset.sub = value;
+        btn.textContent = label;
+        btn.addEventListener('click', () => {
+          container.querySelectorAll('.subcat-chip').forEach(chip => chip.classList.remove('active'));
+          btn.classList.add('active');
+          state.activeSubcategory = value;
+          applyFiltersAndRender();
+        });
+        return btn;
+      }
+
+      function resetSubcategoryFilters() {
+        const container = document.getElementById('subcatContainer');
+        if (!container) return;
+        container.innerHTML = '';
+        container.classList.add('hidden');
+        state.activeSubcategory = 'all';
+      }
+
+      function renderPortfolioFromData() {
+        const section = document.getElementById('portfolioSection');
+        const grid = document.getElementById('portfolioGrid');
+        if (!section || !grid) return;
+
+        const items = Array.isArray(state.portfolios) ? state.portfolios.slice(0, 10) : [];
+        if (!items.length) {
+          section.classList.add('hidden');
+          grid.innerHTML = '';
+          return;
+        }
+
+        section.classList.remove('hidden');
+        grid.innerHTML = items
+          .map(item => {
+            const image = resolvePortfolioImage(item);
+            const title = escapeHtml(item && item.title ? item.title : 'نمونه‌کار');
+            const shopName = escapeHtml(item && item.shop && item.shop.name ? item.shop.name : 'مشاهده نمونه');
+            const shopUrl = item && item.shop && item.shop.shopUrl ? item.shop.shopUrl : '';
+            const link = shopUrl ? `service-shops.html?shopurl=${encodeURIComponent(shopUrl)}` : '#';
+            const linkAttrs = link === '#' ? 'aria-disabled="true" tabindex="-1"' : '';
+
+            return `
+              <a class="portfolio-card" href="${link}" ${linkAttrs}>
+                <img src="${image}" alt="${title}" onerror="this.src='https://placehold.co/400?text=Portfolio'">
+                <div class="portfolio-overlay">
+                  <h4 class="text-white font-bold text-sm">${title}</h4>
+                  <span class="text-emerald-400 text-xs font-bold">${shopName}</span>
                 </div>
-             `).join('');
-         } else {
-             portfolioSec.classList.add('hidden');
-         }
+              </a>
+            `;
+          })
+          .join('');
       }
 
       function attachFilterEvents() {
         document.getElementById('searchInput').addEventListener('input', (e) => {
-            state.search = e.target.value;
-            applyFiltersAndRender();
+          state.search = e.target.value || '';
+          applyFiltersAndRender();
         });
         document.getElementById('sortSelect').addEventListener('change', (e) => {
-            state.sort = e.target.value;
-            applyFiltersAndRender();
+          state.sort = e.target.value;
+          applyFiltersAndRender();
         });
       }
 
       function applyFiltersAndRender() {
-        let collection = [...state.shops];
+        let collection = state.shops.slice();
 
-        // 1. Subcategory Filter (If active)
+        collection = collection.filter(matchesActiveCategory);
+
         if (state.activeSubcategory !== 'all') {
-            collection = collection.filter(s => s.subcategory === state.activeSubcategory);
-        }
-
-        // 2. Search Filter
-        if (state.search) {
-          const term = state.search.toLowerCase();
+          const selectedSub = normalizeCategorySlug(state.activeSubcategory);
           collection = collection.filter(shop => {
-             return (shop.storename && shop.storename.toString().toLowerCase().includes(term)) || 
-                    (shop.address && shop.address.toString().toLowerCase().includes(term));
+            const entries = [];
+            if (shop.subcategory) entries.push(shop.subcategory);
+            if (Array.isArray(shop.subcategories)) entries.push(...shop.subcategories);
+            return entries.some(entry => normalizeCategorySlug(entry) === selectedSub);
           });
         }
 
-        // 3. Sort
-        if (state.sort === 'newest') {
-             collection.reverse(); 
+        if (state.search) {
+          const term = state.search.toLowerCase();
+          collection = collection.filter(shop => {
+            const name = (shop.storename || '').toString().toLowerCase();
+            const address = (shop.address || '').toString().toLowerCase();
+            const desc = (shop.desc || shop.description || '').toString().toLowerCase();
+            const city = (shop.city || '').toString().toLowerCase();
+            return name.includes(term) || address.includes(term) || desc.includes(term) || city.includes(term);
+          });
         }
 
-        // Update Meta
-        document.getElementById('resultsMeta').textContent = `${collection.length}`;
+        if (state.sort === 'newest') {
+          collection = collection.reverse();
+        }
 
+        document.getElementById('resultsMeta').textContent = `${collection.length}`;
         renderCards(collection);
       }
 
@@ -417,21 +522,23 @@
         grid.innerHTML = shops.map(shop => createModernCard(shop)).join('');
       }
 
-      // --- Modern Card Component ---
       function createModernCard(shop) {
         const imageSrc = resolveShopImage(shop);
-        const shopName = shop.storename || 'فروشگاه';
-        const address = shop.address || '';
-        const badge = shop.subcategory || shop.category || 'فروشگاه';
-        const profileLink = `shop.html?id=${shop.id}`;
+        const shopName = shop.storename || shop.name || 'فروشگاه';
+        const address = shop.address || shop.city || '';
+        const badge = shop.subcategory || (Array.isArray(shop.subcategories) && shop.subcategories[0]) || shop.category || shop.categoryName || 'فروشگاه';
+        const slug = (shop.shopurl || shop.shopUrl || '').toString().trim();
+        const profileLink = shop.isServiceShop
+          ? (slug ? `service-shops.html?shopurl=${encodeURIComponent(slug)}` : '#')
+          : (slug ? `shop.html?shopurl=${encodeURIComponent(slug)}` : `shop.html?id=${shop.id}`);
 
         return `
           <article class="card-shell group">
             <div class="shop-card-image-wrapper">
-              <img src="${imageSrc}" class="shop-card-image" loading="lazy" />
+              <img src="${imageSrc}" class="shop-card-image" loading="lazy" alt="${shopName}">
               <div class="image-badge">${badge}</div>
             </div>
-            
+
             <div>
               <h3 class="card-title">${shopName}</h3>
               <p class="card-address mt-1 truncate">${address}</p>
@@ -444,24 +551,125 @@
         `;
       }
 
-      // --- Image Resolver with Placeholder Fallback ---
       function resolveShopImage(shop) {
-        // 1. Check if data exists
-        let candidate = shop.image;
-
-        // 2. If empty, create a placeholder with text
-        if (!candidate || candidate.trim() === "") {
-           const text = encodeURIComponent(shop.storename || 'Store');
-           // Using a reliable placeholder service
-           return `https://placehold.co/600x400/f1f5f9/334155?text=${text}`;
+        let candidate = shop.image || shop.coverImage || (shop.boardImage || '');
+        if (!candidate && Array.isArray(shop.portfolioPreview) && shop.portfolioPreview.length > 0) {
+          candidate = shop.portfolioPreview[0].image;
         }
 
-        // 3. Fix regex syntax error from before
+        if (!candidate || candidate.toString().trim() === '') {
+          const text = encodeURIComponent(shop.storename || shop.name || 'Store');
+          return `https://placehold.co/600x400/f1f5f9/334155?text=${text}`;
+        }
+
         if (/^(https?:\/\/|\/|data:image\/)/.test(candidate)) {
           return candidate;
         }
-        
+
         return `/${candidate.replace(/^\/+/, '')}`;
+      }
+
+      function resolvePortfolioImage(item) {
+        const candidate = item && item.image ? item.image : '';
+        if (!candidate || candidate.toString().trim() === '') {
+          return 'https://placehold.co/400?text=Portfolio';
+        }
+        if (/^(https?:\/\/|\/|data:image\/)/.test(candidate)) {
+          return candidate;
+        }
+        return `/${candidate.replace(/^\/+/, '')}`;
+      }
+
+      function mapServiceShopToCard(entry) {
+        const subcategories = Array.isArray(entry && entry.subcategories) ? entry.subcategories : [];
+        const tags = Array.isArray(entry && entry.tags) ? entry.tags : [];
+        const shopUrl = entry && (entry.shopUrl || entry.shopurl) ? (entry.shopUrl || entry.shopurl).toString().trim() : '';
+        const coverImage = entry && entry.coverImage ? entry.coverImage : ((entry && entry.portfolioPreview && entry.portfolioPreview[0]) ? entry.portfolioPreview[0].image : '');
+
+        return {
+          id: entry && (entry.id || entry._id) ? (entry.id || entry._id) : '',
+          storename: (entry && (entry.name || entry.storename)) || 'کسب‌وکار خدماتی',
+          category: (entry && (entry.categoryName || entry.category)) || '',
+          categoryName: entry && entry.categoryName ? entry.categoryName : '',
+          categorySlug: entry && entry.categorySlug ? entry.categorySlug : normalizeCategorySlug(entry && entry.categoryName),
+          subcategory: subcategories.length ? subcategories[0] : '',
+          subcategories,
+          tags,
+          address: (entry && entry.address) || '',
+          city: (entry && entry.city) || '',
+          desc: (entry && entry.description) || '',
+          shopurl: shopUrl,
+          shopUrl,
+          image: coverImage,
+          portfolioPreview: Array.isArray(entry && entry.portfolioPreview) ? entry.portfolioPreview : [],
+          isServiceShop: true
+        };
+      }
+
+      function matchesActiveCategory(shop) {
+        if (!state.category || state.category === 'general') {
+          return true;
+        }
+
+        const target = normalizeCategorySlug(state.category);
+        if (!target || target === 'general') {
+          return true;
+        }
+
+        const allowed = new Set([target]);
+        const aliases = CATEGORY_ALIASES[target] || [];
+        aliases.forEach(alias => allowed.add(normalizeCategorySlug(alias)));
+
+        const tokens = collectCategoryTokens(shop);
+        return tokens.some(token => allowed.has(token));
+      }
+
+      function collectCategoryTokens(shop) {
+        const tokens = [];
+        ['category', 'categoryName', 'categorySlug', 'subcategory'].forEach(key => {
+          if (shop && shop[key]) {
+            tokens.push(shop[key]);
+          }
+        });
+        if (Array.isArray(shop && shop.subcategories)) {
+          tokens.push(...shop.subcategories);
+        }
+        if (Array.isArray(shop && shop.tags)) {
+          tokens.push(...shop.tags);
+        }
+        return tokens.map(normalizeCategorySlug).filter(Boolean);
+      }
+
+      function normalizeCategorySlug(value) {
+        if (!value) return '';
+        return value.toString().trim().toLowerCase().replace(/[_\s]+/g, '-');
+      }
+
+      function formatCategoryLabel(value) {
+        if (!value) return '';
+        return value.toString().replace(/[-_]+/g, ' ');
+      }
+
+      function isServiceCategorySlug(value) {
+        if (!value) return false;
+        return SERVICE_CATEGORY_KEYS.has(normalizeCategorySlug(value));
+      }
+
+      function escapeHtml(value) {
+        return (value || '')
+          .toString()
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;')
+          .replace(/'/g, '&#39;');
+      }
+
+      function renderErrorState() {
+        document.getElementById('results-grid').innerHTML = `
+          <div class="col-span-full text-center py-10 text-red-500 font-bold">خطا در برقراری ارتباط با سرور</div>
+        `;
+        document.getElementById('categorySubtitle').textContent = 'خطا در دریافت اطلاعات';
       }
 
     })();
