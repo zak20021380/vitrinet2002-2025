@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="fa" dir="rtl">
 <head>
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com https://cdn.jsdelivr.net data:; connect-src 'self'; img-src 'self' data:; base-uri 'self'; form-action 'self'; upgrade-insecure-requests; block-all-mixed-content">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdn.tailwindcss.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com https://cdn.jsdelivr.net data:; connect-src 'self'; img-src 'self' data:; base-uri 'self'; form-action 'self'; upgrade-insecure-requests; block-all-mixed-content">
 <meta http-equiv="Strict-Transport-Security" content="max-age=63072000; includeSubDomains; preload">
 <meta http-equiv="Referrer-Policy" content="no-referrer">
 <meta http-equiv="X-Content-Type-Options" content="nosniff">
@@ -10,308 +10,18 @@
 <meta http-equiv="Permissions-Policy" content="geolocation=(), microphone=(), camera=()">
     <script src="/security.js" defer></script>
 
+  <script src="/js/runtime-config.js" defer></script>
+  <script src="/js/analytics.js" defer></script>
+
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>مغازه‌های دسته | ویترینت</title>
+  <title>دسته‌بندی مغازه‌ها | ویترینت</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;800&family=Montserrat:wght@700&display=swap" rel="stylesheet"/>
-  <style>
-    body {
-      font-family: 'Vazirmatn', 'Montserrat', sans-serif;
-      background: #f8fafc;
-      letter-spacing: -0.01em;
-    }
-    .main-logo {
-      font-size: 2.25rem;
-      color: #10b981;
-      font-family: 'Vazirmatn','Montserrat',sans-serif;
-      letter-spacing:-1px;
-      filter: drop-shadow(0 0 9px #e0fdfa88);
-      font-weight: 900;
-      user-select: none;
-      line-height: 2.6rem;
-    }
-    @media (max-width: 640px) {
-      .main-logo {font-size: 1.3rem; line-height:2rem;}
-    }
-    .area-btn {
-      background: linear-gradient(90deg,#e0fdfa 0%,#d2fbf1 100%);
-      color: #10b981;
-      font-weight: 800;
-      border-radius: 1rem;
-      font-size: 1rem;
-      min-width: 82px;
-      padding: 9px 0 9px 0;
-      margin-inline-end: 7px;
-      margin-bottom: 3px;
-      transition: all 0.16s;
-      box-shadow: 0 1.5px 8px #bbf7d0a1;
-      border: none;
-      cursor: pointer;
-      font-family: 'Vazirmatn', 'Montserrat', sans-serif;
-    }
-    .area-btn.active, .area-btn:hover {
-      background: linear-gradient(90deg,#10b981,#0ea5e9);
-      color: #fff;
-      box-shadow: 0 8px 36px #10b98122;
-      transform: scale(1.055);
-    }
-    .glass-bg {
-      backdrop-filter: blur(12px);
-      background: rgba(255,255,255,0.95) !important;
-    }
-    .shop-card {
-      background: #fff;
-      border-radius: 1.1rem;
-      box-shadow: 0 7px 22px #10b98114, 0 2px 10px #0ea5e910;
-      transition: transform .13s, box-shadow .15s;
-      overflow: hidden;
-      border: 1.2px solid #e0fdfa;
-      min-height: 320px;
-      font-family: 'Vazirmatn', 'Montserrat', sans-serif;
-      padding: 1.3rem 1.1rem 1.2rem 1.1rem;
-    }
-    .shop-card-content {
-      display: flex;
-      flex-direction: column;
-      height: 100%;
-      gap: 1.1rem;
-    }
-    .shop-card-body {
-      display: flex;
-      flex-direction: column;
-      gap: 0.65rem;
-      height: 100%;
-      align-items: stretch;
-    }
-    .shop-card-spacer {
-      flex: 1 1 auto;
-    }
-    .shop-card:hover {
-      transform: scale(1.034);
-      box-shadow: 0 14px 40px #0ea5e925;
-      border-color: #10b98150;
-    }
-    .shop-card-image-container {
-      position: relative;
-      width: 100%;
-      border-radius: 1.1rem;
-      overflow: hidden;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-    .shop-tags-container {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 0.4rem;
-      align-items: center;
-    }
-    .shop-tag {
-      margin-inline-end: 0;
-    }
-    @media (max-width: 640px) {
-      .shop-card { padding: 0.8rem !important; min-height: 110px;}
-      .area-btn {font-size: 12px; padding: 7px 0;}
-    }
-    .logo-vitreenet {
-      font-family: 'Poppins', sans-serif;
-      background: linear-gradient(90deg,#10b981 5%,#0ea5e9 90%);
-      -webkit-background-clip: text;
-      background-clip: text;
-      color: transparent;
-      letter-spacing: 2px;
-      text-shadow: 0 2px 10px #0ea5e955;
-    }
-    @media (max-width: 640px) {
-      .logo-vitreenet {font-size: 1.18rem !important;}
-    }
-    /* آیکون تلفن */
-    .phone-icon {
-      display: inline-block;
-      vertical-align: middle;
-      width: 17px;
-      height: 17px;
-      margin-left: 2px;
-      color: #10b981;
-    }
-    .shop-phone {
-      justify-content: center;
-    }
-
-    .btn-grad {
-      background: linear-gradient(90deg,#10b981 10%,#0ea5e9 100%);
-      color: #fff !important;
-      box-shadow: 0 2px 12px #10b98133;
-    }
-    .btn-grad:hover { filter: brightness(1.08); }
-    .mobile-register-btn { display: none; }
-
-    /* ================== MOBILE UPGRADES (max-width: 640px) ================== */
-    @media (max-width: 640px) {
-      /* General Spacing & Layout */
-      body {
-        padding-bottom: 72px; /* Space for fixed bottom nav */
-      }
-      main, header, footer, .areas-scroll {
-        padding-left: 16px !important;
-        padding-right: 16px !important;
-      }
-      main {
-        padding-top: 1.5rem;
-        padding-bottom: 1.5rem;
-      }
-
-      /* Header Upgrade - Glassmorphism */
-      header {
-        backdrop-filter: blur(10px) !important;
-        background: rgba(255,255,255,0.88) !important;
-        box-shadow: 0 2px 20px rgba(0,0,0,0.08);
-        border-bottom: 1px solid rgba(224,253,250,0.7);
-      }
-      .main-logo {
-        font-size: 1.5rem !important;
-        margin-left: 8px;
-      }
-      .header-right-items {
-        display: none !important; /* Hide desktop nav items */
-      }
-      .mobile-register-btn {
-        display: inline-block !important;
-        font-size: 0.85rem;
-        padding: 0.35rem 0.75rem;
-        margin-left: 6px;
-      }
-
-      /* Shop Card Improvements */
-      .shop-card {
-        padding: 1.05rem 1.05rem 1.15rem !important;
-        min-height: 175px !important;
-        margin-bottom: 18px;
-        border-radius: 1.5rem;
-      }
-      .shop-card-content {
-        flex-direction: row;
-        align-items: stretch;
-        gap: 0.85rem;
-      }
-      .shop-card-image-container {
-        width: 40%;
-        min-width: 128px;
-        max-width: 160px;
-        aspect-ratio: 4 / 3;
-        height: auto !important;
-        border-radius: 1rem !important;
-        margin-bottom: 0;
-      }
-      .shop-card-image-container img {
-        height: 100%;
-        width: 100%;
-        object-fit: cover;
-      }
-      .shop-card-body {
-        gap: 0.55rem;
-        align-items: flex-start;
-      }
-      .shop-tags-container {
-        gap: 0.35rem 0.5rem;
-        margin-bottom: 4px;
-      }
-      .shop-tag {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-      }
-      .shop-tag {
-        font-size: 12px !important;
-        padding: 5.5px 10px !important;
-        border-radius: 10px !important;
-        box-shadow: 0 2px 6px rgba(0,0,0,0.08);
-      }
-      .shop-name {
-        font-size: 1.1rem !important;
-        margin-bottom: 6px !important;
-      }
-      .shop-address {
-        font-size: 0.82rem !important;
-        line-height: 1.6;
-        margin-bottom: 4px !important;
-      }
-      .shop-phone {
-        justify-content: flex-start;
-        font-size: 0.78rem;
-      }
-      .shop-entry-btn {
-        width: 100% !important;
-        padding: 12px !important;
-        border-radius: 14px !important;
-        font-size: 1rem !important;
-        font-weight: 800 !important;
-        background: linear-gradient(90deg, #10b981, #0ea5e9) !important;
-        box-shadow: 0 4px 12px rgba(16,185,129,0.3) !important;
-        margin-top: 10px;
-        transition: all 0.2s;
-      }
-      .shop-entry-btn:active {
-        transform: scale(0.98);
-        box-shadow: 0 2px 8px rgba(16,185,129,0.4) !important;
-      }
-      .shop-card-spacer {
-        display: none;
-      }
-
-      /* Area Buttons */
-      .areas-scroll {
-        display: flex;
-        overflow-x: auto;
-        overflow-y: hidden;
-        padding-bottom: 10px;
-        margin-bottom: 18px;
-        flex-wrap: nowrap !important;
-        justify-content: flex-start;
-        -webkit-overflow-scrolling: touch;
-        scroll-behavior: smooth;
-        scrollbar-width: none;
-        -ms-overflow-style: none;
-        touch-action: pan-x;
-      }
-      .areas-scroll::-webkit-scrollbar {
-        display: none;
-      }
-      .area-btn {
-        padding: 10px 16px !important;
-        min-width: 100px !important;
-        height: 42px;
-        font-size: 14px !important;
-        font-weight: 800;
-        border-radius: 14px !important;
-        margin-inline-end: 10px;
-        flex-shrink: 0;
-        box-shadow: 0 3px 8px rgba(0,0,0,0.1);
-        background: linear-gradient(90deg, #e0fdfa, #d1f9f0);
-      }
-      .area-btn:active {
-        transform: scale(0.96);
-      }
-
-      /* Search Input */
-      #searchInput {
-        padding: 16px 20px !important;
-        border-radius: 50px !important;
-        font-size: 1rem !important;
-        margin-bottom: 20px !important;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-        border: 1px solid #e2e8f0;
-        background: rgba(255,255,255,0.9);
-      }
-
-      .nav-label {
-        font-size: 11px;
-        font-weight: 800;
-      }
-    }
-  </style>
-  <script src="/nav-active.js" defer></script>
+  <link rel="stylesheet" href="style-index.css" />
+  <link rel="stylesheet" href="shops-by-category.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;700;900&family=Poppins:wght@800;900&display=swap" rel="stylesheet"/>
+    <script src="/nav-active.js" defer></script>
+    <script src="shops-by-category.js" defer></script>
 
 <!-- TODO: فعال‌سازی پست‌هاگ را هنگام انتشار فراموش نکنید | TODO: Enable PostHog analytics when going live -->
 <!--
@@ -332,255 +42,124 @@
 -->
 
 </head>
-<body class="min-h-screen flex flex-col bg-[#f8fafc]">
+<body class="text-gray-800">
 
-  <!-- هدر -->
-  <header class="w-full sticky top-0 z-50 bg-white/90 backdrop-blur-[10px] shadow-md border-b border-[#e0fdfa]">
-    <nav class="max-w-7xl mx-auto flex items-center justify-between px-2 sm:px-6 py-2 sm:py-3 gap-y-2">
-      <div class="flex items-center gap-4 flex-shrink-0">
-        <a href="index.html" class="logo-vitreenet font-extrabold text-[1.7rem] sm:text-[2.2rem] text-[#11d6ad] tracking-wide drop-shadow hover:brightness-110 transition-all select-none">
-          Vitreenet
-        </a>
-        <!-- بج شهر (سنندج) -->
-        <div class="flex items-center gap-1 px-3 py-1 rounded-full shadow-lg"
-          style="background:linear-gradient(90deg,#10b981E6 70%,#0ea5e9E6); border: 1.5px solid #fff6;">
-          <svg width="18" height="18" fill="none" viewBox="0 0 22 22" class="ml-1 drop-shadow">
+<!-- HEADER افقی همیشه باز -->
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@900&display=swap" rel="stylesheet" />
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@800&display=swap" rel="stylesheet"/>
+
+<header id="mainHeader" class="w-full bg-white/95 shadow-md backdrop-blur-md sticky top-0 z-50">
+  <div id="headerInner" class="max-w-7xl mx-auto flex flex-row items-center justify-between px-4 sm:px-6 py-3 md:py-3.5 gap-3">
+
+    <!-- لوگو و انتخاب شهر -->
+    <div id="logoCityWrap" class="flex items-center gap-2 md:gap-3 flex-shrink-0">
+      <!-- لوگوی جدید ویترینت -->
+      <a href="index.html" class="vitreenet-brand header-item" aria-label="ویترینت">
+        <span class="vitreenet-brand__mark" aria-hidden="true">
+          <svg viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg" role="presentation">
             <defs>
-              <linearGradient id="city-icon" x1="0" y1="0" x2="22" y2="22" gradientUnits="userSpaceOnUse">
-                <stop stop-color="#fff" />
-                <stop offset="1" stop-color="#b2f2e9" />
+              <linearGradient id="vtMarkGradient" x1="0%" y1="100%" x2="100%" y2="0%">
+                <stop offset="0%" stop-color="#0ea5e9" />
+                <stop offset="55%" stop-color="#10b981" />
+                <stop offset="100%" stop-color="#0fb67f" />
+              </linearGradient>
+              <linearGradient id="vtMarkInner" x1="15%" y1="85%" x2="85%" y2="15%">
+                <stop offset="0%" stop-color="#ffffff" stop-opacity="0.9" />
+                <stop offset="100%" stop-color="#dcfce7" stop-opacity="0.25" />
               </linearGradient>
             </defs>
-            <path d="M11 2.5C7.13 2.5 4 5.61 4 9.45c0 3.52 4.1 7.93 6.2 10.01.46.47 1.2.47 1.66 0 2.1-2.08 6.14-6.49 6.14-10.01C18 5.61 14.87 2.5 11 2.5Zm0 10.25a2.75 2.75 0 1 1 0-5.5 2.75 2.75 0 0 1 0 5.5Z"
-              fill="url(#city-icon)"/>
+            <circle cx="24" cy="24" r="22" fill="url(#vtMarkGradient)" />
+            <circle cx="24" cy="24" r="18" fill="url(#vtMarkInner)" />
+            <path d="M15.5 16h4.7l4.3 10.6L28.8 16h4.7L26 33h-4.2L15.5 16Z" fill="#0f172a" fill-opacity="0.9" />
+            <path d="M18.2 17.6 24 31.1l5.8-13.5" fill="none" stroke="#22c55e" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" />
           </svg>
-          <span class="font-bold text-white text-[13px] sm:text-[14px] drop-shadow-sm" style="letter-spacing:.3px;">
-            سنندج
-          </span>
-        </div>
+        </span>
+        <span class="vitreenet-brand__text">
+          <span class="vitreenet-brand__title">Vitreenet</span>
+          <span class="vitreenet-brand__subtitle">ویترینت</span>
+        </span>
+      </a>
+
+      <!-- بج شهر - فقط در دسکتاپ نمایش داده شود -->
+      <div class="hidden md:flex items-center gap-1 px-3 py-1.5 rounded-full shadow-lg header-item"
+           style="background:linear-gradient(90deg,#10b981E6 70%,#0ea5e9E6); border: 1.5px solid #fff6; backdrop-filter: blur(5px);">
+        <svg width="18" height="18" fill="none" viewBox="0 0 22 22" class="ml-1 drop-shadow" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <linearGradient id="city-icon" x1="0%" y1="0%" x2="0%" y2="100%">
+              <stop offset="0%" stop-color="#ffffff" stop-opacity="1" />
+              <stop offset="100%" stop-color="#e0f2fe" stop-opacity="0.9" />
+            </linearGradient>
+          </defs>
+          <path d="M11 2.5C7.13 2.5 4 5.61 4 9.45c0 3.52 4.1 7.93 6.2 10.01.46.47 1.2.47 1.66 0 2.1-2.08 6.14-6.49 6.14-10.01C18 5.61 14.87 2.5 11 2.5Zm0 10.25a2.75 2.75 0 1 1 0-5.5 2.75 2.75 0 0 1 0 5.5Z"
+            fill="url(#city-icon)"/>
+        </svg>
+        <span id="headerCity" class="font-bold text-white text-[14px] drop-shadow-sm" style="letter-spacing:.3px;">سنندج</span>
       </div>
-      <!-- منو -->
-      <div class="flex items-center gap-2 sm:gap-4 ml-2 header-right-items">
-        <a href="index.html" class="hidden sm:inline text-gray-700 hover:text-[#10b981] font-bold px-2 sm:px-3 transition">خانه</a>
-        <a href="categories.html" class="hidden sm:inline text-gray-700 hover:text-[#0ea5e9] font-bold px-2 sm:px-3 transition">دسته‌بندی</a>
-        <a href="login.html" class="hidden sm:inline text-gray-700 hover:text-[#0ea5e9] font-bold px-2 sm:px-3 transition">ورود</a>
-        <!-- حساب کاربری واکنشی -->
-        <a href="login.html"
-          class="flex items-center gap-2 px-4 py-2 rounded-full bg-[#10b981]/10 hover:bg-[#0ea5e9]/15 text-[#10b981] hover:text-[#0ea5e9] font-bold shadow-sm transition-all duration-150 text-base"
-          style="font-family: Vazirmatn, sans-serif;">
-          <svg width="20" height="20" fill="none" viewBox="0 0 22 22">
-            <circle cx="11" cy="7" r="4" stroke="currentColor" stroke-width="1.5" />
-            <path d="M4 19c0-3.3 2.7-6 6-6s6 2.7 6 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-          </svg>
-          <span class="hidden xs:inline">حساب کاربری</span>
-        </a>
-        <!-- ثبت فروشگاه -->
-        <a href="post.html"
-          class="bg-gradient-to-l from-[#10b981] to-[#0ea5e9] hover:from-[#0ea5e9] hover:to-[#10b981] rounded-full px-5 py-2 text-white font-extrabold text-base shadow-sm transition-all duration-200 whitespace-nowrap"
-          style="font-family: Vazirmatn, sans-serif;">
-          ثبت فروشگاه
-        </a>
-      </div>
-      <!-- Mobile Register Shop Button -->
-      <a href="post.html" id="mobileRegisterShopBtn"
-        class="mobile-register-btn btn-grad hidden px-3 py-1.5 rounded-full font-black shadow hover:scale-105 transition-all duration-200 whitespace-nowrap text-white text-sm"
-        style="font-family: Vazirmatn, sans-serif;">
-        ثبت فروشگاه
+    </div>
+
+    <!-- منو - فقط در دسکتاپ -->
+    <nav id="desktopNav" class="hidden md:flex items-center gap-1 text-base flex-1 justify-end">
+      <a href="index.html" class="main-nav-link text-gray-700 hover:text-[#10b981] font-bold px-4 py-2 rounded-lg transition-all hover:bg-emerald-50">
+        خانه
+      </a>
+      <a href="categories.html" class="main-nav-link text-gray-700 hover:text-[#0ea5e9] font-bold px-4 py-2 rounded-lg transition-all hover:bg-sky-50">
+        دسته‌بندی
+      </a>
+      <a href="login.html" id="loginNavLink" class="main-nav-link text-gray-700 hover:text-[#0ea5e9] font-bold px-4 py-2 rounded-lg transition-all hover:bg-sky-50">
+        <span class="login-link-label">ورود</span>
       </a>
     </nav>
-  </header>
 
-  <main class="flex-1 w-full max-w-6xl mx-auto px-3 sm:px-8 py-7 sm:py-12">
-    <!-- تیتر و دکمه‌ها -->
-    <div class="mb-7 flex items-center flex-col gap-3 sm:gap-4">
-      <h1 id="cat-title" class="text-2xl sm:text-[2.18rem] font-extrabold text-center bg-gradient-to-l from-[#16c6b7] to-[#0ea5e9] text-transparent bg-clip-text tracking-tight leading-tight drop-shadow-lg" style="letter-spacing:-.6px">
-        مغازه‌های این دسته
-      </h1>
+    <!-- دکمه‌های اکشن هدر -->
+    <div class="flex items-center gap-2 header-item">
+      <button type="button" id="rewardClaimBtn"
+        class="reward-header-btn inline-flex items-center gap-2 px-4 py-2 md:px-5 md:py-2.5 rounded-full font-extrabold shadow-lg hover:shadow-xl transition-all duration-200 whitespace-nowrap text-white text-sm md:text-base header-item"
+        aria-haspopup="dialog" aria-controls="rewardModal" aria-expanded="false">
+        <span class="reward-header-icon" aria-hidden="true">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M5 8h14v12H5z" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M3 8h18" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+            <path d="M12 4c.8-1.3 2.5-2 3.8-1 .7.5 1.2 1.3 1.2 2.1 0 1.5-1.2 2.9-3 2.9h-2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M12 4c-.8-1.3-2.5-2-3.8-1-.7.5-1.2 1.3-1.2 2.1 0 1.5 1.2 2.9 3 2.9h2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </span>
+        <span>دریافت جایزه</span>
+      </button>
+      <a href="post.html" id="registerShopBtn" class="btn-grad px-4 py-2 md:px-5 md:py-2.5 rounded-full font-extrabold shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-200 whitespace-nowrap text-white text-sm md:text-base header-item">
+        ثبت فروشگاه
+      </a>
     </div>
-    <!-- مناطق معروف -->
-    <div class="areas-scroll flex gap-2 mb-6 pb-1 justify-center" id="areasShort"></div>
-    <!-- سرچ -->
-    <div class="relative flex flex-col md:flex-row gap-4 mb-10 items-center justify-between">
-      <input id="searchInput" type="text" placeholder="جستجوی نام یا آدرس مغازه..." class="flex-1 py-3 px-5 border border-gray-200 rounded-full text-base shadow-sm focus:outline-none bg-white/80 w-full md:w-auto"/>
+  </div>
+</header>
+
+<main class="min-h-screen pb-16">
+  <section class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-10">
+    <div class="glass-panel p-6 sm:p-9">
+      <div class="page-heading text-center">
+        <p class="text-sm sm:text-base font-extrabold text-emerald-600" id="categoryBadge">دسته‌بندی</p>
+        <h1 id="categoryTitle">مغازه‌های محبوب ویترینت</h1>
+        <p class="mt-3 text-base sm:text-lg" id="categorySubtitle">مرتب‌سازی دقیق بر اساس موقعیت و علاقه شما.</p>
+      </div>
+
+      <div class="filters-shell mt-8" id="filtersWrapper" aria-live="polite"></div>
     </div>
 
-    <!-- فروشگاه‌ها -->
-    <div id="shopsList" class="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-5"></div>
-    <div id="noResult" class="hidden text-center text-gray-400 text-lg p-12 font-bold">هیچ مغازه‌ای پیدا نشد!</div>
-  </main>
-<!-- Desktop Footer -->
-  <footer class="w-full bg-gradient-to-tr from-[#f8fafc] via-[#e0fdfa] to-[#d4fbe8] border-t mt-16 px-2 pt-6 pb-3 text-center text-[15px] text-gray-500 rounded-t-[1.7rem] shadow-lg font-bold tracking-wide">
-    © 2025 ویترینت | همه حقوق محفوظ است.
-  </footer>
-<script>
-  // تعریف دسته‌ها (حتماً طبق دسته‌هایی که داری!)
-  const categories = [
-    { catId: "food",     name: "خوراک" },
-    { catId: "clothing", name: "پوشاک" },
-    { catId: "beauty",   name: "زیبایی" },
-    { catId: "service",  name: "خدمات" },
-    { catId: "digital",  name: "دیجیتال" },
-    { catId: "book",     name: "کتاب و تحریر" },
-    { catId: "auto",     name: "خودرو" },
-    { catId: "sweets",   name: "قنادی و شیرینی" },
-    { catId: "flower",   name: "گل و گیاه" },
-    { catId: "home",     name: "لوازم خانگی" },
-    { catId: "sport",    name: "ورزشی" },
-    { catId: "talar",    name: "تالار و مجالس" }
-  ];
+    <div class="results-wrapper mt-10">
+      <div class="flex items-center justify-between flex-wrap gap-3">
+        <div>
+          <p class="text-xs font-black tracking-wide text-emerald-600 uppercase">نتایج</p>
+          <h2 class="text-2xl font-black text-slate-800" id="resultsTitle">لیست مغازه‌ها</h2>
+        </div>
+        <div class="text-sm font-bold text-slate-500" id="resultsMeta"></div>
+      </div>
+      <div id="results-grid" class="mt-6"></div>
+    </div>
+  </section>
+</main>
 
-  const AREAS = [
-    {id:'baneta', name:'بانتا'},
-    {id:'ferdowsi', name:'فردوسی'},
-    {id:'sanacenter', name:'سنه سنتر'},
-    {id:'tanakora', name:'تاناکورا'},
-    {id:'almas', name:'الماس غرب'},
-    {id:'abidar', name:'آبیدر'},
-    {id:'navid', name:'نوید'},
-    {id:'ghezel', name:'قزل قایا'},
-    {id:'shahrak', name:'شهرک بهاران'},
-    {id:'azadi', name:'میدان آزادی'},
-    {id:'masjed', name:'خیابان مسجد جامع'},
-    {id:'mellat', name:'پارک ملت'},
-    {id:'salar', name:'سالار'},
-    {id:'parastar', name:'پرستار'},
-    {id:'emam', name:'بلوار امام'},
-    {id:'ghadir', name:'قدیر'},
-    {id:'shohada', name:'بلوار شهدا'},
-  ];
-
-  function getCatParam() {
-    const urlParams = new URLSearchParams(window.location.search);
-    return urlParams.get('cat') || '';
-  }
-
-  // مقدار جستجو و منطقه
-  let current = { area: null, search: "" };
-
-  document.getElementById('searchInput').oninput = function () {
-    current.search = this.value;
-    loadShopsByCategory();
-  }
-
-  function renderAreasShort(selected = null) {
-    const container = document.getElementById('areasShort');
-    container.innerHTML = '';
-    AREAS.slice(0, 8).forEach(area => {
-      const btn = document.createElement('button');
-      btn.className = 'area-btn' + (selected === area.id ? ' active' : '');
-      btn.innerText = area.name;
-      btn.onclick = () => {
-        current.area = (current.area === area.id) ? null : area.id;
-        renderAreasShort(current.area);
-        loadShopsByCategory();
-      }
-      container.appendChild(btn);
-    });
-  }
-
-  function setCatTitle() {
-    const cat = getCatParam();
-    // پیدا کردن اسم فارسی دسته
-    const found = categories.find(c => c.catId === cat);
-    document.getElementById('cat-title').innerText =
-      found ? `مغازه‌های دسته "${found.name}"` : 'مغازه‌های این دسته';
-  }
-
-  // دریافت و نمایش مغازه‌های این دسته
-  async function loadShopsByCategory() {
-    const cat = getCatParam();
-    setCatTitle();
-    const list = document.getElementById('shopsList');
-    const empty = document.getElementById('noResult');
-    list.innerHTML = '<div style="margin: 50px auto;">در حال بارگذاری...</div>';
-    empty.classList.add('hidden');
-    try {
-      // همه مغازه‌ها را بگیر
-      const res = await fetch("http://localhost:5000/api/shops");
-      const shops = await res.json();
-
-      // مغازه‌های این دسته، اگر category فارسی یا انگلیسی ثبت شده باشه
-      const shopsInCat = shops.filter(shop =>
-        shop.category === cat ||
-        shop.category === (categories.find(c => c.catId === cat)?.name)
-      );
-
-      // فیلتر منطقه و سرچ
-      let filtered = shopsInCat.filter(shop =>
-        (!current.area || shop.area === current.area) &&
-        (
-          !current.search ||
-          (shop.storename && shop.storename.includes(current.search)) ||
-          (shop.address && shop.address.includes(current.search))
-        )
-      );
-
-      list.innerHTML = '';
-      if (!filtered.length) {
-        empty.classList.remove('hidden');
-        return;
-      }
-      filtered.forEach(shop => {
-        // پیدا کردن اسم منطقه (فارسی)
-        let areaName = '';
-        if (shop.area) {
-          const foundArea = AREAS.find(a => a.id === shop.area);
-          if (foundArea) areaName = foundArea.name;
-          else areaName = shop.area;
-        }
-        // کارت مغازه
-        const card = document.createElement('div');
-        card.className = 'shop-card group transition-all duration-200 relative hover:-translate-y-1 hover:shadow-2xl';
-        card.innerHTML = `
-          <div class="shop-card-content">
-            <div class="shop-card-image-container relative h-36 sm:h-44 bg-gradient-to-tr from-[#e0fdfa] to-[#e0f7fa] border-2 border-[#10b98112] group-hover:border-[#10b98144] shadow">
-              ${shop.boardImage
-                ? `<img src="${shop.boardImage}" class="object-cover w-full h-full transition-all duration-200 group-hover:scale-105" alt="${shop.storename}" loading="lazy"/>`
-                : `<img src="${shop.banner || 'assets/images/shop-default.png'}" class="object-cover w-full h-full opacity-90 transition-all duration-200 group-hover:scale-105" alt="${shop.storename}" loading="lazy"/>`
-              }
-              <span class="absolute top-2 left-2 bg-[#10b981] text-white text-xs font-bold px-2 py-1 rounded-full shadow group-hover:bg-[#0ea5e9] transition-all duration-150">جدید</span>
-            </div>
-            <div class="shop-card-body">
-              <div class="shop-tags-container w-full">
-                <span class="shop-tag inline-block bg-[#0ea5e9]/10 text-[#0ea5e9] text-[12px] font-extrabold px-2 py-1 rounded-full">${areaName}</span>
-                <span class="shop-tag inline-block bg-[#10b981]/10 text-[#10b981] text-[12px] font-extrabold px-2 py-1 rounded-full">${shop.category || ''}</span>
-              </div>
-              <h4 class="shop-name font-bold text-base sm:text-lg text-[#10b981] text-right sm:text-center lg:text-right mb-1 sm:mb-2 truncate w-full group-hover:text-[#0ea5e9] transition-all">${shop.storename}</h4>
-              <div class="shop-address text-[#13bfa4] font-extrabold text-sm text-right sm:text-center lg:text-right">${shop.address || ''}</div>
-              ${shop.phone ? `<div class="shop-phone text-gray-400 text-xs font-bold flex items-center gap-1">
-                <svg class="phone-icon" fill="none" viewBox="0 0 24 24"><path d="M6.62 10.79a15.054 15.054 0 006.59 6.59l2.2-2.2a1.003 1.003 0 011.01-.24c1.12.37 2.33.57 3.58.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1C10.07 21 3 13.93 3 5c0-.55.45-1 1-1h3.01c.55 0 1 .45 1 1 0 1.25.2 2.46.57 3.59a1 1 0 01-.24 1.01l-2.2 2.19z" fill="#10b981"/></svg>
-                ${shop.phone}
-              </div>` : ''}
-              <div class="shop-card-spacer"></div>
-              <a href="shop.html?shopurl=${shop.shopurl}" class="shop-entry-btn w-full inline-block bg-gradient-to-l from-[#10b981] to-[#0ea5e9] hover:from-[#0ea5e9] hover:to-[#10b981] rounded-full px-4 py-2 mt-3 text-white font-extrabold text-sm shadow transition-all duration-200 text-center">
-                ورود به فروشگاه
-              </a>
-            </div>
-          </div>
-        `;
-        list.appendChild(card);
-      });
-    } catch (e) {
-      list.innerHTML = '<div class="text-red-500 text-center w-full p-8">مشکل در ارتباط با سرور!</div>';
-    }
-  }
-
-  // شروع
-  renderAreasShort();
-  setCatTitle();
-  window.addEventListener('DOMContentLoaded', loadShopsByCategory);
-</script>
-
-
-<!-- TODO: افزودن رویدادهای PostHog پس از فعال‌سازی | TODO: Enable PostHog events after activation -->
-<!--
-<script>
-  document.addEventListener('DOMContentLoaded', function () {
-    const safeCapture = window.safePosthogCapture || function () {};
-    // safeCapture('event_name', { /* داده‌های تکمیلی */ });
-  });
-</script>
--->
+<footer class="w-full bg-gradient-to-tr from-[#f8fafc] via-[#e0fdfa] to-[#d4fbe8] border-t mt-16 px-2 pt-6 pb-3 text-center text-[15px] text-gray-500 rounded-t-[1.7rem] shadow-lg font-bold tracking-wide">
+  © 2025 ویترینت | همه حقوق محفوظ است.
+</footer>
 
 </body>
 </html>
