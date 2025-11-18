@@ -417,8 +417,7 @@
     const tags = (shop.tags || []).slice(0, 3).map((tag) => `<span class="card-badge bg-emerald-50 text-emerald-600">${tag}</span>`).join('');
     const imageSrc = resolveShopImage(shop);
     const altText = shop.name ? `نمایی از ${shop.name}` : 'تصویر مغازه';
-    return `
-      <article class="card-shell" data-type="shop">
+    return `<article class="card-shell" data-type="shop">
         <div class="shop-card-image">
           <img src="${imageSrc}" alt="${altText}" loading="lazy" decoding="async" />
         </div>
