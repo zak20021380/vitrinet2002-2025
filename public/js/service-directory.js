@@ -336,7 +336,7 @@ function renderResults() {
 
   if (elements.emptyState) elements.emptyState.classList.add('hidden');
 
-  grid.innerHTML = items.map(shop => {
+  const cardsHTML = items.map(shop => {
     const ratingText = Number(shop.rating || 0).toLocaleString('fa-IR', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
     const reviewText = Number(shop.reviewCount || 0).toLocaleString('fa-IR');
     const followers = Number(shop?.stats?.followers || 0).toLocaleString('fa-IR');
