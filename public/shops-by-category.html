@@ -285,41 +285,83 @@
     </section>
   </main>
 
+
   <script>
-    (function () {
-      const categoryParam = new URLSearchParams(window.location.search).get('cat') || 'general';
+    (() => {
+      const CATEGORY_CONFIG = [
+        { catId: 'general', name: 'همه مغازه‌ها', desc: 'نمایش تمام فروشگاه‌های ثبت شده در ویترینت.' },
+        { catId: 'food', name: 'خوراک', desc: 'مواد غذایی، سوپرمارکت‌ها و تجربه‌های خوشمزه شهر.' },
+        { catId: 'clothing', name: 'پوشاک', desc: 'بوتیک‌ها، لباس‌های مردانه، زنانه و پوشاک تخصصی.' },
+        { catId: 'beauty', name: 'زیبایی', desc: 'سالن‌های زیبایی، آرایشی و خدمات مراقبت پوست و مو.' },
+        { catId: 'service', name: 'خدمات', desc: 'کسب‌وکارهای خدماتی، آموزشی و تعمیراتی.' },
+        { catId: 'digital', name: 'دیجیتال', desc: 'موبایل، لپ‌تاپ، گجت و لوازم جانبی دیجیتال.' },
+        { catId: 'book', name: 'کتاب و تحریر', desc: 'کتاب‌فروشی‌ها و فروشگاه‌های لوازم اداری و تحریر.' },
+        { catId: 'auto', name: 'خودرو', desc: 'قطعات و خدمات مرتبط با خودرو و حمل و نقل.' },
+        { catId: 'sweets', name: 'قنادی و شیرینی', desc: 'قنادی‌ها، نان فانتزی و هر آنچه شیرین است.' },
+        { catId: 'flower', name: 'گل و گیاه', desc: 'گل‌فروشی‌ها و فروشگاه‌های گیاهان آپارتمانی.' },
+        { catId: 'home', name: 'لوازم خانگی', desc: 'وسایل منزل، آشپزخانه و تجهیزات برقی خانگی.' },
+        { catId: 'sport', name: 'ورزشی', desc: 'پوشاک، تجهیزات و باشگاه‌های ورزشی.' },
+        { catId: 'talar', name: 'تالار و مجالس', desc: 'تالارها و خدمات مجالس و تشریفات.' }
+      ];
+
       const state = {
-        category: categoryParam,
+        category: (new URLSearchParams(window.location.search).get('cat') || 'general').toLowerCase(),
         search: '',
         sort: 'popular',
-        rating: 'all',
-        subcategory: 'all',
-        serviceData: { items: [], portfolios: [] },
-        standardData: getStandardFallbackData(), // داده‌های پیش‌فرض همیشه لود می‌شوند
+        shops: [],
+        loading: true,
+        error: ''
       };
 
-      document.addEventListener('DOMContentLoaded', async () => {
+      const selectors = {
+        grid: () => document.getElementById('results-grid'),
+        meta: () => document.getElementById('resultsMeta'),
+        title: () => document.getElementById('resultsTitle'),
+        badge: () => document.getElementById('categoryBadge'),
+        heroTitle: () => document.getElementById('categoryTitle'),
+        heroSubtitle: () => document.getElementById('categorySubtitle'),
+        filtersWrapper: () => document.getElementById('filtersWrapper')
+      };
+
+      document.addEventListener('DOMContentLoaded', () => {
         hydrateHero();
-        renderStandardFilters();
-        attachStandardFilterEvents();
-        // برای تست فوری، مستقیم داده‌های فال‌بک (Fallback) را نمایش می‌دهیم
-        // تا مطمئن شویم مشکل از فچ کردن API نیست
-        applyStandardFilters(); 
+        renderFilters();
+        attachFilterEvents();
+        fetchShopsFromApi();
       });
 
+      function getCategoryMeta(cat) {
+        const normalized = (cat || '').toLowerCase();
+        return CATEGORY_CONFIG.find(cfg => cfg.catId === normalized) || {
+          catId: normalized,
+          name: cat,
+          desc: 'فروشگاه‌های ثبت شده در این دسته'
+        };
+      }
+
       function hydrateHero() {
-        const badge = document.getElementById('categoryBadge');
-        const title = document.getElementById('categoryTitle');
-        const subtitle = document.getElementById('categorySubtitle');
-        if(state.category === 'general') {
-             title.textContent = "همه مغازه‌ها";
-        } else {
-             title.textContent = `مغازه‌های ${state.category}`;
+        const categoryMeta = getCategoryMeta(state.category);
+        const badge = selectors.badge();
+        const title = selectors.heroTitle();
+        const subtitle = selectors.heroSubtitle();
+        const isGeneral = !categoryMeta.catId || categoryMeta.catId === 'general';
+
+        if (badge) {
+          badge.textContent = isGeneral ? 'تمام دسته‌ها' : `#${categoryMeta.catId}`;
+        }
+        if (title) {
+          title.textContent = isGeneral ? 'همه مغازه‌ها' : `مغازه‌های ${categoryMeta.name || ''}`.trim();
+        }
+        if (subtitle) {
+          subtitle.textContent = categoryMeta.desc || 'فروشگاه‌های ثبت شده در ویترینت';
+        }
+        if (selectors.title()) {
+          selectors.title().textContent = isGeneral ? 'لیست همه مغازه‌ها' : `مغازه‌های ${categoryMeta.name || ''}`.trim();
         }
       }
 
-      function renderStandardFilters() {
-        const wrapper = document.getElementById('filtersWrapper');
+      function renderFilters() {
+        const wrapper = selectors.filtersWrapper();
         if (!wrapper) return;
         wrapper.innerHTML = `
           <div class="grid gap-5 md:grid-cols-3">
@@ -332,74 +374,231 @@
               <select id="sortSelect">
                 <option value="popular">محبوب‌ترین</option>
                 <option value="rating_desc">بیشترین امتیاز</option>
+                <option value="alphabetical">مرتب‌سازی الفبا</option>
               </select>
             </div>
           </div>
         `;
       }
 
-      function attachStandardFilterEvents() {
-        const wrapper = document.getElementById('filtersWrapper');
+      function attachFilterEvents() {
+        const wrapper = selectors.filtersWrapper();
         if (!wrapper) return;
-        wrapper.querySelector('#searchInput').addEventListener('input', (e) => {
-            state.search = e.target.value;
-            applyStandardFilters();
-        });
-        wrapper.querySelector('#sortSelect').addEventListener('change', (e) => {
-            state.sort = e.target.value;
-            applyStandardFilters();
-        });
-      }
+        const searchInput = wrapper.querySelector('#searchInput');
+        const sortSelect = wrapper.querySelector('#sortSelect');
 
-      function applyStandardFilters() {
-        let collection = [...state.standardData];
-        
-        // اعمال جستجو
-        if (state.search) {
-          const term = state.search.toLowerCase();
-          collection = collection.filter(shop => shop.name.includes(term));
+        if (searchInput) {
+          searchInput.addEventListener('input', (event) => {
+            state.search = event.target.value;
+            applyFilters();
+          });
         }
 
-        // رندر کارت‌ها
-        const cards = collection.map(shop => createShopCard(shop)).join('');
-        const grid = document.getElementById('results-grid');
-        if(grid) grid.innerHTML = cards;
-        
-        const meta = document.getElementById('resultsMeta');
-        if(meta) meta.textContent = `${collection.length} مغازه`;
+        if (sortSelect) {
+          sortSelect.addEventListener('change', (event) => {
+            state.sort = event.target.value;
+            applyFilters();
+          });
+        }
+      }
+
+      async function fetchShopsFromApi() {
+        setLoadingState('در حال بارگذاری مغازه‌های ثبت‌شده...');
+        try {
+          const response = await fetch('/api/shops');
+          if (!response.ok) {
+            throw new Error('خطا در دریافت اطلاعات مغازه‌ها');
+          }
+          const data = await response.json();
+          state.shops = Array.isArray(data) ? data : [];
+          state.loading = false;
+          applyFilters();
+        } catch (error) {
+          console.error('Shop listing error:', error);
+          state.loading = false;
+          state.error = 'متاسفانه در بارگذاری مغازه‌ها مشکلی پیش آمد. لطفا کمی بعد دوباره تلاش کنید.';
+          renderErrorState();
+        }
+      }
+
+      function applyFilters() {
+        if (state.loading) return;
+        const searchTerm = (state.search || '').toLowerCase().trim();
+        const targetCategory = state.category;
+
+        let collection = state.shops.filter((shop) => matchesCategory(shop, targetCategory));
+
+        if (searchTerm) {
+          collection = collection.filter((shop) => {
+            const name = getShopName(shop).toLowerCase();
+            const desc = (shop.desc || shop.description || '').toLowerCase();
+            return name.includes(searchTerm) || desc.includes(searchTerm);
+          });
+        }
+
+        if (state.sort === 'rating_desc') {
+          collection.sort((a, b) => {
+            const diff = getRating(b) - getRating(a);
+            if (diff !== 0) return diff;
+            return getShopName(a).localeCompare(getShopName(b));
+          });
+        } else if (state.sort === 'alphabetical') {
+          collection.sort((a, b) => getShopName(a).localeCompare(getShopName(b)));
+        } else {
+          collection.sort((a, b) => Number(b.isPremium || false) - Number(a.isPremium || false));
+        }
+
+        renderResults(collection);
+      }
+
+      function matchesCategory(shop, category) {
+        const normalized = normalize(category);
+        if (!normalized || normalized === 'general') {
+          return true;
+        }
+        const shopCategories = [
+          shop.category,
+          shop.categorySlug,
+          shop.shopCategory,
+          shop.categoryName,
+          Array.isArray(shop.tags) ? shop.tags.join(' ') : ''
+        ];
+        return shopCategories.some((value) => normalize(value) === normalized);
+      }
+
+      function normalize(value) {
+        return (value || '').toString().trim().toLowerCase();
+      }
+
+      function getRating(shop) {
+        if (!shop) return 0;
+        const value = parseFloat(shop.rating || shop.shopRating || 0);
+        return Number.isFinite(value) ? value : 0;
+      }
+
+      function getShopName(shop) {
+        if (!shop) return '';
+        return (shop.storename || shop.shopName || '').toString().trim();
+      }
+
+      function renderResults(collection) {
+        const grid = selectors.grid();
+        if (!grid) return;
+
+        if (!collection.length) {
+          grid.innerHTML = `
+            <div class="empty-state col-span-full">
+              <p>هیچ مغازه‌ای در این دسته‌بندی یافت نشد.</p>
+            </div>
+          `;
+        } else {
+          grid.innerHTML = collection.map((shop) => createShopCard(shop)).join('');
+        }
+
+        const meta = selectors.meta();
+        if (meta) {
+          meta.textContent = `${collection.length} مغازه ثبت شده`;
+        }
+      }
+
+      function renderErrorState() {
+        const grid = selectors.grid();
+        if (!grid) return;
+        grid.innerHTML = `
+          <div class="empty-state col-span-full text-red-600">
+            <p>${state.error}</p>
+          </div>
+        `;
+        const meta = selectors.meta();
+        if (meta) {
+          meta.textContent = '0 مغازه';
+        }
+      }
+
+      function setLoadingState(message) {
+        const grid = selectors.grid();
+        if (!grid) return;
+        grid.innerHTML = `
+          <div class="loading-state col-span-full">
+            <span class="block font-black text-emerald-600">${message}</span>
+          </div>
+        `;
+        const meta = selectors.meta();
+        if (meta) {
+          meta.textContent = '...';
+        }
       }
 
       function createShopCard(shop) {
-        // استفاده از یک تصویر آنلاین برای تست که مطمئن شویم عکس لود می‌شود
-        const imageSrc = "https://placehold.co/600x400/e2e8f0/1e293b?text=Shop+Image"; 
-        
+        const name = shop.storename || shop.shopName || 'بدون نام';
+        const rating = getRating(shop);
+        const imageSrc = getShopImage(shop);
+        const address = formatAddress(shop);
+        const shopLink = getShopLink(shop);
+        const description = shop.desc || shop.description || '';
+
         return `
           <article class="card-shell">
             <div class="shop-card-image">
-              <img src="${imageSrc}" alt="${shop.name}" loading="lazy" />
+              <img src="${imageSrc}" alt="${escapeHtml(name)}" loading="lazy" />
             </div>
             <div class="flex items-center justify-between">
-              <span class="card-badge bg-emerald-50 text-emerald-600">مغازه</span>
-              <span class="card-meta">⭐ ${shop.rating}</span>
+              <span class="card-badge ${shop.isPremium ? 'bg-yellow-50 text-amber-600' : 'bg-emerald-50 text-emerald-600'}">
+                ${shop.isPremium ? 'پریمیوم' : 'مغازه'}
+              </span>
+              <span class="card-meta">⭐ ${rating ? rating.toFixed(1) : 'بدون امتیاز'}</span>
             </div>
-            <h3 class="card-title">${shop.name}</h3>
-            <p class="text-sm text-slate-500 font-semibold">${shop.address}</p>
+            <h3 class="card-title">${escapeHtml(name)}</h3>
+            <p class="text-sm text-slate-500 font-semibold">${escapeHtml(address)}</p>
+            ${description ? `<p class="text-sm text-slate-400">${escapeHtml(description)}</p>` : ''}
             <div class="card-actions mt-auto">
-              <a href="#">مشاهده پروفایل</a>
+              ${shopLink ? `<a href="${shopLink}">مشاهده پروفایل</a>` : '<span class="text-slate-400">بدون صفحه</span>'}
             </div>
           </article>
         `;
       }
 
-      function getStandardFallbackData() {
-        return [
-          { id: 1, name: 'سوپرمارکت امید', address: 'سنندج، پارک آبیدر', rating: 4.7 },
-          { id: 2, name: 'آرایشگاه آریاس', address: 'سنندج، خیابان کشاورز', rating: 4.4 },
-          { id: 3, name: 'کارواش موج آبی', address: 'سنندج، جاده همدان', rating: 4.1 },
-          { id: 4, name: 'بوتیک رویال', address: 'سنندج، پاساژ کوروش', rating: 4.6 },
+      function getShopImage(shop) {
+        const candidates = [
+          shop.image,
+          shop.boardImage,
+          shop.banner,
+          Array.isArray(shop.images) && shop.images.length ? shop.images[0] : '',
+          Array.isArray(shop.slides) && shop.slides.length ? shop.slides[0].img : ''
         ];
+        const raw = candidates.find((src) => typeof src === 'string' && src.trim().length > 0);
+        if (raw && /^(https?:\/\/|\/|data:image\//).test(raw)) {
+          return raw;
+        }
+        return 'https://placehold.co/600x400/e2e8f0/1e293b?text=No+Image';
+      }
+
+      function formatAddress(shop) {
+        if (shop.address) return shop.address;
+        const city = shop.city ? `${shop.city}` : '';
+        const region = shop.region ? `${shop.region}` : '';
+        return [city, region].filter(Boolean).join('، ') || 'آدرس ثبت نشده';
+      }
+
+      function getShopLink(shop) {
+        const slug = shop.shopurl || shop.shopUrl || shop.customUrl || '';
+        if (!slug) return '';
+        const encoded = encodeURIComponent(slug);
+        return `shop.html?shopurl=${encoded}`;
+      }
+
+      function escapeHtml(value = '') {
+        return value
+          .toString()
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;')
+          .replace(/'/g, '&#39;');
       }
     })();
   </script>
+
 </body>
 </html>
+
