@@ -1,5 +1,12 @@
 (function () {
   const categoryParam = new URLSearchParams(window.location.search).get('cat') || 'general';
+  const DEFAULT_SERVICE_CATEGORY_NAME = 'خدمات';
+  const FALLBACK_SERVICE_SUBCATEGORIES = [
+    { slug: 'gym', name: 'باشگاه' },
+    { slug: 'decor', name: 'دکوراسیون' },
+    { slug: 'repair', name: 'تعمیرات' },
+  ];
+
   const state = {
     category: categoryParam,
     search: '',
@@ -7,8 +14,21 @@
     rating: 'all',
     subcategory: 'all',
     view: 'all',
+    serviceCategoryName: DEFAULT_SERVICE_CATEGORY_NAME,
+    serviceCategorySlug: 'service',
+    serviceSubcategoryMap: new Map(),
     serviceData: { items: [], portfolios: [] },
     standardData: getStandardFallbackData(),
+  };
+
+  const slugifyClient = (value = '') => {
+    return String(value || '')
+      .trim()
+      .toLowerCase()
+      .replace(/[_\s]+/g, '-')
+      .replace(/[^a-z0-9\u0600-\u06FF-]/g, '')
+      .replace(/-+/g, '-')
+      .replace(/^-|-$/g, '');
   };
 
   const texts = {
@@ -23,8 +43,13 @@
   document.addEventListener('DOMContentLoaded', async () => {
     hydrateHero();
     if (state.category === 'service') {
-      const subcategories = await fetchServiceSubcategories();
-      renderServiceFilters(subcategories);
+      const serviceCategoryData = await fetchServiceCategoryData();
+      state.serviceCategoryName = serviceCategoryData.categoryName || DEFAULT_SERVICE_CATEGORY_NAME;
+      state.serviceCategorySlug = serviceCategoryData.categorySlug || slugifyClient(state.serviceCategoryName);
+      state.serviceSubcategoryMap = new Map(
+        serviceCategoryData.subcategories.map((item) => [item.slug, item])
+      );
+      renderServiceFilters(serviceCategoryData.subcategories);
       attachServiceFilterEvents();
       await loadServiceContent();
     } else {
@@ -68,21 +93,43 @@
     };
   }
 
-  async function fetchServiceSubcategories() {
+  async function fetchServiceCategoryData() {
     try {
-      const response = await fetch('/api/categories?parent=service');
-      if (!response.ok) throw new Error('subcategories failed');
+      const response = await fetch('/api/categories');
+      if (!response.ok) throw new Error('categories failed');
       const data = await response.json();
-      if (!Array.isArray(data)) throw new Error('invalid subcategories payload');
-      return data;
+      const serviceSubcategories = Array.isArray(data?.serviceSubcategories)
+        ? data.serviceSubcategories
+        : [];
+
+      const normalisedSubs = serviceSubcategories
+        .map((item) => ({
+          id: item.id || item._id,
+          name: item.name,
+          parentName: item.parentName || '',
+          slug: slugifyClient(item.slug || item.name),
+        }))
+        .filter((item) => item.name && item.slug);
+
+      const resolvedParentName = normalisedSubs.find((sub) => sub.parentName)?.parentName
+        || (Array.isArray(data?.categories)
+          ? (data.categories.find((cat) => slugifyClient(cat.slug || cat.name) === slugifyClient(DEFAULT_SERVICE_CATEGORY_NAME))?.name
+            || data.categories.find((cat) => cat.name?.includes('خدمات'))?.name)
+          : null)
+        || DEFAULT_SERVICE_CATEGORY_NAME;
+
+      return {
+        subcategories: normalisedSubs,
+        categoryName: resolvedParentName,
+        categorySlug: slugifyClient(resolvedParentName),
+      };
     } catch (error) {
       console.warn('Failed to load service subcategories, using fallback.', error);
-      return [
-        { slug: 'all', name: 'همه' },
-        { slug: 'gym', name: 'باشگاه' },
-        { slug: 'decor', name: 'دکوراسیون' },
-        { slug: 'repair', name: 'تعمیرات' },
-      ];
+      return {
+        subcategories: FALLBACK_SERVICE_SUBCATEGORIES,
+        categoryName: DEFAULT_SERVICE_CATEGORY_NAME,
+        categorySlug: slugifyClient(DEFAULT_SERVICE_CATEGORY_NAME),
+      };
     }
   }
 
@@ -129,7 +176,18 @@
 
     const chipsContainer = document.getElementById('subcategoryChips');
     chipsContainer.innerHTML = '';
-    const list = [{ slug: 'all', name: 'همه' }, ...subcategories.filter((item) => item.slug !== 'all')];
+    const uniqueSubs = [];
+    const seenSubs = new Set();
+    subcategories.forEach((item) => {
+      const slug = item.slug || slugifyClient(item.name);
+      if (!slug || seenSubs.has(slug)) return;
+      seenSubs.add(slug);
+      uniqueSubs.push({ slug, name: item.name || slug });
+    });
+
+    uniqueSubs.sort((a, b) => a.name.localeCompare(b.name, 'fa')); 
+
+    const list = [{ slug: 'all', name: 'همه' }, ...uniqueSubs];
     list.forEach((item) => {
       const button = document.createElement('button');
       button.type = 'button';
@@ -198,9 +256,21 @@
   }
 
   async function fetchServiceShowcase() {
-    const params = new URLSearchParams({ category: 'service' });
-    if (state.subcategory && state.subcategory !== 'all') {
-      params.append('subcategory', state.subcategory);
+    const params = new URLSearchParams();
+    const selectedSubcategory = state.subcategory && state.subcategory !== 'all'
+      ? state.subcategory
+      : '';
+
+    const categorySlug = selectedSubcategory || state.serviceCategorySlug || slugifyClient(state.category);
+    if (categorySlug) {
+      params.append('category', categorySlug);
+    }
+
+    const categoryName = selectedSubcategory
+      ? (state.serviceSubcategoryMap.get(selectedSubcategory)?.name || selectedSubcategory.replace(/-/g, ' '))
+      : state.serviceCategoryName;
+    if (categoryName) {
+      params.append('categoryName', categoryName);
     }
 
     try {
@@ -235,7 +305,7 @@
           .some((field) => field.toString().toLowerCase().includes(term));
       });
       filteredPortfolios = filteredPortfolios.filter((item) => {
-        return [item.title, item.shopName, ...(item.tags || [])]
+        return [item.title, item.description, item.shopName, item.shop?.name, ...(item.tags || [])]
           .filter(Boolean)
           .some((field) => field.toString().toLowerCase().includes(term));
       });
@@ -400,7 +470,21 @@
   }
 
   function createPortfolioCard(portfolio) {
-    const rating = Number(portfolio.rating || 0).toFixed(1);
+    const ratingSource = portfolio.rating || portfolio.shop?.rating || 0;
+    const rating = Number(ratingSource || 0).toFixed(1);
+    const description = portfolio.description || portfolio.previewText || '';
+    const shopName = portfolio.shop?.name || portfolio.shopName || 'نام فروشگاه';
+    const shopId = portfolio.shop?.id || portfolio.shopId || portfolio.shopName;
+    const imageSection = portfolio.image
+      ? `<div class="portfolio-preview with-image"><img src="${portfolio.image}" alt="${portfolio.title || 'نمونه‌کار'}" loading="lazy" /></div>`
+      : `<div class="portfolio-preview">${description || 'پیش‌نمایش نمونه‌کار'}</div>`;
+    const stats = [];
+    if (typeof portfolio.likeCount === 'number') {
+      stats.push(`<span>❤️ ${portfolio.likeCount}</span>`);
+    }
+    if (typeof portfolio.viewCount === 'number') {
+      stats.push(`<span>👁 ${portfolio.viewCount}</span>`);
+    }
     return `
       <article class="card-shell" data-type="portfolio">
         <div class="flex items-center justify-between">
@@ -410,14 +494,14 @@
           </span>
           <span class="card-meta">⭐ ${rating}</span>
         </div>
-        <div class="portfolio-preview">
-          ${portfolio.previewText || 'پیش‌نمایش نمونه‌کار'}
-        </div>
+        ${imageSection}
         <h3 class="card-title">${portfolio.title}</h3>
-        <p class="text-sm text-slate-500 font-semibold">${portfolio.shopName || 'نام فروشگاه'}</p>
+        <p class="text-sm text-slate-500 font-semibold">${shopName}</p>
+        ${description ? `<p class="text-xs text-slate-500 leading-relaxed">${description}</p>` : ''}
         <div class="flex flex-wrap gap-2">${(portfolio.tags || []).map((tag) => `<span class="card-badge bg-sky-50 text-sky-700">${tag}</span>`).join('')}</div>
+        ${stats.length ? `<div class="portfolio-stats">${stats.join('')}</div>` : ''}
         <div class="card-actions mt-auto">
-          <a href="shop.html?id=${encodeURIComponent(portfolio.shopId || portfolio.shopName)}">مشاهده نمونه‌کار</a>
+          <a href="shop.html?id=${encodeURIComponent(shopId)}">مشاهده نمونه‌کار</a>
         </div>
       </article>
     `;
@@ -511,7 +595,8 @@
 
     const filterBySubcategory = (collection) => {
       if (!selectedSubcategory || selectedSubcategory === 'all') return collection;
-      return collection.filter((item) => item.subcategory === selectedSubcategory);
+      const selectedSlug = slugifyClient(selectedSubcategory);
+      return collection.filter((item) => slugifyClient(item.subcategory) === selectedSlug);
     };
 
     return {
