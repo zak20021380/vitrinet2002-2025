@@ -1,172 +1,405 @@
 <!DOCTYPE html>
 <html lang="fa" dir="rtl">
 <head>
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdn.tailwindcss.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com https://cdn.jsdelivr.net data:; connect-src 'self'; img-src 'self' data:; base-uri 'self'; form-action 'self'; upgrade-insecure-requests; block-all-mixed-content">
-<meta http-equiv="Strict-Transport-Security" content="max-age=63072000; includeSubDomains; preload">
-<meta http-equiv="Referrer-Policy" content="no-referrer">
-<meta http-equiv="X-Content-Type-Options" content="nosniff">
-<meta http-equiv="X-XSS-Protection" content="1; mode=block">
-<meta name="referrer" content="no-referrer">
-<meta http-equiv="Permissions-Policy" content="geolocation=(), microphone=(), camera=()">
-    <script src="/security.js" defer></script>
-
-  <script src="/js/runtime-config.js" defer></script>
-  <script src="/js/analytics.js" defer></script>
-
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>دسته‌بندی مغازه‌ها | ویترینت</title>
+
   <script src="https://cdn.tailwindcss.com"></script>
-  <link rel="stylesheet" href="style-index.css" />
-  <link rel="stylesheet" href="shops-by-category.css" />
-    <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;700;900&family=Poppins:wght@800;900&display=swap" rel="stylesheet"/>
-    <script src="/nav-active.js" defer></script>
-    <script src="shops-by-category.js" defer></script>
+  
+  <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;700;900&family=Poppins:wght@800;900&display=swap" rel="stylesheet"/>
 
-<!-- TODO: فعال‌سازی پست‌هاگ را هنگام انتشار فراموش نکنید | TODO: Enable PostHog analytics when going live -->
-<!--
-<script>
-  (function () {
-    var config = window.POSTHOG_CONFIG || { enabled: false, apiKey: 'phc_YOUR_KEY_HERE', apiHost: 'https://analytics.vitreenet.ir' };
-    if (!config.enabled) {
-      return; // فعال نیست | Not enabled yet
+  <style>
+    /* تنظیمات پایه */
+    body {
+      font-family: 'Vazirmatn', sans-serif;
+      background: #f8fafc;
+      color: #0f172a;
     }
-    try {
-      (function(t,e){var o,n,p,r;e.__SV||(window.posthog=e,e._i=[],e.init=function(i,s,a){function g(t,e){var o=e.split(".");2==o.length&&(t=t[o[0]],e=o[1]),t[e]=function(){t.push([e].concat(Array.prototype.slice.call(arguments,0)))}}(p=t.createElement("script")),p.type="text/javascript",p.async=!0,p.src=s.api_host+"/static/array.js";(r=t.getElementsByTagName("script")[0]),r.parentNode.insertBefore(p,r);var u=e;for(void 0!==a?u=e[a]=[]:u=e,u.people=u.people||[],u.toString=function(t){var e="posthog";return"posthog"!==u._i&&(e+="."+u._i),t||(e+=" (stub)"),e},u.people.toString=function(){return u.toString(1)+".people (stub)"};n="capture identify alias people.set people.set_once people.unset people.increment people.append people.union people.remove people.clear_opt_out_outcome register register_once unregister opt_out_capturing opt_in_capturing has_opted_out_capturing reset isFeatureEnabled onFeatureFlags reloadFeatureFlags group".split(" ");for(o=0;o<n.length;o++)g(u,n[o]);e._i.push([i,s,a])},e.__SV=1.1)})(document, window.posthog || []);
-      window.posthog.init(config.apiKey, { api_host: config.apiHost, capture_pageview: true, advanced_disable_decide: true });
-    } catch (error) {
-      console.warn('PostHog init failed (preview mode):', error);
+    
+    /* حذف وابستگی به فایل‌های خارجی */
+    *, ::before, ::after {
+      box-sizing: border-box;
     }
-  })();
-</script>
--->
 
+    main {
+      background: linear-gradient(145deg, #f8fafc 0%, #ecfeff 45%, #ecfdf5 100%);
+    }
 
+    .glass-panel {
+      background: rgba(255, 255, 255, 0.92);
+      border-radius: 1.75rem;
+      border: 1px solid rgba(16, 185, 129, 0.15);
+      box-shadow: 0 25px 70px rgba(14, 165, 233, 0.08), 0 12px 30px rgba(15, 118, 110, 0.12);
+      backdrop-filter: blur(16px);
+    }
 
+    .page-heading h1 {
+      font-size: clamp(1.9rem, 2.4vw, 2.7rem);
+      font-weight: 900;
+      line-height: 1.3;
+      background: linear-gradient(90deg, #10b981, #0ea5e9);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
 
+    .page-heading p {
+      color: #475569;
+      font-weight: 600;
+    }
 
+    .filters-shell {
+      margin-top: 1.75rem;
+      padding: 1.5rem;
+      border-radius: 1.5rem;
+      border: 1px solid rgba(14, 165, 233, 0.2);
+      background: rgba(248, 250, 252, 0.78);
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.6);
+    }
+
+    .filters-shell label {
+      font-size: 0.85rem;
+      font-weight: 800;
+      color: #0f172a;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    .filters-shell input[type="text"],
+    .filters-shell select {
+      width: 100%;
+      border-radius: 999px;
+      border: 1px solid rgba(15, 118, 110, 0.18);
+      padding: 0.9rem 1.2rem;
+      background: rgba(255, 255, 255, 0.9);
+      font-weight: 600;
+      color: #0f172a;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .filters-shell input[type="text"]:focus,
+    .filters-shell select:focus {
+      outline: none;
+      border-color: #10b981;
+      box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.2);
+    }
+
+    .filter-chip {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0.45rem 1.15rem;
+      border-radius: 999px;
+      border: 1px solid rgba(14, 165, 233, 0.25);
+      background: rgba(255, 255, 255, 0.8);
+      font-size: 0.9rem;
+      font-weight: 800;
+      color: #0369a1;
+      cursor: pointer;
+      transition: transform 0.15s ease, box-shadow 0.2s ease, background 0.2s ease;
+    }
+
+    .filter-chip:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 8px 25px rgba(14, 165, 233, 0.18);
+    }
+
+    .filter-chip.active {
+      background: linear-gradient(120deg, #10b981, #0ea5e9);
+      color: #fff;
+      border-color: transparent;
+      box-shadow: 0 12px 30px rgba(14, 165, 233, 0.25);
+    }
+
+    .results-wrapper {
+      margin-top: 2rem;
+    }
+
+    #results-grid {
+      display: grid;
+      gap: clamp(1rem, 2vw, 1.5rem);
+      grid-template-columns: minmax(0, 1fr);
+      grid-auto-rows: 1fr;
+      align-content: stretch;
+      align-items: stretch;
+    }
+
+    @media (min-width: 640px) {
+      #results-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+
+    @media (min-width: 1024px) {
+      #results-grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+      }
+    }
+
+    @media (min-width: 1280px) {
+      #results-grid {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+      }
+    }
+
+    .card-shell {
+      border-radius: 1.35rem;
+      background: rgba(255, 255, 255, 0.96);
+      border: 1px solid rgba(226, 232, 240, 0.9);
+      box-shadow: 0 15px 30px rgba(15, 118, 110, 0.12);
+      padding: 1.3rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.85rem;
+      height: 100%;
+      transition: transform 0.18s ease, box-shadow 0.2s ease;
+    }
+
+    .shop-card-image {
+      width: 100%;
+      aspect-ratio: 4 / 3;
+      border-radius: 1rem;
+      overflow: hidden;
+      background: linear-gradient(135deg, rgba(14, 165, 233, 0.18), rgba(16, 185, 129, 0.18));
+      border: 1px solid rgba(14, 165, 233, 0.08);
+    }
+
+    .shop-card-image img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .card-shell:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 25px 45px rgba(14, 165, 233, 0.18);
+    }
+
+    .card-shell .card-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      padding: 0.2rem 0.9rem;
+      border-radius: 999px;
+      background: rgba(16, 185, 129, 0.1);
+      color: #0f766e;
+      font-size: 0.8rem;
+      font-weight: 800;
+    }
+
+    .card-shell .card-title {
+      font-size: 1.15rem;
+      font-weight: 900;
+      color: #0f172a;
+    }
+
+    .card-shell .card-meta {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-size: 0.85rem;
+      color: #475569;
+      font-weight: 700;
+    }
+
+    .card-shell .card-actions a {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 999px;
+      padding: 0.6rem 1.2rem;
+      font-weight: 800;
+      color: #fff;
+      background: linear-gradient(120deg, #0ea5e9, #10b981);
+      box-shadow: 0 15px 30px rgba(14, 165, 233, 0.25);
+      text-decoration: none;
+    }
+
+    .loading-state,
+    .empty-state {
+      text-align: center;
+      padding: 2rem 1rem;
+      color: #0f766e;
+      font-weight: 800;
+    }
+
+    @media (max-width: 639px) {
+      .filters-shell {
+        padding: 1.25rem;
+      }
+    }
+  </style>
 </head>
 <body class="text-gray-800">
 
-<!-- HEADER افقی همیشه باز -->
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@900&display=swap" rel="stylesheet" />
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@800&display=swap" rel="stylesheet"/>
-
-<header id="mainHeader" class="w-full bg-white/95 shadow-md backdrop-blur-md sticky top-0 z-50">
-  <div id="headerInner" class="max-w-7xl mx-auto flex flex-row items-center justify-between px-4 sm:px-6 py-3 md:py-3.5 gap-3">
-
-    <!-- لوگو و انتخاب شهر -->
-    <div id="logoCityWrap" class="flex items-center gap-2 md:gap-3 flex-shrink-0">
-      <!-- لوگوی جدید ویترینت -->
-      <a href="index.html" class="vitreenet-brand header-item" aria-label="ویترینت">
-        <span class="vitreenet-brand__mark" aria-hidden="true">
-          <svg viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg" role="presentation">
-            <defs>
-              <linearGradient id="vtMarkGradient" x1="0%" y1="100%" x2="100%" y2="0%">
-                <stop offset="0%" stop-color="#0ea5e9" />
-                <stop offset="55%" stop-color="#10b981" />
-                <stop offset="100%" stop-color="#0fb67f" />
-              </linearGradient>
-              <linearGradient id="vtMarkInner" x1="15%" y1="85%" x2="85%" y2="15%">
-                <stop offset="0%" stop-color="#ffffff" stop-opacity="0.9" />
-                <stop offset="100%" stop-color="#dcfce7" stop-opacity="0.25" />
-              </linearGradient>
-            </defs>
-            <circle cx="24" cy="24" r="22" fill="url(#vtMarkGradient)" />
-            <circle cx="24" cy="24" r="18" fill="url(#vtMarkInner)" />
-            <path d="M15.5 16h4.7l4.3 10.6L28.8 16h4.7L26 33h-4.2L15.5 16Z" fill="#0f172a" fill-opacity="0.9" />
-            <path d="M18.2 17.6 24 31.1l5.8-13.5" fill="none" stroke="#22c55e" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" />
-          </svg>
-        </span>
-        <span class="vitreenet-brand__text">
-          <span class="vitreenet-brand__title">Vitreenet</span>
-          <span class="vitreenet-brand__subtitle">ویترینت</span>
-        </span>
-      </a>
-
-      <!-- بج شهر - فقط در دسکتاپ نمایش داده شود -->
-      <div class="hidden md:flex items-center gap-1 px-3 py-1.5 rounded-full shadow-lg header-item"
-           style="background:linear-gradient(90deg,#10b981E6 70%,#0ea5e9E6); border: 1.5px solid #fff6; backdrop-filter: blur(5px);">
-        <svg width="18" height="18" fill="none" viewBox="0 0 22 22" class="ml-1 drop-shadow" xmlns="http://www.w3.org/2000/svg">
-          <defs>
-            <linearGradient id="city-icon" x1="0%" y1="0%" x2="0%" y2="100%">
-              <stop offset="0%" stop-color="#ffffff" stop-opacity="1" />
-              <stop offset="100%" stop-color="#e0f2fe" stop-opacity="0.9" />
-            </linearGradient>
-          </defs>
-          <path d="M11 2.5C7.13 2.5 4 5.61 4 9.45c0 3.52 4.1 7.93 6.2 10.01.46.47 1.2.47 1.66 0 2.1-2.08 6.14-6.49 6.14-10.01C18 5.61 14.87 2.5 11 2.5Zm0 10.25a2.75 2.75 0 1 1 0-5.5 2.75 2.75 0 0 1 0 5.5Z"
-            fill="url(#city-icon)"/>
-        </svg>
-        <span id="headerCity" class="font-bold text-white text-[14px] drop-shadow-sm" style="letter-spacing:.3px;">سنندج</span>
-      </div>
-    </div>
-
-    <!-- منو - فقط در دسکتاپ -->
-    <nav id="desktopNav" class="hidden md:flex items-center gap-1 text-base flex-1 justify-end">
-      <a href="index.html" class="main-nav-link text-gray-700 hover:text-[#10b981] font-bold px-4 py-2 rounded-lg transition-all hover:bg-emerald-50">
-        خانه
-      </a>
-      <a href="categories.html" class="main-nav-link text-gray-700 hover:text-[#0ea5e9] font-bold px-4 py-2 rounded-lg transition-all hover:bg-sky-50">
-        دسته‌بندی
-      </a>
-      <a href="login.html" id="loginNavLink" class="main-nav-link text-gray-700 hover:text-[#0ea5e9] font-bold px-4 py-2 rounded-lg transition-all hover:bg-sky-50">
-        <span class="login-link-label">ورود</span>
-      </a>
-    </nav>
-
-    <!-- دکمه‌های اکشن هدر -->
-    <div class="flex items-center gap-2 header-item">
-      <button type="button" id="rewardClaimBtn"
-        class="reward-header-btn inline-flex items-center gap-2 px-4 py-2 md:px-5 md:py-2.5 rounded-full font-extrabold shadow-lg hover:shadow-xl transition-all duration-200 whitespace-nowrap text-white text-sm md:text-base header-item"
-        aria-haspopup="dialog" aria-controls="rewardModal" aria-expanded="false">
-        <span class="reward-header-icon" aria-hidden="true">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M5 8h14v12H5z" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
-            <path d="M3 8h18" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
-            <path d="M12 4c.8-1.3 2.5-2 3.8-1 .7.5 1.2 1.3 1.2 2.1 0 1.5-1.2 2.9-3 2.9h-2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
-            <path d="M12 4c-.8-1.3-2.5-2-3.8-1-.7.5-1.2 1.3-1.2 2.1 0 1.5 1.2 2.9 3 2.9h2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
-        </span>
-        <span>دریافت جایزه</span>
-      </button>
-      <a href="post.html" id="registerShopBtn" class="btn-grad px-4 py-2 md:px-5 md:py-2.5 rounded-full font-extrabold shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-200 whitespace-nowrap text-white text-sm md:text-base header-item">
-        ثبت فروشگاه
-      </a>
-    </div>
-  </div>
-</header>
-
-<main class="min-h-screen pb-16">
-  <section class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-10">
-    <div class="glass-panel p-6 sm:p-9">
-      <div class="page-heading text-center">
-        <p class="text-sm sm:text-base font-extrabold text-emerald-600" id="categoryBadge">دسته‌بندی</p>
-        <h1 id="categoryTitle">مغازه‌های محبوب ویترینت</h1>
-        <p class="mt-3 text-base sm:text-lg" id="categorySubtitle">مرتب‌سازی دقیق بر اساس موقعیت و علاقه شما.</p>
-      </div>
-
-      <div class="filters-shell mt-8" id="filtersWrapper" aria-live="polite"></div>
-    </div>
-
-    <div class="results-wrapper mt-10">
-      <div class="flex items-center justify-between flex-wrap gap-3">
-        <div>
-          <p class="text-xs font-black tracking-wide text-emerald-600 uppercase">نتایج</p>
-          <h2 class="text-2xl font-black text-slate-800" id="resultsTitle">لیست مغازه‌ها</h2>
+  <header id="mainHeader" class="w-full bg-white/95 shadow-md backdrop-blur-md sticky top-0 z-50">
+    <div id="headerInner" class="max-w-7xl mx-auto flex flex-row items-center justify-between px-4 sm:px-6 py-3 md:py-3.5 gap-3">
+      <div id="logoCityWrap" class="flex items-center gap-2 md:gap-3 flex-shrink-0">
+        <a href="index.html" class="flex items-center gap-2" aria-label="ویترینت">
+           <div class="w-10 h-10 rounded-full bg-gradient-to-br from-sky-500 to-emerald-500 flex items-center justify-center text-white font-bold">V</div>
+           <span class="font-black text-xl text-slate-800 tracking-tight">ویترینت</span>
+        </a>
+        <div class="hidden md:flex items-center gap-1 px-3 py-1.5 rounded-full shadow-lg bg-emerald-500 text-white">
+          <span class="font-bold text-sm">سنندج</span>
         </div>
-        <div class="text-sm font-bold text-slate-500" id="resultsMeta"></div>
       </div>
-      <div
-        id="results-grid"
-        class="mt-6 grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 auto-rows-fr"
-      ></div>
+
+      <nav class="hidden md:flex items-center gap-1 text-base flex-1 justify-end">
+        <a href="index.html" class="text-gray-700 hover:text-emerald-600 font-bold px-4 py-2">خانه</a>
+        <a href="categories.html" class="text-gray-700 hover:text-sky-600 font-bold px-4 py-2">دسته‌بندی</a>
+      </nav>
+      
+      <div class="flex items-center gap-2">
+         <a href="#" class="px-5 py-2.5 rounded-full font-extrabold shadow-lg text-white bg-gradient-to-r from-sky-500 to-emerald-500 hover:shadow-xl transition-all">
+            ثبت فروشگاه
+         </a>
+      </div>
     </div>
-  </section>
-</main>
+  </header>
 
-<footer class="w-full bg-gradient-to-tr from-[#f8fafc] via-[#e0fdfa] to-[#d4fbe8] border-t mt-16 px-2 pt-6 pb-3 text-center text-[15px] text-gray-500 rounded-t-[1.7rem] shadow-lg font-bold tracking-wide">
-  © 2025 ویترینت | همه حقوق محفوظ است.
-</footer>
+  <main class="min-h-screen pb-16">
+    <section class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-10">
+      <div class="glass-panel p-6 sm:p-9">
+        <div class="page-heading text-center">
+          <p class="text-sm sm:text-base font-extrabold text-emerald-600" id="categoryBadge">دسته‌بندی</p>
+          <h1 id="categoryTitle">مغازه‌های محبوب ویترینت</h1>
+          <p class="mt-3 text-base sm:text-lg" id="categorySubtitle">مرتب‌سازی دقیق بر اساس موقعیت و علاقه شما.</p>
+        </div>
 
+        <div class="filters-shell mt-8" id="filtersWrapper" aria-live="polite"></div>
+      </div>
+
+      <div class="results-wrapper mt-10">
+        <div class="flex items-center justify-between flex-wrap gap-3">
+          <div>
+            <p class="text-xs font-black tracking-wide text-emerald-600 uppercase">نتایج</p>
+            <h2 class="text-2xl font-black text-slate-800" id="resultsTitle">لیست مغازه‌ها</h2>
+          </div>
+          <div class="text-sm font-bold text-slate-500" id="resultsMeta"></div>
+        </div>
+        <div id="results-grid" class="mt-6 grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 auto-rows-fr"></div>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    (function () {
+      const categoryParam = new URLSearchParams(window.location.search).get('cat') || 'general';
+      const state = {
+        category: categoryParam,
+        search: '',
+        sort: 'popular',
+        rating: 'all',
+        subcategory: 'all',
+        serviceData: { items: [], portfolios: [] },
+        standardData: getStandardFallbackData(), // داده‌های پیش‌فرض همیشه لود می‌شوند
+      };
+
+      document.addEventListener('DOMContentLoaded', async () => {
+        hydrateHero();
+        renderStandardFilters();
+        attachStandardFilterEvents();
+        // برای تست فوری، مستقیم داده‌های فال‌بک (Fallback) را نمایش می‌دهیم
+        // تا مطمئن شویم مشکل از فچ کردن API نیست
+        applyStandardFilters(); 
+      });
+
+      function hydrateHero() {
+        const badge = document.getElementById('categoryBadge');
+        const title = document.getElementById('categoryTitle');
+        const subtitle = document.getElementById('categorySubtitle');
+        if(state.category === 'general') {
+             title.textContent = "همه مغازه‌ها";
+        } else {
+             title.textContent = `مغازه‌های ${state.category}`;
+        }
+      }
+
+      function renderStandardFilters() {
+        const wrapper = document.getElementById('filtersWrapper');
+        if (!wrapper) return;
+        wrapper.innerHTML = `
+          <div class="grid gap-5 md:grid-cols-3">
+            <div class="md:col-span-1">
+              <label>جستجوی سریع</label>
+              <input type="text" id="searchInput" placeholder="نام مغازه..." />
+            </div>
+            <div>
+              <label>مرتب‌سازی</label>
+              <select id="sortSelect">
+                <option value="popular">محبوب‌ترین</option>
+                <option value="rating_desc">بیشترین امتیاز</option>
+              </select>
+            </div>
+          </div>
+        `;
+      }
+
+      function attachStandardFilterEvents() {
+        const wrapper = document.getElementById('filtersWrapper');
+        if (!wrapper) return;
+        wrapper.querySelector('#searchInput').addEventListener('input', (e) => {
+            state.search = e.target.value;
+            applyStandardFilters();
+        });
+        wrapper.querySelector('#sortSelect').addEventListener('change', (e) => {
+            state.sort = e.target.value;
+            applyStandardFilters();
+        });
+      }
+
+      function applyStandardFilters() {
+        let collection = [...state.standardData];
+        
+        // اعمال جستجو
+        if (state.search) {
+          const term = state.search.toLowerCase();
+          collection = collection.filter(shop => shop.name.includes(term));
+        }
+
+        // رندر کارت‌ها
+        const cards = collection.map(shop => createShopCard(shop)).join('');
+        const grid = document.getElementById('results-grid');
+        if(grid) grid.innerHTML = cards;
+        
+        const meta = document.getElementById('resultsMeta');
+        if(meta) meta.textContent = `${collection.length} مغازه`;
+      }
+
+      function createShopCard(shop) {
+        // استفاده از یک تصویر آنلاین برای تست که مطمئن شویم عکس لود می‌شود
+        const imageSrc = "https://placehold.co/600x400/e2e8f0/1e293b?text=Shop+Image"; 
+        
+        return `
+          <article class="card-shell">
+            <div class="shop-card-image">
+              <img src="${imageSrc}" alt="${shop.name}" loading="lazy" />
+            </div>
+            <div class="flex items-center justify-between">
+              <span class="card-badge bg-emerald-50 text-emerald-600">مغازه</span>
+              <span class="card-meta">⭐ ${shop.rating}</span>
+            </div>
+            <h3 class="card-title">${shop.name}</h3>
+            <p class="text-sm text-slate-500 font-semibold">${shop.address}</p>
+            <div class="card-actions mt-auto">
+              <a href="#">مشاهده پروفایل</a>
+            </div>
+          </article>
+        `;
+      }
+
+      function getStandardFallbackData() {
+        return [
+          { id: 1, name: 'سوپرمارکت امید', address: 'سنندج، پارک آبیدر', rating: 4.7 },
+          { id: 2, name: 'آرایشگاه آریاس', address: 'سنندج، خیابان کشاورز', rating: 4.4 },
+          { id: 3, name: 'کارواش موج آبی', address: 'سنندج، جاده همدان', rating: 4.1 },
+          { id: 4, name: 'بوتیک رویال', address: 'سنندج، پاساژ کوروش', rating: 4.6 },
+        ];
+      }
+    })();
+  </script>
 </body>
 </html>
