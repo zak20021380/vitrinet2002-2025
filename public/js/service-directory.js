@@ -383,6 +383,7 @@ function renderResults() {
     `;
   }).join('');
 
+  grid.innerHTML = cardsHTML;
   updateStats(items);
   updateResultsBadge();
 }
@@ -612,7 +613,7 @@ function renderPortfolioShowcase() {
 
   if (elements.portfolioEmpty) elements.portfolioEmpty.classList.add('hidden');
 
-  grid.innerHTML = sorted.map(item => {
+  const portfolioHTML = sorted.map(item => {
     const likes = formatPortfolioNumber(item.likeCount);
     const views = formatPortfolioNumber(item.viewCount);
     const ratingText = Number(item.shop?.rating || 0).toLocaleString('fa-IR', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
@@ -661,6 +662,7 @@ function renderPortfolioShowcase() {
     `;
   }).join('');
 
+  grid.innerHTML = portfolioHTML;
   updateResultsBadge();
 }
 
