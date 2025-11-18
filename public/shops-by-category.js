@@ -17,7 +17,7 @@
     serviceCategorySlug: 'service',
     serviceSubcategoryMap: new Map(),
     serviceData: { items: [], portfolios: [] },
-    standardData: getStandardFallbackData(),
+    standardData: [],
   };
 
   const slugifyClient = (value = '') => {
@@ -54,7 +54,7 @@
     } else {
       renderStandardFilters();
       attachStandardFilterEvents();
-      applyStandardFilters();
+      await loadStandardContent();
     }
   });
 
@@ -364,11 +364,67 @@
     standardFilterTimeout = setTimeout(applyStandardFilters, 200);
   }
 
+  async function loadStandardContent() {
+    setResultsMeta('در حال بارگذاری...');
+    showLoadingState();
+    state.standardData = await fetchStandardShops();
+    if (!state.standardData.length) {
+      showEmptyState('هیچ مغازه‌ای ثبت نشده است.');
+      setResultsMeta('بدون نتیجه');
+      return;
+    }
+    applyStandardFilters();
+  }
+
+  async function fetchStandardShops() {
+    try {
+      const response = await fetch('/api/shops');
+      if (!response.ok) throw new Error('shops failed');
+      const data = await response.json();
+      return normaliseStandardShops(data);
+    } catch (error) {
+      console.warn('Failed to load standard shops.', error);
+      return [];
+    }
+  }
+
+  function normaliseStandardShops(collection) {
+    if (!Array.isArray(collection)) return [];
+    return collection
+      .map((item) => {
+        const category = item.category || item.shopCategory || '';
+        return {
+          id: item.id || item._id || item.sellerId || item.shopurl || null,
+          name: item.storename || item.shopName || 'بدون نام',
+          address: item.address || item.shopAddress || '',
+          phone: item.phone || item.shopPhone || '',
+          rating: Number(item.rating || item.shopRating || 0) || 0,
+          tags: deriveShopTags(item),
+          category,
+          updatedAt: item.updatedAt || item.createdAt || null,
+          image: item.boardImage || item.banner || item.image || '',
+          slug: item.shopurl || item.customUrl || slugifyClient(item.storename || ''),
+        };
+      })
+      .filter((shop) => shop && (shop.id || shop.slug));
+  }
+
+  function deriveShopTags(item) {
+    const tags = [item.category, item.subcategory, item.city, item.region];
+    if (item.isPremium) {
+      tags.push('پریمیوم');
+    }
+    return tags.filter((tag) => typeof tag === 'string' && tag.trim().length);
+  }
+
   function applyStandardFilters() {
     let collection = [...state.standardData];
 
     if (state.category && state.category !== 'general') {
-      collection = collection.filter((item) => item.category === state.category || !item.category);
+      const selectedCategory = slugifyClient(state.category);
+      if (selectedCategory) {
+        collection = collection.filter((item) => slugifyClient(item.category) === selectedCategory);
+      }
     }
 
     if (state.search) {
@@ -467,13 +523,7 @@ function renderCards(cardsHTML) {
   if (!cardsHTML) return;
   const temp = document.createElement('div');
   temp.innerHTML = cardsHTML.trim();
-  
-  // DEBUG: Check what temp contains
-  console.log('=== TEMP DIV DEBUG ===');
-  console.log('Temp children count:', temp.children.length);
-  console.log('First child tag:', temp.children[0]?.tagName);
-  console.log('Second child tag:', temp.children[1]?.tagName);
-  
+
   while (temp.firstChild) {
     grid.appendChild(temp.firstChild);
   }
@@ -568,48 +618,4 @@ function renderCards(cardsHTML) {
     };
   }
 
-  function getStandardFallbackData() {
-    return [
-      {
-        id: 'std-1',
-        name: 'سوپرمارکت امید',
-        address: 'سنندج، محله پارک آبیدر، کوچه سرو',
-        phone: '087-3123123',
-        rating: 4.7,
-        tags: ['تحویل سریع', 'محصولات تازه'],
-        category: 'grocery',
-        updatedAt: '2025-02-11',
-      },
-      {
-        id: 'std-2',
-        name: 'آرایشگاه مردانه آریاس',
-        address: 'سنندج، خیابان کشاورز، پاساژ نگین',
-        phone: '0918-1239876',
-        rating: 4.4,
-        tags: ['گریم عروس', 'پکیج ویژه'],
-        category: 'beauty',
-        updatedAt: '2025-02-03',
-      },
-      {
-        id: 'std-3',
-        name: 'کارواش موج آبی',
-        address: 'سنندج، خروجی جاده همدان، کنارگذر غربی',
-        phone: '087-3310202',
-        rating: 4.1,
-        tags: ['واکس بدنه', 'کارواش نانو'],
-        category: 'carwash',
-        updatedAt: '2025-01-26',
-      },
-      {
-        id: 'std-4',
-        name: 'بوتیک رویال',
-        address: 'سنندج، پاساژ کوروش، طبقه ۲',
-        phone: '087-3334455',
-        rating: 4.6,
-        tags: ['لباس مجلسی', 'فروش آنلاین'],
-        category: 'fashion',
-        updatedAt: '2025-02-09',
-      },
-    ];
-  }
 })();
