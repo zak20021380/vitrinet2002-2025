@@ -202,14 +202,25 @@
   }
 
   function resolveShopImage(shop) {
-    let candidate = shop.image;
+    let candidate = shop.image || shop.coverImage;
+
+    if (!candidate && Array.isArray(shop.gallery) && shop.gallery.length > 0) {
+      candidate = shop.gallery[0];
+    }
+
+    if (!candidate && shop.logoUrl) {
+      candidate = shop.logoUrl;
+    }
+
     if (!candidate || candidate.trim() === '') {
       const text = encodeURIComponent(shop.storename || 'Shop');
       return `https://placehold.co/600x400/f1f5f9/10b981?text=${text}`;
     }
+
     if (/^(https?:\/\/|\/|data:image\/)/.test(candidate)) {
       return candidate;
     }
+
     return `/${candidate.replace(/^\/+/, '')}`;
   }
 })();
