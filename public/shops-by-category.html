@@ -89,6 +89,39 @@
       box-shadow: 0 8px 20px -4px rgba(16, 185, 129, 0.4);
     }
 
+    /* --- Type Filter Buttons --- */
+    .type-filter-btn {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.75rem 1.25rem;
+      border-radius: 1rem;
+      font-size: 0.875rem;
+      font-weight: 700;
+      background: #ffffff;
+      border: 2px solid #e2e8f0;
+      color: #64748b;
+      cursor: pointer;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
+    }
+    .type-filter-btn:hover {
+      border-color: #10b981;
+      color: #10b981;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(16, 185, 129, 0.15);
+    }
+    .type-filter-btn.active {
+      background: linear-gradient(135deg, #10b981 0%, #0ea5e9 100%);
+      color: white;
+      border-color: transparent;
+      box-shadow: 0 8px 20px -4px rgba(16, 185, 129, 0.4);
+      transform: translateY(-2px);
+    }
+    .type-filter-btn.active svg {
+      filter: drop-shadow(0 2px 4px rgba(255, 255, 255, 0.3));
+    }
+
     /* --- CARD STYLES (FIXED) --- */
     .shop-card {
       background: #ffffff;
@@ -279,7 +312,37 @@
 
         </div>
 
-        <div class="mt-8 grid grid-cols-1 lg:grid-cols-12 gap-4">
+        <!-- Filter Type Toggle -->
+        <div class="mt-6 flex flex-wrap items-center gap-3 justify-center lg:justify-start">
+          <div class="flex items-center gap-2">
+            <svg class="w-5 h-5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"></path>
+            </svg>
+            <span class="text-sm font-bold text-slate-600">فیلتر نمایش:</span>
+          </div>
+          <div class="flex gap-2" id="typeFilterContainer">
+            <button class="type-filter-btn active" data-type="all">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+              </svg>
+              همه موارد
+            </button>
+            <button class="type-filter-btn" data-type="service">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
+              </svg>
+              مغازه‌های خدماتی
+            </button>
+            <button class="type-filter-btn" data-type="portfolio">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+              </svg>
+              نمونه کارها
+            </button>
+          </div>
+        </div>
+
+        <div class="mt-6 grid grid-cols-1 lg:grid-cols-12 gap-4">
           <div class="lg:col-span-8 relative w-full">
             <input type="text" id="searchInput" class="vitrine-input pl-12" placeholder="جستجو در نام مغازه، محله یا آدرس..."/>
             <span class="absolute left-4 top-3.5 text-slate-400">
@@ -328,7 +391,10 @@
         search: '',
         sort: 'popular',
         activeSubcategory: 'all',
+        typeFilter: 'all', // all, service, portfolio
         shops: [],
+        serviceShops: [],
+        regularShops: []
       };
 
       document.addEventListener('DOMContentLoaded', async () => {
@@ -365,7 +431,7 @@
           const shopsData = await shopsResponse.json();
           const shopList = Array.isArray(shopsData) ? shopsData : (shopsData.shops || []);
 
-          // Parse service shops data
+          // Parse service shops data and mark them as service type
           let serviceShopList = [];
           if (serviceShopsResponse.ok) {
             const serviceData = await serviceShopsResponse.json();
@@ -380,12 +446,23 @@
               region: '',
               desc: item.description || '',
               isPremium: !!item.isPremium,
-              image: item.coverImage || ''
+              image: item.coverImage || '',
+              shopType: 'service' // Mark as service shop
             }));
           }
 
+          // Mark regular shops as portfolio type
+          const markedShopList = shopList.map(shop => ({
+            ...shop,
+            shopType: 'portfolio' // Mark as portfolio
+          }));
+
+          // Store separately for filtering
+          state.regularShops = markedShopList;
+          state.serviceShops = serviceShopList;
+
           // Merge both lists
-          state.shops = [...shopList, ...serviceShopList];
+          state.shops = [...markedShopList, ...serviceShopList];
 
           // Detect Service Category
           const hasService = state.shops.some(s => s.category && s.category.includes('خدمات'));
@@ -468,10 +545,32 @@
             state.sort = e.target.value;
             applyFiltersAndRender();
         });
+
+        // Type filter buttons
+        const typeFilterBtns = document.querySelectorAll('.type-filter-btn');
+        typeFilterBtns.forEach(btn => {
+          btn.addEventListener('click', () => {
+            const type = btn.getAttribute('data-type');
+            state.typeFilter = type;
+
+            // Update active state
+            typeFilterBtns.forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+
+            applyFiltersAndRender();
+          });
+        });
       }
 
       function applyFiltersAndRender() {
         let collection = [...state.shops];
+
+        // Apply type filter (service/portfolio/all)
+        if (state.typeFilter === 'service') {
+          collection = collection.filter(s => s.shopType === 'service');
+        } else if (state.typeFilter === 'portfolio') {
+          collection = collection.filter(s => s.shopType === 'portfolio');
+        }
 
         if (state.activeSubcategory !== 'all') {
             collection = collection.filter(s => s.subcategory === state.activeSubcategory);
@@ -480,13 +579,13 @@
         if (state.search) {
           const term = state.search.toLowerCase();
           collection = collection.filter(shop => {
-             return (shop.storename && shop.storename.toString().toLowerCase().includes(term)) || 
+             return (shop.storename && shop.storename.toString().toLowerCase().includes(term)) ||
                     (shop.address && shop.address.toString().toLowerCase().includes(term));
           });
         }
 
         if (state.sort === 'newest') {
-             collection.reverse(); 
+             collection.reverse();
         }
 
         document.getElementById('resultsMeta').textContent = collection.length;
