@@ -5,10 +5,43 @@ const Seller = require('../models/Seller');
 const Product = require('../models/product'); // اضافه شده برای گرفتن محصولات
 const dailyVisitCtrl = require('../controllers/dailyVisitController');
 
+// Category mapping - English ID to Persian name
+const categoryMapping = {
+  'food': 'خوراک',
+  'clothing': 'پوشاک',
+  'beauty': 'زیبایی',
+  'service': 'خدمات',
+  'digital': 'دیجیتال',
+  'book': 'کتاب و تحریر',
+  'auto': 'خودرو',
+  'sweets': 'قنادی و شیرینی',
+  'flower': 'گل و گیاه',
+  'home': 'لوازم خانگی',
+  'sport': 'ورزشی',
+  'talar': 'تالار و مجالس'
+};
+
 // دریافت لیست همه فروشگاه‌ها از مدل Seller
 router.get('/', async (req, res) => {
   try {
-    const sellers = await Seller.find({},
+    // Build filter based on category query parameter
+    const filter = {};
+    const categoryParam = req.query.category;
+
+    if (categoryParam && categoryParam !== 'general') {
+      // Get Persian name if catId is provided, otherwise use as-is
+      const persianName = categoryMapping[categoryParam] || categoryParam;
+
+      // Filter by category - support both catId and Persian name
+      filter.$or = [
+        { category: categoryParam },
+        { category: persianName },
+        { category: { $regex: new RegExp(categoryParam, 'i') } },
+        { category: { $regex: new RegExp(persianName, 'i') } }
+      ];
+    }
+
+    const sellers = await Seller.find(filter,
       'storename category subcategory shopurl address city region desc isPremium boardImage'
     ).lean();
 
