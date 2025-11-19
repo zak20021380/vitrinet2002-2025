@@ -626,67 +626,65 @@
 
         <!-- Professional Shop Filters (for non-service categories) -->
         <div id="shopFiltersContainer" class="shop-filters-container" style="display: none;">
-          <div class="flex items-center gap-2 mb-4">
-            <svg class="w-5 h-5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"></path>
-            </svg>
-            <h3 class="text-base font-black text-slate-700">فیلترهای پیشرفته</h3>
+          <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
+            <div class="flex items-center gap-2">
+              <svg class="w-5 h-5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"></path>
+              </svg>
+              <h3 class="text-base font-black text-slate-700">فیلترهای پیشرفته فروشگاه</h3>
+            </div>
+            <button id="resetShopFilters" class="text-sm font-bold px-4 py-2 rounded-lg bg-white text-emerald-600 border border-emerald-100 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
+              بازنشانی فیلترها
+            </button>
           </div>
 
-          <!-- Premium Filter -->
-          <div class="filter-group" id="premiumFilterGroup">
-            <div class="filter-label">
-              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"></path>
-              </svg>
-              <span>نوع فروشگاه</span>
-            </div>
-            <div class="filter-chips">
-              <button class="filter-chip active" data-filter="premium" data-value="all">
+          <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+            <!-- Premium Filter -->
+            <div class="filter-group" id="premiumFilterGroup">
+              <div class="filter-label">
                 <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"></path>
                 </svg>
-                همه فروشگاه‌ها
-              </button>
-              <button class="filter-chip" data-filter="premium" data-value="true">
-                <svg fill="currentColor" viewBox="0 0 20 20">
-                  <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
-                </svg>
-                ویژه و پریمیوم
-              </button>
-              <button class="filter-chip" data-filter="premium" data-value="false">
+                <span>نوع فروشگاه</span>
+              </div>
+              <div class="filter-chips">
+                <button class="filter-chip active" data-filter="premium" data-value="all">
+                  همه
+                </button>
+                <button class="filter-chip" data-filter="premium" data-value="true">
+                  پریمیوم
+                </button>
+                <button class="filter-chip" data-filter="premium" data-value="false">
+                  عادی
+                </button>
+              </div>
+            </div>
+
+            <!-- Subcategory Filter -->
+            <div class="filter-group" id="subcategoryFilterGroup" style="display: none;">
+              <div class="filter-label">
                 <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"></path>
                 </svg>
-                عادی
-              </button>
+                <span>دسته‌بندی فرعی</span>
+              </div>
+              <div class="filter-chips" id="subcategoryChips">
+                <!-- Will be populated dynamically -->
+              </div>
             </div>
-          </div>
 
-          <!-- Subcategory Filter -->
-          <div class="filter-group" id="subcategoryFilterGroup" style="display: none;">
-            <div class="filter-label">
-              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"></path>
-              </svg>
-              <span>دسته‌بندی فرعی</span>
-            </div>
-            <div class="filter-chips" id="subcategoryChips">
-              <!-- Will be populated dynamically -->
-            </div>
-          </div>
-
-          <!-- Region Filter -->
-          <div class="filter-group" id="regionFilterGroup" style="display: none;">
-            <div class="filter-label">
-              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
-              </svg>
-              <span>منطقه</span>
-            </div>
-            <div class="filter-chips" id="regionChips">
-              <!-- Will be populated dynamically -->
+            <!-- Region Filter -->
+            <div class="filter-group" id="regionFilterGroup" style="display: none;">
+              <div class="filter-label">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                </svg>
+                <span>منطقه</span>
+              </div>
+              <div class="filter-chips" id="regionChips">
+                <!-- Will be populated dynamically -->
+              </div>
             </div>
           </div>
         </div>
@@ -864,27 +862,31 @@
        */
       function initializeShopFilters(shops) {
         const shopFiltersContainer = document.getElementById('shopFiltersContainer');
+        const retailShops = (shops || []).filter(s => s.shopType !== 'service');
         const isServiceCategory = state.categorySlug === 'service' || state.filterCategory === 'خدمات';
 
         // Show shop filters only for non-service categories
-        if (isServiceCategory || state.categorySlug === 'general') {
+        if (isServiceCategory) {
           shopFiltersContainer.style.display = 'none';
           return;
         }
 
         // Filter to only regular shops (non-service)
-        const regularShops = shops.filter(s => s.shopType !== 'service');
-
-        if (regularShops.length === 0) {
+        if (retailShops.length === 0) {
           shopFiltersContainer.style.display = 'none';
           return;
         }
 
+        // Reset defaults on render
+        state.premiumFilter = 'all';
+        state.subcategoryFilter = 'all';
+        state.regionFilter = 'all';
+
         // Extract unique subcategories
-        const subcategories = [...new Set(regularShops.map(s => s.subcategory).filter(Boolean))];
+        const subcategories = [...new Set(retailShops.map(s => s.subcategory).filter(Boolean))];
 
         // Extract unique regions
-        const regions = [...new Set(regularShops.map(s => s.region).filter(Boolean))];
+        const regions = [...new Set(retailShops.map(s => s.region).filter(Boolean))];
 
         // Show/hide subcategory filter
         const subcategoryFilterGroup = document.getElementById('subcategoryFilterGroup');
@@ -960,6 +962,13 @@
        * Attach Event Listeners for Shop Filters
        */
       function attachShopFilterEvents() {
+        const resetBtn = document.getElementById('resetShopFilters');
+        if (resetBtn) {
+          resetBtn.addEventListener('click', () => {
+            resetShopFilters();
+          });
+        }
+
         // Use event delegation for dynamic filter chips
         document.addEventListener('click', (e) => {
           const filterChip = e.target.closest('.filter-chip');
@@ -986,6 +995,27 @@
 
           // Re-render
           applyFiltersAndRender();
+        });
+      }
+
+      function resetShopFilters() {
+        state.premiumFilter = 'all';
+        state.subcategoryFilter = 'all';
+        state.regionFilter = 'all';
+
+        setActiveChipGroup(document.querySelectorAll('#premiumFilterGroup .filter-chip'), 'all');
+        setActiveChipGroup(document.querySelectorAll('#subcategoryFilterGroup .filter-chip'), 'all');
+        setActiveChipGroup(document.querySelectorAll('#regionFilterGroup .filter-chip'), 'all');
+
+        applyFiltersAndRender();
+      }
+
+      function setActiveChipGroup(chips, activeValue) {
+        if (!chips || chips.length === 0) return;
+        chips.forEach(chip => {
+          const chipValue = chip.getAttribute('data-value');
+          const isActive = chipValue === activeValue;
+          chip.classList.toggle('active', isActive);
         });
       }
 
