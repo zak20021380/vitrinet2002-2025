@@ -6,15 +6,17 @@
   <title>دسته‌بندی مغازه‌ها | ویترینت</title>
 
   <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="style-index.css" />
   <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@100;300;400;600;700;900&family=Poppins:wght@800;900&display=swap" rel="stylesheet"/>
 
   <style>
     /* --- Base Settings --- */
     body {
       font-family: 'Vazirmatn', sans-serif;
-      background-color: #ecfdf5; /* Mint/Emerald-50 Background */
+      background: linear-gradient(115deg, #e0fdfa 0%, #f8fafc 60%, #d4fbe8 100%);
       color: #064e3b;
       overflow-x: hidden;
+      min-height: 100vh;
     }
 
     /* Smooth Scrolling */
@@ -41,7 +43,10 @@
     }
 
     .category-pill {
-      background: #ecfdf5; border: 1px solid #a7f3d0; color: #059669;
+      background: linear-gradient(90deg, #d1fae5 0%, #a7f3d0 100%);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      color: #059669;
+      box-shadow: 0 2px 8px rgba(16, 185, 129, 0.15);
     }
 
     /* --- Inputs --- */
@@ -78,7 +83,9 @@
       border-color: #10b981; color: #10b981; transform: translateY(-2px);
     }
     .category-chip.active {
-      background: #10b981; color: white; border-color: #10b981;
+      background: linear-gradient(90deg, #10b981 10%, #0ea5e9 100%);
+      color: white;
+      border-color: transparent;
       box-shadow: 0 8px 20px -4px rgba(16, 185, 129, 0.4);
     }
 
@@ -117,12 +124,13 @@
 
     .card-badge {
       position: absolute; top: 12px; right: 12px;
-      background: #ffffff;
+      background: linear-gradient(90deg, #d1fae5 0%, #a7f3d0 100%);
       color: #059669;
       font-size: 0.75rem; font-weight: 800;
       padding: 6px 12px;
       border-radius: 99px;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+      box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2);
+      border: 1px solid rgba(16, 185, 129, 0.15);
       z-index: 10;
     }
 
@@ -136,15 +144,16 @@
       font-weight: 800;
       font-size: 0.95rem;
       text-align: center;
-      background: #f0fdfa; /* Light Emerald */
-      color: #059669;
+      background: linear-gradient(90deg, #10b981 10%, #0ea5e9 100%);
+      color: white;
       transition: all 0.2s;
       display: block;
+      box-shadow: 0 2px 12px rgba(16, 185, 129, 0.2);
     }
     .shop-card:hover .card-btn {
-      background: #10b981; /* Brand Emerald */
-      color: white;
+      background: linear-gradient(90deg, #0ea5e9 10%, #10b981 100%);
       box-shadow: 0 8px 15px -3px rgba(16, 185, 129, 0.3);
+      filter: brightness(1.05);
     }
 
     /* --- Portfolio --- */
@@ -176,34 +185,76 @@
 </head>
 <body class="text-gray-800">
 
-  <header id="mainHeader" class="w-full sticky top-0 z-50">
-    <div class="max-w-7xl mx-auto flex items-center justify-between px-4 sm:px-6 h-20">
-      <div class="flex items-center gap-3">
-        <a href="index.html" class="flex items-center gap-3 group">
-          <div class="w-11 h-11 rounded-full bg-emerald-500 flex items-center justify-center text-white font-black text-xl shadow-lg shadow-emerald-500/30 transition-transform group-hover:scale-105">V</div>
-          <div class="flex flex-col">
-            <span class="font-black text-2xl tracking-tight text-slate-800">VITREENET</span>
-            <span class="text-xs font-bold text-emerald-600 -mt-1 mr-0.5">ویترینت</span>
-          </div>
-        </a>
-        <div class="hidden md:flex items-center gap-1.5 px-4 py-1.5 bg-emerald-500 rounded-full shadow-md shadow-emerald-500/20 text-white">
-           <span class="text-sm font-bold">سنندج</span>
-        </div>
-      </div>
+<header id="mainHeader" class="w-full bg-white/95 shadow-md backdrop-blur-md sticky top-0 z-50">
+  <div id="headerInner" class="max-w-7xl mx-auto flex flex-row items-center justify-between px-4 sm:px-6 py-3 md:py-3.5 gap-3">
 
-      <nav class="hidden md:flex items-center gap-8">
-        <a href="index.html" class="nav-link">خانه</a>
-        <a href="categories.html" class="nav-link">دسته‌بندی</a>
-        <a href="#" class="nav-link">پنل فروشنده</a>
-      </nav>
+    <!-- لوگو و انتخاب شهر -->
+    <div id="logoCityWrap" class="flex items-center gap-2 md:gap-3 flex-shrink-0">
+      <!-- لوگوی جدید ویترینت -->
+      <a href="index.html" class="vitreenet-brand header-item" aria-label="ویترینت">
+        <span class="vitreenet-brand__mark" aria-hidden="true">
+          <svg viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg" role="presentation">
+            <defs>
+              <linearGradient id="vtMarkGradient" x1="0%" y1="100%" x2="100%" y2="0%">
+                <stop offset="0%" stop-color="#0ea5e9" />
+                <stop offset="55%" stop-color="#10b981" />
+                <stop offset="100%" stop-color="#0fb67f" />
+              </linearGradient>
+              <linearGradient id="vtMarkInner" x1="15%" y1="85%" x2="85%" y2="15%">
+                <stop offset="0%" stop-color="#ffffff" stop-opacity="0.9" />
+                <stop offset="100%" stop-color="#dcfce7" stop-opacity="0.25" />
+              </linearGradient>
+            </defs>
+            <circle cx="24" cy="24" r="22" fill="url(#vtMarkGradient)" />
+            <circle cx="24" cy="24" r="18" fill="url(#vtMarkInner)" />
+            <path d="M15.5 16h4.7l4.3 10.6L28.8 16h4.7L26 33h-4.2L15.5 16Z" fill="#0f172a" fill-opacity="0.9" />
+            <path d="M18.2 17.6 24 31.1l5.8-13.5" fill="none" stroke="#22c55e" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
+        </span>
+        <span class="vitreenet-brand__text">
+          <span class="vitreenet-brand__title">Vitreenet</span>
+          <span class="vitreenet-brand__subtitle">ویترینت</span>
+        </span>
+      </a>
 
-      <div>
-        <a href="#" class="hidden sm:inline-flex px-6 py-2.5 rounded-full bg-emerald-500 text-white font-bold shadow-lg shadow-emerald-500/30 hover:bg-emerald-600 hover:shadow-emerald-600/40 transition-all hover:-translate-y-0.5">
-          ثبت فروشگاه
-        </a>
+      <!-- بج شهر - فقط در دسکتاپ نمایش داده شود -->
+      <div class="hidden md:flex items-center gap-1 px-3 py-1.5 rounded-full shadow-lg header-item"
+           style="background:linear-gradient(90deg,#10b981E6 70%,#0ea5e9E6); border: 1.5px solid #fff6; backdrop-filter: blur(5px);">
+        <svg width="18" height="18" fill="none" viewBox="0 0 22 22" class="ml-1 drop-shadow" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <linearGradient id="city-icon" x1="0%" y1="0%" x2="0%" y2="100%">
+              <stop offset="0%" stop-color="#ffffff" stop-opacity="1" />
+              <stop offset="100%" stop-color="#e0f2fe" stop-opacity="0.9" />
+            </linearGradient>
+          </defs>
+          <path d="M11 2.5C7.13 2.5 4 5.61 4 9.45c0 3.52 4.1 7.93 6.2 10.01.46.47 1.2.47 1.66 0 2.1-2.08 6.14-6.49 6.14-10.01C18 5.61 14.87 2.5 11 2.5Zm0 10.25a2.75 2.75 0 1 1 0-5.5 2.75 2.75 0 0 1 0 5.5Z"
+            fill="url(#city-icon)"/>
+        </svg>
+        <span id="headerCity" class="font-bold text-white text-[14px] drop-shadow-sm" style="letter-spacing:.3px;">سنندج</span>
       </div>
     </div>
-  </header>
+
+    <!-- منو - فقط در دسکتاپ -->
+    <nav id="desktopNav" class="hidden md:flex items-center gap-1 text-base flex-1 justify-end">
+      <a href="index.html" class="main-nav-link text-gray-700 hover:text-[#10b981] font-bold px-4 py-2 rounded-lg transition-all hover:bg-emerald-50">
+        خانه
+      </a>
+      <a href="categories.html" class="main-nav-link text-gray-700 hover:text-[#0ea5e9] font-bold px-4 py-2 rounded-lg transition-all hover:bg-sky-50">
+        دسته‌بندی
+      </a>
+      <a href="login.html" id="loginNavLink" class="main-nav-link text-gray-700 hover:text-[#0ea5e9] font-bold px-4 py-2 rounded-lg transition-all hover:bg-sky-50">
+        <span class="login-link-label">ورود</span>
+      </a>
+    </nav>
+
+    <!-- دکمه‌های اکشن هدر -->
+    <div class="flex items-center gap-2 header-item">
+      <a href="post.html" id="registerShopBtn" class="btn-grad px-4 py-2 md:px-5 md:py-2.5 rounded-full font-extrabold shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-200 whitespace-nowrap text-white text-sm md:text-base header-item">
+        ثبت فروشگاه
+      </a>
+    </div>
+  </div>
+</header>
 
   <main class="px-4 sm:px-6 lg:px-8 pt-12 pb-16">
     <section class="max-w-7xl mx-auto flex flex-col gap-10">
@@ -220,8 +271,8 @@
           </div>
           
           <div class="flex flex-col items-center lg:items-end gap-2">
-             <div class="bg-emerald-50 px-6 py-3 rounded-2xl border border-emerald-100 flex items-center gap-3">
-                <div class="text-3xl font-black text-emerald-600" id="resultsMeta">0</div>
+             <div class="px-6 py-3 rounded-2xl flex items-center gap-3" style="background: linear-gradient(135deg, rgba(16, 185, 129, 0.12), rgba(14, 165, 233, 0.12)); border: 1px solid rgba(16, 185, 129, 0.2); box-shadow: 0 4px 12px rgba(16, 185, 129, 0.1);">
+                <div class="text-3xl font-black bg-gradient-to-l from-[#10b981] to-[#0ea5e9] bg-clip-text text-transparent" id="resultsMeta">0</div>
                 <div class="text-sm font-bold text-emerald-800">فروشگاه فعال</div>
              </div>
           </div>
