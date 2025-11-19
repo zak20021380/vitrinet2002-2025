@@ -638,6 +638,7 @@
         activeSubcategory: 'all',
         typeFilter: 'all',
         hasPortfolioSamples: false,
+        portfolioSamples: [],
         shops: [],
         serviceShops: [],
         regularShops: []
@@ -709,6 +710,9 @@
           let serviceShopList = [];
           if (serviceShopsResponse.ok) {
             const serviceData = await serviceShopsResponse.json();
+            state.portfolioSamples = Array.isArray(serviceData?.portfolios)
+              ? serviceData.portfolios.filter(item => !!getRawImageValue(item?.image || (Array.isArray(item?.images) ? item.images[0] : '')))
+              : [];
             serviceShopList = (serviceData.items || []).map(item => ({
               id: item._id || item.id,
               storename: item.name || '',
@@ -743,7 +747,7 @@
                state.typeFilter = 'service';
                setActiveTypeFilterButton('service');
              }
-             setupServiceView(state.shops);
+             setupServiceView(state.shops, state.portfolioSamples);
           }
 
           document.getElementById('categorySubtitle').textContent = `لیست فروشگاه‌های اطراف شما`;
@@ -838,7 +842,7 @@
       // Be sure to include setupServiceView, attachFilterEvents, renderCards, createCard, resolveShopImage here.
       // Since I'm providing the fix block, paste the rest of the functions from your previous file here if they are missing.
       
-      function setupServiceView(allShops) {
+      function setupServiceView(allShops, portfolioItems = []) {
          const subcats = [...new Set(allShops.map(s => s.subcategory).filter(Boolean))];
          if (subcats.length > 0) {
              const container = document.getElementById('subcatContainer');
@@ -868,26 +872,51 @@
          // Portfolio Logic
          const portfolioSec = document.getElementById('portfolioSection');
          const portfolioGrid = document.getElementById('portfolioGrid');
-         const sampleShops = allShops.slice(0, 5);
+         const validPortfolios = Array.isArray(portfolioItems)
+           ? portfolioItems.filter(item => !!getRawImageValue(item?.image || (Array.isArray(item?.images) ? item.images[0] : '')))
+           : [];
+         const hasRealPortfolios = validPortfolios.length > 0;
+
+         const sampleShops = hasRealPortfolios
+           ? validPortfolios.slice(0, 5).map(item => {
+               const shopId = item?.shop?.id || item?.shopId || item?.id;
+               return {
+                 id: shopId,
+                 storename: item?.title || item?.shop?.name || 'نمونه کار',
+                 category: item?.categoryName || item?.shop?.category || 'نمونه کار',
+                 image: item?.image,
+                 shopType: 'portfolio',
+                 portfolioMeta: { title: item?.title, shopId }
+               };
+             })
+           : allShops.slice(0, 5);
 
          state.hasPortfolioSamples = sampleShops.length > 0;
 
-         if(sampleShops.length > 0) {
+         if(sampleShops.length > 0 && portfolioSec && portfolioGrid) {
              portfolioSec.classList.remove('hidden');
-             portfolioGrid.innerHTML = sampleShops.map((shop, index) => `
-                <div class="portfolio-item group" data-shop-id="${shop.id}">
-                    <img src="${resolveShopImage(shop)}" alt="${shop.storename}" onerror="this.src='https://placehold.co/300?text=Portfolio'">
+             portfolioGrid.innerHTML = sampleShops.map((shop) => {
+                const imageSrc = hasRealPortfolios ? resolvePortfolioImage(shop) : resolveShopImage(shop);
+                const title = shop.storename || 'نمونه کار';
+                const targetId = shop.portfolioMeta?.shopId || shop.id;
+                const buttonAttrs = targetId
+                  ? `onclick="openPortfolioModal('${targetId}')"`
+                  : 'type="button" disabled';
+               return `
+                <div class="portfolio-item group" data-shop-id="${targetId || ''}">
+                    <img src="${imageSrc}" alt="${title}">
                     <div class="portfolio-overlay">
                         <div>
-                           <h4 class="text-white font-bold text-sm">${shop.storename}</h4>
+                           <h4 class="text-white font-bold text-sm">${title}</h4>
                            <span class="text-emerald-300 text-xs font-bold">نمونه کار</span>
                         </div>
                     </div>
-                    <button class="portfolio-detail-btn" onclick="openPortfolioModal('${shop.id}')">
+                    <button class="portfolio-detail-btn" ${buttonAttrs}>
                         مشاهده جزئیات
                     </button>
                 </div>
-            `).join('');
+               `;
+             }).join('');
              updateTypeFilterViews();
          } else if (portfolioSec) {
              portfolioSec.style.display = 'none';
@@ -956,16 +985,55 @@
         `;
       }
 
+      function getRawImageValue(value) {
+        if (!value) return '';
+        if (typeof value === 'string') return value.trim();
+        if (Array.isArray(value)) {
+          for (const entry of value) {
+            const extracted = getRawImageValue(entry);
+            if (extracted) return extracted;
+          }
+          return '';
+        }
+        if (typeof value === 'object') {
+          if (value.url) return String(value.url).trim();
+          if (value.src) return String(value.src).trim();
+          if (value.path) return String(value.path).trim();
+        }
+        return '';
+      }
+
+      function buildImageSource(candidate, label) {
+        const source = getRawImageValue(candidate);
+        if (!source) {
+          const text = encodeURIComponent(label || 'Shop');
+          return `https://placehold.co/600x400/f1f5f9/10b981?text=${text}`;
+        }
+        if (/^(https?:\/\/|data:image\/|\/\/)/i.test(source)) {
+          return source;
+        }
+        if (source.startsWith('/')) {
+          return source;
+        }
+        return `/${source.replace(/^\/+/, '')}`;
+      }
+
       function resolveShopImage(shop) {
-        let candidate = shop.image;
-        if (!candidate || candidate.trim() === "") {
-           const text = encodeURIComponent(shop.storename || 'Shop');
-           return `https://placehold.co/600x400/f1f5f9/10b981?text=${text}`;
-        }
-        if (/^(https?:\/\/|\/|data:image\/)/.test(candidate)) {
-          return candidate;
-        }
-        return `/${candidate.replace(/^\/+/, '')}`;
+        const candidate = shop?.image
+          || shop?.coverImage
+          || shop?.boardImage
+          || shop?.banner
+          || (Array.isArray(shop?.gallery) ? shop.gallery[0] : null)
+          || (Array.isArray(shop?.images) ? shop.images[0] : null);
+        return buildImageSource(candidate, shop?.storename || 'Shop');
+      }
+
+      function resolvePortfolioImage(sample) {
+        const candidate = sample?.image
+          || (Array.isArray(sample?.gallery) ? sample.gallery[0] : null)
+          || (Array.isArray(sample?.images) ? sample.images[0] : null);
+        const label = sample?.storename || sample?.title || sample?.portfolioMeta?.title || 'نمونه کار';
+        return buildImageSource(candidate, label);
       }
 
       // Modal Functions Global
