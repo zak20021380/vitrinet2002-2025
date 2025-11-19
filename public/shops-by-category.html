@@ -295,17 +295,41 @@
           </div>
         </div>
 
+        <!-- Professional Service Filters -->
+        <div id="serviceFilters" class="mt-6 hidden">
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+              <label class="block text-sm font-bold text-slate-700 mb-2">💰 محدوده قیمت</label>
+              <select id="priceRangeFilter" class="vitrine-input cursor-pointer">
+                <option value="all">همه</option>
+                <option value="budget">اقتصادی</option>
+                <option value="mid">متوسط</option>
+                <option value="premium">پریمیوم</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-sm font-bold text-slate-700 mb-2">⭐ امتیاز مشتریان</label>
+              <select id="ratingFilter" class="vitrine-input cursor-pointer">
+                <option value="all">همه</option>
+                <option value="5">⭐⭐⭐⭐⭐ عالی</option>
+                <option value="4">⭐⭐⭐⭐ خوب</option>
+                <option value="3">⭐⭐⭐ متوسط</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-sm font-bold text-slate-700 mb-2">🔔 وضعیت</label>
+              <select id="availabilityFilter" class="vitrine-input cursor-pointer">
+                <option value="all">همه</option>
+                <option value="available">آماده ارائه خدمات</option>
+                <option value="busy">پرمشغله</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
         <div id="subcatContainer" class="mt-6 hidden flex-wrap gap-2 justify-center lg:justify-start">
           <button class="category-chip active" data-sub="all">همه</button>
           </div>
-      </div>
-
-      <div id="portfolioSection" class="hidden">
-        <div class="flex items-center gap-3 mb-6">
-          <div class="w-2 h-8 rounded-full bg-emerald-500"></div>
-          <h2 class="text-2xl font-black text-slate-800">نمونه کارهای برتر</h2>
-        </div>
-        <div id="portfolioGrid" class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4"></div>
       </div>
 
       <div id="results-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
@@ -313,6 +337,14 @@
           <div class="loader mb-4"></div>
           <p class="font-bold text-lg text-slate-500">در حال بارگذاری فروشگاه‌ها...</p>
         </div>
+      </div>
+
+      <div id="portfolioSection" class="hidden mt-12">
+        <div class="flex items-center gap-3 mb-6">
+          <div class="w-2 h-8 rounded-full bg-emerald-500"></div>
+          <h2 class="text-2xl font-black text-slate-800">نمونه کارهای برتر</h2>
+        </div>
+        <div id="portfolioGrid" class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4"></div>
       </div>
 
     </section>
@@ -328,6 +360,9 @@
         search: '',
         sort: 'popular',
         activeSubcategory: 'all',
+        priceRange: 'all',
+        rating: 'all',
+        availability: 'all',
         shops: [],
       };
 
@@ -384,13 +419,17 @@
       }
 
       function setupServiceView(allShops) {
+         // Show professional service filters
+         const serviceFilters = document.getElementById('serviceFilters');
+         serviceFilters.classList.remove('hidden');
+
          const subcats = [...new Set(allShops.map(s => s.subcategory).filter(Boolean))];
-         
+
          if (subcats.length > 0) {
              const container = document.getElementById('subcatContainer');
              container.classList.remove('hidden');
              container.classList.add('flex');
-             
+
              subcats.forEach(sub => {
                  const btn = document.createElement('button');
                  btn.className = 'category-chip';
@@ -403,7 +442,7 @@
                  };
                  container.appendChild(btn);
              });
-             
+
              container.firstElementChild.onclick = () => {
                  container.querySelectorAll('.category-chip').forEach(b => b.classList.remove('active'));
                  container.firstElementChild.classList.add('active');
@@ -442,6 +481,32 @@
             state.sort = e.target.value;
             applyFiltersAndRender();
         });
+
+        // Service filters
+        const priceFilter = document.getElementById('priceRangeFilter');
+        const ratingFilter = document.getElementById('ratingFilter');
+        const availabilityFilter = document.getElementById('availabilityFilter');
+
+        if (priceFilter) {
+            priceFilter.addEventListener('change', (e) => {
+                state.priceRange = e.target.value;
+                applyFiltersAndRender();
+            });
+        }
+
+        if (ratingFilter) {
+            ratingFilter.addEventListener('change', (e) => {
+                state.rating = e.target.value;
+                applyFiltersAndRender();
+            });
+        }
+
+        if (availabilityFilter) {
+            availabilityFilter.addEventListener('change', (e) => {
+                state.availability = e.target.value;
+                applyFiltersAndRender();
+            });
+        }
       }
 
       function applyFiltersAndRender() {
@@ -454,13 +519,38 @@
         if (state.search) {
           const term = state.search.toLowerCase();
           collection = collection.filter(shop => {
-             return (shop.storename && shop.storename.toString().toLowerCase().includes(term)) || 
+             return (shop.storename && shop.storename.toString().toLowerCase().includes(term)) ||
                     (shop.address && shop.address.toString().toLowerCase().includes(term));
           });
         }
 
+        // Price range filter
+        if (state.priceRange !== 'all') {
+            collection = collection.filter(shop => {
+                const priceTag = shop.priceRange || 'mid';
+                return priceTag === state.priceRange;
+            });
+        }
+
+        // Rating filter
+        if (state.rating !== 'all') {
+            const minRating = parseInt(state.rating);
+            collection = collection.filter(shop => {
+                const shopRating = shop.rating || 3;
+                return shopRating >= minRating;
+            });
+        }
+
+        // Availability filter
+        if (state.availability !== 'all') {
+            collection = collection.filter(shop => {
+                const status = shop.availability || 'available';
+                return status === state.availability;
+            });
+        }
+
         if (state.sort === 'newest') {
-             collection.reverse(); 
+             collection.reverse();
         }
 
         document.getElementById('resultsMeta').textContent = collection.length;
