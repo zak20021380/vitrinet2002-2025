@@ -717,22 +717,31 @@
           }
 
           // Process Regular Shops
-          const markedShopList = shopList.map(shop => ({ 
-            ...shop, 
-            shopType: 'portfolio' 
+          const markedShopList = shopList.map(shop => ({
+            ...shop,
+            shopType: 'portfolio'
           }));
+
+          console.log('🏪 Regular shops (portfolio):', markedShopList.length);
+          console.log('🛠️ Service shops:', serviceShopList.length);
 
           state.regularShops = markedShopList;
           state.serviceShops = serviceShopList;
           state.shops = [...markedShopList, ...serviceShopList];
 
+          console.log('📦 Total shops:', state.shops.length);
+          console.log('🔍 Sample shop types:', state.shops.slice(0, 3).map(s => ({ name: s.storename, type: s.shopType })));
+
           // Detect if we are in a Service Context
           const isServiceUrl = state.categorySlug.includes('service') || state.filterCategory === 'خدمات';
-          
+
           if (isServiceUrl) {
              state.isServiceCategory = true;
-             // If user selected "Service", show services by default
-             if(state.typeFilter === 'all') state.typeFilter = 'service'; 
+             console.log('🎯 Service category detected, setting up service view');
+
+             // REMOVED: Don't auto-change typeFilter, let user choose
+             // if(state.typeFilter === 'all') state.typeFilter = 'service';
+
              setupServiceView(state.shops);
           }
 
@@ -754,6 +763,9 @@
       function applyFiltersAndRender() {
         let collection = [...state.shops];
 
+        console.log('🔍 Starting filter - Total shops:', collection.length);
+        console.log('🎯 Type Filter:', state.typeFilter);
+
         // 1. CATEGORY FILTER (The Fix)
         if (state.categorySlug !== 'general') {
             collection = collection.filter(shop => {
@@ -761,18 +773,34 @@
                 const shopCat = (shop.category || '').trim();
                 return shopCat === state.filterCategory || shopCat === state.categorySlug;
             });
+            console.log('📂 After category filter:', collection.length, 'shops');
         }
 
-        // 2. Type Filter
-        if (state.typeFilter === 'service') {
-          collection = collection.filter(s => s.shopType === 'service');
-        } else if (state.typeFilter === 'portfolio') {
-          collection = collection.filter(s => s.shopType === 'portfolio');
+        // 2. Type Filter - FIXED: More explicit filtering
+        if (state.typeFilter && state.typeFilter !== 'all') {
+          console.log('🔧 Applying type filter:', state.typeFilter);
+
+          if (state.typeFilter === 'service') {
+            collection = collection.filter(s => {
+              const isService = s.shopType === 'service';
+              if (!isService) console.log('❌ Filtering out (not service):', s.storename, 'shopType:', s.shopType);
+              return isService;
+            });
+          } else if (state.typeFilter === 'portfolio') {
+            collection = collection.filter(s => {
+              const isPortfolio = s.shopType === 'portfolio';
+              if (!isPortfolio) console.log('❌ Filtering out (not portfolio):', s.storename, 'shopType:', s.shopType);
+              return isPortfolio;
+            });
+          }
+
+          console.log('✅ After type filter:', collection.length, 'shops');
         }
 
         // 3. Subcategory Filter
         if (state.activeSubcategory !== 'all') {
             collection = collection.filter(s => s.subcategory === state.activeSubcategory);
+            console.log('📋 After subcategory filter:', collection.length, 'shops');
         }
 
         // 4. Search Filter
@@ -782,6 +810,7 @@
              return (shop.storename && shop.storename.toString().toLowerCase().includes(term)) ||
                     (shop.address && shop.address.toString().toLowerCase().includes(term));
           });
+          console.log('🔎 After search filter:', collection.length, 'shops');
         }
 
         // 5. Sort
@@ -789,6 +818,7 @@
              collection.reverse();
         }
 
+        console.log('📊 Final result:', collection.length, 'shops');
         document.getElementById('resultsMeta').textContent = collection.length;
         renderCards(collection);
       }
@@ -857,13 +887,26 @@
             state.sort = e.target.value;
             applyFiltersAndRender();
         });
+
+        // Type Filter Buttons - FIXED: Added debugging and verification
         const typeFilterBtns = document.querySelectorAll('.type-filter-btn');
+        console.log('🔘 Found', typeFilterBtns.length, 'type filter buttons');
+
         typeFilterBtns.forEach(btn => {
-          btn.addEventListener('click', () => {
+          btn.addEventListener('click', (e) => {
+            e.preventDefault();
             const type = btn.getAttribute('data-type');
+            console.log('🖱️ Type filter button clicked:', type);
+            console.log('📝 Previous typeFilter:', state.typeFilter);
+
             state.typeFilter = type;
+            console.log('✏️ New typeFilter:', state.typeFilter);
+
+            // Update UI
             typeFilterBtns.forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
+
+            // Apply filters
             applyFiltersAndRender();
           });
         });
