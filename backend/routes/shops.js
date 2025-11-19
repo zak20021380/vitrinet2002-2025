@@ -8,7 +8,18 @@ const dailyVisitCtrl = require('../controllers/dailyVisitController');
 // دریافت لیست همه فروشگاه‌ها از مدل Seller
 router.get('/', async (req, res) => {
   try {
-    const sellers = await Seller.find({},
+    // دریافت پارامتر category از query string
+    const categoryParam = req.query.category;
+
+    // ساخت فیلتر برای جستجو
+    let filter = {};
+
+    // اگر category مشخص شده باشد، فیلتر اعمال می‌شود
+    if (categoryParam) {
+      filter.category = categoryParam;
+    }
+
+    const sellers = await Seller.find(filter,
       'storename category subcategory shopurl address city region desc isPremium boardImage'
     ).lean();
 
