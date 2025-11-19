@@ -1,506 +1,546 @@
 <!DOCTYPE html>
 <html lang="fa" dir="rtl">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>دسته‌بندی مغازه‌ها | ویترینت</title>
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdn.tailwindcss.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com https://cdn.jsdelivr.net data:; connect-src 'self'; img-src 'self' data: https://placehold.co; base-uri 'self'; form-action 'self'; upgrade-insecure-requests; block-all-mixed-content">
+<meta http-equiv="Strict-Transport-Security" content="max-age=63072000; includeSubDomains; preload">
+<meta http-equiv="Referrer-Policy" content="no-referrer">
+<meta http-equiv="X-Content-Type-Options" content="nosniff">
+<meta http-equiv="X-XSS-Protection" content="1; mode=block">
+<meta name="referrer" content="no-referrer">
+<meta http-equiv="Permissions-Policy" content="geolocation=(), microphone=(), camera=()">
+<script src="/security.js" defer></script>
+<script src="/js/runtime-config.js" defer></script>
+<script src="/js/analytics.js" defer></script>
 
-  <script src="https://cdn.tailwindcss.com"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@100;300;400;700;900&family=Poppins:wght@800;900&display=swap" rel="stylesheet"/>
-
-  <style>
-    /* --- Base Settings --- */
-    body {
-      font-family: 'Vazirmatn', sans-serif;
-      background-color: #ecfdf5; /* Mint/Emerald-50 to match screenshot */
-      color: #064e3b; /* Dark Emerald Text */
-      overflow-x: hidden;
-    }
-
-    /* Soft Background Gradient */
-    main { 
-      background: linear-gradient(180deg, #ecfdf5 0%, #f0fdfa 100%);
-      min-height: 100vh;
-    }
-
-    /* --- Professional Header --- */
-    #mainHeader {
-      background: rgba(255, 255, 255, 0.95);
-      backdrop-filter: blur(12px);
-      border-bottom: 1px solid rgba(16, 185, 129, 0.1);
-      box-shadow: 0 4px 25px -5px rgba(16, 185, 129, 0.05);
-    }
-    
-    .nav-link {
-      font-weight: 700;
-      color: #334155;
-      transition: color 0.2s;
-      position: relative;
-    }
-    .nav-link:hover { color: #10b981; }
-
-    /* --- The "Big White Card" (Hero) --- */
-    .hero-panel {
-      background: #ffffff;
-      border-radius: 2rem;
-      box-shadow: 0 20px 40px -10px rgba(6, 78, 59, 0.06);
-      border: 1px solid rgba(255, 255, 255, 1);
-    }
-
-    /* --- Inputs --- */
-    .vitrine-input {
-      width: 100%;
-      padding: 0.9rem 1.2rem;
-      border-radius: 1rem;
-      background: #f8fafc;
-      border: 2px solid #e2e8f0;
-      color: #334155;
-      font-weight: 500;
-      transition: all 0.2s ease;
-    }
-    .vitrine-input:focus {
-      background: #fff;
-      border-color: #10b981;
-      box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.15);
-      outline: none;
-    }
-
-    /* --- Modern Filter Chips --- */
-    .chip-btn {
-      padding: 0.6rem 1.2rem;
-      border-radius: 1rem;
-      font-size: 0.9rem;
-      font-weight: 700;
-      background: #fff;
-      border: 1px solid #e2e8f0;
-      color: #64748b;
-      cursor: pointer;
-      transition: all 0.2s;
-    }
-    .chip-btn:hover {
-      border-color: #10b981;
-      color: #10b981;
-      transform: translateY(-2px);
-    }
-    .chip-btn.active {
-      background: #10b981;
-      color: white;
-      border-color: #10b981;
-      box-shadow: 0 8px 20px -4px rgba(16, 185, 129, 0.4);
-    }
-
-    /* --- Beautiful Cards --- */
-    .shop-card {
-      background: #ffffff;
-      border-radius: 1.5rem;
-      overflow: hidden;
-      position: relative;
-      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-      border: 1px solid rgba(226, 232, 240, 0.6);
-      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.02);
-      height: 100%;
-      display: flex; flex-direction: column;
-    }
-    
-    .shop-card:hover {
-      transform: translateY(-8px);
-      box-shadow: 0 20px 30px -10px rgba(16, 185, 129, 0.15);
-      border-color: #10b981;
-    }
-
-    .card-image-box {
-      width: 100%;
-      aspect-ratio: 4 / 3;
-      background: #f1f5f9;
-      position: relative;
-      overflow: hidden;
-    }
-    
-    .card-image-box img {
-      width: 100%; height: 100%; object-fit: cover;
-      transition: transform 0.5s ease;
-    }
-    .shop-card:hover .card-image-box img { transform: scale(1.1); }
-
-    .card-badge {
-      position: absolute; top: 12px; right: 12px;
-      background: #ffffff;
-      color: #059669;
-      font-size: 0.75rem; font-weight: 800;
-      padding: 6px 12px;
-      border-radius: 99px;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-    }
-
-    .card-body { padding: 1.25rem; flex: 1; display: flex; flex-direction: column; }
-
-    .card-btn {
-      margin-top: auto;
-      width: 100%;
-      padding: 0.8rem;
-      border-radius: 1rem;
-      font-weight: 800;
-      font-size: 0.95rem;
-      text-align: center;
-      background: #f0fdfa; /* Very light emerald */
-      color: #059669;
-      transition: all 0.2s;
-    }
-    .shop-card:hover .card-btn {
-      background: #10b981; /* Brand Emerald */
-      color: white;
-      box-shadow: 0 8px 15px -3px rgba(16, 185, 129, 0.3);
-    }
-
-    /* --- Portfolio --- */
-    .portfolio-item {
-      border-radius: 1.2rem;
-      overflow: hidden;
-      aspect-ratio: 1;
-      position: relative;
-      cursor: pointer;
-      box-shadow: 0 10px 20px -5px rgba(0,0,0,0.05);
-    }
-    .portfolio-item img { width: 100%; height: 100%; object-fit: cover; transition: 0.3s; }
-    .portfolio-item:hover img { transform: scale(1.1); }
-    .portfolio-overlay {
-      position: absolute; inset: 0;
-      background: linear-gradient(to top, rgba(6, 78, 59, 0.8), transparent);
-      display: flex; align-items: flex-end; padding: 1rem;
-      opacity: 0; transition: 0.3s;
-    }
-    .portfolio-item:hover .portfolio-overlay { opacity: 1; }
-
-    /* Loader */
-    .loader {
-      border: 3px solid #f3f3f3;
-      border-top: 3px solid #10b981;
-      border-radius: 50%;
-      width: 30px; height: 30px;
-      animation: spin 1s linear infinite;
-    }
-    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-
-  </style>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>دسته‌بندی مغازه‌ها | ویترینت</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="stylesheet" href="style-index.css" />
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;600;700;900&family=Poppins:wght@700;900&display=swap" rel="stylesheet"/>
+<script src="/nav-active.js" defer></script>
+<style>
+  main {
+    min-height: 100vh;
+  }
+  .category-hero h1 {
+    background: linear-gradient(120deg,#10b981,#0ea5e9);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .category-pill {
+    background: rgba(16,185,129,0.08);
+    border: 1px solid rgba(16,185,129,0.2);
+    color: #047857;
+  }
+  .filter-card {
+    background: rgba(255,255,255,0.85);
+    border-radius: 1.75rem;
+    border: 1px solid rgba(148, 163, 184, 0.2);
+    box-shadow: 0 15px 40px rgba(14,165,233,0.08);
+    backdrop-filter: blur(18px);
+  }
+  .category-chip {
+    padding: 0.55rem 1.3rem;
+    border-radius: 999px;
+    border: 1px solid rgba(148,163,184,0.4);
+    background: rgba(255,255,255,0.92);
+    color: #475569;
+    font-weight: 700;
+    transition: all 0.2s ease;
+  }
+  .category-chip:hover,
+  .category-chip.active {
+    border-color: #10b981;
+    color: #10b981;
+    box-shadow: 0 6px 18px rgba(16,185,129,0.18);
+  }
+  .category-card {
+    background: rgba(255,255,255,0.95);
+    border-radius: 1.75rem;
+    border: 1px solid rgba(226,232,240,0.7);
+    box-shadow: 0 25px 40px -20px rgba(15,118,110,0.4);
+    overflow: hidden;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    display: flex;
+    flex-direction: column;
+  }
+  .category-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 30px 45px -25px rgba(14,165,233,0.4);
+    border-color: rgba(16,185,129,0.4);
+  }
+  .category-card__image {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 4 / 3;
+    overflow: hidden;
+  }
+  .category-card__image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.45s ease;
+  }
+  .category-card:hover .category-card__image img {
+    transform: scale(1.08);
+  }
+  .category-card__badge {
+    position: absolute;
+    top: 14px;
+    right: 14px;
+    background: rgba(255,255,255,0.9);
+    border-radius: 999px;
+    padding: 0.3rem 0.85rem;
+    font-size: 0.75rem;
+    font-weight: 800;
+    color: #0f172a;
+    box-shadow: 0 8px 20px rgba(15,118,110,0.1);
+  }
+  .category-card__body {
+    padding: 1.4rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    flex: 1;
+  }
+  .category-card__cta {
+    margin-top: auto;
+    background: rgba(16,185,129,0.08);
+    color: #047857;
+    border-radius: 1rem;
+    padding: 0.8rem;
+    font-weight: 800;
+    text-align: center;
+    transition: all 0.2s ease;
+  }
+  .category-card:hover .category-card__cta {
+    background: linear-gradient(120deg,#10b981,#0ea5e9);
+    color: #fff;
+    box-shadow: 0 12px 25px rgba(16,185,129,0.35);
+  }
+  .portfolio-card {
+    border-radius: 1.5rem;
+    overflow: hidden;
+    position: relative;
+  }
+  .portfolio-card::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg,rgba(15,23,42,0) 40%,rgba(15,23,42,0.65));
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+  .portfolio-card:hover::after { opacity: 1; }
+  .portfolio-card__meta {
+    position: absolute;
+    inset-inline: 0;
+    bottom: 0;
+    padding: 1rem;
+    color: #fff;
+    z-index: 2;
+    opacity: 0;
+    transform: translateY(10px);
+    transition: all 0.3s ease;
+  }
+  .portfolio-card:hover .portfolio-card__meta {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  .loader {
+    border: 3px solid #f3f3f3;
+    border-top: 3px solid #10b981;
+    border-radius: 50%;
+    width: 36px;
+    height: 36px;
+    animation: spin 1s linear infinite;
+  }
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+</style>
 </head>
-<body>
-
-  <header id="mainHeader" class="fixed w-full top-0 left-0 z-50">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
-      
-      <div class="flex items-center gap-4">
-        <a href="index.html" class="flex items-center gap-3 group">
-          <div class="w-11 h-11 rounded-full bg-emerald-500 flex items-center justify-center text-white font-black text-xl shadow-lg shadow-emerald-500/30 transition-transform group-hover:scale-105">
-            V
-          </div>
-          <div class="flex flex-col">
-            <span class="font-black text-2xl tracking-tight text-slate-800">VITREENET</span>
-            <span class="text-xs font-bold text-emerald-600 -mt-1 mr-0.5">ویترینت</span>
-          </div>
-        </a>
-
-        <div class="hidden md:flex items-center gap-1.5 px-4 py-1.5 bg-emerald-500 rounded-full shadow-md shadow-emerald-500/20 text-white">
-           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
-           <span class="text-sm font-bold">سنندج</span>
-        </div>
-      </div>
-
-      <nav class="hidden md:flex items-center gap-8">
-        <a href="index.html" class="nav-link">خانه</a>
-        <a href="categories.html" class="nav-link">دسته‌بندی</a>
-        <a href="#" class="nav-link">پنل فروشنده</a>
-      </nav>
-
-      <div class="flex items-center gap-3">
-        <a href="#" class="hidden sm:inline-flex px-6 py-2.5 rounded-full bg-emerald-500 text-white font-bold shadow-lg shadow-emerald-500/30 hover:bg-emerald-600 hover:shadow-emerald-600/40 transition-all hover:-translate-y-0.5">
-          ثبت فروشگاه
-        </a>
+<body class="text-gray-800">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@900&display=swap" rel="stylesheet" />
+<header id="mainHeader" class="w-full bg-white/95 shadow-md backdrop-blur-md sticky top-0 z-50">
+  <div id="headerInner" class="max-w-7xl mx-auto flex flex-row items-center justify-between px-4 sm:px-6 py-3 md:py-3.5 gap-3">
+    <div id="logoCityWrap" class="flex items-center gap-2 md:gap-3 flex-shrink-0">
+      <a href="index.html" class="vitreenet-brand header-item" aria-label="ویترینت">
+        <span class="vitreenet-brand__mark" aria-hidden="true">
+          <svg viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg" role="presentation">
+            <defs>
+              <linearGradient id="vtMarkGradient" x1="0%" y1="100%" x2="100%" y2="0%">
+                <stop offset="0%" stop-color="#0ea5e9" />
+                <stop offset="55%" stop-color="#10b981" />
+                <stop offset="100%" stop-color="#0fb67f" />
+              </linearGradient>
+              <linearGradient id="vtMarkInner" x1="15%" y1="85%" x2="85%" y2="15%">
+                <stop offset="0%" stop-color="#ffffff" stop-opacity="0.9" />
+                <stop offset="100%" stop-color="#dcfce7" stop-opacity="0.25" />
+              </linearGradient>
+            </defs>
+            <circle cx="24" cy="24" r="22" fill="url(#vtMarkGradient)" />
+            <circle cx="24" cy="24" r="18" fill="url(#vtMarkInner)" />
+            <path d="M15.5 16h4.7l4.3 10.6L28.8 16h4.7L26 33h-4.2L15.5 16Z" fill="#0f172a" fill-opacity="0.9" />
+            <path d="M18.2 17.6 24 31.1l5.8-13.5" fill="none" stroke="#22c55e" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
+        </span>
+        <span class="vitreenet-brand__text">
+          <span class="vitreenet-brand__title">Vitreenet</span>
+          <span class="vitreenet-brand__subtitle">ویترینت</span>
+        </span>
+      </a>
+      <div class="hidden md:flex items-center gap-1 px-3 py-1.5 rounded-full shadow-lg header-item"
+           style="background:linear-gradient(90deg,#10b981E6 70%,#0ea5e9E6); border: 1.5px solid #fff6; backdrop-filter: blur(5px);">
+        <svg width="18" height="18" fill="none" viewBox="0 0 22 22" class="ml-1 drop-shadow" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <linearGradient id="city-icon" x1="0%" y1="0%" x2="0%" y2="100%">
+              <stop offset="0%" stop-color="#ffffff" stop-opacity="1" />
+              <stop offset="100%" stop-color="#e0f2fe" stop-opacity="0.9" />
+            </linearGradient>
+          </defs>
+          <path d="M11 2.5C7.13 2.5 4 5.61 4 9.45c0 3.52 4.1 7.93 6.2 10.01.46.47 1.2.47 1.66 0 2.1-2.08 6.14-6.49 6.14-10.01C18 5.61 14.87 2.5 11 2.5Zm0 10.25a2.75 2.75 0 1 1 0-5.5 2.75 2.75 0 0 1 0 5.5Z" fill="url(#city-icon)"/>
+        </svg>
+        <span id="headerCity" class="font-bold text-white text-[14px] drop-shadow-sm" style="letter-spacing:.3px;">سنندج</span>
       </div>
     </div>
-  </header>
+    <nav id="desktopNav" class="hidden md:flex items-center gap-1 text-base flex-1 justify-end">
+      <a href="index.html" class="main-nav-link text-gray-700 hover:text-[#10b981] font-bold px-4 py-2 rounded-lg transition-all hover:bg-emerald-50">خانه</a>
+      <a href="categories.html" class="main-nav-link text-gray-700 hover:text-[#0ea5e9] font-bold px-4 py-2 rounded-lg transition-all hover:bg-sky-50">دسته‌بندی</a>
+      <a href="login.html" id="loginNavLink" class="main-nav-link text-gray-700 hover:text-[#0ea5e9] font-bold px-4 py-2 rounded-lg transition-all hover:bg-sky-50">
+        <span class="login-link-label">ورود</span>
+      </a>
+    </nav>
+    <div class="flex items-center gap-2 header-item">
+      <button type="button" id="rewardClaimBtn"
+        class="reward-header-btn inline-flex items-center gap-2 px-4 py-2 md:px-5 md:py-2.5 rounded-full font-extrabold shadow-lg hover:shadow-xl transition-all duration-200 whitespace-nowrap text-white text-sm md:text-base header-item"
+        aria-haspopup="dialog" aria-controls="rewardModal" aria-expanded="false">
+        <span class="reward-header-icon" aria-hidden="true">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M5 8h14v12H5z" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M3 8h18" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+            <path d="M12 4c.8-1.3 2.5-2 3.8-1 .7.5 1.2 1.3 1.2 2.1 0 1.5-1.2 2.9-3 2.9h-2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M12 4c-.8-1.3-2.5-2-3.8-1-.7.5-1.2 1.3-1.2 2.1 0 1.5 1.2 2.9 3 2.9h2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </span>
+        <span>دریافت جایزه</span>
+      </button>
+      <a href="post.html" id="registerShopBtn" class="btn-grad px-4 py-2 md:px-5 md:py-2.5 rounded-full font-extrabold shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-200 whitespace-nowrap text-white text-sm md:text-base header-item">
+        ثبت فروشگاه
+      </a>
+    </div>
+  </div>
+</header>
 
-  <main class="pt-28 pb-20">
-    <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      
-      <div class="hero-panel p-8 md:p-10 mb-14 text-center md:text-right">
-        
-        <div class="flex flex-col md:flex-row justify-between items-center mb-8 gap-4">
-           <div>
-              <h1 id="categoryTitle" class="text-3xl md:text-4xl font-black text-slate-800 mb-2">فروشگاه‌ها</h1>
-              <p id="categorySubtitle" class="text-emerald-600 font-bold text-sm">در حال دریافت اطلاعات...</p>
-           </div>
-           
-           <div class="bg-emerald-50 px-5 py-2 rounded-2xl border border-emerald-100">
-              <span id="resultsMeta" class="font-black text-emerald-700 text-lg">0</span>
-              <span class="text-emerald-600 text-sm font-bold mr-1">فروشگاه فعال</span>
-           </div>
+<main class="px-4 sm:px-6 lg:px-8 pt-32 pb-16">
+  <section class="max-w-7xl mx-auto flex flex-col gap-10">
+    <div class="glass category-hero w-full mx-auto px-5 sm:px-10 py-8 sm:py-12 shadow-2xl">
+      <div class="flex flex-col lg:flex-row items-center lg:items-start justify-between gap-6">
+        <div class="text-center lg:text-right max-w-2xl">
+          <span class="category-pill inline-flex items-center gap-2 px-4 py-1 rounded-full text-xs font-black uppercase tracking-wider">
+            <span id="categoryPill">ویترین اینترنتی</span>
+          </span>
+          <h1 id="categoryTitle" class="text-3xl md:text-4xl font-black mt-4 mb-3 leading-tight">فروشگاه‌ها</h1>
+          <p id="categorySubtitle" class="text-gray-600 text-base md:text-lg font-semibold">در حال دریافت اطلاعات...</p>
         </div>
-
-        <div class="grid grid-cols-1 md:grid-cols-12 gap-4">
-           <div class="md:col-span-8 lg:col-span-9 relative">
-              <input type="text" id="searchInput" class="vitrine-input pl-12" placeholder="جستجو در نام مغازه، محله یا آدرس..." />
-              <div class="absolute left-4 top-4 text-slate-400">
-                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
-              </div>
-           </div>
-           <div class="md:col-span-4 lg:col-span-3">
-              <select id="sortSelect" class="vitrine-input cursor-pointer">
-                 <option value="popular">🔥 محبوب‌ترین</option>
-                 <option value="newest">📅 جدیدترین</option>
-                 <option value="rating_desc">⭐ بیشترین امتیاز</option>
-              </select>
-           </div>
+        <div class="flex flex-col items-center lg:items-end gap-3">
+          <p class="text-sm text-gray-500 font-semibold">فروشگاه فعال در این دسته</p>
+          <div class="cta-blur px-6 py-4 rounded-2xl flex items-center gap-3">
+            <div class="text-4xl font-black text-emerald-500" id="resultsMeta">0</div>
+            <div class="text-sm font-bold text-gray-600">کسب‌وکار آماده بازدید</div>
+          </div>
         </div>
-
-        <div id="subcatContainer" class="mt-6 flex flex-wrap gap-2 hidden justify-center md:justify-start">
-           <button class="chip-btn active" data-sub="all">همه</button>
-           </div>
       </div>
-
-      <div id="portfolioSection" class="mb-16 hidden">
-        <div class="flex items-center gap-3 mb-6">
-           <div class="w-3 h-8 bg-emerald-500 rounded-full"></div>
-           <h2 class="text-2xl font-black text-slate-800">نمونه کارهای برتر</h2>
+      <div class="mt-8 grid grid-cols-1 lg:grid-cols-12 gap-4">
+        <label class="lg:col-span-8 relative w-full">
+          <span class="sr-only">جستجو</span>
+          <input type="text" id="searchInput" class="vitrine-input pl-12" placeholder="جستجو در نام مغازه، محله یا آدرس..."/>
+          <span class="absolute left-4 top-3 text-slate-400">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+          </span>
+        </label>
+        <div class="lg:col-span-4">
+          <select id="sortSelect" class="vitrine-input cursor-pointer">
+            <option value="popular">🔥 محبوب‌ترین</option>
+            <option value="newest">📅 جدیدترین</option>
+            <option value="rating_desc">⭐ بیشترین امتیاز</option>
+          </select>
         </div>
-        <div id="portfolioGrid" class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">
-           </div>
       </div>
-
-      <div id="results-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-         <div class="col-span-full flex flex-col items-center justify-center py-24 text-slate-400">
-            <div class="loader mb-4"></div>
-            <p class="font-bold text-lg text-slate-500">در حال بارگذاری فروشگاه‌ها...</p>
-         </div>
+      <div id="subcatContainer" class="mt-6 hidden flex-wrap gap-2 justify-center lg:justify-start">
+        <button class="category-chip active" data-sub="all">همه</button>
       </div>
+    </div>
 
-    </section>
-  </main>
+    <div id="portfolioSection" class="hidden">
+      <div class="flex items-center gap-3 mb-4">
+        <div class="w-2 h-8 rounded-full" style="background:linear-gradient(180deg,#10b981,#0ea5e9);"></div>
+        <h2 class="text-2xl font-black text-slate-800">نمونه کارهای برتر</h2>
+      </div>
+      <div id="portfolioGrid" class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4"></div>
+    </div>
 
-  <script>
-    (function () {
-      const categoryParam = new URLSearchParams(window.location.search).get('cat') || 'general';
-      
-      const state = {
-        category: categoryParam,
-        isServiceCategory: false,
-        search: '',
-        sort: 'popular',
-        activeSubcategory: 'all',
-        shops: [],
-      };
+    <div id="results-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+      <div class="col-span-full flex flex-col items-center justify-center py-16 text-slate-400">
+        <div class="loader mb-4"></div>
+        <p class="font-bold text-lg text-slate-500">در حال بارگذاری فروشگاه‌ها...</p>
+      </div>
+    </div>
+  </section>
+</main>
 
-      document.addEventListener('DOMContentLoaded', async () => {
-        hydrateHero();
-        attachFilterEvents();
-        await fetchRealShops();
-      });
+<div id="rewardModalBackdrop" class="reward-modal-backdrop" role="presentation" aria-hidden="true">
+  <div id="rewardModal" class="reward-modal" role="dialog" aria-modal="true" aria-labelledby="rewardModalTitle" aria-describedby="rewardModalSubtitle">
+    <button type="button" id="rewardModalCloseBtn" class="reward-modal__close" aria-label="بستن پنجره">
+      <span aria-hidden="true">×</span>
+    </button>
+    <div class="reward-modal__header">
+      <h2 id="rewardModalTitle">کمپین جوایز ویترینت</h2>
+      <p id="rewardModalSubtitle">به محض فعال شدن کمپین، جزئیات اینجا نمایش داده می‌شود.</p>
+    </div>
+    <div class="reward-modal__body">
+      <div class="reward-modal__stats" id="rewardModalStats">
+        <div>
+          <span class="reward-modal__stat-label">مبلغ جایزه</span>
+          <span class="reward-modal__stat-value" id="rewardPrizeValue">—</span>
+        </div>
+        <div>
+          <span class="reward-modal__stat-label">ظرفیت</span>
+          <span class="reward-modal__stat-value" id="rewardCapacityValue">—</span>
+        </div>
+        <div>
+          <span class="reward-modal__stat-label">برندگان</span>
+          <span class="reward-modal__stat-value" id="rewardWinnersValue">—</span>
+        </div>
+      </div>
+      <div class="reward-modal__progress">
+        <div id="rewardProgressBar" class="reward-modal__progress-bar" style="width: 0%"></div>
+      </div>
+      <form id="rewardClaimForm" class="reward-modal__form">
+        <label for="rewardCodeInput">کد ۶ رقمی جایزه</label>
+        <input type="text" id="rewardCodeInput" inputmode="numeric" pattern="[0-9]*" maxlength="6" placeholder="مثلاً ۱۲۳۴۵۶" />
+        <p id="rewardMessage" class="reward-modal__message" aria-live="polite"></p>
+        <button type="submit" class="reward-modal__submit" id="rewardModalSubmitBtn">دریافت جایزه</button>
+      </form>
+      <button type="button" id="rewardModalDismissBtn" class="reward-modal__secondary">بعداً امتحان می‌کنم</button>
+      <button type="button" id="rewardHelpToggle" class="reward-modal__help" aria-expanded="false">راهنمای شرکت در کمپین</button>
+      <div id="rewardHelpContent" class="reward-modal__help-content" hidden>
+        <p>هنگام فعال بودن کمپین، کد جایزه را از فروشنده دریافت کنید و در همین صفحه وارد نمایید.</p>
+      </div>
+      <section id="rewardPublicWinnersSection" class="reward-modal__winners" hidden>
+        <h3>برندگان اخیر</h3>
+        <ul id="rewardPublicWinnersList"></ul>
+        <p id="rewardPublicWinnersEmpty">هنوز برنده‌ای ثبت نشده است.</p>
+      </section>
+    </div>
+  </div>
+</div>
 
-      function hydrateHero() {
-        const title = document.getElementById('categoryTitle');
-        if(state.category === 'general') {
-             title.textContent = "ویترین اینترنتی شهر";
-        } else {
-             title.textContent = `فروشگاه‌های ${state.category.replace(/-/g, ' ')}`;
-        }
+<div id="authPromptBackdrop" class="auth-prompt" role="dialog" aria-modal="true" aria-labelledby="authPromptTitle" aria-describedby="authPromptDescription">
+  <div class="auth-prompt__dialog">
+    <button type="button" id="authPromptCloseBtn" class="auth-prompt__close" aria-label="بستن"></button>
+    <div class="auth-prompt__content">
+      <h2 id="authPromptTitle">حساب کاربری لازم است</h2>
+      <p id="authPromptDescription">برای دریافت جایزه، وارد حساب کاربری شوید یا ثبت‌نام کنید.</p>
+      <div class="auth-prompt__actions">
+        <a href="login.html" id="authPromptLoginBtn" class="auth-prompt__btn auth-prompt__btn--primary">ورود</a>
+        <a href="register.html" id="authPromptRegisterBtn" class="auth-prompt__btn">ثبت‌نام</a>
+      </div>
+      <button type="button" id="authPromptDismissBtn" class="auth-prompt__dismiss">فعلاً نه</button>
+    </div>
+  </div>
+</div>
+
+<script src="/js/main-index.js" defer></script>
+<script>
+  (function () {
+    const categoryParam = new URLSearchParams(window.location.search).get('cat') || 'general';
+    const state = {
+      category: categoryParam,
+      isServiceCategory: false,
+      search: '',
+      sort: 'popular',
+      activeSubcategory: 'all',
+      shops: [],
+    };
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      hydrateHero();
+      attachFilterEvents();
+      await fetchRealShops();
+    });
+
+    function hydrateHero() {
+      const title = document.getElementById('categoryTitle');
+      const pill = document.getElementById('categoryPill');
+      if (state.category === 'general') {
+        title.textContent = 'ویترین اینترنتی شهر';
+        pill.textContent = 'ویترین اینترنتی';
+      } else {
+        const label = state.category.replace(/-/g, ' ');
+        title.textContent = `فروشگاه‌های ${label}`;
+        pill.textContent = `دسته ${label}`;
       }
+    }
 
-      async function fetchRealShops() {
-        try {
-          // --- API CONFIG ---
-          let apiUrl = `/api/shops`; 
-          if(state.category && state.category !== 'general') {
-              apiUrl += `?category=${encodeURIComponent(state.category)}`;
-          }
-
-          const response = await fetch(apiUrl);
-          if (!response.ok) throw new Error('Server Error');
-
-          const data = await response.json();
-          const shopList = Array.isArray(data) ? data : (data.shops || []);
-          state.shops = shopList;
-
-          // Check if this is a Service category (e.g., Barber)
-          const hasService = shopList.some(s => s.category && s.category.includes('خدمات'));
-          if (hasService || state.category.includes('service') || state.category === 'خدمات') {
-             state.isServiceCategory = true;
-             setupServiceView(shopList);
-          }
-
-          document.getElementById('categorySubtitle').textContent = `لیست فروشگاه‌های اطراف شما`;
-          applyFiltersAndRender();
-
-        } catch (error) {
-          console.error(error);
-          const grid = document.getElementById('results-grid');
-          grid.innerHTML = `
-            <div class="col-span-full text-center py-16 bg-white rounded-3xl shadow-sm border border-red-100">
-               <p class="font-black text-xl text-slate-800 mb-2">مشکلی پیش آمده!</p>
-               <p class="text-slate-500">نتوانستیم اطلاعات را دریافت کنیم. لطفا دوباره تلاش کنید.</p>
-               <button onclick="location.reload()" class="mt-4 px-6 py-2 bg-emerald-500 text-white rounded-full font-bold hover:bg-emerald-600">تلاش مجدد</button>
-            </div>
-          `;
+    async function fetchRealShops() {
+      try {
+        let apiUrl = `/api/shops`;
+        if (state.category && state.category !== 'general') {
+          apiUrl += `?category=${encodeURIComponent(state.category)}`;
         }
-      }
-
-      // --- Service View Setup ---
-      function setupServiceView(allShops) {
-         // 1. Subcategories
-         const subcats = [...new Set(allShops.map(s => s.subcategory).filter(Boolean))];
-         
-         if (subcats.length > 0) {
-             const container = document.getElementById('subcatContainer');
-             container.classList.remove('hidden');
-             container.classList.add('flex'); // Make flex visible
-             
-             subcats.forEach(sub => {
-                 const btn = document.createElement('button');
-                 btn.className = 'chip-btn';
-                 btn.textContent = sub;
-                 btn.onclick = () => {
-                     container.querySelectorAll('.chip-btn').forEach(b => b.classList.remove('active'));
-                     btn.classList.add('active');
-                     state.activeSubcategory = sub;
-                     applyFiltersAndRender();
-                 };
-                 container.appendChild(btn);
-             });
-             
-             // All Button Logic
-             container.firstElementChild.onclick = () => {
-                 container.querySelectorAll('.chip-btn').forEach(b => b.classList.remove('active'));
-                 container.firstElementChild.classList.add('active');
-                 state.activeSubcategory = 'all';
-                 applyFiltersAndRender();
-             }
-         }
-
-         // 2. Portfolio (Dummy Data from Shops)
-         const portfolioSec = document.getElementById('portfolioSection');
-         const portfolioGrid = document.getElementById('portfolioGrid');
-         const sampleShops = allShops.slice(0, 5);
-
-         if(sampleShops.length > 0) {
-             portfolioSec.classList.remove('hidden');
-             portfolioGrid.innerHTML = sampleShops.map(shop => `
-                <div class="portfolio-item group">
-                    <img src="${resolveShopImage(shop)}" alt="${shop.storename}" onerror="this.src='https://placehold.co/300?text=Portfolio'">
-                    <div class="portfolio-overlay">
-                        <div>
-                           <h4 class="text-white font-bold text-sm">${shop.storename}</h4>
-                           <span class="text-emerald-300 text-xs font-bold">نمونه کار</span>
-                        </div>
-                    </div>
-                </div>
-             `).join('');
-         }
-      }
-
-      function attachFilterEvents() {
-        document.getElementById('searchInput').addEventListener('input', (e) => {
-            state.search = e.target.value;
-            applyFiltersAndRender();
-        });
-        document.getElementById('sortSelect').addEventListener('change', (e) => {
-            state.sort = e.target.value;
-            applyFiltersAndRender();
-        });
-      }
-
-      function applyFiltersAndRender() {
-        let collection = [...state.shops];
-
-        // Subcategory
-        if (state.activeSubcategory !== 'all') {
-            collection = collection.filter(s => s.subcategory === state.activeSubcategory);
+        const response = await fetch(apiUrl);
+        if (!response.ok) throw new Error('Server Error');
+        const data = await response.json();
+        const shopList = Array.isArray(data) ? data : (data.shops || []);
+        state.shops = shopList;
+        const hasService = shopList.some(s => s.category && s.category.includes('خدمات'));
+        if (hasService || state.category.includes('service') || state.category === 'خدمات') {
+          state.isServiceCategory = true;
+          setupServiceView(shopList);
         }
-
-        // Search
-        if (state.search) {
-          const term = state.search.toLowerCase();
-          collection = collection.filter(shop => {
-             return (shop.storename && shop.storename.toString().toLowerCase().includes(term)) || 
-                    (shop.address && shop.address.toString().toLowerCase().includes(term));
-          });
-        }
-
-        // Sort
-        if (state.sort === 'newest') {
-             collection.reverse(); 
-        }
-
-        // Update Counter
-        document.getElementById('resultsMeta').textContent = collection.length;
-
-        renderCards(collection);
-      }
-
-      function renderCards(shops) {
+        document.getElementById('categorySubtitle').textContent = 'لیست فروشگاه‌های اطراف شما';
+        applyFiltersAndRender();
+      } catch (error) {
+        console.error(error);
         const grid = document.getElementById('results-grid');
-        
-        if (shops.length === 0) {
-          grid.innerHTML = `
-            <div class="col-span-full text-center py-16">
-               <div class="inline-block p-4 bg-white rounded-full mb-3 shadow-sm">
-                 <svg class="w-8 h-8 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-               </div>
-               <p class="text-slate-500 font-bold">هیچ فروشگاهی با این مشخصات پیدا نشد.</p>
-            </div>`;
-          return;
-        }
-        
-        grid.innerHTML = shops.map(shop => createCard(shop)).join('');
-      }
-
-      function createCard(shop) {
-        const imageSrc = resolveShopImage(shop);
-        const shopName = shop.storename || 'فروشگاه';
-        const address = shop.address || 'آدرس ثبت نشده';
-        const badge = shop.subcategory || shop.category || 'عمومی';
-        const profileLink = `shop.html?id=${shop.id}`;
-
-        return `
-          <article class="shop-card group">
-            <div class="card-image-box">
-              <img src="${imageSrc}" loading="lazy" alt="${shopName}" />
-              <div class="card-badge">${badge}</div>
-            </div>
-            
-            <div class="card-body">
-              <div class="flex justify-between items-start mb-1">
-                 <h3 class="font-black text-lg text-slate-800 group-hover:text-emerald-600 transition-colors line-clamp-1">${shopName}</h3>
-              </div>
-              
-              <div class="flex items-center gap-1 mb-4">
-                  <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
-                  <p class="text-xs font-bold text-slate-500 line-clamp-1">${address}</p>
-              </div>
-
-              <a href="${profileLink}" class="card-btn">
-                مشاهده پروفایل
-              </a>
-            </div>
-          </article>
+        grid.innerHTML = `
+          <div class="col-span-full text-center py-16 glass">
+            <p class="font-black text-xl text-slate-800 mb-2">مشکلی پیش آمده!</p>
+            <p class="text-slate-500">نتوانستیم اطلاعات را دریافت کنیم. لطفا دوباره تلاش کنید.</p>
+            <button onclick="location.reload()" class="mt-4 btn-grad px-6 py-2 rounded-full font-bold">تلاش مجدد</button>
+          </div>
         `;
       }
+    }
 
-      function resolveShopImage(shop) {
-        let candidate = shop.image;
-
-        // Fallback if empty
-        if (!candidate || candidate.trim() === "") {
-           const text = encodeURIComponent(shop.storename || 'Shop');
-           return `https://placehold.co/600x400/f1f5f9/10b981?text=${text}`;
+    function setupServiceView(allShops) {
+      const subcats = [...new Set(allShops.map(s => s.subcategory).filter(Boolean))];
+      if (subcats.length > 0) {
+        const container = document.getElementById('subcatContainer');
+        container.classList.remove('hidden');
+        subcats.forEach(sub => {
+          const btn = document.createElement('button');
+          btn.className = 'category-chip';
+          btn.textContent = sub;
+          btn.onclick = () => {
+            container.querySelectorAll('.category-chip').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            state.activeSubcategory = sub;
+            applyFiltersAndRender();
+          };
+          container.appendChild(btn);
+        });
+        const first = container.querySelector('[data-sub="all"]');
+        if (first) {
+          first.onclick = () => {
+            container.querySelectorAll('.category-chip').forEach(b => b.classList.remove('active'));
+            first.classList.add('active');
+            state.activeSubcategory = 'all';
+            applyFiltersAndRender();
+          };
         }
-
-        // Regex fix
-        if (/^(https?:\/\/|\/|data:image\/)/.test(candidate)) {
-          return candidate;
-        }
-        
-        return `/${candidate.replace(/^\/+/, '')}`;
       }
+      const portfolioSec = document.getElementById('portfolioSection');
+      const portfolioGrid = document.getElementById('portfolioGrid');
+      const sampleShops = allShops.slice(0, 5);
+      if (sampleShops.length > 0) {
+        portfolioSec.classList.remove('hidden');
+        portfolioGrid.innerHTML = sampleShops.map(shop => `
+          <div class="portfolio-card">
+            <img src="${resolveShopImage(shop)}" alt="${shop.storename}" onerror="this.src='https://placehold.co/300?text=Portfolio'"/>
+            <div class="portfolio-card__meta">
+              <p class="text-sm font-bold">${shop.storename || 'نمونه کار'}</p>
+              <span class="text-xs text-emerald-200">${shop.category || 'فروشگاه'}</span>
+            </div>
+          </div>
+        `).join('');
+      }
+    }
 
-    })();
-  </script>
+    function attachFilterEvents() {
+      document.getElementById('searchInput').addEventListener('input', (e) => {
+        state.search = e.target.value;
+        applyFiltersAndRender();
+      });
+      document.getElementById('sortSelect').addEventListener('change', (e) => {
+        state.sort = e.target.value;
+        applyFiltersAndRender();
+      });
+    }
+
+    function applyFiltersAndRender() {
+      let collection = [...state.shops];
+      if (state.activeSubcategory !== 'all') {
+        collection = collection.filter(s => s.subcategory === state.activeSubcategory);
+      }
+      if (state.search) {
+        const term = state.search.toLowerCase();
+        collection = collection.filter(shop => {
+          return (shop.storename && shop.storename.toString().toLowerCase().includes(term)) ||
+            (shop.address && shop.address.toString().toLowerCase().includes(term));
+        });
+      }
+      if (state.sort === 'newest') {
+        collection = [...collection].reverse();
+      }
+      document.getElementById('resultsMeta').textContent = collection.length;
+      renderCards(collection);
+    }
+
+    function renderCards(shops) {
+      const grid = document.getElementById('results-grid');
+      if (shops.length === 0) {
+        grid.innerHTML = `
+          <div class="col-span-full glass text-center py-16">
+            <div class="inline-flex items-center justify-center w-14 h-14 rounded-full bg-emerald-50 text-emerald-500 mb-4">
+              <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+            </div>
+            <p class="text-slate-500 font-bold">هیچ فروشگاهی با این مشخصات پیدا نشد.</p>
+          </div>`;
+        return;
+      }
+      grid.innerHTML = shops.map(shop => createCard(shop)).join('');
+    }
+
+    function createCard(shop) {
+      const imageSrc = resolveShopImage(shop);
+      const shopName = shop.storename || 'فروشگاه';
+      const address = shop.address || 'آدرس ثبت نشده';
+      const badge = shop.subcategory || shop.category || 'عمومی';
+      const profileLink = `shop.html?id=${shop.id}`;
+      return `
+        <article class="category-card">
+          <div class="category-card__image">
+            <img src="${imageSrc}" loading="lazy" alt="${shopName}" />
+            <div class="category-card__badge">${badge}</div>
+          </div>
+          <div class="category-card__body">
+            <h3 class="font-black text-lg text-slate-800 line-clamp-1">${shopName}</h3>
+            <div class="flex items-center gap-1 text-xs font-semibold text-slate-500">
+              <svg class="w-4 h-4 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+              <span class="line-clamp-1">${address}</span>
+            </div>
+            <a href="${profileLink}" class="category-card__cta">مشاهده پروفایل</a>
+          </div>
+        </article>
+      `;
+    }
+
+    function resolveShopImage(shop) {
+      let candidate = shop.image;
+      if (!candidate || candidate.trim() === '') {
+        const text = encodeURIComponent(shop.storename || 'Shop');
+        return `https://placehold.co/600x400/f1f5f9/10b981?text=${text}`;
+      }
+      if (/^(https?:\/\/|\/|data:image\/)/.test(candidate)) {
+        return candidate;
+      }
+      return `/${candidate.replace(/^\/+/, '')}`;
+    }
+  })();
+</script>
 </body>
 </html>
