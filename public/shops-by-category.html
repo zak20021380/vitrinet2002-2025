@@ -329,6 +329,65 @@
       transform: translateY(0);
     }
 
+    /* --- Divider between portfolio & services --- */
+    .content-divider {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 1rem;
+      padding: 1.25rem 1.75rem;
+      border-radius: 1.75rem;
+      background: linear-gradient(120deg, rgba(16, 185, 129, 0.08), rgba(14, 165, 233, 0.08));
+      border: 1px solid rgba(16, 185, 129, 0.15);
+      box-shadow: 0 10px 30px -15px rgba(15, 118, 110, 0.45);
+      margin: 1.5rem 0 0.5rem;
+      flex-wrap: wrap;
+    }
+
+    .content-divider__line {
+      flex: 1;
+      min-width: 80px;
+      height: 2px;
+      border-radius: 999px;
+      background: linear-gradient(90deg, rgba(16, 185, 129, 0), rgba(16, 185, 129, 0.6), rgba(14, 165, 233, 0));
+      opacity: 0.9;
+    }
+
+    .content-divider__badge {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 0.85rem 1.25rem;
+      border-radius: 1.25rem;
+      background: #ffffff;
+      box-shadow: 0 10px 25px -18px rgba(6, 78, 59, 0.75);
+      border: 1px solid rgba(14, 165, 233, 0.15);
+    }
+
+    .content-divider__icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 1rem;
+      background: linear-gradient(135deg, #10b981, #0ea5e9);
+      display: grid;
+      place-items: center;
+      color: #fff;
+      box-shadow: 0 12px 24px -12px rgba(14, 165, 233, 0.7);
+    }
+
+    .content-divider__title {
+      font-size: 1rem;
+      font-weight: 900;
+      color: #0f172a;
+      margin-bottom: 0.15rem;
+    }
+
+    .content-divider__subtitle {
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: #059669;
+    }
+
     .portfolio-detail-btn:hover {
       background: linear-gradient(135deg, #10b981 0%, #0ea5e9 100%);
       color: white;
@@ -543,6 +602,22 @@
         <div id="portfolioGrid" class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4"></div>
       </div>
 
+      <div id="portfolioServicesDivider" class="content-divider hidden" aria-hidden="true">
+        <span class="content-divider__line" aria-hidden="true"></span>
+        <div class="content-divider__badge">
+          <div class="content-divider__icon">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+            </svg>
+          </div>
+          <div>
+            <p class="content-divider__title">از الهام تا انتخاب</p>
+            <p class="content-divider__subtitle">ابتدا نمونه‌کارها را مرور کن، سپس فروشگاه خدماتی مناسب را پیدا کن</p>
+          </div>
+        </div>
+        <span class="content-divider__line" aria-hidden="true"></span>
+      </div>
+
       <div id="results-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
         <div class="col-span-full flex flex-col items-center justify-center py-16 text-slate-400">
           <div class="loader mb-4"></div>
@@ -647,6 +722,7 @@
       const ui = {
         resultsGrid: document.getElementById('results-grid'),
         portfolioSection: document.getElementById('portfolioSection'),
+        portfolioDivider: document.getElementById('portfolioServicesDivider'),
         typeFilterButtons: Array.from(document.querySelectorAll('.type-filter-btn'))
       };
 
@@ -816,6 +892,10 @@
           if (ui.portfolioSection) {
             ui.portfolioSection.style.display = 'none';
           }
+          if (ui.portfolioDivider) {
+            ui.portfolioDivider.classList.add('hidden');
+            ui.portfolioDivider.setAttribute('aria-hidden', 'true');
+          }
           return;
         }
 
@@ -827,6 +907,12 @@
           : (state.typeFilter === 'service' || showBoth);
 
         ui.resultsGrid.style.display = showShops ? '' : 'none';
+
+        if (ui.portfolioDivider) {
+          const shouldShowDivider = hasSamples && showBoth && showShops;
+          ui.portfolioDivider.classList.toggle('hidden', !shouldShowDivider);
+          ui.portfolioDivider.setAttribute('aria-hidden', shouldShowDivider ? 'false' : 'true');
+        }
 
         if (ui.portfolioSection) {
           if (hasSamples) {
