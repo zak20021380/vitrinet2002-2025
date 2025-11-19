@@ -113,11 +113,15 @@
       height: 18px;
     }
 
-    .centers-modal { 
-      display: none; 
-      padding: 1.5rem; 
-      align-items: center; 
-      justify-content: center; 
+    .centers-modal {
+      display: none;
+      padding: 1.5rem;
+      align-items: center;
+      justify-content: center;
+      position: fixed;
+      inset: 0;
+      overflow-y: auto;
+      overscroll-behavior: contain;
     }
 
     .centers-modal.active { 
@@ -195,10 +199,10 @@
       color: #0ea5e9;
     }
 
-    .centers-modal-content { 
-      max-height: 85vh; 
-      overflow-y: auto; 
-      width: min(100%, 680px); 
+    .centers-modal-content {
+      max-height: calc(100dvh - 2.5rem);
+      overflow-y: auto;
+      width: min(100%, 680px);
     }
 
     .centers-modal-list {
@@ -388,9 +392,11 @@
       .centers-modal {
         padding: 0.65rem;
         align-items: flex-end;
+        padding-bottom: calc(0.65rem + env(safe-area-inset-bottom));
+        overflow-y: auto;
       }
       .centers-modal-content {
-        max-height: 78vh;
+        max-height: 88dvh;
         border-radius: 1.9rem 1.9rem 0 0;
         padding: 1.85rem 1.35rem 1.55rem 1.35rem !important;
         box-shadow: 0 -4px 26px rgba(14, 165, 233, 0.12);
