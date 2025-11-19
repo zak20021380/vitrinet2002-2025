@@ -935,7 +935,7 @@
         const shopName = shop.storename || 'فروشگاه';
         const address = shop.address || 'آدرس ثبت نشده';
         const badge = shop.subcategory || shop.category || 'عمومی';
-        const profileLink = `shop.html?id=${shop.id}`;
+        const profileLink = resolveProfileLink(shop);
 
         return `
           <article class="shop-card group">
@@ -978,7 +978,7 @@
         document.getElementById('modalCategory').textContent = shop.category;
         document.getElementById('modalDescription').textContent = shop.desc || 'توضیحات در دسترس نیست';
         document.getElementById('modalSeller').textContent = shop.storename;
-        document.getElementById('modalSellerLink').href = `shop.html?id=${shop.id}`;
+        document.getElementById('modalSellerLink').href = resolveProfileLink(shop);
         modal.classList.add('active');
         document.body.style.overflow = 'hidden';
       };
@@ -994,6 +994,14 @@
       document.addEventListener('keydown', function(e) {
         if (e.key === 'Escape') closePortfolioModal();
       });
+
+      function resolveProfileLink(shop) {
+        if (shop.shopType === 'service' && shop.shopurl) {
+          const serviceSlug = encodeURIComponent(shop.shopurl);
+          return `service-shops.html?shopurl=${serviceSlug}`;
+        }
+        return `shop.html?id=${shop.id}`;
+      }
 
     })();
   </script>
