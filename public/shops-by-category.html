@@ -134,11 +134,148 @@
       height: 100%;
       display: flex; flex-direction: column;
     }
-    
+
     .shop-card:hover {
       transform: translateY(-8px);
       box-shadow: 0 20px 30px -10px rgba(16, 185, 129, 0.15);
       border-color: #10b981;
+    }
+
+    /* --- SERVICE SHOP CARD ENHANCEMENTS --- */
+    .shop-card.service-shop-card {
+      background: linear-gradient(135deg, #ffffff 0%, #f0fdfa 100%);
+      border: 2px solid transparent;
+      background-clip: padding-box;
+      position: relative;
+    }
+
+    .shop-card.service-shop-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      border-radius: 1.5rem;
+      padding: 2px;
+      background: linear-gradient(135deg, #10b981 0%, #0ea5e9 50%, #10b981 100%);
+      -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+      -webkit-mask-composite: xor;
+      mask-composite: exclude;
+      opacity: 0.6;
+      transition: opacity 0.3s ease;
+    }
+
+    .shop-card.service-shop-card:hover::before {
+      opacity: 1;
+    }
+
+    .shop-card.service-shop-card::after {
+      content: '';
+      position: absolute;
+      top: -2px;
+      left: -2px;
+      right: -2px;
+      bottom: -2px;
+      background: linear-gradient(135deg, #10b981, #0ea5e9);
+      border-radius: 1.5rem;
+      z-index: -1;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+
+    .shop-card.service-shop-card:hover {
+      transform: translateY(-10px) scale(1.02);
+      box-shadow: 0 25px 40px -10px rgba(16, 185, 129, 0.25),
+                  0 10px 20px -5px rgba(14, 165, 233, 0.15);
+    }
+
+    .shop-card.service-shop-card .card-badge {
+      background: linear-gradient(135deg, #10b981 0%, #0ea5e9 100%);
+      color: #ffffff;
+      border: none;
+      box-shadow: 0 4px 15px rgba(16, 185, 129, 0.35);
+      font-weight: 900;
+      padding: 8px 16px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .shop-card.service-shop-card .card-badge::before {
+      content: '✨';
+      position: absolute;
+      right: -5px;
+      top: -5px;
+      font-size: 14px;
+      animation: sparkle 2s ease-in-out infinite;
+    }
+
+    @keyframes sparkle {
+      0%, 100% { opacity: 0; transform: scale(0.8) rotate(0deg); }
+      50% { opacity: 1; transform: scale(1.2) rotate(180deg); }
+    }
+
+    .shop-card.service-shop-card .card-body {
+      background: linear-gradient(180deg, rgba(255,255,255,0) 0%, rgba(240, 253, 250, 0.5) 100%);
+    }
+
+    .shop-card.service-shop-card .card-btn {
+      background: linear-gradient(135deg, #10b981 0%, #059669 50%, #0ea5e9 100%);
+      background-size: 200% 100%;
+      background-position: 0% 0%;
+      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .shop-card.service-shop-card .card-btn::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+      transition: left 0.5s ease;
+    }
+
+    .shop-card.service-shop-card:hover .card-btn {
+      background-position: 100% 0%;
+      box-shadow: 0 8px 20px rgba(16, 185, 129, 0.4),
+                  0 4px 10px rgba(14, 165, 233, 0.2);
+      transform: translateY(-2px);
+    }
+
+    .shop-card.service-shop-card:hover .card-btn::before {
+      left: 100%;
+    }
+
+    .shop-card.service-shop-card .card-image-box::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, rgba(14, 165, 233, 0.1) 100%);
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+
+    .shop-card.service-shop-card:hover .card-image-box::after {
+      opacity: 1;
+    }
+
+    /* Service Icon Indicator */
+    .shop-card.service-shop-card h3::before {
+      content: '⚙️';
+      display: inline-block;
+      margin-left: 6px;
+      font-size: 0.9em;
+      opacity: 0.8;
+      transition: transform 0.3s ease;
+    }
+
+    .shop-card.service-shop-card:hover h3::before {
+      transform: rotate(90deg);
     }
 
     .card-image-box {
@@ -988,9 +1125,11 @@
         const address = shop.address || 'آدرس ثبت نشده';
         const badge = shop.subcategory || shop.category || 'عمومی';
         const profileLink = resolveProfileLink(shop);
+        const isServiceShop = shop.shopType === 'service';
+        const cardClass = isServiceShop ? 'shop-card service-shop-card group' : 'shop-card group';
 
         return `
-          <article class="shop-card group">
+          <article class="${cardClass}">
             <div class="card-image-box">
               <img src="${imageSrc}" loading="lazy" alt="${shopName}" />
               <div class="card-badge">${badge}</div>
