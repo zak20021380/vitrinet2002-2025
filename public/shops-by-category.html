@@ -709,18 +709,27 @@
           let serviceShopList = [];
           if (serviceShopsResponse.ok) {
             const serviceData = await serviceShopsResponse.json();
-            serviceShopList = (serviceData.items || []).map(item => ({
-              id: item._id || item.id,
-              storename: item.name || '',
-              category: item.categoryName || 'خدمات',
-              subcategory: (item.subcategories && item.subcategories[0]) || '',
-              shopurl: item.shopUrl || '',
-              address: item.address || '',
-              city: item.city || '',
-              desc: item.description || '',
-              image: item.coverImage || '',
-              shopType: 'service'
-            }));
+            serviceShopList = (serviceData.items || []).map(item => {
+              // Use coverImage, fallback to first gallery image, then portfolioPreview
+              let imageUrl = item.coverImage || '';
+              if (!imageUrl && item.portfolioPreview && item.portfolioPreview.length > 0) {
+                imageUrl = item.portfolioPreview[0].image || '';
+              }
+
+              return {
+                id: item._id || item.id,
+                storename: item.name || '',
+                category: item.categoryName || 'خدمات',
+                subcategory: (item.subcategories && item.subcategories[0]) || '',
+                shopurl: item.shopUrl || '',
+                address: item.address || '',
+                city: item.city || '',
+                desc: item.description || '',
+                image: imageUrl,
+                portfolioPreview: item.portfolioPreview || [],
+                shopType: 'service'
+              };
+            });
           }
 
           // Process Regular Shops
@@ -868,18 +877,28 @@
          // Portfolio Logic
          const portfolioSec = document.getElementById('portfolioSection');
          const portfolioGrid = document.getElementById('portfolioGrid');
-         const sampleShops = allShops.slice(0, 5);
+
+         // Filter shops that have images (either direct image or portfolio preview)
+         const shopsWithImages = allShops.filter(shop => {
+           if (shop.image && shop.image.trim()) return true;
+           if (shop.portfolioPreview && shop.portfolioPreview.length > 0) return true;
+           return false;
+         });
+
+         const sampleShops = shopsWithImages.slice(0, 5);
 
          state.hasPortfolioSamples = sampleShops.length > 0;
 
          if(sampleShops.length > 0) {
              portfolioSec.classList.remove('hidden');
-             portfolioGrid.innerHTML = sampleShops.map((shop, index) => `
+             portfolioGrid.innerHTML = sampleShops.map((shop, index) => {
+                const imgSrc = resolveShopImage(shop);
+                return `
                 <div class="portfolio-item group" data-shop-id="${shop.id}">
-                    <img src="${resolveShopImage(shop)}" alt="${shop.storename}" onerror="this.src='https://placehold.co/300?text=Portfolio'">
+                    <img src="${imgSrc}" alt="${shop.storename || 'نمونه کار'}" onerror="this.src='https://placehold.co/300x300/f1f5f9/10b981?text=No+Image'">
                     <div class="portfolio-overlay">
                         <div>
-                           <h4 class="text-white font-bold text-sm">${shop.storename}</h4>
+                           <h4 class="text-white font-bold text-sm">${shop.storename || 'فروشگاه'}</h4>
                            <span class="text-emerald-300 text-xs font-bold">نمونه کار</span>
                         </div>
                     </div>
@@ -887,7 +906,8 @@
                         مشاهده جزئیات
                     </button>
                 </div>
-            `).join('');
+                `;
+             }).join('');
              updateTypeFilterViews();
          } else if (portfolioSec) {
              portfolioSec.style.display = 'none';
@@ -958,13 +978,26 @@
 
       function resolveShopImage(shop) {
         let candidate = shop.image;
+
+        // If no image, try portfolio preview as fallback
+        if (!candidate || candidate.trim() === "") {
+          if (shop.portfolioPreview && shop.portfolioPreview.length > 0) {
+            candidate = shop.portfolioPreview[0].image;
+          }
+        }
+
+        // If still no image, return placeholder
         if (!candidate || candidate.trim() === "") {
            const text = encodeURIComponent(shop.storename || 'Shop');
            return `https://placehold.co/600x400/f1f5f9/10b981?text=${text}`;
         }
+
+        // Handle absolute URLs, data URIs, and relative paths
         if (/^(https?:\/\/|\/|data:image\/)/.test(candidate)) {
           return candidate;
         }
+
+        // Convert relative paths to absolute
         return `/${candidate.replace(/^\/+/, '')}`;
       }
 
