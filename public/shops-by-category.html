@@ -162,6 +162,23 @@
       gap: 0.5rem;
     }
 
+    /* Scroll support for dense chip rows on mobile */
+    .filter-chips.scrollable {
+      flex-wrap: nowrap;
+      overflow-x: auto;
+      padding-bottom: 0.35rem;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .filter-chips.scrollable::-webkit-scrollbar {
+      height: 6px;
+    }
+
+    .filter-chips.scrollable::-webkit-scrollbar-thumb {
+      background: linear-gradient(90deg, rgba(16,185,129,0.4), rgba(14,165,233,0.4));
+      border-radius: 999px;
+    }
+
     .filter-chip {
       display: inline-flex;
       align-items: center;
@@ -663,6 +680,32 @@
             </div>
           </div>
 
+          <!-- Product Category Filter -->
+          <div class="filter-group" id="productCategoryFilterGroup" style="display: none;">
+            <div class="filter-label">
+              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7h18M3 12h18M3 17h18"></path>
+              </svg>
+              <span>دسته‌بندی کالا</span>
+            </div>
+            <div class="filter-chips scrollable" id="productCategoryChips">
+              <!-- Dynamic -->
+            </div>
+          </div>
+
+          <!-- Product Type Filter -->
+          <div class="filter-group" id="productTypeFilterGroup" style="display: none;">
+            <div class="filter-label">
+              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+              </svg>
+              <span>نوع یا تگ کالا</span>
+            </div>
+            <div class="filter-chips scrollable" id="productTypeChips">
+              <!-- Dynamic -->
+            </div>
+          </div>
+
           <!-- Subcategory Filter -->
           <div class="filter-group" id="subcategoryFilterGroup" style="display: none;">
             <div class="filter-label">
@@ -814,7 +857,12 @@
         // New filter states
         premiumFilter: 'all',      // all, true, false
         subcategoryFilter: 'all',  // all or specific subcategory
-        regionFilter: 'all'        // all or specific region
+        regionFilter: 'all',       // all or specific region
+        productCategoryFilter: 'all', // category of goods
+        productTypeFilter: 'all',     // tag/type of goods
+        availableProductCategories: [],
+        availableProductTypes: [],
+        shopProductMeta: {}
       };
 
       const ui = {
@@ -831,6 +879,13 @@
         attachShopFilterEvents();
         await fetchRealShops();
       });
+
+      function normalizeId(value) {
+        if (!value) return '';
+        if (typeof value === 'string') return value;
+        if (typeof value === 'object' && value !== null && value.toString) return value.toString();
+        return String(value);
+      }
 
       /**
        * Initialize Type Filter Visibility
@@ -862,7 +917,7 @@
        * Initialize Shop Filters for Non-Service Categories
        * Professional implementation with dynamic population
        */
-      function initializeShopFilters(shops) {
+      async function initializeShopFilters(shops) {
         const shopFiltersContainer = document.getElementById('shopFiltersContainer');
         const isServiceCategory = state.categorySlug === 'service' || state.filterCategory === 'خدمات';
 
@@ -885,6 +940,9 @@
 
         // Extract unique regions
         const regions = [...new Set(regularShops.map(s => s.region).filter(Boolean))];
+
+        // Hydrate product based filters (categories + tags)
+        await hydrateProductFilters(regularShops);
 
         // Show/hide subcategory filter
         const subcategoryFilterGroup = document.getElementById('subcategoryFilterGroup');
@@ -957,6 +1015,124 @@
       }
 
       /**
+       * Fetch products and derive product filters for non-service shops
+       */
+      async function hydrateProductFilters(regularShops) {
+        const categoryGroup = document.getElementById('productCategoryFilterGroup');
+        const typeGroup = document.getElementById('productTypeFilterGroup');
+
+        try {
+          const response = await fetch('/api/products');
+          if (!response.ok) throw new Error('product fetch failed');
+
+          const data = await response.json();
+          const products = Array.isArray(data?.products) ? data.products : (Array.isArray(data) ? data : []);
+
+          const regularShopIds = new Set(regularShops.map(s => normalizeId(s.id)));
+          const relevantProducts = products.filter(p => {
+            const sellerId = normalizeId(p.sellerId);
+            if (!sellerId || !regularShopIds.has(sellerId)) return false;
+
+            if (state.categorySlug === 'general') return true;
+            const sellerCat = (p.sellerCategory || p.seller?.category || '').trim();
+            return sellerCat === state.filterCategory || sellerCat === state.categorySlug;
+          });
+
+          const productCategories = new Set();
+          const productTypes = new Set();
+          state.shopProductMeta = {};
+
+          relevantProducts.forEach(p => {
+            const sellerId = normalizeId(p.sellerId);
+            if (!sellerId) return;
+
+            if (!state.shopProductMeta[sellerId]) {
+              state.shopProductMeta[sellerId] = { categories: new Set(), tags: new Set() };
+            }
+
+            if (p.category) {
+              state.shopProductMeta[sellerId].categories.add(p.category);
+              productCategories.add(p.category);
+            }
+
+            if (Array.isArray(p.tags)) {
+              p.tags.forEach(tag => {
+                if (!tag) return;
+                state.shopProductMeta[sellerId].tags.add(tag);
+                productTypes.add(tag);
+              });
+            }
+          });
+
+          state.availableProductCategories = Array.from(productCategories);
+          state.availableProductTypes = Array.from(productTypes);
+
+          if (state.availableProductCategories.length > 0) {
+            categoryGroup.style.display = 'block';
+            populateProductCategoryFilter(state.availableProductCategories);
+          } else {
+            categoryGroup.style.display = 'none';
+          }
+
+          if (state.availableProductTypes.length > 0) {
+            typeGroup.style.display = 'block';
+            populateProductTypeFilter(state.availableProductTypes);
+          } else {
+            typeGroup.style.display = 'none';
+          }
+        } catch (err) {
+          console.error('product filter hydration failed', err);
+          categoryGroup.style.display = 'none';
+          typeGroup.style.display = 'none';
+        }
+      }
+
+      function populateProductCategoryFilter(categories) {
+        const container = document.getElementById('productCategoryChips');
+        container.innerHTML = `
+          <button class="filter-chip active" data-filter="productCategory" data-value="all">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+            </svg>
+            همه کالاها
+          </button>
+          ${categories.map(cat => `
+            <button class="filter-chip" data-filter="productCategory" data-value="${cat}">
+              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v8m-4-4h8"></path>
+              </svg>
+              ${cat}
+            </button>
+          `).join('')}
+        `;
+      }
+
+      function populateProductTypeFilter(types) {
+        const container = document.getElementById('productTypeChips');
+        container.innerHTML = `
+          <button class="filter-chip active" data-filter="productType" data-value="all">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+            </svg>
+            همه انواع
+          </button>
+          ${types.map(type => `
+            <button class="filter-chip" data-filter="productType" data-value="${type}">
+              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+              </svg>
+              ${type}
+            </button>
+          `).join('')}
+        `;
+      }
+
+      function getShopProductMeta(shop) {
+        const shopId = normalizeId(shop.id || shop._id || shop.sellerId);
+        return state.shopProductMeta[shopId];
+      }
+
+      /**
        * Attach Event Listeners for Shop Filters
        */
       function attachShopFilterEvents() {
@@ -982,6 +1158,10 @@
             state.subcategoryFilter = filterValue;
           } else if (filterType === 'region') {
             state.regionFilter = filterValue;
+          } else if (filterType === 'productCategory') {
+            state.productCategoryFilter = filterValue;
+          } else if (filterType === 'productType') {
+            state.productTypeFilter = filterValue;
           }
 
           // Re-render
@@ -1059,7 +1239,7 @@
           document.getElementById('categorySubtitle').textContent = `لیست فروشگاه‌های اطراف شما`;
 
           // Initialize shop filters for non-service categories
-          initializeShopFilters(state.shops);
+          await initializeShopFilters(state.shops);
 
           // Apply Initial Filter
           applyFiltersAndRender();
@@ -1114,7 +1294,23 @@
           collection = collection.filter(s => s.region === state.regionFilter);
         }
 
-        // 7. Search Filter
+        // 7. Product Category Filter (non-service)
+        if (state.productCategoryFilter !== 'all' && !state.isServiceCategory) {
+          collection = collection.filter(shop => {
+            const meta = getShopProductMeta(shop);
+            return meta?.categories?.has(state.productCategoryFilter);
+          });
+        }
+
+        // 8. Product Type Filter (non-service)
+        if (state.productTypeFilter !== 'all' && !state.isServiceCategory) {
+          collection = collection.filter(shop => {
+            const meta = getShopProductMeta(shop);
+            return meta?.tags?.has(state.productTypeFilter);
+          });
+        }
+
+        // 9. Search Filter
         if (state.search) {
           const term = state.search.toLowerCase();
           collection = collection.filter(shop => {
@@ -1124,7 +1320,7 @@
           });
         }
 
-        // 8. Sort
+        // 10. Sort
         if (state.sort === 'newest') {
              collection.reverse();
         } else if (state.sort === 'rating_desc') {
