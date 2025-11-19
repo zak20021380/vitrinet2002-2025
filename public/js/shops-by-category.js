@@ -34,15 +34,44 @@
       if (state.category && state.category !== 'general') {
         apiUrl += `?category=${encodeURIComponent(state.category)}`;
       }
-      const response = await fetch(apiUrl);
-      if (!response.ok) throw new Error('Server Error');
-      const data = await response.json();
-      const shopList = Array.isArray(data) ? data : (data.shops || []);
-      state.shops = shopList;
-      const hasService = shopList.some(s => s.category && s.category.includes('خدمات'));
-      if (hasService || state.category.includes('service') || state.category === 'خدمات') {
+
+      // Fetch both regular shops and service shops
+      const [shopsResponse, serviceShopsResponse] = await Promise.all([
+        fetch(apiUrl),
+        fetch('/api/service-shops/showcase')
+      ]);
+
+      if (!shopsResponse.ok) throw new Error('Server Error');
+
+      const shopsData = await shopsResponse.json();
+      const shopList = Array.isArray(shopsData) ? shopsData : (shopsData.shops || []);
+
+      // Parse service shops data
+      let serviceShopList = [];
+      if (serviceShopsResponse.ok) {
+        const serviceData = await serviceShopsResponse.json();
+        serviceShopList = (serviceData.items || []).map(item => ({
+          id: item._id || item.id,
+          storename: item.name || '',
+          category: item.categoryName || 'خدمات',
+          subcategory: (item.subcategories && item.subcategories[0]) || '',
+          shopurl: item.shopUrl || '',
+          address: item.address || '',
+          city: item.city || '',
+          region: '',
+          desc: item.description || '',
+          isPremium: !!item.isPremium,
+          image: item.coverImage || ''
+        }));
+      }
+
+      // Merge both lists
+      state.shops = [...shopList, ...serviceShopList];
+
+      const hasService = state.shops.some(s => s.category && s.category.includes('خدمات'));
+      if (hasService || state.category.includes('service') || state.category === 'خدمات' || serviceShopList.length > 0) {
         state.isServiceCategory = true;
-        setupServiceView(shopList);
+        setupServiceView(state.shops);
       }
       document.getElementById('categorySubtitle').textContent = 'لیست فروشگاه‌های اطراف شما';
       applyFiltersAndRender();
