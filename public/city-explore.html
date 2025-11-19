@@ -1058,9 +1058,20 @@
   const centerInfoAddress = document.getElementById('centerInfoAddress');
   const centerInfoEmpty = document.getElementById('centerInfoEmpty');
 
+  const updateBodyModalState = () => {
+    const body = document.body;
+    if (!body) return;
+    const hasModalOpen = centersModal?.classList.contains('active') || centerInfoModal?.classList.contains('active');
+    if (hasModalOpen) {
+      body.classList.add('overflow-hidden', 'hide-mobile-nav');
+    } else {
+      body.classList.remove('overflow-hidden', 'hide-mobile-nav');
+    }
+  };
+
   function openCentersModal() {
     centersModal.classList.add('active');
-    document.body.classList.add('overflow-hidden');
+    updateBodyModalState();
   }
 
   function closeCentersModal() {
@@ -1068,7 +1079,7 @@
     if (centerInfoModal?.classList.contains('active')) {
       centerInfoModal.classList.remove('active');
     }
-    document.body.classList.remove('overflow-hidden');
+    updateBodyModalState();
   }
 
   function openCenterInfoModal(area) {
@@ -1089,15 +1100,13 @@
       }
     }
     centerInfoModal.classList.add('active');
-    document.body.classList.add('overflow-hidden');
+    updateBodyModalState();
   }
 
   function closeCenterInfoModal() {
     if (!centerInfoModal) return;
     centerInfoModal.classList.remove('active');
-    if (!centersModal?.classList.contains('active')) {
-      document.body.classList.remove('overflow-hidden');
-    }
+    updateBodyModalState();
   }
 
   function renderCentersModal() {
