@@ -636,10 +636,17 @@
         search: '',
         sort: 'popular',
         activeSubcategory: 'all',
-        typeFilter: 'all', 
+        typeFilter: 'all',
+        hasPortfolioSamples: false,
         shops: [],
         serviceShops: [],
         regularShops: []
+      };
+
+      const ui = {
+        resultsGrid: document.getElementById('results-grid'),
+        portfolioSection: document.getElementById('portfolioSection'),
+        typeFilterButtons: Array.from(document.querySelectorAll('.type-filter-btn'))
       };
 
       document.addEventListener('DOMContentLoaded', async () => {
@@ -732,7 +739,10 @@
           if (isServiceUrl) {
              state.isServiceCategory = true;
              // If user selected "Service", show services by default
-             if(state.typeFilter === 'all') state.typeFilter = 'service'; 
+             if(state.typeFilter === 'all') {
+               state.typeFilter = 'service';
+               setActiveTypeFilterButton('service');
+             }
              setupServiceView(state.shops);
           }
 
@@ -791,6 +801,37 @@
 
         document.getElementById('resultsMeta').textContent = collection.length;
         renderCards(collection);
+        updateTypeFilterViews();
+      }
+
+      function updateTypeFilterViews() {
+        if (!ui.resultsGrid) return;
+
+        if (!state.isServiceCategory) {
+          ui.resultsGrid.style.display = '';
+          if (ui.portfolioSection) {
+            ui.portfolioSection.style.display = 'none';
+          }
+          return;
+        }
+
+        const hasSamples = state.hasPortfolioSamples && !!ui.portfolioSection;
+        const showPortfolioOnly = state.typeFilter === 'portfolio';
+        const showBoth = state.typeFilter === 'all';
+        const showShops = !hasSamples
+          ? true
+          : (state.typeFilter === 'service' || showBoth);
+
+        ui.resultsGrid.style.display = showShops ? '' : 'none';
+
+        if (ui.portfolioSection) {
+          if (hasSamples) {
+            const showPortfolio = showPortfolioOnly || showBoth;
+            ui.portfolioSection.style.display = showPortfolio ? '' : 'none';
+          } else {
+            ui.portfolioSection.style.display = 'none';
+          }
+        }
       }
 
       // ... (Keep your existing helper functions below: renderCards, createCard, resolveShopImage, etc.) ...
@@ -829,6 +870,8 @@
          const portfolioGrid = document.getElementById('portfolioGrid');
          const sampleShops = allShops.slice(0, 5);
 
+         state.hasPortfolioSamples = sampleShops.length > 0;
+
          if(sampleShops.length > 0) {
              portfolioSec.classList.remove('hidden');
              portfolioGrid.innerHTML = sampleShops.map((shop, index) => `
@@ -844,7 +887,10 @@
                         مشاهده جزئیات
                     </button>
                 </div>
-             `).join('');
+            `).join('');
+             updateTypeFilterViews();
+         } else if (portfolioSec) {
+             portfolioSec.style.display = 'none';
          }
       }
 
@@ -857,15 +903,21 @@
             state.sort = e.target.value;
             applyFiltersAndRender();
         });
-        const typeFilterBtns = document.querySelectorAll('.type-filter-btn');
-        typeFilterBtns.forEach(btn => {
+        ui.typeFilterButtons.forEach(btn => {
           btn.addEventListener('click', () => {
             const type = btn.getAttribute('data-type');
             state.typeFilter = type;
-            typeFilterBtns.forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
+            setActiveTypeFilterButton(type);
             applyFiltersAndRender();
           });
+        });
+      }
+
+      function setActiveTypeFilterButton(selectedType) {
+        ui.typeFilterButtons.forEach(btn => {
+          const btnType = btn.getAttribute('data-type');
+          const shouldActivate = btnType === selectedType || (selectedType === 'all' && btnType === 'all');
+          btn.classList.toggle('active', shouldActivate);
         });
       }
 
