@@ -764,7 +764,7 @@
     <div id="shopsList" class="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-5"></div>
     <div id="noResult" class="hidden text-center text-gray-400 text-lg p-12 font-bold">هیچ مغازه‌ای پیدا نشد!</div>
   </main>
-  <div id="centersModal" class="centers-modal fixed inset-0 z-[999] items-center justify-center px-4">
+  <div id="centersModal" class="centers-modal fixed inset-0 z-[1100] items-center justify-center px-4">
     <div id="centersModalOverlay" class="absolute inset-0 bg-[#0f172a]/40 backdrop-blur-sm transition-opacity"></div>
     <div class="relative z-10 bg-white rounded-3xl shadow-2xl border border-[#e0fdfa] w-full max-w-3xl mx-auto p-6 sm:p-8 overflow-hidden centers-modal-content">
       <button id="closeCentersModal" class="absolute top-4 left-4 text-[#0f9a8b] hover:text-[#0ea5e9] transition-colors text-2xl font-bold" aria-label="بستن">
@@ -792,7 +792,7 @@
     </div>
   </div>
 
-  <div id="centerInfoModal" class="center-info-modal fixed inset-0 z-[1000] justify-center items-center">
+  <div id="centerInfoModal" class="center-info-modal fixed inset-0 z-[1200] justify-center items-center">
     <div id="centerInfoOverlay" class="absolute inset-0 bg-[#0f172a]/45 backdrop-blur-sm"></div>
     <div class="relative z-10 center-info-card p-6 sm:p-8">
       <button id="closeCenterInfo" class="center-info-close" aria-label="بستن پاپ‌آپ">&times;</button>
@@ -1061,6 +1061,7 @@
   function openCentersModal() {
     centersModal.classList.add('active');
     document.body.classList.add('overflow-hidden');
+    document.body.classList.add('hide-mobile-nav');
   }
 
   function closeCentersModal() {
@@ -1069,6 +1070,7 @@
       centerInfoModal.classList.remove('active');
     }
     document.body.classList.remove('overflow-hidden');
+    document.body.classList.remove('hide-mobile-nav');
   }
 
   function openCenterInfoModal(area) {
@@ -1090,6 +1092,7 @@
     }
     centerInfoModal.classList.add('active');
     document.body.classList.add('overflow-hidden');
+    document.body.classList.add('hide-mobile-nav');
   }
 
   function closeCenterInfoModal() {
@@ -1097,6 +1100,7 @@
     centerInfoModal.classList.remove('active');
     if (!centersModal?.classList.contains('active')) {
       document.body.classList.remove('overflow-hidden');
+      document.body.classList.remove('hide-mobile-nav');
     }
   }
 
