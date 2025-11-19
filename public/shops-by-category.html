@@ -607,10 +607,130 @@
 
   <script>
     (function () {
-      const categoryParam = new URLSearchParams(window.location.search).get('cat') || 'general';
-      
+      const CATEGORY_DEFINITIONS = {
+        general: { label: 'ویترین اینترنتی شهر', aliases: ['general', 'all', 'همه'] },
+        food: { label: 'خوراک', aliases: ['food', 'خوراک', 'مواد غذایی', 'سوپرمارکت', 'رستوران', 'فست فود', 'کافه'] },
+        clothing: { label: 'پوشاک', aliases: ['clothing', 'پوشاک', 'لباس', 'کفش', 'مد و پوشاک'] },
+        beauty: { label: 'زیبایی', aliases: ['beauty', 'زیبایی', 'آرایشی', 'بهداشتی', 'سالن زیبایی'] },
+        service: { label: 'خدمات', aliases: ['service', 'services', 'خدمات', 'سرویس', 'تعمیرات'] },
+        digital: { label: 'دیجیتال', aliases: ['digital', 'دیجیتال', 'موبایل', 'کالای دیجیتال', 'لوازم جانبی'] },
+        book: { label: 'کتاب و تحریر', aliases: ['book', 'کتاب', 'کتاب و تحریر', 'تحریر'] },
+        auto: { label: 'خودرو', aliases: ['auto', 'car', 'خودرو', 'ماشین'] },
+        sweets: { label: 'قنادی و شیرینی', aliases: ['sweets', 'قنادی', 'شیرینی', 'نان فانتزی'] },
+        flower: { label: 'گل و گیاه', aliases: ['flower', 'گل و گیاه', 'گل', 'گیاه'] },
+        home: { label: 'لوازم خانگی', aliases: ['home', 'خانه', 'لوازم خانگی', 'وسایل منزل'] },
+        sport: { label: 'ورزشی', aliases: ['sport', 'ورزشی', 'ورزش', 'باشگاه'] },
+        talar: { label: 'تالار و مجالس', aliases: ['talar', 'تالار', 'تالار و مجالس', 'مجالس'] }
+      };
+
+      const aliasCache = new Map();
+      const allowedSlugCache = new Map();
+
+      function normaliseText(value = '') {
+        return (value || '').toString().replace(/\s+/g, ' ').trim();
+      }
+
+      function slugifyCategory(value = '') {
+        return normaliseText(value)
+          .replace(/[._]/g, '-')
+          .replace(/[\u200c\u200f\u202a-\u202e]/g, '')
+          .replace(/[^-\w\u0600-\u06FF]/g, '')
+          .replace(/-+/g, '-')
+          .toLowerCase();
+      }
+
+      function resolveCategorySlug(value = '') {
+        const slug = slugifyCategory(value);
+        if (!slug) {
+          return '';
+        }
+
+        if (aliasCache.has(slug)) {
+          return aliasCache.get(slug);
+        }
+
+        if (CATEGORY_DEFINITIONS[slug]) {
+          aliasCache.set(slug, slug);
+          return slug;
+        }
+
+        const match = Object.entries(CATEGORY_DEFINITIONS).find(([, def]) =>
+          (def.aliases || []).some((alias) => slugifyCategory(alias) === slug)
+        );
+
+        const resolved = match ? match[0] : slug;
+        aliasCache.set(slug, resolved);
+        return resolved;
+      }
+
+      function getAliasSlugSet(slug = '') {
+        const canonical = resolveCategorySlug(slug);
+        if (!canonical) {
+          return new Set();
+        }
+
+        if (allowedSlugCache.has(canonical)) {
+          return allowedSlugCache.get(canonical);
+        }
+
+        const definition = CATEGORY_DEFINITIONS[canonical];
+        const aliasValues = definition?.aliases || [];
+        const set = new Set(
+          [canonical, ...aliasValues.map((alias) => resolveCategorySlug(alias)).filter(Boolean)]
+        );
+
+        allowedSlugCache.set(canonical, set);
+        return set;
+      }
+
+      function buildCategoryMeta(value = '') {
+        const slug = resolveCategorySlug(value || 'general') || 'general';
+        const definition = CATEGORY_DEFINITIONS[slug];
+        const readableName = slug === 'general'
+          ? 'ویترین اینترنتی شهر'
+          : (definition?.label || normaliseText(value) || slug);
+        const pillLabel = slug === 'general'
+          ? 'ویترین اینترنتی'
+          : `دسته ${definition?.label || readableName}`;
+        return { slug, readableName, pillLabel };
+      }
+
+      function matchesAllowedSlugs(shop, allowedSet) {
+        if (!allowedSet || !allowedSet.size) {
+          return false;
+        }
+
+        const mainSlug = slugifyCategory(shop?.categorySlug || shop?.category || '');
+        if (mainSlug && allowedSet.has(mainSlug)) {
+          return true;
+        }
+
+        const subSlug = slugifyCategory(shop?.subcategory || '');
+        return Boolean(subSlug && allowedSet.has(subSlug));
+      }
+
+      function filterShopsByCategory(shops, categorySlug) {
+        const canonical = resolveCategorySlug(categorySlug);
+        if (!canonical || canonical === 'general') {
+          return Array.isArray(shops) ? shops : [];
+        }
+
+        const allowed = getAliasSlugSet(canonical);
+        if (!allowed.size) {
+          return [];
+        }
+
+        return (Array.isArray(shops) ? shops : []).filter((shop) => matchesAllowedSlugs(shop, allowed));
+      }
+
+      const urlParams = new URLSearchParams(window.location.search);
+      const rawCategoryParam = urlParams.get('cat') || 'general';
+      const categoryMeta = buildCategoryMeta(rawCategoryParam);
+
       const state = {
-        category: categoryParam,
+        category: categoryMeta.slug,
+        categoryLabel: categoryMeta.readableName,
+        categoryPillLabel: categoryMeta.pillLabel,
         isServiceCategory: false,
         search: '',
         sort: 'popular',
@@ -618,7 +738,8 @@
         typeFilter: 'all', // all, service, portfolio
         shops: [],
         serviceShops: [],
-        regularShops: []
+        regularShops: [],
+        allFetchedShops: []
       };
 
       document.addEventListener('DOMContentLoaded', async () => {
@@ -629,10 +750,20 @@
 
       function hydrateHero() {
         const title = document.getElementById('categoryTitle');
-        if(state.category === 'general') {
-             title.textContent = "ویترین اینترنتی شهر";
+        const pill = document.getElementById('categoryPill');
+
+        if (!title) {
+          return;
+        }
+
+        if (state.category === 'general') {
+          title.textContent = state.categoryLabel;
         } else {
-             title.textContent = `فروشگاه‌های ${state.category.replace(/-/g, ' ')}`;
+          title.textContent = `فروشگاه‌های ${state.categoryLabel}`;
+        }
+
+        if (pill) {
+          pill.textContent = state.categoryPillLabel;
         }
       }
 
@@ -640,8 +771,8 @@
         try {
           // --- API CONFIG ---
           let apiUrl = `/api/shops`;
-          if(state.category && state.category !== 'general') {
-              apiUrl += `?category=${encodeURIComponent(state.category)}`;
+          if (state.category && state.category !== 'general') {
+            apiUrl += `?category=${encodeURIComponent(state.category)}`;
           }
 
           // Fetch both regular shops and service shops
@@ -671,31 +802,39 @@
               desc: item.description || '',
               isPremium: !!item.isPremium,
               image: item.coverImage || '',
-              shopType: 'service' // Mark as service shop
+              shopType: 'service', // Mark as service shop
+              categorySlug: slugifyCategory(item.categorySlug || item.categoryName || 'خدمات')
             }));
           }
 
           // Mark regular shops as portfolio type
           const markedShopList = shopList.map(shop => ({
             ...shop,
-            shopType: 'portfolio' // Mark as portfolio
+            shopType: 'portfolio', // Mark as portfolio
+            categorySlug: shop.categorySlug || slugifyCategory(shop.category || shop.subcategory || '')
           }));
 
           // Store separately for filtering
           state.regularShops = markedShopList;
           state.serviceShops = serviceShopList;
 
-          // Merge both lists
-          state.shops = [...markedShopList, ...serviceShopList];
+          // Merge both lists and apply category filter
+          state.allFetchedShops = [...markedShopList, ...serviceShopList];
+          state.shops = filterShopsByCategory(state.allFetchedShops, state.category);
 
           // Detect Service Category
-          const hasService = state.shops.some(s => s.category && s.category.includes('خدمات'));
-          if (hasService || state.category.includes('service') || state.category === 'خدمات' || serviceShopList.length > 0) {
-             state.isServiceCategory = true;
-             setupServiceView(state.shops);
+          const hasService = state.shops.some(s => s.shopType === 'service' || (s.category && s.category.includes('خدمات')));
+          if (hasService || state.category === 'service' || serviceShopList.length > 0) {
+            state.isServiceCategory = true;
+            setupServiceView(state.shops);
           }
 
-          document.getElementById('categorySubtitle').textContent = `لیست فروشگاه‌های اطراف شما`;
+          const subtitle = document.getElementById('categorySubtitle');
+          if (subtitle) {
+            subtitle.textContent = state.category === 'general'
+              ? 'لیست فروشگاه‌های اطراف شما'
+              : `لیست فروشگاه‌های ${state.categoryLabel}`;
+          }
           applyFiltersAndRender();
 
         } catch (error) {
@@ -712,12 +851,12 @@
 
       function setupServiceView(allShops) {
          const subcats = [...new Set(allShops.map(s => s.subcategory).filter(Boolean))];
-         
+
          if (subcats.length > 0) {
              const container = document.getElementById('subcatContainer');
              container.classList.remove('hidden');
              container.classList.add('flex');
-             
+
              subcats.forEach(sub => {
                  const btn = document.createElement('button');
                  btn.className = 'category-chip';
@@ -730,12 +869,15 @@
                  };
                  container.appendChild(btn);
              });
-             
-             container.firstElementChild.onclick = () => {
+
+             const resetBtn = container.querySelector('[data-sub="all"]');
+             if (resetBtn) {
+               resetBtn.onclick = () => {
                  container.querySelectorAll('.category-chip').forEach(b => b.classList.remove('active'));
-                 container.firstElementChild.classList.add('active');
+                 resetBtn.classList.add('active');
                  state.activeSubcategory = 'all';
                  applyFiltersAndRender();
+               };
              }
          }
 
@@ -794,7 +936,11 @@
       }
 
       function applyFiltersAndRender() {
-        let collection = [...state.shops];
+        const baseCollection = state.shops.length
+          ? [...state.shops]
+          : filterShopsByCategory(state.allFetchedShops, state.category);
+
+        let collection = [...baseCollection];
 
         // Apply type filter (service/portfolio/all)
         if (state.typeFilter === 'service') {
