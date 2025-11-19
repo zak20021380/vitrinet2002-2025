@@ -545,6 +545,14 @@
         <div id="portfolioGrid" class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4"></div>
       </div>
 
+      <!-- Professional Section Divider -->
+      <div id="sectionDivider" class="hidden">
+        <div class="flex items-center gap-3 mb-6">
+          <div class="w-2 h-8 rounded-full bg-gradient-to-b from-emerald-500 to-blue-500"></div>
+          <h2 class="text-2xl font-black text-slate-800">مغازه‌های برتر</h2>
+        </div>
+      </div>
+
       <div id="results-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
         <div class="col-span-full flex flex-col items-center justify-center py-16 text-slate-400">
           <div class="loader mb-4"></div>
@@ -649,6 +657,7 @@
       const ui = {
         resultsGrid: document.getElementById('results-grid'),
         portfolioSection: document.getElementById('portfolioSection'),
+        sectionDivider: document.getElementById('sectionDivider'),
         typeFilterButtons: Array.from(document.querySelectorAll('.type-filter-btn'))
       };
 
@@ -818,6 +827,9 @@
           if (ui.portfolioSection) {
             ui.portfolioSection.style.display = 'none';
           }
+          if (ui.sectionDivider) {
+            ui.sectionDivider.style.display = 'none';
+          }
           return;
         }
 
@@ -837,6 +849,15 @@
           } else {
             ui.portfolioSection.style.display = 'none';
           }
+        }
+
+        // Show divider only when both sections are visible
+        if (ui.sectionDivider) {
+          const portfolioVisible = ui.portfolioSection && ui.portfolioSection.style.display !== 'none';
+          const gridVisible = ui.resultsGrid && ui.resultsGrid.style.display !== 'none';
+          const shouldShowDivider = hasSamples && showBoth && portfolioVisible && gridVisible;
+
+          ui.sectionDivider.style.display = shouldShowDivider ? 'block' : 'none';
         }
       }
 
