@@ -969,19 +969,28 @@
       }
 
       // Modal Functions Global
-      window.openPortfolioModal = function(shopId) {
-        const shop = state.shops.find(s => s.id === shopId);
-        if (!shop) return;
-        const modal = document.getElementById('portfolioModal');
-        document.getElementById('modalImage').src = resolveShopImage(shop);
-        document.getElementById('modalTitle').textContent = shop.storename;
-        document.getElementById('modalCategory').textContent = shop.category;
-        document.getElementById('modalDescription').textContent = shop.desc || 'توضیحات در دسترس نیست';
-        document.getElementById('modalSeller').textContent = shop.storename;
-        document.getElementById('modalSellerLink').href = resolveProfileLink(shop);
-        modal.classList.add('active');
-        document.body.style.overflow = 'hidden';
-      };
+window.openPortfolioModal = function (shopId) {
+  const shop = state.shops.find(s => s.id === shopId);
+  if (!shop) return;
+
+  const modal = document.getElementById('portfolioModal');
+
+  document.getElementById('modalImage').src = resolveShopImage(shop);
+  document.getElementById('modalTitle').textContent = shop.storename;
+  document.getElementById('modalCategory').textContent = shop.category;
+  document.getElementById('modalDescription').textContent = shop.desc || 'توضیحات در دسترس نیست';
+  document.getElementById('modalSeller').textContent = shop.storename;
+
+  const sellerLinkHref = shop.shopurl
+    ? `service-shops.html?shopurl=${encodeURIComponent(shop.shopurl)}`
+    : resolveProfileLink(shop);
+
+  document.getElementById('modalSellerLink').href = sellerLinkHref;
+
+  modal.classList.add('active');
+  document.body.style.overflow = 'hidden';
+};
+
 
       window.closePortfolioModal = function() {
         document.getElementById('portfolioModal').classList.remove('active');
