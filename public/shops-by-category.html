@@ -605,17 +605,38 @@
     </div>
   </div>
 
-  <script>
+<script>
     (function () {
-      const categoryParam = new URLSearchParams(window.location.search).get('cat') || 'general';
+      // 1. Capture the URL parameter (e.g., "digital" or "food")
+      const rawCategory = new URLSearchParams(window.location.search).get('cat') || 'general';
       
+      // 2. Map English slugs to Farsi DB names
+      const categoryMap = {
+        "food": "خوراک",
+        "clothing": "پوشاک",
+        "beauty": "زیبایی",
+        "service": "خدمات",
+        "digital": "دیجیتال",
+        "book": "کتاب و تحریر",
+        "auto": "خودرو",
+        "sweets": "قنادی و شیرینی",
+        "flower": "گل و گیاه",
+        "home": "لوازم خانگی",
+        "sport": "ورزشی",
+        "talar": "تالار و مجالس"
+      };
+
+      // 3. Determine the filter name (use Farsi map if available, else raw)
+      const dbCategoryName = categoryMap[rawCategory] || rawCategory;
+
       const state = {
-        category: categoryParam,
+        categorySlug: rawCategory,   // For URL logic
+        filterCategory: dbCategoryName, // For DB filtering
         isServiceCategory: false,
         search: '',
         sort: 'popular',
         activeSubcategory: 'all',
-        typeFilter: 'all', // all, service, portfolio
+        typeFilter: 'all', 
         shops: [],
         serviceShops: [],
         regularShops: []
@@ -629,24 +650,19 @@
 
       function hydrateHero() {
         const title = document.getElementById('categoryTitle');
-        if(state.category === 'general') {
+        if(state.categorySlug === 'general') {
              title.textContent = "ویترین اینترنتی شهر";
         } else {
-             title.textContent = `فروشگاه‌های ${state.category.replace(/-/g, ' ')}`;
+             // Show the Farsi name in the title
+             title.textContent = `فروشگاه‌های ${state.filterCategory}`;
         }
       }
 
       async function fetchRealShops() {
         try {
-          // --- API CONFIG ---
-          let apiUrl = `/api/shops`;
-          if(state.category && state.category !== 'general') {
-              apiUrl += `?category=${encodeURIComponent(state.category)}`;
-          }
-
-          // Fetch both regular shops and service shops
+          // Fetch all shops
           const [shopsResponse, serviceShopsResponse] = await Promise.all([
-            fetch(apiUrl),
+            fetch('/api/shops'),
             fetch('/api/service-shops/showcase')
           ]);
 
@@ -655,7 +671,7 @@
           const shopsData = await shopsResponse.json();
           const shopList = Array.isArray(shopsData) ? shopsData : (shopsData.shops || []);
 
-          // Parse service shops data and mark them as service type
+          // Process Service Shops
           let serviceShopList = [];
           if (serviceShopsResponse.ok) {
             const serviceData = await serviceShopsResponse.json();
@@ -667,52 +683,95 @@
               shopurl: item.shopUrl || '',
               address: item.address || '',
               city: item.city || '',
-              region: '',
               desc: item.description || '',
-              isPremium: !!item.isPremium,
               image: item.coverImage || '',
-              shopType: 'service' // Mark as service shop
+              shopType: 'service'
             }));
           }
 
-          // Mark regular shops as portfolio type
-          const markedShopList = shopList.map(shop => ({
-            ...shop,
-            shopType: 'portfolio' // Mark as portfolio
+          // Process Regular Shops
+          const markedShopList = shopList.map(shop => ({ 
+            ...shop, 
+            shopType: 'portfolio' 
           }));
 
-          // Store separately for filtering
           state.regularShops = markedShopList;
           state.serviceShops = serviceShopList;
-
-          // Merge both lists
           state.shops = [...markedShopList, ...serviceShopList];
 
-          // Detect Service Category
-          const hasService = state.shops.some(s => s.category && s.category.includes('خدمات'));
-          if (hasService || state.category.includes('service') || state.category === 'خدمات' || serviceShopList.length > 0) {
+          // Detect if we are in a Service Context
+          const isServiceUrl = state.categorySlug.includes('service') || state.filterCategory === 'خدمات';
+          
+          if (isServiceUrl) {
              state.isServiceCategory = true;
+             // If user selected "Service", show services by default
+             if(state.typeFilter === 'all') state.typeFilter = 'service'; 
              setupServiceView(state.shops);
           }
 
           document.getElementById('categorySubtitle').textContent = `لیست فروشگاه‌های اطراف شما`;
+          
+          // Apply Initial Filter
           applyFiltersAndRender();
 
         } catch (error) {
           console.error(error);
-          const grid = document.getElementById('results-grid');
-          grid.innerHTML = `
+          document.getElementById('results-grid').innerHTML = `
             <div class="col-span-full text-center py-16 bg-white rounded-3xl shadow-sm border border-red-100">
-               <p class="font-black text-xl text-slate-800 mb-2">مشکلی پیش آمده!</p>
-               <p class="text-slate-500">نتوانستیم اطلاعات را دریافت کنیم.</p>
+               <p class="text-slate-500">خطا در دریافت اطلاعات</p>
             </div>
           `;
         }
       }
 
+      function applyFiltersAndRender() {
+        let collection = [...state.shops];
+
+        // 1. CATEGORY FILTER (The Fix)
+        if (state.categorySlug !== 'general') {
+            collection = collection.filter(shop => {
+                // Normalize for comparison
+                const shopCat = (shop.category || '').trim();
+                return shopCat === state.filterCategory || shopCat === state.categorySlug;
+            });
+        }
+
+        // 2. Type Filter
+        if (state.typeFilter === 'service') {
+          collection = collection.filter(s => s.shopType === 'service');
+        } else if (state.typeFilter === 'portfolio') {
+          collection = collection.filter(s => s.shopType === 'portfolio');
+        }
+
+        // 3. Subcategory Filter
+        if (state.activeSubcategory !== 'all') {
+            collection = collection.filter(s => s.subcategory === state.activeSubcategory);
+        }
+
+        // 4. Search Filter
+        if (state.search) {
+          const term = state.search.toLowerCase();
+          collection = collection.filter(shop => {
+             return (shop.storename && shop.storename.toString().toLowerCase().includes(term)) ||
+                    (shop.address && shop.address.toString().toLowerCase().includes(term));
+          });
+        }
+
+        // 5. Sort
+        if (state.sort === 'newest') {
+             collection.reverse();
+        }
+
+        document.getElementById('resultsMeta').textContent = collection.length;
+        renderCards(collection);
+      }
+
+      // ... (Keep your existing helper functions below: renderCards, createCard, resolveShopImage, etc.) ...
+      // Be sure to include setupServiceView, attachFilterEvents, renderCards, createCard, resolveShopImage here.
+      // Since I'm providing the fix block, paste the rest of the functions from your previous file here if they are missing.
+      
       function setupServiceView(allShops) {
          const subcats = [...new Set(allShops.map(s => s.subcategory).filter(Boolean))];
-         
          if (subcats.length > 0) {
              const container = document.getElementById('subcatContainer');
              container.classList.remove('hidden');
@@ -738,8 +797,7 @@
                  applyFiltersAndRender();
              }
          }
-
-         // Portfolio
+         // Portfolio Logic
          const portfolioSec = document.getElementById('portfolioSection');
          const portfolioGrid = document.getElementById('portfolioGrid');
          const sampleShops = allShops.slice(0, 5);
@@ -756,10 +814,6 @@
                         </div>
                     </div>
                     <button class="portfolio-detail-btn" onclick="openPortfolioModal('${shop.id}')">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
-                        </svg>
                         مشاهده جزئیات
                     </button>
                 </div>
@@ -776,64 +830,24 @@
             state.sort = e.target.value;
             applyFiltersAndRender();
         });
-
-        // Type filter buttons
         const typeFilterBtns = document.querySelectorAll('.type-filter-btn');
         typeFilterBtns.forEach(btn => {
           btn.addEventListener('click', () => {
             const type = btn.getAttribute('data-type');
             state.typeFilter = type;
-
-            // Update active state
             typeFilterBtns.forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
-
             applyFiltersAndRender();
           });
         });
       }
 
-      function applyFiltersAndRender() {
-        let collection = [...state.shops];
-
-        // Apply type filter (service/portfolio/all)
-        if (state.typeFilter === 'service') {
-          collection = collection.filter(s => s.shopType === 'service');
-        } else if (state.typeFilter === 'portfolio') {
-          collection = collection.filter(s => s.shopType === 'portfolio');
-        }
-
-        if (state.activeSubcategory !== 'all') {
-            collection = collection.filter(s => s.subcategory === state.activeSubcategory);
-        }
-
-        if (state.search) {
-          const term = state.search.toLowerCase();
-          collection = collection.filter(shop => {
-             return (shop.storename && shop.storename.toString().toLowerCase().includes(term)) ||
-                    (shop.address && shop.address.toString().toLowerCase().includes(term));
-          });
-        }
-
-        if (state.sort === 'newest') {
-             collection.reverse();
-        }
-
-        document.getElementById('resultsMeta').textContent = collection.length;
-        renderCards(collection);
-      }
-
       function renderCards(shops) {
         const grid = document.getElementById('results-grid');
-        
         if (shops.length === 0) {
-          grid.innerHTML = `
-            <div class="col-span-full text-center py-16">
-               <p class="text-slate-500 font-bold">هیچ فروشگاهی با این مشخصات پیدا نشد.</p>
-            </div>`;
+          grid.innerHTML = `<div class="col-span-full text-center py-16"><p class="text-slate-500 font-bold">هیچ فروشگاهی با این مشخصات پیدا نشد.</p></div>`;
           return;
         }
-        
         grid.innerHTML = shops.map(shop => createCard(shop)).join('');
       }
 
@@ -850,20 +864,14 @@
               <img src="${imageSrc}" loading="lazy" alt="${shopName}" />
               <div class="card-badge">${badge}</div>
             </div>
-            
             <div class="card-body">
               <div class="flex justify-between items-start mb-1">
                  <h3 class="font-black text-lg text-slate-800 group-hover:text-emerald-600 transition-colors line-clamp-1">${shopName}</h3>
               </div>
-              
               <div class="flex items-center gap-1 mb-4">
-                  <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
                   <p class="text-xs font-bold text-slate-500 line-clamp-1">${address}</p>
               </div>
-
-              <a href="${profileLink}" class="card-btn">
-                مشاهده پروفایل
-              </a>
+              <a href="${profileLink}" class="card-btn">مشاهده پروفایل</a>
             </div>
           </article>
         `;
@@ -881,57 +889,33 @@
         return `/${candidate.replace(/^\/+/, '')}`;
       }
 
-      // Make openPortfolioModal and closePortfolioModal global
+      // Modal Functions Global
       window.openPortfolioModal = function(shopId) {
         const shop = state.shops.find(s => s.id === shopId);
         if (!shop) return;
-
         const modal = document.getElementById('portfolioModal');
-        const modalImage = document.getElementById('modalImage');
-        const modalTitle = document.getElementById('modalTitle');
-        const modalCategory = document.getElementById('modalCategory');
-        const modalLikes = document.getElementById('modalLikes');
-        const modalDescription = document.getElementById('modalDescription');
-        const modalSeller = document.getElementById('modalSeller');
-        const modalSellerLink = document.getElementById('modalSellerLink');
-
-        // Populate modal with shop data
-        modalImage.src = resolveShopImage(shop);
-        modalTitle.textContent = shop.storename || 'نمونه کار';
-        modalCategory.textContent = shop.category || 'دسته‌بندی نشده';
-
-        // Generate random likes for demo (in production, this would come from API)
-        const likes = Math.floor(Math.random() * 500) + 50;
-        modalLikes.textContent = likes;
-
-        modalDescription.textContent = shop.desc || 'توضیحات نمونه کار در اینجا نمایش داده می‌شود.';
-        modalSeller.textContent = shop.storename || 'نام فروشنده';
-        modalSellerLink.href = `shop.html?id=${shop.id}`;
-
-        // Show modal
+        document.getElementById('modalImage').src = resolveShopImage(shop);
+        document.getElementById('modalTitle').textContent = shop.storename;
+        document.getElementById('modalCategory').textContent = shop.category;
+        document.getElementById('modalDescription').textContent = shop.desc || 'توضیحات در دسترس نیست';
+        document.getElementById('modalSeller').textContent = shop.storename;
+        document.getElementById('modalSellerLink').href = `shop.html?id=${shop.id}`;
         modal.classList.add('active');
-        document.body.style.overflow = 'hidden'; // Prevent background scroll
+        document.body.style.overflow = 'hidden';
       };
 
       window.closePortfolioModal = function() {
-        const modal = document.getElementById('portfolioModal');
-        modal.classList.remove('active');
-        document.body.style.overflow = ''; // Restore scroll
+        document.getElementById('portfolioModal').classList.remove('active');
+        document.body.style.overflow = '';
       };
 
-      // Close modal when clicking outside
       document.getElementById('portfolioModal').addEventListener('click', function(e) {
-        if (e.target === this) {
-          closePortfolioModal();
-        }
+        if (e.target === this) closePortfolioModal();
+      });
+      document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') closePortfolioModal();
       });
 
-      // Close modal with Escape key
-      document.addEventListener('keydown', function(e) {
-        if (e.key === 'Escape') {
-          closePortfolioModal();
-        }
-      });
     })();
   </script>
 </body>
