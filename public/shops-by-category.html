@@ -214,6 +214,178 @@
       animation: spin 0.8s linear infinite;
     }
     @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+    /* --- Portfolio Modal --- */
+    .portfolio-modal {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.85);
+      backdrop-filter: blur(8px);
+      z-index: 9999;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 1rem;
+      animation: fadeIn 0.3s ease;
+    }
+
+    .portfolio-modal.active {
+      display: flex;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    @keyframes slideUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px) scale(0.95);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+    }
+
+    .portfolio-modal-content {
+      background: #ffffff;
+      border-radius: 2rem;
+      max-width: 900px;
+      width: 100%;
+      max-height: 90vh;
+      overflow-y: auto;
+      position: relative;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+      animation: slideUp 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .portfolio-modal-close {
+      position: absolute;
+      top: 1rem;
+      left: 1rem;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(8px);
+      border: 2px solid rgba(16, 185, 129, 0.2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.2s;
+      z-index: 10;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+
+    .portfolio-modal-close:hover {
+      background: #10b981;
+      border-color: #10b981;
+      transform: rotate(90deg) scale(1.1);
+    }
+
+    .portfolio-modal-close:hover svg {
+      color: white;
+    }
+
+    .portfolio-modal-image {
+      width: 100%;
+      aspect-ratio: 16 / 10;
+      object-fit: cover;
+      border-radius: 2rem 2rem 0 0;
+    }
+
+    .portfolio-modal-body {
+      padding: 2rem;
+    }
+
+    .portfolio-detail-btn {
+      position: absolute;
+      bottom: 1rem;
+      right: 1rem;
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(8px);
+      border: 2px solid rgba(16, 185, 129, 0.3);
+      padding: 0.6rem 1.2rem;
+      border-radius: 1rem;
+      font-weight: 700;
+      font-size: 0.85rem;
+      color: #10b981;
+      cursor: pointer;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      z-index: 5;
+      opacity: 0;
+      transform: translateY(10px);
+    }
+
+    .portfolio-item:hover .portfolio-detail-btn {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .portfolio-detail-btn:hover {
+      background: linear-gradient(135deg, #10b981 0%, #0ea5e9 100%);
+      color: white;
+      border-color: transparent;
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(16, 185, 129, 0.4);
+    }
+
+    .like-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.75rem 1.25rem;
+      background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(14, 165, 233, 0.1));
+      border: 2px solid rgba(16, 185, 129, 0.3);
+      border-radius: 1rem;
+      font-weight: 700;
+      color: #10b981;
+      font-size: 1rem;
+    }
+
+    .seller-link-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 1rem 2rem;
+      background: linear-gradient(135deg, #10b981 0%, #0ea5e9 100%);
+      color: white;
+      border-radius: 1.25rem;
+      font-weight: 800;
+      font-size: 1rem;
+      text-decoration: none;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      box-shadow: 0 8px 20px -4px rgba(16, 185, 129, 0.4);
+    }
+
+    .seller-link-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 28px -6px rgba(16, 185, 129, 0.5);
+      filter: brightness(1.1);
+    }
+
+    @media (max-width: 640px) {
+      .portfolio-modal-content {
+        border-radius: 1.5rem;
+        max-height: 95vh;
+      }
+
+      .portfolio-modal-body {
+        padding: 1.5rem;
+      }
+
+      .portfolio-modal-image {
+        aspect-ratio: 4 / 3;
+        border-radius: 1.5rem 1.5rem 0 0;
+      }
+    }
   </style>
 </head>
 <body class="text-gray-800">
@@ -381,6 +553,58 @@
     </section>
   </main>
 
+  <!-- Portfolio Modal -->
+  <div id="portfolioModal" class="portfolio-modal">
+    <div class="portfolio-modal-content">
+      <button class="portfolio-modal-close" onclick="closePortfolioModal()" aria-label="بستن">
+        <svg class="w-5 h-5 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+        </svg>
+      </button>
+
+      <img id="modalImage" class="portfolio-modal-image" src="" alt="نمونه کار">
+
+      <div class="portfolio-modal-body">
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
+          <div>
+            <h3 id="modalTitle" class="text-2xl md:text-3xl font-black text-slate-800 mb-2"></h3>
+            <p id="modalCategory" class="text-emerald-600 font-bold text-sm"></p>
+          </div>
+
+          <div class="like-badge">
+            <svg class="w-6 h-6 text-red-500" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+            </svg>
+            <span id="modalLikes" class="text-lg font-black">0</span>
+            <span class="text-sm">لایک</span>
+          </div>
+        </div>
+
+        <div id="modalDescription" class="text-slate-600 leading-relaxed mb-6 text-base">
+        </div>
+
+        <div class="border-t border-slate-200 pt-6 mt-6">
+          <div class="flex flex-col sm:flex-row gap-4 items-center justify-between">
+            <div class="flex items-center gap-3">
+              <svg class="w-5 h-5 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+              </svg>
+              <span class="text-slate-600 font-bold">فروشنده:</span>
+              <span id="modalSeller" class="text-slate-800 font-black"></span>
+            </div>
+
+            <a id="modalSellerLink" href="#" class="seller-link-btn">
+              <span>مشاهده صفحه فروشنده</span>
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+              </svg>
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <script>
     (function () {
       const categoryParam = new URLSearchParams(window.location.search).get('cat') || 'general';
@@ -522,8 +746,8 @@
 
          if(sampleShops.length > 0) {
              portfolioSec.classList.remove('hidden');
-             portfolioGrid.innerHTML = sampleShops.map(shop => `
-                <div class="portfolio-item group">
+             portfolioGrid.innerHTML = sampleShops.map((shop, index) => `
+                <div class="portfolio-item group" data-shop-id="${shop.id}">
                     <img src="${resolveShopImage(shop)}" alt="${shop.storename}" onerror="this.src='https://placehold.co/300?text=Portfolio'">
                     <div class="portfolio-overlay">
                         <div>
@@ -531,6 +755,13 @@
                            <span class="text-emerald-300 text-xs font-bold">نمونه کار</span>
                         </div>
                     </div>
+                    <button class="portfolio-detail-btn" onclick="openPortfolioModal('${shop.id}')">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                        </svg>
+                        مشاهده جزئیات
+                    </button>
                 </div>
              `).join('');
          }
@@ -649,6 +880,58 @@
         }
         return `/${candidate.replace(/^\/+/, '')}`;
       }
+
+      // Make openPortfolioModal and closePortfolioModal global
+      window.openPortfolioModal = function(shopId) {
+        const shop = state.shops.find(s => s.id === shopId);
+        if (!shop) return;
+
+        const modal = document.getElementById('portfolioModal');
+        const modalImage = document.getElementById('modalImage');
+        const modalTitle = document.getElementById('modalTitle');
+        const modalCategory = document.getElementById('modalCategory');
+        const modalLikes = document.getElementById('modalLikes');
+        const modalDescription = document.getElementById('modalDescription');
+        const modalSeller = document.getElementById('modalSeller');
+        const modalSellerLink = document.getElementById('modalSellerLink');
+
+        // Populate modal with shop data
+        modalImage.src = resolveShopImage(shop);
+        modalTitle.textContent = shop.storename || 'نمونه کار';
+        modalCategory.textContent = shop.category || 'دسته‌بندی نشده';
+
+        // Generate random likes for demo (in production, this would come from API)
+        const likes = Math.floor(Math.random() * 500) + 50;
+        modalLikes.textContent = likes;
+
+        modalDescription.textContent = shop.desc || 'توضیحات نمونه کار در اینجا نمایش داده می‌شود.';
+        modalSeller.textContent = shop.storename || 'نام فروشنده';
+        modalSellerLink.href = `shop.html?id=${shop.id}`;
+
+        // Show modal
+        modal.classList.add('active');
+        document.body.style.overflow = 'hidden'; // Prevent background scroll
+      };
+
+      window.closePortfolioModal = function() {
+        const modal = document.getElementById('portfolioModal');
+        modal.classList.remove('active');
+        document.body.style.overflow = ''; // Restore scroll
+      };
+
+      // Close modal when clicking outside
+      document.getElementById('portfolioModal').addEventListener('click', function(e) {
+        if (e.target === this) {
+          closePortfolioModal();
+        }
+      });
+
+      // Close modal with Escape key
+      document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+          closePortfolioModal();
+        }
+      });
     })();
   </script>
 </body>
