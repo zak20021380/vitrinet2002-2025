@@ -73,12 +73,15 @@
       border-radius: 999px;
       font-size: 0.9rem;
       font-weight: 700;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.45rem;
       background: #fff;
       border: 1px solid #e2e8f0;
       color: #64748b;
       cursor: pointer;
       transition: all 0.2s;
-    }
+      }
     .category-chip:hover {
       border-color: #10b981; color: #10b981; transform: translateY(-2px);
     }
@@ -87,6 +90,28 @@
       color: white;
       border-color: transparent;
       box-shadow: 0 8px 20px -4px rgba(16, 185, 129, 0.4);
+    }
+
+    #subcategoryFilterBlock {
+      background: rgba(255, 255, 255, 0.9);
+      border: 1px solid rgba(15, 118, 110, 0.12);
+      border-radius: 1.5rem;
+      box-shadow: 0 20px 40px -18px rgba(15, 118, 110, 0.3);
+    }
+    .subcategory-chip__icon {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 1.5rem;
+      height: 1.5rem;
+      border-radius: 999px;
+      margin-left: 0.35rem;
+      background: rgba(16, 185, 129, 0.12);
+      color: #10b981;
+    }
+    .category-chip.active .subcategory-chip__icon {
+      background: rgba(255,255,255,0.2);
+      color: #fff;
     }
 
     /* --- Type Filter Buttons --- */
@@ -532,9 +557,26 @@
           </div>
         </div>
 
-        <div id="subcatContainer" class="mt-6 hidden flex-wrap gap-2 justify-center lg:justify-start">
-          <button class="category-chip active" data-sub="all">همه</button>
+        <div id="subcategoryFilterBlock" class="mt-8 hidden flex flex-col gap-3 px-5 py-4">
+          <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 rounded-2xl flex items-center justify-center"
+                   style="background: linear-gradient(135deg, rgba(16, 185, 129, 0.15), rgba(14, 165, 233, 0.12));">
+                <svg class="w-6 h-6 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.6" d="M4 7h16M4 12h16M4 17h16"></path>
+                </svg>
+              </div>
+              <div>
+                <p class="text-base font-black text-slate-800">فیلتر تخصصی فروشگاه‌ها</p>
+                <p class="text-sm font-medium text-slate-500">دسته موردنیاز خود را سریع پیدا کنید (مانند مراکز خرید، بوتیک، کافه)</p>
+              </div>
+            </div>
+            <div class="text-xs font-bold text-emerald-600 bg-emerald-50 px-3 py-1 rounded-full self-start sm:self-auto">کاملاً واکنش‌گرا</div>
           </div>
+          <div id="subcatContainer" class="flex flex-wrap gap-2 justify-center lg:justify-start">
+            <button class="category-chip active" data-sub="all">همه فروشگاه‌ها</button>
+          </div>
+        </div>
       </div>
 
       <div id="portfolioSection" class="hidden">
@@ -658,7 +700,9 @@
         resultsGrid: document.getElementById('results-grid'),
         portfolioSection: document.getElementById('portfolioSection'),
         sectionDivider: document.getElementById('sectionDivider'),
-        typeFilterButtons: Array.from(document.querySelectorAll('.type-filter-btn'))
+        typeFilterButtons: Array.from(document.querySelectorAll('.type-filter-btn')),
+        subcategoryBlock: document.getElementById('subcategoryFilterBlock'),
+        subcategoryContainer: document.getElementById('subcatContainer')
       };
 
       document.addEventListener('DOMContentLoaded', async () => {
@@ -748,6 +792,8 @@
           state.serviceShops = serviceShopList;
           state.shops = [...markedShopList, ...serviceShopList];
 
+          buildSubcategoryFilters();
+
           // Detect if we are in a Service Context
           const isServiceUrl = state.categorySlug.includes('service') || state.filterCategory === 'خدمات';
           
@@ -762,7 +808,7 @@
           }
 
           document.getElementById('categorySubtitle').textContent = `لیست فروشگاه‌های اطراف شما`;
-          
+
           // Apply Initial Filter
           applyFiltersAndRender();
 
@@ -774,6 +820,104 @@
             </div>
           `;
         }
+      }
+
+      function buildSubcategoryFilters() {
+        if (!ui.subcategoryBlock || !ui.subcategoryContainer) return;
+
+        ui.subcategoryContainer.innerHTML = '';
+
+        const isGeneralContext = state.categorySlug === 'general';
+        if (isGeneralContext) {
+          ui.subcategoryBlock.classList.add('hidden');
+          state.activeSubcategory = 'all';
+          return;
+        }
+
+        const matchedShops = state.shops.filter(shop => {
+          const shopCategory = (shop.category || '').trim();
+          return shopCategory === state.filterCategory || shopCategory === state.categorySlug;
+        });
+
+        const subcategories = [...new Set(matchedShops
+          .map(shop => (shop.subcategory || '').trim())
+          .filter(Boolean))];
+
+        if (subcategories.length === 0) {
+          ui.subcategoryBlock.classList.add('hidden');
+          state.activeSubcategory = 'all';
+          return;
+        }
+
+        ui.subcategoryBlock.classList.remove('hidden');
+
+        ui.subcategoryContainer.appendChild(createSubcategoryChip('همه فروشگاه‌ها', 'all'));
+        subcategories.forEach(sub => {
+          ui.subcategoryContainer.appendChild(createSubcategoryChip(sub, sub));
+        });
+
+        setActiveSubcategoryChip(state.activeSubcategory || 'all');
+      }
+
+      function createSubcategoryChip(label, value) {
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.className = 'category-chip text-sm sm:text-base';
+        button.dataset.sub = value;
+
+        const iconSpan = document.createElement('span');
+        iconSpan.className = 'subcategory-chip__icon';
+        iconSpan.innerHTML = getSubcategoryIcon(label, value);
+        button.appendChild(iconSpan);
+
+        const textSpan = document.createElement('span');
+        textSpan.textContent = label;
+        button.appendChild(textSpan);
+
+        button.addEventListener('click', () => {
+          state.activeSubcategory = value;
+          setActiveSubcategoryChip(value);
+          applyFiltersAndRender();
+        });
+
+        return button;
+      }
+
+      function setActiveSubcategoryChip(value) {
+        if (!ui.subcategoryContainer) return;
+        const chips = Array.from(ui.subcategoryContainer.querySelectorAll('.category-chip'));
+        let hasMatch = false;
+
+        chips.forEach(chip => {
+          const isActive = chip.dataset.sub === value;
+          if (isActive) hasMatch = true;
+          chip.classList.toggle('active', isActive);
+        });
+
+        if (!hasMatch && value !== 'all') {
+          state.activeSubcategory = 'all';
+          setActiveSubcategoryChip('all');
+        }
+      }
+
+      function getSubcategoryIcon(label, value) {
+        const normalized = (label || value || '').toLowerCase();
+        if (normalized.includes('مرکز') || normalized.includes('مجتمع') || normalized.includes('پاساژ')) {
+          return `<svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 24 24"><path d="M4 21h16M5 10h14M9 21V7m6 14V3" stroke-linecap="round" stroke-linejoin="round"></path></svg>`;
+        }
+        if (normalized.includes('پوشاک') || normalized.includes('لباس') || normalized.includes('بوتیک') || normalized.includes('مزون')) {
+          return `<svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 24 24"><path d="m4 7 4-4 4 4 4-4 4 4-2 4v9H6V11L4 7Z" stroke-linecap="round" stroke-linejoin="round"></path></svg>`;
+        }
+        if (normalized.includes('کافه') || normalized.includes('رستوران') || normalized.includes('کافی') || normalized.includes('خوراک')) {
+          return `<svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 24 24"><path d="M4 5h14a3 3 0 0 1 0 6h-4" stroke-linecap="round" stroke-linejoin="round"></path><path d="M10 5v10a4 4 0 1 1-8 0V5" stroke-linecap="round" stroke-linejoin="round"></path></svg>`;
+        }
+        if (normalized.includes('دیجیتال') || normalized.includes('موبایل') || normalized.includes('لوازم') || normalized.includes('برق')) {
+          return `<svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 24 24"><rect x="7" y="3" width="10" height="18" rx="2"/><path d="M11 17h2" stroke-linecap="round"></path></svg>`;
+        }
+        if (normalized.includes('سوپر') || normalized.includes('مارکت') || normalized.includes('مراکز خرید')) {
+          return `<svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 24 24"><path d="M3 5h18l-2 11H5L3 5Z" stroke-linecap="round" stroke-linejoin="round"></path><path d="M7 21h2m6 0h2" stroke-linecap="round"></path></svg>`;
+        }
+        return `<svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 24 24"><path d="M12 3v3m6-3v3M6 3v3M5 9h14l-1 11H6L5 9Z" stroke-linecap="round" stroke-linejoin="round"></path></svg>`;
       }
 
       function applyFiltersAndRender() {
@@ -861,37 +1005,7 @@
         }
       }
 
-      // ... (Keep your existing helper functions below: renderCards, createCard, resolveShopImage, etc.) ...
-      // Be sure to include setupServiceView, attachFilterEvents, renderCards, createCard, resolveShopImage here.
-      // Since I'm providing the fix block, paste the rest of the functions from your previous file here if they are missing.
-      
       function setupServiceView(allShops, portfolioItems = []) {
-         const subcats = [...new Set(allShops.map(s => s.subcategory).filter(Boolean))];
-         if (subcats.length > 0) {
-             const container = document.getElementById('subcatContainer');
-             container.classList.remove('hidden');
-             container.classList.add('flex');
-             
-             subcats.forEach(sub => {
-                 const btn = document.createElement('button');
-                 btn.className = 'category-chip';
-                 btn.textContent = sub;
-                 btn.onclick = () => {
-                     container.querySelectorAll('.category-chip').forEach(b => b.classList.remove('active'));
-                     btn.classList.add('active');
-                     state.activeSubcategory = sub;
-                     applyFiltersAndRender();
-                 };
-                 container.appendChild(btn);
-             });
-             
-             container.firstElementChild.onclick = () => {
-                 container.querySelectorAll('.category-chip').forEach(b => b.classList.remove('active'));
-                 container.firstElementChild.classList.add('active');
-                 state.activeSubcategory = 'all';
-                 applyFiltersAndRender();
-             }
-         }
          // Portfolio Logic
          const portfolioSec = document.getElementById('portfolioSection');
          const portfolioGrid = document.getElementById('portfolioGrid');
