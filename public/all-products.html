@@ -2078,7 +2078,9 @@ function setupEventListeners() {
   /* --- اسکرول هدر --- */
   window.addEventListener('scroll', () => {
     const h = document.getElementById('mainHeader');
-    window.scrollY > 20 ? h.classList.add('scrolled') : h.classList.remove('scrolled');
+    if (h) {
+      window.scrollY > 20 ? h.classList.add('scrolled') : h.classList.remove('scrolled');
+    }
   });
   
   /* --- منوی فیلتر موبایل --- */
@@ -2086,81 +2088,102 @@ function setupEventListeners() {
   const mobileFiltersOverlay = document.getElementById('mobileFiltersOverlay');
   const mobileFiltersPanel = document.getElementById('mobileFilters');
 
-  mobileFilterBtn.addEventListener('click', () => {
-    if (mobileFiltersCloseTimer) {
-      clearTimeout(mobileFiltersCloseTimer);
-      mobileFiltersCloseTimer = null;
-    }
-    mobileFiltersOverlay.style.display = 'flex';
-    document.body.style.overflow = 'hidden';
-    document.body.classList.add('hide-mobile-nav');
-    mobileFiltersPanel.scrollTop = 0;
-    mobileFilterBtn.setAttribute('aria-expanded', 'true');
-    setTimeout(() => {
-      mobileFiltersPanel.classList.add('active');
-      mobileFiltersPanel.focus({ preventScroll: true });
-    }, 10);
-  });
+  if (mobileFilterBtn && mobileFiltersOverlay && mobileFiltersPanel) {
+    mobileFilterBtn.addEventListener('click', () => {
+      if (mobileFiltersCloseTimer) {
+        clearTimeout(mobileFiltersCloseTimer);
+        mobileFiltersCloseTimer = null;
+      }
+      mobileFiltersOverlay.style.display = 'flex';
+      document.body.style.overflow = 'hidden';
+      document.body.classList.add('hide-mobile-nav');
+      mobileFiltersPanel.scrollTop = 0;
+      mobileFilterBtn.setAttribute('aria-expanded', 'true');
+      setTimeout(() => {
+        mobileFiltersPanel.classList.add('active');
+        mobileFiltersPanel.focus({ preventScroll: true });
+      }, 10);
+    });
 
-  mobileFiltersOverlay.addEventListener('click', event => {
-    if (event.target === mobileFiltersOverlay) {
+    mobileFiltersOverlay.addEventListener('click', event => {
+      if (event.target === mobileFiltersOverlay) {
+        closeMobileFilters();
+      }
+    });
+
+    document.addEventListener('keydown', event => {
+      if ((event.key === 'Escape' || event.key === 'Esc') && mobileFiltersOverlay.style.display === 'flex') {
+        closeMobileFilters();
+      }
+    });
+  }
+
+  const closeFiltersBtn = document.getElementById('closeFilters');
+  const applyFiltersMobileBtn = document.getElementById('applyFiltersMobile');
+
+  if (closeFiltersBtn) {
+    closeFiltersBtn.addEventListener('click', closeMobileFilters);
+  }
+
+  if (applyFiltersMobileBtn) {
+    applyFiltersMobileBtn.addEventListener('click', () => {
+      filterAndSortProducts();
       closeMobileFilters();
-    }
-  });
-
-  document.addEventListener('keydown', event => {
-    if ((event.key === 'Escape' || event.key === 'Esc') && mobileFiltersOverlay.style.display === 'flex') {
-      closeMobileFilters();
-    }
-  });
-
-  document.getElementById('closeFilters').addEventListener('click', closeMobileFilters);
-  document.getElementById('applyFiltersMobile').addEventListener('click', () => {
-    filterAndSortProducts();
-    closeMobileFilters();
-  });
+    });
+  }
 }
 
 function setupDesktopFilters() {
   const catMenu = document.getElementById('filterDropdown');
   const shopMenu = document.getElementById('shopsDropdown');
-  
-  // فیلتر دسته‌بندی
-  document.getElementById('mainFilterBtn').addEventListener('click', e => {
-    e.stopPropagation();
-    catMenu.style.display = catMenu.style.display === 'block' ? 'none' : 'block';
-    shopMenu.style.display = 'none';
-    document.getElementById('priceFilterMenu').style.display = 'none';
-  });
-  
-  // فیلتر فروشگاه
-  document.getElementById('shopsBtn').addEventListener('click', e => {
-    e.stopPropagation();
-    shopMenu.style.display = shopMenu.style.display === 'block' ? 'none' : 'block';
-    catMenu.style.display = 'none';
-    document.getElementById('priceFilterMenu').style.display = 'none';
-  });
+  const mainFilterBtn = document.getElementById('mainFilterBtn');
+  const shopsBtn = document.getElementById('shopsBtn');
+  const priceFilterMenu = document.getElementById('priceFilterMenu');
 
   // فیلتر دسته‌بندی
-  document.querySelectorAll('#filterDropdown .dropdown-item').forEach(item => {
-    item.addEventListener('click', function() {
-      currentCategory = this.dataset.filter;
-      document.getElementById('mainFilterBtn').innerHTML = 
-        `<i class="fas fa-boxes"></i>${currentCategory}<i class="fas fa-chevron-down" style="margin-right:7px;font-size:0.95em"></i>`;
+  if (mainFilterBtn && catMenu && shopMenu && priceFilterMenu) {
+    mainFilterBtn.addEventListener('click', e => {
+      e.stopPropagation();
+      catMenu.style.display = catMenu.style.display === 'block' ? 'none' : 'block';
+      shopMenu.style.display = 'none';
+      priceFilterMenu.style.display = 'none';
+    });
+  }
+
+  // فیلتر فروشگاه
+  if (shopsBtn && shopMenu && catMenu && priceFilterMenu) {
+    shopsBtn.addEventListener('click', e => {
+      e.stopPropagation();
+      shopMenu.style.display = shopMenu.style.display === 'block' ? 'none' : 'block';
+      catMenu.style.display = 'none';
+      priceFilterMenu.style.display = 'none';
+    });
+  }
+
+  // فیلتر دسته‌بندی
+  if (catMenu && mainFilterBtn) {
+    document.querySelectorAll('#filterDropdown .dropdown-item').forEach(item => {
+      item.addEventListener('click', function() {
+        currentCategory = this.dataset.filter;
+        mainFilterBtn.innerHTML =
+          `<i class="fas fa-boxes"></i>${currentCategory}<i class="fas fa-chevron-down" style="margin-right:7px;font-size:0.95em"></i>`;
+        filterAndSortProducts();
+        updateActiveFilters();
+      });
+    });
+  }
+
+  if (shopMenu) {
+    shopMenu.addEventListener('click', event => {
+      const target = event.target.closest('.dropdown-item');
+      if(!target) return;
+      event.stopPropagation();
+      setCurrentShop(target.dataset.shop);
       filterAndSortProducts();
       updateActiveFilters();
+      shopMenu.style.display = 'none';
     });
-  });
-
-  shopMenu.addEventListener('click', event => {
-    const target = event.target.closest('.dropdown-item');
-    if(!target) return;
-    event.stopPropagation();
-    setCurrentShop(target.dataset.shop);
-    filterAndSortProducts();
-    updateActiveFilters();
-    shopMenu.style.display = 'none';
-  });
+  }
 }
 
 function setupMobileFilters() {
@@ -2172,165 +2195,243 @@ function setupMobileFilters() {
   const priceFilterBtnMobile = document.getElementById('priceFilterBtnMobile');
 
   // فیلتر دسته‌بندی موبایل
-  mainFilterBtnMobile.addEventListener('click', e => {
-    e.stopPropagation();
-    const isOpen = catMenuMobile.style.display === 'block';
-    catMenuMobile.style.display = isOpen ? 'none' : 'block';
-    shopMenuMobile.style.display = 'none';
-    priceMenuMobile.style.display = 'none';
-    mainFilterBtnMobile.setAttribute('aria-expanded', isOpen ? 'false' : 'true');
-    shopsBtnMobile.setAttribute('aria-expanded', 'false');
-    priceFilterBtnMobile.setAttribute('aria-expanded', 'false');
-  });
+  if (mainFilterBtnMobile && catMenuMobile && shopMenuMobile && priceMenuMobile && shopsBtnMobile && priceFilterBtnMobile) {
+    mainFilterBtnMobile.addEventListener('click', e => {
+      e.stopPropagation();
+      const isOpen = catMenuMobile.style.display === 'block';
+      catMenuMobile.style.display = isOpen ? 'none' : 'block';
+      shopMenuMobile.style.display = 'none';
+      priceMenuMobile.style.display = 'none';
+      mainFilterBtnMobile.setAttribute('aria-expanded', isOpen ? 'false' : 'true');
+      shopsBtnMobile.setAttribute('aria-expanded', 'false');
+      priceFilterBtnMobile.setAttribute('aria-expanded', 'false');
+    });
+  }
 
   // فیلتر فروشگاه موبایل
-  shopsBtnMobile.addEventListener('click', e => {
-    e.stopPropagation();
-    const isOpen = shopMenuMobile.style.display === 'block';
-    shopMenuMobile.style.display = isOpen ? 'none' : 'block';
-    catMenuMobile.style.display = 'none';
-    priceMenuMobile.style.display = 'none';
-    shopsBtnMobile.setAttribute('aria-expanded', isOpen ? 'false' : 'true');
-    mainFilterBtnMobile.setAttribute('aria-expanded', 'false');
-    priceFilterBtnMobile.setAttribute('aria-expanded', 'false');
-  });
+  if (shopsBtnMobile && shopMenuMobile && catMenuMobile && priceMenuMobile && mainFilterBtnMobile && priceFilterBtnMobile) {
+    shopsBtnMobile.addEventListener('click', e => {
+      e.stopPropagation();
+      const isOpen = shopMenuMobile.style.display === 'block';
+      shopMenuMobile.style.display = isOpen ? 'none' : 'block';
+      catMenuMobile.style.display = 'none';
+      priceMenuMobile.style.display = 'none';
+      shopsBtnMobile.setAttribute('aria-expanded', isOpen ? 'false' : 'true');
+      mainFilterBtnMobile.setAttribute('aria-expanded', 'false');
+      priceFilterBtnMobile.setAttribute('aria-expanded', 'false');
+    });
+  }
 
   // فیلتر قیمت موبایل
-  priceFilterBtnMobile.addEventListener('click', e => {
-    e.stopPropagation();
-    const isOpen = priceMenuMobile.style.display === 'block';
-    priceMenuMobile.style.display = isOpen ? 'none' : 'block';
-    catMenuMobile.style.display = 'none';
-    shopMenuMobile.style.display = 'none';
-    priceFilterBtnMobile.setAttribute('aria-expanded', isOpen ? 'false' : 'true');
-    mainFilterBtnMobile.setAttribute('aria-expanded', 'false');
-    shopsBtnMobile.setAttribute('aria-expanded', 'false');
-  });
+  if (priceFilterBtnMobile && priceMenuMobile && catMenuMobile && shopMenuMobile && mainFilterBtnMobile && shopsBtnMobile) {
+    priceFilterBtnMobile.addEventListener('click', e => {
+      e.stopPropagation();
+      const isOpen = priceMenuMobile.style.display === 'block';
+      priceMenuMobile.style.display = isOpen ? 'none' : 'block';
+      catMenuMobile.style.display = 'none';
+      shopMenuMobile.style.display = 'none';
+      priceFilterBtnMobile.setAttribute('aria-expanded', isOpen ? 'false' : 'true');
+      mainFilterBtnMobile.setAttribute('aria-expanded', 'false');
+      shopsBtnMobile.setAttribute('aria-expanded', 'false');
+    });
+  }
 
   // فیلتر دسته‌بندی موبایل
-  document.querySelectorAll('#filterDropdownMobile .dropdown-item').forEach(item => {
-    item.addEventListener('click', function() {
-      currentCategory = this.dataset.filter;
-      mainFilterBtnMobile.innerHTML =
-        `<i class="fas fa-boxes"></i><span>${currentCategory}</span><i class="fas fa-chevron-down"></i>`;
-      updateActiveFilters();
-      catMenuMobile.style.display = 'none';
-      mainFilterBtnMobile.setAttribute('aria-expanded', 'false');
+  if (catMenuMobile && mainFilterBtnMobile) {
+    document.querySelectorAll('#filterDropdownMobile .dropdown-item').forEach(item => {
+      item.addEventListener('click', function() {
+        currentCategory = this.dataset.filter;
+        mainFilterBtnMobile.innerHTML =
+          `<i class="fas fa-boxes"></i><span>${currentCategory}</span><i class="fas fa-chevron-down"></i>`;
+        updateActiveFilters();
+        catMenuMobile.style.display = 'none';
+        mainFilterBtnMobile.setAttribute('aria-expanded', 'false');
+      });
     });
-  });
+  }
 
-  shopMenuMobile.addEventListener('click', event => {
-    const target = event.target.closest('.dropdown-item');
-    if(!target) return;
-    event.stopPropagation();
-    setCurrentShop(target.dataset.shop);
-    updateActiveFilters();
-    shopMenuMobile.style.display = 'none';
-    shopsBtnMobile.setAttribute('aria-expanded', 'false');
-  });
+  if (shopMenuMobile && shopsBtnMobile) {
+    shopMenuMobile.addEventListener('click', event => {
+      const target = event.target.closest('.dropdown-item');
+      if(!target) return;
+      event.stopPropagation();
+      setCurrentShop(target.dataset.shop);
+      updateActiveFilters();
+      shopMenuMobile.style.display = 'none';
+      shopsBtnMobile.setAttribute('aria-expanded', 'false');
+    });
+  }
 
   // فیلتر قیمت موبایل
-  document.getElementById('applyPriceFilterMobile').addEventListener('click', function() {
-    const min = parseFloat(document.getElementById('minPriceMobile').value) || 0;
-    const max = parseFloat(document.getElementById('maxPriceMobile').value) || Number.MAX_SAFE_INTEGER;
-    
-    if (min > max) {
-      alert("حداقل قیمت نمی‌تواند از حداکثر بیشتر باشد!");
-      return;
-    }
-    
-    currentPriceFilter = { min, max };
-    priceFilterBtnMobile.innerHTML =
-      `<i class="fas fa-dollar-sign"></i><span>فیلتر قیمت (${min.toLocaleString('fa-IR')} - ${max.toLocaleString('fa-IR')})</span><i class="fas fa-chevron-down"></i>`;
-    updateActiveFilters();
-    priceMenuMobile.style.display = 'none';
-    priceFilterBtnMobile.setAttribute('aria-expanded', 'false');
-  });
+  const applyPriceFilterMobileBtn = document.getElementById('applyPriceFilterMobile');
+  const minPriceMobileInput = document.getElementById('minPriceMobile');
+  const maxPriceMobileInput = document.getElementById('maxPriceMobile');
+
+  if (applyPriceFilterMobileBtn && minPriceMobileInput && maxPriceMobileInput && priceFilterBtnMobile && priceMenuMobile) {
+    applyPriceFilterMobileBtn.addEventListener('click', function() {
+      const min = parseFloat(minPriceMobileInput.value) || 0;
+      const max = parseFloat(maxPriceMobileInput.value) || Number.MAX_SAFE_INTEGER;
+
+      if (min > max) {
+        alert("حداقل قیمت نمی‌تواند از حداکثر بیشتر باشد!");
+        return;
+      }
+
+      currentPriceFilter = { min, max };
+      priceFilterBtnMobile.innerHTML =
+        `<i class="fas fa-dollar-sign"></i><span>فیلتر قیمت (${min.toLocaleString('fa-IR')} - ${max.toLocaleString('fa-IR')})</span><i class="fas fa-chevron-down"></i>`;
+      updateActiveFilters();
+      priceMenuMobile.style.display = 'none';
+      priceFilterBtnMobile.setAttribute('aria-expanded', 'false');
+    });
+  }
 }
 
 function setupSorting() {
   // مرتب‌سازی دسکتاپ
-  document.getElementById('sort-cheap').addEventListener('click', function() {
-    currentSort = 'cheap';
-    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-    this.classList.add('active');
-    filterAndSortProducts();
-    updateActiveFilters();
-  });
-  
-  document.getElementById('sort-expensive').addEventListener('click', function() {
-    currentSort = 'expensive';
-    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-    this.classList.add('active');
-    filterAndSortProducts();
-    updateActiveFilters();
-  });
-  
+  const sortCheap = document.getElementById('sort-cheap');
+  const sortExpensive = document.getElementById('sort-expensive');
+
+  if (sortCheap) {
+    sortCheap.addEventListener('click', function() {
+      currentSort = 'cheap';
+      document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+      this.classList.add('active');
+      filterAndSortProducts();
+      updateActiveFilters();
+    });
+  }
+
+  if (sortExpensive) {
+    sortExpensive.addEventListener('click', function() {
+      currentSort = 'expensive';
+      document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+      this.classList.add('active');
+      filterAndSortProducts();
+      updateActiveFilters();
+    });
+  }
+
   // مرتب‌سازی موبایل
-  document.getElementById('sort-cheap-mobile').addEventListener('click', function() {
-    currentSort = 'cheap';
-    document.querySelectorAll('#mobileFilters .filter-btn').forEach(b => b.classList.remove('active'));
-    this.classList.add('active');
-    updateActiveFilters();
-  });
-  
-  document.getElementById('sort-expensive-mobile').addEventListener('click', function() {
-    currentSort = 'expensive';
-    document.querySelectorAll('#mobileFilters .filter-btn').forEach(b => b.classList.remove('active'));
-    this.classList.add('active');
-    updateActiveFilters();
-  });
+  const sortCheapMobile = document.getElementById('sort-cheap-mobile');
+  const sortExpensiveMobile = document.getElementById('sort-expensive-mobile');
+
+  if (sortCheapMobile) {
+    sortCheapMobile.addEventListener('click', function() {
+      currentSort = 'cheap';
+      document.querySelectorAll('#mobileFilters .filter-btn').forEach(b => b.classList.remove('active'));
+      this.classList.add('active');
+      updateActiveFilters();
+    });
+  }
+
+  if (sortExpensiveMobile) {
+    sortExpensiveMobile.addEventListener('click', function() {
+      currentSort = 'expensive';
+      document.querySelectorAll('#mobileFilters .filter-btn').forEach(b => b.classList.remove('active'));
+      this.classList.add('active');
+      updateActiveFilters();
+    });
+  }
 }
 
 function setupPriceFilter() {
   const priceMenu = document.getElementById('priceFilterMenu');
-  
+  const priceFilterBtn = document.getElementById('priceFilterBtn');
+  const filterDropdown = document.getElementById('filterDropdown');
+  const shopsDropdown = document.getElementById('shopsDropdown');
+
   // فیلتر قیمت دسکتاپ
-  document.getElementById('priceFilterBtn').addEventListener('click', e => {
-    e.stopPropagation();
-    priceMenu.style.display = priceMenu.style.display === 'block' ? 'none' : 'block';
-    document.getElementById('filterDropdown').style.display = 'none';
-    document.getElementById('shopsDropdown').style.display = 'none';
-  });
-  
-  document.getElementById('applyPriceFilter').addEventListener('click', function() {
-    const min = parseFloat(document.getElementById('minPrice').value) || 0;
-    const max = parseFloat(document.getElementById('maxPrice').value) || Number.MAX_SAFE_INTEGER;
-    
-    if (min > max) {
-      alert("حداقل قیمت نمی‌تواند از حداکثر بیشتر باشد!");
-      return;
-    }
-    
-    currentPriceFilter = { min, max };
-    document.getElementById('priceFilterBtn').innerHTML = 
-      `<i class="fas fa-dollar-sign"></i>فیلتر قیمت (${min.toLocaleString('fa-IR')} - ${max.toLocaleString('fa-IR')})<i class="fas fa-chevron-down" style="margin-right:7px;font-size:0.95em"></i>`;
-    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-    document.getElementById('priceFilterBtn').classList.add('active');
-    filterAndSortProducts();
-    updateActiveFilters();
-  });
+  if (priceFilterBtn && priceMenu && filterDropdown && shopsDropdown) {
+    priceFilterBtn.addEventListener('click', e => {
+      e.stopPropagation();
+      priceMenu.style.display = priceMenu.style.display === 'block' ? 'none' : 'block';
+      filterDropdown.style.display = 'none';
+      shopsDropdown.style.display = 'none';
+    });
+  }
+
+  const applyPriceFilter = document.getElementById('applyPriceFilter');
+  const minPrice = document.getElementById('minPrice');
+  const maxPrice = document.getElementById('maxPrice');
+
+  if (applyPriceFilter && minPrice && maxPrice && priceFilterBtn) {
+    applyPriceFilter.addEventListener('click', function() {
+      const min = parseFloat(minPrice.value) || 0;
+      const max = parseFloat(maxPrice.value) || Number.MAX_SAFE_INTEGER;
+
+      if (min > max) {
+        alert("حداقل قیمت نمی‌تواند از حداکثر بیشتر باشد!");
+        return;
+      }
+
+      currentPriceFilter = { min, max };
+      priceFilterBtn.innerHTML =
+        `<i class="fas fa-dollar-sign"></i>فیلتر قیمت (${min.toLocaleString('fa-IR')} - ${max.toLocaleString('fa-IR')})<i class="fas fa-chevron-down" style="margin-right:7px;font-size:0.95em"></i>`;
+      document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+      priceFilterBtn.classList.add('active');
+      filterAndSortProducts();
+      updateActiveFilters();
+    });
+  }
 }
 
 function closeMobileFilters() {
   const mobileFiltersPanel = document.getElementById('mobileFilters');
   const overlay = document.getElementById('mobileFiltersOverlay');
-  mobileFiltersPanel.classList.remove('active');
-  document.getElementById('mobileFilterBtn').setAttribute('aria-expanded', 'false');
-  document.getElementById('filterDropdownMobile').style.display = 'none';
-  document.getElementById('shopsDropdownMobile').style.display = 'none';
-  document.getElementById('priceFilterMenuMobile').style.display = 'none';
-  document.getElementById('mainFilterBtnMobile').setAttribute('aria-expanded', 'false');
-  document.getElementById('shopsBtnMobile').setAttribute('aria-expanded', 'false');
-  document.getElementById('priceFilterBtnMobile').setAttribute('aria-expanded', 'false');
+  const mobileFilterBtn = document.getElementById('mobileFilterBtn');
+  const filterDropdownMobile = document.getElementById('filterDropdownMobile');
+  const shopsDropdownMobile = document.getElementById('shopsDropdownMobile');
+  const priceFilterMenuMobile = document.getElementById('priceFilterMenuMobile');
+  const mainFilterBtnMobile = document.getElementById('mainFilterBtnMobile');
+  const shopsBtnMobile = document.getElementById('shopsBtnMobile');
+  const priceFilterBtnMobile = document.getElementById('priceFilterBtnMobile');
+
+  if (mobileFiltersPanel) {
+    mobileFiltersPanel.classList.remove('active');
+  }
+
+  if (mobileFilterBtn) {
+    mobileFilterBtn.setAttribute('aria-expanded', 'false');
+  }
+
+  if (filterDropdownMobile) {
+    filterDropdownMobile.style.display = 'none';
+  }
+
+  if (shopsDropdownMobile) {
+    shopsDropdownMobile.style.display = 'none';
+  }
+
+  if (priceFilterMenuMobile) {
+    priceFilterMenuMobile.style.display = 'none';
+  }
+
+  if (mainFilterBtnMobile) {
+    mainFilterBtnMobile.setAttribute('aria-expanded', 'false');
+  }
+
+  if (shopsBtnMobile) {
+    shopsBtnMobile.setAttribute('aria-expanded', 'false');
+  }
+
+  if (priceFilterBtnMobile) {
+    priceFilterBtnMobile.setAttribute('aria-expanded', 'false');
+  }
+
   if (mobileFiltersCloseTimer) {
     clearTimeout(mobileFiltersCloseTimer);
   }
+
   mobileFiltersCloseTimer = setTimeout(() => {
-    overlay.style.display = 'none';
+    if (overlay) {
+      overlay.style.display = 'none';
+    }
     document.body.style.overflow = '';
     document.body.classList.remove('hide-mobile-nav');
-    document.getElementById('mobileFilterBtn').focus({ preventScroll: true });
+    if (mobileFilterBtn) {
+      mobileFilterBtn.focus({ preventScroll: true });
+    }
     mobileFiltersCloseTimer = null;
   }, 300);
 }
