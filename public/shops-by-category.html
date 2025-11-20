@@ -202,6 +202,16 @@
       filter: brightness(0) invert(1);
     }
 
+    /* View Type Filter Styles */
+    #viewTypeFilterWrapper {
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    #viewTypeFilterWrapper .type-filter-btn {
+      min-height: 44px; /* Touch-friendly size */
+      justify-content: center;
+    }
+
     @media (max-width: 640px) {
       .shop-filters-container {
         padding: 1rem;
@@ -211,6 +221,15 @@
       .filter-chip {
         font-size: 0.75rem;
         padding: 0.5rem 0.875rem;
+      }
+
+      #viewTypeFilterWrapper {
+        margin-top: 1rem;
+      }
+
+      #viewTypeFilterWrapper .type-filter-btn {
+        font-size: 0.8125rem;
+        padding: 0.625rem 1rem;
       }
     }
 
@@ -624,6 +643,33 @@
           </div>
         </div>
 
+        <!-- Shop/Products View Toggle (for non-service categories ONLY) -->
+        <div id="viewTypeFilterWrapper" class="mt-6" style="display: none;">
+          <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 justify-center lg:justify-start bg-gradient-to-br from-emerald-50/50 to-sky-50/50 p-4 rounded-2xl border-2 border-emerald-100/60 shadow-sm">
+            <div class="flex items-center gap-2 min-w-fit">
+              <svg class="w-5 h-5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+              </svg>
+              <span class="text-sm font-black text-slate-700">نمایش:</span>
+            </div>
+            <div class="flex gap-2 flex-1" id="viewTypeFilterContainer">
+              <button class="type-filter-btn active flex-1 sm:flex-initial" data-view-type="shops">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
+                </svg>
+                فروشگاه‌ها
+              </button>
+              <button class="type-filter-btn flex-1 sm:flex-initial" data-view-type="products">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
+                </svg>
+                کالاها
+              </button>
+            </div>
+          </div>
+        </div>
+
         <!-- Professional Shop Filters (for non-service categories) -->
         <div id="shopFiltersContainer" class="shop-filters-container" style="display: none;">
           <div class="flex items-center gap-2 mb-4">
@@ -716,6 +762,14 @@
         <div class="col-span-full flex flex-col items-center justify-center py-16 text-slate-400">
           <div class="loader mb-4"></div>
           <p class="font-bold text-lg text-slate-500">در حال بارگذاری فروشگاه‌ها...</p>
+        </div>
+      </div>
+
+      <!-- Products Grid (for non-service categories when "کالاها" is selected) -->
+      <div id="products-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6" style="display: none;">
+        <div class="col-span-full flex flex-col items-center justify-center py-16 text-slate-400">
+          <div class="loader mb-4"></div>
+          <p class="font-bold text-lg text-slate-500">در حال بارگذاری کالاها...</p>
         </div>
       </div>
 
@@ -814,7 +868,8 @@
         // New filter states
         premiumFilter: 'all',      // all, true, false
         subcategoryFilter: 'all',  // all or specific subcategory
-        regionFilter: 'all'        // all or specific region
+        regionFilter: 'all',       // all or specific region
+        viewType: 'shops'          // shops or products (for non-service categories only)
       };
 
       const ui = {
@@ -827,8 +882,10 @@
       document.addEventListener('DOMContentLoaded', async () => {
         hydrateHero();
         initializeTypeFilter();
+        initializeViewTypeFilter();
         attachFilterEvents();
         attachShopFilterEvents();
+        attachViewTypeFilterEvents();
         await fetchRealShops();
       });
 
@@ -856,6 +913,57 @@
           // Hide filter for other categories
           typeFilterWrapper.style.display = 'none';
         }
+      }
+
+      /**
+       * Initialize View Type Filter Visibility
+       * Professional implementation: Show filter ONLY for non-service categories
+       */
+      function initializeViewTypeFilter() {
+        const viewTypeFilterWrapper = document.getElementById('viewTypeFilterWrapper');
+
+        // Check if current category is NOT 'service' and NOT 'general'
+        const isServiceCategory = state.categorySlug === 'service' || state.filterCategory === 'خدمات';
+        const isGeneralCategory = state.categorySlug === 'general';
+
+        if (!isServiceCategory && !isGeneralCategory) {
+          // Show filter with smooth transition for non-service categories
+          viewTypeFilterWrapper.style.display = 'block';
+          viewTypeFilterWrapper.style.opacity = '0';
+
+          // Trigger animation after display
+          requestAnimationFrame(() => {
+            viewTypeFilterWrapper.style.transition = 'opacity 0.3s ease-in-out';
+            viewTypeFilterWrapper.style.opacity = '1';
+          });
+        } else {
+          // Hide filter for service categories and general
+          viewTypeFilterWrapper.style.display = 'none';
+        }
+      }
+
+      /**
+       * Attach Event Listeners for View Type Filter
+       * Handles switching between shops and products view
+       */
+      function attachViewTypeFilterEvents() {
+        const viewTypeButtons = document.querySelectorAll('[data-view-type]');
+
+        viewTypeButtons.forEach(btn => {
+          btn.addEventListener('click', () => {
+            const viewType = btn.getAttribute('data-view-type');
+
+            // Update active state
+            viewTypeButtons.forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+
+            // Update state
+            state.viewType = viewType;
+
+            // Re-render with smooth transition
+            applyFiltersAndRender();
+          });
+        });
       }
 
       /**
@@ -1144,8 +1252,127 @@
         }
 
         document.getElementById('resultsMeta').textContent = collection.length;
-        renderCards(collection);
+
+        // Handle view type rendering (shops vs products for non-service categories)
+        updateViewTypeDisplay(collection);
         updateTypeFilterViews();
+      }
+
+      /**
+       * Update Display Based on View Type
+       * Shows shops or products based on the selected view type
+       */
+      function updateViewTypeDisplay(collection) {
+        const resultsGrid = document.getElementById('results-grid');
+        const productsGrid = document.getElementById('products-grid');
+
+        const isServiceCategory = state.categorySlug === 'service' || state.filterCategory === 'خدمات';
+        const isGeneralCategory = state.categorySlug === 'general';
+
+        // For service categories or general, always show shops grid
+        if (isServiceCategory || isGeneralCategory) {
+          resultsGrid.style.display = '';
+          productsGrid.style.display = 'none';
+          renderCards(collection);
+          return;
+        }
+
+        // For non-service categories, toggle based on viewType
+        if (state.viewType === 'shops') {
+          resultsGrid.style.display = '';
+          productsGrid.style.display = 'none';
+          renderCards(collection);
+        } else if (state.viewType === 'products') {
+          resultsGrid.style.display = 'none';
+          productsGrid.style.display = '';
+          renderProducts(collection);
+        }
+      }
+
+      /**
+       * Render Products Grid
+       * Displays products from the filtered shops
+       */
+      function renderProducts(shops) {
+        const grid = document.getElementById('products-grid');
+
+        // Collect all products from all shops
+        let allProducts = [];
+        shops.forEach(shop => {
+          if (shop.products && Array.isArray(shop.products)) {
+            shop.products.forEach(product => {
+              allProducts.push({
+                ...product,
+                shopName: shop.storename,
+                shopId: shop.id
+              });
+            });
+          }
+        });
+
+        if (allProducts.length === 0) {
+          grid.innerHTML = `
+            <div class="col-span-full flex flex-col items-center justify-center py-16 bg-white rounded-3xl shadow-sm border border-emerald-100">
+              <svg class="w-16 h-16 text-emerald-200 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
+              </svg>
+              <p class="text-slate-600 font-bold text-lg mb-2">کالایی یافت نشد</p>
+              <p class="text-slate-400 text-sm">فروشگاه‌های این دسته هنوز کالایی ثبت نکرده‌اند</p>
+            </div>
+          `;
+          return;
+        }
+
+        grid.innerHTML = allProducts.map(product => createProductCard(product)).join('');
+      }
+
+      /**
+       * Create Product Card HTML
+       * Renders a professional product card
+       */
+      function createProductCard(product) {
+        const imageSrc = resolveProductImage(product);
+        const productName = product.name || product.title || 'محصول';
+        const price = product.price ? formatPrice(product.price) : 'تماس بگیرید';
+        const shopName = product.shopName || 'فروشگاه';
+
+        return `
+          <article class="shop-card group">
+            <div class="card-image-box">
+              <img src="${imageSrc}" loading="lazy" alt="${productName}" />
+              <div class="card-badge">${shopName}</div>
+            </div>
+            <div class="card-body">
+              <div class="flex justify-between items-start mb-2">
+                <h3 class="font-black text-lg text-slate-800 group-hover:text-emerald-600 transition-colors line-clamp-2">${productName}</h3>
+              </div>
+              <div class="flex items-center justify-between mb-4">
+                <div class="text-emerald-600 font-black text-lg">${price}</div>
+              </div>
+              <a href="shop.html?id=${product.shopId}" class="card-btn">مشاهده در فروشگاه</a>
+            </div>
+          </article>
+        `;
+      }
+
+      /**
+       * Resolve Product Image
+       * Gets the product image URL or returns placeholder
+       */
+      function resolveProductImage(product) {
+        const candidate = product?.image
+          || product?.coverImage
+          || (Array.isArray(product?.images) ? product.images[0] : null);
+        return buildImageSource(candidate, product?.name || 'محصول');
+      }
+
+      /**
+       * Format Price
+       * Formats price with thousand separators
+       */
+      function formatPrice(price) {
+        if (!price || price === 0) return 'تماس بگیرید';
+        return price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',') + ' تومان';
       }
 
       function updateTypeFilterViews() {
