@@ -507,10 +507,21 @@
       }
     }
 
+    @keyframes mobileSlideUp {
+      from {
+        opacity: 0;
+        transform: translateY(100%);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
     .portfolio-modal-content {
       background: #ffffff;
       border-radius: 1.5rem;
-      max-width: 640px;
+      max-width: 560px;
       width: 100%;
       max-height: 90vh;
       overflow: hidden;
@@ -525,7 +536,7 @@
     .modal-image-wrapper {
       position: relative;
       width: 100%;
-      height: 320px;
+      height: 260px;
       overflow: hidden;
       background: linear-gradient(135deg, #10b981 0%, #0ea5e9 100%);
     }
@@ -574,8 +585,8 @@
     .portfolio-modal-body {
       flex: 1;
       overflow-y: auto;
-      padding: 1.75rem 1.5rem;
-      padding-bottom: 100px; /* Space for sticky footer */
+      padding: 1.5rem 1.25rem;
+      padding-bottom: 95px; /* Space for sticky footer */
     }
 
     .modal-title-row {
@@ -587,15 +598,16 @@
     }
 
     .modal-title-content h3 {
-      font-size: 1.5rem;
-      font-weight: 900;
+      font-size: 1.375rem;
+      font-weight: 800;
       color: #0f172a;
-      margin: 0 0 0.375rem 0;
+      margin: 0 0 0.25rem 0;
       line-height: 1.2;
+      letter-spacing: -0.015em;
     }
 
     .modal-title-content p {
-      font-size: 0.875rem;
+      font-size: 0.8125rem;
       font-weight: 600;
       color: #10b981;
       margin: 0;
@@ -638,7 +650,7 @@
       right: 0;
       background: #ffffff;
       border-top: 1px solid #e2e8f0;
-      padding: 1rem 1.5rem;
+      padding: 0.875rem 1.25rem;
       box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.05);
       z-index: 10;
     }
@@ -646,20 +658,20 @@
     .modal-seller-profile {
       display: flex;
       align-items: center;
-      gap: 0.75rem;
-      margin-bottom: 0.875rem;
+      gap: 0.625rem;
+      margin-bottom: 0.75rem;
     }
 
     .seller-avatar {
-      width: 44px;
-      height: 44px;
+      width: 40px;
+      height: 40px;
       border-radius: 50%;
       background: linear-gradient(135deg, #10b981 0%, #0ea5e9 100%);
       display: flex;
       align-items: center;
       justify-content: center;
       font-weight: 800;
-      font-size: 1.125rem;
+      font-size: 1rem;
       color: white;
       flex-shrink: 0;
       box-shadow: 0 2px 8px rgba(16, 185, 129, 0.25);
@@ -691,13 +703,13 @@
     .modal-cta-btn {
       display: block;
       width: 100%;
-      padding: 0.875rem 1.5rem;
+      padding: 0.75rem 1.25rem;
       background: linear-gradient(135deg, #10b981 0%, #0ea5e9 100%);
       color: white;
       border: none;
-      border-radius: 0.875rem;
+      border-radius: 0.75rem;
       font-weight: 800;
-      font-size: 0.9375rem;
+      font-size: 0.875rem;
       text-decoration: none;
       text-align: center;
       transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
@@ -827,28 +839,31 @@
       filter: brightness(1.05);
     }
 
-    /* Mobile Responsive - Full-screen on mobile */
+    /* Mobile Responsive - Compact modern design */
     @media (max-width: 640px) {
       .portfolio-modal {
         padding: 0;
+        align-items: flex-end;
       }
 
       .portfolio-modal-content {
-        border-radius: 0;
-        max-height: 100vh;
-        height: 100vh;
+        border-radius: 1.25rem 1.25rem 0 0;
+        max-height: 88vh;
+        height: auto;
         max-width: 100%;
+        animation: mobileSlideUp 0.35s cubic-bezier(0.4, 0, 0.2, 1);
       }
 
       .modal-image-wrapper {
-        height: 280px;
+        height: 200px;
+        border-radius: 1rem 1rem 0 0;
       }
 
       .portfolio-modal-close {
-        width: 36px;
-        height: 36px;
-        top: 1rem;
-        left: 1rem;
+        width: 32px;
+        height: 32px;
+        top: 0.75rem;
+        left: 0.75rem;
       }
 
       .portfolio-modal-close svg {
@@ -857,44 +872,69 @@
       }
 
       .portfolio-modal-body {
-        padding: 1.5rem 1.25rem;
-        padding-bottom: 100px;
+        padding: 1.25rem 1rem;
+        padding-bottom: 90px;
+      }
+
+      .modal-title-row {
+        margin-bottom: 0.5rem;
       }
 
       .modal-title-content h3 {
-        font-size: 1.25rem;
+        font-size: 1.125rem;
+        margin-bottom: 0.25rem;
       }
 
       .modal-title-content p {
-        font-size: 0.8125rem;
+        font-size: 0.75rem;
+      }
+
+      .modal-likes-subtle {
+        padding: 0.375rem;
+        min-width: 44px;
       }
 
       .modal-likes-subtle svg {
-        width: 20px;
-        height: 20px;
+        width: 18px;
+        height: 18px;
       }
 
       .modal-likes-subtle span {
-        font-size: 0.8125rem;
+        font-size: 0.75rem;
       }
 
       .modal-description {
-        font-size: 0.875rem;
+        font-size: 0.8125rem;
+        line-height: 1.6;
       }
 
       .modal-footer-sticky {
-        padding: 0.875rem 1.25rem;
+        padding: 0.75rem 1rem;
+      }
+
+      .modal-seller-profile {
+        margin-bottom: 0.625rem;
+        gap: 0.625rem;
       }
 
       .seller-avatar {
-        width: 40px;
-        height: 40px;
-        font-size: 1rem;
+        width: 36px;
+        height: 36px;
+        font-size: 0.9375rem;
+      }
+
+      .seller-label {
+        font-size: 0.6875rem;
+      }
+
+      .seller-name {
+        font-size: 0.875rem;
       }
 
       .modal-cta-btn {
-        padding: 0.75rem 1.25rem;
-        font-size: 0.875rem;
+        padding: 0.6875rem 1.125rem;
+        font-size: 0.8125rem;
+        border-radius: 0.75rem;
       }
 
       .portfolio-detail-btn {
