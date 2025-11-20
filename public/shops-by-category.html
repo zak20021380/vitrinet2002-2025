@@ -1516,6 +1516,10 @@
         const badge = shop.subcategory || shop.category || 'عمومی';
         const profileLink = resolveProfileLink(shop);
 
+        // Determine button text based on shop type
+        const isServiceShop = shop.shopType === 'service' || shop.category === 'خدمات' || (shop.category && shop.category.includes('خدمات'));
+        const buttonText = isServiceShop ? 'رزرو نوبت' : 'مشاهده فروشگاه';
+
         // Premium badge
         const premiumBadge = shop.isPremium ? `
           <div style="position: absolute; top: 12px; left: 12px; background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color: white; font-size: 0.7rem; font-weight: 900; padding: 5px 10px; border-radius: 99px; box-shadow: 0 4px 12px rgba(245, 158, 11, 0.4); border: 1.5px solid rgba(255, 255, 255, 0.5); z-index: 10; display: flex; align-items: center; gap: 4px;">
@@ -1540,7 +1544,7 @@
               <div class="flex items-center gap-1 mb-4">
                   <p class="text-xs font-bold text-slate-500 line-clamp-1">${address}</p>
               </div>
-              <a href="${profileLink}" class="card-btn">مشاهده پروفایل</a>
+              <a href="${profileLink}" class="card-btn">${buttonText}</a>
             </div>
           </article>
         `;
