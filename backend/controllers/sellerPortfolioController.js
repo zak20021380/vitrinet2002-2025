@@ -199,39 +199,31 @@ exports.toggleLike = async (req, res) => {
     }
 
     const userId = req.user.id;
-    const session = await mongoose.startSession();
-    session.startTransaction();
     try {
-      await PortfolioLike.create([{ portfolioId: id, userId }], { session });
+      await PortfolioLike.create({ portfolioId: id, userId });
       const updated = await SellerPortfolio.findByIdAndUpdate(
         id,
         { $inc: { likeCount: 1 } },
-        { new: true, session, projection: { likeCount: 1 } }
+        { new: true, projection: { likeCount: 1 } }
       );
-      await session.commitTransaction();
       return res.json({ liked: true, likeCount: updated.likeCount });
     } catch (err) {
       if (err.code === 11000) {
         try {
-          await PortfolioLike.deleteOne({ portfolioId: id, userId }, { session });
+          await PortfolioLike.deleteOne({ portfolioId: id, userId });
           const updated = await SellerPortfolio.findByIdAndUpdate(
             id,
             { $inc: { likeCount: -1 } },
-            { new: true, session, projection: { likeCount: 1 } }
+            { new: true, projection: { likeCount: 1 } }
           );
-          await session.commitTransaction();
           return res.json({ liked: false, likeCount: updated.likeCount });
         } catch (inner) {
-          await session.abortTransaction();
           console.error('toggleLike error:', inner);
           return res.status(500).json({ message: 'خطای سرور' });
         }
       }
-      await session.abortTransaction();
       console.error('toggleLike error:', err);
       return res.status(500).json({ message: 'خطای سرور' });
-    } finally {
-      session.endSession();
     }
   } catch (err) {
     console.error('toggleLike error:', err);
