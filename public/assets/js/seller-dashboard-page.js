@@ -875,6 +875,7 @@ async function deleteProduct(productId) {
 
     const modal = document.getElementById("editProductModal");
     modal.style.display = "flex";
+    toggleInstallCtaVisibility(true);
     const form = document.getElementById("editProductForm");
 
     // مقداردهی input مخفی productId
@@ -985,6 +986,13 @@ async function deleteProduct(productId) {
   // بستن مدال ویرایش
   function closeEditModal() {
     document.getElementById("editProductModal").style.display = "none";
+    toggleInstallCtaVisibility(false);
+  }
+
+  function toggleInstallCtaVisibility(hidden) {
+    const cta = document.getElementById('installAppCta');
+    if (!cta) return;
+    cta.classList.toggle('hidden', !!hidden);
   }
 
   const editImagesInputEl = document.getElementById("editProductImagesInput");
