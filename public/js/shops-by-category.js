@@ -122,10 +122,14 @@
       portfolioSec.classList.remove('hidden');
       portfolioGrid.innerHTML = sampleShops.map(shop => `
         <div class="portfolio-card">
-          <img src="${resolveShopImage(shop)}" alt="${shop.storename}" onerror="this.src='https://placehold.co/300?text=Portfolio'"/>
-          <div class="portfolio-card__meta">
-            <p class="text-sm font-bold">${shop.storename || 'نمونه کار'}</p>
-            <span class="text-xs text-emerald-200">${shop.category || 'فروشگاه'}</span>
+          <div class="portfolio-card__image-wrapper">
+            <img src="${resolveShopImage(shop)}" alt="${shop.storename}" onerror="this.src='https://placehold.co/300?text=Portfolio'"/>
+            <div class="portfolio-card__overlay">
+              <div class="portfolio-card__meta">
+                <p class="portfolio-card__title">${shop.storename || 'نمونه کار'}</p>
+                <p class="portfolio-card__category">${shop.category || 'فروشگاه'}</p>
+              </div>
+            </div>
           </div>
         </div>
       `).join('');
