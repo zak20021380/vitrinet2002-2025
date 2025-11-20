@@ -2618,80 +2618,83 @@
   <!-- مدال ویرایش محصول -->
 <!-- مدال ویرایش محصول - کاملاً ریسپانسیو و موبایل‌فرندلی -->
 <div id="editProductModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40" style="display:none;">
-  <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md mx-2 p-3 sm:p-5 relative animate-fadeIn"
+  <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md lg:max-w-2xl mx-2 p-3 sm:p-5 lg:p-8 relative animate-fadeIn"
       style="max-height:95vh;display:flex;flex-direction:column;">
     <!-- دکمه بستن -->
-    <button class="absolute left-3 top-3 text-gray-400 hover:text-red-500" id="editModalClose" aria-label="بستن">
+    <button type="button" class="absolute left-3 top-3 text-gray-400 hover:text-red-500 z-10 transition-all duration-200 hover:scale-110" id="editModalClose" aria-label="بستن">
       <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-        <path d="M6 18L18 6M6 6l12 12" stroke="#ef4444" stroke-width="2" stroke-linecap="round"/>
+        <path d="M6 18L18 6M6 6l12 12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
       </svg>
     </button>
-    <h3 class="text-xl font-bold text-[#0ea5e9] mb-3 text-center mt-1">ویرایش محصول</h3>
+    <h3 class="text-xl lg:text-2xl font-bold text-[#0ea5e9] mb-4 lg:mb-6 text-center mt-1">ویرایش محصول</h3>
     <!-- بدنه فرم اسکرولی برای موبایل کوچک -->
     <form id="editProductForm"
-          class="space-y-3 flex-1 overflow-y-auto px-1"
+          class="space-y-3 flex-1 overflow-y-auto px-1 lg:px-2"
           style="min-width:0;max-height:calc(85vh - 70px);" autocomplete="off">
       <input type="hidden" name="productId" />
-      <div>
-        <label class="block font-bold mb-1 text-[#10b981]">نام محصول</label>
-        <input name="title" type="text"
-              class="w-full p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#10b981] text-base"
-              required>
-      </div>
-      <div>
-        <label class="block font-bold mb-1 text-[#10b981]">قیمت (تومان)</label>
-        <input name="price" type="number" min="1"
-              class="w-full p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#10b981] text-base"
-              required>
-      </div>
-      <div>
-        <label class="block font-bold mb-1 text-[#10b981]">دسته‌بندی</label>
-        <input name="category" type="text"
-              class="w-full p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#10b981] text-base"
-              required>
-      </div>
-      <div>
-        <label class="block font-bold mb-1 text-[#10b981]">برچسب محصول</label>
-        <div class="flex gap-5 flex-wrap" id="editTagRadioGroup">
-          <label class="flex items-center gap-2 text-gray-600 cursor-pointer text-base">
-            <input type="radio" name="tag" value="پرفروش" class="accent-[#10b981]">
-            <span>پرفروش</span>
-          </label>
-          <label class="flex items-center gap-2 text-gray-600 cursor-pointer text-base">
-            <input type="radio" name="tag" value="جدید" class="accent-[#10b981]">
-            <span>جدید</span>
-          </label>
+      <!-- Grid layout for desktop, single column for mobile -->
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-3 lg:gap-4">
+        <div>
+          <label class="block font-bold mb-1 text-[#10b981] text-sm lg:text-base">نام محصول</label>
+          <input name="title" type="text"
+                class="w-full p-2 lg:p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#10b981] text-base"
+                required>
+        </div>
+        <div>
+          <label class="block font-bold mb-1 text-[#10b981] text-sm lg:text-base">قیمت (تومان)</label>
+          <input name="price" type="number" min="1"
+                class="w-full p-2 lg:p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#10b981] text-base"
+                required>
+        </div>
+        <div>
+          <label class="block font-bold mb-1 text-[#10b981] text-sm lg:text-base">دسته‌بندی</label>
+          <input name="category" type="text"
+                class="w-full p-2 lg:p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#10b981] text-base"
+                required>
+        </div>
+        <div>
+          <label class="block font-bold mb-1 text-[#10b981] text-sm lg:text-base">برچسب محصول</label>
+          <div class="flex gap-5 flex-wrap" id="editTagRadioGroup">
+            <label class="flex items-center gap-2 text-gray-600 cursor-pointer text-base">
+              <input type="radio" name="tag" value="پرفروش" class="accent-[#10b981]">
+              <span>پرفروش</span>
+            </label>
+            <label class="flex items-center gap-2 text-gray-600 cursor-pointer text-base">
+              <input type="radio" name="tag" value="جدید" class="accent-[#10b981]">
+              <span>جدید</span>
+            </label>
+          </div>
         </div>
       </div>
       <div>
-        <label class="block font-bold mb-1 text-[#10b981]">توضیحات</label>
+        <label class="block font-bold mb-1 text-[#10b981] text-sm lg:text-base">توضیحات</label>
         <textarea name="desc"
-                  class="w-full p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#10b981] text-base"
-                  rows="2"></textarea>
+                  class="w-full p-2 lg:p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#10b981] text-base"
+                  rows="2" style="resize: vertical;"></textarea>
       </div>
 <div>
-  <label class="block font-bold mb-1 text-[#10b981]">عکس محصول</label>
-  <div id="editImagePreview" class="flex flex-wrap gap-2 mb-2"></div>
+  <label class="block font-bold mb-1 text-[#10b981] text-sm lg:text-base">عکس محصول</label>
+  <div id="editImagePreview" class="flex flex-wrap gap-2 lg:gap-3 mb-2"></div>
   <input
     name="images"
     id="editProductImagesInput"
     type="file"
     accept="image/*"
     multiple
-    class="w-full p-2 border rounded-lg bg-white text-base"
+    class="w-full p-2 lg:p-3 border rounded-lg bg-white text-base"
     style="direction: ltr"
   >
-  <div id="editImgHelp" class="text-xs text-gray-500 mt-1">
+  <div id="editImgHelp" class="text-xs lg:text-sm text-gray-500 mt-1">
     می‌توانید تا <b>۳ عکس</b> داشته باشید. برای حذف هر عکس روی <b>ضربدر</b> بزنید.
   </div>
-  <div id="editImgErrorMsg" class="text-xs text-red-500 mt-1 hidden"></div>
+  <div id="editImgErrorMsg" class="text-xs lg:text-sm text-red-500 mt-1 hidden"></div>
 </div>
 
 
       <!-- فاصله برای موبایل که دکمه زیر فرم قرار بگیره -->
       <div style="height:4px"></div>
       <button type="submit"
-              class="bg-[#10b981] hover:bg-[#0ea5e9] text-white rounded-xl py-2 px-6 font-bold text-base transition w-full mt-2 shadow">
+              class="bg-[#10b981] hover:bg-[#0ea5e9] text-white rounded-xl py-2 lg:py-3 px-6 lg:px-8 font-bold text-base lg:text-lg transition-all duration-200 w-full mt-2 shadow-lg hover:shadow-xl hover:scale-[1.02]">
         ثبت تغییرات
       </button>
     </form>

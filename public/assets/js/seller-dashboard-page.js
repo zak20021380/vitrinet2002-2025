@@ -997,6 +997,17 @@ async function deleteProduct(productId) {
     editModalCloseBtn.addEventListener('click', () => closeEditModal());
   }
 
+  // Close modal when clicking on backdrop
+  const editModalBackdrop = document.getElementById('editProductModal');
+  if (editModalBackdrop) {
+    editModalBackdrop.addEventListener('click', (e) => {
+      // Only close if clicking directly on the backdrop, not on the modal content
+      if (e.target === editModalBackdrop) {
+        closeEditModal();
+      }
+    });
+  }
+
   // ارسال فرم ویرایش محصول
   const editForm = document.getElementById("editProductForm");
   if (editForm) editForm.addEventListener("submit", async function(e) {
