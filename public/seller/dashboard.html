@@ -2782,12 +2782,8 @@
 
 <script>
   (function () {
-    const discountProducts = [
-      { id: 1, name: 'پیراهن مردانه لینن', price: 420000, discountPrice: 350000, start: new Date().toISOString(), end: null, active: true },
-      { id: 2, name: 'کفش پیاده‌روی تنفسی', price: 680000, discountPrice: null, start: null, end: null, active: false },
-      { id: 3, name: 'هدفون بلوتوثی اسپرت', price: 520000, discountPrice: 455000, start: new Date().toISOString(), end: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toISOString(), active: true },
-      { id: 4, name: 'عطر جیبی روزانه', price: 190000, discountPrice: null, start: null, end: null, active: false }
-    ];
+    const discountProducts = [];
+    const apiClient = window.VITRINET_API;
 
     const modal = document.getElementById('discountModal');
     const modalCard = modal?.querySelector('.discount-modal__card');
@@ -2807,6 +2803,20 @@
     let currentProductId = null;
     let lastFocusedElement = null;
 
+    const buildApiUrl = (path) => {
+      if (!path) return '';
+      if (apiClient?.buildUrl) return apiClient.buildUrl(path);
+      return path.startsWith('/') ? path : `/${path}`;
+    };
+
+    const withCredentials = (init = {}) => {
+      if (apiClient?.ensureCredentials) return apiClient.ensureCredentials(init);
+      if (init.credentials === undefined) {
+        return { ...init, credentials: 'include' };
+      }
+      return init;
+    };
+
     const toLocalInputValue = (value) => {
       if (!value) return '';
       const date = new Date(value);
@@ -2814,7 +2824,7 @@
       return date.toISOString().slice(0, 16);
     };
 
-    const formatPrice = (price) => `${new Intl.NumberFormat('fa-IR').format(price)} تومان`;
+    const formatPrice = (price) => `${new Intl.NumberFormat('fa-IR').format(Number(price) || 0)} تومان`;
 
     const remainingTime = (end) => {
       if (!end) return 'بدون زمان پایان';
@@ -2827,6 +2837,42 @@
       return `${hours} ساعت و ${minutes} دقیقه باقی مانده`;
     };
 
+    async function fetchDiscountProducts() {
+      if (!window.seller?.id) {
+        return;
+      }
+
+      try {
+        const response = await fetch(buildApiUrl(`/api/products?sellerId=${window.seller.id}`), withCredentials());
+        if (!response.ok) {
+          throw new Error('Failed to load products');
+        }
+        const products = await response.json();
+        const normalized = Array.isArray(products)
+          ? products.map((product) => {
+              const discountPrice = product.discountPrice != null ? Number(product.discountPrice) : null;
+              return {
+                id: product._id || product.id,
+                name: product.title || product.name || 'محصول بدون نام',
+                price: Number(product.price) || 0,
+                discountPrice: discountPrice && !Number.isNaN(discountPrice) ? discountPrice : null,
+                start: product.discountStart || product.start || null,
+                end: product.discountEnd || product.end || null,
+                active: Boolean(discountPrice && !Number.isNaN(discountPrice))
+              };
+            })
+          : [];
+
+        discountProducts.length = 0;
+        discountProducts.push(...normalized);
+        renderDiscounts();
+      } catch (error) {
+        console.error('Failed to fetch discount products:', error);
+        discountProducts.length = 0;
+        renderDiscounts();
+      }
+    }
+
     function renderDiscounts() {
       const activeCount = discountProducts.filter((p) => p.active).length;
       if (discountSummary) {
@@ -2835,64 +2881,75 @@
       }
 
       if (discountTableBody) {
-        discountTableBody.innerHTML = discountProducts
-          .map((product) => {
-            const isActive = product.active && product.discountPrice;
-            const priceView = isActive
-              ? `<span class="discount-original">${formatPrice(product.price)}</span><span class="discount-price">${formatPrice(product.discountPrice)}</span>`
-              : `<span class="discount-price">${formatPrice(product.price)}</span>`;
-            const status = isActive
-              ? `<span class="discount-pill"><i class="ri-flashlight-line" aria-hidden="true"></i> تخفیف فعال</span>`
-              : `<span class="discount-pill off">بدون تخفیف</span>`;
-            const timer = isActive && product.end ? `<div class="discount-timer" aria-label="زمان باقی مانده"><i class="ri-timer-line" aria-hidden="true"></i>${remainingTime(product.end)}</div>` : '';
+        if (!discountProducts.length) {
+          discountTableBody.innerHTML = '<tr><td colspan="4" class="text-center text-gray-500 py-4">محصولی برای نمایش وجود ندارد.</td></tr>';
+        } else {
+          discountTableBody.innerHTML = discountProducts
+            .map((product) => {
+              const isActive = product.active && product.discountPrice;
+              const priceView = isActive
+                ? `<span class="discount-original">${formatPrice(product.price)}</span><span class="discount-price">${formatPrice(product.discountPrice)}</span>`
+                : `<span class="discount-price">${formatPrice(product.price)}</span>`;
+              const status = isActive
+                ? `<span class="discount-pill"><i class="ri-flashlight-line" aria-hidden="true"></i> تخفیف فعال</span>`
+                : `<span class="discount-pill off">بدون تخفیف</span>`;
+              const timer = isActive && product.end ? `<div class="discount-timer" aria-label="زمان باقی مانده"><i class="ri-timer-line" aria-hidden="true"></i>${remainingTime(product.end)}</div>` : '';
 
-            return `<tr class="discount-row">
-              <td class="font-bold">${product.name}</td>
-              <td>${priceView}</td>
-              <td class="space-y-1">${status}${timer ? `<div>${timer}</div>` : ''}</td>
-              <td class="text-left">
-                <button type="button" class="discount-cta" data-discount-id="${product.id}">
-                  <i class="ri-edit-2-line" aria-hidden="true"></i>
-                  تنظیم / ویرایش تخفیف
-                </button>
-              </td>
-            </tr>`;
-          })
-          .join('');
+              return `<tr class="discount-row">
+                <td class="font-bold">${product.name}</td>
+                <td>${priceView}</td>
+                <td class="space-y-1">${status}${timer ? `<div>${timer}</div>` : ''}</td>
+                <td class="text-left">
+                  <button type="button" class="discount-cta" data-discount-id="${product.id}">
+                    <i class="ri-edit-2-line" aria-hidden="true"></i>
+                    تنظیم / ویرایش تخفیف
+                  </button>
+                </td>
+              </tr>`;
+            })
+            .join('');
+        }
       }
 
       if (discountMobileList) {
-        discountMobileList.innerHTML = discountProducts
-          .map((product) => {
-            const isActive = product.active && product.discountPrice;
-            return `<div class="discount-mobile-card">
-              <div class="flex-1">
-                <div class="discount-mobile-title">${product.name}</div>
-                <div class="flex items-center gap-2 mb-1">
-                  ${isActive ? `<span class="discount-original">${formatPrice(product.price)}</span>` : ''}
-                  <span class="discount-price">${formatPrice(isActive ? product.discountPrice : product.price)}</span>
+        if (!discountProducts.length) {
+          discountMobileList.innerHTML = '<div class="text-center text-gray-500 py-4">محصولی برای نمایش وجود ندارد.</div>';
+        } else {
+          discountMobileList.innerHTML = discountProducts
+            .map((product) => {
+              const isActive = product.active && product.discountPrice;
+              return `<div class="discount-mobile-card">
+                <div class="flex-1">
+                  <div class="discount-mobile-title">${product.name}</div>
+                  <div class="flex items-center gap-2 mb-1">
+                    ${isActive ? `<span class="discount-original">${formatPrice(product.price)}</span>` : ''}
+                    <span class="discount-price">${formatPrice(isActive ? product.discountPrice : product.price)}</span>
+                  </div>
+                  <div class="discount-meta">
+                    <span class="${isActive ? 'discount-pill' : 'discount-pill off'}">${isActive ? 'تخفیف فعال' : 'بدون تخفیف'}</span>
+                    ${isActive && product.end ? `<span class="discount-timer"><i class="ri-timer-line" aria-hidden="true"></i>${remainingTime(product.end)}</span>` : ''}
+                  </div>
                 </div>
-                <div class="discount-meta">
-                  <span class="${isActive ? 'discount-pill' : 'discount-pill off'}">${isActive ? 'تخفیف فعال' : 'بدون تخفیف'}</span>
-                  ${isActive && product.end ? `<span class="discount-timer"><i class="ri-timer-line" aria-hidden="true"></i>${remainingTime(product.end)}</span>` : ''}
+                <div class="flex flex-col gap-2">
+                  <button type="button" class="discount-cta" data-discount-id="${product.id}">تنظیم / ویرایش</button>
                 </div>
-              </div>
-              <div class="flex flex-col gap-2">
-                <button type="button" class="discount-cta" data-discount-id="${product.id}">تنظیم / ویرایش</button>
-              </div>
-            </div>`;
-          })
-          .join('');
+              </div>`;
+            })
+            .join('');
+        }
       }
 
       document.querySelectorAll('[data-discount-id]').forEach((btn) => {
         btn.addEventListener('click', () => {
-          const targetId = Number(btn.dataset.discountId);
-          const product = discountProducts.find((p) => p.id === targetId);
+          const targetId = btn.dataset.discountId;
+          const product = discountProducts.find((p) => String(p.id) === String(targetId));
           if (product) openModal(product);
         });
       });
     }
+
+    document.addEventListener('seller:ready', fetchDiscountProducts);
+    fetchDiscountProducts();
 
     function validatePrice(product) {
       const value = Number(discountNewPrice.value);
