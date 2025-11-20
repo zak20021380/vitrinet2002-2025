@@ -1597,6 +1597,299 @@
     from { opacity: 0; transform: scale(.95);}
     to   { opacity: 1; transform: scale(1);}
   }
+
+  .discount-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 10px;
+    border-radius: 999px;
+    background: linear-gradient(135deg, rgba(14,165,233,0.12), rgba(16,185,129,0.12));
+    color: #0f172a;
+    font-weight: 700;
+    font-size: 13px;
+    white-space: nowrap;
+  }
+
+  .discount-pill i {
+    color: #0ea5e9;
+    font-size: 17px;
+  }
+
+  .discount-price-new {
+    color: #0ea5e9;
+    font-weight: 800;
+    font-size: 15px;
+  }
+
+  .discount-price-old {
+    color: #94a3b8;
+    text-decoration: line-through;
+    font-size: 13px;
+    font-weight: 600;
+  }
+
+  .discount-time {
+    color: #0f172a;
+    font-size: 12px;
+    font-weight: 600;
+  }
+
+  .discount-action-btn {
+    background: #0ea5e9;
+    color: #fff;
+    border-radius: 0.9rem;
+    padding: 8px 12px;
+    font-weight: 800;
+    font-size: 13px;
+    transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    box-shadow: 0 10px 30px rgba(14, 165, 233, 0.25);
+  }
+
+  .discount-action-btn:hover,
+  .discount-action-btn:focus {
+    background: #0d9488;
+    transform: translateY(-1px);
+    box-shadow: 0 14px 32px rgba(16, 185, 129, 0.28);
+    outline: none;
+  }
+
+  .discount-modal {
+    position: fixed;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    background: rgba(15, 23, 42, 0.55);
+    backdrop-filter: blur(6px);
+    z-index: 1300;
+    padding: 1rem;
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition: opacity 0.28s ease, visibility 0.28s ease;
+  }
+
+  .discount-modal.active {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+  }
+
+  .discount-modal__card {
+    width: min(520px, 100%);
+    background: linear-gradient(135deg, #ffffff 0%, #f7fffb 100%);
+    border-radius: 1.4rem;
+    box-shadow: 0 26px 60px rgba(14, 165, 233, 0.22);
+    padding: 1.25rem 1.4rem 1.4rem;
+    color: #0f172a;
+    position: relative;
+    overflow: hidden;
+    transform: translateY(12px);
+    transition: transform 0.28s ease;
+  }
+
+  .discount-modal.active .discount-modal__card {
+    transform: translateY(0);
+  }
+
+  .discount-modal__close {
+    position: absolute;
+    top: 12px;
+    left: 12px;
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    background: rgba(226, 232, 240, 0.9);
+    color: #ef4444;
+    border: none;
+    display: grid;
+    place-items: center;
+    cursor: pointer;
+    transition: background 0.18s ease, transform 0.18s ease;
+  }
+
+  .discount-modal__close:hover,
+  .discount-modal__close:focus {
+    background: rgba(254, 242, 242, 0.9);
+    transform: rotate(-90deg);
+    outline: none;
+  }
+
+  .discount-modal__title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 900;
+    font-size: 20px;
+    color: #0ea5e9;
+    margin: 0 0 12px;
+  }
+
+  .discount-modal__form {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .discount-field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .discount-field label {
+    font-weight: 800;
+    color: #10b981;
+    font-size: 14px;
+  }
+
+  .discount-input,
+  .discount-datetime {
+    border: 1px solid #e2e8f0;
+    border-radius: 0.9rem;
+    padding: 12px 14px;
+    font-size: 15px;
+    font-weight: 700;
+    color: #0f172a;
+    background: #fff;
+    transition: border 0.18s ease, box-shadow 0.18s ease;
+  }
+
+  .discount-input:focus,
+  .discount-datetime:focus {
+    outline: none;
+    border-color: #0ea5e9;
+    box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.18);
+  }
+
+  .discount-help {
+    font-size: 12px;
+    color: #94a3b8;
+  }
+
+  .discount-error {
+    color: #ef4444;
+    font-size: 12px;
+    font-weight: 700;
+  }
+
+  .discount-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    background: #f8fafc;
+    border-radius: 12px;
+    border: 1px solid #e2e8f0;
+    font-weight: 800;
+    color: #0f172a;
+  }
+
+  .discount-actions {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-top: 4px;
+  }
+
+  .discount-btn-primary {
+    flex: 1 1 160px;
+    background: linear-gradient(135deg, #0ea5e9, #10b981);
+    color: #fff;
+    border: none;
+    border-radius: 0.95rem;
+    padding: 12px 16px;
+    font-weight: 900;
+    font-size: 15px;
+    box-shadow: 0 14px 36px rgba(14, 165, 233, 0.25);
+    cursor: pointer;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+
+  .discount-btn-primary:hover,
+  .discount-btn-primary:focus {
+    transform: translateY(-2px);
+    box-shadow: 0 18px 40px rgba(16, 185, 129, 0.28);
+    outline: none;
+  }
+
+  .discount-btn-secondary {
+    flex: 1 1 140px;
+    background: #f1f5f9;
+    color: #0f172a;
+    border: 1px solid #e2e8f0;
+    border-radius: 0.95rem;
+    padding: 12px 16px;
+    font-weight: 800;
+    font-size: 15px;
+    cursor: pointer;
+    transition: transform 0.18s ease, background 0.18s ease;
+  }
+
+  .discount-btn-secondary:hover,
+  .discount-btn-secondary:focus {
+    background: #e2e8f0;
+    transform: translateY(-1px);
+    outline: none;
+  }
+
+  .duration-pills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .duration-pill {
+    padding: 8px 12px;
+    border-radius: 999px;
+    border: 1px solid #e2e8f0;
+    background: #fff;
+    color: #0f172a;
+    font-weight: 800;
+    cursor: pointer;
+    transition: background 0.18s ease, transform 0.18s ease, border 0.18s ease;
+  }
+
+  .duration-pill:hover,
+  .duration-pill:focus {
+    background: #f0fdfa;
+    border-color: #10b981;
+    transform: translateY(-1px);
+    outline: none;
+  }
+
+  .discount-feedback {
+    font-size: 13px;
+    font-weight: 700;
+    border-radius: 12px;
+    padding: 10px 12px;
+  }
+
+  .discount-feedback.success { background: #e0fdfa; color: #0f172a; }
+  .discount-feedback.error { background: #fef2f2; color: #b91c1c; }
+
+  @media (max-width: 640px) {
+    .discount-modal {
+      align-items: flex-end;
+    }
+    .discount-modal__card {
+      width: 100%;
+      max-height: 92vh;
+      border-radius: 1.25rem 1.25rem 0.5rem 0.5rem;
+      padding: 1rem 1rem 1.15rem;
+    }
+    .discount-actions {
+      flex-direction: column;
+    }
+    .discount-btn-primary,
+    .discount-btn-secondary {
+      width: 100%;
+      flex: 1 1 auto;
+    }
+  }
   .animate-fadeIn {
     animation: fadeIn .35s cubic-bezier(.36,1.32,.3,1) both;
   }
@@ -2178,24 +2471,26 @@
   <div class="panel-card mx-auto w-full max-w-2xl bg-[#f9fdfb] shadow-xl border border-[#10b98122] rounded-2xl animate-fadeIn">
 
     <!-- جدول محصولات فقط دسکتاپ و تبلت -->
-    <div class="overflow-x-auto mt-1 hidden md:block">
-      <table class="min-w-full text-[15px] bg-white rounded-xl border border-gray-200 overflow-hidden" id="productsTable">
-        <thead class="bg-[#f1f7f5]">
-          <tr>
-            <th class="px-2 py-3 text-right font-bold min-w-[60px]">عکس</th>
-            <th class="px-2 py-3 text-right font-bold min-w-[120px]">نام محصول</th>
-            <th class="px-2 py-3 text-right font-bold min-w-[80px]">قیمت</th>
-            <th class="px-2 py-3 text-right font-bold min-w-[100px]">دسته‌بندی</th>
-            <th class="px-2 py-3 text-right font-bold min-w-[90px]">برچسب‌ها</th>
-            <th class="px-2 py-3 text-right font-bold min-w-[70px]">ویرایش</th>
-            <th class="px-2 py-3 text-right font-bold min-w-[60px]">حذف</th>
-          </tr>
-        </thead>
-        <tbody id="productsTableBody" class="divide-y divide-gray-100">
-          <!-- محصولات اینجا رندر می‌شوند -->
-        </tbody>
-      </table>
-    </div>
+      <div class="overflow-x-auto mt-1 hidden md:block">
+        <table class="min-w-full text-[15px] bg-white rounded-xl border border-gray-200 overflow-hidden" id="productsTable">
+          <thead class="bg-[#f1f7f5]">
+            <tr>
+              <th class="px-2 py-3 text-right font-bold min-w-[60px]">عکس</th>
+              <th class="px-2 py-3 text-right font-bold min-w-[120px]">نام محصول</th>
+              <th class="px-2 py-3 text-right font-bold min-w-[80px]">قیمت</th>
+              <th class="px-2 py-3 text-right font-bold min-w-[140px]">تخفیف فعال</th>
+              <th class="px-2 py-3 text-right font-bold min-w-[100px]">دسته‌بندی</th>
+              <th class="px-2 py-3 text-right font-bold min-w-[90px]">برچسب‌ها</th>
+              <th class="px-2 py-3 text-right font-bold min-w-[100px]">تخفیف</th>
+              <th class="px-2 py-3 text-right font-bold min-w-[70px]">ویرایش</th>
+              <th class="px-2 py-3 text-right font-bold min-w-[60px]">حذف</th>
+            </tr>
+          </thead>
+          <tbody id="productsTableBody" class="divide-y divide-gray-100">
+            <!-- محصولات اینجا رندر می‌شوند -->
+          </tbody>
+        </table>
+      </div>
 
     <!-- کارت محصولات فقط موبایل (زیر سایز md) -->
     <div id="productsMobileList" class="md:hidden flex flex-col gap-3 mt-3">
@@ -2223,11 +2518,11 @@
 
   <!-- مدال ویرایش محصول -->
 <!-- مدال ویرایش محصول - کاملاً ریسپانسیو و موبایل‌فرندلی -->
-<div id="editProductModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40" style="display:none;">
-  <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md mx-2 p-3 sm:p-5 relative animate-fadeIn"
-      style="max-height:95vh;display:flex;flex-direction:column;">
-    <!-- دکمه بستن -->
-    <button class="absolute left-3 top-3 text-gray-400 hover:text-red-500" id="editModalClose" aria-label="بستن">
+  <div id="editProductModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40" style="display:none;">
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md mx-2 p-3 sm:p-5 relative animate-fadeIn"
+        style="max-height:95vh;display:flex;flex-direction:column;">
+      <!-- دکمه بستن -->
+      <button class="absolute left-3 top-3 text-gray-400 hover:text-red-500" id="editModalClose" aria-label="بستن">
       <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
         <path d="M6 18L18 6M6 6l12 12" stroke="#ef4444" stroke-width="2" stroke-linecap="round"/>
       </svg>
@@ -2300,6 +2595,56 @@
               class="bg-[#10b981] hover:bg-[#0ea5e9] text-white rounded-xl py-2 px-6 font-bold text-base transition w-full mt-2 shadow">
         ثبت تغییرات
       </button>
+    </form>
+  </div>
+</div>
+
+<!-- مدال تعریف تخفیف محصول -->
+<div id="discountModal" class="discount-modal" role="dialog" aria-modal="true" aria-labelledby="discountModalTitle" aria-hidden="true">
+  <div class="discount-modal__card" role="document">
+    <button class="discount-modal__close" type="button" id="discountModalClose" aria-label="بستن پنجره تخفیف">
+      <i class="ri-close-line"></i>
+    </button>
+    <h3 class="discount-modal__title" id="discountModalTitle">
+      <i class="ri-price-tag-3-line"></i>
+      تخفیف محصول
+    </h3>
+    <form id="discountForm" class="discount-modal__form" novalidate>
+      <input type="hidden" id="discountProductId">
+      <div class="discount-field">
+        <label for="discountOriginal">قیمت اصلی</label>
+        <input id="discountOriginal" type="text" class="discount-input" readonly aria-readonly="true">
+        <span class="discount-help">این مبلغ فقط جهت نمایش است و قابل ویرایش نیست.</span>
+      </div>
+      <div class="discount-field">
+        <label for="discountPrice">قیمت بعد از تخفیف <span class="text-red-500">*</span></label>
+        <input id="discountPrice" type="number" min="1" class="discount-input" required inputmode="decimal" placeholder="مثلاً 320000" data-focus-default>
+        <span id="discountPriceError" class="discount-error" aria-live="polite"></span>
+      </div>
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <div class="discount-field">
+          <label for="discountStart">شروع تخفیف</label>
+          <input id="discountStart" type="datetime-local" class="discount-datetime">
+        </div>
+        <div class="discount-field">
+          <label for="discountEnd">پایان تخفیف</label>
+          <input id="discountEnd" type="datetime-local" class="discount-datetime">
+          <div class="duration-pills" aria-label="پیشنهاد مدت زمان تخفیف">
+            <button type="button" class="duration-pill" data-duration="3">۳ روزه</button>
+            <button type="button" class="duration-pill" data-duration="7">۷ روزه</button>
+            <button type="button" class="duration-pill" data-duration="30">۳۰ روزه</button>
+          </div>
+        </div>
+      </div>
+      <label class="discount-toggle" for="discountActive">
+        <input id="discountActive" type="checkbox" class="accent-[#10b981]" checked>
+        فعال شود
+      </label>
+      <div id="discountFeedback" class="discount-feedback hidden" role="status"></div>
+      <div class="discount-actions">
+        <button type="submit" class="discount-btn-primary" id="discountSaveBtn">ذخیره تخفیف</button>
+        <button type="button" class="discount-btn-secondary" id="discountCancelBtn">انصراف</button>
+      </div>
     </form>
   </div>
 </div>
