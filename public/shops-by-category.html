@@ -578,89 +578,95 @@
     <section class="max-w-7xl mx-auto flex flex-col gap-10">
       
       <div class="category-hero w-full mx-auto px-6 sm:px-10 py-8 sm:py-12">
-        <div class="flex flex-col lg:flex-row items-center lg:items-start justify-between gap-6">
-          
-          <div class="text-center lg:text-right max-w-2xl">
+        <!-- Desktop Layout: Centered Title with Stats Badge -->
+        <div class="flex flex-col items-center gap-6">
+
+          <!-- Title Section - Centered -->
+          <div class="text-center max-w-3xl w-full">
             <span class="category-pill inline-flex items-center gap-2 px-4 py-1 rounded-full text-xs font-black uppercase tracking-wider">
               <span id="categoryPill">دسته‌بندی</span>
             </span>
-            <h1 id="categoryTitle" class="text-3xl md:text-4xl font-black mt-4 mb-3 leading-tight text-slate-800">فروشگاه‌ها</h1>
-            <p id="categorySubtitle" class="text-emerald-600 text-base md:text-lg font-bold">در حال دریافت اطلاعات...</p>
+            <h1 id="categoryTitle" class="text-3xl md:text-5xl lg:text-6xl font-black mt-4 mb-3 leading-tight text-slate-800">فروشگاه‌ها</h1>
+            <p id="categorySubtitle" class="text-emerald-600 text-base md:text-xl font-bold">در حال دریافت اطلاعات...</p>
           </div>
-          
-          <div class="flex flex-col items-center lg:items-end gap-2">
-             <div class="px-6 py-3 rounded-2xl flex items-center gap-3" style="background: linear-gradient(135deg, rgba(16, 185, 129, 0.12), rgba(14, 165, 233, 0.12)); border: 1px solid rgba(16, 185, 129, 0.2); box-shadow: 0 4px 12px rgba(16, 185, 129, 0.1);">
-                <div class="text-3xl font-black bg-gradient-to-l from-[#10b981] to-[#0ea5e9] bg-clip-text text-transparent" id="resultsMeta">0</div>
-                <div class="text-sm font-bold text-emerald-800">فروشگاه فعال</div>
-             </div>
+
+          <!-- Stats Badge - Centered -->
+          <div class="px-6 py-3 rounded-2xl flex items-center gap-3" style="background: linear-gradient(135deg, rgba(16, 185, 129, 0.12), rgba(14, 165, 233, 0.12)); border: 1px solid rgba(16, 185, 129, 0.2); box-shadow: 0 4px 12px rgba(16, 185, 129, 0.1);">
+            <div class="text-3xl font-black bg-gradient-to-l from-[#10b981] to-[#0ea5e9] bg-clip-text text-transparent" id="resultsMeta">0</div>
+            <div class="text-sm font-bold text-emerald-800">فروشگاه فعال</div>
           </div>
 
         </div>
 
         <!-- Filter Type Toggle - Only visible when cat=service -->
-        <div id="typeFilterWrapper" class="mt-6 flex-wrap items-center gap-3 justify-center lg:justify-start" style="display: none;">
-          <div class="flex items-center gap-2">
-            <svg class="w-5 h-5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"></path>
-            </svg>
-            <span class="text-sm font-bold text-slate-600">فیلتر نمایش:</span>
-          </div>
-          <div class="flex gap-2" id="typeFilterContainer">
-            <button class="type-filter-btn active" data-type="all">
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+        <div id="typeFilterWrapper" class="mt-8 max-w-5xl mx-auto" style="display: none;">
+          <div class="flex flex-col sm:flex-row flex-wrap items-center gap-3 justify-center bg-gradient-to-br from-emerald-50/50 to-sky-50/50 p-4 rounded-2xl border-2 border-emerald-100/60 shadow-sm">
+            <div class="flex items-center gap-2">
+              <svg class="w-5 h-5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"></path>
               </svg>
-              همه موارد
-            </button>
-            <button class="type-filter-btn" data-type="service">
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
-              </svg>
-              مغازه‌های خدماتی
-            </button>
-            <button class="type-filter-btn" data-type="portfolio">
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-              </svg>
-              نمونه کارها
-            </button>
+              <span class="text-sm font-black text-slate-700">فیلتر نمایش:</span>
+            </div>
+            <div class="flex gap-2 flex-wrap justify-center" id="typeFilterContainer">
+              <button class="type-filter-btn active" data-type="all">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                </svg>
+                همه موارد
+              </button>
+              <button class="type-filter-btn" data-type="service">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
+                </svg>
+                مغازه‌های خدماتی
+              </button>
+              <button class="type-filter-btn" data-type="portfolio">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                </svg>
+                نمونه کارها
+              </button>
+            </div>
           </div>
         </div>
 
-        <div class="mt-6 grid grid-cols-1 lg:grid-cols-12 gap-4">
-          <div class="lg:col-span-8 relative w-full">
-            <input type="text" id="searchInput" class="vitrine-input pl-12" placeholder="جستجو در نام مغازه، محله یا آدرس..."/>
-            <span class="absolute left-4 top-3.5 text-slate-400">
-              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
-            </span>
-          </div>
-          <div class="lg:col-span-4">
-            <select id="sortSelect" class="vitrine-input cursor-pointer">
-              <option value="popular">🔥 محبوب‌ترین</option>
-              <option value="newest">📅 جدیدترین</option>
-              <option value="rating_desc">⭐ بیشترین امتیاز</option>
-            </select>
+        <!-- Search and Sort - Centered Layout -->
+        <div class="mt-8 max-w-5xl mx-auto">
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div class="md:col-span-2 relative w-full">
+              <input type="text" id="searchInput" class="vitrine-input pl-12" placeholder="جستجو در نام مغازه، محله یا آدرس..."/>
+              <span class="absolute left-4 top-3.5 text-slate-400">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+              </span>
+            </div>
+            <div class="w-full">
+              <select id="sortSelect" class="vitrine-input cursor-pointer">
+                <option value="popular">🔥 محبوب‌ترین</option>
+                <option value="newest">📅 جدیدترین</option>
+                <option value="rating_desc">⭐ بیشترین امتیاز</option>
+              </select>
+            </div>
           </div>
         </div>
 
         <!-- Shop/Products View Toggle (for non-service categories ONLY) -->
-        <div id="viewTypeFilterWrapper" class="mt-6" style="display: none;">
-          <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 justify-center lg:justify-start bg-gradient-to-br from-emerald-50/50 to-sky-50/50 p-4 rounded-2xl border-2 border-emerald-100/60 shadow-sm">
-            <div class="flex items-center gap-2 min-w-fit">
+        <div id="viewTypeFilterWrapper" class="mt-8 max-w-5xl mx-auto" style="display: none;">
+          <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 justify-center bg-gradient-to-br from-emerald-50/50 to-sky-50/50 p-4 rounded-2xl border-2 border-emerald-100/60 shadow-sm">
+            <div class="flex items-center gap-2 min-w-fit justify-center">
               <svg class="w-5 h-5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
               </svg>
               <span class="text-sm font-black text-slate-700">نمایش:</span>
             </div>
-            <div class="flex gap-2 flex-1" id="viewTypeFilterContainer">
-              <button class="type-filter-btn active flex-1 sm:flex-initial" data-view-type="shops">
+            <div class="flex gap-2 flex-1 justify-center" id="viewTypeFilterContainer">
+              <button class="type-filter-btn active" data-view-type="shops">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
                 </svg>
                 فروشگاه‌ها
               </button>
-              <button class="type-filter-btn flex-1 sm:flex-initial" data-view-type="products">
+              <button class="type-filter-btn" data-view-type="products">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
                 </svg>
@@ -671,85 +677,60 @@
         </div>
 
         <!-- Professional Shop Filters (for non-service categories) -->
-        <div id="shopFiltersContainer" class="shop-filters-container" style="display: none;">
-          <div class="flex items-center gap-2 mb-4">
-            <svg class="w-5 h-5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"></path>
-            </svg>
-            <h3 class="text-base font-black text-slate-700">فیلترها</h3>
-          </div>
+        <div id="shopFiltersContainer" class="max-w-5xl mx-auto mt-6" style="display: none;">
+          <div class="bg-gradient-to-br from-white to-emerald-50/30 rounded-2xl border-2 border-emerald-100/60 p-6 shadow-sm">
 
-          <!-- Price Filter -->
-          <div class="filter-group" id="priceFilterGroup">
-            <div class="filter-label">
-              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            <!-- Filters Header -->
+            <div class="flex items-center gap-2 mb-6 pb-4 border-b-2 border-emerald-100">
+              <svg class="w-5 h-5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"></path>
               </svg>
-              <span>محدوده قیمت</span>
+              <h3 class="text-lg font-black text-slate-700">فیلترهای جستجو</h3>
             </div>
-            <div class="filter-chips">
-              <button class="filter-chip active" data-filter="price" data-value="all">
-                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
-                </svg>
-                همه قیمت‌ها
-              </button>
-              <button class="filter-chip" data-filter="price" data-value="0-100000">
-                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                </svg>
-                تا 100 هزار تومان
-              </button>
-              <button class="filter-chip" data-filter="price" data-value="100000-500000">
-                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                </svg>
-                100 تا 500 هزار تومان
-              </button>
-              <button class="filter-chip" data-filter="price" data-value="500000-1000000">
-                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                </svg>
-                500 هزار تا 1 میلیون تومان
-              </button>
-              <button class="filter-chip" data-filter="price" data-value="1000000-5000000">
-                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                </svg>
-                1 تا 5 میلیون تومان
-              </button>
-              <button class="filter-chip" data-filter="price" data-value="5000000-999999999">
-                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                </svg>
-                بالای 5 میلیون تومان
-              </button>
-            </div>
-          </div>
 
-          <!-- Shopping Centers Filter -->
-          <div class="filter-group" id="shoppingCenterFilterGroup">
-            <div class="filter-label">
-              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
-              </svg>
-              <span>مراکز خرید</span>
-            </div>
-            <div class="filter-chips" id="shoppingCenterChips">
-              <button class="filter-chip active" data-filter="shoppingCenter" data-value="all">
-                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
-                </svg>
-                همه مراکز
-              </button>
-              <!-- Will be populated dynamically from API -->
+            <!-- Filters Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+              <!-- Price Filter -->
+              <div class="filter-group" id="priceFilterGroup">
+                <div class="filter-label mb-3">
+                  <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                  </svg>
+                  <span>محدوده قیمت</span>
+                </div>
+                <select id="priceFilterSelect" class="vitrine-input cursor-pointer" data-filter-type="price">
+                  <option value="all">همه قیمت‌ها</option>
+                  <option value="0-100000">تا 100 هزار تومان</option>
+                  <option value="100000-500000">100 تا 500 هزار</option>
+                  <option value="500000-1000000">500 هزار تا 1 میلیون</option>
+                  <option value="1000000-5000000">1 تا 5 میلیون</option>
+                  <option value="5000000-999999999">بالای 5 میلیون</option>
+                </select>
+              </div>
+
+              <!-- Shopping Centers Filter -->
+              <div class="filter-group" id="shoppingCenterFilterGroup">
+                <div class="filter-label mb-3">
+                  <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
+                  </svg>
+                  <span>مراکز خرید</span>
+                </div>
+                <select id="shoppingCenterFilterSelect" class="vitrine-input cursor-pointer" data-filter-type="shoppingCenter">
+                  <option value="all">همه مراکز</option>
+                  <!-- Will be populated dynamically from API -->
+                </select>
+              </div>
+
             </div>
           </div>
         </div>
 
-        <div id="subcatContainer" class="mt-6 hidden flex-wrap gap-2 justify-center lg:justify-start">
+        <!-- Subcategories - Centered -->
+        <div id="subcatContainer" class="mt-8 max-w-5xl mx-auto hidden flex-wrap gap-2 justify-center">
           <button class="category-chip active" data-sub="all">همه</button>
-          </div>
+        </div>
       </div>
 
       <div id="portfolioSection" class="hidden">
@@ -1030,38 +1011,23 @@
       }
 
       /**
-       * Populate Shopping Center Filter Chips
+       * Populate Shopping Center Filter Dropdown
        */
       function populateShoppingCenterFilter(shoppingCenters) {
-        const container = document.getElementById('shoppingCenterChips');
+        const select = document.getElementById('shoppingCenterFilterSelect');
 
-        // Keep the "all" button and add shopping centers
-        const allButton = container.querySelector('[data-value="all"]');
-
-        if (shoppingCenters.length === 0) {
-          // Keep only the "all" button if no shopping centers
+        if (!select || shoppingCenters.length === 0) {
           return;
         }
 
-        // Add shopping center chips
-        const shoppingCenterChips = shoppingCenters.map(center => `
-          <button class="filter-chip" data-filter="shoppingCenter" data-value="${escapeHtml(center.title)}">
-            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
-            </svg>
-            ${escapeHtml(center.title)}
-            ${center.stores ? `<span style="font-size: 0.7rem; opacity: 0.8;">(${center.stores})</span>` : ''}
-          </button>
-        `).join('');
+        // Add shopping center options
+        const options = shoppingCenters.map(center =>
+          `<option value="${escapeHtml(center.title)}">${escapeHtml(center.title)}${center.stores ? ` (${center.stores})` : ''}</option>`
+        ).join('');
 
-        container.innerHTML = `
-          <button class="filter-chip active" data-filter="shoppingCenter" data-value="all">
-            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
-            </svg>
-            همه مراکز
-          </button>
-          ${shoppingCenterChips}
+        select.innerHTML = `
+          <option value="all">همه مراکز</option>
+          ${options}
         `;
       }
 
@@ -1078,31 +1044,23 @@
        * Attach Event Listeners for Shop Filters
        */
       function attachShopFilterEvents() {
-        // Use event delegation for dynamic filter chips
-        document.addEventListener('click', (e) => {
-          const filterChip = e.target.closest('.filter-chip');
-          if (!filterChip) return;
+        // Price filter dropdown
+        const priceSelect = document.getElementById('priceFilterSelect');
+        if (priceSelect) {
+          priceSelect.addEventListener('change', (e) => {
+            state.priceFilter = e.target.value;
+            applyFiltersAndRender();
+          });
+        }
 
-          const filterType = filterChip.getAttribute('data-filter');
-          const filterValue = filterChip.getAttribute('data-value');
-
-          if (!filterType || !filterValue) return;
-
-          // Update active state
-          const siblingChips = filterChip.parentElement.querySelectorAll('.filter-chip');
-          siblingChips.forEach(chip => chip.classList.remove('active'));
-          filterChip.classList.add('active');
-
-          // Update state based on filter type
-          if (filterType === 'price') {
-            state.priceFilter = filterValue;
-          } else if (filterType === 'shoppingCenter') {
-            state.shoppingCenterFilter = filterValue;
-          }
-
-          // Re-render with smooth transition
-          applyFiltersAndRender();
-        });
+        // Shopping center filter dropdown
+        const centerSelect = document.getElementById('shoppingCenterFilterSelect');
+        if (centerSelect) {
+          centerSelect.addEventListener('change', (e) => {
+            state.shoppingCenterFilter = e.target.value;
+            applyFiltersAndRender();
+          });
+        }
       }
 
       function hydrateHero() {
