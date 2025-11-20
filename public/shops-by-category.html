@@ -603,24 +603,43 @@
 
     /* Subtle heart icon for likes */
     .modal-likes-subtle {
-      display: flex;
-      flex-direction: column;
+      display: inline-flex;
       align-items: center;
-      gap: 0.25rem;
-      padding: 0.5rem;
-      min-width: 50px;
+      gap: 0.45rem;
+      padding: 0.6rem 1rem;
+      min-width: 52px;
+      border-radius: 999px;
+      background: rgba(248, 113, 113, 0.08);
+      border: 1px solid rgba(248, 113, 113, 0.2);
+      color: #ef4444;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      box-shadow: 0 10px 22px -12px rgba(248, 113, 113, 0.3);
     }
 
     .modal-likes-subtle svg {
-      width: 24px;
-      height: 24px;
-      color: #ef4444;
+      width: 22px;
+      height: 22px;
+      color: currentColor;
+      transition: transform 0.2s ease;
     }
 
     .modal-likes-subtle span {
       font-size: 0.875rem;
-      font-weight: 700;
-      color: #64748b;
+      font-weight: 800;
+      color: currentColor;
+      letter-spacing: -0.01em;
+    }
+
+    .modal-likes-subtle.is-liked {
+      background: rgba(248, 113, 113, 0.15);
+      color: #dc2626;
+      box-shadow: 0 12px 26px -14px rgba(220, 38, 38, 0.4);
+    }
+
+    .modal-likes-subtle.is-busy {
+      opacity: 0.75;
+      pointer-events: none;
     }
 
     .modal-description {
@@ -780,18 +799,31 @@
       display: inline-flex;
       align-items: center;
       gap: 0.45rem;
-      padding: 0.45rem 0.85rem;
+      padding: 0.45rem 0.9rem;
       border-radius: 999px;
-      background: rgba(255, 255, 255, 0.18);
-      border: 1.2px solid rgba(255, 255, 255, 0.26);
-      font-size: 0.85rem;
+      background: rgba(255, 255, 255, 0.92);
+      border: 1.2px solid rgba(255, 255, 255, 0.4);
+      font-size: 0.88rem;
       font-weight: 800;
-      color: #ffffff;
+      color: #f87171;
       backdrop-filter: blur(4px);
-      box-shadow: 0 8px 18px rgba(0, 0, 0, 0.18);
+      box-shadow: 0 10px 24px rgba(0, 0, 0, 0.16);
+      transition: all 0.2s ease;
     }
 
     .portfolio-like-pill svg { width: 16px; height: 16px; color: #f87171; }
+
+    .portfolio-like-pill.is-liked {
+      background: rgba(248, 113, 113, 0.12);
+      color: #dc2626;
+      border-color: rgba(248, 113, 113, 0.3);
+      box-shadow: 0 12px 28px -12px rgba(220, 38, 38, 0.45);
+    }
+
+    .portfolio-like-pill.is-busy {
+      opacity: 0.75;
+      pointer-events: none;
+    }
 
     .like-badge {
       display: inline-flex;
@@ -898,8 +930,9 @@
       }
 
       .portfolio-detail-btn {
-        padding: 0.45rem 0.8rem;
-        font-size: 0.8rem;
+        padding: 0.4rem 0.78rem;
+        font-size: 0.78rem;
+        min-height: 34px;
       }
 
       .portfolio-item {
@@ -912,9 +945,9 @@
       }
 
       .portfolio-detail-btn {
-        padding: 0.5rem 0.95rem;
-        font-size: 0.78rem;
-        border-radius: 0.9rem;
+        padding: 0.46rem 0.9rem;
+        font-size: 0.76rem;
+        border-radius: 0.85rem;
       }
 
       .portfolio-detail-btn svg {
@@ -1294,12 +1327,12 @@
             <p id="modalCategory"></p>
           </div>
 
-          <div class="modal-likes-subtle">
+          <button class="modal-likes-subtle" type="button" data-portfolio-like="modal" aria-label="پسند نمونه کار">
             <svg fill="currentColor" viewBox="0 0 24 24">
               <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
             </svg>
-            <span id="modalLikes">0</span>
-          </div>
+            <span id="modalLikes" data-like-counter>0</span>
+          </button>
         </div>
 
         <!-- Description -->
@@ -1356,6 +1389,7 @@
         typeFilter: 'all',
         hasPortfolioSamples: false,
         portfolioSamples: [],
+        portfolioCards: [],
         shops: [],
         serviceShops: [],
         regularShops: [],
@@ -1932,7 +1966,8 @@
 
          const sampleShops = hasRealPortfolios
            ? validPortfolios.slice(0, 5).map(item => {
-               const shopId = item?.shop?.id || item?.shopId || item?.id;
+               const portfolioId = item?.id || item?._id || item?.portfolioId;
+               const shopId = item?.shop?.id || item?.shopId || item?.shop?._id || item?.id;
                const likeCount = typeof item?.likes === 'number'
                  ? item.likes
                  : (typeof item?.likeCount === 'number' ? item.likeCount : 0);
@@ -1943,7 +1978,12 @@
                  image: item?.image,
                  shopType: 'portfolio',
                  likes: likeCount,
-                 portfolioMeta: { title: item?.title, shopId }
+                 portfolioMeta: {
+                   title: item?.title,
+                   shopId,
+                   portfolioId,
+                   liked: !!item?.liked
+                 }
                };
              })
            : allShops.slice(0, 5).map(shop => ({
@@ -1952,6 +1992,7 @@
              }));
 
          state.hasPortfolioSamples = sampleShops.length > 0;
+         state.portfolioCards = sampleShops;
 
          if(sampleShops.length > 0 && portfolioSec && portfolioGrid) {
              portfolioSec.classList.remove('hidden');
@@ -1960,12 +2001,17 @@
                 const title = shop.storename || 'نمونه کار';
                 const category = shop.category || 'فروشگاه';
                 const targetId = shop.portfolioMeta?.shopId || shop.id;
+                const portfolioId = shop.portfolioMeta?.portfolioId;
                 const buttonAttrs = targetId
-                  ? `onclick="openPortfolioModal('${targetId}')"`
+                  ? `onclick="openPortfolioModal('${targetId}','${portfolioId || ''}')"`
                   : 'type="button" disabled';
                 const likeCount = typeof shop?.likes === 'number' ? shop.likes : 0;
+                const likeLabel = likeCount?.toLocaleString ? likeCount.toLocaleString('fa-IR') : likeCount;
+                const likeButtonAttrs = portfolioId
+                  ? `type="button" data-portfolio-like data-portfolio-id="${portfolioId}" aria-pressed="${shop.portfolioMeta?.liked ? 'true' : 'false'}"`
+                  : 'type="button" disabled';
                return `
-                <div class="portfolio-item group" data-shop-id="${targetId || ''}">
+                <div class="portfolio-item group" data-shop-id="${targetId || ''}" data-portfolio-id="${portfolioId || ''}">
                       <img src="${imageSrc}" alt="${title}" onerror="this.src='https://placehold.co/600x600/f1f5f9/10b981?text=${encodeURIComponent(title)}'">
                       <div class="portfolio-overlay">
                           <div class="portfolio-overlay-top">
@@ -1976,15 +2022,15 @@
                               ${category}
                             </div>
                           </div>
-                          <div class="portfolio-meta">
+                <div class="portfolio-meta">
                              <h4 class="text-white font-black text-base mb-2 leading-tight" style="text-shadow: 0 2px 12px rgba(0, 0, 0, 0.4), 0 1px 4px rgba(0, 0, 0, 0.3);">${title}</h4>
                              <div class="flex items-center justify-between gap-3 text-white" style="opacity: 0.94;">
-                               <div class="portfolio-like-pill">
+                               <button class="portfolio-like-pill" ${likeButtonAttrs}>
                                  <svg fill="currentColor" viewBox="0 0 24 24">
                                    <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"></path>
                                  </svg>
-                                 <span>${likeCount?.toLocaleString ? likeCount.toLocaleString('fa-IR') : likeCount}</span>
-                               </div>
+                                 <span class="js-likes">${likeLabel}</span>
+                               </button>
                                <button class="portfolio-detail-btn" ${buttonAttrs}>
                                   <span>مشاهده</span>
                                   <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1996,10 +2042,16 @@
                       </div>
                     </div>
                 `;
-               }).join('');
-             updateTypeFilterViews();
-         } else if (portfolioSec) {
-             portfolioSec.style.display = 'none';
+              }).join('');
+            const likeItems = sampleShops
+              .map(item => ({ id: item.portfolioMeta?.portfolioId, likes: item.likes, liked: !!item.portfolioMeta?.liked }))
+              .filter(it => it.id);
+            if (likeItems.length) {
+              document.dispatchEvent(new CustomEvent('portfolio:rendered', { detail: { items: likeItems } }));
+            }
+            updateTypeFilterViews();
+        } else if (portfolioSec) {
+            portfolioSec.style.display = 'none';
          }
       }
 
@@ -2139,11 +2191,14 @@
       }
 
       // Modal Functions Global
-window.openPortfolioModal = function (shopId) {
-  const shop = state.shops.find(s => s.id === shopId);
+window.openPortfolioModal = function (shopId, portfolioId = '') {
+  const shop = state.shops.find(s => s.id === shopId)
+    || state.portfolioCards.find((item) => item.id === shopId || item?.portfolioMeta?.shopId === shopId)
+    || null;
   if (!shop) return;
 
   const modal = document.getElementById('portfolioModal');
+  const activePortfolioId = portfolioId || shop?.portfolioMeta?.portfolioId || '';
 
   // Populate image
   document.getElementById('modalImage').src = resolveShopImage(shop);
@@ -2156,8 +2211,10 @@ window.openPortfolioModal = function (shopId) {
   document.getElementById('modalDescription').textContent = shop.desc || 'توضیحات در دسترس نیست';
 
   // Populate likes (default to 0 if not available)
-  const likes = shop.likes || shop.likeCount || 0;
-  document.getElementById('modalLikes').textContent = likes;
+  const likeValue = (activePortfolioId && typeof window.__getPortfolioLikes === 'function')
+    ? window.__getPortfolioLikes(activePortfolioId)
+    : (shop.likes || shop.likeCount || 0);
+  document.getElementById('modalLikes').textContent = likeValue;
 
   // Generate and populate seller avatar
   const avatarText = generateTextAvatar(shop.storename);
@@ -2172,6 +2229,15 @@ window.openPortfolioModal = function (shopId) {
     : resolveProfileLink(shop);
 
   document.getElementById('modalSellerLink').href = sellerLinkHref;
+
+  const modalLikeBtn = document.querySelector('[data-portfolio-like="modal"]');
+  if (modalLikeBtn) {
+    modalLikeBtn.dataset.portfolioId = activePortfolioId || '';
+    modalLikeBtn.disabled = !activePortfolioId;
+  }
+  if (typeof window.__PF_SET_ACTIVE_ID === 'function') {
+    window.__PF_SET_ACTIVE_ID(activePortfolioId || null);
+  }
 
   modal.classList.add('active');
   document.body.style.overflow = 'hidden';
@@ -2197,6 +2263,182 @@ window.openPortfolioModal = function (shopId) {
         }
         return `shop.html?id=${shop.id}`;
       }
+
+      /* ===== Portfolio Likes (server-based with guest fallback) ===== */
+      (function(){
+        'use strict';
+        const API_BASE = (window.API_BASE || '').replace(/\/+$/, '');
+        const toFa = n => String(n ?? 0).replace(/\d/g, d => '۰۱۲۳۴۵۶۷۸۹'[d]);
+
+        const likeCache = new Map();
+        const pendingLikes = new Set();
+        let authPromise = null;
+        let lastAuthCheckedAt = 0;
+        let lastAuthResult = window.__APP_USER__?.id ? true : null;
+
+        const guestLikes = (() => {
+          const KEY = 'vit_portfolio_guest_likes';
+          let cache = null;
+          function load() {
+            if (cache) return cache;
+            try {
+              const raw = localStorage.getItem(KEY);
+              cache = raw ? JSON.parse(raw) || {} : {};
+            } catch (_) {
+              cache = {};
+            }
+            return cache;
+          }
+          function persist() {
+            try { localStorage.setItem(KEY, JSON.stringify(cache || {})); } catch (_) {}
+          }
+          return {
+            isLiked(id) { return !!load()[id]; },
+            toggle(id) { const store = load(); const next = !store[id]; if (next) store[id]=1; else delete store[id]; persist(); return next; },
+            set(id, liked) { const store = load(); if (liked) store[id]=1; else delete store[id]; persist(); }
+          };
+        })();
+
+        async function ensureLoggedIn(){
+          if (window.__APP_USER__?.id) { lastAuthResult = true; return true; }
+          if (authPromise) return authPromise;
+          const now = Date.now();
+          if (lastAuthResult === false && now - lastAuthCheckedAt < 3000) return false;
+          lastAuthCheckedAt = now;
+          authPromise = (async () => {
+            try {
+              const res = await fetch(`${API_BASE}/api/auth/getCurrentUser`, { credentials:'include' });
+              if (!res.ok) return false;
+              const data = await res.json().catch(() => null);
+              if (data?.success && data.user) {
+                window.__APP_USER__ = Object.assign({}, window.__APP_USER__ || {}, data.user);
+                return true;
+              }
+            } catch (_) {}
+            return false;
+          })();
+          const ok = await authPromise;
+          authPromise = null;
+          lastAuthResult = ok;
+          return ok;
+        }
+
+        function updateWrapState(wrap, state, busy, counterEl){
+          if (!wrap) return;
+          const counter = counterEl || wrap.querySelector('.js-likes') || wrap.querySelector('[data-like-counter]');
+          if (counter) counter.textContent = toFa(state.count);
+          wrap.classList.toggle('is-liked', !!state.liked);
+          wrap.classList.toggle('is-busy', !!busy);
+        }
+
+        function updateUI(id){
+          const state = likeCache.get(id) || { liked:false, count:0 };
+          const busy = pendingLikes.has(id);
+          const selectors = new Set();
+          document.querySelectorAll(`[data-portfolio-like][data-portfolio-id="${id}"]`).forEach(el => selectors.add(el));
+          document.querySelectorAll(`[data-portfolio-id="${id}"] [data-portfolio-like]`).forEach(el => selectors.add(el));
+          selectors.forEach(el => updateWrapState(el, state, busy));
+
+          if (window.__PF_ACTIVE_ID === id) {
+            const modalBtn = document.querySelector('[data-portfolio-like="modal"]');
+            const modalLikes = document.getElementById('modalLikes');
+            updateWrapState(modalBtn, state, busy, modalLikes);
+          }
+        }
+
+        function applyGuestToggle(id, baseState){
+          const prev = baseState || likeCache.get(id) || { liked:false, count:0 };
+          const nextLiked = guestLikes.toggle(id);
+          const nextCount = Math.max(0, prev.count + (nextLiked === prev.liked ? 0 : (nextLiked ? 1 : -1)));
+          likeCache.set(id, { liked: nextLiked, count: nextCount });
+          updateUI(id);
+        }
+
+        async function toggle(id){
+          if (!id || pendingLikes.has(id)) return;
+          const prev = likeCache.get(id) || { liked:false, count:0 };
+          const loggedIn = await ensureLoggedIn();
+          if (!loggedIn) { applyGuestToggle(id, prev); return; }
+
+          const optimistic = { liked: !prev.liked, count: Math.max(0, prev.count + (prev.liked ? -1 : 1)) };
+          likeCache.set(id, optimistic);
+          pendingLikes.add(id);
+          updateUI(id);
+          try {
+            const res = await fetch(`${API_BASE}/api/portfolio/${id}/like`, { method:'POST', credentials:'include' });
+            let data = null; try { data = await res.json(); } catch (_) {}
+            if (res.status === 401) {
+              lastAuthResult = false; lastAuthCheckedAt = Date.now(); window.__APP_USER__ = null; likeCache.set(id, prev); applyGuestToggle(id, prev); return;
+            }
+            if (res.ok && data && typeof data.likeCount === 'number') {
+              likeCache.set(id, { liked: !!data.liked, count: Math.max(0, data.likeCount) });
+            } else {
+              likeCache.set(id, prev);
+            }
+          } catch (_) {
+            likeCache.set(id, prev);
+          } finally {
+            pendingLikes.delete(id);
+            updateUI(id);
+          }
+        }
+
+        function bind(el){
+          const id = el.dataset.portfolioId;
+          if (!id || el.dataset.likeBound) return;
+          el.dataset.likeBound = '1';
+          el.addEventListener('click', e => { e.preventDefault(); toggle(id); });
+          if (el.tagName !== 'BUTTON') {
+            el.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggle(id); } });
+          }
+        }
+
+        function init(ev){
+          const items = ev?.detail?.items || [];
+          const isGuest = !(window.__APP_USER__ && window.__APP_USER__.id);
+          items.forEach(it => {
+            if (!it?.id) return;
+            const rawCount = Number(it.likes);
+            const count = Number.isFinite(rawCount) ? rawCount : 0;
+            let state = { liked: !!it.liked, count };
+            if (isGuest && !state.liked && guestLikes.isLiked(it.id)) {
+              state = { liked: true, count: Math.max(0, count + 1) };
+            }
+            likeCache.set(it.id, state);
+          });
+
+          document.querySelectorAll('[data-portfolio-like][data-portfolio-id]').forEach(bind);
+          const modalBtn = document.querySelector('[data-portfolio-like="modal"]');
+          if (modalBtn && !modalBtn.dataset.likeBound) {
+            modalBtn.dataset.likeBound = '1';
+            modalBtn.addEventListener('click', e => {
+              e.preventDefault();
+              const activeId = modalBtn.dataset.portfolioId || window.__PF_ACTIVE_ID;
+              if (activeId) toggle(activeId);
+            });
+            if (modalBtn.tagName !== 'BUTTON') {
+              modalBtn.addEventListener('keydown', e => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault();
+                  const activeId = modalBtn.dataset.portfolioId || window.__PF_ACTIVE_ID;
+                  if (activeId) toggle(activeId);
+                }
+              });
+            }
+          }
+          const activeId = window.__PF_ACTIVE_ID;
+          if (activeId) updateUI(activeId);
+        }
+
+        window.__PF_SET_ACTIVE_ID = function(id){
+          window.__PF_ACTIVE_ID = id;
+          if (id) updateUI(id);
+        };
+        window.__getPortfolioLikes = id => (likeCache.get(id)?.count ?? 0);
+
+        if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', init); else init();
+        document.addEventListener('portfolio:rendered', init);
+      })();
 
     })();
   </script>
