@@ -686,6 +686,42 @@
     }
   };
 
+  const handleShareEntry = async (entry = {}) => {
+    const statusLabel = statusLabels[entry.computedStatus || entry.status] || statusLabels.paid;
+    const receiptText = [
+      '🧾 رسید تراکنش',
+      '----------------------',
+      `عنوان: ${entry.title || 'بدون عنوان'}`,
+      `مبلغ: ${formatCurrency(entry.amount)}`,
+      `تاریخ: ${formatDateForDisplay(entry.recordedAt)}`,
+      `دسته: ${entry.category || '-'}`,
+      `وضعیت: ${statusLabel || '-'}`,
+      '----------------------',
+      'مدیریت حسابداری ویترینت'
+    ].join('\n');
+
+    try {
+      if (navigator.share) {
+        await navigator.share({
+          title: 'رسید تراکنش',
+          text: receiptText
+        });
+        return;
+      }
+
+      if (navigator.clipboard?.writeText) {
+        await navigator.clipboard.writeText(receiptText);
+        showFormMessage('متن رسید کپی شد', 'success');
+        return;
+      }
+
+      throw new Error('SHARE_UNAVAILABLE');
+    } catch (error) {
+      console.error('Failed to share receipt:', error);
+      showFormMessage('امکان اشتراک گذاری رسید وجود ندارد.', 'error');
+    }
+  };
+
   const renderTransactionCard = (entry) => {
     const card = document.createElement('div');
     card.className = `transaction-card ${entry.type}`;
@@ -738,6 +774,13 @@
     const actions = document.createElement('div');
     actions.className = 'transaction-actions';
 
+    const shareButton = document.createElement('button');
+    shareButton.type = 'button';
+    shareButton.className = 'action-button share';
+    shareButton.style.color = 'var(--color-primary)';
+    shareButton.innerHTML = '<i class="ri-share-forward-line"></i> اشتراک‌گذاری';
+    shareButton.onclick = () => handleShareEntry(entry);
+
     const editButton = document.createElement('button');
     editButton.type = 'button';
     editButton.className = 'action-button edit';
@@ -750,6 +793,7 @@
     deleteButton.innerHTML = '<i class="ri-delete-bin-6-line"></i> حذف';
     deleteButton.onclick = () => handleDeleteEntry(entry.id);
 
+    actions.appendChild(shareButton);
     actions.appendChild(editButton);
     actions.appendChild(deleteButton);
     footer.appendChild(actions);
