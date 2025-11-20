@@ -1074,49 +1074,215 @@
     color: #d1fae5;
   }
 
-  /* Product Table */
-  .product-table {
+  /* Product Visits Preview & Modal */
+  .visits-preview-card {
     width: 100%;
-    max-width: 600px;
+    max-width: 640px;
     margin: 20px auto;
-    background: #fff;
+    background: #ffffff;
     border-radius: 1.3rem;
-    box-shadow: 0 8px 32px rgba(16, 185, 129, 0.1);
-    overflow: hidden;
+    box-shadow: 0 12px 32px rgba(16, 185, 129, 0.14);
+    padding: 1.25rem 1rem 1.5rem;
+    border: 1px solid rgba(16, 185, 129, 0.08);
   }
 
-  .product-table table {
+  .visits-table {
     width: 100%;
     border-collapse: collapse;
+    table-layout: fixed;
   }
 
-  .product-table th,
-  .product-table td {
-    padding: 12px;
+  .visits-table thead th {
+    background: linear-gradient(135deg, #e0fdfa, #f8fff5);
+    color: #0f172a;
+    font-weight: 800;
+    border-bottom: 1px solid rgba(16, 185, 129, 0.25);
+    padding: 12px 10px;
     text-align: center;
-    font-size: 15px;
   }
 
-  .product-table th {
-    background: #d1fae5;
-    color: #047857;
-    font-weight: bold;
+  .visits-table td {
+    padding: 12px 10px;
+    text-align: center;
+    border-bottom: 1px solid #f1f5f9;
+    color: #0f172a;
+    word-break: break-word;
+    white-space: normal;
   }
 
-  .product-table td {
-    color: #333;
-    border-bottom: 1px solid rgba(16, 185, 129, 0.1);
+  .visits-table tr:last-child td {
+    border-bottom: none;
   }
 
-  .product-table tr:hover {
-    background: #e0fdfa;
+  .visits-table tr:hover {
+    background: #f8fffb;
   }
 
-  @media (max-width: 600px) {
-    .product-table th,
-    .product-table td {
-      font-size: 13px;
-      padding: 8px;
+  .visits-preview-meta {
+    color: #0f172a;
+    font-weight: 800;
+    font-size: 1rem;
+    margin-bottom: 0.5rem;
+    text-align: right;
+  }
+
+  .view-all-visits-btn {
+    width: 100%;
+    margin-top: 0.75rem;
+    padding: 0.85rem 1rem;
+    border-radius: 1rem;
+    border: none;
+    background: linear-gradient(135deg, #10b981, #0ea5e9);
+    color: #ffffff;
+    font-weight: 800;
+    cursor: pointer;
+    box-shadow: 0 14px 30px rgba(16, 185, 129, 0.25);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+
+  .view-all-visits-btn:hover,
+  .view-all-visits-btn:focus-visible {
+    transform: translateY(-2px);
+    box-shadow: 0 18px 36px rgba(16, 185, 129, 0.28);
+    outline: none;
+  }
+
+  .visits-modal {
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.55);
+    backdrop-filter: blur(8px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1.25rem;
+    z-index: 420;
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition: opacity 0.25s ease, visibility 0.25s ease;
+  }
+
+  .visits-modal.is-open {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+  }
+
+  .visits-modal__dialog {
+    position: relative;
+    width: min(960px, 100%);
+    max-height: min(90vh, 760px);
+    background: linear-gradient(145deg, #ffffff 10%, #f5fffb 90%);
+    border-radius: 1.5rem;
+    box-shadow: 0 24px 60px rgba(16, 185, 129, 0.25);
+    padding: 1.2rem 1.1rem 1.1rem;
+    overflow: hidden;
+    transform: scale(0.96);
+    transition: transform 0.25s ease;
+    outline: none;
+  }
+
+  .visits-modal.is-open .visits-modal__dialog {
+    transform: scale(1);
+  }
+
+  .visits-modal__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    padding: 0.5rem 0.5rem 0.75rem;
+  }
+
+  .visits-modal__title {
+    margin: 0;
+    font-size: 1.2rem;
+    font-weight: 900;
+    color: #0f172a;
+  }
+
+  .visits-modal__close-icon {
+    border: none;
+    background: rgba(241, 245, 249, 0.9);
+    color: #0f172a;
+    width: 42px;
+    height: 42px;
+    border-radius: 12px;
+    display: grid;
+    place-items: center;
+    cursor: pointer;
+    transition: background 0.18s ease, transform 0.18s ease;
+  }
+
+  .visits-modal__close-icon:hover,
+  .visits-modal__close-icon:focus-visible {
+    background: rgba(226, 232, 240, 0.95);
+    transform: rotate(-90deg);
+    outline: none;
+  }
+
+  .visits-modal__body {
+    background: #ffffff;
+    border-radius: 1rem;
+    border: 1px solid rgba(16, 185, 129, 0.08);
+    padding: 0.75rem 0.5rem;
+    overflow: auto;
+    max-height: calc(80vh - 120px);
+  }
+
+  .visits-modal__footer {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 0.75rem;
+    padding: 0.9rem 0.5rem 0.3rem;
+  }
+
+  .visits-modal__close-btn {
+    background: #0f172a;
+    color: #ffffff;
+    border: none;
+    padding: 0.85rem 1.4rem;
+    border-radius: 0.9rem;
+    font-weight: 800;
+    cursor: pointer;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    box-shadow: 0 12px 24px rgba(15, 23, 42, 0.18);
+  }
+
+  .visits-modal__close-btn:hover,
+  .visits-modal__close-btn:focus-visible {
+    transform: translateY(-1px);
+    box-shadow: 0 16px 30px rgba(15, 23, 42, 0.22);
+    outline: none;
+  }
+
+  @media (max-width: 640px) {
+    .visits-preview-card {
+      padding: 1rem 0.85rem 1.2rem;
+      border-radius: 1.1rem;
+    }
+
+    .visits-table thead th,
+    .visits-table td {
+      padding: 10px 8px;
+      font-size: 14px;
+    }
+
+    .visits-modal {
+      padding: 0.8rem;
+    }
+
+    .visits-modal__dialog {
+      width: 100%;
+      max-height: 94vh;
+      border-radius: 1.1rem;
+      padding: 1rem 0.85rem 0.85rem;
+    }
+
+    .visits-modal__body {
+      max-height: calc(90vh - 130px);
     }
   }
 
@@ -1797,41 +1963,87 @@
         <div class="chart-info">بروزرسانی: امروز | داده‌ها شبیه‌سازی شده‌اند</div>
       </div>
 
-      <!-- Product Table -->
-      <div class="product-table overflow-x-auto">
-        <table class="min-w-full">
-          <thead>
-            <tr>
-              <th>محصول</th>
-              <th>بازدید این ماه</th>
-              <th>بازدید کل</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td>پسته ممتاز</td>
-              <td>۳۵۵</td>
-              <td>۷۲۰۰</td>
-            </tr>
-            <tr>
-              <td>زعفران صادراتی</td>
-              <td>۲۷۸</td>
-              <td>۶۹۵۰</td>
-            </tr>
-            <tr>
-              <td>خرمای کبکاب</td>
-              <td>۱۹۰</td>
-              <td>۴۴۰۰</td>
-            </tr>
-            <tr>
-              <td>عسل طبیعی</td>
-              <td>۱۶۰</td>
-              <td>۳۷۰۰</td>
-            </tr>
-          </tbody>
-        </table>
+      <!-- Product Visits Preview -->
+      <div class="visits-preview-card" aria-labelledby="product-visits-title">
+        <div class="visits-preview-meta" id="product-visits-title">بازدید محصولات (برترین‌ها)</div>
+        <div class="overflow-hidden rounded-xl border border-[#10b9811a] bg-white">
+          <table class="visits-table" aria-label="بازدید محصولات این ماه">
+            <thead>
+              <tr>
+                <th scope="col">محصول</th>
+                <th scope="col">بازدید این ماه</th>
+                <th scope="col">بازدید کل</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>پسته ممتاز</td>
+                <td>۳۵۵</td>
+                <td>۷۲۰۰</td>
+              </tr>
+              <tr>
+                <td>زعفران صادراتی</td>
+                <td>۲۷۸</td>
+                <td>۶۹۵۰</td>
+              </tr>
+              <tr>
+                <td>خرمای کبکاب</td>
+                <td>۱۹۰</td>
+                <td>۴۴۰۰</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <button id="openVisitsModal" class="view-all-visits-btn" type="button">مشاهده همه محصولات</button>
       </div>
     </section>
+
+    <!-- Product Visits Modal -->
+    <div class="visits-modal" id="visitsModal" role="dialog" aria-modal="true" aria-labelledby="visits-modal-title" aria-describedby="visits-modal-desc" aria-hidden="true" tabindex="-1">
+      <div class="visits-modal__dialog" role="document" tabindex="-1">
+        <div class="visits-modal__header">
+          <h3 class="visits-modal__title" id="visits-modal-title">جزئیات کامل بازدید محصولات</h3>
+          <button class="visits-modal__close-icon" type="button" aria-label="بستن" data-close-visits-modal>&times;</button>
+        </div>
+        <p class="visits-preview-meta" id="visits-modal-desc">نمایش جدول کامل بازدید ماه جاری و مجموع بازدیدها</p>
+        <div class="visits-modal__body" role="document">
+          <table class="visits-table" aria-label="جدول کامل بازدید محصولات">
+            <thead>
+              <tr>
+                <th scope="col">محصول</th>
+                <th scope="col">بازدید این ماه</th>
+                <th scope="col">بازدید کل</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>پسته ممتاز</td>
+                <td>۳۵۵</td>
+                <td>۷۲۰۰</td>
+              </tr>
+              <tr>
+                <td>زعفران صادراتی</td>
+                <td>۲۷۸</td>
+                <td>۶۹۵۰</td>
+              </tr>
+              <tr>
+                <td>خرمای کبکاب</td>
+                <td>۱۹۰</td>
+                <td>۴۴۰۰</td>
+              </tr>
+              <tr>
+                <td>عسل طبیعی</td>
+                <td>۱۶۰</td>
+                <td>۳۷۰۰</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="visits-modal__footer">
+          <button class="visits-modal__close-btn" type="button" data-close-visits-modal>بستن</button>
+        </div>
+      </div>
+    </div>
 
 
 
@@ -2146,7 +2358,76 @@
 </div>
 </div>
 
- 
+
+<script>
+  (function () {
+    const modal = document.getElementById('visitsModal');
+    const dialog = modal?.querySelector('.visits-modal__dialog');
+    const openButton = document.getElementById('openVisitsModal');
+    const closeButtons = modal ? modal.querySelectorAll('[data-close-visits-modal]') : [];
+    const focusableSelector = 'a[href], area[href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), button:not([disabled]), [tabindex]:not([tabindex="-1"])';
+    let lastFocusedElement = null;
+
+    if (!modal || !dialog || !openButton) return;
+
+    const getFocusableElements = () => Array.from(modal.querySelectorAll(focusableSelector)).filter((el) => el.offsetParent !== null);
+
+    const trapFocus = (event) => {
+      if (event.key !== 'Tab') return;
+      const focusable = getFocusableElements();
+      if (!focusable.length) return;
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+      }
+    };
+
+    const handleEscape = (event) => {
+      if (event.key === 'Escape') {
+        closeModal();
+      }
+    };
+
+    const openModal = () => {
+      lastFocusedElement = document.activeElement;
+      modal.classList.add('is-open');
+      modal.setAttribute('aria-hidden', 'false');
+      document.body.style.overflow = 'hidden';
+      dialog.focus({ preventScroll: true });
+      modal.addEventListener('keydown', trapFocus);
+      document.addEventListener('keydown', handleEscape);
+    };
+
+    const closeModal = () => {
+      modal.classList.remove('is-open');
+      modal.setAttribute('aria-hidden', 'true');
+      document.body.style.overflow = '';
+      modal.removeEventListener('keydown', trapFocus);
+      document.removeEventListener('keydown', handleEscape);
+      if (lastFocusedElement) {
+        lastFocusedElement.focus({ preventScroll: true });
+      } else {
+        openButton.focus({ preventScroll: true });
+      }
+    };
+
+    openButton.addEventListener('click', openModal);
+    closeButtons.forEach((btn) => btn.addEventListener('click', closeModal));
+    modal.addEventListener('click', (event) => {
+      if (event.target === modal) {
+        closeModal();
+      }
+    });
+  })();
+</script>
+
+
 
 
 
