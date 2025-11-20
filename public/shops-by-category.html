@@ -300,22 +300,22 @@
       filter: brightness(1.05);
     }
 
-    /* --- Portfolio Cards (Redesigned) --- */
+    /* --- Portfolio Cards (Redesigned - Professional & Responsive) --- */
     .portfolio-item {
-      border-radius: 1.5rem;
+      border-radius: 1.25rem;
       overflow: hidden;
-      aspect-ratio: 1;
+      aspect-ratio: 4 / 3;
       position: relative;
       cursor: pointer;
-      box-shadow: 0 8px 24px -6px rgba(16, 185, 129, 0.15);
-      border: 2px solid rgba(16, 185, 129, 0.1);
-      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      box-shadow: 0 4px 16px rgba(16, 185, 129, 0.12);
+      border: 2px solid rgba(226, 232, 240, 0.8);
+      transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
       background: #ffffff;
     }
 
     .portfolio-item:hover {
-      transform: translateY(-8px) scale(1.02);
-      box-shadow: 0 20px 40px -10px rgba(16, 185, 129, 0.25);
+      transform: translateY(-6px);
+      box-shadow: 0 16px 36px -8px rgba(16, 185, 129, 0.3), 0 0 0 3px rgba(16, 185, 129, 0.1);
       border-color: #10b981;
     }
 
@@ -323,36 +323,49 @@
       width: 100%;
       height: 100%;
       object-fit: cover;
-      transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+      transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1), filter 0.35s ease;
     }
 
     .portfolio-item:hover img {
-      transform: scale(1.08);
+      transform: scale(1.06);
+      filter: brightness(0.92);
     }
 
     .portfolio-overlay {
       position: absolute;
       inset: 0;
-      background: linear-gradient(to top, rgba(6, 78, 59, 0.95) 0%, rgba(16, 185, 129, 0.6) 50%, transparent 100%);
+      background: linear-gradient(to top,
+        rgba(6, 78, 59, 0.92) 0%,
+        rgba(16, 185, 129, 0.6) 40%,
+        rgba(16, 185, 129, 0.15) 70%,
+        transparent 100%
+      );
       display: flex;
       flex-direction: column;
       justify-content: flex-end;
-      padding: 1.5rem;
+      padding: 1.25rem;
       opacity: 1;
-      transition: background 0.4s ease;
+      transition: background 0.35s ease;
     }
 
     .portfolio-item:hover .portfolio-overlay {
-      background: linear-gradient(to top, rgba(6, 78, 59, 0.98) 0%, rgba(16, 185, 129, 0.8) 50%, rgba(0, 0, 0, 0.2) 100%);
+      background: linear-gradient(to top,
+        rgba(6, 78, 59, 0.96) 0%,
+        rgba(16, 185, 129, 0.75) 45%,
+        rgba(16, 185, 129, 0.25) 75%,
+        rgba(0, 0, 0, 0.1) 100%
+      );
     }
 
     .portfolio-meta {
       transform: translateY(0);
-      transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+      z-index: 5;
     }
 
     .portfolio-item:hover .portfolio-meta {
-      transform: translateY(-4px);
+      transform: translateY(-3px);
     }
 
     /* Section Headers */
@@ -406,18 +419,18 @@
     }
     @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
-    /* --- Portfolio Modal --- */
+    /* --- Portfolio Modal (Enhanced Professional Design) --- */
     .portfolio-modal {
       position: fixed;
       inset: 0;
-      background: rgba(0, 0, 0, 0.85);
-      backdrop-filter: blur(8px);
+      background: rgba(0, 0, 0, 0.88);
+      backdrop-filter: blur(10px);
       z-index: 9999;
       display: none;
       align-items: center;
       justify-content: center;
       padding: 1rem;
-      animation: fadeIn 0.3s ease;
+      animation: fadeIn 0.25s ease;
     }
 
     .portfolio-modal.active {
@@ -432,7 +445,7 @@
     @keyframes slideUp {
       from {
         opacity: 0;
-        transform: translateY(30px) scale(0.95);
+        transform: translateY(24px) scale(0.96);
       }
       to {
         opacity: 1;
@@ -442,50 +455,55 @@
 
     .portfolio-modal-content {
       background: #ffffff;
-      border-radius: 2rem;
+      border-radius: 1.75rem;
       max-width: 900px;
       width: 100%;
       max-height: 90vh;
       overflow-y: auto;
       position: relative;
-      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-      animation: slideUp 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      box-shadow: 0 24px 48px -12px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(16, 185, 129, 0.1);
+      animation: slideUp 0.35s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
     .portfolio-modal-close {
       position: absolute;
       top: 1rem;
       left: 1rem;
-      width: 40px;
-      height: 40px;
+      width: 44px;
+      height: 44px;
       border-radius: 50%;
-      background: rgba(255, 255, 255, 0.95);
-      backdrop-filter: blur(8px);
-      border: 2px solid rgba(16, 185, 129, 0.2);
+      background: rgba(255, 255, 255, 0.98);
+      backdrop-filter: blur(10px);
+      border: 2px solid rgba(226, 232, 240, 0.8);
       display: flex;
       align-items: center;
       justify-content: center;
       cursor: pointer;
-      transition: all 0.2s;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
       z-index: 10;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
     }
 
     .portfolio-modal-close:hover {
-      background: #10b981;
-      border-color: #10b981;
-      transform: rotate(90deg) scale(1.1);
+      background: linear-gradient(135deg, #10b981 0%, #0ea5e9 100%);
+      border-color: transparent;
+      transform: rotate(90deg) scale(1.08);
+      box-shadow: 0 8px 24px rgba(16, 185, 129, 0.35);
     }
 
     .portfolio-modal-close:hover svg {
       color: white;
     }
 
+    .portfolio-modal-close:active {
+      transform: rotate(90deg) scale(1.02);
+    }
+
     .portfolio-modal-image {
       width: 100%;
-      aspect-ratio: 16 / 10;
+      aspect-ratio: 16 / 9;
       object-fit: cover;
-      border-radius: 2rem 2rem 0 0;
+      border-radius: 1.75rem 1.75rem 0 0;
     }
 
     .portfolio-modal-body {
@@ -494,47 +512,50 @@
 
     .portfolio-detail-btn {
       position: absolute;
-      bottom: 1.25rem;
+      bottom: 1rem;
       left: 50%;
       transform: translateX(-50%);
-      background: linear-gradient(135deg, #10b981 0%, #0ea5e9 100%);
+      background: rgba(255, 255, 255, 0.98);
       backdrop-filter: blur(12px);
-      border: 2px solid rgba(255, 255, 255, 0.3);
-      padding: 0.75rem 1.5rem;
-      border-radius: 1.25rem;
+      border: 2px solid rgba(16, 185, 129, 0.25);
+      padding: 0.65rem 1.35rem;
+      border-radius: 1rem;
       font-weight: 800;
-      font-size: 0.9rem;
-      color: white;
+      font-size: 0.875rem;
+      color: #10b981;
       cursor: pointer;
-      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
       display: flex;
       align-items: center;
       gap: 0.5rem;
-      box-shadow: 0 6px 20px rgba(16, 185, 129, 0.35);
+      box-shadow: 0 4px 16px rgba(16, 185, 129, 0.2);
       z-index: 15;
       opacity: 1;
       white-space: nowrap;
     }
 
     .portfolio-detail-btn svg {
-      width: 18px;
-      height: 18px;
+      width: 16px;
+      height: 16px;
       transition: transform 0.3s ease;
+      color: #10b981;
     }
 
     .portfolio-detail-btn:hover {
-      background: linear-gradient(135deg, #0ea5e9 0%, #10b981 100%);
-      border-color: rgba(255, 255, 255, 0.5);
-      transform: translateX(-50%) translateY(-4px) scale(1.05);
-      box-shadow: 0 12px 30px rgba(16, 185, 129, 0.5);
+      background: linear-gradient(135deg, #10b981 0%, #0ea5e9 100%);
+      border-color: transparent;
+      color: white;
+      transform: translateX(-50%) translateY(-3px) scale(1.04);
+      box-shadow: 0 8px 24px rgba(16, 185, 129, 0.4);
     }
 
     .portfolio-detail-btn:hover svg {
-      transform: translateX(3px);
+      transform: translateX(2px);
+      color: white;
     }
 
     .portfolio-detail-btn:active {
-      transform: translateX(-50%) translateY(-2px) scale(1.02);
+      transform: translateX(-50%) translateY(-1px) scale(1.01);
     }
 
     .like-badge {
@@ -571,39 +592,67 @@
       filter: brightness(1.1);
     }
 
+    /* Mobile Responsive - Enhanced */
     @media (max-width: 640px) {
+      .portfolio-modal {
+        padding: 0.75rem;
+      }
+
       .portfolio-modal-content {
-        border-radius: 1.5rem;
-        max-height: 95vh;
+        border-radius: 1.25rem;
+        max-height: 92vh;
+      }
+
+      .portfolio-modal-close {
+        width: 36px;
+        height: 36px;
+        top: 0.75rem;
+        left: 0.75rem;
+      }
+
+      .portfolio-modal-close svg {
+        width: 18px;
+        height: 18px;
       }
 
       .portfolio-modal-body {
-        padding: 1.5rem;
+        padding: 1.25rem;
       }
 
       .portfolio-modal-image {
-        aspect-ratio: 4 / 3;
-        border-radius: 1.5rem 1.5rem 0 0;
+        aspect-ratio: 1;
+        border-radius: 1.25rem 1.25rem 0 0;
+      }
+
+      .like-badge {
+        padding: 0.6rem 1rem;
+        font-size: 0.875rem;
+      }
+
+      .seller-link-btn {
+        padding: 0.875rem 1.5rem;
+        font-size: 0.875rem;
       }
 
       .portfolio-item {
-        border-radius: 1.25rem;
+        border-radius: 1rem;
+        aspect-ratio: 1;
       }
 
       .portfolio-overlay {
-        padding: 1rem;
+        padding: 0.875rem;
       }
 
       .portfolio-detail-btn {
-        bottom: 1rem;
-        padding: 0.625rem 1.25rem;
-        font-size: 0.8125rem;
-        border-radius: 1rem;
+        bottom: 0.75rem;
+        padding: 0.55rem 1.1rem;
+        font-size: 0.75rem;
+        border-radius: 0.875rem;
       }
 
       .portfolio-detail-btn svg {
-        width: 16px;
-        height: 16px;
+        width: 14px;
+        height: 14px;
       }
 
       .section-header {
@@ -626,21 +675,55 @@
         font-size: 0.6875rem;
       }
 
-      .section-header-badge svg {
-        width: 0.875rem;
-        height: 0.875rem;
+      #portfolioGrid {
+        gap: 0.75rem;
+      }
+
+      .portfolio-meta h4 {
+        font-size: 0.875rem !important;
+      }
+
+      .portfolio-meta span {
+        font-size: 0.75rem !important;
       }
     }
 
-    /* Tablet Responsive */
+    /* Tablet Responsive - Enhanced */
     @media (max-width: 768px) and (min-width: 641px) {
       .portfolio-item {
-        border-radius: 1.375rem;
+        border-radius: 1.125rem;
+        aspect-ratio: 4 / 3;
+      }
+
+      .portfolio-overlay {
+        padding: 1.125rem;
       }
 
       .portfolio-detail-btn {
-        padding: 0.7rem 1.375rem;
-        font-size: 0.875rem;
+        bottom: 0.875rem;
+        padding: 0.6rem 1.25rem;
+        font-size: 0.8125rem;
+      }
+
+      .portfolio-detail-btn svg {
+        width: 15px;
+        height: 15px;
+      }
+
+      #portfolioGrid {
+        gap: 1rem;
+      }
+    }
+
+    /* Large Desktop - Optimized Grid */
+    @media (min-width: 1536px) {
+      #portfolioGrid {
+        grid-template-columns: repeat(6, minmax(0, 1fr));
+        gap: 1.5rem;
+      }
+
+      .portfolio-item {
+        border-radius: 1.375rem;
       }
     }
   </style>
@@ -884,9 +967,6 @@
           <div class="section-header-line"></div>
           <h2 class="section-header-title">نمونه کارهای برتر</h2>
           <div class="section-header-badge">
-            <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20">
-              <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
-            </svg>
             <span>برترین‌ها</span>
           </div>
         </div>
@@ -1617,19 +1697,19 @@
                     <div class="portfolio-overlay">
                         <div class="portfolio-meta">
                            <div class="mb-2">
-                             <div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold" style="background: rgba(255, 255, 255, 0.25); backdrop-filter: blur(8px); border: 1px solid rgba(255, 255, 255, 0.3); color: white; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);">
+                             <div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold" style="background: rgba(255, 255, 255, 0.22); backdrop-filter: blur(10px); border: 1.5px solid rgba(255, 255, 255, 0.35); color: white; box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);">
                                <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20">
                                  <path d="M10.394 2.08a1 1 0 00-.788 0l-7 3a1 1 0 000 1.84L5.25 8.051a.999.999 0 01.356-.257l4-1.714a1 1 0 11.788 1.838L7.667 9.088l1.94.831a1 1 0 00.787 0l7-3a1 1 0 000-1.838l-7-3zM3.31 9.397L5 10.12v4.102a8.969 8.969 0 00-1.05-.174 1 1 0 01-.89-.89 11.115 11.115 0 01.25-3.762zM9.3 16.573A9.026 9.026 0 007 14.935v-3.957l1.818.78a3 3 0 002.364 0l5.508-2.361a11.026 11.026 0 01.25 3.762 1 1 0 01-.89.89 8.968 8.968 0 00-5.35 2.524 1 1 0 01-1.4 0zM6 18a1 1 0 001-1v-2.065a8.935 8.935 0 00-2-.712V17a1 1 0 001 1z"></path>
                                </svg>
                                ${category}
                              </div>
                            </div>
-                           <h4 class="text-white font-black text-base mb-1 leading-tight drop-shadow-lg" style="text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);">${title}</h4>
-                           <div class="flex items-center gap-1.5 text-emerald-200">
-                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"></path>
+                           <h4 class="text-white font-black text-base mb-1.5 leading-tight" style="text-shadow: 0 2px 12px rgba(0, 0, 0, 0.4), 0 1px 4px rgba(0, 0, 0, 0.3);">${title}</h4>
+                           <div class="flex items-center gap-1.5 text-white" style="opacity: 0.95;">
+                             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"></path>
                              </svg>
-                             <span class="text-sm font-bold drop-shadow">نمونه کار برتر</span>
+                             <span class="text-xs font-bold">نمونه کار برتر</span>
                            </div>
                         </div>
                     </div>
