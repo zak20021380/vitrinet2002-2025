@@ -780,18 +780,58 @@ if (!window.seller?.id) {
       // ---- رندر کارت موبایل (فقط نمایش در md و پایین‌تر) ----
       if (mobileList) {
         const card = document.createElement('div');
-        card.className = "flex items-center gap-3 bg-white rounded-xl shadow p-3 border border-gray-100";
+        card.className = "bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden transition-all hover:shadow-xl";
         card.innerHTML = `
-          <img src="${cover}" alt="" class="w-14 h-14 object-cover rounded-lg border" />
-          <div class="flex-1 flex flex-col gap-1">
-            <div class="font-bold text-[#10b981] text-[15px]">${prod.title}</div>
-            <div class="text-gray-600 text-xs">دسته: <span class="font-bold">${prod.category || '-'}</span></div>
-            <div class="text-[#0ea5e9] text-sm font-bold">قیمت: ${prod.price ? prod.price.toLocaleString('fa-IR') : '-'}</div>
-            <div class="text-xs text-gray-400 mt-1">برچسب‌ها: <span class="font-bold">${prod.tags && prod.tags.length ? prod.tags.join('، ') : '-'}</span></div>
-          </div>
-          <div class="flex flex-col gap-2">
-            <button class="bg-[#10b981] hover:bg-[#0ea5e9] text-white rounded-lg px-2 py-1 text-xs font-bold transition" data-action="edit-product" data-product-id="${prod._id}">ویرایش</button>
-            <button class="bg-red-500 hover:bg-red-600 text-white rounded-lg px-2 py-1 text-xs font-bold transition" data-action="delete-product" data-product-id="${prod._id}">حذف</button>
+          <div class="flex flex-col">
+            <!-- تصویر محصول -->
+            <div class="relative w-full h-48 bg-gradient-to-br from-gray-50 to-gray-100">
+              <img src="${cover}" alt="${prod.title}" class="w-full h-full object-cover" />
+              ${prod.tags && prod.tags.length ? `
+                <div class="absolute top-3 right-3 bg-[#10b981] text-white text-xs font-bold px-3 py-1.5 rounded-full shadow-lg">
+                  ${prod.tags[0]}
+                </div>
+              ` : ''}
+            </div>
+
+            <!-- اطلاعات محصول -->
+            <div class="p-4 space-y-3">
+              <!-- عنوان -->
+              <h3 class="font-bold text-gray-800 text-lg leading-tight line-clamp-2">${prod.title}</h3>
+
+              <!-- دسته‌بندی و قیمت -->
+              <div class="flex items-center justify-between gap-2 flex-wrap">
+                <div class="flex items-center gap-2 text-sm text-gray-600">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                    <path d="M3 7h18M3 12h18M3 17h18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                  </svg>
+                  <span class="font-medium">${prod.category || 'بدون دسته'}</span>
+                </div>
+                <div class="flex items-center gap-2">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z" fill="#0ea5e9"/>
+                    <path d="M12.5 7H11v6l5.25 3.15.75-1.23-4.5-2.67V7z" fill="#0ea5e9"/>
+                  </svg>
+                  <span class="text-[#0ea5e9] font-bold text-lg">${prod.price ? prod.price.toLocaleString('fa-IR') : '0'} تومان</span>
+                </div>
+              </div>
+
+              <!-- دکمه‌های عملیات -->
+              <div class="flex gap-2 pt-2 border-t border-gray-100">
+                <button class="flex-1 bg-gradient-to-r from-[#10b981] to-[#059669] hover:from-[#059669] hover:to-[#047857] text-white rounded-xl px-4 py-2.5 font-bold text-sm transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-2" data-action="edit-product" data-product-id="${prod._id}">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+                  ویرایش
+                </button>
+                <button class="flex-1 bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white rounded-xl px-4 py-2.5 font-bold text-sm transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-2" data-action="delete-product" data-product-id="${prod._id}">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                    <path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M10 11v6M14 11v6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+                  حذف
+                </button>
+              </div>
+            </div>
           </div>
         `;
         mobileList.appendChild(card);
