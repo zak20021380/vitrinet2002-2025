@@ -183,6 +183,11 @@
     const address = shop.address || 'آدرس ثبت نشده';
     const badge = shop.subcategory || shop.category || 'عمومی';
     const profileLink = `shop.html?id=${shop.id}`;
+
+    // Determine button text based on shop type
+    const isServiceShop = shop.category === 'خدمات' || (shop.category && shop.category.includes('خدمات'));
+    const buttonText = isServiceShop ? 'رزرو نوبت' : 'مشاهده فروشگاه';
+
     return `
       <article class="category-card">
         <div class="category-card__image">
@@ -195,7 +200,7 @@
             <svg class="w-4 h-4 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
             <span class="line-clamp-1">${address}</span>
           </div>
-          <a href="${profileLink}" class="category-card__cta">مشاهده پروفایل</a>
+          <a href="${profileLink}" class="category-card__cta">${buttonText}</a>
         </div>
       </article>
     `;
