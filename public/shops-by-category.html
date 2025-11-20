@@ -566,23 +566,26 @@
 
     .portfolio-detail-btn {
       align-self: flex-start;
-      background: rgba(255, 255, 255, 0.96);
-      backdrop-filter: blur(14px);
-      border: 1.75px solid rgba(16, 185, 129, 0.28);
-      padding: 0.55rem 1rem;
-      border-radius: 0.95rem;
+      background: rgba(255, 255, 255, 0.14);
+      backdrop-filter: blur(12px);
+      border: 1.25px solid rgba(255, 255, 255, 0.26);
+      padding: 0.5rem 0.9rem;
+      min-height: 38px;
+      border-radius: 0.9rem;
       font-weight: 800;
-      font-size: 0.82rem;
-      color: #0f766e;
+      font-size: 0.84rem;
+      color: #ffffff;
       cursor: pointer;
-      transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
       display: inline-flex;
       align-items: center;
       gap: 0.45rem;
-      box-shadow: 0 10px 24px rgba(0, 0, 0, 0.14);
+      box-shadow: 0 8px 18px rgba(0, 0, 0, 0.18);
       z-index: 15;
       white-space: nowrap;
       position: relative;
+      overflow: hidden;
+      isolation: isolate;
     }
 
     .portfolio-detail-btn::after {
@@ -591,7 +594,7 @@
       inset: 0;
       border-radius: inherit;
       padding: 1px;
-      background: linear-gradient(135deg, rgba(16, 185, 129, 0.7), rgba(14, 165, 233, 0.7));
+      background: linear-gradient(135deg, rgba(16, 185, 129, 0.9), rgba(14, 165, 233, 0.9));
       mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
       -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
       -webkit-mask-composite: xor;
@@ -602,9 +605,9 @@
     }
 
     .portfolio-detail-btn svg {
-      width: 15px;
-      height: 15px;
-      transition: transform 0.3s ease;
+      width: 14px;
+      height: 14px;
+      transition: transform 0.25s ease;
       color: inherit;
     }
 
@@ -612,21 +615,32 @@
       background: linear-gradient(135deg, #10b981 0%, #0ea5e9 100%);
       border-color: transparent;
       color: #ffffff;
-      transform: translateY(-2px) scale(1.03);
-      box-shadow: 0 16px 30px rgba(16, 185, 129, 0.35);
+      transform: translateY(-1px);
+      box-shadow: 0 12px 22px rgba(16, 185, 129, 0.28);
     }
 
-    .portfolio-detail-btn:hover::after {
-      opacity: 1;
+    .portfolio-detail-btn:hover::after { opacity: 1; }
+
+    .portfolio-detail-btn:hover svg { transform: translateX(-1px); }
+
+    .portfolio-detail-btn:active { transform: translateY(0); }
+
+    .portfolio-like-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.45rem;
+      padding: 0.45rem 0.85rem;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.18);
+      border: 1.2px solid rgba(255, 255, 255, 0.26);
+      font-size: 0.85rem;
+      font-weight: 800;
+      color: #ffffff;
+      backdrop-filter: blur(4px);
+      box-shadow: 0 8px 18px rgba(0, 0, 0, 0.18);
     }
 
-    .portfolio-detail-btn:hover svg {
-      transform: translateX(-2px);
-    }
-
-    .portfolio-detail-btn:active {
-      transform: translateY(-0.5px) scale(1.005);
-    }
+    .portfolio-like-pill svg { width: 16px; height: 16px; color: #f87171; }
 
     .like-badge {
       display: inline-flex;
@@ -697,6 +711,17 @@
       .like-badge {
         padding: 0.6rem 1rem;
         font-size: 0.875rem;
+      }
+
+      .portfolio-like-pill {
+        padding: 0.4rem 0.75rem;
+        font-size: 0.78rem;
+        gap: 0.35rem;
+      }
+
+      .portfolio-detail-btn {
+        padding: 0.45rem 0.8rem;
+        font-size: 0.8rem;
       }
 
       .seller-link-btn {
@@ -1738,16 +1763,23 @@
          const sampleShops = hasRealPortfolios
            ? validPortfolios.slice(0, 5).map(item => {
                const shopId = item?.shop?.id || item?.shopId || item?.id;
+               const likeCount = typeof item?.likes === 'number'
+                 ? item.likes
+                 : (typeof item?.likeCount === 'number' ? item.likeCount : 0);
                return {
                  id: shopId,
                  storename: item?.title || item?.shop?.name || 'نمونه کار',
                  category: item?.categoryName || item?.shop?.category || 'نمونه کار',
                  image: item?.image,
                  shopType: 'portfolio',
+                 likes: likeCount,
                  portfolioMeta: { title: item?.title, shopId }
                };
              })
-           : allShops.slice(0, 5);
+           : allShops.slice(0, 5).map(shop => ({
+               ...shop,
+               likes: typeof shop?.likes === 'number' ? shop.likes : 0
+             }));
 
          state.hasPortfolioSamples = sampleShops.length > 0;
 
@@ -1761,6 +1793,7 @@
                 const buttonAttrs = targetId
                   ? `onclick="openPortfolioModal('${targetId}')"`
                   : 'type="button" disabled';
+                const likeCount = typeof shop?.likes === 'number' ? shop.likes : 0;
                return `
                 <div class="portfolio-item group" data-shop-id="${targetId || ''}">
                       <img src="${imageSrc}" alt="${title}" onerror="this.src='https://placehold.co/600x600/f1f5f9/10b981?text=${encodeURIComponent(title)}'">
@@ -1775,12 +1808,12 @@
                           </div>
                           <div class="portfolio-meta">
                              <h4 class="text-white font-black text-base mb-2 leading-tight" style="text-shadow: 0 2px 12px rgba(0, 0, 0, 0.4), 0 1px 4px rgba(0, 0, 0, 0.3);">${title}</h4>
-                             <div class="flex items-center justify-between gap-2 text-white" style="opacity: 0.94;">
-                               <div class="flex items-center gap-1.5 text-xs font-semibold">
-                                 <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20">
-                                   <path d="M2.003 5.884l8-3a1 1 0 01.994 0l8 3A1 1 0 0119 6.816v6.368a1 1 0 01-.643.93l-8 3a1 1 0 01-.714 0l-8-3A1 1 0 011 13.184V6.816a1 1 0 011.003-.932z"></path>
+                             <div class="flex items-center justify-between gap-3 text-white" style="opacity: 0.94;">
+                               <div class="portfolio-like-pill">
+                                 <svg fill="currentColor" viewBox="0 0 24 24">
+                                   <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"></path>
                                  </svg>
-                                 <span>جزئیات سریع</span>
+                                 <span>${likeCount?.toLocaleString ? likeCount.toLocaleString('fa-IR') : likeCount}</span>
                                </div>
                                <button class="portfolio-detail-btn" ${buttonAttrs}>
                                   <span>مشاهده</span>
@@ -1792,7 +1825,7 @@
                           </div>
                       </div>
                     </div>
-                 `;
+                `;
                }).join('');
              updateTypeFilterViews();
          } else if (portfolioSec) {
