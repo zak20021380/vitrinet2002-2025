@@ -97,7 +97,8 @@
     navButtons: document.querySelectorAll('.nav-item'),
     categoryChartCanvas: document.getElementById('categoryChart'),
     paymentChartCanvas: document.getElementById('paymentChart'),
-    amountInput: document.getElementById('amountInput')
+    amountInput: document.getElementById('amountInput'),
+    entrySubmitButton: document.querySelector('#entryForm button[type="submit"]')
   };
 
   // ============================================================================
@@ -413,6 +414,39 @@
     }
   };
 
+  const updateEntry = async (id, payload) => {
+    try {
+      const response = await fetch(`${ACCOUNTANT_API}/${id}`, {
+        method: 'PUT',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(payload)
+      });
+
+      if (response.status === 401) {
+        handleUnauthorized('برای ویرایش تراکنش ابتدا وارد حساب خود شوید.');
+        const err = new Error('UNAUTHENTICATED');
+        err.code = 401;
+        throw err;
+      }
+
+      if (!response.ok) {
+        const error = await response.json().catch(() => ({ message: 'ویرایش تراکنش با خطا مواجه شد.' }));
+        const err = new Error(error.message || 'FAILED_UPDATE');
+        err.code = response.status;
+        throw err;
+      }
+
+      const data = await response.json();
+      return normaliseEntryShape(data.entry || payload);
+    } catch (error) {
+      console.error('Failed to update accountant entry:', error);
+      throw error;
+    }
+  };
+
   // ============================================================================
   // RENDERING FUNCTIONS - MODERNIZED
   // ============================================================================
@@ -575,9 +609,87 @@
     });
   };
 
+  const handleDeleteEntry = async (id) => {
+    if (!id) return;
+
+    const confirmed = window.confirm('آیا از حذف این تراکنش مطمئن هستید؟');
+    if (!confirmed) return;
+
+    try {
+      const response = await fetch(`${ACCOUNTANT_API}/${id}`, {
+        method: 'DELETE',
+        credentials: 'include'
+      });
+
+      if (!response.ok) {
+        const error = await response.json().catch(() => ({ message: 'حذف تراکنش با خطا مواجه شد.' }));
+        throw new Error(error.message || 'FAILED_DELETE');
+      }
+
+      const card = document.getElementById(`card-${id}`);
+      if (card) {
+        card.style.transition = 'opacity 300ms ease';
+        card.style.opacity = '0';
+        setTimeout(() => {
+          card.remove();
+          loadEntries();
+        }, 320);
+      } else {
+        await loadEntries();
+      }
+    } catch (error) {
+      console.error('Failed to delete entry:', error);
+      showFormMessage(error?.message || 'امکان حذف تراکنش وجود ندارد.', 'error');
+    }
+  };
+
+  const handleEditEntry = (entry = {}) => {
+    if (!elements.entryForm) return;
+
+    openModal();
+
+    const form = elements.entryForm;
+    form.dataset.editingId = entry.id;
+
+    const setValue = (selector, value) => {
+      const field = form.querySelector(selector);
+      if (field) {
+        field.value = value ?? '';
+      }
+    };
+
+    setValue('input[name="title"]', entry.title || '');
+    setValue('input[name="amount"]', entry.amount ?? '');
+    setValue('input[name="recordedAt"]', formatDateForInput(entry.recordedAt));
+    setValue('select[name="category"]', entry.category || 'عمومی');
+    setValue('select[name="paymentMethod"]', entry.paymentMethod || 'cash');
+    setValue('select[name="status"]', entry.status || 'paid');
+    setValue('input[name="counterpartyType"]', entry.counterpartyType || 'customer');
+    setValue('input[name="counterpartyName"]', entry.counterpartyName || '');
+    setValue('input[name="referenceNumber"]', entry.referenceNumber || '');
+    setValue('input[name="dueDate"]', entry.dueDate ? formatDateForInput(entry.dueDate) : '');
+    setValue('input[name="tags"]', Array.isArray(entry.tags) ? entry.tags.join('، ') : entry.tags || '');
+    setValue('textarea[name="description"]', entry.description || '');
+
+    const typeInput = form.querySelector(`input[name="type"][value="${entry.type === 'expense' ? 'expense' : 'income'}"]`);
+    if (typeInput) {
+      typeInput.checked = true;
+    }
+
+    if (elements.entrySubmitButton) {
+      elements.entrySubmitButton.innerHTML = '<i class="ri-edit-2-line"></i> ویرایش تراکنش';
+    }
+
+    if (elements.advancedFields && elements.advancedToggle) {
+      elements.advancedFields.classList.add('show');
+      elements.advancedToggle.classList.add('active');
+    }
+  };
+
   const renderTransactionCard = (entry) => {
     const card = document.createElement('div');
     card.className = `transaction-card ${entry.type}`;
+    card.id = `card-${entry.id}`;
 
     const header = document.createElement('div');
     header.className = 'transaction-header';
@@ -620,8 +732,31 @@
     statusBadge.textContent = statusLabels[entry.computedStatus || entry.status] || 'تسویه';
     details.appendChild(statusBadge);
 
+    const footer = document.createElement('div');
+    footer.className = 'transaction-footer';
+
+    const actions = document.createElement('div');
+    actions.className = 'transaction-actions';
+
+    const editButton = document.createElement('button');
+    editButton.type = 'button';
+    editButton.className = 'action-button edit';
+    editButton.innerHTML = '<i class="ri-pencil-line"></i> ویرایش';
+    editButton.onclick = () => handleEditEntry(entry);
+
+    const deleteButton = document.createElement('button');
+    deleteButton.type = 'button';
+    deleteButton.className = 'action-button delete';
+    deleteButton.innerHTML = '<i class="ri-delete-bin-6-line"></i> حذف';
+    deleteButton.onclick = () => handleDeleteEntry(entry.id);
+
+    actions.appendChild(editButton);
+    actions.appendChild(deleteButton);
+    footer.appendChild(actions);
+
     card.appendChild(header);
     card.appendChild(details);
+    card.appendChild(footer);
 
     return card;
   };
@@ -668,6 +803,9 @@
       elements.addModal.classList.remove('show');
       document.body.style.overflow = '';
     }
+
+    resetEntryFormState(true);
+    clearFormMessage();
   };
 
   const toggleFilters = () => {
@@ -735,6 +873,26 @@
       renderSummary(summary, entries);
     } catch (error) {
       showFormMessage('خطا در دریافت تراکنش‌ها.', 'error');
+    }
+  };
+
+  const resetEntryFormState = (shouldResetFields = false) => {
+    if (!elements.entryForm) return;
+
+    if (shouldResetFields) {
+      elements.entryForm.reset();
+      setDefaultDateValue();
+    }
+
+    delete elements.entryForm.dataset.editingId;
+
+    if (elements.entrySubmitButton) {
+      elements.entrySubmitButton.innerHTML = '<i class="ri-save-line"></i> ذخیره تراکنش';
+    }
+
+    if (elements.advancedFields && elements.advancedToggle) {
+      elements.advancedFields.classList.remove('show');
+      elements.advancedToggle.classList.remove('active');
     }
   };
 
@@ -890,6 +1048,9 @@
         const dueDate = formData.get('dueDate');
         const tagsInput = (formData.get('tags') || '').toString().trim();
 
+        const isEditing = Boolean(elements.entryForm.dataset.editingId);
+        const editingId = elements.entryForm.dataset.editingId;
+
         if (!title) {
           showFormMessage('لطفاً عنوان تراکنش را وارد کنید.', 'error');
           return;
@@ -917,12 +1078,17 @@
         };
 
         try {
-          await createEntry(payload);
-          showFormMessage('تراکنش با موفقیت ثبت شد! ✓', 'success');
-          elements.entryForm.reset();
-          setDefaultDateValue();
+          if (isEditing && editingId) {
+            await updateEntry(editingId, payload);
+            showFormMessage('تراکنش با موفقیت ویرایش شد! ✓', 'success');
+          } else {
+            await createEntry(payload);
+            showFormMessage('تراکنش با موفقیت ثبت شد! ✓', 'success');
+          }
+
+          resetEntryFormState(true);
           await loadEntries();
-          
+
           // Close modal after success
           setTimeout(() => {
             closeModal();
@@ -932,6 +1098,12 @@
           const message = error?.message || 'خطا در ذخیره‌سازی.';
           showFormMessage(message, 'error');
         }
+      });
+
+      elements.entryForm.addEventListener('reset', () => {
+        resetEntryFormState(false);
+        setDefaultDateValue();
+        clearFormMessage();
       });
     }
 
