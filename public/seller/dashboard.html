@@ -378,6 +378,18 @@
     font-size: 12px;
   }
 
+  .discount-quantity {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 10px;
+    border-radius: 999px;
+    background: #fff7ed;
+    color: #ea580c;
+    font-weight: 700;
+    font-size: 12px;
+  }
+
   .discount-modal {
     position: fixed;
     inset: 0;
@@ -619,6 +631,13 @@
     color: #ef4444;
     font-size: 12px;
     margin-top: 4px;
+  }
+
+  .discount-helper {
+    color: #475569;
+    font-size: 12px;
+    margin-top: 4px;
+    line-height: 1.7;
   }
 
   body.sidebar-expanded {
@@ -2776,7 +2795,7 @@
         <span id="discountProductName">تنظیم تخفیف</span>
       </h3>
       <p class="text-gray-600 text-sm mb-3 leading-7" id="discountModalDesc">
-        قیمت جدید را ثبت کنید و محدوده زمانی تعیین کنید؛ بعد از ذخیره، تخفیف به صورت خودکار فعال شده و وضعیت محصول بلافاصله در لیست به‌روزرسانی می‌شود.
+        قیمت جدید را ثبت کنید، محدوده زمانی را مشخص کنید و سقف تعداد فروش با قیمت تخفیف را تعیین نمایید. بعد از ذخیره، تخفیف به صورت خودکار فعال شده و وضعیت محصول بلافاصله در لیست به‌روزرسانی می‌شود.
       </p>
 
       <div class="discount-modal__grid">
@@ -2789,6 +2808,13 @@
           <input id="discountNewPrice" class="discount-input" type="number" min="1" required inputmode="decimal" aria-describedby="discountPriceError" />
           <div id="discountPriceError" class="discount-error" role="alert" style="display:none"></div>
         </div>
+      </div>
+
+      <div class="mt-3">
+        <label for="discountQuantityLimit">سقف تعداد فروش با تخفیف <span class="text-red-500">*</span></label>
+        <input id="discountQuantityLimit" class="discount-input" type="number" min="1" required inputmode="numeric" aria-describedby="discountQuantityHelper discountQuantityError" />
+        <div id="discountQuantityHelper" class="discount-helper">فقط این تعداد (عدد صحیح، مثلاً ۵۰) با قیمت تخفیفی فروش می‌رود. بعد از اتمام، قیمت به حالت اصلی برمی‌گردد.</div>
+        <div id="discountQuantityError" class="discount-error" role="alert" style="display:none"></div>
       </div>
 
       <div class="discount-modal__grid mt-3">
@@ -3010,6 +3036,7 @@
     const discountProductName = document.getElementById('discountProductName');
     const discountOriginalPrice = document.getElementById('discountOriginalPrice');
     const discountNewPrice = document.getElementById('discountNewPrice');
+    const discountQuantityLimit = document.getElementById('discountQuantityLimit');
     const discountStart = document.getElementById('discountStart');
     const discountEnd = document.getElementById('discountEnd');
     const discountStartDisplay = document.getElementById('discountStartDisplay');
@@ -3017,6 +3044,7 @@
     const discountStartPreview = document.getElementById('discountStartPreview');
     const discountEndPreview = document.getElementById('discountEndPreview');
     const priceError = document.getElementById('discountPriceError');
+    const discountQuantityError = document.getElementById('discountQuantityError');
     const discountEndError = document.getElementById('discountEndError');
     const saveDiscountBtn = document.getElementById('saveDiscountBtn');
     const discountFeedback = document.getElementById('discountFeedback');
@@ -3100,7 +3128,14 @@
       const hasDiscount = normalizedDiscount != null;
       const start = product.discountStart || product.start || null;
       const end = product.discountEnd || product.end || null;
+      const limit = product.discountQuantityLimit != null ? Number(product.discountQuantityLimit) : null;
+      const sold = Number(product.discountQuantitySold || 0);
+      const remainingQty = limit != null ? Math.max(Math.floor(limit - sold), 0) : null;
       const isActive = product.discountActive != null ? Boolean(product.discountActive) : hasDiscount;
+      const now = new Date();
+      const expiredByTime = end ? new Date(end) <= now : false;
+      const notStarted = start ? new Date(start) > now : false;
+      const soldOut = limit != null ? remainingQty <= 0 : false;
 
       return {
         id: product._id || product.id,
@@ -3109,7 +3144,10 @@
         discountPrice: normalizedDiscount,
         start,
         end,
-        active: Boolean(isActive && hasDiscount)
+        limit,
+        sold,
+        remainingQty,
+        active: Boolean(isActive && hasDiscount && !expiredByTime && !soldOut && !notStarted)
       };
     };
 
@@ -3122,6 +3160,19 @@
       if (days > 0) return `${days} روز و ${hours} ساعت باقی مانده`;
       const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
       return `${hours} ساعت و ${minutes} دقیقه باقی مانده`;
+    };
+
+    const buildRemainingBadges = (product) => {
+      if (!product?.active) return '';
+      const badges = [];
+      if (product.end) {
+        badges.push(`<span class="discount-timer"><i class="ri-timer-line" aria-hidden="true"></i>${remainingTime(product.end)}</span>`);
+      }
+      if (product.remainingQty != null) {
+        badges.push(`<span class="discount-quantity"><i class="ri-archive-stack-line" aria-hidden="true"></i>${product.remainingQty} عدد باقی مانده</span>`);
+      }
+      if (!badges.length) return '';
+      return `<div class="flex flex-wrap gap-2 mt-1" aria-label="وضعیت محدودیت تخفیف">${badges.join('')}</div>`;
     };
 
     async function fetchDiscountProducts() {
@@ -3169,12 +3220,12 @@
               const status = isActive
                 ? `<span class="discount-pill"><i class="ri-flashlight-line" aria-hidden="true"></i> تخفیف فعال</span>`
                 : `<span class="discount-pill off">بدون تخفیف</span>`;
-              const timer = isActive && product.end ? `<div class="discount-timer" aria-label="زمان باقی مانده"><i class="ri-timer-line" aria-hidden="true"></i>${remainingTime(product.end)}</div>` : '';
+              const remainingChips = isActive ? buildRemainingBadges(product) : '';
 
               return `<tr class="discount-row">
                 <td class="font-bold">${product.name}</td>
                 <td>${priceView}</td>
-                <td class="space-y-1">${status}${timer ? `<div>${timer}</div>` : ''}</td>
+                <td class="space-y-1">${status}${remainingChips}</td>
                 <td class="text-left">
                   <div class="discount-actions">
                     <button type="button" class="discount-cta" data-discount-id="${product.id}">
@@ -3197,6 +3248,7 @@
           discountMobileList.innerHTML = discountProducts
             .map((product) => {
               const isActive = product.active && product.discountPrice;
+              const remainingChips = isActive ? buildRemainingBadges(product) : '';
               return `<div class="discount-mobile-card">
                 <div class="flex-1">
                   <div class="discount-mobile-title">${product.name}</div>
@@ -3206,8 +3258,8 @@
                   </div>
                   <div class="discount-meta">
                     <span class="${isActive ? 'discount-pill' : 'discount-pill off'}">${isActive ? 'تخفیف فعال' : 'بدون تخفیف'}</span>
-                    ${isActive && product.end ? `<span class="discount-timer"><i class="ri-timer-line" aria-hidden="true"></i>${remainingTime(product.end)}</span>` : ''}
                   </div>
+                  ${remainingChips}
                 </div>
                 <div class="flex flex-col gap-2">
                   <button type="button" class="discount-cta" data-discount-id="${product.id}">تنظیم / ویرایش</button>
@@ -3258,6 +3310,28 @@
       priceError.textContent = '';
       priceError.style.display = 'none';
       discountNewPrice.classList.remove('error');
+      return true;
+    }
+
+    function validateQuantity() {
+      if (!discountQuantityLimit) return true;
+      const rawValue = discountQuantityLimit.value;
+      const value = Number(rawValue);
+      if (!rawValue) {
+        discountQuantityError.textContent = 'سقف تعداد تخفیف را وارد کنید.';
+        discountQuantityError.style.display = 'block';
+        discountQuantityLimit.classList.add('error');
+        return false;
+      }
+      if (!Number.isInteger(value) || value <= 0) {
+        discountQuantityError.textContent = 'تعداد باید یک عدد صحیح بزرگ‌تر از صفر باشد.';
+        discountQuantityError.style.display = 'block';
+        discountQuantityLimit.classList.add('error');
+        return false;
+      }
+      discountQuantityError.textContent = '';
+      discountQuantityError.style.display = 'none';
+      discountQuantityLimit.classList.remove('error');
       return true;
     }
 
@@ -3336,6 +3410,7 @@
           : defaultSaveLabel;
       }
       discountNewPrice?.setAttribute('aria-busy', String(isSaving));
+      discountQuantityLimit?.setAttribute('aria-busy', String(isSaving));
       discountEnd?.setAttribute('aria-busy', String(isSaving));
     }
 
@@ -3344,8 +3419,9 @@
       if (product?.active && product.discountPrice) {
         const endDate = product.end ? new Date(product.end) : null;
         const endLabel = endDate ? `تا ${endDate.toLocaleDateString('fa-IR')}` : 'فعال';
+        const quantityLabel = product.remainingQty != null ? ` | ${product.remainingQty} عدد باقی مانده` : '';
         discountStatus.classList.remove('off');
-        discountStatus.innerHTML = `<i class="ri-flashlight-fill" aria-hidden="true"></i><span>تخفیف فعال ${endLabel}</span>`;
+        discountStatus.innerHTML = `<i class="ri-flashlight-fill" aria-hidden="true"></i><span>تخفیف فعال ${endLabel}${quantityLabel}</span>`;
       } else {
         discountStatus.classList.add('off');
         discountStatus.innerHTML = '<i class="ri-information-line" aria-hidden="true"></i><span>بدون تخفیف فعال</span>';
@@ -3387,7 +3463,9 @@
           discountPrice: null,
           discountStart: null,
           discountEnd: null,
-          discountActive: false
+          discountActive: false,
+          discountQuantityLimit: null,
+          discountQuantitySold: 0
         };
 
         upsertLocalProduct(payload);
@@ -3413,8 +3491,15 @@
         priceError.style.display = 'none';
         discountNewPrice.classList.remove('error');
       }
+      if (discountQuantityLimit) {
+        discountQuantityLimit.value = product.limit != null ? product.limit : '';
+        discountQuantityLimit.placeholder = product.limit != null ? product.limit : 'مثلاً ۲۰';
+        discountQuantityError.textContent = '';
+        discountQuantityError.style.display = 'none';
+        discountQuantityLimit.classList.remove('error');
+      }
       const now = new Date();
-      setDateInput(discountStart, discountStartDisplay, now, true);
+      setDateInput(discountStart, discountStartDisplay, product.start || now, true);
       setDateInput(discountEnd, discountEndDisplay, product.end);
       updateModalStatus(product);
       validateEnd();
@@ -3465,8 +3550,9 @@
       const product = discountProducts.find((p) => p.id === currentProductId);
       if (!product) return;
       const isPriceValid = validatePrice(product);
+      const isQuantityValid = validateQuantity();
       const isEndValid = validateEnd();
-      if (!isPriceValid || !isEndValid) return;
+      if (!isPriceValid || !isEndValid || !isQuantityValid) return;
 
       const startDate = getDateFromInput(discountStart, new Date());
       if (Number.isNaN(startDate.getTime())) {
@@ -3488,7 +3574,8 @@
             body: JSON.stringify({
               priceAfterDiscount: Number(discountNewPrice.value),
               start: startDate.toISOString(),
-              end: endDate.toISOString()
+              end: endDate.toISOString(),
+              quantityLimit: Number(discountQuantityLimit.value)
             })
           })
         );
@@ -3502,7 +3589,9 @@
           discountPrice: Number(discountNewPrice.value),
           discountStart: startDate,
           discountEnd: endDate,
-          discountActive: true
+          discountActive: true,
+          discountQuantityLimit: Number(discountQuantityLimit.value),
+          discountQuantitySold: 0
         };
 
         const normalized = normalizeProduct(payload);
@@ -3521,6 +3610,8 @@
       const product = discountProducts.find((p) => p.id === currentProductId);
       if (product) validatePrice(product);
     });
+
+    discountQuantityLimit?.addEventListener('input', validateQuantity);
 
     discountStart?.addEventListener('input', syncDatePreviews);
     discountStart?.addEventListener('change', syncDatePreviews);

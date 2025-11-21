@@ -44,6 +44,48 @@ exports.addProduct = async (req, res) => {
   }
 };
 
+function deactivateDiscount(product) {
+  if (!product) return;
+  product.discountPrice = null;
+  product.discountStart = null;
+  product.discountEnd = null;
+  product.discountActive = false;
+  product.discountQuantityLimit = null;
+  product.discountQuantitySold = 0;
+}
+
+async function enforceDiscountLifecycle(product, now = new Date()) {
+  if (!product?.discountActive || product.discountPrice == null) return false;
+  const limit = product.discountQuantityLimit;
+  const sold = Number(product.discountQuantitySold || 0);
+  const endDate = product.discountEnd ? new Date(product.discountEnd) : null;
+  const expiredByTime = endDate ? endDate.getTime() <= now.getTime() : false;
+  const hasQuantityLimit = limit != null && Number.isFinite(Number(limit));
+  const soldOut = hasQuantityLimit ? sold >= Number(limit) : false;
+
+  if (expiredByTime || soldOut) {
+    deactivateDiscount(product);
+    await product.save();
+    return true;
+  }
+  return false;
+}
+
+function buildProductResponse(req, doc) {
+  const p = typeof doc?.toObject === 'function' ? doc.toObject() : doc;
+  const idx = Number.isInteger(p.mainImageIndex) ? p.mainImageIndex : 0;
+  const mainImg = (p.images?.length ? (p.images[idx] || p.images[0]) : '');
+  return {
+    ...p,
+    image: makeFullUrl(req, mainImg),
+    shopName: p.sellerId?.storename || '',
+    seller: p.sellerId || {},
+    sellerCategory: p.sellerId?.category || '',
+    sellerLocation: p.sellerId?.address || p.sellerId?.city || '—',
+    sellerId: p.sellerId?._id?.toString() || p.sellerId
+  };
+}
+
 // ساخت یا به‌روزرسانی تخفیف محصول
 exports.upsertDiscount = async (req, res) => {
   try {
@@ -53,7 +95,7 @@ exports.upsertDiscount = async (req, res) => {
       return res.status(404).json({ message: 'محصول پیدا نشد!' });
     }
 
-    const { priceAfterDiscount, start, end } = req.body || {};
+    const { priceAfterDiscount, start, end, quantityLimit } = req.body || {};
     const discountPrice = Number(priceAfterDiscount);
     if (!Number.isFinite(discountPrice) || discountPrice <= 0) {
       return res.status(400).json({ message: 'قیمت بعد از تخفیف نامعتبر است.' });
@@ -78,10 +120,20 @@ exports.upsertDiscount = async (req, res) => {
       return res.status(400).json({ message: 'زمان پایان باید بعد از زمان شروع باشد.' });
     }
 
+    const normalizedQuantity = Number.isInteger(Number(quantityLimit))
+      ? Number(quantityLimit)
+      : Math.floor(Number(quantityLimit));
+
+    if (!Number.isFinite(normalizedQuantity) || normalizedQuantity <= 0) {
+      return res.status(400).json({ message: 'سقف تعداد تخفیف باید یک عدد صحیح بزرگ‌تر از صفر باشد.' });
+    }
+
     product.discountPrice = discountPrice;
     product.discountStart = startDate;
     product.discountEnd = endDate;
     product.discountActive = true;
+    product.discountQuantityLimit = normalizedQuantity;
+    product.discountQuantitySold = 0;
 
     await product.save();
 
@@ -101,10 +153,7 @@ exports.removeDiscount = async (req, res) => {
       return res.status(404).json({ message: 'محصول پیدا نشد!' });
     }
 
-    product.discountPrice = null;
-    product.discountStart = null;
-    product.discountEnd = null;
-    product.discountActive = false;
+    deactivateDiscount(product);
 
     await product.save();
 
@@ -121,26 +170,18 @@ exports.getProducts = async (req, res) => {
   try {
     const filter = req.query.sellerId ? { sellerId: req.query.sellerId } : {};
 
-    const raw = await Product.find(filter)
+    const now = new Date();
+    const docs = await Product.find(filter)
       .sort({ createdAt: -1 })
       .populate({
         path: 'sellerId',
         select: 'storename ownerName address shopurl ownerFirstname ownerLastname category city'
-      })
-      .lean();
+      });
 
-    const products = raw.map(p => {
-      const idx      = Number.isInteger(p.mainImageIndex) ? p.mainImageIndex : 0;
-      const mainImg  = (p.images?.length ? (p.images[idx] || p.images[0]) : '');
-      return {
-        ...p,
-        image: makeFullUrl(req, mainImg),               // ✅ عکس شاخص
-        shopName: p.sellerId?.storename || '',          // ✅ نام فروشگاه
-        seller: p.sellerId || {},                       // ⚙️ همان خروجی قبلی
-        sellerCategory: p.sellerId?.category || '',
-        sellerId: p.sellerId?._id?.toString() || p.sellerId
-      };
-    });
+    const products = await Promise.all(docs.map(async (doc) => {
+      await enforceDiscountLifecycle(doc, now);
+      return buildProductResponse(req, doc);
+    }));
 
     res.json(products);
   } catch (err) {
@@ -209,15 +250,17 @@ exports.getProductById = async (req, res) => {
       .populate({
         path: 'sellerId',
         select: 'storename ownerName address shopurl ownerFirstname ownerLastname phone logo category city'
-      })
-      .lean();
+      });
 
     if (!product) return res.status(404).json({ message: 'محصول پیدا نشد!' });
 
-    // اضافه کردن اطلاعات seller به خروجی
-    product.seller = product.sellerId || {};
+    await enforceDiscountLifecycle(product);
+    const payload = buildProductResponse(req, product);
 
-    res.json(product);
+    // اضافه کردن اطلاعات seller به خروجی
+    payload.seller = payload.seller || payload.sellerId || {};
+
+    res.json(payload);
   } catch (err) {
     res.status(500).json({ message: 'خطا در دریافت محصول', error: err.message });
   }
@@ -232,28 +275,19 @@ exports.getProductById = async (req, res) => {
 // گرفتن جدیدترین محصولات
 exports.getLatestProducts = async (req, res) => {
   try {
-    const raw = await Product.find()
+    const now = new Date();
+    const docs = await Product.find()
       .sort({ createdAt: -1 })
       .limit(10)
       .populate({
         path: 'sellerId',
         select: 'storename ownerName address shopurl ownerFirstname ownerLastname category city'
-      })
-      .lean();
+      });
 
-    const products = raw.map(p => {
-      const idx      = Number.isInteger(p.mainImageIndex) ? p.mainImageIndex : 0;
-      const mainImg  = (p.images?.length ? (p.images[idx] || p.images[0]) : '');
-      return {
-        ...p,
-        image: makeFullUrl(req, mainImg),               // ✅ عکس شاخص
-        shopName: p.sellerId?.storename || '',          // ✅ نام فروشگاه
-        seller: p.sellerId || {},                       // ⚙️ همان خروجی قبلی
-        sellerCategory: p.sellerId?.category || '',
-        sellerLocation: p.sellerId?.address || p.sellerId?.city || '—',
-        sellerId: p.sellerId?._id?.toString() || p.sellerId
-      };
-    });
+    const products = await Promise.all(docs.map(async (doc) => {
+      await enforceDiscountLifecycle(doc, now);
+      return buildProductResponse(req, doc);
+    }));
 
     if (!products.length)
       return res.status(404).json({ success: false, message: 'محصولی یافت نشد' });
