@@ -3413,7 +3413,8 @@
         priceError.style.display = 'none';
         discountNewPrice.classList.remove('error');
       }
-      setDateInput(discountStart, discountStartDisplay, product.start, true);
+      const now = new Date();
+      setDateInput(discountStart, discountStartDisplay, now, true);
       setDateInput(discountEnd, discountEndDisplay, product.end);
       updateModalStatus(product);
       validateEnd();
@@ -3531,13 +3532,6 @@
     discountEnd?.addEventListener('change', () => {
       validateEnd();
       syncDatePreviews();
-    });
-
-    discountStartDisplay?.addEventListener('click', () => {
-      discountStart?.showPicker?.();
-    });
-    discountEndDisplay?.addEventListener('click', () => {
-      discountEnd?.showPicker?.();
     });
 
     quickButtons.forEach((btn) => {
