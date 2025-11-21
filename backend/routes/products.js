@@ -50,6 +50,16 @@ router.get('/shop/:shopurl', async (req, res) => {
 });
 
 // -----------------------------
+// ساخت/ویرایش تخفیف محصول
+// -----------------------------
+router.put('/:id/discount', /* authMiddleware */ productController.upsertDiscount);
+
+// -----------------------------
+// حذف تخفیف محصول
+// -----------------------------
+router.delete('/:id/discount', /* authMiddleware */ productController.removeDiscount);
+
+// -----------------------------
 // دریافت محصول تکی با آیدی
 // GET /api/products/:id
 // -----------------------------

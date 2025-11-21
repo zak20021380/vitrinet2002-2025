@@ -448,15 +448,97 @@
     margin-top: 12px;
   }
 
-  .discount-toggle {
+  .discount-footer__actions {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+  }
+
+  .discount-status {
     display: inline-flex;
     align-items: center;
     gap: 8px;
+    color: #0f172a;
+    font-weight: 700;
+    min-height: 20px;
+  }
+
+  .discount-status.off {
+    color: #94a3b8;
+  }
+
+  .discount-ghost {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 10px 14px;
+    border-radius: 12px;
+    border: 1px solid #fecdd3;
+    background: #fff1f2;
+    color: #ef4444;
+    font-weight: 800;
+    transition: transform 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease;
+  }
+
+  .discount-ghost:hover,
+  .discount-ghost:focus {
+    transform: translateY(-1px);
+    box-shadow: 0 10px 24px rgba(239, 68, 68, 0.18);
+    outline: none;
+  }
+
+  .discount-feedback {
+    margin-top: 10px;
     padding: 10px 12px;
     border-radius: 12px;
-    background: #f0fdf4;
+    font-weight: 700;
+    font-size: 13px;
+    display: none;
+  }
+
+  .discount-feedback.success {
+    display: block;
+    background: #ecfdf3;
     color: #0f9c66;
-    font-weight: 800;
+    border: 1px solid #bbf7d0;
+  }
+
+  .discount-feedback.error {
+    display: block;
+    background: #fef2f2;
+    color: #ef4444;
+    border: 1px solid #fecdd3;
+  }
+
+  .discount-cta:disabled,
+  .discount-ghost:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+  }
+
+  .discount-cta.loading::after {
+    content: '';
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    border: 2px solid rgba(255, 255, 255, 0.6);
+    border-top-color: #fff;
+    animation: spin 0.9s linear infinite;
+  }
+
+  .discount-cta.loading {
+    gap: 10px;
+  }
+
+  @keyframes spin {
+    from {
+      transform: rotate(0deg);
+    }
+    to {
+      transform: rotate(360deg);
+    }
   }
 
   .discount-modal__close {
@@ -2640,7 +2722,7 @@
         <span id="discountProductName">تنظیم تخفیف</span>
       </h3>
       <p class="text-gray-600 text-sm mb-3 leading-7" id="discountModalDesc">
-        قیمت جدید را ثبت کنید، محدوده زمانی تعیین کنید و تخفیف را فعال یا غیرفعال نمایید. بعد از ذخیره، وضعیت محصول بلافاصله در لیست به‌روزرسانی می‌شود.
+        قیمت جدید را ثبت کنید و محدوده زمانی تعیین کنید؛ بعد از ذخیره، تخفیف به صورت خودکار فعال شده و وضعیت محصول بلافاصله در لیست به‌روزرسانی می‌شود.
       </p>
 
       <div class="discount-modal__grid">
@@ -2663,6 +2745,7 @@
         <div>
           <label for="discountEnd">پایان تخفیف</label>
           <input id="discountEnd" class="discount-input" type="datetime-local" />
+          <div id="discountEndError" class="discount-error" role="alert" style="display:none"></div>
         </div>
       </div>
 
@@ -2673,16 +2756,20 @@
       </div>
 
       <div class="discount-modal__footer">
-        <label class="discount-toggle" for="discountActive">
-          <input id="discountActive" type="checkbox" class="accent-[#10b981]" />
-          فعال‌سازی تخفیف
-        </label>
+        <div class="discount-status" id="discountStatus" aria-live="polite"></div>
         <div class="flex-1"></div>
-        <button type="button" class="discount-cta" id="saveDiscountBtn">
-          <i class="ri-save-3-line" aria-hidden="true"></i>
-          ذخیره تخفیف
-        </button>
+        <div class="discount-footer__actions">
+          <button type="button" class="discount-ghost" id="deleteDiscountBtn" style="display:none;">
+            <i class="ri-close-circle-line" aria-hidden="true"></i>
+            حذف تخفیف
+          </button>
+          <button type="button" class="discount-cta" id="saveDiscountBtn">
+            <i class="ri-save-3-line" aria-hidden="true"></i>
+            ذخیره تخفیف
+          </button>
+        </div>
       </div>
+      <div id="discountFeedback" class="discount-feedback" role="status" aria-live="polite"></div>
     </div>
   </div>
 
@@ -2867,12 +2954,16 @@
     const discountNewPrice = document.getElementById('discountNewPrice');
     const discountStart = document.getElementById('discountStart');
     const discountEnd = document.getElementById('discountEnd');
-    const discountActive = document.getElementById('discountActive');
     const priceError = document.getElementById('discountPriceError');
+    const discountEndError = document.getElementById('discountEndError');
     const saveDiscountBtn = document.getElementById('saveDiscountBtn');
+    const deleteDiscountBtn = document.getElementById('deleteDiscountBtn');
+    const discountFeedback = document.getElementById('discountFeedback');
+    const discountStatus = document.getElementById('discountStatus');
     const quickButtons = document.querySelectorAll('[data-discount-days]');
     let currentProductId = null;
     let lastFocusedElement = null;
+    const defaultSaveLabel = saveDiscountBtn?.innerHTML;
 
     const buildApiUrl = (path) => {
       if (!path) return '';
@@ -2897,6 +2988,26 @@
 
     const formatPrice = (price) => `${new Intl.NumberFormat('fa-IR').format(Number(price) || 0)} تومان`;
 
+    const normalizeProduct = (product) => {
+      if (!product) return null;
+      const discountPrice = product.discountPrice != null ? Number(product.discountPrice) : null;
+      const normalizedDiscount = Number.isNaN(discountPrice) ? null : discountPrice;
+      const hasDiscount = normalizedDiscount != null;
+      const start = product.discountStart || product.start || null;
+      const end = product.discountEnd || product.end || null;
+      const isActive = product.discountActive != null ? Boolean(product.discountActive) : hasDiscount;
+
+      return {
+        id: product._id || product.id,
+        name: product.title || product.name || 'محصول بدون نام',
+        price: Number(product.price) || 0,
+        discountPrice: normalizedDiscount,
+        start,
+        end,
+        active: Boolean(isActive && hasDiscount)
+      };
+    };
+
     const remainingTime = (end) => {
       if (!end) return 'بدون زمان پایان';
       const diff = new Date(end) - new Date();
@@ -2920,18 +3031,7 @@
         }
         const products = await response.json();
         const normalized = Array.isArray(products)
-          ? products.map((product) => {
-              const discountPrice = product.discountPrice != null ? Number(product.discountPrice) : null;
-              return {
-                id: product._id || product.id,
-                name: product.title || product.name || 'محصول بدون نام',
-                price: Number(product.price) || 0,
-                discountPrice: discountPrice && !Number.isNaN(discountPrice) ? discountPrice : null,
-                start: product.discountStart || product.start || null,
-                end: product.discountEnd || product.end || null,
-                active: Boolean(discountPrice && !Number.isNaN(discountPrice))
-              };
-            })
+          ? products.map((product) => normalizeProduct(product)).filter(Boolean)
           : [];
 
         discountProducts.length = 0;
@@ -3042,9 +3142,91 @@
       return true;
     }
 
+    function setEndError(message = '') {
+      if (!discountEndError) return;
+      discountEndError.textContent = message;
+      discountEndError.style.display = message ? 'block' : 'none';
+      discountEnd?.classList.toggle('error', Boolean(message));
+    }
+
+    function validateEnd() {
+      if (!discountEnd) return true;
+      const startDate = discountStart.value ? new Date(discountStart.value) : new Date();
+
+      if (!discountEnd.value) {
+        setEndError('پایان تخفیف را وارد کنید.');
+        return false;
+      }
+
+      const endDate = new Date(discountEnd.value);
+      if (Number.isNaN(endDate.getTime())) {
+        setEndError('زمان پایان تخفیف معتبر نیست.');
+        return false;
+      }
+
+      if (endDate <= startDate) {
+        setEndError('زمان پایان باید بعد از شروع باشد.');
+        return false;
+      }
+
+      setEndError('');
+      return true;
+    }
+
+    function setFeedback(message = '', tone = '') {
+      if (!discountFeedback) return;
+      discountFeedback.textContent = message;
+      discountFeedback.className = 'discount-feedback';
+      if (message && tone) {
+        discountFeedback.classList.add(tone);
+      }
+    }
+
+    function setSaving(isSaving) {
+      if (saveDiscountBtn) {
+        saveDiscountBtn.disabled = isSaving;
+        saveDiscountBtn.classList.toggle('loading', isSaving);
+        saveDiscountBtn.innerHTML = isSaving
+          ? '<i class="ri-loader-4-line" aria-hidden="true"></i> در حال ذخیره...'
+          : defaultSaveLabel;
+      }
+      if (deleteDiscountBtn) {
+        deleteDiscountBtn.disabled = isSaving;
+      }
+      discountNewPrice?.setAttribute('aria-busy', String(isSaving));
+      discountEnd?.setAttribute('aria-busy', String(isSaving));
+    }
+
+    function updateModalStatus(product) {
+      if (!discountStatus) return;
+      if (product?.active && product.discountPrice) {
+        const endDate = product.end ? new Date(product.end) : null;
+        const endLabel = endDate ? `تا ${endDate.toLocaleDateString('fa-IR')}` : 'فعال';
+        discountStatus.classList.remove('off');
+        discountStatus.innerHTML = `<i class="ri-flashlight-fill" aria-hidden="true"></i><span>تخفیف فعال ${endLabel}</span>`;
+      } else {
+        discountStatus.classList.add('off');
+        discountStatus.innerHTML = '<i class="ri-information-line" aria-hidden="true"></i><span>بدون تخفیف فعال</span>';
+      }
+    }
+
+    function upsertLocalProduct(updatedProduct) {
+      const normalized = normalizeProduct(updatedProduct);
+      if (!normalized || !normalized.id) return;
+      const index = discountProducts.findIndex((p) => String(p.id) === String(normalized.id));
+      if (index >= 0) {
+        discountProducts[index] = normalized;
+      } else {
+        discountProducts.push(normalized);
+      }
+      renderDiscounts();
+    }
+
     function openModal(product) {
       currentProductId = product.id;
       lastFocusedElement = document.activeElement;
+      setFeedback('');
+      setEndError('');
       if (discountProductName) discountProductName.textContent = product.name;
       if (discountOriginalPrice) discountOriginalPrice.value = formatPrice(product.price);
       if (discountNewPrice) {
@@ -3053,8 +3235,12 @@
       }
       if (discountStart) discountStart.value = toLocalInputValue(product.start) || toLocalInputValue(new Date());
       if (discountEnd) discountEnd.value = toLocalInputValue(product.end);
-      if (discountActive) discountActive.checked = Boolean(product.active && product.discountPrice);
+      if (deleteDiscountBtn) {
+        deleteDiscountBtn.style.display = product.active && product.discountPrice ? 'inline-flex' : 'none';
+      }
+      updateModalStatus(product);
       validatePrice(product);
+      validateEnd();
 
       modal.classList.add('active');
       modal.setAttribute('aria-hidden', 'false');
@@ -3097,28 +3283,100 @@
       }
     }
 
-    saveDiscountBtn?.addEventListener('click', () => {
+    saveDiscountBtn?.addEventListener('click', async () => {
       const product = discountProducts.find((p) => p.id === currentProductId);
       if (!product) return;
-      const isValid = validatePrice(product);
-      if (!isValid) return;
-      const startDate = discountStart.value ? new Date(discountStart.value) : new Date();
-      const endDate = discountEnd.value ? new Date(discountEnd.value) : null;
+      const isPriceValid = validatePrice(product);
+      const isEndValid = validateEnd();
+      if (!isPriceValid || !isEndValid) return;
 
-      if (endDate && endDate <= startDate) {
-        priceError.textContent = 'زمان پایان باید بعد از شروع باشد.';
-        priceError.style.display = 'block';
-        discountEnd.classList.add('error');
+      const startDate = discountStart.value ? new Date(discountStart.value) : new Date();
+      if (Number.isNaN(startDate.getTime())) {
+        setEndError('زمان شروع تخفیف معتبر نیست.');
         return;
       }
-      discountEnd.classList.remove('error');
 
-      product.discountPrice = Number(discountNewPrice.value);
-      product.start = startDate.toISOString();
-      product.end = endDate ? endDate.toISOString() : null;
-      product.active = discountActive.checked;
-      renderDiscounts();
-      closeModal();
+      const endDate = new Date(discountEnd.value);
+
+      setSaving(true);
+      setFeedback('');
+
+      try {
+        const response = await fetch(
+          buildApiUrl(`/api/products/${product.id}/discount`),
+          withCredentials({
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              priceAfterDiscount: Number(discountNewPrice.value),
+              start: startDate.toISOString(),
+              end: endDate.toISOString()
+            })
+          })
+        );
+        const data = await response.json().catch(() => ({}));
+        if (!response.ok) {
+          throw new Error(data?.message || 'خطا در ذخیره تخفیف');
+        }
+
+        const payload = data.product || {
+          ...product,
+          discountPrice: Number(discountNewPrice.value),
+          discountStart: startDate,
+          discountEnd: endDate,
+          discountActive: true
+        };
+
+        const normalized = normalizeProduct(payload);
+        updateModalStatus(normalized);
+        if (deleteDiscountBtn) {
+          deleteDiscountBtn.style.display = normalized?.active && normalized.discountPrice ? 'inline-flex' : 'none';
+        }
+        upsertLocalProduct(payload);
+        setFeedback('تخفیف با موفقیت ذخیره و فعال شد.', 'success');
+        setTimeout(() => closeModal(), 350);
+      } catch (error) {
+        setFeedback(error?.message || 'خطا در ذخیره تخفیف', 'error');
+      } finally {
+        setSaving(false);
+      }
+    });
+
+    deleteDiscountBtn?.addEventListener('click', async () => {
+      const product = discountProducts.find((p) => p.id === currentProductId);
+      if (!product) return;
+      setSaving(true);
+      setFeedback('');
+
+      try {
+        const response = await fetch(
+          buildApiUrl(`/api/products/${product.id}/discount`),
+          withCredentials({ method: 'DELETE' })
+        );
+        const data = await response.json().catch(() => ({}));
+        if (!response.ok) {
+          throw new Error(data?.message || 'خطا در حذف تخفیف');
+        }
+
+        const payload = data.product || {
+          ...product,
+          discountPrice: null,
+          discountStart: null,
+          discountEnd: null,
+          discountActive: false
+        };
+
+        const normalized = normalizeProduct(payload);
+        updateModalStatus(normalized);
+        if (deleteDiscountBtn) deleteDiscountBtn.style.display = 'none';
+        upsertLocalProduct(payload);
+        setFeedback('تخفیف حذف شد و قیمت اصلی بازیابی شد.', 'success');
+        setTimeout(() => closeModal(), 350);
+      } catch (error) {
+        setFeedback(error?.message || 'خطا در حذف تخفیف', 'error');
+      } finally {
+        setSaving(false);
+      }
     });
 
     discountNewPrice?.addEventListener('input', () => {
@@ -3126,12 +3384,15 @@
       if (product) validatePrice(product);
     });
 
+    discountEnd?.addEventListener('input', validateEnd);
+
     quickButtons.forEach((btn) => {
       btn.addEventListener('click', () => {
         const days = Number(btn.dataset.discountDays || 0);
         const startValue = discountStart.value ? new Date(discountStart.value) : new Date();
         const target = new Date(startValue.getTime() + days * 24 * 60 * 60 * 1000);
         discountEnd.value = toLocalInputValue(target);
+        validateEnd();
       });
     });
 
