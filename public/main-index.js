@@ -1329,6 +1329,183 @@ function attachSearchEvents() {
 
 attachSearchEvents();
 
+
+// -----------------------------
+// تخفیف‌های فعال صفحه اصلی
+// -----------------------------
+const discountNumberFormatter = new Intl.NumberFormat('fa-IR', { maximumFractionDigits: 0 });
+
+function formatToman(value) {
+  if (value === null || value === undefined || value === '') return '';
+  const num = Number(value);
+  if (Number.isNaN(num)) return '';
+  return `${discountNumberFormatter.format(Math.round(num))} تومان`;
+}
+
+function resolveProductImage(product) {
+  if (!product) return 'assets/images/no-image.png';
+  if (product.image) return product.image;
+  if (Array.isArray(product.images) && product.images.length) return product.images[0];
+  return 'assets/images/no-image.png';
+}
+
+function isDiscountCurrentlyActive(product, now = new Date()) {
+  if (!product) return false;
+
+  const basePrice = Number(product.price);
+  const discounted = Number(product.discountPrice);
+  if (!Number.isFinite(basePrice) || !Number.isFinite(discounted) || discounted <= 0 || discounted >= basePrice) {
+    return false;
+  }
+
+  const startDate = product.discountStart ? new Date(product.discountStart) : null;
+  const endDate = product.discountEnd ? new Date(product.discountEnd) : null;
+  const nowTs = now.getTime();
+  const startValid = !startDate || !Number.isNaN(startDate.getTime());
+  const endValid = endDate && !Number.isNaN(endDate.getTime());
+
+  if (!endValid) return false;
+  if (startValid && startDate && startDate.getTime() > nowTs) return false;
+  if (endDate.getTime() <= nowTs) return false;
+
+  const limit = Number(product.discountQuantityLimit);
+  const sold = Number(product.discountQuantitySold || 0);
+  const hasLimit = Number.isFinite(limit) && limit > 0;
+  if (hasLimit && sold >= limit) return false;
+
+  return product.discountActive !== false;
+}
+
+function formatDiscountCountdown(endDate, now = new Date()) {
+  if (!endDate) return '';
+  const target = new Date(endDate);
+  const diff = target.getTime() - now.getTime();
+  if (Number.isNaN(diff) || diff <= 0) return '';
+
+  const totalMinutes = Math.floor(diff / 60000);
+  const days = Math.floor(totalMinutes / (60 * 24));
+  const hours = Math.floor((totalMinutes % (60 * 24)) / 60);
+  const minutes = totalMinutes % 60;
+  const parts = [];
+
+  if (days > 0) parts.push(`${discountNumberFormatter.format(days)} روز`);
+  if (hours > 0) parts.push(`${discountNumberFormatter.format(hours)} ساعت`);
+  if (!parts.length && minutes > 0) parts.push(`${discountNumberFormatter.format(minutes)} دقیقه`);
+
+  const label = parts.join(' و ');
+  return label ? `${label} باقی مانده` : 'کمتر از یک ساعت باقی مانده';
+}
+
+function getRemainingDiscountQuantity(product) {
+  const limit = Number(product?.discountQuantityLimit);
+  if (!Number.isFinite(limit) || limit <= 0) return null;
+  const sold = Number(product?.discountQuantitySold || 0);
+  return Math.max(0, limit - sold);
+}
+
+function buildDiscountCard(product) {
+  const card = document.createElement('a');
+  const productId = product?._id || product?.id;
+  const sellerId = product?.sellerId?._id || product?.sellerId || product?.seller?._id;
+  const title = product?.title || 'پیشنهاد ویژه';
+  const shopName = product?.shopName || product?.seller?.storename || product?.seller?.name || 'فروشگاه ثبت‌شده';
+  const categoryLabel = product?.sellerCategory || product?.category || 'دسته‌بندی نشده';
+  const countdownLabel = formatDiscountCountdown(product?.discountEnd);
+  const remainingQty = getRemainingDiscountQuantity(product);
+
+  card.href = productId ? `product.html?id=${encodeURIComponent(productId)}` : '#';
+  card.className = 'discount-card group';
+  card.setAttribute('data-product-id', productId || '');
+  card.setAttribute('data-product-name', title);
+  card.setAttribute('data-product-category', product?.category || '');
+  card.setAttribute('data-product-price', product?.discountPrice || product?.price || '');
+  card.setAttribute('data-product-currency', 'IRR');
+  if (sellerId) {
+    card.setAttribute('data-shop-id', sellerId);
+    card.setAttribute('data-shop-name', shopName);
+  }
+
+  const priceMarkup = formatToman(product?.discountPrice);
+  const originalMarkup = formatToman(product?.price);
+  const imageSrc = resolveProductImage(product);
+
+  const countdownChip = countdownLabel
+    ? `<span class="discount-card__timer"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l2.5 2.5"/><circle cx="12" cy="12" r="9"/></svg>${escapeHTML(countdownLabel)}</span>`
+    : '';
+
+  const quantityChip = Number.isInteger(remainingQty)
+    ? `<span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h10"/></svg>${escapeHTML(`${discountNumberFormatter.format(remainingQty)} عدد باقی مانده`)}</span>`
+    : '';
+
+  const countdownMeta = countdownLabel
+    ? `<span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l2.5 2.5"/><circle cx="12" cy="12" r="9"/></svg>${escapeHTML(countdownLabel)}</span>`
+    : '';
+
+  card.innerHTML = `
+    <div class="discount-card__media">
+      <img src="${escapeHTML(imageSrc)}" alt="${escapeHTML(title)}" loading="lazy" onerror="this.src='assets/images/no-image.png'" />
+      <span class="discount-card__badge">تخفیف فعال</span>
+      ${countdownChip}
+    </div>
+    <div class="discount-card__body">
+      <div class="discount-card__shop">
+        <div>
+          <h4>${escapeHTML(shopName)}</h4>
+          <span>${escapeHTML(categoryLabel)}</span>
+        </div>
+        <span class="discount-card__tag">ویژه امروز</span>
+      </div>
+      <div class="discount-card__title">${escapeHTML(title)}</div>
+      <div class="discount-card__price-row">
+        ${originalMarkup ? `<span class="discount-original">${escapeHTML(originalMarkup)}</span>` : ''}
+        ${priceMarkup ? `<span class="discount-price">${escapeHTML(priceMarkup)}</span>` : ''}
+      </div>
+      <div class="discount-meta">
+        ${countdownMeta}
+        ${quantityChip}
+      </div>
+      <span class="discount-cta">مشاهده تخفیف<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M7 17L17 7M7 7h10v10"/></svg></span>
+    </div>
+  `;
+
+  return card;
+}
+
+async function loadActiveDiscounts() {
+  const section = document.getElementById('discounts-section');
+  const grid = document.getElementById('discounts-grid');
+  if (!section || !grid) return;
+
+  grid.innerHTML = '<div class="discounts-loading">در حال بارگذاری پیشنهادهای تخفیف‌دار...</div>';
+
+  try {
+    const products = await fetchJSON(`${SEARCH_API_BASE}/products`);
+    const now = new Date();
+    const activeDiscounts = Array.isArray(products)
+      ? products.filter(item => isDiscountCurrentlyActive(item, now))
+      : [];
+
+    if (!activeDiscounts.length) {
+      grid.innerHTML = '<div class="discounts-empty">فعلاً تخفیف فعالی ثبت نشده است. به زودی پیشنهادهای ویژه را اینجا می‌بینید.</div>';
+      return;
+    }
+
+    grid.innerHTML = '';
+    activeDiscounts
+      .sort((a, b) => new Date(a.discountEnd || 0) - new Date(b.discountEnd || 0))
+      .slice(0, 12)
+      .forEach(product => {
+        const card = buildDiscountCard(product);
+        grid.appendChild(card);
+      });
+  } catch (error) {
+    console.error('Failed to load active discounts', error);
+    grid.innerHTML = '<div class="discounts-empty">مشکل در دریافت تخفیف‌های فعال. لطفاً دوباره تلاش کنید.</div>';
+  }
+}
+
+document.addEventListener('DOMContentLoaded', loadActiveDiscounts);
+
 // واکشی و رندر تبلیغ فروشگاه ویژه قبل از کارت فروشگاه‌ها
 // متغیر تبلیغ ویژه (در صورت وجود)
 let adHomeData = null;
