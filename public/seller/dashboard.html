@@ -300,6 +300,47 @@
     opacity: 0.95;
   }
 
+  .discount-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: flex-end;
+  }
+
+  .discount-mobile-card .discount-actions {
+    width: 100%;
+    justify-content: flex-start;
+  }
+
+  .discount-delete {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 10px 12px;
+    border-radius: 12px;
+    border: 1px solid #fecdd3;
+    background: #fff1f2;
+    color: #e11d48;
+    font-weight: 800;
+    transition: transform 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease;
+  }
+
+  .discount-delete:hover,
+  .discount-delete:focus {
+    transform: translateY(-1px);
+    box-shadow: 0 10px 20px rgba(225, 29, 72, 0.16);
+    outline: none;
+  }
+
+  .discount-delete.loading {
+    opacity: 0.9;
+    gap: 10px;
+  }
+
+  .discount-delete.loading i {
+    animation: spin 0.9s linear infinite;
+  }
+
   .discount-mobile-card {
     background: #fff;
     border: 1px solid #e2e8f0;
@@ -508,6 +549,10 @@
     background: #fef2f2;
     color: #ef4444;
     border: 1px solid #fecdd3;
+  }
+
+  .discount-feedback.inline {
+    margin-top: 6px;
   }
 
   .discount-cta:disabled,
@@ -2692,6 +2737,8 @@
         </div>
       </div>
 
+      <div id="discountActionFeedback" class="discount-feedback inline" role="status" aria-live="polite"></div>
+
       <div class="hidden md:block">
         <table class="discount-table" aria-describedby="discountSummary">
           <thead>
@@ -2759,10 +2806,6 @@
         <div class="discount-status" id="discountStatus" aria-live="polite"></div>
         <div class="flex-1"></div>
         <div class="discount-footer__actions">
-          <button type="button" class="discount-ghost" id="deleteDiscountBtn" style="display:none;">
-            <i class="ri-close-circle-line" aria-hidden="true"></i>
-            حذف تخفیف
-          </button>
           <button type="button" class="discount-cta" id="saveDiscountBtn">
             <i class="ri-save-3-line" aria-hidden="true"></i>
             ذخیره تخفیف
@@ -2957,8 +3000,8 @@
     const priceError = document.getElementById('discountPriceError');
     const discountEndError = document.getElementById('discountEndError');
     const saveDiscountBtn = document.getElementById('saveDiscountBtn');
-    const deleteDiscountBtn = document.getElementById('deleteDiscountBtn');
     const discountFeedback = document.getElementById('discountFeedback');
+    const discountActionFeedback = document.getElementById('discountActionFeedback');
     const discountStatus = document.getElementById('discountStatus');
     const quickButtons = document.querySelectorAll('[data-discount-days]');
     let currentProductId = null;
@@ -3071,10 +3114,13 @@
                 <td>${priceView}</td>
                 <td class="space-y-1">${status}${timer ? `<div>${timer}</div>` : ''}</td>
                 <td class="text-left">
-                  <button type="button" class="discount-cta" data-discount-id="${product.id}">
-                    <i class="ri-edit-2-line" aria-hidden="true"></i>
-                    تنظیم / ویرایش تخفیف
-                  </button>
+                  <div class="discount-actions">
+                    <button type="button" class="discount-cta" data-discount-id="${product.id}">
+                      <i class="ri-edit-2-line" aria-hidden="true"></i>
+                      تنظیم / ویرایش تخفیف
+                    </button>
+                    ${isActive ? `<button type="button" class="discount-delete" data-discount-remove-id="${product.id}"><i class="ri-close-circle-line" aria-hidden="true"></i> حذف تخفیف</button>` : ''}
+                  </div>
                 </td>
               </tr>`;
             })
@@ -3103,6 +3149,7 @@
                 </div>
                 <div class="flex flex-col gap-2">
                   <button type="button" class="discount-cta" data-discount-id="${product.id}">تنظیم / ویرایش</button>
+                  ${isActive ? `<button type="button" class="discount-delete" data-discount-remove-id="${product.id}"><i class="ri-close-circle-line" aria-hidden="true"></i> حذف تخفیف</button>` : ''}
                 </div>
               </div>`;
             })
@@ -3115,6 +3162,16 @@
           const targetId = btn.dataset.discountId;
           const product = discountProducts.find((p) => String(p.id) === String(targetId));
           if (product) openModal(product);
+        });
+      });
+
+      document.querySelectorAll('[data-discount-remove-id]').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          const targetId = btn.dataset.discountRemoveId;
+          const product = discountProducts.find((p) => String(p.id) === String(targetId));
+          if (product) {
+            removeDiscount(product, btn);
+          }
         });
       });
     }
@@ -3182,6 +3239,32 @@
       }
     }
 
+    function setActionFeedback(message = '', tone = '') {
+      if (!discountActionFeedback) return;
+      discountActionFeedback.textContent = message;
+      discountActionFeedback.className = 'discount-feedback inline';
+      if (message && tone) {
+        discountActionFeedback.classList.add(tone);
+      }
+    }
+
+    function setButtonLoading(button, isLoading, loadingLabel = '') {
+      if (!button) return;
+      if (isLoading) {
+        button.dataset.defaultLabel = button.dataset.defaultLabel || button.innerHTML;
+        button.classList.add('loading');
+        button.disabled = true;
+        button.innerHTML = `<i class="ri-loader-4-line" aria-hidden="true"></i>${loadingLabel ? ` ${loadingLabel}` : ''}`;
+      } else {
+        button.disabled = false;
+        button.classList.remove('loading');
+        if (button.dataset.defaultLabel) {
+          button.innerHTML = button.dataset.defaultLabel;
+          delete button.dataset.defaultLabel;
+        }
+      }
+    }
+
     function setSaving(isSaving) {
       if (saveDiscountBtn) {
         saveDiscountBtn.disabled = isSaving;
@@ -3189,9 +3272,6 @@
         saveDiscountBtn.innerHTML = isSaving
           ? '<i class="ri-loader-4-line" aria-hidden="true"></i> در حال ذخیره...'
           : defaultSaveLabel;
-      }
-      if (deleteDiscountBtn) {
-        deleteDiscountBtn.disabled = isSaving;
       }
       discountNewPrice?.setAttribute('aria-busy', String(isSaving));
       discountEnd?.setAttribute('aria-busy', String(isSaving));
@@ -3222,6 +3302,41 @@
       renderDiscounts();
     }
 
+    async function removeDiscount(product, triggerBtn) {
+      if (!product?.id) return;
+      const confirmed = window.confirm(`حذف تخفیف «${product.name}»؟ این کار قیمت را به حالت اصلی برمی‌گرداند.`);
+      if (!confirmed) return;
+
+      setActionFeedback('');
+      setButtonLoading(triggerBtn, true, 'در حال حذف...');
+
+      try {
+        const response = await fetch(
+          buildApiUrl(`/api/products/${product.id}/discount`),
+          withCredentials({ method: 'DELETE' })
+        );
+        const data = await response.json().catch(() => ({}));
+        if (!response.ok) {
+          throw new Error(data?.message || 'خطا در حذف تخفیف');
+        }
+
+        const payload = data.product || {
+          ...product,
+          discountPrice: null,
+          discountStart: null,
+          discountEnd: null,
+          discountActive: false
+        };
+
+        upsertLocalProduct(payload);
+        setActionFeedback('تخفیف حذف شد و قیمت اصلی بازیابی شد.', 'success');
+      } catch (error) {
+        setActionFeedback(error?.message || 'خطا در حذف تخفیف', 'error');
+      } finally {
+        setButtonLoading(triggerBtn, false);
+      }
+    }
+
     function openModal(product) {
       currentProductId = product.id;
       lastFocusedElement = document.activeElement;
@@ -3235,9 +3350,6 @@
       }
       if (discountStart) discountStart.value = toLocalInputValue(product.start) || toLocalInputValue(new Date());
       if (discountEnd) discountEnd.value = toLocalInputValue(product.end);
-      if (deleteDiscountBtn) {
-        deleteDiscountBtn.style.display = product.active && product.discountPrice ? 'inline-flex' : 'none';
-      }
       updateModalStatus(product);
       validatePrice(product);
       validateEnd();
@@ -3329,51 +3441,11 @@
 
         const normalized = normalizeProduct(payload);
         updateModalStatus(normalized);
-        if (deleteDiscountBtn) {
-          deleteDiscountBtn.style.display = normalized?.active && normalized.discountPrice ? 'inline-flex' : 'none';
-        }
         upsertLocalProduct(payload);
         setFeedback('تخفیف با موفقیت ذخیره و فعال شد.', 'success');
         setTimeout(() => closeModal(), 350);
       } catch (error) {
         setFeedback(error?.message || 'خطا در ذخیره تخفیف', 'error');
-      } finally {
-        setSaving(false);
-      }
-    });
-
-    deleteDiscountBtn?.addEventListener('click', async () => {
-      const product = discountProducts.find((p) => p.id === currentProductId);
-      if (!product) return;
-      setSaving(true);
-      setFeedback('');
-
-      try {
-        const response = await fetch(
-          buildApiUrl(`/api/products/${product.id}/discount`),
-          withCredentials({ method: 'DELETE' })
-        );
-        const data = await response.json().catch(() => ({}));
-        if (!response.ok) {
-          throw new Error(data?.message || 'خطا در حذف تخفیف');
-        }
-
-        const payload = data.product || {
-          ...product,
-          discountPrice: null,
-          discountStart: null,
-          discountEnd: null,
-          discountActive: false
-        };
-
-        const normalized = normalizeProduct(payload);
-        updateModalStatus(normalized);
-        if (deleteDiscountBtn) deleteDiscountBtn.style.display = 'none';
-        upsertLocalProduct(payload);
-        setFeedback('تخفیف حذف شد و قیمت اصلی بازیابی شد.', 'success');
-        setTimeout(() => closeModal(), 350);
-      } catch (error) {
-        setFeedback(error?.message || 'خطا در حذف تخفیف', 'error');
       } finally {
         setSaving(false);
       }
