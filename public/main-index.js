@@ -1429,42 +1429,24 @@ function buildDiscountCard(product) {
   const originalMarkup = formatToman(product?.price);
   const imageSrc = resolveProductImage(product);
 
-  const countdownChip = countdownLabel
-    ? `<span class="discount-card__timer"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l2.5 2.5"/><circle cx="12" cy="12" r="9"/></svg>${escapeHTML(countdownLabel)}</span>`
-    : '';
-
-  const quantityChip = Number.isInteger(remainingQty)
-    ? `<span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h10"/></svg>${escapeHTML(`${discountNumberFormatter.format(remainingQty)} عدد باقی مانده`)}</span>`
-    : '';
-
-  const countdownMeta = countdownLabel
-    ? `<span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l2.5 2.5"/><circle cx="12" cy="12" r="9"/></svg>${escapeHTML(countdownLabel)}</span>`
-    : '';
-
   card.innerHTML = `
     <div class="discount-card__media">
       <img src="${escapeHTML(imageSrc)}" alt="${escapeHTML(title)}" loading="lazy" onerror="this.src='assets/images/no-image.png'" />
       <span class="discount-card__badge">تخفیف فعال</span>
-      ${countdownChip}
+      ${countdownLabel ? `<div class="discount-card__timer-bar">${escapeHTML(countdownLabel)}</div>` : ''}
     </div>
     <div class="discount-card__body">
       <div class="discount-card__shop">
-        <div>
-          <h4>${escapeHTML(shopName)}</h4>
-          <span>${escapeHTML(categoryLabel)}</span>
-        </div>
-        <span class="discount-card__tag">ویژه امروز</span>
+        <div class="discount-card__shop-name">${escapeHTML(shopName)}</div>
+        <div class="discount-card__category">${escapeHTML(categoryLabel)}</div>
       </div>
-      <div class="discount-card__title">${escapeHTML(title)}</div>
+      <div class="discount-card__title" title="${escapeHTML(title)}">${escapeHTML(title)}</div>
       <div class="discount-card__price-row">
         ${originalMarkup ? `<span class="discount-original">${escapeHTML(originalMarkup)}</span>` : ''}
         ${priceMarkup ? `<span class="discount-price">${escapeHTML(priceMarkup)}</span>` : ''}
       </div>
-      <div class="discount-meta">
-        ${countdownMeta}
-        ${quantityChip}
-      </div>
-      <span class="discount-cta">مشاهده تخفیف<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M7 17L17 7M7 7h10v10"/></svg></span>
+      ${Number.isInteger(remainingQty) ? `<div class="discount-remaining">${escapeHTML(`${discountNumberFormatter.format(remainingQty)} عدد باقی مانده`)}</div>` : ''}
+      <span class="discount-cta discount-cta--full">مشاهده تخفیف<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M7 17L17 7M7 7h10v10"/></svg></span>
     </div>
   `;
 
