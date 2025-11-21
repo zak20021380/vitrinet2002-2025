@@ -40,6 +40,22 @@ const productSchema = new mongoose.Schema({
   mainImageIndex: {
     type: Number,
     default: 0
+  },
+  discountPrice: {
+    type: Number,
+    default: null
+  },
+  discountStart: {
+    type: Date,
+    default: null
+  },
+  discountEnd: {
+    type: Date,
+    default: null
+  },
+  discountActive: {
+    type: Boolean,
+    default: false
   }
 }, { timestamps: true });
 

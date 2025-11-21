@@ -44,6 +44,77 @@ exports.addProduct = async (req, res) => {
   }
 };
 
+// ساخت یا به‌روزرسانی تخفیف محصول
+exports.upsertDiscount = async (req, res) => {
+  try {
+    const id = req.params.id;
+    const product = await Product.findById(id);
+    if (!product) {
+      return res.status(404).json({ message: 'محصول پیدا نشد!' });
+    }
+
+    const { priceAfterDiscount, start, end } = req.body || {};
+    const discountPrice = Number(priceAfterDiscount);
+    if (!Number.isFinite(discountPrice) || discountPrice <= 0) {
+      return res.status(400).json({ message: 'قیمت بعد از تخفیف نامعتبر است.' });
+    }
+
+    if (discountPrice >= Number(product.price || 0)) {
+      return res.status(400).json({ message: 'قیمت جدید باید کمتر از قیمت اصلی باشد.' });
+    }
+
+    const startDate = start ? new Date(start) : new Date();
+    const endDate = end ? new Date(end) : null;
+
+    if (!endDate || Number.isNaN(endDate.getTime())) {
+      return res.status(400).json({ message: 'زمان پایان تخفیف معتبر نیست.' });
+    }
+
+    if (Number.isNaN(startDate.getTime())) {
+      return res.status(400).json({ message: 'زمان شروع تخفیف معتبر نیست.' });
+    }
+
+    if (endDate <= startDate) {
+      return res.status(400).json({ message: 'زمان پایان باید بعد از زمان شروع باشد.' });
+    }
+
+    product.discountPrice = discountPrice;
+    product.discountStart = startDate;
+    product.discountEnd = endDate;
+    product.discountActive = true;
+
+    await product.save();
+
+    res.json({ message: 'تخفیف با موفقیت ذخیره و فعال شد.', product });
+  } catch (err) {
+    console.error('Failed to upsert product discount:', err);
+    res.status(500).json({ message: 'خطا در ذخیره تخفیف محصول', error: err.message });
+  }
+};
+
+// حذف یا غیرفعال‌سازی تخفیف محصول
+exports.removeDiscount = async (req, res) => {
+  try {
+    const id = req.params.id;
+    const product = await Product.findById(id);
+    if (!product) {
+      return res.status(404).json({ message: 'محصول پیدا نشد!' });
+    }
+
+    product.discountPrice = null;
+    product.discountStart = null;
+    product.discountEnd = null;
+    product.discountActive = false;
+
+    await product.save();
+
+    res.json({ message: 'تخفیف محصول حذف شد.', product });
+  } catch (err) {
+    console.error('Failed to remove product discount:', err);
+    res.status(500).json({ message: 'خطا در حذف تخفیف محصول', error: err.message });
+  }
+};
+
 // دریافت محصولات (به ‌همراه دسته‌بندی فروشنده)
 // دریافت محصولات (به ‌همراه اطلاعات کامل فروشنده)
 exports.getProducts = async (req, res) => {
