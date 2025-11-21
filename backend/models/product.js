@@ -56,6 +56,14 @@ const productSchema = new mongoose.Schema({
   discountActive: {
     type: Boolean,
     default: false
+  },
+  discountQuantityLimit: {
+    type: Number,
+    default: null
+  },
+  discountQuantitySold: {
+    type: Number,
+    default: 0
   }
 }, { timestamps: true });
 
