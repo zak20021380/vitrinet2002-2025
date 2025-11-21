@@ -621,6 +621,373 @@
     margin-top: 4px;
   }
 
+  /* فروش فوری */
+  .flash-sale-wrapper {
+    background: #ffffff;
+    border: 1px solid #0ea5e91a;
+    border-radius: 20px;
+    box-shadow: 0 14px 40px rgba(14, 165, 233, 0.15);
+    padding: 1.25rem;
+    width: 100%;
+  }
+
+  .flash-sale-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+  }
+
+  .flash-sale-summary {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.6rem 1rem;
+    border-radius: 999px;
+    background: #ecfeff;
+    color: #0ea5e9;
+    font-weight: 800;
+    box-shadow: 0 6px 18px rgba(14, 165, 233, 0.15);
+  }
+
+  .flash-sale-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 1rem;
+    margin-top: 1rem;
+  }
+
+  .flash-card {
+    display: flex;
+    flex-direction: column;
+    gap: 0.9rem;
+    background: linear-gradient(160deg, #f8fdff 0%, #ffffff 100%);
+    border: 1px solid #e2e8f0;
+    border-radius: 18px;
+    padding: 1rem;
+    box-shadow: 0 12px 30px rgba(15, 23, 42, 0.08);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+
+  .flash-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 16px 36px rgba(14, 165, 233, 0.18);
+  }
+
+  .flash-card__title {
+    font-weight: 900;
+    color: #0f172a;
+    font-size: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+  }
+
+  .flash-card__prices {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+    align-items: center;
+  }
+
+  .flash-card__original {
+    color: #94a3b8;
+    text-decoration: line-through;
+    font-weight: 700;
+  }
+
+  .flash-card__discounted {
+    color: #0ea5e9;
+    font-weight: 900;
+    font-size: 1.05rem;
+  }
+
+  .flash-card__meta {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 0.6rem;
+  }
+
+  .flash-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.45rem 0.75rem;
+    border-radius: 12px;
+    background: #f8fafc;
+    color: #0f172a;
+    font-size: 0.9rem;
+    font-weight: 700;
+    border: 1px solid #e2e8f0;
+  }
+
+  .flash-chip.success {
+    background: rgba(16, 185, 129, 0.12);
+    color: #0f9c66;
+    border-color: rgba(16, 185, 129, 0.3);
+  }
+
+  .flash-chip.warn {
+    background: rgba(234, 179, 8, 0.12);
+    color: #b45309;
+    border-color: rgba(234, 179, 8, 0.25);
+  }
+
+  .flash-card__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+    margin-top: auto;
+  }
+
+  .flash-card__btn {
+    flex: 1 1 150px;
+    border: 1px solid #0ea5e9;
+    background: #0ea5e9;
+    color: #ffffff;
+    border-radius: 12px;
+    padding: 0.65rem 0.9rem;
+    font-weight: 800;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.35rem;
+    cursor: pointer;
+    transition: transform 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
+  }
+
+  .flash-card__btn.secondary {
+    background: #f8fafc;
+    color: #ef4444;
+    border-color: rgba(239, 68, 68, 0.35);
+  }
+
+  .flash-card__btn:hover,
+  .flash-card__btn:focus {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 24px rgba(14, 165, 233, 0.2);
+    outline: none;
+  }
+
+  .flash-card__btn.secondary:hover,
+  .flash-card__btn.secondary:focus {
+    box-shadow: 0 10px 24px rgba(239, 68, 68, 0.18);
+    background: #fff1f2;
+  }
+
+  .flash-empty {
+    text-align: center;
+    color: #94a3b8;
+    padding: 1.5rem 0.75rem;
+    font-weight: 700;
+  }
+
+  .flash-feedback {
+    margin-top: 0.5rem;
+    padding: 0.75rem 1rem;
+    border-radius: 12px;
+    font-weight: 700;
+    display: none;
+  }
+
+  .flash-feedback.show {
+    display: block;
+  }
+
+  .flash-feedback.success {
+    background: rgba(16, 185, 129, 0.12);
+    color: #0f9c66;
+  }
+
+  .flash-feedback.error {
+    background: rgba(239, 68, 68, 0.12);
+    color: #b91c1c;
+  }
+
+  .flash-modal {
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+    z-index: 401;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.25s ease, visibility 0.25s ease;
+  }
+
+  .flash-modal.active {
+    opacity: 1;
+    visibility: visible;
+  }
+
+  .flash-modal__card {
+    width: min(520px, 100%);
+    background: #ffffff;
+    border-radius: 18px;
+    box-shadow: 0 24px 50px rgba(14, 165, 233, 0.22);
+    padding: 1.5rem;
+    position: relative;
+    outline: none;
+  }
+
+  .flash-modal__title {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    font-size: 1.2rem;
+    font-weight: 900;
+    color: #0f172a;
+    margin-top: 0;
+  }
+
+  .flash-close {
+    position: absolute;
+    top: 0.9rem;
+    left: 0.9rem;
+    width: 38px;
+    height: 38px;
+    border-radius: 12px;
+    border: none;
+    background: #f8fafc;
+    cursor: pointer;
+    display: grid;
+    place-items: center;
+    color: #ef4444;
+    transition: background 0.18s ease, transform 0.18s ease;
+  }
+
+  .flash-close:hover,
+  .flash-close:focus {
+    background: #fee2e2;
+    transform: rotate(-6deg);
+    outline: none;
+  }
+
+  .flash-form {
+    display: grid;
+    gap: 1rem;
+  }
+
+  .flash-field label {
+    display: block;
+    margin-bottom: 0.35rem;
+    font-weight: 800;
+    color: #0f172a;
+  }
+
+  .flash-input {
+    width: 100%;
+    padding: 0.75rem 0.85rem;
+    border-radius: 12px;
+    border: 1px solid #e2e8f0;
+    background: #f8fafc;
+    font-size: 0.95rem;
+    transition: border 0.15s ease, box-shadow 0.15s ease;
+  }
+
+  .flash-input:focus {
+    border-color: #0ea5e9;
+    box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.2);
+    outline: none;
+  }
+
+  .flash-input.error {
+    border-color: #ef4444;
+    box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.2);
+  }
+
+  .flash-error {
+    color: #b91c1c;
+    font-size: 0.85rem;
+    margin-top: 0.35rem;
+    display: none;
+  }
+
+  .flash-error.show {
+    display: block;
+  }
+
+  .flash-form__row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 0.85rem;
+  }
+
+  .flash-presets {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .flash-preset-btn {
+    border: 1px solid #0ea5e9;
+    background: #ecfeff;
+    color: #0ea5e9;
+    padding: 0.4rem 0.9rem;
+    border-radius: 999px;
+    cursor: pointer;
+    font-weight: 800;
+    transition: transform 0.15s ease, background 0.15s ease;
+  }
+
+  .flash-preset-btn:hover,
+  .flash-preset-btn:focus {
+    transform: translateY(-1px);
+    background: #e0f2fe;
+    outline: none;
+  }
+
+  .flash-modal__footer {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.75rem;
+    justify-content: space-between;
+    margin-top: 0.75rem;
+  }
+
+  .flash-save-btn {
+    border: none;
+    background: linear-gradient(135deg, #0ea5e9, #10b981);
+    color: #ffffff;
+    padding: 0.75rem 1.1rem;
+    border-radius: 12px;
+    font-weight: 900;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    cursor: pointer;
+    min-width: 170px;
+    justify-content: center;
+    transition: transform 0.18s ease, box-shadow 0.18s ease;
+  }
+
+  .flash-save-btn:hover,
+  .flash-save-btn:focus {
+    transform: translateY(-1px);
+    box-shadow: 0 10px 26px rgba(16, 185, 129, 0.3);
+    outline: none;
+  }
+
+  @media (max-width: 640px) {
+    body {
+      padding-right: 0;
+    }
+
+    .flash-sale-wrapper {
+      padding: 1rem;
+      border-radius: 16px;
+    }
+
+    .flash-card {
+      padding: 0.9rem;
+    }
+  }
+
   body.sidebar-expanded {
     padding-right: 320px;
   }
@@ -2326,6 +2693,13 @@
       </svg>
       <span>تخفیف‌ها</span>
     </button>
+    <button class="sidebar-link" id="menu-flash-sale" data-section="flash-sale" aria-label="فروش فوری">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <path d="M13 2L6 14h5l-1 8 7-12h-5l1-8z" stroke="#0ea5e9" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        <circle cx="18" cy="6" r="2" fill="#10b981"/>
+      </svg>
+      <span>فروش فوری</span>
+    </button>
     <button class="sidebar-link" id="menu-content" data-section="content" aria-label="مدیریت ظاهر فروشگاه">
       <svg width="22" height="22" fill="none" viewBox="0 0 24 24">
         <rect x="4" y="4" width="16" height="16" rx="3" stroke="#10b981" stroke-width="2"/>
@@ -2764,6 +3138,99 @@
     </div>
   </section>
 
+  <section id="section-flash-sale" style="display:none;">
+    <div class="flex flex-col gap-3 items-center text-center mb-4">
+      <div class="flex items-center gap-2 text-[#0ea5e9] font-extrabold text-lg">
+        <i class="ri-flashlight-line text-xl" aria-hidden="true"></i>
+        <span>فروش فوری (زمان + تعداد)</span>
+      </div>
+      <p class="text-gray-600 max-w-2xl text-sm sm:text-base leading-7">
+        تخفیف‌های زمان‌دار و محدودیتی را اینجا فعال کنید. قیمت ویژه، سقف تعداد و بازه‌ی زمانی را مشخص کنید تا فروش فوری به صورت خودکار فعال شود.
+      </p>
+    </div>
+
+    <div class="flash-sale-wrapper">
+      <div class="flash-sale-header">
+        <div class="flash-sale-summary" id="flashSummary">
+          <i class="ri-bolt-line" aria-hidden="true"></i>
+          ۰ فروش فوری فعال
+        </div>
+        <div class="text-sm text-gray-600 flex items-center gap-2">
+          <i class="ri-information-line" aria-hidden="true"></i>
+          <span>برای هر محصول «تنظیم / ویرایش» را بزنید. حذف تخفیف هم از همین کارت انجام می‌شود.</span>
+        </div>
+      </div>
+
+      <div id="flashFeedback" class="flash-feedback" role="status" aria-live="polite"></div>
+      <div id="flashList" class="flash-sale-grid" aria-live="polite"></div>
+      <div id="flashEmpty" class="flash-empty">محصولی یافت نشد یا هنوز فروش فوری فعالی ندارید.</div>
+    </div>
+  </section>
+
+  <div class="flash-modal" id="flashModal" role="dialog" aria-modal="true" aria-labelledby="flashModalTitle" aria-describedby="flashModalDesc">
+    <div class="flash-modal__card" tabindex="-1">
+      <button class="flash-close" type="button" data-flash-close aria-label="بستن پنجره فروش فوری">
+        <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true">
+          <path d="M4 4l10 10M14 4L4 14" stroke="#ef4444" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+      </button>
+      <h3 class="flash-modal__title" id="flashModalTitle">
+        <i class="ri-bolt-line text-[#0ea5e9]" aria-hidden="true"></i>
+        <span id="flashProductName">تنظیم فروش فوری</span>
+      </h3>
+      <p class="text-gray-600 text-sm leading-7" id="flashModalDesc">
+        قیمت ویژه، محدودیت تعداد و بازه زمانی را مشخص کنید. با ذخیره، فروش فوری فعال می‌شود و محدودیت‌ها اعمال می‌گردد.
+      </p>
+
+      <div class="flash-form">
+        <div class="flash-form__row">
+          <div class="flash-field">
+            <label for="flashOriginalPrice">قیمت اصلی</label>
+            <input id="flashOriginalPrice" class="flash-input" type="text" readonly aria-readonly="true" />
+          </div>
+          <div class="flash-field">
+            <label for="flashDiscountPrice">قیمت فروش فوری <span class="text-red-500">*</span></label>
+            <input id="flashDiscountPrice" class="flash-input" type="number" min="1" required inputmode="decimal" aria-describedby="flashPriceError" />
+            <div id="flashPriceError" class="flash-error" role="alert"></div>
+          </div>
+        </div>
+
+        <div class="flash-form__row">
+          <div class="flash-field">
+            <label for="flashQuantity">محدودیت تعداد <span class="text-red-500">*</span></label>
+            <input id="flashQuantity" class="flash-input" type="number" min="1" required inputmode="numeric" aria-describedby="flashQuantityError" />
+            <div id="flashQuantityError" class="flash-error" role="alert"></div>
+          </div>
+          <div class="flash-field">
+            <label for="flashStart">شروع فروش فوری</label>
+            <input id="flashStart" class="flash-input" type="datetime-local" />
+          </div>
+          <div class="flash-field">
+            <label for="flashEnd">پایان فروش فوری <span class="text-red-500">*</span></label>
+            <input id="flashEnd" class="flash-input" type="datetime-local" aria-describedby="flashTimeError" />
+            <div id="flashTimeError" class="flash-error" role="alert"></div>
+          </div>
+        </div>
+
+        <div class="flash-presets" aria-label="بازه‌های پیشنهادی">
+          <button type="button" class="flash-preset-btn" data-flash-preset="24">+ ۲۴ ساعت</button>
+          <button type="button" class="flash-preset-btn" data-flash-preset="48">+ ۴۸ ساعت</button>
+          <button type="button" class="flash-preset-btn" data-flash-preset="168">+ ۷ روز</button>
+        </div>
+      </div>
+
+      <div class="flash-modal__footer">
+        <div id="flashStatus" class="text-sm text-gray-600 flex items-center gap-2" aria-live="polite"></div>
+        <div class="flex-1"></div>
+        <button type="button" class="flash-save-btn" id="flashSaveBtn">
+          <i class="ri-save-3-line" aria-hidden="true"></i>
+          ذخیره تخفیف
+        </button>
+      </div>
+      <div id="flashModalFeedback" class="flash-feedback" role="status" aria-live="polite"></div>
+    </div>
+  </div>
+
   <div class="discount-modal" id="discountModal" role="dialog" aria-modal="true" aria-labelledby="discountModalTitle" aria-describedby="discountModalDesc">
     <div class="discount-modal__card" tabindex="-1">
       <button class="discount-modal__close" type="button" data-discount-close aria-label="بستن پنجره تخفیف">
@@ -2993,6 +3460,538 @@
     });
 
     showSection('visit');
+  })();
+</script>
+
+<script>
+  (function () {
+    const apiClient = window.VITRINET_API;
+    const flashProducts = [];
+
+    const listEl = document.getElementById('flashList');
+    const emptyEl = document.getElementById('flashEmpty');
+    const summaryEl = document.getElementById('flashSummary');
+    const feedbackEl = document.getElementById('flashFeedback');
+
+    const modal = document.getElementById('flashModal');
+    const modalCard = modal?.querySelector('.flash-modal__card');
+    const closeButtons = modal ? modal.querySelectorAll('[data-flash-close]') : [];
+    const productNameEl = document.getElementById('flashProductName');
+    const originalPriceEl = document.getElementById('flashOriginalPrice');
+    const discountPriceEl = document.getElementById('flashDiscountPrice');
+    const quantityEl = document.getElementById('flashQuantity');
+    const startEl = document.getElementById('flashStart');
+    const endEl = document.getElementById('flashEnd');
+    const priceErrorEl = document.getElementById('flashPriceError');
+    const quantityErrorEl = document.getElementById('flashQuantityError');
+    const timeErrorEl = document.getElementById('flashTimeError');
+    const statusEl = document.getElementById('flashStatus');
+    const modalFeedbackEl = document.getElementById('flashModalFeedback');
+    const saveBtn = document.getElementById('flashSaveBtn');
+    const presetButtons = document.querySelectorAll('[data-flash-preset]');
+
+    let currentProductId = null;
+    let lastFocusedElement = null;
+    const defaultSaveLabel = saveBtn?.innerHTML;
+
+    const buildApiUrl = (path) => {
+      if (!path) return '';
+      if (apiClient?.buildUrl) return apiClient.buildUrl(path);
+      return path.startsWith('/') ? path : `/${path}`;
+    };
+
+    const withCredentials = (init = {}) => {
+      if (apiClient?.ensureCredentials) return apiClient.ensureCredentials(init);
+      if (init.credentials === undefined) {
+        return { ...init, credentials: 'include' };
+      }
+      return init;
+    };
+
+    const toLocalInputValue = (value) => {
+      if (!value) return '';
+      const date = new Date(value);
+      date.setMinutes(date.getMinutes() - date.getTimezoneOffset());
+      return date.toISOString().slice(0, 16);
+    };
+
+    const parseDate = (input, fallback = null) => {
+      if (!input || !input.value) return fallback;
+      const date = new Date(input.value);
+      return Number.isNaN(date.getTime()) ? fallback : date;
+    };
+
+    const formatDateTime = (value) => {
+      if (!value) return '—';
+      const date = value instanceof Date ? value : new Date(value);
+      if (Number.isNaN(date.getTime())) return 'زمان نامعتبر';
+      return new Intl.DateTimeFormat('fa-IR-u-ca-persian', {
+        dateStyle: 'medium',
+        timeStyle: 'short'
+      }).format(date);
+    };
+
+    const formatPrice = (price) => `${new Intl.NumberFormat('fa-IR').format(Number(price) || 0)} تومان`;
+
+    const remainingTime = (end) => {
+      if (!end) return 'بدون زمان پایان';
+      const diff = new Date(end) - new Date();
+      if (diff <= 0) return 'پایان یافته';
+      const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+      const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+      const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+      if (days > 0) return `${days} روز و ${hours} ساعت`;
+      if (hours > 0) return `${hours} ساعت و ${minutes} دقیقه`;
+      return `${minutes} دقیقه`;
+    };
+
+    const normalizeFlashProduct = (product) => {
+      if (!product) return null;
+      const flash = product.flashSale || product.flash_sale || product.activeFlashSale || {};
+      const toNumber = (val) => {
+        const num = Number(val);
+        return Number.isNaN(num) ? null : num;
+      };
+
+      const flashPrice = toNumber(flash.priceAfterDiscount ?? flash.price ?? flash.discountedPrice ?? product.flashSalePrice ?? product.flash_price);
+      const quantityLimit = toNumber(flash.quantityLimit ?? flash.maxQuantity ?? flash.quantity ?? product.flashSaleQuantity ?? product.flash_quantity);
+      const remainingQuantity = toNumber(flash.remainingQuantity ?? flash.remaining ?? product.flashSaleRemaining);
+      const start = flash.start ?? flash.startDate ?? product.flashSaleStart ?? product.flash_sale_start;
+      const end = flash.end ?? flash.endDate ?? flash.expireAt ?? product.flashSaleEnd ?? product.flash_sale_end;
+      const activeFlag = flash.active ?? flash.isActive ?? product.flashSaleActive ?? product.flash_sale_active;
+
+      return {
+        id: product._id || product.id,
+        name: product.title || product.name || 'محصول بدون نام',
+        price: Number(product.price) || 0,
+        flashPrice: flashPrice,
+        quantityLimit: quantityLimit,
+        remainingQuantity: remainingQuantity ?? quantityLimit,
+        start,
+        end,
+        active: Boolean((activeFlag ?? true) && flashPrice && quantityLimit)
+      };
+    };
+
+    const setFeedback = (message = '', tone = '') => {
+      if (!feedbackEl) return;
+      feedbackEl.textContent = message;
+      feedbackEl.className = 'flash-feedback';
+      if (message) {
+        feedbackEl.classList.add('show');
+      }
+      if (message && tone) {
+        feedbackEl.classList.add(tone);
+      }
+      if (!message) {
+        feedbackEl.classList.remove('show');
+      }
+    };
+
+    const setModalFeedback = (message = '', tone = '') => {
+      if (!modalFeedbackEl) return;
+      modalFeedbackEl.textContent = message;
+      modalFeedbackEl.className = 'flash-feedback';
+      if (message) {
+        modalFeedbackEl.classList.add('show');
+      }
+      if (message && tone) {
+        modalFeedbackEl.classList.add(tone);
+      }
+      if (!message) {
+        modalFeedbackEl.classList.remove('show');
+      }
+    };
+
+    const setButtonLoading = (button, isLoading, label = '') => {
+      if (!button) return;
+      if (isLoading) {
+        button.dataset.defaultLabel = button.dataset.defaultLabel || button.innerHTML;
+        button.disabled = true;
+        button.innerHTML = `<i class="ri-loader-4-line" aria-hidden="true"></i> ${label || 'در حال پردازش...'}`;
+      } else {
+        button.disabled = false;
+        if (button.dataset.defaultLabel) {
+          button.innerHTML = button.dataset.defaultLabel;
+          delete button.dataset.defaultLabel;
+        }
+      }
+    };
+
+    const setSaving = (isSaving) => {
+      if (saveBtn) {
+        saveBtn.disabled = isSaving;
+        saveBtn.classList.toggle('loading', isSaving);
+        saveBtn.innerHTML = isSaving
+          ? '<i class="ri-loader-4-line" aria-hidden="true"></i> در حال ذخیره...'
+          : defaultSaveLabel;
+      }
+      discountPriceEl?.setAttribute('aria-busy', String(isSaving));
+      quantityEl?.setAttribute('aria-busy', String(isSaving));
+      endEl?.setAttribute('aria-busy', String(isSaving));
+    };
+
+    const updateSummary = () => {
+      if (!summaryEl) return;
+      const activeCount = flashProducts.filter((p) => p.active).length;
+      summaryEl.textContent = `${activeCount} فروش فوری فعال`;
+    };
+
+    const renderProducts = () => {
+      if (!listEl) return;
+      updateSummary();
+      if (!flashProducts.length) {
+        listEl.innerHTML = '';
+        if (emptyEl) emptyEl.style.display = 'block';
+        return;
+      }
+
+      listEl.innerHTML = flashProducts
+        .map((product) => {
+          const isActive = product.active && product.flashPrice && product.quantityLimit;
+          const remainingQty = product.remainingQuantity ?? product.quantityLimit;
+          const lowStock = remainingQty != null && product.quantityLimit ? remainingQty <= Math.max(1, Math.ceil(product.quantityLimit * 0.2)) : false;
+          const priceBlock = isActive
+            ? `<div class="flash-card__prices"><span class="flash-card__original">${formatPrice(product.price)}</span><span class="flash-card__discounted">${formatPrice(product.flashPrice)}</span></div>`
+            : `<div class="flash-card__prices"><span class="flash-card__discounted">${formatPrice(product.price)}</span></div>`;
+          const quantityBlock = product.quantityLimit
+            ? `<span class="flash-chip ${lowStock ? 'warn' : 'success'}"><i class="ri-stack-line" aria-hidden="true"></i> باقی‌مانده: ${remainingQty ?? product.quantityLimit} / ${product.quantityLimit}</span>`
+            : '<span class="flash-chip warn">بدون محدودیت تعداد</span>';
+          const timeBlock = product.end
+            ? `<span class="flash-chip"><i class="ri-timer-line" aria-hidden="true"></i>${remainingTime(product.end)}</span>`
+            : '<span class="flash-chip">بدون زمان پایان</span>';
+          const statusBlock = isActive
+            ? '<span class="flash-chip success"><i class="ri-lightbulb-flash-line" aria-hidden="true"></i>فروش فوری فعال</span>'
+            : '<span class="flash-chip warn">بدون فروش فوری</span>';
+
+          return `<article class="flash-card">
+            <div class="flash-card__title"><i class="ri-store-2-line" aria-hidden="true"></i>${product.name}</div>
+            ${priceBlock}
+            <div class="flash-card__meta">
+              ${statusBlock}
+              ${quantityBlock}
+              ${timeBlock}
+            </div>
+            <div class="flash-card__actions">
+              <button type="button" class="flash-card__btn" data-flash-open="${product.id}"><i class="ri-edit-2-line" aria-hidden="true"></i> تنظیم / ویرایش</button>
+              <button type="button" class="flash-card__btn secondary" data-flash-remove="${product.id}"><i class="ri-delete-bin-6-line" aria-hidden="true"></i> حذف تخفیف</button>
+            </div>
+          </article>`;
+        })
+        .join('');
+
+      if (emptyEl) emptyEl.style.display = flashProducts.length ? 'none' : 'block';
+
+      document.querySelectorAll('[data-flash-open]').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          const targetId = btn.getAttribute('data-flash-open');
+          const product = flashProducts.find((p) => String(p.id) === String(targetId));
+          if (product) openModal(product);
+        });
+      });
+
+      document.querySelectorAll('[data-flash-remove]').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          const targetId = btn.getAttribute('data-flash-remove');
+          const product = flashProducts.find((p) => String(p.id) === String(targetId));
+          if (product) removeFlashSale(product, btn);
+        });
+      });
+    };
+
+    const upsertProduct = (payload) => {
+      const normalized = normalizeFlashProduct(payload);
+      if (!normalized) return;
+      const existingIndex = flashProducts.findIndex((p) => String(p.id) === String(normalized.id));
+      if (existingIndex >= 0) {
+        flashProducts[existingIndex] = normalized;
+      } else {
+        flashProducts.push(normalized);
+      }
+      renderProducts();
+    };
+
+    const fetchProducts = async () => {
+      if (!window.seller?.id) {
+        return;
+      }
+      try {
+        const response = await fetch(buildApiUrl(`/api/products?sellerId=${window.seller.id}`), withCredentials());
+        if (!response.ok) throw new Error('خطا در دریافت محصولات');
+        const products = await response.json();
+        const normalized = Array.isArray(products) ? products.map((item) => normalizeFlashProduct(item)).filter(Boolean) : [];
+        flashProducts.length = 0;
+        flashProducts.push(...normalized);
+        renderProducts();
+      } catch (error) {
+        console.error('Failed to load flash sale products:', error);
+        setFeedback('بارگذاری محصولات فروش فوری با خطا مواجه شد.', 'error');
+      }
+    };
+
+    const validatePrice = (product) => {
+      if (!discountPriceEl || !priceErrorEl) return false;
+      const value = Number(discountPriceEl.value);
+      if (!value || value <= 0) {
+        priceErrorEl.textContent = 'قیمت باید بیشتر از صفر باشد.';
+        priceErrorEl.classList.add('show');
+        discountPriceEl.classList.add('error');
+        return false;
+      }
+      if (value >= product.price) {
+        priceErrorEl.textContent = 'قیمت فروش فوری باید کمتر از قیمت اصلی باشد.';
+        priceErrorEl.classList.add('show');
+        discountPriceEl.classList.add('error');
+        return false;
+      }
+      priceErrorEl.textContent = '';
+      priceErrorEl.classList.remove('show');
+      discountPriceEl.classList.remove('error');
+      return true;
+    };
+
+    const validateQuantity = () => {
+      if (!quantityEl || !quantityErrorEl) return false;
+      const value = Number(quantityEl.value);
+      if (!value || value <= 0) {
+        quantityErrorEl.textContent = 'تعداد باید بیشتر از صفر باشد.';
+        quantityErrorEl.classList.add('show');
+        quantityEl.classList.add('error');
+        return false;
+      }
+      quantityErrorEl.textContent = '';
+      quantityErrorEl.classList.remove('show');
+      quantityEl.classList.remove('error');
+      return true;
+    };
+
+    const validateTime = () => {
+      if (!endEl || !timeErrorEl) return false;
+      if (!endEl.value) {
+        timeErrorEl.textContent = 'زمان پایان فروش فوری را مشخص کنید.';
+        timeErrorEl.classList.add('show');
+        endEl.classList.add('error');
+        return false;
+      }
+      const startDate = parseDate(startEl, new Date());
+      const endDate = parseDate(endEl, null);
+      if (!endDate || Number.isNaN(endDate.getTime())) {
+        timeErrorEl.textContent = 'زمان پایان معتبر نیست.';
+        timeErrorEl.classList.add('show');
+        endEl.classList.add('error');
+        return false;
+      }
+      if (endDate <= startDate) {
+        timeErrorEl.textContent = 'زمان پایان باید بعد از شروع باشد.';
+        timeErrorEl.classList.add('show');
+        endEl.classList.add('error');
+        return false;
+      }
+      timeErrorEl.textContent = '';
+      timeErrorEl.classList.remove('show');
+      endEl.classList.remove('error');
+      return true;
+    };
+
+    const updateStatus = () => {
+      if (!statusEl) return;
+      const startDate = parseDate(startEl, null);
+      const endDate = parseDate(endEl, null);
+      const parts = [];
+      if (startDate) parts.push(`شروع: ${formatDateTime(startDate)}`);
+      if (endDate) parts.push(`پایان: ${formatDateTime(endDate)}`);
+      statusEl.textContent = parts.join(' | ');
+    };
+
+    const openModal = (product) => {
+      currentProductId = product.id;
+      lastFocusedElement = document.activeElement;
+      setModalFeedback('');
+      if (productNameEl) productNameEl.textContent = product.name;
+      if (originalPriceEl) originalPriceEl.value = formatPrice(product.price);
+      if (discountPriceEl) {
+        discountPriceEl.value = product.flashPrice ?? '';
+        discountPriceEl.placeholder = Math.max(1, Math.round(product.price * 0.9));
+        discountPriceEl.classList.remove('error');
+      }
+      if (quantityEl) {
+        quantityEl.value = product.quantityLimit ?? '';
+        quantityEl.placeholder = product.quantityLimit ?? 1;
+        quantityEl.classList.remove('error');
+      }
+      priceErrorEl?.classList.remove('show');
+      quantityErrorEl?.classList.remove('show');
+      timeErrorEl?.classList.remove('show');
+
+      const now = new Date();
+      if (startEl) startEl.value = toLocalInputValue(product.start || now);
+      if (endEl) endEl.value = toLocalInputValue(product.end || new Date(now.getTime() + 24 * 60 * 60 * 1000));
+      updateStatus();
+
+      modal?.classList.add('active');
+      modal?.setAttribute('aria-hidden', 'false');
+      document.body.style.overflow = 'hidden';
+      modalCard?.focus({ preventScroll: true });
+      modal?.addEventListener('keydown', trapFocus);
+      document.addEventListener('keydown', handleEscape);
+    };
+
+    const closeModal = () => {
+      modal?.classList.remove('active');
+      modal?.setAttribute('aria-hidden', 'true');
+      document.body.style.overflow = '';
+      modal?.removeEventListener('keydown', trapFocus);
+      document.removeEventListener('keydown', handleEscape);
+      if (lastFocusedElement) {
+        lastFocusedElement.focus({ preventScroll: true });
+      }
+    };
+
+    const trapFocus = (event) => {
+      if (event.key !== 'Tab') return;
+      const focusableSelector = 'a[href], button:not([disabled]), textarea, input, select, [tabindex]:not([tabindex="-1"])';
+      const focusable = Array.from(modal.querySelectorAll(focusableSelector)).filter((el) => el.offsetParent !== null);
+      if (!focusable.length) return;
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+      }
+    };
+
+    const handleEscape = (event) => {
+      if (event.key === 'Escape') {
+        closeModal();
+      }
+    };
+
+    const removeFlashSale = async (product, triggerBtn) => {
+      if (!product?.id) return;
+      const confirmed = window.confirm(`حذف فروش فوری «${product.name}»؟ قیمت به حالت اصلی برگردانده می‌شود.`);
+      if (!confirmed) return;
+      setFeedback('');
+      setButtonLoading(triggerBtn, true, 'در حال حذف...');
+      try {
+        const response = await fetch(buildApiUrl(`/api/products/${product.id}/flash-sale`), withCredentials({ method: 'DELETE' }));
+        const data = await response.json().catch(() => ({}));
+        if (!response.ok) throw new Error(data?.message || 'خطا در حذف فروش فوری');
+        const updated = data.product || {
+          ...product,
+          flashSale: { active: false },
+          flashPrice: null,
+          quantityLimit: null,
+          remainingQuantity: null,
+          start: null,
+          end: null,
+          flashSaleActive: false
+        };
+        upsertProduct(updated);
+        setFeedback('فروش فوری حذف شد و قیمت اصلی بازگشت.', 'success');
+      } catch (error) {
+        setFeedback(error?.message || 'خطا در حذف فروش فوری', 'error');
+      } finally {
+        setButtonLoading(triggerBtn, false);
+      }
+    };
+
+    saveBtn?.addEventListener('click', async () => {
+      const product = flashProducts.find((p) => p.id === currentProductId);
+      if (!product) return;
+      const priceValid = validatePrice(product);
+      const qtyValid = validateQuantity();
+      const timeValid = validateTime();
+      if (!priceValid || !qtyValid || !timeValid) return;
+
+      const startDate = parseDate(startEl, new Date());
+      const endDate = parseDate(endEl, null);
+      setSaving(true);
+      setModalFeedback('');
+
+      try {
+        const response = await fetch(
+          buildApiUrl(`/api/products/${product.id}/flash-sale`),
+          withCredentials({
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              priceAfterDiscount: Number(discountPriceEl.value),
+              quantityLimit: Number(quantityEl.value),
+              start: startDate?.toISOString(),
+              end: endDate?.toISOString()
+            })
+          })
+        );
+        const data = await response.json().catch(() => ({}));
+        if (!response.ok) {
+          throw new Error(data?.message || 'خطا در ذخیره فروش فوری');
+        }
+
+        const payload = data.product || {
+          ...product,
+          flashSale: {
+            priceAfterDiscount: Number(discountPriceEl.value),
+            quantityLimit: Number(quantityEl.value),
+            remainingQuantity: Number(quantityEl.value),
+            start: startDate,
+            end: endDate,
+            active: true
+          },
+          flashSaleActive: true,
+          flashPrice: Number(discountPriceEl.value),
+          quantityLimit: Number(quantityEl.value),
+          start: startDate,
+          end: endDate
+        };
+
+        upsertProduct(payload);
+        setModalFeedback('فروش فوری با موفقیت ذخیره شد.', 'success');
+        setFeedback('فروش فوری ثبت شد و فعال است.', 'success');
+        setTimeout(() => closeModal(), 350);
+      } catch (error) {
+        setModalFeedback(error?.message || 'خطا در ذخیره فروش فوری', 'error');
+      } finally {
+        setSaving(false);
+      }
+    });
+
+    discountPriceEl?.addEventListener('input', () => {
+      const product = flashProducts.find((p) => p.id === currentProductId);
+      if (product) validatePrice(product);
+    });
+
+    quantityEl?.addEventListener('input', validateQuantity);
+
+    startEl?.addEventListener('input', updateStatus);
+    endEl?.addEventListener('input', () => {
+      validateTime();
+      updateStatus();
+    });
+
+    presetButtons.forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const hours = Number(btn.dataset.flashPreset || 0);
+        const startDate = parseDate(startEl, new Date());
+        const newEnd = new Date(startDate.getTime() + hours * 60 * 60 * 1000);
+        if (startEl && !startEl.value) {
+          startEl.value = toLocalInputValue(startDate);
+        }
+        if (endEl) endEl.value = toLocalInputValue(newEnd);
+        updateStatus();
+        validateTime();
+      });
+    });
+
+    closeButtons.forEach((btn) => btn.addEventListener('click', closeModal));
+    modal?.addEventListener('click', (event) => {
+      if (event.target === modal) closeModal();
+    });
+
+    document.addEventListener('seller:ready', fetchProducts);
+    fetchProducts();
   })();
 </script>
 
