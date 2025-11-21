@@ -2793,13 +2793,19 @@
 
       <div class="discount-modal__grid mt-3">
         <div>
-          <label for="discountStart">شروع تخفیف</label>
-          <input id="discountStart" class="discount-input" type="datetime-local" />
+          <label for="discountStartDisplay">شروع تخفیف</label>
+          <div class="discount-date-wrapper">
+            <input id="discountStart" class="discount-input" type="datetime-local" aria-hidden="true" tabindex="-1" style="position:absolute;opacity:0;width:0;height:0;pointer-events:none;" />
+            <input id="discountStartDisplay" class="discount-input" type="text" readonly aria-label="شروع تخفیف (نمایش شمسی)" />
+          </div>
           <div class="discount-date-preview" id="discountStartPreview">—</div>
         </div>
         <div>
-          <label for="discountEnd">پایان تخفیف</label>
-          <input id="discountEnd" class="discount-input" type="datetime-local" />
+          <label for="discountEndDisplay">پایان تخفیف</label>
+          <div class="discount-date-wrapper">
+            <input id="discountEnd" class="discount-input" type="datetime-local" aria-hidden="true" tabindex="-1" style="position:absolute;opacity:0;width:0;height:0;pointer-events:none;" />
+            <input id="discountEndDisplay" class="discount-input" type="text" readonly aria-label="پایان تخفیف (نمایش شمسی)" />
+          </div>
           <div class="discount-date-preview" id="discountEndPreview">—</div>
           <div id="discountEndError" class="discount-error" role="alert" style="display:none"></div>
         </div>
@@ -3006,6 +3012,8 @@
     const discountNewPrice = document.getElementById('discountNewPrice');
     const discountStart = document.getElementById('discountStart');
     const discountEnd = document.getElementById('discountEnd');
+    const discountStartDisplay = document.getElementById('discountStartDisplay');
+    const discountEndDisplay = document.getElementById('discountEndDisplay');
     const discountStartPreview = document.getElementById('discountStartPreview');
     const discountEndPreview = document.getElementById('discountEndPreview');
     const priceError = document.getElementById('discountPriceError');
@@ -3040,6 +3048,22 @@
       return date.toISOString().slice(0, 16);
     };
 
+    const getDateFromInput = (input, fallback = null) => {
+      if (!input || !input.value) return fallback;
+      const date = new Date(input.value);
+      return Number.isNaN(date.getTime()) ? fallback : date;
+    };
+
+    const setDateInput = (input, displayInput, value, fallbackToNow = false) => {
+      const targetDate = value ? new Date(value) : (fallbackToNow ? new Date() : null);
+      if (input) {
+        input.value = targetDate ? toLocalInputValue(targetDate) : '';
+      }
+      if (displayInput) {
+        displayInput.value = targetDate ? formatPersianDateTime(targetDate) : '—';
+      }
+    };
+
     const formatPersianDateTime = (value) => {
       if (!value) return 'وارد نشده';
       const date = value instanceof Date ? value : new Date(value);
@@ -3051,8 +3075,14 @@
     };
 
     const syncDatePreviews = () => {
-      const startDate = discountStart?.value ? new Date(discountStart.value) : new Date();
-      const endDate = discountEnd?.value ? new Date(discountEnd.value) : null;
+      const startDate = getDateFromInput(discountStart, new Date());
+      const endDate = getDateFromInput(discountEnd, null);
+      if (discountStartDisplay) {
+        discountStartDisplay.value = formatPersianDateTime(startDate);
+      }
+      if (discountEndDisplay) {
+        discountEndDisplay.value = endDate ? formatPersianDateTime(endDate) : '—';
+      }
       if (discountStartPreview) {
         discountStartPreview.textContent = formatPersianDateTime(startDate);
       }
@@ -3240,14 +3270,14 @@
 
     function validateEnd() {
       if (!discountEnd) return true;
-      const startDate = discountStart.value ? new Date(discountStart.value) : new Date();
+      const startDate = getDateFromInput(discountStart, new Date());
 
       if (!discountEnd.value) {
         setEndError('پایان تخفیف را وارد کنید.');
         return false;
       }
 
-      const endDate = new Date(discountEnd.value);
+      const endDate = getDateFromInput(discountEnd, null);
       if (Number.isNaN(endDate.getTime())) {
         setEndError('زمان پایان تخفیف معتبر نیست.');
         return false;
@@ -3383,8 +3413,8 @@
         priceError.style.display = 'none';
         discountNewPrice.classList.remove('error');
       }
-      if (discountStart) discountStart.value = toLocalInputValue(product.start) || toLocalInputValue(new Date());
-      if (discountEnd) discountEnd.value = toLocalInputValue(product.end);
+      setDateInput(discountStart, discountStartDisplay, product.start, true);
+      setDateInput(discountEnd, discountEndDisplay, product.end);
       updateModalStatus(product);
       validateEnd();
       syncDatePreviews();
@@ -3437,13 +3467,13 @@
       const isEndValid = validateEnd();
       if (!isPriceValid || !isEndValid) return;
 
-      const startDate = discountStart.value ? new Date(discountStart.value) : new Date();
+      const startDate = getDateFromInput(discountStart, new Date());
       if (Number.isNaN(startDate.getTime())) {
         setEndError('زمان شروع تخفیف معتبر نیست.');
         return;
       }
 
-      const endDate = new Date(discountEnd.value);
+      const endDate = getDateFromInput(discountEnd, null);
 
       setSaving(true);
       setFeedback('');
@@ -3492,16 +3522,28 @@
     });
 
     discountStart?.addEventListener('input', syncDatePreviews);
+    discountStart?.addEventListener('change', syncDatePreviews);
 
     discountEnd?.addEventListener('input', () => {
       validateEnd();
       syncDatePreviews();
     });
+    discountEnd?.addEventListener('change', () => {
+      validateEnd();
+      syncDatePreviews();
+    });
+
+    discountStartDisplay?.addEventListener('click', () => {
+      discountStart?.showPicker?.();
+    });
+    discountEndDisplay?.addEventListener('click', () => {
+      discountEnd?.showPicker?.();
+    });
 
     quickButtons.forEach((btn) => {
       btn.addEventListener('click', () => {
         const days = Number(btn.dataset.discountDays || 0);
-        const startValue = discountStart.value ? new Date(discountStart.value) : new Date();
+        const startValue = getDateFromInput(discountStart, new Date());
         const target = new Date(startValue.getTime() + days * 24 * 60 * 60 * 1000);
         discountEnd.value = toLocalInputValue(target);
         validateEnd();
