@@ -2870,6 +2870,38 @@ body.hide-mobile-nav .mobile-bottom-nav {
   display: none;
 }
 
+.brand-shelf__nav {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 46px;
+  height: 46px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: #ffffff;
+  color: #0d9488;
+  border: 1px solid rgba(16, 185, 129, 0.2);
+  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.12);
+  transition: all 0.2s ease;
+  z-index: 2;
+}
+
+.brand-shelf__nav:hover {
+  background: #0d9488;
+  color: #ffffff;
+  box-shadow: 0 12px 28px rgba(15, 23, 42, 0.18);
+}
+
+.brand-shelf__nav[data-direction="prev"] {
+  left: 14px;
+}
+
+.brand-shelf__nav[data-direction="next"] {
+  right: 14px;
+}
+
 .brand-card {
   flex: 0 0 180px;
   min-width: 180px;
@@ -2901,6 +2933,8 @@ body.hide-mobile-nav .mobile-bottom-nav {
   padding: 6px 10px;
   border-radius: 10px;
   box-shadow: 0 4px 12px rgba(239, 68, 68, 0.35);
+  font-family: 'Vazirmatn', sans-serif;
+  direction: rtl;
 }
 
 .brand-card__image {
@@ -2937,27 +2971,46 @@ body.hide-mobile-nav .mobile-bottom-nav {
   -webkit-box-orient: vertical;
   overflow: hidden;
   text-align: right;
+  direction: rtl;
 }
 
 .brand-card__price-row {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 8px;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
   margin-top: auto;
+  text-align: right;
 }
 
 .brand-card__price-new {
-  font-size: 16px;
+  font-size: 18px;
   font-weight: 800;
   color: #0f172a;
+  display: inline-flex;
+  align-items: baseline;
+  gap: 6px;
 }
 
 .brand-card__price-old {
   font-size: 12px;
-  font-weight: 600;
+  font-weight: 700;
   color: #9ca3af;
   text-decoration: line-through;
+  display: inline-flex;
+  align-items: baseline;
+  gap: 4px;
+}
+
+.brand-card__currency {
+  font-size: 12px;
+  font-weight: 700;
+  color: #6b7280;
+}
+
+.brand-card__currency--new {
+  font-weight: 800;
+  color: #0f172a;
 }
 
 @media (max-width: 767px) {
@@ -3000,6 +3053,10 @@ body.hide-mobile-nav .mobile-bottom-nav {
   .brand-shelf__slider {
     width: 100%;
     padding: 12px 6px;
+  }
+
+  .brand-shelf__nav {
+    display: none;
   }
 }
 

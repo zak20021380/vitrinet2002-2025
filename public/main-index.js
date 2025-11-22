@@ -2922,6 +2922,7 @@ slider.addEventListener('touchend', () => {
 
 
 const sliderNavIds = [
+  'brand-shelf-slider',
   'drag-scroll-cards',
   'popular-products-slider',
   'banta-shops-section',
@@ -2936,10 +2937,10 @@ function updateSliderNavVisibility(sliderId) {
     return;
   }
 
-  const hasInteractiveCards = Boolean(sliderEl.querySelector(':scope > a'));
+  const hasItems = Boolean(sliderEl.querySelector(':scope > *'));
 
   buttons.forEach(button => {
-    if (hasInteractiveCards) {
+    if (hasItems) {
       button.style.display = '';
       button.setAttribute('aria-hidden', 'false');
       button.removeAttribute('aria-disabled');
