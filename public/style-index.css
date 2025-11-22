@@ -2815,6 +2815,13 @@ body.hide-mobile-nav .mobile-bottom-nav {
   gap: 12px;
 }
 
+.brand-shelf__slider-wrapper {
+  flex: 1;
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
 .brand-shelf__icon {
   width: 96px;
   height: 96px;
@@ -2864,10 +2871,50 @@ body.hide-mobile-nav .mobile-bottom-nav {
   -webkit-overflow-scrolling: touch;
   scrollbar-width: none;
   -ms-overflow-style: none;
+  scroll-behavior: smooth;
 }
 
 .brand-shelf__slider::-webkit-scrollbar {
   display: none;
+}
+
+.brand-shelf__nav {
+  display: none;
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.95);
+  border: none;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+  cursor: pointer;
+  z-index: 10;
+  transition: all 0.25s ease;
+  align-items: center;
+  justify-content: center;
+  color: rgba(13, 148, 136, 0.9);
+}
+
+.brand-shelf__nav:hover {
+  background: #ffffff;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.25);
+  transform: translateY(-50%) scale(1.08);
+}
+
+.brand-shelf__nav--prev {
+  right: -8px;
+}
+
+.brand-shelf__nav--next {
+  left: -8px;
+}
+
+@media (min-width: 768px) {
+  .brand-shelf__nav {
+    display: flex;
+  }
 }
 
 .brand-card {
@@ -2896,11 +2943,14 @@ body.hide-mobile-nav .mobile-bottom-nav {
   right: 10px;
   background: #ef4444;
   color: #ffffff;
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 800;
   padding: 6px 10px;
   border-radius: 10px;
   box-shadow: 0 4px 12px rgba(239, 68, 68, 0.35);
+  font-family: 'Vazirmatn', sans-serif;
+  direction: rtl;
+  letter-spacing: 0;
 }
 
 .brand-card__image {
@@ -2937,6 +2987,8 @@ body.hide-mobile-nav .mobile-bottom-nav {
   -webkit-box-orient: vertical;
   overflow: hidden;
   text-align: right;
+  direction: rtl;
+  unicode-bidi: embed;
 }
 
 .brand-card__price-row {
@@ -2947,17 +2999,38 @@ body.hide-mobile-nav .mobile-bottom-nav {
   margin-top: auto;
 }
 
+.brand-card__price-group {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+  margin-top: auto;
+  text-align: right;
+  direction: rtl;
+}
+
 .brand-card__price-new {
-  font-size: 16px;
+  font-size: 17px;
   font-weight: 800;
   color: #0f172a;
+  font-family: 'Vazirmatn', sans-serif;
+  direction: rtl;
+}
+
+.brand-card__currency {
+  font-size: 12px;
+  font-weight: 600;
+  color: #6b7280;
+  margin-right: 2px;
 }
 
 .brand-card__price-old {
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 600;
   color: #9ca3af;
   text-decoration: line-through;
+  font-family: 'Vazirmatn', sans-serif;
+  direction: rtl;
 }
 
 @media (max-width: 767px) {
@@ -2997,9 +3070,17 @@ body.hide-mobile-nav .mobile-bottom-nav {
     padding: 10px 16px;
   }
 
+  .brand-shelf__slider-wrapper {
+    width: 100%;
+  }
+
   .brand-shelf__slider {
     width: 100%;
     padding: 12px 6px;
+  }
+
+  .brand-shelf__nav {
+    display: none !important;
   }
 }
 

@@ -3307,3 +3307,45 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 });
+
+// Brand Shelf Navigation
+document.addEventListener('DOMContentLoaded', () => {
+  const slider = document.getElementById('brand-shelf-slider');
+  const prevBtn = document.querySelector('.brand-shelf__nav--prev');
+  const nextBtn = document.querySelector('.brand-shelf__nav--next');
+
+  if (!slider || !prevBtn || !nextBtn) return;
+
+  const scrollAmount = 400; // Scroll by ~2 cards at a time
+
+  prevBtn.addEventListener('click', () => {
+    slider.scrollBy({
+      left: scrollAmount,
+      behavior: 'smooth'
+    });
+  });
+
+  nextBtn.addEventListener('click', () => {
+    slider.scrollBy({
+      left: -scrollAmount,
+      behavior: 'smooth'
+    });
+  });
+
+  // Update button states based on scroll position
+  const updateNavState = () => {
+    const isAtStart = slider.scrollLeft >= slider.scrollWidth - slider.clientWidth - 10;
+    const isAtEnd = slider.scrollLeft <= 10;
+
+    prevBtn.style.opacity = isAtStart ? '0.4' : '1';
+    prevBtn.style.cursor = isAtStart ? 'default' : 'pointer';
+    prevBtn.disabled = isAtStart;
+
+    nextBtn.style.opacity = isAtEnd ? '0.4' : '1';
+    nextBtn.style.cursor = isAtEnd ? 'default' : 'pointer';
+    nextBtn.disabled = isAtEnd;
+  };
+
+  slider.addEventListener('scroll', updateNavState);
+  updateNavState();
+});
