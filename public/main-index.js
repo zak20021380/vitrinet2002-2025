@@ -3000,16 +3000,23 @@ function setupBrandShelfArrowVisibility() {
 
   if (!sliderEl || !prevBtn || !nextBtn) return;
 
+  const maxScroll = Math.max(0, sliderEl.scrollWidth - sliderEl.clientWidth);
+  const initialScroll = sliderEl.scrollLeft;
+  const candidatePositions = [0, maxScroll, -maxScroll];
+  const startPos = candidatePositions.reduce((closest, pos) => {
+    return Math.abs(pos - initialScroll) < Math.abs(closest - initialScroll) ? pos : closest;
+  }, candidatePositions[0]);
+  const endPos = candidatePositions.reduce((farthest, pos) => {
+    return Math.abs(pos - startPos) > Math.abs(farthest - startPos) ? pos : farthest;
+  }, candidatePositions[0]);
+
   const toggleVisibility = () => {
     const tolerance = 2;
-    const scrollLeft = sliderEl.scrollLeft;
-    const viewWidth = sliderEl.clientWidth;
+    const atStart = Math.abs(sliderEl.scrollLeft - startPos) <= tolerance;
+    const atEnd = Math.abs(sliderEl.scrollLeft - endPos) <= tolerance || maxScroll <= tolerance;
 
-    const atStart = scrollLeft <= tolerance;
-    const atEnd = scrollLeft + viewWidth >= sliderEl.scrollWidth - tolerance;
-
-    prevBtn.classList.toggle('is-hidden', atStart);
-    nextBtn.classList.toggle('is-hidden', atEnd);
+    prevBtn.classList.toggle('is-hidden', atEnd);
+    nextBtn.classList.toggle('is-hidden', atStart);
   };
 
   sliderEl.addEventListener('scroll', toggleVisibility, { passive: true });
