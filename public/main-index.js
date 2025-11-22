@@ -1533,12 +1533,19 @@ function buildDiscountCard(product) {
 async function loadActiveDiscounts() {
   const section = document.getElementById('discounts-section');
   const grid = document.getElementById('discounts-grid');
-  if (!section || !grid) return;
-
-  grid.innerHTML = '<div class="discounts-loading">در حال بارگذاری پیشنهادهای تخفیف‌دار...</div>';
-  section.style.display = '';
-
   const brandShelfSlider = document.getElementById('brand-shelf-slider');
+
+  // اگر هیچ بخشی برای نمایش تخفیف‌ها وجود ندارد، زودتر خارج شو
+  if (!section && !grid && !brandShelfSlider) return;
+
+  if (grid) {
+    grid.innerHTML = '<div class="discounts-loading">در حال بارگذاری پیشنهادهای تخفیف‌دار...</div>';
+  }
+
+  if (section) {
+    section.style.display = '';
+  }
+
   if (brandShelfSlider) {
     brandShelfSlider.innerHTML = '<p class="brand-card__title" data-placeholder="true">در حال بارگذاری پیشنهادهای تخفیف‌دار...</p>';
     updateSliderNavVisibility('brand-shelf-slider');
@@ -1555,25 +1562,33 @@ async function loadActiveDiscounts() {
     renderBrandShelf(activeDiscounts);
 
     if (!activeDiscounts.length) {
-      grid.innerHTML = '<div class="discounts-empty">فعلاً تخفیف فعالی ثبت نشده است. به زودی پیشنهادهای ویژه را اینجا می‌بینید.</div>';
-      section.style.display = 'none';
+      if (grid) {
+        grid.innerHTML = '<div class="discounts-empty">فعلاً تخفیف فعالی ثبت نشده است. به زودی پیشنهادهای ویژه را اینجا می‌بینید.</div>';
+      }
+      if (section) {
+        section.style.display = 'none';
+      }
       return;
     }
 
-    grid.innerHTML = '';
-    activeDiscounts
-      .sort((a, b) => new Date(a.discountEnd || 0) - new Date(b.discountEnd || 0))
-      .slice(0, 12)
-      .forEach(product => {
-        const card = buildDiscountCard(product);
-        grid.appendChild(card);
-      });
+    if (grid) {
+      grid.innerHTML = '';
+      activeDiscounts
+        .sort((a, b) => new Date(a.discountEnd || 0) - new Date(b.discountEnd || 0))
+        .slice(0, 12)
+        .forEach(product => {
+          const card = buildDiscountCard(product);
+          grid.appendChild(card);
+        });
 
-    setupDiscountsCarousel();
+      setupDiscountsCarousel();
+    }
   } catch (error) {
     console.error('Failed to load active discounts', error);
     renderBrandShelf([]);
-    grid.innerHTML = '<div class="discounts-empty">مشکل در دریافت تخفیف‌های فعال. لطفاً دوباره تلاش کنید.</div>';
+    if (grid) {
+      grid.innerHTML = '<div class="discounts-empty">مشکل در دریافت تخفیف‌های فعال. لطفاً دوباره تلاش کنید.</div>';
+    }
   }
 }
 
