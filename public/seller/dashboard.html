@@ -262,6 +262,233 @@
     border: 1px dashed #cbd5e1;
   }
 
+  .discount-add-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 14px;
+    border-radius: 12px;
+    border: 1px solid #0ea5e933;
+    background: linear-gradient(120deg, #f0f9ff, #ecfdf3);
+    color: #0f172a;
+    font-weight: 800;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+
+  .discount-add-btn:hover,
+  .discount-add-btn:focus {
+    transform: translateY(-1px);
+    box-shadow: 0 12px 26px rgba(14, 165, 233, 0.16);
+    outline: none;
+  }
+
+  .add-discount-modal {
+    position: fixed;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1.25rem;
+    background: rgba(15, 23, 42, 0.55);
+    backdrop-filter: blur(8px);
+    z-index: 450;
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition: opacity 0.25s ease, visibility 0.25s ease;
+  }
+
+  .add-discount-modal.active {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+  }
+
+  .add-discount-modal__card {
+    width: min(720px, 100%);
+    background: linear-gradient(145deg, #ffffff 0%, #f8fffc 100%);
+    border-radius: 20px;
+    box-shadow: 0 24px 60px rgba(16, 185, 129, 0.22);
+    padding: 1.6rem;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    max-height: 90vh;
+    overflow: hidden;
+  }
+
+  .add-discount-modal__close {
+    position: absolute;
+    left: 1rem;
+    top: 1rem;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+    display: grid;
+    place-items: center;
+    color: #ef4444;
+    cursor: pointer;
+    transition: transform 0.18s ease, box-shadow 0.18s ease;
+  }
+
+  .add-discount-modal__close:hover,
+  .add-discount-modal__close:focus {
+    transform: rotate(-4deg) scale(1.03);
+    box-shadow: 0 10px 20px rgba(239, 68, 68, 0.16);
+    outline: none;
+  }
+
+  .add-discount-modal__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+  }
+
+  .add-discount-modal__title {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+    font-weight: 900;
+    color: #0f172a;
+    margin: 0;
+  }
+
+  .add-discount-modal__badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 12px;
+    background: rgba(16, 185, 129, 0.12);
+    color: #0f9c66;
+    border-radius: 12px;
+    font-weight: 800;
+  }
+
+  .add-discount-modal__search {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    background: #fff;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.7);
+  }
+
+  .add-discount-modal__search input {
+    flex: 1;
+    border: none;
+    outline: none;
+    font-size: 14px;
+    color: #0f172a;
+    background: transparent;
+  }
+
+  .add-discount-modal__list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    overflow: auto;
+    padding: 4px;
+    margin: 0 -4px;
+  }
+
+  .add-discount-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 12px 14px;
+    border-radius: 14px;
+    border: 1px solid #e2e8f0;
+    background: #fff;
+    box-shadow: 0 8px 22px rgba(15, 23, 42, 0.06);
+  }
+
+  .add-discount-item__info {
+    display: grid;
+    gap: 6px;
+  }
+
+  .add-discount-item__title {
+    font-weight: 800;
+    color: #0f172a;
+  }
+
+  .add-discount-item__meta {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    font-size: 12px;
+    color: #475569;
+  }
+
+  .add-discount-item__btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 10px 12px;
+    border-radius: 12px;
+    border: 1px solid #0ea5e933;
+    background: linear-gradient(135deg, #10b981, #0ea5e9);
+    color: #fff;
+    font-weight: 800;
+    cursor: pointer;
+    transition: transform 0.18s ease, box-shadow 0.18s ease;
+  }
+
+  .add-discount-item__btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  .add-discount-item__btn:hover:not(:disabled),
+  .add-discount-item__btn:focus-visible:not(:disabled) {
+    transform: translateY(-1px);
+    box-shadow: 0 10px 22px rgba(14, 165, 233, 0.24);
+    outline: none;
+  }
+
+  .add-discount-empty {
+    padding: 14px;
+    text-align: center;
+    color: #64748b;
+    background: #f8fafc;
+    border: 1px dashed #cbd5e1;
+    border-radius: 14px;
+  }
+
+  @media (max-width: 640px) {
+    .add-discount-modal__card {
+      padding: 1.25rem 1rem 1rem;
+      border-radius: 16px;
+    }
+
+    .add-discount-modal__header {
+      align-items: flex-start;
+    }
+
+    .add-discount-modal__badge {
+      width: 100%;
+      justify-content: center;
+    }
+
+    .add-discount-item {
+      align-items: flex-start;
+      flex-direction: column;
+    }
+
+    .add-discount-item__btn {
+      width: 100%;
+      justify-content: center;
+    }
+  }
+
   .discount-price {
     color: #0ea5e9;
     font-weight: 800;
@@ -2802,9 +3029,15 @@
         <div class="flex items-center gap-2 text-[#0f172a] font-bold text-base">
           <span class="discount-pill off" id="discountSummary">۰ محصول با تخفیف فعال</span>
         </div>
-        <div class="flex items-center gap-2 text-sm text-gray-500">
-          <i class="ri-information-line" aria-hidden="true"></i>
-          <span>روی «تنظیم / ویرایش تخفیف» بزنید تا جزئیات هر محصول را ببینید.</span>
+        <div class="flex flex-wrap items-center gap-2 text-sm text-gray-500 justify-end">
+          <button type="button" id="openAddDiscountModal" class="discount-add-btn" aria-haspopup="dialog">
+            <i class="ri-add-circle-line text-[#0ea5e9]" aria-hidden="true"></i>
+            افزودن کالا
+          </button>
+          <div class="flex items-center gap-2 text-sm text-gray-500">
+            <i class="ri-information-line" aria-hidden="true"></i>
+            <span>روی «تنظیم / ویرایش تخفیف» بزنید تا جزئیات هر محصول را ببینید.</span>
+          </div>
         </div>
       </div>
 
@@ -2827,6 +3060,38 @@
       <div id="discountMobileList" class="grid md:hidden gap-3 mt-4"></div>
     </div>
   </section>
+
+  <div class="add-discount-modal" id="addDiscountModal" role="dialog" aria-modal="true" aria-labelledby="addDiscountTitle" aria-describedby="addDiscountDesc">
+    <div class="add-discount-modal__card" tabindex="-1">
+      <button class="add-discount-modal__close" type="button" data-add-discount-close aria-label="بستن پنجره افزودن کالا">
+        <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+          <path d="M5 5l10 10M15 5L5 15" stroke="#ef4444" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+      </button>
+
+      <div class="add-discount-modal__header">
+        <div class="add-discount-modal__title" id="addDiscountTitle">
+          <i class="ri-shopping-basket-2-line text-[#0ea5e9]" aria-hidden="true"></i>
+          <span>افزودن کالا به تخفیف‌ها</span>
+        </div>
+        <span class="add-discount-modal__badge" id="addDiscountBadge">
+          <i class="ri-check-fill" aria-hidden="true"></i>
+          انتخاب از محصولات شما
+        </span>
+      </div>
+      <p class="text-gray-600 text-sm leading-7" id="addDiscountDesc">
+        در این لیست تمام کالاهای ثبت‌شده شما نمایش داده می‌شود. محصول موردنظر را انتخاب کنید تا به لیست مدیریت تخفیف‌ها اضافه شود و سپس مقدار تخفیف را تعیین کنید.
+      </p>
+
+      <label class="add-discount-modal__search" for="addDiscountSearch">
+        <i class="ri-search-2-line text-[#10b981]" aria-hidden="true"></i>
+        <input type="search" id="addDiscountSearch" placeholder="جستجوی نام کالا..." />
+      </label>
+
+      <div id="addDiscountList" class="add-discount-modal__list" role="list"></div>
+      <div id="addDiscountEmpty" class="add-discount-empty" style="display:none;">همه محصولات شما در لیست تخفیف‌ها هستند!</div>
+    </div>
+  </div>
 
   <div class="discount-modal" id="discountModal" role="dialog" aria-modal="true" aria-labelledby="discountModalTitle" aria-describedby="discountModalDesc">
     <div class="discount-modal__card" tabindex="-1">
@@ -3070,6 +3335,7 @@
 <script>
   (function () {
     const discountProducts = [];
+    const allSellerProducts = [];
     const apiClient = window.VITRINET_API;
 
     const modal = document.getElementById('discountModal');
@@ -3096,8 +3362,17 @@
     const discountActionFeedback = document.getElementById('discountActionFeedback');
     const discountStatus = document.getElementById('discountStatus');
     const quickButtons = document.querySelectorAll('[data-discount-days]');
+    const addDiscountModal = document.getElementById('addDiscountModal');
+    const addDiscountModalCard = addDiscountModal?.querySelector('.add-discount-modal__card');
+    const addDiscountList = document.getElementById('addDiscountList');
+    const addDiscountSearch = document.getElementById('addDiscountSearch');
+    const addDiscountEmpty = document.getElementById('addDiscountEmpty');
+    const addDiscountBadge = document.getElementById('addDiscountBadge');
+    const addDiscountCloseBtns = addDiscountModal ? addDiscountModal.querySelectorAll('[data-add-discount-close]') : [];
+    const openAddDiscountModalBtn = document.getElementById('openAddDiscountModal');
     let currentProductId = null;
     let lastFocusedElement = null;
+    let addModalLastFocused = null;
     const defaultSaveLabel = saveDiscountBtn?.innerHTML;
 
     const buildApiUrl = (path) => {
@@ -3207,6 +3482,9 @@
       return `${hours} ساعت و ${minutes} دقیقه باقی مانده`;
     };
 
+    const hasExistingDiscount = (product) =>
+      product.discountPrice != null || product.active || product.limit != null || product.start || product.end;
+
     const buildRemainingBadges = (product) => {
       if (!product?.active) return '';
       const badges = [];
@@ -3248,11 +3526,15 @@
           ? products.map((product) => normalizeProduct(product)).filter(Boolean)
           : [];
 
+        allSellerProducts.length = 0;
+        allSellerProducts.push(...normalized);
+
         discountProducts.length = 0;
-        discountProducts.push(...normalized);
+        discountProducts.push(...normalized.filter((product) => hasExistingDiscount(product)));
         renderDiscounts();
       } catch (error) {
         console.error('Failed to fetch discount products:', error);
+        allSellerProducts.length = 0;
         discountProducts.length = 0;
         renderDiscounts();
       }
@@ -3286,6 +3568,90 @@
           renderDiscounts();
         });
       });
+    }
+
+    const getAvailableProductsForDiscount = () =>
+      allSellerProducts.filter(
+        (product) => !discountProducts.some((selected) => String(selected.id) === String(product.id))
+      );
+
+    function renderAddModalList(searchTerm = '') {
+      if (!addDiscountList) return;
+      const term = searchTerm.trim().toLowerCase();
+      const availableProducts = getAvailableProductsForDiscount().filter((product) =>
+        product.name?.toLowerCase().includes(term)
+      );
+
+      addDiscountList.innerHTML = availableProducts
+        .map(
+          (product) => `
+          <div class="add-discount-item" role="listitem">
+            <div class="add-discount-item__info">
+              <div class="add-discount-item__title">${product.name}</div>
+              <div class="add-discount-item__meta">
+                <span class="flex items-center gap-1"><i class="ri-price-tag-3-line" aria-hidden="true"></i>${formatPrice(product.price)}</span>
+                <span class="flex items-center gap-1 text-[#0ea5e9]"><i class="ri-flashlight-fill" aria-hidden="true"></i>${product.active ? 'تخفیف فعال دارد' : 'بدون تخفیف'}</span>
+              </div>
+            </div>
+            <button type="button" class="add-discount-item__btn" data-add-discount-id="${product.id}">
+              <i class="ri-add-line" aria-hidden="true"></i>
+              افزودن به تخفیف‌ها
+            </button>
+          </div>
+        `
+        )
+        .join('');
+
+      const hasItems = availableProducts.length > 0;
+      if (addDiscountEmpty) {
+        addDiscountEmpty.style.display = hasItems ? 'none' : 'block';
+      }
+
+      const availableCount = getAvailableProductsForDiscount().length;
+      if (addDiscountBadge) {
+        addDiscountBadge.textContent = availableCount > 0
+          ? `${availableCount} کالا آماده افزودن`
+          : 'همه کالاها اضافه شده‌اند';
+      }
+    }
+
+    function openAddDiscountModal() {
+      if (!addDiscountModal) return;
+      addModalLastFocused = document.activeElement;
+      addDiscountModal.classList.add('active');
+      document.body.style.overflow = 'hidden';
+      renderAddModalList(addDiscountSearch?.value || '');
+      addDiscountModalCard?.focus();
+      document.addEventListener('keydown', handleAddModalEscape);
+    }
+
+    function closeAddDiscountModal() {
+      if (!addDiscountModal) return;
+      addDiscountModal.classList.remove('active');
+      document.body.style.overflow = '';
+      document.removeEventListener('keydown', handleAddModalEscape);
+      if (addModalLastFocused?.focus) {
+        addModalLastFocused.focus();
+      }
+    }
+
+    function handleAddModalEscape(event) {
+      if (event.key === 'Escape') {
+        closeAddDiscountModal();
+      }
+    }
+
+    function addProductToDiscounts(productId) {
+      const product = allSellerProducts.find((p) => String(p.id) === String(productId));
+      if (!product) return;
+      if (discountProducts.some((p) => String(p.id) === String(productId))) {
+        closeAddDiscountModal();
+        return;
+      }
+      discountProducts.push({ ...product });
+      renderDiscounts();
+      setActionFeedback('محصول به لیست تخفیف‌ها اضافه شد. حالا تخفیف را تنظیم کنید.', 'success');
+      closeAddDiscountModal();
     }
 
     function renderDiscounts() {
@@ -3359,6 +3725,7 @@
         }
       }
 
+      renderAddModalList(addDiscountSearch?.value || '');
       attachInventorySteppers();
 
       document.querySelectorAll('[data-discount-id]').forEach((btn) => {
@@ -3713,6 +4080,23 @@
     discountEnd?.addEventListener('change', () => {
       validateEnd();
       syncDatePreviews();
+    });
+
+    openAddDiscountModalBtn?.addEventListener('click', openAddDiscountModal);
+    addDiscountCloseBtns.forEach((btn) => btn.addEventListener('click', closeAddDiscountModal));
+    addDiscountModal?.addEventListener('click', (event) => {
+      if (event.target === addDiscountModal) {
+        closeAddDiscountModal();
+      }
+    });
+    addDiscountSearch?.addEventListener('input', (event) => {
+      renderAddModalList(event.target.value);
+    });
+    addDiscountList?.addEventListener('click', (event) => {
+      const btn = event.target.closest('[data-add-discount-id]');
+      if (btn) {
+        addProductToDiscounts(btn.dataset.addDiscountId);
+      }
     });
 
     quickButtons.forEach((btn) => {
