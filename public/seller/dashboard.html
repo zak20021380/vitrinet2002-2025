@@ -3234,12 +3234,13 @@
     };
 
     async function fetchDiscountProducts() {
-      if (!window.seller?.id) {
+      const sellerId = window.seller?.id || window.seller?._id || window.seller?.sellerId;
+      if (!sellerId) {
         return;
       }
 
       try {
-        const response = await fetch(buildApiUrl(`/api/products?sellerId=${window.seller.id}`), withCredentials());
+        const response = await fetch(buildApiUrl(`/api/products?sellerId=${sellerId}`), withCredentials());
         if (!response.ok) {
           throw new Error('Failed to load products');
         }
