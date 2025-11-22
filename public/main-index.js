@@ -1411,45 +1411,61 @@ function calculateDiscountPercent(product) {
   return percent > 0 ? percent : null;
 }
 
-function buildBrandShelfCard(product) {
-  const card = document.createElement('article');
-  card.className = 'brand-card';
+const SPECIAL_OFFERS_FALLBACK = [
+  { title: 'دستگاه اسپرسو ساز خانگی', price: '۲,۸۹۰,۰۰۰ تومان', oldPrice: '۳,۶۵۰,۰۰۰ تومان', discount: '٪۲۰', image: 'assets/images/no-image.png' },
+  { title: 'هدفون بلوتوثی نویزکنسل', price: '۱,۷۹۰,۰۰۰ تومان', oldPrice: '۲,۳۵۰,۰۰۰ تومان', discount: '٪۲۴', image: 'assets/images/no-image.png' },
+  { title: 'کفش ورزشی رانینگ', price: '۹۸۰,۰۰۰ تومان', oldPrice: '۱,۲۵۰,۰۰۰ تومان', discount: '٪۲۲', image: 'assets/images/no-image.png' },
+  { title: 'ست مراقبت پوستی روزانه', price: '۶۴۵,۰۰۰ تومان', oldPrice: '۸۲۰,۰۰۰ تومان', discount: '٪۲۱', image: 'assets/images/no-image.png' }
+];
+
+function normaliseSpecialOffer(product) {
+  if (!product) return null;
 
   const percent = calculateDiscountPercent(product);
-  const badgeLabel = percent != null
-    ? `٪${discountNumberFormatter.format(percent)} تخفیف`
-    : 'تخفیف ویژه';
+  const badgeLabel = product.discount
+    || product.badge
+    || (percent != null ? `٪${discountNumberFormatter.format(percent)}` : 'تخفیف ویژه');
 
-  const imageSrc = resolveProductImage(product);
-  const title = product?.title || product?.name || 'محصول تخفیف‌دار';
-  const originalPrice = Number(product?.price);
-  const discountedPrice = Number(product?.discountPrice);
+  const imageSrc = product.image || resolveProductImage(product);
+  const title = product.title || product.name || 'پیشنهاد ویژه';
 
-  const originalMarkup = Number.isFinite(originalPrice) && originalPrice > 0
-    ? `<span class="brand-card__amount">${discountNumberFormatter.format(Math.round(originalPrice))}</span><span class="brand-card__currency">تومان</span>`
-    : '';
-  const discountedMarkup = Number.isFinite(discountedPrice) && discountedPrice > 0
-    ? `<span class="brand-card__amount">${discountNumberFormatter.format(Math.round(discountedPrice))}</span><span class="brand-card__currency brand-card__currency--new">تومان</span>`
-    : '';
+  const originalValue = product.oldPrice ?? product.price;
+  const discountedValue = product.discountPrice ?? product.price ?? product.newPrice;
+  const originalMarkup = typeof originalValue === 'string' ? originalValue : formatToman(originalValue);
+  const discountedMarkup = typeof discountedValue === 'string' ? discountedValue : formatToman(discountedValue);
 
-  card.innerHTML = `
-    <span class="brand-card__badge">${escapeHTML(badgeLabel)}</span>
-    <div class="brand-card__image">
-      <img src="${escapeHTML(imageSrc)}" alt="${escapeHTML(title)}">
-    </div>
-    <h4 class="brand-card__title">${escapeHTML(title)}</h4>
-    <div class="brand-card__price-row">
-      ${originalMarkup ? `<span class="brand-card__price-old">${originalMarkup}</span>` : ''}
-      ${discountedMarkup ? `<span class="brand-card__price-new">${discountedMarkup}</span>` : ''}
+  return {
+    discount: badgeLabel || 'تخفیف ویژه',
+    image: imageSrc,
+    title,
+    oldPrice: originalMarkup || '',
+    price: discountedMarkup || ''
+  };
+}
+
+function buildBrandShelfCard(product) {
+  const offer = normaliseSpecialOffer(product);
+  if (!offer) return '';
+
+  return `
+    <div class="product-card">
+      <div class="badge">${escapeHTML(offer.discount)}</div>
+      <img src="${escapeHTML(offer.image)}">
+      <h3>${escapeHTML(offer.title)}</h3>
+      <div class="prices">
+        ${offer.oldPrice ? `<span class="old">${escapeHTML(offer.oldPrice)}</span>` : ''}
+        ${offer.price ? `<span class="new">${escapeHTML(offer.price)}</span>` : ''}
+      </div>
     </div>
   `;
-
-  return card;
 }
 
 function renderBrandShelf(discounts) {
-  const slider = document.getElementById('brand-shelf-slider');
-  if (!slider) return;
+  const slider = document.getElementById('special-offers-slider');
+  if (!slider) {
+    console.error('Special Offers Slider not found');
+    return;
+  }
 
   slider.scrollTo({ left: 0, behavior: 'auto' });
 
@@ -1457,19 +1473,17 @@ function renderBrandShelf(discounts) {
     ? discounts.filter(item => isDiscountCurrentlyActive(item))
     : [];
 
-  if (!validItems.length) {
-    slider.innerHTML = '<p class="brand-card__title" data-placeholder="true">فعلاً تخفیف فعالی ثبت نشده است.</p>';
-    updateSliderNavVisibility('brand-shelf-slider');
-    setupBrandShelfArrowVisibility();
-    return;
-  }
+  const itemsToRender = validItems.length ? validItems.slice(0, 10) : SPECIAL_OFFERS_FALLBACK;
 
   slider.innerHTML = '';
-  validItems.slice(0, 10).forEach(product => {
-    slider.appendChild(buildBrandShelfCard(product));
+  itemsToRender.forEach(product => {
+    const cardMarkup = buildBrandShelfCard(product);
+    if (cardMarkup) {
+      slider.insertAdjacentHTML('beforeend', cardMarkup);
+    }
   });
 
-  updateSliderNavVisibility('brand-shelf-slider');
+  updateSliderNavVisibility('special-offers-slider');
   setupBrandShelfArrowVisibility();
 }
 
@@ -1534,10 +1548,10 @@ async function loadActiveDiscounts() {
   grid.innerHTML = '<div class="discounts-loading">در حال بارگذاری پیشنهادهای تخفیف‌دار...</div>';
   section.style.display = '';
 
-  const brandShelfSlider = document.getElementById('brand-shelf-slider');
-  if (brandShelfSlider) {
-    brandShelfSlider.innerHTML = '<p class="brand-card__title" data-placeholder="true">در حال بارگذاری پیشنهادهای تخفیف‌دار...</p>';
-    updateSliderNavVisibility('brand-shelf-slider');
+  const specialOffersSlider = document.getElementById('special-offers-slider');
+  if (specialOffersSlider) {
+    specialOffersSlider.innerHTML = '<p class="brand-card__title" data-placeholder="true">در حال بارگذاری پیشنهادهای تخفیف‌دار...</p>';
+    updateSliderNavVisibility('special-offers-slider');
     setupBrandShelfArrowVisibility();
   }
 
@@ -2994,7 +3008,7 @@ slider.addEventListener('touchend', () => {
 
 
 const sliderNavIds = [
-  'brand-shelf-slider',
+  'special-offers-slider',
   'drag-scroll-cards',
   'popular-products-slider',
   'banta-shops-section',
@@ -3066,9 +3080,9 @@ function setupSliderNavigation(sliderId) {
 sliderNavIds.forEach(setupSliderNavigation);
 
 function setupBrandShelfArrowVisibility() {
-  const sliderEl = document.getElementById('brand-shelf-slider');
-  const prevBtn = document.querySelector('[data-scroll-target="brand-shelf-slider"][data-direction="prev"]');
-  const nextBtn = document.querySelector('[data-scroll-target="brand-shelf-slider"][data-direction="next"]');
+  const sliderEl = document.getElementById('special-offers-slider');
+  const prevBtn = document.querySelector('[data-scroll-target="special-offers-slider"][data-direction="prev"]');
+  const nextBtn = document.querySelector('[data-scroll-target="special-offers-slider"][data-direction="next"]');
 
   if (!sliderEl || !prevBtn || !nextBtn) return;
 
