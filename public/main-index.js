@@ -1,5 +1,12 @@
+const API_CONFIG = {
+  BASE_URL: 'http://localhost:5000',
+  API_PATH: '/api'
+};
+
+const API_BASE_URL = `${API_CONFIG.BASE_URL}${API_CONFIG.API_PATH}`;
+
 const SERVICE_PANEL_KEYWORDS = ['خدمات', 'زیبایی', 'تالار', 'مجالس', 'خودرو', 'ورزشی', 'پزشکی', 'سلامت', 'آرایش'];
-const REWARD_API_BASE = '/api/rewards';
+const REWARD_API_BASE = `${API_BASE_URL}/rewards`;
 const REWARD_USER_CLAIM_KEY = 'vt_reward_user_claim';
 const rewardNumberFormatter = new Intl.NumberFormat('fa-IR', { maximumFractionDigits: 0 });
 const rewardDateFormatter = new Intl.DateTimeFormat('fa-IR', {
@@ -745,7 +752,7 @@ initAuthPrompt();
 // -----------------------------
 // جستجوی پیشرفته صفحه اصلی
 // -----------------------------
-const SEARCH_API_BASE = 'http://localhost:5000/api';
+const SEARCH_API_BASE = API_BASE_URL;
 const searchElements = {
   form: document.getElementById('searchForm'),
   input: document.getElementById('mainSearchInput'),
@@ -1655,7 +1662,7 @@ let adHomeData = null;
 // گرفتن تبلیغ ad_home فقط یکبار برای هر بار بارگذاری فروشگاه‌ها
 async function fetchAdHome() {
   try {
-    const res = await fetch('http://localhost:5000/api/adOrder/active?planSlug=ad_home');
+    const res = await fetch(`${API_BASE_URL}/adOrder/active?planSlug=ad_home`);
     const data = await res.json();
     if (data.success && Array.isArray(data.ads)) {
       const approved = data.ads.filter(ad => ad && ad.status === 'approved');
@@ -1677,7 +1684,7 @@ async function loadShops() {
   await fetchAdHome();
 
   try {
-    const res = await fetch('http://localhost:5000/api/shops');
+    const res = await fetch(`${API_BASE_URL}/shops`);
     const shops = await res.json();
     cardsWrap.innerHTML = '';
     updateSliderNavVisibility('drag-scroll-cards');
@@ -1848,7 +1855,7 @@ async function loadMostVisitedStores() {
   }
   container.innerHTML = '<div class="w-full text-center py-8 text-gray-500">در حال بارگذاری...</div>';
   try {
-    const res = await fetch('/api/shops/top-visited?city=سنندج&limit=8');
+    const res = await fetch(`${API_BASE_URL}/shops/top-visited?city=سنندج&limit=8`);
     if (!res.ok) throw new Error('network');
     let stores = await res.json();
     stores = Array.isArray(stores) ? stores : [];
@@ -2048,7 +2055,7 @@ function renderPopularProductsSection(section) {
 
 async function loadPopularProductsFallback(slider) {
   try {
-    const res = await fetch('http://localhost:5000/api/products/latest-products');
+    const res = await fetch(`${API_BASE_URL}/products/latest-products`);
     if (!res.ok) throw new Error('Network error');
 
     const payload = await res.json();
@@ -2128,7 +2135,7 @@ async function loadPopularProducts() {
 
   let customLoaded = false;
   try {
-    const res = await fetch('/api/home-card-sections');
+    const res = await fetch(`${API_BASE_URL}/home-card-sections`);
     if (!res.ok) {
       throw new Error(`Failed to fetch home sections: ${res.status}`);
     }
@@ -2220,7 +2227,7 @@ async function loadBantaShops() {
   slider.innerHTML = '';
   updateSliderNavVisibility('banta-shops-section');
   try {
-    const res = await fetch('/api/shops');
+    const res = await fetch(`${API_BASE_URL}/shops`);
     if (!res.ok) throw new Error('network');
     const data = await res.json();
     const shopsAll = Array.isArray(data) ? data : [];
@@ -2322,7 +2329,7 @@ async function loadShoesAndBagsShops() {
   updateSliderNavVisibility('shoes-bags-slider');
 
   try {
-    const res = await fetch('/api/shops');
+    const res = await fetch(`${API_BASE_URL}/shops`);
     if (!res.ok) throw new Error('network');
 
     const raw = await res.json();
@@ -2648,7 +2655,7 @@ async function loadServiceShowcases() {
 
   let shops = [];
   try {
-    const res = await fetch('/api/service-shops/showcase?limit=40');
+    const res = await fetch(`${API_BASE_URL}/service-shops/showcase?limit=40`);
     if (!res.ok) throw new Error('network');
     const raw = await res.json();
     shops = Array.isArray(raw)
@@ -2680,7 +2687,7 @@ window.addEventListener('DOMContentLoaded', loadServiceShowcases);
 
 
 // ====== آدرس API سرور (در صورت نیاز کامل کن: http://yourdomain.com/api/shopping-centers) ======
-const API_URL = '/api/shopping-centers';
+const API_URL = `${API_BASE_URL}/shopping-centers`;
 
 // آیکون لوکیشن
 const locationSVG = `
@@ -2755,242 +2762,90 @@ fetch(API_URL, FETCH_OPTIONS)
     updateSliderNavVisibility('shopping-centers-slider');
   });
 
-// --- اسکرول drag/momentum ---
-const centersSlider = document.getElementById('shopping-centers-slider');
-let centersDown = false, centersStartX, centersScrollLeft, centersLastX, centersVelocity = 0, centersMomentumID;
-function centersMomentum() {
-  if (Math.abs(centersVelocity) > 0.4) {
-    centersSlider.scrollLeft -= centersVelocity;
-    centersVelocity *= 0.93;
-    centersMomentumID = requestAnimationFrame(centersMomentum);
-  } else {
-    cancelAnimationFrame(centersMomentumID);
-    centersVelocity = 0;
-  }
-}
-centersSlider.addEventListener('mousedown', (e) => {
-  centersDown = true;
-  centersStartX = e.pageX - centersSlider.offsetLeft;
-  centersLastX = e.pageX;
-  centersScrollLeft = centersSlider.scrollLeft;
-  centersVelocity = 0;
-  cancelAnimationFrame(centersMomentumID);
-});
-centersSlider.addEventListener('mousemove', (e) => {
-  if (!centersDown) return;
-  const x = e.pageX - centersSlider.offsetLeft;
-  centersSlider.scrollLeft = centersScrollLeft - (x - centersStartX);
-  centersVelocity = (e.pageX - centersLastX);
-  centersLastX = e.pageX;
-});
-centersSlider.addEventListener('mouseup', () => {
-  centersDown = false;
-  if (Math.abs(centersVelocity) > 1) centersMomentum();
-});
-centersSlider.addEventListener('mouseleave', () => {
-  centersDown = false;
-  if (Math.abs(centersVelocity) > 1) centersMomentum();
-});
-centersSlider.addEventListener('touchstart', (e) => {
-  centersDown = true;
-  centersStartX = e.touches[0].pageX - centersSlider.offsetLeft;
-  centersLastX = e.touches[0].pageX;
-  centersScrollLeft = centersSlider.scrollLeft;
-  centersVelocity = 0;
-  cancelAnimationFrame(centersMomentumID);
-}, {passive:true});
-centersSlider.addEventListener('touchmove', (e) => {
-  if (!centersDown) return;
-  const x = e.touches[0].pageX - centersSlider.offsetLeft;
-  centersSlider.scrollLeft = centersScrollLeft - (x - centersStartX);
-  centersVelocity = (e.touches[0].pageX - centersLastX);
-  centersLastX = e.touches[0].pageX;
-}, {passive:false});
-centersSlider.addEventListener('touchend', () => {
-  centersDown = false;
-  if (Math.abs(centersVelocity) > 2) centersMomentum();
-}, {passive:true});
+function enableDragScroll(sliderElement) {
+  if (!sliderElement) return;
 
+  let isPointerDown = false;
+  let startX = 0;
+  let scrollLeft = 0;
+  let lastX = 0;
+  let velocity = 0;
+  let momentumID = null;
+  const sliderId = sliderElement.id;
 
-const shoesBagsSlider = document.getElementById('shoes-bags-slider');
-if (shoesBagsSlider) {
-  let shoesBagsDown = false, shoesBagsStartX, shoesBagsScrollLeft, shoesBagsLastX, shoesBagsVelocity = 0, shoesBagsMomentumID;
-  function shoesBagsMomentum() {
-    if (Math.abs(shoesBagsVelocity) > 0.4) {
-      shoesBagsSlider.scrollLeft -= shoesBagsVelocity;
-      shoesBagsVelocity *= 0.93;
-      shoesBagsMomentumID = requestAnimationFrame(shoesBagsMomentum);
-    } else {
-      cancelAnimationFrame(shoesBagsMomentumID);
-      shoesBagsVelocity = 0;
+  const updateNavVisibility = () => {
+    if (sliderId) {
+      updateSliderNavVisibility(sliderId);
     }
-  }
-  shoesBagsSlider.addEventListener('mousedown', (e) => {
-    shoesBagsDown = true;
-    shoesBagsStartX = e.pageX - shoesBagsSlider.offsetLeft;
-    shoesBagsLastX = e.pageX;
-    shoesBagsScrollLeft = shoesBagsSlider.scrollLeft;
-    shoesBagsVelocity = 0;
-    cancelAnimationFrame(shoesBagsMomentumID);
-  });
-  shoesBagsSlider.addEventListener('mousemove', (e) => {
-    if (!shoesBagsDown) return;
-    const x = e.pageX - shoesBagsSlider.offsetLeft;
-    shoesBagsSlider.scrollLeft = shoesBagsScrollLeft - (x - shoesBagsStartX);
-    shoesBagsVelocity = (e.pageX - shoesBagsLastX);
-    shoesBagsLastX = e.pageX;
-  });
-  shoesBagsSlider.addEventListener('mouseup', () => {
-    shoesBagsDown = false;
-    if (Math.abs(shoesBagsVelocity) > 1) shoesBagsMomentum();
-  });
-  shoesBagsSlider.addEventListener('mouseleave', () => {
-    shoesBagsDown = false;
-    if (Math.abs(shoesBagsVelocity) > 1) shoesBagsMomentum();
-  });
-  shoesBagsSlider.addEventListener('touchstart', (e) => {
-    shoesBagsDown = true;
-    shoesBagsStartX = e.touches[0].pageX - shoesBagsSlider.offsetLeft;
-    shoesBagsLastX = e.touches[0].pageX;
-    shoesBagsScrollLeft = shoesBagsSlider.scrollLeft;
-    shoesBagsVelocity = 0;
-    cancelAnimationFrame(shoesBagsMomentumID);
-  }, {passive:true});
-  shoesBagsSlider.addEventListener('touchmove', (e) => {
-    if (!shoesBagsDown) return;
-    const x = e.touches[0].pageX - shoesBagsSlider.offsetLeft;
-    shoesBagsSlider.scrollLeft = shoesBagsScrollLeft - (x - shoesBagsStartX);
-    shoesBagsVelocity = (e.touches[0].pageX - shoesBagsLastX);
-    shoesBagsLastX = e.touches[0].pageX;
-  }, {passive:false});
-  shoesBagsSlider.addEventListener('touchend', () => {
-    shoesBagsDown = false;
-    if (Math.abs(shoesBagsVelocity) > 2) shoesBagsMomentum();
-  }, {passive:true});
-}
+  };
 
+  const stopMomentum = () => {
+    if (momentumID) {
+      cancelAnimationFrame(momentumID);
+      momentumID = null;
+    }
+  };
 
-const slider2 = document.getElementById('popular-products-slider');
-let down2 = false, startX2, scrollLeft2, lastX2, velocity2 = 0, drag2 = false, momentumID2;
-function momentum2() {
-  if (Math.abs(velocity2) > 0.4) {
-    slider2.scrollLeft -= velocity2;
-    velocity2 *= 0.93;
-    momentumID2 = requestAnimationFrame(momentum2);
-  } else {
-    cancelAnimationFrame(momentumID2);
-    velocity2 = 0;
-  }
-}
-slider2.addEventListener('mousedown', (e) => {
-  down2 = true; drag2 = false;
-  startX2 = e.pageX - slider2.offsetLeft;
-  lastX2 = e.pageX;
-  scrollLeft2 = slider2.scrollLeft;
-  velocity2 = 0;
-  cancelAnimationFrame(momentumID2);
-});
-slider2.addEventListener('mousemove', (e) => {
-  if (!down2) return;
-  drag2 = true;
-  const x = e.pageX - slider2.offsetLeft;
-  slider2.scrollLeft = scrollLeft2 - (x - startX2);
-  velocity2 = (e.pageX - lastX2);
-  lastX2 = e.pageX;
-});
-slider2.addEventListener('mouseup', () => {
-  down2 = false;
-  if (Math.abs(velocity2) > 1) momentum2();
-});
-slider2.addEventListener('mouseleave', () => {
-  down2 = false;
-  if (Math.abs(velocity2) > 1) momentum2();
-});
-slider2.addEventListener('touchstart', (e) => {
-  down2 = true;
-  startX2 = e.touches[0].pageX - slider2.offsetLeft;
-  lastX2 = e.touches[0].pageX;
-  scrollLeft2 = slider2.scrollLeft;
-  velocity2 = 0;
-  cancelAnimationFrame(momentumID2);
-}, {passive:true});
-slider2.addEventListener('touchmove', (e) => {
-  if (!down2) return;
-  const x = e.touches[0].pageX - slider2.offsetLeft;
-  slider2.scrollLeft = scrollLeft2 - (x - startX2);
-  velocity2 = (e.touches[0].pageX - lastX2);
-  lastX2 = e.touches[0].pageX;
-}, {passive:false});
-slider2.addEventListener('touchend', () => {
-  down2 = false;
-  if (Math.abs(velocity2) > 2) momentum2();
-}, {passive:true});
+  const momentum = () => {
+    if (Math.abs(velocity) > 0.4) {
+      sliderElement.scrollLeft -= velocity;
+      velocity *= 0.93;
+      updateNavVisibility();
+      momentumID = requestAnimationFrame(momentum);
+    } else {
+      stopMomentum();
+      velocity = 0;
+      updateNavVisibility();
+    }
+  };
 
-const slider = document.getElementById('drag-scroll-cards');
-let isDown = false;
-let startX, scrollLeft, lastX, isDragged = false;
-let velocity = 0, momentumID;
-
-function momentum() {
-  if (Math.abs(velocity) > 0.4) {
-    slider.scrollLeft -= velocity;
-    velocity *= 0.93; // عدد کمتر = روان‌تر
-    momentumID = requestAnimationFrame(momentum);
-  } else {
-    cancelAnimationFrame(momentumID);
+  const handleStart = (pageX) => {
+    isPointerDown = true;
+    startX = pageX - sliderElement.offsetLeft;
+    lastX = pageX;
+    scrollLeft = sliderElement.scrollLeft;
     velocity = 0;
-  }
+    stopMomentum();
+  };
+
+  const handleMove = (pageX) => {
+    if (!isPointerDown) return;
+    const x = pageX - sliderElement.offsetLeft;
+    sliderElement.scrollLeft = scrollLeft - (x - startX);
+    velocity = pageX - lastX;
+    lastX = pageX;
+    updateNavVisibility();
+  };
+
+  const handleEnd = () => {
+    if (!isPointerDown) return;
+    isPointerDown = false;
+    if (Math.abs(velocity) > 1) {
+      momentum();
+    } else {
+      updateNavVisibility();
+    }
+  };
+
+  sliderElement.addEventListener('mousedown', event => handleStart(event.pageX));
+  sliderElement.addEventListener('mousemove', event => handleMove(event.pageX));
+  sliderElement.addEventListener('mouseup', handleEnd);
+  sliderElement.addEventListener('mouseleave', handleEnd);
+
+  sliderElement.addEventListener('touchstart', (event) => {
+    const touch = event.touches[0];
+    handleStart(touch.pageX);
+  }, { passive: true });
+  sliderElement.addEventListener('touchmove', (event) => {
+    if (!isPointerDown) return;
+    const touch = event.touches[0];
+    handleMove(touch.pageX);
+  }, { passive: false });
+  sliderElement.addEventListener('touchend', handleEnd, { passive: true });
 }
 
-// دسکتاپ موس
-slider.addEventListener('mousedown', (e) => {
-  isDown = true;
-  isDragged = false;
-  startX = e.pageX - slider.offsetLeft;
-  lastX = e.pageX;
-  scrollLeft = slider.scrollLeft;
-  velocity = 0;
-  cancelAnimationFrame(momentumID);
-});
-slider.addEventListener('mousemove', (e) => {
-  if (!isDown) return;
-  isDragged = true;
-  const x = e.pageX - slider.offsetLeft;
-  const walk = x - startX;
-  slider.scrollLeft = scrollLeft - walk;
-  velocity = (e.pageX - lastX);
-  lastX = e.pageX;
-});
-slider.addEventListener('mouseup', () => {
-  isDown = false;
-  if (Math.abs(velocity) > 1) momentum();
-});
-slider.addEventListener('mouseleave', () => {
-  isDown = false;
-  if (Math.abs(velocity) > 1) momentum();
-});
-
-// موبایل تاچ
-slider.addEventListener('touchstart', (e) => {
-  isDown = true;
-  startX = e.touches[0].pageX - slider.offsetLeft;
-  lastX = e.touches[0].pageX;
-  scrollLeft = slider.scrollLeft;
-  velocity = 0;
-  cancelAnimationFrame(momentumID);
-}, {passive:true});
-slider.addEventListener('touchmove', (e) => {
-  if (!isDown) return;
-  const x = e.touches[0].pageX - slider.offsetLeft;
-  const walk = x - startX;
-  slider.scrollLeft = scrollLeft - walk;
-  velocity = (e.touches[0].pageX - lastX);
-  lastX = e.touches[0].pageX;
-}, {passive:false});
-slider.addEventListener('touchend', () => {
-  isDown = false;
-  if (Math.abs(velocity) > 2) momentum();
-}, {passive:true});
+['banta-shops-section', 'shopping-centers-slider', 'shoes-bags-slider', 'popular-products-slider', 'drag-scroll-cards']
+  .forEach(sliderId => enableDragScroll(document.getElementById(sliderId)));
 
 
 const sliderNavIds = [
@@ -3142,7 +2997,7 @@ window.showAdBannerPopup = async function() {
 
   try {
     console.log("⏳ ارسال درخواست fetch برای تبلیغ...");
-const res = await fetch('http://localhost:5000/api/adOrder/active?planSlug=ad_search');
+const res = await fetch(`${API_BASE_URL}/adOrder/active?planSlug=ad_search`);
     console.log("✅ پاسخ اولیه fetch دریافت شد", res);
 
     if (!res.ok) {
