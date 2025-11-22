@@ -1436,15 +1436,22 @@ function buildBrandShelfCard(product) {
     ? `<span class="brand-card__amount">${discountNumberFormatter.format(Math.round(discountedPrice))}</span><span class="brand-card__currency brand-card__currency--new">تومان</span>`
     : '';
 
+  const percentPill = percent != null
+    ? `<span class="brand-card__pill">${escapeHTML(`٪${discountNumberFormatter.format(percent)} سود`)}</span>`
+    : '';
+
   card.innerHTML = `
     <span class="brand-card__badge">${escapeHTML(badgeLabel)}</span>
     <div class="brand-card__image">
       <img src="${escapeHTML(imageSrc)}" alt="${escapeHTML(title)}">
     </div>
     <h4 class="brand-card__title">${escapeHTML(title)}</h4>
-    <div class="brand-card__price-row">
-      ${originalMarkup ? `<span class="brand-card__price-old">${originalMarkup}</span>` : ''}
-      ${discountedMarkup ? `<span class="brand-card__price-new">${discountedMarkup}</span>` : ''}
+    <div class="brand-card__footer">
+      <div class="brand-card__price-row">
+        ${originalMarkup ? `<span class="brand-card__price-old">${originalMarkup}</span>` : ''}
+        ${discountedMarkup ? `<span class="brand-card__price-new">${discountedMarkup}</span>` : ''}
+      </div>
+      ${percentPill}
     </div>
   `;
 
@@ -1513,16 +1520,18 @@ function buildDiscountCard(product) {
       ${countdownLabel ? `<div class="discount-card__timer-bar"><span class="discount-card__timer-text">${escapeHTML(countdownLabel)}</span></div>` : ''}
     </div>
     <div class="discount-card__body">
+      <div class="discount-card__meta">
+        <span class="discount-chip discount-chip--shop">${escapeHTML(shopName)}</span>
+        <span class="discount-chip">${escapeHTML(categoryLabel)}</span>
+      </div>
       <div class="discount-card__title" title="${escapeHTML(title)}">${escapeHTML(title)}</div>
-      <div class="discount-card__shop">
-        <div class="discount-card__shop-name">${escapeHTML(shopName)}</div>
-        <div class="discount-card__category">${escapeHTML(categoryLabel)}</div>
+      <div class="discount-card__price-stack">
+        <div class="discount-card__price-row">
+          ${originalMarkup ? `<span class="discount-original">${escapeHTML(originalMarkup)}</span>` : ''}
+          ${priceMarkup ? `<span class="discount-price">${escapeHTML(priceMarkup)}</span>` : ''}
+        </div>
+        ${Number.isInteger(remainingQty) ? `<div class="discount-remaining">${escapeHTML(`${discountNumberFormatter.format(remainingQty)} عدد باقی مانده`)}</div>` : ''}
       </div>
-      <div class="discount-card__price-row">
-        ${originalMarkup ? `<span class="discount-original">${escapeHTML(originalMarkup)}</span>` : ''}
-        ${priceMarkup ? `<span class="discount-price">${escapeHTML(priceMarkup)}</span>` : ''}
-      </div>
-      ${Number.isInteger(remainingQty) ? `<div class="discount-remaining">${escapeHTML(`${discountNumberFormatter.format(remainingQty)} عدد باقی مانده`)}</div>` : ''}
       <span class="discount-cta discount-cta--full">مشاهده تخفیف<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M7 17L17 7M7 7h10v10"/></svg></span>
     </div>
   `;
