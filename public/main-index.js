@@ -745,7 +745,11 @@ initAuthPrompt();
 // -----------------------------
 // جستجوی پیشرفته صفحه اصلی
 // -----------------------------
-const SEARCH_API_BASE = 'http://localhost:5000/api';
+const SEARCH_API_BASE = (() => {
+  const apiBase = (window.__API_BASE__ || window.API_BASE || '').replace(/\/$/, '');
+  if (apiBase) return `${apiBase}/api`;
+  return `${window.location.origin}/api`;
+})();
 const searchElements = {
   form: document.getElementById('searchForm'),
   input: document.getElementById('mainSearchInput'),
