@@ -2922,7 +2922,6 @@ slider.addEventListener('touchend', () => {
 
 
 const sliderNavIds = [
-  'brand-shelf-slider',
   'drag-scroll-cards',
   'popular-products-slider',
   'banta-shops-section',
@@ -2992,31 +2991,6 @@ function setupSliderNavigation(sliderId) {
 }
 
 sliderNavIds.forEach(setupSliderNavigation);
-
-function setupBrandShelfArrowVisibility() {
-  const sliderEl = document.getElementById('brand-shelf-slider');
-  const prevBtn = document.querySelector('[data-scroll-target="brand-shelf-slider"][data-direction="prev"]');
-  const nextBtn = document.querySelector('[data-scroll-target="brand-shelf-slider"][data-direction="next"]');
-
-  if (!sliderEl || !prevBtn || !nextBtn) return;
-
-  const toggleVisibility = () => {
-    const tolerance = 2;
-    const scrollLeft = sliderEl.scrollLeft;
-    const viewWidth = sliderEl.clientWidth;
-
-    const atStart = scrollLeft <= tolerance;
-    const atEnd = scrollLeft + viewWidth >= sliderEl.scrollWidth - tolerance;
-
-    prevBtn.classList.toggle('is-hidden', atStart);
-    nextBtn.classList.toggle('is-hidden', atEnd);
-  };
-
-  sliderEl.addEventListener('scroll', toggleVisibility, { passive: true });
-  toggleVisibility();
-}
-
-setupBrandShelfArrowVisibility();
 
 
 function toggleAdPopupVisibility(popupEl, shouldShow) {
