@@ -1343,10 +1343,10 @@ function formatToman(value) {
 }
 
 function resolveProductImage(product) {
-  if (!product) return 'assets/images/no-image.png';
+  if (!product) return 'assets/images/shop-placeholder.svg';
   if (product.image) return product.image;
   if (Array.isArray(product.images) && product.images.length) return product.images[0];
-  return 'assets/images/no-image.png';
+  return 'assets/images/shop-placeholder.svg';
 }
 
 function isDiscountCurrentlyActive(product, now = new Date()) {
@@ -1503,7 +1503,7 @@ function buildDiscountCard(product) {
 
   card.innerHTML = `
     <div class="discount-card__media">
-      <img src="${escapeHTML(imageSrc)}" alt="${escapeHTML(title)}" loading="lazy" onerror="this.src='assets/images/no-image.png'" />
+      <img src="${escapeHTML(imageSrc)}" alt="${escapeHTML(title)}" loading="lazy" onerror="this.src='assets/images/shop-placeholder.svg'" />
       <div class="discount-card__percent-badge">${escapeHTML(percentBadgeLabel)}</div>
       <span class="discount-card__badge">تخفیف فعال</span>
       ${countdownLabel ? `<div class="discount-card__timer-bar"><span class="discount-card__timer-text">${escapeHTML(countdownLabel)}</span></div>` : ''}
@@ -1862,7 +1862,7 @@ async function loadMostVisitedStores() {
 
     stores.forEach((shop, i) => {
       const rank = i + 1;
-      const img = shop.image || 'assets/images/no-image.png';
+      const img = shop.image || 'assets/images/shop-placeholder.svg';
       const name = shop.name || 'بدون نام';
       const loc = shop.address || '';
       const category = shop.category || 'نامشخص';
@@ -1879,7 +1879,7 @@ async function loadMostVisitedStores() {
       card.className = 'relative rounded-2xl shadow-md bg-[#f9f7f4] p-3 transition-all hover:shadow-lg hover:scale-[1.01]';
       card.innerHTML = `
         <div class="absolute top-2 left-2 text-white text-[11px] px-2 py-1 rounded-full ${badgeColor}">رتبه ${rank}</div>
-        <img src="${img}" class="w-full h-32 object-cover rounded-xl mb-2" onerror="this.src='assets/images/no-image.png'" />
+        <img src="${img}" class="w-full h-32 object-cover rounded-xl mb-2" onerror="this.src='assets/images/shop-placeholder.svg'" />
         <h3 class="text-sm font-bold text-gray-800 truncate">${name}</h3>
         <p class="text-xs text-gray-600 truncate">${loc}</p>
         <div class="flex items-center justify-between mt-2">
@@ -1994,7 +1994,7 @@ function renderPopularProductsSection(section) {
         }
       }
 
-      const imageUrl = card.imageUrl?.trim() || 'assets/images/no-image.png';
+      const imageUrl = card.imageUrl?.trim() || 'assets/images/shop-placeholder.svg';
       const tag = card.tag ? `<span class="absolute top-2 right-2 text-xs font-bold px-3 py-1 rounded-full bg-gradient-to-r from-[#10b981] to-[#0ea5e9] text-white shadow-md">${escapeHTML(card.tag)}</span>` : '';
       const description = card.description
         ? `<p class="popular-card-description text-sm text-gray-600 leading-relaxed">${escapeHTML(card.description)}</p>`
@@ -2018,7 +2018,7 @@ function renderPopularProductsSection(section) {
 
       cardEl.innerHTML = `
         <div class="popular-card-image w-full h-[130px] sm:h-[170px] rounded-2xl mb-5 flex items-center justify-center relative overflow-hidden" style="background:linear-gradient(120deg,#d4fbe8,#e0fdfa,#c8f7e6); box-shadow:inset 0 2px 10px rgba(16,185,129,0.1);">
-          <img src="${imageUrl}" alt="${escapeHTML(card.title)}" class="w-full h-full object-cover group-hover:brightness-105 transition-all duration-300" onerror="this.src='assets/images/no-image.png'"/>
+          <img src="${imageUrl}" alt="${escapeHTML(card.title)}" class="w-full h-full object-cover group-hover:brightness-105 transition-all duration-300" onerror="this.src='assets/images/shop-placeholder.svg'"/>
           ${tag}
         </div>
         <div class="popular-card-body flex flex-col gap-3 w-full text-right">
@@ -2065,7 +2065,7 @@ async function loadPopularProductsFallback(slider) {
     products.forEach((p) => {
       const cat = p.sellerCategory || p.category || 'نامشخص';
       const loc = p.sellerLocation || '—';
-      const img = p.images?.[0] ?? 'assets/images/no-image.png';
+      const img = p.images?.[0] ?? 'assets/images/shop-placeholder.svg';
       const priceText = (p.price ?? 0).toLocaleString() + ' تومان';
 
       const card = document.createElement('a');
@@ -2304,7 +2304,7 @@ function resolveShopImage(shop) {
     || shop?.boardImage
     || shop?.banner
     || (Array.isArray(shop?.images) ? shop.images[0] : shop?.image);
-  let src = candidate || 'assets/images/no-image.png';
+  let src = candidate || 'assets/images/shop-placeholder.svg';
   if (/^https?:/i.test(src) || src.startsWith('data:') || src.startsWith('//')) {
     return src;
   }
@@ -2364,7 +2364,7 @@ async function loadShoesAndBagsShops() {
 
       card.innerHTML = `
         <div class="w-full h-[120px] sm:h-[160px] rounded-xl mb-5 flex items-center justify-center relative overflow-hidden" style="background:linear-gradient(100deg,#e0fdfa,#d4fbe8);">
-          <img src="${resolveShopImage(shop)}" class="object-cover w-full h-full absolute inset-0 rounded-xl" alt="${escapeHTML(name)}" onerror="this.src='assets/images/no-image.png'">
+          <img src="${resolveShopImage(shop)}" class="object-cover w-full h-full absolute inset-0 rounded-xl" alt="${escapeHTML(name)}" onerror="this.src='assets/images/shop-placeholder.svg'">
           ${badgeTemplate}
         </div>
         <div class="w-full flex flex-col items-center mb-2">
@@ -2603,7 +2603,7 @@ function renderServiceShowcase(config, shops) {
     card.innerHTML = `
       <div class="featured-service-card__media">
         <span class="featured-service-card__chip">${escapeHTML(chipText)}</span>
-        <img class="featured-service-card__image" loading="lazy" src="${escapeHTML(imageSrc)}" alt="${escapeHTML(altText)}" onerror="this.src='assets/images/no-image.png'" />
+        <img class="featured-service-card__image" loading="lazy" src="${escapeHTML(imageSrc)}" alt="${escapeHTML(altText)}" onerror="this.src='assets/images/shop-placeholder.svg'" />
       </div>
       <div class="featured-service-card__body">
         <h4 class="featured-service-card__title">${escapeHTML(shop?.storename || shop?.name || 'فروشگاه بدون نام')}</h4>
