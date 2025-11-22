@@ -1574,7 +1574,89 @@ function setupDiscountsCarousel() {
   syncDots();
 }
 
-document.addEventListener('DOMContentLoaded', loadActiveDiscounts);
+document.addEventListener('DOMContentLoaded', () => {
+  loadActiveDiscounts();
+  loadBrandShelfOffers();
+});
+
+function toggleBrandShelfNav(hasItems) {
+  const buttons = document.querySelectorAll('[data-scroll-target="brand-shelf-slider"]');
+  buttons.forEach(button => {
+    button.style.display = hasItems ? '' : 'none';
+    button.setAttribute('aria-hidden', hasItems ? 'false' : 'true');
+    button.tabIndex = hasItems ? 0 : -1;
+  });
+}
+
+function buildBrandShelfCard(product) {
+  const card = document.createElement('a');
+  const productId = product?._id || product?.id;
+  const title = product?.title || product?.name || 'محصول تخفیف‌دار';
+  const shopName = product?.shopName || product?.seller?.storename || product?.seller?.name || 'فروشنده ثبت‌شده';
+  const percent = calculateDiscountPercent(product);
+  const badgeLabel = percent != null
+    ? `٪${discountNumberFormatter.format(percent)} تخفیف`
+    : 'تخفیف فعال';
+  const oldPrice = formatToman(product?.price);
+  const newPrice = formatToman(product?.discountPrice);
+  const imageSrc = resolveProductImage(product);
+
+  card.className = 'brand-card';
+  card.href = productId ? `product.html?id=${encodeURIComponent(productId)}` : '#';
+  card.innerHTML = `
+    <span class="brand-card__badge">${escapeHTML(badgeLabel)}</span>
+    <div class="brand-card__image">
+      <img src="${escapeHTML(imageSrc)}" alt="${escapeHTML(title)}" loading="lazy" onerror="this.src='assets/images/no-image.png'" />
+    </div>
+    <h4 class="brand-card__title">${escapeHTML(title)}</h4>
+    <div class="brand-card__price-row">
+      ${oldPrice ? `<span class="brand-card__price-old"><span class="brand-card__amount">${escapeHTML(oldPrice.replace(' تومان', ''))}</span><span class="brand-card__currency">تومان</span></span>` : ''}
+      ${newPrice ? `<span class="brand-card__price-new"><span class="brand-card__amount">${escapeHTML(newPrice.replace(' تومان', ''))}</span><span class="brand-card__currency brand-card__currency--new">تومان</span></span>` : ''}
+    </div>
+    <div class="brand-card__shop">${escapeHTML(shopName)}</div>
+  `;
+
+  return card;
+}
+
+async function loadBrandShelfOffers() {
+  const slider = document.getElementById('brand-shelf-slider');
+  if (!slider) return;
+
+  slider.innerHTML = '<div class="brand-shelf__loading">در حال دریافت پیشنهادهای واقعی...</div>';
+  toggleBrandShelfNav(false);
+
+  try {
+    const products = await fetchJSON(`${SEARCH_API_BASE}/products`);
+    const now = new Date();
+    const activeDiscounts = Array.isArray(products)
+      ? products.filter(item => isDiscountCurrentlyActive(item, now))
+      : [];
+
+    if (!activeDiscounts.length) {
+      slider.innerHTML = '<div class="brand-shelf__empty">فعلاً تخفیف فعالی ثبت نشده است.</div>';
+      toggleBrandShelfNav(false);
+      return;
+    }
+
+    slider.innerHTML = '';
+    activeDiscounts
+      .sort((a, b) => {
+        const percentDiff = (calculateDiscountPercent(b) ?? 0) - (calculateDiscountPercent(a) ?? 0);
+        if (percentDiff !== 0) return percentDiff;
+        return new Date(a.discountEnd || 0) - new Date(b.discountEnd || 0);
+      })
+      .slice(0, 10)
+      .forEach(product => slider.appendChild(buildBrandShelfCard(product)));
+
+    toggleBrandShelfNav(true);
+    updateSliderNavVisibility('brand-shelf-slider');
+  } catch (error) {
+    console.error('Failed to load brand shelf offers', error);
+    slider.innerHTML = '<div class="brand-shelf__empty">مشکل در دریافت پیشنهادهای تخفیف‌دار.</div>';
+    toggleBrandShelfNav(false);
+  }
+}
 
 // واکشی و رندر تبلیغ فروشگاه ویژه قبل از کارت فروشگاه‌ها
 // متغیر تبلیغ ویژه (در صورت وجود)
