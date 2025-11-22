@@ -2782,3 +2782,327 @@ body.hide-mobile-nav .mobile-bottom-nav {
   --card-accent-rgba: rgba(99, 102, 241, 0.18);
   --card-secondary-rgba: rgba(45, 212, 191, 0.16);
 }
+/* ================================================
+   SPECIAL OFFERS SHELF LAYOUT
+   Strict technical constraints for RTL layout
+   ================================================ */
+
+/* 1. PARENT CONTAINER (The Shelf Wrapper) */
+.special-offers-shelf {
+  display: flex;
+  flex-direction: row;  /* RTL document flow compatible */
+  background: linear-gradient(to left, #00b894, #0984e3);
+  border-radius: 16px;
+  padding: 24px;
+  min-height: 350px;
+  gap: 24px;
+  position: relative;
+  overflow: hidden;
+}
+
+/* 2. RIGHT COLUMN (The Static Sidebar) */
+.shelf-sidebar {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+  flex: 0 0 200px;  /* STRICT: no shrinking */
+  flex-shrink: 0;   /* Explicitly prevent shrinking */
+  min-width: 200px; /* Enforce minimum width */
+  text-align: center;
+  padding: 16px;
+}
+
+/* Sidebar Icon (Top) */
+.shelf-sidebar__icon {
+  width: 80px;
+  height: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 8px;
+}
+
+.shelf-sidebar__icon svg {
+  width: 100%;
+  height: 100%;
+  color: rgba(255, 255, 255, 0.8);
+  filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.15));
+}
+
+/* Sidebar Headline (Middle) */
+.shelf-sidebar__headline {
+  font-size: 24px;
+  font-weight: 800;
+  color: #ffffff;
+  text-align: center;
+  line-height: 1.3;
+  margin: 0;
+  padding: 8px 0;
+  letter-spacing: -0.3px;
+}
+
+/* Sidebar CTA Link (Bottom) */
+.shelf-sidebar__cta {
+  display: inline-block;
+  color: #ffffff;
+  font-size: 14px;
+  font-weight: 700;
+  border: 1px solid rgba(255, 255, 255, 0.9);
+  border-radius: 999px;
+  padding: 10px 24px;
+  text-decoration: none;
+  transition: all 0.25s ease;
+  margin-top: 8px;
+  white-space: nowrap;
+}
+
+.shelf-sidebar__cta:hover {
+  background: rgba(255, 255, 255, 0.15);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+/* 3. LEFT COLUMN (The Product Slider) */
+.shelf-products-slider {
+  display: flex;
+  flex: 1;  /* Takes remaining space */
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  gap: 16px;
+  padding: 8px 4px;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;  /* Firefox */
+  -ms-overflow-style: none;  /* IE/Edge */
+}
+
+/* Hide scrollbar for WebKit browsers */
+.shelf-products-slider::-webkit-scrollbar {
+  display: none;
+}
+
+/* 4. PRODUCT CARDS (Inside the Slider) */
+.shelf-product-card {
+  flex: 0 0 180px;  /* CRITICAL: prevents squishing */
+  min-width: 180px; /* Enforce minimum width */
+  max-width: 180px; /* Enforce maximum width */
+  scroll-snap-align: start;
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  transition: all 0.25s ease;
+  cursor: pointer;
+}
+
+.shelf-product-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+}
+
+/* Discount Badge (Absolute top-right) */
+.shelf-product-badge {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+  color: #ffffff;
+  font-size: 13px;
+  font-weight: 800;
+  padding: 4px 10px;
+  border-radius: 8px;
+  z-index: 10;
+  box-shadow: 0 2px 6px rgba(238, 90, 36, 0.3);
+}
+
+/* Product Image */
+.shelf-product-image {
+  width: 100%;
+  height: 120px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 12px;
+  overflow: hidden;
+  border-radius: 8px;
+  background: #f8f9fa;
+}
+
+.shelf-product-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  transition: transform 0.3s ease;
+}
+
+.shelf-product-card:hover .shelf-product-image img {
+  transform: scale(1.05);
+}
+
+/* Product Title */
+.shelf-product-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: #2d3748;
+  line-height: 1.4;
+  margin: 0 0 12px 0;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;  /* Max 2 lines */
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-height: 36px; /* Reserve space for 2 lines */
+  text-align: right;
+}
+
+/* Price Row */
+.shelf-product-price-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: auto;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+/* New Price */
+.shelf-product-price-new {
+  font-size: 15px;
+  font-weight: 800;
+  color: #10b981;
+  white-space: nowrap;
+}
+
+/* Old Price (Strikethrough) */
+.shelf-product-price-old {
+  font-size: 12px;
+  font-weight: 600;
+  color: #9ca3af;
+  text-decoration: line-through;
+  white-space: nowrap;
+}
+
+/* 5. RESPONSIVE BREAKPOINT (Mobile) */
+@media (max-width: 767px) {
+  /* Change parent to column layout */
+  .special-offers-shelf {
+    flex-direction: column;
+    min-height: auto;
+    padding: 20px;
+    gap: 20px;
+  }
+
+  /* Right column becomes banner mode */
+  .shelf-sidebar {
+    flex-direction: row;
+    width: 100%;
+    flex: 0 0 auto;
+    min-width: 100%;
+    justify-content: space-between;
+    padding: 12px 16px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+  }
+
+  /* Icon smaller in mobile */
+  .shelf-sidebar__icon {
+    width: 48px;
+    height: 48px;
+    margin-bottom: 0;
+  }
+
+  /* Headline adjusts for horizontal layout */
+  .shelf-sidebar__headline {
+    font-size: 18px;
+    text-align: center;
+    flex: 1;
+    padding: 0 12px;
+  }
+
+  .shelf-sidebar__headline br {
+    display: none; /* Remove line break in mobile */
+  }
+
+  /* CTA button adjusts */
+  .shelf-sidebar__cta {
+    font-size: 12px;
+    padding: 8px 16px;
+    margin-top: 0;
+  }
+
+  /* Product slider full width */
+  .shelf-products-slider {
+    width: 100%;
+    padding: 4px 2px;
+  }
+
+  /* Cards slightly smaller on mobile */
+  .shelf-product-card {
+    flex: 0 0 160px;
+    min-width: 160px;
+    max-width: 160px;
+  }
+
+  .shelf-product-image {
+    height: 100px;
+  }
+}
+
+/* Extra small devices */
+@media (max-width: 480px) {
+  .special-offers-shelf {
+    padding: 16px;
+  }
+
+  .shelf-sidebar__headline {
+    font-size: 16px;
+  }
+
+  .shelf-product-card {
+    flex: 0 0 140px;
+    min-width: 140px;
+    max-width: 140px;
+    padding: 10px;
+  }
+
+  .shelf-product-image {
+    height: 90px;
+  }
+
+  .shelf-product-title {
+    font-size: 12px;
+    min-height: 32px;
+  }
+
+  .shelf-product-price-new {
+    font-size: 13px;
+  }
+
+  .shelf-product-price-old {
+    font-size: 11px;
+  }
+
+  .shelf-product-badge {
+    font-size: 11px;
+    padding: 3px 8px;
+  }
+}
+
+/* Smooth scroll behavior */
+.shelf-products-slider {
+  scroll-behavior: smooth;
+}
+
+/* Focus states for accessibility */
+.shelf-product-card:focus {
+  outline: 2px solid rgba(255, 255, 255, 0.8);
+  outline-offset: 2px;
+}
+
+.shelf-sidebar__cta:focus {
+  outline: 2px solid rgba(255, 255, 255, 0.9);
+  outline-offset: 2px;
+}
