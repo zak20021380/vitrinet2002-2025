@@ -381,13 +381,58 @@
   .discount-quantity {
     display: inline-flex;
     align-items: center;
-    gap: 6px;
-    padding: 4px 10px;
-    border-radius: 999px;
+    gap: 10px;
+    padding: 8px 12px;
+    border-radius: 14px;
     background: #fff7ed;
     color: #ea580c;
     font-weight: 700;
     font-size: 12px;
+    flex-wrap: wrap;
+  }
+
+  .inventory-stepper {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 4px 8px;
+    border-radius: 12px;
+    background: #fff;
+    border: 1px solid #fed7aa;
+    box-shadow: 0 10px 24px rgba(249, 115, 22, 0.08);
+  }
+
+  .inventory-stepper__btn {
+    width: 28px;
+    height: 28px;
+    border: 1px solid #fb923c;
+    border-radius: 8px;
+    background: linear-gradient(135deg, #fff7ed, #ffedd5);
+    color: #c2410c;
+    font-weight: 900;
+    font-size: 15px;
+    cursor: pointer;
+    transition: transform 0.18s ease, box-shadow 0.18s ease, opacity 0.2s ease;
+  }
+
+  .inventory-stepper__btn:hover:enabled,
+  .inventory-stepper__btn:focus:enabled {
+    transform: translateY(-1px);
+    box-shadow: 0 8px 14px rgba(251, 146, 60, 0.2);
+    outline: none;
+  }
+
+  .inventory-stepper__btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    box-shadow: none;
+  }
+
+  .inventory-stepper__value {
+    min-width: 28px;
+    text-align: center;
+    font-weight: 800;
+    color: #0f172a;
   }
 
   .discount-modal {
@@ -3169,7 +3214,20 @@
         badges.push(`<span class="discount-timer"><i class="ri-timer-line" aria-hidden="true"></i>${remainingTime(product.end)}</span>`);
       }
       if (product.remainingQty != null) {
-        badges.push(`<span class="discount-quantity"><i class="ri-archive-stack-line" aria-hidden="true"></i>${product.remainingQty} عدد باقی مانده</span>`);
+        const safeQty = Math.max(Number(product.remainingQty) || 0, 0);
+        badges.push(`
+          <div class="discount-quantity" data-stepper-product="${product.id}">
+            <span class="flex items-center gap-2 text-[12px] font-extrabold text-amber-700">
+              <i class="ri-archive-stack-line" aria-hidden="true"></i>
+              مدیریت موجودی
+            </span>
+            <div class="inventory-stepper" role="group" aria-label="تنظیم موجودی تخفیف">
+              <button type="button" class="inventory-stepper__btn" data-stepper-action="decrease" aria-label="کاهش موجودی" ${safeQty <= 0 ? 'disabled' : ''}>−</button>
+              <span class="inventory-stepper__value" aria-live="polite">${safeQty}</span>
+              <button type="button" class="inventory-stepper__btn" data-stepper-action="increase" aria-label="افزایش موجودی">+</button>
+            </div>
+          </div>
+        `);
       }
       if (!badges.length) return '';
       return `<div class="flex flex-wrap gap-2 mt-1" aria-label="وضعیت محدودیت تخفیف">${badges.join('')}</div>`;
@@ -3198,6 +3256,36 @@
         discountProducts.length = 0;
         renderDiscounts();
       }
+    }
+
+    function attachInventorySteppers() {
+      document.querySelectorAll('[data-stepper-product]').forEach((stepper) => {
+        const productId = stepper.dataset.stepperProduct;
+        const product = discountProducts.find((p) => String(p.id) === String(productId));
+        if (!product) return;
+
+        const decreaseBtn = stepper.querySelector('[data-stepper-action="decrease"]');
+        const increaseBtn = stepper.querySelector('[data-stepper-action="increase"]');
+        const valueEl = stepper.querySelector('.inventory-stepper__value');
+
+        const sync = () => {
+          const qty = Math.max(Number(product.remainingQty) || 0, 0);
+          if (valueEl) valueEl.textContent = qty;
+          if (decreaseBtn) decreaseBtn.disabled = qty <= 0;
+        };
+
+        sync();
+
+        decreaseBtn?.addEventListener('click', () => {
+          product.remainingQty = Math.max((Number(product.remainingQty) || 0) - 1, 0);
+          renderDiscounts();
+        });
+
+        increaseBtn?.addEventListener('click', () => {
+          product.remainingQty = Math.max((Number(product.remainingQty) || 0) + 1, 0);
+          renderDiscounts();
+        });
+      });
     }
 
     function renderDiscounts() {
@@ -3270,6 +3358,8 @@
             .join('');
         }
       }
+
+      attachInventorySteppers();
 
       document.querySelectorAll('[data-discount-id]').forEach((btn) => {
         btn.addEventListener('click', () => {

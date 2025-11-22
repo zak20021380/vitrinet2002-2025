@@ -1421,6 +1421,7 @@ function buildDiscountCard(product) {
   const countdownLabel = formatDiscountCountdown(product?.discountEnd);
   const remainingQty = getRemainingDiscountQuantity(product);
   const discountPercent = calculateDiscountPercent(product);
+  const percentBadgeLabel = discountPercent != null ? `${discountPercent}% OFF` : 'تخفیف ویژه';
 
   card.href = productId ? `product.html?id=${encodeURIComponent(productId)}` : '#';
   card.className = 'discount-card group';
@@ -1441,7 +1442,7 @@ function buildDiscountCard(product) {
   card.innerHTML = `
     <div class="discount-card__media">
       <img src="${escapeHTML(imageSrc)}" alt="${escapeHTML(title)}" loading="lazy" onerror="this.src='assets/images/no-image.png'" />
-      ${discountPercent ? `<div class="discount-card__percent-badge">${discountPercent}% تخفیف</div>` : ''}
+      <div class="discount-card__percent-badge">${escapeHTML(percentBadgeLabel)}</div>
       <span class="discount-card__badge">تخفیف فعال</span>
       ${countdownLabel ? `<div class="discount-card__timer-bar"><span class="discount-card__timer-text">${escapeHTML(countdownLabel)}</span></div>` : ''}
     </div>
@@ -1469,6 +1470,7 @@ async function loadActiveDiscounts() {
   if (!section || !grid) return;
 
   grid.innerHTML = '<div class="discounts-loading">در حال بارگذاری پیشنهادهای تخفیف‌دار...</div>';
+  section.style.display = '';
 
   try {
     const products = await fetchJSON(`${SEARCH_API_BASE}/products`);
@@ -1479,6 +1481,7 @@ async function loadActiveDiscounts() {
 
     if (!activeDiscounts.length) {
       grid.innerHTML = '<div class="discounts-empty">فعلاً تخفیف فعالی ثبت نشده است. به زودی پیشنهادهای ویژه را اینجا می‌بینید.</div>';
+      section.style.display = 'none';
       return;
     }
 
@@ -1503,8 +1506,17 @@ function setupDiscountsCarousel() {
   const dotsContainer = document.getElementById('discounts-dots');
   const prevBtn = document.getElementById('discounts-prev');
   const nextBtn = document.getElementById('discounts-next');
+  const inlinePrev = document.getElementById('discounts-prev-inline');
+  const inlineNext = document.getElementById('discounts-next-inline');
 
   if (!grid || !dotsContainer || !prevBtn || !nextBtn) return;
+
+  const syncNavState = () => {
+    const disablePrev = grid.scrollLeft <= 0;
+    const disableNext = grid.scrollLeft + grid.clientWidth >= grid.scrollWidth - 1;
+    [prevBtn, inlinePrev].forEach(btn => { if (btn) btn.disabled = disablePrev; });
+    [nextBtn, inlineNext].forEach(btn => { if (btn) btn.disabled = disableNext; });
+  };
 
   const syncDots = () => {
     const totalPages = Math.max(1, Math.ceil(grid.scrollWidth / grid.clientWidth));
@@ -1531,16 +1543,24 @@ function setupDiscountsCarousel() {
     dotsContainer.style.display = hasOverflow ? 'flex' : 'none';
     prevBtn.style.display = hasOverflow ? 'inline-flex' : 'none';
     nextBtn.style.display = hasOverflow ? 'inline-flex' : 'none';
-    prevBtn.disabled = grid.scrollLeft <= 0;
-    nextBtn.disabled = grid.scrollLeft + grid.clientWidth >= grid.scrollWidth - 1;
+    if (inlinePrev) inlinePrev.style.display = hasOverflow ? 'inline-flex' : 'none';
+    if (inlineNext) inlineNext.style.display = hasOverflow ? 'inline-flex' : 'none';
+    syncNavState();
   };
 
   const scrollByPage = direction => {
     grid.scrollBy({ left: direction * grid.clientWidth, behavior: 'smooth' });
   };
 
-  prevBtn.addEventListener('click', () => scrollByPage(-1));
-  nextBtn.addEventListener('click', () => scrollByPage(1));
+  const bindNav = (btn, direction) => {
+    if (!btn) return;
+    btn.addEventListener('click', () => scrollByPage(direction));
+  };
+
+  bindNav(prevBtn, -1);
+  bindNav(nextBtn, 1);
+  bindNav(inlinePrev, -1);
+  bindNav(inlineNext, 1);
 
   let rafId = null;
   grid.addEventListener('scroll', () => {
