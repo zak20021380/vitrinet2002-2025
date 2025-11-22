@@ -1403,6 +1403,14 @@ function getRemainingDiscountQuantity(product) {
   return Math.max(0, limit - sold);
 }
 
+function calculateDiscountPercent(product) {
+  const original = Number(product?.price);
+  const discounted = Number(product?.discountPrice);
+  if (!Number.isFinite(original) || !Number.isFinite(discounted) || original <= 0 || discounted <= 0) return null;
+  const percent = Math.round(((original - discounted) / original) * 100);
+  return percent > 0 ? percent : null;
+}
+
 function buildDiscountCard(product) {
   const card = document.createElement('a');
   const productId = product?._id || product?.id;
@@ -1412,6 +1420,7 @@ function buildDiscountCard(product) {
   const categoryLabel = product?.sellerCategory || product?.category || 'دسته‌بندی نشده';
   const countdownLabel = formatDiscountCountdown(product?.discountEnd);
   const remainingQty = getRemainingDiscountQuantity(product);
+  const discountPercent = calculateDiscountPercent(product);
 
   card.href = productId ? `product.html?id=${encodeURIComponent(productId)}` : '#';
   card.className = 'discount-card group';
@@ -1432,15 +1441,16 @@ function buildDiscountCard(product) {
   card.innerHTML = `
     <div class="discount-card__media">
       <img src="${escapeHTML(imageSrc)}" alt="${escapeHTML(title)}" loading="lazy" onerror="this.src='assets/images/no-image.png'" />
+      ${discountPercent ? `<div class="discount-card__percent-badge">${discountPercent}% تخفیف</div>` : ''}
       <span class="discount-card__badge">تخفیف فعال</span>
-      ${countdownLabel ? `<div class="discount-card__timer-bar">${escapeHTML(countdownLabel)}</div>` : ''}
+      ${countdownLabel ? `<div class="discount-card__timer-bar"><span class="discount-card__timer-text">${escapeHTML(countdownLabel)}</span></div>` : ''}
     </div>
     <div class="discount-card__body">
+      <div class="discount-card__title" title="${escapeHTML(title)}">${escapeHTML(title)}</div>
       <div class="discount-card__shop">
         <div class="discount-card__shop-name">${escapeHTML(shopName)}</div>
         <div class="discount-card__category">${escapeHTML(categoryLabel)}</div>
       </div>
-      <div class="discount-card__title" title="${escapeHTML(title)}">${escapeHTML(title)}</div>
       <div class="discount-card__price-row">
         ${originalMarkup ? `<span class="discount-original">${escapeHTML(originalMarkup)}</span>` : ''}
         ${priceMarkup ? `<span class="discount-price">${escapeHTML(priceMarkup)}</span>` : ''}
@@ -1480,10 +1490,68 @@ async function loadActiveDiscounts() {
         const card = buildDiscountCard(product);
         grid.appendChild(card);
       });
+
+    setupDiscountsCarousel();
   } catch (error) {
     console.error('Failed to load active discounts', error);
     grid.innerHTML = '<div class="discounts-empty">مشکل در دریافت تخفیف‌های فعال. لطفاً دوباره تلاش کنید.</div>';
   }
+}
+
+function setupDiscountsCarousel() {
+  const grid = document.getElementById('discounts-grid');
+  const dotsContainer = document.getElementById('discounts-dots');
+  const prevBtn = document.getElementById('discounts-prev');
+  const nextBtn = document.getElementById('discounts-next');
+
+  if (!grid || !dotsContainer || !prevBtn || !nextBtn) return;
+
+  const syncDots = () => {
+    const totalPages = Math.max(1, Math.ceil(grid.scrollWidth / grid.clientWidth));
+    if (dotsContainer.childElementCount !== totalPages) {
+      dotsContainer.innerHTML = '';
+      for (let i = 0; i < totalPages; i += 1) {
+        const dot = document.createElement('button');
+        dot.type = 'button';
+        dot.className = 'discounts-dot';
+        dot.setAttribute('aria-label', `نمایش اسلاید ${i + 1}`);
+        dot.addEventListener('click', () => {
+          grid.scrollTo({ left: i * grid.clientWidth, behavior: 'smooth' });
+        });
+        dotsContainer.appendChild(dot);
+      }
+    }
+
+    const activeIndex = Math.round(grid.scrollLeft / grid.clientWidth);
+    [...dotsContainer.children].forEach((dot, index) => {
+      dot.classList.toggle('discounts-dot--active', index === activeIndex);
+    });
+
+    const hasOverflow = grid.scrollWidth - grid.clientWidth > 8;
+    dotsContainer.style.display = hasOverflow ? 'flex' : 'none';
+    prevBtn.style.display = hasOverflow ? 'inline-flex' : 'none';
+    nextBtn.style.display = hasOverflow ? 'inline-flex' : 'none';
+    prevBtn.disabled = grid.scrollLeft <= 0;
+    nextBtn.disabled = grid.scrollLeft + grid.clientWidth >= grid.scrollWidth - 1;
+  };
+
+  const scrollByPage = direction => {
+    grid.scrollBy({ left: direction * grid.clientWidth, behavior: 'smooth' });
+  };
+
+  prevBtn.addEventListener('click', () => scrollByPage(-1));
+  nextBtn.addEventListener('click', () => scrollByPage(1));
+
+  let rafId = null;
+  grid.addEventListener('scroll', () => {
+    if (rafId) cancelAnimationFrame(rafId);
+    rafId = requestAnimationFrame(syncDots);
+  });
+
+  window.addEventListener('resize', syncDots);
+
+  grid.scrollTo({ left: 0, behavior: 'auto' });
+  syncDots();
 }
 
 document.addEventListener('DOMContentLoaded', loadActiveDiscounts);

@@ -1806,11 +1806,20 @@ body.hide-mobile-nav .mobile-bottom-nav {
   }
 
   /* تخفیف‌های فعال */
+  .discounts-carousel {
+    position: relative;
+    padding: 0.25rem 0.25rem 0.5rem;
+  }
+
   .discounts-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    display: flex;
     gap: 1rem;
     width: 100%;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    padding: 0.5rem 0.5rem 1rem;
+    -webkit-overflow-scrolling: touch;
+    scroll-behavior: smooth;
   }
 
   .discounts-loading,
@@ -1834,15 +1843,17 @@ body.hide-mobile-nav .mobile-bottom-nav {
     border-radius: 1.1rem;
     background: linear-gradient(145deg, rgba(255, 255, 255, 0.97), rgba(236, 253, 245, 0.9));
     border: 1px solid rgba(14, 165, 233, 0.08);
-    box-shadow: 0 14px 35px rgba(16, 185, 129, 0.08), 0 6px 18px rgba(15, 23, 42, 0.05);
-    transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease;
+    box-shadow: 0 14px 35px rgba(16, 185, 129, 0.1), 0 10px 26px rgba(15, 23, 42, 0.06);
+    transition: transform .24s ease, box-shadow .24s ease, border-color .24s ease;
     scroll-snap-align: center;
+    flex: 0 0 86%;
+    max-width: 88%;
   }
 
   .discount-card:hover {
-    transform: translateY(-4px);
-    border-color: rgba(14, 165, 233, 0.22);
-    box-shadow: 0 24px 60px rgba(14, 165, 233, 0.12), 0 12px 30px rgba(16, 185, 129, 0.12);
+    transform: translateY(-8px);
+    border-color: rgba(14, 165, 233, 0.3);
+    box-shadow: 0 26px 70px rgba(14, 165, 233, 0.16), 0 18px 42px rgba(16, 185, 129, 0.16);
   }
 
   .discount-card__media {
@@ -1881,12 +1892,25 @@ body.hide-mobile-nav .mobile-bottom-nav {
     letter-spacing: 0.01em;
   }
 
+  .discount-card__percent-badge {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    padding: 6px 12px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, #f43f5e, #fb7185);
+    color: #fff;
+    font-weight: 900;
+    font-size: 0.92rem;
+    box-shadow: 0 12px 26px rgba(248, 113, 113, 0.32);
+  }
+
   .discount-card__timer-bar {
     position: absolute;
     inset-inline: 0;
     bottom: 0;
-    padding: 10px 14px;
-    background: linear-gradient(180deg, rgba(15, 23, 42, 0.05) 0%, rgba(15, 23, 42, 0.7) 100%);
+    padding: 10px 14px 14px;
+    background: linear-gradient(180deg, rgba(15, 23, 42, 0.15) 0%, rgba(15, 23, 42, 0.8) 100%);
     color: #fff;
     font-weight: 800;
     font-size: 12px;
@@ -1894,7 +1918,16 @@ body.hide-mobile-nav .mobile-bottom-nav {
     align-items: center;
     justify-content: center;
     gap: 8px;
-    backdrop-filter: blur(6px);
+    backdrop-filter: blur(8px);
+  }
+
+  .discount-card__timer-text {
+    display: inline-flex;
+    align-items: center;
+    padding: 6px 12px;
+    border-radius: 999px;
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(2px);
   }
 
   .discount-card__body {
@@ -1910,9 +1943,9 @@ body.hide-mobile-nav .mobile-bottom-nav {
   }
 
   .discount-card__shop-name {
-    font-size: 1rem;
-    font-weight: 900;
-    color: #0f172a;
+    font-size: 0.95rem;
+    font-weight: 800;
+    color: #475569;
   }
 
   .discount-card__category {
@@ -1922,7 +1955,7 @@ body.hide-mobile-nav .mobile-bottom-nav {
   }
 
   .discount-card__title {
-    font-size: 1rem;
+    font-size: 1.12rem;
     font-weight: 900;
     color: #0f172a;
     line-height: 1.6;
@@ -1999,37 +2032,101 @@ body.hide-mobile-nav .mobile-bottom-nav {
     height: 18px;
   }
 
-  @media (max-width: 1024px) {
-    .discounts-grid {
-      display: flex;
-      overflow-x: auto;
-      padding-bottom: 12px;
-      scroll-snap-type: x mandatory;
-      gap: 0.9rem;
-    }
+  .discounts-nav {
+    position: absolute;
+    top: 43%;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    border: 1px solid #e2e8f0;
+    background: rgba(255, 255, 255, 0.95);
+    box-shadow: 0 12px 30px rgba(15, 23, 42, 0.14);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: #0f172a;
+    transition: transform .2s ease, box-shadow .2s ease, background .2s ease;
+    z-index: 1;
+  }
 
-    .discount-card {
-      min-width: 82%;
-      max-width: 86%;
-    }
+  .discounts-nav:hover:not([disabled]) {
+    transform: translateY(-4px);
+    box-shadow: 0 18px 38px rgba(14, 165, 233, 0.22);
+    background: linear-gradient(135deg, #ecfeff, #f0fdf4);
+  }
+
+  .discounts-nav:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+  }
+
+  #discounts-prev {
+    inset-inline-start: -12px;
+  }
+
+  #discounts-next {
+    inset-inline-end: -12px;
+  }
+
+  .discounts-dots {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 6px;
+  }
+
+  .discounts-dot {
+    width: 9px;
+    height: 9px;
+    border-radius: 999px;
+    background: #cbd5e1;
+    border: 1px solid #e2e8f0;
+    transition: width .2s ease, background .2s ease, border-color .2s ease;
+  }
+
+  .discounts-dot--active {
+    width: 20px;
+    background: linear-gradient(90deg, #10b981, #0ea5e9);
+    border-color: transparent;
   }
 
   @media (min-width: 640px) {
-    .discounts-grid {
-      grid-template-columns: repeat(2, minmax(0, 1fr));
+    .discount-card {
+      flex: 0 0 60%;
+      max-width: 62%;
     }
   }
 
   @media (min-width: 1024px) {
+    .discounts-carousel {
+      padding-inline: 1rem;
+    }
+
     .discounts-grid {
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-      overflow: visible;
+      padding-inline: 1.25rem;
+    }
+
+    .discount-card {
+      flex: 0 0 32%;
+      max-width: 34%;
     }
   }
 
   @media (min-width: 1280px) {
-    .discounts-grid {
-      grid-template-columns: repeat(4, minmax(0, 1fr));
+    .discount-card {
+      flex: 0 0 27%;
+      max-width: 28%;
+    }
+
+    #discounts-prev {
+      inset-inline-start: -18px;
+    }
+
+    #discounts-next {
+      inset-inline-end: -18px;
     }
   }
 
