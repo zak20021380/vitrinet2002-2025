@@ -1418,6 +1418,9 @@ function calculateDiscountPercent(product) {
 function buildBrandShelfCard(product) {
   const card = document.createElement('article');
   card.className = 'brand-card';
+  card.style.backgroundColor = '#ffffff';
+  card.style.boxShadow = '0 18px 45px rgba(15, 23, 42, 0.18)';
+  card.style.filter = 'drop-shadow(0 10px 25px rgba(14, 165, 233, 0.18))';
 
   const percent = calculateDiscountPercent(product);
   const badgeLabel = percent != null
@@ -1448,6 +1451,18 @@ function buildBrandShelfCard(product) {
     </div>
   `;
 
+  const titleEl = card.querySelector('.brand-card__title');
+  if (titleEl) {
+    titleEl.style.textAlign = 'right';
+    titleEl.style.direction = 'rtl';
+  }
+
+  const priceRow = card.querySelector('.brand-card__price-row');
+  if (priceRow) {
+    priceRow.style.alignItems = 'flex-start';
+    priceRow.style.textAlign = 'left';
+  }
+
   return card;
 }
 
@@ -1460,6 +1475,10 @@ function renderBrandShelf(discounts) {
   const validItems = Array.isArray(discounts)
     ? discounts.filter(item => isDiscountCurrentlyActive(item))
     : [];
+
+  slider.style.justifyContent = validItems.length > 0 && validItems.length < 3
+    ? 'center'
+    : '';
 
   if (!validItems.length) {
     slider.innerHTML = '<p class="brand-card__title" data-placeholder="true">فعلاً تخفیف فعالی ثبت نشده است.</p>';
