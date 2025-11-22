@@ -1411,6 +1411,68 @@ function calculateDiscountPercent(product) {
   return percent > 0 ? percent : null;
 }
 
+function buildBrandShelfCard(product) {
+  const card = document.createElement('article');
+  card.className = 'brand-card';
+
+  const percent = calculateDiscountPercent(product);
+  const badgeLabel = percent != null
+    ? `٪${discountNumberFormatter.format(percent)} تخفیف`
+    : 'تخفیف ویژه';
+
+  const imageSrc = resolveProductImage(product);
+  const title = product?.title || product?.name || 'محصول تخفیف‌دار';
+  const originalPrice = Number(product?.price);
+  const discountedPrice = Number(product?.discountPrice);
+
+  const originalMarkup = Number.isFinite(originalPrice) && originalPrice > 0
+    ? `<span class="brand-card__amount">${discountNumberFormatter.format(Math.round(originalPrice))}</span><span class="brand-card__currency">تومان</span>`
+    : '';
+  const discountedMarkup = Number.isFinite(discountedPrice) && discountedPrice > 0
+    ? `<span class="brand-card__amount">${discountNumberFormatter.format(Math.round(discountedPrice))}</span><span class="brand-card__currency brand-card__currency--new">تومان</span>`
+    : '';
+
+  card.innerHTML = `
+    <span class="brand-card__badge">${escapeHTML(badgeLabel)}</span>
+    <div class="brand-card__image">
+      <img src="${escapeHTML(imageSrc)}" alt="${escapeHTML(title)}">
+    </div>
+    <h4 class="brand-card__title">${escapeHTML(title)}</h4>
+    <div class="brand-card__price-row">
+      ${originalMarkup ? `<span class="brand-card__price-old">${originalMarkup}</span>` : ''}
+      ${discountedMarkup ? `<span class="brand-card__price-new">${discountedMarkup}</span>` : ''}
+    </div>
+  `;
+
+  return card;
+}
+
+function renderBrandShelf(discounts) {
+  const slider = document.getElementById('brand-shelf-slider');
+  if (!slider) return;
+
+  slider.scrollTo({ left: 0, behavior: 'auto' });
+
+  const validItems = Array.isArray(discounts)
+    ? discounts.filter(item => isDiscountCurrentlyActive(item))
+    : [];
+
+  if (!validItems.length) {
+    slider.innerHTML = '<p class="brand-card__title" data-placeholder="true">فعلاً تخفیف فعالی ثبت نشده است.</p>';
+    updateSliderNavVisibility('brand-shelf-slider');
+    setupBrandShelfArrowVisibility();
+    return;
+  }
+
+  slider.innerHTML = '';
+  validItems.slice(0, 10).forEach(product => {
+    slider.appendChild(buildBrandShelfCard(product));
+  });
+
+  updateSliderNavVisibility('brand-shelf-slider');
+  setupBrandShelfArrowVisibility();
+}
+
 function buildDiscountCard(product) {
   const card = document.createElement('a');
   const productId = product?._id || product?.id;
@@ -1472,12 +1534,21 @@ async function loadActiveDiscounts() {
   grid.innerHTML = '<div class="discounts-loading">در حال بارگذاری پیشنهادهای تخفیف‌دار...</div>';
   section.style.display = '';
 
+  const brandShelfSlider = document.getElementById('brand-shelf-slider');
+  if (brandShelfSlider) {
+    brandShelfSlider.innerHTML = '<p class="brand-card__title" data-placeholder="true">در حال بارگذاری پیشنهادهای تخفیف‌دار...</p>';
+    updateSliderNavVisibility('brand-shelf-slider');
+    setupBrandShelfArrowVisibility();
+  }
+
   try {
     const products = await fetchJSON(`${SEARCH_API_BASE}/products`);
     const now = new Date();
     const activeDiscounts = Array.isArray(products)
       ? products.filter(item => isDiscountCurrentlyActive(item, now))
       : [];
+
+    renderBrandShelf(activeDiscounts);
 
     if (!activeDiscounts.length) {
       grid.innerHTML = '<div class="discounts-empty">فعلاً تخفیف فعالی ثبت نشده است. به زودی پیشنهادهای ویژه را اینجا می‌بینید.</div>';
@@ -1497,6 +1568,7 @@ async function loadActiveDiscounts() {
     setupDiscountsCarousel();
   } catch (error) {
     console.error('Failed to load active discounts', error);
+    renderBrandShelf([]);
     grid.innerHTML = '<div class="discounts-empty">مشکل در دریافت تخفیف‌های فعال. لطفاً دوباره تلاش کنید.</div>';
   }
 }
@@ -2937,7 +3009,7 @@ function updateSliderNavVisibility(sliderId) {
     return;
   }
 
-  const hasItems = Boolean(sliderEl.querySelector(':scope > *'));
+  const hasItems = Boolean(sliderEl.querySelector(':scope > *:not([data-placeholder])'));
 
   buttons.forEach(button => {
     if (hasItems) {
@@ -3000,17 +3072,17 @@ function setupBrandShelfArrowVisibility() {
 
   if (!sliderEl || !prevBtn || !nextBtn) return;
 
-  const maxScroll = Math.max(0, sliderEl.scrollWidth - sliderEl.clientWidth);
-  const initialScroll = sliderEl.scrollLeft;
-  const candidatePositions = [0, maxScroll, -maxScroll];
-  const startPos = candidatePositions.reduce((closest, pos) => {
-    return Math.abs(pos - initialScroll) < Math.abs(closest - initialScroll) ? pos : closest;
-  }, candidatePositions[0]);
-  const endPos = candidatePositions.reduce((farthest, pos) => {
-    return Math.abs(pos - startPos) > Math.abs(farthest - startPos) ? pos : farthest;
-  }, candidatePositions[0]);
-
   const toggleVisibility = () => {
+    const maxScroll = Math.max(0, sliderEl.scrollWidth - sliderEl.clientWidth);
+    const initialScroll = sliderEl.scrollLeft;
+    const candidatePositions = [0, maxScroll, -maxScroll];
+    const startPos = candidatePositions.reduce((closest, pos) => {
+      return Math.abs(pos - initialScroll) < Math.abs(closest - initialScroll) ? pos : closest;
+    }, candidatePositions[0]);
+    const endPos = candidatePositions.reduce((farthest, pos) => {
+      return Math.abs(pos - startPos) > Math.abs(farthest - startPos) ? pos : farthest;
+    }, candidatePositions[0]);
+
     const tolerance = 2;
     const atStart = Math.abs(sliderEl.scrollLeft - startPos) <= tolerance;
     const atEnd = Math.abs(sliderEl.scrollLeft - endPos) <= tolerance || maxScroll <= tolerance;
@@ -3019,7 +3091,10 @@ function setupBrandShelfArrowVisibility() {
     nextBtn.classList.toggle('is-hidden', atStart);
   };
 
-  sliderEl.addEventListener('scroll', toggleVisibility, { passive: true });
+  if (sliderEl.dataset.brandShelfArrows !== 'true') {
+    sliderEl.addEventListener('scroll', toggleVisibility, { passive: true });
+    sliderEl.dataset.brandShelfArrows = 'true';
+  }
   toggleVisibility();
 }
 
