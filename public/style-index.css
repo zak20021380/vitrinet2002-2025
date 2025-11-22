@@ -2793,15 +2793,29 @@ body.hide-mobile-nav .mobile-bottom-nav {
 .brand-shelf {
   display: flex;
   flex-direction: row;
-  background: linear-gradient(to left, #00b894, #0984e3);
-  border-radius: 20px;
-  padding: 24px;
-  min-height: 380px;
+  background: radial-gradient(circle at 18% 30%, rgba(255, 255, 255, 0.12), transparent 42%),
+    radial-gradient(circle at 88% 80%, rgba(255, 255, 255, 0.12), transparent 40%),
+    linear-gradient(120deg, #0ea5e9, #0fb67f);
+  border-radius: 24px;
+  padding: 28px;
+  min-height: 400px;
   gap: 24px;
   position: relative;
   overflow: hidden;
   width: 100%;
-  box-shadow: 0 14px 45px rgba(0, 0, 0, 0.16);
+  box-shadow: 0 18px 50px rgba(14, 165, 233, 0.18);
+  isolation: isolate;
+}
+
+.brand-shelf::before {
+  content: '';
+  position: absolute;
+  inset: 18px;
+  border-radius: 18px;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.02));
+  z-index: 0;
+  pointer-events: none;
 }
 
 .brand-shelf__sidebar {
@@ -2813,6 +2827,8 @@ body.hide-mobile-nav .mobile-bottom-nav {
   flex-shrink: 0;
   text-align: center;
   gap: 12px;
+  position: relative;
+  z-index: 1;
 }
 
 .brand-shelf__icon {
@@ -2821,7 +2837,8 @@ body.hide-mobile-nav .mobile-bottom-nav {
   display: flex;
   align-items: center;
   justify-content: center;
-  color: rgba(255, 255, 255, 0.8);
+  color: rgba(255, 255, 255, 0.9);
+  filter: drop-shadow(0 8px 18px rgba(0, 0, 0, 0.16));
 }
 
 .brand-shelf__headline {
@@ -2831,6 +2848,7 @@ body.hide-mobile-nav .mobile-bottom-nav {
   line-height: 1.4;
   margin: 0;
   white-space: pre-line;
+  text-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);
 }
 
 .brand-shelf__cta {
@@ -2839,14 +2857,14 @@ body.hide-mobile-nav .mobile-bottom-nav {
   justify-content: center;
   gap: 8px;
   padding: 12px 24px;
-  background: #ffffff;
+  background: rgba(255, 255, 255, 0.9);
   color: #0d9488;
   border-radius: 999px;
   font-weight: 800;
   font-size: 14px;
   text-decoration: none;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
-  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.12);
+  box-shadow: 0 10px 26px rgba(0, 0, 0, 0.14);
 }
 
 .brand-shelf__cta:hover {
@@ -2864,6 +2882,8 @@ body.hide-mobile-nav .mobile-bottom-nav {
   -webkit-overflow-scrolling: touch;
   scrollbar-width: none;
   -ms-overflow-style: none;
+  position: relative;
+  z-index: 1;
 }
 
 .brand-shelf__slider::-webkit-scrollbar {
@@ -2887,6 +2907,7 @@ body.hide-mobile-nav .mobile-bottom-nav {
   transition: all 0.2s ease, opacity 0.3s ease;
   z-index: 10;
   opacity: 1;
+  box-shadow: 0 12px 26px rgba(0, 0, 0, 0.16);
 }
 
 .brand-shelf__nav:hover {
@@ -2909,68 +2930,75 @@ body.hide-mobile-nav .mobile-bottom-nav {
 }
 
 .brand-card {
-  flex: 0 0 180px;
-  min-width: 180px;
-  max-width: 180px;
-  background: #ffffff;
-  border-radius: 12px;
-  padding: 14px;
+  flex: 0 0 210px;
+  min-width: 210px;
+  max-width: 210px;
+  background: linear-gradient(150deg, rgba(255, 255, 255, 0.95), rgba(236, 254, 255, 0.95));
+  border-radius: 16px;
+  padding: 16px;
   display: flex;
   flex-direction: column;
   position: relative;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 16px 36px rgba(15, 23, 42, 0.18);
+  border: 1px solid rgba(255, 255, 255, 0.6);
   scroll-snap-align: start;
-  transition: transform 0.25s ease, box-shadow 0.25s ease;
+  transition: transform 0.28s ease, box-shadow 0.28s ease, border-color 0.28s ease;
+  backdrop-filter: blur(6px);
 }
 
 .brand-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.16);
+  transform: translateY(-10px);
+  box-shadow: 0 20px 42px rgba(14, 165, 233, 0.2);
+  border-color: rgba(14, 165, 233, 0.35);
 }
 
 .brand-card__badge {
   position: absolute;
   top: 10px;
   right: 10px;
-  background: #ef4444;
+  background: linear-gradient(135deg, #f43f5e, #fb7185);
   color: #ffffff;
   font-size: 12px;
-  font-weight: 800;
-  padding: 6px 10px;
-  border-radius: 10px;
-  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.35);
+  font-weight: 900;
+  padding: 7px 11px;
+  border-radius: 999px;
+  box-shadow: 0 10px 24px rgba(244, 63, 94, 0.32);
   font-family: 'Vazirmatn', sans-serif;
   direction: rtl;
+  letter-spacing: 0.02em;
 }
 
 .brand-card__image {
   width: 100%;
-  height: 140px;
+  height: 150px;
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-bottom: 14px;
-  background: #f8fafc;
-  border-radius: 10px;
+  margin-bottom: 16px;
+  background: radial-gradient(circle at 20% 20%, rgba(16, 185, 129, 0.1), transparent 46%),
+    linear-gradient(135deg, #f8fafc, #e0f7ff);
+  border-radius: 12px;
   overflow: hidden;
+  border: 1px solid rgba(14, 165, 233, 0.12);
 }
 
 .brand-card__image img {
   width: 100%;
   height: 100%;
   object-fit: contain;
-  transition: transform 0.3s ease;
+  transition: transform 0.35s ease, filter 0.35s ease;
 }
 
 .brand-card:hover .brand-card__image img {
-  transform: scale(1.05);
+  transform: scale(1.06);
+  filter: saturate(1.1);
 }
 
 .brand-card__title {
-  font-size: 13px;
-  font-weight: 700;
-  color: #1f2937;
-  line-height: 1.5;
+  font-size: 14px;
+  font-weight: 800;
+  color: #0f172a;
+  line-height: 1.6;
   margin: 0 0 12px 0;
   display: -webkit-box;
   -webkit-line-clamp: 2;
@@ -2984,24 +3012,28 @@ body.hide-mobile-nav .mobile-bottom-nav {
   display: flex;
   flex-direction: column;
   align-items: flex-end;
-  gap: 4px;
+  gap: 6px;
   margin-top: auto;
   text-align: right;
 }
 
 .brand-card__price-new {
-  font-size: 18px;
-  font-weight: 800;
+  font-size: 17px;
+  font-weight: 900;
   color: #0f172a;
   display: inline-flex;
   align-items: baseline;
   gap: 6px;
+  padding: 8px 12px;
+  border-radius: 12px;
+  background: linear-gradient(120deg, rgba(16, 185, 129, 0.12), rgba(14, 165, 233, 0.12));
+  box-shadow: inset 0 0 0 1px rgba(14, 165, 233, 0.12);
 }
 
 .brand-card__price-old {
   font-size: 12px;
   font-weight: 700;
-  color: #9ca3af;
+  color: #94a3b8;
   text-decoration: line-through;
   display: inline-flex;
   align-items: baseline;
@@ -3015,8 +3047,8 @@ body.hide-mobile-nav .mobile-bottom-nav {
 }
 
 .brand-card__currency--new {
-  font-weight: 800;
-  color: #0f172a;
+  font-weight: 900;
+  color: #0f766e;
 }
 
 @media (max-width: 767px) {
@@ -3068,17 +3100,17 @@ body.hide-mobile-nav .mobile-bottom-nav {
 
 @media (max-width: 480px) {
   .brand-shelf {
-    padding: 16px;
+    padding: 18px;
   }
 
   .brand-card {
-    flex: 0 0 160px;
-    min-width: 160px;
-    max-width: 160px;
+    flex: 0 0 185px;
+    min-width: 185px;
+    max-width: 185px;
   }
 
   .brand-card__image {
-    height: 120px;
+    height: 135px;
   }
 }
 
