@@ -1542,7 +1542,7 @@ async function loadActiveDiscounts() {
   }
 
   try {
-    const products = await fetchJSON(`${SEARCH_API_BASE}/products`);
+    const products = await fetchJSON(`${SEARCH_API_BASE}/products/active-discounts`);
     const now = new Date();
     const activeDiscounts = Array.isArray(products)
       ? products.filter(item => isDiscountCurrentlyActive(item, now))

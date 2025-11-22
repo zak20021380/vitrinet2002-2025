@@ -86,6 +86,31 @@ function buildProductResponse(req, doc) {
   };
 }
 
+function isDiscountActive(product, now = new Date()) {
+  if (!product?.discountActive || product.discountPrice == null) return false;
+
+  const original = Number(product.price);
+  const discounted = Number(product.discountPrice);
+  if (!Number.isFinite(original) || !Number.isFinite(discounted) || discounted <= 0 || discounted >= original) {
+    return false;
+  }
+
+  const startDate = product.discountStart ? new Date(product.discountStart) : null;
+  const endDate = product.discountEnd ? new Date(product.discountEnd) : null;
+  const nowTs = now.getTime();
+
+  if (startDate && (Number.isNaN(startDate.getTime()) || startDate.getTime() > nowTs)) return false;
+  if (!endDate || Number.isNaN(endDate.getTime()) || endDate.getTime() <= nowTs) return false;
+
+  const limit = Number(product.discountQuantityLimit);
+  const sold = Number(product.discountQuantitySold || 0);
+  const hasLimit = Number.isFinite(limit) && limit > 0;
+
+  if (hasLimit && sold >= limit) return false;
+
+  return true;
+}
+
 // ساخت یا به‌روزرسانی تخفیف محصول
 exports.upsertDiscount = async (req, res) => {
   try {
@@ -186,6 +211,33 @@ exports.getProducts = async (req, res) => {
     res.json(products);
   } catch (err) {
     res.status(500).json({ message: 'خطا در دریافت محصولات', error: err.message });
+  }
+};
+
+// دریافت فقط تخفیف‌های فعال برای نمایش در صفحه اصلی
+exports.getActiveDiscounts = async (req, res) => {
+  try {
+    const now = new Date();
+    const docs = await Product.find({ discountActive: true, discountPrice: { $ne: null } })
+      .sort({ discountEnd: 1 })
+      .populate({
+        path: 'sellerId',
+        select: 'storename ownerName address shopurl ownerFirstname ownerLastname category city'
+      });
+
+    const active = [];
+
+    // هم از نظر تاریخ و هم از نظر سقف تعداد بررسی می‌کنیم
+    for (const doc of docs) {
+      await enforceDiscountLifecycle(doc, now);
+      if (isDiscountActive(doc, now)) {
+        active.push(buildProductResponse(req, doc));
+      }
+    }
+
+    res.json(active);
+  } catch (err) {
+    res.status(500).json({ message: 'خطا در دریافت تخفیف‌های فعال', error: err.message });
   }
 };
 

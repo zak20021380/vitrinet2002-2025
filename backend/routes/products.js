@@ -19,6 +19,11 @@ router.post('/', /* authMiddleware */ productController.addProduct);
 // -----------------------------
 router.get('/', productController.getProducts);
 
+// -----------------------------
+// دریافت تخفیف‌های فعال
+// -----------------------------
+router.get('/active-discounts', productController.getActiveDiscounts);
+
 
 
 // اضافه کردن مسیر جدید برای دریافت جدیدترین محصولات
