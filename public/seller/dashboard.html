@@ -3604,14 +3604,17 @@
     function addProductToDiscounts(productId) {
       const product = allSellerProducts.find((p) => String(p.id) === String(productId));
       if (!product) return;
-      if (discountProducts.some((p) => String(p.id) === String(productId))) {
-        closeAddDiscountModal();
+      const existing = discountProducts.find((p) => String(p.id) === String(productId));
+      closeAddDiscountModal();
+
+      if (existing) {
+        setActionFeedback('این محصول قبلاً به تخفیف‌ها اضافه شده است. جزئیات را ویرایش کنید.', 'success');
+        openModal(existing);
         return;
       }
-      discountProducts.push({ ...product });
-      renderDiscounts();
-      setActionFeedback('محصول به لیست تخفیف‌ها اضافه شد. حالا تخفیف را تنظیم کنید.', 'success');
-      closeAddDiscountModal();
+
+      setActionFeedback('قبل از افزودن، جزئیات تخفیف را تنظیم کنید.', 'success');
+      openModal(normalizeProduct(product));
     }
 
     function renderDiscounts() {
@@ -3983,7 +3986,8 @@
     }
 
     saveDiscountBtn?.addEventListener('click', async () => {
-      const product = discountProducts.find((p) => p.id === currentProductId);
+      const product = discountProducts.find((p) => p.id === currentProductId)
+        || allSellerProducts.find((p) => p.id === currentProductId);
       if (!product) return;
       const isPriceValid = validatePrice(product);
       const isQuantityValid = validateQuantity();
