@@ -605,61 +605,57 @@
     font-size: 12px;
   }
 
-  .discount-quantity {
+  .discount-badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 6px;
+  }
+
+  .discount-limit {
     display: inline-flex;
     align-items: center;
-    gap: 10px;
-    padding: 8px 12px;
-    border-radius: 14px;
+    gap: 6px;
+    padding: 6px 10px;
+    border-radius: 12px;
     background: #fff7ed;
-    color: #ea580c;
+    color: #c2410c;
     font-weight: 700;
     font-size: 12px;
-    flex-wrap: wrap;
   }
 
-  .inventory-stepper {
-    display: inline-flex;
+  .discount-section-title {
+    display: flex;
     align-items: center;
-    gap: 8px;
-    padding: 4px 8px;
-    border-radius: 12px;
-    background: #fff;
-    border: 1px solid #fed7aa;
-    box-shadow: 0 10px 24px rgba(249, 115, 22, 0.08);
-  }
-
-  .inventory-stepper__btn {
-    width: 28px;
-    height: 28px;
-    border: 1px solid #fb923c;
-    border-radius: 8px;
-    background: linear-gradient(135deg, #fff7ed, #ffedd5);
-    color: #c2410c;
-    font-weight: 900;
-    font-size: 15px;
-    cursor: pointer;
-    transition: transform 0.18s ease, box-shadow 0.18s ease, opacity 0.2s ease;
-  }
-
-  .inventory-stepper__btn:hover:enabled,
-  .inventory-stepper__btn:focus:enabled {
-    transform: translateY(-1px);
-    box-shadow: 0 8px 14px rgba(251, 146, 60, 0.2);
-    outline: none;
-  }
-
-  .inventory-stepper__btn:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-    box-shadow: none;
-  }
-
-  .inventory-stepper__value {
-    min-width: 28px;
-    text-align: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 10px 12px;
+    border-radius: 14px;
+    background: linear-gradient(90deg, #ecfdf3 0%, #e0fdfa 100%);
     font-weight: 800;
     color: #0f172a;
+  }
+
+  .discount-section-title.muted {
+    background: #f8fafc;
+    color: #475569;
+  }
+
+  .discount-section-count {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 10px;
+    border-radius: 12px;
+    background: #0ea5e910;
+    color: #0f172a;
+    font-size: 12px;
+    font-weight: 800;
+  }
+
+  .discount-mobile-section {
+    display: grid;
+    gap: 10px;
   }
 
   .discount-modal {
@@ -3491,24 +3487,18 @@
       if (product.end) {
         badges.push(`<span class="discount-timer"><i class="ri-timer-line" aria-hidden="true"></i>${remainingTime(product.end)}</span>`);
       }
-      if (product.remainingQty != null) {
+      if (product.limit != null) {
+        const safeLimit = Math.max(Number(product.limit) || 0, 0);
         const safeQty = Math.max(Number(product.remainingQty) || 0, 0);
         badges.push(`
-          <div class="discount-quantity" data-stepper-product="${product.id}">
-            <span class="flex items-center gap-2 text-[12px] font-extrabold text-amber-700">
-              <i class="ri-archive-stack-line" aria-hidden="true"></i>
-              مدیریت موجودی
-            </span>
-            <div class="inventory-stepper" role="group" aria-label="تنظیم موجودی تخفیف">
-              <button type="button" class="inventory-stepper__btn" data-stepper-action="decrease" aria-label="کاهش موجودی" ${safeQty <= 0 ? 'disabled' : ''}>−</button>
-              <span class="inventory-stepper__value" aria-live="polite">${safeQty}</span>
-              <button type="button" class="inventory-stepper__btn" data-stepper-action="increase" aria-label="افزایش موجودی">+</button>
-            </div>
-          </div>
+          <span class="discount-limit" aria-label="سقف تعداد تخفیف">
+            <i class="ri-archive-stack-line" aria-hidden="true"></i>
+            ${safeQty} از ${safeLimit} عدد باقی مانده
+          </span>
         `);
       }
       if (!badges.length) return '';
-      return `<div class="flex flex-wrap gap-2 mt-1" aria-label="وضعیت محدودیت تخفیف">${badges.join('')}</div>`;
+      return `<div class="discount-badges" aria-label="وضعیت محدودیت تخفیف">${badges.join('')}</div>`;
     };
 
     async function fetchDiscountProducts() {
@@ -3538,36 +3528,6 @@
         discountProducts.length = 0;
         renderDiscounts();
       }
-    }
-
-    function attachInventorySteppers() {
-      document.querySelectorAll('[data-stepper-product]').forEach((stepper) => {
-        const productId = stepper.dataset.stepperProduct;
-        const product = discountProducts.find((p) => String(p.id) === String(productId));
-        if (!product) return;
-
-        const decreaseBtn = stepper.querySelector('[data-stepper-action="decrease"]');
-        const increaseBtn = stepper.querySelector('[data-stepper-action="increase"]');
-        const valueEl = stepper.querySelector('.inventory-stepper__value');
-
-        const sync = () => {
-          const qty = Math.max(Number(product.remainingQty) || 0, 0);
-          if (valueEl) valueEl.textContent = qty;
-          if (decreaseBtn) decreaseBtn.disabled = qty <= 0;
-        };
-
-        sync();
-
-        decreaseBtn?.addEventListener('click', () => {
-          product.remainingQty = Math.max((Number(product.remainingQty) || 0) - 1, 0);
-          renderDiscounts();
-        });
-
-        increaseBtn?.addEventListener('click', () => {
-          product.remainingQty = Math.max((Number(product.remainingQty) || 0) + 1, 0);
-          renderDiscounts();
-        });
-      });
     }
 
     const getAvailableProductsForDiscount = () =>
@@ -3655,78 +3615,97 @@
     }
 
     function renderDiscounts() {
-      const activeCount = discountProducts.filter((p) => p.active).length;
+      const isActiveProduct = (product) => Boolean(product.active && product.discountPrice);
+      const activeProducts = discountProducts.filter((p) => isActiveProduct(p));
+      const inactiveProducts = discountProducts.filter((p) => !isActiveProduct(p));
+
+      const activeCount = activeProducts.length;
       if (discountSummary) {
         discountSummary.textContent = `${activeCount} محصول با تخفیف فعال`;
         discountSummary.classList.toggle('off', activeCount === 0);
       }
 
+      const buildTableRows = (items, label, muted = false) => {
+        if (!items.length) return '';
+        const sectionTitle = `<tr class="discount-row"><td colspan="4"><div class="discount-section-title ${muted ? 'muted' : ''}">${label}<span class="discount-section-count"><i class="ri-stack-line" aria-hidden="true"></i>${items.length} محصول</span></div></td></tr>`;
+
+        const rows = items
+          .map((product) => {
+            const isActive = isActiveProduct(product);
+            const priceView = isActive
+              ? `<span class="discount-original">${formatPrice(product.price)}</span><span class="discount-price">${formatPrice(product.discountPrice)}</span>`
+              : `<span class="discount-price">${formatPrice(product.price)}</span>`;
+            const status = isActive
+              ? `<span class="discount-pill"><i class="ri-flashlight-line" aria-hidden="true"></i> تخفیف فعال</span>`
+              : `<span class="discount-pill off">بدون تخفیف</span>`;
+            const remainingChips = isActive ? buildRemainingBadges(product) : '';
+
+            return `<tr class="discount-row">
+              <td class="font-bold">${product.name}</td>
+              <td>${priceView}</td>
+              <td class="space-y-1">${status}${remainingChips}</td>
+              <td class="text-left">
+                <div class="discount-actions">
+                  <button type="button" class="discount-cta" data-discount-id="${product.id}">
+                    <i class="ri-edit-2-line" aria-hidden="true"></i>
+                    تنظیم / ویرایش تخفیف
+                  </button>
+                  ${isActive ? `<button type="button" class="discount-delete" data-discount-remove-id="${product.id}"><i class="ri-close-circle-line" aria-hidden="true"></i> حذف تخفیف</button>` : ''}
+                </div>
+              </td>
+            </tr>`;
+          })
+          .join('');
+
+        return sectionTitle + rows;
+      };
+
       if (discountTableBody) {
         if (!discountProducts.length) {
           discountTableBody.innerHTML = '<tr><td colspan="4" class="text-center text-gray-500 py-4">محصولی برای نمایش وجود ندارد.</td></tr>';
         } else {
-          discountTableBody.innerHTML = discountProducts
-            .map((product) => {
-              const isActive = product.active && product.discountPrice;
-              const priceView = isActive
-                ? `<span class="discount-original">${formatPrice(product.price)}</span><span class="discount-price">${formatPrice(product.discountPrice)}</span>`
-                : `<span class="discount-price">${formatPrice(product.price)}</span>`;
-              const status = isActive
-                ? `<span class="discount-pill"><i class="ri-flashlight-line" aria-hidden="true"></i> تخفیف فعال</span>`
-                : `<span class="discount-pill off">بدون تخفیف</span>`;
-              const remainingChips = isActive ? buildRemainingBadges(product) : '';
-
-              return `<tr class="discount-row">
-                <td class="font-bold">${product.name}</td>
-                <td>${priceView}</td>
-                <td class="space-y-1">${status}${remainingChips}</td>
-                <td class="text-left">
-                  <div class="discount-actions">
-                    <button type="button" class="discount-cta" data-discount-id="${product.id}">
-                      <i class="ri-edit-2-line" aria-hidden="true"></i>
-                      تنظیم / ویرایش تخفیف
-                    </button>
-                    ${isActive ? `<button type="button" class="discount-delete" data-discount-remove-id="${product.id}"><i class="ri-close-circle-line" aria-hidden="true"></i> حذف تخفیف</button>` : ''}
-                  </div>
-                </td>
-              </tr>`;
-            })
-            .join('');
+          discountTableBody.innerHTML = `${buildTableRows(activeProducts, 'تخفیف‌های فعال')}${buildTableRows(inactiveProducts, 'محصولات بدون تخفیف فعال', true)}`;
         }
       }
+
+      const buildMobileSection = (items, label, muted = false) => {
+        if (!items.length) return '';
+        const sectionTitle = `<div class="discount-section-title ${muted ? 'muted' : ''}">${label}<span class="discount-section-count"><i class="ri-stack-line" aria-hidden="true"></i>${items.length} محصول</span></div>`;
+        const cards = items
+          .map((product) => {
+            const isActive = isActiveProduct(product);
+            const remainingChips = isActive ? buildRemainingBadges(product) : '';
+            return `<div class="discount-mobile-card">
+              <div class="flex-1">
+                <div class="discount-mobile-title">${product.name}</div>
+                <div class="flex items-center gap-2 mb-1">
+                  ${isActive ? `<span class="discount-original">${formatPrice(product.price)}</span>` : ''}
+                  <span class="discount-price">${formatPrice(isActive ? product.discountPrice : product.price)}</span>
+                </div>
+                <div class="discount-meta">
+                  <span class="${isActive ? 'discount-pill' : 'discount-pill off'}">${isActive ? 'تخفیف فعال' : 'بدون تخفیف'}</span>
+                </div>
+                ${remainingChips}
+              </div>
+              <div class="flex flex-col gap-2">
+                <button type="button" class="discount-cta" data-discount-id="${product.id}">تنظیم / ویرایش</button>
+                ${isActive ? `<button type="button" class="discount-delete" data-discount-remove-id="${product.id}"><i class="ri-close-circle-line" aria-hidden="true"></i> حذف تخفیف</button>` : ''}
+              </div>
+            </div>`;
+          })
+          .join('');
+        return `<div class="discount-mobile-section">${sectionTitle}${cards}</div>`;
+      };
 
       if (discountMobileList) {
         if (!discountProducts.length) {
           discountMobileList.innerHTML = '<div class="text-center text-gray-500 py-4">محصولی برای نمایش وجود ندارد.</div>';
         } else {
-          discountMobileList.innerHTML = discountProducts
-            .map((product) => {
-              const isActive = product.active && product.discountPrice;
-              const remainingChips = isActive ? buildRemainingBadges(product) : '';
-              return `<div class="discount-mobile-card">
-                <div class="flex-1">
-                  <div class="discount-mobile-title">${product.name}</div>
-                  <div class="flex items-center gap-2 mb-1">
-                    ${isActive ? `<span class="discount-original">${formatPrice(product.price)}</span>` : ''}
-                    <span class="discount-price">${formatPrice(isActive ? product.discountPrice : product.price)}</span>
-                  </div>
-                  <div class="discount-meta">
-                    <span class="${isActive ? 'discount-pill' : 'discount-pill off'}">${isActive ? 'تخفیف فعال' : 'بدون تخفیف'}</span>
-                  </div>
-                  ${remainingChips}
-                </div>
-                <div class="flex flex-col gap-2">
-                  <button type="button" class="discount-cta" data-discount-id="${product.id}">تنظیم / ویرایش</button>
-                  ${isActive ? `<button type="button" class="discount-delete" data-discount-remove-id="${product.id}"><i class="ri-close-circle-line" aria-hidden="true"></i> حذف تخفیف</button>` : ''}
-                </div>
-              </div>`;
-            })
-            .join('');
+          discountMobileList.innerHTML = `${buildMobileSection(activeProducts, 'تخفیف‌های فعال')}${buildMobileSection(inactiveProducts, 'محصولات بدون تخفیف فعال', true)}`;
         }
       }
 
       renderAddModalList(addDiscountSearch?.value || '');
-      attachInventorySteppers();
 
       document.querySelectorAll('[data-discount-id]').forEach((btn) => {
         btn.addEventListener('click', () => {
