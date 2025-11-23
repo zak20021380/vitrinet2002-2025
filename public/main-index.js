@@ -1469,7 +1469,22 @@ function renderBrandShelf(discounts) {
     : [];
 
   if (!validItems.length) {
-    slider.innerHTML = '<p class="brand-card__title" data-placeholder="true">فعلاً تخفیف فعالی ثبت نشده است.</p>';
+    slider.innerHTML = `
+      <div class="brand-shelf__empty">
+        <div class="brand-shelf__empty-icon" aria-hidden="true">
+          <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="32" cy="32" r="22" stroke="currentColor" stroke-width="4" opacity="0.4" />
+            <path d="M32 18v14l9 6" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" opacity="0.8" />
+            <circle cx="32" cy="32" r="4" fill="currentColor" opacity="0.8" />
+          </svg>
+        </div>
+        <div class="brand-shelf__empty-text">
+          <p class="brand-shelf__empty-headline">پیشنهادهای طلایی به پایان رسید!</p>
+          <p class="brand-shelf__empty-subtext">منتظر طوفان تخفیف‌های بعدی باشید...</p>
+        </div>
+        <a class="brand-shelf__empty-btn" href="all-shops.html">مشاهده فروشگاه‌ها</a>
+      </div>
+    `;
     updateSliderNavVisibility('brand-shelf-slider');
     setupBrandShelfArrowVisibility();
     return;
@@ -1573,9 +1588,6 @@ async function loadActiveDiscounts() {
     if (!activeDiscounts.length) {
       if (grid) {
         grid.innerHTML = '<div class="discounts-empty">فعلاً تخفیف فعالی ثبت نشده است. به زودی پیشنهادهای ویژه را اینجا می‌بینید.</div>';
-      }
-      if (section) {
-        section.style.display = 'none';
       }
       return;
     }
