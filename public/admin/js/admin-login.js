@@ -56,6 +56,15 @@ document.addEventListener('DOMContentLoaded', () => {
       const data = await res.json();
 
       if (res.ok) {
+        try {
+          if (data && data.token) {
+            localStorage.setItem('admin_token', data.token);
+          } else {
+            localStorage.removeItem('admin_token');
+          }
+        } catch (storageErr) {
+          console.warn('⚠️  Unable to persist admin token locally', storageErr);
+        }
         window.location.href = 'dashboard.html';
       } else {
         errorDiv.textContent = data.message || 'ورود ناموفق بود. لطفاً اطلاعات را درست وارد کنید.';
