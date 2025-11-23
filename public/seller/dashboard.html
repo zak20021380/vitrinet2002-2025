@@ -3601,8 +3601,12 @@
       return `${hours} ساعت و ${minutes} دقیقه باقی مانده`;
     };
 
-    const hasExistingDiscount = (product) =>
-      product.discountPrice != null || product.active || product.limit != null || product.start || product.end;
+    const hasExistingDiscount = (product) => {
+      if (!product) return false;
+      const hasValidDiscountPrice =
+        product.discountPrice != null && Number(product.discountPrice) < Number(product.price || 0);
+      return Boolean(hasValidDiscountPrice);
+    };
 
     const buildRemainingBadges = (product) => {
       if (!product?.active) return '';
@@ -3790,7 +3794,7 @@
         if (!discountProducts.length) {
           discountTableBody.innerHTML = '<tr><td colspan="4" class="text-center text-gray-500 py-4">محصولی برای نمایش وجود ندارد.</td></tr>';
         } else {
-          discountTableBody.innerHTML = `${buildTableRows(activeProducts, 'تخفیف‌های فعال')}${buildTableRows(inactiveProducts, 'محصولات بدون تخفیف فعال', true)}`;
+          discountTableBody.innerHTML = `${buildTableRows(activeProducts, 'تخفیف‌های فعال')}${buildTableRows(inactiveProducts, 'محصولات تخفیف‌دار', true)}`;
         }
       }
 
@@ -3827,7 +3831,7 @@
         if (!discountProducts.length) {
           discountMobileList.innerHTML = '<div class="text-center text-gray-500 py-4">محصولی برای نمایش وجود ندارد.</div>';
         } else {
-          discountMobileList.innerHTML = `${buildMobileSection(activeProducts, 'تخفیف‌های فعال')}${buildMobileSection(inactiveProducts, 'محصولات بدون تخفیف فعال', true)}`;
+          discountMobileList.innerHTML = `${buildMobileSection(activeProducts, 'تخفیف‌های فعال')}${buildMobileSection(inactiveProducts, 'محصولات تخفیف‌دار', true)}`;
         }
       }
 
