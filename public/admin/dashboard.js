@@ -1,5 +1,30 @@
-const ADMIN_API_BASE = "http://localhost:5000/api";
-const ADMIN_API_ORIGIN = "http://localhost:5000";
+const ADMIN_API_BASE = (() => {
+  const configured = window.ADMIN_API_BASE && String(window.ADMIN_API_BASE).trim();
+  if (configured) return configured;
+
+  const hasLocationOrigin = typeof location !== 'undefined'
+    && location
+    && typeof location.origin === 'string'
+    && location.origin !== 'null';
+
+  if (hasLocationOrigin) {
+    return `${location.origin.replace(/\/$/, '')}/api`;
+  }
+
+  return 'http://localhost:5000/api';
+})();
+
+const ADMIN_API_ORIGIN = (() => {
+  try {
+    const url = new URL(ADMIN_API_BASE, typeof location !== 'undefined' ? location.href : undefined);
+    return url.origin;
+  } catch (err) {
+    console.warn('ADMIN_API_ORIGIN fallback due to invalid ADMIN_API_BASE:', err);
+    return 'http://localhost:5000';
+  }
+})();
+
+window.ADMIN_API_BASE = ADMIN_API_BASE;
 const SHOPPING_CENTER_PLACEHOLDER =
   'data:image/svg+xml;utf8,' +
   encodeURIComponent(
@@ -3714,6 +3739,17 @@ function adjustServiceShopsIframeHeight() {
 
 function setupServiceShopsIframeListeners() {
   if (!serviceShopsIframe || serviceShopsIframe.dataset.listeners === 'true') return;
+
+  const isServiceShopsIframeSameOrigin = () => {
+    try {
+      const iframeSrc = serviceShopsIframe.src || serviceShopsIframe.dataset.src || '';
+      const iframeUrl = new URL(iframeSrc, window.location.href);
+      return iframeUrl.origin === window.location.origin;
+    } catch (err) {
+      return false;
+    }
+  };
+
   serviceShopsIframe.addEventListener('load', () => {
     if (serviceShopsIframe.dataset.loaded !== 'true') {
       return;
@@ -3724,6 +3760,11 @@ function setupServiceShopsIframeListeners() {
     }
     serviceShopsIframe.classList.add('is-ready');
     adjustServiceShopsIframeHeight();
+
+    if (!isServiceShopsIframeSameOrigin()) {
+      return;
+    }
+
     try {
       const doc = serviceShopsIframe.contentDocument;
       if (doc?.body) {
