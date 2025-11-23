@@ -1859,11 +1859,27 @@
       setTimeout(() => toast.remove(), 3600);
     }
 
+    function getAdminToken() {
+      try {
+        return localStorage.getItem('admin_token') || sessionStorage.getItem('admin_token');
+      } catch (err) {
+        console.warn('getAdminToken storage error', err);
+        return null;
+      }
+    }
+
     // Fetch helper
     async function fetchJSON(url, options = {}) {
+      const headers = { 'Content-Type': 'application/json', ...(options.headers || {}) };
+      if (!headers.Authorization) {
+        const token = getAdminToken();
+        if (token) {
+          headers.Authorization = `Bearer ${token}`;
+        }
+      }
       const res = await fetch(url, {
         credentials: 'include',
-        headers: { 'Content-Type': 'application/json', ...(options.headers || {}) },
+        headers,
         ...options
       });
       let data;
