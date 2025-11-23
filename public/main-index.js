@@ -1469,31 +1469,46 @@ function renderBrandShelf(discounts) {
     : [];
 
   if (!validItems.length) {
+    slider.style.cssText = [
+      'display: flex',
+      'flex-direction: column',
+      'justify-content: center',
+      'align-items: center',
+      'width: 100%',
+      'height: 100%',
+      'text-align: center',
+      'overflow: hidden'
+    ].join(';');
+
     slider.innerHTML = `
-      <div class="brand-shelf__empty">
-        <div class="brand-shelf__empty-icon" aria-hidden="true">
-          <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <circle cx="32" cy="32" r="22" stroke="currentColor" stroke-width="4" opacity="0.4" />
-            <path d="M32 18v14l9 6" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" opacity="0.8" />
-            <circle cx="32" cy="32" r="4" fill="currentColor" opacity="0.8" />
-          </svg>
-        </div>
-        <div class="brand-shelf__empty-text">
-          <p class="brand-shelf__empty-headline">پیشنهادهای طلایی به پایان رسید!</p>
-          <p class="brand-shelf__empty-subtext">منتظر طوفان تخفیف‌های بعدی باشید...</p>
-        </div>
-        <a class="brand-shelf__empty-btn" href="all-shops.html">مشاهده فروشگاه‌ها</a>
-      </div>
+      <svg data-placeholder="true" width="80" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" style="opacity:0.4;">
+        <rect x="10" y="18" width="44" height="30" rx="6" stroke="white" stroke-width="3" />
+        <path d="M10 24h44" stroke="white" stroke-width="3" />
+        <path d="M22 18v-4c0-3.3137 2.6863-6 6-6h8c3.3137 0 6 2.6863 6 6v4" stroke="white" stroke-width="3" stroke-linecap="round" />
+      </svg>
+      <h3 data-placeholder="true" style="font-size:1.5rem;color:#fff;margin-top:20px;">به‌زودی پیشنهادهای ویژه را می‌بینید</h3>
+      <p data-placeholder="true" style="color:rgba(255,255,255,0.8);margin:10px 0 20px;max-width:520px;">در حال آماده‌سازی تخفیف‌های جذاب هستیم تا بهترین گزینه‌ها را برای شما بیاوریم. کمی صبر کنید!</p>
+      <a data-placeholder="true" href="all-shops.html" style="border:1px solid #fff;color:#fff;background:transparent;padding:10px 18px;border-radius:999px;font-weight:800;">مشاهده فروشگاه‌ها</a>
     `;
+
+    const prevBtn = document.querySelector('[data-scroll-target="brand-shelf-slider"][data-direction="prev"]');
+    const nextBtn = document.querySelector('[data-scroll-target="brand-shelf-slider"][data-direction="next"]');
+    [prevBtn, nextBtn].forEach(btn => { if (btn) btn.style.display = 'none'; });
+
     updateSliderNavVisibility('brand-shelf-slider');
     setupBrandShelfArrowVisibility();
     return;
   }
 
+  slider.style.cssText = '';
   slider.innerHTML = '';
   validItems.slice(0, 10).forEach(product => {
     slider.appendChild(buildBrandShelfCard(product));
   });
+
+  const prevBtn = document.querySelector('[data-scroll-target="brand-shelf-slider"][data-direction="prev"]');
+  const nextBtn = document.querySelector('[data-scroll-target="brand-shelf-slider"][data-direction="next"]');
+  [prevBtn, nextBtn].forEach(btn => { if (btn) btn.style.display = ''; });
 
   updateSliderNavVisibility('brand-shelf-slider');
   setupBrandShelfArrowVisibility();
