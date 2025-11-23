@@ -1460,43 +1460,36 @@ function buildBrandShelfCard(product) {
 
 function renderBrandShelf(discounts) {
   const slider = document.getElementById('brand-shelf-slider');
-  if (!slider) return;
+  const container = document.getElementById('special-offers-container');
+  if (!slider && !container) return;
 
-  slider.scrollTo({ left: 0, behavior: 'auto' });
+  if (slider) {
+    slider.scrollTo({ left: 0, behavior: 'auto' });
+  }
 
   const validItems = Array.isArray(discounts)
     ? discounts.filter(item => isDiscountCurrentlyActive(item))
     : [];
 
   if (!validItems.length) {
-    slider.style.cssText = [
-      'display: flex',
-      'flex-direction: column',
-      'justify-content: center',
-      'align-items: center',
-      'width: 100%',
-      'height: 100%',
-      'text-align: center',
-      'overflow: hidden'
-    ].join(';');
-
-    slider.innerHTML = `
-      <svg data-placeholder="true" width="80" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" style="opacity:0.4;">
-        <rect x="10" y="18" width="44" height="30" rx="6" stroke="white" stroke-width="3" />
-        <path d="M10 24h44" stroke="white" stroke-width="3" />
-        <path d="M22 18v-4c0-3.3137 2.6863-6 6-6h8c3.3137 0 6 2.6863 6 6v4" stroke="white" stroke-width="3" stroke-linecap="round" />
-      </svg>
-      <h3 data-placeholder="true" style="font-size:1.5rem;color:#fff;margin-top:20px;">به‌زودی پیشنهادهای ویژه را می‌بینید</h3>
-      <p data-placeholder="true" style="color:rgba(255,255,255,0.8);margin:10px 0 20px;max-width:520px;">در حال آماده‌سازی تخفیف‌های جذاب هستیم تا بهترین گزینه‌ها را برای شما بیاوریم. کمی صبر کنید!</p>
-      <a data-placeholder="true" href="all-shops.html" style="border:1px solid #fff;color:#fff;background:transparent;padding:10px 18px;border-radius:999px;font-weight:800;">مشاهده فروشگاه‌ها</a>
-    `;
-
-    const prevBtn = document.querySelector('[data-scroll-target="brand-shelf-slider"][data-direction="prev"]');
-    const nextBtn = document.querySelector('[data-scroll-target="brand-shelf-slider"][data-direction="next"]');
-    [prevBtn, nextBtn].forEach(btn => { if (btn) btn.style.display = 'none'; });
-
-    updateSliderNavVisibility('brand-shelf-slider');
-    setupBrandShelfArrowVisibility();
+    if (container) {
+      container.innerHTML = `
+        <div style="display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;padding:40px 20px;min-height:300px;background:linear-gradient(to left, #00b894, #0984e3);border-radius:16px;width:100%;height:100%;">
+          <div aria-hidden="true" style="opacity:0.12;color:#fff;margin-bottom:20px;">
+            <svg width="120" height="120" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <rect x="8" y="22" width="48" height="32" rx="6" stroke="currentColor" stroke-width="3" />
+              <path d="M8 26h48" stroke="currentColor" stroke-width="3" />
+              <path d="M32 22v32" stroke="currentColor" stroke-width="3" />
+              <path d="M26 22c-3.5 0-7-2.5-7-6s2.5-6 6-6c3.2 0 5.6 2.4 6.5 6" stroke="currentColor" stroke-width="3" stroke-linecap="round" />
+              <path d="M38 22c3.5 0 7-2.5 7-6s-2.5-6-6-6c-3.2 0-5.6 2.4-6.5 6" stroke="currentColor" stroke-width="3" stroke-linecap="round" />
+            </svg>
+          </div>
+          <h3 style="font-size:1.5rem;color:#fff;font-weight:900;margin-bottom:8px;">به زودی پیشنهادهای ویژه را می‌بینید</h3>
+          <p style="color:rgba(255,255,255,0.85);margin:0 0 18px;max-width:520px;line-height:1.8;">در حال آماده‌سازی تخفیف‌های جذاب هستیم...</p>
+          <a href="all-shops.html" style="display:inline-flex;align-items:center;justify-content:center;border:1px solid rgba(255,255,255,0.9);color:#0b7d6c;background:#fff;padding:12px 22px;border-radius:999px;font-weight:800;text-decoration:none;box-shadow:0 10px 30px rgba(0,0,0,0.12);">مشاهده فروشگاه‌ها</a>
+        </div>
+      `;
+    }
     return;
   }
 
