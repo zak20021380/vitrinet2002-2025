@@ -1486,7 +1486,7 @@ function renderBrandShelf(discounts) {
           </div>
           <h3 style="font-size:1.5rem;color:#fff;font-weight:900;margin-bottom:8px;">به زودی پیشنهادهای ویژه را می‌بینید</h3>
           <p style="color:rgba(255,255,255,0.85);margin:0 0 18px;max-width:520px;line-height:1.8;">در حال آماده‌سازی تخفیف‌های جذاب هستیم...</p>
-          <a href="all-shops.html" style="display:inline-flex;align-items:center;justify-content:center;border:1px solid rgba(255,255,255,0.9);color:#0b7d6c;background:#fff;padding:12px 22px;border-radius:999px;font-weight:800;text-decoration:none;box-shadow:0 10px 30px rgba(0,0,0,0.12);">مشاهده فروشگاه‌ها</a>
+          <span style="display:inline-flex;align-items:center;justify-content:center;padding:6px 12px;border-radius:999px;font-weight:800;color:rgba(255,255,255,0.75);background:rgba(255,255,255,0.12);backdrop-filter:blur(4px);">پیشنهادهای ویژه در راه‌اند</span>
         </div>
       `;
     }
