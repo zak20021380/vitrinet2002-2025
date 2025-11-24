@@ -3979,7 +3979,7 @@ function renderServiceShopsTable() {
         <td style="padding:12px; width:20%; vertical-align:middle;">
           <div style="display:flex; gap:6px; flex-wrap:wrap;">
             <button class="action-btn" style="background:#e0f2fe; color:#0369a1; border:none; padding:5px 10px; border-radius:6px; cursor:pointer; font-size:0.85rem;" data-action="grant-free" data-id="${escapeHtml(shop.id)}">اعطای پلن</button>
-            ${shop.shopUrl ? `<a class="action-btn view" style="background:#10b981; color:white; padding:5px 10px; border-radius:6px; text-decoration:none; font-size:0.85rem;" target="_blank" rel="noopener" href="/service/${encodeURIComponent(shop.shopUrl)}">مشاهده</a>` : ''}
+            ${shop.shopUrl ? `<a class="action-btn view" style="background:#10b981; color:white; padding:5px 10px; border-radius:6px; text-decoration:none; font-size:0.85rem;" target="_blank" rel="noopener" href="/service-shops.html?shopurl=${encodeURIComponent(shop.shopUrl)}">مشاهده</a>` : ''}
           </div>
         </td>
       </tr>
