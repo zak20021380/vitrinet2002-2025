@@ -204,18 +204,50 @@
         }
         
         .badge-timer {
-            position: absolute; bottom: 15px; left: 50%; transform: translateX(-50%);
-            background: rgba(255, 255, 255, 0.95);
+            position: absolute;
+            bottom: 15px;
+            left: 50%;
+            transform: translateX(-50%) translateY(0);
+            background: rgba(255, 255, 255, 0.96);
             color: var(--text-dark);
-            font-size: 0.75rem; font-weight: 700;
-            padding: 6px 12px; border-radius: 50px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            padding: 6px 14px;
+            border-radius: 999px;
             box-shadow: 0 4px 15px rgba(0,0,0,0.08);
             white-space: nowrap;
-            display: flex; gap: 5px; align-items: center;
-            opacity: 0; transition: 0.3s; transform: translateX(-50%) translateY(10px);
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            opacity: 1;
+            backdrop-filter: blur(6px);
         }
-        /* Show timer on hover */
-        .offer-card:hover .badge-timer { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+        .badge-timer svg {
+            width: 14px;
+            height: 14px;
+        }
+
+        .badge-timer-label {
+            font-size: 0.7rem;
+            opacity: 0.8;
+        }
+
+        .badge-timer-value {
+            font-size: 0.85rem;
+            font-weight: 900;
+            letter-spacing: 0.5px;
+        }
+
+        .offer-card:hover .badge-timer {
+            box-shadow: 0 6px 18px rgba(0,0,0,0.12);
+            transform: translateX(-50%) translateY(-2px);
+        }
+
+        .badge-timer.expired {
+            background: rgba(255, 239, 239, 0.98);
+            color: var(--accent-red);
+        }
 
         /* Body */
         .card-body { padding: 20px; display: flex; flex-direction: column; flex-grow: 1; }
@@ -375,12 +407,18 @@
 
             <div class="offers-grid">
 
+                <!-- CARD 1 -->
                 <article class="offer-card">
                     <div class="card-header">
                         <div class="badge-discount">٪۳۵</div>
-                        <div class="badge-timer">
-                            <span>۰۴:۱۲:۰۰</span> 
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                        <!-- Timer: 4 hours from page load -->
+                        <div class="badge-timer" data-minutes="240">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <polyline points="12 6 12 12 16 14"></polyline>
+                            </svg>
+                            <span class="badge-timer-label">تا پایان پیشنهاد</span>
+                            <span class="badge-timer-value">۰۴:۰۰:۰۰</span>
                         </div>
                         <img src="https://via.placeholder.com/400x300?text=Sony+Headphones" class="product-img" alt="Product">
                     </div>
@@ -398,9 +436,19 @@
                     </div>
                 </article>
 
+                <!-- CARD 2 -->
                 <article class="offer-card">
                     <div class="card-header">
                         <div class="badge-discount" style="background:#2d3436;">٪۱۵</div>
+                        <!-- Timer: 3 hours from page load -->
+                        <div class="badge-timer" data-minutes="180">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <polyline points="12 6 12 12 16 14"></polyline>
+                            </svg>
+                            <span class="badge-timer-label">تا پایان پیشنهاد</span>
+                            <span class="badge-timer-value">۰۳:۰۰:۰۰</span>
+                        </div>
                         <img src="https://via.placeholder.com/400x300?text=Apple+Watch" class="product-img" alt="Product">
                     </div>
                     <div class="card-body">
@@ -417,10 +465,19 @@
                     </div>
                 </article>
 
+                <!-- CARD 3 -->
                 <article class="offer-card">
                     <div class="card-header">
                         <div class="badge-discount">٪۵۰</div>
-                        <div class="badge-timer">🔥 فروش ویژه</div>
+                        <!-- Timer: 1 hour from page load -->
+                        <div class="badge-timer" data-minutes="60">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <polyline points="12 6 12 12 16 14"></polyline>
+                            </svg>
+                            <span class="badge-timer-label">🔥 فروش ویژه</span>
+                            <span class="badge-timer-value">۰۱:۰۰:۰۰</span>
+                        </div>
                         <img src="https://via.placeholder.com/400x300?text=Nike+Shoes" class="product-img" alt="Product">
                     </div>
                     <div class="card-body">
@@ -437,9 +494,19 @@
                     </div>
                 </article>
 
+                <!-- CARD 4 -->
                 <article class="offer-card">
                     <div class="card-header">
                         <div class="badge-discount">٪۲۵</div>
+                        <!-- Timer: 30 minutes from page load -->
+                        <div class="badge-timer" data-minutes="30">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <polyline points="12 6 12 12 16 14"></polyline>
+                            </svg>
+                            <span class="badge-timer-label">تا پایان پیشنهاد</span>
+                            <span class="badge-timer-value">۰۰:۳۰:۰۰</span>
+                        </div>
                         <img src="https://via.placeholder.com/400x300?text=Asus+Laptop" class="product-img" alt="Product">
                     </div>
                     <div class="card-body">
@@ -470,6 +537,83 @@
             const sidebar = document.getElementById('filterSidebar');
             sidebar.classList.toggle('active');
         }
+
+        (function () {
+            // Convert English digits to Persian digits for display
+            function toPersianDigits(str) {
+                const persianMap = ['۰','۱','۲','۳','۴','۵','۶','۷','۸','۹'];
+                return str.replace(/\d/g, d => persianMap[d]);
+            }
+
+            // Supports:
+            // - data-expire="2025-12-31T23:59:59"
+            // - data-minutes="240" (relative to page load)
+            const timerElements = document.querySelectorAll('.badge-timer[data-expire], .badge-timer[data-minutes]');
+
+            timerElements.forEach(function (el) {
+                const expireAttr = el.getAttribute('data-expire');
+                const minutesAttr = el.getAttribute('data-minutes');
+
+                let endTime = null;
+                const now = new Date();
+
+                if (expireAttr) {
+                    const parsed = new Date(expireAttr);
+                    if (!isNaN(parsed.getTime())) {
+                        endTime = parsed;
+                    }
+                }
+
+                if (!endTime && minutesAttr) {
+                    const minutes = parseInt(minutesAttr, 10);
+                    if (!isNaN(minutes)) {
+                        endTime = new Date(now.getTime() + minutes * 60 * 1000);
+                    }
+                }
+
+                const valueEl = el.querySelector('.badge-timer-value');
+                const labelEl = el.querySelector('.badge-timer-label');
+
+                if (!endTime || !valueEl) return;
+
+                function updateTimer() {
+                    const nowTime = new Date();
+                    const diff = endTime - nowTime;
+
+                    if (diff <= 0) {
+                        el.classList.add('expired');
+                        valueEl.textContent = '۰۰:۰۰:۰۰';
+                        if (labelEl) {
+                            labelEl.textContent = 'مهلت تمام شد';
+                        }
+                        return true; // finished
+                    }
+
+                    const totalSeconds = Math.floor(diff / 1000);
+                    const hours = Math.floor(totalSeconds / 3600);
+                    const minutes = Math.floor((totalSeconds % 3600) / 60);
+                    const seconds = totalSeconds % 60;
+
+                    const hh = String(hours).padStart(2, '0');
+                    const mm = String(minutes).padStart(2, '0');
+                    const ss = String(seconds).padStart(2, '0');
+
+                    valueEl.textContent = toPersianDigits(hh + ':' + mm + ':' + ss);
+                    return false;
+                }
+
+                // Initial paint
+                let finished = updateTimer();
+
+                if (!finished) {
+                    const intervalId = setInterval(function () {
+                        if (updateTimer()) {
+                            clearInterval(intervalId);
+                        }
+                    }, 1000);
+                }
+            });
+        })();
     </script>
 
 </body>

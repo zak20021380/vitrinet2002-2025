@@ -3968,20 +3968,34 @@ async function ensureServiceShopsData(force = false) {
 }
 
 async function grantComplimentaryPlanToShop(shopId, buttonEl) {
+  // 1. Find the shop in the local list
   const shop = serviceShopsList.find(item => toIdString(item.id) === toIdString(shopId));
+  
   const planSelect = document.getElementById('serviceShopPlanSelect');
   const durationInput = document.getElementById('serviceShopPlanDuration');
+  
   const planId = planSelect ? planSelect.value : '';
   const durationValue = durationInput ? Number(durationInput.value) : null;
 
-  if (!shop) return alert('مغازه یافت نشد.');
-  if (!shop.ownerPhone) return alert('شماره مالک برای این مغازه ثبت نشده است.');
-  if (!planId) return alert('لطفاً یک پلن را انتخاب کنید.');
+  if (!shop) return alert('خطا: اطلاعات مغازه در لیست پیدا نشد.');
+  
+  // 2. Validate and Normalize Phone Number
+  // We check ownerPhone, phone, and mobile to be safe
+  const rawPhone = shop.ownerPhone || shop.phone || shop.mobile;
+  const cleanPhone = normalizePhone(rawPhone); // Utility function defined earlier in your code
 
+  if (!cleanPhone) {
+    console.error('Invalid Phone:', rawPhone, shop);
+    return alert(`شماره تماس معتبر برای این مغازه یافت نشد.\nشماره موجود: ${rawPhone || 'خالی'}`);
+  }
+
+  if (!planId) return alert('لطفاً ابتدا یک پلن را از منوی بالا انتخاب کنید.');
+
+  // 3. Prepare Payload
   const payload = {
-    phone: shop.ownerPhone,
-    serviceShopId: shop.id,
-    planId,
+    phone: cleanPhone,       // Send the normalized phone (e.g. 09123456789)
+    serviceShopId: shop.id,  // Send the Shop ID
+    planId: planId,
     customPrice: 0
   };
 
@@ -3989,28 +4003,40 @@ async function grantComplimentaryPlanToShop(shopId, buttonEl) {
     payload.durationDays = durationValue;
   }
 
+  // 4. UI Feedback
   const originalText = buttonEl?.textContent;
   if (buttonEl) {
     buttonEl.disabled = true;
-    buttonEl.textContent = 'در حال اعمال...';
+    buttonEl.textContent = '⏳ در حال اعمال...';
   }
 
   try {
     const res = await fetch(`${ADMIN_API_BASE}/service-plans/assignments`, {
       method: 'POST',
       credentials: 'include',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 
+        'Content-Type': 'application/json' 
+        // Authorization header is handled by credentials: 'include' usually, 
+        // but if your setup needs it explicitly:
+        // ...(getCookie('admin_token') ? { Authorization: `Bearer ${getCookie('admin_token')}` } : {}) 
+      },
       body: JSON.stringify(payload)
     });
 
     const data = await res.json();
-    if (!res.ok) throw new Error(data?.message || data?.error || 'خطا در اعطای پلن رایگان');
 
-    alert('پلن رایگان با موفقیت اعمال شد.');
+    if (!res.ok) {
+      throw new Error(data?.message || data?.error || 'خطا در اعطای پلن رایگان');
+    }
+
+    alert(`✅ پلن رایگان با موفقیت برای شماره ${cleanPhone} فعال شد.`);
+    
+    // Refresh data to show new status
     await ensureServiceShopsData(true);
+
   } catch (err) {
-    console.error('grantComplimentaryPlanToShop error', err);
-    alert(err.message || 'اعمال پلن با خطا مواجه شد');
+    console.error('grantComplimentaryPlanToShop error:', err);
+    alert('❌ ' + (err.message || 'خطای ناشناخته در ارتباط با سرور'));
   } finally {
     if (buttonEl) {
       buttonEl.disabled = false;
