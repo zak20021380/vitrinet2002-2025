@@ -1171,6 +1171,10 @@ function renderComplimentaryPlan(planRaw) {
   const statusChip = document.getElementById('plan-status-chip');
   const subtextEl = document.getElementById('plan-hero-subtext');
   const plansDisabled = document.body?.dataset?.sellerPlans === 'disabled';
+  const planCtaBtn = document.getElementById('plan-renew-btn');
+
+  const hasAnyPlanLifecycle = plan.activeNow || plan.isActive || plan.hasExpired || plan.startDate || plan.endDate;
+  const planlessNudge = !plansDisabled && !hasAnyPlanLifecycle;
 
   const planState = plan.activeNow
     ? 'active'
@@ -1185,9 +1189,23 @@ function renderComplimentaryPlan(planRaw) {
     planHero.dataset.planDisabled = plansDisabled ? 'true' : 'false';
   }
 
+  planHero.classList.toggle('plan-hero--empty', planlessNudge);
+
   bindPlanHeroActions();
 
-  if (tierEl) tierEl.textContent = '🎖 پلن مهمان (رایگان)';
+  if (tierEl) {
+    tierEl.textContent = planlessNudge ? 'نیاز به انتخاب پلن' : '🎖 پلن مهمان (رایگان)';
+  }
+
+  if (planCtaBtn) {
+    if (planlessNudge) {
+      planCtaBtn.textContent = 'مشاهده و خرید پلن';
+      planCtaBtn.setAttribute('aria-label', 'مشاهده و خرید پلن مناسب کسب‌وکار');
+    } else {
+      planCtaBtn.textContent = 'تمدید / ارتقا';
+      planCtaBtn.setAttribute('aria-label', 'تمدید یا ارتقای پلن فعلی');
+    }
+  }
 
   const remainingDays = plan.remainingDays != null ? Math.max(0, plan.remainingDays) : null;
   if (daysLeftEl) {
@@ -1212,7 +1230,9 @@ function renderComplimentaryPlan(planRaw) {
 
   if (statusChip) {
     statusChip.classList.remove('chip-live');
-    if (plan.activeNow) {
+    if (planlessNudge) {
+      statusChip.textContent = 'پلن انتخاب نشده است';
+    } else if (plan.activeNow) {
       statusChip.textContent = 'دسترسی رایگان فعال';
       statusChip.classList.add('chip-live');
     } else if (plan.hasExpired) {
@@ -1226,7 +1246,14 @@ function renderComplimentaryPlan(planRaw) {
 
   if (perksList) {
     perksList.innerHTML = '';
-    plan.perks.forEach((perk) => {
+    const perks = planlessNudge
+      ? [
+          'مقایسه پلن‌ها و انتخاب سریع',
+          'پشتیبانی تلفنی ۹۱۰۰-۹۹۰۰ برای راهنمایی',
+          'فعال‌سازی فوری پس از پرداخت'
+        ]
+      : plan.perks;
+    perks.forEach((perk) => {
       const li = document.createElement('li');
       li.textContent = perk;
       perksList.appendChild(li);
@@ -1236,6 +1263,8 @@ function renderComplimentaryPlan(planRaw) {
   if (messageEl) {
     if (plan.note) {
       messageEl.textContent = plan.note;
+    } else if (planlessNudge) {
+      messageEl.textContent = 'هیچ پلنی برای فروشگاه فعال نیست. برای فعال شدن همه قابلیت‌ها، از بخش «پلن‌ها» یکی از گزینه‌ها را انتخاب کنید.';
     } else if (plan.activeNow) {
       const urgency = remainingDays != null
         ? (remainingDays <= 1
@@ -1268,7 +1297,11 @@ function renderComplimentaryPlan(planRaw) {
     subtext = 'دسترسی رایگان به صورت سراسری غیرفعال شده است؛ با تغییر وضعیت، اطلاع‌رسانی می‌شود.';
   }
   if (subtextEl) {
-    subtextEl.textContent = subtext;
+    if (planlessNudge) {
+      subtextEl.textContent = 'برای شروع فروش حرفه‌ای، وارد بخش پلن‌ها شوید، پلن مناسب را انتخاب کنید و در کمتر از یک دقیقه فعال‌سازی را انجام دهید.';
+    } else {
+      subtextEl.textContent = subtext;
+    }
   }
 }
 
