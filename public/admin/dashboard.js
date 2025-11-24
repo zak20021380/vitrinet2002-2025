@@ -3524,6 +3524,25 @@ function normaliseSellerRecord(raw) {
   const address = raw.address || raw.shopAddress || '';
   const phone = raw.phone || raw.ownerPhone || raw.mobile || '';
 
+  const rawCategory = raw.serviceCategory || raw.category || '';
+  const rawSubcategory = raw.serviceSubcategory || raw.subcategory || raw.subCategory || '';
+  const rawSubcategories = Array.isArray(raw.serviceSubcategories)
+    ? raw.serviceSubcategories
+    : Array.isArray(raw.subcategories)
+      ? raw.subcategories
+      : (raw.services && Array.isArray(raw.services) ? raw.services : []);
+  const cleanedSubcategories = [rawSubcategory, ...rawSubcategories]
+    .map(item => (item || '').toString().trim())
+    .filter(Boolean);
+  const serviceCategoryName = (rawCategory || '').toString().trim();
+  const serviceType = (raw.userType || raw.sellerType || raw.type || '').toString().toLowerCase();
+  const serviceKeywords = `${serviceCategoryName} ${cleanedSubcategories.join(' ')}`;
+  const isServiceSeller = !!raw.isServiceSeller
+    || serviceType === 'service'
+    || serviceType === 'serviceseller'
+    || /خدمات|service/i.test(serviceKeywords)
+    || cleanedSubcategories.length > 0;
+
   result.sellerId = sellerId;
   result._sid = sellerId;
   result.ownerFirstname = ownerFirstname;
@@ -3547,6 +3566,9 @@ function normaliseSellerRecord(raw) {
   result.blockedReason = raw.blockedReason || '';
   result.productsCount = raw.productsCount || raw.productCount || 0;
   result.visits = raw.visits || raw.shopVisits || 0;
+  result.serviceCategoryName = serviceCategoryName;
+  result.serviceSubcategories = cleanedSubcategories;
+  result.isServiceSeller = isServiceSeller;
 
   if (!result.createdAt && raw.createdAt) {
     result.createdAt = raw.createdAt;
@@ -6250,11 +6272,22 @@ document.head.appendChild(style);
 
 // --- فیلتر و مرتب‌سازی فروشگاه‌ها ---
 let sellersSortMode = 'newest'; // حالت پیش‌فرض
-document.querySelectorAll('.seller-filter-btn').forEach(btn => {
+let sellersTypeFilter = 'all';
+
+document.querySelectorAll('.seller-filter-btn[data-sort]').forEach(btn => {
   btn.onclick = function() {
-    document.querySelectorAll('.seller-filter-btn').forEach(b=>b.classList.remove('active'));
+    document.querySelectorAll('.seller-filter-btn[data-sort]').forEach(b=>b.classList.remove('active'));
     this.classList.add('active');
     sellersSortMode = this.getAttribute('data-sort');
+    renderSellers();
+  }
+});
+
+document.querySelectorAll('.seller-type-btn').forEach(btn => {
+  btn.onclick = function() {
+    document.querySelectorAll('.seller-type-btn').forEach(b=>b.classList.remove('active'));
+    this.classList.add('active');
+    sellersTypeFilter = this.getAttribute('data-filter') || 'all';
     renderSellers();
   }
 });
@@ -6273,7 +6306,7 @@ function renderSellers() {
   tbody.innerHTML = '';
 
   if (!shopsList.length) {
-    tbody.innerHTML = `<tr><td colspan="8" style="color:#888;text-align:center">هیچ فروشگاهی ثبت نشده است.</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="9" style="color:#888;text-align:center">هیچ فروشگاهی ثبت نشده است.</td></tr>`;
     return;
   }
 
@@ -6290,6 +6323,10 @@ function renderSellers() {
       phone.includes(sellerSearchQuery)
     );
   });
+
+  if (sellersTypeFilter === 'service') {
+    sellers = sellers.filter(shop => shop.isServiceSeller);
+  }
 
   sellers.forEach(shop => {
     shop._productsCount = shop.productsCount ?? shop.productCount ?? 0;
@@ -6319,6 +6356,16 @@ function renderSellers() {
     const shopLink = shopUrl
       ? `<a class="seller-link" href="/shop.html?shopurl=${encodeURIComponent(shopUrl)}" target="_blank" rel="noopener noreferrer">${escapeHtml(shopUrl)}</a>`
       : '-';
+
+    const hasServiceData = shop.isServiceSeller || (shop.serviceSubcategories && shop.serviceSubcategories.length);
+    const serviceCategory = shop.serviceCategoryName || (hasServiceData ? 'خدمات' : '');
+    const serviceSubcats = Array.isArray(shop.serviceSubcategories) ? shop.serviceSubcategories : [];
+    const serviceBadge = hasServiceData
+      ? `<div class="seller-category-badges">
+          ${serviceCategory ? `<span class=\"seller-category-chip\">${escapeHtml(serviceCategory)}</span>` : ''}
+          ${serviceSubcats.length ? `<span class=\"seller-subcategory-chip\">${escapeHtml(serviceSubcats.join('، '))}</span>` : ''}
+        </div>`
+      : '<span class="seller-category-chip muted">بدون دسته</span>';
 
     const sellerKey = resolveSellerKeyFromShop(shop);
     const performance = sellerKey ? getSellerPerformanceByKey(sellerKey) : null;
@@ -6376,6 +6423,7 @@ function renderSellers() {
       </td>
       <td class="seller-cell seller-modal-trigger">${escapeHtml(ownerName)}</td>
       <td class="seller-cell seller-modal-trigger">${escapeHtml(address)}</td>
+      <td class="seller-cell seller-modal-trigger">${serviceBadge}</td>
       <td>${shopLink}</td>
       <td>${countProducts}</td>
       <td>${shop._visits}</td>
@@ -6434,7 +6482,7 @@ function renderSellers() {
   });
 
   if (!sellers.length) {
-    tbody.innerHTML = `<tr><td colspan="8" style="color:#888;text-align:center">هیچ فروشگاهی یافت نشد.</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="9" style="color:#888;text-align:center">هیچ فروشگاهی یافت نشد.</td></tr>`;
   }
 }
 
