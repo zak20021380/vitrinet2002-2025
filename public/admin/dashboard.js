@@ -3503,6 +3503,49 @@ async function fetchUsers() {
 }
 
 
+function extractCategoryLabel(value) {
+  if (value == null) return '';
+  if (Array.isArray(value)) {
+    return value.map(extractCategoryLabel).filter(Boolean).join('، ');
+  }
+  if (['string', 'number', 'boolean'].includes(typeof value)) {
+    return String(value).trim();
+  }
+  if (typeof value === 'object') {
+    const candidate = value.title
+      || value.name
+      || value.label
+      || value.faName
+      || value.displayName
+      || value.subcategoryName
+      || value.subCategoryName
+      || value.subGroupName
+      || value.subgroup
+      || value.subGroup
+      || value.value
+      || value.text;
+    if (candidate) {
+      return String(candidate).trim();
+    }
+  }
+  return '';
+}
+
+function normaliseCategoryList(values) {
+  const result = [];
+  (values || []).forEach((item) => {
+    if (Array.isArray(item)) {
+      result.push(...normaliseCategoryList(item));
+    } else {
+      const label = extractCategoryLabel(item);
+      if (label) {
+        result.push(label);
+      }
+    }
+  });
+  return result;
+}
+
 function normaliseSellerRecord(raw) {
   if (!raw || typeof raw !== 'object') return null;
 
@@ -3524,17 +3567,16 @@ function normaliseSellerRecord(raw) {
   const address = raw.address || raw.shopAddress || '';
   const phone = raw.phone || raw.ownerPhone || raw.mobile || '';
 
-  const rawCategory = raw.serviceCategory || raw.category || '';
-  const rawSubcategory = raw.serviceSubcategory || raw.subcategory || raw.subCategory || '';
+  const rawCategoryValue = raw.serviceCategory || raw.category || raw.serviceCategoryName || raw.categoryName || '';
+  const rawSubcategory = raw.serviceSubcategory || raw.subcategory || raw.subCategory || raw.serviceSubcategoryName || raw.serviceSubcategoryTitle || raw.subgroup || raw.subGroup || raw.subGroupName || raw.serviceSubgroup || '';
   const rawSubcategories = Array.isArray(raw.serviceSubcategories)
     ? raw.serviceSubcategories
     : Array.isArray(raw.subcategories)
       ? raw.subcategories
       : (raw.services && Array.isArray(raw.services) ? raw.services : []);
-  const cleanedSubcategories = [rawSubcategory, ...rawSubcategories]
-    .map(item => (item || '').toString().trim())
-    .filter(Boolean);
-  const serviceCategoryName = (rawCategory || '').toString().trim();
+
+  const cleanedSubcategories = Array.from(new Set(normaliseCategoryList([rawSubcategory, rawSubcategories])));
+  const serviceCategoryName = extractCategoryLabel(rawCategoryValue);
   const serviceType = (raw.userType || raw.sellerType || raw.type || '').toString().toLowerCase();
   const serviceKeywords = `${serviceCategoryName} ${cleanedSubcategories.join(' ')}`;
   const isServiceSeller = !!raw.isServiceSeller
