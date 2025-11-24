@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ویترین تخفیف‌های طلایی | Vitrinnet</title>
+    
+    <link href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css" rel="stylesheet" type="text/css" />
+
+    <style>
+        /* --- 1. VARIABLES & RESET --- */
+        :root {
+            --primary: #00b894;
+            --primary-dark: #008f72;
+            --secondary: #0984e3;
+            --accent-red: #ff4757;
+            --text-dark: #2d3436;
+            --text-grey: #636e72;
+            --bg-body: #f8f9fa; /* Slightly warmer grey */
+            --bg-white: #ffffff;
+            --border-color: #eef2f7;
+            --gradient-main: linear-gradient(135deg, #00b894 0%, #0984e3 100%);
+            --radius-card: 20px;
+            --radius-btn: 12px;
+            --shadow-sm: 0 2px 8px rgba(0,0,0,0.04);
+            --shadow-hover: 0 15px 35px rgba(0, 184, 148, 0.15);
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; outline: none; -webkit-tap-highlight-color: transparent; }
+        body { font-family: 'Vazirmatn', sans-serif; background-color: var(--bg-body); color: var(--text-dark); padding-bottom: 80px; line-height: 1.6; }
+        a { text-decoration: none; color: inherit; transition: 0.3s; }
+        ul { list-style: none; }
+        button { font-family: inherit; cursor: pointer; }
+
+        /* --- 2. HERO SECTION (Textured) --- */
+        .hero {
+            background: var(--gradient-main);
+            /* Adding a subtle pattern overlay for texture */
+            background-image: 
+                linear-gradient(135deg, rgba(0, 184, 148, 0.95) 0%, rgba(9, 132, 227, 0.95) 100%),
+                url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+            padding: 100px 20px 120px;
+            text-align: center;
+            color: white;
+            border-radius: 0 0 40px 40px;
+            margin-bottom: -70px; /* Overlap effect */
+            position: relative;
+            z-index: 1;
+            box-shadow: 0 10px 30px rgba(9, 132, 227, 0.2);
+        }
+        .hero h1 { font-size: 2.8rem; font-weight: 900; margin-bottom: 15px; letter-spacing: -1px; }
+        .hero p { font-size: 1.1rem; opacity: 0.95; font-weight: 300; max-width: 600px; margin: 0 auto; }
+
+        /* --- 3. LAYOUT --- */
+        .container {
+            max-width: 1280px;
+            margin: 0 auto;
+            padding: 0 25px;
+            display: grid;
+            grid-template-columns: 280px 1fr;
+            gap: 35px;
+            position: relative;
+            z-index: 2;
+        }
+
+        /* --- 4. SIDEBAR (Modern & Clean) --- */
+        .sidebar {
+            background: var(--bg-white);
+            border-radius: var(--radius-card);
+            padding: 25px;
+            height: fit-content;
+            position: sticky;
+            top: 25px;
+            border: 1px solid var(--border-color);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .filter-group { margin-bottom: 25px; padding-bottom: 20px; border-bottom: 1px solid var(--border-color); }
+        .filter-group:last-child { border: none; margin-bottom: 0; padding-bottom: 0; }
+        
+        .filter-title { 
+            font-weight: 800; 
+            margin-bottom: 15px; 
+            display: flex; 
+            justify-content: space-between;
+            font-size: 0.95rem; 
+            color: var(--text-dark); 
+        }
+
+        /* Custom Checkbox Styling */
+        .checkbox-label {
+            display: flex;
+            align-items: center;
+            margin-bottom: 12px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            color: var(--text-grey);
+            transition: 0.2s;
+            padding: 4px 0;
+        }
+        .checkbox-label:hover { color: var(--primary); }
+        
+        /* Hide default input */
+        .checkbox-label input { display: none; }
+        
+        /* Custom box */
+        .checkmark {
+            width: 20px; height: 20px;
+            border: 2px solid #dfe6e9;
+            border-radius: 6px;
+            margin-left: 12px;
+            position: relative;
+            transition: 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        /* Checked state */
+        .checkbox-label input:checked + .checkmark {
+            background-color: var(--primary);
+            border-color: var(--primary);
+        }
+        .checkbox-label input:checked + .checkmark::after {
+            content: '✔'; font-size: 12px; color: white;
+        }
+        /* Radio variant */
+        .radio-mark { border-radius: 50%; }
+
+        /* --- 5. TOOLBAR --- */
+        .toolbar {
+            background: var(--bg-white);
+            padding: 15px 20px;
+            border-radius: var(--radius-btn);
+            border: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+        .result-count { font-size: 0.9rem; color: var(--text-grey); font-weight: 500; }
+        .sort-select {
+            border: none;
+            background: #f1f2f6;
+            padding: 8px 15px;
+            border-radius: 8px;
+            color: var(--text-dark);
+            font-weight: 500;
+            cursor: pointer;
+            font-family: inherit;
+        }
+
+        /* --- 6. OFFERS GRID --- */
+        .offers-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(270px, 1fr));
+            gap: 30px;
+        }
+
+        /* --- 7. PRO CARD DESIGN --- */
+        .offer-card {
+            background: var(--bg-white);
+            border-radius: var(--radius-card);
+            border: 1px solid var(--border-color);
+            overflow: hidden;
+            transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+
+        .offer-card:hover {
+            transform: translateY(-10px);
+            box-shadow: var(--shadow-hover);
+            border-color: transparent;
+        }
+
+        /* Image Area */
+        .card-header {
+            position: relative;
+            height: 240px;
+            background: #f8f9fa;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 30px;
+            overflow: hidden;
+        }
+        .product-img { 
+            max-width: 100%; max-height: 100%; 
+            object-fit: contain; 
+            mix-blend-mode: multiply; 
+            transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94); 
+        }
+        .offer-card:hover .product-img { transform: scale(1.08); }
+
+        /* Badges */
+        .badge-discount {
+            position: absolute; top: 15px; right: 15px;
+            background: var(--accent-red); color: white;
+            font-weight: 800; font-size: 0.85rem;
+            padding: 4px 12px; border-radius: 50px;
+            box-shadow: 0 4px 10px rgba(255, 71, 87, 0.3);
+            z-index: 2;
+        }
+        
+        .badge-timer {
+            position: absolute; bottom: 15px; left: 50%; transform: translateX(-50%);
+            background: rgba(255, 255, 255, 0.95);
+            color: var(--text-dark);
+            font-size: 0.75rem; font-weight: 700;
+            padding: 6px 12px; border-radius: 50px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+            white-space: nowrap;
+            display: flex; gap: 5px; align-items: center;
+            opacity: 0; transition: 0.3s; transform: translateX(-50%) translateY(10px);
+        }
+        /* Show timer on hover */
+        .offer-card:hover .badge-timer { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+        /* Body */
+        .card-body { padding: 20px; display: flex; flex-direction: column; flex-grow: 1; }
+
+        /* Seller */
+        .seller-row {
+            display: flex; align-items: center; gap: 10px;
+            margin-bottom: 12px;
+        }
+        .seller-avatar { width: 24px; height: 24px; border-radius: 50%; object-fit: cover; border: 1px solid #eee; }
+        .seller-name { font-size: 0.8rem; color: var(--text-grey); font-weight: 500; }
+
+        .card-title {
+            font-size: 1rem; font-weight: 700; margin-bottom: 15px;
+            line-height: 1.6; height: 52px; overflow: hidden;
+            color: var(--text-dark);
+            transition: 0.2s;
+        }
+        .offer-card:hover .card-title { color: var(--primary); }
+
+        /* Price */
+        .price-section { margin-top: auto; }
+        .old-price { text-decoration: line-through; color: #b2bec3; font-size: 0.9rem; display: block;}
+        .new-price { font-size: 1.3rem; font-weight: 900; color: var(--text-dark); }
+        .currency { font-size: 0.7rem; font-weight: 400; color: var(--text-grey); margin-right: 4px; }
+
+        /* Button */
+        .btn-offer {
+            margin-top: 15px; width: 100%;
+            padding: 12px;
+            border-radius: var(--radius-btn);
+            border: none;
+            background: linear-gradient(90deg, #00b894, #00cec9);
+            color: white;
+            font-weight: 700;
+            box-shadow: 0 4px 15px rgba(0, 184, 148, 0.3);
+            transition: 0.3s;
+            display: flex; align-items: center; justify-content: center; gap: 8px;
+        }
+        .btn-offer:hover {
+            background: linear-gradient(90deg, #00a383, #00b5b0);
+            transform: scale(1.02);
+            box-shadow: 0 6px 20px rgba(0, 184, 148, 0.4);
+        }
+
+        /* --- 8. RESPONSIVE --- */
+        .mobile-filter-toggle { display: none; }
+
+        @media (max-width: 900px) {
+            .container { grid-template-columns: 1fr; gap: 20px; }
+            
+            .sidebar { 
+                position: fixed; bottom: -100%; left: 0; right: 0; top: auto;
+                z-index: 1000; height: 70vh; 
+                border-radius: 24px 24px 0 0;
+                transition: 0.4s cubic-bezier(0.19, 1, 0.22, 1); 
+                box-shadow: 0 -10px 40px rgba(0,0,0,0.2);
+                overflow-y: auto;
+                padding-bottom: 50px;
+            }
+            .sidebar.active { bottom: 0; }
+
+            .mobile-filter-toggle {
+                display: flex; position: fixed; bottom: 30px; left: 50%;
+                transform: translateX(-50%);
+                background: var(--text-dark); color: white;
+                padding: 14px 28px; border-radius: 50px;
+                box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+                font-weight: bold; z-index: 999; align-items: center; gap: 8px;
+                cursor: pointer;
+                font-size: 0.9rem;
+                backdrop-filter: blur(10px);
+            }
+
+            .hero h1 { font-size: 2rem; }
+            .hero { border-radius: 0 0 30px 30px; padding: 60px 20px 90px; }
+        }
+    </style>
+</head>
+<body>
+
+    <header class="hero">
+        <h1>ویترینِ پیشنهادهای طلایی</h1>
+        <p>شکار بهترین تخفیف‌های لحظه‌ای از معتبرترین فروشگاه‌های شهر</p>
+    </header>
+
+    <div class="container">
+        
+        <aside class="sidebar" id="filterSidebar">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;" class="mobile-only-header">
+                <h3 class="filter-title" style="margin:0; font-size:1.2rem;">فیلترها</h3>
+                <button onclick="toggleFilters()" style="background:none; border:none; font-size:1.5rem; padding:10px;">&times;</button>
+            </div>
+
+            <div class="filter-group">
+                <span class="filter-title">دسته‌بندی‌ها</span>
+                <label class="checkbox-label">
+                    <input type="checkbox" checked>
+                    <span class="checkmark"></span>
+                    کالای دیجیتال
+                </label>
+                <label class="checkbox-label">
+                    <input type="checkbox">
+                    <span class="checkmark"></span>
+                    مد و پوشاک
+                </label>
+                <label class="checkbox-label">
+                    <input type="checkbox">
+                    <span class="checkmark"></span>
+                    زیبایی و سلامت
+                </label>
+                <label class="checkbox-label">
+                    <input type="checkbox">
+                    <span class="checkmark"></span>
+                    خانه و آشپزخانه
+                </label>
+            </div>
+
+            <div class="filter-group">
+                <span class="filter-title">میزان تخفیف</span>
+                <label class="checkbox-label">
+                    <input type="radio" name="disc">
+                    <span class="checkmark radio-mark"></span>
+                    همه تخفیف‌ها
+                </label>
+                <label class="checkbox-label">
+                    <input type="radio" name="disc">
+                    <span class="checkmark radio-mark"></span>
+                    بیش از ۲۰٪
+                </label>
+                <label class="checkbox-label">
+                    <input type="radio" name="disc" checked>
+                    <span class="checkmark radio-mark" style="border-color:var(--accent-red); background: #fff0f0;"></span>
+                    <span style="color:var(--accent-red); font-weight:bold;">پیشنهادهای داغ 🔥</span>
+                </label>
+            </div>
+
+            <div class="filter-group" style="border:none;">
+                <label class="checkbox-label" style="justify-content: space-between; width:100%;">
+                    <span>فقط کالاهای موجود</span>
+                    <div style="position:relative; width:40px; height:20px; background:#ddd; border-radius:20px;">
+                        <div style="position:absolute; left:2px; top:2px; width:16px; height:16px; background:white; border-radius:50%; box-shadow:0 2px 5px rgba(0,0,0,0.2);"></div>
+                    </div>
+                </label>
+            </div>
+        </aside>
+
+        <main>
+            <div class="toolbar">
+                <span class="result-count">نمایش ۱۴۸ پیشنهاد</span>
+                <select class="sort-select">
+                    <option>بیشترین تخفیف</option>
+                    <option>جدیدترین</option>
+                    <option>ارزان‌ترین</option>
+                </select>
+            </div>
+
+            <div class="offers-grid">
+
+                <article class="offer-card">
+                    <div class="card-header">
+                        <div class="badge-discount">٪۳۵</div>
+                        <div class="badge-timer">
+                            <span>۰۴:۱۲:۰۰</span> 
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                        </div>
+                        <img src="https://via.placeholder.com/400x300?text=Sony+Headphones" class="product-img" alt="Product">
+                    </div>
+                    <div class="card-body">
+                        <div class="seller-row">
+                            <img src="https://via.placeholder.com/30?text=S" class="seller-avatar" alt="Seller">
+                            <span class="seller-name">دیجیتال سنتر</span>
+                        </div>
+                        <h3 class="card-title">هدفون بی سیم سونی مدل WH-1000XM5 نویز کنسلینگ</h3>
+                        <div class="price-section">
+                            <span class="old-price">۱۴,۵۰۰,۰۰۰</span>
+                            <span class="new-price">۹,۴۵۰,۰۰۰ <span class="currency">تومان</span></span>
+                        </div>
+                        <button class="btn-offer">مشاهده و خرید</button>
+                    </div>
+                </article>
+
+                <article class="offer-card">
+                    <div class="card-header">
+                        <div class="badge-discount" style="background:#2d3436;">٪۱۵</div>
+                        <img src="https://via.placeholder.com/400x300?text=Apple+Watch" class="product-img" alt="Product">
+                    </div>
+                    <div class="card-body">
+                        <div class="seller-row">
+                            <img src="https://via.placeholder.com/30?text=G" class="seller-avatar" alt="Seller">
+                            <span class="seller-name">گالری زمان</span>
+                        </div>
+                        <h3 class="card-title">ساعت هوشمند اپل واچ سری ۹ آلومینیومی</h3>
+                        <div class="price-section">
+                            <span class="old-price">۲۲,۰۰۰,۰۰۰</span>
+                            <span class="new-price">۱۸,۷۰۰,۰۰۰ <span class="currency">تومان</span></span>
+                        </div>
+                        <button class="btn-offer">مشاهده و خرید</button>
+                    </div>
+                </article>
+
+                <article class="offer-card">
+                    <div class="card-header">
+                        <div class="badge-discount">٪۵۰</div>
+                        <div class="badge-timer">🔥 فروش ویژه</div>
+                        <img src="https://via.placeholder.com/400x300?text=Nike+Shoes" class="product-img" alt="Product">
+                    </div>
+                    <div class="card-body">
+                        <div class="seller-row">
+                            <img src="https://via.placeholder.com/30?text=N" class="seller-avatar" alt="Seller">
+                            <span class="seller-name">کفش ملی</span>
+                        </div>
+                        <h3 class="card-title">کفش پیاده‌روی مردانه نایک مدل Zoom Fly 5</h3>
+                        <div class="price-section">
+                            <span class="old-price">۸,۰۰۰,۰۰۰</span>
+                            <span class="new-price">۴,۰۰۰,۰۰۰ <span class="currency">تومان</span></span>
+                        </div>
+                        <button class="btn-offer">مشاهده و خرید</button>
+                    </div>
+                </article>
+
+                <article class="offer-card">
+                    <div class="card-header">
+                        <div class="badge-discount">٪۲۵</div>
+                        <img src="https://via.placeholder.com/400x300?text=Asus+Laptop" class="product-img" alt="Product">
+                    </div>
+                    <div class="card-body">
+                        <div class="seller-row">
+                            <img src="https://via.placeholder.com/30?text=A" class="seller-avatar" alt="Seller">
+                            <span class="seller-name">آریا رایانه</span>
+                        </div>
+                        <h3 class="card-title">لپ تاپ 15.6 اینچی ایسوس مدل TUF Gaming F15</h3>
+                        <div class="price-section">
+                            <span class="old-price">۴۸,۰۰۰,۰۰۰</span>
+                            <span class="new-price">۳۶,۰۰۰,۰۰۰ <span class="currency">تومان</span></span>
+                        </div>
+                        <button class="btn-offer">مشاهده و خرید</button>
+                    </div>
+                </article>
+
+            </div>
+        </main>
+    </div>
+
+    <div class="mobile-filter-toggle" onclick="toggleFilters()">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="21" x2="4" y2="14"></line><line x1="4" y1="10" x2="4" y2="3"></line><line x1="12" y1="21" x2="12" y2="12"></line><line x1="12" y1="8" x2="12" y2="3"></line><line x1="20" y1="21" x2="20" y2="16"></line><line x1="20" y1="12" x2="20" y2="3"></line><line x1="1" y1="14" x2="7" y2="14"></line><line x1="9" y1="8" x2="15" y2="8"></line><line x1="17" y1="16" x2="23" y2="16"></line></svg>
+        فیلترها
+    </div>
+
+    <script>
+        function toggleFilters() {
+            const sidebar = document.getElementById('filterSidebar');
+            sidebar.classList.toggle('active');
+        }
+    </script>
+
+</body>
+</html>

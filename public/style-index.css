@@ -3273,3 +3273,109 @@ body.hide-mobile-nav .mobile-bottom-nav {
   outline-offset: 2px;
 }
 
+
+/* =========================================
+   SPECIAL OFFERS ANIMATION (Added)
+   ========================================= */
+
+/* 1. Breathing Background Gradient */
+#special-offers-container-fixed {
+  background-size: 200% 200%;
+  animation: gradientBreath 8s ease infinite;
+  transition: transform 0.5s ease;
+}
+
+@keyframes gradientBreath {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+/* 2. Floating Background Blobs */
+#special-offers-container-fixed .absolute.rounded-full {
+  animation: floatBlobs 10s ease-in-out infinite;
+}
+
+@keyframes floatBlobs {
+  0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 0.5; }
+  50% { transform: translate(-40%, -60%) scale(1.2); opacity: 0.8; }
+}
+
+/* 3. Setup Elements for Scroll Animation (Hidden Initially) */
+/* Targets: Icon, Title, Paragraph, Button Wrapper */
+#special-offers-container-fixed .flex-1 > div,
+#special-offers-container-fixed .flex-1 > h3,
+#special-offers-container-fixed .flex-1 > p {
+  opacity: 0;
+  transform: translateY(30px);
+  transition: all 0.8s cubic-bezier(0.22, 1, 0.36, 1);
+  will-change: opacity, transform;
+}
+
+/* Target: The Right Side Box */
+#brand-shelf-slider-fixed {
+  opacity: 0;
+  transform: translateY(40px) scale(0.95);
+  transition: all 0.9s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* 4. The Trigger Class (Added via JS) */
+/* When class 'start-anim' is added, everything slides in */
+
+/* Icon enters first */
+#special-offers-container-fixed.start-anim .flex-1 > div:first-child {
+  opacity: 1;
+  transform: translateY(0);
+  transition-delay: 0.1s;
+}
+
+/* Title enters second */
+#special-offers-container-fixed.start-anim .flex-1 > h3 {
+  opacity: 1;
+  transform: translateY(0);
+  transition-delay: 0.2s;
+}
+
+/* Text enters third */
+#special-offers-container-fixed.start-anim .flex-1 > p {
+  opacity: 1;
+  transform: translateY(0);
+  transition-delay: 0.3s;
+}
+
+/* Badge enters fourth */
+#special-offers-container-fixed.start-anim .flex-1 > div:last-child {
+  opacity: 1;
+  transform: translateY(0);
+  transition-delay: 0.4s;
+}
+
+/* Right Box enters last */
+#special-offers-container-fixed.start-anim #brand-shelf-slider-fixed {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+  transition-delay: 0.5s;
+}
+
+
+/* ============================================================
+   GIFT SHAKE ANIMATION (Updated: Faster Interval)
+   ============================================================ */
+
+@keyframes giftShake {
+  0% { transform: rotate(0deg); }
+  4% { transform: rotate(-12deg) translateX(-2px); }
+  8% { transform: rotate(12deg) translateX(2px); }
+  12% { transform: rotate(-12deg) translateX(-2px); }
+  16% { transform: rotate(12deg) translateX(2px); }
+  20% { transform: rotate(-12deg) translateX(-2px); }
+  24% { transform: rotate(12deg) translateX(2px); }
+  28% { transform: rotate(0deg); }
+  100% { transform: rotate(0deg); } /* Shorter pause before next loop */
+}
+
+.animate-gift-shake {
+  /* Duration reduced from 4s to 2.5s for more frequent action */
+  animation: giftShake 2.5s ease-in-out infinite;
+  transform-origin: bottom center;
+}

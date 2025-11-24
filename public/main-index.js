@@ -3463,3 +3463,27 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 });
+
+
+// ============================================================
+// ANIMATION TRIGGER (Add to bottom of main-index.js)
+// ============================================================
+document.addEventListener("DOMContentLoaded", function() {
+  const target = document.getElementById("special-offers-container-fixed");
+  
+  // Only run if the element exists (prevent errors)
+  if (target) {
+    const observer = new IntersectionObserver((entries, obs) => {
+      entries.forEach(entry => {
+        // If 20% of the element is visible in viewport
+        if (entry.isIntersecting) {
+          entry.target.classList.add("start-anim");
+          // Stop watching after it animates once (performance)
+          obs.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.2 });
+
+    observer.observe(target);
+  }
+});
