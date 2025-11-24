@@ -6337,6 +6337,76 @@ document.querySelectorAll('.seller-type-btn').forEach(btn => {
 
 let sellerSearchQuery = '';  // متغیر برای ذخیره کوئری جستجو
 
+function getSellerCategoryStats(list = []) {
+  const statsMap = new Map();
+
+  list.forEach((shop) => {
+    const primaryCategory = (shop.serviceCategoryName || '').trim();
+    const fallbackCategory = Array.isArray(shop.serviceSubcategories) && shop.serviceSubcategories.length
+      ? String(shop.serviceSubcategories[0])
+      : '';
+    const label = primaryCategory || fallbackCategory || 'بدون دسته';
+    const key = label.toLowerCase();
+    const existing = statsMap.get(key) || { label, count: 0, serviceCount: 0 };
+    existing.count += 1;
+    if (shop.isServiceSeller) {
+      existing.serviceCount += 1;
+    }
+    statsMap.set(key, existing);
+  });
+
+  const stats = Array.from(statsMap.values()).sort((a, b) => {
+    if (b.count !== a.count) return b.count - a.count;
+    return a.label.localeCompare(b.label, 'fa', { sensitivity: 'base' });
+  });
+
+  return { total: list.length, stats };
+}
+
+function renderSellerCategorySummary() {
+  const grid = document.getElementById('sellerCategorySummary');
+  const totalEl = document.getElementById('sellerCategorySummaryTotal');
+  if (!grid || !totalEl) return;
+
+  totalEl.textContent = formatNumber(shopsList.length);
+
+  if (!shopsList.length) {
+    grid.innerHTML = '<p class="seller-category-summary__empty">هیچ فروشنده‌ای ثبت نشده است.</p>';
+    return;
+  }
+
+  const { total, stats } = getSellerCategoryStats(shopsList);
+  if (!stats.length) {
+    grid.innerHTML = '<p class="seller-category-summary__empty">اطلاعات دسته‌بندی برای فروشنده‌ها ثبت نشده است.</p>';
+    return;
+  }
+
+  grid.innerHTML = '';
+
+  stats.forEach((item) => {
+    const percent = total > 0 ? Math.round((item.count / total) * 100) : 0;
+    const serviceCount = item.serviceCount || 0;
+    const generalCount = Math.max(item.count - serviceCount, 0);
+    const card = document.createElement('article');
+    card.className = 'seller-category-summary__card';
+    card.innerHTML = `
+      <div class="seller-category-summary__title">
+        <span>${escapeHtml(item.label)}</span>
+        <span class="seller-category-summary__pill muted">${formatNumber(percent)}٪ از کل</span>
+      </div>
+      <div class="seller-category-summary__count">${formatNumber(item.count)} فروشنده</div>
+      <div class="seller-category-summary__meta">
+        ${serviceCount ? `<span class="seller-category-summary__pill"><i class="ri-hand-heart-line"></i>${formatNumber(serviceCount)} خدماتی</span>` : ''}
+        <span class="seller-category-summary__pill muted"><i class="ri-store-3-line"></i>${formatNumber(generalCount)} سایر</span>
+      </div>
+      <div class="seller-category-summary__progress" aria-label="سهم از کل فروشندگان">
+        <span style="width:${Math.max(percent, 6)}%"></span>
+      </div>
+    `;
+    grid.appendChild(card);
+  });
+}
+
 // جستجو فروشگاه‌ها
 document.getElementById('sellerSearch').addEventListener('input', e => {
   sellerSearchQuery = e.target.value.trim().toLowerCase();
@@ -6346,6 +6416,8 @@ document.getElementById('sellerSearch').addEventListener('input', e => {
 function renderSellers() {
   const tbody = document.querySelector('#sellersTable tbody');
   tbody.innerHTML = '';
+
+  renderSellerCategorySummary();
 
   if (!shopsList.length) {
     tbody.innerHTML = `<tr><td colspan="9" style="color:#888;text-align:center">هیچ فروشگاهی ثبت نشده است.</td></tr>`;
