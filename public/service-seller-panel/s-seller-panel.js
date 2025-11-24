@@ -3381,6 +3381,8 @@ destroy() {
       const mine = data?.mine || {};
       const metrics = mine.metrics || {};
       const total = Number(data?.total) || 0;
+      const aggregateScore = this.calculateAggregateScore(metrics);
+      const updatedAt = this.formatDateTime(data?.updatedAt);
       const categoryLabel = data?.category || 'حوزه شما';
 
       this.setText('rank-category', categoryLabel);
@@ -3389,6 +3391,15 @@ destroy() {
       this.setText('ucw30', this.formatNumber(metrics.uniqueCustomers ?? metrics.completedBookings ?? 0));
       this.setText('bookingsTotal', this.formatNumber(metrics.totalBookings ?? 0));
       this.setText('rating30', this.formatNumber(metrics.ratingAverage ?? 0, { fractionDigits: 1, fallback: '۰٫۰' }));
+      this.setText('rank-cta-current', mine.rank ? this.formatNumber(mine.rank) : '—');
+      this.setText('rank-cta-total', this.formatNumber(total));
+      this.setText('rank-cta-rating', this.formatNumber(metrics.ratingAverage ?? 0, { fractionDigits: 1, fallback: '۰٫۰' }));
+      this.setText('rank-cta-score', this.formatNumber(aggregateScore, { fractionDigits: 1, fallback: '۰٫۰' }));
+
+      const ctaUpdated = document.getElementById('rank-cta-updated');
+      if (ctaUpdated) {
+        ctaUpdated.textContent = updatedAt ? `آخرین بروزرسانی: ${updatedAt}` : 'به‌روزرسانی به‌زودی';
+      }
 
       const modalCurrent = document.getElementById('rank-modal-current');
       if (modalCurrent) {
