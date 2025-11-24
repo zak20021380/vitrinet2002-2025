@@ -64,6 +64,7 @@
         <a href="#" data-section="daily-visits"><i class="ri-eye-line"></i> آمار روزانه بازدید</a>
         <a href="#" data-section="users"><i class="ri-user-3-line"></i> کاربران <span class="count" id="count-users">0</span></a>
         <a href="#" data-section="sellers"><i class="ri-store-2-line"></i> فروشنده‌ها <span class="count" id="count-sellers">0</span></a>
+        <a href="#" data-section="service-shops"><i class="ri-hand-heart-line"></i> مدیریت مغازه‌های خدماتی <span class="count" id="count-service-shops">0</span></a>
         <a href="#" data-section="service-plan-management"><i class="ri-hand-heart-line"></i> مدیریت پلن‌های خدماتی <span class="count" id="count-service-plans">0</span></a>
         <a href="#" data-section="categories"><i class="ri-folders-line"></i> مدیریت دسته‌بندی‌ها</a>
         <a href="#" data-section="products"><i class="ri-box-3-line"></i> محصولات <span class="count" id="count-products">0</span></a>
@@ -517,6 +518,119 @@
         </div>
       </section>
     </div>
+  </div>
+
+  <!-- مدیریت مغازه‌های خدماتی -->
+  <div class="section-panel section-panel--service-shops" id="service-shops-panel" style="display:none;">
+    <div class="content-header">
+      مدیریت مغازه‌های خدماتی
+      <span class="header-count" id="header-service-shops-count"></span>
+    </div>
+
+    <div class="service-shops-summary service-shops-summary--main" id="serviceShopsSummary">
+      <div class="service-summary-card" data-status-filter="all">
+        <div class="label">کل مغازه‌ها</div>
+        <div class="value" id="serviceShopsTotal">۰</div>
+        <div class="hint">مجموع ثبت‌شده در سامانه</div>
+      </div>
+      <div class="service-summary-card" data-status-filter="approved">
+        <div class="label">فعال</div>
+        <div class="value" id="serviceShopsActive">۰</div>
+        <div class="hint">نمایش در حال انجام</div>
+      </div>
+      <div class="service-summary-card" data-status-filter="pending">
+        <div class="label">در انتظار تایید</div>
+        <div class="value" id="serviceShopsPending">۰</div>
+        <div class="hint">نیازمند بررسی</div>
+      </div>
+      <div class="service-summary-card" data-status-filter="suspended">
+        <div class="label">معلق</div>
+        <div class="value" id="serviceShopsSuspended">۰</div>
+        <div class="hint">غیرفعال موقت</div>
+      </div>
+    </div>
+
+    <div class="service-shops-summary service-shops-summary--secondary">
+      <div class="service-summary-card" data-plan-filter="premium">
+        <div class="label">پلن پولی فعال</div>
+        <div class="value" id="serviceShopsPremium">۰</div>
+        <div class="hint">دارای اشتراک پریمیوم</div>
+      </div>
+      <div class="service-summary-card" data-plan-filter="complimentary">
+        <div class="label">پلن رایگان فعال</div>
+        <div class="value" id="serviceShopsComplimentary">۰</div>
+        <div class="hint">دریافت هدیه از طرف ادمین</div>
+      </div>
+      <div class="service-summary-card" data-plan-filter="expiring">
+        <div class="label">رو به پایان</div>
+        <div class="value" id="serviceShopsComplimentarySoon">۰</div>
+        <div class="hint">کمتر از ۷ روز آینده</div>
+      </div>
+      <div class="service-summary-card" data-plan-filter="expired">
+        <div class="label">منقضی شده</div>
+        <div class="value" id="serviceShopsComplimentaryExpired">۰</div>
+        <div class="hint">نیازمند تمدید</div>
+      </div>
+    </div>
+
+    <div class="service-shops-plan-card" id="serviceShopsPlanCard">
+      <div class="service-shops-plan-card__header">
+        <div>
+          <h3>اعطای پلن رایگان</h3>
+          <p>پلن را انتخاب کنید تا روی مغازه‌های انتخابی اعمال شود.</p>
+        </div>
+        <span class="service-shops-plan-card__chip">هدیه ادمین</span>
+      </div>
+      <div class="service-shops-plan-card__text">
+        <p>پلن انتخاب‌شده با قیمت صفر و از امروز برای مغازه اعمال می‌شود. در صورت نیاز می‌توانید مدت را دستی وارد کنید.</p>
+      </div>
+      <div class="service-shops-plan-card__list">
+        <label for="serviceShopPlanSelect">انتخاب پلن</label>
+        <select id="serviceShopPlanSelect">
+          <option value="">در حال بارگذاری پلن‌ها...</option>
+        </select>
+        <label for="serviceShopPlanDuration">مدت (روز)</label>
+        <input type="number" id="serviceShopPlanDuration" placeholder="پیش‌فرض مدت پلن" min="1" />
+      </div>
+      <div class="service-shops-plan-card__actions">
+        <button class="service-shops-plan-card__action" id="refreshServiceShops">بروزرسانی لیست</button>
+        <button class="service-shops-plan-card__action service-shops-plan-card__action--secondary" id="refreshServiceShopsOverview">بازخوانی آمار</button>
+      </div>
+      <p class="service-shops-plan-card__footnote">
+        <i class="ri-information-line"></i>
+        برای اعمال، روی دکمه «اعطای پلن رایگان» در جدول کلیک کنید.
+      </p>
+    </div>
+
+    <div class="service-shops-toolbar">
+      <div class="service-shops-search">
+        <i class="ri-search-line"></i>
+        <input type="search" id="serviceShopsSearch" placeholder="جستجو نام مغازه، شهر یا شماره" aria-label="جستجوی مغازه خدماتی" />
+      </div>
+      <div class="service-shops-quick" id="serviceShopsQuickFilters">
+        <button class="service-quick-filter active" data-filter="all">همه</button>
+        <button class="service-quick-filter" data-filter="approved">تایید شده</button>
+        <button class="service-quick-filter" data-filter="pending">در انتظار</button>
+        <button class="service-quick-filter" data-filter="complimentary">دارای پلن رایگان</button>
+      </div>
+    </div>
+
+    <div class="table-wrap">
+      <table id="serviceShopsTable">
+        <thead>
+          <tr>
+            <th>نام مغازه</th>
+            <th>شهر</th>
+            <th>وضعیت</th>
+            <th>وضعیت پلن</th>
+            <th>عملیات</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+
+    <div class="service-insights-grid" id="serviceShopsInsights"></div>
   </div>
 
   <!-- ۴) محصولات -->

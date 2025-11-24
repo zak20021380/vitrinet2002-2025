@@ -1353,6 +1353,13 @@ let usersPerDay = [];
 let sellersPerDay = [];
 let productsPerDay = [];
 let serviceShopsPerDay = [];
+let serviceShopsOverview = null;
+let serviceShopsList = [];
+let serviceShopsLoading = false;
+let serviceShopsOverviewLoading = false;
+let serviceShopsFilter = 'all';
+let serviceShopsPlanFilter = '';
+let serviceShopsSearch = '';
 
 let usersList = [];
 let shopsList = [];
@@ -3687,6 +3694,287 @@ async function fetchProducts () {
   }
 }
 
+function normaliseServiceShopRecord(raw) {
+  if (!raw || typeof raw !== 'object') return null;
+
+  const id = toIdString(raw._id || raw.id || raw.shopId || raw.legacySellerId || raw.shopUrl || '');
+  const name = raw.name || raw.storename || raw.shopName || raw.ownerName || 'بدون نام';
+  const city = raw.city || raw.addressCity || raw.shopCity || '';
+  const status = (raw.status || raw.adminModeration?.status || '').toLowerCase() || 'draft';
+  const ownerPhone = raw.ownerPhone || raw.phone || raw.mobile || '';
+  const shopUrl = raw.shopUrl || raw.shopurl || raw.slug || '';
+  const now = Date.now();
+
+  const premiumActive = !!raw.isPremium && (!raw.premiumUntil || new Date(raw.premiumUntil).getTime() > now);
+  const complimentaryPlan = raw.complimentaryPlan || {};
+  const complimentaryEnd = complimentaryPlan.endDate ? new Date(complimentaryPlan.endDate) : null;
+  const complimentaryStart = complimentaryPlan.startDate ? new Date(complimentaryPlan.startDate) : null;
+  const complimentaryActive = !!complimentaryPlan.isActive
+    && (!complimentaryStart || complimentaryStart.getTime() <= now)
+    && (!complimentaryEnd || complimentaryEnd.getTime() >= now);
+
+  return {
+    id,
+    name,
+    city,
+    status,
+    ownerPhone,
+    shopUrl,
+    updatedAt: raw.updatedAt || raw.createdAt || null,
+    isPremium: premiumActive,
+    complimentaryActive,
+    complimentaryEnd,
+    complimentaryStart,
+    complimentaryNotes: complimentaryPlan.notes || '',
+    planTitle: complimentaryPlan.title || complimentaryPlan.name || '',
+    meta: raw
+  };
+}
+
+async function fetchServiceShopsOverview(force = false) {
+  if (serviceShopsOverviewLoading && !force) return serviceShopsOverview;
+  serviceShopsOverviewLoading = true;
+  try {
+    const res = await fetch(`${ADMIN_API_BASE}/service-shops/overview`, { credentials: 'include' });
+    if (!res.ok) {
+      console.error('service-shops overview failed', res.status, await res.text());
+      return serviceShopsOverview;
+    }
+    const data = await res.json();
+    serviceShopsOverview = data || null;
+    renderServiceShopsOverview();
+    updateSidebarCounts();
+    updateHeaderCounts();
+    return serviceShopsOverview;
+  } catch (err) {
+    console.error('fetchServiceShopsOverview EXCEPTION', err);
+    return serviceShopsOverview;
+  } finally {
+    serviceShopsOverviewLoading = false;
+  }
+}
+
+async function fetchServiceShopsList({ force = false } = {}) {
+  if (serviceShopsLoading && !force) return serviceShopsList;
+  serviceShopsLoading = true;
+  const tableBody = document.querySelector('#serviceShopsTable tbody');
+  if (tableBody) {
+    tableBody.innerHTML = `<tr><td colspan="5" style="text-align:center;color:#6b7280;">در حال بارگذاری...</td></tr>`;
+  }
+
+  const url = new URL(`${ADMIN_API_BASE}/service-shops`);
+  url.searchParams.set('limit', '100');
+  if (serviceShopsSearch) url.searchParams.set('q', serviceShopsSearch);
+  if (serviceShopsFilter && serviceShopsFilter !== 'all') url.searchParams.set('status', serviceShopsFilter);
+  if (serviceShopsPlanFilter) url.searchParams.set('planStatus', serviceShopsPlanFilter);
+
+  try {
+    const res = await fetch(url.toString(), { credentials: 'include' });
+    if (!res.ok) {
+      console.error('service-shops list failed', res.status, await res.text());
+      serviceShopsList = [];
+      renderServiceShopsTable();
+      return [];
+    }
+    const payload = await res.json();
+    const items = Array.isArray(payload?.items)
+      ? payload.items
+      : Array.isArray(payload?.data?.items)
+        ? payload.data.items
+        : Array.isArray(payload?.shops)
+          ? payload.shops
+          : Array.isArray(payload)
+            ? payload
+            : [];
+
+    serviceShopsList = items.map(normaliseServiceShopRecord).filter(Boolean);
+    renderServiceShopsTable();
+    updateSidebarCounts();
+    updateHeaderCounts();
+    return serviceShopsList;
+  } catch (err) {
+    console.error('fetchServiceShopsList EXCEPTION', err);
+    serviceShopsList = [];
+    renderServiceShopsTable();
+    return [];
+  } finally {
+    serviceShopsLoading = false;
+  }
+}
+
+function renderServiceShopsOverview() {
+  const totals = serviceShopsOverview?.totals || {};
+  const statusCounts = serviceShopsOverview?.statusCounts || {};
+
+  const setText = (id, value) => {
+    const el = document.getElementById(id);
+    if (el) el.textContent = formatNumber(value || 0);
+  };
+
+  setText('serviceShopsTotal', totals.total || 0);
+  setText('serviceShopsActive', totals.active || statusCounts.approved || 0);
+  setText('serviceShopsPending', totals.pending || 0);
+  setText('serviceShopsSuspended', totals.suspended || 0);
+  setText('serviceShopsPremium', totals.premiumActive || 0);
+  setText('serviceShopsComplimentary', totals.complimentaryActiveNow || totals.complimentaryActive || 0);
+  setText('serviceShopsComplimentarySoon', totals.complimentaryExpiringSoon || 0);
+  setText('serviceShopsComplimentaryExpired', totals.complimentaryExpired || 0);
+
+  const insights = document.getElementById('serviceShopsInsights');
+  if (insights) {
+    const cities = Array.isArray(serviceShopsOverview?.topCities) ? serviceShopsOverview.topCities : [];
+    const categories = Array.isArray(serviceShopsOverview?.topCategories) ? serviceShopsOverview.topCategories : [];
+    const recent = Array.isArray(serviceShopsOverview?.recent) ? serviceShopsOverview.recent : [];
+    insights.innerHTML = `
+      <div class="service-insight-card">
+        <h4>شهرهای برتر</h4>
+        <ul>
+          ${cities.length ? cities.map(item => `<li><span>${escapeHtml(item?._id || '-')}</span><span>${formatNumber(item?.count || 0)} مغازه</span></li>`).join('') : '<li class="empty">داده‌ای موجود نیست</li>'}
+        </ul>
+      </div>
+      <div class="service-insight-card">
+        <h4>دسته‌های پر تکرار</h4>
+        <ul>
+          ${categories.length ? categories.map(item => `<li><span>${escapeHtml(item?._id || '-')}</span><span>${formatNumber(item?.count || 0)} بار</span></li>`).join('') : '<li class="empty">فعلا اطلاعاتی نیست</li>'}
+        </ul>
+      </div>
+      <div class="service-insight-card">
+        <h4>آخرین بروزرسانی‌ها</h4>
+        <div>
+          ${recent.length ? recent.map(item => {
+            const shop = normaliseServiceShopRecord(item);
+            const date = shop?.updatedAt ? persianDateFormatter.format(new Date(shop.updatedAt)) : '—';
+            return `<div class="service-recent-item"><strong>${escapeHtml(shop?.name || '-')}</strong><span>${escapeHtml(date)}</span></div>`;
+          }).join('') : '<p class="empty">موردی ثبت نشده است.</p>'}
+        </div>
+      </div>
+    `;
+  }
+}
+
+function getServiceShopPlanLabel(shop) {
+  if (shop?.complimentaryActive) {
+    const expires = shop.complimentaryEnd ? `تا ${persianDateFormatter.format(new Date(shop.complimentaryEnd))}` : 'فعال';
+    return `پلن رایگان (${expires})`;
+  }
+  if (shop?.isPremium) return 'پریمیوم فعال';
+  return 'بدون پلن فعال';
+}
+
+function renderServiceShopsTable() {
+  const tbody = document.querySelector('#serviceShopsTable tbody');
+  if (!tbody) return;
+
+  const filtered = serviceShopsList.filter((shop) => {
+    const matchesStatus = serviceShopsFilter === 'all' || shop.status === serviceShopsFilter;
+    const matchesPlan = !serviceShopsPlanFilter
+      || (serviceShopsPlanFilter === 'complimentary' && shop.complimentaryActive)
+      || (serviceShopsPlanFilter === 'premium' && shop.isPremium);
+    const searchText = serviceShopsSearch.trim().toLowerCase();
+    const matchesSearch = !searchText
+      || shop.name.toLowerCase().includes(searchText)
+      || (shop.city || '').toLowerCase().includes(searchText)
+      || (shop.ownerPhone || '').toLowerCase().includes(searchText);
+    return matchesStatus && matchesPlan && matchesSearch;
+  });
+
+  if (!filtered.length) {
+    tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;color:#6b7280;">مغازه‌ای یافت نشد.</td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = filtered.map((shop) => {
+    const statusText = shop.status === 'approved' ? 'تایید شده' : shop.status === 'pending' ? 'در انتظار' : shop.status;
+    const planLabel = getServiceShopPlanLabel(shop);
+    return `
+      <tr>
+        <td class="service-shop-name">${escapeHtml(shop.name)}</td>
+        <td class="service-shop-meta">${escapeHtml(shop.city || '—')}</td>
+        <td class="service-status-cell"><span class="service-status-badge ${escapeHtml(shop.status || '')}">${escapeHtml(statusText || 'نامشخص')}</span></td>
+        <td class="service-status-cell">${escapeHtml(planLabel)}</td>
+        <td class="service-actions-cell">
+          <div class="service-shop-actions">
+            <button class="action-btn" data-action="grant-free" data-id="${escapeHtml(shop.id)}">اعطای پلن رایگان</button>
+            ${shop.shopUrl ? `<a class="action-btn view" target="_blank" rel="noopener" href="/service/${encodeURIComponent(shop.shopUrl)}">مشاهده</a>` : ''}
+          </div>
+        </td>
+      </tr>
+    `;
+  }).join('');
+}
+
+function updateServiceShopPlanSelect() {
+  const select = document.getElementById('serviceShopPlanSelect');
+  if (!select) return;
+  if (!servicePlansList.length) {
+    select.innerHTML = '<option value="">پلنی برای اعطا وجود ندارد</option>';
+    return;
+  }
+  select.innerHTML = '<option value="">انتخاب پلن...</option>' + servicePlansList.map(plan => (
+    `<option value="${escapeHtml(plan.id || plan._id || '')}">${escapeHtml(plan.title || plan.slug || 'پلن بدون نام')}</option>`
+  )).join('');
+}
+
+async function ensureServiceShopsData(force = false) {
+  await loadServicePlans(force);
+  updateServiceShopPlanSelect();
+  await Promise.all([
+    fetchServiceShopsOverview(force),
+    fetchServiceShopsList({ force })
+  ]);
+}
+
+async function grantComplimentaryPlanToShop(shopId, buttonEl) {
+  const shop = serviceShopsList.find(item => toIdString(item.id) === toIdString(shopId));
+  const planSelect = document.getElementById('serviceShopPlanSelect');
+  const durationInput = document.getElementById('serviceShopPlanDuration');
+  const planId = planSelect ? planSelect.value : '';
+  const durationValue = durationInput ? Number(durationInput.value) : null;
+
+  if (!shop) return alert('مغازه یافت نشد.');
+  if (!shop.ownerPhone) return alert('شماره مالک برای این مغازه ثبت نشده است.');
+  if (!planId) return alert('لطفاً یک پلن را انتخاب کنید.');
+
+  const payload = {
+    phone: shop.ownerPhone,
+    planId,
+    customPrice: 0
+  };
+
+  if (Number.isFinite(durationValue) && durationValue > 0) {
+    payload.durationDays = durationValue;
+  }
+
+  const originalText = buttonEl?.textContent;
+  if (buttonEl) {
+    buttonEl.disabled = true;
+    buttonEl.textContent = 'در حال اعمال...';
+  }
+
+  try {
+    const res = await fetch(`${ADMIN_API_BASE}/service-plans/assignments`, {
+      method: 'POST',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+
+    const data = await res.json();
+    if (!res.ok) throw new Error(data?.message || data?.error || 'خطا در اعطای پلن رایگان');
+
+    alert('پلن رایگان با موفقیت اعمال شد.');
+    await ensureServiceShopsData(true);
+  } catch (err) {
+    console.error('grantComplimentaryPlanToShop error', err);
+    alert(err.message || 'اعمال پلن با خطا مواجه شد');
+  } finally {
+    if (buttonEl) {
+      buttonEl.disabled = false;
+      buttonEl.textContent = originalText || 'اعطای پلن رایگان';
+    }
+  }
+}
+
 
 // -------- نمایش کارت‌ها و جداول --------
 function updateDashboardCards() {
@@ -3699,6 +3987,13 @@ function updateSidebarCounts() {
   document.getElementById('count-users').textContent    = formatNumber(usersList.length);
   document.getElementById('count-sellers').textContent  = formatNumber(shopsList.length);
   document.getElementById('count-products').textContent = formatNumber(productsList.length);
+  const serviceShopsCountEl = document.getElementById('count-service-shops');
+  if (serviceShopsCountEl) {
+    const overviewTotal = serviceShopsOverview?.totals?.total;
+    serviceShopsCountEl.textContent = formatNumber(
+      Number.isFinite(overviewTotal) ? overviewTotal : dashboardSummary.totalServiceShops || 0
+    );
+  }
   const servicePlansCountEl = document.getElementById('count-service-plans');
   if (servicePlansCountEl) {
     servicePlansCountEl.textContent = formatNumber(servicePlansList.length || 0);
@@ -3715,6 +4010,12 @@ function updateHeaderCounts() {
   document.getElementById('header-users-count').textContent    = `(${formatNumber(usersList.length)} کاربر)`;
   document.getElementById('header-sellers-count').textContent  = `(${formatNumber(shopsList.length)} فروشگاه)`;
   document.getElementById('header-products-count').textContent = `(${formatNumber(productsList.length)} محصول)`;
+  const serviceShopsHeaderEl = document.getElementById('header-service-shops-count');
+  if (serviceShopsHeaderEl) {
+    const overviewTotal = serviceShopsOverview?.totals?.total;
+    const total = Number.isFinite(overviewTotal) ? overviewTotal : dashboardSummary.totalServiceShops || 0;
+    serviceShopsHeaderEl.textContent = `(${formatNumber(total)} مغازه خدماتی)`;
+  }
   const servicePlanHeaderEl = document.getElementById('header-service-plans-count');
   if (servicePlanHeaderEl) {
     servicePlanHeaderEl.textContent = `(${formatNumber(servicePlansList.length || 0)} پلن)`;
@@ -4851,6 +5152,7 @@ async function loadServicePlans(force = false) {
     servicePlansList = plans;
     servicePlansLoaded = true;
     renderServicePlans();
+    updateServiceShopPlanSelect();
     updateSidebarCounts();
     updateHeaderCounts();
   } catch (err) {
@@ -5060,6 +5362,12 @@ const rewardWinnerPhoneInput = document.getElementById('rewardWinnerPhone');
 const rewardWinnersMessageEl = document.getElementById('rewardWinnersMessage');
 const rewardWinnersListEl = document.getElementById('rewardWinnersList');
 const rewardWinnersEmptyStateEl = document.getElementById('rewardWinnersEmptyState');
+const serviceShopsSearchInput = document.getElementById('serviceShopsSearch');
+const serviceShopsQuickFiltersEl = document.getElementById('serviceShopsQuickFilters');
+const serviceShopsSummaryEl = document.getElementById('serviceShopsSummary');
+const refreshServiceShopsBtn = document.getElementById('refreshServiceShops');
+const refreshServiceShopsOverviewBtn = document.getElementById('refreshServiceShopsOverview');
+const serviceShopsTableEl = document.getElementById('serviceShopsTable');
 
 const DEFAULT_REWARD_CAMPAIGN = {
   title: '',
@@ -5845,6 +6153,56 @@ if (rewardPanelEl) {
   ensureRewardCampaignPanel().catch(err => console.error(err));
 }
 
+if (serviceShopsSearchInput) {
+  serviceShopsSearchInput.addEventListener('input', (event) => {
+    serviceShopsSearch = (event.target.value || '').trim();
+    fetchServiceShopsList();
+  });
+}
+
+if (serviceShopsQuickFiltersEl) {
+  serviceShopsQuickFiltersEl.addEventListener('click', (event) => {
+    const btn = event.target.closest('button[data-filter]');
+    if (!btn) return;
+    serviceShopsQuickFiltersEl.querySelectorAll('button').forEach((el) => el.classList.remove('active'));
+    btn.classList.add('active');
+    const filter = btn.dataset.filter || 'all';
+    serviceShopsFilter = filter;
+    serviceShopsPlanFilter = filter === 'complimentary' ? 'complimentary' : '';
+    fetchServiceShopsList();
+  });
+}
+
+if (serviceShopsSummaryEl) {
+  serviceShopsSummaryEl.addEventListener('click', (event) => {
+    const card = event.target.closest('.service-summary-card');
+    if (!card) return;
+    const statusFilter = card.dataset.statusFilter || 'all';
+    serviceShopsFilter = statusFilter;
+    if (serviceShopsQuickFiltersEl) {
+      serviceShopsQuickFiltersEl.querySelectorAll('button').forEach((el) => {
+        el.classList.toggle('active', el.dataset.filter === statusFilter);
+      });
+    }
+    fetchServiceShopsList();
+  });
+}
+
+refreshServiceShopsBtn?.addEventListener('click', () => {
+  fetchServiceShopsList({ force: true });
+});
+
+refreshServiceShopsOverviewBtn?.addEventListener('click', () => {
+  fetchServiceShopsOverview(true);
+});
+
+serviceShopsTableEl?.addEventListener('click', (event) => {
+  const btn = event.target.closest('button[data-action="grant-free"]');
+  if (!btn) return;
+  const shopId = btn.dataset.id;
+  grantComplimentaryPlanToShop(shopId, btn);
+});
+
 // -------- Nav & Responsive (FIXED) --------
 // -------- Nav & Responsive (FIXED) --------
 const sidebar       = document.getElementById('sidebar');
@@ -5864,6 +6222,7 @@ const panels = {
   rewards: document.getElementById('rewards-panel'),
   users:     document.getElementById('users-panel'),
   sellers:   document.getElementById('sellers-panel'),
+  'service-shops': document.getElementById('service-shops-panel'),
   'service-plan-management': document.getElementById('service-plan-management-panel'),
   categories: document.getElementById('categories-panel'),
   products:  document.getElementById('products-panel'),
@@ -5913,6 +6272,10 @@ menuLinks.forEach(link => {
 
     if (section === 'service-plan-management') {
       await ensureServicePlanManager();
+    }
+
+    if (section === 'service-shops') {
+      await ensureServiceShopsData();
     }
 
     if (section === 'ad-orders') {
