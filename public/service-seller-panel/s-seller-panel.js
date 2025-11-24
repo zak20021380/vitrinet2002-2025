@@ -2948,6 +2948,7 @@ setupEventListeners() {
       reviewsFilter: document.querySelector('#reviews-view .filter-chips'),
       settingsForm: document.getElementById('settings-form'),
       rankCard: document.getElementById('rank-card'),
+      rankCtaBtn: document.getElementById('rank-cta-btn'),
       topViewAllBtn: document.getElementById('top-view-all'),
       topLeaderboardList: document.getElementById('top-leaderboard-list'),
       addCustomerBtn: document.getElementById('add-customer-btn'),
@@ -3170,6 +3171,13 @@ if (elements.viewStoreBtn) {
       element.addEventListener('click', handler);
     }
   });
+
+  if (elements.rankCtaBtn) {
+    elements.rankCtaBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      window.location.hash = '/top';
+    });
+  }
 
   if (elements.bookingHistoryRefresh) {
     elements.bookingHistoryRefresh.addEventListener('click', () => {
