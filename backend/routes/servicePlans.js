@@ -454,10 +454,10 @@ router.get('/assignments', async (req, res) => {
 
 router.post('/assignments', auth('admin'), async (req, res) => {
   try {
-    const { phone, planId, customPrice, durationDays, startDate, notes } = req.body || {};
+    const { phone, planId, serviceShopId, customPrice, durationDays, startDate, notes } = req.body || {};
 
-    if (!phone || !planId) {
-      return res.status(400).json({ message: 'شماره تلفن و پلن انتخابی الزامی است.' });
+    if (!planId || (!phone && !serviceShopId)) {
+      return res.status(400).json({ message: 'شناسه پلن و یکی از شناسه مغازه یا شماره تلفن الزامی است.' });
     }
 
     const plan = await ServicePlan.findById(planId);
@@ -465,38 +465,50 @@ router.post('/assignments', auth('admin'), async (req, res) => {
       return res.status(404).json({ message: 'پلن انتخابی یافت نشد.' });
     }
 
-    const normalizedPhone = normalizePhone(phone);
+    let serviceShop = null;
+    if (serviceShopId) {
+      serviceShop = await ServiceShop.findById(serviceShopId);
+    }
+
+    const phoneToUse = phone || serviceShop?.ownerPhone;
+    if (!phoneToUse) {
+      return res.status(400).json({ message: 'شماره تلفن برای این فروشنده ثبت نشده است.' });
+    }
+
+    const normalizedPhone = normalizePhone(phoneToUse);
     if (!normalizedPhone) {
       return res.status(400).json({ message: 'شماره تلفن معتبر نیست.' });
     }
 
-    const regex = buildDigitInsensitiveRegex(phone, { allowSeparators: true });
-    const phoneCandidates = buildPhoneCandidates(phone);
-    if (normalizedPhone && !phoneCandidates.includes(normalizedPhone)) {
-      phoneCandidates.push(normalizedPhone);
-    }
-    if (normalizedPhone && normalizedPhone.startsWith('0')) {
-      const withoutZero = normalizedPhone.slice(1);
-      if (withoutZero) {
-        phoneCandidates.push(`98${withoutZero}`, `+98${withoutZero}`);
+    if (!serviceShop) {
+      const regex = buildDigitInsensitiveRegex(phoneToUse, { allowSeparators: true });
+      const phoneCandidates = buildPhoneCandidates(phoneToUse);
+      if (normalizedPhone && !phoneCandidates.includes(normalizedPhone)) {
+        phoneCandidates.push(normalizedPhone);
       }
-    }
+      if (normalizedPhone && normalizedPhone.startsWith('0')) {
+        const withoutZero = normalizedPhone.slice(1);
+        if (withoutZero) {
+          phoneCandidates.push(`98${withoutZero}`, `+98${withoutZero}`);
+        }
+      }
 
-    const queryConditions = [];
-    if (phoneCandidates.length) {
-      queryConditions.push({ ownerPhone: { $in: phoneCandidates } });
-    }
-    if (regex) {
-      queryConditions.push({ ownerPhone: { $regex: regex } });
-    }
+      const queryConditions = [];
+      if (phoneCandidates.length) {
+        queryConditions.push({ ownerPhone: { $in: phoneCandidates } });
+      }
+      if (regex) {
+        queryConditions.push({ ownerPhone: { $regex: regex } });
+      }
 
-    const shopQuery = queryConditions.length === 0
-      ? { ownerPhone: normalizedPhone }
-      : queryConditions.length === 1
-        ? queryConditions[0]
-        : { $or: queryConditions };
+      const shopQuery = queryConditions.length === 0
+        ? { ownerPhone: normalizedPhone }
+        : queryConditions.length === 1
+          ? queryConditions[0]
+          : { $or: queryConditions };
 
-    const serviceShop = await ServiceShop.findOne(shopQuery);
+      serviceShop = await ServiceShop.findOne(shopQuery);
+    }
 
     if (!serviceShop) {
       return res.status(404).json({ message: 'فروشنده خدماتی با این شماره یافت نشد.' });
@@ -517,7 +529,7 @@ router.post('/assignments', auth('admin'), async (req, res) => {
         serviceShop: serviceShop._id,
         servicePlan: plan._id,
         assignedBy: req.user?.id || null,
-        assignedPhone: String(phone).trim(),
+        assignedPhone: String(phoneToUse).trim(),
         normalizedPhone,
         basePrice: plan.price,
         customPrice: customPrice != null && customPrice !== '' ? Number(customPrice) : null,

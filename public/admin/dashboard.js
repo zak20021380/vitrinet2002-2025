@@ -3980,6 +3980,7 @@ async function grantComplimentaryPlanToShop(shopId, buttonEl) {
 
   const payload = {
     phone: shop.ownerPhone,
+    serviceShopId: shop.id,
     planId,
     customPrice: 0
   };
