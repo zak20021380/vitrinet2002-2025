@@ -3700,6 +3700,31 @@ function normaliseServiceShopRecord(raw) {
   const id = toIdString(raw._id || raw.id || raw.shopId || raw.legacySellerId || raw.shopUrl || '');
   const name = raw.name || raw.storename || raw.shopName || raw.ownerName || 'بدون نام';
   const city = raw.city || raw.addressCity || raw.shopCity || '';
+  const address = raw.address
+    || raw.shopAddress
+    || raw.addressFull
+    || raw.addressText
+    || raw.location
+    || raw.shopLocation
+    || raw.addressLine
+    || '';
+  const rawSubcategory = raw.serviceSubcategory
+    || raw.subcategory
+    || raw.subCategory
+    || raw.serviceSubcategoryName
+    || raw.serviceSubcategoryTitle
+    || raw.subgroup
+    || raw.subGroup
+    || raw.subGroupName
+    || raw.serviceSubgroup
+    || '';
+  const rawSubcategories = Array.isArray(raw.serviceSubcategories)
+    ? raw.serviceSubcategories
+    : Array.isArray(raw.subcategories)
+      ? raw.subcategories
+      : (raw.services && Array.isArray(raw.services) ? raw.services : []);
+  const subcategories = Array.from(new Set(normaliseCategoryList([rawSubcategory, rawSubcategories])));
+  const subcategory = subcategories[0] || '';
   const status = (raw.status || raw.adminModeration?.status || '').toLowerCase() || 'draft';
   const ownerPhone = raw.ownerPhone || raw.phone || raw.mobile || '';
   const shopUrl = raw.shopUrl || raw.shopurl || raw.slug || '';
@@ -3717,6 +3742,9 @@ function normaliseServiceShopRecord(raw) {
     id,
     name,
     city,
+    address,
+    subcategory,
+    subcategories,
     status,
     ownerPhone,
     shopUrl,
@@ -3759,7 +3787,7 @@ async function fetchServiceShopsList({ force = false } = {}) {
   serviceShopsLoading = true;
   const tableBody = document.querySelector('#serviceShopsTable tbody');
   if (tableBody) {
-    tableBody.innerHTML = `<tr><td colspan="5" style="text-align:center;color:#6b7280;">در حال بارگذاری...</td></tr>`;
+    tableBody.innerHTML = `<tr><td colspan="6" style="text-align:center;color:#6b7280;">در حال بارگذاری...</td></tr>`;
   }
 
   const url = new URL(`${ADMIN_API_BASE}/service-shops`);
@@ -3874,12 +3902,14 @@ function renderServiceShopsTable() {
     const matchesSearch = !searchText
       || shop.name.toLowerCase().includes(searchText)
       || (shop.city || '').toLowerCase().includes(searchText)
+      || (shop.address || '').toLowerCase().includes(searchText)
+      || (shop.subcategory || '').toLowerCase().includes(searchText)
       || (shop.ownerPhone || '').toLowerCase().includes(searchText);
     return matchesStatus && matchesPlan && matchesSearch;
   });
 
   if (!filtered.length) {
-    tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;color:#6b7280;">مغازه‌ای یافت نشد.</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;color:#6b7280;">مغازه‌ای یافت نشد.</td></tr>`;
     return;
   }
 
@@ -3889,7 +3919,8 @@ function renderServiceShopsTable() {
     return `
       <tr>
         <td class="service-shop-name">${escapeHtml(shop.name)}</td>
-        <td class="service-shop-meta">${escapeHtml(shop.city || '—')}</td>
+        <td class="service-shop-meta">${escapeHtml(shop.address || '—')}</td>
+        <td class="service-shop-meta">${escapeHtml(shop.subcategory || '—')}</td>
         <td class="service-status-cell"><span class="service-status-badge ${escapeHtml(shop.status || '')}">${escapeHtml(statusText || 'نامشخص')}</span></td>
         <td class="service-status-cell">${escapeHtml(planLabel)}</td>
         <td class="service-actions-cell">
