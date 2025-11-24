@@ -2998,15 +2998,15 @@ elements.body.addEventListener('click', (e) => {
 
   // Handle route navigation
   const routeTarget = target.closest('[data-route]');
-  if (routeTarget) {
-    const route = routeTarget.dataset.route;
-    if (route === 'ranking') {
-      UIComponents.openModal('rank-modal');
-    } else {
-      window.location.hash = `/${route}`;
+    if (routeTarget) {
+      const route = routeTarget.dataset.route;
+      if (route === 'ranking') {
+        UIComponents.openModal('rank-modal');
+      } else {
+        window.location.hash = `/${route}`;
+      }
+      return;
     }
-    return;
-  }
 
   // ✅ Close the overlay you clicked inside (modal/drawer)
 // ✅ FIXED: Close button handler
@@ -3036,6 +3036,21 @@ if (dismissTarget) {
 
 
 }, { passive: true });
+
+elements.body.addEventListener('keydown', (e) => {
+  const routeTarget = e.target.closest('[data-route]');
+  if (!routeTarget) return;
+
+  if (e.key === 'Enter' || e.key === ' ') {
+    e.preventDefault();
+    const route = routeTarget.dataset.route;
+    if (route === 'ranking') {
+      UIComponents.openModal('rank-modal');
+    } else {
+      window.location.hash = `/${route}`;
+    }
+  }
+});
 
 
 
@@ -3389,6 +3404,11 @@ destroy() {
       this.setText('ucw30', this.formatNumber(metrics.uniqueCustomers ?? metrics.completedBookings ?? 0));
       this.setText('bookingsTotal', this.formatNumber(metrics.totalBookings ?? 0));
       this.setText('rating30', this.formatNumber(metrics.ratingAverage ?? 0, { fractionDigits: 1, fallback: '۰٫۰' }));
+      this.setText('cta-total-sellers', this.formatNumber(total));
+      this.setText('cta-current-rank', mine.rank ? this.formatNumber(mine.rank) : '—');
+      this.setText('cta-rating30', this.formatNumber(metrics.ratingAverage ?? 0, { fractionDigits: 1, fallback: '۰٫۰' }));
+      this.setText('cta-customers30', this.formatNumber(metrics.uniqueCustomers ?? metrics.completedBookings ?? 0));
+      this.setText('cta-bookings30', this.formatNumber(metrics.totalBookings ?? 0));
 
       const modalCurrent = document.getElementById('rank-modal-current');
       if (modalCurrent) {
