@@ -6402,12 +6402,24 @@ function renderSellers() {
     const hasServiceData = shop.isServiceSeller || (shop.serviceSubcategories && shop.serviceSubcategories.length);
     const serviceCategory = shop.serviceCategoryName || (hasServiceData ? 'خدمات' : '');
     const serviceSubcats = Array.isArray(shop.serviceSubcategories) ? shop.serviceSubcategories : [];
-    const serviceBadge = hasServiceData
-      ? `<div class="seller-category-badges">
-          ${serviceCategory ? `<span class=\"seller-category-chip\">${escapeHtml(serviceCategory)}</span>` : ''}
-          ${serviceSubcats.length ? `<span class=\"seller-subcategory-chip\">${escapeHtml(serviceSubcats.join('، '))}</span>` : ''}
-        </div>`
-      : '<span class="seller-category-chip muted">بدون دسته</span>';
+
+    let serviceBadge = '';
+    if (shop.isServiceSeller) {
+      const categoryChip = serviceCategory
+        ? `<span class=\"seller-category-chip\">${escapeHtml(serviceCategory)}</span>`
+        : '';
+      const subcategoryChip = serviceSubcats.length
+        ? `<span class=\"seller-subcategory-chip\">${escapeHtml(serviceSubcats.join('، '))}</span>`
+        : '';
+
+      serviceBadge = categoryChip || subcategoryChip
+        ? `<div class="seller-category-badges">${categoryChip}${subcategoryChip}</div>`
+        : '<span class="seller-category-chip muted">بدون دسته</span>';
+    } else {
+      serviceBadge = serviceCategory
+        ? `<span class="seller-category-chip">${escapeHtml(serviceCategory)}</span>`
+        : '<span class="seller-category-chip muted">بدون دسته</span>';
+    }
 
     const sellerKey = resolveSellerKeyFromShop(shop);
     const performance = sellerKey ? getSellerPerformanceByKey(sellerKey) : null;
