@@ -3713,10 +3713,18 @@ function normaliseServiceShopRecord(raw) {
     || raw.subCategory
     || raw.serviceSubcategoryName
     || raw.serviceSubcategoryTitle
+    || raw.subcategoryTitle
+    || raw.subcategoryLabel
+    || raw.subCategoryTitle
+    || raw.subCategoryLabel
+    || raw.serviceSubgroup
+    || raw.serviceSubgroupTitle
+    || raw.serviceSubGroupTitle
     || raw.subgroup
     || raw.subGroup
     || raw.subGroupName
-    || raw.serviceSubgroup
+    || raw.subGroupTitle
+    || raw.subGroupLabel
     || '';
   const rawSubcategories = Array.isArray(raw.serviceSubcategories)
     ? raw.serviceSubcategories
@@ -3724,7 +3732,8 @@ function normaliseServiceShopRecord(raw) {
       ? raw.subcategories
       : (raw.services && Array.isArray(raw.services) ? raw.services : []);
   const subcategories = Array.from(new Set(normaliseCategoryList([rawSubcategory, rawSubcategories])));
-  const subcategory = subcategories[0] || '';
+  const subcategoryFallback = extractCategoryLabel(rawSubcategory);
+  const subcategory = subcategories[0] || subcategoryFallback || '';
   const status = (raw.status || raw.adminModeration?.status || '').toLowerCase() || 'draft';
   const ownerPhone = raw.ownerPhone || raw.phone || raw.mobile || '';
   const shopUrl = raw.shopUrl || raw.shopurl || raw.slug || '';
@@ -3916,11 +3925,14 @@ function renderServiceShopsTable() {
   tbody.innerHTML = filtered.map((shop) => {
     const statusText = shop.status === 'approved' ? 'تایید شده' : shop.status === 'pending' ? 'در انتظار' : shop.status;
     const planLabel = getServiceShopPlanLabel(shop);
+    const subcategoryLabel = shop.subcategory
+      || (Array.isArray(shop.subcategories) ? shop.subcategories.filter(Boolean).join('، ') : '')
+      || extractCategoryLabel(shop.meta?.serviceSubcategory || shop.meta?.serviceSubcategoryName || shop.meta?.subcategory || shop.meta?.subCategory);
     return `
       <tr>
         <td class="service-shop-name">${escapeHtml(shop.name)}</td>
         <td class="service-shop-meta">${escapeHtml(shop.address || '—')}</td>
-        <td class="service-shop-meta">${escapeHtml(shop.subcategory || '—')}</td>
+        <td class="service-shop-meta">${escapeHtml(subcategoryLabel || '—')}</td>
         <td class="service-status-cell"><span class="service-status-badge ${escapeHtml(shop.status || '')}">${escapeHtml(statusText || 'نامشخص')}</span></td>
         <td class="service-status-cell">${escapeHtml(planLabel)}</td>
         <td class="service-actions-cell">
