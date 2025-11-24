@@ -74,6 +74,46 @@ const parseList = (value, { unique = true, limit = 50 } = {}) => {
   return result;
 };
 
+// Ensure that category/subcategory fields never leak moderation statuses into the
+// admin UI (which caused the "زیرگروه" column to show "تایید شده"). These values
+// should only contain business categories such as «آرایشگاه مردانه» or «کارواش».
+const STATUS_CATEGORY_LABELS = new Set([
+  'draft', 'pending', 'approved', 'suspended', 'archived',
+  'تایید شده', 'در انتظار', 'مسدود', 'آرشیو', 'پیش نویس'
+]);
+
+const cleanCategoryLabels = (list = []) => {
+  const cleaned = [];
+  list.forEach((item) => {
+    if (!item) return;
+    const label = String(item).trim();
+    if (!label) return;
+    const normalized = label.toLowerCase();
+    if (STATUS_CATEGORY_LABELS.has(normalized)) return;
+    cleaned.push(label);
+  });
+  return cleaned;
+};
+
+const attachCategoryInfo = (item = {}) => {
+  if (!item || typeof item !== 'object') return item;
+
+  const mergedCategories = [
+    ...(Array.isArray(item.subcategories) ? item.subcategories : []),
+    item.category
+  ].filter(Boolean);
+
+  const cleaned = cleanCategoryLabels(mergedCategories);
+  if (cleaned.length) {
+    item.subcategories = cleaned;
+    item.subcategory = cleaned[0];
+  } else if (item.category) {
+    item.subcategory = String(item.category).trim();
+  }
+
+  return item;
+};
+
 const parseDateValue = (value, { allowNull = false } = {}) => {
   if (value == null || value === '') {
     return allowNull ? null : undefined;
@@ -1905,6 +1945,7 @@ exports.listServiceShops = async (req, res) => {
         .filter(item => matchesLegacyFilters(item, legacyFilters));
 
       const combinedItems = [...matchedItems, ...legacyFiltered]
+        .map(attachCategoryInfo)
         .sort(sortByRecentActivityDesc);
 
       const total = combinedItems.length;
@@ -1916,7 +1957,7 @@ exports.listServiceShops = async (req, res) => {
       const totals = mergeOverviewTotals(overviewTotals?.totals, legacyTotals);
 
       return res.json({
-        items,
+        items: items.map(attachCategoryInfo),
         pagination: {
           page,
           limit,
@@ -1946,7 +1987,7 @@ exports.listServiceShops = async (req, res) => {
     ]);
 
     res.json({
-      items,
+      items: items.map(attachCategoryInfo),
       pagination: {
         page,
         limit,
