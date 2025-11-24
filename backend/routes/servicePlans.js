@@ -460,7 +460,10 @@ router.post('/assignments', auth('admin'), async (req, res) => {
       return res.status(400).json({ message: 'شناسه پلن و یکی از شناسه مغازه یا شماره تلفن الزامی است.' });
     }
 
-    const plan = await ServicePlan.findById(planId);
+    let plan = await ServicePlan.findById(planId);
+    if (!plan) {
+      plan = await ServicePlan.findOne({ slug: String(planId).trim().toLowerCase() });
+    }
     if (!plan) {
       return res.status(404).json({ message: 'پلن انتخابی یافت نشد.' });
     }
