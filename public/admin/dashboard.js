@@ -3899,6 +3899,8 @@ function getServiceShopPlanLabel(shop) {
 }
 
 function renderServiceShopsTable() {
+  console.log("✅ FINAL LAYOUT FIX RUNNING");
+
   const tbody = document.querySelector('#serviceShopsTable tbody');
   if (!tbody) return;
 
@@ -3912,33 +3914,72 @@ function renderServiceShopsTable() {
       || shop.name.toLowerCase().includes(searchText)
       || (shop.city || '').toLowerCase().includes(searchText)
       || (shop.address || '').toLowerCase().includes(searchText)
-      || (shop.subcategory || '').toLowerCase().includes(searchText)
       || (shop.ownerPhone || '').toLowerCase().includes(searchText);
     return matchesStatus && matchesPlan && matchesSearch;
   });
 
   if (!filtered.length) {
-    tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;color:#6b7280;">مغازه‌ای یافت نشد.</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;padding:20px;color:#888;">مغازه‌ای یافت نشد.</td></tr>`;
     return;
   }
 
   tbody.innerHTML = filtered.map((shop) => {
-    const statusText = shop.status === 'approved' ? 'تایید شده' : shop.status === 'pending' ? 'در انتظار' : shop.status;
+    // 1. Status Text
+    let statusText = 'نامشخص';
+    let statusClass = shop.status || '';
+    if (shop.status === 'approved') statusText = 'تایید شده';
+    else if (shop.status === 'pending') statusText = 'در انتظار';
+    else if (shop.status === 'suspended') statusText = 'معلق';
+    else statusText = shop.status;
+
+    // 2. Plan Label
     const planLabel = getServiceShopPlanLabel(shop);
-    const subcategoryLabel = shop.subcategory
-      || (Array.isArray(shop.subcategories) ? shop.subcategories.filter(Boolean).join('، ') : '')
-      || extractCategoryLabel(shop.meta?.serviceSubcategory || shop.meta?.serviceSubcategoryName || shop.meta?.subcategory || shop.meta?.subCategory);
+
+    // 3. Subcategory Extraction
+    let subcategoryLabel = shop.subcategory;
+    if (!subcategoryLabel && Array.isArray(shop.subcategories) && shop.subcategories.length > 0) {
+        subcategoryLabel = shop.subcategories.filter(Boolean).join('، ');
+    }
+    if (!subcategoryLabel && shop.meta) {
+        subcategoryLabel = extractCategoryLabel(shop.meta.serviceSubcategory) 
+                        || extractCategoryLabel(shop.meta.subcategory)
+                        || extractCategoryLabel(shop.meta.serviceSubcategoryName)
+                        || extractCategoryLabel(shop.meta.subCategoryTitle);
+    }
+
+    // 4. RENDER - Using explicit widths to prevent shifting
     return `
-      <tr>
-        <td class="service-shop-name">${escapeHtml(shop.name)}</td>
-        <td class="service-shop-meta">${escapeHtml(shop.address || '—')}</td>
-        <td class="service-shop-meta">${escapeHtml(subcategoryLabel || '—')}</td>
-        <td class="service-status-cell"><span class="service-status-badge ${escapeHtml(shop.status || '')}">${escapeHtml(statusText || 'نامشخص')}</span></td>
-        <td class="service-status-cell">${escapeHtml(planLabel)}</td>
-        <td class="service-actions-cell">
-          <div class="service-shop-actions">
-            <button class="action-btn" data-action="grant-free" data-id="${escapeHtml(shop.id)}">اعطای پلن رایگان</button>
-            ${shop.shopUrl ? `<a class="action-btn view" target="_blank" rel="noopener" href="/service/${encodeURIComponent(shop.shopUrl)}">مشاهده</a>` : ''}
+      <tr style="border-bottom:1px solid #f0f0f0;">
+        
+        <td style="padding:12px; width:15%; vertical-align:middle;">
+            <div style="font-weight:bold; color:#333;">${escapeHtml(shop.name)}</div>
+            <div style="color:#888; font-size:0.8rem; margin-top:2px;">${escapeHtml(shop.ownerPhone || '')}</div>
+        </td>
+        
+        <td style="padding:12px; width:25%; vertical-align:middle; font-size:0.9rem; color:#555; line-height:1.4;">
+            ${escapeHtml(shop.address || '—')}
+        </td>
+        
+        <td style="padding:12px; width:15%; vertical-align:middle;">
+            <span style="display:inline-block; background-color:#fffde7; color:#f59e0b; border:1px solid #fcd34d; padding:4px 8px; border-radius:6px; font-weight:600; font-size:0.85rem; white-space:nowrap;">
+                ${escapeHtml(subcategoryLabel || 'بدون دسته')}
+            </span>
+        </td>
+
+        <td style="padding:12px; width:10%; vertical-align:middle;">
+            <span class="service-status-badge ${escapeHtml(statusClass)}" style="white-space:nowrap;">
+                ${escapeHtml(statusText)}
+            </span>
+        </td>
+        
+        <td style="padding:12px; width:15%; vertical-align:middle; font-size:0.85rem;">
+            ${escapeHtml(planLabel)}
+        </td>
+        
+        <td style="padding:12px; width:20%; vertical-align:middle;">
+          <div style="display:flex; gap:6px; flex-wrap:wrap;">
+            <button class="action-btn" style="background:#e0f2fe; color:#0369a1; border:none; padding:5px 10px; border-radius:6px; cursor:pointer; font-size:0.85rem;" data-action="grant-free" data-id="${escapeHtml(shop.id)}">اعطای پلن</button>
+            ${shop.shopUrl ? `<a class="action-btn view" style="background:#10b981; color:white; padding:5px 10px; border-radius:6px; text-decoration:none; font-size:0.85rem;" target="_blank" rel="noopener" href="/service/${encodeURIComponent(shop.shopUrl)}">مشاهده</a>` : ''}
           </div>
         </td>
       </tr>
