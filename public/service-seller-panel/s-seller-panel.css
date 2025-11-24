@@ -3755,7 +3755,7 @@ body { -webkit-font-smoothing: auto !important; }
 @keyframes planGlow{ from{transform:rotate(0)} to{transform:rotate(360deg)} }
 
 .plan-hero-content{ position: relative; z-index: 1; display: grid; gap: var(--space-3); }
-.plan-hero-top{ display:flex; justify-content:space-between; align-items:center; gap: var(--space-2); }
+.plan-hero-top{ display:flex; justify-content:space-between; align-items:flex-start; gap: var(--space-3); flex-wrap: wrap; }
 .plan-tier-badge{
   display:inline-flex; align-items:center; gap:.5rem;
   padding:.4rem .8rem; border-radius:999px;
@@ -3763,40 +3763,36 @@ body { -webkit-font-smoothing: auto !important; }
   color:#fff; font-weight:700; font-size:.9rem;
   box-shadow: 0 6px 18px rgba(var(--c-primary-rgb), .35);
 }
-.plan-hero-title{ margin:0; font-size:1.25rem; font-weight:800; }
-.plan-hero-message{
-  margin:0;
-  padding:0.9rem 1.1rem;
-  border-radius:18px;
-  background: rgba(255,255,255,.06);
-  border:1px solid rgba(255,255,255,.08);
-  color: var(--c-text-primary);
-  font-size:1rem;
-  line-height:1.9;
-  display:flex;
-  align-items:flex-start;
-  gap:.75rem;
-  box-shadow: 0 12px 32px rgba(0,0,0,.18);
-}
+.plan-hero-title{ margin:0 0 .25rem; font-size:1.2rem; font-weight:800; }
 .plan-hero-subtext{
   margin:0;
   font-size:0.9rem;
-  line-height:1.8;
-  color:rgba(255,255,255,0.75);
+  line-height:1.6;
+  color:rgba(255,255,255,0.72);
 }
-.plan-hero-message::before{
-  content:'🎁';
-  font-size:1.25rem;
-  line-height:1.4;
+.plan-hero-highlight{
+  display: grid;
+  gap: var(--space-3);
+  padding: 1rem;
+  border-radius: 16px;
+  background: rgba(255,255,255,.05);
+  border:1px solid rgba(255,255,255,.08);
+}
+.plan-hero-message{
+  margin:0;
+  font-size:0.98rem;
+  line-height:1.7;
+  color: var(--c-text-primary);
 }
 
 .plan-hero-meta{ display:flex; flex-wrap:wrap; gap:.5rem .75rem; }
 .meta-item{
-  display:inline-flex; align-items:center; gap:.4rem;
-  padding:.35rem .6rem; border-radius:10px;
-  background: var(--c-bg-tertiary); font-size:.9rem;
+  display:inline-flex; align-items:center; gap:.55rem;
+  padding:.5rem .75rem; border-radius:12px;
+  background: var(--c-bg-tertiary); font-size:.88rem;
 }
-.hide-on-xs{ display:none; }
+.meta-text span{ display:block; color: var(--c-text-secondary); font-size:.8rem; }
+.meta-text strong{ display:block; font-size:.95rem; }
 
 .progress-bar{
   position:relative; height:10px; border-radius:12px; overflow:hidden;
@@ -3811,13 +3807,9 @@ body { -webkit-font-smoothing: auto !important; }
 .plan-hero-progress{ display:grid; gap:.5rem; }
 .progress-legend{ display:flex; justify-content:space-between; font-size:.85rem; color:var(--c-text-secondary); }
 
-.plan-hero-perks{
-  display:flex; gap:.5rem; flex-wrap:wrap; list-style:none; padding:0; margin:0;
-}
-.plan-hero-perks li{
-  padding:.45rem .7rem; border-radius:999px; font-size:.85rem;
-  background: rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.10);
-}
+.plan-hero-footer{ display: grid; gap: var(--space-3); }
+.plan-hero-perks{ display:flex; gap:.4rem; flex-wrap:wrap; list-style:none; padding:0; margin:0; }
+.plan-hero-perks li{ padding:.4rem .65rem; border-radius:12px; font-size:.82rem; background: rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.10); }
 
 .plan-hero-actions{ display:flex; align-items:center; justify-content:center; gap:.5rem; flex-wrap:wrap; }
 .btn-renew{
@@ -3849,8 +3841,18 @@ body { -webkit-font-smoothing: auto !important; }
 /* desktop tweaks */
 @media (min-width: 768px){
   .plan-hero{ min-height: 220px; padding: var(--space-5); }
-  .hide-on-xs{ display:inline-flex; }
-  .plan-hero-title{ font-size:1.4rem; }
+  .plan-hero-title{ font-size:1.35rem; }
+  .plan-hero-highlight{ grid-template-columns: 1fr auto; align-items: center; }
+  .plan-hero-message{ max-width: 70ch; }
+}
+
+@media (max-width: 640px){
+  .plan-hero{ padding: var(--space-3); }
+  .plan-hero-top{ flex-direction: column; align-items: flex-start; }
+  .plan-hero-highlight{ padding: .85rem; }
+  .plan-hero-meta{ gap:.4rem; }
+  .meta-item{ width:100%; justify-content:space-between; }
+  .plan-hero-actions .btn-renew{ width:100%; }
 }
 
 
