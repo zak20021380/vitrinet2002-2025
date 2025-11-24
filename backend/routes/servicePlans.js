@@ -486,9 +486,16 @@ router.post('/assignments', auth('admin'), async (req, res) => {
     if (!serviceShop) {
       const regex = buildDigitInsensitiveRegex(phoneToUse, { allowSeparators: true });
       const phoneCandidates = buildPhoneCandidates(phoneToUse);
+
       if (normalizedPhone && !phoneCandidates.includes(normalizedPhone)) {
         phoneCandidates.push(normalizedPhone);
       }
+
+      const digitsOnly = normalizedPhone ? normalizedPhone.replace(/\D+/g, '') : '';
+      if (digitsOnly && !phoneCandidates.includes(digitsOnly)) {
+        phoneCandidates.push(digitsOnly);
+      }
+
       if (normalizedPhone && normalizedPhone.startsWith('0')) {
         const withoutZero = normalizedPhone.slice(1);
         if (withoutZero) {
@@ -496,12 +503,28 @@ router.post('/assignments', auth('admin'), async (req, res) => {
         }
       }
 
+      if (digitsOnly && digitsOnly.startsWith('98')) {
+        const withoutCode = digitsOnly.slice(2);
+        const withZero = withoutCode.startsWith('0') ? withoutCode : `0${withoutCode}`;
+        if (withoutCode && !phoneCandidates.includes(withoutCode)) {
+          phoneCandidates.push(withoutCode);
+        }
+        if (withZero && !phoneCandidates.includes(withZero)) {
+          phoneCandidates.push(withZero);
+        }
+      }
+
+      const regexDigitsOnly = digitsOnly ? buildDigitInsensitiveRegex(digitsOnly, { allowSeparators: false }) : null;
+
       const queryConditions = [];
       if (phoneCandidates.length) {
         queryConditions.push({ ownerPhone: { $in: phoneCandidates } });
       }
       if (regex) {
         queryConditions.push({ ownerPhone: { $regex: regex } });
+      }
+      if (regexDigitsOnly) {
+        queryConditions.push({ ownerPhone: { $regex: regexDigitsOnly } });
       }
 
       const shopQuery = queryConditions.length === 0
