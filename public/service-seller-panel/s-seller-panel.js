@@ -1175,6 +1175,8 @@ function renderComplimentaryPlan(planRaw) {
   const plansDisabled = document.body?.dataset?.sellerPlans === 'disabled';
   const planCtaBtn = document.getElementById('plan-renew-btn');
   const planNameEl = document.getElementById('plan-name');
+  const progressTrack = document.getElementById('plan-progress');
+  const giftNote = document.getElementById('plan-gift-note');
 
   const hasAnyPlanLifecycle = plan.activeNow || plan.isActive || plan.hasExpired || plan.startDate || plan.endDate;
   const planlessNudge = !plansDisabled && !hasAnyPlanLifecycle;
@@ -1199,7 +1201,7 @@ function renderComplimentaryPlan(planRaw) {
   if (tierEl) {
     const tierLabel = planlessNudge
       ? 'نیاز به انتخاب پلن'
-      : `🎖 ${plan.title || 'پلن رایگان'} (رایگان)`;
+      : `🎁 ${plan.title || 'پلن رایگان'} | هدیه مدیریت ویترینت`;
     tierEl.textContent = tierLabel;
   }
 
@@ -1240,8 +1242,19 @@ function renderComplimentaryPlan(planRaw) {
     progressBar.setAttribute('aria-valuemax', '100');
     progressBar.setAttribute('aria-valuenow', String(progress));
   }
-  if (usedEl) usedEl.textContent = `${progress}%`;
-  if (leftEl) leftEl.textContent = `${Math.max(0, 100 - progress)}%`;
+  const usedDays = plan.usedDays != null ? Math.max(0, plan.usedDays) : 0;
+  const leftDays = remainingDays != null && plan.totalDays != null
+    ? Math.max(0, plan.totalDays - usedDays)
+    : remainingDays ?? 0;
+  const progressText = `${faNumber(progress)}٪ استفاده شده`;
+
+  if (progressTrack) {
+    progressTrack.setAttribute('aria-valuenow', String(progress));
+    progressTrack.setAttribute('aria-valuetext', progressText);
+  }
+
+  if (usedEl) usedEl.textContent = `${faNumber(usedDays)} روز (${faNumber(progress)}٪)`;
+  if (leftEl) leftEl.textContent = `${faNumber(leftDays)} روز`;
 
   if (statusChip) {
     statusChip.classList.remove('chip-live');
@@ -1319,6 +1332,12 @@ function renderComplimentaryPlan(planRaw) {
     } else {
       subtextEl.textContent = subtext;
     }
+  }
+
+  if (giftNote) {
+    giftNote.textContent = planlessNudge
+      ? 'پلن هدیه ویترینت هنوز فعال نشده؛ بعد از انتخاب پلن، همه جزئیات در همین بخش نمایش داده می‌شود.'
+      : 'این پلن رایگان به عنوان هدیه مدیریت ویترینت در اختیار شماست.';
   }
 }
 
