@@ -3826,16 +3826,31 @@ body { -webkit-font-smoothing: auto !important; }
 .meta-text span{ display:block; color: var(--c-text-secondary); font-size:.8rem; }
 .meta-text strong{ display:block; font-size:.95rem; }
 
+.plan-progress-header{ display:flex; flex-wrap:wrap; justify-content:space-between; gap:.75rem; align-items:flex-start; }
+.gift-note{ background: rgba(var(--c-primary-rgb),0.08); border:1px solid rgba(var(--c-primary-rgb),0.25); border-radius:14px; padding:.75rem .85rem; display:grid; gap:.35rem; min-width: min(420px, 100%); box-shadow: 0 12px 30px rgba(var(--c-primary-rgb),0.12); }
+.gift-badge{ display:inline-flex; align-items:center; gap:.35rem; padding:.3rem .65rem; border-radius:999px; background: linear-gradient(135deg, rgba(var(--c-primary-rgb),0.18), rgba(255,255,255,0.08)); color:#fff; font-weight:800; letter-spacing:-.02em; }
+.gift-badge::before{ content:"🎁"; }
+.gift-copy{ margin:0; color: var(--c-text-primary); font-size:.92rem; line-height:1.7; }
+.gift-note.is-pending .gift-copy{ color: var(--c-text-secondary); }
+.progress-stats{ display:flex; gap:.75rem; flex-wrap:wrap; justify-content:flex-end; }
+.progress-stat{ background: var(--c-bg-tertiary); border:1px solid var(--c-border); border-radius:12px; padding:.6rem .85rem; min-width:140px; box-shadow: inset 0 1px 0 rgba(255,255,255,.04); }
+.progress-stat span{ display:block; color: var(--c-text-secondary); font-size:.82rem; }
+.progress-stat strong{ display:block; margin-top:.2rem; font-size:1rem; }
+
 .progress-bar{
   position:relative; height:10px; border-radius:12px; overflow:hidden;
   background: rgba(255,255,255,.08); border:1px solid rgba(255,255,255,.08);
 }
 .progress-bar > span{
+  position:relative;
   display:block; height:100%;
   background: linear-gradient(90deg, var(--c-primary), var(--c-primary-hover));
   box-shadow: inset 0 0 10px rgba(0,0,0,.25);
   transition: width .35s ease;
 }
+.progress-bar::after{ content:""; position:absolute; inset:0; background: linear-gradient(90deg, rgba(255,255,255,.08), rgba(255,255,255,0)); pointer-events:none; }
+.progress-value{ position:absolute; inset:auto -42px -26px auto; background: #101014; border:1px solid rgba(255,255,255,.1); color:#fff; padding:.3rem .55rem; border-radius:10px; font-size:.82rem; box-shadow: 0 12px 30px rgba(0,0,0,.35); }
+.progress-value::after{ content:""; position:absolute; top:-6px; right:12px; border:6px solid transparent; border-bottom-color:rgba(255,255,255,.12); }
 .plan-hero-progress{ display:grid; gap:.5rem; }
 .progress-legend{ display:flex; justify-content:space-between; font-size:.85rem; color:var(--c-text-secondary); }
 

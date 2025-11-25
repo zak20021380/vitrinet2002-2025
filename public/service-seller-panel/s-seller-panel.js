@@ -1166,8 +1166,12 @@ function renderComplimentaryPlan(planRaw) {
   const daysLeftEl = document.getElementById('plan-days-left');
   const expiryEl = document.getElementById('plan-expiry');
   const progressBar = document.getElementById('plan-progress-bar');
+  const progressTrack = document.getElementById('plan-progress-track');
+  const progressValue = document.getElementById('plan-progress-value');
   const usedEl = document.getElementById('plan-used');
   const leftEl = document.getElementById('plan-left');
+  const usedDaysEl = document.getElementById('plan-used-days');
+  const leftDaysEl = document.getElementById('plan-left-days');
   const messageEl = document.getElementById('plan-hero-message');
   const perksList = document.getElementById('plan-hero-perks');
   const statusChip = document.getElementById('plan-status-chip');
@@ -1175,6 +1179,8 @@ function renderComplimentaryPlan(planRaw) {
   const plansDisabled = document.body?.dataset?.sellerPlans === 'disabled';
   const planCtaBtn = document.getElementById('plan-renew-btn');
   const planNameEl = document.getElementById('plan-name');
+  const giftNote = document.getElementById('plan-gift-note');
+  const giftCopy = document.getElementById('plan-gift-copy');
 
   const hasAnyPlanLifecycle = plan.activeNow || plan.isActive || plan.hasExpired || plan.startDate || plan.endDate;
   const planlessNudge = !plansDisabled && !hasAnyPlanLifecycle;
@@ -1218,6 +1224,11 @@ function renderComplimentaryPlan(planRaw) {
   }
 
   const remainingDays = plan.remainingDays != null ? Math.max(0, plan.remainingDays) : null;
+  const usedDays = plan.usedDays != null
+    ? Math.max(0, plan.usedDays)
+    : plan.totalDays != null && remainingDays != null
+      ? Math.max(0, plan.totalDays - remainingDays)
+      : null;
   if (daysLeftEl) {
     daysLeftEl.textContent = remainingDays != null ? `${faNumber(remainingDays)} روز` : '—';
   }
@@ -1236,12 +1247,23 @@ function renderComplimentaryPlan(planRaw) {
     : 0;
   if (progressBar) {
     progressBar.style.width = `${progress}%`;
-    progressBar.setAttribute('aria-valuemin', '0');
-    progressBar.setAttribute('aria-valuemax', '100');
-    progressBar.setAttribute('aria-valuenow', String(progress));
   }
-  if (usedEl) usedEl.textContent = `${progress}%`;
-  if (leftEl) leftEl.textContent = `${Math.max(0, 100 - progress)}%`;
+  if (progressTrack) {
+    progressTrack.setAttribute('role', 'progressbar');
+    progressTrack.setAttribute('aria-valuemin', '0');
+    progressTrack.setAttribute('aria-valuemax', '100');
+    progressTrack.setAttribute('aria-valuenow', String(progress));
+    progressTrack.setAttribute('aria-label', 'پیشرفت دوره پلن هدیه');
+  }
+  if (progressValue) {
+    progressValue.textContent = `${progress}%`;
+  }
+  const usedPercentLabel = `${progress}%`;
+  const leftPercentLabel = `${Math.max(0, 100 - progress)}%`;
+  if (usedEl) usedEl.textContent = usedDays != null ? `${usedPercentLabel} • ${faNumber(usedDays)} روز` : usedPercentLabel;
+  if (leftEl) leftEl.textContent = remainingDays != null ? `${leftPercentLabel} • ${faNumber(remainingDays)} روز` : leftPercentLabel;
+  if (usedDaysEl) usedDaysEl.textContent = usedDays != null ? `${faNumber(usedDays)} روز` : '—';
+  if (leftDaysEl) leftDaysEl.textContent = remainingDays != null ? `${faNumber(remainingDays)} روز` : '—';
 
   if (statusChip) {
     statusChip.classList.remove('chip-live');
@@ -1287,7 +1309,7 @@ function renderComplimentaryPlan(planRaw) {
             : `${faNumber(remainingDays)} روز دیگر از دسترسی رایگان باقی مانده است.`)
         : 'دسترسی رایگان شما فعال است.';
       const planLabel = plan.title ? `پلن «${plan.title}»` : 'پلن رایگان';
-      messageEl.textContent = `${planLabel} تا ${expiryLabel} فعال است. ${urgency} بدون هزینه از تمام امکانات استفاده کنید و در صورت نیاز از همین جا ارتقا دهید.`;
+      messageEl.textContent = `${planLabel} تا ${expiryLabel} فعال است. ${urgency} این دسترسی به عنوان هدیه مدیریت ویترینت برای شما فعال شده؛ بدون هزینه از تمام امکانات استفاده کنید و در صورت نیاز از همین جا ارتقا دهید.`;
     } else if (plan.hasExpired) {
       messageEl.textContent = 'دوره رایگان تمام شده است. برای ادامه، یکی از پلن‌ها را انتخاب کنید یا با پشتیبانی هماهنگ شوید.';
     } else if (plan.isActive) {
@@ -1318,6 +1340,19 @@ function renderComplimentaryPlan(planRaw) {
       subtextEl.textContent = 'برای شروع فروش حرفه‌ای، وارد بخش پلن‌ها شوید، پلن مناسب را انتخاب کنید و در کمتر از یک دقیقه فعال‌سازی را انجام دهید.';
     } else {
       subtextEl.textContent = subtext;
+    }
+  }
+
+  if (giftNote && giftCopy) {
+    giftNote.classList.toggle('is-pending', planlessNudge);
+    if (planlessNudge) {
+      giftCopy.textContent = 'هدیه مدیریت ویترینت آماده است. کافیست یکی از پلن‌ها را فعال کنید تا شرایط ویژه هدیه برای شما اعمال شود.';
+    } else if (plan.activeNow) {
+      giftCopy.textContent = 'این پلن به صورت هدیه از طرف مدیریت مجموعه ویترینت برای شما فعال شده است.';
+    } else if (plan.hasExpired) {
+      giftCopy.textContent = 'اعتبار پلن هدیه مدیریت به پایان رسیده است؛ برای تمدید یا دریافت هدیه بعدی با پشتیبانی هماهنگ کنید.';
+    } else {
+      giftCopy.textContent = 'این پلن با هدیه مدیریت ویترینت برای فروشگاه شما رزرو شده است و مطابق زمان‌بندی فعال می‌شود.';
     }
   }
 }
