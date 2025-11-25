@@ -113,6 +113,24 @@ const computeStatus = (startDate, endDate) => {
   return 'active';
 };
 
+const syncComplimentaryPlanOnShop = async (assignment, adminId = null) => {
+  if (!assignment?.serviceShop) return;
+
+  const payload = {
+    complimentaryPlan: {
+      isActive: assignment.status === 'active',
+      durationDays: assignment.durationDays || null,
+      startDate: assignment.startDate || null,
+      endDate: assignment.endDate || null,
+      note: assignment.notes || ''
+    },
+    updatedBy: adminId || null,
+    updatedAt: new Date()
+  };
+
+  await ServiceShop.findByIdAndUpdate(assignment.serviceShop, { $set: payload });
+};
+
 const buildPlanSnapshot = (plan) => ({
   title: plan.title,
   slug: plan.slug,
@@ -546,6 +564,8 @@ router.post('/assignments', auth('admin'), async (req, res) => {
       { new: true, upsert: true, setDefaultsOnInsert: true }
     ).populate('serviceShop', 'name ownerPhone city shopUrl').populate('servicePlan');
 
+    await syncComplimentaryPlanOnShop(assignment, req.user?.id || null);
+
     res.status(201).json({ assignment: mapAssignment(assignment) });
   } catch (error) {
     console.error('Failed to assign service plan:', error);
@@ -586,6 +606,8 @@ router.patch('/assignments/:id', auth('admin'), async (req, res) => {
     assignment.status = computeStatus(assignment.startDate, assignment.endDate);
     await assignment.save();
 
+    await syncComplimentaryPlanOnShop(assignment, req.user?.id || null);
+
     await assignment.populate('serviceShop', 'name ownerPhone city shopUrl');
     await assignment.populate('servicePlan');
 
@@ -603,6 +625,15 @@ router.delete('/assignments/:id', auth('admin'), async (req, res) => {
     if (!deleted) {
       return res.status(404).json({ message: 'رکورد اختصاص پلن یافت نشد.' });
     }
+
+    await syncComplimentaryPlanOnShop({
+      serviceShop: deleted.serviceShop,
+      status: 'expired',
+      durationDays: null,
+      startDate: null,
+      endDate: null,
+      notes: ''
+    }, req.user?.id || null);
     res.status(204).send();
   } catch (error) {
     console.error('Failed to delete plan assignment:', error);
