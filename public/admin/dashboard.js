@@ -8191,14 +8191,30 @@ const planFormRefs = PLAN_SLUGS.reduce((acc, slug) => {
 const plansMsg  = document.getElementById('plansMsg');
 const planSaveModal = document.getElementById('plan-save-success-modal');
 const planSaveModalClose = document.getElementById('plan-save-success-close');
+const planSaveModalTitle = document.getElementById('plan-save-success-title');
+const planSaveModalMessage = document.getElementById('plan-save-success-message');
+const planSaveModalIcon = planSaveModal?.querySelector('.plan-save-modal__icon i');
 let planCache   = {};
 let lastFocusedBeforePlanSaveModal = null;
 
-function openPlanSaveModal() {
+function openPlanSaveModal(options = {}) {
+  const { success = true, message = '' } = options;
   if (!planSaveModal) return;
   lastFocusedBeforePlanSaveModal = document.activeElement instanceof HTMLElement
     ? document.activeElement
     : null;
+  planSaveModal.classList.toggle('plan-save-modal--error', !success);
+  if (planSaveModalIcon) {
+    planSaveModalIcon.className = success ? 'ri-checkbox-circle-line' : 'ri-error-warning-line';
+  }
+  if (planSaveModalTitle) {
+    planSaveModalTitle.textContent = success ? 'تغییرات با موفقیت ذخیره شد' : 'ذخیره پلن‌ها ناموفق بود';
+  }
+  if (planSaveModalMessage) {
+    planSaveModalMessage.textContent = message || (success
+      ? 'قیمت پلن‌ها بلافاصله بروزرسانی شد و برای فروشندگان قابل مشاهده است.'
+      : 'لطفاً مجدداً تلاش کنید یا اتصال سرور را بررسی کنید.');
+  }
   planSaveModal.classList.add('is-visible');
   planSaveModal.setAttribute('aria-hidden', 'false');
   planSaveModalClose?.focus({ preventScroll: true });
@@ -8655,10 +8671,16 @@ async function savePlanPrices(e) {
 
     await loadPlanPrices();
     showPlansMsg('✅ ' + (data.message || 'پلن‌ها با موفقیت ذخیره شدند.'), true, phone);
-    openPlanSaveModal();
+    try {
+      localStorage.setItem('admin-plans-updated', String(Date.now()));
+    } catch (storageErr) {
+      console.warn('Unable to broadcast plan update timestamp', storageErr);
+    }
+    openPlanSaveModal({ success: true, message: data.message || '' });
   } catch (err) {
     console.error('خطا در ذخیره قیمت‌ها:', err);
     showPlansMsg('❌ ' + err.message, false, phone);
+    openPlanSaveModal({ success: false, message: err.message || 'امکان ذخیره تغییرات وجود ندارد.' });
   }
 }
 
