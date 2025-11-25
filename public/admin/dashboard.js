@@ -37,6 +37,7 @@ const SHOPPING_CENTER_PLACEHOLDER =
     ' text-anchor="middle">Shopping Center</text>' +
     '</svg>'
   );
+const DAY_IN_MS = 24 * 60 * 60 * 1000;
 // اگر admin_token ست نشده، از کلید token هم استفاده کن
 
 let messagesInterval = null;
@@ -3743,6 +3744,9 @@ function normaliseServiceShopRecord(raw) {
   const complimentaryPlan = raw.complimentaryPlan || {};
   const complimentaryEnd = complimentaryPlan.endDate ? new Date(complimentaryPlan.endDate) : null;
   const complimentaryStart = complimentaryPlan.startDate ? new Date(complimentaryPlan.startDate) : null;
+  const complimentaryDuration = Number.isFinite(Number(complimentaryPlan.durationDays))
+    ? Number(complimentaryPlan.durationDays)
+    : null;
   const complimentaryActive = !!complimentaryPlan.isActive
     && (!complimentaryStart || complimentaryStart.getTime() <= now)
     && (!complimentaryEnd || complimentaryEnd.getTime() >= now);
@@ -3762,7 +3766,8 @@ function normaliseServiceShopRecord(raw) {
     complimentaryActive,
     complimentaryEnd,
     complimentaryStart,
-    complimentaryNotes: complimentaryPlan.notes || '',
+    complimentaryDurationDays: complimentaryDuration,
+    complimentaryNotes: complimentaryPlan.notes || complimentaryPlan.note || '',
     planTitle: complimentaryPlan.title || complimentaryPlan.name || '',
     meta: raw
   };
@@ -3890,12 +3895,45 @@ function renderServiceShopsOverview() {
 }
 
 function getServiceShopPlanLabel(shop) {
+  const now = Date.now();
+
   if (shop?.complimentaryActive) {
+    const remaining = getComplimentaryRemainingDays(shop);
+    if (remaining != null) {
+      return `پلن رایگان (${formatNumber(remaining)} روز باقی‌مانده)`;
+    }
     const expires = shop.complimentaryEnd ? `تا ${persianDateFormatter.format(new Date(shop.complimentaryEnd))}` : 'فعال';
     return `پلن رایگان (${expires})`;
   }
+
+  const startTime = shop?.complimentaryStart ? new Date(shop.complimentaryStart).getTime() : null;
+  const endTime = shop?.complimentaryEnd ? new Date(shop.complimentaryEnd).getTime() : null;
+  if (startTime && startTime > now) {
+    return `پلن رایگان (شروع از ${persianDateFormatter.format(new Date(shop.complimentaryStart))})`;
+  }
+  if (endTime) {
+    return 'پلن رایگان (منقضی شده)';
+  }
+
   if (shop?.isPremium) return 'پریمیوم فعال';
   return 'بدون پلن فعال';
+}
+
+function getComplimentaryRemainingDays(shop) {
+  if (!shop) return null;
+  const now = Date.now();
+  const end = shop.complimentaryEnd ? new Date(shop.complimentaryEnd).getTime() : null;
+  if (end) {
+    const diff = Math.ceil((end - now) / DAY_IN_MS);
+    return diff >= 0 ? diff : 0;
+  }
+  const start = shop.complimentaryStart ? new Date(shop.complimentaryStart).getTime() : null;
+  const duration = Number.isFinite(shop.complimentaryDurationDays) ? shop.complimentaryDurationDays : null;
+  if (start && duration != null) {
+    const elapsed = Math.floor((now - start) / DAY_IN_MS);
+    return Math.max(duration - elapsed, 0);
+  }
+  return null;
 }
 
 function renderServiceShopsTable() {
