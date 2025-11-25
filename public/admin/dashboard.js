@@ -3762,8 +3762,8 @@ function normaliseServiceShopRecord(raw) {
     complimentaryActive,
     complimentaryEnd,
     complimentaryStart,
-    complimentaryNotes: complimentaryPlan.notes || '',
-    planTitle: complimentaryPlan.title || complimentaryPlan.name || '',
+    complimentaryNotes: complimentaryPlan.note || complimentaryPlan.notes || '',
+    planTitle: complimentaryPlan.title || complimentaryPlan.name || complimentaryPlan.slug || '',
     meta: raw
   };
 }
@@ -3891,8 +3891,12 @@ function renderServiceShopsOverview() {
 
 function getServiceShopPlanLabel(shop) {
   if (shop?.complimentaryActive) {
-    const expires = shop.complimentaryEnd ? `تا ${persianDateFormatter.format(new Date(shop.complimentaryEnd))}` : 'فعال';
-    return `پلن رایگان (${expires})`;
+    const now = Date.now();
+    const expiryDate = shop.complimentaryEnd ? new Date(shop.complimentaryEnd) : null;
+    const expires = expiryDate ? `تا ${persianDateFormatter.format(expiryDate)}` : 'فعال';
+    const daysLeft = expiryDate ? Math.max(0, Math.ceil((expiryDate.getTime() - now) / (24 * 60 * 60 * 1000))) : null;
+    const daysSuffix = Number.isFinite(daysLeft) ? ` - ${daysLeft} روز باقی‌مانده` : '';
+    return `پلن رایگان (${expires}${daysSuffix})`;
   }
   if (shop?.isPremium) return 'پریمیوم فعال';
   return 'بدون پلن فعال';
