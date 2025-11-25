@@ -3739,6 +3739,36 @@ function normaliseServiceShopRecord(raw) {
   const shopUrl = raw.shopUrl || raw.shopurl || raw.slug || '';
   const now = Date.now();
 
+  const toCount = (value) => {
+    const num = Number(value);
+    if (Number.isFinite(num)) return num;
+    if (Array.isArray(value)) return value.length;
+    return null;
+  };
+
+  const appointmentsCount = toCount(
+    raw.appointmentsCount
+    || raw.totalAppointments
+    || raw.bookingsCount
+    || raw.bookingsTotal
+    || raw.totalBookings
+    || raw.bookings
+  );
+  const servicesCount = toCount(
+    raw.servicesCount
+    || raw.totalServices
+    || raw.serviceCount
+    || raw.services
+  );
+  const portfolioCount = toCount(
+    raw.portfolioCount
+    || raw.samplesCount
+    || raw.samplesTotal
+    || raw.sampleWorksCount
+    || raw.samples
+    || raw.portfolio
+  );
+
   const premiumActive = !!raw.isPremium && (!raw.premiumUntil || new Date(raw.premiumUntil).getTime() > now);
   const complimentaryPlan = raw.complimentaryPlan || {};
   const complimentaryEnd = complimentaryPlan.endDate ? new Date(complimentaryPlan.endDate) : null;
@@ -3762,8 +3792,12 @@ function normaliseServiceShopRecord(raw) {
     complimentaryActive,
     complimentaryEnd,
     complimentaryStart,
+    complimentaryAssignmentId: complimentaryPlan.assignmentId || complimentaryPlan.id || complimentaryPlan._id || '',
     complimentaryNotes: complimentaryPlan.notes || '',
     planTitle: complimentaryPlan.title || complimentaryPlan.name || '',
+    appointmentsCount,
+    servicesCount,
+    portfolioCount,
     meta: raw
   };
 }
@@ -4003,8 +4037,10 @@ function renderServiceShopsTable() {
       <tr style="border-bottom:1px solid #f0f0f0;">
         
         <td style="padding:12px; width:15%; vertical-align:middle;">
-            <div style="font-weight:bold; color:#333;">${escapeHtml(shop.name)}</div>
-            <div style="color:#888; font-size:0.8rem; margin-top:2px;">${escapeHtml(shop.ownerPhone || '')}</div>
+            <button class="service-shop-name-btn" type="button" data-action="open-service-shop" data-id="${escapeHtml(shop.id)}">
+              <span class="service-shop-name-btn__title">${escapeHtml(shop.name)}</span>
+              <span class="service-shop-name-btn__phone">${escapeHtml(shop.ownerPhone || '')}</span>
+            </button>
         </td>
         
         <td style="padding:12px; width:25%; vertical-align:middle; font-size:0.9rem; color:#555; line-height:1.4;">
@@ -4035,7 +4071,96 @@ function renderServiceShopsTable() {
         </td>
       </tr>
     `;
+
   }).join('');
+}
+
+function getServiceShopStatusLabel(status) {
+  if (status === 'approved') return 'تایید شده';
+  if (status === 'pending') return 'در انتظار';
+  if (status === 'suspended') return 'معلق';
+  if (!status) return 'نامشخص';
+  return status;
+}
+
+function openServiceShopModal(shopId) {
+  const modal = document.getElementById('serviceShopModal');
+  if (!modal) return;
+
+  const shop = serviceShopsList.find(item => toIdString(item.id) === toIdString(shopId));
+  if (!shop) {
+    alert('اطلاعات این مغازه در لیست یافت نشد.');
+    return;
+  }
+
+  const displayNumber = (value) => Number.isFinite(value) ? formatNumber(value) : '—';
+
+  const statusEl = document.getElementById('serviceShopModalStatus');
+  if (statusEl) statusEl.textContent = getServiceShopStatusLabel(shop.status);
+
+  const titleEl = document.getElementById('serviceShopModalTitle');
+  if (titleEl) titleEl.textContent = shop.name || '—';
+
+  const addressEl = document.getElementById('serviceShopModalAddress');
+  if (addressEl) addressEl.textContent = shop.address || 'آدرسی ثبت نشده است';
+
+  const phoneEl = document.getElementById('serviceShopModalPhone');
+  if (phoneEl) phoneEl.textContent = shop.ownerPhone || 'شماره‌ای ثبت نشده';
+
+  const appointmentsEl = document.getElementById('serviceShopModalAppointments');
+  if (appointmentsEl) appointmentsEl.textContent = displayNumber(shop.appointmentsCount);
+
+  const servicesEl = document.getElementById('serviceShopModalServices');
+  if (servicesEl) servicesEl.textContent = displayNumber(shop.servicesCount);
+
+  const portfolioEl = document.getElementById('serviceShopModalPortfolio');
+  if (portfolioEl) portfolioEl.textContent = displayNumber(shop.portfolioCount);
+
+  const planEl = document.getElementById('serviceShopModalPlan');
+  if (planEl) {
+    const planLabel = getServiceShopPlanLabel(shop);
+    const notes = [];
+    if (shop.complimentaryActive) {
+      if (shop.complimentaryEnd) {
+        notes.push(`تا ${persianDateFormatter.format(new Date(shop.complimentaryEnd))}`);
+      }
+      if (shop.complimentaryNotes) notes.push(escapeHtml(shop.complimentaryNotes));
+    }
+    planEl.innerHTML = `
+      <p class="service-shop-modal__plan-title">${escapeHtml(planLabel)}</p>
+      ${shop.planTitle ? `<small>نام پلن: ${escapeHtml(shop.planTitle)}</small>` : ''}
+      ${notes.length ? `<small>یادداشت: ${notes.join(' - ')}</small>` : ''}
+    `;
+  }
+
+  const publicLinkEl = document.getElementById('serviceShopModalPublicLink');
+  if (publicLinkEl) {
+    if (shop.shopUrl) {
+      publicLinkEl.href = `/service-shops.html?shopurl=${encodeURIComponent(shop.shopUrl)}`;
+      publicLinkEl.removeAttribute('aria-disabled');
+    } else {
+      publicLinkEl.href = '#';
+      publicLinkEl.setAttribute('aria-disabled', 'true');
+    }
+  }
+
+  const disableBtn = document.getElementById('serviceShopModalDisablePlan');
+  if (disableBtn) {
+    const canDisable = !!shop.complimentaryActive && !!shop.complimentaryAssignmentId;
+    disableBtn.hidden = !canDisable;
+    disableBtn.disabled = false;
+    disableBtn.dataset.assignmentId = shop.complimentaryAssignmentId || '';
+    disableBtn.dataset.shopId = shop.id || '';
+    disableBtn.textContent = 'غیرفعال کردن پلن رایگان';
+  }
+
+  modal.hidden = false;
+}
+
+function closeServiceShopModal() {
+  const modal = document.getElementById('serviceShopModal');
+  if (!modal) return;
+  modal.hidden = true;
 }
 
 function updateServiceShopPlanSelect() {
@@ -4057,6 +4182,49 @@ async function ensureServiceShopsData(force = false) {
     fetchServiceShopsOverview(force),
     fetchServiceShopsList({ force })
   ]);
+}
+
+async function revokeComplimentaryPlan(assignmentId, shopId, buttonEl) {
+  if (!assignmentId) return alert('شناسه پلن رایگان برای این فروشنده در دسترس نیست.');
+
+  const confirmed = confirm('آیا از غیرفعال کردن پلن رایگان این فروشنده مطمئن هستید؟');
+  if (!confirmed) return;
+
+  const originalText = buttonEl?.textContent;
+  if (buttonEl) {
+    buttonEl.disabled = true;
+    buttonEl.textContent = '⏳ در حال غیرفعال‌سازی...';
+  }
+
+  try {
+    const res = await fetch(`${ADMIN_API_BASE}/service-plans/assignments/${encodeURIComponent(assignmentId)}`, {
+      method: 'DELETE',
+      credentials: 'include'
+    });
+
+    if (!res.ok && res.status !== 204) {
+      let message = 'خطا در غیرفعال‌سازی پلن رایگان';
+      try {
+        const data = await res.json();
+        message = data?.message || message;
+      } catch (err) {
+        /* ignore parse errors */
+      }
+      throw new Error(message);
+    }
+
+    alert('پلن رایگان با موفقیت غیرفعال شد.');
+    await ensureServiceShopsData(true);
+    closeServiceShopModal();
+  } catch (error) {
+    console.error('Failed to revoke complimentary plan', error);
+    alert('❌ ' + (error.message || 'خطا در ارتباط با سرور'));
+  } finally {
+    if (buttonEl) {
+      buttonEl.disabled = false;
+      buttonEl.textContent = originalText || 'غیرفعال کردن پلن رایگان';
+    }
+  }
 }
 
 async function grantComplimentaryPlanToShop(shopId, buttonEl) {
@@ -5530,6 +5698,8 @@ const serviceShopsSummaryEl = document.getElementById('serviceShopsSummary');
 const refreshServiceShopsBtn = document.getElementById('refreshServiceShops');
 const refreshServiceShopsOverviewBtn = document.getElementById('refreshServiceShopsOverview');
 const serviceShopsTableEl = document.getElementById('serviceShopsTable');
+const serviceShopModalEl = document.getElementById('serviceShopModal');
+const serviceShopModalDisableBtn = document.getElementById('serviceShopModalDisablePlan');
 
 const DEFAULT_REWARD_CAMPAIGN = {
   title: '',
@@ -6359,10 +6529,35 @@ refreshServiceShopsOverviewBtn?.addEventListener('click', () => {
 });
 
 serviceShopsTableEl?.addEventListener('click', (event) => {
+  const modalBtn = event.target.closest('[data-action="open-service-shop"]');
+  if (modalBtn) {
+    openServiceShopModal(modalBtn.dataset.id);
+    return;
+  }
+
   const btn = event.target.closest('button[data-action="grant-free"]');
   if (!btn) return;
   const shopId = btn.dataset.id;
   grantComplimentaryPlanToShop(shopId, btn);
+});
+
+serviceShopModalEl?.addEventListener('click', (event) => {
+  const actionEl = event.target.closest('[data-action="close-service-modal"]');
+  if (actionEl) {
+    closeServiceShopModal();
+  }
+});
+
+document.addEventListener('keydown', (event) => {
+  if (event.key === 'Escape' && serviceShopModalEl && !serviceShopModalEl.hidden) {
+    closeServiceShopModal();
+  }
+});
+
+serviceShopModalDisableBtn?.addEventListener('click', () => {
+  const assignmentId = serviceShopModalDisableBtn.dataset.assignmentId;
+  const shopId = serviceShopModalDisableBtn.dataset.shopId;
+  revokeComplimentaryPlan(assignmentId, shopId, serviceShopModalDisableBtn);
 });
 
 // -------- Nav & Responsive (FIXED) --------
