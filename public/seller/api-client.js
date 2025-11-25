@@ -4,8 +4,8 @@
   }
 
   const backendOrigins = ['http://localhost:5000', 'http://127.0.0.1:5000'];
-  const defaultBackend = backendOrigins[0];
   const currentOrigin = global.location && global.location.origin ? global.location.origin : '';
+  const defaultBackend = currentOrigin || backendOrigins[0];
   const isServedFromBackend = backendOrigins.includes(currentOrigin);
 
   function normalizePath(path) {
