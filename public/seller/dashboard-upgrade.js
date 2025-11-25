@@ -381,6 +381,13 @@ let planPricePromise = null;
 let lastPlanFetchTimestamp = 0;
 const PLAN_FETCH_TTL = 60 * 1000; // هر ۶۰ ثانیه حداقل یکبار از سرور بخوان
 
+window.addEventListener('storage', (event) => {
+  if (event.key !== 'admin-plans-updated') return;
+  lastPlanFetchTimestamp = 0;
+  fetchPlanPrices(true);
+  fetchAdPrices(true);
+});
+
 function refreshPlanCardRegistry() {
   planCardRegistry = {};
   SUBSCRIPTION_PLAN_SLUGS.forEach(slug => {
