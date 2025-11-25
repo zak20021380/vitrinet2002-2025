@@ -5,6 +5,7 @@ const ServicePlan = require('../models/servicePlan');
 const ServicePlanSubscription = require('../models/servicePlanSubscription');
 const ServicePlanDiscountCode = require('../models/servicePlanDiscountCode');
 const ServiceShop = require('../models/serviceShop');
+const Seller = require('../models/Seller');
 const auth = require('../middlewares/authMiddleware');
 const { normalizePhone, buildDigitInsensitiveRegex, buildPhoneCandidates } = require('../utils/phone');
 
@@ -73,6 +74,79 @@ const normalizeDiscountCode = (value) => {
     .toUpperCase()
     .replace(/[^A-Z0-9-_]/g, '');
 };
+
+const slugify = (value = '') => {
+  const trimmed = String(value || '')
+    .trim()
+    .toLowerCase()
+    .replace(/[_\s]+/g, '-');
+  return trimmed
+    .replace(/[^a-z0-9\u0600-\u06FF-]/g, '-')
+    .replace(/-+/g, '-')
+    .replace(/^-|-$/g, '');
+};
+
+async function findOrCreateServiceShopFromLegacySeller({ phoneCandidates = [], regex = null, normalizedPhone = '' }) {
+  const sellerConditions = [];
+  if (phoneCandidates.length) {
+    sellerConditions.push({ phone: { $in: phoneCandidates } });
+  }
+  if (regex) {
+    sellerConditions.push({ phone: { $regex: regex } });
+  }
+
+  const sellerQuery = sellerConditions.length === 0
+    ? null
+    : sellerConditions.length === 1
+      ? sellerConditions[0]
+      : { $or: sellerConditions };
+
+  const legacySeller = sellerQuery ? await Seller.findOne(sellerQuery) : null;
+  if (!legacySeller) return null;
+
+  const existingShop = await ServiceShop.findOne({ $or: [
+    { legacySellerId: legacySeller._id },
+    { shopUrl: legacySeller.shopurl || legacySeller.shopUrl }
+  ].filter(Boolean) });
+  if (existingShop) return existingShop;
+
+  const baseSlug = slugify(
+    legacySeller.shopurl
+      || legacySeller.shopUrl
+      || legacySeller.storename
+      || normalizedPhone
+      || legacySeller.phone
+      || `seller-${legacySeller._id}`
+  ) || `seller-${legacySeller._id}`;
+
+  let slug = baseSlug;
+  let counter = 1;
+  // Ensure uniqueness to satisfy the unique index on shopUrl
+  // eslint-disable-next-line no-await-in-loop
+  while (await ServiceShop.exists({ shopUrl: slug })) {
+    slug = `${baseSlug}-${counter}`;
+    counter += 1;
+  }
+
+  const shopName = legacySeller.storename
+    || `${legacySeller.firstname || ''} ${legacySeller.lastname || ''}`.trim()
+    || 'فروشنده خدماتی';
+
+  const newShop = new ServiceShop({
+    name: shopName,
+    shopUrl: slug,
+    ownerPhone: normalizedPhone || legacySeller.phone || '',
+    city: legacySeller.city || '',
+    address: legacySeller.address || '',
+    status: 'approved',
+    isVisible: true,
+    isBookable: true,
+    legacySellerId: legacySeller._id
+  });
+
+  await newShop.save();
+  return newShop;
+}
 
 const toPositiveInt = (value) => {
   const num = Number(value);
@@ -531,6 +605,14 @@ router.post('/assignments', auth('admin'), async (req, res) => {
           : { $or: queryConditions };
 
       serviceShop = await ServiceShop.findOne(shopQuery);
+
+      if (!serviceShop) {
+        serviceShop = await findOrCreateServiceShopFromLegacySeller({
+          phoneCandidates,
+          regex,
+          normalizedPhone
+        });
+      }
     }
 
     if (!serviceShop) {
