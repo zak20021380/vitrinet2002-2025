@@ -766,7 +766,7 @@ window.selectPlan = async function (slug) {
 
   if (slug === '3month' || slug === '12month') {
     const months = slug === '3month' ? 3 : 12;
-    const basePrice = subscriptionPlanStore['1month']?.price ?? Number(faToEn(document.getElementById('price-1month')?.textContent || '').replace(/,/g, '')) || 0;
+    const basePrice = (subscriptionPlanStore['1month']?.price ?? Number(faToEn(document.getElementById('price-1month')?.textContent || '').replace(/,/g, ''))) || 0;
     if (basePrice && oldPriceEl) {
       const oldNum = basePrice * months;
       oldPriceEl.textContent = toFaPrice(oldNum) + ' تومان';
