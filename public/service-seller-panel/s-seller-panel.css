@@ -6256,6 +6256,143 @@ body[data-shop-blocked="true"] .app-nav {
   user-select: none;
 }
 
+#bookings-view .view-container,
+#settings-view .view-container {
+  position: relative;
+}
+
+.plan-lock-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: clamp(1rem, 3vw, 2rem);
+  background: linear-gradient(135deg, rgba(7, 11, 30, 0.86), rgba(9, 14, 40, 0.9));
+  backdrop-filter: blur(8px);
+  z-index: 6;
+}
+
+.plan-lock-card {
+  width: min(560px, 100%);
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 16px;
+  padding: clamp(1.25rem, 3vw, 1.75rem);
+  display: grid;
+  gap: 0.75rem;
+  box-shadow: 0 18px 45px rgba(0, 0, 0, 0.35);
+  text-align: right;
+  color: var(--c-text-primary);
+}
+
+.plan-lock-eyebrow {
+  margin: 0;
+  color: var(--c-primary-light);
+  font-weight: 700;
+  letter-spacing: 0.3px;
+  font-size: 0.85rem;
+}
+
+.plan-lock-card h3 {
+  margin: 0;
+  font-size: 1.15rem;
+  font-weight: 800;
+}
+
+.plan-lock-text {
+  margin: 0;
+  color: var(--c-text-secondary);
+  line-height: 1.8;
+}
+
+.plan-lock-actions {
+  display: flex;
+  justify-content: flex-start;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.plan-lock-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: rgba(var(--c-primary-rgb), 0.12);
+  color: var(--c-primary);
+  font-size: 1.2rem;
+}
+
+.plan-lock-card button[disabled] {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.plan-prompt-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  z-index: 50;
+  backdrop-filter: blur(4px);
+}
+
+.plan-prompt-backdrop[hidden] {
+  display: none;
+}
+
+.plan-prompt {
+  width: min(460px, 100%);
+  background: var(--c-surface);
+  border-radius: 16px;
+  padding: 1.5rem;
+  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.4);
+  border: 1px solid var(--c-border);
+  display: grid;
+  gap: 0.75rem;
+}
+
+.plan-prompt header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 0.5rem;
+}
+
+.plan-prompt h3 {
+  margin: 0;
+  font-size: 1.2rem;
+  font-weight: 800;
+}
+
+.plan-prompt p {
+  margin: 0;
+  color: var(--c-text-secondary);
+  line-height: 1.7;
+}
+
+.plan-prompt .actions {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.plan-prompt .close-btn {
+  border: none;
+  background: transparent;
+  color: var(--c-text-secondary);
+  cursor: pointer;
+}
+
+.plan-prompt .close-btn:focus-visible {
+  outline: 2px solid var(--c-primary);
+  border-radius: 8px;
+}
+
 @media (max-width: 600px) {
   .moderation-overlay__card {
     border-radius: 22px;
@@ -6274,5 +6411,19 @@ body[data-shop-blocked="true"] .app-nav {
   .moderation-banner {
     flex-direction: column;
     align-items: flex-start;
+  }
+}
+
+@media (max-width: 640px) {
+  .plan-lock-card {
+    text-align: center;
+  }
+
+  .plan-lock-actions {
+    justify-content: center;
+  }
+
+  .plan-prompt {
+    padding: 1.1rem;
   }
 }

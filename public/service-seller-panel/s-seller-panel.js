@@ -1339,6 +1339,150 @@ function renderComplimentaryPlan(planRaw) {
       ? 'پلن هدیه ویترینت هنوز فعال نشده؛ بعد از انتخاب پلن، همه جزئیات در همین بخش نمایش داده می‌شود.'
       : 'این پلن رایگان به عنوان هدیه مدیریت ویترینت در اختیار شماست.';
   }
+
+  window.__COMPLIMENTARY_PLAN_NORMALIZED__ = plan;
+}
+
+const PlanAccessGuard = (() => {
+  let normalizedPlan = null;
+
+  const overlays = {
+    settings: document.getElementById('plan-lock-settings'),
+    bookings: document.getElementById('plan-lock-bookings')
+  };
+
+  const lockableButtons = [
+    document.getElementById('add-service-btn'),
+    document.getElementById('add-portfolio-btn'),
+    document.getElementById('vip-settings-btn'),
+    document.getElementById('vip-toggle-btn'),
+    document.getElementById('vip-toggle-confirm'),
+    document.getElementById('service-image-btn'),
+    document.getElementById('portfolio-image-btn'),
+    document.getElementById('footer-pick-btn'),
+    document.getElementById('footer-remove-btn')
+  ];
+
+  const lockableForms = [
+    document.getElementById('settings-form'),
+    document.getElementById('service-form'),
+    document.getElementById('portfolio-form'),
+    document.getElementById('vip-form')
+  ];
+
+  const goPlans = () => { window.location.hash = '#/plans'; };
+
+  const ensureOverlayActions = () => {
+    Object.values(overlays).forEach((overlay) => {
+      if (!overlay || overlay.dataset.bind === 'true') return;
+      overlay.dataset.bind = 'true';
+      overlay.querySelectorAll('[data-go-plans]').forEach((btn) => {
+        btn.addEventListener('click', goPlans);
+      });
+    });
+  };
+
+  const toggleOverlay = (locked) => {
+    ensureOverlayActions();
+    Object.values(overlays).forEach((overlay) => {
+      if (!overlay) return;
+      overlay.hidden = !locked;
+      overlay.setAttribute('aria-hidden', locked ? 'false' : 'true');
+    });
+  };
+
+  const toggleControls = (locked) => {
+    lockableButtons.forEach((btn) => {
+      if (!btn) return;
+      if (locked) {
+        btn.dataset.prevDisabled = btn.disabled ? 'true' : 'false';
+        btn.disabled = true;
+        btn.setAttribute('aria-disabled', 'true');
+        btn.classList.add('is-disabled');
+      } else if (btn.dataset.prevDisabled !== undefined) {
+        if (btn.dataset.prevDisabled === 'false') {
+          btn.disabled = false;
+        }
+        btn.removeAttribute('aria-disabled');
+        btn.classList.remove('is-disabled');
+        delete btn.dataset.prevDisabled;
+      }
+    });
+
+    lockableForms.forEach((form) => {
+      if (!form) return;
+      form.classList.toggle('is-disabled', locked);
+      form.setAttribute('aria-disabled', locked ? 'true' : 'false');
+      form.querySelectorAll('input, select, textarea, button').forEach((ctrl) => {
+        if (locked) {
+          ctrl.dataset.planLocked = ctrl.disabled ? 'keep' : 'toggle';
+          ctrl.disabled = true;
+          ctrl.setAttribute('aria-disabled', 'true');
+        } else if (ctrl.dataset.planLocked) {
+          if (ctrl.dataset.planLocked === 'toggle') {
+            ctrl.disabled = false;
+          }
+          ctrl.removeAttribute('aria-disabled');
+          delete ctrl.dataset.planLocked;
+        }
+      });
+    });
+  };
+
+  const hasActivePlan = (plan) => {
+    if (!plan) return false;
+    if (plan.activeNow) return true;
+    if (plan.isActive && !plan.hasExpired) return true;
+    if (plan.endDate instanceof Date && plan.endDate > new Date()) return true;
+    return false;
+  };
+
+  const refresh = (rawPlan) => {
+    normalizedPlan = rawPlan ? normalizePlanForUI(rawPlan) : null;
+    const locked = !hasActivePlan(normalizedPlan);
+    toggleOverlay(locked);
+    toggleControls(locked);
+    window.__COMPLIMENTARY_PLAN_NORMALIZED__ = normalizedPlan;
+  };
+
+  return {
+    refresh,
+    isActive: () => hasActivePlan(normalizedPlan)
+  };
+})();
+
+function showPlanPromptModal() {
+  let backdrop = document.getElementById('plan-prompt-modal');
+  if (!backdrop) {
+    backdrop = document.createElement('div');
+    backdrop.id = 'plan-prompt-modal';
+    backdrop.className = 'plan-prompt-backdrop';
+    backdrop.innerHTML = `
+      <div class="plan-prompt" role="dialog" aria-modal="true" aria-labelledby="plan-prompt-title">
+        <header>
+          <h3 id="plan-prompt-title">برای افزودن خدمات باید پلن بخرید</h3>
+          <button type="button" class="close-btn" aria-label="بستن" data-close>✕</button>
+        </header>
+        <p>هیچ پلنی برای فروشگاه فعال نیست. برای اضافه کردن خدمات، نمونه‌کار و استفاده از نوبت‌دهی، یکی از پلن‌های پنل فروشنده را فعال کنید.</p>
+        <div class="actions">
+          <button type="button" class="btn-primary" data-go-plans>مشاهده پلن‌ها</button>
+          <button type="button" class="btn-secondary" data-close>بعداً</button>
+        </div>
+      </div>`;
+    document.body.appendChild(backdrop);
+
+    const close = () => backdrop.setAttribute('hidden', '');
+    backdrop.addEventListener('click', (e) => {
+      if (e.target === backdrop) close();
+    });
+    backdrop.querySelectorAll('[data-close]').forEach((btn) => btn.addEventListener('click', close));
+    backdrop.querySelectorAll('[data-go-plans]').forEach((btn) => btn.addEventListener('click', () => {
+      window.location.hash = '#/plans';
+      close();
+    }));
+  }
+
+  backdrop.removeAttribute('hidden');
 }
 
 async function loadComplimentaryPlan() {
@@ -1347,9 +1491,11 @@ async function loadComplimentaryPlan() {
     const plan = response?.plan || null;
     renderComplimentaryPlan(plan);
     window.__COMPLIMENTARY_PLAN__ = plan;
+    PlanAccessGuard.refresh(plan);
   } catch (err) {
     console.warn('loadComplimentaryPlan failed', err);
     renderComplimentaryPlan(null);
+    PlanAccessGuard.refresh(null);
   }
 }
 
@@ -3115,6 +3261,10 @@ if (dismissTarget) {
 // 4. View Store button
 if (elements.viewStoreBtn) {
   elements.viewStoreBtn.addEventListener('click', () => {
+    if (!PlanAccessGuard.isActive()) {
+      showPlanPromptModal();
+      return;
+    }
     try {
       const sellerData = JSON.parse(localStorage.getItem('seller') || '{}');
       if (sellerData.shopurl) {
