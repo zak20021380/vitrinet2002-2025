@@ -546,6 +546,16 @@ router.post('/assignments', auth('admin'), async (req, res) => {
       { new: true, upsert: true, setDefaultsOnInsert: true }
     ).populate('serviceShop', 'name ownerPhone city shopUrl').populate('servicePlan');
 
+    // Ensure the complimentary plan on the service shop reflects the latest assignment
+    const complimentaryUpdate = {
+      isActive: true,
+      durationDays: Number.isFinite(effectiveDuration) ? effectiveDuration : plan.durationDays || null,
+      startDate: start,
+      endDate: end,
+      note: notes ? String(notes).trim() : ''
+    };
+    await ServiceShop.findByIdAndUpdate(serviceShop._id, { complimentaryPlan: complimentaryUpdate });
+
     res.status(201).json({ assignment: mapAssignment(assignment) });
   } catch (error) {
     console.error('Failed to assign service plan:', error);
