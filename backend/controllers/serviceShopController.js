@@ -671,13 +671,21 @@ const mapLegacySellerToItem = (seller, { appearance, services = [], booking = {}
 
 const buildComplimentaryPlanPayload = (shop) => {
   const plan = shop?.complimentaryPlan || {};
-  const start = coerceDate(plan.startDate);
-  const end = coerceDate(plan.endDate);
   const now = new Date();
 
   const rawDuration = Number(plan.durationDays);
-  const duration = Number.isFinite(rawDuration) && rawDuration > 0
+  const durationFromPlan = Number.isFinite(rawDuration) && rawDuration > 0
     ? Math.max(1, Math.round(rawDuration))
+    : null;
+
+  const start = coerceDate(plan.startDate);
+  const computedEndFromDuration = start && durationFromPlan
+    ? new Date(start.getTime() + durationFromPlan * MS_PER_DAY)
+    : null;
+  const end = coerceDate(plan.endDate) || computedEndFromDuration;
+
+  const derivedDuration = durationFromPlan != null
+    ? durationFromPlan
     : (start && end ? Math.max(1, Math.round((end - start) / MS_PER_DAY)) : null);
 
   let usedDays = null;
@@ -686,22 +694,24 @@ const buildComplimentaryPlanPayload = (shop) => {
     usedDays = Math.max(0, Math.round((effectiveEnd - start) / MS_PER_DAY));
   }
 
-  if (duration != null && usedDays != null) {
-    usedDays = Math.min(usedDays, duration);
+  if (derivedDuration != null && usedDays != null) {
+    usedDays = Math.min(usedDays, derivedDuration);
   }
 
   const remainingDays = end ? Math.max(0, Math.ceil((end - now) / MS_PER_DAY)) : null;
 
   return {
     isActive: !!plan.isActive,
-    activeNow: !!plan.isActive && (!end || end >= now),
+    activeNow: !!plan.isActive
+      && (!start || start <= now)
+      && (!end || end >= now),
     startDate: start ? start.toISOString() : null,
     endDate: end ? end.toISOString() : null,
-    durationDays: duration,
+    durationDays: derivedDuration,
     note: plan.note || '',
     remainingDays,
     usedDays,
-    totalDays: duration,
+    totalDays: derivedDuration,
     hasExpired: !!plan.isActive && !!end && end < now
   };
 };
