@@ -79,7 +79,9 @@ const complimentaryPlanSchema = new mongoose.Schema({
   durationDays: { type: Number, default: 14 },
   startDate: { type: Date, default: null },
   endDate: { type: Date, default: null },
-  note: { type: String, default: '' }
+  note: { type: String, default: '' },
+  planTitle: { type: String, default: '' },
+  planSlug: { type: String, default: '' }
 }, { _id: false });
 
 const serviceShopSchema = new mongoose.Schema({

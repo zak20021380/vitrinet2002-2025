@@ -1094,7 +1094,9 @@ const normalizePlanForUI = (raw = {}) => {
     totalDays: raw.totalDays ?? null,
     activeNow: !!raw.activeNow,
     hasExpired: !!raw.hasExpired,
-    perks: Array.isArray(raw.perks) && raw.perks.length ? raw.perks : PLAN_PERKS_DEFAULT
+    perks: Array.isArray(raw.perks) && raw.perks.length ? raw.perks : PLAN_PERKS_DEFAULT,
+    title: raw.planTitle || raw.title || '',
+    slug: raw.planSlug || raw.slug || ''
   };
 
   const durationInput = Number(raw.durationDays);
@@ -1172,6 +1174,7 @@ function renderComplimentaryPlan(planRaw) {
   const subtextEl = document.getElementById('plan-hero-subtext');
   const plansDisabled = document.body?.dataset?.sellerPlans === 'disabled';
   const planCtaBtn = document.getElementById('plan-renew-btn');
+  const planNameEl = document.getElementById('plan-name');
 
   const hasAnyPlanLifecycle = plan.activeNow || plan.isActive || plan.hasExpired || plan.startDate || plan.endDate;
   const planlessNudge = !plansDisabled && !hasAnyPlanLifecycle;
@@ -1194,7 +1197,14 @@ function renderComplimentaryPlan(planRaw) {
   bindPlanHeroActions();
 
   if (tierEl) {
-    tierEl.textContent = planlessNudge ? 'نیاز به انتخاب پلن' : '🎖 پلن مهمان (رایگان)';
+    const tierLabel = planlessNudge
+      ? 'نیاز به انتخاب پلن'
+      : `🎖 ${plan.title || 'پلن رایگان'} (رایگان)`;
+    tierEl.textContent = tierLabel;
+  }
+
+  if (planNameEl) {
+    planNameEl.textContent = planlessNudge ? 'در انتظار انتخاب پلن' : (plan.title || 'پلن هدیه فعال');
   }
 
   if (planCtaBtn) {
@@ -1224,7 +1234,12 @@ function renderComplimentaryPlan(planRaw) {
   const progress = plan.totalDays
     ? Math.min(100, Math.max(0, Math.round(((plan.usedDays || 0) / plan.totalDays) * 100)))
     : 0;
-  if (progressBar) progressBar.style.width = `${progress}%`;
+  if (progressBar) {
+    progressBar.style.width = `${progress}%`;
+    progressBar.setAttribute('aria-valuemin', '0');
+    progressBar.setAttribute('aria-valuemax', '100');
+    progressBar.setAttribute('aria-valuenow', String(progress));
+  }
   if (usedEl) usedEl.textContent = `${progress}%`;
   if (leftEl) leftEl.textContent = `${Math.max(0, 100 - progress)}%`;
 
@@ -1271,7 +1286,8 @@ function renderComplimentaryPlan(planRaw) {
             ? 'امروز آخرین روز دسترسی رایگان است.'
             : `${faNumber(remainingDays)} روز دیگر از دسترسی رایگان باقی مانده است.`)
         : 'دسترسی رایگان شما فعال است.';
-      messageEl.textContent = `${urgency} بدون هزینه از تمام امکانات استفاده کنید و در صورت نیاز از همین جا ارتقا دهید.`;
+      const planLabel = plan.title ? `پلن «${plan.title}»` : 'پلن رایگان';
+      messageEl.textContent = `${planLabel} تا ${expiryLabel} فعال است. ${urgency} بدون هزینه از تمام امکانات استفاده کنید و در صورت نیاز از همین جا ارتقا دهید.`;
     } else if (plan.hasExpired) {
       messageEl.textContent = 'دوره رایگان تمام شده است. برای ادامه، یکی از پلن‌ها را انتخاب کنید یا با پشتیبانی هماهنگ شوید.';
     } else if (plan.isActive) {
@@ -1286,7 +1302,8 @@ function renderComplimentaryPlan(planRaw) {
 
   let subtext = 'وضعیت پلن رایگان توسط تیم مدیریت ویترینت کنترل می‌شود. برای پیگیری با پشتیبانی در ارتباط باشید.';
   if (plan.activeNow) {
-    subtext = `دسترسی رایگان فعال است${expiryLabel ? ` و تا ${expiryLabel} معتبر می‌ماند` : ''}.`;
+    const planLabel = plan.title ? `پلن «${plan.title}»` : 'پلن رایگان';
+    subtext = `${planLabel} فعال است${expiryLabel ? ` و تا ${expiryLabel} معتبر می‌ماند` : ''}.`;
   } else if (plan.hasExpired) {
     subtext = 'دوره رایگان پایان یافته است. برای تمدید یا خرید پلن جدید، با پشتیبانی هماهنگ کنید.';
   } else if (plan.isActive) {

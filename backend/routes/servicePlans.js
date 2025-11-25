@@ -122,7 +122,9 @@ const syncComplimentaryPlanOnShop = async (assignment, adminId = null) => {
       durationDays: assignment.durationDays || null,
       startDate: assignment.startDate || null,
       endDate: assignment.endDate || null,
-      note: assignment.notes || ''
+      note: assignment.notes || '',
+      planTitle: assignment.planSnapshot?.title || assignment.servicePlan?.title || '',
+      planSlug: assignment.planSnapshot?.slug || assignment.servicePlan?.slug || ''
     },
     updatedBy: adminId || null,
     updatedAt: new Date()

@@ -308,7 +308,9 @@ const clampComplimentaryDuration = (value) => {
 const normaliseComplimentaryPlan = (plan = {}) => {
   const normalized = {
     isActive: !!plan.isActive,
-    note: String(plan.note || '').trim()
+    note: String(plan.note || '').trim(),
+    planTitle: String(plan.planTitle || '').trim(),
+    planSlug: String(plan.planSlug || '').trim()
   };
 
   const start = plan.startDate instanceof Date
@@ -363,6 +365,8 @@ const parseComplimentaryPlan = (value, { existing = null, partial = false } = {}
     base.startDate = null;
     base.endDate = null;
     base.note = '';
+    base.planTitle = '';
+    base.planSlug = '';
   }
 
   if (source.isActive !== undefined) {
@@ -387,6 +391,16 @@ const parseComplimentaryPlan = (value, { existing = null, partial = false } = {}
 
   if (source.note !== undefined) {
     base.note = String(source.note || '').trim();
+    changed = true;
+  }
+
+  if (source.planTitle !== undefined) {
+    base.planTitle = String(source.planTitle || '').trim();
+    changed = true;
+  }
+
+  if (source.planSlug !== undefined) {
+    base.planSlug = String(source.planSlug || '').trim();
     changed = true;
   }
 
@@ -712,7 +726,9 @@ const buildComplimentaryPlanPayload = (shop) => {
     remainingDays,
     usedDays,
     totalDays: derivedDuration,
-    hasExpired: !!plan.isActive && !!end && end < now
+    hasExpired: !!plan.isActive && !!end && end < now,
+    planTitle: plan.planTitle || '',
+    planSlug: plan.planSlug || ''
   };
 };
 
