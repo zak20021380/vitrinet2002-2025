@@ -1883,7 +1883,18 @@ exports.listServiceShops = async (req, res) => {
         : { $and: filterConditions };
 
     if (includeLegacy) {
-      const [matchedItems, legacyAll, overviewTotals, legacyLinkedIds] = await Promise.all([
+      const lookupProjection = {
+        _id: 1,
+        ownerPhone: 1,
+        shopUrl: 1,
+        legacySellerId: 1,
+        complimentaryPlan: 1,
+        isPremium: 1,
+        status: 1
+      };
+
+      const [lookupShops, matchedItems, legacyAll, overviewTotals, legacyLinkedIds] = await Promise.all([
+        ServiceShop.find({}, lookupProjection).lean(),
         ServiceShop.find(filters)
           .sort({ updatedAt: -1 })
           .lean(),
@@ -1892,14 +1903,87 @@ exports.listServiceShops = async (req, res) => {
         ServiceShop.distinct('legacySellerId', { legacySellerId: { $ne: null } })
       ]);
 
+      const mergedLookup = new Map();
+
+      const addLookupEntry = (shop) => {
+        if (!shop) return;
+        const payload = {
+          complimentaryPlan: shop.complimentaryPlan,
+          isPremium: !!shop.isPremium,
+          status: shop.status || ''
+        };
+
+        const addKey = (key) => {
+          if (key) {
+            mergedLookup.set(key, payload);
+          }
+        };
+
+        const normalizedLegacyId = shop.legacySellerId || shop._id;
+        if (normalizedLegacyId) {
+          addKey(`id:${String(normalizedLegacyId)}`);
+        }
+
+        const shopUrlKey = String(shop.shopUrl || '').trim().toLowerCase();
+        if (shopUrlKey) {
+          addKey(`url:${shopUrlKey}`);
+        }
+
+        const phoneCandidates = buildPhoneCandidates(shop.ownerPhone || shop.phone || '');
+        phoneCandidates.forEach((candidate) => {
+          const normalized = normalizePhone(candidate);
+          if (normalized) {
+            addKey(`phone:${normalized}`);
+          }
+        });
+      };
+
+      lookupShops.forEach(addLookupEntry);
+
       const convertedSet = new Set(
         legacyLinkedIds
           .filter(id => id)
           .map(id => String(id))
       );
 
+      const enrichLegacyItem = (item) => {
+        if (!item) return null;
+
+        const tryMatch = (...keys) => {
+          for (const key of keys) {
+            if (!key) continue;
+            const match = mergedLookup.get(key);
+            if (match) return match;
+          }
+          return null;
+        };
+
+        const phoneKeys = buildPhoneCandidates(item.ownerPhone || '')
+          .map(value => normalizePhone(value))
+          .filter(Boolean)
+          .map(value => `phone:${value}`);
+
+        const urlKey = String(item.shopUrl || '').trim().toLowerCase();
+        const legacyIdKey = item.legacySellerId || item._id;
+
+        const matched = tryMatch(
+          ...phoneKeys,
+          urlKey ? `url:${urlKey}` : '',
+          legacyIdKey ? `id:${String(legacyIdKey)}` : ''
+        );
+
+        if (matched) {
+          item.complimentaryPlan = matched.complimentaryPlan;
+          item.isPremium = matched.isPremium;
+          item.status = matched.status || item.status;
+        }
+
+        return item;
+      };
+
       const legacyUnconvertedAll = legacyAll
-        .filter(item => item && !convertedSet.has(String(item.legacySellerId || item._id)));
+        .filter(item => item && !convertedSet.has(String(item.legacySellerId || item._id)))
+        .map(enrichLegacyItem);
 
       const legacyFiltered = legacyUnconvertedAll
         .filter(item => matchesLegacyFilters(item, legacyFilters));
