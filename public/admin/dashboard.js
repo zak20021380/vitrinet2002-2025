@@ -3768,6 +3768,57 @@ function normaliseServiceShopRecord(raw) {
   };
 }
 
+function dedupeServiceShops(list = []) {
+  const result = [];
+  const map = new Map();
+
+  const getKey = (shop) => {
+    const id = toIdString(shop?.id || shop?._id);
+    if (id) return `id:${id}`;
+    const phone = normalizePhone(shop?.ownerPhone || shop?.phone || shop?.mobile || '');
+    if (phone) return `phone:${phone}`;
+    const slug = (shop?.shopUrl || shop?.shopurl || '').trim().toLowerCase();
+    if (slug) return `slug:${slug}`;
+    return '';
+  };
+
+  const score = (shop) => {
+    if (!shop) return -1;
+    if (shop.complimentaryActive) return 3;
+    if (shop.isPremium) return 2;
+    if (shop.subscriptionType) return 1;
+    return 0;
+  };
+
+  const newerThan = (a, b) => {
+    const timeA = new Date(a?.updatedAt || a?.createdAt || 0).getTime();
+    const timeB = new Date(b?.updatedAt || b?.createdAt || 0).getTime();
+    return timeA > timeB;
+  };
+
+  for (const shop of list) {
+    if (!shop) continue;
+    const key = getKey(shop);
+    if (!key) {
+      result.push(shop);
+      continue;
+    }
+
+    const existing = map.get(key);
+    if (!existing) {
+      map.set(key, shop);
+      continue;
+    }
+
+    const scoreDiff = score(shop) - score(existing);
+    if (scoreDiff > 0 || (scoreDiff === 0 && newerThan(shop, existing))) {
+      map.set(key, shop);
+    }
+  }
+
+  return [...map.values(), ...result];
+}
+
 async function fetchServiceShopsOverview(force = false) {
   if (serviceShopsOverviewLoading && !force) return serviceShopsOverview;
   serviceShopsOverviewLoading = true;
@@ -3824,7 +3875,7 @@ async function fetchServiceShopsList({ force = false } = {}) {
             ? payload
             : [];
 
-    serviceShopsList = items.map(normaliseServiceShopRecord).filter(Boolean);
+    serviceShopsList = dedupeServiceShops(items.map(normaliseServiceShopRecord).filter(Boolean));
     renderServiceShopsTable();
     updateSidebarCounts();
     updateHeaderCounts();
