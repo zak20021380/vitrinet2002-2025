@@ -1292,7 +1292,7 @@ function renderComplimentaryPlan(planRaw) {
     if (plan.note) {
       messageEl.textContent = plan.note;
     } else if (planlessNudge) {
-      messageEl.textContent = 'هیچ پلنی برای فروشگاه فعال نیست. برای فعال شدن همه قابلیت‌ها، از بخش «پلن‌ها» یکی از گزینه‌ها را انتخاب کنید.';
+      messageEl.innerHTML = 'هیچ پلنی برای فروشگاه فعال نیست. برای فعال شدن همه قابلیت‌ها، از بخش «<a href="#/plans" class="plan-link">پلن‌ها</a>» یکی از گزینه‌ها را انتخاب کنید.';
     } else if (plan.activeNow) {
       const urgency = remainingDays != null
         ? (remainingDays <= 1
@@ -1328,7 +1328,7 @@ function renderComplimentaryPlan(planRaw) {
   }
   if (subtextEl) {
     if (planlessNudge) {
-      subtextEl.textContent = 'برای شروع فروش حرفه‌ای، وارد بخش پلن‌ها شوید، پلن مناسب را انتخاب کنید و در کمتر از یک دقیقه فعال‌سازی را انجام دهید.';
+      subtextEl.innerHTML = 'برای شروع فروش حرفه‌ای، وارد بخش <a href="#/plans" class="plan-link">پلن‌ها</a> شوید، پلن مناسب را انتخاب کنید و در کمتر از یک دقیقه فعال‌سازی را انجام دهید.';
     } else {
       subtextEl.textContent = subtext;
     }
