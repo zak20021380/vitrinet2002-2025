@@ -3747,6 +3747,12 @@ function normaliseServiceShopRecord(raw) {
     && (!complimentaryStart || complimentaryStart.getTime() <= now)
     && (!complimentaryEnd || complimentaryEnd.getTime() >= now);
 
+  const planStatus = (raw.planStatus
+    || complimentaryPlan.status
+    || complimentaryPlan.state
+    || raw.complimentaryStatus
+    || '').toString().trim();
+
   return {
     id,
     name,
@@ -3764,6 +3770,7 @@ function normaliseServiceShopRecord(raw) {
     complimentaryStart,
     complimentaryNotes: complimentaryPlan.notes || '',
     planTitle: complimentaryPlan.title || complimentaryPlan.name || '',
+    planStatus,
     meta: raw
   };
 }
@@ -3891,8 +3898,27 @@ function renderServiceShopsOverview() {
 
 function getServiceShopPlanLabel(shop) {
   if (shop?.complimentaryActive) {
-    const expires = shop.complimentaryEnd ? `تا ${persianDateFormatter.format(new Date(shop.complimentaryEnd))}` : 'فعال';
-    return `پلن رایگان (${expires})`;
+    const now = Date.now();
+    const endTs = shop.complimentaryEnd ? new Date(shop.complimentaryEnd).getTime() : null;
+    const remainingDays = endTs ? Math.max(0, Math.ceil((endTs - now) / (1000 * 60 * 60 * 24))) : null;
+
+    const statusText = shop.planStatus
+      ? `وضعیت: ${shop.planStatus}`
+      : 'فعال';
+
+    const expiryText = shop.complimentaryEnd
+      ? `تا ${persianDateFormatter.format(new Date(shop.complimentaryEnd))}`
+      : 'بدون تاریخ پایان';
+
+    const remainingText = Number.isFinite(remainingDays)
+      ? `${remainingDays} روز باقی‌مانده`
+      : '';
+
+    const titleText = shop.planTitle ? `پلن: ${shop.planTitle}` : 'پلن رایگان';
+
+    return [titleText, statusText, expiryText, remainingText]
+      .filter(Boolean)
+      .join(' • ');
   }
   if (shop?.isPremium) return 'پریمیوم فعال';
   return 'بدون پلن فعال';
