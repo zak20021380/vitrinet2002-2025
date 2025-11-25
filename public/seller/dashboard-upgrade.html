@@ -11,43 +11,175 @@
   <style>
     body {
       font-family: 'Vazirmatn', sans-serif;
-      background: linear-gradient(115deg, #e0fdfa 0%, #f8fafc 65%, #d4fbe8 100%);
+      background: radial-gradient(circle at 20% 20%, #d1fae5 0, #e0fdfa 16%, transparent 40%),
+        radial-gradient(circle at 80% 0%, #dbeafe 0, #eff6ff 20%, transparent 46%),
+        linear-gradient(135deg, #eef2ff 0%, #f0fdf4 55%, #ecfeff 100%);
       min-height: 100vh;
       margin: 0;
       padding: 0;
+      position: relative;
+      overflow-x: hidden;
+    }
+    body::before,
+    body::after {
+      content: "";
+      position: absolute;
+      filter: blur(80px);
+      opacity: 0.32;
+      border-radius: 9999px;
+      z-index: 0;
+    }
+    body::before {
+      width: 380px;
+      height: 380px;
+      background: #a5f3fc;
+      top: -120px;
+      right: -100px;
+    }
+    body::after {
+      width: 320px;
+      height: 320px;
+      background: #bbf7d0;
+      bottom: -120px;
+      left: -120px;
     }
     .tab-active {
       background: #10b981 !important;
       color: #fff !important;
       box-shadow: 0 4px 24px #10b98122;
     }
+    .tab-btn {
+      border: 1px solid rgba(16,185,129,0.2);
+      box-shadow: 0 12px 28px rgba(15,118,110,0.08);
+      backdrop-filter: blur(8px);
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    .tab-btn:hover,
+    .tab-btn:focus {
+      transform: translateY(-2px);
+      box-shadow: 0 14px 32px rgba(14,165,233,0.15);
+    }
+    .page-shell {
+      position: relative;
+      overflow: hidden;
+      border: 1px solid rgba(148,163,184,0.15);
+      box-shadow: 0 24px 60px rgba(15,118,110,0.14), 0 6px 16px rgba(14,165,233,0.08);
+      background: linear-gradient(180deg, rgba(255,255,255,0.98) 0%, rgba(240,253,244,0.96) 55%, rgba(255,255,255,0.98) 100%);
+      z-index: 1;
+    }
+    .page-shell::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(120% 120% at 12% 20%, rgba(16,185,129,0.08), transparent),
+        radial-gradient(90% 80% at 92% 8%, rgba(14,165,233,0.08), transparent),
+        linear-gradient(120deg, rgba(14,165,233,0.04), rgba(16,185,129,0.06));
+      pointer-events: none;
+      z-index: 0;
+    }
+    .page-shell::after {
+      content: "";
+      position: absolute;
+      width: 200px;
+      height: 200px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(59,130,246,0.18), transparent 60%);
+      top: 10%;
+      right: -12%;
+      filter: blur(12px);
+      opacity: 0.6;
+      pointer-events: none;
+    }
     .plan-card {
       position: relative;
-      background: #fff;
-      border: 2px solid #e0e8e7;
-      border-radius: 1.5rem;
-      padding: 2.5rem 2rem;
+      background: linear-gradient(165deg, #ffffff 0%, #f0fdf4 40%, #f8fafc 100%);
+      border: 1px solid rgba(14,165,233,0.14);
+      border-radius: 1.6rem;
+      padding: 2.4rem 2.2rem;
       display: flex;
       flex-direction: column;
       align-items: center;
       text-align: center;
       gap: 0.85rem;
       min-height: 300px;
-      box-shadow: 0 10px 30px rgba(15,118,110,0.08);
-      transition: transform 0.2s ease, box-shadow 0.2s ease;
+      box-shadow: 0 18px 48px rgba(13,148,136,0.12), 0 8px 20px rgba(14,165,233,0.08);
+      transition: transform 0.25s ease, box-shadow 0.3s ease, border-color 0.25s ease;
+      overflow: hidden;
+      isolation: isolate;
     }
     .plan-card:hover {
-      transform: translateY(-4px);
-      box-shadow: 0 18px 38px rgba(15,118,110,0.16);
+      transform: translateY(-6px);
+      border-color: rgba(16,185,129,0.35);
+      box-shadow: 0 26px 64px rgba(16,185,129,0.18), 0 10px 20px rgba(14,165,233,0.12);
+    }
+    .plan-card::before {
+      content: "";
+      position: absolute;
+      inset: 12px;
+      border-radius: 1.1rem;
+      background: radial-gradient(circle at 20% 20%, rgba(16,185,129,0.06), transparent 50%),
+        radial-gradient(circle at 80% 10%, rgba(14,165,233,0.08), transparent 55%),
+        linear-gradient(120deg, rgba(255,255,255,0.8), rgba(255,255,255,0.98));
+      z-index: -1;
+      transition: opacity 0.25s ease;
+    }
+    .plan-card__top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.9rem;
+      width: 100%;
+    }
+    .plan-card__icon-bubble {
+      width: 3.5rem;
+      height: 3.5rem;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 1.2rem;
+      background: linear-gradient(145deg, rgba(16,185,129,0.1), rgba(14,165,233,0.12));
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.9);
+      flex-shrink: 0;
+    }
+    .plan-card__headline {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 0.2rem;
     }
     .plan-card__icon {
-      margin-bottom: 0.4rem;
+      margin-bottom: 0;
     }
     .plan-card__title {
       margin: 0;
       font-size: 1.25rem;
       font-weight: 800;
       color: #0f172a;
+    }
+    .plan-card__subtitle {
+      font-size: 0.78rem;
+      color: #475569;
+    }
+    .plan-card__pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      padding: 0.35rem 0.8rem;
+      background: rgba(16,185,129,0.12);
+      color: #0f766e;
+      border-radius: 999px;
+      font-weight: 800;
+      font-size: 0.75rem;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.9);
+    }
+    .plan-card__pill--sky { background: rgba(14,165,233,0.12); color: #0ea5e9; }
+    .plan-card__pill--amber { background: rgba(245,158,11,0.12); color: #c2410c; }
+    .plan-card__meta-row {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+      justify-content: flex-start;
+      width: 100%;
     }
     .plan-card__price {
       display: flex;
@@ -70,6 +202,10 @@
       font-size: 0.92rem;
       color: #334155;
       min-height: 48px;
+      background: rgba(255,255,255,0.9);
+      border-radius: 1rem;
+      padding: 0.65rem 0.8rem;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.8);
     }
     .plan-card__features {
       list-style: none;
@@ -86,7 +222,12 @@
       justify-content: flex-start;
       text-align: right;
       font-size: 0.9rem;
-      color: #1f2937;
+      color: #0f172a;
+      background: linear-gradient(120deg, rgba(16,185,129,0.08), rgba(14,165,233,0.08));
+      border-radius: 0.85rem;
+      padding: 0.55rem 0.75rem;
+      border: 1px solid rgba(14,165,233,0.08);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.7);
     }
     .plan-feature-icon {
       display: inline-flex;
@@ -109,6 +250,13 @@
       font-weight: 800;
       color: #fff;
       transition: transform 0.15s ease, box-shadow 0.2s ease;
+      border: none;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.45rem;
+      background: linear-gradient(115deg, #10b981 0%, #0ea5e9 60%, #6366f1 110%);
+      box-shadow: 0 16px 36px rgba(14,165,233,0.3);
     }
     .plan-card__cta:hover {
       transform: translateY(-2px);
@@ -151,6 +299,8 @@
     /* تبلیغ ویژه */
     .ad-highlight {
       background: linear-gradient(90deg, #a7f3d0 65%, #dbeafe 100%);
+      border: 1px solid rgba(14,165,233,0.2);
+      box-shadow: 0 18px 42px rgba(16,185,129,0.14);
     }
     /* پلن فعال */
     .active-plan {
@@ -196,6 +346,63 @@
 .btn-grad:focus::before {
   opacity: 1;
 }
+
+    .hero-banner {
+      position: relative;
+      overflow: hidden;
+      border: 1px solid rgba(148,163,184,0.2);
+      border-radius: 1.5rem;
+      padding: 1rem 1.25rem;
+      background: linear-gradient(120deg, rgba(14,165,233,0.08), rgba(16,185,129,0.14));
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.8), 0 10px 32px rgba(14,165,233,0.12);
+    }
+    .hero-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.35rem 0.9rem;
+      border-radius: 999px;
+      background: #fefce8;
+      color: #854d0e;
+      font-weight: 800;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.8);
+      margin-left: 0.75rem;
+    }
+    .hero-meta-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit,minmax(160px,1fr));
+      gap: 0.65rem;
+      margin-top: 0.8rem;
+    }
+    .hero-meta-card {
+      display: flex;
+      align-items: center;
+      gap: 0.7rem;
+      padding: 0.75rem 0.85rem;
+      border-radius: 1rem;
+      background: rgba(255,255,255,0.86);
+      border: 1px solid rgba(148,163,184,0.18);
+      box-shadow: 0 12px 26px rgba(15,118,110,0.08);
+    }
+    .hero-meta-icon {
+      width: 38px;
+      height: 38px;
+      border-radius: 12px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(135deg, rgba(16,185,129,0.12), rgba(14,165,233,0.14));
+      color: #0ea5e9;
+    }
+    .hero-meta-title {
+      font-size: 0.88rem;
+      font-weight: 800;
+      color: #0f172a;
+    }
+    .hero-meta-sub {
+      font-size: 0.75rem;
+      color: #475569;
+    }
 
     /* استایل مدال اشتراک */
     #upgradeModal .modal-box {
@@ -717,7 +924,7 @@
 </head>
 <body class="min-h-screen px-2 pt-6 pb-8">
   <!-- Responsive padding & spacing for main container -->
-  <div class="max-w-3xl mx-auto bg-white/90 shadow-2xl rounded-3xl p-4 sm:p-6 md:p-10 mb-6 sm:mb-7 mt-2 sm:mt-3 animate-fadeIn">
+  <div class="page-shell max-w-3xl mx-auto rounded-3xl p-4 sm:p-6 md:p-10 mb-6 sm:mb-7 mt-2 sm:mt-3 animate-fadeIn">
     <!-- Responsive heading sizing -->
     <h1 class="text-2xl sm:text-3xl md:text-4xl font-extrabold text-[#10b981] text-center mb-1 flex items-center justify-center gap-2">
       <svg width="30" height="30" fill="none" viewBox="0 0 24 24">
@@ -727,6 +934,47 @@
       <span id="premiumBadge" class="hidden bg-[#f59e0b] text-white text-xs px-2 py-0.5 rounded-full">پرمیوم</span>
     </h1>
     <div class="text-gray-500 text-center text-base mb-5">همین الان با خرید اشتراک یا تبلیغات ویژه، رشد فروشگاهت رو چند برابر کن!</div>
+    <div class="hero-banner mb-6">
+      <div class="flex items-center justify-between flex-wrap gap-3">
+        <div class="flex items-center flex-wrap gap-3">
+          <span class="hero-chip">نسخه جدید ویترینت پلاس</span>
+          <span class="text-sm text-slate-700">طراحی تازه، پرداخت امن و مسیر رشد شفاف برای فروشندگان حرفه‌ای</span>
+        </div>
+        <div class="inline-flex items-center gap-2 text-emerald-700 text-sm font-bold bg-white/80 px-3 py-2 rounded-xl shadow-sm">
+          <svg width="20" height="20" fill="none" viewBox="0 0 24 24" class="text-emerald-500"><path d="M12 3l3 6 6 .5-4.5 4 1 6.5L12 17l-5.5 3.9 1-6.4L3 9.5 9 9z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>
+          <span>بیش از ۵۰۰ فروشنده فعال</span>
+        </div>
+      </div>
+      <div class="hero-meta-grid">
+        <div class="hero-meta-card">
+          <div class="hero-meta-icon">
+            <svg width="20" height="20" fill="none" viewBox="0 0 24 24"><path d="M4 14l4 4 12-12" stroke="#10b981" stroke-width="2" stroke-linecap="round"/></svg>
+          </div>
+          <div>
+            <div class="hero-meta-title">+۲٫۸ برابر دیده‌شدن</div>
+            <div class="hero-meta-sub">با اشتراک‌های ویترینت</div>
+          </div>
+        </div>
+        <div class="hero-meta-card">
+          <div class="hero-meta-icon">
+            <svg width="20" height="20" fill="none" viewBox="0 0 24 24"><path d="M4 7h16M4 12h12M4 17h8" stroke="#0ea5e9" stroke-width="2" stroke-linecap="round"/></svg>
+          </div>
+          <div>
+            <div class="hero-meta-title">تبلیغات هدفمند</div>
+            <div class="hero-meta-sub">نمایش در جایگاه‌های طلایی</div>
+          </div>
+        </div>
+        <div class="hero-meta-card">
+          <div class="hero-meta-icon">
+            <svg width="20" height="20" fill="none" viewBox="0 0 24 24"><path d="M12 3v18m0 0-4-4m4 4 4-4" stroke="#f59e0b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          <div>
+            <div class="hero-meta-title">پرداخت امن و شفاف</div>
+            <div class="hero-meta-sub">صدور فاکتور و گزارش آنلاین</div>
+          </div>
+        </div>
+      </div>
+    </div>
     <!-- تب‌های انتخاب بخش -->
     <div class="flex md:flex-nowrap tab-actions gap-2 justify-center mb-8">
       <button id="tab-sub" class="tab-btn bg-[#f1faf7] text-[#10b981] px-4 py-2 text-sm sm:text-base rounded-xl font-bold shadow hover:bg-[#10b98111] focus:outline-none transition tab-active">
@@ -747,11 +995,22 @@
         <!-- پلن یک ماهه -->
         <div class="plan-card plan-card--sub" data-plan-card="1month">
           <div class="badge" data-plan-badge="1month">پیشنهاد اقتصادی</div>
-          <svg width="42" height="42" fill="none" viewBox="0 0 24 24" class="plan-card__icon">
-            <circle cx="12" cy="12" r="10" stroke="#10b981" stroke-width="2"/>
-            <path d="M12 6v6l3 2" stroke="#0ea5e9" stroke-width="2" stroke-linecap="round"/>
-          </svg>
-          <h2 class="plan-card__title" data-plan-title="1month">اشتراک ۱ ماهه</h2>
+          <div class="plan-card__top">
+            <div class="plan-card__icon-bubble">
+              <svg width="42" height="42" fill="none" viewBox="0 0 24 24" class="plan-card__icon">
+                <circle cx="12" cy="12" r="10" stroke="#10b981" stroke-width="2"/>
+                <path d="M12 6v6l3 2" stroke="#0ea5e9" stroke-width="2" stroke-linecap="round"/>
+              </svg>
+            </div>
+            <div class="plan-card__headline">
+              <h2 class="plan-card__title" data-plan-title="1month">اشتراک ۱ ماهه</h2>
+              <p class="plan-card__subtitle">شروع سریع برای آزمودن بازار</p>
+            </div>
+          </div>
+          <div class="plan-card__meta-row">
+            <span class="plan-card__pill">راه‌اندازی سریع</span>
+            <span class="plan-card__pill plan-card__pill--sky">پشتیبانی استاندارد</span>
+          </div>
           <div class="plan-card__price">
             <span id="price-1month" data-plan-price="1month">۴۹,۰۰۰</span>
             <span class="plan-card__price-unit">تومان</span>
@@ -763,16 +1022,27 @@
             <li><span class="plan-feature-icon">✔</span><span>پشتیبانی استاندارد تیم ویترینت</span></li>
             <li><span class="plan-feature-icon">✔</span><span>امکان فعالسازی VitriPlus</span></li>
           </ul>
-          <button class="plan-card__cta bg-[#10b981] hover:bg-[#0ea5e9]" data-plan-select="1month" onclick="selectPlan('1month')">خرید این پلن</button>
+          <button class="plan-card__cta" data-plan-select="1month" onclick="selectPlan('1month')">خرید این پلن</button>
         </div>
         <!-- پلن سه ماهه -->
         <div class="plan-card plan-card--sub" data-plan-card="3month">
           <div class="badge" data-plan-badge="3month" style="background:linear-gradient(90deg,#f59e0b 65%,#10b981 100%)">پیشنهاد محبوب</div>
-          <svg width="42" height="42" fill="none" viewBox="0 0 24 24" class="plan-card__icon">
-            <circle cx="12" cy="12" r="10" stroke="#f59e0b" stroke-width="2"/>
-            <path d="M12 8v8" stroke="#10b981" stroke-width="2" stroke-linecap="round"/>
-          </svg>
-          <h2 class="plan-card__title" data-plan-title="3month">اشتراک ۳ ماهه</h2>
+          <div class="plan-card__top">
+            <div class="plan-card__icon-bubble">
+              <svg width="42" height="42" fill="none" viewBox="0 0 24 24" class="plan-card__icon">
+                <circle cx="12" cy="12" r="10" stroke="#f59e0b" stroke-width="2"/>
+                <path d="M12 8v8" stroke="#10b981" stroke-width="2" stroke-linecap="round"/>
+              </svg>
+            </div>
+            <div class="plan-card__headline">
+              <h2 class="plan-card__title" data-plan-title="3month">اشتراک ۳ ماهه</h2>
+              <p class="plan-card__subtitle">تعادل هزینه و رشد پایدار</p>
+            </div>
+          </div>
+          <div class="plan-card__meta-row">
+            <span class="plan-card__pill plan-card__pill--amber">پیشنهاد محبوب</span>
+            <span class="plan-card__pill plan-card__pill--sky">اولویت نمایش</span>
+          </div>
           <div class="plan-card__price">
             <span id="price-3month" data-plan-price="3month">۱۲۹,۰۰۰</span>
             <span class="plan-card__price-unit">تومان</span>
@@ -784,16 +1054,27 @@
             <li><span class="plan-feature-icon">✔</span><span>اولویت نمایش در لیست فروشگاه‌ها</span></li>
             <li><span class="plan-feature-icon">✔</span><span>پشتیبانی سریع‌تر</span></li>
           </ul>
-          <button class="plan-card__cta bg-[#f59e0b] hover:bg-[#0ea5e9]" data-plan-select="3month" onclick="selectPlan('3month')">خرید این پلن</button>
+          <button class="plan-card__cta" data-plan-select="3month" onclick="selectPlan('3month')">خرید این پلن</button>
         </div>
         <!-- پلن یک‌ساله -->
         <div class="plan-card plan-card--sub" data-plan-card="12month">
           <div class="badge" data-plan-badge="12month" style="background:linear-gradient(90deg,#10b981 65%,#0ea5e9 100%)">بیشترین صرفه‌جویی</div>
-          <svg width="42" height="42" fill="none" viewBox="0 0 24 24" class="plan-card__icon">
-            <circle cx="12" cy="12" r="10" stroke="#0ea5e9" stroke-width="2"/>
-            <path d="M12 4v14" stroke="#0ea5e9" stroke-width="2" stroke-linecap="round"/>
-          </svg>
-          <h2 class="plan-card__title" data-plan-title="12month">اشتراک ۱ ساله</h2>
+          <div class="plan-card__top">
+            <div class="plan-card__icon-bubble">
+              <svg width="42" height="42" fill="none" viewBox="0 0 24 24" class="plan-card__icon">
+                <circle cx="12" cy="12" r="10" stroke="#0ea5e9" stroke-width="2"/>
+                <path d="M12 4v14" stroke="#0ea5e9" stroke-width="2" stroke-linecap="round"/>
+              </svg>
+            </div>
+            <div class="plan-card__headline">
+              <h2 class="plan-card__title" data-plan-title="12month">اشتراک ۱ ساله</h2>
+              <p class="plan-card__subtitle">همراهی بلندمدت با صرفه‌جویی بیشتر</p>
+            </div>
+          </div>
+          <div class="plan-card__meta-row">
+            <span class="plan-card__pill">ویتری‌پلاس فعال</span>
+            <span class="plan-card__pill plan-card__pill--sky">تحلیل و گزارش VIP</span>
+          </div>
           <div class="plan-card__price">
             <span id="price-12month" data-plan-price="12month">۳۸۹,۰۰۰</span>
             <span class="plan-card__price-unit">تومان</span>
@@ -805,7 +1086,7 @@
             <li><span class="plan-feature-icon">✔</span><span>نمایش ویژه و پروموشن‌های اختصاصی</span></li>
             <li><span class="plan-feature-icon">✔</span><span>پشتیبانی VIP و گزارش‌های تحلیلی</span></li>
           </ul>
-          <button class="plan-card__cta bg-[#0ea5e9] hover:bg-[#10b981]" data-plan-select="12month" onclick="selectPlan('12month')">خرید این پلن</button>
+          <button class="plan-card__cta" data-plan-select="12month" onclick="selectPlan('12month')">خرید این پلن</button>
         </div>
       </div>
     </div>
@@ -815,65 +1096,95 @@
         <!-- تبلیغ سرچ -->
         <div class="plan-card ad-highlight relative border-2 border-[#a7f3d0] rounded-2xl px-6 py-7 flex flex-col items-center shadow-xl text-center min-h-[250px] sm:min-h-[290px]">
           <div class="badge" style="background:linear-gradient(90deg,#f59e0b 70%,#10b981 100%)">جدید</div>
-          <svg width="40" height="40" fill="none" viewBox="0 0 24 24" class="mb-2">
-            <rect x="4" y="4" width="16" height="16" rx="3" stroke="#10b981" stroke-width="2"/>
-            <path d="M8 8h8M8 12h8M8 16h8" stroke="#0ea5e9" stroke-width="2"/>
-          </svg>
-          <h2 class="font-extrabold text-lg text-[#10b981] mb-2">تبلیغ در جستجو</h2>
-<div class="text-lg font-bold text-[#f59e0b] mb-1">
-  <span id="price-ad_search">۷۹,۰۰۰</span>
-  <span class="text-sm font-normal">تومان / ۱ روز</span>
-</div>
-          <ul class="text-gray-700 text-sm text-right mb-4 px-0.5">
-            <li>✨ نمایش بنر در باکس جستجوی صفحه اول</li>
-            <li>🛒 لینک به محصول یا فروشگاه</li>
-            <li>⏱ اعتبار: ۱ روز</li>
+          <div class="plan-card__top">
+            <div class="plan-card__icon-bubble">
+              <svg width="40" height="40" fill="none" viewBox="0 0 24 24" class="plan-card__icon">
+                <rect x="4" y="4" width="16" height="16" rx="3" stroke="#10b981" stroke-width="2"/>
+                <path d="M8 8h8M8 12h8M8 16h8" stroke="#0ea5e9" stroke-width="2"/>
+              </svg>
+            </div>
+            <div class="plan-card__headline">
+              <h2 class="font-extrabold text-lg text-[#10b981]">تبلیغ در جستجو</h2>
+              <p class="plan-card__subtitle">در معرض دید خریداران واقعی</p>
+            </div>
+          </div>
+          <div class="plan-card__meta-row">
+            <span class="plan-card__pill plan-card__pill--sky">نتایج جستجو</span>
+            <span class="plan-card__pill plan-card__pill--amber">کلیک فوری</span>
+          </div>
+          <div class="plan-card__price text-[#f59e0b]">
+            <span id="price-ad_search">۷۹,۰۰۰</span>
+            <span class="plan-card__price-unit">تومان / ۱ روز</span>
+          </div>
+          <div class="plan-card__duration">اعتبار: ۱ روز</div>
+          <ul class="plan-card__features text-sm text-right">
+            <li><span class="plan-feature-icon">★</span><span>نمایش بنر در باکس جستجوی صفحه اول</span></li>
+            <li><span class="plan-feature-icon">↗</span><span>لینک مستقیم به محصول یا فروشگاه</span></li>
+            <li><span class="plan-feature-icon">⚡</span><span>افزایش سریع ورودی هدفمند</span></li>
           </ul>
-        <button class="w-full py-2 text-sm sm:text-lg bg-[#10b981] hover:bg-[#0ea5e9] text-white font-bold rounded-xl transition shadow"
-        onclick="openAdModal('ad_search')">درخواست تبلیغ</button>
-
+          <button class="plan-card__cta mt-3" onclick="openAdModal('ad_search')">درخواست تبلیغ</button>
         </div>
         <!-- تبلیغ صفحه اول مغازه‌ها -->
         <div class="plan-card ad-highlight relative border-2 border-[#93c5fd] rounded-2xl px-6 py-7 flex flex-col items-center shadow-xl text-center min-h-[250px] sm:min-h-[290px]">
           <div class="badge" style="background:linear-gradient(90deg,#0ea5e9 70%,#10b981 100%)">محبوب</div>
-          <svg width="40" height="40" fill="none" viewBox="0 0 24 24" class="mb-2">
-            <rect x="3" y="6" width="18" height="13" rx="3" stroke="#0ea5e9" stroke-width="2"/>
-            <path d="M8 13h8" stroke="#10b981" stroke-width="2" stroke-linecap="round"/>
-          </svg>
-          <h2 class="font-extrabold text-lg text-[#0ea5e9] mb-2">تبلیغ در صفحه اول</h2>
-<div class="text-lg font-bold text-[#10b981] mb-1">
-  <span id="price-ad_home">۹۹,۰۰۰</span>
-  <span class="text-sm font-normal">تومان / ۱ روز</span>
-</div>
-          <ul class="text-gray-700 text-sm text-right mb-4 px-0.5">
-            <li>👑 نمایش مغازه یا محصول در ردیف اول</li>
-            <li>🏆 استایل ویژه و دیده شدن بیشتر</li>
-            <li>⏱ اعتبار: ۱ روز</li>
+          <div class="plan-card__top">
+            <div class="plan-card__icon-bubble">
+              <svg width="40" height="40" fill="none" viewBox="0 0 24 24" class="plan-card__icon">
+                <rect x="3" y="6" width="18" height="13" rx="3" stroke="#0ea5e9" stroke-width="2"/>
+                <path d="M8 13h8" stroke="#10b981" stroke-width="2" stroke-linecap="round"/>
+              </svg>
+            </div>
+            <div class="plan-card__headline">
+              <h2 class="font-extrabold text-lg text-[#0ea5e9]">تبلیغ در صفحه اول</h2>
+              <p class="plan-card__subtitle">برندینگ سریع در صفحه اصلی</p>
+            </div>
+          </div>
+          <div class="plan-card__meta-row">
+            <span class="plan-card__pill plan-card__pill--sky">صفحه اول</span>
+            <span class="plan-card__pill plan-card__pill--amber">جایگاه طلایی</span>
+          </div>
+          <div class="plan-card__price text-[#10b981]">
+            <span id="price-ad_home">۹۹,۰۰۰</span>
+            <span class="plan-card__price-unit">تومان / ۱ روز</span>
+          </div>
+          <div class="plan-card__duration">اعتبار: ۱ روز</div>
+          <ul class="plan-card__features text-sm text-right">
+            <li><span class="plan-feature-icon">👑</span><span>نمایش مغازه یا محصول در ردیف اول</span></li>
+            <li><span class="plan-feature-icon">🚀</span><span>استایل ویژه و دیده شدن بیشتر</span></li>
+            <li><span class="plan-feature-icon">⭐</span><span>بیشترین نرخ کلیک و بازدید</span></li>
           </ul>
-      <button class="w-full py-2 text-sm sm:text-lg bg-[#0ea5e9] hover:bg-[#10b981] text-white font-bold rounded-xl transition shadow"
-        onclick="openAdModal('ad_home')">درخواست تبلیغ</button>
-
+          <button class="plan-card__cta mt-3" onclick="openAdModal('ad_home')">درخواست تبلیغ</button>
         </div>
         <!-- تبلیغ بین محصولات -->
         <div class="plan-card ad-highlight relative border-2 border-[#fbbf24] rounded-2xl px-6 py-7 flex flex-col items-center shadow-xl text-center min-h-[250px] sm:min-h-[290px]">
           <div class="badge" style="background:linear-gradient(90deg,#f59e0b 70%,#fbbf24 100%)">ویژه</div>
-          <svg width="40" height="40" fill="none" viewBox="0 0 24 24" class="mb-2">
-            <circle cx="12" cy="12" r="10" stroke="#f59e0b" stroke-width="2"/>
-            <path d="M12 8v8M8 12h8" stroke="#fbbf24" stroke-width="2" stroke-linecap="round"/>
-          </svg>
-          <h2 class="font-extrabold text-lg text-[#f59e0b] mb-2">تبلیغ بین محصولات</h2>
-<div class="text-lg font-bold text-[#f59e0b] mb-1">
-  <span id="price-ad_products">۸۹,۰۰۰</span>
-  <span class="text-sm font-normal">تومان / ۱ روز</span>
-</div>
-          <ul class="text-gray-700 text-sm text-right mb-4 px-0.5">
-            <li>📣 نمایش محصول در لیست محصولات عمومی</li>
-            <li>✨ برچسب تبلیغ و جایگاه تضمینی</li>
-            <li>⏱ اعتبار: ۱ روز</li>
+          <div class="plan-card__top">
+            <div class="plan-card__icon-bubble">
+              <svg width="40" height="40" fill="none" viewBox="0 0 24 24" class="plan-card__icon">
+                <circle cx="12" cy="12" r="10" stroke="#f59e0b" stroke-width="2"/>
+                <path d="M12 8v8M8 12h8" stroke="#fbbf24" stroke-width="2" stroke-linecap="round"/>
+              </svg>
+            </div>
+            <div class="plan-card__headline">
+              <h2 class="font-extrabold text-lg text-[#f59e0b]">تبلیغ بین محصولات</h2>
+              <p class="plan-card__subtitle">حضور در کنار محصولات پربازدید</p>
+            </div>
+          </div>
+          <div class="plan-card__meta-row">
+            <span class="plan-card__pill plan-card__pill--amber">جایگاه تضمینی</span>
+            <span class="plan-card__pill plan-card__pill--sky">برچسب ویژه</span>
+          </div>
+          <div class="plan-card__price text-[#f59e0b]">
+            <span id="price-ad_products">۸۹,۰۰۰</span>
+            <span class="plan-card__price-unit">تومان / ۱ روز</span>
+          </div>
+          <div class="plan-card__duration">اعتبار: ۱ روز</div>
+          <ul class="plan-card__features text-sm text-right">
+            <li><span class="plan-feature-icon">📣</span><span>نمایش محصول در لیست محصولات عمومی</span></li>
+            <li><span class="plan-feature-icon">✨</span><span>برچسب تبلیغ و جایگاه تضمینی</span></li>
+            <li><span class="plan-feature-icon">🎯</span><span>هدایت مشتری به کالاهای منتخب</span></li>
           </ul>
-        <button class="w-full py-2 text-sm sm:text-lg bg-[#f59e0b] hover:bg-[#0ea5e9] text-white font-bold rounded-xl transition shadow"
-        onclick="openAdModal('ad_products')">درخواست تبلیغ</button>
-
+          <button class="plan-card__cta mt-3" onclick="openAdModal('ad_products')">درخواست تبلیغ</button>
         </div>
       </div>
     </div>
