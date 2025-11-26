@@ -1492,6 +1492,27 @@ async function loadComplimentaryPlan() {
     renderComplimentaryPlan(plan);
     window.__COMPLIMENTARY_PLAN__ = plan;
     PlanAccessGuard.refresh(plan);
+
+    // اگر پلن هدیه واقعاً فعال باشد، حتی در صورت شکست در دریافت فلگ‌ها
+    // باید دسترسی پلن برای فروشنده آزاد شود.
+    try {
+      const normalizedPlan = plan ? normalizePlanForUI(plan) : null;
+      const hasActivePlan = normalizedPlan && (
+        normalizedPlan.activeNow
+          || (normalizedPlan.isActive && !normalizedPlan.hasExpired)
+          || (normalizedPlan.endDate instanceof Date && normalizedPlan.endDate > new Date())
+      );
+
+      if (hasActivePlan) {
+        featureFlags = applySellerPlanFeatureFlags({
+          ...featureFlags,
+          sellerPlansEnabled: true
+        });
+        window.__FEATURE_FLAGS__ = featureFlags;
+      }
+    } catch (planErr) {
+      console.warn('normalize complimentary plan failed', planErr);
+    }
   } catch (err) {
     console.warn('loadComplimentaryPlan failed', err);
     renderComplimentaryPlan(null);
