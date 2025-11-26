@@ -1431,9 +1431,19 @@ const PlanAccessGuard = (() => {
 
   const hasActivePlan = (plan) => {
     if (!plan) return false;
+
+    const now = new Date();
+    const hasFutureWindow = plan.endDate instanceof Date
+      ? plan.endDate > now
+      : false;
+    const hasRemainingDays = Number.isFinite(plan.remainingDays)
+      ? plan.remainingDays > 0
+      : false;
+
     if (plan.activeNow) return true;
     if (plan.isActive && !plan.hasExpired) return true;
-    if (plan.endDate instanceof Date && plan.endDate > new Date()) return true;
+    if (hasFutureWindow) return true;
+    if (hasRemainingDays && (!plan.startDate || plan.startDate <= now)) return true;
     return false;
   };
 
