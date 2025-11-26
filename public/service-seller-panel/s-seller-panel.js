@@ -1082,18 +1082,42 @@ const ensureDate = (value) => {
   return Number.isNaN(date.getTime()) ? null : date;
 };
 
+const ensureNumber = (value) => {
+  const num = Number(value);
+  return Number.isFinite(num) ? num : null;
+};
+
 const normalizePlanForUI = (raw = {}) => {
+  const status = (raw.status || raw.state || raw.phase || '').toString().trim().toLowerCase();
+
+  const normalizedStartDate = ensureDate(
+    raw.startDate || raw.planStartDate || raw.startedAt || raw.activatedAt || raw.activationDate
+  );
+
+  const normalizedEndDate = ensureDate(
+    raw.endDate || raw.planEndDate || raw.expiryDate || raw.expiredAt || raw.expiresAt || raw.expirationDate
+  );
+
+  const normalizedRemainingDays = ensureNumber(raw.remainingDays ?? raw.daysLeft ?? raw.remaining);
+  const normalizedTotalDays = ensureNumber(raw.totalDays ?? raw.durationDays ?? raw.duration ?? raw.days);
+
   const plan = {
-    isActive: !!raw.isActive,
+    isActive:
+      !!raw.isActive ||
+      !!raw.active ||
+      status === 'active' ||
+      status === 'running' ||
+      status === 'in-progress' ||
+      status === 'ongoing',
     note: raw.note || '',
-    startDate: ensureDate(raw.startDate),
-    endDate: ensureDate(raw.endDate),
+    startDate: normalizedStartDate,
+    endDate: normalizedEndDate,
     durationDays: null,
     usedDays: null,
-    remainingDays: raw.remainingDays ?? null,
-    totalDays: raw.totalDays ?? null,
+    remainingDays: normalizedRemainingDays,
+    totalDays: normalizedTotalDays,
     activeNow: !!raw.activeNow,
-    hasExpired: !!raw.hasExpired,
+    hasExpired: !!raw.hasExpired || status === 'expired',
     perks: Array.isArray(raw.perks) && raw.perks.length ? raw.perks : PLAN_PERKS_DEFAULT,
     title: raw.planTitle || raw.title || '',
     slug: raw.planSlug || raw.slug || ''
