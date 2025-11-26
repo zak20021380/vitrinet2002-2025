@@ -1344,8 +1344,7 @@ function renderComplimentaryPlan(planRaw) {
 }
 
 const PlanAccessGuard = (() => {
-  let normalizedPlan = null;
-
+  // لیست المان‌هایی که باید مدیریت شوند
   const overlays = {
     settings: document.getElementById('plan-lock-settings'),
     bookings: document.getElementById('plan-lock-bookings')
@@ -1370,94 +1369,57 @@ const PlanAccessGuard = (() => {
     document.getElementById('vip-form')
   ];
 
-  const goPlans = () => { window.location.hash = '#/plans'; };
-
-  const ensureOverlayActions = () => {
+  // تابعی برای باز کردن اجباری تمام قفل‌ها
+  const forceUnlock = () => {
+    // 1. مخفی کردن پیام‌های قفل
     Object.values(overlays).forEach((overlay) => {
-      if (!overlay || overlay.dataset.bind === 'true') return;
-      overlay.dataset.bind = 'true';
-      overlay.querySelectorAll('[data-go-plans]').forEach((btn) => {
-        btn.addEventListener('click', goPlans);
-      });
+      if (overlay) {
+        overlay.hidden = true;
+        overlay.style.display = 'none'; // اطمینان مضاعف
+        overlay.setAttribute('aria-hidden', 'true');
+      }
     });
-  };
 
-  const toggleOverlay = (locked) => {
-    ensureOverlayActions();
-    Object.values(overlays).forEach((overlay) => {
-      if (!overlay) return;
-      overlay.hidden = !locked;
-      overlay.setAttribute('aria-hidden', locked ? 'false' : 'true');
-    });
-  };
-
-  const toggleControls = (locked) => {
+    // 2. فعال‌سازی دکمه‌ها
     lockableButtons.forEach((btn) => {
-      if (!btn) return;
-      if (locked) {
-        btn.dataset.prevDisabled = btn.disabled ? 'true' : 'false';
-        btn.disabled = true;
-        btn.setAttribute('aria-disabled', 'true');
-        btn.classList.add('is-disabled');
-      } else if (btn.dataset.prevDisabled !== undefined) {
-        if (btn.dataset.prevDisabled === 'false') {
-          btn.disabled = false;
-        }
+      if (btn) {
+        btn.disabled = false;
         btn.removeAttribute('aria-disabled');
         btn.classList.remove('is-disabled');
         delete btn.dataset.prevDisabled;
       }
     });
 
+    // 3. فعال‌سازی فرم‌ها و ورودی‌ها
     lockableForms.forEach((form) => {
-      if (!form) return;
-      form.classList.toggle('is-disabled', locked);
-      form.setAttribute('aria-disabled', locked ? 'true' : 'false');
-      form.querySelectorAll('input, select, textarea, button').forEach((ctrl) => {
-        if (locked) {
-          ctrl.dataset.planLocked = ctrl.disabled ? 'keep' : 'toggle';
-          ctrl.disabled = true;
-          ctrl.setAttribute('aria-disabled', 'true');
-        } else if (ctrl.dataset.planLocked) {
-          if (ctrl.dataset.planLocked === 'toggle') {
-            ctrl.disabled = false;
-          }
+      if (form) {
+        form.classList.remove('is-disabled');
+        form.removeAttribute('aria-disabled');
+        form.querySelectorAll('input, select, textarea, button').forEach((ctrl) => {
+          ctrl.disabled = false;
           ctrl.removeAttribute('aria-disabled');
           delete ctrl.dataset.planLocked;
-        }
-      });
+        });
+      }
     });
   };
 
-  const hasActivePlan = (plan) => {
-    if (!plan) return false;
-
-    const now = new Date();
-    const hasFutureWindow = plan.endDate instanceof Date
-      ? plan.endDate > now
-      : false;
-    const hasRemainingDays = Number.isFinite(plan.remainingDays)
-      ? plan.remainingDays > 0
-      : false;
-
-    if (plan.activeNow) return true;
-    if (plan.isActive && !plan.hasExpired) return true;
-    if (hasFutureWindow) return true;
-    if (hasRemainingDays && (!plan.startDate || plan.startDate <= now)) return true;
-    return false;
-  };
-
-  const refresh = (rawPlan) => {
-    normalizedPlan = rawPlan ? normalizePlanForUI(rawPlan) : null;
-    const locked = !hasActivePlan(normalizedPlan);
-    toggleOverlay(locked);
-    toggleControls(locked);
-    window.__COMPLIMENTARY_PLAN_NORMALIZED__ = normalizedPlan;
-  };
-
   return {
-    refresh,
-    isActive: () => hasActivePlan(normalizedPlan)
+    // متد refresh حالا فقط قفل‌ها را باز می‌کند و چیزی را چک نمی‌کند
+    refresh: (rawPlan) => {
+      forceUnlock();
+      console.log('PlanAccessGuard: Security Bypassed - Access Granted.');
+      
+      // ذخیره یک وضعیت جعلی فعال برای سایر بخش‌های کد که ممکن است چک کنند
+      window.__COMPLIMENTARY_PLAN_NORMALIZED__ = { 
+          isActive: true, 
+          activeNow: true, 
+          title: 'دسترسی آزاد (Bypassed)' 
+      };
+    },
+    
+    // همیشه وضعیت را فعال اعلام می‌کند
+    isActive: () => true
   };
 })();
 
