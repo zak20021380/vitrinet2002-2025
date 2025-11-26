@@ -1083,16 +1083,19 @@ const ensureDate = (value) => {
 };
 
 const normalizePlanForUI = (raw = {}) => {
+  const normalizedStatus = (raw.planStatus || raw.status || '').toString().trim().toLowerCase();
+  const isStatusActive = normalizedStatus === 'active' || normalizedStatus === 'running' || normalizedStatus === 'enabled';
+
   const plan = {
-    isActive: !!raw.isActive,
+    isActive: !!raw.isActive || isStatusActive,
     note: raw.note || '',
-    startDate: ensureDate(raw.startDate),
-    endDate: ensureDate(raw.endDate),
+    startDate: ensureDate(raw.startDate || raw.startedAt),
+    endDate: ensureDate(raw.endDate || raw.endedAt || raw.expiresAt),
     durationDays: null,
     usedDays: null,
     remainingDays: raw.remainingDays ?? null,
     totalDays: raw.totalDays ?? null,
-    activeNow: !!raw.activeNow,
+    activeNow: !!raw.activeNow || isStatusActive,
     hasExpired: !!raw.hasExpired,
     perks: Array.isArray(raw.perks) && raw.perks.length ? raw.perks : PLAN_PERKS_DEFAULT,
     title: raw.planTitle || raw.title || '',
