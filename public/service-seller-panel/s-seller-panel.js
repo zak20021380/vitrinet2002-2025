@@ -1344,7 +1344,9 @@ function renderComplimentaryPlan(planRaw) {
 }
 
 const PlanAccessGuard = (() => {
-  // لیست المان‌هایی که باید مدیریت شوند
+  // نگهداری آخرین وضعیت پلن
+  let currentPlan = null;
+
   const overlays = {
     settings: document.getElementById('plan-lock-settings'),
     bookings: document.getElementById('plan-lock-bookings')
@@ -1369,57 +1371,93 @@ const PlanAccessGuard = (() => {
     document.getElementById('vip-form')
   ];
 
-  // تابعی برای باز کردن اجباری تمام قفل‌ها
-  const forceUnlock = () => {
-    // 1. مخفی کردن پیام‌های قفل
+  const goPlans = () => { window.location.hash = '#/plans'; };
+
+  const ensureOverlayActions = () => {
     Object.values(overlays).forEach((overlay) => {
-      if (overlay) {
-        overlay.hidden = true;
-        overlay.style.display = 'none'; // اطمینان مضاعف
-        overlay.setAttribute('aria-hidden', 'true');
-      }
+      if (!overlay || overlay.dataset.bind === 'true') return;
+      overlay.dataset.bind = 'true';
+      overlay.querySelectorAll('[data-go-plans]').forEach((btn) => {
+        btn.addEventListener('click', goPlans);
+      });
+    });
+  };
+
+  // تابع اصلی اعمال قفل یا باز کردن
+  const setLockedState = (isLocked) => {
+    ensureOverlayActions();
+    
+    // 1. مدیریت پرده‌های قفل (Overlays)
+    Object.values(overlays).forEach((overlay) => {
+      if (!overlay) return;
+      overlay.hidden = !isLocked;
+      overlay.setAttribute('aria-hidden', isLocked ? 'false' : 'true');
+      // اگر باز شد، مطمئن شو دیسپلی none نباشه
+      if (!isLocked) overlay.style.display = 'none'; 
+      else overlay.style.display = '';
     });
 
-    // 2. فعال‌سازی دکمه‌ها
+    // 2. مدیریت دکمه‌ها
     lockableButtons.forEach((btn) => {
-      if (btn) {
-        btn.disabled = false;
+      if (!btn) return;
+      btn.disabled = isLocked;
+      if (isLocked) {
+        btn.setAttribute('aria-disabled', 'true');
+        btn.classList.add('is-disabled');
+      } else {
         btn.removeAttribute('aria-disabled');
         btn.classList.remove('is-disabled');
         delete btn.dataset.prevDisabled;
       }
     });
 
-    // 3. فعال‌سازی فرم‌ها و ورودی‌ها
+    // 3. مدیریت فرم‌ها
     lockableForms.forEach((form) => {
-      if (form) {
-        form.classList.remove('is-disabled');
-        form.removeAttribute('aria-disabled');
-        form.querySelectorAll('input, select, textarea, button').forEach((ctrl) => {
-          ctrl.disabled = false;
-          ctrl.removeAttribute('aria-disabled');
-          delete ctrl.dataset.planLocked;
-        });
-      }
+      if (!form) return;
+      form.classList.toggle('is-disabled', isLocked);
+      form.setAttribute('aria-disabled', isLocked ? 'true' : 'false');
+      form.querySelectorAll('input, select, textarea, button').forEach((ctrl) => {
+        ctrl.disabled = isLocked;
+        if (!isLocked) ctrl.removeAttribute('aria-disabled');
+      });
     });
   };
 
+  // === منطق هوشمند تشخیص فعال بودن ===
+  const hasActivePlan = (plan) => {
+    // 1. اگر آبجکت پلن معتبر از سمت سرور اومده باشه
+    if (plan && (plan.activeNow || plan.isActive)) return true;
+
+    // 2. [مهم] چک کردن اطلاعات فروشنده در LocalStorage
+    // اگر API پلن null داد، شاید در اطلاعات فروشنده (api/sellers/me) چیزی باشه
+    try {
+        const seller = JSON.parse(localStorage.getItem('seller') || '{}');
+        // اگر فروشنده "ویژه" باشه یا فلگ خاصی داشته باشه (اینجا فرضی چک می‌کنیم)
+        // اگر ادمین هستید یا دیتای خاصی دارید، اینجا رو میشه شرط گذاشت
+        if (seller && seller.hasActivePlan === true) return true; 
+    } catch(e) {}
+
+    return false; // در غیر این صورت قفل شود
+  };
+
   return {
-    // متد refresh حالا فقط قفل‌ها را باز می‌کند و چیزی را چک نمی‌کند
     refresh: (rawPlan) => {
-      forceUnlock();
-      console.log('PlanAccessGuard: Security Bypassed - Access Granted.');
+      // تبدیل دیتای خام به فرمت استاندارد UI
+      const normalizedPlan = rawPlan ? normalizePlanForUI(rawPlan) : null;
+      currentPlan = normalizedPlan;
       
-      // ذخیره یک وضعیت جعلی فعال برای سایر بخش‌های کد که ممکن است چک کنند
-      window.__COMPLIMENTARY_PLAN_NORMALIZED__ = { 
-          isActive: true, 
-          activeNow: true, 
-          title: 'دسترسی آزاد (Bypassed)' 
-      };
+      // تصمیم‌گیری: قفل باشه یا باز؟
+      const shouldBeLocked = !hasActivePlan(normalizedPlan);
+      
+      setLockedState(shouldBeLocked);
+      
+      // ذخیره وضعیت برای دسترسی گلوبال
+      window.__COMPLIMENTARY_PLAN_NORMALIZED__ = normalizedPlan;
+      
+      console.log('PlanGuard Updated:', shouldBeLocked ? 'LOCKED 🔒' : 'UNLOCKED 🔓');
     },
     
-    // همیشه وضعیت را فعال اعلام می‌کند
-    isActive: () => true
+    isActive: () => hasActivePlan(currentPlan)
   };
 })();
 
