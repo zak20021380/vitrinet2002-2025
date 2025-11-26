@@ -2397,7 +2397,21 @@ exports.getMyComplimentaryPlan = async (req, res) => {
     }
 
     if (shopQueries.length) {
-      shop = await ServiceShop.findOne({ $or: shopQueries }).lean();
+      const candidates = await ServiceShop.find({ $or: shopQueries }).lean();
+      if (candidates.length) {
+        const now = new Date();
+        const pickActiveComplimentaryPlan = (list) => list.find((candidate) => {
+          const plan = candidate?.complimentaryPlan || {};
+          if (!plan.isActive) return false;
+          const start = plan.startDate ? new Date(plan.startDate) : null;
+          const end = plan.endDate ? new Date(plan.endDate) : null;
+          const startsOnTime = !start || start <= now;
+          const endsOnTime = !end || end >= now;
+          return startsOnTime && endsOnTime;
+        });
+
+        shop = pickActiveComplimentaryPlan(candidates) || candidates[0];
+      }
     }
 
     if (!shop) {
