@@ -155,13 +155,10 @@
     sessionStorage.removeItem('signup_pwd');
     sessionStorage.removeItem('signup_phone');
 
-    const SERVICE_CATEGORIES = ['خدمات', 'زیبایی', 'تالار و مجالس', 'خودرو', 'ورزشی'];
-    const categoryFromServer = loginResult?.seller?.category || '';
-    const roleFromSignup = SafeSS.getJSON('signup_role');
-
-    const isServiceSeller = categoryFromServer
-      ? SERVICE_CATEGORIES.includes(categoryFromServer)
-      : roleFromSignup === 'service';
+    const SERVICE_CATEGORY = 'خدمات';
+    const categoryFromServer = (loginResult?.seller?.category || '').trim();
+    const normalizedCategory = categoryFromServer.normalize('NFC');
+    const isServiceSeller = normalizedCategory === SERVICE_CATEGORY;
 
     const SERVICE_PANEL_URL = 'service-seller-panel/s-seller-panel.html';
     const DEFAULT_SELLER_PANEL_URL = 'seller/dashboard.html';
