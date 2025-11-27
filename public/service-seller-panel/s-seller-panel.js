@@ -5562,12 +5562,11 @@ _handleFooterUpload(evt){
   const file = evt.target.files && evt.target.files[0];
   if (!file) return;
 
-  const reader = new FileReader();
-  reader.onload = () => {
-    this.brandImages.footer = reader.result;
-    this.applyBrandImages();
-  };
-  reader.readAsDataURL(file);
+  const previousFooter = this.brandImages.footer;
+  // Use a temporary object URL for instant preview without persisting in storage
+  const tempPreviewUrl = URL.createObjectURL(file);
+  this.brandImages.footer = tempPreviewUrl;
+  this.applyBrandImages();
 
   const formData = new FormData();
   formData.append('image', file);
@@ -5577,11 +5576,21 @@ _handleFooterUpload(evt){
     body: formData,
     credentials:'include'
   })
-    .then(res => {
-      if(!res.ok) throw new Error();
+    .then(async (res) => {
+      if(!res.ok) throw new Error('UPLOAD_FAILED');
+      const data = await res.json();
+      this.brandImages.footer = data.url || '';
+      this.applyBrandImages();
       UIComponents.showToast('تصویر فوتر ذخیره شد.', 'success');
     })
-    .catch(() => UIComponents.showToast('خطا در آپلود تصویر.', 'error'));
+    .catch(() => {
+      this.brandImages.footer = previousFooter;
+      this.applyBrandImages();
+      UIComponents.showToast('خطا در آپلود تصویر.', 'error');
+    })
+    .finally(() => {
+      URL.revokeObjectURL(tempPreviewUrl);
+    });
 }
 
 _removeFooterImage(){
