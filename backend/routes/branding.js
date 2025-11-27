@@ -79,6 +79,10 @@ router.post('/footer', auth('seller'), upload.single('image'), async (req, res) 
       return res.status(404).json({ message: 'ظاهر فروشگاه یافت نشد.' });
     }
 
+    if (!req.file) {
+      return res.status(400).json({ message: 'هیچ فایلی برای آپلود ارسال نشده است.' });
+    }
+
     // remove previous file if exists
     if (appearance.footerImage) {
       fs.unlink(path.join(__dirname, '..', appearance.footerImage), () => {});
