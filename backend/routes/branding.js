@@ -3,6 +3,7 @@ const router = express.Router();
 const path = require('path');
 const fs = require('fs');
 const multer = require('multer');
+const mongoose = require('mongoose');
 const auth = require('../middlewares/authMiddleware');
 const ShopAppearance = require('../models/ShopAppearance');
 
@@ -31,6 +32,10 @@ function makeFullUrl(req, filePath) {
 // GET current footer image for seller
 router.get('/footer', auth('seller'), async (req, res) => {
   try {
+    if (!mongoose.isValidObjectId(req.user?.id)) {
+      return res.status(400).json({ message: 'شناسه فروشنده معتبر نیست.' });
+    }
+
     const appearance = await ShopAppearance.findOne({ sellerId: req.user.id });
     const url = makeFullUrl(req, appearance?.footerImage || '');
     res.json({ url });
@@ -42,6 +47,10 @@ router.get('/footer', auth('seller'), async (req, res) => {
 // Public endpoint to get a seller's footer image by ID
 router.get('/footer/:sellerId', async (req, res) => {
   try {
+    if (!mongoose.isValidObjectId(req.params.sellerId)) {
+      return res.status(400).json({ message: 'شناسه فروشنده معتبر نیست.' });
+    }
+
     const appearance = await ShopAppearance.findOne({ sellerId: req.params.sellerId });
     const url = makeFullUrl(req, appearance?.footerImage || '');
     if (!url) {
@@ -56,6 +65,10 @@ router.get('/footer/:sellerId', async (req, res) => {
 // POST upload new footer image
 router.post('/footer', auth('seller'), upload.single('image'), async (req, res) => {
   try {
+    if (!mongoose.isValidObjectId(req.user?.id)) {
+      return res.status(400).json({ message: 'شناسه فروشنده معتبر نیست.' });
+    }
+
     const appearance = await ShopAppearance.findOne({ sellerId: req.user.id });
     if (!appearance) {
       return res.status(404).json({ message: 'ظاهر فروشگاه یافت نشد.' });
@@ -79,6 +92,10 @@ router.post('/footer', auth('seller'), upload.single('image'), async (req, res) 
 // DELETE footer image
 router.delete('/footer', auth('seller'), async (req, res) => {
   try {
+    if (!mongoose.isValidObjectId(req.user?.id)) {
+      return res.status(400).json({ message: 'شناسه فروشنده معتبر نیست.' });
+    }
+
     const appearance = await ShopAppearance.findOne({ sellerId: req.user.id });
     if (!appearance) {
       return res.status(404).json({ message: 'ظاهر فروشگاه یافت نشد.' });
