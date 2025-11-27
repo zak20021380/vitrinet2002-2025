@@ -142,7 +142,7 @@ async function fetchChats() {
     chatsData = chats;
     if (typeof window.updateBadge === 'function') {
       const totalUnread = chatsData.reduce(
-        (s, c) => s + (c.messages || []).filter(m => m.from === 'admin' && !m.readBySeller).length,
+        (s, c) => s + (c.messages || []).filter(m => m.from !== 'seller' && !m.readBySeller).length,
         0
       );
       window.updateBadge(totalUnread);
@@ -199,7 +199,7 @@ function removeErrorBar() {
  *    (فقط DOM می‌سازد و برمی‌گرداند)
  ***********************************************/
 function renderChatListItem(chat) {
-  const unread        = (chat.messages || []).filter(m => m.from === 'admin' && !m.readBySeller).length;
+  const unread        = (chat.messages || []).filter(m => m.from !== 'seller' && !m.readBySeller).length;
   const productObj    = chat.productId || {};
   const productImg    = productObj.images?.[0] || '';
   const productTitle  = productObj.title;
@@ -243,7 +243,7 @@ function renderChatListItem(chat) {
                ${title}
              </a>`
           : `<span class="font-bold text-[#10b981] truncate max-w-[160px] sm:max-w-[220px]">${title}</span>`}
-        <span class="text-xs text-gray-400 mt-0.5 hidden sm:block truncate">${lastText}</span>
+        <span class="text-xs text-gray-500 mt-0.5 block truncate leading-5 sm:leading-4">${lastText}</span>
       </div>
     </div>
     <div class="flex items-center gap-3 flex-shrink-0">
@@ -278,7 +278,7 @@ function renderChatListItem(chat) {
     if (badge) badge.classList.add('hidden');
     if (typeof window.updateBadge === 'function') {
       const totalUnread = chatsData.reduce(
-        (s, c) => s + (c.messages || []).filter(m => m.from === 'admin' && !m.readBySeller).length,
+        (s, c) => s + (c.messages || []).filter(m => m.from !== 'seller' && !m.readBySeller).length,
         0
       );
       window.updateBadge(totalUnread);
