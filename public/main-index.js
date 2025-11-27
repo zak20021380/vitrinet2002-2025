@@ -1,4 +1,4 @@
-const SERVICE_PANEL_KEYWORDS = ['خدمات', 'زیبایی', 'تالار', 'مجالس', 'خودرو', 'ورزشی', 'پزشکی', 'سلامت', 'آرایش'];
+const SERVICE_PANEL_KEYWORDS = ['خدمات'];
 const REWARD_API_BASE = '/api/rewards';
 const REWARD_USER_CLAIM_KEY = 'vt_reward_user_claim';
 const rewardNumberFormatter = new Intl.NumberFormat('fa-IR', { maximumFractionDigits: 0 });
@@ -636,13 +636,10 @@ function initAuthPrompt() {
 
 function isServiceSellerAccount(seller) {
   if (!seller || typeof seller !== 'object') return false;
-  if (seller.isService || seller.panelType === 'service') return true;
-  const role = (seller.role || seller.type || '').toString().toLowerCase();
-  if (role.includes('service')) return true;
-  const category = (seller.category || seller.sellerCategory || '').toString();
-  const tags = Array.isArray(seller.tags) ? seller.tags.join(' ') : '';
-  const haystack = `${category} ${tags}`;
-  return SERVICE_PANEL_KEYWORDS.some(keyword => haystack.includes(keyword));
+  const category = (seller.category || seller.sellerCategory || '').toString().trim();
+  const normalizedCategory = category.normalize('NFC');
+
+  return SERVICE_PANEL_KEYWORDS.some(keyword => normalizedCategory === keyword);
 }
 
 function buildSellerPanelLink(seller) {

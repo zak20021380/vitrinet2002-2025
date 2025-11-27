@@ -77,14 +77,11 @@ form.addEventListener('submit', async e => {
       errorBox.textContent = data.message || 'ورود ناموفق بود.';
     } else {
       // موفقیت: تصمیم‌گیری برای پنل مناسب
-      // Decide panel by category (consistent with public/verify.html)
-      const SERVICE_CATEGORIES = ["خدمات","زیبایی","تالار و مجالس","خودرو","ورزشی"];
+      const SERVICE_CATEGORY = 'خدمات';
 
-      const catRaw = (data?.seller?.category ?? "").trim();
-      const category = catRaw.normalize("NFC");
-      const isServiceByCat = SERVICE_CATEGORIES.includes(category);
-      const isServiceByType = (data?.seller?.type === "service");
-      const isServiceSeller = isServiceByType || isServiceByCat;
+      const catRaw = (data?.seller?.category ?? '').trim();
+      const category = catRaw.normalize('NFC');
+      const isServiceSeller = category === SERVICE_CATEGORY;
 
       const panel = isServiceSeller
         ? "../service-seller-panel/s-seller-panel.html"
