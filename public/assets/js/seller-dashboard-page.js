@@ -154,13 +154,23 @@ async function fetchCurrentSeller() {
   }
 }
 
+// ————————— تابع کمکی برای واکشی لیست چت‌ها (بدون وابستگی به sellerId) —————————
+async function fetchSellerChats() {
+  const sellerId = window.seller?.id;
+  const url = sellerId ? `/api/chats?sellerId=${sellerId}` : '/api/chats/my';
+  const res = await apiFetch(url);
+  if (!res.ok) {
+    const errBody = await res.json().catch(() => ({}));
+    const message = errBody.error || errBody.message || res.statusText || 'خطا در دریافت چت‌ها';
+    throw new Error(message);
+  }
+  return res.json();
+}
+
 // ————————— تابع دریافت تعداد پیام‌های خوانده‌نشده —————————
 async function fetchUnreadCount() {
   try {
-    if (!window.seller?.id) return 0;
-    const res = await apiFetch(`/api/chats?sellerId=${window.seller.id}`);
-    if (!res.ok) return 0;
-    const chats = await res.json();
+    const chats = await fetchSellerChats();
     return getUnreadTotal(chats);
   } catch (err) {
     console.error('Error fetching unread count:', err);
@@ -281,10 +291,7 @@ let lastMsgCount = 0;
 // فراخوانی تعداد پیام‌های خوانده‌نشده جدید (می‌توانید همان fetchUnreadCount را مجدداً استفاده کنید)
 async function fetchNewMsgCount(){
   try{
-    if(!window.seller?.id) return 0;
-    const res = await apiFetch(`/api/chats?sellerId=${window.seller.id}`);
-    if(!res.ok) return 0;
-    const chats = await res.json();
+    const chats = await fetchSellerChats();
     return getUnreadTotal(chats);    // ← همان محاسبه‌ی عمومی
   }catch{
     return 0;
