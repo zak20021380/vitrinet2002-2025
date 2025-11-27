@@ -11,10 +11,10 @@ let chatsBox      = null;           // بعداً در DOMContentLoaded مقدا
 let firstLoad     = true;           // فقط بار اول لودینگ را نشان بده
 let chatsData     = [];             // ذخیره لیست چت‌ها برای محاسبه بج
 
-const API = window.VITRINET_API || null;
-const apiUrl = path => API ? API.buildUrl(path) : `http://localhost:5000${path}`;
+const MESSAGES_API = window.VITRINET_API || null;
+const apiUrl = path => MESSAGES_API ? MESSAGES_API.buildUrl(path) : `http://localhost:5000${path}`;
 const withCreds = (init = {}) => {
-  if (API) return API.ensureCredentials(init);
+  if (MESSAGES_API) return MESSAGES_API.ensureCredentials(init);
   if (init.credentials === undefined) {
     return { ...init, credentials: 'include' };
   }
