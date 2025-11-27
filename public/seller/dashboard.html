@@ -2478,29 +2478,70 @@
 
 
 /* ==== استایل پاپ‌اپ پیام جدید ==== */
-#messagePopup {
-  position: fixed;
-  /* نمایش بالا به جای پایین */
-  top: 30px;
-  left: 50%;
-  bottom: auto; /* اطمینان از لغو bottom */
-  transform: translateX(-50%) translateY(-120%);
-  background: #10b981;
-  color: #fff;
-  padding: 20px 40px;      /* بزرگ‌تر از قبل */
-  border-radius: 14px;
-  box-shadow: 0 6px 28px rgba(0,0,0,0.20);
-  font-weight: bold;
-  font-size: 18px;         /* فونت بزرگ‌تر */
-  opacity: 0;
-  transition: transform 0.4s ease, opacity 0.4s ease;
-  z-index: 2000;
-}
+  #messagePopup {
+    position: fixed;
+    top: 18px;
+    left: 50%;
+    transform: translateX(-50%) translateY(-140%);
+    background: linear-gradient(135deg, #0ea5e9, #10b981);
+    color: #fff;
+    padding: 18px 32px;
+    border-radius: 14px;
+    box-shadow: 0 20px 70px rgba(14, 165, 233, 0.28);
+    font-weight: 800;
+    font-size: 17px;
+    opacity: 0;
+    gap: 12px;
+    display: flex;
+    align-items: center;
+    transition: transform 0.35s ease, opacity 0.35s ease;
+    z-index: 2400;
+  }
 
-#messagePopup.show {
-  transform: translateX(-50%) translateY(0);
-  opacity: 1;
-}
+  #messagePopup.show {
+    transform: translateX(-50%) translateY(0);
+    opacity: 1;
+  }
+
+  #messagePopup i {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    border-radius: 14px;
+    background: rgba(255,255,255,0.18);
+    font-size: 22px;
+  }
+
+  .unread-sticky {
+    position: fixed;
+    top: 18px;
+    right: 18px;
+    display: none;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 14px;
+    border-radius: 12px;
+    background: #0f172aee;
+    color: #e0fdfa;
+    box-shadow: 0 15px 40px rgba(15, 23, 42, 0.22);
+    z-index: 2200;
+    font-weight: 700;
+  }
+
+  .unread-sticky__count {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 34px;
+    height: 30px;
+    padding: 0 10px;
+    border-radius: 10px;
+    background: #ef4444;
+    color: #fff;
+    font-size: 14px;
+  }
 
 /* موبایل */
 @media (max-width: 600px) {
@@ -2549,7 +2590,15 @@
 </head>
 <body>
 
-  <div id="messagePopup">پیام جدید دارید: <span id="newMsgCount">0</span> پیام</div>
+  <div id="messagePopup" role="status" aria-live="polite">
+    <i class="ri-chat-1-line" aria-hidden="true"></i>
+    <div>پیام جدید دریافت شد • <span id="newMsgCount">0</span> پیام</div>
+  </div>
+  <div id="unreadSticky" class="unread-sticky" aria-live="polite">
+    <i class="ri-mail-unread-line text-lg" aria-hidden="true"></i>
+    <span>پیام خوانده‌نشده</span>
+    <span id="unreadStickyCount" class="unread-sticky__count">0</span>
+  </div>
 
   <!-- Hamburger Button for Mobile -->
   <button class="sidebar-hamburger" id="sidebarHamburger" aria-label="باز کردن منو" aria-expanded="false">

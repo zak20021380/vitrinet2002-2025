@@ -161,13 +161,7 @@ async function fetchUnreadCount() {
     const res = await apiFetch(`/api/chats?sellerId=${window.seller.id}`);
     if (!res.ok) return 0;
     const chats = await res.json();
-    // مجموع پیام‌های ادمین که هنوز readBySeller=false هستند
-    return chats.reduce((sum, chat) => {
-      const unread = (chat.messages||[])
-        .filter(m => m.from === 'admin' && !m.readBySeller)
-        .length;
-      return sum + unread;
-    }, 0);
+    return getUnreadTotal(chats);
   } catch (err) {
     console.error('Error fetching unread count:', err);
     return 0;
@@ -177,28 +171,44 @@ async function fetchUnreadCount() {
 // ————————— تابع به‌روزرسانی نمای بج —————————
 function updateBadge(count) {
   const badge = document.getElementById('msgBadge');
-  if (!badge) return;
-  if (count > 0) {
-    badge.innerText = count > 99 ? '99+' : count;
-    badge.style.display = 'flex';
-    badge.animate([
-      { transform: 'scale(1)', opacity: 1 },
-      { transform: 'scale(1.18)', opacity: .85 },
-      { transform: 'scale(1)', opacity: 1 }
-    ], { duration: 280 });
-  } else {
-    badge.style.display = 'none';
+  const sticky = document.getElementById('unreadSticky');
+  const stickyCount = document.getElementById('unreadStickyCount');
+
+  if (badge) {
+    if (count > 0) {
+      badge.innerText = count > 99 ? '99+' : count;
+      badge.style.display = 'flex';
+      badge.animate([
+        { transform: 'scale(1)', opacity: 1 },
+        { transform: 'scale(1.18)', opacity: .85 },
+        { transform: 'scale(1)', opacity: 1 }
+      ], { duration: 280 });
+    } else {
+      badge.style.display = 'none';
+    }
   }
+
+  if (sticky && stickyCount) {
+    if (count > 0) {
+      sticky.style.display = 'inline-flex';
+      stickyCount.textContent = count > 99 ? '99+' : count;
+    } else {
+      sticky.style.display = 'none';
+    }
+  }
+
+  window.updateBadge = updateBadge;
 }
+window.updateBadge = updateBadge;
 
 // ————————— شروع پولینگ بج —————————
 function startBadgePolling() {
   if (window.badgeInterval) clearInterval(window.badgeInterval);
   // بار اول فوری
-  fetchUnreadCount().then(updateBadge);
+  fetchNewMsgCount().then(updateBadge);
   // سپس هر ۱۵ ثانیه
   window.badgeInterval = setInterval(() => {
-    fetchUnreadCount().then(updateBadge);
+    fetchNewMsgCount().then(updateBadge);
   }, 15000);
 }
 
