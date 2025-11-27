@@ -38,9 +38,13 @@ router.get('/footer', auth('seller'), async (req, res) => {
 
     const appearance = await ShopAppearance.findOne({ sellerId: req.user.id });
     const url = makeFullUrl(req, appearance?.footerImage || '');
-    res.json({ url });
+    return res.json({ url });
   } catch (err) {
-    res.status(500).json({ message: 'خطا در دریافت تصویر فوتر.' });
+    console.error('Failed to fetch footer image:', err);
+    // Return an empty result instead of bubbling up a 500 so the front-end
+    // can gracefully fall back to the default UI without showing console
+    // errors in environments where branding data is unavailable.
+    return res.status(200).json({ url: '' });
   }
 });
 
@@ -56,9 +60,10 @@ router.get('/footer/:sellerId', async (req, res) => {
     if (!url) {
       return res.status(404).json({ message: 'تصویر فوتر موجود نیست.' });
     }
-    res.json({ url });
+    return res.json({ url });
   } catch (err) {
-    res.status(500).json({ message: 'خطا در دریافت تصویر فوتر.' });
+    console.error('Failed to fetch public footer image:', err);
+    return res.status(200).json({ url: '' });
   }
 });
 
