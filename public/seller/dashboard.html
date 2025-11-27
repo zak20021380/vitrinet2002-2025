@@ -3317,14 +3317,63 @@
   (function () {
     const sidebarButtons = document.querySelectorAll('.sidebar-link[data-section]');
     const sections = Array.from(document.querySelectorAll('section[id^="section-"]'));
+    const performanceBtn = document.getElementById('menu-performance');
+    const performanceContainer = document.getElementById('performance-container');
+    let performanceLoaded = false;
 
-    function showSection(sectionName) {
-      sections.forEach((section) => {
-        section.style.display = section.id === `section-${sectionName}` ? '' : 'none';
-      });
+    function updateActiveButton(sectionName) {
       sidebarButtons.forEach((btn) => {
         btn.classList.toggle('active', btn.dataset.section === sectionName);
       });
+      if (performanceBtn) {
+        performanceBtn.classList.toggle('active', sectionName === 'performance');
+      }
+    }
+
+    async function loadPerformanceSection() {
+      if (performanceLoaded || !performanceContainer) return;
+
+      try {
+        const response = await fetch('performance-status.html');
+        if (!response.ok) {
+          throw new Error('خطا در دریافت محتوا');
+        }
+
+        performanceContainer.innerHTML = await response.text();
+        performanceLoaded = true;
+
+        if (typeof window.initSellerPerformanceStatus === 'function') {
+          const performanceRoot = performanceContainer.querySelector('#performance-root');
+          window.initSellerPerformanceStatus(performanceRoot);
+        }
+      } catch (error) {
+        performanceContainer.innerHTML = '<div class="error-box">خطا در بارگذاری وضعیت عملکرد.</div>';
+      }
+    }
+
+    function showSection(sectionName) {
+      if (performanceContainer) {
+        performanceContainer.style.display = 'none';
+      }
+
+      sections.forEach((section) => {
+        section.style.display = section.id === `section-${sectionName}` ? '' : 'none';
+      });
+
+      updateActiveButton(sectionName);
+    }
+
+    async function showPerformance() {
+      sections.forEach((section) => {
+        section.style.display = 'none';
+      });
+
+      if (performanceContainer) {
+        performanceContainer.style.display = '';
+        await loadPerformanceSection();
+      }
+
+      updateActiveButton('performance');
     }
 
     sidebarButtons.forEach((btn) => {
@@ -3335,6 +3384,13 @@
         }
       });
     });
+
+    if (performanceBtn) {
+      performanceBtn.addEventListener('click', (event) => {
+        event.preventDefault();
+        showPerformance();
+      });
+    }
 
     showSection('visit');
   })();
