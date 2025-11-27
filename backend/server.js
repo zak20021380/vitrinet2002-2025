@@ -50,6 +50,7 @@ app.use(cors({
 }));
 
 
+app.use('/api/branding', require('./routes/branding'));
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 
@@ -89,7 +90,6 @@ app.use('/api/service-plans', require('./routes/servicePlans'));
 app.use('/api/shopping-centers', require('./routes/shoppingCenter'));
 app.use('/api/shop-appearances', require('./routes/shopAppearance'));
 app.use('/api/payment', paymentRoutes);  // روت‌های پرداخت
-app.use('/api/branding', require('./routes/branding'));
 app.use('/api/settings', settingsRoutes);
 app.use('/api/accountant', accountantRoutes);
 app.use('/api/security', securityRoutes);
