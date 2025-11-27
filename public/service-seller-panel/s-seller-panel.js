@@ -3205,6 +3205,7 @@ setupEventListeners() {
     serviceImageInput: document.getElementById('service-image'),
     portfolioImageBtn: document.getElementById('portfolio-image-btn'),
     portfolioImageInput: document.getElementById('portfolio-image'),
+    portfolioImagePreview: document.getElementById('portfolio-image-preview'),
     vipSettingsBtn: document.getElementById('vip-settings-btn'),
     vipForm: document.getElementById('vip-form'),
     vipToggleBtn: document.getElementById('vip-toggle-btn'),
@@ -3359,6 +3360,26 @@ if (elements.viewStoreBtn) {
 
   if (elements.portfolioImageBtn && elements.portfolioImageInput) {
     elements.portfolioImageBtn.addEventListener('click', () => elements.portfolioImageInput.click());
+  }
+
+  if (elements.portfolioImageInput) {
+    elements.portfolioImageInput.addEventListener('change', async (event) => {
+      const file = event.target.files && event.target.files[0];
+      if (file) {
+        try {
+          const dataUrl = await this.fileToDataURL(file);
+          this.currentPortfolioImage = dataUrl;
+          this.updatePortfolioPreview(dataUrl);
+        } catch (err) {
+          console.error('portfolio image preview failed', err);
+          this.currentPortfolioImage = '';
+          this.updatePortfolioPreview('');
+        }
+      } else {
+        this.currentPortfolioImage = '';
+        this.updatePortfolioPreview('');
+      }
+    });
   }
 
   if (elements.vipForm) {
@@ -4977,6 +4998,25 @@ async initPortfolio() {
             });
         });
     }
+    updatePortfolioPreview(imageSrc) {
+        const preview = document.getElementById('portfolio-image-preview');
+        if (!preview) return;
+
+        preview.innerHTML = '';
+
+        if (imageSrc) {
+            const img = document.createElement('img');
+            img.src = imageSrc;
+            img.alt = 'پیش‌نمایش تصویر نمونه‌کار';
+            preview.appendChild(img);
+            preview.classList.remove('is-empty');
+        } else {
+            const placeholder = document.createElement('span');
+            placeholder.textContent = 'پس از انتخاب، پیش‌نمایش تصویر اینجا نمایش داده می‌شود.';
+            preview.appendChild(placeholder);
+            preview.classList.add('is-empty');
+        }
+    }
     populatePortfolioForm(item) {
         const form = document.getElementById('portfolio-form');
         const titleEl = document.getElementById('portfolio-drawer-title');
@@ -4995,6 +5035,7 @@ async initPortfolio() {
             this.currentPortfolioImage = '';
             titleEl.textContent = 'افزودن نمونه‌کار جدید';
         }
+        this.updatePortfolioPreview(this.currentPortfolioImage);
     }
 async handlePortfolioFormSubmit() {
         const form = document.getElementById('portfolio-form');
