@@ -10,6 +10,8 @@ let currentChatId = null;           // اگر مدال باز است، آی‌د
 let chatsBox      = null;           // بعداً در DOMContentLoaded مقدار می‌گیرد
 let firstLoad     = true;           // فقط بار اول لودینگ را نشان بده
 let chatsData     = [];             // ذخیره لیست چت‌ها برای محاسبه بج
+let unreadSnapshot = {};            // آخرین تعداد پیام‌ خوانده‌نشده هر چت برای تشخیص پیام جدید
+let toastTimer     = null;          // برای مدیریت خودکار بسته شدن نوتیفیکیشن
 
 const MESSAGES_API = window.VITRINET_API || null;
 const apiUrl = path => MESSAGES_API ? MESSAGES_API.buildUrl(path) : `http://localhost:5000${path}`;
@@ -114,11 +116,58 @@ function formatDateTime(iso) {
 }
 const fa = n => n.toLocaleString('fa-IR');
 
+function getCustomerName(chat) {
+  const user = (chat.participants || []).find(p => p.role === 'user' || p.role === 'customer');
+  return ((user?.firstname || '') + ' ' + (user?.lastname || '')).trim() || 'مشتری';
+}
+
+function countUnreadMessages(chat) {
+  return (chat.messages || []).filter(m => m.from !== 'seller' && !m.readBySeller).length;
+}
+
+function showNewMessageToast(title, desc) {
+  const toast = document.getElementById('newMessageToast');
+  const toastTitle = document.getElementById('toastTitle');
+  const toastDesc = document.getElementById('toastDesc');
+  if (!toast || !toastTitle || !toastDesc) return;
+
+  toastTitle.textContent = title;
+  toastDesc.textContent = desc;
+  toast.classList.add('show');
+
+  if (toastTimer) clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => toast.classList.remove('show'), 3000);
+}
+
 
 
 /***********************************************
  * ۴) واکشی و رندر لیست چت‌ها
  ***********************************************/
+function detectNewMessages(chats) {
+  const highlightIds = new Set();
+  const notifications = [];
+
+  chats.forEach(chat => {
+    const unread = countUnreadMessages(chat);
+    const previous = unreadSnapshot[chat._id] ?? 0;
+    if (unread > previous) {
+      highlightIds.add(chat._id);
+      const unreadMessages = (chat.messages || []).filter(m => m.from !== 'seller' && !m.readBySeller);
+      const latestUnread = unreadMessages[unreadMessages.length - 1];
+      const fromAdmin = latestUnread?.from === 'admin' || latestUnread?.sender?.role === 'admin';
+      const title = fromAdmin ? 'پیام جدید از مدیر سایت' : 'پیام جدید از مشتری';
+      const subtitle = fromAdmin
+        ? 'پاسخ جدید مدیریت دریافت شد.'
+        : `${getCustomerName(chat)}${chat.productId?.title ? ` • ${chat.productId.title}` : ''}`;
+      notifications.push({ title, subtitle });
+    }
+    unreadSnapshot[chat._id] = unread;
+  });
+
+  return { highlightIds, notifications };
+}
+
 async function fetchChats() {
   if (firstLoad && chatsBox) {
     chatsBox.innerHTML = '<div class="text-gray-400 text-center py-8">در حال بارگذاری …</div>';
@@ -139,10 +188,14 @@ async function fetchChats() {
       }
     });
 
+    const detection = detectNewMessages(chats);
+    const highlightIds = firstLoad ? new Set() : detection.highlightIds;
+    const notifications = firstLoad ? [] : detection.notifications;
+
     chatsData = chats;
     if (typeof window.updateBadge === 'function') {
       const totalUnread = chatsData.reduce(
-        (s, c) => s + (c.messages || []).filter(m => m.from !== 'seller' && !m.readBySeller).length,
+        (s, c) => s + countUnreadMessages(c),
         0
       );
       window.updateBadge(totalUnread);
@@ -158,10 +211,12 @@ async function fetchChats() {
 
     // ساخت لیست در Fragment و جایگزینی اتمیک
     const frag = document.createDocumentFragment();
-    chats.forEach(chat => frag.appendChild(renderChatListItem(chat)));
+    chats.forEach(chat => frag.appendChild(renderChatListItem(chat, highlightIds.has(chat._id))));
     chatsBox.replaceChildren(frag);
     removeErrorBar();
     firstLoad = false;
+
+    notifications.forEach(n => showNewMessageToast(n.title, n.subtitle));
 
     // اگر مدال باز است آن را هم تازه کن
     if (currentChatId) {
@@ -198,8 +253,8 @@ function removeErrorBar() {
  * ۵) رندر یک آیتم در لیست چت‌ها
  *    (فقط DOM می‌سازد و برمی‌گرداند)
  ***********************************************/
-function renderChatListItem(chat) {
-  const unread        = (chat.messages || []).filter(m => m.from !== 'seller' && !m.readBySeller).length;
+function renderChatListItem(chat, highlightNew = false) {
+  const unread        = countUnreadMessages(chat);
   const productObj    = chat.productId || {};
   const productImg    = productObj.images?.[0] || '';
   const productTitle  = productObj.title;
@@ -208,10 +263,7 @@ function renderChatListItem(chat) {
 
   const lastMsg  = chat.messages?.slice(-1)[0];
   const lastText = lastMsg ? (lastMsg.text || '').slice(0, 40) : '';
-  const customerName = (() => {
-    const u = (chat.participants || []).find(p => p.role === 'user' || p.role === 'customer');
-    return ((u?.firstname || '') + ' ' + (u?.lastname || '')).trim() || 'ناشناس';
-  })();
+  const customerName = getCustomerName(chat) || 'ناشناس';
   const customerId = (chat.participants || []).find(p => p.role === 'user' || p.role === 'customer')?._id || '';
 
   const lastRole =
@@ -225,7 +277,7 @@ function renderChatListItem(chat) {
     : 'مشتری';
 
   const wrapper = document.createElement('div');
-  wrapper.className = 'chat-item cursor-pointer bg-white border rounded-xl p-4 flex justify-between items-center';
+  wrapper.className = `chat-item cursor-pointer bg-white border rounded-xl p-4 flex justify-between items-center${highlightNew ? ' chat-item--new' : ''}`;
   wrapper.dataset.chatId = chat._id;
 
   /* === بخش تصویر و عنوان محصول با لینک قابل‌کلیک === */
@@ -248,7 +300,7 @@ function renderChatListItem(chat) {
     </div>
     <div class="flex items-center gap-3 flex-shrink-0">
       <span class="hidden sm:inline text-xs text-gray-400" id="chat-time-${chat._id}">${formatAgo(chat.lastUpdated)}</span>
-      <span id="badge-${chat._id}" class="inline-flex items-center justify-center h-5 min-w-[20px] text-xs font-bold rounded-full bg-red-500 text-white ${unread ? '' : 'hidden'}">
+      <span id="badge-${chat._id}" class="inline-flex items-center justify-center h-5 min-w-[20px] text-xs font-bold rounded-full bg-red-500 text-white ${unread ? '' : 'hidden'} ${highlightNew && unread ? 'badge-pulse' : ''}">
         ${fa(unread)}
       </span>
       <button title="حذف چت" class="chat-delete-btn text-red-500 text-xs sm:text-sm" data-delete="${chat._id}">حذف</button>
@@ -278,7 +330,7 @@ function renderChatListItem(chat) {
     if (badge) badge.classList.add('hidden');
     if (typeof window.updateBadge === 'function') {
       const totalUnread = chatsData.reduce(
-        (s, c) => s + (c.messages || []).filter(m => m.from !== 'seller' && !m.readBySeller).length,
+        (s, c) => s + countUnreadMessages(c),
         0
       );
       window.updateBadge(totalUnread);
