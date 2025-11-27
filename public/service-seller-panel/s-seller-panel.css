@@ -6458,36 +6458,46 @@ body[data-shop-blocked="true"] .app-nav {
 
 
 
-/* === MOBILE HEADER FIX: Compact Icons Only === */
+/* === MOBILE HEADER FIX: Larger, labeled actions === */
 @media (max-width: 640px) {
-  /* 1. Hide the text labels inside header buttons */
+  /* Keep labels visible and give the buttons room */
   .app-header .btn-icon-text span {
-    display: none !important;
+    display: inline-flex !important;
+    align-items: center;
+    font-size: 13px;
   }
 
-  /* 2. Turn buttons into squares (icon-only) */
+  /* Make the action buttons larger so text stays readable */
   .app-header .btn-icon-text {
-    min-width: 40px !important;
-    width: 40px !important;
-    height: 40px !important;
-    padding: 0 !important;
+    min-width: 88px !important;
+    width: auto !important;
+    height: 44px !important;
+    padding: 0.4rem 0.75rem !important;
     justify-content: center !important;
-    border-radius: 10px !important;
+    gap: 6px !important;
+    border-radius: 12px !important;
   }
 
-  /* 3. Ensure icons are centered */
+  /* Enlarge icons alongside the labels */
   .app-header .btn-icon-text svg {
     margin: 0 !important;
-    width: 22px;
-    height: 22px;
+    width: 24px;
+    height: 24px;
   }
 
-  /* 4. Tighten the spacing between buttons */
+  /* Make the notification button match the larger tap target */
+  #notification-btn {
+    width: 52px;
+    height: 52px;
+    border-radius: 14px;
+  }
+
+  /* Slightly relaxed spacing for better readability */
   .app-header .header-actions {
-    gap: 8px !important;
+    gap: 10px !important;
   }
 
-  /* 5. Adjust container padding */
+  /* Adjust container padding to fit the larger controls */
   .header-container {
     padding: 0 12px !important;
   }
