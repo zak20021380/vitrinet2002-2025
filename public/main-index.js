@@ -1442,34 +1442,34 @@ function buildBrandShelfCard(product) {
     : 'ارسال فوری فروشنده';
 
   card.href = productLink;
-  card.className = 'group relative flex flex-col rounded-2xl bg-white text-slate-900 shadow-sm hover:shadow-xl hover:-translate-y-1 transition duration-200 min-w-[210px] w-56 sm:w-60 lg:w-full snap-center';
+  card.className = 'group relative flex flex-col rounded-2xl bg-white text-slate-900 shadow-sm hover:shadow-xl hover:-translate-y-1 transition duration-200 min-w-[200px] w-52 sm:w-56 lg:w-full snap-center';
   card.setAttribute('aria-label', title);
 
   card.innerHTML = `
-    <div class="relative w-full bg-gradient-to-b from-slate-50 to-white rounded-2xl p-4 pt-6 aspect-[3/4] flex items-center justify-center overflow-hidden">
-      <div class="absolute top-3 right-3 flex flex-col items-end gap-2">
-        <span class="inline-flex items-center gap-1 rounded-xl bg-emerald-600 text-white text-xs font-bold px-2.5 py-1 shadow-lg">
+    <div class="relative w-full bg-gradient-to-b from-slate-50 to-white rounded-2xl p-3 pt-4 h-40 flex items-center justify-center overflow-hidden">
+      <div class="absolute top-2.5 right-2.5 flex flex-col items-end gap-1.5">
+        <span class="inline-flex items-center gap-1 rounded-xl bg-emerald-600 text-white text-[11px] font-bold px-2.5 py-1 shadow-lg">
           <i class="ri-price-tag-3-fill text-base"></i>${escapeHTML(badgeLabel)}
         </span>
-        ${countdownLabel ? `<span class="inline-flex items-center gap-1 rounded-lg bg-white/85 text-emerald-700 text-[11px] font-bold px-2 py-1 shadow-sm"><i class="ri-timer-2-line text-base"></i>${escapeHTML(countdownLabel)}</span>` : ''}
+        ${countdownLabel ? `<span class="inline-flex items-center gap-1 rounded-lg bg-white/85 text-emerald-700 text-[10px] font-bold px-2 py-1 shadow-sm"><i class="ri-timer-2-line text-sm"></i>${escapeHTML(countdownLabel)}</span>` : ''}
       </div>
-      <div class="absolute top-3 left-3 inline-flex items-center gap-1 px-2 py-1 rounded-full bg-white/85 text-emerald-700 text-[11px] font-bold shadow-sm">
-        <i class="ri-shining-fill text-base"></i>
+      <div class="absolute top-2.5 left-2.5 inline-flex items-center gap-1 px-2 py-1 rounded-full bg-white/85 text-emerald-700 text-[10px] font-bold shadow-sm">
+        <i class="ri-shining-fill text-sm"></i>
         ویژه
       </div>
       <img src="${escapeHTML(imageSrc)}" alt="${escapeHTML(title)}" class="h-full object-contain mix-blend-multiply drop-shadow-sm transition duration-200 scale-100 group-hover:scale-105" onerror="this.src='assets/images/shop-placeholder.svg'" />
-      <div class="absolute bottom-3 right-3 inline-flex items-center gap-1 px-2 py-1 rounded-lg ${Number.isInteger(remainingQty) ? 'bg-amber-50 text-amber-700 border border-amber-100' : 'bg-emerald-50 text-emerald-700 border border-emerald-100'} text-[11px] font-bold shadow-sm">${escapeHTML(stockLabel)}</div>
+      <div class="absolute bottom-2.5 right-2.5 inline-flex items-center gap-1 px-2 py-1 rounded-lg ${Number.isInteger(remainingQty) ? 'bg-amber-50 text-amber-700 border border-amber-100' : 'bg-emerald-50 text-emerald-700 border border-emerald-100'} text-[10px] font-bold shadow-sm">${escapeHTML(stockLabel)}</div>
     </div>
-    <div class="p-4 pb-5 flex flex-col gap-2 text-slate-900">
+    <div class="p-3 pb-4 flex flex-col gap-1.5 text-slate-900">
       ${shopName ? `<div class="text-[11px] font-semibold text-slate-500 leading-tight line-clamp-1">${escapeHTML(shopName)}</div>` : ''}
-      <h4 class="text-sm sm:text-base font-black leading-6 line-clamp-2 min-h-[48px]">${escapeHTML(title)}</h4>
-      <div class="flex items-baseline gap-2">
-        ${originalMarkup ? `<span class="text-xs text-gray-400 line-through">${escapeHTML(originalMarkup)}</span>` : ''}
-        ${discountedMarkup ? `<span class="text-lg font-black text-emerald-600">${escapeHTML(discountedMarkup)}</span>` : ''}
+      <h4 class="text-sm sm:text-base font-black leading-6 line-clamp-1">${escapeHTML(title)}</h4>
+      <div class="flex items-baseline gap-1.5">
+        ${originalMarkup ? `<span class="text-[11px] text-gray-400 line-through">${escapeHTML(originalMarkup)}</span>` : ''}
+        ${discountedMarkup ? `<span class="text-base sm:text-lg font-black text-emerald-600">${escapeHTML(discountedMarkup)}</span>` : ''}
       </div>
-      <div class="flex items-center justify-between mt-1 gap-2">
-        <span class="inline-flex items-center gap-1 px-2 py-1 rounded-lg bg-slate-100 text-[11px] font-bold text-slate-700"><i class="ri-store-2-line text-base text-emerald-600"></i>${escapeHTML(categoryLabel)}</span>
-        <span class="inline-flex items-center justify-center w-11 h-11 rounded-xl border border-emerald-100 bg-emerald-50 text-emerald-600 opacity-0 group-hover:opacity-100 group-focus-visible:opacity-100 transition shadow-sm"><i class="ri-add-line text-xl"></i></span>
+      <div class="flex items-center justify-between gap-2">
+        <span class="inline-flex items-center gap-1 px-2 py-1 rounded-lg bg-slate-100 text-[11px] font-bold text-slate-700"><i class="ri-store-2-line text-sm text-emerald-600"></i>${escapeHTML(categoryLabel)}</span>
+        <span class="inline-flex items-center justify-center w-9 h-9 rounded-lg border border-emerald-100 bg-emerald-50 text-emerald-600 opacity-0 group-hover:opacity-100 group-focus-visible:opacity-100 transition shadow-sm"><i class="ri-add-line text-lg"></i></span>
       </div>
     </div>
   `;
