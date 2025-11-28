@@ -1951,30 +1951,51 @@ body.hide-mobile-nav .mobile-bottom-nav {
   }
 
   .discount-card__timer-bar {
+    --timer-accent: #f97316;
     position: absolute;
     inset-inline: 0;
     bottom: 0;
-    padding: 10px 14px 14px;
-    background: linear-gradient(180deg, rgba(15, 23, 42, 0.15) 0%, rgba(15, 23, 42, 0.8) 100%);
+    padding: 12px 16px 16px;
+    background:
+      linear-gradient(180deg, rgba(15, 23, 42, 0.05) 0%, rgba(15, 23, 42, 0.72) 100%),
+      linear-gradient(90deg, color-mix(in srgb, var(--timer-accent) 40%, transparent) 0%, transparent 40%, transparent 60%, color-mix(in srgb, var(--timer-accent) 40%, transparent) 100%);
     color: #fff;
     font-weight: 800;
     font-size: 12px;
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 8px;
-    backdrop-filter: blur(8px);
+    gap: 12px;
+    backdrop-filter: blur(10px);
+    border-top: 1px solid rgba(255, 255, 255, 0.12);
+    box-shadow: 0 -10px 30px rgba(15, 23, 42, 0.25);
   }
 
   .discount-card__timer-text {
     display: inline-flex;
     align-items: center;
-    padding: 6px 12px;
+    gap: 10px;
+    padding: 8px 14px;
     border-radius: 999px;
-    background: rgba(15, 23, 42, 0.72);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    box-shadow: 0 10px 30px rgba(15, 23, 42, 0.3);
+    background: rgba(15, 23, 42, 0.7);
+    border: 1px solid rgba(255, 255, 255, 0.22);
+    box-shadow: 0 10px 30px rgba(15, 23, 42, 0.35), 0 0 0 1px rgba(255, 255, 255, 0.06);
     backdrop-filter: blur(4px);
+    letter-spacing: 0.01em;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.15);
+  }
+
+  .discount-card__timer-text::before {
+    content: '\23F0';
+    display: grid;
+    place-items: center;
+    width: 28px;
+    height: 28px;
+    border-radius: 999px;
+    background: radial-gradient(circle at 30% 30%, #fff 0%, #fff 8%, color-mix(in srgb, var(--timer-accent) 85%, #fff 15%) 45%, color-mix(in srgb, var(--timer-accent) 75%, #0b1120 25%) 100%);
+    box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.18), 0 8px 20px color-mix(in srgb, var(--timer-accent) 35%, transparent);
+    font-size: 16px;
+    color: #0b1120;
   }
 
   .discount-card__body {
@@ -2233,13 +2254,20 @@ body.hide-mobile-nav .mobile-bottom-nav {
     }
 
     .discount-card__timer-bar {
-      padding: 9px 12px 12px;
+      padding: 10px 12px 12px;
       font-size: 11px;
-      gap: 6px;
+      gap: 8px;
     }
 
     .discount-card__timer-text {
-      padding: 5px 10px;
+      padding: 6px 11px;
+      gap: 8px;
+    }
+
+    .discount-card__timer-text::before {
+      width: 24px;
+      height: 24px;
+      font-size: 14px;
     }
 
     .discount-card__body {
