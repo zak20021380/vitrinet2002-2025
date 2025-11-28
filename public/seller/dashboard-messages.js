@@ -47,6 +47,16 @@ if (document.readyState === 'loading') {
 }
 function initMessaging() {
   chatsBox = document.getElementById('chats');
+  if (chatsBox) {
+    chatsBox.addEventListener('click', e => {
+      const deleteBtn = e.target.closest('[data-delete]');
+      const blockBtn = e.target.closest('[data-block]');
+      if (deleteBtn || blockBtn) return;
+      const item = e.target.closest('.chat-item[data-chat-id]');
+      if (!item) return;
+      openChatById(item.dataset.chatId);
+    });
+  }
   startChatsPolling();
 }
 
@@ -253,6 +263,35 @@ function removeErrorBar() {
  * ۵) رندر یک آیتم در لیست چت‌ها
  *    (فقط DOM می‌سازد و برمی‌گرداند)
  ***********************************************/
+async function openChatById(chatId) {
+  if (!chatId) return;
+  let chat = chatsData.find(c => c._id === chatId);
+  try {
+    const res = await fetch(apiUrl(`/api/chats/${chatId}`), withCreds());
+    if (res.ok) {
+      const fresh = await res.json();
+      chat = fresh;
+      const idx = chatsData.findIndex(c => c._id === chatId);
+      if (idx !== -1) chatsData[idx] = chat;
+    }
+  } catch (err) {
+    console.error('openChatById fetch:', err);
+  }
+  if (!chat) return;
+
+  renderChatModal(chat);
+  currentChatId = chat._id;
+  const badge = document.getElementById(`badge-${chat._id}`);
+  if (badge) badge.classList.add('hidden');
+  if (typeof window.updateBadge === 'function') {
+    const totalUnread = chatsData.reduce(
+      (s, c) => s + countUnreadMessages(c),
+      0
+    );
+    window.updateBadge(totalUnread);
+  }
+}
+
 function renderChatListItem(chat, highlightNew = false) {
   const unread        = countUnreadMessages(chat);
   const productObj    = chat.productId || {};
@@ -314,28 +353,7 @@ function renderChatListItem(chat, highlightNew = false) {
   );
 
   /* باز کردن مدال گفتگو */
-  wrapper.addEventListener('click', async () => {
-    try {
-      const res = await fetch(apiUrl(`/api/chats/${chat._id}`), withCreds());
-      if (res.ok) {
-        const fresh = await res.json();
-        chat = fresh;
-        const idx = chatsData.findIndex(c => c._id === chat._id);
-        if (idx !== -1) chatsData[idx] = chat;
-      }
-    } catch {}
-    renderChatModal(chat);
-    currentChatId = chat._id;
-    const badge = document.getElementById(`badge-${chat._id}`);
-    if (badge) badge.classList.add('hidden');
-    if (typeof window.updateBadge === 'function') {
-      const totalUnread = chatsData.reduce(
-        (s, c) => s + countUnreadMessages(c),
-        0
-      );
-      window.updateBadge(totalUnread);
-    }
-  });
+  wrapper.addEventListener('click', () => openChatById(chat._id));
 
   /* حذف چت */
   wrapper.querySelector('[data-delete]').addEventListener('click', async e => {
