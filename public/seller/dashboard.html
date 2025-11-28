@@ -886,6 +886,37 @@
     margin-top: 6px;
   }
 
+  .discount-toast {
+    position: fixed;
+    bottom: 18px;
+    left: 50%;
+    transform: translate(-50%, 16px);
+    background: linear-gradient(135deg, #ecfdf3 0%, #d1fae5 100%);
+    color: #0f9c66;
+    border: 1px solid #a7f3d0;
+    border-radius: 16px;
+    padding: 12px 16px;
+    font-weight: 800;
+    font-size: 13px;
+    box-shadow: 0 16px 36px rgba(16, 185, 129, 0.25);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    z-index: 9999;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.25s ease, transform 0.25s ease;
+  }
+
+  .discount-toast i {
+    font-size: 18px;
+  }
+
+  .discount-toast.visible {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+
   .discount-cta:disabled,
   .discount-ghost:disabled {
     opacity: 0.6;
@@ -3105,6 +3136,16 @@
       </div>
 
       <div id="discountActionFeedback" class="discount-feedback inline" role="status" aria-live="polite"></div>
+      <div
+        id="discountSuccessToast"
+        class="discount-toast"
+        role="status"
+        aria-live="polite"
+        aria-hidden="true"
+      >
+        <i class="ri-checkbox-circle-line" aria-hidden="true"></i>
+        <span></span>
+      </div>
 
       <div class="hidden md:block">
         <table class="discount-table" aria-describedby="discountSummary">
@@ -3536,6 +3577,7 @@
     const saveDiscountBtn = document.getElementById('saveDiscountBtn');
     const discountFeedback = document.getElementById('discountFeedback');
     const discountActionFeedback = document.getElementById('discountActionFeedback');
+    const discountSuccessToast = document.getElementById('discountSuccessToast');
     const discountStatus = document.getElementById('discountStatus');
     const quickButtons = document.querySelectorAll('[data-discount-days]');
     const addDiscountModal = document.getElementById('addDiscountModal');
@@ -3549,6 +3591,7 @@
     let currentProductId = null;
     let lastFocusedElement = null;
     let addModalLastFocused = null;
+    let discountToastTimer = null;
     const defaultSaveLabel = saveDiscountBtn?.innerHTML;
     const fixedStartDate = new Date();
     let modalStartDate = new Date(fixedStartDate);
@@ -4104,6 +4147,21 @@
       }
     }
 
+    function showDiscountToast(message = '') {
+      if (!discountSuccessToast) return;
+      const messageTarget = discountSuccessToast.querySelector('span');
+      if (messageTarget) {
+        messageTarget.textContent = message;
+      }
+      discountSuccessToast.classList.add('visible');
+      discountSuccessToast.setAttribute('aria-hidden', String(!message));
+      clearTimeout(discountToastTimer);
+      discountToastTimer = setTimeout(() => {
+        discountSuccessToast.classList.remove('visible');
+        discountSuccessToast.setAttribute('aria-hidden', 'true');
+      }, 3000);
+    }
+
     function setButtonLoading(button, isLoading, loadingLabel = '') {
       if (!button) return;
       if (isLoading) {
@@ -4152,12 +4210,16 @@
       const normalized = normalizeProduct(updatedProduct);
       if (!normalized || !normalized.id) return;
       const index = discountProducts.findIndex((p) => String(p.id) === String(normalized.id));
+      const isNewProduct = index < 0;
       if (index >= 0) {
         discountProducts[index] = normalized;
       } else {
         discountProducts.push(normalized);
       }
       renderDiscounts();
+      if (isNewProduct) {
+        showDiscountToast('کالا با موفقیت به تخفیف‌ها اضافه شد.');
+      }
     }
 
     async function removeDiscount(product, triggerBtn) {
