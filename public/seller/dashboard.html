@@ -448,12 +448,41 @@
   }
 
   .add-discount-empty {
-    padding: 14px;
-    text-align: center;
-    color: #64748b;
-    background: #f8fafc;
-    border: 1px dashed #cbd5e1;
+    display: grid;
+    grid-template-columns: auto 1fr;
+    align-items: center;
+    gap: 12px;
+    padding: 16px 18px;
+    color: #0f172a;
+    background: linear-gradient(135deg, #f8fafc, #ecfeff);
+    border: 1px solid #cbd5e1;
+    border-radius: 16px;
+    box-shadow: 0 10px 30px rgba(14, 165, 233, 0.08);
+  }
+
+  .add-discount-empty__icon {
+    width: 48px;
+    height: 48px;
     border-radius: 14px;
+    display: grid;
+    place-items: center;
+    background: rgba(16, 185, 129, 0.08);
+    color: #0ea5e9;
+    font-size: 24px;
+  }
+
+  .add-discount-empty__title {
+    margin: 0;
+    font-weight: 800;
+    font-size: 0.95rem;
+    color: #0f172a;
+  }
+
+  .add-discount-empty__text {
+    margin: 4px 0 0;
+    font-size: 0.9rem;
+    color: #475569;
+    line-height: 1.8;
   }
 
   @media (max-width: 640px) {
@@ -3099,7 +3128,15 @@
       </label>
 
       <div id="addDiscountList" class="add-discount-modal__list" role="list"></div>
-      <div id="addDiscountEmpty" class="add-discount-empty" style="display:none;">همه محصولات شما در لیست تخفیف‌ها هستند!</div>
+      <div id="addDiscountEmpty" class="add-discount-empty" style="display:none;" aria-live="polite">
+        <div class="add-discount-empty__icon" aria-hidden="true">
+          <i class="ri-sparkling-2-line"></i>
+        </div>
+        <div>
+          <p class="add-discount-empty__title">محصول جدیدی برای اضافه کردن نیست</p>
+          <p class="add-discount-empty__text">برای افزودن تخفیف‌های تازه، محصول جدیدی ثبت کنید یا تخفیف یکی از کالاهای فعلی را آزاد کنید.</p>
+        </div>
+      </div>
     </div>
   </div>
 
