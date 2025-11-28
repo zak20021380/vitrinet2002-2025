@@ -2078,7 +2078,28 @@ function renderPopularProductsSection(section) {
           </div>`
         : '';
       const price = card.price
-        ? `<div class="popular-card-price self-center inline-flex items-center justify-center bg-gradient-to-r from-[#10b981]/10 to-[#0ea5e9]/10 px-4 py-1 rounded-full text-[#10b981] font-extrabold text-base shadow-sm text-center">${escapeHTML(card.price)}</div>`
+        ? `<div class="popular-card-price">
+            <div class="price-chip">
+              <span class="price-chip__icon" aria-hidden="true">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <defs>
+                    <linearGradient id="price-icon" x1="0%" y1="0%" x2="100%" y2="100%">
+                      <stop offset="0%" stop-color="#10b981" />
+                      <stop offset="100%" stop-color="#0ea5e9" />
+                    </linearGradient>
+                  </defs>
+                  <rect x="3" y="5" width="18" height="14" rx="3" fill="url(#price-icon)" opacity="0.18" />
+                  <path d="M7.5 9.5h9M9 12h6m-7.5 2.5h9" stroke="#0ea5e9" stroke-width="1.6" stroke-linecap="round" />
+                  <circle cx="8" cy="10" r="1" fill="#10b981" />
+                  <circle cx="16" cy="14" r="1" fill="#10b981" />
+                </svg>
+              </span>
+              <div class="price-chip__text">
+                <span class="price-chip__label">قیمت</span>
+                <span class="price-chip__value">${escapeHTML(card.price)}</span>
+              </div>
+            </div>
+          </div>`
         : '';
       const button = card.buttonText
         ? `<span class="popular-card-link inline-flex items-center gap-2 text-sm font-bold text-[#0ea5e9] bg-[#e0fdfa] px-4 py-1.5 rounded-full shadow-sm">${escapeHTML(card.buttonText)}<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M7 17L17 7M7 7h10v10"/></svg></span>`
@@ -2165,8 +2186,27 @@ async function loadPopularProductsFallback(slider) {
             </svg>
             <span class="truncate">${escapeHTML(loc)}</span>
           </div>
-          <div class="popular-card-price self-center inline-flex items-center justify-center bg-gradient-to-r from-[#10b981]/10 to-[#0ea5e9]/10 px-4 py-1 rounded-full text-[#10b981] font-extrabold text-base shadow-sm text-center">
-            ${escapeHTML(priceText)}
+          <div class="popular-card-price">
+            <div class="price-chip">
+              <span class="price-chip__icon" aria-hidden="true">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <defs>
+                    <linearGradient id="price-icon-fallback" x1="0%" y1="0%" x2="100%" y2="100%">
+                      <stop offset="0%" stop-color="#10b981" />
+                      <stop offset="100%" stop-color="#0ea5e9" />
+                    </linearGradient>
+                  </defs>
+                  <rect x="3" y="5" width="18" height="14" rx="3" fill="url(#price-icon-fallback)" opacity="0.18" />
+                  <path d="M7.5 9.5h9M9 12h6m-7.5 2.5h9" stroke="#0ea5e9" stroke-width="1.6" stroke-linecap="round" />
+                  <circle cx="8" cy="10" r="1" fill="#10b981" />
+                  <circle cx="16" cy="14" r="1" fill="#10b981" />
+                </svg>
+              </span>
+              <div class="price-chip__text">
+                <span class="price-chip__label">قیمت</span>
+                <span class="price-chip__value">${escapeHTML(priceText)}</span>
+              </div>
+            </div>
           </div>
         </div>
         <div class="popular-card-footer w-full">
