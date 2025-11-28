@@ -3016,7 +3016,6 @@
           </svg>
           مدیریت محصولات فروشگاه
         </div>
-        <div class="product-toolbar__hint">لیست محصولات روی دسکتاپ با عرض کامل و اسکرول روان نمایش داده می‌شود.</div>
       </div>
     </div>
 
@@ -3048,7 +3047,32 @@
     </div>
 
     <!-- پیام خالی -->
-    <div id="noProductMsg" class="text-center text-gray-400 text-[16px] py-4 hidden">هیچ محصولی ثبت نشده است!</div>
+    <div id="noProductMsg" class="hidden">
+      <div class="max-w-3xl mx-auto mt-4 bg-white/80 backdrop-blur-sm border border-[#e5e7eb] rounded-2xl p-6 shadow-sm text-right">
+        <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:gap-4">
+          <div class="shrink-0 flex items-center justify-center w-12 h-12 rounded-full bg-[#e0fdfa] text-[#10b981] text-2xl">
+            <i class="ri-store-2-line" aria-hidden="true"></i>
+          </div>
+          <div class="flex-1 space-y-2">
+            <div class="font-extrabold text-lg text-[#0f172a]">هیچ محصولی در این بخش ثبت نشده است</div>
+            <p class="text-gray-600 leading-7 text-sm sm:text-base">
+              برای نمایش محصولات در ویترین فروشگاه، از بخش «افزودن محصول» اطلاعات و تصاویر را وارد کنید. بعد از ثبت، محصولات در لیست مدیریت نمایش داده می‌شوند و می‌توانید آن‌ها را ویرایش یا حذف کنید.
+            </p>
+            <div class="flex flex-wrap gap-2 text-[13px] text-gray-500">
+              <span class="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-[#f8fafc] border border-[#e2e8f0]"><i class="ri-image-line" aria-hidden="true"></i>۳ تصویر یا بیشتر انتخاب کنید</span>
+              <span class="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-[#f8fafc] border border-[#e2e8f0]"><i class="ri-price-tag-3-line" aria-hidden="true"></i>قیمت و دسته‌بندی را کامل کنید</span>
+            </div>
+          </div>
+        </div>
+        <div class="mt-4 flex flex-wrap items-center gap-3">
+          <button id="noProductAddBtn" type="button" class="inline-flex items-center gap-2 bg-[#10b981] hover:bg-[#0ea5e9] text-white px-5 py-3 rounded-2xl text-[15px] font-bold transition active:scale-[0.98]">
+            <i class="ri-add-circle-line text-lg" aria-hidden="true"></i>
+            افزودن اولین محصول
+          </button>
+          <span class="text-gray-500 text-sm">در کمتر از یک دقیقه محصول خود را ثبت کنید.</span>
+        </div>
+      </div>
+    </div>
   </div>
 </section>
 
@@ -3370,6 +3394,10 @@
     const sections = Array.from(document.querySelectorAll('section[id^="section-"]'));
     const performanceBtn = document.getElementById('menu-performance');
     const performanceContainer = document.getElementById('performance-container');
+    const productsTableBody = document.getElementById('productsTableBody');
+    const productsMobileList = document.getElementById('productsMobileList');
+    const noProductMsg = document.getElementById('noProductMsg');
+    const noProductAddBtn = document.getElementById('noProductAddBtn');
     let performanceLoaded = false;
 
     function updateActiveButton(sectionName) {
@@ -3425,6 +3453,33 @@
       }
 
       updateActiveButton('performance');
+    }
+
+    function updateProductEmptyState() {
+      if (!noProductMsg) return;
+      const hasDesktopRows = productsTableBody?.querySelector('tr');
+      const hasMobileCards = productsMobileList?.children?.length;
+      const hasProducts = Boolean(hasDesktopRows || hasMobileCards);
+      noProductMsg.classList.toggle('hidden', hasProducts);
+    }
+
+    [productsTableBody, productsMobileList].forEach((el) => {
+      if (!el || typeof MutationObserver === 'undefined') return;
+      const observer = new MutationObserver(updateProductEmptyState);
+      observer.observe(el, { childList: true });
+    });
+
+    updateProductEmptyState();
+
+    if (noProductAddBtn) {
+      noProductAddBtn.addEventListener('click', () => {
+        const addMenuBtn = document.getElementById('menu-add');
+        if (addMenuBtn) {
+          addMenuBtn.click();
+        } else {
+          showSection('add');
+        }
+      });
     }
 
     sidebarButtons.forEach((btn) => {
