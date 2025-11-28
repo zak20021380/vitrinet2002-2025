@@ -293,6 +293,13 @@ async function openChatById(chatId) {
     );
     window.updateBadge(totalUnread);
   }
+
+  // هم‌زمان لیست را تازه کن تا بج‌ها و شمارنده کلی دقیق بمانند
+  try {
+    await fetchChats();
+  } catch (err) {
+    console.error('refresh after openChatById:', err);
+  }
 }
 
 function renderChatListItem(chat, highlightNew = false) {
