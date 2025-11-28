@@ -1462,9 +1462,14 @@ function buildBrandShelfCard(product) {
         ${shopName ? `<div class="text-[11px] font-semibold text-slate-500 leading-tight line-clamp-1">${escapeHTML(shopName)}</div>` : '<span class="text-[11px] text-slate-400">فروشنده فعال</span>'}
         <span class="inline-flex items-center gap-1 px-2 py-1 rounded-lg bg-slate-100 text-[11px] font-bold text-slate-700"><i class="ri-store-2-line text-sm text-emerald-600"></i>${escapeHTML(categoryLabel)}</span>
       </div>
-      <div class="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-rose-50 text-rose-600 text-[12px] font-extrabold shadow-[0_10px_30px_rgba(248,113,113,0.18)]">
-        <i class="ri-timer-flash-line text-base"></i>
-        ${escapeHTML(countdownLabel || 'زمان محدود')}
+      <div class="discount-countdown" role="status" aria-label="زمان باقی‌مانده تخفیف">
+        <span class="discount-countdown__icon" aria-hidden="true">
+          <i class="ri-timer-line"></i>
+        </span>
+        <span class="discount-countdown__content">
+          <span class="discount-countdown__label">مهلت خرید ویژه</span>
+          <span class="discount-countdown__value">${escapeHTML(countdownLabel || 'مهلت محدود')}</span>
+        </span>
       </div>
       <h4 class="text-sm sm:text-base font-black leading-6 line-clamp-2">${escapeHTML(title)}</h4>
       <div class="flex items-baseline gap-2">
