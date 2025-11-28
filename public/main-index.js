@@ -1446,7 +1446,7 @@ function buildBrandShelfCard(product) {
   card.setAttribute('aria-label', title);
 
   card.innerHTML = `
-    <div class="relative w-full bg-gradient-to-b from-slate-50 to-white rounded-2xl p-3 pt-4 aspect-[4/5] flex items-center justify-center overflow-hidden">
+    <div class="relative w-full bg-gradient-to-b from-slate-50 to-white rounded-2xl p-3 pt-4 aspect-[4/3] flex items-center justify-center overflow-hidden">
       <div class="absolute top-0 left-0 px-3 py-2 rounded-br-2xl bg-gradient-to-l from-rose-500 via-orange-500 to-amber-400 text-white text-xs font-black shadow-lg">
         ${percent != null ? `${escapeHTML(discountNumberFormatter.format(percent))}%` : escapeHTML(badgeLabel)}
       </div>
@@ -1472,7 +1472,7 @@ function buildBrandShelfCard(product) {
         ${discountedMarkup ? `<span class="text-lg font-black text-emerald-600">${escapeHTML(discountedMarkup)}</span>` : ''}
       </div>
       <div class="mt-auto flex items-center gap-2">
-        <span class="w-full inline-flex items-center justify-center gap-2 rounded-xl border-2 border-emerald-100 bg-emerald-50 text-emerald-700 font-extrabold text-sm py-2.5 shadow-inner hover:bg-emerald-100 hover:border-emerald-200 transition">
+        <span class="w-full inline-flex items-center justify-center gap-2 rounded-xl btn-grad text-white font-extrabold text-sm py-2.5 shadow-lg transition">
           <i class="ri-eye-line text-base"></i>
           مشاهده محصول
         </span>
