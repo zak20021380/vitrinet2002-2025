@@ -255,9 +255,6 @@ async function markAllRead() {
       await loadDashboardMessages();
     }
 
-    // علامت‌گذاری همه پیام‌ها خوانده شده
-    await markAllRead();
-
     // بستن سایدبار در موبایل
     if (window.innerWidth <= 768) {
       toggleSidebar();
