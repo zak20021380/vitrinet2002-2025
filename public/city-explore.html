@@ -17,13 +17,12 @@
     body {
       font-family: 'Vazirmatn', 'Montserrat', sans-serif;
       background: #f8fafc;
-      letter-spacing: -0.01em;
+      letter-spacing: normal;
     }
     .main-logo {
       font-size: 2.25rem;
       color: #10b981;
       font-family: 'Vazirmatn','Montserrat',sans-serif;
-      letter-spacing:-1px;
       filter: drop-shadow(0 0 9px #e0fdfa88);
       font-weight: 900;
       user-select: none;
@@ -56,27 +55,28 @@
       transform: scale(1.055);
     }
     /* دکمه مراکز خرید */
-    .center-btn {
+    .center-btn,
+    .more-centers-btn {
       background: #fff;
       border: 2px solid #10b98133;
       color: #13bfa4;
       font-weight: 900;
       border-radius: 1.3rem;
-      font-size: 1.08rem;
+      font-size: 1.05rem;
       width: 350px;
       max-width: 95vw;
-      padding: 13px 0;
+      padding: 13px 16px;
       margin-bottom: 3px;
       box-shadow: 0 2px 16px #6ee7b78c;
       transition: all 0.18s;
       text-align: center;
-      letter-spacing: -.5px;
       display: block;
       margin-left: auto;
       margin-right: auto;
     }
 
-    .center-btn:hover {
+    .center-btn:hover,
+    .more-centers-btn:hover {
       background: linear-gradient(90deg,#0ea5e9,#10b981);
       color: #fff;
       border-color: #0ea5e9;
@@ -84,34 +84,20 @@
       transform: scale(1.045);
     }
 
-    .center-btn.active {
+    .center-btn.active,
+    .more-centers-btn.active {
       background: linear-gradient(90deg,#10b981,#0ea5e9);
       color: #fff;
       border-color: #0ea5e9;
       box-shadow: 0 10px 28px #10b9812a;
       transform: scale(1.03);
     }
-
     .more-centers-btn {
-      background: linear-gradient(90deg,#10b981,#0ea5e9);
-      color: #fff;
-      font-weight: 800;
-      border-radius: 9999px;
-      font-size: 0.98rem;
-      padding: 10px 22px;
-      box-shadow: 0 5px 20px #0ea5e926;
-      transition: transform 0.18s ease, box-shadow 0.18s ease, filter 0.18s ease;
-      border: none;
-      cursor: pointer;
       display: inline-flex;
       align-items: center;
-      gap: 6px;
-    }
-
-    .more-centers-btn:hover {
-      transform: translateY(-2px) scale(1.03);
-      box-shadow: 0 12px 30px #0ea5e933;
-      filter: brightness(1.05);
+      gap: 10px;
+      justify-content: center;
+      cursor: pointer;
     }
 
     .more-centers-btn svg {
@@ -214,6 +200,19 @@
     .centers-modal-list {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    }
+
+    .modal-handle {
+      width: 82px;
+      height: 6px;
+      background: #cbd5e1;
+      border-radius: 999px;
+      margin: 0.35rem auto 1.1rem auto;
+      opacity: 0.9;
+    }
+
+    .mobile-close-btn {
+      display: none;
     }
 
     .centers-loading {
@@ -338,12 +337,8 @@
       position: relative;
       direction: rtl;
       cursor: pointer;
-      text-align: center;
-    }
-
-    .category-select {
-      text-align: center;
-      text-align-last: center; /* واسه مرورگرهای مدرن */
+      text-align: right;
+      text-align-last: right;
     }
 
 
@@ -382,7 +377,27 @@
       mask-image: linear-gradient(to left, transparent 0, black 20px, black 95%, transparent 100%);
       -webkit-mask-image: linear-gradient(to left, transparent 0, black 20px, black 95%, transparent 100%);
     }
+    .header-actions {
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+    .header-actions > a {
+      display: inline-flex;
+      align-items: center;
+    }
+    .logo-group {
+      min-width: 180px;
+    }
     .areas-scroll::-webkit-scrollbar { display: none; }
+    @media (min-width: 1024px) {
+      .areas-scroll {
+        flex-wrap: wrap;
+        overflow-x: visible;
+        mask-image: none;
+        -webkit-mask-image: none;
+        gap: 0.6rem;
+      }
+    }
     @media (max-width: 1024px) {
       .shop-card { min-height: 170px; }
       .area-btn { font-size: .93rem; min-width: 65px; padding: 7px 0; }
@@ -390,9 +405,12 @@
     }
     @media (max-width: 640px) {
       .area-btn { font-size: 12.1px; padding: 6px 0; min-width: 47px;}
-      .center-btn { font-size: 13px; padding: 9px 0; min-width: 70vw;}
+      .center-btn, .more-centers-btn { font-size: 13px; padding: 9px 0; min-width: 70vw;}
       .shop-card { border-radius: .6rem; min-height: 80px; }
       .category-select { min-width: 86px !important; font-size: .97rem;}
+      .header-actions { width: 100%; justify-content: space-between; gap: 0.5rem; }
+      .header-actions > a { flex: 1 1 auto; justify-content: center; min-width: 0; }
+      .logo-group { width: 100%; justify-content: space-between; }
       .centers-modal {
         padding: 0.65rem;
         align-items: flex-end;
@@ -410,9 +428,16 @@
         transform: translateY(0);
       }
       #closeCentersModal {
-        top: 12px;
-        left: 16px;
-        font-size: 1.85rem;
+        top: auto;
+        left: 50%;
+        transform: translateX(-50%);
+        bottom: 14px;
+        font-size: 1.1rem;
+        background: #0f9a8b;
+        color: #fff;
+        padding: 0.5rem 1.1rem;
+        border-radius: 999px;
+        box-shadow: 0 12px 24px rgba(14, 165, 233, 0.25);
       }
       .centers-modal-header {
         gap: 1rem !important;
@@ -484,6 +509,20 @@
       .selected-center-indicator .selected-center-name {
         font-size: 0.95rem;
       }
+
+      .mobile-close-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 100%;
+        margin-top: 0.75rem;
+        padding: 0.75rem;
+        border-radius: 999px;
+        background: linear-gradient(90deg, #10b981, #0ea5e9);
+        color: #fff;
+        font-weight: 800;
+        box-shadow: 0 10px 26px rgba(14, 165, 233, 0.25);
+      }
     }
     @media (max-width: 480px) {
       .centers-modal-content {
@@ -497,7 +536,6 @@
       .modal-area-info-btn {
         font-size: 0.9rem;
         padding: 0.62rem 0.65rem;
-        letter-spacing: -0.2px;
       }
       .center-info-card {
         border-radius: 1.45rem;
@@ -608,18 +646,20 @@
     /* فروشگاه کارت */
     .shop-card {
       background: #fff;
-      border-radius: 1.12rem;
-      box-shadow: 0 5px 22px #10b98114, 0 2px 10px #0ea5e910;
-      transition: transform .13s, box-shadow .15s;
+      border-radius: 1rem;
+      box-shadow: 0 8px 22px rgba(15, 23, 42, 0.06);
+      transition: transform .14s ease, box-shadow .18s ease, border-color .14s ease;
       overflow: hidden;
-      border: 1.3px solid #e0fdfa;
+      border: 1px solid #e2e8f0;
       min-height: 290px;
       font-family: 'Vazirmatn', 'Montserrat', sans-serif;
+      display: block;
+      color: inherit;
     }
-    .shop-card:hover { 
-      transform: scale(1.034);
-      box-shadow: 0 10px 36px #0ea5e922;
-      border-color: #10b98150;
+    .shop-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 14px 30px rgba(15, 23, 42, 0.12);
+      border-color: #cbd5e1;
     }
     @media (max-width: 640px) {
       .shop-card { padding: 0.8rem !important; min-height: 90px;}
@@ -650,9 +690,9 @@
 
   <!-- هدر با لوگو اصلی -->
 <header class="w-full sticky top-0 z-50 bg-white/90 backdrop-blur-[10px] shadow-md border-b border-[#e0fdfa]">
-  <nav class="max-w-7xl mx-auto flex items-center justify-between px-2 sm:px-6 py-2 sm:py-3 gap-y-2">
+  <nav class="max-w-7xl mx-auto flex flex-wrap items-center justify-between px-2 sm:px-6 py-2 sm:py-3 gap-3 sm:gap-4">
     <!-- لوگوی Vitreenet -->
-    <div class="flex items-center gap-4 flex-shrink-0">
+    <div class="logo-group flex items-center gap-4 flex-shrink-0">
       <a href="index.html" class="logo-vitreenet font-extrabold text-[1.7rem] sm:text-[2.2rem] text-[#11d6ad] tracking-wide drop-shadow hover:brightness-110 transition-all select-none">
         Vitreenet
       </a>
@@ -675,7 +715,7 @@
       </div>
     </div>
     <!-- منو -->
-    <div class="flex items-center gap-2 sm:gap-4 ml-2">
+    <div class="header-actions flex items-center gap-2 sm:gap-4 ml-2">
       <a href="index.html" class="hidden sm:inline text-gray-700 hover:text-[#10b981] font-bold px-2 sm:px-3 transition">خانه</a>
       <a href="categories.html" class="hidden sm:inline text-gray-700 hover:text-[#0ea5e9] font-bold px-2 sm:px-3 transition">دسته‌بندی</a>
       <a href="login.html" class="hidden sm:inline text-gray-700 hover:text-[#0ea5e9] font-bold px-2 sm:px-3 transition">ورود</a>
@@ -719,7 +759,7 @@
   <main class="flex-1 w-full max-w-6xl mx-auto px-3 sm:px-8 py-7 sm:py-12">
     <!-- تیتر و دکمه‌ها -->
     <div class="mb-5 flex items-center flex-col gap-3 sm:gap-4">
-      <h1 class="main-title text-2xl sm:text-[2.18rem] font-extrabold text-center bg-gradient-to-l from-[#16c6b7] to-[#0ea5e9] text-transparent bg-clip-text tracking-tight leading-tight drop-shadow-lg" style="letter-spacing:-.6px">
+      <h1 class="main-title text-2xl sm:text-[2.18rem] font-extrabold text-center bg-gradient-to-l from-[#16c6b7] to-[#0ea5e9] text-transparent bg-clip-text tracking-tight leading-tight drop-shadow-lg">
         مغازه‌های شهر رو بگرد!
       </h1>
       <div class="flex flex-wrap gap-3 items-center justify-center">
@@ -730,7 +770,7 @@
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
             <path d="M12 5v14M5 12h14" />
           </svg>
-          بیشتر
+          مشاهده همه مراکز
         </button>
       </div>
       <div id="selectedCenterIndicator" class="hidden selected-center-indicator mt-2">
@@ -753,18 +793,6 @@
       <div class="relative w-full md:w-60">
         <select id="categorySelect" class="category-select w-full pr-9">
           <option value="">همه فروشگاه ها</option>
-          <option>پوشاک</option>
-          <option>خوراک</option>
-          <option>خدمات</option>
-          <option>دیجیتال</option>
-          <option>زیبایی</option>
-          <option>کتاب و تحریر</option>
-          <option>لوازم خانگی</option>
-          <option>ورزشی</option>
-          <option>تالار و مجالس</option>
-          <option>قنادی و شیرینی</option>
-          <option>گل و گیاه</option>
-          <option>خودرو</option>
         </select>
         <span class="select-arrow material-icons"></span>
       </div>
@@ -774,16 +802,17 @@
     <div id="shopsList" class="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-5"></div>
     <div id="noResult" class="hidden text-center text-gray-400 text-lg p-12 font-bold">هیچ مغازه‌ای پیدا نشد!</div>
   </main>
-  <div id="centersModal" class="centers-modal fixed inset-0 z-[1100] items-center justify-center px-4">
-    <div id="centersModalOverlay" class="absolute inset-0 bg-[#0f172a]/40 backdrop-blur-sm transition-opacity"></div>
-    <div class="relative z-10 bg-white rounded-3xl shadow-2xl border border-[#e0fdfa] w-full max-w-3xl mx-auto p-6 sm:p-8 overflow-hidden centers-modal-content">
-      <button id="closeCentersModal" class="absolute top-4 left-4 text-[#0f9a8b] hover:text-[#0ea5e9] transition-colors text-2xl font-bold" aria-label="بستن">
-        &times;
-      </button>
-      <div class="centers-modal-header flex flex-col gap-4 text-center sm:text-right">
-        <div class="centers-modal-badge mx-auto sm:mx-0">
-          <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M3 21h18" />
+    <div id="centersModal" class="centers-modal fixed inset-0 z-[1100] items-center justify-center px-4">
+      <div id="centersModalOverlay" class="absolute inset-0 bg-[#0f172a]/40 backdrop-blur-sm transition-opacity"></div>
+      <div class="relative z-10 bg-white rounded-3xl shadow-2xl border border-[#e0fdfa] w-full max-w-3xl mx-auto p-6 sm:p-8 overflow-hidden centers-modal-content">
+        <button id="closeCentersModal" class="absolute top-4 left-4 text-[#0f9a8b] hover:text-[#0ea5e9] transition-colors text-2xl font-bold" aria-label="بستن">
+          &times;
+        </button>
+        <div class="modal-handle" aria-hidden="true"></div>
+        <div class="centers-modal-header flex flex-col gap-4 text-center sm:text-right">
+          <div class="centers-modal-badge mx-auto sm:mx-0">
+            <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M3 21h18" />
             <path d="M5 21V7.5a1.5 1.5 0 0 1 1.5-1.5H9" />
             <path d="M19 21V7.5A1.5 1.5 0 0 0 17.5 6H15" />
             <rect x="9" y="3" width="6" height="6" rx="1.2" />
@@ -797,8 +826,9 @@
             برای مشاهده فروشگاه‌های هر مرکز خرید روی نام آن کلیک کن.
           </p>
         </div>
-      </div>
+        </div>
       <div id="centersList" class="centers-modal-list mt-6 grid gap-3 sm:gap-4 text-sm"></div>
+      <button id="closeCentersModalMobile" type="button" class="mobile-close-btn">بستن</button>
     </div>
   </div>
 
@@ -832,6 +862,30 @@
   const API_BASE = 'http://localhost:5000/api';
   const API_ORIGIN = 'http://localhost:5000';
   const numberFormatter = new Intl.NumberFormat('fa-IR');
+
+  const CATEGORY_OPTIONS = [
+    { value: '', label: 'همه فروشگاه ها' },
+    { value: 'پوشاک', label: 'پوشاک' },
+    { value: 'خوراک', label: 'خوراک' },
+    { value: 'خدمات', label: 'خدمات' },
+    { value: 'دیجیتال', label: 'دیجیتال' },
+    { value: 'زیبایی', label: 'زیبایی' },
+    { value: 'کتاب و تحریر', label: 'کتاب و تحریر' },
+    { value: 'لوازم خانگی', label: 'لوازم خانگی' },
+    { value: 'ورزشی', label: 'ورزشی' },
+    { value: 'تالار و مجالس', label: 'تالار و مجالس' },
+    { value: 'قنادی و شیرینی', label: 'قنادی و شیرینی' },
+    { value: 'گل و گیاه', label: 'گل و گیاه' },
+    { value: 'خودرو', label: 'خودرو' }
+  ];
+
+  const debounce = (fn, delay = 550) => {
+    let timeout;
+    return (...args) => {
+      clearTimeout(timeout);
+      timeout = setTimeout(() => fn(...args), delay);
+    };
+  };
 
   const FALLBACK_CENTERS = [
     { id: 'baneta', title: 'بانتا', order: 0 },
@@ -1054,13 +1108,35 @@
     updateSelectedCenterIndicator();
   }
 
-  document.getElementById('categorySelect').onchange = function () {
-    current.category = this.value;
-    loadAllShops();
+  function populateCategories() {
+    const select = document.getElementById('categorySelect');
+    if (!select) return;
+    select.innerHTML = '';
+    CATEGORY_OPTIONS.forEach(option => {
+      const opt = document.createElement('option');
+      opt.value = option.value;
+      opt.textContent = option.label;
+      select.appendChild(opt);
+    });
   }
-  document.getElementById('searchInput').oninput = function () {
-    current.search = this.value;
-    loadAllShops();
+
+  const categorySelect = document.getElementById('categorySelect');
+  const searchInput = document.getElementById('searchInput');
+  populateCategories();
+
+  if (categorySelect) {
+    categorySelect.addEventListener('change', () => {
+      current.category = categorySelect.value;
+      loadAllShops();
+    });
+  }
+
+  if (searchInput) {
+    const debouncedSearch = debounce(value => {
+      current.search = value;
+      loadAllShops();
+    }, 550);
+    searchInput.addEventListener('input', event => debouncedSearch(event.target.value));
   }
   if (allCentersBtn) {
     allCentersBtn.onclick = () => {
@@ -1076,6 +1152,7 @@
   const centersModalOverlay = document.getElementById('centersModalOverlay');
   const openCentersBtn = document.getElementById('more-centers-btn');
   const closeCentersBtn = document.getElementById('closeCentersModal');
+  const closeCentersBtnMobile = document.getElementById('closeCentersModalMobile');
   const centerInfoModal = document.getElementById('centerInfoModal');
   const centerInfoOverlay = document.getElementById('centerInfoOverlay');
   const closeCenterInfoBtn = document.getElementById('closeCenterInfo');
@@ -1181,7 +1258,7 @@
     });
   }
 
-  [centersModalOverlay, closeCentersBtn].forEach(el => {
+  [centersModalOverlay, closeCentersBtn, closeCentersBtnMobile].forEach(el => {
     if (el) {
       el.addEventListener('click', closeCentersModal);
     }
@@ -1268,18 +1345,19 @@
         const imageSrc = resolveShopImage(shop.boardImage || shop.banner);
         const centerBadgeTitle = shop.centerLocation ? `title="${escapeHtml(shop.centerLocation)}"` : '';
 
-        const card = document.createElement('div');
+        const card = document.createElement('a');
+        card.href = `shop.html?shopurl=${encodeURIComponent(shop.shopurl || '')}`;
         card.className = `
-          shop-card flex flex-col justify-between items-stretch
+          shop-card flex flex-col justify-start items-stretch
           p-3 sm:p-4 group transition-all duration-200
-          relative hover:-translate-y-1 hover:shadow-2xl
+          relative
         `;
+        card.setAttribute('aria-label', `مشاهده ${escapeHtml(storeName)}`);
 
         card.innerHTML = `
           <div class="relative w-full aspect-[4/3] mb-4 rounded-xl overflow-hidden
                       flex items-center justify-center
-                      bg-gradient-to-tr from-[#e0fdfa] to-[#e0f7fa]
-                      border-2 border-[#10b98112] group-hover:border-[#10b98144] shadow">
+                      bg-white border border-[#e2e8f0]">
             <img
               src="${imageSrc}"
               alt="${escapeHtml(storeName)}"
@@ -1287,19 +1365,18 @@
               class="w-full h-full object-cover object-center transition-all duration-200 group-hover:scale-105"
               style="aspect-ratio:4/3;max-height:260px;"
             />
-            <span class="absolute top-2 left-2 bg-[#10b981] text-white text-xs font-bold px-2 py-1 rounded-full shadow group-hover:bg-[#0ea5e9] transition-all duration-150">جدید</span>
           </div>
           <div class="w-full flex flex-row-reverse items-center justify-between mb-2 gap-1">
-            <span class="inline-block bg-[#10b981]/10 text-[#10b981] text-[12px] font-extrabold px-2 py-1 rounded-full ml-1">${escapeHtml(categoryLabel)}</span>
-            <span class="center-badge inline-block bg-[#0ea5e9]/10 text-[#0ea5e9] text-[12px] font-extrabold px-2 py-1 rounded-full" ${centerBadgeTitle}>${escapeHtml(areaName || 'سایر مراکز')}</span>
+            <span class="inline-flex items-center gap-1 bg-[#10b981]/10 text-[#0f9a8b] text-[12px] font-extrabold px-2 py-1 rounded-full ml-1">${escapeHtml(categoryLabel)}</span>
+            <span class="center-badge inline-flex items-center gap-1 bg-[#0ea5e9]/10 text-[#0ea5e9] text-[12px] font-extrabold px-2 py-1 rounded-full" ${centerBadgeTitle}>${escapeHtml(areaName || 'سایر مراکز')}</span>
           </div>
-          <h4 class="font-bold text-base sm:text-lg text-[#10b981] text-center mb-2 truncate w-full group-hover:text-[#0ea5e9] transition-all">${escapeHtml(storeName)}</h4>
-          <div class="text-[#13bfa4] font-extrabold text-sm mb-1">${escapeHtml(address)}</div>
-          ${phone ? `<div class="text-gray-400 text-xs font-bold mt-1 flex items-center gap-1 justify-center"><svg width="16" height="16" viewBox="0 0 24 24" fill="#10b981"><path d="M6.62 10.79a15.054 15.054 0 006.59 6.59l2.2-2.2a1.003 1.003 0 011.01-.24c1.12.37 2.33.57 3.58.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1C10.07 21 3 13.93 3 5c0-.55.45-1 1-1h3.01c.55 0 1 .45 1 1 0 1.25.2 2.46.57 3.59a1 1 0 01-.24 1.01l-2.2 2.19z"/></svg> ${escapeHtml(phone)}</div>` : ''}
-          <div class="flex-1"></div>
-          <a href="shop.html?shopurl=${encodeURIComponent(shop.shopurl || '')}" class="w-full inline-block mt-4 bg-gradient-to-l from-[#10b981] to-[#0ea5e9] hover:from-[#0ea5e9] hover:to-[#10b981] rounded-full px-4 py-2 text-white font-extrabold text-sm shadow transition-all duration-200 text-center">
-            مشاهده فروشگاه
-          </a>
+          <h4 class="font-bold text-base sm:text-lg text-slate-900 text-center mb-2 truncate w-full">${escapeHtml(storeName)}</h4>
+          <div class="text-[#0f9a8b] font-extrabold text-sm mb-1 text-center">${escapeHtml(address)}</div>
+          ${phone ? `<div class="text-gray-500 text-xs font-bold mt-1 flex items-center gap-1 justify-center"><svg width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"#10b981\"><path d=\"M6.62 10.79a15.054 15.054 0 006.59 6.59l2.2-2.2a1.003 1.003 0 011.01-.24c1.12.37 2.33.57 3.58.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1C10.07 21 3 13.93 3 5c0-.55.45-1 1-1h3.01c.55 0 1 .45 1 1 0 1.25.2 2.46.57 3.59a1 1 0 01-.24 1.01l-2.2 2.19z\"/></svg> ${escapeHtml(phone)}</div>` : ''}
+          <div class="mt-3 flex items-center justify-between text-[#0ea5e9] font-extrabold text-sm">
+            <span class="inline-flex items-center gap-1">مشاهده فروشگاه</span>
+            <span aria-hidden="true">↗</span>
+          </div>
         `;
 
         list.appendChild(card);
