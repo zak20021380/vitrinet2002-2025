@@ -5,6 +5,27 @@ const router = express.Router();
 const productController = require('../controllers/productController');
 const Seller = require('../models/Seller');
 const Product = require('../models/product');
+const multer = require('multer');
+const path = require('path');
+const fs = require('fs');
+
+// پیکربندی آپلود تصاویر محصول
+const uploadDir = path.join(__dirname, '..', 'uploads', 'products');
+fs.mkdirSync(uploadDir, { recursive: true });
+
+const storage = multer.diskStorage({
+  destination: function (_req, _file, cb) {
+    cb(null, uploadDir);
+  },
+  filename: function (_req, file, cb) {
+    const uniqueSuffix = `${Date.now()}-${Math.round(Math.random() * 1e6)}`;
+    const ext = path.extname(file.originalname || '').toLowerCase();
+    const safeName = (file.originalname || 'file').replace(/[^a-zA-Z0-9_-]/g, '');
+    cb(null, `${safeName || 'product'}-${uniqueSuffix}${ext}`);
+  }
+});
+
+const upload = multer({ storage });
 
 // اگر middleware احراز هویت داری، این خط را فعال کن:
 // const authMiddleware = require('../middlewares/authMiddleware');
@@ -12,7 +33,7 @@ const Product = require('../models/product');
 // -----------------------------
 // افزودن محصول جدید
 // -----------------------------
-router.post('/', /* authMiddleware */ productController.addProduct);
+router.post('/', upload.array('images', 10), /* authMiddleware */ productController.addProduct);
 
 // -----------------------------
 // دریافت همه محصولات (مثلاً با ?sellerId=...)
