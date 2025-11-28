@@ -723,10 +723,12 @@ if (!window.seller?.id) {
     // اگر هیچ محصولی نیست
     if (!products.length) {
       noProductMsg.classList.remove('hidden');
+      document.dispatchEvent(new CustomEvent('products:updated', { detail: { products } }));
       return;
     }
     noProductMsg.classList.add('hidden');
     window._allProducts = products;
+    document.dispatchEvent(new CustomEvent('products:updated', { detail: { products } }));
 
     // ---- رندر جدول (دسکتاپ) ----
     products.forEach((prod) => {
