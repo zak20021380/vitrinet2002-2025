@@ -669,13 +669,35 @@
       display: block;
       color: inherit;
     }
+    .shop-card__media {
+      border-radius: 1rem;
+    }
     .shop-card:hover {
       transform: translateY(-4px);
       box-shadow: 0 14px 30px rgba(15, 23, 42, 0.12);
       border-color: #cbd5e1;
     }
     @media (max-width: 640px) {
-      .shop-card { padding: 0.8rem !important; min-height: 90px;}
+      .shop-card {
+        padding: 1rem !important;
+        min-height: 230px;
+        border-radius: 1.1rem;
+        border-width: 1.5px;
+      }
+      .shop-card__media img {
+        min-height: 170px;
+        object-fit: cover;
+      }
+      .shop-card .card-action-btn {
+        width: 100%;
+        max-width: none;
+        font-size: 0.95rem;
+        padding: 11px 18px;
+      }
+      .shop-card .card-action-btn svg {
+        width: 18px;
+        height: 18px;
+      }
     }
   </style>
 
@@ -1391,7 +1413,7 @@
         card.setAttribute('aria-label', `مشاهده ${escapeHtml(storeName)}`);
 
         card.innerHTML = `
-          <div class="relative w-full aspect-[4/3] mb-4 rounded-xl overflow-hidden
+          <div class="shop-card__media relative w-full aspect-[4/3] mb-4 rounded-xl overflow-hidden
                       flex items-center justify-center
                       bg-white border border-[#e2e8f0]">
             <img
