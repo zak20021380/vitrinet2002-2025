@@ -84,6 +84,14 @@
       transform: scale(1.045);
     }
 
+    .center-btn.active {
+      background: linear-gradient(90deg,#10b981,#0ea5e9);
+      color: #fff;
+      border-color: #0ea5e9;
+      box-shadow: 0 10px 28px #10b9812a;
+      transform: scale(1.03);
+    }
+
     .more-centers-btn {
       background: linear-gradient(90deg,#10b981,#0ea5e9);
       color: #fff;
@@ -987,6 +995,7 @@
 
   let current = { area: null, category: "", search: "" };
 
+  const allCentersBtn = document.getElementById('all-centers-btn');
   const selectedCenterIndicator = document.getElementById('selectedCenterIndicator');
   const selectedCenterName = document.getElementById('selectedCenterName');
 
@@ -994,6 +1003,17 @@
     if (!id) return '';
     const found = AREAS.find(area => area.id === id);
     return found ? found.name : id;
+  }
+
+  function updateAllCentersButtonState() {
+    if (!allCentersBtn) return;
+    if (!current.area) {
+      allCentersBtn.classList.add('active');
+      allCentersBtn.setAttribute('aria-pressed', 'true');
+    } else {
+      allCentersBtn.classList.remove('active');
+      allCentersBtn.setAttribute('aria-pressed', 'false');
+    }
   }
 
   function updateSelectedCenterIndicator() {
@@ -1005,6 +1025,7 @@
       selectedCenterIndicator.classList.add('hidden');
       selectedCenterName.textContent = '';
     }
+    updateAllCentersButtonState();
   }
 
   // ساخت دکمه مناطق معروف (بالا)
@@ -1043,12 +1064,14 @@
     current.search = this.value;
     loadAllShops();
   }
-  document.getElementById('all-centers-btn').onclick = () => {
-    current.area = null;
-    renderAreasShort();
-    loadAllShops();
-    window.scrollTo({ top: document.getElementById('areasShort').offsetTop - 60, behavior: 'smooth' });
-  };
+  if (allCentersBtn) {
+    allCentersBtn.onclick = () => {
+      current.area = null;
+      renderAreasShort();
+      loadAllShops();
+      window.scrollTo({ top: document.getElementById('areasShort').offsetTop - 60, behavior: 'smooth' });
+    };
+  }
 
   const centersModal = document.getElementById('centersModal');
   const centersList = document.getElementById('centersList');
