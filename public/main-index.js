@@ -3073,9 +3073,13 @@ function updateSliderNavVisibility(sliderId) {
   }
 
   const hasItems = Boolean(sliderEl.querySelector(':scope > *:not([data-placeholder])'));
+  const isBrandShelf = sliderId === 'brand-shelf-slider';
+  const viewportAllowsNav = !isBrandShelf || window.innerWidth >= 1024;
+  const hasOverflow = sliderEl.scrollWidth - sliderEl.clientWidth > 8;
+  const shouldShowNav = hasItems && (!isBrandShelf ? true : (viewportAllowsNav && hasOverflow));
 
   buttons.forEach(button => {
-    if (hasItems) {
+    if (shouldShowNav) {
       button.style.display = '';
       button.setAttribute('aria-hidden', 'false');
       button.removeAttribute('aria-disabled');
@@ -3162,6 +3166,10 @@ function setupBrandShelfArrowVisibility() {
 }
 
 setupBrandShelfArrowVisibility();
+window.addEventListener('resize', () => {
+  updateSliderNavVisibility('brand-shelf-slider');
+  setupBrandShelfArrowVisibility();
+});
 
 
 function toggleAdPopupVisibility(popupEl, shouldShow) {
