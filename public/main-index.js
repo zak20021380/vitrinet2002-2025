@@ -1416,6 +1416,9 @@ function buildBrandShelfCard(product) {
   const card = document.createElement('article');
   card.className = 'brand-card';
 
+  const productId = product?._id || product?.id;
+  const productLink = productId ? `product.html?id=${encodeURIComponent(productId)}` : '#';
+  const shopName = product?.shopName || product?.seller?.storename || product?.seller?.name || '';
   const percent = calculateDiscountPercent(product);
   const badgeLabel = percent != null
     ? `٪${discountNumberFormatter.format(percent)} تخفیف`
@@ -1425,6 +1428,8 @@ function buildBrandShelfCard(product) {
   const title = product?.title || product?.name || 'محصول تخفیف‌دار';
   const originalPrice = Number(product?.price);
   const discountedPrice = Number(product?.discountPrice);
+  const countdownLabel = formatDiscountCountdown(product?.discountEnd);
+  const remainingQty = getRemainingDiscountQuantity(product);
 
   const originalMarkup = Number.isFinite(originalPrice) && originalPrice > 0
     ? `<span class="brand-card__amount">${discountNumberFormatter.format(Math.round(originalPrice))}</span><span class="brand-card__currency">تومان</span>`
@@ -1442,6 +1447,10 @@ function buildBrandShelfCard(product) {
     <div class="brand-card__image">
       <img src="${escapeHTML(imageSrc)}" alt="${escapeHTML(title)}">
     </div>
+    <div class="brand-card__meta-row">
+      ${shopName ? `<span class="brand-card__chip">${escapeHTML(shopName)}</span>` : ''}
+      ${countdownLabel ? `<span class="brand-card__chip brand-card__chip--timer">${escapeHTML(countdownLabel)}</span>` : ''}
+    </div>
     <h4 class="brand-card__title">${escapeHTML(title)}</h4>
     <div class="brand-card__footer">
       <div class="brand-card__price-row">
@@ -1449,6 +1458,15 @@ function buildBrandShelfCard(product) {
         ${discountedMarkup ? `<span class="brand-card__price-new">${discountedMarkup}</span>` : ''}
       </div>
       ${percentPill}
+    </div>
+    <div class="brand-card__actions">
+      ${Number.isInteger(remainingQty)
+        ? `<span class="brand-card__stock">${escapeHTML(`${discountNumberFormatter.format(remainingQty)} عدد باقی مانده`)}</span>`
+        : '<span class="brand-card__stock brand-card__stock--soft">ارسال فوری فروشنده</span>'}
+      <a class="brand-card__cta" href="${escapeHTML(productLink)}">
+        مشاهده محصول
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M5 12h14M13 6l6 6-6 6"/></svg>
+      </a>
     </div>
   `;
 
