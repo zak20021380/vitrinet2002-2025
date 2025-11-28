@@ -3398,6 +3398,7 @@
     const productsMobileList = document.getElementById('productsMobileList');
     const noProductMsg = document.getElementById('noProductMsg');
     const noProductAddBtn = document.getElementById('noProductAddBtn');
+    const installAppActions = document.querySelector('.top-left-actions');
     let performanceLoaded = false;
 
     function updateActiveButton(sectionName) {
@@ -3407,6 +3408,11 @@
       if (performanceBtn) {
         performanceBtn.classList.toggle('active', sectionName === 'performance');
       }
+    }
+
+    function updateInstallCtaVisibility(isVisitSection) {
+      if (!installAppActions) return;
+      installAppActions.style.display = isVisitSection ? '' : 'none';
     }
 
     async function loadPerformanceSection() {
@@ -3439,6 +3445,7 @@
         section.style.display = section.id === `section-${sectionName}` ? '' : 'none';
       });
 
+      updateInstallCtaVisibility(sectionName === 'visit');
       updateActiveButton(sectionName);
     }
 
@@ -3452,6 +3459,7 @@
         await loadPerformanceSection();
       }
 
+      updateInstallCtaVisibility(false);
       updateActiveButton('performance');
     }
 
