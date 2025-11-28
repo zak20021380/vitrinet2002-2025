@@ -1413,9 +1413,7 @@ function calculateDiscountPercent(product) {
 }
 
 function buildBrandShelfCard(product) {
-  const card = document.createElement('article');
-  card.className = 'brand-card';
-
+  const card = document.createElement('a');
   const productId = product?._id || product?.id;
   const productLink = productId ? `product.html?id=${encodeURIComponent(productId)}` : '#';
   const shopName = product?.shopName || product?.seller?.storename || product?.seller?.name || '';
@@ -1430,43 +1428,49 @@ function buildBrandShelfCard(product) {
   const discountedPrice = Number(product?.discountPrice);
   const countdownLabel = formatDiscountCountdown(product?.discountEnd);
   const remainingQty = getRemainingDiscountQuantity(product);
+  const categoryLabel = product?.sellerCategory || product?.category || 'فروشنده فعال';
 
   const originalMarkup = Number.isFinite(originalPrice) && originalPrice > 0
-    ? `<span class="brand-card__amount">${discountNumberFormatter.format(Math.round(originalPrice))}</span><span class="brand-card__currency">تومان</span>`
+    ? formatToman(originalPrice)
     : '';
   const discountedMarkup = Number.isFinite(discountedPrice) && discountedPrice > 0
-    ? `<span class="brand-card__amount">${discountNumberFormatter.format(Math.round(discountedPrice))}</span><span class="brand-card__currency brand-card__currency--new">تومان</span>`
+    ? formatToman(discountedPrice)
     : '';
 
-  const percentPill = percent != null
-    ? `<span class="brand-card__pill">${escapeHTML(`٪${discountNumberFormatter.format(percent)} سود`)}</span>`
-    : '';
+  const stockLabel = Number.isInteger(remainingQty)
+    ? `${discountNumberFormatter.format(remainingQty)} عدد باقی‌مانده`
+    : 'ارسال فوری فروشنده';
+
+  card.href = productLink;
+  card.className = 'group relative flex flex-col rounded-2xl bg-white text-slate-900 shadow-sm hover:shadow-xl hover:-translate-y-1 transition duration-200 min-w-[210px] w-56 sm:w-60 lg:w-full snap-center';
+  card.setAttribute('aria-label', title);
 
   card.innerHTML = `
-    <span class="brand-card__badge">${escapeHTML(badgeLabel)}</span>
-    <div class="brand-card__image">
-      <img src="${escapeHTML(imageSrc)}" alt="${escapeHTML(title)}">
-    </div>
-    <div class="brand-card__meta-row">
-      ${shopName ? `<span class="brand-card__chip">${escapeHTML(shopName)}</span>` : ''}
-      ${countdownLabel ? `<span class="brand-card__chip brand-card__chip--timer">${escapeHTML(countdownLabel)}</span>` : ''}
-    </div>
-    <h4 class="brand-card__title">${escapeHTML(title)}</h4>
-    <div class="brand-card__footer">
-      <div class="brand-card__price-row">
-        ${originalMarkup ? `<span class="brand-card__price-old">${originalMarkup}</span>` : ''}
-        ${discountedMarkup ? `<span class="brand-card__price-new">${discountedMarkup}</span>` : ''}
+    <div class="relative w-full bg-gradient-to-b from-slate-50 to-white rounded-2xl p-4 pt-6 aspect-[3/4] flex items-center justify-center overflow-hidden">
+      <div class="absolute top-3 right-3 flex flex-col items-end gap-2">
+        <span class="inline-flex items-center gap-1 rounded-xl bg-emerald-600 text-white text-xs font-bold px-2.5 py-1 shadow-lg">
+          <i class="ri-price-tag-3-fill text-base"></i>${escapeHTML(badgeLabel)}
+        </span>
+        ${countdownLabel ? `<span class="inline-flex items-center gap-1 rounded-lg bg-white/85 text-emerald-700 text-[11px] font-bold px-2 py-1 shadow-sm"><i class="ri-timer-2-line text-base"></i>${escapeHTML(countdownLabel)}</span>` : ''}
       </div>
-      ${percentPill}
+      <div class="absolute top-3 left-3 inline-flex items-center gap-1 px-2 py-1 rounded-full bg-white/85 text-emerald-700 text-[11px] font-bold shadow-sm">
+        <i class="ri-shining-fill text-base"></i>
+        ویژه
+      </div>
+      <img src="${escapeHTML(imageSrc)}" alt="${escapeHTML(title)}" class="h-full object-contain mix-blend-multiply drop-shadow-sm transition duration-200 scale-100 group-hover:scale-105" onerror="this.src='assets/images/shop-placeholder.svg'" />
+      <div class="absolute bottom-3 right-3 inline-flex items-center gap-1 px-2 py-1 rounded-lg ${Number.isInteger(remainingQty) ? 'bg-amber-50 text-amber-700 border border-amber-100' : 'bg-emerald-50 text-emerald-700 border border-emerald-100'} text-[11px] font-bold shadow-sm">${escapeHTML(stockLabel)}</div>
     </div>
-    <div class="brand-card__actions">
-      ${Number.isInteger(remainingQty)
-        ? `<span class="brand-card__stock">${escapeHTML(`${discountNumberFormatter.format(remainingQty)} عدد باقی مانده`)}</span>`
-        : '<span class="brand-card__stock brand-card__stock--soft">ارسال فوری فروشنده</span>'}
-      <a class="brand-card__cta" href="${escapeHTML(productLink)}">
-        مشاهده محصول
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M5 12h14M13 6l6 6-6 6"/></svg>
-      </a>
+    <div class="p-4 pb-5 flex flex-col gap-2 text-slate-900">
+      ${shopName ? `<div class="text-[11px] font-semibold text-slate-500 leading-tight line-clamp-1">${escapeHTML(shopName)}</div>` : ''}
+      <h4 class="text-sm sm:text-base font-black leading-6 line-clamp-2 min-h-[48px]">${escapeHTML(title)}</h4>
+      <div class="flex items-baseline gap-2">
+        ${originalMarkup ? `<span class="text-xs text-gray-400 line-through">${escapeHTML(originalMarkup)}</span>` : ''}
+        ${discountedMarkup ? `<span class="text-lg font-black text-emerald-600">${escapeHTML(discountedMarkup)}</span>` : ''}
+      </div>
+      <div class="flex items-center justify-between mt-1 gap-2">
+        <span class="inline-flex items-center gap-1 px-2 py-1 rounded-lg bg-slate-100 text-[11px] font-bold text-slate-700"><i class="ri-store-2-line text-base text-emerald-600"></i>${escapeHTML(categoryLabel)}</span>
+        <span class="inline-flex items-center justify-center w-11 h-11 rounded-xl border border-emerald-100 bg-emerald-50 text-emerald-600 opacity-0 group-hover:opacity-100 group-focus-visible:opacity-100 transition shadow-sm"><i class="ri-add-line text-xl"></i></span>
+      </div>
     </div>
   `;
 
@@ -1489,19 +1493,14 @@ function renderBrandShelf(discounts) {
   if (!validItems.length) {
     if (container) {
       container.innerHTML = `
-        <div style="display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;padding:40px 20px;min-height:300px;background:linear-gradient(to left, #00b894, #0984e3);border-radius:16px;width:100%;height:100%;">
-          <div aria-hidden="true" style="opacity:0.12;color:#fff;margin-bottom:20px;">
-            <svg width="120" height="120" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <rect x="8" y="22" width="48" height="32" rx="6" stroke="currentColor" stroke-width="3" />
-              <path d="M8 26h48" stroke="currentColor" stroke-width="3" />
-              <path d="M32 22v32" stroke="currentColor" stroke-width="3" />
-              <path d="M26 22c-3.5 0-7-2.5-7-6s2.5-6 6-6c3.2 0 5.6 2.4 6.5 6" stroke="currentColor" stroke-width="3" stroke-linecap="round" />
-              <path d="M38 22c3.5 0 7-2.5 7-6s-2.5-6-6-6c-3.2 0-5.6 2.4-6.5 6" stroke="currentColor" stroke-width="3" stroke-linecap="round" />
-            </svg>
+        <div class="relative overflow-hidden rounded-3xl bg-gradient-to-l from-[#0ea5e9] via-[#12c2b9] to-[#10b981] text-white p-10 shadow-2xl">
+          <div class="absolute inset-0 opacity-15" aria-hidden="true" style="background-image:radial-gradient(circle at 20% 20%, rgba(255,255,255,0.28) 0, rgba(255,255,255,0.28) 6px, transparent 7px),radial-gradient(circle at 80% 10%, rgba(255,255,255,0.20) 0, rgba(255,255,255,0.20) 6px, transparent 7px),radial-gradient(circle at 50% 70%, rgba(255,255,255,0.15) 0, rgba(255,255,255,0.15) 7px, transparent 8px);"></div>
+          <div class="relative z-10 flex flex-col items-center justify-center text-center gap-4">
+            <span class="inline-flex items-center gap-2 px-4 py-2 rounded-2xl bg-white/15 border border-white/25 text-sm font-bold backdrop-blur-md"><i class="ri-flashlight-fill text-lg"></i>پیشنهادهای ویژه</span>
+            <h3 class="text-2xl sm:text-3xl font-black">به زودی پیشنهادهای ویژه را می‌بینید</h3>
+            <p class="max-w-3xl text-white/85 leading-8">در حال آماده‌سازی تخفیف‌های جذاب هستیم. خیلی زود، تخفیف‌های داغ فروشندگان شهر را همینجا می‌بینید.</p>
+            <span class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/15 border border-white/20 text-white/85 font-bold backdrop-blur-sm"><i class="ri-timer-flash-line text-lg"></i>پیشنهادهای ویژه در راه‌اند</span>
           </div>
-          <h3 style="font-size:1.5rem;color:#fff;font-weight:900;margin-bottom:8px;">به زودی پیشنهادهای ویژه را می‌بینید</h3>
-          <p style="color:rgba(255,255,255,0.85);margin:0 0 18px;max-width:520px;line-height:1.8;">در حال آماده‌سازی تخفیف‌های جذاب هستیم...</p>
-          <span style="display:inline-flex;align-items:center;justify-content:center;padding:6px 12px;border-radius:999px;font-weight:800;color:rgba(255,255,255,0.75);background:rgba(255,255,255,0.12);backdrop-filter:blur(4px);">پیشنهادهای ویژه در راه‌اند</span>
         </div>
       `;
     }
