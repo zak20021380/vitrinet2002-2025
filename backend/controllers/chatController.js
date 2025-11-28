@@ -960,7 +960,8 @@ exports.adminReplyToChat = async (req, res) => {
       date: new Date(),
       read: false,
       readByAdmin: true,
-      readBySeller: chat.type === 'seller-admin'
+      // پیام‌های مدیر برای فروشنده باید «خوانده‌نشده» باشند تا بج نمایش داده شود
+      readBySeller: false
     });
     chat.lastUpdated = Date.now();
     await chat.save();
