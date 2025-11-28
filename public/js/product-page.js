@@ -130,16 +130,6 @@
       updatedCard: document.getElementById('updatedCard'),
       updated: document.getElementById('productUpdated')
     },
-    sellerCard: document.getElementById('sellerCard'),
-    sellerAvatar: document.getElementById('sellerAvatar'),
-    sellerImage: document.getElementById('sellerImage'),
-    sellerName: document.getElementById('sellerName'),
-    sellerDescription: document.getElementById('sellerDescription'),
-    sellerCategory: document.getElementById('sellerCategory'),
-    sellerPhoneRow: document.getElementById('sellerPhoneRow'),
-    sellerPhone: document.getElementById('sellerPhone'),
-    sellerAddressRow: document.getElementById('sellerAddressRow'),
-    sellerAddress: document.getElementById('sellerAddress'),
     sellerActions: document.getElementById('sellerActions'),
     sellerAddressButton: document.getElementById('sellerAddressButton'),
     sellerLink: document.getElementById('sellerLink'),
@@ -1119,7 +1109,6 @@
     const hasSeller = !!(seller && (seller.storename || seller.ownerName || seller.ownerFirstname || seller.ownerLastname || seller.phone || seller.address || seller.category || seller.boardImage || seller.desc)) || !!sellerId || !!shopSlug;
 
     if (!hasSeller) {
-      dom.sellerCard.hidden = true;
       if (dom.sellerActions) {
         dom.sellerActions.hidden = false;
       }
@@ -1151,8 +1140,6 @@
       return;
     }
 
-    dom.sellerCard.hidden = false;
-    dom.sellerName.textContent = sellerName;
     const addressText = seller && seller.address ? String(seller.address).trim() : '';
     const cityText = seller && seller.city ? String(seller.city).trim() : '';
 
@@ -1163,9 +1150,6 @@
     }
 
     if (addressText) {
-      dom.sellerAddressRow.hidden = false;
-      dom.sellerAddress.textContent = addressText;
-
       if (dom.sellerAddressButton) {
         const mapQuery = [addressText, cityText].filter(Boolean).join('، ');
         const mapUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(mapQuery || addressText)}`;
@@ -1180,8 +1164,6 @@
         dom.sellerAddressButton.dataset.hasAddress = 'true';
       }
     } else {
-      dom.sellerAddressRow.hidden = false;
-      dom.sellerAddress.textContent = fallbackAddress;
       if (dom.sellerAddressButton) {
         dom.sellerAddressButton.setAttribute('aria-label', fallbackAddress);
         dom.sellerAddressButton.dataset.hasAddress = 'false';
