@@ -8,6 +8,17 @@ function makeFullUrl(req, path = '') {
   return `${req.protocol}://${req.headers.host}/${path.replace(/^\/+/, '')}`;
 }
 
+const BSON_MAX_BYTES = 16 * 1024 * 1024; // 16MB – محدودیت پیشفرض MongoDB
+const BSON_SAFETY_MARGIN = 512 * 1024;   // نیم مگابایت حاشیه امن برای متادیتا
+
+function estimatePayloadBytes(data) {
+  try {
+    return Buffer.byteLength(JSON.stringify(data || {}), 'utf8');
+  } catch (_err) {
+    return BSON_MAX_BYTES; // اگر مشکلی در محاسبه بود، اجازه ذخیره نده
+  }
+}
+
 // افزودن محصول جدید
 exports.addProduct = async (req, res) => {
   try {
@@ -22,7 +33,13 @@ exports.addProduct = async (req, res) => {
     const _tags = Array.isArray(tags) ? tags : tags ? tags.split(',') : [];
     const _images = Array.isArray(images) ? images : images ? images.split(',') : [];
 
-    const product = new Product({
+    // جلوگیری از ثبت تصاویر base64/data URL که باعث عبور از سقف ۱۶MB می‌شوند
+    const hasInlineImage = _images.some((img) => typeof img === 'string' && /^data:/i.test(img));
+    if (hasInlineImage) {
+      return res.status(400).json({ message: 'لطفاً تصویر را به‌صورت فایل آپلود کنید؛ ارسال رشته‌های data:URL پشتیبانی نمی‌شود.' });
+    }
+
+    const productData = {
       sellerId,
       title,
       price,
@@ -31,7 +48,18 @@ exports.addProduct = async (req, res) => {
       desc,
       images: _images,
       mainImageIndex: typeof mainImageIndex === "number" ? mainImageIndex : 0
-    });
+    };
+
+    // جلوگیری از ذخیره سند بزرگ‌تر از محدودیت BSON (16MB)
+    const estimatedBytes = estimatePayloadBytes(productData);
+    if (estimatedBytes > (BSON_MAX_BYTES - BSON_SAFETY_MARGIN)) {
+      return res.status(413).json({
+        message: 'حجم داده محصول بیش از حد مجاز است. لطفاً اندازه توضیحات یا تصاویر را کاهش دهید.',
+        estimatedBytes
+      });
+    }
+
+    const product = new Product(productData);
 
     await product.save();
     // TODO: ثبت محصول منتشر شده در PostHog بعد از فعال‌سازی | TODO: Capture product_published after enabling PostHog
