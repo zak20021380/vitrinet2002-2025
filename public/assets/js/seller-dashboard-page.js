@@ -658,13 +658,6 @@ if (addProductFormEl) addProductFormEl.addEventListener("submit", async function
     return;
   }
 
-  // خواندن همه عکس‌ها به صورت base64
-  let imagesBase64 = [];
-  for (const file of files) {
-    const base64 = await readFileAsBase64(file);
-    imagesBase64.push(base64);
-  }
-
   // درست کردن برچسب‌ها (tags)
   let tags = [];
   if (form.tags) {
@@ -673,21 +666,19 @@ if (addProductFormEl) addProductFormEl.addEventListener("submit", async function
     tags = [form.tag.value.trim()];
   }
 
-  const productData = {
-    sellerId: window.seller.id,  // اینجا هم از window.seller استفاده می‌کنیم
-    title: form.title.value.trim(),
-    price: Number(form.price.value),
-    category: form.category.value.trim(),
-    tags: tags,
-    desc: form.desc.value.trim(),
-    images: imagesBase64
-  };
+  const formData = new FormData();
+  formData.append('sellerId', window.seller.id);
+  formData.append('title', form.title.value.trim());
+  formData.append('price', Number(form.price.value));
+  formData.append('category', form.category.value.trim());
+  formData.append('tags', tags.join(','));
+  formData.append('desc', form.desc.value.trim());
+  files.forEach((file) => formData.append('images', file));
 
   try {
     const res = await apiFetch('/api/products', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(productData)
+      body: formData
     });
     const result = await res.json();
     if (res.ok) {
@@ -705,20 +696,6 @@ if (addProductFormEl) addProductFormEl.addEventListener("submit", async function
     console.error(err);
   }
 });
-
-
-
-
-
-function readFileAsBase64(file) {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = e => resolve(e.target.result);
-    reader.onerror = reject;
-    reader.readAsDataURL(file);
-  });
-}
-
 // ----------- نمایش محصولات (دریافت از سرور) ----------
 async function renderProducts() {
   // seller رو اینجا از localStorage بخون تا همیشه مقدار درست داشته باشی

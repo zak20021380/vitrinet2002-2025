@@ -1,6 +1,7 @@
 // controllers/productController.js
 
 const Product = require('../models/product');
+const path = require('path');
 // تبدیل مسیر نسبى → آدرس کامل (نسبى، http/https یا data:)
 function makeFullUrl(req, path = '') {
   if (!path) return '';
@@ -19,10 +20,22 @@ function estimatePayloadBytes(data) {
   }
 }
 
+function normalizeUploadedPath(file) {
+  if (!file?.path) return '';
+  const backendRoot = path.join(__dirname, '..');
+  const relative = path.relative(backendRoot, file.path).replace(/\\/g, '/');
+  if (relative.startsWith('uploads/')) return relative;
+  return `uploads/${path.basename(file.path)}`;
+}
+
 // افزودن محصول جدید
 exports.addProduct = async (req, res) => {
   try {
     const { sellerId, title, price, category, tags, desc, images, mainImageIndex } = req.body;
+
+    const uploadedImages = Array.isArray(req.files)
+      ? req.files.map((file) => normalizeUploadedPath(file)).filter(Boolean)
+      : [];
 
     // چک فیلدهای الزامی
     if (!sellerId || !title || !price || !category) {
@@ -31,11 +44,12 @@ exports.addProduct = async (req, res) => {
 
     // آرایه‌سازی مطمئن
     const _tags = Array.isArray(tags) ? tags : tags ? tags.split(',') : [];
-    const _images = Array.isArray(images) ? images : images ? images.split(',') : [];
+    const bodyImages = Array.isArray(images) ? images : images ? images.split(',') : [];
+    const _images = uploadedImages.length ? uploadedImages : bodyImages;
 
     // جلوگیری از ثبت تصاویر base64/data URL که باعث عبور از سقف ۱۶MB می‌شوند
     const hasInlineImage = _images.some((img) => typeof img === 'string' && /^data:/i.test(img));
-    if (hasInlineImage) {
+    if (hasInlineImage && !uploadedImages.length) {
       return res.status(400).json({ message: 'لطفاً تصویر را به‌صورت فایل آپلود کنید؛ ارسال رشته‌های data:URL پشتیبانی نمی‌شود.' });
     }
 
@@ -47,7 +61,7 @@ exports.addProduct = async (req, res) => {
       tags: _tags,
       desc,
       images: _images,
-      mainImageIndex: typeof mainImageIndex === "number" ? mainImageIndex : 0
+      mainImageIndex: Number.isInteger(Number(mainImageIndex)) ? Number(mainImageIndex) : 0
     };
 
     // جلوگیری از ذخیره سند بزرگ‌تر از محدودیت BSON (16MB)
