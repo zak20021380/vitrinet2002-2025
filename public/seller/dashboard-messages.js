@@ -74,13 +74,16 @@ const chatModalMsgsBox = document.getElementById('chatModalMessages');
 const chatReplyForm    = document.getElementById('chatReplyForm');
 const chatReplyInput   = document.getElementById('chatReplyInput');
 
-closeChatModal.addEventListener('click', () => {
+function hideChatModal() {
   chatModalBg.classList.add('hidden');
   document.body.style.overflow = '';
+  document.body.classList.remove('chat-modal-open');
   currentChatId = null;
   chatModalMsgsBox.innerHTML = '';
   chatReplyInput.value = '';
-});
+}
+
+closeChatModal.addEventListener('click', hideChatModal);
 
 chatReplyForm.addEventListener('submit', async e => {
   e.preventDefault();
@@ -364,9 +367,7 @@ function renderChatListItem(chat, highlightNew = false) {
         method: 'DELETE'
       }));
       if (currentChatId === chat._id) {
-        chatModalBg.classList.add('hidden');
-        document.body.style.overflow = '';
-        currentChatId = null;
+        hideChatModal();
       }
       fetchChats();
     } catch {
@@ -392,7 +393,12 @@ function renderChatListItem(chat, highlightNew = false) {
  ***********************************************/
 function renderChatModal(chat) {
   const productTitle = chat.productId?.title || '';
-  const isAdminChat = (chat.participants || []).some(p => p.role === 'admin');
+  const hasAdminParticipant = (chat.participants || []).some(p => p.role === 'admin');
+  const hasAdminMessage = (chat.messages || []).some(m => {
+    const role = m.from || m.sender?.role || m.senderId?.role;
+    return role === 'admin';
+  });
+  const isAdminChat = hasAdminParticipant || hasAdminMessage;
   chatModalTitle.textContent = isAdminChat
     ? 'گفتگو با مدیر سایت'
     : productTitle
@@ -449,6 +455,7 @@ function renderChatModal(chat) {
   chatReplyForm.dataset.chatId = chat._id;
   chatModalBg.classList.remove('hidden');
   document.body.style.overflow = 'hidden';
+  document.body.classList.add('chat-modal-open');
 }
 
 
