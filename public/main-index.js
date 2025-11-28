@@ -1442,34 +1442,40 @@ function buildBrandShelfCard(product) {
     : 'ارسال فوری فروشنده';
 
   card.href = productLink;
-  card.className = 'group relative flex flex-col rounded-2xl bg-white text-slate-900 shadow-sm hover:shadow-xl hover:-translate-y-1 transition duration-200 min-w-[200px] w-52 sm:w-56 lg:w-full snap-center';
+  card.className = 'group relative flex flex-col overflow-hidden rounded-2xl bg-white text-slate-900 shadow-sm hover:shadow-xl hover:-translate-y-1 transition duration-200 min-w-[220px] w-56 lg:w-full snap-center border border-slate-100';
   card.setAttribute('aria-label', title);
 
   card.innerHTML = `
-    <div class="relative w-full bg-gradient-to-b from-slate-50 to-white rounded-2xl p-3 pt-4 h-40 flex items-center justify-center overflow-hidden">
-      <div class="absolute top-2.5 right-2.5 flex flex-col items-end gap-1.5">
-        <span class="inline-flex items-center gap-1 rounded-xl bg-emerald-600 text-white text-[11px] font-bold px-2.5 py-1 shadow-lg">
-          <i class="ri-price-tag-3-fill text-base"></i>${escapeHTML(badgeLabel)}
-        </span>
-        ${countdownLabel ? `<span class="inline-flex items-center gap-1 rounded-lg bg-white/85 text-emerald-700 text-[10px] font-bold px-2 py-1 shadow-sm"><i class="ri-timer-2-line text-sm"></i>${escapeHTML(countdownLabel)}</span>` : ''}
+    <div class="relative w-full bg-gradient-to-b from-slate-50 to-white rounded-2xl p-3 pt-4 aspect-[4/5] flex items-center justify-center overflow-hidden">
+      <div class="absolute top-0 left-0 px-3 py-2 rounded-br-2xl bg-gradient-to-l from-rose-500 via-orange-500 to-amber-400 text-white text-xs font-black shadow-lg">
+        ${percent != null ? `${escapeHTML(discountNumberFormatter.format(percent))}%` : escapeHTML(badgeLabel)}
       </div>
-      <div class="absolute top-2.5 left-2.5 inline-flex items-center gap-1 px-2 py-1 rounded-full bg-white/85 text-emerald-700 text-[10px] font-bold shadow-sm">
+      <div class="absolute top-2.5 right-2.5 inline-flex items-center gap-1 px-3 py-1.5 rounded-full bg-white/90 text-emerald-700 text-[11px] font-extrabold shadow-sm backdrop-blur">
         <i class="ri-shining-fill text-sm"></i>
-        ویژه
+        پیشنهاد ویژه
       </div>
       <img src="${escapeHTML(imageSrc)}" alt="${escapeHTML(title)}" class="h-full object-contain mix-blend-multiply drop-shadow-sm transition duration-200 scale-100 group-hover:scale-105" onerror="this.src='assets/images/shop-placeholder.svg'" />
-      <div class="absolute bottom-2.5 right-2.5 inline-flex items-center gap-1 px-2 py-1 rounded-lg ${Number.isInteger(remainingQty) ? 'bg-amber-50 text-amber-700 border border-amber-100' : 'bg-emerald-50 text-emerald-700 border border-emerald-100'} text-[10px] font-bold shadow-sm">${escapeHTML(stockLabel)}</div>
+      <div class="absolute bottom-2.5 right-2.5 inline-flex items-center gap-1 px-2.5 py-1.5 rounded-xl ${Number.isInteger(remainingQty) ? 'bg-amber-50 text-amber-700 border border-amber-100' : 'bg-emerald-50 text-emerald-700 border border-emerald-100'} text-[11px] font-bold shadow-sm">${escapeHTML(stockLabel)}</div>
     </div>
-    <div class="p-3 pb-4 flex flex-col gap-1.5 text-slate-900">
-      ${shopName ? `<div class="text-[11px] font-semibold text-slate-500 leading-tight line-clamp-1">${escapeHTML(shopName)}</div>` : ''}
-      <h4 class="text-sm sm:text-base font-black leading-6 line-clamp-1">${escapeHTML(title)}</h4>
-      <div class="flex items-baseline gap-1.5">
-        ${originalMarkup ? `<span class="text-[11px] text-gray-400 line-through">${escapeHTML(originalMarkup)}</span>` : ''}
-        ${discountedMarkup ? `<span class="text-base sm:text-lg font-black text-emerald-600">${escapeHTML(discountedMarkup)}</span>` : ''}
-      </div>
+    <div class="p-3 pb-4 flex flex-col gap-2 text-slate-900 flex-1">
       <div class="flex items-center justify-between gap-2">
+        ${shopName ? `<div class="text-[11px] font-semibold text-slate-500 leading-tight line-clamp-1">${escapeHTML(shopName)}</div>` : '<span class="text-[11px] text-slate-400">فروشنده فعال</span>'}
         <span class="inline-flex items-center gap-1 px-2 py-1 rounded-lg bg-slate-100 text-[11px] font-bold text-slate-700"><i class="ri-store-2-line text-sm text-emerald-600"></i>${escapeHTML(categoryLabel)}</span>
-        <span class="inline-flex items-center justify-center w-9 h-9 rounded-lg border border-emerald-100 bg-emerald-50 text-emerald-600 opacity-0 group-hover:opacity-100 group-focus-visible:opacity-100 transition shadow-sm"><i class="ri-add-line text-lg"></i></span>
+      </div>
+      <div class="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-rose-50 text-rose-600 text-[12px] font-extrabold shadow-[0_10px_30px_rgba(248,113,113,0.18)]">
+        <i class="ri-timer-flash-line text-base"></i>
+        ${escapeHTML(countdownLabel || 'زمان محدود')}
+      </div>
+      <h4 class="text-sm sm:text-base font-black leading-6 line-clamp-2">${escapeHTML(title)}</h4>
+      <div class="flex items-baseline gap-2">
+        ${originalMarkup ? `<span class="text-[12px] text-gray-400 line-through">${escapeHTML(originalMarkup)}</span>` : ''}
+        ${discountedMarkup ? `<span class="text-lg font-black text-emerald-600">${escapeHTML(discountedMarkup)}</span>` : ''}
+      </div>
+      <div class="mt-auto flex items-center gap-2">
+        <span class="w-full inline-flex items-center justify-center gap-2 rounded-xl border-2 border-emerald-100 bg-emerald-50 text-emerald-700 font-extrabold text-sm py-2.5 shadow-inner hover:bg-emerald-100 hover:border-emerald-200 transition">
+          <i class="ri-eye-line text-base"></i>
+          مشاهده محصول
+        </span>
       </div>
     </div>
   `;
