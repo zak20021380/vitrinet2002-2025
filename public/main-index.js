@@ -1442,12 +1442,12 @@ function buildBrandShelfCard(product) {
     : 'ارسال فوری فروشنده';
 
   card.href = productLink;
-  card.className = 'group relative flex flex-col overflow-hidden rounded-2xl bg-white text-slate-900 shadow-sm hover:shadow-xl hover:-translate-y-1 transition duration-200 min-w-[220px] w-56 lg:w-full snap-center border border-slate-100';
+  card.className = 'group relative flex flex-col overflow-hidden rounded-2xl bg-white text-slate-900 shadow-sm hover:shadow-xl hover:-translate-y-1 transition duration-200 min-w-[78vw] sm:min-w-[240px] w-[82vw] sm:w-64 md:w-72 lg:w-full snap-center border border-slate-100';
   card.setAttribute('aria-label', title);
 
   card.innerHTML = `
     <div class="relative w-full bg-gradient-to-b from-slate-50 to-white rounded-2xl p-3 pt-4 aspect-[4/3] flex items-center justify-center overflow-hidden">
-      <div class="absolute top-0 left-0 px-3 py-2 rounded-br-2xl bg-gradient-to-l from-rose-500 via-orange-500 to-amber-400 text-white text-xs font-black shadow-lg">
+      <div class="absolute top-0 left-0 px-3 py-2 rounded-br-2xl bg-gradient-to-l from-emerald-500 via-emerald-500 to-sky-500 text-white text-xs font-black shadow-lg shadow-emerald-300/40">
         ${percent != null ? `${escapeHTML(discountNumberFormatter.format(percent))}%` : escapeHTML(badgeLabel)}
       </div>
       <div class="absolute top-2.5 right-2.5 inline-flex items-center gap-1 px-3 py-1.5 rounded-full bg-white/90 text-emerald-700 text-[11px] font-extrabold shadow-sm backdrop-blur">
