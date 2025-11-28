@@ -1,1449 +1,607 @@
 <!DOCTYPE html>
 <html lang="fa" dir="rtl">
 <head>
-<meta http-equiv="Strict-Transport-Security" content="max-age=63072000; includeSubDomains; preload">
-<meta http-equiv="Referrer-Policy" content="no-referrer">
-<meta http-equiv="X-Content-Type-Options" content="nosniff">
-<meta http-equiv="X-XSS-Protection" content="1; mode=block">
-<meta name="referrer" content="no-referrer">
-<meta http-equiv="Permissions-Policy" content="geolocation=(), microphone=(), camera=()">
-
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>شهر رو بگرد | ویترینت</title>
+  <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;700;800&display=swap" rel="stylesheet" />
+  <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet" />
   <script src="/js/runtime-config.js" defer></script>
   <script src="/js/analytics.js" defer></script>
-  <script src="/js/main-index.js" defer></script>
-
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>شهر رو بگرد | ویترینت</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <link
-    href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css"
-    rel="stylesheet"
-  />
-  <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;800&family=Montserrat:wght@700&display=swap" rel="stylesheet"/>
-  <link rel="stylesheet" href="style-index.css" />
-    <script src="main-index.js" defer></script>
-    <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;700&display=swap" rel="stylesheet"/>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@800;900&display=swap" rel="stylesheet" />
-    <script src="/nav-active.js" defer></script>
+  <script src="/nav-active.js" defer></script>
   <style>
+    :root {
+      --brand-sky: #0ea5e9;
+      --brand-mint: #10b981;
+      --text-strong: #0f172a;
+      --surface: #ffffff;
+      --muted: #94a3b8;
+      --shadow-soft: 0 10px 30px rgba(15, 23, 42, 0.08);
+      --shadow-card: 0 12px 36px rgba(14, 165, 233, 0.09);
+      --radius-lg: 1.1rem;
+    }
+
+    * { box-sizing: border-box; }
+
     body {
+      margin: 0;
       font-family: 'Vazirmatn', 'Montserrat', sans-serif;
       background: #f8fafc;
+      color: var(--text-strong);
       letter-spacing: normal;
     }
-    .main-logo {
-      font-size: 2.25rem;
-      color: #10b981;
-      font-family: 'Vazirmatn','Montserrat',sans-serif;
-      filter: drop-shadow(0 0 9px #e0fdfa88);
-      font-weight: 900;
-      user-select: none;
-      line-height: 2.6rem;
-    }
-    @media (max-width: 640px) {
-      .main-logo {font-size: 1.3rem; line-height:2rem;}
-    }
-    .area-btn {
-      background: linear-gradient(90deg,#e0fdfa 0%,#d2fbf1 100%);
-      color: #10b981;
-      font-weight: 800;
-      border-radius: 1rem;
-      font-size: 1rem;
-      min-width: 90px;
-      padding: 10px 0 11px 0;
-      margin-inline-end: 6px;
-      margin-bottom: 3px;
-      transition: all 0.16s;
-      box-shadow: 0 1.5px 8px #bbf7d0a1;
-      outline: none;
-      border: none;
-      cursor: pointer;
-      font-family: 'Vazirmatn', 'Montserrat', sans-serif;
-    }
-    .area-btn.active, .area-btn:hover {
-      background: linear-gradient(90deg,#10b981,#0ea5e9);
-      color: #fff;
-      box-shadow: 0 8px 36px #10b98122;
-      transform: scale(1.055);
-    }
-    /* دکمه مراکز خرید */
-    .center-btn,
-    .more-centers-btn {
-      background: #fff;
-      border: 2px solid #10b98133;
-      color: #13bfa4;
-      font-weight: 900;
-      border-radius: 1.3rem;
-      font-size: 1.05rem;
-      width: 350px;
-      max-width: 95vw;
-      padding: 13px 16px;
-      margin-bottom: 3px;
-      box-shadow: 0 2px 16px #6ee7b78c;
-      transition: all 0.18s;
-      text-align: center;
-      display: block;
-      margin-left: auto;
-      margin-right: auto;
-    }
 
-    .center-btn:hover,
-    .more-centers-btn:hover {
-      background: linear-gradient(90deg,#0ea5e9,#10b981);
-      color: #fff;
-      border-color: #0ea5e9;
-      box-shadow: 0 7px 26px #10b98136;
-      transform: scale(1.045);
-    }
+    a { color: inherit; text-decoration: none; }
 
-    .center-btn.active,
-    .more-centers-btn.active {
-      background: linear-gradient(90deg,#10b981,#0ea5e9);
-      color: #fff;
-      border-color: #0ea5e9;
-      box-shadow: 0 10px 28px #10b9812a;
-      transform: scale(1.03);
-    }
-    .more-centers-btn {
-      display: inline-flex;
-      align-items: center;
-      gap: 10px;
-      justify-content: center;
-      cursor: pointer;
-    }
-
-    .more-centers-btn svg {
-      width: 18px;
-      height: 18px;
-    }
-
-    .centers-modal {
-      display: none;
-      padding: 1.5rem;
-      align-items: center;
-      justify-content: center;
-      position: fixed;
-      inset: 0;
-      overflow-y: auto;
-      overscroll-behavior: contain;
-    }
-
-    .centers-modal.active { 
-      display: flex; 
-      align-items: center; 
-      justify-content: center; 
-    }
-
-    .center-info-modal {
-      display: none;
-      align-items: center;
-      justify-content: center;
-      padding: 1.25rem;
-    }
-
-    .center-info-modal.active {
-      display: flex;
-    }
-
-    .center-info-card {
-      width: min(100%, 420px);
-      border-radius: 1.8rem;
-      background: linear-gradient(145deg, rgba(255, 255, 255, 0.98), rgba(224, 253, 250, 0.95));
-      box-shadow: 0 28px 55px -30px rgba(14, 165, 233, 0.55), 0 18px 40px -35px rgba(16, 185, 129, 0.55);
-      border: 1.4px solid rgba(13, 148, 136, 0.18);
-      overflow: hidden;
-    }
-
-    .center-info-header {
-      display: flex;
-      align-items: center;
-      gap: 0.85rem;
-      margin-bottom: 1.1rem;
-    }
-
-    .center-info-icon {
-      width: 48px;
-      height: 48px;
-      border-radius: 16px;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      background: linear-gradient(135deg, rgba(16, 185, 129, 0.85), rgba(14, 165, 233, 0.85));
-      color: #fff;
-      box-shadow: 0 12px 28px -16px rgba(14, 165, 233, 0.6);
-    }
-
-    .center-info-title {
-      font-size: 1.35rem;
-      font-weight: 900;
-      color: #0f9a8b;
-    }
-
-    .center-info-address {
-      font-size: 1.05rem;
-      font-weight: 700;
-      line-height: 1.9rem;
-      color: #0ea5e9;
-      background: rgba(255, 255, 255, 0.75);
-      border-radius: 1.2rem;
-      padding: 1rem 1.2rem;
-      border: 1.2px dashed rgba(14, 165, 233, 0.35);
-    }
-
-    .center-info-close {
-      position: absolute;
-      top: 18px;
-      left: 18px;
-      font-size: 1.7rem;
-      color: #0f9a8b;
-      transition: color 0.2s ease;
-    }
-
-    .center-info-close:hover {
-      color: #0ea5e9;
-    }
-
-    .centers-modal-content {
-      max-height: calc(100dvh - 2.5rem);
-      overflow-y: auto;
-      width: min(100%, 680px);
-    }
-
-    .centers-modal-list {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-    }
-
-    .modal-handle {
-      width: 82px;
-      height: 6px;
-      background: #cbd5e1;
-      border-radius: 999px;
-      margin: 0.35rem auto 1.1rem auto;
-      opacity: 0.9;
-    }
-
-    .mobile-close-btn {
-      display: none;
-    }
-
-    .centers-loading {
-      width: 100%;
-      text-align: center;
-      color: #0f9a8b;
-      font-weight: 700;
-      padding: 12px 0;
-    }
-
-    .modal-area-item {
-      display: flex;
-      align-items: center;
-      gap: 0.75rem;
-      background: rgba(255, 255, 255, 0.88);
-      border-radius: 1.1rem;
-      padding: 0.65rem 0.85rem;
-      box-shadow: 0 4px 16px rgba(14, 165, 233, 0.12);
-      border: 1px solid rgba(16, 185, 129, 0.16);
-      transition: box-shadow 0.2s ease, transform 0.2s ease;
-    }
-
-    .modal-area-item:hover {
-      box-shadow: 0 10px 26px rgba(14, 165, 233, 0.18);
-      transform: translateY(-1px);
-    }
-
-    .modal-area-item:focus-within {
-      box-shadow: 0 0 0 2.5px rgba(14, 165, 233, 0.2), 0 10px 26px rgba(14, 165, 233, 0.18);
-      transform: translateY(-1px);
-    }
-
-    .modal-area-btn {
-      flex: 1 1 auto;
-      background: transparent;
-      border: none;
-      color: #0f9a8b;
-      font-weight: 800;
-      border-radius: 0.85rem;
-      padding: 0.45rem 0.35rem;
-      font-size: 1rem;
-      text-align: right;
-      display: inline-flex;
-      align-items: center;
-      justify-content: flex-start;
-      transition: color 0.18s ease, background 0.18s ease, transform 0.18s ease;
-      cursor: pointer;
-    }
-
-    .modal-center-name {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.4rem;
-    }
-
-    .modal-area-btn:hover,
-    .modal-area-btn:focus-visible {
-      color: #0ea5e9;
-      background: rgba(13, 148, 136, 0.08);
-      transform: translateY(-1px);
-      outline: none;
-      box-shadow: 0 0 0 2.5px rgba(14, 165, 233, 0.22);
-    }
-
-    .modal-area-info-btn {
-      flex-shrink: 0;
-      background: linear-gradient(135deg, #10b981, #0ea5e9);
-      border: none;
-      color: #fff;
-      font-weight: 800;
-      border-radius: 9999px;
-      padding: 0.45rem 0.95rem;
-      font-size: 0.85rem;
-      box-shadow: 0 8px 22px rgba(14, 165, 233, 0.22);
-      transition: transform 0.18s ease, box-shadow 0.18s ease, filter 0.18s ease;
-      white-space: nowrap;
-      cursor: pointer;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .modal-area-info-btn:hover,
-    .modal-area-info-btn:focus-visible {
-      transform: translateY(-1px);
-      filter: brightness(1.05);
-      outline: none;
-      box-shadow: 0 0 0 2.5px rgba(14, 165, 233, 0.26), 0 12px 26px rgba(14, 165, 233, 0.25);
-    }
-    .selected-center-indicator {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.6rem;
-      background: rgba(255,255,255,0.9);
-      border: 1.5px solid #10b98133;
-      border-radius: 9999px;
-      padding: 0.55rem 1.3rem;
-      color: #0ea5e9;
-      box-shadow: 0 4px 14px #0ea5e91a;
-      font-weight: 800;
-    }
-
-    .selected-center-indicator .selected-center-name {
-      color: #0f9a8b;
-      font-size: 0.95rem;
-    }
-    /* سلکت‌باکس ریسپانسیو */
-    .category-select {
-      appearance: none;
-      background: linear-gradient(135deg, #f6fffd 0%, #e6fcf6 55%, #d6f7ee 100%);
-      border: 2px solid #13bfa433;
-      color: #08918e;
-      font-weight: 800;
-      padding: 12px 2.5rem 12px 1rem;
-      min-width: 160px;
-      font-size: 1.1rem;
-      border-radius: 9999px;
-      box-shadow: 0 3px 18px #10b98121, 0 1px 6px #0ea5e90f;
-      transition: all 0.17s ease, transform 0.12s ease;
-      outline: none;
-      font-family: 'Vazirmatn', 'Montserrat', sans-serif;
-      position: relative;
-      direction: rtl;
-      cursor: pointer;
-      text-align: right;
-      text-align-last: right;
-    }
-
-
-    .category-select:focus, .category-select:hover {
-      border-color: #0ea5e9;
-      background: linear-gradient(135deg, #dffaf3, #d0f3ff);
-      color: #0c9c8f;
-      box-shadow: 0 8px 22px #0ea5e92c, 0 2px 8px #0ea5e90f;
-      transform: translateY(-1px) scale(1.01);
-    }
-    .category-select option {
-      font-size: 1rem;
-      font-weight: 600;
-      color: #098981;
-      background: #f6fefc;
-    }
-    .select-arrow {
-      position: absolute;
-      right: 18px;
-      top: 52%;
-      transform: translateY(-50%);
-      pointer-events: none;
-      font-size: 22px;
-      color: #13bfa4;
-      z-index: 10;
-    }
-    /* مناطق */
-    .areas-scroll {
-      position: relative;
-      overflow-x: auto;
-      scrollbar-width: none;
-      scroll-behavior: smooth;
-      padding-bottom: 3px;
-      justify-content: center;
-      -ms-overflow-style: none;
-      mask-image: linear-gradient(to left, transparent 0, black 20px, black 95%, transparent 100%);
-      -webkit-mask-image: linear-gradient(to left, transparent 0, black 20px, black 95%, transparent 100%);
-    }
-    .header-actions {
-      flex-wrap: wrap;
-      justify-content: flex-end;
-    }
-    .header-actions > a {
-      display: inline-flex;
-      align-items: center;
-    }
-    .logo-group {
-      min-width: 180px;
-    }
-    .areas-scroll::-webkit-scrollbar { display: none; }
-    @media (min-width: 1024px) {
-      .areas-scroll {
-        flex-wrap: wrap;
-        overflow-x: visible;
-        mask-image: none;
-        -webkit-mask-image: none;
-        gap: 0.6rem;
-      }
-    }
-    @media (max-width: 1024px) {
-      .shop-card { min-height: 170px; }
-      .area-btn { font-size: .93rem; min-width: 65px; padding: 7px 0; }
-      .center-btn {font-size: .99rem; min-width: 120px;}
-    }
-    @media (max-width: 640px) {
-      .area-btn { font-size: 12.1px; padding: 6px 0; min-width: 47px;}
-      .center-btn, .more-centers-btn { font-size: 13px; padding: 9px 0; min-width: 70vw;}
-      .shop-card { border-radius: .6rem; min-height: 80px; }
-      .category-select { min-width: 86px !important; font-size: .97rem;}
-      .header-actions { width: 100%; justify-content: space-between; gap: 0.5rem; }
-      .header-actions > a { flex: 1 1 auto; justify-content: center; min-width: 0; }
-      .logo-group { width: 100%; justify-content: space-between; }
-      .centers-modal {
-        padding: 0.65rem;
-        align-items: flex-end;
-        padding-bottom: calc(0.65rem + env(safe-area-inset-bottom));
-        overflow-y: auto;
-      }
-      .centers-modal-content {
-        max-height: 88dvh;
-        border-radius: 1.9rem 1.9rem 0 0;
-        padding: 1.85rem 1.35rem 1.55rem 1.35rem !important;
-        box-shadow: 0 -4px 26px rgba(14, 165, 233, 0.12);
-        width: 100%;
-        max-width: 100%;
-        margin: 0;
-        transform: translateY(0);
-      }
-      #closeCentersModal {
-        top: auto;
-        left: 50%;
-        transform: translateX(-50%);
-        bottom: 14px;
-        font-size: 1.1rem;
-        background: #0f9a8b;
-        color: #fff;
-        padding: 0.5rem 1.1rem;
-        border-radius: 999px;
-        box-shadow: 0 12px 24px rgba(14, 165, 233, 0.25);
-      }
-      .centers-modal-header {
-        gap: 1rem !important;
-        text-align: right !important;
-      }
-      .centers-modal-title {
-        font-size: 1.5rem !important;
-      }
-      .centers-modal-subtitle {
-        font-size: 0.95rem !important;
-        line-height: 1.8;
-      }
-      .centers-modal-list {
-        grid-template-columns: repeat(1, minmax(0, 1fr));
-      }
-      .modal-area-item {
-        flex-direction: column;
-        align-items: stretch;
-        padding: 0.85rem 0.9rem;
-        gap: 0.75rem;
-        border-radius: 1.2rem;
-        background: linear-gradient(135deg, rgba(255, 255, 255, 0.92), rgba(224, 253, 250, 0.9));
-        box-shadow: 0 16px 38px -24px rgba(14, 165, 233, 0.45);
-      }
-      .modal-area-btn {
-        width: 100%;
-        font-size: 1rem;
-        padding: 0.65rem 0.9rem;
-        justify-content: center;
-        text-align: center;
-        background: rgba(14, 165, 233, 0.08);
-        border-radius: 0.95rem;
-      }
-      .modal-area-btn:hover,
-      .modal-area-btn:focus-visible {
-        background: rgba(14, 165, 233, 0.14);
-      }
-      .modal-area-info-btn {
-        width: 100%;
-        padding: 0.68rem 0.75rem;
-        font-size: 0.95rem;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 0.45rem;
-        border-radius: 999px;
-        background: linear-gradient(90deg, #0ea5e9, #10b981);
-        box-shadow: 0 18px 38px -22px rgba(14, 165, 233, 0.55);
-      }
-      .modal-area-info-btn:focus-visible {
-        box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.25), 0 18px 38px -22px rgba(14, 165, 233, 0.55);
-      }
-      .center-info-card {
-        border-radius: 1.55rem;
-        padding: 1.6rem 1.35rem !important;
-      }
-      .center-info-title {
-        font-size: 1.15rem;
-      }
-      .center-info-address {
-        font-size: 0.95rem;
-        line-height: 1.7rem;
-      }
-      .selected-center-indicator {
-        font-size: 0.9rem;
-        padding-inline: 1rem;
-        gap: 0.5rem;
-      }
-      .selected-center-indicator .selected-center-name {
-        font-size: 0.95rem;
-      }
-
-      .mobile-close-btn {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        width: 100%;
-        margin-top: 0.75rem;
-        padding: 0.75rem;
-        border-radius: 999px;
-        background: linear-gradient(90deg, #10b981, #0ea5e9);
-        color: #fff;
-        font-weight: 800;
-        box-shadow: 0 10px 26px rgba(14, 165, 233, 0.25);
-      }
-    }
-    @media (max-width: 480px) {
-      .centers-modal-content {
-        border-radius: 1.65rem 1.65rem 0 0;
-        padding: 1.55rem 1.05rem 1.35rem 1.05rem !important;
-      }
-      .modal-area-btn {
-        font-size: 0.92rem;
-        padding: 0.6rem 0.65rem;
-      }
-      .modal-area-info-btn {
-        font-size: 0.9rem;
-        padding: 0.62rem 0.65rem;
-      }
-      .center-info-card {
-        border-radius: 1.45rem;
-        padding: 1.4rem 1.15rem !important;
-      }
-      .center-info-title {
-        font-size: 1.05rem;
-      }
-      .center-info-address {
-        font-size: 0.9rem;
-        line-height: 1.6rem;
-      }
-      .selected-center-indicator {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 0.35rem;
-        text-align: right;
-      }
-    }
-
-    .centers-modal-badge {
-      display: none;
-    }
-
-    @media (min-width: 641px) {
-      .centers-modal {
-        padding: 3rem 2.5rem;
-        backdrop-filter: blur(14px);
-      }
-
-      .centers-modal-content {
-        border-radius: 2.4rem;
-        padding: 2.75rem 3rem 2.5rem 3rem !important;
-        border: 1.5px solid #bbf7d0;
-        background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 8%, rgba(208, 251, 241, 0.9) 100%);
-        box-shadow: 0 28px 60px -28px #0ea5e955, 0 18px 40px -35px #10b98188;
-        position: relative;
-        overflow: hidden;
-      }
-
-      .centers-modal-content::before {
-        content: '';
-        position: absolute;
-        inset: -55% -10% auto;
-        height: 72%;
-        background: radial-gradient(circle at top left, rgba(14, 165, 233, 0.14), transparent 55%);
-        pointer-events: none;
-      }
-
-      .centers-modal-header {
-        flex-direction: row !important;
-        text-align: right !important;
-        align-items: center;
-        gap: 1.8rem !important;
-      }
-
-      .centers-modal-badge {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        width: 92px;
-        height: 92px;
-        border-radius: 50%;
-        background: linear-gradient(135deg, #10b981, #0ea5e9);
-        box-shadow: 0 18px 45px -24px #0ea5e9aa;
-        color: #fff;
-      }
-
-      .centers-modal-title {
-        font-size: 2.2rem !important;
-        color: #0f9a8b !important;
-      }
-
-      .centers-modal-subtitle {
-        font-size: 1.05rem !important;
-        color: #0ea5e9 !important;
-      }
-
-      .centers-modal-list {
-        margin-top: 2.5rem !important;
-        grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-      }
-
-      .modal-area-item {
-        flex-direction: row;
-        align-items: center;
-        gap: 0.85rem;
-        padding: 0.75rem 1rem;
-      }
-
-      .modal-area-btn {
-        justify-content: flex-start;
-        font-size: 1.05rem;
-        padding: 0.5rem 0.65rem;
-      }
-
-      .modal-area-info-btn {
-        font-size: 0.88rem;
-        padding: 0.5rem 1.05rem;
-      }
-    }
-    /* هدر شیشه‌ای */
-    .glass-bg {
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      background: rgba(255, 255, 255, 0.94);
       backdrop-filter: blur(12px);
-      background: rgba(255,255,255,0.95) !important;
+      border-bottom: 1px solid #e2e8f0;
+      box-shadow: 0 8px 24px rgba(15, 23, 42, 0.06);
     }
-    input:focus {border-color:#10b981 !important;}
-    /* فروشگاه کارت */
-    .shop-card {
-      background: #fff;
-      border-radius: 1rem;
-      box-shadow: 0 8px 22px rgba(15, 23, 42, 0.06);
-      transition: transform .14s ease, box-shadow .18s ease, border-color .14s ease;
-      overflow: hidden;
-      border: 1px solid #e2e8f0;
-      min-height: 290px;
-      font-family: 'Vazirmatn', 'Montserrat', sans-serif;
-      display: block;
-      color: inherit;
+
+    .main-shell { max-width: 1200px; margin: 0 auto; padding: 1.25rem 1rem; }
+    .header-inner { display: flex; align-items: center; justify-content: space-between; gap: 0.75rem; flex-wrap: wrap; }
+    .logo { display: inline-flex; align-items: center; gap: 0.75rem; font-weight: 900; color: var(--brand-mint); }
+    .logo svg { width: 42px; height: 42px; filter: drop-shadow(0 8px 18px rgba(16, 185, 129, 0.35)); }
+
+    .pill { display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.65rem 1rem; border-radius: 999px; background: linear-gradient(90deg, rgba(16,185,129,0.1), rgba(14,165,233,0.1)); color: var(--brand-mint); font-weight: 800; box-shadow: inset 0 1px 0 rgba(255,255,255,0.7); }
+
+    .actions { display: flex; align-items: center; gap: 0.6rem; flex-wrap: wrap; justify-content: flex-end; }
+    .btn { border: none; cursor: pointer; font-weight: 800; border-radius: 999px; transition: transform 0.15s ease, box-shadow 0.2s ease; }
+    .btn-ghost { padding: 0.75rem 1.25rem; background: #fff; color: var(--brand-mint); border: 1px solid rgba(16, 185, 129, 0.18); box-shadow: var(--shadow-soft); }
+    .btn-primary { padding: 0.8rem 1.45rem; background: linear-gradient(120deg, var(--brand-sky), var(--brand-mint)); color: #fff; box-shadow: 0 16px 40px rgba(14,165,233,0.35); }
+    .btn:active { transform: translateY(1px) scale(.99); }
+
+    main { max-width: 1100px; margin: 0 auto; padding: 2rem 1rem 3rem; }
+    h1 { margin: 0 0 1rem; text-align: center; font-size: clamp(1.6rem, 2vw + 1rem, 2.5rem); background: linear-gradient(120deg, var(--brand-mint), var(--brand-sky)); color: transparent; -webkit-background-clip: text; background-clip: text; letter-spacing: -0.02em; }
+
+    .area-row { display: flex; gap: 0.5rem; align-items: center; padding: 0.5rem 0; }
+    .areas-scroll { display: flex; gap: 0.5rem; overflow-x: auto; padding-bottom: 0.25rem; scrollbar-width: thin; }
+    .areas-scroll::-webkit-scrollbar { height: 8px; }
+    .areas-scroll::-webkit-scrollbar-thumb { background: rgba(148,163,184,0.5); border-radius: 999px; }
+    .area-btn { border: none; background: #fff; color: var(--brand-mint); padding: 0.75rem 1.15rem; border-radius: 999px; font-weight: 800; white-space: nowrap; box-shadow: var(--shadow-soft); transition: all 0.2s ease; }
+    .area-btn:hover, .area-btn.active { background: linear-gradient(120deg, var(--brand-mint), var(--brand-sky)); color: #fff; box-shadow: 0 14px 36px rgba(14, 165, 233, 0.25); }
+
+    .filter-row { display: flex; gap: 1rem; align-items: center; flex-wrap: wrap; justify-content: space-between; margin: 1.5rem 0 1rem; }
+    .search { flex: 1 1 260px; display: flex; align-items: center; background: #fff; border-radius: 999px; padding: 0.2rem 0.75rem; border: 1px solid #e2e8f0; box-shadow: var(--shadow-soft); }
+    .search input { width: 100%; padding: 0.75rem; border: none; outline: none; background: transparent; font-size: 1rem; }
+    .select-wrap { position: relative; min-width: 180px; }
+    .category-select { width: 100%; padding: 0.85rem 1rem; padding-right: 2.8rem; border-radius: 999px; border: 1px solid #dfe7ef; background: #fff; color: var(--text-strong); font-weight: 700; text-align: right; appearance: none; outline: none; box-shadow: var(--shadow-soft); direction: rtl; }
+    .category-select:focus { border-color: rgba(14,165,233,0.6); box-shadow: 0 14px 30px rgba(14,165,233,0.18); }
+    .select-wrap::after { content: '\ea4e'; font-family: 'remixicon'; position: absolute; right: 1rem; top: 50%; transform: translateY(-50%); color: var(--brand-mint); font-size: 1.3rem; pointer-events: none; }
+
+    .center-actions { display: flex; gap: 0.65rem; flex-wrap: wrap; justify-content: center; }
+    .center-btn { background: #fff; color: var(--brand-mint); border: 1px solid rgba(16,185,129,0.2); padding: 0.8rem 1.35rem; border-radius: 999px; font-weight: 800; box-shadow: var(--shadow-soft); transition: all 0.18s ease; }
+    .center-btn:hover, .center-btn.active { background: linear-gradient(120deg, var(--brand-mint), var(--brand-sky)); color: #fff; box-shadow: 0 18px 36px rgba(14,165,233,0.22); }
+
+    .shops-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 1rem; }
+    .shop-card { position: relative; display: flex; flex-direction: column; gap: 0.75rem; background: #fff; border-radius: var(--radius-lg); padding: 0.9rem; box-shadow: var(--shadow-card); border: 1px solid #e2e8f0; transition: transform 0.18s ease, box-shadow 0.18s ease; }
+    .shop-card:hover { transform: translateY(-4px); box-shadow: 0 16px 38px rgba(15, 23, 42, 0.12); }
+    .shop-thumb { position: relative; width: 100%; aspect-ratio: 4 / 3; border-radius: 0.85rem; overflow: hidden; background: #f8fafc; }
+    .shop-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform 0.2s ease; }
+    .shop-card:hover .shop-thumb img { transform: scale(1.03); }
+    .tag-row { display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; }
+    .badge { display: inline-flex; align-items: center; gap: 0.35rem; padding: 0.35rem 0.75rem; border-radius: 999px; font-weight: 800; font-size: 0.8rem; }
+    .badge.green { background: rgba(16,185,129,0.1); color: #0f9a8b; }
+    .badge.blue { background: rgba(14,165,233,0.1); color: var(--brand-sky); }
+    .shop-name { margin: 0; font-size: 1.05rem; font-weight: 800; text-align: center; color: var(--text-strong); }
+    .shop-address { text-align: center; font-weight: 700; color: #0f9a8b; font-size: 0.95rem; }
+    .shop-meta { display: flex; align-items: center; justify-content: center; gap: 0.35rem; color: #475569; font-weight: 600; font-size: 0.85rem; }
+    .shop-footer { display: flex; align-items: center; justify-content: space-between; color: var(--brand-sky); font-weight: 800; font-size: 0.9rem; }
+
+    .selected-center { display: inline-flex; align-items: center; gap: 0.45rem; background: #fff; color: var(--brand-sky); padding: 0.65rem 1rem; border-radius: 999px; border: 1px solid rgba(14,165,233,0.2); box-shadow: var(--shadow-soft); font-weight: 800; }
+
+    /* Centers modal */
+    .centers-modal { position: fixed; inset: 0; display: none; align-items: center; justify-content: center; padding: 1rem; z-index: 1200; }
+    .centers-modal.active { display: flex; }
+    .centers-overlay { position: absolute; inset: 0; background: rgba(15,23,42,0.35); backdrop-filter: blur(6px); }
+    .centers-content { position: relative; width: min(100%, 760px); background: #fff; border-radius: 1.5rem; padding: 1.5rem 1.75rem; box-shadow: 0 24px 60px rgba(15,23,42,0.22); border: 1px solid #e2e8f0; max-height: calc(100dvh - 2rem); overflow: hidden; display: flex; flex-direction: column; gap: 1rem; }
+    .centers-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 0.85rem; overflow: auto; padding-right: 0.35rem; }
+    .center-item { display: flex; align-items: center; gap: 0.65rem; padding: 0.8rem; background: #f8fafc; border-radius: 1rem; border: 1px solid #e2e8f0; box-shadow: var(--shadow-soft); }
+    .center-name { flex: 1; text-align: right; font-weight: 800; color: var(--text-strong); }
+    .center-info-btn { border: none; padding: 0.5rem 0.9rem; border-radius: 999px; background: linear-gradient(120deg, var(--brand-sky), var(--brand-mint)); color: #fff; font-weight: 800; cursor: pointer; box-shadow: 0 12px 28px rgba(14,165,233,0.25); }
+    .modal-close { position: absolute; inset-inline-end: 1rem; top: 1rem; background: #fff; border: 1px solid #e2e8f0; width: 42px; height: 42px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: var(--shadow-soft); color: var(--text-strong); }
+    .modal-handle { width: 90px; height: 6px; border-radius: 999px; background: #cbd5e1; margin: 0 auto; }
+    .mobile-close-btn { display: none; }
+
+    /* Center info popup */
+    .center-info-modal { position: fixed; inset: 0; display: none; align-items: center; justify-content: center; padding: 1rem; z-index: 1300; }
+    .center-info-modal.active { display: flex; }
+    .center-card { position: relative; background: #fff; border-radius: 1.25rem; padding: 1.5rem; width: min(100%, 420px); box-shadow: 0 24px 60px rgba(15,23,42,0.2); border: 1px solid #e2e8f0; }
+    .center-card h3 { margin: 0; font-size: 1.15rem; color: var(--brand-mint); }
+    .center-card p { margin: 0.4rem 0 0; color: #475569; font-weight: 700; line-height: 1.7; }
+    .center-info-close { position: absolute; inset-inline-start: 0.75rem; top: 0.75rem; background: transparent; border: none; font-size: 1.6rem; cursor: pointer; color: var(--muted); }
+
+    footer { margin-top: 2.5rem; text-align: center; color: #94a3b8; padding: 2rem 1rem 1.5rem; background: linear-gradient(180deg, rgba(255,255,255,0), #eef9f4); font-weight: 700; }
+
+    /* Desktop areas become wrapped grid */
+    @media (min-width: 1024px) {
+      .areas-scroll { flex-wrap: wrap; overflow: visible; justify-content: center; }
+      .areas-scroll::-webkit-scrollbar { display: none; }
     }
-    .shop-card:hover {
-      transform: translateY(-4px);
-      box-shadow: 0 14px 30px rgba(15, 23, 42, 0.12);
-      border-color: #cbd5e1;
-    }
+
+    /* Mobile tweaks */
     @media (max-width: 640px) {
-      .shop-card { padding: 0.8rem !important; min-height: 90px;}
+      .main-shell { padding: 1rem 0.85rem; }
+      .filter-row { flex-direction: column; align-items: stretch; }
+      .select-wrap { width: 100%; }
+      .center-actions { flex-direction: column; }
+      .centers-content { border-radius: 1.4rem 1.4rem 0 0; padding-bottom: 4.5rem; max-height: 90dvh; }
+      .centers-modal { align-items: flex-end; }
+      .mobile-close-btn { display: block; position: sticky; bottom: 0; width: calc(100% + 3.5rem); margin-inline: -1.75rem; margin-top: 0.75rem; padding: 1rem 1.25rem; border: none; border-radius: 0 0 1.4rem 1.4rem; background: #0f9a8b; color: #fff; font-weight: 800; cursor: pointer; box-shadow: 0 -6px 24px rgba(15,23,42,0.16); }
+      .modal-close { display: none; }
     }
   </style>
-
-<!-- TODO: فعال‌سازی پست‌هاگ را هنگام انتشار فراموش نکنید | TODO: Enable PostHog analytics when going live -->
-<!--
-<script>
-  (function () {
-    var config = window.POSTHOG_CONFIG || { enabled: false, apiKey: 'phc_YOUR_KEY_HERE', apiHost: 'https://analytics.vitreenet.ir' };
-    if (!config.enabled) {
-      return; // فعال نیست | Not enabled yet
-    }
-    try {
-      (function(t,e){var o,n,p,r;e.__SV||(window.posthog=e,e._i=[],e.init=function(i,s,a){function g(t,e){var o=e.split(".");2==o.length&&(t=t[o[0]],e=o[1]),t[e]=function(){t.push([e].concat(Array.prototype.slice.call(arguments,0)))}}(p=t.createElement("script")),p.type="text/javascript",p.async=!0,p.src=s.api_host+"/static/array.js";(r=t.getElementsByTagName("script")[0]),r.parentNode.insertBefore(p,r);var u=e;for(void 0!==a?u=e[a]=[]:u=e,u.people=u.people||[],u.toString=function(t){var e="posthog";return"posthog"!==u._i&&(e+="."+u._i),t||(e+=" (stub)"),e},u.people.toString=function(){return u.toString(1)+".people (stub)"};n="capture identify alias people.set people.set_once people.unset people.increment people.append people.union people.remove people.clear_opt_out_outcome register register_once unregister opt_out_capturing opt_in_capturing has_opted_out_capturing reset isFeatureEnabled onFeatureFlags reloadFeatureFlags group".split(" ");for(o=0;o<n.length;o++)g(u,n[o]);e._i.push([i,s,a])},e.__SV=1.1)})(document, window.posthog || []);
-      window.posthog.init(config.apiKey, { api_host: config.apiHost, capture_pageview: true, advanced_disable_decide: true });
-    } catch (error) {
-      console.warn('PostHog init failed (preview mode):', error);
-    }
-  })();
-</script>
--->
-
 </head>
-<body class="min-h-screen flex flex-col bg-[#f8fafc]">
-
-  <!-- HEADER افقی همیشه باز -->
-  <!-- اضافه کردن فونت Poppins -->
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@900&display=swap" rel="stylesheet" />
-
-
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@800&display=swap" rel="stylesheet"/>
-
-  <header id="mainHeader" class="w-full bg-white/95 shadow-md backdrop-blur-md sticky top-0 z-50">
-    <div id="headerInner" class="max-w-7xl mx-auto flex flex-row items-center justify-between px-4 sm:px-6 py-3 md:py-3.5 gap-3">
-
-      <!-- لوگو و انتخاب شهر -->
-      <div id="logoCityWrap" class="flex items-center gap-2 md:gap-3 flex-shrink-0">
-        <!-- لوگوی جدید ویترینت -->
-        <a href="index.html" class="vitreenet-brand header-item" aria-label="ویترینت">
-          <span class="vitreenet-brand__mark" aria-hidden="true">
-            <svg viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg" role="presentation">
-              <defs>
-                <linearGradient id="vtMarkGradient" x1="0%" y1="100%" x2="100%" y2="0%">
-                  <stop offset="0%" stop-color="#0ea5e9" />
-                  <stop offset="55%" stop-color="#10b981" />
-                  <stop offset="100%" stop-color="#0fb67f" />
-                </linearGradient>
-                <linearGradient id="vtMarkInner" x1="15%" y1="85%" x2="85%" y2="15%">
-                  <stop offset="0%" stop-color="#ffffff" stop-opacity="0.9" />
-                  <stop offset="100%" stop-color="#dcfce7" stop-opacity="0.25" />
-                </linearGradient>
-              </defs>
-              <circle cx="24" cy="24" r="22" fill="url(#vtMarkGradient)" />
-              <circle cx="24" cy="24" r="18" fill="url(#vtMarkInner)" />
-              <path d="M15.5 16h4.7l4.3 10.6L28.8 16h4.7L26 33h-4.2L15.5 16Z" fill="#0f172a" fill-opacity="0.9" />
-              <path d="M18.2 17.6 24 31.1l5.8-13.5" fill="none" stroke="#22c55e" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" />
-            </svg>
-          </span>
-          <span class="vitreenet-brand__text">
-            <span class="vitreenet-brand__title">Vitreenet</span>
-            <span class="vitreenet-brand__subtitle">ویترینت</span>
-          </span>
-        </a>
-
-        <!-- بج شهر - فقط در دسکتاپ نمایش داده شود -->
-        <div class="hidden md:flex items-center gap-1 px-3 py-1.5 rounded-full shadow-lg header-item"
-             style="background:linear-gradient(90deg,#10b981E6 70%,#0ea5e9E6); border: 1.5px solid #fff6; backdrop-filter: blur(5px);">
-          <svg width="18" height="18" fill="none" viewBox="0 0 22 22" class="ml-1 drop-shadow" xmlns="http://www.w3.org/2000/svg">
-            <defs>
-              <linearGradient id="city-icon" x1="0%" y1="0%" x2="0%" y2="100%">
-                <stop offset="0%" stop-color="#ffffff" stop-opacity="1" />
-                <stop offset="100%" stop-color="#e0f2fe" stop-opacity="0.9" />
-              </linearGradient>
-            </defs>
-            <path d="M11 2.5C7.13 2.5 4 5.61 4 9.45c0 3.52 4.1 7.93 6.2 10.01.46.47 1.2.47 1.66 0 2.1-2.08 6.14-6.49 6.14-10.01C18 5.61 14.87 2.5 11 2.5Zm0 10.25a2.75 2.75 0 1 1 0-5.5 2.75 2.75 0 0 1 0 5.5Z"
-              fill="url(#city-icon)"/>
-          </svg>
-          <span id="headerCity" class="font-bold text-white text-[14px] drop-shadow-sm" style="letter-spacing:.3px;">سنندج</span>
+<body>
+  <header>
+    <div class="main-shell header-inner">
+      <a href="index.html" class="logo" aria-label="ویترینت">
+        <svg viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg" role="presentation">
+          <defs>
+            <linearGradient id="vtMarkGradient" x1="0%" y1="100%" x2="100%" y2="0%">
+              <stop offset="0%" stop-color="#0ea5e9" />
+              <stop offset="55%" stop-color="#10b981" />
+            </linearGradient>
+          </defs>
+          <circle cx="24" cy="24" r="22" fill="url(#vtMarkGradient)" />
+          <path d="M15.5 16h4.7l4.3 10.6L28.8 16h4.7L26 33h-4.2L15.5 16Z" fill="#0f172a" fill-opacity="0.9" />
+          <path d="M18.2 17.6 24 31.1l5.8-13.5" fill="none" stroke="#22c55e" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" />
+        </svg>
+        <div>
+          <div style="font-size:1.2rem;">Vitreenet</div>
+          <div style="font-size:0.95rem; color:#0f9a8b;">ویترینت</div>
         </div>
-      </div>
-
-      <!-- منو - فقط در دسکتاپ -->
-      <nav id="desktopNav" class="hidden md:flex items-center gap-1 text-base flex-1 justify-end">
-        <a href="index.html" class="main-nav-link text-gray-700 hover:text-[#10b981] font-bold px-4 py-2 rounded-lg transition-all hover:bg-emerald-50">
-          خانه
-        </a>
-        <a href="categories.html" class="main-nav-link text-gray-700 hover:text-[#0ea5e9] font-bold px-4 py-2 rounded-lg transition-all hover:bg-sky-50">
-          دسته‌بندی
-        </a>
-        <a href="login.html" id="loginNavLink" class="main-nav-link text-gray-700 hover:text-[#0ea5e9] font-bold px-4 py-2 rounded-lg transition-all hover:bg-sky-50">
-          <span class="login-link-label">ورود</span>
-        </a>
-      </nav>
-
-      <!-- دکمه‌های اکشن هدر -->
-      <div class="flex items-center gap-2 header-item">
-        <button type="button" id="rewardClaimBtn"
-          class="reward-header-btn inline-flex items-center gap-2 px-4 py-2 md:px-5 md:py-2.5 rounded-full font-extrabold shadow-lg hover:shadow-xl transition-all duration-200 whitespace-nowrap text-white text-sm md:text-base header-item"
-          aria-haspopup="dialog" aria-controls="rewardModal" aria-expanded="false">
-          <span class="reward-header-icon" aria-hidden="true">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M5 8h14v12H5z" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
-              <path d="M3 8h18" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
-              <path d="M12 4c.8-1.3 2.5-2 3.8-1 .7.5 1.2 1.3 1.2 2.1 0 1.5-1.2 2.9-3 2.9h-2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
-              <path d="M12 4c-.8-1.3-2.5-2-3.8-1-.7.5-1.2 1.3-1.2 2.1 0 1.5 1.2 2.9 3 2.9h2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
-          </span>
-          <span>دریافت جایزه</span>
-        </button>
-        <a href="post.html" id="registerShopBtn" class="btn-grad px-4 py-2 md:px-5 md:py-2.5 rounded-full font-extrabold shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-200 whitespace-nowrap text-white text-sm md:text-base header-item">
-          ثبت فروشگاه
-        </a>
+      </a>
+      <div class="pill" id="headerCity">سنندج</div>
+      <div class="actions">
+        <a class="btn btn-ghost" href="login.html">ورود</a>
+        <a class="btn btn-primary" href="post.html">ثبت فروشگاه</a>
       </div>
     </div>
   </header>
 
+  <main>
+    <section class="text-center">
+      <h1>مغازه‌های شهر رو بگرد!</h1>
+      <div class="center-actions">
+        <button class="center-btn" id="all-centers-btn" type="button">همه مراکز خرید</button>
+        <button class="center-btn" id="more-centers-btn" type="button">مشاهده همه مراکز</button>
+      </div>
+      <div id="selectedCenterIndicator" class="selected-center" style="margin-top:0.8rem; display:none;">
+        <span class="ri-map-pin-2-line" aria-hidden="true"></span>
+        <span>مرکز خرید انتخاب شده:</span>
+        <span id="selectedCenterName"></span>
+      </div>
+    </section>
 
-  <main class="flex-1 w-full max-w-6xl mx-auto px-3 sm:px-8 py-7 sm:py-12">
-    <!-- تیتر و دکمه‌ها -->
-    <div class="mb-5 flex items-center flex-col gap-3 sm:gap-4">
-      <h1 class="main-title text-2xl sm:text-[2.18rem] font-extrabold text-center bg-gradient-to-l from-[#16c6b7] to-[#0ea5e9] text-transparent bg-clip-text tracking-tight leading-tight drop-shadow-lg">
-        مغازه‌های شهر رو بگرد!
-      </h1>
-      <div class="flex flex-wrap gap-3 items-center justify-center">
-        <button id="all-centers-btn" class="center-btn" type="button">
-          همه مراکز خرید
-        </button>
-        <button id="more-centers-btn" class="more-centers-btn" type="button">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M12 5v14M5 12h14" />
-          </svg>
-          مشاهده همه مراکز
-        </button>
+    <section class="area-row" aria-label="مناطق معروف">
+      <div class="areas-scroll" id="areasShort"></div>
+    </section>
+
+    <section class="filter-row">
+      <div class="search">
+        <span class="ri-search-line" style="color:#0ea5e9; font-size:1.2rem; padding-inline:0.5rem;"></span>
+        <input id="searchInput" type="text" placeholder="جستجوی نام یا آدرس مغازه..." aria-label="جستجو" />
       </div>
-      <div id="selectedCenterIndicator" class="hidden selected-center-indicator mt-2">
-        <span class="flex items-center gap-1 text-xs sm:text-sm text-[#0ea5e9]">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" class="text-[#10b981]">
-            <circle cx="12" cy="12" r="9"></circle>
-            <path d="m9.5 12.5 1.9 1.9 3.1-3.8"></path>
-          </svg>
-          مرکز خرید انتخاب شده:
-        </span>
-        <span id="selectedCenterName" class="selected-center-name text-sm sm:text-base"></span>
-      </div>
-    </div>
-    <!-- مناطق معروف -->
-    <div class="areas-scroll flex gap-2 mb-6 pb-1 justify-center" id="areasShort"></div>
-    
-    <!-- سرچ و سلکت -->
-    <div class="relative flex flex-col md:flex-row gap-4 mb-9 items-center justify-between">
-      <input id="searchInput" type="text" placeholder="جستجوی نام یا آدرس مغازه..." class="flex-1 py-3 px-5 border border-gray-200 rounded-full text-base shadow-sm focus:outline-none bg-white/80 w-full md:w-auto"/>
-      <div class="relative w-full md:w-60">
-        <select id="categorySelect" class="category-select w-full pr-9">
+      <div class="select-wrap">
+        <select id="categorySelect" class="category-select">
           <option value="">همه فروشگاه ها</option>
         </select>
-        <span class="select-arrow material-icons"></span>
       </div>
-    </div>
+    </section>
 
-    <!-- فروشگاه‌ها -->
-    <div id="shopsList" class="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-5"></div>
-    <div id="noResult" class="hidden text-center text-gray-400 text-lg p-12 font-bold">هیچ مغازه‌ای پیدا نشد!</div>
+    <section aria-live="polite">
+      <div id="shopsList" class="shops-grid"></div>
+      <div id="noResult" style="display:none; text-align:center; color:#94a3b8; font-weight:800; padding:2rem;">هیچ مغازه‌ای پیدا نشد!</div>
+    </section>
   </main>
-    <div id="centersModal" class="centers-modal fixed inset-0 z-[1100] items-center justify-center px-4">
-      <div id="centersModalOverlay" class="absolute inset-0 bg-[#0f172a]/40 backdrop-blur-sm transition-opacity"></div>
-      <div class="relative z-10 bg-white rounded-3xl shadow-2xl border border-[#e0fdfa] w-full max-w-3xl mx-auto p-6 sm:p-8 overflow-hidden centers-modal-content">
-        <button id="closeCentersModal" class="absolute top-4 left-4 text-[#0f9a8b] hover:text-[#0ea5e9] transition-colors text-2xl font-bold" aria-label="بستن">
-          &times;
-        </button>
-        <div class="modal-handle" aria-hidden="true"></div>
-        <div class="centers-modal-header flex flex-col gap-4 text-center sm:text-right">
-          <div class="centers-modal-badge mx-auto sm:mx-0">
-            <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M3 21h18" />
-            <path d="M5 21V7.5a1.5 1.5 0 0 1 1.5-1.5H9" />
-            <path d="M19 21V7.5A1.5 1.5 0 0 0 17.5 6H15" />
-            <rect x="9" y="3" width="6" height="6" rx="1.2" />
-            <path d="M9 12h6" />
-            <path d="M9 16h6" />
-          </svg>
-        </div>
-        <div class="flex flex-col gap-2">
-          <h2 class="centers-modal-title text-2xl sm:text-3xl font-extrabold text-[#0ea5e9]">مراکز خرید سنندج</h2>
-          <p class="centers-modal-subtitle text-sm sm:text-base text-[#0f9a8b] font-semibold">
-            برای مشاهده فروشگاه‌های هر مرکز خرید روی نام آن کلیک کن.
-          </p>
-        </div>
-        </div>
-      <div id="centersList" class="centers-modal-list mt-6 grid gap-3 sm:gap-4 text-sm"></div>
+
+  <div id="centersModal" class="centers-modal" role="dialog" aria-modal="true" aria-labelledby="centersTitle" aria-describedby="centersDesc">
+    <div id="centersModalOverlay" class="centers-overlay"></div>
+    <div class="centers-content">
+      <button id="closeCentersModal" class="modal-close" aria-label="بستن">&times;</button>
+      <div class="modal-handle" aria-hidden="true"></div>
+      <div>
+        <h2 id="centersTitle" style="margin:0 0 0.35rem; font-size:1.35rem; color:var(--brand-sky);">مراکز خرید سنندج</h2>
+        <p id="centersDesc" style="margin:0; color:#475569; font-weight:700;">برای مشاهده فروشگاه‌های هر مرکز خرید، نام مرکز را انتخاب کنید.</p>
+      </div>
+      <div id="centersList" class="centers-grid"></div>
       <button id="closeCentersModalMobile" type="button" class="mobile-close-btn">بستن</button>
     </div>
   </div>
 
-  <div id="centerInfoModal" class="center-info-modal fixed inset-0 z-[1200] justify-center items-center">
-    <div id="centerInfoOverlay" class="absolute inset-0 bg-[#0f172a]/45 backdrop-blur-sm"></div>
-    <div class="relative z-10 center-info-card p-6 sm:p-8">
-      <button id="closeCenterInfo" class="center-info-close" aria-label="بستن پاپ‌آپ">&times;</button>
-      <div class="center-info-header">
-        <div class="center-info-icon">
-          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
-            <path d="M9 22V12h6v10" />
-          </svg>
-        </div>
-        <div>
-          <h3 id="centerInfoTitle" class="center-info-title"></h3>
-          <p class="text-sm font-semibold text-[#0ea5e9] opacity-80 mt-1">آدرس ثبت‌شده برای این مرکز خرید</p>
-        </div>
-      </div>
-      <div class="center-info-address" id="centerInfoAddress"></div>
-      <div id="centerInfoEmpty" class="hidden text-sm font-semibold text-[#64748b] bg-white/70 border border-[#e2e8f0] rounded-xl px-4 py-3 mt-4">
-        آدرسی برای این مرکز خرید ثبت نشده است.
-      </div>
+  <div id="centerInfoModal" class="center-info-modal" role="dialog" aria-modal="true" aria-labelledby="centerInfoTitle">
+    <div id="centerInfoOverlay" class="centers-overlay"></div>
+    <div class="center-card">
+      <button id="closeCenterInfo" class="center-info-close" aria-label="بستن">&times;</button>
+      <h3 id="centerInfoTitle"></h3>
+      <p class="text-sm" id="centerInfoAddress"></p>
+      <p id="centerInfoEmpty" class="text-sm" style="display:none;">آدرسی برای این مرکز خرید ثبت نشده است.</p>
     </div>
   </div>
 
-  <footer class="w-full bg-gradient-to-tr from-[#f8fafc] via-[#e0fdfa] to-[#d4fbe8] border-t mt-16 px-2 pt-6 pb-3 text-center text-[15px] text-gray-500 rounded-t-[1.7rem] shadow-lg font-bold tracking-wide">
-    © 2025 ویترینت | همه حقوق محفوظ است.
-  </footer>
-<script>
-  const API_BASE = 'http://localhost:5000/api';
-  const API_ORIGIN = 'http://localhost:5000';
-  const numberFormatter = new Intl.NumberFormat('fa-IR');
+  <footer>© 2025 ویترینت | همه حقوق محفوظ است.</footer>
 
-  const CATEGORY_OPTIONS = [
-    { value: '', label: 'همه فروشگاه ها' },
-    { value: 'پوشاک', label: 'پوشاک' },
-    { value: 'خوراک', label: 'خوراک' },
-    { value: 'خدمات', label: 'خدمات' },
-    { value: 'دیجیتال', label: 'دیجیتال' },
-    { value: 'زیبایی', label: 'زیبایی' },
-    { value: 'کتاب و تحریر', label: 'کتاب و تحریر' },
-    { value: 'لوازم خانگی', label: 'لوازم خانگی' },
-    { value: 'ورزشی', label: 'ورزشی' },
-    { value: 'تالار و مجالس', label: 'تالار و مجالس' },
-    { value: 'قنادی و شیرینی', label: 'قنادی و شیرینی' },
-    { value: 'گل و گیاه', label: 'گل و گیاه' },
-    { value: 'خودرو', label: 'خودرو' }
-  ];
+  <script>
+    const API_BASE = 'http://localhost:5000/api';
+    const API_ORIGIN = 'http://localhost:5000';
 
-  const debounce = (fn, delay = 550) => {
-    let timeout;
-    return (...args) => {
-      clearTimeout(timeout);
-      timeout = setTimeout(() => fn(...args), delay);
+    const CATEGORY_OPTIONS = [
+      { value: '', label: 'همه فروشگاه ها' },
+      { value: 'پوشاک', label: 'پوشاک' },
+      { value: 'خوراک', label: 'خوراک' },
+      { value: 'خدمات', label: 'خدمات' },
+      { value: 'دیجیتال', label: 'دیجیتال' },
+      { value: 'زیبایی', label: 'زیبایی' },
+      { value: 'کتاب و تحریر', label: 'کتاب و تحریر' },
+      { value: 'لوازم خانگی', label: 'لوازم خانگی' },
+      { value: 'ورزشی', label: 'ورزشی' },
+      { value: 'تالار و مجالس', label: 'تالار و مجالس' },
+      { value: 'قنادی و شیرینی', label: 'قنادی و شیرینی' },
+      { value: 'گل و گیاه', label: 'گل و گیاه' },
+      { value: 'خودرو', label: 'خودرو' }
+    ];
+
+    const debounce = (fn, delay = 550) => {
+      let timeout;
+      return (...args) => {
+        clearTimeout(timeout);
+        timeout = setTimeout(() => fn(...args), delay);
+      };
     };
-  };
 
-  const FALLBACK_CENTERS = [
-    { id: 'baneta', title: 'بانتا', order: 0 },
-    { id: 'ferdowsi', title: 'فردوسی', order: 1 },
-    { id: 'sanacenter', title: 'سنه سنتر', order: 2 },
-    { id: 'tanakora', title: 'تاناکورا', order: 3 },
-    { id: 'almas', title: 'الماس غرب', order: 4 },
-    { id: 'abidar', title: 'آبیدر', order: 5 },
-    { id: 'navid', title: 'نوید', order: 6 },
-    { id: 'ghezel', title: 'قزل قایا', order: 7 },
-    { id: 'shahrak', title: 'شهرک بهاران', order: 8 },
-    { id: 'azadi', title: 'میدان آزادی', order: 9 },
-    { id: 'masjed', title: 'خیابان مسجد جامع', order: 10 },
-    { id: 'mellat', title: 'پارک ملت', order: 11 },
-    { id: 'salar', title: 'سالار', order: 12 },
-    { id: 'parastar', title: 'پرستار', order: 13 },
-    { id: 'emam', title: 'بلوار امام', order: 14 },
-    { id: 'ghadir', title: 'قدیر', order: 15 },
-    { id: 'shohada', title: 'بلوار شهدا', order: 16 },
-  ];
+    const FALLBACK_CENTERS = [
+      { id: 'baneta', title: 'بانتا', order: 0 },
+      { id: 'ferdowsi', title: 'فردوسی', order: 1 },
+      { id: 'sanacenter', title: 'سنه سنتر', order: 2 },
+      { id: 'tanakora', title: 'تاناکورا', order: 3 },
+      { id: 'almas', title: 'الماس غرب', order: 4 },
+      { id: 'abidar', title: 'آبیدر', order: 5 },
+      { id: 'navid', title: 'نوید', order: 6 },
+      { id: 'ghezel', title: 'قزل قایا', order: 7 },
+      { id: 'shahrak', title: 'شهرک بهاران', order: 8 },
+      { id: 'azadi', title: 'میدان آزادی', order: 9 },
+      { id: 'masjed', title: 'خیابان مسجد جامع', order: 10 },
+      { id: 'mellat', title: 'پارک ملت', order: 11 },
+      { id: 'salar', title: 'سالار', order: 12 },
+      { id: 'parastar', title: 'پرستار', order: 13 },
+      { id: 'emam', title: 'بلوار امام', order: 14 },
+      { id: 'ghadir', title: 'قدیر', order: 15 },
+      { id: 'shohada', title: 'بلوار شهدا', order: 16 },
+    ];
 
-  let AREAS = [];
-  let centersLoaded = false;
-  let centersLoadingPromise = null;
+    let AREAS = [];
+    let centersLoaded = false;
+    let centersLoadingPromise = null;
+    let current = { area: null, category: '', search: '' };
 
-  const normalizeForSearch = text => {
-    if (!text) return '';
-    return text
-      .toString()
-      .trim()
-      .toLowerCase()
-      .replace(/ي/g, 'ی')
-      .replace(/ك/g, 'ک');
-  };
+    const normalizeForSearch = text => {
+      if (!text) return '';
+      return text.toString().trim().toLowerCase().replace(/ي/g, 'ی').replace(/ك/g, 'ک');
+    };
 
-  const slugifyCenter = (title, fallback = 'center') => {
-    const base = normalizeForSearch(title || '').replace(/[^\p{L}\p{N}\s-]+/gu, '');
-    if (!base) return fallback;
-    return base.trim().replace(/\s+/g, '-');
-  };
+    const slugifyCenter = (title, fallback = 'center') => {
+      const base = normalizeForSearch(title || '').replace(/[^\p{L}\p{N}\s-]+/gu, '');
+      if (!base) return fallback;
+      return base.trim().replace(/\s+/g, '-');
+    };
 
-  const sortCenters = list => {
-    return [...list].sort((a, b) => {
+    const sortCenters = list => [...list].sort((a, b) => {
       const orderA = Number.isFinite(a?.order) ? a.order : 0;
       const orderB = Number.isFinite(b?.order) ? b.order : 0;
       if (orderA !== orderB) return orderA - orderB;
       return (a?.name || '').localeCompare(b?.name || '', 'fa');
     });
-  };
 
-  const buildCenterKeywords = center => {
-    const keywords = new Set();
-    const add = value => {
-      const normalized = normalizeForSearch(value);
-      if (normalized) keywords.add(normalized);
+    const buildCenterKeywords = center => {
+      const keywords = new Set();
+      const add = value => { const normalized = normalizeForSearch(value); if (normalized) keywords.add(normalized); };
+      add(center.title); add(center.name); add(center.tag); add(center.location);
+      if (center.slug) { add(center.slug.replace(/-/g, ' ')); add(center.slug.replace(/-/g, '')); }
+      return Array.from(keywords);
     };
-    add(center.title);
-    add(center.name);
-    add(center.tag);
-    add(center.location);
-    if (center.slug) {
-      add(center.slug.replace(/-/g, ' '));
-      add(center.slug.replace(/-/g, ''));
-    }
-    return Array.from(keywords);
-  };
 
-  const normalizeCenterRecord = (center, index = 0) => {
-    if (!center) return null;
-    const rawId = center.centerId || center._id || center.id || center._id?.$oid || '';
-    const title = center.title || center.name || center.label || '';
-    const slug = slugifyCenter(title || rawId || `center-${index}`, `center-${index}`);
-    const id = rawId ? String(rawId) : (center.id ? String(center.id) : slug);
-    const order = Number.isFinite(Number(center.order)) ? Number(center.order) : (Number.isFinite(Number(center.rank)) ? Number(center.rank) : (Number.isFinite(Number(center.position)) ? Number(center.position) : (center.orderIndex ?? index)));
-    const record = {
-      id,
-      name: title || slug,
-      title: title || slug,
-      slug,
-      location: center.location || center.address || '',
-      tag: center.tag || center.badge || '',
-      stores: Number.isFinite(Number(center.stores)) ? Number(center.stores) : (Number(center.shopCount) || 0),
-      order,
-      raw: center
+    const normalizeCenterRecord = (center, index = 0) => {
+      if (!center) return null;
+      const rawId = center.centerId || center._id || center.id || center._id?.$oid || '';
+      const title = center.title || center.name || center.label || '';
+      const slug = slugifyCenter(title || rawId || `center-${index}`, `center-${index}`);
+      const id = rawId ? String(rawId) : (center.id ? String(center.id) : slug);
+      const order = Number.isFinite(Number(center.order)) ? Number(center.order) : (Number.isFinite(Number(center.rank)) ? Number(center.rank) : (Number.isFinite(Number(center.position)) ? Number(center.position) : (center.orderIndex ?? index)));
+      const record = { id, name: title || slug, title: title || slug, slug, location: center.location || center.address || '', tag: center.tag || center.badge || '', stores: Number.isFinite(Number(center.stores)) ? Number(center.stores) : (Number(center.shopCount) || 0), order, raw: center };
+      record.matchKeywords = buildCenterKeywords(record);
+      return record;
     };
-    record.matchKeywords = buildCenterKeywords(record);
-    return record;
-  };
 
-  async function loadCentersFromBackend(force = false) {
-    if (force) {
-      centersLoaded = false;
-      centersLoadingPromise = null;
-    }
-
-    if (centersLoaded && !force) return AREAS;
-
-    if (!centersLoadingPromise) {
-      centersLoadingPromise = (async () => {
-        try {
-          const res = await fetch(`${API_BASE}/shopping-centers`);
-          if (res.ok) {
-            const data = await res.json();
-            if (Array.isArray(data) && data.length) {
-              const normalized = data.map((center, idx) => normalizeCenterRecord(center, idx)).filter(Boolean);
-              if (normalized.length) {
-                AREAS = sortCenters(normalized);
-                centersLoaded = true;
-                return AREAS;
+    async function loadCentersFromBackend(force = false) {
+      if (force) { centersLoaded = false; centersLoadingPromise = null; }
+      if (centersLoaded && !force) return AREAS;
+      if (!centersLoadingPromise) {
+        centersLoadingPromise = (async () => {
+          try {
+            const res = await fetch(`${API_BASE}/shopping-centers`);
+            if (res.ok) {
+              const data = await res.json();
+              if (Array.isArray(data) && data.length) {
+                const normalized = data.map((center, idx) => normalizeCenterRecord(center, idx)).filter(Boolean);
+                if (normalized.length) { AREAS = sortCenters(normalized); centersLoaded = true; return AREAS; }
               }
             }
+          } catch (err) {
+            console.warn('loadCentersFromBackend error:', err);
           }
-        } catch (err) {
-          console.warn('loadCentersFromBackend error:', err);
-        }
-
-        AREAS = sortCenters(FALLBACK_CENTERS.map((center, idx) => normalizeCenterRecord(center, idx)).filter(Boolean));
-        centersLoaded = true;
-        return AREAS;
-      })().finally(() => {
-        centersLoadingPromise = null;
-      });
+          AREAS = sortCenters(FALLBACK_CENTERS.map((center, idx) => normalizeCenterRecord(center, idx)).filter(Boolean));
+          centersLoaded = true; return AREAS;
+        })().finally(() => { centersLoadingPromise = null; });
+      }
+      return centersLoadingPromise;
     }
 
-    return centersLoadingPromise;
-  }
-
-  const detectCenterForShop = shop => {
-    if (!shop || !AREAS.length) return null;
-    const haystack = normalizeForSearch([
-      shop.address,
-      shop.desc,
-      shop.storename,
-      shop.customAddress,
-      shop.location
-    ].filter(Boolean).join(' '));
-    if (!haystack) return null;
-    return AREAS.find(area => area.matchKeywords?.some(keyword => haystack.includes(keyword))) || null;
-  };
-
-  const escapeHtml = value => {
-    if (value === null || value === undefined) return '';
-    return String(value)
-      .replace(/&/g, '&amp;')
-      .replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;')
-      .replace(/"/g, '&quot;')
-      .replace(/'/g, '&#039;');
-  };
-
-  const resolveShopImage = src => {
-    if (!src) return 'https://via.placeholder.com/640x360.png?text=Shop';
-    const str = String(src);
-    if (str.startsWith('http://') || str.startsWith('https://') || str.startsWith('data:')) {
-      return str;
-    }
-    return `${API_ORIGIN}/${str.replace(/^\/+/, '')}`;
-  };
-
-  let current = { area: null, category: "", search: "" };
-
-  const allCentersBtn = document.getElementById('all-centers-btn');
-  const selectedCenterIndicator = document.getElementById('selectedCenterIndicator');
-  const selectedCenterName = document.getElementById('selectedCenterName');
-
-  function getAreaNameById(id) {
-    if (!id) return '';
-    const found = AREAS.find(area => area.id === id);
-    return found ? found.name : id;
-  }
-
-  function updateAllCentersButtonState() {
-    if (!allCentersBtn) return;
-    if (!current.area) {
-      allCentersBtn.classList.add('active');
-      allCentersBtn.setAttribute('aria-pressed', 'true');
-    } else {
-      allCentersBtn.classList.remove('active');
-      allCentersBtn.setAttribute('aria-pressed', 'false');
-    }
-  }
-
-  function updateSelectedCenterIndicator() {
-    if (!selectedCenterIndicator || !selectedCenterName) return;
-    if (current.area) {
-      selectedCenterName.textContent = getAreaNameById(current.area);
-      selectedCenterIndicator.classList.remove('hidden');
-    } else {
-      selectedCenterIndicator.classList.add('hidden');
-      selectedCenterName.textContent = '';
-    }
-    updateAllCentersButtonState();
-  }
-
-  // ساخت دکمه مناطق معروف (بالا)
-  function renderAreasShort(selected = null) {
-    const container = document.getElementById('areasShort');
-    container.innerHTML = '';
-    const activeArea = selected ?? current.area;
-    if (!AREAS.length) {
-      const placeholder = document.createElement('div');
-      placeholder.className = 'centers-loading';
-      placeholder.textContent = 'در حال بارگذاری مراکز خرید...';
-      container.appendChild(placeholder);
-      updateSelectedCenterIndicator();
-      return;
-    }
-
-    sortCenters(AREAS).slice(0, 6).forEach(area => {
-      const btn = document.createElement('button');
-      btn.className = 'area-btn' + (activeArea === area.id ? ' active' : '');
-      btn.textContent = area.name;
-      btn.onclick = () => {
-        current.area = (current.area === area.id) ? null : area.id;
-        renderAreasShort(current.area);
-        loadAllShops();
-      };
-      container.appendChild(btn);
-    });
-    updateSelectedCenterIndicator();
-  }
-
-  function populateCategories() {
-    const select = document.getElementById('categorySelect');
-    if (!select) return;
-    select.innerHTML = '';
-    CATEGORY_OPTIONS.forEach(option => {
-      const opt = document.createElement('option');
-      opt.value = option.value;
-      opt.textContent = option.label;
-      select.appendChild(opt);
-    });
-  }
-
-  const categorySelect = document.getElementById('categorySelect');
-  const searchInput = document.getElementById('searchInput');
-  populateCategories();
-
-  if (categorySelect) {
-    categorySelect.addEventListener('change', () => {
-      current.category = categorySelect.value;
-      loadAllShops();
-    });
-  }
-
-  if (searchInput) {
-    const debouncedSearch = debounce(value => {
-      current.search = value;
-      loadAllShops();
-    }, 550);
-    searchInput.addEventListener('input', event => debouncedSearch(event.target.value));
-  }
-  if (allCentersBtn) {
-    allCentersBtn.onclick = () => {
-      current.area = null;
-      renderAreasShort();
-      loadAllShops();
-      window.scrollTo({ top: document.getElementById('areasShort').offsetTop - 60, behavior: 'smooth' });
+    const detectCenterForShop = shop => {
+      if (!shop || !AREAS.length) return null;
+      const haystack = normalizeForSearch([shop.address, shop.desc, shop.storename, shop.customAddress, shop.location].filter(Boolean).join(' '));
+      if (!haystack) return null;
+      return AREAS.find(area => area.matchKeywords?.some(keyword => haystack.includes(keyword))) || null;
     };
-  }
 
-  const centersModal = document.getElementById('centersModal');
-  const centersList = document.getElementById('centersList');
-  const centersModalOverlay = document.getElementById('centersModalOverlay');
-  const openCentersBtn = document.getElementById('more-centers-btn');
-  const closeCentersBtn = document.getElementById('closeCentersModal');
-  const closeCentersBtnMobile = document.getElementById('closeCentersModalMobile');
-  const centerInfoModal = document.getElementById('centerInfoModal');
-  const centerInfoOverlay = document.getElementById('centerInfoOverlay');
-  const closeCenterInfoBtn = document.getElementById('closeCenterInfo');
-  const centerInfoTitle = document.getElementById('centerInfoTitle');
-  const centerInfoAddress = document.getElementById('centerInfoAddress');
-  const centerInfoEmpty = document.getElementById('centerInfoEmpty');
+    const escapeHtml = value => {
+      if (value === null || value === undefined) return '';
+      return String(value).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#039;');
+    };
 
-  function openCentersModal() {
-    centersModal.classList.add('active');
-    document.body.classList.add('overflow-hidden');
-    document.body.classList.add('hide-mobile-nav');
-  }
+    const resolveShopImage = src => {
+      if (!src) return 'https://via.placeholder.com/640x360.png?text=Shop';
+      const str = String(src);
+      if (str.startsWith('http://') || str.startsWith('https://') || str.startsWith('data:')) return str;
+      return `${API_ORIGIN}/${str.replace(/^\/+/, '')}`;
+    };
 
-  function closeCentersModal() {
-    centersModal.classList.remove('active');
-    if (centerInfoModal?.classList.contains('active')) {
-      centerInfoModal.classList.remove('active');
+    const allCentersBtn = document.getElementById('all-centers-btn');
+    const selectedCenterIndicator = document.getElementById('selectedCenterIndicator');
+    const selectedCenterName = document.getElementById('selectedCenterName');
+
+    function getAreaNameById(id) {
+      if (!id) return '';
+      const found = AREAS.find(area => area.id === id);
+      return found ? found.name : id;
     }
-    document.body.classList.remove('overflow-hidden');
-    document.body.classList.remove('hide-mobile-nav');
-  }
 
-  function openCenterInfoModal(area) {
-    if (!centerInfoModal || !area) return;
-    const location = (area.location || '').trim();
-    if (centerInfoTitle) {
-      centerInfoTitle.textContent = area.name || 'مرکز خرید';
-    }
-    if (centerInfoAddress && centerInfoEmpty) {
-      if (location) {
-        centerInfoAddress.textContent = location;
-        centerInfoAddress.classList.remove('hidden');
-        centerInfoEmpty.classList.add('hidden');
+    function updateSelectedCenterIndicator() {
+      if (!selectedCenterIndicator || !selectedCenterName) return;
+      if (current.area) {
+        selectedCenterName.textContent = getAreaNameById(current.area);
+        selectedCenterIndicator.style.display = 'inline-flex';
       } else {
-        centerInfoAddress.textContent = '';
-        centerInfoAddress.classList.add('hidden');
-        centerInfoEmpty.classList.remove('hidden');
+        selectedCenterIndicator.style.display = 'none';
+        selectedCenterName.textContent = '';
+      }
+      if (allCentersBtn) {
+        allCentersBtn.classList.toggle('active', !current.area);
+        allCentersBtn.setAttribute('aria-pressed', !current.area ? 'true' : 'false');
       }
     }
-    centerInfoModal.classList.add('active');
-    document.body.classList.add('overflow-hidden');
-    document.body.classList.add('hide-mobile-nav');
-  }
 
-  function closeCenterInfoModal() {
-    if (!centerInfoModal) return;
-    centerInfoModal.classList.remove('active');
-    if (!centersModal?.classList.contains('active')) {
-      document.body.classList.remove('overflow-hidden');
-      document.body.classList.remove('hide-mobile-nav');
-    }
-  }
-
-  function renderCentersModal() {
-    if (!centersList) return;
-    centersList.innerHTML = '';
-    if (!AREAS.length) {
-      const placeholder = document.createElement('div');
-      placeholder.className = 'centers-loading';
-      placeholder.textContent = 'در حال بارگذاری مراکز خرید...';
-      centersList.appendChild(placeholder);
-      return;
-    }
-    sortCenters(AREAS).forEach(area => {
-      const item = document.createElement('div');
-      item.className = 'modal-area-item';
-
-      const selectBtn = document.createElement('button');
-      selectBtn.type = 'button';
-      selectBtn.className = 'modal-area-btn';
-      const nameHtml = escapeHtml(area.name);
-      selectBtn.innerHTML = `
-        <span class="modal-center-name" data-center-id="${escapeHtml(area.id)}">${nameHtml}</span>
-      `;
-      selectBtn.onclick = () => {
-        current.area = area.id;
-        renderAreasShort(area.id);
-        loadAllShops();
-        closeCentersModal();
-        window.scrollTo({ top: document.getElementById('areasShort').offsetTop - 40, behavior: 'smooth' });
-      };
-
-      const infoBtn = document.createElement('button');
-      infoBtn.type = 'button';
-      infoBtn.className = 'modal-area-info-btn';
-      infoBtn.textContent = 'آدرس';
-      infoBtn.addEventListener('click', event => {
-        event.stopPropagation();
-        openCenterInfoModal(area);
-      });
-
-      item.appendChild(selectBtn);
-      item.appendChild(infoBtn);
-      centersList.appendChild(item);
-    });
-  }
-
-  if (openCentersBtn) {
-    openCentersBtn.addEventListener('click', async () => {
-      await loadCentersFromBackend();
-      renderCentersModal();
-      openCentersModal();
-    });
-  }
-
-  [centersModalOverlay, closeCentersBtn, closeCentersBtnMobile].forEach(el => {
-    if (el) {
-      el.addEventListener('click', closeCentersModal);
-    }
-  });
-
-  [centerInfoOverlay, closeCenterInfoBtn].forEach(el => {
-    if (el) {
-      el.addEventListener('click', closeCenterInfoModal);
-    }
-  });
-
-  document.addEventListener('keydown', event => {
-    if (event.key === 'Escape') {
-      if (centersModal.classList.contains('active')) {
-        closeCentersModal();
-      }
-      if (centerInfoModal?.classList.contains('active')) {
-        closeCenterInfoModal();
-      }
-    }
-  });
-
-  // دریافت و نمایش مغازه‌های واقعی از بک‌اند + فیلتر سمت کلاینت
-  async function loadAllShops() {
-    const list = document.getElementById('shopsList');
-    const empty = document.getElementById('noResult');
-    if (!list || !empty) return;
-
-    list.innerHTML = '<div style="margin: 50px auto;">در حال بارگذاری...</div>';
-    empty.classList.add('hidden');
-
-    try {
-      await loadCentersFromBackend();
-      const res = await fetch(`${API_BASE}/shops`);
-      if (!res.ok) throw new Error('خطا در دریافت فروشگاه‌ها');
-      const data = await res.json();
-      const shopsArray = Array.isArray(data)
-        ? data
-        : Array.isArray(data?.shops)
-          ? data.shops
-          : Array.isArray(data?.data)
-            ? data.data
-            : [];
-
-      const enriched = shopsArray.map(shop => {
-        const center = detectCenterForShop(shop);
-        return {
-          ...shop,
-          centerId: center?.id || null,
-          centerName: center?.name || '',
-          centerLocation: center?.location || '',
-          centerTag: center?.tag || ''
-        };
-      });
-
-      const searchTerm = normalizeForSearch(current.search);
-      const categoryFilter = normalizeForSearch(current.category);
-
-      const filtered = enriched.filter(shop => {
-        const matchesCenter = !current.area || shop.centerId === current.area;
-        const matchesCategory = !categoryFilter || normalizeForSearch(shop.category) === categoryFilter;
-        const matchesSearch = !searchTerm || [
-          shop.storename,
-          shop.address,
-          shop.centerName,
-          shop.category
-        ].some(field => normalizeForSearch(field).includes(searchTerm));
-        return matchesCenter && matchesCategory && matchesSearch;
-      });
-
-      list.innerHTML = '';
-
-      if (!filtered.length) {
-        empty.classList.remove('hidden');
+    function renderAreasShort(selected = null) {
+      const container = document.getElementById('areasShort');
+      container.innerHTML = '';
+      const activeArea = selected ?? current.area;
+      if (!AREAS.length) {
+        const placeholder = document.createElement('div');
+        placeholder.textContent = 'در حال بارگذاری مراکز خرید...';
+        placeholder.style.color = '#0f9a8b';
+        placeholder.style.fontWeight = '700';
+        container.appendChild(placeholder);
+        updateSelectedCenterIndicator();
         return;
       }
-
-      filtered.forEach(shop => {
-        const areaName = shop.centerName || '';
-        const categoryLabel = shop.category || '';
-        const storeName = shop.storename || 'بدون نام';
-        const address = shop.address || '';
-        const phone = shop.phone || '';
-        const imageSrc = resolveShopImage(shop.boardImage || shop.banner);
-        const centerBadgeTitle = shop.centerLocation ? `title="${escapeHtml(shop.centerLocation)}"` : '';
-
-        const card = document.createElement('a');
-        card.href = `shop.html?shopurl=${encodeURIComponent(shop.shopurl || '')}`;
-        card.className = `
-          shop-card flex flex-col justify-start items-stretch
-          p-3 sm:p-4 group transition-all duration-200
-          relative
-        `;
-        card.setAttribute('aria-label', `مشاهده ${escapeHtml(storeName)}`);
-
-        card.innerHTML = `
-          <div class="relative w-full aspect-[4/3] mb-4 rounded-xl overflow-hidden
-                      flex items-center justify-center
-                      bg-white border border-[#e2e8f0]">
-            <img
-              src="${imageSrc}"
-              alt="${escapeHtml(storeName)}"
-              loading="lazy"
-              class="w-full h-full object-cover object-center transition-all duration-200 group-hover:scale-105"
-              style="aspect-ratio:4/3;max-height:260px;"
-            />
-          </div>
-          <div class="w-full flex flex-row-reverse items-center justify-between mb-2 gap-1">
-            <span class="inline-flex items-center gap-1 bg-[#10b981]/10 text-[#0f9a8b] text-[12px] font-extrabold px-2 py-1 rounded-full ml-1">${escapeHtml(categoryLabel)}</span>
-            <span class="center-badge inline-flex items-center gap-1 bg-[#0ea5e9]/10 text-[#0ea5e9] text-[12px] font-extrabold px-2 py-1 rounded-full" ${centerBadgeTitle}>${escapeHtml(areaName || 'سایر مراکز')}</span>
-          </div>
-          <h4 class="font-bold text-base sm:text-lg text-slate-900 text-center mb-2 truncate w-full">${escapeHtml(storeName)}</h4>
-          <div class="text-[#0f9a8b] font-extrabold text-sm mb-1 text-center">${escapeHtml(address)}</div>
-          ${phone ? `<div class="text-gray-500 text-xs font-bold mt-1 flex items-center gap-1 justify-center"><svg width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"#10b981\"><path d=\"M6.62 10.79a15.054 15.054 0 006.59 6.59l2.2-2.2a1.003 1.003 0 011.01-.24c1.12.37 2.33.57 3.58.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1C10.07 21 3 13.93 3 5c0-.55.45-1 1-1h3.01c.55 0 1 .45 1 1 0 1.25.2 2.46.57 3.59a1 1 0 01-.24 1.01l-2.2 2.19z\"/></svg> ${escapeHtml(phone)}</div>` : ''}
-          <div class="mt-3 flex items-center justify-between text-[#0ea5e9] font-extrabold text-sm">
-            <span class="inline-flex items-center gap-1">مشاهده فروشگاه</span>
-            <span aria-hidden="true">↗</span>
-          </div>
-        `;
-
-        list.appendChild(card);
+      sortCenters(AREAS).slice(0, 6).forEach(area => {
+        const btn = document.createElement('button');
+        btn.className = 'area-btn' + (activeArea === area.id ? ' active' : '');
+        btn.textContent = area.name;
+        btn.type = 'button';
+        btn.onclick = () => { current.area = (current.area === area.id) ? null : area.id; renderAreasShort(current.area); loadAllShops(); };
+        container.appendChild(btn);
       });
-
-    } catch (e) {
-      list.innerHTML = '<div class="text-red-500 text-center w-full p-8">مشکل در ارتباط با سرور!</div>';
+      updateSelectedCenterIndicator();
     }
-  }
 
+    function populateCategories() {
+      const select = document.getElementById('categorySelect');
+      if (!select) return;
+      select.innerHTML = '';
+      CATEGORY_OPTIONS.forEach(option => {
+        const opt = document.createElement('option');
+        opt.value = option.value; opt.textContent = option.label; select.appendChild(opt);
+      });
+    }
 
-  // اجرای اولیه
-  (async () => {
-    await loadCentersFromBackend();
-    renderAreasShort();
-    renderCentersModal();
-    updateSelectedCenterIndicator();
-    await loadAllShops();
-  })();
-</script>
+    const categorySelect = document.getElementById('categorySelect');
+    const searchInput = document.getElementById('searchInput');
+    populateCategories();
 
+    if (categorySelect) {
+      categorySelect.addEventListener('change', () => { current.category = categorySelect.value; loadAllShops(); });
+    }
 
-<!-- TODO: افزودن رویدادهای PostHog پس از فعال‌سازی | TODO: Enable PostHog events after activation -->
-<!--
-<script>
-  document.addEventListener('DOMContentLoaded', function () {
-    const safeCapture = window.safePosthogCapture || function () {};
-    // safeCapture('event_name', { /* داده‌های تکمیلی */ });
-  });
-</script>
--->
+    if (searchInput) {
+      const debouncedSearch = debounce(value => { current.search = value; loadAllShops(); }, 550);
+      searchInput.addEventListener('input', event => debouncedSearch(event.target.value));
+    }
 
+    if (allCentersBtn) {
+      allCentersBtn.onclick = () => { current.area = null; renderAreasShort(); loadAllShops(); window.scrollTo({ top: document.getElementById('areasShort').offsetTop - 40, behavior: 'smooth' }); };
+    }
+
+    const centersModal = document.getElementById('centersModal');
+    const centersList = document.getElementById('centersList');
+    const centersModalOverlay = document.getElementById('centersModalOverlay');
+    const openCentersBtn = document.getElementById('more-centers-btn');
+    const closeCentersBtn = document.getElementById('closeCentersModal');
+    const closeCentersBtnMobile = document.getElementById('closeCentersModalMobile');
+    const centerInfoModal = document.getElementById('centerInfoModal');
+    const centerInfoOverlay = document.getElementById('centerInfoOverlay');
+    const closeCenterInfoBtn = document.getElementById('closeCenterInfo');
+    const centerInfoTitle = document.getElementById('centerInfoTitle');
+    const centerInfoAddress = document.getElementById('centerInfoAddress');
+    const centerInfoEmpty = document.getElementById('centerInfoEmpty');
+
+    function openCentersModal() {
+      centersModal.classList.add('active');
+      document.body.classList.add('overflow-hidden');
+    }
+
+    function closeCentersModal() {
+      centersModal.classList.remove('active');
+      centerInfoModal?.classList.remove('active');
+      document.body.classList.remove('overflow-hidden');
+    }
+
+    function openCenterInfoModal(area) {
+      if (!centerInfoModal || !area) return;
+      const location = (area.location || '').trim();
+      centerInfoTitle.textContent = area.name || 'مرکز خرید';
+      if (location) {
+        centerInfoAddress.textContent = location;
+        centerInfoAddress.style.display = 'block';
+        centerInfoEmpty.style.display = 'none';
+      } else {
+        centerInfoAddress.textContent = '';
+        centerInfoAddress.style.display = 'none';
+        centerInfoEmpty.style.display = 'block';
+      }
+      centerInfoModal.classList.add('active');
+      document.body.classList.add('overflow-hidden');
+    }
+
+    function closeCenterInfoModal() {
+      centerInfoModal?.classList.remove('active');
+      if (!centersModal.classList.contains('active')) {
+        document.body.classList.remove('overflow-hidden');
+      }
+    }
+
+    function renderCentersModal() {
+      if (!centersList) return;
+      centersList.innerHTML = '';
+      if (!AREAS.length) {
+        const placeholder = document.createElement('div');
+        placeholder.textContent = 'در حال بارگذاری مراکز خرید...';
+        placeholder.style.textAlign = 'center';
+        placeholder.style.padding = '1rem';
+        placeholder.style.color = '#0f9a8b';
+        placeholder.style.fontWeight = '700';
+        centersList.appendChild(placeholder);
+        return;
+      }
+      sortCenters(AREAS).forEach(area => {
+        const item = document.createElement('div');
+        item.className = 'center-item';
+
+        const selectBtn = document.createElement('button');
+        selectBtn.type = 'button';
+        selectBtn.className = 'center-name';
+        selectBtn.textContent = area.name;
+        selectBtn.onclick = () => { current.area = area.id; renderAreasShort(area.id); loadAllShops(); closeCentersModal(); window.scrollTo({ top: document.getElementById('areasShort').offsetTop - 40, behavior: 'smooth' }); };
+
+        const infoBtn = document.createElement('button');
+        infoBtn.type = 'button';
+        infoBtn.className = 'center-info-btn';
+        infoBtn.textContent = 'آدرس';
+        infoBtn.addEventListener('click', event => { event.stopPropagation(); openCenterInfoModal(area); });
+
+        item.appendChild(selectBtn);
+        item.appendChild(infoBtn);
+        centersList.appendChild(item);
+      });
+    }
+
+    if (openCentersBtn) {
+      openCentersBtn.addEventListener('click', async () => { await loadCentersFromBackend(); renderCentersModal(); openCentersModal(); });
+    }
+
+    [centersModalOverlay, closeCentersBtn, closeCentersBtnMobile].forEach(el => { if (el) el.addEventListener('click', closeCentersModal); });
+    [centerInfoOverlay, closeCenterInfoBtn].forEach(el => { if (el) el.addEventListener('click', closeCenterInfoModal); });
+
+    document.addEventListener('keydown', event => {
+      if (event.key === 'Escape') {
+        if (centersModal.classList.contains('active')) closeCentersModal();
+        if (centerInfoModal?.classList.contains('active')) closeCenterInfoModal();
+      }
+    });
+
+    async function loadAllShops() {
+      const list = document.getElementById('shopsList');
+      const empty = document.getElementById('noResult');
+      if (!list || !empty) return;
+      empty.style.display = 'none';
+      list.innerHTML = '<div style="grid-column:1/-1;text-align:center;color:#0f9a8b;font-weight:800;padding:1.2rem;">در حال بارگذاری...</div>';
+      try {
+        const res = await fetch(`${API_BASE}/shops`);
+        if (!res.ok) throw new Error('خطا در دریافت فروشگاه‌ها');
+        const data = await res.json();
+        const shopsArray = Array.isArray(data) ? data : Array.isArray(data?.shops) ? data.shops : Array.isArray(data?.data) ? data.data : [];
+        const enriched = shopsArray.map(shop => {
+          const center = detectCenterForShop(shop);
+          return { ...shop, centerId: center?.id || null, centerName: center?.name || '', centerLocation: center?.location || '', centerTag: center?.tag || '' };
+        });
+
+        const searchTerm = normalizeForSearch(current.search);
+        const categoryFilter = normalizeForSearch(current.category);
+
+        const filtered = enriched.filter(shop => {
+          const matchesCenter = !current.area || shop.centerId === current.area;
+          const matchesCategory = !categoryFilter || normalizeForSearch(shop.category) === categoryFilter;
+          const matchesSearch = !searchTerm || [shop.storename, shop.address, shop.centerName, shop.category].some(field => normalizeForSearch(field).includes(searchTerm));
+          return matchesCenter && matchesCategory && matchesSearch;
+        });
+
+        list.innerHTML = '';
+        if (!filtered.length) { empty.style.display = 'block'; return; }
+
+        filtered.forEach(shop => {
+          const areaName = shop.centerName || '';
+          const categoryLabel = shop.category || '';
+          const storeName = shop.storename || 'بدون نام';
+          const address = shop.address || '';
+          const phone = shop.phone || '';
+          const imageSrc = resolveShopImage(shop.boardImage || shop.banner);
+          const card = document.createElement('a');
+          card.href = `shop.html?shopurl=${encodeURIComponent(shop.shopurl || '')}`;
+          card.className = 'shop-card';
+          card.setAttribute('aria-label', `مشاهده ${escapeHtml(storeName)}`);
+          card.innerHTML = `
+            <div class="shop-thumb">
+              <img src="${imageSrc}" alt="${escapeHtml(storeName)}" loading="lazy" onerror="this.onerror=null;this.src='https://via.placeholder.com/640x360.png?text=Shop';" />
+            </div>
+            <div class="tag-row">
+              <span class="badge green">${escapeHtml(categoryLabel)}</span>
+              <span class="badge blue" title="${escapeHtml(shop.centerLocation || '')}">${escapeHtml(areaName || 'سایر مراکز')}</span>
+            </div>
+            <h4 class="shop-name">${escapeHtml(storeName)}</h4>
+            <div class="shop-address">${escapeHtml(address)}</div>
+            ${phone ? `<div class="shop-meta"><span class="ri-phone-line" aria-hidden="true"></span><span>${escapeHtml(phone)}</span></div>` : ''}
+            <div class="shop-footer"><span>مشاهده فروشگاه</span><span aria-hidden="true">↗</span></div>
+          `;
+          list.appendChild(card);
+        });
+      } catch (e) {
+        list.innerHTML = '<div style="grid-column:1/-1;text-align:center;color:#ef4444;font-weight:800;padding:1.2rem;">مشکل در ارتباط با سرور!</div>';
+        console.error(e);
+      }
+    }
+
+    (async () => {
+      await loadCentersFromBackend();
+      renderAreasShort();
+      renderCentersModal();
+      updateSelectedCenterIndicator();
+      await loadAllShops();
+    })();
+  </script>
 </body>
 </html>
