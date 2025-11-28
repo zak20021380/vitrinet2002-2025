@@ -8,11 +8,24 @@
 <meta name="referrer" content="no-referrer">
 <meta http-equiv="Permissions-Policy" content="geolocation=(), microphone=(), camera=()">
 
+  <script src="/js/runtime-config.js" defer></script>
+  <script src="/js/analytics.js" defer></script>
+  <script src="/js/main-index.js" defer></script>
+
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>شهر رو بگرد | ویترینت</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <link
+    href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css"
+    rel="stylesheet"
+  />
   <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;800&family=Montserrat:wght@700&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="style-index.css" />
+    <script src="main-index.js" defer></script>
+    <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;700&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@800;900&display=swap" rel="stylesheet" />
+    <script src="/nav-active.js" defer></script>
   <style>
     body {
       font-family: 'Vazirmatn', 'Montserrat', sans-serif;
@@ -665,7 +678,6 @@
       .shop-card { padding: 0.8rem !important; min-height: 90px;}
     }
   </style>
-  <script src="/nav-active.js" defer></script>
 
 <!-- TODO: فعال‌سازی پست‌هاگ را هنگام انتشار فراموش نکنید | TODO: Enable PostHog analytics when going live -->
 <!--
@@ -688,72 +700,96 @@
 </head>
 <body class="min-h-screen flex flex-col bg-[#f8fafc]">
 
-  <!-- هدر با لوگو اصلی -->
-<header class="w-full sticky top-0 z-50 bg-white/90 backdrop-blur-[10px] shadow-md border-b border-[#e0fdfa]">
-  <nav class="max-w-7xl mx-auto flex flex-wrap items-center justify-between px-2 sm:px-6 py-2 sm:py-3 gap-3 sm:gap-4">
-    <!-- لوگوی Vitreenet -->
-    <div class="logo-group flex items-center gap-4 flex-shrink-0">
-      <a href="index.html" class="logo-vitreenet font-extrabold text-[1.7rem] sm:text-[2.2rem] text-[#11d6ad] tracking-wide drop-shadow hover:brightness-110 transition-all select-none">
-        Vitreenet
-      </a>
-      <!-- بج شهر (سنندج) -->
-      <div class="flex items-center gap-1 px-3 py-1 rounded-full shadow-lg"
-        style="background:linear-gradient(90deg,#10b981E6 70%,#0ea5e9E6); border: 1.5px solid #fff6;">
-        <svg width="18" height="18" fill="none" viewBox="0 0 22 22" class="ml-1 drop-shadow">
-          <defs>
-            <linearGradient id="city-icon" x1="0" y1="0" x2="22" y2="22" gradientUnits="userSpaceOnUse">
-              <stop stop-color="#fff" />
-              <stop offset="1" stop-color="#b2f2e9" />
-            </linearGradient>
-          </defs>
-          <path d="M11 2.5C7.13 2.5 4 5.61 4 9.45c0 3.52 4.1 7.93 6.2 10.01.46.47 1.2.47 1.66 0 2.1-2.08 6.14-6.49 6.14-10.01C18 5.61 14.87 2.5 11 2.5Zm0 10.25a2.75 2.75 0 1 1 0-5.5 2.75 2.75 0 0 1 0 5.5Z"
-            fill="url(#city-icon)"/>
-        </svg>
-        <span class="font-bold text-white text-[13px] sm:text-[14px] drop-shadow-sm" style="letter-spacing:.3px;">
-          سنندج
-        </span>
+  <!-- HEADER افقی همیشه باز -->
+  <!-- اضافه کردن فونت Poppins -->
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@900&display=swap" rel="stylesheet" />
+
+
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@800&display=swap" rel="stylesheet"/>
+
+  <header id="mainHeader" class="w-full bg-white/95 shadow-md backdrop-blur-md sticky top-0 z-50">
+    <div id="headerInner" class="max-w-7xl mx-auto flex flex-row items-center justify-between px-4 sm:px-6 py-3 md:py-3.5 gap-3">
+
+      <!-- لوگو و انتخاب شهر -->
+      <div id="logoCityWrap" class="flex items-center gap-2 md:gap-3 flex-shrink-0">
+        <!-- لوگوی جدید ویترینت -->
+        <a href="index.html" class="vitreenet-brand header-item" aria-label="ویترینت">
+          <span class="vitreenet-brand__mark" aria-hidden="true">
+            <svg viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg" role="presentation">
+              <defs>
+                <linearGradient id="vtMarkGradient" x1="0%" y1="100%" x2="100%" y2="0%">
+                  <stop offset="0%" stop-color="#0ea5e9" />
+                  <stop offset="55%" stop-color="#10b981" />
+                  <stop offset="100%" stop-color="#0fb67f" />
+                </linearGradient>
+                <linearGradient id="vtMarkInner" x1="15%" y1="85%" x2="85%" y2="15%">
+                  <stop offset="0%" stop-color="#ffffff" stop-opacity="0.9" />
+                  <stop offset="100%" stop-color="#dcfce7" stop-opacity="0.25" />
+                </linearGradient>
+              </defs>
+              <circle cx="24" cy="24" r="22" fill="url(#vtMarkGradient)" />
+              <circle cx="24" cy="24" r="18" fill="url(#vtMarkInner)" />
+              <path d="M15.5 16h4.7l4.3 10.6L28.8 16h4.7L26 33h-4.2L15.5 16Z" fill="#0f172a" fill-opacity="0.9" />
+              <path d="M18.2 17.6 24 31.1l5.8-13.5" fill="none" stroke="#22c55e" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" />
+            </svg>
+          </span>
+          <span class="vitreenet-brand__text">
+            <span class="vitreenet-brand__title">Vitreenet</span>
+            <span class="vitreenet-brand__subtitle">ویترینت</span>
+          </span>
+        </a>
+
+        <!-- بج شهر - فقط در دسکتاپ نمایش داده شود -->
+        <div class="hidden md:flex items-center gap-1 px-3 py-1.5 rounded-full shadow-lg header-item"
+             style="background:linear-gradient(90deg,#10b981E6 70%,#0ea5e9E6); border: 1.5px solid #fff6; backdrop-filter: blur(5px);">
+          <svg width="18" height="18" fill="none" viewBox="0 0 22 22" class="ml-1 drop-shadow" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <linearGradient id="city-icon" x1="0%" y1="0%" x2="0%" y2="100%">
+                <stop offset="0%" stop-color="#ffffff" stop-opacity="1" />
+                <stop offset="100%" stop-color="#e0f2fe" stop-opacity="0.9" />
+              </linearGradient>
+            </defs>
+            <path d="M11 2.5C7.13 2.5 4 5.61 4 9.45c0 3.52 4.1 7.93 6.2 10.01.46.47 1.2.47 1.66 0 2.1-2.08 6.14-6.49 6.14-10.01C18 5.61 14.87 2.5 11 2.5Zm0 10.25a2.75 2.75 0 1 1 0-5.5 2.75 2.75 0 0 1 0 5.5Z"
+              fill="url(#city-icon)"/>
+          </svg>
+          <span id="headerCity" class="font-bold text-white text-[14px] drop-shadow-sm" style="letter-spacing:.3px;">سنندج</span>
+        </div>
+      </div>
+
+      <!-- منو - فقط در دسکتاپ -->
+      <nav id="desktopNav" class="hidden md:flex items-center gap-1 text-base flex-1 justify-end">
+        <a href="index.html" class="main-nav-link text-gray-700 hover:text-[#10b981] font-bold px-4 py-2 rounded-lg transition-all hover:bg-emerald-50">
+          خانه
+        </a>
+        <a href="categories.html" class="main-nav-link text-gray-700 hover:text-[#0ea5e9] font-bold px-4 py-2 rounded-lg transition-all hover:bg-sky-50">
+          دسته‌بندی
+        </a>
+        <a href="login.html" id="loginNavLink" class="main-nav-link text-gray-700 hover:text-[#0ea5e9] font-bold px-4 py-2 rounded-lg transition-all hover:bg-sky-50">
+          <span class="login-link-label">ورود</span>
+        </a>
+      </nav>
+
+      <!-- دکمه‌های اکشن هدر -->
+      <div class="flex items-center gap-2 header-item">
+        <button type="button" id="rewardClaimBtn"
+          class="reward-header-btn inline-flex items-center gap-2 px-4 py-2 md:px-5 md:py-2.5 rounded-full font-extrabold shadow-lg hover:shadow-xl transition-all duration-200 whitespace-nowrap text-white text-sm md:text-base header-item"
+          aria-haspopup="dialog" aria-controls="rewardModal" aria-expanded="false">
+          <span class="reward-header-icon" aria-hidden="true">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M5 8h14v12H5z" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M3 8h18" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+              <path d="M12 4c.8-1.3 2.5-2 3.8-1 .7.5 1.2 1.3 1.2 2.1 0 1.5-1.2 2.9-3 2.9h-2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M12 4c-.8-1.3-2.5-2-3.8-1-.7.5-1.2 1.3-1.2 2.1 0 1.5 1.2 2.9 3 2.9h2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </span>
+          <span>دریافت جایزه</span>
+        </button>
+        <a href="post.html" id="registerShopBtn" class="btn-grad px-4 py-2 md:px-5 md:py-2.5 rounded-full font-extrabold shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-200 whitespace-nowrap text-white text-sm md:text-base header-item">
+          ثبت فروشگاه
+        </a>
       </div>
     </div>
-    <!-- منو -->
-    <div class="header-actions flex items-center gap-2 sm:gap-4 ml-2">
-      <a href="index.html" class="hidden sm:inline text-gray-700 hover:text-[#10b981] font-bold px-2 sm:px-3 transition">خانه</a>
-      <a href="categories.html" class="hidden sm:inline text-gray-700 hover:text-[#0ea5e9] font-bold px-2 sm:px-3 transition">دسته‌بندی</a>
-      <a href="login.html" class="hidden sm:inline text-gray-700 hover:text-[#0ea5e9] font-bold px-2 sm:px-3 transition">ورود</a>
-      <!-- حساب کاربری واکنشی -->
-      <a href="login.html"
-        class="flex items-center gap-2 px-4 py-2 rounded-full bg-[#10b981]/10 hover:bg-[#0ea5e9]/15 text-[#10b981] hover:text-[#0ea5e9] font-bold shadow-sm transition-all duration-150 text-base"
-        style="font-family: Vazirmatn, sans-serif;">
-        <svg width="20" height="20" fill="none" viewBox="0 0 22 22">
-          <circle cx="11" cy="7" r="4" stroke="currentColor" stroke-width="1.5" />
-          <path d="M4 19c0-3.3 2.7-6 6-6s6 2.7 6 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-        </svg>
-        <span class="hidden xs:inline">حساب کاربری</span>
-      </a>
-      <!-- ثبت فروشگاه -->
-      <a href="post.html"
-        class="bg-gradient-to-l from-[#10b981] to-[#0ea5e9] hover:from-[#0ea5e9] hover:to-[#10b981] rounded-full px-5 py-2 text-white font-extrabold text-base shadow-sm transition-all duration-200 whitespace-nowrap"
-        style="font-family: Vazirmatn, sans-serif;">
-        ثبت فروشگاه
-      </a>
-    </div>
-  </nav>
-</header>
-
-<!-- استایل لوگو Vitreenet (به بالای فایل <head> هم می‌تونی بذاری) -->
-<style>
-.logo-vitreenet {
-  font-family: 'Poppins', sans-serif;
-  background: linear-gradient(90deg,#10b981 5%,#0ea5e9 90%);
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-  letter-spacing: 2px;
-  text-shadow: 0 2px 10px #0ea5e955;
-}
-@media (max-width: 640px) {
-  .logo-vitreenet {font-size: 1.18rem !important;}
-}
-</style>
+  </header>
 
 
   <main class="flex-1 w-full max-w-6xl mx-auto px-3 sm:px-8 py-7 sm:py-12">
