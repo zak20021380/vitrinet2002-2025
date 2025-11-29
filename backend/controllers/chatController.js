@@ -1143,9 +1143,7 @@ exports.broadcastMessage = async (req, res) => {
           },
           $set: {
             lastUpdated: Date.now(),
-            type: chatType,
-            participants,
-            participantsModel
+            type: chatType
           },
           $push: { messages: message }
         },
