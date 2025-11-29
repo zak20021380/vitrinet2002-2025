@@ -164,20 +164,52 @@
       return `${val.toLocaleString('fa-IR')}${suffix}`;
     };
 
-    setText(refs.visitRank, visitRank);
-    setText(refs.visitTotal, `از ${total || 'کل'} فروشگاه‌های سنندج`);
-    setText(refs.visitAvg, `میانگین شهر: ${formatNumber(ranking.avgVisit, '')} بازدید`);
-    setText(refs.visitYour, `فروشگاه تو: ${formatNumber(ranking.yourVisit, '')} بازدید واقعی`);
-    setText(refs.visitPercentile, `در بین ${visitPercentile}% بالایی`);
+    const visitSurpassed = (typeof total === 'number' && typeof visitRank === 'number')
+      ? Math.max(total - visitRank, 0)
+      : null;
+    const customerSurpassed = (typeof total === 'number' && typeof customerRank === 'number')
+      ? Math.max(total - customerRank, 0)
+      : null;
+
+    const visitMultiplierValue = (typeof ranking.yourVisit === 'number' && typeof ranking.avgVisit === 'number' && ranking.avgVisit > 0)
+      ? (ranking.yourVisit / ranking.avgVisit)
+      : null;
+    const customerLeadValue = (typeof ranking.yourCustomer === 'number' && typeof ranking.avgCustomer === 'number')
+      ? ranking.yourCustomer - ranking.avgCustomer
+      : null;
+
+    setText(refs.visitRank, typeof visitRank === 'number' ? visitRank.toLocaleString('fa-IR') : visitRank);
+    setText(refs.visitSurpassed, visitSurpassed != null
+      ? `از ${formatNumber(visitSurpassed)} رقیب جلو زدی!`
+      : 'پله محبوبیتت اوج گرفته');
+    setText(refs.visitMultiplier, visitMultiplierValue != null
+      ? `${visitMultiplierValue.toLocaleString('fa-IR', { minimumFractionDigits: 1, maximumFractionDigits: 1 })}x پررفت‌وآمدتر از بازار شهر`
+      : 'پررفت‌وآمدتر از بازار شهر');
+    setText(refs.visitYour, `بازدید واقعی تو: ${formatNumber(ranking.yourVisit)}`);
+    setText(refs.visitPercentile, visitPercentile
+      ? `🔥 فروشگاه داغ · جلوتر از ${visitPercentile.toLocaleString('fa-IR')}٪`
+      : '🔥 فروشگاه داغ');
+    setText(refs.visitPercentileNote, visitPercentile
+      ? `در بین ${visitPercentile.toLocaleString('fa-IR')}٪ بالایی`
+      : 'در مسیر داغ شدن بازار');
     if (refs.visitProgress) {
       refs.visitProgress.style.width = `${visitPercentile}%`;
     }
 
-    setText(refs.customerRank, customerRank);
-    setText(refs.customerTotal, `از ${total || 'کل'} فروشگاه‌های سنندج`);
-    setText(refs.customerAvg, `میانگین شهر: ${formatNumber(ranking.avgCustomer, '')} مشتری فعال`);
-    setText(refs.customerYour, `فروشگاه تو: ${formatNumber(ranking.yourCustomer, '')} مشتری فعال`);
-    setText(refs.customerPercentile, `در بین ${customerPercentile}% بالایی`);
+    setText(refs.customerRank, typeof customerRank === 'number' ? customerRank.toLocaleString('fa-IR') : customerRank);
+    setText(refs.customerSurpassed, customerSurpassed != null
+      ? `بازار در دست توست؛ از ${formatNumber(customerSurpassed)} فروشگاه جلوتر هستی`
+      : 'باشگاه وفاداری دست توست');
+    setText(refs.customerLead, customerLeadValue != null
+      ? `${customerLeadValue > 0 ? '+' : ''}${formatNumber(customerLeadValue)} نفر جلوتر از فروشگاه‌های معمولی`
+      : 'جلوتر از فروشگاه‌های معمولی');
+    setText(refs.customerYour, `مشتری‌های فعال تو: ${formatNumber(ranking.yourCustomer)}`);
+    setText(refs.customerPercentile, customerPercentile
+      ? `🤝 رهبر جامعه · جلوتر از ${customerPercentile.toLocaleString('fa-IR')}٪`
+      : '🤝 رهبر جامعه');
+    setText(refs.customerPercentileNote, customerPercentile
+      ? `در بین ${customerPercentile.toLocaleString('fa-IR')}٪ بالایی`
+      : 'جایگاه وفاداری بالا');
     if (refs.customerProgress) {
       refs.customerProgress.style.width = `${customerPercentile}%`;
     }
@@ -231,17 +263,20 @@
       messageName: root.querySelector('#performance-message-name'),
       rankingSection: root.querySelector('#city-ranking'),
       visitRank: root.querySelector('#visit-rank'),
-      visitTotal: root.querySelector('#visit-total'),
-      visitAvg: root.querySelector('#visit-avg'),
       visitYour: root.querySelector('#visit-your'),
       visitPercentile: root.querySelector('#visit-percentile-badge'),
+      visitPercentileNote: root.querySelector('#visit-percentile-note'),
+      visitSurpassed: root.querySelector('#visit-surpassed'),
+      visitMultiplier: root.querySelector('#visit-multiplier'),
       visitProgress: root.querySelector('#visit-progress'),
       customerRank: root.querySelector('#customer-rank'),
-      customerTotal: root.querySelector('#customer-total'),
-      customerAvg: root.querySelector('#customer-avg'),
       customerYour: root.querySelector('#customer-your'),
       customerPercentile: root.querySelector('#customer-percentile-badge'),
+      customerPercentileNote: root.querySelector('#customer-percentile-note'),
+      customerSurpassed: root.querySelector('#customer-surpassed'),
+      customerLead: root.querySelector('#customer-lead'),
       customerProgress: root.querySelector('#customer-progress'),
+      customerCta: root.querySelector('#customer-cta'),
       updated: root.querySelector('#city-ranking-updated')
     };
 
