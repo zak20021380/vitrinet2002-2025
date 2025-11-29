@@ -3891,6 +3891,8 @@ async function showChatModal() {
   }
 
   // مودال HTML
+  // هنگام نمایش مودال، ناوبری پایین موبایل را پنهان می‌کنیم
+  document.body.classList.add('hide-mobile-nav');
   document.body.insertAdjacentHTML('beforeend', `
     <div id="chatModal" class="fixed inset-0 z-50 flex items-center justify-center" style="backdrop-filter:blur(4px);background:#0003;animation:fadein .25s">
       <div class="bg-white rounded-2xl w-[98vw] max-w-md max-h-[93vh] flex flex-col shadow-xl border">
@@ -3941,6 +3943,7 @@ async function showChatModal() {
   // بستن مودال چت
   function closeChat() {
     document.getElementById('chatModal')?.remove();
+    document.body.classList.remove('hide-mobile-nav');
     currentCid = null;
   }
 
