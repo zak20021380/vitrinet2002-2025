@@ -1085,6 +1085,180 @@ body {
   .favorite-btn { padding: .45rem .8rem; font-size: .8rem; }
 }
 
+/* Favorite modal styling */
+.fav-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 140;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.25rem;
+  background: radial-gradient(circle at 20% 20%, rgba(124,131,253,0.28), transparent 40%),
+              radial-gradient(circle at 80% 10%, rgba(82,183,136,0.22), transparent 35%),
+              rgba(17, 24, 39, 0.45);
+  backdrop-filter: blur(10px);
+}
+
+.fav-modal-card {
+  position: relative;
+  width: min(480px, 100%);
+  border-radius: 22px;
+  padding: 1.5rem;
+  background: linear-gradient(140deg, rgba(255,255,255,0.96) 0%, rgba(244,246,255,0.96) 100%);
+  border: 1px solid rgba(124, 131, 253, 0.16);
+  box-shadow: 0 20px 60px rgba(35, 41, 70, 0.18), 0 8px 24px rgba(35, 41, 70, 0.12);
+  overflow: hidden;
+}
+
+.fav-modal-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 15% 15%, rgba(124,131,253,0.09), transparent 35%),
+              radial-gradient(circle at 85% 0%, rgba(82,183,136,0.08), transparent 30%);
+  pointer-events: none;
+}
+
+.fav-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: .5rem;
+}
+
+.fav-modal-title {
+  display: flex;
+  align-items: center;
+  gap: .85rem;
+}
+
+.fav-star-icon {
+  width: 3rem;
+  height: 3rem;
+  display: grid;
+  place-items: center;
+  border-radius: 16px;
+  background: linear-gradient(135deg, #7C83FD, #52b788);
+  color: #fff;
+  box-shadow: 0 12px 25px rgba(124, 131, 253, 0.25);
+}
+
+.fav-overline {
+  margin: 0;
+  font-size: .78rem;
+  letter-spacing: .04em;
+  color: #6b7280;
+  font-weight: 700;
+}
+
+.fav-headline {
+  margin: 2px 0 0;
+  font-size: 1.15rem;
+  font-weight: 900;
+  color: var(--text);
+  letter-spacing: -0.01em;
+}
+
+.fav-close-btn {
+  width: 40px;
+  height: 40px;
+  border: none;
+  border-radius: 12px;
+  background: rgba(124, 131, 253, 0.08);
+  color: #6b7280;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all .2s ease;
+}
+
+.fav-close-btn:hover {
+  background: rgba(124, 131, 253, 0.16);
+  color: var(--text);
+  transform: translateY(-1px);
+}
+
+.fav-modal-body {
+  display: flex;
+  flex-direction: column;
+  gap: .75rem;
+  margin-top: .75rem;
+}
+
+.fav-count-chip {
+  align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  gap: .5rem;
+  padding: .5rem .85rem;
+  border-radius: 999px;
+  background: rgba(124, 131, 253, 0.08);
+  border: 1px solid rgba(124, 131, 253, 0.15);
+  color: var(--text);
+  font-weight: 800;
+  font-size: .9rem;
+}
+
+.chip-dot {
+  width: .6rem;
+  height: .6rem;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #7C83FD, #52b788);
+  box-shadow: 0 0 0 6px rgba(124, 131, 253, 0.12);
+}
+
+.fav-description {
+  margin: 0;
+  line-height: 1.7;
+  color: #4b5563;
+  font-weight: 600;
+}
+
+.fav-cta-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: .6rem;
+  width: 100%;
+  padding: .9rem 1rem;
+  border: none;
+  border-radius: 14px;
+  background: linear-gradient(120deg, #7C83FD, #6aa5f5, #52b788);
+  color: #fff;
+  font-weight: 800;
+  font-size: .95rem;
+  letter-spacing: -.01em;
+  box-shadow: 0 14px 35px rgba(124, 131, 253, 0.28);
+  cursor: pointer;
+  transition: transform .2s ease, box-shadow .2s ease;
+}
+
+.fav-cta-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 16px 38px rgba(124, 131, 253, 0.32);
+}
+
+.fav-cta-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.16);
+}
+
+.fav-cta-text { white-space: nowrap; }
+
+@media (max-width: 520px) {
+  .fav-modal-card { padding: 1.2rem; border-radius: 18px; }
+  .fav-headline   { font-size: 1.05rem; }
+  .fav-cta-text   { white-space: normal; text-align: center; }
+}
+
 
 
 
@@ -1234,23 +1408,35 @@ body {
   </div>
 
   <!-- پاپ‌آپ مغازه محبوب -->
-  <div id="favShopModal" class="fixed inset-0 z-[140] hidden flex items-center justify-center bg-black/40">
-    <div class="bg-white/80 backdrop-blur-lg rounded-3xl p-6 shadow-2xl w-[90vw] max-w-sm flex flex-col gap-4 animate-fade-in-down border border-gray-200 text-center">
-      <div class="flex items-center justify-between mb-1">
-        <span class="text-lg font-bold text-[var(--primary)] flex items-center gap-1">
-          <i class="fas fa-star"></i>
-          مشتریان
-        </span>
-        <button id="closeFavShopModal" class="p-1 hover:bg-gray-100 rounded transition" aria-label="بستن">
-          <svg class="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+  <div id="favShopModal" class="fav-modal-backdrop hidden" role="dialog" aria-modal="true">
+    <div class="fav-modal-card animate-fade-in-down">
+      <div class="fav-modal-header">
+        <div class="fav-modal-title">
+          <span class="fav-star-icon"><i class="fas fa-star"></i></span>
+          <div>
+            <p class="fav-overline">اعتماد مشتریان</p>
+            <h3 class="fav-headline">این مغازه مورد علاقه مشتریان است</h3>
+          </div>
+        </div>
+        <button id="closeFavShopModal" class="fav-close-btn" aria-label="بستن">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
           </svg>
         </button>
       </div>
-      <div class="text-gray-800 text-base font-bold mt-3">
-        این مغازه توسط <span id="favShopCount" data-customer-count>150</span> مشتری دنبال می‌شود
+
+      <div class="fav-modal-body">
+        <div class="fav-count-chip">
+          <span class="chip-dot"></span>
+          <span>دنبال‌کنندگان</span>
+          <strong id="favShopCount" data-customer-count>150</strong>
+        </div>
+        <p class="fav-description">با افزودن این مغازه به محبوب‌ها، سریع‌تر به محصولات جدید و تخفیف‌های ویژه دسترسی خواهید داشت.</p>
+        <button id="toggleFavShopBtn" class="fav-cta-btn">
+          <span class="fav-cta-icon"><i class="fas fa-heart"></i></span>
+          <span class="fav-cta-text">ورود برای افزودن به محبوب‌ها</span>
+        </button>
       </div>
-      <button id="toggleFavShopBtn" class="mt-2 favorite-btn w-full justify-center"></button>
     </div>
   </div>
 
@@ -2068,6 +2254,13 @@ addressModal?.addEventListener('click', e => (e.target === addressModal) && addr
   const favShopCountEl   = document.getElementById('favShopCount');
   const toggleFavShopBtn = document.getElementById('toggleFavShopBtn');
 
+  const setFavBtnLabel = (text) => {
+    if (!toggleFavShopBtn) return;
+    const label = toggleFavShopBtn.querySelector('.fav-cta-text');
+    if (label) label.textContent = text;
+    else toggleFavShopBtn.textContent = text;
+  };
+
   async function refreshFavShopInfo() {
     if (!toggleFavShopBtn) return;
 
@@ -2086,7 +2279,7 @@ addressModal?.addEventListener('click', e => (e.target === addressModal) && addr
 
     if (!loggedIn) {
       toggleFavShopBtn.dataset.added = 'false';
-      toggleFavShopBtn.textContent = 'ورود برای افزودن به محبوب‌ها';
+      setFavBtnLabel('ورود برای افزودن به محبوب‌ها');
       return;
     }
 
@@ -2100,7 +2293,7 @@ addressModal?.addEventListener('click', e => (e.target === addressModal) && addr
     } catch {}
 
     toggleFavShopBtn.dataset.added = added ? 'true' : 'false';
-    toggleFavShopBtn.textContent = added ? 'افزوده شد' : 'افزودن به محبوب‌ها';
+    setFavBtnLabel(added ? 'افزوده شد' : 'افزودن به محبوب‌ها');
   }
 
   async function ensureFavoriteLogin({ silent = false } = {}) {
@@ -2136,7 +2329,7 @@ addressModal?.addEventListener('click', e => (e.target === addressModal) && addr
 
     const added = toggleFavShopBtn.dataset.added === 'true';
     toggleFavShopBtn.disabled = true;
-    toggleFavShopBtn.textContent = 'در حال بروزرسانی…';
+    setFavBtnLabel('در حال بروزرسانی…');
     try {
       const res = await fetch(`${API_BASE}/api/favorite-shops/${currentSellerId}`, {
         method: added ? 'DELETE' : 'POST',
@@ -2144,7 +2337,7 @@ addressModal?.addEventListener('click', e => (e.target === addressModal) && addr
       });
       if (res.status === 401) {
         toggleFavShopBtn.dataset.auth = 'false';
-        toggleFavShopBtn.textContent = 'ورود برای افزودن به محبوب‌ها';
+        setFavBtnLabel('ورود برای افزودن به محبوب‌ها');
         await ensureFavoriteLogin();
         return;
       }
@@ -2152,7 +2345,7 @@ addressModal?.addEventListener('click', e => (e.target === addressModal) && addr
       await refreshFavShopInfo();
     } catch (err) {
       console.error(err);
-      toggleFavShopBtn.textContent = 'خطا! دوباره تلاش کنید';
+      setFavBtnLabel('خطا! دوباره تلاش کنید');
       setTimeout(() => refreshFavShopInfo(), 1500);
       return;
     } finally {
