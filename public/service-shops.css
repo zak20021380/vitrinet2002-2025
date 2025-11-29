@@ -4,6 +4,49 @@
         :root {
             --footer-image: none;
         }
+        body.service-body {
+            background: linear-gradient(115deg, #e0fdfa 0%, #f8fafc 60%, #d4fbe8 100%);
+            min-height: 100vh;
+            color: #0f172a;
+            overflow-x: hidden;
+        }
+        .page-section {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .glass-panel {
+            position: relative;
+            background: rgba(255, 255, 255, 0.82);
+            border-radius: 1.6rem;
+            border: 1px solid rgba(255, 255, 255, 0.6);
+            box-shadow: 0 10px 40px #10b98124, 0 3px 12px #0ea5e91a;
+            backdrop-filter: blur(16px);
+            overflow: hidden;
+        }
+        .glass-panel::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(circle at 20% 20%, rgba(16, 185, 129, 0.08), transparent 35%),
+                        radial-gradient(circle at 80% 10%, rgba(14, 165, 233, 0.08), transparent 30%),
+                        radial-gradient(circle at 50% 90%, rgba(59, 130, 246, 0.07), transparent 32%);
+            pointer-events: none;
+            z-index: 0;
+        }
+        .glass-panel > * {
+            position: relative;
+            z-index: 1;
+        }
+        #services h3,
+        .portfolio-title,
+        #booking-wizard h3,
+        #loyalty-card h2,
+        section.page-section h3 {
+            background: linear-gradient(90deg,#0f172a 0%,#0ea5e9 45%,#10b981 100%);
+            -webkit-background-clip: text;
+            color: transparent;
+            display: inline-block;
+        }
         .glassmorphism {
             background: rgba(255, 255, 255, 0.7);
             backdrop-filter: blur(20px);
@@ -13,12 +56,31 @@
         }
         .service-card {
             scroll-snap-align: start;
+            background: linear-gradient(145deg, rgba(255,255,255,0.95), rgba(236,253,245,0.85));
+            border: 1px solid rgba(16, 185, 129, 0.14);
+            box-shadow: 0 12px 35px rgba(16, 185, 129, 0.12);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        .service-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 16px 40px rgba(14, 165, 233, 0.18);
         }
         .review-card {
             scroll-snap-align: start;
         }
+        .portfolio-section {
+            position: relative;
+        }
         .portfolio-card {
             scroll-snap-align: start;
+            background: rgba(255, 255, 255, 0.92);
+            border: 1px solid rgba(14, 165, 233, 0.12);
+            box-shadow: 0 14px 40px rgba(14, 165, 233, 0.12);
+            backdrop-filter: blur(12px);
+        }
+        .portfolio-card .portfolio-btn {
+            background: linear-gradient(90deg,#10b981 10%,#0ea5e9 100%);
+            box-shadow: 0 10px 22px rgba(14, 165, 233, 0.22);
         }
         .scroll-container {
             scroll-snap-type: x mandatory;
