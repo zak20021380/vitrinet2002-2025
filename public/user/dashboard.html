@@ -92,6 +92,59 @@
       .quick-action-more .quick-action-icon {
         stroke: #9ca3af;
       }
+      /* Profile Edit Modal */
+      .profile-modal-overlay {
+        position: fixed;
+        inset: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 1.25rem;
+        background: rgba(15, 23, 42, 0.55);
+        backdrop-filter: blur(6px);
+        z-index: 1600;
+        opacity: 0;
+        transition: opacity 0.28s ease;
+      }
+      .profile-modal-overlay.active {
+        opacity: 1;
+      }
+      .profile-modal-card {
+        width: 100%;
+        max-width: 520px;
+        background: linear-gradient(145deg, #ffffff, #f8fafc);
+        border-radius: 1.5rem;
+        box-shadow: 0 24px 65px rgba(15, 23, 42, 0.18);
+        position: relative;
+        padding: 1.75rem;
+        transform: translateY(24px) scale(0.98);
+        opacity: 0;
+        transition: transform 0.3s ease, opacity 0.3s ease;
+      }
+      .profile-modal-overlay.active .profile-modal-card {
+        transform: translateY(0) scale(1);
+        opacity: 1;
+      }
+      .profile-modal-close {
+        position: absolute;
+        top: 1rem;
+        left: 1rem;
+        width: 38px;
+        height: 38px;
+        border-radius: 12px;
+        display: grid;
+        place-items: center;
+        border: none;
+        background: rgba(239, 68, 68, 0.1);
+        color: #ef4444;
+        font-weight: 800;
+        cursor: pointer;
+        transition: all 0.2s ease;
+      }
+      .profile-modal-close:hover {
+        background: rgba(239, 68, 68, 0.16);
+        transform: translateY(-2px);
+      }
       /* Profile Section */
       .profile-section {
         display: flex;
@@ -1589,6 +1642,42 @@
         </section>
       </div>
     </main>
+
+    <!-- Edit Profile Modal -->
+    <div id="editProfileModal" class="profile-modal-overlay hidden" aria-hidden="true">
+      <div class="profile-modal-card" role="dialog" aria-modal="true" aria-labelledby="editProfileTitle">
+        <button type="button" class="profile-modal-close" data-dismiss="edit-modal" aria-label="بستن">
+          ×
+        </button>
+        <div class="flex items-center gap-3 mb-2">
+          <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-emerald-500 to-cyan-500 flex items-center justify-center text-white font-black text-xl shadow-lg">
+            <span id="editInitialsPreview">VN</span>
+          </div>
+          <div>
+            <h3 id="editProfileTitle" class="text-xl font-black text-gray-800">ویرایش اطلاعات کاربری</h3>
+            <p class="text-sm text-gray-500">فعلاً فقط نام و نام خانوادگی قابل ویرایش است.</p>
+          </div>
+        </div>
+
+        <form id="editProfileForm" class="mt-4 space-y-4">
+          <div>
+            <label for="editFirstName" class="block text-sm font-semibold text-gray-700 mb-1">نام</label>
+            <input id="editFirstName" name="firstName" type="text" class="w-full rounded-xl border border-gray-200 bg-white px-3 py-3 text-gray-800 focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100 transition" placeholder="مثلاً حمیده" required />
+          </div>
+          <div>
+            <label for="editLastName" class="block text-sm font-semibold text-gray-700 mb-1">نام خانوادگی</label>
+            <input id="editLastName" name="lastName" type="text" class="w-full rounded-xl border border-gray-200 bg-white px-3 py-3 text-gray-800 focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100 transition" placeholder="مثلاً آذرمیخت" required />
+          </div>
+
+          <div id="editProfileStatus" class="text-sm font-semibold text-emerald-600 hidden"></div>
+
+          <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 pt-2">
+            <button type="submit" class="flex-1 brand-btn py-3 rounded-2xl font-black text-base shadow-md">ذخیره تغییرات</button>
+            <button type="button" class="flex-1 sm:flex-none px-4 py-3 rounded-2xl bg-gray-100 text-gray-700 font-bold border border-gray-200 hover:bg-gray-200 transition" data-dismiss="edit-modal">انصراف</button>
+          </div>
+        </form>
+      </div>
+    </div>
     <footer class="mt-14 bg-white border-t text-center text-xs sm:text-sm text-gray-400 py-5 rounded-t-3xl">
       © 2025 <span class="text-[#10b981] font-bold">Vitrinet</span> - همه حقوق محفوظ است.
     </footer>
@@ -1631,17 +1720,192 @@
             }
           });
         });
+
+        initEditProfileModal();
       });
 
       // Bookings state
-      let currentBookingFilter = 'all';
-      let allBookings = [];
+        let currentBookingFilter = 'all';
+        let allBookings = [];
 
-      let pollHandle = null;
-      let bookingsData = [];
-      let bookingsLoaded = false;
-      // داده‌ی دموی پروفایل
-  async function loadProfileSection() {
+        let pollHandle = null;
+        let bookingsData = [];
+        let bookingsLoaded = false;
+        const profileState = {
+          user: {
+            firstName: '',
+            lastName: '',
+            city: '',
+            phone: ''
+          }
+        };
+
+        const formatInitials = (firstName = '', lastName = '') => {
+          const parts = [firstName.trim().charAt(0), lastName.trim().charAt(0)].filter(Boolean);
+          return parts.length ? parts.join(' ') : 'VN';
+        };
+
+        function populateEditProfileForm() {
+          const firstInput = document.getElementById('editFirstName');
+          const lastInput = document.getElementById('editLastName');
+          const initialsPreview = document.getElementById('editInitialsPreview');
+
+          if (firstInput) firstInput.value = profileState.user.firstName || '';
+          if (lastInput) lastInput.value = profileState.user.lastName || '';
+          if (initialsPreview) {
+            initialsPreview.textContent = formatInitials(profileState.user.firstName, profileState.user.lastName);
+          }
+        }
+
+        function applyProfileStateToUI() {
+          const { firstName, lastName, city } = profileState.user;
+          const fullName = `${firstName} ${lastName}`.trim() || 'کاربر ویترینت';
+          const initials = formatInitials(firstName, lastName);
+
+          const hello = document.querySelector('.profile-hello');
+          if (hello) hello.textContent = `سلام ${firstName || 'کاربر'}`;
+
+          const nameEls = document.querySelectorAll('.profile-fullname');
+          nameEls.forEach(el => (el.textContent = fullName));
+
+          const badgeCity = document.querySelector('.profile-badge.profile-badge--outline');
+          if (badgeCity && city) badgeCity.textContent = city;
+
+          const avatar = document.querySelector('.profile-avatar-large');
+          if (avatar) avatar.textContent = initials;
+
+          const sidebarNames = document.querySelectorAll('.sidebar-user-name');
+          sidebarNames.forEach(el => (el.textContent = fullName));
+
+          const initialsPreview = document.getElementById('editInitialsPreview');
+          if (initialsPreview) initialsPreview.textContent = initials;
+        }
+
+        function openEditProfileModal() {
+          const modal = document.getElementById('editProfileModal');
+          const status = document.getElementById('editProfileStatus');
+          if (!modal) return;
+          populateEditProfileForm();
+          if (status) {
+            status.textContent = '';
+            status.classList.add('hidden');
+            status.classList.remove('text-red-500');
+            status.classList.add('text-emerald-600');
+          }
+          modal.classList.remove('hidden');
+          document.body.classList.add('overflow-hidden');
+          requestAnimationFrame(() => {
+            modal.classList.add('active');
+            modal.setAttribute('aria-hidden', 'false');
+          });
+        }
+
+        function closeEditProfileModal() {
+          const modal = document.getElementById('editProfileModal');
+          const status = document.getElementById('editProfileStatus');
+          if (!modal) return;
+          modal.classList.remove('active');
+          modal.setAttribute('aria-hidden', 'true');
+          document.body.classList.remove('overflow-hidden');
+          if (status) status.classList.add('hidden');
+          setTimeout(() => modal.classList.add('hidden'), 220);
+        }
+
+        async function handleEditProfileSubmit(event) {
+          event.preventDefault();
+          const form = event.currentTarget;
+          const firstInput = document.getElementById('editFirstName');
+          const lastInput = document.getElementById('editLastName');
+          const status = document.getElementById('editProfileStatus');
+          const submitBtn = form.querySelector('button[type="submit"]');
+
+          const firstName = firstInput?.value.trim() || '';
+          const lastName = lastInput?.value.trim() || '';
+
+          if (!firstName || !lastName) {
+            if (status) {
+              status.textContent = 'نام و نام خانوادگی را کامل وارد کنید.';
+              status.classList.remove('hidden', 'text-emerald-600');
+              status.classList.add('text-red-500');
+            }
+            return;
+          }
+
+          if (status) {
+            status.textContent = 'در حال ذخیره...';
+            status.classList.remove('hidden', 'text-red-500');
+            status.classList.add('text-emerald-600');
+          }
+
+          if (submitBtn) {
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'در حال ذخیره...';
+          }
+
+          try {
+            const res = await fetch('/api/user/profile', {
+              method: 'PUT',
+              credentials: 'include',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                firstname: firstName,
+                lastname: lastName,
+                firstName,
+                lastName
+              })
+            });
+
+            if (!res.ok) {
+              throw new Error('ثبت اطلاعات انجام نشد. دوباره تلاش کنید.');
+            }
+
+            profileState.user.firstName = firstName;
+            profileState.user.lastName = lastName;
+            applyProfileStateToUI();
+
+            if (status) {
+              status.textContent = 'اطلاعات با موفقیت ذخیره شد.';
+              status.classList.remove('text-red-500');
+              status.classList.add('text-emerald-600');
+            }
+
+            setTimeout(() => closeEditProfileModal(), 600);
+          } catch (error) {
+            console.error('edit profile error:', error);
+            if (status) {
+              status.textContent = error?.message || 'خطا در ذخیره اطلاعات.';
+              status.classList.remove('text-emerald-600');
+              status.classList.remove('hidden');
+              status.classList.add('text-red-500');
+            }
+          } finally {
+            if (submitBtn) {
+              submitBtn.disabled = false;
+              submitBtn.textContent = 'ذخیره تغییرات';
+            }
+          }
+        }
+
+        function initEditProfileModal() {
+          const modal = document.getElementById('editProfileModal');
+          const form = document.getElementById('editProfileForm');
+          if (!modal || !form) return;
+
+          form.addEventListener('submit', handleEditProfileSubmit);
+
+          document.querySelectorAll('[data-dismiss="edit-modal"]').forEach(btn => {
+            btn.addEventListener('click', closeEditProfileModal);
+          });
+
+          modal.addEventListener('click', (event) => {
+            if (event.target === modal) {
+              closeEditProfileModal();
+            }
+          });
+        }
+
+        // داده‌ی دموی پروفایل
+    async function loadProfileSection() {
       const formatDate = (value) => {
         if (!value) return '---';
         const date = new Date(value);
@@ -1675,7 +1939,7 @@
       const firstName = (user.firstname || user.firstName || 'کاربر').toString().trim() || 'کاربر';
       const lastName = (user.lastname || user.lastName || '').toString().trim();
       const fullName = `${firstName} ${lastName}`.trim() || 'کاربر ویترینت';
-      const initials = (firstName.charAt(0) + (lastName.charAt(0) || '')).trim().toUpperCase() || 'VN';
+      const initials = formatInitials(firstName, lastName);
       const city = (user.city || user.cityName || 'سنندج').toString().trim() || 'سنندج';
       const safeCity = city && city !== '---' ? city : 'سنندج';
       const memberSince = formatDate(user.createdAt || user.created_at || user.signupDate);
@@ -1691,6 +1955,13 @@
       const membershipLabel = user.role === 'seller'
         ? 'فروشنده تاییدشده'
         : 'کاربر تاییدشده';
+
+      profileState.user = {
+        firstName,
+        lastName,
+        city: safeCity,
+        phone
+      };
 
       html = `
         <section class="profile-section fadein">
@@ -1814,9 +2085,10 @@
         </div>`;
     }
 
-    document.getElementById('mainContent').innerHTML = html;
-    initProfileSectionInteractions();
-  }
+      document.getElementById('mainContent').innerHTML = html;
+      applyProfileStateToUI();
+      initProfileSectionInteractions();
+    }
 
   function initProfileSectionInteractions() {
     document.querySelectorAll('[data-target-section]').forEach(btn => {
@@ -1828,17 +2100,13 @@
       });
     });
 
-    const editBtn = document.querySelector('[data-action="edit-profile"]');
-    if (editBtn) {
-      editBtn.addEventListener('click', () => {
-        showSection('profile');
-        const container = document.getElementById('mainContent');
-        if (container) {
-          container.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        }
-      });
+      const editBtn = document.querySelector('[data-action="edit-profile"]');
+      if (editBtn) {
+        editBtn.addEventListener('click', () => {
+          openEditProfileModal();
+        });
+      }
     }
-  }
 
 
 
@@ -3183,20 +3451,28 @@
 
       const first  = user.firstname || user.firstName || 'کاربر';
       const last   = user.lastname  || user.lastName  || 'ویترینت';
-      const phone  = user.phone     || user.mobile    || '';
-      const masked = phone
-        ? phone.toString().slice(0, 4) + '***' + phone.toString().slice(-3)
-        : '---';
+        const phone  = user.phone     || user.mobile    || '';
+        const masked = phone
+          ? phone.toString().slice(0, 4) + '***' + phone.toString().slice(-3)
+          : '---';
 
-      document.querySelectorAll('.sidebar-user-name')
-              .forEach(el => (el.textContent = `${first} ${last}`));
+        document.querySelectorAll('.sidebar-user-name')
+                .forEach(el => (el.textContent = `${first} ${last}`));
 
-      document.querySelectorAll('.sidebar-user-mobile')
-              .forEach(el => (el.textContent = masked));
+        document.querySelectorAll('.sidebar-user-mobile')
+                .forEach(el => (el.textContent = masked));
 
-      window.currentUserPhone = phone;
-      refreshBookingsBadge();
-    } catch (_) {
+        profileState.user = {
+          ...profileState.user,
+          firstName: first,
+          lastName: last,
+          phone
+        };
+        applyProfileStateToUI();
+
+        window.currentUserPhone = phone;
+        refreshBookingsBadge();
+      } catch (_) {
       /* اگر خطا بود، سایدبار را بدون تغییر رها کن */
     }
   }
