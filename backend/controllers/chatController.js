@@ -1091,29 +1091,29 @@ exports.broadcastMessage = async (req, res) => {
       return res.status(400).json({ error: 'پارامترها ناقص یا نامعتبرند.' });
     }
 
-    // پیدا کردن آیدی ادمین
+    // 1. Find Admin ID
     const adminDoc = await Admin.findOne().select('_id');
     if (!adminDoc) {
       return res.status(500).json({ error: 'ادمین وجود ندارد.' });
     }
     const adminId = adminDoc._id;
 
-    // لیست دریافت‌کننده‌ها
+    // 2. Get Recipients (using lean for speed)
     const recipients = target === 'sellers'
-      ? await Seller.find({}, '_id')
-      : await User.find({}, '_id');
+      ? await Seller.find({}, '_id').lean()
+      : await User.find({}, '_id').lean();
 
     let count = 0;
+
     for (let r of recipients) {
-      // ترتیب شرکت‌کننده‌ها
+      // 3. Prepare Data
       const sortedParts = sortIdArray([r._id, adminId]);
-      const participants = sortedParts;
-      const participantsModel = participants.map(id =>
+      
+      const participantsModel = sortedParts.map(id =>
         id.toString() === r._id.toString() ?
           (target === 'sellers' ? 'Seller' : 'User') : 'Admin'
       );
 
-      // نوع چت را بر اساس target تنظیم کنید
       const chatType = target === 'sellers' ? 'seller-admin' : 'admin-user';
 
       const message = {
@@ -1122,36 +1122,49 @@ exports.broadcastMessage = async (req, res) => {
         date: new Date(),
         read: false,
         readByAdmin: true,
-        readBySeller: false // برای customers هم false ست کنید تا سازگار باشد
+        readBySeller: false
       };
 
-      // استفاده از upsert برای جلوگیری از ایجاد رکورد تکراری روی ایندکس یکتا
-      await Chat.findOneAndUpdate(
-        {
-          participants: { $all: participants, $size: participants.length },
-          productId: null,
-          type: chatType
-        },
-        {
-          $setOnInsert: {
-            participants,
+      // 4. THE FIX: Separate Find and Create
+      // This avoids the "matched twice" error completely
+      let chat = await Chat.findOne({
+        participants: sortedParts,
+        productId: null,
+        type: chatType
+      });
+
+      if (chat) {
+        // If chat exists, just push the message
+        chat.messages.push(message);
+        chat.lastUpdated = Date.now();
+        await chat.save();
+      } else {
+        // If chat does not exist, create it safely
+        try {
+          await Chat.create({
+            participants: sortedParts,
             participantsModel,
             type: chatType,
             productId: null,
-            sellerId: target === 'sellers' ? r._id : null
-          },
-          $set: {
+            sellerId: target === 'sellers' ? r._id : null,
+            messages: [message],
             lastUpdated: Date.now()
-          },
-          $push: { messages: message }
-        },
-        {
-          upsert: true,
-          new: true,
-          setDefaultsOnInsert: true
+          });
+        } catch (createErr) {
+          // If a race condition caused a duplicate, update the existing one found by the database
+          if (createErr.code === 11000) {
+             await Chat.updateOne(
+               { participants: sortedParts, productId: null, type: chatType },
+               { 
+                 $push: { messages: message }, 
+                 $set: { lastUpdated: Date.now() } 
+               }
+             );
+          } else {
+            console.error(`Failed to create chat for ${r._id}`);
+          }
         }
-      );
-
+      }
       count++;
     }
 

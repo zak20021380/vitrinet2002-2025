@@ -31,16 +31,16 @@ const chatSchema = new Schema({
   sellerId:   { type: Schema.Types.ObjectId, ref: 'Seller' },
 
   // در گفت‌وگوی ادمین ↔ فروشنده ممکن است customerId خالی باشد
-participants: [{
-  type: mongoose.Schema.Types.ObjectId,
-  required: true,
-  refPath: 'participantsModel'
-}],
-participantsModel: [{
-  type: String,
-  required: true,
-  enum: ['User', 'Seller', 'Admin']
-}],
+  participants: [{
+    type: mongoose.Schema.Types.ObjectId,
+    required: true,
+    refPath: 'participantsModel'
+  }],
+  participantsModel: [{
+    type: String,
+    required: true,
+    enum: ['User', 'Seller', 'Admin']
+  }],
 
   productId:  { type: Schema.Types.ObjectId, ref: 'Product' },
   type: {
@@ -48,7 +48,6 @@ participantsModel: [{
     enum: ['product', 'user-admin', 'admin-user', 'user-seller', 'seller-admin', 'general'], // allow general chats
     required: true
   },
-
 
   messages:   [messageSchema],
 
@@ -69,11 +68,7 @@ chatSchema.pre('save', function(next) {
   next();
 });
 
-// اطمینان از یکتایی ترکیب شرکت‌کنندگان، نوع چت و محصول
-chatSchema.index(
-  { participants: 1, productId: 1, type: 1 },
-  { unique: true }
-);
+// REMOVED: chatSchema.index({ participants: 1 ... }) because it causes duplicate key errors
 
 /* جلوگیری از OverwriteModelError هنگام هات‌ریلود */
 module.exports = mongoose.models.Chat || mongoose.model('Chat', chatSchema);
