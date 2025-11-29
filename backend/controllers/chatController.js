@@ -1114,43 +1114,48 @@ exports.broadcastMessage = async (req, res) => {
       );
 
       // نوع چت را بر اساس target تنظیم کنید
-        const chatType = target === 'sellers' ? 'seller-admin' : 'admin-user';
+      const chatType = target === 'sellers' ? 'seller-admin' : 'admin-user';
 
-      // تلاش برای پیدا کردن چت موجود با فیلتر نوع و productId
-      // از $all + $size استفاده می‌کنیم تا ترتیب آرایه مهم نباشد
-      let chat = await Chat.findOne({
-        participants: { $all: participants, $size: participants.length },
-        productId: null,
-        type: chatType
-      });
-
-      if (!chat) {
-        // اگر نبود، بساز
-        chat = new Chat({
-          participants,
-          participantsModel,
-          type: chatType,
-          productId: null,
-          sellerId: target === 'sellers' ? r._id : null,
-          messages: []
-        });
-      } else {
-        // اگر موجود بود ولی type نداشت، حتما ستش کن
-        chat.type = chatType;
-      }
-
-      // افزودن پیام
-      chat.messages.push({
+      const message = {
         from: 'admin',
         text,
         date: new Date(),
         read: false,
         readByAdmin: true,
-        readBySeller: target === 'sellers' ? false : false  // برای customers هم false ست کنید تا سازگار باشد
-      });
-      chat.lastUpdated = Date.now();
+        readBySeller: false // برای customers هم false ست کنید تا سازگار باشد
+      };
 
-      await chat.save();
+      // استفاده از upsert برای جلوگیری از ایجاد رکورد تکراری روی ایندکس یکتا
+      await Chat.findOneAndUpdate(
+        {
+          participants: { $all: participants, $size: participants.length },
+          productId: null,
+          type: chatType
+        },
+        {
+          $setOnInsert: {
+            participants,
+            participantsModel,
+            type: chatType,
+            productId: null,
+            sellerId: target === 'sellers' ? r._id : null,
+            messages: []
+          },
+          $set: {
+            lastUpdated: Date.now(),
+            type: chatType,
+            participants,
+            participantsModel
+          },
+          $push: { messages: message }
+        },
+        {
+          upsert: true,
+          new: true,
+          setDefaultsOnInsert: true
+        }
+      );
+
       count++;
     }
 
