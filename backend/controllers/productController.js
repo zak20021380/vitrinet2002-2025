@@ -160,7 +160,7 @@ function buildProductResponse(req, doc, options = {}) {
     image: makeFullUrl(req, mainImg),
     shopName: p.sellerId?.storename || '',
     likesCount: Number.isFinite(Number(p.likesCount)) ? Number(p.likesCount) : 0,
-    ...(liked !== null ? { liked } : {})
+    ...(liked !== null ? { liked } : {}),
     seller: p.sellerId || {},
     sellerCategory: p.sellerId?.category || '',
     sellerLocation: p.sellerId?.address || p.sellerId?.city || '—',
