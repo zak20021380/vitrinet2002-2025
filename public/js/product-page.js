@@ -143,7 +143,13 @@
     featuresPanel: document.getElementById('featuresPanel'),
     featureList: document.getElementById('featureList'),
     contactList: document.getElementById('contactList'),
-    jsonLd: document.getElementById('productJsonLd')
+    jsonLd: document.getElementById('productJsonLd'),
+    likeCard: document.getElementById('likeCard'),
+    likeButton: document.getElementById('likeButton'),
+    likeCount: document.getElementById('likeCount'),
+    likeButtonLabel: document.getElementById('likeButtonLabel'),
+    likeStatus: document.getElementById('likeStatus'),
+    likeMeterFill: document.getElementById('likeMeterFill')
   };
 
   const state = {
@@ -168,6 +174,13 @@
     statusTimeout: null
   };
 
+  const likeState = {
+    deviceId: getOrCreateDeviceId(),
+    likesCount: 0,
+    liked: false,
+    loading: false
+  };
+
   const persianNumberFormatter = new Intl.NumberFormat('fa-IR');
 
   const sliderTransition = 'transform 0.45s cubic-bezier(0.22, 0.61, 0.36, 1)';
@@ -186,6 +199,29 @@
     active: null,
     lastFocus: null
   };
+
+  function getOrCreateDeviceId() {
+    const storageKey = 'vitrinet:device-id';
+    try {
+      const cached = localStorage.getItem(storageKey);
+      if (cached) return cached;
+    } catch (_err) {
+      // دسترسی به localStorage ممکن نیست
+    }
+
+    const randomPart = (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function')
+      ? crypto.randomUUID()
+      : `${Date.now()}-${Math.floor(Math.random() * 1e6)}`;
+    const generated = `client-${randomPart}`;
+
+    try {
+      localStorage.setItem(storageKey, generated);
+    } catch (_err) {
+      // اگر ذخیره نشد، مقدار تولید شده را برمی‌گردانیم
+    }
+
+    return generated;
+  }
 
   function notifyProductAnalytics(detail) {
     try {
@@ -251,6 +287,10 @@
     dom.sellerLink.addEventListener('click', handleSellerLinkClick);
   }
 
+  if (dom.likeButton) {
+    dom.likeButton.addEventListener('click', handleLikeToggle);
+  }
+
   const canonical = document.querySelector('link[rel="canonical"]');
   if (canonical) {
     canonical.setAttribute('href', window.location.href.split('#')[0]);
@@ -267,7 +307,12 @@
 
   async function fetchProduct(id) {
     try {
-      const response = await fetch(`/api/products/${encodeURIComponent(id)}`);
+      const response = await fetch(`/api/products/${encodeURIComponent(id)}`, {
+        headers: {
+          'x-client-id': likeState.deviceId
+        },
+        credentials: 'include'
+      });
       if (!response.ok) {
         throw new Error(`Request failed with status ${response.status}`);
       }
@@ -523,6 +568,93 @@
     }
   }
 
+  function updateLikeUI() {
+    if (!dom.likeButton || !dom.likeCount) return;
+
+    dom.likeButton.setAttribute('aria-pressed', likeState.liked ? 'true' : 'false');
+    dom.likeButton.classList.toggle('is-liked', likeState.liked);
+    dom.likeButton.classList.toggle('is-busy', likeState.loading);
+
+    if (dom.likeButtonLabel) {
+      dom.likeButtonLabel.textContent = likeState.liked ? 'این محصول را پسندیده‌اید' : 'پسندیدن محصول';
+    }
+
+    dom.likeCount.textContent = persianNumberFormatter.format(Math.max(0, likeState.likesCount));
+
+    if (dom.likeMeterFill) {
+      const progress = Math.min(100, 12 + Math.log(likeState.likesCount + 1) * 28);
+      dom.likeMeterFill.style.width = `${progress}%`;
+    }
+
+    if (dom.likeStatus) {
+      dom.likeStatus.textContent = likeState.liked
+        ? 'بازخورد شما ثبت شد'
+        : 'اولین نفری باشید که این محصول را می‌پسندد';
+      dom.likeStatus.classList.toggle('is-liked', likeState.liked);
+    }
+  }
+
+  async function loadLikeStatus(productId) {
+    if (!productId) return;
+    try {
+      const response = await fetch(`/api/products/${encodeURIComponent(productId)}/like-status`, {
+        headers: {
+          'x-client-id': likeState.deviceId
+        },
+        credentials: 'include'
+      });
+
+      if (!response.ok) return;
+      const payload = await response.json();
+      likeState.likesCount = Number(payload.likesCount || likeState.likesCount || 0);
+      likeState.liked = Boolean(payload.liked);
+      updateLikeUI();
+    } catch (_err) {
+      // سکوت در صورت خطا، بخش لایک نباید تجربه کلی را خراب کند
+    }
+  }
+
+  async function handleLikeToggle(event) {
+    if (event) event.preventDefault();
+    if (!state.productId || likeState.loading) return;
+
+    likeState.loading = true;
+    updateLikeUI();
+    try {
+      const response = await fetch(`/api/products/${encodeURIComponent(state.productId)}/like`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-client-id': likeState.deviceId
+        },
+        credentials: 'include'
+      });
+
+      if (!response.ok) {
+        throw new Error(`Like toggle failed: ${response.status}`);
+      }
+
+      const payload = await response.json();
+      likeState.likesCount = Number(payload.likesCount || likeState.likesCount || 0);
+      likeState.liked = Boolean(payload.liked);
+      animateLikeButton();
+      updateLikeUI();
+    } catch (_err) {
+      announce('امکان ثبت پسند در حال حاضر وجود ندارد. لطفاً دوباره تلاش کنید.', true);
+    } finally {
+      likeState.loading = false;
+      updateLikeUI();
+    }
+  }
+
+  function animateLikeButton() {
+    if (!dom.likeButton) return;
+    dom.likeButton.classList.remove('pop');
+    void dom.likeButton.offsetWidth;
+    dom.likeButton.classList.add('pop');
+    window.setTimeout(() => dom.likeButton && dom.likeButton.classList.remove('pop'), 650);
+  }
+
   function renderProduct(product, id) {
     if (!product || typeof product !== 'object') {
       showError('اطلاعات معتبری برای این محصول ثبت نشده است.');
@@ -556,6 +688,10 @@
     state.productId = product._id || product.id || id || '';
     state.category = product.category || '';
     state.shopName = sellerName || '';
+
+    likeState.likesCount = Number(product.likesCount || 0);
+    likeState.liked = Boolean(product.liked);
+    updateLikeUI();
 
     const priceValue = normaliseNumber(product.price);
     if (priceValue !== null) {
@@ -591,6 +727,9 @@
     renderContactPanel(seller);
     updateMetaTags(product, seller, summary);
     updateStructuredData(product, seller, id);
+    if (state.productId) {
+      loadLikeStatus(state.productId);
+    }
 
     const analyticsState = {
       item_id: state.productId,

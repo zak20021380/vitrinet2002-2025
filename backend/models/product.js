@@ -64,7 +64,15 @@ const productSchema = new mongoose.Schema({
   discountQuantitySold: {
     type: Number,
     default: 0
-  }
+  },
+  likesCount: {
+    type: Number,
+    default: 0
+  },
+  likedBy: [{
+    type: String,
+    index: true
+  }]
 }, { timestamps: true });
 
 module.exports = mongoose.models.Product || mongoose.model('Product', productSchema);

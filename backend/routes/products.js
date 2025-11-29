@@ -84,6 +84,8 @@ router.delete('/:id/discount', /* authMiddleware */ productController.removeDisc
 // دریافت محصول تکی با آیدی
 // GET /api/products/:id
 // -----------------------------
+router.get('/:id/like-status', productController.getLikeStatus);
+router.post('/:id/like', productController.toggleLike);
 router.get('/:id', async (req, res) => {
   try {
     const product = await Product.findById(req.params.id)
