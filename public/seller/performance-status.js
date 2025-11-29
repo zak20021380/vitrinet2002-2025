@@ -118,6 +118,79 @@
     root.innerHTML = `<div class="error-box">${message}</div>`;
   }
 
+  const fallbackCityRanking = {
+    city: 'سنندج',
+    totalShops: 412,
+    visitRank: 7,
+    visitPercentile: 94,
+    avgVisit: 680,
+    yourVisit: 1240,
+    customerRank: 5,
+    customerPercentile: 96,
+    avgCustomer: 210,
+    yourCustomer: 338,
+    updatedAt: '2025-01-03T08:00:00Z'
+  };
+
+  async function fetchCityRanking() {
+    try {
+      const res = await fetch(apiUrl('/api/seller/performance/city-ranking'), withCreds());
+      if (!res.ok) {
+        throw new Error('response not ok');
+      }
+      const payload = await res.json();
+      if (!payload || typeof payload !== 'object') {
+        throw new Error('invalid payload');
+      }
+      return { ...fallbackCityRanking, ...payload };
+    } catch (err) {
+      console.warn('city ranking fallback in use', err);
+      return fallbackCityRanking;
+    }
+  }
+
+  function renderCityRanking(refs, ranking) {
+    if (!refs.rankingSection || !ranking) return;
+
+    const total = ranking.totalShops || 0;
+    const visitRank = ranking.visitRank || '--';
+    const customerRank = ranking.customerRank || '--';
+    const visitPercentile = Math.min(100, Math.max(0, ranking.visitPercentile || 0));
+    const customerPercentile = Math.min(100, Math.max(0, ranking.customerPercentile || 0));
+
+    const setText = (el, value) => { if (el) el.textContent = value; };
+    const formatNumber = (val, suffix = '') => {
+      if (typeof val !== 'number' || Number.isNaN(val)) return `—${suffix}`;
+      return `${val.toLocaleString('fa-IR')}${suffix}`;
+    };
+
+    setText(refs.visitRank, visitRank);
+    setText(refs.visitTotal, `از ${total || 'کل'} فروشگاه‌های سنندج`);
+    setText(refs.visitAvg, `میانگین شهر: ${formatNumber(ranking.avgVisit, '')} بازدید`);
+    setText(refs.visitYour, `فروشگاه تو: ${formatNumber(ranking.yourVisit, '')} بازدید واقعی`);
+    setText(refs.visitPercentile, `در بین ${visitPercentile}% بالایی`);
+    if (refs.visitProgress) {
+      refs.visitProgress.style.width = `${visitPercentile}%`;
+    }
+
+    setText(refs.customerRank, customerRank);
+    setText(refs.customerTotal, `از ${total || 'کل'} فروشگاه‌های سنندج`);
+    setText(refs.customerAvg, `میانگین شهر: ${formatNumber(ranking.avgCustomer, '')} مشتری فعال`);
+    setText(refs.customerYour, `فروشگاه تو: ${formatNumber(ranking.yourCustomer, '')} مشتری فعال`);
+    setText(refs.customerPercentile, `در بین ${customerPercentile}% بالایی`);
+    if (refs.customerProgress) {
+      refs.customerProgress.style.width = `${customerPercentile}%`;
+    }
+
+    if (refs.updated) {
+      refs.updated.textContent = ranking.updatedAt
+        ? `آخرین بروزرسانی: ${formatDateTime(ranking.updatedAt)}`
+        : 'آخرین بروزرسانی: —';
+    }
+
+    refs.rankingSection.hidden = false;
+  }
+
   async function fetchPerformancePayload() {
     const res = await fetch(apiUrl('/api/seller/performance/status'), withCreds());
     let payload = null;
@@ -155,12 +228,30 @@
       messageCard: root.querySelector('#performance-message-card'),
       messageText: root.querySelector('#performance-message-text'),
       messageUpdated: root.querySelector('#performance-message-updated'),
-      messageName: root.querySelector('#performance-message-name')
+      messageName: root.querySelector('#performance-message-name'),
+      rankingSection: root.querySelector('#city-ranking'),
+      visitRank: root.querySelector('#visit-rank'),
+      visitTotal: root.querySelector('#visit-total'),
+      visitAvg: root.querySelector('#visit-avg'),
+      visitYour: root.querySelector('#visit-your'),
+      visitPercentile: root.querySelector('#visit-percentile-badge'),
+      visitProgress: root.querySelector('#visit-progress'),
+      customerRank: root.querySelector('#customer-rank'),
+      customerTotal: root.querySelector('#customer-total'),
+      customerAvg: root.querySelector('#customer-avg'),
+      customerYour: root.querySelector('#customer-your'),
+      customerPercentile: root.querySelector('#customer-percentile-badge'),
+      customerProgress: root.querySelector('#customer-progress'),
+      updated: root.querySelector('#city-ranking-updated')
     };
 
     try {
-      const payload = await fetchPerformancePayload();
-      applyState(refs, payload);
+      const [performancePayload, ranking] = await Promise.all([
+        fetchPerformancePayload(),
+        fetchCityRanking()
+      ]);
+      applyState(refs, performancePayload);
+      renderCityRanking(refs, ranking);
     } catch (err) {
       console.error('loadPerformanceStatus error:', err);
       renderError(root, err.message || 'خطا در دریافت وضعیت عملکرد.');

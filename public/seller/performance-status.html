@@ -36,6 +36,28 @@
   }
   .summary-card h3 { font-weight: 800; color: #0ea5e9; font-size: 1.1rem; margin-bottom: .6rem; }
   .summary-card p { color: #475569; margin: 0; }
+  .city-ranking { background: #ffffff; border-radius: 1.1rem; box-shadow: 0 12px 34px rgba(14,165,233,.12); padding: 22px 20px; border: 1px solid #bae6fd; }
+  .city-ranking__header { display: flex; flex-direction: column; gap: 6px; margin-bottom: 16px; text-align: right; }
+  .city-ranking__eyebrow { display: inline-flex; align-items: center; gap: 8px; background: linear-gradient(120deg, #ecfeff, #f0fdfa); border: 1px dashed #67e8f9; padding: 6px 10px; border-radius: 999px; font-size: .85rem; color: #0ea5e9; font-weight: 800; width: fit-content; }
+  .city-ranking__title { margin: 0; font-size: 1.2rem; font-weight: 900; color: #0f172a; }
+  .city-ranking__desc { margin: 0; color: #475569; font-size: .93rem; line-height: 1.9; }
+  .city-ranking__grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 14px; }
+  .ranking-card { position: relative; overflow: hidden; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 1rem; padding: 18px 16px; box-shadow: 0 10px 28px rgba(15,118,110,.08); display: flex; flex-direction: column; gap: 10px; min-height: 170px; }
+  .ranking-card::after { content: ""; position: absolute; inset: 0; pointer-events: none; background: radial-gradient(circle at 80% 10%, rgba(14,165,233,.12), transparent 45%); }
+  .ranking-card__header { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+  .ranking-card__title { margin: 0; font-size: 1rem; font-weight: 900; color: #0f172a; }
+  .ranking-card__badge { display: inline-flex; align-items: center; gap: 6px; padding: 6px 10px; border-radius: 12px; font-weight: 800; font-size: .85rem; }
+  .ranking-card__badge--green { background: #ecfdf3; color: #15803d; border: 1px solid #bbf7d0; }
+  .ranking-card__badge--blue { background: #e0f2fe; color: #0369a1; border: 1px solid #bae6fd; }
+  .ranking-card__metric { display: flex; align-items: flex-end; gap: 6px; font-size: 2.1rem; font-weight: 900; color: #0ea5e9; }
+  .ranking-card__metric small { font-size: .95rem; color: #475569; font-weight: 700; }
+  .ranking-card__meta { color: #475569; font-size: .9rem; display: flex; flex-wrap: wrap; gap: 10px; justify-content: space-between; }
+  .ranking-card__progress { width: 100%; background: #e2e8f0; border-radius: 999px; height: 10px; overflow: hidden; }
+  .ranking-card__progress-bar { height: 100%; background: linear-gradient(120deg, #0ea5e9, #10b981); border-radius: 999px; width: 0; transition: width .4s ease; }
+  .city-ranking__footer { margin-top: 14px; display: flex; flex-wrap: wrap; gap: 10px; align-items: center; color: #0f172a; font-weight: 700; font-size: .92rem; }
+  .city-ranking__updated { color: #475569; font-weight: 600; font-size: .86rem; }
+  .city-ranking__chips { display: flex; flex-wrap: wrap; gap: 8px; }
+  .city-ranking__chip { background: #f0f9ff; color: #0ea5e9; border: 1px solid #bae6fd; padding: 6px 10px; border-radius: 999px; font-weight: 700; font-size: .85rem; }
   .message-card {
     background: #fff;
     border-radius: 1rem;
@@ -78,6 +100,8 @@
     .message-card { padding: 18px; gap: 0.85rem; }
     .message-card-icon { width: 40px; height: 40px; font-size: 1.3rem; }
     .greeting-line { font-size: .95rem; }
+    .city-ranking { padding: 18px 16px; }
+    .ranking-card { min-height: unset; }
   }
 </style>
 <div class="performance-wrap max-w-3xl mx-auto py-6 space-y-6" id="performance-root">
@@ -102,6 +126,60 @@
       </div>
     </div>
     <p class="message-card-text" id="performance-message-text"></p>
+  </section>
+  <section class="city-ranking" id="city-ranking" hidden>
+    <div class="city-ranking__header">
+      <span class="city-ranking__eyebrow">
+        <i class="ri-compass-3-line" aria-hidden="true"></i>
+        جایگاه تو در شهر
+      </span>
+      <h3 class="city-ranking__title">سنندج، رقبا و مشتری‌ها چه می‌گویند؟</h3>
+      <p class="city-ranking__desc">بر اساس آخرین بازدیدهای واقعی و تعداد مشتریان فعال، جایگاه فروشگاهت در سطح شهر سنندج را ببین و مطمئن شو مسیر رشد را درست می‌روی.</p>
+    </div>
+    <div class="city-ranking__grid">
+      <article class="ranking-card" aria-labelledby="rank-visits-title">
+        <div class="ranking-card__header">
+          <h4 class="ranking-card__title" id="rank-visits-title">رتبه بازدید فروشگاه</h4>
+          <span class="ranking-card__badge ranking-card__badge--blue" id="visit-percentile-badge">در بین ۰٪ بالایی</span>
+        </div>
+        <div class="ranking-card__metric">
+          <span id="visit-rank">--</span>
+          <small id="visit-total">از کل فروشگاه‌های سنندج</small>
+        </div>
+        <div class="ranking-card__progress" aria-hidden="true">
+          <div class="ranking-card__progress-bar" id="visit-progress"></div>
+        </div>
+        <div class="ranking-card__meta">
+          <span id="visit-avg">میانگین شهر: -- بازدید</span>
+          <span id="visit-your">فروشگاه تو: -- بازدید واقعی</span>
+        </div>
+      </article>
+      <article class="ranking-card" aria-labelledby="rank-customers-title">
+        <div class="ranking-card__header">
+          <h4 class="ranking-card__title" id="rank-customers-title">رتبه تعداد مشتری</h4>
+          <span class="ranking-card__badge ranking-card__badge--green" id="customer-percentile-badge">مشتری‌ها راضی‌اند</span>
+        </div>
+        <div class="ranking-card__metric">
+          <span id="customer-rank">--</span>
+          <small id="customer-total">از کل فروشگاه‌های سنندج</small>
+        </div>
+        <div class="ranking-card__progress" aria-hidden="true">
+          <div class="ranking-card__progress-bar" id="customer-progress"></div>
+        </div>
+        <div class="ranking-card__meta">
+          <span id="customer-avg">میانگین شهر: -- مشتری فعال</span>
+          <span id="customer-your">فروشگاه تو: -- مشتری فعال</span>
+        </div>
+      </article>
+    </div>
+    <div class="city-ranking__footer">
+      <div class="city-ranking__chips" aria-hidden="true">
+        <span class="city-ranking__chip" id="city-ranking-chip-1">بازار سنندج</span>
+        <span class="city-ranking__chip" id="city-ranking-chip-2">نرخ رشد واقعی</span>
+        <span class="city-ranking__chip" id="city-ranking-chip-3">بازخورد مشتریان</span>
+      </div>
+      <span class="city-ranking__updated" id="city-ranking-updated">آخرین بروزرسانی: --</span>
+    </div>
   </section>
   <div class="summary-card" id="performance-summary">
     <h3>جمع‌بندی وضعیت</h3>
