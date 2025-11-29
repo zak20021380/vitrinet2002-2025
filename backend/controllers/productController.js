@@ -2,6 +2,7 @@
 
 const Product = require('../models/product');
 const path = require('path');
+const jwt = require('jsonwebtoken');
 // تبدیل مسیر نسبى → آدرس کامل (نسبى، http/https یا data:)
 function makeFullUrl(req, path = '') {
   if (!path) return '';
@@ -26,6 +27,40 @@ function normalizeUploadedPath(file) {
   const relative = path.relative(backendRoot, file.path).replace(/\\/g, '/');
   if (relative.startsWith('uploads/')) return relative;
   return `uploads/${path.basename(file.path)}`;
+}
+
+function resolveRequestActor(req, { allowIpFallback = true } = {}) {
+  const bearerToken = req.headers.authorization?.startsWith('Bearer ')
+    ? req.headers.authorization.split(' ')[1]
+    : null;
+
+  if (bearerToken) {
+    try {
+      const payload = jwt.verify(bearerToken, 'vitrinet_secret_key');
+      if (payload?.id) {
+        return `user:${payload.id}`;
+      }
+    } catch (_err) {
+      // توکن نامعتبر، ادامه می‌دهیم
+    }
+  }
+
+  if (req.user?.id) {
+    return `user:${req.user.id}`;
+  }
+
+  const deviceId = typeof req.headers['x-client-id'] === 'string'
+    ? req.headers['x-client-id'].trim()
+    : '';
+  if (deviceId) {
+    return `device:${deviceId}`;
+  }
+
+  if (!allowIpFallback) return null;
+
+  const forwarded = (req.headers['x-forwarded-for'] || '').toString().split(',').map((ip) => ip.trim()).find(Boolean);
+  const ip = forwarded || req.ip;
+  return ip ? `ip:${ip}` : null;
 }
 
 // افزودن محصول جدید
@@ -113,14 +148,19 @@ async function enforceDiscountLifecycle(product, now = new Date()) {
   return false;
 }
 
-function buildProductResponse(req, doc) {
+function buildProductResponse(req, doc, options = {}) {
   const p = typeof doc?.toObject === 'function' ? doc.toObject() : doc;
   const idx = Number.isInteger(p.mainImageIndex) ? p.mainImageIndex : 0;
   const mainImg = (p.images?.length ? (p.images[idx] || p.images[0]) : '');
+  const liked = options.likeActor
+    ? Array.isArray(p.likedBy) && p.likedBy.includes(options.likeActor)
+    : null;
   return {
     ...p,
     image: makeFullUrl(req, mainImg),
     shopName: p.sellerId?.storename || '',
+    likesCount: Number.isFinite(Number(p.likesCount)) ? Number(p.likesCount) : 0,
+    ...(liked !== null ? { liked } : {})
     seller: p.sellerId || {},
     sellerCategory: p.sellerId?.category || '',
     sellerLocation: p.sellerId?.address || p.sellerId?.city || '—',
@@ -211,6 +251,7 @@ exports.removeDiscount = async (req, res) => {
 exports.getProducts = async (req, res) => {
   try {
     const filter = req.query.sellerId ? { sellerId: req.query.sellerId } : {};
+    const likeActor = resolveRequestActor(req, { allowIpFallback: false });
 
     const now = new Date();
     const docs = await Product.find(filter)
@@ -218,11 +259,11 @@ exports.getProducts = async (req, res) => {
       .populate({
         path: 'sellerId',
         select: 'storename ownerName address shopurl ownerFirstname ownerLastname category city'
-      });
+    });
 
     const products = await Promise.all(docs.map(async (doc) => {
       await enforceDiscountLifecycle(doc, now);
-      return buildProductResponse(req, doc);
+      return buildProductResponse(req, doc, { likeActor });
     }));
 
     res.json(products);
@@ -280,6 +321,57 @@ exports.deleteProduct = async (req, res) => {
   }
 };
 
+exports.getLikeStatus = async (req, res) => {
+  try {
+    const id = req.params.id;
+    const actor = resolveRequestActor(req, { allowIpFallback: false });
+
+    const product = await Product.findById(id).select('likesCount likedBy');
+    if (!product) return res.status(404).json({ message: 'محصول پیدا نشد!' });
+
+    const likesCount = Number(product.likesCount || 0);
+    const liked = actor ? product.likedBy.includes(actor) : false;
+
+    res.json({ likesCount, liked });
+  } catch (err) {
+    res.status(500).json({ message: 'خطا در دریافت وضعیت پسندیدن', error: err.message });
+  }
+};
+
+exports.toggleLike = async (req, res) => {
+  try {
+    const id = req.params.id;
+    const actor = resolveRequestActor(req);
+
+    if (!actor) {
+      return res.status(400).json({ message: 'هویت کاربر برای ثبت پسند ضروری است.' });
+    }
+
+    const product = await Product.findById(id).select('likesCount likedBy');
+    if (!product) return res.status(404).json({ message: 'محصول پیدا نشد!' });
+
+    const hasLiked = product.likedBy.includes(actor);
+    if (hasLiked) {
+      product.likedBy = product.likedBy.filter((entry) => entry !== actor);
+      product.likesCount = Math.max(0, Number(product.likesCount || 0) - 1);
+    } else {
+      product.likedBy.push(actor);
+      product.likesCount = Number(product.likesCount || 0) + 1;
+    }
+
+    await product.save();
+
+    res.json({
+      liked: !hasLiked,
+      likesCount: product.likesCount,
+      message: hasLiked ? 'پسند شما حذف شد.' : 'محصول با موفقیت پسندیده شد.'
+    });
+  } catch (err) {
+    console.error('Failed to toggle product like:', err);
+    res.status(500).json({ message: 'خطا در ثبت پسند', error: err.message });
+  }
+};
+
 
 // گرفتن محصول تکی با آیدی
 // گرفتن محصول تکی با آیدی و دادن مشخصات فروشنده
@@ -287,6 +379,8 @@ exports.deleteProduct = async (req, res) => {
 exports.getProductById = async (req, res) => {
   try {
     const id = req.params.id;
+    const likeActor = resolveRequestActor(req, { allowIpFallback: false });
+
     // پیدا کردن محصول و گرفتن اطلاعات seller (گسترش‌یافته)
     const product = await Product.findById(id)
       .populate({
@@ -297,7 +391,7 @@ exports.getProductById = async (req, res) => {
     if (!product) return res.status(404).json({ message: 'محصول پیدا نشد!' });
 
     await enforceDiscountLifecycle(product);
-    const payload = buildProductResponse(req, product);
+    const payload = buildProductResponse(req, product, { likeActor });
 
     // اضافه کردن اطلاعات seller به خروجی
     payload.seller = payload.seller || payload.sellerId || {};
@@ -317,6 +411,7 @@ exports.getProductById = async (req, res) => {
 // گرفتن جدیدترین محصولات
 exports.getLatestProducts = async (req, res) => {
   try {
+    const likeActor = resolveRequestActor(req, { allowIpFallback: false });
     const now = new Date();
     const docs = await Product.find()
       .sort({ createdAt: -1 })
@@ -328,7 +423,7 @@ exports.getLatestProducts = async (req, res) => {
 
     const products = await Promise.all(docs.map(async (doc) => {
       await enforceDiscountLifecycle(doc, now);
-      return buildProductResponse(req, doc);
+      return buildProductResponse(req, doc, { likeActor });
     }));
 
     if (!products.length)
