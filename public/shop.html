@@ -169,73 +169,82 @@ body {
   align-items: center;
   justify-content: center;
   /* در دسکتاپ کمی فاصله می‌دهیم */
-  margin-left: 1rem; 
+  margin-left: 1rem;
 }
 
 .customer-badge {
   display: inline-flex;
   align-items: center;
-  gap: 0.6rem;
+  gap: 0.7rem;
   /* ارتفاع ثابت برای هماهنگی با دکمه‌های سمت چپ */
-  height: 42px; 
-  padding: 0 1rem;
-  border-radius: 12px;
-  background: rgba(124, 131, 253, 0.08); /* رنگ پس‌زمینه ملایم‌تر */
-  border: 1px solid rgba(124, 131, 253, 0.2);
-  color: var(--text);
-  font-weight: 700;
-  font-size: 0.85rem;
+  height: 44px;
+  padding: 0 1.1rem;
+  border-radius: 14px;
+  background: linear-gradient(135deg, rgba(124, 131, 253, 0.92) 0%, rgba(82, 183, 136, 0.9) 100%);
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  color: #fff;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  font-size: 0.9rem;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, filter 0.2s ease;
   white-space: nowrap; /* جلوگیری از شکستن متن */
+  box-shadow: 0 12px 30px rgba(124, 131, 253, 0.28), 0 6px 18px rgba(82, 183, 136, 0.24);
 }
 
 .customer-badge:hover {
-  background: rgba(124, 131, 253, 0.15);
-  border-color: var(--primary);
+  filter: brightness(1.03);
   transform: translateY(-1px);
+  box-shadow: 0 14px 32px rgba(124, 131, 253, 0.32), 0 8px 20px rgba(82, 183, 136, 0.26);
+}
+
+.customer-badge:active {
+  transform: translateY(0);
 }
 
 .customer-icon {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 26px; /* سایز آیکون کوچک شد */
-  height: 26px;
-  border-radius: 8px;
-  background: white;
-  color: var(--primary);
-  box-shadow: 0 2px 6px rgba(124, 131, 253, 0.15);
+  width: 28px; /* سایز آیکون کمی بزرگ‌تر برای تاکید */
+  height: 28px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.15);
+  color: #fff;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.35), 0 2px 6px rgba(0, 0, 0, 0.08);
+  backdrop-filter: blur(6px);
 }
 
 .customer-icon svg {
-  width: 15px;
-  height: 15px;
+  width: 16px;
+  height: 16px;
 }
 
 .customer-meta {
   display: flex;
   flex-direction: row; /* مهم: چیدمان افقی شد */
   align-items: center;
-  gap: 0.5rem;
+  gap: 0.55rem;
   line-height: 1;
 }
 
 .customer-count {
-  color: #0f172a;
-  font-size: 0.9rem;
+  color: #f7fafc;
+  font-size: 0.92rem;
+  text-shadow: 0 1px 8px rgba(0, 0, 0, 0.16);
 }
 
 /* متن عضویت سریع */
 .customer-cta {
   display: inline-flex;
   align-items: center;
-  gap: 0.2rem;
-  font-size: 0.75rem;
-  color: var(--primary);
-  background: rgba(255, 255, 255, 0.6);
-  padding: 2px 6px;
-  border-radius: 6px;
+  gap: 0.25rem;
+  font-size: 0.78rem;
+  color: #e0f5ff;
+  background: rgba(255, 255, 255, 0.12);
+  padding: 4px 8px;
+  border-radius: 999px;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.28);
 }
 
 .customer-cta svg {
@@ -1177,15 +1186,6 @@ body {
           <circle cx="12" cy="10" r="3"/>
         </svg>
         <span>آدرس</span>
-      </button>
-      <button id="favShopBtn" class="action-item" aria-label="مشاهده مشتریان" type="button">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
-          <circle cx="9" cy="7" r="4"/>
-          <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
-          <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
-        </svg>
-        <span>مشتریان</span>
       </button>
       <button id="reportBtn" class="action-item" aria-label="ثبت گزارش تخلف" type="button">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
