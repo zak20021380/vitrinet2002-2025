@@ -6,6 +6,21 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title>داشبورد کاربر | ویترینت</title>
+    <script>
+      (function() {
+        const originalWarn = console.warn;
+        console.warn = (...args) => {
+          const first = args[0];
+          if (typeof first === 'string' && first.includes('cdn.tailwindcss.com should not be used in production')) {
+            return;
+          }
+          originalWarn(...args);
+        };
+        window.addEventListener('DOMContentLoaded', () => {
+          console.warn = originalWarn;
+        });
+      })();
+    </script>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;700&display=swap" rel="stylesheet"/>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@800&display=swap" rel="stylesheet"/>
@@ -1821,10 +1836,21 @@
 
           const firstName = firstInput?.value.trim() || '';
           const lastName = lastInput?.value.trim() || '';
+          const phone = (profileState.user.phone || '').toString().trim();
+          const name = `${firstName} ${lastName}`.trim();
 
           if (!firstName || !lastName) {
             if (status) {
               status.textContent = 'نام و نام خانوادگی را کامل وارد کنید.';
+              status.classList.remove('hidden', 'text-emerald-600');
+              status.classList.add('text-red-500');
+            }
+            return;
+          }
+
+          if (!phone) {
+            if (status) {
+              status.textContent = 'شماره تماس کاربر یافت نشد. لطفاً دوباره تلاش کنید.';
               status.classList.remove('hidden', 'text-emerald-600');
               status.classList.add('text-red-500');
             }
@@ -1848,10 +1874,8 @@
               credentials: 'include',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({
-                firstname: firstName,
-                lastname: lastName,
-                firstName,
-                lastName
+                name,
+                phone
               })
             });
 
