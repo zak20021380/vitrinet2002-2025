@@ -1117,8 +1117,9 @@ exports.broadcastMessage = async (req, res) => {
         const chatType = target === 'sellers' ? 'seller-admin' : 'admin-user';
 
       // تلاش برای پیدا کردن چت موجود با فیلتر نوع و productId
+      // از $all + $size استفاده می‌کنیم تا ترتیب آرایه مهم نباشد
       let chat = await Chat.findOne({
-        participants: sortIdArray(participants),
+        participants: { $all: participants, $size: participants.length },
         productId: null,
         type: chatType
       });
