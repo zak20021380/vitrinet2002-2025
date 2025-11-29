@@ -1138,8 +1138,7 @@ exports.broadcastMessage = async (req, res) => {
             participantsModel,
             type: chatType,
             productId: null,
-            sellerId: target === 'sellers' ? r._id : null,
-            messages: []
+            sellerId: target === 'sellers' ? r._id : null
           },
           $set: {
             lastUpdated: Date.now()
