@@ -104,18 +104,89 @@
         '/verify.html',
         'verify.html',
         '/verify-user.html',
-        'verify-user.html',
-        '/user',
-        'user/',
-        '/user-panel.html',
-        'user-panel.html',
-        '/seller',
-        'seller/',
-        '/seller-paneel.html',
-        'seller-paneel.html'
+        'verify-user.html'
       ]
     }
   ];
+
+  function safeParse(json) {
+    if (!json) return null;
+    try {
+      return JSON.parse(json);
+    } catch (_) {
+      return null;
+    }
+  }
+
+  function getAuthState() {
+    const sellerData = safeParse(localStorage.getItem('seller')) || {};
+    const hasSeller =
+      sellerData &&
+      (sellerData.id || sellerData._id || sellerData.storename || sellerData.shopurl);
+
+    if (hasSeller) {
+      return {
+        role: 'seller',
+        label: 'پنل فروشنده',
+        href: '/seller/dashboard.html',
+        matches: [
+          '/seller',
+          '/seller/',
+          '/seller/dashboard',
+          '/seller/dashboard.html',
+          '/seller-paneel.html',
+          'seller-paneel.html'
+        ],
+        icon: '<path d="M5.5 7.5 12 3l6.5 4.5V19a1.5 1.5 0 0 1-1.5 1.5h-10A1.5 1.5 0 0 1 5.5 19Z" fill="currentColor"/><path d="M9 21.5v-7a3 3 0 0 1 3-3v0a3 3 0 0 1 3 3v7" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>',
+      };
+    }
+
+    const user = safeParse(localStorage.getItem('user')) || {};
+    const hasUser = localStorage.getItem('token') || user.name || user.phone;
+
+    if (hasUser) {
+      return {
+        role: 'user',
+        label: 'پنل کاربر',
+        href: '/user/dashboard.html',
+        matches: [
+          '/user',
+          '/user/',
+          '/user/dashboard',
+          '/user/dashboard.html',
+          '/user-panel.html',
+          'user-panel.html'
+        ],
+        icon: '<path d="M12 3.75a5.25 5.25 0 1 1-5.25 5.25A5.25 5.25 0 0 1 12 3.75Zm0 10.5c-4.8 0-7.75 2.7-7.75 5.25 0 .69.56 1.25 1.25 1.25h13c.69 0 1.25-.56 1.25-1.25 0-2.55-2.95-5.25-7.75-5.25Z" fill="currentColor"/>',
+      };
+    }
+
+    return {
+      role: null,
+      label: null,
+      href: null,
+      matches: null,
+      icon: null
+    };
+  }
+
+  function withAccountConfig(items) {
+    const auth = getAuthState();
+
+    return items.map(item => {
+      if (item.id !== 'loginMobileLink' || !auth.role) return item;
+
+      return {
+        ...item,
+        href: auth.href || item.href,
+        label: auth.label || item.label,
+        icon: auth.icon || item.icon,
+        matches: Array.isArray(auth.matches)
+          ? Array.from(new Set([...(item.matches || []), ...auth.matches]))
+          : item.matches
+      };
+    });
+  }
 
   function normalisePath(pathname) {
     if (!pathname) return 'index.html';
@@ -278,7 +349,7 @@
     const items = nav.querySelectorAll('.nav-item');
 
     items.forEach((item) => {
-      const config = NAV_ITEMS.find(entry => entry.id === item.id);
+      const config = navConfigs.find(entry => entry.id === item.id);
       const isActive = config ? matchesCurrent(config, currentPath) : false;
       if (isActive) {
         item.classList.add('active');
@@ -322,7 +393,9 @@
       nav.innerHTML = '';
     }
 
-    NAV_ITEMS.forEach(config => {
+    navConfigs = withAccountConfig(NAV_ITEMS);
+
+    navConfigs.forEach(config => {
       const item = createNavItem(config);
       nav.appendChild(item);
     });
@@ -338,6 +411,7 @@
     return nav;
   }
 
+  let navConfigs = NAV_ITEMS;
   let navElement = null;
 
   window.addEventListener('DOMContentLoaded', () => {
