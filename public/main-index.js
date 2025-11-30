@@ -1,4 +1,3 @@
-const SERVICE_PANEL_KEYWORDS = ['خدمات'];
 const REWARD_API_BASE = '/api/rewards';
 const REWARD_USER_CLAIM_KEY = 'vt_reward_user_claim';
 const rewardNumberFormatter = new Intl.NumberFormat('fa-IR', { maximumFractionDigits: 0 });
@@ -21,6 +20,16 @@ const DEFAULT_REWARD_CAMPAIGN = {
   winners: [],
   updatedAt: null
 };
+
+function safeParseLocalStorage(key) {
+  try {
+    const raw = localStorage.getItem(key);
+    return raw ? JSON.parse(raw) : null;
+  } catch (err) {
+    console.warn('خطا در خواندن localStorage برای', key, err);
+    return null;
+  }
+}
 
 function normaliseRewardCampaign(raw) {
   const source = raw && typeof raw === 'object' ? raw : {};
@@ -560,16 +569,6 @@ function initRewardModal() {
   });
 }
 
-function safeParseLocalStorage(key) {
-  try {
-    const raw = localStorage.getItem(key);
-    return raw ? JSON.parse(raw) : null;
-  } catch (err) {
-    console.warn('خطا در خواندن localStorage برای', key, err);
-    return null;
-  }
-}
-
 function isUserAuthenticated() {
   try {
     const token = localStorage.getItem('token');
@@ -633,90 +632,6 @@ function initAuthPrompt() {
     }
   });
 }
-
-function isServiceSellerAccount(seller) {
-  if (!seller || typeof seller !== 'object') return false;
-  const category = (seller.category || seller.sellerCategory || '').toString().trim();
-  const normalizedCategory = category.normalize('NFC');
-
-  return SERVICE_PANEL_KEYWORDS.some(keyword => normalizedCategory === keyword);
-}
-
-function buildSellerPanelLink(seller) {
-  const baseUrl = isServiceSellerAccount(seller)
-    ? 'service-seller-panel/s-seller-panel.html'
-    : 'seller/dashboard.html';
-  const shopurl = seller?.shopurl || seller?.shopUrl || seller?.slug || '';
-  const query = shopurl ? `?shopurl=${encodeURIComponent(shopurl)}` : '';
-  return `${baseUrl}${query}`;
-}
-
-function updateAuthNavigationState() {
-  const loginLink = document.getElementById('loginNavLink');
-  const loginMobile = document.getElementById('loginMobileLink');
-  const desktopLabel = loginLink?.querySelector('.login-link-label');
-  const mobileLabel = loginMobile?.querySelector('.login-mobile-label');
-
-  if (!loginLink && !loginMobile) return;
-
-  const token = localStorage.getItem('token');
-  const seller = safeParseLocalStorage('seller');
-  const user = safeParseLocalStorage('user');
-
-  let targetUrl = 'login.html';
-  let labelText = 'ورود';
-  let accountType = '';
-
-  // در صورت وجود اطلاعات هر دو نوع حساب، ابتدا کاربر عادی را در اولویت قرار می‌دهیم
-  if (token && user && typeof user === 'object') {
-    targetUrl = 'user/dashboard.html';
-    labelText = 'پنل مشتری';
-    accountType = 'customer';
-  } else if (token && seller && typeof seller === 'object') {
-    targetUrl = buildSellerPanelLink(seller);
-    labelText = 'پنل فروشنده';
-    accountType = 'seller';
-  }
-
-  if (loginLink) {
-    loginLink.href = targetUrl;
-    if (accountType) {
-      loginLink.classList.add('logged-in');
-      loginLink.setAttribute('data-account-type', accountType);
-    } else {
-      loginLink.classList.remove('logged-in');
-      loginLink.removeAttribute('data-account-type');
-    }
-    if (desktopLabel) desktopLabel.textContent = labelText;
-  }
-
-  if (loginMobile) {
-    loginMobile.href = targetUrl;
-    if (accountType) {
-      loginMobile.classList.add('logged-in');
-      loginMobile.setAttribute('data-account-type', accountType);
-    } else {
-      loginMobile.classList.remove('logged-in');
-      loginMobile.removeAttribute('data-account-type');
-    }
-    if (mobileLabel) mobileLabel.textContent = labelText;
-  }
-}
-
-updateAuthNavigationState();
-window.addEventListener('storage', (event) => {
-  if (!event.key || ['token', 'seller', 'user'].includes(event.key)) {
-    updateAuthNavigationState();
-  }
-});
-document.addEventListener('visibilitychange', () => {
-  if (!document.hidden) {
-    updateAuthNavigationState();
-  }
-});
-document.addEventListener('mobileNavReady', () => {
-  updateAuthNavigationState();
-});
 
 initRewardModal();
 initAuthPrompt();

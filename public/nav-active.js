@@ -3,9 +3,88 @@
   const NAV_STYLE_ID = 'vitreenet-mobile-nav-style';
   const BODY_READY_CLASS = 'has-mobile-nav';
   const NAV_READY_CLASS = 'vitreenet-mobile-nav';
+  const SERVICE_PANEL_KEYWORDS = ['خدمات'];
 
   const SVG_NS = 'http://www.w3.org/2000/svg';
   const parser = typeof DOMParser !== 'undefined' ? new DOMParser() : null;
+
+  function safeParseLocalStorage(key) {
+    try {
+      const value = localStorage.getItem(key);
+      return value ? JSON.parse(value) : null;
+    } catch (error) {
+      console.warn('[Vitreenet] Failed to parse localStorage item:', key, error);
+      return null;
+    }
+  }
+
+  function isServiceSellerAccount(seller) {
+    if (!seller || typeof seller !== 'object') return false;
+    const category = (seller.category || seller.sellerCategory || '').toString().trim();
+    const normalizedCategory = category.normalize('NFC');
+
+    return SERVICE_PANEL_KEYWORDS.some(keyword => normalizedCategory === keyword);
+  }
+
+  function buildSellerPanelLink(seller) {
+    const baseUrl = isServiceSellerAccount(seller)
+      ? 'service-seller-panel/s-seller-panel.html'
+      : 'seller/dashboard.html';
+    const shopurl = seller?.shopurl || seller?.shopUrl || seller?.slug || '';
+    const query = shopurl ? `?shopurl=${encodeURIComponent(shopurl)}` : '';
+    return `${baseUrl}${query}`;
+  }
+
+  function updateAuthNavigationState() {
+    const loginLink = document.getElementById('loginNavLink');
+    const loginMobile = document.getElementById('loginMobileLink');
+    const desktopLabel = loginLink?.querySelector('.login-link-label');
+    const mobileLabel = loginMobile?.querySelector('.login-mobile-label');
+
+    if (!loginLink && !loginMobile) return;
+
+    const token = localStorage.getItem('token');
+    const seller = safeParseLocalStorage('seller');
+    const user = safeParseLocalStorage('user');
+
+    let targetUrl = 'login.html';
+    let labelText = 'ورود';
+    let accountType = '';
+
+    if (token && user && typeof user === 'object') {
+      targetUrl = 'user/dashboard.html';
+      labelText = 'پنل مشتری';
+      accountType = 'customer';
+    } else if (token && seller && typeof seller === 'object') {
+      targetUrl = buildSellerPanelLink(seller);
+      labelText = 'پنل فروشنده';
+      accountType = 'seller';
+    }
+
+    if (loginLink) {
+      loginLink.href = targetUrl;
+      if (accountType) {
+        loginLink.classList.add('logged-in');
+        loginLink.setAttribute('data-account-type', accountType);
+      } else {
+        loginLink.classList.remove('logged-in');
+        loginLink.removeAttribute('data-account-type');
+      }
+      if (desktopLabel) desktopLabel.textContent = labelText;
+    }
+
+    if (loginMobile) {
+      loginMobile.href = targetUrl;
+      if (accountType) {
+        loginMobile.classList.add('logged-in');
+        loginMobile.setAttribute('data-account-type', accountType);
+      } else {
+        loginMobile.classList.remove('logged-in');
+        loginMobile.removeAttribute('data-account-type');
+      }
+      if (mobileLabel) mobileLabel.textContent = labelText;
+    }
+  }
 
   function appendSvgContent(svgElement, markup) {
     if (!svgElement || !markup) return;
@@ -333,6 +412,8 @@
 
     setActiveState(nav);
 
+    updateAuthNavigationState();
+
     document.dispatchEvent(new CustomEvent('mobileNavReady', { detail: { nav } }));
 
     return nav;
@@ -342,6 +423,22 @@
 
   window.addEventListener('DOMContentLoaded', () => {
     navElement = initialiseNav();
+  });
+
+  window.addEventListener('storage', (event) => {
+    if (!event.key || ['token', 'seller', 'user'].includes(event.key)) {
+      updateAuthNavigationState();
+    }
+  });
+
+  document.addEventListener('visibilitychange', () => {
+    if (!document.hidden) {
+      updateAuthNavigationState();
+    }
+  });
+
+  document.addEventListener('mobileNavReady', () => {
+    updateAuthNavigationState();
   });
 
   window.addEventListener('hashchange', () => setActiveState(navElement));
