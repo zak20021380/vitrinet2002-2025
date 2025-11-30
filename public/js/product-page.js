@@ -181,6 +181,14 @@
     loading: false
   };
 
+  function normaliseLikesCount(value) {
+    const numericValue = Number(
+      (value && typeof value === 'object') ? value.likesCount ?? value.likeCount ?? value.likes : value
+    );
+    if (!Number.isFinite(numericValue) || numericValue < 0) return 0;
+    return numericValue;
+  }
+
   const persianNumberFormatter = new Intl.NumberFormat('fa-IR');
 
   const sliderTransition = 'transform 0.45s cubic-bezier(0.22, 0.61, 0.36, 1)';
@@ -606,7 +614,8 @@
 
       if (!response.ok) return;
       const payload = await response.json();
-      likeState.likesCount = Number(payload.likesCount || likeState.likesCount || 0);
+      const count = normaliseLikesCount(payload);
+      likeState.likesCount = Number.isFinite(count) ? count : likeState.likesCount;
       likeState.liked = Boolean(payload.liked);
       updateLikeUI();
     } catch (_err) {
@@ -635,7 +644,8 @@
       }
 
       const payload = await response.json();
-      likeState.likesCount = Number(payload.likesCount || likeState.likesCount || 0);
+      const count = normaliseLikesCount(payload);
+      likeState.likesCount = Number.isFinite(count) ? count : likeState.likesCount;
       likeState.liked = Boolean(payload.liked);
       animateLikeButton();
       updateLikeUI();
@@ -689,7 +699,8 @@
     state.category = product.category || '';
     state.shopName = sellerName || '';
 
-    likeState.likesCount = Number(product.likesCount || 0);
+    const likeCount = normaliseLikesCount(product);
+    likeState.likesCount = Number.isFinite(likeCount) ? likeCount : 0;
     likeState.liked = Boolean(product.liked);
     updateLikeUI();
 
