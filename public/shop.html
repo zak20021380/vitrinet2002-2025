@@ -1253,6 +1253,50 @@ body {
 
 .fav-cta-text { white-space: nowrap; }
 
+.fav-success {
+  display: flex;
+  align-items: flex-start;
+  gap: .75rem;
+  padding: .85rem 1rem;
+  margin-top: .25rem;
+  border-radius: 16px;
+  background: linear-gradient(135deg, rgba(124,131,253,0.1), rgba(82,183,136,0.12));
+  border: 1px solid rgba(124,131,253,0.18);
+  box-shadow: 0 14px 28px rgba(124, 131, 253, 0.14);
+  animation: favPulse .4s ease;
+}
+
+.fav-success-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #7C83FD, #52b788);
+  color: #fff;
+  display: grid;
+  place-items: center;
+  box-shadow: 0 10px 20px rgba(82,183,136,0.28);
+}
+
+.fav-success-title {
+  margin: 0 0 4px 0;
+  font-size: 1rem;
+  font-weight: 900;
+  color: var(--text);
+  letter-spacing: -.01em;
+}
+
+.fav-success-desc {
+  margin: 0;
+  color: #4b5563;
+  font-weight: 600;
+  line-height: 1.6;
+}
+
+@keyframes favPulse {
+  from { transform: translateY(6px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
 @media (max-width: 520px) {
   .fav-modal-card { padding: 1.2rem; border-radius: 18px; }
   .fav-headline   { font-size: 1.05rem; }
@@ -1430,6 +1474,13 @@ body {
           <span class="chip-dot"></span>
           <span>مشتریان</span>
           <strong id="favShopCount" data-customer-count>150</strong>
+        </div>
+        <div id="favSuccessNotice" class="fav-success hidden" role="status" aria-live="polite">
+          <span class="fav-success-icon" aria-hidden="true"><i class="fas fa-check"></i></span>
+          <div>
+            <p class="fav-success-title">با موفقیت به محبوب‌های شما اضافه شد</p>
+            <p class="fav-success-desc">زین پس تخفیف‌ها و محصولات جدید این مغازه را زودتر از بقیه می‌بینید.</p>
+          </div>
         </div>
         <p class="fav-description">با افزودن مغازه به محبوب‌ها، محصولات جدید و تخفیف‌ها را زودتر می‌بینید.</p>
         <button id="toggleFavShopBtn" class="fav-cta-btn">
@@ -2278,6 +2329,8 @@ addressModal?.addEventListener('click', e => (e.target === addressModal) && addr
   const closeFavShop     = document.getElementById('closeFavShopModal');
   const favShopCountEl   = document.getElementById('favShopCount');
   const toggleFavShopBtn = document.getElementById('toggleFavShopBtn');
+  const favSuccessNotice = document.getElementById('favSuccessNotice');
+  let favSuccessTimer    = null;
 
   const setFavBtnLabel = (text) => {
     if (!toggleFavShopBtn) return;
@@ -2342,7 +2395,27 @@ addressModal?.addEventListener('click', e => (e.target === addressModal) && addr
     return false;
   }
 
+  const hideFavSuccessNotice = () => {
+    favSuccessNotice?.classList.add('hidden');
+    if (favSuccessTimer) {
+      clearTimeout(favSuccessTimer);
+      favSuccessTimer = null;
+    }
+  };
+
+  const showFavSuccessNotice = (totalCustomers) => {
+    if (typeof totalCustomers === 'number') {
+      favShopCountEl.textContent = totalCustomers.toLocaleString();
+      setCustomerCount(totalCustomers);
+    }
+    favShopModal.classList.remove('hidden');
+    favSuccessNotice?.classList.remove('hidden');
+    if (favSuccessTimer) clearTimeout(favSuccessTimer);
+    favSuccessTimer = setTimeout(hideFavSuccessNotice, 4500);
+  };
+
   const openCustomerModal = async () => {
+    hideFavSuccessNotice();
     await refreshFavShopInfo();
     favShopModal.classList.remove('hidden');
   };
@@ -2350,8 +2423,16 @@ addressModal?.addEventListener('click', e => (e.target === addressModal) && addr
   favShopBtn?.addEventListener('click', openCustomerModal);
   customerBadge?.addEventListener('click', openCustomerModal);
 
-  closeFavShop?.addEventListener('click', () => favShopModal.classList.add('hidden'));
-  favShopModal?.addEventListener('click', e => (e.target === favShopModal) && favShopModal.classList.add('hidden'));
+  closeFavShop?.addEventListener('click', () => {
+    hideFavSuccessNotice();
+    favShopModal.classList.add('hidden');
+  });
+  favShopModal?.addEventListener('click', e => {
+    if (e.target === favShopModal) {
+      hideFavSuccessNotice();
+      favShopModal.classList.add('hidden');
+    }
+  });
 
   toggleFavShopBtn?.addEventListener('click', async () => {
     if (!(await ensureFavoriteLogin())) return;
@@ -2374,6 +2455,7 @@ addressModal?.addEventListener('click', e => (e.target === addressModal) && addr
       const updatedCount = await refreshFavShopInfo();
       if (!added) {
         emitCustomerAdded({ totalCustomers: updatedCount });
+        showFavSuccessNotice(updatedCount);
       }
     } catch (err) {
       console.error(err);
