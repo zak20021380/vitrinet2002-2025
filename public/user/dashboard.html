@@ -3570,20 +3570,26 @@
       if (!res.ok) throw new Error('دریافت لیست ناموفق بود!');
       const shops = await res.json();
 
-      if (!Array.isArray(shops) || shops.length === 0) {
+      // حذف مقادیر null/undefined برای جلوگیری از خطاهای دسترسی به خصوصیت
+      const validShops = Array.isArray(shops) ? shops.filter(Boolean) : [];
+
+      if (validShops.length === 0) {
         html = `<div class="glass px-6 py-7 fadein text-center text-gray-400">هیچ مغازه‌ای در لیست محبوب‌ها نیست.</div>`;
       } else {
         html = `
         <div class="glass px-6 py-7 fadein">
           <div class="text-xl font-black primary-text mb-5">مغازه‌های محبوب من</div>
           <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            ${shops.map(s => `
+            ${validShops.map(s => {
+              const shop = s || {};
+              return `
               <div class="bg-white rounded-xl shadow border border-gray-100 p-4 flex flex-col gap-2 text-center">
-                <span class="text-lg font-bold text-[#10b981]">${s.storename || '-'}</span>
-                <span class="text-xs text-gray-500">${s.category || ''}</span>
-                <button data-id="${s._id}" class="removeFavShop mt-2 px-3 py-1.5 rounded-lg bg-red-50 text-red-600 border border-red-100 text-sm">حذف از محبوب‌ها</button>
+                <span class="text-lg font-bold text-[#10b981]">${shop.storename || '-'}</span>
+                <span class="text-xs text-gray-500">${shop.category || ''}</span>
+                ${shop._id ? `<button data-id="${shop._id}" class="removeFavShop mt-2 px-3 py-1.5 rounded-lg bg-red-50 text-red-600 border border-red-100 text-sm">حذف از محبوب‌ها</button>` : ''}
               </div>
-            `).join('')}
+              `;
+            }).join('')}
           </div>
         </div>`;
       }
