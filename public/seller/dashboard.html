@@ -169,8 +169,164 @@
       height: 42px;
     }
 
-    .like-notification__close {
-      align-self: center;
+  .like-notification__close {
+    align-self: center;
+  }
+  }
+
+  /* اعلان مشتری جدید */
+  .customer-toast-stack {
+    position: fixed;
+    top: 110px;
+    inset-inline: 16px;
+    max-width: 540px;
+    margin-inline: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    z-index: 520;
+    pointer-events: none;
+  }
+
+  .customer-toast {
+    position: relative;
+    overflow: hidden;
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    align-items: center;
+    gap: 14px;
+    padding: 14px 16px;
+    border-radius: 18px;
+    background: radial-gradient(circle at 12% 12%, rgba(16, 185, 129, 0.12), transparent 40%),
+      radial-gradient(circle at 80% 10%, rgba(14, 165, 233, 0.12), transparent 42%),
+      linear-gradient(135deg, #ffffff 0%, #f4fbff 100%);
+    box-shadow: 0 14px 32px rgba(15, 23, 42, 0.18);
+    border: 1px solid rgba(14, 165, 233, 0.16);
+    color: #0f172a;
+    transform: translateY(-14px);
+    opacity: 0;
+    transition: transform 0.3s ease, opacity 0.3s ease, box-shadow 0.2s ease;
+    pointer-events: auto;
+  }
+
+  .customer-toast--visible {
+    transform: translateY(0);
+    opacity: 1;
+  }
+
+  .customer-toast__halo {
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at 30% 30%, rgba(34, 197, 94, 0.2), transparent 36%);
+    opacity: 0.8;
+    pointer-events: none;
+  }
+
+  .customer-toast__icon {
+    width: 52px;
+    height: 52px;
+    border-radius: 14px;
+    display: grid;
+    place-items: center;
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.2), rgba(14, 165, 233, 0.18));
+    color: #0f766e;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.5);
+  }
+
+  .customer-toast__content {
+    display: grid;
+    gap: 6px;
+  }
+
+  .customer-toast__title {
+    font-weight: 900;
+    font-size: 15px;
+    color: #0f172a;
+    letter-spacing: -0.01em;
+  }
+
+  .customer-toast__subtitle {
+    font-size: 13px;
+    color: #1f2937;
+    line-height: 1.5;
+  }
+
+  .customer-toast__meta {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    font-size: 12px;
+    color: #0f172a;
+  }
+
+  .customer-toast__pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 10px;
+    border-radius: 999px;
+    background: rgba(16, 185, 129, 0.12);
+    color: #0f766e;
+    font-weight: 700;
+  }
+
+  .customer-toast__pill--accent {
+    background: rgba(14, 165, 233, 0.12);
+    color: #0369a1;
+  }
+
+  .customer-toast__close {
+    width: 34px;
+    height: 34px;
+    border-radius: 10px;
+    border: none;
+    background: #ecfeff;
+    color: #0f766e;
+    cursor: pointer;
+    display: grid;
+    place-items: center;
+    transition: transform 0.16s ease, background 0.16s ease, color 0.16s ease;
+  }
+
+  .customer-toast__close:hover,
+  .customer-toast__close:focus {
+    transform: scale(1.04);
+    background: #0ea5e9;
+    color: #fff;
+    outline: none;
+  }
+
+  .customer-toast__progress {
+    position: absolute;
+    inset-inline: 16px;
+    bottom: 10px;
+    height: 3px;
+    border-radius: 999px;
+    background: rgba(14, 165, 233, 0.1);
+    overflow: hidden;
+  }
+
+  .customer-toast__progress-bar {
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, #10b981, #0ea5e9);
+    transform-origin: right;
+    transform: scaleX(1);
+    transition: transform var(--customer-toast-duration, 6500ms) linear;
+  }
+
+  @media (max-width: 640px) {
+    .customer-toast {
+      grid-template-columns: 1fr auto;
+      grid-template-rows: auto auto;
+      gap: 10px;
+      padding: 13px;
+    }
+
+    .customer-toast__icon {
+      width: 46px;
+      height: 46px;
     }
   }
   .subscription-modal {
@@ -2907,6 +3063,7 @@
 <body>
 
   <div class="like-notification-stack" id="likeNotificationStack" aria-live="polite" aria-atomic="true"></div>
+  <div class="customer-toast-stack" id="customerNotificationStack" aria-live="polite" aria-atomic="true"></div>
 
   <div id="messagePopup" role="status" aria-live="polite">
     <i class="ri-chat-1-line" aria-hidden="true"></i>
@@ -3810,6 +3967,101 @@
         });
       }, 1400);
     }
+  })();
+</script>
+
+
+<script>
+  (function () {
+    const stack = document.getElementById('customerNotificationStack');
+    if (!stack) return;
+
+    const DISPLAY_DURATION = 6800;
+    const sellerId = window.seller?.id || window.seller?._id || window.seller?.sellerId;
+
+    const closeToast = (card) => {
+      if (!card) return;
+      card.classList.remove('customer-toast--visible');
+      setTimeout(() => card.remove(), 280);
+    };
+
+    const showCustomerToast = (detail = {}) => {
+      const customerName = detail.customerName || 'یک خریدار جدید';
+      const totalCustomers = Number.isFinite(detail.totalCustomers) ? detail.totalCustomers : null;
+      const timeLabel = new Date(detail.at || Date.now()).toLocaleTimeString('fa-IR', {
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+
+      const card = document.createElement('div');
+      card.className = 'customer-toast';
+      card.setAttribute('role', 'status');
+      card.setAttribute('aria-live', 'assertive');
+      card.style.setProperty('--customer-toast-duration', `${DISPLAY_DURATION}ms`);
+
+      const countText = totalCustomers != null
+        ? `<span class="customer-toast__pill"><i class="ri-team-line"></i>کل مشتریان: ${totalCustomers.toLocaleString('fa-IR')}</span>`
+        : '';
+
+      card.innerHTML = `
+        <div class="customer-toast__halo" aria-hidden="true"></div>
+        <div class="customer-toast__icon" aria-hidden="true">
+          <i class="ri-user-star-line" style="font-size:26px;"></i>
+        </div>
+        <div class="customer-toast__content">
+          <div class="customer-toast__title">مشتری جدید به جمع شما اضافه شد</div>
+          <div class="customer-toast__subtitle">${customerName} همین الان فروشگاه شما را به لیست محبوب‌ها افزوده است.</div>
+          <div class="customer-toast__meta">${countText}<span class="customer-toast__pill customer-toast__pill--accent"><i class="ri-time-line"></i>${timeLabel}</span></div>
+        </div>
+        <button class="customer-toast__close" type="button" aria-label="بستن اعلان مشتری">
+          <i class="ri-close-line"></i>
+        </button>
+        <div class="customer-toast__progress" aria-hidden="true">
+          <div class="customer-toast__progress-bar"></div>
+        </div>
+      `;
+
+      const closeBtn = card.querySelector('.customer-toast__close');
+      const progressBar = card.querySelector('.customer-toast__progress-bar');
+      closeBtn?.addEventListener('click', () => closeToast(card));
+
+      stack.appendChild(card);
+      requestAnimationFrame(() => {
+        card.classList.add('customer-toast--visible');
+        if (progressBar) {
+          progressBar.style.transform = 'scaleX(0)';
+        }
+      });
+
+      setTimeout(() => closeToast(card), DISPLAY_DURATION);
+    };
+
+    const matchesSeller = (incomingId) => {
+      if (!incomingId || !sellerId) return true;
+      return String(incomingId) === String(sellerId);
+    };
+
+    const handleMessage = (data) => {
+      if (!data || data.type !== 'customer-added') return;
+      if (!matchesSeller(data.sellerId)) return;
+      showCustomerToast(data);
+    };
+
+    const channel = typeof BroadcastChannel !== 'undefined'
+      ? new BroadcastChannel('seller-customer-updates')
+      : null;
+
+    channel?.addEventListener('message', (event) => handleMessage(event.data));
+
+    window.addEventListener('storage', (event) => {
+      if (event.key !== 'seller-customer-updates' || !event.newValue) return;
+      try {
+        const payload = JSON.parse(event.newValue);
+        handleMessage(payload);
+      } catch (error) {
+        console.warn('Cannot parse customer update payload', error);
+      }
+    });
   })();
 </script>
 

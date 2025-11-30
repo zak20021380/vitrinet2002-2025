@@ -1722,6 +1722,31 @@ function getShopSlug() {
 // ← این متغیر رو در بالای اسکریپت تعریف می‌کنیم
 let currentSellerId = null;
 
+const customerUpdateChannel = typeof BroadcastChannel !== 'undefined'
+  ? new BroadcastChannel('seller-customer-updates')
+  : null;
+
+function emitCustomerAdded({ totalCustomers } = {}) {
+  if (!currentSellerId) return;
+  const payload = {
+    type: 'customer-added',
+    sellerId: currentSellerId,
+    totalCustomers: Number.isFinite(totalCustomers) ? totalCustomers : undefined,
+    at: Date.now()
+  };
+
+  customerUpdateChannel?.postMessage(payload);
+
+  try {
+    const nonce = (typeof crypto !== 'undefined' && crypto.randomUUID)
+      ? crypto.randomUUID()
+      : `${Date.now()}-${Math.random()}`;
+    localStorage.setItem('seller-customer-updates', JSON.stringify({ ...payload, nonce }));
+  } catch (error) {
+    console.warn('Cannot persist customer update', error);
+  }
+}
+
 const slug = getShopSlug();
 
 // نمایش تعداد مشتریان در همه المان‌های مربوطه
@@ -2262,11 +2287,13 @@ addressModal?.addEventListener('click', e => (e.target === addressModal) && addr
   };
 
   async function refreshFavShopInfo() {
-    if (!toggleFavShopBtn) return;
+    if (!toggleFavShopBtn) return 0;
 
+    let count = 0;
     try {
       const res = await fetch(`${API_BASE}/api/favorite-shops/count/${currentSellerId}`);
-      const { count = 0 } = await res.json();
+      const data = await res.json();
+      count = Number.isFinite(data?.count) ? data.count : 0;
       favShopCountEl.textContent = count;
       setCustomerCount(count);
     } catch {
@@ -2280,7 +2307,7 @@ addressModal?.addEventListener('click', e => (e.target === addressModal) && addr
     if (!loggedIn) {
       toggleFavShopBtn.dataset.added = 'false';
       setFavBtnLabel('ورود برای افزودن به محبوب‌ها');
-      return;
+      return count;
     }
 
     let added = false;
@@ -2294,6 +2321,8 @@ addressModal?.addEventListener('click', e => (e.target === addressModal) && addr
 
     toggleFavShopBtn.dataset.added = added ? 'true' : 'false';
     setFavBtnLabel(added ? 'افزوده شد' : 'افزودن به محبوب‌ها');
+
+    return count;
   }
 
   async function ensureFavoriteLogin({ silent = false } = {}) {
@@ -2342,7 +2371,10 @@ addressModal?.addEventListener('click', e => (e.target === addressModal) && addr
         return;
       }
       if (!res.ok) throw new Error('خطا در به‌روزرسانی محبوب‌ها');
-      await refreshFavShopInfo();
+      const updatedCount = await refreshFavShopInfo();
+      if (!added) {
+        emitCustomerAdded({ totalCustomers: updatedCount });
+      }
     } catch (err) {
       console.error(err);
       setFavBtnLabel('خطا! دوباره تلاش کنید');
