@@ -732,6 +732,7 @@ if (!window.seller?.id) {
 
     // ---- رندر جدول (دسکتاپ) ----
     products.forEach((prod) => {
+      const likeCountDisplay = Number(prod.likesCount || 0).toLocaleString('fa-IR');
       // تعیین عکس شاخص بر اساس mainImageIndex یا اولین عکس
       let cover = "";
       if (prod.images && prod.images.length) {
@@ -749,6 +750,12 @@ if (!window.seller?.id) {
           <td>${prod.price ? prod.price.toLocaleString('fa-IR') : "-"}</td>
           <td>${prod.category || '-'}</td>
           <td>${prod.tags && prod.tags.length ? prod.tags.join('، ') : '-'}</td>
+          <td class="text-center">
+            <span class="like-chip" title="تعداد پسندهای واقعی">
+              <i class="ri-heart-3-fill" aria-hidden="true"></i>
+              <span>${likeCountDisplay}</span>
+            </span>
+          </td>
           <td>
             <button class="bg-[#10b981] hover:bg-[#0ea5e9] text-white rounded-lg px-3 py-1 text-[14px] transition" data-action="edit-product" data-product-id="${prod._id}">ویرایش</button>
           </td>
@@ -798,6 +805,17 @@ if (!window.seller?.id) {
                     <path d="M12.5 7H11v6l5.25 3.15.75-1.23-4.5-2.67V7z" fill="#0ea5e9"/>
                   </svg>
                   <span class="text-[#0ea5e9] font-bold text-lg">${prod.price ? prod.price.toLocaleString('fa-IR') : '0'} تومان</span>
+                </div>
+              </div>
+
+              <div class="flex items-center justify-between gap-2 flex-wrap bg-[#f8fafc] border border-gray-100 rounded-xl px-3 py-2">
+                <div class="flex items-center gap-2 text-sm text-gray-500">
+                  <i class="ri-heart-3-line text-[#e11d48] text-lg" aria-hidden="true"></i>
+                  <span class="font-bold text-gray-700">پسندهای واقعی</span>
+                </div>
+                <div class="like-chip like-chip__mobile shadow-none">
+                  <i class="ri-heart-3-fill text-[#e11d48]" aria-hidden="true"></i>
+                  <span class="text-[#9f1239]">${likeCountDisplay}</span>
                 </div>
               </div>
 
