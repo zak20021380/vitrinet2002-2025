@@ -2716,6 +2716,73 @@
 
   /* استایل کارت موبایل محصولات */
 
+  .product-card-view {
+    display: block;
+    margin-top: 14px;
+    padding: 12px 14px;
+    border-radius: 14px;
+    background: linear-gradient(120deg, rgba(16, 185, 129, 0.18), rgba(14, 165, 233, 0.16));
+    color: #0f172a;
+    border: 1px solid rgba(16, 185, 129, 0.25);
+    box-shadow: 0 10px 25px rgba(15, 23, 42, 0.12);
+    text-decoration: none;
+    transition: transform 0.18s ease, box-shadow 0.18s ease, background 0.2s ease;
+  }
+
+  .product-card-view:hover,
+  .product-card-view:focus-visible {
+    transform: translateY(-1px);
+    box-shadow: 0 14px 34px rgba(14, 165, 233, 0.18);
+    background: linear-gradient(120deg, rgba(16, 185, 129, 0.24), rgba(14, 165, 233, 0.22));
+    outline: none;
+  }
+
+  .product-card-view__title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 900;
+    font-size: 15px;
+  }
+
+  .product-card-view__subtitle {
+    margin-top: 6px;
+    color: #065f46;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+  }
+
+  .dark .product-card-view {
+    background: linear-gradient(120deg, rgba(16, 185, 129, 0.2), rgba(14, 165, 233, 0.16));
+    border-color: rgba(16, 185, 129, 0.35);
+    color: #e0fdfa;
+    box-shadow: 0 10px 22px rgba(0, 0, 0, 0.32);
+  }
+
+  .dark .product-card-view__subtitle {
+    color: #c3f3e3;
+  }
+
+  .product-card-view .badge-outline {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 10px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.6);
+    border: 1px solid rgba(16, 185, 129, 0.4);
+    color: #0f766e;
+    font-weight: 800;
+    font-size: 12px;
+  }
+
+  .dark .product-card-view .badge-outline {
+    background: rgba(255, 255, 255, 0.12);
+    color: #bbf7d0;
+  }
+
 
 
 
@@ -3830,13 +3897,64 @@
       noProductMsg.classList.toggle('hidden', hasProducts);
     }
 
+    function resolveProductUrl(card) {
+      if (!card) return '';
+      const dataset = card.dataset || {};
+      const urlCandidate = dataset.productUrl || dataset.url;
+      if (urlCandidate) return urlCandidate;
+
+      const productId = dataset.productId || dataset.id || dataset.product || dataset.productKey;
+      if (productId) return `/product.html?id=${encodeURIComponent(productId)}`;
+
+      const actionButton = card.querySelector('[data-product-id], [data-id], [data-product]');
+      const actionId = actionButton?.dataset?.productId || actionButton?.dataset?.id || actionButton?.dataset?.product;
+      if (actionId) return `/product.html?id=${encodeURIComponent(actionId)}`;
+
+      return '';
+    }
+
+    function renderProductCta(card) {
+      if (!card || card.querySelector('.product-card-view')) return;
+      const url = resolveProductUrl(card);
+      if (!url) return;
+
+      const cta = document.createElement('a');
+      cta.className = 'product-card-view';
+      cta.href = url;
+      cta.target = '_blank';
+      cta.rel = 'noopener noreferrer';
+      cta.innerHTML = `
+        <div class="product-card-view__title">
+          <span class="badge-outline"><i class="ri-road-map-line" aria-hidden="true"></i>مشاهده ویترین</span>
+          <span>نمایش صفحه محصول</span>
+        </div>
+        <div class="product-card-view__subtitle">
+          <i class="ri-arrow-left-up-line" aria-hidden="true"></i>
+          <span>برای دیدن جزئیات، نظرات و تصاویر بیشتر لمس کنید</span>
+        </div>
+      `;
+
+      card.appendChild(cta);
+    }
+
+    function enhanceProductCards() {
+      if (!productsMobileList) return;
+      Array.from(productsMobileList.children || []).forEach((card) => renderProductCta(card));
+    }
+
     [productsTableBody, productsMobileList].forEach((el) => {
       if (!el || typeof MutationObserver === 'undefined') return;
       const observer = new MutationObserver(updateProductEmptyState);
       observer.observe(el, { childList: true });
     });
 
+    if (productsMobileList && typeof MutationObserver !== 'undefined') {
+      const cardObserver = new MutationObserver(enhanceProductCards);
+      cardObserver.observe(productsMobileList, { childList: true });
+    }
+
     updateProductEmptyState();
+    enhanceProductCards();
 
     if (noProductAddBtn) {
       noProductAddBtn.addEventListener('click', () => {
