@@ -3573,6 +3573,24 @@
       // حذف مقادیر null/undefined برای جلوگیری از خطاهای دسترسی به خصوصیت
       const validShops = Array.isArray(shops) ? shops.filter(Boolean) : [];
 
+      const resolveShopImage = (shop) => {
+        const candidate = shop?.boardImage
+          || shop?.coverImage
+          || shop?.banner
+          || (Array.isArray(shop?.images) ? shop.images[0] : shop?.image);
+        const src = candidate || '/assets/images/shop-placeholder.svg';
+        if (/^https?:/i.test(src) || src.startsWith('data:') || src.startsWith('//')) return src;
+        if (src.startsWith('/')) return src;
+        return `/${src.replace(/^\/+/, '')}`;
+      };
+
+      const buildShopLink = (shop) => {
+        const slug = shop?.shopurl || shop?.shopUrl || shop?.slug;
+        if (slug) return `/shop.html?shopurl=${encodeURIComponent(slug)}`;
+        if (shop?._id) return `/shop.html?id=${encodeURIComponent(shop._id)}`;
+        return '';
+      };
+
       if (validShops.length === 0) {
         html = `<div class="glass px-6 py-7 fadein text-center text-gray-400">هیچ مغازه‌ای در لیست محبوب‌ها نیست.</div>`;
       } else {
@@ -3582,11 +3600,27 @@
           <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             ${validShops.map(s => {
               const shop = s || {};
+              const cover = resolveShopImage(shop);
+              const linkUrl = buildShopLink(shop);
+              const category = shop.category || shop.subcategory || 'دسته‌بندی ثبت نشده';
               return `
-              <div class="bg-white rounded-xl shadow border border-gray-100 p-4 flex flex-col gap-2 text-center">
-                <span class="text-lg font-bold text-[#10b981]">${shop.storename || '-'}</span>
-                <span class="text-xs text-gray-500">${shop.category || ''}</span>
-                ${shop._id ? `<button data-id="${shop._id}" class="removeFavShop mt-2 px-3 py-1.5 rounded-lg bg-red-50 text-red-600 border border-red-100 text-sm">حذف از محبوب‌ها</button>` : ''}
+              <div class="relative overflow-hidden rounded-2xl bg-white border border-emerald-50 shadow-xl transition hover:-translate-y-1 hover:shadow-2xl flex flex-col">
+                <div class="relative h-32 w-full overflow-hidden">
+                  <img src="${cover}" alt="${shop.storename || 'فروشگاه'}" class="w-full h-full object-cover" loading="lazy" onerror="this.src='/assets/images/shop-placeholder.svg'" />
+                  <div class="absolute inset-0 bg-gradient-to-t from-black/40 to-black/10"></div>
+                  <span class="absolute top-3 left-3 bg-white/80 text-emerald-600 text-[11px] font-extrabold px-3 py-1 rounded-full shadow-sm">محبوب</span>
+                </div>
+                <div class="p-4 flex flex-col gap-2 text-right">
+                  <div class="flex items-center justify-between gap-2 flex-wrap">
+                    <span class="text-lg font-black text-slate-800">${shop.storename || '-'}</span>
+                    <span class="text-[11px] px-2 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-100">${category}</span>
+                  </div>
+                  ${shop.city || shop.address ? `<p class="text-xs text-gray-500 flex items-center gap-1"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="text-emerald-500"><path stroke-linecap="round" stroke-linejoin="round" d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7Zm0 9.5a2.5 2.5 0 1 1 0-5 2.5 2.5 0 0 1 0 5Z"/></svg>${[shop.city, shop.address].filter(Boolean).join('، ')}</p>` : ''}
+                  <div class="flex gap-2 pt-2">
+                    ${linkUrl ? `<a href="${linkUrl}" target="_blank" rel="noopener noreferrer" class="flex-1 brand-btn rounded-xl px-4 py-2 text-sm font-bold flex items-center justify-center gap-2 shadow-sm hover:shadow-lg"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M14 3h7v7m0-7L10 14"/><path stroke-linecap="round" stroke-linejoin="round" d="M5 5h4m-4 4h2m5 10H5a2 2 0 0 1-2-2V5c0-1.1.9-2 2-2h5l4 4v12c0 1.1-.9 2-2 2Z"/></svg>ورود به صفحه مغازه</a>` : ''}
+                    ${shop._id ? `<button data-id="${shop._id}" class="removeFavShop px-4 py-2 rounded-xl border border-red-100 bg-red-50 text-red-600 text-sm font-bold transition hover:bg-red-100">حذف</button>` : ''}
+                  </div>
+                </div>
               </div>
               `;
             }).join('')}
