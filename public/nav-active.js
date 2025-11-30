@@ -51,14 +51,14 @@
     let labelText = 'ورود';
     let accountType = '';
 
-    if (token && user && typeof user === 'object') {
-      targetUrl = 'user/dashboard.html';
-      labelText = 'پنل مشتری';
-      accountType = 'customer';
-    } else if (token && seller && typeof seller === 'object') {
+    if (token && seller && typeof seller === 'object') {
       targetUrl = buildSellerPanelLink(seller);
       labelText = 'پنل فروشنده';
       accountType = 'seller';
+    } else if (token && user && typeof user === 'object') {
+      targetUrl = 'user/dashboard.html';
+      labelText = 'پنل من';
+      accountType = 'customer';
     }
 
     if (loginLink) {
