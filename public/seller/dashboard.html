@@ -1107,6 +1107,7 @@
     border: none;
     outline: none;
     cursor: pointer;
+    overflow: hidden;
   }
 
   .sidebar.expanded .sidebar-link {
@@ -1145,12 +1146,40 @@
     color: #fff;
   }
 
-  .sidebar-link.active,
   .sidebar-link:hover {
-    background: #e0fdfa;
+    background: #eef6ff;
     color: #0ea5e9;
-    font-weight: bold;
-    box-shadow: 0 2px 8px rgba(14, 165, 233, 0.1);
+    font-weight: 700;
+    box-shadow: 0 4px 12px rgba(14, 165, 233, 0.12);
+  }
+
+  .sidebar-link.active {
+    background: linear-gradient(135deg, #e0fdfa 0%, #dbeafe 100%);
+    color: #0284c7;
+    font-weight: 800;
+    box-shadow: 0 8px 18px rgba(14, 165, 233, 0.18);
+  }
+
+  .sidebar-link.active::before {
+    content: '';
+    position: absolute;
+    right: 6px;
+    top: 8px;
+    bottom: 8px;
+    width: 6px;
+    border-radius: 999px;
+    background: linear-gradient(180deg, #0ea5e9, #10b981);
+    box-shadow: 0 6px 16px rgba(14, 165, 233, 0.25);
+  }
+
+  .sidebar-link.active svg path,
+  .sidebar-link:hover svg path {
+    stroke: currentColor;
+  }
+
+  .sidebar-link.active i,
+  .sidebar-link:hover i {
+    color: currentColor;
   }
 
   .sidebar .sidebar-link span {
