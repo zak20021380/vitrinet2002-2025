@@ -73,7 +73,7 @@
     },
     {
       id: 'mobileNavServices',
-      href: '/service-directory.html',
+      href: '/shops-by-category.html?cat=service',
       label: 'خدمات',
       icon: '<path d="M12 3.5a8.5 8.5 0 1 1 0 17 8.5 8.5 0 0 1 0-17Z" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M12 8.25v7.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><path d="M8.25 12h7.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>',
       matches: [
