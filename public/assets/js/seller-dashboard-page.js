@@ -275,6 +275,66 @@ return chats.reduce((sum , chat)=>
 // نگهداری تعداد آخرین پیام‌ها
 let lastMsgCount = 0;
 
+// --- مانیتور کردن لایک محصولات ---
+const productLikeSnapshot = new Map();
+let likePollingInitialized = false;
+let likeNotificationsPrimed = false;
+
+function updateProductLikeSnapshot(products, { notify = false } = {}) {
+  if (!Array.isArray(products) || !products.length) return;
+
+  const canShowNotification = typeof window.showProductLikeNotification === 'function';
+
+  const seenIds = new Set();
+  products.forEach((prod) => {
+    const productId = prod?._id || prod?.id;
+    if (!productId) return;
+
+    seenIds.add(productId);
+    const currentLikes = Number.isFinite(prod.likesCount) ? Number(prod.likesCount) : 0;
+    const previousLikes = productLikeSnapshot.get(productId);
+
+    if (notify && canShowNotification && Number.isFinite(previousLikes) && currentLikes > previousLikes) {
+      window.showProductLikeNotification({
+        productTitle: prod.title,
+        totalLikes: currentLikes
+      });
+    }
+
+    productLikeSnapshot.set(productId, currentLikes);
+  });
+
+  // حذف محصولات قدیمی از عکس فوری
+  Array.from(productLikeSnapshot.keys()).forEach((id) => {
+    if (!seenIds.has(id)) {
+      productLikeSnapshot.delete(id);
+    }
+  });
+
+  likeNotificationsPrimed = true;
+}
+
+function startProductLikePolling() {
+  if (likePollingInitialized) return;
+  likePollingInitialized = true;
+
+  const pollLikes = async (shouldNotify) => {
+    if (!window.seller?.id) return;
+    try {
+      const res = await apiFetch(`/api/products?sellerId=${window.seller.id}`);
+      if (!res.ok) return;
+      const products = await res.json();
+      updateProductLikeSnapshot(products, { notify: shouldNotify && likeNotificationsPrimed });
+    } catch (err) {
+      console.warn('Unable to poll product likes:', err);
+    }
+  };
+
+  // اولین بار فقط عکس فوری می‌گیریم
+  pollLikes(false);
+  setInterval(() => pollLikes(true), 20000);
+}
+
 // فراخوانی تعداد پیام‌های خوانده‌نشده جدید (می‌توانید همان fetchUnreadCount را مجدداً استفاده کنید)
 async function fetchNewMsgCount(){
   try{
@@ -314,17 +374,19 @@ function startMessagePolling() {
 
 
 // ————————— راه‌اندازی اولیه —————————
-document.addEventListener('DOMContentLoaded', async () => {
-  setupSubscriptionExpiryModal();
+  document.addEventListener('DOMContentLoaded', async () => {
+    setupSubscriptionExpiryModal();
 
-  // ۱) دریافت فروشنده
-  window.seller = await fetchCurrentSeller();
-  console.log('🚀 seller object:', window.seller);
-  document.dispatchEvent(new CustomEvent('seller:ready', { detail: { seller: window.seller } }));
+    // ۱) دریافت فروشنده
+    window.seller = await fetchCurrentSeller();
+    console.log('🚀 seller object:', window.seller);
+    document.dispatchEvent(new CustomEvent('seller:ready', { detail: { seller: window.seller } }));
 
-  if (shouldShowSubscriptionExpiryModal(window.seller)) {
-    setTimeout(() => openSubscriptionExpiryModal(), 160);
-  }
+    startProductLikePolling();
+
+    if (shouldShowSubscriptionExpiryModal(window.seller)) {
+      setTimeout(() => openSubscriptionExpiryModal(), 160);
+    }
 
   const accountantShortcut = document.getElementById('accountantShortcut');
   if (accountantShortcut) {
@@ -727,6 +789,7 @@ if (!window.seller?.id) {
       return;
     }
     noProductMsg.classList.add('hidden');
+    updateProductLikeSnapshot(products, { notify: likeNotificationsPrimed });
     window._allProducts = products;
     document.dispatchEvent(new CustomEvent('products:updated', { detail: { products } }));
 
