@@ -667,14 +667,15 @@ function updateAuthNavigationState() {
   let labelText = 'ورود';
   let accountType = '';
 
-  if (token && seller && typeof seller === 'object') {
-    targetUrl = buildSellerPanelLink(seller);
-    labelText = 'پنل فروشنده';
-    accountType = 'seller';
-  } else if (token && user && typeof user === 'object') {
+  // در صورت وجود اطلاعات هر دو نوع حساب، ابتدا کاربر عادی را در اولویت قرار می‌دهیم
+  if (token && user && typeof user === 'object') {
     targetUrl = 'user/dashboard.html';
     labelText = 'پنل مشتری';
     accountType = 'customer';
+  } else if (token && seller && typeof seller === 'object') {
+    targetUrl = buildSellerPanelLink(seller);
+    labelText = 'پنل فروشنده';
+    accountType = 'seller';
   }
 
   if (loginLink) {
