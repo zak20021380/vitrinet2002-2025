@@ -1176,7 +1176,6 @@ function renderComplimentaryPlan(planRaw) {
   const planCtaBtn = document.getElementById('plan-renew-btn');
   const planNameEl = document.getElementById('plan-name');
   const progressTrack = document.getElementById('plan-progress');
-  const giftNote = document.getElementById('plan-gift-note');
 
   const hasAnyPlanLifecycle = plan.activeNow || plan.isActive || plan.hasExpired || plan.startDate || plan.endDate;
   const planlessNudge = !plansDisabled && !hasAnyPlanLifecycle;
@@ -1324,12 +1323,6 @@ function renderComplimentaryPlan(planRaw) {
     } else {
       subtextEl.textContent = subtext;
     }
-  }
-
-  if (giftNote) {
-    giftNote.textContent = planlessNudge
-      ? 'پلن هدیه ویترینت هنوز فعال نشده و دسترسی شما غیرفعال است.'
-      : 'پلن هدیه موقتاً غیرفعال شده است؛ برای فعال‌سازی مجدد با پشتیبانی هماهنگ کنید.';
   }
 
   window.__COMPLIMENTARY_PLAN_NORMALIZED__ = plan;
