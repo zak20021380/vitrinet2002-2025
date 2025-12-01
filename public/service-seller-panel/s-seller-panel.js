@@ -1302,7 +1302,7 @@ function renderComplimentaryPlan(planRaw) {
       const planLabel = plan.title ? `پلن «${plan.title}»` : 'پلن رایگان';
       messageEl.textContent = `${planLabel} تا ${expiryLabel} فعال است. ${urgency} بدون هزینه از تمام امکانات استفاده کنید و در صورت نیاز از همین جا ارتقا دهید.`;
     } else if (plan.hasExpired) {
-      messageEl.textContent = 'دوره رایگان تمام شده است. برای ادامه، یکی از پلن‌ها را انتخاب کنید یا با پشتیبانی هماهنگ شوید.';
+      messageEl.textContent = 'دوره پلن به پایان رسیده است. برای ادامه از بخش «پلن‌ها» پلن جدیدی انتخاب و فعال کنید.';
     } else if (plan.isActive) {
       const startText = startLabel ? `از ${startLabel}` : 'به‌زودی';
       messageEl.textContent = `پلن رایگان شما ${startText} فعال می‌شود. هنگام شروع، همینجا اطلاع‌رسانی خواهد شد.`;
@@ -1318,7 +1318,7 @@ function renderComplimentaryPlan(planRaw) {
     const planLabel = plan.title ? `پلن «${plan.title}»` : 'پلن رایگان';
     subtext = `${planLabel} فعال است${expiryLabel ? ` و تا ${expiryLabel} معتبر می‌ماند` : ''}.`;
   } else if (plan.hasExpired) {
-    subtext = 'دوره رایگان پایان یافته است. برای تمدید یا خرید پلن جدید، با پشتیبانی هماهنگ کنید.';
+    subtext = 'پلن قبلی منقضی شده است. از بخش «پلن‌ها» یکی از گزینه‌ها را انتخاب کنید تا دسترسی کامل دوباره فعال شود.';
   } else if (plan.isActive) {
     subtext = startLabel
       ? `پلن رایگان شما از ${startLabel} فعال می‌شود و وضعیت در همین صفحه بروزرسانی خواهد شد.`
@@ -1426,7 +1426,10 @@ const PlanAccessGuard = (() => {
   // === منطق هوشمند تشخیص فعال بودن ===
   const hasActivePlan = (plan) => {
     // 1. اگر آبجکت پلن معتبر از سمت سرور اومده باشه
-    if (plan && (plan.activeNow || plan.isActive)) return true;
+    if (plan) {
+      if (plan.hasExpired) return false;
+      if (plan.activeNow || plan.isActive) return true;
+    }
 
     // 2. [مهم] چک کردن اطلاعات فروشنده در LocalStorage
     // اگر API پلن null داد، شاید در اطلاعات فروشنده (api/sellers/me) چیزی باشه
