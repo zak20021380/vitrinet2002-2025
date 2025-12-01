@@ -17,6 +17,669 @@
     <script src="/nav-active.js" defer></script>
     <link rel="stylesheet" href="service-shops.css">
 
+    <style>
+:root {
+  --primary: #7C83FD;
+  --secondary: #FFB677;
+  --background: #F7FAFE;
+  --text: #232946;
+  --success: #52b788;
+  --danger: #ee6c4d;
+}
+/* ===== Modern & Responsive Shop Header ===== */
+.shop-header {
+  position: sticky;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 60;
+  background: rgba(255, 255, 255, 0.98);
+  border-bottom: 1px solid rgba(124, 131, 253, 0.1);
+  backdrop-filter: blur(20px);
+  box-shadow: 0 2px 20px rgba(35, 41, 70, 0.06);
+  transition: all 0.3s ease;
+}
+
+.shop-header .header-shell {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 1rem 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 2rem;
+}
+
+/* ===== Brand Section ===== */
+.brand-area {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  flex: 0 0 auto;
+}
+
+.menu-toggle {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  border: none;
+  background: rgba(124, 131, 253, 0.08);
+  color: var(--primary);
+  cursor: pointer;
+  transition: all 0.25s ease;
+  flex-shrink: 0;
+}
+
+.menu-toggle:hover {
+  background: rgba(124, 131, 253, 0.15);
+  transform: scale(1.05);
+}
+
+.menu-toggle:active {
+  transform: scale(0.95);
+}
+
+.menu-toggle svg {
+  width: 20px;
+  height: 20px;
+  stroke-width: 2.5;
+}
+
+.home-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+  text-decoration: none;
+  background: transparent;
+  padding: 0;
+  color: inherit;
+  transition: transform 0.2s ease;
+}
+
+.home-link:hover {
+  transform: translateX(4px);
+}
+
+.brand-label {
+  font-size: clamp(1.1rem, 1vw + 0.8rem, 1.5rem);
+  font-weight: 900;
+  letter-spacing: -0.02em;
+  line-height: 1;
+  background: linear-gradient(135deg, var(--primary) 0%, #52b788 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  flex-shrink: 0;
+}
+
+.logo-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.logo-text {
+  font-family: 'Vazirmatn', sans-serif;
+  font-weight: 700;
+  font-size: clamp(1.05rem, 0.9vw + 0.7rem, 1.4rem);
+  color: var(--text);
+  line-height: 1.2;
+  transition: color 0.2s ease;
+  margin: 0;
+  padding: 0;
+}
+
+.home-link:hover .logo-text {
+  color: var(--primary);
+}
+
+.logo-caption {
+  font-size: clamp(0.75rem, 0.7vw + 0.6rem, 0.9rem);
+  color: #6b7280;
+  font-weight: 500;
+  line-height: 1.3;
+  margin: 0;
+  padding: 0;
+}
+
+/* ===== Customer Badge (Compact) ===== */
+/* ===== Customer Badge (Fixed & Responsive) ===== */
+.badge-cluster {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  /* در دسکتاپ کمی فاصله می‌دهیم */
+  margin-left: 1rem;
+}
+
+.customer-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.7rem;
+  /* ارتفاع ثابت برای هماهنگی با دکمه‌های سمت چپ */
+  height: 44px;
+  padding: 0 1.1rem;
+  border-radius: 14px;
+  background: linear-gradient(135deg, rgba(124, 131, 253, 0.92) 0%, rgba(82, 183, 136, 0.9) 100%);
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  color: #fff;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, filter 0.2s ease;
+  white-space: nowrap; /* جلوگیری از شکستن متن */
+  box-shadow: 0 12px 30px rgba(124, 131, 253, 0.28), 0 6px 18px rgba(82, 183, 136, 0.24);
+}
+
+.customer-badge:hover {
+  filter: brightness(1.03);
+  transform: translateY(-1px);
+  box-shadow: 0 14px 32px rgba(124, 131, 253, 0.32), 0 8px 20px rgba(82, 183, 136, 0.26);
+}
+
+.customer-badge:active {
+  transform: translateY(0);
+}
+
+.customer-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px; /* سایز آیکون کمی بزرگ‌تر برای تاکید */
+  height: 28px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.15);
+  color: #fff;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.35), 0 2px 6px rgba(0, 0, 0, 0.08);
+  backdrop-filter: blur(6px);
+}
+
+.customer-icon svg {
+  width: 16px;
+  height: 16px;
+}
+
+.customer-meta {
+  display: flex;
+  flex-direction: row; /* مهم: چیدمان افقی شد */
+  align-items: center;
+  gap: 0.55rem;
+  line-height: 1;
+}
+
+.customer-count {
+  color: #f7fafc;
+  font-size: 0.92rem;
+  text-shadow: 0 1px 8px rgba(0, 0, 0, 0.16);
+}
+
+/* متن عضویت سریع */
+.customer-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.78rem;
+  color: #e0f5ff;
+  background: rgba(255, 255, 255, 0.12);
+  padding: 4px 8px;
+  border-radius: 999px;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.28);
+}
+
+.customer-cta svg {
+  width: 12px;
+  height: 12px;
+}
+
+/* === تنظیمات ریسپانسیو اختصاصی بج === */
+
+/* در تبلت و موبایل فاصله مارجین حذف شود */
+@media (max-width: 1024px) {
+  .badge-cluster {
+    margin-left: 0;
+  }
+}
+
+/* در موبایل (زیر 640 پیکسل) */
+@media (max-width: 640px) {
+  .customer-badge {
+    padding: 0 0.75rem;
+    height: 38px; /* کمی کوتاه‌تر در موبایل */
+    gap: 0.5rem;
+  }
+
+  /* متن "عضویت سریع" را در موبایل مخفی می‌کنیم تا جا باز شود */
+  .customer-cta {
+    display: none;
+  }
+
+  .customer-icon {
+    width: 24px;
+    height: 24px;
+  }
+
+  .customer-count {
+    font-size: 0.8rem;
+  }
+}
+
+/* ===== Mobile Header Actions (فقط در موبایل) ===== */
+.mobile-header-actions {
+  display: none;
+  align-items: center;
+  gap: 0.5rem;
+  flex: 0 0 auto;
+}
+
+  .mobile-action-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
+    padding: 0.55rem 0.95rem;
+    background: linear-gradient(135deg, var(--primary) 0%, #52b788 100%);
+    border: none;
+    border-radius: 10px;
+    color: white;
+  font-weight: 700;
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  white-space: nowrap;
+  text-decoration: none;
+  box-shadow: 0 2px 8px rgba(124, 131, 253, 0.25);
+}
+
+.mobile-action-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(124, 131, 253, 0.4);
+}
+
+.mobile-action-btn:active {
+  transform: translateY(0);
+}
+
+  .mobile-action-btn svg {
+    width: 16px;
+    height: 16px;
+    stroke-width: 2.5;
+  }
+
+/* ===== Header Actions ===== */
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex: 0 0 auto;
+}
+
+.action-item {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.6rem 1.1rem;
+  border-radius: 12px;
+  border: 1px solid rgba(124, 131, 253, 0.18);
+  background: rgba(124, 131, 253, 0.07);
+  color: var(--text);
+  font-weight: 800;
+  font-size: 0.92rem;
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+  white-space: nowrap;
+  box-shadow: 0 4px 18px rgba(124, 131, 253, 0.12);
+}
+
+.action-item:hover {
+  border-color: var(--primary);
+  background: linear-gradient(135deg, rgba(124, 131, 253, 0.15) 0%, rgba(82, 183, 136, 0.15) 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 10px 24px rgba(124, 131, 253, 0.16);
+}
+
+.action-item:active {
+  transform: translateY(0);
+}
+
+.action-item svg {
+  width: 18px;
+  height: 18px;
+  stroke-width: 2.5;
+}
+
+.action-item span {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.rating-count-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.15rem 0.55rem;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.45);
+  color: #374151;
+  font-size: 0.76rem;
+  font-weight: 800;
+  border: 1px solid rgba(124, 131, 253, 0.18);
+  box-shadow: 0 8px 18px rgba(124, 131, 253, 0.12);
+}
+
+.rating-count-pill span {
+  margin: 0 0.2rem;
+  font-weight: 900;
+}
+
+/* ===== Fav Badge (Compact) ===== */
+.fav-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.35rem 0.8rem;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.92);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  color: #f59e0b;
+  font-weight: 700;
+  font-size: 0.9rem;
+  box-shadow: 0 10px 20px rgba(249, 115, 22, 0.12);
+}
+
+.fav-badge svg {
+  width: 16px;
+  height: 16px;
+}
+
+/* ===== Customer Badge - alternate minimal view ===== */
+.customer-badge.minimal {
+  background: linear-gradient(135deg, rgba(124, 131, 253, 0.95) 0%, rgba(82, 183, 136, 0.92) 100%);
+  box-shadow: 0 10px 28px rgba(124, 131, 253, 0.22), 0 8px 18px rgba(82, 183, 136, 0.2);
+}
+
+.customer-badge.minimal .customer-icon {
+  background: rgba(255, 255, 255, 0.22);
+}
+
+.customer-badge.minimal .customer-cta {
+  display: none;
+}
+
+/* ===== Adaptive Layouts ===== */
+@media (max-width: 1200px) {
+  .shop-header .header-shell {
+    padding: 1rem 1.25rem;
+    gap: 1rem;
+  }
+
+  .brand-label {
+    font-size: 1.1rem;
+  }
+
+  .customer-badge {
+    height: 42px;
+    padding: 0 1rem;
+  }
+}
+
+@media (max-width: 1100px) {
+  .shop-header .header-shell {
+    gap: 1rem;
+  }
+  .brand-area {
+    gap: 1rem;
+  }
+  .customer-badge {
+    padding: 0 0.95rem;
+    font-size: 0.88rem;
+  }
+}
+
+@media (max-width: 1024px) {
+  .shop-header .header-shell {
+    padding: 0.9rem 1.25rem;
+    gap: 0.9rem;
+  }
+
+  .brand-area {
+    gap: 0.9rem;
+  }
+
+  .customer-badge {
+    padding: 0 0.9rem;
+    gap: 0.6rem;
+  }
+}
+
+@media (max-width: 980px) {
+  .home-link {
+    gap: 0.6rem;
+  }
+
+  .brand-label {
+    font-size: clamp(1rem, 0.8vw + 0.7rem, 1.25rem);
+  }
+
+  .logo-text {
+    font-size: clamp(1rem, 0.85vw + 0.65rem, 1.25rem);
+  }
+
+  .logo-caption {
+    font-size: clamp(0.72rem, 0.6vw + 0.58rem, 0.85rem);
+  }
+}
+
+/* Adaptive layout for medium screens */
+@media (max-width: 920px) {
+  .shop-header .header-shell {
+    gap: 0.85rem;
+    padding: 0.9rem 1.1rem;
+  }
+
+  .brand-area {
+    gap: 0.85rem;
+  }
+
+  .customer-badge {
+    padding: 0 0.85rem;
+    font-size: 0.86rem;
+  }
+
+  .action-item {
+    padding: 0.65rem 1rem;
+  }
+}
+
+/* Tablet Portrait */
+@media (max-width: 900px) {
+  .menu-toggle {
+    display: flex;
+  }
+
+  .badge-cluster {
+    flex: 0 1 auto;
+  }
+
+  /* نمایش دکمه‌های موبایل */
+  .mobile-header-actions {
+    display: flex;
+  }
+
+  /* مخفی کردن دکمه آدرس از منوی اصلی */
+  .header-actions #addressBtn {
+    display: none;
+  }
+
+  .header-actions {
+    position: fixed;
+    top: 70px;
+    left: 1rem;
+    right: 1rem;
+    flex-direction: column;
+    background: white;
+    border: 1px solid rgba(124, 131, 253, 0.15);
+    border-radius: 16px;
+    padding: 0;
+    gap: 0;
+    box-shadow: 0 8px 32px rgba(35, 41, 70, 0.12);
+    max-height: 0;
+    overflow: hidden;
+    opacity: 0;
+    transform: translateY(-10px);
+    pointer-events: none;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .shop-header.menu-open .header-actions {
+    max-height: 300px;
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+    padding: 0.75rem;
+    gap: 0.5rem;
+  }
+
+  .action-item {
+    width: 100%;
+    justify-content: flex-start;
+    padding: 0.75rem 1rem;
+    border-radius: 12px;
+    border: none;
+    background: rgba(124, 131, 253, 0.05);
+  }
+
+  .action-item span {
+    display: inline;
+  }
+
+  .action-item:hover {
+    background: var(--primary);
+    transform: translateX(4px);
+    box-shadow: 0 2px 8px rgba(124, 131, 253, 0.2);
+  }
+}
+
+/* Mobile */
+@media (max-width: 768px) {
+  .shop-header .header-shell {
+    padding: 0.875rem 1rem;
+    gap: 0.75rem;
+  }
+
+  .brand-area {
+    gap: 1rem;
+  }
+
+  .customer-badge {
+    font-size: 0.85rem;
+    padding: 0.5rem 0.95rem;
+    gap: 0.55rem;
+  }
+
+  .customer-icon {
+    width: 32px;
+    height: 32px;
+  }
+
+  .customer-icon svg {
+    width: 15px;
+    height: 15px;
+  }
+
+  /* تنظیم اندازه دکمه‌های موبایل */
+  .mobile-action-btn {
+    font-size: 0.82rem;
+    padding: 0.55rem 0.9rem;
+    gap: 0.4rem;
+  }
+
+  .mobile-action-btn svg {
+    width: 14px;
+    height: 14px;
+  }
+}
+
+/* Small Mobile */
+@media (max-width: 640px) {
+  .shop-header .header-shell {
+    padding: 0.75rem 0.875rem;
+    gap: 0.5rem;
+  }
+
+  .brand-area {
+    gap: 0.75rem;
+  }
+
+  .home-link {
+    gap: 0.6rem;
+  }
+
+  .logo-caption {
+    display: none;
+  }
+
+  .customer-badge {
+    padding: 0.45rem 0.85rem;
+    font-size: 0.8rem;
+  }
+
+  .customer-meta {
+    line-height: 1.1;
+  }
+
+  /* اندازه کوچک‌تر برای دکمه‌های موبایل */
+  .mobile-action-btn {
+    font-size: 0.78rem;
+    padding: 0.5rem 0.8rem;
+    gap: 0.35rem;
+  }
+
+  .mobile-action-btn svg {
+    width: 13px;
+    height: 13px;
+  }
+
+  .mobile-action-btn span {
+    display: inline;
+  }
+}
+
+/* Extra Small Mobile */
+@media (max-width: 480px) {
+  .shop-header .header-shell {
+    padding: 0.75rem;
+    gap: 0.5rem;
+  }
+
+  .menu-toggle {
+    width: 36px;
+    height: 36px;
+  }
+
+  .customer-badge {
+    padding: 0.4rem 0.7rem;
+  }
+
+  /* برای صفحات خیلی کوچک، فقط آیکون‌ها نمایش داده می‌شوند */
+  .mobile-action-btn {
+    font-size: 0.72rem;
+    padding: 0.45rem 0.7rem;
+    gap: 0.3rem;
+  }
+
+  .mobile-action-btn svg {
+    width: 12px;
+    height: 12px;
+  }
+}
+    </style>
+
 <!-- TODO: فعال‌سازی پست‌هاگ را هنگام انتشار فراموش نکنید | TODO: Enable PostHog analytics when going live -->
 <!--
 <script>
@@ -72,178 +735,90 @@
   <button type="button" class="shop-moderation-banner__close" data-dismiss="shop-moderation-banner" aria-label="بستن پیام">×</button>
 </div>
 
-    <!-- Sticky Header -->
-    <!-- header desktop redesign start -->
-<!-- header desktop redesign start -->
-<!-- ===== Modern, Professional Header ===== -->
-<header id="main-header" class="sticky top-0 z-[90] isolate backdrop-blur-2xl bg-gradient-to-b from-white/98 via-white/95 to-white/90 border-b border-slate-200/80 shadow-lg transition-all duration-300">
-  <!-- Elegant gradient line -->
-  <div aria-hidden="true" class="h-[3px] w-full bg-gradient-to-l from-cyan-500 via-blue-600 to-purple-600 shadow-sm"></div>
-
-  <!-- ========== Mobile - Redesigned ========== -->
-  <div id="mobile-header" class="md:hidden text-[13px]">
-    <!-- Top Section: Brand + Actions -->
-    <div class="flex items-center justify-between px-4 py-2.5 bg-gradient-to-b from-white via-slate-50/50 to-transparent">
-      <!-- Brand Logo with Icon -->
-      <a href="/index.html" class="flex items-center gap-2 group">
-        <div class="w-8 h-8 rounded-xl bg-gradient-to-br from-blue-600 via-blue-700 to-purple-600 flex items-center justify-center shadow-lg shadow-blue-500/30 group-hover:shadow-blue-500/50 transition-all duration-300 group-hover:scale-105">
-          <i class="fa-solid fa-store text-white text-[12px]"></i>
+            <!-- Sticky Header -->
+    <!-- Header aligned with shop.html -->
+<header class="shop-header" id="shopHeader" role="banner">
+  <div class="header-shell">
+    <!-- Brand & Logo Section -->
+    <div class="brand-area">
+      <button class="menu-toggle" id="headerMenuToggle" aria-label="باز و بسته کردن منو" aria-expanded="false" aria-controls="headerActions" type="button">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="3" y1="6" x2="21" y2="6"/>
+          <line x1="3" y1="12" x2="21" y2="12"/>
+          <line x1="3" y1="18" x2="21" y2="18"/>
+        </svg>
+      </button>
+      <a href="/" class="home-link" title="رفتن به صفحه اصلی" aria-label="بازگشت به صفحه اصلی">
+        <span class="brand-label">ویترینت</span>
+        <div class="logo-wrap">
+          <h1 class="logo-text logo-txt" id="shopLogoText">نئون استایل</h1>
+          <p class="logo-caption logo-tagline">پوشاک مدرن و اکسسوری خاص</p>
         </div>
-        <span class="font-black text-[14px] bg-gradient-to-l from-blue-600 via-blue-700 to-purple-600 bg-clip-text text-transparent tracking-tight leading-none">
-          ویترینت
-        </span>
       </a>
-
-      <!-- Action Buttons -->
-      <div class="flex items-center gap-2">
-        <button id="mobile-address-chip" data-open="addressModal" aria-label="آدرس"
-                class="h-8 px-3 rounded-xl bg-gradient-to-br from-blue-50 to-blue-100/60 border border-blue-200/70 hover:border-blue-300 active:scale-95 transition-all duration-200 text-[11px] font-bold text-blue-700 flex items-center gap-1.5 shadow-sm hover:shadow-md">
-          <i class="fa-solid fa-location-dot text-blue-600 text-[11px]"></i>
-          <span class="max-[360px]:hidden">آدرس</span>
-        </button>
-        <button id="mobile-report-trigger" data-open="reportModal" aria-label="گزارش"
-                class="h-8 w-8 grid place-items-center rounded-xl bg-gradient-to-br from-slate-50 to-slate-100/60 border border-slate-200/70 hover:border-slate-300 active:scale-95 transition-all duration-200 shadow-sm hover:shadow-md">
-          <i class="fa-regular fa-flag text-slate-700 text-[12px]"></i>
-        </button>
-      </div>
     </div>
 
-    <!-- Shop Name Section - More Prominent -->
-    <div class="px-4 pb-2.5">
-      <div class="bg-gradient-to-br from-white via-blue-50/40 to-purple-50/20 rounded-2xl border border-blue-100/70 shadow-sm backdrop-blur-sm overflow-hidden">
-        <div class="relative px-4 py-2.5">
-          <!-- Decorative corner accent -->
-          <div class="absolute top-0 left-0 w-20 h-20 bg-gradient-to-br from-blue-400/10 to-transparent rounded-full blur-2xl"></div>
-          <div class="absolute bottom-0 right-0 w-16 h-16 bg-gradient-to-tl from-purple-400/10 to-transparent rounded-full blur-2xl"></div>
-
-          <div class="relative flex items-center justify-center gap-2">
-            <div class="flex-1 text-center">
-              <h1 id="header-shop-name-mobile"
-                  class="text-[15px] font-black text-slate-900 truncate mb-0.5"
-                  title="نام فروشگاه">
-                نام فروشگاه
-              </h1>
-              <p class="text-[10px] font-medium text-slate-500">صفحه خدمات و محصولات</p>
-            </div>
-          </div>
+    <!-- Customer Badge -->
+    <div class="badge-cluster">
+      <button id="customerBadge" class="customer-badge" type="button" aria-label="مشاهده مشتریان و عضویت سریع">
+        <span class="customer-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+            <circle cx="9" cy="7" r="4"/>
+            <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+            <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+          </svg>
+        </span>
+        <div class="customer-meta">
+          <span class="customer-count"><span id="customerCountBadge" data-customer-count>0</span> مشتری</span>
+          <span class="customer-cta">عضویت سریع
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 5v14m7-7H5"/>
+            </svg>
+          </span>
         </div>
-      </div>
+      </button>
     </div>
 
-    <!-- keep stub for your scroll logic -->
-    <div id="mobile-chips" class="hidden h-0 overflow-hidden"></div>
-
-    <!-- Customer Section - Redesigned -->
-    <div class="px-4 pb-3">
-      <div class="relative overflow-hidden rounded-2xl bg-gradient-to-br from-blue-600 via-blue-600/90 to-blue-700 shadow-lg shadow-blue-500/30 border border-blue-400/40" data-customer-section>
-        <!-- Animated background pattern -->
-        <div class="absolute inset-0 opacity-20">
-          <div class="absolute top-0 right-0 w-32 h-32 bg-white/90 rounded-full blur-3xl"></div>
-          <div class="absolute bottom-0 left-0 w-24 h-24 bg-indigo-200/80 rounded-full blur-2xl"></div>
-        </div>
-
-        <div class="relative flex items-center justify-between px-4 py-2.5">
-          <!-- Customer Count -->
-          <div class="flex items-center gap-3">
-            <div class="w-10 h-10 rounded-xl bg-white/15 backdrop-blur-sm flex items-center justify-center border border-white/30 shadow-inner">
-              <i class="fa-solid fa-user-group text-white text-[13px]"></i>
-            </div>
-            <div class="flex flex-col">
-              <span class="text-[10px] font-semibold text-blue-100 tracking-wide uppercase">مشتریان فعال</span>
-              <span class="text-[18px] font-black text-white leading-none" data-customer-count>۰</span>
-            </div>
-          </div>
-
-          <!-- Follow Button -->
-          <button type="button"
-                  class="customer-follow-btn inline-flex items-center justify-center gap-1.5 rounded-xl px-4 py-2 text-[11px] font-bold transition-all duration-200 active:scale-95 shadow-lg hover:shadow-xl bg-white/90 text-blue-700"
-                  data-customer-follow>
-            <i class="fa-solid fa-plus text-[10px]"></i>
-            <span>دنبال کردن</span>
-          </button>
-        </div>
-      </div>
+    <!-- Mobile Visible Actions (فقط در موبایل نمایش داده می‌شود) -->
+    <div class="mobile-header-actions">
+      <button id="addressBtnMobile" class="mobile-action-btn" aria-label="مشاهده آدرس فروشگاه" type="button" data-open="addressModal">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+          <circle cx="12" cy="10" r="3"/>
+        </svg>
+        <span>آدرس</span>
+      </button>
     </div>
-  </div>
 
-  <!-- ========== Desktop / Large screens ========== -->
-  <div class="hidden md:block">
-    <div class="max-w-screen-xl mx-auto px-4 py-4">
-      <div class="rounded-3xl bg-gradient-to-br from-white/90 via-white/80 to-blue-50/40 backdrop-blur-xl border border-white/70 ring-1 ring-blue-100/50 shadow-xl px-6 lg:px-8 py-4">
-        <div class="flex items-center justify-between gap-4">
-          <!-- Right: Brand (RTL) with enhanced gradient + logo -->
-          <a href="/index.html" class="group flex items-center gap-3 flex-shrink-0 transition-transform duration-200 hover:scale-[1.02]">
-            <span class="relative inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-600 via-blue-700 to-purple-700 shadow-lg shadow-blue-500/20 ring-2 ring-white/70 ring-offset-2 ring-offset-blue-50 overflow-hidden">
-              <span class="absolute inset-0 bg-white/10 opacity-0 transition-opacity duration-200 group-hover:opacity-100"></span>
-              <svg viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="لوگوی ویترینت" class="w-8 h-8 drop-shadow">
-                <defs>
-                  <linearGradient id="vtMarkGradient" x1="0%" y1="100%" x2="100%" y2="0%">
-                    <stop offset="0%" stop-color="#0ea5e9" />
-                    <stop offset="55%" stop-color="#10b981" />
-                    <stop offset="100%" stop-color="#0fb67f" />
-                  </linearGradient>
-                </defs>
-                <circle cx="24" cy="24" r="22" fill="url(#vtMarkGradient)" />
-                <g fill="none" stroke="#ffffff" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M10 16 L18 32 L26 16" />
-                    <path d="M31 32 L31 16 L39 32 L39 16" />
-                </g>
-              </svg>
-            </span>
-            <div class="flex flex-col items-start leading-tight">
-              <span class="font-black text-lg lg:text-xl bg-gradient-to-l from-blue-600 via-blue-700 to-purple-600 bg-clip-text text-transparent drop-shadow-sm">
-                ویترینت
-              </span>
-              <span class="text-[11px] lg:text-xs font-semibold text-slate-500">بازار آنلاین خدمات و محصولات</span>
-            </div>
-          </a>
-
-          <!-- Center: identity with improved visual hierarchy -->
-          <div class="flex-1 min-w-0 flex items-center justify-center gap-4 text-sm">
-            <h1 id="header-shop-name-lg"
-                class="truncate font-black text-lg lg:text-xl bg-gradient-to-l from-slate-800 to-slate-900 bg-clip-text text-transparent max-w-[42vw] lg:max-w-[48vw]"
-                title="نام فروشگاه">
-              نام فروشگاه
-            </h1>
-            <span class="hidden sm:inline text-slate-300 text-xl">·</span>
-            <button id="desktop-address-chip" data-open="addressModal"
-                    class="hidden sm:inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-br from-blue-50 to-blue-100/80 border border-blue-200/60 shadow-md hover:from-blue-100 hover:to-blue-200/80 hover:shadow-lg active:scale-95 transition-all duration-200 text-[13px] font-bold text-blue-700">
-              <i class="fa-solid fa-location-dot text-blue-600"></i>
-              آدرس
-            </button>
-            <span class="hidden sm:inline text-slate-300 text-xl">·</span>
-            <span class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-br from-amber-50 to-amber-100/80 border border-amber-200/70 shadow-md text-[13px] font-bold text-amber-900">
-              <i class="fa-solid fa-star text-amber-500 text-base"></i>
-              <span id="header-rating-lg" class="font-black text-amber-900">0.0</span>
-              <span class="text-amber-700/70">(<span id="header-count-lg">0</span>)</span>
-            </span>
-            <span class="hidden sm:inline text-slate-300 text-xl">·</span>
-            <div class="inline-flex items-center gap-3 rounded-xl border border-blue-200/60 bg-gradient-to-br from-white to-blue-50/50 px-4 py-2 text-[13px] font-semibold text-slate-700 shadow-md hover:shadow-lg transition-shadow duration-200" data-customer-section>
-              <span class="inline-flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 text-white shadow-md">
-                <i class="fa-solid fa-user-group text-sm"></i>
-              </span>
-              <div class="flex items-center gap-2">
-                <span class="font-bold text-slate-700">مشتریان</span>
-                <span class="text-lg font-black bg-gradient-to-l from-blue-600 to-purple-600 bg-clip-text text-transparent" data-customer-count>۰</span>
-              </div>
-              <button type="button"
-                      class="customer-follow-btn inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2 text-xs font-bold transition-all duration-200 shadow-md hover:shadow-lg active:scale-95 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500"
-                      data-customer-follow>
-                دنبال کردن
-              </button>
-            </div>
-          </div>
-
-          <!-- Left: report button with enhanced styling -->
-          <button id="report-trigger" data-open="reportModal"
-                  class="h-11 px-5 rounded-xl bg-gradient-to-br from-slate-50 to-slate-100/80 border border-slate-200/70 text-blue-700 font-bold shadow-md hover:from-slate-100 hover:to-slate-200/80 hover:shadow-lg active:scale-95 transition-all duration-200 flex-shrink-0">
-            گزارش
-          </button>
-        </div>
-      </div>
-    </div>
+    <!-- Navigation / Actions -->
+    <nav class="header-actions" id="headerActions" aria-label="منوی اصلی">
+      <button id="addressBtn" class="action-item" aria-label="مشاهده آدرس فروشگاه" type="button" data-open="addressModal">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+          <circle cx="12" cy="10" r="3"/>
+        </svg>
+        <span>آدرس</span>
+      </button>
+      <button id="reportBtn" class="action-item" aria-label="ثبت گزارش تخلف" type="button" data-open="reportModal">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"/>
+          <line x1="12" y1="8" x2="12" y2="12"/>
+          <line x1="12" y1="16" x2="12.01" y2="16"/>
+        </svg>
+        <span>گزارش</span>
+      </button>
+      <button id="rateShow" class="action-item" aria-label="مشاهده و ثبت امتیاز" type="button">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+          <polygon points="12 2 15 9 22 9 17 14 19 21 12 17 5 21 7 14 2 9 9 9 12 2"/>
+        </svg>
+        <span><span id="shop-rating">4.8</span> امتیاز</span>
+        <span class="rating-count-pill"><span id="rating-count">0</span> رای</span>
+      </button>
+    </nav>
   </div>
 </header>
+
+
 
 
 <div id="seller-profile" class="max-w-4xl mx-auto p-4 text-center hidden">
