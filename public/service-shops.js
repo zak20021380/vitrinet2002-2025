@@ -246,6 +246,63 @@ async function getShopUrlFromLocation() {
   });
 })();
 
+// ===== Header menu interactions (matching shop.html) =====
+document.addEventListener('DOMContentLoaded', () => {
+  const shopHeader = document.getElementById('shopHeader');
+  const headerMenuToggle = document.getElementById('headerMenuToggle');
+
+  const closeHeaderMenu = () => {
+    if (!shopHeader || !headerMenuToggle) return;
+    shopHeader.classList.remove('menu-open');
+    headerMenuToggle.setAttribute('aria-expanded', 'false');
+  };
+
+  if (shopHeader && headerMenuToggle) {
+    const headerActions = document.getElementById('headerActions');
+
+    headerMenuToggle.addEventListener('click', () => {
+      const isOpen = shopHeader.classList.toggle('menu-open');
+      headerMenuToggle.setAttribute('aria-expanded', String(isOpen));
+    });
+
+    if (headerActions) {
+      headerActions.querySelectorAll('.action-item').forEach((actionButton) => {
+        actionButton.addEventListener('click', () => {
+          if (window.innerWidth < 768) {
+            requestAnimationFrame(closeHeaderMenu);
+          }
+        });
+      });
+    }
+
+    document.addEventListener('click', (event) => {
+      if (!shopHeader.contains(event.target)) {
+        closeHeaderMenu();
+      }
+    });
+
+    document.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape') {
+        closeHeaderMenu();
+      }
+    });
+
+    window.addEventListener('resize', () => {
+      if (window.innerWidth >= 768) {
+        closeHeaderMenu();
+      }
+    });
+  }
+
+  const rateShow = document.getElementById('rateShow');
+  if (rateShow && typeof window.openModalById === 'function') {
+    rateShow.addEventListener('click', (event) => {
+      event.preventDefault();
+      window.openModalById('reviewFormModal');
+    });
+  }
+});
+
 function showToastDark(message, {type='success', durationMs=2600} = {}) {
   const icons = {
     success: 'fas fa-check',
@@ -292,7 +349,7 @@ function showToastDark(message, {type='success', durationMs=2600} = {}) {
 
 (() => {
   // ====== Sticky header + toast ======
-  const header = document.getElementById('main-header');
+  const header = document.getElementById('shopHeader');
   const toast  = document.getElementById('headerToast');
   const sharedIdentifiers = window.__serviceShopIdentifiers || { slug: '', sellerId: '' };
   const ensureIdentifiers = async () => {
@@ -3419,14 +3476,15 @@ function updateSummary(avg, count, ratings) {
   const avgStr = toFa((Number(avg)||0).toFixed(1).replace('.', '٫'));
   setTextAllById('review-average', avgStr);
   setTextAllById('avg-rating', avgStr);
-  
+
   // Update header ratings
-  const avgEn = (Number(avg)||0).toFixed(1);
   const headerRatingMobile = document.getElementById('header-rating-mobile');
   if (headerRatingMobile) headerRatingMobile.textContent = avgStr;
   const headerRatingLg = document.getElementById('header-rating-lg');
   if (headerRatingLg) headerRatingLg.textContent = avgStr;
-  
+  const headerRatingShop = document.getElementById('shop-rating');
+  if (headerRatingShop) headerRatingShop.textContent = avgStr;
+
   const modalAvg = document.getElementById('modal-average');
   if (modalAvg) modalAvg.textContent = avgStr;
   const bigAvg = document.getElementById('summary-average');
@@ -3436,12 +3494,14 @@ function updateSummary(avg, count, ratings) {
   const cntStr = toFaNum(count || 0);
   setTextAllById('review-count', cntStr);
   setTextAllById('review-count-text', `(${cntStr} نظر)`);
-  
+
   // Update header counts
   const headerCountMobile = document.getElementById('header-count-mobile');
   if (headerCountMobile) headerCountMobile.textContent = cntStr;
   const headerCountLg = document.getElementById('header-count-lg');
   if (headerCountLg) headerCountLg.textContent = cntStr;
+  const ratingCount = document.getElementById('rating-count');
+  if (ratingCount) ratingCount.textContent = cntStr;
   
   const modalCount = document.getElementById('modal-count');
   if (modalCount) modalCount.textContent = `بر اساس ${cntStr} نظر`;
