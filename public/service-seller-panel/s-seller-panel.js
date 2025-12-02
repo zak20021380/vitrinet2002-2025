@@ -2829,16 +2829,22 @@ const Notifications = {
     this.render();
   },
 
-  add(text, type = 'info') {
+  add(payload, fallbackType = 'info') {
     const items = this.load();
-    items.push({
+    const nowLabel = new Date().toLocaleTimeString('fa-IR', { hour: '2-digit', minute: '2-digit' });
+    const normalized = typeof payload === 'string'
+      ? { text: payload, type: fallbackType }
+      : payload || {};
+
+    items.unshift({
       id: 'n' + Date.now(),
-      type,
-      text,
-      time: new Date().toLocaleTimeString('fa-IR'),
+      type: normalized.type || fallbackType,
+      text: normalized.text || '—',
+      title: normalized.title || '',
+      time: normalized.time || nowLabel,
       read: false
     });
-    this.save(items);
+    this.save(items.slice(0, 30));
     this.render();
   },
 
@@ -2849,12 +2855,18 @@ const Notifications = {
     // badge
     if (this._els.badge) {
       if (unread > 0) {
-        this._els.badge.textContent = unread.toString();
+        this._els.badge.textContent = unread > 99 ? '99+' : unread.toString();
+        this._els.badge.dataset.count = unread > 99 ? 'max' : unread > 9 ? 'high' : 'normal';
         this._els.badge.hidden = false;
       } else {
         this._els.badge.textContent = '';
         this._els.badge.hidden = true;
+        delete this._els.badge.dataset.count;
       }
+    }
+
+    if (this._els.btn) {
+      this._els.btn.classList.toggle('has-unread', unread > 0);
     }
 
     // لیست / حالت خالی
@@ -2871,13 +2883,153 @@ const Notifications = {
         <div class="notif-row">
           <div class="notif-icon ${n.type || 'info'}" aria-hidden="true"></div>
           <div class="notif-content">
-            <div class="notif-text">${n.text}</div>
+            <div class="notif-text">
+              ${n.title ? `<strong class="notif-title">${n.title}</strong>` : ''}
+              <span class="notif-body">${n.text}</span>
+            </div>
             <time class="notif-time">${n.time || ''}</time>
           </div>
           <button class="notif-delete" aria-label="حذف اعلان">×</button>
         </div>
       </li>
     `).join('');
+  }
+};
+
+/* === Live Activity Stream (comments / likes / follows) === */
+const LiveActivity = {
+  container: null,
+  timer: null,
+  _portfolioTitles: [],
+
+  init() {
+    this.container = document.getElementById('live-alerts');
+    if (!this.container) return;
+    this._portfolioTitles = (StorageManager.get('vit_portfolio') || []).map(p => p.title).filter(Boolean);
+
+    document.addEventListener('live:activity', (event) => {
+      if (event.detail) this.push(event.detail);
+    });
+
+    // نخستین اعلان سریع برای جلب توجه
+    setTimeout(() => this.push(this.createRandomEvent()), 1500);
+    // جریان مستمر اعلان‌ها
+    this.timer = setInterval(() => {
+      this.push(this.createRandomEvent());
+    }, 16000);
+  },
+
+  push(detail) {
+    if (!detail) return;
+    const normalized = this.normalize(detail);
+    if (!normalized) return;
+    this.renderToast(normalized);
+    Notifications.add({
+      text: normalized.panelText || normalized.message,
+      title: normalized.title,
+      type: normalized.type,
+      time: normalized.timeLabel
+    });
+  },
+
+  normalize(detail) {
+    const type = detail.type || 'info';
+    const iconMap = { comment: '💬', like: '❤', follow: '⭐' };
+    const titleMap = {
+      comment: 'نظر جدید',
+      like: 'پسند جدید',
+      follow: 'دنبال‌کننده تازه'
+    };
+
+    const timeLabel = detail.timeLabel || new Date().toLocaleTimeString('fa-IR', { hour: '2-digit', minute: '2-digit' });
+
+    return {
+      type,
+      icon: detail.icon || iconMap[type] || '•',
+      title: detail.title || titleMap[type] || 'اعلان جدید',
+      message: detail.message || detail.text || '—',
+      pill: detail.pill || null,
+      accentClass: detail.accentClass || (type === 'like' ? 'live-alert__accent--like' : type === 'follow' ? 'live-alert__accent--follow' : ''),
+      meta: detail.meta || 'همین حالا',
+      panelText: detail.panelText,
+      timeLabel
+    };
+  },
+
+  createRandomEvent() {
+    const names = ['نیلوفر محمدی', 'امیرحسین پارسا', 'آرزو مقدم', 'مهیار کیانی', 'سارا نوری', 'محمدرضا شکیبا'];
+    const commentSnippets = [
+      'کیفیت کارتون عالیه، ممنون از پاسخ‌گویی سریع.',
+      'وقت‌شناس و حرفه‌ای بودید، ممنون.',
+      'نمونه‌کار جدیدتون عالیه!'
+    ];
+    const portfolioFallbacks = ['طراحی لوگو مینیمال', 'عکاسی صنعتی', 'طراحی منو رستوران'];
+    const portfolioPool = [...this._portfolioTitles, ...portfolioFallbacks];
+    const portfolioTitle = portfolioPool[Math.floor(Math.random() * portfolioPool.length)] || 'نمونه‌کار شما';
+    const actor = names[Math.floor(Math.random() * names.length)];
+    const timeLabel = new Date().toLocaleTimeString('fa-IR', { hour: '2-digit', minute: '2-digit' });
+
+    const variants = [
+      {
+        type: 'comment',
+        message: `${actor} یک نظر جدید ثبت کرد: «${commentSnippets[Math.floor(Math.random() * commentSnippets.length)]}»`,
+        pill: 'نظر مشتری',
+        meta: 'همین حالا',
+        panelText: `${actor} برای شما کامنت گذاشت`,
+        accentClass: '',
+        timeLabel
+      },
+      {
+        type: 'like',
+        message: `${actor} نمونه‌کار «${portfolioTitle}» را پسندید.`,
+        pill: portfolioTitle,
+        meta: 'پسند تازه',
+        panelText: `${portfolioTitle} یک پسند جدید گرفت`,
+        accentClass: 'live-alert__accent--like',
+        timeLabel
+      },
+      {
+        type: 'follow',
+        message: `${actor} فروشگاه شما را دنبال کرد.`,
+        pill: 'دنبال‌کننده جدید',
+        meta: 'افزایش مخاطبان',
+        panelText: `${actor} به دنبال‌کنندگان شما اضافه شد`,
+        accentClass: 'live-alert__accent--follow',
+        timeLabel
+      }
+    ];
+
+    return variants[Math.floor(Math.random() * variants.length)];
+  },
+
+  renderToast(event) {
+    if (!this.container) return;
+    const card = document.createElement('article');
+    card.className = 'live-alert';
+    card.innerHTML = `
+      <div class="live-alert__icon live-alert__icon--${event.type}" aria-hidden="true">${event.icon}</div>
+      <div class="live-alert__content">
+        <div class="live-alert__title">${event.title}</div>
+        <p class="live-alert__text">${event.message}</p>
+        <div class="live-alert__meta">
+          <span class="live-alert__accent ${event.accentClass || ''}">${event.meta}</span>
+          ${event.pill ? `<span class="live-alert__pill">${event.pill}</span>` : ''}
+          <span aria-hidden="true">•</span>
+          <span>${event.timeLabel}</span>
+        </div>
+      </div>
+    `;
+
+    this.container.prepend(card);
+    setTimeout(() => {
+      card.classList.add('is-leaving');
+      setTimeout(() => card.remove(), 220);
+    }, 5400);
+
+    if (this.container.children.length > 3) {
+      const last = this.container.lastElementChild;
+      if (last) last.remove();
+    }
   }
 };
 
@@ -3022,6 +3174,7 @@ const BookingPopup = {
 
 // اجرا
 Notifications.init();
+LiveActivity.init();
 BookingPopup.init();
 
   window.addEventListener('storage', (event) => {
