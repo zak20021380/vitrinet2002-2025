@@ -3005,6 +3005,8 @@ const LiveActivity = {
   renderToast(event) {
     if (!this.container) return;
     const card = document.createElement('article');
+    const displayDuration = 9000;
+
     card.className = 'live-alert';
     card.innerHTML = `
       <div class="live-alert__icon live-alert__icon--${event.type}" aria-hidden="true">${event.icon}</div>
@@ -3018,13 +3020,30 @@ const LiveActivity = {
           <span>${event.timeLabel}</span>
         </div>
       </div>
+      <button class="live-alert__close" aria-label="بستن اعلان">×</button>
+      <div class="live-alert__progress" role="presentation"></div>
     `;
 
-    this.container.prepend(card);
-    setTimeout(() => {
+    const progress = card.querySelector('.live-alert__progress');
+    if (progress) {
+      progress.style.setProperty('animation-duration', `${displayDuration}ms`);
+    }
+
+    const removeCard = () => {
       card.classList.add('is-leaving');
       setTimeout(() => card.remove(), 220);
-    }, 5400);
+    };
+
+    this.container.prepend(card);
+
+    const autoHide = setTimeout(removeCard, displayDuration);
+    const closeBtn = card.querySelector('.live-alert__close');
+    if (closeBtn) {
+      closeBtn.addEventListener('click', () => {
+        clearTimeout(autoHide);
+        removeCard();
+      });
+    }
 
     if (this.container.children.length > 3) {
       const last = this.container.lastElementChild;

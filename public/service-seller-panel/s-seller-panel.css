@@ -5870,6 +5870,27 @@ body.has-overlay { overflow: hidden; }
   overflow: hidden;
 }
 
+.live-alert__close {
+  position: absolute;
+  inset-block-start: 10px;
+  inset-inline-end: 10px;
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.14);
+  color: #f5f5f7;
+  inline-size: 28px;
+  block-size: 28px;
+  border-radius: 50%;
+  display: inline-grid;
+  place-items: center;
+  cursor: pointer;
+  transition: transform 0.15s ease, background 0.2s ease, border-color 0.2s ease;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.live-alert__close:hover { background: rgba(255,255,255,0.12); border-color: rgba(255,255,255,0.26); }
+.live-alert__close:active { transform: scale(0.95); }
+
 .live-alert::before {
   content: "";
   position: absolute;
@@ -5906,8 +5927,8 @@ body.has-overlay { overflow: hidden; }
 .live-alert__icon--follow { background: radial-gradient(circle at 20% 20%, #8cffc1, #1bbf78); }
 
 .live-alert__content { display: grid; gap: 6px; position: relative; z-index: 1; }
-.live-alert__title { font-weight: 800; font-size: 0.98rem; color: #fff; letter-spacing: -0.01em; }
-.live-alert__text { color: rgba(255,255,255,0.88); font-size: 0.9rem; line-height: 1.55; font-weight: 600; }
+.live-alert__title { font-weight: 800; font-size: 1rem; color: #fff; letter-spacing: -0.01em; display: block; }
+.live-alert__text { color: rgba(255,255,255,0.85); font-size: 0.92rem; line-height: 1.55; font-weight: 600; display: block; }
 .live-alert__meta { color: rgba(255,255,255,0.7); font-size: 0.78rem; display: inline-flex; align-items: center; gap: 8px; }
 .live-alert__pill {
   padding: 4px 10px;
@@ -5923,6 +5944,25 @@ body.has-overlay { overflow: hidden; }
 .live-alert__accent--like { color: #ffb2c7; }
 .live-alert__accent--follow { color: #a8ffde; }
 
+.live-alert__progress {
+  position: absolute;
+  inset-inline: 12px;
+  inset-block-end: 8px;
+  block-size: 4px;
+  border-radius: 999px;
+  background: rgba(255,255,255,0.12);
+  overflow: hidden;
+}
+
+.live-alert__progress::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, #4ad8ff, #6fffb7);
+  transform-origin: left center;
+  animation: liveAlertProgress linear forwards;
+}
+
 .live-alert.is-leaving { animation: liveAlertOut 220ms ease forwards; }
 
 @keyframes liveAlertIn {
@@ -5933,6 +5973,11 @@ body.has-overlay { overflow: hidden; }
 @keyframes liveAlertOut {
   from { opacity: 1; transform: translateY(0) scale(1); }
   to { opacity: 0; transform: translateY(14px) scale(0.98); }
+}
+
+@keyframes liveAlertProgress {
+  from { transform: scaleX(1); }
+  to { transform: scaleX(0); }
 }
 
 @media (max-width: 720px) {
