@@ -2937,8 +2937,8 @@ const LiveActivity = {
     const iconMap = { comment: '💬', like: '❤', follow: '⭐' };
     const titleMap = {
       comment: 'بازخورد مشتری',
-      like: 'پسند ثبت شد',
-      follow: 'دنبال‌کننده جدید'
+      like: 'پسند جدید',
+      follow: 'دنبال‌کننده تازه'
     };
 
     const timeLabel = detail.timeLabel || new Date().toLocaleTimeString('fa-IR', { hour: '2-digit', minute: '2-digit' });
@@ -2959,9 +2959,9 @@ const LiveActivity = {
   createRandomEvent() {
     const names = ['نیلوفر محمدی', 'امیرحسین پارسا', 'آرزو مقدم', 'مهیار کیانی', 'سارا نوری', 'محمدرضا شکیبا'];
     const commentSnippets = [
-      'کیفیت کارتون عالیه، ممنون از پاسخ‌گویی سریع.',
-      'وقت‌شناس و حرفه‌ای بودید، ممنون.',
-      'نمونه‌کار جدیدتون عالیه!'
+      'از دقت و نظم کار راضی‌ام و برای همکاری بعدی مشتاقم.',
+      'تحویل به‌موقع بود و ارتباط حرفه‌ای برقرار شد، سپاس.',
+      'کیفیت کار مطابق انتظار و استانداردهای حرفه‌ای بود.'
     ];
     const portfolioFallbacks = ['طراحی لوگو مینیمال', 'عکاسی صنعتی', 'طراحی منو رستوران'];
     const portfolioPool = [...this._portfolioTitles, ...portfolioFallbacks];
@@ -2972,28 +2972,28 @@ const LiveActivity = {
     const variants = [
       {
         type: 'comment',
-        message: `${actor} بازخوردی محترمانه ارسال کرد: «${commentSnippets[Math.floor(Math.random() * commentSnippets.length)]}»`,
+        message: `${actor} بازخورد جدیدی ثبت کرد: «${commentSnippets[Math.floor(Math.random() * commentSnippets.length)]}»`,
         pill: 'بازخورد مشتری',
-        meta: 'تعامل تازه',
-        panelText: `${actor} برای فروشگاه شما دیدگاه گذاشت`,
+        meta: 'تعامل حرفه‌ای',
+        panelText: `${actor} یک نظر رسمی برای فروشگاه ثبت کرد`,
         accentClass: '',
         timeLabel
       },
       {
         type: 'like',
-        message: `${actor} با پسندیدن «${portfolioTitle}» به دیده شدن شما کمک کرد.`,
+        message: `${actor} «${portfolioTitle}» را پسندید و به دیده شدن برند شما کمک کرد.`,
         pill: portfolioTitle,
         meta: 'تعامل مثبت',
-        panelText: `«${portfolioTitle}» یک پسند تازه دریافت کرد`,
+        panelText: `نمونه‌کار «${portfolioTitle}» یک پسند جدید دریافت کرد`,
         accentClass: 'live-alert__accent--like',
         timeLabel
       },
       {
         type: 'follow',
-        message: `${actor} به جمع دنبال‌کنندگان فروشگاه شما پیوست.`,
+        message: `${actor} فروشگاه شما را دنبال کرد.`,
         pill: 'دنبال‌کننده جدید',
-        meta: 'رشد جامعه',
-        panelText: `${actor} به مخاطبان وفادار شما اضافه شد`,
+        meta: 'رشد جامعه مشتریان',
+        panelText: `${actor} به فهرست دنبال‌کنندگان شما اضافه شد`,
         accentClass: 'live-alert__accent--follow',
         timeLabel
       }
