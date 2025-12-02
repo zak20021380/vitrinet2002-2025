@@ -2936,9 +2936,9 @@ const LiveActivity = {
     const type = detail.type || 'info';
     const iconMap = { comment: '💬', like: '❤', follow: '⭐' };
     const titleMap = {
-      comment: 'نظر جدید',
-      like: 'پسند جدید',
-      follow: 'دنبال‌کننده تازه'
+      comment: 'بازخورد مشتری',
+      like: 'پسند ثبت شد',
+      follow: 'دنبال‌کننده جدید'
     };
 
     const timeLabel = detail.timeLabel || new Date().toLocaleTimeString('fa-IR', { hour: '2-digit', minute: '2-digit' });
@@ -2972,28 +2972,28 @@ const LiveActivity = {
     const variants = [
       {
         type: 'comment',
-        message: `${actor} یک نظر جدید ثبت کرد: «${commentSnippets[Math.floor(Math.random() * commentSnippets.length)]}»`,
-        pill: 'نظر مشتری',
-        meta: 'همین حالا',
-        panelText: `${actor} برای شما کامنت گذاشت`,
+        message: `${actor} بازخوردی محترمانه ارسال کرد: «${commentSnippets[Math.floor(Math.random() * commentSnippets.length)]}»`,
+        pill: 'بازخورد مشتری',
+        meta: 'تعامل تازه',
+        panelText: `${actor} برای فروشگاه شما دیدگاه گذاشت`,
         accentClass: '',
         timeLabel
       },
       {
         type: 'like',
-        message: `${actor} نمونه‌کار «${portfolioTitle}» را پسندید.`,
+        message: `${actor} با پسندیدن «${portfolioTitle}» به دیده شدن شما کمک کرد.`,
         pill: portfolioTitle,
-        meta: 'پسند تازه',
-        panelText: `${portfolioTitle} یک پسند جدید گرفت`,
+        meta: 'تعامل مثبت',
+        panelText: `«${portfolioTitle}» یک پسند تازه دریافت کرد`,
         accentClass: 'live-alert__accent--like',
         timeLabel
       },
       {
         type: 'follow',
-        message: `${actor} فروشگاه شما را دنبال کرد.`,
+        message: `${actor} به جمع دنبال‌کنندگان فروشگاه شما پیوست.`,
         pill: 'دنبال‌کننده جدید',
-        meta: 'افزایش مخاطبان',
-        panelText: `${actor} به دنبال‌کنندگان شما اضافه شد`,
+        meta: 'رشد جامعه',
+        panelText: `${actor} به مخاطبان وفادار شما اضافه شد`,
         accentClass: 'live-alert__accent--follow',
         timeLabel
       }
