@@ -2989,13 +2989,6 @@ const LiveActivity = {
     document.addEventListener('live:activity', (event) => {
       if (event.detail) this.push(event.detail);
     });
-
-    // نخستین اعلان سریع برای جلب توجه
-    setTimeout(() => this.push(this.createRandomEvent()), 1500);
-    // جریان مستمر اعلان‌ها
-    this.timer = setInterval(() => {
-      this.push(this.createRandomEvent());
-    }, 16000);
   },
 
   push(detail) {
