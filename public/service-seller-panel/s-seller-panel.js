@@ -2795,6 +2795,11 @@ const Notifications = {
       if (!li) return;
       if (e.target.closest('.notif-delete')) {
         this.remove(li.dataset.id);
+      } else if (e.target.closest('.notif-view-more')) {
+        const btn = e.target.closest('.notif-view-more');
+        const fullText = btn?.dataset?.fulltext || '';
+        this.showFullComment(fullText);
+        this.markRead(li.dataset.id);
       } else {
         this.markRead(li.dataset.id);
       }
@@ -2851,6 +2856,7 @@ const Notifications = {
   render() {
     const items = this.load();
     const unread = items.filter(n => !n.read).length;
+    const LONG_BODY_LIMIT = 90;
 
     // badge
     if (this._els.badge) {
@@ -2880,7 +2886,11 @@ const Notifications = {
 
     this._els.list.innerHTML = items.map(n => {
       const { label, body } = this._splitMessage(n.text);
-      const safeBody = body || n.text;
+      const fullBody = body || n.text;
+      const isLong = (fullBody || '').length > LONG_BODY_LIMIT;
+      const previewText = isLong ? `${fullBody.slice(0, LONG_BODY_LIMIT)}…` : fullBody;
+      const safePreview = this._escapeHtml(previewText);
+      const safeFull = this._escapeHtml(fullBody);
 
       return `
       <li class="notification-item ${n.read ? 'is-read' : 'is-unread'}" data-id="${n.id}" role="listitem" tabindex="0">
@@ -2890,7 +2900,8 @@ const Notifications = {
             <div class="notif-text">
               ${label ? `<span class="notif-label">${label}</span>` : ''}
               ${n.title ? `<strong class="notif-title">${n.title}</strong>` : ''}
-              <span class="notif-body">${safeBody}</span>
+              <span class="notif-body">${safePreview}</span>
+              ${isLong ? `<button class="notif-view-more" data-fulltext="${safeFull}" aria-label="نمایش کامل نظر">مشاهده</button>` : ''}
             </div>
             <time class="notif-time">${n.time || ''}</time>
           </div>
@@ -2907,20 +2918,61 @@ Notifications._splitMessage = function(text = '') {
   const normalized = text.trim();
   if (!normalized) return { label: '', body: '' };
 
-  const tokens = normalized.split(/\s+/);
-  if (tokens.length < 3) return { label: '', body: normalized };
-
-  const labelCandidate = tokens.slice(0, 2).join(' ');
-  const prominentLabels = ['بازخورد مشتری', 'پسند مشتری', 'نظر مشتری'];
-
-  if (!prominentLabels.includes(labelCandidate)) {
+  const LABEL_KEY = 'نظر یا کامنت';
+  if (!normalized.startsWith(LABEL_KEY)) {
     return { label: '', body: normalized };
   }
 
+  const body = normalized.slice(LABEL_KEY.length).trim();
   return {
-    label: labelCandidate,
-    body: tokens.slice(2).join(' ')
+    label: LABEL_KEY,
+    body: body || normalized
   };
+};
+
+Notifications._escapeHtml = function(str = '') {
+  return str
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+};
+
+Notifications.showFullComment = function(text = '') {
+  if (!text) return;
+
+  if (!this._els.fullView) {
+    const overlay = document.createElement('div');
+    overlay.className = 'notif-view-overlay';
+    overlay.innerHTML = `
+      <div class="notif-view-modal" role="dialog" aria-modal="true" aria-label="نمایش کامل نظر">
+        <div class="notif-view-header">
+          <span>متن کامل نظر</span>
+          <button type="button" class="notif-view-close" aria-label="بستن">×</button>
+        </div>
+        <div class="notif-view-body"></div>
+        <div class="notif-view-footer">
+          <button type="button" class="notif-view-close btn-close">بستن</button>
+        </div>
+      </div>`;
+    overlay.addEventListener('click', (e) => {
+      if (e.target.classList.contains('notif-view-overlay') || e.target.closest('.notif-view-close')) {
+        overlay.classList.remove('active');
+        overlay.setAttribute('hidden', '');
+      }
+    });
+    overlay.setAttribute('hidden', '');
+    this._els.panel.appendChild(overlay);
+    this._els.fullView = overlay;
+  }
+
+  const bodyEl = this._els.fullView.querySelector('.notif-view-body');
+  if (bodyEl) {
+    bodyEl.textContent = text;
+  }
+  this._els.fullView.removeAttribute('hidden');
+  requestAnimationFrame(() => this._els.fullView.classList.add('active'));
 };
 
 /* === Live Activity Stream (comments / likes / follows) === */
@@ -2963,7 +3015,7 @@ const LiveActivity = {
     const type = detail.type || 'info';
     const iconMap = { comment: '💬', like: '❤', follow: '⭐' };
     const titleMap = {
-      comment: 'بازخورد مشتری',
+      comment: 'نظر یا کامنت',
       like: 'پسند جدید',
       follow: 'دنبال‌کننده تازه'
     };
@@ -2999,8 +3051,8 @@ const LiveActivity = {
     const variants = [
       {
         type: 'comment',
-        message: `${actor} بازخورد جدیدی ثبت کرد: «${commentSnippets[Math.floor(Math.random() * commentSnippets.length)]}»`,
-        pill: 'بازخورد مشتری',
+        message: `${actor} نظر جدیدی ثبت کرد: «${commentSnippets[Math.floor(Math.random() * commentSnippets.length)]}»`,
+        pill: 'نظر یا کامنت',
         meta: 'تعامل حرفه‌ای',
         panelText: `${actor} یک نظر رسمی برای فروشگاه ثبت کرد`,
         accentClass: '',
