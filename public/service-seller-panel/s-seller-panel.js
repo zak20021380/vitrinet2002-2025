@@ -2878,22 +2878,49 @@ const Notifications = {
     }
     this._els.empty?.setAttribute('hidden', '');
 
-    this._els.list.innerHTML = items.map(n => `
+    this._els.list.innerHTML = items.map(n => {
+      const { label, body } = this._splitMessage(n.text);
+      const safeBody = body || n.text;
+
+      return `
       <li class="notification-item ${n.read ? 'is-read' : 'is-unread'}" data-id="${n.id}" role="listitem" tabindex="0">
         <div class="notif-row">
           <div class="notif-icon ${n.type || 'info'}" aria-hidden="true"></div>
           <div class="notif-content">
             <div class="notif-text">
+              ${label ? `<span class="notif-label">${label}</span>` : ''}
               ${n.title ? `<strong class="notif-title">${n.title}</strong>` : ''}
-              <span class="notif-body">${n.text}</span>
+              <span class="notif-body">${safeBody}</span>
             </div>
             <time class="notif-time">${n.time || ''}</time>
           </div>
           <button class="notif-delete" aria-label="حذف اعلان">×</button>
         </div>
       </li>
-    `).join('');
+    `;
+    }).join('');
   }
+};
+
+// Helpers for notification presentation
+Notifications._splitMessage = function(text = '') {
+  const normalized = text.trim();
+  if (!normalized) return { label: '', body: '' };
+
+  const tokens = normalized.split(/\s+/);
+  if (tokens.length < 3) return { label: '', body: normalized };
+
+  const labelCandidate = tokens.slice(0, 2).join(' ');
+  const prominentLabels = ['بازخورد مشتری', 'پسند مشتری', 'نظر مشتری'];
+
+  if (!prominentLabels.includes(labelCandidate)) {
+    return { label: '', body: normalized };
+  }
+
+  return {
+    label: labelCandidate,
+    body: tokens.slice(2).join(' ')
+  };
 };
 
 /* === Live Activity Stream (comments / likes / follows) === */
