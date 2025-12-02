@@ -892,6 +892,8 @@ async function hasPending(){
   const sectionEls = qAll('[data-customer-section]');
   const countEls = qAll('[data-customer-count]');
   const followButtons = qAll('[data-customer-follow]');
+  const followProxy = document.querySelector('[data-customer-follow-proxy]');
+  const badgeTrigger = document.getElementById('customerBadge');
   const bookingModal = document.getElementById('booking-reminder-modal');
   const bookingModalBackdrop = bookingModal?.querySelector('[data-modal-backdrop]') || null;
   const bookingModalCard = bookingModal?.querySelector('[data-modal-card]') || null;
@@ -1160,6 +1162,13 @@ async function hasPending(){
   };
 
   const init = () => {
+    if (badgeTrigger && followProxy) {
+      badgeTrigger.addEventListener('click', (event) => {
+        event.preventDefault();
+        followProxy.click();
+      });
+    }
+
     followButtons.forEach(btn => {
       if (!btn) return;
       ensureBaseClasses(btn);
