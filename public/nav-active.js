@@ -35,6 +35,15 @@
     return `${baseUrl}${query}`;
   }
 
+  function hasValidSellerProfile(seller) {
+    if (!seller || typeof seller !== 'object') return false;
+
+    const sellerId = seller._id || seller.id || seller.sellerId;
+    const sellerSlug = seller.shopurl || seller.shopUrl || seller.slug;
+
+    return Boolean(sellerId || (typeof sellerSlug === 'string' && sellerSlug.trim())) || isServiceSellerAccount(seller);
+  }
+
   function updateAuthNavigationState() {
     const loginLink = document.getElementById('loginNavLink');
     const loginMobile = document.getElementById('loginMobileLink');
@@ -51,14 +60,14 @@
     let labelText = 'ورود';
     let accountType = '';
 
-    if (token && seller && typeof seller === 'object') {
-      targetUrl = buildSellerPanelLink(seller);
-      labelText = 'پنل فروشنده';
-      accountType = 'seller';
-    } else if (token && user && typeof user === 'object') {
+    if (token && user && typeof user === 'object') {
       targetUrl = 'user/dashboard.html';
       labelText = 'پنل من';
       accountType = 'customer';
+    } else if (token && hasValidSellerProfile(seller)) {
+      targetUrl = buildSellerPanelLink(seller);
+      labelText = 'پنل فروشنده';
+      accountType = 'seller';
     }
 
     if (loginLink) {
