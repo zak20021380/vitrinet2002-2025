@@ -1805,97 +1805,322 @@
     z-index: 160;
   }
 
-  /* Floating Action Button - Home Icon در پایین چپ */
-  .home-btn {
+  /* Floating Action Button - Notification Icon */
+  .notif-btn {
     position: fixed;
     bottom: 1.6rem;
     left: 1.6rem;
-    width: 56px;
-    height: 56px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: linear-gradient(135deg, #10b981 0%, #0ea5e9 100%);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    border: none;
-    border-radius: 9999px;
+    width: 60px;
+    height: 60px;
+    display: grid;
+    place-items: center;
+    background: linear-gradient(150deg, #0ea5e9 0%, #10b981 50%, #0f766e 100%);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    border: 0;
+    border-radius: 18px;
     color: #ffffff;
-    box-shadow: 0 7px 18px rgba(16, 185, 129, 0.35),
-                0 4px 10px rgba(14, 165, 233, 0.25),
-                0 0 0 0 rgba(16, 185, 129, 0.35);
+    box-shadow: 0 12px 32px rgba(14, 165, 233, 0.32), 0 8px 22px rgba(16, 185, 129, 0.28);
     cursor: pointer;
-    transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
-    z-index: 200;
-    animation: fabPulse 3s ease-in-out infinite;
+    transition: transform 0.35s ease, box-shadow 0.35s ease, background 0.35s ease;
+    z-index: 220;
+    overflow: hidden;
   }
 
-  .home-btn i {
-    font-size: 24px;
-    transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
-  }
-
-  .home-btn::before {
+  .notif-btn::after {
     content: '';
     position: absolute;
-    inset: -4px;
-    border-radius: 9999px;
-    background: linear-gradient(135deg, #10b981, #0ea5e9);
-    opacity: 0;
-    transition: opacity 0.4s ease;
-    z-index: -1;
-    filter: blur(8px);
+    inset: 0;
+    background: radial-gradient(circle at 25% 25%, rgba(255, 255, 255, 0.18), transparent 38%);
+    opacity: 0.7;
+    pointer-events: none;
   }
 
-  .home-btn:hover,
-  .home-btn:focus {
-    background: linear-gradient(135deg, #0ea5e9 0%, #10b981 100%);
-    box-shadow: 0 12px 32px rgba(16, 185, 129, 0.5),
-                0 6px 16px rgba(14, 165, 233, 0.4),
-                0 0 0 8px rgba(16, 185, 129, 0.15);
-    transform: translateY(-4px) scale(1.08);
+  .notif-btn i {
+    font-size: 26px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .notif-btn:hover,
+  .notif-btn:focus {
+    transform: translateY(-6px) scale(1.05);
+    box-shadow: 0 16px 38px rgba(14, 165, 233, 0.38), 0 10px 26px rgba(16, 185, 129, 0.32), 0 0 0 10px rgba(14, 165, 233, 0.12);
     outline: none;
   }
 
-  .home-btn:hover::before,
-  .home-btn:focus::before {
-    opacity: 1;
+  .notif-btn:active {
+    transform: translateY(-2px) scale(1.01);
   }
 
-  .home-btn:hover i,
-  .home-btn:focus i {
-    transform: rotate(360deg) scale(1.15);
+  .notif-btn .notif-ping {
+    position: absolute;
+    width: 120%;
+    height: 120%;
+    border-radius: 30px;
+    background: radial-gradient(circle, rgba(14, 165, 233, 0.12), transparent 55%);
+    animation: notifPulse 2.4s ease-in-out infinite;
+    inset: auto;
+    z-index: 0;
   }
 
-  .home-btn:active {
-    transform: translateY(-2px) scale(1.02);
+  .notif-btn .notif-count {
+    position: absolute;
+    top: 6px;
+    right: 6px;
+    min-width: 22px;
+    height: 22px;
+    padding: 0 6px;
+    border-radius: 999px;
+    background: linear-gradient(135deg, #f43f5e, #fb7185);
+    color: #fff;
+    font-size: 12px;
+    font-weight: 800;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 6px 14px rgba(244, 63, 94, 0.32);
   }
 
-  @keyframes fabPulse {
+  @keyframes notifPulse {
     0%, 100% {
-      box-shadow: 0 8px 24px rgba(16, 185, 129, 0.4),
-                0 4px 12px rgba(14, 165, 233, 0.3),
-                0 0 0 0 rgba(16, 185, 129, 0.35);
+      transform: scale(1);
+      opacity: 0.95;
     }
     50% {
-      box-shadow: 0 8px 24px rgba(16, 185, 129, 0.4),
-                  0 4px 12px rgba(14, 165, 233, 0.3),
-                  0 0 0 12px rgba(16, 185, 129, 0);
+      transform: scale(1.08);
+      opacity: 0.65;
     }
   }
 
-  .dark .home-btn {
-    background: linear-gradient(135deg, #059669 0%, #0284c7 100%);
-    box-shadow: 0 8px 24px rgba(5, 150, 105, 0.5),
-                0 4px 12px rgba(2, 132, 199, 0.4);
+  .dark .notif-btn {
+    background: linear-gradient(160deg, #0ea5e9 0%, #10b981 60%, #059669 100%);
+    box-shadow: 0 14px 36px rgba(14, 165, 233, 0.4), 0 8px 24px rgba(5, 150, 105, 0.36);
   }
 
-  .dark .home-btn:hover,
-  .dark .home-btn:focus {
-    background: linear-gradient(135deg, #0284c7 0%, #059669 100%);
-    box-shadow: 0 12px 32px rgba(5, 150, 105, 0.6),
-                0 6px 16px rgba(2, 132, 199, 0.5),
-                0 0 0 8px rgba(5, 150, 105, 0.2);
+  .dark .notif-btn:hover,
+  .dark .notif-btn:focus {
+    box-shadow: 0 18px 40px rgba(14, 165, 233, 0.46), 0 10px 28px rgba(5, 150, 105, 0.38), 0 0 0 10px rgba(14, 165, 233, 0.14);
+  }
+
+  .notification-modal {
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.45);
+    backdrop-filter: blur(6px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.25s ease;
+    z-index: 240;
+  }
+
+  .notification-modal--open {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .notification-card {
+    width: min(720px, 96vw);
+    max-height: 86vh;
+    background: linear-gradient(135deg, #ffffff 0%, #f8fffd 100%);
+    border-radius: 24px;
+    box-shadow: 0 28px 62px rgba(15, 23, 42, 0.26);
+    padding: 22px 22px 10px;
+    display: grid;
+    grid-template-rows: auto 1fr auto;
+    gap: 14px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .notification-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at 15% 18%, rgba(14, 165, 233, 0.08), transparent 35%),
+                radial-gradient(circle at 85% 20%, rgba(16, 185, 129, 0.08), transparent 40%);
+    pointer-events: none;
+  }
+
+  .notification-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .notification-title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 18px;
+    font-weight: 800;
+    color: #0f172a;
+  }
+
+  .notification-title span {
+    color: #0ea5e9;
+  }
+
+  .notification-close {
+    border: 0;
+    width: 40px;
+    height: 40px;
+    border-radius: 14px;
+    display: grid;
+    place-items: center;
+    background: #e0f2fe;
+    color: #0f172a;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  .notification-close:hover,
+  .notification-close:focus {
+    background: #0ea5e9;
+    color: #fff;
+    transform: translateY(-2px);
+    outline: none;
+  }
+
+  .notification-list {
+    display: grid;
+    gap: 10px;
+    overflow: auto;
+    padding-inline: 2px;
+  }
+
+  .notification-item {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    gap: 14px;
+    padding: 14px;
+    background: #ffffff;
+    border-radius: 16px;
+    border: 1px solid rgba(14, 165, 233, 0.12);
+    box-shadow: 0 14px 26px rgba(15, 23, 42, 0.08);
+    position: relative;
+    z-index: 1;
+    --accent: #0ea5e9;
+    --accent-soft: rgba(14, 165, 233, 0.12);
+  }
+
+  .notification-icon {
+    width: 46px;
+    height: 46px;
+    border-radius: 14px;
+    display: grid;
+    place-items: center;
+    color: var(--accent, #0f172a);
+    font-size: 22px;
+    background: linear-gradient(135deg, var(--accent-soft, rgba(14, 165, 233, 0.12)), rgba(16, 185, 129, 0.08));
+  }
+
+  .notification-body {
+    display: grid;
+    gap: 6px;
+  }
+
+  .notification-body h4 {
+    margin: 0;
+    font-size: 15px;
+    font-weight: 800;
+    color: #0f172a;
+  }
+
+  .notification-body p {
+    margin: 0;
+    color: #334155;
+    font-size: 13px;
+    line-height: 1.6;
+  }
+
+  .notification-meta {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .notification-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 10px;
+    border-radius: 999px;
+    background: var(--accent-soft, rgba(14, 165, 233, 0.12));
+    color: var(--accent, #0ea5e9);
+    font-weight: 700;
+    font-size: 12px;
+  }
+
+  .notification-time {
+    font-size: 12px;
+    color: #6b7280;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .notification-remove {
+    border: 0;
+    width: 36px;
+    height: 36px;
+    border-radius: 12px;
+    display: grid;
+    place-items: center;
+    background: #fef2f2;
+    color: #ef4444;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  .notification-remove:hover,
+  .notification-remove:focus {
+    background: #ef4444;
+    color: #fff;
+    transform: translateY(-2px);
+    outline: none;
+  }
+
+  .notification-empty {
+    background: #f8fafc;
+    border: 1px dashed rgba(14, 165, 233, 0.3);
+    padding: 28px 18px;
+    border-radius: 18px;
+    text-align: center;
+    color: #0f172a;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8);
+  }
+
+  .notification-empty p {
+    margin: 0;
+    color: #6b7280;
+    margin-top: 6px;
+  }
+
+  @media (max-width: 640px) {
+    .notification-card {
+      padding: 18px 16px 10px;
+      border-radius: 18px;
+    }
+
+    .notification-item {
+      grid-template-columns: 1fr auto;
+      align-items: flex-start;
+    }
+
+    .notification-icon {
+      width: 42px;
+      height: 42px;
+      font-size: 20px;
+    }
   }
 
   .install-app-btn {
@@ -3199,10 +3424,27 @@
 
 
 
-  <!-- Floating Action Button - Home Icon -->
-  <button class="home-btn" id="dashboardHome" title="رفتن به صفحه اصلی ویترینت" aria-label="رفتن به صفحه اصلی ویترینت">
-    <i class="ri-home-4-line"></i>
+  <!-- Floating Action Button - Notifications -->
+  <button class="notif-btn" id="notificationFab" title="اعلان‌های جدید" aria-label="مشاهده اعلان‌ها">
+    <span class="notif-ping" aria-hidden="true"></span>
+    <i class="ri-notification-3-line"></i>
+    <span class="notif-count" id="notificationCount">0</span>
   </button>
+
+  <div class="notification-modal" id="notificationModal" role="dialog" aria-modal="true" aria-labelledby="notificationTitle">
+    <div class="notification-card">
+      <div class="notification-header">
+        <div class="notification-title" id="notificationTitle">
+          <i class="ri-notification-2-fill" style="color:#0ea5e9;"></i>
+          <span>اعلان‌های شما</span>
+        </div>
+        <button class="notification-close" id="closeNotificationModal" aria-label="بستن اعلان‌ها">
+          <i class="ri-close-line"></i>
+        </button>
+      </div>
+      <div class="notification-list" id="notificationList"></div>
+    </div>
+  </div>
 
   <!-- App Install CTA -->
   <div class="top-left-actions" aria-label="میانبرهای دسترسی سریع">
@@ -5200,6 +5442,153 @@
         closeModal();
       }
     });
+  })();
+</script>
+
+<script>
+  (function () {
+    const notifications = [
+      {
+        id: 1,
+        type: 'customer',
+        title: 'مشتری جدید ثبت شد',
+        description: 'پروفایل آقای "امیر نصیری" تکمیل شد و منتظر تایید شماست.',
+        time: '۱ دقیقه پیش'
+      },
+      {
+        id: 2,
+        type: 'message',
+        title: 'پیام تازه از خریدار',
+        description: 'خانم زهرا سادات: «آیا امکان ارسال فوری برای تهران دارید؟»',
+        time: '۷ دقیقه پیش'
+      },
+      {
+        id: 3,
+        type: 'order',
+        title: 'درخواست سفارش عمده',
+        description: 'کاربر "شرکت پویان" سبد خرید عمده ارسال کرده است. جزئیات را بررسی کنید.',
+        time: '۱۵ دقیقه پیش'
+      },
+      {
+        id: 4,
+        type: 'promo',
+        title: 'امتیاز ویترینت',
+        description: '۵ امتیاز جدید بابت پاسخ‌گویی سریع به پیام‌ها دریافت کردید. ادامه دهید! ',
+        time: '۲۰ دقیقه پیش'
+      }
+    ];
+
+    const typeConfigs = {
+      customer: { icon: 'ri-user-smile-line', label: 'مشتری جدید', accent: '#10b981', soft: 'rgba(16, 185, 129, 0.16)' },
+      message: { icon: 'ri-chat-3-line', label: 'پیام جدید', accent: '#0ea5e9', soft: 'rgba(14, 165, 233, 0.16)' },
+      order: { icon: 'ri-shopping-bag-3-line', label: 'سفارش جدید', accent: '#f59e0b', soft: 'rgba(245, 158, 11, 0.18)' },
+      promo: { icon: 'ri-broadcast-line', label: 'خبر سیستم', accent: '#8b5cf6', soft: 'rgba(139, 92, 246, 0.16)' }
+    };
+
+    const fab = document.getElementById('notificationFab');
+    const countBadge = document.getElementById('notificationCount');
+    const modal = document.getElementById('notificationModal');
+    const modalCard = modal.querySelector('.notification-card');
+    const closeButton = document.getElementById('closeNotificationModal');
+    const listContainer = document.getElementById('notificationList');
+    let lastFocusedElement = null;
+
+    modalCard.setAttribute('tabindex', '-1');
+
+    const updateBadge = () => {
+      const total = notifications.length;
+      countBadge.textContent = total;
+      countBadge.style.display = total ? 'inline-flex' : 'none';
+    };
+
+    const renderNotifications = () => {
+      listContainer.innerHTML = '';
+
+      if (!notifications.length) {
+        listContainer.innerHTML = `
+          <div class="notification-empty">
+            <i class="ri-emotion-laugh-line" style="font-size:26px; color:#0ea5e9;"></i>
+            <p>فعلا اعلان جدیدی ندارید. هر فعالیت تازه اینجا نمایش داده می‌شود.</p>
+          </div>
+        `;
+        updateBadge();
+        return;
+      }
+
+      notifications.forEach((item) => {
+        const config = typeConfigs[item.type] || typeConfigs.message;
+        const wrapper = document.createElement('article');
+        wrapper.className = 'notification-item';
+        wrapper.setAttribute('data-id', item.id);
+        wrapper.style.setProperty('--accent', config.accent);
+        wrapper.style.setProperty('--accent-soft', config.soft);
+
+        wrapper.innerHTML = `
+          <div class="notification-icon">
+            <i class="${config.icon}"></i>
+          </div>
+          <div class="notification-body">
+            <h4>${item.title}</h4>
+            <p>${item.description}</p>
+            <div class="notification-meta">
+              <span class="notification-chip"><i class="ri-flashlight-line"></i>${config.label}</span>
+              <span class="notification-time"><i class="ri-time-line"></i>${item.time}</span>
+            </div>
+          </div>
+          <button class="notification-remove" data-remove="${item.id}" aria-label="حذف اعلان">
+            <i class="ri-delete-bin-6-line"></i>
+          </button>
+        `;
+
+        listContainer.appendChild(wrapper);
+      });
+
+      updateBadge();
+    };
+
+    const openModal = () => {
+      lastFocusedElement = document.activeElement;
+      modal.classList.add('notification-modal--open');
+      setTimeout(() => modalCard.focus({ preventScroll: true }), 50);
+      document.addEventListener('keydown', handleEscape);
+    };
+
+    const closeModal = () => {
+      modal.classList.remove('notification-modal--open');
+      document.removeEventListener('keydown', handleEscape);
+      if (lastFocusedElement) {
+        lastFocusedElement.focus({ preventScroll: true });
+      } else {
+        fab.focus({ preventScroll: true });
+      }
+    };
+
+    const handleEscape = (event) => {
+      if (event.key === 'Escape') {
+        closeModal();
+      }
+    };
+
+    fab.addEventListener('click', openModal);
+    closeButton.addEventListener('click', closeModal);
+    modal.addEventListener('click', (event) => {
+      if (event.target === modal) {
+        closeModal();
+      }
+    });
+
+    listContainer.addEventListener('click', (event) => {
+      const target = event.target.closest('[data-remove]');
+      if (!target) return;
+      const id = Number(target.getAttribute('data-remove'));
+      const index = notifications.findIndex((item) => item.id === id);
+      if (index !== -1) {
+        notifications.splice(index, 1);
+        renderNotifications();
+      }
+    });
+
+    renderNotifications();
   })();
 </script>
 
