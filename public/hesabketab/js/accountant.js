@@ -1208,11 +1208,28 @@
     };
 
     const formatNumber = (num) => {
-      const str = num.toString();
-      if (str.length > 15) {
-        return parseFloat(str).toExponential(8);
+      const str = (num ?? '0').toString();
+
+      const [rawIntegerPart = '0', rawDecimalPart] = str.split('.');
+      const hasDecimal = str.includes('.');
+      const sign = rawIntegerPart.startsWith('-') ? '-' : '';
+      const integerDigits = rawIntegerPart.replace('-', '') || '0';
+      const normalizedDigits = integerDigits.replace(/^0+(?=\d)/, '') || '0';
+
+      if (normalizedDigits.length > 15) {
+        const numericValue = parseFloat(str);
+        return Number.isFinite(numericValue) ? numericValue.toExponential(8) : str;
       }
-      return str;
+
+      const groupedInteger = normalizedDigits.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+      const formattedInteger = `${sign}${groupedInteger}`;
+
+      if (hasDecimal) {
+        const decimalPart = rawDecimalPart ?? '';
+        return `${formattedInteger}.${decimalPart}`;
+      }
+
+      return formattedInteger;
     };
 
     const getOperationSymbol = (operation) => {
