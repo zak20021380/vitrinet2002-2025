@@ -5448,44 +5448,7 @@
 
 <script>
   (function () {
-    const notifications = [
-      {
-        id: 1,
-        type: 'customer',
-        title: 'مشتری جدید ثبت شد',
-        description: 'پروفایل آقای "امیر نصیری" تکمیل شد و منتظر تایید شماست.',
-        time: '۱ دقیقه پیش'
-      },
-      {
-        id: 2,
-        type: 'message',
-        title: 'پیام تازه از خریدار',
-        description: 'خانم زهرا سادات: «آیا امکان ارسال فوری برای تهران دارید؟»',
-        time: '۷ دقیقه پیش'
-      },
-      {
-        id: 3,
-        type: 'order',
-        title: 'درخواست سفارش عمده',
-        description: 'کاربر "شرکت پویان" سبد خرید عمده ارسال کرده است. جزئیات را بررسی کنید.',
-        time: '۱۵ دقیقه پیش'
-      },
-      {
-        id: 4,
-        type: 'promo',
-        title: 'امتیاز ویترینت',
-        description: '۵ امتیاز جدید بابت پاسخ‌گویی سریع به پیام‌ها دریافت کردید. ادامه دهید! ',
-        time: '۲۰ دقیقه پیش'
-      }
-    ];
-
-    const typeConfigs = {
-      customer: { icon: 'ri-user-smile-line', label: 'مشتری جدید', accent: '#10b981', soft: 'rgba(16, 185, 129, 0.16)' },
-      message: { icon: 'ri-chat-3-line', label: 'پیام جدید', accent: '#0ea5e9', soft: 'rgba(14, 165, 233, 0.16)' },
-      order: { icon: 'ri-shopping-bag-3-line', label: 'سفارش جدید', accent: '#f59e0b', soft: 'rgba(245, 158, 11, 0.18)' },
-      promo: { icon: 'ri-broadcast-line', label: 'خبر سیستم', accent: '#8b5cf6', soft: 'rgba(139, 92, 246, 0.16)' }
-    };
-
+    const apiClient = window.VITRINET_API;
     const fab = document.getElementById('notificationFab');
     const countBadge = document.getElementById('notificationCount');
     const modal = document.getElementById('notificationModal');
@@ -5493,47 +5456,89 @@
     const closeButton = document.getElementById('closeNotificationModal');
     const listContainer = document.getElementById('notificationList');
     let lastFocusedElement = null;
+    let notifications = [];
+    let loading = false;
+    let errorMessage = '';
 
-    modalCard.setAttribute('tabindex', '-1');
+    const buildApiUrl = (path) => {
+      if (!path) return '';
+      if (apiClient?.buildUrl) return apiClient.buildUrl(path);
+      return path.startsWith('/') ? path : `/${path}`;
+    };
+
+    const withCredentials = (init = {}) => {
+      if (apiClient?.ensureCredentials) return apiClient.ensureCredentials(init);
+      return init.credentials === undefined ? { ...init, credentials: 'include' } : init;
+    };
+
+    const formatRelativeTime = (value) => {
+      if (!value) return '';
+      const now = Date.now();
+      const date = new Date(value).getTime();
+      if (Number.isNaN(date)) return '';
+      const diff = Math.max(0, Math.floor((now - date) / 1000));
+      if (diff < 60) return `${diff} ثانیه پیش`;
+      if (diff < 3600) return `${Math.floor(diff / 60)} دقیقه پیش`;
+      if (diff < 86400) return `${Math.floor(diff / 3600)} ساعت پیش`;
+      return `${Math.floor(diff / 86400)} روز پیش`;
+    };
 
     const updateBadge = () => {
-      const total = notifications.length;
-      countBadge.textContent = total;
-      countBadge.style.display = total ? 'inline-flex' : 'none';
+      const unread = notifications.filter((item) => !item.read).length;
+      countBadge.textContent = unread;
+      countBadge.style.display = unread ? 'inline-flex' : 'none';
+    };
+
+    const renderEmptyState = (message = 'فعلا اعلان جدیدی ندارید. هر فعالیت تازه اینجا نمایش داده می‌شود.') => {
+      listContainer.innerHTML = `
+        <div class="notification-empty">
+          <i class="ri-emotion-laugh-line" style="font-size:26px; color:#0ea5e9;"></i>
+          <p>${message}</p>
+        </div>
+      `;
     };
 
     const renderNotifications = () => {
       listContainer.innerHTML = '';
 
+      if (errorMessage) {
+        renderEmptyState(errorMessage);
+        updateBadge();
+        return;
+      }
+
+      if (loading) {
+        renderEmptyState('در حال بارگذاری اعلان‌ها...');
+        updateBadge();
+        return;
+      }
+
       if (!notifications.length) {
-        listContainer.innerHTML = `
-          <div class="notification-empty">
-            <i class="ri-emotion-laugh-line" style="font-size:26px; color:#0ea5e9;"></i>
-            <p>فعلا اعلان جدیدی ندارید. هر فعالیت تازه اینجا نمایش داده می‌شود.</p>
-          </div>
-        `;
+        renderEmptyState();
         updateBadge();
         return;
       }
 
       notifications.forEach((item) => {
-        const config = typeConfigs[item.type] || typeConfigs.message;
         const wrapper = document.createElement('article');
         wrapper.className = 'notification-item';
         wrapper.setAttribute('data-id', item.id);
-        wrapper.style.setProperty('--accent', config.accent);
-        wrapper.style.setProperty('--accent-soft', config.soft);
+
+        const accent = item.read ? '#cbd5e1' : '#0ea5e9';
+        const accentSoft = item.read ? 'rgba(148, 163, 184, 0.18)' : 'rgba(14, 165, 233, 0.16)';
+        wrapper.style.setProperty('--accent', accent);
+        wrapper.style.setProperty('--accent-soft', accentSoft);
 
         wrapper.innerHTML = `
           <div class="notification-icon">
-            <i class="${config.icon}"></i>
+            <i class="ri-notification-3-line"></i>
           </div>
           <div class="notification-body">
-            <h4>${item.title}</h4>
-            <p>${item.description}</p>
+            <h4>${item.title || 'اعلان جدید'}</h4>
+            <p>${item.message}</p>
             <div class="notification-meta">
-              <span class="notification-chip"><i class="ri-flashlight-line"></i>${config.label}</span>
-              <span class="notification-time"><i class="ri-time-line"></i>${item.time}</span>
+              <span class="notification-chip"><i class="ri-flashlight-line"></i>${item.read ? 'خوانده شده' : 'جدید'}</span>
+              <span class="notification-time"><i class="ri-time-line"></i>${item.time || ''}</span>
             </div>
           </div>
           <button class="notification-remove" data-remove="${item.id}" aria-label="حذف اعلان">
@@ -5547,11 +5552,88 @@
       updateBadge();
     };
 
+    const fetchNotifications = async () => {
+      loading = true;
+      errorMessage = '';
+      renderNotifications();
+
+      try {
+        const response = await fetch(buildApiUrl('/api/notifications'), withCredentials());
+        if (response.status === 401) {
+          throw new Error('برای مشاهده اعلان‌ها ابتدا وارد حساب خود شوید.');
+        }
+        if (!response.ok) {
+          throw new Error('بارگذاری اعلان‌ها با مشکل مواجه شد.');
+        }
+
+        const data = await response.json();
+        const items = Array.isArray(data) ? data : [];
+        notifications = items
+          .map((item) => ({
+            id: item._id || item.id,
+            message: item.message || '',
+            read: Boolean(item.read),
+            time: formatRelativeTime(item.createdAt || item.updatedAt),
+            title: item.title || ''
+          }))
+          .filter((item) => item.id);
+      } catch (error) {
+        console.error('Failed to load notifications', error);
+        errorMessage = error?.message || 'مشکلی در بارگذاری اعلان‌ها رخ داد.';
+        notifications = [];
+      } finally {
+        loading = false;
+        renderNotifications();
+      }
+    };
+
+    const markNotificationRead = async (id) => {
+      try {
+        const response = await fetch(buildApiUrl(`/api/notifications/${id}/read`), withCredentials({ method: 'PUT' }));
+        if (response.ok) {
+          const target = notifications.find((item) => item.id === id);
+          if (target) {
+            target.read = true;
+          }
+        }
+      } catch (error) {
+        console.error('Failed to mark notification as read', error);
+      }
+    };
+
+    const markAllAsRead = async () => {
+      const unread = notifications.filter((item) => !item.read);
+      if (!unread.length) return;
+      unread.forEach((item) => markNotificationRead(item.id));
+      notifications = notifications.map((item) => ({ ...item, read: true }));
+      updateBadge();
+    };
+
+    const deleteNotification = async (id) => {
+      const previous = notifications.slice();
+      notifications = notifications.filter((item) => item.id !== id);
+      renderNotifications();
+
+      try {
+        const response = await fetch(buildApiUrl(`/api/notifications/${id}`), withCredentials({ method: 'DELETE' }));
+        if (!response.ok) {
+          throw new Error('حذف اعلان انجام نشد');
+        }
+      } catch (error) {
+        console.error('Failed to delete notification', error);
+        notifications = previous;
+        renderNotifications();
+      }
+    };
+
+    modalCard.setAttribute('tabindex', '-1');
+
     const openModal = () => {
       lastFocusedElement = document.activeElement;
       modal.classList.add('notification-modal--open');
       setTimeout(() => modalCard.focus({ preventScroll: true }), 50);
       document.addEventListener('keydown', handleEscape);
+      markAllAsRead();
     };
 
     const closeModal = () => {
@@ -5581,15 +5663,11 @@
     listContainer.addEventListener('click', (event) => {
       const target = event.target.closest('[data-remove]');
       if (!target) return;
-      const id = Number(target.getAttribute('data-remove'));
-      const index = notifications.findIndex((item) => item.id === id);
-      if (index !== -1) {
-        notifications.splice(index, 1);
-        renderNotifications();
-      }
+      const id = target.getAttribute('data-remove');
+      deleteNotification(id);
     });
 
-    renderNotifications();
+    fetchNotifications();
   })();
 </script>
 
