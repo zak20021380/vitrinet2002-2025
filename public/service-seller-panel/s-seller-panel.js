@@ -2410,7 +2410,13 @@ async function loadCustomers() {
       app.renderCustomers();
     }
 
+    if (typeof app !== 'undefined' && app.refreshDiscountCustomers) {
+      app.refreshDiscountCustomers();
+      app.renderDiscounts?.();
+    }
+
     // اطلاع‌رسانی به رابط VIP برای بروزرسانی آمار پس از بارگذاری مشتریان
+    document.dispatchEvent(new CustomEvent('customers:loaded', { detail: mapped }));
     document.dispatchEvent(new Event('vip:refresh'));
   } catch (err) {
     console.error('loadCustomers', err);
@@ -2496,6 +2502,37 @@ const CustomerPrefs = {
     this.save(all);
   }
 };
+
+class DiscountStore {
+  constructor(key = 'vit_seller_discounts') {
+    this._KEY = key;
+  }
+
+  load() { return StorageManager.get(this._KEY) || []; }
+  save(list) { StorageManager.set(this._KEY, list); }
+
+  purgeExpired(now = new Date()) {
+    const active = this.load().filter(item => new Date(item.expiresAt) > now);
+    this.save(active);
+    return active;
+  }
+
+  getActive(now = new Date()) {
+    return this.purgeExpired(now).sort((a, b) => new Date(a.expiresAt) - new Date(b.expiresAt));
+  }
+
+  upsert(discount) {
+    const items = this.getActive().filter(d => d.id !== discount.id && d.customerId !== discount.customerId);
+    items.push(discount);
+    this.save(items);
+  }
+
+  remove(id) {
+    const filtered = this.load().filter(item => item.id !== id);
+    this.save(filtered);
+    return filtered;
+  }
+}
 
 
 
@@ -3315,6 +3352,9 @@ function bindFloatingCloseOnce() {
       this.topPeersAutoRefreshInterval = null;
       this.topPeersAutoRefreshMs = 30 * 60 * 1000;
 
+      this.discountStore = new DiscountStore();
+      this.discountStore.purgeExpired();
+
       this.setFeatureFlags(flags);
 
       // Initialize Services, Portfolio, VIP & customer features
@@ -3322,6 +3362,7 @@ function bindFloatingCloseOnce() {
       this.initPortfolio();
       this.initVipSettings();
       this.initCustomerFeatures();
+      this.initDiscountFeature();
 
     }
 
@@ -3779,6 +3820,7 @@ destroy() {
         case 'dashboard': this.renderDashboard(); break;
         case 'bookings': this.renderBookings(); break;
         case 'customers': this.renderCustomers(); break;
+        case 'discounts': this.renderDiscounts(); break;
         case 'reviews': this.renderReviews(); break;
         case 'top':
           this.renderTopPeers();
@@ -5564,6 +5606,277 @@ renderCustomers(query = '') {
     `;
   }).join('');
 }
+
+  initDiscountFeature() {
+    this.discountForm = document.getElementById('discount-form');
+    this.discountCustomerSelect = document.getElementById('discount-customer');
+    this.discountAmountInput = document.getElementById('discount-amount');
+    this.discountNoteInput = document.getElementById('discount-note');
+    this.discountSuggestions = document.getElementById('discount-suggestions');
+    this.discountListEl = document.getElementById('discounts-list');
+    this.discountEmptyEl = document.getElementById('discounts-empty');
+
+    if (this.discountForm) {
+      this.discountForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        this.handleDiscountSubmit();
+      });
+    }
+
+    if (this.discountSuggestions) {
+      this.discountSuggestions.addEventListener('click', (e) => {
+        const btn = e.target.closest('.quick-customer');
+        if (!btn) return;
+        const customerId = btn.dataset.customerId;
+        if (this.discountCustomerSelect) {
+          this.discountCustomerSelect.value = customerId;
+          this.discountCustomerSelect.dispatchEvent(new Event('change'));
+        }
+        const preset = btn.dataset.presetAmount;
+        if (preset && this.discountAmountInput) {
+          this.discountAmountInput.value = preset;
+        }
+      });
+    }
+
+    if (this.discountListEl) {
+      this.discountListEl.addEventListener('click', (e) => {
+        const cancelBtn = e.target.closest('[data-action="cancel-discount"]');
+        if (cancelBtn) {
+          this.discountStore.remove(cancelBtn.dataset.id);
+          UIComponents.showToast('تخفیف برای این مشتری لغو شد.', 'info');
+          this.renderDiscounts();
+        }
+      });
+    }
+
+    document.addEventListener('customers:loaded', () => {
+      this.refreshDiscountCustomers();
+      this.renderDiscounts();
+    });
+
+    this.refreshDiscountCustomers();
+    this.renderDiscounts();
+  }
+
+  getDiscountCustomers() {
+    const primarySource = Array.isArray(window.MOCK_DATA?.customers) && window.MOCK_DATA.customers.length
+      ? window.MOCK_DATA.customers
+      : (Array.isArray(window.customersData) ? window.customersData : []);
+
+    if (primarySource.length) {
+      return primarySource.map(c => ({
+        id: String(c.id || c.userId || c._id),
+        name: c.name || 'مشتری',
+        phone: c.phone || c.phoneNumber || '',
+        lastReservation: c.lastReservation || c.lastReservationAt || ''
+      }));
+    }
+
+    return [
+      { id: 'demo-1', name: 'مشتری وفادار', phone: '۰۹۱۲۱۲۳۴۵۶۷', lastReservation: '۱۴۰۳/۰۴/۲۲' },
+      { id: 'demo-2', name: 'مشتری جدید', phone: '۰۹۳۵۴۴۴۴۴۴۴', lastReservation: 'دیروز' },
+      { id: 'demo-3', name: 'مشتری نزدیک', phone: '۰۹۱۳۳۳۳۳۳۳۳', lastReservation: 'هفته جاری' }
+    ];
+  }
+
+  refreshDiscountCustomers(selectedId = '') {
+    if (!this.discountCustomerSelect) return;
+    const customers = this.getDiscountCustomers();
+    const placeholder = '<option value="" disabled selected>یک مشتری را انتخاب کنید</option>';
+    this.discountCustomerSelect.innerHTML = placeholder + customers.map(c => `
+      <option value="${c.id}">${escapeHtml(c.name)} • ${UIComponents.formatPersianNumber(c.phone || '')}</option>
+    `).join('');
+
+    if (selectedId) {
+      this.discountCustomerSelect.value = selectedId;
+    } else {
+      this.discountCustomerSelect.selectedIndex = 0;
+    }
+
+    this.renderDiscountSuggestions(customers);
+  }
+
+  renderDiscountSuggestions(customers = []) {
+    if (!this.discountSuggestions) return;
+    const top = customers.slice(0, 3);
+    if (!top.length) {
+      this.discountSuggestions.innerHTML = '';
+      return;
+    }
+
+    this.discountSuggestions.innerHTML = top.map(c => `
+      <button type="button" class="quick-customer" data-customer-id="${c.id}" data-preset-amount="10000">
+        <div class="avatar">${escapeHtml(c.name?.charAt(0) || 'م')}</div>
+        <div>
+          <strong>${escapeHtml(c.name || 'مشتری')}</strong>
+          <small>${UIComponents.formatPersianNumber(c.phone || '')}</small>
+        </div>
+      </button>
+    `).join('');
+  }
+
+  getSelectedDiscountDuration() {
+    const selected = document.querySelector('input[name="discount-duration"]:checked');
+    return selected ? selected.value : 'today';
+  }
+
+  getDiscountDurationLabel(mode) {
+    switch (mode) {
+      case '3d': return 'مهلت استفاده تا ۳ روز آینده';
+      case 'week': return 'مهلت استفاده تا یک هفته';
+      default: return 'مهلت تا پایان امروز';
+    }
+  }
+
+  calculateDiscountExpiry(duration) {
+    const end = new Date();
+    if (duration === '3d') {
+      end.setDate(end.getDate() + 3);
+    } else if (duration === 'week') {
+      end.setDate(end.getDate() + 7);
+    }
+    end.setHours(23, 59, 0, 0);
+    return end.toISOString();
+  }
+
+  formatToman(value) {
+    const numeric = Math.max(0, Number(value) || 0);
+    return `${new Intl.NumberFormat('fa-IR').format(numeric)} تومان`;
+  }
+
+  formatRemainingTime(expiresAt) {
+    const end = new Date(expiresAt);
+    if (!expiresAt || Number.isNaN(end.getTime())) return '';
+    const diff = end.getTime() - Date.now();
+    if (diff <= 0) return 'منقضی شده';
+    const minutes = Math.round(diff / 60000);
+    if (minutes < 60) {
+      return `${UIComponents.formatPersianNumber(Math.max(1, minutes))} دقیقه باقی‌مانده`;
+    }
+    const hours = Math.floor(diff / 3600000);
+    if (hours < 24) {
+      return `${UIComponents.formatPersianNumber(hours)} ساعت آینده`;
+    }
+    const days = Math.ceil(hours / 24);
+    return `${UIComponents.formatPersianNumber(days)} روز آینده`;
+  }
+
+  handleDiscountSubmit() {
+    if (!this.discountForm || !this.discountCustomerSelect) return;
+    const customerId = this.discountCustomerSelect.value;
+    if (!customerId) {
+      UIComponents.showToast('لطفاً یک مشتری را انتخاب کنید.', 'error');
+      return;
+    }
+
+    const amount = Number(this.discountAmountInput?.value || 0);
+    if (!Number.isFinite(amount) || amount < 1000) {
+      UIComponents.showToast('مبلغ تخفیف را حداقل با ۱۰۰۰ تومان وارد کنید.', 'error');
+      return;
+    }
+
+    const duration = this.getSelectedDiscountDuration();
+    const customer = this.getDiscountCustomers().find(c => String(c.id) === String(customerId)) || {};
+    const note = (this.discountNoteInput?.value || '').trim();
+
+    const discount = {
+      id: crypto.randomUUID ? crypto.randomUUID() : `disc-${Date.now()}`,
+      customerId,
+      customerName: customer.name || 'مشتری',
+      customerPhone: customer.phone || '',
+      amount,
+      createdAt: new Date().toISOString(),
+      expiresAt: this.calculateDiscountExpiry(duration),
+      note: note || this.getDiscountDurationLabel(duration)
+    };
+
+    this.discountStore.upsert(discount);
+    UIComponents.showToast('تخفیف برای مشتری ثبت شد.', 'success');
+    this.discountForm.reset();
+    const todayOption = this.discountForm.querySelector('input[name="discount-duration"][value="today"]');
+    if (todayOption) todayOption.checked = true;
+    this.refreshDiscountCustomers(customerId);
+    this.renderDiscounts();
+  }
+
+  updateDiscountStats(active = []) {
+    const today = new Date().toDateString();
+    const expiringToday = active.filter(d => new Date(d.expiresAt).toDateString() === today).length;
+    const totalValue = active.reduce((sum, d) => sum + (Number(d.amount) || 0), 0);
+    const average = active.length ? totalValue / active.length : 0;
+
+    const setStat = (id, value) => {
+      const el = document.getElementById(id);
+      if (el) {
+        el.dataset.value = value;
+        el.textContent = this.formatNumber(value, { fractionDigits: 0, fallback: '۰' });
+        UIComponents.animateCountUp?.(el);
+      }
+    };
+
+    setStat('discount-active-count', active.length);
+    setStat('discount-active-count-inline', active.length);
+    setStat('discount-expiring-today', expiringToday);
+    setStat('discount-expiring-inline', expiringToday);
+    setStat('discount-total-value', totalValue);
+    setStat('discount-average', average);
+  }
+
+  renderDiscounts() {
+    const listEl = document.getElementById('discounts-list');
+    const emptyEl = document.getElementById('discounts-empty');
+    if (!listEl || !emptyEl) return;
+
+    const customers = this.getDiscountCustomers();
+    const customerMap = new Map(customers.map(c => [String(c.id), c]));
+    const active = this.discountStore.getActive().map(item => {
+      const info = customerMap.get(String(item.customerId));
+      if (info) {
+        return {
+          ...item,
+          customerName: item.customerName || info.name,
+          customerPhone: item.customerPhone || info.phone,
+          lastReservation: item.lastReservation || info.lastReservation
+        };
+      }
+      return item;
+    });
+
+    this.updateDiscountStats(active);
+
+    if (!active.length) {
+      listEl.innerHTML = '';
+      emptyEl.hidden = false;
+      return;
+    }
+
+    emptyEl.hidden = true;
+    listEl.innerHTML = active.map(d => {
+      const remaining = this.formatRemainingTime(d.expiresAt);
+      const note = d.note ? `<div class="meta">${escapeHtml(d.note)}</div>` : '';
+      const lastVisit = d.lastReservation ? ` • آخرین مراجعه: ${UIComponents.formatRelativeDate(d.lastReservation)}` : '';
+
+      return `
+        <article class="discount-card" role="listitem">
+          <div class="discount-card__avatar" aria-hidden="true">${escapeHtml(d.customerName?.charAt(0) || 'م')}</div>
+          <div class="discount-card__body">
+            <div class="name">${escapeHtml(d.customerName || 'مشتری')}</div>
+            <div class="meta">${UIComponents.formatPersianNumber(d.customerPhone || '')}${lastVisit}</div>
+            ${note}
+          </div>
+          <div class="discount-card__amount">
+            <span class="label">مبلغ</span>
+            <span class="value">${this.formatToman(d.amount)}</span>
+            <span class="expires">${this.formatDateTime(d.expiresAt)} • ${remaining}</span>
+          </div>
+          <div class="discount-card__actions">
+            <button type="button" class="btn-text" data-action="cancel-discount" data-id="${d.id}">لغو</button>
+          </div>
+        </article>
+      `;
+    }).join('');
+  }
 
 
 
