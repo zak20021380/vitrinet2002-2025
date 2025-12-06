@@ -552,109 +552,7 @@
 
 
 
-<!-- ✅ VIP Stats Bar (زیر سرچ / بالای لیست) -->
-<section id="vip-stats" class="vip-stats-bar" role="group" aria-label="آمار مشتریان ویژه">
-  <button type="button" class="vip-chip" data-target="eligible" aria-pressed="false" title="رسیده به جایزه (قابل دریافت)">
-    <span class="label">واجد جایزه</span>
-    <span class="count" id="vip-count-eligible">۰</span>
-  </button>
-  <button type="button" class="vip-chip" data-target="oneaway" aria-pressed="false" title="یک قدم تا جایزه">
-    <span class="label">یک‌قدم تا جایزه</span>
-    <span class="count" id="vip-count-oneaway">۰</span>
-  </button>
-  <button type="button" class="vip-chip" data-target="claimed" aria-pressed="false" title="جایزه گرفته‌اند">
-    <span class="label">جایزه‌گرفته‌اند</span>
-    <span class="count" id="vip-count-claimed">۰</span>
-  </button>
-</section>
-
-<!-- ✅ پنل نام‌ها (جمع‌شونده و دسترس‌پذیر) -->
-<!-- ✅ VIP: پنل نام‌ها (جمع‌شونده) -->
-<section id="vip-stats-panel"
-         class="vip-panel-compact"
-         role="region"
-         aria-labelledby="vip-panel-title"
-         hidden
-         tabindex="-1">
-
-  <header class="vipc-header">
-    <div class="vipc-title-wrap">
-      <div class="vipc-badge" aria-hidden="true">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
-        </svg>
-      </div>
-      <div>
-        <h4 id="vip-panel-title" class="vipc-title">واجد جایزه</h4>
-        <div id="vip-panel-sub" class="vipc-sub">مشتری‌هایی که به حد نصاب رسیده‌اند</div>
-      </div>
-    </div>
-
-    <!-- دکمه بستن پنل -->
-    <button type="button" class="vipc-close" id="vip-close-panel" aria-label="بستن">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-        <line x1="18" y1="6" x2="6" y2="18"></line>
-        <line x1="6" y1="6" x2="18" y2="18"></line>
-      </svg>
-    </button>
-  </header>
-
-  <div class="vipc-body">
-    <div class="vipc-hint" id="vipc-hint">برای دیدن جزئیات، روی نام مشتری بزنید</div>
-
-    <!-- لیست نام‌ها: هر آیتم یک دکمه با عرضِ متن -->
-    <div id="vip-list" class="vipc-chips" role="list"><!-- با JS پر می‌شود --></div>
-
-    <div id="vip-empty" class="vipc-empty" hidden>فعلاً اسمی اینجا نیست.</div>
-  </div>
-</section>
-
-<!-- مودال جزئیات مشتری VIP -->
-<div id="vip-customer-modal" class="vipc-modal" role="dialog" aria-modal="true" aria-labelledby="vipc-modal-title" hidden>
-  <div class="vipc-backdrop" data-close></div>
-  <div class="vipc-card" role="document">
-    <button class="vipc-card-close" data-close aria-label="بستن">
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
-      </svg>
-    </button>
-
-    <div class="vipc-head">
-      <div class="vipc-avatar" id="vipc-avatar">م</div>
-      <div>
-        <h3 id="vipc-modal-title" class="vipc-name">—</h3>
-        <div class="vipc-phone" id="vipc-phone">—</div>
-      </div>
-    </div>
-
-    <div class="vipc-stats">
-      <div class="vipc-stat">
-        <div class="vipc-stat-val" id="vipc-res-count">۰</div>
-        <div class="vipc-stat-label">کل رزروها</div>
-      </div>
-      <div class="vipc-stat">
-        <div class="vipc-stat-val" id="vipc-reward-count">۰</div>
-        <div class="vipc-stat-label">تعداد جایزه</div>
-      </div>
-      <div class="vipc-stat">
-        <div class="vipc-stat-val" id="vipc-last-date">—</div>
-        <div class="vipc-stat-label">آخرین رزرو</div>
-      </div>
-    </div>
-
-    <div class="vipc-actions">
-      <button type="button" class="btn-primary" id="vipc-open-customer">مشاهده در مشتریان</button>
-    </div>
-  </div>
-</div>
-
-
-
-
-
-
-
-          <div id="customers-list" class="customers-grid" role="list"></div>
+<div id="customers-list" class="customers-grid" role="list"></div>
         </div>
       </section>
       <section id="discounts-view" class="view-section" role="region" aria-labelledby="discounts-title" data-page="discounts">
@@ -1104,25 +1002,7 @@
     </div>
   </div>
 
-  <!-- === NEW: مشتریان ویژه (VIP Customers) — polished === -->
-<div class="settings-group vip-settings-group">
-  <div class="view-header" style="margin-bottom: var(--space-1);">
-    <h3 class="settings-group-title" style="margin: 0; border-bottom: none; display:flex; align-items:center; gap:.5rem;">
-      <span class="vip-star" aria-hidden="true">★</span>
-      <span>مشتریان ویژه</span>
-    </h3>
-    <div class="header-actions">
-      <button type="button" id="vip-toggle-btn" class="btn-danger">
-        <span>غیرفعال کردن جایزه</span>
-      </button>
-      <button type="button" id="vip-settings-btn" class="btn-primary" aria-haspopup="dialog" aria-controls="vip-modal">
-        <span>تنظیمات</span>
-      </button>
-    </div>
-  </div>
-</div>
 
-  <!-- === END VIP === -->
 
   <!-- === NEW: خدمات من (My Services) === -->
   <div class="settings-group">
@@ -1377,33 +1257,7 @@
       </div>
     </div>
   </div>
-  <div id="vip-modal" class="modal vip-modal" role="dialog" aria-modal="true" aria-labelledby="vip-modal-title" hidden>
-    <div class="modal-backdrop" data-dismiss="modal"></div>
-  <div class="modal-content card" role="document">
-      <div class="modal-header">
-          <h3 id="vip-modal-title" class="modal-title">تنظیمات مشتریان ویژه</h3>
-            <button type="button" class="btn-icon modal-close-btn" data-dismiss="modal" aria-label="بستن">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-            </button>
-        </div>
-      <form id="vip-form" class="modal-body">
-            <div class="form-group">
-                <label for="vip-required" class="form-label">تعداد رزرو لازم برای جایزه</label>
-                <input type="number" id="vip-required" class="form-control" min="1">
-            </div>
-            <div class="form-group">
-                <label for="vip-reward" class="form-label">نام جایزه</label>
-                <input type="text" id="vip-reward" class="form-control">
-            </div>
-            <div class="form-actions">
-                <button type="submit" class="btn-primary">ذخیره</button>
-            </div>
-        </form>
-    </div>
-  </div>
-
-
-<div id="resv-modal" class="modal resv-modal" role="dialog" aria-modal="true" aria-labelledby="resv-title" hidden>
+  <div id="resv-modal" class="modal resv-modal" role="dialog" aria-modal="true" aria-labelledby="resv-title" hidden>
   <div class="modal-backdrop" data-dismiss="modal"></div>
   <div class="modal-content card resv-card" role="document">
 <div class="modal-header resv-header">
@@ -1481,27 +1335,7 @@
   </div>
 </div>
 
-<div id="vip-toggle-modal" class="modal" role="dialog" aria-modal="true" aria-labelledby="vip-toggle-title" hidden>
-  <div class="modal-backdrop" data-dismiss="modal"></div>
-  <div class="modal-content card" role="document">
-    <div class="modal-header">
-      <h3 id="vip-toggle-title" class="modal-title">تایید</h3>
-      <button type="button" class="btn-icon modal-close-btn" data-dismiss="modal" aria-label="بستن">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
-      </button>
-    </div>
-    <div class="modal-body">
-      <p id="vip-toggle-message">آیا از غیر فعال کردن بخش جایزه دادن مطمئن هستید؟</p>
-    </div>
-    <div class="modal-actions">
-      <button type="button" class="btn-secondary" data-dismiss="modal">انصراف</button>
-      <button type="button" id="vip-toggle-confirm" class="btn-danger">بله، غیر فعال کن</button>
-    </div>
-  </div>
-</div>
-
-
-  <div id="customer-drawer" class="drawer" role="dialog" aria-modal="true" aria-labelledby="customer-drawer-title" hidden>
+<div id="customer-drawer" class="drawer" role="dialog" aria-modal="true" aria-labelledby="customer-drawer-title" hidden>
     <div class="drawer-backdrop" data-dismiss="drawer"></div>
     <div class="drawer-content" role="document">
         <div class="drawer-header">

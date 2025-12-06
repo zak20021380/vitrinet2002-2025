@@ -1340,9 +1340,6 @@ const PlanAccessGuard = (() => {
   const lockableButtons = [
     document.getElementById('add-service-btn'),
     document.getElementById('add-portfolio-btn'),
-    document.getElementById('vip-settings-btn'),
-    document.getElementById('vip-toggle-btn'),
-    document.getElementById('vip-toggle-confirm'),
     document.getElementById('service-image-btn'),
     document.getElementById('portfolio-image-btn'),
     document.getElementById('footer-pick-btn'),
@@ -1353,7 +1350,6 @@ const PlanAccessGuard = (() => {
     document.getElementById('settings-form'),
     document.getElementById('service-form'),
     document.getElementById('portfolio-form'),
-    document.getElementById('vip-form')
   ];
 
   const goPlans = () => { window.location.hash = '#/plans'; };
@@ -3360,7 +3356,6 @@ function bindFloatingCloseOnce() {
       // Initialize Services, Portfolio, VIP & customer features
       this.initServices();
       this.initPortfolio();
-      this.initVipSettings();
       this.initCustomerFeatures();
       this.initDiscountFeature();
 
@@ -3460,18 +3455,12 @@ setupEventListeners() {
     portfolioImageBtn: document.getElementById('portfolio-image-btn'),
     portfolioImageInput: document.getElementById('portfolio-image'),
     portfolioImagePreview: document.getElementById('portfolio-image-preview'),
-    vipSettingsBtn: document.getElementById('vip-settings-btn'),
-    vipForm: document.getElementById('vip-form'),
-    vipToggleBtn: document.getElementById('vip-toggle-btn'),
-    vipToggleConfirm: document.getElementById('vip-toggle-confirm'),
-    vipToggleMessage: document.getElementById('vip-toggle-message')
   };
 
   // Map for drawer/modal management
   const overlays = {
     modals: {
       'rank': 'rank-modal',
-      'vip': 'vip-modal'
     },
     drawers: {
       'customer': 'customer-drawer',
@@ -3488,7 +3477,6 @@ setupEventListeners() {
   this.boundHandleSettingsFormSubmit = this.handleSettingsFormSubmit.bind(this);
   this.boundHandleServiceFormSubmit = this.handleServiceFormSubmit.bind(this);
   this.boundHandlePortfolioFormSubmit = this.handlePortfolioFormSubmit.bind(this);
-  this.boundHandleVipFormSubmit = this.handleVipFormSubmit.bind(this);
 
   // 1. Route change listener
   window.addEventListener('hashchange', this.boundHandleRouteChange);
@@ -3636,13 +3624,6 @@ if (elements.viewStoreBtn) {
     });
   }
 
-  if (elements.vipForm) {
-    elements.vipForm.addEventListener('submit', (e) => {
-      e.preventDefault();
-      this.boundHandleVipFormSubmit();
-    });
-  }
-
   // 7. Button click handlers with null checks
   const buttonHandlers = [
     {
@@ -3671,197 +3652,8 @@ if (elements.viewStoreBtn) {
         UIComponents.openDrawer('portfolio-drawer');
       }
     },
-    {
-      element: elements.vipSettingsBtn,
-      handler: () => UIComponents.openModal('vip-modal')
-    },
-    {
-      element: elements.vipToggleBtn,
-      handler: () => {
-        const disabled = localStorage.getItem('vit_vip_rewards_disabled') === '1';
-        if (elements.vipToggleMessage && elements.vipToggleConfirm) {
-          elements.vipToggleMessage.textContent = disabled ? 'آیا می‌خواهید بخش جایزه دادن را فعال کنید؟' : 'آیا از غیر فعال کردن بخش جایزه دادن مطمئن هستید؟';
-          elements.vipToggleConfirm.textContent = disabled ? 'فعال کردن' : 'غیرفعال کردن';
-          elements.vipToggleConfirm.classList.toggle('btn-danger', !disabled);
-          elements.vipToggleConfirm.classList.toggle('btn-success', disabled);
-        }
-        UIComponents.openModal('vip-toggle-modal');
-      }
-    }
-  ];
-
-  buttonHandlers.forEach(({ element, handler }) => {
-    if (element) {
-      element.addEventListener('click', handler);
-    }
-  });
-
-  if (elements.rankCtaBtn) {
-    elements.rankCtaBtn.addEventListener('click', (e) => {
-      e.stopPropagation();
-      window.location.hash = '/top';
-    });
-  }
-
-  if (elements.bookingHistoryRefresh) {
-    elements.bookingHistoryRefresh.addEventListener('click', () => {
-      this.renderBookingHistory(true).catch((err) => {
-        console.error('bookingHistoryRefresh error', err);
-      });
-    });
-  }
-
-  if (elements.topLeaderboardList) {
-    elements.topLeaderboardList.addEventListener('click', (e) => {
-      if (e.target.closest('button, a')) {
-        return;
-      }
-      const item = e.target.closest('li[data-shop-url]');
-      if (!item) return;
-      const slug = item.dataset.shopUrl;
-      if (!slug) return;
-      window.open(`/service-shops.html?shopurl=${encodeURIComponent(slug)}`, '_blank', 'noopener,noreferrer');
-    });
-  }
-
-  function updateVipToggleBtn() {
-    if (!elements.vipToggleBtn) return;
-    const disabled = localStorage.getItem('vit_vip_rewards_disabled') === '1';
-    elements.vipToggleBtn.textContent = disabled ? 'فعال‌سازی جایزه' : 'غیرفعال کردن جایزه';
-    elements.vipToggleBtn.classList.toggle('btn-danger', !disabled);
-    elements.vipToggleBtn.classList.toggle('btn-success', disabled);
-  }
-
-  updateVipToggleBtn();
-
-  if (elements.vipToggleConfirm) {
-    elements.vipToggleConfirm.addEventListener('click', () => {
-      const disabled = localStorage.getItem('vit_vip_rewards_disabled') === '1';
-      if (disabled) {
-        localStorage.removeItem('vit_vip_rewards_disabled');
-        UIComponents.showToast('باشگاه مشتریان ویژه فعال شد.', 'success');
-      } else {
-        localStorage.setItem('vit_vip_rewards_disabled', '1');
-        UIComponents.showToast('باشگاه مشتریان ویژه غیرفعال شد.', 'info');
-      }
-      updateVipToggleBtn();
-      UIComponents.closeModal('vip-toggle-modal');
-    });
-  }
-
-  // 8. Optimized Escape key handler - only closes active overlay
-  document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape' && StateManager.isModalOpen) {
-      // Find and close only the currently open overlay
-      const activeModal = document.querySelector('.modal.is-open');
-      const activeDrawer = document.querySelector('.drawer.is-open');
-
-      if (activeModal) {
-        UIComponents.closeModal(activeModal.id);
-      } else if (activeDrawer) {
-        UIComponents.closeDrawer(activeDrawer.id);
-      }
-    }
-  });
-
-  // 9. Cleanup method for memory management (optional)
-  this.cleanup = () => {
-    window.removeEventListener('hashchange', this.boundHandleRouteChange);
-    this.clearTopPeersAutoRefresh();
-    // Remove other event listeners if needed when app is destroyed
-  };
-}
-
-// Optional: Add this method to properly clean up event listeners
-destroy() {
-  if (this.cleanup) {
-    this.cleanup();
-  }
-  
-  // Clear any intervals or timeouts
-  if (this.debouncedSearchTimeout) {
-    clearTimeout(this.debouncedSearchTimeout);
-  }
-}
-    // --- Routing ---
-    handleRouteChange() {
-      const hash = window.location.hash || '#/dashboard';
-      const page = hash.substring(2) || 'dashboard';
-      this.clearTopPeersAutoRefresh();
-      if (page === 'plans' && !this.isSellerPlansEnabled()) {
-        if (window.location.hash !== '#/dashboard') {
-          window.location.hash = '#/dashboard';
-        }
-        UIComponents?.showToast?.('بخش پلن‌ها به‌زودی فعال می‌شود.', 'info');
-        return;
-      }
-      document.querySelectorAll('.view-section').forEach(s => s.classList.remove('active'));
-      document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-      document.querySelectorAll('.nav-item').forEach(n => n.removeAttribute('aria-current'));
-      const activeSection = document.getElementById(`${page}-view`);
-      const activeNav = document.querySelector(`.nav-item[data-page="${page}"]`);
-      if (activeSection) {
-        activeSection.classList.add('active');
-        document.title = `پنل فروشنده - ${activeNav?.textContent.trim() || 'داشبورد'}`;
-        this.renderPageContent(page);
-      } else {
-        const dashboardView = document.getElementById('dashboard-view');
-        if (dashboardView) {
-          dashboardView.classList.add('active');
-        }
-      }
-      if (activeNav) {
-        activeNav.classList.add('active');
-        activeNav.setAttribute('aria-current', 'page');
-      }
-    }
-    renderPageContent(page) {
-      switch(page) {
-        case 'dashboard': this.renderDashboard(); break;
-        case 'bookings': this.renderBookings(); break;
-        case 'customers': this.renderCustomers(); break;
-        case 'discounts': this.renderDiscounts(); break;
-        case 'reviews': this.renderReviews(); break;
-        case 'top':
-          this.renderTopPeers();
-          this.scheduleTopPeersAutoRefresh(true);
-          break;
-        case 'plans':
-          if (this.isSellerPlansEnabled()) {
-            this.renderPlans();
-          }
-          break;
-        case 'settings': this.renderSettings(); break; // New call for settings
-      }
-    }
-    clearTopPeersAutoRefresh() {
-      if (this.topPeersAutoRefreshInterval) {
-        clearInterval(this.topPeersAutoRefreshInterval);
-        this.topPeersAutoRefreshInterval = null;
-      }
-    }
-
-    scheduleTopPeersAutoRefresh(reset = false) {
-      if (reset) {
-        this.clearTopPeersAutoRefresh();
-      } else if (this.topPeersAutoRefreshInterval) {
-        return;
-      }
-
-      const topView = document.getElementById('top-view');
-      if (!topView || !topView.classList.contains('active')) {
-        return;
-      }
-
-      const intervalMs = Math.max(15000, Number(this.topPeersAutoRefreshMs) || (30 * 60 * 1000));
-      this.topPeersAutoRefreshInterval = window.setInterval(() => {
-        const topView = document.getElementById('top-view');
-        if (!topView || !topView.classList.contains('active')) {
-          this.clearTopPeersAutoRefresh();
-          return;
-        }
-        this.refreshTopPeersSilently();
-      }, intervalMs);
+,
+, intervalMs);
     }
 
     restartTopPeersAutoRefresh() {
@@ -5379,25 +5171,7 @@ async handlePortfolioFormSubmit() {
         });
     }
 
-    // === NEW: VIP Settings Methods ===
-    initVipSettings() {
-        const data = StorageManager.get('vit_vip_settings') || {};
-        const requiredEl = document.getElementById('vip-required');
-        const rewardEl = document.getElementById('vip-reward');
-        if (requiredEl) requiredEl.value = data.required || '';
-        if (rewardEl) rewardEl.value = data.reward || '';
-    }
-    handleVipFormSubmit() {
-        const required = parseInt(document.getElementById('vip-required').value, 10) || 0;
-        const reward = document.getElementById('vip-reward').value.trim();
-        StorageManager.set('vit_vip_settings', { required, reward });
-        UIComponents.showToast('تنظیمات ذخیره شد.', 'success');
-        UIComponents.closeModal('vip-modal');
-    }
-
-
-
-// === BRAND IMAGE (footer only) ===
+    // === BRAND IMAGE (footer only) ===
 initBrandImages(){
   this.brandImages = { footer: '' };
   this.loadFooterImage();
@@ -6859,331 +6633,3 @@ function cleanScheduleData() {
 
 
 });
-
-
-
-
-
-window.customersData = window.customersData || [];
-
-(function(){
-  const $ = s => document.querySelector(s);
-  const $$ = s => Array.from(document.querySelectorAll(s));
-
-  // 1) منبع داده‌ها
-  function getVipRequired(){
-    const fromInput = document.getElementById('vip-required');
-    const v = parseInt(fromInput?.value, 10);
-    return Number.isFinite(v) && v > 0 ? v : 5; // پیش‌فرض ۵
-  }
-
-  function normalizeCustomers(raw){
-    // خروجی استاندارد:
-    // { id, name, reservations, rewardCount, lastReservationAt, vipCurrent, vipRequired }
-    return raw.map(c => ({
-      id: c.id ?? c._id ?? c.phone ?? c.name,
-      name: c.name ?? c.fullName ?? 'بدون‌نام',
-      reservations: c.reservations ?? c.totalReservations ?? c.stats?.reservations ?? 0,
-      rewardCount: c.rewardCount ?? c.vip?.rewards ?? c.rewards ?? 0,
-      vipCurrent: c.vipCurrent ?? c.vip?.current ?? c.stats?.vipCurrent ?? c.reservations ?? 0,
-      vipRequired: c.vipRequired ?? c.vip?.required ?? c.stats?.vipRequired ?? getVipRequired(),
-      lastReservationAt: c.lastReservationAt ?? c.lastAt ?? null,
-    }));
-  }
-
-  function collectCustomers(){
-    try{
-      if (window.CUSTOMERS_STORE?.getAll){
-        return normalizeCustomers(window.CUSTOMERS_STORE.getAll());
-      }
-      if (Array.isArray(window.customersData)){
-        return normalizeCustomers(window.customersData);
-      }
-    }catch(e){}
-
-    // از DOM (اگر کارت‌ها data-* داشته باشند)
-    const cards = $$('#customers-list .customer-card');
-    if(cards.length){
-      return cards.map(el => ({
-        id: el.dataset.id || el.querySelector('.customer-phone')?.textContent?.trim() || el.querySelector('.customer-name')?.textContent?.trim(),
-        name: el.querySelector('.customer-name')?.textContent?.trim() || 'بدون‌نام',
-        reservations: parseInt(el.dataset.reservations || '0', 10),
-        rewardCount: parseInt(el.dataset.rewards || '0', 10),
-        vipCurrent: parseInt(el.dataset.vipCurrent || el.dataset.reservations || '0', 10),
-        vipRequired: parseInt(el.dataset.vipRequired || getVipRequired(), 10),
-        lastReservationAt: el.dataset.lastReservationAt || null
-      }));
-    }
-    return [];
-  }
-
-  // 2) باکت‌ها
-  let buckets = { eligible: [], oneaway: [], claimed: [] };
-
-  function computeBuckets(list){
-    // معیارها:
-    // eligible: به حد نصاب رسیده ولی هنوز claim نشده (rewardCount == 0)
-    // oneaway: یک رزرو تا حد نصاب فاصله دارد
-    // claimed: حداقل یک بار جایزه گرفته‌اند
-    const eligible = [];
-    const oneaway = [];
-    const claimed  = [];
-    list.forEach(c => {
-      const req = c.vipRequired ?? getVipRequired();
-      const cur = c.vipCurrent ?? 0;
-      const hasClaim = (c.rewardCount ?? 0) > 0;
-
-      if (hasClaim){
-        claimed.push(c);
-      }
-      if (cur >= req && !hasClaim){
-        eligible.push(c);
-      }else if (cur === req - 1){
-        oneaway.push(c);
-      }
-    });
-    return { eligible, oneaway, claimed };
-  }
-
-  // 3) رندر شمارنده‌ها
-  function renderCounts(b){
-    $('#vip-count-eligible').textContent = b.eligible.length.toLocaleString('fa-IR');
-    $('#vip-count-oneaway').textContent  = b.oneaway.length.toLocaleString('fa-IR');
-    $('#vip-count-claimed').textContent  = b.claimed.length.toLocaleString('fa-IR');
-  }
-
-  // بروزرسانی باکت‌ها و شمارنده‌ها از داده‌های فعلی
-  function updateBuckets(){
-    buckets = computeBuckets(collectCustomers());
-    renderCounts(buckets);
-  }
-
-  // 4) رندر لیست نام‌ها
-  function renderNames(title, arr){
-    $('#vip-panel-title').textContent = title;
-    const list = $('#vip-list');
-    list.innerHTML = '';
-    if(!arr.length){
-      $('#vip-empty').hidden = false;
-      return;
-    }
-    $('#vip-empty').hidden = true;
-    const frag = document.createDocumentFragment();
-    arr.forEach(c => {
-      const pill = document.createElement('span');
-      pill.className = 'vip-pill';
-      pill.textContent = c.name;
-      pill.title = `${c.name} — رزروها: ${c.reservations ?? 0}`;
-      pill.dataset.id = c.id;
-      frag.appendChild(pill);
-    });
-    list.appendChild(frag);
-  }
-
-  // 5) فیلتر لیست (در صورت وجود data-id روی کارت‌ها)
-  function filterListByIds(ids){
-    const cards = $$('#customers-list .customer-card');
-    if(!cards.length) return; // رندر خارجی؛ صرفاً پنل را نشان بده
-    if(!ids || !ids.length){
-      cards.forEach(el => el.hidden = false);
-      return;
-    }
-    const set = new Set(ids);
-    cards.forEach(el => {
-      const id = el.dataset.id || el.querySelector('.customer-name')?.textContent?.trim();
-      el.hidden = !set.has(id);
-    });
-  }
-
-  // 6) راه‌اندازی
-  function initVipUI(){
-    const root = $('#vip-stats');
-    if(!root) return;
-
-    const panel = $('#vip-stats-panel');
-    const closeBtn = $('#vip-close-panel');
-
-    function openPanel(kind){
-      const map = {
-        eligible: { title: 'واجد جایزه', arr: buckets.eligible },
-        oneaway:  { title: 'یک‌قدم تا جایزه', arr: buckets.oneaway },
-        claimed:  { title: 'جایزه‌گرفته‌اند', arr: buckets.claimed },
-      };
-      const { title, arr } = map[kind] || map.eligible;
-      renderNames(title, arr);
-      panel.hidden = false;
-    }
-    function closePanel(){
-      panel.hidden = true;
-    }
-
-    root.addEventListener('click', (ev)=>{
-      const chip = ev.target.closest('.vip-chip');
-      if(!chip) return;
-      const active = chip.getAttribute('aria-pressed') === 'true';
-      // reset chips
-      $$('.vip-chip').forEach(c => c.setAttribute('aria-pressed','false'));
-      if(active){
-        // خاموش کردن و لغو فیلتر
-        filterListByIds(null);
-        closePanel();
-        return;
-      }
-      chip.setAttribute('aria-pressed','true');
-      const kind = chip.dataset.target;
-      const arr  = kind === 'eligible' ? buckets.eligible : kind === 'oneaway' ? buckets.oneaway : buckets.claimed;
-
-      // بازکردن پنل اسامی
-      openPanel(kind);
-
-      // فیلتر مستقیم لیست در صورت وجود data-id
-      filterListByIds(arr.map(c => c.id));
-
-      // رویداد سفارشی برای رندرهای خارجی
-      const evt = new CustomEvent('vip:filter', { detail: { kind, ids: arr.map(c => c.id) }});
-      document.getElementById('customers-list')?.dispatchEvent(evt);
-    });
-
-    closeBtn.addEventListener('click', closePanel);
-
-    // ابتدا باکت‌ها را بر اساس داده‌های فعلی محاسبه کن
-    updateBuckets();
-
-    // اگر دیتایی نداریم، پنل را غیرفعال نکن—اما نوار را نگه دار
-  }
-
-  document.addEventListener('DOMContentLoaded', initVipUI);
-  document.addEventListener('vip:refresh', updateBuckets);
-})();
-
-
-document.addEventListener('DOMContentLoaded', function(){
-  const panel   = document.getElementById('vip-stats-panel');
-  const titleEl = document.getElementById('vip-panel-title');
-  const subEl   = document.getElementById('vip-panel-sub');
-  const listEl  = document.getElementById('vip-list');
-  const emptyEl = document.getElementById('vip-empty');
-  const chipsBar = document.getElementById('vip-stats'); // همان سه دکمه بالای صفحه مشتریان (eligible/oneaway/claimed)
-
-  if (!panel || !titleEl || !subEl || !listEl || !emptyEl) return;
-
-  const faNum = (n) => new Intl.NumberFormat('fa-IR').format(n);
-
-  // متن هر تب
-  const PANEL_TEXT = {
-    eligible: { title:'واجد جایزه',     sub:'مشتری‌هایی که به حد نصاب رسیده‌اند' },
-    oneaway:  { title:'یک‌قدم تا جایزه', sub:'مشتری‌هایی که یک رزرو تا جایزه فاصله دارند' },
-    claimed:  { title:'جایزه‌گرفته‌اند', sub:'مشتری‌هایی که جایزه‌شان را دریافت کرده‌اند' }
-  };
-
-  // نام کامل بساز (اگر فقط اسم کوچک باشد)
-  function fullNameOf(rec){
-    const raw = (rec.name || [rec.firstName, rec.lastName].filter(Boolean).join(' ')).trim();
-    if (raw.includes(' ')) return raw;
-    const all = (window.MOCK_DATA?.customers || []);
-    const m = all.find(x => x.name.startsWith(raw + ' '));
-    return (m?.name || raw || '—').trim();
-  }
-
-  // داده‌ها را فیلتر کن
-  function getRows(kind){
-    const base = (window.customersData || []);
-    return base.filter(c=>{
-      const need = c.vipRequired ?? 0, cur=c.vipCurrent ?? 0, rew=c.rewardCount ?? 0;
-      if (kind==='eligible') return cur>=need && rew===0;
-      if (kind==='oneaway')  return need>0 && cur===need-1;
-      if (kind==='claimed')  return rew>0;
-      return false;
-    }).map(c=>{
-      const fn = fullNameOf(c);
-      const m  = (window.MOCK_DATA?.customers || []).find(x=>x.name===fn) || {};
-      return { ...c, name: fn, phone: c.phone || m.phone || '' };
-    });
-  }
-
-  function renderList(rows){
-    listEl.innerHTML = rows.map(c => {
-      const full = fullNameOf(c);
-      return `
-        <button type="button" class="vipc-chip"
-                role="button"
-                aria-label="مشاهده جزئیات ${full}"
-                title="برای مشاهده جزئیات کلیک کنید"
-                data-name="${full}"
-                data-phone="${c.phone || ''}"
-                data-reservations="${c.reservations ?? c.vipCurrent ?? 0}"
-                data-rewards="${c.rewardCount ?? 0}"
-                data-last-reservation="${c.lastReservationAt || ''}">
-          <span class="vipc-chip-text">${full}</span>
-          <svg class="vipc-chip-caret" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-            <polyline points="15 18 9 12 15 6"></polyline>
-          </svg>
-        </button>`;
-    }).join('');
-    emptyEl.hidden = rows.length > 0;
-  }
-
-  function openPanel(kind){
-    const t = PANEL_TEXT[kind] || PANEL_TEXT.eligible;
-    titleEl.textContent = t.title;
-    subEl.textContent   = t.sub;
-    renderList(getRows(kind));
-    panel.hidden = false;
-    panel.focus();
-  }
-
-  // دکمه‌های سه‌گانه‌ی بالای صفحه مشتریان
-  chipsBar?.addEventListener('click', (e)=>{
-    const chip = e.target.closest('.vip-chip');
-    if (!chip) return;
-    const kind = chip.dataset.target || 'eligible';
-    chipsBar.querySelectorAll('.vip-chip').forEach(b => b.classList.toggle('active', b===chip));
-    openPanel(kind);
-  });
-
-  // بستن پنل
-  document.getElementById('vip-close-panel')?.addEventListener('click', ()=> panel.hidden = true);
-
-  // باز کردن مودال با کلیک روی نام
-  (function attachVipModal(){
-    const modal = document.getElementById('vip-customer-modal');
-    if (!modal) return;
-
-    function fill(d){
-      document.getElementById('vipc-avatar').textContent = (d.name||'—').charAt(0);
-      document.getElementById('vipc-modal-title').textContent = d.name || '—';
-      document.getElementById('vipc-phone').textContent = d.phone || '—';
-      document.getElementById('vipc-res-count').textContent = faNum(d.reservations ?? 0);
-      document.getElementById('vipc-reward-count').textContent = faNum(d.rewardCount ?? 0);
-      document.getElementById('vipc-last-date').textContent = d.lastReservation || d.lastReservationAt || '—';
-    }
-
-    // delegation روی خودِ لیست
-    listEl.addEventListener('click', (e)=>{
-      const btn = e.target.closest('.vipc-chip');
-      if (!btn) return;
-      fill({
-        name: btn.dataset.name,
-        phone: btn.dataset.phone,
-        reservations: +btn.dataset.reservations || 0,
-        rewardCount: +btn.dataset.rewards || 0,
-        lastReservation: btn.dataset.lastReservation
-      });
-      modal.hidden = false;
-    });
-
-    modal.addEventListener('click', (e)=>{
-      if (e.target.hasAttribute('data-close') || e.target.closest('[data-close]')) modal.hidden = true;
-    });
-
-    document.getElementById('vipc-open-customer')?.addEventListener('click', ()=>{
-      window.location.hash = '/customers';
-      modal.hidden = true;
-    });
-  })();
-});
-
-
-
-
-
