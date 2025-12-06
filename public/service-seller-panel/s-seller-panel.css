@@ -1714,6 +1714,79 @@ button:disabled, .btn:disabled {
 }
 
 /* === Discounts === */
+.discounts-toolbar {
+  display: grid;
+  gap: 12px;
+  margin-bottom: var(--space-3);
+  background: linear-gradient(135deg, rgba(10, 132, 255, 0.08), rgba(191, 90, 242, 0.08));
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: var(--border-radius-lg);
+  padding: 14px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.18);
+}
+
+.toolbar-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.toolbar-title {
+  font-weight: var(--font-weight-medium);
+  color: var(--c-text-secondary);
+}
+
+.toolbar-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: var(--c-text-primary);
+  font-size: 0.9rem;
+}
+
+.pill-outline {
+  background: transparent;
+  border: 1px solid var(--c-border);
+  border-radius: 999px;
+  padding: 6px 12px;
+  color: var(--c-text-primary);
+  transition: border-color var(--transition-fast), color var(--transition-fast);
+}
+
+.pill-glow {
+  background: rgba(var(--c-primary-rgb), 0.14);
+  color: var(--c-primary);
+  border-radius: 999px;
+  padding: 6px 12px;
+  border: 1px solid rgba(var(--c-primary-rgb), 0.3);
+  box-shadow: 0 6px 18px rgba(var(--c-primary-rgb), 0.18);
+}
+
+.btn-ghost-sm {
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--c-text-primary);
+  border-radius: var(--border-radius-md);
+  padding: 8px 10px;
+  font-size: 0.9rem;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.btn-ghost-sm:hover { background: rgba(255, 255, 255, 0.1); }
+
+.btn-ghost-sm:focus-visible { outline: 2px solid var(--c-primary); outline-offset: 2px; }
+
 .discounts-grid {
   display: grid;
   grid-template-columns: 1fr;
@@ -1745,21 +1818,17 @@ button:disabled, .btn:disabled {
 .discount-hero__title { margin: 8px 0; font-size: 1.2rem; }
 .discount-hero__text { color: var(--c-text-secondary); max-width: 54ch; }
 
-.discount-hero__meta {
-  display: flex;
-  flex-wrap: wrap;
+.hero-head { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+
+.discount-hero__highlights {
+  list-style: none;
+  padding: 0;
+  margin: 12px 0 0;
+  display: grid;
   gap: 8px;
-  margin-top: 12px;
 }
 
-.discount-hero__meta .pill {
-  background: rgba(255, 255, 255, 0.06);
-  color: var(--c-text-primary);
-  padding: 6px 12px;
-  border-radius: 999px;
-  font-size: 0.85rem;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-}
+.discount-hero__highlights li { display: flex; gap: 8px; align-items: center; color: var(--c-text-secondary); }
 
 .discount-hero__stats {
   position: relative;
@@ -1769,13 +1838,18 @@ button:disabled, .btn:disabled {
   gap: 12px;
 }
 
-.discount-hero__stats div {
+.stat-card {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 10px;
   background: rgba(18, 18, 18, 0.35);
   padding: 12px;
   border-radius: var(--border-radius-md);
   border: 1px solid rgba(255, 255, 255, 0.06);
   backdrop-filter: blur(10px);
 }
+
+.stat-icon { font-size: 1.2rem; }
 
 .discount-hero__stats strong {
   display: block;
@@ -1796,6 +1870,32 @@ button:disabled, .btn:disabled {
 .discount-form-card { display: grid; gap: var(--space-3); }
 
 .discount-form { display: flex; flex-direction: column; gap: var(--space-3); }
+
+.form-progress {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 8px;
+  background: var(--c-bg-tertiary);
+  border-radius: var(--border-radius-md);
+  border: 1px solid var(--c-border);
+  padding: 10px;
+}
+
+.progress-pill {
+  padding: 10px 12px;
+  background: rgba(255, 255, 255, 0.04);
+  border-radius: var(--border-radius-md);
+  color: var(--c-text-secondary);
+  text-align: center;
+  font-weight: var(--font-weight-medium);
+  border: 1px dashed rgba(255, 255, 255, 0.06);
+}
+
+.progress-pill.is-active {
+  background: rgba(var(--c-primary-rgb), 0.1);
+  color: var(--c-text-primary);
+  border-color: rgba(var(--c-primary-rgb), 0.4);
+}
 
 .discount-form-layout {
   display: grid;
@@ -2018,6 +2118,8 @@ button:disabled, .btn:disabled {
 
 .dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
 .dot-success { background: var(--c-success); }
+.dot-info { background: var(--c-primary); }
+.dot-warning { background: var(--c-warning); }
 
 .discount-list-meta {
   display: grid;
@@ -2081,6 +2183,22 @@ button:disabled, .btn:disabled {
 .discount-card__actions { display: flex; gap: 8px; flex-wrap: wrap; justify-content: flex-end; }
 .discount-card__actions .btn-text { color: var(--c-danger); }
 
+.list-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  padding: 10px 12px;
+  background: var(--c-bg-tertiary);
+  border-radius: var(--border-radius-md);
+  border: 1px solid var(--c-border);
+}
+
+.list-tags { display: flex; gap: 8px; flex-wrap: wrap; }
+
+.list-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+
 .badge-soft {
   background: rgba(255, 255, 255, 0.08);
   color: var(--c-text-primary);
@@ -2101,6 +2219,7 @@ button:disabled, .btn:disabled {
 
 @media (max-width: 680px) {
   .discount-hero { padding: var(--space-3); }
+  .discounts-toolbar { padding: 12px; }
   .discount-form .form-grid { grid-template-columns: 1fr; }
   .discount-form-layout { grid-template-columns: 1fr; }
   .input-with-icon { align-items: flex-start; }
