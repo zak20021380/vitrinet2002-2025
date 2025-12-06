@@ -1716,9 +1716,13 @@ button:disabled, .btn:disabled {
 /* === Discounts === */
 .discounts-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  grid-template-columns: 1fr;
   gap: var(--space-3);
   align-items: start;
+}
+
+@media (min-width: 960px) {
+  .discounts-grid { grid-template-columns: 1.1fr 0.9fr; }
 }
 
 .discount-hero {
@@ -1785,15 +1789,17 @@ button:disabled, .btn:disabled {
   display: flex;
   justify-content: space-between;
   gap: var(--space-2);
-  align-items: center;
+  align-items: flex-start;
   flex-wrap: wrap;
 }
+
+.discount-form-card { display: grid; gap: var(--space-3); }
 
 .discount-form { display: flex; flex-direction: column; gap: var(--space-3); }
 
 .discount-form .form-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
   gap: var(--space-3);
 }
 
@@ -1816,6 +1822,17 @@ button:disabled, .btn:disabled {
   width: 100%;
   font-size: 1rem;
 }
+
+.quick-customers-block {
+  display: grid;
+  gap: 8px;
+  padding: 12px;
+  border-radius: var(--border-radius-md);
+  background: var(--c-bg-tertiary);
+  border: 1px solid var(--c-border);
+}
+
+.quick-customers__header { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
 
 .quick-customers {
   display: grid;
@@ -1854,6 +1871,12 @@ button:disabled, .btn:disabled {
   display: flex;
   gap: 8px;
   flex-wrap: wrap;
+}
+
+.discount-duration .chip-selectable {
+  flex: 1;
+  min-width: 140px;
+  justify-content: space-between;
 }
 
 .chip-selectable {
@@ -1968,6 +1991,18 @@ button:disabled, .btn:disabled {
 }
 
 .empty-illustration { font-size: 2rem; }
+
+@media (max-width: 680px) {
+  .discount-hero { padding: var(--space-3); }
+  .discount-form .form-grid { grid-template-columns: 1fr; }
+  .input-with-icon { align-items: flex-start; }
+  .discount-duration { width: 100%; }
+  .form-actions { flex-direction: column; align-items: flex-start; }
+  .form-actions .btn-primary { width: 100%; justify-content: center; }
+  .discount-card { flex-direction: column; align-items: flex-start; }
+  .discount-card__amount { width: 100%; text-align: right; }
+  .discount-card__actions { width: 100%; justify-content: flex-start; }
+}
 .empty-title { font-weight: 700; margin: 8px 0; }
 .empty-text { color: var(--c-text-secondary); }
 .search-wrapper {
