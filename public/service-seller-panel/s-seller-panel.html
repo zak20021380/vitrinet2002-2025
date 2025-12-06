@@ -708,63 +708,122 @@
               </header>
 
               <form id="discount-form" class="discount-form" novalidate>
-                <div class="form-control">
-                  <label for="discount-customer">مشتری</label>
-                  <div class="input-with-icon">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-                    <select id="discount-customer" required aria-describedby="discount-customer-hint">
-                      <option value="" selected disabled>در حال بارگذاری مشتریان...</option>
-                    </select>
-                  </div>
-                  <p id="discount-customer-hint" class="help">مشتریان فعال هفته اخیر در اولویت هستند.</p>
-                </div>
+                <div class="discount-form-layout">
+                  <div class="discount-form-main">
+                    <div class="form-control">
+                      <label for="discount-customer">مشتری</label>
+                      <div class="input-with-icon">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                        <select id="discount-customer" required aria-describedby="discount-customer-hint">
+                          <option value="" selected disabled>در حال بارگذاری مشتریان...</option>
+                        </select>
+                      </div>
+                      <p id="discount-customer-hint" class="help">مشتریان فعال هفته اخیر در اولویت هستند.</p>
+                    </div>
 
-                <div class="quick-customers-block" aria-label="پیشنهاد مشتریان منتخب">
-                  <div class="quick-customers__header">
-                    <p class="eyebrow">پیشنهاد سریع</p>
-                    <small class="muted">بر اساس تعامل و خرید اخیر</small>
-                  </div>
-                  <div class="quick-customers" id="discount-suggestions"></div>
-                </div>
+                    <div class="quick-customers-block" aria-label="پیشنهاد مشتریان منتخب">
+                      <div class="quick-customers__header">
+                        <div>
+                          <p class="eyebrow">پیشنهاد سریع</p>
+                          <small class="muted">انتخاب هوشمند بر اساس خرید و تعامل اخیر</small>
+                        </div>
+                        <span class="chip chip-ghost">بروزرسانی زنده</span>
+                      </div>
+                      <div class="quick-customers" id="discount-suggestions"></div>
+                    </div>
 
-                <div class="form-grid">
-                  <div class="form-control">
-                    <label for="discount-amount">مبلغ تخفیف (تومان)</label>
-                    <div class="input-with-icon">
-                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 1v22"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
-                      <input type="number" inputmode="numeric" min="1000" step="500" id="discount-amount" placeholder="مثلاً ۱۰۰۰۰" required />
+                    <div class="form-grid">
+                      <div class="form-control">
+                        <label for="discount-amount">مبلغ تخفیف (تومان)</label>
+                        <div class="input-with-icon">
+                          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 1v22"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+                          <input type="number" inputmode="numeric" min="1000" step="500" id="discount-amount" placeholder="مثلاً ۱۰۰۰۰" required />
+                        </div>
+                        <p class="help">پیشنهاد: ۳ تا ۸٪ میانگین خرید اخیر مشتری.</p>
+                      </div>
+                      <div class="form-control">
+                        <label>مهلت استفاده</label>
+                        <div class="discount-duration" role="radiogroup" aria-label="مهلت استفاده از تخفیف">
+                          <label class="chip chip-selectable">
+                            <input type="radio" name="discount-duration" value="today" checked />
+                            <span>تا پایان امروز</span>
+                          </label>
+                          <label class="chip chip-selectable">
+                            <input type="radio" name="discount-duration" value="3d" />
+                            <span>۳ روز آینده</span>
+                          </label>
+                          <label class="chip chip-selectable">
+                            <input type="radio" name="discount-duration" value="week" />
+                            <span>یک هفته</span>
+                          </label>
+                        </div>
+                        <p class="help">بهترین اثرگذاری برای مشتریان وفادار بین ۲۴ تا ۷۲ ساعت است.</p>
+                      </div>
+                    </div>
+
+                    <div class="form-control">
+                      <label for="discount-note">یادداشت برای مشتری (اختیاری)</label>
+                      <div class="input-with-icon input-textarea">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                        <textarea id="discount-note" rows="3" placeholder="مثلاً: ویژه امروز تا ساعت ۲۳:۵۹ یا هدیه برای خرید بعدی"></textarea>
+                      </div>
+                    </div>
+
+                    <div class="form-actions">
+                      <div class="inline-hint">
+                        <span class="dot dot-success"></span>
+                        <div>
+                          <small>پیام در تاریخچه مشتری ذخیره می‌شود.</small>
+                          <small>ارسال همزمان در نوتیفیکیشن و پیامک داخلی.</small>
+                        </div>
+                      </div>
+                      <button type="submit" class="btn-primary">ثبت تخفیف شخصی‌سازی‌شده</button>
                     </div>
                   </div>
-                  <div class="form-control">
-                    <label>مهلت استفاده</label>
-                    <div class="discount-duration" role="radiogroup" aria-label="مهلت استفاده از تخفیف">
-                      <label class="chip chip-selectable">
-                        <input type="radio" name="discount-duration" value="today" checked />
-                        <span>تا پایان امروز</span>
-                      </label>
-                      <label class="chip chip-selectable">
-                        <input type="radio" name="discount-duration" value="3d" />
-                        <span>۳ روز آینده</span>
-                      </label>
-                      <label class="chip chip-selectable">
-                        <input type="radio" name="discount-duration" value="week" />
-                        <span>یک هفته</span>
-                      </label>
+
+                  <aside class="discount-form-aside" aria-label="راهنمای تخفیف اختصاصی">
+                    <div class="aside-block">
+                      <div class="aside-block__title">
+                        <p class="eyebrow">گام‌های پیشنهادی</p>
+                        <small class="muted">برای نتیجه بهتر همین حالا اجرا کنید</small>
+                      </div>
+                      <ol class="discount-steps">
+                        <li>
+                          <div class="step-icon">۱</div>
+                          <div>
+                            <strong>انتخاب مشتری فعال</strong>
+                            <p class="muted">مشتریانی که اخیراً خرید کرده‌اند بیشترین پاسخ را می‌دهند.</p>
+                          </div>
+                        </li>
+                        <li>
+                          <div class="step-icon">۲</div>
+                          <div>
+                            <strong>تعیین سقف هوشمند</strong>
+                            <p class="muted">مبالغ یکنواخت و کوتاه‌مدت حس فوریت ایجاد می‌کند.</p>
+                          </div>
+                        </li>
+                        <li>
+                          <div class="step-icon">۳</div>
+                          <div>
+                            <strong>متن کوتاه و روشن</strong>
+                            <p class="muted">دلیل تخفیف و زمان انقضا را حتماً ذکر کنید.</p>
+                          </div>
+                        </li>
+                      </ol>
                     </div>
-                  </div>
-                </div>
 
-                <div class="form-control">
-                  <label for="discount-note">یادداشت برای مشتری (اختیاری)</label>
-                  <textarea id="discount-note" rows="2" placeholder="مثلاً: ویژه امروز تا ساعت ۲۳:۵۹"></textarea>
-                </div>
-
-                <div class="form-actions">
-                  <div class="inline-hint">
-                    <span class="dot dot-success"></span>
-                    <small>پیام در تاریخچه مشتری ذخیره می‌شود.</small>
-                  </div>
-                  <button type="submit" class="btn-primary">ثبت تخفیف شخصی‌سازی‌شده</button>
+                    <div class="aside-block">
+                      <div class="aside-block__title">
+                        <p class="eyebrow">نکات حرفه‌ای</p>
+                        <small class="muted">برای ظاهر منظم و اعتماد بیشتر</small>
+                      </div>
+                      <ul class="discount-tips">
+                        <li>از اعداد فارسی و کاماگذاری خوانا استفاده کنید.</li>
+                        <li>در صورت امکان، پیشنهاد را به خرید بعدی هم تعمیم دهید.</li>
+                        <li>پس از ثبت، وضعیت را در لیست تخفیف‌های فعال بررسی کنید.</li>
+                      </ul>
+                    </div>
+                  </aside>
                 </div>
               </form>
             </article>
