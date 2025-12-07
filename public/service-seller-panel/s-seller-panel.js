@@ -3359,11 +3359,15 @@ function bindFloatingCloseOnce() {
   _closeModalBound = true;
 
   document.addEventListener('click', (e) => {
-    if (e.target.closest('.modal-close-floating')) {
-      e.preventDefault();
-      e.stopPropagation();
-      UIComponents.closeModal('customer-details-modal');
-    }
+    const closeBtn = e.target.closest('.modal-close-floating');
+    if (!closeBtn) return;
+
+    const modalId = closeBtn.dataset.targetModal || closeBtn.closest('.modal')?.id;
+    if (!modalId) return;
+
+    e.preventDefault();
+    e.stopPropagation();
+    UIComponents.closeModal(modalId);
   }, true);
 }
 
