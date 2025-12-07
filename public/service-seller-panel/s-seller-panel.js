@@ -3556,15 +3556,19 @@ const dismissTarget = target.closest('[data-dismiss]');
 if (dismissTarget) {
   e.preventDefault();
   e.stopPropagation();
-  
-  // Find the parent modal or drawer
+
+  // Find the parent modal or drawer first
   let container = dismissTarget.closest('.modal, .drawer');
-  
-  // Special handling for customer modal close button
-  if (dismissTarget.classList.contains('modal-close-floating')) {
-    container = document.getElementById('customer-details-modal');
+
+  // If the button sits outside the modal card (floating buttons), fall back to the currently open overlay
+  if (!container) {
+    if (dismissTarget.dataset.dismiss === 'modal') {
+      container = document.querySelector('.modal.is-open');
+    } else if (dismissTarget.dataset.dismiss === 'drawer') {
+      container = document.querySelector('.drawer.is-open');
+    }
   }
-  
+
   if (container) {
     if (container.classList.contains('modal')) {
       UIComponents.closeModal(container.id);
