@@ -2380,30 +2380,37 @@ async function fetchInitialData() {
 
 window.MOCK_DATA = MOCK_DATA;
 
+function buildSampleCustomers() {
+  const baseDate = new Date();
+  const daysAgo = (d) => {
+    const copy = new Date(baseDate);
+    copy.setDate(copy.getDate() - d);
+    return copy.toISOString();
+  };
+
+  return [
+    { id: 'c-101', name: 'امیر محمدی', phone: '۰۹۱۲۳۴۵۶۷۸۹', bookingsCount: 12, reviewCount: 4, joinedAt: daysAgo(320), lastReservation: daysAgo(3), pendingRewards: 1 },
+    { id: 'c-102', name: 'نسترن حیدری', phone: '۰۹۳۵۴۳۲۱۵۴۵', bookingsCount: 7, reviewCount: 2, joinedAt: daysAgo(45), lastReservation: daysAgo(9), vipCurrent: 2 },
+    { id: 'c-103', name: 'حسین مرادی', phone: '۰۹۱۳۳۳۳۳۳۳۳', bookingsCount: 3, reviewCount: 1, joinedAt: daysAgo(18), lastReservation: daysAgo(2) },
+    { id: 'c-104', name: 'شیما مقدم', phone: '۰۹۱۲۴۴۴۴۳۳۳', bookingsCount: 15, reviewCount: 6, joinedAt: daysAgo(600), lastReservation: daysAgo(40), rewardCount: 3 },
+    { id: 'c-105', name: 'سینا احدی', phone: '۰۹۰۱۱۲۲۲۳۳۴', bookingsCount: 1, reviewCount: 0, joinedAt: daysAgo(10), lastReservation: daysAgo(8) },
+    { id: 'c-106', name: 'الهام کاظمی', phone: '۰۹۱۹۸۷۶۵۴۳۲', bookingsCount: 9, reviewCount: 5, joinedAt: daysAgo(120), lastReservation: daysAgo(14), pendingRewards: 2 }
+  ];
+}
+
 // دریافت مشتریان واقعی فروشنده
 async function loadCustomers() {
-  try {
-    const res = await fetch(`${API_BASE}/api/loyalty/customers`, { credentials: 'include' });
-    if (!res.ok) return;
-    const data = await res.json();
-
-    const mapped = data.map(c => ({
-      id: String(c.id || c.userId || c._id),
-      name: c.name || '-',
-      phone: c.phone || '-',
-      lastReservation: c.lastReservation || '',
-      pendingRewards: c.pending || 0,
-      vipCurrent: c.completed || 0,
-      rewardCount: c.claimed || 0
-    }));
-
-    MOCK_DATA.customers = mapped;
-    window.customersData = mapped.map(c => ({
+  const applyCustomers = (list) => {
+    MOCK_DATA.customers = list;
+    window.customersData = list.map(c => ({
       id: c.id,
       name: c.name,
       vipCurrent: c.vipCurrent,
-      rewardCount: c.rewardCount,
-      lastReservationAt: c.lastReservation
+      rewardCount: c.reviewCount ?? c.rewardCount,
+      lastReservationAt: c.lastReservation,
+      joinedAt: c.joinedAt,
+      bookingsCount: c.bookingsCount,
+      reviewCount: c.reviewCount
     }));
 
     if (typeof app !== 'undefined' && app.renderCustomers) {
@@ -2415,11 +2422,41 @@ async function loadCustomers() {
       app.renderDiscounts?.();
     }
 
-    // اطلاع‌رسانی به رابط VIP برای بروزرسانی آمار پس از بارگذاری مشتریان
-    document.dispatchEvent(new CustomEvent('customers:loaded', { detail: mapped }));
+    document.dispatchEvent(new CustomEvent('customers:loaded', { detail: list }));
     document.dispatchEvent(new Event('vip:refresh'));
+  };
+
+  try {
+    const res = await fetch(`${API_BASE}/api/loyalty/customers`, { credentials: 'include' });
+    const data = res.ok ? await res.json() : [];
+
+    let mapped = data.map(c => {
+      const bookingsCount = Number(c.totalBookings ?? c.bookingsCount ?? c.completedBookings ?? 0);
+      const reviewCount = Number(c.reviewCount ?? c.feedbackCount ?? c.reviews ?? c.rewardCount ?? 0);
+      const joinedAt = c.joinedAt || c.memberSince || c.createdAt || c.lastReservation || new Date().toISOString();
+
+      return {
+      id: String(c.id || c.userId || c._id),
+      name: c.name || '-',
+      phone: c.phone || '-',
+      lastReservation: c.lastReservation || c.lastReservationAt || '',
+      joinedAt,
+      bookingsCount,
+      reviewCount,
+      pendingRewards: c.pending || 0,
+      vipCurrent: c.completed || 0,
+      rewardCount: c.claimed || 0
+      };
+    });
+
+    if (!mapped.length) {
+      mapped = buildSampleCustomers();
+    }
+
+    applyCustomers(mapped);
   } catch (err) {
     console.error('loadCustomers', err);
+    applyCustomers(buildSampleCustomers());
   }
 }
 
@@ -3352,6 +3389,9 @@ function bindFloatingCloseOnce() {
       this.topPeersAutoRefreshInterval = null;
       this.topPeersAutoRefreshMs = 30 * 60 * 1000;
 
+      this.currentCustomerFilter = 'all';
+      this.currentCustomerQuery = '';
+
       this.discountStore = new DiscountStore();
       this.discountStore.purgeExpired();
 
@@ -3443,6 +3483,7 @@ setupEventListeners() {
 
       plansView: document.getElementById('plans-view'),
       customerSearch: document.getElementById('customer-search'),
+      customerFilters: document.querySelector('.customer-filters'),
       bookingsFilter: document.querySelector('#bookings-view .filter-chips'),
       reviewsFilter: document.querySelector('#reviews-view .filter-chips'),
       settingsForm: document.getElementById('settings-form'),
@@ -3572,10 +3613,14 @@ if (elements.viewStoreBtn) {
 
   // 5. Search and Filters with optimized event handling
   if (elements.customerSearch) {
-    elements.customerSearch.addEventListener('input', 
-      (e) => this.debouncedSearch(e.target.value), 
+    elements.customerSearch.addEventListener('input',
+      (e) => this.debouncedSearch(e.target.value),
       { passive: true }
     );
+  }
+
+  if (elements.customerFilters) {
+    elements.customerFilters.addEventListener('click', (e) => this.handleCustomerFilterChange(e));
   }
 
   if (elements.bookingsFilter) {
@@ -4894,7 +4939,16 @@ handlePlanDurationChange() {
       chip.classList.add('active');
       this.renderReviews(chip.dataset.filter);
     }
+    handleCustomerFilterChange(e) {
+      const btn = e.target.closest('.customer-filter');
+      if (!btn) return;
+      this.currentCustomerFilter = btn.dataset.filter || 'all';
+      btn.parentElement?.querySelectorAll('.customer-filter').forEach(el => el.classList.remove('active'));
+      btn.classList.add('active');
+      this.renderCustomers(this.currentCustomerQuery);
+    }
     filterCustomers(query) {
+      this.currentCustomerQuery = query;
       this.renderCustomers(query);
     }
     initSidebarObserver() {
@@ -5439,6 +5493,7 @@ initCustomerClickHandlers() {
     customersList.addEventListener('click', (e) => {
       const approveBtn = e.target.closest('.reward-approve');
       const rejectBtn  = e.target.closest('.reward-reject');
+      const discountBtn = e.target.closest('[data-action="prefill-discount"]');
       if (approveBtn) {
         handleRewardAction(approveBtn.dataset.userId, 'approve');
         e.stopPropagation();
@@ -5449,12 +5504,68 @@ initCustomerClickHandlers() {
         e.stopPropagation();
         return;
       }
+      if (discountBtn) {
+        this.prefillDiscount(discountBtn.dataset.customerId);
+        e.stopPropagation();
+        return;
+      }
       const card = e.target.closest('.customer-card');
       if (card) {
         this.showCustomerDetails(card);
       }
     });
   }
+}
+
+prefillDiscount(customerId) {
+  if (!customerId) return;
+  this.refreshDiscountCustomers(customerId);
+  if (this.discountAmountInput && !this.discountAmountInput.value) {
+    this.discountAmountInput.value = 5000;
+  }
+  document.getElementById('discount-form')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+matchesCustomerFilter(customer = {}) {
+  const bookings = Number(customer.bookingsCount ?? customer.vipCurrent ?? 0);
+  const reviews = Number(customer.reviewCount ?? customer.rewardCount ?? 0);
+  const joinedAt = new Date(customer.joinedAt || customer.createdAt || customer.lastReservation || Date.now());
+  const lastReservation = new Date(customer.lastReservation || customer.lastReservationAt || customer.joinedAt || Date.now());
+  const now = new Date();
+  const daysSinceJoin = Math.floor((now - joinedAt) / 86400000);
+  const daysFromLastReservation = Math.floor((now - lastReservation) / 86400000);
+
+  switch (this.currentCustomerFilter) {
+    case 'recent':
+      return daysSinceJoin <= 45;
+    case 'loyal':
+      return bookings >= 5;
+    case 'reviewers':
+      return reviews > 0;
+    case 'dormant':
+      return daysFromLastReservation > 45;
+    default:
+      return true;
+  }
+}
+
+updateCustomerStats(customers = []) {
+  const totalCustomers = customers.length;
+  const totalBookings = customers.reduce((sum, c) => sum + (Number(c.bookingsCount) || 0), 0);
+  const totalReviews = customers.reduce((sum, c) => sum + (Number(c.reviewCount ?? c.rewardCount) || 0), 0);
+  const newThisMonth = customers.filter(c => {
+    const joined = new Date(c.joinedAt || c.createdAt || c.lastReservation);
+    if (Number.isNaN(joined.getTime())) return false;
+    const now = new Date();
+    const oneMonthAgo = new Date(now);
+    oneMonthAgo.setDate(oneMonthAgo.getDate() - 30);
+    return joined >= oneMonthAgo;
+  }).length;
+
+  this.setText('customer-total-count', this.formatNumber(totalCustomers));
+  this.setText('customer-visit-count', this.formatNumber(totalBookings));
+  this.setText('customer-review-count', this.formatNumber(totalReviews));
+  this.setText('customer-new-month', this.formatNumber(newThisMonth));
 }
 
 // Show customer details modal
@@ -5573,34 +5684,77 @@ renderCustomers(query = '') {
     console.warn('renderCustomers: element with id "customers-list" not found');
     return;
   }
-  const normalizedQuery = query.trim().toLowerCase();
+  this.currentCustomerQuery = query;
+  const normalizedQuery = (query || '').trim().toLowerCase();
 
-  const filteredCustomers = MOCK_DATA.customers.filter(c =>
-    c.name.toLowerCase().includes(normalizedQuery) ||
-    c.phone.includes(normalizedQuery)
-  );
+  const filteredCustomers = MOCK_DATA.customers
+    .filter(c =>
+      c.name.toLowerCase().includes(normalizedQuery) ||
+      (c.phone || '').includes(normalizedQuery)
+    )
+    .filter(c => this.matchesCustomerFilter(c));
+
+  this.updateCustomerStats(MOCK_DATA.customers);
 
   if (filteredCustomers.length === 0) {
-    listEl.innerHTML = `<p>مشتری با این مشخصات یافت نشد.</p>`;
+    listEl.innerHTML = `<div class="empty-state"><p class="muted">مشتری با این مشخصات یافت نشد.</p></div>`;
     return;
   }
 
   listEl.innerHTML = filteredCustomers.map(c => {
+    const lastReservation = UIComponents.formatRelativeDate(c.lastReservation);
+    const joinedLabel = UIComponents.formatRelativeDate(c.joinedAt || c.lastReservation);
+    const bookingsCount = this.formatNumber(c.bookingsCount ?? c.vipCurrent ?? 0);
+    const reviewCount = this.formatNumber(c.reviewCount ?? c.rewardCount ?? 0);
+    const pending = this.formatNumber(c.pendingRewards || 0);
+    const tier = (c.bookingsCount ?? 0) >= 10 ? 'وفادار' : 'فعال';
+
     return `
       <article class="customer-card card"
                role="listitem" tabindex="0"
-               data-name="${c.name}" data-phone="${c.phone}" data-user-id="${c.id}">
-        <div class="customer-avatar" aria-hidden="true">${c.name.charAt(0)}</div>
-        <div class="customer-info">
-          <div class="customer-name">${c.name}</div>
-          <div class="customer-phone">${UIComponents.formatPersianNumber(c.phone)}</div>
-          <div class="customer-last-reservation">آخرین رزرو نوبت: ${UIComponents.formatRelativeDate(c.lastReservation)}</div>
+               data-name="${escapeHtml(c.name)}" data-phone="${escapeHtml(c.phone)}" data-user-id="${escapeHtml(c.id)}">
+        <div class="customer-card__top">
+          <div class="customer-avatar" aria-hidden="true">${escapeHtml(c.name.charAt(0))}</div>
+          <div class="customer-info">
+            <div class="customer-name-row">
+              <div class="customer-name">${escapeHtml(c.name)}</div>
+              <span class="customer-tier">${tier}</span>
+            </div>
+            <div class="customer-phone">${UIComponents.formatPersianNumber(c.phone)}</div>
+            <div class="customer-tags">
+              <span class="customer-chip">عضویت از ${joinedLabel || '—'}</span>
+              <span class="customer-chip">آخرین رزرو: ${lastReservation || '—'}</span>
+            </div>
+          </div>
+          <div class="customer-actions">
+            <button type="button" class="btn-secondary" data-action="prefill-discount" data-customer-id="${escapeHtml(c.id)}">تخفیف اختصاصی</button>
+          </div>
+        </div>
+        <div class="customer-card__stats">
+          <div class="stat-chip">
+            <span>رزرو</span>
+            <strong>${bookingsCount}</strong>
+          </div>
+          <div class="stat-chip">
+            <span>نظرات</span>
+            <strong>${reviewCount}</strong>
+          </div>
+          <div class="stat-chip">
+            <span>درخواست جایزه</span>
+            <strong>${pending}</strong>
+          </div>
+          <div class="stat-chip stat-chip--accent">
+            <span>تخفیف</span>
+            <button type="button" class="link-btn" data-action="prefill-discount" data-customer-id="${escapeHtml(c.id)}">اعمال سریع</button>
+          </div>
         </div>
         ${c.pendingRewards ? `
-        <div class="customer-reward" style="margin-top:8px;">
-          <span class="status-badge status-pending" style="margin-left:8px;">درخواست جایزه (${c.pendingRewards})</span>
-          <button type="button" class="btn-success reward-approve" data-user-id="${c.id}">تایید</button>
-          <button type="button" class="btn-danger reward-reject" data-user-id="${c.id}">رد</button>
+        <div class="customer-reward">
+          <span class="status-badge status-pending">درخواست جایزه (${c.pendingRewards})</span>
+          <div class="reward-actions">
+            <button type="button" class="btn-success reward-approve" data-user-id="${c.id}">تایید</button>
+            <button type="button" class="btn-danger reward-reject" data-user-id="${c.id}">رد</button>
+          </div>
         </div>` : ''}
       </article>
     `;
@@ -5612,6 +5766,8 @@ renderCustomers(query = '') {
     this.discountCustomerSelect = document.getElementById('discount-customer');
     this.discountAmountInput = document.getElementById('discount-amount');
     this.discountNoteInput = document.getElementById('discount-note');
+    this.discountTypeInputs = this.discountForm?.querySelectorAll('input[name="discount-type"]') || [];
+    this.discountExpiryInput = document.getElementById('discount-expiry');
     this.discountSuggestions = document.getElementById('discount-suggestions');
     this.discountListEl = document.getElementById('discounts-list');
     this.discountEmptyEl = document.getElementById('discounts-empty');
@@ -5740,6 +5896,15 @@ renderCustomers(query = '') {
     return end.toISOString();
   }
 
+  normalizeExpiry(dateValue) {
+    const parsed = new Date(dateValue);
+    if (Number.isNaN(parsed.getTime())) {
+      return this.calculateDiscountExpiry(this.getSelectedDiscountDuration());
+    }
+    parsed.setHours(23, 59, 0, 0);
+    return parsed.toISOString();
+  }
+
   formatToman(value) {
     const numeric = Math.max(0, Number(value) || 0);
     return `${new Intl.NumberFormat('fa-IR').format(numeric)} تومان`;
@@ -5770,15 +5935,25 @@ renderCustomers(query = '') {
       return;
     }
 
+    const selectedType = Array.from(this.discountTypeInputs || []).find(input => input.checked)?.value || 'amount';
     const amount = Number(this.discountAmountInput?.value || 0);
-    if (!Number.isFinite(amount) || amount < 1000) {
-      UIComponents.showToast('مبلغ تخفیف را حداقل با ۱۰۰۰ تومان وارد کنید.', 'error');
-      return;
+    if (selectedType === 'percent') {
+      if (!Number.isFinite(amount) || amount <= 0 || amount > 90) {
+        UIComponents.showToast('درصد تخفیف باید بین ۱ تا ۹۰ باشد.', 'error');
+        return;
+      }
+    } else {
+      if (!Number.isFinite(amount) || amount < 1000) {
+        UIComponents.showToast('مبلغ تخفیف را حداقل با ۱۰۰۰ تومان وارد کنید.', 'error');
+        return;
+      }
     }
 
     const duration = this.getSelectedDiscountDuration();
     const customer = this.getDiscountCustomers().find(c => String(c.id) === String(customerId)) || {};
     const note = (this.discountNoteInput?.value || '').trim();
+    const manualExpiry = this.discountExpiryInput?.value;
+    const expiresAt = manualExpiry ? this.normalizeExpiry(manualExpiry) : this.calculateDiscountExpiry(duration);
 
     const discount = {
       id: crypto.randomUUID ? crypto.randomUUID() : `disc-${Date.now()}`,
@@ -5786,8 +5961,9 @@ renderCustomers(query = '') {
       customerName: customer.name || 'مشتری',
       customerPhone: customer.phone || '',
       amount,
+      type: selectedType,
       createdAt: new Date().toISOString(),
-      expiresAt: this.calculateDiscountExpiry(duration),
+      expiresAt,
       note: note || this.getDiscountDurationLabel(duration)
     };
 
@@ -5803,8 +5979,9 @@ renderCustomers(query = '') {
   updateDiscountStats(active = []) {
     const today = new Date().toDateString();
     const expiringToday = active.filter(d => new Date(d.expiresAt).toDateString() === today).length;
-    const totalValue = active.reduce((sum, d) => sum + (Number(d.amount) || 0), 0);
-    const average = active.length ? totalValue / active.length : 0;
+    const amountOnly = active.filter(d => d.type !== 'percent');
+    const totalValue = amountOnly.reduce((sum, d) => sum + (Number(d.amount) || 0), 0);
+    const average = amountOnly.length ? totalValue / amountOnly.length : 0;
 
     const setStat = (id, value) => {
       const el = document.getElementById(id);
@@ -5856,6 +6033,10 @@ renderCustomers(query = '') {
       const remaining = this.formatRemainingTime(d.expiresAt);
       const note = d.note ? `<div class="meta">${escapeHtml(d.note)}</div>` : '';
       const lastVisit = d.lastReservation ? ` • آخرین مراجعه: ${UIComponents.formatRelativeDate(d.lastReservation)}` : '';
+      const valueText = d.type === 'percent'
+        ? `${UIComponents.formatPersianNumber(d.amount)}٪`
+        : this.formatToman(d.amount);
+      const valueLabel = d.type === 'percent' ? 'درصدی' : 'مبلغ';
 
       return `
         <article class="discount-card" role="listitem">
@@ -5866,8 +6047,8 @@ renderCustomers(query = '') {
             ${note}
           </div>
           <div class="discount-card__amount">
-            <span class="label">مبلغ</span>
-            <span class="value">${this.formatToman(d.amount)}</span>
+            <span class="label">${valueLabel}</span>
+            <span class="value">${valueText}</span>
             <span class="expires">${this.formatDateTime(d.expiresAt)} • ${remaining}</span>
           </div>
           <div class="discount-card__actions">
