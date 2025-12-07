@@ -5831,6 +5831,9 @@ renderCustomers(query = '') {
     this.globalDiscountDurationInputs = this.globalDiscountForm?.querySelectorAll('input[name="global-discount-duration"]') || [];
     this.globalDiscountStatus = document.getElementById('global-discount-status');
     this.globalDiscountClear = document.getElementById('global-discount-clear');
+    this.globalDiscountCustomDate = document.getElementById('global-discount-custom-date');
+    this.globalDiscountCustomDateWrap = document.getElementById('global-discount-custom-date-wrap');
+    this.globalDiscountCouponInput = document.getElementById('global-discount-coupon');
 
     if (this.discountModalTypeInputs?.length) {
       this.discountModalTypeInputs.forEach(input => {
@@ -5917,6 +5920,14 @@ renderCustomers(query = '') {
       });
       const initialGlobalType = Array.from(this.globalDiscountTypeInputs).find(input => input.checked)?.value || 'amount';
       this.updateGlobalDiscountType(initialGlobalType);
+    }
+
+    if (this.globalDiscountDurationInputs?.length) {
+      this.globalDiscountDurationInputs.forEach(input => {
+        input.addEventListener('change', () => this.updateGlobalDurationState(input.value));
+      });
+      const initialDuration = Array.from(this.globalDiscountDurationInputs).find(input => input.checked)?.value || 'today';
+      this.updateGlobalDurationState(initialDuration);
     }
 
     if (this.globalDiscountDurationInputs?.length) {
@@ -6157,10 +6168,91 @@ renderCustomers(query = '') {
 
   getDiscountDurationLabel(mode) {
     switch (mode) {
+      case 'custom': return 'انقضای دلخواه فروشنده';
       case '3d': return 'مهلت استفاده تا ۳ روز آینده';
       case 'week': return 'مهلت استفاده تا یک هفته';
       default: return 'مهلت تا پایان امروز';
     }
+  }
+
+  normalizePersianDigits(value = '') {
+    const persianDigits = '۰۱۲۳۴۵۶۷۸۹';
+    const arabicDigits = '٠١٢٣٤٥٦٧٨٩';
+    return String(value)
+      .replace(/[۰-۹]/g, d => persianDigits.indexOf(d))
+      .replace(/[٠-٩]/g, d => arabicDigits.indexOf(d));
+  }
+
+  jalaliToGregorian(jy, jm, jd) {
+    jy += 1595;
+    let days = -355668 + (365 * jy) + Math.floor(jy / 33) * 8 + Math.floor(((jy % 33) + 3) / 4) + jd + (jm < 7 ? (jm - 1) * 31 : ((jm - 7) * 30) + 186);
+    let gy = 400 * Math.floor(days / 146097);
+    days %= 146097;
+
+    if (days > 36524) {
+      gy += 100 * Math.floor(--days / 36524);
+      days %= 36524;
+      if (days >= 365) days++;
+    }
+
+    gy += 4 * Math.floor(days / 1461);
+    days %= 1461;
+    if (days > 365) {
+      gy += Math.floor((days - 1) / 365);
+      days = (days - 1) % 365;
+    }
+
+    days += 1;
+    const leap = (gy % 4 === 0 && gy % 100 !== 0) || (gy % 400 === 0);
+    const monthDays = [0, 31, leap ? 29 : 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+    let gm = 1;
+    while (gm <= 12 && days > monthDays[gm]) {
+      days -= monthDays[gm];
+      gm++;
+    }
+
+    return { gy, gm, gd: days };
+  }
+
+  parseDiscountDateInput(dateValue) {
+    const normalized = this.normalizePersianDigits(dateValue).replace(/\s+/g, '');
+    if (!normalized) return null;
+
+    if (/^\d{4}-\d{2}-\d{2}(?:T|$)/.test(normalized)) {
+      const d = new Date(normalized);
+      return Number.isNaN(d.getTime()) ? null : d;
+    }
+
+    const match = normalized.match(/^(\d{4})[\/\-.](\d{1,2})[\/\-.](\d{1,2})$/);
+    if (!match) return null;
+
+    const [_, yStr, mStr, dStr] = match;
+    const y = Number(yStr);
+    const m = Number(mStr);
+    const d = Number(dStr);
+    const pad = (n) => String(n).padStart(2, '0');
+
+    if (m < 1 || m > 12 || d < 1 || d > 31) return null;
+
+    if (y >= 1700) {
+      const greg = new Date(`${y}-${pad(m)}-${pad(d)}`);
+      return Number.isNaN(greg.getTime()) ? null : greg;
+    }
+
+    if (y >= 1200) {
+      const { gy, gm, gd } = this.jalaliToGregorian(y, m, d);
+      const greg = new Date(`${gy}-${pad(gm)}-${pad(gd)}`);
+      return Number.isNaN(greg.getTime()) ? null : greg;
+    }
+
+    return null;
+  }
+
+  formatCustomExpiryLabel(dateValue) {
+    const parsed = this.parseDiscountDateInput(dateValue);
+    if (!parsed) return 'انقضا بر اساس تاریخ واردشده';
+    const fa = new Intl.DateTimeFormat('fa-IR-u-ca-persian', { year: 'numeric', month: '2-digit', day: '2-digit' }).format(parsed);
+    return `انقضا تا ${fa}`;
   }
 
   calculateDiscountExpiry(duration) {
@@ -6174,10 +6266,10 @@ renderCustomers(query = '') {
     return end.toISOString();
   }
 
-  normalizeExpiry(dateValue) {
-    const parsed = new Date(dateValue);
-    if (Number.isNaN(parsed.getTime())) {
-      return this.calculateDiscountExpiry(this.getSelectedDiscountDuration());
+  normalizeExpiry(dateValue, fallbackDuration = 'today') {
+    const parsed = this.parseDiscountDateInput(dateValue);
+    if (!parsed) {
+      return this.calculateDiscountExpiry(fallbackDuration);
     }
     parsed.setHours(23, 59, 0, 0);
     return parsed.toISOString();
@@ -6246,6 +6338,18 @@ renderCustomers(query = '') {
     }
   }
 
+  updateGlobalDurationState(duration = 'today') {
+    if (!this.globalDiscountCustomDateWrap) return;
+    const isCustom = duration === 'custom';
+    this.globalDiscountCustomDateWrap.classList.toggle('is-active', isCustom);
+    if (isCustom && this.globalDiscountCustomDate && !this.globalDiscountCustomDate.value) {
+      const base = new Date();
+      base.setDate(base.getDate() + 3);
+      const faDate = new Intl.DateTimeFormat('fa-IR-u-ca-persian', { year: 'numeric', month: '2-digit', day: '2-digit' }).format(base);
+      this.globalDiscountCustomDate.placeholder = faDate;
+    }
+  }
+
   getGlobalDiscount() {
     return (this.discountStore?.getActive() || []).find(d =>
       d.isGlobal || d.customerId === this.GLOBAL_CUSTOMER_ID || d.id === this.GLOBAL_DISCOUNT_ID
@@ -6274,6 +6378,8 @@ renderCustomers(query = '') {
     const type = Array.from(this.globalDiscountTypeInputs || []).find(input => input.checked)?.value || 'amount';
     const amount = Number(this.globalDiscountAmount?.value || 0);
     const note = (this.globalDiscountNoteInput?.value || '').trim();
+    const customDate = this.globalDiscountCustomDate?.value || '';
+    const couponCode = (this.globalDiscountCouponInput?.value || '').trim();
 
     if (type === 'percent') {
       if (!Number.isFinite(amount) || amount <= 0 || amount > 90) {
@@ -6286,6 +6392,13 @@ renderCustomers(query = '') {
     }
 
     const duration = Array.from(this.globalDiscountDurationInputs || []).find(input => input.checked)?.value || 'week';
+    const expiresAt = duration === 'custom'
+      ? this.normalizeExpiry(customDate, duration)
+      : this.calculateDiscountExpiry(duration);
+    const noteLabel = duration === 'custom'
+      ? this.formatCustomExpiryLabel(customDate)
+      : this.getDiscountDurationLabel(duration);
+
     const discount = {
       id: this.GLOBAL_DISCOUNT_ID,
       customerId: this.GLOBAL_CUSTOMER_ID,
@@ -6294,8 +6407,9 @@ renderCustomers(query = '') {
       amount,
       type,
       createdAt: new Date().toISOString(),
-      expiresAt: this.calculateDiscountExpiry(duration),
-      note: note || this.getDiscountDurationLabel(duration),
+      expiresAt,
+      note: note || noteLabel,
+      couponCode: couponCode || undefined,
       isGlobal: true
     };
 
@@ -6304,6 +6418,9 @@ renderCustomers(query = '') {
     this.globalDiscountForm.reset();
     const today = this.globalDiscountForm.querySelector('input[name="global-discount-duration"][value="today"]');
     if (today) today.checked = true;
+    if (this.globalDiscountCustomDate) this.globalDiscountCustomDate.value = '';
+    this.updateGlobalDurationState('today');
+    if (this.globalDiscountCouponInput) this.globalDiscountCouponInput.value = '';
     this.updateGlobalDiscountType(type);
     this.updateGlobalDiscountStatus();
     this.renderDiscounts();
@@ -6344,7 +6461,8 @@ renderCustomers(query = '') {
     const customer = this.getDiscountCustomers().find(c => String(c.id) === String(customerId)) || {};
     const note = (this.discountNoteInput?.value || '').trim();
     const manualExpiry = this.discountExpiryInput?.value;
-    const expiresAt = manualExpiry ? this.normalizeExpiry(manualExpiry) : this.calculateDiscountExpiry(duration);
+    const expiresAt = manualExpiry ? this.normalizeExpiry(manualExpiry, duration) : this.calculateDiscountExpiry(duration);
+    const noteLabel = manualExpiry ? this.formatCustomExpiryLabel(manualExpiry) : this.getDiscountDurationLabel(duration);
 
     const discount = {
       id: crypto.randomUUID ? crypto.randomUUID() : `disc-${Date.now()}`,
@@ -6355,7 +6473,7 @@ renderCustomers(query = '') {
       type: selectedType,
       createdAt: new Date().toISOString(),
       expiresAt,
-      note: note || this.getDiscountDurationLabel(duration)
+      note: note || noteLabel
     };
 
     this.discountStore.upsert(discount);
@@ -6431,6 +6549,7 @@ renderCustomers(query = '') {
     listEl.innerHTML = active.map(d => {
       const remaining = this.formatRemainingTime(d.expiresAt);
       const note = d.note ? `<div class="meta">${escapeHtml(d.note)}</div>` : '';
+      const coupon = d.couponCode ? `<div class="meta meta-highlight">کد تخفیف: ${escapeHtml(d.couponCode)}</div>` : '';
       const lastVisit = d.lastReservation && !d.isGlobal ? ` • آخرین مراجعه: ${UIComponents.formatRelativeDate(d.lastReservation)}` : '';
       const valueText = d.type === 'percent'
         ? `${UIComponents.formatPersianNumber(d.amount)}٪`
@@ -6447,6 +6566,7 @@ renderCustomers(query = '') {
           <div class="discount-card__body">
             <div class="name">${escapeHtml(d.customerName || 'مشتری')} ${badge}</div>
             <div class="meta">${metaLine}</div>
+            ${coupon}
             ${note}
           </div>
           <div class="discount-card__amount">
