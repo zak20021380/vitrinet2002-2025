@@ -2666,6 +2666,7 @@ static formatRelativeDate(dateStr) {
   const latinDigits = '0123456789';
   const toEnglish = (s) => s.replace(/[۰-۹]/g, (d) => latinDigits[persianDigits.indexOf(d)]);
   const toPersian = (s) => s.replace(/[0-9]/g, (d) => persianDigits[d]);
+  const pad2 = (n) => String(n).padStart(2, '0');
 
   const normalizeInput = typeof dateStr === 'string' ? toEnglish(dateStr.trim()) : dateStr;
 
@@ -2685,6 +2686,11 @@ static formatRelativeDate(dateStr) {
   }
 
   if (!parsedDate || Number.isNaN(parsedDate.getTime())) {
+    const match = String(normalizeInput || '').match(/(\d{4})[\/-](\d{1,2})[\/-](\d{1,2})/);
+    if (match) {
+      const [, y, m, d] = match;
+      return toPersian(`${y}/${pad2(m)}/${pad2(d)}`);
+    }
     return toPersian(String(dateStr));
   }
 
