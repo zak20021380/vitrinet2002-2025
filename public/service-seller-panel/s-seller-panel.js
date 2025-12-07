@@ -2661,26 +2661,54 @@ static formatPersianDayMonth(dateInput) {
 
 static formatRelativeDate(dateStr) {
   if (!dateStr) return '';
+
   const persianDigits = '۰۱۲۳۴۵۶۷۸۹';
   const latinDigits = '0123456789';
-  const toEnglish = s => s.replace(/[۰-۹]/g, d => latinDigits[persianDigits.indexOf(d)]);
-  const toPersian = s => s.replace(/[0-9]/g, d => persianDigits[d]);
+  const toEnglish = (s) => s.replace(/[۰-۹]/g, (d) => latinDigits[persianDigits.indexOf(d)]);
+  const toPersian = (s) => s.replace(/[0-9]/g, (d) => persianDigits[d]);
 
-  const target = toEnglish(String(dateStr).trim());
-  const fmt = d => new Intl.DateTimeFormat(
-    'fa-IR-u-nu-latn-ca-persian',
-    { year: 'numeric', month: '2-digit', day: '2-digit' }
-  ).format(d);
+  const normalizeInput = typeof dateStr === 'string' ? toEnglish(dateStr.trim()) : dateStr;
 
-  const today = new Date();
-  const todayStr = fmt(today);
-  const yesterdayStr = fmt(new Date(today.getTime() - 86400000));
-  const tomorrowStr = fmt(new Date(today.getTime() + 86400000));
+  let parsedDate;
+  if (normalizeInput instanceof Date) {
+    parsedDate = normalizeInput;
+  } else if (typeof normalizeInput === 'number') {
+    parsedDate = new Date(normalizeInput);
+  } else {
+    const candidate = String(normalizeInput || '');
+    if (/^\d{4}[\/-]\d{1,2}[\/-]\d{1,2}/.test(candidate)) {
+      // Normalize separators for reliable parsing
+      parsedDate = new Date(candidate.replace(/-/g, '/'));
+    } else {
+      parsedDate = new Date(candidate);
+    }
+  }
 
-  if (target === todayStr) return 'امروز';
-  if (target === yesterdayStr) return 'دیروز';
-  if (target === tomorrowStr) return 'فردا';
-  return toPersian(target);
+  if (!parsedDate || Number.isNaN(parsedDate.getTime())) {
+    return toPersian(String(dateStr));
+  }
+
+  const startOfDay = (d) => {
+    const copy = new Date(d);
+    copy.setHours(0, 0, 0, 0);
+    return copy;
+  };
+
+  const today = startOfDay(new Date());
+  const target = startOfDay(parsedDate);
+  const diffDays = Math.round((target - today) / 86400000);
+
+  if (diffDays === 0) return 'امروز';
+  if (diffDays === -1) return 'دیروز';
+  if (diffDays === 1) return 'فردا';
+
+  const formatter = new Intl.DateTimeFormat('fa-IR-u-ca-persian', {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit'
+  });
+
+  return toPersian(formatter.format(parsedDate));
 }
 
 static animateCountUp(el) {
