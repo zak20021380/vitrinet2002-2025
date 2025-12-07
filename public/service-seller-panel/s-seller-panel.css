@@ -1714,6 +1714,15 @@ button:disabled, .btn:disabled {
 .stat-chip span { color: var(--c-text-secondary); font-size: 0.9rem; }
 .stat-chip strong { font-size: 1.05rem; }
 .stat-chip--accent { background: rgba(var(--c-primary-rgb), 0.12); border-color: rgba(var(--c-primary-rgb), 0.5); }
+.stat-chip--discount { gap: 6px; }
+.discount-state { display: flex; align-items: center; gap: 10px; justify-content: space-between; }
+.discount-pill { padding: 6px 10px; border-radius: 999px; font-weight: 700; font-size: 0.85rem; border: 1px solid rgba(255,255,255,0.12); background: rgba(255,255,255,0.06); color: var(--c-text-primary); }
+.discount-pill.is-active { background: rgba(var(--c-success-rgb, 52,199,89),0.18); color: var(--c-success, #34c759); border-color: rgba(var(--c-success-rgb,52,199,89),0.5); }
+.discount-pill.is-empty { background: rgba(255,255,255,0.05); color: var(--c-text-secondary); }
+.discount-value { font-size: 1rem; }
+.discount-meta { color: var(--c-text-secondary); margin: 0; font-size: 0.9rem; }
+.discount-actions { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+.link-muted { color: var(--c-text-secondary); }
 .link-btn { background: none; color: var(--c-primary); border: none; cursor: pointer; font-weight: 600; }
 .customer-actions .btn-secondary { padding: 10px 14px; }
 .customer-reward { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 10px; background: rgba(255,255,255,0.04); border-radius: 12px; }
@@ -1722,6 +1731,30 @@ button:disabled, .btn:disabled {
 .discount-type-toggle { display: flex; gap: 8px; flex-wrap: wrap; }
 .discount-type-toggle input { margin-left: 6px; }
 .grid-2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; }
+
+/* Quick discount modal */
+.discount-modal__content { width: min(560px, 94vw); padding: 20px; border-radius: 20px; background: radial-gradient(circle at 10% 10%, rgba(10,132,255,0.12), transparent 25%), radial-gradient(circle at 90% 0%, rgba(191,90,242,0.14), transparent 20%), var(--c-bg-tertiary); border: 1px solid rgba(255,255,255,0.08); box-shadow: 0 14px 40px rgba(0,0,0,0.35); }
+.discount-modal__header { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 14px; }
+.discount-modal__identity { display: flex; align-items: center; gap: 12px; }
+.discount-modal__avatar { width: 54px; height: 54px; border-radius: 16px; display: grid; place-items: center; font-weight: 800; background: linear-gradient(145deg, rgba(10,132,255,0.18), rgba(191,90,242,0.16)); color: white; box-shadow: 0 8px 24px rgba(0,0,0,0.28); }
+.discount-modal__phone { margin: 4px 0 0; color: var(--c-text-secondary); }
+.discount-modal__badge { padding: 8px 12px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.12); background: rgba(255,255,255,0.06); font-weight: 700; }
+.discount-modal__badge.is-active { border-color: rgba(var(--c-success-rgb,52,199,89),0.6); color: var(--c-success, #34c759); background: rgba(var(--c-success-rgb,52,199,89),0.14); }
+.discount-modal__badge.is-empty { color: var(--c-text-secondary); }
+.discount-modal__summary { padding: 14px; border-radius: 14px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); margin-bottom: 12px; color: var(--c-text-secondary); }
+.discount-modal__form { display: grid; gap: 12px; }
+.discount-modal__grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; }
+.discount-modal__toggle { display: flex; gap: 8px; flex-wrap: wrap; }
+.discount-modal__duration { display: flex; gap: 8px; flex-wrap: wrap; }
+.discount-modal__footer { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; padding-top: 10px; border-top: 1px solid rgba(255,255,255,0.06); margin-top: 4px; }
+.discount-modal__actions { display: flex; gap: 10px; flex-wrap: wrap; }
+.discount-modal__hint { color: var(--c-text-secondary); font-size: 0.92rem; }
+
+@media (max-width: 640px) {
+  .discount-modal__content { width: min(520px, 96vw); padding: 16px; }
+  .discount-modal__header { align-items: flex-start; }
+  .discount-modal__summary { font-size: 0.95rem; }
+}
 
 @media (max-width: 1100px) {
   .customers-layout { grid-template-columns: 1fr; }

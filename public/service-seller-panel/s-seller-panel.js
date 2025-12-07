@@ -5504,6 +5504,16 @@ initCustomerClickHandlers() {
         e.stopPropagation();
         return;
       }
+      const discountModalBtn = e.target.closest('[data-action="open-discount-modal"]');
+      if (discountModalBtn) {
+        this.openCustomerDiscountModal({
+          id: discountModalBtn.dataset.customerId,
+          name: discountModalBtn.dataset.customerName,
+          phone: discountModalBtn.dataset.customerPhone
+        });
+        e.stopPropagation();
+        return;
+      }
       if (discountBtn) {
         this.prefillDiscount(discountBtn.dataset.customerId);
         e.stopPropagation();
@@ -5701,6 +5711,11 @@ renderCustomers(query = '') {
     return;
   }
 
+  const activeDiscounts = (this.discountStore?.getActive?.() || []).reduce((map, d) => {
+    map.set(String(d.customerId), d);
+    return map;
+  }, new Map());
+
   listEl.innerHTML = filteredCustomers.map(c => {
     const lastReservation = UIComponents.formatRelativeDate(c.lastReservation);
     const joinedLabel = UIComponents.formatRelativeDate(c.joinedAt || c.lastReservation);
@@ -5708,6 +5723,16 @@ renderCustomers(query = '') {
     const reviewCount = this.formatNumber(c.reviewCount ?? c.rewardCount ?? 0);
     const pending = this.formatNumber(c.pendingRewards || 0);
     const tier = (c.bookingsCount ?? 0) >= 10 ? 'وفادار' : 'فعال';
+    const discount = activeDiscounts.get(String(c.id));
+    const hasDiscount = !!discount;
+    const discountValue = hasDiscount
+      ? (discount.type === 'percent'
+        ? `${this.formatNumber(discount.amount)}٪`
+        : `${this.formatNumber(discount.amount)} تومان`)
+      : 'بدون تخفیف فعال';
+    const discountExpiry = hasDiscount
+      ? UIComponents.formatRelativeDate(discount.expiresAt)
+      : 'تخفیفی برای این مشتری فعال نیست.';
 
     return `
       <article class="customer-card card"
@@ -5727,7 +5752,7 @@ renderCustomers(query = '') {
             </div>
           </div>
           <div class="customer-actions">
-            <button type="button" class="btn-secondary" data-action="prefill-discount" data-customer-id="${escapeHtml(c.id)}">تخفیف اختصاصی</button>
+            <button type="button" class="btn-secondary" data-action="open-discount-modal" data-customer-id="${escapeHtml(c.id)}" data-customer-name="${escapeHtml(c.name)}" data-customer-phone="${escapeHtml(c.phone)}">تخفیف اختصاصی</button>
           </div>
         </div>
         <div class="customer-card__stats">
@@ -5743,9 +5768,16 @@ renderCustomers(query = '') {
             <span>درخواست جایزه</span>
             <strong>${pending}</strong>
           </div>
-          <div class="stat-chip stat-chip--accent">
-            <span>تخفیف</span>
-            <button type="button" class="link-btn" data-action="prefill-discount" data-customer-id="${escapeHtml(c.id)}">اعمال سریع</button>
+          <div class="stat-chip stat-chip--accent stat-chip--discount">
+            <div class="discount-state">
+              <span class="discount-pill ${hasDiscount ? 'is-active' : 'is-empty'}">${hasDiscount ? 'تخفیف فعال' : 'بدون تخفیف'}</span>
+              <strong class="discount-value">${discountValue}</strong>
+            </div>
+            <p class="discount-meta">${hasDiscount ? `این کاربر تخفیف فعال دارد • ${discountExpiry}` : discountExpiry}</p>
+            <div class="discount-actions">
+              <button type="button" class="link-btn" data-action="open-discount-modal" data-customer-id="${escapeHtml(c.id)}" data-customer-name="${escapeHtml(c.name)}" data-customer-phone="${escapeHtml(c.phone)}">${hasDiscount ? 'مدیریت تخفیف' : 'اهدای تخفیف'}</button>
+              <button type="button" class="link-btn link-muted" data-action="prefill-discount" data-customer-id="${escapeHtml(c.id)}">اعمال سریع</button>
+            </div>
           </div>
         </div>
         ${c.pendingRewards ? `
@@ -5771,6 +5803,29 @@ renderCustomers(query = '') {
     this.discountSuggestions = document.getElementById('discount-suggestions');
     this.discountListEl = document.getElementById('discounts-list');
     this.discountEmptyEl = document.getElementById('discounts-empty');
+
+    this.discountModal = document.getElementById('discount-modal');
+    this.discountModalForm = document.getElementById('discount-modal-form');
+    this.discountModalName = document.getElementById('discount-modal-name');
+    this.discountModalPhone = document.getElementById('discount-modal-phone');
+    this.discountModalAvatar = document.getElementById('discount-modal-avatar');
+    this.discountModalStatus = document.getElementById('discount-modal-status');
+    this.discountModalSummary = document.getElementById('discount-modal-summary');
+    this.discountModalAmount = document.getElementById('discount-modal-amount');
+    this.discountModalNote = document.getElementById('discount-modal-note');
+    this.discountModalHint = document.getElementById('discount-modal-hint');
+    this.discountModalTypeInputs = this.discountModal?.querySelectorAll('input[name="discount-modal-type"]') || [];
+    this.discountModalDurationInputs = this.discountModal?.querySelectorAll('input[name="discount-modal-duration"]') || [];
+    this.discountModalCustomerId = '';
+    this.discountModalCustomerName = '';
+    this.discountModalCustomerPhone = '';
+
+    if (this.discountModalForm) {
+      this.discountModalForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        this.submitQuickDiscount();
+      });
+    }
 
     if (this.discountForm) {
       this.discountForm.addEventListener('submit', (e) => {
@@ -5813,6 +5868,113 @@ renderCustomers(query = '') {
 
     this.refreshDiscountCustomers();
     this.renderDiscounts();
+  }
+
+  openCustomerDiscountModal(customer = {}) {
+    const fallback = this.getDiscountCustomers().find(c => String(c.id) === String(customer.id)) || {};
+    const id = customer.id || fallback.id;
+    if (!id) return;
+
+    const name = customer.name || fallback.name || 'مشتری';
+    const phone = customer.phone || fallback.phone || '';
+    const activeDiscount = this.getActiveDiscountForCustomer(id);
+    const typeToSelect = activeDiscount?.type || 'amount';
+    const defaultDuration = 'week';
+
+    this.discountModalCustomerId = id;
+    this.discountModalCustomerName = name;
+    this.discountModalCustomerPhone = phone;
+
+    if (this.discountModalName) this.discountModalName.textContent = name;
+    if (this.discountModalPhone) this.discountModalPhone.textContent = UIComponents.formatPersianNumber(phone || '');
+    if (this.discountModalAvatar) this.discountModalAvatar.textContent = name.charAt(0);
+
+    if (this.discountModalAmount) {
+      this.discountModalAmount.value = activeDiscount?.amount || 5000;
+      this.discountModalAmount.focus({ preventScroll: true });
+    }
+
+    const setChecked = (inputs, value) => {
+      if (!inputs) return;
+      inputs.forEach(input => {
+        input.checked = input.value === value;
+      });
+    };
+    setChecked(this.discountModalTypeInputs, typeToSelect);
+    setChecked(this.discountModalDurationInputs, defaultDuration);
+
+    if (this.discountModalNote) {
+      this.discountModalNote.value = activeDiscount?.note || '';
+    }
+
+    if (this.discountModalStatus) {
+      this.discountModalStatus.textContent = activeDiscount ? 'این مشتری تخفیف فعال دارد' : 'بدون تخفیف فعال';
+      this.discountModalStatus.className = `discount-modal__badge ${activeDiscount ? 'is-active' : 'is-empty'}`;
+    }
+
+    if (this.discountModalSummary) {
+      const summary = activeDiscount
+        ? `${activeDiscount.type === 'percent' ? `${this.formatNumber(activeDiscount.amount)}٪` : `${this.formatNumber(activeDiscount.amount)} تومان`} • تا ${UIComponents.formatRelativeDate(activeDiscount.expiresAt)}`
+        : 'هنوز هیچ تخفیفی به این مشتری اختصاص داده نشده است. با چند کلیک یک پیشنهاد جذاب بدهید.';
+      this.discountModalSummary.textContent = summary;
+    }
+
+    if (this.discountModalHint) {
+      this.discountModalHint.textContent = activeDiscount
+        ? 'ثبت تخفیف جدید، تخفیف فعال فعلی را جایگزین می‌کند.'
+        : 'پس از ثبت، مشتری یک تخفیف اختصاصی دریافت می‌کند.';
+    }
+
+    UIComponents.openModal('discount-modal');
+  }
+
+  submitQuickDiscount() {
+    if (!this.discountModalCustomerId) {
+      UIComponents.showToast('مشتری انتخاب نشده است.', 'error');
+      return;
+    }
+
+    const type = Array.from(this.discountModalTypeInputs || []).find(input => input.checked)?.value || 'amount';
+    const amount = Number(this.discountModalAmount?.value || 0);
+
+    if (type === 'percent') {
+      if (!Number.isFinite(amount) || amount <= 0 || amount > 90) {
+        UIComponents.showToast('درصد تخفیف باید بین ۱ تا ۹۰ باشد.', 'error');
+        return;
+      }
+    } else {
+      if (!Number.isFinite(amount) || amount < 1000) {
+        UIComponents.showToast('مبلغ تخفیف را حداقل با ۱۰۰۰ تومان وارد کنید.', 'error');
+        return;
+      }
+    }
+
+    const duration = Array.from(this.discountModalDurationInputs || []).find(input => input.checked)?.value || 'today';
+    const note = (this.discountModalNote?.value || '').trim();
+    const expiresAt = this.calculateDiscountExpiry(duration);
+
+    const discount = {
+      id: crypto.randomUUID ? crypto.randomUUID() : `disc-${Date.now()}`,
+      customerId: this.discountModalCustomerId,
+      customerName: this.discountModalCustomerName || 'مشتری',
+      customerPhone: this.discountModalCustomerPhone || '',
+      amount,
+      type,
+      createdAt: new Date().toISOString(),
+      expiresAt,
+      note: note || this.getDiscountDurationLabel(duration)
+    };
+
+    this.discountStore.upsert(discount);
+    UIComponents.showToast('تخفیف برای مشتری ثبت شد.', 'success');
+    UIComponents.closeModal('discount-modal');
+    this.renderDiscounts();
+    this.renderCustomers(this.currentCustomerQuery || '');
+  }
+
+  getActiveDiscountForCustomer(customerId) {
+    if (!customerId) return null;
+    return (this.discountStore?.getActive() || []).find(d => String(d.customerId) === String(customerId)) || null;
   }
 
   getDiscountCustomers() {
