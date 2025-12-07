@@ -2684,6 +2684,20 @@ static formatRelativeDate(dateStr) {
     }
   }
 
+  // Extract embedded yyyy/mm/dd-like fragments to avoid leaking English text
+  if (!parsedDate || Number.isNaN(parsedDate.getTime())) {
+    const embedded = String(normalizeInput || '').match(/(\d{4})[\/\-.](\d{1,2})[\/\-.](\d{1,2})/);
+    if (embedded) {
+      const [, y, m, d] = embedded;
+      const candidate = new Date(`${y}-${pad2(m)}-${pad2(d)}`);
+      if (!Number.isNaN(candidate.getTime())) {
+        parsedDate = candidate;
+      } else {
+        return toPersian(`${y}/${pad2(m)}/${pad2(d)}`);
+      }
+    }
+  }
+
   if (!parsedDate || Number.isNaN(parsedDate.getTime())) {
     return toPersian(String(dateStr));
   }
