@@ -6255,8 +6255,8 @@ renderCustomers(query = '') {
     if (!this.globalDiscountStatus) return;
     const active = this.getGlobalDiscount();
     if (!active) {
-      this.globalDiscountStatus.textContent = 'بدون تخفیف همگانی';
-      this.globalDiscountStatus.classList.remove('is-active');
+      this.globalDiscountStatus.textContent = '';
+      this.globalDiscountStatus.classList.remove('is-active', 'is-visible');
       return;
     }
 
@@ -6265,7 +6265,7 @@ renderCustomers(query = '') {
       : `${this.formatNumber(active.amount, { fractionDigits: 0 })} تومان`;
     const time = this.formatRemainingTime(active.expiresAt);
     this.globalDiscountStatus.textContent = `فعال (${value}${time ? ` • ${time}` : ''})`;
-    this.globalDiscountStatus.classList.add('is-active');
+    this.globalDiscountStatus.classList.add('is-active', 'is-visible');
   }
 
   handleGlobalDiscountSubmit() {
