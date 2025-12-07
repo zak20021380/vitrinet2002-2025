@@ -5804,6 +5804,14 @@ renderCustomers(query = '') {
     this.discountModalCustomerName = '';
     this.discountModalCustomerPhone = '';
 
+    if (this.discountModalTypeInputs?.length) {
+      this.discountModalTypeInputs.forEach(input => {
+        input.addEventListener('change', () => {
+          this.updateDiscountModalType(input.value);
+        });
+      });
+    }
+
     if (this.discountModalForm) {
       this.discountModalForm.addEventListener('submit', (e) => {
         e.preventDefault();
@@ -5850,6 +5858,16 @@ renderCustomers(query = '') {
       this.renderDiscounts();
     });
 
+    if (this.discountTypeInputs?.length) {
+      this.discountTypeInputs.forEach(input => {
+        input.addEventListener('change', () => {
+          this.updateDiscountFieldType(input.value);
+        });
+      });
+      const initialType = Array.from(this.discountTypeInputs).find(input => input.checked)?.value || 'amount';
+      this.updateDiscountFieldType(initialType);
+    }
+
     this.refreshDiscountCustomers();
     this.renderDiscounts();
   }
@@ -5887,6 +5905,8 @@ renderCustomers(query = '') {
     setChecked(this.discountModalTypeInputs, typeToSelect);
     setChecked(this.discountModalDurationInputs, defaultDuration);
 
+    this.updateDiscountModalType(typeToSelect);
+
     if (this.discountModalNote) {
       this.discountModalNote.value = activeDiscount?.note || '';
     }
@@ -5910,6 +5930,40 @@ renderCustomers(query = '') {
     }
 
     UIComponents.openModal('discount-modal');
+  }
+
+  updateDiscountModalType(type = 'amount') {
+    const field = this.discountModal?.querySelector('.discount-modal__amount-field');
+    const isPercent = type === 'percent';
+    if (field) {
+      field.dataset.icon = isPercent ? 'percent' : 'amount';
+    }
+    if (this.discountModalAmount) {
+      this.discountModalAmount.placeholder = isPercent ? 'مثلاً ۲۰' : 'مثلاً ۵۰۰۰۰';
+      this.discountModalAmount.step = isPercent ? '1' : '500';
+      if (isPercent) {
+        this.discountModalAmount.max = '90';
+      } else {
+        this.discountModalAmount.removeAttribute('max');
+      }
+    }
+  }
+
+  updateDiscountFieldType(type = 'amount') {
+    const field = this.discountForm?.querySelector('.discount-amount-field');
+    const isPercent = type === 'percent';
+    if (field) {
+      field.dataset.icon = isPercent ? 'percent' : 'amount';
+    }
+    if (this.discountAmountInput) {
+      this.discountAmountInput.placeholder = isPercent ? 'مثلاً ۲۰' : 'مثلاً ۵۰۰۰۰';
+      this.discountAmountInput.step = isPercent ? '1' : '500';
+      if (isPercent) {
+        this.discountAmountInput.max = '90';
+      } else {
+        this.discountAmountInput.removeAttribute('max');
+      }
+    }
   }
 
   submitQuickDiscount() {
