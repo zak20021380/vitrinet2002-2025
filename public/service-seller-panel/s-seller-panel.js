@@ -5826,6 +5826,7 @@ renderCustomers(query = '') {
     this.globalDiscountForm = document.getElementById('global-discount-form');
     this.globalDiscountAmount = document.getElementById('global-discount-amount');
     this.globalDiscountAmountField = document.getElementById('global-discount-amount-field');
+    this.globalDiscountNoteInput = document.getElementById('global-discount-note');
     this.globalDiscountTypeInputs = this.globalDiscountForm?.querySelectorAll('input[name="global-discount-type"]') || [];
     this.globalDiscountDurationInputs = this.globalDiscountForm?.querySelectorAll('input[name="global-discount-duration"]') || [];
     this.globalDiscountStatus = document.getElementById('global-discount-status');
@@ -6272,6 +6273,7 @@ renderCustomers(query = '') {
     if (!this.globalDiscountForm) return;
     const type = Array.from(this.globalDiscountTypeInputs || []).find(input => input.checked)?.value || 'amount';
     const amount = Number(this.globalDiscountAmount?.value || 0);
+    const note = (this.globalDiscountNoteInput?.value || '').trim();
 
     if (type === 'percent') {
       if (!Number.isFinite(amount) || amount <= 0 || amount > 90) {
@@ -6293,7 +6295,7 @@ renderCustomers(query = '') {
       type,
       createdAt: new Date().toISOString(),
       expiresAt: this.calculateDiscountExpiry(duration),
-      note: this.getDiscountDurationLabel(duration),
+      note: note || this.getDiscountDurationLabel(duration),
       isGlobal: true
     };
 
