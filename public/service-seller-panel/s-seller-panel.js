@@ -5567,25 +5567,31 @@ initCustomerClickHandlers() {
 
 matchesCustomerFilter(customer = {}) {
   const bookings = Number(customer.bookingsCount ?? customer.vipCurrent ?? 0);
-  const reviews = Number(customer.reviewCount ?? customer.rewardCount ?? 0);
   const joinedAt = new Date(customer.joinedAt || customer.createdAt || customer.lastReservation || Date.now());
-  const lastReservation = new Date(customer.lastReservation || customer.lastReservationAt || customer.joinedAt || Date.now());
   const now = new Date();
   const daysSinceJoin = Math.floor((now - joinedAt) / 86400000);
-  const daysFromLastReservation = Math.floor((now - lastReservation) / 86400000);
 
   switch (this.currentCustomerFilter) {
     case 'recent':
       return daysSinceJoin <= 45;
     case 'loyal':
       return bookings >= 5;
-    case 'reviewers':
-      return reviews > 0;
-    case 'dormant':
-      return daysFromLastReservation > 45;
+    case 'most-bookings':
+    case 'least-bookings':
+      return true;
     default:
       return true;
   }
+}
+
+sortCustomersByFilter(customers = []) {
+  if (this.currentCustomerFilter === 'most-bookings') {
+    return [...customers].sort((a, b) => (Number(b.bookingsCount) || 0) - (Number(a.bookingsCount) || 0));
+  }
+  if (this.currentCustomerFilter === 'least-bookings') {
+    return [...customers].sort((a, b) => (Number(a.bookingsCount) || 0) - (Number(b.bookingsCount) || 0));
+  }
+  return customers;
 }
 
 updateCustomerStats(customers = []) {
@@ -5733,9 +5739,11 @@ renderCustomers(query = '') {
     )
     .filter(c => this.matchesCustomerFilter(c));
 
+  const orderedCustomers = this.sortCustomersByFilter(filteredCustomers);
+
   this.updateCustomerStats(MOCK_DATA.customers);
 
-  if (filteredCustomers.length === 0) {
+  if (orderedCustomers.length === 0) {
     listEl.innerHTML = `<div class="empty-state"><p class="muted">مشتری با این مشخصات یافت نشد.</p></div>`;
     return;
   }
@@ -5747,7 +5755,7 @@ renderCustomers(query = '') {
 
   const globalDiscount = activeDiscounts.get(this.GLOBAL_CUSTOMER_ID);
 
-  listEl.innerHTML = filteredCustomers.map(c => {
+  listEl.innerHTML = orderedCustomers.map(c => {
     const lastReservation = UIComponents.formatRelativeDate(c.lastReservation);
     const joinedLabel = UIComponents.formatRelativeDate(c.joinedAt || c.lastReservation);
     const bookingsCount = this.formatNumber(c.bookingsCount ?? c.vipCurrent ?? 0);
@@ -5778,12 +5786,12 @@ renderCustomers(query = '') {
           <div class="customer-info">
             <div class="customer-name-row">
               <div class="customer-name">${escapeHtml(c.name)}</div>
-              <span class="customer-tier">${tier}</span>
+              <span class="customer-tier ${tier === 'وفادار' ? 'customer-tier--loyal' : 'customer-tier--active'}">${tier}</span>
             </div>
             <div class="customer-phone">${UIComponents.formatPersianNumber(c.phone)}</div>
             <div class="customer-tags">
-              <span class="customer-chip">عضویت از ${joinedLabel || '—'}</span>
-              <span class="customer-chip">آخرین رزرو: ${lastReservation || '—'}</span>
+              <span class="customer-chip customer-chip--join"><span class="chip-dot"></span>عضویت از ${joinedLabel || '—'}</span>
+              <span class="customer-chip customer-chip--recent"><span class="chip-dot"></span>آخرین رزرو: ${lastReservation || '—'}</span>
             </div>
           </div>
           <div class="customer-actions">
