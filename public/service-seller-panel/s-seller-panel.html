@@ -541,24 +541,198 @@
               <p class="view-subtitle">مدیریت اطلاعات مشتریان</p>
             </div>
           </header>
-          <div class="search-section">
+          <div class="customer-hero card">
+            <div class="customer-hero__intro">
+              <p class="eyebrow">باشگاه مشتریان فروشنده</p>
+              <h3>تصویر کامل از هر مشتری در یک نگاه</h3>
+              <p class="muted">آخرین نوبت، تعداد رزروها، تاریخ عضویت و تعاملات هر مشتری را دقیق ببینید.</p>
+              <div class="customer-hero__pills">
+                <span class="pill pill-success">رزروهای موفق بیشتر</span>
+                <span class="pill pill-glow">نظرات ثبت‌شده</span>
+                <span class="pill">عضویت‌های جدید</span>
+              </div>
+            </div>
+            <div class="customer-hero__stats">
+              <div class="hero-stat">
+                <span class="label">کل مشتریان</span>
+                <strong id="customer-total-count">۰</strong>
+                <small>از آغاز همکاری</small>
+              </div>
+              <div class="hero-stat">
+                <span class="label">تعداد کل رزروها</span>
+                <strong id="customer-visit-count">۰</strong>
+                <small>سفارش ثبت‌شده</small>
+              </div>
+              <div class="hero-stat">
+                <span class="label">ثبت نظر</span>
+                <strong id="customer-review-count">۰</strong>
+                <small>نظرات مشتریان</small>
+              </div>
+              <div class="hero-stat">
+                <span class="label">عضویت‌های این ماه</span>
+                <strong id="customer-new-month">۰</strong>
+                <small>کاربر تازه</small>
+              </div>
+            </div>
+          </div>
+
+          <div class="customer-toolbar">
             <div class="search-wrapper">
               <svg class="search-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                 <circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/>
               </svg>
-              <input type="search" id="customer-search" class="search-input" placeholder="جستجوی نام، شماره تماس..." aria-label="جستجو در مشتریان">
+              <input type="search" id="customer-search" class="search-input" placeholder="جستجوی نام یا شماره تماس" aria-label="جستجو در مشتریان">
+            </div>
+            <div class="customer-filters" role="tablist" aria-label="فیلتر مشتریان">
+              <button type="button" class="customer-filter active" data-filter="all" role="tab" aria-selected="true">همه</button>
+              <button type="button" class="customer-filter" data-filter="recent" role="tab" aria-selected="false">جدید</button>
+              <button type="button" class="customer-filter" data-filter="loyal" role="tab" aria-selected="false">وفادار</button>
+              <button type="button" class="customer-filter" data-filter="reviewers" role="tab" aria-selected="false">نظردهنده</button>
+              <button type="button" class="customer-filter" data-filter="dormant" role="tab" aria-selected="false">غیرفعال</button>
             </div>
           </div>
 
+          <div class="customers-layout">
+            <div class="customers-column">
+              <div id="customers-list" class="customers-grid" role="list"></div>
+            </div>
+            <aside class="customers-discount card" aria-label="تخفیف اختصاصی مشتریان">
+              <div class="discounts-header">
+                <div class="discounts-header__intro">
+                  <div class="eyebrow">تخفیف اختصاصی</div>
+                  <h3 class="discounts-header__title">بهترین مشتریان را خوشحال کنید</h3>
+                  <p class="muted">مشتری را انتخاب کنید، مبلغ یا درصد را تعیین کنید و مهلت مصرف را مشخص کنید.</p>
+                  <div class="discounts-header__chips">
+                    <span class="chip">تخفیف فعال: <strong id="discount-active-count-inline">۰</strong></span>
+                    <span class="chip chip-ghost">منقضی امروز: <strong id="discount-expiring-inline">۰</strong></span>
+                  </div>
+                </div>
+                <div class="discounts-header__stats">
+                  <div class="stat-tile">
+                    <div class="stat-icon">🔥</div>
+                    <div>
+                      <p class="stat-label">تعداد فعال</p>
+                      <p class="stat-value" id="discount-active-count">۰</p>
+                    </div>
+                  </div>
+                  <div class="stat-tile">
+                    <div class="stat-icon">⏳</div>
+                    <div>
+                      <p class="stat-label">انقضا امروز</p>
+                      <p class="stat-value" id="discount-expiring-today">۰</p>
+                    </div>
+                  </div>
+                  <div class="stat-tile">
+                    <div class="stat-icon">💰</div>
+                    <div>
+                      <p class="stat-label">ارزش کل</p>
+                      <p class="stat-value" id="discount-total-value">۰</p>
+                    </div>
+                  </div>
+                  <div class="stat-tile">
+                    <div class="stat-icon">📊</div>
+                    <div>
+                      <p class="stat-label">میانگین</p>
+                      <p class="stat-value" id="discount-average">۰</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
 
+              <form id="discount-form" class="discount-form discount-form-shell" novalidate>
+                <div class="form-section">
+                  <div class="section-head">
+                    <div class="section-icon">🎯</div>
+                    <div>
+                      <h4>انتخاب مشتری</h4>
+                      <p class="muted">مشتری را جستجو کنید یا از میان پیشنهادهای سریع انتخاب نمایید.</p>
+                    </div>
+                  </div>
+                  <div class="input-with-icon">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                      <path d="M20 21l-4.35-4.35"/><circle cx="11" cy="11" r="7"/>
+                    </svg>
+                    <select id="discount-customer" required aria-label="انتخاب مشتری"></select>
+                  </div>
+                  <div class="quick-customers-block">
+                    <div class="quick-customers__header">
+                      <strong>پیشنهاد سریع</strong>
+                      <span class="chip chip-ghost">آخرین مراجعه</span>
+                    </div>
+                    <div id="discount-suggestions" class="quick-customers" role="list"></div>
+                  </div>
+                </div>
 
+                <div class="form-section">
+                  <div class="section-head">
+                    <div class="section-icon">💳</div>
+                    <div>
+                      <h4>نوع تخفیف</h4>
+                      <p class="muted">مبلغ ثابت یا درصدی را انتخاب کنید.</p>
+                    </div>
+                  </div>
+                  <div class="discount-type-toggle" role="radiogroup" aria-label="نوع تخفیف">
+                    <label class="chip">
+                      <input type="radio" name="discount-type" value="amount" checked>
+                      مبلغ (تومان)
+                    </label>
+                    <label class="chip chip-ghost">
+                      <input type="radio" name="discount-type" value="percent">
+                      درصدی
+                    </label>
+                  </div>
+                  <div class="discount-form grid-2">
+                    <div class="input-with-icon">
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="M12 1v22"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7H14a3.5 3.5 0 1 1 0 7H6"/>
+                      </svg>
+                      <input id="discount-amount" type="number" inputmode="numeric" min="0" step="500" placeholder="مثلاً ۵۰۰۰۰">
+                    </div>
+                    <div class="input-with-icon">
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/>
+                      </svg>
+                      <input id="discount-expiry" type="date" aria-label="تاریخ انقضا اختیاری">
+                    </div>
+                  </div>
+                  <div class="discount-duration" role="radiogroup" aria-label="مهلت استفاده">
+                    <label class="radio-pill">
+                      <input type="radio" name="discount-duration" value="today" checked>
+                      امروز
+                    </label>
+                    <label class="radio-pill">
+                      <input type="radio" name="discount-duration" value="3d">
+                      ۳ روز آینده
+                    </label>
+                    <label class="radio-pill">
+                      <input type="radio" name="discount-duration" value="week">
+                      یک هفته
+                    </label>
+                  </div>
+                  <div class="input-with-icon">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                      <path d="M12 20h9"/><path d="M12 4h9"/><circle cx="4" cy="4" r="2"/><circle cx="4" cy="12" r="2"/><circle cx="4" cy="20" r="2"/>
+                    </svg>
+                    <textarea id="discount-note" rows="2" placeholder="توضیحات برای مشتری (اختیاری)"></textarea>
+                  </div>
+                  <div class="form-actions">
+                    <button type="submit" class="btn-primary btn-block">ثبت تخفیف اختصاصی</button>
+                  </div>
+                </div>
+              </form>
 
-
-
-
-
-
-          <div id="customers-list" class="customers-grid" role="list"></div>
+              <div class="discounts-list-wrapper">
+                <div class="list-head">
+                  <h4>تخفیف‌های فعال</h4>
+                  <span class="badge">به ترتیب انقضا</span>
+                </div>
+                <div id="discounts-list" class="discounts-list" role="list"></div>
+                <div id="discounts-empty" class="empty-state" role="status">
+                  <p class="muted">هنوز برای هیچ مشتری تخفیف اختصاصی ثبت نشده است.</p>
+                </div>
+              </div>
+            </aside>
+          </div>
         </div>
       </section>
       <section id="reviews-view" class="view-section" role="region" aria-labelledby="reviews-title" data-page="reviews">
