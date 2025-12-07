@@ -5493,7 +5493,6 @@ initCustomerClickHandlers() {
     customersList.addEventListener('click', (e) => {
       const approveBtn = e.target.closest('.reward-approve');
       const rejectBtn  = e.target.closest('.reward-reject');
-      const discountBtn = e.target.closest('[data-action="prefill-discount"]');
       if (approveBtn) {
         handleRewardAction(approveBtn.dataset.userId, 'approve');
         e.stopPropagation();
@@ -5514,26 +5513,12 @@ initCustomerClickHandlers() {
         e.stopPropagation();
         return;
       }
-      if (discountBtn) {
-        this.prefillDiscount(discountBtn.dataset.customerId);
-        e.stopPropagation();
-        return;
-      }
       const card = e.target.closest('.customer-card');
       if (card) {
         this.showCustomerDetails(card);
       }
     });
   }
-}
-
-prefillDiscount(customerId) {
-  if (!customerId) return;
-  this.refreshDiscountCustomers(customerId);
-  if (this.discountAmountInput && !this.discountAmountInput.value) {
-    this.discountAmountInput.value = 5000;
-  }
-  document.getElementById('discount-form')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
 matchesCustomerFilter(customer = {}) {
@@ -5776,7 +5761,6 @@ renderCustomers(query = '') {
             <p class="discount-meta">${hasDiscount ? `این کاربر تخفیف فعال دارد • ${discountExpiry}` : discountExpiry}</p>
             <div class="discount-actions">
               <button type="button" class="link-btn" data-action="open-discount-modal" data-customer-id="${escapeHtml(c.id)}" data-customer-name="${escapeHtml(c.name)}" data-customer-phone="${escapeHtml(c.phone)}">${hasDiscount ? 'مدیریت تخفیف' : 'اهدای تخفیف'}</button>
-              <button type="button" class="link-btn link-muted" data-action="prefill-discount" data-customer-id="${escapeHtml(c.id)}">اعمال سریع</button>
             </div>
           </div>
         </div>
