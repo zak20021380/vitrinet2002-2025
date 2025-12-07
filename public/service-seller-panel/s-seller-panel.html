@@ -657,205 +657,6 @@
           <div id="customers-list" class="customers-grid" role="list"></div>
         </div>
       </section>
-      <section id="discounts-view" class="view-section" role="region" aria-labelledby="discounts-title" data-page="discounts">
-        <div class="view-container">
-          <header class="view-header">
-            <div class="header-content">
-              <h2 class="view-title" id="discounts-title">تخفیف‌ها</h2>
-              <p class="view-subtitle">قدردانی سریع از مشتریان وفادار</p>
-            </div>
-            <div class="chip chip-success">جدید</div>
-          </header>
-
-          <div class="discounts-header" role="toolbar" aria-label="مدیریت تخفیف‌ها">
-            <div class="discounts-header__intro">
-              <div class="eyebrow">باشگاه مشتریان اختصاصی</div>
-              <h3 class="discounts-header__title">یک بخش مرتب برای پیشنهادهای هوشمند</h3>
-              <p class="muted">
-                یک مشتری را انتخاب کنید، مبلغ را تعریف کنید و مهلت واضح بگذارید. همه‌چیز در یک کارت تمیز و منظم ذخیره و برای
-                مشتری ارسال می‌شود.
-              </p>
-              <div class="discounts-header__chips" aria-label="فیلترهای سریع">
-                <button type="button" class="pill pill-glow" aria-pressed="true">پیشنهاد روز</button>
-                <button type="button" class="pill pill-outline">مشتریان وفادار</button>
-                <button type="button" class="pill pill-outline">مشتریان جدید</button>
-              </div>
-            </div>
-            <div class="discounts-header__stats" aria-hidden="false">
-              <div class="stat-tile">
-                <div class="stat-tile__label">تخفیف فعال</div>
-                <div class="stat-tile__value" id="discount-active-count" data-value="0">۰</div>
-                <small>همین حالا در دست مشتری</small>
-              </div>
-              <div class="stat-tile">
-                <div class="stat-tile__label">در انتظار انقضا</div>
-                <div class="stat-tile__value" id="discount-expiring-today" data-value="0">۰</div>
-                <small>تا پایان امروز</small>
-              </div>
-              <div class="stat-tile">
-                <div class="stat-tile__label">جمع ارزش (تومان)</div>
-                <div class="stat-tile__value" id="discount-total-value" data-value="0">۰</div>
-                <small>محاسبه در لحظه</small>
-              </div>
-            </div>
-          </div>
-
-          <div class="discounts-grid">
-            <article class="card discount-form-card" aria-label="ایجاد تخفیف جدید">
-              <header class="discount-form-card__header">
-                <div>
-                  <p class="eyebrow">ثبت سریع و مرتب</p>
-                  <h3>تخفیف اختصاصی ثبت کنید</h3>
-                  <p class="muted">مراحل را از بالا به پایین دنبال کنید تا هیچ جزئیاتی جا نماند.</p>
-                </div>
-                <div class="badge badge-soft">همگام با پیامک و نوتیف</div>
-              </header>
-
-              <div class="form-progress" aria-hidden="true">
-                <span class="progress-pill is-active">انتخاب مشتری</span>
-                <span class="progress-pill">مبلغ و مهلت</span>
-                <span class="progress-pill">توضیح و ارسال</span>
-              </div>
-
-              <form id="discount-form" class="discount-form" novalidate>
-                <div class="discount-form-shell">
-                  <div class="form-section">
-                    <div class="section-head">
-                      <div class="section-icon">👤</div>
-                      <div>
-                        <strong>مخاطب</strong>
-                        <p class="muted">اول مشتری را مشخص کنید تا پیشنهاد به‌صورت هوشمند ذخیره شود.</p>
-                      </div>
-                    </div>
-                    <div class="form-control">
-                      <label for="discount-customer">مشتری</label>
-                      <div class="input-with-icon">
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-                        <select id="discount-customer" required aria-describedby="discount-customer-hint">
-                          <option value="" selected disabled>در حال بارگذاری مشتریان...</option>
-                        </select>
-                      </div>
-                      <p id="discount-customer-hint" class="help">مشتریان فعال هفته اخیر در اولویت هستند.</p>
-                    </div>
-                  </div>
-
-                  <div class="form-section">
-                    <div class="section-head">
-                      <div class="section-icon">💰</div>
-                      <div>
-                        <strong>مبلغ و مهلت</strong>
-                        <p class="muted">عدد دقیق و بازه زمانی کوتاه حس فوریت ایجاد می‌کند.</p>
-                      </div>
-                    </div>
-                    <div class="form-grid">
-                      <div class="form-control">
-                        <label for="discount-amount">مبلغ تخفیف (تومان)</label>
-                        <div class="input-with-icon">
-                          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 1v22M17 5H9.5a3.5 3.5 0 1 0 0 7h5a3.5 3.5 0 1 1 0 7H7"/></svg>
-                          <input type="number" id="discount-amount" name="discount-amount" inputmode="numeric" placeholder="مثلاً ۲۰۰٬۰۰۰" required />
-                        </div>
-                        <div class="inline-hint inline-hint--pills">
-                          <span class="chip chip-ghost">۳۰۰٬۰۰۰</span>
-                          <span class="chip chip-ghost">۵۰۰٬۰۰۰</span>
-                          <span class="chip chip-ghost">۷۵۰٬۰۰۰</span>
-                        </div>
-                      </div>
-
-                      <div class="form-control">
-                        <label>مهلت استفاده</label>
-                        <div class="discount-duration" role="radiogroup" aria-label="مهلت استفاده از تخفیف">
-                          <label class="chip chip-selectable">
-                            <input type="radio" name="discount-duration" value="today" checked />
-                            <span>تا پایان امروز</span>
-                          </label>
-                          <label class="chip chip-selectable">
-                            <input type="radio" name="discount-duration" value="3days" />
-                            <span>تا ۳ روز آینده</span>
-                          </label>
-                          <label class="chip chip-selectable">
-                            <input type="radio" name="discount-duration" value="week" />
-                            <span>یک هفته</span>
-                          </label>
-                        </div>
-                        <p class="muted inline-hint">تمام گزینه‌ها برای صفحه موبایل به صورت خطی و قابل لمس هستند.</p>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div class="form-section">
-                    <div class="section-head">
-                      <div class="section-icon">✏️</div>
-                      <div>
-                        <strong>پیام کوتاه</strong>
-                        <p class="muted">دلیل تخفیف و زمان انقضا را شفاف بیان کنید تا اعتماد ایجاد شود.</p>
-                      </div>
-                    </div>
-                    <div class="form-control">
-                      <label for="discount-note">یادداشت برای مشتری (اختیاری)</label>
-                      <div class="input-with-icon input-textarea">
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-                        <textarea id="discount-note" rows="3" placeholder="مثلاً: ویژه امروز تا ساعت ۲۳:۵۹ یا هدیه برای خرید بعدی"></textarea>
-                      </div>
-                      <div class="form-actions">
-                        <div class="inline-hint">
-                          <small>پیام در تاریخچه مشتری ذخیره می‌شود.</small>
-                          <small>ارسال همزمان در پیامک و پوش نوتیفیکیشن.</small>
-                        </div>
-                        <button type="submit" class="btn-primary">ثبت تخفیف شخصی‌سازی‌شده</button>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </form>
-            </article>
-
-            <article class="card discount-list-card" aria-label="لیست تخفیف‌های فعال">
-              <header class="discount-list-card__header">
-                <div>
-                  <p class="eyebrow">پایش مستمر</p>
-                  <h3>تخفیف‌های فعال</h3>
-                  <p class="muted">به‌صورت خودکار در زمان انقضا بایگانی می‌شوند.</p>
-                </div>
-                <div class="pill pill-soft">همگام با مشتریان</div>
-              </header>
-
-              <div class="list-toolbar" aria-label="تنظیم نمایش تخفیف‌ها">
-                <div class="list-tags">
-                  <span class="chip chip-ghost">فعال</span>
-                  <span class="chip chip-ghost">در انتظار تایید</span>
-                  <span class="chip chip-ghost">منقضی</span>
-                </div>
-                <div class="list-actions">
-                  <button type="button" class="btn-ghost-sm">مرتب‌سازی هوشمند</button>
-                  <button type="button" class="btn-ghost-sm">خروجی</button>
-                </div>
-              </div>
-
-              <div class="discount-list-meta">
-                <div>
-                  <span class="label">تعداد فعال</span>
-                  <strong id="discount-active-count-inline">۰</strong>
-                </div>
-                <div>
-                  <span class="label">در انتظار انقضا امروز</span>
-                  <strong id="discount-expiring-inline">۰</strong>
-                </div>
-                <div>
-                  <span class="label">متوسط تخفیف</span>
-                  <strong id="discount-average">۰</strong>
-                </div>
-              </div>
-
-              <div id="discounts-list" class="discounts-list" role="list"></div>
-              <div id="discounts-empty" class="empty-state" hidden>
-                <div class="empty-illustration" aria-hidden="true">🏷️</div>
-                <p class="empty-title">تخفیفی ثبت نشده است</p>
-                <p class="empty-text">برای تشویق مشتریان وفادار، یک تخفیف شخصی‌سازی‌شده ثبت کنید.</p>
-              </div>
-            </article>
-          </div>
-        </div>
-      </section>
       <section id="reviews-view" class="view-section" role="region" aria-labelledby="reviews-title" data-page="reviews">
         <div class="view-container">
           <header class="view-header">
@@ -1133,13 +934,6 @@
     <a href="#/customers" class="nav-item" data-page="customers">
       <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
       <span class="nav-label">مشتریان</span>
-    </a>
-    <a href="#/discounts" class="nav-item" data-page="discounts">
-      <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-        <path d="M20.59 13.41 11 3.83a2 2 0 0 0-1.42-.59H4a2 2 0 0 0-2 2v5.58a2 2 0 0 0 .59 1.42l9.59 9.59a2 2 0 0 0 2.82 0l5.59-5.59a2 2 0 0 0 0-2.83Z" />
-        <circle cx="7" cy="7" r="1.25" />
-      </svg>
-      <span class="nav-label">تخفیف‌ها</span>
     </a>
     <a href="#/top" class="nav-item" data-page="top">
       <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
