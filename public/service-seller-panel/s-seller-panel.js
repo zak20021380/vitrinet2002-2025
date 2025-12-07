@@ -3398,6 +3398,8 @@ function bindFloatingCloseOnce() {
 
       this.discountStore = new DiscountStore();
       this.discountStore.purgeExpired();
+      this.GLOBAL_CUSTOMER_ID = 'ALL_CUSTOMERS';
+      this.GLOBAL_DISCOUNT_ID = 'global-discount';
 
       this.setFeatureFlags(flags);
 
@@ -5709,6 +5711,8 @@ renderCustomers(query = '') {
     return map;
   }, new Map());
 
+  const globalDiscount = activeDiscounts.get(this.GLOBAL_CUSTOMER_ID);
+
   listEl.innerHTML = filteredCustomers.map(c => {
     const lastReservation = UIComponents.formatRelativeDate(c.lastReservation);
     const joinedLabel = UIComponents.formatRelativeDate(c.joinedAt || c.lastReservation);
@@ -5716,15 +5720,19 @@ renderCustomers(query = '') {
     const reviewCount = this.formatNumber(c.reviewCount ?? c.rewardCount ?? 0);
     const pending = this.formatNumber(c.pendingRewards || 0);
     const tier = (c.bookingsCount ?? 0) >= 10 ? 'وفادار' : 'فعال';
-    const discount = activeDiscounts.get(String(c.id));
+    const discount = activeDiscounts.get(String(c.id)) || globalDiscount;
+    const isGlobalDiscount = !!discount && (discount.isGlobal || discount.customerId === this.GLOBAL_CUSTOMER_ID);
     const hasDiscount = !!discount;
+    const discountLabel = hasDiscount ? (isGlobalDiscount ? 'تخفیف همگانی' : 'تخفیف فعال') : 'بدون تخفیف';
     const discountValue = hasDiscount
       ? (discount.type === 'percent'
         ? `${this.formatNumber(discount.amount)}٪`
         : `${this.formatNumber(discount.amount)} تومان`)
       : 'بدون تخفیف فعال';
     const discountExpiry = hasDiscount
-      ? UIComponents.formatRelativeDate(discount.expiresAt)
+      ? (isGlobalDiscount
+        ? `تخفیف همگانی برای تمام مشتریان شما فعال است • ${UIComponents.formatRelativeDate(discount.expiresAt)}`
+        : `این کاربر تخفیف فعال دارد • ${UIComponents.formatRelativeDate(discount.expiresAt)}`)
       : 'تخفیفی برای این مشتری فعال نیست.';
 
     return `
@@ -5763,10 +5771,10 @@ renderCustomers(query = '') {
           </div>
           <div class="stat-chip stat-chip--accent stat-chip--discount">
             <div class="discount-state">
-              <span class="discount-pill ${hasDiscount ? 'is-active' : 'is-empty'}">${hasDiscount ? 'تخفیف فعال' : 'بدون تخفیف'}</span>
+              <span class="discount-pill ${hasDiscount ? 'is-active' : 'is-empty'}">${discountLabel}</span>
               <strong class="discount-value">${discountValue}</strong>
             </div>
-            <p class="discount-meta">${hasDiscount ? `این کاربر تخفیف فعال دارد • ${discountExpiry}` : discountExpiry}</p>
+            <p class="discount-meta">${discountExpiry}</p>
             <div class="discount-actions">
               <button type="button" class="link-btn" data-action="open-discount-modal" data-customer-id="${escapeHtml(c.id)}" data-customer-name="${escapeHtml(c.name)}" data-customer-phone="${escapeHtml(c.phone)}">${hasDiscount ? 'مدیریت تخفیف' : 'اهدای تخفیف'}</button>
             </div>
@@ -5811,6 +5819,17 @@ renderCustomers(query = '') {
     this.discountModalCustomerId = '';
     this.discountModalCustomerName = '';
     this.discountModalCustomerPhone = '';
+
+    this.discountQuickSearch = document.getElementById('discount-quick-search');
+    this.discountQuickResults = document.getElementById('discount-quick-results');
+
+    this.globalDiscountForm = document.getElementById('global-discount-form');
+    this.globalDiscountAmount = document.getElementById('global-discount-amount');
+    this.globalDiscountAmountField = document.getElementById('global-discount-amount-field');
+    this.globalDiscountTypeInputs = this.globalDiscountForm?.querySelectorAll('input[name="global-discount-type"]') || [];
+    this.globalDiscountDurationInputs = this.globalDiscountForm?.querySelectorAll('input[name="global-discount-duration"]') || [];
+    this.globalDiscountStatus = document.getElementById('global-discount-status');
+    this.globalDiscountClear = document.getElementById('global-discount-clear');
 
     if (this.discountModalTypeInputs?.length) {
       this.discountModalTypeInputs.forEach(input => {
@@ -5861,9 +5880,55 @@ renderCustomers(query = '') {
       });
     }
 
+    if (this.discountQuickSearch) {
+      this.discountQuickSearch.addEventListener('input', (e) => {
+        this.renderQuickDiscountResults(e.target.value);
+      });
+    }
+
+    if (this.discountQuickResults) {
+      this.discountQuickResults.addEventListener('click', (e) => {
+        const btn = e.target.closest('[data-action="quick-discount"]');
+        if (btn) {
+          this.openCustomerDiscountModal({
+            id: btn.dataset.customerId,
+            name: btn.dataset.customerName,
+            phone: btn.dataset.customerPhone
+          });
+        }
+      });
+    }
+
+    if (this.globalDiscountForm) {
+      this.globalDiscountForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        this.handleGlobalDiscountSubmit();
+      });
+    }
+
+    if (this.globalDiscountClear) {
+      this.globalDiscountClear.addEventListener('click', () => this.clearGlobalDiscount());
+    }
+
+    if (this.globalDiscountTypeInputs?.length) {
+      this.globalDiscountTypeInputs.forEach(input => {
+        input.addEventListener('change', () => this.updateGlobalDiscountType(input.value));
+      });
+      const initialGlobalType = Array.from(this.globalDiscountTypeInputs).find(input => input.checked)?.value || 'amount';
+      this.updateGlobalDiscountType(initialGlobalType);
+    }
+
+    if (this.globalDiscountDurationInputs?.length) {
+      this.globalDiscountDurationInputs.forEach(input => {
+        input.addEventListener('change', () => this.updateGlobalDiscountStatus());
+      });
+    }
+
     document.addEventListener('customers:loaded', () => {
       this.refreshDiscountCustomers();
       this.renderDiscounts();
+      this.renderQuickDiscountResults(this.discountQuickSearch?.value || '');
+      this.updateGlobalDiscountStatus();
     });
 
     if (this.discountTypeInputs?.length) {
@@ -5878,6 +5943,8 @@ renderCustomers(query = '') {
 
     this.refreshDiscountCustomers();
     this.renderDiscounts();
+    this.renderQuickDiscountResults('');
+    this.updateGlobalDiscountStatus();
   }
 
   openCustomerDiscountModal(customer = {}) {
@@ -6020,7 +6087,9 @@ renderCustomers(query = '') {
 
   getActiveDiscountForCustomer(customerId) {
     if (!customerId) return null;
-    return (this.discountStore?.getActive() || []).find(d => String(d.customerId) === String(customerId)) || null;
+    const personal = (this.discountStore?.getActive() || []).find(d => String(d.customerId) === String(customerId));
+    if (personal) return personal;
+    return this.getGlobalDiscount();
   }
 
   getDiscountCustomers() {
@@ -6135,6 +6204,118 @@ renderCustomers(query = '') {
     return `${UIComponents.formatPersianNumber(days)} روز آینده`;
   }
 
+  renderQuickDiscountResults(query = '') {
+    if (!this.discountQuickResults) return;
+    const customers = this.getDiscountCustomers();
+    const cleaned = normalizeKeyPart(query);
+    const matches = cleaned
+      ? customers.filter(c => {
+          const nameKey = normalizeKeyPart(c.name || '');
+          const phoneKey = normalizeKeyPart(c.phone || '');
+          return nameKey.includes(cleaned) || phoneKey.includes(cleaned.replace(/[^\d]/g, ''));
+        })
+      : customers.slice(0, 4);
+
+    if (!matches.length) {
+      this.discountQuickResults.innerHTML = '<div class="discount-quick-empty">مشتری با این مشخصات پیدا نشد.</div>';
+      return;
+    }
+
+    const maxItems = 5;
+    this.discountQuickResults.innerHTML = matches.slice(0, maxItems).map((c) => `
+      <div class="discount-quick-result" role="listitem">
+        <div class="discount-quick-result__meta">
+          <strong>${escapeHtml(c.name || 'مشتری')}</strong>
+          <small>${UIComponents.formatPersianNumber(c.phone || '')}</small>
+          <small>${c.lastReservation ? `آخرین مراجعه: ${UIComponents.formatRelativeDate(c.lastReservation)}` : 'بدون تاریخ رزرو'}</small>
+        </div>
+        <button type="button" class="btn-secondary" data-action="quick-discount" data-customer-id="${escapeHtml(c.id)}" data-customer-name="${escapeHtml(c.name)}" data-customer-phone="${escapeHtml(c.phone)}">
+          تخفیف فوری
+        </button>
+      </div>
+    `).join('');
+  }
+
+  updateGlobalDiscountType(type = 'amount') {
+    if (this.globalDiscountAmountField) {
+      this.globalDiscountAmountField.dataset.icon = type === 'percent' ? 'percent' : 'amount';
+    }
+    if (this.globalDiscountAmount) {
+      this.globalDiscountAmount.placeholder = type === 'percent' ? 'مثلاً ۱۰' : 'مثلاً ۲۰٬۰۰۰';
+    }
+  }
+
+  getGlobalDiscount() {
+    return (this.discountStore?.getActive() || []).find(d =>
+      d.isGlobal || d.customerId === this.GLOBAL_CUSTOMER_ID || d.id === this.GLOBAL_DISCOUNT_ID
+    ) || null;
+  }
+
+  updateGlobalDiscountStatus() {
+    if (!this.globalDiscountStatus) return;
+    const active = this.getGlobalDiscount();
+    if (!active) {
+      this.globalDiscountStatus.textContent = 'بدون تخفیف همگانی';
+      this.globalDiscountStatus.classList.remove('is-active');
+      return;
+    }
+
+    const value = active.type === 'percent'
+      ? `${this.formatNumber(active.amount, { fractionDigits: 0 })}٪`
+      : `${this.formatNumber(active.amount, { fractionDigits: 0 })} تومان`;
+    const time = this.formatRemainingTime(active.expiresAt);
+    this.globalDiscountStatus.textContent = `فعال (${value}${time ? ` • ${time}` : ''})`;
+    this.globalDiscountStatus.classList.add('is-active');
+  }
+
+  handleGlobalDiscountSubmit() {
+    if (!this.globalDiscountForm) return;
+    const type = Array.from(this.globalDiscountTypeInputs || []).find(input => input.checked)?.value || 'amount';
+    const amount = Number(this.globalDiscountAmount?.value || 0);
+
+    if (type === 'percent') {
+      if (!Number.isFinite(amount) || amount <= 0 || amount > 90) {
+        UIComponents.showToast('درصد تخفیف باید بین ۱ تا ۹۰ باشد.', 'error');
+        return;
+      }
+    } else if (!Number.isFinite(amount) || amount < 500) {
+      UIComponents.showToast('مبلغ تخفیف همگانی باید حداقل ۵۰۰ تومان باشد.', 'error');
+      return;
+    }
+
+    const duration = Array.from(this.globalDiscountDurationInputs || []).find(input => input.checked)?.value || 'week';
+    const discount = {
+      id: this.GLOBAL_DISCOUNT_ID,
+      customerId: this.GLOBAL_CUSTOMER_ID,
+      customerName: 'تمام مشتریان',
+      customerPhone: '',
+      amount,
+      type,
+      createdAt: new Date().toISOString(),
+      expiresAt: this.calculateDiscountExpiry(duration),
+      note: this.getDiscountDurationLabel(duration),
+      isGlobal: true
+    };
+
+    this.discountStore.upsert(discount);
+    UIComponents.showToast('تخفیف همگانی فعال شد.', 'success');
+    this.globalDiscountForm.reset();
+    const today = this.globalDiscountForm.querySelector('input[name="global-discount-duration"][value="today"]');
+    if (today) today.checked = true;
+    this.updateGlobalDiscountType(type);
+    this.updateGlobalDiscountStatus();
+    this.renderDiscounts();
+    this.renderCustomers(this.currentCustomerQuery || '');
+  }
+
+  clearGlobalDiscount() {
+    this.discountStore.remove(this.GLOBAL_DISCOUNT_ID);
+    this.updateGlobalDiscountStatus();
+    this.renderDiscounts();
+    this.renderCustomers(this.currentCustomerQuery || '');
+    UIComponents.showToast('تخفیف همگانی حذف شد.', 'info');
+  }
+
   handleDiscountSubmit() {
     if (!this.discountForm || !this.discountCustomerSelect) return;
     const customerId = this.discountCustomerSelect.value;
@@ -6216,6 +6397,14 @@ renderCustomers(query = '') {
     const customers = this.getDiscountCustomers();
     const customerMap = new Map(customers.map(c => [String(c.id), c]));
     const active = this.discountStore.getActive().map(item => {
+      if (item.isGlobal || item.customerId === this.GLOBAL_CUSTOMER_ID) {
+        return {
+          ...item,
+          customerName: 'تخفیف همگانی',
+          customerPhone: 'روی همه مشتریان',
+          isGlobal: true
+        };
+      }
       const info = customerMap.get(String(item.customerId));
       if (info) {
         return {
@@ -6226,7 +6415,7 @@ renderCustomers(query = '') {
         };
       }
       return item;
-    });
+    }).sort((a, b) => (a.isGlobal ? -1 : 1));
 
     this.updateDiscountStats(active);
 
@@ -6240,18 +6429,22 @@ renderCustomers(query = '') {
     listEl.innerHTML = active.map(d => {
       const remaining = this.formatRemainingTime(d.expiresAt);
       const note = d.note ? `<div class="meta">${escapeHtml(d.note)}</div>` : '';
-      const lastVisit = d.lastReservation ? ` • آخرین مراجعه: ${UIComponents.formatRelativeDate(d.lastReservation)}` : '';
+      const lastVisit = d.lastReservation && !d.isGlobal ? ` • آخرین مراجعه: ${UIComponents.formatRelativeDate(d.lastReservation)}` : '';
       const valueText = d.type === 'percent'
         ? `${UIComponents.formatPersianNumber(d.amount)}٪`
         : this.formatToman(d.amount);
-      const valueLabel = d.type === 'percent' ? 'درصدی' : 'مبلغ';
+      const valueLabel = d.isGlobal ? 'تخفیف همگانی' : (d.type === 'percent' ? 'درصدی' : 'مبلغ');
+      const metaLine = d.isGlobal
+        ? 'اعمال شده روی تمام مشتریان'
+        : `${UIComponents.formatPersianNumber(d.customerPhone || '')}${lastVisit}`;
+      const badge = d.isGlobal ? '<span class="status-badge status-active">همگانی</span>' : '';
 
       return `
         <article class="discount-card" role="listitem">
-          <div class="discount-card__avatar" aria-hidden="true">${escapeHtml(d.customerName?.charAt(0) || 'م')}</div>
+          <div class="discount-card__avatar" aria-hidden="true">${escapeHtml((d.isGlobal ? '٪' : d.customerName?.charAt(0)) || 'م')}</div>
           <div class="discount-card__body">
-            <div class="name">${escapeHtml(d.customerName || 'مشتری')}</div>
-            <div class="meta">${UIComponents.formatPersianNumber(d.customerPhone || '')}${lastVisit}</div>
+            <div class="name">${escapeHtml(d.customerName || 'مشتری')} ${badge}</div>
+            <div class="meta">${metaLine}</div>
             ${note}
           </div>
           <div class="discount-card__amount">
@@ -6260,7 +6453,7 @@ renderCustomers(query = '') {
             <span class="expires">${this.formatDateTime(d.expiresAt)} • ${remaining}</span>
           </div>
           <div class="discount-card__actions">
-            <button type="button" class="btn-text" data-action="cancel-discount" data-id="${d.id}">لغو</button>
+            <button type="button" class="btn-text" data-action="cancel-discount" data-id="${d.id}">${d.isGlobal ? 'لغو همگانی' : 'لغو'}</button>
           </div>
         </article>
       `;

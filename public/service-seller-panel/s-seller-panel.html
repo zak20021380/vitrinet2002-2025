@@ -541,6 +541,81 @@
               <p class="view-subtitle">مدیریت اطلاعات مشتریان</p>
             </div>
           </header>
+          <section class="customer-discount-superbar card" aria-label="جستجو و تخفیف مشتریان">
+            <div class="superbar__search">
+              <div>
+                <p class="eyebrow">تخفیف شخصی</p>
+                <h3>مشتری را با نام یا شماره پیدا کنید</h3>
+                <p class="muted">فروشنده می‌تواند با یک جستجوی سریع، همان لحظه تخفیف اختصاصی را ثبت کند.</p>
+              </div>
+              <div class="superbar__searchbox">
+                <div class="input-with-icon">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <circle cx="11" cy="11" r="7"/><path d="M20 20 17 17"/>
+                  </svg>
+                  <input id="discount-quick-search" type="search" placeholder="مثلاً: نگار یا ۰۹۱۲..." aria-label="جستجوی سریع مشتری برای تخفیف" autocomplete="off" />
+                </div>
+                <div id="discount-quick-results" class="discount-quick-results" role="list"></div>
+              </div>
+            </div>
+            <div class="superbar__broadcast">
+              <div class="broadcast__header">
+                <div>
+                  <p class="eyebrow">تخفیف همگانی</p>
+                  <h3>یک پیشنهاد برای همه مشتریان</h3>
+                  <p class="muted">در چند ثانیه یک درصد یا مبلغ مشخص را برای تمام مخاطبان فعال کنید.</p>
+                </div>
+                <div id="global-discount-status" class="broadcast__status" aria-live="polite">بدون تخفیف همگانی</div>
+              </div>
+              <form id="global-discount-form" class="broadcast__form" novalidate>
+                <div class="discount-type-toggle">
+                  <label class="chip">
+                    <input type="radio" name="global-discount-type" value="amount" checked>
+                    مبلغ (تومان)
+                  </label>
+                  <label class="chip chip-ghost">
+                    <input type="radio" name="global-discount-type" value="percent">
+                    درصدی
+                  </label>
+                </div>
+                <div class="broadcast__grid">
+                  <div id="global-discount-amount-field" class="input-with-icon discount-amount-field" data-icon="amount">
+                    <svg class="icon-amount" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                      <path d="M6 5h9.5c2 0 3.5 1.5 3.5 3.5S17.5 12 15.5 12H10c-2 0-3.5 1.5-3.5 3.5S8 19 10 19H18"/>
+                      <path d="M10 2v20"/>
+                    </svg>
+                    <svg class="icon-percent" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                      <line x1="19" y1="5" x2="5" y2="19"/>
+                      <circle cx="7" cy="7" r="2.5"/>
+                      <circle cx="17" cy="17" r="2.5"/>
+                    </svg>
+                    <input id="global-discount-amount" type="number" inputmode="numeric" min="0" step="500" placeholder="مثلاً ۱۰٬۰۰۰">
+                  </div>
+                  <div class="broadcast__duration" role="radiogroup" aria-label="مهلت تخفیف همگانی">
+                    <label class="radio-pill">
+                      <input type="radio" name="global-discount-duration" value="today" checked>
+                      امروز
+                    </label>
+                    <label class="radio-pill">
+                      <input type="radio" name="global-discount-duration" value="3d">
+                      ۳ روز آینده
+                    </label>
+                    <label class="radio-pill">
+                      <input type="radio" name="global-discount-duration" value="week">
+                      یک هفته
+                    </label>
+                  </div>
+                </div>
+                <div class="broadcast__actions">
+                  <div>
+                    <button type="submit" class="btn-primary">ثبت تخفیف همگانی</button>
+                    <button type="button" id="global-discount-clear" class="btn-ghost" aria-label="حذف تخفیف همگانی فعال">لغو تخفیف همگانی</button>
+                  </div>
+                  <p class="muted">یک بار تعریف کنید؛ روی تمام کارت‌های مشتری نمایش داده می‌شود.</p>
+                </div>
+              </form>
+            </div>
+          </section>
           <div class="customer-hero card">
             <div class="customer-hero__intro">
               <p class="eyebrow">باشگاه مشتریان فروشنده</p>
