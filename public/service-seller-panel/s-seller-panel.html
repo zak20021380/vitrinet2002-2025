@@ -158,17 +158,7 @@
   <span>نوبت‌دهی</span>
 </button>
 
-
-        <button class="install-app-btn" id="install-app-btn" aria-label="نصب اپلیکیشن">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-            <path d="M12 3v14"/>
-            <path d="m6 12 6 6 6-6"/>
-            <rect x="4" y="18" width="16" height="3" rx="1.5"/>
-          </svg>
-          <span>نصب اپلیکیشن</span>
-        </button>
-
-
+        
         <button id="view-store-btn" class="btn-primary btn-icon-text" aria-label="مشاهده صفحه من">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
             <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/>
@@ -178,7 +168,6 @@
       </div>
     </div>
   </header>
-  <div id="live-alerts" class="live-alerts" aria-live="polite" aria-atomic="true"></div>
   <main id="app" class="app-main" role="main" tabindex="-1">
     <div class="app-container">
       <section id="dashboard-view" class="view-section" role="region" aria-labelledby="dashboard-title" data-page="dashboard">
@@ -201,10 +190,11 @@
     <div class="plan-hero-content">
       <div class="plan-hero-top">
         <div>
-          <h3 class="plan-hero-title">پلن شما غیرفعال است</h3>
+          <h3 class="plan-hero-title">پلن فعال شما</h3>
           <p class="plan-hero-subtext" id="plan-hero-subtext">
-            دسترسی پلن فروشگاه توسط مدیریت متوقف شده و در حال بررسی است.
+            وضعیت پلن رایگان فروشگاه در حال بارگذاری است.
           </p>
+          <div class="plan-gift-note" id="plan-gift-note">این پلن رایگان به عنوان هدیه مدیریت ویترینت فعال شده است.</div>
         </div>
         <span class="plan-tier-badge" id="plan-tier"></span>
       </div>
@@ -212,12 +202,12 @@
       <div class="plan-hero-highlight" role="status" aria-live="polite">
         <div class="plan-hero-highlight__text">
           <p class="plan-hero-message" id="plan-hero-message">
-            پلن شما غیر فعال است و همه دسترسی‌ها محدود شده‌اند. از بخش پلن‌ها یا پشتیبانی اقدام کنید.
+            اگر پلن فعالی نداشته باشید یا دسترسی توسط مدیریت غیرفعال شده باشد، از همین بخش اطلاع‌رسانی می‌شود.
           </p>
           <div class="plan-hero-meta" role="list">
             <div class="meta-item" role="listitem">
               <div class="meta-text">
-                <span>وضعیت پلن</span>
+                <span>پلن هدیه</span>
                 <strong id="plan-name"></strong>
               </div>
             </div>
@@ -259,18 +249,18 @@
           <span id="plan-progress-bar"></span>
         </div>
         <div class="progress-legend">
-          <span>روز استفاده‌شده تا پیش از توقف: <b id="plan-used"></b></span>
-          <span>روز باقی‌مانده در صورت فعال‌سازی مجدد: <b id="plan-left"></b></span>
+          <span>روز استفاده‌شده: <b id="plan-used"></b></span>
+          <span>روز باقی‌مانده از هدیه: <b id="plan-left"></b></span>
         </div>
       </div>
 
-        <div class="plan-hero-footer">
-          <ul class="plan-hero-perks" aria-label="مزایای پلن" id="plan-hero-perks"></ul>
-          <div class="plan-hero-actions">
-            <button type="button" class="btn-renew" id="plan-renew-btn">فعالسازی مجدد / ارتقا</button>
-          </div>
+      <div class="plan-hero-footer">
+        <ul class="plan-hero-perks" aria-label="مزایای پلن" id="plan-hero-perks"></ul>
+        <div class="plan-hero-actions">
+          <button type="button" class="btn-renew" id="plan-renew-btn">تمدید / ارتقا</button>
         </div>
       </div>
+    </div>
 </section>
 
 
@@ -410,18 +400,17 @@
                     <span class="metric-label">امتیاز</span>
                   </div>
                 </div>
-                <div class="rank-actions">
-                  <button type="button" id="rank-cta-btn" class="btn-rank-cta" data-route="top" aria-label="مشاهده رتبه‌بندی من">
-                    <span class="btn-rank-cta__icon" aria-hidden="true">
-                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M5 12h14"/>
-                        <path d="M13 5l7 7-7 7"/>
-                      </svg>
-                    </span>
-                    <span class="btn-rank-cta__text">مشاهده رتبه‌بندی من</span>
-                    <span class="btn-rank-cta__pill" aria-hidden="true">جدید</span>
-                  </button>
-                </div>
+         <div class="rank-actions">
+  <button type="button" id="rank-cta-btn" class="btn-rank-cta" data-route="top">
+    <span class="btn-rank-cta__pill">جدید</span>
+    <span class="btn-rank-cta__text">مشاهده رتبه‌بندی من</span>
+    <span class="btn-rank-cta__icon">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M5 12h14"></path><path d="M13 5l7 7-7 7"></path>
+      </svg>
+    </span>
+  </button>
+</div>
               </div>
             </article>
           </div>
@@ -541,181 +530,115 @@
               <p class="view-subtitle">مدیریت اطلاعات مشتریان</p>
             </div>
           </header>
-          
-          <section class="discount-overview card" aria-label="آمار کلی تخفیف‌ها">
-            <div class="discount-overview__header">
-              <div class="discount-overview__intro">
-                <p class="eyebrow">تصویر کلی تخفیف‌ها</p>
-                <h3>سلامت تخفیف‌ها در یک نگاه</h3>
-                <p class="muted">تعداد تخفیف‌های فعال، نزدیک‌ترین موعد انقضا و ارزش کل تخفیف‌های شما همیشه به‌روز نمایش داده می‌شود.</p>
-              </div>
-              <div class="discount-overview__status">
-                <span class="status-dot"></span>
-                <div>
-                  <small>وضعیت فعلی</small>
-                  <strong id="discount-summary-status">بدون تخفیف فعال</strong>
-                </div>
-              </div>
-            </div>
-            <div class="discount-overview__grid">
-              <article class="discount-metric">
-                <div class="metric-icon metric-icon--fire" aria-hidden="true">🔥</div>
-                <div class="metric-body">
-                  <p class="metric-label">تخفیف فعال</p>
-                  <div class="metric-value">
-                    <span id="discount-summary-active" class="metric-number">۰</span>
-                    <span class="metric-unit">مورد</span>
-                  </div>
-                  <p class="metric-hint">مجموع تخفیف‌های فردی و همگانی</p>
-                </div>
-              </article>
-              <article class="discount-metric">
-                <div class="metric-icon metric-icon--time" aria-hidden="true">⏳</div>
-                <div class="metric-body">
-                  <p class="metric-label">نزدیک‌ترین انقضا</p>
-                  <div class="metric-value">
-                    <span id="discount-summary-next-expiry" class="metric-number">بدون موعد فعال</span>
-                  </div>
-                  <p class="metric-hint">تخفیف‌های منقضی امروز: <strong id="discount-summary-expiring">۰</strong></p>
-                </div>
-              </article>
-              <article class="discount-metric">
-                <div class="metric-icon metric-icon--value" aria-hidden="true">💰</div>
-                <div class="metric-body">
-                  <p class="metric-label">ارزش کل تخفیف</p>
-                  <div class="metric-value">
-                    <span id="discount-summary-total" class="metric-number">۰</span>
-                    <span class="metric-unit">تومان</span>
-                  </div>
-                  <p class="metric-hint">میانگین هر تخفیف: <strong id="discount-summary-average">۰</strong></p>
-                </div>
-              </article>
-              <article class="discount-metric">
-                <div class="metric-icon metric-icon--mix" aria-hidden="true">🤝</div>
-                <div class="metric-body">
-                  <p class="metric-label">نوع تخفیف‌ها</p>
-                  <div class="metric-value metric-value--split">
-                    <div>
-                      <span class="metric-number" id="discount-summary-global">۰</span>
-                      <small class="metric-chip">همگانی</small>
-                    </div>
-                    <div>
-                      <span class="metric-number" id="discount-summary-personal">۰</span>
-                      <small class="metric-chip">اختصاصی</small>
-                    </div>
-                  </div>
-                  <p class="metric-hint">ترکیب تخفیف‌های فعال شما</p>
-                </div>
-              </article>
-            </div>
-          </section>
-
-          <div class="customer-hero card">
-            <div class="customer-hero__intro">
-              <p class="eyebrow">باشگاه مشتریان فروشنده</p>
-              <h3>تصویر کامل از هر مشتری در یک نگاه</h3>
-              <p class="muted">آخرین نوبت، تعداد رزروها، تاریخ عضویت و تعاملات هر مشتری را دقیق ببینید.</p>
-              <div class="customer-hero__pills">
-                <span class="pill pill-success">رزروهای موفق بیشتر</span>
-                <span class="pill pill-glow">نظرات ثبت‌شده</span>
-                <span class="pill">عضویت‌های جدید</span>
-              </div>
-            </div>
-            <div class="customer-hero__stats">
-              <div class="hero-stat">
-                <span class="label">کل مشتریان</span>
-                <strong id="customer-total-count">۰</strong>
-                <small>از آغاز همکاری</small>
-              </div>
-              <div class="hero-stat">
-                <span class="label">تعداد کل رزروها</span>
-                <strong id="customer-visit-count">۰</strong>
-                <small>سفارش ثبت‌شده</small>
-              </div>
-              <div class="hero-stat">
-                <span class="label">ثبت نظر</span>
-                <strong id="customer-review-count">۰</strong>
-                <small>نظرات مشتریان</small>
-              </div>
-              <div class="hero-stat">
-                <span class="label">عضویت‌های این ماه</span>
-                <strong id="customer-new-month">۰</strong>
-                <small>کاربر تازه</small>
-              </div>
+          <div class="search-section">
+            <div class="search-wrapper">
+              <svg class="search-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/>
+              </svg>
+              <input type="search" id="customer-search" class="search-input" placeholder="جستجوی نام، شماره تماس..." aria-label="جستجو در مشتریان">
             </div>
           </div>
 
-          <div class="customer-toolbar">
-            <div class="customer-filters" role="tablist" aria-label="فیلتر مشتریان">
-              <button type="button" class="customer-filter active" data-filter="all" role="tab" aria-selected="true">همه</button>
-              <button type="button" class="customer-filter" data-filter="recent" role="tab" aria-selected="false">جدید</button>
-              <button type="button" class="customer-filter" data-filter="loyal" role="tab" aria-selected="false">وفادار</button>
-              <button type="button" class="customer-filter" data-filter="most-bookings" role="tab" aria-selected="false">بیشترین رزرو</button>
-              <button type="button" class="customer-filter" data-filter="least-bookings" role="tab" aria-selected="false">کمترین رزرو</button>
-            </div>
-          </div>
 
-          <div class="customers-layout">
-            <div class="customers-column">
-              <div id="customers-list" class="customers-grid" role="list"></div>
-            </div>
-            <aside class="customers-discount card" aria-label="تخفیف اختصاصی مشتریان">
-              <div class="discounts-header">
-                <div class="discounts-header__intro">
-                  <div class="eyebrow">تخفیف اختصاصی</div>
-                  <h3 class="discounts-header__title">بهترین مشتریان را خوشحال کنید</h3>
-                  <p class="muted">مشتری را انتخاب کنید، مبلغ یا درصد را تعیین کنید و مهلت مصرف را مشخص کنید.</p>
-                  <div class="discounts-header__chips">
-                    <span class="chip">تخفیف فعال: <strong id="discount-active-count-inline">۰</strong></span>
-                    <span class="chip chip-ghost">منقضی امروز: <strong id="discount-expiring-inline">۰</strong></span>
-                  </div>
-                </div>
-                <div class="discounts-header__stats">
-                  <div class="stat-tile">
-                    <div class="stat-icon">🔥</div>
-                    <div>
-                      <p class="stat-label">تعداد فعال</p>
-                      <p class="stat-value" id="discount-active-count">۰</p>
-                    </div>
-                  </div>
-                  <div class="stat-tile">
-                    <div class="stat-icon">⏳</div>
-                    <div>
-                      <p class="stat-label">انقضا امروز</p>
-                      <p class="stat-value" id="discount-expiring-today">۰</p>
-                    </div>
-                  </div>
-                  <div class="stat-tile">
-                    <div class="stat-icon">💰</div>
-                    <div>
-                      <p class="stat-label">ارزش کل</p>
-                      <p class="stat-value" id="discount-total-value">۰</p>
-                    </div>
-                  </div>
-                  <div class="stat-tile">
-                    <div class="stat-icon">📊</div>
-                    <div>
-                      <p class="stat-label">میانگین</p>
-                      <p class="stat-value" id="discount-average">۰</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
 
-              
+<!-- ✅ VIP Stats Bar (زیر سرچ / بالای لیست) -->
+<section id="vip-stats" class="vip-stats-bar" role="group" aria-label="آمار مشتریان ویژه">
+  <button type="button" class="vip-chip" data-target="eligible" aria-pressed="false" title="رسیده به جایزه (قابل دریافت)">
+    <span class="label">واجد جایزه</span>
+    <span class="count" id="vip-count-eligible">۰</span>
+  </button>
+  <button type="button" class="vip-chip" data-target="oneaway" aria-pressed="false" title="یک قدم تا جایزه">
+    <span class="label">یک‌قدم تا جایزه</span>
+    <span class="count" id="vip-count-oneaway">۰</span>
+  </button>
+  <button type="button" class="vip-chip" data-target="claimed" aria-pressed="false" title="جایزه گرفته‌اند">
+    <span class="label">جایزه‌گرفته‌اند</span>
+    <span class="count" id="vip-count-claimed">۰</span>
+  </button>
+</section>
 
-              <div class="discounts-list-wrapper">
-                <div class="list-head">
-                  <h4>تخفیف‌های فعال</h4>
-                  <span class="badge">به ترتیب انقضا</span>
-                </div>
-                <div id="discounts-list" class="discounts-list" role="list"></div>
-                <div id="discounts-empty" class="empty-state" role="status">
-                  <p class="muted">هنوز برای هیچ مشتری تخفیف اختصاصی ثبت نشده است.</p>
-                </div>
-              </div>
-            </aside>
-          </div>
+<!-- ✅ پنل نام‌ها (جمع‌شونده و دسترس‌پذیر) -->
+<!-- ✅ VIP: پنل نام‌ها (جمع‌شونده) -->
+<section id="vip-stats-panel"
+         class="vip-panel-compact"
+         role="region"
+         aria-labelledby="vip-panel-title"
+         hidden
+         tabindex="-1">
+
+  <header class="vipc-header">
+    <div class="vipc-title-wrap">
+      <div class="vipc-badge" aria-hidden="true">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+        </svg>
+      </div>
+      <div>
+        <h4 id="vip-panel-title" class="vipc-title">واجد جایزه</h4>
+        <div id="vip-panel-sub" class="vipc-sub">مشتری‌هایی که به حد نصاب رسیده‌اند</div>
+      </div>
+    </div>
+
+    <!-- دکمه بستن پنل -->
+    <button type="button" class="vipc-close" id="vip-close-panel" aria-label="بستن">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <line x1="18" y1="6" x2="6" y2="18"></line>
+        <line x1="6" y1="6" x2="18" y2="18"></line>
+      </svg>
+    </button>
+  </header>
+
+  <div class="vipc-body">
+    <div class="vipc-hint" id="vipc-hint">برای دیدن جزئیات، روی نام مشتری بزنید</div>
+
+    <!-- لیست نام‌ها: هر آیتم یک دکمه با عرضِ متن -->
+    <div id="vip-list" class="vipc-chips" role="list"><!-- با JS پر می‌شود --></div>
+
+    <div id="vip-empty" class="vipc-empty" hidden>فعلاً اسمی اینجا نیست.</div>
+  </div>
+</section>
+
+<!-- مودال جزئیات مشتری VIP -->
+<div id="vip-customer-modal" class="vipc-modal" role="dialog" aria-modal="true" aria-labelledby="vipc-modal-title" hidden>
+  <div class="vipc-backdrop" data-close></div>
+  <div class="vipc-card" role="document">
+    <button class="vipc-card-close" data-close aria-label="بستن">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+      </svg>
+    </button>
+
+    <div class="vipc-head">
+      <div class="vipc-avatar" id="vipc-avatar">م</div>
+      <div>
+        <h3 id="vipc-modal-title" class="vipc-name">—</h3>
+        <div class="vipc-phone" id="vipc-phone">—</div>
+      </div>
+    </div>
+
+    <div class="vipc-stats">
+      <div class="vipc-stat">
+        <div class="vipc-stat-val" id="vipc-res-count">۰</div>
+        <div class="vipc-stat-label">کل رزروها</div>
+      </div>
+      <div class="vipc-stat">
+        <div class="vipc-stat-val" id="vipc-reward-count">۰</div>
+        <div class="vipc-stat-label">تعداد جایزه</div>
+      </div>
+      <div class="vipc-stat">
+        <div class="vipc-stat-val" id="vipc-last-date">—</div>
+        <div class="vipc-stat-label">آخرین رزرو</div>
+      </div>
+    </div>
+
+    <div class="vipc-actions">
+      <button type="button" class="btn-primary" id="vipc-open-customer">مشاهده در مشتریان</button>
+    </div>
+  </div>
+</div>
+
+
+          <div id="customers-list" class="customers-grid" role="list"></div>
         </div>
       </section>
       <section id="reviews-view" class="view-section" role="region" aria-labelledby="reviews-title" data-page="reviews">
@@ -1438,99 +1361,6 @@
 </div>
 
     
-
-
-<!-- Discount quick modal -->
-<div id="discount-modal" class="modal discount-modal" role="dialog" aria-modal="true" aria-labelledby="discount-modal-name" hidden>
-  <div class="modal-backdrop" data-dismiss="modal"></div>
-  <div class="modal-content discount-modal__content" role="document">
-    <button type="button" class="modal-close-floating" data-dismiss="modal" aria-label="بستن">
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
-      </svg>
-    </button>
-
-    <header class="discount-modal__header">
-      <div class="discount-modal__identity">
-        <div class="discount-modal__avatar" id="discount-modal-avatar">م</div>
-        <div>
-          <p class="eyebrow">تخفیف اختصاصی مشتری</p>
-          <h3 id="discount-modal-name">نام مشتری</h3>
-          <p class="discount-modal__phone" id="discount-modal-phone">۰۹۱۲۳۴۵۶۷۸۹</p>
-        </div>
-      </div>
-      <span class="discount-modal__badge is-empty" id="discount-modal-status">بدون تخفیف فعال</span>
-    </header>
-
-    <div class="discount-modal__summary" id="discount-modal-summary">
-      هنوز هیچ تخفیفی برای این مشتری ثبت نشده است. با چند کلیک تخفیف خوشامدگویی هدیه دهید.
-    </div>
-
-    <form id="discount-modal-form" class="discount-modal__form">
-      <div class="discount-modal__grid">
-        <div class="field-block">
-          <label class="field-label">نوع تخفیف</label>
-          <div class="discount-modal__toggle" role="radiogroup" aria-label="نوع تخفیف سریع">
-            <label class="chip">
-              <input type="radio" name="discount-modal-type" value="amount" checked>
-              مبلغ ثابت
-            </label>
-            <label class="chip chip-ghost">
-              <input type="radio" name="discount-modal-type" value="percent">
-              درصدی
-            </label>
-          </div>
-        </div>
-        <div class="field-block">
-          <label class="field-label">مبلغ / درصد</label>
-          <div class="input-with-icon discount-modal__amount-field" data-icon="amount">
-            <svg class="icon-amount" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-              <path d="M6 5h9.5c2 0 3.5 1.5 3.5 3.5S17.5 12 15.5 12H10c-2 0-3.5 1.5-3.5 3.5S8 19 10 19H18"/>
-              <path d="M10 2v20"/>
-            </svg>
-            <svg class="icon-percent" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-              <line x1="19" y1="5" x2="5" y2="19"/>
-              <circle cx="7" cy="7" r="2.5"/>
-              <circle cx="17" cy="17" r="2.5"/>
-            </svg>
-            <input type="number" id="discount-modal-amount" min="0" step="500" inputmode="numeric" placeholder="مثلاً ۵۰۰۰۰">
-          </div>
-        </div>
-      </div>
-
-      <div class="discount-modal__grid">
-        <div class="field-block">
-          <label class="field-label">مهلت استفاده</label>
-          <div class="discount-modal__duration" role="radiogroup" aria-label="مهلت تخفیف">
-            <label class="radio-pill">
-              <input type="radio" name="discount-modal-duration" value="today">امروز
-            </label>
-            <label class="radio-pill">
-              <input type="radio" name="discount-modal-duration" value="3d">۳ روز آینده
-            </label>
-            <label class="radio-pill">
-              <input type="radio" name="discount-modal-duration" value="week" checked>یک هفته
-            </label>
-          </div>
-        </div>
-        <div class="field-block">
-          <label class="field-label">پیام برای مشتری (اختیاری)</label>
-          <textarea id="discount-modal-note" rows="3" placeholder="مثلاً: این هدیه برای رزرو بعدی شماست"></textarea>
-        </div>
-      </div>
-
-      <div class="discount-modal__footer">
-        <div class="discount-modal__hint" id="discount-modal-hint">پس از ثبت، تخفیف بلافاصله فعال می‌شود.</div>
-        <div class="discount-modal__actions">
-          <button type="button" class="btn-secondary" data-dismiss="modal">انصراف</button>
-          <button type="submit" class="btn-primary">اعمال تخفیف</button>
-        </div>
-      </div>
-    </form>
-  </div>
-</div>
-
-
 
   <!-- === NEW: Service Management Drawer === -->
   <div id="service-drawer" class="drawer" role="dialog" aria-modal="true" aria-labelledby="service-drawer-title" hidden>
