@@ -6421,6 +6421,7 @@ renderCustomers(query = '') {
   updateGlobalDurationState(duration = 'today') {
     if (!this.globalDiscountCustomDateWrap) return;
     const isCustom = duration === 'custom';
+    this.globalDiscountCustomDateWrap.hidden = !isCustom;
     this.globalDiscountCustomDateWrap.classList.toggle('is-active', isCustom);
     if (isCustom && this.globalDiscountCustomDate && !this.globalDiscountCustomDate.value) {
       const base = new Date();
@@ -6440,7 +6441,7 @@ renderCustomers(query = '') {
     if (!this.globalDiscountStatus) return;
     const active = this.getGlobalDiscount();
     if (!active) {
-      this.globalDiscountStatus.textContent = '';
+      this.globalDiscountStatus.textContent = 'غیرفعال';
       this.globalDiscountStatus.classList.remove('is-active', 'is-visible');
       return;
     }

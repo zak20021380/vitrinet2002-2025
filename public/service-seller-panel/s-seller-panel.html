@@ -531,13 +531,120 @@
             </div>
           </header>
           <div class="search-section">
-            <div class="search-wrapper">
-              <svg class="search-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                <circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/>
-              </svg>
-              <input type="search" id="customer-search" class="search-input" placeholder="جستجوی نام، شماره تماس..." aria-label="جستجو در مشتریان">
+          <div class="search-wrapper">
+            <svg class="search-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/>
+            </svg>
+            <input type="search" id="customer-search" class="search-input" placeholder="جستجوی نام، شماره تماس..." aria-label="جستجو در مشتریان">
+          </div>
+        </div>
+
+        <section class="global-discount card" aria-labelledby="global-discount-title">
+          <div class="global-discount__header">
+            <div class="global-discount__intro">
+              <p class="eyebrow">اهدای تخفیف همگانی</p>
+              <h3 id="global-discount-title">برای همه مشتریان، یک هدیه خوشایند</h3>
+              <p class="muted">یک تخفیف همگانی تنظیم کنید تا هنگام رزرو، همه مشتریان از آن بهره‌مند شوند. این بخش برای موبایل بهینه شده و در چند ثانیه آماده می‌شود.</p>
+              <span id="global-discount-status" class="global-discount__status" aria-live="polite">بدون تخفیف فعال</span>
+            </div>
+            <div class="global-discount__highlights" aria-hidden="true">
+              <div class="gd-highlight">
+                <div class="gd-highlight__icon">🎁</div>
+                <div>
+                  <strong>هدیه همزمان به همه</strong>
+                  <p>به‌صورت خودکار برای همه مشتریان اعمال می‌شود.</p>
+                </div>
+              </div>
+              <div class="gd-highlight">
+                <div class="gd-highlight__icon">⏳</div>
+                <div>
+                  <strong>مهلت مشخص</strong>
+                  <p>تاریخ انقضا را دلخواه تعیین کنید.</p>
+                </div>
+              </div>
             </div>
           </div>
+
+          <form id="global-discount-form" class="global-discount__form">
+            <div class="global-discount__grid">
+              <div class="form-group">
+                <label class="form-label">نوع تخفیف</label>
+                <div class="discount-type-toggle">
+                  <label class="chip-selectable">
+                    <input type="radio" name="global-discount-type" value="amount" checked>
+                    مبلغی (تومان)
+                  </label>
+                  <label class="chip-selectable">
+                    <input type="radio" name="global-discount-type" value="percent">
+                    درصدی
+                  </label>
+                </div>
+              </div>
+
+              <div class="form-group discount-amount-field" id="global-discount-amount-field" data-icon="amount">
+                <label for="global-discount-amount" class="form-label">میزان تخفیف</label>
+                <div class="input-group">
+                  <input type="number" id="global-discount-amount" class="form-control" inputmode="decimal" min="0" step="500" placeholder="مثلاً ۲۰٬۰۰۰" required>
+                  <div class="input-icon icon-amount" aria-hidden="true">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1v22"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
+                  </div>
+                  <div class="input-icon icon-percent" aria-hidden="true">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="19" y1="5" x2="5" y2="19"/><circle cx="7.5" cy="7.5" r="2.5"/><circle cx="16.5" cy="16.5" r="2.5"/></svg>
+                  </div>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">مهلت استفاده</label>
+                <div class="discount-modal__duration">
+                  <label class="chip-selectable">
+                    <input type="radio" name="global-discount-duration" value="today" checked>
+                    تا پایان امروز
+                  </label>
+                  <label class="chip-selectable">
+                    <input type="radio" name="global-discount-duration" value="3d">
+                    سه روز آینده
+                  </label>
+                  <label class="chip-selectable">
+                    <input type="radio" name="global-discount-duration" value="week">
+                    یک هفته آینده
+                  </label>
+                  <label class="chip-selectable">
+                    <input type="radio" name="global-discount-duration" value="custom">
+                    تاریخ دلخواه
+                  </label>
+                </div>
+              </div>
+
+              <div class="form-group global-discount__custom" id="global-discount-custom-date-wrap" hidden>
+                <label for="global-discount-custom-date" class="form-label">تاریخ انقضا</label>
+                <input type="text" id="global-discount-custom-date" class="form-control persian-date-input" inputmode="numeric" placeholder="مثلاً ۱۴۰۴/۰۸/۲۵" autocomplete="off">
+              </div>
+
+              <div class="form-group">
+                <label for="global-discount-note" class="form-label">پیام کوتاه برای مشتریان</label>
+                <textarea id="global-discount-note" class="form-control" rows="2" placeholder="مثلاً: فقط تا آخر هفته معتبر است"></textarea>
+              </div>
+
+              <div class="form-group">
+                <label for="global-discount-coupon" class="form-label">کد تخفیف اختصاصی (اختیاری)</label>
+                <input type="text" id="global-discount-coupon" class="form-control" inputmode="text" placeholder="مثلاً HAPPY20">
+                <p class="help">در صورت نیاز برای پیگیری، یک کد کوتاه وارد کنید.</p>
+              </div>
+            </div>
+
+            <div class="global-discount__footer">
+              <div class="global-discount__hint">
+                <strong>فوری و هوشمند</strong>
+                <p>تخفیف همگانی به‌صورت خودکار روی رزروها اعمال می‌شود و هر زمان می‌توانید آن را لغو کنید.</p>
+              </div>
+              <div class="global-discount__actions">
+                <button type="button" class="btn-ghost" id="global-discount-clear">لغو تخفیف همگانی</button>
+                <button type="submit" class="btn-primary">فعال‌سازی تخفیف</button>
+              </div>
+            </div>
+          </form>
+        </section>
 
 <!-- مودال جزئیات مشتری VIP -->
 <div id="vip-customer-modal" class="vipc-modal" role="dialog" aria-modal="true" aria-labelledby="vipc-modal-title" hidden>
