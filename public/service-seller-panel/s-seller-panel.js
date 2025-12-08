@@ -6310,7 +6310,8 @@ renderCustomers(query = '') {
     const parsed = dateValue ? new Date(dateValue) : null;
     if (!parsed || Number.isNaN(parsed.getTime())) return '';
     const offsetDate = new Date(parsed.getTime() - parsed.getTimezoneOffset() * 60000);
-    return offsetDate.toISOString().slice(0, 10);
+    const formatter = new Intl.DateTimeFormat('fa-IR-u-ca-persian', { year: 'numeric', month: '2-digit', day: '2-digit' });
+    return formatter.format(offsetDate).replace(/\u200f/g, '');
   }
 
   formatToman(value) {
