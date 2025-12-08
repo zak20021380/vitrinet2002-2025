@@ -5814,6 +5814,8 @@ renderCustomers(query = '') {
     this.discountModalHint = document.getElementById('discount-modal-hint');
     this.discountModalTypeInputs = this.discountModal?.querySelectorAll('input[name="discount-modal-type"]') || [];
     this.discountModalDurationInputs = this.discountModal?.querySelectorAll('input[name="discount-modal-duration"]') || [];
+    this.discountModalCustomDateWrap = document.getElementById('discount-modal-custom-date');
+    this.discountModalExpiryInput = document.getElementById('discount-modal-expiry');
     this.discountModalCustomerId = '';
     this.discountModalCustomerName = '';
     this.discountModalCustomerPhone = '';
@@ -5839,6 +5841,14 @@ renderCustomers(query = '') {
           this.updateDiscountModalType(input.value);
         });
       });
+    }
+
+    if (this.discountModalDurationInputs?.length) {
+      this.discountModalDurationInputs.forEach(input => {
+        input.addEventListener('change', () => this.updateDiscountModalDuration(input.value));
+      });
+      const initialModalDuration = Array.from(this.discountModalDurationInputs).find(input => input.checked)?.value || 'week';
+      this.updateDiscountModalDuration(initialModalDuration);
     }
 
     if (this.discountModalForm) {
@@ -5987,10 +5997,18 @@ renderCustomers(query = '') {
         input.checked = input.value === value;
       });
     };
+    const expiryInputValue = this.formatDateInputValue(activeDiscount?.expiresAt);
+    const durationToSelect = activeDiscount?.expiresAt ? 'custom' : defaultDuration;
+
     setChecked(this.discountModalTypeInputs, typeToSelect);
-    setChecked(this.discountModalDurationInputs, defaultDuration);
+    setChecked(this.discountModalDurationInputs, durationToSelect);
+
+    if (this.discountModalExpiryInput) {
+      this.discountModalExpiryInput.value = expiryInputValue;
+    }
 
     this.updateDiscountModalType(typeToSelect);
+    this.updateDiscountModalDuration(durationToSelect);
 
     if (this.discountModalNote) {
       this.discountModalNote.value = activeDiscount?.note || '';
@@ -6034,6 +6052,16 @@ renderCustomers(query = '') {
     }
   }
 
+  updateDiscountModalDuration(mode = 'week') {
+    const showCustom = mode === 'custom';
+    if (this.discountModalCustomDateWrap) {
+      this.discountModalCustomDateWrap.hidden = !showCustom;
+    }
+    if (!showCustom && this.discountModalExpiryInput) {
+      this.discountModalExpiryInput.value = '';
+    }
+  }
+
   updateDiscountFieldType(type = 'amount') {
     const field = this.discountForm?.querySelector('.discount-amount-field');
     const isPercent = type === 'percent';
@@ -6073,8 +6101,13 @@ renderCustomers(query = '') {
     }
 
     const duration = Array.from(this.discountModalDurationInputs || []).find(input => input.checked)?.value || 'today';
+    const manualExpiry = duration === 'custom' ? (this.discountModalExpiryInput?.value || '') : '';
+    if (duration === 'custom' && !manualExpiry) {
+      UIComponents.showToast('تاریخ انقضا را وارد کنید.', 'error');
+      return;
+    }
     const note = (this.discountModalNote?.value || '').trim();
-    const expiresAt = this.calculateDiscountExpiry(duration);
+    const expiresAt = manualExpiry ? this.normalizeExpiry(manualExpiry, duration) : this.calculateDiscountExpiry(duration);
 
     const discount = {
       id: crypto.randomUUID ? crypto.randomUUID() : `disc-${Date.now()}`,
@@ -6085,7 +6118,7 @@ renderCustomers(query = '') {
       type,
       createdAt: new Date().toISOString(),
       expiresAt,
-      note: note || this.getDiscountDurationLabel(duration)
+      note: note || (manualExpiry ? this.formatCustomExpiryLabel(manualExpiry) : this.getDiscountDurationLabel(duration))
     };
 
     this.discountStore.upsert(discount);
@@ -6271,6 +6304,13 @@ renderCustomers(query = '') {
     }
     parsed.setHours(23, 59, 0, 0);
     return parsed.toISOString();
+  }
+
+  formatDateInputValue(dateValue) {
+    const parsed = dateValue ? new Date(dateValue) : null;
+    if (!parsed || Number.isNaN(parsed.getTime())) return '';
+    const offsetDate = new Date(parsed.getTime() - parsed.getTimezoneOffset() * 60000);
+    return offsetDate.toISOString().slice(0, 10);
   }
 
   formatToman(value) {

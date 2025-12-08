@@ -539,65 +539,6 @@
             </div>
           </div>
 
-
-
-<!-- ✅ VIP Stats Bar (زیر سرچ / بالای لیست) -->
-<section id="vip-stats" class="vip-stats-bar" role="group" aria-label="آمار مشتریان ویژه">
-  <button type="button" class="vip-chip" data-target="eligible" aria-pressed="false" title="رسیده به جایزه (قابل دریافت)">
-    <span class="label">واجد جایزه</span>
-    <span class="count" id="vip-count-eligible">۰</span>
-  </button>
-  <button type="button" class="vip-chip" data-target="oneaway" aria-pressed="false" title="یک قدم تا جایزه">
-    <span class="label">یک‌قدم تا جایزه</span>
-    <span class="count" id="vip-count-oneaway">۰</span>
-  </button>
-  <button type="button" class="vip-chip" data-target="claimed" aria-pressed="false" title="جایزه گرفته‌اند">
-    <span class="label">جایزه‌گرفته‌اند</span>
-    <span class="count" id="vip-count-claimed">۰</span>
-  </button>
-</section>
-
-<!-- ✅ پنل نام‌ها (جمع‌شونده و دسترس‌پذیر) -->
-<!-- ✅ VIP: پنل نام‌ها (جمع‌شونده) -->
-<section id="vip-stats-panel"
-         class="vip-panel-compact"
-         role="region"
-         aria-labelledby="vip-panel-title"
-         hidden
-         tabindex="-1">
-
-  <header class="vipc-header">
-    <div class="vipc-title-wrap">
-      <div class="vipc-badge" aria-hidden="true">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
-        </svg>
-      </div>
-      <div>
-        <h4 id="vip-panel-title" class="vipc-title">واجد جایزه</h4>
-        <div id="vip-panel-sub" class="vipc-sub">مشتری‌هایی که به حد نصاب رسیده‌اند</div>
-      </div>
-    </div>
-
-    <!-- دکمه بستن پنل -->
-    <button type="button" class="vipc-close" id="vip-close-panel" aria-label="بستن">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-        <line x1="18" y1="6" x2="6" y2="18"></line>
-        <line x1="6" y1="6" x2="18" y2="18"></line>
-      </svg>
-    </button>
-  </header>
-
-  <div class="vipc-body">
-    <div class="vipc-hint" id="vipc-hint">برای دیدن جزئیات، روی نام مشتری بزنید</div>
-
-    <!-- لیست نام‌ها: هر آیتم یک دکمه با عرضِ متن -->
-    <div id="vip-list" class="vipc-chips" role="list"><!-- با JS پر می‌شود --></div>
-
-    <div id="vip-empty" class="vipc-empty" hidden>فعلاً اسمی اینجا نیست.</div>
-  </div>
-</section>
-
 <!-- مودال جزئیات مشتری VIP -->
 <div id="vip-customer-modal" class="vipc-modal" role="dialog" aria-modal="true" aria-labelledby="vipc-modal-title" hidden>
   <div class="vipc-backdrop" data-close></div>
@@ -1353,14 +1294,114 @@
       </div>
     </div>
 
-    <div class="modal-actions">
+  <div class="modal-actions">
       <button type="button" class="btn-primary modal-close-btn-bottom" data-dismiss="modal">بستن</button>
     </div>
 
   </div>
 </div>
 
-    
+
+
+<!-- Quick exclusive discount modal -->
+<div id="discount-modal" class="modal discount-modal" role="dialog" aria-modal="true" aria-labelledby="discount-modal-title" hidden>
+  <div class="modal-backdrop" data-dismiss="modal"></div>
+  <div class="modal-content discount-modal__content" role="document">
+    <button type="button" class="modal-close-floating" data-dismiss="modal" aria-label="بستن">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+      </svg>
+    </button>
+
+    <div class="discount-modal__header">
+      <div class="discount-modal__identity">
+        <div id="discount-modal-avatar" class="discount-modal__avatar">م</div>
+        <div>
+          <h3 id="discount-modal-title" class="modal-title">اهدای تخفیف اختصاصی</h3>
+          <p id="discount-modal-name" class="discount-modal__name">—</p>
+          <p id="discount-modal-phone" class="discount-modal__phone">—</p>
+        </div>
+      </div>
+      <span id="discount-modal-status" class="discount-modal__badge">بدون تخفیف فعال</span>
+    </div>
+
+    <div id="discount-modal-summary" class="discount-modal__summary">
+      تخفیفی برای این مشتری ثبت نشده است. همین حالا یک پیشنهاد جذاب بدهید.
+    </div>
+
+    <form id="discount-modal-form" class="discount-modal__form">
+      <div class="discount-modal__grid">
+        <div class="form-group discount-modal__amount-field" data-icon="amount">
+          <label for="discount-modal-amount" class="form-label">مبلغ یا درصد</label>
+          <div class="input-group">
+            <input type="number" id="discount-modal-amount" class="form-control" inputmode="decimal" min="0" step="500" required>
+            <div class="input-icon icon-amount" aria-hidden="true">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1v22"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
+            </div>
+            <div class="input-icon icon-percent" aria-hidden="true">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="19" y1="5" x2="5" y2="19"/><circle cx="7.5" cy="7.5" r="2.5"/><circle cx="16.5" cy="16.5" r="2.5"/></svg>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">نوع تخفیف</label>
+          <div class="discount-modal__toggle">
+            <label class="chip-selectable">
+              <input type="radio" name="discount-modal-type" value="amount" checked>
+              مبلغی (تومان)
+            </label>
+            <label class="chip-selectable">
+              <input type="radio" name="discount-modal-type" value="percent">
+              درصدی
+            </label>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">مهلت استفاده</label>
+          <div class="discount-modal__duration">
+            <label class="chip-selectable">
+              <input type="radio" name="discount-modal-duration" value="today" checked>
+              تا پایان امروز
+            </label>
+            <label class="chip-selectable">
+              <input type="radio" name="discount-modal-duration" value="3d">
+              سه روز آینده
+            </label>
+            <label class="chip-selectable">
+              <input type="radio" name="discount-modal-duration" value="week">
+              یک هفته آینده
+            </label>
+            <label class="chip-selectable">
+              <input type="radio" name="discount-modal-duration" value="custom">
+              تاریخ دلخواه
+            </label>
+          </div>
+        </div>
+
+        <div class="form-group" id="discount-modal-custom-date" hidden>
+          <label for="discount-modal-expiry" class="form-label">تاریخ انقضا</label>
+          <input type="date" id="discount-modal-expiry" class="form-control" inputmode="numeric">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="discount-modal-note" class="form-label">توضیح اختیاری برای مشتری</label>
+        <textarea id="discount-modal-note" class="form-control" placeholder="مثلاً: فقط برای این هفته معتبر است..."></textarea>
+      </div>
+
+      <div class="discount-modal__footer">
+        <p id="discount-modal-hint" class="discount-modal__hint">پس از ثبت، تخفیف برای این مشتری فعال می‌شود.</p>
+        <div class="discount-modal__actions">
+          <button type="button" class="btn-secondary" data-dismiss="modal">انصراف</button>
+          <button type="submit" class="btn-primary">ثبت و ارسال تخفیف</button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+
 
   <!-- === NEW: Service Management Drawer === -->
   <div id="service-drawer" class="drawer" role="dialog" aria-modal="true" aria-labelledby="service-drawer-title" hidden>
