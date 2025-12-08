@@ -6233,14 +6233,14 @@ renderCustomers(query = '') {
 
   formatPersianDateMask(value = '') {
     const digitsOnly = this.normalizePersianDigits(value).replace(/\D/g, '').slice(0, 8);
-    const year = digitsOnly.slice(0, 4);
-    const month = digitsOnly.slice(4, 6);
-    const day = digitsOnly.slice(6, 8);
+    const day = digitsOnly.slice(0, 2);
+    const month = digitsOnly.slice(2, 4);
+    const year = digitsOnly.slice(4, 8);
     const parts = [];
 
-    if (year) parts.push(year);
-    if (month) parts.push(month);
     if (day) parts.push(day);
+    if (month) parts.push(month);
+    if (year) parts.push(year);
 
     return this.toPersianDigits(parts.join('/'));
   }
@@ -6285,10 +6285,13 @@ renderCustomers(query = '') {
       return Number.isNaN(d.getTime()) ? null : d;
     }
 
-    const match = normalized.match(/^(\d{4})[\/\-.](\d{1,2})[\/\-.](\d{1,2})$/);
+    const dayFirstMatch = normalized.match(/^(\d{1,2})[\/\-.](\d{1,2})[\/\-.](\d{2,4})$/);
+    const yearFirstMatch = normalized.match(/^(\d{4})[\/\-.](\d{1,2})[\/\-.](\d{1,2})$/);
+    const match = dayFirstMatch || yearFirstMatch;
     if (!match) return null;
 
-    const [_, yStr, mStr, dStr] = match;
+    const [_, first, second, third] = match;
+    const [dStr, mStr, yStr] = match === dayFirstMatch ? [first, second, third] : [third, second, first];
     const y = Number(yStr);
     const m = Number(mStr);
     const d = Number(dStr);
@@ -6342,7 +6345,14 @@ renderCustomers(query = '') {
     if (!parsed || Number.isNaN(parsed.getTime())) return '';
     const offsetDate = new Date(parsed.getTime() - parsed.getTimezoneOffset() * 60000);
     const formatter = new Intl.DateTimeFormat('fa-IR-u-ca-persian', { year: 'numeric', month: '2-digit', day: '2-digit' });
-    return formatter.format(offsetDate).replace(/\u200f/g, '');
+    const parts = formatter.formatToParts(offsetDate).reduce((acc, part) => {
+      if (part.type === 'day') acc.day = part.value;
+      if (part.type === 'month') acc.month = part.value;
+      if (part.type === 'year') acc.year = part.value;
+      return acc;
+    }, { day: '', month: '', year: '' });
+    const dayFirst = [parts.day, parts.month, parts.year].filter(Boolean).join('/');
+    return dayFirst.replace(/\u200f/g, '');
   }
 
   formatToman(value) {
