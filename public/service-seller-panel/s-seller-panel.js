@@ -5858,6 +5858,18 @@ renderCustomers(query = '') {
       });
     }
 
+    if (this.discountModalExpiryInput) {
+      this.discountModalExpiryInput.addEventListener('input', (e) => {
+        const input = e.target;
+        const formatted = this.formatPersianDateMask(input.value);
+        if (formatted !== input.value) {
+          input.value = formatted;
+          const cursorPos = formatted.length;
+          input.setSelectionRange(cursorPos, cursorPos);
+        }
+      });
+    }
+
     if (this.discountForm) {
       this.discountForm.addEventListener('submit', (e) => {
         e.preventDefault();
@@ -6206,12 +6218,31 @@ renderCustomers(query = '') {
     }
   }
 
+  toPersianDigits(value = '') {
+    const digits = ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹'];
+    return String(value).replace(/[0-9]/g, d => digits[Number(d)] ?? d);
+  }
+
   normalizePersianDigits(value = '') {
     const persianDigits = '۰۱۲۳۴۵۶۷۸۹';
     const arabicDigits = '٠١٢٣٤٥٦٧٨٩';
     return String(value)
       .replace(/[۰-۹]/g, d => persianDigits.indexOf(d))
       .replace(/[٠-٩]/g, d => arabicDigits.indexOf(d));
+  }
+
+  formatPersianDateMask(value = '') {
+    const digitsOnly = this.normalizePersianDigits(value).replace(/\D/g, '').slice(0, 8);
+    const year = digitsOnly.slice(0, 4);
+    const month = digitsOnly.slice(4, 6);
+    const day = digitsOnly.slice(6, 8);
+    const parts = [];
+
+    if (year) parts.push(year);
+    if (month) parts.push(month);
+    if (day) parts.push(day);
+
+    return this.toPersianDigits(parts.join('/'));
   }
 
   jalaliToGregorian(jy, jm, jd) {
