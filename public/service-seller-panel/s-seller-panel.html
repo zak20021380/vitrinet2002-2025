@@ -541,148 +541,75 @@
               <p class="view-subtitle">مدیریت اطلاعات مشتریان</p>
             </div>
           </header>
-          <section class="customer-discount-superbar card" aria-label="جستجو و تخفیف مشتریان">
-            <div class="superbar__search">
-              <div>
-                <p class="eyebrow">تخفیف شخصی</p>
-                <h3>مشتری را با نام یا شماره پیدا کنید</h3>
-                <p class="muted">فروشنده می‌تواند با یک جستجوی سریع، همان لحظه تخفیف اختصاصی را ثبت کند.</p>
+          
+          <section class="discount-overview card" aria-label="آمار کلی تخفیف‌ها">
+            <div class="discount-overview__header">
+              <div class="discount-overview__intro">
+                <p class="eyebrow">تصویر کلی تخفیف‌ها</p>
+                <h3>سلامت تخفیف‌ها در یک نگاه</h3>
+                <p class="muted">تعداد تخفیف‌های فعال، نزدیک‌ترین موعد انقضا و ارزش کل تخفیف‌های شما همیشه به‌روز نمایش داده می‌شود.</p>
               </div>
-              <div class="superbar__searchbox">
-                <div class="input-with-icon">
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                    <circle cx="11" cy="11" r="7"/><path d="M20 20 17 17"/>
-                  </svg>
-                  <input id="discount-quick-search" type="search" placeholder="مثلاً: نگار یا ۰۹۱۲..." aria-label="جستجوی سریع مشتری برای تخفیف" autocomplete="off" />
+              <div class="discount-overview__status">
+                <span class="status-dot"></span>
+                <div>
+                  <small>وضعیت فعلی</small>
+                  <strong id="discount-summary-status">بدون تخفیف فعال</strong>
                 </div>
-                <div id="discount-quick-results" class="discount-quick-results" role="list"></div>
               </div>
             </div>
-            <div class="superbar__broadcast">
-              <div class="broadcast__header">
-                <div>
-                  <p class="eyebrow">تخفیف همگانی</p>
-                  <h3>یک پیشنهاد برای همه مشتریان</h3>
-                  <p class="muted">در چند ثانیه یک درصد یا مبلغ مشخص را برای تمام مخاطبان فعال کنید.</p>
-                </div>
-                <div id="global-discount-status" class="broadcast__status" aria-live="polite"></div>
-              </div>
-              <form id="global-discount-form" class="broadcast__form" novalidate>
-                <div class="discount-type-toggle">
-                  <label class="chip">
-                    <input type="radio" name="global-discount-type" value="amount" checked>
-                    مبلغ (تومان)
-                  </label>
-                  <label class="chip chip-ghost">
-                    <input type="radio" name="global-discount-type" value="percent">
-                    درصدی
-                  </label>
-                </div>
-                <div class="broadcast__grid">
-                  <div id="global-discount-amount-field" class="input-with-icon discount-amount-field" data-icon="amount">
-                    <svg class="icon-amount" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                      <path d="M6 5h9.5c2 0 3.5 1.5 3.5 3.5S17.5 12 15.5 12H10c-2 0-3.5 1.5-3.5 3.5S8 19 10 19H18"/>
-                      <path d="M10 2v20"/>
-                    </svg>
-                    <svg class="icon-percent" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                      <line x1="19" y1="5" x2="5" y2="19"/>
-                      <circle cx="7" cy="7" r="2.5"/>
-                      <circle cx="17" cy="17" r="2.5"/>
-                    </svg>
-                    <input id="global-discount-amount" type="number" inputmode="numeric" min="0" step="500" placeholder="مثلاً ۱۰٬۰۰۰">
+            <div class="discount-overview__grid">
+              <article class="discount-metric">
+                <div class="metric-icon metric-icon--fire" aria-hidden="true">🔥</div>
+                <div class="metric-body">
+                  <p class="metric-label">تخفیف فعال</p>
+                  <div class="metric-value">
+                    <span id="discount-summary-active" class="metric-number">۰</span>
+                    <span class="metric-unit">مورد</span>
                   </div>
-                  <div class="broadcast__expiry" role="group" aria-labelledby="global-discount-expiry-title">
-                    <div class="broadcast__expiry-header">
-                      <p class="eyebrow">انقضای تخفیف</p>
-                      <h4 id="global-discount-expiry-title">مهلت پایان تخفیف همگانی</h4>
-                      <p class="muted">انتخاب کنید این پیشنهاد تا چه زمانی روی کارت مشتریان فعال بماند.</p>
-                    </div>
-                    <div class="broadcast__duration" role="radiogroup" aria-label="مهلت تخفیف همگانی">
-                      <label class="radio-pill">
-                        <input type="radio" name="global-discount-duration" value="today" checked>
-                        امروز (تا پایان روز)
-                      </label>
-                      <label class="radio-pill">
-                        <input type="radio" name="global-discount-duration" value="3d">
-                        ۳ روز آینده
-                      </label>
-                      <label class="radio-pill">
-                        <input type="radio" name="global-discount-duration" value="week">
-                        یک هفته کامل
-                      </label>
-                      <label class="radio-pill">
-                        <input type="radio" name="global-discount-duration" value="custom">
-                        تاریخ دلخواه فروشنده
-                      </label>
-                    </div>
-                    <div class="broadcast__custom-date" id="global-discount-custom-date-wrap">
-                      <div class="broadcast__custom-date-header">
-                        <div>
-                          <p class="eyebrow">ورود تاریخ شمسی</p>
-                          <h5>تعیین دقیق تاریخ انقضا</h5>
-                        </div>
-                        <span class="badge-soft">اختیاری</span>
-                      </div>
-                      <div class="input-with-icon">
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                          <rect x="3" y="4" width="18" height="18" rx="3"/>
-                          <line x1="16" y1="2" x2="16" y2="6"/>
-                          <line x1="8" y1="2" x2="8" y2="6"/>
-                          <line x1="3" y1="10" x2="21" y2="10"/>
-                        </svg>
-                        <input id="global-discount-custom-date" type="text" inputmode="numeric" placeholder="مثلاً ۱۴۰۳/۰۶/۱۵" aria-label="تاریخ شمسی دلخواه برای انقضای تخفیف">
-                      </div>
-                      <p class="muted field-hint">تاریخ را به شمسی وارد کنید (۱۴۰۳/۰۶/۱۵ یا 1403-06-15). زمان پایان به صورت خودکار ساعت ۲۳:۵۹ همان روز تنظیم می‌شود.</p>
-                    </div>
-                  </div>
+                  <p class="metric-hint">مجموع تخفیف‌های فردی و همگانی</p>
                 </div>
-                <div class="broadcast__coupon">
-                  <div class="broadcast__coupon-header">
+              </article>
+              <article class="discount-metric">
+                <div class="metric-icon metric-icon--time" aria-hidden="true">⏳</div>
+                <div class="metric-body">
+                  <p class="metric-label">نزدیک‌ترین انقضا</p>
+                  <div class="metric-value">
+                    <span id="discount-summary-next-expiry" class="metric-number">بدون موعد فعال</span>
+                  </div>
+                  <p class="metric-hint">تخفیف‌های منقضی امروز: <strong id="discount-summary-expiring">۰</strong></p>
+                </div>
+              </article>
+              <article class="discount-metric">
+                <div class="metric-icon metric-icon--value" aria-hidden="true">💰</div>
+                <div class="metric-body">
+                  <p class="metric-label">ارزش کل تخفیف</p>
+                  <div class="metric-value">
+                    <span id="discount-summary-total" class="metric-number">۰</span>
+                    <span class="metric-unit">تومان</span>
+                  </div>
+                  <p class="metric-hint">میانگین هر تخفیف: <strong id="discount-summary-average">۰</strong></p>
+                </div>
+              </article>
+              <article class="discount-metric">
+                <div class="metric-icon metric-icon--mix" aria-hidden="true">🤝</div>
+                <div class="metric-body">
+                  <p class="metric-label">نوع تخفیف‌ها</p>
+                  <div class="metric-value metric-value--split">
                     <div>
-                      <p class="eyebrow">کد تخفیف</p>
-                      <h4>کد اختصاصی برای همه مشتریان</h4>
+                      <span class="metric-number" id="discount-summary-global">۰</span>
+                      <small class="metric-chip">همگانی</small>
                     </div>
-                    <span class="badge-soft">اختیاری</span>
-                  </div>
-                  <div class="input-with-icon discount-coupon-field">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                      <rect x="3" y="3" width="18" height="18" rx="4" ry="4"/>
-                      <path d="M7 8h10M7 12h10M7 16h6"/>
-                    </svg>
-                    <input id="global-discount-coupon" type="text" placeholder="مثلاً AUTUMN-1403" aria-label="کد تخفیف همگانی">
-                  </div>
-                  <p class="muted field-hint">در صورت وارد کردن، این کد روی کارت تخفیف نمایش داده می‌شود تا مشتریان راحت‌تر از آن استفاده کنند.</p>
-                </div>
-                <div class="broadcast__note">
-                  <div class="input-with-icon broadcast-note-field">
-                    <div class="broadcast-note-field__icon" aria-hidden="true">
-                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M12 20h9"/><path d="M12 4h9"/><circle cx="4" cy="4" r="2"/><circle cx="4" cy="12" r="2"/><circle cx="4" cy="20" r="2"/>
-                      </svg>
-                    </div>
-                    <div class="broadcast-note-field__body">
-                      <div class="broadcast-note-field__header">
-                        <div>
-                          <p class="eyebrow">توضیح پیشنهادی</p>
-                          <h4>این تخفیف برای کدام خدمات است؟</h4>
-                        </div>
-                        <span class="badge-soft">اختیاری</span>
-                      </div>
-                      <textarea id="global-discount-note" rows="3" placeholder="مثلاً: فقط برای خدمات اصلاح و شستشو تا پایان هفته"></textarea>
-                      <p class="muted field-hint">این متن روی کارت تخفیف دیده می‌شود تا مشخص باشد تخفیف روی چه خدماتی اعمال می‌شود.</p>
+                    <div>
+                      <span class="metric-number" id="discount-summary-personal">۰</span>
+                      <small class="metric-chip">اختصاصی</small>
                     </div>
                   </div>
+                  <p class="metric-hint">ترکیب تخفیف‌های فعال شما</p>
                 </div>
-                <div class="broadcast__actions">
-                  <div>
-                    <button type="submit" class="btn-primary">ثبت تخفیف همگانی</button>
-                    <button type="button" id="global-discount-clear" class="btn-ghost" aria-label="حذف تخفیف همگانی فعال">لغو تخفیف همگانی</button>
-                  </div>
-                  <p class="muted">یک بار تعریف کنید؛ روی تمام کارت‌های مشتری نمایش داده می‌شود.</p>
-                </div>
-              </form>
+              </article>
             </div>
           </section>
+
           <div class="customer-hero card">
             <div class="customer-hero__intro">
               <p class="eyebrow">باشگاه مشتریان فروشنده</p>

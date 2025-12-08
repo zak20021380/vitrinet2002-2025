@@ -6489,6 +6489,19 @@ renderCustomers(query = '') {
     const amountOnly = active.filter(d => d.type !== 'percent');
     const totalValue = amountOnly.reduce((sum, d) => sum + (Number(d.amount) || 0), 0);
     const average = amountOnly.length ? totalValue / amountOnly.length : 0;
+    const activeGlobal = active.filter(d => d.isGlobal || d.customerId === this.GLOBAL_CUSTOMER_ID).length;
+    const personalCount = Math.max(0, active.length - activeGlobal);
+    const upcoming = active
+      .map(d => ({
+        date: new Date(d.expiresAt),
+        isGlobal: d.isGlobal || d.customerId === this.GLOBAL_CUSTOMER_ID
+      }))
+      .filter(item => !Number.isNaN(item.date?.getTime?.()))
+      .sort((a, b) => a.date - b.date)[0];
+    const nextExpiry = upcoming?.date;
+    const nextExpiryText = nextExpiry
+      ? `${UIComponents.formatRelativeDate(nextExpiry)}${upcoming.isGlobal ? ' • تخفیف همگانی' : ''}`
+      : 'بدون موعد فعال';
 
     const setStat = (id, value) => {
       const el = document.getElementById(id);
@@ -6499,12 +6512,30 @@ renderCustomers(query = '') {
       }
     };
 
+    const setText = (id, value) => {
+      const el = document.getElementById(id);
+      if (el) {
+        el.textContent = value;
+      }
+    };
+
     setStat('discount-active-count', active.length);
     setStat('discount-active-count-inline', active.length);
     setStat('discount-expiring-today', expiringToday);
     setStat('discount-expiring-inline', expiringToday);
     setStat('discount-total-value', totalValue);
     setStat('discount-average', average);
+    setStat('discount-summary-active', active.length);
+    setStat('discount-summary-expiring', expiringToday);
+    setStat('discount-summary-total', totalValue);
+    setStat('discount-summary-average', average);
+    setStat('discount-summary-global', activeGlobal);
+    setStat('discount-summary-personal', personalCount);
+
+    setText('discount-summary-next-expiry', nextExpiryText);
+    setText('discount-summary-status', active.length
+      ? `${this.formatNumber(active.length)} تخفیف فعال ${activeGlobal ? ' • شامل تخفیف همگانی' : ''}`.trim()
+      : 'بدون تخفیف فعال');
   }
 
   renderDiscounts() {
