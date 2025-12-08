@@ -321,41 +321,75 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 0.5rem;
-  padding: 0.6rem 1.1rem;
-  border-radius: 12px;
+  gap: 0.65rem;
+  padding: 0.75rem 1.15rem;
+  border-radius: 14px;
   border: 1px solid rgba(124, 131, 253, 0.18);
-  background: rgba(124, 131, 253, 0.07);
-  color: var(--text);
+  background: linear-gradient(135deg, rgba(124, 131, 253, 0.12) 0%, rgba(82, 183, 136, 0.1) 100%);
+  color: #111827;
   font-weight: 800;
-  font-size: 0.92rem;
+  font-size: 0.94rem;
   cursor: pointer;
-  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease, background 0.2s ease;
   white-space: nowrap;
-  box-shadow: 0 4px 18px rgba(124, 131, 253, 0.12);
+  box-shadow: 0 10px 28px rgba(124, 131, 253, 0.16);
+  backdrop-filter: blur(10px);
+  position: relative;
+  overflow: hidden;
 }
 
 .action-item:hover {
-  border-color: var(--primary);
-  background: linear-gradient(135deg, rgba(124, 131, 253, 0.15) 0%, rgba(82, 183, 136, 0.15) 100%);
-  transform: translateY(-1px);
-  box-shadow: 0 10px 24px rgba(124, 131, 253, 0.16);
+  border-color: rgba(124, 131, 253, 0.45);
+  background: linear-gradient(135deg, rgba(124, 131, 253, 0.2) 0%, rgba(82, 183, 136, 0.18) 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 14px 30px rgba(124, 131, 253, 0.2);
 }
 
 .action-item:active {
   transform: translateY(0);
 }
 
-.action-item svg {
+.action-item:focus-visible {
+  outline: 2px solid rgba(124, 131, 253, 0.55);
+  outline-offset: 3px;
+}
+
+.action-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.8);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.7), 0 6px 18px rgba(124, 131, 253, 0.18);
+}
+
+.action-icon svg {
   width: 18px;
   height: 18px;
   stroke-width: 2.5;
+  color: var(--primary);
 }
 
-.action-item span {
+.action-item .action-label {
   display: inline-flex;
   align-items: center;
   gap: 0.35rem;
+}
+
+.address-icon {
+  background: linear-gradient(135deg, rgba(124, 131, 253, 0.12), rgba(82, 183, 136, 0.12));
+}
+
+.report-icon {
+  background: linear-gradient(135deg, rgba(255, 182, 119, 0.2), rgba(255, 255, 255, 0.85));
+  color: #d97706;
+}
+
+.rating-icon {
+  background: linear-gradient(135deg, rgba(255, 221, 87, 0.25), rgba(255, 255, 255, 0.9));
+  color: #eab308;
 }
 
 .rating-count-pill {
@@ -364,12 +398,12 @@
   justify-content: center;
   padding: 0.15rem 0.55rem;
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.45);
-  color: #374151;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.85), rgba(124, 131, 253, 0.14));
+  color: #1f2937;
   font-size: 0.76rem;
   font-weight: 800;
-  border: 1px solid rgba(124, 131, 253, 0.18);
-  box-shadow: 0 8px 18px rgba(124, 131, 253, 0.12);
+  border: 1px solid rgba(124, 131, 253, 0.28);
+  box-shadow: 0 8px 18px rgba(124, 131, 253, 0.14);
 }
 
 .rating-count-pill span {
@@ -548,20 +582,28 @@
   .action-item {
     width: 100%;
     justify-content: flex-start;
-    padding: 0.75rem 1rem;
+    padding: 0.85rem 1rem;
     border-radius: 12px;
-    border: none;
-    background: rgba(124, 131, 253, 0.05);
+    border: 1px solid rgba(124, 131, 253, 0.16);
+    background: linear-gradient(135deg, rgba(124, 131, 253, 0.12) 0%, rgba(82, 183, 136, 0.08) 100%);
+    box-shadow: 0 10px 24px rgba(124, 131, 253, 0.12);
   }
 
-  .action-item span {
-    display: inline;
+  .action-item .action-label,
+  .action-item .rating-count-pill {
+    display: inline-flex;
   }
 
   .action-item:hover {
-    background: var(--primary);
+    background: linear-gradient(135deg, rgba(124, 131, 253, 0.24), rgba(82, 183, 136, 0.2));
     transform: translateX(4px);
-    box-shadow: 0 2px 8px rgba(124, 131, 253, 0.2);
+    box-shadow: 0 6px 12px rgba(124, 131, 253, 0.2);
+    color: #0f172a;
+  }
+
+  .action-icon {
+    width: 32px;
+    height: 32px;
   }
 }
 
@@ -794,25 +836,31 @@
     <!-- Navigation / Actions -->
     <nav class="header-actions" id="headerActions" aria-label="منوی اصلی">
       <button id="addressBtn" class="action-item" aria-label="مشاهده آدرس فروشگاه" type="button" data-open="addressModal">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
-          <circle cx="12" cy="10" r="3"/>
-        </svg>
-        <span>آدرس</span>
+        <span class="action-icon address-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+            <circle cx="12" cy="10" r="3"/>
+          </svg>
+        </span>
+        <span class="action-label">آدرس</span>
       </button>
       <button id="reportBtn" class="action-item" aria-label="ثبت گزارش تخلف" type="button" data-open="reportModal">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
-          <circle cx="12" cy="12" r="10"/>
-          <line x1="12" y1="8" x2="12" y2="12"/>
-          <line x1="12" y1="16" x2="12.01" y2="16"/>
-        </svg>
-        <span>گزارش</span>
+        <span class="action-icon report-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"/>
+            <line x1="12" y1="8" x2="12" y2="12"/>
+            <line x1="12" y1="16" x2="12.01" y2="16"/>
+          </svg>
+        </span>
+        <span class="action-label">گزارش</span>
       </button>
       <button id="rateShow" class="action-item" aria-label="مشاهده و ثبت امتیاز" type="button">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
-          <polygon points="12 2 15 9 22 9 17 14 19 21 12 17 5 21 7 14 2 9 9 9 12 2"/>
-        </svg>
-        <span><span id="shop-rating">4.8</span> امتیاز</span>
+        <span class="action-icon rating-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+            <polygon points="12 2 15 9 22 9 17 14 19 21 12 17 5 21 7 14 2 9 9 9 12 2"/>
+          </svg>
+        </span>
+        <span class="action-label"><span id="shop-rating">4.8</span> امتیاز</span>
         <span class="rating-count-pill"><span id="rating-count">0</span> رای</span>
       </button>
     </nav>
