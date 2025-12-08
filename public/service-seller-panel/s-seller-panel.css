@@ -1942,6 +1942,43 @@ button:disabled, .btn:disabled {
   .customer-card__top { grid-template-columns: 1fr; }
   .customer-discount-superbar { grid-template-columns: 1fr; }
 }
+
+/* Mobile-first refinements for customer area */
+@media (max-width: 768px) {
+  .customer-hero {
+    padding: 16px;
+    gap: 12px;
+    background: radial-gradient(circle at 12% 16%, rgba(10,132,255,0.12), transparent 38%),
+      radial-gradient(circle at 86% 6%, rgba(191,90,242,0.12), transparent 28%),
+      var(--c-bg-tertiary);
+  }
+  .customer-hero__intro h3 { font-size: 1.1rem; }
+  .customer-hero__stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .hero-stat { text-align: center; padding: 10px; border-radius: 14px; }
+
+  .customer-toolbar { position: sticky; top: 64px; z-index: 2; padding: 10px; margin: 12px -10px; background: linear-gradient(180deg, rgba(24,24,27,0.94), rgba(24,24,27,0.78)); backdrop-filter: blur(8px); }
+  .customer-filters { width: 100%; justify-content: space-between; gap: 6px; }
+  .customer-filter { flex: 1 1 auto; text-align: center; padding: 10px 0; font-size: 0.95rem; }
+
+  .customers-layout { gap: 14px; }
+  .customer-card { padding: 14px; border-radius: 16px; box-shadow: 0 12px 30px rgba(0,0,0,0.26); }
+  .customer-card__top { grid-template-columns: auto 1fr; gap: 10px; align-items: center; }
+  .customer-info { display: grid; gap: 6px; }
+  .customer-name-row { flex-wrap: nowrap; justify-content: space-between; gap: 6px; }
+  .customer-actions { grid-column: 1 / -1; width: 100%; }
+  .customer-actions .btn-secondary { width: 100%; justify-content: center; }
+  .customer-tags { gap: 6px; }
+  .customer-chip { padding: 8px 10px; font-size: 0.82rem; }
+
+  .customer-card__stats { grid-template-columns: 1fr; gap: 8px; }
+  .stat-chip { padding: 10px 12px; border-radius: 12px; }
+  .discount-state { flex-direction: column; align-items: flex-start; gap: 6px; }
+  .discount-value { font-size: 1.1rem; }
+  .discount-actions { width: 100%; justify-content: flex-start; }
+  .discount-pill { font-size: 0.82rem; }
+
+  .customers-discount { border-radius: 16px; }
+}
 .reviews-container { display: flex; flex-direction: column; gap: var(--space-3); }
 .review-card { display: flex; flex-direction: column; gap: var(--space-3); }
 .review-header { display: flex; justify-content: space-between; align-items: center; }
