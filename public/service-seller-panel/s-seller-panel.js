@@ -2389,12 +2389,12 @@ function buildSampleCustomers() {
   };
 
   return [
-    { id: 'c-101', name: 'امیر محمدی', phone: '۰۹۱۲۳۴۵۶۷۸۹', bookingsCount: 12, reviewCount: 4, joinedAt: daysAgo(320), lastReservation: daysAgo(3), pendingRewards: 1 },
+    { id: 'c-101', name: 'امیر محمدی', phone: '۰۹۱۲۳۴۵۶۷۸۹', bookingsCount: 12, reviewCount: 4, joinedAt: daysAgo(320), lastReservation: daysAgo(3) },
     { id: 'c-102', name: 'نسترن حیدری', phone: '۰۹۳۵۴۳۲۱۵۴۵', bookingsCount: 7, reviewCount: 2, joinedAt: daysAgo(45), lastReservation: daysAgo(9), vipCurrent: 2 },
     { id: 'c-103', name: 'حسین مرادی', phone: '۰۹۱۳۳۳۳۳۳۳۳', bookingsCount: 3, reviewCount: 1, joinedAt: daysAgo(18), lastReservation: daysAgo(2) },
     { id: 'c-104', name: 'شیما مقدم', phone: '۰۹۱۲۴۴۴۴۳۳۳', bookingsCount: 15, reviewCount: 6, joinedAt: daysAgo(600), lastReservation: daysAgo(40), rewardCount: 3 },
     { id: 'c-105', name: 'سینا احدی', phone: '۰۹۰۱۱۲۲۲۳۳۴', bookingsCount: 1, reviewCount: 0, joinedAt: daysAgo(10), lastReservation: daysAgo(8) },
-    { id: 'c-106', name: 'الهام کاظمی', phone: '۰۹۱۹۸۷۶۵۴۳۲', bookingsCount: 9, reviewCount: 5, joinedAt: daysAgo(120), lastReservation: daysAgo(14), pendingRewards: 2 }
+    { id: 'c-106', name: 'الهام کاظمی', phone: '۰۹۱۹۸۷۶۵۴۳۲', bookingsCount: 9, reviewCount: 5, joinedAt: daysAgo(120), lastReservation: daysAgo(14) }
   ];
 }
 
@@ -2443,7 +2443,6 @@ async function loadCustomers() {
       joinedAt,
       bookingsCount,
       reviewCount,
-      pendingRewards: c.pending || 0,
       vipCurrent: c.completed || 0,
       rewardCount: c.claimed || 0
       };
@@ -2457,24 +2456,6 @@ async function loadCustomers() {
   } catch (err) {
     console.error('loadCustomers', err);
     applyCustomers(buildSampleCustomers());
-  }
-}
-
-// Handle approve/reject reward actions
-async function handleRewardAction(userId, action) {
-  try {
-    await fetch(`${API_BASE}/api/loyalty/requests/resolve`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      credentials: 'include',
-      body: JSON.stringify({ userId, action })
-    });
-    if (typeof UIComponents !== 'undefined' && UIComponents.showToast) {
-      UIComponents.showToast(action === 'approve' ? 'جایزه تایید شد' : 'درخواست رد شد', action === 'approve' ? 'success' : 'error');
-    }
-    await loadCustomers();
-  } catch (err) {
-    console.error('handleRewardAction', err);
   }
 }
 
@@ -5535,18 +5516,6 @@ initCustomerClickHandlers() {
   const customersList = document.getElementById('customers-list');
   if (customersList) {
     customersList.addEventListener('click', (e) => {
-      const approveBtn = e.target.closest('.reward-approve');
-      const rejectBtn  = e.target.closest('.reward-reject');
-      if (approveBtn) {
-        handleRewardAction(approveBtn.dataset.userId, 'approve');
-        e.stopPropagation();
-        return;
-      }
-      if (rejectBtn) {
-        handleRewardAction(rejectBtn.dataset.userId, 'reject');
-        e.stopPropagation();
-        return;
-      }
       const discountModalBtn = e.target.closest('[data-action="open-discount-modal"]');
       if (discountModalBtn) {
         this.openCustomerDiscountModal({
@@ -5760,7 +5729,6 @@ renderCustomers(query = '') {
     const joinedLabel = UIComponents.formatRelativeDate(c.joinedAt || c.lastReservation);
     const bookingsCount = this.formatNumber(c.bookingsCount ?? c.vipCurrent ?? 0);
     const reviewCount = this.formatNumber(c.reviewCount ?? c.rewardCount ?? 0);
-    const pending = this.formatNumber(c.pendingRewards || 0);
     const tier = (c.bookingsCount ?? 0) >= 10 ? 'وفادار' : 'فعال';
     const discount = activeDiscounts.get(String(c.id)) || globalDiscount;
     const isGlobalDiscount = !!discount && (discount.isGlobal || discount.customerId === this.GLOBAL_CUSTOMER_ID);
@@ -5807,10 +5775,6 @@ renderCustomers(query = '') {
             <span>نظرات</span>
             <strong>${reviewCount}</strong>
           </div>
-          <div class="stat-chip">
-            <span>درخواست جایزه</span>
-            <strong>${pending}</strong>
-          </div>
           <div class="stat-chip stat-chip--accent stat-chip--discount">
             <div class="discount-state">
               <span class="discount-pill ${hasDiscount ? 'is-active' : 'is-empty'}">${discountLabel}</span>
@@ -5822,14 +5786,6 @@ renderCustomers(query = '') {
             </div>
           </div>
         </div>
-        ${c.pendingRewards ? `
-        <div class="customer-reward">
-          <span class="status-badge status-pending">درخواست جایزه (${c.pendingRewards})</span>
-          <div class="reward-actions">
-            <button type="button" class="btn-success reward-approve" data-user-id="${c.id}">تایید</button>
-            <button type="button" class="btn-danger reward-reject" data-user-id="${c.id}">رد</button>
-          </div>
-        </div>` : ''}
       </article>
     `;
   }).join('');
