@@ -5763,7 +5763,7 @@ renderCustomers(query = '') {
             </div>
           </div>
           <div class="customer-actions">
-            <button type="button" class="btn-secondary" data-action="open-discount-modal" data-customer-id="${escapeHtml(c.id)}" data-customer-name="${escapeHtml(c.name)}" data-customer-phone="${escapeHtml(c.phone)}">تخفیف اختصاصی</button>
+            <button type="button" class="btn-secondary btn-exclusive-discount" data-action="open-discount-modal" data-customer-id="${escapeHtml(c.id)}" data-customer-name="${escapeHtml(c.name)}" data-customer-phone="${escapeHtml(c.phone)}">اهدای تخفیف اختصاصی</button>
           </div>
         </div>
         <div class="customer-card__stats">

@@ -1889,6 +1889,35 @@ button:disabled, .btn:disabled {
 .link-muted { color: var(--c-text-secondary); }
 .link-btn { background: none; color: var(--c-primary); border: none; cursor: pointer; font-weight: 600; }
 .customer-actions .btn-secondary { padding: 10px 14px; }
+.btn-exclusive-discount {
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(120deg, #fde68a, #fbbf24, #f97316);
+  color: #1f2937;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  box-shadow: 0 12px 28px rgba(249, 115, 22, 0.28), 0 0 0 1px rgba(0, 0, 0, 0.1);
+  font-weight: 800;
+  letter-spacing: 0.1px;
+  transition: transform 120ms ease, box-shadow 160ms ease;
+}
+.btn-exclusive-discount::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 18% 20%, rgba(255, 255, 255, 0.32), transparent 32%),
+    radial-gradient(circle at 82% 0%, rgba(255, 255, 255, 0.24), transparent 26%);
+  opacity: 0.9;
+  pointer-events: none;
+}
+.btn-exclusive-discount:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 16px 36px rgba(249, 115, 22, 0.34), 0 0 0 1px rgba(0, 0, 0, 0.12);
+}
+.btn-exclusive-discount:focus-visible {
+  outline: 3px solid rgba(249, 115, 22, 0.35);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.28), 0 12px 28px rgba(249, 115, 22, 0.32);
+}
 .discount-type-toggle { display: flex; gap: 8px; flex-wrap: wrap; }
 .discount-type-toggle input { margin-left: 6px; }
 .grid-2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; }
