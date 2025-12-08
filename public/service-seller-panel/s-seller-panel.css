@@ -6502,15 +6502,48 @@ body.has-overlay { overflow: hidden; }
   width: 36px; height: 36px; margin-bottom: 8px; opacity: .7;
 }
 
-/* Small screens: turn into full-width sheet under header */
-@media (max-width: 480px) {
+/* Small screens: responsive, fully visible notification sheet */
+@media (max-width: 640px) {
+  .notification-container {
+    position: static;
+  }
+
   .notification-panel {
     position: fixed;
-    inset-inline: 12px;
-    inset-block-start: max(60px,  env(safe-area-inset-top));
+    inset-inline: max(12px, env(safe-area-inset-left) + 8px) max(12px, env(safe-area-inset-right) + 8px);
+    inset-block-start: calc(var(--header-height, 60px) + max(8px, env(safe-area-inset-top)));
     inline-size: auto;
-    max-block-size: calc(80vh - env(safe-area-inset-bottom));
-    border-radius: 16px;
+    max-inline-size: none;
+    max-block-size: min(78vh, calc(100vh - calc(var(--header-height, 60px) + 24px) - env(safe-area-inset-bottom)));
+    border-radius: 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    transform-origin: top center;
+    box-shadow:
+      0 16px 40px rgba(0, 0, 0, 0.45),
+      0 0 0 1px rgba(255, 255, 255, 0.04);
+  }
+
+  .notif-header {
+    position: sticky;
+    inset-block-start: 0;
+    z-index: 1;
+  }
+
+  .notification-list {
+    flex: 1;
+    max-block-size: none;
+    padding: 10px 12px 14px;
+  }
+
+  .notif-footer {
+    position: sticky;
+    inset-block-end: 0;
+    padding: 10px 12px calc(12px + env(safe-area-inset-bottom));
+    background: linear-gradient(180deg, rgba(28, 28, 30, 0.92), rgba(28, 28, 30, 0.98));
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    backdrop-filter: blur(8px);
   }
 }
 
