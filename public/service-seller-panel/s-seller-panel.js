@@ -6233,14 +6233,14 @@ renderCustomers(query = '') {
 
   formatPersianDateMask(value = '') {
     const digitsOnly = this.normalizePersianDigits(value).replace(/\D/g, '').slice(0, 8);
-    const day = digitsOnly.slice(0, 2);
-    const month = digitsOnly.slice(2, 4);
-    const year = digitsOnly.slice(4, 8);
+    const year = digitsOnly.slice(0, 4);
+    const month = digitsOnly.slice(4, 6);
+    const day = digitsOnly.slice(6, 8);
     const parts = [];
 
-    if (day) parts.push(day);
-    if (month) parts.push(month);
     if (year) parts.push(year);
+    if (month) parts.push(month);
+    if (day) parts.push(day);
 
     return this.toPersianDigits(parts.join('/'));
   }
