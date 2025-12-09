@@ -69,6 +69,93 @@ const escapeHtml = (str = '') => String(str).replace(/[&<>"']/g, (char) => ({
     activeType: null
   };
 
+  const toMidnight = (dateLike) => {
+    const date = new Date(dateLike);
+    if (Number.isNaN(date)) return null;
+    date.setHours(0, 0, 0, 0);
+    return date;
+  };
+
+  /**
+   * Checkpoint & Cycle logic (decouples status count from weekly cycle)
+   * Input: lastLoginDate, currentStreak, userPoints (plus optional freeze)
+   * Output: { currentStreak, visualCycle, weekProgress, isFrozen, message, softPenalty }
+   */
+  const evaluateCheckpointStreak = ({
+    lastLoginDate,
+    currentStreak = 0,
+    userPoints = 0,
+    pendingWeekPoints = 0,
+    freezeUsed = false,
+    now = new Date()
+  }) => {
+    const today = toMidnight(now);
+    const lastLogin = lastLoginDate ? toMidnight(lastLoginDate) : null;
+    const daysDiff = lastLogin ? Math.floor((today - lastLogin) / 86_400_000) : Infinity;
+
+    let nextStreak = currentStreak;
+    let message = 'امروز ثبت شد و زنجیره فعال ماند.';
+    let softPenalty = 0;
+    let isFrozen = false;
+
+    if (daysDiff === 1) {
+      nextStreak = currentStreak + 1;
+      message = 'یک قدم دیگر به جایزه هفتگی نزدیک شدی!';
+    } else if (daysDiff > 1) {
+      if (freezeUsed) {
+        isFrozen = true;
+        message = 'آیتم استریک فریز استفاده شد و زنجیره حفظ گردید.';
+      } else {
+        const checkpoint = Math.floor(currentStreak / 7) * 7;
+        nextStreak = checkpoint;
+        if (pendingWeekPoints > 0 && checkpoint < currentStreak) {
+          softPenalty = pendingWeekPoints;
+          userPoints = Math.max(0, userPoints - pendingWeekPoints);
+        }
+        message = checkpoint
+          ? `استریک به آخرین چک‌پوینت ${checkpoint} روزه برگشت. ${softPenalty ? 'امتیازهای در انتظار این هفته سوزانده شد.' : ''}`
+          : 'هنوز به چک‌پوینت نرسیدی؛ استریک از صفر شروع می‌شود.';
+      }
+    }
+
+    const visualCycle = nextStreak % 7;
+    const weekProgress = visualCycle;
+    const checkpointReached = nextStreak > 0 && nextStreak % 7 === 0;
+
+    return {
+      currentStreak: nextStreak,
+      totalDays: nextStreak,
+      visualCycle,
+      weekProgress,
+      checkpointReached,
+      isFrozen,
+      message,
+      softPenalty,
+      userPoints
+    };
+  };
+
+  const createWeeklyDayState = (progress) => {
+    const labels = ['ش', 'ی', 'د', 'س', 'چ', 'پ', 'ج'];
+    return labels.map((label, idx) => {
+      const status = idx < progress ? 'hit' : 'pending';
+      return { label, status };
+    });
+  };
+
+  const streakSnapshot = evaluateCheckpointStreak({
+    lastLoginDate: new Date(Date.now() - 26 * 60 * 60 * 1000), // دیروز - نمایش رشد استریک
+    currentStreak: 105,
+    userPoints: 940,
+    pendingWeekPoints: 35,
+    freezeUsed: false
+  });
+
+  const daysToNextCheckpoint = streakSnapshot.checkpointReached ? 7 : 7 - streakSnapshot.weekProgress;
+  const nextRewardCopy = streakSnapshot.checkpointReached
+    ? 'چک‌پوینت فعال شد؛ چرخه جدید شروع شده است'
+    : `${daysToNextCheckpoint} روز تا چک‌پوینت بعدی`;
+
   const sheetData = {
     wallet: {
       balance: '۳٬۵۰۰٬۰۰۰ تومان',
@@ -83,21 +170,32 @@ const escapeHtml = (str = '') => String(str).replace(/[&<>"']/g, (char) => ({
       ]
     },
     streak: {
-      progress: 78,
+      totalDays: streakSnapshot.totalDays,
+      weekProgress: streakSnapshot.weekProgress,
+      visualCycle: streakSnapshot.visualCycle,
+      checkpointReached: streakSnapshot.checkpointReached,
+      progress: Math.round((streakSnapshot.weekProgress / 7) * 100),
       freezeCost: '۱۲۰ امتیاز',
-      nextReward: '۲۵ امتیاز وفاداری تا جایزه بعدی',
-      rules: 'هر روز حداقل یک نوبت تأیید‌شده داشته باشید تا استریک حفظ شود. یک روز تاخیر باعث از دست رفتن زنجیره می‌شود.',
-      days: [
-        { label: 'ش', hit: true },
-        { label: 'ی', hit: true },
-        { label: 'د', hit: true },
-        { label: 'س', hit: false },
-        { label: 'چ', hit: true },
-        { label: 'پ', hit: true },
-        { label: 'ج', hit: true }
-      ]
+      nextReward: nextRewardCopy,
+      rules: 'هر ۷ روز یک چک‌پوینت ذخیره می‌شود. با از دست دادن روز، زنجیره به آخرین چک‌پوینت برمی‌گردد مگر اینکه استریک فریز فعال باشد.',
+      days: createWeeklyDayState(streakSnapshot.weekProgress),
+      message: streakSnapshot.message,
+      softPenalty: streakSnapshot.softPenalty,
+      isFrozen: streakSnapshot.isFrozen
     }
   };
+
+  const updateStreakCard = () => {
+    const streakEl = document.getElementById('daily-streak');
+    if (!streakEl) return;
+    streakEl.textContent = `${sheetData.streak.totalDays} روز متوالی`;
+    const streakCard = streakEl.closest('.streak-card');
+    if (streakCard && sheetData.streak.checkpointReached) {
+      streakCard.classList.add('has-checkpoint');
+    }
+  };
+
+  updateStreakCard();
 
   const closeBottomSheet = () => {
     if (!bottomSheet.root) return;
@@ -170,16 +268,40 @@ const escapeHtml = (str = '') => String(str).replace(/[&<>"']/g, (char) => ({
     const data = sheetData.streak;
     bottomSheet.title.textContent = 'استریک روزانه';
 
-    const dayMarkup = data.days.map((day) => `
-      <div class="streak-day ${day.hit ? 'is-hit' : 'is-missed'}" aria-label="${day.label} ${day.hit ? 'فعال' : 'از دست رفته'}">
-        <div class="streak-day__circle">${day.hit ? '✔' : '✕'}</div>
-        <span>${day.label}</span>
-      </div>
-    `).join('');
+    const dayMarkup = data.days.map((day) => {
+      const statusClass = day.status === 'hit' ? 'is-hit' : day.status === 'missed' ? 'is-missed' : 'is-pending';
+      const symbol = day.status === 'hit' ? '✔' : day.status === 'missed' ? '✕' : '•';
+      const stateLabel = day.status === 'hit' ? 'فعال' : day.status === 'missed' ? 'از دست رفته' : 'در انتظار';
+      return `
+        <div class="streak-day ${statusClass}" aria-label="${day.label} ${stateLabel}">
+          <div class="streak-day__circle">${symbol}</div>
+          <span>${day.label}</span>
+        </div>
+      `;
+    }).join('');
 
     bottomSheet.content.innerHTML = `
+      <div class="sheet-section streak-summary">
+        ${data.totalDays > 7 ? `
+          <div class="streak-total" aria-label="کل روزهای متوالی">
+            <span class="streak-total__label">کل استریک</span>
+            <div class="streak-total__value">${data.totalDays} روز</div>
+            ${data.checkpointReached ? '<span class="checkpoint-badge" role="status">چک‌پوینت فعال</span>' : ''}
+          </div>
+        ` : ''}
+        <div class="streak-week" aria-label="چرخه هفتگی">
+          <span class="streak-week__label">هفته جاری</span>
+          <div class="streak-week__value">${data.weekProgress}/7</div>
+          <span class="streak-week__hint">نمایش چرخه هفت‌روزه</span>
+        </div>
+      </div>
+
+      <p class="sheet-note sheet-note--accent">${data.message}</p>
+      ${data.softPenalty ? `<p class="sheet-note sheet-note--warning">${data.softPenalty} امتیاز وفاداری این هفته سوزانده شد.</p>` : ''}
+      ${data.isFrozen ? '<p class="sheet-note">استریک فریز فعال است و زنجیره از دست نمی‌رود.</p>' : ''}
+
       <div class="sheet-section">
-        <h4 class="sheet-section__title">۷ روز اخیر</h4>
+        <h4 class="sheet-section__title">پیشرفت این هفته</h4>
         <div class="streak-calendar" role="list">${dayMarkup}</div>
       </div>
 
