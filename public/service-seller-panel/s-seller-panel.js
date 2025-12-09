@@ -205,8 +205,7 @@ const escapeHtml = (str = '') => String(str).replace(/[&<>"']/g, (char) => ({
       ],
       earners: [
         { icon: '🔥', title: 'فعالیت روزانه و حفظ استریک', description: 'با حضور مداوم اعتبار هدیه بگیر.' },
-        { icon: '👥', title: 'دعوت از دوستان همکار', description: 'با هر دعوت موفق، اعتبار رایگان اضافه می‌شود.' },
-        { icon: '💳', title: 'خرید مستقیم اعتبار', description: 'هر زمان خواستی موجودی را سریع شارژ کن.' }
+        { icon: '👥', title: 'دعوت از دوستان همکار', description: 'با هر دعوت موفق، اعتبار رایگان اضافه می‌شود.' }
       ]
     },
     streak: {
@@ -264,24 +263,6 @@ const escapeHtml = (str = '') => String(str).replace(/[&<>"']/g, (char) => ({
           <p class="wallet-sheet__badge">${data.note}</p>
         </div>
 
-        <div class="wallet-sheet__section" aria-label="کجا خرجش کنم؟">
-          <div class="wallet-sheet__section-heading">
-            <h4 class="wallet-sheet__section-title">کجا خرجش کنم؟</h4>
-            <p class="wallet-sheet__section-subtitle">چند پیشنهاد فوری برای خرج اعتبار داخل اپ</p>
-          </div>
-          <div class="wallet-sheet__spend-grid" role="list">
-            ${data.useCases.map((item) => `
-              <article class="wallet-sheet__spend-card" role="listitem">
-                <div class="wallet-sheet__spend-icon" aria-hidden="true">${item.icon}</div>
-                <div class="wallet-sheet__spend-copy">
-                  <div class="wallet-sheet__spend-title">${item.title}</div>
-                  <p class="wallet-sheet__spend-desc">${item.description}</p>
-                </div>
-              </article>
-            `).join('')}
-          </div>
-        </div>
-
         <div class="wallet-sheet__section" aria-label="روش‌های افزایش اعتبار">
           <div class="wallet-sheet__section-heading">
             <h4 class="wallet-sheet__section-title">چطور رایگان شارژش کنم؟</h4>
@@ -301,8 +282,8 @@ const escapeHtml = (str = '') => String(str).replace(/[&<>"']/g, (char) => ({
         </div>
 
         <div class="wallet-sheet__cta-row">
-          <button type="button" class="wallet-sheet__cta wallet-sheet__cta--primary">استفاده از اعتبار / خرید پلن</button>
-          <button type="button" class="wallet-sheet__cta wallet-sheet__cta--ghost">افزایش موجودی</button>
+          <button type="button" class="wallet-sheet__cta wallet-sheet__cta--primary">خرید اشتراک جدید</button>
+          <p class="wallet-sheet__hint">در صورت کسر موجودی، مابقی را آنلاین پرداخت کنید.</p>
         </div>
       </section>
     `;
