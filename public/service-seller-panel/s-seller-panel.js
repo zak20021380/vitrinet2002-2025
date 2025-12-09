@@ -251,23 +251,22 @@ const escapeHtml = (str = '') => String(str).replace(/[&<>"']/g, (char) => ({
   const renderWalletSheet = () => {
     if (!bottomSheet.title || !bottomSheet.content) return;
     const data = sheetData.wallet;
-    bottomSheet.title.textContent = 'اعتبار فروشگاه';
+    bottomSheet.title.textContent = 'کیف پول و اعتبار';
     bottomSheet.content.innerHTML = `
       <section class="wallet-sheet" aria-label="اعتبار فروشگاه">
         <div class="wallet-sheet__hero">
-          <span class="wallet-sheet__eyebrow">اعتبار فروشگاه</span>
           <div class="wallet-sheet__amount">
             <span class="wallet-sheet__amount-number">${data.balance}</span>
             <span class="wallet-sheet__currency">${data.currency}</span>
           </div>
-          <p class="wallet-sheet__badge">${data.note}</p>
+          <p class="wallet-sheet__label">اعتبار جهت خرید خدمات اپلیکیشن</p>
+          <div class="wallet-sheet__usecases" aria-hidden="true">
+            ${data.useCases.map((item) => `<span class="wallet-sheet__usecase">${item.icon}<span>${item.title}</span></span>`).join('')}
+          </div>
         </div>
 
-        <div class="wallet-sheet__section" aria-label="روش‌های افزایش اعتبار">
-          <div class="wallet-sheet__section-heading">
-            <h4 class="wallet-sheet__section-title">چطور رایگان شارژش کنم؟</h4>
-            <p class="wallet-sheet__section-subtitle">روش‌های افزایش اعتبار</p>
-          </div>
+        <div class="wallet-sheet__section" aria-label="روش‌های کسب اعتبار رایگان">
+          <h4 class="wallet-sheet__section-title">روش‌های کسب اعتبار رایگان</h4>
           <ul class="wallet-sheet__earn-list">
             ${data.earners.map((item) => `
               <li class="wallet-sheet__earn-item">
@@ -281,9 +280,8 @@ const escapeHtml = (str = '') => String(str).replace(/[&<>"']/g, (char) => ({
           </ul>
         </div>
 
-        <div class="wallet-sheet__cta-row">
-          <button type="button" class="wallet-sheet__cta wallet-sheet__cta--primary">خرید اشتراک جدید</button>
-          <p class="wallet-sheet__hint">در صورت کسر موجودی، مابقی را آنلاین پرداخت کنید.</p>
+        <div class="wallet-sheet__footer">
+          <button type="button" class="wallet-sheet__cta">خرید اشتراک / ارتقا</button>
         </div>
       </section>
     `;
