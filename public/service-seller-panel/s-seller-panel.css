@@ -839,6 +839,28 @@ button:disabled, .btn:disabled {
   position: relative;
 }
 
+.header-actions-scroll {
+  display: flex;
+  flex-direction: row;
+  gap: var(--space-2);
+  direction: rtl;
+  padding: var(--space-1) 2px;
+  max-width: 100%;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+
+.header-actions-scroll::-webkit-scrollbar {
+  display: none;
+}
+
+.header-actions-scroll > * {
+  scroll-snap-align: start;
+  flex-shrink: 0;
+}
+
 .app-header .header-actions {
   gap: var(--space-2);
 }
@@ -6148,7 +6170,8 @@ body.has-overlay { overflow: hidden; }
 
 
 /* ====== Appointment button (Header) ====== */
-#open-reservations-btn{
+#open-reservations-btn,
+#accounting-btn{
   /* override هرچی از .btn-secondary میاد */
   position: relative;
   display: inline-flex;
@@ -6166,28 +6189,71 @@ body.has-overlay { overflow: hidden; }
   isolation: isolate; /* برای شاینِ ::after */
 }
 
-#open-reservations-btn svg{
+#open-reservations-btn svg,
+#accounting-btn svg{
   width: 18px;
   height: 18px;
 }
 
+#install-app-btn.header-btn-outline {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: .5rem;
+  padding: .5rem 1rem;
+  min-width: 132px;
+  border-radius: 999px;
+  border: 1.5px solid #ff5722;
+  background: rgba(255, 87, 34, 0.08);
+  color: #ff9b75;
+  font-weight: 700;
+  box-shadow: 0 8px 20px rgba(255, 87, 34, 0.16);
+  transition: background .2s ease, transform .15s ease, box-shadow .2s ease, color .2s ease;
+}
+
+#install-app-btn.header-btn-outline svg {
+  width: 18px;
+  height: 18px;
+}
+
+#install-app-btn.header-btn-outline:hover {
+  background: rgba(255, 87, 34, 0.14);
+  color: #ffc5aa;
+  transform: translateY(-1px);
+  box-shadow: 0 12px 28px rgba(255, 87, 34, 0.22);
+}
+
+#install-app-btn.header-btn-outline:active {
+  transform: translateY(0);
+  background: rgba(255, 87, 34, 0.18);
+}
+
+#install-app-btn.header-btn-outline:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(255, 87, 34, 0.28);
+}
+
 /* hover/active/focus */
-#open-reservations-btn:hover{
+#open-reservations-btn:hover,
+#accounting-btn:hover{
   background: linear-gradient(135deg,#6aa6ff,#8a5dff);
   transform: translateY(-1px);
   box-shadow: 0 12px 28px rgba(124,77,255,.35);
 }
-#open-reservations-btn:active{
+#open-reservations-btn:active,
+#accounting-btn:active{
   transform: translateY(0);
   filter: saturate(1.05);
 }
-#open-reservations-btn:focus-visible{
+#open-reservations-btn:focus-visible,
+#accounting-btn:focus-visible{
   outline: none;
   box-shadow: 0 0 0 3px rgba(124,77,255,.28);
 }
 
 /* شاین لطیف */
-#open-reservations-btn::after{
+#open-reservations-btn::after,
+#accounting-btn::after{
   content:"";
   position:absolute; inset:0;
   border-radius:inherit;
@@ -6195,7 +6261,8 @@ body.has-overlay { overflow: hidden; }
   background-size:200% 100%;
   opacity:0; pointer-events:none;
 }
-#open-reservations-btn:hover::after{
+#open-reservations-btn:hover::after,
+#accounting-btn:hover::after{
   opacity:1; animation: resvShine 1.2s ease;
 }
 
@@ -6205,7 +6272,8 @@ body.has-overlay { overflow: hidden; }
 }
 
 @media (min-width:768px){
-  #open-reservations-btn{ padding-inline: 1.1rem; }
+  #open-reservations-btn,
+  #accounting-btn{ padding-inline: 1.1rem; }
 }
 
 
@@ -8120,6 +8188,12 @@ body[data-shop-blocked="true"] .app-nav {
   /* Slightly relaxed spacing for better readability */
   .app-header .header-actions {
     gap: 10px !important;
+  }
+
+  .header-actions-scroll {
+    gap: 12px;
+    padding-inline: 0;
+    scroll-padding-inline: 6px;
   }
 
   /* Adjust container padding to fit the larger controls */
