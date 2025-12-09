@@ -539,6 +539,88 @@
             </div>
           </div>
 
+          <section class="universal-discount" aria-label="اهدای تخفیف همگانی">
+            <div class="universal-discount__header">
+              <div class="universal-discount__title">
+                <span class="ud-badge">جدید</span>
+                <div>
+                  <h3>اهدای تخفیف همگانی</h3>
+                  <p>یک پیشنهاد کوتاه‌مدت برای همه مشتریان ثبت کنید.</p>
+                </div>
+              </div>
+              <div class="ud-status" id="global-discount-status" aria-live="polite"></div>
+            </div>
+
+            <form id="global-discount-form" class="universal-discount__form">
+              <div class="ud-grid">
+                <div class="form-group">
+                  <label class="form-label">نوع تخفیف</label>
+                  <div class="pill-options discount-type-toggle">
+                    <label class="pill-option">
+                      <input type="radio" name="global-discount-type" value="amount" checked>
+                      <span>تومان</span>
+                    </label>
+                    <label class="pill-option">
+                      <input type="radio" name="global-discount-type" value="percent">
+                      <span>درصد</span>
+                    </label>
+                  </div>
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label" for="global-discount-amount">مقدار تخفیف</label>
+                  <div class="discount-amount-field" id="global-discount-amount-field" data-icon="amount">
+                    <div class="input-group">
+                      <div class="input-icon icon-amount" aria-hidden="true">ت</div>
+                      <div class="input-icon icon-percent" aria-hidden="true">٪</div>
+                      <input id="global-discount-amount" class="form-control" type="number" min="0" placeholder="مثلاً ۲۰٬۰۰۰" inputmode="numeric" autocomplete="off" required>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label">تاریخ انقضا</label>
+                  <div class="pill-options" role="group">
+                    <label class="pill-option">
+                      <input type="radio" name="global-discount-duration" value="today" checked>
+                      <span>تا پایان امروز</span>
+                    </label>
+                    <label class="pill-option">
+                      <input type="radio" name="global-discount-duration" value="week">
+                      <span>۷ روز آینده</span>
+                    </label>
+                    <label class="pill-option">
+                      <input type="radio" name="global-discount-duration" value="month">
+                      <span>۳۰ روز آینده</span>
+                    </label>
+                    <label class="pill-option">
+                      <input type="radio" name="global-discount-duration" value="custom">
+                      <span>تاریخ دلخواه</span>
+                    </label>
+                  </div>
+                  <div class="custom-date" id="global-discount-custom-date-wrap">
+                    <input id="global-discount-custom-date" class="form-control persian-date-input" type="text" inputmode="numeric" placeholder="۱۴۰۳/۰۹/۲۰" autocomplete="off">
+                  </div>
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label" for="global-discount-coupon">کد تخفیف (اختیاری)</label>
+                  <input id="global-discount-coupon" class="form-control" type="text" placeholder="مثلاً OFF1403" autocomplete="off">
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label" for="global-discount-note">یادداشت کوتاه برای مشتری</label>
+                  <input id="global-discount-note" class="form-control" type="text" placeholder="اعتبار محدود - ثبت سریع!" maxlength="60">
+                </div>
+              </div>
+
+              <div class="universal-discount__footer">
+                <button type="submit" class="btn-primary">ثبت برای همه مشتریان</button>
+                <button type="button" class="btn-text" id="global-discount-clear">حذف تخفیف فعال</button>
+              </div>
+            </form>
+          </section>
+
 <!-- مودال جزئیات مشتری VIP -->
 <div id="vip-customer-modal" class="vipc-modal" role="dialog" aria-modal="true" aria-labelledby="vipc-modal-title" hidden>
   <div class="vipc-backdrop" data-close></div>
