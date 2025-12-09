@@ -5813,7 +5813,6 @@ renderCustomers(query = '') {
           </div>
           <div class="discount-control__actions">
             ${actionBtn}
-            <button type="button" class="btn-ghost-sm" data-action="open-global-discount-confirm">حذف همگانی</button>
           </div>
         </div>`;
     }
