@@ -5844,6 +5844,13 @@ renderCustomers(query = '') {
     this.globalDiscountSuccessExpiry = document.getElementById('global-discount-success-expiry');
     this.globalDiscountSuccessNote = document.getElementById('global-discount-success-note');
     this.globalDiscountSuccessDescription = document.getElementById('global-discount-success-description');
+    this.discountGuardModal = document.getElementById('discount-guard-modal');
+    this.discountGuardAmount = document.getElementById('discount-guard-amount');
+    this.discountGuardExpiry = document.getElementById('discount-guard-expiry');
+    this.discountGuardNote = document.getElementById('discount-guard-note');
+    this.discountGuardDescription = document.getElementById('discount-guard-description');
+    this.discountGuardTitle = document.getElementById('discount-guard-title');
+    this.discountGuardRemove = document.getElementById('discount-guard-remove');
 
     if (this.discountModalTypeInputs?.length) {
       this.discountModalTypeInputs.forEach(input => {
@@ -5950,6 +5957,13 @@ renderCustomers(query = '') {
       });
     }
 
+    if (this.discountGuardRemove) {
+      this.discountGuardRemove.addEventListener('click', () => {
+        UIComponents.closeModal('discount-guard-modal');
+        this.openGlobalDiscountConfirm();
+      });
+    }
+
     if (this.globalDiscountConfirmAccept) {
       this.globalDiscountConfirmAccept.addEventListener('click', () => this.confirmClearGlobalDiscount());
     }
@@ -6000,6 +6014,11 @@ renderCustomers(query = '') {
   }
 
   openCustomerDiscountModal(customer = {}) {
+    if (this.getGlobalDiscount()) {
+      this.showDiscountGuardModal('personal');
+      return;
+    }
+
     const fallback = this.getDiscountCustomers().find(c => String(c.id) === String(customer.id)) || {};
     const id = customer.id || fallback.id;
     if (!id) return;
@@ -6112,6 +6131,11 @@ renderCustomers(query = '') {
   }
 
   submitQuickDiscount() {
+    if (this.getGlobalDiscount()) {
+      this.showDiscountGuardModal('personal');
+      return;
+    }
+
     if (!this.discountModalCustomerId) {
       UIComponents.showToast('مشتری انتخاب نشده است.', 'error');
       return;
@@ -6492,6 +6516,40 @@ renderCustomers(query = '') {
     ) || null;
   }
 
+  showDiscountGuardModal(mode = 'personal') {
+    const active = this.getGlobalDiscount();
+    if (!active) return false;
+
+    const amountLabel = active.type === 'percent'
+      ? `${this.formatNumber(active.amount, { fractionDigits: 0 })}٪`
+      : `${this.formatNumber(active.amount, { fractionDigits: 0 })} تومان`;
+    const expiryRelative = active.expiresAt ? this.formatRemainingTime(active.expiresAt) : '';
+    const expiryLabel = active.expiresAt
+      ? (expiryRelative || `اعتبار تا ${UIComponents.formatRelativeDate(active.expiresAt)}`)
+      : 'بدون زمان انقضا';
+
+    if (this.discountGuardAmount) {
+      this.discountGuardAmount.textContent = `تخفیف فعال: ${amountLabel}`;
+    }
+    if (this.discountGuardExpiry) {
+      this.discountGuardExpiry.textContent = expiryRelative ? `انقضا: ${expiryRelative}` : expiryLabel;
+    }
+    if (this.discountGuardNote) {
+      this.discountGuardNote.textContent = 'برای ثبت تخفیف جدید، ابتدا تخفیف همگانی فعلی را حذف کنید.';
+    }
+
+    const description = mode === 'global'
+      ? 'تا زمانی که تخفیف همگانی فعلی فعال است نمی‌توانید تخفیف همگانی جدیدی ثبت کنید.'
+      : 'تا زمانی که تخفیف همگانی فعال است امکان ثبت تخفیف اختصاصی برای مشتریان وجود ندارد.';
+    const title = 'تخفیف همگانی فعال است';
+
+    if (this.discountGuardDescription) this.discountGuardDescription.textContent = description;
+    if (this.discountGuardTitle) this.discountGuardTitle.textContent = title;
+
+    UIComponents.openModal('discount-guard-modal');
+    return true;
+  }
+
   updateGlobalDiscountStatus() {
     if (!this.globalDiscountStatus) return;
     const active = this.getGlobalDiscount();
@@ -6584,6 +6642,10 @@ renderCustomers(query = '') {
 
   handleGlobalDiscountSubmit() {
     if (!this.globalDiscountForm) return;
+    if (this.getGlobalDiscount()) {
+      this.showDiscountGuardModal('global');
+      return;
+    }
     const type = Array.from(this.globalDiscountTypeInputs || []).find(input => input.checked)?.value || 'amount';
     const amount = Number(this.globalDiscountAmount?.value || 0);
     const note = (this.globalDiscountNoteInput?.value || '').trim();
@@ -6669,6 +6731,10 @@ renderCustomers(query = '') {
 
   handleDiscountSubmit() {
     if (!this.discountForm || !this.discountCustomerSelect) return;
+    if (this.getGlobalDiscount()) {
+      this.showDiscountGuardModal('personal');
+      return;
+    }
     const customerId = this.discountCustomerSelect.value;
     if (!customerId) {
       UIComponents.showToast('لطفاً یک مشتری را انتخاب کنید.', 'error');
