@@ -249,59 +249,39 @@ const escapeHtml = (str = '') => String(str).replace(/[&<>"']/g, (char) => ({
   const renderWalletSheet = () => {
     if (!bottomSheet.title || !bottomSheet.content) return;
     const data = sheetData.wallet;
-    bottomSheet.title.textContent = 'کیف پول';
+    bottomSheet.title.textContent = 'کیف پول و اشتراک';
     bottomSheet.content.innerHTML = `
-      <div class="sheet-balance" aria-live="polite">
-        <span class="sheet-balance__label">موجودی کل</span>
-        <div class="sheet-balance__value">${data.balance}</div>
-        <p class="sheet-note">${data.lastUpdated}</p>
-      </div>
-
-      <div class="sheet-breakdown" role="list" aria-label="جزئیات موجودی">
-        <div class="sheet-breakdown__item" role="listitem">
-          <span class="sheet-breakdown__label">قابل تسویه</span>
-          <span class="sheet-breakdown__value">${data.withdrawable}</span>
+      <section class="wallet-sheet" aria-label="موجودی کیف پول">
+        <div class="wallet-sheet__hero">
+          <p class="wallet-sheet__label">موجودی کل</p>
+          <div class="wallet-sheet__amount">${data.balance}</div>
+          <p class="wallet-sheet__subtext">${data.lastUpdated}</p>
         </div>
-        <div class="sheet-breakdown__item" role="listitem">
-          <span class="sheet-breakdown__label">در انتظار و مسدود</span>
-          <span class="sheet-breakdown__value">${data.blocked}</span>
+
+        <div class="wallet-sheet__actions">
+          <button type="button" class="btn-primary wallet-sheet__primary">خرید اشتراک / ارتقا</button>
+          <button type="button" class="btn-ghost wallet-sheet__secondary">افزایش موجودی</button>
         </div>
-      </div>
 
-      <button type="button" class="btn-primary sheet-primary-action" data-action="withdraw">
-        درخواست تسویه
-      </button>
-
-      <div class="sheet-section">
-        <h4 class="sheet-section__title">آخرین تراکنش‌ها</h4>
-        <ul class="sheet-list" aria-label="آخرین تراکنش‌های کیف پول">
-          ${data.transactions.map((tx) => {
-            const amountClass = tx.amount.trim().startsWith('-') ? 'is-negative' : 'is-positive';
-            return `
-              <li class="sheet-list__item">
-                <div class="sheet-list__meta">
-                  <span class="sheet-list__title">${tx.title}</span>
-                  <span class="sheet-list__time">${tx.time}</span>
-                </div>
-                <span class="sheet-list__amount ${amountClass}">${tx.amount}</span>
-              </li>
-            `;
-          }).join('')}
-        </ul>
-      </div>
-
-      <div class="sheet-iban" aria-label="اطلاعات حساب بانکی">
-        <span class="sheet-iban__label">شماره شبا</span>
-        <strong class="sheet-iban__value">${data.iban}</strong>
-        <span class="sheet-note">برای تسویه سریع، صحت حساب بانکی را بررسی کنید.</span>
-      </div>
+        <div class="wallet-sheet__transactions" aria-label="آخرین تراکنش‌ها">
+          <h4 class="wallet-sheet__section-title">تراکنش‌های اخیر</h4>
+          <ul class="wallet-sheet__list">
+            ${data.transactions.map((tx) => {
+              const amountClass = tx.amount.trim().startsWith('-') ? 'is-negative' : 'is-positive';
+              return `
+                <li class="wallet-sheet__item">
+                  <div class="wallet-sheet__meta">
+                    <span class="wallet-sheet__title">${tx.title}</span>
+                    <span class="wallet-sheet__time">${tx.time}</span>
+                  </div>
+                  <span class="wallet-sheet__amount ${amountClass}">${tx.amount}</span>
+                </li>
+              `;
+            }).join('')}
+          </ul>
+        </div>
+      </section>
     `;
-
-    const withdrawBtn = bottomSheet.content.querySelector('[data-action="withdraw"]');
-    withdrawBtn?.addEventListener('click', () => {
-      window.UIComponents?.showToast?.('درخواست تسویه ثبت شد. تیم مالی در اسرع وقت بررسی می‌کند.', 'success');
-      closeBottomSheet();
-    });
   };
 
   const renderStreakSheet = () => {
@@ -322,58 +302,48 @@ const escapeHtml = (str = '') => String(str).replace(/[&<>"']/g, (char) => ({
     }).join('');
 
     bottomSheet.content.innerHTML = `
-      <div class="sheet-section streak-hero">
-        <div class="streak-total" aria-label="کل روزهای متوالی">
-          <span class="streak-total__label">کل استریک</span>
-          <div class="streak-total__value streak-total__value--gold">${data.totalDays} روز</div>
-          ${data.checkpointReached ? '<span class="checkpoint-badge" role="status">چک‌پوینت فعال</span>' : ''}
+      <section class="streak-sheet" aria-label="جزئیات استریک">
+        <div class="streak-sheet__hero">
+          <span class="streak-sheet__icon" aria-hidden="true">🏆</span>
+          <div class="streak-sheet__tier">${data.level.label}</div>
+          <div class="streak-sheet__count">${data.totalDays} روز</div>
+          ${data.checkpointReached ? '<span class="streak-sheet__badge" role="status">چک‌پوینت فعال</span>' : ''}
         </div>
-        <div class="streak-level" aria-label="سطح فعلی">
-          <span class="streak-level__badge">${data.level.label}</span>
-          <p class="streak-level__hint">${data.level.daysToNextLevel ? `${data.level.daysToNextLevel} روز تا سطح بعدی` : 'در اوج طلا هستی!'}</p>
-        </div>
-      </div>
 
-      <div class="sheet-section">
-        <div class="level-progress" aria-label="پیشرفت سطح ماهانه">
-          <div class="level-progress__meta">
-            <span class="level-progress__label">${data.level.name === 'طلایی' ? 'پیشرفت مستمر ماهانه' : 'پیشرفت سطح ماهانه'}</span>
-            <span class="level-progress__value">${data.level.progressDays}/${data.level.span}</span>
+        <div class="streak-sheet__progress" aria-label="پیشرفت سطح بعدی">
+          <div class="streak-sheet__progress-meta">
+            <span>${data.level.name === 'طلایی' ? 'پیشرفت مستمر ماهانه' : 'تا سطح بعدی'}</span>
+            <span class="streak-sheet__progress-value">${data.level.progressDays}/${data.level.span}</span>
           </div>
-          <div class="sheet-progress" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${data.level.progressPercent}" aria-valuetext="${data.level.progressPercent} درصد">
-            <span class="sheet-progress__bar" style="inline-size: ${data.level.progressPercent}%"></span>
+          <div class="streak-sheet__progress-bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${data.level.progressPercent}" aria-valuetext="${data.level.progressPercent} درصد">
+            <span style="inline-size: ${data.level.progressPercent}%"></span>
           </div>
-          <p class="sheet-note">رسیدن به روز ${data.level.nextMilestoneDay} = ارتقای سطح ${data.level.nextLevelName} + ${data.level.nextRewardAmount}</p>
+          <p class="streak-sheet__hint">رسیدن به روز ${data.level.nextMilestoneDay} = سطح ${data.level.nextLevelName} + ${data.level.nextRewardAmount}</p>
         </div>
-      </div>
 
-      <p class="sheet-note sheet-note--accent">${data.message}</p>
-      ${data.softPenalty ? `<p class="sheet-note sheet-note--warning">${data.softPenalty} امتیاز وفاداری این هفته سوزانده شد.</p>` : ''}
-      ${data.isFrozen ? '<p class="sheet-note">استریک فریز فعال است و زنجیره از دست نمی‌رود.</p>' : ''}
-
-      <div class="sheet-section">
-        <div class="streak-week" aria-label="چرخه هفتگی">
-          <div class="streak-week__label">اهداف هفتگی</div>
-          <div class="streak-week__value">${data.weekProgress}/7</div>
-          <span class="streak-week__hint">هر ۷ روز = ${data.weeklyReward}</span>
+        <div class="streak-sheet__weekly" aria-label="پیشرفت هفتگی">
+          <div class="streak-sheet__weekly-header">
+            <div>
+              <p class="streak-sheet__week-label">اهداف هفتگی</p>
+              <p class="streak-sheet__week-hint">هر ۷ روز = ${data.weeklyReward}</p>
+            </div>
+            <div class="streak-sheet__week-value">${data.weekProgress}/7</div>
+          </div>
+          <div class="streak-sheet__calendar" role="list">${dayMarkup}</div>
         </div>
-        <h4 class="sheet-section__title">پیشرفت این هفته</h4>
-        <div class="streak-calendar" role="list">${dayMarkup}</div>
-      </div>
 
-      <div class="next-milestone" aria-label="پاداش بزرگ بعدی">
-        <div class="next-milestone__icon" aria-hidden="true">🏆</div>
-        <div class="next-milestone__content">
-          <div class="next-milestone__title">نقطه بزرگ بعدی</div>
-          <p class="next-milestone__copy">تا روز ${data.level.nextMilestoneDay} ادامه بده تا ${data.level.nextLevelName === data.level.name ? 'پاداش ویژه را بگیری' : `به سطح ${data.level.nextLevelName} برسی`} و ${data.level.nextRewardAmount} اعتبار دریافت کنی.</p>
+        <div class="streak-sheet__notes">
+          <p class="streak-sheet__note streak-sheet__note--accent">${data.message}</p>
+          ${data.softPenalty ? `<p class="streak-sheet__note streak-sheet__note--warning">${data.softPenalty} امتیاز وفاداری این هفته سوزانده شد.</p>` : ''}
+          ${data.isFrozen ? '<p class="streak-sheet__note">استریک فریز فعال است و زنجیره حفظ می‌شود.</p>' : ''}
         </div>
-      </div>
 
-      <div class="sheet-actions">
-        <button type="button" class="btn-secondary sheet-primary-action" data-action="freeze">خرید استریک فریز (${data.freezeCost})</button>
-        <p class="sheet-note">${data.dailyReward} | پاداش هفتگی: ${data.weeklyReward} | پاداش ماهانه: ${data.monthlyReward} + ارتقای سطح</p>
-        <p class="sheet-note">${data.rules}</p>
-      </div>
+        <div class="streak-sheet__actions">
+          <button type="button" class="btn-secondary" data-action="freeze">خرید استریک فریز (${data.freezeCost})</button>
+          <p class="streak-sheet__meta">${data.dailyReward} | پاداش هفتگی: ${data.weeklyReward} | پاداش ماهانه: ${data.monthlyReward} + ارتقای سطح</p>
+          <p class="streak-sheet__meta">${data.rules}</p>
+        </div>
+      </section>
     `;
 
     const freezeBtn = bottomSheet.content.querySelector('[data-action="freeze"]');
