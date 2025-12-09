@@ -5820,6 +5820,21 @@ renderCustomers(query = '') {
     this.discountModalCustomerName = '';
     this.discountModalCustomerPhone = '';
 
+    this.discountInsightsOpen = document.getElementById('discount-insights-open');
+    this.discountInsightsUsage = document.getElementById('discount-insights-usage');
+    this.discountInsightsNextExpiry = document.getElementById('discount-insights-next-expiry');
+
+    this.discountAnalyticsModal = document.getElementById('discount-analytics-modal');
+    this.discountAnalyticsList = document.getElementById('discount-analytics-list');
+    this.discountAnalyticsEmpty = document.getElementById('discount-analytics-empty');
+    this.discountAnalyticsUsage = document.getElementById('discount-analytics-usage');
+    this.discountAnalyticsNextExpiry = document.getElementById('discount-analytics-next-expiry');
+    this.discountAnalyticsExpiring = document.getElementById('discount-analytics-expiring');
+    this.discountAnalyticsIssued = document.getElementById('discount-analytics-issued');
+    this.discountAnalyticsActive = document.getElementById('discount-analytics-active');
+    this.discountAnalyticsGlobal = document.getElementById('discount-analytics-global');
+    this.discountAnalyticsPersonal = document.getElementById('discount-analytics-personal');
+
     this.discountQuickSearch = document.getElementById('discount-quick-search');
     this.discountQuickResults = document.getElementById('discount-quick-results');
 
@@ -5867,6 +5882,14 @@ renderCustomers(query = '') {
       const initialModalDuration = Array.from(this.discountModalDurationInputs).find(input => input.checked)?.value || 'week';
       this.updateDiscountModalDuration(initialModalDuration);
     }
+
+    if (this.discountInsightsOpen) {
+      this.discountInsightsOpen.addEventListener('click', () => this.openDiscountAnalyticsModal());
+    }
+
+    document.querySelectorAll('[data-dismiss="discount-analytics-modal"]').forEach(btn => {
+      btn.addEventListener('click', () => UIComponents.closeModal('discount-analytics-modal'));
+    });
 
     if (this.discountModalForm) {
       this.discountModalForm.addEventListener('submit', (e) => {
@@ -5995,6 +6018,7 @@ renderCustomers(query = '') {
       this.renderDiscounts();
       this.renderQuickDiscountResults(this.discountQuickSearch?.value || '');
       this.updateGlobalDiscountStatus();
+      this.updateDiscountAnalytics();
     });
 
     if (this.discountTypeInputs?.length) {
@@ -6011,6 +6035,7 @@ renderCustomers(query = '') {
     this.renderDiscounts();
     this.renderQuickDiscountResults('');
     this.updateGlobalDiscountStatus();
+    this.updateDiscountAnalytics();
   }
 
   openCustomerDiscountModal(customer = {}) {
@@ -6919,6 +6944,98 @@ renderCustomers(query = '') {
           </div>
           <div class="discount-card__actions">
             <button type="button" class="btn-text" data-action="cancel-discount" data-id="${d.id}">${d.isGlobal ? 'لغو همگانی' : 'لغو'}</button>
+          </div>
+        </article>
+      `;
+    }).join('');
+
+    this.updateDiscountAnalytics();
+  }
+
+  openDiscountAnalyticsModal() {
+    this.updateDiscountAnalytics();
+    UIComponents.openModal('discount-analytics-modal');
+  }
+
+  updateDiscountAnalytics() {
+    const updateNumber = (id, value) => {
+      const el = document.getElementById(id);
+      if (!el) return;
+      el.dataset.value = value;
+      el.textContent = this.formatNumber(value, { fallback: '۰' });
+      UIComponents.animateCountUp?.(el);
+    };
+
+    const allDiscounts = this.discountStore?.load?.() || [];
+    const active = this.discountStore?.getActive?.() || [];
+    const personal = active.filter(d => !(d.isGlobal || d.customerId === this.GLOBAL_CUSTOMER_ID));
+    const global = active.filter(d => d.isGlobal || d.customerId === this.GLOBAL_CUSTOMER_ID);
+    const now = new Date();
+    const expiringSoon = active.filter(d => {
+      const expiry = new Date(d.expiresAt);
+      const diff = expiry - now;
+      return diff > 0 && diff <= 72 * 60 * 60 * 1000;
+    }).length;
+
+    const sortedByExpiry = [...active].sort((a, b) => new Date(a.expiresAt) - new Date(b.expiresAt));
+    const nextExpiry = sortedByExpiry[0];
+    const nextExpiryLabel = nextExpiry ? UIComponents.formatRelativeDate(nextExpiry.expiresAt) : 'بدون تخفیف فعال';
+
+    const usageNames = personal.map(d => d.customerName || 'مشتری').filter(Boolean);
+    const usagePreview = usageNames.length
+      ? `${usageNames.slice(0, 3).join('، ')}${usageNames.length > 3 ? ' و سایر مشتریان' : ''}`
+      : 'فعلاً مشتری از تخفیف استفاده نکرده است.';
+
+    updateNumber('discount-insights-total', allDiscounts.length);
+    updateNumber('discount-insights-active', active.length);
+    updateNumber('discount-insights-expiring', expiringSoon);
+    if (this.discountInsightsNextExpiry) this.discountInsightsNextExpiry.textContent = nextExpiryLabel;
+    if (this.discountInsightsUsage) this.discountInsightsUsage.textContent = usagePreview;
+
+    updateNumber('discount-analytics-issued', allDiscounts.length);
+    updateNumber('discount-analytics-active', active.length);
+    updateNumber('discount-analytics-global', global.length);
+    updateNumber('discount-analytics-personal', personal.length);
+    updateNumber('discount-analytics-expiring', expiringSoon);
+    if (this.discountAnalyticsNextExpiry) this.discountAnalyticsNextExpiry.textContent = nextExpiryLabel;
+    if (this.discountAnalyticsUsage) this.discountAnalyticsUsage.textContent = usagePreview;
+
+    if (!this.discountAnalyticsList || !this.discountAnalyticsEmpty) return;
+
+    if (!active.length) {
+      this.discountAnalyticsList.innerHTML = '';
+      this.discountAnalyticsEmpty.hidden = false;
+      return;
+    }
+
+    this.discountAnalyticsEmpty.hidden = true;
+    this.discountAnalyticsList.innerHTML = sortedByExpiry.map((d) => {
+      const amountLabel = d.type === 'percent'
+        ? `${this.formatNumber(d.amount)}٪`
+        : `${this.formatNumber(d.amount)} تومان`;
+      const expiryLabel = UIComponents.formatRelativeDate(d.expiresAt);
+      const createdLabel = UIComponents.formatRelativeDate(d.createdAt);
+      const target = d.isGlobal || d.customerId === this.GLOBAL_CUSTOMER_ID
+        ? 'تخفیف همگانی'
+        : escapeHtml(d.customerName || 'مشتری');
+      const badge = d.isGlobal || d.customerId === this.GLOBAL_CUSTOMER_ID ? 'همگانی' : 'اختصاصی';
+      const note = d.note ? escapeHtml(d.note) : 'بدون یادداشت';
+
+      return `
+        <article class="discount-analytics-item" role="listitem">
+          <div class="discount-analytics-item__avatar" aria-hidden="true">${escapeHtml((d.isGlobal ? '٪' : (d.customerName || 'م')[0]))}</div>
+          <div class="discount-analytics-item__body">
+            <div class="discount-analytics-item__header">
+              <div>
+                <h4 class="discount-analytics-item__title">${target}</h4>
+                <p class="discount-analytics-item__meta">${badge} • ثبت ${createdLabel}</p>
+              </div>
+              <div class="discount-analytics-item__amount">${amountLabel}</div>
+            </div>
+            <div class="discount-analytics-item__footer">
+              <span class="pill">انقضا: ${expiryLabel}</span>
+              <span class="pill pill--muted">${note}</span>
+            </div>
           </div>
         </article>
       `;

@@ -530,6 +530,48 @@
               <p class="view-subtitle">مدیریت اطلاعات مشتریان</p>
             </div>
           </header>
+
+          <section class="discount-insights card" aria-label="آمار تخفیف‌ها">
+            <div class="discount-insights__content">
+              <p class="discount-insights__eyebrow">آمار تخفیف‌ها</p>
+              <h3 class="discount-insights__title">نمای کلی تخفیف‌ها برای مشتریان</h3>
+              <p class="discount-insights__muted">با یک نگاه، وضعیت فعلی تخفیف‌های فعال، نزدیک‌ترین تاریخ انقضا و مشتریانی که از پیشنهادهای شما استفاده کرده‌اند را ببینید.</p>
+
+              <div class="discount-insights__stats">
+                <div class="di-stat">
+                  <span>تخفیف‌های ثبت‌شده</span>
+                  <strong id="discount-insights-total" data-value="0">۰</strong>
+                  <p class="di-hint">مجموع تخفیف‌های فعال و همگانی</p>
+                </div>
+                <div class="di-stat">
+                  <span>فعال الان</span>
+                  <strong id="discount-insights-active" data-value="0">۰</strong>
+                  <p class="di-hint">تعداد تخفیف‌هایی که هنوز اعتبار دارند</p>
+                </div>
+                <div class="di-stat">
+                  <span>انقضا تا ۷۲ ساعت</span>
+                  <strong id="discount-insights-expiring" data-value="0">۰</strong>
+                  <p class="di-hint">برای تمدید یا یادآوری آماده شوید</p>
+                </div>
+              </div>
+            </div>
+
+            <div class="discount-insights__actions">
+              <div class="discount-insights__next">
+                <p class="di-label">نزدیک‌ترین انقضا</p>
+                <strong id="discount-insights-next-expiry">—</strong>
+                <p id="discount-insights-usage" class="discount-insights__tiny">در حال بررسی مشتریان...</p>
+              </div>
+              <button type="button" id="discount-insights-open" class="btn-primary btn-icon-text">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                  <polyline points="17 8 12 3 7 8"/>
+                  <line x1="12" y1="3" x2="12" y2="15"/>
+                </svg>
+                <span>مشاهده آمار کامل</span>
+              </button>
+            </div>
+          </section>
           <div class="search-section">
             <div class="search-wrapper">
               <svg class="search-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -656,6 +698,78 @@
 
     <div class="vipc-actions">
       <button type="button" class="btn-primary" id="vipc-open-customer">مشاهده در مشتریان</button>
+    </div>
+  </div>
+</div>
+
+<!-- Discount analytics modal -->
+<div
+  id="discount-analytics-modal"
+  class="modal discount-analytics-modal"
+  role="dialog"
+  aria-modal="true"
+  aria-labelledby="discount-analytics-title"
+  hidden
+>
+  <div class="modal-backdrop" data-dismiss="discount-analytics-modal"></div>
+  <div class="modal-content discount-analytics-modal__content" role="document">
+    <button type="button" class="modal-close-floating" data-dismiss="discount-analytics-modal" aria-label="بستن">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+      </svg>
+    </button>
+
+    <header class="discount-analytics-modal__header">
+      <div>
+        <p class="discount-analytics__eyebrow">آمار تخفیف‌ها</p>
+        <h3 id="discount-analytics-title" class="modal-title">تصویر کامل تخفیف‌ها</h3>
+        <p class="discount-analytics__muted">جزئیات تخفیف‌های فعال، وضعیت انقضا و مشتریانی که از پیشنهادهای شما استفاده کرده‌اند.</p>
+      </div>
+      <div class="discount-analytics__badge" id="discount-analytics-next-expiry">—</div>
+    </header>
+
+    <div class="discount-analytics__grid">
+      <div class="da-tile">
+        <p class="da-label">کل تخفیف‌های ثبت‌شده</p>
+        <strong id="discount-analytics-issued" data-value="0">۰</strong>
+        <span class="da-hint">همگانی و اختصاصی</span>
+      </div>
+      <div class="da-tile">
+        <p class="da-label">تخفیف‌های فعال</p>
+        <strong id="discount-analytics-active" data-value="0">۰</strong>
+        <span class="da-hint">در حال اجرا</span>
+      </div>
+      <div class="da-tile">
+        <p class="da-label">همگانی</p>
+        <strong id="discount-analytics-global" data-value="0">۰</strong>
+        <span class="da-hint">روی همه مشتریان</span>
+      </div>
+      <div class="da-tile">
+        <p class="da-label">اختصاصی</p>
+        <strong id="discount-analytics-personal" data-value="0">۰</strong>
+        <span class="da-hint">برای مشتریان خاص</span>
+      </div>
+      <div class="da-tile">
+        <p class="da-label">انقضا در ۷۲ ساعت</p>
+        <strong id="discount-analytics-expiring" data-value="0">۰</strong>
+        <span class="da-hint">نیازمند اقدام سریع</span>
+      </div>
+      <div class="da-tile da-tile--wide">
+        <p class="da-label">مشتریان استفاده‌کننده</p>
+        <p id="discount-analytics-usage" class="da-usage">در حال بارگذاری...</p>
+      </div>
+    </div>
+
+    <div class="discount-analytics-list__header">
+      <div>
+        <p class="da-label">لیست تخفیف‌های فعال</p>
+        <p class="discount-analytics__muted">مقصد، مقدار و زمان انقضای هر تخفیف را یکجا ببینید.</p>
+      </div>
+    </div>
+
+    <div class="discount-analytics-list" id="discount-analytics-list" role="list"></div>
+    <div class="discount-analytics-empty" id="discount-analytics-empty" hidden>
+      هنوز تخفیفی ثبت نشده است. برای شروع، یک تخفیف همگانی یا اختصاصی اضافه کنید.
     </div>
   </div>
 </div>

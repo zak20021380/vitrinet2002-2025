@@ -2063,6 +2063,44 @@ button:disabled, .btn:disabled {
   margin-top: 4px;
 }
 
+.discount-insights {
+  display: grid;
+  grid-template-columns: 1.5fr 0.9fr;
+  gap: 18px;
+  align-items: stretch;
+  background: radial-gradient(circle at 12% 14%, rgba(10,132,255,0.2), transparent 35%),
+    radial-gradient(circle at 86% 10%, rgba(191,90,242,0.18), transparent 32%),
+    linear-gradient(145deg, rgba(255,255,255,0.02), rgba(255,255,255,0.05));
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: var(--border-radius-xl);
+  box-shadow: 0 16px 36px rgba(0,0,0,0.28);
+  padding: 18px;
+  margin-bottom: 18px;
+}
+
+.discount-insights__content { display: grid; gap: 8px; align-content: start; }
+.discount-insights__eyebrow { color: #7c9bff; font-weight: 700; margin: 0; letter-spacing: 0.3px; }
+.discount-insights__title { margin: 0; font-size: 1.25rem; }
+.discount-insights__muted { margin: 0; color: var(--c-text-secondary); line-height: 1.6; max-width: 56ch; }
+.discount-insights__stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px,1fr)); gap: 12px; margin-top: 4px; }
+.di-stat { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 14px; padding: 12px; display: grid; gap: 4px; }
+.di-stat span { color: var(--c-text-secondary); font-size: 0.95rem; }
+.di-stat strong { font-size: 1.4rem; letter-spacing: 0.3px; }
+.di-hint { margin: 0; color: var(--c-text-secondary); font-size: 0.9rem; }
+
+.discount-insights__actions { display: grid; gap: 12px; align-content: center; justify-items: start; }
+.discount-insights__next { background: rgba(255,255,255,0.05); border: 1px dashed rgba(255,255,255,0.16); border-radius: 16px; padding: 12px 14px; display: grid; gap: 6px; min-width: 220px; }
+.discount-insights__tiny { margin: 0; color: var(--c-text-secondary); font-size: 0.9rem; }
+.di-label { margin: 0; color: var(--c-text-secondary); font-size: 0.95rem; }
+
+.discount-insights .btn-primary { width: 100%; justify-content: center; gap: 8px; }
+
+@media (max-width: 960px) {
+  .discount-insights { grid-template-columns: 1fr; }
+  .discount-insights__actions { justify-items: stretch; }
+  .discount-insights .btn-primary { width: 100%; }
+}
+
 @media (max-width: 720px) {
   .discount-overview__header { align-items: flex-start; }
   .discount-overview__status { width: 100%; justify-content: space-between; }
@@ -2129,6 +2167,43 @@ button:disabled, .btn:disabled {
 .link-muted { color: var(--c-text-secondary); }
 .link-btn { background: none; color: var(--c-primary); border: none; cursor: pointer; font-weight: 600; }
 .customer-actions .btn-secondary { padding: 10px 14px; }
+
+.discount-analytics-modal__content { max-width: 960px; width: min(960px, 96vw); }
+.discount-analytics-modal__header { display: flex; justify-content: space-between; gap: 12px; align-items: flex-start; margin-bottom: 14px; }
+.discount-analytics__eyebrow { color: #7c9bff; margin: 0; font-weight: 700; }
+.discount-analytics__muted { margin: 4px 0 0; color: var(--c-text-secondary); }
+.discount-analytics__badge { background: rgba(var(--c-primary-rgb),0.14); border: 1px solid rgba(var(--c-primary-rgb),0.4); color: white; padding: 10px 12px; border-radius: 12px; font-weight: 800; box-shadow: 0 10px 24px rgba(10,132,255,0.25); min-width: 140px; text-align: center; }
+
+.discount-analytics__grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px,1fr)); gap: 10px; margin: 14px 0; }
+.da-tile { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 14px; padding: 12px; display: grid; gap: 6px; align-content: start; box-shadow: 0 10px 24px rgba(0,0,0,0.24); }
+.da-tile--wide { grid-column: span 2; }
+.da-label { margin: 0; color: var(--c-text-secondary); font-size: 0.95rem; }
+.da-hint { color: var(--c-text-secondary); font-size: 0.9rem; }
+.da-usage { margin: 0; line-height: 1.6; }
+.da-tile strong { font-size: 1.4rem; letter-spacing: 0.4px; }
+
+.discount-analytics-list__header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+.discount-analytics-list { display: grid; gap: 12px; max-height: 420px; overflow: auto; padding-right: 4px; }
+.discount-analytics-empty { padding: 12px; border-radius: 12px; border: 1px dashed rgba(255,255,255,0.15); background: rgba(255,255,255,0.03); color: var(--c-text-secondary); }
+
+.discount-analytics-item { display: grid; grid-template-columns: auto 1fr; gap: 12px; padding: 12px; border-radius: 14px; background: linear-gradient(145deg, rgba(255,255,255,0.03), rgba(10,132,255,0.08)); border: 1px solid rgba(255,255,255,0.08); box-shadow: 0 12px 26px rgba(0,0,0,0.22); }
+.discount-analytics-item__avatar { width: 48px; height: 48px; border-radius: 14px; display: grid; place-items: center; background: linear-gradient(135deg, rgba(10,132,255,0.22), rgba(94,92,230,0.18)); font-weight: 800; }
+.discount-analytics-item__header { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; }
+.discount-analytics-item__title { margin: 0; font-size: 1.05rem; }
+.discount-analytics-item__meta { margin: 0; color: var(--c-text-secondary); }
+.discount-analytics-item__amount { background: rgba(255,255,255,0.05); border-radius: 12px; padding: 8px 10px; min-width: 120px; text-align: center; border: 1px solid rgba(255,255,255,0.12); }
+.discount-analytics-item__footer { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 6px; }
+.pill { display: inline-flex; align-items: center; gap: 6px; padding: 6px 10px; border-radius: 12px; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); font-size: 0.9rem; }
+.pill--muted { background: rgba(255,255,255,0.03); color: var(--c-text-secondary); }
+
+@media (max-width: 720px) {
+  .discount-analytics-modal__header { flex-direction: column; align-items: flex-start; }
+  .discount-analytics__badge { width: 100%; }
+  .da-tile--wide { grid-column: span 1; }
+  .discount-analytics-item { grid-template-columns: 1fr; }
+  .discount-analytics-item__header { flex-direction: column; align-items: flex-start; }
+  .discount-analytics-item__amount { width: 100%; }
+}
 .btn-exclusive-discount {
   position: relative;
   overflow: hidden;
