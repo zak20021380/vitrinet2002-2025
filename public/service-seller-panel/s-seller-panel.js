@@ -6777,7 +6777,7 @@ renderCustomers(query = '') {
     this.globalDiscountSuccess.hidden = false;
     requestAnimationFrame(() => this.globalDiscountSuccess?.classList.add('is-visible'));
     clearTimeout(this.globalDiscountSuccessTimer);
-    this.globalDiscountSuccessTimer = setTimeout(() => this.hideGlobalDiscountSuccess(), 5200);
+    this.globalDiscountSuccessTimer = null;
   }
 
   openGlobalDiscountConfirm() {
