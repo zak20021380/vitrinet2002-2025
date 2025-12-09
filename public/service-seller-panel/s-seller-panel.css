@@ -1097,14 +1097,100 @@ button:disabled, .btn:disabled {
     visibility: visible;
   }
 }
-.welcome-message {
-  color: var(--c-text-secondary);
-  margin: 0;
-}
-.welcome-date { display: block; margin-top: var(--space-1); }
-.stats-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  .welcome-message {
+    color: var(--c-text-secondary);
+    margin: 0;
+  }
+  .welcome-date { display: block; margin-top: var(--space-1); }
+  .stats-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: var(--space-2);
+    margin-top: var(--space-4);
+    align-items: stretch;
+  }
+  .stats-card {
+    position: relative;
+    background: var(--c-bg-primary);
+    border-radius: var(--border-radius-lg);
+    padding: calc(var(--space-3) + 2px);
+    border: 1px solid var(--c-border);
+    display: grid;
+    gap: var(--space-2);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    touch-action: manipulation;
+  }
+  .stats-card__header {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    justify-content: flex-start;
+  }
+  .stats-card__icon {
+    width: 42px;
+    height: 42px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--border-radius-md);
+    background: rgba(var(--c-primary-rgb), 0.12);
+    color: var(--c-primary);
+  }
+  .stats-card__label {
+    font-weight: var(--font-weight-semibold);
+    color: var(--c-text-primary);
+  }
+  .stats-card__value {
+    font-size: 1.4rem;
+    font-weight: 800;
+    letter-spacing: 0.2px;
+    color: #f5f6f8;
+  }
+  .stats-card__hint {
+    margin: 0;
+    color: var(--c-text-secondary);
+    font-size: var(--font-size-sm);
+  }
+  .stats-card__hint--accent {
+    color: #ff9d5c;
+  }
+  .wallet-card {
+    background: linear-gradient(135deg, rgba(40, 86, 255, 0.9), rgba(129, 106, 255, 0.8));
+    border: 1px solid rgba(124, 155, 255, 0.6);
+    box-shadow: 0 12px 40px rgba(48, 106, 255, 0.25);
+  }
+  .wallet-card .stats-card__icon {
+    background: rgba(255, 255, 255, 0.14);
+    color: #e9eeff;
+  }
+  .wallet-card .stats-card__label,
+  .wallet-card .stats-card__value,
+  .wallet-card .stats-card__hint {
+    color: #f7f9ff;
+  }
+  .streak-card {
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 138, 61, 0.65);
+    backdrop-filter: blur(14px);
+    box-shadow: 0 14px 45px rgba(0, 0, 0, 0.28);
+  }
+  .stats-card__icon--fire {
+    background: rgba(255, 138, 61, 0.14);
+    color: #ff8a3d;
+  }
+  @media (max-width: 480px) {
+    .stats-card {
+      padding: var(--space-3);
+    }
+  }
+  @media (max-width: 360px) {
+    .stats-row {
+      grid-template-columns: 1fr;
+    }
+  }
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
   gap: var(--space-3);
   margin-top: var(--space-4);
 }
