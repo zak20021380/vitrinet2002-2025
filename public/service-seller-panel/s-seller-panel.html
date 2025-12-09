@@ -109,56 +109,14 @@
   <header class="app-header" role="banner">
     <div class="header-container">
       <div class="header-actions">
-     <div class="notification-container">
-  <button id="notification-btn" class="header-btn icon-btn" aria-label="اعلان‌ها" aria-haspopup="true" aria-expanded="false">
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-      <path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/>
-      <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
-    </svg>
-    <span class="notification-badge" id="notification-badge"></span>
-  </button>
-<!-- Notification panel (replace this whole block) -->
-<!-- Notification panel (replace this whole block) -->
-<div id="notification-panel" class="notification-panel" role="dialog" aria-labelledby="notification-title" aria-modal="true" hidden>
-  <header class="notif-header">
-    <h2 id="notification-title" class="notif-title">اعلان‌ها</h2>
-    <div class="notif-actions">
-      <button type="button" id="notif-clear-all" class="notif-clear-all" aria-label="حذف همه اعلان‌ها">
-        حذف همه
-        <svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true">
-          <path fill="currentColor" d="M3 6h18v2H3V6zm2 3h14l-1.2 11.2A2 2 0 0 1 15.82 22H8.18a2 2 0 0 1-1.98-1.8L5 9zm6-6h2a2 2 0 0 1 2 2v1H9V5a2 2 0 0 1 2-2z"/>
-        </svg>
-      </button>
-    </div>
-  </header>
+        <button id="open-reservations-btn" class="btn-secondary btn-icon-text" aria-label="نوبت‌دهی">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <rect x="3" y="4" width="18" height="18" rx="2"/>
+            <path d="M16 2v4M8 2v4M3 10h18"/>
+          </svg>
+          <span>نوبت‌دهی</span>
+        </button>
 
-  <!-- لیست اعلان‌ها -->
-  <ul class="notification-list" id="notification-list" role="list" aria-live="polite"></ul>
-
-  <!-- حالت خالی -->
-  <div id="notif-empty" class="notif-empty" hidden>
-    هیچ اعلانی ندارید.
-  </div>
-
-  <!-- نوار پایین: اکشن‌های سریع -->
-  <footer class="notif-footer">
-    <button type="button" id="notif-mark-read" class="btn-text-sm">علامت‌گذاری همه به‌عنوان خوانده‌شده</button>
-  </footer>
-</div>
-
-
-</div>
-
-<button id="open-reservations-btn" class="btn-secondary btn-icon-text" aria-label="نوبت‌دهی">
-  <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
-       stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-    <rect x="3" y="4" width="18" height="18" rx="2"/>
-    <path d="M16 2v4M8 2v4M3 10h18"/>
-  </svg>
-  <span>نوبت‌دهی</span>
-</button>
-
-        
         <button id="view-store-btn" class="btn-primary btn-icon-text" aria-label="مشاهده صفحه من">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
             <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/>
@@ -185,7 +143,7 @@
 
 <!-- Preview: Hero (بالای داشبورد) -->
 <section class="plan-hero card" id="plan-hero" aria-label="وضعیت پلن فروشنده" aria-hidden="true" hidden>
-  <div class="plan-hero-bg" aria-hidden="true"></div>
+      <div class="plan-hero-bg" aria-hidden="true"></div>
 
     <div class="plan-hero-content">
       <div class="plan-hero-top">
@@ -204,7 +162,7 @@
           <p class="plan-hero-message" id="plan-hero-message">
             اگر پلن فعالی نداشته باشید یا دسترسی توسط مدیریت غیرفعال شده باشد، از همین بخش اطلاع‌رسانی می‌شود.
           </p>
-          <div class="plan-hero-meta" role="list">
+      <div class="plan-hero-meta" role="list">
             <div class="meta-item" role="listitem">
               <div class="meta-text">
                 <span>پلن هدیه</span>
@@ -1850,6 +1808,44 @@
   </div>
 
   <div id="toast-root" aria-live="assertive" aria-atomic="true"></div>
+
+  <!-- Notification FAB -->
+  <div class="notification-fab" aria-live="polite">
+    <button id="notification-btn" class="notification-fab__btn" aria-label="اعلان‌ها" aria-haspopup="true" aria-expanded="false">
+      <span class="notification-fab__glow" aria-hidden="true"></span>
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/>
+        <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+      </svg>
+      <span class="notification-badge" id="notification-badge"></span>
+    </button>
+
+    <div id="notification-panel" class="notification-panel" role="dialog" aria-labelledby="notification-title" aria-modal="true" hidden>
+      <div class="notification-panel__surface">
+        <header class="notif-header">
+          <h2 id="notification-title" class="notif-title">اعلان‌ها</h2>
+          <div class="notif-actions">
+            <button type="button" id="notif-clear-all" class="notif-clear-all" aria-label="حذف همه اعلان‌ها">
+              حذف همه
+              <svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true">
+                <path fill="currentColor" d="M3 6h18v2H3V6zm2 3h14l-1.2 11.2A2 2 0 0 1 15.82 22H8.18a2 2 0 0 1-1.98-1.8L5 9zm6-6h2a2 2 0 0 1 2 2v1H9V5a2 2 0 0 1 2-2z"/>
+              </svg>
+            </button>
+          </div>
+        </header>
+
+        <ul class="notification-list" id="notification-list" role="list" aria-live="polite"></ul>
+
+        <div id="notif-empty" class="notif-empty" hidden>
+          هیچ اعلانی ندارید.
+        </div>
+
+        <footer class="notif-footer">
+          <button type="button" id="notif-mark-read" class="btn-text-sm">علامت‌گذاری همه به‌عنوان خوانده‌شده</button>
+        </footer>
+      </div>
+    </div>
+  </div>
 
 
   <!-- Removed explicit API base configuration to prevent CORS issues -->
