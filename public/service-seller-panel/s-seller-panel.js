@@ -58,6 +58,200 @@ const escapeHtml = (str = '') => String(str).replace(/[&<>"']/g, (char) => ({
   "'": '&#39;'
 }[char] || char));
 
+  // --- Bottom sheet: wallet & streak ---
+  const bottomSheet = {
+    root: document.getElementById('dashboard-bottom-sheet'),
+    overlay: document.getElementById('bottom-sheet-overlay'),
+    panel: document.querySelector('#dashboard-bottom-sheet .bottom-sheet__panel'),
+    title: document.getElementById('bottom-sheet-title'),
+    content: document.getElementById('bottom-sheet-content'),
+    closeBtn: document.getElementById('bottom-sheet-close'),
+    activeType: null
+  };
+
+  const sheetData = {
+    wallet: {
+      balance: '۳٬۵۰۰٬۰۰۰ تومان',
+      withdrawable: '۲٬۸۰۰٬۰۰۰ تومان',
+      blocked: '۷۰۰٬۰۰۰ تومان',
+      lastUpdated: 'به‌روزرسانی لحظه‌ای در داشبورد',
+      iban: 'IR820540102680020817909002',
+      transactions: [
+        { title: 'واریز نوبت آنلاین', amount: '+۲۵۰٬۰۰۰', time: 'امروز، ۱۱:۲۰' },
+        { title: 'درخواست تسویه', amount: '-۱٬۲۰۰٬۰۰۰', time: 'دیروز، ۱۸:۴۵' },
+        { title: 'امتیاز وفاداری تبدیل به کیف پول', amount: '+۱۵۰٬۰۰۰', time: '۲ روز قبل، ۱۳:۱۰' }
+      ]
+    },
+    streak: {
+      progress: 78,
+      freezeCost: '۱۲۰ امتیاز',
+      nextReward: '۲۵ امتیاز وفاداری تا جایزه بعدی',
+      rules: 'هر روز حداقل یک نوبت تأیید‌شده داشته باشید تا استریک حفظ شود. یک روز تاخیر باعث از دست رفتن زنجیره می‌شود.',
+      days: [
+        { label: 'ش', hit: true },
+        { label: 'ی', hit: true },
+        { label: 'د', hit: true },
+        { label: 'س', hit: false },
+        { label: 'چ', hit: true },
+        { label: 'پ', hit: true },
+        { label: 'ج', hit: true }
+      ]
+    }
+  };
+
+  const closeBottomSheet = () => {
+    if (!bottomSheet.root) return;
+    bottomSheet.root.classList.remove('is-active');
+    bottomSheet.root.setAttribute('aria-hidden', 'true');
+    document.body.classList.remove('is-bottom-sheet-open');
+    bottomSheet.activeType = null;
+  };
+
+  const renderWalletSheet = () => {
+    if (!bottomSheet.title || !bottomSheet.content) return;
+    const data = sheetData.wallet;
+    bottomSheet.title.textContent = 'کیف پول';
+    bottomSheet.content.innerHTML = `
+      <div class="sheet-balance" aria-live="polite">
+        <span class="sheet-balance__label">موجودی کل</span>
+        <div class="sheet-balance__value">${data.balance}</div>
+        <p class="sheet-note">${data.lastUpdated}</p>
+      </div>
+
+      <div class="sheet-breakdown" role="list" aria-label="جزئیات موجودی">
+        <div class="sheet-breakdown__item" role="listitem">
+          <span class="sheet-breakdown__label">قابل تسویه</span>
+          <span class="sheet-breakdown__value">${data.withdrawable}</span>
+        </div>
+        <div class="sheet-breakdown__item" role="listitem">
+          <span class="sheet-breakdown__label">در انتظار و مسدود</span>
+          <span class="sheet-breakdown__value">${data.blocked}</span>
+        </div>
+      </div>
+
+      <button type="button" class="btn-primary sheet-primary-action" data-action="withdraw">
+        درخواست تسویه
+      </button>
+
+      <div class="sheet-section">
+        <h4 class="sheet-section__title">آخرین تراکنش‌ها</h4>
+        <ul class="sheet-list" aria-label="آخرین تراکنش‌های کیف پول">
+          ${data.transactions.map((tx) => {
+            const amountClass = tx.amount.trim().startsWith('-') ? 'is-negative' : 'is-positive';
+            return `
+              <li class="sheet-list__item">
+                <div class="sheet-list__meta">
+                  <span class="sheet-list__title">${tx.title}</span>
+                  <span class="sheet-list__time">${tx.time}</span>
+                </div>
+                <span class="sheet-list__amount ${amountClass}">${tx.amount}</span>
+              </li>
+            `;
+          }).join('')}
+        </ul>
+      </div>
+
+      <div class="sheet-iban" aria-label="اطلاعات حساب بانکی">
+        <span class="sheet-iban__label">شماره شبا</span>
+        <strong class="sheet-iban__value">${data.iban}</strong>
+        <span class="sheet-note">برای تسویه سریع، صحت حساب بانکی را بررسی کنید.</span>
+      </div>
+    `;
+
+    const withdrawBtn = bottomSheet.content.querySelector('[data-action="withdraw"]');
+    withdrawBtn?.addEventListener('click', () => {
+      window.UIComponents?.showToast?.('درخواست تسویه ثبت شد. تیم مالی در اسرع وقت بررسی می‌کند.', 'success');
+      closeBottomSheet();
+    });
+  };
+
+  const renderStreakSheet = () => {
+    if (!bottomSheet.title || !bottomSheet.content) return;
+    const data = sheetData.streak;
+    bottomSheet.title.textContent = 'استریک روزانه';
+
+    const dayMarkup = data.days.map((day) => `
+      <div class="streak-day ${day.hit ? 'is-hit' : 'is-missed'}" aria-label="${day.label} ${day.hit ? 'فعال' : 'از دست رفته'}">
+        <div class="streak-day__circle">${day.hit ? '✔' : '✕'}</div>
+        <span>${day.label}</span>
+      </div>
+    `).join('');
+
+    bottomSheet.content.innerHTML = `
+      <div class="sheet-section">
+        <h4 class="sheet-section__title">۷ روز اخیر</h4>
+        <div class="streak-calendar" role="list">${dayMarkup}</div>
+      </div>
+
+      <div class="sheet-section" aria-label="پیشرفت تا پاداش بعدی">
+        <h4 class="sheet-section__title">${data.nextReward}</h4>
+        <div class="sheet-progress" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${data.progress}" aria-valuetext="${data.progress} درصد">
+          <span class="sheet-progress__bar" style="inline-size: ${data.progress}%"></span>
+        </div>
+      </div>
+
+      <div class="sheet-actions">
+        <button type="button" class="btn-secondary sheet-primary-action" data-action="freeze">خرید استریک فریز (${data.freezeCost})</button>
+        <p class="sheet-note">${data.rules}</p>
+      </div>
+    `;
+
+    const freezeBtn = bottomSheet.content.querySelector('[data-action="freeze"]');
+    freezeBtn?.addEventListener('click', () => {
+      window.UIComponents?.showToast?.('استریک فریز با موفقیت به سبد شما افزوده شد.', 'info');
+      closeBottomSheet();
+    });
+  };
+
+  const openBottomSheet = (type = 'wallet') => {
+    if (!bottomSheet.root || !bottomSheet.overlay || !bottomSheet.panel) return;
+    bottomSheet.activeType = type;
+    if (type === 'wallet') {
+      renderWalletSheet();
+    } else {
+      renderStreakSheet();
+    }
+    bottomSheet.root.classList.add('is-active');
+    bottomSheet.root.setAttribute('aria-hidden', 'false');
+    document.body.classList.add('is-bottom-sheet-open');
+    requestAnimationFrame(() => bottomSheet.panel?.focus({ preventScroll: true }));
+  };
+
+  const handleSheetKeydown = (event) => {
+    if (event.key === 'Escape' && bottomSheet.root?.classList.contains('is-active')) {
+      closeBottomSheet();
+    }
+  };
+
+  const bindSheetTriggers = () => {
+    if (bottomSheet.root) {
+      bottomSheet.root.setAttribute('aria-hidden', 'true');
+    }
+    const targets = [
+      { selector: '.wallet-card', type: 'wallet' },
+      { selector: '.streak-card', type: 'streak' }
+    ];
+
+    targets.forEach(({ selector, type }) => {
+      document.querySelectorAll(selector).forEach((card) => {
+        const open = () => openBottomSheet(type);
+        card.addEventListener('click', open);
+        card.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            open();
+          }
+        });
+      });
+    });
+
+    bottomSheet.overlay?.addEventListener('click', closeBottomSheet);
+    bottomSheet.closeBtn?.addEventListener('click', closeBottomSheet);
+    document.addEventListener('keydown', handleSheetKeydown);
+  };
+
+  bindSheetTriggers();
+
 const MODERATION_STORAGE_KEY = 'vt:service-seller:moderation';
 const moderationElements = {
   overlay: document.getElementById('moderation-overlay'),
