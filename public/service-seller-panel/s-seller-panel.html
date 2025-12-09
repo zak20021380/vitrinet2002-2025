@@ -616,7 +616,7 @@
 
               <div class="universal-discount__footer">
                 <button type="submit" class="btn-primary">ثبت برای همه مشتریان</button>
-                <button type="button" class="btn-text" id="global-discount-clear">حذف تخفیف فعال</button>
+                <button type="button" class="btn-ghost-danger" id="global-discount-clear">حذف تخفیف همگانی فعال</button>
               </div>
             </form>
           </section>
@@ -656,6 +656,38 @@
 
     <div class="vipc-actions">
       <button type="button" class="btn-primary" id="vipc-open-customer">مشاهده در مشتریان</button>
+    </div>
+  </div>
+</div>
+
+<!-- Global discount remove confirmation -->
+<div id="global-discount-confirm-modal" class="modal confirm-modal" role="dialog" aria-modal="true" aria-labelledby="global-discount-confirm-title" hidden>
+  <div class="modal-backdrop" data-dismiss="modal"></div>
+  <div class="modal-content confirm-modal__content" role="document">
+    <button type="button" class="modal-close-floating" data-dismiss="modal" aria-label="بستن">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+      </svg>
+    </button>
+
+    <div class="confirm-modal__header">
+      <div class="confirm-modal__icon">
+        <span class="confirm-modal__pulse"></span>
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M12 9v4"/><circle cx="12" cy="16" r="0.5"/><path d="M21 18a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/>
+        </svg>
+      </div>
+      <div>
+        <h3 id="global-discount-confirm-title" class="modal-title">حذف تخفیف همگانی؟</h3>
+        <p id="global-discount-confirm-subtitle" class="confirm-modal__subtitle">تخفیف همگانی برای همه مشتریان فعال است. از حذف آن مطمئن هستید؟</p>
+      </div>
+    </div>
+
+    <div id="global-discount-confirm-details" class="confirm-modal__details" aria-live="polite"></div>
+
+    <div class="confirm-modal__actions">
+      <button type="button" class="btn-secondary" data-dismiss="modal">خیر، انصراف</button>
+      <button type="button" class="btn-danger" id="global-discount-confirm-accept">بله، حذف شود</button>
     </div>
   </div>
 </div>
