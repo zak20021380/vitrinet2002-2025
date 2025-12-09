@@ -143,6 +143,41 @@ const escapeHtml = (str = '') => String(str).replace(/[&<>"']/g, (char) => ({
     });
   };
 
+  const formatTomans = (amount) => `${Number(amount || 0).toLocaleString('fa-IR')} تومان`;
+
+  const calculateUserLevel = (streakDays = 0) => {
+    const tiers = [
+      { min: 0, max: 30, name: 'نوآموز', icon: '🌱' },
+      { min: 30, max: 60, name: 'برنزی', icon: '🥉' },
+      { min: 60, max: 90, name: 'نقره‌ای', icon: '🛡️' },
+      { min: 90, max: Infinity, name: 'طلایی', icon: '🏆' }
+    ];
+
+    const activeTier = tiers.find((tier) => streakDays >= tier.min && streakDays < tier.max) || tiers[tiers.length - 1];
+    const tierIndex = tiers.indexOf(activeTier);
+    const span = Number.isFinite(activeTier.max) ? activeTier.max - activeTier.min : 30;
+    const completedCycles = Math.floor((streakDays - activeTier.min) / span);
+    const progressDays = Math.max(0, Math.min(span, streakDays - (activeTier.min + completedCycles * span)));
+    const nextMilestoneDay = activeTier.min + (completedCycles + 1) * span;
+    const daysToNextLevel = Math.max(0, nextMilestoneDay - streakDays);
+    const progressPercent = Math.min(100, Math.round((progressDays / span) * 100));
+    const milestoneIndex = Math.ceil(nextMilestoneDay / 30);
+    const nextLevel = tiers[tierIndex + 1] || activeTier;
+
+    return {
+      name: activeTier.name,
+      icon: activeTier.icon,
+      label: `${activeTier.icon} فروشنده ${activeTier.name}`,
+      progressDays,
+      span,
+      progressPercent,
+      daysToNextLevel,
+      nextMilestoneDay,
+      nextLevelName: nextLevel.name,
+      nextRewardAmount: formatTomans(milestoneIndex * 50_000)
+    };
+  };
+
   const streakSnapshot = evaluateCheckpointStreak({
     lastLoginDate: new Date(Date.now() - 26 * 60 * 60 * 1000), // دیروز - نمایش رشد استریک
     currentStreak: 105,
@@ -150,6 +185,8 @@ const escapeHtml = (str = '') => String(str).replace(/[&<>"']/g, (char) => ({
     pendingWeekPoints: 35,
     freezeUsed: false
   });
+
+  const levelSnapshot = calculateUserLevel(streakSnapshot.totalDays);
 
   const daysToNextCheckpoint = streakSnapshot.checkpointReached ? 7 : 7 - streakSnapshot.weekProgress;
   const nextRewardCopy = streakSnapshot.checkpointReached
@@ -177,6 +214,10 @@ const escapeHtml = (str = '') => String(str).replace(/[&<>"']/g, (char) => ({
       progress: Math.round((streakSnapshot.weekProgress / 7) * 100),
       freezeCost: '۱۲۰ امتیاز',
       nextReward: nextRewardCopy,
+      level: levelSnapshot,
+      dailyReward: '+۱۰ امتیاز وفاداری',
+      weeklyReward: `${formatTomans(5_000)} اعتبار فروشگاه`,
+      monthlyReward: formatTomans(50_000),
       rules: 'هر ۷ روز یک چک‌پوینت ذخیره می‌شود. با از دست دادن روز، زنجیره به آخرین چک‌پوینت برمی‌گردد مگر اینکه استریک فریز فعال باشد.',
       days: createWeeklyDayState(streakSnapshot.weekProgress),
       message: streakSnapshot.message,
@@ -266,7 +307,7 @@ const escapeHtml = (str = '') => String(str).replace(/[&<>"']/g, (char) => ({
   const renderStreakSheet = () => {
     if (!bottomSheet.title || !bottomSheet.content) return;
     const data = sheetData.streak;
-    bottomSheet.title.textContent = 'استریک روزانه';
+    bottomSheet.title.textContent = 'مسیر استریک و پاداش ماهانه';
 
     const dayMarkup = data.days.map((day) => {
       const statusClass = day.status === 'hit' ? 'is-hit' : day.status === 'missed' ? 'is-missed' : 'is-pending';
@@ -281,18 +322,28 @@ const escapeHtml = (str = '') => String(str).replace(/[&<>"']/g, (char) => ({
     }).join('');
 
     bottomSheet.content.innerHTML = `
-      <div class="sheet-section streak-summary">
-        ${data.totalDays > 7 ? `
-          <div class="streak-total" aria-label="کل روزهای متوالی">
-            <span class="streak-total__label">کل استریک</span>
-            <div class="streak-total__value">${data.totalDays} روز</div>
-            ${data.checkpointReached ? '<span class="checkpoint-badge" role="status">چک‌پوینت فعال</span>' : ''}
+      <div class="sheet-section streak-hero">
+        <div class="streak-total" aria-label="کل روزهای متوالی">
+          <span class="streak-total__label">کل استریک</span>
+          <div class="streak-total__value streak-total__value--gold">${data.totalDays} روز</div>
+          ${data.checkpointReached ? '<span class="checkpoint-badge" role="status">چک‌پوینت فعال</span>' : ''}
+        </div>
+        <div class="streak-level" aria-label="سطح فعلی">
+          <span class="streak-level__badge">${data.level.label}</span>
+          <p class="streak-level__hint">${data.level.daysToNextLevel ? `${data.level.daysToNextLevel} روز تا سطح بعدی` : 'در اوج طلا هستی!'}</p>
+        </div>
+      </div>
+
+      <div class="sheet-section">
+        <div class="level-progress" aria-label="پیشرفت سطح ماهانه">
+          <div class="level-progress__meta">
+            <span class="level-progress__label">${data.level.name === 'طلایی' ? 'پیشرفت مستمر ماهانه' : 'پیشرفت سطح ماهانه'}</span>
+            <span class="level-progress__value">${data.level.progressDays}/${data.level.span}</span>
           </div>
-        ` : ''}
-        <div class="streak-week" aria-label="چرخه هفتگی">
-          <span class="streak-week__label">هفته جاری</span>
-          <div class="streak-week__value">${data.weekProgress}/7</div>
-          <span class="streak-week__hint">نمایش چرخه هفت‌روزه</span>
+          <div class="sheet-progress" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${data.level.progressPercent}" aria-valuetext="${data.level.progressPercent} درصد">
+            <span class="sheet-progress__bar" style="inline-size: ${data.level.progressPercent}%"></span>
+          </div>
+          <p class="sheet-note">رسیدن به روز ${data.level.nextMilestoneDay} = ارتقای سطح ${data.level.nextLevelName} + ${data.level.nextRewardAmount}</p>
         </div>
       </div>
 
@@ -301,19 +352,26 @@ const escapeHtml = (str = '') => String(str).replace(/[&<>"']/g, (char) => ({
       ${data.isFrozen ? '<p class="sheet-note">استریک فریز فعال است و زنجیره از دست نمی‌رود.</p>' : ''}
 
       <div class="sheet-section">
+        <div class="streak-week" aria-label="چرخه هفتگی">
+          <div class="streak-week__label">اهداف هفتگی</div>
+          <div class="streak-week__value">${data.weekProgress}/7</div>
+          <span class="streak-week__hint">هر ۷ روز = ${data.weeklyReward}</span>
+        </div>
         <h4 class="sheet-section__title">پیشرفت این هفته</h4>
         <div class="streak-calendar" role="list">${dayMarkup}</div>
       </div>
 
-      <div class="sheet-section" aria-label="پیشرفت تا پاداش بعدی">
-        <h4 class="sheet-section__title">${data.nextReward}</h4>
-        <div class="sheet-progress" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${data.progress}" aria-valuetext="${data.progress} درصد">
-          <span class="sheet-progress__bar" style="inline-size: ${data.progress}%"></span>
+      <div class="next-milestone" aria-label="پاداش بزرگ بعدی">
+        <div class="next-milestone__icon" aria-hidden="true">🏆</div>
+        <div class="next-milestone__content">
+          <div class="next-milestone__title">نقطه بزرگ بعدی</div>
+          <p class="next-milestone__copy">تا روز ${data.level.nextMilestoneDay} ادامه بده تا ${data.level.nextLevelName === data.level.name ? 'پاداش ویژه را بگیری' : `به سطح ${data.level.nextLevelName} برسی`} و ${data.level.nextRewardAmount} اعتبار دریافت کنی.</p>
         </div>
       </div>
 
       <div class="sheet-actions">
         <button type="button" class="btn-secondary sheet-primary-action" data-action="freeze">خرید استریک فریز (${data.freezeCost})</button>
+        <p class="sheet-note">${data.dailyReward} | پاداش هفتگی: ${data.weeklyReward} | پاداش ماهانه: ${data.monthlyReward} + ارتقای سطح</p>
         <p class="sheet-note">${data.rules}</p>
       </div>
     `;
