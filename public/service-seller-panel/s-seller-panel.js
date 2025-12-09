@@ -2675,14 +2675,23 @@ static formatRelativeDate(dateStr) {
     return toPersian(String(dateStr));
   }
 
-  const startOfDay = (d) => {
-    const copy = new Date(d);
-    copy.setHours(0, 0, 0, 0);
-    return copy;
+  const tehranDayParts = (d) => new Intl.DateTimeFormat('en-CA', {
+    timeZone: 'Asia/Tehran',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit'
+  }).formatToParts(d).reduce((acc, part) => {
+    if (part.type !== 'literal') acc[part.type] = part.value;
+    return acc;
+  }, {});
+
+  const startOfTehranDay = (d) => {
+    const parts = tehranDayParts(d);
+    return Date.UTC(Number(parts.year), Number(parts.month) - 1, Number(parts.day));
   };
 
-  const today = startOfDay(new Date());
-  const target = startOfDay(parsedDate);
+  const today = startOfTehranDay(new Date());
+  const target = startOfTehranDay(parsedDate);
   const diffDays = Math.round((target - today) / 86400000);
 
   if (diffDays === 0) return 'امروز';
@@ -2690,6 +2699,7 @@ static formatRelativeDate(dateStr) {
   if (diffDays === 1) return 'فردا';
 
   const formatter = new Intl.DateTimeFormat('fa-IR-u-ca-persian', {
+    timeZone: 'Asia/Tehran',
     year: 'numeric',
     month: '2-digit',
     day: '2-digit'
