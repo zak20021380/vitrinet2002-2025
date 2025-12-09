@@ -281,7 +281,7 @@ const escapeHtml = (str = '') => String(str).replace(/[&<>"']/g, (char) => ({
         </div>
 
         <div class="wallet-sheet__footer">
-          <button type="button" class="wallet-sheet__cta">خرید اشتراک / ارتقا</button>
+          <button type="button" class="wallet-sheet__cta">استفاده از اعتبار / خرید پلن</button>
         </div>
       </section>
     `;
