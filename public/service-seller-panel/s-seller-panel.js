@@ -4515,7 +4515,8 @@ destroy() {
     renderWelcomeDate() {
       const el = document.getElementById('welcome-date');
       if (el) {
-        el.textContent = UIComponents.formatPersianNumber(new Date().toLocaleDateString('fa-IR'));
+        const dateTarget = el.querySelector('.dashboard-hero__date-text') || el;
+        dateTarget.textContent = UIComponents.formatPersianNumber(new Date().toLocaleDateString('fa-IR'));
       }
     }
     async loadDashboardStats(force = false) {
