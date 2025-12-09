@@ -5526,6 +5526,20 @@ initCustomerFeatures() {
           return;
         }
 
+        const excludeGlobalBtn = e.target.closest('[data-action="exclude-global-discount"]');
+        if (excludeGlobalBtn) {
+          this.excludeCustomerFromGlobal(excludeGlobalBtn.dataset.customerId);
+          e.stopPropagation();
+          return;
+        }
+
+        const restoreGlobalBtn = e.target.closest('[data-action="restore-global-discount"]');
+        if (restoreGlobalBtn) {
+          this.restoreCustomerGlobalDiscount(restoreGlobalBtn.dataset.customerId);
+          e.stopPropagation();
+          return;
+        }
+
         const discountModalBtn = e.target.closest('[data-action="open-discount-modal"]');
         if (discountModalBtn) {
           this.openCustomerDiscountModal({
@@ -5740,37 +5754,59 @@ renderCustomers(query = '') {
     const bookingsCount = this.formatNumber(c.bookingsCount ?? c.vipCurrent ?? 0);
     const reviewCount = this.formatNumber(c.reviewCount ?? c.rewardCount ?? 0);
     const tier = (c.bookingsCount ?? 0) >= 10 ? 'وفادار' : 'فعال';
-    const discount = activeDiscounts.get(String(c.id)) || globalDiscount;
+    const personalDiscount = activeDiscounts.get(String(c.id));
+    const isGlobalExcluded = this.isGlobalDiscountExcludedForCustomer(globalDiscount, c.id);
+    const appliedGlobalDiscount = globalDiscount && !isGlobalExcluded ? globalDiscount : null;
+    const discount = personalDiscount || appliedGlobalDiscount;
     const isGlobalDiscount = !!discount && (discount.isGlobal || discount.customerId === this.GLOBAL_CUSTOMER_ID);
     const hasDiscount = !!discount;
-    const discountLabel = hasDiscount ? (isGlobalDiscount ? 'تخفیف همگانی' : 'تخفیف فعال') : 'بدون تخفیف';
+    const discountLabel = hasDiscount
+      ? (isGlobalDiscount ? 'تخفیف همگانی' : 'تخفیف فعال')
+      : (isGlobalExcluded ? 'تخفیف همگانی غیرفعال' : 'بدون تخفیف');
     const discountValue = hasDiscount
       ? (discount.type === 'percent'
         ? `${this.formatNumber(discount.amount)}٪`
         : `${this.formatNumber(discount.amount)} تومان`)
-      : 'بدون تخفیف فعال';
+      : (isGlobalExcluded ? 'اعمال تخفیف همگانی برای این مشتری لغو شده است.' : 'بدون تخفیف فعال');
     const discountExpiry = hasDiscount
       ? (isGlobalDiscount
-        ? `تخفیف همگانی برای تمام مشتریان شما فعال است • ${UIComponents.formatRelativeDate(discount.expiresAt)}`
+        ? `تخفیف همگانی${discount.expiresAt ? ` • ${UIComponents.formatRelativeDate(discount.expiresAt)}` : ''}`
         : `این کاربر تخفیف فعال دارد • ${UIComponents.formatRelativeDate(discount.expiresAt)}`)
-      : 'تخفیفی برای این مشتری فعال نیست.';
+      : (isGlobalExcluded ? 'تخفیف همگانی برای این مشتری غیرفعال است.' : 'تخفیفی برای این مشتری فعال نیست.');
 
-    const discountCancelBlock = hasDiscount
-      ? `
-        <div class="discount-control ${isGlobalDiscount ? 'discount-control--muted' : ''}">
+    let discountCancelBlock = '';
+    if (personalDiscount) {
+      discountCancelBlock = `
+        <div class="discount-control">
           <div>
-            <p class="discount-control__title">${isGlobalDiscount ? 'تخفیف همگانی فعال است' : 'لغو سریع تخفیف'}</p>
-            <p class="discount-control__subtitle">${isGlobalDiscount
-              ? 'برای لغو، ابتدا تخفیف همگانی را حذف کنید.'
-              : `اعتبار تا ${UIComponents.formatRelativeDate(discount.expiresAt)}`}</p>
+            <p class="discount-control__title">لغو سریع تخفیف</p>
+            <p class="discount-control__subtitle">اعتبار تا ${UIComponents.formatRelativeDate(discount.expiresAt)}</p>
           </div>
           <div class="discount-control__actions">
-            ${isGlobalDiscount
-              ? '<button type="button" class="btn-ghost-sm" data-action="open-global-discount-confirm">حذف همگانی</button>'
-              : `<button type=\"button\" class=\"btn-ghost-sm btn-ghost-sm--danger\" data-action=\"cancel-discount\" data-id=\"${escapeHtml(discount.id)}\">لغو تخفیف</button>`}
+            <button type=\"button\" class=\"btn-ghost-sm btn-ghost-sm--danger\" data-action=\"cancel-discount\" data-id=\"${escapeHtml(discount.id)}\">لغو تخفیف</button>
           </div>
-        </div>`
-      : '';
+        </div>`;
+    } else if (globalDiscount) {
+      const actionBtn = isGlobalExcluded
+        ? `<button type=\"button\" class=\"btn-ghost-sm\" data-action=\"restore-global-discount\" data-customer-id=\"${escapeHtml(c.id)}\">فعال‌سازی مجدد</button>`
+        : `<button type=\"button\" class=\"btn-ghost-sm btn-ghost-sm--danger\" data-action=\"exclude-global-discount\" data-customer-id=\"${escapeHtml(c.id)}\">لغو برای این مشتری</button>`;
+      const subtitle = isGlobalExcluded
+        ? 'با فعال‌سازی مجدد، این مشتری هم تخفیف را دریافت می‌کند.'
+        : `اعتبار تا ${UIComponents.formatRelativeDate(globalDiscount.expiresAt)}`;
+      const title = isGlobalExcluded ? 'تخفیف همگانی متوقف شده' : 'تخفیف همگانی فعال است';
+
+      discountCancelBlock = `
+        <div class="discount-control ${isGlobalExcluded ? 'discount-control--muted' : ''}">
+          <div>
+            <p class="discount-control__title">${title}</p>
+            <p class="discount-control__subtitle">${subtitle}</p>
+          </div>
+          <div class="discount-control__actions">
+            ${actionBtn}
+            <button type="button" class="btn-ghost-sm" data-action="open-global-discount-confirm">حذف همگانی</button>
+          </div>
+        </div>`;
+    }
 
     return `
       <article class="customer-card card"
@@ -6058,6 +6094,18 @@ renderCustomers(query = '') {
       this.updateGlobalDurationState(initialDuration);
     }
 
+    if (this.globalDiscountCustomDate) {
+      this.globalDiscountCustomDate.addEventListener('input', (e) => {
+        const input = e.target;
+        const formatted = this.formatPersianDateMask(input.value);
+        if (formatted !== input.value) {
+          input.value = formatted;
+          const cursorPos = formatted.length;
+          input.setSelectionRange(cursorPos, cursorPos);
+        }
+      });
+    }
+
     if (this.globalDiscountDurationInputs?.length) {
       this.globalDiscountDurationInputs.forEach(input => {
         input.addEventListener('change', () => this.updateGlobalDiscountStatus());
@@ -6271,7 +6319,9 @@ renderCustomers(query = '') {
     if (!customerId) return null;
     const personal = (this.discountStore?.getActive() || []).find(d => String(d.customerId) === String(customerId));
     if (personal) return personal;
-    return this.getGlobalDiscount();
+    const globalDiscount = this.getGlobalDiscount();
+    if (this.isGlobalDiscountExcludedForCustomer(globalDiscount, customerId)) return null;
+    return globalDiscount;
   }
 
   getDiscountCustomers() {
@@ -6586,6 +6636,12 @@ renderCustomers(query = '') {
     }
   }
 
+  isGlobalDiscountExcludedForCustomer(globalDiscount, customerId) {
+    if (!globalDiscount || !customerId) return false;
+    const exclusions = Array.isArray(globalDiscount.excludedCustomerIds) ? globalDiscount.excludedCustomerIds : [];
+    return exclusions.map(String).includes(String(customerId));
+  }
+
   getGlobalDiscount() {
     return (this.discountStore?.getActive() || []).find(d =>
       d.isGlobal || d.customerId === this.GLOBAL_CUSTOMER_ID || d.id === this.GLOBAL_DISCOUNT_ID
@@ -6639,8 +6695,46 @@ renderCustomers(query = '') {
       ? `${this.formatNumber(active.amount, { fractionDigits: 0 })}٪`
       : `${this.formatNumber(active.amount, { fractionDigits: 0 })} تومان`;
     const time = this.formatRemainingTime(active.expiresAt);
-    this.globalDiscountStatus.textContent = `فعال (${value}${time ? ` • ${time}` : ''})`;
+    const excludedCount = Array.isArray(active.excludedCustomerIds) ? active.excludedCustomerIds.length : 0;
+    const excludedLabel = excludedCount ? ` • لغو برای ${this.formatNumber(excludedCount)} مشتری` : '';
+    this.globalDiscountStatus.textContent = `فعال (${value}${time ? ` • ${time}` : ''}${excludedLabel})`;
     this.globalDiscountStatus.classList.add('is-active', 'is-visible');
+  }
+
+  excludeCustomerFromGlobal(customerId) {
+    const active = this.getGlobalDiscount();
+    if (!active || !customerId) {
+      UIComponents.showToast('تخفیف همگانی فعالی یافت نشد.', 'warning');
+      return;
+    }
+
+    const exclusions = new Set((active.excludedCustomerIds || []).map(String));
+    exclusions.add(String(customerId));
+
+    this.discountStore.upsert({ ...active, excludedCustomerIds: Array.from(exclusions) });
+    UIComponents.showToast('تخفیف همگانی برای این مشتری غیرفعال شد.', 'info');
+    this.updateGlobalDiscountStatus();
+    this.renderCustomers(this.currentCustomerQuery || '');
+    this.renderDiscounts();
+    this.updateDiscountAnalytics();
+  }
+
+  restoreCustomerGlobalDiscount(customerId) {
+    const active = this.getGlobalDiscount();
+    if (!active || !customerId) {
+      UIComponents.showToast('تخفیف همگانی فعالی یافت نشد.', 'warning');
+      return;
+    }
+
+    const exclusions = new Set((active.excludedCustomerIds || []).map(String));
+    exclusions.delete(String(customerId));
+
+    this.discountStore.upsert({ ...active, excludedCustomerIds: Array.from(exclusions) });
+    UIComponents.showToast('تخفیف همگانی برای این مشتری دوباره فعال شد.', 'success');
+    this.updateGlobalDiscountStatus();
+    this.renderCustomers(this.currentCustomerQuery || '');
+    this.renderDiscounts();
+    this.updateDiscountAnalytics();
   }
 
   hideGlobalDiscountSuccess() {
@@ -6768,7 +6862,8 @@ renderCustomers(query = '') {
       expiresAt,
       note: note || noteLabel,
       couponCode: couponCode || undefined,
-      isGlobal: true
+      isGlobal: true,
+      excludedCustomerIds: []
     };
 
     this.discountStore.upsert(discount);
@@ -6975,7 +7070,13 @@ renderCustomers(query = '') {
         : this.formatToman(d.amount);
       const valueLabel = d.isGlobal ? 'تخفیف همگانی' : (d.type === 'percent' ? 'درصدی' : 'مبلغ');
       const metaLine = d.isGlobal
-        ? 'اعمال شده روی تمام مشتریان'
+        ? (() => {
+          const excludedCount = Array.isArray(d.excludedCustomerIds) ? d.excludedCustomerIds.length : 0;
+          const appliedCount = Math.max((customers?.length || 0) - excludedCount, 0);
+          const appliedLabel = appliedCount ? `${this.formatNumber(appliedCount)} مشتری` : 'بدون مشتری فعال';
+          const excludedLabel = excludedCount ? ` • لغو برای ${this.formatNumber(excludedCount)} نفر` : '';
+          return `اعمال شده روی ${appliedLabel}${excludedLabel}`;
+        })()
         : `${UIComponents.formatPersianNumber(d.customerPhone || '')}${lastVisit}`;
       const badge = d.isGlobal ? '<span class="status-badge status-active">همگانی</span>' : '';
 
