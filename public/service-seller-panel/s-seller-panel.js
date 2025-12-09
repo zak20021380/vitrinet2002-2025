@@ -195,15 +195,18 @@ const escapeHtml = (str = '') => String(str).replace(/[&<>"']/g, (char) => ({
 
   const sheetData = {
     wallet: {
-      balance: '۳٬۵۰۰٬۰۰۰ تومان',
-      withdrawable: '۲٬۸۰۰٬۰۰۰ تومان',
-      blocked: '۷۰۰٬۰۰۰ تومان',
-      lastUpdated: 'به‌روزرسانی لحظه‌ای در داشبورد',
-      iban: 'IR820540102680020817909002',
-      transactions: [
-        { title: 'واریز نوبت آنلاین', amount: '+۲۵۰٬۰۰۰', time: 'امروز، ۱۱:۲۰' },
-        { title: 'درخواست تسویه', amount: '-۱٬۲۰۰٬۰۰۰', time: 'دیروز، ۱۸:۴۵' },
-        { title: 'امتیاز وفاداری تبدیل به کیف پول', amount: '+۱۵۰٬۰۰۰', time: '۲ روز قبل، ۱۳:۱۰' }
+      balance: '۳٬۵۰۰٬۰۰۰',
+      currency: 'تومان',
+      note: 'این اعتبار مخصوص خرید خدمات در اپلیکیشن است.',
+      useCases: [
+        { icon: '👑', title: 'خرید اشتراک', description: 'پلن‌های حرفه‌ای مدیریت فروشگاه' },
+        { icon: '🚀', title: 'نردبان آگهی', description: 'نمایش اول در نتایج جستجو' },
+        { icon: '⭐', title: 'خدمات ویژه', description: 'ابزارهای VIP برای فروش بیشتر' }
+      ],
+      earners: [
+        { icon: '🔥', title: 'فعالیت روزانه و حفظ استریک', description: 'با حضور مداوم اعتبار هدیه بگیر.' },
+        { icon: '👥', title: 'دعوت از دوستان همکار', description: 'با هر دعوت موفق، اعتبار رایگان اضافه می‌شود.' },
+        { icon: '💳', title: 'خرید مستقیم اعتبار', description: 'هر زمان خواستی موجودی را سریع شارژ کن.' }
       ]
     },
     streak: {
@@ -249,36 +252,57 @@ const escapeHtml = (str = '') => String(str).replace(/[&<>"']/g, (char) => ({
   const renderWalletSheet = () => {
     if (!bottomSheet.title || !bottomSheet.content) return;
     const data = sheetData.wallet;
-    bottomSheet.title.textContent = 'کیف پول و اشتراک';
+    bottomSheet.title.textContent = 'اعتبار فروشگاه';
     bottomSheet.content.innerHTML = `
-      <section class="wallet-sheet" aria-label="موجودی کیف پول">
+      <section class="wallet-sheet" aria-label="اعتبار فروشگاه">
         <div class="wallet-sheet__hero">
-          <p class="wallet-sheet__label">موجودی کل</p>
-          <div class="wallet-sheet__amount">${data.balance}</div>
-          <p class="wallet-sheet__subtext">${data.lastUpdated}</p>
+          <span class="wallet-sheet__eyebrow">اعتبار فروشگاه</span>
+          <div class="wallet-sheet__amount">
+            <span class="wallet-sheet__amount-number">${data.balance}</span>
+            <span class="wallet-sheet__currency">${data.currency}</span>
+          </div>
+          <p class="wallet-sheet__badge">${data.note}</p>
         </div>
 
-        <div class="wallet-sheet__actions">
-          <button type="button" class="btn-primary wallet-sheet__primary">خرید اشتراک / ارتقا</button>
-          <button type="button" class="btn-ghost wallet-sheet__secondary">افزایش موجودی</button>
+        <div class="wallet-sheet__section" aria-label="کجا خرجش کنم؟">
+          <div class="wallet-sheet__section-heading">
+            <h4 class="wallet-sheet__section-title">کجا خرجش کنم؟</h4>
+            <p class="wallet-sheet__section-subtitle">چند پیشنهاد فوری برای خرج اعتبار داخل اپ</p>
+          </div>
+          <div class="wallet-sheet__spend-grid" role="list">
+            ${data.useCases.map((item) => `
+              <article class="wallet-sheet__spend-card" role="listitem">
+                <div class="wallet-sheet__spend-icon" aria-hidden="true">${item.icon}</div>
+                <div class="wallet-sheet__spend-copy">
+                  <div class="wallet-sheet__spend-title">${item.title}</div>
+                  <p class="wallet-sheet__spend-desc">${item.description}</p>
+                </div>
+              </article>
+            `).join('')}
+          </div>
         </div>
 
-        <div class="wallet-sheet__transactions" aria-label="آخرین تراکنش‌ها">
-          <h4 class="wallet-sheet__section-title">تراکنش‌های اخیر</h4>
-          <ul class="wallet-sheet__list">
-            ${data.transactions.map((tx) => {
-              const amountClass = tx.amount.trim().startsWith('-') ? 'is-negative' : 'is-positive';
-              return `
-                <li class="wallet-sheet__item">
-                  <div class="wallet-sheet__meta">
-                    <span class="wallet-sheet__title">${tx.title}</span>
-                    <span class="wallet-sheet__time">${tx.time}</span>
-                  </div>
-                  <span class="wallet-sheet__amount ${amountClass}">${tx.amount}</span>
-                </li>
-              `;
-            }).join('')}
+        <div class="wallet-sheet__section" aria-label="روش‌های افزایش اعتبار">
+          <div class="wallet-sheet__section-heading">
+            <h4 class="wallet-sheet__section-title">چطور رایگان شارژش کنم؟</h4>
+            <p class="wallet-sheet__section-subtitle">روش‌های افزایش اعتبار</p>
+          </div>
+          <ul class="wallet-sheet__earn-list">
+            ${data.earners.map((item) => `
+              <li class="wallet-sheet__earn-item">
+                <span class="wallet-sheet__earn-icon" aria-hidden="true">${item.icon}</span>
+                <div class="wallet-sheet__earn-copy">
+                  <div class="wallet-sheet__earn-title">${item.title}</div>
+                  <p class="wallet-sheet__earn-desc">${item.description}</p>
+                </div>
+              </li>
+            `).join('')}
           </ul>
+        </div>
+
+        <div class="wallet-sheet__cta-row">
+          <button type="button" class="wallet-sheet__cta wallet-sheet__cta--primary">استفاده از اعتبار / خرید پلن</button>
+          <button type="button" class="wallet-sheet__cta wallet-sheet__cta--ghost">افزایش موجودی</button>
         </div>
       </section>
     `;
