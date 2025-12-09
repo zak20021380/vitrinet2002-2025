@@ -5834,6 +5834,11 @@ renderCustomers(query = '') {
     this.globalDiscountCustomDate = document.getElementById('global-discount-custom-date');
     this.globalDiscountCustomDateWrap = document.getElementById('global-discount-custom-date-wrap');
     this.globalDiscountCouponInput = document.getElementById('global-discount-coupon');
+    this.globalDiscountConfirmModal = document.getElementById('global-discount-confirm-modal');
+    this.globalDiscountConfirmTitle = document.getElementById('global-discount-confirm-title');
+    this.globalDiscountConfirmSubtitle = document.getElementById('global-discount-confirm-subtitle');
+    this.globalDiscountConfirmDetails = document.getElementById('global-discount-confirm-details');
+    this.globalDiscountConfirmAccept = document.getElementById('global-discount-confirm-accept');
 
     if (this.discountModalTypeInputs?.length) {
       this.discountModalTypeInputs.forEach(input => {
@@ -5931,7 +5936,11 @@ renderCustomers(query = '') {
     }
 
     if (this.globalDiscountClear) {
-      this.globalDiscountClear.addEventListener('click', () => this.clearGlobalDiscount());
+      this.globalDiscountClear.addEventListener('click', () => this.openGlobalDiscountConfirm());
+    }
+
+    if (this.globalDiscountConfirmAccept) {
+      this.globalDiscountConfirmAccept.addEventListener('click', () => this.confirmClearGlobalDiscount());
     }
 
     if (this.globalDiscountTypeInputs?.length) {
@@ -6489,6 +6498,45 @@ renderCustomers(query = '') {
     this.globalDiscountStatus.classList.add('is-active', 'is-visible');
   }
 
+  openGlobalDiscountConfirm() {
+    const active = this.getGlobalDiscount();
+    const hasActive = Boolean(active);
+    const amountLabel = active
+      ? (active.type === 'percent'
+        ? `${this.formatNumber(active.amount)}٪`
+        : `${this.formatNumber(active.amount)} تومان`)
+      : '';
+    const expiryLabel = active?.expiresAt ? UIComponents.formatRelativeDate(active.expiresAt) : '';
+
+    if (this.globalDiscountConfirmTitle) {
+      this.globalDiscountConfirmTitle.textContent = hasActive ? 'حذف تخفیف همگانی فعال؟' : 'تخفیف همگانی فعال نیست';
+    }
+
+    if (this.globalDiscountConfirmSubtitle) {
+      this.globalDiscountConfirmSubtitle.textContent = hasActive
+        ? 'تخفیف همگانی برای همه مشتریان فعال است. از حذف آن مطمئن هستید؟'
+        : 'در حال حاضر هیچ تخفیف همگانی فعالی ثبت نشده است.';
+    }
+
+    if (this.globalDiscountConfirmDetails) {
+      this.globalDiscountConfirmDetails.innerHTML = hasActive
+        ? `تخفیف <strong>${amountLabel}</strong> برای تمام مشتریان شما فعال است ${expiryLabel ? `• تا ${expiryLabel}` : ''}. با حذف این مورد، همه مشتریان به حالت بدون تخفیف برمی‌گردند.`
+        : 'برای حذف، ابتدا باید یک تخفیف همگانی فعال داشته باشید.';
+    }
+
+    if (this.globalDiscountConfirmAccept) {
+      this.globalDiscountConfirmAccept.disabled = !hasActive;
+      this.globalDiscountConfirmAccept.setAttribute('aria-disabled', (!hasActive).toString());
+      this.globalDiscountConfirmAccept.textContent = hasActive ? 'بله، حذف شود' : 'باشه';
+    }
+
+    if (!hasActive) {
+      UIComponents.showToast('هیچ تخفیف همگانی فعال نیست.', 'info');
+    }
+
+    UIComponents.openModal('global-discount-confirm-modal');
+  }
+
   handleGlobalDiscountSubmit() {
     if (!this.globalDiscountForm) return;
     const type = Array.from(this.globalDiscountTypeInputs || []).find(input => input.checked)?.value || 'amount';
@@ -6560,6 +6608,18 @@ renderCustomers(query = '') {
     this.renderDiscounts();
     this.renderCustomers(this.currentCustomerQuery || '');
     UIComponents.showToast('تخفیف همگانی حذف شد.', 'info');
+  }
+
+  confirmClearGlobalDiscount() {
+    const active = this.getGlobalDiscount();
+    if (!active) {
+      UIComponents.showToast('هیچ تخفیف همگانی فعال نیست.', 'info');
+      UIComponents.closeModal('global-discount-confirm-modal');
+      return;
+    }
+
+    this.clearGlobalDiscount();
+    UIComponents.closeModal('global-discount-confirm-modal');
   }
 
   handleDiscountSubmit() {
