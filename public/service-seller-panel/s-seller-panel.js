@@ -5511,16 +5511,26 @@ initCustomerFeatures() {
 
 
 // Initialize customer click handlers
-initCustomerClickHandlers() {
-  // Use event delegation for customer cards
-  const customersList = document.getElementById('customers-list');
-  if (customersList) {
-    customersList.addEventListener('click', (e) => {
-      const discountModalBtn = e.target.closest('[data-action="open-discount-modal"]');
-      if (discountModalBtn) {
-        this.openCustomerDiscountModal({
-          id: discountModalBtn.dataset.customerId,
-          name: discountModalBtn.dataset.customerName,
+  initCustomerClickHandlers() {
+    // Use event delegation for customer cards
+    const customersList = document.getElementById('customers-list');
+    if (customersList) {
+      customersList.addEventListener('click', (e) => {
+        const cancelBtn = e.target.closest('[data-action="cancel-discount"]');
+        if (cancelBtn) {
+          this.handleDiscountCancellation(cancelBtn.dataset.id, {
+            analyticsContext: false,
+            customerContext: true
+          });
+          e.stopPropagation();
+          return;
+        }
+
+        const discountModalBtn = e.target.closest('[data-action="open-discount-modal"]');
+        if (discountModalBtn) {
+          this.openCustomerDiscountModal({
+            id: discountModalBtn.dataset.customerId,
+            name: discountModalBtn.dataset.customerName,
           phone: discountModalBtn.dataset.customerPhone
         });
         e.stopPropagation();
@@ -5745,6 +5755,23 @@ renderCustomers(query = '') {
         : `این کاربر تخفیف فعال دارد • ${UIComponents.formatRelativeDate(discount.expiresAt)}`)
       : 'تخفیفی برای این مشتری فعال نیست.';
 
+    const discountCancelBlock = hasDiscount
+      ? `
+        <div class="discount-control ${isGlobalDiscount ? 'discount-control--muted' : ''}">
+          <div>
+            <p class="discount-control__title">${isGlobalDiscount ? 'تخفیف همگانی فعال است' : 'لغو سریع تخفیف'}</p>
+            <p class="discount-control__subtitle">${isGlobalDiscount
+              ? 'برای لغو، ابتدا تخفیف همگانی را حذف کنید.'
+              : `اعتبار تا ${UIComponents.formatRelativeDate(discount.expiresAt)}`}</p>
+          </div>
+          <div class="discount-control__actions">
+            ${isGlobalDiscount
+              ? '<button type="button" class="btn-ghost-sm" data-action="open-global-discount-confirm">حذف همگانی</button>'
+              : `<button type=\"button\" class=\"btn-ghost-sm btn-ghost-sm--danger\" data-action=\"cancel-discount\" data-id=\"${escapeHtml(discount.id)}\">لغو تخفیف</button>`}
+          </div>
+        </div>`
+      : '';
+
     return `
       <article class="customer-card card"
                role="listitem" tabindex="0"
@@ -5784,6 +5811,7 @@ renderCustomers(query = '') {
             <div class="discount-actions">
               <button type="button" class="link-btn" data-action="open-discount-modal" data-customer-id="${escapeHtml(c.id)}" data-customer-name="${escapeHtml(c.name)}" data-customer-phone="${escapeHtml(c.phone)}">${hasDiscount ? 'مدیریت تخفیف' : 'اهدای تخفیف'}</button>
             </div>
+            ${discountCancelBlock}
           </div>
         </div>
       </article>
@@ -5937,9 +5965,32 @@ renderCustomers(query = '') {
       this.discountListEl.addEventListener('click', (e) => {
         const cancelBtn = e.target.closest('[data-action="cancel-discount"]');
         if (cancelBtn) {
-          this.discountStore.remove(cancelBtn.dataset.id);
-          UIComponents.showToast('تخفیف برای این مشتری لغو شد.', 'info');
-          this.renderDiscounts();
+          this.handleDiscountCancellation(cancelBtn.dataset.id);
+          this.renderCustomers(this.currentCustomerQuery || '');
+        }
+      });
+    }
+
+    if (this.discountAnalyticsList) {
+      this.discountAnalyticsList.addEventListener('click', (e) => {
+        const cancelBtn = e.target.closest('[data-action="cancel-discount"]');
+        if (cancelBtn) {
+          this.handleDiscountCancellation(cancelBtn.dataset.id, { analyticsContext: true });
+          return;
+        }
+
+        const searchBtn = e.target.closest('[data-action="open-discount-modal"]');
+        if (searchBtn) {
+          this.openCustomerDiscountModal({
+            id: searchBtn.dataset.customerId,
+            name: searchBtn.dataset.customerName,
+            phone: searchBtn.dataset.customerPhone
+          });
+        }
+
+        const openGlobalConfirm = e.target.closest('[data-action="open-global-discount-confirm"]');
+        if (openGlobalConfirm) {
+          this.openGlobalDiscountConfirm();
         }
       });
     }
@@ -7020,6 +7071,13 @@ renderCustomers(query = '') {
         : escapeHtml(d.customerName || 'مشتری');
       const badge = d.isGlobal || d.customerId === this.GLOBAL_CUSTOMER_ID ? 'همگانی' : 'اختصاصی';
       const note = d.note ? escapeHtml(d.note) : 'بدون یادداشت';
+      const canCancel = !(d.isGlobal || d.customerId === this.GLOBAL_CUSTOMER_ID);
+      const cancelAction = canCancel
+        ? `<button type="button" class="btn-ghost-sm btn-ghost-sm--danger" data-action="cancel-discount" data-id="${escapeHtml(d.id)}">لغو تخفیف</button>`
+        : '<span class="pill pill--muted">غیرفعال‌سازی فردی امکان‌پذیر نیست</span>';
+      const manageAction = canCancel
+        ? `<button type="button" class="btn-ghost-sm" data-action="open-discount-modal" data-customer-id="${escapeHtml(d.customerId)}" data-customer-name="${escapeHtml(d.customerName || 'مشتری')}" data-customer-phone="${escapeHtml(d.customerPhone || '')}">مدیریت</button>`
+        : `<button type="button" class="btn-ghost-sm" data-action="open-global-discount-confirm">حذف همگانی</button>`;
 
       return `
         <article class="discount-analytics-item" role="listitem">
@@ -7035,11 +7093,38 @@ renderCustomers(query = '') {
             <div class="discount-analytics-item__footer">
               <span class="pill">انقضا: ${expiryLabel}</span>
               <span class="pill pill--muted">${note}</span>
+              <div class="discount-analytics-item__actions">
+                ${manageAction}
+                ${cancelAction}
+              </div>
             </div>
           </div>
         </article>
       `;
     }).join('');
+  }
+
+  handleDiscountCancellation(discountId, { analyticsContext = false, customerContext = false } = {}) {
+    if (!discountId) return;
+    const active = this.discountStore.getActive();
+    const target = active.find(d => d.id === discountId);
+    if (!target) {
+      UIComponents.showToast('تخفیفی برای لغو یافت نشد.', 'warning');
+      return;
+    }
+
+    this.discountStore.remove(discountId);
+
+    const toastContext = analyticsContext
+      ? 'از آمار تخفیف‌ها حذف شد.'
+      : (customerContext ? 'برای این مشتری غیرفعال شد.' : 'لغو شد.');
+    UIComponents.showToast(`تخفیف ${toastContext}`, 'info');
+
+    this.renderDiscounts();
+    this.renderCustomers(this.currentCustomerQuery || '');
+    if (analyticsContext) {
+      this.updateDiscountAnalytics();
+    }
   }
 
 
