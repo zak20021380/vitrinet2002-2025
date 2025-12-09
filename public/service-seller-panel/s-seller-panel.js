@@ -5839,6 +5839,11 @@ renderCustomers(query = '') {
     this.globalDiscountConfirmSubtitle = document.getElementById('global-discount-confirm-subtitle');
     this.globalDiscountConfirmDetails = document.getElementById('global-discount-confirm-details');
     this.globalDiscountConfirmAccept = document.getElementById('global-discount-confirm-accept');
+    this.globalDiscountSuccess = document.getElementById('global-discount-success');
+    this.globalDiscountSuccessAmount = document.getElementById('global-discount-success-amount');
+    this.globalDiscountSuccessExpiry = document.getElementById('global-discount-success-expiry');
+    this.globalDiscountSuccessNote = document.getElementById('global-discount-success-note');
+    this.globalDiscountSuccessDescription = document.getElementById('global-discount-success-description');
 
     if (this.discountModalTypeInputs?.length) {
       this.discountModalTypeInputs.forEach(input => {
@@ -5937,6 +5942,12 @@ renderCustomers(query = '') {
 
     if (this.globalDiscountClear) {
       this.globalDiscountClear.addEventListener('click', () => this.openGlobalDiscountConfirm());
+    }
+
+    if (this.globalDiscountSuccess) {
+      this.globalDiscountSuccess.querySelectorAll('[data-dismiss="global-discount-success"]').forEach(btn => {
+        btn.addEventListener('click', () => this.hideGlobalDiscountSuccess());
+      });
     }
 
     if (this.globalDiscountConfirmAccept) {
@@ -6498,6 +6509,40 @@ renderCustomers(query = '') {
     this.globalDiscountStatus.classList.add('is-active', 'is-visible');
   }
 
+  hideGlobalDiscountSuccess() {
+    if (!this.globalDiscountSuccess) return;
+    this.globalDiscountSuccess.classList.remove('is-visible');
+    clearTimeout(this.globalDiscountSuccessTimer);
+    this.globalDiscountSuccessTimer = setTimeout(() => {
+      if (this.globalDiscountSuccess) this.globalDiscountSuccess.hidden = true;
+    }, 200);
+  }
+
+  showGlobalDiscountSuccess(discount) {
+    if (!this.globalDiscountSuccess) return;
+    const amountLabel = discount.type === 'percent'
+      ? `${this.formatNumber(discount.amount, { fractionDigits: 0 })}٪`
+      : `${this.formatNumber(discount.amount, { fractionDigits: 0 })} تومان`;
+    const expiryRelative = discount.expiresAt ? this.formatRemainingTime(discount.expiresAt) : '';
+    const expiryLabel = expiryRelative
+      ? `اعتبار: ${expiryRelative}`
+      : (discount.expiresAt ? `اعتبار تا ${UIComponents.formatRelativeDate(discount.expiresAt)}` : 'بدون زمان انقضا');
+    const noteLabel = discount.note || 'پیشنهاد فعال برای همه مشتریان ثبت شد.';
+    const descLabel = discount.couponCode
+      ? `کد ${discount.couponCode} برای همه مشتریان فعال شد.`
+      : 'پیشنهاد شما برای همه مشتریان ثبت شد.';
+
+    if (this.globalDiscountSuccessAmount) this.globalDiscountSuccessAmount.textContent = amountLabel;
+    if (this.globalDiscountSuccessExpiry) this.globalDiscountSuccessExpiry.textContent = expiryLabel;
+    if (this.globalDiscountSuccessNote) this.globalDiscountSuccessNote.textContent = noteLabel;
+    if (this.globalDiscountSuccessDescription) this.globalDiscountSuccessDescription.textContent = descLabel;
+
+    this.globalDiscountSuccess.hidden = false;
+    requestAnimationFrame(() => this.globalDiscountSuccess?.classList.add('is-visible'));
+    clearTimeout(this.globalDiscountSuccessTimer);
+    this.globalDiscountSuccessTimer = setTimeout(() => this.hideGlobalDiscountSuccess(), 5200);
+  }
+
   openGlobalDiscountConfirm() {
     const active = this.getGlobalDiscount();
     const hasActive = Boolean(active);
@@ -6589,7 +6634,7 @@ renderCustomers(query = '') {
     };
 
     this.discountStore.upsert(discount);
-    UIComponents.showToast('تخفیف همگانی فعال شد.', 'success');
+    this.showGlobalDiscountSuccess(discount);
     this.globalDiscountForm.reset();
     const today = this.globalDiscountForm.querySelector('input[name="global-discount-duration"][value="today"]');
     if (today) today.checked = true;
